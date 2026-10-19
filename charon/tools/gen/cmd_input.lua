@@ -1,19 +1,3 @@
--- `input`: the constant record of a framework, spec/<F>/constants.tsv (committed data, one row per constant the 6.1.3 ledger lists as
--- missing and the port has to export), and measured.held-caches.tsv when --measured names the gate's release-split output. It is the
--- port of the input stage of tools/gen.py, the oracle until its deletion (last revision 52253c0650): the record's rows equal
--- the oracle's constant rows, byte for byte, with the oracle's "decl" column named "type" (the proof is in the round-15 report).
--- Each row is read from the source that owns the fact:
---   * the declaration shard (spec/<F>/declarations.tsv, the extractor's IR): the typedefs, which give the string and CFString shapes
---     and the constant pointer typedefs (`typedef NSString *const X`, whose constants are const);
---   * the extractor's doc text (decls --doc, doc_text.lua): the declaration as written. The record's type is the text before the name
---     with its macros dropped (declared_type); its hash is the digest of that type and the availability macros the declaration writes;
---   * the coordination corpus: the ledger (the constants 6.1.3 lacks, in ledger order) and the iOS 26.2 cache's constants table (the value
---     of each string constant, and where it came from);
---   * the owned.tsv snapshot and the registry: a constant either names is owned, and its value is not read;
---   * the host oracle (probe.lua): the macOS value of each string constant the iOS table does not answer for;
---   * the SDK's .tbd (exported or not).
--- The record is written through emit, which rewrites the file only when its bytes change.
-
 local layout = import("layout", {anonymous = true})
 local files = import("files", {anonymous = true})
 local tsv = import("tsv", {anonymous = true})
@@ -32,22 +16,19 @@ local sdk_imports = import("sdk_imports", {anonymous = true})
 local sdk_modules = import("sdk_modules", {anonymous = true})
 local json = import("core.base.json")
 
--- The record's columns, in the order the file holds them.
 local COLUMNS = {"kind", "api", "cls", "key", "introduced", "type", "availability", "hash", "value_status", "value", "host_value",
                  "value_source", "owned", "tbd", "shape", "measured"}
 local STRING_TYPES = {NSString = true, CFStringRef = true}
 local LINKAGE = {extern = true}
 local NULLABILITY = {_Nonnull = true, __nonnull = true, _Nullable = true, __nullable = true}
-local IOS_CACHE = {}  -- the table's values, read once per table path: name -> value, and the names it holds with conflicting values
+local IOS_CACHE = {}
 
--- The name as the key of the record: its non-alphanumeric runs as one underscore, without the ones at the ends (the spec's key).
 local function key_of(api)
     local key = string.gsub(api, "[^%w]+", "_")
     key = string.gsub(key, "^_+", "")
     return (string.gsub(key, "_+$", ""))
 end
 
--- The text before a name: what the declaration writes before its first whole-word occurrence of the name, or nil when it has none.
 local function text_before(text, name)
     local from = 1
     while true do
@@ -63,8 +44,6 @@ local function text_before(text, name)
     end
 end
 
--- Whether a word is a macro the type drops (gen.py's strip_macros): one that names AVAILABLE, DEPRECATED or OBSOLETED, an API_, NS_,
--- OS_, CF_ or __ macro in capitals, or __attribute__.
 local function is_macro(word)
     return string.find(word, "AVAILABLE", 1, true) ~= nil or string.find(word, "DEPRECATED", 1, true) ~= nil
         or string.find(word, "OBSOLETED", 1, true) ~= nil or word == "__attribute__"
@@ -73,7 +52,6 @@ local function is_macro(word)
         or string.match(word, "^__%u[%u%d_]*$") ~= nil
 end
 
--- The position after the parenthesised group that opens at `at` (nested parentheses balanced), or after the text.
 local function after_group(text, at)
     local depth = 0
     repeat
@@ -88,9 +66,6 @@ local function after_group(text, at)
     return at
 end
 
--- The type a declaration writes before a name, as gen.py's declared_type writes it: the macros and their argument lists dropped
--- (availability, attributes, and the all-capitals project macros such as MTL_EXTERN), the linkage and nullability words dropped, and
--- one space between the words that remain.
 local function declared_type(before)
     local out, pos = {}, 1
     while true do
@@ -123,8 +98,6 @@ local function declared_type(before)
     return table.concat(words, " ")
 end
 
--- The declared type with "const " in front when it names a constant pointer typedef and does not say const itself: a constant of
--- `typedef NSString *const X` is const (gen.py's constant_decls prepends it).
 local function with_const(decl, const_typedefs)
     local words = {}
     for word in string.gmatch(decl, "%S+") do
@@ -141,8 +114,6 @@ local function with_const(decl, const_typedefs)
     return decl
 end
 
--- The availability macros of a declaration: each identifier that names AVAILABLE, DEPRECATED or OBSOLETED and its parenthesised
--- arguments (nested parentheses balanced), in the text's order, joined by one space.
 local function availability_of(text)
     local out, pos = {}, 1
     while true do
@@ -175,7 +146,6 @@ local function availability_of(text)
     return (string.gsub(joined, "^%s*(.-)%s*$", "%1"))
 end
 
--- The first identifier of a declaration's words that is not const or volatile: the type the shape reads ("NSString" when none).
 local function base_of(decl)
     for word in string.gmatch(decl, "[%a_][%w_]*") do
         if word ~= "const" and word ~= "volatile" then
@@ -185,7 +155,6 @@ local function base_of(decl)
     return "NSString"
 end
 
--- Whether a declaration names a string type: one of the words is NSString or CFStringRef, or a typedef of the shards that is.
 local function is_string(decl, typedefs)
     for word in string.gmatch(decl, "[%a_][%w_]*") do
         if STRING_TYPES[word] or typedefs[word] then
@@ -195,8 +164,6 @@ local function is_string(decl, typedefs)
     return false
 end
 
--- The text as the body of an ObjC string literal, ASCII only, escaped as gen.py@52253c0650's objc_escape escapes it. The iOS table is read as
--- ASCII with errors="replace" (ios_constants), so each byte above 0x7f has already become one U+FFFD: every such byte is one \uFFFD here.
 local function objc_escape(text)
     local out = {}
     for i = 1, #text do
@@ -219,8 +186,6 @@ local function objc_escape(text)
     return table.concat(out)
 end
 
--- The iOS 26.2 cache's constants table: name -> value for every cfstring row, the first value a name has; names with two values are
--- in conflicts. Read through gzip's pipe, once per process.
 local function ios_constants(path)
     if IOS_CACHE[path] ~= nil then
         return IOS_CACHE[path].values, IOS_CACHE[path].conflicts
@@ -250,9 +215,6 @@ local function ios_constants(path)
     return values, conflicts
 end
 
--- The measured release of each symbol: the gate's release-split output names (object, symbol, release), with the symbol's leading
--- underscore removed, and a MIXED-RELEASES line is not a symbol; or a measured.held-caches.tsv snapshot (symbol, release), whose
--- header line is not a symbol. The snapshot is the file the writer makes from the gate's output, so reading it back reproduces it.
 local function measured_releases(path)
     local out = {}
     for _, line in ipairs(strings.lines(files.read_text(path) or "")) do
@@ -266,8 +228,6 @@ local function measured_releases(path)
     return out
 end
 
--- The ledger rows the record covers: the constants that are missing at 6.1.3, lifted (code+lift), in the ledger's order. A framework
--- absent from 6.1.3 has no ledger, and every constant of its surface is missing: its surface's constant rows stand in for the ledger's.
 local function ledger_constants(tree, corpus, fw, sdk_release)
     local out = {}
     if surface.has_ledger(corpus, surface.ledger_6_1_3(), fw) then
@@ -288,20 +248,14 @@ local function ledger_constants(tree, corpus, fw, sdk_release)
     return out
 end
 
--- The owned constants: name -> the label of the decision that owns it. The registry gives "registry:<file>": the first file (in
--- name order, the framework's own single file last) that names it, as registry_constants has it. The snapshot owned.tsv (name,
--- branch) in the framework's spec folder gives the branch: a constant a live branch owns, whose commit is not in this tree
--- (AVFAudio's info-dictionary keys, v-avmidi), so the record reproduces the owner the oracle was given with --owned.
 local function owned_constants(tree, fw)
     local out = {}
-    -- the snapshot first: gen.py's cmd_input reads owned.tsv, then adds the registry's names it does not hold
     for _, line in ipairs(strings.lines(files.read_text(path.join(layout.snap_dir(tree, fw), "owned.tsv")) or "")) do
         local cells = tsv.fields(line)
         if #cells == 2 and out[cells[1]] == nil then
             out[cells[1]] = cells[2]
         end
     end
-    -- the registry files in full-path order (gen.py's registry_constants sorts them as paths: the framework's single file sorts first)
     local found = {}
     for _, filepath in ipairs(files.glob(path.join(tree, layout.registry_dir(fw), "*.json"))) do
         table.insert(found, {full = filepath, relative = path.join(layout.registry_dir(fw), path.filename(filepath))})
@@ -322,9 +276,6 @@ local function owned_constants(tree, fw)
     return out
 end
 
--- The typedefs of the shards that name a string type (string), a CFStringRef (cf), and a constant NSString pointer (const, the
--- `NSString *const` shape), read over the framework and the two it is built on, as gen.py's string_typedefs, cf_typedefs and
--- const_typedefs read them.
 local function typedefs_of(tree, fws)
     local string_names, cf_names, const_names = {}, {}, {}
     for _, fw in ipairs(fws) do
@@ -346,8 +297,6 @@ local function typedefs_of(tree, fws)
     return string_names, cf_names, const_names
 end
 
--- Rewrites the measured column of a committed constant record from the measured releases: each constant row the measurement names takes
--- its release, and every other row and column is kept as it is. A record that is absent is left absent.
 local function refresh_measured(path, measured)
     local text = files.read_text(path)
     if text == nil then
@@ -365,15 +314,10 @@ local function refresh_measured(path, measured)
     emit.file(path, table.concat(out, "\n") .. "\n")
 end
 
--- Writes the record of one framework (and measured.held-caches.tsv when measured is given). Returns the counts for the summary.
 local function write_framework(args, fw, sdk_release)
     local tree, sdk = args.tree, args.sdk
     local names = sdk_info.names(sdk_release)
     local ledger = ledger_constants(tree, args.coordination, fw, sdk_release)
-    -- The declarations are read only for the Objective-C constants the ledger lists. A Swift-only module (no C header) has no declaration
-    -- the extractor can read as one, so a ledger that lists one of its constants fails by name; a ledger with none reads nothing here,
-    -- and the framework's record is decided from the SDK alone. A framework the extractor does not list has no declarations to read: its
-    -- constants would all come out "undeclared", so it fails.
     local docs = {usr = {}}
     if #ledger > 0 then
         local record = sdk_modules.module_of(sdk, fw)
@@ -384,17 +328,9 @@ local function write_framework(args, fw, sdk_release)
         docs, reason = doc_text.rows(tree, fw, sdk)
         assert(docs ~= nil, string.format("input %s: %s, so its constants cannot be read", fw, reason))
     end
-    -- the typedefs of the framework and of every module its headers reach in the SDK (sdk_imports.closure: the compiler's own reading of
-    -- its imports, for the SDK's target), so no module is named here
     local typedefs, cf_typedefs, const_typedefs = typedefs_of(tree, sdk_imports.closure(sdk, fw))
-    -- A constant is "exported" when the framework's own arm64 .tbd exports it. Merging Foundation's exports into every other framework
-    -- was measured to change no record: no constant row of spec/*/constants.tsv is exported only through Foundation.tbd, on the
-    -- iPhoneOS 26.2 SDK the records came from (1177 rows, 73 frameworks) and on the 16.4 SDK the port compiles against (1160 rows,
-    -- 67 frameworks). The script is charon/.agent-work/runs/v-gen9/item2/flip.lua, outside the tree.
     local symbols, _, has_export_list = tbd.exports(sdk, fw)
     local owned = owned_constants(tree, fw)
-    -- An enumerator the shard holds is declared, and its value is the one clang evaluates: the shard's value column (round 16, the
-    -- owner's rule; gen.py's cmd_input reads the same column). The first row a name has wins, as in the oracle.
     local enum_values = {}
     for _, r in ipairs(headers.shard_value_records(tree, fw)) do
         local name = r.kind == "enumconst" and string.match(r.usr, "@([^@]+)$")
@@ -409,10 +345,6 @@ local function write_framework(args, fw, sdk_release)
     for _ in pairs(ios_conflicts) do
         conflicting = conflicting + 1
     end
-    -- The measured releases: the --measured file, or the committed measured.held-caches.tsv of a framework that has one (the read-back
-    -- of its last release split). Without the default, input --all on a clean checkout dropped the measured column of those records
-    -- (Round 14: the data commit's regeneration passed the snapshot by hand). Only --measured writes the snapshot back. Under --all
-    -- the --measured file is neither read nor written, as the oracle's cmd_input_all passes measured=None.
     local held = path.join(layout.snap_dir(tree, fw), "measured.held-caches.tsv")
     local measured = {}
     if args.measured and not args.all then
@@ -458,7 +390,6 @@ local function write_framework(args, fw, sdk_release)
         end
         local host_value, source = value, "host-macos"
         if status == "found" and d.decl == "" then
-            -- an enumerator is read from the SDK's declaration, not probed on the host: it has no host value
             host_value, source = "-", "sdk-enum-value"
         end
         if status == "found" and ios[api] ~= nil then
@@ -467,7 +398,6 @@ local function write_framework(args, fw, sdk_release)
                 table.insert(differences, {api, host_value, value})
             end
         elseif status ~= "found" and owned[api] == nil and ios[api] ~= nil and d.decl ~= "" and is_string(d.decl, typedefs) then
-            -- the host does not carry the framework (AddressBookUI is iOS-only): the iOS cache is the only oracle, and it is the expectation
             status, value, host_value, source = "found", objc_escape(ios[api]), "-", names.ios_value .. " (no host value)"
         end
         if status ~= "found" then
@@ -487,11 +417,9 @@ local function write_framework(args, fw, sdk_release)
         end
         table.insert(lines, table.concat(cells, "\t"))
     end
-    -- A framework with no constant has no record: check fails on a record that holds no rows, so none is written.
     if #lines > 1 then
         emit.file(layout.constant_record_path(tree, fw), table.concat(lines, "\n") .. "\n")
     elseif args.measured and not args.all then
-        -- The ledger lists no constant to write, so the committed record keeps its rows; only their measured column is refreshed.
         refresh_measured(layout.constant_record_path(tree, fw), measured)
     end
     if args.measured and not args.all then
@@ -506,12 +434,9 @@ local function write_framework(args, fw, sdk_release)
     return #ledger, differences, conflicting
 end
 
--- Returns the exit status. --framework F writes one record; --all writes every surface framework that has a ledger or is absent from 6.1.3.
 function run(args)
     assert(args.sdk, "input needs --sdk: the iPhoneOS SDK the declarations are read from")
     assert(args.coordination, "input needs --coordination: the corpus folder (the ledgers and the iOS constants table)")
-    -- a required input that is not there fails with its path named, before anything is written: a missing --measured file would
-    -- otherwise write a header-only snapshot
     assert(os.isdir(args.sdk), "input: the --sdk folder is not found: " .. args.sdk)
     assert(os.isdir(args.coordination), "input: the --coordination folder is not found: " .. args.coordination)
     if args.measured and not args.all then
@@ -520,11 +445,7 @@ function run(args)
     local sdk_release = sdk_info.discover(args.sdk).version
     local targets = args.all and surface.surface_frameworks(args.tree, args.coordination, sdk_release) or {args.framework}
     local written, without_ledger = 0, 0
-    -- every framework of the surface is read: a framework the inputs cannot read is an error that names it, and the run stops there (no
-    -- framework is skipped; a module with no C constants writes a record with none)
     for _, fw in ipairs(targets) do
-        -- a framework with no 6.1.3 ledger is written when it is absent from 6.1.3 (its constants are all work); one that is not
-        -- absent and has no ledger is not checked, and counted, as before
         if surface.has_ledger(args.coordination, surface.ledger_6_1_3(), fw) or surface.absent_frameworks(args.tree)[fw] ~= nil then
             local rows, differences, conflicting = write_framework(args, fw, sdk_release)
             written = written + 1
@@ -539,6 +460,5 @@ function run(args)
     else
         print(string.format("input: %d record(s) written, %d framework(s) without a ledger", written, without_ledger))
     end
-    -- a run that wrote nothing (a --framework with no ledger checked nothing) fails
     return written > 0 and 0 or 1
 end

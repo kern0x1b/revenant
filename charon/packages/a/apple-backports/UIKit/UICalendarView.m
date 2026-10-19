@@ -1,22 +1,12 @@
 #import <UIKit/UIKit.h>
 #import "CharonCalendar.h"
 
-// A month calendar: a title with arrows for the months before and after, a row of weekday names, and the days of the visible month in a
-// grid of up to six weeks. The release draws the grid itself; this view draws it with the port's own text and paths, so the picture is
-// the port's and not the release's. What the view does is the release's: the visible month is kept within the available range (a month
-// set outside it raises, and a range that moves past the visible month pulls it to the nearest end), the locale, calendar and time zone
-// decide the names and the first weekday, and days are chosen through the selection behaviour the app attaches.
-//
-// Animation: a visible-month change with `animated:YES` takes effect at once here; the release animates it, which this view does not.
-//
-// The view declares the delegate protocol through a function the image keeps, so the release's name for it answers in the image.
 static Protocol *charon_calendarViewDelegateProtocol(void) __attribute__((used));
 static Protocol *charon_calendarViewDelegateProtocol(void)
 {
     return @protocol(UICalendarViewDelegate);
 }
 
-// The release's default font design, as its string value on the host.
 static NSString *const CharonDefaultFontDesign = @"NSCTFontUIFontDesignDefault";
 
 static const CGFloat CharonHeaderHeight = 44;
@@ -24,14 +14,12 @@ static const CGFloat CharonWeekdayHeight = 20;
 static const CGFloat CharonGridTop = 64;
 static const CGFloat CharonArrowInset = 44;
 
-// Raises the way the host raises a parameter it refuses, with the same condition text.
 static void charon_needs(BOOL held, NSString *condition)
 {
     if (!held)
         [NSException raise:NSInternalInconsistencyException format:@"Invalid parameter not satisfying: %@", condition];
 }
 
-// The first instant of the month that holds the date, in the calendar.
 static NSDate *charon_monthStart(NSCalendar *calendar, NSDate *date)
 {
     NSDateComponents *parts = [calendar components:NSCalendarUnitYear | NSCalendarUnitMonth fromDate:date];
@@ -39,7 +27,6 @@ static NSDate *charon_monthStart(NSCalendar *calendar, NSDate *date)
     return [calendar dateFromComponents:parts];
 }
 
-// The first instant of the month the visible components name; a missing year or month is read as 1, as the host reads it.
 static NSDate *charon_firstOfMonth(NSCalendar *calendar, NSDateComponents *components)
 {
     NSDateComponents *parts = [[NSDateComponents alloc] init];
@@ -49,7 +36,6 @@ static NSDate *charon_firstOfMonth(NSCalendar *calendar, NSDateComponents *compo
     return [calendar dateFromComponents:parts];
 }
 
-// Visible components for a month: its year and month, with the day undefined, as the host answers.
 static NSDateComponents *charon_monthComponents(NSCalendar *calendar, NSDate *monthStart)
 {
     NSDateComponents *parts = [calendar components:NSCalendarUnitEra | NSCalendarUnitYear | NSCalendarUnitMonth fromDate:monthStart];
@@ -65,7 +51,6 @@ static NSDate *charon_shiftMonths(NSCalendar *calendar, NSDate *date, NSInteger 
     return [calendar dateByAddingComponents:step toDate:date options:0];
 }
 
-// The release's default range: the years 1 to 4001 in the Gregorian calendar, in UTC.
 static NSDateInterval *charon_defaultRange(void)
 {
     NSCalendar *gregorian = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
@@ -110,8 +95,6 @@ static NSDateInterval *charon_defaultRange(void)
     return self;
 }
 
-// The release's starting state: the current locale and calendar, the default font design and range, the current month visible, and the
-// decorations wanted. Taps select days, and swipes and the arrows move between months.
 - (void)charon_setUp
 {
     _locale = [NSLocale currentLocale];
@@ -145,7 +128,6 @@ static NSDateInterval *charon_defaultRange(void)
     return _selectionBehavior;
 }
 
-// The behaviour that was attached is told it has left, and the new one that it is in this view; a nil removes the selection.
 - (void)setSelectionBehavior:(UICalendarSelection *)selectionBehavior
 {
     UICalendarSelection *previous = _selectionBehavior;
@@ -160,7 +142,6 @@ static NSDateInterval *charon_defaultRange(void)
     return _locale;
 }
 
-// The host refuses a nil locale with the calendar's condition text, and the port says the same.
 - (void)setLocale:(NSLocale *)locale
 {
     charon_needs(locale != nil, @"calendar");
@@ -173,7 +154,6 @@ static NSDateInterval *charon_defaultRange(void)
     return _calendar;
 }
 
-// A new calendar keeps the month the view shows: the same first day of that month, in the new calendar's own years.
 - (void)setCalendar:(NSCalendar *)calendar
 {
     charon_needs(calendar != nil, @"calendar");
@@ -199,7 +179,6 @@ static NSDateInterval *charon_defaultRange(void)
     return _fontDesign;
 }
 
-// The design is kept as the app gives it. The 6.1.3 system font has one design, so the drawn text does not change with it.
 - (void)setFontDesign:(NSString *)fontDesign
 {
     _fontDesign = [fontDesign copy];
@@ -211,7 +190,6 @@ static NSDateInterval *charon_defaultRange(void)
     return _availableDateRange;
 }
 
-// A range that no longer holds the visible month moves the view to the nearer end of the range, as the host does.
 - (void)setAvailableDateRange:(NSDateInterval *)availableDateRange
 {
     charon_needs(availableDateRange != nil, @"date");
@@ -231,7 +209,6 @@ static NSDateInterval *charon_defaultRange(void)
     return [_visibleDateComponents copy];
 }
 
-// The month the components name is shown; a month outside the available range raises, as the host raises it.
 - (void)setVisibleDateComponents:(NSDateComponents *)dateComponents animated:(BOOL)animated
 {
     charon_needs(dateComponents != nil, @"date");
@@ -253,7 +230,6 @@ static NSDateInterval *charon_defaultRange(void)
     [self setNeedsDisplay];
 }
 
-// The decorations are asked of the delegate again on the next drawing, for the whole visible month; the dates named are drawn with the rest.
 - (void)reloadDecorationsForDateComponents:(NSArray<NSDateComponents *> *)dates animated:(BOOL)animated
 {
     [self setNeedsDisplay];
@@ -276,7 +252,6 @@ static NSDateInterval *charon_defaultRange(void)
     return [monthStart compare:first] != NSOrderedAscending && [monthStart compare:last] != NSOrderedDescending;
 }
 
-// Makes the month the visible one, and tells the delegate what it was when the month really changes.
 - (void)charon_showMonthStartingAt:(NSDate *)monthStart
 {
     NSDateComponents *previous = _visibleDateComponents;
@@ -286,8 +261,6 @@ static NSDateInterval *charon_defaultRange(void)
         return;
     _visibleDateComponents = next;
     [self setNeedsDisplay];
-    // The method is the release's from iOS 16.2; it is called through its implementation so the port's build, which targets 6.1.3, does
-    // not need the newer availability to compile.
     SEL changed = @selector(calendarView:didChangeVisibleDateComponentsFrom:);
     if ([_delegate respondsToSelector:changed]) {
         void (*notify)(id, SEL, id, id) = (void (*)(id, SEL, id, id))[(NSObject *)_delegate methodForSelector:changed];
@@ -313,7 +286,6 @@ static NSDateInterval *charon_defaultRange(void)
     [self charon_stepMonths:-1];
 }
 
-// The header's arrows step a month; a tap on the grid is a day, which the selection behaviour decides on.
 - (void)charon_tapped:(UITapGestureRecognizer *)tap
 {
     CGPoint point = [tap locationInView:self];
@@ -329,7 +301,6 @@ static NSDateInterval *charon_defaultRange(void)
         [_selectionBehavior charon_didTapDay:day];
 }
 
-// The number of days in the visible month, and the blank cells before the first of them in the grid.
 - (NSInteger)charon_daysInVisibleMonth:(NSDate *)first calendar:(NSCalendar *)calendar
 {
     return [calendar rangeOfUnit:NSCalendarUnitDay inUnit:NSCalendarUnitMonth forDate:first].length;
@@ -442,8 +413,6 @@ static NSDateInterval *charon_defaultRange(void)
     }
 }
 
-// A day: its number in the cell's upper part, a disc behind it when it is selected, grey when it cannot be chosen, and the decoration the
-// delegate gives for it at the cell's foot.
 - (void)charon_drawDay:(NSInteger)day inCell:(CGRect)cell calendar:(NSCalendar *)calendar
 {
     NSDateComponents *components = [self charon_dayComponents:day];

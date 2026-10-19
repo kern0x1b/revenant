@@ -1,13 +1,3 @@
-// Probe, shared by the host program (disposewait.m) and the 6.1.3 application (emulate/coremidi/app/main.m): does the release's
-// dispose of a destination, and of an input port, wait for a read procedure that is running? The library frees the receive side
-// of an object it finds gone when another is made, on whatever thread makes it, and the release's read thread may be inside the
-// library's read procedure for that object at that moment (CharonMIDIPorts.m, charon_protocol_read). If the dispose waits for the
-// running procedure, the dispose and the free are ordered on the application's own thread; if it does not, only the reference
-// the library holds across the call (charon_port_retain) keeps the port alive, and a free of the object at the instant a read is
-// entered (before it holds the reference) is the one window. This measures which.
-//
-// The read procedure announces that it is running and then waits, up to 5 s, for the probe to let it go. Another thread disposes
-// the object. The line says whether the dispose came back while the procedure was still running, and after how long.
 #include <CoreMIDI/CoreMIDI.h>
 #include <Foundation/Foundation.h>
 #include <dispatch/dispatch.h>
@@ -40,7 +30,6 @@ static double charon_dw_now(void)
 
 static void charon_dw_run(const char *kind, MIDIObjectRef object, int isPort, MIDIEndpointRef sender)
 {
-    // The procedure is entered by a list of one packet.
     Byte buffer[64];
     MIDIPacketList *list = (MIDIPacketList *)buffer;
     MIDIPacket *packet = MIDIPacketListInit(list);

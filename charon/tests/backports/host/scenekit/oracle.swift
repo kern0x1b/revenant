@@ -1,5 +1,3 @@
-// The answers of macOS SceneKit that tests/backports/device/scenekit.m holds the port to: its matrix functions,
-// a node's rotation conventions and SCNView's defaults and delegate messages. Writes them as JSON.
 import SceneKit
 import GLKit
 
@@ -44,7 +42,6 @@ out["node/new rotation"] = v4(SCNNode().rotation)
 out["node/new eulerAngles"] = v3(SCNNode().eulerAngles)
 let r = SCNNode(); r.rotation = SCNVector4(0, 1, 0, 1.2)
 out["node/rotation to orientation"] = v4(r.orientation)
-// a matrix set as the transform is kept as it was given; the parts are its split, and setting one recomposes it
 var shear = SCNMatrix4Identity; shear.m21 = 0.5; shear.m41 = 1
 let sheared = SCNNode(); sheared.transform = shear
 out["node/shear transform"] = m(sheared.transform)
@@ -59,7 +56,6 @@ out["node/mirror scale"] = v3(mirrored.scale)
 out["node/mirror orientation"] = v4(mirrored.orientation)
 mirrored.position = SCNVector3(9, 8, 7)
 out["node/mirror then position transform"] = m(mirrored.transform)
-// the presentation node: one for each node, with the hierarchy, after a frame
 let presented = SCNNode(); presented.position = SCNVector3(0, 1, 0)
 let presentedChild = SCNNode(); presentedChild.position = SCNVector3(1, 0, 0); presented.addChildNode(presentedChild)
 let presentedCamera = SCNNode(); presentedCamera.camera = SCNCamera(); presentedCamera.position = SCNVector3(0, 0, 5)

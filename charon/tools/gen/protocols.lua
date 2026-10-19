@@ -1,8 +1,3 @@
--- The protocol objects the generator emits for a framework, from the snapshot's protocol records (protocols.tsv). The objects are
--- emitted only for the protocols the generation set names. A protocol the SDK declares ("sdk16 body") is named through the
--- framework's own umbrella header; a transcribed one has no declaration in the tree (the transcriber's header is not committed:
--- generated output), so a set that names one raises instead of emitting an object no compiler can resolve.
-
 local layout = import("layout", {anonymous = true})
 local tsv = import("tsv", {anonymous = true})
 local files = import("files", {anonymous = true})
@@ -12,12 +7,8 @@ local order = import("order", {anonymous = true})
 
 local TRANSCRIBED = "transcribed"
 local GENERATED_STATUS = {["sdk16 body"] = true, [TRANSCRIBED] = true}
--- The release whose ledger says which members the 6.1.3 release lacks.
 local LEDGER_RELEASE = surface.ledger_6_1_3()
 
--- The rule of generation_set in tools/gen.py@52253c0650: the objc protocols missing at 6.1.3 (a row the ledger lists
--- with a status other than header-ok, which the port's headers cover) and named by no registry row of the framework. It
--- reads the coordination corpus (the surface table and the ledgers), which lives outside the repository.
 function rule_set(tree, fw, corpus, sdk_release)
     local led6 = surface.ledger_status(corpus, fw, LEDGER_RELEASE)
     local registry = surface.registry_entries(tree, fw)
@@ -33,8 +24,6 @@ function rule_set(tree, fw, corpus, sdk_release)
     return out
 end
 
--- The reviewed set of a framework: the protocols named by its record (protocol-sets/<F>.tsv), and the empty set without a record.
--- Read by the check too (cmd_check.record_conflicts), in every clean checkout.
 function recorded_set(tree, fw)
     local out = {}
     local text = files.read_text(layout.protocol_set_path(tree, fw))
@@ -46,9 +35,6 @@ function recorded_set(tree, fw)
     return out
 end
 
--- The objc protocols whose objects this generator emits. Without the coordination corpus (corpus nil: the build, a clean checkout)
--- the set is the reviewed record. With it, the rule is worked out from the corpus and must equal the record: a difference names the
--- protocols on each side, so a change of the rule or of the corpus is reviewed through the record, never silently emitted.
 function generation_set(tree, fw, corpus, sdk_release)
     local recorded = recorded_set(tree, fw)
     if corpus == nil then
@@ -71,8 +57,6 @@ function generation_set(tree, fw, corpus, sdk_release)
     return computed
 end
 
--- name -> the protocol's record in the snapshot (its release, status, reasons, bases, and members), or none when the framework
--- has no protocol snapshot.
 function records(tree, fw)
     local out = {}
     local text = files.read_text(path.join(layout.snap_dir(tree, fw), "protocols.tsv"))
@@ -93,8 +77,6 @@ function records(tree, fw)
     return out
 end
 
--- The generated protocol files of a framework: name -> text. One source per release a protocol arrived in: each source names
--- every protocol of its release, so clang emits its protocol object there.
 function protocol_files(tree, fw, corpus, sdk_release)
     local protocols = records(tree, fw)
     local wanted = generation_set(tree, fw, corpus, sdk_release)

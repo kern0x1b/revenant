@@ -19,8 +19,6 @@ package("widgetkit")
     on_load("iphoneos", function (package)
         package:add("deps", "charon@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
                     backports = package:config("backports") or nil, backports_uikit = package:config("backports_uikit") or nil}})
-        -- the module's API is written in terms of the AppIntents module (an intent a widget is
-        -- configured by) and of ActivityKit (the attributes of a Live Activity)
         package:add("deps", "charon@appintents", {alias = "appintents", configs = {shared = package:config("shared") or nil,
                     backports = package:config("backports") or nil, backports_uikit = package:config("backports_uikit") or nil}})
         package:add("deps", "charon@activitykit", {alias = "activitykit", configs = {shared = package:config("shared") or nil,
@@ -46,26 +44,14 @@ package("widgetkit")
         os.mkdir(swiftdir)
         os.mkdir(probe_dir)
 
-        -- The module's API is written in terms of the AppIntents module (an intent a widget is
-        -- configured by) and of ActivityKit (the attributes of a Live Activity), so both are on the
-        -- module's search path, and both archives are linked by the port that uses this one.
         local module_paths = {}
         for _, dependency in ipairs({"appintents", "activitykit"}) do
             table.insert(module_paths, "-I")
             table.insert(module_paths, path.join(package:dep(dependency):installdir("lib"), "swift", "iphoneos"))
         end
 
-        -- One module, as Styx's Combine is one module and AppIntents is one: the whole framework in a
-        -- single compile, so a declaration of one file sees every other.
         local module = path.join(swiftdir, "WidgetKit.swiftmodule")
         os.mkdir(module)
-        -- Absolute, and refused when it matches nothing: `modules/apple/sources.lua` is where the
-        -- C-family sources go and it raises "compiles %s, which matches no file" for a pattern
-        -- that matches none, and the Swift side had neither -- a relative glob resolved against
-        -- the *compiler's* working directory, which is how charon@appintents' install failed with
-        -- "error opening input file 'Sources/AppIntents/LocalizedStringResource.swift'"
-        -- (kits r2), and a glob that matched nothing compiles an empty module and calls it a
-        -- pass (kits r3).
         local sources_widgetkit = os.files(path.join(package:scriptdir(), "Sources", "WidgetKit", "**.swift"))
         if #sources_widgetkit == 0 then
             raise("%s compiles Sources/WidgetKit/**.swift, which matches no file", package:name())
@@ -88,7 +74,3 @@ package("widgetkit")
         os.cp(path.join(os.scriptdir(), "..", "..", "..", "LICENSE"), path.join(package:installdir("licenses")))
         os.cp("README.md", path.join(package:installdir("share")))
     end)
-
--- The two modules this one is written in terms of are linked by whatever uses it, so a port that
--- imports WidgetKit carries the AppIntents and ActivityKit archives with it; `links` names this
--- module's own archive and the two dependencies' names theirs.

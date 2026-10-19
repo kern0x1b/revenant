@@ -1,9 +1,3 @@
--- The host side of the differential and of the probe: the oracle's values for names (found, missing, probe-crashed for a library
--- the oracle cannot load), the probe of tools/gen.py@52253c0650 with its arguments and values, and the text helpers the differential prints
--- with (Python's repr, str.splitlines). The probe builds the host programs through xmake, so this test configures the project
--- (tools/gen/host). Run from the repository root:
---   xmake l tests/gen/probe_test.lua
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 
 local function checks()
@@ -40,7 +34,6 @@ local function test_probe(check)
           and got.NSMultipleUnderlyingErrorsKey[2] == "NSMultipleUnderlyingErrorsKey", "probe reads the host framework of fw")
 end
 
--- The files and folders under a folder, sorted, as one text (in memory; nothing is written).
 local function listing(folder)
     local entries = {}
     for _, filepath in ipairs(os.files(path.join(folder, "**"))) do
@@ -53,8 +46,6 @@ local function listing(folder)
     return table.concat(entries, "\n")
 end
 
--- A probe run leaves no file behind: the listing of the probe folder (the build directory's gen folder) is the same before and after
--- each run, and no staging file of the names (probe-names.txt, probe-name.txt) exists in it.
 local function test_no_files(check)
     local probe = import("gen.probe", {rootdir = TOOLS, anonymous = true})
     local host = import("gen.host", {rootdir = TOOLS, anonymous = true})
@@ -95,7 +86,6 @@ end
 
 function main()
     local check, failures = checks()
-    -- first: the listing of the probe folder is taken before any probe run of this process
     test_no_files(check)
     test_text(check)
     test_values(check)

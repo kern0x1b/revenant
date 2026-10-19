@@ -1,12 +1,6 @@
 import("fixtures")
 import("core.package.package")
 
--- The package keeps its install while its digest is the same, so the digest has
--- to cover everything a library is built from and everything the build checks
--- it against: a source left out is a change that is built once and never again,
--- and a registry left out is a change that is never checked against the libraries. The recipe works it out as the package
--- interpreter loads it, which offers no import(), so the test loads the recipe
--- itself, in a tree of its own for each change.
 local function recipe_digest(folder, name, recipe, tree_files)
     local tree = path.join(folder, name)
     local root = path.join(tree, "packages", "a", "apple-backports")
@@ -58,19 +52,6 @@ local function digest_step(opt, folder, found)
     end
 end
 
--- A backport carries a class by defining it, and the release is told of it by
--- the library's exports: a class the compiler leaves hidden is a class no port
--- can link, and the band for a release that already has it cannot see that it
--- is there. The library is compiled as the package compiles it, with the
--- compiler the toolchain names, and asked both questions of one class.
--- The case that drives the lookup, rather than calling it: releases_in() is what places an
--- object's API, and it is the line that was wrong. The registry spells a function with its
--- parentheses, `foo()`, while the name releases_in() has is the symbol's, `_foo`; when it reached
--- the registry by a raw index it found nothing, the function was unplaced, and check_releases
--- refused the object holding it - an 18.2 function on a port whose held caches end at 18.0, which
--- no cache and no source can place, is exactly that case. The three assertions in registry_test
--- check entry_of's answers and the call site as text, which a fix that reverted the line would
--- leave green; this one runs the path.
 local function placement_step(backports, opt, folder, found)
     if not opt.sdk or not opt.clang then
         table.insert(found, "the placement check needs an SDK and a compiler and was given neither, so it did not run")
@@ -122,8 +103,6 @@ local function surface_step(backports, opt, folder, found)
     if #kept ~= 1 or #reexported ~= 0 then
         table.insert(found, string.format("a release without the class must keep the object, not %d of them with %d re-exported", #kept, #reexported))
     end
-    -- The release carries classes it does not export, and a band that keeps one
-    -- of those puts a second class of that name in the process.
     local told = backports.duplicated({object}, {NSDateInterval = {image = "Foundation"}})
     if table.concat(told, " ") ~= "NSDateInterval (NSDateInterval.o)" then
         table.insert(found, "a class the release holds without exporting it must be named with the object that carries it, not " .. table.concat(told, " "))
@@ -131,8 +110,6 @@ local function surface_step(backports, opt, folder, found)
     if #backports.duplicated({object}, {NSSomethingElse = {}}) ~= 0 then
         table.insert(found, "a class no release holds is the backport's to carry")
     end
-    -- A proxy defines the class under a name of Charon's own and exports the
-    -- release's name as an alias of it, which is not a second class.
     local proxy_source = path.join(folder, "surface", "NSProxied.m")
     io.writefile(proxy_source, "#import <Foundation/Foundation.h>\n" ..
                                "@interface CharonNSProxied : NSObject\n@end\n@implementation CharonNSProxied\n@end\n" ..
@@ -165,10 +142,6 @@ local function surface_step(backports, opt, folder, found)
     end
 end
 
--- A band drops what the release already carries and re-exports it in its place,
--- and dyld learned that in iOS 4.2: ld64 refuses the list for anything older,
--- so a band for such a release has to drop without promising. The floor is the
--- linker's, not ours, so the test asks the linker where it is.
 local function floor_step(backports, opt, folder, found)
     for _, deployment in ipairs({"4.1", "4.2", "6.0"}) do
         local wanted = deployment ~= "4.1"
@@ -195,9 +168,6 @@ local function floor_step(backports, opt, folder, found)
     end
 end
 
--- ld64 merges the categories a library puts on one class into a single category under one of
--- their names, so the library's category list names one file's category for all of them. A
--- category left unattached is named with every member it adds, which is what finds each file.
 local function categories_step(backports, opt, folder, found)
     local work = path.join(folder, "categories")
     os.mkdir(work)
@@ -219,9 +189,6 @@ local function categories_step(backports, opt, folder, found)
     if named ~= "" then
         table.insert(found, "a category on a class the release exports is attached, and must not be named: " .. named)
     end
-    -- An alias of charon_alias.h, whose class no release of a band carries: the proxy is a class of the
-    -- band and is the class the release's name stands for there, so it is carried, while an alias whose
-    -- proxy is in no binary of the band stands for a class nothing of the band has and is named.
     io.writefile(path.join(work, "alias.m"),
                  "#import <Foundation/Foundation.h>\n" ..
                  "struct charon_alias { const void *proxy; const char *name; };\n" ..
@@ -237,9 +204,6 @@ local function categories_step(backports, opt, folder, found)
     if named ~= "" then
         table.insert(found, "an alias whose proxy the band defines carries the class of a release that has none, and must not be named: " .. named)
     end
-    -- The other side of the rule needs no case of its own: the proxy is what the alias's .set resolves to,
-    -- so a band whose binaries hold an alias record and none of them define the proxy is a library that does
-    -- not link, and there is nothing to build for it.
 end
 
 function failures(opt)
@@ -402,7 +366,6 @@ function failures(opt)
     carried.classes.UIBlurEffect = nil
     carried.answered = nil
     os.rm(path.join(registry, "UIKit", "absent.json"))
-    -- an owed class with a stand-in built is a note the check returns, and not a refusal: the real behaviour is owed
     io.writefile(path.join(registry, "UIKit", "owed.json"), [[
         [{"api": "UIBlurEffect", "kind": "class", "introduced": "8.0", "status": "owed",
           "reason": "build the class UIBlurEffect", "effect": "until built: NSClassFromString answers nil"}]

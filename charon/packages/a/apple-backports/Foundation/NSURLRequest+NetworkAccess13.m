@@ -5,8 +5,6 @@
 #include <netinet/in.h>
 #include <string.h>
 
-/* The two keys the port keeps the expensive and constrained answers under, beside the category that
-   reads them. */
 static NSString *const CharonExpensiveKey = @"CharonAllowsExpensiveNetworkAccess";
 static NSString *const CharonConstrainedKey = @"CharonAllowsConstrainedNetworkAccess";
 

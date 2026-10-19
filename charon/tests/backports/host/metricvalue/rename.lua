@@ -1,11 +1,5 @@
--- Writes the header that compiles the port's classes under names of their own, so a build that never links the real
--- Contacts.framework builds anyway, and the two builds are never confused for one another even though the Contacts and
--- AddressBook frameworks of the host load in both.
--- Usage: xmake l ./rename.lua <registry.json>... <out.h>
-
 import("core.base.json")
 
--- Names are written in byte order, as Python's sorted writes them (see records.lua for why Lua's own order is not used).
 local function byte_less(a, b)
     for i = 1, math.min(#a, #b) do
         local x, y = a:byte(i), b:byte(i)

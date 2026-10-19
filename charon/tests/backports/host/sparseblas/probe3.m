@@ -1,6 +1,3 @@
-// Apple's cblas_sgemm takes fourteen arguments - the standard thirteen plus a K of its own - and
-// this measures what it does with them, because the port builds its level-3 products on it.
-
 #import <Accelerate/Accelerate.h>
 #include <stdio.h>
 #include <string.h>
@@ -15,7 +12,6 @@ static void show(const char *tag, const float *c, int count)
 int main(void)
 {
     setvbuf(stdout, NULL, _IONBF, 0);
-    // A is 2x3 row-major, B is 3x2 row-major, so the product is 2x2: [[11,14],[29,36]].
     float A[6] = {1, 0, 2, 0, 3, 4};
     float B[6] = {1, 2, 3, 4, 5, 6};
     float C[4] = {0, 0, 0, 0};
@@ -38,14 +34,12 @@ int main(void)
     cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, 2, 2, 3, 1.0f, A, 2, B, 2, 0.0f, C, 2);
     show("lda=2 ldb=2", C, 4);
 
-    // And a 2x2 by 2x2, whose product is unambiguous: [[7,10],[9,12]].
     float A2[4] = {1, 2, 0, 3};
     float B2[4] = {1, 2, 3, 4};
     memset(C, 0, sizeof(C));
     cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, 2, 2, 2, 1.0f, A2, 2, B2, 2, 0.0f, C, 2);
     show("2x2 by 2x2, expect 7 10 9 12", C, 4);
 
-    // cblas_sgemv, cblas_sger and cblas_strsv, the three the port leans on.
     float x[3] = {1, 1, 1}, y[3] = {0, 0, 0};
     cblas_sgemv(CblasRowMajor, CblasNoTrans, 2, 3, 1.0f, A, 3, x, 1, 0.0f, y, 1);
     show("sgemv no-trans, expect 3 7 0", y, 3);

@@ -2,15 +2,9 @@
 #import <ImageIO/ImageIO.h>
 #include <string.h>
 
-// Read by the photo output's host oracle (host/photosettings) and its device test (device/photooutput10.m) alike.
-
 static unsigned read16(const uint8_t *p, BOOL big) { return big ? (p[0] << 8 | p[1]) : (p[1] << 8 | p[0]); }
 static unsigned read32(const uint8_t *p, BOOL big) { return big ? ((unsigned)p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3]) : ((unsigned)p[3] << 24 | p[2] << 16 | p[1] << 8 | p[0]); }
 
-// What a JPEG file holds, read by the Exif standard's layout rather than through ImageIO (which on the host answers a
-// thumbnail for a file that has none): the picture's size and Exif user comment by ImageIO, then IFD1 of the Exif
-// segment, each tag with its type, count and value (a rational read out; the thumbnail's offset and length as "set"),
-// the APPn segments of the thumbnail and its size.
 static NSString *jpeg_contents(NSData *file)
 {
     if (!file)

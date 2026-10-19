@@ -1,8 +1,5 @@
 #import "CharonMetricKit.h"
 #import "CharonMetricValue.h"
-// The value classes of this framework that arrived in iOS 13.0, one file for that release alone: an
-// object carries API that arrived in one release, so this is the iOS 13.0 half and no two of them are one
-// object.
 
 @implementation MXAppLaunchMetric
 @dynamic histogrammedTimeToFirstDraw, histogrammedApplicationResumeTime, histogrammedOptimizedTimeToFirstDraw, histogrammedExtendedLaunch;
@@ -110,13 +107,9 @@ CHARON_VALUE_PROPERTY(NSString *, deviceType)
 CHARON_VALUE_PROPERTY(NSString *, applicationBuildVersion)
 CHARON_VALUE_PROPERTY(NSString *, platformArchitecture)
 
-// Its own header gives it the two representations.
 - (NSData *)JSONRepresentation { return [CharonMetricValue jsonOf:self]; }
 - (NSDictionary *)dictionaryRepresentation { return [CharonMetricValue dictionaryOf:self]; }
 @end
-// The properties the lowered SDK does not declare, in a category because a property a
-// category declares is implemented in a category - and only there: a host build takes the
-// host's own, newer, declarations, and the host's own class supplies these accessors.
 @implementation MXMetaData (CharonMetricKit)
 #ifndef CHARON_HOST_DIFFERENTIAL
 @dynamic lowPowerModeEnabled, isTestFlightApp, pid, bundleIdentifier;
@@ -127,7 +120,6 @@ CHARON_SCALAR_PROPERTY(bool, isTestFlightApp)
 CHARON_SCALAR_PROPERTY(pid_t, pid)
 CHARON_VALUE_PROPERTY(NSString *, bundleIdentifier)
 
-// Its own header gives it the two representations.
 - (NSData *)JSONRepresentation { return [CharonMetricValue jsonOf:self]; }
 - (NSDictionary *)dictionaryRepresentation { return [CharonMetricValue dictionaryOf:self]; }
 @end
@@ -157,13 +149,9 @@ CHARON_VALUE_PROPERTY(MXAppExitMetric *, applicationExitMetrics)
 CHARON_VALUE_PROPERTY(NSArray *, signpostMetrics)
 CHARON_VALUE_PROPERTY(MXMetaData *, metaData)
 
-// Its own header gives it the two representations.
 - (NSData *)JSONRepresentation { return [CharonMetricValue jsonOf:self]; }
 - (NSDictionary *)dictionaryRepresentation { return [CharonMetricValue dictionaryOf:self]; }
 @end
-// The properties the lowered SDK does not declare, in a category because a property a
-// category declares is implemented in a category - and only there: a host build takes the
-// host's own, newer, declarations, and the host's own class supplies these accessors.
 @implementation MXMetricPayload (CharonMetricKit)
 #ifndef CHARON_HOST_DIFFERENTIAL
 @dynamic diskSpaceUsageMetrics;
@@ -171,7 +159,6 @@ CHARON_VALUE_PROPERTY(MXMetaData *, metaData)
 
 CHARON_VALUE_PROPERTY(MXDiskSpaceUsageMetric *, diskSpaceUsageMetrics)
 
-// Its own header gives it the two representations.
 - (NSData *)JSONRepresentation { return [CharonMetricValue jsonOf:self]; }
 - (NSDictionary *)dictionaryRepresentation { return [CharonMetricValue dictionaryOf:self]; }
 @end

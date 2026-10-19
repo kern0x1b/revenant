@@ -1,10 +1,5 @@
 #import <UIKit/UIKit.h>
 
-// The defaults the host's -init answers, measured by tests/backports/host/paste-config: an icon and a label, the cornerStyle the host
-// gives (2), no corner radius, the image on the leading edge (NSDirectionalRectEdgeLeading), and no colours. The first two are not zero,
-// so -init sets them; the release's -init is the constructor the SDK does not mark unavailable.
-//
-// The class is NSSecureCoding: each property is archived under its own name, and an archive decodes to the same six values.
 @implementation UIPasteControlConfiguration {
 @private
     UIPasteControlDisplayMode _displayMode;

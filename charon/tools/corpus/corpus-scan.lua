@@ -1,10 +1,3 @@
--- Structured wrapper over the canonical apple.dyld.missing_imports.
--- Prints one TSV line per missing entry: <importer-basename>\t<raw message>
--- Usage: CHARON_ROOT=<worktree> xmake l corpus-scan.lua <release> <binary>...
--- Pass the app's main binary PLUS every embedded framework/appex binary so
--- intra-app and 3rd-party-defined symbols resolve out; what remains is demand
--- against the stock shared cache of <release>. Add band dylibs to the binary
--- list to fold the current backports in (remaining-gap pass).
 function main(release, ...)
     local binaries = {...}
     assert(release and #binaries > 0, "usage: corpus-scan.lua <release> <binary>...")

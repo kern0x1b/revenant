@@ -4,8 +4,6 @@
 #include <unistd.h>
 #import "check.h"
 
-// The port's four factories (renamed charonHost_*) against the host's own, driven the same way side by side.
-
 @interface NSMapTable (CharonHostObjects6)
 + (instancetype)charonHost_weakToStrongObjectsMapTable;
 + (instancetype)charonHost_strongToWeakObjectsMapTable;
@@ -13,8 +11,6 @@
 + (instancetype)charonHost_strongToStrongObjectsMapTable;
 @end
 
-// Reads an archived NSMapTable in the order 6.0 writes it (xmake emulate): the key and value options, unkeyed, then
-// each key and value, then nil. A later host also writes "NS.count", which this does not read.
 @interface CharonHostArchivedTable : NSObject <NSCoding>
 @property (nonatomic, readonly) NSString *fields;
 @property (nonatomic, readonly) BOOL later;
@@ -48,8 +44,6 @@ static const char *label(const char *side, const char *what)
     return [NSString stringWithFormat:@"%s %s", side, what].UTF8String;
 }
 
-// A value a scenario puts in a table that holds its values weakly is kept alive by the scenario, unless the scenario is
-// about a value going: the numbers a literal makes are not the same object on every release.
 static NSMutableArray *pinned;
 
 static id V(int number)
@@ -59,7 +53,6 @@ static id V(int number)
     return value;
 }
 
-// What a table answers after a scenario, as one comparable string.
 static NSString *outcome(void (^scenario)(NSMutableArray *said))
 {
     pinned = [NSMutableArray array];
@@ -243,7 +236,6 @@ static void weak_checks(const char *variant, NSMapTable *(^make)(void), NSMapTab
         void (^run)(NSMapTable *, NSMutableArray *) = scenarios[i].run;
         NSString *ours = outcome(^(NSMutableArray *said) { run(make(), said); });
         printf("port %s %s: %s\n", variant, scenarios[i].name, ours.UTF8String);
-        // A release before 6.0 has no table of its own to set beside the port: its answers are compared with 6.0's.
         if (!host)
             continue;
         NSString *theirs = outcome(^(NSMutableArray *said) { run(host(), said); });
@@ -257,12 +249,9 @@ static CharonHostArchivedTable *archived(NSMapTable *table)
     [table setObject:@"v" forKey:@"k"];
     NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:[NSKeyedArchiver archivedDataWithRootObject:table]];
     [unarchiver setClass:[CharonHostArchivedTable class] forClassName:@"NSMapTable"];
-    // "root": where 6.0's archive holds its top object ($top), NSKeyedArchiveRootObjectKey being iOS 10.
     return [unarchiver decodeObjectForKey:@"root"];
 }
 
-// The port archives as 6.0 does: the same fields as the release's own where the release writes 6.0's format, and 6.0's
-// measured order (the key options, the value options, key, value) where a later host writes its own, with "NS.count".
 static void archive_checks(const char *variant, NSMapTable *ours, NSMapTable *theirs, NSString *fields)
 {
     CharonHostArchivedTable *port = archived(ours), *release = theirs ? archived(theirs) : nil;
@@ -275,9 +264,6 @@ static void archive_checks(const char *variant, NSMapTable *ours, NSMapTable *th
         CHECK(!port.later, label(variant, "a later host writes NS.count, which 6.0 does not"));
 }
 
-// A known divergence, held so that the test fails if it ever stops diverging: after a key or a value goes the release's
-// table still counts its entry, and keeps what it holds, until it next grows (host, and 6.0 under xmake emulate); the
-// port forgets the entry before it answers. What goes is a key where the table holds keys weakly, else a value.
 static void count_after_death(const char *variant, BOOL weakKeys, NSMapTable *ours, NSMapTable *theirs)
 {
     pinned = [NSMutableArray array];
@@ -296,8 +282,6 @@ static void count_after_death(const char *variant, BOOL weakKeys, NSMapTable *ou
         CHECK_EQUAL(@([theirs count]), @4, label(variant, "release still counts a dead entry until it grows"));
 }
 
-// The same divergence for what the entry held: the side that stays is let go of by the port when the other goes, and kept
-// by the release until the table grows. Only where one side is held.
 static BOOL keeps_held_side(BOOL weakKeys, NSMapTable *table)
 {
     __weak id held;
@@ -320,17 +304,12 @@ static void held_side_checks(const char *variant, BOOL weakKeys, NSMapTable *our
         CHECK(keeps_held_side(weakKeys, theirs), label(variant, "release keeps it until the table grows"));
 }
 
-// What the port does with the watches it leaves on objects, and how much work a table's reads take, are read from the
-// port's own classes: the watches alive (made less gone) and the calls of an entry's -key.
 static long watches_made, watches_gone, key_calls;
 
-// The wrappers return a raw pointer, not an object: an object returned from a block under ARC is retained and
-// autoreleased, which keeps every watch and every key the hooks see alive until the pool drains.
 static void count_calls(Class cls, SEL selector, void (^count)(void))
 {
     IMP original = method_getImplementation(class_getInstanceMethod(cls, selector));
     if (selector == @selector(init)) {
-        // -init is NSObject's; the class gets its own, calling NSObject's.
         IMP counted = imp_implementationWithBlock(^void *(__unsafe_unretained id object) {
             count();
             return ((void *(*)(id, SEL))original)(object, selector);
@@ -354,8 +333,6 @@ static long live_watches(void)
     return watches_made - watches_gone;
 }
 
-// A key that lives on carries a watch for each entry of a live table it is in, and none for an entry that has gone from
-// its table: taken out, or the table discarded, or emptied.
 static void watch_checks(const char *variant, NSMapTable *(^make)(void), long perEntry)
 {
     id key = [NSObject new];
@@ -387,8 +364,6 @@ static void watch_checks(const char *variant, NSMapTable *(^make)(void), long pe
     CHECK_EQUAL(@(live_watches() - base), @(perEntry), label(variant, "the keys that go take their watches with them"));
 }
 
-// Building a table of n keys, and forgetting n keys that went, takes work in n, not in n squared: an entry's key is read
-// a few times an entry, where a scan of every entry on every call reads it n * n times.
 static void cost_checks(const char *variant, BOOL weakKeys, NSMapTable *(^make)(void))
 {
     const int n = 1000;
@@ -419,10 +394,6 @@ static void cost_checks(const char *variant, BOOL weakKeys, NSMapTable *(^make)(
     CHECK(key_calls < 20 * n, label(variant, "forgetting n keys that went reads entries a few times each"));
 }
 
-// The owner thread of a table against the deaths of its sides on other threads, the one thing the port's lock and queue
-// are for: keys and values are dropped by blocks on a concurrent queue, that never read the table, while the owner adds
-// entries and asks -count and a live key's value. Only what a table claims is asked: nothing reads a key that is dying.
-// It must finish, answer for the live key every time, and end with the live entry alone.
 #ifndef THREAD_ROUNDS
 #define THREAD_ROUNDS 20000
 #endif
@@ -452,14 +423,10 @@ static void thread_checks(const char *variant, BOOL port, NSMapTable *(^make)(vo
     }
     dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
     CHECK(answered, label(variant, "a live key answers its value while others die on other threads"));
-    // The release keeps counting an entry that has gone until it grows (above), so what it enumerates is what is asked.
     CHECK_EQUAL(@(port ? [table count] : [[[table keyEnumerator] allObjects] count]), @1,
                 label(variant, "and once they have gone the live entry is alone"));
 }
 
-// Whether the release has weak references of its own (5.0 and later), from its Foundation version, not from the port:
-// which of the port's two paths a release takes is checked against this, and the checks that need the runtime's weak
-// references run where this answers YES. 881.0 is NSFoundationVersionNumber of 5.0 (4.3 is 751.x).
 static BOOL release_has_weak(void)
 {
     return NSFoundationVersionNumber >= 881.0;
@@ -471,9 +438,6 @@ static BOOL ivar_flag(id object, const char *name)
     return *(BOOL *)((char *)(__bridge void *)object + ivar_getOffset(ivar));
 }
 
-// The port's own choice of path for a weak side, read from its entry: through the runtime's weak reference where the
-// release has one, the watch alone where it has none. A release that answers otherwise (a lookup that finds a function
-// where there is none, or none where there is) fails here, before the calls the path makes safe are tried.
 static void path_checks(const char *variant, BOOL weakKeys, BOOL weakValues, NSMapTable *table)
 {
     id key = [NSObject new], value = [NSObject new];
@@ -489,8 +453,6 @@ static void path_checks(const char *variant, BOOL weakKeys, BOOL weakValues, NSM
                     label(variant, native ? "a weak value is read through the runtime's weak reference" : "a weak value is watched only"));
 }
 
-// A key or a value of the kinds that keep their own retain count and that a table is really given: a mutable string, then
-// a number too large for a tagged pointer.
 static id enumerated_object(int kind, long i, const char *tag)
 {
     if (kind == 0)
@@ -498,10 +460,6 @@ static id enumerated_object(int kind, long i, const char *tag)
     return [NSNumber numberWithUnsignedLongLong:ULLONG_MAX - 2 * (unsigned long long)i - (tag[0] == 'v')];
 }
 
-// The calls that read every entry's key - the enumerators, -copy - while the keys and values go on other threads, which
-// the watch alone does not survive (4.3: the contract of the facts), and the runtime's weak references do. It runs where
-// the release has them, and says so where it does not. The owner reads each key it is handed (-hash) and takes -copy; the
-// live entry must be in every enumeration and every copy, and alone at the end.
 static void enumeration_checks(const char *variant, BOOL port, NSMapTable *(^make)(void))
 {
     if (!release_has_weak()) {
@@ -546,11 +504,6 @@ static void enumeration_checks(const char *variant, BOOL port, NSMapTable *(^mak
                 label(variant, "and after the enumerations the live entry is alone"));
 }
 
-// A class that refuses a weak reference to its instances, as the weak side of a table: what a release does with it is its
-// own answer (6.0 aborts: "cannot form weak reference"), and the port must give the same one where the release has weak
-// references. An abort ends the process, so each case is a run of its own, asked for by argument:
-//     maptable6 theirs|port weakToStrong|strongToWeak|weakToWeak|strongToStrong key|value
-// and emulate.sh compares the outcomes. strongToStrong is the control: the class alone is not what aborts.
 @interface CharonHostRefusesWeak : NSObject
 @end
 
@@ -594,7 +547,6 @@ int main(int argc, char **argv)
         count_calls(NSClassFromString(@"CharonSideWatch"), NSSelectorFromString(@"dealloc"), ^{ __sync_fetch_and_add(&watches_gone, 1); });
         count_calls(NSClassFromString(@"CharonMapEntry"), @selector(key), ^{ key_calls++; });
 
-        // What the port makes, and what the release makes where it has the factory.
         struct {
             const char *name;
             BOOL weakKeys, weakValues;
@@ -632,7 +584,6 @@ int main(int argc, char **argv)
             }
         }
 
-        // Strong keys are retained, not copied, and values retained, as the host's own.
         BOOL released = [NSMapTable respondsToSelector:@selector(strongToStrongObjectsMapTable)];
         NSMapTable *ours = [NSMapTable charonHost_strongToStrongObjectsMapTable];
         NSMapTable *theirs = released ? [NSMapTable strongToStrongObjectsMapTable] : [NSMapTable mapTableWithKeyOptions:0 valueOptions:0];

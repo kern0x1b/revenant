@@ -1,16 +1,6 @@
 #import <Contacts/Contacts.h>
 #import "contacts-cases.h"
 
-// Every case here builds its objects in memory and never touches a real
-// address book: no CNContactStore instance is ever asked for a permission,
-// a fetch or a save. That is not a limitation of the harness, it is the
-// point - the host runs under whoever is signed into this Mac, and this
-// package promised never to read, log or write that person's own contacts.
-// What is left is the whole of the value-object surface: CNContact and its
-// values, the formatter, the vCard pair, groups before they are saved, and
-// the plain value classes beside them - which is most of what an
-// application does with Contacts before it ever calls the store.
-
 static NSString *flag(BOOL value)
 {
     return value ? @"1" : @"0";
@@ -205,9 +195,6 @@ static void userDefaults(ContactsRecorder record)
     record(@"defaults.countryCodeIsTwoLetters", flag(defaults.countryCode.length == 2));
 }
 
-// A predicate travels as an object: it answers -predicateFormat and -description without raising (the
-// release answers a format only for the identifier lists), survives secure coding, and a fetch request
-// carries it through an archive.
 static id predicateRoundTrip(id object, Class cls, BOOL secure)
 {
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:object];

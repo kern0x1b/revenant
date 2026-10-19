@@ -1,43 +1,3 @@
-/*
- * The group of connections of Network: `nw_connection_group_*`, the surface iOS 14 and iOS 15 added.
- *
- * What a connection group is here: one socket, one group, the messages that arrive on it. A multicast
- * group is a datagram socket bound to the port the group's endpoint names and joined to the group
- * address (and to every further address the descriptor added), read by a dispatch source on the group's
- * own queue - so every handler of the group is called on the queue that was set and none of them runs
- * before `nw_connection_group_start` has returned to its caller. A message is one datagram: the bytes
- * arrive whole, the sender's address is the message's remote endpoint, and the address the datagram was
- * *sent to* is the message's local endpoint, read out of the kernel's own `IP_PKTINFO` rather than
- * guessed from the socket. `nw_connection_group_reply` answers the sender;
- * `nw_connection_group_send_message` sends to one member or to the group;
- * `nw_connection_group_extract_connection_for_message` hands the peer a real `nw_connection_t` of this
- * library over a datagram socket to that address, so a caller that wants that peer's messages over a
- * connection of its own has one.
- *
- * A multiplex group is a different thing and this release cannot carry it. A multiplex group is one
- * connection that demultiplexes into many peers, which in Apple's implementation is QUIC, and this
- * library's own facts for the QUIC transport carry the measurement: this release's SecureTransport has
- * no TLS 1.2, let alone the TLS 1.3 a QUIC handshake is built on, so the port's QUIC connection is a
- * connection over its transport with no QUIC layer on it (facts/Network/NWQUIC.md). A group whose
- * members would all ride on one such connection is reported failed with the POSIX "protocol not
- * supported" that is what that is, and the object then answers every call the way an object with no
- * transport answers: no socket, no messages, no path, and nothing where a value would name a transport
- * that does not exist. That is the same shape nw16-quic-options.m takes for a parameters of QUIC.
- *
- * The states are the SDK's: `waiting` while the group is being brought up, `ready` once the socket is
- * joined and bound, `failed` with the error that stopped it and `cancelled` when the program said so.
- *
- * The messages are this library's own content contexts, so the four calls that take one read the record
- * the group made when the datagram was read: the address it came from, the address it was sent to, the
- * path it arrived over, the per-protocol metadata, and whether it has been answered. The header allows
- * one reply per inbound message, and no more.
- *
- * Which object holds what: an object holds the API of one release, and the ladder this port builds has
- * no rung between 12.0 and 16.0 and the 12.0 cache exports no `nw_connection_group_*` at all, so the
- * whole family measures at 16.0 and lives in this one file (`coordination/corpus/caches/12.0.tsv`,
- * `16.0.tsv`, and `tools/release-split.lua` for the same measurement).
- */
-
 #import "CharonNW.h"
 #import "CharonNWSupport.h"
 
@@ -50,9 +10,6 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-/* One inbound message: what it came from, what it was sent to, and what has been done with it since.
-   The group keeps it under its content context, so a program that saves the context and answers later
-   finds the same record the reply reads. */
 @interface CharonNWGroupMessage : NSObject {
 @public
     CharonNWEndpoint *_remote;
@@ -67,8 +24,6 @@
 @implementation CharonNWGroupMessage
 @end
 
-/* The class is declared here and nowhere else: with the fragile ABI a class's ivar offsets are emitted
-   by every file that sees its @interface, so the object lives in this one file. */
 @interface CharonNWConnectionGroup : NSObject <OS_nw_connection_group> {
 @public
     CharonNWGroupDescriptor *_descriptor;
@@ -118,9 +73,6 @@ static CharonNWError *charon_group_error(int code)
     return error;
 }
 
-/* An address endpoint as the socket address it is, copied out: the endpoint's own bytes are the port's
-   and the port does not write through them. NULL for anything that is not an address - a group whose
-   endpoint is a name has no address to join, and the header's own failure is what that answers. */
 static struct sockaddr_storage charon_group_address(CharonNWEndpoint *endpoint, socklen_t *out_length)
 {
     struct sockaddr_storage address;
@@ -137,8 +89,6 @@ static struct sockaddr_storage charon_group_address(CharonNWEndpoint *endpoint, 
     return address;
 }
 
-/* Every address the group joins: the one its endpoint names and every address endpoint the descriptor
-   added, which is what a multicast group with further members is. */
 static NSArray *charon_group_members(CharonNWConnectionGroup *group)
 {
     NSMutableArray *members = [NSMutableArray array];
@@ -155,8 +105,6 @@ static NSArray *charon_group_members(CharonNWConnectionGroup *group)
     return members;
 }
 
-/* The address the datagrams of a group go out to when the program names no member: the group address
-   itself, with the port the socket was bound to. */
 static NSData *charon_group_destination(CharonNWConnectionGroup *group)
 {
     for (NSData *member in group->_members) {
@@ -171,8 +119,6 @@ static NSData *charon_group_destination(CharonNWConnectionGroup *group)
     return group->_members.firstObject;
 }
 
-/* The source address the descriptor asks the group to send from, as an IP_TOS-carrying sendmsg would
-   want it: a group with a specific source binds it, and the kernel then sends from it. */
 static void charon_group_bind_source(CharonNWConnectionGroup *group, struct sockaddr_storage *bound)
 {
     socklen_t length = 0;
@@ -185,8 +131,6 @@ static void charon_group_bind_source(CharonNWConnectionGroup *group, struct sock
         ((struct sockaddr_in6 *)bound)->sin6_addr = ((struct sockaddr_in6 *)&source)->sin6_addr;
 }
 
-/* The service class an outbound context asks for, as the byte of it a socket sends: the context's IP
-   metadata carries the class, and a DSCP class is the top six bits of IP_TOS. */
 static int charon_group_type_of_service(nw_content_context_t context)
 {
     if (!context)
@@ -199,9 +143,6 @@ static int charon_group_type_of_service(nw_content_context_t context)
     return value;
 }
 
-/* One datagram sent on the group's socket. The type of service an outbound context's IP metadata asks
-   for rides with it as the kernel's own IP_TOS, which is what that class is on the wire (its DSCP is the
-   top six bits of that byte), and a reply with no class sends no such option at all. */
 static void charon_group_send(CharonNWConnectionGroup *group, const struct sockaddr *to, socklen_t length,
                               const void *bytes, size_t size, int service)
 {
@@ -232,13 +173,9 @@ static void charon_group_send(CharonNWConnectionGroup *group, const struct socka
     (void)sendmsg(group->_socket, &message, 0);
 }
 
-/* The socket, the join and the bind. A group is joined on every interface that is up: a multicast group
-   is a property of the link, not of one interface on it. */
 static void charon_group_open(CharonNWConnectionGroup *group)
 {
     if (!group->_multicast) {
-        /* One connection carrying many peers is a QUIC group, and this release has no transport that can
-           be one (facts/Network/NWQUIC.md). There is no socket to open and no address to join. */
         charon_group_report(group, nw_connection_group_state_failed, charon_group_error(EPROTONOSUPPORT));
         return;
     }
@@ -258,8 +195,6 @@ static void charon_group_open(CharonNWConnectionGroup *group)
     int on = 1;
     setsockopt(handle, SOL_SOCKET, SO_REUSEADDR, &on, sizeof on);
     if (address.ss_family == AF_INET) {
-        /* The address every datagram is sent to is asked for, so a message knows where it arrived without
-           the port having to guess which of the group's addresses it was sent to. */
         setsockopt(handle, IPPROTO_IP, IP_PKTINFO, &on, sizeof on);
         struct ifaddrs *list = NULL;
         if (getifaddrs(&list) == 0) {
@@ -330,7 +265,6 @@ static void charon_group_open(CharonNWConnectionGroup *group)
     group->_socket = handle;
 }
 
-/* The bytes of a dispatch data object, as one region; NULL for an empty one. */
 static const void *charon_group_bytes(dispatch_data_t content, size_t *out_size)
 {
     *out_size = 0;
@@ -350,9 +284,6 @@ static const void *charon_group_bytes(dispatch_data_t content, size_t *out_size)
 void nw_connection_group_reply(nw_connection_group_t group, nw_content_context_t inbound_message,
                           nw_content_context_t outbound_message, dispatch_data_t content);
 
-/* One datagram read from the socket: the bytes, who sent them, and which of the group's addresses they
-   were sent to. The destination comes from the kernel's own answer to IP_PKTINFO, so a datagram that
-   arrived for another group on the same port is not mistaken for one of this group's. */
 static void charon_group_read(CharonNWConnectionGroup *group)
 {
     for (int taken = 0; taken < 32; taken++) {
@@ -415,8 +346,6 @@ static void charon_group_read(CharonNWConnectionGroup *group)
         }
         if (!local)
             local = group->_local;
-        /* A group that refuses traffic that is not multicast is refusing a datagram that was sent to this
-           host's own address on the group's port, which is what the destination address says it is. */
         if (group->_descriptor->_disableUnicastTraffic && !ours)
             continue;
         CharonNWContentContext *context = [[CharonNWContentContext alloc] init];
@@ -431,9 +360,6 @@ static void charon_group_read(CharonNWConnectionGroup *group)
         record->_udp = (CharonNWProtocolMetadata *)nw_udp_create_metadata();
         BOOL complete = (uint32_t)received <= group->_maximum;
         if (!complete && group->_rejectOversized) {
-            /* The header says a message over the maximum is an error when the program asked for that, and
-               then the group answers it for itself. A datagram has no remainder, so what is over the
-               maximum is the kernel's to have dropped. */
             group->_inbound[(id)context] = record;
             nw_connection_group_reply(group, (nw_content_context_t)context, NULL, NULL);
             [group->_inbound removeObjectForKey:(id)context];
@@ -465,8 +391,6 @@ nw_connection_group_t nw_connection_group_create(nw_group_descriptor_t group_des
     group->_maximum = UINT32_MAX;
     group->_socket = -1;
     group->_value = nw_connection_group_state_invalid;
-    /* The kind of the descriptor is what the group is: one multicast group the datagrams all go to, or
-       one connection that carries many peers. */
     group->_multicast = [descriptor->_kind isEqualToString:@"multicast"];
     return group;
 }
@@ -512,8 +436,6 @@ void nw_connection_group_start(nw_connection_group_t group)
         return;
     CharonNWConnectionGroup *self = (CharonNWConnectionGroup *)group;
     @synchronized(self) {
-        /* The header says the queue and a receive handler must be set before the group is started, and a
-           group started twice is the same group: the second start says nothing and calls nobody. */
         if (self->_started || self->_cancelled || !self->_queue)
             return;
         self->_started = YES;
@@ -526,8 +448,6 @@ void nw_connection_group_start(nw_connection_group_t group)
         if (self->_cancelled)
             return;
         if (self->_socket < 0) {
-            /* A group that already failed while it was being opened keeps the error it failed with; this
-               is the path for a socket that could not be made at all, where errno is the reason. */
             if (self->_value != nw_connection_group_state_failed)
                 charon_group_report(self, nw_connection_group_state_failed, charon_group_error(errno));
             return;
@@ -586,7 +506,6 @@ void nw_connection_group_cancel(nw_connection_group_t group)
         stop();
 }
 
-/* The record of an inbound message, looked up by the context the receive handler was given. */
 static CharonNWGroupMessage *charon_group_message(nw_connection_group_t group, nw_content_context_t context)
 {
     if (!group || !context)
@@ -614,10 +533,6 @@ nw_path_t nw_connection_group_copy_path_for_message(nw_connection_group_t group,
     return message ? message->_path : NULL;
 }
 
-/* The peer of a message as a connection of this library: a real datagram connection over the address the
-   sender used, with the group's parameters and its queue, started the way a program starts one. The
-   record leaves the group's hands with it, so later messages from that peer are the connection's to
-   read and not the group's. */
 nw_connection_t nw_connection_group_extract_connection_for_message(nw_connection_group_t group,
                                                                   nw_content_context_t context)
 {
@@ -633,8 +548,6 @@ nw_connection_t nw_connection_group_extract_connection_for_message(nw_connection
     return connection;
 }
 
-/* The answer to an inbound message: the bytes go to the address they came from, with the type of service
-   the outbound context's IP metadata asks for, and a message may be answered exactly once. */
 void nw_connection_group_reply(nw_connection_group_t group, nw_content_context_t inbound_message,
                                nw_content_context_t outbound_message, dispatch_data_t content)
 {
@@ -648,15 +561,10 @@ void nw_connection_group_reply(nw_connection_group_t group, nw_content_context_t
     struct sockaddr_storage to = charon_group_address(message->_remote, &length);
     charon_group_send((CharonNWConnectionGroup *)group, (struct sockaddr *)&to, length, bytes, size,
                       charon_group_type_of_service(outbound_message));
-    /* A message marked final expects no further communication from that peer, so the group stops holding
-       what it knows about it. */
     if (nw_content_context_get_is_final(inbound_message))
         [((CharonNWConnectionGroup *)group)->_inbound removeObjectForKey:(id)inbound_message];
 }
 
-/* An outbound message of the group's own: to the member the program names, or to every member of the
-   group when it names none. The completion says the content was handed to the socket, which is what the
-   header says it says - it is not an acknowledgement by the peer. */
 void nw_connection_group_send_message(nw_connection_group_t group, dispatch_data_t content,
                                       nw_endpoint_t endpoint, nw_content_context_t context,
                                       nw_connection_group_send_completion_t completion)
@@ -689,8 +597,6 @@ void nw_connection_group_send_message(nw_connection_group_t group, dispatch_data
         completion(NULL);
 }
 
-/* The metadata of a protocol of the group's stack, and the metadata a message carried. The group is IP
-   over UDP, so those are the two definitions a caller gets an answer for and no other. */
 nw_protocol_metadata_t nw_connection_group_copy_protocol_metadata(nw_connection_group_t group,
                                                                   nw_protocol_definition_t definition)
 {

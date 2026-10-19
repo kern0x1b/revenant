@@ -1,29 +1,3 @@
--- The ImageIO name constants the port does not carry, written one object per release band, with their registry rows and the
--- harness's pins. It replaces tools/corpus/gen-imageio-names.py, which did the same, and it reads its inputs from the repository:
---     packages/a/apple-backports/spec/ImageIO/ledger.tsv   the workspace ledger's ImageIO rows (a copy of the corpus ledger)
---     tests/backports/host/imageio-names/probe.c           the host probe that answers each name's value
--- and the first held rung of each name from tools/cache-index/first-rung.lua, which reads the index build.lua writes.
---
--- WHAT IT MEASURES ITSELF:
---   1. every value, with the HOST's own ImageIO over dlsym, one process per symbol, by compiling and running probe.c. Eleven of
---      these names are not their own name: kCGImagePropertyAVISDictionary is "{AVIS}", kCGImagePropertyGroupMonoscopicImageLocation
---      is "GroupImageIndexMonoscopicImageLocation", the two TIFF position names are "XPosition" and "YPosition", and the monoscopic
---      locations and the stereo aggressor keys are bare words, so no naming convention produces this table.
---   2. for every name, the first HELD RUNG that exports the SYMBOL, through tools/cache-index/first-rung.lua. A name no rung carries
---      is placed by the ledger's own introduced release, because the ladder ends at 10.3.4 and nothing else says anything about it.
---
--- The full run (no mode) writes the spec snapshot packages/a/apple-backports/spec/ImageIO/names.tsv (one row per name: api, band,
--- introduced, value), the objects into packages/a/apple-backports/.gen/ImageIO/ImageIONames<TAG>.m, the registry rows
--- packages/a/apple-backports/registry/ImageIO/names<TAG>.json, and tests/backports/host/imageio-names/objects.txt and expected.txt,
--- which the harness pins. --objects is the build's run (generate() in modules/apple/backports.lua): it reads the snapshot and writes
--- only the objects into .gen/ImageIO. It compiles nothing and reads no index, so a clean checkout builds them.
---
---     xmake l tools/gen/imageio_names.lua [LEDGER] [OUT] [--objects]
---
--- LEDGER defaults to the committed spec copy. OUT is the root the files are written under; it defaults to this repository, and a
--- scratch run names a copy of the same layout so the committed files are not touched. The probe compiles and runs one process per
--- name, so run the full run under the slot: coordination/heavy.sh xmake l tools/gen/imageio_names.lua
-
 local tsv = import("tsv", {anonymous = true})
 local pyjson = import("pyjson", {anonymous = true})
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
@@ -36,7 +10,6 @@ local PROBE = path.join(ROOT, "tests", "backports", "host", "imageio-names", "pr
 local FIRST_RUNG = path.join(ROOT, "tools", "cache-index", "first-rung.lua")
 local SPEC_LEDGER = path.join(ROOT, PORT, "spec", "ImageIO", "ledger.tsv")
 
--- suffix -> release the object's symbols are placed at, and one line saying why it is an object of its own
 local BANDS = {
     ["1001"] = {"10.0.1", "the release's own caches first export these four symbols at iOS 10.0.1, and the 10.0.1 band has no object of its own yet"},
     ["134"] = {"13.4", "the two BC names, kCGImagePropertyBCEncoder and kCGImagePropertyBCFormat, are annotated iOS 12.0, and the first held rung that exports their symbols is iOS 13.4, the release the cache index answers for both"},
@@ -51,8 +24,6 @@ local SOURCE = "the host's own ImageIO with dlsym, one process per symbol, by te
     .. "port's own: 'GREEN (port vs host): 438 agree, 0 differ' and 'imageio-names: 438 constants, 438 mutants "
     .. "run, 438 RED', the last line being the harness proving it can fail on every one of them"
 
--- The object's text. {name} is replaced once, in a single pass, so a value that holds a brace is not read again; {{ and }} are
--- the braces they stand for.
 local OBJECT = [[#import <ImageIO/ImageIO.h>
 
 // The iOS {release} band's ImageIO name constants, {count} of them that the port did not carry, one object per
@@ -78,8 +49,6 @@ local OBJECT = [[#import <ImageIO/ImageIO.h>
 {definitions}
 ]]
 
--- Renders the object's template: {{ and }} become one brace each, and each {name} becomes its value. The braces are first set
--- aside as two bytes that no template holds, so a value's own braces are never read as a placeholder.
 local function render(template, values)
     local text = string.gsub(template, "{{", "\1")
     text = string.gsub(text, "}}", "\2")
@@ -88,8 +57,6 @@ local function render(template, values)
     return string.gsub(text, "\2", "}")
 end
 
--- The text of a name's value as the host's ImageIO gives it, one probe process per name. The probe is compiled against the
--- host's frameworks into `build`; a name it does not know has no TYPE line and fails the assert, as the Python did.
 local function measure_values(names, build)
     os.mkdir(build)
     local probe = path.join(build, "iio-probe")
@@ -111,7 +78,6 @@ local function measure_values(names, build)
     return values
 end
 
--- The first held rung of each name, from tools/cache-index/first-rung.lua: name TAB release, one line per name asked.
 local function measure_rungs(names)
     local args = {"l", FIRST_RUNG}
     for _, name in ipairs(names) do
@@ -126,7 +92,6 @@ local function measure_rungs(names)
     return rungs
 end
 
--- objects.txt in release order, with a dotted version (10.0.1) beside the release it follows.
 local function harness_order(names)
     local function major_of(name)
         return tonumber(string.match(name, "^ImageIONames(%d+)"))
@@ -141,7 +106,6 @@ local function harness_order(names)
         end
         return suffix_of(a) < suffix_of(b)
     end)
-    -- 10.0.1 reads as 1001 in the file name, which sorts after every other object; it goes back beside 10.0
     local tail, rest = {}, {}
     for _, name in ipairs(ordered) do
         if string.match(name, "^ImageIONames%d%d%d%d%.m$") then
@@ -163,7 +127,6 @@ local function harness_order(names)
     return rest
 end
 
--- The names of the constants a band object declares and defines: the two patterns the harness counts by, line by line.
 local function counted_names(text, into)
     for line in string.gmatch(text .. "\n", "([^\n]*)\n") do
         for _, pattern in ipairs({
@@ -193,7 +156,6 @@ local function write_bytes(filepath, text)
     io.writefile(filepath, text, {encoding = "binary"})
 end
 
--- The ledger's rows as records: a missing ImageIO constant maps to the release the ledger introduces it at.
 local function missing_constants(ledger)
     local introduced = {}
     local count = 0
@@ -216,8 +178,6 @@ function main(ledger, out, mode)
     local objects_dir = path.join(port, ".gen", FRAMEWORK)
     os.mkdir(objects_dir)
 
-    -- the values, the introduced releases and the band of each name: the full run measures them and commits them as the spec snapshot,
-    -- and the build's run (--objects) reads that snapshot, so a build measures nothing and needs no cache index
     local introduced, values, suffix_of = {}, {}, {}
     if objects_only then
         assert(os.isfile(spec), "no spec snapshot at " .. spec .. ": the full run (tools/gen/imageio_names.lua with no mode) writes it")
@@ -319,13 +279,10 @@ function main(ledger, out, mode)
         print(string.format("%-28s %3d constants", "ImageIONames" .. suffix .. ".m", #names))
     end
 
-    -- the build's run stops here: the registry rows and the harness pins are committed, and only the full run writes them
     if objects_only then
         return
     end
 
-    -- the harness counts every band object there is, in the library's folder or the generated one, and pins the total, so both
-    -- files move with the slice; a band object is one or the other, never both
     local on_disk, where = {}, {}
     for _, dir in ipairs({path.join(port, "Graphics"), objects_dir}) do
         for _, file in ipairs(os.files(path.join(dir, "ImageIONames*.m"))) do
@@ -337,7 +294,6 @@ function main(ledger, out, mode)
     local ordered = harness_order(on_disk)
     write_bytes(path.join(harness, "objects.txt"), table.concat(ordered, "\n") .. "\n")
 
-    -- the names the harness can see, declared or defined, are the number it pins
     local counted = {}
     for _, name in ipairs(on_disk) do
         counted_names(read_bytes(where[name]), counted)

@@ -1,12 +1,6 @@
 import("fixtures")
 import("core.package.addon")
 
--- The tweak rule is exercised nowhere else: every other suite checks apple.platform and apple.bundle with a target it
--- fakes by hand, and the real @addon/charon/tweak rule has never been asked to build, link and place a binary. This
--- suite builds one for real, the way a port would, with a source already held to a running iPhone 4S -
--- tests/backports/device/safearea-tweak.m, whose checks the README records as answered on the device - so the first
--- real use of the rule is a source this repository already trusts, not one written for the occasion.
-
 local CONTROL = "Package: org.charon.tweaktest\nName: Tweak test\nArchitecture: iphoneos-arm\nDescription: a tweak the tests build\nDepends: mobilesubstrate\n"
 local FILTER = '{ Filter = { Bundles = ( "com.apple.Preferences" ); }; }\n'
 
@@ -70,7 +64,6 @@ function failures(opt)
         end
     end
 
-    -- Both halves of the addon this installed go, the files and the registry entry, for the reason port_test gives.
     addon.unregister("charon", version)
     os.tryrm(path.join(addon.installdir(), addon.dirname("charon"), version))
     os.tryrm(folder)

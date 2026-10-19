@@ -1,31 +1,13 @@
-// The port's SCNSceneRenderer.projectPoint / unprojectPoint, held to what macOS SceneKit's own
-// renderer answers for the same camera, viewport and points.
-//
-// The answers are the ones host/scenekitprojection/project.swift recorded into
-// scenekitprojection-expectations.h, from an SCNRenderer that had rendered one offscreen frame - a
-// renderer that has not rendered answers its input back unchanged, which is the failure the host
-// case's control exists to catch, and this test renders for the same reason.
-//
-// Three parts: the comparison against the sixteen recorded answers, a check that every one of them
-// was asked for, and the mutant - the comparison run once more against a *mirrored* y, which has to
-// fail, so that the comparison is known to have teeth before it is trusted. The mirrored y is the
-// error the arithmetic actually had (measured on the host: the port's y came back flipped the wrong
-// way, by hundreds of units), and the tolerance below is 0.05 of a unit, which is four orders of
-// magnitude tighter than that and four orders wider than the float rounding the two sides share.
-
 #import <Foundation/Foundation.h>
 #import <QuartzCore/QuartzCore.h>
 #import <SceneKit/SceneKit.h>
 
 #import "check.h"
 
-// The answers macOS SceneKit gave, one {"name", "value"} per line, recorded by
-// host/scenekitprojection/project.swift. The same shape accelerate7.m:8-9 uses.
 static const char *expectations[][2] = {
 #include "scenekitprojection-expectations.h"
 };
 
-/// The points the host projected, in the order it recorded them.
 static const struct { const char *label; CGFloat x, y, z; } cases[] = {
     {"0,0,0", 0, 0, 0},
     {"1,0,0", 1, 0, 0},
@@ -38,19 +20,16 @@ static const struct { const char *label; CGFloat x, y, z; } cases[] = {
 };
 static const size_t case_count = sizeof(cases) / sizeof(*cases);
 
-/// The viewport the host recorded for, and the camera it put in front of it.
 static const CGFloat viewport_width = 800, viewport_height = 600;
 static const CGFloat tolerance = 0.05;
 
 static NSMutableDictionary *recorded = nil;
 
-/// "x,y,z", the shape the host wrote and the shape the comparison reads.
 static NSString *spelling(SCNVector3 v)
 {
     return [NSString stringWithFormat:@"%g,%g,%g", v.x, v.y, v.z];
 }
 
-/// Whether an answer is within the tolerance of a recorded one, component by component.
 static BOOL agrees(NSString *answer, NSString *expected)
 {
     if (expected == nil) {
@@ -69,8 +48,6 @@ static BOOL agrees(NSString *answer, NSString *expected)
     return YES;
 }
 
-/// A view with the host's camera and viewport, and one frame rendered, so the renderer has a
-/// projection at all.
 static SCNView *rendered_view(void)
 {
     SCNView *view = [[SCNView alloc] initWithFrame:CGRectMake(0, 0, viewport_width, viewport_height)];
@@ -78,9 +55,6 @@ static SCNView *rendered_view(void)
     SCNNode *camera = [SCNNode node];
     camera.name = @"camera";
     SCNCamera *cam = [SCNCamera camera];
-    // fieldOfView is left alone: it is iOS 11 and newer, and 60 is its default, which is the one
-    // the host recorded with (measured: the store's clang reports setFieldOfView: "only available
-    // on iOS 11.0 or newer" for this target).
     cam.zNear = 1;
     cam.zFar = 1000;
     camera.camera = cam;
@@ -92,8 +66,6 @@ static SCNView *rendered_view(void)
     [scene.rootNode addChildNode:lit];
     view.scene = scene;
     view.pointOfView = camera;
-    // One frame, which is what gives the renderer its projection. Without an OpenGL ES 2.0 context
-    // there is no frame to render and the test says so rather than comparing against nothing.
     if (view.eaglContext == nil) {
         return nil;
     }
@@ -134,8 +106,6 @@ int main(int argc, char **argv)
             charon_check(ok, name.UTF8String,
                          [NSString stringWithFormat:@"%@ != %@", answer, recorded[name] ?: @"nothing recorded"]);
 
-            // The mutant: the same answer with its y mirrored, which is the error this arithmetic
-            // had, and which the comparison has to reject.
             NSString *mirrored = spelling(SCNVector3Make(projected.x, viewport_height - projected.y, projected.z));
             if (!agrees(mirrored, recorded[name])) {
                 mutant_rejected++;

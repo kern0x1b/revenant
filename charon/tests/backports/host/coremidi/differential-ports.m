@@ -1,9 +1,3 @@
-// The port behaviour of CharonMIDIPorts.m, against macOS CoreMIDI in the same process: the parser of each source of a 2.0
-// input port (the SysEx of one source is not continued by another source's bytes), a 2.0 velocity sent to a destination
-// this process made (it arrives as it was sent, and so it does from the release's own 2.0 destination for the same list),
-// and a disposed destination, which takes nothing (oracle/removal-notify-macos.txt). The library is the one compiled for the
-// host here; the sources and destinations are virtual endpoints this process disposes before it exits (no device, entity
-// or setup is touched).
 #import <Foundation/Foundation.h>
 #import <CoreMIDI/CoreMIDI.h>
 #include <dispatch/dispatch.h>
@@ -13,7 +7,6 @@
 
 #import "CharonCoreMIDI.h"
 
-// What a port or destination received: one entry per list, with the first packet's words and the connection's reference.
 typedef struct charon_received {
     UInt32 words[8];
     int count;
@@ -28,7 +21,6 @@ static charon_received gDest[CHARON_RECEIVED_MAX];
 static int gDestCount;
 static dispatch_semaphore_t gDestSignal;
 
-// The first packet's words of a list, at most eight, into out.
 static int charon_first_words(const MIDIEventList *list, UInt32 *out)
 {
     if (list->numPackets == 0)
@@ -59,7 +51,6 @@ static void charon_record_dest(const MIDIEventList *list, void *srcConnRefCon)
     dispatch_semaphore_signal(gDestSignal);
 }
 
-// Waits for one arrival, up to two seconds: macOS delivers on its own thread.
 static int charon_wait(dispatch_semaphore_t signal)
 {
     return dispatch_semaphore_wait(signal, dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC)) == 0;
@@ -79,7 +70,6 @@ static MIDIPacketList *charon_packets(Byte *buffer, size_t size, const Byte *dat
     return list;
 }
 
-// Sends the bytes from a source and waits for the port to receive one list.
 static int charon_receive_bytes(MIDIEndpointRef source, const Byte *data, ByteCount length)
 {
     Byte buffer[256];
@@ -95,11 +85,8 @@ static void charon_report(int *checks, int *failures, const char *name, int pass
     printf("%s %s\n", passed ? "ok" : "FAIL", name);
 }
 
-// The library's client with a block (renamed in the library's object by run.sh, like the other block forms).
 extern OSStatus charon_host_MIDIClientCreateWithBlock(CFStringRef name, MIDIClientRef *outClient, MIDINotifyBlock notifyBlock);
 
-// A token whose deallocation is observable: only a client's notify block holds it, so it deallocates when the library
-// releases the block's copy.
 static int gTokenReleased;
 
 @interface CharonProbeToken : NSObject
@@ -112,7 +99,6 @@ static int gTokenReleased;
 }
 @end
 
-// A client made with a block that holds a token, then disposed. The token is kept by the block alone.
 static void charon_make_disposed_client_with_token(void)
 {
     CharonProbeToken *token = [[CharonProbeToken alloc] init];
@@ -138,7 +124,6 @@ int charon_ports_run(int *checks)
         return failures;
     }
 
-    // Two sources into one 2.0 input port, the SysEx of A open while B sends a note.
     MIDIPortRef inPort = 0;
     MIDIEndpointRef srcA = 0, srcB = 0;
     status = CharonMIDIInputPort(client, CFSTR("charon-in"), kMIDIProtocol_2_0, &inPort, ^(const MIDIEventList *list, void *ref) {
@@ -160,7 +145,6 @@ int charon_ports_run(int *checks)
         charon_report(checks, &failures, "ports: source B's note is a 2.0 note on, as B's own",
                       ok2 && gInputCount == 2 && charon_same_words(&gInput[1], note, 2) && gInput[1].ref == (void *)2);
         int ok3 = charon_receive_bytes(srcA, (const Byte[]){0x02, 0xF7}, 2);
-        // A's SysEx went out as its start at the end of the first list (Translation.md), so its end carries the 02 alone.
         const UInt32 end[] = {0x30310200u, 0x00000000u};
         charon_report(checks, &failures, "ports: source A's 02 F7 ends A's own SysEx, not a note of B's running status",
                       ok3 && gInputCount == 3 && charon_same_words(&gInput[2], end, 2) && gInput[2].ref == (void *)1);
@@ -168,8 +152,6 @@ int charon_ports_run(int *checks)
         MIDIPortDisconnectSource(inPort, srcB);
     }
 
-    // A 2.0 velocity of 0x1234 to a destination this process made: sent through the library, and through the release's own
-    // 2.0 destination for the same list, which must agree (macOS keeps the 16-bit value).
     MIDIPortRef outPort = 0;
     MIDIEndpointRef dest = 0, releaseDest = 0;
     OSStatus outStatus = MIDIOutputPortCreate(client, CFSTR("charon-out"), &outPort);
@@ -196,11 +178,6 @@ int charon_ports_run(int *checks)
         charon_report(checks, &failures, "ports: the release's own 2.0 destination gets the same 0x1234 (the measured answer)",
                       releaseGot && gDestCount == 2 && charon_same_words(&gDest[gDestCount - 1], words, 2));
 
-        // The creator of a virtual destination may set its UniqueID (MIDIServices.h, kMIDIPropertyUniqueID: the property is
-        // the creator's to set, to keep an identity across launches). The destination is the same object after that, so the
-        // library keeps its port: objects made afterwards sweep the owned rows, and a 2.0 list sent to the destination must
-        // still arrive as it was sent (a freed row would send it down the release's 1.0 route, with the velocity cut to
-        // 0x1200, and its block and port would be freed under the release).
         OSStatus setStatus = MIDIObjectSetIntegerProperty(dest, kMIDIPropertyUniqueID, 0x2A2A2A2A);
         SInt32 readBack = 0;
         MIDIObjectGetIntegerProperty(dest, kMIDIPropertyUniqueID, &readBack);
@@ -224,12 +201,6 @@ int charon_ports_run(int *checks)
     }
 
 
-    // A 2.0 source's list to a 2.0 input port connected to it. macOS's own source and port keep the 16-bit velocity of 0x1234
-    // (the check below is that measurement). The library's pair routes through the release's MIDI 1.0 bytes: the library
-    // cannot see which ports an application connected to a source (MIDIPortConnectSource is the release's own function, and the
-    // release shows no connection: facts/CoreMIDI/Translation.md, "2.0 sources and input ports"), so the velocity arrives cut to
-    // 7 bits and spread again. That is the crutch of coordination/crutches.md; the line it prints is a measurement, counted
-    // neither as a pass nor as a failure, and it names the macOS value beside the library's.
     if (made) {
         UInt32 words[2] = {0x40903C00u, 0x12340000u};
         Byte buffer[64];
@@ -278,7 +249,6 @@ int charon_ports_run(int *checks)
         if (librarySrcStatus == noErr) MIDIEndpointDispose(librarySrc);
     }
 
-    // A disposed destination takes nothing: the library's own send and in-process delivery both answer, and no block runs.
     MIDIEndpointRef gone = 0;
     int before = gDestCount;
     OSStatus goneStatus = CharonMIDIDestination(client, CFSTR("charon-dest-gone"), kMIDIProtocol_2_0, &gone, ^(const MIDIEventList *list, void *ref) {
@@ -307,8 +277,6 @@ int charon_ports_run(int *checks)
     if (status == noErr) MIDIPortDispose(inPort);
     MIDIClientDispose(client);
 
-    // A client made with a block keeps the block's copy while the client lives. The copy is released once the client is gone
-    // and the library has swept its rows (the next object it makes): a token held only by the block deallocates then.
     charon_make_disposed_client_with_token();
     MIDIClientRef sweepClient = 0;
     if (MIDIClientCreate(CFSTR("charon-sweep-client"), NULL, NULL, &sweepClient) == noErr) {

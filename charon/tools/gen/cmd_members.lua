@@ -1,10 +1,5 @@
--- `members`: reads the member rows of a framework from its declaration shard (spec.member_rows, the rows gen builds in memory), and reports
--- the pinned members whose declaration hash differs from their pin: gen refuses those unless it re-records them. Writes nothing; the
--- members listing is derived under .gen and is not compared here.
-
 local snapshot = import("spec", {anonymous = true})
 
--- Returns the exit status.
 function run(args)
     snapshot.forget()
     local fw = args.framework

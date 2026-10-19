@@ -1,6 +1,3 @@
-/* motion.m - what the host answers for the two motion requests, on a fixed synthetic input. Each line is one answer that
- * the port would have to give: the observation class, the buffer format and size, and the first frame that yields a
- * trajectory. Values of the flow are not printed, because on these inputs they do not track the shift (facts/Vision/Motion.md). */
 #import <Foundation/Foundation.h>
 #import <Vision/Vision.h>
 #import <CoreVideo/CoreVideo.h>

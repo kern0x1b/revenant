@@ -1,11 +1,5 @@
 #import "uirest.h"
 
-// The accessibility custom action's constructors and properties that the port carries beyond the name and target: the
-// handler, the image and the attributed name. The same calls with the same arguments on the port's class and on the
-// system's, in one process; the answers are the names, the identities of the image and target, the handler's result
-// and how often it ran, and the selector.
-
-// The port's perform, declared here for the sends below: the class is the port's own and the system has no such method.
 @protocol charonPerformable
 - (BOOL)charonPerform;
 @end
@@ -62,7 +56,6 @@ static NSArray *action_lines(Class cls, charonCustomActionTarget *target, UIImag
     [lines addObject:ur_line(@"attributed name kept", [[byAttributed attributedName] string])];
     [lines addObject:ur_line(@"attributed handler kept", ur_yes([byAttributed actionHandler] != nil))];
 
-    // The setters: the handler and the image are read back as they were set.
     id plain = [[cls alloc] initWithName:@"plain" target:nil selector:NULL];
     [plain setActionHandler:handler];
     [plain setImage:image];
@@ -84,9 +77,6 @@ int main(void)
         charonCustomActionTarget *target = [[charonCustomActionTarget alloc] init];
         ur_agree(@"custom action", action_lines(ours, target, image), action_lines([UIAccessibilityCustomAction class], target, image));
 
-        // The invocation: performing an action calls its handler once, with the action, and returns the handler's answer;
-        // performing a target action sends its selector once to the target, with the action; an action with neither
-        // performs nothing. The system has no such call - the accessibility system makes it - so these are the port's own.
         __block NSInteger handled = 0;
         __block id handledWith = nil;
         id byHandler = [[ours alloc] initWithName:@"open" actionHandler:^BOOL(id action) {

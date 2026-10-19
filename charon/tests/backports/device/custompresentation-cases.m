@@ -21,7 +21,6 @@ static NSInteger layoutCalls;
 static UIView *presenterView;
 static CGRect presenterFrame;
 
-/* Where the presenting view is on the screen, against where it was before the presentation. */
 static NSString *presenter_place(void)
 {
     if (!presenterView.window)
@@ -186,8 +185,6 @@ static NSString *presenter_text(void)
 }
 @end
 
-/* A full-screen presentation with an animator and no presentation controller, dismissed through an interaction
-   controller: the case where the port's interactive transition puts the presenting view back. */
 @interface CPFade : NSObject <UIViewControllerAnimatedTransitioning>
 @property (nonatomic) BOOL presenting;
 @end
@@ -235,7 +232,6 @@ void custompresentation_run(UIWindow *window, CustomPresentationRecorder record,
 
     NSMutableArray *steps = [NSMutableArray array];
     void (^step)(NSTimeInterval, void (^)(void)) = ^(NSTimeInterval wait, void (^block)(void)) { [steps addObject:@[@(wait), [block copy]]]; };
-    /* The frame the release gave the root view, which every presentation below is to leave as it is. */
     step(0.3, ^{ presenterFrame = [base.view convertRect:base.view.bounds toView:nil]; });
     NSArray *variants = @[@[@"dim", @NO, @NO, @YES], @[@"remove", @NO, @YES, @YES], @[@"plain", @NO, @NO, @NO], @[@"full", @YES, @NO, @YES]];
     for (NSArray *variant in variants) {
@@ -273,8 +269,6 @@ void custompresentation_run(UIWindow *window, CustomPresentationRecorder record,
             record([@"info." stringByAppendingString:[tag stringByAppendingString:@".dismissed.presenterFrame"]], [NSString stringWithFormat:@"before=%@ now=%@", frame_text(presenterFrame), presenter_text()]);
         });
     }
-    /* A custom presentation with no transitioning delegate: UIKit makes a presentation controller of its own
-       (-_presentViewController:withAnimationController:completion: 0x1891a8fe0 in UIKitCore of 16.0). */
     CPController *bare = [[CPController alloc] init];
     bare.title = @"bare";
     bare.modalPresentationStyle = UIModalPresentationCustom;
@@ -298,7 +292,6 @@ void custompresentation_run(UIWindow *window, CustomPresentationRecorder record,
         record(@"bare.dismiss.end", [NSString stringWithFormat:@"presented=%d modalWindow=%d baseWindow=%d", base.presentedViewController != nil, bare.view.window != nil, base.view.window != nil]);
         record(@"bare.dismissed.presenterFrame", presenter_place());
     });
-    /* The control: the release's own full-screen presentation and dismissal, with no transitioning delegate. */
     CPController *native = [[CPController alloc] init];
     native.title = @"native";
     native.modalPresentationStyle = UIModalPresentationFullScreen;

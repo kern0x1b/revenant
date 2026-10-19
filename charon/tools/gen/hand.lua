@@ -1,24 +1,14 @@
--- The hand-written sources of the package, read once per tree: the methods and synthesized or dynamic properties the hand code
--- defines (a stub must not replace them), the classes it defines with @implementation (the trace layer generates no class
--- object for them), and the C functions it defines (a stub must not replace them either). The scans leave different directories
--- out, as the oracle's do, and each keeps its own list.
-
 local layout = import("layout", {anonymous = true})
 local strings = import("strings", {anonymous = true})
 local decl = import("decl", {anonymous = true})
 local files = import("files", {anonymous = true})
 
--- The package's root, where the hand sources are (SOURCES_ROOT of tools/gen.py@52253c0650).
 local SOURCES_ROOT = layout.constants().SOURCES_ROOT
--- The directories the implementation scan leaves out, at every level.
 local IMPLEMENTATION_SKIP = strings.set({".gen", "spec", "registry", "facts", "overrides", "gen"})
--- The directories the class scan leaves out, at every level.
 local CLASS_SKIP = strings.set({".gen", "spec", "overrides", "registry", ".agent-work"})
 
 local memo = {}
 
--- The paths of the .m and .mm files under a directory (and its .c files when with_c), the directories named in skip left out at every
--- level. A symbolic link to a directory is not entered, as os.walk does not enter one.
 local function sources(root, skip, with_c)
     local found = {}
     local function walk(dir)
@@ -37,8 +27,6 @@ local function sources(root, skip, with_c)
     return found
 end
 
--- The class names an @implementation names in a text: the name must be followed, after whitespace that may run over lines, by a
--- line break, by { or by the end of the text (the lookahead of the oracle's regular expression).
 local function class_names_in(text, names)
     local pos = 1
     while true do
@@ -59,7 +47,6 @@ local function class_names_in(text, names)
     end
 end
 
--- True when the character at position i of the line is a word character (the \b after an @end).
 local function is_word_after(line, i)
     local c = string.sub(line, i, i)
     return c ~= "" and string.find(c, "[%w_]") ~= nil
@@ -72,8 +59,6 @@ local function add_selector(found, cls, selector)
     end
 end
 
--- The methods, synthesized and dynamic properties one source defines, into found (cls -> selector -> true). A method signature
--- spans lines until its brace or semicolon.
 local function implementations_in(text, found)
     local current, signature = nil, nil
     for _, line in ipairs(strings.lines(text)) do
@@ -108,8 +93,6 @@ local function implementations_in(text, found)
     end
 end
 
--- The name of the function a definition's head names (its text before the first brace): the identifier before the first parenthesis,
--- which a return type comes before. nil for a static or typedef head, an assignment, and a head with no parameter list or no type.
 local function defined_name(head)
     if string.match(head, "^%s*static%f[^%w_]") or string.match(head, "^%s*typedef%f[^%w_]") or string.find(head, "=", 1, true) then
         return nil
@@ -124,8 +107,6 @@ local function defined_name(head)
     return nil
 end
 
--- The non-static C functions one source defines into found (name -> true). A definition's signature starts at a line's start and spans
--- the lines until its first brace or semicolon: a brace makes it a definition, a semicolon a prototype.
 local function functions_in(text, found)
     local signature = nil
     for _, line in ipairs(strings.lines(text)) do
@@ -152,7 +133,6 @@ local function state(tree)
     return memo[tree]
 end
 
--- cls -> set of selectors (and synthesized or dynamic property names) the hand sources of the package define.
 function implementations(tree)
     local cache = state(tree)
     if cache.implementations == nil then
@@ -165,7 +145,6 @@ function implementations(tree)
     return cache.implementations
 end
 
--- The set of class names the hand sources of the package define with @implementation.
 function class_names(tree)
     local cache = state(tree)
     if cache.classes == nil then
@@ -178,7 +157,6 @@ function class_names(tree)
     return cache.classes
 end
 
--- The set of C function names the hand sources of the package define (not static): name -> true. The .c files are scanned too.
 function functions(tree)
     local cache = state(tree)
     if cache.functions == nil then

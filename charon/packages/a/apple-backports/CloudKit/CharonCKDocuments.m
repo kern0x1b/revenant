@@ -1,20 +1,9 @@
-// The documents the service reads and writes for a subscription and for a record, and the scheduler
-// the operations run on.
-//
-// Nothing here is API: no class or symbol in this file is in the registry, and the one class it
-// declares carries a CharonCK prefix, so no release ever exports it and no band ever leaves it out.
-
 #import "CharonCloudKit.h"
 #import "CharonCKConstants.h"
 #import "CharonCKSubscription.h"
 
 #import <objc/runtime.h>
 
-// MARK: - A subscription
-
-// A subscription is a name, a type and the notification information it was given. The three kinds
-// the header has each say what they are about in one member, and the type is the one the service
-// reads the endpoint from.
 NSDictionary *CharonCKSubscriptionDocument(CKSubscription *subscription)
 {
     NSMutableDictionary *document = [NSMutableDictionary dictionary];
@@ -32,9 +21,6 @@ NSDictionary *CharonCKSubscriptionDocument(CKSubscription *subscription)
         NSDictionary *filter = CharonCKQueryDocument([[CKQuery alloc] initWithRecordType:query.recordType
                                                                      predicate:query.predicate ?: [NSPredicate predicateWithValue:YES]],
                                                      query.zoneID.zoneName, nil, 0, &refused);
-        // A query subscription whose predicate the service has no form for is refused with the code
-        // the header names for a malformed predicate, rather than saved as a subscription that would
-        // never fire.
         if (!filter) {
             return nil;
         }
@@ -108,10 +94,6 @@ CKSubscription *CharonCKSubscriptionWithDocument(NSDictionary *document)
     if ([type isEqualToString:@"query"]) {
         CKRecordZoneID *zoneID = zone ? [[CKRecordZoneID alloc] initWithZoneName:zone[@"zoneName"]
                                                                        ownerName:zone[@"ownerName"] ?: CKOwnerDefaultName] : nil;
-        // A query subscription's predicate is a query document and the predicate it was made from
-        // was the caller's, so what comes back is a subscription of the right type with the right
-        // record type and zone; the predicate is the one the service is running, which is the
-        // document it sent, and there is no NSPredicate to rebuild it from.
         NSPredicate *predicate = [NSPredicate predicateWithValue:YES];
         CKQuerySubscription *query = [[CKQuerySubscription alloc] initWithRecordType:document[@"recordType"] ?: @"*"
                                                                           predicate:predicate
@@ -149,11 +131,6 @@ CKSubscription *CharonCKSubscriptionWithDocument(NSDictionary *document)
     return subscription;
 }
 
-// MARK: - A record
-
-// The fields a save sends: what the record holds now, with the system fields taken out. The service
-// keeps the change token and the creation and modification dates; a port that sent them back would
-// be asking the service to take its word for its own state.
 NSDictionary *CharonCKFieldsSnapshot(CKRecord *record)
 {
     NSMutableDictionary *fields = [NSMutableDictionary dictionary];
@@ -201,16 +178,6 @@ CKServerChangeToken *CharonCKServerTokenFromData(NSData *data)
     return data.length ? [CKServerChangeToken tokenWithData:data] : nil;
 }
 
-// MARK: - The scheduler
-
-// The operations of this package are run on a scheduler of the port's own rather than on the
-// release's NSOperationQueue. Three reasons, and each is a place where the release's queue would
-// have decided something on the application's behalf: an operation's priority and its quality of
-// service are its own, an operation that is cancelled is cancelled and not merely paused, and an
-// operation that is added from a background thread starts on that thread's own run loop rather than
-// the one the caller happened to be on.
-// The entry is what the queue holds between the add and the start, so that a cancelled operation
-// can be found again: NSOperation tells a caller nothing about where its work is.
 @interface CharonCKOPSchedulerEntry : NSObject
 @property (nonatomic, strong) NSOperation *operation;
 @end
@@ -230,9 +197,6 @@ static NSOperationQueue *CharonCKQueue(void)
     dispatch_once(&once, ^{
         queue = [[NSOperationQueue alloc] init];
         queue.maxConcurrentOperationCount = 4;
-        // A CloudKit client is usually a daemon, and a request that outlives the process it was made
-        // in has answered nobody: the configuration's own timeouts end one, and this is the backstop
-        // for an operation that has none.
         [queue setSuspended:NO];
     });
     return queue;
@@ -248,9 +212,6 @@ static NSOperationQueue *CharonCKQueue(void)
 
 + (void)complete:(NSOperation *)operation
 {
-    // The queue is what holds an operation, and it has no way of being told one has finished early:
-    // the flag is the port's own, so that a caller waiting on the operation is released once and
-    // only once whether the operation ended by finishing or by the port's own name.
     objc_setAssociatedObject(operation, "CharonCKFinished", @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [operation setValue:@YES forKey:@"finished"];
 }
@@ -262,19 +223,11 @@ static NSOperationQueue *CharonCKQueue(void)
 
 @end
 
-// MARK: - The sharing documents
-//
-// The service's own answers for a user identity, a lookup, a participant and a share's metadata.
-// These are the only way any of the four is built: a share's metadata in particular is never
-// instantiated by an application, and a user identity is only ever the service's answer to a lookup.
-
 CKUserIdentity *CharonCKUserIdentityWithDocument(NSDictionary *document)
 {
     if (![document isKindOfClass:[NSDictionary class]]) {
         return nil;
     }
-    // Measured: the host answers +[CKUserIdentity new] with a user identity, but the SDK marks both
-    // +new and -init unavailable, so the value the service sent is made through the port's own.
     CKUserIdentity *identity = [[CKUserIdentity alloc] charon_identity];
     CKRecordID *recordID = CharonCKRecordIDFromDocument(document[@"userRecordID"]);
     if (recordID) {

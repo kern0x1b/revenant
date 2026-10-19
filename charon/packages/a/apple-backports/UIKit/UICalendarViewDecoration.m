@@ -1,10 +1,6 @@
 #import <UIKit/UIKit.h>
 #import "CharonCalendar.h"
 
-// What a day shows under its number: an image, a disc of colour, both (the image tinted), or a view the app makes. The decoration keeps what
-// the app gave and has no getters: the release's view is its only reader, and the port's view reads it through charon_drawInRect:.
-//
-// The three sizes are the port's own steps: the release's sizes are not measured, since a decoration is only visible in a drawn calendar.
 @implementation UICalendarViewDecoration {
 @private
     UIImage *_image;
@@ -57,7 +53,6 @@
     return [[self alloc] initWithCustomViewProvider:customViewProvider];
 }
 
-// The side of the disc, or of the image, for the size the app gave.
 - (CGFloat)charon_discSide
 {
     switch (_size) {
@@ -76,7 +71,6 @@
     }
 }
 
-// Drawn at the foot of the cell, centred: the custom view at its own size, the image at its side, and the disc.
 - (void)charon_drawInRect:(CGRect)rect
 {
     if (_customViewProvider) {
@@ -103,7 +97,6 @@
     }
 }
 
-// The view's layer is drawn into the cell at its own size, with its origin at the foot of the cell.
 - (void)charon_drawView:(UIView *)view inRect:(CGRect)rect
 {
     CGSize size = view.frame.size;

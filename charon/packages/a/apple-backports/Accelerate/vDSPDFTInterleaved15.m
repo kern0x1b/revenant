@@ -1,45 +1,3 @@
-// vDSP_DFT_Interleaved, iOS 15.0, in single precision. The three rows are CreateSetup, Execute and
-// DestroySetup, and the setup is the PORT's own object from end to end - nothing of the release's is opaque,
-// which is what makes this family different from vDSP_biquad_SetCoefficients.
-//
-// **The supported lengths, measured over 1 to 1024.** The header (vDSP.h:7523) gives the length as f * 2**n, with f
-// taken from a short list of factors and n at least 2, and returns zero when it has no implementation for the case.
-// Measured: 31 of 1024 lengths are accepted, and they are exactly **f * 2**n with f in {2, 3, 5, 9, 15} and
-// n >= 2**. The header's `5*5 = 25` is not implemented: 25 is refused and so are 100, 200, 400 and 800, every
-// one of which the header's list admits. `3*5 = 15` is implemented. RealtoComplex and ComplextoComplex accept
-// the same set, measured over the whole sweep. **So the refusal below is the host's set and not the header's**,
-// and the difference is the difference between a port that matches the release and one that does not.
-//
-// **Execute takes no stride, no direction and no length**: all three live in the setup, which the header says
-// may be used only for the length given at setup and may not be used for a shorter length.
-//
-// **The arithmetic, in the port's own type, and where a bound rather than bit-exactness is the
-// specification.** No guest here runs 15.0 and the host's own FFT is not reachable bit for bit, so the
-// transform's arithmetic is held to an error bound taken from the host:
-//
-//     per element:  |out - ref| <= 1.538 * log2(N) * FLT_EPSILON * ||x||_2
-//
-// 1.538 is the host's OWN worst ratio over the 31 accepted lengths, 24 random real inputs each, against a
-// naive double-precision DFT - so the constant is not chosen to pass this port. The exact parts, which need no
-// bound, are the packing layout and the scale factors below.
-//
-// **The packing, measured by impulse in each of the sixteen scalar inputs of the inverse and read as the
-// sixteen real samples it produces** - the inverse is linear, so that table is the formula:
-//
-//     o[0].real  contributes  1        to every sample
-//     o[0].imag  contributes  (-1)^j
-//     o[k].real  contributes  2*cos(2*pi*k*j/(2N))     k = 1 .. N-1
-//     o[k].imag  contributes -2*sin(2*pi*k*j/(2N))
-//
-// and the forward packs the other way: `o[0] = (2*X_0, 2*X_n)` with `X_n` the Nyquist bin - for a real input
-// the ALTERNATING SUM `sum x[j] * (-1)^j`, since `e^(-pi*i*j) = (-1)^j` - and `o[k] = 2*X_k` for k = 1 .. N-1.
-// The x2 is vDSP's real-transform scale. The inverse is unscaled, and a forward then an inverse on a real signal
-// gives back 4*N times the input, measured.
-//
-// The transform is a direct sum in the caller's type. That is not the fastest way to compute a DFT and it is
-// the only one whose arithmetic is stated in the port's own terms, which is what the bound is about; the
-// release's radix stages are not reproduced and the bound is what stands in for them.
-
 #import <Accelerate/Accelerate.h>
 #include <math.h>
 #include <stdlib.h>
@@ -49,17 +7,14 @@
 #pragma clang diagnostic ignored "-Wpointer-bool-conversion"
 #pragma clang diagnostic ignored "-Wnonnull"
 
-// The setup: everything Execute needs, because Execute is given nothing else.
-// Every buffer Execute needs is allocated here, by CreateSetup, and freed by DestroySetup: Execute itself never
-// allocates, so it has no failure it could only swallow.
 struct vDSP_DFT_Interleaved_SetupStruct {
-    vDSP_Length length;             // N, the number of complex elements
-    vDSP_Length real_length;        // 2N for a real-to-complex transform, else 0
-    int forward;                    // 1 forward, 0 inverse
-    int real_to_complex;            // 1 real-to-complex, 0 complex-to-complex
-    double *twiddles;               // 2N doubles: cos and sin of the transform's angles, the sign set by the direction
-    DSPDoubleComplex *packed;       // N: the real input packed as complex, real-to-complex only
-    DSPDoubleComplex *z;            // N: the complex forward of the packed input, real-to-complex only
+    vDSP_Length length;
+    vDSP_Length real_length;
+    int forward;
+    int real_to_complex;
+    double *twiddles;
+    DSPDoubleComplex *packed;
+    DSPDoubleComplex *z;
 };
 
 struct vDSP_DFT_Interleaved_SetupStructD {
@@ -69,15 +24,9 @@ struct vDSP_DFT_Interleaved_SetupStructD {
     int real_to_complex;
 };
 
-// The host's accepted set: length == f * 2**n with f in {2, 3, 5, 9, 15} and n >= 2. The header's list adds
-// 5*5 = 25, which the release does not implement.
 static int charon_dft_length_supported(vDSP_Length length)
 {
     static const vDSP_Length factors[5] = {2, 3, 5, 9, 15};
-    /* sizeof factors / sizeof *factors, and not a literal 5: the bound IS the table's size. A mutant that
-     * grew the table to the header's f = 5*5 = 25 and left this at 5 was INERT - it landed, and changed
-     * nothing, because index 5 was never read. The two could drift apart silently, and a check that cannot be
-     * broken by growing the table is not covering the table. */
     for (int i = 0; i < (int)(sizeof factors / sizeof *factors); i++) {
         vDSP_Length n = length / factors[i];
         if (length % factors[i] == 0 && n >= 4 && (n & (n - 1)) == 0)
@@ -86,7 +35,6 @@ static int charon_dft_length_supported(vDSP_Length length)
     return 0;
 }
 
-// A twiddle table for the transform, the sign following the direction.
 static double *charon_dft_twiddles(vDSP_Length length, int forward)
 {
     double *twiddles = (double *)malloc(sizeof(double) * (size_t)(2 * length));
@@ -101,7 +49,6 @@ static double *charon_dft_twiddles(vDSP_Length length, int forward)
     return twiddles;
 }
 
-// Frees a setup and every buffer it holds; free(NULL) is a no-op, so a half-built setup is released the same way.
 static void charon_dft_release(struct vDSP_DFT_Interleaved_SetupStruct *setup)
 {
     if (!setup)
@@ -117,9 +64,7 @@ vDSP_DFT_Interleaved_Setup vDSP_DFT_Interleaved_CreateSetup(vDSP_DFT_Interleaved
                                                              vDSP_DFT_RealtoComplex RealtoComplex)
 {
     if (!charon_dft_length_supported(Length))
-        return NULL;                                  // the host's set, not the header's
-    // Previous is an optimisation the release offers ("if feasible"): this setup takes its own tables, which the
-    // header's contract allows and nothing in this port depends on, so Previous is not read.
+        return NULL;
     (void)Previous;
     struct vDSP_DFT_Interleaved_SetupStruct *setup = (struct vDSP_DFT_Interleaved_SetupStruct *)calloc(1, sizeof(*setup));
     if (!setup)
@@ -133,8 +78,6 @@ vDSP_DFT_Interleaved_Setup vDSP_DFT_Interleaved_CreateSetup(vDSP_DFT_Interleaved
         setup->packed = (DSPDoubleComplex *)calloc(Length, sizeof(DSPDoubleComplex));
         setup->z = (DSPDoubleComplex *)calloc(Length, sizeof(DSPDoubleComplex));
     }
-    // A buffer that did not come back is a setup that cannot run, so it is refused here, where the caller can see it,
-    // and never reaches Execute.
     if (!setup->twiddles || (setup->real_to_complex && (!setup->packed || !setup->z))) {
         charon_dft_release(setup);
         return NULL;
@@ -146,11 +89,8 @@ void vDSP_DFT_Interleaved_Execute(const vDSP_DFT_Interleaved_Setup Setup, const 
 {
     const struct vDSP_DFT_Interleaved_SetupStruct *setup = (const struct vDSP_DFT_Interleaved_SetupStruct *)Setup;
     const vDSP_Length n = setup->length;
-    const double *twiddles = setup->twiddles;      // built by CreateSetup, which refuses a setup it cannot build
+    const double *twiddles = setup->twiddles;
     if (!setup->real_to_complex) {
-        // complex to complex: a plain DFT of N complex values, unscaled. The sums are in double and each result is
-        // rounded to float once: a float sum over N terms grows its error with N, and against the bound of the facts
-        // file it is 2.5 to 4.6 times too large from N = 480 up (measured by tests/backports/host/vdspdft15).
         for (vDSP_Length k = 0; k < n; k++) {
             double re = 0.0, im = 0.0;
             for (vDSP_Length j = 0; j < n; j++) {
@@ -163,19 +103,9 @@ void vDSP_DFT_Interleaved_Execute(const vDSP_DFT_Interleaved_Setup Setup, const 
             Ori[k].imag = (float)im;
         }
     } else {
-        // The real path is NOT a direct sum of the 2N real samples: it is the VERIFIED complex forward of
-        // length N on the packed signal, then the standard split. A direct sum with its own twiddle table is
-        // what went wrong - the real transform resolves 2N frequencies and indexing an N-entry table by
-        // (k*j) is structurally wrong, not a rounding difference - and building on the part already known to
-        // be exact removes the whole class of error.
         const vDSP_Length samples = 2 * n;
         if (setup->forward) {
-            // 1. pack z[n] = x[2n] + i*x[2n+1] over the interleaved input's real parts
-            DSPDoubleComplex *packed = setup->packed;   // every entry is written below, so no clearing is needed
-            // The packing reaches the input as x[2m] and x[2m+1] for m < n, which is the SAME 2*n fact that
-            // the inverse's output loop reaches as j < samples. Two derivations of one fact can drift, so the
-            // packing now walks `samples` and derives m from it - one declaration, two uses - and the input
-            // cannot be read past the caller's half.
+            DSPDoubleComplex *packed = setup->packed;
             const float *x = &Iri[0].real;
             for (vDSP_Length j = 0; j < samples; j++) {
                 const vDSP_Length m = j / 2;
@@ -184,8 +114,6 @@ void vDSP_DFT_Interleaved_Execute(const vDSP_DFT_Interleaved_Setup Setup, const 
                 else
                     packed[m].real = x[j];
             }
-            // 2. the complex forward of length N, the same loop as the complex-to-complex case above, in double
-            //    throughout: the split below reads Z, and a float Z would put its own rounding into every bin
             DSPDoubleComplex *z = setup->z;
             for (vDSP_Length k = 0; k < n; k++) {
                 double re = 0.0, im = 0.0;
@@ -199,35 +127,24 @@ void vDSP_DFT_Interleaved_Execute(const vDSP_DFT_Interleaved_Setup Setup, const 
                 z[k].real = re;
                 z[k].imag = im;
             }
-            // 3. the split, with Z_N taken as Z_0:
-            //       E_k = (Z_k + conj Z_{N-k}) / 2,  O_k = (Z_k - conj Z_{N-k}) / (2i),
-            //       X_k = E_k + e^{-i*pi*k/N} * O_k,  and X_N = E_0 - O_0, which is real.
-            //    The split is in double, and so is Z, so the only rounding left is the one to float at the
-            //    output; the bound it is held to is in facts/Accelerate/vDSPDFTInterleaved.md.
             for (vDSP_Length k = 0; k < n; k++) {
-                const vDSP_Length m = (k == 0) ? 0 : n - k;            /* Z_N is Z_0 */
+                const vDSP_Length m = (k == 0) ? 0 : n - k;
                 const double zr = z[k].real, zi = z[k].imag;
-                const double cr = z[m].real, ci = -z[m].imag;          /* conj Z_{N-k} */
+                const double cr = z[m].real, ci = -z[m].imag;
                 const double er = (zr + cr) / 2.0, ei = (zi + ci) / 2.0;
-                const double or_ = (zi - ci) / 2.0, oi = -(zr - cr) / 2.0;   /* (z - conj)/(2i) */
-                const double w = -M_PI * (double)k / (double)n;        /* e^{-i*pi*k/N} */
+                const double or_ = (zi - ci) / 2.0, oi = -(zr - cr) / 2.0;
+                const double w = -M_PI * (double)k / (double)n;
                 const double pr = or_ * cos(w) - oi * sin(w);
                 const double pi_ = or_ * sin(w) + oi * cos(w);
                 if (k == 0) {
-                    /* X_0 = E_0 + O_0 - the DC bin, and the general branch above would have said so, because
-                     * W_0 = 1. Writing 2*E_0 here instead dropped the O_0 and put the whole DC bin out by
-                     * O_0, which the bound reported as a ratio near 1e7. X_N = E_0 - O_0 is the other one and
-                     * it is real. */
                     Ori[0].real = (float)(2.0 * (er + or_));
-                    Ori[0].imag = (float)(2.0 * (er - or_));          /* X_N = E_0 - O_0, and it is real */
+                    Ori[0].imag = (float)(2.0 * (er - or_));
                 } else {
                     Ori[k].real = (float)(2.0 * (er + pr));
                     Ori[k].imag = (float)(2.0 * (ei + pi_));
                 }
             }
         } else {
-            // The inverse unpacks, and the table of sixteen impulses above is this formula: o[0].real gives
-            // every sample 1, o[0].imag gives (-1)^j, and o[k] gives 2*cos and -2*sin.
             for (vDSP_Length j = 0; j < samples; j++) {
                 double acc = (double)Iri[0].real + (double)Iri[0].imag * ((j % 2) ? -1.0 : 1.0);
                 for (vDSP_Length k = 1; k < n; k++) {

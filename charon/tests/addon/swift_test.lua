@@ -61,8 +61,6 @@ local function build(folder, opt, swift, architecture, deployment)
     return path.join(work, "probe"), path.join(work, "probe.o")
 end
 
--- The availability macros of the standard library name the releases whose Swift runtime carries a feature; a runtime that
--- ships with the program has them all, so every macro is rewritten to "always".
 local function bundled_availability(swift, source, found)
     local written = swift.bundled_availability(source)
     local defined, all = 0, 0

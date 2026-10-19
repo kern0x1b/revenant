@@ -2,10 +2,9 @@
 #include <stdio.h>
 
 @implementation CharonHomeKitStore {
-    NSMutableDictionary *_tables;      // name -> NSMutableDictionary
-    NSMutableSet *_loaded;             // names already read from disk
-    NSObject *_lock;                   // the store is touched from the main thread and from the
-                                       // transport's own queues, so every access is serialised
+    NSMutableDictionary *_tables;
+    NSMutableSet *_loaded;
+    NSObject *_lock;
 }
 
 + (CharonHomeKitStore *)shared
@@ -88,9 +87,6 @@
 
 @end
 
-// The pair every graph edge is written with, declared in CharonHomeKitConstruction.h. The store holds
-// the identifier as a string because that is what a property list holds; Apple's headers give the
-// uniqueIdentifier family an NSUUID, and this is where one becomes the other.
 NSUUID *CharonHomeKitUUID(NSString *identifier)
 {
     return identifier ? [[NSUUID alloc] initWithUUIDString:identifier] : nil;
@@ -106,8 +102,6 @@ NSString *CharonHomeKitNewIdentifier(void)
     return [[[NSUUID UUID] UUIDString] uppercaseString];
 }
 
-// A store that cannot persist must say so once, not once per write: the port's own log, at the
-// level a caller can act on. Only the first failure per message is printed.
 static void charon_homekit_once_impl(NSString *message)
 {
     static NSMutableSet *printed;

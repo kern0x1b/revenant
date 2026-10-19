@@ -1,34 +1,8 @@
-// factory-rows.m: the six release-13 rows of registry/Intents/ios16.json that the file listed as
-// absent with a reason about a group of the delivery, measured against the system's own class.
-//
-// WHY objc_msgSend AND NOT THE IMP.  An earlier version of this harness called each method through
-// class_getMethodImplementation and every one of the four classes killed the process with
-// EXC_ARM_DA_ALIGN at the IMP address (crash report read back: the symbol is
-// _OBJC_$_CLASS_METHODS_INFile(Readable|INEnumerable|INJSONSerialization), so this host's Intents
-// compiles its Objective-C entry points as SVE/pointer-authenticated thunks and a bare C function
-// pointer reaches them on the wrong convention).  objc_msgSend is the runtime's own entry point and
-// dispatches on the real convention, so every call below goes through it.  This is worth writing
-// down: the first harness did not read "the class is absent", it read "the reader is wrong", and
-// only the crash reports told the two apart.
-//
-// WHY NOTHING HERE NAMES A CLASS THE SDK HIDES.  All four are API_UNAVAILABLE(macos) in the SDK, so
-// a variable of the class's own type does not compile in this program.  Every value is read through
-// KVC on an id and every method is reached by selector from the runtime.
-//
-// ONE SECTION PER RUN, and the section is an argument, so that a section which cannot be answered
-// cannot take the other three down with it.  A single process running all four would have died in
-// the first - which is exactly what happened - and printed nothing about the rest.
-//
-//   $ xcrun clang -fobjc-arc -w -framework Intents -framework Foundation \
-//         tests/backports/host/intents/factory-rows.m -o factory-rows
-//   $ ./factory-rows destination     # also: resolution, file, usercontext
 #import <Foundation/Foundation.h>
 #import <Intents/Intents.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-// One wrapper per arity, so each call names its own signature.  A single variadic helper forwarding
-// a va_list would be shorter and wrong: a va_list is not a set of arguments.
 static id send_none(id receiver, SEL selector)
 {
     return ((id (*)(id, SEL))objc_msgSend)(receiver, selector);
@@ -61,8 +35,6 @@ static NSString *shown(id value)
 
 #define text(value) (shown(value).UTF8String)
 
-// An enumeration-valued property, read through KVC, because the class is unavailable to this SDK
-// and its own type cannot be named here.
 static long long enumeration(id object, NSString *name)
 {
     return (long long)[[object valueForKey:name] longLongValue];
@@ -86,15 +58,11 @@ int main(int argc, char **argv)
     NSString *section = argc > 1 ? [NSString stringWithUTF8String:argv[1]] : @"all";
     @autoreleasepool {
         printf("section %s\n", section.UTF8String);
-        // The control: a class the system does not carry has to read ABSENT, or a run that measures
-        // nothing is indistinguishable from a run that measures an absence.  This harness learned
-        // that the hard way - see the note above objc_msgSend.
         printf("control: INCharonNoSuchClassForThisHarness reads %s\n",
                NSClassFromString(@"INCharonNoSuchClassForThisHarness") ? "PRESENT, which is wrong"
                                                                         : "absent, as it must");
         BOOL all = [section isEqualToString:@"all"];
 
-        // ---- +[INMediaDestination libraryDestination] and +playlistDestinationWithName: ----
         if (all || [section isEqualToString:@"destination"]) {
             printf("\n== +[INMediaDestination libraryDestination] / +playlistDestinationWithName: ==\n");
             Class cls = NSClassFromString(@"INMediaDestination");
@@ -121,11 +89,6 @@ int main(int argc, char **argv)
             }
         }
 
-        // ---- +[INAddTasksTargetTaskListResolutionResult confirmationRequired...forReason:] ----
-        // Its superclass already carries the one-argument factory, so what the subclass's answer adds
-        // is the question.  Its description is the whole of what the class can be inspected for: the
-        // class declares no property of its own, so a reason kept anywhere would be kept nowhere the
-        // SDK declares.
         if (all || [section isEqualToString:@"resolution"]) {
             printf("\n== +[INAddTasksTargetTaskListResolutionResult confirmationRequiredWithTaskListToConfirm:forReason:] ==\n");
             Class cls = NSClassFromString(@"INAddTasksTargetTaskListResolutionResult");
@@ -150,10 +113,6 @@ int main(int argc, char **argv)
             }
         }
 
-        // ---- +[INFile fileWithData:...] and +fileWithFileURL:...] ----
-        // INFile is the one class of the four this SDK does declare on macOS, and the two factories are
-        // the only rows of the six the header's own words fully determine: a filename of nil is the
-        // header's own nullable, and the URL form is the one that reads the file.
         if (all || [section isEqualToString:@"file"]) {
             printf("\n== +[INFile fileWithData:filename:typeIdentifier:] / +fileWithFileURL:filename:typeIdentifier:] ==\n");
             Class cls = NSClassFromString(@"INFile");
@@ -200,11 +159,6 @@ int main(int argc, char **argv)
             }
         }
 
-        // ---- -[INUserContext becomeCurrent] ----
-        // The base class declares no -init and no property of its own (measured): it is a token, its
-        // identity is its class, and what the method does is hand it to a store.  A subclass is the
-        // object the method is written for - INMediaUserContext is the one this SDK declares - and it
-        // is made through the class's own _init, because -init is NSObject's here.
         if (all || [section isEqualToString:@"usercontext"]) {
             printf("\n== -[INUserContext becomeCurrent] ==\n");
             Class cls = NSClassFromString(@"INUserContext");

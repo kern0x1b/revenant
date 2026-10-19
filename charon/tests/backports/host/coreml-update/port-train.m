@@ -1,7 +1,3 @@
-// port-train.m - trains an updatable model with the port's MLUpdateTask, and records what each event reports, in the
-// format host-train.m prints. The snapshots are written with the port's MLWritable and decoded by the reader's dump.
-//
-// usage: port-train MODEL.mlmodel INPUT.f32 TARGET.f32 OUTDIR SAMPLES
 #import <Foundation/Foundation.h>
 #import <CoreML/CoreML.h>
 

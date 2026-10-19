@@ -4,18 +4,9 @@
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
 @interface MDLObjectContainer ()
-// The object this container is the children of, held without retaining it: an object owns its own
-// children, so a container that retained its owner and its owner's children kept both alive.
 @property (nonatomic, assign) MDLObject *charon_owner;
 @end
 
-// An object is a named node with a transform, a set of components keyed by the protocol each of them
-// answers to, and children. Everything the port places in a scene - a mesh, a voxel array, a light, a
-// camera - is one of these. iOS 6 has no ModelIO at all, so the whole of it is the port's own.
-
-// The two ends of a box, a component at a time. simd_min and simd_max take a three-element vector and
-// give the vector straight back on this target - measured, not read - so a box built with them keeps
-// the inverted box it started from. Every box the port answers goes through these two.
 static void CharonMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
 {
     float low[3], high[3], p[3];
@@ -135,7 +126,6 @@ static void CharonMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
     if (_children != children) {
         _children = children;
     }
-    // A container that is not the object's own one still makes its objects children of this object.
     if ([children isKindOfClass:[MDLObjectContainer class]])
         [(MDLObjectContainer *)children setCharon_owner:self];
     for (MDLObject *child in [_children objects])
@@ -176,9 +166,6 @@ static void CharonMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
             [parts addObject:part];
     if (!parts.count)
         return self;
-    // The path is the one the object's own `path` prints, read from the receiver: the receiver is where
-    // the walk starts, so the first name is one of its children and not its own. That is what the
-    // system answers: /root/child is not under root, and /child is.
     MDLObject *at = self;
     for (NSUInteger k = 0; k < parts.count; k++) {
         MDLObject *next = nil;
@@ -210,8 +197,6 @@ static void CharonMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
     }
 }
 
-// The box of a node is the union of the boxes of its children, each brought into this node's own
-// space by the transform of the whole chain above it. A node with no children has no box of its own.
 - (MDLAxisAlignedBoundingBox)boundingBoxAtTime:(NSTimeInterval)time
 {
     MDLAxisAlignedBoundingBox result = {{-INFINITY, -INFINITY, -INFINITY}, {INFINITY, INFINITY, INFINITY}};
@@ -229,8 +214,6 @@ static void CharonMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
             CharonMDLBounds(&result, transformed.xyz);
         }
     }
-    // Nothing contributed a box: the answer is the box no point is in, which is a maximum of zero and
-    // a minimum of minus one, as the system's own empty box is.
     if (result.minBounds[0] > result.maxBounds[0]) {
         result.minBounds = (vector_float3){0, 0, 0};
         result.maxBounds = (vector_float3){-1, -1, -1};
@@ -260,7 +243,6 @@ static void CharonMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
     if (!object || [_objects containsObject:object])
         return;
     [_objects addObject:object];
-    // An object put in a container is a child of the object that container belongs to.
     if (self.charon_owner && object.parent != self.charon_owner)
         [object setParent:self.charon_owner];
 }

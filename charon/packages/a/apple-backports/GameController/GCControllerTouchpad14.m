@@ -3,12 +3,6 @@
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-// A touchpad is a GCControllerElement, not a profile: it is one element of a
-// controller's profile, so it builds its own two children through the same
-// -initWithCharonSpec: seam GCPhysicalInputProfile uses for every element it makes,
-// and it links them with the same -charon_linkXAxis:yAxis:up:down:left:right: a dpad
-// spec is linked with, so the surface's axes and its four buttons behave as they do
-// in every other profile in this port.
 @implementation GCControllerTouchpad {
     GCControllerButtonInput *_button;
     GCControllerDirectionPad *_touchSurface;
@@ -47,10 +41,6 @@
     [x charon_linkPositive:right negative:left dpad:_touchSurface];
     [y charon_linkPositive:up negative:down dpad:_touchSurface];
     _touchState = GCTouchStateUp;
-    // Measured, not the header's: the header's own comment says the default is YES, and
-    // the host's own touchpad answers NO before anything has touched it (the facts page
-    // carries the command). A comment in Apple's header is a claim about the framework;
-    // the host is the framework.
     _reportsAbsoluteTouchSurfaceValues = NO;
     return self;
 }
@@ -110,12 +100,6 @@
     _touchUp = [touchUp copy];
 }
 
-// The one entry point a touchpad's surface has. It clamps both axes and the button
-// value the way every axis and button in this port does, moves the touch state
-// between Up and Down from the flag - Down again while a touch is already down is
-// Moving - and runs the handler the header names for the transition, on the
-// device's handler queue. The header's own note is why the state is separate from
-// the axes: a non-zero axis value does not mean the surface is being touched.
 - (void)setValueForXAxis:(float)xAxis yAxis:(float)yAxis touchDown:(BOOL)touchDown buttonValue:(float)buttonValue
 {
     float x = fmaxf(-1, fminf(1, xAxis));

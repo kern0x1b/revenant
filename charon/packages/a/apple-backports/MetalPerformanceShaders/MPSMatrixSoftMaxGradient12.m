@@ -1,6 +1,3 @@
-// MPSMatrixSoftMaxGradient, from the header of the SDK of iOS 16.4. One object per release: the band machinery keeps an
-// object whole or drops it whole, so a file here carries the API of exactly one release.
-
 #import "CharonMPS.h"
 
 
@@ -54,9 +51,6 @@
         CharonMPSRefuse(@"MPSMatrixSoftMaxGradient: a matrix of a data type that is not one of the eight element types was given");
         return;
     }
-    // The gradient of a softmax row, in the formula MPSMatrixSoftMax.h gives for it:
-    //     dL_dX_ij = Y_ij * (dL_dY_ij - sum_k(dL_dY_ik * Y_ik))
-    // where Y is the forward kernel's output and dL_dY the incoming gradient.
     NSUInteger rows = _sourceRows == NSUIntegerMax ? forward.rows : _sourceRows;
     NSUInteger columns = _sourceColumns == NSUIntegerMax ? forward.columns : _sourceColumns;
     NSUInteger start, count;

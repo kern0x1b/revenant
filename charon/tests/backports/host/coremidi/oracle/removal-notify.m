@@ -1,8 +1,3 @@
-// Host probe: what a MIDI client's notify proc reports when a virtual destination, an input port and a virtual source
-// are disposed, whether a disposed object still answers a property read (its UniqueID), and whether a disposed
-// destination still calls its read block. The notify proc prints the thread (main or other) and whether a dispose
-// call was in progress (inCall), so each notification can be placed before, during or after the call. Every line is
-// written unbuffered, so the output order is the order of the calls.
 #import <CoreMIDI/CoreMIDI.h>
 #import <Foundation/Foundation.h>
 #include <pthread.h>

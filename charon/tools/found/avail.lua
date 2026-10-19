@@ -1,25 +1,3 @@
--- The availability of a declaration, in the IR's form, the rule that merges the declarations of one key that disagree, and the render
--- of the spec's availability text from those fields (ruling D7: the generator renders; no regex over declaration text).
---
--- The IR's form (the avail column): flags first, then one entry per platform clang names, sorted by platform name:
---   *unavailable, *deprecated    the flag holds for every platform (no platform names it)
---   platform=introduced/deprecated/obsoleted/unavailable
---                                each version as written ("16.0"), "-" for none, the unavailable flag as 1 or 0
---   "-"                          no availability at all
--- The message column holds the texts: "deprecated: TEXT" (the API_DEPRECATED message) and "unavailable: TEXT" (an unavailable
--- attribute's message), the second after " | " (split_message reads it; a deprecation text may contain " | " itself).
---
--- The rule for a key whose declarations disagree (merge): per platform, a declaration that names the platform votes; the declarations
--- that name the platform as unavailable do not introduce it. A declaration that names no platform at all carries no availability
--- fact and does not vote: the annotated declarations decide (ruling of 2026-10-10).
---   introduced   the earliest introduction of the available votes (an unrestricted vote makes it unrestricted)
---   deprecated   the latest deprecation, and only when every available vote deprecates the platform
---   obsoleted    the latest obsoletion, and only when every available vote obsoletes the platform
---   unavailable  only when every vote is unavailable (available if any declaration is available)
--- The message is the deprecation text of the declaration that gives the latest deprecation, and the unavailable text of the first
--- declaration that makes a platform unavailable.
-
--- A version as major * 10000 + minor * 100 + subminor; "-" is none, and none is 0.
 local byteorder = import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
 
 function version_number(text)
@@ -28,7 +6,6 @@ function version_number(text)
     return tonumber(major) * 10000 + (tonumber(minor) or 0) * 100 + (tonumber(sub) or 0)
 end
 
--- The parsed availability of one declaration: its flags and its platforms (intro, dep, obs as text; unavailable as a boolean).
 function parse_availability(text)
     local out = {always_unavailable = false, always_deprecated = false, entries = {}}
     local body = text
@@ -46,7 +23,6 @@ function parse_availability(text)
     return out
 end
 
--- The IR's text of a set of platform entries and flags (the order and the spelling availability() writes).
 function format_availability(flags, entries)
     local head = {}
     if flags.always_unavailable then table.insert(head, "*unavailable") end
@@ -64,9 +40,6 @@ function format_availability(flags, entries)
     return out == "" and "-" or out
 end
 
--- The deprecation and the unavailability texts of a message cell: "deprecated: TEXT", "unavailable: TEXT", or both as
--- "deprecated: TEXT | unavailable: TEXT". The unavailability text is the part after the last " | unavailable: ", so a deprecation text
--- may contain " | " (a replacement list does).
 function split_message(message)
     local rest, unavailable = message, nil
     local head, tail = message:match("^(.*) | unavailable: (.*)$")
@@ -78,7 +51,6 @@ function split_message(message)
     return rest:match("^deprecated: (.*)$"), unavailable
 end
 
--- The version of the votes for one field: the latest, when every vote has one; none otherwise.
 local function latest(votes, field)
     local best, best_text = nil, "-"
     for _, vote in ipairs(votes) do
@@ -89,11 +61,8 @@ local function latest(votes, field)
     return best_text
 end
 
--- The rows of one key, each {avail = IR text, message = IR text}: the merged availability and message (the rule of the header).
 function merge(rows)
     local parsed, names, named = {}, {}, {}
-    -- each flag is ANDed only over the rows that vote on it: a row that names a platform, or carries that flag. A row that names no
-    -- platform and carries no flag is unannotated and votes on nothing (the rule of the header; review F7).
     local all_unavailable, all_deprecated = true, true
     local voting_unavailable, voting_deprecated = 0, 0
     for _, r in ipairs(rows) do
@@ -132,7 +101,6 @@ function merge(rows)
         if #votes == 0 then
             entries[platform] = {intro = "-", dep = "-", obs = "-", unavailable = true}
         else
-            -- an unrestricted vote (no introduction) makes the introduction none
             local earliest, unrestricted = nil, false
             for _, v in ipairs(votes) do
                 if v.intro == "-" then
@@ -149,7 +117,6 @@ function merge(rows)
     local flags = {always_unavailable = all_unavailable and voting_unavailable > 0,
         always_deprecated = all_deprecated and voting_deprecated > 0}
     local avail = format_availability(flags, entries)
-    -- the messages: the deprecation of the row with the latest deprecation, the unavailable text of the first row that has one
     local deprecated_row, latest_dep = nil, -1
     local any_unavailable = false
     for _, e in pairs(entries) do
@@ -176,8 +143,6 @@ function merge(rows)
     return {avail = avail, message = table.concat(pieces, " | ")}
 end
 
--- The spec's availability text, rendered from the IR fields (the contract of design-foundation.md section 5.8): the macros in the
--- order API_AVAILABLE, API_DEPRECATED, API_OBSOLETED, API_UNAVAILABLE, each listing its platforms in name order, separated by spaces.
 local function quoted(text)
     return '"' .. text:gsub("\\", "\\\\"):gsub('"', '\\"') .. '"'
 end

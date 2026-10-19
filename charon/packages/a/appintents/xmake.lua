@@ -39,10 +39,6 @@ package("appintents")
         os.mkdir(swiftdir)
         os.mkdir(probe_dir)
 
-        -- The headers of the port: the runtime's overlay, when it was built with the backports, maps the SDK's files to the port's
-        -- own rendering (the generator's, with the availability of the port's release: tools/gen/target_availability.lua). That is
-        -- what makes Foundation's NSUserActivity and CoreLocation's CLPlacemark visible at this release. CoreSpotlight's three classes
-        -- are declared there too, which the SDK marks iOS 9; whether this release has them is measured below, not assumed.
         local overlays, defs = {}, {}
         local port_headers = table.wrap((runtime:envs() or {}).CHARON_SWIFT_PORT_HEADERS)[1]
         if port_headers then
@@ -57,16 +53,7 @@ package("appintents")
             table.insert(overlay_flags, overlay)
         end
 
-        -- `LocalizedStringResource`: this module carries the type when the runtime's Foundation has
-        -- not got it, and leaves it out when the platform brings its own. Which is which is measured
-        -- with a probe, not assumed, and the file is taken out of the source list either way - two
-        -- types of one name in one image is not something a caller could use.
         local sources, carries = {}, false
-        -- Absolute, not relative: the glob's relative names resolve against the compiler's working
-        -- directory, which is not this one, so the compile was handed a path it could not open --
-        -- "error opening input file 'Sources/AppIntents/LocalizedStringResource.swift'" under
-        -- `xmake f`, where every other band was told the package installed
-        -- (.agent-work/runs/packages/emulate/build/configure.log).
         for _, file in ipairs(os.files(path.join(package:scriptdir(), "Sources", "AppIntents", "**.swift"))) do
             if path.filename(file) ~= "LocalizedStringResource.swift" then
                 table.insert(sources, file)
@@ -95,11 +82,6 @@ package("appintents")
                   package:name())
         end
 
-        -- The Foundation types AppIntents' API is written in that this runtime may not have yet. Each is
-        -- measured, not assumed: a probe that uses the type the way the conformance does compiles only
-        -- when the runtime has it and is available at the port's release, and only then is the block
-        -- of Gated.swift that conforms it compiled into the module. What is left out is printed, so a
-        -- row that is missing is never mistaken for one that is placed.
         local probes = {
             {flag = "CHARON_APPINTENTS_ATTRIBUTED_STRING", name = "AttributedString",
              body = "import Foundation\npublic func probe() -> AttributedString { return AttributedString(\"x\") }"},
@@ -129,9 +111,6 @@ package("appintents")
             end
         end
 
-        -- CoreSpotlight: the three classes Spotlight.swift extends, measured at the release through the port's headers. The probe
-        -- names what that file uses, so it compiles only where the release has those declarations at the port's deployment. Without
-        -- the headers of the port the SDK's iOS 9 marks answer, and the probe fails: the rows are left out, as they were before.
         local spotlight_source = path.join(probe_dir, "spotlight.swift")
         io.writefile(spotlight_source, "import CoreSpotlight\npublic func probe() -> CSSearchableItem {\n"
             .. "    return CSSearchableItem(uniqueIdentifier: \"x\", domainIdentifier: nil, attributeSet: CSSearchableItemAttributeSet(contentType: \"public.item\"))\n}\n"
@@ -153,9 +132,6 @@ package("appintents")
             print("%s: CoreSpotlight has no CSSearchableItem at %s, its AppIntents rows are left out of the module", package:name(), minimum)
         end
 
-        -- One module, as Styx's Combine is one module: the whole framework in a single compile, so a
-        -- declaration of one file sees every other. Availability checking stays on; what the port's
-        -- release has, the module declares, because the module IS the port's own copy of the API.
         local module = path.join(swiftdir, "AppIntents.swiftmodule")
         os.mkdir(module)
         local argv = table.join(swift.runtime_flags({

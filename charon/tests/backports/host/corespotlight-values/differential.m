@@ -1,7 +1,3 @@
-// differential.m - the same program, built once against the host's CoreSpotlight and once against the port's CSPerson.m and
-// CSSearchQueryContext.m. Every line it prints must be the same on both sides, after run.sh has replaced object addresses.
-// Each line is one answer the host was measured to give: defaults, coercion of nil, copy and storage semantics, equality,
-// hashing, the text of description, and what a coded and decoded copy reads back.
 #import <Foundation/Foundation.h>
 #import <CoreSpotlight/CoreSpotlight.h>
 #import <objc/runtime.h>

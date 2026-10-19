@@ -1,10 +1,5 @@
 #import "CharonNetworkExtensionSettings.h"
 
-/* The proxy settings object and the proxy server it holds. Both are state: the system reads them
-   when a configuration is applied, so the answer to every getter is the value a caller set, and the
-   header's own defaults are what a fresh object answers.
-   The names are Apple's, capitalised where Apple capitalises them (HTTPEnabled, HTTPSEnabled,
-   HTTPSServer), because a differently-spelled selector is a different API and would not link. */
 @implementation NEProxyServer {
     NSString *_address;
     NSInteger _port;

@@ -2,16 +2,6 @@
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-/* NSPresentationIntent (iOS 15.0) over the port's release.
-
-   The class is a value: a kind, the identity the document gives it, its place in a tree of intents
-   and the few numbers its kind carries. It is immutable, so the state is one object kept beside
-   the instance -- the SDK's declaration carries no ivar block and the armv7 ABI has nowhere to add
-   one. The rules, the archive keys, the indentation and the equality are the host's own, read out
-   of it through tests/backports/host/presentationintent; facts/Foundation/NSPresentationIntent.md
-   carries the measurements. */
-
-/* The state of one intent. Private to this file, and the only class here that is not Apple's. */
 @interface CharonPresentationIntentState : NSObject
 @property NSInteger intentKind;
 @property NSInteger identity;
@@ -27,8 +17,6 @@
 
 @implementation CharonPresentationIntentState
 
-/* The port's own build refuses an implicitly synthesised property (-Wobjc-missing-property-synthesis),
-   so each one is synthesised here by name rather than left to the compiler. */
 @synthesize intentKind = _intentKind;
 @synthesize identity = _identity;
 @synthesize parentIntent = _parentIntent;
@@ -44,11 +32,6 @@
 
 static char CharonPresentationIntentStateKey;
 
-/* A list item and a block quote are the two kinds that hold a span of the document, and a span adds
-   one level to everything under it. A paragraph and a thematic break are the two that answer 0
-   whatever holds them -- the text of a list item is not indented inside it -- and so does anything
-   with nothing above it. Measured over every chain of one, two and three kinds and over runs up to
-   six spans on the host, through tests/backports/host/presentationintent. */
 static BOOL charon_is_span(NSInteger kind)
 {
     return kind == NSPresentationIntentKindListItem || kind == NSPresentationIntentKindBlockQuote;
@@ -56,8 +39,6 @@ static BOOL charon_is_span(NSInteger kind)
 
 static NSInteger charon_indentation_level(NSPresentationIntent *intent)
 {
-    /* The level is a step per span from the root down, so the chain is walked up once into a buffer
-       and read back down: a chain as deep as an archive can nest costs memory, not stack. */
     NSUInteger capacity = 16, count = 0;
     NSPresentationIntent *__unsafe_unretained *chain = (NSPresentationIntent *__unsafe_unretained *)malloc(capacity * sizeof(*chain));
     if (!chain)
@@ -81,7 +62,6 @@ static NSInteger charon_indentation_level(NSPresentationIntent *intent)
     }
     NSInteger level = 0;
     for (NSUInteger index = count; index-- > 0;) {
-        /* The root of the chain is the one intent with nothing above it to be indented under. */
         if (index + 1 == count)
             continue;
         CharonPresentationIntentState *state = objc_getAssociatedObject(chain[index], &CharonPresentationIntentStateKey);
@@ -103,9 +83,6 @@ static CharonPresentationIntentState *charon_state(NSPresentationIntent *intent)
 static NSPresentationIntent *charon_intent(NSPresentationIntentKind kind, NSInteger identity, NSPresentationIntent *parent)
 {
     NSPresentationIntent *intent = [NSPresentationIntent alloc];
-    /* -init is NS_UNAVAILABLE in the SDK's own header, which is right: an intent is only ever made
-       by the twelve factories. What -init would run is the superclass's, and NSObject's only
-       returns self -- so that is what runs here, through the superclass's own dispatch. */
     struct objc_super super = { .receiver = intent, .super_class = [NSObject class] };
     ((void (*)(struct objc_super *, SEL))objc_msgSendSuper)(&super, @selector(init));
     CharonPresentationIntentState *state = [[CharonPresentationIntentState alloc] init];
@@ -263,7 +240,6 @@ static NSPresentationIntent *charon_intent(NSPresentationIntentKind kind, NSInte
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    /* The state is immutable once the factory has built it, so a copy shares it. */
     return self;
 }
 
@@ -283,9 +259,6 @@ static NSPresentationIntent *charon_intent(NSPresentationIntentKind kind, NSInte
         return NO;
     if (mine.columnAlignments != theirs.columnAlignments && ![mine.columnAlignments isEqualToArray:theirs.columnAlignments])
         return NO;
-    /* The parent is compared the same way, so two intents under equal parents are equal and the
-       comparison reaches up the tree. Measured: an intent under a paragraph and one under a block
-       quote are neither equal nor equivalent; two under equal paragraphs are. */
     NSPresentationIntent *myParent = mine.parentIntent, *theirParent = theirs.parentIntent;
     if (myParent == theirParent)
         return YES;
@@ -315,9 +288,6 @@ static NSPresentationIntent *charon_intent(NSPresentationIntentKind kind, NSInte
     return [self isEquivalentToPresentationIntent:object];
 }
 
-/* A mixing of everything two equal intents share, so that equal intents hash equal -- which is the
-   whole of what -hash owes. The host's own numbers are a private mixing of the same fields and are
-   not part of the API; facts/Foundation/NSPresentationIntent.md says so. */
 - (NSUInteger)hash
 {
     CharonPresentationIntentState *state = charon_state(self);

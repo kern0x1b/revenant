@@ -1,27 +1,3 @@
-// HKHealthStore: what an application asks of the health data, and the store that answers it.
-//
-// Every answer here comes out of CharonHKStore, the SQLite database under Application Support that
-// stands in for the healthd of the releases that have one. What this release does not have is said
-// once, in the log, and is said in the registry and in facts/HealthKit:
-//
-//   - The authorization sheet is a SpringBoard surface. This release has no health application, so
-//     there is no sheet to put up, and a request records what it was asked for and calls its
-//     completion with success. The store then enforces it: a save of a type the process may not share
-//     fails with HKErrorAuthorizationDenied, and a query that finds a type it may not read answers
-//     the same error and returns nothing.
-//   - Background delivery is woken by the healthd. Nothing here wakes the process, so a registration
-//     is kept and read back, and nothing more is claimed for it.
-//   - The user sets their own biological sex, blood type and date of birth in the Health application.
-//     This release has none, and iOS 8's public API of HKHealthStore has no way to set them either,
-//     so the three characteristic readers answer HKErrorNoData and the store's table stays empty
-//     until a later release's -updateBiologicalSex: and its neighbours are carried.
-//
-// The members of iOS 9 and later of this class - the source readers, the per-source ordering, the
-// characteristic setters, -deleteObjects:ofType:predicate:withCompletion:, -preferredUnitsForQuantityTypes:
-// and -getRequestStatusForAuthorizationToShareTypes:readTypes:completion: - are in the group of their
-// own release, and the watchOS-only workout-session methods are unavailable on iOS, as the header
-// marks them.
-
 #import <HealthKit/HealthKit.h>
 
 #import "CharonHKStore.h"
@@ -36,9 +12,6 @@
     return NO;
 }
 
-// The release's own answer on a device that has the hardware and runs it, the iPhone 4S and the iPad
-// 2, both of which do: YES. The data of this port is the process's own database, so there is no
-// store of Apple's that could be unavailable.
 + (BOOL)isHealthDataAvailable
 {
     return YES;
@@ -75,8 +48,6 @@
     BOOL ok = [[CharonHKStore sharedStore] recordAuthorizationToShare:typesToShare read:typesToRead error:&error];
     if (!ok)
         charon_hk_say_once(@"authorization-failed", [NSString stringWithFormat:@"HealthKit: %@", error.localizedDescription]);
-    // success says whether the request was recorded, not whether a user granted anything: there was
-    // no user to ask. The completion is called on a background queue, as the header says it is.
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         completion(ok, ok ? nil : error);
     });
@@ -92,8 +63,6 @@
 - (void)saveObjects:(NSArray<HKObject *> *)objects withCompletion:(void (^)(BOOL success, NSError *_Nullable error))completion
 {
     NSError *error = nil;
-    // Every object is written in one transaction, so a save of several either keeps all of them or
-    // none of them, which is what the release promises.
     BOOL ok = [[CharonHKStore sharedStore] saveObjects:objects ?: @[] error:&error];
     [self charon_complete:completion ok:ok error:error];
 }
@@ -121,8 +90,6 @@
                     format:@"%@ is not a query this store can execute.", NSStringFromClass([query class])];
         return;
     }
-    // Each HKQuery instance may only be executed once, and executing one that has been executed is
-    // the exception the header says it is.
     if ([(id<CharonHKRunnableQuery>)query charon_hasBeenExecuted]) {
         [NSException raise:NSInvalidArgumentException
                     format:@"Each HKQuery instance may only be executed once, and this one has been executed already."];

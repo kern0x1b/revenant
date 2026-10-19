@@ -1,5 +1,3 @@
-// CMTagHash: the coordinator's bounded candidate set, evaluated against the host in C, because
-// CFHash cannot be reproduced in Python and every candidate that involves it has to run here.
 #import <CoreMedia/CoreMedia.h>
 #import <CoreMedia/CMTag.h>
 #import <Foundation/Foundation.h>
@@ -62,7 +60,6 @@ int main(void){
             c_mul31(s[i].t), c_mul33(s[i].t), c_fnv32(s[i].t), c_fnv64(s[i].t),
             c_cfhash_dict(s[i].t), c_cfhash_num(s[i].t));
     }
-    // the self-check: a candidate that cannot tell two tags apart is not a hash of the tag
     printf("\nself-check: does the candidate separate the pair that differs only in data type and value?\n");
     printf("  host %llu vs %llu -> %s\n", (unsigned long long)CMTagHash(s[2].t), (unsigned long long)CMTagHash(s[4].t),
         CMTagHash(s[2].t)!=CMTagHash(s[4].t) ? "distinguished" : "COLLIDES");

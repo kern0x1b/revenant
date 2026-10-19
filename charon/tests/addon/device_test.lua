@@ -53,7 +53,6 @@ function claim_failures(device, folder)
     return found
 end
 
--- The removal runs against a stand-in for dpkg that keeps its packages in a file, one per line as name|status|depends.
 local function pruning_failures(device, folder)
     local found = {}
     local bin = path.join(folder, "prune-bin")

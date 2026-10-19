@@ -1,10 +1,3 @@
-// probe.m - AVDepthData and AVCameraCalibrationData, asked the same questions on the host's own framework and on
-// the port's classes (AVFoundation/AVDepthData11.m, renamed by run.sh). One line per answer, so the two outputs
-// are compared with diff: a line the port answers differently is a line in the diff.
-//
-// Built twice by run.sh: plain, where AVDepthData is Apple's class, and with -DAVDepthData=charon_host_AVDepthData
-// and -DAVCameraCalibrationData=charon_host_AVCameraCalibrationData, where the same names are the port's own.
-// The source does not change between the two builds, and the rename covers the header's declarations too.
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 #import <CoreVideo/CoreVideo.h>
@@ -12,7 +5,6 @@
 static NSString *const KeyData = @"kCGImageAuxiliaryDataInfoData";
 static NSString *const KeyDescription = @"kCGImageAuxiliaryDataInfoDataDescription";
 
-// The bytes per pixel and the reader of one pixel, so a map prints its values, not its stride.
 static double readPixel(const unsigned char *p, OSType format)
 {
     if (format == kCVPixelFormatType_DisparityFloat16 || format == kCVPixelFormatType_DepthFloat16) {
@@ -83,7 +75,6 @@ int main(void)
         const float values[6] = { 0.5f, 2.0f, 4.0f, 0.25f, 1.0f, 8.0f };
         NSError *error = nil;
 
-        // 1. Refusals, by the reason the dictionary fails for.
         error = nil;
         printDepth("empty", [AVDepthData depthDataFromDictionaryRepresentation:@{} error:&error]);
         printError("empty", error);
@@ -98,7 +89,6 @@ int main(void)
         printDepth("bgra-format", [AVDepthData depthDataFromDictionaryRepresentation:auxDictionary(values, 2, 2, kCVPixelFormatType_32BGRA) error:&error]);
         printError("bgra-format", error);
 
-        // 2. Each of the four formats, read back from its own dictionary.
         OSType formats[4] = { kCVPixelFormatType_DisparityFloat16, kCVPixelFormatType_DisparityFloat32,
                               kCVPixelFormatType_DepthFloat16, kCVPixelFormatType_DepthFloat32 };
         const char *names[4] = { "disp16", "disp32", "depth16", "depth32" };
@@ -110,7 +100,6 @@ int main(void)
             printError(names[f], error);
         }
 
-        // 3. Every conversion between the four formats, and the same format.
         for (int from = 0; from < 4; from++)
             for (int to = 0; to < 4; to++) {
                 char label[32];
@@ -123,20 +112,17 @@ int main(void)
             printf("convert-to-bgra raises %s: %s\n", exception.name.UTF8String, exception.reason.UTF8String);
         }
 
-        // 4. The types a depth data object lists.
         printf("available:");
         for (NSNumber *type in sources[1].availableDepthDataTypes)
             printf(" %08x", type.unsignedIntValue);
         printf("\n");
 
-        // 5. The eight EXIF orientations on a non-square map, the map of 3 by 2 values.
         for (int o = 1; o <= 8; o++) {
             char label[32];
             snprintf(label, sizeof label, "exif-%d", o);
             printDepth(label, [sources[1] depthDataByApplyingExifOrientation:(CGImagePropertyOrientation)o]);
         }
 
-        // 6. Map replacement: a buffer of the same format is taken, one of another format is refused.
         CVPixelBufferRef same = NULL, other = NULL;
         CVPixelBufferCreate(NULL, 2, 2, kCVPixelFormatType_DisparityFloat32, NULL, &same);
         CVPixelBufferLockBaseAddress(same, 0);
@@ -152,7 +138,6 @@ int main(void)
         printDepth("replaced-other", [sources[1] depthDataByReplacingDepthDataMapWithPixelBuffer:other error:&error]);
         printError("replaced-other", error);
 
-        // 7. The dictionary a depth data object gives back: its keys, its description, and its values.
         NSString *auxType = nil;
         NSDictionary *back = [sources[3] dictionaryRepresentationForAuxiliaryDataType:&auxType];
         printf("dictionary depth32 type=%s keys=%lu\n", auxType.UTF8String, (unsigned long)back.count);
@@ -165,10 +150,6 @@ int main(void)
         AVDepthData *again = [AVDepthData depthDataFromDictionaryRepresentation:back error:NULL];
         printDepth("round-trip depth32", again);
 
-        // 8. The calibration class answers its own selectors. -init is marked unavailable in the header, and on this
-        // host it is not a refusal but a crash (measured: sent by name, it segfaults), so the host's zero object comes
-        // from its private -_initEmpty instead. The port has no private selector; its own -init is the zero object by
-        // its implementation, and CHARON_PORT (set by run.sh for the port build only) picks that selector.
         printf("respond init=%d new=%d\n", [AVCameraCalibrationData instancesRespondToSelector:NSSelectorFromString(@"init")],
                [AVCameraCalibrationData respondsToSelector:NSSelectorFromString(@"new")]);
 #ifdef CHARON_PORT
@@ -194,13 +175,11 @@ int main(void)
         printf("zero-lut %s inverse=%s\n", zero.lensDistortionLookupTable ? "data" : "nil",
                zero.inverseLensDistortionLookupTable ? "data" : "nil");
 
-        // 9. A dictionary whose metadata names a high quality, filtered, absolute depth.
         NSMutableDictionary *tagged = [auxDictionary(values, 3, 2, kCVPixelFormatType_DepthFloat32) mutableCopy];
         tagged[@"kCGImageAuxiliaryDataInfoMetadata"] = @"depthData:Quality = high\ndepthData:Filtered = True\ndepthData:Accuracy = absolute\n";
         printDepth("tagged", [AVDepthData depthDataFromDictionaryRepresentation:tagged error:NULL]);
         printDepth("tagged-converted", [[AVDepthData depthDataFromDictionaryRepresentation:tagged error:NULL] depthDataByConvertingToDepthDataType:kCVPixelFormatType_DisparityFloat32]);
 
-        // 10. Zero and a value beyond the half range: the conversion's own edge cases.
         const float edge[4] = { 0.0f, 1.0e-6f, 70000.0f, -2.0f };
         printDepth("edge-disp32", [AVDepthData depthDataFromDictionaryRepresentation:auxDictionary(edge, 4, 1, kCVPixelFormatType_DisparityFloat32) error:NULL]);
         printDepth("edge-depth16", [[AVDepthData depthDataFromDictionaryRepresentation:auxDictionary(edge, 4, 1, kCVPixelFormatType_DisparityFloat32) error:NULL] depthDataByConvertingToDepthDataType:kCVPixelFormatType_DepthFloat16]);
@@ -208,7 +187,6 @@ int main(void)
         printDepth("edge-disp16", [[AVDepthData depthDataFromDictionaryRepresentation:auxDictionary(edge, 4, 1, kCVPixelFormatType_DisparityFloat32) error:NULL] depthDataByConvertingToDepthDataType:kCVPixelFormatType_DisparityFloat16]);
         printDepth("edge-half-depth32", [[AVDepthData depthDataFromDictionaryRepresentation:auxDictionary(edge, 4, 1, kCVPixelFormatType_DisparityFloat16) error:NULL] depthDataByConvertingToDepthDataType:kCVPixelFormatType_DepthFloat32]);
 
-        // 11. The metadata text, one fact at a time: which of its lines the host reads.
         NSArray *texts = @[ @"depthData:Filtered = True\n", @"depthData:Accuracy = absolute\n", @"depthData:Quality = low\n",
                             @"depthData:Quality = high\ndepthData:Accuracy = absolute\n", @"depthData:Quality = high\n" ];
         for (NSUInteger i = 0; i < texts.count; i++) {
@@ -218,7 +196,6 @@ int main(void)
             snprintf(label, sizeof label, "metadata-%lu", (unsigned long)i);
             printDepth(label, [AVDepthData depthDataFromDictionaryRepresentation:variant error:NULL]);
         }
-        // 12. Depth to disparity on the edges, and the metadata a dictionary without metadata comes back with.
         const float depthEdge[4] = { 0.0f, 1.0e-6f, 70000.0f, -2.0f };
         AVDepthData *depthEdges = [AVDepthData depthDataFromDictionaryRepresentation:auxDictionary(depthEdge, 4, 1, kCVPixelFormatType_DepthFloat32) error:NULL];
         printDepth("depthedge-depth32", depthEdges);
@@ -230,7 +207,6 @@ int main(void)
         NSDictionary *bareBack = [bare dictionaryRepresentationForAuxiliaryDataType:&bareType];
         printf("bare dictionary keys=%lu metadata=%s\n", (unsigned long)bareBack.count, bareBack[@"kCGImageAuxiliaryDataInfoMetadata"] ? "present" : "absent");
         printDepth("bare-reparsed", [AVDepthData depthDataFromDictionaryRepresentation:bareBack error:NULL]);
-        // The reason a conversion of a refused source gives nothing: a half-float map read back at its own precision.
         printDepth("bare-half", [bare depthDataByConvertingToDepthDataType:kCVPixelFormatType_DisparityFloat16]);
         CVPixelBufferRelease(same);
         CVPixelBufferRelease(other);

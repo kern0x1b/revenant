@@ -1,10 +1,3 @@
-// AudioToolbox's constants this round carries: the two AudioComponent notification names (exported symbols, which the port
-// defines in packages/a/apple-backports/AVFAudio/AudioComponentNotifications7.m and 9.m) and the 24 enumerators the SDK
-// declares for AudioUnit, AudioQueue and the mixer (declared constants with no symbol, so the header is the port's answer).
-//
-// The oracle for the notifications is the host's own symbol, compared as the string it holds. The oracle for the enumerators
-// is the value each one has in the iOS 26.2 declarations (spec/AudioToolbox/declarations.tsv), which the host's macOS headers
-// must match: an application compiled for the device and one compiled for the host name the same value.
 #import <Foundation/Foundation.h>
 #import <AudioToolbox/AudioToolbox.h>
 #import <AudioToolbox/AudioComponent.h>

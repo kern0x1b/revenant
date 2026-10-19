@@ -71,8 +71,6 @@
     _containerView = view;
 }
 
-/* A controller the caller made holds its presented controller; once that controller owns it, it does not, so the two
-   are freed together, as UIKit 16.0's are on the host (host/sheet, sheet.lifetime). */
 - (void)charon_ownedByPresentedViewController
 {
     _presentedOwner = nil;
@@ -184,9 +182,6 @@
 
 @implementation UIViewController (CharonPresentationController)
 
-/* A page or form sheet's controller is made when it is first asked for, as UIKit makes it, so a
-   delegate set before the presentation hears of its dismissal; the sheet is asked by name, as this
-   file is linked into releases that do not carry it (UISheetPresentationController.m). */
 - (UIPresentationController *)presentationController
 {
     UIPresentationController *current = charon_presentation_controller_of(self);

@@ -1,10 +1,6 @@
 #import "CharonMetal.h"
 
 
-// The 13.0 blits between whole surfaces. -copyFromTexture:toTexture: is the convenience Metal
-// documents: as many whole surfaces as the two textures can match, level by level, and both of them
-// have to be laid out so that a level of one is the same size as a level of the other.
-
 @implementation CharonMetalBlitEncoder (Surfaces)
 
 - (void)copyFromTexture:(id<MTLTexture>)sourceTexture sourceSlice:(NSUInteger)sourceSlice sourceLevel:(NSUInteger)sourceLevel toTexture:(id<MTLTexture>)destinationTexture destinationSlice:(NSUInteger)destinationSlice destinationLevel:(NSUInteger)destinationLevel sliceCount:(NSUInteger)sliceCount levelCount:(NSUInteger)levelCount
@@ -51,8 +47,6 @@
         return;
     CharonMetalTexture *source = (CharonMetalTexture *)sourceTexture;
     CharonMetalTexture *destination = (CharonMetalTexture *)destinationTexture;
-    // Metal's own rule for the convenience: one of the two textures has a mip of the size of the
-    // other's first mip, and as many levels as both have from there.
     NSUInteger sourceLevel = 0, destinationLevel = 0;
     if (source.width == destination.width && source.height == destination.height) {
         sourceLevel = 0;

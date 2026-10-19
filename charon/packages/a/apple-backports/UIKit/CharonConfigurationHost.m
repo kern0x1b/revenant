@@ -265,7 +265,6 @@ NSNumber *charon_host_table_style(UITableViewCell *cell)
     state->updating = YES;
     UIViewConfigurationState *configurationState = [self charon_makeConfigurationState];
     ((void (*)(id, SEL, id))objc_msgSend)(self, @selector(updateConfigurationUsingState:), configurationState);
-    // The handler of iOS 15 runs after the view's own update, with the same state.
     void (^handler)(id, id) = objc_getAssociatedObject(self, &CharonUpdateHandlerKey);
     if (handler)
         handler(self, configurationState);

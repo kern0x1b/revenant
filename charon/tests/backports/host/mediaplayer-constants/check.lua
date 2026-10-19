@@ -1,20 +1,3 @@
--- The Lua half of the MediaPlayer constants harness (run.sh): the probe that asks the host which names it exports, and the comparison of the
--- registry's implemented constant rows with the port's objects. It replaces the python that stood here (rows-vs-objects.py and the probe
--- writer), and keeps its behaviour: the same patterns, the same counts, the same lines and the same exit statuses.
---
--- Usage:
---   xmake l check.lua probe <names file> <probe.m>        writes the program that prints "H <name>" for each name the host exports
---   xmake l check.lua rows-vs-objects <registry dir> <objects dir>
---       exit 0 when the two agree, 1 when they do not, 2 when nothing was examined
---
--- The definition and declaration patterns allow a space between the star and `const`, because the tree writes both forms:
--- MediaPlayerConstants*.m writes `NSString *const X` and MPMediaItem*.m writes `NSString * const X`. A pattern for one form alone reported
--- five constants that ARE carried as unbacked, and had them added a second time.
---
--- The comparison is over the registry's own words: a row is examined when its `kind` is "constant" and its `status` is "implemented", and
--- it is backed when some object defines that symbol. The count of rows examined is printed and must be nonzero, because an empty comparison
--- passes silently and a checker that examined nothing has proved nothing.
-
 import("core.base.json")
 
 local DEFINE = "^NSString%s*%*%s*const%s+([%w_%.]+)%s*="
@@ -29,7 +12,6 @@ local function sorted_keys(set)
     return keys
 end
 
--- {symbol -> the registry files its implemented constant rows are in}, and the registry's file count.
 local function rows_of(registry_dir)
     local found = {}
     local files = os.files(path.join(registry_dir, "*.json"))
@@ -45,7 +27,6 @@ local function rows_of(registry_dir)
     return found, #files
 end
 
--- {symbol -> the object that defines it}, the set of names the objects declare extern, the object count and the definition count.
 local function definitions(objects_dir)
     local defined, declared, objects = {}, {}, 0
     for _, path_ in ipairs(os.files(path.join(objects_dir, "*.m"))) do
@@ -107,7 +88,6 @@ local function rows_vs_objects(registry_dir, objects_dir)
     return 0
 end
 
--- The program that asks the host, through dlsym, which of the names it exports: one "H <name>" line for each.
 local function probe(names_file, out_file)
     local names = {}
     for line in io.lines(names_file) do

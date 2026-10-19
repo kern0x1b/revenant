@@ -1,22 +1,3 @@
-// check.m - the six sensor-data classes of ARKit against the host's own ARKit, on Mac Catalyst.
-//
-// The host's ARKit.framework (the iOSSupport copy in the macOS SDK) answers for every class named here, and
-// so does the port: the port's files are compiled into this program with each class renamed to
-// CharonPort<name>, so both are alive in one process and nothing is taken on trust from either side.
-//
-// What is compared: the superclass; the protocol ARFaceAnchor adopts; every property the port declares,
-// found on the host by name and compared by type and ownership (the SDK declaration is the contract, so
-// readonly is not compared: the host's runtime attribute is its implementation's); and, for
-// AREnvironmentProbeAnchor, what its two extent initialisers answer - the extent, the place, the name, and a
-// texture that is nil because no session renders one.
-//
-// What is not compared: a property the host carries and the port does not. The host's release is later than
-// the band the port is built for, so it has members the port never declared; that is not a difference in
-// what the port carries.
-//
-// What is not measured at all: a session. No session runs here, so no ARFaceAnchor, ARDepthData, ARMeshAnchor,
-// ARObjectAnchor or ARDirectionalLightEstimate is ever produced by either side.
-
 #import <ARKit/ARKit.h>
 #import <objc/runtime.h>
 #import <simd/simd.h>
@@ -34,16 +15,11 @@ static void verdict(BOOL ok, NSString *name, NSString *detail)
     }
 }
 
-// The probe and the anchor read through their declared types, so each value has the type the SDK gives it.
-// The receiver is the host's class or the port's; the selector decides which implementation answers.
 static simd_float3 probeExtent(id probe) { return ((AREnvironmentProbeAnchor *)probe).extent; }
 static simd_float4x4 anchorTransform(id anchor) { return ((ARAnchor *)anchor).transform; }
 static id probeTexture(id probe) { return ((AREnvironmentProbeAnchor *)probe).environmentTexture; }
 static NSString *anchorName(id anchor) { return ((ARAnchor *)anchor).name; }
 
-// The type and ownership of a property as the runtime states them: T<type>, then copy (C) or weak (W). Retain
-// (&) is left out, and so is readonly: the host states ARC strong (&) on environmentTexture and does not on geometry,
-// which is also declared strong, so the flag does not say the same thing on both sides of one framework.
 static NSString *typeAndOwnership(const char *attributes)
 {
     NSArray *fields = [@(attributes) componentsSeparatedByString:@","];
@@ -54,8 +30,6 @@ static NSString *typeAndOwnership(const char *attributes)
     return out;
 }
 
-// Every property the port declares, found on the host by name. A name the host lacks is a difference; a
-// name the host has with another type or ownership is a difference. Returns the differences, or "" for none.
 static NSString *compareProperties(Class port, Class host)
 {
     NSMutableArray *differences = [NSMutableArray array];
@@ -77,7 +51,6 @@ static NSString *compareProperties(Class port, Class host)
     return [differences componentsJoinedByString:@"; "];
 }
 
-// One class: the port's (renamed) against the host's.
 static void compareShape(NSString *name, NSString *superName, Protocol *protocol)
 {
     Class host = NSClassFromString(name);
@@ -111,7 +84,6 @@ int main(void)
         compareShape(@"ARObjectAnchor", @"ARAnchor", nil);
         compareShape(@"ARDirectionalLightEstimate", @"ARLightEstimate", nil);
 
-        // The probe's constructors: the port's and the host's answer the same extent, place, name and texture.
         simd_float4x4 place = matrix_identity_float4x4;
         place.columns[3] = (simd_float4){1.5f, -2.0f, 0.25f, 1.0f};
         simd_float3 extent = {3.0f, 2.0f, 4.0f};

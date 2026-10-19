@@ -1,12 +1,6 @@
 #import <UIKit/UIKit.h>
 #include <stdio.h>
 
-// A bundled Mac Catalyst app with the iPad idiom and a window. The scene delegate runs the same checks on the host's focus effects and focus
-// groups and, in the port's build, on the port's (the effect classes are compiled renamed, and the view and view-controller categories have
-// the host's method names, so in that process they replace the host's and the checks read the port's answers). Each check writes one
-// "side<TAB>check<TAB>value" line to the file named by CHARON_SCENE_OUT, then the app quits. The focus engine itself is not measured here: no
-// halo is drawn and no focus moves, which the port does not build.
-
 static FILE *out;
 static const char *side;
 

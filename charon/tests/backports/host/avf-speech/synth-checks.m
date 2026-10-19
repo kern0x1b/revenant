@@ -1,26 +1,9 @@
-// synth-checks.m -- AVSpeechSynthesizer: the host's own class against the port's, in one binary (run.sh). The same driver
-// runs each scenario twice, once on AVSpeechSynthesizer and once on charon_host_AVSpeechSynthesizer (the port, compiled
-// with its names renamed), and the two transcripts must be equal. A transcript is the lifecycle callbacks in order
-// (didStart, didPause, didContinue, didFinish, didCancel) with the synthesizer's speaking and paused flags at each one,
-// and the return value of each stop, pause and continue. willSpeakRange is kept out: its count depends on the speed,
-// and only the order and the flags are the host's contract.
-//
-// The host has no VoiceServices, so VSSpeechSynthesizer below is a stub in this file, and the port drives it. The stub is
-// modelled on the guest's measurements (facts/AVFoundation/AVSpeech.md, the synthesizer section): one string at a time
-// (a second start replaces the first silently), isSpeaking 1 at the start call and 0 while paused, a stop at the
-// immediate boundary ends at once and at the word boundary at the next word, a pause the same, a stop with the queue
-// empty answers an error. The stub cannot show that the release speaks: run 2 on the 6.1.3 emulator did, and that is
-// the other half of the claim. This check shows the port turns those callbacks into the host's order.
-//
-// Output: "ok" and "FAIL" lines and checks=N failures=M. A planted control in run.sh must go red.
-
 #import <Foundation/Foundation.h>
 #import <AVFAudio/AVFAudio.h>
 #import <objc/message.h>
 
 #pragma mark - The stub VoiceServices synthesizer
 
-// The delegate calls the stub makes, as the guest's calls arrived (facts/AVFoundation/AVSpeech.md).
 @protocol StubVoiceServicesDelegate <NSObject>
 - (void)speechSynthesizerDidStartSpeaking:(id)synthesizer;
 - (void)speechSynthesizerDidPauseSpeaking:(id)synthesizer;
@@ -39,7 +22,7 @@
     NSUInteger _nextWord;
     double _elapsed;
     BOOL _running, _paused, _startPending, _continuePending;
-    int _pendingStop, _pendingPause;      // -1 none, else the boundary asked for
+    int _pendingStop, _pendingPause;
     double _requestedAt;
     NSTimer *_timer;
     float _rate, _pitch, _volume;
@@ -72,7 +55,6 @@
 
 - (id)startSpeakingString:(NSString *)string
 {
-    // A start while another string speaks replaces it, with no callback for the replaced one (the guest's behaviour).
     [_timer invalidate];
     _text = [string copy];
     _wordRanges = [NSMutableArray array];
@@ -134,7 +116,6 @@
         NSRange r = [_wordRanges[_nextWord] rangeValue];
         _nextWord++;
         [(id<StubVoiceServicesDelegate>)_delegate speechSynthesizer:self willSpeakRangeOfSpeechString:r];
-        // The word boundary: a stop or a pause asked for the word takes effect here.
         if (_pendingStop == 1) { [self finish:NO]; return; }
         if (_pendingPause == 1) {
             _pendingPause = -1; _paused = YES;
@@ -181,7 +162,6 @@ static NSString *flags(void)
             [[gSynth valueForKey:@"paused"] boolValue]];
 }
 
-// The delegate: records the lifecycle callbacks of the transcript. It is the same class on both sides.
 @interface DriverDelegate : NSObject
 @end
 
@@ -196,9 +176,6 @@ static NSString *flags(void)
 
 static NSString *const kLong = @"one two three four five six seven eight nine ten eleven twelve.";
 
-// The two properties iOS 10 and iOS 13 added, sent by selector name: the macOS header marks both unavailable, so a
-// caller compiled against it could not name them. The route's channel descriptions are the host's own objects, the same
-// for both sides, and they are the only AVAudioSessionChannelDescription the host gives without a running session.
 static id laterChannels(void)
 {
     id session = [NSClassFromString(@"AVAudioSession") performSelector:NSSelectorFromString(@"sharedInstance")];
@@ -229,7 +206,6 @@ static void setUsesApplicationAudioSessionOf(id synth, BOOL uses)
     ((void (*)(id, SEL, BOOL))objc_msgSend)(synth, NSSelectorFromString(@"setUsesApplicationAudioSession:"), uses);
 }
 
-// What an outputChannels answer is, for the transcript: nil, the same array the caller set (identity), or an array of n.
 static NSString *describeChannels(id answer, id set)
 {
     if (!answer) return @"nil";
@@ -237,7 +213,6 @@ static NSString *describeChannels(id answer, id set)
     return [NSString stringWithFormat:@"an array of %lu", (unsigned long)[answer count]];
 }
 
-// One side's transcript for every scenario, in order. The class is AVSpeechSynthesizer or the port's.
 static NSArray *transcripts(Class synthClass, Class utteranceClass, NSArray **names)
 {
     NSMutableArray *out = [NSMutableArray array];
@@ -246,7 +221,6 @@ static NSArray *transcripts(Class synthClass, Class utteranceClass, NSArray **na
     void (^begin)(NSString *) = ^(NSString *name) {
         [scenarioNames addObject:name];
         gLog = [NSMutableString string];
-        // The previous scenario's synthesizer is silenced first: a callback still due from it must not reach this log.
         [gSynth setValue:nil forKey:@"delegate"];
         gSynth = [[synthClass alloc] init];
         [gSynth setValue:delegate forKey:@"delegate"];
@@ -333,7 +307,6 @@ static NSArray *transcripts(Class synthClass, Class utteranceClass, NSArray **na
      [SYNTH pauseSpeakingAtBoundary:AVSpeechBoundaryImmediate], [SYNTH continueSpeaking]];
     end();
 
-    // The later properties, on a fresh synthesizer each: the default, what a set then a get answers, and the flag.
     begin(@"later properties");
     id routeChannels = laterChannels();
     [gLog appendFormat:@"outputChannels fresh: %@\n", describeChannels(channelsOf(gSynth), nil)];
@@ -359,7 +332,6 @@ static NSArray *transcripts(Class synthClass, Class utteranceClass, NSArray **na
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-        // The host's class is run first, and every scenario must have a non-empty host transcript (checked below).
         NSArray *names = nil;
         NSArray *host = transcripts(NSClassFromString(@"AVSpeechSynthesizer"), NSClassFromString(@"AVSpeechUtterance"), &names);
         NSArray *port = transcripts(NSClassFromString(@"charon_host_AVSpeechSynthesizer"),

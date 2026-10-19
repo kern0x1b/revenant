@@ -1,10 +1,3 @@
-// The time events of iOS 11.0: HMTimeEvent and the four that fire on a time -- HMDurationEvent,
-// HMCalendarEvent, HMSignificantTimeEvent and HMPresenceEvent -- their mutable forms, the threshold
-// event that fires on a characteristic leaving a number range, and HMNumberRange, the value object
-// that range is.
-//
-// One release's API per object file, which is what the band machinery needs: every class here
-// arrived in iOS 11.0, whatever release a later member of one of them arrived in.
 #import "CharonHomeKitInternal.h"
 
 #pragma mark - HMTimeEvent
@@ -151,8 +144,6 @@
 {
     self = [super init];
     if (self) {
-        // The two types are the header's own enumerations, not strings, and they are held as the
-        // numbers they are so that what comes back is the value the release gives.
         _charon_presenceEventType = @(presenceEventType);
         _charon_presenceUserType = @(presenceUserType);
     }

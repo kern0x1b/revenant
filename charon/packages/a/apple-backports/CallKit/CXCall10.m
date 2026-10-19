@@ -69,8 +69,6 @@
     _hasEnded = hasEnded;
 }
 
-// The delegate of an observer is handed a call that does not change under it,
-// so what it is given is a copy taken while the broker holds its lock.
 - (CXCall *)charon_snapshot
 {
     CXCall *copy = [[CXCall alloc] charon_initWithUUID:_UUID outgoing:_outgoing];
@@ -119,9 +117,6 @@
     dispatch_queue_t _queue;
 }
 
-// Making an observer is what starts the watch on the release's own calls: an
-// application that never asks for one never loads CoreTelephony's call
-// centre.
 - (instancetype)init
 {
     if ((self = [super init])) {

@@ -1,12 +1,3 @@
-// gelu-probe.m - does the release's own batch-normalisation kernel crash on GeLU by itself?
-//
-// The differential's oracle dies at the eleventh neuron type, batch normalisation with GeLU, and the
-// harness used to name the crash site with the last line the oracle printed, which was a philox case
-// in a different family entirely. So the question this file answers is the one the differential cannot:
-// is the crash a property of that one case, or does it need the cases before it.
-//
-// One file, one case, run directly. It takes the number of preceding cases to run first, so the same
-// binary bisects: 0 is the case alone, and k is the case after the k cases that come before it.
 #import <Foundation/Foundation.h>
 #include <unistd.h>
 #import <Metal/Metal.h>
@@ -40,7 +31,6 @@ static MPSVector *vectorOf(const void *values, MPSDataType type, NSUInteger leng
                                                                   vectorBytes:length * sizeof(float) dataType:type]];
 }
 
-// the names of the raw enum values, so a run says which type it asked for rather than only its number
 static const char *typeName(MPSCNNNeuronType t)
 {
     switch (t) {
@@ -110,7 +100,6 @@ int main(int argc, char **argv)
     @autoreleasepool {
         gDevice = MTLCreateSystemDefaultDevice();
         if (!gDevice) { printf("no device\n"); return 2; }
-        // the type before GeLU, run first when asked, to see whether the crash needs earlier state
         const unsigned kPreceding = (argc > 1) ? (unsigned)atoi(argv[1]) : 0;
         printf("device %s, preceding cases %u\n", [[gDevice name] UTF8String], kPreceding);
         fflush(stdout);
@@ -120,8 +109,6 @@ int main(int argc, char **argv)
         } else {
             for (int t = 0; t < 15; t++) {
                 if (t == MPSCNNNeuronTypePReLU) {
-                    // MPSMatrixBatchNormalization.mm:469 asserts `PReLU not supported.`, measured on
-                    // this host, so the one raw value that cannot be asked is named and stepped over
                     printf("--- type %d PReLU skipped: the release asserts it is not supported\n", t);
                     fflush(stdout);
                     continue;

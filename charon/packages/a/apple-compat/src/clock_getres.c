@@ -2,9 +2,6 @@
 #include <mach/mach_time.h>
 #include <time.h>
 
-/* The resolution of the clocks charon_clock_gettime answers, which is not always Darwin's: CLOCK_MONOTONIC_RAW counts from the
-   boot time in microseconds and CLOCK_THREAD_CPUTIME_ID from thread_info's microseconds, where Darwin reads the Mach clock; the
-   uptime clocks read mach_absolute_time, whose tick is the timebase, rounded up to a nanosecond as Darwin does. */
 __attribute__((visibility("hidden")))
 int charon_clock_getres(clockid_t which, struct timespec *resolution)
 {

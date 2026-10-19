@@ -1,6 +1,3 @@
-// inventory <scenes-dir> : what macOS SceneKit finds in each of Telegram's ten scenes (facts/SceneKit/SCNView.md, "Which
-// scenes Telegram draws"): the decompressed files star2.scn, coin.scn, gift2.scn, badge.scn, emoji.scn, tag.scn, business.scn,
-// boost.scn, lightspeed.scn and swirl.scn (`git show release-12.9.2:submodules/PremiumUI/Resources/<name> | gunzip`).
 import SceneKit
 import AppKit
 

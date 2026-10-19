@@ -1,25 +1,3 @@
-/* delta.m -- the same ramp through both sides, and the difference in source coordinates.
- *
- * The port's resampler is linked in from the library, so this is the code the check builds; the
- * Vision classes are renamed by the harness's rename header because this file also links the
- * framework's own.
- *
- *   SDK=$(xcrun --show-sdk-path)
- *   xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$SDK" \
- *       -iframework "$SDK/System/iOSSupport/System/Library/Frameworks" -fobjc-arc -w \
- *       -Wno-unguarded-availability -I tests/backports/host/vision/crop-probe \
- *       tests/backports/host/vision/crop-probe/delta.m \
- *       packages/a/apple-backports/Vision/CharonVisionBilinear.c \
- *       -framework Foundation -framework CoreGraphics -framework CoreVideo -framework CoreML \
- *       -framework Vision -o /tmp/delta && /tmp/delta
- *
- *
- * The ramp is fed to Core ML and to the port's own resampler, and for every output pixel the two
- * answers are decoded back into source coordinates (a value of v is the source column v / k) and
- * subtracted. The result is one number per axis per pixel, and what it is says which of the three
- * things is going on: a constant is a pixel-centre convention, a number that grows along the row is a
- * different scale, and a spread with no shape is a different kernel or its rounding.
- */
 #import <CoreGraphics/CoreGraphics.h>
 #import <CoreVideo/CoreVideo.h>
 #import <CoreML/CoreML.h>
@@ -27,8 +5,6 @@
 #import <Foundation/Foundation.h>
 #import <dlfcn.h>
 
-/* The port's own resampler, compiled in: the kernel is a .c of the library and the placement is in
- * the header, so this is the same code the check builds. */
 extern void charon_vision_bilinear(const uint8_t *source, size_t sourceStride, size_t sourceWide,
                                    size_t sourceHigh, uint8_t *target, size_t targetStride, long insetX,
                                    long insetY, long drawWide, long drawHigh, long targetWide, long targetHigh);
@@ -115,7 +91,7 @@ int main(int argc, char **argv)
             for (dy = 0; dy < th; dy++) for (dx = 0; dx < tw; dx++) {
                 size_t pa = dy * strideA + dx * 4, pb = dy * strideB + dx * 4;
                 double dxr, dyr;
-                if (a[pa] == 0 && a[pa + 1] == 0) { continue; }   /* a bar on one side or the other */
+                if (a[pa] == 0 && a[pa + 1] == 0) { continue; }
                 dxr = (double)a[pa + 2] - (double)b[pb + 2];
                 dyr = (double)a[pa + 1] - (double)b[pb + 1];
                 taken++;

@@ -1,6 +1,3 @@
-// MKPolygonRenderer: a polygon drawn as a closed path through its own points, with the holes of a
-// polygon that has them cut out of it the way MapKit documents (each interior ring drawn with the
-// opposite winding, so one fill leaves them open), and the partial-stroke range iOS 14 added.
 #import <MapKit/MapKit.h>
 #import <UIKit/UIKit.h>
 #import <math.h>
@@ -35,8 +32,6 @@
     [self invalidatePath];
 }
 
-// A ring drawn as a closed polyline, with the stroke taken from the fraction of the ring's points
-// the caller asked for. Charon's own, so it carries no API.
 - (void)charon_addRing:(const CLLocationCoordinate2D *)coordinates
                   count:(NSUInteger)count
               start:(double)start
@@ -82,7 +77,6 @@
     }
 }
 
-// The points of one ring, read out through the release's own -getCoordinates:range:.
 - (void)charon_addRingOf:(MKPolygon *)polygon
                     count:(NSUInteger)count
                     start:(double)start
@@ -115,7 +109,6 @@
     double start = (double)self.strokeStart;
     double end = (double)self.strokeEnd;
     [self charon_addRingOf:polygon count:polygon.pointCount start:start end:end reversed:NO toPath:path];
-    // The interior rings run the other way round, which is what makes one fill leave them open.
     for (NSUInteger index = 1; index < polygon.interiorPolygons.count; index++) {
         MKPolygon *hole = polygon.interiorPolygons[index];
         if (hole.pointCount > 0) {

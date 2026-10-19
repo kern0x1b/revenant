@@ -1,8 +1,3 @@
--- One mutation of the port's time functions. The three are the three relations the case asks: the round trip, the agreement
--- with CFAbsoluteTime, and the monotonic reading.
--- Usage: xmake l ./mutate.lua <file> <old text> <new text>
-
--- The number of places the text stands, counted the way Python's str.count counts: without overlap.
 local function occurrences(text, needle)
     local n, start = 0, 1
     while true do

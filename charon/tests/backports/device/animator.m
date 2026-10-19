@@ -4,10 +4,6 @@
 #include <mach/mach_time.h>
 #import "check.h"
 
-/* There is no host to hold the animator to: Mac Catalyst raises no UIWindow, and
-   there is neither a simulator nor a device of iOS 10 here. So every expectation
-   below is read off the algorithm in UIKit of iOS 10.3.4 and checked here. */
-
 static NSString *const results_folder = @"/private/var/backports";
 
 #define NAMED(...) ([NSString stringWithFormat:__VA_ARGS__].UTF8String)
@@ -67,7 +63,6 @@ static void run_checks(UIView *stage)
     box.backgroundColor = [UIColor redColor];
     [stage addSubview:box];
 
-    /* What a fresh animator is. */
     UIViewPropertyAnimator *fresh = [[UIViewPropertyAnimator alloc] initWithDuration:2 curve:UIViewAnimationCurveEaseInOut
                                                                          animations:^{ box.alpha = 0.5; }];
     CHECK(fresh.state == UIViewAnimatingStateInactive, "a fresh animator is inactive");
@@ -83,18 +78,15 @@ static void run_checks(UIView *stage)
     CHECK([fresh.description rangeOfString:@" interruptible"].location != NSNotFound,
           "the description says it is interruptible");
 
-    /* A copy carries what was asked for, not what is happening. */
     UIViewPropertyAnimator *copy = [fresh copy];
     CHECK(copy.duration == 2 && copy.isInterruptible == fresh.isInterruptible,
           "a copy carries the duration and the flags");
     CHECK(copy.state == UIViewAnimatingStateInactive, "a copy starts inactive");
 
-    /* The two real exceptions, with the texts UIKit raises. */
     CHECK_EQUAL(raises(^{ [fresh startAnimationAfterDelay:-1]; }),
                 @"NSInvalidArgumentException|The delay should be greater than or equal to zero.",
                 "a negative delay raises");
 
-    /* Running, and the notifications it sends. */
     CharonObserver *observer = [[CharonObserver alloc] init];
     UIViewPropertyAnimator *animator = [[UIViewPropertyAnimator alloc] initWithDuration:2 curve:UIViewAnimationCurveLinear
                                                                             animations:^{ box.center = CGPointMake(200, 200); }];
@@ -116,9 +108,6 @@ static void run_checks(UIView *stage)
     animator.fractionComplete = 0.5;
     CHECK(fabs(animator.fractionComplete - 0.5) < 1e-6, "the fraction is where it was put");
     CHECK([observer countOf:@"fractionComplete"] >= 1, "scrubbing notifies of the fraction");
-    /* Where the layer is drawn comes from the render server, which answers only
-       inside a window; without one there is nothing to read and the check is not
-       pretended. */
     if (box.window) {
         [CATransaction flush];
         [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
@@ -129,8 +118,6 @@ static void run_checks(UIView *stage)
         printf("skip half way along the animation the view is between its ends: no window, so no presentation layer\n");
     }
 
-    /* An animation this animator never started must keep running while it is paused.
-       Freezing every layer that happens to animate would stop this one too. */
     UIView *other = [[UIView alloc] initWithFrame:CGRectMake(0, 100, 20, 20)];
     other.backgroundColor = [UIColor blueColor];
     [stage addSubview:other];
@@ -150,7 +137,6 @@ static void run_checks(UIView *stage)
     [second stopAnimation:NO];
     [second finishAnimationAtPosition:UIViewAnimatingPositionCurrent];
 
-    /* Stopping and finishing. */
     __block UIViewAnimatingPosition reported = (UIViewAnimatingPosition)-1;
     [animator addCompletion:^(UIViewAnimatingPosition position) { reported = position; }];
     [animator stopAnimation:NO];
@@ -163,7 +149,6 @@ static void run_checks(UIView *stage)
     for (NSString *key in @[@"state", @"running", @"reversed", @"fractionComplete"])
         [animator removeObserver:observer forKeyPath:key];
 
-    /* Stopping without finishing drops the completions. */
     __block UIViewAnimatingPosition second_reported = (UIViewAnimatingPosition)-1;
     UIViewPropertyAnimator *third = [[UIViewPropertyAnimator alloc] initWithDuration:2 curve:UIViewAnimationCurveLinear
                                                                          animations:^{ box.center = CGPointMake(30, 30); }];
@@ -176,7 +161,6 @@ static void run_checks(UIView *stage)
           "finishing an inactive animator is quietly nothing");
     CHECK(second_reported == (UIViewAnimatingPosition)-1, "and calls no completion");
 
-    /* Scrubbing an animator that has blocks and has not started starts it paused. */
     UIViewPropertyAnimator *unstarted = [[UIViewPropertyAnimator alloc] initWithDuration:2 curve:UIViewAnimationCurveLinear
                                                                              animations:^{ box.alpha = 0.5; }];
     unstarted.fractionComplete = 0.25;
@@ -184,7 +168,6 @@ static void run_checks(UIView *stage)
           "scrubbing an animator that has not started leaves it active and paused");
     [unstarted stopAnimation:YES];
 
-    /* An animator that is not interruptible is left to Core Animation. */
     UIViewPropertyAnimator *plain = [[UIViewPropertyAnimator alloc] initWithDuration:1 curve:UIViewAnimationCurveLinear
                                                                          animations:^{ box.alpha = 1; }];
     plain.interruptible = NO;
@@ -219,11 +202,6 @@ static void measure_scrubbing_curve(UIView *stage)
           NAMED(@"scrubbing along the curve puts a quarter where ease-in-out does, 0.129 of the way (x = %g)", curved));
 }
 
-/* What the correct scrubbing costs on this hardware. Rebuilding the animation
-   with its own speed and time offset is the only way to scrub one animator
-   without freezing animations it never started; freezing the layer is cheaper
-   and wrong. The A5 is the slowest thing this port runs on, so the number that
-   matters is whether one scrub step fits in a display frame. */
 static double per_step_microseconds(NSUInteger steps, void (^step)(double fraction))
 {
     mach_timebase_info_data_t timebase;

@@ -1,13 +1,3 @@
-// mlc-training-forms.m - what a training graph answers over a graph object NOTHING has compiled, and where
-// the host raises. This is the binding facts/MLCompute/Graph.md names as the one no case can be asked in:
-// the compile answers YES, the device memory size is twice the node's bytes, the gradient pass and the
-// optimizer update answer YES, and the forward pass raises an NSRangeException inside the CPU engine.
-//
-// It is also the binding the port's own MLCTrainingGraph14.m refuses every engine member in, and the reasons
-// for both are in that file's header.
-//
-// argv[1] is the loss layer: relu-loss, which is an activation and not a loss layer, or softmax, which is a
-// softmax cross entropy loss over the reduction mean.
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <MLCompute/MLCompute.h>
@@ -46,7 +36,6 @@ int main(int argc, char **argv)
                                                                              weight:1.0f];
         MLCLayer *lossLayer = [variant isEqualToString:@"softmax"] ? (MLCLayer *)loss : (MLCLayer *)relu;
 
-        // The graph object of its own, so that nothing in this process has compiled it: the binding.
         MLCGraph *graph = [MLCGraph graph];
         MLCTensor *output = [graph nodeWithLayer:relu source:input];
         MLCGraph *lossGraph = [MLCGraph graph];
@@ -89,7 +78,6 @@ int main(int argc, char **argv)
             printf("executeOptimizerUpdate\tRAISED %s: %s\n", exception.name.UTF8String, exception.reason.UTF8String);
         }
 
-        // A graph with no layer, and the compile that raises inside the host.
         @try {
             MLCInferenceGraph *empty = [MLCInferenceGraph graphWithGraphObjects:@[]];
             report(@"empty graph compile", [empty compileWithOptions:0 device:device]);
@@ -97,7 +85,6 @@ int main(int argc, char **argv)
             printf("empty graph compile\tRAISED %s: %s\n", exception.name.UTF8String, exception.reason.UTF8String);
         }
 
-        // What +new and -init answer for the two classes, which their own headers mark unavailable.
         for (NSString *name in @[ @"MLCInferenceGraph", @"MLCTrainingGraph" ]) {
             Class cls = NSClassFromString(name);
             id fresh = [cls new];

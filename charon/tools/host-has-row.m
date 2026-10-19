@@ -4,22 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 
-/* Does the host's own Foundation already have each of these rows?
- *
- * A host differential can only prove the port's own code for an API the host does NOT answer: when
- * the host answers it too, its implementation is the one that runs (measured, with a moved-key
- * mutant, in the report of the NSMutableURLRequest slice), and every assertion becomes a statement
- * about Apple. This probe is the instrument for that question, and it asks the runtime rather than
- * the headers: a selector the class implements, a class or protocol the runtime knows, a constant the
- * image exports.
- *
- * Three controls, one per shape, so a run that examined nothing cannot pass:
- *   -[NSURLSessionTask cancel]                      a selector the host has        -> HAS
- *   -[NSURLSessionTask charonProbeNoSuchSelector]   a planted selector             -> LACKS
- *   NSAttributedString                              a class the host has          -> HAS
- *   NSCharonProbeNoSuchClass                        a planted class                -> LACKS
- */
-
 static int has_instance_method(Class cls, SEL selector)
 {
     return cls && class_getInstanceMethod(cls, selector) != NULL;
@@ -58,8 +42,6 @@ static const char *answer(const char *api, const char *kind)
         size_t owner_length = (size_t)(strchr(open + 1, ' ') - (open + 1));
         if (owner_length == 0 || owner_length >= sizeof owner) return "MALFORMED";
         memcpy(owner, open + 1, owner_length);
-        /* the selector is what follows the space, not the whole bracket: -[NSObject description]
-           is the class NSObject and the selector description. */
         const char *selector_start = strchr(open + 1, ' ') + 1;
         if (selector_start <= open + 1 || selector_start > close) return "MALFORMED";
         size_t selector_length = (size_t)(close - selector_start);
@@ -89,8 +71,6 @@ static const char *answer(const char *api, const char *kind)
     return "MALFORMED";
 }
 
-/* --by-owner groups the LACKS rows by the class or protocol they belong to, which is the shape the
-   facts file's table is written from: a table of groups that nobody printed is a table that drifts. */
 static int print_by_owner(const char *path)
 {
     FILE *input = fopen(path, "r");
@@ -122,9 +102,6 @@ static int print_by_owner(const char *path)
     return unparsed ? 1 : 0;
 }
 
-/* --write-facts F TSV rewrites F's generated group block from this run, so the number a facts file
-   quotes beside an owed line is this probe's and not a porter's. The block sits between
-   <!-- host-lacks:begin --> and <!-- host-lacks:end -->, next to a <!-- host-lacks --> line. */
 static int write_facts(const char *path, const char *tsv)
 {
     const char *begin = "<!-- host-lacks:begin -->";
@@ -145,7 +122,6 @@ static int write_facts(const char *path, const char *tsv)
         printf("FAIL %s has no %s / %s markers\n", path, grouped_begin, grouped_end);
         return 1;
     }
-    /* the groups first, into a string, then the block: one run, one block */
     char block[1 << 15];
     int written = 0;
     static char names[128][256];
@@ -174,7 +150,6 @@ static int write_facts(const char *path, const char *tsv)
             snprintf(owner, sizeof owner, "%s", api);
         }
         written += snprintf(block + written, sizeof block - written, "%s\n", api);
-        /* the grouped counts, in the same run, so the two blocks cannot disagree */
         {
             unsigned found = groups;
             for (unsigned g = 0; g < groups; g++) {
@@ -192,13 +167,9 @@ static int write_facts(const char *path, const char *tsv)
     written += snprintf(block + written, sizeof block - written,
                         "# %u rows the host lacks, over the tree this walk read\n```\n%s", total, end);
 
-    /* splice both blocks: the list and the grouped counts, in the file's own order */
     char staged[1 << 17];
     size_t kept = 0;
     const char *cursor = text;
-    /* in the order they appear in the file, not the order they are written here: a splice that
-       assumes an order it does not check leaves the earlier block stale, which is how a generated
-       block came out empty above. */
     int list_first = strstr(text, begin) < strstr(text, grouped_begin);
     for (int pass = 0; pass < 2; pass++) {
         int list = (pass == 0) ? list_first : !list_first;
@@ -250,14 +221,9 @@ int main(int argc, char **argv)
     if (!input) { printf("FAIL cannot read %s\n", path); return 2; }
     char line[1024];
     unsigned rows = 0, has = 0, lacks = 0, malformed = 0, input_lines = 0, unparsed = 0;
-    /* One loop over every line, the first included: reading the first line outside the loop is how
-       a row goes missing from the totals while the summary still says the totals cover the file. */
     while (fgets(line, sizeof line, input)) {
         input_lines++;
         char api[512], kind[64], introduced[32];
-        /* A line that does not parse is counted, not skipped: a row this probe never read cannot be
-           in its totals, and a summary that says "0 malformed" over 114 of 115 rows has measured
-           nothing about the one it dropped. */
         if (sscanf(line, "%511[^\t]\t%63[^\t]\t%31s", api, kind, introduced) != 3) {
             unparsed++;
             printf("UNPARSED\t-\t-\t%s", line);

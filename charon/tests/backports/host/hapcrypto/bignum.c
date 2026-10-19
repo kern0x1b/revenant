@@ -1,20 +1,3 @@
-/* The bignum HAP's pairing arithmetic is written on: a reader, and the cases come from run.sh.
- *
- * One case per line, TAB separated:
- *
- *   mul|pow    left    right    modulus
- *
- * in hex, most significant first, and the answer is printed the same way, one line per case, so that
- * run.sh can generate the cases with an independent implementation and diff the two answers. The
- * operands are written at whatever width they are: a narrow value is a narrow value, and reading it
- * padded is the mistake this file exists to keep visible.
- *
- * The two shapes are the point. `pow` is what a modular exponentiation makes and what the first
- * 72-case check covered: two full-width operands. `mul` is what SRP-6a makes and what that check
- * never reached: a narrow `k`, `x` or `u` against a full-width `v`, a narrow value reduced on its own,
- * and a 2000-bit value against a narrow one. The defect those found is in `mont_finish`: a modulus
- * that fills its own width has 2n above R, so the reduced value carries a limb past R, and the code
- * used to read only the low limbs and subtract the modulus *because* that limb was set. */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -48,8 +31,6 @@ int main(void)
 {
     char line[3 * (BN_LIMBS * 4) * 2 + 32];
     while (fgets(line, sizeof line, stdin)) {
-        /* Four fields, split on tabs: the kind and three hex numbers. A short line is skipped rather
-         * than read past, so a malformed case is a "-" in the answers and a diff, not a crash. */
         char *fields[4] = { 0, 0, 0, 0 };
         int count = 0;
         char *cursor = line;

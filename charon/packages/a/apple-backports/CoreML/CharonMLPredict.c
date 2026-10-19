@@ -1,12 +1,3 @@
-/* Running a model: the values in, the values out.
- * CharonMLPredict.h says what it is for; this is the kind by kind reading of it.
- *
- * A model is run over a set of values named by their own names, and a pipeline runs each of
- * its sub-models over the same set in turn: the output of one is the input of the next, found
- * by name, which is how a converted tabular or text classifier is put together. A model is
- * read out of its message for each run rather than kept beside it, so a sub-model is a model
- * in every respect but where its bytes live.
- */
 #include "CharonMLPredict.h"
 
 #include <math.h>
@@ -20,8 +11,6 @@
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
-
-/* --- the set of values ------------------------------------------------------------------------- */
 
 void charon_ml_features_init(charon_ml_features *features)
 {
@@ -92,10 +81,6 @@ int charon_ml_features_remove(charon_ml_features *features, const char *name)
     return 0;
 }
 
-/* --- the values as numbers ---------------------------------------------------------------------- */
-
-/* One value as a vector of numbers, which is what every model that is not a neural network
- * works in: a tree, a GLM and each of the preprocessing models take one number per feature. */
 static int value_as_vector(const charon_ml_value *value, double **out, size_t *count)
 {
     double *numbers;
@@ -128,8 +113,6 @@ static int value_as_vector(const charon_ml_value *value, double **out, size_t *c
     return 1;
 }
 
-/* Every input of a model as one vector of numbers, in the order the description names them,
- * which is the order a tree's branchFeatureIndex and a GLM's weights count in. */
 static int inputs_as_vector(const charon_ml_model *model, const charon_ml_features *values, double **out,
                             size_t *count, char *error, size_t error_size)
 {
@@ -178,7 +161,7 @@ int charon_ml_features_satisfy(const charon_ml_model *model, const charon_ml_fea
         int axis;
         if (value == NULL || value->kind == CHARON_ML_VALUE_NONE) {
             if (described->optional) {
-                continue; /* an optional input may be absent, which is what optional means */
+                continue;
             }
             if (missing != NULL && described->name != NULL) {
                 snprintf(missing, missing_size, "%s", described->name);
@@ -187,7 +170,7 @@ int charon_ml_features_satisfy(const charon_ml_model *model, const charon_ml_fea
         }
         if (described->type == CHARON_ML_FEATURE_MULTI_ARRAY) {
             if (value->kind == CHARON_ML_VALUE_NUMBER) {
-                continue; /* a scalar stands for an array of one, which is what a SizeRange of 1 says */
+                continue;
             }
             if (value->kind != CHARON_ML_VALUE_ARRAY) {
                 goto mismatched;
@@ -225,9 +208,6 @@ int charon_ml_features_take_outputs(const charon_ml_model *model, charon_ml_feat
         if (value == NULL) {
             return 0;
         }
-        /* The value moves, it is not copied: the struct is copied and the original is cleared
-         * without being freed, because the copy now owns the same buffer and freeing the
-         * original would free it out from under the answer. */
         if (!charon_ml_features_put(outputs, name, *value)) {
             return 0;
         }
@@ -237,11 +217,6 @@ int charon_ml_features_take_outputs(const charon_ml_model *model, charon_ml_feat
     return 1;
 }
 
-/* --- the post-evaluation transforms ------------------------------------------------------------ */
-
-/* The specification's own enumerations, by their own numbers: the tree ensemble's four. A
- * transform is what turns the numbers a model accumulates into the numbers an application
- * reads, and each is the arithmetic its name is. */
 enum {
     CHARON_ML_TREE_NO_TRANSFORM = 0,
     CHARON_ML_TREE_SOFTMAX = 1,
@@ -259,8 +234,6 @@ static double probit(double x)
     return 0.5 * (1.0 + erf(x / sqrt(2.0)));
 }
 
-/* A softmax over a whole set, in place, with the largest value taken out first so that no
- * exponential of it can overflow. */
 static void softmax_over(double *values, size_t count)
 {
     size_t index;
@@ -298,8 +271,6 @@ static void apply_tree_transform(int transform, double *values, size_t count)
         }
         break;
     case CHARON_ML_TREE_SOFTMAX_WITH_ZERO_CLASS:
-        /* The softmax over every class but the first, which is the reference class: it keeps a
-         * score of its own rather than taking one from the others, so it is 1 - the rest. */
         if (count > 1) {
             softmax_over(values + 1, count - 1);
             values[0] = 0.0;
@@ -329,16 +300,6 @@ static void apply_glm_transform(int transform, double *values, size_t count)
     }
 }
 
-/* --- the answers a model gives -------------------------------------------------------------------- */
-
-/* A vector of scores as the values a model's description asks for. A classifier's two answers
- * are the name of the class with the largest score and the scores themselves, under the two
- * names the description gives; a regressor answers with the numbers under the name of its
- * output. Both are written, and a description that names an output which is neither of those
- * is answered with the numbers too, so a caller that asked for the scores by their own name
- * finds them. */
-/* The feature of the model a name belongs to, or NULL when it names none: an answer takes the
- * shape of the feature it answers, and a name the model does not declare has no shape to take. */
 static const charon_ml_feature *model_feature_named(const charon_ml_model *model, const char *name)
 {
     size_t index;
@@ -353,13 +314,6 @@ static const charon_ml_feature *model_feature_named(const charon_ml_model *model
     return NULL;
 }
 
-/* The shape an answer of `count` numbers has for a feature the model describes.
- *
- * The numbers are the same however they are shaped, but the shape is part of what the model said
- * and part of what a caller reads: a caller that asked for an output of shape 1x1x2 and is handed
- * a flat vector of two has to unwrap it, and one that is handed 1x1x2 where the model named 2 has to
- * guess. So the declared shape is used whenever its element count is the count of numbers there
- * are -- which is the only case where the two can both be true -- and the flat shape otherwise. */
 static int answer_shape(const charon_ml_feature *described, size_t count, int64_t *shape)
 {
     if (described != NULL && described->rank > 0 && described->rank <= CHARON_ML_MAX_RANK &&
@@ -388,9 +342,6 @@ static int answer_with_scores(const charon_ml_model *model, const double *scores
             snprintf(error, error_size, "the model has no output to answer in");
             return 0;
         }
-        /* A description that calls its output a double and not an array wants one number, and
-         * not an array of one: a GLM regressor's output is a scalar, and an application that
-         * reads the value would otherwise have to unwrap an array the model never named. */
         if (model->output_count == 1 && model->outputs[0].type == CHARON_ML_FEATURE_DOUBLE && count == 1) {
             if (!charon_ml_features_put(outputs, name, charon_ml_value_number(scores[0]))) {
                 snprintf(error, error_size, "the model's answers have no room for '%s'", name);
@@ -427,18 +378,12 @@ static int answer_with_scores(const charon_ml_model *model, const double *scores
         } else {
             snprintf(text, sizeof text, "%lu", (unsigned long)best);
         }
-        /* The label is a copy: the answer outlives the frame that wrote it, and a string over
-         * that frame's buffer would be read after the frame is gone. */
         if (!charon_ml_features_put(outputs, label_name, charon_ml_value_string_copy(text, strlen(text)))) {
             snprintf(error, error_size, "the model's answers have no room for the class label");
             return 0;
         }
     }
     if (probability_name != NULL) {
-        /* The probabilities are a dictionary of the class labels to their scores, which is the
-         * type the specification gives that output and the one MLFeatureProvider's
-         * dictionaryValue reads. A model that names no labels of its own is answered with the
-         * class numbers as the keys, which is what the specification's own fallback is. */
         charon_ml_value probabilities = charon_ml_value_dictionary();
         for (index = 0; index < count; index++) {
             char key[32];
@@ -497,12 +442,6 @@ static int answer_with_scores(const charon_ml_model *model, const double *scores
     return 1;
 }
 
-/* --- the models ------------------------------------------------------------------------------------ */
-
-/* A tree ensemble: the base prediction, then the value of the leaf each tree reaches, added
- * per class, and the post-evaluation transform over the result. The nodes are one flat list
- * for all the trees and are found by their nodeId within their own treeId, which is how the
- * specification writes them. */
 static int run_tree_ensemble(const charon_ml_node *kind_node, const charon_ml_model *model,
                              const charon_ml_features *values, charon_ml_features *outputs, char *error,
                              size_t error_size)
@@ -514,9 +453,6 @@ static int run_tree_ensemble(const charon_ml_node *kind_node, const charon_ml_mo
         snprintf(error, error_size, "the tree ensemble has no trees in it");
         return 0;
     }
-    /* The nodes, the base prediction and a leaf's evaluations are all repeated fields, so each
-     * is reached by its own name on the message that holds it rather than as a child of the
-     * first entry: the entries are siblings in that message's list. */
     node_count = charon_ml_count_field(ensemble, "nodes");
     base_count = charon_ml_count_field(ensemble, "basePredictionValue");
     size_t classes, index;
@@ -540,9 +476,6 @@ static int run_tree_ensemble(const charon_ml_node *kind_node, const charon_ml_mo
         int64_t current = charon_ml_int(charon_ml_get(root, "nodeId"), 0);
         int64_t steps;
         int is_root = 1;
-        /* A node that some other node of the same tree names as a true or a false child is an
-         * interior node, not the root of that tree: the walk from it would add a leaf the tree
-         * never reaches. The root is the one nothing else in its tree points at. */
         for (steps = 0; steps < (int64_t)node_count; steps++) {
             const charon_ml_node *other = charon_ml_node_at_field(ensemble, "nodes", (size_t)steps);
             if (other == root || charon_ml_int(charon_ml_get(other, "treeId"), 0) != tree) {
@@ -570,10 +503,10 @@ static int run_tree_ensemble(const charon_ml_node *kind_node, const charon_ml_mo
                 }
             }
             if (node == NULL) {
-                break; /* a child that is not in the list: the walk ends where the model does */
+                break;
             }
             behaviour = charon_ml_int(charon_ml_get(node, "nodeBehavior"), 0);
-            if (behaviour == 6) { /* LeafNode */
+            if (behaviour == 6) {
                 size_t evaluations = charon_ml_count_field(node, "evaluationInfo"), which;
                 for (which = 0; which < evaluations; which++) {
                     const charon_ml_node *entry = charon_ml_node_at_field(node, "evaluationInfo", which);
@@ -605,7 +538,7 @@ static int run_tree_ensemble(const charon_ml_node *kind_node, const charon_ml_mo
                 case 5:
                     go_true = value != threshold;
                     break;
-                default: /* 1 is BranchOnValueLessThan */
+                default:
                     go_true = value < threshold;
                     break;
                 }
@@ -625,10 +558,6 @@ static int run_tree_ensemble(const charon_ml_node *kind_node, const charon_ml_mo
     }
 }
 
-/* A GLM: the weights are one vector per class, the offset is the intercept beside it, and a
- * class's score is the dot product with the input plus that offset. A classifier that names
- * the reference class encoding has one weight vector fewer than it has classes, and the first
- * class scores the total of the rest, which is the one-against-rest reading that encoding is. */
 static int run_glm(const charon_ml_node *kind_node, const charon_ml_model *model,
                    const charon_ml_features *values, charon_ml_features *outputs, char *error,
                    size_t error_size)
@@ -638,9 +567,6 @@ static int run_glm(const charon_ml_node *kind_node, const charon_ml_model *model
     size_t offsets = charon_ml_count_field(kind_node, "offset");
     size_t index, at, classes;
     int classifier = charon_ml_kind_is_classifier(model->kind);
-    /* The encoding's own first case is ReferenceClass and a field set to it is not written at
-     * all, so absent and ReferenceClass are the same value here: reading the absent one as
-     * OneVsRest is what a converter's default would be, and it is not the specification's. */
     int reference_class = charon_ml_int(charon_ml_get(kind_node, "classEncoding"), 0) == 0;
 
     if (!inputs_as_vector(model, values, &features, &feature_count, error, error_size)) {
@@ -674,16 +600,6 @@ static int run_glm(const charon_ml_node *kind_node, const charon_ml_model *model
     }
     free(features);
     if (classifier && reference_class) {
-        /* The reference class has no weight vector of its own: it is the one every other
-         * class is measured against, and it scores zero. The vectors then fill the classes
-         * after it in order. Measured against coremltools' own runtime over four inputs of a
-         * two-vector, three-class model: softmax over (0, v0.x + o0, v1.x + o1) is that
-         * runtime's answer to the last digit, and the sum of what it answers is one.
-         *
-         * The score the reference class is given is the zero above, and the answer is a
-         * softmax over the whole set -- not the per-class logistic the post-evaluation
-         * transform names, which on these inputs gives (0.5, 0.525, 0.475) and would not sum
-         * to one. That is what was measured, and it is what is written here. */
         double *shifted = (double *)calloc(classes, sizeof *shifted);
         int answered;
         if (shifted == NULL) {
@@ -708,8 +624,6 @@ static int run_glm(const charon_ml_node *kind_node, const charon_ml_model *model
     }
 }
 
-/* The preprocessing models, each of which is one arithmetic over the values it is given, and
- * the identity, which is the one that passes them on. */
 static int run_preprocessing(const charon_ml_model *model, const charon_ml_node *kind_node,
                              const charon_ml_features *values, charon_ml_features *outputs, char *error,
                              size_t error_size)
@@ -728,10 +642,6 @@ static int run_preprocessing(const charon_ml_model *model, const charon_ml_node 
     case CHARON_ML_KIND_SCALER: {
         size_t scales = charon_ml_count_field(kind_node, "scaleValue");
         size_t shifts = charon_ml_count_field(kind_node, "shiftValue");
-        /* The scaler is (x + shift) * scale, measured against coremltools' own runtime on a
-         * two-feature model over four inputs (facts/CoreML/CoreML.md); the name "shift" reads
-         * the other way round, and x * scale + shift is not what it does. A feature with no
-         * scale or shift of its own is passed through as the value 1 and 0 give. */
         for (index = 0; index < count; index++) {
             double by_scale = index < scales ? charon_ml_double_at(kind_node, "scaleValue", index, 1.0) : 1.0;
             double by_shift = index < shifts ? charon_ml_double_at(kind_node, "shiftValue", index, 0.0) : 0.0;
@@ -740,8 +650,6 @@ static int run_preprocessing(const charon_ml_model *model, const charon_ml_node 
         break;
     }
     case CHARON_ML_KIND_NORMALIZER: {
-        /* The normalizer divides the whole vector by one norm: L2 for 1, the largest absolute
-         * value for 0, and a sum of the absolute values for 2. */
         int64_t norm = charon_ml_int_at(kind_node, "norm", 0, 1);
         double total = 0.0;
         for (index = 0; index < count; index++) {
@@ -766,8 +674,6 @@ static int run_preprocessing(const charon_ml_model *model, const charon_ml_node 
         break;
     }
     case CHARON_ML_KIND_ONE_HOT_ENCODER: {
-        /* One output per input, a one where the input names a category of the model and a zero
-         * where it does not. The categories are the integers the model lists. */
         size_t listed = charon_ml_count_field(kind_node, "categories");
         if (listed == 0) {
             free(numbers);
@@ -788,11 +694,6 @@ static int run_preprocessing(const charon_ml_model *model, const charon_ml_node 
     }
     case CHARON_ML_KIND_IDENTITY:
     case CHARON_ML_KIND_IMPUTER:
-        /* The imputer replaces what a model cannot hold with the value the model names, and
-         * this port's inputs arrive already without one: a value a caller hands over that is
-         * not a number is the only thing an imputer is asked for, and the port refuses to read
-         * one rather than guessing what it should become. Saying so is the honest answer, and
-         * it is the caller's own arithmetic to do first. */
         for (index = 0; index < count; index++) {
             if (numbers[index] != numbers[index]) {
                 free(numbers);
@@ -826,8 +727,6 @@ static int run_preprocessing(const charon_ml_model *model, const charon_ml_node 
     return 1;
 }
 
-/* The preprocessing a network's specification declares for one of its features, and the feature type
- * that decides whether the scale is put through at all. */
 static int input_is_image(const charon_ml_model *model, const char *feature)
 {
     size_t index;
@@ -837,14 +736,9 @@ static int input_is_image(const charon_ml_model *model, const char *feature)
             return model->inputs[index].type == CHARON_ML_FEATURE_IMAGE;
         }
     }
-    /* A feature the description does not name is not an image's pixels, and a scaler named for the
-     * colours of a picture is not a scaler an array of numbers is put through. */
     return 0;
 }
 
-/* A neural network: the values its inputs name are put in, its layers are run in order, and
- * its outputs are read out. A classifier's scores are the output the description names as its
- * probabilities, or the one output that is a vector of more than one number. */
 static int run_neural_network(const charon_ml_node *kind_node, const charon_ml_model *model,
                               charon_ml_features *values, char *error, size_t error_size)
 {
@@ -876,22 +770,6 @@ static int run_neural_network(const charon_ml_node *kind_node, const charon_ml_m
         }
     }
     {
-        /* The network's own preprocessing, which runs before its first layer: the scale and the
-         * per-channel bias an image's pixels are put through, or a mean to take off them. It is
-         * named per feature, and a network that names none has none.
-         *
-         * The scale is a picture's, and it goes through for a feature the specification declares
-         * as an image and not for an array. Measured on macOS 27.0 build 26A428 against
-         * nn_image.mlmodel - a convolution, a ReLU and a global pool over a 3x8x8 feature, declared
-         * as an array and carrying exactly this scale and these three colour biases - over the
-         * input pattern tests/backports/host/coreml/cases.m feeds, a five-element pattern repeated
-         * over the elements: the release answers 0.3570, 0.3338, 0.3595, 0.3827, which is the
-         * global maximum of the convolution over the values as they were fed, and this port
-         * answered 0.4189, 0.0000, 0.0000, 0.0000, which is the same convolution over the values
-         * after the scale. coremltools 9.0's own runtime answers the same four numbers for the
-         * container's own input, so neither runtime puts an array through the scale and this one
-         * did. facts/CoreML/CoreML.md carries the tables and the port's own numbers.
-         */
         size_t steps = charon_ml_count_field(kind_node, "preprocessing"), step;
         for (step = 0; step < steps; step++) {
             const charon_ml_node *step_node = charon_ml_node_at_field(kind_node, "preprocessing", step);
@@ -918,8 +796,6 @@ static int run_neural_network(const charon_ml_node *kind_node, const charon_ml_m
                     area *= value->shape[axis];
                 }
                 for (channel = 0; channel < value->shape[0]; channel++) {
-                    /* The bias is named for the colour the channel is: the first is red, the
-                     * second green and the third blue, and a one-channel value is gray. */
                     double add = value->shape[0] == 1 ? gray
                                    : value->shape[0] == 2 ? (channel == 0 ? red : green)
                                    : (channel == 0 ? red : (channel == 1 ? green : blue));
@@ -953,10 +829,6 @@ static int run_neural_network(const charon_ml_node *kind_node, const charon_ml_m
             score_name = model->predicted_probabilities_name;
         }
         if (scores == NULL) {
-            /* The scores are the one output that holds one number per class. A network that
-             * ends in a global pool leaves them as an array of channels by one by one, which
-             * is one number per class written in three dimensions, so a candidate is judged by
-             * how many values it has and not by its rank. */
             for (index = 0; index < model->output_count; index++) {
                 charon_ml_tensor *candidate = charon_ml_bindings_find(&bindings, model->outputs[index].name);
                 if (candidate != NULL && candidate->data != NULL && candidate->count > 1 &&
@@ -980,8 +852,6 @@ static int run_neural_network(const charon_ml_node *kind_node, const charon_ml_m
         for (index = 0; index < scores->count; index++) {
             numbers[index] = scores->data[index];
         }
-        /* The scores are answered under their own name first, so a description that names them
-         * is answered from the number the network produced, and the label is read off them. */
         if (score_name != NULL) {
             int64_t shape[CHARON_ML_MAX_RANK];
             int rank = answer_shape(model_feature_named(model, score_name), scores->count, shape);
@@ -1010,10 +880,6 @@ static int run_neural_network(const charon_ml_node *kind_node, const charon_ml_m
             continue;
         }
         value = charon_ml_tensor_to_value(tensor, CHARON_ML_ARRAY_FLOAT32);
-        /* The tensor carries the shape the layers produced, which is not always the shape the
-         * model declared: a layer that squeezes or flattens leaves a rank the description does not
-         * name. The declared shape is the one an application reads and the one it built its input
-         * for, so where the two hold the same number of elements the declared one is answered. */
         if (model->outputs[index].rank > 0 &&
             charon_ml_count_of_shape(model->outputs[index].shape, model->outputs[index].rank) ==
                 (int64_t)value.array.count) {
@@ -1037,15 +903,9 @@ static int run_neural_network(const charon_ml_node *kind_node, const charon_ml_m
     return 1;
 }
 
-/* One model message run over a set of values. The kind decides; the values are whatever the
- * model wrote, so a pipeline's second model finds the first one's output by name. */
 static int run_one(const charon_ml_node *document, const char *bundle, charon_ml_features *values,
                    char *error, size_t error_size)
 {
-    /* A model is 326 KB of struct and a set of values is 1.1 MB, so neither is an automatic
-     * variable here: a device's main thread has a fraction of that, and a pipeline's run_one is
-     * recursive, so the stack a pipeline needs is the sum over its stages. The host, whose stack is
-     * eight megabytes, never noticed; the emulated iPad 2 faulted on the first prediction. */
     charon_ml_model *model = calloc(1, sizeof *model);
     const char *kind_field = charon_ml_node_kind_name(document);
     const charon_ml_node *kind_node;
@@ -1117,7 +977,6 @@ static int run_one(const charon_ml_node *document, const char *bundle, charon_ml
 int charon_ml_predict(const charon_ml_model *model, charon_ml_features *inputs,
                       charon_ml_features *outputs, char *error, size_t error_size)
 {
-    /* The working set is 1.1 MB, so it is on the heap for the same reason run_one's model is. */
     charon_ml_features *working = calloc(1, sizeof *working);
     char missing[256], mismatched[256];
     size_t index;
@@ -1139,8 +998,6 @@ int charon_ml_predict(const charon_ml_model *model, charon_ml_features *inputs,
     }
     charon_ml_features_init(working);
     for (index = 0; index < inputs->count; index++) {
-        /* The caller's values are borrowed: the set inside is a view of them, not a second
-         * owner, so releasing it frees nothing the caller still holds. */
         charon_ml_value borrowed = inputs->entries[index].value;
         borrowed.array.owns_data = 0;
         if (!charon_ml_features_put(working, inputs->entries[index].name, borrowed)) {

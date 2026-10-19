@@ -1,31 +1,8 @@
-// The container and the database: the two classes an application starts from.
-//
-// A CKContainer is a name and three databases, plus the requests that are about the account rather
-// than about a database. A CKDatabase is a scope and the fourteen convenience methods the header
-// gives it, each of which is one request and one answer over the transport:
-// facts/CloudKit/WebServices.md names the endpoints.
-//
-// The two classes the header marks unavailable are refused with the host's own exception and the
-// host's own words, measured: `[CKDatabase new]` raises `NSInternalInconsistencyException` with
-// "Use +[CKContainer privateCloudDatabase] or +[CKContainer publicCloudDatabase] instead of creating
-// your own", and a database's `-init` is the same refusal, which is what NSObject answers for a
-// class method sent the wrong way round.
-//
-// A database is only ever made by a container and neither names the other, so a container tells the
-// transport which one a database is and which environment it is reached in, once, and every request
-// below is built from that.
-
 #import "CharonCloudKit.h"
 #import "CharonCKConstants.h"
 #import "CharonCKSubscription.h"
 
-// The two things a database needs that its own header does not name: the container it belongs to and
-// the fact that it was made by one. A database is only ever made by a container, and the service's
-// path is under a container, so the container is the port's own state here.
 @interface CKDatabase ()
-// The container a database belongs to. Neither the header's CKDatabase nor its CKContainer names
-// the other, and the service's path is under a container, so this is the port's own state and the
-// one thing the transport and the operations both read to find out where a request goes.
 @property (nonatomic, strong) CKContainer *ck_container;
 @end
 
@@ -64,9 +41,6 @@
 
 + (CKContainer *)defaultContainer
 {
-    // CloudKit's own default is the first container the Info.plist names, under the key its own
-    // tooling writes. A process with no container at all has no identifier, and every request it
-    // makes answers CKErrorBadContainer rather than raising: see facts/CloudKit/WebServices.md.
     NSString *identifier = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CKContainerIdentifier"];
     if (![identifier isKindOfClass:[NSString class]] || !identifier.length) {
         identifier = [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CloudKitContainerIdentifier"] copy];
@@ -81,13 +55,9 @@
 
 + (instancetype)new
 {
-    // Measured: the host answers +[CKContainer new] with a container, and its own header marks
-    // neither -init nor +new unavailable, so this port does the same and hands back the default one.
     return [self defaultContainer];
 }
 
-// A database is made once per container and per scope, because the transport is told which
-// container a database belongs to and a database that had no container could not make a request.
 - (CKDatabase *)databaseWithScope:(CKDatabaseScope)scope
 {
     NSNumber *key = @(scope);
@@ -147,11 +117,6 @@
 
 - (void)accountStatusWithCompletionHandler:(void (^)(CKAccountStatus accountStatus, NSError *error))completionHandler
 {
-    // Whether the device has an iCloud account is the release's own question, and this release has
-    // no account service to ask: `CKAccountStatusNoAccount` is what a device that has none answers
-    // and what a device whose account cannot be reached from a process with no container answers too.
-    // A container that is provisioned is the only case where anything else could be said, and it
-    // cannot be decided without the service.
     CKAccountStatus status = CKAccountStatusNoAccount;
     if (!self.containerIdentifier.length) {
         completionHandler(status, CharonCKBadContainer(nil));
@@ -162,9 +127,6 @@
 
 - (void)fetchUserRecordIDWithCompletionHandler:(void (^)(CKRecordID *recordID, NSError *error))completionHandler
 {
-    // The record of the signed-in user is the only user record CloudKit has for this container, and
-    // the credentials remember the one they saw, so this is answered without a request: the user
-    // record of a container is found under the name `_defaultOwner` in the default zone.
     NSString *name = [[CharonCKCredentials shared] userRecordIDForContainer:self.containerIdentifier];
     if (!name.length) {
         name = CKOwnerDefaultName;
@@ -177,19 +139,12 @@
 - (void)statusForApplicationPermission:(CKApplicationPermissions)applicationPermission
                     completionHandler:(void (^)(CKApplicationPermissionStatus status, NSError *error))completionHandler
 {
-    // User discoverability is a property of the account as the service sees it, and this port has no
-    // service and no account, so the answer is the header's own initial state: a permission that has
-    // never been asked for. It is not a refusal, and it is not a grant.
     completionHandler(CKApplicationPermissionStatusInitialState, nil);
 }
 
 - (void)requestApplicationPermission:(CKApplicationPermissions)applicationPermission
                     completionHandler:(void (^)(CKApplicationPermissionStatus status, NSError *error))completionHandler
 {
-    // Asking needs the same service and the same account, and with neither the answer is the header's
-    // own: a request that could not be completed. The code is CKErrorNotAuthenticated, the one the
-    // header names for a client that is not signed in, and a caller that is told the initial state
-    // instead would be told nothing happened.
     if (!self.containerIdentifier.length) {
         completionHandler(CKApplicationPermissionStatusInitialState, CharonCKBadContainer(nil));
         return;
@@ -229,8 +184,6 @@
     [CharonCKOPScheduler add:operation];
 }
 
-// Every request a database makes goes through here, so the container and the environment are taken
-// from the one the container told the transport about, and the path is built once.
 - (void)perform:(NSString *)method path:(NSString *)path body:(NSDictionary *)body
      completion:(void (^)(id body, NSError *error))completion
 {
@@ -258,9 +211,6 @@
         }
         NSArray *records = [body[@"records"] isKindOfClass:[NSArray class]] ? body[@"records"] : nil;
         CKRecord *record = records.count ? CharonCKRecordFromResult(records[0], nil) : nil;
-        // A lookup that found nothing is CKErrorUnknownItem, the code the header names for a record
-        // that does not exist. The service answers 200 with an empty list, and a caller handed nil
-        // with no error cannot tell that from a record whose value is nil.
         completionHandler(record, record ? nil : CharonCKError(CKErrorUnknownItem, @"The record does not exist", nil));
     }];
 }
@@ -277,9 +227,6 @@
     if (system[@"recordChangeTag"]) {
         [document addEntriesFromDictionary:system];
     }
-    // A record that has never been saved is a create and one that has a change tag is an update: the
-    // tag is what the service issued, and a port that invented one would overwrite a record it has
-    // not read.
     NSString *operationType = record.recordChangeTag ? @"update" : @"create";
     [self perform:@"POST" path:@"records/modify"
             body:@{@"records": @[@{@"operationType": operationType, @"record": document}]}
@@ -305,8 +252,6 @@
             completionHandler(nil, error);
             return;
         }
-        // The answer to a delete is the record it removed, as the header says, and the service sends
-        // the document back rather than nothing.
         NSArray *records = [body[@"records"] isKindOfClass:[NSArray class]] ? body[@"records"] : nil;
         completionHandler(recordID, nil);
         (void)records;
@@ -376,8 +321,6 @@
     NSError *refused = nil;
     NSDictionary *document = CharonCKQueryDocument(query, zoneID.zoneName, nil, 0, &refused);
     if (!document) {
-        // A predicate the service has no form for never leaves this process, and the code is the
-        // header's for a malformed predicate.
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             completionHandler(nil, refused);
         });
@@ -430,8 +373,6 @@
 {
     NSDictionary *document = CharonCKSubscriptionDocument(subscription);
     if (!document) {
-        // A query subscription whose predicate the service has no form for is refused here rather
-        // than saved as one that would never fire.
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             completionHandler(nil, CharonCKError(CKErrorInvalidArguments,
                                                   @"This predicate has no form in a CloudKit query", nil));

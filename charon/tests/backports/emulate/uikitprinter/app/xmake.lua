@@ -1,8 +1,5 @@
 set_project("charonuikitprinterapp")
 set_version("0.0.1")
--- The Bonjour printer picker as an installed application, launched through SpringBoard (xmake emulate launch): the port's
--- UIPrinterPickerController from libUIKitBackports, presented over the application's key window. The addon is the one the
--- machine's store holds and names active (v0.8.17), so a resolve finds it already installed and moves nothing.
 local root = os.getenv("CHARUIKITPRINTER_ROOT") or path.join(os.scriptdir(), "../../../../..")
 add_repositories("charon " .. root)
 add_addons("charon v0.8.17")

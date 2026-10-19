@@ -1,6 +1,3 @@
-/* probe.m - prints every string constant of Vision that iOS 14 added, one `name=value` line each, read with UTF8String
- * so the two sides compare by bytes. Compiled once against the host's Vision framework and once against the port's
- * Vision14_0Constants.m (the same source, the same names, no framework linked on the port side). */
 #import <Foundation/Foundation.h>
 #import <Vision/Vision.h>
 

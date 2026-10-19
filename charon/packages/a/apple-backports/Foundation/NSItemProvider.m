@@ -144,8 +144,6 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
     NSProgress *(^_dataLoader)(void (^)(NSData *, NSError *));
     NSProgress *(^_fileLoader)(void (^)(NSURL *, BOOL, NSError *));
     NSItemProviderFileOptions _fileOptions;
-    /* The visibility the caller handed the registration. The port took the argument and dropped it,
-       so -itemProviderVisibilityForRepresentationWithTypeIdentifier: had nothing true to answer with. */
     NSItemProviderRepresentationVisibility _visibility;
     BOOL _itemBacked;
 }
@@ -492,19 +490,6 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
     return progress;
 }
 
-/* The six members of the two provider protocols, answered by the provider itself: this class *is* the
-   port's item provider, so it can answer them rather than only read through an application's object.
-   The two protocols stay `ignored` in the registry and their own effect says why - an application's
-   class adopts them and -registerObject:visibility: and -loadObjectOfClass:completionHandler: read
-   the four members a conforming object has to answer.
-
-   The type identifiers are the ones this provider has registered, which is the only thing either
-   member can mean of an object that carries nothing else. The visibility is the one the caller handed
-   the registration, which the port used to take and drop. The class answer is All, the enumeration's
-   own case for a class that registers nothing narrower. +objectWithItemProviderData:...: builds a
-   provider over the data and hands out the documented failure rather than raising when the type
-   identifier is empty or the data is nil. */
-
 - (NSArray<NSString *> *)readableTypeIdentifiersForItemProvider
 {
     return [self registeredTypeIdentifiers];
@@ -524,8 +509,6 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
 - (NSItemProviderRepresentationVisibility)itemProviderVisibilityForRepresentationWithTypeIdentifier:(NSString *)typeIdentifier
 {
     (void)typeIdentifier;
-    /* The narrowest of the registered visibilities, and nothing else: the widest one was computed
-       here and never read, which is a variable that lies about what the method does. */
     NSItemProviderRepresentationVisibility narrowest = NSItemProviderRepresentationVisibilityAll;
     BOOL any = NO;
     for (CharonRepresentation *representation in _representations) {
@@ -533,8 +516,6 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
         if (representation->_visibility > narrowest)
             narrowest = representation->_visibility;
     }
-    /* A provider registered with mixed visibilities is only as visible as its least visible member:
-       anything else would claim a representation the receiver is not allowed to see. */
     return any ? narrowest : NSItemProviderRepresentationVisibilityAll;
 }
 

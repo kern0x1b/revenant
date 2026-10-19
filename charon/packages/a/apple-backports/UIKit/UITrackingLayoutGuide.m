@@ -1,10 +1,5 @@
 #import <UIKit/UIKit.h>
 
-// UITrackingLayoutGuide, iOS 15. A layout guide that holds two sets of constraints, one for each side of its owning view it may be near or
-// away from. The sets are stored per edge: a set on one edge leaves the other alone, removeAllTrackedConstraints clears both, a read of an
-// edge with nothing set answers an empty array, and a nil set raises NSInvalidArgumentException, as the host does (measured by
-// tests/backports/host/layout-guides). The constraints are not yet activated as the guide moves near or away from an edge: the host's rule
-// for that did not reduce to a position test in the measurement, so it is owed (facts/UIKit/UIKeyboardLayoutGuide.md).
 @implementation UITrackingLayoutGuide {
     NSMutableDictionary *_nearConstraints;
     NSMutableDictionary *_awayConstraints;

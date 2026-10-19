@@ -1,11 +1,3 @@
-// host-train.m - trains an updatable model with the host's own Core ML, and records what each step reports.
-//
-// usage: host-train MODEL.mlmodel INPUT.f32 TARGET.f32 OUTDIR SAMPLES
-//
-// The model is compiled, then an MLUpdateTask trains it on CPU units over the samples in file order, with the
-// three progress events. At each event the model as the event saw it is written to OUTDIR (a snapshot, in
-// the container format), and one line goes to stdout: the event, the epoch and mini-batch indices, and the
-// loss the event reports. The completion context's state and error are printed last.
 #import <Foundation/Foundation.h>
 #import <CoreML/CoreML.h>
 
@@ -31,9 +23,6 @@ static NSArray<id<MLFeatureProvider>> *samples_from(NSData *inputs, NSData *targ
     return providers;
 }
 
-/* The updatable weights and biases of each layer, in the format dump.c prints: the host answers the updatable
- * parameter keys only inside an update's handlers, so this is called from them. A missing parameter is an error,
- * never a zero. */
 static BOOL dump_model(MLModel *model, NSString *path, NSError **error)
 {
     NSMutableString *text = [NSMutableString string];

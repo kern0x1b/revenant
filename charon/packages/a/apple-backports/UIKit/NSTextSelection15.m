@@ -1,21 +1,7 @@
-// NSTextSelection: one logical selection, a set of disjoint ranges and the two things that say how it behaves -
-// which end the cursor is at, and what an extending operation moves by. What the header declares is in
-// NSTextSelection.h of SDK 26.2; what the host's own UIKit answers is in facts/UIKit/NSTextRange15.md.
-//
-// A selection is a value: the host answers two separately made selections over the same ranges, affinity,
-// granularity, anchor offset, logical flag and typing attributes as -isEqual:, and a set holding two of them
-// holds one (M8). So equality and hashing are written out here, over the keys that were measured. The one key
-// left out is -transient: the header declares it readonly and nothing sets it, so two selections on the port
-// cannot differ in it and the host was never asked.
-
 #import <UIKit/UIKit.h>
 
 @implementation NSTextSelection {
-    // The one property with a setter of its own, so its storage is written out here: a setter that also sets
-    // -logical cannot be a synthesized pair, and the header says setting a secondary location makes the
-    // selection not a logical one.
     id<NSTextLocation> _secondarySelectionLocation;
-    // And the one property whose getter and setter do not agree, which is why it too is written out.
     NSDictionary *_typingAttributes;
 }
 
@@ -27,10 +13,6 @@
 
 - (NSDictionary *)typingAttributes
 {
-    // nil until the setter has been called at all, and a dictionary from then on, which is what the host answers
-    // (M6): a selection that was never given any is nil, and a selection whose setter was handed nil answers an
-    // empty dictionary. So the substitution belongs in the setter and not in the getter, or a fresh selection
-    // would answer a dictionary where the system answers nil.
     return _typingAttributes;
 }
 
@@ -44,10 +26,6 @@
                    granularity:(NSTextSelectionGranularity)granularity
 {
     if ((self = [super init])) {
-        // The ranges are kept as they are given, in the order they are given, overlapping and out of order
-        // included. The header's comment on this initializer says they are reordered and merged, and the host
-        // does neither (M3): it is the one place the header and the system disagree in this family, and the
-        // system decides, so a caller that hands over overlapping ranges gets them back overlapping.
         _textRanges = [textRanges copy] ?: @[];
         _affinity = affinity;
         _granularity = granularity;
@@ -77,8 +55,6 @@
 
 - (instancetype)init
 {
-    // As on NSTextRange, and for the same reason: the header marks this one unavailable because a selection is
-    // ranges, an affinity and a granularity, and the host faults rather than answering (M9).
     [NSException raise:NSInternalInconsistencyException
                 format:@"%@ cannot be made without ranges: use -initWithRanges:affinity:granularity:",
                        NSStringFromClass([self class])];
@@ -87,8 +63,6 @@
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    // The header makes this a designated initialiser of its own, so it reads the archive into the storage
-    // directly rather than through -initWithRanges:..., which is the other designated initialiser.
     if ((self = [super init])) {
         _textRanges = [[coder decodeObjectForKey:@"textRanges"] copy] ?: @[];
         _affinity = [coder decodeIntegerForKey:@"affinity"];
@@ -97,8 +71,6 @@
         _anchorPositionOffset = (CGFloat)[coder decodeDoubleForKey:@"anchorPositionOffset"];
         _logical = [coder decodeBoolForKey:@"logical"];
         _secondarySelectionLocation = [coder decodeObjectForKey:@"secondarySelectionLocation"];
-        // A selection that is read back has been through the setter, so its typing attributes are a dictionary
-        // even when the archive held none (M6).
         _typingAttributes = [coder decodeObjectForKey:@"typingAttributes"] ?: @{};
     }
     return self;
@@ -120,17 +92,10 @@
 {
     NSTextSelection *copy =
         [[[self class] alloc] initWithRanges:textRanges affinity:_affinity granularity:_granularity];
-    // -transient is readonly in the header: it says whether the selection is one a drag is making, which only
-    // the responder chain that is dragging knows, so there is no setter to copy through and the value is the
-    // one the selection was made with.
     copy->_transient = _transient;
     copy->_anchorPositionOffset = _anchorPositionOffset;
     copy->_logical = _logical;
-    // The copy carries the secondary location, and it does not go through -setSecondarySelectionLocation: to do
-    // it: the host's copy of a selection that is logical and has a secondary location is still logical (M7),
-    // where the setter's own side effect would have made it not.
     copy->_secondarySelectionLocation = _secondarySelectionLocation;
-    // And a copy always has a dictionary, even of a selection that had none (M6).
     copy->_typingAttributes = _typingAttributes ?: @{};
     return copy;
 }
@@ -143,9 +108,6 @@
 - (void)setSecondarySelectionLocation:(id<NSTextLocation>)secondarySelectionLocation
 {
     _secondarySelectionLocation = secondarySelectionLocation;
-    // The header's own side effect, and the host's answer: a selection with a secondary location is not a
-    // logical one (M3). It is the setter's side effect and not the copy's, which is why the copy above assigns
-    // the storage directly.
     if (secondarySelectionLocation)
         _logical = NO;
 }
@@ -176,8 +138,6 @@
 
 - (NSUInteger)hash
 {
-    // Unlike NSTextRange's, the host's own hash for a selection is a function of its value (M8): two equal
-    // selections hash alike and a set of two of them holds one, so this one is by value too.
     NSUInteger hash = (NSUInteger)_affinity * 31 + (NSUInteger)_granularity;
     hash = hash * 31 + (_logical ? 2u : 0u);
     hash = hash * 31 + (NSUInteger)_anchorPositionOffset;
@@ -188,8 +148,6 @@
     return hash;
 }
 
-// The host's own text for a selection, which names the two enumerations by their case names and then the ranges
-// one to a line: "NSTextSelection:<0x...> granularity=character, affinity=downstream, textRanges=(\n    \"0...5\"\n)".
 static NSString *charon_granularity_name(NSTextSelectionGranularity granularity)
 {
     switch (granularity) {
@@ -213,8 +171,6 @@ static NSString *charon_affinity_name(NSTextSelectionAffinity affinity)
 
 static NSString *charon_ranges_text(NSArray *ranges)
 {
-    // The host separates the ranges with a comma and a line each, and no comma after the last one, so a
-    // selection of two ranges prints as (\n    "0...5",\n    "5...10"\n) and a selection of none as (\n).
     NSMutableString *text = [NSMutableString stringWithString:@"(\n"];
     for (NSTextRange *range in ranges) {
         [text appendFormat:@"    \"%@\"", range];

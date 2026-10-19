@@ -1,20 +1,3 @@
-// The rest of CloudKit's sync engine surface: the engine and its configuration, the twelve events,
-// the three pending changes, the batch, and the two classes of what the service refused.
-//
-// The declarations are in CharonCKSyncEngine26.h beside the state group's, and every @implementation
-// here carries an explicit @synthesize for each of its properties - the build compiles with
-// -Werror=objc-missing-property-synthesis, which fires on implicit synthesis.
-//
-// The engine's own refusals are the header's, and one of them is measured and worse: the host's
-// +[CKSyncEngine new] and -[CKSyncEngine init] call __builtin_trap behind its private class, so a
-// caller who writes them loses the process. This port raises instead, which is the one written-down
-// difference in this family and one in the port's favour.
-//
-// What the engine does with a request is the operations this package already carries: a fetch of the
-// database is CKFetchDatabaseChangesOperation, a fetch of a zone is CKFetchRecordZoneChangesOperation,
-// and a send is CKModifyRecordsOperation. What is here is the walk - the state, the events and the
-// order - and the four requests that drive it.
-
 #import "CharonCloudKit.h"
 #import "CharonCKConstants.h"
 #import "CharonCKSubscription.h"
@@ -96,8 +79,6 @@
 @synthesize zone = _zone;
 - (instancetype)initWithZone:(CKRecordZone *)zone
 {
-    // The base class's -initWithZone: is the one that knows how a zone change is held, and the zone
-    // itself is this subclass's own addition, so it is written after the base class has set up.
     self = [super initWithZone:zone];
     if (self) {
         _zone = zone;
@@ -123,9 +104,6 @@
 {
     self = [super init];
     if (self) {
-        // A batch is a set of pending changes plus the records they name, and the records are asked
-        // for of the provider the delegate gave. A caller decides what a record it has not read is
-        // worth, and a port that sent a record it had invented would be overwriting one it never saw.
         NSMutableArray *records = [NSMutableArray array];
         NSMutableArray *deletions = [NSMutableArray array];
         for (CKSyncEnginePendingRecordZoneChange *change in pendingChanges) {
@@ -182,9 +160,6 @@
 @synthesize sentDatabaseChangesEvent = _sentDatabaseChangesEvent;
 @synthesize sentRecordZoneChangesEvent = _sentRecordZoneChangesEvent;
 @synthesize didSendChangesEvent = _didSendChangesEvent;
-// An event carries a type and, of the twelve, whichever one the type names. The eleven the port
-// builds are handed to the delegate through -handleEvent: and a delegate that is handed one with a
-// member that is nil is being told a moment of the walk that has nothing further in it.
 @end
 @implementation CKSyncEngineStateUpdateEvent
 @synthesize stateSerialization = _stateSerialization;
@@ -249,4 +224,3 @@
 @synthesize deletedRecordIDs = _deletedRecordIDs;
 @synthesize failedRecordDeletes = _failedRecordDeletes;
 @end
-

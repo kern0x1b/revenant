@@ -2,9 +2,6 @@
 #include <stdio.h>
 #include "CharonCalendar.h"
 
-// The host's own selection classes and the port's, run on the same checks. A line is "side<TAB>check<TAB>value": "host" and "port" lines are
-// compared, and "only" lines are the port's own tap checks, which the host cannot be asked without a window; run.sh asserts those.
-
 typedef id (*PlainFn)(id, SEL);
 
 static void report(const char *side, const char *check, NSString *value)
@@ -33,7 +30,6 @@ static NSString *day_text(NSDateComponents *c)
     return [NSString stringWithFormat:@"%ld/%ld/%ld", (long)c.year, (long)c.month, (long)c.day];
 }
 
-// The delegate both sides are given: it counts what it is told, and refuses the days it is set to refuse.
 @interface CharonSingleProbe : NSObject <UICalendarSelectionSingleDateDelegate>
 @property (nonatomic) NSInteger selectedCalls;
 @property (nonatomic) NSInteger refusedDay;
@@ -88,7 +84,6 @@ static void run(const char *side, Class baseClass, Class singleClass)
     report(side, "single-copy-absent", [singleClass instancesRespondToSelector:@selector(copyWithZone:)] ? @"no" : @"yes");
 }
 
-// The port's own tap path: a tap chooses a day the delegate allows, once, and tells the delegate. The host has no tap without a window.
 static void runPortOnly(void)
 {
     CharonSingleProbe *probe = [[CharonSingleProbe alloc] init];

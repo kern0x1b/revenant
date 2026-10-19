@@ -64,21 +64,6 @@ void host_attach_prefixed(const char *prefix)
     }
 }
 
-/* What a host differential needs where the RELEASE carries the class and exports nothing - the 8.0 -
- * 8.4.1 shape - and a device gets from attach.c's charon_reparent and charon_collect: the port's
- * members on the class the release's own session instantiates. Measured on the host 2026-10-04, the
- * class of the release's NAME is not that class: NSURLSessionStreamTask answers 0 own methods and has
- * no class below it, while the task the host's own factory makes is a __NSCFTCPIOStreamTask, a sibling
- * of it, and it is that class which carries _onqueue_resume and the 26 other instance variables the
- * release's -[NSURLSessionTask resume] drives. charon_reparent's own mechanism cannot be used here at
- * all: it writes the superclass word and reads the layout back, and every compiled class of a host
- * image is already realized before the first constructor runs.
- *
- * So the members are INSTALLED on the release's class rather than inherited by a proxy of it, which is
- * what charon_collect does on a device, and the class is the one the harness measured rather than a
- * private name written here. class_replaceMethod, not class_addMethod: the port's member shadows the
- * release's on the same class, which is the whole point of the comparison. Returns how many it put on,
- * so a run that collected nothing says so instead of quietly measuring the release against itself. */
 size_t host_attach_members(Class from, Class to)
 {
     unsigned long size;
@@ -108,11 +93,6 @@ size_t host_attach_members(Class from, Class to)
     return moved;
 }
 
-/* +alloc on `from` that hands out an instance of `to`, which is what attach.c's alias answers on a
- * device ([release alloc]) and what the port's own factory needs here: it allocates
- * +[NSURLSessionStreamTask alloc], so without this the port's task is an instance of the class of the
- * release's name, which is the empty shell and cannot be resumed by the release. Returns whether it
- * put the method on. */
 static Class host_allocated_from;
 
 static id host_alloc_from_released_class(id ignored)
@@ -122,20 +102,11 @@ static id host_alloc_from_released_class(id ignored)
 
 BOOL host_alloc_from(Class from, Class to)
 {
-    /* The type encoding is the one the method being replaced carries, read out of the runtime rather
-     * than written here: +alloc is (id self, SEL _cmd) and its frame is the two pointers, so the
-     * offset is 8 bytes where a pointer is 4 and 16 where it is 8 - "@8:0" is the 32-bit spelling and
-     * this host is 64-bit (measured, in test.m's own note). A method installed with an encoding that
-     * does not describe its own arguments is a method the runtime and every caller that reads the
-     * encoding have to guess about, and the guess is not the method's. A class whose own +alloc is not
-     * found gets no method at all, which the caller can see, rather than one typed by a literal. */
     SEL selector = sel_registerName("alloc");
     Method own = class_getClassMethod(from, selector);
     const char *types = own ? method_getTypeEncoding(own) : NULL;
     if (!types)
         return NO;
-    /* class_replaceMethod, not class_addMethod: the port's own class answers +alloc already - the
-       alias defines it - so adding a second one is refused and the task would still be the port's. */
     if (!class_replaceMethod(object_getClass((id)from), selector, (IMP)host_alloc_from_released_class, types))
         return NO;
     host_allocated_from = to;

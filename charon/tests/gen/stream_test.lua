@@ -1,11 +1,6 @@
--- stream.lines and stream.run: the lines of a program in order, the exit status and standard error, a last line with no line feed,
--- and the kill of a program and of what it started when the callback raises (review r3 G6). It runs sh and sleep and reads ps; nothing
--- else. Run: xmake l tests/gen/stream_test.lua (exits 1 on failure).
-
 local ROOT = path.absolute(path.join(os.scriptdir(), "..", ".."))
 local TOOLS = path.join(ROOT, "tools")
 
--- The error text f raises, or nil when f returns.
 local function error_of(f)
     local message = nil
     try {
@@ -21,7 +16,6 @@ local function error_of(f)
     return message
 end
 
--- The ps lines of the processes whose command contains text and that are not exited (state Z is an exited process not yet reaped).
 local function running(text)
     local found = {}
     for line in string.gmatch(os.iorunv("ps", {"-axo", "pid=,state=,command="}), "[^\n]+") do
@@ -65,7 +59,6 @@ function main()
     local mixed_status, mixed, mixed_err = stream.text("sh", {"-c", "echo out; echo err 1>&2"})
     check(mixed_status == 0 and mixed == "out\n" and mixed_err == "err\n", "text: the standard error is returned apart from the output")
 
-    -- The duration is drawn at random, so the ps line of this command (which names no duration) cannot match it.
     local secs = tostring(math.random(3000, 3999))
     local message = error_of(function()
         stream.lines("sh", {"-c", "echo first; sleep " .. secs}, function(line)

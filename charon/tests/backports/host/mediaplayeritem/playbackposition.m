@@ -1,5 +1,3 @@
-// The 9.0 command event's contract: the class is a kind of the base the port carries, both properties
-// read back what was set, and the base's own command answers what it was built with.
 #import "MPMediaItemStandin.h"
 
 @implementation MPRemoteCommandEvent
@@ -18,8 +16,6 @@
 @implementation MPRemoteCommand
 @end
 
-// The 9.0 event's option type is declared by the stand-in because the 8.0 event's own
-// header pulls MediaPlayer in; it is not used here.
 @implementation MPNowPlayingInfoLanguageOption
 @end
 

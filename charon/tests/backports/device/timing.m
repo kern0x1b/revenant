@@ -3,7 +3,6 @@
 #include <dlfcn.h>
 #import "check.h"
 
-/* Private, so no header declares it. */
 @interface UISpringTimingParameters (CharonSettling)
 - (NSTimeInterval)settlingDuration;
 @end
@@ -34,9 +33,6 @@ int main(void)
         for (NSString *name in @[@"UICubicTimingParameters", @"UISpringTimingParameters"])
             CHECK_EQUAL(image_of(NSClassFromString(name)), @"libUIKitBackports.dylib",
                         [name stringByAppendingString:@" comes from the backports library"].UTF8String);
-        /* The private timing function is registered at run time under Apple's name,
-           and only where the release has none, so it belongs to no image and its
-           provenance cannot be read; that it answers to the name is the point. */
         CHECK(NSClassFromString(@"_UIViewCubicTimingFunction") != Nil,
               "the private timing function answers to Apple's name");
 
@@ -97,8 +93,6 @@ int main(void)
               "a spring made from a ratio describes itself by that ratio");
         UISpringTimingParameters *ratioBack =
             [NSKeyedUnarchiver unarchiveObjectWithData:[NSKeyedArchiver archivedDataWithRootObject:ratio]];
-        /* A description carries the object's address, so two of them never read
-           alike; what is compared is the shape and the numbers between them. */
         CHECK([shape_of(ratioBack.description) isEqualToString:shape_of(ratio.description)],
               "a spring survives an archive");
         CHECK([shape_of([[ratio copy] description]) isEqualToString:shape_of(ratio.description)],

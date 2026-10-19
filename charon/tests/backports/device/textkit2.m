@@ -1,19 +1,8 @@
-// textkit2.m - every implemented method of the range layer of TextKit 2, called on the release, as a device
-// binary run under xmake emulate. The port's own classes are the only ones of their names on iOS 6.1.3, so there
-// is nothing to compare against here: what this proves is that each method answers, and that none of them
-// crashes on the release. What each answer is was measured against the host's own UIKit and is in
-// packages/a/apple-backports/facts/UIKit/NSTextRange15.md; the checks here are the same rules, held on the
-// release.
-//
-// A data source of the test's own is written out below, so the navigation object is asked real questions about a
-// real document rather than only about its own absence. The content manager is not carried by this port yet, so
-// the two derived ranges of a paragraph are nil here, and that is what the check says.
 #import <UIKit/UIKit.h>
 #import "check.h"
 
 #define NAMED(...) ([NSString stringWithFormat:__VA_ARGS__].UTF8String)
 
-// A location over an offset, which is all NSTextLocation asks for.
 @interface CallTestLocation : NSObject <NSTextLocation>
 @property (nonatomic, readonly) NSInteger offset;
 - (instancetype)initWithOffset:(NSInteger)offset;
@@ -51,9 +40,6 @@ static id<NSTextLocation> at(NSInteger offset)
     return [[CallTestLocation alloc] initWithOffset:offset];
 }
 
-// A document of "abcdefghij" with a break after every third character, which is what the granularity answers and
-// the offsets are read out of. The real content manager is the next group's work; this is the protocol the
-// navigation object is written against, and answering it is the navigation object's whole job.
 static const char *const kText = "abcdefghij";
 static const NSInteger kBreak = 3;
 
@@ -145,7 +131,6 @@ static const NSInteger kBreak = 3;
 
 - (NSTextRange *)lineFragmentRangeForPoint:(CGPoint)point inContainerAtLocation:(id<NSTextLocation>)location
 {
-    // One line for the whole document, which is all a data source without soft wrapping has to say.
     return self.documentRange;
 }
 
@@ -172,8 +157,6 @@ static NSTextRange *range(NSInteger from, NSInteger to)
     return [[NSTextRange alloc] initWithLocation:at(from) endLocation:at(to)];
 }
 
-// Every method the headers mark unavailable, held to the port's own answer: it raises and names the
-// initialiser to use, where the host faults.
 static void check_unavailable(void)
 {
     @try {
@@ -324,8 +307,6 @@ static void check_elements(void)
     charon_check(plain.textContentManager == nil, "and no content manager", "it has one");
     plain.elementRange = range(0, 5);
     charon_check([[plain.elementRange description] isEqualToString:@"0...5"], "and the range it keeps", "it differs");
-    // The content manager is not carried by this port yet, so the two derived ranges are nil: the host's own
-    // answer in the same state, and what the check holds.
     for (NSString *text in @[ @"Hello", @"Hello\n", @"Hello\r\n", @"\n" ]) {
         NSTextParagraph *paragraph = [[NSTextParagraph alloc] initWithAttributedString:[[NSAttributedString alloc] initWithString:text]];
         paragraph.elementRange = range(0, (NSInteger)text.length);
@@ -346,8 +327,6 @@ static void check_elements(void)
                  @"a paragraph over no string keeps none and says so", described(noString));
 }
 
-// The navigation object against a data source of the test's own, so the movement code runs rather than only the
-// answers it gives with no data source at all.
 static void check_navigation(void)
 {
     CallTestSource *source = [[CallTestSource alloc] initWithLength:10];
@@ -365,7 +344,6 @@ static void check_navigation(void)
 
     NSTextSelection *cursor = [[NSTextSelection alloc] initWithLocation:at(4)
                                                               affinity:NSTextSelectionAffinityDownstream];
-    // Forward over one character from 4 is 5, backward is 3, and to the document's ends are 0 and 10.
     charon_check([[[navigation destinationSelectionForTextSelection:cursor
                                                           direction:NSTextSelectionNavigationDirectionForward
                                                         destination:NSTextSelectionNavigationDestinationCharacter
@@ -384,14 +362,12 @@ static void check_navigation(void)
                                                          extending:NO
                                                            confined:NO].textRanges firstObject] description] == @"4...10",
                  @"and a move to the document's end lands there", "it is not");
-    // A destination the data source has no boundary for answers nil, which is what the header says.
     charon_check([navigation destinationSelectionForTextSelection:cursor
                                                           direction:NSTextSelectionNavigationDirectionForward
                                                         destination:NSTextSelectionNavigationDestinationContainer
                                                          extending:NO
                                                            confined:NO] == nil,
                  "a move to a container boundary with none to move to answers nil", "it answered something");
-    // Extending keeps the first location and moves the end, in both directions.
     charon_check([[[navigation destinationSelectionForTextSelection:cursor
                                                           direction:NSTextSelectionNavigationDirectionForward
                                                         destination:NSTextSelectionNavigationDestinationCharacter
@@ -403,7 +379,6 @@ static void check_navigation(void)
                                                             extending:YES
                                                               confined:NO].textRanges firstObject] description] == @"3...4",
                  @"extending keeps the first location and moves only the end", "it does not");
-    // A granularity the data source encloses a location in.
     NSTextSelection *word = [navigation textSelectionForSelectionGranularity:NSTextSelectionGranularityWord
                                                             enclosingTextSelection:cursor];
     charon_check(word != nil && word.granularity == NSTextSelectionGranularityWord && word.textRanges.count == 1,
@@ -419,7 +394,6 @@ static void check_navigation(void)
                                                 selecting:YES
                                                     bounds:CGRectMake(0, 0, 10, 10)].count == 1,
                  "a point with a line under it interacts with one selection", "it did not");
-    // The insertion location is the secondary location of a selection that is not logical.
     charon_check([navigation resolvedInsertionLocationForTextSelection:cursor
                                                      writingDirection:NSTextSelectionNavigationWritingDirectionLeftToRight] == nil,
                  "a logical selection has no insertion location", "it has one");
@@ -427,7 +401,6 @@ static void check_navigation(void)
     charon_check([[navigation resolvedInsertionLocationForTextSelection:cursor
                                                        writingDirection:NSTextSelectionNavigationWritingDirectionLeftToRight] description] == @"4",
                  @"and a selection that is not logical inserts at its secondary location", "it does not");
-    // A delete of a selection with contents is that selection; of a cursor, what a move over the same place is.
     NSTextSelection *withContents = [[NSTextSelection alloc] initWithRange:range(2, 5)
                                                                   affinity:NSTextSelectionAffinityDownstream
                                                                granularity:NSTextSelectionGranularityCharacter];

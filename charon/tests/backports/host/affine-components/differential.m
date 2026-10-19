@@ -1,9 +1,3 @@
-// differential.m - the port's CGAffineTransformDecompose and CGAffineTransformMakeWithComponents, held to the host's own
-// CoreGraphics on the battery below. The port's source is linked in with its two functions renamed (run.sh), so both
-// stand in one process. run.sh links the port twice: once with the sine and the cosine through the system's pair, and
-// once through apple-compat's shim, which is what a build for an older release runs. Three checks per transform: the
-// components the two answer for the same matrix, the matrix the port rebuilds from its own components, and the matrix
-// each answers for the host's components.
 #import <CoreGraphics/CoreGraphics.h>
 #include <float.h>
 #include <math.h>
@@ -15,8 +9,6 @@ CGAffineTransform CharonHostMakeWithComponents(CGAffineTransformComponents compo
 static int checks, failures;
 static double worst;
 
-// Two numbers agree when they differ by at most 1e-12 of their size (or of 1 for a size below 1). The host's own
-// rounding of a cosine or a sine is the reason a zero can come back as 1e-16: the bound is what the battery measures.
 static int agree(double host, double port)
 {
     double size = fabs(host) > 1 ? fabs(host) : 1;
@@ -47,15 +39,6 @@ static int same_matrix(CGAffineTransform h, CGAffineTransform p)
         && agree(h.tx, p.tx) && agree(h.ty, p.ty);
 }
 
-/* Where the sign of a decomposition is decided by rounding. The sign of across is the sign of d*cos - c*sin, the difference
-   of two products of size terms = |d*cos| + |c*sin|. The host and the port take the sine and the cosine of the same angle
-   from two sources (the host's pair, the port's libm or shim), which may be one ulp apart, and each product and the
-   difference round once. So across is known only to within ROUNDING_ULPS * DBL_EPSILON * terms, and inside that bound its
-   sign is either sign: both decompositions are valid, and the test checks that each rebuilds the transform.
-   A y scale and a shear divide by across, so their relative error is that bound over |across|: they agree to the test's
-   1e-12 only where |across| exceeds the bound by 1e-12. The shear divides the numerator c*cos + d*sin as well, whose
-   error is the same kind of bound over its own terms. Where either is inside the wider bound, the sign and the length and
-   the rotation are held, and the rebuild decides the rest. Outside it, everything is held exact. */
 #define ROUNDING_ULPS 4
 
 enum band { EXACT, SCALE_BAND, SIGN_BAND };
@@ -82,10 +65,6 @@ static enum band band_of(CGAffineTransform m)
     return EXACT;
 }
 
-/* Whether components rebuild the matrix to rounding. The first row always; the second only where the y scale is not zero,
-   since a zero y scale carries no second row (the host's own answer for a singular transform with exactly zero across).
-   An entry is held to the size of the largest entry of the matrix, not its own: a small entry beside a large one carries
-   the large one's rounding (a shear of 5e18 with a y scale of 1e-16 leaves an entry near 1 with an error of 400 ulps). */
 static int rebuilds(CGAffineTransform m, CGAffineTransformComponents k)
 {
     CGAffineTransform r = CGAffineTransformMakeWithComponents(k);
@@ -104,7 +83,6 @@ static int rebuilds(CGAffineTransform m, CGAffineTransformComponents k)
     return agree(m.tx, r.tx) && agree(m.ty, r.ty);
 }
 
-/* Whether the port's decomposition is held for the host's, in the band the matrix is in. */
 static int accepts(CGAffineTransform m, CGAffineTransformComponents h, CGAffineTransformComponents p, enum band band)
 {
     if (band == EXACT)
@@ -131,16 +109,12 @@ static void battery(const char *label, double a, double b, double c, double d, d
         report(label, "both decompositions rebuild the matrix (sign within the rounding band)", accepts(m, hc, pc, band));
     report(label, "the port's components rebuild the matrix as the host's do",
            same_matrix(CGAffineTransformMakeWithComponents(pc), CharonHostMakeWithComponents(pc)));
-    /* A singular transform with two rows that are not zero does not come back from its components: the host does
-       not either, so the round trip is held only where the determinant is not zero. */
     if (fabs(a * d - b * c) > 1e-9 * (fabs(a * d) + fabs(b * c)))
         report(label, "the port's components rebuild the matrix", same_matrix(m, CGAffineTransformMakeWithComponents(pc)));
     report(label, "port builds the host's matrix from the host's components",
            same_matrix(CGAffineTransformMakeWithComponents(hc), CharonHostMakeWithComponents(hc)));
 }
 
-/* Generated transforms, held on the decomposition alone: a deterministic generator (a 64-bit linear congruence), so the
-   same transforms come out on every run. A singular one has its second row a multiple of the first, rounded. */
 static uint64_t seed = 20261016;
 
 static double next_unit(void)

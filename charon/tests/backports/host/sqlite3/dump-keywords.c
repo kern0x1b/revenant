@@ -1,6 +1,3 @@
-// Dumps the host's keyword table for packages/a/apple-backports/SQLite3/Keywords.c, which is generated from this output:
-//   xcrun clang -O2 -w dump-keywords.c -lsqlite3 -o dump-keywords && ./dump-keywords > keywords-host.txt
-// Each keyword row is "<return code> <length> <name>", in the order sqlite3_keyword_name answers them.
 #include <stdio.h>
 #include <sqlite3.h>
 

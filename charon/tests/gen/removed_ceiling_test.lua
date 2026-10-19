@@ -1,11 +1,3 @@
--- The removed-override ceiling (review r4 G11; coordinator ruling G11). A removed override is a registry override whose symbol the 26.2
--- spec no longer holds: a WARN, not a failure, because the backports exist for exactly the APIs that 26.2 removed or deprecated and 6.1.3
--- carries. Its count must not grow: the total over every framework is held to tests/gen/removed-overrides.tsv, one row per framework
--- that has removed overrides. A total above the ceiling fails and names each framework that grew; a total below it passes, and the ceiling
--- is lowered in the change that removes the overrides. The ceiling is derived from a check run: `xmake l tools/gen.lua check --all --tree .`
--- prints one "check <F>: ... removed overrides (warned) N, ..." line per framework; its rows are the frameworks with N > 0, by name.
--- Run: xmake l tests/gen/removed_ceiling_test.lua (exits 1 on failure).
-
 local ROOT = path.absolute(path.join(os.scriptdir(), "..", ".."))
 local TOOLS = path.join(ROOT, "tools")
 local CEILING = path.join(ROOT, "tests", "gen", "removed-overrides.tsv")

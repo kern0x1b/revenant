@@ -5,20 +5,11 @@
 #import "CharonCMTag26.h"
 #endif
 
-// CMTaggedBufferGroup, transcribed from the SDK 26.2 header the port is written against, the way
-// CharonCMTag26.h does for the tag collection: the type arrived at iOS 17 and the SDK the toolchain
-// resolves is 16.4, where the header does not exist. CMTaggedBufferGroupRef is a bridged Objective-C
-// class, so the port's is a class too.
-
 #if !__has_include(<CoreMedia/CMTaggedBufferGroup.h>)
 
 typedef struct CM_BRIDGED_TYPE(id) OpaqueCMTaggedBufferGroup * CMTaggedBufferGroupRef
     CF_REFINED_FOR_SWIFT CF_SWIFT_UNAVAILABLE("Unavailable in Swift");
 
-// The format description for a group. Unlike the group, this is not an Objective-C class: what a caller
-// gets back is the platform's own CMFormatDescription, with media subtype 'tbgr' and the group's per-entry
-// tag collections travelling in its extensions dictionary under a key of the port's own. So there is no
-// opaque class behind this name - it is an alias, and the alias is deliberate.
 typedef CMFormatDescriptionRef CMTaggedBufferGroupFormatDescriptionRef
     CF_REFINED_FOR_SWIFT CF_SWIFT_UNAVAILABLE("Unavailable in Swift");
 
@@ -76,10 +67,6 @@ typedef CF_ENUM(OSStatus, CMTaggedBufferGroupError) {
 
 #endif
 
-// The group's class, named so it cannot collide with the SDK's. It holds its entries' CMTags by value
-// in a malloc'd C array it owns and frees in its finaliser, because a CTag is three machine words with
-// no lifetime of its own and cannot go into an NSArray as an object. The implementation is in
-// CharonCMTaggedBufferGroup.m.
 @interface CharonCMTaggedBufferGroup : NSObject
 - (instancetype)charon_initWithCollections:(NSArray *)collections buffers:(NSArray *)buffers
     __attribute__((objc_method_family(init)));
@@ -91,8 +78,6 @@ typedef CF_ENUM(OSStatus, CMTaggedBufferGroupError) {
 - (CMItemCount)charon_tagOffsetAtIndex:(NSInteger)index;
 - (CMTagCollectionRef)charon_collectionAtIndex:(NSInteger)index;
 - (CVBufferRef)charon_bufferAtIndex:(NSInteger)index;
-// The entry carrying every one of the wanted tags, when there is exactly one; NULL otherwise, and
-// indexOut is left as the caller passed it.
 - (CVBufferRef)charon_bufferForTags:(const CMTag *)tags count:(CMItemCount)count index:(NSInteger *)index;
 - (NSInteger)charon_matchesForTags:(const CMTag *)tags count:(CMItemCount)count;
 @end

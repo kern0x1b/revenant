@@ -1,17 +1,10 @@
--- The class objects of the trace layer. A class the 6.1.3 release lacks is generated as one @implementation of stubs when every
--- missing member row of the surface it owns is a stub: then its presence implies the whole surface. Any other class is listed
--- with its reasons. A generated class whose superclass the release lacks and the generator does not generate is not generated.
-
 local surface = import("surface", {anonymous = true})
 local hand = import("hand", {anonymous = true})
 local order = import("order", {anonymous = true})
 
--- The ledger status of a row the header parse covers with no symbol to generate.
 local HEADER_OK = "header-ok"
--- The reason a generated class is listed with.
 local GENERATED_REASON = "generated: every member is a stub"
 
--- The strings of a list, unique and sorted.
 local function sorted_unique(list)
     local seen, out = {}, {}
     for _, item in ipairs(list) do
@@ -24,8 +17,6 @@ local function sorted_unique(list)
     return out
 end
 
--- The reasons each candidate class cannot be generated: a hand class, no missing member row, and each member of the surface the
--- class owns that is Swift-only, overridden, or has no stub (with the reason it has none). A class with no reason is generated.
 local function class_reasons(input, spec_apis, owned, hand_classes, candidates)
     local reasons = {}
     for _, cls in ipairs(candidates) do
@@ -56,16 +47,10 @@ local function class_reasons(input, spec_apis, owned, hand_classes, candidates)
     return reasons
 end
 
--- The class objects and their reasons for one framework. input: tree, fw, spec (the spec rows), stub_keys (the stubbed members' keys),
--- overridden (the canonical keys a registry row covers), surface (the framework's surface rows, keyed by surface.key), led6 (the 6.1.3
--- ledger's statuses, keyed by surface.key), skip_reasons (api -> why a member has no stub) and supers (class -> the superclass the
--- header parse names). Returns cls -> {generated = bool, reason = text} for every candidate class.
 function decisions(input)
     local supers = input.supers
     local hand_classes = hand.class_names(input.tree)
     local owned = {}
-    -- A member the 6.1.3 ledger does not list is owned too: it is not checked, so the class cannot claim it is a stub (its reason is
-    -- the one the stubs give it, not checked at 6.1.3).
     for _, row in ipairs(input.surface) do
         local status = input.led6[surface.key(row.kind, row.api)]
         if (row.kind == "method" or row.kind == "property") and status ~= HEADER_OK then

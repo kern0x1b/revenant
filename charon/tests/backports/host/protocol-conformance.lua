@@ -1,36 +1,3 @@
--- protocol-conformance.lua - the acceptance test for a protocol row marked `implemented`, in Lua.
---
---     CONF_ROOT=<checkout> CONF_SDK=<iPhoneOS16.4.sdk> CONF_CLANG=<clang> CONF_GEN=<generated headers> \
---     CONF_WORK=<run dir> xmake lua tests/backports/host/protocol-conformance.lua
---
--- protocol-conformance.sh sets those and generates the protocol headers, so a run needs no python.
--- CONF_MODE=members with CONF_PROTOCOL, CONF_CLASS and CONF_FILE (relative to the package) checks one row only.
---
--- THE CRITERION, as the python checker it replaces stated it, and this keeps it. An `implemented` row
--- claims every member of the protocol is callable, and backports.lua:664 turns that claim into a band floor. So
--- for EVERY member - required and optional instance and class methods, and every property's getter and (when
--- readwrite) its setter - some @implementation or category implementation of the class DEFINES the selector, or a
--- @synthesize binds it. The members come from the SDK's own protocol declaration in the AST, and the definitions
--- from the class's files in the package.
---
--- WHAT IS READ: clang's AST as its text dump, with -ast-dump-filter so that only the declarations whose name
--- matches are printed. The text is read by its shape: a node's depth is the number of '-' markers before its kind;
--- a definition is an ObjCMethodDecl with a CompoundStmt child; a declaration in an @interface has no body. No SDK
--- header text is read, only the compiler's declarations.
---
--- DIFFERENCES FROM THE PYTHON IT REPLACES:
---   - the class's definitions come from EVERY package file that implements the class (its @implementation and its
---     categories, which can be in other files: MTLCommandQueue8.m adds to CharonMetalQueue). The python read only
---     the one file it was given, so a category in another file could never satisfy a row.
---   - the generated protocol header is on the include path (-I), since the sources import it and the header is
---     written at build time, not kept in the tree.
---
--- A file that does not compile is refused: its declarations cannot be trusted. A protocol the SDK does not declare
--- has zero members, which is a failure and not a pass.
---
--- Exit status: 0 every row conformant and every mutant red; 1 the rows with gaps are owed work and the check is
--- working; 3 a mutant went unnoticed, so the check is broken and what it says about conformant rows is not evidence.
-
 import("core.base.json")
 
 local root = os.getenv("CONF_ROOT")
@@ -41,7 +8,6 @@ local gen = os.getenv("CONF_GEN")
 local work = os.getenv("CONF_WORK")
 local mode = os.getenv("CONF_MODE") or "all"
 
--- The protocols whose rows are checked, as the python version listed them.
 local CHECKED = {
     "MTLDevice", "MTLResource", "MTLBuffer", "MTLTexture", "MTLSamplerState", "MTLFunction",
     "MTLLibrary", "MTLRenderPipelineState", "MTLCommandQueue", "MTLCommandBuffer",
@@ -49,14 +15,12 @@ local CHECKED = {
     "MTLDepthStencilState", "MTLCaptureScope",
 }
 
--- The rows with no @interface of their own, and the protocols 16.4 says each inherits FROM.
 local INHERITED_BY = {
     MTLResource = {"MTLBuffer", "MTLTexture"},
     MTLCommandEncoder = {"MTLRenderCommandEncoder", "MTLComputeCommandEncoder"},
     MTLDrawable = {"CAMetalDrawable"},
 }
 
--- The mutants, on the rows the criterion most often catches: protocol, class, the class's own file.
 local MUTANT_ROWS = {
     {"MTLFunction", "CharonMetalFunction", "Metal/CharonMetalLibrary.m"},
     {"MTLDepthStencilState", "CharonMetalDepthStencil", "Metal/CharonMetalDepthStencil.m"},
@@ -89,8 +53,6 @@ local function trim(s)
     return (s:gsub("^%s+", ""):gsub("%s+$", ""))
 end
 
--- The files of the Metal folder with an extension, sorted, so the first match is the same on every run. Every class
--- the rows name is in that folder; the registry rows are read from the registry's own folder.
 local function package_files(ext, folder)
     local out = {}
     for _, p in ipairs(os.files((folder or (pkg .. "/Metal")) .. "/*." .. ext) or {}) do
@@ -100,7 +62,6 @@ local function package_files(ext, folder)
     return out
 end
 
--- A file read once per run: the class scans look at the same files again and again.
 local reads = {}
 local function cached(p)
     if reads[p] == nil then reads[p] = read(p) end
@@ -109,8 +70,6 @@ end
 
 local run_counter = 0
 
--- Runs clang on FILE with ARGS from CWD. The AST (stdout) and the diagnostics (stderr) are written to files of the
--- run directory and read back separately, so a diagnostic line can never be taken for a node of the tree.
 local function clang_run(cwd, args, file, tag)
     run_counter = run_counter + 1
     local base = work .. "/" .. tostring(run_counter) .. "-" .. tag
@@ -127,8 +86,6 @@ local function base_flags()
             "-Wno-unguarded-availability-new", "-Wno-unguarded-availability", "-I", gen}
 end
 
--- The AST of one file, filtered to the declarations whose name contains FILTER. A file that does not compile gives
--- nil and its error lines: its exit status is not zero, or a line is in the form <file>:<line>:<col>: error:.
 local function ast(file, filter, tag)
     local args = base_flags()
     for _, a in ipairs({"-Werror=objc-missing-property-synthesis", "-fsyntax-only", "-Xclang", "-ast-dump",
@@ -148,7 +105,6 @@ local function ast(file, filter, tag)
     return out, nil
 end
 
--- The tree of a text dump: blocks named by their "Dumping NAME:" line, each holding its nodes in order with their depth.
 local function parse(text)
     local blocks, block = {}, nil
     for line in (text .. "\n"):gmatch("(.-)\n") do
@@ -157,7 +113,6 @@ local function parse(text)
             block = {name = name, nodes = {}}
             blocks[#blocks + 1] = block
         elseif block and line ~= "" then
-            -- every level of the tree is two columns: "|-", "`-" or "| " before the marker
             local prefix = line:match("^([| `%-]*)")
             block.nodes[#block.nodes + 1] = {depth = math.floor(#prefix / 2), text = line:sub(#prefix + 1)}
         end
@@ -165,7 +120,6 @@ local function parse(text)
     return blocks
 end
 
--- The indices of the direct children of node i.
 local function children(nodes, i)
     local out = {}
     local d = nodes[i].depth
@@ -177,12 +131,10 @@ local function children(nodes, i)
     return out
 end
 
--- The sign and the selector of an ObjCMethodDecl's text: "... - addDebugMarker:range:" gives "-", "addDebugMarker:range:".
 local function selector_of(text)
     return text:match("%s([%-+]) (%S+)")
 end
 
--- The members of a protocol: the union over every declaration of that name (a forward declaration has none).
 local function protocol_members(blocks, name)
     local members = {}
     for _, b in ipairs(blocks) do
@@ -197,7 +149,6 @@ local function protocol_members(blocks, name)
                     local getter = before and before:match("(%S+)%s*$")
                     if getter then
                         members["-" .. getter] = true
-                        -- a setter is owed for a readwrite property, which the AST marks by the absence of readonly
                         if not t:find("readonly", 1, true) then
                             members["-set" .. upper_first(getter) .. ":"] = true
                         end
@@ -209,9 +160,6 @@ local function protocol_members(blocks, name)
     return members
 end
 
--- The selectors a class defines in one file: each method with a body in its @implementation or in one of its
--- categories, and each @synthesize binding (a getter and a setter).
--- BODIES, when given, collects only the methods defined with a body, which a mutant can remove.
 local function defines_in(blocks, cls, defines, bodies)
     for _, b in ipairs(blocks) do
         local own = b.name == cls
@@ -242,8 +190,6 @@ local function defines_in(blocks, cls, defines, bodies)
     return defines
 end
 
--- Every package file that implements the class: its @implementation, or a category of it. OVERRIDES maps a package
--- file to the scratch copy a mutant was written to.
 local function implementing_files(cls, overrides)
     local out = {}
     for _, p in ipairs(package_files("m")) do
@@ -254,7 +200,6 @@ local function implementing_files(cls, overrides)
     return out
 end
 
--- The class of a row: the one whose @interface adopts the protocol, else one that adopts a protocol inheriting it.
 local function class_of(protocol)
     local inherit = INHERITED_BY[protocol] or {}
     local fallback_cls, fallback_file
@@ -277,7 +222,6 @@ local function class_of(protocol)
     return fallback_cls, fallback_file
 end
 
--- The file of a class: the one named after it, else the first that implements it.
 local function file_of(cls)
     for _, p in ipairs(package_files("m")) do
         if p:match("/" .. cls .. "%.m$") then return p end
@@ -285,8 +229,6 @@ local function file_of(cls)
     return implementing_files(cls)[1]
 end
 
--- The criterion for one row. Returns the missing selectors (empty when conformant) and the member count, or nil and
--- the reason. OVERRIDES maps package files to scratch copies (a mutant).
 local function check(protocol, cls, overrides, tag)
     local protoFile = file_of(cls)
     if not protoFile then return nil, "has no file in the package" end
@@ -317,7 +259,6 @@ local function check(protocol, cls, overrides, tag)
     return missing, count
 end
 
--- The -Wprotocol cross-check, for methods: a method inherited from another class would pass the criterion above.
 local function wprotocol(protocol, file)
     local args = base_flags()
     args[#args + 1] = "-Wall"
@@ -333,7 +274,6 @@ local function wprotocol(protocol, file)
     return lines
 end
 
--- The selector a method DEFINITION names, from its head: "- (BOOL)setX:(int)x y:(int)y" gives "setX:y:"; "- (id)device" "device".
 local function head_selector(head)
     local rest = head:gsub("^[-+]%s*%b()", "", 1)
     local pieces = {}
@@ -342,20 +282,16 @@ local function head_selector(head)
     return rest:match("^%s*([%w_]+)%s*$")
 end
 
--- The source without the definition of SELECTOR: its head, its body, and the comment lines above it. Works on lines.
--- Returns nil when the text has no such definition.
 local function remove_definition(source, selector)
     local lines = {}
     for line in (source .. "\n"):gmatch("(.-)\n") do lines[#lines + 1] = line end
     for i, line in ipairs(lines) do
         if line:match("^[-+] %(") then
-            -- the head runs to the line that opens the body, which starts with "{"
             local k = i
             while k <= #lines and not lines[k]:match("^{") do k = k + 1 end
             if k > #lines then return nil end
             local head = table.concat(lines, " ", i, k - 1)
             if head_selector(head) == selector then
-                -- the body: from line k to the line where its braces balance
                 local depth, last = 0, k
                 for j = k, #lines do
                     for c in lines[j]:gmatch(".") do
@@ -364,10 +300,8 @@ local function remove_definition(source, selector)
                     last = j
                     if depth == 0 then break end
                 end
-                -- comment lines directly above the head go with it
                 local first = i
                 while first > 1 and lines[first - 1]:match("^%s*//") do first = first - 1 end
-                -- and the blank line the removal would leave behind
                 if lines[last + 1] == "" then last = last + 1 end
                 local kept = {}
                 for j, l in ipairs(lines) do
@@ -380,14 +314,11 @@ local function remove_definition(source, selector)
     return nil
 end
 
--- The mutants: one member the protocol requires and the class defines is removed from a scratch copy, and the check
--- must report it. Returns the number of mutants run, how many were red, and whether any failed in another way.
 local function mutants()
     local tree = work .. "/tree"
     os.tryrm(tree)
     os.mkdir(tree)
     os.cp(pkg .. "/Metal", tree .. "/Metal")
-    -- the Metal folder reaches the package's own headers as "../X.h" (air2cpu-abi.h), so the copy carries them too
     for _, h in ipairs(os.files(pkg .. "/*.h") or {}) do
         os.cp(h, tree .. "/" .. path.filename(h))
     end
@@ -398,7 +329,6 @@ local function mutants()
         local scratch = tree .. "/" .. file
         for _, kind in ipairs({"method", "getter"}) do
             runs = runs + 1
-            -- the members the protocol requires that the class defines, from the unmodified package
             local wanted = protocol_members(parse(ast(original, protocol, "mut-want") or ""), protocol)
             local defines, bodies = {}, {}
             for _, f in ipairs(implementing_files(cls)) do
@@ -432,7 +362,6 @@ local function mutants()
                         print(string.format("  ok   %s mutant on %s via %s: removed %s -> %d selector(s) missing",
                             kind, protocol, cls, chosen, #missing))
                     elseif missing == nil then
-                        -- the mutant did not get a verdict: it is not evidence either way, so it is not red
                         print(string.format("  FAIL the %s mutant on %s via %s gave no verdict: %s", kind, protocol, cls, why))
                         failed = true
                     else

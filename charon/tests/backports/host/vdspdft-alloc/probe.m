@@ -1,10 +1,3 @@
-// The answer of vDSP_DFT_Interleaved_CreateSetup(D) when one of its allocations fails, measured on the host and
-// checked on the port. Each allocation the call makes is numbered; the k-th one is made to fail, and the answer is
-// printed: NULL, or a setup. Built twice by run.sh: once against the host's own functions (the host's table), and
-// once against the port's objects, renamed to charon_host_* (the port's check: NULL on every failure it hits).
-//
-// Only creation is probed. A setup the host returns after a failure is not executed here: one such setup (double
-// real-to-complex, N = 256, its last allocation failed) crashes in Execute, so executing it would end the probe.
 #import <Accelerate/Accelerate.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,7 +24,6 @@ static const char *who = "host";
 
 static int failures = 0;
 
-// One creation with the k-th allocation made to fail (k = -1: the unfailed call, which also counts the allocations).
 static void *createWith(int dbl, vDSP_Length n, vDSP_DFT_Direction dir, vDSP_DFT_RealtoComplex form, long k, long *calls, long *hit)
 {
     charon_fail_at = k;
@@ -65,9 +57,7 @@ int main(void)
             void *t = createWith(dbl, n, dir, form, k, NULL, &h);
             printf("%s N=%lu %s %s %s fail_at=%ld: %s hit=%ld\n", who, (unsigned long)n, dbl ? "D" : "S", r ? "R2C" : "C2C",
                    f ? "fwd" : "inv", k, t ? "setup" : "NULL", h);
-            // the port's check: a failure it hits must give NULL. The host's table is printed, not checked.
             if (t && h > 0 && who[0] == 'p') { failures++; }
-            // a setup returned under a failure is leaked on purpose: this probe never executes it
         }
     }
     printf("%s: checks=%s failures=%d\n", who, who[0] == 'p' ? "port-null-on-hit" : "table", failures);

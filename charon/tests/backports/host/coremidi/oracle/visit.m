@@ -1,6 +1,3 @@
-// Host probe: what macOS CoreMIDI's MIDIEventListForEachEvent hands the visitor for each kind of UMP. Prints the
-// visitor's timestamp, and the whole MIDIUniversalMessage (28 bytes) in hex, for words chosen to exercise each type.
-// The bytes of the message are what the port's visitor is compared with (differential.m, check_visitor).
 #import <CoreMIDI/CoreMIDI.h>
 #include <stdio.h>
 #include <string.h>

@@ -1,6 +1,3 @@
-// The MIDI-CI and MIDI-UMP keys and notifications of iOS 18, and kMIDIPropertyAssociatedEndpoint. The notification
-// and key strings are the names themselves, as macOS CoreMIDI gives them (oracle/constants.m); kMIDIPropertyAssociatedEndpoint
-// is the key "associated endpoint" that macOS holds once a client exists (the same probe, after MIDIClientCreate).
 #import <Foundation/Foundation.h>
 #import <CoreMIDI/CoreMIDI.h>
 

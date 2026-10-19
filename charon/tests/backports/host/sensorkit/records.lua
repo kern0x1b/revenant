@@ -1,13 +1,5 @@
--- The three things run.sh asked of a records file with python -c: its count, the keys on which two files differ, and one
--- value. Usage (from run.sh):
---   xmake l ./records.lua count <file.json>
---   xmake l ./records.lua differing <a.json> <b.json>     the sorted keys whose values differ, one line, space-separated
---   xmake l ./records.lua value <file.json> <key>         the value as print() shows it: None when the key is absent
-
 import("core.base.json")
 
--- Keys are sorted by their bytes, as Python sorts strings. The string comparison of Lua follows the locale's collation, which
--- puts "B.x" after "b.x" and "a_b" before "a.c", so it is not used.
 local function byte_less(a, b)
     for i = 1, math.min(#a, #b) do
         local x, y = a:byte(i), b:byte(i)

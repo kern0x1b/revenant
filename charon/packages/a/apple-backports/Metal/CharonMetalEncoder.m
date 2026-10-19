@@ -205,10 +205,6 @@ static float halfToFloat(uint16_t h)
     glScissor((GLint)rect.x, _target.screen ? (GLint)(_target.height - rect.y - rect.height) : (GLint)rect.y, (GLsizei)rect.width, (GLsizei)rect.height);
 }
 
-// The heaps -useHeap: and -useHeaps:count: name, and the check a bind makes against them. Metal leaves
-// undefined what happens when a resource that did not come from one of them is bound, so the port says
-// which resource it was rather than passing it by: an application that lists heaps and then binds
-// something else has a bug the log names, and one that lists no heap is not checked at all.
 - (void)charonUseHeaps:(id<MTLHeap> const *)heaps count:(NSUInteger)count
 {
     _heapCount = 0;
@@ -484,13 +480,7 @@ static const GLfloat *rampOf(NSUInteger count)
             int compare = plan->textures[k].compare ? 1 : 0;
             if (sampler && (texture.appliedSampler != sampler || texture.appliedCompare != compare)) {
                 BOOL depth = texture.attachmentKind != 0;
-                // A format this device cannot filter, asked to be filtered, is what Metal answers with
-                // a validation error: the draw is refused rather than filtered in the encoding, and the
-                // log says which texture and which format, once per texture so a loop cannot flood it.
                 if (!depth && sampler.minFilter == GL_LINEAR && ![texture charonCanFilter]) {
-                    // Keyed by the TEXTURE and not by its name: two textures may carry one name, and a
-                    // set keyed by the name would let the second one's refusal go unlogged forever.
-                    // One line per texture, which is the most that can be said about a draw.
                     static NSMutableSet *refused;
                     static dispatch_once_t once;
                     dispatch_once(&once, ^{ refused = [NSMutableSet set]; });

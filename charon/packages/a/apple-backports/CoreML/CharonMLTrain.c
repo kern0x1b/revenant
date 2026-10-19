@@ -17,8 +17,6 @@ typedef enum {
     OPTIMISER_ADAM
 } optimiser_kind;
 
-/* One layer of the network as the trainer holds it. The sizes are counts of values: a sample of the layer's
- * input and output, and for a convolution the channel and spatial shapes the kernel walks. */
 typedef struct {
     layer_kind kind;
     char name[256];
@@ -31,7 +29,6 @@ typedef struct {
     float *weight, *bias;
     size_t weight_count, bias_count;
     float *grad_weight, *grad_bias;
-    /* the optimiser's state: the momentum for stochastic gradient descent, the first and second moments for Adam */
     float *state_weight, *state_bias, *state2_weight, *state2_bias;
 } layer;
 
@@ -55,11 +52,8 @@ static void fail(char *error, size_t size, const char *what, const char *name)
     }
 }
 
-/* The most values a tensor, a sample or a mini-batch may hold. Every size below that a model field gives is checked
- * against this before it is multiplied or allocated, so a model that asks for more is refused, never overflowed. */
 #define TRAIN_MAX_VALUES ((size_t)1 << 28)
 
-/* A dimension the model gives: it must be positive and within the limit. */
 static int dimension(int value, size_t *out)
 {
     if (value <= 0 || (size_t)value > TRAIN_MAX_VALUES) {
@@ -69,7 +63,6 @@ static int dimension(int value, size_t *out)
     return 1;
 }
 
-/* a * b, refused when the product would pass the limit, which is checked before the multiplication. */
 static int product(size_t a, size_t b, size_t *out)
 {
     if (b != 0 && a > TRAIN_MAX_VALUES / b) {
@@ -108,8 +101,6 @@ static long long integer_parameter(const charon_ml_node *parameter, const char *
     return value ? charon_ml_int(child(value, "defaultValue"), fallback) : fallback;
 }
 
-/* Copies a weight tensor's values out of its WeightParams node: the packed run of floats, which the reader
- * flattens into sibling entries. A missing tensor is an error, never a zero. */
 static float *read_tensor(const charon_ml_node *params, size_t expected, size_t *count)
 {
     if (!params) {
@@ -159,8 +150,6 @@ void charon_ml_trainer_free(charon_ml_trainer *trainer)
     free(trainer);
 }
 
-/* The input shape of the network: the first input feature's multi-array shape, which is channels, height and
- * width for an image and a single dimension for a vector. */
 static int input_shape(const charon_ml_node *document, size_t *channels, size_t *height, size_t *width)
 {
     const charon_ml_node *description = child(document, "description");
@@ -198,7 +187,6 @@ charon_ml_trainer *charon_ml_trainer_new(const charon_ml_node *document, char *e
         return NULL;
     }
 
-    /* the loss: the mean squared error, the one the port trains */
     const charon_ml_node *loss_layer = charon_ml_node_at_field(update, "lossLayers", 0);
     if (!charon_ml_oneof(loss_layer, "meanSquaredErrorLossLayer")) {
         fail(error, error_size, "the loss is not the mean squared error", NULL);
@@ -206,7 +194,6 @@ charon_ml_trainer *charon_ml_trainer_new(const charon_ml_node *document, char *e
         return NULL;
     }
 
-    /* the optimiser: stochastic gradient descent with a momentum, or Adam */
     const charon_ml_node *optimiser = child(update, "optimizer");
     const charon_ml_node *sgd = charon_ml_oneof(optimiser, "sgdOptimizer");
     const charon_ml_node *adam = charon_ml_oneof(optimiser, "adamOptimizer");
@@ -253,7 +240,6 @@ charon_ml_trainer *charon_ml_trainer_new(const charon_ml_node *document, char *e
         return NULL;
     }
 
-    /* the layers, in order: each one's input is the one before's output, starting from the network input */
     size_t channels = trainer->input_channels, height = trainer->input_height, width = trainer->input_width;
     int vector = 0;
     size_t flat = trainer->input_count;
@@ -391,7 +377,6 @@ size_t charon_ml_trainer_layer_count(const charon_ml_trainer *trainer)
     return trainer->trainable_count;
 }
 
-/* The `which`th layer that holds weights, in network order. */
 static const layer *trainable(const charon_ml_trainer *trainer, size_t which)
 {
     size_t seen = 0;
@@ -412,7 +397,6 @@ const char *charon_ml_trainer_layer_name(const charon_ml_trainer *trainer, size_
     return l ? l->name : NULL;
 }
 
-/* The specification's name of the layer's kind, which is the case of its oneof. */
 const char *charon_ml_trainer_layer_kind(const charon_ml_trainer *trainer, size_t which)
 {
     const layer *l = trainable(trainer, which);
@@ -433,7 +417,6 @@ const float *charon_ml_trainer_tensor(const charon_ml_trainer *trainer, size_t w
     return bias ? l->bias : l->weight;
 }
 
-/* The forward pass of one layer for one sample: `in` is the layer's input, `out` receives its output. */
 static void forward(const layer *l, const float *in, float *out)
 {
     switch (l->kind) {
@@ -472,9 +455,6 @@ static void forward(const layer *l, const float *in, float *out)
     }
 }
 
-/* The backward pass of one layer for one sample: `grad_out` holds the loss's slope at the layer's output, the
- * weight and bias gradients are added to the layer's own, and `grad_in` (when not NULL) receives the slope at
- * the layer's input. */
 static void backward(layer *l, const float *in, const float *grad_out, float *grad_in)
 {
     switch (l->kind) {
@@ -533,15 +513,11 @@ static void backward(layer *l, const float *in, const float *grad_out, float *gr
     }
 }
 
-/* The number of values at boundary `index` of the network: 0 is the input, and boundary i + 1 is the output of layer i. */
 static size_t boundary_size(const charon_ml_trainer *trainer, size_t index)
 {
     return index == 0 ? trainer->input_count : trainer->layers[index - 1].out_count;
 }
 
-/* One optimiser step over `count` values: the momentum for stochastic gradient descent, or the first and second
- * moments with their bias correction for Adam. The Adam update is taken in double precision, with the constants
- * as the specification gives them: a float32 0.999 is not 0.999, and the bias correction must agree with it. */
 static void apply(float *value, float *velocity, float *second, const float *gradient, size_t count,
                   const charon_ml_trainer *trainer)
 {
@@ -555,7 +531,6 @@ static void apply(float *value, float *velocity, float *second, const float *gra
         return;
     }
     double b1 = trainer->beta1, b2 = trainer->beta2, eps = trainer->eps, rate = trainer->learning_rate;
-    /* steps already counts this mini-batch: the first update is the step t = 1 */
     double t = (double)trainer->steps;
     double c1 = 1.0 - pow(b1, t), c2 = 1.0 - pow(b2, t);
     for (size_t i = 0; i < count; i++) {
@@ -572,7 +547,6 @@ int charon_ml_trainer_step(charon_ml_trainer *trainer, const float *inputs, cons
     if (samples == 0) {
         return 1;
     }
-    /* the activations of every layer, for every sample of the mini-batch: index 0 is the network input */
     float **act = calloc(trainer->layer_count + 1, sizeof(float *));
     float **grad = calloc(trainer->layer_count + 1, sizeof(float *));
     if (!act || !grad) {
@@ -581,7 +555,6 @@ int charon_ml_trainer_step(charon_ml_trainer *trainer, const float *inputs, cons
         fail(error, error_size, "out of memory for the mini-batch", NULL);
         return 0;
     }
-    /* index i holds the values at the boundary before layer i: 0 is the network input, the last is the output */
     int ok = 1, fits = 1;
     for (size_t i = 0; ok && i <= trainer->layer_count; i++) {
         size_t size = 0;
@@ -604,7 +577,6 @@ int charon_ml_trainer_step(charon_ml_trainer *trainer, const float *inputs, cons
     }
     memcpy(act[0], inputs, sizeof(float) * samples * trainer->input_count);
 
-    /* the forward pass of each sample through every layer */
     for (size_t s = 0; s < samples; s++) {
         for (size_t l = 0; l < trainer->layer_count; l++) {
             const layer *ly = &trainer->layers[l];
@@ -612,7 +584,6 @@ int charon_ml_trainer_step(charon_ml_trainer *trainer, const float *inputs, cons
         }
     }
 
-    /* the gradient of the mean of the squared errors over the samples and the outputs, at the output */
     size_t last = trainer->layer_count;
     float scale = 2.0f / (float)(samples * trainer->output_count);
     for (size_t s = 0; s < samples; s++) {
@@ -622,7 +593,6 @@ int charon_ml_trainer_step(charon_ml_trainer *trainer, const float *inputs, cons
         }
     }
 
-    /* the backward pass: the slope at each layer's input becomes the slope at the output of the layer before */
     for (size_t l = trainer->layer_count; l-- > 0;) {
         layer *ly = &trainer->layers[l];
         for (size_t s = 0; s < samples; s++) {
@@ -631,7 +601,6 @@ int charon_ml_trainer_step(charon_ml_trainer *trainer, const float *inputs, cons
         }
     }
 
-    /* the update, once per mini-batch, of every layer that is updatable */
     trainer->steps++;
     for (size_t l = 0; l < trainer->layer_count; l++) {
         layer *ly = &trainer->layers[l];
@@ -663,8 +632,6 @@ done:
     return ok;
 }
 
-/* Writes one tensor's values back into its WeightParams node's floatValue entries, in the order the reader
- * flattened them, so the writer encodes them as the packed run they were. */
 static int store_tensor(const charon_ml_node *params, const float *values, size_t count)
 {
     if (!params || charon_ml_count_field(params, "floatValue") != count) {

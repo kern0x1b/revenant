@@ -638,8 +638,6 @@ static NSString *charon_orthogonal_text(NSInteger behavior)
     return _supplementariesFollowContentInsets;
 }
 
-// The host refuses the flag once a reference has been set to anything but automatic, and so does the port, with the same exception.
-// Setting NO is always allowed; it leaves the reference as it is.
 - (void)setSupplementariesFollowContentInsets:(BOOL)supplementariesFollowContentInsets
 {
     if (supplementariesFollowContentInsets && _supplementaryContentInsetsReference != UIContentInsetsReferenceAutomatic)
@@ -652,7 +650,6 @@ static NSString *charon_orthogonal_text(NSInteger behavior)
     return (UIContentInsetsReference)_supplementaryContentInsetsReference;
 }
 
-// Setting a reference also ends the flag's mode, which then reads NO, as the host's does (tests/backports/host/layout-section).
 - (void)setSupplementaryContentInsetsReference:(UIContentInsetsReference)supplementaryContentInsetsReference
 {
     _supplementaryContentInsetsReference = supplementaryContentInsetsReference;

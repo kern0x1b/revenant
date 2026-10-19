@@ -1,60 +1,13 @@
--- The host differential for Matter: what macOS's own Matter.framework carries, against the SDK 26.2 surface the
--- port implements, against what the port's own libMatterBackports.dylib carries.
---
--- The host's framework is in its dyld shared cache and not on disk, so the binary is written out first
--- (dyld.extract). Everything after that is read the same way the gate reads a library: the exports from the symbol
--- table, the classes and their selectors from the Objective-C metadata.
---
--- The three answers this exists to tell apart:
---
---   surface only   the SDK declares it, the host's framework has no such name, and neither does the port's. A row of
---                  the SDK 26.2 surface that no release of the framework carries, which is a row the port does not
---                  owe anything for.
---   host carries   the host's framework carries it and the port's does not: a row the port is missing, named.
---   port carries   the port's library carries it and the host's framework has no such name: either a row of a later
---                  SDK than the host's, or a name of the port's own. Both are said, not glossed.
---
--- Usage: xmake l tools/matter-host-diff.lua <corpus.tsv> <host.dylib> [port.dylib] [architecture]
 import("core.base.json")
 local objc = import("apple.objc", {rootdir = path.join(os.scriptdir(), "..", "modules"), anonymous = true})
 local macho = import("apple.macho", {rootdir = path.join(os.scriptdir(), "..", "modules"), anonymous = true})
 
--- The host differential for Matter: what macOS's own Matter.framework carries, against the SDK 26.2 surface the port
--- implements, against what the port's own libMatterBackports.dylib carries.
---
--- The host's half is read from a live process, not from a file. The framework is in the host's dyld shared cache and
--- is not on disk, and a binary written out of that cache (dyld.extract) does not carry the Objective-C metadata in a
--- form this repository's reader can walk - so the classes and functions came from its exports and the members could
--- not be read at all. tests/backports/host/matter/run.sh loads the framework into a process on this host and walks
--- objc_copyClassList, class_copyMethodList, class_copyPropertyList, class_copyProtocolList and
--- protocol_copyMethodDescriptionList, and asks the surface's function rows of the loaded image by name. That TSV is
--- the host's real surface, from the host's own runtime.
---
--- The port's half is read from its own library with the same modules the gate's check reads one with
--- (modules/apple/objc.lua, modules/apple/macho.lua), so the two halves are the same kind of reading and the comparison
--- needs no translation between them.
---
---   surface only   the SDK declares it and neither side carries it: a row of the surface that no framework of either
---                  kind has, which the port does not owe anything for.
---   host carries   the host's framework carries it and the port's does not: a row the port is missing, named.
---   port carries   the port's library carries it and the host's framework does not: a row of a later SDK than the
---                  host's, or a name of the port's own. Both are said, not glossed.
---   both           the same name in both.
---
--- The surface's constants are not in this comparison and are not a difference: they are header-declared enumerations,
--- so they live in the importing program and are not symbols either library exports.
---
--- Usage: xmake l tools/matter-host-diff.lua <corpus.tsv> <host-members.tsv> [port.dylib]
 import("core.base.json")
 local objc = import("apple.objc", {rootdir = path.join(os.scriptdir(), "..", "modules"), anonymous = true})
 local macho = import("apple.macho", {rootdir = path.join(os.scriptdir(), "..", "modules"), anonymous = true})
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "modules")})
 
 
--- A member of a class is answered by the class or by any of its superclasses, and objc.lua keys a class's *own*
--- method list by sign and selector ("-authMode"), not by the -[Class selector:] spelling the registry uses. Reading
--- only the class's own list therefore misses every accessor a subclass inherits, which is every accessor of the
--- deprecated ...Entry, ...EP and ...OutputInfo classes the model declares over its ...Struct classes.
 local function responds(inv, name, sign, selector)
     local seen = {}
     while name and inv.classes[name] and not seen[name] do
@@ -69,8 +22,6 @@ end
 
 local FRAMEWORK = "Matter"
 
--- The symbols a C++ library and a compiler's runtime carry that are not the framework's API: not the port's business,
--- and not the registry's.
 local function api_symbol(symbol)
     if symbol:startswith("_OBJC_METACLASS_$_") or symbol:startswith("_OBJC_IVAR_$_") or symbol:startswith("__Z")
        or symbol:startswith("___Z") or symbol:startswith("__Unwind_") or symbol:startswith("_unwind_") or symbol:startswith("$")
@@ -80,7 +31,6 @@ local function api_symbol(symbol)
     return symbol:sub(2)
 end
 
--- Every defined external symbol of every slice of the port's library.
 local function symbols_of(binary)
     local found = {}
     local data = macho.read(binary)
@@ -100,7 +50,6 @@ local function symbols_of(binary)
     return found
 end
 
--- The classes, their members and the symbols the port's own library carries, read as the gate reads a library.
 local function surface(binary, architecture)
     local found = {classes = {}, members = {}, symbols = {}, protocols = {}}
     for symbol in pairs(symbols_of(binary)) do
@@ -135,14 +84,11 @@ local function surface(binary, architecture)
     return found, inventory
 end
 
--- The host's TSV, as a surface of the same shape the port's library is read into.
 local function host_surface(file)
     local found = {classes = {}, members = {}, symbols = {}, protocols = {}}
     local unknown = 0
     for line in io.lines(file) do
         local fields = {}
-        -- io.lines keeps the trailing newline in this Lua, so it is taken off the line before it is split: a name that
-        -- ended in "\n" would match nothing, and the comparison would say "neither side carries it" for every row.
         for field in (line:gsub("\n$", "") .. "\t"):gmatch("([^\t]*)\t") do
             table.insert(fields, field)
         end
@@ -155,9 +101,6 @@ local function host_surface(file)
                 found.classes[name] = true
             end
         elseif fields[1] == "property" and fields[2] then
-            -- A property is written as its accessors, and a host's framework names its own accessors: the getter is
-            -- -[Class name] or isName/hasName/canName/... and the setter is -[Class setName:]. The port's side is read
-            -- the same way, so the two halves of the comparison are the same reading.
             local owner, name = fields[2]:match("^([%u][%w_]*)%.(.+)$")
             if owner then
                 found.classes[owner] = true
@@ -214,8 +157,6 @@ local function rows_of(corpus)
     local rows, seen = {}, {}
     for line in io.lines(corpus) do
         local fields = {}
-        -- io.lines keeps the trailing newline in this Lua, so it is taken off the line before it is split: a name that
-        -- ended in "\n" would match nothing, and the comparison would say "neither side carries it" for every row.
         for field in (line:gsub("\n$", "") .. "\t"):gmatch("([^\t]*)\t") do
             table.insert(fields, field)
         end
@@ -227,14 +168,11 @@ local function rows_of(corpus)
     return rows
 end
 
--- The port's own inventory, kept so a member can be looked up through the class's superclasses.
 local portinventory
 
 function main(corpus, host, port, architecture)
     local rows = rows_of(corpus)
     local theirs = host_surface(host)
-    -- With no port library to compare, the third column is the host's alone, which is still worth having: it says which
-    -- rows of the SDK 26.2 surface this host's own framework carries.
     local ours, haveport
     if port and os.isfile(port) then
         ours, portinventory = surface(port, architecture or "armv7")
@@ -250,7 +188,6 @@ function main(corpus, host, port, architecture)
     end
     local lines = {}
     for _, row in ipairs(rows) do
-        -- The port's side: the same rows, but a member is looked for through the class's superclasses.
         local sign, owner_of, selector = row.api:match("^([-+])%[([%w_]+) (.+)%]$")
         if sign and portinventory then
             row.resolved = responds(portinventory, owner_of, sign, selector)

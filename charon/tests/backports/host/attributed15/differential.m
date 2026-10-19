@@ -1,20 +1,3 @@
-// The iOS 15.0 attributed-string object against the system's own, in one process.
-//
-// Every case asks the system first and the port second, and the two answers are compared. The port's
-// selectors carry a charonHost_ prefix (prefix_selectors.py) and its Markdown class is renamed with a
-// CharonHost prefix (uikit2/renames.sh), so the two never meet: a comparison that quietly compared the
-// port with itself would have to answer identically for the wrong reason, and the failure line names
-// which side did not answer.
-//
-// What is compared is what the API fixes: the text, the runs and their boundaries, and the value of every
-// attribute that is a number, a string, a URL or an intent's own shape. A font or a colour is the same
-// object on both sides and is printed as its own description. An intent is printed as its kind number and
-// its chain and never as a pointer, because a pointer is an address and two images never share one.
-//
-// The Markdown cases compare the parser and not the intent class: the intents it builds are the system's
-// own NSPresentationIntent objects, since the port's class for those is another object's and is measured
-// by tests/backports/host/presentationintent. What is compared here is which factory the parser called,
-// in what order, with which identity, and which text each run carries.
 #import <Foundation/Foundation.h>
 #import <dlfcn.h>
 #import <objc/runtime.h>
@@ -24,9 +7,6 @@
 
 void host_attach_prefixed(const char *prefix);
 
-/* A delegate of the port's own, so the accessor is handed a real id<NSURLSessionTaskDelegate> and the
-   case compiles without a cast. The protocol has no required member, so an empty implementation is
-   the whole of it. */
 @interface ProbeDelegate : NSObject <NSURLSessionTaskDelegate>
 @end
 @implementation ProbeDelegate
@@ -34,9 +14,6 @@ void host_attach_prefixed(const char *prefix);
 
 static NSAttributedString *plain(NSString *text);
 
-/* The value of one attribute, printed so that two images can be compared: a number as itself, a string
-   quoted, a URL as its own text, an intent as its kind and its chain, and anything else as its own
-   description - which for a font and a colour is the same object on both sides. */
 static NSString *printed(id value)
 {
     if (!value)
@@ -78,13 +55,8 @@ static NSString *printed(id value)
     return [value description];
 }
 
-/* The one attribute the port's object cannot carry, and why: NSListItemDelimiterAttributeName is a 16.0
-   name and the SDK this port builds against (iPhoneOS16.5) does not declare it, so a list item's run
-   carries its intent and not the delimiter. It is dropped from the comparison and printed instead, with
-   the value the system used, so the difference is on every run and not folded into a pass. */
 static NSString *const CharonListItemDelimiter = @"NSListItemDelimiter";
 
-/* The whole answer as one string: every run, its text and its attributes in name order. */
 static NSString *shape(NSAttributedString *string)
 {
     if (!string)
@@ -111,9 +83,6 @@ static NSAttributedString *plain(NSString *text)
     return [[NSAttributedString alloc] initWithString:text];
 }
 
-/* The rule every inflection case is built from unless it is about the rule itself: an explicit one over
-   a plural noun. It is the SYSTEM's class on both sides - the host test compiles the port's member and
-   not the classes it reads - so the two answers are given the same rule object. */
 static NSMorphology *plainPlural(void)
 {
     NSMorphology *morphology = [[NSMorphology alloc] init];
@@ -136,9 +105,6 @@ static NSAttributedString *twoTagged(void)
     return string;
 }
 
-/* The two attributes the merge cases need are the port's own, not a colour and a font: a Catalyst build
-   declares neither, and which key it is has no bearing on which side wins. Both sides are handed the
-   same two objects, so the comparison is about the merge and not about the value. */
 static NSString *const CharonFormatKey = @"CharonTestFormatAttribute";
 static NSString *const CharonArgumentKey = @"CharonTestArgumentAttribute";
 
@@ -156,7 +122,6 @@ static NSAttributedString *marked(NSString *text)
     return string;
 }
 
-/* What the one attribute that is not carried held, printed beside the comparison that leaves it out. */
 static void note_delimiters(NSString *name, NSAttributedString *string)
 {
     NSMutableArray *found = [NSMutableArray array];
@@ -173,8 +138,6 @@ static void note_delimiters(NSString *name, NSAttributedString *string)
            found.count ? [found componentsJoinedByString:@", "].UTF8String : "none");
 }
 
-/* A string with a rule on one range of it, and the language on all of it. A fresh object each call, so the
-   two sides of a comparison are handed two objects of the same shape and neither is passed twice. */
 static NSAttributedString *inflected(NSString *text, NSRange range, id rule, NSString *language)
 {
     NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithString:text];
@@ -203,9 +166,6 @@ static void compare(NSString *name, NSString *system, NSString *port)
                  [NSString stringWithFormat:@"system %@\n           port   %@", system, port]);
 }
 
-/* -[NSAttributedString initWithFormat:options:locale:arguments:] has to be called through a variadic
-   helper on both sides: the list is handed on in a register the caller cannot name, so the only way to
-   have one is to build it, and the two helpers build theirs the same way and from the same literals. */
 static NSAttributedString *systemVaList(NSAttributedString *format, NSLocale *locale, ...)
 {
     va_list arguments;
@@ -237,11 +197,6 @@ int main(void)
                 { "NSInlinePresentationIntentAttributeName", NSInlinePresentationIntentAttributeName },
                 { "NSLanguageIdentifierAttributeName", NSLanguageIdentifierAttributeName },
             };
-            /* the system's own through a second handle on the image: a dlsym on the default search order
-               finds the port's definition, which is the one this file is linked against, and would answer
-               with the value under test */
-            /* three of the four live in the image that declares them for the platform and the fourth is
-               Foundation's, so both images are asked and the first that has the name answers */
             void *handles[2] = {
                 dlopen("/System/Library/Frameworks/AppKit.framework/AppKit", RTLD_LAZY | RTLD_LOCAL),
                 dlopen("/System/Library/Frameworks/Foundation.framework/Foundation", RTLD_LAZY | RTLD_LOCAL),
@@ -279,7 +234,6 @@ int main(void)
             compare(@"format.classMethod.options2",
                     shape([NSAttributedString localizedAttributedStringWithFormat:plain(@"%@=%d") options:2, @"x", 7]),
                     shape([NSAttributedString charonHost_localizedAttributedStringWithFormat:plain(@"%@=%d") options:2, @"x", 7]));
-            /* the format's own attributes, merged with the argument's, then with the merge refused */
             NSAttributedString *two = coloured(@"pre %@ mid %@ post", NSMakeRange(4, 3));
             for (NSUInteger options = 0; options < 4; options++) {
                 NSString *name = [NSString stringWithFormat:@"format.options%lu", (unsigned long)options];
@@ -287,7 +241,6 @@ int main(void)
                         shape([[NSAttributedString alloc] initWithFormat:two options:options locale:nil, marked(@"ARG"), @"plain"]),
                         shape([plain(@"x") initCharonHostWithFormat:two options:options locale:nil, marked(@"ARG"), @"plain"]));
             }
-            /* the two families differ in the locale they format numbers with, and that is the case */
             NSAttributedString *numbers = plain(@"%d and %.2f");
             for (NSString *identifier in @[ @"de_DE", @"fr_FR" ]) {
                 NSLocale *locale = [NSLocale localeWithLocaleIdentifier:identifier];
@@ -301,10 +254,6 @@ int main(void)
             compare(@"format.currentLocale",
                     shape([NSAttributedString localizedAttributedStringWithFormat:numbers, 1234, 1234.5]),
                     shape([NSAttributedString charonHost_localizedAttributedStringWithFormat:numbers, 1234, 1234.5]));
-            /* The other spelling of the initialiser. A va_list parameter is a copy, so a case cannot
-               hand one to a member directly - va_start is the only way to have one - so each side is
-               called from its own helper below with a list built the same way, and the two answers are
-               what is compared. */
             for (NSString *identifier in @[ @"de_DE", @"fr_FR" ]) {
                 NSLocale *locale = [NSLocale localeWithLocaleIdentifier:identifier];
                 compare([NSString stringWithFormat:@"format.argumentList.%@", identifier],
@@ -317,12 +266,6 @@ int main(void)
             compare(@"format.argumentList.currentLocale",
                     shape(systemVaList(numbers, [NSLocale currentLocale], 1234, 1234.5)),
                     shape(portVaList(numbers, [NSLocale currentLocale], 1234, 1234.5)));
-            /* A conversion that names its argument by position, which is what makes one argument be
-               substituted twice and one conversion be answered by an argument the format reached out
-               of order. Each case is written out with the arguments its own format stands for: a
-               positional conversion reads the argument it names, so a case whose first argument is not
-               the one its first conversion names reads something else entirely, which is undefined on
-               this side and on the system's and so is not a case. */
             compare(@"format.positional.0",
                     shape([NSAttributedString localizedAttributedStringWithFormat:plain(@"%1$@ and %1$@ and %2$@"), @"one", @"two"]),
                     shape([NSAttributedString charonHost_localizedAttributedStringWithFormat:plain(@"%1$@ and %1$@ and %2$@"), @"one", @"two"]));
@@ -347,16 +290,12 @@ int main(void)
             compare(@"format.positional.7",
                     shape([NSAttributedString localizedAttributedStringWithFormat:plain(@"%1$@ and %@"), @"one", @"two"]),
                     shape([NSAttributedString charonHost_localizedAttributedStringWithFormat:plain(@"%1$@ and %@"), @"one", @"two"]));
-            /* the same with the replacement index asked for, which numbers each substituted run by the
-               argument its conversion stands for and not by the order the runs appear in */
             compare(@"format.positional.indexOption",
                     shape([NSAttributedString localizedAttributedStringWithFormat:plain(@"%1$@ and %1$@ and %2$@") options:2, @"one", @"two"]),
                     shape([NSAttributedString charonHost_localizedAttributedStringWithFormat:plain(@"%1$@ and %1$@ and %2$@") options:2, @"one", @"two"]));
             compare(@"format.positional.outOfOrder.indexOption",
                     shape([NSAttributedString localizedAttributedStringWithFormat:plain(@"%3$@ %1$@ %2$@") options:2, @"one", @"two", @"three"]),
                     shape([NSAttributedString charonHost_localizedAttributedStringWithFormat:plain(@"%3$@ %1$@ %2$@") options:2, @"one", @"two", @"three"]));
-            /* A width and a precision written '*': arguments of their own, read before the conversion's,
-               and a negative one of those is the '-' flag with its magnitude. */
             compare(@"format.star.width",
                     shape([NSAttributedString localizedAttributedStringWithFormat:plain(@"[%*d]"), 6, 42]),
                     shape([NSAttributedString charonHost_localizedAttributedStringWithFormat:plain(@"[%*d]"), 6, 42]));
@@ -378,12 +317,6 @@ int main(void)
             compare(@"format.star.bothNegative",
                     shape([NSAttributedString localizedAttributedStringWithFormat:plain(@"[%*.*f]"), -8, 2, 3.14159]),
                     shape([NSAttributedString charonHost_localizedAttributedStringWithFormat:plain(@"[%*.*f]"), -8, 2, 3.14159]));
-            /* The one shape of this family the port does not carry, printed rather than compared: a
-               negative precision on a LOCALIZED value is the value's own digits and not the default
-               six, which is a search over the precisions rather than a rule, and facts/
-               Foundation/AttributedStrings15.md carries the measurement and the reason. The canonical
-               family answers the default six, which is what this object does with it, so the case
-               beside it is a comparison and this one is a note. */
             NSAttributedString *systemShortest = [NSAttributedString localizedAttributedStringWithFormat:plain(@"[%.*f]"), -2, 3.14159];
             NSAttributedString *portShortest = [NSAttributedString charonHost_localizedAttributedStringWithFormat:plain(@"[%.*f]"), -2, 3.14159];
             printf("note format.star.negativePrecision: the system answers <%s> and the port <%s> - a negative\n"
@@ -393,19 +326,12 @@ int main(void)
             compare(@"format.star.negativePrecision.canonical",
                     shape(systemVaList(plain(@"[%.*f]"), nil, -2, 3.14159)),
                     shape(portVaList(plain(@"[%.*f]"), nil, -2, 3.14159)));
-            /* A width off the list is an argument, so the conversion behind it is the third and the
-               replacement index says so; and the width is padded onto the LOCALIZED spelling, so the
-               two have to agree about the locale as well as about the width. */
             compare(@"format.star.indexOption",
                     shape([NSAttributedString localizedAttributedStringWithFormat:plain(@"[%*.*f]") options:2, 8, 2, 3.14159]),
                     shape([NSAttributedString charonHost_localizedAttributedStringWithFormat:plain(@"[%*.*f]") options:2, 8, 2, 3.14159]));
             compare(@"format.star.localizedWidth",
                     shape([NSAttributedString localizedAttributedStringWithFormat:plain(@"[%*.*f]"), 8, 2, 1234.5]),
                     shape([NSAttributedString charonHost_localizedAttributedStringWithFormat:plain(@"[%*.*f]"), 8, 2, 1234.5]));
-            /* a '%' that opens no conversion is consumed, and the shapes of the arguments */
-            /* A format whose conversion has no argument behind it reads past the end of the list on both
-               sides - "50% off" answers "505ff" on one run and "500ff" on the next, from a slot nobody
-               passed - so it is not a case with an answer and is not compared here. */
             const char *literals[] = { "100%% %@ %q", "a % b", "trailing %", "%", "%%" };
             for (unsigned i = 0; i < sizeof literals / sizeof *literals; i++) {
                 NSAttributedString *caseFormat = plain(@(literals[i]));
@@ -425,7 +351,6 @@ int main(void)
             compare(@"format.widths",
                     shape([NSAttributedString localizedAttributedStringWithFormat:plain(@"[%6.2f] %ld %c"), 3.14159, 42L, (int)65]),
                     shape([NSAttributedString charonHost_localizedAttributedStringWithFormat:plain(@"[%6.2f] %ld %c"), 3.14159, 42L, (int)65]));
-            /* -appendLocalizedFormat: adds to what is there */
             NSMutableAttributedString *systemAppend = [plain(@"Start: ") mutableCopy];
             [systemAppend appendLocalizedFormat:plain(@"%@/%d"), @"Ann", 3];
             NSMutableAttributedString *portAppend = [plain(@"Start: ") mutableCopy];
@@ -445,11 +370,6 @@ int main(void)
 
         printf("== 4. the inflection pass, with a run that carries a rule\n");
         {
-            /* One rule per shape, and the same rule object on both sides: the host test compiles the
-               port's member and not the classes it reads, so the rule both sides see is the system's.
-               The language tag is the port's own constant (NSLanguageIdentifierAttributeName is
-               "NSLanguage"), which is the same string the system uses - measured by
-               constant.NSLanguageIdentifierAttributeName and by the shape of every answer below. */
             NSMorphology *(^morphology)(NSInteger, NSInteger) = ^NSMorphology *(NSInteger number, NSInteger partOfSpeech) {
                 NSMorphology *m = [[NSMorphology alloc] init];
                 m.number = number;
@@ -463,30 +383,20 @@ int main(void)
             id plural = explicit(NSGrammaticalNumberPlural, NSGrammaticalPartOfSpeechNoun);
             id singular = explicit(NSGrammaticalNumberSingular, NSGrammaticalPartOfSpeechNoun);
 
-            /* The words. Every one of them is asked of the system first and the port second, and the
-               text and the run boundaries of the two answers are compared, so a table that answers the
-               wrong thing is a failure and not a look-alike. */
             static const char *words[] = {
-                /* the three rules that need no table */
                 "dog", "key", "day", "guy", "boy", "toy", "piano", "photo", "zero", "pizza", "shoe",
                 "canoe", "house", "sieve", "test", "attorney",
-                /* -es */
                 "box", "church", "dish", "bus", "quiz", "index", "matrix", "vertex", "axis", "crisis",
                 "analysis", "address", "class", "wish", "status", "alias", "virus", "cactus", "focus",
                 "fungus", "nucleus", "octopus", "echo", "veto", "torpedo", "volcano", "mosquito",
                 "embargo", "tornado", "hero", "potato", "tomato",
-                /* -y and -ies */
                 "city", "baby", "grocery",
-                /* -ves */
                 "knife", "leaf", "life", "wife", "half", "loaf", "self", "thief", "wolf", "shelf",
                 "calf", "elf", "scarf",
-                /* the irregular and the invariant */
                 "mouse", "foot", "tooth", "goose", "ox", "person", "child", "man", "woman", "datum",
                 "criterion", "phenomenon", "hypothesis", "thesis", "sheep", "deer", "fish", "moose",
                 "buffalo",
-                /* the capitalisations */
                 "KNIFE", "Knife", "Wolf", "Person", "CHURCH", "Church",
-                /* the shapes that are declined */
                 "x", "e", "I", "s", "house3", "house-s", "house's", "child's",
             };
             for (unsigned i = 0; i < sizeof words / sizeof *words; i++) {
@@ -499,8 +409,6 @@ int main(void)
                         shape([inflected(word, range, singular, nil) attributedStringByInflectingString]),
                         shape([inflected(word, range, singular, nil) charonHost_attributedStringByInflectingString]));
             }
-            /* The same for the words that are already plural, which is what exercises the singular rules
-               rather than the three that decline a word already in its own singular. */
             static const char *plurals[] = {
                 "houses", "dogs", "keys", "days", "boxes", "churches", "dishes", "buses", "quizzes",
                 "indexes", "matrixes", "axes", "crises", "analyses", "hypotheses", "theses",
@@ -519,7 +427,6 @@ int main(void)
                         shape([inflected(word, NSMakeRange(4, word.length - 4), singular, nil) attributedStringByInflectingString]),
                         shape([inflected(word, NSMakeRange(4, word.length - 4), singular, nil) charonHost_attributedStringByInflectingString]));
             }
-            /* The numbers, all seven the SDK declares, one at a time. */
             const char *numbers[] = { "notSet", "singular", "zero", "plural", "pluralTwo", "pluralFew", "pluralMany" };
             for (NSInteger n = 0; n < 7; n++) {
                 NSString *name = [NSString stringWithFormat:@"inflect.number.%@", @(numbers[n])];
@@ -527,21 +434,16 @@ int main(void)
                         shape([inflected(@"the house", NSMakeRange(4, 5), explicit(n, NSGrammaticalPartOfSpeechNoun), nil) attributedStringByInflectingString]),
                         shape([inflected(@"the house", NSMakeRange(4, 5), explicit(n, NSGrammaticalPartOfSpeechNoun), nil) charonHost_attributedStringByInflectingString]));
             }
-            /* The parts of speech, all fifteen the SDK declares, one at a time. */
             for (NSInteger p = 0; p < 15; p++) {
                 compare([NSString stringWithFormat:@"inflect.partOfSpeech.%ld", (long)p],
                         shape([inflected(@"the house", NSMakeRange(4, 5), explicit(NSGrammaticalNumberPlural, p), nil) attributedStringByInflectingString]),
                         shape([inflected(@"the house", NSMakeRange(4, 5), explicit(NSGrammaticalNumberPlural, p), nil) charonHost_attributedStringByInflectingString]));
             }
-            /* The language: no tag and an English one are followed, and the tags the system declines are
-               the ones this object declines. */
             const char *languages[] = { "en", "en-GB", "en-US", "EN", "de", "fr", "ru", "ar", "ja", "und" };
             for (unsigned i = 0; i < sizeof languages / sizeof *languages; i++)
                 compare([NSString stringWithFormat:@"inflect.language.%s", languages[i]],
                         shape([inflected(@"the house", NSMakeRange(4, 5), plural, @(languages[i])) attributedStringByInflectingString]),
                         shape([inflected(@"the house", NSMakeRange(4, 5), plural, @(languages[i])) charonHost_attributedStringByInflectingString]));
-            /* A range that stops inside a word: with no language the system does not follow it, and with
-               an English one it follows the whole word the range lies in. */
             struct { const char *name; const char *text; NSRange range; const char *language; } partial[] = {
                 { "inflect.partial.noLanguage", "the house and the dog", { 4, 4 }, NULL },
                 { "inflect.partial.language", "the house and the dog", { 4, 3 }, "en" },
@@ -552,20 +454,15 @@ int main(void)
                 compare(@(partial[i].name),
                         shape([inflected(@(partial[i].text), partial[i].range, plural, partial[i].language ? @(partial[i].language) : nil) attributedStringByInflectingString]),
                         shape([inflected(@(partial[i].text), partial[i].range, plural, partial[i].language ? @(partial[i].language) : nil) charonHost_attributedStringByInflectingString]));
-            /* A range carrying its own answer takes it verbatim, and a range that still holds a format
-               specifier keeps the tag because the pass never looked at it. */
             compare(@"inflect.alternative",
                     shape([inflectedWithAlternative(@"the mouse", @"mice") attributedStringByInflectingString]),
                     shape([inflectedWithAlternative(@"the mouse", @"mice") charonHost_attributedStringByInflectingString]));
             compare(@"inflect.specifier",
                     shape([inflected(@"%d house", NSMakeRange(0, 8), plural, @"en") attributedStringByInflectingString]),
                     shape([inflected(@"%d house", NSMakeRange(0, 8), plural, @"en") charonHost_attributedStringByInflectingString]));
-            /* Two runs, two rules and one run between them: the neighbours that answer alike come back
-               as one run with no attribute on it. */
             compare(@"inflect.twoRuns",
                     shape([twoTagged() attributedStringByInflectingString]),
                     shape([twoTagged() charonHost_attributedStringByInflectingString]));
-            /* A string with no rule at all comes back as it stood, with its attributes. */
             NSMutableAttributedString *untagged = [coloured(@"the house", NSMakeRange(4, 5)) mutableCopy];
             compare(@"inflect.untagged",
                     shape([untagged attributedStringByInflectingString]),
@@ -607,7 +504,6 @@ int main(void)
                         shape([[NSAttributedString alloc] initWithMarkdownString:markdown options:nil baseURL:base error:&systemError]),
                         shape([plain(@"x") initCharonHostWithMarkdownString:markdown options:nil baseURL:base error:&portError]));
             }
-            /* -initWithMarkdown: over the same bytes, the file the release reads, and bytes it refuses */
             NSData *bytes = [documents[0] dataUsingEncoding:NSUTF8StringEncoding];
             NSError *systemDataError = nil, *portDataError = nil;
             note_delimiters(@"markdown.data", [[NSAttributedString alloc] initWithMarkdown:bytes options:nil baseURL:nil error:NULL]);
@@ -628,7 +524,6 @@ int main(void)
             compare(@"markdown.notText",
                     shape([[NSAttributedString alloc] initWithMarkdown:notText options:nil baseURL:nil error:&systemBad]),
                     shape([plain(@"x") initCharonHostWithMarkdown:notText options:nil baseURL:nil error:&portBad]));
-            /* the language the options name, on both sides */
             NSAttributedStringMarkdownParsingOptions *french = [[NSAttributedStringMarkdownParsingOptions alloc] init];
             french.languageCode = @"fr";
             id portFrench = [[portOptions alloc] init];
@@ -656,11 +551,6 @@ int main(void)
 
         printf("== 7. what the RELEASE answers for the members of an abstract class\n");
         {
-            /* The three rows the port declines to carry are refused because the class is abstract and the
-               SDK marks the initialisers NS_UNAVAILABLE, and what the RELEASE does with them is the other
-               half of that claim: it answers every one of them, and the answer is an object with no state
-               in it. Measured here, on the system's own class, so the claim in the registry is a command
-               a reader can run and not a sentence. */
             Class intent = NSClassFromString(@"NSPresentationIntent");
             charon_check(intent != Nil && [intent respondsToSelector:@selector(new)],
                          "release.presentationIntent.new",

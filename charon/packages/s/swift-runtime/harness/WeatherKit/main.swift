@@ -1,6 +1,3 @@
-// Differential probe for WeatherCondition: built once against the host's WeatherKit (no -DOURS) and
-// once against packages/s/swift-runtime/files/WeatherKit/WeatherCondition.swift (-DOURS). The two
-// outputs must match line for line (facts/WeatherKit/WeatherCondition.md).
 import Foundation
 #if !OURS
 import WeatherKit

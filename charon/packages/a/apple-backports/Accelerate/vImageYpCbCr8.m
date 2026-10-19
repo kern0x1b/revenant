@@ -1,20 +1,10 @@
 #import <Accelerate/Accelerate.h>
-#import <Foundation/Foundation.h>   // BOOL, which the 4.3 include chain does not reach on its own
+#import <Foundation/Foundation.h>
 #include "CharonYpCbCr.h"
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 #pragma clang diagnostic ignored "-Wpointer-bool-conversion"
 #pragma clang diagnostic ignored "-Wnonnull"
-
-// The Y'CbCr conversions of vImage, iOS 8.0: the whole of Conversion.h's thirty-four entry points, the
-// 4:2:2, 4:4:4, 4:2:0, 10-bit v410 and v210, 16-bit v216 and y416 shapes, both directions, and the two
-// generators that build the conversion each of them takes. The arithmetic is CharonYpCbCr.h's, which
-// says where the header's per-pixel text puts it and why.
-//
-// Everything here is the port's own. The armv7 cache of iOS 6.1.3 exports 235 vImage names and not one
-// kvImage matrix among them, so none of this calls into the release: each conversion is a loop over
-// buffers with the header's coefficients in it, and the host differential compares every byte of the
-// result against macOS's own vImage.
 
 static const vImage_YpCbCrToARGBMatrix charon_ypcbcr_601_4 = {1.0f, 1.40199995f, -0.714136302f, -0.344136298f, 1.77199996f};
 static const vImage_YpCbCrToARGBMatrix charon_ypcbcr_709_2 = {1.0f, 1.57480001f, -0.46812427f, -0.187324271f, 1.8556f};
@@ -29,10 +19,6 @@ const vImage_ARGBToYpCbCrMatrix *kvImage_ARGBToYpCbCrMatrix_ITU_R_709_2 = &charo
 static const vImage_Flags charon_vimage_conversion_flags = kvImageDoNotTile | kvImagePrintDiagnosticsToConsole;
 static const vImage_Flags charon_vimage_generate_flags = kvImagePrintDiagnosticsToConsole;
 
-// Which of the thirteen Y'CbCr types the header's own table in the two generators pairs with which of
-// the three ARGB types, read straight off it: the columns are RGB8, RGB16Q12 and RGB16, the rows the
-// Y'CbCr types grouped by bit depth. The 12- and 14-bit rows of that table name no format this header
-// declares, so nothing answers for them.
 static BOOL charon_yuv_supports(vImageYpCbCrType yuv, vImageARGBType argb)
 {
     switch (yuv) {
@@ -136,28 +122,16 @@ vImage_Error vImageConvert_ARGBToYpCbCr_GenerateConversion(const vImage_ARGBToYp
     return kvImageNoError;
 }
 
-// ---------------------------------------------------------------------------------------------
-// The layouts. Which of the thirteen Y'CbCr shapes a buffer holds is not a parameter of any of the
-// thirty-two conversions - the name says it - so the port keeps it as a number its own loops read, and
-// the two directions share one table of it. A source and a destination of one name are the same layout
-// read the other way round, which is what lets one pair of loops serve both.
-//
-//   across     luma samples that share one chroma sample, left to right
-//   down       luma samples that share one chroma sample, top to bottom
-//   group      luma samples one unit of the layout holds, which is the width the shape divides by
-//   alphaWords words the shape's own alpha channel takes, where only y416's is sixteen bit wide
-// ---------------------------------------------------------------------------------------------
-
 enum {
-    CharonYUV422YpCbYpCr8,   // Y0 Cb Y1 Cr, four bytes to two pixels
-    CharonYUV422CbYpCrYp8,   // Cb Y0 Cr Y1
-    CharonYUV444AYpCbCr8,    // A Y Cb Cr
-    CharonYUV444CbYpCrA8,    // Cb Y Cr A
-    CharonYUV444CrYpCb8,     // Cr Y Cb
-    CharonYUV444AYpCbCr16,   // A Y Cb Cr, four 16-bit words to one pixel
-    CharonYUV422CbYpCrYp16,  // Cb Y0 Cr Y1, four 16-bit words to two pixels
-    CharonYUV444CrYpCb10,    // v410: one word to one pixel, Cb in bits 0-9, Yp in 10-19, Cr in 20-29
-    CharonYUV422v210         // four words to six pixels
+    CharonYUV422YpCbYpCr8,
+    CharonYUV422CbYpCrYp8,
+    CharonYUV444AYpCbCr8,
+    CharonYUV444CbYpCrA8,
+    CharonYUV444CrYpCb8,
+    CharonYUV444AYpCbCr16,
+    CharonYUV422CbYpCrYp16,
+    CharonYUV444CrYpCb10,
+    CharonYUV422v210
 };
 
 typedef struct CharonYUVLayout {
@@ -167,12 +141,6 @@ typedef struct CharonYUVLayout {
     unsigned alphaWords;
 } CharonYUVLayout;
 
-// `rows` is one for every shape: a v210 unit is SIX samples of ONE row and not a block of two rows, which
-// the header's own pseudo-code says - it reads six pixels and writes six - and the system agrees: over a
-// four-row buffer whose four units each carry their own values, row 1 comes back as row 1's unit and not
-// as row 0's again. An earlier version of this file divided the row by six, which made every row of a
-// short picture the first row's, and the differential now holds the two to each other over the whole of
-// the shape.
 static const CharonYUVLayout charon_yuv_layouts[] = {
     [CharonYUV422YpCbYpCr8]  = {2, 1, 2, 1},
     [CharonYUV422CbYpCrYp8]  = {2, 1, 2, 1},
@@ -185,10 +153,6 @@ static const CharonYUVLayout charon_yuv_layouts[] = {
     [CharonYUV422v210]       = {2, 1, 6, 1}
 };
 
-// The v410 word, read off the header's own diagram: the three ten-bit channels in bits 0-9, 10-19 and
-// 20-29, two bits of each byte unused, the top two of the word unused. Splitting and joining them that
-// way is the only reading of the diagram that gives a picture back the picture it came from, which is
-// what the host differential checks over every one of the 1024 three of them.
 static inline void charon_v410_split(uint32_t pixel, float *Yp, float *Cb, float *Cr)
 {
     *Cb = (float)(pixel & 0x3FFu);
@@ -201,9 +165,6 @@ static inline uint32_t charon_v410_join(uint32_t Yp, uint32_t Cb, uint32_t Cr)
     return ((Cr & 0x3FFu) << 20) | ((Yp & 0x3FFu) << 10) | (Cb & 0x3FFu);
 }
 
-// The v210 group, the header's four diagrams: Cb0, Y0 and Cr0; Y1, Cb1 and Y2; Cr1, Y3 and Cb2; Y4, Cr2
-// and Y5 - six luma and three of each chroma in sixteen words, each channel in bits 0-9, 10-19 or 20-29
-// of its word.
 static inline void charon_v210_split(const uint32_t *words, float *Yp, float *Cb, float *Cr)
 {
     Cb[0] = (float)(words[0] & 0x3FFu);
@@ -220,9 +181,6 @@ static inline void charon_v210_split(const uint32_t *words, float *Yp, float *Cb
     Yp[5] = (float)((words[3] >> 20) & 0x3FFu);
 }
 
-// The same four words the other way round. Its arguments are the graded integers, not floats: an
-// earlier version of this took a float array and was handed a uint32_t array through a cast, so the
-// integers' bit patterns were read as floats and every chroma of a Q12 source came out wrong.
 static inline void charon_v210_join(uint32_t *words, const uint32_t *Yp, const uint32_t *Cb, const uint32_t *Cr)
 {
     words[0] = charon_v410_join(Yp[0], Cb[0], Cr[0]);
@@ -231,13 +189,6 @@ static inline void charon_v210_join(uint32_t *words, const uint32_t *Yp, const u
     words[3] = charon_v410_join(Yp[5], Yp[4], Cr[2]);
 }
 
-// ---------------------------------------------------------------------------------------------
-// Y'CbCr to ARGB
-// ---------------------------------------------------------------------------------------------
-
-// One luma sample's Yp, Cb, Cr and alpha, read out of a source of the given layout. The chroma comes from
-// the sample the layout shares: for 4:2:2 the pair to the left, for 4:4:4 the pixel itself, and for v210
-// the six-pixel unit it belongs to.
 static void charon_yuv_read(int layout, const uint8_t *row, vImagePixelCount column, uint32_t alpha,
                             BOOL hasAlphaArgument, float *Yp, float *Cb, float *Cr, uint32_t *A)
 {
@@ -298,10 +249,6 @@ static void charon_yuv_read(int layout, const uint8_t *row, vImagePixelCount col
         break;
     }
     case CharonYUV422v210: {
-        // A unit is six pixels of forty-eight bytes, so the unit is at column / 6 of the row and the index
-        // inside it is the column modulo six: reading the arrays at the column itself walks off the end of
-        // all three from the seventh column on, and reading the unit at the row's start makes every
-        // sixth column the first unit's.
         float yp[6], cb[3], cr[3];
         unsigned at = (unsigned)column % 6u;
         charon_v210_split((const uint32_t *)(const void *)(row + (column / 6) * 48), yp, cb, cr);
@@ -318,8 +265,6 @@ static void charon_yuv_read(int layout, const uint8_t *row, vImagePixelCount col
     }
 }
 
-// The store, in the destination's own width: the header's four ARGB channels go through the permutation
-// map on the way out, and the alpha the caller gave is the fourth of the four the map may name.
 static void charon_argb_store8(const CharonToARGB *conversion, float Yp, float Cb, float Cr, uint32_t A,
                                const uint8_t *permuteMap, uint8_t *out)
 {
@@ -345,9 +290,6 @@ static void charon_argb_store16(const CharonToARGB *conversion, float Yp, float 
     out[3] = (uint16_t)argb[permuteMap[3]];
 }
 
-// The whole of the interleaved direction, from one layout to one destination width. The header's return
-// list for every one of these is the same three: no error, an unknown flag, and a destination larger
-// than the source.
 static vImage_Error charon_yuv_to_argb(int layout, float destFull, const vImage_Buffer *src,
                                        const vImage_Buffer *dest, const vImage_YpCbCrToARGB *info,
                                        const uint8_t *permuteMap, uint32_t alpha, BOOL hasAlphaArgument,
@@ -380,10 +322,6 @@ static vImage_Error charon_yuv_to_argb(int layout, float destFull, const vImage_
             charon_yuv_read(layout, in, column, alpha, hasAlphaArgument, &Yp, &Cb, &Cr, &A);
             if (alphaRow)
                 A = alphaRow[column];
-            // A shape whose own alpha is sixteen bit wide and an eight-bit destination narrow it the way
-            // Conversion.h narrows a sixteen-bit channel to eight: (bits * 255 + 32767) / 65535. Measured
-            // over seventeen values, and it is a rounding rule and not a shift: 255 gives 1 and 511 gives 2,
-            // where a shift gives 0 and 1. A sixteen-bit destination takes the value as it stands.
             if (shape->alphaWords == 2 && destFull == 255.0f)
                 A = (A * 255u + 32767u) / 65535u;
             if (destFull == 255.0f) {
@@ -405,9 +343,6 @@ static vImage_Error charon_yuv_to_argb(int layout, float destFull, const vImage_
         return charon_yuv_to_argb(layout, full, src, dest, info, permuteMap, (uint32_t)alpha, hasAlpha, NULL);   \
     }
 
-// Four of the eleven interleaved Y'CbCr-to-ARGB conversions take no alpha argument at all: the shape
-// carries one, and the header declares them without the parameter. They are the same call with the
-// fixed alpha out of it, so they get the same macro with a different head.
 #define CharonYUVToARGBNoAlpha(name, layout, full)                                                            \
     vImage_Error name(const vImage_Buffer *src, const vImage_Buffer *dest, const vImage_YpCbCrToARGB *info,     \
                       const uint8_t permuteMap[4], vImage_Flags flags)                                         \
@@ -456,10 +391,6 @@ vImage_Error vImageConvert_444CrYpCb10ToARGB16Q12(const vImage_Buffer *src, cons
     return charon_yuv_to_argb(CharonYUV444CrYpCb10, 4096.0f, src, dest, info, permuteMap, alpha, YES, NULL);
 }
 
-// The unit of this shape is six pixels of one row, so a destination whose width is not a whole number of
-// units asks for luma the source has not got: the header's own pseudo-code reads six pixels and writes
-// six, and a width of five has no sixth. Measured on the system over a four-row buffer: row 1 is its own
-// unit, so nothing carries over from row 0.
 vImage_Error vImageConvert_422CrYpCbYpCbYpCbYpCrYpCrYp10ToARGB8888(const vImage_Buffer *src,
                                                                      const vImage_Buffer *dest,
                                                                      const vImage_YpCbCrToARGB *info,
@@ -490,21 +421,11 @@ vImage_Error vImageConvert_422CbYpCrYp8_AA8ToARGB8888(const vImage_Buffer *src, 
         return kvImageUnknownFlagsBit;
     if (!srcA)
         return kvImageNullPointerArgument;
-    // One alpha byte to a pixel, measured: a plane of eight bytes over an eight-pixel row of ten, twenty,
-    // thirty ... puts 10, 20, 30 ... into the eight pixels' alpha channels one for one, and a plane
-    // narrower than the image is refused with kvImageRoiLargerThanInputBuffer. The header's own
-    // pseudo-code writes two alpha bytes and then advances by two, which is a plane half as wide - so
-    // the header's text and the system's behaviour disagree here, and the port follows the system, which
-    // is the one a caller of the system has to match. facts/Accelerate/vImageYpCbCr.md records it.
     if (srcA->width < src->width || srcA->height < src->height)
         return kvImageRoiLargerThanInputBuffer;
     return charon_yuv_to_argb(CharonYUV422CbYpCrYp8, 255.0f, src, dest, info, permuteMap, 0, NO, srcA);
 }
 
-// The 4:2:0 shapes, the only two of the thirteen with no interleaved form: one luma plane and either
-// two chroma planes or one. The chroma of a two by two block is the mean of the block's four pixels,
-// which is what the header's pseudo-code adds up and divides by four; a block at the right or bottom
-// edge of an odd-sized picture averages the pixels it has.
 static vImage_Error charon_420_to_argb(const vImage_Buffer *srcYp, const vImage_Buffer *srcCb,
                                        const vImage_Buffer *srcCr, const vImage_Buffer *srcCbCr,
                                        const vImage_Buffer *dest, const vImage_YpCbCrToARGB *info,
@@ -567,13 +488,6 @@ vImage_Error vImageConvert_420Yp8_Cb8_Cr8ToARGB8888(const vImage_Buffer *srcYp, 
     return charon_420_to_argb(srcYp, srcCb, srcCr, NULL, dest, info, permuteMap, alpha, flags);
 }
 
-// ---------------------------------------------------------------------------------------------
-// ARGB to Y'CbCr
-// ---------------------------------------------------------------------------------------------
-
-// One source pixel's red, green and blue, at the source's own full scale - 255 for an eight-bit pixel,
-// 65535 for a sixteen-bit one, 4096 for a Q12 one. The scale itself is already folded into the two
-// scales of the conversion the generator built, so the sample is used as it stands.
 static void charon_rgb_read(int words, const vImage_Buffer *src, vImagePixelCount row, vImagePixelCount column,
                             const uint8_t *permuteMap, float *rgb)
 {
@@ -590,7 +504,6 @@ static void charon_rgb_read(int words, const vImage_Buffer *src, vImagePixelCoun
     }
 }
 
-// The luma of one pixel, which every layout writes for every pixel.
 static uint32_t charon_luma_of(const CharonToYpCbCr *conversion, const float *rgb)
 {
     float Yp, Cb, Cr;
@@ -598,11 +511,6 @@ static uint32_t charon_luma_of(const CharonToYpCbCr *conversion, const float *rg
     return charon_encode(Yp, conversion->YpMin, conversion->YpMax);
 }
 
-// The chroma of the block a pixel starts, the header's rule: the sum over the block's pixels of the
-// same three dot products, divided by the number of them. A block at the right or bottom edge of an
-// odd-sized picture has fewer, and the header's own pseudo-code adds up what it has. What is summed is
-// the raw dot product, before the scale and the bias, which is what the header's own text adds up -
-// CharonYpCbCr.h says why the two must not be confused.
 static void charon_chroma_of(const CharonToYpCbCr *conversion, int words, const vImage_Buffer *src,
                              vImagePixelCount width, vImagePixelCount height, vImagePixelCount row,
                              vImagePixelCount column, unsigned across, unsigned down, const uint8_t *permuteMap,
@@ -632,8 +540,6 @@ static void charon_chroma_of(const CharonToYpCbCr *conversion, int words, const 
                         conversion->CbCrMax);
 }
 
-// One source pixel's alpha, at the source's own full scale, which is the fourth of the four the
-// permutation map may name.
 static uint32_t charon_alpha_of(int words, const vImage_Buffer *src, vImagePixelCount row, vImagePixelCount column,
                                 const uint8_t *permuteMap)
 {
@@ -643,10 +549,6 @@ static uint32_t charon_alpha_of(int words, const vImage_Buffer *src, vImagePixel
     return ((const uint16_t *)(const void *)in)[column * 4 + permuteMap[0]];
 }
 
-// The eight interleaved layouts, one pair of loops. Every one of them writes a luma for every pixel and,
-// where the layout subsamples the chroma, a chroma for every sample; where a pixel's alpha belongs in
-// the destination it goes there in the same pass, which is what the header's pseudo-code for
-// ARGB8888To422CbYpCrYp8_AA8 does - the alpha plane is written as the luma planes are.
 static vImage_Error charon_argb_to_yuv(int layout, int words, const vImage_Buffer *src, const vImage_Buffer *dest,
                                        const vImage_ARGBToYpCbCr *info, const uint8_t *permuteMap,
                                        const vImage_Buffer *destA)
@@ -665,8 +567,6 @@ static vImage_Error charon_argb_to_yuv(int layout, int words, const vImage_Buffe
     vImagePixelCount width = dest->width, height = dest->height;
     if (src->width < width || src->height < height)
         return kvImageRoiLargerThanInputBuffer;
-    // The same rule as the A8 shape's own alpha plane, measured on the system: at least as wide as the
-    // image, and one byte to a pixel.
     if (destA && (destA->width < width || destA->height < height))
         return kvImageRoiLargerThanInputBuffer;
     for (vImagePixelCount row = 0; row < height; row++) {
@@ -718,9 +618,6 @@ static vImage_Error charon_argb_to_yuv(int layout, int words, const vImage_Buffe
                 out[column * 3 + 2] = (uint8_t)Cb;
                 break;
             case CharonYUV444AYpCbCr16: {
-                // An eight-bit source's alpha widened into the sixteen-bit shape by 257, which is the
-                // reverse of the narrowing above and what the system does: 32 becomes 8224, 128 becomes
-                // 32896 and 255 becomes 65535.
                 uint32_t source = charon_alpha_of(words, src, row, column, permuteMap);
                 wide[column * 4] = (uint16_t)(words == 1 ? source * 257u : source);
                 wide[column * 4 + 1] = (uint16_t)luma;
@@ -741,9 +638,6 @@ static vImage_Error charon_argb_to_yuv(int layout, int words, const vImage_Buffe
                 break;
             }
         }
-        // One alpha byte to a pixel, the same rule the A8 shape's own source plane follows and the same
-        // one the system was measured on: eight input alphas of 30 to 37 come back as eight plane bytes
-        // of 30 to 37, in order.
         if (destA) {
             uint8_t *alphaRow = (uint8_t *)destA->data + row * destA->rowBytes;
             for (vImagePixelCount column = 0; column < width; column++)
@@ -801,9 +695,6 @@ vImage_Error vImageConvert_ARGB8888To422CbYpCrYp8_AA8(const vImage_Buffer *src, 
     return charon_argb_to_yuv(CharonYUV422CbYpCrYp8, 1, src, dest, info, permuteMap, destA);
 }
 
-// The two 10-bit shapes are the same word layout as the others and the same dot products, but each
-// pixel's three channels share one word, so they are written a pixel at a time rather than a channel at
-// a time: v410 packs them, v210 gathers six pixels and three of each chroma into sixteen words.
 static vImage_Error charon_argb_to_v410(int words, const vImage_Buffer *src, const vImage_Buffer *dest,
                                         const vImage_ARGBToYpCbCr *info, const uint8_t *permuteMap)
 {
@@ -881,9 +772,6 @@ static vImage_Error charon_argb_to_v210(int words, const vImage_Buffer *src, con
                                           conversion->YpMin, conversion->YpMax);
             }
             for (vImagePixelCount index = 0; index < 3; index++) {
-                // The header's own pseudo-code: Cb0 is the mean of pixels 0 and 1 of THIS row, Cb1 that
-                // of 2 and 3, Cb2 that of 4 and 5. The chroma of a v210 unit is not shared with the row
-                // below it.
                 charon_chroma_of(conversion, words, src, width, height, row, column + index * 2, 2, 1, permuteMap,
                                  &Cb[index], &Cr[index]);
             }
@@ -913,8 +801,6 @@ vImage_Error vImageConvert_ARGB16Q12To422CrYpCbYpCbYpCbYpCrYpCrYp10(const vImage
     return charon_argb_to_v210(3, src, dest, info, permuteMap);
 }
 
-// The 4:2:0 shapes again, the other way round: the luma plane is written for every pixel and the chroma
-// planes for every two by two block, whose chroma is the mean of the four pixels' own.
 static vImage_Error charon_argb_to_420(const vImage_Buffer *src, const vImage_Buffer *destYp,
                                        const vImage_Buffer *destCb, const vImage_Buffer *destCr,
                                        const vImage_Buffer *destCbCr, const vImage_ARGBToYpCbCr *info,

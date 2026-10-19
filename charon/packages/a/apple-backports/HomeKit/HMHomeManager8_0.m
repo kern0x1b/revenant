@@ -1,8 +1,3 @@
-// HMHome and HMHomeManager, of iOS 8.0: the root of the graph and the one place the set of homes is
-// read and written. What an application builds through -addHomeWithName:completionHandler: is in
-// CharonHomeKitStore before the handler is called, and is there for the next launch.
-//
-// One release's API per object file, which is what the band machinery needs.
 #import "CharonHomeKitInternal.h"
 
 #pragma mark - HMHome
@@ -10,21 +5,8 @@
 @implementation HMHome
 @synthesize charon_identifier = _charon_identifier, charon_homeIdentifier = _charon_homeIdentifier, charon_delegate = _charon_delegate;
 
-// -init, as the release's own class answers it: the body read out of the arm64e cache of iOS 16.0
-// releases the receiver and answers nil, which the macro below carries. A home is made through the
-// port's own -charon_initWithStore:identifier: below, which is what CharonHomeKitModel.m's
-// CharonHomeKitHome() calls - that file and not this one, because a band from iOS 8.0 on does not link
-// this object and two files that no band drops (HMAccessoryHome10_0.m and CharonHomeKitDelegate.m)
-// call that function - and +new is not defined here for the reason its comment in HMHomeManager
-// gives.
 CHARON_HOMEKIT_NIL_INIT
 
-// The port's own designated initializer, and where a home's identity comes from: see
-// CharonHomeKitConstruction.h for why this is not -init and what the method-family attribute is for.
-// Every model call in this file and in HMHomeGraph8_0.m reaches a home through it, and so does
-// CharonHomeKitHome() in CharonHomeKitModel.m, which is where the graph's own entry point is built -
-// it is here rather than in a +new the release has no use for, and the entry point is there because
-// this object is not in every band.
 - (instancetype)charon_initWithStore:(CharonHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
 {
     self = [super init];
@@ -63,18 +45,12 @@ CHARON_HOMEKIT_NIL_INIT
 
 - (HMUser *)currentUser
 {
-    // The current user is the one the store records as current for this home. There is no iCloud
-    // account on this release to decide it from, so it is whatever -addUserWithCompletionHandler: last
-    // made current, and nothing until then.
     NSString *current = CharonHomeKitRecord(@"homes", _charon_identifier)[@"currentUser"];
     return current ? CharonHomeKitUser(current, _charon_identifier) : nil;
 }
 
 - (HMHomeHubState)homeHubState
 {
-    // A home hub is the Apple TV or iPad that runs a home away from home. This release has neither in
-    // the role, so the state is the one a home with no hub answers, and it is the daemon's absence the
-    // port is reporting rather than a guess: see facts/HomeKit/HMHome.md.
     return HMHomeHubStateNotAvailable;
 }
 
@@ -93,9 +69,6 @@ CHARON_HOMEKIT_NIL_INIT
 
 - (HMRoom *)roomForEntireHome
 {
-    // The room that holds an accessory with no room of its own. HomeKit makes it on demand and it is
-    // a real room, so it is written into the home's own list the first time it is asked for and is
-    // there after that.
     NSMutableDictionary *record = CharonHomeKitRecord(@"homes", _charon_identifier);
     NSString *identifier = record[@"entireHomeRoom"];
     if (identifier)
@@ -144,14 +117,8 @@ CHARON_HOMEKIT_NIL_INIT
 
 - (NSArray<HMTrigger *> *)triggers
 {
-    // The home's triggers, in the order the home lists them. The kind is recorded with each one, so a
-    // trigger read back is the kind it was created as rather than whichever subclass comes first.
     NSMutableArray *found = [NSMutableArray array];
     for (NSString *identifier in CharonHomeKitStringListField(CharonHomeKitRecord(@"homes", _charon_identifier), @"triggerOrder")) {
-        // The kind is recorded with each trigger, so one read back is the kind it was created as. The
-        // event trigger of iOS 9.0 is not in the tree in this round, so a trigger recorded as one is
-        // listed here as the timer trigger its own store says it is rather than as a class that is
-        // not there; facts/HomeKit/HMHome.md says so.
         [found addObject:CharonHomeKitTimerTrigger(identifier, _charon_identifier)];
     }
     return found;
@@ -167,9 +134,6 @@ CHARON_HOMEKIT_NIL_INIT
 
 - (HMActionSet *)builtinActionSetOfType:(NSString *)type
 {
-    // The built-in action sets are the home's own and are listed with the rest. An application asking
-    // for one by name gets that one, and an unknown type gets nil, which is what asking for an action
-    // set that is not there answers.
     for (HMActionSet *set in self.actionSets) {
         if ([set.actionSetType isEqualToString:type])
             return set;
@@ -197,9 +161,6 @@ CHARON_HOMEKIT_NIL_INIT
         CharonHomeKitFinish(completionHandler, nil, CharonHomeKitError(HMErrorCodeNilParameter, @"a room needs a name"));
         return;
     }
-    // A second room, zone or service group with a name this home already uses is refused, and the code
-    // the release refuses it with: an application that lays out a home would otherwise get two rooms
-    // it cannot tell apart.
     if ([self charon_nameInUse:name]) {
         CharonHomeKitFinish(completionHandler, nil,
                             CharonHomeKitError(HMErrorCodeObjectWithSimilarNameExistsInHome,
@@ -262,11 +223,6 @@ CHARON_HOMEKIT_NIL_INIT
 
 - (void)addUserWithCompletionHandler:(void (^)(HMUser * _Nullable user, NSError * _Nullable error))completionHandler
 {
-    // Adding a user is adding a person, and there is no Apple ID on this release to add: the port
-    // makes the user the process runs as, names it from the account the keychain already holds, and
-    // says what it could not do through the error it passes alongside the user HomeKit also returns.
-    // An application that checks only the user still gets a usable one, and one that reads the error
-    // learns that no invitation was sent.
     HMUser *user = [[HMUser alloc] charon_initWithStore:[CharonHomeKitStore shared] identifier:nil];
     [user charon_setName:@"Me"];
     [self charon_append:CharonHomeKitUUIDString(user.uniqueIdentifier) to:@"userOrder"];
@@ -312,9 +268,6 @@ CHARON_HOMEKIT_NIL_INIT
                                                                         @"the accessory is already in a home"));
         return;
     }
-    // Adding an accessory to a home is a HAP pair-setup, and this port carries none: no HAP session, no
-    // Bonjour browse, no Bluetooth LE scan. The refusal is the documented one for a pairing that did not
-    // happen, and the graph is left exactly as it was.
     CharonHomeKitFinishError(completionHandler, CharonHomeKitErrorForAccessory(HMErrorCodeAccessoryPairingFailed, accessory,
                                                                                 @"adding an accessory needs a completed HAP pair-setup, which this port does not carry"));
 }
@@ -445,8 +398,6 @@ CHARON_HOMEKIT_NIL_INIT
         return;
     }
     if (order.count == 1) {
-        // A home keeps at least one user. The code is the release's own for an object a home will not do
-        // without, which is what the release answers here too.
         CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeCannotRemoveBuiltinActionSet,
                                                                         @"a home keeps at least one user"));
         return;
@@ -579,8 +530,6 @@ CHARON_HOMEKIT_NIL_INIT
     return held;
 }
 
-// Whether the graph holds an accessory at all, which is what adding and assigning both ask: an
-// accessory is in a home when that home's own ordering names it, and the ordering is the graph.
 - (BOOL)charon_holdsAccessory:(HMAccessory *)accessory
 {
     for (HMAccessory *held in self.accessories) {
@@ -614,18 +563,6 @@ CHARON_HOMEKIT_NIL_INIT
 @implementation HMHomeManager
 @synthesize charon_delegate = _charon_delegate;
 
-// -init, as the release's own class answers it: the body read out of the arm64e cache of iOS 16.0 is
-// `[self initWithHomeMangerConfiguration:[HMHomeManagerConfiguration defaultConfiguration]]`, so the
-// manager comes up on its default configuration rather than bare, and it is not a raise. What the
-// configuration holds on a device is the daemon's settings; the port's manager reads and writes the
-// shared store, which is the same role, and its accessors already read it - so the default
-// configuration is what this object already answers from and there is nothing else to store.
-// facts/HomeKit/HMAccessoryProfile.md carries the body and the names out of it.
-//
-// +new is not defined here: the metaclass of this class carries no +new of its own in the cache of
-// iOS 16.0, so the class inherits NSObject's, which is [[self alloc] init] and reaches the -init
-// above. A definition here would put the selector in the port's metadata where the release's has none
-// and would answer a caller what -init answers.
 - (instancetype)init
 {
     return [super init];
@@ -643,17 +580,11 @@ CHARON_HOMEKIT_NIL_INIT
 
 - (HMHomeManagerAuthorizationStatus)authorizationStatus
 {
-    // The status answers whether this process may read the homes. It may: the port's graph is the
-    // application's own store, which no other application can reach, and there is nothing for the
-    // system to refuse. The host, which has a daemon, answers for a process the daemon has not
-    // authorized -- see facts/HomeKit/HMHome.md for the difference and what the host answers instead.
     return HMHomeManagerAuthorizationStatusDetermined;
 }
 
 - (NSArray<HMHome *> *)homes
 {
-    // The stored homes in the order the store lists them, so the order an application sees is the order
-    // the graph was built in and the same on every launch.
     NSMutableArray *found = [NSMutableArray array];
     for (NSString *identifier in CharonHomeKitStringListField(CharonHomeKitRecord(@"homes", CharonHomeKitHomeOrderKey), @"homes"))
         [found addObject:CharonHomeKitHome(identifier)];
@@ -686,9 +617,6 @@ CHARON_HOMEKIT_NIL_INIT
     [home updateName:name completionHandler:nil];
     CharonHomeKitSetField(@"homes", CharonHomeKitUUIDString(home.uniqueIdentifier), @"primary", @(self.homes.count == 0));
 
-    // The manager's own ordering, so that the homes come back in the order they were made. It is one
-    // more row of the same table, so a store that grew a home and a store that grew its order cannot
-    // disagree about which homes exist.
     CharonHomeKitStore *store = [CharonHomeKitStore shared];
     NSMutableDictionary *homes = [store tableNamed:@"homes"];
     NSMutableArray *order = [homes[CharonHomeKitHomeOrderKey][@"homes"] mutableCopy] ?: [NSMutableArray array];
@@ -737,8 +665,6 @@ CHARON_HOMEKIT_NIL_INIT
     for (HMHome *home in self.homes)
         CharonHomeKitSetField(@"homes", CharonHomeKitUUIDString(home.uniqueIdentifier), @"primary", @(home == primaryHome));
     CharonHomeKitTell(_charon_delegate, @selector(homeManagerDidUpdatePrimaryHome:), ^(id target) {
-        // HMHomeManager.h:133 spells this one with the manager as its only argument; the delegate reads
-        // the primary home off the manager, which is what the port has just written.
         [(id<HMHomeManagerDelegate>)target homeManagerDidUpdatePrimaryHome:self];
     });
     CharonHomeKitFinishError(completionHandler, nil);
@@ -746,9 +672,6 @@ CHARON_HOMEKIT_NIL_INIT
 
 - (void)findVendorAccessoryWithHAPPublicKey:(NSData *)publicKey completionHandler:(void (^)(HMAccessory * _Nullable accessory, NSError * _Nullable error))completionHandler
 {
-    // A vendor accessory is one whose HAP public key the vendor has published, and looking one up is a
-    // search of what the port holds, not a call to a service: the store's pairings are the ones this
-    // port has, and a key that is not among them names nothing.
     if (!publicKey.length) {
         CharonHomeKitFinish(completionHandler, nil, CharonHomeKitError(HMErrorCodeNilParameter, @"a public key is needed"));
         return;

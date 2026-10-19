@@ -4,9 +4,6 @@
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
-// The video stabilization modes of iOS 8 and the format's stabilization of iOS 7 over the release's
-// switch (facts/AVFoundation/VideoStabilization.md). A daemon: the camera needs no permission on 6.1.3.
-
 @interface AVCaptureDeviceFormat (CharonReleaseStabilization)
 - (int)supportedStabilizationMethod;
 @end

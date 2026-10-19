@@ -26,8 +26,6 @@ static void charon_require(BOOL condition, NSString *what)
     return YES;
 }
 
-// The header redeclares -init NS_UNAVAILABLE. An alternate made by -init has no title, no action and no modifier
-// flags, which is what the system's -init answers; the factory below starts from the same empty alternate.
 - (instancetype)init
 {
     return [super init];
@@ -119,8 +117,6 @@ static void charon_require(BOOL condition, NSString *what)
     return [[self alloc] initCharonWithTitle:title image:image action:action propertyList:propertyList alternates:alternates];
 }
 
-// The header redeclares -init NS_UNAVAILABLE. A command made by -init is the one the factory of a command with
-// no alternates makes, with no title, no image, no action and no property list: the host answers the same.
 - (instancetype)init
 {
     return [self initCharonWithTitle:nil image:nil action:NULL propertyList:nil alternates:@[]];
@@ -250,8 +246,6 @@ static void charon_require(BOOL condition, NSString *what)
     _state = state;
 }
 
-// The command's action goes up the responder chain from the target, or from the
-// first responder when there is none, with the command as the sender of the message.
 - (void)charon_performWithSender:(id)sender target:(id)target
 {
     objc_setAssociatedObject(self, @selector(sender), sender, OBJC_ASSOCIATION_ASSIGN);

@@ -1,18 +1,3 @@
-/*
- * The host differential for the objects of Network: every family the port carries, asked the same
- * questions of the host's own Network.framework and of the port's implementation compiled beside it
- * with its names changed, and the two answers compared.
- *
- * The port's files are compiled into this program by run.sh with every symbol they define renamed -
- * every nw_* call to charonhost_nw_*, every Charon class to CharonHostCharon* - so one table of
- * function pointers reaches either side and a scenario runs through both unchanged. What is compared
- * is what a program can observe: a getter's default, a set and a get, a refused argument, the shape
- * of an endpoint, the bytes of a record, and the predicate that says which protocol an object is.
- *
- * Where a call has no getter, the setter is called on both sides and the two are compared by the fact
- * that nothing crashed: there is nothing else of a setting-only call to see.
- */
-
 #import <Foundation/Foundation.h>
 #import <Network/Network.h>
 #import <arpa/inet.h>
@@ -26,12 +11,8 @@
 #import <string.h>
 #import "check.h"
 
-/* ---------------------------------------------------------------- the port's side, renamed */
-
 #define P(name) charonhost_##name
 
-/* The port's own types of iOS 17, which the 16.4 SDK does not carry: the port declares them itself
-   (CharonNW.h), so the test names them the way the port does. */
 typedef id P(nw_proxy_config_t);
 typedef id P(nw_relay_hop_t);
 typedef enum { P(nw_link_quality_t) } P(nw_link_quality_e);
@@ -63,12 +44,9 @@ extern void charonhost_nw_path_monitor_cancel(nw_path_monitor_t);
 extern bool charonhost_nw_path_is_constrained(nw_path_t);
 extern void charonhost_nw_path_enumerate_gateways(nw_path_t, void (^)(nw_endpoint_t));
 extern nw_path_unsatisfied_reason_t charonhost_nw_path_get_unsatisfied_reason(nw_path_t);
-/* The path's own decision about an interface, asked with synthetic types: what the release's
-   path does with a tunnel and a bridge is measured on the host and is the same. */
 extern bool charon_path_wants_interface(nw_interface_type_t required, nw_interface_type_t type, bool reachable,
                                         bool cellular, bool hasAddress);
 extern int charonhost_nw_path_get_link_quality(nw_path_t);
-/* The port's own interface classifier, over the AF_LINK entry of an interface. */
 extern nw_interface_type_t charon_path_interface_type(const struct ifaddrs *item);
 extern int charonhost_nw_path_get_link_quality(nw_path_t);
 extern bool charonhost_nw_path_is_ultra_constrained(nw_path_t);
@@ -342,16 +320,12 @@ extern uint64_t P(nw_data_transfer_report_get_transport_rtt_variance)(nw_data_tr
 extern nw_interface_t P(nw_data_transfer_report_copy_path_interface)(nw_data_transfer_report_t, uint32_t);
 extern nw_interface_radio_type_t P(nw_data_transfer_report_get_path_radio_type)(nw_data_transfer_report_t, uint32_t);
 
-/* The two sentinel blocks are compared by pointer, so each side is given its own: a factory that was
-   given the other's sentinel sees a block of one's own, which is what a program passing nothing sees. */
 extern const nw_parameters_configure_protocol_block_t charonhost__nw_parameters_configure_protocol_default_configuration;
 extern const nw_parameters_configure_protocol_block_t charonhost__nw_parameters_configure_protocol_disable;
 #define SYSTEM_DEFAULT NW_PARAMETERS_DEFAULT_CONFIGURATION
 #define SYSTEM_DISABLE NW_PARAMETERS_DISABLE_PROTOCOL
 #define PORT_DEFAULT ((nw_parameters_configure_protocol_block_t)charonhost__nw_parameters_configure_protocol_default_configuration)
 #define PORT_DISABLE ((nw_parameters_configure_protocol_block_t)charonhost__nw_parameters_configure_protocol_disable)
-
-/* ---------------------------------------------------------------- the one table both sides answer through */
 
 typedef struct {
     nw_endpoint_t (*endpoint_host)(const char *, const char *);
@@ -668,9 +642,6 @@ typedef struct {
     CFErrorRef (*error_cf)(nw_error_t);
 } API;
 
-/* The two tables name the same fields in the same order: the host's own calls on one side, the port's
-   on the other. A call Apple's headers mark as returning a retained object is a different
-   function-pointer type from the same call without that mark, so both are written through a void *. */
 static API system_api(void)
 {
     API api;
@@ -1289,10 +1260,6 @@ static API port_api(void)
     return api;
 }
 
-/* ---------------------------------------------------------------- the scenarios */
-
-/* What is compared is what a program sees: both answers are made into text, so a difference in how
-   each side made it is not a difference. */
 static void compare(NSString *name, id system, id port)
 {
     NSString *left = [NSString stringWithFormat:@"%@", system], *right = [NSString stringWithFormat:@"%@", port];
@@ -1329,9 +1296,6 @@ static NSString *stack_shape(API api, nw_parameters_t parameters)
             api.stack_internet(stack) != NULL, api.stack_transport(stack) != NULL, count];
 }
 
-/* The options of QUIC, as text, one field per getter and named after it. The datagram frame size is
-   asked for separately: the host's own *default* for it is whatever was in the memory (measured, two
-   runs two numbers), so it cannot be compared before a program sets it, and after it can. */
 static NSString *quic_options_shape(API api, nw_protocol_options_t options)
 {
     return [NSString stringWithFormat:@"idle=%u max_udp=%u data=%llu data_local=%llu data_remote=%llu data_uni=%llu "
@@ -1392,7 +1356,6 @@ int main(void)
         v6.sin6_port = htons(443);
         v6.sin6_addr = in6addr_loopback;
 
-        /* the endpoint */
         {
             const char *hosts[] = {"example.test", "192.0.2.7", "", "::1"};
             const char *ports[] = {"80", "443", "0", "http"};
@@ -1442,7 +1405,6 @@ int main(void)
                     @(port.endpoint_txt_record(port.endpoint_bonjour("n", "_http._tcp", "local.")) != NULL));
         }
 
-        /* the parameters: every default, then every set and get */
         {
             nw_parameters_t a = system.parameters_create(), b = port.parameters_create();
             compare(@"parameters: the defaults",
@@ -1515,7 +1477,6 @@ int main(void)
             compare(@"parameters: the stack of a configured parameters", stack_shape(system, a), stack_shape(port, b));
         }
 
-        /* the factories and the stacks they build */
         {
             compare(@"parameters: the stack of a plain one", stack_shape(system, system.parameters_create()),
                     stack_shape(port, port.parameters_create()));
@@ -1551,7 +1512,6 @@ int main(void)
             compare(@"parameters: the QUIC configure block runs with QUIC options", @(system_quic), @(port_quic));
         }
 
-        /* the protocol stack's own calls */
         {
             nw_protocol_stack_t system_stack = system.parameters_stack(system.parameters_secure_tcp(SYSTEM_DEFAULT, SYSTEM_DEFAULT));
             nw_protocol_stack_t port_stack = port.parameters_stack(port.parameters_secure_tcp(PORT_DEFAULT, PORT_DEFAULT));
@@ -1577,7 +1537,6 @@ int main(void)
                     @(port.definition_equal(port.options_definition(port.stack_internet(port_stack)), port.definition_ip())));
         }
 
-        /* the identity of a protocol, and which one an object is */
         {
             compare(@"definition: the same TCP twice is equal", @(system.definition_equal(system.definition_tcp(), system.definition_tcp())),
                     @(port.definition_equal(port.definition_tcp(), port.definition_tcp())));
@@ -1619,7 +1578,6 @@ int main(void)
                     @(port.metadata_is_framer_message(port.framer_message(port_framer))));
         }
 
-        /* the options of IP, TCP, TLS and UDP, and the metadata of a message */
         {
             nw_protocol_options_t system_tcp = system.tcp_options(), port_tcp = port.tcp_options();
             system.tcp_no_delay(system_tcp, true); port.tcp_no_delay(port_tcp, true);
@@ -1681,7 +1639,6 @@ int main(void)
                     @(port.quic_sec_metadata(port_meta) != NULL));
         }
 
-        /* the content of a message */
         {
             nw_content_context_t system_context = system.context_create("ctx"), port_context = port.context_create("ctx");
             compare(@"content: the defaults",
@@ -1736,12 +1693,8 @@ int main(void)
             system.context_foreach(system_open, ^(nw_protocol_definition_t d, nw_protocol_metadata_t m) { system_seen++; });
             port.context_foreach(port_open, ^(nw_protocol_definition_t d, nw_protocol_metadata_t m) { port_seen++; });
             compare(@"content: and it is enumerated once", @(system_seen), @(port_seen));
-            /* A context with no name is not asked of the host: nw_content_context_create(NULL) traps
-               there (measured), so there is no answer to compare - the port refuses it instead, which
-               is what the header says a factory does when it fails. */
         }
 
-        /* the TXT record of a service */
         {
             nw_txt_record_t system_record = system.txt_bytes(record_bytes, sizeof record_bytes);
             nw_txt_record_t port_record = port.txt_bytes(record_bytes, sizeof record_bytes);
@@ -1793,7 +1746,6 @@ int main(void)
                     txt_shape(port, port.txt_bytes((const uint8_t *)"", 0)));
         }
 
-        /* the WebSocket objects */
         {
             nw_protocol_metadata_t system_meta = system.ws_metadata(nw_ws_opcode_text), port_meta = port.ws_metadata(nw_ws_opcode_text);
             compare(@"ws: the defaults of a frame",
@@ -1846,7 +1798,6 @@ int main(void)
                     @(port.ws_request_headers(NULL, ^bool(const char *name, const char *value) { return true; })));
         }
 
-        /* a framer a program writes */
         {
             nw_protocol_definition_t system_framer = system.framer_definition("_http._tcp", 0, ^(nw_framer_t f) { return nw_framer_start_result_ready; }),
                 port_framer = port.framer_definition("_http._tcp", 0, ^(nw_framer_t f) { return nw_framer_start_result_ready; });
@@ -1892,7 +1843,6 @@ int main(void)
                     @(port.framer_options(NULL) != NULL));
         }
 
-        /* the QUIC options and metadata */
         {
             nw_protocol_options_t system_quic = system.quic_options(), port_quic = port.quic_options();
             compare(@"quic: the defaults", quic_options_shape(system, system_quic), quic_options_shape(port, port_quic));
@@ -1909,7 +1859,6 @@ int main(void)
             system.quic_datagram_frame(system_quic, 1200); port.quic_datagram_frame(port_quic, 1200);
             system.quic_add_application_protocol(system_quic, "h3"); port.quic_add_application_protocol(port_quic, "h3");
             compare(@"quic: every setting that was made", quic_options_shape(system, system_quic), quic_options_shape(port, port_quic));
-            /* Once a program has set the frame size it is a value both sides stand behind. */
             compare(@"quic: the datagram frame size that was set", @(system.quic_datagram_frame_value(system_quic)),
                     @(port.quic_datagram_frame_value(port_quic)));
             nw_protocol_metadata_t system_meta = system.ip_metadata(), port_meta = port.ip_metadata();
@@ -1931,7 +1880,6 @@ int main(void)
                     quic_metadata_shape(port, port_meta));
         }
 
-        /* the descriptors of what to look for and what to publish */
         {
             nw_browse_descriptor_t system_browse = system.browse_bonjour("_http._tcp", "local."),
                 port_browse = port.browse_bonjour("_http._tcp", "local.");
@@ -1975,7 +1923,6 @@ int main(void)
                     @(port.advertise_bonjour("n", NULL, "local.") != NULL));
         }
 
-        /* the group of connections and the privacy of their names */
         {
             nw_endpoint_t system_group = system.endpoint_host("224.0.0.251", "5353"),
                 port_group = port.endpoint_host("224.0.0.251", "5353");
@@ -1988,12 +1935,6 @@ int main(void)
             port.group_specific_source(port_multicast, port.endpoint_host("192.0.2.1", "0"));
             compare(@"group: and not once that is prohibited", @(system.group_disable_unicast_value(system_multicast)),
                     @(port.group_disable_unicast_value(port_multicast)));
-            /* nw_group_descriptor_add_endpoint is not compared: the host's own Network answers false
-               and adds nothing for any endpoint at all - a name, an address, a URL, a Bonjour service,
-               on a multicast group and on a multiplex one (measured, and in facts/Network/NWGroup.md) -
-               which is not what its own header says. The port follows the header, and these two checks
-               are the port's own answer rather than a comparison: a peer is added and enumerated, an
-               endpoint that names no peer is refused. */
             nw_group_descriptor_t port_multiplex = port.group_multiplex(port.endpoint_host("192.0.2.3", "9"));
             BOOL port_added = port.group_add(port_multiplex, port.endpoint_host("peer.test", "9"));
             __block int port_members = 0;
@@ -2028,7 +1969,6 @@ int main(void)
                     @(port.resolver_https(port.endpoint_url("https://dns.example/dns-query")) != NULL));
         }
 
-        /* the prohibited interfaces of a parameters, the two rows the review named */
         {
             nw_parameters_t system_parameters = system.parameters_create(), port_parameters = port.parameters_create();
             __block int system_count = 0, port_count = 0;
@@ -2055,7 +1995,6 @@ int main(void)
             compare(@"parameters: and none of them after they are cleared", @(system_left), @(port_left));
         }
 
-        /* the path: the five rows the review named, asked of a real path from each side's own monitor */
         {
             dispatch_queue_t system_queue = dispatch_queue_create("system.path", DISPATCH_QUEUE_SERIAL);
             dispatch_queue_t port_queue = dispatch_queue_create("port.path", DISPATCH_QUEUE_SERIAL);
@@ -2078,12 +2017,6 @@ int main(void)
             if (system_path && port_path) {
                 compare(@"path: whether it is a constrained network", @(system.path_is_constrained(system_path)),
                         @(port.path_is_constrained(port_path)));
-                /* The port's answer, and it is an answer rather than a shape: this device's path is
-                   not over a point-to-point interface, and SIOCGIFDSTADDR - the one ioctl that names
-                   a router with no privilege - answers for those only, so the port enumerates nothing
-                   and says so (facts/Network/NWPath.md). That is what is asserted. The host's own
-                   enumeration is not asserted at all: what the host's routers are is not a fact this
-                   program can check, and a check that cannot fail is worse than none. */
                 __block int port_gateways = 0;
                 port.path_enumerate_gateways(port_path, ^(nw_endpoint_t gateway) {
                     port_gateways++;
@@ -2092,12 +2025,6 @@ int main(void)
                       "the port enumerates no gateway on a path that is not point-to-point");
                 compare(@"path: why it is unsatisfied", @(system.path_unsatisfied_reason(system_path)),
                         @(port.path_unsatisfied_reason(port_path)));
-                /* The link quality is the port's own check, and the host's answer is not one to
-                   compare with: the host measures the quality of its own link and reports 20
-                   (moderate) for a wired one, while the release the port builds for has no way to
-                   ask its link anything and every path there answers "no measurement available",
-                   which is the first of the four values (facts/Network/NWPath.md). Two different
-                   machines' links are not one measurement. */
                 CHECK(port.path_link_quality(port_path) == 0, "path: the port's link quality is the one it has");
                 compare(@"path: whether it is ultra-constrained", @(system.path_is_ultra_constrained(system_path)),
                         @(port.path_is_ultra_constrained(port_path)));
@@ -2105,11 +2032,6 @@ int main(void)
             nw_path_monitor_cancel(system_monitor); port.monitor_cancel(port_monitor);
         }
 
-        /* The interface classifier, over the numbers measured on the host with getifaddrs' AF_LINK
-           entries beside ifconfig -v (facts/Network/NWPath.md has the table). Each row is a
-           synthetic ifaddrs chain the port's own classifier reads, so flipping a branch of it turns
-           its own row red: the loopback number into cellular, the cellular number into loopback, the
-           ethernet number into other, or the default into loopback each fail one row here. */
         {
             struct if_data info;
             unsigned char link[128];
@@ -2124,43 +2046,35 @@ int main(void)
             entry.ifa_data = &info;
             entry.ifa_flags = IFF_UP | IFF_RUNNING;
 
-            info.ifi_type = 24;   /* lo0: softwareLoopback */
+            info.ifi_type = 24;
             entry.ifa_name = "lo0";
             entry.ifa_flags |= IFF_LOOPBACK;
             compare(@"path: the loopback number types the loopback", @(charon_path_interface_type(&entry)),
                     @(nw_interface_type_loopback));
-            info.ifi_type = 6;    /* en0: ethernetCsmacd, which on this release is the Wi-Fi radio */
+            info.ifi_type = 6;
             entry.ifa_name = "en0";
             entry.ifa_flags = IFF_UP | IFF_RUNNING | IFF_BROADCAST;
             compare(@"path: the ethernet number types Wi-Fi", @(charon_path_interface_type(&entry)),
                     @(nw_interface_type_wifi));
-            info.ifi_type = 0xff; /* XNU's IFT_CELLULAR: the cellular radio */
+            info.ifi_type = 0xff;
             entry.ifa_name = "pdp_ip0";
             entry.ifa_flags = IFF_UP | IFF_RUNNING | IFF_POINTOPOINT;
             compare(@"path: the cellular number types cellular", @(charon_path_interface_type(&entry)),
                     @(nw_interface_type_cellular));
-            info.ifi_type = 1;    /* utun0: the kernel says `other`, and not IANA tunnel */
+            info.ifi_type = 1;
             entry.ifa_name = "utun0";
             entry.ifa_flags = IFF_UP | IFF_RUNNING | IFF_POINTOPOINT;
             compare(@"path: a tunnel keeps its own kind and is other", @(charon_path_interface_type(&entry)),
                     @(nw_interface_type_other));
-            info.ifi_type = 209;  /* bridge100: IANA bridge */
+            info.ifi_type = 209;
             entry.ifa_name = "bridge100";
             entry.ifa_flags = IFF_UP | IFF_RUNNING | IFF_BROADCAST;
             compare(@"path: a bridge is other too", @(charon_path_interface_type(&entry)),
                     @(nw_interface_type_other));
-            info.ifi_type = 0;    /* nothing the kernel classified: the point-to-point rule decides */
+            info.ifi_type = 0;
             entry.ifa_name = "pdp_ip1";
             compare(@"path: an unclassified point-to-point link is other without a gateway",
                     @(charon_path_interface_type(&entry)), @(nw_interface_type_other));
-            /* What the path does with an interface the kernel names `other` - a tunnel, a bridge - and
-               why the answer is its ADDRESS and not its type. Measured on this machine, reading only,
-               three runs, stable: with 44 interfaces up, nw_path_enumerate_interfaces on a live path
-               returns en0, en0 and utun21, and utun21 is a tunnel the classifier types `other` (its
-               ifi_type is 1, IANA other, not 131, tunnel). So an `other` interface is on the path when
-               it carries an address the path can be over; a bridge has none, and is dropped for that
-               and not for its type. The mutants: taking the address away from the `other` branch turns
-               the tunnel row red; putting the type filter back turns the tunnel row red too. */
             compare(@"path: a tunnel with an address is on the path, as the release puts it",
                     @(charon_path_wants_interface(nw_interface_type_other, nw_interface_type_other, true, false, true)), @YES);
             compare(@"path: a bridge with no address is not on it",
@@ -2181,7 +2095,6 @@ int main(void)
                     @(charon_path_wants_interface(nw_interface_type_cellular, nw_interface_type_cellular, true, true, true)), @YES);
         }
 
-        /* the errors and their domains */
         {
             compare(@"error: nothing is no error at all",
                     [NSString stringWithFormat:@"%d %d", system.error_domain(NULL), system.error_code(NULL)],

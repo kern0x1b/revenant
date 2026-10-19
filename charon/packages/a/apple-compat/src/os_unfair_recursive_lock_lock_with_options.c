@@ -9,8 +9,6 @@ static void charon_resolve_recursive_lock(void)
     charon_system_function(&charon_system_recursive_lock, CHARON_LIBSYSTEM_PLATFORM, "os_unfair_recursive_lock_lock_with_options");
 }
 
-/* The options of libplatform (data synchronization, adaptive spin) tune the kernel's wait, which is not there; a lock taken
-   with any of them is taken the same way. */
 __attribute__((visibility("default")))
 void os_unfair_recursive_lock_lock_with_options(charon_unfair_recursive_lock *lock, uint32_t options)
 {

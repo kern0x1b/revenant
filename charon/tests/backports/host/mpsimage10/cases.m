@@ -1,20 +1,3 @@
-// cases.m - the image classes iOS 10 added that this port answers, run twice: once against the
-// system's own MPS and once against this port's classes under names of their own.
-//
-// Two classes are compared and one is refused, and the refusal is the point of the third:
-//   laplacian-bias0 / -bias1   MPSImageLaplacian, the fixed [0 1 0; 1 -4 1; 0 1 0]. Two cases
-//                              because the difference between them IS the order of
-//                              MPSImageConvolution.h:62-72: if the bias were added after the store
-//                              rather than before it, the two would be the same numbers apart.
-//   fresh-image-zeroes          A fresh image reads as zeros on both sides, which is what
-//                              MPSImage13.m:266-274 does by asking for them rather than leaving a
-//                              texture's own contents to be read as the caller's pixels.
-//   conversion-null-info        MPSImageConversion with a NULL conversionInfo, which the release
-//                              answers as a NO-OP: the four values of a 2x2 come back unchanged. The
-//                              case prints both sides' answer rather than comparing them, because
-//                              what it establishes is that the release's own no-op is a no-op - which
-//                              is why MPSImageConversion's row says a converter that cannot convert is
-//                              not that class.
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <Metal/Metal.h>
@@ -45,9 +28,6 @@ static void printClassImages(void)
 
 static NSUInteger gCompared = 0, gNotCompared = 0;
 
-// Whether the port has its own copy of a class. The rename header is generated from the classes the
-// port's objects define, so a class the port does not implement is not renamed and a case would reach
-// the host's class instead - which means comparing the host with itself. It fails rather than passes.
 static BOOL portHas(const char *name)
 {
 #ifdef CHARON_PORT_BUILD
@@ -58,8 +38,6 @@ static BOOL portHas(const char *name)
 #endif
 }
 
-// The same guard by case name, so a case that cannot be built is named and counted rather than
-// compared against the host's own class of the same name.
 static BOOL require_class(const char *caseName, const char *className)
 {
     if (portHas(className))
@@ -76,8 +54,6 @@ static void counted(BOOL ran)
         gCompared++;
 }
 
-// A macOS MTLTexture declares no row stride - -bytesPerRow is an unrecognized selector on
-// AGXG16XFamilyTexture, measured - so the row stride is chosen here, 256-byte aligned.
 static size_t strideFor(NSUInteger width)
 {
     size_t row = width * sizeof(float);
@@ -165,19 +141,12 @@ static void freshImageCase(void)
     dump("fresh-image-zeroes", fresh, 4, 4);
 }
 
-// The conversion case: it does not compare, it REPORTS. What it establishes is that the release's own
-// MPSImageConversion answers a NULL conversionInfo by copying, which is the measurement MPSImageConversion's
-// row rests on - a class whose one job is a conversion that answers a copy is not that class.
 static void conversionCase(void)
 {
     if (!portHas("MPSImageConversion")) {
         printf("case conversion-null-info  NOT COMPARED: the port has no MPSImageConversion, which is what"
                " this row's absence says - the class needs a CGColorConversionInfoRef this port does not"
                " carry. The SYSTEM side below is the measurement: its no-op is what makes the row's claim.\n");
-        /* And that branch is what the port is measured against, not a name written into run.sh: the port
-           DOES carry MPSImageConversion as of the row at absent_MetalPerformanceShaders.json:212, where
-           it refuses a non-NULL conversionInfo at initialization rather than being absent, so with a NULL
-           conversionInfo it runs and this case is compared like any other. */
         gNotCompared++;
         return;
     }

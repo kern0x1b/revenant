@@ -3,20 +3,6 @@
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-// A heap is one allocation that resources are taken out of, and on this device that is literally what
-// it is: a calloc of the size the descriptor asks for, and every resource made from the heap is a
-// range of those bytes. That is not a stand-in for a GPU heap, it is the whole of what a heap can be
-// where every resource is already CPU memory, and it is why the accounting is exact rather than
-// approximate: `usedSize` is the offset the next allocation starts at, `currentAllocatedSize` is the
-// sum of what was handed out, and an explicit offset is the offset asked for, once it is aligned and
-// once it is in range.
-//
-// Apple's documented alignment of a heap allocation is 256 bytes. It is named here rather than
-// measured, because it is a property of Metal's heaps and not of this device, and nothing an
-// application can observe here depends on the exact value beyond the offsets it asks for: an offset
-// that is a multiple of 256 is also a multiple of 16, which is the largest alignment any ARMv7
-// allocation needs. facts/Metal/Heaps.md says where the number comes from and what would change.
-
 const NSUInteger CharonMetalHeapAlignment = 256;
 
 @implementation CharonMetalHeap {
@@ -101,8 +87,6 @@ const NSUInteger CharonMetalHeapAlignment = 256;
     return remainder ? offset + (CharonMetalHeapAlignment - remainder) : offset;
 }
 
-// What is left of the heap, for an allocation aligned as asked. A zero or past-the-end alignment
-// asks for the heap's own alignment, which is the only one Metal defines for it.
 - (NSUInteger)maxAvailableSizeWithAlignment:(NSUInteger)alignment
 {
     NSUInteger step = alignment ? alignment : CharonMetalHeapAlignment;
@@ -114,9 +98,6 @@ const NSUInteger CharonMetalHeapAlignment = 256;
     return available - available % step;
 }
 
-// Every refusal here says so in the log as well as through the error, because the two MTLHeap methods
-// that reach these pass NULL and would otherwise refuse in silence: a nil from
-// -newBufferWithLength:options: that says nothing is the failure this port must not ship.
 - (BOOL)charonReserve:(NSUInteger)length atOffset:(NSUInteger *)offset error:(NSError **)error
 {
     if (_type == (MTLHeapType)MTLHeapTypePlacement) {
@@ -167,7 +148,6 @@ const NSUInteger CharonMetalHeapAlignment = 256;
     _allocated += length;
 }
 
-// The heap's own bytes, for the 13.0 method that places a resource at an offset the application chose.
 - (BOOL)charonPlace:(NSUInteger)length atOffset:(NSUInteger)offset error:(NSError **)error
 {
     if (offset % CharonMetalHeapAlignment) {
@@ -209,18 +189,11 @@ const NSUInteger CharonMetalHeapAlignment = 256;
     if (bytes && ![self charonReserve:bytes atOffset:&offset error:NULL])
         return nil;
     [texture charonSetHeap:self offset:offset];
-    // Said once per texture, because it is the one thing about a heap texture an application cannot
-    // see any other way: its pixels are the texture's own and not the heap's bytes, since an ES 2.0
-    // texture is copied into and cannot be backed by memory the application can address. The size
-    // taken out of the heap, the offset and the accounting are exact; this is what is not, and
-    // facts/Metal/Heaps.md names it and what a native fix would be.
     NSLog(@"Metal: a texture taken out of a heap at offset %lu of %lu bytes has its own pixels, not the heap's: an OpenGL ES 2.0 texture is copied into and cannot be backed by memory the heap hands out (facts/Metal/Heaps.md)",
           (unsigned long)offset, (unsigned long)bytes);
     return texture;
 }
 
-// Purgeable memory is memory the system may page out and back, and answers as a device that has no
-// such memory: NO, the same answer -[MTLBuffer setPurgeableState:] gives for a buffer of the port.
 - (BOOL)setPurgeableState:(MTLPurgeableState)state
 {
     return NO;
@@ -239,4 +212,3 @@ const NSUInteger CharonMetalHeapAlignment = 256;
 }
 
 @end
-

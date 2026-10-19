@@ -1,14 +1,3 @@
-// The HOST's own -[NSString sr_sensorForDeletionRecordsFromSensor], read out of the host's SensorKit.
-//
-// Nothing here calls into SensorKit's reader or asks for any sensor: the framework is opened, the
-// category on NSString is found through the runtime, and the method is sent. That is all the port's
-// method does too, which is why the two can be compared without a device.
-//
-// The dlopen is not decoration and the order matters. Measured: asked BEFORE the framework is opened,
-// every one of the 50 inputs raises NSInvalidArgumentException "unrecognized selector sent to instance",
-// because the category lives in SensorKit.framework and has not been loaded; asked after, all 58 answer.
-// A harness that forgot the dlopen would report 58 failures and look like the port disagreeing with the
-// host rather than like a harness that had not loaded anything.
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <dlfcn.h>

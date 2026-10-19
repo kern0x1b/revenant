@@ -1,11 +1,5 @@
 #import "CharonSecurityUI.h"
 
-// The sheet a trust object is shown in. It is the port's own: a plain UIViewController with labels
-// laid out in -viewDidLayoutSubviews, presented through the release's own modal presentation, which
-// iOS 5 gave UIKit and which this release has. The lines are read out of the trust object itself
-// with the Security calls that have been public since iOS 2, so what the sheet says is the trust's
-// own content and not a rendering of it.
-
 @interface CharonCertificateSheetController : UIViewController
 @property (nonatomic, copy) NSString *sheetTitle;
 @property (nonatomic, copy) NSString *sheetMessage;
@@ -13,11 +7,6 @@
 @property (nonatomic, strong) NSURL *helpURL;
 @property (nonatomic, copy) void (^dismissHandler)(void);
 
-// The trust's own content, read with the Security calls this release already carries. A NULL trust
-// is what a caller that reached the unavailable -init holds, and then there is nothing to describe,
-// so the sheet shows its title and message alone. It is a class method of the controller that draws
-// the lines rather than a function of the file, so that what a sheet shows and what a test can ask
-// for are one call and not two that agree by accident.
 + (NSArray<NSString *> *)linesForTrust:(SecTrustRef)trust;
 @end
 
@@ -95,8 +84,6 @@
 
 - (void)charon_openHelp
 {
-    // -openURL: is the release's own, measured in its armv7 6.1.3 metadata; a help URL is opened the
-    // way this release opens any URL.
     UIApplication *application = [UIApplication sharedApplication];
     if (application && self.helpURL)
         [application openURL:self.helpURL];
@@ -139,10 +126,6 @@
     }
 
 #ifndef CHARON_HOST_DIFFERENTIAL
-    // macCatalyst has no SecTrustCopyProperties - the call is API_UNAVAILABLE there, not deprecated -
-    // so a host build cannot compile this line, and the host is the oracle for the other two lines of a
-    // sheet. The lines it contributes are the trust's own dates and policy, and the device test
-    // (tests/backports/emulate) is what covers them; see facts/SecurityUI/SFCertificatePresentation.md.
     NSArray *properties = (__bridge_transfer NSArray *)SecTrustCopyProperties(trust);
     for (NSDictionary *property in properties) {
         NSString *label = property[@"label"];
@@ -173,20 +156,12 @@
 - (instancetype)initWithTrust:(SecTrustRef)trust
 {
     if ((self = [super init])) {
-        // Retained only when there is something to retain: CFRetain(NULL) traps, and the header's
-        // unavailable -init below is the one caller that passes NULL. Found by the host differential's
-        // sheet.trustOfUnavailableInit case, which trapped before this guard.
         if (trust)
             _trust = (SecTrustRef)CFRetain(trust);
     }
     return self;
 }
 
-// The header marks -init unavailable and there is no other way to make one, so a caller that
-// reaches it anyway gets a presentation with no trust to show: the sheet then carries its title and
-// message alone. Nothing is invented to fill the gap.
-// The designated initialiser's parameter is nonnull in the header, and NULL is exactly the point:
-// this is the one caller the header says not to write, and the one that has to be answered.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnonnull"
 - (instancetype)init
@@ -230,8 +205,6 @@
         [presentation dismissViewControllerAnimated:YES completion:nil];
         return;
     }
-    // Nothing was ever presented, so there is no animation to wait for: the dismiss handler still
-    // runs, once, as the header's dismissHandler is promised to.
     void (^dismissHandler)(void) = sheet.dismissHandler;
     sheet.dismissHandler = nil;
     if (dismissHandler)

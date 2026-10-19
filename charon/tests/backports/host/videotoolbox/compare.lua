@@ -1,13 +1,3 @@
--- compare.lua SYSTEM.json PORT.json - a check per constant: the port's value must be the host's, character for character.
---
---    xmake l compare.lua <system.json> <port.json>
---
--- This is the check that would catch a value written from a rule instead of from a measurement. The reason it exists is
--- measured too: none of the 135 is the constant's own name, so "a string constant is its own name" - the form this package
--- uses for MXErrorDomain and PKPushTypeVoIP, both measured right - would be wrong in every one of them.
---
--- Exits 1 after the first twenty DIFFERS lines, with no newline after the last line when there are more (as the Python did).
-
 local lib = import("vtlib", {rootdir = os.scriptdir(), anonymous = true})
 local json = import("core.base.json")
 

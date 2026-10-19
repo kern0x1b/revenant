@@ -5,7 +5,6 @@
 
 CF_EXPORT CFDateFormatterRef CFDateFormatterCreateISO8601Formatter(CFAllocatorRef allocator,
                                                                    CFISO8601DateFormatOptions options);
-/* The backport's own pattern builder, which is what the formatter is assembled from. */
 extern NSString *charon_iso8601_pattern(NSISO8601DateFormatOptions options);
 
 static int checks;
@@ -44,8 +43,6 @@ int main(void)
             NSISO8601DateFormatWithColonSeparatorInTime, NSISO8601DateFormatWithColonSeparatorInTimeZone,
             NSISO8601DateFormatWithFractionalSeconds };
 
-        /* Every combination of the eleven options, held to the pattern the real
-           CFDateFormatterCreateISO8601Formatter builds. */
         for (unsigned mask = 0; mask < 2048; mask++) {
             NSISO8601DateFormatOptions options = 0;
             for (unsigned bit = 0; bit < 11; bit++)
@@ -60,7 +57,6 @@ int main(void)
                 CFRelease(theirs);
         }
 
-        /* And what the formatter makes of real dates, in several zones. */
         NSArray *dates = @[[NSDate dateWithTimeIntervalSinceReferenceDate:0],
                            [NSDate dateWithTimeIntervalSinceReferenceDate:0.25],
                            [NSDate dateWithTimeIntervalSinceReferenceDate:-0.25],
@@ -101,7 +97,6 @@ int main(void)
                     same_object(ourBack, theirBack, [what stringByAppendingString:@" read back"]);
                 }
 
-        /* A fresh formatter, and what it refuses. */
         NSISO8601DateFormatter *themPlain = [[NSISO8601DateFormatter alloc] init];
         id usPlain = [[mine alloc] init];
         same_object(((id (*)(id, SEL))objc_msgSend)(usPlain, @selector(timeZone)), themPlain.timeZone,

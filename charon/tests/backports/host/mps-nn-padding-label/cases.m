@@ -1,7 +1,3 @@
-// cases.m - the label and the nil answer of +[MPSNNDefaultPadding paddingWithMethod:], the port's beside Apple's, in
-// one process. Every combination of the align, remainder and size fields is asked of both, plus the custom bit.
-// The port's class is CharonHostMPSNNDefaultPadding (run.sh renames it). Apple's answers are the reference: the
-// label string, whether the object is nil, and the method read back.
 #import <Foundation/Foundation.h>
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>
 
@@ -44,12 +40,10 @@ int main(void)
             printf("FAIL the port's class is not in the process\n");
             return 1;
         }
-        // The 64 combinations of the three fields: align 0..3, remainder 0..3, size 0..3.
         for (NSUInteger align = 0; align < 4; align++)
             for (NSUInteger remainder = 0; remainder < 4; remainder++)
                 for (NSUInteger size = 0; size < 4; size++)
                     compare(align | (remainder << 2) | (size << 4), port, apple);
-        // The custom bit with the fields that the factories use.
         compare((1UL << 15) | 0x0c, port, apple);
         compare((1UL << 15) | 0x10, port, apple);
         printf("checks=%d failures=%d\n", checks, failures);

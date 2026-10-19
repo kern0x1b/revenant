@@ -1,11 +1,5 @@
--- Behaviour of the generator's support modules: the SHA-256 digest, the one writer (emit), the pipe stream, and the zero-writes rule
--- of a second gen on an unchanged tree. Run:
---   xmake l tests/gen/gen_test.lua
--- The writer's test works in a scratch directory under .agent-work/runs of this checkout, removed when the test ends.
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 
--- True when fn raises an error.
 local function raises(fn)
     local raised = false
     try {
@@ -40,7 +34,6 @@ local function test_sha256(check)
           "sha256 of a text with a NUL and a high byte (shasum's value)")
 end
 
--- order.less compares eight bytes at a time; its answer must be the byte-by-byte one, for every length, prefix and high byte.
 local function test_order(check)
     local order = import("gen.order", {rootdir = TOOLS, anonymous = true})
     local function reference(a, b)
@@ -57,7 +50,6 @@ local function test_order(check)
         local out = {}
         for i = 1, seed % (max + 1) do
             seed = (seed * 1103515245 + 12345) % 2147483648
-            -- a small alphabet (shared prefixes and a high byte) so that long common prefixes are the usual case
             out[i] = string.char(({65, 66, 95, 97, 128, 200, 255, 0})[seed % 8 + 1])
         end
         return table.concat(out)
@@ -68,7 +60,6 @@ local function test_order(check)
         if order.less(a, b) ~= reference(a, b) then
             different = different + 1
         end
-        -- the same string with one byte changed after a long shared prefix
         local c = a .. "AAAAAAAAAAAAAAAAB" .. b
         local d = a .. "AAAAAAAAAAAAAAAA\255" .. b
         if order.less(c, d) ~= reference(c, d) or order.less(d, c) ~= reference(d, c) or order.less(c, c) then
@@ -89,7 +80,6 @@ local function test_lines(check)
           "lines splits where Python's str.splitlines does, NEL, LS and PS included")
     check(#strings.lines("a\n") == 1 and #strings.lines("") == 0 and #strings.lines("\n\n") == 2,
           "a final break ends the last line, and the empty text has no line")
-    -- the markup of ipsw is split where splitlines does: two instructions in one stream line (a CR between them) are two
     local behaviour = import("gen.behaviour", {rootdir = TOOLS, anonymous = true})
     local state = behaviour.new_summary()
     behaviour.add_line(state, "0x1000:  1f 20 03 d5  bl  _foo\r0x1004:  c0 03 5f d6  ret\194\1330x1008:  1f 20 03 d5  bl  _bar")
@@ -120,9 +110,6 @@ local function test_emit(check)
     os.rm(dir)
 end
 
--- A second `gen --all` on an unchanged tree writes no file: the emitter compares before it writes (design-spec-driven.md D2).
--- Both runs write the whole .gen of their tree, so they run on a copy of the package without its .gen, under .agent-work/runs: a
--- checkout that holds a generated .gen would make registry_test depend on which suite ran first (a second run failed on it).
 local function test_zero_writes(check)
     local gen = import("gen.cmd_gen", {rootdir = TOOLS, anonymous = true})
     local release_fixture = import("release_fixture", {rootdir = os.scriptdir(), anonymous = true})

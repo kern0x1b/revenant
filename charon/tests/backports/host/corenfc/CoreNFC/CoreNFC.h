@@ -1,12 +1,3 @@
-// CoreNFC/CoreNFC.h - the two classes of the port's NDEF family, transcribed from the declarations of
-// the SDK 16.4 the port builds against (NFCNDEFPayload.h and NFCNDEFMessage.h), so the host
-// differential can compile the port's own sources: **macOS has no CoreNFC** - every declaration of
-// both headers is API_UNAVAILABLE(macos) - and there is nothing to link against here.
-//
-// The declarations are the SDK's, member for member and annotation for annotation. The port's sources
-// include <CoreNFC/CoreNFC.h> as they do on the device, and this header is that include for the host:
-// the test's include path comes first, so the sources see this and never the SDK's.
-
 #ifndef CHARON_TEST_CORENFC_H
 #define CHARON_TEST_CORENFC_H
 

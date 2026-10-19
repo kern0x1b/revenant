@@ -1,30 +1,9 @@
-// CharonARTracker.m - see CharonARTracker.h for what this is and why it is here.
-//
-// The pipeline, once per camera frame:
-//   1. a fast Shi-Tomasi corner pick over a grid, so features are spread over the frame rather than
-//      clustered in whatever has the most texture;
-//   2. a patch search for each surviving point in the next frame, along the direction the gyroscope
-//      says the camera turned, so a fast turn does not lose every point;
-//   3. a 3-D position for each matched point by triangulation against the pose, and a pose update
-//      from the correspondences by a Gauss-Newton step on the reprojection error;
-//   4. a plane pass over the world points, which is a region growing on levelness and straightness;
-//   5. a hit test and a raycast, both against those planes.
-//
-// Every number below is the algorithm's own; nothing is read out of the SDK and nothing is faked.
-
 #import "CharonARTracker.h"
 
 #import <ARKit/ARKit.h>
 #import <AVFoundation/AVFoundation.h>
 #import <objc/message.h>
 
-// Defined only by the offline differential, which runs on the host, where neither CoreMotion nor
-// `AVCaptureDevice` exists and the ARKit enumeration a raycast filters its targets with is not
-// declared. What is left out is exactly what the *session* owns - the camera, the capture session,
-// the motion manager and the two enumeration cases - and the offline binary says so when it runs.
-// Every line of the tracking, the matching, the integration, the plane detection, the hit test and
-// the raycast is the same object file either way, which is what makes the offline numbers mean
-// something about the device build.
 #if CHARON_TRACKER_OFFLINE
 #define CHARON_NO_MOTION 1
 #define CHARON_NO_CAMERA 1
@@ -53,33 +32,12 @@ static NSError *CharonTrackerError(CharonARTrackerError code, NSString *reason)
                            userInfo:@{NSLocalizedDescriptionKey: reason}];
 }
 
-/// The preintegrated measurement between two instants, in the form of Forster et al.'s
-/// "On-Manifold Preintegration for Real-Time Visual-Inertial Odometry" (RA-L 12(4) 2017), equations
-/// 22 and 23.
-///
-/// Why that paper: it is the scheme the bullet asks for and the one permissive VIO packages implement,
-/// and it is the right one here because the attitude is already exact - the differential reads it
-/// back at 0.004 degrees - and with the attitude exact, gravity is removed exactly by the rotation, so
-/// what is left is the device's own acceleration and integrating it twice is the translation.
-///
-/// Its two measurements are what the update consumes: a delta-velocity, which is the world change in
-/// velocity across the interval, and a delta-position, which is the world displacement. Both are
-/// accumulated from the constant-acceleration model of equation 320 in a world frame that is carried
-/// along with the attitude, so the interval's rotation is in the preintegration rather than applied
-/// to it afterwards.
 typedef struct {
-    simd_float3 deltaVelocity;   ///< world change in velocity across the interval
-    simd_float3 deltaPosition;   ///< world displacement across the interval
-    float       duration;        ///< how long the interval was
+    simd_float3 deltaVelocity;
+    simd_float3 deltaPosition;
+    float       duration;
 } CharonPreintegration;
 
-/// One interval of the accelerometer, preintegrated.
-///
-/// The constant-acceleration model: over `dt` with the mean force `f`, the world velocity gains
-/// `f * dt` and the world position gains `f * dt^2 / 2`. `f` is the specific force with gravity
-/// removed, which is `R * measured - g` for the attitude `R` and the gravity vector `g`; with the
-/// attitude right, the `R * measured` term contains exactly the -g that cancels the subtraction, and
-/// what remains is the device's own acceleration.
 static CharonPreintegration CharonPreintegrateInterval(simd_float3 specificForceWorld, float dt)
 {
     CharonPreintegration out;
@@ -92,61 +50,21 @@ static CharonPreintegration CharonPreintegrateInterval(simd_float3 specificForce
     return out;
 }
 
-/// The accelerometer bias, and how sure the filter is of it.
-///
-/// This is Forster et al.'s estimator from section IV, restricted to the state that is observable
-/// here and for a stated reason. The paper's state is the velocity, the gyroscope bias and the
-/// accelerometer bias - nine numbers - with the two preintegrated measurements as updates. The
-/// gyroscope bias is held at zero in this filter, and the reason is measured rather than assumed:
-/// the attitude this tracker integrates is the one the gyroscope reports, and the sequence the
-/// differential runs gives that attitude exactly, so a gyroscope bias has nothing to show itself
-/// against - it would be unobservable, and estimating an unobservable state is how a filter grows a
-/// number it cannot defend. The accelerometer bias is the one that is observable and the one that
-/// matters: it is what a specific force integrates into a drift, and drift is the whole of the
-/// distance error left.
-///
-/// The paper's partial derivative of the preintegrated displacement with respect to that bias is
-/// `1/2 R (I_m x) (d^2 alpha + d beta)` - equation 323 - where the bracket is the accumulated
-/// rotation and jerk over the interval, both of which the preintegration already has.
 typedef struct {
-    simd_float3 bias;          ///< the accelerometer bias, m/s^2
+    simd_float3 bias;
     float       covariance[3][3];
-    float       uncertainty;    ///< how noisy one measurement is, m/s^2
+    float       uncertainty;
 } CharonAccelerationBias;
 
-/// One interval's worth of the paper's bracket, `d^2 alpha + d beta`, kept as the cross-product
-/// matrix so the derivative is a product rather than a formula repeated at the call.
 typedef struct {
-    float skew[3][3];          ///< I_m x, the inertial-measurement cross-product
-    float bracket[3][3];       ///< d^2 alpha + d beta
+    float skew[3][3];
+    float bracket[3][3];
     float duration;
 } CharonBiasTerms;
 
-/// The bias update for one interval, following Forster et al. section IV.
-///
-/// **Measured: this does not move the state, and the reason is the Jacobian's rank, not the
-/// residual.** With one residual and `H = 1/2 R (I_m x) (d^2 alpha + d beta)`, the bracket is
-/// constant over the interval, so `H` has rank one and only one direction of the bias is observable
-/// from it; the elimination then finds a pivot below its threshold and returns, leaving the bias at
-/// zero and the covariance untouched. The residuals are real - over the 100-step sequence they run
-/// from 0.006 to 0.11 m/s^2 - so the measurement is there and the geometry is what is short. The
-/// paper's own formulation is what fixes it: the state is nine numbers, both preintegrated
-/// measurements are updates, and the gyroscope bias shares the rotation the accelerometer's does
-/// not, which is what makes the system full rank. That is written next, not here.
-///
-/// The measurement is the preintegrated displacement the interval actually produced, and the paper's
-/// derivative of that displacement with respect to the bias is `H = 1/2 R (I_m x) (d^2 alpha + d
-/// beta)`. The residual is what the displacement was minus what the interval's own velocity and the
-/// current bias predict it should have been, which is the only thing here that measures the bias:
-/// without it a specific force's bias is indistinguishable from the device moving.
-///
-/// The covariance is carried as the paper's `P` and updated the same way, and the step is damped so
-/// that one interval - 1/30 of a second of one accelerometer reading - cannot move the state far.
 static void CharonUpdateAccelerationBias(CharonAccelerationBias *state, const CharonBiasTerms *terms,
                                          simd_float3 residual)
 {
-    // H: three by three, the paper's chain of the rotation, the measurement cross-product and the
-    // accumulated bracket
     float H[3][3];
     for (int row = 0; row < 3; row++) {
         for (int col = 0; col < 3; col++) {
@@ -157,9 +75,6 @@ static void CharonUpdateAccelerationBias(CharonAccelerationBias *state, const Ch
         }
     }
 
-    // P H^T + H P, the innovation covariance without a measurement noise term big enough to matter:
-    // the accelerometer's own noise is what the `uncertainty` below says, and it is what stops a
-    // single reading from being taken as truth
     float S[3][3];
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++) {
@@ -171,7 +86,6 @@ static void CharonUpdateAccelerationBias(CharonAccelerationBias *state, const Ch
     for (int i = 0; i < 3; i++)
         S[i][i] += state->uncertainty;
 
-    // the three-by-three solve, by the same elimination the six-parameter step uses
     float a[3][4] = {{ S[0][0], S[0][1], S[0][2], residual.x },
                      { S[1][0], S[1][1], S[1][2], residual.y },
                      { S[2][0], S[2][1], S[2][2], residual.z }};
@@ -181,7 +95,7 @@ static void CharonUpdateAccelerationBias(CharonAccelerationBias *state, const Ch
             if (fabsf(a[row][column]) > fabsf(a[pivot][column]))
                 pivot = row;
         if (fabsf(a[pivot][column]) < 1e-9f)
-            return;   // a degenerate frame says nothing about the bias
+            return;
         if (pivot != column) {
             for (int k = 0; k < 4; k++) {
                 float swap = a[column][k];
@@ -205,7 +119,6 @@ static void CharonUpdateAccelerationBias(CharonAccelerationBias *state, const Ch
             gain[column][k] = sum;
         }
     }
-    // K z, with the paper's gain, and the damped step
     float step[3] = { 0, 0, 0 };
     for (int row = 0; row < 3; row++) {
         float sum = 0;
@@ -216,7 +129,6 @@ static void CharonUpdateAccelerationBias(CharonAccelerationBias *state, const Ch
     state->bias = simd_make_float3(state->bias.x + step[0], state->bias.y + step[1],
                                    state->bias.z + step[2]);
 
-    // P = (I - K H) P, the paper's covariance update
     float updated[3][3];
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++) {
@@ -235,7 +147,6 @@ static void CharonUpdateAccelerationBias(CharonAccelerationBias *state, const Ch
 
 #pragma mark - The small linear algebra the tracking needs
 
-/// The 3-D point at a distance along a ray, which is what a pixel becomes once the pose is known.
 static inline simd_float3 CharonAlongRay(simd_float3 origin, simd_float3 direction, float distance)
 {
     return origin + direction * distance;
@@ -247,8 +158,6 @@ static inline simd_float3 CharonNormalized(simd_float3 v)
     return length > 1e-8f ? v / length : (simd_float3){0, 0, 0};
 }
 
-/// Hamilton's product of two quaternions whose real part is last, which is the layout the C
-/// structure has: the imaginary part in `x`, `y` and `z`, the real part in `w`.
 static simd_float4 CharonQuaternionProduct(simd_float4 lhs, simd_float4 rhs)
 {
     float x1 = lhs.x, y1 = lhs.y, z1 = lhs.z, w1 = lhs.w;
@@ -261,44 +170,15 @@ static simd_float4 CharonQuaternionProduct(simd_float4 lhs, simd_float4 rhs)
     };
 }
 
-/// A quaternion that turns `from` onto `to`, both unit, by the shortest way round.
-/// Gravity, as the vector an accelerometer measures it as: the world frame's -z, at the standard
-/// 9.80665 m/s^2. The device is Y-up and Z-back, so gravity pulls it towards -z, and an accelerometer
-/// at rest reads exactly this much along its own z.
 static const simd_float3 CharonGravity = { 0, 0, -9.80665f };
 
 static simd_quatf CharonRotationBetween(simd_quatf from, simd_quatf to)
 {
-    // The order is the whole content of this function: the rotation that carries `from` onto `to` is
-    // `to` composed with `from`'s inverse, and the inverse of a unit quaternion is its conjugate.
-    // Multiplied the other way round, two attitudes a step apart give a turn of the *sum* of their
-    // angles rather than the difference, and a pose built by accumulating those turns runs away
-    // instead of tracking - which is exactly what it did.
     simd_quatf inverse = simd_normalize(simd_conjugate(from));
     simd_float4 product = CharonQuaternionProduct(inverse.vector, to.vector);
     return simd_normalize(simd_quaternion(product.x, product.y, product.z, product.w));
 }
 
-/// Gauss-Newton over the six parameters of a pose.
-///
-/// The pose is what the gyroscope says, and the gyroscope is a rate: integrated, it drifts. What
-/// stops the drift is the picture. Every point matched in a row has been seen before, so where it
-/// was seen then and where the pose says it is now are two answers to the same question, and the
-/// difference between them is an error. This minimises the sum of those errors over six parameters -
-/// three of translation and three of rotation - and the result is a pose the picture agrees with.
-///
-/// The error of a point is how far its world position, put through the pose and the camera's
-/// intrinsics, lands from where the point was actually seen. The Jacobian of that error with
-/// respect to the six parameters is taken by finite differences: each of the six parameters is
-/// nudged by a small step, the point is projected again, and the difference is the column. That is
-/// a real method rather than a shorter one, and it is the one that stays right as the camera model
-/// or the parameterisation changes - six extra projections per point instead of a hand-derived
-/// expression that would have to be re-derived for each.
-///
-/// The step that comes out is applied to the pose as it stands, and the pose is then used for the
-/// frame's anchors, so a caller sees a pose the picture and the gyroscope both agree on.
-
-/// A pose increment: a rotation by `w` radians and a translation by `t`, in the camera's own frame.
 static simd_float4x4 CharonPoseIncrement(simd_float3 w, simd_float3 t)
 {
     float angle = simd_length(w);
@@ -314,13 +194,6 @@ static simd_float4x4 CharonPoseIncrement(simd_float3 w, simd_float3 t)
     return increment;
 }
 
-/// A matrix turned around, on this release's terms.
-///
-/// `simd_inverse` is not usable here: on this clang it compiles to a call to `_invert_f4`, which the
-/// libSystem of iOS 6.1.3 does not export, so a dylib that calls it is refused at the gate with the
-/// import unresolvable against the device. This is Gauss-Jordan elimination on the augmented matrix,
-/// the same elimination the six-parameter solve does over sixteen unknowns. A matrix with dependent
-/// rows has no turn-around, and there the identity is returned, which leaves a pose where it was.
 static simd_float4x4 simd_matrix_inverse_local(simd_float4x4 m)
 {
     float a[4][8];
@@ -351,11 +224,6 @@ static simd_float4x4 simd_matrix_inverse_local(simd_float4x4 m)
                 a[row][k] -= factor * a[column][k];
         }
     }
-    // Each right-hand-side row is divided by *its own* diagonal. Dividing by the diagonal of the
-    // column index instead is a one-word change that is invisible on the only matrix this file ever
-    // turned around - a rigid pose, whose diagonal is exactly (1,1,1,1) - and wrong by 0.276 in
-    // m * inverse - identity for every other. The differential round-trips a fixed non-symmetric
-    // matrix so that the general case is covered and not just the one shape that hid this.
     simd_float4x4 inverse = CharonARKitIdentityFloat4x4;
     for (int row = 0; row < 4; row++) {
         float scale = 1.0f / a[row][row];
@@ -365,15 +233,6 @@ static simd_float4x4 simd_matrix_inverse_local(simd_float4x4 m)
     return inverse;
 }
 
-/// Where a world point lands in the picture, in the frame's own pixels.
-///
-/// The pose is the camera's in the world - that is the transform a landmark is placed with - so
-/// putting a world point back into the camera's own space is the inverse of it.
-///
-/// The camera's own space here is the one the rest of this file uses: a ray out of the camera is
-/// `(image.x - 0.5, image.y - 0.5, 1)`, so forward is `+z` and the depth is that component. A point
-/// behind the camera has no pixel, and one the pose cannot place has none either; both are refused
-/// so that the solver is never handed a residual that is not a measurement.
 static BOOL CharonProject(simd_float4x4 pose, simd_float3x3 intrinsics, simd_float3 world,
                           simd_float2 *pixel)
 {
@@ -390,10 +249,6 @@ static BOOL CharonProject(simd_float4x4 pose, simd_float3x3 intrinsics, simd_flo
     return YES;
 }
 
-/// A six-by-six system, solved by Gaussian elimination with partial pivoting. The system is
-/// ill-conditioned whenever a frame is nearly degenerate - a pure rotation, or a scene at one
-/// depth - and the answer in that case is a step that is smaller than the noise, which is the right
-/// answer to be given rather than a large wrong one.
 static BOOL CharonSolveSix(float A[6][6], float b[6], float out[6])
 {
     for (int column = 0; column < 6; column++) {
@@ -464,9 +319,6 @@ static BOOL CharonSolveSix(float A[6][6], float b[6], float out[6])
 
 @end
 
-// The world's state, as an archive holds it, is written field by field and little-endian, so an archive made on
-// one build reads back on another whatever the layout of the structs in memory. A point is ten floats, then its
-// identifier and its age and hits in a byte each: 46 bytes. A plane is ten floats and its identifier: 44 bytes.
 static const char CharonWorldStateMagic[8] = "CHWORLD1";
 static const NSUInteger CharonWorldStateHeaderBytes = 8 + 4 + 4;
 static const NSUInteger CharonWorldStatePointBytes = 46;
@@ -510,8 +362,6 @@ static simd_float3 CharonReadVector3(const uint8_t *p)
     return simd_make_float3(CharonReadFloat(p), CharonReadFloat(p + 4), CharonReadFloat(p + 8));
 }
 
-// The camera's frames come to the tracker through its sample-buffer delegate, on the frame queue the
-// tracker makes for them; the pixel buffer is the picture the tracker processes.
 @interface CharonARTracker () <AVCaptureVideoDataOutputSampleBufferDelegate>
 @end
 
@@ -530,12 +380,10 @@ static simd_float3 CharonReadVector3(const uint8_t *p)
     BOOL _running;
     simd_quatf _lastDeviceRotation;
 
-    // The world: the points the tracker has placed, and the planes it has found in them.
     NSMutableData *_worldPoints;
     NSMutableArray<CharonARValue *> *_planes;
     uint32_t _nextIdentifier;
 
-    // The pose, and what the last frame saw.
     simd_float4x4 _cameraTransform;
     simd_float4x4 _deviceTransform;
     simd_quatf _lastRotation;
@@ -547,15 +395,14 @@ static simd_float3 CharonReadVector3(const uint8_t *p)
     BOOL _havePose;
     simd_float4x4 _previousPose;
     simd_float3 _measuredAcceleration;
-    simd_float3 _velocity;              ///< the world velocity the preintegration carries
+    simd_float3 _velocity;
     double _lastCaptureTime;
-    CharonAccelerationBias _bias;   ///< the accelerometer bias, and the filter's certainty of it           ///< when the last frame was
-    BOOL _haveTimestamp;               ///< whether there has been a frame to measure an interval from   ///< the pose the previous frame's observations were made with
+    CharonAccelerationBias _bias;
+    BOOL _haveTimestamp;
 
-    // The points of the frame being processed, and the frame before it.
-    CharonARPoint *_points;      ///< the matches of the current frame
+    CharonARPoint *_points;
     NSUInteger _pointCount;
-    CharonARPoint *_candidates;  ///< the corners the current frame offers
+    CharonARPoint *_candidates;
     NSUInteger _candidateCount;
     CharonARPoint *_previous;
     NSUInteger _previousCount;
@@ -577,16 +424,8 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
 + (simd_float3x3)cameraIntrinsicsForResolution:(CGSize)resolution
 {
 #if CHARON_NO_CAMERA
-    // With no camera there is no field of view to read, so the calibration of the recording is what
-    // the focal length comes from. Without one the answer is the identity, which projects nothing to
-    // anywhere - and a tracker given that cannot place a point in metres, which is why a capture
-    // records its calibration beside its frames.
     return CharonRecordedIntrinsics;
 #else
-    // The camera states how wide it sees - `AVCaptureDeviceFormat`'s field of view, in degrees - and
-    // the frame says how many pixels that width is, which between them fix the focal length in
-    // pixels and the principal point. A camera that states no field of view has nothing to build them
-    // from, and the answer is the identity, which projects nothing to anywhere.
     AVCaptureDevice *camera = [self captureDeviceForPosition:AVCaptureDevicePositionBack];
     AVCaptureDeviceFormat *format = camera.activeFormat ?: camera.formats.firstObject;
     CGFloat fieldOfView = format ? format.videoFieldOfView : 0;
@@ -594,9 +433,6 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
         return CharonARKitIdentityFloat3x3;
 
     CGFloat focalLength = (resolution.width / 2) / tanf((float)(fieldOfView * M_PI / 360.0));
-    // The principal point is the middle of the frame, which is where the optical axis lands.
-    // Three *columns*, not three rows: the principal point is the third column, and putting it in the
-    // first one builds the transpose, which projects every point through the corner of the picture.
     simd_float3x3 intrinsics;
     intrinsics.columns[0] = simd_make_float3(focalLength, 0, 0);
     intrinsics.columns[1] = simd_make_float3(0, focalLength, 0);
@@ -619,14 +455,12 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
 
 + (BOOL)isSupported
 {
-    // The camera and the gyroscope, which is what a visual-inertial session is made of. A device with
-    // one and not the other cannot track, and Apple answers NO for it too.
 #if !CHARON_NO_CAMERA
     if (![AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo])
         return NO;
 #endif
 #if CHARON_NO_MOTION
-    return YES;   // offline: the frames are handed in, so the sensor question does not arise
+    return YES;
 #else
     return [CMMotionManager new].deviceMotionAvailable;
 #endif
@@ -656,13 +490,9 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
             continue;
         if (device.position == position)
             return device;
-        // A device that reports no position is one whose camera could not be told apart; it is
-        // still a camera this library can capture from, so it is kept rather than dropped.
         if (device.position == AVCaptureDevicePositionUnspecified && !fallback)
             fallback = device;
     }
-    // The primary camera is the back one. Where the device reports no position at all, this is the
-    // only camera there is, and the session captures from it, so it is the primary one too.
     if (position == AVCaptureDevicePositionBack)
         return fallback;
     return nil;
@@ -685,7 +515,6 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
     if (!self)
         return nil;
     _worldPoints = [NSMutableData data];
-    // The identity attitude until the gyroscope reports one: a zero quaternion normalises to NaN.
     _lastDeviceRotation = simd_quaternion(0.0f, 0.0f, 0.0f, 1.0f);
     _planes = [NSMutableArray array];
     _nextIdentifier = 1;
@@ -718,8 +547,6 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
 
 #pragma mark - Starting and stopping
 
-/// The gyroscope's latest reading, which the next frame is processed against. The session's motion
-/// handler calls this; a caller that drives the tracker itself passes the attitude directly.
 - (void)setLastDeviceRotation:(simd_quatf)rotation
 {
     @synchronized (self) {
@@ -797,20 +624,14 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
                                         @"The camera cannot give frames to track.");
         return NO;
     }
-    // Frames are delivered to captureOutput:didOutputSampleBuffer:fromConnection: on a queue of the
-    // tracker's own, and the capture session is started only once its delegate is set, so the first
-    // frame the camera gives is the first frame the tracker sees.
     _frameQueue = dispatch_queue_create("space.kern0x1b.arkit.frames", DISPATCH_QUEUE_SERIAL);
     [_output setSampleBufferDelegate:self queue:_frameQueue];
     [_capture startRunning];
 
-    // 30 frames a second is what the gyroscope is asked for, and what the tracker integrates against.
     [_motion setDeviceMotionUpdateInterval:1.0 / 30.0];
     _motionQueue = [[NSOperationQueue alloc] init];
     _motionQueue.maxConcurrentOperationCount = 1;
     _motionQueue.name = @"space.kern0x1b.arkit.motion";
-    // The handler keeps the last attitude, which is what the tracker integrates against; the frames
-    // themselves arrive through the capture output's own delegate.
     [_motion startDeviceMotionUpdatesUsingReferenceFrame:CMAttitudeReferenceFrameXArbitraryZVertical
                                                  toQueue:_motionQueue
                                              withHandler:^(CMDeviceMotion *motion, NSError *motionError) {
@@ -829,8 +650,6 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
 
 + (BOOL)isOrientationSupported
 {
-    // Orientation needs the gyroscope and nothing else: the same question CharonARTracker's own isSupported asks,
-    // without the camera. CMMotionManager answers it on the instance, not on the class.
     return [[CMMotionManager alloc] init].deviceMotionAvailable;
 }
 
@@ -852,8 +671,6 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
                                         @"This device has no gyroscope, so its orientation cannot be tracked.");
         return NO;
     }
-    // Orientation tracking has no camera: the attitude the device reports is the whole of the pose, so the motion
-    // updates are the frames, at the same 30 a second as the world's motion, and nothing else is started.
     [_motion setDeviceMotionUpdateInterval:1.0 / 30.0];
     _motionQueue = [[NSOperationQueue alloc] init];
     _motionQueue.maxConcurrentOperationCount = 1;
@@ -870,8 +687,6 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
 #endif
 }
 
-/// The attitude the device reports, as the pose of the camera. Orientation tracking places nothing: the position
-/// stays at the origin, and there is no picture, so the image resolution stays empty and no point is placed.
 - (void)updateOrientationFromMotion:(CMDeviceMotion *)motion
 {
     CMQuaternion q = motion.attitude.quaternion;
@@ -888,8 +703,6 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
 
 #pragma mark - Frames from the camera
 
-/// A frame from the camera, which is the picture the tracker processes with the attitude the gyroscope had last
-/// reported for it.
 - (void)captureOutput:(AVCaptureOutput *)output
 didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
        fromConnection:(AVCaptureConnection *)connection
@@ -905,9 +718,6 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 
 #pragma mark - The world as an archive holds it
 
-/// The points and planes the tracker has placed, and the counter the next identifier comes from, as bytes an archive
-/// can keep. A restored state is the world the archive had, with no pose: the next frame starts its pose again, so the
-/// restored world is coherent with the device only where the device is when the session starts.
 - (NSData *)worldState
 {
     NSMutableData *out = [NSMutableData dataWithBytes:CharonWorldStateMagic length:sizeof CharonWorldStateMagic];
@@ -941,8 +751,6 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     return out;
 }
 
-/// Takes a state back in. NO is answered for anything that is not one of this build's states, which is what a
-/// truncated or foreign archive is, and nothing is changed then.
 - (BOOL)restoreWorldState:(NSData *)state
 {
     const NSUInteger length = state.length;
@@ -1005,17 +813,12 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                                  userInfo:@{ NSLocalizedDescriptionKey: @"no camera on this device" }];
     return NULL;
 #else
-    // The still output is the camera's own, added to the session the stream is already running on, so
-    // the photograph is taken with the same optics and at the same moment as the frames around it.
     if (!_capture) {
         if (error)
             *error = [NSError errorWithDomain:@"space.kern0x1b.arkit" code:2
                                      userInfo:@{ NSLocalizedDescriptionKey: @"the session is not running" }];
         return NULL;
     }
-    // The still output of this release's AVFoundation takes the picture at the camera's own active
-    // format, which is the largest one the video output is configured for - there is no separate
-    // high-resolution setting to ask for on a release that has none.
     AVCaptureStillImageOutput *still = [[AVCaptureStillImageOutput alloc] init];
     if ([_capture canAddOutput:still])
         [_capture addOutput:still];
@@ -1077,42 +880,26 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 {
     if (!pixelBuffer)
         return _cameraTransform;
-    // The camera is the session's business, not this file's: the tracker answers for whatever frame
-    // it is handed, which is also what lets a recorded sequence be run through it offline.
 
     _timestamp = captureTime;
     [self readLumaFromPixelBuffer:pixelBuffer];
     if (_lumaWidth == 0)
         return _cameraTransform;
 
-    // The rotation the gyroscope reports, and the one the tracker believes it has, are what tells
-    // the patch search where to look and how far the camera turned.
     if (!_havePose) {
         _lastRotation = deviceRotation;
         _cameraTransform = CharonARKitIdentityFloat4x4;
         _havePose = YES;
     }
-    // The attitude this frame is given, which is the gyroscope's last reading, and the one the
-    // tracker believed last time: the difference between them is how far the camera has turned.
     deviceRotation = simd_normalize(deviceRotation);
     simd_quatf turn = CharonRotationBetween(_lastRotation, deviceRotation);
 
-    // The gyroscope's turn is applied to the pose the tracker already holds, so the pose is carried
-    // from one frame to the next rather than restarted: a rate integrated over a sequence is the only
-    // reason the sequence is worth anything, and the picture is what corrects it.
     simd_float4x4 worldFromDevice = CharonQuaternionMatrix(turn);
-    // the turn rotates the camera's attitude and leaves its position alone, so the translation column
-    // is carried across untouched rather than swung round the world's origin
     simd_float3 held = { _cameraTransform.columns[3][0], _cameraTransform.columns[3][1],
                          _cameraTransform.columns[3][2] };
     _cameraTransform = simd_mul(worldFromDevice, _cameraTransform);
     _cameraTransform.columns[3] = simd_make_float4(held.x, held.y, held.z, 1);
 
-    // Translation, from the accelerometer and the attitude that is now exact. The accelerometer reads
-    // the device's own acceleration with gravity still in it; rotating that reading into the world by
-    // the attitude leaves gravity along -z, and subtracting the gravity vector leaves the device's own
-    // acceleration. That is preintegrated over the interval and added to the pose's translation, which
-    // is the whole of Forster et al.'s equation 320 for a single interval.
     float dt = _haveTimestamp ? (float)(captureTime - _lastCaptureTime) : 0;
     if (dt > 0 && dt < 1.0f) {
         {
@@ -1127,8 +914,6 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                     pose.columns[0][2] * _measuredAcceleration.x +
                     pose.columns[1][2] * _measuredAcceleration.y +
                     pose.columns[2][2] * _measuredAcceleration.z);
-            // the accelerometer's own bias, estimated below, is what a specific force carries on top
-            // of the device's acceleration; removing it is the point of the filter
             simd_float3 own = simd_make_float3(inWorld.x - pose.columns[0][0] * _bias.bias.x -
                                                pose.columns[1][0] * _bias.bias.y -
                                                pose.columns[2][0] * _bias.bias.z,
@@ -1140,10 +925,6 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                                                pose.columns[2][2] * _bias.bias.z);
             CharonPreintegration interval = CharonPreintegrateInterval(own, dt);
 
-            // The paper's bracket for this interval: d^2 alpha is the rotation the interval
-            // accumulated and d beta its jerk, and for a single interval both follow from the mean
-            // force, which is what the constant-acceleration model already used. The cross-product
-            // matrix of the measurement is what pairs them in the derivative.
             CharonBiasTerms terms;
             memset(&terms, 0, sizeof terms);
             terms.duration = dt;
@@ -1155,11 +936,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
             for (int i = 0; i < 3; i++)
                 for (int j = 0; j < 3; j++)
                     terms.bracket[i][j] = dAlpha + dBeta;
-            terms.bracket[0][0] += 0;   // the diagonal takes the rotation's own square
+            terms.bracket[0][0] += 0;
 
-            // What the interval's displacement should have been for the velocity it carried and the
-            // bias the filter currently believes. The difference is the measurement: a specific force
-            // with a bias in it is a device that is not where the pose says it is.
             simd_float3 predicted = simd_make_float3(_velocity.x * dt, _velocity.y * dt,
                                                      _velocity.z * dt);
             simd_float3 residual = simd_make_float3(interval.deltaPosition.x - predicted.x,
@@ -1171,14 +949,9 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                     residual.x, residual.y, residual.z, _bias.bias.x, _bias.bias.y, _bias.bias.z,
                     _bias.covariance[0][0]);
 #endif
-            // The velocity the poses carry between frames, so the displacement is the velocity times
-            // the interval plus the preintegrated one - the constant-acceleration form, which is what
-            // the paper's delta-position is for.
             _velocity = simd_make_float3(_velocity.x + interval.deltaVelocity.x,
                                          _velocity.y + interval.deltaVelocity.y,
                                          _velocity.z + interval.deltaVelocity.z);
-            // the preintegrated displacement is already in the world, so it is added to where the
-            // camera is and not put through the pose a second time
             simd_float4 position = (simd_float4){ interval.deltaPosition.x, interval.deltaPosition.y,
                                                   interval.deltaPosition.z, 0 };
             _cameraTransform.columns[3] = simd_make_float4(
@@ -1187,33 +960,11 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                     _cameraTransform.columns[3][2] + position.z, 1);
         }
     }
-    // the record of this frame is made whether or not there was an interval to preintegrate, or the
-    // first frame with one would never be the frame before it
     _lastCaptureTime = captureTime;
     _haveTimestamp = YES;
 
     [self findFeatures];
-    // The Gauss-Newton step is written and runs, but it is not in the frame's path, because it was
-    // measured and it made the pose worse: with the step the differential reports 124.10 degrees of
-    // mean rotation error, without it 78.13. A step that fits the picture less well is fitting
-    // landmarks whose depth and pose convention still disagree, and shipping it would trade 46
-    // degrees of accuracy for the appearance of a solver. It stays here, called from one place, so
-    // that the work which makes it correct has somewhere to land; the run.sh floor is the
-    // without-the-step number, so putting it back in turns that floor red until it beats it.
-    // Still out of the frame's path, and now for a second measured reason. With the principal point
-    // found and fixed (the intrinsics had been built transposed, so cx and cy were 0 and every point
-    // was projected through the corner of the picture), the step reports 130.150 degrees of mean
-    // rotation error against 78.126 without it, and the plane count falls from sixteen to two. So the
-    // projection was not what was wrong: the landmark depth is, which is the first of the three
-    // candidates in the facts and is the one this points at.
     BOOL matched = [self matchFeaturesTurningBy:turn];
-    // Measured out of the frame's path, twice, for two different reasons, and both times by the
-    // same measurement: with the step 68.655 degrees of mean rotation error, without it 0.002. A
-    // step that fits the picture less well is fitting a world that is wrong, and now that the
-    // translation is integrated the step has a baseline to fit against and fits the wrong one. It is
-    // written and it runs, from one place, so the work that makes it correct has somewhere to land -
-    // and the differential's floor is the without-the-step number, so turning it back on turns that
-    // floor red until it beats it.
     if (matched && 0)
         [self refinePose];
     [self placeUnmatchedPoints];
@@ -1251,8 +1002,6 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     size_t stride = CVPixelBufferGetBytesPerRow(pixelBuffer);
     NSUInteger x, y;
     if (base) {
-        // The 420 biplanar and the BGRA and the one-plane grey all reduce to a luma row here, which
-        // is all the corner pick and the patch search read.
         OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
         size_t component = (format == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange ||
                             format == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange) ? 2 : 1;
@@ -1265,9 +1014,6 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
 }
 
-/// The Shi-Tomasi score of the four points around a pixel, which is the smaller of the two
-/// eigenvalues of the structure tensor of the gradients. Written out, because the two 2x2 halves
-/// are all it needs and no eigen solver is wanted here.
 static float CharonCornerScore(const uint8_t *luma, NSUInteger width, NSUInteger height, NSUInteger x, NSUInteger y)
 {
     if (x < 1 || y < 1 || x + 1 >= width || y + 1 >= height)
@@ -1293,8 +1039,6 @@ static float CharonCornerScore(const uint8_t *luma, NSUInteger width, NSUInteger
     return (float)(trace / 2.0 - sqrt(discriminant));
 }
 
-/// Every eighth pixel of every eighth row, scored, and the best of each cell kept. A grid rather
-/// than a plain threshold, so the features are spread over the frame.
 - (void)findFeatures
 {
     if (!_points) {
@@ -1336,8 +1080,6 @@ static float CharonCornerScore(const uint8_t *luma, NSUInteger width, NSUInteger
         }
     }
 
-    // A third of the grid, which is a few hundred points: enough to hold a pose through a turn,
-    // few enough to match exhaustively in the time between frames.
     NSUInteger wanted = cells * cells / 3;
     NSUInteger count = 0;
     for (cell = 0; cell < cells * cells && count < wanted; cell++) {
@@ -1347,7 +1089,6 @@ static float CharonCornerScore(const uint8_t *luma, NSUInteger width, NSUInteger
         memset(point, 0, sizeof(*point));
         point->image = simd_make_float2((float)bestX[cell] / (float)_lumaWidth,
                                         (float)bestY[cell] / (float)_lumaHeight);
-        // The patch size follows the cell, so a nearby point is searched over a comparable distance.
         point->scale = (float)cellWidth;
         point->identifier = _nextIdentifier++;
         point->hits = 1;
@@ -1359,9 +1100,6 @@ static float CharonCornerScore(const uint8_t *luma, NSUInteger width, NSUInteger
 
 #pragma mark - Matching a point into the next frame
 
-/// The sum of absolute differences of two patches, which is what the search minimises. An L1
-/// patch cost rather than a correlation, because a brightness change between the two exposures
-/// shifts a correlation's peak but not the ordering of an L1 cost nearly as much.
 static uint32_t CharonPatchCost(const uint8_t *luma, NSUInteger width, NSUInteger height,
                                 NSUInteger x, NSUInteger y, NSUInteger otherX, NSUInteger otherY,
                                 NSUInteger radius)
@@ -1383,21 +1121,18 @@ static uint32_t CharonPatchCost(const uint8_t *luma, NSUInteger width, NSUIntege
     return total;
 }
 
-/// Where a point in the previous frame went, found by searching a window along the direction the
-/// gyroscope says the camera turned. `yaw` and `pitch` are that direction in image coordinates.
 - (BOOL)matchFeaturesTurningBy:(simd_quatf)turn
 {
     if (_previousCount == 0 || _pointCount == 0)
         return NO;
 
-    // The camera's turn, as a drift of the image, which is what the search window follows.
     simd_quatf relative = simd_normalize(simd_conjugate(turn));
     simd_float3 axis = {relative.vector.x, relative.vector.y, relative.vector.z};
     float angle = 2.0f * acosf(fmaxf(-1.0f, fminf(1.0f, relative.vector.w)));
     simd_float2 drift = simd_make_float2(axis.x, axis.y) * angle * 0.5f;
 
     const NSUInteger radius = 3;
-    const float weight = 2.0f;   // Apple's patch cost, the one its own open sources use
+    const float weight = 2.0f;
     const NSUInteger step = 3;
     NSUInteger matched = 0, i, j;
 
@@ -1408,7 +1143,6 @@ static uint32_t CharonPatchCost(const uint8_t *luma, NSUInteger width, NSUIntege
         if (wasX + 32 >= _lumaWidth || wasY + 32 >= _lumaHeight)
             continue;
 
-        // The window, which is the size of a cell times the weight, centred on where the gyro says.
         float searchX = (float)wasX + drift.x * (float)_lumaWidth;
         float searchY = (float)wasY + drift.y * (float)_lumaHeight;
         NSUInteger reach = (NSUInteger)(was->scale * weight);
@@ -1434,16 +1168,12 @@ static uint32_t CharonPatchCost(const uint8_t *luma, NSUInteger width, NSUIntege
             }
         }
 
-        // A match has to be better than a fixed fraction of the worst patch the search could have
-        // found, which is what keeps a textureless patch from matching the first thing it lands on.
         if (bestX == NSNotFound)
             continue;
         uint32_t ceiling = (uint32_t)((2 * radius * 2 + 1) * (2 * radius * 2 + 1) * 60);
         if (bestX == NSNotFound || bestCost > ceiling)
             continue;
 
-        // Keep the match only if no earlier point already claimed it, so a point cannot be counted
-        // twice and pull the pose towards where it is not.
         BOOL taken = NO;
         for (j = 0; j < matched; j++) {
             if (_points[j].identifier == was->identifier) {
@@ -1461,13 +1191,6 @@ static uint32_t CharonPatchCost(const uint8_t *luma, NSUInteger width, NSUIntege
         now->age = was->age > 250 ? 250 : (uint8_t)(was->age + 1);
         now->hits = (uint8_t)(was->hits < 250 ? was->hits + 1 : 250);
 
-        // The drift of this point across the frame, against the turn that should have caused it. The
-        // median of those over the frame is the scene's depth, and every point takes it: a frame
-        // looks at one scene, so its points are all at one distance to the accuracy a single frame
-        // can give, and the median is the one that is not a mis-correspondence.
-        // Two views of the point: the image it was last matched at, and the image it is at now,
-        // with the pose the camera held for the first of them and the pose it holds now. The range is
-        // where those two rays meet, which is triangulation and not a first-order guess about drift.
         simd_float2 wasPixel = simd_make_float2(was->image.x * (float)_lumaWidth,
                                                 was->image.y * (float)_lumaHeight);
         simd_float2 nowPixel = simd_make_float2(now->image.x * (float)_lumaWidth,
@@ -1482,9 +1205,6 @@ static uint32_t CharonPatchCost(const uint8_t *luma, NSUInteger width, NSUIntege
             [self placePointInWorld:now];
 #ifdef CHARON_TRACKER_TRACE
         if (matched == 0) {
-            // The four lines: where the point was matched, what world position it carries, where that
-            // position projects, and what the camera projects it through. Which of the three
-            // conventions is wrong is visible in the difference between the first two columns.
             simd_float3x3 k = [CharonARTracker cameraIntrinsicsForResolution:_resolution];
             fprintf(stderr, "landmark image      %.2f %.2f px of %.0fx%.0f\n",
                     now->image.x * (float)_lumaWidth, now->image.y * (float)_lumaHeight,
@@ -1508,10 +1228,6 @@ static uint32_t CharonPatchCost(const uint8_t *luma, NSUInteger width, NSUIntege
     }
     _pointCount = matched;
 
-    // One scene, one distance: the median of what each point's own drift said about it, and then
-    // every point is placed at that. A single frame cannot separate depth from a feature's size -
-    // that is the ambiguity a camera and a gyroscope leave - so the frame's own answer is the one
-    // all of its points share, and the Gauss-Newton step is what improves on it from there.
     if (matched) {
         float *depths = calloc(matched, sizeof(float));
         if (depths) {
@@ -1520,7 +1236,7 @@ static uint32_t CharonPatchCost(const uint8_t *luma, NSUInteger width, NSUIntege
                 if (_points[k].depth > 0)
                     depths[measured++] = _points[k].depth;
             if (measured >= 3) {
-                for (NSUInteger a = 1; a < measured; a++) {   // a selection, for the median
+                for (NSUInteger a = 1; a < measured; a++) {
                     float key = depths[a];
                     NSUInteger b = a;
                     while (b > 0 && depths[b - 1] > key) {
@@ -1544,12 +1260,6 @@ static uint32_t CharonPatchCost(const uint8_t *luma, NSUInteger width, NSUIntege
 
 #pragma mark - The pose
 
-/// One Gauss-Newton step: the six parameters of the camera pose, the residual of each match, and
-/// the step that squares away. The points are at a unit depth until the pose has a scale, which is
-/// what an uncalibrated monocular system gives, so the scale of the world is set from the motion
-/// the gyroscope reports and the points follow it.
-/// The pose nudged by one parameter, as six plain numbers so that a single component can be moved
-/// without indexing a vector - which C's simd does not allow.
 static simd_float4x4 CharonNudgedPose(simd_float4x4 pose, int parameter, float epsilon)
 {
     float translation[3] = { 0, 0, 0 }, rotation[3] = { 0, 0, 0 };
@@ -1563,14 +1273,10 @@ static simd_float4x4 CharonNudgedPose(simd_float4x4 pose, int parameter, float e
 
 - (void)refinePose
 {
-    // The pose the gyroscope integrated to, and the picture's own answer to the same question. The
-    // difference between them, over every point matched in a row, is what this solves for.
     simd_float3x3 intrinsics = [CharonARTracker cameraIntrinsicsForResolution:_resolution];
     if (_resolution.width <= 0 || _resolution.height <= 0)
         return;
 
-    // A point matched in a row has been seen before, so where it was seen then is a measurement
-    // rather than a guess - and fewer than six of them cannot determine six parameters.
     NSUInteger usable = 0;
     for (NSUInteger i = 0; i < _pointCount; i++)
         if (_points[i].hits >= 2)
@@ -1578,7 +1284,7 @@ static simd_float4x4 CharonNudgedPose(simd_float4x4 pose, int parameter, float e
     if (usable < 6)
         return;
 
-    const float epsilon = 1e-4f;   // the nudge each parameter is differentiated by
+    const float epsilon = 1e-4f;
     float normal[6][6] = {{ 0 }};
     float gradient[6] = { 0 };
 
@@ -1591,11 +1297,9 @@ static simd_float4x4 CharonNudgedPose(simd_float4x4 pose, int parameter, float e
                                  point->image.y * (float)_resolution.height };
         simd_float2 predicted;
         if (!CharonProject(_cameraTransform, intrinsics, point->world, &predicted))
-            continue;   // a point behind the camera is not a measurement of anything
+            continue;
         float residual[2] = { predicted.x - observed.x, predicted.y - observed.y };
 
-        // The Jacobian: one column per parameter, the first three a nudge of translation and the
-        // last three a nudge of rotation in the camera's own frame.
         float jacobian[2][6];
         BOOL usableRow = YES;
         for (int parameter = 0; parameter < 6 && usableRow; parameter++) {
@@ -1605,15 +1309,13 @@ static simd_float4x4 CharonNudgedPose(simd_float4x4 pose, int parameter, float e
             BOOL haveBackward = CharonProject(CharonNudgedPose(_cameraTransform, parameter, -epsilon),
                                               intrinsics, point->world, &backward);
             if (haveForward && haveBackward) {
-                // the central difference, which is what the method wants and what a point that
-                // goes behind the camera under one nudge still gets
                 jacobian[0][parameter] = (forward.x - backward.x) / (2 * epsilon);
                 jacobian[1][parameter] = (forward.y - backward.y) / (2 * epsilon);
             } else if (haveForward) {
                 jacobian[0][parameter] = (forward.x - predicted.x) / epsilon;
                 jacobian[1][parameter] = (forward.y - predicted.y) / epsilon;
             } else {
-                usableRow = NO;   // the point carries no information about this parameter
+                usableRow = NO;
             }
         }
         if (!usableRow)
@@ -1627,8 +1329,6 @@ static simd_float4x4 CharonNudgedPose(simd_float4x4 pose, int parameter, float e
         }
     }
 
-    // A little regularisation on the diagonal, so that a frame which cannot see - a pure rotation,
-    // or a scene at one depth - gives a step of nearly zero rather than a large wrong one.
     for (int row = 0; row < 6; row++)
         normal[row][row] += 1e-6f;
 
@@ -1636,8 +1336,6 @@ static simd_float4x4 CharonNudgedPose(simd_float4x4 pose, int parameter, float e
     if (!CharonSolveSix(normal, gradient, step))
         return;
 
-    // The step is limited to what a frame between two pictures could plausibly have missed, so that
-    // one bad correspondence cannot throw the pose across the room.
     for (int row = 0; row < 6; row++)
         step[row] = fmaxf(-0.05f, fminf(0.05f, step[row]));
 
@@ -1649,45 +1347,18 @@ static simd_float4x4 CharonNudgedPose(simd_float4x4 pose, int parameter, float e
 
 #pragma mark - The points
 
-/// The points the search did not match keep their position in the world and are the only ones that
-/// can start a new one, so a feature that has been seen three frames running is given a place.
-/// How far off a point is, from the turn the gyroscope reported and the drift that turn put into
-/// the picture.
-///
-/// A camera and a gyroscope cannot say how far a thing is - that is why the reconstruction a camera
-/// alone gives is only good up to a scale. What it can say is this: when a camera turns by a known
-/// angle, a point at depth `z` drifts across the frame by an amount proportional to `1/z`, and the
-/// camera's own focal length is the constant that turns that drift into a depth. So the drift of a
-/// point that is known to be the same point, divided by the turn that moved it, gives the distance -
-/// no assumed size for the feature, and no constant fitted to a scene.
-/// A landmark's range from two views of it and the pose between them.
-///
-/// This is the triangulation a two-frame stereo pair does, and it is what the drift formula was
-/// reaching for and could not reach. A point seen at `u0` in one frame and `u1` in the next, with the
-/// camera's pose changed by `from` -> `to` between them, is on the ray out of the first camera
-/// through `u0` and on the ray out of the second camera through `u1`; the distance along the first
-/// ray at which the two rays meet is the point's depth.
-///
-/// The first-order form of it is `depth = f * (baseline / disparity)`, with the disparity in pixels
-/// and the baseline the distance the camera moved, and it is exact for a point's own ray pair - which
-/// is what the drift formula was *not*: it attributed the whole drift to the rotation and had no
-/// baseline at all, because the translation was never integrated. Here the baseline is the pose
-/// delta's own translation, so the translation is in the model rather than missing from it.
 static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, simd_float2 u1,
                                      simd_float4x4 from, simd_float4x4 to)
 {
-    // the two rays, in the world, through the two observations
     simd_float3 d0 = CharonRayDirection(intrinsics, from, u0);
     simd_float3 d1 = CharonRayDirection(intrinsics, to, u1);
     simd_float3 o0 = { from.columns[3][0], from.columns[3][1], from.columns[3][2] };
     simd_float3 o1 = { to.columns[3][0], to.columns[3][1], to.columns[3][2] };
 
-    // the plane through the first origin and the two directions; the point is on it, and its distance
-    // along the first ray follows from where the second ray crosses that plane
     simd_float3 n = simd_normalize(simd_cross(d0, d1));
     float denominator = simd_dot(n, d1);
     if (fabsf(denominator) < 1e-6f)
-        return 0;   // the two rays are coplanar with the baseline: no parallax, no range
+        return 0;
     float along = simd_dot(n, o1 - o0) / denominator;
     if (along <= 0)
         return 0;
@@ -1701,8 +1372,6 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
     simd_float3 axis = CharonNormalized(turnAxis);
     if (simd_length(axis) < 1e-6f || focalLength <= 0)
         return 0;
-    // The first-order relation for a point on the ray `unit`: the horizontal drift a turn about
-    // `axis` puts into its projection is `f * (axis x unit).x / z`, so `z` follows from the drift.
     simd_float3 unit = CharonNormalized(simd_make_float3(driftPixels.x, driftPixels.y, 1));
     float numerator = focalLength * simd_cross(axis, unit).x;
     float denominator = driftPixels.x;
@@ -1712,8 +1381,6 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
     return depth > 0 ? depth : 0;
 }
 
-/// A point's place in the world, along the ray through it, as far off as the drift that placed it
-/// there says. A point with no usable drift has no distance yet, and is not placed.
 - (void)placePointInWorld:(CharonARPoint *)point
 {
     if (_lumaWidth == 0 || point->depth <= 0)
@@ -1727,8 +1394,6 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
     point->world = simd_make_float3(world.x, world.y, world.z);
 }
 
-/// The camera's focal length in pixels, which is the constant that turns a drift in the picture into
-/// a distance.
 - (float)focalLengthInPixels
 {
     return [CharonARTracker cameraIntrinsicsForResolution:_resolution].columns[0][0];
@@ -1743,7 +1408,6 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
     for (i = 0; i < matched; i++) {
         if (_points[i].hits >= 3) {
             carried[count] = _points[i];
-            // A feature's size says how far away it is, which is what puts it in the world.
             float distance = 0.5f / (_points[i].scale / (float)_lumaWidth);
             carried[count].camera = CharonAlongRay((simd_float3){0, 0, 0},
                                                    CharonNormalized((simd_float3){_points[i].image.x - 0.5f,
@@ -1757,10 +1421,6 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
     if (count) {
         [_worldPoints appendBytes:carried length:count * sizeof(CharonARPoint)];
     }
-    // The array holds the matches followed by the corners the search did not match, and the second
-    // run starts where the first ended: written from zero it overwrote every match, so a matched point
-    // never accumulated the frames that would have placed it in the world. Measured - 17 to 19 matches
-    // a frame and still 0 points placed, 0 planes, a mean rotation error of 91 degrees.
     NSUInteger total = matched;
     for (i = 0; i < _candidateCount && total < 4096; i++) {
         _points[total++] = _candidates[i];
@@ -1779,10 +1439,6 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
 
 #pragma mark - Planes
 
-/// A plane is a run of world points that stay level and straight. Every point is compared with every
-/// other within a cell of a coarse grid, the ones that agree are averaged into a plane, and the
-/// planes are what ARKit calls *detected*: there is no depth measurement behind them, and none is
-/// claimed.
 - (void)detectPlanes
 {
     const NSUInteger count = _worldPoints.length / sizeof(CharonARPoint);
@@ -1790,9 +1446,9 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
         return;
 
     const CharonARPoint *points = (const CharonARPoint *)_worldPoints.bytes;
-    const float cell = 0.25f;          ///< a quarter of a metre, which is a tabletop's worth
-    const float level = 0.90f;         ///< how nearly the normal has to be up
-    const float spread = 0.75f;        ///< how far a point may stray and still be on the surface
+    const float cell = 0.25f;
+    const float level = 0.90f;
+    const float spread = 0.75f;
     NSMutableArray<CharonARValue *> *found = [NSMutableArray array];
     NSUInteger i, j;
 
@@ -1815,9 +1471,6 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
             continue;
         mean = sum / (float)onPlane;
 
-        // The plane through the run: the smallest eigenvector of the scatter is its normal, and for
-        // a plane that is the direction the points agree least in, which here is found by three
-        // passes of subtracting the mean.
         simd_float3 axis1 = (simd_float3){0, 0, 0}, axis2 = (simd_float3){0, 0, 0};
         for (j = 0; j < count; j++) {
             simd_float3 d = points[j].world - (anchor + mean);
@@ -1843,7 +1496,6 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
         if (normal.y < level)
             continue;
 
-        // The extent of what was seen, in the plane's own two directions.
         for (j = 0; j < count; j++) {
             simd_float3 d = points[j].world - (anchor + mean);
             if (fabsf(simd_dot(d, normal)) > cell)
@@ -1860,7 +1512,7 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
         plane.center = anchor + mean;
         plane.normal = normal;
         plane.extent = (high - low) * 0.5f;
-        plane.alignment = 0.5f;   // a detector's confidence, never Apple's measured alignment
+        plane.alignment = 0.5f;
         plane.identifier = _nextIdentifier++;
         [found addObject:[[CharonARValue alloc] initWithBytes:&plane size:sizeof plane]];
         if ([found count] >= 16)
@@ -1899,22 +1551,18 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
 
 #pragma mark - Rays
 
-/// The ray through a point of the frame, in the camera's own space, which is the one every hit test
-/// and every raycast starts from.
 static BOOL CharonCameraRay(CGSize resolution, CGPoint point, simd_float3 *origin, simd_float3 *direction)
 {
     if (resolution.width <= 0 || resolution.height <= 0)
         return NO;
     float x = ((float)point.x / (float)resolution.width - 0.5f) * 2.0f;
     float y = (0.5f - (float)point.y / (float)resolution.height) * 2.0f;
-    // A 60-degree vertical field of view is what the back camera of this class of device gives.
     const float tanHalf = 0.5773502692f;
     *origin = (simd_float3){0, 0, 0};
     *direction = CharonNormalized((simd_float3){x * tanHalf, y * tanHalf, -1});
     return YES;
 }
 
-/// A ray against a plane, which is a plane equation and a substitution.
 static BOOL CharonRayPlane(simd_float3 origin, simd_float3 direction, CharonARPlane plane,
                            simd_float3 *hit)
 {
@@ -1943,7 +1591,6 @@ static BOOL CharonRayPlane(simd_float3 origin, simd_float3 direction, CharonARPl
                 allowing:(NSUInteger)targets
                   results:(NSMutableArray<CharonARValue *> *)results
 {
-    // The ray is given in the camera's space, which is where Apple's raycast query takes it.
     simd_float3 world = simd_mul(_cameraTransform, (simd_float4){origin.x, origin.y, origin.z, 1}).xyz;
     simd_float3 aim = simd_mul(_cameraTransform, (simd_float4){direction.x, direction.y, direction.z, 0}).xyz;
     direction = CharonNormalized(aim);
@@ -1962,7 +1609,6 @@ static BOOL CharonRayPlane(simd_float3 origin, simd_float3 direction, CharonARPl
         float distance = simd_length(hit - world);
         if (any && distance >= nearest)
             continue;
-        // Apple's targets: 0 every plane, 1 any, 2 existing, 4 estimated.
 #if CHARON_NO_MOTION
         if (targets != 0)
             continue;
@@ -1999,7 +1645,6 @@ static BOOL CharonRayPlane(simd_float3 origin, simd_float3 direction, CharonARPl
     if (results)
         [results removeAllObjects];
 
-    // First the points the tracker has placed, which is what a feature hit is.
     const NSUInteger count = _worldPoints.length / sizeof(CharonARPoint);
     const CharonARPoint *points = (const CharonARPoint *)_worldPoints.bytes;
     NSUInteger i;

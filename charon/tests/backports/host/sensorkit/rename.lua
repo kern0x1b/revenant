@@ -1,12 +1,3 @@
--- Renames the port's four time functions, so a host binary can carry the port's build and the host's own side by side without
--- either shadowing the other. The names are the header's own, so the case file spells one set and the port's file spells the
--- other.
---
--- Usage: xmake l ./rename.lua <registry> <out.h>   (the registry is named but not read, as it always was)
-
--- The four time functions, and the three NSDate category METHODS, which the port's file spells the way the SDK does - that is
--- the spelling a client compiled against the 14.0 SDK sends, and it is what the 6.1.3 gate looks for. The rename here is for
--- the PORT'S half only, so that this binary's category and the host's own SensorKit do not shadow one another.
 local names = { "SRAbsoluteTimeGetCurrent", "SRAbsoluteTimeFromContinuousTime",
     "SRAbsoluteTimeToCFAbsoluteTime", "SRAbsoluteTimeFromCFAbsoluteTime",
     "dateWithSRAbsoluteTime", "initWithSRAbsoluteTime", "srAbsoluteTime" }

@@ -1,24 +1,3 @@
-// extent.m - the port's ARPlaneExtent, its archive, and the keys that archive carries.
-//
-// There is no host oracle for this class: this Mac's ARKit.framework has no ARPlaneExtent, no
-// ARWorldTrackingConfiguration and no ARReferenceObject (dlopen of the framework by path answers a
-// handle and NSClassFromString answers nil for all three), so nothing here is compared with a host
-// answer. What is checked instead is that the port's class does what the release's own code does,
-// with the release named as the source of every number and every string in
-// facts/ARKit/PlaneExtent.md:
-//
-//   1. a fresh extent reads the release's -init defaults: rotation 0, width -1, height -1;
-//   2. +supportsSecureCoding answers YES, and a class that does not declare NSSecureCoding answers
-//      NO on the same runtime, which is what makes the YES mean something;
-//   3. an archive written by the port carries the three literal keys the release's -encodeWithCoder:
-//      uses -- origin, width, height -- read out of the archive's own bytes;
-//   4. an archive round-trips: the three floats that went in are the three that come out;
-//   5. a float that is not representable as a round trip of its own bits still round-trips exactly,
-//      so the check above is not passing because the values are small integers in disguise.
-//
-// The port's class is renamed into CharonPortARPlaneExtent when this file is compiled, so nothing
-// here can reach a host ARPlaneExtent by accident even if a future macOS has one.
-
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <stdlib.h>
@@ -29,18 +8,12 @@
 @property (nonatomic, readonly) float rotationOnYAxis;
 @property (nonatomic, readonly) float width;
 @property (nonatomic, readonly) float height;
-// The release's own method list carries these three (0x1af14f4d4, 0x1af14f4e4, 0x1af14f4f4) and its
-// public header does not declare them, so they are declared here for the harness and claimed nowhere.
 - (void)setRotationOnYAxis:(float)rotationOnYAxis;
 - (void)setWidth:(float)width;
 - (void)setHeight:(float)height;
-// Reachable from the SDK's own NSObject declaration, so the port's answer to it is a caller's answer.
 - (id)copyWithZone:(NSZone *)zone;
 @end
 
-// The release's class method list has exactly one entry and it is +supportsSecureCoding (read with
-// tools/corpus/skeleton-table.lua), so the answer is the class's own and not an inherited one. This
-// checks the same thing on the port's side: that the class itself carries the selector.
 static BOOL class_implements(Class cls, SEL selector)
 {
     unsigned count = 0;
@@ -66,10 +39,6 @@ static void ok(BOOL condition, NSString *what)
     }
 }
 
-/// The bytes of an archive carry the key strings verbatim: a keyed archive is a binary property list
-/// whose dictionaries are keyed by the very strings passed to -encode...forKey:. So the presence of a
-/// string in the bytes is the check that the port wrote that key, and its absence is a check that it
-/// did not.
 static BOOL archive_carries(NSData *data, const char *key)
 {
     return [data rangeOfData:[NSData dataWithBytes:key length:strlen(key)]
@@ -117,8 +86,6 @@ int main(void)
         ok(read.width == extent.width, @"the width survives the archive");
         ok(read.height == extent.height, @"the height survives the archive");
 
-        // Values whose bits are not a short decimal, so a check that passed because both sides read
-        // zero, or because a float comparison was widened, would go red here.
         CharonPortARPlaneExtent *odd = [[CharonPortARPlaneExtent alloc] init];
         [odd setRotationOnYAxis:0.1234567f];
         [odd setWidth:12345.6789f];
@@ -141,9 +108,6 @@ int main(void)
         ok(memcmp(&gotHeight, &wantHeight, sizeof(float)) == 0,
            @"the odd height survives bit for bit");
 
-        // -isEqual: and -copyWithZone: are in the release's own method list (0x1af14f3bc and
-        // 0x1af14f470) and both are reachable from the SDK's NSObject declarations, so a port that
-        // did not carry them would answer identity where the release answers by value.
         CharonPortARPlaneExtent *twin = [[CharonPortARPlaneExtent alloc] init];
         [twin setRotationOnYAxis:extent.rotationOnYAxis];
         [twin setWidth:extent.width];

@@ -1,10 +1,3 @@
--- The ledger's cache pass (tools/gen/ledger.lua) on fixtures, with no cache and no SDK: the readers' lines parsed (a selector's sign is not
--- part of its name, an instance and a class selector are told apart by their field), each declaration checked against the facts (an ObjC
--- class, protocol, method and property by its runtime name; a C symbol by its linker name with the underscore; an enum member not at all),
--- and the verdict rule (present when a declaration is in the cache; absent on ObjC runtime evidence, or on a C symbol the cache lacks while the
--- 26.2 .tbd of its framework exports it, since a C symbol the .tbd does not export may be a static inline function; undecided otherwise).
--- Run: xmake l tests/gen/ledger_test.lua (exits 1 on any failure).
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 
 local function checks()
@@ -18,7 +11,6 @@ local function checks()
     return check, function() return failures end
 end
 
--- A declaration record as surface_model.declarations gives it (the fields the check reads).
 local function decl(fw, kind, api, usr, getter)
     return {framework = fw, claimed_by = fw, kind = kind, lang = "objc", api = api, usr = usr or "", getter = getter or "-"}
 end
@@ -27,7 +19,6 @@ function main()
     local check, failures = checks()
     local ledger = import("gen.ledger", {rootdir = TOOLS, anonymous = true})
 
-    -- the readers' lines: objc-inventory prints each selector with a sign, the instance selectors in field 5 and the class ones in field 6
     local objc = table.concat({
         "class\tUIView\tUIResponder\t/System/Library/Frameworks/UIKit.framework/UIKit\t-setFrame:,-frame\t+animateWithDuration:\tNSCoding",
         "protocol\tNSLocking\t\t\t-lock,-unlock\t\t",
@@ -44,7 +35,6 @@ function main()
     check(facts.exports._NSLog == true and facts.exports["_OBJC_CLASS_$_UIView"] == true,
           "exports are read by their linker symbol, underscore kept")
 
-    -- each declaration against the facts
     check(ledger.check(decl("UIKit", "class", "UIView"), facts) == "present", "an ObjC class in the cache is present")
     check(ledger.check(decl("X", "class", "XYZMissing"), facts) == "absent", "an ObjC class not in the cache is absent")
     check(ledger.check(decl("UIKit", "protocol", "NSLocking"), facts) == "present", "a protocol in the cache is present")
@@ -60,7 +50,6 @@ function main()
           "a property with no getter is checked by its name, and absent when the cache lacks it")
     check(ledger.check(decl("X", "method", "-[Gone make]"), facts) == "absent", "a method of a class not in the cache is absent")
     check(ledger.check(decl("F", "function", "NSLog()"), facts) == "present", "a function in the cache is present by its symbol")
-    -- a C declaration missing from the cache proves nothing unless the 26.2 .tbd of its framework exports it
     check(ledger.check(decl("F", "function", "NSMissing()"), facts) == nil, "a C function missing from the cache, no .tbd export: no evidence")
     check(ledger.check(decl("F", "function", "NSMissing()"), facts, {}) == nil, "an empty export set proves nothing either")
     check(ledger.check(decl("F", "function", "NSMissing()"), facts, {NSMissing = true}) == "absent",
@@ -75,15 +64,12 @@ function main()
     check(ledger.check(decl("F", "constant", "kGlobal", "c:@kGlobal"), facts, {kGlobal = true}) == "absent",
           "a global constant the .tbd exports is checkable by its symbol")
 
-    -- the verdict rule over the declarations of each framework
-    -- decls is framework -> the records of its shard; a record's claimed_by is the framework that owns it, which may be another shard's
     local decls = {
         RuntimeHere = {decl("RuntimeHere", "class", "UIView"), decl("RuntimeHere", "class", "Gone")},
         RuntimeGone = {decl("RuntimeGone", "class", "Gone"), decl("RuntimeGone", "method", "-[Gone make]")},
         COnly = {decl("COnly", "function", "NSMissing()"), decl("COnly", "constant", "NSMissingConst")},
         MixedFn = {decl("MixedFn", "class", "Gone"), decl("MixedFn", "function", "NSLog()")},
         Types = {decl("Types", "enum", "NSThing")},
-        -- a shard holding only a usr another framework owns: that one counts it, this one has nothing of its own
         Borrower = {decl("RuntimeGone", "class", "Gone")},
     }
     decls.Borrower[1].claimed_by = "MixedFn"
@@ -99,7 +85,6 @@ function main()
     check(verdicts.Borrower.verdict == "undecided" and verdicts.Borrower.checkable == 0,
           "a shard whose only declaration another framework owns gives it nothing (got " .. verdicts.Borrower.verdict .. ")")
 
-    -- with the SDK's exports: a C-only framework whose .tbd exports what the cache lacks is absent; one whose .tbd exports nothing is not
     local exported = function(unit)
         if unit == "COnly" then
             return {NSMissing = true, NSMissingConst = true}
@@ -111,8 +96,6 @@ function main()
           "a C-only framework the .tbd exports, absent from the cache, is absent (got " .. with_tbd.COnly.verdict .. ")")
     check(with_tbd.Types.verdict == "undecided", "a framework with no runtime or exported C declaration stays undecided")
 
-    -- a nested shard is its own unit, named by its folder: its declarations claimed by the outer framework count for it, and it has its
-    -- own verdict beside the outer one (the trace and the input name it by its folder)
     local sub = decl("Outer", "class", "Gone")
     sub.unit = "Outer/Sub"
     local nested = {Outer = {decl("Outer", "class", "UIView"), sub}}
@@ -122,7 +105,6 @@ function main()
     check(both.Outer.verdict == "present" and both.Outer.checkable == 2 and both.Outer.present == 1,
           "the outer framework still aggregates all of its declarations (got checkable " .. tostring(both.Outer.checkable) .. ")")
 
-    -- the built libraries' names join the cache's: a class's selectors are the union, and the exports of both are there
     local built = ledger.parse_facts("class\tUIView\t\t\t-addSub:\t\t\nclass\tARSession\t\t\t-run:\t\t", "_NSBuilt\tlib")
     local both = ledger.merge(ledger.parse_facts(objc, exports), built)
     check(both.classes.UIView.inst["setFrame:"] == true and both.classes.UIView.inst["addSub:"] == true,
@@ -130,7 +112,6 @@ function main()
     check(both.classes.ARSession ~= nil and both.exports._NSBuilt == true and both.exports._NSLog == true,
           "a built library's classes and exports are added, the cache's kept")
 
-    -- a declaration's state: implemented when the cache or a library has it, missing when neither does, undecided with its pass otherwise
     local status, needs = ledger.state_of(decl("UIKit", "class", "UIView"), facts)
     check(status == "implemented" and needs == "none", "a class in the cache is implemented (got " .. tostring(status) .. ")")
     status, needs = ledger.state_of(decl("X", "class", "XYZMissing"), facts)
@@ -143,8 +124,6 @@ function main()
     status, needs = ledger.state_of(swift, facts)
     check(status == "undecided" and needs == "swift-module", "a Swift declaration is undecided without the cache's Swift proof")
 
-    -- the Swift proof: a cache with no libswift* image and no Swift-compiled export holds no Swift, so a Swift-only declaration is missing
-    -- at the release, with the proof in its reason; a cache with one Swift image does not
     local swift_only = {framework = "F", claimed_by = "F", kind = "method", lang = "swift", api = "Thing.run()", usr = "s:1F5ThingC3runyyF",
                         getter = "-"}
     local plain_images = "/usr/lib/libSystem.B.dylib\t4938\n/System/Library/Frameworks/Foundation.framework/Foundation\t9\n"
@@ -159,7 +138,6 @@ function main()
     status = ledger.state_of(swift_only, with_swift)
     check(status == "undecided", "without the proof a Swift-only declaration stays undecided")
 
-    -- an import takes the state of its ObjC or C twin (the twins index, by usr), named in the reason; no twin: undecided
     local twin = decl("F", "class", "UIView", "c:objc(cs)UIView")
     local swift_import = {framework = "F", claimed_by = "F", kind = "class", lang = "swift", api = "UIView", usr = "c:objc(cs)UIView", getter = "-"}
     local twins = ledger.twins_of(ledger.rows_of({twin}, facts, function() return {} end))
@@ -173,7 +151,6 @@ function main()
     local macro_row = ledger.rows_of({macro}, facts, function() return {} end, nil, {})
     check(string.find(macro_row[1].reason, "a C macro", 1, true) ~= nil, "an import of a C macro says so")
 
-    -- rows: one per kind, language and api (the first record of a key), sorted by kind then api, with the record's introduction
     local records = {decl("UIKit", "class", "XYZMissing"), decl("UIKit", "class", "UIView"), decl("UIKit", "class", "UIView"),
                      decl("UIKit", "function", "NSLog()")}
     records[2].introduced = "2.0"
@@ -188,8 +165,6 @@ function main()
           "the ledger's header is ledger-w45's columns")
     check(#ledger.split(string.match(text, "\n([^\n]*)"), "\t") == 8, "a row has eight columns")
 
-    -- the lifted-header pass (header_pass.lua), on the compiler's text: a statement names one declaration per line, and the diagnostic on its
-    -- line is the answer; a deprecation warning is no answer, a notes line adds to the diagnostic it follows
     local header_pass = import("gen.header_pass", {rootdir = TOOLS, anonymous = true})
     check(header_pass.statement_of("function", "NSLog()") == "(void)(NSLog);", "a function is named by its name, without the call")
     check(header_pass.statement_of("method", "UIView.run") == nil, "a method is not named by the header pass")

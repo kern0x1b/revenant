@@ -1,8 +1,3 @@
-// MPSMatrixBatchNormalizationGradient, from the header of the SDK of iOS 16.4. One object per release: the band machinery keeps an
-// object whole or drops it whole, so a file here carries the API of exactly one release.
-
-// The state every one of the neural network matrix kernels carries, and the accessors each of them
-// declares. A macro defines no symbol, so a file that uses one needs nothing from another.
 #define CHARON_MPS_NEURON_IVARS \
     MPSCNNNeuronType _neuronType; \
     float _neuronParameterA, _neuronParameterB, _neuronParameterC; \
@@ -101,12 +96,6 @@ CHARON_MPS_NEURON_COMMON
         CharonMPSRefuse(@"MPSMatrixBatchNormalizationGradient: a matrix of a data type that is not one of the eight element types was given");
         return;
     }
-    // Backpropagating through y[j] = gamma[j] * (x[j] - m[j]) / (v[j] + epsilon) + beta[j], in the
-    // header's own notation: the gradient with respect to gamma is the incoming gradient times the
-    // normalised value, the gradient with respect to beta its column sums, and the gradient with
-    // respect to the input the usual per-channel form
-    //     gamma / sqrt(v + epsilon) * (dY - mean(dY) - yhat / n * sum(dY))
-    // where yhat is the normalised value and n the number of feature vectors.
     NSUInteger available = in.rows - _secondarySourceMatrixOrigin.x;
     NSUInteger vectors = _sourceNumberOfFeatureVectors < available ? _sourceNumberOfFeatureVectors : available;
     NSUInteger columns = in.columns - _secondarySourceMatrixOrigin.y;
@@ -137,9 +126,6 @@ CHARON_MPS_NEURON_COMMON
                     (unsigned long)column, m, v, g, g / sqrt(v + (double)_epsilon),
                     (unsigned long)in.rowBytes);
 #endif
-            // gamma / sqrt(variance + epsilon), which is not gamma / (variance + epsilon): the trace
-            // shows the port answering 0.1875, 0.125 and 0.333 where the root gives 0.530, 0.306 and
-            // 0.816, and that is what put channels 1 and 2 out.
             double divisor = g / sqrt(v + (double)_epsilon);
             double sum = 0.0, gammaGradient = 0.0, betaGradient = 0.0;
             for (NSUInteger row = 0; row < vectors; row++) {
@@ -152,12 +138,6 @@ CHARON_MPS_NEURON_COMMON
             }
             double meanGradient = vectors ? sum / (double)vectors : 0.0;
             double scaledSum = vectors ? sum / (double)vectors : 0.0;
-            // The per-parameter gradients are left untouched. The release writes neither: with a
-            // -1.0f sentinel in both destinations they come back -1.0f, so it is untouched and not
-            // zero - and a fresh buffer is already zero, which is why the two looked the same. The
-            // header's formula for them, sum of dY * xhat and sum of dY, is in
-            // facts/MetalPerformanceShaders/Cnn.md with the program that shows this, and the registry
-            // entry carries it.
             for (NSUInteger row = 0; row < vectors; row++) {
                 double d = CharonMPSLoad(CharonMPSMatrixElement(&gradient, b, _primarySourceMatrixOrigin.x + row, _primarySourceMatrixOrigin.y + column), gradient.dataType, 0);
                 double x = CharonMPSLoad(CharonMPSMatrixElement(&in, b, _secondarySourceMatrixOrigin.x + row, _secondarySourceMatrixOrigin.y + column), in.dataType, 0);

@@ -4,26 +4,13 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-// The rest of what a collection view and a table view ask their layout, their controller and their
-// delegate between iOS 7.0 and 12.0, where the release's own UIKit never asks.
-//
-// The defaults are the host's, measured in tests/backports/host/uikitscroll and not assumed: both of
-// the flow layout's pinning flags are NO, `useLayoutToLayoutNavigationTransitions` is NO and
-// `installsStandardGestureForInteractiveMovement` is YES, and a layout attribute's `bounds` is a real
-// property beside `frame` where setting the frame moves the bounds' size and leaves its origin at
-// zero.
 static const char CharonHeadersPinKey;
 static const char CharonFootersPinKey;
 static const char CharonUseLayoutToLayoutKey;
 static const char CharonInstallsGestureKey;
 
-// The questions a collection view asks its delegate before it puts a cell on screen, and the three a
-// table view asks about a height it does not have yet. The release asks none of them, so an
-// application that answered them was never called.
 @implementation UICollectionViewLayoutAttributes (CharonBounds7)
 
-// bounds beside frame: the origin is the frame's and the size is the element's, and setting the frame
-// moves the size without moving the origin, which is what the host answers.
 - (CGRect)bounds
 {
     return CGRectMake(0, 0, self.frame.size.width, self.frame.size.height);
@@ -66,8 +53,6 @@ static const char CharonInstallsGestureKey;
 
 @implementation UICollectionViewController (CharonController7)
 
-// The layout the controller's collection view is using. It is the view's own layout, so a controller
-// that is given one and a controller whose view makes one answer the same thing.
 - (UICollectionViewLayout *)collectionViewLayout
 {
     return self.collectionView.collectionViewLayout;
@@ -90,7 +75,6 @@ static const char CharonInstallsGestureKey;
 
 - (BOOL)installsStandardGestureForInteractiveMovement
 {
-    // The host answers YES for a controller made by hand, so the flag is on until it is turned off.
     NSNumber *stored = objc_getAssociatedObject(self, &CharonInstallsGestureKey);
     return stored ? stored.boolValue : YES;
 }
@@ -102,7 +86,6 @@ static const char CharonInstallsGestureKey;
 
 @end
 
-// Declared here because the installer's +load runs before this category is attached.
 @interface UICollectionView (CharonDelegateQuestions9)
 - (void)charon_tellDelegateAboutVisibleElements;
 - (void)charon_tellDelegateWillDisplayIndexPath:(NSIndexPath *)indexPath;
@@ -110,9 +93,6 @@ static const char CharonInstallsGestureKey;
 - (CGPoint)charon_targetContentOffsetForProposedContentOffset:(CGPoint)proposed;
 @end
 
-// The call site: the layout pass that puts an element on screen. The implementation already there is
-// captured and called, so this composes with any other wrap of the same method whichever order the
-// two are installed in, instead of replacing it.
 @interface CharonCollectionViewDelegateInstaller : NSObject
 @end
 
@@ -133,9 +113,6 @@ static const char CharonInstallsGestureKey;
 
 @implementation UICollectionView (CharonDelegateQuestions9)
 
-// Every element now on screen is told to the delegate once, and only once: the ones told are
-// remembered, so a layout pass that runs again for the same cell does not ask a second time, which
-// is what a delegate that configures a cell would notice.
 - (void)charon_tellDelegateAboutVisibleElements
 {
     static const char toldKey;
@@ -161,8 +138,6 @@ static const char CharonInstallsGestureKey;
     }
 }
 
-// The offset a collection view should come to rest at. The layout is asked first, as it is on a
-// release that has the question, and the delegate is asked after it so it keeps the last word.
 - (CGPoint)charon_targetContentOffsetForProposedContentOffset:(CGPoint)proposed
 {
     CGPoint target = [self.collectionViewLayout targetContentOffsetForProposedContentOffset:proposed];
@@ -173,9 +148,6 @@ static const char CharonInstallsGestureKey;
     return target;
 }
 
-// A cell is about to be shown, and a supplementary view with it. The release asks for neither, so an
-// application that implemented them to lay a cell out as it arrives was never called; here it is,
-// once per element, from the layout pass that puts the element on screen.
 - (void)charon_tellDelegateWillDisplayIndexPath:(NSIndexPath *)indexPath
 {
     id delegate = self.delegate;
@@ -207,13 +179,6 @@ static const char CharonInstallsGestureKey;
 
 @implementation UITableView (CharonEstimatedHeights7)
 
-// A table view asks its delegate for an estimated height when it needs to know how far away a row is
-// before it has drawn it: for scrolling, and for deciding what is about to come on screen. The
-// release has no estimation of its own, so the port asks, and these are the three questions it asks.
-//
-// Where the port uses the answer is its own prefetch geometry in UITableView+Prefetching10.m, which
-// needs to know how many rows are about to appear; that is a real use and the release's own
-// scrolling does not consult the questions, which is the one thing about them this port cannot give.
 - (CGFloat)charon_estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     id delegate = self.delegate;

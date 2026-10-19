@@ -5,27 +5,10 @@
 #import <AudioToolbox/ExtendedAudioFile.h>
 #import "CharonAVAudioBuffer.h"
 
-// AVAudioFile reads and writes a file through the release's own ExtAudioFile, which iOS 6 carries
-// whole: it opens and creates every container and codec AudioToolbox knows, converts between the
-// file's format and the client format a caller asks for, and does the seeking. Nothing here decodes
-// or encodes a sample; the class only maps the AVAudioFile vocabulary onto ExtAudioFile's, and holds
-// the AVAudioFormat and AVAudioPCMBuffer objects of this port at that boundary.
-//
-// The processing format is the standard format (Float32, deinterleaved, the file's rate and channel
-// count) unless the init names a common format, in which case it is that format, interleaved or not.
-// It is set as the client format, so ExtAudioFile does every conversion between the file and it.
-//
-// Errors carry the domain and the code the host gives, measured in tests/backports/host/avfaudio-file
-// (the host's probe, run against Apple's AVFAudio): a missing file is AudioFile's 'wht?', a format it
-// cannot write is 'fmt?', and the end of a file is an error, not an empty buffer, as on the host.
-// A request for more frames than the buffer holds raises the exception the host raises.
-
-// Named by its text, not by the NSString constant: NSOSStatusErrorDomain is not in iOS 6's Foundation,
-// and a strong reference to it would stop the load of every application that carries this class.
 static NSString *const charon_avfaudioErrorDomain = @"com.apple.coreaudio.avfaudio";
 static NSString *const charon_osstatusErrorDomain = @"NSOSStatusErrorDomain";
-static const OSStatus charon_eofErr = -39;       // MacErrors.h's eofErr: the end of the file
-static const OSStatus charon_paramErr = -50;     // MacErrors.h's paramErr: a buffer of another format
+static const OSStatus charon_eofErr = -39;
+static const OSStatus charon_paramErr = -50;
 
 @interface AVAudioFile () {
     ExtAudioFileRef _extFile;
@@ -41,7 +24,6 @@ static void charon_setError(NSError **outError, NSString *domain, NSInteger code
         *outError = [NSError errorWithDomain:domain code:code userInfo:nil];
 }
 
-// The file type a path's extension names, as AudioToolbox lists it; the first of the types it lists.
 static BOOL charon_fileTypeForURL(NSURL *url, AudioFileTypeID *outType)
 {
     CFStringRef extension = (__bridge CFStringRef)url.pathExtension;
@@ -56,14 +38,10 @@ static BOOL charon_fileTypeForURL(NSURL *url, AudioFileTypeID *outType)
     return found;
 }
 
-// The format of a file being created, from its settings. Linear PCM is what AVAudioFormat already
-// builds from settings; any other format names only its ID, rate and channel count, and ExtAudioFile
-// fills in the rest of a compressed description itself.
 static AVAudioFormat *charon_fileFormatFromSettings(NSDictionary<NSString *, id> *settings)
 {
     UInt32 formatID = [settings[AVFormatIDKey] unsignedIntValue];
     if (formatID == kAudioFormatLinearPCM) {
-        // A channel count of zero makes a mono file, as the host does (measured by probe.m). A missing key reads as zero here; the host was not measured on that.
         if ([settings[AVNumberOfChannelsKey] unsignedIntValue] == 0) {
             NSMutableDictionary<NSString *, id> *mono = [settings mutableCopy];
             mono[AVNumberOfChannelsKey] = @1;
@@ -170,7 +148,6 @@ static AVAudioFormat *charon_fileFormatFromSettings(NSDictionary<NSString *, id>
     }
     status = ExtAudioFileSetProperty(file, kExtAudioFileProperty_ClientDataFormat, sizeof(AudioStreamBasicDescription), processingFormat.streamDescription);
     if (status == noErr && settings[AVEncoderBitRateKey] && fileASBD.mFormatID != kAudioFormatLinearPCM) {
-        // An encoder is only there for a compressed file, and only once the client format is set.
         AudioConverterRef converter = NULL;
         UInt32 size = sizeof(converter);
         status = ExtAudioFileGetProperty(file, kExtAudioFileProperty_AudioConverter, &size, &converter);
@@ -196,7 +173,6 @@ static AVAudioFormat *charon_fileFormatFromSettings(NSDictionary<NSString *, id>
 
 - (void)dealloc
 {
-    // Disposing an ExtAudioFile writes what a writer still holds, so a file written and released is whole.
     if (_extFile)
         ExtAudioFileDispose(_extFile);
 }
@@ -252,7 +228,6 @@ static AVAudioFormat *charon_fileFormatFromSettings(NSDictionary<NSString *, id>
         charon_setError(outError, charon_avfaudioErrorDomain, charon_paramErr);
         return NO;
     }
-    // ExtAudioFile reads into the buffers it is given up to their byte sizes, so each is set to the request first.
     AudioBufferList *list = buffer.mutableAudioBufferList;
     UInt32 bytesPerFrame = _processingFormat.streamDescription->mBytesPerFrame;
     for (UInt32 i = 0; i < list->mNumberBuffers; i++)

@@ -1,7 +1,3 @@
--- Tab-separated text: the snapshot's tables and the generator's reports. A table is a header line of column names and one line
--- per row; the snapshot holds no quoted field and no carriage return, so a field is the text between two tabs.
-
--- The lines of a text, as Python's splitlines gives them for text with newlines only: a final newline ends the last line.
 function lines(text)
     local out, pos = {}, 1
     while pos <= #text do
@@ -16,7 +12,6 @@ function lines(text)
     return out
 end
 
--- The fields of a line, split on tabs.
 function fields(line)
     local out, pos = {}, 1
     while true do
@@ -30,8 +25,6 @@ function fields(line)
     end
 end
 
--- The rows of a table, each a record keyed by the header's column names, in file order (csv.DictReader with a tab delimiter).
--- Empty lines are skipped, as csv skips them.
 function records(text)
     local all = lines(text)
     local header = fields(all[1] or "")
@@ -49,7 +42,6 @@ function records(text)
     return out
 end
 
--- The text of a table: the header line of the columns, then one line per row, each row a list of its cells in order.
 function table_text(columns, rows)
     local out = {table.concat(columns, "\t")}
     for _, row in ipairs(rows) do

@@ -1,14 +1,6 @@
 #import "CharonMetal.h"
 
-// The 9.0 blits are the 8.0 ones with a set of options on top, so they live in a category beside the
-// 8.0 class: a band from 9.0 on keeps both files and a band of 8.0 keeps only the class, which is
-// what the release it is built for can have.
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
-
-// The 9.0 blits are the 8.0 ones with a set of options on top. This port has no compressed format to
-// decompress a row of, and its depth and stencil are ES 2.0's own pair rather than Metal's packed
-// one, so an option other than none names a blit the port does not do: it says so in the log and
-// copies nothing.
 
 @interface CharonMetalBlitEncoder (Options)
 @end

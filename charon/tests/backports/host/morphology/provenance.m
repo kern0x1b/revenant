@@ -1,9 +1,3 @@
-// Which image answered, for the two sides of the differential.
-//
-// The harness renames the port's five classes and links them beside the host's five in one process,
-// so "the two answers differ" would be meaningless if both sends had gone to one class. This prints,
-// for a selector each side implements and a selector only the port has, the image the IMP came from:
-// dladdr on the IMP, so the answer is the loader's and not this file's opinion.
 #import <Foundation/Foundation.h>
 #import <dlfcn.h>
 #import <objc/runtime.h>
@@ -36,7 +30,6 @@ int main(void)
         where("port  +[charonHostNSMorphology ...]", portMorph, @selector(customPronounForLanguage:), YES);
         where("host  +[NSMorphologyPronoun isSupported...]", hostPronoun, @selector(isSupportedForLanguage:), YES);
         where("port  +[charonHostNSMorphologyPronoun..]", portPronoun, @selector(isSupportedForLanguage:), YES);
-        // a selector ONLY the port declares, so the host side must be absent
         printf("  %-34s %s\n", "host  -[NSMorphology grammaticalCase]",
                class_getInstanceMethod(hostMorph, @selector(grammaticalCase)) ? "PRESENT" : "absent (ios17 name)");
         where("port  -[charonHostNSMorphological...]", portMorph, @selector(grammaticalCase), NO);

@@ -1,17 +1,7 @@
-// csvwriting.swift - the port's CSV writer and Apple's, in one process, over the same frames.
-//
-// Each case is built as a frame of Apple's TabularData and as one of PortTabularData, written with each
-// module's own options, and the two results must be equal: the bytes written, or the error's case, its
-// row, its column, its cell contents and its text. A mismatch is a failure.
-//
-// Every case here is one the host answers. A gap the host shows and the port does not is a failure, not
-// an OPEN line: the writer's rules are the host's, and nothing is printed and left uncounted.
-
 import Foundation
 import PortTabularData
 import TabularData
 
-/// One column, by its element type's name, with its cells; a nil cell is `nil`.
 struct Col {
     let name: String
     let kind: String
@@ -27,15 +17,12 @@ struct Case {
     var falseEnc = "false"
     var newline = "\n"
     var delimiter: Character = ","
-    /// Selects the initialiser that takes a date format, when set.
     var dateFormat: String? = nil
-    /// Property assignments made after the initialiser, which the host honours.
     var setNewline: String? = nil
     var setDelimiter: Character? = nil
     var setNilEnc: String? = nil
     var setTrueEnc: String? = nil
     var setFalseEnc: String? = nil
-    /// A date formatter assigned as a property: the format, in UTC, in the POSIX locale.
     var setDateFormat: String? = nil
 }
 
@@ -135,7 +122,6 @@ func portOptions(_ c: Case) -> PortTabularData.CSVWritingOptions {
     return options
 }
 
-/// What a write answers: the bytes as text, or the error's case, row, column, cell contents and text.
 func appleAnswer(_ c: Case) -> String {
     do {
         let data = try appleFrame(c.cols).csvRepresentation(options: appleOptions(c))
@@ -260,8 +246,6 @@ let cases: [Case] = [
 for c in cases {
     check(c)
 }
-// writeCSV(to:options:) is checked through the file it writes: both modules write the first case beside
-// this binary, in the directory run.sh already removes, and the two files must be the same bytes.
 checks += 1
 let directory = URL(fileURLWithPath: CommandLine.arguments[0]).deletingLastPathComponent()
 do {

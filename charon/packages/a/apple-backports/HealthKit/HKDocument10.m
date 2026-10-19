@@ -1,9 +1,3 @@
-// The iOS 10.0 group: documents, the document query, the CDA document, the wheelchair use, the
-// workout configuration, and the members of the earlier classes that arrived with them.
-//
-// One object per release, so each of these is a file of its own and the earlier classes' new members
-// are in categories, where the SDK itself keeps them.
-
 #import <HealthKit/HealthKit.h>
 
 #import "CharonHKStore.h"
@@ -15,9 +9,6 @@
 
 @implementation HKObjectType (CharonIOS100)
 
-// The one document type of 10.0, CDA, held as a shared object the way +workoutType and
-// +activitySummaryType are. An identifier the SDK's headers do not declare a document type for is
-// refused, as the release refuses one it has no type for.
 + (nullable HKDocumentType *)documentTypeForIdentifier:(HKDocumentTypeIdentifier)identifier
 {
     if (![identifier isKindOfClass:[NSString class]] || ![identifier isEqualToString:HKDocumentTypeIdentifierCDA])
@@ -101,8 +92,6 @@
     return _documentType;
 }
 
-// The same sample with a different metadata dictionary, which is how a document query that was asked
-// not to include the document's data hands the sample back without it.
 - (instancetype)charon_copyWithoutDocument:(nullable NSDictionary *)metadata
 {
     HKDocumentSample *copy = [self charon_copyForStore];
@@ -115,9 +104,6 @@
 
 #pragma mark - HKCDADocumentSample
 
-// The document's own facts, which the header declares on HKCDADocument: the data, the title and the
-// three names of the people it is about. They are kept where the store can hand them back, and a
-// document the store was given keeps the dictionary it arrived as.
 @interface HKCDADocumentSample (CharonIOS100)
 - (NSDictionary *)charon_document;
 @end
@@ -139,10 +125,6 @@
     return YES;
 }
 
-// A CDA document sample over the data given, with the validation error a later release's parser
-// found. There is no such parser on this release and no such argument in iOS 10.0's own signature -
-// the header adds it with 11.0 - so it is read out of the metadata dictionary the caller was given,
-// under HKDetailedCDAValidationErrorKey, and the caller's dictionary is not otherwise changed.
 + (instancetype)CDADocumentSampleWithData:(NSData *)data
                                 startDate:(NSDate *)startDate
                                   endDate:(NSDate *)endDate
@@ -195,8 +177,6 @@
     return sample;
 }
 
-// The document, as the four members of the header spell it over one dictionary: the data, the title
-// and the three names.
 - (nullable HKCDADocument *)document
 {
     NSDictionary *facts = [self charon_document];
@@ -274,8 +254,6 @@
 
 #pragma mark - HKWorkoutConfiguration
 
-// A workout's configuration: what kind it is, where it happened, and the two lengths the rings of a
-// lap swim and a cycle are measured in. Every member the header gives is kept and read back.
 @implementation HKWorkoutConfiguration {
     HKWorkoutActivityType _activityType;
     HKWorkoutSessionLocationType _locationType;

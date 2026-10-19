@@ -1,17 +1,3 @@
-// MPSCNNPooling and the two kernels over it, from the header of MPSCNNPooling.h in the SDK of iOS
-// 16.4: a max or an average over a window of one feature channel.
-//
-// The divisor is the window's area, always. Measured on the release: a 3x3 image, a 3x3 window, a
-// stride of one, and the edge mode zero, so that the corner windows of the output are half outside
-// the image, answers 1.33333 at the top left - which is 12 over 9, the sum of the four values really
-// there over the whole window, and not 12 over 4, the count of them. Setting zeroPadSize to one on
-// each side does not change the answer, so the pad enlarges the window and the divisor with it.
-//
-// That is ncnn's rule with `avgpool_count_include_pad` set, read from Pooling at
-// c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause): the window is divided by, and what falls
-// outside is zero, not skipped. ncnn's other setting, dividing by the count of the values that are
-// really there, is the one MPS does not take.
-
 #import "CharonMPSCnn.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
@@ -33,9 +19,6 @@
                         strideInPixelsX:strideInPixelsX strideInPixelsY:strideInPixelsY
                          dilationRateX:1 dilationRateY:1];
     }
-    // Outside the image is zero, not the nearest value: measured, with no edge mode set, the release
-    // answers 0.25 for the corner window of a 2x2 average over (1, 2, 3 / 4, 5, 6 / 7, 8, 9), which is
-    // the one value really there over the whole window. Clamping answers that same value four times.
     self.edgeMode = MPSImageEdgeModeZero;
     return self;
 }
@@ -75,11 +58,6 @@
     CharonMPSCnnTake(sourceImage, &from, &inWidth, &inHeight, &inChannels);
     CharonMPSCnnTake(destinationImage, &to, &outWidth, &outHeight, &outChannels);
 
-    // The window is the kernel grown by the zero pad, and the divisor is its area whatever of it lies
-    // outside the image. That is what the release answers, measured.
-    // The window is the kernel and the divisor is its area, always. Setting zeroPadSize on the
-    // average kernel changes nothing here: the release answers the same values with it set as
-    // without, over the same shape, so the pad is carried and is not applied to the window.
     NSUInteger windowWidth = self.kernelWidth;
     NSUInteger windowHeight = self.kernelHeight;
     double divisor = (double)windowWidth * (double)windowHeight;
@@ -106,9 +84,6 @@
                                                                       channel < inChannels ? channel : inChannels - 1),
                                                   MPSDataTypeFloat32, 0);
                         }
-                        // Zero is the value outside the image, and the divisor is the whole window
-                        // either way: that is ncnn's count_include_pad setting, read from Pooling at
-                        // c6b351b5 (BSD 3-Clause), and the release's answer agrees.
                         sum += value;
                         if (value > best)
                             best = value;

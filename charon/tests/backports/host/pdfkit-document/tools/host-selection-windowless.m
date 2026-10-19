@@ -2,9 +2,6 @@
 #import <AppKit/AppKit.h>
 #import <PDFKit/PDFKit.h>
 #include <stdio.h>
-// The rect and the point are DERIVED from the page's own text position rather than typed in, because a
-// fixed coordinate silently covers one fixture's text and misses another's - measured: the two
-// fixtures draw at y=360 and y=752, and a rect at y=360 answers "page 1" on one and empty on the other.
 int main(int argc, char **argv) { @autoreleasepool {
   for (int i = 1; i < argc; i++) {
     NSString *path = @(argv[i]);
@@ -12,7 +9,6 @@ int main(int argc, char **argv) { @autoreleasepool {
     CGPDFDocumentRef doc = CGPDFDocumentCreateWithURL(u);
     CGPDFPageRef pg = doc ? CGPDFDocumentGetPage(doc, 1) : NULL;
     CGPDFDictionaryRef pd = pg ? CGPDFPageGetDictionary(pg) : NULL;
-    // the text matrix of the first BT..Tj, read from the page's own content stream
     double tx = 0, ty = 0;
     if (pd) {
         CGPDFStreamRef st = NULL;

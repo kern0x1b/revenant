@@ -278,17 +278,6 @@ static NSMutableArray *update_log;
 static NSString *state_text(id state)
 {
     UICellConfigurationState *s = state;
-    // The plain name on both sides, and the port's side is why. UICellConfigurationState is a class the port
-    // DEFINES, so it is renamed to CharonHostUICellConfigurationState and its members are not carried: no
-    // member of it is prefixed, exactly as prefix_selectors.py's ported() says. The group's own objects say
-    // which name is whose:
-    //
-    //   -[CharonHostUICellConfigurationState isEditing]
-    //   -[UICollectionView(CharonEditing) charonHostIsEditing]
-    //
-    // so the collection view's is the prefixed one (is_editing() above asks for it by that name) and the state
-    // object's is not. Asking the port's own object for the prefixed name raised
-    // -[CharonHostUICellConfigurationState charonHostIsEditing]: unrecognized selector.
     BOOL editing = ((BOOL (*)(id, SEL))objc_msgSend)(state, @selector(isEditing));
     return [NSString stringWithFormat:@"h=%d s=%d e=%d d=%d f=%d", s.highlighted, s.selected, editing, s.disabled, s.focused];
 }

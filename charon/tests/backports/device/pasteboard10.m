@@ -27,9 +27,6 @@ static void check_sources(void)
         Dl_info info;
         NSString *image = (symbol && dladdr(symbol, &info) && info.dli_fname) ? @(info.dli_fname).lastPathComponent : @"<missing>";
         charon_check([image isEqualToString:@"UIKit"], [NSString stringWithFormat:@"%@ is the release's own", name].UTF8String, image);
-        // The count, because the port's -[UIPasteboard setObjects:] stores under the FIRST entry of a
-        // list and the facts page has to say how many entries a list holds. Proving the symbol is the
-        // release's own is not the same as reading it.
         NSArray *__unsafe_unretained list = symbol ? *(NSArray *__unsafe_unretained *)symbol : nil;
         charon_check([list isKindOfClass:[NSArray class]] && list.count > 0,
                       [NSString stringWithFormat:@"%@ is a non-empty array", name].UTF8String,

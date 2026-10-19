@@ -6,7 +6,6 @@
 static char charon_preferred_symbol_configuration_key;
 static char charon_original_symbol_image_key;
 
-// A symbol image on a view that has a preferred configuration is drawn again with the image's own configuration over it.
 static UIImage *charon_preferred_image(UIImageView *view, UIImage *image)
 {
     UIImageSymbolConfiguration *preferred = objc_getAssociatedObject(view, &charon_preferred_symbol_configuration_key);

@@ -1,27 +1,14 @@
-// fields_test.m - facts/UIKit/UIFieldBehavior.md §16 rows F1, F3, F4 and F5 (F2, the region truth table, is
-// region_test.m), where a field acts (§10.1, §10.4), and UIFloatRange's exported symbols (UIDynamicAnimator.md §6.4).
-// Each scene runs with the host's UIFieldBehavior (the oracle) and with ours; ours is compared with the oracle's
-// answer, and the oracle with the numbers the facts file gives as measured, so a scene that is not the probe's shows
-// up as such.
-//
-// Ours is written over the public 7.0 API and applies the field once per animator step, after the world step (§10.7),
-// where the host evaluates it inside the solver once per 1/120 s sub-step: the trajectories (F4) are compared within
-// the error §10.7 measured for that design, and the force itself (F5) through the emulation's own acceleration
-// function, -charon_accelerationAt:velocity:mass:charge:time:, given the state the host's first sub-step starts from.
 #import "dynamics.h"
 #include <float.h>
 #include <math.h>
 
 static const double frame = 1.0 / 60.0;
-// The host's sub-step, and the world time after the first one (§0).
 static const double substep = (double)(float)(1.0 / 120.0);
 
 @interface NSObject (FieldsPrivate)
-// ours: the emulation's acceleration, pt/s^2, of an item at `center` (the region not asked)
 - (CGVector)charon_accelerationAt:(CGPoint)center velocity:(CGPoint)velocity mass:(CGFloat)mass charge:(CGFloat)charge time:(NSTimeInterval)time;
 @end
 
-// Ours, under run.sh's renaming.
 extern const UIFloatRange CharonHostUIFloatRangeZero;
 extern const UIFloatRange CharonHostUIFloatRangeInfinite;
 BOOL CharonHostUIFloatRangeIsInfinite(UIFloatRange range);
@@ -72,7 +59,6 @@ static NSArray *properties(UIFieldBehavior *field)
              @(field.position.x), @(field.position.y), @(field.smoothness), @(field.animationSpeed)];
 }
 
-// Every property after the factory, then after a round of sets with values that do not survive float and metres.
 static NSArray *answers(Side side, FieldMaker make)
 {
     UIFieldBehavior *field = make(field_class(side));
@@ -106,7 +92,6 @@ static void test_properties(void)
             }
         }
     }
-    // f_1 (§10.1): the default minimum radius 0.00305175781 (2^-15 m), (30, 40) read back as (29.9999982, 39.9999976).
     NSArray *oracle = answers(Oracle, made[@"drag"]);
     check_near([oracle[0][2] doubleValue], 0.00305175781, 5e-12, "oracle field is as f_1 measured", @"default minimumRadius");
     check_near([oracle[2][5] doubleValue], 29.9999982, 5e-8, "oracle field is as f_1 measured", @"position x");
@@ -209,16 +194,11 @@ static void test_categories(void)
         charon_check([ours[index] isEqual:oracle[index]], "F3 the 33rd field as the oracle",
                      [NSString stringWithFormat:@"%s: ours %@ oracle %@", rows[index], ours[index], oracle[index]]);
     }
-    // m_f33 (M5).
     CHECK_EQUAL(oracle[0], @"Invalid Association: UIDynamicAnimator supports a maximum of 32 distinct fields", "oracle fields are as m_f33 measured");
 }
 
 #pragma mark Where a field acts
 
-// §10.1 and §10.4: a field acts on its own items only, inside its region (asked in the field's local space, points),
-// never on an anchored item. Each case answers whether the item has a velocity after one step: ours gives it after the
-// world step, so its position changes only in the next (§10.7), and a position also moves by the float round trip of
-// the write-back, where a velocity does not.
 static BOOL accelerated(UIDynamicItemBehavior *material, id<UIDynamicItem> item)
 {
     CGPoint velocity = [material linearVelocityForItem:item];
@@ -270,7 +250,6 @@ static void test_where(void)
         charon_check([ours[index] isEqual:oracle[index]], "a field acts where the oracle's does",
                      [NSString stringWithFormat:@"%s: ours %@ oracle %@", rows[index], ours[index], oracle[index]]);
     }
-    // f_4 (§10.1): a radius-50 region at (300,300) acts at distance 50, not at 50.001.
     CHECK([oracle[0] boolValue] && ![oracle[1] boolValue], "oracle region is as f_4 measured");
 }
 
@@ -281,14 +260,10 @@ typedef struct {
     FieldMaker make;
     CGFloat density, charge;
     CGPoint velocity;
-    CGVector measured; // §10.2's number, pt/s^2; NAN where the facts file gives none
-    double tolerance;  // relative
+    CGVector measured;
+    double tolerance;
 } ForceCase;
 
-// The host's acceleration over its first sub-step of a new world, from the velocity it adds: a 100x100 item at
-// (300,400) with resistance 0, density and charge as given, starting at `velocity`. The body keeps its velocity as
-// float m/s, so the acceleration read back from it is known to one float step of the final velocity over the
-// sub-step: `resolution`, pt/s^2, per axis.
 typedef struct {
     CGVector acceleration, resolution;
 } OracleAcceleration;
@@ -333,8 +308,6 @@ static void test_forces(void)
         ^CGVector(UIFieldBehavior *f, CGPoint p, CGVector v, CGFloat m, CGFloat q, NSTimeInterval t) {
             return CGVectorMake(1, 0);
         };
-    // 1e-3 relative (§16 F5); noise and turbulence 1e-5 (M7 measured that force bit-exact); each plus the resolution
-    // of the oracle's reading.
     const ForceCase cases[] = {
         {"linear (3,4)", ^(Class k) { return [k linearGravityFieldWithVector:CGVectorMake(3, 4)]; }, 1, 0, {0, 0}, {300, 400}, 1e-3},
         {"linear (3,4) m 3", ^(Class k) { return [k linearGravityFieldWithVector:CGVectorMake(3, 4)]; }, 3, 0, {0, 0}, {300, 400}, 1e-3},
@@ -408,7 +381,6 @@ static void test_forces(void)
         check_relative(ours.dx, oracle.dx, c.tolerance, measured.resolution.dx, "F5 field acceleration as the oracle", [name stringByAppendingString:@" x"]);
         check_relative(ours.dy, oracle.dy, c.tolerance, measured.resolution.dy, "F5 field acceleration as the oracle", [name stringByAppendingString:@" y"]);
         if (!isnan(c.measured.dx)) {
-            // f_2, f_3 (§10.2), printed to 4 or 5 digits.
             check_relative(oracle.dx, c.measured.dx, 1e-3, measured.resolution.dx, "oracle field acceleration is as f_2/f_3 measured", [name stringByAppendingString:@" x"]);
             check_relative(oracle.dy, c.measured.dy, 1e-3, measured.resolution.dy, "oracle field acceleration is as f_2/f_3 measured", [name stringByAppendingString:@" y"]);
         } else {
@@ -425,12 +397,11 @@ typedef struct {
     FieldMaker make;
     CGPoint velocity;
     int frames;
-    double tolerance;  // pt
-    CGPoint appleF60;  // §10.7's "Apple f60"; NAN where the scene stops earlier
-    CGPoint emulationF60; // §10.7's "emulation f60": the same design over the host's own 7.0 API
+    double tolerance;
+    CGPoint appleF60;
+    CGPoint emulationF60;
 } TrajectoryCase;
 
-// §10.7's scene: a 100x100 item at (300,400), resistance 0, the field alone, steps of 1/60.
 static void trajectory(Side side, TrajectoryCase c, CGPoint positions[])
 {
     UIDynamicAnimator *animator = make_animator(side, nil);
@@ -451,8 +422,6 @@ static void trajectory(Side side, TrajectoryCase c, CGPoint positions[])
 
 static void test_trajectories(void)
 {
-    // Tolerance 1.2 x the maximum error §10.7 measured over the same frames (§16 F4); radial gravity over its first 10
-    // frames only, before the path nears the centre where the lag makes the emulation miss the singularity (§10.7).
     const TrajectoryCase cases[] = {
         {"linear (3,4)", ^(Class k) { return [k linearGravityFieldWithVector:CGVectorMake(3, 4)]; }, {0, 0}, 60, 1.2 * 2.083, {448.7500, 598.3333}, {447.5000, 596.6667}},
         {"radial S 200 at 0", ^(Class k) {
@@ -498,10 +467,8 @@ static void test_trajectories(void)
         printf("F4 %s: worst %.6g pt at frame %d; f%d ours (%.4f, %.4f) oracle (%.4f, %.4f)\n", c.name, worst, worstFrame, c.frames,
                ours[c.frames - 1].x, ours[c.frames - 1].y, oracle[c.frames - 1].x, oracle[c.frames - 1].y);
         if (!isnan(c.appleF60.x)) {
-            // s_fld.m (§10.7), printed to 4 decimals.
             check_near(oracle[59].x, c.appleF60.x, 5e-5, "oracle field trajectory is as s_fld measured", [@(c.name) stringByAppendingString:@" f60 x"]);
             check_near(oracle[59].y, c.appleF60.y, 5e-5, "oracle field trajectory is as s_fld measured", [@(c.name) stringByAppendingString:@" f60 y"]);
-            // The emulation s_fld.m ran over the host's classes lands where ours does, to the 4 decimals printed.
             check_near(ours[59].x, c.emulationF60.x, 5e-5, "F4 ours at frame 60 as s_fld's emulation", [@(c.name) stringByAppendingString:@" f60 x"]);
             check_near(ours[59].y, c.emulationF60.y, 5e-5, "F4 ours at frame 60 as s_fld's emulation", [@(c.name) stringByAppendingString:@" f60 y"]);
         }
@@ -511,8 +478,6 @@ static void test_trajectories(void)
 int main(void)
 {
     @autoreleasepool {
-        // PhysicsKit's points-per-metre ratio is 150 until the process makes its first UIDynamicAnimator (region_test.m):
-        // a field's position and minimum radius are converted with it, so the oracle is put in UIKit's state first.
         (void)make_animator(Oracle, nil);
         test_properties();
         test_object();

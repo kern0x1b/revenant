@@ -1,25 +1,3 @@
-// differential.m -- the port's state machines, entity/component system, behaviours, rules,
-// distributions and shuffle held against what the host's own GameplayKit answers.
-//
-// The host is the oracle and it is measured, not called: measure.m prints its answers and every number
-// below is one of its lines. run.sh does not load the host's framework beside the port's, because the
-// two carry the same selectors and ld64 binds each objc_msgSend$selector stub to one implementation of
-// it, so a side-by-side process would answer the host's method where the port's was meant. This links
-// Foundation only, so every GK* class in the process is the port's own, named as the SDK's headers name
-// it, which is how an application reaching the port finds it.
-//
-// Three kinds of check appear, and every one of them names the measure.m line it came from:
-//   host      the port must answer what the host was measured to answer
-//   contract  a property the API promises, with no oracle for it (an archive round trip, a permutation,
-//             an order nothing defines)
-//   diverge   the two part on purpose and the check fails if they ever stop parting
-//
-// The distributions and the shuffle are measured through a written script
-// (CharonGKScriptedSource.h), because the port's own random generators are NOT the host's -- see
-// facts/GameplayKit/GKRandomSource.md, where that is measured -- so no number that came out of one
-// source can be compared with the same number out of the other. What has to agree is which protocol
-// methods a family reaches for, in which order, and how it combines the answers.
-
 #import <Foundation/Foundation.h>
 #import <GameplayKit/GameplayKit.h>
 #import <objc/runtime.h>
@@ -51,8 +29,6 @@ static void contract(BOOL ok, NSString *what, NSString *detail)
     }
 }
 
-// A place where the port and the host answer differently on purpose, and the check fails if they ever
-// stop: that is what tells a later change on either side from the divergence recorded here.
 static void diverge(BOOL apart, NSString *what)
 {
     checksRun++;
@@ -61,8 +37,6 @@ static void diverge(BOOL apart, NSString *what)
     }
 }
 
-// The three helpers the checks read their answers with, kept out of the checks themselves so that a
-// message send never has to be nested inside another one: `[floats(x) isEqual:@"...", @"what", nil]`.
 static NSString *floats(NSArray<NSNumber *> *numbers)
 {
     NSMutableArray *parts = [NSMutableArray array];
@@ -100,7 +74,6 @@ static BOOL is(NSString *got, NSString *want)
     return [got isEqualToString:want];
 }
 
-// The hook log the two state classes below write into, so the order they are called in can be read off.
 static NSMutableString *CharonGKHookLog(void)
 {
     static NSMutableString *log;
@@ -109,8 +82,6 @@ static NSMutableString *CharonGKHookLog(void)
     }
     return log;
 }
-
-// ------------------------------------------------------------------ state machines
 
 @interface OpenA : GKState @end
 @implementation OpenA
@@ -122,9 +93,6 @@ static NSMutableString *CharonGKHookLog(void)
 - (BOOL)isValidNextState:(Class)stateClass { return NO; }
 @end
 
-// The hooks in the order the machine calls them. Nothing in the host's answer names them, so the check
-// on their order is a contract check on the header's own account: the state leaving is told before the
-// state arriving, and the first entry has no previous state.
 @interface Leaving : GKState @end
 @implementation Leaving
 - (void)didEnterWithPreviousState:(GKState *)previous { [CharonGKHookLog() appendFormat:@"A<%@ ", named(previous)]; }
@@ -139,7 +107,6 @@ static NSMutableString *CharonGKHookLog(void)
 
 static void stateMachines(void)
 {
-    // measure.m, "machine init" and "machine new".
     @try {
         [[GKStateMachine alloc] init];
         host(NO, @"a machine built with -init raises, as the host's does", @"it did not raise");
@@ -157,7 +124,6 @@ static void stateMachines(void)
         host(is([exception name], @"GKInitNotAllowedException"),
              @"a machine built with +new raises GKInitNotAllowedException", [exception name]);
     }
-    // measure.m, "plain state" and "empty machine".
     {
         GKState *plain = [GKState state];
         host([plain isMemberOfClass:[GKState class]] && plain.stateMachine == nil &&
@@ -170,7 +136,6 @@ static void stateMachines(void)
              [empty stateForClass:[GKState class]] == nil && [empty stateForClass:Nil] == nil,
              @"a machine with no states has none, allows anything and finds nothing, as the host's does", nil);
     }
-    // measure.m, "machine of two" through "fresh machine".
     {
         OpenA *a = [OpenA new];
         OpenB *b = [OpenB new];
@@ -193,7 +158,6 @@ static void stateMachines(void)
         host([third canEnterState:[OpenB class]] && [third enterState:[OpenB class]] && third.currentState == b,
              @"a machine that has entered nothing allows anything, as the host's does", nil);
     }
-    // The hooks, and the order of them.
     {
         NSMutableString *log = CharonGKHookLog();
         [log setString:@""];
@@ -207,8 +171,6 @@ static void stateMachines(void)
                  @"and the first entry has no previous state", log);
     }
 }
-
-// -------------------------------------------------- entities, components, behaviours
 
 @interface ProbeOne : GKComponent
 @property (nonatomic, readonly) NSMutableString *log;
@@ -225,7 +187,6 @@ static void stateMachines(void)
 
 static void entitiesAndBehaviours(void)
 {
-    // measure.m, "new entity" through "removing the held one".
     {
         GKEntity *entity = [GKEntity entity];
         host(entity.components.count == 0, @"a new entity has no components, as the host's does", nil);
@@ -235,9 +196,6 @@ static void entitiesAndBehaviours(void)
                  [entity componentForClass:[ProbeOne class]] != nil &&
                  [entity componentForClass:[ProbeTwo class]] != nil,
                  @"an entity holds a component of each class it is given", classes(entity.components));
-        // measure.m gives "ProbeOne ProbeTwo" here and "ProbeTwo ProbeOne" for the other order, and
-        // "C2 C1" for BOTH orders with two other class names: the host's order is a dictionary's and is
-        // no order at all. The port's is the order the caller added in, which is the one it can rely on.
         contract(is(classes(entity.components), @"ProbeOne ProbeTwo"),
                  @"the port's own -components answers in the order the components were added, which the "
                  @"host's dictionary order is not", classes(entity.components));
@@ -257,7 +215,6 @@ static void entitiesAndBehaviours(void)
         host([GKEntity supportsSecureCoding] && [GKComponent supportsSecureCoding],
              @"an entity and a component both answer for secure coding, as the host's do", nil);
     }
-    // measure.m, "archive round trip" and "copy".
     {
         GKEntity *carried = [GKEntity entity];
         [carried addComponent:[[ProbeOne alloc] init]];
@@ -280,8 +237,6 @@ static void entitiesAndBehaviours(void)
                  copied.components.firstObject != carried.components.firstObject,
                  @"a copied entity is an entity of its own with a copy of each component", nil);
     }
-    // What an entity tells a component. A contract check: the host's answer is in the facts file, and
-    // the hooks are what the header says they are for.
     {
         GKEntity *entity = [GKEntity entity];
         ProbeOne *one = [[ProbeOne alloc] init];
@@ -292,7 +247,6 @@ static void entitiesAndBehaviours(void)
                  @"an entity tells a component it was added, updates it, and tells it when it is taken off",
                  one.log);
     }
-    // measure.m, the component system.
     {
         GKComponentSystem *system = [[GKComponentSystem alloc] initWithComponentClass:[ProbeOne class]];
         host(system.componentClass == [ProbeOne class] && system.components.count == 0 &&
@@ -339,7 +293,6 @@ static void entitiesAndBehaviours(void)
         [system removeComponent:one];
         host(system.components.count == 1, @"removing by the component takes it out, as the host's does", nil);
     }
-    // measure.m, the behaviour.
     {
         GKGoal *wander = [GKGoal goalToWander:1.0f];
         GKGoal *speed = [GKGoal goalToReachTargetSpeed:2.0f];
@@ -350,11 +303,6 @@ static void entitiesAndBehaviours(void)
         GKBehavior *empty = [[GKBehavior alloc] init];
         host(empty.goalCount == 0 && [empty weightForGoal:wander] == 0.0f,
              @"a new behaviour has no goals and weighs an absent one at zero, as the host's does", nil);
-        // Read through the goals the behaviour itself holds: an NSDictionary copies its keys, and a
-        // GKGoal's copy is a goal of its own, so the goals a behaviour ends up with are the copies the
-        // dictionary made. Asking for a weight by the goal that went in would therefore find nothing --
-        // on the host as much as here -- and the weight of each goal the behaviour holds is the thing
-        // this method is for.
         GKBehavior *weighted = [GKBehavior behaviorWithWeightedGoals:@{wander: @3, speed: @7}];
         NSMutableArray *weights = [NSMutableArray array];
         for (GKGoal *goal in weighted) {
@@ -391,7 +339,6 @@ static void entitiesAndBehaviours(void)
         [keyed removeAllGoals];
         host(keyed.goalCount == 0, @"removing every goal empties the behaviour, as the host's does", nil);
     }
-    // measure.m, "goals N weights M" over every combination up to two and two, and "nil weights".
     {
         NSArray *expected = @[@[], @[], @[],
                               @"NSRangeException", @[@10], @[@10],
@@ -439,7 +386,6 @@ static void entitiesAndBehaviours(void)
         host(unweighted.goalCount == 1 && [unweighted weightForGoal:[unweighted objectAtIndexedSubscript:0]] == 0.0f,
              @"a nil weights array leaves every goal weighing nothing, as the host's does", nil);
     }
-    // measure.m, the goals.
     {
         NSArray *refusals = @[@"goalToSeekAgent:", @"goalToFleeAgent:", @"goalToInterceptAgent:"];
         for (NSString *name in refusals) {
@@ -482,11 +428,8 @@ static void entitiesAndBehaviours(void)
     }
 }
 
-// ------------------------------------------------------------------------- rules
-
 static void rules(void)
 {
-    // measure.m, the four-rule pass.
     {
         NSString *a = @"fact-a";
         NSString *b = @"fact-b";
@@ -548,8 +491,6 @@ static void rules(void)
         system.state[@"written"] = @1;
         host(system.state.count == 1, @"the state is the caller's to write in, as the host's is", nil);
     }
-    // measure.m, "a substituted variable", "an absent variable", "a key path through state",
-    // "a block predicate" and "a rule with no predicate".
     {
         GKRuleSystem *system = [[GKRuleSystem alloc] init];
         [system.state setObject:@1 forKey:@"mine"];
@@ -592,7 +533,6 @@ static void rules(void)
              @"a block rule is a rule, and the port answers the public class its header names",
              NSStringFromClass([fromBlock class]));
     }
-    // measure.m, "agenda after one add" through "added past an evaluate".
     {
         GKRuleSystem *keys = [[GKRuleSystem alloc] init];
         [keys addRule:[[GKRule alloc] init]];
@@ -613,11 +553,8 @@ static void rules(void)
     }
 }
 
-// ------------------------------------------------------------ distributions and the shuffle
-
 static void distributions(void)
 {
-    // measure.m, the ranges.
     {
         GKRandomDistribution *plain = [[GKRandomDistribution alloc] init];
         host(plain.lowestValue == 0 && plain.highestValue == 0 && plain.numberOfPossibleOutcomes == 1,
@@ -662,7 +599,6 @@ static void distributions(void)
               (long)overRange.lowestValue, (long)overRange.highestValue,
               (long)overMoments.lowestValue, (long)overMoments.highestValue]);
     }
-    // measure.m, "a d6 over the script" and the line under it.
     {
         CharonGKScriptedSource *source = [[CharonGKScriptedSource alloc]
                                           initWithScript:@[@"bounded:6=2", @"bounded:6=5", @"bounded:6=1",
@@ -704,12 +640,9 @@ static void distributions(void)
              @"host's is",
              [NSString stringWithFormat:@"asked '%s' gave %g %g %g", uniform.log, first, second, third]);
     }
-    // measure.m, "nextIntWithUpperBound over 2..5" and "over -2..2": which span is asked for.
     {
         const NSInteger lows[] = {-2, 0, 2, 3};
         const NSInteger highs[] = {2, 2, 5, 3};
-        // measure.m prints the same lines with an empty script: what the source was asked for, as
-        // starved(bounded:N) because the script had nothing left to give.
         const char *asks[] = {
             "starved(bounded:5) starved(bounded:3) starved(bounded:4) starved(bounded:5) starved(bounded:5) "
             "starved(bounded:5) starved(bounded:5) starved(bounded:5) starved(bounded:5)",
@@ -717,8 +650,6 @@ static void distributions(void)
             "starved(bounded:3) starved(bounded:3) starved(bounded:3) starved(bounded:3)",
             "starved(bounded:0) starved(bounded:1) starved(bounded:2) starved(bounded:3) starved(bounded:4) "
             "starved(bounded:4) starved(bounded:4)",
-            // over 3..3, bounds 3..8: the span is 0 for the bound that matches the lowest and 1 for
-            // every bound above it, because the whole range is one outcome.
             "starved(bounded:0) starved(bounded:1) starved(bounded:1) starved(bounded:1) "
             "starved(bounded:1) starved(bounded:1)"};
         for (unsigned range = 0; range < 4; range++) {
@@ -747,7 +678,6 @@ static void distributions(void)
                  @"the spans a bounded draw asks its source for are the host's, and a bound of zero asks "
                  @"for the whole range", [got componentsJoinedByString:@" "]);
         }
-        // And the answer: the draw plus the lowest, or the draw alone when the lowest is below zero.
         CharonGKScriptedSource *drawn = [[CharonGKScriptedSource alloc] initWithScript:@[@"bounded:4=3"]];
         GKRandomDistribution *negative = [[GKRandomDistribution alloc] initWithRandomSource:drawn
                                                                                 lowestValue:-2 highestValue:2];
@@ -756,7 +686,6 @@ static void distributions(void)
              @"a draw over a range whose lowest is below zero answers the draw and not the draw plus the lowest",
              [NSString stringWithFormat:@"%lu", first]);
     }
-    // measure.m, "a gaussian over the script" and the line under it.
     {
         CharonGKScriptedSource *source = [[CharonGKScriptedSource alloc]
                                           initWithScript:@[@"uniform=0.25", @"uniform=0.75", @"uniform=0.5",
@@ -772,7 +701,6 @@ static void distributions(void)
              @"a gaussian asks for two uniforms per draw and combines them the host's way",
              [NSString stringWithFormat:@"gave %@ asked '%s'", floats(draws), source.log]);
     }
-    // measure.m, "a shuffled d6 over the script" and the line under it.
     {
         CharonGKScriptedSource *source = [[CharonGKScriptedSource alloc]
                                           initWithScript:@[@"bounded:1=0", @"bounded:2=1", @"bounded:3=2",
@@ -793,8 +721,6 @@ static void distributions(void)
                  @"a nine-draw pass over a six-value range asks for a second pass and runs out of script",
                  source.log);
     }
-    // measure.m, the shuffle NSArray carries: the host hands the array to the source and returns what
-    // the source answers.
     {
         CharonGKScriptedSource *source = [[CharonGKScriptedSource alloc] initWithScript:@[]];
         NSArray *array = @[@1, @2, @3, @4];
@@ -819,8 +745,6 @@ static void distributions(void)
             contract([seen containsObject:number], @"every object of the input is in the output", nil);
         }
     }
-    // The one place the port answers where the host's is undefined, recorded so a later change is told
-    // from it: -[GKEntity components] has no order on the host at all.
     {
         GKEntity *entity = [GKEntity entity];
         [entity addComponent:[[ProbeOne alloc] init]];

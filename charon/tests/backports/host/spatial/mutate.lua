@@ -1,6 +1,3 @@
--- mutate.lua FILE FROM TO - the one-token change the control in run.sh makes (Lua port of the former mutate.py).
--- Refused unless FROM occurs exactly once, so a control that cannot be planted says so instead of reporting a mutant
--- that was never applied (2026-10-03: a planted run over an unplanted file reported a mutant as applied four times).
 function main(path, old, new)
     local handle = assert(io.open(path, "r"), "cannot read " .. path)
     local text = handle:read("*a")

@@ -1,27 +1,7 @@
-// arkit-config.m - the configurations of the port, as a program on the 4S under 6.1.3 (xmake emulate -d iPhone4,1
-// -r 6.1.3 run /usr/libexec/arkitconfig). The configuration classes come from charon@apple-backports, linked, so
-// the answers are the library's own, read by the program the way an application reads them.
-//
-// What is checked, each printed as `check <name> ok` or `FAIL <name>: got <x>, want <y>`:
-//   - the classes the registry carries are there, ARGeoTrackingConfiguration among them, and its new answers an instance
-//   - the defaults of the stored settings are the host's (facts/ARKit/ConfigurationSettings.md): 0, NO and nil
-//   - each stored setting reads back what was set, and detectionObjects keeps a copy of the set given
-//   - world.initialWorldMap reads back the map given, and a world map archives and reads back (NSKeyedArchiver)
-//   - body.initialWorldMap is not answered (owed with the body estimator)
-//   - +isSupported: YES for the configurations a camera and a gyroscope run, NO for body, geographic, face and object scanning
-//   - the support queries the port answers NO (scene reconstruction, user face tracking, App Clip codes)
-//   - a session started with the body configuration is refused through session:didFailWithError:
-//   - a world session and an orientation session start exactly when their +isSupported is YES
-//
-// Nothing here is a host oracle: the host answers NO for every isSupported (it is a Mac), so the expectations for the
-// support answers are the port's own design, written out here, and the defaults are the host's measured ones.
 #import <Foundation/Foundation.h>
 #import <ARKit/ARKit.h>
 #import <objc/runtime.h>
 
-// The SDK marks ARWorldMap's -init unavailable: an application gets a map from a session's
-// getCurrentWorldMapWithCompletionHandler:. The probe needs an empty map to store, so it reaches the
-// port's own initialiser (CharonARKitPrivate.h), declared here the way that header declares it.
 @interface ARWorldMap (ProbeInit)
 - (instancetype)initWithAnchors:(NSArray<ARAnchor *> *)anchors featurePoints:(nullable ARPointCloud *)featurePoints;
 @end
@@ -151,9 +131,6 @@ int main(void)
               delegate.error ? @"an error" : @"no error", @"an error");
         [session pause];
 
-        // A session starts exactly when its configuration's +isSupported is YES, whatever the hardware answers: the
-        // refusal and the start are the same answer given two ways, so a mismatch is a session that starts a
-        // configuration the port does not support, or refuses one it does.
         printf("sessions agree with +isSupported\n");
         ARWorldTrackingConfiguration *worldConfig = [[ARWorldTrackingConfiguration alloc] init];
         ARSession *worldSession = [[ARSession alloc] init];

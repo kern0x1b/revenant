@@ -1,9 +1,3 @@
--- `diff`: the host differential of the constants (tools/gen.py@52253c0650 cmd_diff). For each constant the spec holds as found, owned by
--- nobody and exported on iOS, the value macOS holds is read by a reference program built against the host framework, and the
--- value the generated constants objects hold is read by the oracle from the constants dylib and compared with it. Where macOS
--- differs from the iOS 26.2 cache, the cache's value is the expectation (iOS wins). Prints one line per difference and a summary;
--- returns the exit status: 1 when a name differs, a host program does not build or the reference program fails, 0 otherwise.
-
 local layout = import("layout", {anonymous = true})
 local snapshot = import("spec", {anonymous = true})
 local host = import("host", {anonymous = true})
@@ -14,8 +8,6 @@ local render = import("render", {anonymous = true})
 local sdk_info = import("sdk", {anonymous = true})
 local sdk_imports = import("sdk_imports", {anonymous = true})
 
--- Python's repr of a text of ASCII and UTF-8 bytes: quoted with ' unless it holds ' and no ", the backslash and the quote escaped,
--- tab, newline and carriage return as escapes, other control characters as \xNN.
 function repr(text)
     local quote = "'"
     if string.find(text, "'", 1, true) and not string.find(text, '"', 1, true) then
@@ -45,8 +37,6 @@ function repr(text)
     return table.concat(out)
 end
 
--- The reference program for the names: each declared with the type the spec declares it with (CFStringRef or NSString, the qualifiers
--- where the declaration has them), and printed as name, a tab, and the UTF-8 text of its value, one line per name.
 local function reference_source(names, shape, types, imports)
     local body = {}
     for _, line in ipairs(imports) do
@@ -72,7 +62,6 @@ local function reference_source(names, shape, types, imports)
     return table.concat(body, "\n") .. "\n"
 end
 
--- The number of keys of a table.
 local function count_of(map)
     local n = 0
     for _ in pairs(map) do
@@ -81,7 +70,6 @@ local function count_of(map)
     return n
 end
 
--- Returns the exit status.
 function run(args)
     assert(args.sdk, "diff needs --sdk: the iPhoneOS SDK whose release names the iOS cache value source")
     local fw = args.framework
@@ -112,7 +100,6 @@ function run(args)
     local gen = layout.gen_dir(tree, fw)
     host.configure(fw, gen)
 
-    -- A name macOS does not export cannot be read on the host: it is named, not compared, and the link is retried without it.
     local absent = {}
     local imports = sdk_imports.umbrella_imports(args.sdk, fw, true)
     while true do
@@ -153,7 +140,6 @@ function run(args)
 
     local ran, out, err, exit = host.run(host.product("reference"))
     if not ran then
-        -- A reference that exits with an error (a crash included) has no values: the run fails, and says why.
         print("reference crashed (exit status " .. tostring(exit) .. ")" .. (err ~= "" and (": " .. host.tail(err, 300)) or ""))
         return 1
     end
@@ -171,8 +157,6 @@ function run(args)
         return 0
     end
 
-    -- xmake compares whole-second mtimes: a source written in the second its dylib was built is not seen as newer. A source
-    -- whose mtime is not older than the dylib's forces the rebuild (the same rule the reference uses).
     local product_path = host.product("constants")
     local force = not os.isfile(product_path)
     for _, source in ipairs(sources) do
@@ -192,7 +176,6 @@ function run(args)
         local entry = port[name]
         local status, value = "missing", nil
         if entry ~= nil then
-            -- probe-crashed: the oracle failed for this name, which is not the same as a name the constants do not hold
             status, value = entry[1], entry[2]
         end
         local ref = reference[name]
@@ -203,7 +186,6 @@ function run(args)
             if value == expected then
                 equal = equal + 1
             elseif ios_value[name] ~= nil and value == ios_value[name] then
-                -- The iOS 26.2 cache is the expectation (iOS wins): a macOS value the port does not carry is expected, and listed.
                 ios_wins = ios_wins + 1
             else
                 table.insert(differ, {name, "port " .. repr(value) .. ", reference " .. repr(ref)})

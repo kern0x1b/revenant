@@ -4,13 +4,6 @@
 #include <malloc/malloc.h>
 #include <sqlite3.h>
 
-// The sqlite3_str string builder, over the buffer and printf calls every libsqlite3 has (sqlite3_malloc, sqlite3_realloc,
-// sqlite3_vmprintf, sqlite3_limit). The formats are the sqlite printf dialect, because sqlite3_vmprintf is that dialect, and
-// the limit is the database's SQLITE_LIMIT_LENGTH, or the compile-time default with no database. The answers for an
-// empty builder, a builder that reached its limit, and a reset are the host's, measured in
-// tests/backports/host/sqlite3/run.sh and described in facts/SQLite3/StringBuilder.md.
-
-// The object behind the opaque sqlite3_str of the header.
 struct sqlite3_str {
     sqlite3 *db;
     char *text;
@@ -20,17 +13,10 @@ struct sqlite3_str {
     int error;
 };
 
-// The compile-time length limit of sqlite, used when the builder has no database.
 enum { kDefaultLengthLimit = 1000000000 };
 
-// The C sources of a backport are compiled -fvisibility=hidden, so the entry points of the API are marked here, and
-// nothing else of this file is.
 #define SQLITE3_EXPORT __attribute__((visibility("default")))
 
-// Makes room for extra more bytes and the terminating NUL, as sqlite does: the text fits while it is within the capacity the
-// allocator reports for the buffer (malloc_size, not the size asked for), and the buffer grows only when it does not. Growth
-// past the limit sets SQLITE_TOOBIG, and the builder then holds nothing (measured: the text is dropped, not kept); a buffer
-// that cannot be allocated sets SQLITE_NOMEM. Returns non-zero when the append may proceed.
 static int reserve(sqlite3_str *p, size_t extra)
 {
     if (p->error)
@@ -46,8 +32,6 @@ static int reserve(sqlite3_str *p, size_t extra)
         p->length = 0;
         return 0;
     }
-    // sqlite doubles the size while the doubled size stays within the limit, so a builder that grows by appends does not
-    // reallocate on every one
     size_t size = needed;
     if (size + p->length <= p->limit)
         size += p->length;

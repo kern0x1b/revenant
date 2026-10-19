@@ -1,18 +1,7 @@
-// eventattribution_test.m - the link-preview attribution of iOS 14.5 and its view, port against host.
-//
-// Same shape as the rest of this suite: the port's classes are renamed by uikit2/run.sh and sit beside the
-// system's own in one process, and every case below asks both sides. The system side is the SDK's class -
-// the 16.4 SDK this package compiles against already declares both, and so does the Catalyst SDK the
-// differential links - so this group has a real system side from a framework, not from the test's own
-// @interface declarations, which is the stronger of the two positions the suite has.
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 #import "check.h"
 
-// The port's two classes, under the names run.sh's renamer gives them. run.sh compiles the group's SOURCES
-// with the rename flags and the TEST without them, so the test declares the port's side itself - the same
-// shape contentunavailable_test.m uses. The SYSTEM side is the SDK's own class throughout, which is what
-// makes this group's system side come out of a framework rather than out of this file.
 @interface CharonHostUIEventAttribution : NSObject <NSCopying>
 - (instancetype)initWithSourceIdentifier:(uint8_t)sourceIdentifier
                          destinationURL:(NSURL *)destinationURL
@@ -30,10 +19,6 @@
 
 typedef id (*zero_init)(id, SEL);
 
-// -init and +new are NS_UNAVAILABLE on the SDK's declaration on both sides, and what is under test is what
-// they do at run time, so they go through objc_msgSend rather than being silenced.
-// -init is an INSTANCE method, so it is sent to an allocated object; sending it to the class object raises
-// "cannot init a class object", which is this harness talking to itself rather than either side answering.
 static id call_init(Class c)
 {
     return ((zero_init)objc_msgSend)((id)((zero_init)objc_msgSend)((id)c, @selector(alloc)), @selector(init));
@@ -50,10 +35,6 @@ static void BOTH(NSString *what, NSString *ours, NSString *theirs)
                  [NSString stringWithFormat:@"port %@ != system %@", ours, theirs]);
 }
 
-// -init and +new are NS_UNAVAILABLE in the header on both sides and neither refuses at run time, so what is
-// compared is what they answer: an object whose five values are the zeros of their types. The first version
-// of this case asked the wrong question - it expected a refusal, on the strength of a probe that had sent
-// `new` to an instance - so it went red against a port that was answering what the host answers.
 static void check_the_zeros(void)
 {
     CharonHostUIEventAttribution *ours = call_init([CharonHostUIEventAttribution class]);
@@ -105,16 +86,12 @@ static void check_the_five_values(void)
     BOTH(@"a fresh attribution has no report endpoint", ours.reportEndpoint == nil ? @"nil" : @"set",
          theirs.reportEndpoint == nil ? @"nil" : @"set");
 
-    // The URL and the strings are `copy` properties, so what comes back is what was handed in: identity,
-    // not just equality, which is what -copyWithZone: and -[NSURL copy] give for an immutable value.
     BOTH(@"the destination URL is the URL it was given", ours.destinationURL == url ? @"same" : @"copied",
          theirs.destinationURL == url ? @"same" : @"copied");
     BOTH(@"the source description is the string it was given",
          [ours.sourceDescription isEqual:@"a source"] && ours.sourceDescription == source ? @"same" : @"copied",
          [theirs.sourceDescription isEqual:@"a source"] && theirs.sourceDescription == source ? @"same" : @"copied");
 
-    // The copy: equal to its receiver and holding the same five values, which is the question a copy of a
-    // value object has to answer.
     CharonHostUIEventAttribution *ourCopy = [ours copy];
     UIEventAttribution *theirCopy = [theirs copy];
     BOTH(@"a copy is equal to its receiver", [ourCopy isEqual:ours] ? @"equal" : @"other",
@@ -135,7 +112,6 @@ static void check_the_five_values(void)
     BOTH(@"two attributions with the same values are equal", [ours isEqual:ourTwin] ? @"equal" : @"other",
          [theirs isEqual:theirTwin] ? @"equal" : @"other");
 
-    // Two that differ are not equal, on either side, so -isEqual: is not answering YES to everything.
     CharonHostUIEventAttribution *other = [[CharonHostUIEventAttribution alloc] initWithSourceIdentifier:8
                                                                          destinationURL:url
                                                                      sourceDescription:source
@@ -150,8 +126,6 @@ static void check_the_five_values(void)
     BOTH(@"the hashes of equal attributions agree", [ours isEqual:ourTwin] ? @"equal" : @"other", @"equal");
 }
 
-// The view. Its only rows are its symbol and what a fresh instance answers, so that is what is compared:
-// the two answers that differ from UIView's own defaults, and the two that do not.
 static void check_the_view(void)
 {
     CharonHostUIEventAttributionView *ours = [[CharonHostUIEventAttributionView alloc] initWithFrame:CGRectMake(1, 2, 3, 4)];

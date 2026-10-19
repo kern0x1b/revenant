@@ -28,8 +28,6 @@ static inline NSError *charon_vision_error(NSInteger code, NSString *message)
     return [NSError errorWithDomain:VNErrorDomain code:code userInfo:@{NSLocalizedDescriptionKey: message}];
 }
 
-/* The contour request's answer for a picture, which the handler asks for: the request is a 14.0 class whose work is in
- * Vision14_0.m, and the handler is in VNHandlers.m. */
 @interface VNDetectContoursRequest (CharonPerform)
 - (NSArray<VNContoursObservation *> *)charon_observationsOnImage:(id)image error:(NSError **)error;
 - (nullable NSNumber *)charon_contrastPivotValue;

@@ -5,10 +5,6 @@ package("shade")
     set_license("MPL-2.0")
 
     add_urls("https://github.com/kern0x1b/shade.git")
-    -- The revision is a config as well as the version: the version string names a release, and a
-    -- different commit under the same name must be a different install. xmake keeps one source
-    -- checkout per version name and builds what it holds without fetching again, so each commit
-    -- takes a name of its own, and the install checks it built that commit.
     local revision = "5e9716f1e8fe800cb24c1bc54d2534d490d508ba"
     add_versions("2026.10.15+1", revision)
     add_configs("revision", {description = "The Shade commit this package builds, so another commit is another emulator.", default = revision, type = "string", readonly = true})

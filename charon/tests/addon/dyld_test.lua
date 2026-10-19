@@ -42,14 +42,6 @@ local function dylib(folder, ld64, name, triple, imported, extra)
 end
 
 
--- A framework's public path and its private one are two different libraries, not one library with two names:
--- on every rung of the ladder exactly one of the two is a library, and the public one appears later, at a
--- release of its own. So exported_by answers only for the name it is given, and a symbol is placed at the
--- release where the install name a client binds it through first exists - the same rule missing_imports asks
--- cache.images for, so the two readers cannot disagree. Measured 2026-09-27 by the review of 0012/0013: a
--- fallback that followed the name into the other folder moved 14,001 of 87,185 placements, and put
--- _IOSurfaceCreate, _VTCompressionSessionCreate, _CVPixelBufferCreate and ImageIO's at 3.0 rather than at the
--- release their public path appears.
 local function public_path_step(dyld, folder, found)
     local private = "/System/Library/PrivateFrameworks/IOSurface.framework/IOSurface"
     local public = "/System/Library/Frameworks/IOSurface.framework/IOSurface"
@@ -115,8 +107,6 @@ function failures(opt)
     if not weak:find("_arrived (weakly bound to /usr/lib/libSystem.B.dylib, which does not export it, while /usr/lib/charon/libprovider.dylib does", 1, true) then
         table.insert(found, "a weak import bound to a system library that lacks it, while a library of the build provides it, must be refused: " .. weak)
     end
-    -- An import the runtime's guard table records is called only behind its guard, so the order that binds it to the system
-    -- library is reported for a copy of the runtime's image and refused for any other, including a recorded name in another image.
     local recorded = {[path.filename(system_first)] = {_arrived = "weak.c's own test of the pointer"}}
     local guarded_order = fixtures.refusal(function () dyld.check(armv7, {system_first, provider}, nil, {runtime = {system_first}, guards = recorded}) end)
     if guarded_order then
@@ -146,8 +136,6 @@ function failures(opt)
     if #dyld.missing_imports(armv7, {unprovided}) > 0 then
         table.insert(found, "a weak import the release lacks and nothing in the build provides must pass, as it runs behind a check")
     end
-    -- A released image is refused a weak import that nothing the process loads exports, and one the load order binds to the
-    -- carried library that exports it passes: the cache lacks _arrived, the carried library (provider_first's link) exports it.
     local carried_bound = fixtures.refusal(function () dyld.check(armv7, {provider_first, provider}, nil, {release = true}) end)
     if carried_bound then
         table.insert(found, "a weak import bound to the carried library that exports it must pass a release check: " .. carried_bound)
@@ -166,13 +154,11 @@ function failures(opt)
     if fixtures.refusal(function () dyld.check(armv7, {unprovided}, nil, {release = true, waived = "each call is behind a check"}) end) then
         table.insert(found, "a released image whose target waives weak-imports with a reason must pass")
     end
-    -- a library another package provides is not this program's image to refuse
     local other = fixtures.link(folder, opt.ld64, "other.dylib", "armv7-apple-ios6.0", "weak.c", {"-dynamiclib"})
     local exempted = fixtures.refusal(function () dyld.check(armv7, {other}, nil, {release = true, exempt = {other}}) end)
     if exempted then
         table.insert(found, "a released build must not be refused for a weak import in a library another package provides: " .. exempted)
     end
-    -- and the same when the images are named relative to the folder they are checked in
     local relative = fixtures.refusal(function () dyld.check(armv7, {other}, folder, {release = true, exempt = {other}}) end)
     if relative then
         table.insert(found, "an exempt library must stay exempt when the check names images relative to a folder: " .. relative)
@@ -181,7 +167,6 @@ function failures(opt)
     if not mixed:find("unprovided.dylib", 1, true) or mixed:find("other.dylib", 1, true) then
         table.insert(found, "the program's own weak import must still be refused, and only it, when a provided library is exempt: " .. mixed)
     end
-    -- every image's unguarded weak imports are a warning of their own, printed and returned by the check
     local warned = table.concat(dyld.check(armv7, {unprovided, other}) or {}, "\n")
     if not warned:find("unprovided.dylib", 1, true) or not warned:find("other.dylib", 1, true) then
         table.insert(found, "the check's warnings must name the weak imports of every image the release lacks, not the first image's alone: " .. warned)
@@ -193,7 +178,6 @@ function failures(opt)
     if not refused:find("_objc_storeStrong", 1, true) or not refused:find("arclite", 1, true) then
         table.insert(found, "a weak import of a symbol the compiler emits, which the release lacks and the image does not carry, must be refused naming what should carry it: " .. refused)
     end
-    -- a weak import the toolchain's own code calls only behind a test for it (apple.compat's GUARDED) is reported, released or not
     io.writefile(path.join(folder, "availability.c"),
                  "extern int _availability_version_check(unsigned, void *) __attribute__((weak_import));\n" ..
                  "int use(void *versions) { return _availability_version_check ? _availability_version_check(1, versions) : 0; }\n")
@@ -207,7 +191,6 @@ function failures(opt)
             table.insert(found, "a weak import the toolchain's own code guards must be reported, naming the code that guards it: " .. warned)
         end
     end
-    -- a copy of the runtime the program carries: a weak import its guard table records is reported, any other is refused
     local copy = fixtures.link(folder, opt.ld64, "libcarried.dylib", "armv7-apple-ios6.0", "weak.c", {"-dynamiclib"})
     local recorded = {["libcarried.dylib"] = {_arrived = "weak.c: use tests arrived before calling it"}}
     local carried_refused = fixtures.refusal(function () dyld.check(armv7, {copy}, nil, {release = true, runtime = {copy}, guards = recorded}) end)
@@ -227,15 +210,7 @@ function failures(opt)
     if unreleased then
         table.insert(found, "an image that is not released is told of an unrecorded weak import, not refused it: " .. unreleased)
     end
-    -- The table and what the installed runtime imports are compared against the build that produced them, in both
-    -- directions: a weak import nothing exports has to be recorded, a row whose symbol the build imports strongly has
-    -- to be satisfied by something the process carries, and a row the build does not import at all is not a
-    -- difference for a configuration that compiles its guard's code out.
     local guards = import("apple.runtime_guards", {rootdir = opt.modules, anonymous = true})
-    -- A package's own library carried beside the program (libswiftSystem.dylib, which swift-system declares rows for): the rows
-    -- the package declares are the guard table the check reads for that copy, so a weak import one of them records is reported,
-    -- and a weak import none of them records is refused as the program's own. The rows are read from the merged table, and the
-    -- fixture stands for the library by its file name, the key the check looks the rows up by.
     local declared = guards.guards()
     local mach = {"_mach_port_destruct", "_mach_port_guard", "_mach_port_unguard"}
     for _, symbol in ipairs(mach) do
@@ -268,8 +243,6 @@ function failures(opt)
         table.insert(found, "the guard table must refuse an unrecorded weak import and leave the toolchain's own guard to apple.compat: " .. problems)
     end
 
-    -- one library, one row, and the two ways a build can reach a symbol it records, plus the way it reaches none.
-    -- The keys are sorted here rather than through table.orderkeys, which is not a global in this sandbox.
     local function first(list)
         local keys = {}
         for key in pairs(list) do
@@ -310,8 +283,6 @@ function failures(opt)
             end
         end
     end
-    -- the count, because pairs(nil) iterates nothing instead of raising: a loop over a table the module could not
-    -- hand over reported nothing at all and the suite was green
     if cited < 50 then
         table.insert(found, "apple.runtime_guards' rows were read over: " .. cited .. " of the table's libraries, which is fewer than the table holds")
     end

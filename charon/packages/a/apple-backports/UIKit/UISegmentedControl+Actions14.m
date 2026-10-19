@@ -6,28 +6,12 @@
 
 static const char charon_actions_key, charon_trigger_key;
 
-// The class an action has to be a kind of, which is **not** always the name in this file.
-//
-// Where the host has UIAction of its own - iOS 13 and up - the port's own class is CharonHostUIAction, and a
-// host action is not a kind of it, so a comparison against `[UIAction class]` written here would reject every
-// action the host hands this control, and the host hands it host actions freely: its own
-// -initWithFrame:actions: builds them. Where the host has no UIAction the name in this file is the port's own
-// class, and the runtime lookup finds it under its own name because the band's flags are not in play on a
-// device. So the class is asked for at run time, and both a host action and a port action pass.
-// YES between the host's -initWithFrame:actions: entering and leaving. The host's initialiser calls the
-// port's -insertSegmentWithAction: from inside itself, and anything the port does to the control then lands in
-// the middle of the host's own construction of it.
 static Class charon_action_class(void)
 {
     Class host = objc_getClass("UIAction");
     return host ?: [UIAction class];
 }
 
-// Whether something is an action at all, on **either** side. `charon_action_class()` is the host's class where
-// the host has one, and the port's own action is CharonHostUIAction and is not a kind of it - so a comparison
-// against that one class alone never recognised a port action, and the identifier lookup answered NSNotFound for
-// an action the control was holding. `[UIAction class]` written here is the port's own class, so the two together
-// cover both.
 static BOOL charon_is_action(id object)
 {
     return [object isKindOfClass:charon_action_class()] || [object isKindOfClass:[UIAction class]];
@@ -68,10 +52,6 @@ static NSMutableArray *charon_segment_actions(UISegmentedControl *control, BOOL 
 {
     NSMutableArray *actions = objc_getAssociatedObject(control, &charon_actions_key);
     if (actions) {
-        // One slot per segment, always. The array is created once and the +load guard stops the swizzles that
-        // used to keep it in step, so without this a control only ever remembers the first action it was given -
-        // which is what the per-slot dump showed, and why the port's identifier lookup answered NSNotFound for
-        // actions the control was plainly holding.
         while (actions.count < control.numberOfSegments)
             [actions addObject:[NSNull null]];
     }
@@ -80,11 +60,6 @@ static NSMutableArray *charon_segment_actions(UISegmentedControl *control, BOOL 
         for (NSInteger index = 0; index < control.numberOfSegments; index++)
             [actions addObject:[NSNull null]];
         objc_setAssociatedObject(control, &charon_actions_key, actions, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-        // The target is bound only where the port owns the control, and **never** from
-        // -insertSegmentWithAction: - because the host's -initWithFrame:actions: calls that while it is still
-        // building the control, and a control given a target in the middle of its own initialisation is a control
-        // the host is still writing. A control the host builds with its own initializer therefore carries no
-        // port target at all, and the host's own value-changed handling is what fires for it.
         if (bind) {
             CharonSegmentTrigger *trigger = [[CharonSegmentTrigger alloc] initWithControl:control];
             objc_setAssociatedObject(control, &charon_trigger_key, trigger, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
@@ -133,16 +108,6 @@ static void charon_shift_in(UISegmentedControl *control, NSUInteger index)
 
 + (void)load
 {
-    // These hooks replace four of the host's own public methods, and they install **always**, on every release.
-    // They are not a step-in for the host's API: they are the port's only way of learning that the control
-    // gained or lost a segment, and its bookkeeping of which action is in which slot is positional. A plain title
-    // segment inserted at 0 shifts every action along on the host, and without this the port's array does not
-    // shift with it - which is what the differential's last disagreement was, in a line the port's own lookups
-    // now answer.
-    //
-    // What is release-dependent is the *public initializer*, not these: on a release that has
-    // -initWithFrame:actions: the host's own must run, with a real UIAction, and the port's must not replace it.
-    // That check is in -initWithFrame:actions: itself, where it belongs.
     Class cls = [UISegmentedControl class];
     Method title = class_getInstanceMethod(cls, @selector(insertSegmentWithTitle:atIndex:animated:));
     Method image = class_getInstanceMethod(cls, @selector(insertSegmentWithImage:atIndex:animated:));
@@ -183,16 +148,6 @@ static void charon_shift_in(UISegmentedControl *control, NSUInteger index)
 
 @implementation UISegmentedControl (CharonActions14)
 
-// The port's own implementation of a control made of actions, as a name of its own.
-//
-// Two callers, and the difference between them is the whole of it. On a release with no
-// -initWithFrame:actions: of its own, the method below calls this after -initWithFrame: has returned, and it is
-// how a control is built there. Where the host has one, that method is the one that must run - its own, with its
-// own UIAction - and this is reachable only by name, which is what a differential needs: there the port's classes
-// and the host's are in one process, and the public name is the host's.
-//
-// It is exported so that the harness can reach it. The package builds with hidden visibility, and a differential
-// is a caller in the same process, not a linker of the package.
 __attribute__((visibility("default"))) UISegmentedControl *charon_control_init_with_actions(UISegmentedControl *control, CGRect frame, NSArray<UIAction *> *actions)
 {
     if (!(control = [control initWithFrame:frame]))
@@ -205,8 +160,6 @@ __attribute__((visibility("default"))) UISegmentedControl *charon_control_init_w
 
 - (instancetype)initWithFrame:(CGRect)frame actions:(NSArray<UIAction *> *)actions
 {
-    // Where the host has an initialiser of its own, the port does not step in at all: the host's is the one the
-    // release intends, and on 13 and up that is the path an application takes, with a real UIAction.
     if ([UISegmentedControl instancesRespondToSelector:@selector(initWithFrame:actions:)])
         return [self initWithFrame:frame];
     return charon_control_init_with_actions(self, frame, actions);
@@ -235,9 +188,6 @@ __attribute__((visibility("default"))) UISegmentedControl *charon_control_init_w
 {
     NSMutableArray *actions = charon_segment_actions(self, YES, NO);
     charon_check_identifier(actions, action, segment);
-    // Measured on the host, in probe-setaction.m: inserting an action whose identifier is **already** in the
-    // control does nothing at all - the segment count does not change and neither action moves. A segment with
-    // that identifier is already there, and the host does not add a second.
     for (NSUInteger index = 0; index < actions.count; index++) {
         UIAction *held = actions[index];
         if (index == segment || !charon_is_action(held))
@@ -245,17 +195,11 @@ __attribute__((visibility("default"))) UISegmentedControl *charon_control_init_w
         if ([held.identifier isEqualToString:action.identifier])
             return;
     }
-    // **The segment goes in first, and the bookkeeping second.** The other order loses the action: the array is
-    // sized from the segment count, so before the insert the first one has none, the index clamps to -1, and the
-    // action never lands in a slot - which is what the per-slot dump showed, every slot but one reading "not an
-    // action", and the identifier the host still resolves the port could not.
     NSUInteger before = self.numberOfSegments;
     [self insertSegmentWithTitle:action.image ? nil : action.title atIndex:segment animated:animated];
     NSUInteger added = self.numberOfSegments - before;
     if (!added)
         return;
-    // One slot per segment, brought up **here**: the ask that started this method saw the control's old length,
-    // so growing there left the array one short and every index clamped down into the previous slot.
     while (actions.count < self.numberOfSegments)
         [actions addObject:[NSNull null]];
     NSUInteger written = MIN(segment, actions.count - 1);

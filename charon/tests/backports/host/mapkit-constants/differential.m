@@ -1,7 +1,3 @@
-// The comparison probe for tests/backports/host/mapkit-constants/run.sh. The names themselves are
-// generated into probe.h beside this file, one function per name, each holding the port's own value
-// (renamed to charonHost_*) beside Apple's (the unrenamed symbol, which the host's own
-// MapKit.framework answers for). This file is only the comparison and the report.
 #import <Foundation/Foundation.h>
 #import <stdio.h>
 #include "probe.h"

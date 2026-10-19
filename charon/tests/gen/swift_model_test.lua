@@ -1,12 +1,6 @@
--- The full Swift model (tools/gen/swift_model.lua): a synthetic digester dump is walked into rows and every field the model promises
--- is checked, so a walker change that drops or misreads a field turns the test red (the mutant: the annotate_async call removed, or
--- a field in row_of dropped). The fixture is our own JSON in the digester's shape (tests/gen/input/fixtures/swift/model.json), not
--- an Apple dump. Run: xmake l tests/gen/swift_model_test.lua
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 local json = import("core.base.json")
 
--- The rows of the fixture dump, keyed by "kind name" for a direct read.
 local function by_kind(rows)
     local out = {}
     for _, r in ipairs(rows) do
@@ -71,7 +65,6 @@ function main()
           "an extension member names its owner and its extension state")
     check(r["swift-property tag"].is_let == "yes", "a stored let is marked let")
 
-    -- Members of the same name in two types share a key in r, so these are found by their container.
     local function member(container, name)
         for _, row in ipairs(rows) do
             if row.container == container and row.name == name then
@@ -89,7 +82,6 @@ function main()
     check(r["swift-typealias Opaque"] ~= nil and r["swift-typealias Opaque"].alias == "some Swift.Sendable",
           "a typealias carries the type it aliases")
 
-    -- Every row carries every column: a walker that drops a field leaves a nil cell and is caught here.
     local missing = 0
     for _, row in ipairs(rows) do
         for _, column in ipairs(model.columns()) do
@@ -100,8 +92,6 @@ function main()
     end
     check(missing == 0, "every row carries every model column (" .. missing .. " missing)")
 
-    -- async has no key in the dump: it is read from the mangled name. The batch demangler is injected here so the test needs no
-    -- toolchain; the line the real demangler prints for moved carries " async".
     local asked = {}
     model.annotate_async(rows, function(names)
         asked = names
@@ -120,24 +110,17 @@ function main()
     check(r["swift-method moved(dx:)"].async == "yes", "an async function is marked async from its demangled signature")
     check(r["swift-method render(_:)"].async == "-", "a declaration with no mangled name keeps the empty async cell")
 
-    -- The model reads back from its own text: every row survives the TSV round trip by column name.
     local reparsed = tsv_records(model.text(rows))
     check(#reparsed == #rows, "the model text holds one line per row")
     check(reparsed[1].kind ~= nil and reparsed[#reparsed].declhash ~= nil, "the model text is read back by column name")
 
-    -- The triple is the SDK's own (SDKSettings.json through sdk.lua), the fixture SDK's deployment target.
     check(model.triple_of(path.join(os.scriptdir(), "sdk_fixture", "good")) == "arm64e-apple-ios9.9",
           "the triple of an SDK is its deployment target, read from its SDKSettings.json")
 
-    -- The implementation modules: an interface whose -public-module-name names another module maps to it; one that names
-    -- itself, or none, is not in the map. The fixture folder holds one interface of each kind.
     local public = model.public_modules(path.join(os.scriptdir(), "input", "fixtures", "swift-interfaces"))
     check(public.Impl == "Public", "a module whose interface names another as its public module maps to it")
     check(public.Plain == nil and public.Public == nil, "a module that names itself, or no public module, is not in the map")
 
-    -- The non-ASCII identifiers of the model: a macron name (m, a with a macron, ori; the bytes are written as escapes, the file
-    -- is ASCII) is one, and the canonical parameter tau_0_0 (the Greek letter) is not. The emitter allows exactly those words: a
-    -- model word inside a longer run is refused, and so is any other byte above 0x7f.
     local macron = "m\196\129ori"
     local canonical = "\207\132_0_0"
     local superclass = "Base<" .. canonical .. ">"
@@ -151,9 +134,6 @@ function main()
     check(emit.refused("let s = \"" .. canonical .. "\"", {}) == canonical, "a non-ASCII byte in a string is refused too")
     check(emit.refused("plain ASCII", {}) == nil, "ASCII is never refused")
 
-    -- The class index: a class is keyed by the module that declares it, so an extension's row of another module's class is
-    -- keyed by that module; a class two modules give is one entry, with the union of their conformances and the superclass
-    -- that is named.
     local function class(name, owner, superclass, conformances)
         return {kind = "swift-class", container = "-", name = name, owner_module = owner, superclass = superclass,
                 conformances = conformances}
@@ -178,7 +158,6 @@ function main()
     end
 end
 
--- The records of a TSV text, read by the header's column names (the same reader the commands use).
 function tsv_records(text)
     local tsv = import("gen.tsv", {rootdir = TOOLS, anonymous = true})
     return tsv.records(text)

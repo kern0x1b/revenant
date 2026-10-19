@@ -1,11 +1,6 @@
 #import <UIKit/UIKit.h>
 #include <stdio.h>
 
-// One body of checks, run on the host's own classes (looked up by name, which run.sh's -D renames do not touch) and on the port's,
-// which run.sh compiles under the same identifiers. A line is "side<TAB>check<TAB>value". Class names are not printed: the port's
-// are renamed at compile time, so the checks name superclasses and behaviour instead. Messages are sent by selector name, since
-// several SDK classes declare the same property names with other types.
-
 typedef id (*InitWithFn)(id, SEL, id);
 typedef id (*PlainFn)(id, SEL);
 typedef id (*FactoryFn)(id, SEL, id, id, id);

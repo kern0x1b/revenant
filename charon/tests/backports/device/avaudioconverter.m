@@ -2,29 +2,6 @@
 #include <math.h>
 #import "check.h"
 
-// AVAudioConverter over real AudioConverterServices (AudioConverterNew/ConvertComplexBuffer):
-// converts a known Float32 tone down to Int16 and back up to Float32, both directions through
-// -convertToBuffer:fromBuffer:error: (same sample rate, no codec - AudioConverterConvertComplexBuffer's
-// own documented restriction). The error this round trip can introduce is Int16 quantization and
-// nothing else, and that error has a known upper bound stated here BEFORE the run, not fitted to
-// it afterwards: AVAudioPCMFormatInt16 maps the float range [-1, 1] to the int16 range
-// [-32768, 32767], so no sample can be moved by more than one int16 step either converting down or
-// back up - 1/32768 = 0.0000305175... per hop, twice for a round trip, so the round trip's own
-// bound is 2/32768 = 0.00006103515625. If the measured error exceeds that, the converter is doing
-// something other than quantization - resampling, clipping, a wrong format - and the check must
-// fail, not the bound move. Measured on an iPhone4,1 (6.1.3): max error 0.0000152587890625, about
-// half the bound and almost exactly 1/65536 (half an int16 step) - what round-to-nearest
-// quantization predicts for a full-scale sine tone.
-//
-// The first run of this test failed every conversion with OSStatus -50 (paramErr), the same shape
-// of failure AVAudioEngine's own AudioUnitRender/Output-scope-format trap was
-// (facts/AVFoundation/AVAudioEngine.md): a freshly allocated AVAudioPCMBuffer already owns real,
-// calloc'd sample memory at its full frameCapacity, but its AudioBufferList's mDataByteSize starts
-// at 0, mirroring the real class - it tracks frameLength, not capacity, and AudioConverterServices
-// reads mDataByteSize as how much room it has to write into. Fixed in AVAudioConverter.m: both
-// convert methods claim the output buffer's full intended byte range via -setFrameLength: before
-// calling into AudioConverterServices, not after.
-
 static const AVAudioFrameCount kFrames = 512;
 static const float kSampleRate = 44100.0f;
 static const float kRoundTripBound = 2.0f / 32768.0f;

@@ -1,14 +1,6 @@
--- Captures the fixtures of the input light test (tests/gen/input_test.lua) from the real modules of a tree whose extractor is built
--- (xmake -P tools/found), with the SDK and the coordination corpus at hand. Run from the tree's root:
---   xmake l tests/gen/input/capture.lua <tree> <sdk> <corpus>
--- It writes tests/gen/input/fixtures under the tree: for each of the four frameworks the ledger's constant rows (corpus/ledger-w45),
--- the extractor's doc rows of those constants (decls --doc, their comment cells replaced by synthetic text: see synthetic_row), the exports
--- the SDK's .tbd gives, the host probe's values of those constants; and the iOS 26.2 cache rows of the same names (corpus/cache-26.2,
--- gzip). The fixtures hold no absolute path: the SDK and the corpus are read, not written.
-
 local FRAMEWORKS = {"CoreNFC", "Foundation", "Accelerate", "WiFiInfrastructure"}
 local SWIFT_ONLY = "WiFiInfrastructure"
-local DOC_USR = 3  -- the doc row's cells: framework, kind, usr, ...
+local DOC_USR = 3
 
 local function write_file(filepath, text)
     os.mkdir(path.directory(filepath))
@@ -17,10 +9,6 @@ local function write_file(filepath, text)
     handle:close()
 end
 
--- A doc row with its comment cells replaced by synthetic text of the same shape: the brief (cell 8) becomes one line of ours, and the
--- raw comment (cell 9) keeps its lines and their forms (a /*! block line for line, a /// line). The input test reads the USR and the
--- declaration only, so it sees the same rows; the SDK's comment text is not written into the fixtures. The extractor writes a line feed
--- as the two characters \n, and the cells are joined back the same way.
 local BRIEF_CELL, RAW_CELL, NAME_CELL = 8, 9, 5
 local ESCAPED_LINE_FEED = "\\n"
 
@@ -69,7 +57,6 @@ function main(tree, sdk, corpus)
     local fixtures = path.join(tree, "tests", "gen", "input", "fixtures")
     local decls = host.target_product(tree, path.join(tree, "tools", "found"), "decls")
 
-    -- the ledger's constant rows, as the file holds them (the header line first), and the names they name
     local names, ledgers = {}, {}
     for _, fw in ipairs(FRAMEWORKS) do
         local lines = strings.lines(io.readfile(surface.ledger_file(corpus, surface.ledger_6_1_3(), fw)))
@@ -91,7 +78,6 @@ function main(tree, sdk, corpus)
         write_file(path.join(fixtures, "corpus", "ledger-w45", (string.gsub(fw, "/", "_")) .. ".tsv"), ledgers[fw])
     end
 
-    -- the names of the constants of the four frameworks: the iOS rows and the exports are kept for them
     local wanted = {}
     for _, fw in ipairs(FRAMEWORKS) do
         for _, api in ipairs(names[fw] or {}) do
@@ -99,7 +85,6 @@ function main(tree, sdk, corpus)
         end
     end
 
-    -- the doc rows, the exports and the host probe, per framework
     for _, fw in ipairs(FRAMEWORKS) do
         if fw ~= SWIFT_ONLY then
             local text = os.iorunv(decls, {"--doc", fw}, {envs = {IR_SDK = sdk}})
@@ -113,7 +98,6 @@ function main(tree, sdk, corpus)
                     table.insert(keep, line)
                 end
             end
-            -- the SDK's rows stay out of the fixtures: they go to the tree's .agent-work (ignored by git) for a local comparison
             write_file(path.join(tree, ".agent-work", "runs", "capture", "doc", fw .. ".txt"), table.concat(keep, "\n") .. (#keep > 0 and "\n" or ""))
             local synthetic = {}
             for _, line in ipairs(keep) do
@@ -141,7 +125,6 @@ function main(tree, sdk, corpus)
         end
     end
 
-    -- the iOS 26.2 cache rows of the names: the header, then the cfstring rows of those names (gzip)
     local table_text = os.iorunv("gzip", {"-dc", path.join(corpus, "cache-26.2", "constants-26.2.tsv.gz")})
     local kept = {}
     local header = nil

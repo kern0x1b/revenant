@@ -1,4 +1,3 @@
--- xmake l tools/recipe-digests.lua: writes the digest.lua of each recipe that takes the digest of its own Lua (modules/digest.lua)
 function main()
     local digest = import("digest", {rootdir = path.join(os.scriptdir(), "..", "modules"), anonymous = true})
     local root = path.join(os.scriptdir(), "..")

@@ -3,8 +3,6 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-// Only a Mac application draws the mac style; on a phone or tablet every control
-// resolves to pad, whatever it was asked for. What was asked is kept.
 static const char charon_preferred_style_key = 0;
 
 static UIBehavioralStyle charon_preferred_style(id view)
@@ -72,7 +70,6 @@ static void charon_set_preferred_style(id view, UIBehavioralStyle style)
     charon_set_preferred_style(self, preferredBehavioralStyle);
 }
 
-// A phone or tablet has no NSToolbar for the bar's contents to be in.
 - (UINavigationBarNSToolbarSection)currentNSToolbarSection
 {
     return UINavigationBarNSToolbarSectionNone;

@@ -11,46 +11,10 @@
 #import <unistd.h>
 #import "check.h"
 
-/* The four names a stream task's transaction reports about the socket underneath it, against the host's own.
-
-   The port's classes are compiled under names of their own (uikit2/renames.sh with "*", which renames
-   the classes and leaves the selectors), so the two sides never meet and each answer can be held beside
-   the other. The listener is this test's own: a plain TCP socket on the loopback the kernel gives a port,
-   which accepts the connections the tasks below open and holds each one open, so what is compared is what
-   each side REPORTS about a socket both of them opened to the same place.
-
-   WHERE THE SYSTEM'S OWN ANSWERS COME FROM, and why not from a stream task. Measured on this host,
-   2026-10-04, in a process with no port object in it at all, over a listener of that shape:
-
-     - the host's own stream task DOES finish, and what finishes it is this side: -closeRead and
-       -closeWrite together, which in the same millisecond bring URLSession:readClosedForStreamTask:,
-       URLSession:writeClosedForStreamTask: and URLSession:task:didCompleteWithError: with the task's
-       state already 3. -cancel finishes it too (state 3, NSURLErrorDomain -999). The LISTENER's close
-       alone does not: the task sat at state 0 for three seconds with its listener gone.
-     - and for that stream task URLSession:task:didFinishCollectingMetrics: NEVER fires. Nine endings,
-       six of which complete the task with no error at all, and no transaction in any of them.
-       -captureStreams ends the delegate messages by its own contract: once the release's completion message arrives, the task is treated as finished and gets no further delegate messages, so a
-       stream task has no shape on this host in which a transaction arrives at all.
-     - the same delegate, the same session and this same listener DO get one out of a DATA task, 7 ms
-       after its resume: 127.0.0.1, the ephemeral port, 127.0.0.1, this listener's port, and nil for both
-       negotiated TLS values, because there is no TLS on the connection.
-
-   So the left side of every row below is the system's own transaction over this listener, taken from the
-   task the system collects metrics for - and the run prints, as a note, that the stream task on the same
-   listener delivered none. The oracle is the system's answer; nothing here stands in for it.
-
-   The port's members go onto the class the host's own session instantiates, and the host's own answers
-   are read before that happens: that class is the class of a task the host made, so reading them
-   afterwards would compare the port against itself. The order is the measurement, not a style. */
-
 void host_attach_prefixed(const char *prefix);
 size_t host_attach_members(Class from, Class to);
 BOOL host_alloc_from(Class from, Class to);
 
-/* What the system told one delegate. A stream task and a data task answer differently (above), so the
-   collector counts what arrived instead of keeping only the metrics: the run prints the counts either
-   way, which is how "the system finished the task and delivered no transaction" stays a measurement
-   rather than a gap. */
 @interface CharonMetricsCollector : NSObject <NSURLSessionDelegate, NSURLSessionStreamDelegate>
 @property NSURLSessionTaskMetrics *metrics;
 @property int read_closed;
@@ -101,7 +65,7 @@ static int charon_listener(void)
     memset(&address, 0, sizeof(address));
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    address.sin_port = 0; /* the kernel picks a free one, so two runs never collide */
+    address.sin_port = 0;
     socklen_t length = sizeof(address);
     if (bind(listener, (struct sockaddr *)&address, sizeof(address)) != 0 || listen(listener, 1) != 0 ||
         getsockname(listener, (struct sockaddr *)&address, &length) != 0) {
@@ -120,9 +84,6 @@ static NSUInteger charon_port_of(int descriptor)
     return ntohs(address.sin_port);
 }
 
-/* What the system's own getsockname says of a descriptor: the two names, or why it says nothing. Two
-   buffers, because the caller compares two descriptors in one printf and a shared one would print the
-   last answer twice. */
 static void charon_names_of(int descriptor, char *text, size_t size)
 {
     struct sockaddr_in address;
@@ -136,17 +97,6 @@ static void charon_names_of(int descriptor, char *text, size_t size)
     snprintf(text, size, "%s:%d", host, ntohs(address.sin_port));
 }
 
-/* Every connection this run's listener accepted, in the order the tasks that opened them were made,
-   with the peer's address and port. That pair is the connection's OWN local endpoint read from the far
-   end of it - the system's own answer for it - and it is where a connection's local port can be read
-   when the near end of that connection carries no descriptor. Measured 2026-10-04 on this host:
-   CFReadStreamCopyProperty(stream, kCFStreamPropertySocketNativeHandle) on the pair
-   +[NSStream getStreamsToHostWithName:port:] hands back a POINTER here (0x78b2c1c370, CFTypeID 20, and
-   CFNumber is 22), so the descriptor the port casts it to is not one and getsockname on it answers
-   EBADF. On iOS, where the port runs, that property is the descriptor (the symbol is CoreFoundation's
-   in the 6.1.3 cache - facts/Foundation/NSURLSessionStreamTask.md), so this is a property of the
-   host's CFNetwork and not of the port. main() prints the property's own value, so the rows below and
-   that note are read together. */
 #define CHARON_MAX_CONNECTIONS 8
 static NSString *charon_peer_address[CHARON_MAX_CONNECTIONS];
 static NSUInteger charon_peer_port[CHARON_MAX_CONNECTIONS];
@@ -154,10 +104,6 @@ static const char *charon_peer_answer[CHARON_MAX_CONNECTIONS];
 static int charon_connections;
 static int charon_expected_connections;
 
-/* What a connection says in its first bytes. The data task below sends an HTTP request; the two stream
-   tasks send nothing until something is written to them, so this is what tells the listener which answer
-   to give. Read with MSG_PEEK under a poll, so a connection that sends nothing costs the half second
-   below and no more - that is the listener's own bound, not the run's. */
 static int charon_says_http(int connection)
 {
     struct pollfd waiting;
@@ -172,12 +118,6 @@ static int charon_says_http(int connection)
                        strncmp(first, "POST ", 5) == 0);
 }
 
-/* The accept runs on its own queue, because it blocks until a connection lands and the connections only
-   land once the tasks under test are resumed: accepting on the main thread is the second thing this test
-   got wrong, and the thirty second bound is what said so. Each accepted connection is recorded and then
-   held open. The one the data task opens is answered with the HTTP a data task needs to complete at all
-   and is then closed - that task's transaction is the oracle for the rows below, and a data task that
-   never completes delivers no metrics. */
 static void charon_accept_connections(int listener)
 {
     for (int index = 0; index < charon_expected_connections; index++) {
@@ -197,9 +137,6 @@ static void charon_accept_connections(int listener)
             charon_peer_answer[charon_connections] = "was answered HTTP/1.1 200 and closed";
             close(connection);
         } else {
-            /* One byte, so a reader on the other end has something to read. The first version of this
-               test accepted and said nothing, which left both sides waiting for bytes that never came:
-               that is what hung it, and this line is the whole fix. */
             const char greeting = 'k';
             write(connection, &greeting, 1);
             charon_peer_answer[charon_connections] = "was given one byte and held open";
@@ -215,16 +152,12 @@ static void charon_on_alarm(int number)
     _exit(1);
 }
 
-/* Every wait in this test is bounded, so a run that goes wrong fails instead of hanging: the host test
-   sweep runs every one of these run.sh scripts, and a hanging test would hang the sweep for every band on
-   the machine. */
 static void charon_bound_the_run(void)
 {
     signal(SIGALRM, charon_on_alarm);
     alarm(30);
 }
 
-/* The one transaction of a task, whichever side built it. */
 static id first_transaction(id metrics)
 {
     if (![metrics respondsToSelector:NSSelectorFromString(@"transactionMetrics")])
@@ -268,13 +201,6 @@ static void compare(const char *label, id system, id ours)
     }
 }
 
-/* The two of the four that are a port number, and cannot be one string on both sides: the system's task
-   and the port's task each opened their OWN connection and the kernel gave each its own ephemeral port
-   (measured: 61828 and 61827 in one run, two connections to one listener). So each side is held against
-   its own answer read out of the sockets, and the system's side is what proves the question is the right
-   one - its number has to be the one the sockets say before the port's number means anything. The
-   expectations come from getsockname on this listener and getpeername on the connection each task opened,
-   and every one of the four numbers is printed whether they agree or not. */
 static void compare_port(const char *label, id system_value, NSUInteger system_expected,
                          id our_value, NSUInteger our_expected, const char *which)
 {
@@ -308,24 +234,14 @@ int main(void)
         NSUInteger port = charon_port_of(listener);
         printf("note the listener is on the loopback at port %lu\n", (unsigned long)port);
 
-        /* The port's class, named first: the check below is the red control for the harness's own defect,
-           that the port's factory answered the release's and the left side of this differential was the
-           port. */
         Class ourTaskClass = NSClassFromString(@"CharonHostNSURLSessionStreamTask");
         charon_check(ourTaskClass != Nil, "the port defines a stream task", @"no such class");
 
-        /* Three connections are expected: the host's own stream task, the system's data task and the
-           port's task, one each, in that order. The count is checked, so a run in which a side opened a
-           second connection fails instead of quietly holding a row against another side's socket. */
         charon_expected_connections = 3;
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             charon_accept_connections(listener);
         });
 
-        /* ---- the host's own stream task, over this listener: what ends it, and what it delivers ---- */
-        /* -closeRead and -closeWrite together are what end it (measured above), so that is what this
-           test does, and the delegate counts what came back: a stream task that completes and delivers
-           no transaction is the measurement the six rows below stand on, and not a reason to skip them. */
         CharonMetricsCollector *systemDelegate = [[CharonMetricsCollector alloc] init];
         NSURLSession *systemSession = [NSURLSession sessionWithConfiguration:
             [NSURLSessionConfiguration ephemeralSessionConfiguration]
@@ -346,11 +262,6 @@ int main(void)
                systemDelegate.completed, systemDelegate.error ? "yes" : "(none)",
                systemDelegate.metrics ? "yes" : "none - the system delivers none for a stream task");
 
-        /* ---- the system's own transaction, the way the system does deliver one ---- */
-        /* A data task over this same listener with its own delegate: the system's answer for the same
-           socket, at the same time, in the same process. The check is that answer's own existence -
-           with it missing, the six rows below would compare nothing again, which is the defect this test
-           was rewritten for. */
         CharonMetricsCollector *oracleDelegate = [[CharonMetricsCollector alloc] init];
         NSURLSession *oracleSession = [NSURLSession sessionWithConfiguration:
             [NSURLSessionConfiguration ephemeralSessionConfiguration]
@@ -365,11 +276,6 @@ int main(void)
                      "the system hands its delegate a transaction over this listener",
                      systemDelegate.metrics ? @"that was the stream task's" : @"no metrics arrived at all");
 
-        /* ---- the port's members, on the class the host's own session instantiates ---- */
-        /* The order here is the measurement and not a style: the port's members go onto the class a task
-           the host made is an instance of, so the host's own answers above were collected while the
-           release's own implementations were still the ones in place. Reading them afterwards would
-           compare the port against itself. */
         NSURLSession *probeSession = [NSURLSession sessionWithConfiguration:
             [NSURLSessionConfiguration ephemeralSessionConfiguration]];
         NSURLSessionTask *probeTask = [probeSession streamTaskWithHostName:@"127.0.0.1" port:9];
@@ -380,10 +286,6 @@ int main(void)
         size_t moved = host_attach_members(ourTaskClass, released);
         charon_check(moved > 0, "the port's members go on the host's own stream task class",
                      [NSString stringWithFormat:@"%lu of them", (unsigned long)moved]);
-        /* What +alloc is typed as on this host, read out of the runtime rather than written beside it: the
-           method takes (id self, SEL _cmd), so the frame is the two pointers and the offset names them -
-           8 bytes where a pointer is 4, 16 where it is 8. host_alloc_from() installs it under the
-           encoding of the method it replaces, which is what this line prints. */
         Method ownAlloc = class_getClassMethod(ourTaskClass, sel_registerName("alloc"));
         printf("note the port's own +alloc is typed %s on this host\n",
                ownAlloc ? method_getTypeEncoding(ownAlloc) : "(the port's class has no +alloc to read)");
@@ -394,11 +296,6 @@ int main(void)
         charon_check([NSURLSession instancesRespondToSelector:NSSelectorFromString(@"charonHost_streamTaskWithHostName:port:")],
                      "the port's factory is attached to the session", @"the category is not attached");
 
-        /* ---- the port's, the same way, and the transaction its delegate is handed ---- */
-        /* The class under test here is the *task*: +streamTaskWithHostName:port: is a category on
-           NSURLSession, and the port's own session is two thousand lines that this build does not need.
-           The task is made through that category, renamed, on the host's own session, which is the shape
-           a differential has when the port adds to a class the release already has. */
         SEL ourFactory = NSSelectorFromString(@"charonHost_streamTaskWithHostName:port:");
         if (!ourTaskClass)
             return 1;
@@ -424,7 +321,6 @@ int main(void)
             printf("FAIL the port handed no transaction to its delegate\n");
         }
 
-        /* ---- the listener's own record of the three connections ---- */
         for (int waited = 0; waited < 3 && charon_connections < charon_expected_connections; waited++)
             [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
         charon_check(charon_connections == charon_expected_connections,
@@ -435,11 +331,6 @@ int main(void)
                    [charon_peer_address[index] UTF8String], (unsigned long)charon_peer_port[index],
                    charon_peer_answer[index]);
 
-        /* The host's own CFStream pair, and what the port reads out of it: printed so the four socket rows
-           below are read against the host's own answer and not only against this test's. Opened after the
-           three the tasks opened, so it is not one of them, and opened the way the port opens its own -
-           scheduled on this run loop and -open - because the property answers nothing at all before the
-           stream is open, which would be a different measurement again. */
         {
             NSInputStream *input = nil;
             NSOutputStream *output = nil;
@@ -452,10 +343,6 @@ int main(void)
                 [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
                 CFTypeRef handle = CFReadStreamCopyProperty((__bridge CFReadStreamRef)input,
                                                             kCFStreamPropertySocketNativeHandle);
-                /* CFStream.h: "Value will be a CFData containing the native handle" - so the descriptor is
-                   inside the data, and the value itself is the data's address. Both readings are printed,
-                   with what the system's own getsockname says of each, because one of them is a descriptor
-                   and the other is not, and which is which is the whole of the four rows below. */
                 if (handle && CFGetTypeID(handle) == CFDataGetTypeID()) {
                     int cast = (int)(intptr_t)handle;
                     int read = -1;
@@ -477,13 +364,6 @@ int main(void)
             }
         }
 
-        /* ---- the four names, each side's own ---- */
-        /* localAddress and remoteAddress are one string on both sides and are compared as one string. The
-           two negotiated TLS values are the other two rows of that kind: there is no TLS on this
-           connection, so the system answers nil on both and the port has to as well - which is the answer,
-           not a gap. The two port numbers are compare_port's rows: a remote port is the port of this
-           listener, and a local port is the peer port the listener read for the connection that side
-           opened. */
         for (NSString *name in @[@"localAddress", @"remoteAddress", @"negotiatedTLSProtocolVersion",
                                  @"negotiatedTLSCipherSuite"]) {
             compare([name UTF8String], property(systemTransaction, [name UTF8String]),

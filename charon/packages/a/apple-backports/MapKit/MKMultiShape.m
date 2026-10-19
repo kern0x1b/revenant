@@ -1,7 +1,3 @@
-// MKMultiPolygon and MKMultiPolyline: several shapes under one overlay, so that a caller can add
-// and remove them as one, and the renderers that draw them. The bounding map rect is the union of
-// the members' own, through the release's own MKMapRectUnion, so a map view that adds one of these
-// asks it where it is and gets the whole group.
 #import <MapKit/MKMultiPolygon.h>
 #import <MapKit/MKMultiPolygonRenderer.h>
 #import <MapKit/MKMultiPolyline.h>
@@ -46,8 +42,6 @@
 
 @implementation MKMultiPolygonRenderer
 
-// The points of a shape, read out through the release's own -getCoordinates:range:. Charon's own,
-// so it carries no API.
 - (CLLocationCoordinate2D *)charon_coordinatesOf:(MKMultiPoint *)shape
 {
     NSUInteger count = shape.pointCount;
@@ -73,7 +67,6 @@
 
 - (instancetype)initWithOverlay:(id <MKOverlay>)overlay
 {
-    // Only a multi polygon is drawn this way; the header's own initialiser is the way in.
     if ([overlay isKindOfClass:[MKMultiPolygon class]]) {
         return [self initWithMultiPolygon:(MKMultiPolygon *)overlay];
     }

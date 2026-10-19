@@ -1,20 +1,5 @@
 import("fixtures")
 
--- Whether toolchain("apple-ios")'s on_check answers honestly about a package graph that names the SDK
--- but has not installed it yet (package.lua's own _check_package_toolchains runs before packages
--- install - its own comment, xmake PR #5466). Entirely local and network-free: three tiny fake
--- packages stand in for iphoneos-sdk/ld64/llvm (aliased to those exact names, which is all parts()
--- reads), each writing only the one file on_check/on_load look for, and the toolchain itself is
--- read directly from the checkout by path - no addon install, no real SDK/llvm/ld64, no network, an
--- empty XMAKE_GLOBALDIR each run so every package is genuinely "never installed" without forcing a
--- digest change or hard-linking anything.
---
--- Both resolves read a real toolchains/apple-ios/xmake.lua, never a copy of its on_check maintained
--- here: the "new" one is the file this checkout actually ships, unmodified, by path; the "old" one is
--- what git itself says that file held one commit before whichever commit last touched it - read with
--- `git show`, not retyped, so a real regression in the shipped file is what turns this test red, not
--- a second, separately-maintained idea of what it should say.
-
 local FAKE_SDK = [[
 package("fakesdk")
     set_kind("toolchain")
@@ -54,17 +39,6 @@ local function fake_repo(folder)
     return repo
 end
 
--- The commit right before the fix (14ff46c3, "toolchain(apple-ios): don't require the SDK already
--- installed to pass on_check") - pinned by hash, not derived, after two derivations each failed a
--- reproduced case: "the file's last touch" (round 2) breaks on any later, unrelated commit to this
--- file; a pickaxe on the string "SDKSettings.json" (round 3) breaks the same way the moment a later
--- commit touches *that particular string* anywhere else in the file (on_load's own occurrence, most
--- plausibly) without touching the fix itself - reviewed and reproduced both times,
--- coordination/reviews/2026-09-27-charon-7f181ae3.md and -a475687c.md. A hash cannot be fooled by a
--- later commit's content the way a derivation can, at the one cost a derivation does not have: if
--- 14ff46c3 is ever rebased (a different band's merge, a history rewrite), this hash must be updated
--- to whatever it becomes, by hand - the assert below fails loudly, naming that requirement, rather
--- than silently reading the wrong commit's file if the update is missed.
 local FIX_COMMIT = "14ff46c3"
 local BEFORE_FIX_COMMIT = "2a8af359963d9eb62daa52ca750833dfc2ed64ea"
 
@@ -99,8 +73,6 @@ local function project_file(project, repo, toolchain_lua)
     }, "\n"))
 end
 
--- xmake f -c -y in a fresh, isolated, empty store: whether it resolved clean, and whether it named
--- the toolchain not found along the way (a run can fail for an unrelated reason too, so both are told).
 local function resolve(label, folder, repo, toolchain_lua)
     local run = path.join(folder, label)
     local project, store = path.join(run, "project"), path.join(run, "store")
@@ -109,8 +81,6 @@ local function resolve(label, folder, repo, toolchain_lua)
     project_file(project, repo, toolchain_lua)
     local envs = {XMAKE_GLOBALDIR = store}
     local log = path.join(run, "resolve.log")
-    -- A wedged resolve (this whole test exists because one already did, for an unrelated reason) must
-    -- not hang the suite: a hard wall-clock timeout, not xmake's own (os.execv has none).
     local ok, code = try {function ()
         return true, os.execv("timeout", {"60", "xmake", "f", "-c", "-y"}, {curdir = project, envs = envs, stdout = log, stderr = log})
     end}

@@ -1,15 +1,3 @@
-/* driver.c — a translated kernel run the way the port's compute encoder will run it.
- *
- * A workgroup is run as real threads, one per thread of the group, because that is the only way a
- * barrier means anything: thread 0 must not pass a barrier before threads 1..n-1 have written their
- * slots, and a group run one thread after another does exactly that. iOS 6 has no pthread_barrier, so
- * the rendezvous is a mutex and a condition variable - the count of threads that have arrived, and a
- * generation that is bumped and broadcast when the last one arrives.
- *
- * The numbers this prints are compared with what Apple's own Metal produces for the same kernel on
- * the same input, by compare.py. A kernel air2cpu refused is absent from the table, which is the
- * honest answer: this program says so and says nothing about it.
- */
 #include <pthread.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -17,8 +5,6 @@
 #include "../../../../packages/a/apple-backports/air2cpu-abi.h"
 #include <string.h>
 
-/* The rendezvous of one workgroup: how many of its threads have arrived at the current barrier, and
-   which generation of the barrier they are all waiting for. */
 typedef struct {
     pthread_mutex_t mutex;
     pthread_cond_t arrived;
@@ -70,26 +56,17 @@ static void *runOneThread(void *argument)
 int main(void)
 {
     setvbuf(stdout, NULL, _IONBF, 0);
-    /* 16 threads of 4 elements each is what the three one-dimensional kernels touch, so the buffer is
-       that wide and every write lands inside it. The two-dimensional and three-dimensional kernels
-       index differently, so each is dispatched the grid its own formula assumes - and the oracle
-       dispatches the same shape for the same kernel, or the two numbers are not about the same work. */
-    const uint32_t count = 64;   // as oracle.m
-    /* the threadgroup block, 64 bytes of headroom, which is what these kernels ask of it */
+    const uint32_t count = 64;
     char *block = calloc(1, 256);
     const uint32_t blockBytes = 256;
     float *values = malloc(count * sizeof(float));
 
     printf("kernels=%u\n", air2cpu_kernel_count);
     for (unsigned index = 0; index < air2cpu_kernel_count; index++) {
-        /* threads (x, y, z) and the number of groups, per kernel, by its name */
         uint32_t tx = 16, ty = 1, tz = 1, gx = 1, gy = 1, gz = 1;
         const char *name = air2cpu_kernels[index].name;
         if (name && strcmp(name, "grid2Kernel") == 0) { tx = 8; ty = 2; tz = 1; gx = 1; gy = 1; gz = 1; }
         else if (name && strcmp(name, "grid3Kernel") == 0) { tx = 2; ty = 2; tz = 2; gx = 1; gy = 1; gz = 1; }
-        // atomicFamilyKernel is a group of EIGHT with two slots per thread, which is 16 of
-        // Metal's 30 threadgroup slots, and it writes 32 cells - so the dispatch and the buffer
-        // follow the kernel rather than a default that happens to fit the others.
         else if (name && strcmp(name, "atomicFamilyKernel") == 0) { tx = 8; ty = 1; tz = 1; gx = 1; gy = 1; gz = 1; }
         else if (name && strcmp(name, "atomicFamilyKernelProbe") == 0) { tx = 8; ty = 1; tz = 1; gx = 1; gy = 1; gz = 1; }
         else if (name && strcmp(name, "blockProbe") == 0) { tx = 8; ty = 1; tz = 1; gx = 1; gy = 1; gz = 1; }
@@ -99,11 +76,6 @@ int main(void)
         else if (name && strcmp(name, "positionKernel") == 0) { tx = 16; ty = 1; tz = 1; gx = 1; gy = 1; gz = 1; }
         else if (name && strcmp(name, "positionKernel") == 0) { tx = 16; ty = 1; tz = 1; gx = 1; gy = 1; gz = 1; }
         uint32_t each = tx * ty * tz;
-        /* a fresh buffer per kernel, seeded the way the oracle seeds it, so a kernel's answer is not
-           the previous kernel's leftovers */
-        // the same seed as oracle.m: 1, 1, 2, 2, ... so > and >= differ for half the threads
-        // 1.0f, 2.0f, ... as bits, which is what the oracle and the harness seed, so all three
-        // sides start from the same numbers and a sum of them is exact
         for (uint32_t element = 0; element < count; element++)
             values[element] = (float)(element + 1);
         memset(block, 0, blockBytes);

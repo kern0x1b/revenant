@@ -1,7 +1,3 @@
-/*
- * The WebSocket definition and the one predicate of iOS 13 that answers for it.
- */
-
 #import "CharonNW.h"
 
 nw_protocol_definition_t nw_protocol_copy_ws_definition(void)

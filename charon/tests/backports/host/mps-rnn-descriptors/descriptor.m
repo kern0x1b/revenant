@@ -1,19 +1,3 @@
-/* descriptor.m - the four MetalPerformanceShaders recurrent descriptors (iOS 11.0), compared with Apple's own objects.
- *
- * MPSRNNDescriptor, MPSRNNSingleGateDescriptor, MPSGRUDescriptor and MPSLSTMDescriptor, each as the header MPSRNNLayer.h
- * of the iOS 16.4 SDK declares it. Every case builds the same object on Apple's side and on the port's, in this process,
- * and compares what the two answer. A disagreement names the member and both values.
- *
- * WHAT IS COMPARED: the members the 16.4 header declares, and only those, read through their KVC keys. The host's own
- * framework also declares members that header does not (inputTransform, outputTransform, recurrentOutputTransform,
- * internalKernelSelector on the base; cellClipThreshold and coupleForgetGateToInputGate on the LSTM). They are not compared
- * and not carried; the facts pages under facts/MetalPerformanceShaders say so.
- *
- * COPY: Apple's four classes conform to neither NSCopying nor NSSecureCoding, and copy raises an unrecognized selector on
- * each. The port must answer the same, so a copy is tried on both sides and its outcome compared, not assumed.
- *
- * NO DEVICE IS CREATED. These objects ask a device nothing.
- */
 #import <Foundation/Foundation.h>
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>
 #include <stdio.h>
@@ -35,7 +19,6 @@ static NSArray *member(NSString *name, Kind kind)
     return @[name, @(kind)];
 }
 
-/* The members the 16.4 header declares, in the order the header gives them. */
 static NSArray *baseMembers(void)
 {
     return @[member(@"inputFeatureChannels", KindUInt), member(@"outputFeatureChannels", KindUInt),
@@ -82,14 +65,12 @@ static NSString *portName(NSString *cls)
     return [@"CharonHost" stringByAppendingString:cls];
 }
 
-/* A new object of the class, from alloc and init, on Apple's side (port NO) or the port's (port YES). */
 static id makeInit(NSString *cls, BOOL port)
 {
     id c = NSClassFromString(port ? portName(cls) : cls);
     return [[c alloc] init];
 }
 
-/* The class's factory with the given channels, sent to Apple's class or the port's. */
 static id makeFactory(NSString *cls, BOOL port, NSUInteger inCh, NSUInteger outCh)
 {
     id c = NSClassFromString(port ? portName(cls) : cls);
@@ -118,7 +99,6 @@ static NSString *describeValue(id v, Kind kind)
     return @"?";
 }
 
-/* Every member read through its KVC key. A key the object does not answer is reported as MISSING, not a crash. */
 static NSDictionary *snapshot(id obj, NSArray *members)
 {
     NSMutableDictionary *s = [NSMutableDictionary dictionary];
@@ -153,7 +133,6 @@ static void compareSnapshots(NSString *label, NSDictionary *a, NSDictionary *p, 
     }
 }
 
-/* Sets every member away from its default. A weight source is the stand-in object given for it. */
 static void setAway(id obj, NSArray *members, NSDictionary *standIns)
 {
     for (NSArray *m in members) {
@@ -209,7 +188,6 @@ static int weightsReadBackByIdentity(id obj, NSArray *members, NSDictionary *sta
     return 1;
 }
 
-/* What copy does: the outcome is the exception's name, or "answered". */
 static NSString *copyOutcome(id obj)
 {
     @try {
@@ -274,7 +252,6 @@ int main(void)
                   [NSString stringWithFormat:@"%@: each answers an instance of its own class", label]);
             compareSnapshots(label, snapshot(apple, members), snapshot(port, members), members);
         }
-        // The base class has no factory in the header; its init is the only creation, and its defaults are above.
 
         printf("set values: every member set away from its default, weight sources by identity\n");
         for (NSString *cls in classes) {

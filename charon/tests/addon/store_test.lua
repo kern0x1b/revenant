@@ -21,7 +21,6 @@ function failures(opt)
     install(source, "swift", "6.4.0", "dddd", false)
     install(target, "llvm", "23.1.1", "bbbb")
 
-    -- An install without a manifest is one that was interrupted, not one to take.
     local listed = store.installs(source, "swift")
     if #listed ~= 1 or not listed[1]:endswith("cccc") then
         table.insert(found, "a store holds the installs whose manifest says they finished, not " .. table.concat(listed, " "))
@@ -41,8 +40,6 @@ function failures(opt)
         table.insert(found, "a store takes what it lacks and leaves what it holds: planned " .. table.concat(named, " "))
     end
 
-    -- What is brought over answers under the same digest, which is what xmake
-    -- looks an install up by, and the bytes are the ones it was built with.
     for _, entry in ipairs(planned) do
         store.bring(entry)
     end
@@ -57,10 +54,6 @@ function failures(opt)
     if #store.borrowed(source, target, {"llvm", "swift"}) ~= 0 then
         table.insert(found, "a store that already holds every install takes nothing")
     end
-    -- The plugin is what a session runs, and it runs in xmake's sandbox: the
-    -- step installs the repository as an addon in a store of its own and asks
-    -- it to take a package from another store of its own, so nothing of the
-    -- machine's is touched and the task itself is what answers.
     local work = path.join(folder, "plugin")
     local held = path.join(work, "target")
     os.mkdir(held)

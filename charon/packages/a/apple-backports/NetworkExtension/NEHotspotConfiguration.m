@@ -1,15 +1,5 @@
 #import "CharonNEHotspot.h"
 
-/* The configuration object: property storage, `copy` and the keyed archive, which the 26.2 header declares
-   on the class (<NSCopying,NSSecureCoding>). The host's own NetworkExtension was measured for exactly these
-   answers - the defaults (SSID and SSIDPrefix empty, joinOnce and hidden NO, lifeTimeInDays nil), the
-   setters, a -copy that is another object, and an NSKeyedArchiver round trip that decodes the values back
-   (facts/NetworkExtension/Hotspot.md) - and tests/backports/host/netext-hotspot/ compares them name by name.
-
-   The passphrase is kept for the join, which is not carried yet, and it is not archived: a password does not
-   go into a file the object writes. The EAP and HS20 objects of the two initializers that take them are kept as
-   copies, so a later change to the caller's object does not reach the configuration (the probe's wiring op), and
-   they are archived. The EAP object's password goes into the archive, as the host's archive holds it. */
 @implementation NEHotspotConfiguration {
     NSString *_SSID;
     NSString *_SSIDPrefix;

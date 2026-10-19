@@ -3,7 +3,6 @@ typedef struct {
     NSString *two, *start, *middle, *end;
 } CharonListPattern;
 
-/* Read from the list formatter of the host's own Foundation for every locale it knows, under the identifier the host gives it and the one it was asked for, keeping the ones that differ from the locale they inherit from. */
 static const CharonListPattern charon_list_patterns[] = {
     {"acf", @"{0}, {1}", @"{0}, {1}", @"{0}, {1}", @"{0}, {1}"},
     {"af", @"{0} en {1}", @"{0}, {1}", @"{0}, {1}", @"{0} en {1}"},

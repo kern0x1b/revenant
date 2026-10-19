@@ -1,19 +1,8 @@
--- Writes a C header holding one JSON file as a string: the JSON read back with its key order, written as one C string literal
--- in 160-character lines, under the identifier the third argument names. Every host run.sh that compares its output with a
--- committed expectations header runs this on the expectations JSON. The text is the one Python's json.dumps made of the
--- same data with ensure_ascii and the separators "," and ":": the same escapes (lower-case hex, \u007f for DEL, a surrogate
--- pair above U+FFFF), so the committed header is reproduced byte for byte.
--- Usage: xmake l common/embed.lua <expectations.json> <out.h> <identifier>   (e.g. url_expectations, foundation2_expectations)
-
 local NULL = {}
 
 local short_escapes = { [0x22] = '\\"', [0x5C] = "\\\\", [0x08] = "\\b", [0x0C] = "\\f", [0x0A] = "\\n", [0x0D] = "\\r", [0x09] = "\\t" }
 local simple_escapes = { ['"'] = '"', ["\\"] = "\\", ["/"] = "/", b = "\b", f = "\f", n = "\n", r = "\r", t = "\t" }
 
--- Parses the file's text. An object is {object = true, keys = {...}, values = {...}} with its keys in file order; an array
--- is {array = true, items = {...}}; an integer is {integer = "<digits>"}; a string is kept as its UTF-8 bytes (lone
--- surrogates from \u escapes included). A float is refused: nothing of the expectations is one, and a silent rounding
--- would be the worst kind of wrong.
 local function parse(text)
     local pos = 1
 
@@ -81,7 +70,6 @@ local function parse(text)
         at = at + #exponent
         pos = at
         if fraction ~= "" or exponent ~= "" then
-            -- a float is read as the double it names, and written back the way Python's repr writes it
             return { float = tonumber(lexeme .. fraction .. exponent) }
         end
         if lexeme == "-0" then
@@ -134,7 +122,6 @@ local function parse(text)
             pos = pos + 1
             skip()
             local item = value()
-            -- A repeated key keeps its first place in the order and takes the later value, as a Python dict does.
             if index[key] then
                 object.values[index[key]] = item
             else
@@ -182,8 +169,6 @@ local function parse(text)
     return data
 end
 
--- The ASCII text of a string, escaped as Python's json.dumps(ensure_ascii=True) escapes it: every character outside
--- space to tilde is written as a \u escape, DEL included, and a character above U+FFFF as a surrogate pair.
 local function encode_string(bytes)
     local out = { '"' }
     for _, code in utf8.codes(bytes, true) do
@@ -202,8 +187,6 @@ local function encode_string(bytes)
     return table.concat(out)
 end
 
--- Python's repr of a float, which json.dumps writes: the shortest digits that read back as the same double, in fixed notation
--- when the decimal exponent is from -4 to 15, and otherwise as d.ddde+XX with at least two exponent digits.
 local function float_repr(x)
     if x ~= x or x == math.huge or x == -math.huge then
         raise("embed.lua: a non-finite float, which json.dumps writes as NaN or Infinity and nothing here carries")

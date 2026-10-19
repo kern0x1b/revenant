@@ -1,23 +1,3 @@
-//
-//  probe.m
-//  AVPlayerItem's automatically loaded asset keys (iOS 7.0), the host against the port.
-//
-//  The probe makes a one-second movie with the host's AVAssetWriter, then makes items and reads what the item and its
-//  asset say, with the run loop turning between the steps:
-//
-//    A  the factory with two keys;
-//    B  the plain factory, with no keys: the release's own default;
-//    C  the initializer with a key the asset does not have;
-//    D  the factory with keys, once the item is in a player;
-//    E  the plain factory, once the item is in a player.
-//
-//  Plain (CHARON_PORT_BUILD unset), the probe uses Apple's AVPlayerItem. With CHARON_PORT_BUILD=1 it uses
-//  CharonStandInPlayerItem, which holds a real AVPlayerItem and is where the port's category is compiled (run.sh
-//  makes that copy). The stand-in is needed because Apple's own -initWithAsset: calls the keys initializer on the
-//  item it makes, so a category that overrides that selector on AVPlayerItem would call itself without end. The
-//  stand-in gives the port's category its own class to live on, and the keys are loaded on the real asset either way.
-//
-//  Usage: probe <output directory>. Prints "key = value" rows, "owner:" lines (not rows) and "rows: N" last.
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMedia/CoreMedia.h>
 #import <CoreVideo/CoreVideo.h>
@@ -88,7 +68,6 @@ static NSURL *writeMovie(NSString *dir)
     return url;
 }
 
-// The status of a key on the asset as the release reports it: 0 unknown, 1 loading, 2 loaded, 3 failed, 4 cancelled.
 static long keyStatus(AVAsset *asset, NSString *key)
 {
     NSError *error = nil;
@@ -101,8 +80,6 @@ static NSString *keysOf(id item)
     return keys ? [keys componentsJoinedByString:@","] : nil;
 }
 
-// Which image answers a member: a system image (Apple's) or this executable (the port's category). Printed as
-// "owner: <member> <where>", which is not a row, so run.sh checks it against the build it expects.
 static void printOwner(Class cls, const char *selectorName, BOOL classMethod)
 {
     Method method = classMethod ? class_getClassMethod(cls, sel_registerName(selectorName))
@@ -126,7 +103,6 @@ int main(int argc, const char *argv[])
         printOwner([ITEM_CLASS class], "initWithAsset:automaticallyLoadedAssetKeys:", NO);
         printOwner([ITEM_CLASS class], "automaticallyLoadedAssetKeys", NO);
 
-        // A: the factory with keys. The keys are readable at once, and the asset starts loading them.
         AVURLAsset *assetA = [AVURLAsset URLAssetWithURL:movie options:nil];
         id itemA = ((id (*)(id, SEL, id, id))objc_msgSend)([ITEM_CLASS class],
             sel_registerName("playerItemWithAsset:automaticallyLoadedAssetKeys:"), assetA, keys);
@@ -139,7 +115,6 @@ int main(int argc, const char *argv[])
         emitInt("A.item.status", nativeItem(itemA).status);
         emit("A.keys.end", keysOf(itemA));
 
-        // B: the plain factory, no keys: the readback is the release's default list.
         AVURLAsset *assetB = [AVURLAsset URLAssetWithURL:movie options:nil];
         id itemB = plainItem(assetB);
         emit("B.keys", keysOf(itemB));
@@ -147,8 +122,6 @@ int main(int argc, const char *argv[])
         emitInt("B.duration.status", keyStatus(assetB, @"duration"));
         emit("B.keys.end", keysOf(itemB));
 
-        // C: the initializer with a key the asset does not have. Asking the asset about that key raises, so the
-        // probe reads the item only.
         AVURLAsset *assetC = [AVURLAsset URLAssetWithURL:movie options:nil];
         id itemC = ((id (*)(id, SEL, id, id))objc_msgSend)([ITEM_CLASS alloc],
             sel_registerName("initWithAsset:automaticallyLoadedAssetKeys:"), assetC, @[@"charon-no-such-key"]);
@@ -158,7 +131,6 @@ int main(int argc, const char *argv[])
         emitInt("C.item.status", nativeItem(itemC).status);
         emit("C.keys.end", keysOf(itemC));
 
-        // D: the keys once the item is in a player. Loading starts with the player on the host.
         AVURLAsset *assetD = [AVURLAsset URLAssetWithURL:movie options:nil];
         id itemD = ((id (*)(id, SEL, id, id))objc_msgSend)([ITEM_CLASS class],
             sel_registerName("playerItemWithAsset:automaticallyLoadedAssetKeys:"), assetD, keys);
@@ -170,7 +142,6 @@ int main(int argc, const char *argv[])
         emitInt("D.item.status", nativeItem(itemD).status);
         emit("D.keys.end", keysOf(itemD));
 
-        // E: the plain factory, in a player.
         AVURLAsset *assetE = [AVURLAsset URLAssetWithURL:movie options:nil];
         id itemE = plainItem(assetE);
         AVPlayer *playerE = [AVPlayer playerWithPlayerItem:nativeItem(itemE)];

@@ -1,15 +1,6 @@
-// CPButton and CPTextButton, the two CarPlay buttons of iOS 16, in the shapes the SDK declares.
-//
-// Like every CarPlay button they are NSObject subclasses and not views, so each is DRAWN BY THE
-// TEMPLATE THAT HOLDS IT, and each draws itself here. CPButton is the base the header's own
-// designated initialiser takes an image and a handler; CPTextButton is the one with a title and a text
-// style. Both are in this object because apple.dyld's first_releases puts them at 16.0, and CPBarButton,
-// CPGridButton and CPMapButton are at 12.0 and live in the objects of their own release.
 #import <CarPlay/CarPlay.h>
 #import <UIKit/UIKit.h>
 
-// The one rect helper both of them need, for drawing a button's own image at its own shape. Charon's
-// own, so it carries no API.
 static CGRect CharonCarPlayFit(CGSize size, CGRect rect)
 {
     if (size.width <= 0.0 || size.height <= 0.0) {
@@ -56,9 +47,6 @@ static CGRect CharonCarPlayFit(CGSize size, CGRect rect)
     _enabled = enabled;
 }
 
-// The button, drawn. The image above the title, or the title alone, or a rounded plate when it has
-// neither -- which is what a bar button with no image and no title is on a real car. Charon's own, so
-// it carries no API.
 - (void)charon_drawInRect:(CGRect)rect
 {
     if (CGRectIsEmpty(rect)) {
@@ -123,9 +111,6 @@ static CGRect CharonCarPlayFit(CGSize size, CGRect rect)
     return self;
 }
 
-// The button, drawn: the header's own text styles, which is a default action, a cancelling one and
-// a normal one, and which are drawn as a plain title, a title on a bright plate and a title on a
-// quiet one. Charon's own, so it carries no API.
 - (void)charon_drawInRect:(CGRect)rect
 {
     if (CGRectIsEmpty(rect) || _title.length == 0) {

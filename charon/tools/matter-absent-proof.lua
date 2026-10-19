@@ -1,26 +1,3 @@
--- The proof behind the removal of the generated Matter classes (v-matter11).
---
--- Every row of the apple-backports Matter registry whose owner is one of the generated classes (class-overlap.tsv
--- says yes), and that the SDK 26.2 corpus does not carry at all, is classified against the SDK 26.2 Matter headers.
--- The owner's own @interface blocks and its categories are read, the block only: a member is looked for in those
--- blocks, then in the superclass chain, and never in another block of the same name.
---
---   a            unavailable: the declaration, or the @interface or category that encloses it, carries one of
---                UNAVAILABLE_MARKS. MTR_PROVISIONALLY_AVAILABLE and MTR_UNSTABLE_API expand to _MTR_UNAVAILABLE
---                unless the client opts in (MTRDefines.h:94-102); NS_UNAVAILABLE and API_UNAVAILABLE are explicit.
---                A superclass that declares the member unavailable makes it unavailable for the owner too.
---   b            inherited: the owner's blocks do not declare the member, a superclass declares it available. The
---                row belongs to that superclass; it is homed when the superclass's own row is in the real registry.
---   b-homeless   inherited and available, but the superclass's row is not in the real registry: the removal stops.
---   p            the accessor (-[Class name], -[Class setName:]) of a property the owner's blocks declare available; the
---                corpus spells that surface as the property row Class.name, which is available and in the real registry.
---   c            declared nowhere: no owner or superclass block in the Matter headers declares it.
---   x            declared available in the owner's own blocks and absent from the corpus: not a brief category, and
---                the removal stops on it.
---
--- Usage: xmake l tools/matter-absent-proof.lua <registry.json> <class-overlap.tsv> <corpus.tsv> <Headers dir>
---        <real registry dir> <out.tsv>
--- The output is one row per absent row: category, kind, api, owner, where (header:line of the declaration), detail.
 import("core.base.json")
 
 local UNAVAILABLE_MARKS = {"MTR_PROVISIONALLY_AVAILABLE", "MTR_UNSTABLE_API", "NS_UNAVAILABLE", "API_UNAVAILABLE"}
@@ -29,7 +6,6 @@ for _, mark in ipairs(UNAVAILABLE_MARKS) do
     UNAVAILABLE[mark] = true
 end
 
--- Block comments become spaces (line numbers survive), line comments and preprocessor lines go.
 local function strip(text)
     text = text:gsub("/%*.-%*/", function(comment)
         return (comment:gsub("[^\n]", " "))
@@ -39,7 +15,6 @@ local function strip(text)
     return text
 end
 
--- Tokens with their line numbers: identifiers, @keywords, numbers, and single punctuation characters.
 local function tokenize(text)
     local toks, lines = {}, {}
     local line, i, n = 1, 1, #text
@@ -76,7 +51,6 @@ local function is_ident(token)
     return token ~= nil and token:match("^[%a_][%w_]*$") ~= nil
 end
 
--- The index of the ')' that closes the '(' at st[j].
 local function skip_group(st, j)
     local depth = 0
     for k = j, #st do
@@ -92,9 +66,6 @@ local function skip_group(st, j)
     return #st
 end
 
--- A member declaration's kind, key and unavailable mark, read from its tokens: a method gives sign and selector
--- (the return type group and the parameter types and names are skipped), a property gives its name, which is the
--- last identifier before the trailing availability macros.
 local function read_member(st)
     local mark
     for _, t in ipairs(st) do
@@ -152,8 +123,6 @@ local function read_member(st)
     return "method", sign .. " " .. sel, mark
 end
 
--- The @interface blocks of one header: the name, the superclass or the category, the unavailable mark on the
--- @interface line (the tokens since the last ';', '@end' or '}'), and the members by key.
 local function parse(file, text)
     local toks, lines = tokenize(strip(text))
     local blocks, block, since = {}, nil, {}
@@ -173,7 +142,6 @@ local function parse(file, text)
                     local list = kind == "property" and block.props or block.methods
                     list[key] = list[key] or {}
                     table.insert(list[key], {line = st_line, mark = mark})
-                    -- a custom getter, getter=name in the attributes, is the property's own accessor method
                     for k, tok in ipairs(st) do
                         if kind == "property" and tok == "getter" and st[k + 1] == "=" and is_ident(st[k + 2]) then
                             block.methods["- " .. st[k + 2]] = block.methods["- " .. st[k + 2]] or {}
@@ -233,7 +201,6 @@ local function load_headers(dir)
     return index
 end
 
--- The declarations of one member in one block, each with the block's own mark applied.
 local function decls_in(block, key, props)
     local out = {}
     for _, d in ipairs((props and block.props or block.methods)[key] or {}) do
@@ -252,8 +219,6 @@ local function member_decls(index, owner, key, props)
     return out
 end
 
--- The property a method row names, when the row is its accessor: the getter -[Class name] or the setter
--- -[Class setName:], which is how the generator spells a property the SDK declares.
 local function accessor_of(sign, sel)
     if sign ~= "-" then
         return nil
@@ -268,8 +233,6 @@ local function accessor_of(sign, sel)
     return nil
 end
 
--- The declarations of a row's member on one class: a method as a method, and failing that as the accessor of a
--- property of the same name.
 local function class_decls(index, owner, sign, sel, name)
     if name then
         return member_decls(index, owner, name, true), name
@@ -294,7 +257,6 @@ local function read_lines(file)
 end
 
 function main(registry_path, overlap_path, corpus_path, headers, realdir, outfile)
-    -- the 1188 generated classes
     local generated = {}
     for index, line in ipairs(read_lines(overlap_path)) do
         local name, verdict = line:match("^([^\t]+)\t([^\t]+)")
@@ -303,8 +265,6 @@ function main(registry_path, overlap_path, corpus_path, headers, realdir, outfil
         end
     end
 
-    -- the corpus: every Matter row by kind and api, with its unavailable column (the value is "yes" for an
-    -- unavailable row, and "" otherwise)
     local corpus = {}
     for index, line in ipairs(read_lines(corpus_path)) do
         local cells = {}
@@ -316,7 +276,6 @@ function main(registry_path, overlap_path, corpus_path, headers, realdir, outfil
         end
     end
 
-    -- the real registry: every api it carries, any kind
     local real = {}
     for _, file in ipairs(os.files(path.join(realdir, "*.json"))) do
         for _, entry in ipairs(json.decode(io.readfile(file)).entries) do
@@ -326,8 +285,6 @@ function main(registry_path, overlap_path, corpus_path, headers, realdir, outfil
 
     local index = load_headers(headers)
 
-    -- every member any block of the headers declares, by its key, to tell a member declared on another class
-    -- (a selector the generator copied to the wrong owner) from one no block declares at all
     local everywhere = {}
     for _, blocks in pairs(index.byname) do
         for _, block in ipairs(blocks) do
@@ -407,8 +364,6 @@ function main(registry_path, overlap_path, corpus_path, headers, realdir, outfil
                             detail = "inherited from " .. chain
                         end
                         if open and not chain then
-                            -- the accessor of a property the SDK declares available is the property's own surface:
-                            -- the corpus spells it as Class.name, and the real registry must carry that row
                             category = "x"
                             local pname = prop and owner .. "." .. prop
                             local cell = pname and corpus["property " .. pname]

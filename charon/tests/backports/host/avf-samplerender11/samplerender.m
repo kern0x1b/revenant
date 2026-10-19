@@ -1,31 +1,3 @@
-// samplerender.m - the 11.0 sample-buffer render pair, one source, two builds.
-//
-// Compiled twice by run.sh: once with the real <AVFoundation/AVFoundation.h> and this machine's own
-// AVFoundation - the ORACLE, from which every expectation in the join is read - and once with -I standin
-// and the port's own AVFoundation/AVSampleBufferRenderSynchronizer11.m,
-// AVSampleBufferAudioRenderer11.m, AVSampleBufferRenderSynchronizer12.m and
-// AVSampleBufferRenderSynchronizer14.m linked in UNMODIFIED, against a stand-in release shaped like the
-// one the port runs on: 6.1.3 carries no AVSampleBufferAudioRenderer, no
-// AVSampleBufferRenderSynchronizer and no AVQueuedSampleBufferRendering protocol at all, which
-// tools/corpus/objc-inventory.lua over the armv7 caches of 6.1.3 and 4.3 answers (the command, its
-// output and the control - AVCaptureDevice with 100 instance selectors at 6.1.3 - are in
-// packages/a/apple-backports/facts/AVFoundation/Release11.md).
-//
-// Every row is a question the header asks, asked through the SHARED selectors, on the same generated
-// sample buffers: a 1 kHz sine at 44.1 kHz, 100 ms per buffer, each with a known output presentation
-// timestamp. Nothing here asks a question only one build can answer: the two classes are constructed the
-// same way on both sides, -init, because that is the construction both the 16.4 SDK and this Mac's SDK
-// declare (the -initWithAudioFormatDescription:bufferCapacity: of 11.0 is in neither, and
-// +sampleBufferAudioRenderer is a runtime factory no header here declares, so neither half may use it).
-//
-// The join is not "nothing differs". A row that both halves print must agree unless ALLOWANCES names it,
-// a row the host prints and the port does not is always a failure, and a row only one side prints is
-// always a failure. ALLOWANCES is a short list of differences that are in the PORT's build, each with the
-// measurement that explains it.
-//
-// Timing rows are asked as booleans and buckets, never as raw instants: a row whose answer is a
-// millisecond on one machine and a different millisecond on another is not a row, and the two tolerance
-// rows below name the bound that was measured.
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMedia/CoreMedia.h>
 #import <Foundation/Foundation.h>
@@ -33,7 +5,7 @@
 
 static const double kSampleRate = 44100.0;
 static const double kToneHz = 1000.0;
-static const uint32_t kFramesPerBuffer = 4410;   // 100 ms
+static const uint32_t kFramesPerBuffer = 4410;
 
 static void row(const char *key, NSString *value)
 {
@@ -59,7 +31,6 @@ static NSString *describeTime(CMTime time)
     return [NSString stringWithFormat:@"%lld/%d", time.value, time.timescale];
 }
 
-// The time the synchronizer's own clock reads, which is what every timing row below is measured against.
 static CMTime clockNow(void)
 {
     return CMClockGetTime(CMClockGetHostTimeClock());
@@ -71,7 +42,6 @@ static double secondsBetween(CMTime from, CMTime to)
     return CMTimeGetSeconds(CMTimeSubtract(to, from));
 }
 
-// ---- the media both builds are handed: a 1 kHz sine, 100 ms, int16 mono at 44.1 kHz.
 static CMAudioFormatDescriptionRef makeFormat(void)
 {
     AudioStreamBasicDescription asbd = {0};
@@ -93,10 +63,6 @@ static CMSampleBufferRef makeSine(CMAudioFormatDescriptionRef format, CMTime pre
 static CMSampleBufferRef makeSine(CMAudioFormatDescriptionRef format, CMTime presentation, uint32_t frames)
 {
     size_t bytes = (size_t)frames * 2;
-    // the tone is kept in a static table and never freed: this Mac's own renderer is given these buffers
-    // and then stalls, and its own teardown of a stalled sample buffer frees the block's memory through a
-    // callback CoreMedia cannot find (measured: BBufFinalize -> _xzm_free_not_found -> abort, on four runs
-    // in five). Nothing in this file owns that memory's lifetime after the run, so it is not freed here.
     static int16_t *sTones[64];
     static int sToneCount;
     int16_t *samples = calloc(frames ? frames : 1, sizeof *samples);
@@ -105,10 +71,6 @@ static CMSampleBufferRef makeSine(CMAudioFormatDescriptionRef format, CMTime pre
         double phase = 2.0 * M_PI * kToneHz * (double)frame / kSampleRate;
         samples[frame] = (int16_t)(12000.0 * sin(phase));
     }
-    // NULL for the block allocator, so the block borrows this function's allocation and this function is
-    // the only thing that frees it: kCFAllocatorDefault here would make the block own the memory AND
-    // free() it, which is a double free the moment the block is released (measured: BBufFinalize,
-    // __BUG_IN_CLIENT_OF_LIBMALLOC_POINTER_BEING_FREED_WAS_NOT_ALLOCATED, SIGABRT).
     CMBlockBufferRef block = NULL;
     OSStatus status = CMBlockBufferCreateWithMemoryBlock(kCFAllocatorDefault, samples, bytes,
                                                          NULL, NULL, 0, bytes, 0, &block);
@@ -121,15 +83,12 @@ static CMSampleBufferRef makeSine(CMAudioFormatDescriptionRef format, CMTime pre
     return status ? NULL : buffer;
 }
 
-// A completion handler may be called on the queue the release chose; this gives it the main run loop's
-// slice of time, which is what a client on the main thread would have given it.
 static void self_drain(BOOL *completion)
 {
     for (int step = 0; step < 50 && !*completion; step++)
         CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.02, false);
 }
 
-// ---- the synchronizer: its own clock, its rate, its time, and the two observers.
 static void probeSynchronizerClock(void)
 {
     AVSampleBufferRenderSynchronizer *sync = [[AVSampleBufferRenderSynchronizer alloc] init];
@@ -139,12 +98,6 @@ static void probeSynchronizerClock(void)
     row("sync: currentTime at init", describeTime([sync currentTime]));
     rowf("sync: renderers at init", @"%lu", (unsigned long)sync.renderers.count);
 
-    // Every rate read here is taken after a settle, because this Mac applies a rate change through a
-    // barrier and a read in the same breath can answer the rate from before the change: measured, a run of
-    // four back-to-back -setRate: calls answered 1.000, 0.000, 0.000 and 1.000 for the rates 1, 0, 2 and 1,
-    // and the same four answered 1.000, 0.000, 2.000 and 1.000 on another run. The port applies the change
-    // in the call, so the rows below ask the settled question and the transient is recorded in
-    // facts/AVFoundation/SampleBufferRender11.md rather than in a row that changes from run to run.
     [sync setRate:1.0];
     usleep(150000);
     rowf("sync: rate after setRate: 1.0", @"%.3f", sync.rate);
@@ -164,12 +117,8 @@ static void probeSynchronizerClock(void)
         row("sync: setRate: -1.0, which the header forbids, is refused", @"YES");
     }
 
-    // setRate:time: with a time the client names, and with kCMTimeInvalid, which the header says
-    // leaves the time alone.
     [sync setRate:1.0 time:CMTimeMake(600, 1)];
     double named = secondsBetween(kCMTimeZero, [sync currentTime]);
-    // the named time is 600 s, and the answer is asked as a bucket: the two builds return it in their own
-    // timescale (measured on the host: 600000011125/1000000000), so the row is the second it names.
     row("sync: currentTime right after setRate: 1.0 time: 600/1 is in [599 s, 601 s)",
         yesno(named >= 599.0 && named <= 601.0));
     [sync setRate:1.0 time:kCMTimeInvalid];
@@ -178,7 +127,6 @@ static void probeSynchronizerClock(void)
     [sync setRate:0.0];
     row("sync: currentTime after setRate: 0.0 keeps the 600/1", yesno(CMTimeCompare([sync currentTime], CMTimeMake(600, 1)) >= 0));
 
-    // rate 0 is stopped: the time does not move. rate 1 moves it at the clock's own pace.
     CMTime frozen = [sync currentTime];
     usleep(200000);
     row("sync: currentTime frozen while the rate is 0", yesno(fabs(secondsBetween(frozen, [sync currentTime])) < 0.02));
@@ -189,8 +137,6 @@ static void probeSynchronizerClock(void)
     double moved = secondsBetween(started, [sync currentTime]);
     double hostMoved = secondsBetween(hostStarted, clockNow());
     row("sync: currentTime moves while the rate is 1", yesno(moved > 0.1));
-    // the bound the join names: a third of a second of sleep, and the timebase's own answer has to be
-    // within a tenth of a second of the host clock's own advance.
     row("sync: timebase advance within 100 ms of the host clock over 300 ms",
         yesno(fabs(moved - hostMoved) < 0.1));
 
@@ -210,8 +156,6 @@ static void probeSynchronizerObservers(void)
     AVSampleBufferRenderSynchronizer *sync = [[AVSampleBufferRenderSynchronizer alloc] init];
     [sync setRate:1.0 time:kCMTimeZero];
 
-    // The periodic observer. The two timing questions that do not depend on which machine runs this:
-    // how many calls arrive in four intervals, and how far apart two consecutive reported times are.
     __block NSInteger fires = 0;
     __block CMTime first = kCMTimeInvalid, atFirst = kCMTimeInvalid, previous = kCMTimeInvalid;
     __block double step = -1.0;
@@ -219,8 +163,6 @@ static void probeSynchronizerObservers(void)
     id periodic = [sync addPeriodicTimeObserverForInterval:CMTimeMake(1, 10)
                                                       queue:queue
                                                   usingBlock:^(CMTime time) {
-        // what the block is handed is read against the timebase inside the block: comparing it against a
-        // time read after the fact would measure the harness's sleep instead of the observer.
         if (!fires) { first = time; atFirst = [sync currentTime]; }
         if (fires) step = secondsBetween(previous, time);
         previous = time;
@@ -241,7 +183,6 @@ static void probeSynchronizerObservers(void)
     usleep(300000);
     row("sync: no further periodic calls after removeTimeObserver:", yesno(fires == before));
 
-    // a second observer on the same synchronizer, to show removal is per observer.
     __block NSInteger second = 0;
     id other = [sync addPeriodicTimeObserverForInterval:CMTimeMake(1, 10) queue:queue usingBlock:^(CMTime time) {
         (void)time;
@@ -251,7 +192,6 @@ static void probeSynchronizerObservers(void)
     row("sync: a second periodic observer fires while the first is removed", yesno(second > 0));
     [sync removeTimeObserver:other];
 
-    // the boundary observer: a time still ahead, a time already past, and no times at all.
     __block NSInteger boundary = 0;
     CMTime ahead = CMTimeAdd([sync currentTime], CMTimeMake(15, 100));
     id boundaryObserver = [sync addBoundaryTimeObserverForTimes:@[ [NSValue valueWithCMTime:ahead] ]
@@ -286,8 +226,6 @@ static void probeSynchronizerObservers(void)
     }
     if (emptyObserver) [sync removeTimeObserver:emptyObserver];
 
-    // an observer removed twice, and a token that is not one of ours: both are the header's "will not do
-    // anything" cases, and a release answer of a raise is a row of its own.
     id removed = [sync addPeriodicTimeObserverForInterval:CMTimeMake(1, 10) queue:queue usingBlock:^(CMTime time) {
         (void)time;
     }];
@@ -306,16 +244,12 @@ static void probeSynchronizerObservers(void)
     }
 }
 
-// The 14.5 anchor form, whose whole content is what the timebase does either side of the host time the
-// client named.
 static void probeAnchorForm(void)
 {
     AVSampleBufferRenderSynchronizer *sync = [[AVSampleBufferRenderSynchronizer alloc] init];
     [sync setRate:1.0 time:CMTimeMake(10, 1)];
     usleep(100000);
 
-    // a host time one second in the PAST: the timebase is already past it, so it runs at the rate from
-    // the named time and has moved on by the elapsed interval.
     CMTime past = CMTimeSubtract(clockNow(), CMTimeMake(1, 1));
     [sync setRate:1.0 time:CMTimeMake(100, 1) atHostTime:past];
     double afterPast = secondsBetween(kCMTimeZero, [sync currentTime]);
@@ -328,8 +262,6 @@ static void probeAnchorForm(void)
     row("anchor: with the host time 1 s in the past, the time keeps moving at that rate",
         yesno(secondsBetween(kCMTimeZero, [sync currentTime]) > afterPast + 0.15));
 
-    // a host time one second in the FUTURE: the time is the named time and does not move until the host
-    // time arrives.
     [sync setRate:1.0 time:CMTimeMake(10, 1)];
     usleep(100000);
     CMTime future = CMTimeAdd(clockNow(), CMTimeMake(1, 1));
@@ -340,7 +272,6 @@ static void probeAnchorForm(void)
     double stillHeld = secondsBetween(kCMTimeZero, [sync currentTime]);
     row("anchor: with the host time 1 s in the future, the time does not move before it arrives",
         yesno(fabs(stillHeld - held) < 0.01));
-    // 1.2 s in total, so the read is clear of the instant the anchor is reached rather than racing it.
     usleep(800000);
     double moved = secondsBetween(kCMTimeZero, [sync currentTime]);
     row("anchor: with the host time 1 s in the future, the time moves at the rate once it arrives",
@@ -349,10 +280,6 @@ static void probeAnchorForm(void)
     [sync setRate:1.0];
 }
 
-// The two invalid inputs, on a synchronizer of their own: what they answer does not depend on anything a
-// previous call left behind, and both are read after a settle, because this Mac applies a rate change
-// through a barrier and a read in the same breath can still see the rate before it (measured: a read
-// straight after such a change answers the previous rate and the same read 150 ms later the new one).
 static void probeAnchorInvalidInputs(void)
 {
     AVSampleBufferRenderSynchronizer *sync = [[AVSampleBufferRenderSynchronizer alloc] init];
@@ -396,11 +323,8 @@ static void probeSynchronizerRenderers(void)
         row("sync: adding a second renderer is refused", @"YES");
     }
 
-    // removal at a time still ahead: the handler is called with YES, and only when the time is reached.
     __block BOOL removedAhead = NO;
     __block BOOL handlerRan = NO;
-    // the removal time is a time on the synchronizer's own clock; the two instants it is compared with
-    // are both read from the HOST clock, because that is the clock the call and the handler share.
     NSUInteger before = sync.renderers.count;
     CMTime when = CMTimeAdd([sync currentTime], CMTimeMake(12, 100));
     __block double askedAt = secondsBetween(kCMTimeZero, clockNow());
@@ -417,7 +341,6 @@ static void probeSynchronizerRenderers(void)
     row("sync: the renderers list is one shorter after the removal ran",
         yesno(sync.renderers.count + 1 == before));
 
-    // removal of a renderer that was never added, which the header says answers NO.
     __block BOOL never = YES;
     [sync removeRenderer:[[AVSampleBufferAudioRenderer alloc] init]
                   atTime:kCMTimeInvalid
@@ -457,7 +380,6 @@ static void probeRendererSurface(void)
         renderer.audioTimePitchAlgorithm ?: @"(nil)");
 }
 
-// ---- the renderer against a synchronizer, and the media path.
 static void probeRendererAttached(AVSampleBufferRenderSynchronizer *sync, AVSampleBufferAudioRenderer *renderer)
 {
     row("attached: the renderer's timebase is the synchronizer's own",
@@ -478,15 +400,11 @@ static void probeRendererAttached(AVSampleBufferRenderSynchronizer *sync, AVSamp
     row("attached: the renderer's timebase stops when the synchronizer's rate is 0",
         yesno(fabs(secondsBetween(base, CMTimebaseGetTime(renderer.timebase))) < 0.2));
 
-    // The time as well as the rate: the synchronizer's clock is set to five seconds and the renderer's is
-    // read again. Measured on the host, both read 5.2032 afterwards, which is what the header's remark about adding a renderer
-    // to the synchronizer is about.
     [sync setRate:1.0 time:CMTimeMake(5, 1)];
     usleep(150000);
     row("attached: the renderer's clock reads the synchronizer's new time",
         yesno(fabs(secondsBetween(CMTimebaseGetTime(renderer.timebase), CMTimebaseGetTime(sync.timebase))) < 0.02));
 
-    // And after a removal the renderer's clock is on its own again, at zero and stopped.
     [sync removeRenderer:renderer atTime:kCMTimeInvalid completionHandler:NULL];
     usleep(150000);
     row("attached: the renderer's clock is at zero after it is removed",
@@ -495,22 +413,6 @@ static void probeRendererAttached(AVSampleBufferRenderSynchronizer *sync, AVSamp
         yesno(fabs(CMTimebaseGetRate(renderer.timebase)) < 0.001));
 }
 
-// Flush semantics, asked of a renderer that has been given NO media.
-//
-// Measured on this machine's own class: -flush and -flushFromSourceTime: both answer on a renderer that
-// has never been given a buffer, for a time in the past and for a time in the future alike, and the
-// status stays AVQueuedSampleBufferRenderingStatusUnknown. The same two calls ABORT on a renderer that
-// has been given media on this machine, because there is no output device for the media to have been
-// handed to (measured: probe over the macOS SDK's own AVSampleBufferAudioRenderer, SIGABRT, empty
-// stderr), so the with-media case is not asked here and is written down in
-// facts/AVFoundation/SampleBufferRender11.md.
-// What the port does NOT carry, asked of the built classes. clang synthesises an ivar and a pair of
-// accessors for every property an SDK @interface declares and an @implementation does not mention, whatever
-// the property's API_AVAILABLE says, so a member the registry rows answer absent can still be answered by
-// the class - and check_registry reads that as "listed as absent, but what is built answers it". Each of
-// these four is a property of one of the two SDK @interfaces or of the protocol, and each must leave
-// respondsToSelector: answering NO on the port. Apple's own classes answer YES for all four, because their
-// surface is a later one, which is what the ALLOWANCES in run.sh say.
 static void probeAbsentMembers(void)
 {
     row("absent: the renderer answers respondsToSelector: for allowedAudioSpatializationFormats",
@@ -563,7 +465,6 @@ static void probeRendererFlushWithoutMedia(AVSampleBufferRenderSynchronizer *syn
         row("flush: flushFromSourceTime: with no media is refused for kCMTimeInvalid", @"YES");
     }
 
-    // the media-data request, asked of a renderer that is ready for media data because it holds none.
     __block NSInteger supplies = 0;
     dispatch_queue_t queue = dispatch_queue_create("charon.media", DISPATCH_QUEUE_SERIAL);
     [renderer requestMediaDataWhenReadyOnQueue:queue usingBlock:^{ supplies++; }];
@@ -575,16 +476,12 @@ static void probeRendererFlushWithoutMedia(AVSampleBufferRenderSynchronizer *syn
     row("renderer: no further calls after stopRequestingMediaData", yesno(supplies == beforeStop));
 }
 
-// The media path: what a renderer answers once it has been handed sample buffers with known
-// presentation timestamps.
 static void probeRendererMedia(AVSampleBufferRenderSynchronizer *sync, AVSampleBufferAudioRenderer *renderer)
 {
     CMAudioFormatDescriptionRef format = makeFormat();
     if (!format) { row("media: the audio format description", @"(could not be made)"); return; }
     [sync setRate:1.0];
 
-    // a buffer stamped at the timebase's own time, and one stamped in the future: both are the
-    // timestamps the header says the timebase interprets.
     CMTime now = [sync currentTime];
     CMSampleBufferRef immediate = makeSine(format, now, kFramesPerBuffer);
     CMSampleBufferRef later = makeSine(format, CMTimeAdd(now, CMTimeMake(1, 2)), kFramesPerBuffer);
@@ -599,8 +496,6 @@ static void probeRendererMedia(AVSampleBufferRenderSynchronizer *sync, AVSampleB
     row("renderer: error after the first enqueue is nil", yesno(renderer.error == nil));
     row("renderer: isReadyForMoreMediaData after the first enqueue", yesno(renderer.isReadyForMoreMediaData));
 
-    // more media than the renderer can hold: the header says a client should stop when this is NO, and
-    // that the value often changes back asynchronously.
     for (int i = 0; i < 8; i++) {
         CMSampleBufferRef more = makeSine(format, CMTimeAdd([sync currentTime], CMTimeMake(1, 4)), kFramesPerBuffer);
         [renderer enqueueSampleBuffer:more];
@@ -610,7 +505,6 @@ static void probeRendererMedia(AVSampleBufferRenderSynchronizer *sync, AVSampleB
     rowf("renderer: status after nine enqueues", @"%ld", (long)renderer.status);
     row("renderer: error after nine enqueues is nil", yesno(renderer.error == nil));
 
-    // a buffer that carries no audio at all, which is what an empty media segment looks like.
     CMSampleBufferRef empty = makeSine(format, [sync currentTime], 0);
     if (empty) {
         [renderer enqueueSampleBuffer:empty];
@@ -623,12 +517,6 @@ static void probeRendererMedia(AVSampleBufferRenderSynchronizer *sync, AVSampleB
     CFRelease(format);
 }
 
-// A rate change is the one thing a synchronizer does that a renderer has to react to, and the header
-// names the reaction: the notification the release posts when its media data is flushed for a reason
-// other than -flush. Asked of a renderer that holds no media, because on this machine a rate change on
-// a renderer that HAS been given media ABORTS (measured, empty stderr, SIGABRT) - there is no output
-// device for the media to have been handed to. What was measured instead is in
-// facts/AVFoundation/SampleBufferRender11.md.
 static void probeRateChange(AVSampleBufferRenderSynchronizer *sync, AVSampleBufferAudioRenderer *renderer)
 {
     [sync setRate:1.0];
@@ -658,10 +546,6 @@ static void probeRateChange(AVSampleBufferRenderSynchronizer *sync, AVSampleBuff
     [[NSNotificationCenter defaultCenter] removeObserver:token];
 }
 
-// This Mac's own renderer ABORTS when a renderer that was given media and has never played it is
-// released (measured: SIGABRT, empty stderr, from -dealloc on the release's own stalled renderer), so
-// the one renderer of the run that is given media is held in a static and never released. A global is
-// the whole of the mechanism: nothing in this file releases it, and the process is about to exit.
 static AVSampleBufferAudioRenderer *sFedRenderer;
 
 int main(void)
@@ -683,10 +567,6 @@ int main(void)
         probeSynchronizerObservers();
         probeSynchronizerRenderers();
 
-        // One renderer per state the run needs, because this machine's own class is only usable in some
-        // of them: a renderer that has been given media is stalled for want of an output device and
-        // ABORTS on a flush or a rate change, so the flush rows and the rate-change rows are asked of
-        // renderers that hold no media at all.
         AVSampleBufferRenderSynchronizer *sync = [[AVSampleBufferRenderSynchronizer alloc] init];
         AVSampleBufferAudioRenderer *renderer = [[AVSampleBufferAudioRenderer alloc] init];
         probeRendererSurface();

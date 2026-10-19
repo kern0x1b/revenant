@@ -2,12 +2,6 @@
 #include <math.h>
 #include "../CharonBezier.h"
 
-/* The animator runs the animation blocks through UIView's own animation, and, when
-   it is interruptible, immediately stops the layers it touched and moves their time
-   itself. That is what UIKit does: an interruptible animator is paused the moment it
-   starts, its curve replaced by a linear one, and the real curve applied by moving
-   the animation's time along it. A non-interruptible animator is left to run. */
-
 @interface CharonAnimatorDriver : NSObject
 @end
 
@@ -149,7 +143,6 @@
 
 #pragma mark - Driving the layers
 
-/* Where along its curve the animation stands at a fraction of its time. */
 static double charon_curve_at(id <UITimingCurveProvider> parameters, double fraction)
 {
     if (fraction <= 0)
@@ -164,7 +157,6 @@ static double charon_curve_at(id <UITimingCurveProvider> parameters, double frac
     }
     UICubicTimingParameters *cubic = parameters.cubicTimingParameters;
     CGPoint first = cubic.controlPoint1, second = cubic.controlPoint2;
-    /* The cubic Bézier of Core Animation: x and y both run on the control points. */
     return charon_bezier_progress(first.x, first.y, second.x, second.y, fraction);
 }
 
@@ -175,8 +167,6 @@ static void charon_walk(CALayer *layer, void (^visit)(CALayer *))
         charon_walk(sublayer, visit);
 }
 
-/* Which animations are on every layer of every window right now, so that what the
-   blocks add can be told from what was already running. */
 static NSMapTable *charon_animation_keys(void)
 {
     NSMapTable *keys = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsObjectPointerPersonality
@@ -486,9 +476,6 @@ static NSMapTable *charon_animation_keys(void)
     NSMapTable *before = charon_animation_keys();
     for (NSArray *entry in _animations)
         [self charon_runBlock:entry[0] afterFactor:[entry[1] doubleValue]];
-    /* Only what these blocks added belongs to this animator. Freezing every layer
-       that happens to be animating would stop animations that are not ours, and
-       two animators at once would each stop the other. */
     for (UIWindow *window in [UIApplication sharedApplication].windows)
         charon_walk(window.layer, ^(CALayer *layer) {
             NSSet *was = [before objectForKey:layer];
@@ -500,10 +487,6 @@ static NSMapTable *charon_animation_keys(void)
     [self charon_setRunning:YES];
     if (!_interruptible)
         return;
-    /* Interruptible: the animations this animator added are stopped where they are
-       and their time is moved from here on, which is what UIKit does the moment
-       such an animator starts. The animation is stopped rather than the layer, so
-       anything else animating the same layer keeps running. */
     [self charon_setFraction:0];
     _driver = [[CharonAnimatorDriver alloc] initWithAnimator:self];
 }
@@ -524,10 +507,6 @@ static NSMapTable *charon_animation_keys(void)
         _driver = [[CharonAnimatorDriver alloc] initWithAnimator:self];
 }
 
-/* An animation already on a layer cannot be changed in place, so the one to show
-   is built afresh and put back under the same key - which is what UIKit's own
-   animation factory does. The animation is held still by its own speed, not the
-   layer's, so it is the only thing this animator moves. */
 - (void)charon_setFraction:(CGFloat)fraction
 {
     _fractionComplete = MIN(MAX(fraction, 0), 1);
@@ -589,8 +568,6 @@ static NSMapTable *charon_animation_keys(void)
     [_layers removeAllObjects];
 }
 
-/* A copy carries what the animation was asked for, not what it is doing: the
-   blocks, the completions and the state are left behind. */
 - (id)copyWithZone:(NSZone *)zone
 {
     UIViewPropertyAnimator *copy = [[[self class] allocWithZone:zone] init];

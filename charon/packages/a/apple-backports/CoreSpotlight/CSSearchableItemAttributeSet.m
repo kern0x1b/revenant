@@ -83,8 +83,6 @@
     return YES;
 }
 
-// Under -requiresSecureCoding (the search bundle decodes this way inside searchd) a container's
-// elements must be allowed too, not only the container's own class.
 static NSSet *CharonStringArrayClasses(void)
 {
     return [NSSet setWithObjects:[NSArray class], [NSString class], nil];

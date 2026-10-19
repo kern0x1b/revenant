@@ -1,7 +1,3 @@
-// MPSCNNKernel, from the header of MPSCNNKernel.h in the SDK of iOS 16.4: what every convolutional
-// kernel carries, whether it convolves, pools or normalises - the edge mode, the offsets into the
-// feature channels, the clip rectangle, and the window it walks.
-
 #import "CharonMPSCnn.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
@@ -21,8 +17,6 @@
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
     if ((self = [super initWithDevice:device])) {
-        // The window a kernel walks is one pixel wide and one pixel high unless its own initialiser
-        // says otherwise, and the edges clamp, which is what the header's defaults are.
         _kernelWidth = 1;
         _kernelHeight = 1;
         _strideInPixelsX = 1;
@@ -86,8 +80,6 @@
 
 - (BOOL)isStateModified { return NO; }
 
-// The window the kernel walks, which a subclass's initialiser sets and every kernel here reads rather
-// than keeping its own copy of.
 - (void)charon_mps_setWindowWidth:(NSUInteger)width
                            height:(NSUInteger)height
                     strideInPixelsX:(NSUInteger)strideX

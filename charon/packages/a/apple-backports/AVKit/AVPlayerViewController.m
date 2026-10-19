@@ -3,22 +3,10 @@
 #import <MediaPlayer/MediaPlayer.h>
 #import <QuartzCore/QuartzCore.h>
 #import <CoreImage/CoreImage.h>
-// The one declaration this object needs from the 16.0 speed object, for the play path's call. A
-// declaration, not a definition: the method lives in AVPlayerViewControllerSpeeds16.m.
 #import "CharonAVKitSpeeds.h"
-
-// Rank 25 of coordination/corpus/band-frameworks.tsv, LOAD-FAIL: session strong-imports the class
-// (Session and SignalUtilitiesKit bind _OBJC_CLASS_$_AVPlayerViewController), so the application
-// dies in dyld before its first line without it. The armv7 cache ladder first carries the class at
-// 8.0. It is a view controller around an AVPlayerLayer with its own playback controls, which is
-// what this is: the same AVPlayerLayer iOS 6 already carries, with controls built of UIKit views
-// the release has, picture in picture over this package's own AVPictureInPictureController, and
-// the full screen presentation of an inline player as an ordinary modal view controller.
-// What differs from the release is in facts/AVKit/AVPlayerViewController.md.
 
 @class CharonAVPlayerPictureInPictureRelay;
 
-// A display link retains its target; the controller is reached through this, so that it can go away.
 @interface CharonAVPlayerFrameTicker : NSObject
 @property (nonatomic, weak) id target;
 - (void)tick:(CADisplayLink *)link;
@@ -57,7 +45,6 @@
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-    // Picture in picture takes the layer into its own window; it is laid out there, not here.
     if (_playerLayer.superlayer != self.layer)
         return;
     [CATransaction begin];
@@ -68,7 +55,6 @@
 
 @end
 
-// Draws the controls' glyphs, since iOS 6 has no symbol images: white on clear, 22x22 points.
 static UIImage *charon_glyph(void (^draw)(CGRect bounds))
 {
     CGRect bounds = CGRectMake(0, 0, 22, 22);
@@ -175,8 +161,6 @@ static NSString *charon_time_text(CMTime time)
 - (void)charon_pictureInPictureDidStop;
 @end
 
-// AVPictureInPictureController's delegate for the player view controller, so that the class does
-// not claim a protocol the release's own does not answer to in conformsToProtocol:.
 @interface CharonAVPlayerPictureInPictureRelay : NSObject <AVPictureInPictureControllerDelegate>
 @property (nonatomic, weak) AVPlayerViewController *owner;
 @end
@@ -223,8 +207,6 @@ static NSString *charon_time_text(CMTime time)
 
 static void *const CharonAVPlayerObservation = (void *)&CharonAVPlayerObservation;
 
-// A player view controller in picture in picture is held here, since the application may drop
-// its last reference once the controller dismisses itself, as the release's own does.
 static NSMutableSet *charon_players_in_picture(void)
 {
     static NSMutableSet *held;
@@ -281,16 +263,6 @@ static NSMutableSet *charon_players_in_picture(void)
 @synthesize exitsFullScreenWhenPlaybackEnds = _exitsFullScreenWhenPlaybackEnds;
 @synthesize requiresLinearPlayback = _requiresLinearPlayback;
 @synthesize charonVideoView = _charonVideoView;
-// Declared by the header, not carried: without @dynamic clang would synthesize accessors that store
-// a value and do nothing with it. See the registry's absent entries for why each is not built.
-//
-// `speeds` and `selectedSpeed` are on this line and STAY on it, though both are now implemented - in
-// AVPlayerViewControllerSpeeds16.m, the object that owns the 16.0 API. Dropping them here is not
-// neutral: this object has no @dynamic then, and clang synthesizes its own `speeds` and
-// `selectedSpeed` that store a value and are never read. A class's own synthesized methods beat a
-// category's, so the 16.0 implementation would never be reached. Measured: with the names removed
-// from this line, otool -ov of THIS object lists -[AVPlayerViewController speeds] and
-// -[AVPlayerViewController selectedSpeed], and the 16.0 object's category lists neither.
 @dynamic showsTimecodes, canStartPictureInPictureAutomaticallyFromInline, allowsVideoFrameAnalysis, speeds,
     selectedSpeed;
 
@@ -361,9 +333,6 @@ static NSMutableSet *charon_players_in_picture(void)
 
 #pragma mark - Pixel buffer attributes
 
-// 6.1.3's AVPlayerLayer takes no pixel format, and AVPlayerItemVideoOutput (6.0) does: with attributes set,
-// the frames on screen are the output's, made with them, drawn over the layer, which stays for picture in
-// picture, readiness and the video rectangle. facts/AVKit/AVPlayerViewController.md.
 static NSString *charon_contents_gravity(NSString *videoGravity)
 {
     if ([videoGravity isEqualToString:AVLayerVideoGravityResizeAspectFill])
@@ -399,8 +368,6 @@ static NSString *charon_contents_gravity(NSString *videoGravity)
         _charonFrameLayer = nil;
         return;
     }
-    // The release decodes into IOSurfaces for its own layer, and CoreImage of 6.1.3 draws only a buffer
-    // that is one, so the output is asked for that as well as for what the application gave.
     NSMutableDictionary *attributes = [_charonPixelBufferAttributes mutableCopy];
     if (!attributes[(__bridge NSString *)kCVPixelBufferIOSurfacePropertiesKey])
         attributes[(__bridge NSString *)kCVPixelBufferIOSurfacePropertiesKey] = @{};
@@ -444,7 +411,6 @@ static NSString *charon_contents_gravity(NSString *videoGravity)
     OSType format = CVPixelBufferGetPixelFormatType(buffer);
     CVPixelBufferRelease(buffer);
     if (!frame) {
-        // What CoreImage of the release cannot draw stays under the layer's own frames, and is said once.
         if (!_charonFrameRefusalLogged)
             NSLog(@"AVPlayerViewController: CoreImage of this release draws no frame of pixel format '%c%c%c%c'; the player layer's own frames are shown",
                   (char)(format >> 24), (char)(format >> 16), (char)(format >> 8), (char)format);
@@ -598,7 +564,6 @@ static NSString *charon_contents_gravity(NSString *videoGravity)
     _charonControls.backgroundColor = [UIColor clearColor];
     [_charonStage addSubview:_charonControls];
 
-    // The system's own Done, titled and localized by UIKit.
     _charonTopBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, bounds.size.width, 44)];
     _charonTopBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
     _charonTopBar.barStyle = UIBarStyleBlack;
@@ -687,7 +652,6 @@ static NSString *charon_contents_gravity(NSString *videoGravity)
     if (!self.isViewLoaded)
         return;
     AVPlayerItem *item = self.player.currentItem;
-    // The release takes a failed item out of the player, so the failure is kept until another item comes.
     BOOL failed = _charonFailure != nil || item.status == AVPlayerItemStatusFailed || self.player.status == AVPlayerStatusFailed;
     _charonFailureLabel.hidden = !failed;
     if (failed)
@@ -914,9 +878,6 @@ static NSString *charon_contents_gravity(NSString *videoGravity)
     if (item && CMTIME_IS_NUMERIC(item.duration) && CMTimeCompare(_player.currentTime, item.duration) >= 0)
         [_player seekToTime:kCMTimeZero];
     [_player play];
-    // A playback speed selected while paused is applied here, which is the event AVPlaybackSpeed.h:51
-    // names. The method belongs to the 16.0 object, so it is asked for rather than sent blindly: this
-    // object also links in the bands that do not carry it.
     if ([self respondsToSelector:@selector(charon_applySelectedSpeed)])
         [self charon_applySelectedSpeed];
 }
@@ -996,9 +957,6 @@ static NSString *charon_contents_gravity(NSString *videoGravity)
     [self charon_tellDelegateFullScreenBegins:YES of:full];
 }
 
-// The transition coordinator is the one UIKitBackports (which this library links) attaches to the full
-// screen controller when its presentViewController: or dismissViewControllerAnimated: starts, and keeps
-// until the transition ends: the delegate animates alongside it and sees whether it was cancelled.
 - (void)charon_tellDelegateFullScreenBegins:(BOOL)begins of:(UIViewController *)full
 {
     id<AVPlayerViewControllerDelegate> delegate = _charonDelegate;

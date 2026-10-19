@@ -1,17 +1,9 @@
--- Outputs decided by a string sort must not depend on the machine's locale. Lua's `<` on strings goes through
--- strcoll, so the same names came out in a different order under en_NZ than under C ("UIVieX" after "UIView" under
--- en_NZ, before it under C). Each locale runs locale_probe.lua in its own process, with that locale in its
--- environment, and the outputs are compared byte for byte. A case whose output differs between locales, or that
--- prints nothing, is a failure, and the comparison says how many strings it compared.
 local LOCALES = {
     {name = "C", envs = {LC_ALL = "C"}},
     {name = "en_NZ.UTF-8", envs = {LC_ALL = "", LANG = "en_NZ.UTF-8"}},
     {name = "en_US.UTF-8", envs = {LC_ALL = "", LANG = "en_US.UTF-8"}},
 }
 
--- The table.sort calls that do not sort strings with `<` under a locale: numbers, booleans and version strings compared by
--- compare_versions (which reads digits only), or a comparator that orders by a number first and by byteorder.less after.
--- Each is keyed by its file and its trimmed line; a new table.sort outside this list, and outside byteorder, is a failure.
 local NOT_STRINGS = {
     ["modules/emulator.lua|table.sort(held, function (a, b) return a.address < b.address end)"] = "addresses",
     ["modules/emulator.lua|table.sort(named, function (a, b) return a.address < b.address end)"] = "addresses",
@@ -38,8 +30,6 @@ local NOT_STRINGS = {
     ["tools/corpus/cache-value.lua|table.sort(entries, function (a, b) return a.address < b.address end)"] = "addresses",
 }
 
--- Every table.sort in the tree, outside tools/gen and the byteorder module itself, is either on byteorder or in NOT_STRINGS.
--- Prints the count it read, so a scan that found nothing cannot pass.
 local function unsorted_strings(root)
     local found, sites, on_byteorder, used = {}, 0, 0, {}
     for _, folder in ipairs({"addons", "modules", "tools"}) do
@@ -65,7 +55,6 @@ local function unsorted_strings(root)
             end
         end
     end
-    -- An entry that matches no sort is a stale allowlist, which would hide the line it was written for when it moves.
     for key in pairs(NOT_STRINGS) do
         if not used[key] then
             table.insert(found, "the allowlist entry matches no table.sort in the tree: " .. key)
@@ -77,7 +66,6 @@ end
 function failures(opt)
     local found = {}
     local probe = path.join(opt.modules, "..", "tests", "addon", "locale_probe.lua")
-    -- The run's own folder, like every other fixture folder in these suites.
     local work = path.join(os.tmpdir(), "locale_order_test-" .. os.getpid())
     os.tryrm(work)
     os.mkdir(work)
@@ -94,7 +82,6 @@ function failures(opt)
     end
     os.tryrm(work)
 
-    -- Group every locale's lines by case: the same case must print the same lines, in the same order, in each locale.
     local function by_case(text)
         local cases, order = {}, {}
         for line in text:gmatch("[^\n]+") do

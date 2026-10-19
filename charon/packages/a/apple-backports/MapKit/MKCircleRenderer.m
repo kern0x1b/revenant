@@ -1,6 +1,3 @@
-// MKCircleRenderer: a circle drawn as the ellipse inscribed in the circle's own bounding map rect,
-// and the partial-stroke range iOS 14 added (strokeStart and strokeEnd, each a fraction of the
-// circle's sweep, 0 to 1, defaulting to the whole circle).
 #import <MapKit/MapKit.h>
 #import <UIKit/UIKit.h>
 #import <math.h>
@@ -56,12 +53,6 @@
     if (!path) {
         return;
     }
-    // A whole circle: the ellipse, which is what the release's own MKCircleView drew. A part of
-    // one: the same ellipse's arc from the start fraction round to the end fraction, with the
-    // fractions taken over the sweep from due south, so 0.25 is east and 0.5 is north. The arc is
-    // built as a polyline, which is how the release's own path flattening draws one too: the
-    // release's CoreGraphics has CGPathAddArc for circles only, and no way to add an elliptical
-    // arc with independent radii to a path while a transform is in force.
     if (start <= 0.0 && end >= 1.0) {
         CGPathAddEllipseInRect(path, NULL, box);
     } else {

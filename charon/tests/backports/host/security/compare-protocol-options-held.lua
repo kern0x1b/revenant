@@ -1,7 +1,3 @@
--- compare-protocol-options-held.lua - the held settings and the held block, differences NAMED.
---
---    xmake l compare-protocol-options-held.lua <the binary's output>
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
 local HELD = {{"ciphersuites-held", 2}, {"groups-held", 1}, {"hint-set", 1}, {"held-block-present", 1},

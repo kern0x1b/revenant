@@ -4,11 +4,6 @@
 #import <DeviceCheck/DeviceCheck.h>
 #import "check.h"
 
-// The port's DCAppAttestService against the host's own DeviceCheck. The host is a platform that does
-// not provide the App Attest service, and an iPhone 4S and an iPad 2 are two more: no Secure Enclave,
-// which came with the A7 of the iPhone 5s. So every question here is one the port must answer as the
-// host does: not supported, no key, and the documented error, off the main thread and after the call.
-
 @interface CharonHostDCAppAttestService : NSObject
 + (DCAppAttestService *)sharedService;
 - (BOOL)isSupported;
@@ -17,8 +12,6 @@
 - (void)generateAssertion:(NSString *)keyId clientDataHash:(NSData *)clientDataHash completionHandler:(void (^)(NSData *object, NSError *error))completionHandler;
 @end
 
-// sharedService is a class method on both sides; a protocol says so without naming either class, so
-// the port's renamed class and the system's are asked the same way.
 @protocol Shared <NSObject>
 + (id)sharedService;
 @end
@@ -35,7 +28,6 @@
 
 static NSString *const KeyId = @"ABCD0123-4567-89AB-CDEF-0123456789AB";
 
-// Records what a completion heard and whether it had already returned when it did.
 static Answer *record(Answer *answer, BOOL present, NSError *error, int returned)
 {
     answer.present = present;
@@ -52,7 +44,6 @@ static void spin(Answer *answer, volatile int *done)
         [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
     }
     if (!*done) {
-        // A call that never answers is not an answer: the checks below read it as a failure.
         record(answer, YES, [NSError errorWithDomain:DCErrorDomain code:999 userInfo:nil], 0);
     }
 }
@@ -140,8 +131,6 @@ int main(void)
     charon_check([system_name sharedService] == host, "and so is the host's, which is the control",
                  [NSString stringWithFormat:@"%@", [system_name sharedService]]);
 
-    // The host has no +isSupported but does answer -isSupported, the getter the header gives the
-    // property; the port is asked the same question.
     BOOL (*send)(id, SEL) = (BOOL (*)(id, SEL))objc_msgSend;
     BOOL port_supported = send(port, NSSelectorFromString(@"isSupported"));
     BOOL host_supported = send(host, NSSelectorFromString(@"isSupported"));

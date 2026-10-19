@@ -1,44 +1,18 @@
--- Corpus API-demand aggregator (name-based, arch-independent).
---
--- Modern App Store apps are arm64-only; stock iOS 6.0 has only armv7/armv7s caches, so demand is
--- measured by NAME: a symbol an app imports that stock 6.0 does not export is a backport candidate.
--- A later cache confirms it is a real Apple system symbol (not a 3rd-party embedded-framework symbol,
--- which appears in no Apple cache) and gives its home framework and INTRODUCTION BAND, routing it to
--- the right backport session.
---
--- Cache ladder (from dump-cache.lua), oldest first after the 6.0 baseline:
---   6.0      baseline (present here => not a candidate)
---   7.0.1    introduced in iOS 7            -> Backports 7-10
---   10.3.4   introduced in iOS 8-10.3       -> Backports 7-10 / 10
---   12.0     introduced in iOS 11-12        -> Backports 11-12
---   (not in any) -> residual: iOS 13+ system OR 3rd-party; excluded from ranking.
---
--- Usage:
---   xmake l tools/corpus/aggregate.lua ingest <app> <path-to-.app>   scan the bundle's Mach-O, classify, merge store.json
---   xmake l tools/corpus/aggregate.lua report [cat,cat...]           frequency-ranked demand
--- Other tools import this file (import("aggregate", {rootdir = os.scriptdir()})) for its functions.
-
 import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 local objc = import("apple.objc", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
 local dyld = import("apple.dyld", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
 
--- CACHES and STORE are DATA (an accumulated cache ladder and a multi-MB ingest store), not this module's
--- own location: both live in the durable location CHARON_CORPUS_ROOT addresses (default coordination/
--- corpus/), so a copy of this file elsewhere reads the same data. Either can be overridden per run.
--- See tools/corpus/README.md.
 CORPUS_ROOT = os.getenv("CHARON_CORPUS_ROOT") or path.join(os.getenv("HOME"), "Git", "projects", "ios", "coordination")
 CORPUS = path.join(CORPUS_ROOT, "corpus")
 if not os.isdir(CORPUS) then
     raise("aggregate.lua: no corpus/ data directory found at %s. Set CHARON_CORPUS_ROOT to the directory "
         .. "that contains corpus/ (holds store.json, caches/).", CORPUS)
 end
--- The corpus data directory, for the tools that import this module.
 function corpus_dir()
     return CORPUS
 end
 
--- Where the 6.1.3 band's export list lives (load_built_exports reads it; built-exports.lua writes it).
 function built_exports_file()
     return BUILT_EXPORTS
 end
@@ -47,7 +21,6 @@ function built_exports_header()
     return BUILT_EXPORTS_HEADER
 end
 
--- Whether a carried status is a gap (undecided, owed or absent: not carried today).
 function is_gap(status)
     return GAP_STATUS[status] == true
 end
@@ -63,36 +36,23 @@ BAND_ORDER = {"7", "8-10", "11-12", "13+"}
 BAND_ROUTE = {["7"] = "Backports 7-10", ["8-10"] = "Backports 7-10/10",
               ["11-12"] = "Backports 11-12", ["13+"] = "beyond current backports"}
 
--- Segment the attributed home into what each demand actually implies:
---   FRAMEWORK - public *.framework API (Foundation/UIKit/WebKit/...) => backport target
---   SYSCALL   - libsystem_kernel => a syscall stock 6.0 lacks (kernel/libsystem shim)
---   SYSLIB    - other libsystem_*/libsqlite3/libcommonCrypto => low-level OS shim
---   RUNTIME   - libobjc/libdyld/libc++/compiler-rt/unwind => Katabasis runtime, NOT a backport
 RUNTIME_LIBS = {"libobjc", "libdyld", "libc++", "libc++abi", "libcompiler_rt",
-                "libunwind", "libSystem", "libdbm"}   -- libdbm hosts unwind/compiler-rt exports
+                "libunwind", "libSystem", "libdbm"}
 CAT_ORDER = {FRAMEWORK = 0, SYSCALL = 1, SYSLIB = 2, RUNTIME = 3}
-GAP_STATUS = {["gap?"] = true, owed = true, absent = true}   -- not carried today => real priority; owed is ours to do
+GAP_STATUS = {["gap?"] = true, owed = true, absent = true}
 STATUS_RANK = {implemented = 0, inert = 1, ignored = 2, owed = 3, absent = 4}
--- Frameworks unreachable on our A5 hardware (iPhone 4S / iPad 2): Metal needs A7+, so
--- MTLCreateSystemDefaultDevice() returns nil and apps fall back to GLES; backporting the descriptor
--- cluster would be silently wrong. Mark, don't rank.
 A5_UNREACHABLE = {Metal = true, MetalKit = true, MetalPerformanceShaders = true, MetalPerformanceShadersGraph = true}
 BUILT_EXPORTS = os.getenv("CHARON_BUILT_EXPORTS") or path.join(CORPUS, "built-exports-6.1.3.txt")
 BUILT_EXPORTS_HEADER = "# canon "
--- The registry export: CHARON_REGISTRY_TSV lets a run read a different one (e.g. regenerated straight
--- from origin/main) WITHOUT touching the shared file. The default is a file in this checkout's run folder,
--- .agent-work/runs/registry-export/, which the corpus-regen skill writes it to.
 REGISTRY_TSV = os.getenv("CHARON_REGISTRY_TSV")
     or path.join(os.scriptdir(), "..", "..", ".agent-work", "runs", "registry-export", "carried-registry.tsv")
 
--- The registry export every corpus tool reads (see REGISTRY_TSV above).
 function registry_export()
     return REGISTRY_TSV
 end
 
 local SKIP_EXTENSIONS = {png = true, plist = true, nib = true, car = true, json = true, strings = true, storyboardc = true}
 
--- Splits on tabs, keeping empty fields; the result is a 1-based Lua list (Python field k is entry k+1).
 local function split_tabs(line)
     local fields, start = {}, 1
     while true do
@@ -114,7 +74,6 @@ function read_json(file)
     return held
 end
 
--- symbol -> framework (first seen); the table's keys are the symbol set.
 function load_cache_tsv(stem, caches)
     local attr = {}
     for line in io.lines(path.join(caches or CACHES, stem .. ".tsv")) do
@@ -126,7 +85,6 @@ function load_cache_tsv(stem, caches)
     return attr
 end
 
--- The 6.0 baseline set and the ladder of attributed rungs, oldest first.
 function build_index(caches)
     local b60 = load_cache_tsv("6.0", caches)
     local ladder = {}
@@ -136,7 +94,6 @@ function build_index(caches)
     return b60, ladder
 end
 
--- Every Mach-O file under the bundle, sorted in byte order (resources are skipped by extension).
 function macho_binaries(appdir)
     local out = {}
     for _, p in ipairs(os.files(path.join(appdir, "**"))) do
@@ -149,11 +106,6 @@ function macho_binaries(appdir)
     return out
 end
 
--- One `nm -m` pass. Returns undefined {symbol = weak} and defined {symbol = true}.
--- weak = imported under #available (NULL-tolerant); strong = hard dep.
--- defined = external symbols this binary EXPORTS (used to drop intra-app / bundled-3rd-party symbols
--- whose name collides with an Apple private class, e.g. Session bundles WebRTC.framework exporting
--- RTC* that also exist in Apple's private cached WebRTC).
 function scan_symbols(binary)
     local undefined, defined = {}, {}
     for line in os.iorunv("nm", {"-m", binary}):gmatch("[^\n]+") do
@@ -182,9 +134,6 @@ function scan_symbols(binary)
     return undefined, defined
 end
 
--- kind and name of a linker symbol. A protocol referenced from another translation unit is a real
--- weak-external link symbol, same mechanism as a class: _OBJC_PROTOCOL_$_<Name> (the protocol_t struct)
--- or _OBJC_LABEL_PROTOCOL_$_<Name> (the __objc_protolist entry).
 function sym_kind(sym)
     local name = sym:match("^_OBJC_CLASS_%$_(.+)$") or sym:match("^_OBJC_METACLASS_%$_(.+)$")
     if name then
@@ -213,7 +162,6 @@ function categorize(fw)
     return "SYSLIB"
 end
 
--- The store as ingest left it. Ingest starts from an empty store; a report never does.
 function load_store(missing_ok)
     if os.isfile(STORE) then
         return read_json(STORE)
@@ -225,14 +173,13 @@ function load_store(missing_ok)
 end
 
 function ingest(app, appdir)
-    -- A path that is not a bundle has no Mach-O under it: it would store the app with zero demand and no error.
     if not os.isdir(appdir) then
         raise("aggregate.lua: %s is not a bundle directory; ingest reads the .app, not a scan of it.", appdir)
     end
     local b60, ladder = build_index()
     local bins = macho_binaries(appdir)
-    local undefined = {}   -- symbol -> weak (bool); strong in any binary wins
-    local defined = {}     -- symbols the app's own bundle exports (intra-app satisfied)
+    local undefined = {}
+    local defined = {}
     for _, binary in ipairs(bins) do
         local und, defd = scan_symbols(binary)
         for sym, weak in pairs(und) do
@@ -244,12 +191,12 @@ function ingest(app, appdir)
             defined[sym] = true
         end
     end
-    local demand = {}      -- "kind<SOH>name" -> {kind, name, framework, band, cat, weak}
+    local demand = {}
     local residual, bundled = 0, 0
     for _, sym in ipairs(byteorder.keys(undefined)) do
         if b60[sym] == nil then
             if defined[sym] then
-                bundled = bundled + 1   -- satisfied by the app's own bundle (3rd-party / name collision)
+                bundled = bundled + 1
             else
                 local band, fw = nil, nil
                 for _, rung in ipairs(ladder) do
@@ -259,10 +206,9 @@ function ingest(app, appdir)
                     end
                 end
                 if band == nil then
-                    residual = residual + 1   -- iOS13+ system or 3rd-party embedded; not ranked
+                    residual = residual + 1
                 else
                     local kind, name = sym_kind(sym)
-                    -- fold metaclass into class; a class is strong if any of its symbols is strong
                     local key = kind .. "\1" .. name
                     local current = demand[key]
                     if current == nil then
@@ -301,20 +247,14 @@ function ingest(app, appdir)
         app, #bins, #records, classes, #records - classes, table.concat(shown, ", "), residual, bundled))
 end
 
--- Carried-vs-gap: source of truth is the registry export (status, framework, kind, api, introduced).
--- Classes match by name; constants are stored without the leading underscore, so it is stripped here.
--- Returns api -> status. An api listed twice keeps the status with the lower STATUS_RANK; a status not in STATUS_RANK ranks 9.
 function load_registry()
     if not os.isfile(REGISTRY_TSV) then
-        -- A missing registry export is not "nothing is decided yet": every caller reads an empty registry
-        -- as undecided and runs to completion with a plausible, badly inflated gap list.
         raise("aggregate.lua: registry export not found at %s (CHARON_REGISTRY_TSV). Every row would "
             .. "silently read as undecided instead of raising.", REGISTRY_TSV)
     end
     local reg = {}
     local lines = io.lines(REGISTRY_TSV)
     local header = lines() or ""
-    -- Support both formats: "framework\tapi\tstatus\t..." and the old "status\tframework\tkind\tapi\t..."
     local new_format = header:sub(1, 10) == "framework\t"
     for line in lines do
         local p = split_tabs(line)
@@ -334,7 +274,6 @@ function load_registry()
     return reg
 end
 
--- The registry's `kind` column (its 5th), keyed by api. Empty when the export has no kind column.
 function load_reg_kinds()
     if not os.isfile(REGISTRY_TSV) then
         raise("aggregate.lua: registry export not found at %s (CHARON_REGISTRY_TSV). load_reg_kinds() has "
@@ -367,19 +306,15 @@ function carried_status(reg, kind, name, framework)
     if A5_UNREACHABLE[framework] then
         return "n/a-A5"
     end
-    -- Mach-O prepends exactly one underscore to C symbols; strip just that one.
     local api = name
     if kind ~= "class" and name:sub(1, 1) == "_" then
         api = name:sub(2)
     end
-    -- The registry writes a C FUNCTION as `name()`. A Mach-O symbol carries no parentheses, so both spellings are tried.
     if reg[api] ~= nil then return reg[api] end
     if reg[api .. "()"] ~= nil then return reg[api .. "()"] end
-    return "gap?"   -- gap? = undecided/not listed => treat as gap
+    return "gap?"
 end
 
--- (names, canon version) of the 6.1.3 band's export list, written by built-exports.lua.
--- Missing is not "nothing is exported": every carried row would read as a launch blocker.
 function load_built_exports()
     if not os.isfile(BUILT_EXPORTS) then
         raise("aggregate.lua: export list of the 6.1.3 band not found at %s (CHARON_BUILT_EXPORTS); make it "
@@ -407,7 +342,6 @@ function load_built_exports()
     return built, header:sub(#BUILT_EXPORTS_HEADER + 1)
 end
 
--- A strong import the device cannot bind: a gap, or a carried row whose symbol the band does not export.
 function launch_blocks(strong, status, kind, name, built)
     if strong < 1 or status == "n/a-A5" then
         return false
@@ -422,7 +356,6 @@ function launch_blocks(strong, status, kind, name, built)
     return built[symbol] == nil
 end
 
--- Swift symbols (_$s.../_$S...) are Swift-runtime domain, never ObjC backports.
 function is_swift_mangled(name)
     return name:sub(1, 3) == "_$s" or name:sub(1, 3) == "_$S" or name:sub(1, 2) == "$s" or name:sub(1, 2) == "$S"
 end
@@ -436,12 +369,11 @@ local function sorted_members(set)
     return out
 end
 
--- Frequency-ranked demand. `only` is a set of categories, or nil for all.
 function report(only)
     local store = load_store(false)
     local reg = load_registry()
     local apps = byteorder.keys(store.apps)
-    local rows, agg = {}, {}   -- agg: key -> row; rows keep first-insertion order, the stable-sort tiebreak
+    local rows, agg = {}, {}
     for _, app in ipairs(apps) do
         for _, r in ipairs(store.apps[app].demand) do
             if not is_swift_mangled(r.name) then
@@ -470,13 +402,9 @@ function report(only)
     end
     for _, e in ipairs(rows) do
         e.status = carried_status(reg, e.kind, e.name, e.framework)
-        e.gap = GAP_STATUS[e.status] and 0 or 1   -- gaps first
+        e.gap = GAP_STATUS[e.status] and 0 or 1
         e.na, e.ns = count(e.apps), count(e.strong)
     end
-    -- The ranking as one byte-order key per row: the numbers zero-padded (more apps or strong imports rank
-    -- first, so they are inverted), the strings after them, each field ended by SOH, which sorts below every
-    -- byte a field can hold. Comparing the keys is comparing the fields in turn, and the row's first
-    -- appearance breaks the last tie, as a stable sort would.
     local keyed = {}
     for _, e in ipairs(rows) do
         local key = string.format("%d\1%d\1%09d\1%09d\1%s\1%s\1%s\1%09d", CAT_ORDER[e.cat] or 9, e.gap,
@@ -495,10 +423,6 @@ function report(only)
     end
 end
 
--- The stock 6.0 armv7 universe: every Objective-C selector and every class the held 6.0 cache's own images carry.
--- Both are read through the charon module that owns the reading (apple.objc: known_selectors keeps the selector
--- list beside the held release and rereads the cache only when the reader changed; inventory is the class list
--- it is built from). The selector set is keyed by name, without objc's leading dash.
 local function stock_source()
     local source = dyld.held_source(path.join(dyld.root(), "6.0"), "armv7")
     if not source then
@@ -523,8 +447,6 @@ function class_universe()
     return names
 end
 
--- The entries sorted by a count (largest first), then by the entry's name in byte order, as the Python's
--- sort(key=(-count, name)) did. Ties on both keep the input order.
 function ranked(entries, count_of, name_of)
     local keyed = {}
     for index, entry in ipairs(entries) do

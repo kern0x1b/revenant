@@ -1,11 +1,3 @@
--- rename.lua OUT NAMES - writes OUT, a header that renames the port's 135 VideoToolbox constants, so one host binary carries
--- the port's build and the host's own side by side and every constant is compared under a name of its own.
---
---    xmake l rename.lua <rename.h> <names.txt>
---
--- The Python this replaces was rename.py. The header's first line is kept as rename.py wrote it: the port's objects
--- carry the same comment wording, and this header is generated from the same rule.
-
 local lib = import("vtlib", {rootdir = os.scriptdir(), anonymous = true})
 
 function main(out, namesPath)

@@ -1,15 +1,3 @@
--- The CIFilter convenience constructors of CoreImage, one object per band of the release that first exports them, written into
--- .gen/CoreImage/ from the measured table spec/CoreImage/filter-builders.tsv: one row per class method of CIFilter the host answers
--- (its selector, the filter name the host gives it, the first held rung that exports the selector, and the SDK's introduced release).
--- A selector no held rung exports is placed by its introduced release, because the ladder ends before the release that adds it.
---
--- The counts the object's header states come from the differential that compares the port's objects with the host's own
--- (tests/backports/host/ciimagefilter), recorded in spec/CoreImage/filter-builders-differential.tsv. This module does not run that
--- differential, and the record is what it was measured as, not what it would measure now.
---
--- It replaces tools/corpus/gen-cifilter-builtins.py, which measured the same table and wrote the same objects. The registry rows that
--- script wrote are committed (registry/CoreImage/filterbuilders<tag>.json) and are not written here.
-
 local tsv = import("tsv", {anonymous = true})
 local files = import("files", {anonymous = true})
 local layout = import("layout", {anonymous = true})
@@ -19,8 +7,6 @@ local FRAMEWORK = "CoreImage"
 local TABLE_NAME = "filter-builders.tsv"
 local MEASURE_NAME = "filter-builders-differential.tsv"
 
--- The band of each object: its tag in the file name, the release it names, and the reason the release is a band of its own. The tags are
--- the file names' suffixes, and the release is the first held rung a band's selectors are in (or their introduced release, for none).
 local BANDS = {
     ["7"] = {version = "7.0", why = "iOS 7.0 is the first held rung that exports +gaussianBlurFilter."},
     ["80"] = {version = "8.0", why = "iOS 8.0 is the first held rung that exports +colorCubeFilter and +vibranceFilter."},
@@ -33,13 +19,11 @@ local BANDS = {
         .. "availability places them."},
 }
 
--- The release of each band, back to its tag.
 local BY_VERSION = {}
 for tag, band in pairs(BANDS) do
     BY_VERSION[band.version] = tag
 end
 
--- The object's header. Its {name} fields are the values of the object, filled in by fill below; the text is the one the python wrote.
 local OBJECT = [[#import <CoreImage/CoreImage.h>
 
 // The CIFilter convenience constructors of iOS {version}: {count} of the {total} the SDK's own
@@ -71,7 +55,6 @@ local OBJECT = [[#import <CoreImage/CoreImage.h>
 
 ]]
 
--- The text of {name} with each {key} of values replaced by its value; a key the values do not give is refused.
 local function fill(text, values)
     return (string.gsub(text, "{(%a+)}", function(key)
         assert(values[key] ~= nil, "the object's text names {" .. key .. "}, which has no value")
@@ -79,12 +62,10 @@ local function fill(text, values)
     end))
 end
 
--- One constructor: the class method that answers the host's filter of that name.
 local function method_text(selector, name)
     return "+ (CIFilter *)" .. selector .. "\n{\n    return [CIFilter filterWithName:@\"" .. name .. "\"];\n}\n\n"
 end
 
--- The table's rows, checked: each selector and name is present, and each names a band the objects are written for.
 local function measured_rows(text)
     local rows = tsv.records(text)
     for _, row in ipairs(rows) do
@@ -94,8 +75,6 @@ local function measured_rows(text)
     return rows
 end
 
--- The band a row is written in: the release of the first held rung that exports its selector, or, where no held rung does, the release
--- the SDK introduces it in. Refused when that release is not the release of one of the bands.
 local function band_of(row)
     local tag = BY_VERSION[row.rung]
     if tag == nil then
@@ -105,7 +84,6 @@ local function band_of(row)
     return tag
 end
 
--- The differential's numbers, as the record gives them: the constructors it compared, the fields, the rendered, and the differences.
 local function measured_counts(text)
     local counts = {}
     for _, row in ipairs(tsv.records(text)) do
@@ -117,7 +95,6 @@ local function measured_counts(text)
     return counts
 end
 
--- The objects of CoreImage that the measured table defines: name -> text, each name a file of .gen/CoreImage/. Empty for any other framework.
 function objects(tree, fw)
     local out = {}
     if fw ~= FRAMEWORK then

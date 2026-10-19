@@ -1,8 +1,6 @@
 #ifndef CHARON_OS_SYSTEM_VERSION_GET_CURRENT_VERSION_H
 #define CHARON_OS_SYSTEM_VERSION_GET_CURRENT_VERSION_H
 
-/* The caller defines the structure (libxpc's major, minor, patch, each an unsigned int), as Swift's runtime does; the
-   declaration only names it. */
 struct os_system_version_s;
 
 #ifdef __cplusplus

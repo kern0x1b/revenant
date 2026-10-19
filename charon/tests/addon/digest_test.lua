@@ -1,4 +1,3 @@
--- What a recipe's digest ignores (comments and the layout of code) and what it does not (code, and everything in a string).
 function failures(opt)
     local digest = import("digest", {rootdir = opt.modules, anonymous = true})
     local found = {}
@@ -38,12 +37,9 @@ end
             table.insert(found, name .. " must change the digest")
         end
     end
-    -- the strings survive whole
     if not digest.stripped(base):find('"a -- b"', 1, true) or not digest.stripped(base):find("line -- not a comment", 1, true) then
         table.insert(found, "a string keeps its comment marker")
     end
-    -- The digests a recipe takes are the ones its sources give now: a source changed without them written again is caught
-    -- here, not by a build that quietly kept its old hash.
     local root = path.join(opt.modules, "..")
     for _, recipe in ipairs(digest.recipes()) do
         local written = io.readfile(path.join(root, recipe.folder, "digest.lua"))

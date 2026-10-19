@@ -1,45 +1,15 @@
--- xmake l tools/registry-one-minimum.lua [--framework NAME] [ROOT]
---
--- The gate's 4.3 rule over a whole tree: an object is carried from one release on, and its minimum
--- is read from the entries the symbols it carries answer to, so within one object those entries all
--- name the same minimum or none of them names one. A set holding both none and a value, or two
--- values, is what minimums() refuses as misplaced. This prints those objects and exits 1.
---
---   NSURLSessionWebSocket13.m: ... rows name the minimums 5.0 and 6.0 - NSURLSession (5.0), ...
---   WKContentWorld14.m:        ... rows name the minimums 6.0 and none - WKContentWorld (6.0), ...
---
--- It is a tool and not a guard test on purpose. The rule is the gate's, and a guard that holds the
--- whole repository to it is red on objects the gate itself carries in a stack - four of them, none of
--- them in CloudKit. This reports them and leaves landing them to whoever owns the object.
--- tests/addon/registry_test.lua proves the rule on synthetic objects, which is where a rule of this
--- shape is settled, and calls the same offenders() this calls.
---
--- ROOT is resolved against the current directory and, failing that, against the PROJECT's own root,
--- which is where xmake found this project however the run was invoked - so an absolute ROOT and a run
--- from any directory of the project both land on the package. Reading nothing is never a clean bill of health: a run that read zero objects prints a
--- different sentence and exits non-zero, because "nothing is owed" and "nothing was read" must never
--- print the same line.
---
--- Objects are the files, so the grouping is by the file that DEFINES a class and never by the row's
--- `source` field: that field is a transcription, it can be wrong, and eight were - the rows of
--- CKSyncEngineConfiguration and of the six scopes, options and contexts named CKSyncEngine17.m while
--- CKSyncEngine.m and CKSyncEngineState17.m define them - which is how a check keyed on it reads clean
--- over an object the gate refuses. A class two files implement is carried by both, so both are asked.
-
 import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "modules")})
 
--- The registry files the gate reads: registry/<Framework>.json and registry/<Framework>/<part>.json
 local function registry_files(root)
     return table.join(os.files(path.join(root, "registry", "*.json")),
                       os.files(path.join(root, "registry", "*/*.json")))
 end
 
--- api -> the entries filed under that spelling, each with the registry it was read from
 function rows_of(root, framework)
     local rows = {}
     local files = registry_files(root)
-    byteorder.sort(files)                     -- sorts in place and returns nothing
+    byteorder.sort(files)
     for _, file in ipairs(files) do
         local folder = path.filename(path.directory(file))
         local name = folder == "registry" and path.basename(file) or folder
@@ -54,12 +24,10 @@ function rows_of(root, framework)
     return rows
 end
 
--- class -> the source files that define it
 function definitions(root, framework)
     local defines = {}
     for _, file in ipairs(os.files(path.join(root, "*/*.m"))) do
         if not framework or path.basename(path.directory(file)) == framework then
-            -- comments go first: a sentence beginning "// @implementation" is not a definition
             local text = io.readfile(file):gsub("//[^\n]*", "")
             for cls in text:gmatch("@implementation%s+(%w+)") do
                 local places = defines[cls]
@@ -76,8 +44,6 @@ function definitions(root, framework)
     return defines
 end
 
--- The objects that mix: {{object = file, minimums = {...}, names = {...}}}, and how many objects
--- were read. offenders() is what tests/addon/registry_test.lua drives on synthetic objects.
 function offenders(root, framework)
     local defines = definitions(root, framework)
     local objects, order = {}, {}
@@ -131,8 +97,6 @@ function main(...)
             index = index + 1
         end
     end
-    -- the package, wherever this was run from: the given ROOT, else the default relative to the cwd,
-    -- else the default relative to this script
     local package = "packages/a/apple-backports"
     local candidates = {}
     if root then

@@ -1,10 +1,3 @@
--- The dump step is time-bounded with a reported failure (tools/gen/swift_shard.lua dump_command, cached_root; tools/gen/heavy_batch.lua
--- bound_prefix). gtimeout without -k sends SIGTERM only: a child that ignores SIGTERM ran on (two dumps of the coordinator's sdk run,
--- AdAttributionKit and AppIntents, ran 10 to 13 hours). Checked here: the command text carries -k (the escalation to SIGKILL), a
--- status of 124 or 137 (stopped by the bound) is reported as such, and a child that ignores SIGTERM is killed by the bound (the real
--- gtimeout, a 2-second bound with a 1-second escalation: it must end well inside 15 seconds, with status 137).
--- Run: xmake l tests/gen/dump_bound_test.lua
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 local SCRATCH = path.join(os.scriptdir(), "..", "..", "build", "dump-bound-test")
 
@@ -25,7 +18,6 @@ function main()
     check(string.sub(command, 1, #"gtimeout -k 30 1800 xcrun ") == "gtimeout -k 30 1800 xcrun ",
           "a dump is bounded by -k (SIGKILL after 30 s more): " .. string.sub(command, 1, 60))
 
-    -- a dump the bound stopped (124 after SIGTERM, 137 after SIGKILL) is a reported failure, not a missing JSON
     local folder = path.join(SCRATCH, "cache")
     os.rm(folder)
     for _, status in ipairs({"124", "137"}) do
@@ -37,7 +29,6 @@ function main()
               "status " .. status .. " is reported as stopped at the time bound: " .. tostring(reason))
     end
 
-    -- the real mechanism: TERM is ignored by the child (exec: the sleep itself), so only the escalation ends it
     local started = os.time()
     local output = os.iorunv("sh", {"-c", "gtimeout -k 1 2 sh -c 'trap \"\" TERM; exec sleep 60'; echo $?"})
     local elapsed = os.time() - started

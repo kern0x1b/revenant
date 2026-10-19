@@ -6,9 +6,6 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-// The table view's half of a drag and drop, in its own object from the collection view's: an object
-// carries the API of one release, and the two views are separate objects.
-
 @interface UITableView (CharonDragDropIntegration11)
 - (NSArray<UIDragInteraction *> *)charon_dragInteractions;
 - (NSArray<id<UITableViewDropItem>> *)charon_dropItemsAtPoint:(CGPoint)point session:(id<UIDropSession>)session;

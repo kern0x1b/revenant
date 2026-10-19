@@ -1,19 +1,3 @@
-/*
- * The WebSocket options, metadata, request and response of ws_options.h.
- *
- * These are the four objects a WebSocket connection is configured and described with: the options a
- * program sets (the subprotocols it will speak, the headers it adds, the largest message it will
- * take, whether it answers the handshake itself and whether it answers a ping by itself), the
- * metadata that describes one message of a connection (its opcode, its close code, the pong handler
- * a ping is answered with, the response the server sent for the client's request), and the request
- * and response objects of that handshake.
- *
- * What the port does not have is the WebSocket layer itself: see facts/Network/NWWebSocket.md. These
- * objects are the configuration and the description a program reads and writes, and they keep what
- * they are given and answer it as the SDK documents; a connection of WebSocket options carries no
- * WebSocket layer, which is stated there rather than hidden.
- */
-
 #import "CharonNW.h"
 #import "CharonNWSupport.h"
 

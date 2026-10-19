@@ -2,22 +2,6 @@
 #import <CoreTelephony/CTCall.h>
 #import <CoreTelephony/CTCallCenter.h>
 
-// A CXCallObserver reports every call of the device, not only the ones the
-// application made, and on iOS 6 the calls the device makes itself are the
-// cellular ones CoreTelephony holds. CTCallCenter is there from iPhone OS 4
-// and is the whole of what a third party may see of them: an identifier and
-// one of four states. What it gives is put into the broker beside the
-// application's own calls, with no provider, so nothing of the application
-// can act on a call it did not make.
-//
-// A cellular call has no outgoing flag of its own. CTCallStateDialing is the
-// device placing one, CTCallStateIncoming is one arriving, and either becomes
-// CTCallStateConnected without saying which it was, so the direction is
-// remembered from the state the call was first seen in. A call first seen
-// already connected - the observer was made during a call - is reported as
-// incoming, which is what a call of unknown direction looks like from the
-// outside.
-
 @implementation CharonCallTelephony {
     CTCallCenter *_center;
     NSMutableDictionary<NSString *, CXCall *> *_calls;

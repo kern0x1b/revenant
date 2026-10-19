@@ -2,12 +2,6 @@
 #include <stdio.h>
 #include <objc/message.h>
 
-// A bundled Mac Catalyst app with a window, so the window's safe area and its layout guides exist the way an app meets them. The scene
-// delegate runs the same checks on the host's own guides and, in the port's build, on the port's (the guide classes are compiled renamed, and
-// the view and window categories replace the host's methods in that process, so the port's answers are the ones read). Each check writes one
-// "side<TAB>check<TAB>value" line to the file named by CHARON_SCENE_OUT, then the app quits. run.sh builds both and diffs them. The host's
-// class names are host-only evidence (CHARON_HOST_ONLY_OUT), since the port's classes are its own.
-
 static FILE *out;
 static FILE *hostOnly;
 static const char *side;
@@ -50,7 +44,6 @@ static NSString *count_text(NSArray *items)
     return [NSString stringWithFormat:@"%lu", (unsigned long)items.count];
 }
 
-// A set that raises: the name of the exception, or ok.
 static NSString *outcome(void (^change)(void))
 {
     @try {

@@ -1,13 +1,3 @@
-/*
- * The two calls of iOS 16 an endpoint answers: the TXT record a Bonjour endpoint carries, and the
- * signature that names the kind of service it is.
- *
- * A TXT record is what a Bonjour service says about itself, and a signature is the fixed prefix
- * that says which kind of service a name is - `_http._tcp` begins with a signature that says it is
- * an HTTP-over-TCP service, and a program can tell a service's kind without parsing its type. An
- * endpoint of another kind has neither, and answers nothing for both, as the host does, measured.
- */
-
 #import "CharonNW.h"
 
 nw_txt_record_t nw_endpoint_copy_txt_record(nw_endpoint_t endpoint)

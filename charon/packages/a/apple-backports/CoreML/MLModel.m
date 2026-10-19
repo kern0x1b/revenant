@@ -1,19 +1,3 @@
-/* MLModel and the classes that describe it: what a model is made of, what it takes, and what it
- * answers.
- *
- * A model is a container read once and kept: the C reader builds the whole thing -- its kind, its
- * inputs and outputs, its class labels, its metadata -- and the interpreter runs it over a set
- * of values. This is the surface an application touches: it loads a model from a URL, asks it
- * what it wants through its model description, hands it values through a feature provider, and
- * reads the answer back as another provider.
- *
- * The prediction is the whole of it, and it is three steps with nothing hidden between: the
- * caller's values are copied into the C's own set (the interpreter may consume them, so they
- * cannot be windows on the caller's), the interpreter runs, and the values it produced are moved
- * into a dictionary provider under the names the description gives them. A model that cannot be
- * run says which of its inputs was missing or wrong, or names the layer or the kind it refuses,
- * in the error's own message.
- */
 #import <CoreML/CoreML.h>
 
 #include "CharonMLBridge.h"
@@ -21,8 +5,6 @@
 #include "CharonMLModel.h"
 #include "CharonMLPredict.h"
 #include "CharonMLTensor.h"
-
-/* --- the description ------------------------------------------------------------------------- */
 
 
 @implementation MLModelDescription {
@@ -68,12 +50,6 @@
             training[@(model->training_inputs[index].name)] = described;
         }
     }
-    /* The metadata is the specification's own message, and all five of Core ML's own keys are
-     * always there: measured against a real Core ML, a model that names no author at all answers
-     * an empty string for the author rather than nil, and an empty dictionary for the map of
-     * whatever else its author put in. A caller reading the metadata of a model that has none
-     * therefore gets a dictionary with five entries whose values are empty, which is what a caller
-     * can tell apart from a model whose metadata is not there at all. */
     metadata[MLModelAuthorKey] = model->author != NULL ? @(model->author) : @"";
     metadata[MLModelLicenseKey] = model->license != NULL ? @(model->license) : @"";
     metadata[MLModelDescriptionKey] = model->short_description != NULL ? @(model->short_description) : @"";
@@ -136,9 +112,6 @@
     return built;
 }
 
-/* The description of one named function of the model, which is a description of its own: its own
- * inputs, its own outputs and the two names it answers under. A model with no named functions has
- * none of these, and the model's own description is the description of its only entry point. */
 - (instancetype)charon_initWithFunction:(const charon_ml_function *)function
 {
     MLModelDescription *built = [super init];
@@ -215,12 +188,6 @@
 
 - (BOOL)isUpdatable
 {
-    /* A model is updatable when its own container says so, which is the specification's own
-     * field. This port does not train: it reads a container and runs it, and a model that names
-     * itself updatable is one whose weights could be written back by a framework that trains,
-     * which is not this one. The flag is therefore the model's own answer, and a caller that
-     * asks may use it to decide whether to look for an update API -- which is absent here, and
-     * says so. */
     return _isUpdatable;
 }
 
@@ -279,8 +246,6 @@
 
 @end
 
-/* --- the configuration ------------------------------------------------------------------------ */
-
 
 @implementation MLPredictionOptions {
     BOOL _usesCPUOnly;
@@ -291,10 +256,6 @@
 {
     self = [super init];
     if (self != nil) {
-        /* Core ML's own defaults for a fresh options object, both measured: NO for the CPU-only
-         * flag, because the model is run where it chooses to run and a release with one unit is
-         * that unit, and an empty dictionary for the backings -- not nil, so a caller that adds
-         * one to it does not have to make it first. */
         _usesCPUOnly = NO;
         _outputBackings = @{};
     }
@@ -329,8 +290,6 @@
 
 @end
 
-/* --- a model built in memory -------------------------------------------------------------------- */
-
 
 @implementation MLModelAsset {
     NSData *_specification;
@@ -346,11 +305,6 @@
         charon_ml_error(error, CHARON_ML_ERROR_GENERIC, @"there were no specification bytes to make a model of");
         return nil;
     }
-    /* The data is kept, and it is a copy of the caller's own: an asset outlives the data it was
-     * made from -- it is handed to an asynchronous load -- and a data the caller has mutated or
-     * freed in between would make a model out of bytes that are no longer the model's. The
-     * bytes are checked here rather than at the load, so a caller that made an asset out of
-     * something that is not a model is told at once instead of from a completion handler. */
     {
         charon_ml_model probe;
         char message[512];
@@ -369,11 +323,6 @@
                                     blobMapping:(NSDictionary<NSURL *, NSData *> *)blobMapping
                                           error:(NSError **)error
 {
-    /* The blob mapping is for a model of a program, whose weights live in files beside it and
-     * are named from the specification: this port reads no such model -- the interpreter refuses
-     * the mlProgram form by name, and facts/CoreML/CoreML.md says so -- so a mapping of blobs to
-     * put in place of those files has nothing to stand in for. A model that names no blob is the
-     * ordinary case and is made the ordinary way, which is the same asset. */
     if (blobMapping.count == 0) {
         return [self modelAssetWithSpecificationData:specificationData error:error];
     }
@@ -390,10 +339,6 @@
         charon_ml_error(error, CHARON_ML_ERROR_GENERIC, @"a model asset is read from a file's URL");
         return nil;
     }
-    /* A compiled model is a bundle and its container is the coremldata.bin inside it, which is
-     * where a compiled model keeps its program. A URL that is not a bundle is read as the
-     * container itself, so an asset can be made of an .mlmodel file as readily as of one this
-     * port compiled. */
     {
         BOOL directory = NO;
         NSString *inside = [compiledModelURL.path stringByAppendingPathComponent:@"coremldata.bin"];
@@ -451,10 +396,6 @@
     });
 }
 
-/* The names the model declares, in the order it declares them, and the empty list for a model
- * that declares none -- which is every model of a single entry point, and an empty list is the
- * answer for those rather than nil, because "this model has no named functions" is a fact about
- * the model and not a failure to read it. */
 - (NSArray<NSString *> *)charon_functionNamesWithError:(NSError **)error
 {
     charon_ml_model read;
@@ -475,11 +416,6 @@
     return names;
 }
 
-/* The description of one named function, or of the model as a whole when the name is nil -- which
- * is what the specification's own default function is, and what a model with no named functions
- * has and only has. A model that names functions and is asked for one it does not have is
- * refused by name: the answer would otherwise be the whole model's description, which a caller
- * reading it would take for the function's own. */
 - (MLModelDescription *)descriptionOfFunctionNamed:(NSString *)functionName error:(NSError **)error
 {
     charon_ml_model read;
@@ -525,8 +461,6 @@
 
 @end
 
-/* --- the model --------------------------------------------------------------------------------- */
-
 
 @implementation MLModel {
     charon_ml_model _model;
@@ -535,20 +469,9 @@
     NSURL *_url;
 }
 
-/* One prediction, and the whole of it. The values in are copied into the C's own set because the
- * interpreter owns what it is given -- a pipeline moves each sub-model's outputs on by name --
- * and a value that were a window on the caller's would be freed under it. The values out are the
- * interpreter's own, moved into a dictionary provider, and the type each is given is the one the
- * model declares for that output rather than the one the C's struct happens to hold, so a whole
- * number a model declared as a whole number is read as one. */
 - (id<MLFeatureProvider>)predictionFromFeatures:(id<MLFeatureProvider>)input
                                           error:(NSError **)error
 {
-    /* The set of values is 1.1 MB of struct -- a value holds a dictionary of 256 pairs and an
-     * array with its own shape -- and a model is 326 KB, so neither is an automatic variable on a
-     * thread whose stack is a device's: the emulated iPad 2 faulted four bytes below its own stack
-     * pointer on the first prediction, and the host, whose stack is eight megabytes, never would.
-     * Both are on the heap, and every path out releases and frees them. */
     charon_ml_features *inputs = calloc(1, sizeof *inputs);
     charon_ml_features *outputs = calloc(1, sizeof *outputs);
     NSMutableDictionary<NSString *, MLFeatureValue *> *answered;
@@ -565,14 +488,6 @@
     }
     charon_ml_features_init(inputs);
     charon_ml_features_init(outputs);
-    /* A feature the caller did not supply, or supplied as the undefined value that stands for
-     * having not supplied it. The description says whether the model may do without it, and the
-     * ones it may not are reported here, by name, rather than being left to the interpreter.
-     *
-     * The code is the framework-level one, and that is measured rather than assumed: a real Core ML
-     * asked to predict without a required feature answers com.apple.CoreML with code 0, and the
-     * name of the feature is in the message. The port used to let the failure come out of the
-     * interpreter, which is where the same 0 came from by accident and without the name. */
     for (index = 0; index < _model.input_count; index++) {
         const charon_ml_feature *described = &_model.inputs[index];
         NSString *wanted = described->name != NULL ? @(described->name) : nil;
@@ -585,10 +500,6 @@
             charon_ml_features_release(outputs);
             free(inputs);
             free(outputs);
-            /* The release's own wording for a required feature the caller left out, measured
-             * against this host's own Core ML over tools/coreml's vision_image container:
-             * "Feature image is required but not specified." The type of the feature is not part of
-             * it, so it is not in this sentence either. */
             charon_ml_error(error, CHARON_ML_ERROR_GENERIC,
                             [NSString stringWithFormat:@"Feature %@ is required but not specified.", wanted]);
             return nil;
@@ -599,8 +510,6 @@
         MLFeatureValue *value = [input featureValueForName:name];
         charon_ml_value held;
         if (value == nil || value.isUndefined) {
-            /* An optional feature the caller left out, which a model may do without: the check
-             * above has already refused the ones it may not. */
             continue;
         }
         held = charon_ml_value_owned_copy([value charonValue]);
@@ -661,12 +570,6 @@
     if (answer == nil || options == nil || options.outputBackings.count == 0) {
         return answer;
     }
-    /* The backing objects a caller proposed: an MLMultiArray it allocated itself, which the
-     * answer is written into so that the caller never has to copy it out. A backing object that
-     * does not fit the answer -- the wrong shape, the wrong element type, not an array at all --
-     * is ignored rather than refused, which is what Core ML's own documentation says a framework
-     * does with one it cannot use, and the caller finds out by comparing the answer with the
-     * object it gave. */
     {
         NSMutableDictionary<NSString *, MLFeatureValue *> *moved = [NSMutableDictionary dictionary];
         NSEnumerator *names = [answer.featureNames objectEnumerator];
@@ -682,10 +585,6 @@
                 continue;
             }
             {
-                /* The numbers go into the caller's own buffer and the caller's object is what
-                 * the answer then names, so `[prediction featureValueForName:@"out"]
-                 * .multiArrayValue == backing` is true, which is the test Core ML documents for
-                 * whether a backing object was used. */
                 NSUInteger element;
                 for (element = 0; element < produced.count; element++) {
                     [wanting setObject:[produced objectAtIndexedSubscript:(NSInteger)element]
@@ -725,8 +624,6 @@
 
 - (id<MLBatchProvider>)predictionsFromBatch:(id<MLBatchProvider>)inputBatch error:(NSError **)error
 {
-    /* No options: the same run as the one with options, and Core ML's own options object is the
-     * one a caller gets from a fresh MLPredictionOptions, so the run is the same either way. */
     return [self predictionsFromBatch:inputBatch options:[[MLPredictionOptions alloc] init] error:error];
 }
 
@@ -753,8 +650,6 @@
         }
         answer = [self predictionFromFeatures:one options:options error:error];
         if (answer == nil) {
-            /* Which element failed is part of the answer: a batch of a thousand where the
-             * seven hundredth is wrong is a different thing to fix from a batch that is wrong. */
             if (error != NULL && *error != nil) {
                 charon_ml_error(error, [*error code],
                                 [NSString stringWithFormat:@"the prediction of element %ld failed: %@",
@@ -780,9 +675,6 @@
             continue;
         }
         if (key.scope != nil) {
-            /* A scoped key is a parameter of one named part of a pipeline, and this port's
-             * models name their parameters without a scope: there is no sub-model to scope one
-             * to, so the answer is the model's own error for a parameter it does not have. */
             charon_ml_error(error, CHARON_ML_ERROR_PARAMETERS,
                             [NSString stringWithFormat:@"'%@' is a parameter of the part called '%@', and this "
                                                        @"model has no part of that name", key.name, key.scope]);
@@ -800,9 +692,6 @@
 
 - (MLModelDescription *)modelDescription
 {
-    /* Built once and kept: it is the same description for the life of the model, and building it
-     * again for each call would walk the whole specification each time an application asks what a
-     * model wants -- which is once per prediction, usually. */
     if (_description == nil) {
         _description = [[MLModelDescription alloc] charon_initWithModel:&_model];
     }
@@ -831,9 +720,6 @@
         return nil;
     }
     if (url == nil || !url.isFileURL) {
-        /* The one I/O case a load has: measured against a real Core ML, which answers IO -- and
-         * only IO -- for a URL that is not a file's. A file that is not there, and a file that is
-         * not a model, are the generic case, which is what the same framework answers for those. */
         charon_ml_error(error, CHARON_ML_ERROR_IO,
                         @"a model is read from a file, and the URL given is not a file's");
         return nil;
@@ -863,9 +749,6 @@
             configuration:(MLModelConfiguration *)configuration
         completionHandler:(void (^)(MLModel *, NSError *))handler
 {
-    /* On a queue of its own, because a model read from a slow store is the reason this method
-     * exists: the caller's thread is not held up by a read it does not have to wait for. The
-     * handler is called exactly once, with the model or with the reason there was none. */
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSError *failure = nil;
         MLModel *model = [self modelWithContentsOfURL:url configuration:configuration error:&failure];
@@ -893,7 +776,6 @@
     });
 }
 
-/* A model out of an asset, which is the same read out of bytes rather than out of a file. */
 - (instancetype)charon_initWithContentsOfAsset:(MLModelAsset *)asset
                            configuration:(MLModelConfiguration *)configuration
                                    error:(NSError **)error
@@ -914,19 +796,6 @@
 
 #pragma mark - compiling
 
-/* A model compiled, which for this port means its container written into a bundle of the same
- * name. Apple's own compiled form is a private storage container this port does not read --
- * facts/CoreML/CoreML.md says so -- so what is written here is the specification's own message
- * under the name a compiled model keeps it, and a bundle written this way is read and run by
- * this port and by no other. It is a real, complete, working artefact rather than a refusal: a
- * caller that compiles a model to ship it in an app gets back a bundle that loads. */
-/* A model compiled, which for this port means its container written into a bundle of the same
- * shape, under a name of its own in the temporary directory. Apple's own compiled form is a
- * private storage container this port does not read -- facts/CoreML/CoreML.md says so -- so what
- * is written here is the specification's own message under the name a compiled model keeps it,
- * and a bundle written this way is read and run by this port and by no other. It is a real,
- * complete, working artefact rather than a refusal: a caller that compiles a model to ship it in
- * an app gets back a URL it can load a model from, which is what Core ML promises. */
 + (NSURL *)charon_compiledModelAtURL:(NSURL *)modelURL error:(NSError **)error
 {
     NSData *container = [NSData dataWithContentsOfFile:modelURL.path];
@@ -938,9 +807,6 @@
                         [NSString stringWithFormat:@"the model at %@ could not be read", modelURL.path]);
         return nil;
     }
-    /* A compiled model is a bundle, and a bundle is a directory: the name is the model's own
-     * name with .mlmodelc in place of .mlmodel, in a directory of this model's own so that two
-     * compilations of two models in the same temporary directory do not meet. */
     name = [[[modelURL.path lastPathComponent] stringByDeletingPathExtension]
         stringByAppendingPathExtension:@"mlmodelc"];
     directory = [NSTemporaryDirectory() stringByAppendingPathComponent:

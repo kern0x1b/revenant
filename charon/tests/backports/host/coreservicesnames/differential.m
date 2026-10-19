@@ -4,14 +4,6 @@
 #import <dlfcn.h>
 #import "check.h"
 
-// The port's kUTType names against the host's own CoreServices, which exports every one of them. Each
-// value was read out of the arm64e shared cache of iOS 18.0 through the symbol; this asks the running
-// system for the same names and compares, so a value mistyped between the cache and the source is a
-// failure here rather than a uniform type identifier no file would ever match.
-//
-// The names come from names.txt, which is the corpus's own list, so a name the source does not carry
-// is a failure and not a skip.
-
 static void check_named(BOOL passed, NSString *name, NSString *detail)
 {
     charon_check(passed, [name UTF8String], detail);
@@ -22,7 +14,6 @@ static NSString *plain(void *value)
     if (!value) {
         return @"(not exported here)";
     }
-    // dlsym gives the address of the variable, which holds the CFStringRef.
     CFStringRef string = *(CFStringRef __unsafe_unretained *)value;
     if (!string) {
         return @"(nil)";

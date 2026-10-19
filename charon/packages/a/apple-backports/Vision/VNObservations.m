@@ -93,11 +93,6 @@ static void charon_vision_decode(id object, NSCoder *coder)
     return _requestRevision;
 }
 
-/* How sure the observation is. Every observation this port makes starts at one -- an observation
- * that is a fact rather than a detection, such as a Core ML answer, is as sure as it can be --
- * and a detection sets its own. */
-/* The observation's own identity, which a caller uses to tell one observation from another of the
- * same request. Every observation is made with one, so it is never nil. */
 - (NSUUID *)uuid
 {
     return _uuid;
@@ -175,9 +170,6 @@ static void charon_vision_decode(id object, NSCoder *coder)
     NSString *_identifier;
 }
 
-/* A classification: the label the model gave and how sure it was. Vision builds these from a
- * Core ML classifier's label and probability outputs, and from nothing else -- a model that
- * answers with a dictionary of classes is the case this is for. */
 - (instancetype)charon_initWithIdentifier:(NSString *)identifier confidence:(float)confidence
 {
     VNClassificationObservation *built = [super init];
@@ -199,9 +191,6 @@ static void charon_vision_decode(id object, NSCoder *coder)
     NSString *_featureName;
 }
 
-/* One feature of a model's answer, held whole: whatever kind of value it is -- a number, a
- * string, a dictionary of scores, an array -- so a caller reads the answer the model gave rather
- * than a shape of it. */
 - (instancetype)charon_initWithFeatureValue:(MLFeatureValue *)featureValue featureName:(NSString *)featureName
 {
     VNCoreMLFeatureValueObservation *built = [super init];
@@ -228,7 +217,6 @@ static void charon_vision_decode(id object, NSCoder *coder)
     NSString *_featureName;
 }
 
-/* An image a model answered with, under the name of the output it came from. */
 - (instancetype)charon_initWithPixelBuffer:(CVPixelBufferRef)pixelBuffer featureName:(NSString *)featureName
 {
     VNPixelBufferObservation *built = [super init];
@@ -308,8 +296,6 @@ static void charon_vision_decode(id object, NSCoder *coder)
     NSUInteger _pointCount;
 }
 
-/* The header marks +new NS_UNAVAILABLE. The release answers it with NSObject's own +new, which is an allocation and an
- * -init, and so does this: an object of the class (facts/Vision/InitUnavailable11.md, tests/backports/host/vision-init11). */
 + (instancetype)new
 {
     return [[self alloc] init];

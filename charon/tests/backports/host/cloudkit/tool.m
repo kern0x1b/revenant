@@ -1,15 +1,3 @@
-// The harness the CloudKit differential runs through: the port's own CharonCKSignES256, the port's
-// own CharonCKVerifyES256, and the port's own public key, called directly - not a re-implementation,
-// and not a binary left in a work area. Everything it prints is the port's answer.
-//
-//   tool sign   <scalar-hex> <public-hex> <message-file> <der-out>
-//   tool verify <scalar-hex> <public-hex> <message-file> <der-in>
-//   tool low-s  <scalar-hex> <public-hex> <count>
-//
-// `low-s` is the check the OpenSSL differential cannot make: (r, s) and (r, n - s) both verify, so
-// forty checks pass with either. This one counts the s of every signature against half the group
-// order the port itself reports, which is how a wrong order or a wrong shift is caught.
-
 #import <Foundation/Foundation.h>
 #import "CharonCKWebAuth.h"
 
@@ -57,9 +45,6 @@ int main(int argc, char **argv)
             return ok ? 0 : 1;
         }
         if ([mode isEqualToString:@"low-s"]) {
-            // The assertion the OpenSSL round trip cannot make. Every signature made here must have
-            // an s at or below half the order, and the half comes from the port, so this catches a
-            // wrong order and a wrong shift alike.
             NSUInteger count = argc > 5 ? (NSUInteger)atoi(argv[5]) : 5000;
             const uint8_t *order = CharonCKGroupOrder();
             const uint8_t *half = CharonCKGroupOrderHalf();
@@ -73,8 +58,6 @@ int main(int argc, char **argv)
                 uint8_t der[80];
                 int length = CharonCKSignES256(scalar.bytes, body.bytes, body.length, der, sizeof der);
                 if (length <= 0) { selfVerifyFailed++; continue; }
-                // s is found by reading the two INTEGER lengths rather than by a fixed offset: a
-                // minimal encoding of a low-s signature is 70 bytes, so s does not begin at 40.
                 const uint8_t *s = CharonCKDERSignatureS(der, (size_t)length);
                 if (!s) { selfVerifyFailed++; continue; }
                 if (memcmp(s, half, 32) <= 0) { low++; } else { high++; }

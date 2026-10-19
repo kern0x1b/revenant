@@ -2,11 +2,6 @@
 #import <CoreMedia/CoreMedia.h>
 #import <VideoToolbox/VideoToolbox.h>
 
-// The string constants VideoToolbox's first held export of which is iOS 16.0. Where the values
-// come from, and why a value is not the constant's own name: the head of
-// VideoToolboxConstants7_0.m. The fifteen the held iOS 13.4 image exports first are in
-// VideoToolboxConstants13_4.m. An object carries the API of one release.
-
 const CFStringRef kVTCompressionPropertyKey_BaseLayerBitRateFraction = CFSTR("BaseLayerBitRateFraction");
 const CFStringRef kVTCompressionPropertyKey_BaseLayerFrameRateFraction = CFSTR("BaseLayerFrameRateFraction");
 const CFStringRef kVTCompressionPropertyKey_ConstantBitRate = CFSTR("ConstantBitRate");

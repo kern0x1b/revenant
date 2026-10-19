@@ -1,10 +1,3 @@
-// CKAcceptSharesOperation, which arrived in iOS 8.3 and not in iOS 10 with the rest of this file's
-// operations. The band machinery puts an object in the band of the release its API arrived in, so an
-// object carrying both 8.3's and 10.0.1's symbols belongs to no band at all: the gate refuses it as
-// "an object carries API that arrived in one release, so split it", and release-split reads the same
-// two releases out of the compiled symbols. It is its own file, and it is the same request and the
-// same answer as the operations beside it, over the same transport.
-
 #import "CharonCloudKit.h"
 #import "CharonCKConstants.h"
 #import "CharonCKSubscription.h"
@@ -53,9 +46,6 @@
         }
     }
     __unsafe_unretained CKAcceptSharesOperation *weakSelf = self;
-    // Accepting a share is the service taking the inviter into the share's own database, and the
-    // share that comes back is the one the caller now has: the record it is of, the participants and
-    // the zone it lives in.
     [self runMethod:@"POST" path:@"shares/accept" body:@{@"shareURLs": metadatas}
        completion:^(id answer, NSError *error) {
         CKAcceptSharesOperation *strongSelf = weakSelf;

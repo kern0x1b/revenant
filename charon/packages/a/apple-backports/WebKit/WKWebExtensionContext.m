@@ -1,10 +1,6 @@
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 #import "CharonWebExtension.h"
 
-/* The measured values of the context's constants. A notification NAME drops the "Notification" suffix
- * its symbol carries, and the two user-info keys are "permissions" and "matchPatterns" -- all read by
- * dlsym on this host, not written from the symbol names. */
-
 NSString *const WKWebExtensionContextErrorDomain = @"WKWebExtensionContextErrorDomain";
 NSString *const WKWebExtensionContextPermissionsWereGrantedNotification = @"WKWebExtensionContextPermissionsWereGranted";
 NSString *const WKWebExtensionContextPermissionMatchPatternsWereGrantedNotification = @"WKWebExtensionContextPermissionMatchPatternsWereGranted";
@@ -15,36 +11,6 @@ NSString *const WKWebExtensionContextDeniedPermissionMatchPatternsWereRemovedNot
 NSString *const WKWebExtensionContextErrorsDidUpdateNotification = @"WKWebExtensionContextErrorsDidUpdate";
 NSString *const WKWebExtensionContextNotificationUserInfoKeyPermissions = @"permissions";
 NSString *const WKWebExtensionContextNotificationUserInfoKeyMatchPatterns = @"matchPatterns";
-
-/* WKWebExtensionContext: what an extension, once it has a context, can do and be asked about.
- *
- * A context is SOFTWARE STATE, not a thing a machine either has or lacks, so it is carried and
- * callable. The host hands one out for a real extension and every member below has a measured answer
- * for a FRESH one -- one made from a manifest and never loaded into a web view -- taken by calling
- * +[WKWebExtensionContext contextForExtension:] on this host with an extension built from
- * $D/ext/manifest.json:
- *
- *   contextForExtension:ext  = 0x102e58330      a real object
- *   webExtension             = the extension    webExtensionController = nil, no controller has it
- *   uniqueIdentifier         = a fresh UUID per call -- two calls answered two different ones
- *   baseURL                  = webkit-extension://<that UUID>/
- *   optionsPageURL           = webkit-extension://<that UUID>/options.html
- *   overrideNewTabPageURL    = nil for a manifest with no chrome_url_overrides
- *   loaded 0   inspectable 0
- *   errors = the extension's own two      unsupportedAPIs = 0
- *   every permission set empty; every has* flag NO except hasInjectedContent, YES for a manifest
- *     with content_scripts
- *   webViewConfiguration = nil            openTabs 0  openWindows 0  focusedWindow nil
- *   commands = 1, and it is NOT the manifest's do-it: its identifier is _execute_action and its
- *     title is the action's default_title, because a manifest with an action section has that
- *     command synthesised for it
- *   inspectionName = the manifest's name, an em dash, and "Extension Background Page" for a
- *     manifest with a background section
- *
- * The two that need a LOADED context and so are answered from stored state a context has not got yet
- * are webExtensionController and webViewConfiguration, and the host answers nil for both on a fresh
- * context -- which is what this carries.
- */
 
 @implementation WKWebExtensionContext {
     __weak WKWebExtension *_webExtension;
@@ -58,9 +24,6 @@ NSString *const WKWebExtensionContextNotificationUserInfoKeyMatchPatterns = @"ma
 
 + (instancetype)contextForExtension:(WKWebExtension *)extension
 {
-    /* The host raises on anything that is not a WKWebExtension -- measured:
-     *   NSInternalInconsistencyException, reason: 'Invalid parameter not satisfying:
-     *   [extension isKindOfClass:WKWebExtension.class]' -- so this checks rather than lets it throw. */
     if (![extension isKindOfClass:[WKWebExtension class]])
         return nil;
     WKWebExtensionContext *context = [[self alloc] charon_initWithExtension:extension];
@@ -72,8 +35,6 @@ NSString *const WKWebExtensionContextNotificationUserInfoKeyMatchPatterns = @"ma
 {
     if ((self = [super init])) {
         _webExtension = extension;
-        /* A fresh identifier per context, and the base URL carries it: measured, two calls to
-         * contextForExtension: answered two different UUIDs and two different base URLs. */
         _uniqueIdentifier = [[[NSUUID UUID] UUIDString] copy];
         _commands = @[];
     }
@@ -85,8 +46,6 @@ NSString *const WKWebExtensionContextNotificationUserInfoKeyMatchPatterns = @"ma
     WKWebExtension *extension = _webExtension;
     if (extension == nil)
         return;
-    /* The command a manifest with an action section gets, which is not one the manifest wrote: the
-     * host answers identifier _execute_action and the title from the action's default_title. */
     NSMutableArray<WKWebExtensionCommand *> *commands = [NSMutableArray array];
     id actionSection = extension.manifest[@"action"];
     if (actionSection != nil) {
@@ -120,12 +79,6 @@ NSString *const WKWebExtensionContextNotificationUserInfoKeyMatchPatterns = @"ma
     return _uniqueIdentifier;
 }
 
-/* -isLoaded and -isInspectable, not -loaded and -inspectable: Apple's own header declares
-   `@property (nonatomic, readonly, getter=isLoaded) BOOL loaded` and `@property (nonatomic,
-   getter=isInspectable) BOOL inspectable` (WKWebExtensionContext.h:172 and :202), and the getter the
-   header names is the API. CharonWebExtension.h now carries the same two attributes, so the property
-   and the method that answers it agree with the release. */
-
 - (BOOL)isLoaded
 {
     return _loaded;
@@ -155,8 +108,6 @@ NSString *const WKWebExtensionContextNotificationUserInfoKeyMatchPatterns = @"ma
 
 - (NSURL *)overrideNewTabPageURL
 {
-    /* The host answers nil for a manifest with no chrome_url_overrides, which is what this carries;
-     * the page itself is a web view, and a context that has not been loaded has none. */
     return nil;
 }
 
@@ -232,7 +183,6 @@ NSString *const WKWebExtensionContextNotificationUserInfoKeyMatchPatterns = @"ma
 
 - (WKWebViewConfiguration *)webViewConfiguration
 {
-    /* nil on the host for a context that has not been loaded, and that is what this carries. */
     return nil;
 }
 

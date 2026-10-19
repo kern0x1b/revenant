@@ -9,19 +9,9 @@
 #pragma clang diagnostic ignored "-Wobjc-property-implementation"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-// The drop interaction's own question is declared before the drag asks it, because the drop's
-// category appears further down and the drag needs to know the drop will have the session.
 @interface UIDropInteraction (CharonDropQuery)
 - (BOOL)isEnabled;
 @end
-
-// The two interactions a drag is made of: one that lifts and carries, one that receives.
-//
-// The gestures are the release's own, which is what makes this a drag and not a swipe: a long press
-// lifts the item under the touch and a pan carries the preview that lift made, and letting go is the
-// drop. Nothing here reaches outside the application, because on this release there is no service to
-// reach: the preview is added to the application's own window, travels between the application's own
-// windows, and the drop is the one that started in the same process.
 
 @interface UIDragInteraction () <UIGestureRecognizerDelegate>
 @property (nonatomic, strong) CharonDragSession *session;
@@ -39,10 +29,6 @@
     BOOL _enabled;
 }
 
-// The class's own default is read here, where the class is available, and handed to the shared
-// helper that every band carries -- the helper may not name a symbol that only exists from iOS 11.
-// The value is the class's own answer and not a guess, and the helper and this class cannot drift
-// apart because it is this class that supplies it.
 + (void)initialize
 {
     if (self != [UIDragInteraction class])
@@ -50,8 +36,6 @@
     charon_set_drag_interaction_enabled_default([UIDragInteraction isEnabledByDefault]);
 }
 
-// Written out rather than synthesized: the package build treats an unsynthesized property here as an
-// error, and a synthesised one would be silent about which ivar it means.
 @synthesize session = _session;
 @synthesize preview = _preview;
 @synthesize lift = _lift;
@@ -94,8 +78,6 @@
 
 + (BOOL)isEnabledByDefault
 {
-    // A drag is off unless the application asks for it, which is what a release that has no drag
-    // service can honestly default to: nothing lifts unless an interaction for it exists.
     return YES;
 }
 
@@ -104,20 +86,6 @@
     return self.lift.view;
 }
 
-// The two halves of UIInteraction's move, and NEITHER is optional: the protocol declares both, and
-// -[UIView addInteraction:] sends them without asking. An interaction that answers neither cannot be
-// added to a view at all - measured, tests/backports/host/dragdrop:
-//   *** Terminating app due to uncaught exception 'NSInvalidArgumentException', reason:
-//       '-[CharonHostUIDragInteraction willMoveToView:]: unrecognized selector sent to instance'
-// The port's UIDropInteraction, UIPointerInteraction, UIPencilInteraction12, UITextInteraction and
-// UILargeContentViewer all answer both; this class was the one that did not.
-//
-// They are also what makes a drag work. -charon_installGestures builds the lift and the carry
-// recognisers, and a recogniser with no view never sees a touch, so before this the port's drag
-// interaction could be created, held, and configured and would never lift anything. The two
-// recognisers go onto the view the interaction arrives at and come off the one it leaves, which is
-// what -view reads back through -[UIGestureRecognizer view] and what the harness measures next to
-// the system's own UIDragInteraction.
 - (void)willMoveToView:(UIView *)view
 {
     [self.lift.view removeGestureRecognizer:self.lift];
@@ -140,8 +108,6 @@
         return;
     UILongPressGestureRecognizer *lift = [[UILongPressGestureRecognizer alloc] initWithTarget:self
                                                                                         action:@selector(charon_lift:)];
-    // A drag begins with a press that stays, which is what a long press is; a shorter one is a tap
-    // and a longer drag is a carry, so the two gestures cannot be confused for one another.
     lift.minimumPressDuration = 0.5;
     lift.delegate = self;
     UIPanGestureRecognizer *carry = [[UIPanGestureRecognizer alloc] initWithTarget:self
@@ -157,9 +123,6 @@
     return self.allowsSimultaneousRecognitionDuringLift;
 }
 
-// The lift: what is under the touch becomes the session's items, the delegate is asked, and the
-// preview is made from the view under the touch and put in the window so the carry has something to
-// move.
 - (void)charon_lift:(UILongPressGestureRecognizer *)recognizer
 {
     UIView *view = recognizer.view;
@@ -207,9 +170,6 @@
     }
 }
 
-// The carry: the preview follows the finger, and the drop interaction under it is asked what it
-// makes of the session as it moves, which is how a proposal reaches the delegate while the drag is
-// still in the air.
 - (void)charon_carry:(UIPanGestureRecognizer *)recognizer
 {
     CharonDragSession *session = self.session;
@@ -238,19 +198,12 @@
     }
 }
 
-// What is being dragged when the application has not said. A view cannot be put in an item provider
-// on this release — the provider writes objects that can be read back, and a view is not one — and
-// guessing a payload for it would move the wrong data, so a drag with no delegate says nothing is
-// being dragged and the lift ends there. The delegate is the only thing that knows.
 - (NSArray<UIDragItem *> *)charon_defaultItemsForView:(UIView *)view
 {
     (void)view;
     return @[];
 }
 
-// A delegate's targeted preview names the view it shows, and a lift with no preview shows the view
-// under the touch: either way what is carried is a still picture of a view, added to the
-// application's own window.
 - (void)charon_showPreview:(UIView *)preview at:(CGPoint)point inView:(UIView *)view
 {
     [self charon_showView:preview at:point inView:view];
@@ -276,7 +229,6 @@
 {
     if (!view || CGRectIsEmpty(view.bounds))
         return nil;
-    // The still picture a preview is: the view rendered as it is now, which is what a lift shows.
     UIGraphicsBeginImageContextWithOptions(view.bounds.size, NO, 0);
     [view.layer renderInContext:UIGraphicsGetCurrentContext()];
     UIImage *picture = UIGraphicsGetImageFromCurrentImageContext();
@@ -294,9 +246,6 @@
     preview.center = inWindow;
 }
 
-// The drop side: the interactions registered for this application are asked, in the order they were
-// added, which one will have the session under the point, and the one that says yes is told that the
-// session entered and then updated.
 - (void)charon_updateDropUnder:(CGPoint)point inView:(UIView *)view
 {
     for (UIDropInteraction *drop in self.dropTargets) {
@@ -334,9 +283,6 @@
     self.currentDrop = nil;
 }
 
-// The end of a drag: the drop that is under it is told to perform the drop and then to conclude it,
-// and the drag's own delegate is told what the drag ended with. A drag that was called off ends with
-// a cancelled operation and tells the same delegate.
 - (void)charon_finishDragCancelled:(BOOL)cancelled
 {
     CharonDragSession *session = self.session;

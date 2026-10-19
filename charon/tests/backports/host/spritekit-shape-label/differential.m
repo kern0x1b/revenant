@@ -1,7 +1,3 @@
-// differential.m - SKShapeNode, SKLabelNode, SKCropNode and SKEffectNode of iOS 7 (and the points form of SKShapeNode of
-// iOS 8), run against the host's own SpriteKit and against the port's objects, with one source. It is runtime only: no
-// SpriteKit header, typed objc_msgSend casts, and NSClassFromString for the classes, so the same program links either
-// side. CoreImage is linked on both sides for the filter. Each line is printed to stdout and compared line by line.
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
 #import <CoreImage/CoreImage.h>
@@ -50,14 +46,12 @@ static NSString *describeColour(id colour)
 static int elements;
 static int dumped;
 
-// A value rounded to a thousandth, with no negative zero, so that the two sides print the same text.
 static double clean(double value)
 {
     double rounded = round(value * 1000) / 1000;
     return rounded == 0 ? 0 : rounded;
 }
 
-// One path element on one line: its index, its type and its points.
 static void dumpElement(void *info, const CGPathElement *element)
 {
     (void)info;
@@ -111,7 +105,6 @@ int main(void)
     Class effectClass = NSClassFromString(@"SKEffectNode");
     Class spriteClass = NSClassFromString(@"SKSpriteNode");
 
-    // Shapes: the path and the constructors, with their measured geometry.
     CGMutablePathRef rect = CGPathCreateMutable();
     CGPathAddRect(rect, NULL, CGRectMake(0, 0, 40, 20));
     id given = ((ObjectWithPath)objc_msgSend)(shapeClass, S("shapeNodeWithPath:"), rect);
@@ -133,7 +126,6 @@ int main(void)
     shape("points 0", ((ObjectWithPoints)objc_msgSend)(shapeClass, S("shapeNodeWithPoints:count:"), four, 0));
     CGPathRelease(rect);
 
-    // The spline through points, element by element: the host's curve is measured as its control points, not as a box.
     CGPoint square[4] = {{0, 0}, {10, 0}, {10, 10}, {0, 10}};
     CGPoint triangle[3] = {{0, 0}, {10, 0}, {10, 10}};
     CGPoint pair[2] = {{0, 0}, {10, 10}};
@@ -147,7 +139,6 @@ int main(void)
     splinePath("spline none", ((ObjectWithPoints)objc_msgSend)(shapeClass, spline, square, 0));
     splinePath("spline ten", ((ObjectWithPoints)objc_msgSend)(shapeClass, spline, ten, 10));
 
-    // The stroke and fill textures: stored as the same object, cleared by nil, and no change to the colours.
     id textureClass = NSClassFromString(@"SKTexture");
     unsigned char pixels[16] = {0};
     id base = ((ObjectWithData)objc_msgSend)(textureClass, S("textureWithData:size:"), [NSData dataWithBytes:pixels length:16], CGSizeMake(2, 2));
@@ -164,7 +155,6 @@ int main(void)
     printf("fillTexture cleared=%d strokeTexture kept=%d\n", ((ObjectGetter)objc_msgSend)(textured, S("fillTexture")) == nil,
            ((ObjectGetter)objc_msgSend)(textured, S("strokeTexture")) == texture);
 
-    // Shape defaults, then the stored values.
     id shape0 = ((ObjectWithPath)objc_msgSend)(shapeClass, S("shapeNodeWithPath:"), NULL);
     printf("stroke=%s\n", [describeColour(((ObjectGetter)objc_msgSend)(given, S("strokeColor"))) UTF8String]);
     printf("fill=%s\n", [describeColour(((ObjectGetter)objc_msgSend)(given, S("fillColor"))) UTF8String]);
@@ -193,7 +183,6 @@ int main(void)
     printf("path after nil set=%d\n", ((PathGetter)objc_msgSend)(given, S("path")) == NULL);
     printf("default path of a fresh shape nil=%d\n", ((PathGetter)objc_msgSend)(shape0, S("path")) == NULL);
 
-    // Labels: the text and the members, from each of the three constructors.
     id text = ((ObjectWithString)objc_msgSend)(labelClass, S("labelNodeWithText:"), @"Hi");
     printf("label class=%s text=%s font=%s size=%g\n", [NSStringFromClass([text class]) UTF8String],
            [((ObjectGetter)objc_msgSend)(text, S("text")) UTF8String], [((ObjectGetter)objc_msgSend)(text, S("fontName")) UTF8String],
@@ -222,7 +211,6 @@ int main(void)
            (long)((IntGetter)objc_msgSend)(text, S("horizontalAlignmentMode")), (long)((IntGetter)objc_msgSend)(text, S("verticalAlignmentMode")),
            (long)((IntGetter)objc_msgSend)(text, S("numberOfLines")), ((FloatGetter)objc_msgSend)(text, S("preferredMaxLayoutWidth")));
 
-    // Crop: no mask at first, then the mask it is given.
     id crop = ((ObjectGetter)objc_msgSend)(cropClass, S("node"));
     printf("crop class=%s mask nil=%d\n", [NSStringFromClass([crop class]) UTF8String], ((ObjectGetter)objc_msgSend)(crop, S("maskNode")) == nil);
     id white = ((ColorMaker)objc_msgSend)(NSClassFromString(@"NSColor"), S("colorWithDeviceRed:green:blue:alpha:"), 1, 1, 1, 1);
@@ -230,7 +218,6 @@ int main(void)
     ((VoidObject)objc_msgSend)(crop, S("setMaskNode:"), mask);
     printf("mask same=%d\n", ((ObjectGetter)objc_msgSend)(crop, S("maskNode")) == mask);
 
-    // Effects: the defaults of the flags, then the stored values and the filter.
     id effect = ((ObjectGetter)objc_msgSend)(effectClass, S("node"));
     printf("effect class=%s filter nil=%d center=%d enable=%d raster=%d blendMode=%ld\n", [NSStringFromClass([effect class]) UTF8String],
            ((ObjectGetter)objc_msgSend)(effect, S("filter")) == nil, ((BoolGetter)objc_msgSend)(effect, S("shouldCenterFilter")),

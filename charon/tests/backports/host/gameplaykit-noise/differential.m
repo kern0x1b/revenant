@@ -1,10 +1,3 @@
-// differential.m -- the port's noise sources held against what the host's own GameplayKit answers.
-//
-// The host is the oracle and it is measured, not called: the port's classes and the host's have the
-// same names, so loading both into one process would answer one of the two for the other. measure.m
-// prints what the host answers; every expectation below is one of its numbers, and the check's name says
-// which line it came from.
-
 #import <Foundation/Foundation.h>
 #import <GameplayKit/GameplayKit.h>
 #import <objc/runtime.h>
@@ -33,8 +26,6 @@ static void contract(BOOL ok, NSString *what, NSString *detail)
 int main(void)
 {
     @autoreleasepool {
-        // Each factory hands back the class it names, with the numbers it was given. A factory that
-        // answered a shared class instead would be one value wrong in eight places.
         {
             GKPerlinNoiseSource *perlin = [GKPerlinNoiseSource perlinNoiseSourceWithFrequency:1.5 octaveCount:3
                                                                                       persistence:0.25 lacunarity:2.5 seed:11];
@@ -69,7 +60,6 @@ int main(void)
             host([spheres isMemberOfClass:[GKSpheresNoiseSource class]] && spheres.frequency == 1.0,
                  @"the spheres factory answers a spheres source with the frequency, as the host's does");
         }
-        // A property set after the fact is read back, a negative seed included.
         {
             GKPerlinNoiseSource *perlin = [[GKPerlinNoiseSource alloc] initWithFrequency:2.0 octaveCount:1
                                                                            persistence:0.5 lacunarity:2.0 seed:9];
@@ -98,7 +88,6 @@ int main(void)
             host(voronoi.displacement == 0.125 && !voronoi.isDistanceEnabled && voronoi.seed == -11,
                  @"a voronoi source's displacement, distance flag and seed are read back, as the host's are");
         }
-        // The hierarchy, as the host answers it: all nine under the root, three under coherent.
         {
             GKPerlinNoiseSource *perlin = [GKPerlinNoiseSource perlinNoiseSourceWithFrequency:1 octaveCount:1
                                                                                persistence:1 lacunarity:1 seed:0];
@@ -121,14 +110,12 @@ int main(void)
                  [checkerboard isKindOfClass:[GKNoiseSource class]],
                  @"voronoi, constant, cylinders, spheres and checkerboard are noise sources, as they are on the host");
         }
-        // A base instance is a GKNoiseSource and answers neither number.
         {
             GKNoiseSource *base = [[GKNoiseSource alloc] init];
             host([base isMemberOfClass:[GKNoiseSource class]] &&
                  ![base respondsToSelector:@selector(frequency)] && ![base respondsToSelector:@selector(value)],
                  @"a base source is a GKNoiseSource and answers neither a frequency nor a value, as the host's does");
         }
-        // Nothing validates a value: zeros and a negative constant are kept as given.
         {
             GKPerlinNoiseSource *perlin = [[GKPerlinNoiseSource alloc] initWithFrequency:0 octaveCount:0
                                                                            persistence:0 lacunarity:0 seed:0];
@@ -140,9 +127,6 @@ int main(void)
             GKCheckerboardNoiseSource *checkerboard = [GKCheckerboardNoiseSource checkerboardNoiseWithSquareSize:0];
             host(checkerboard.squareSize == 0.0, @"a square size of zero is kept, as the host keeps it");
         }
-        // The property each of the two declaring subclasses binds: persistence is theirs, and it is
-        // the same storage every coherent source uses, so a billow source and a perlin source of the
-        // same numbers answer the same -- and neither can be moved by writing through the other.
         {
             GKPerlinNoiseSource *perlin = [[GKPerlinNoiseSource alloc] initWithFrequency:1 octaveCount:1
                                                                            persistence:0.5 lacunarity:1 seed:0];

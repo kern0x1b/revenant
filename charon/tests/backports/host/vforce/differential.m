@@ -1,11 +1,3 @@
-// The port's vForce entries held against the host's own vForce, case by case, over the values that decide
-// a cube root: the sign change at zero, the perfect cubes and their neighbours, the denormals and the
-// extremes, and a spread of ordinary magnitudes.
-//
-// vForce's header says the exact value returned and the treatment of denormals depend on the machine's microarchitecture and on the operating system version,
-// so the comparison is to a tolerance rather than
-// exact - and the tolerance's size is what the facts file records, with the numbers below as the evidence.
-
 #import <Accelerate/Accelerate.h>
 #import <Foundation/Foundation.h>
 #include <math.h>
@@ -30,8 +22,6 @@ static void report(int passed, const char *name, const char *why)
     fflush(stdout);
 }
 
-// The values: zero, the perfect cubes and their two neighbours either side, the smallest normal, the
-// denormals below it, the extremes, and a geometric spread.
 static const double inputs[] = {
     0.0,        -0.0,       1.0,        -1.0,      8.0,        -8.0,      27.0,      -27.0,
     125.0,      -125.0,     0.9999999,  1.0000001, 7.999999,   8.000001,  2.0,        -2.0,
@@ -60,12 +50,7 @@ int main(void)
         for (int at = 0; at < INPUTS; at++) {
             double mine_answer = mine[at], host_answer = theirs[at];
             char label[96];
-            // One ulp, or a relative part in a million where the answer is not near zero: a cube root
-            // computed two ways differs in the last place and nowhere else, and this is the size of the
-            // difference the measurement shows.
             double scale = fabs(host_answer) > 1.0 ? fabs(host_answer) : 1.0;
-            // Two infinities of one sign are the same answer and their difference is a NaN, so they are
-            // compared as themselves rather than through a subtraction that cannot come back.
             int agreed = mine_answer == host_answer || fabs(mine_answer - host_answer) <= 1e-6 * scale;
             snprintf(detail, sizeof detail, "of %.17g the port says %.17g and the host %.17g", inputs[at], mine_answer,
                      host_answer);
@@ -79,7 +64,6 @@ int main(void)
             snprintf(label, sizeof label, "vvcbrtf of %.9g", (double)xf[at]);
             report(agreed, label, agreed ? "" : detail);
         }
-        // a length of zero, and a length of one, which is how the family is usually called
         {
             int none = 0, one = 1;
             double out = 1234.5, in = 27.0, host = 1234.5;

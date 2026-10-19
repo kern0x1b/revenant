@@ -41,8 +41,6 @@ UIEdgeInsets charon_content_overlay_insets(UIViewController *controller, UIView 
     UIEdgeInsets insets = charon_status_bar_overlap(view);
     UINavigationController *navigation = controller.navigationController;
     UITabBarController *tabs = controller.tabBarController;
-    // A toolbar the controller keeps hidden covers nothing, and its getter makes the bar the first time it is asked, so a hidden
-    // one is not asked for (facts/UIKit/UIViewSafeArea.md).
     UIToolbar *toolbar = navigation.toolbarHidden ? nil : navigation.toolbar;
     UIEdgeInsets bars[] = {charon_bar_overlap(navigation.navigationBar, view, insets.top),
                            charon_bar_overlap(toolbar, view, insets.top),

@@ -5,29 +5,19 @@ package("quicly")
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://github.com/h2o/quicly.git")
-    -- The date of the commit, for the same reason as packages/p/picotls: this tree is pinned by its
-    -- commit and carries no release tag the port would build.
     add_versions("2026.09.25", "0a163c0e45e728a33f83261d8cf957ac0006935a")
 
-    -- picotls as a package, and not as quicly's own submodule: one TLS in the process, and the one
-    -- the port's own TLS and a QUIC connection would both use. quicly's tree still has to be fetched
-    -- whole, so its klib (khash) and picotest submodules are checked out below, at what its own git
-    -- objects record, and only their headers are used.
     add_deps("charon@apple-compat", {alias = "apple-compat"})
     add_deps("charon@picotls 2026.09.24", {alias = "picotls"})
     add_links("picotls-minicrypto", "picotls-core")
 
     add_configs("recipe", {description = "The digest of this recipe, so a changed flag is a different archive.", default = hash.strhash128(hash.sha256(path.join(os.scriptdir(), "xmake.lua"))), type = "string", readonly = true})
 
-    -- The library the project's own CMakeLists.txt names, all fourteen: no t/, no fuzz/, and the cli.
-    -- `-femulated-tls` for the same reason as in packages/p/picotls, and from the same toolchain
-    -- setting: quicly's headers include picotls's, so the flag reaches picotls's thread-local here too.
     local SOURCES = {
         "lib/frame.c", "lib/cc-cubic.c", "lib/cc-pico.c", "lib/defaults.c", "lib/local_cid.c",
         "lib/loss.c", "lib/quicly.c", "lib/ranges.c", "lib/rate.c", "lib/recvstate.c",
         "lib/remote_cid.c", "lib/sendstate.c", "lib/sentmap.c", "lib/streambuf.c"
     }
-    -- klib is quicly's khash, and it is the only submodule this build reads a byte of.
     local SUBMODULES = {["deps/klib"] = true, ["deps/picotest"] = true}
 
     on_install("iphoneos", function (package)
@@ -49,8 +39,6 @@ package("quicly")
                                           "-I" .. path.join(os.curdir(), "include"),
                                           "-I" .. os.curdir()})
 
-        -- quicly-tracer.h, which its own CMakeLists.txt generates from its own probe description with
-        -- its own script; the build is not a CMake one, so the step is done here rather than skipped.
         local tracer = path.join(os.curdir(), "quicly-tracer.h")
         os.vrunv("perl", {path.join(os.curdir(), "misc", "probe2trace.pl"), "-a", "tracer"},
                  {stdout = tracer, inputs = path.join(os.curdir(), "quicly-probes.d")})
@@ -71,8 +59,6 @@ package("quicly")
         for _, header in ipairs(os.files(path.join(os.curdir(), "include", "**", "*.h"))) do
             os.cp(header, path.join(include, path.directory(header)) .. "/")
         end
-        -- the generated header is part of what a consumer compiles against, so it is installed with
-        -- the rest rather than left in the build tree
         os.cp(tracer, path.join(include, "quicly", "quicly-tracer.h"))
         for _, notice in ipairs({"LICENSE", "README.md"}) do
             if os.isfile(path.join(os.curdir(), notice)) then

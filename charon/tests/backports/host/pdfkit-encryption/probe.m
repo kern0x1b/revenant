@@ -1,10 +1,3 @@
-// The same source, built against the host's PDFKit (no CHARON_PORT) and against the port's own
-// CharonPDFKit.h (-DCHARON_PORT). One key=value line per fact, so the two outputs can be diffed.
-//
-// The facts are the document's encryption state and what unlocking it does to that state, because
-// those are the members the port answered NO for without reading the file: /Encrypt was not reachable
-// from a CGPDFDocument's trailer, but CoreGraphics exports the reader for it (CGPDFDocumentIsEncrypted,
-// CGPDFDocumentIsUnlocked, CGPDFDocumentUnlockWithPassword).
 #import <Foundation/Foundation.h>
 #ifdef CHARON_PORT
 #import "CharonPDFKit.h"
@@ -43,14 +36,12 @@ int main(int argc, char **argv)
             }
             report(name, doc, @"opened");
 
-            // no password at all, on a locked document: NO, and the document stays locked
             if (doc.isLocked) {
                 BOOL none = [doc unlockWithPassword:nil];
                 printf("%s.unlockNil=%d\n", name.UTF8String, (int)none);
                 printf("%s.afterNil.isLocked=%d\n", name.UTF8String, (int)doc.isLocked);
             }
 
-            // a wrong password first: it must not unlock, and must not post the notification
             notifications = 0;
             id observer = [[NSNotificationCenter defaultCenter] addObserverForName:PDFDocumentDidUnlockNotification
                                                                             object:doc queue:nil usingBlock:^(NSNotification *n) { counted(n); }];
@@ -67,8 +58,6 @@ int main(int argc, char **argv)
             [[NSNotificationCenter defaultCenter] removeObserver:observer];
         }
 
-        // a document with no file behind it: nothing is encrypted, nothing is locked, and there is
-        // no password to take, but "unlocking" it is not an error
         PDFDocument *empty = [[PDFDocument alloc] init];
         printf("empty.isEncrypted=%d\n", (int)empty.isEncrypted);
         printf("empty.isLocked=%d\n", (int)empty.isLocked);

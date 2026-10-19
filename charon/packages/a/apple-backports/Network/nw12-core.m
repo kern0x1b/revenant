@@ -1,14 +1,3 @@
-/*
- * The objects of Network's C API that arrived with the framework itself, iOS 12: the retain and
- * release of an nw_object, an error, an endpoint, a content context, the identity of a protocol and
- * the settings of the four protocols that had one that day - IP, TCP, TLS and UDP.
- *
- * Everything here is the port's own object graph over data the program gave it, except the socket
- * address of an endpoint, which is the address itself. What a connection does with a stack it is
- * given is nw12-connection.m's business; what the program can ask of the objects themselves is
- * answered here, and every getter's default is the default the SDK documents for it.
- */
-
 #import "CharonNW.h"
 #import "CharonNWSupport.h"
 
@@ -18,10 +7,6 @@
 
 #pragma mark - nw_object
 
-/* The header makes these two Objective-C macros whenever the file is Objective-C, so a program's
-   nw_retain is a message and needs no symbol; these are the C functions of the same name, for a C
-   translation unit and for the two of them to be found where the SDK declares them. The macros are
-   taken back first, or the definitions below would be macros too. */
 #undef nw_retain
 #undef nw_release
 
@@ -78,16 +63,10 @@ nw_endpoint_t nw_endpoint_create_host(const char *hostname, const char *port)
     if (!hostname)
         return NULL;
     CharonNWEndpoint *endpoint = [[CharonNWEndpoint alloc] init];
-    /* The port is what makes a host endpoint one: a host with no port, or with a port that names
-       neither a number nor a service, is the invalid endpoint, which is what the host's own Network
-       makes of it (tests/backports/host/network-objects). */
     uint16_t number = 0;
     if (!charon_nw_resolve_port(port, &number))
         return NULL;
     endpoint->_port = [NSString stringWithFormat:@"%u", number];
-    /* A host that is already an address is not looked up: it is the address, and the endpoint says
-       so, which is what lets a connection open it without a resolver. The host is kept either way,
-       because an address endpoint answers the host it was made from as its own text. */
     CFDataRef address = NULL;
     if (charon_nw_host_is_address(hostname, number, &address)) {
         endpoint->_type = nw_endpoint_type_address;
@@ -119,9 +98,6 @@ nw_endpoint_t nw_endpoint_create_address(const struct sockaddr *address)
 
 nw_endpoint_t nw_endpoint_create_bonjour_service(const char *name, const char *type, const char *domain)
 {
-    /* A service needs all three of what it is: without a name there is nothing to publish, without a
-       type there is nothing to look for, and without a domain there is nowhere to publish it. Each
-       of those is refused, as the host's own Network refuses it (tests/backports/host/network-objects). */
     if (!name || !*name || !type || !*type || !domain || !*domain)
         return NULL;
     CharonNWEndpoint *endpoint = [[CharonNWEndpoint alloc] init];
@@ -129,8 +105,6 @@ nw_endpoint_t nw_endpoint_create_bonjour_service(const char *name, const char *t
     endpoint->_bonjourName = @(name);
     endpoint->_bonjourType = @(type);
     endpoint->_bonjourDomain = @(domain);
-    /* The port of a service is not in its name: it comes from the record the service publishes, and
-       until that is resolved the port is zero - which is what the port string says as well. */
     endpoint->_port = @"0";
     return endpoint;
 }
@@ -151,8 +125,6 @@ const char *nw_endpoint_get_hostname(nw_endpoint_t endpoint)
 
 uint16_t nw_endpoint_get_port(nw_endpoint_t endpoint)
 {
-    /* Host byte order, as the header says, and 0 for an endpoint with no port. The port is kept as the
-       number it names, so this is that number. */
     CharonNWEndpoint *value = (CharonNWEndpoint *)endpoint;
     if (!value || !value->_port.length)
         return 0;
@@ -227,8 +199,6 @@ static CharonNWProtocolDefinition *charon_definition(NSString *family, uint32_t 
     return definition;
 }
 
-/* The built-in protocols each have one definition for the whole process, as the SDK's own do: a
-   stack built twice compares equal to itself. */
 static nw_protocol_definition_t charon_builtin_definition(NSString *family)
 {
     static NSMutableDictionary *cache;
@@ -253,10 +223,6 @@ bool nw_protocol_definition_is_equal(nw_protocol_definition_t first, nw_protocol
     if (!first || !second)
         return false;
     CharonNWProtocolDefinition *a = (CharonNWProtocolDefinition *)first, *b = (CharonNWProtocolDefinition *)second;
-    /* A framer's definition is made afresh every time and belongs to the program that made it, so two
-       of them are not the same protocol even under one name: they carry different start handlers. The
-       built-in protocols each have one definition for the whole process, so those compare by what
-       they are. Both are what the host's own Network answers (tests/backports/host/network-objects). */
     if (a->_payload || b->_payload)
         return false;
     return a->_flags == b->_flags && [a->_family isEqualToString:b->_family] &&
@@ -319,8 +285,6 @@ nw_protocol_options_t nw_tls_create_options(void)
 
 static bool charon_metadata_is(nw_protocol_metadata_t metadata, NSString *family)
 {
-    /* The options of a protocol and the metadata of one are different objects, and a predicate about
-       a message is false for the options: only metadata carries a message's own values. */
     CharonNWProtocolMetadata *value = (CharonNWProtocolMetadata *)metadata;
     if (![value isKindOfClass:[CharonNWProtocolMetadata class]])
         return false;
@@ -448,7 +412,6 @@ nw_content_context_t nw_content_context_create(const char *context_identifier)
     CharonNWContentContext *context = [[CharonNWContentContext alloc] init];
     context->_identifier = @(context_identifier);
     context->_metadata = [NSMutableDictionary dictionary];
-    /* A context is a relative priority of "normal" and no expiration until it is told otherwise. */
     context->_relativePriority = 0.5;
     context->_expirationMilliseconds = 0;
     context->_isFinal = false;
@@ -462,9 +425,6 @@ const char *nw_content_context_get_identifier(nw_content_context_t context)
 
 double nw_content_context_get_relative_priority(nw_content_context_t context)
 {
-    /* A context that has been declared final reports the defaults, whatever it was told before: the
-       end of its message is already decided, and the host's own Network answers it that way
-       (tests/backports/host/network-objects). */
     CharonNWContentContext *value = (CharonNWContentContext *)context;
     if (!value)
         return 0.0;
@@ -473,9 +433,6 @@ double nw_content_context_get_relative_priority(nw_content_context_t context)
 
 void nw_content_context_set_relative_priority(nw_content_context_t context, double relative_priority)
 {
-    /* A context that has been declared final is the end of its message: what it carries is already
-       decided, so a later change of its priority or its expiration is not taken. That is what the
-       host's own Network does, measured (tests/backports/host/network-objects). */
     CharonNWContentContext *value = (CharonNWContentContext *)context;
     if (value && !value->_isFinal)
         value->_relativePriority = relative_priority;
@@ -509,15 +466,12 @@ void nw_content_context_set_is_final(nw_content_context_t context, bool is_final
 
 nw_content_context_t nw_content_context_copy_antecedent(nw_content_context_t context)
 {
-    /* The antecedent itself, held: the context a message is an answer to is the one that was set,
-       which is what the host's own Network answers, measured (tests/backports/host/network-objects). */
     CharonNWContentContext *value = (CharonNWContentContext *)context;
     return value ? value->_antecedent : NULL;
 }
 
 void nw_content_context_set_antecedent(nw_content_context_t context, nw_content_context_t antecedent_context)
 {
-    /* A context that is final takes no antecedent either: what it carries is already decided. */
     CharonNWContentContext *value = (CharonNWContentContext *)context;
     if (value && !value->_isFinal)
         value->_antecedent = (CharonNWContentContext *)antecedent_context;

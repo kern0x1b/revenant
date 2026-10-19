@@ -1,20 +1,3 @@
-// PKPaymentMethod, 9.0: the instrument a payment was made with, as the application is told about it.
-//
-// The 9.0 release's surface (measured with tools/objc-class-surface.lua over the armv7 cache of iOS 9.0) is an NSObject
-// with -type, -displayName, -network and -paymentPass, each with its setter, -initWithPaymentPass:obfuscateNetworks:,
-// -copyWithZone:, -initWithCoder:, -encodeWithCoder: and +supportsSecureCoding. Nothing else is its own; the later
-// members (-secureElementPass from 13.4, -billingAddress from 13.0) are not carried.
-//
-// A method is a description the caller can read back. A method built from nothing answers nil and 0 in every member,
-// which the host answers for a fresh one. The strings are copied on the way in, as the release's copy attributes say
-// for the strings. The payment pass is the one member this device cannot fill: a pass that carries payment data needs a
-// Secure Element, which the device does not have, so -initWithPaymentPass:obfuscateNetworks: answers the empty method for
-// any pass. The host answers the same for a fresh pass (measured on macOS PassKit with a fresh PKPaymentPass: type 0, nil
-// network, nil paymentPass).
-//
-// The coder keys are the four members' own names. The host's archive of this class uses those names for the same four
-// members (measured on macOS PassKit: type as a number, the others as strings or null); its other fields are later
-// releases' members, which the 9.0 surface does not carry, so they are not written here.
 #import <Foundation/Foundation.h>
 #import <PassKit/PassKit.h>
 
@@ -35,8 +18,6 @@
 
 - (instancetype)initWithPaymentPass:(id)paymentPass obfuscateNetworks:(BOOL)obfuscateNetworks
 {
-    // The device has no Secure Element, so no pass it could be given carries payment data: the method is the empty one
-    // whatever pass it is given, and the flag has nothing to obfuscate.
     (void)paymentPass;
     (void)obfuscateNetworks;
     return [super init];

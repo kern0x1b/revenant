@@ -1,14 +1,3 @@
-// A command-line test of the twenty-two elementwise vDSP entry points of Accelerate on the device: every
-// one of them called, and every answer compared with the one the host's own vDSP gives, which
-// host/vdsp measures in the same order these cases run in.
-//
-// The values below are the host's, copied from tests/backports/host/vdsp; the operations that are exact in
-// the scalar type they use are compared exactly, and only the two sums over a vector — the ramp, the dot
-// products and the distance — are compared to a tolerance, because two summations of the same terms in a
-// different order differ in the last place a double has.
-//
-// It needs the package built with accelerate = true.
-
 #import <Accelerate/Accelerate.h>
 #import <Foundation/Foundation.h>
 #include <dlfcn.h>
@@ -17,7 +6,6 @@
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-// Whether a name in this process comes from the backports' own library and not from the release.
 static BOOL fromBackports(const char *name)
 {
     void *symbol = dlsym(RTLD_DEFAULT, name);
@@ -57,8 +45,6 @@ static unsigned charon_read_uint24(const vDSP_uint24 *value, int at)
     return (unsigned)(value[at].bytes[0] | (value[at].bytes[1] << 8) | (value[at].bytes[2] << 16));
 }
 
-// What each side wrote, and whether it is what the host wrote: a fill value no case is expected to write
-// makes an element neither side touched a difference.
 static const float kFill = -987654.0f;
 static const double kFillD = -987654.0;
 static const int kFillI = -987654;
@@ -93,7 +79,6 @@ int main(int argc, char **argv)
         CHECK(fromBackports("vDSP_vswmax"), "vDSP_vswmax comes from the backports");
         CHECK(fromBackports("vDSP_dotpr2D"), "vDSP_dotpr2D comes from the backports");
 
-        // the 24-bit readers
         {
             const int signed_values[6] = {0, 1, -1, 8388607, -8388608, -12345};
             const unsigned unsigned_values[6] = {0, 1, 8388607, 8388608, 16777215, 12345};
@@ -115,7 +100,6 @@ int main(int argc, char **argv)
             vDSP_vfltu24(unsigned24, 1, out, 1, 6);
             CHECK(out[0] == 0.0f && out[3] == 8388607.0f && out[4] == 8388608.0f && out[5] == 16777215.0f,
                   "vDSP_vfltu24 of the same six, unsigned");
-            // the scale is a scalar at B[0] and is applied as it stands
             const float scales[4] = {1.0f, 2.0f, -1.0f, 0.0f};
             for (int which = 0; which < 4; which++) {
                 float scale[4] = {scales[which], 0.0f, 0.0f, 0.0f};
@@ -134,7 +118,6 @@ int main(int argc, char **argv)
                     right = right && out[at] == scales[which] * (float)unsigned_values[at];
                 CHECK(right, "vDSP_vfltsmu24 likewise, and a negative scale is not clamped");
             }
-            // the two clamps
             const float inputs[6] = {1.0f, -1.0f, 0.5f, -0.5f, 2.0f / 3.0f, 100.0f};
             const float big[4] = {8388608.0f, 0.0f, 0.0f, 0.0f};
             vDSP_int24 out24[8];
@@ -155,7 +138,6 @@ int main(int argc, char **argv)
             CHECK(right, "vDSP_vsmfixu24 clamps to [0, 16777215], and a negative result becomes 0");
         }
 
-        // the integer add
         {
             const int a[6] = {1, -2, 3, -4, 5, -6}, b[6] = {10, 20, -30, 40, -50, 60}, want[6] = {11, 18, -27, 36, -45, 54};
             int out[8];
@@ -172,7 +154,6 @@ int main(int argc, char **argv)
             CHECK(out[0] == 11 && out[1] == 23 && out[2] == -25, "vDSP_vaddi with a stride of two on the first");
         }
 
-        // the split-complex products: the accumulator is the last operand
         {
             float ar[4] = {1, 2, 3, 4}, ai[4] = {5, 6, 7, 8};
             float br[4] = {2, 0, -1, 3}, bi[4] = {0, 1, 1, 0};
@@ -192,7 +173,6 @@ int main(int argc, char **argv)
             vDSP_zvmmaa(&E, 1, &F, 1, &G, 1, &H, 1, &I, 1, &J, 1, 3);
             CHECK(jr[0] == 8.0f && ji[0] == 51.0f && jr[1] == 12.0f && ji[1] == 61.0f,
                   "vDSP_zvmmaa is A * B + C * D + E, in that order");
-            // the same two in double, from the same body
             double dar[4] = {1, 2, 3, 4}, dai[4] = {5, 6, 7, 8};
             double dbr[4] = {2, 0, -1, 3}, dbi[4] = {0, 1, 1, 0};
             double dcr[4] = {1, 1, 0, -1}, dci[4] = {1, -1, 1, 1};
@@ -202,7 +182,6 @@ int main(int argc, char **argv)
             CHECK(ddr[0] == 3.0 && ddi[0] == 11.0, "vDSP_zvmaD answers the same as vDSP_zvma");
         }
 
-        // the two sums and differences: the second output is I1 - I0
         {
             const float a[6] = {1, 2, 3, 4, 5, 6}, b[6] = {0.5f, -0.5f, 1.0f, -1.0f, 2.0f, -2.0f};
             float o0[8], o1[8];
@@ -222,7 +201,6 @@ int main(int argc, char **argv)
             CHECK(sameDoubles(d1, wantd1, 4), "vDSP_vaddsubD's difference is the second operand first, too");
         }
 
-        // the ramps, and the start each leaves behind
         {
             const double a[5] = {1, 2, 3, 4, 5}, step = 2.0;
             const double want[5] = {1, 6, 15, 28, 45};
@@ -251,7 +229,6 @@ int main(int argc, char **argv)
                   "vDSP_vrampmuladd2D accumulates into both");
         }
 
-        // the sliding window maximum, over the N + WindowLength - 1 elements the header requires
         {
             const float a[9] = {3, 1, 4, 1, 5, 9, 2, 8, 6};
             float out[9];
@@ -274,11 +251,7 @@ int main(int argc, char **argv)
             CHECK(sameDoubles(dout, wantd, 7), "vDSP_vswmaxD answers the same as vDSP_vswmax");
         }
 
-        // the scaled multiply-multiply-add, the two dot products and the distance
         {
-            // B and D are both scalars, and this case has to be able to tell that from reading them as
-            // vectors: with a constant D either reading gives the same answer, so B and D are both
-            // non-uniform here and the expected answer is the one both scalars give.
             const double a[4] = {1, 2, 3, 4}, b[4] = {2.0, 7.0, 7.0, 7.0}, c[4] = {10, 20, 30, 40},
                          d[4] = {0.5, 99, 99, 99};
             const double want[4] = {7, 14, 21, 28};

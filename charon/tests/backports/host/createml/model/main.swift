@@ -1,20 +1,3 @@
-// model.swift — the port's `.mlmodel` writer, read back by a decoder of the same schema.
-//
-// **What this reaches and what it does not.** The writer emits Core ML's protobuf over the schema
-// vendored in `packages/c/createml/proto/`, and the check below is that `readback.lua` parses the file
-// and every field in it round-trips. That proves the *schema and the encoding*.
-//
-// The reader is `readback.lua`, written in Lua so that the suite needs no python. It is not an
-// independent implementation: its oracle is the committed output of coremltools 9.0 on the same bytes,
-// which the expectations below hold. The arithmetic is not checked by it at all.
-//
-// It does **not** prove the arithmetic. A load and a predict is the only check that does, and on this
-// machine's CoreML Swift surface it is not reachable: `MLModel.prediction(fromFeatures:options:)` is
-// `unavailable in macOS`, `MLModel.prediction(from:)` takes `[String: MLTensor]` and is `async`, and
-// `MLTensor(shape:scalars:)` trips a compiler crash ("failed to produce diagnostic"). So the prediction
-// comparison is **not** in this suite and no claim is made about it; `facts/CreateML/Export.md` says
-// so, and the writer's own comment says which estimators it covers and which it refuses.
-
 import Foundation
 import PortCoreML
 import PortCreateMLComponents
@@ -34,7 +17,6 @@ func check(_ what: String, _ equal: Bool, _ detail: @autoclosure () -> String = 
     }
 }
 
-/// The port's own model: `y = 3 + 2*x1 - 1.5*x2`, as the schema's protobuf.
 let coefficients: [Float] = [2.0, -1.5]
 let intercept: Float = 3.0
 let writer = ModelWriter.model(featureName: "x", outputName: "prediction",
@@ -50,8 +32,6 @@ do {
     exit(1)
 }
 
-// The round trip through this package's own reader first: a writer whose reader cannot read it is
-// a writer that emits the wrong bytes, whatever any other implementation thinks.
 do {
     let fields = try ProtoReader.fields(writer.bytes)
     var seen = [Int: Int]()
@@ -73,7 +53,6 @@ do {
     check("the description is there", description != nil)
     check("the oneof is neuralNetworkRegressor, field 303", network != nil)
 
-    // And inside the network: one layer, whose oneof is innerProduct, field 140.
     var layers = 0
     var innerProducts = 0
     var inputChannels: Int?
@@ -113,15 +92,9 @@ do {
     failures += 1
 }
 
-// The independent read is readback.lua: a protobuf decoder over Core ML's schema, run by xmake, that
-// prints the fields this suite checks. It replaces the coremltools 9.0 scripts the suite ran through
-// /usr/bin/python3. The expectations below are the committed output of coremltools for this model, and
-// the Lua reader must print the same strings for the same file. Its path is beside this source.
 let readbackScript = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
     .appendingPathComponent("readback.lua").path
 
-/// The fields readback.lua prints for a model file, split on the bar with empty fields kept; nil when
-/// the reader did not run to the end.
 func readBack(_ file: String) -> [String]? {
     let process = Process()
     process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
@@ -159,10 +132,6 @@ if let fields = readBackFields, fields.count == 11 {
     checkEqual("and the weights in order", fields[9], "2.0,-1.5")
     checkEqual("and the intercept", fields[10], "3.0")
 }
-// The public `write(to:)` a caller actually calls, on a model that was fitted, read back by the same
-// independent reader. This is the check that the writer is reachable from the model rather than only
-// from the suite, and that the intercept is moved out of the front of the coefficient array into the
-// layer's bias field instead of being written as if it were a weight.
 let fitted = LinearRegressorModel<Double>(coefficients: [7.0, 2.0, -1.5])
 let publicPath = NSTemporaryDirectory() + "/createml-public-\(getpid()).mlmodel"
 try? FileManager.default.removeItem(atPath: publicPath)
@@ -175,8 +144,6 @@ do {
 }
 check("the fitted model's own write(to:) produces a file", wrote)
 
-// The same reader on the fitted model's file. Its weights and bias are exact at six places, so the one
-// line serves both reads.
 let publicFields = readBack(publicPath)
 if let fields = publicFields, fields.count == 11 {
     checkEqual("the intercept is the layer's bias, not a weight",

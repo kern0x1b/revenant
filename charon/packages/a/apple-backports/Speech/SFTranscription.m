@@ -1,7 +1,5 @@
 #import <Speech/Speech.h>
 
-// A transcription of iOS 10. The release produces none, so a transcription is one an application made, and a fresh one
-// answers as the host answers a fresh one: no formatted string and no segments (facts/Speech/recognition-data.md).
 @implementation SFTranscription {
     NSString *_formattedString;
     NSArray<SFTranscriptionSegment *> *_segments;

@@ -1,15 +1,3 @@
-/* coreml.m -- the device call test for Core ML: every method the registry claims is called on the
- * device, over the real containers embedded in coreml-models.h, and nothing crashes.
- *
- * This is not a differential: the host test (tests/backports/host/coreml) is, and it is where the
- * port's answers are held to a release's own. What this proves is the other half -- that the code
- * runs on the release's CPU, in the release's own Foundation, with the models an application would
- * ship, and that every entry the registry claims exists is really there to be called: a selector
- * that the library does not carry raises here rather than passing a test that never sent it.
- *
- * The models are the specification's own message, byte for byte, embedded by
- * tools/coreml/embed-models.lua: what the device reads is what the host reads.
- */
 #import <CoreML/CoreML.h>
 
 #import <objc/runtime.h>
@@ -19,10 +7,6 @@
 #import "check.h"
 #import "coreml-models.h"
 
-/* The two prediction forms iOS 17 added, declared here because the SDK this port is built against
- * is 16.4 and has not got them: the declarations are Core ML's own, from its 17.0 header, and a
- * test that wants to call a method the port carries has to name it the way a caller compiled
- * against that header would. The port defines both, which is what the registry claims. */
 @interface MLModelAsset (CharonEighteen)
 + (instancetype)modelAssetWithSpecificationData:(NSData *)specificationData
                                     blobMapping:(NSDictionary<NSURL *, NSData *> *)blobMapping
@@ -41,9 +25,6 @@
             completionHandler:(void (^)(id<MLFeatureProvider>, NSError *))handler;
 @end
 
-/* A failed check is written to stderr as well as to the log: the log is a path inside the guest,
- * which the run cannot read, and stderr is what the emulator hands back. A check that fails where
- * nobody can see it is a check whose answer is lost. */
 static void coreml_check(BOOL passed, const char *name, NSString *detail)
 {
     charon_check(passed, name, detail);
@@ -61,8 +42,6 @@ static void coreml_check(BOOL passed, const char *name, NSString *detail)
                      [NSString stringWithFormat:@"%@ != %@", charon_actual, charon_expected]); \
     } while (0)
 
-/* A model written out of the embedded bytes and read back through the public API, so the test goes
- * through the same path an application does: a file on disk, then +modelWithContentsOfURL:. */
 static MLModel *model_from(NSString *label, const unsigned char *bytes, unsigned long length, NSError **error)
 {
     NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:
@@ -75,9 +54,6 @@ static MLModel *model_from(NSString *label, const unsigned char *bytes, unsigned
     return [MLModel modelWithContentsOfURL:[NSURL fileURLWithPath:path] error:error];
 }
 
-/* A check's name, built into a C buffer: printf has no %@, so the format is read as an NSString
- * literal and the arguments are formatted by Foundation before the bytes are copied. Every check in
- * this file is named the same way, so a failure line says which model and which feature. */
 static void charon_label(char *into, size_t size, NSString *format, ...)
 {
     va_list arguments;
@@ -89,8 +65,6 @@ static void charon_label(char *into, size_t size, NSString *format, ...)
     into[size - 1] = 0;
 }
 
-/* A value for one input, filled with a pattern that depends only on where each element sits, so
- * that two runs of this test are handed the same numbers. */
 static MLFeatureValue *value_for(MLFeatureDescription *described)
 {
     if (described.type == MLFeatureTypeInt64) {
@@ -145,8 +119,6 @@ static void check_value_types(void)
     CHECK(undefined.isUndefined, "an undefined value says so");
     CHECK(!int64.isUndefined, "a value that holds something does not");
     {
-        /* The literals are hoisted out of the macro: a comma inside an array literal is a comma as
-         * far as the preprocessor is concerned, and CHECK_EQUAL is a macro. */
         MLSequence *two = [MLSequence sequenceWithInt64Array:@[ @1, @2 ]];
         MLSequence *words = [MLSequence sequenceWithStringArray:@[ @"a", @"b" ]];
         CHECK_EQUAL(@(2ul), @(two.int64Values.count), "a sequence keeps its elements");
@@ -186,8 +158,6 @@ static void check_arrays(void)
     [read setObject:@2.5 atIndexedSubscript:4];
     CHECK_EQUAL(@2.5, [read objectAtIndexedSubscript:4], "a second array keeps its own numbers");
     CHECK([array isKindOfClass:[MLMultiArray class]], "a multi array is a multi array");
-    /* The two byte handlers, which are how Core ML asks a caller to read an array without the
-     * deprecated dataPointer: the buffer is the array's own and is only valid inside the block. */
     {
         __block const void *seen = NULL;
         __block NSInteger size = 0;
@@ -201,8 +171,6 @@ static void check_arrays(void)
             __block void *mutableSeen = NULL;
             [read getMutableBytesWithHandler:^(void *bytes, NSInteger length, NSArray<NSNumber *> *strides) {
                 mutableSeen = bytes;
-                /* The array is float32, so the write is a float32: a double written into it would
-                 * be the test's own type error, not a reading of the port. */
                 ((float *)bytes)[0] = 7.5f;
                 CHECK_EQUAL(@(2), @(strides.count), "the mutable handler hands over the strides");
             }];
@@ -211,8 +179,6 @@ static void check_arrays(void)
         }
     }
     {
-        /* An MLFeatureValue over an array is a window on the array's own buffer: a write through
-         * the array is a write through the value, which is what passing an array to a model means. */
         MLFeatureValue *value = [MLFeatureValue featureValueWithMultiArray:read];
         [read setObject:@3.5 atIndexedSubscript:0];
         CHECK_EQUAL(@3.5, [value.multiArrayValue objectAtIndexedSubscript:0], "a value is a window on its array");
@@ -293,9 +259,6 @@ static void check_keys(void)
         CHECK_EQUAL(key.scope, back.scope, "with its scope");
     }
     {
-        /* A description of each kind a model in the corpus can hand us, copied twice and compared: the
-     * copy of a description is the only thing that ever asks a constraint to copy, so this is what
-     * holds that path rather than a check that a class answers a selector. */
     {
         MLModel *model = model_from(@"copy", charon_ml_model_glm_classifier, sizeof(charon_ml_model_glm_classifier), NULL);
         MLModelDescription *described = model.modelDescription;
@@ -311,9 +274,6 @@ static void check_keys(void)
             coreml_check([copy isEqual:one] && [again isEqual:one] && copy != one && again != copy, label,
                           @"a copy differs, or is the original");
             if (one.type == MLFeatureTypeMultiArray) {
-                /* A constraint has no isEqual: of its own -- Core ML declares none -- so the copy is
-                 * compared by the numbers it carries, which is what the class is: the same kind, the
-                 * same ranges, the same set of shapes, and a different object. */
                 MLMultiArrayShapeConstraint *constraint = one.multiArrayConstraint.shapeConstraint;
                 MLMultiArrayShapeConstraint *copied = [constraint copy];
                 snprintf(label, sizeof label, "%s: its shape constraint copies", name.UTF8String);
@@ -324,15 +284,6 @@ static void check_keys(void)
             }
         }
     }
-    /* MLNumericConstraint is not built here: it is a class of the port's own with no public
-         * initialiser of Core ML's, and the only thing that makes one is a model's parameter
-         * description -- and this port reads no updatable model, so there is none to ask. The host
-         * differential builds it, because it compiles the port's own sources and can reach the
-         * initialiser; facts/CoreML/CoreML.md says why the class is here at all. */
-        /* Every one of the eight constraint classes copies, and the question is one the class itself
-     * can fail: `class_getInstanceMethod` asks whether *that* class implements the selector, where
-     * `instancesRespondToSelector:` would be answered by `-copy`, which every object inherits from
-     * NSObject and which therefore answers yes for a class that implements nothing. */
     {
         Class constraints[] = {
             [MLMultiArrayShapeConstraint class], [MLImageSize class], [MLImageSizeConstraint class],
@@ -372,8 +323,6 @@ static void check_configuration(void)
     configuration.parameters = @{ MLParameterKey.momentum : @0.5 };
     CHECK_EQUAL(@(1ul), @(configuration.parameters.count), "a parameter is kept");
     CHECK_EQUAL(@([[configuration copy] computeUnits]), @(configuration.computeUnits), "a copy keeps the units");
-    /* A copy is compared by what it copied: NSCopying promises a copy of the values, not an
-     * object that isEqual: the original -- MLModelConfiguration has no isEqual: of its own. */
     CHECK([[configuration copy] computeUnits] == configuration.computeUnits &&
               [[[configuration copy] copy] computeUnits] == configuration.computeUnits,
           "and a copy of a copy keeps them");
@@ -487,7 +436,6 @@ static void check_model(const charon_ml_embedded_model *embedded, int index)
                     charon_check(value.dictionaryValue.count > 0, prediction, @"none");
                 }
             }
-            /* The same run through the batch API, over a batch of the same inputs. */
             {
                 NSError *batchFailure = nil;
                 MLArrayBatchProvider *batch = [[MLArrayBatchProvider alloc]
@@ -501,7 +449,6 @@ static void check_model(const charon_ml_embedded_model *embedded, int index)
                                [answer.featureNames anyObject]] != nil, "each element of a batch is answered");
                 }
             }
-            /* The options form, and the backing object it proposes. */
             {
                 MLPredictionOptions *options = [[MLPredictionOptions alloc] init];
                 NSError *optionFailure = nil;
@@ -516,7 +463,6 @@ static void check_model(const charon_ml_embedded_model *embedded, int index)
                 }
             }
         }
-        /* A parameter the model does not have is refused, with the model's own error. */
         {
             NSError *parameterFailure = nil;
             id value = [model parameterValueForKey:MLParameterKey.learningRate error:&parameterFailure];
@@ -527,7 +473,6 @@ static void check_model(const charon_ml_embedded_model *embedded, int index)
             charon_check(parameterFailure != nil, refused, @"(no error)");
         }
     }
-    /* The asynchronous forms answer exactly once, on another queue. */
     if (index == 0) {
         dispatch_semaphore_t done = dispatch_semaphore_create(0);
         __block int called = 0;
@@ -621,7 +566,6 @@ static void check_loading_failures(void)
         CHECK([MLModel modelWithContentsOfURL:[NSURL fileURLWithPath:path] error:&failure] == nil,
               "a file that is not a model is refused");
     }
-    /* Compiling: a bundle is written, and a model is read back out of it. */
     {
         NSString *source = [NSTemporaryDirectory() stringByAppendingPathComponent:@"charon-compile-source.mlmodel"];
         NSData *container = [NSData dataWithBytes:charon_ml_model_glm length:sizeof(charon_ml_model_glm)];
@@ -681,8 +625,6 @@ int main(int argc, const char *argv[])
         }
         check_assets();
         check_loading_failures();
-        /* The count goes to stderr, which the run reads: the log is at a path inside the guest and
-         * the run cannot open it, so a pass printed nothing anyone could count. */
         fprintf(stderr, "coreml: %d checks, %d failures\n", charon_checks, charon_failures);
         printf("%d checks, %d failures\n", charon_checks, charon_failures);
     }

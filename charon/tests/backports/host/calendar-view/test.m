@@ -2,10 +2,6 @@
 #include <stdio.h>
 #include "CharonCalendar.h"
 
-// One body of checks for the host's own calendar view and for the port's, which run.sh compiles under the same identifiers. A line is
-// "side<TAB>check<TAB>value": "host" and "port" lines are compared, and "only" lines are the port's own checks (the drawn grid, which the
-// host cannot be asked about without a window), each with its expected value computed here from NSCalendar and asserted by run.sh.
-
 static void report(const char *side, const char *check, NSString *value)
 {
     printf("%s\t%s\t%s\n", side, check, value ? [value UTF8String] : "nil");
@@ -43,7 +39,6 @@ static NSDate *utc(NSInteger year, NSInteger monthNumber, NSInteger day)
     return [g dateFromComponents:c];
 }
 
-// The text of an exception the call raises, or "no raise".
 static NSString *raised(void (^call)(void))
 {
     @try {
@@ -112,7 +107,6 @@ static void run(const char *side, Class cls)
     [clamped setAvailableDateRange:[[NSDateInterval alloc] initWithStartDate:utc(1990, 1, 1) endDate:utc(1995, 2, 1)]];
     report(side, "range-clamps-to-nearer-end", components_text([clamped visibleDateComponents]));
 
-    // Properties that the host answers from a fresh view, so that no earlier range can make a calendar change raise.
     id props = [[cls alloc] initWithFrame:CGRectMake(0, 0, 280, 304)];
     report(side, "nil-calendar", raised(^{ [props setCalendar:nil]; }));
     report(side, "nil-locale", raised(^{ [props setLocale:nil]; }));
@@ -139,15 +133,11 @@ static void run(const char *side, Class cls)
     UIGraphicsEndImageContext();
     report(side, "drawn-without-window", @"yes");
 
-    // A calendar change on a view showing the start of a range: both keep the month. (A host run once raised here, after an earlier nil
-    // range had been refused on the same view; that sequence is not reproduced in this clean view, so it is not asserted.)
     id moved = [[cls alloc] initWithFrame:CGRectMake(0, 0, 280, 304)];
     [moved setAvailableDateRange:[[NSDateInterval alloc] initWithStartDate:utc(1970, 1, 1) duration:86400 * 10]];
     report(side, "calendar-change-outside-range", raised(^{ [moved setCalendar:[NSCalendar calendarWithIdentifier:NSCalendarIdentifierBuddhist]]; }));
 }
 
-// The port's own checks. The grid is 7 columns of 40 points from the top of the grid at 64, with six rows of 40; the expected day comes from
-// NSCalendar's own weekday of the first of the month.
 static void runPortOnly(void)
 {
     CharonCalendarProbeDelegate *probe = [[CharonCalendarProbeDelegate alloc] init];
@@ -157,7 +147,6 @@ static void runPortOnly(void)
     UIGraphicsBeginImageContextWithOptions(CGSizeMake(280, 304), NO, 1);
     [view drawRect:CGRectMake(0, 0, 280, 304)];
     UIGraphicsEndImageContext();
-    // The oracle is the view's own calendar, so a time zone cannot move the first of the month between the two.
     NSCalendar *calendar = [NSCalendar currentCalendar];
     NSDateComponents *firstParts = [month(2024, 5) copy];
     firstParts.day = 1;

@@ -1,4 +1,3 @@
-// Pixel probes of SceneKit's lighting on macOS: one quad facing an orthographic camera, one light.
 import SceneKit
 import AppKit
 import Metal
@@ -35,7 +34,6 @@ func light(_ scene: SCNScene, _ type: SCNLight.LightType, _ intensity: CGFloat, 
 func fmt(_ v: [Double]) -> String { v.map { String(format: "%.1f", $0) }.joined(separator: ",") }
 
 func gray(_ g: Double) -> NSColor { NSColor(srgbRed: g, green: g, blue: g, alpha: 1) }
-// dense data for fitting: angle a of a directional light from the view axis
 let angles = stride(from: 0.0, through: 1.2, by: 0.05).map { $0 }
 for model in [SCNMaterial.LightingModel.blinn, .phong] {
     for sh in [0.25, 0.5, 1.0, 2.0] {

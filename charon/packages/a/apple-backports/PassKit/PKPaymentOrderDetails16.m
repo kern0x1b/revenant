@@ -1,17 +1,3 @@
-// PKPaymentOrderDetails, 16.0: the order a merchant names to a payment request, carried as the caller's own data.
-//
-// The class is in the arm64e cache of iOS 16.0 with exactly these own selectors (tools/objc-class-surface.lua 16.0
-// arm64e): -initWithOrderTypeIdentifier:orderIdentifier:webServiceURL:authenticationToken:, the four properties
-// and their setters, -initWithCoder:, -encodeWithCoder:, and +supportsSecureCoding. Its own list has no -init, so a
-// plain -init is NSObject's, and the host answers the same: the four members read back nil from it.
-//
-// Every member is a value the application sets and reads back, so nothing here is computed. The strings and the URL
-// are copied as they are given, which is what the properties' copy attribute declares and what the host does: a
-// mutable string the caller changes after it was set does not change the order. Nothing here calls the web service
-// the URL names, and no authentication token is checked: the token is the caller's own string.
-//
-// The SDK header declares the class an NSObject with no protocol, and the host's class adopts NSSecureCoding (measured;
-// the inventory does not list protocols), so the extension below adopts it for the coder, as PKPayment8.m does for its two classes.
 #import <Foundation/Foundation.h>
 #import <PassKit/PassKit.h>
 
@@ -85,9 +71,6 @@
     _authenticationToken = [authenticationToken copy];
 }
 
-// The keys and value classes are the release's, measured on the host: an archive of an order written by PassKit holds the
-// four members under these keys, the three strings as NSString and the URL as an NSURL object. The probe in
-// tests/backports/host/payment-value compares this archive with the host's, and each side reads the other's back.
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     self = [super init];

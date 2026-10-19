@@ -1,10 +1,6 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-// A control's tool tip, from iOS 15. Setting a tool tip gives the control a tool-tip interaction, made the first time and kept after, with
-// the tool tip as its default; setting nil takes the interaction off the control and drops it, so the next tool tip is a new interaction.
-// The tool tip is kept by reference, as the host keeps it (tests/backports/host/control-tooltip), not copied as the header's copy says.
-// The interaction is the port's UIToolTipInteraction, which the release's interaction class answers for.
 static const char CharonToolTipKey;
 static const char CharonToolTipInteractionKey;
 

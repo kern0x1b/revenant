@@ -1,13 +1,6 @@
 #import "CharonPhotos.h"
 #import <MobileCoreServices/MobileCoreServices.h>
 
-// -[NSURL fileSystemRepresentation] is of iOS 7.0 (NSURL.h:118, API_AVAILABLE(macos(10.9), ios(7.0),
-// watchos(2.0), tvos(9.0))) and this port builds for 4.3 and 6.1.3, so calling it raises
-// "unrecognized selector sent to instance" on the device -- measured on an iPad 2 running 6.1.3 on
-// 2026-10-01, where a creation request's move and a resource write both reached it. NSString's
-// -fileSystemRepresentation has no such floor, and -[NSURL path] is of iOS 2, so the path comes
-// through it. The index cannot settle this one by name: fileSystemRepresentation reads first-rung
-// 3.0, which is some other class's selector of that name in a 32-bit cache.
 #include <errno.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -15,11 +8,6 @@
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-// The file name extension a video's data is staged under. ALAssetsLibrary takes a video by its path and tells a movie by
-// the path's extension: the same QuickTime bytes are written from a .mov file and refused from one with no extension
-// (tests/backports/device/photosdata9.m, iPad 2, 2026-09-24). The type the options name comes first, then the extension
-// of their original file name, then the data's own container: an ISO base media file names its brand in its first box,
-// `ftyp`, and QuickTime's is "qt  "; a QuickTime movie from before `ftyp` has none.
 static NSString *charon_movie_extension(NSData *data, PHAssetResourceCreationOptions *options)
 {
     if (options.uniformTypeIdentifier.length) {
@@ -128,8 +116,6 @@ static CharonPhotosTransaction *charon_transaction(void)
             *error = [CharonPhotosStore errorWithCode:PHPhotosErrorInvalidResource reason:@"the resource data is not an image this release can decode"];
         return NO;
     }
-    // A move takes the file out of its folder once the asset is made. The header says a hard-linked file cannot be
-    // moved; neither can one whose folder does not let it be removed. Both fail here, before anything is written.
     if (_moveFile && _resourceFileURL) {
         struct stat status;
         const char *path = _resourceFileURL.path.fileSystemRepresentation;
@@ -152,8 +138,6 @@ static CharonPhotosTransaction *charon_transaction(void)
     return YES;
 }
 
-// A moved file is removed once the asset is made from it; a removal that then fails fails the change with the file
-// system's error, like any other write of the change that fails after the ones before it were made.
 - (BOOL)charon_removeMovedFile:(NSError **)error
 {
     if (!_moveFile || !_resourceFileURL)
@@ -176,8 +160,6 @@ static CharonPhotosTransaction *charon_transaction(void)
     } else if (_resourceFileURL) {
         identifier = [CharonPhotosStore writeVideoAtURL:_resourceFileURL error:error];
     } else {
-        // ALAssetsLibrary takes a video only as a file: the data is staged in one of this process's own, named with the
-        // extension of its type, which is removed once the library has copied it, whether the write succeeded or not.
         NSString *name = [[NSUUID UUID].UUIDString stringByAppendingPathExtension:charon_movie_extension(_resourceData, _resourceOptions)];
         staged = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:name]];
         if (![_resourceData writeToURL:staged options:NSDataWritingAtomic error:error])
@@ -186,8 +168,6 @@ static CharonPhotosTransaction *charon_transaction(void)
     }
     if (identifier)
         [CharonPhotosStore bindPlaceholderIdentifier:_token toIdentifier:identifier];
-    // A write that failed keeps its own error, the cause; after one that succeeded, a staged file that cannot be removed
-    // fails the change with the file system's error, as a moved file does.
     if (staged && unlink(staged.path.fileSystemRepresentation) != 0 && identifier) {
         if (error)
             *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:@{NSURLErrorKey: staged}];

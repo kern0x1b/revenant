@@ -1,11 +1,7 @@
--- `pin`: records, in the framework's sidecar, the declaration hash each hand-written override was written against. A new pin is
--- a bootstrap (marked for review); `--repin KEY` re-pins one key by hand. An override with no spec member gets no pin.
-
 local layout = import("layout", {anonymous = true})
 local snapshot = import("spec", {anonymous = true})
 local emit = import("emit", {anonymous = true})
 
--- Returns the exit status.
 function run(args)
     local fw = args.framework
     local spec = snapshot.load(args.tree, fw)

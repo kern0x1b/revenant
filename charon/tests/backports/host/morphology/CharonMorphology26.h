@@ -1,31 +1,8 @@
-/* CharonMorphology26.h - the 26.2 Foundation's NSMorphology.h and NSInflectionRule.h, transcribed.
- *
- * The CommandLineTools SDK's own headers declare an NSMorphology without most of the 26.2 members and
- * none of the 17.0 ones, so a host differential declares them here - on a category of the SDK's class,
- * never a rename, because the class under test is the *host's* and the two must be the same object.
- * This is the same pattern tests/backports/host/prefix_selectors.py uses on the port's own side.
- *
- * Transcribed from $HOME/Git/projects/ios/charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk/System/Library/
- * Frameworks/Foundation.framework/Headers/{NSMorphology.h,NSInflectionRule.h}, both of which are 163 and
- * 44 lines and both of which are read whole - the enums, the two class interfaces, the two categories on
- * NSMorphology, and the constant, which the 26.2 SDK declares in NSAttributedString.h and not here.
- *
- * API_DEPRECATED, NS_REFINED_FOR_SWIFT and NS_UNAVAILABLE are left off deliberately: the differential
- * wants to *call* what the header marks unavailable and to *not* warn about what it marks deprecated,
- * and both are compile-time only.
- */
-
 #ifndef CHARON_MORPHOLOGY_26_H
 #define CHARON_MORPHOLOGY_26_H
 
 #import <Foundation/Foundation.h>
 
-/* The eight grammatical enums are in the CommandLineTools SDK, so they are not transcribed here; the
-   26.2 header's own values for them are the SDK's, and a differential that needs to check a value
-   against the 26.2 spelling reads it from the header in sdk-26.2. What the SDK lacks is the 17.0 set of
-   members and the custom-pronoun and inflection interfaces, and those are the categories below. */
-
-/* The 26.2 SDK declares this in NSAttributedString.h. */
 FOUNDATION_EXPORT NSAttributedStringKey const NSMorphologyAttributeName;
 
 @class NSMorphologyCustomPronoun;

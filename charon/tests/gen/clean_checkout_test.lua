@@ -1,21 +1,8 @@
--- The clean-checkout check (review F2, and the v-gen2 ruling): the tree is extracted into a folder under .agent-work/runs of this
--- checkout (`git archive HEAD` when the checkout is a git work tree, so only committed files; the tree's own files, without its
--- derived folders, when it is not one: a tree that came from git archive has no .git), and `gen --all` and `check --all` run from that
--- folder with no derived file present. It fails when
--- any file outside packages/a/apple-backports/.gen appears or changes (gen may write only that folder), when gen or check exits
--- non-zero, or when the Python oracle runs: gen and check run with a python3 on the PATH that writes a marker and fails, and the marker
--- must not exist afterwards (the build path reads the committed products and runs no generator). In a git work tree it checks HEAD, the last
--- commit: git archive reads committed files only, so an uncommitted change is not tested until it is committed. The archive, the python3
--- stand-in and the marker are removed at the end. Run: xmake l tests/gen/clean_checkout_test.lua (from any folder)
-
 local ROOT = path.absolute(path.join(os.scriptdir(), "..", ".."))
 local GEN_PREFIX = "packages/a/apple-backports/.gen/"
--- The SDK folder the generator reads its release from: the committed release-26.2 fixture (SDKSettings only; gen and check read no framework from it).
 local SDK_FIXTURE = path.absolute(path.join(os.scriptdir(), "sdk_fixture", "release-26.2"))
--- The folders of a tree that are not its sources: the agent work area, the build products, xmake's state and the generator's output.
 local DERIVED = {".git", ".agent-work", "build", ".xmake", "packages/a/apple-backports/.gen"}
 
--- Every file under dir, keyed by its path relative to dir, with its size and modification time.
 local function listing(dir)
     local out = {}
     for _, filepath in ipairs(os.files(path.join(dir, "**"))) do
@@ -24,7 +11,6 @@ local function listing(dir)
     return out
 end
 
--- The sorted names of a listing.
 local function names_of(list)
     local out = {}
     for name in pairs(list) do
@@ -34,8 +20,6 @@ local function names_of(list)
     return out
 end
 
--- Whether ROOT is the top of a git work tree (and not a folder inside another repository, which `git archive` would then take the
--- folder's own path of, and find empty).
 local function is_work_tree_top()
     local top = false
     try {
@@ -50,7 +34,6 @@ local function is_work_tree_top()
     return top
 end
 
--- Extracts the tree under test into dir. Returns the exit status of the extraction (0 on success).
 local function extract(dir)
     if is_work_tree_top() then
         return os.execv("sh", {"-c", 'git -C "$1" archive --format=tar HEAD | tar -x -C "$2"', "sh", ROOT, dir}, {try = true})
@@ -66,7 +49,6 @@ local function extract(dir)
     return os.execv("sh", {"-c", 'tar "$@" | tar -x -C "$0"', dir, table.unpack(argv)}, {try = true})
 end
 
--- The exit status of `xmake l tools/gen.lua <args>` run from dir with the given PATH, or nil when it could not start.
 local function run_gen(dir, args, search_path)
     local argv = {"l", "tools/gen.lua"}
     for _, arg in ipairs(args) do
@@ -87,11 +69,9 @@ function main()
     local marker = path.join(shim_dir, "python3-was-run")
     os.mkdir(dir)
     os.mkdir(shim_dir)
-    -- a python3 that records that it ran and fails, first on the PATH of the generator's runs
     io.writefile(path.join(shim_dir, "python3"), "#!/bin/sh\ntouch '" .. marker .. "'\nexit 99\n")
     os.execv("chmod", {"755", path.join(shim_dir, "python3")})
     local search_path = shim_dir .. ":" .. (os.getenv("PATH") or "")
-    -- the stand-in must catch a call, or the "never ran" result below proves nothing
     os.execv("sh", {"-c", "python3"}, {try = true, envs = {PATH = search_path}})
     local caught = os.isfile(marker)
     if caught then

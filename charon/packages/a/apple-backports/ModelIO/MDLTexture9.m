@@ -5,10 +5,6 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-// A texture is a block of texels of its own channel count and channel encoding, and every way of
-// reading it out - as an image, as raw data with either origin, at a mip level - is a reading of
-// those same texels rather than a copy of something else.
-
 static NSUInteger CharonMDLChannelSize(MDLTextureChannelEncoding encoding)
 {
     switch (encoding) {
@@ -27,9 +23,6 @@ static NSUInteger CharonMDLChannelSize(MDLTextureChannelEncoding encoding)
     return 0;
 }
 
-// The black-body colour of a temperature in kelvin, on the same curve the colour-temperature gradient
-// of a swatch texture walks: a low temperature is red, a high one blue, and the curve is the usual
-// approximation of the sun's spectrum, so a swatch is a real ramp rather than a pair of fixed colours.
 static CGColorRef CharonMDLCreateColorOfTemperature(float kelvin)
 {
     double t = kelvin / 100.0;
@@ -47,8 +40,6 @@ static CGColorRef CharonMDLCreateColorOfTemperature(float kelvin)
     return CGColorCreateGenericRGB(components[0], components[1], components[2], 1);
 }
 
-// One channel of a texture, read at a position with its edge clamped, so the gradient of a normal map
-// at the border is the gradient of the nearest real neighbour rather than of nothing.
 static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteger width, NSInteger height, NSUInteger channels,
                                 NSInteger x, NSInteger y)
 {
@@ -113,8 +104,6 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
         NSUInteger width = dimensions.x > 0 ? (NSUInteger)dimensions.x : 0;
         NSUInteger stride = rowStride > 0 ? (NSUInteger)rowStride : width * CharonMDLChannelSize(channelEncoding) * channelCount;
         _rowStride = (NSInteger)stride;
-        // The data the texture is made of is the data it was given, as much of it as its own geometry
-        // says fits, so a texture never holds bytes outside the texels it can address.
         NSUInteger wanted = pixelData ? stride * (NSUInteger)(dimensions.y > 0 ? dimensions.y : 0) : 0;
         if (pixelData && pixelData.length >= wanted)
             _texels = [pixelData mutableCopy];
@@ -128,8 +117,6 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
 {
 }
 
-// The texels of the whole texture, with the first row the top one or the bottom one, which is a flip
-// of the rows and not of the bytes inside a row.
 - (NSData *)charon_texelDataTopLeft:(BOOL)topLeft atMipLevel:(NSInteger)level
 {
     if (level < 0 || (NSUInteger)level >= _mipLevelCount)
@@ -167,9 +154,6 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
     return [self charon_texelDataTopLeft:NO atMipLevel:level];
 }
 
-// The image of the texture, for the 8-bit channel counts CoreGraphics reads: grey, grey with alpha,
-// RGB, RGBA. A texture of another encoding has no image on this release's drawing path, which is nil,
-// not a picture of something else.
 - (CGImageRef)imageFromTexture
 {
     if (_channelEncoding != MDLTextureChannelEncodingUInt8 || _channelCount < 1 || _channelCount > 4)
@@ -231,8 +215,6 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
     memcpy(_texels.mutableBytes, texels.bytes, wanted);
 }
 
-// A named texture is the image of that name in the main bundle, read through ImageIO, so a caller
-// asking for a texture by the name it has in the project gets that image.
 + (instancetype)textureNamed:(NSString *)name
 {
     return [self textureNamed:name bundle:nil];
@@ -254,9 +236,6 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
 
 + (instancetype)textureCubeWithImagesNamed:(NSArray<NSString *> *)names bundle:(NSBundle *)bundleOrNil
 {
-    // A cube is six images, one per face, in the order the faces of a cube are read: positive X,
-    // negative X, positive Y, negative Y, positive Z, negative Z. A set of a different count is not
-    // a cube, so there is no texture rather than one of the wrong number of faces.
     if (names.count != 6)
         return nil;
     MDLTexture *cube = nil;
@@ -273,9 +252,6 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
     return cube;
 }
 
-// A value noise field of the smoothness asked for, the same field on every channel when it is grey and
-// three independent fields when it is not; a cellular one is the distance to the nearest of a set of
-// points, which is the noise that looks like cells rather than like cloth.
 - (void)charon_fillNoiseSmoothness:(float)smoothness channels:(NSUInteger)channels grayscale:(BOOL)grayscale cellular:(BOOL)cellular
 {
     if (self.channelEncoding != MDLTextureChannelEncodingUInt8 || !channels)
@@ -284,8 +260,6 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
     uint8_t *texels = [self charon_texelMutableBytes];
     if (!texels || !width || !height)
         return;
-    // The lattice the noise is interpolated over: a smoothness of one leaves a point per texel, a
-    // larger smoothness spreads each point over that many texels.
     float period = MAX(1.0f, smoothness);
     uint32_t seed = 0x9e3779b9u;
     for (NSUInteger y = 0; y < height; y++)
@@ -309,7 +283,6 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
                 float gx = (float)x / period, gy = (float)y / period;
                 int x0 = (int)floorf(gx), y0 = (int)floorf(gy);
                 float fx = gx - x0, fy = gy - y0;
-                // The smoothstep between the lattice points, so the field has no crease at them.
                 fx = fx * fx * (3 - 2 * fx);
                 fy = fy * fy * (3 - 2 * fy);
                 float corners[4];
@@ -323,7 +296,6 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
             for (NSUInteger c = 0; c < self.channelCount; c++)
                 at[c] = grayscale ? (uint8_t)(value * 255) : (c == 0 ? (uint8_t)(value * 255) : at[c]);
             if (!grayscale) {
-                // Each of the other channels is its own field, offset along the first so they differ.
                 uint8_t *row = at;
                 for (NSUInteger c = 1; c < self.channelCount; c++) {
                     seed = seed * 1664525u + 1013904223u;
@@ -341,8 +313,6 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
 
 - (instancetype)initWithURL:(NSURL *)URL name:(NSString *)name
 {
-    // A URL texture is the texture of an image file, read through ImageIO: the texels really are
-    // those of the image, at its own size and channel count.
     if ((self = [super initWithData:nil topLeftOrigin:NO name:name dimensions:(vector_int2){0, 0} rowStride:0 channelCount:0
                       channelEncoding:MDLTextureChannelEncodingUInt8]))
         return nil;
@@ -448,8 +418,6 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
     }
 }
 
-// The checkerboard: the divisions the texture is asked for across its width and its height, the
-// squares on the diagonal taking one colour and the rest the other.
 - (void)charon_fillCheckerboard
 {
     if (self.channelEncoding != MDLTextureChannelEncodingUInt8 || self.channelCount < 3)
@@ -476,8 +444,6 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
 
 @implementation MDLColorSwatchTexture
 
-// A gradient along the texture's width between two colours, or between two colour temperatures,
-// which is the same ramp read through the black-body curve at each end.
 - (instancetype)initWithColorGradientFrom:(CGColorRef)color1
                                  toColor:(CGColorRef)color2
                                     name:(NSString *)name
@@ -561,8 +527,6 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
 
 @implementation MDLNormalMapTexture
 
-// The normal map of a texture: the direction of the steepest rise of each of the source's own
-// channels, as the three components of a normal, over the contrast and smoothness asked for.
 - (instancetype)initByGeneratingNormalMapWithTexture:(MDLTexture *)sourceTexture
                                                 name:(NSString *)name
                                           smoothness:(float)smoothness

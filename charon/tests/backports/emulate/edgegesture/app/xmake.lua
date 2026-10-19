@@ -1,7 +1,5 @@
 set_project("charonedgeprobe")
 set_version("0.0.1")
--- The edge-gesture probe as an installed application (xmake emulate launch): one white window, nothing else.
--- Built like the CoreMIDI round trip's application, against the release's own UIKit (no backports).
 local root = os.getenv("CHAREDGE_ROOT") or path.join(os.scriptdir(), "../../../../..")
 add_repositories("charon " .. root)
 add_addons("charon v0.8.17")

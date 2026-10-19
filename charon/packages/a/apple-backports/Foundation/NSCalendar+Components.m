@@ -149,13 +149,6 @@ static NSCalendarUnit charon_calendar_period_unit(NSCalendarUnit unit)
     }
 }
 
-/*
- * Builds the date the real Foundation builds when it fixes one field of a date: everything
- * coarser than `stepUnit` is kept from `date`, `stepUnit` itself becomes `stepValue`, and
- * everything finer is taken from `finerGiven` (when it names that field) or reset to its
- * period base (day/month: 1, everything else: 0). Measured against Catalyst - see
- * .agent-work/records/nscalendar-newmethods-wip.diff for the probes this came from.
- */
 static NSDate *charon_calendar_direct_construct(NSCalendar *calendar, NSDate *date, NSCalendarUnit stepUnit, NSInteger stepValue, NSDateComponents *finerGiven)
 {
     static const NSCalendarUnit chain[] = {NSCalendarUnitEra, NSCalendarUnitYear, NSCalendarUnitMonth, NSCalendarUnitDay, NSCalendarUnitHour, NSCalendarUnitMinute, NSCalendarUnitSecond};
@@ -185,14 +178,6 @@ static NSDate *charon_calendar_roll_by_period(NSCalendar *calendar, NSDate *date
     return [calendar dateByAddingComponents:step toDate:date options:0];
 }
 
-/*
- * Builds the day=targetDay candidate `monthOffset` months from `date`'s own month, for
- * nextDateAfterDate's Day-stepUnit search. Measured on host: when targetDay does not exist in
- * that month (e.g. day 31 rolled back into a 30-day month), the real search does not clamp the
- * way -[NSCalendar dateFromComponents:] does - it carries the overflow into the following month
- * the way date arithmetic would, and drops every finer given field rather than trying to place
- * them on the carried-into day.
- */
 static NSDate *charon_calendar_day_candidate(NSCalendar *calendar, NSDate *date, NSInteger monthOffset, NSInteger targetDay, NSDateComponents *finerGiven)
 {
     NSDateComponents *base = [calendar components:NSCalendarUnitEra | NSCalendarUnitYear | NSCalendarUnitMonth fromDate:date];
@@ -213,11 +198,6 @@ static NSDate *charon_calendar_day_candidate(NSCalendar *calendar, NSDate *date,
         full.second = 0;
         return [calendar dateFromComponents:full];
     }
-    /*
-     * Measured on host: an out-of-range day does not carry the excess across the month
-     * boundary arithmetically - whatever the overflow, the candidate lands exactly on day 1
-     * of the following month, with every finer given field dropped.
-     */
     NSDateComponents *first = [base copy];
     first.day = 1;
     first.hour = 0;
@@ -544,14 +524,6 @@ static NSDate *charon_add_unit(NSCalendar *calendar, NSCalendarUnit unit, NSInte
                                                     : charon_calendar_direct_construct(self, date, stepUnit, target, comps);
     if (!direct)
         return nil;
-    /*
-     * The real search compares the constructed instant to `date`, not the target/current pair -
-     * a finer given field can validate a same-period candidate even when stepUnit ties (measured
-     * on host: day-tie + a later hour stays in the same month for a forward search). The one
-     * exception measured on host is Day itself searching backwards on a tie: real Foundation
-     * always steps out to the previous month there regardless of any finer field, so that is
-     * kept as an explicit override rather than folded into the general comparison.
-     */
     BOOL roll;
     if (stepUnit == NSCalendarUnitDay && !forward && target == current)
         roll = YES;

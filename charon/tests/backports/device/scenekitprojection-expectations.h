@@ -1,6 +1,3 @@
-// The answers of macOS SceneKit's SCNSceneRenderer.projectPoint / unprojectPoint, written by
-// host/scenekitprojection/project.swift from an SCNRenderer that rendered one offscreen frame.
-// The camera is at (0, 0, 10) looking down -z, fieldOfView 60, zNear 1, zFar 1000, viewport 800x600.
     {"projectPoint 0,0,0", "400.0,300.0,0.9009009003639221"},
     {"unprojectPoint 0,0,0", "0.0,0.0,0.0"},
     {"projectPoint 1,0,0", "451.9615173339844,300.0,0.9009009003639221"},

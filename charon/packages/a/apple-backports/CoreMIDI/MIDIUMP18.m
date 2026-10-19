@@ -1,14 +1,3 @@
-// The MIDI-UMP and MIDI-CI classes of iOS 18 that describe a device and its endpoints: MIDI2DeviceInfo, MIDIUMPFunctionBlock
-// and its mutable form, MIDIUMPEndpoint and its mutable form (a client-created endpoint), MIDIUMPEndpointManager, MIDICIDevice,
-// MIDIUMPCIProfile and MIDICIDeviceManager.
-//
-// What is measured on macOS (oracle/umpclasses.m and umpclasses2.m, recorded in umpclasses-macos.txt and
-// umpclasses2-macos.txt, 2026-10-09): a client-created endpoint is made, is disabled until setEnabled:YES, returns YES to
-// setName: and to registerFunctionBlocks:, and is listed by the endpoint manager while disabled; the manager lists no MIDI-CI
-// devices and no endpoints it did not see made; a function block made with any of the group, direction and stream values
-// tried is made; a function block not registered to an endpoint answers NO to its setters. Everything else here follows the
-// header: a MIDI-CI device needs a MIDI-CI transport, which this port does not have, so no MIDI-CI device is ever listed and
-// the classes that describe one are storage that nothing returns (their discovery is in facts/CoreMIDI/MIDICI.md).
 #import <Foundation/Foundation.h>
 #import "CharonCoreMIDI.h"
 #import "CharonMIDICI.h"
@@ -16,9 +5,6 @@
 
 #include <pthread.h>
 
-// One MIDI client for the endpoints this file makes, made on first use. The release's status is returned: a client the release
-// refused is not remembered as a client, so the next endpoint asks again, and the refusal is written for each different status
-// (an endpoint that cannot be made says why).
 static MIDIClientRef charon_client(OSStatus *outStatus)
 {
     static MIDIClientRef client = 0;
@@ -42,7 +28,6 @@ static MIDIClientRef charon_client(OSStatus *outStatus)
     return result;
 }
 
-// The endpoints a client made, in the order they were made; the manager lists them, enabled or not.
 static NSMutableArray *charon_endpoints(void)
 {
     static NSMutableArray *endpoints;
@@ -80,7 +65,6 @@ static NSMutableArray *charon_endpoints(void)
 
 @end
 
-// Set by the endpoint when it registers the block; not part of the public interface.
 @interface MIDIUMPMutableFunctionBlock ()
 - (void)charon_registeredWith:(MIDIUMPEndpoint *)endpoint;
 - (void)charon_setFunctionBlockID:(MIDIUMPFunctionBlockID)identifier;
@@ -139,7 +123,6 @@ static NSMutableArray *charon_endpoints(void)
 
 - (MIDIUMPEndpoint *)UMPEndpoint { return _endpoint; }
 
-// A function block answers its setters once an endpoint has registered it; before that they answer NO, as macOS does.
 - (BOOL)setEnabled:(BOOL)isEnabled error:(NSError **)error
 {
     if (!_endpoint)
@@ -168,14 +151,11 @@ static NSMutableArray *charon_endpoints(void)
     return YES;
 }
 
-// Set by the endpoint when it registers the block.
 - (void)charon_registeredWith:(MIDIUMPEndpoint *)endpoint
 {
     _endpoint = endpoint;
 }
 
-// The function block's ID on its endpoint: the release numbers a registration's blocks from 1, in the order given (measured on
-// macOS: three blocks registered in one call answer 1, 2, 3, oracle/umpgate-macos.txt).
 - (void)charon_setFunctionBlockID:(MIDIUMPFunctionBlockID)identifier
 {
     _functionBlockID = identifier;
@@ -205,9 +185,6 @@ static NSMutableArray *charon_endpoints(void)
 - (MIDIEndpointRef)MIDISource { return _MIDISource; }
 - (MIDI2DeviceInfo *)deviceInfo { return _deviceInfo; }
 - (NSString *)productInstanceID { return _productInstanceID; }
-// The static answer is the markAsStatic argument of the registration (measured on macOS: NO for markAsStatic:NO, YES for YES,
-// oracle/umpstatic-macos.txt). The JRTS answers are NO here: measured 0 for both with the blocks of that probe; a block with
-// JRTS flags is not measured (a crutch, coordination/crutches.md).
 - (BOOL)hasStaticFunctionBlocks { return _hasStaticFunctionBlocks; }
 - (BOOL)hasJRTSReceiveCapability { return NO; }
 - (BOOL)hasJRTSTransmitCapability { return NO; }
@@ -239,8 +216,6 @@ static NSMutableArray *charon_endpoints(void)
     _enabled = NO;
     _mutableBlocks = @[];
     _functionBlocks = @[];
-    // The endpoint's two ends are the library's own protocol endpoints; with the release refusing a virtual endpoint
-    // (facts/CoreMIDI/CoreMIDI.md) they cannot be made, and the initialiser answers nil.
     MIDIEndpointRef destination = 0, source = 0;
     OSStatus status = noErr;
     MIDIClientRef client = charon_client(&status);
@@ -267,8 +242,6 @@ static NSMutableArray *charon_endpoints(void)
 - (void)setMutableFunctionBlocks:(NSArray<MIDIUMPMutableFunctionBlock *> *)mutableFunctionBlocks { _mutableBlocks = [mutableFunctionBlocks copy]; }
 - (BOOL)isEnabled { return _enabled; }
 
-// The name is the release's own name of the endpoint's two ends (kMIDIPropertyName): the server shows it, and the release
-// answers it. An error of the release is returned, not swallowed.
 - (BOOL)setName:(NSString *)name error:(NSError **)error
 {
     OSStatus status = MIDIObjectSetStringProperty(_MIDIDestination, kMIDIPropertyName, (__bridge CFStringRef)name);
@@ -371,7 +344,6 @@ static NSMutableArray *charon_endpoints(void)
     return manager;
 }
 
-// No MIDI-CI transport: no device is ever discovered on this port (macOS: none on the measured host).
 - (NSArray<MIDICIDevice *> *)discoveredCIDevices { return @[]; }
 
 @end

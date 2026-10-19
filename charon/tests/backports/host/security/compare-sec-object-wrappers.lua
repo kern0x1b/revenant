@@ -1,11 +1,5 @@
--- compare-sec-object-wrappers.lua - the certificate and trust wrappers' retain counts, releases, identities and refusals, with
--- differences NAMED.
---
---    xmake l compare-sec-object-wrappers.lua <the binary's output>
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
--- In the order the rows are named.
 local BALANCE = {
     {"fixture-retain", 1}, {"after-create", 2}, {"after-copy", 3},
     {"after-copy-release", 2}, {"after-wrapper-scope", 1},

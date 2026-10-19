@@ -11,8 +11,6 @@ static NSString *const charon_source_file = @"UIDiffableDataSource.m";
     UITableViewRowAnimation _defaultRowAnimation;
 }
 
-// The header redeclares -init NS_UNAVAILABLE. A data source made by -init has no table and no cell provider, and
-// an empty snapshot, which is what the designated initialiser gives when it is handed nothing to keep.
 - (instancetype)init
 {
     if ((self = [super init])) {

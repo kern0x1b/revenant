@@ -1,10 +1,3 @@
-// The four SPAngle functions of iOS 16, the port against the host's own, over the same inputs. The oracle is the
-// host: nothing here writes an expected value. A double is compared by its bits, except that NaN equals NaN (the
-// payload of a NaN is not something the host is asked for). A bool is compared as the bool it is.
-//
-// Inputs: every edge value below, then random bit patterns from a fixed linear congruential generator, so every run
-// sees the same million values. The equality function sees every pair of the edge values and each adjacent pair of
-// the random values.
 #include <float.h>
 #include <math.h>
 #include <stdint.h>
@@ -88,7 +81,6 @@ int main(void)
             if (differ_get++ == 0) { first_get_in = x; first_get_host = host; first_get_port = port; }
         }
     }
-    // Each adjacent pair of the inputs, each value against itself, and every pair of the edge values.
     for (size_t i = 0; i < VALUE_COUNT; i++)
         for (size_t step = 0; step < 2; step++) {
             size_t j = i + step;

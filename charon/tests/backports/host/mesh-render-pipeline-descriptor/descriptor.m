@@ -1,13 +1,3 @@
-/* descriptor.m - MTLMeshRenderPipelineDescriptor (iOS 16.0), compared member by member with Apple's own object.
- *
- * Snapshots are compared at a fresh descriptor, one with every member set away from its default, a copy of that one,
- * and the set one after -reset. -reset is checked to give the buffer and colour arrays new objects on both sides.
- * Equality is compared on a list of single-member changes: Apple's answers are the expected ones, and the port's must
- * match them. A child process checks that reading buffer slot 31 aborts on both sides.
- *
- * THE FUNCTIONS ARE NOT SET: a function is a device's object, so every function member reads as nil on both sides.
- * NO DEVICE IS CREATED.
- */
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #include <sys/wait.h>
@@ -63,7 +53,6 @@ static NSDictionary *snapshot(MTLMeshRenderPipelineDescriptor *d)
     return s;
 }
 
-/* Sets every member away from its default, except the functions (see the file's comment). */
 static void setEverything(MTLMeshRenderPipelineDescriptor *d)
 {
     d.label = @"charon";
@@ -108,7 +97,6 @@ static void compareSides(MTLMeshRenderPipelineDescriptor *apple, MTLMeshRenderPi
 
 typedef void (^Change)(MTLMeshRenderPipelineDescriptor *d);
 
-/* One change per entry: the descriptor's equality to a fresh one, after that change. */
 static NSArray *equalityRow(Class cls)
 {
     NSArray<Change> *changes = @[

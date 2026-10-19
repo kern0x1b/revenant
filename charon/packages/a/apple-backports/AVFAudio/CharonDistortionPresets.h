@@ -2,17 +2,6 @@
 #import <AudioToolbox/AudioUnitParameters.h>
 #import <AudioToolbox/AudioUnit.h>
 
-// The release's distortion unit has sixteen parameters, ids 0-15 (AudioToolbox's AudioUnitParameters.h):
-// Delay, Decay, DelayMix, Decimation, Rounding, DecimationMix, LinearTerm, SquaredTerm, CubicTerm,
-// PolynomialMix, RingModFreq1, RingModFreq2, RingModBalance, RingModMix, SoftClipGain and FinalMix. The
-// SDK's preGain is SoftClipGain (14) and its wetDryMix is FinalMix (15): the host sets and reads
-// them at exactly those ids, which is how this file knows them (facts/AVFAudio/AVAudioUnitDistortion.md).
-//
-// A factory preset is the value of all sixteen. The table is the host's: row = the preset's value in
-// AVAudioUnitDistortionPreset order (0-21), column = parameter id. The host's loadFactoryPreset: is
-// those sixteen AudioUnitSetParameter calls, and a preset outside 0-21 changes nothing. Row 0 is also
-// what a fresh unit holds. The table was read back from the host unit after each preset, not
-// transcribed from documentation; tests/backports/host/avfaudio/distortion.m checks it again.
 #define CharonDistortionPresetCount 22
 #define CharonDistortionParameterCount 16
 static const float CharonDistortionPresets[CharonDistortionPresetCount][CharonDistortionParameterCount] = {
@@ -40,7 +29,6 @@ static const float CharonDistortionPresets[CharonDistortionPresetCount][CharonDi
     { 0.100000001f, 0.100000001f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 44.0f, 48.0f, 50.0f, 100.0f, 16.6000004f, 100.0f },
 };
 
-// Sets the sixteen parameters of one preset on the unit, in id order. A preset outside 0-21 sets nothing.
 static inline void CharonApplyDistortionPreset(AudioUnit unit, NSInteger preset)
 {
     if (unit == NULL || preset < 0 || preset >= CharonDistortionPresetCount) {

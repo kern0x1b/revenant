@@ -1,15 +1,7 @@
-/* MLSequence: an ordered list of numbers or of strings, which is what a Core ML sequence is.
- *
- * A model whose input is a sequence takes one of these: the values of a word vector, the
- * frames of a clip. It is its own class and not an array because the order is all it is -- there
- * is no shape to it, and the elements are the two kinds the specification names.
- */
 #import <CoreML/CoreML.h>
 
 #include "CharonMLBridge.h"
 
-/* The elements, and which kind they are. The strings are the values' own copies: a sequence an
- * application holds after the prediction has gone has to still be there. */
 @interface MLSequence () {
 @public
     MLFeatureType _type;

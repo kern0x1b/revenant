@@ -10,9 +10,6 @@ SCNLightingModel const SCNLightingModelConstant = @"SCNLightingModelConstant";
 - (instancetype)init
 {
     if ((self = [super init])) {
-        // Each slot's contents as macOS SceneKit's new material answers them (tests/backports/device/
-        // scenekit-defaults-expectations.h). Ambient and roughness are a grey of 0.2 in linear light, which SceneKit
-        // works in; a UIColor here is sRGB.
         UIColor *white = [UIColor whiteColor], *black = [UIColor blackColor];
         UIColor *grey = [CharonSCNCoding colorWithLinearWhite:0.2];
         _diffuse = [SCNMaterialProperty charonDefaultWithContents:white];
@@ -89,9 +86,6 @@ SCNLightingModel const SCNLightingModelConstant = @"SCNLightingModelConstant";
             if ([coder containsValueForKey:key]) {
                 SCNMaterialProperty *property = [coder decodeObjectOfClass:[SCNMaterialProperty class] forKey:key];
                 if (property) {
-                    // A colour this port cannot read keeps the slot at the default init gave it, as the log line says;
-                    // an archive with no colour at all is contents set to nil, and stays nil (measured on macOS
-                    // SceneKit: facts/SceneKit/SceneKit.md).
                     if (property.charonColorNotRead) {
                         [property charonKeepDefaultOf:[self valueForKey:key]];
                     }

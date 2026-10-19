@@ -1,19 +1,3 @@
--- readback.lua: reads a Core ML `.mlmodel` and prints the one line the model suite checks. It replaces
--- the two python scripts the suite ran through /usr/bin/python3 (coremltools 9.0), so the suite no
--- longer runs python. The fields, their order, their separators and their number formats are the ones
--- those scripts printed, and the suite's expectations are unchanged: they are the committed output of
--- coremltools, and this reader must print the same strings for the same file.
---
--- The decoder is the protobuf wire format over the field numbers in packages/c/createml/proto/
--- (Model.proto, NeuralNetwork.proto, FeatureTypes.proto). It reads the fields the line prints and
--- nothing else; a message the file carries that the line does not name is skipped, not parsed.
---     xmake l tests/backports/host/createml/model/readback.lua <file.mlmodel>
--- Output, one line:
---     specificationVersion|Type|inputs|outputs|shape|dataType|inputChannels|outputChannels|hasBias|weights|bias
--- with inputs and outputs comma-joined names, shape comma-joined integers, and weights and bias
--- comma-joined floats rounded to six places, as coremltools' `round(v, 6)` printed them.
-
--- The varint at `pos`, and the position after it.
 local function varint(bytes, pos)
     local value, scale = 0, 1
     repeat
@@ -26,15 +10,11 @@ local function varint(bytes, pos)
     return value, pos
 end
 
--- `n` bytes at `pos`, and the position after them; a message that ends early is an error, not a short
--- field.
 local function take(bytes, pos, n)
     if pos + n - 1 > #bytes then error("truncated field at byte " .. pos) end
     return bytes:sub(pos, pos + n - 1), pos + n
 end
 
--- The entries of one message: each field's number, its wire type and its value. A varint is a number,
--- a length-delimited field is its bytes, and a fixed 32 or 64 is its bytes.
 local function decode(bytes)
     local entries, pos = {}, 1
     while pos <= #bytes do
@@ -60,7 +40,6 @@ local function decode(bytes)
     return entries
 end
 
--- The last value of a singular varint field, or `default` when the message does not carry it.
 local function scalar(entries, number, default)
     local found = default
     for _, e in ipairs(entries) do
@@ -69,7 +48,6 @@ local function scalar(entries, number, default)
     return found
 end
 
--- The bytes of each length-delimited field with the number, in order: a repeated message, or a string.
 local function submessages(entries, number)
     local out = {}
     for _, e in ipairs(entries) do
@@ -78,7 +56,6 @@ local function submessages(entries, number)
     return out
 end
 
--- A repeated int64 field, packed or not, as numbers in order.
 local function integers(entries, number)
     local out = {}
     for _, e in ipairs(entries) do
@@ -98,7 +75,6 @@ local function integers(entries, number)
     return out
 end
 
--- An IEEE 754 single from four little-endian bytes.
 local function float32(s)
     local b1, b2, b3, b4 = s:byte(1, 4)
     local bits = ((b4 * 256 + b3) * 256 + b2) * 256 + b1
@@ -114,7 +90,6 @@ local function float32(s)
     return sign * value
 end
 
--- A repeated float field, packed or not, as numbers in order.
 local function floats(entries, number)
     local out = {}
     for _, e in ipairs(entries) do
@@ -131,7 +106,6 @@ local function floats(entries, number)
     return out
 end
 
--- Python's str() of a float: the shortest form that reads back as the same value, with a point.
 local function pyfloat(v)
     local s
     for digits = 1, 17 do
@@ -142,13 +116,11 @@ local function pyfloat(v)
     return s
 end
 
--- round(v, 6), then str().
 local function rounded(v)
     local sign = v < 0 and -1 or 1
     return pyfloat(sign * math.floor(math.abs(v) * 1000000 + 0.5) / 1000000)
 end
 
--- The names of a repeated FeatureDescription, joined with commas.
 local function names(features)
     local out = {}
     for _, feature in ipairs(features) do
@@ -157,8 +129,6 @@ local function names(features)
     return table.concat(out, ",")
 end
 
--- The fields of the Model's `Type` oneof, with the names Model.proto gives them: python's WhichOneof
--- answered with the name of the one that is set.
 local MODEL_TYPE = {
     [200] = "pipelineClassifier", [201] = "pipelineRegressor", [202] = "pipeline",
     [300] = "glmRegressor", [301] = "supportVectorRegressor", [302] = "treeEnsembleRegressor",
@@ -181,14 +151,11 @@ local function readModel(bytes)
     local inputs = submessages(description, 1)
     local outputs = submessages(description, 10)
 
-    -- python's WhichOneof answers None for an unset oneof.
     local typeName = "None"
     for number, name in pairs(MODEL_TYPE) do
         if #submessages(model, number) > 0 then typeName = name end
     end
 
-    -- The first input's type (FeatureDescription field 3) is a FeatureType, and its multiArrayType
-    -- (field 5) an ArrayFeatureType.
     local inputFeature = decode(inputs[1] or "")
     local inputType = decode(submessages(inputFeature, 3)[1] or "")
     local array = decode(submessages(inputType, 5)[1] or "")

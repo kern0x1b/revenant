@@ -1,17 +1,9 @@
-// probe.m - PKPaymentToken and PKPayment, the port's against the host's PassKit, in one process.
-//
-// run.sh builds the port's PKPayment8.m with its two classes renamed (charonHost_PKPayment and
-// charonHost_PKPaymentToken), so the system's PassKit keeps the real names. Each case is asked of both sides
-// the same way, through the runtime: the host's header does not declare every selector the 8.0 surface has, and
-// a message the header does not declare cannot be compiled, so every message here is sent by name. A case prints
-// SAME when the two answers are equal, and FAIL when they are not; the process exits 1 on any FAIL.
 #import <Foundation/Foundation.h>
 #import <objc/message.h>
 #import <stdio.h>
 
 static int failures = 0;
 
-// Answers of a getter, sent by name: the object, or nil when the selector is not there.
 static id get(id target, NSString *name)
 {
     SEL selector = NSSelectorFromString(name);
@@ -29,7 +21,6 @@ static BOOL set(id target, NSString *name, id value)
     return YES;
 }
 
-// The bare allocation of a class by name, nil when the release does not have the class.
 static id allocate(NSString *className)
 {
     Class cls = NSClassFromString(className);
@@ -46,7 +37,6 @@ static id make(NSString *className, NSString *initializer, id argument)
     return ((id (*)(id, SEL, id))objc_msgSend)(allocated, NSSelectorFromString(initializer), argument);
 }
 
-// The four-argument initializer of PKPaymentOrderDetails, sent by name as the others are.
 static id make4(NSString *className, id first, id second, id third, id fourth)
 {
     id allocated = allocate(className);
@@ -63,7 +53,6 @@ static void report(NSString *name, NSString *host, NSString *port)
     printf("%s %s host=%s port=%s\n", same ? "SAME" : "FAIL", name.UTF8String, host.UTF8String, port.UTF8String);
 }
 
-// An answer as a string a person can compare: the description of an object, "nil", or the "no selector" marker.
 static NSString *show(id value)
 {
     if (!value)
@@ -75,8 +64,6 @@ static NSString *show(id value)
     return [NSString stringWithFormat:@"%@", NSStringFromClass([value class])];
 }
 
-// A keyed archive is a property list whose objects refer to one another by UID. The reader hands the UIDs back as
-// CFKeyedArchiverUID objects, so the index is the number after "value = " in their description.
 static BOOL isUIDRef(id value)
 {
     return [[value description] hasPrefix:@"<CFKeyedArchiverUID"];
@@ -89,8 +76,6 @@ static NSUInteger uidValue(id value)
     return [[text substringFromIndex:NSMaxRange(range)] integerValue];
 }
 
-// The fields a release archive of className carries, one "key:kind" per field, sorted. A kind is the class of the
-// object the field refers to: NSString for a string, and the class name the archive stores for an object.
 static NSString *archiveFields(NSData *data, NSString *className)
 {
     NSDictionary *plist = [NSPropertyListSerialization propertyListWithData:data options:0 format:NULL error:NULL];
@@ -120,7 +105,6 @@ static NSString *archiveFields(NSData *data, NSString *className)
     return [[fields sortedArrayUsingSelector:@selector(compare:)] componentsJoinedByString:@" "];
 }
 
-// Decodes an archive whose root object is stored as storedName, with storedName read as the class target.
 static id decodeAs(NSData *data, NSString *storedName, NSString *target)
 {
     NSError *error = nil;
@@ -133,7 +117,6 @@ static id decodeAs(NSData *data, NSString *storedName, NSString *target)
     return object;
 }
 
-// The four members of an order, as one line of text a person can compare.
 static NSString *orderValues(id order)
 {
     return [NSString stringWithFormat:@"%@ %@ %@ %@", show(get(order, @"orderTypeIdentifier")),
@@ -141,7 +124,6 @@ static NSString *orderValues(id order)
             show(get(order, @"authenticationToken"))];
 }
 
-// The NSUInteger member, sent with its own signature (the generic getter would read it as an object).
 static NSString *typeOf(id target)
 {
     return [NSString stringWithFormat:@"%lu", (unsigned long)((NSUInteger (*)(id, SEL))objc_msgSend)(target,
@@ -153,7 +135,6 @@ static void setType(id target, NSUInteger type)
     ((void (*)(id, SEL, NSUInteger))objc_msgSend)(target, NSSelectorFromString(@"setType:"), type);
 }
 
-// The entries of an archiveFields string whose key is one of keys, in the same order.
 static NSString *fieldsNamed(NSString *fields, NSArray *keys)
 {
     NSMutableArray *kept = [NSMutableArray array];
@@ -168,7 +149,6 @@ static NSString *fieldsNamed(NSString *fields, NSArray *keys)
 int main(void)
 {
     @autoreleasepool {
-        // The class exists on both sides and says it supports secure coding.
         for (NSString *cls in @[@"PKPaymentToken", @"PKPayment", @"PKPaymentOrderDetails", @"PKPaymentMethod"]) {
             NSString *host = NSClassFromString(cls) ? @"yes" : @"no";
             NSString *port = NSClassFromString([@"charonHost_" stringByAppendingString:cls]) ? @"yes" : @"no";
@@ -184,7 +164,6 @@ int main(void)
             report([cls stringByAppendingString:@" supportsSecureCoding"], host, port);
         }
 
-        // A fresh token answers nil in every member both sides have.
         NSArray *tokenGetters = @[@"paymentData", @"transactionIdentifier", @"paymentInstrumentName", @"paymentNetwork"];
         for (NSString *getter in tokenGetters) {
             id hostToken = make(@"PKPaymentToken", @"init", nil);
@@ -192,8 +171,6 @@ int main(void)
             report([@"fresh token " stringByAppendingString:getter], show(get(hostToken, getter)), show(get(portToken, getter)));
         }
 
-        // The two members the host lets a caller set copy what they are given, so the caller's later change
-        // does not reach the object.
         NSMutableData *hostData = [NSMutableData dataWithBytes:"abc" length:3];
         NSMutableData *portData = [NSMutableData dataWithBytes:"abc" length:3];
         id hostToken = make(@"PKPaymentToken", @"init", nil);
@@ -214,7 +191,6 @@ int main(void)
         report(@"token transactionIdentifier copies what it is given", show(get(hostToken, @"transactionIdentifier")),
                show(get(portToken, @"transactionIdentifier")));
 
-        // A token that has been set round-trips through its own coder, with its two settable fields intact.
         NSData *hostArchive = [NSKeyedArchiver archivedDataWithRootObject:hostToken requiringSecureCoding:YES error:NULL];
         NSError *portArchiveError = nil;
         NSData *portArchive = [NSKeyedArchiver archivedDataWithRootObject:portToken requiringSecureCoding:YES error:&portArchiveError];
@@ -229,19 +205,16 @@ int main(void)
                show(get(portBack, @"transactionIdentifier")));
         report(@"token round trip keeps paymentData", show(get(hostBack, @"paymentData")), show(get(portBack, @"paymentData")));
 
-        // A payment keeps the token it was built with, and the same object comes back: not a copy.
         id hostPayment = make(@"PKPayment", @"initWithToken:", hostToken);
         id portPayment = make(@"charonHost_PKPayment", @"initWithToken:", portToken);
         report(@"payment token is the same object", [get(hostPayment, @"token") isEqual:hostToken] ? @"same" : @"other",
                [get(portPayment, @"token") isEqual:portToken] ? @"same" : @"other");
 
-        // A payment built with plain -init has no token, and no shipping method.
         id hostEmpty = make(@"PKPayment", @"init", nil);
         id portEmpty = make(@"charonHost_PKPayment", @"init", nil);
         report(@"empty payment token", show(get(hostEmpty, @"token")), show(get(portEmpty, @"token")));
         report(@"empty payment shippingMethod", show(get(hostEmpty, @"shippingMethod")), show(get(portEmpty, @"shippingMethod")));
 
-        // A payment's shipping method, when set, comes back as the object it was given.
         id hostShipping = [NSString stringWithFormat:@"method"];
         id portShipping = [NSString stringWithFormat:@"method"];
         set(hostEmpty, @"setShippingMethod:", hostShipping);
@@ -249,7 +222,6 @@ int main(void)
         report(@"payment shippingMethod is the object set", show(get(hostEmpty, @"shippingMethod")),
                show(get(portEmpty, @"shippingMethod")));
 
-        // A payment round-trips its token through its own coder.
         NSData *hostPaymentArchive = [NSKeyedArchiver archivedDataWithRootObject:hostPayment requiringSecureCoding:YES error:NULL];
         NSData *portPaymentArchive = [NSKeyedArchiver archivedDataWithRootObject:portPayment requiringSecureCoding:YES error:NULL];
         id hostPaymentBack = [NSKeyedUnarchiver unarchivedObjectOfClass:NSClassFromString(@"PKPayment") fromData:hostPaymentArchive error:NULL];
@@ -257,8 +229,6 @@ int main(void)
         report(@"payment round trip keeps the token's identifier",
                show(get(get(hostPaymentBack, @"token"), @"transactionIdentifier")),
                show(get(get(portPaymentBack, @"token"), @"transactionIdentifier")));
-        // PKPaymentOrderDetails: built with its four-argument initializer, the four members read back as given, a
-        // plain init has none of them, a set value is a copy, and the object round-trips through its coder.
         NSURL *url = [NSURL URLWithString:@"https://example.com/w"];
         id hostOrder = make4(@"PKPaymentOrderDetails", @"type", @"order-1", url, @"token");
         id portOrder = make4(@"charonHost_PKPaymentOrderDetails", @"type", @"order-1", url, @"token");
@@ -288,8 +258,6 @@ int main(void)
         report(@"order round trip keeps its URL", show(get(get(hostOrderBack, @"webServiceURL"), @"absoluteString")),
                show(get(get(portOrderBack, @"webServiceURL"), @"absoluteString")));
 
-        // The release's archive, in both directions. The host archives the order itself; the port's keys and value
-        // classes must be the host's, and each side must read the other's archive back to the values it was given.
         report(@"order archive keys and value classes", archiveFields(hostOrderArchive, @"PKPaymentOrderDetails"),
                archiveFields(portOrderArchive, @"PKPaymentOrderDetails"));
         report(@"port decodes the host's order archive", orderValues(decodeAs(hostOrderArchive, @"PKPaymentOrderDetails",
@@ -297,9 +265,6 @@ int main(void)
         report(@"host decodes the port's order archive", orderValues(decodeAs(portOrderArchive,
                @"charonHost_PKPaymentOrderDetails", @"PKPaymentOrderDetails")), orderValues(hostOrder));
 
-        // PKPaymentMethod, 9.0: a fresh method answers nil and 0; its members hold what they are given, and the strings are
-        // copied; a method built from any pass is the empty one (the host answers that for a fresh pass); a copy has the same
-        // members; the archive keeps the four members under their own names, and each side reads the other's back.
         id hostMethod = make(@"PKPaymentMethod", @"init", nil);
         id portMethod = make(@"charonHost_PKPaymentMethod", @"init", nil);
         report(@"fresh method type", typeOf(hostMethod), typeOf(portMethod));

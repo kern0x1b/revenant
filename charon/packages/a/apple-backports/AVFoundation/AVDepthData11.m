@@ -1,54 +1,15 @@
-// AVDepthData11.m - AVDepthData and AVCameraCalibrationData as of 11.0, in one object because they are one
-// release's API: the depth map an application reads off a capture and the calibration that comes with it.
-//
-// Neither class is on 6.1.3, and neither is anything a 6.1.3 capture produces: this port's cameras deliver
-// no depth (AVCaptureDeviceFormat.supportedDepthDataFormats is empty on every device of the port), so the
-// classes here are the value objects an application builds from its own bytes, and the ones this port
-// hands out when a depth dictionary is read. Every answer below is the one the host's own AVFoundation gives
-// for the same input, measured by tests/backports/host/avf-depthdata (the same probe, against this Mac's
-// framework and against this file renamed), and what the host does not measure is named where it is written.
-//
-// THE FORMAT OF A DEPTH MAP is the pixel format of its CVPixelBuffer, one of four: DisparityFloat16,
-// DisparityFloat32, DepthFloat16 and DepthFloat32. A disparity and a depth of the same precision hold the
-// same numbers the other way round, and the host's conversion is depth = 1 / disparity, computed in
-// single precision and stored at the precision of the target (measured: 0.5 -> 2, 2 -> 0.5, 0.25 -> 4 in both
-// directions; the float16 targets round to nearest, 2.0 -> 0x4000 and 0.5 -> 0x3800).
-//
-// THE DICTIONARY IS THE HOST'S OWN SHAPE. kCGImageAuxiliaryDataInfoData carries the map's bytes, one row after
-// another at the stride kCGImageAuxiliaryDataInfoDataDescription names; the description's Width, Height,
-// BytesPerRow and PixelFormat are read here; and kCGImageAuxiliaryDataInfoMetadata carries the three depth
-// facts (quality, accuracy, filtering) as the host writes them. The key strings are the values the host's
-// dictionaries carry (measured: the three keys and the two type names, kCGImageAuxiliaryDataTypeDisparity and
-// kCGImageAuxiliaryDataTypeDepth), and they are spelled here as strings because ImageIO on 6.1.3 exports no
-// symbol for them.
-//
-// THE ONE DIFFERENCE, named: the host's metadata value is a CGImageMetadata object, and 6.1.3's ImageIO has no
-// such type to return. The port writes the same three facts as the text the host's object prints, so the
-// dictionary round-trips and the facts read back the same; a caller that casts the value to CGImageMetadata
-// gets a string instead. facts/AVFoundation/DepthData11.md has the measurements.
-//
-// THE CALIBRATION is not read from any dictionary this port receives: the host's depth dictionaries carry none,
-// and no capture on the port's hardware delivers one. An AVCameraCalibrationData therefore has the values
-// -init gives it, which are the zero values of every field, and an AVDepthData's cameraCalibrationData is nil
-// unless a value was set through the same class. facts/AVFoundation/DepthData11.md, "Calibration", says what
-// a calibrated map would need.
 #import <AVFoundation/AVDepthData.h>
 #import <AVFoundation/AVError.h>
 #import <AVFoundation/AVCameraCalibrationData.h>
 #import <CoreVideo/CoreVideo.h>
 #import <Foundation/Foundation.h>
 
-// The keys of the auxiliary dictionary, as the host spells them. See the note above.
 static NSString *const CharonAuxInfoData = @"kCGImageAuxiliaryDataInfoData";
 static NSString *const CharonAuxInfoDataDescription = @"kCGImageAuxiliaryDataInfoDataDescription";
 static NSString *const CharonAuxInfoMetadata = @"kCGImageAuxiliaryDataInfoMetadata";
 static NSString *const CharonAuxTypeDisparity = @"kCGImageAuxiliaryDataTypeDisparity";
 static NSString *const CharonAuxTypeDepth = @"kCGImageAuxiliaryDataTypeDepth";
 
-// The two errors a dictionary can fail with, by the codes the host returns (AVFoundationErrorDomain, measured:
-// an empty dictionary is -11865 "Depth is malformed", a PixelFormat that is no depth format is -11864
-// "Format Unsupported"). The header's own AVError codes are the same numbers; the port names them here so that
-// the one place that raises them says which.
 static const NSInteger CharonDepthFormatUnsupported = -11864;
 static const NSInteger CharonDepthMalformed = -11865;
 
@@ -68,8 +29,6 @@ static BOOL CharonIsHalfFormat(OSType format)
     return format == kCVPixelFormatType_DisparityFloat16 || format == kCVPixelFormatType_DepthFloat16;
 }
 
-// The value of one pixel, read at its format's precision. A half float is read through __fp16, which is the
-// compiler's own half type, so the rounding is the platform's and not a second one written here.
 static float CharonReadPixel(const unsigned char *pixel, OSType format)
 {
     if (CharonIsHalfFormat(format)) {
@@ -92,9 +51,6 @@ static void CharonWritePixel(unsigned char *pixel, OSType format, float value)
     memcpy(pixel, &value, sizeof value);
 }
 
-// Converting a pixel across the disparity and depth families yields its reciprocal, capped by the host's own
-// behaviour: input at or below zero, or a reciprocal past 10000, reads back as 10000 (measured on the host in both
-// directions: 0, -2 and 1e-6 all answer 10000, and 70000 answers 1/70000 at either precision).
 static float CharonReciprocal(float value)
 {
     const float limit = 10000.0f;
@@ -109,7 +65,6 @@ static size_t CharonBytesPerPixel(OSType format)
     return CharonIsHalfFormat(format) ? 2 : 4;
 }
 
-// A new depth buffer of one format and size. Its rows are the buffer's own stride; nothing is assumed about it.
 static CVPixelBufferRef CharonCreateDepthBuffer(size_t width, size_t height, OSType format)
 {
     CVPixelBufferRef buffer = NULL;
@@ -118,8 +73,6 @@ static CVPixelBufferRef CharonCreateDepthBuffer(size_t width, size_t height, OST
     return buffer;
 }
 
-// The three facts the metadata carries, read from its text. A value the text does not name keeps the default
-// the host gives a dictionary without metadata (quality low, accuracy relative, not filtered).
 static void CharonReadMetadata(NSString *text, AVDepthDataQuality *quality, AVDepthDataAccuracy *accuracy, BOOL *filtered)
 {
     for (NSString *line in [text componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]]) {
@@ -147,10 +100,6 @@ static NSString *CharonMetadataText(AVDepthDataQuality quality, AVDepthDataAccur
 
 @implementation AVCameraCalibrationData
 
-// An object no camera made: every field is the zero value of its type. The host's private -_initEmpty makes the same
-// zeros (measured on macOS 27.0.1); the public -init is unavailable there and segfaults. No public path on 6.1.3 makes
-// such an object, and the calibration paths of this port are absent until a depth file carries one (see the notes
-// above and facts/AVFoundation/DepthData11.md, "Calibration").
 - (matrix_float3x3)intrinsicMatrix
 {
     matrix_float3x3 zero;
@@ -207,8 +156,6 @@ static NSString *CharonMetadataText(AVDepthDataQuality quality, AVDepthDataAccur
         CVPixelBufferRelease(_depthDataMap);
 }
 
-// The one place a depth data object is made: every factory and conversion below builds through it, so the
-// buffer is retained once and the facts travel together.
 - (instancetype)initWithMap:(CVPixelBufferRef)map quality:(AVDepthDataQuality)quality accuracy:(AVDepthDataAccuracy)accuracy
                           filtered:(BOOL)filtered calibration:(AVCameraCalibrationData *)calibration
 {
@@ -285,14 +232,12 @@ static NSString *CharonMetadataText(AVDepthDataQuality quality, AVDepthDataAccur
 
 - (NSArray<NSNumber *> *)availableDepthDataTypes
 {
-    // The four formats in the host's order: a disparity and a depth, each at both precisions.
     return @[ @(kCVPixelFormatType_DisparityFloat16), @(kCVPixelFormatType_DisparityFloat32),
               @(kCVPixelFormatType_DepthFloat16), @(kCVPixelFormatType_DepthFloat32) ];
 }
 
 - (AVDepthData *)depthDataByConvertingToDepthDataType:(OSType)depthDataType
 {
-    // A target that is no depth format has no conversion: the host raises an invalid-argument exception with this reason.
     if (!CharonIsDepthFormat(depthDataType))
         [NSException raise:NSInvalidArgumentException
                     format:@"*** -[AVDepthData depthDataByConvertingToDepthDataType:] Unsupported depth data type"];
@@ -300,7 +245,6 @@ static NSString *CharonMetadataText(AVDepthDataQuality quality, AVDepthDataAccur
     CVPixelBufferRef converted = CharonCreateDepthBuffer(w, h, depthDataType);
     if (!converted)
         return nil;
-    // The same family keeps its values; the other family takes the reciprocal, the host's own conversion.
     BOOL invert = CharonIsDisparityFormat(_depthDataType) != CharonIsDisparityFormat(depthDataType);
     CVPixelBufferLockBaseAddress(_depthDataMap, kCVPixelBufferLock_ReadOnly);
     CVPixelBufferLockBaseAddress(converted, 0);
@@ -323,10 +267,6 @@ static NSString *CharonMetadataText(AVDepthDataQuality quality, AVDepthDataAccur
     return result;
 }
 
-// The eight EXIF orientations, measured on a 2x2 map (the host's own answer for each): 1 is the identity, 2 mirrors
-// across the vertical axis, 3 turns half a circle, 4 mirrors across the horizontal axis, 5 transposes, 6 turns a
-// quarter clockwise, 7 is the anti-transpose and 8 turns a quarter counter-clockwise. The output of 5 to 8 has the
-// input's rows and columns exchanged.
 - (AVDepthData *)depthDataByApplyingExifOrientation:(CGImagePropertyOrientation)orientation
 {
     size_t w = CVPixelBufferGetWidth(_depthDataMap), h = CVPixelBufferGetHeight(_depthDataMap);
@@ -366,7 +306,6 @@ static NSString *CharonMetadataText(AVDepthDataQuality quality, AVDepthDataAccur
 
 - (AVDepthData *)depthDataByReplacingDepthDataMapWithPixelBuffer:(CVPixelBufferRef)depthDataMap error:(NSError **)outError
 {
-    // The map keeps its format: a buffer of another one is refused, as the host refuses a BGRA buffer.
     if (CVPixelBufferGetPixelFormatType(depthDataMap) != _depthDataType) {
         if (outError)
             *outError = [NSError errorWithDomain:AVFoundationErrorDomain code:CharonDepthFormatUnsupported

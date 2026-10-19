@@ -1,6 +1,3 @@
-// What the host's own MLCompute computes for a layer, asked through an inference graph so the numbers
-// come from the framework's own arithmetic rather than from a hand calculation. This is the oracle the
-// port's engine is written against: one input tensor, one or two layers, and the values that come out.
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <string.h>
@@ -26,9 +23,6 @@ static NSString *nums(NSArray *array)
     return text;
 }
 
-// A unary operation is asked with one source and a binary one with two, and the framework compiles only
-// the arity each really has (measured: every unary operation and every logical comparison fails to
-// compile with two sources, and every binary one fails with one).
 static BOOL isUnary(MLCArithmeticOperation operation)
 {
     switch (operation) {
@@ -52,8 +46,6 @@ static MLCTensorDescriptor *described(NSArray *shape)
     return [MLCTensorDescriptor descriptorWithShape:shape dataType:MLCDataTypeFloat32];
 }
 
-// One input, the layers in order, and the values of the first result. Nothing is compared here; the
-// answers are the record.
 static void through(NSString *name, NSArray *shape, NSArray<NSNumber *> *input, MLCTensor * (^build)(MLCGraph *graph, MLCTensor *input))
 {
     @autoreleasepool {
@@ -75,8 +67,6 @@ static void through(NSString *name, NSArray *shape, NSArray<NSNumber *> *input, 
         for (NSUInteger index = 0; index < input.count; index++) {
             bytes[index] = input[index].floatValue;
         }
-        // The result of an execute is written into the buffer the caller names, and the tensor of the
-        // graph that made it holds nothing: the inference graph owns its own tensors.
         float *out = malloc(4096);
         memset(out, 0, 4096);
         MLCTensorData *data = [MLCTensorData dataWithBytesNoCopy:bytes length:input.count * sizeof(float)];
@@ -115,7 +105,6 @@ int main(void)
 {
     setbuf(stdout, NULL);
     @autoreleasepool {
-        // A 2x2 image with one channel, values 1, 2, 3, 4.
         NSArray *image = @[ @1, @2, @3, @4 ];
         NSArray *imageShape = @[ @1, @1, @2, @2 ];
 
@@ -200,7 +189,6 @@ int main(void)
                 return logical ? [graph nodeWithLayer:layer source:input] : [graph nodeWithLayer:layer sources:@[ input, input ]];
             });
         }
-        // the six ordering comparisons against a second tensor, whose values are 2, 1, 1, 2
         through(@"a tensor of 2,1,1,2", imageShape, @[ @2, @1, @1, @2 ], ^(MLCGraph *graph, MLCTensor *input) {
             return [graph nodeWithLayer:[MLCArithmeticLayer layerWithOperation:MLCArithmeticOperationMultiply] source:input];
         });
@@ -209,8 +197,6 @@ int main(void)
         through(@"reshape 1,4", imageShape, image, ^(MLCGraph *graph, MLCTensor *input) {
             return [graph reshapeWithShape:@[ @1, @4 ] source:input];
         });
-        // the dimensions array has one entry for every dimension of the tensor, or the framework raises
-        // (measured: three entries for a tensor of four raises NSInvalidArgumentException)
         through(@"transpose 0,2,1,3", imageShape, image, ^(MLCGraph *graph, MLCTensor *input) {
             return [graph transposeWithDimensions:@[ @0, @2, @1, @3 ] source:input];
         });

@@ -37,11 +37,6 @@ NSError *charon_unsupported(NSString *reason);
                     textInputButtonTitle:(NSString *)buttonTitle textInputPlaceholder:(NSString *)placeholder;
 @end
 
-// What UNLocationNotificationTrigger10.m needs from the centre, and what the centre needs from it. The
-// trigger's own schedule is the region's, which CoreLocation watches since iPhone OS 4.0, so a request
-// carrying one is not a UILocalNotification to schedule: it is a region to monitor, and the
-// notification is presented when CoreLocation says the device entered or left it. The centre builds
-// that notification, because a request's content is turned into one there and nowhere else.
 @interface UNUserNotificationCenter (CharonUserNotifications)
 - (UILocalNotification *)charon_localNotificationForRequest:(UNNotificationRequest *)request;
 - (void)charon_deliverRequest:(UNNotificationRequest *)request state:(UIApplicationState)state;

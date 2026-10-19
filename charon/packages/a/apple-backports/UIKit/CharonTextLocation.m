@@ -1,5 +1,3 @@
-// CharonTextLocation.m - the port's own NSTextLocation. See CharonTextLocation.h for why it holds the
-// document as well as the offset.
 #import "CharonTextLocation.h"
 
 @implementation CharonTextLocation
@@ -21,12 +19,6 @@
     return self;
 }
 
-// The whole of NSTextLocation: the ordering of this place against another, which is the ordering of the two
-// offsets. A location of another document has no order against this one, and the protocol has no way to say
-// so, so the answer is the ordering of the two offsets and the storage's own -offsetFromLocation:toLocation: is
-// what refuses the pair before a comparison is asked for. Ordering two locations that are not of one document
-// is a question with no answer, and answering it with the offsets is the least of the three answers that are
-// not a refusal.
 - (NSComparisonResult)compare:(id<NSTextLocation>)location
 {
     NSInteger other = [location respondsToSelector:@selector(offset)] ? [(CharonTextLocation *)location offset] : 0;
@@ -50,8 +42,6 @@
     return (NSUInteger)_offset ^ (NSUInteger)(__bridge void *)_textContentStorage * 31;
 }
 
-// A location prints as its offset and the document it is in, which is what a range's description shows and the
-// only thing about a place that is worth printing.
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"%@%ld", self.textContentStorage ? @"" : @"(no document) ", (long)_offset];

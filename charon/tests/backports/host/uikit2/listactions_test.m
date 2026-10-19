@@ -64,14 +64,6 @@ static UICollectionView *list_view(int side, id *sourceOut, NSMutableArray *log,
     __block id source;
     source = [[named(side, @"UICollectionViewDiffableDataSource") alloc] initWithCollectionView:view cellProvider:^UICollectionViewCell *(UICollectionView *v, NSIndexPath *path, id item) {
         UICollectionViewListCell *cell = [v dequeueReusableCellWithReuseIdentifier:@"c" forIndexPath:path];
-        // The plain name on both sides: -defaultContentConfiguration is the SDK's own member of
-        // UICollectionViewListCell (UICollectionViewListCell.h:21), and the port's cell is a subclass of it, so
-        // it answers the name it inherits. renamed() is for a selector a port CATEGORY adds, and this one is not
-        // one of those: over the group's own objects only UITableViewCell and UITableViewHeaderFooterView
-        // define the prefixed form, in @implementation UITableViewCell (CharonConfiguration) and
-        // UITableViewHeaderFooterView (CharonConfiguration). Asking the port's cell for the prefixed name raised
-        // -[CharonHostUICollectionViewListCell charonHostDefaultContentConfiguration]: unrecognized selector.
-        // listcell_test.m:679 asks the same question of UICollectionViewCell and expects the same answer.
         id content = ((id (*)(id, SEL))objc_msgSend)(cell, @selector(defaultContentConfiguration));
         [content setText:item];
         ((void (*)(id, SEL, id))objc_msgSend)(cell, side ? NSSelectorFromString(@"charonHostSetContentConfiguration:") : NSSelectorFromString(@"setContentConfiguration:"), content);

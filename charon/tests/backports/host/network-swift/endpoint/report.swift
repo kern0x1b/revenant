@@ -1,5 +1,3 @@
-// Test-only, shared by the NWEndpoint.Host and NWEndpoint.Port differential. Built against Apple's Network and against this
-// tree's Network; the two outputs must be identical. Zones are en0 (see ipv6/report.swift for why not lo0).
 import Foundation
 import Network
 

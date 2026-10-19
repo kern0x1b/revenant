@@ -1,10 +1,5 @@
 #import "CharonDynamics.h"
 
-// The material of an item's body. A property is pushed to the body only once it was set to a value
-// other than the one it had, and then at association, at addItem: and at the start of each step after
-// any change; several behaviors on one item are applied in the animator's hierarchy order, so the last
-// one that set a property wins. Removing the behavior puts the 7.0 properties back to their defaults
-// at once (7.0); anchored and charge (9.0) stay as they were (host).
 enum {
     CharonElasticitySet = 1 << 0,
     CharonFrictionSet = 1 << 1,
@@ -89,8 +84,6 @@ CHARON_PROPERTY(BOOL, isAnchored, setAnchored, _anchored, CharonAnchoredSet)
 
 #undef CHARON_PROPERTY
 
-// -[UIDynamicItemBehavior _configureBody:forView:] (7.0), and the two 9.0 properties after them. An
-// anchored body is static: b2Body::SetType zeroes its velocities, as the host's anchored item has none.
 - (void)charon_configureBody:(CharonDynamicsBody *)body
 {
     if (_stateFlags & CharonElasticitySet)
@@ -127,8 +120,6 @@ static void charon_reset_material(CharonDynamicsBody *body)
     [self charon_configureBody:body];
 }
 
-// Mode 2 is the behavior's own association (bodies registered, then configured); every other mode is
-// the start of a step after a change, which configures the bodies the items already have.
 - (void)charon_reevaluate:(NSInteger)mode
 {
     UIDynamicAnimator *context = [self charon_context];
@@ -194,17 +185,12 @@ static void charon_reset_material(CharonDynamicsBody *body)
     [[self charon_items] removeObject:item];
 }
 
-// 7.0 keys its velocity caches weakly (+weakToStrongObjectsMapTable, which 4.3-5.1.1 lack). An entry
-// exists only for an item in -charon_items, which holds it, and leaves with -removeItem:, so keys that
-// are not retained answer as weak ones do; the options below are the ones 4.3's NSMapTable has.
 static NSMapTable *charon_velocity_cache(void)
 {
     return [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsOpaqueMemory | NSPointerFunctionsObjectPersonality
                                  valueOptions:NSPointerFunctionsStrongMemory];
 }
 
-// A velocity added before the behavior joins an animator is kept, summed, and given to the body at
-// association; after that it goes to the body at once.
 - (void)addLinearVelocity:(CGPoint)velocity forItem:(id<UIDynamicItem>)item
 {
     if ((velocity.x == 0 && velocity.y == 0) || ![[self charon_items] containsObject:item])

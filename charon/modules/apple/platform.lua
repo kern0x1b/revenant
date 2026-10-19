@@ -19,10 +19,6 @@ function waivers(target)
     return waived
 end
 
--- The libraries other packages provide (the backports, a shared runtime) are checked with the program, and a weak import in
--- one of them is that package's to answer for when it is built, not a reason to refuse this program.
--- runtime: the copies the program carries of the runtime's libraries and of the packages that declare guard rows, whose weak
--- imports are that library's to answer for where its guard table records them (apple.runtime_guards).
 function import_options(target, provided, runtime)
     return {release = os.getenv("CHARON_RELEASE") ~= nil, waived = waivers(target)["weak-imports"], exempt = provided,
             runtime = runtime, guards = runtime_guards.guards()}
@@ -34,11 +30,6 @@ function deployment(target)
     return found:config("deployment")
 end
 
--- xmake hands a target the packages it adds under the name a require carries,
--- which is its alias, or its own name when it has none: a require named after
--- the repository it comes from reaches no target without one. A target that
--- adds a package and never receives it links against the frameworks of the
--- release alone, and the program it builds fails on the device saying nothing.
 function verify_packages(target)
     local _, extra = project.requires_str()
     for _, required in ipairs(table.wrap(target:get("packages"))) do
@@ -100,10 +91,6 @@ function verify_inputs(target)
     vprint("%s: %d objects and %d archive members record iOS %s", target:name(), objects, members, deployment(target))
 end
 
--- A package checks what it installs: every image is for the architecture and the release it was built for. The sources of
--- a package are one directory for every architecture, so a build tree, or an object, that another configuration left
--- behind would otherwise reach a port as a library it cannot use. Nothing downstream would say so either: a port's link
--- checks its own objects and the static archives of its packages, not the libraries a package installs.
 function verify_installed(package)
     local chosen = assert(package:toolchains(), package:name() .. " is built for apple-ios without the apple-ios toolchain")[1]
     chosen:load()
@@ -163,13 +150,8 @@ function backport_libraries(target)
     return libraries
 end
 
--- The packages of the runtime a program shares rather than carries: the ones charon@swift-runtime and charon@libcxx wrote
--- for their builds, and the libraries in them under the names the program will find them by.
 local SHARED = {"swift-runtime", "libcxx"}
 
--- Answers the packages of the shared runtime the target's binary is linked against, with what each needs, or nil when it
--- shares none. A package the binary does not load is not depended on: a daemon has no use for the UIKit overlays, and
--- depending on them would put UIKit in its process.
 function shared_runtime(target)
     local all, identities, libraries = {}, {}, {}
     for _, alias in ipairs(SHARED) do
@@ -177,7 +159,6 @@ function shared_runtime(target)
         for _, entry in ipairs(package and table.wrap((package:envs() or {}).CHARON_SHARED_PACKAGE)[1] and table.wrap((package:envs() or {}).CHARON_SHARED_PACKAGE)[1]:split(";") or {}) do
             local name, needs = entry:match("^([^=]+)=?(.*)$")
             local folder = "/usr/lib/charon/" .. name
-            -- what the package left of itself: the tree its libraries are in, and what its Debian package is written from
             local root = path.join(package:installdir(), "share", "root")
             local described = staged.metadata(path.join(package:installdir(), "share", "shared-packages"), name)
             local held = {}
@@ -197,7 +178,6 @@ function shared_runtime(target)
     for _, shared in ipairs(all) do
         byname[shared.name] = shared
     end
-    -- One copy of libc++abi to a process: the runtime and the program name the same build of it.
     for _, shared in ipairs(all) do
         if shared.needs and not byname[shared.needs] then
             raise("target(%s) shares %s, which is linked against %s, and the target itself takes the C++ runtime from a different build; require charon@libcxx with the same configs as the runtime does (packaged)", target:name(), shared.name, shared.needs)
@@ -226,7 +206,6 @@ function shared_runtime(target)
     return {packages = listed, identities = identities, libraries = libraries}
 end
 
--- What the release's own libraries do not hold and the program finds installed by a package it depends on.
 function provided_libraries(target)
     local shared = shared_runtime(target)
     return table.join(backport_libraries(target), shared and shared.libraries or {})
@@ -252,8 +231,6 @@ function report_selectors(source, binaries, architecture, folder, provided)
             local named = folder and path.relative(binary, folder) or binary
             local limit = option.get("verbose") and #missing or 12
             local shown = table.concat(table.slice(missing, 1, math.min(limit, #missing)), " ") .. (#missing > limit and string.format(" and %d more, all of them under xmake -v", #missing - limit) or "")
-            -- xmake shows only the first wprint of a whole run without -v, and one run reports every binary of a
-            -- build, so each binary's warning is printed as its own line, as dyld.check prints its warnings.
             cprint("${color.warning}warning:${clear} %s sends %d selector%s no class of the %s release it is checked against implements, which must run only behind respondsToSelector: or a version check: %s",
                    named, #missing, #missing == 1 and "" or "s", architecture, shown)
         end
@@ -285,12 +262,6 @@ function report_registry(target, binary)
            path.filename(binary), #advised, table.concat(told, "\n"))
 end
 
--- One build of the runtime, and one of the C++ runtime, to a program. A package compiled against the runtime (a library of
--- Swift) asks for it with its own configs, and one that asks for another build than the program does puts two of them in the
--- link: the program compiles against one, links libswiftCore from whichever folder comes first, and either fails on the mark
--- or, when the first is the one it compiled against, quietly ignores the variant it asked for. Neither is the answer; refuse.
--- Every package that was built against a runtime reports that runtime's mark in its environment, and a folder that holds
--- libc++ is one build of it.
 function verify_one_runtime(target)
     local marks, cxx = {}, {}
     for _, dependency in ipairs(target:orderpkgs()) do
@@ -346,20 +317,14 @@ function carried_folder(target)
     return "/usr/lib/charon/" .. package
 end
 
--- The copies a program carries of the runtime's libraries are that runtime's images, as they are when it shares them: a weak
--- import its guard table records is the runtime's to answer for, and the program's own images are checked as usual.
 local function carries_runtime(library)
     return library.package ~= nil and table.contains(SHARED, library.package)
 end
 
--- The copies a program carries whose weak imports the guard table answers for: the runtime's, and a package's own libraries
--- that the package declares rows for (apple.runtime_guards' PACKAGES). Only the runtime's are shared, so only they are held.
 local function carries_guarded(library)
     return carries_runtime(library) or (library.package ~= nil and runtime_guards.declares(library.package))
 end
 
--- The libraries of `offered` (a list of {name, source}) the images in `roots` load, directly or through one another: what a
--- program carries of a package is what it links, and not every library the package holds.
 function reached(offered, roots)
     local byname = {}
     for _, library in ipairs(offered) do
@@ -423,11 +388,6 @@ function verify_placed(target, installed)
     report_selectors(source, binaries, target:arch(), root, provided)
 end
 
--- A copy that failed must not pass for one that happened. os.vcp is a clone-file copy and reports
--- failure by returning nothing at all, so a caller that ignores it writes a package without the program
--- in it and the install still says it installed one: the guest then runs whatever the image last had,
--- which is how an install reports success and leaves the program two edits old. The size is the check,
--- because a program is never rewritten to the same length by accident mid-install.
 function copy_program(source, destination, description)
     os.mkdir(path.directory(destination))
     os.vcp(source, destination)
@@ -439,16 +399,6 @@ function copy_program(source, destination, description)
     return destination
 end
 
--- A file's LC_UUID, which is the one thing neither strip nor a signature touches: strip rewrites the
--- bytes before the signature and ldid adds one after, so a size or a hash says nothing about which build
--- a copy came from - measured, a build output and the copy an install stages of it report the same
--- __TEXT size and differ by 1128 bytes - and the UUID says exactly that. Read with the host's otool,
--- the way the platform's other Mach-O questions are read off a binary.
--- A file's LC_UUID, which is the one thing neither strip nor a signature touches: strip rewrites the
--- bytes before the signature and ldid adds one after, so a size or a hash says nothing about which build a
--- copy came from - measured, a build output and the copy an install stages of it report the same __TEXT
--- size and differ by 1128 bytes - and the UUID says exactly that. otool reads the byte order itself, so
--- the Mach-O is not parsed here; the two lines after LC_UUID are cmdsize and then the uuid.
 function macho_uuid(binary)
     if not os.isfile(binary) then
         return nil
@@ -471,10 +421,6 @@ function macho_uuid(binary)
     return uuid
 end
 
--- That the file an install staged is the build's own, and not an earlier one. An install that stages a
--- program it did not build writes a package, says it installed one, and leaves the image with whatever
--- it last had - so both are refused here, the copy being older than its source and the copy carrying
--- another build's UUID, and the file is named either way.
 function verify_provenance(source, installed, description)
     if not os.isfile(installed) then
         raise("%s: %s is not there, so the image would hold no program at all", description, installed)
@@ -483,8 +429,6 @@ function verify_provenance(source, installed, description)
         raise("%s: %s is older than the %s it was copied from, so the image would hold a program that was not built",
                description, installed, source)
     end
-    -- Two builds, and the copy is from the other one. This is the check that strip and a signature cannot
-    -- hide behind, and it is what catches a stage that was never refreshed.
     local wanted, got = macho_uuid(source), macho_uuid(installed)
     if wanted and got and wanted ~= got then
         raise("%s: %s carries LC_UUID %s and %s carries %s, so the image would hold a program from another build",
@@ -546,8 +490,6 @@ function application(target)
     os.vcp(target:targetfile(), executable)
     local identities = {}
     local binaries, runtime = {executable}, {}
-    -- The runtime's libraries are the ones the program loads, through its own libraries as well; the rest of what it carries
-    -- is carried whether it names it or not (a framework it opens at run time is no link of the executable's).
     local carried, held, roots = {}, {}, {executable}
     for _, library in ipairs(bundle.carried_libraries(target)) do
         table.insert(carries_runtime(library) and held or carried, library)

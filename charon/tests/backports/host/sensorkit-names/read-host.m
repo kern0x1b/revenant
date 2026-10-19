@@ -1,8 +1,3 @@
-// The host's own SensorKit values, read the way the ImageIO trap says: dlsym on a const
-// object-pointer VARIABLE returns the address of the variable, so it is dereferenced ONCE.
-//
-// Nothing here calls into SensorKit. The library is opened, a symbol is looked up, and the bytes of the
-// string the variable holds are printed: no sensor, no reader, no authorization, no device.
 #import <Foundation/Foundation.h>
 #import <dlfcn.h>
 #import <stdio.h>

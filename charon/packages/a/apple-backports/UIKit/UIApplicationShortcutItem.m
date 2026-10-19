@@ -36,7 +36,6 @@ NSString *const UIApplicationLaunchOptionsShortcutItemKey = @"UIApplicationLaunc
     NSString *_localizedSubtitle;
     UIApplicationShortcutIcon *_icon;
     NSDictionary *_userInfo;
-    // The identifier is copied on set, as the header says and the host does (tests/backports/host/shortcut-item). It is nil until set.
     @package
     id _targetContentIdentifier;
 }

@@ -1,26 +1,4 @@
-// The cases CIBarcodeDescriptor and its four subclasses have to answer, compiled twice: once against the
-// host's own CoreImage and once against the port's object, so the two sets of answers are compared by run.sh
-// line by line.
-//
-// WHAT IS BEING ASKED. The header calls the initializer's argument `errorCorrectedPayload` and gives the
-// property the same name, so every case here answers one of two questions: which numbers does a descriptor
-// accept, and what does it hold. A descriptor prints itself as its class, the bytes of its payload and every
-// number its own header declares, so a difference in a case is a difference in the descriptor.
-//
-// ONE GROUP PER PROCESS. The host's own CIPDF417CodeDescriptor dies in its own dealloc: every record is
-// printed and the process then exits 139 (measured 2026-10-03), and one of the QR boundary cases traps. So a
-// process answers ONE group, run.sh runs every group in both builds, and a group the host does not survive is
-// compared on the records it printed and its exit status is reported beside them.
-//
-// A GROUP NAME IS A LIST OF SECTIONS, so that a section can belong to two groups (the payload cases of all
-// four classes, for instance) without duplicating the cases themselves.
 #import <Foundation/Foundation.h>
-// The header only: this file names the five classes and two enums and calls nothing else of CoreImage, so
-// the PORT build can link Foundation alone and define the classes itself. Linking CoreImage there would put
-// the host's own classes in the same process under the same names, the host's would be registered first,
-// and the port build would answer with the host's code - which is exactly what it did until a binding
-// record below caught it (measured 2026-10-03: both builds printed the same answers because only one of
-// them was running).
 #import <CoreImage/CoreImage.h>
 #include <dlfcn.h>
 #include <objc/runtime.h>
@@ -53,11 +31,6 @@ static void record(NSString *name, NSString *answer)
     printf("%s\t%s\n", name.UTF8String, answer.UTF8String);
 }
 
-// CIBarcodeDescriptor.h:26 declares the base class with no member at all, so each subclass's payload is read
-// through that subclass's own property, which is what the header's declaration allows a caller to do.
-// The class as a caller knows it. The port build renames the five classes so both can be in one process
-// (see run.sh), and the rename is a build detail: a record identifies the descriptor by the name the SDK
-// gives it, so the harness's own prefix is taken off here rather than compared as a difference.
 static const char *apiName(id object)
 {
     const char *name = class_getName([object class]);
@@ -95,9 +68,6 @@ static NSString *show(id object)
     return [NSString stringWithFormat:@"%s (no member of its own)", apiName(object)];
 }
 
-// The four error-correction levels, named by index because their values are the CHARACTERS 'L', 'M', 'Q'
-// and 'H' and not 0-3. An earlier sweep of these very questions passed the enum straight into a 0..3 loop and
-// asked nothing at all, which is why this table exists and why the QR group has its own process.
 static const CIQRCodeErrorCorrectionLevel kLevels[4] = { CIQRCodeErrorCorrectionLevelL, CIQRCodeErrorCorrectionLevelM,
                                                           CIQRCodeErrorCorrectionLevelQ, CIQRCodeErrorCorrectionLevelH };
 static const char *kLevelNames[4] = { "L", "M", "Q", "H" };
@@ -105,8 +75,6 @@ static const char *kLevelNames[4] = { "L", "M", "Q", "H" };
 static NSData *eight;
 static NSData *one;
 static NSData *empty;
-
-// MARK: - the sweeps, one per class, each counting the whole of the header's range
 
 static void sweepQR(void)
 {
@@ -168,8 +136,6 @@ static void sweepMatrix(void)
                                                                   (unsigned long)total]);
 }
 
-// MARK: - the boundaries, one case each, with the numbers the caller passed beside them
-
 static void qrBounds(NSInteger version, uint8_t mask, CIQRCodeErrorCorrectionLevel level, NSString *label)
 {
     record([NSString stringWithFormat:@"qr %@", label],
@@ -184,8 +150,6 @@ static void qrBoundsGroup(void)
             continue;
         qrBounds(version, 3, CIQRCodeErrorCorrectionLevelQ, [NSString stringWithFormat:@"version %ld", (long)version]);
     }
-    // every mask the argument can hold: the header says 0 to 7 and the host answers 8 and 255 as well, so
-    // the mask is the one parameter with no upper bound of its own (a uint8_t cannot hold more)
     const NSInteger masks[] = { 0, 7, 8, 255 };
     for (size_t i = 0; i < sizeof masks / sizeof masks[0]; i++)
         qrBounds(5, (uint8_t)masks[i], CIQRCodeErrorCorrectionLevelM,
@@ -249,8 +213,6 @@ static void matrixBoundsGroup(void)
                                                          eccVersion:CIDataMatrixCodeECCVersion000]));
 }
 
-// MARK: - the payload itself
-
 static void payloadCases(BOOL withPDF417)
 {
     NSData *payloads[4] = { nil, empty, one, eight };
@@ -299,8 +261,6 @@ static void factoryIsInit(void)
                                                         errorCorrectionLevel:CIQRCodeErrorCorrectionLevelH];
     record(@"qr factory is init", made && begun && [made isEqual:begun] ? @"same" : @"different");
 }
-
-// MARK: - NSCopying and NSSecureCoding, which the header declares the classes as
 
 static void copyAndArchive(BOOL withPDF417)
 {
@@ -362,8 +322,6 @@ int main(int argc, const char **argv)
         setvbuf(stdout, NULL, _IOLBF, 0);
         NSString *group = argc > 1 ? @(argv[1]) : @"";
 
-        // The port's own answer has to come from the port's own class. dladdr on a method IMP says which
-        // image it is in, and the host's CoreImage is the other one.
 #ifdef CHARON_PORT
         {
             IMP imp = [CIPDF417CodeDescriptor instanceMethodForSelector:@selector(rowCount)];

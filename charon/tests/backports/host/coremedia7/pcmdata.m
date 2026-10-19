@@ -8,11 +8,6 @@ OSStatus CharonHostCMSampleBufferCopyPCMDataIntoAudioBufferList(CMSampleBufferRe
 
 static int failures, checks, cornerSame, cornerDifferent;
 
-// The claim (registry/CoreMedia/ios7.json, facts/CoreMedia/CMSampleBufferCopyPCMDataIntoAudioBufferList.md):
-// for a destination list with as many buffers as the sample buffer's own, and an offset and a frame count
-// that are not negative, the port answers the host's own status and writes the host's own bytes. Outside it the host
-// answers from the shape it was handed in a way the port does not reproduce; how often the two still agree
-// is measured and printed rather than asserted.
 static int insideClaim(CMSampleBufferRef buffer, int32_t offset, int32_t frames, UInt32 buffers, CMBlockBufferRef probe)
 {
     (void)probe;
@@ -22,9 +17,6 @@ static int insideClaim(CMSampleBufferRef buffer, int32_t offset, int32_t frames,
     const AudioStreamBasicDescription *stream = format ? CMAudioFormatDescriptionGetStreamBasicDescription((CMAudioFormatDescriptionRef)format) : NULL;
     if (!stream)
         return 0;
-    // For non-interleaved audio with more than one channel the host reads past the end of the buffer it
-    // was handed (facts/CoreMedia/CMSampleBufferCopyPCMDataIntoAudioBufferList.md), so that shape is
-    // outside the claim and its agreement is measured instead.
     if ((stream->mFormatFlags & kAudioFormatFlagIsNonInterleaved) && stream->mChannelsPerFrame > 1)
         return 0;
     size_t needed = 0;
@@ -40,8 +32,6 @@ static int insideClaim(CMSampleBufferRef buffer, int32_t offset, int32_t frames,
     return buffers == count;
 }
 
-// An AudioBufferList holds one AudioBuffer inline, so a list of n buffers is a block of
-// sizeof(AudioBufferList) + (n - 1) * sizeof(AudioBuffer) read through the struct's own type.
 static AudioBufferList *listOf(UInt32 buffers, size_t bytes, UInt32 numberChannels)
 {
     size_t slots = buffers ? buffers : 1;

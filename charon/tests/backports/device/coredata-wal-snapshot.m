@@ -1,16 +1,3 @@
-// coredata-wal-snapshot.m - the one measurement the query-generation rows turn on, asked of the
-// release itself: with a Core Data store opened on a write-ahead log, does a second connection's read
-// stay on its snapshot after another context writes?
-//
-// A command-line program, no UIApplicationMain: build it as a daemon target (@addon/charon/daemon;
-// CoreData, Foundation; -fobjc-arc) and run it in the emulator at 6.1.3:
-//
-//     xmake emulate -d iPhone4,1 -r 6.1.3 run /usr/libexec/coredata-wal-snapshot
-//
-// run.sh beside it builds, installs and runs it, and prints the answer. What it prints is what
-// facts/CoreData/QueryGeneration.md says, and it prints it either way: if the read stays on its snapshot
-// the port can pin a generation on this release, and if it does not, the pinning answers YES and reads
-// the latest rows - which is what the newest Core Data does for a store that keeps no generations.
 #include <Foundation/Foundation.h>
 #include <CoreData/CoreData.h>
 
@@ -31,8 +18,6 @@ int main(void)
     [[NSFileManager defaultManager] removeItemAtURL:[NSURL fileURLWithPath:@"/tmp/coredata-wal-probe.sqlite-wal"] error:nil];
     [[NSFileManager defaultManager] removeItemAtURL:[NSURL fileURLWithPath:@"/tmp/coredata-wal-probe.sqlite-shm"] error:nil];
 
-    // A managed object model with one entity and one integer attribute, built in code so the probe needs
-    // no bundle and no fixture on the device.
     NSEntityDescription *entity = [[NSEntityDescription alloc] init];
     entity.name = @"Row";
     entity.managedObjectClassName = @"NSManagedObject";
@@ -43,8 +28,6 @@ int main(void)
     NSManagedObjectModel *model = [[NSManagedObjectModel alloc] init];
     model.entities = @[entity];
 
-    // The store is opened on a write-ahead log, through NSSQLitePragmasOption - iOS 5 API, and the
-    // question is what that journal does to a reader that is already in a read transaction.
     NSError *error = nil;
     NSPersistentStoreCoordinator *coordinator =
         [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:model];
@@ -63,7 +46,6 @@ int main(void)
     printf("the store is open on a write-ahead log\n");
     fflush(stdout);
 
-    // One context writes three rows.
     NSManagedObjectContext *writer = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
     writer.persistentStoreCoordinator = coordinator;
     for (int index = 0; index < 3; index++) {
@@ -78,8 +60,6 @@ int main(void)
     printf("the first context wrote three rows\n");
     fflush(stdout);
 
-    // A second context reads inside a read transaction, and the first one writes again. If the read
-    // transaction holds its snapshot, the second read counts three; if it sees the write, it counts four.
     NSManagedObjectContext *reader = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
     reader.persistentStoreCoordinator = coordinator;
     NSFetchRequest *before = [NSFetchRequest fetchRequestWithEntityName:@"Row"];

@@ -9,28 +9,14 @@ package("apple-backports")
 
     add_deps("charon@ldid 2.1.5-procursus7+23.gaf86971", {alias = "ldid"})
     add_deps("charon@box2d 2.2.1", {alias = "box2d"})
-    -- AMD and COLAMD, the two sparse orderings, as a static archive. The Sparse* solve family needs an
-    -- ordering and this stack's own rows must not export one. The archive is not the proof of that: AMD
-    -- and COLAMD mark their entry points with their own AMD_EXPORT and COLAMD_EXPORT, which is
-    -- visibility("default") and overrides the -fvisibility=hidden the recipe compiles with - measured,
-    -- `nm -gU` on the built libSuiteSparseOrdering.a counts 28 global amd_* and colamd_* names. The proof
-    -- is on libAccelerateBackports.dylib and cannot be made until a caller exists. Only AMD, COLAMD and
-    -- SuiteSparse_config are in the recipe: the rest of the tarball is LGPL, GPL, or not this package.
     add_deps("charon@suitesparse-ordering v7.12.2", {alias = "suitesparse-ordering"})
     add_deps("charon@ggml 0.25.3", {alias = "ggml"})
     add_deps("charon@monocypher 4.0.2", {alias = "monocypher"})
-    -- micro-ecc is the P-256 arithmetic iOS 6 cannot do a signature with: SecKeyCreateRandomKey and
-    -- SecKeyCreateSignature are iOS 8, so Security/SecKeyElliptic10.m signs, verifies and exchanges a key
-    -- this package made itself over the archive, and every name it needs begins with Charon.
     add_deps("charon@micro-ecc", {alias = "micro-ecc"})
-    -- The codecs of the Compression backport, each a pinned upstream built as one static archive with its symbols
-    -- hidden (the recipes name the commit they fetch): LZFSE and LZVN, zlib's raw deflate, LZ4's block codec, and the liblzma subset of xz for LZMA.
     add_deps("charon@lzfse lzfse-1.0", {alias = "lzfse"})
     add_deps("charon@zlib v1.3.2", {alias = "zlib"})
     add_deps("charon@lz4 v1.9.2", {alias = "lz4"})
     add_deps("charon@xz v5.8.4", {alias = "xz"})
-    -- apple-compat's __sincos_stret, the pair of sine and cosine iOS 7 adds: GraphicsBackports takes the pair of a singular
-    -- shear through it, and a build for an older release links the shim's copy, so the image imports nothing the release lacks.
     add_deps("charon@apple-compat", {alias = "apple-compat"})
 
     local add_configs = add_configs
@@ -39,9 +25,6 @@ package("apple-backports")
                               os.files(path.join(os.scriptdir(), "*", "*.m")), os.files(path.join(os.scriptdir(), "*", "*.mm")), os.files(path.join(os.scriptdir(), "*", "*.h")),
                               os.files(path.join(os.scriptdir(), "registry", "*.json")), os.files(path.join(os.scriptdir(), "registry", "*", "*.json")))
     table.insert(inputs, path.join(modules, "apple", "backports.lua"))
-    -- The generated layer is written by tools/gen from this package's spec/ snapshot and the measured tables, and it reads the
-    -- modules and tools it imports (tools/atomic.lua, tools/found's Lua, modules/byteorder.lua, modules/apple/dyld.lua). A change to
-    -- any of them is a changed package: the generated sources are not in the tree, so nothing else would notice.
     local repo = path.join(os.scriptdir(), "..", "..", "..")
     inputs = table.join(inputs, os.files(path.join(repo, "tools", "gen", "**")), os.files(path.join(repo, "tools", "found", "**.lua")),
                         os.files(path.join(os.scriptdir(), "spec", "**")))
@@ -49,16 +32,9 @@ package("apple-backports")
     table.insert(inputs, path.join(repo, "tools", "atomic.lua"))
     table.insert(inputs, path.join(repo, "modules", "byteorder.lua"))
     table.insert(inputs, path.join(repo, "modules", "apple", "dyld.lua"))
-    -- The measured tables (tools/gen/measured.lua) and the text it reads: a changed value is a changed package.
     table.insert(inputs, path.join(repo, "tools", "corpus", "uikit-constants.tsv"))
     table.insert(inputs, path.join(repo, "tools", "corpus", "uikit-extras-13.4.txt"))
     table.insert(inputs, path.join(os.scriptdir(), "..", "..", "..", "addons", "c", "charon", "xmake.lua"))
-    -- The shared coding helper's header, in **this** digest and not only in charon-coding's own.
-    -- Eleven files include it by its path in this checkout, so a changed declaration moved
-    -- charon-coding's digest and not the one the objects are cached under: they were not rebuilt,
-    -- and the library linked the new archive beside a stale object. No gate, no import check and no
-    -- check_registry looks at that; the `sources` digest is the thing they would be keyed on, so
-    -- the header belongs here.
     for _, header in ipairs(os.files(path.join(os.scriptdir(), "..", "..", "c", "charon-coding", "files", "*.h"))) do
         table.insert(inputs, header)
     end
@@ -193,15 +169,6 @@ package("apple-backports")
     add_configs("cloudkit", {description = "Build libCloudKitBackports.dylib, for an application that keeps its data with CloudKit: the records, zones, queries, subscriptions, shares, the constants, and the ES256 signature a CloudKit Web Services authentication key takes, which is made by charon@micro-ecc because iOS 6 has no Security framework key. It loads CoreLocation and CoreGraphics into the process, for a location field and a point."; default = false, type = "boolean"})
 
     on_load("iphoneos", function (package)
-        -- The two MPS terms and the mps and mpsgraph arms of the Metal term are here because
-        -- modules/apple/backports.lua declares FoundationBackports, MetalBackports and - for the
-        -- graph dylib - MPSBackports for them: a build that asked for mpsgraph alone and got
-        -- MPSGraphBackports without MetalBackports would be the same shape as the pre-existing
-        -- metalkit-without-metal gap, so the arms are on the Metal term itself rather than on a
-        -- second one. That term also carries metalkit and modelio, and the coreml, vision and
-        -- accelerate terms around it are main's and were not replaced. The arms have been rebased
-        -- onto four versions of that term and each time it had grown; every one of main's arms is
-        -- still there and the MPS arms joined it.
         package:add("links", table.join((package:config("uikit") or package:config("webkit") or package:config("avkit") or package:config("usernotificationsui") or package:config("notificationcenter") or package:config("intents") or package:config("intentsui")) and {"UIKitBackports"} or {}, (package:config("corelocation") or package:config("arkit")) and {"CoreLocationBackports"} or {}, package:config("coredata") and {"CoreDataBackports"} or {}, package:config("security") and {"SecurityBackports"} or {}, package:config("commoncrypto") and {"CommonCryptoBackports"} or {}, package:config("corebluetooth") and {"CoreBluetoothBackports"} or {}, package:config("compression") and {"CompressionBackports"} or {}, package:config("spatial") and {"SpatialBackports"} or {}, package:config("sqlite3") and {"SQLite3Backports"} or {}, package:config("spritekit") and {"SpriteKitBackports"} or {},(package:config("avfoundation") or package:config("arkit") or package:config("speech")) and {"AVFoundationBackports"} or {}, package:config("avfaudio") and {"AVFAudioBackports"} or {}, package:config("webkit") and {"WebKitBackports"} or {}, (package:config("graphics") or package:config("webkit") or package:config("avfoundation") or package:config("speech") or package:config("intents") or package:config("intentsui")) and {"GraphicsBackports"} or {}, package:config("localauthentication") and {"LocalAuthenticationBackports"} or {}, (package:config("safariservices") or package:config("authenticationservices")) and {"SafariServicesBackports"} or {}, package:config("authenticationservices") and {"AuthenticationServicesBackports"} or {}, package:config("backgroundtasks") and {"BackgroundTasksBackports"} or {}, package:config("photos") and {"PhotosBackports"} or {}, package:config("gamecontroller") and {"GameControllerBackports"} or {}, (package:config("coreml") or package:config("vision")) and {"CoreMLBackports"} or {}, package:config("vision") and {"VisionBackports"} or {}, package:config("cloudkit") and {"CloudKitBackports"} or {},
                                         package:config("arkit") and {"ARKitBackports"} or {}, (package:config("metal") or package:config("metalkit") or package:config("modelio") or package:config("mps") or package:config("mpsgraph")) and {"MetalBackports"} or {}, (package:config("mps") or package:config("mpsgraph")) and {"MPSBackports"} or {}, package:config("mpsgraph") and {"MPSGraphBackports"} or {}, (package:config("metalkit") or package:config("modelio")) and {"MetalKitBackports"} or {}, package:config("coretelephony") and {"CoreTelephonyBackports"} or {}, (package:config("accelerate") or package:config("avfoundation") or package:config("speech") or package:config("arkit")) and {"AccelerateBackports"} or {}, package:config("callkit") and {"CallKitBackports"} or {}, package:config("contacts") and {"ContactsBackports"} or {}, package:config("corespotlight") and {"CoreSpotlightBackports"} or {}, package:config("homekit") and {"HomeKitBackports"} or {}, package:config("pushkit") and {"PushKitBackports"} or {}, (package:config("opengles") or package:config("scenekit") or package:config("arkit")) and {"OpenGLESBackports"} or {}, package:config("javascriptcore") and {"JavaScriptCoreBackports"} or {}, (package:config("scenekit") or package:config("arkit")) and {"SceneKitBackports"} or {}, package:config("mediaplayer") and {"MediaPlayerBackports"} or {}, package:config("healthkit") and {"HealthKitBackports"} or {}, package:config("messageui") and {"MessageUIBackports"} or {}, package:config("securityui") and {"SecurityUIBackports"} or {}, package:config("usernotificationsui") and {"UserNotificationsUIBackports"} or {}, package:config("notificationcenter") and {"NotificationCenterBackports"} or {}, package:config("messages") and {"MessagesBackports"} or {}, package:config("metrickit") and {"MetricKitBackports"} or {}, package:config("avkit") and {"AVKitBackports"} or {}, (package:config("intents") or package:config("intentsui")) and {"IntentsBackports"} or {}, package:config("mapkit") and {"MapKitBackports"} or {}, package:config("passkit") and {"PassKitBackports"} or {}, package:config("carplay") and {"CarPlayBackports"} or {}, package:config("videotoolbox") and {"VideoToolboxBackports"} or {}, package:config("fileprovider") and {"FileProviderBackports"} or {}, package:config("network") and {"NetworkBackports"} or {}, {"FoundationBackports"}, package:config("intentsui") and {"IntentsUIBackports"} or {}, package:config("accessibility") and {"AccessibilityBackports"} or {}, package:config("sensorkit") and {"SensorKitBackports"} or {}, package:config("mlcompute") and {"MLComputeBackports"} or {}, package:config("mlcompute") and {"AccelerateBackports"} or {}, package:config("modelio") and {"ModelIOBackports"} or {}, package:config("gamekit") and {"GameKitBackports"} or {}, package:config("corenfc") and {"CoreNFCBackports"} or {}, package:config("iosurface") and {"IOSurfaceBackports"} or {}, package:config("coreservices") and {"CoreServicesBackports"} or {}, package:config("browserkit") and {"BrowserKitBackports"} or {}, package:config("iokit") and {"IOKitBackports"} or {}, package:config("cfnetwork") and {"CFNetworkBackports"} or {}, package:config("accounts") and {"AccountsBackports"} or {}, package:config("appclip") and {"AppClipBackports"} or {}, package:config("adservices") and {"AdServicesBackports"} or {}, package:config("apptrackingtransparency") and {"AppTrackingTransparencyBackports"} or {}, package:config("pdfkit") and {"PDFKitBackports"} or {}, package:config("networkextension") and {"NetworkExtensionBackports"} or {}))
     add_configs("pdfkit", {description = "Build libPDFKitBackports.dylib, for an application that opens a PDF with PDFKit's PDFDocument and PDFPage: the document over the release's own CGPDFDocument, its pages and their boxes, the page rotation and the document attributes, and the constants the framework names. iOS 6 carries no PDFKit at all, so this is the framework's own work over CoreGraphics.", default = false, type = "boolean"})
@@ -296,18 +263,6 @@ package("apple-backports")
                                      package:config("gameplaykit") and {"GameplayKitBackports"} or {},
                                      package:config("pdfkit") and {"PDFKitBackports"} or {},
                                      package:config("networkextension") and {"NetworkExtensionBackports"} or {})
-        -- Every archive a library of this package declares, each with the directory and the static
-        -- library's own name taken from the dependency that carries it, and read out of the build
-        -- module rather than written out here: coordination/build-gate.lua derives its own from the
-        -- same declarations, so the two routes compile one object per source with one line of flags
-        -- and link the same archives.
-        --
-        -- This table used to name four of the six by hand. An install with every config at its
-        -- default died on HomeKit's CharonHapCrypto.m with "'monocypher/monocypher.h' file not
-        -- found", and an install with accelerate (or avfoundation, or avfaudio, or mlcompute) on
-        -- could not link at all: "AccelerateBackports links the static library of the package
-        -- suitesparse-ordering, and the build was given none". The gate route stayed green through
-        -- both, because it reads the module and this table did not.
         local archives = {}
         for _, library in ipairs(backports.libraries()) do
             for _, name in ipairs(library.archives or {}) do
@@ -326,9 +281,6 @@ package("apple-backports")
                         cc = assert(toolchain:tool("cc"), "the apple-ios toolchain names no compiler for " .. package:arch()),
                         ld = assert(linker, "the apple-ios toolchain names no ld64 for " .. package:arch()), libraries = libraries,
                         archives = archives}
-        -- no width here on purpose: on_install runs inside a job of xmake's own, and
-        -- backports.lua's width() sees that and compiles one unit at a time, for this call and for
-        -- write_deb() below, without either of them having to remember
         backports.build(table.join(common, {cache = cache, builddir = path.absolute("link"), outputdir = package:installdir("lib")}))
         local released
         for version in io.readfile(path.join(package:scriptdir(), "..", "..", "..", "addons", "c", "charon", "xmake.lua")):gmatch('add_versions%("v(%d[%d%.]*)"') do

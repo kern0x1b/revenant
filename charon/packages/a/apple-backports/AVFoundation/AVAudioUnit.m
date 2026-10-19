@@ -43,10 +43,6 @@
     return _charon_version;
 }
 
-// A real .aupreset is a plist read through the component's own kAudioUnitProperty_ClassInfo -
-// nothing this port's own NBandEQ/effect wiring depends on, and no application in the corpus needs
-// it yet (see COORDINATION.md section 3, demand-driven). Honestly refuses rather than faking a
-// preset load that silently does nothing.
 - (BOOL)loadAudioUnitPresetAtURL:(NSURL *)url error:(NSError **)outError
 {
     if (outError)
@@ -74,10 +70,6 @@
     return _charon_bypass;
 }
 
-// kAudioUnitProperty_BypassEffect is generic to every real Apple effect unit, not NBandEQ-specific
-// - applying it here, once, at the AVAudioUnitEffect level covers every subclass this port ever
-// adds, the same way Apple's own class hierarchy puts bypass on the base rather than each concrete
-// effect.
 - (void)setBypass:(BOOL)bypass
 {
     _charon_bypass = bypass;

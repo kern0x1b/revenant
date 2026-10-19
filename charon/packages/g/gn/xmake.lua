@@ -4,8 +4,6 @@ package("gn")
     set_description("GN, the meta-build system that generates Ninja files, as a host tool for a package whose upstream builds with GN (Matter, and whatever builds with CMake and Ninja together)")
     set_license("BSD-3-Clause")
 
-    -- The same binaries xmake-repo ships, pinned here so a build of a GN-driven upstream resolves the tool from this
-    -- repository rather than from whatever happens to be on the host's PATH.
     if is_host("macosx") then
         if os.arch() == "arm64" then
             add_urls("https://github.com/xmake-mirror/gn-releases/releases/download/v$(version)/gn-mac-arm64.zip")

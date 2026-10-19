@@ -3,10 +3,6 @@
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-// The reader sessions of CoreNFC on a device with no NFC radio, as the host's CoreNFC answers them (facts/CoreNFC/NFCReaderSession.md):
-// the session is never ready, its initializers answer nil for a delegate that cannot take the session's first callback, and a
-// session that is begun is invalidated at once with NFCReaderErrorUnsupportedFeature, on the session's queue.
-
 NSErrorDomain const NFCErrorDomain = @"NFCError";
 
 NSString * const NFCISO15693TagResponseErrorKey = @"ISO15693TagResponseErrorCode";
@@ -53,7 +49,6 @@ NSString * const NFCISO15693TagResponseErrorKey = @"ISO15693TagResponseErrorCode
     _alertMessage = [alertMessage copy];
 }
 
-// A session invalidated before it is begun is never begun: nothing is called after that, as the host measures.
 - (void)beginSession
 {
     if (_invalidated) {
@@ -72,8 +67,6 @@ NSString * const NFCISO15693TagResponseErrorKey = @"ISO15693TagResponseErrorCode
     [self charon_reportUnsupported];
 }
 
-// The session has no radio, so it is invalidated with the unsupported-feature error. The block holds the session until the
-// callback is made: the framework keeps a session whose callback is due, so an application need not hold it (measured).
 - (void)charon_reportUnsupported
 {
     dispatch_async(_sessionQueue, ^{
@@ -85,7 +78,6 @@ NSString * const NFCISO15693TagResponseErrorKey = @"ISO15693TagResponseErrorCode
     });
 }
 
-// Keeps the delegate and the queue. A nil queue is the session's own serial queue, which the host also makes.
 - (instancetype)initReaderWithDelegate:(id)delegate queue:(dispatch_queue_t)queue
 {
     if ((self = [super init])) {
@@ -99,7 +91,6 @@ NSString * const NFCISO15693TagResponseErrorKey = @"ISO15693TagResponseErrorCode
 
 @implementation NFCNDEFReaderSession
 
-// The host answers nil for a nil delegate, and for one that cannot take a message the session reads.
 - (instancetype)initWithDelegate:(id<NFCNDEFReaderSessionDelegate>)delegate
                            queue:(dispatch_queue_t)queue
         invalidateAfterFirstRead:(BOOL)invalidateAfterFirstRead
@@ -114,7 +105,6 @@ NSString * const NFCISO15693TagResponseErrorKey = @"ISO15693TagResponseErrorCode
 
 @implementation NFCISO15693ReaderSession
 
-// The host answers nil for a nil delegate, and for one that cannot take the session becoming active.
 - (instancetype)initWithDelegate:(id<NFCReaderSessionDelegate>)delegate queue:(dispatch_queue_t)queue
 {
     if (![delegate respondsToSelector:@selector(readerSessionDidBecomeActive:)]) {

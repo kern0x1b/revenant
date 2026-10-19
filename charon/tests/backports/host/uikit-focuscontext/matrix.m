@@ -1,26 +1,14 @@
-// matrix.m - the focus update contexts, one line per measurement: the three classes and their superclasses, the public
-// properties each answers to, the init and +new failures, the answers of an allocated context, and the declared types
-// of the collection and table view index paths.
-//
-// One source, built twice by run.sh: against Mac Catalyst's own UIKit, and against the port's three classes compiled
-// with their names renamed (renames.sh), so both live in one process. A class reaches this file as an identifier, so the
-// renames rename the uses here too. The labels print each class with its CharonHost prefix taken off, so the two outputs
-// are equal line for line.
-
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-// the name a class prints as: the host's own, or the port's with its CharonHost prefix taken off
 static NSString *shown(Class c)
 {
     NSString *name = [NSString stringWithUTF8String:class_getName(c)];
     return [name hasPrefix:@"CharonHost"] ? [name substringFromIndex:10] : name;
 }
 
-// the public properties of each class, as the SDK 16.4 header declares them (the host has more, none of them public)
 static const char *kBase[] = { "previouslyFocusedView", "nextFocusedView", "previouslyFocusedItem", "nextFocusedItem", "focusHeading" };
 static const char *kIndex[] = { "previouslyFocusedIndexPath", "nextFocusedIndexPath" };
-// a subclass inherits the five of its superclass, so it answers to all seven
 static const char *kSub[] = { "previouslyFocusedView", "nextFocusedView", "previouslyFocusedItem", "nextFocusedItem", "focusHeading", "previouslyFocusedIndexPath", "nextFocusedIndexPath" };
 
 static void answers(Class c, id o, const char *prop)
@@ -74,7 +62,6 @@ static void check(Class c, const char **props, int n)
         failure(c, "new", e);
     }
 
-    // a context that is only allocated is an object the app holds; its answers are the zero ones
     id o = [c alloc];
     printf("%s alloc returned %d\n", shown(c).UTF8String, o != nil);
     for (int i = 0; i < n; i++)

@@ -9,15 +9,11 @@ package("libcxx")
     add_deps("charon@apple-compat", {alias = "apple-compat"})
     add_deps("cmake", "ninja", {kind = "binary"})
 
-    -- The Lua this is made of enters the build hash as the digest in digest.lua, which leaves comments out
-    -- (modules/digest.lua): rewording one is not a new runtime.
     includes(path.join(os.scriptdir(), "digest.lua"))
     local digests = {"sources=" .. libcxx_sources_digest}
     for _, patch in ipairs(os.files(path.join(os.scriptdir(), "patches", "*.patch"))) do
         table.insert(digests, path.filename(patch) .. "=" .. hash.sha256(patch))
     end
-    -- What apple-compat holds is linked into the libraries built here (and libc++abi exports its process-wide half), so a
-    -- changed shim is a different runtime: without this a build finds the one it already has and keeps the old shims.
     local folder = path.join(os.scriptdir(), "..", "..", "a", "apple-compat")
     for _, shim in ipairs(table.join(os.files(path.join(folder, "src", "*.c")), os.files(path.join(folder, "src", "*.h")),
                                      os.files(path.join(folder, "include", "charon", "*.h")))) do
@@ -29,9 +25,6 @@ package("libcxx")
     add_configs("shared", {description = "The runtime is always the shared pair an application bundles.", default = true, type = "boolean", readonly = true})
     add_configs("operators", {description = "operator new and delete are ordinary definitions in libc++abi, so no image binds them weakly and dyld never coalesces them with another C++ runtime in the process.", default = "not-weak", type = "string", readonly = true})
 
-    -- The pair as a package of its own, /usr/lib/charon/org.charon.libcxx-<build>, which what links against it depends on
-    -- instead of carrying it: a process has one copy of libc++abi, so the programs and the Swift runtime that share it
-    -- name this one.
     add_configs("packaged", {description = "Install the libraries under absolute install names and leave what a Debian package holding them is written from, which what is linked against them depends on instead of carrying them: the program that depends on it writes and signs that package, so this package needs no host tool.", default = false, type = "boolean"})
 
     add_includedirs("include/c++/v1")
@@ -195,8 +188,6 @@ package("libcxx")
         if package:config("packaged") then
             local shared = import("apple.shared_runtime", {rootdir = modules, anonymous = true})
             local name = shared.package_name("libcxx", package:buildhash())
-            -- What links against these libraries reads their install names, so they are given before the package is written
-            -- and the package holds copies of them under the names the libraries are loaded by.
             local held = {{source = path.join(library, "libc++.1.0.dylib"), leaf = "libc++.1.dylib"},
                           {source = path.join(library, "libc++abi.1.0.dylib"), leaf = "libc++abi.1.dylib"}}
             local identities = {}

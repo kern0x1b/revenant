@@ -1,29 +1,9 @@
-/* hostshape -- what the HOST's own copy of a framework answers for a class's members.
- *
- * The host side of the AuthenticationServices shape check, and nothing else: the port's side is read
- * out of the built library by portshape.py, because the port's own objects are armv7 and this host is
- * arm64 -- a library built for another architecture cannot be dlopen'd here, so its method list is read
- * out of the file rather than asked of a runtime that could not load it.
- *
- * Both sides are answered the same way in principle: from the runtime's own view of the class. Here
- * that is class_getInstanceMethod and class_getClassMethod on the class the framework was opened from,
- * so an inherited method counts as present -- which is the control the coordinator asked for: +new comes
- * from NSObject and is visible here, so a port that also inherits +new agrees rather than being reported
- * as missing one.
- *
- * Usage: hostshape <cases-file>
- * cases: <class> TAB <selector> TAB instance|class TAB available|must-be-unavailable
- */
 #include <dlfcn.h>
 #include <objc/runtime.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-/* A path is taken as given -- the caller may be naming a framework that is not in the two usual
- * places, and one that is private is the interesting case here -- and only then are the usual roots
- * tried with a bare name. The first version formatted a full path into a %s.framework/%s template
- * and so could open nothing at all, and printed nothing when it failed. */
 static void *open_framework(const char *name)
 {
     if (strchr(name, '/')) {
@@ -48,9 +28,6 @@ static void *open_framework(const char *name)
     return NULL;
 }
 
-/* Step one of the types work, deliberately small: with a class and a selector named on the command
- * line, print that ONE method's type encoding and exit. It is a separate path so that "the encoding
- * comes out" can be seen on its own, before the comparison depends on it. */
 static int one_method(const char *framework, const char *className, const char *selectorName)
 {
     if (!open_framework(framework))
@@ -62,9 +39,6 @@ static int one_method(const char *framework, const char *className, const char *
     if (!method)
         method = class_getClassMethod(cls, sel);
     if (!method) { fprintf(stderr, "no method -%s on %s\n", selectorName, className); return 1; }
-    // The digits are removed and the ':' kept: the frame sizes and offsets are four bytes apart
-    // between the host's arm64 and the port's armv7, and a completion typed as a block is '@?' where
-    // the same completion typed as a SEL is '@:'. Keeping only the letters loses the ':'.
     const char *encoding = method_getTypeEncoding(method);
     char stripped[128];
     size_t at = 0;

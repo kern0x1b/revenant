@@ -1,8 +1,3 @@
-// The SKNode tree of iOS 7, the port against the host's own SpriteKit, over the same scenarios. The program reaches the
-// class only through the Objective-C runtime (NSClassFromString and objc_msgSend), so the same source builds against the
-// host's SpriteKit framework (the oracle) and against the port's objects with no SpriteKit framework linked. Nothing
-// here writes an expected value: each scenario prints what the class answers or which exception it raises, and run.sh
-// compares the two runs line by line.
 #import <Foundation/Foundation.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
@@ -96,7 +91,6 @@ int main(void)
             return 1;
         }
 
-        // Defaults of a plain node.
         id plain = ((Maker)objc_msgSend)(nodeClass, S("node"));
         printf("class=%s\n", class_getName([plain class]));
         printf("name=%s\n", [describe(plain) UTF8String]);
@@ -116,7 +110,6 @@ int main(void)
         rect("frame", ((RectGetter)objc_msgSend)(plain, S("frame")));
         rect("calculateAccumulatedFrame", ((RectGetter)objc_msgSend)(plain, S("calculateAccumulatedFrame")));
 
-        // A tree: root > a > x > y, root > b, root > b (second b), root > c.
         id root = node(@"root");
         id a = node(@"a");
         id x = node(@"x");
@@ -139,7 +132,6 @@ int main(void)
                ((BoolWithObject)objc_msgSend)(a, S("inParentHierarchy:"), root));
         printf("inParentHierarchy: nil=%d\n", ((BoolWithObject)objc_msgSend)(a, S("inParentHierarchy:"), nil));
 
-        // Names and search.
         printf("childNodeWithName:b=%s\n", [describe(((ObjectWithPointName)objc_msgSend)(root, S("childNodeWithName:"), @"b")) UTF8String]);
         printf("childNodeWithName:x (not a child)=%s\n", [describe(((ObjectWithPointName)objc_msgSend)(root, S("childNodeWithName:"), @"x")) UTF8String]);
         printf("childNodeWithName:a/x=%s\n", [describe(((ObjectWithPointName)objc_msgSend)(root, S("childNodeWithName:"), @"a/x")) UTF8String]);
@@ -174,7 +166,6 @@ int main(void)
         });
         printf("enumerate:b stop=[%s]\n", [[seen componentsJoinedByString:@","] UTF8String]);
 
-        // Order: insert at index, moves, removal.
         id d = node(@"d");
         ((VoidObjectIndex)objc_msgSend)(root, S("insertChild:atIndex:"), d, 0);
         printf("insert d at 0=%s\n", [names(((ObjectGetter)objc_msgSend)(root, S("children"))) UTF8String]);
@@ -189,7 +180,6 @@ int main(void)
         report("addChild:self", ^{ add(root, root); });
         report("addChild: ancestor", ^{ add(y, root); });
 
-        // Reparenting moves the node.
         report("addChild: d already parented", ^{ add(b, d); });
         printf("after add d to b: root=%s b=%s d.parent=%s\n", [names(((ObjectGetter)objc_msgSend)(root, S("children"))) UTF8String],
                [names(((ObjectGetter)objc_msgSend)(b, S("children"))) UTF8String],
@@ -209,7 +199,6 @@ int main(void)
         printf("removeChildrenInArray [e]=%s\n", [names(((ObjectGetter)objc_msgSend)(root, S("children"))) UTF8String]);
         printf("e.parent nil=%d\n", ((ObjectGetter)objc_msgSend)(e, S("parent")) == nil);
 
-        // Geometry.
         id g = node(@"g");
         ((VoidPoint)objc_msgSend)(g, S("setPosition:"), CGPointMake(10, 20));
         ((VoidCGFloat)objc_msgSend)(g, S("setZRotation:"), 0);
@@ -241,7 +230,6 @@ int main(void)
                ((BoolWithObject)objc_msgSend)(plain, S("isEqualToNode:"), node(@"plain")));
         printf("isEqual: node=%d\n", [plain isEqual:plain]);
 
-        // Frames and hit tests of a plain tree: positions only, no content.
         id framed = node(@"framed");
         ((VoidPoint)objc_msgSend)(framed, S("setPosition:"), CGPointMake(10, 20));
         id framedChild = node(@"framedChild");
@@ -261,7 +249,6 @@ int main(void)
         point("", ((ConvertFrom)objc_msgSend)(framed, S("convertPoint:toNode:"), CGPointMake(0, 0), framedChild));
         printf("name lookup from child: %s\n", describe(((ObjectWithPointName)objc_msgSend)(framedChild, S("childNodeWithName:"), @"framedChild")).UTF8String);
 
-        // Name grammar beyond the plain forms.
         id grammar = node(@"g0");
         id gb1 = node(@"b1");
         id gb2 = node(@"bb");
@@ -286,7 +273,6 @@ int main(void)
         printf("grammar subscript *=%s\n", [names(((ObjectWithPointName)objc_msgSend)(grammar, S("objectForKeyedSubscript:"), @"*")) UTF8String]);
         printf("grammar subscript //deep=%s\n", [names(((ObjectWithPointName)objc_msgSend)(grammar, S("objectForKeyedSubscript:"), @"//deep")) UTF8String]);
 
-        // Descendant order: depth first, or breadth first.
         id order = node(@"order");
         id oq = node(@"q");
         id oz = node(@"z");
@@ -298,7 +284,6 @@ int main(void)
         printf("order ? subscript=%s\n", [names(((ObjectWithPointName)objc_msgSend)(order, S("objectForKeyedSubscript:"), @"?")) UTF8String]);
         printf("order q// trailing=%s\n", describe(((ObjectWithPointName)objc_msgSend)(order, S("childNodeWithName:"), @"q//")).UTF8String);
 
-        // An intermediate step that matches several nodes.
         id multi = node(@"multi");
         id m1 = node(@"b1");
         id m2 = node(@"b2");
@@ -312,7 +297,6 @@ int main(void)
         printf("multi ./b1=%s\n", describe(((ObjectWithPointName)objc_msgSend)(multi, S("childNodeWithName:"), @"./b1")).UTF8String);
         printf("order a//b with empty=%s\n", describe(((ObjectWithPointName)objc_msgSend)(order, S("childNodeWithName:"), @"q//z")).UTF8String);
 
-        // userData and children snapshots.
         id user = [NSMutableDictionary dictionary];
         ((VoidObject)objc_msgSend)(plain, S("setUserData:"), user);
         printf("userData set=%d\n", ((ObjectGetter)objc_msgSend)(plain, S("userData")) != nil);
@@ -321,7 +305,6 @@ int main(void)
         add(root, node(@"late"));
         printf("snapshot unchanged=%d\n", [snapshot count] == before);
 
-        // removeAllChildren.
         ((VoidVoid)objc_msgSend)(root, S("removeAllChildren"));
         printf("removeAllChildren=%s\n", [names(((ObjectGetter)objc_msgSend)(root, S("children"))) UTF8String]);
         printf("b.parent with root cleared=%s\n", [describe(((ObjectGetter)objc_msgSend)(b, S("parent"))) UTF8String]);

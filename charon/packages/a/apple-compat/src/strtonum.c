@@ -11,11 +11,6 @@ static void charon_resolve_strtonum(void)
     charon_system_function(&charon_system_strtonum, CHARON_LIBSYSTEM, "strtonum");
 }
 
-/* A decimal number from the whole string, which must lie between minval and maxval inclusive. On failure the answer is 0 and
-   errstrp, when it is not NULL, names the failure: "invalid" for a string that is not a number, "too small" and "too large" for
-   a number outside the range. errno is set to EINVAL for the first and ERANGE for the two others. The bounds in the wrong order
-   are reported as "invalid". iOS 14.0 is the release the SDK names for it, and no held arm64 cache before 13.4 exports it, so
-   the system's answers when it is there. */
 __attribute__((visibility("default")))
 long long strtonum(const char *numstr, long long minval, long long maxval, const char **errstrp)
 {

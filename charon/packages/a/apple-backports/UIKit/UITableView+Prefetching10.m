@@ -3,24 +3,14 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-// Prefetching for a table view, the same scheme as UICollectionView+Prefetching10.m and for the
-// same reason: the release's table view has no prefetching, so the port asks itself, after the
-// table has laid out, for the rows just past what is on screen, nearest first, and calls off the
-// ones scrolled past. A prefetch data source is held the way the tree holds a weak sender, and
-// prefetching happens only once a data source is set.
 static const char CharonTablePrefetchDataSourceKey;
 static const char CharonTablePrefetchAskedKey;
 static const NSInteger CharonTablePrefetchDistance = 3;
 
-// Declared here because the installer's +load runs before this category is attached, and it calls
-// this on the view.
 @interface UITableView (CharonPrefetching10)
 - (void)charon_prefetchRows;
 @end
 
-// The three estimated-height questions, which are how far away a row is before it has been drawn. The
-// port asks them where it needs that distance, which is deciding how many rows are about to come on
-// screen; without them the candidates are a fixed number of rows either side, which is a guess.
 @interface UITableView (CharonEstimatedHeights7)
 - (CGFloat)charon_estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath;
 - (CGFloat)charon_estimatedHeightForHeaderInSection:(NSInteger)section;
@@ -65,9 +55,6 @@ static const NSInteger CharonTablePrefetchDistance = 3;
     NSArray<NSIndexPath *> *visible = self.indexPathsForVisibleRows;
     if (!visible.count)
         return @[];
-    // How many rows are about to appear is decided by how tall they are, and the delegate's
-    // estimated heights are how far away a row is before it is drawn, so the distance in rows comes
-    // from those rather than from a fixed number.
     CGFloat rowHeight = [self charon_estimatedHeightForRowAtIndexPath:visible.firstObject];
     if (rowHeight <= 0)
         rowHeight = self.rowHeight;

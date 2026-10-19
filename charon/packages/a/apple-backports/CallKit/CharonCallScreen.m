@@ -1,21 +1,6 @@
 #import "CharonCallKit.h"
 #include <notify.h>
 
-// The application's side of the system call screen. The screen itself belongs
-// to SpringBoard, which no library of an application can draw in, so what a
-// provider does here is say that a call has arrived and listen for what the
-// person did with it. The tweak in SpringBoard is the other side.
-//
-// The two sides speak in Darwin notifications and a file, because that is
-// what crosses the boundary on this release: a Darwin notification reaches
-// every process whatever its sandbox but carries nothing, and a file carries
-// the call but is only readable where both sides may reach it.
-//
-// Nothing here fails loudly. An application whose device has no such tweak
-// installed writes a file nobody reads and posts a notification nobody hears,
-// and its calls work exactly as they do without a screen - which is what the
-// backports do without the tweak anyway.
-
 NSString *const charon_call_screen_folder = @"/var/mobile/Library/Caches/org.charon.callkit";
 static const char *const charon_call_incoming = "org.charon.callkit.incoming";
 static const char *const charon_call_ended = "org.charon.callkit.ended";
@@ -70,9 +55,6 @@ static NSString *charon_call_file(NSString *name)
     }
 }
 
-// What the person did on the screen becomes the transaction they would have
-// asked for by hand, so the provider's delegate is called exactly as it is
-// when the application answers a call from its own interface.
 - (void)person:(BOOL)answered
 {
     NSString *identifier = [NSString stringWithContentsOfFile:charon_call_file(answered ? @"answered" : @"declined")
@@ -91,9 +73,6 @@ static NSString *charon_call_file(NSString *name)
     [provider charon_execute:[[CXTransaction alloc] initWithActions:@[action]]];
 }
 
-// Either side may be the first to run, so either side makes the folder, and
-// it is made writable by everyone: the applications that write into it are
-// not the user SpringBoard is, and there is no group the two share.
 - (void)makeFolder
 {
     NSFileManager *files = [NSFileManager defaultManager];

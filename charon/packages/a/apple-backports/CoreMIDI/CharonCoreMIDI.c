@@ -1,7 +1,3 @@
-// Charon's translation between MIDI 1.0 bytes and Universal MIDI Packets, and the event list builder's packet
-// rules. Nothing here is API: every name begins with Charon, so the library exports none of it, and the files
-// that do implement CoreMIDI's functions call it. The rules are measured against macOS CoreMIDI, and the
-// reasons, with the measurements, are in facts/CoreMIDI/Translation.md.
 #include "CharonCoreMIDI.h"
 
 #include <stdlib.h>
@@ -17,7 +13,6 @@ void CharonMIDIWordsAppend(CharonMIDIWords *out, UInt32 word)
         if (capacity && out->heap) {
             grown = realloc(out->words, capacity * sizeof(UInt32));
         } else if (capacity) {
-            // The storage the caller gave is outgrown: the words move to the heap, once.
             grown = malloc(capacity * sizeof(UInt32));
             if (grown && out->count)
                 memcpy(grown, out->words, out->count * sizeof(UInt32));
@@ -58,9 +53,6 @@ static void charon_bytes_append(CharonMIDIBytes *out, uint8_t byte)
     out->bytes[out->count++] = byte;
 }
 
-// Measured on macOS: a value at or below the centre is shifted up, and a value above it is spread over the
-// rest of the range with the slope the measurements give: 65/8 extra per step for 16 bits, a rounded line for
-// 32 bits. Each rule matches every value measured (tests/backports/host/coremidi).
 UInt32 CharonMIDIUp16From7(UInt32 value)
 {
     if (value <= 64)
@@ -73,11 +65,7 @@ UInt32 CharonMIDIUp32From7(UInt32 value)
 {
     if (value <= 64)
         return value << 25;
-    // The centre plus above * (2^31 - 1) / 63, rounded as the measurements round it, in 32-bit arithmetic only (a 64-bit
-    // divide is a libgcc call on armv7). With above in 1..63, 2 * above * (2^31 - 1) + 63 is above * 126 * 34087042 +
-    // 2 * above + 63, because 2^32 = 126 * 34087042 + 4; so the quotient by 126 is above * 34087042 + (2 * above + 63) / 126,
-    // where the last term is 0 for above below 32 and 1 from 32. The largest value, above 63, is 0xFFFFFFFF.
-    UInt32 above = value - 64; // value is a MIDI data byte, 0 to 127
+    UInt32 above = value - 64;
     return 0x80000000u + above * 34087042u + (2 * above + 63) / 126;
 }
 
@@ -89,8 +77,6 @@ UInt32 CharonMIDIUp32From14(UInt32 value)
     return (value << 18) + 32 * above + (above >> 8);
 }
 
-// The sizes of the message types, as the macOS visitor reads them (oracle/visit-sizes.m, visit-sizes-macos.txt): types 6 and 7
-// are one word, 8 to 0xA two, 0xB and 0xC three, 0xD, 0xE and 0xF four (0xD and 0xF are in visit-expectations.h, which run.sh generates from the recording).
 int CharonMIDIUMPWordCount(UInt32 word)
 {
     switch (word >> 28) {
@@ -106,16 +92,11 @@ int CharonMIDIUMPWordCount(UInt32 word)
     return 0;
 }
 
-// The system messages a type 1 word carries, as macOS sends them (oracle/ump-invalid-system.m, ump-invalid-system-macos.txt):
-// F1, F2, F6, F8 and FE were measured as sent. F3 and F9 to FF are not measured: they follow the same rule. F0 and F7
-// are not sent from a system word (a SysEx is type 3), nor are F4 and F5 (undefined), a status below F1, or a channel
-// status (a 1.0 message in a system word): measured as not sent for F0, F4, F5, F7, 0x45 and 0x90.
 static int charon_system_word(uint8_t status)
 {
     return (status >= 0xF1 && status <= 0xF3) || status == 0xF6 || status >= 0xF8;
 }
 
-// How many data bytes a channel or system common status carries in MIDI 1.0.
 static int charon_data_bytes(uint8_t status)
 {
     if (status >= 0x80 && status < 0xF0)
@@ -139,8 +120,6 @@ static UInt32 charon_word_system(UInt32 group, uint8_t status, uint8_t d1, uint8
     return 0x10000000u | (group << 24) | ((UInt32)status << 16) | ((UInt32)d1 << 8) | d2;
 }
 
-// One complete MIDI 1.0 message, as the protocol asked for it. A 2.0 port gets the channel voice messages as
-// their 64-bit form; a note on of velocity 0 stays a 1.0 word, which is what macOS does with it.
 static void charon_emit_message(CharonMIDIWords *out, UInt32 group, int protocol, uint8_t status, uint8_t d1, uint8_t d2)
 {
     UInt32 channel = status & 0x0F;
@@ -186,7 +165,6 @@ static void charon_emit_message(CharonMIDIWords *out, UInt32 group, int protocol
     }
 }
 
-// The bytes of one SysEx chunk, as a UMP SysEx7 packet of one or two words.
 static void charon_emit_sysex(CharonMIDIWords *out, UInt32 group, uint8_t status, uint8_t count, const uint8_t *bytes)
 {
     uint8_t padded[6] = {0, 0, 0, 0, 0, 0};
@@ -195,8 +173,6 @@ static void charon_emit_sysex(CharonMIDIWords *out, UInt32 group, uint8_t status
     CharonMIDIWordsAppend(out, (UInt32)padded[2] << 24 | (UInt32)padded[3] << 16 | (UInt32)padded[4] << 8 | padded[5]);
 }
 
-// The SysEx chunk the parser holds, sent as a start or a continue when more of the SysEx follows it, or as the
-// end or the complete message when the SysEx ends with it.
 static void charon_sysex_chunk(CharonMIDIParser *parser, CharonMIDIWords *out, UInt32 group)
 {
     charon_emit_sysex(out, group, parser->sysexSent ? 2 : 1, parser->sysexCount, parser->sysex);
@@ -204,7 +180,6 @@ static void charon_sysex_chunk(CharonMIDIParser *parser, CharonMIDIWords *out, U
     parser->sysexCount = 0;
 }
 
-// The SysEx ends: what is held goes out as the end, or as the complete message if nothing was sent before it.
 static void charon_sysex_finish(CharonMIDIParser *parser, CharonMIDIWords *out, UInt32 group)
 {
     charon_emit_sysex(out, group, parser->sysexSent ? 3 : 0, parser->sysexCount, parser->sysex);
@@ -213,8 +188,6 @@ static void charon_sysex_finish(CharonMIDIParser *parser, CharonMIDIWords *out, 
     parser->inSysex = 0;
 }
 
-// A byte of a SysEx. The chunk is held until the byte after it arrives, so a SysEx of six bytes is one complete
-// message, not a start and an end.
 static void charon_sysex_byte(CharonMIDIParser *parser, CharonMIDIWords *out, UInt32 group, uint8_t byte)
 {
     if (parser->sysexCount == 6)
@@ -222,9 +195,6 @@ static void charon_sysex_byte(CharonMIDIParser *parser, CharonMIDIWords *out, UI
     parser->sysex[parser->sysexCount++] = byte;
 }
 
-// A real-time byte inside a SysEx sends what is held before it. Measured on macOS: with nothing sent before it, that
-// is a complete message (status 0), and the SysEx goes on as its end (status 3) after the real-time word; a
-// chunk after an earlier one is sent as a continue (status 2), which is not measured and follows the same rule.
 static void charon_sysex_realtime(CharonMIDIParser *parser, CharonMIDIWords *out, UInt32 group)
 {
     charon_emit_sysex(out, group, parser->sysexSent ? 2 : 0, parser->sysexCount, parser->sysex);
@@ -245,8 +215,6 @@ void CharonMIDIParseBytes(CharonMIDIParser *parser, const uint8_t *data, size_t 
     for (size_t i = 0; i < length; i++) {
         uint8_t byte = data[i];
         if (byte >= 0xF8) {
-            // A real-time message: one word, and it changes neither the running status nor an open SysEx, but
-            // the SysEx so far is sent first.
             if (parser->inSysex && parser->sysexCount > 0)
                 charon_sysex_realtime(parser, out, g);
             CharonMIDIWordsAppend(out, 0x10000000u | g << 24 | (UInt32)byte << 16);
@@ -257,7 +225,6 @@ void CharonMIDIParseBytes(CharonMIDIParser *parser, const uint8_t *data, size_t 
             continue;
         }
         if (parser->inSysex) {
-            // F7 ends the SysEx; any other status cuts it short, and then that status is read as usual.
             charon_sysex_finish(parser, out, g);
             if (byte == 0xF7)
                 continue;
@@ -271,7 +238,6 @@ void CharonMIDIParseBytes(CharonMIDIParser *parser, const uint8_t *data, size_t 
             continue;
         }
         if (byte == 0xF7) {
-            // A stray end of SysEx is not a message.
             continue;
         }
         if (byte >= 0x80) {
@@ -288,7 +254,6 @@ void CharonMIDIParseBytes(CharonMIDIParser *parser, const uint8_t *data, size_t 
             }
             continue;
         }
-        // A data byte: it belongs to the pending message, or to the running status when none is pending.
         if (parser->pendingNeed == 0) {
             if (parser->running == 0)
                 continue;
@@ -307,8 +272,6 @@ void CharonMIDIParseBytes(CharonMIDIParser *parser, const uint8_t *data, size_t 
     }
 }
 
-// The 2.0 parameter selection of a channel, as the 1.0 controllers that make it: RPN is 101 and 100, NRPN is
-// 99 and 98, and the data entry is 6 for the most significant part and 38 for the least.
 static void charon_select(CharonMIDIBytes *out, CharonMIDIRPN *state, uint8_t channel, int nrpn, uint8_t msb, uint8_t lsb)
 {
     if (state->selected && state->nrpn == nrpn && state->msb == msb && state->lsb == lsb)
@@ -417,7 +380,6 @@ void CharonMIDIUMPToBytes(const UInt32 *words, size_t count, CharonMIDIRPN rpn[1
             }
             case 0x2:
             case 0x3: {
-                // The registered and the non-registered parameter, both by a bank and an index of 7 bits.
                 uint8_t bank = index & 0x7F, number = (uint8_t)word & 0x7F;
                 charon_select(out, &rpn[channel], channel, opcode == 0x3, bank, number);
                 uint8_t lsb = (uint8_t)((value >> 18) & 0x7F);
@@ -432,8 +394,6 @@ void CharonMIDIUMPToBytes(const UInt32 *words, size_t count, CharonMIDIRPN rpn[1
                 break;
             }
             default:
-                // Per-note controllers, per-note pitch bend, per-note management and the relative
-                // controllers have no 1.0 form: they produce nothing.
                 break;
             }
         }
@@ -441,16 +401,11 @@ void CharonMIDIUMPToBytes(const UInt32 *words, size_t count, CharonMIDIRPN rpn[1
     }
 }
 
-// The words of an event packet, which begin after its time stamp and word count.
 static UInt32 *charon_packet_words(MIDIEventPacket *packet)
 {
     return (UInt32 *)((uint8_t *)packet + sizeof(MIDITimeStamp) + sizeof(UInt32));
 }
 
-// Appends the words of one packet to an event list being built, as MIDIEventListAdd does. curPacket is the end of the list's
-// content, *last is the list's last packet (NULL when the list is empty), and an event at the time of the last packet is merged
-// into it. Returns the new end, or NULL when the words do not fit in listSize bytes. The room is counted down from listSize by
-// subtraction, never by adding the words' size to the end: on armv7 that sum wraps for a count of about 2^30 words.
 MIDIEventPacket *CharonMIDIEventListAppend(MIDIEventList *list, size_t listSize, MIDIEventPacket *curPacket,
                                            MIDIEventPacket **last, MIDITimeStamp time, size_t wordCount, const UInt32 *words)
 {
@@ -462,14 +417,12 @@ MIDIEventPacket *CharonMIDIEventListAppend(MIDIEventList *list, size_t listSize,
         return NULL;
     size_t room = listSize - end;
     if (list->numPackets > 0 && *last && (*last)->timeStamp == time) {
-        // A merge adds four bytes a word, and the packet's word count is a UInt32.
         if (wordCount > room / 4 || wordCount > UINT32_MAX - (*last)->wordCount)
             return NULL;
         memcpy(base + end, words, 4 * wordCount);
         (*last)->wordCount += (UInt32)wordCount;
         return (MIDIEventPacket *)(base + end + 4 * wordCount);
     }
-    // A new packet: its time stamp and word count, then the words.
     const size_t header = sizeof(MIDITimeStamp) + sizeof(UInt32);
     if (room < header || wordCount > (room - header) / 4 || wordCount > UINT32_MAX)
         return NULL;
@@ -482,10 +435,6 @@ MIDIEventPacket *CharonMIDIEventListAppend(MIDIEventList *list, size_t listSize,
     return (MIDIEventPacket *)(base + end + header + 4 * wordCount);
 }
 
-// MIDIEventListAdd as macOS keeps it (oracle/eventlistadd-macos.txt): curPacket is the list's last packet (the place MIDIEventListInit
-// returned while the list is empty), and the packet written or merged into is returned, so the end is found from curPacket in
-// constant time and a list built add by add is linear. NULL when the words do not fit, with the list as it was; for zero words,
-// curPacket. A curPacket that is not inside the buffer, or whose word count runs past it, is refused.
 MIDIEventPacket *CharonMIDIEventListAdd(MIDIEventList *list, size_t listSize, MIDIEventPacket *curPacket,
                                         MIDITimeStamp time, size_t wordCount, const UInt32 *words)
 {
@@ -507,7 +456,6 @@ MIDIEventPacket *CharonMIDIEventListAdd(MIDIEventList *list, size_t listSize, MI
     return wordCount == 0 ? curPacket : last;
 }
 
-// A status byte that is not a timestamp and not real-time: it cuts an open SysEx, and starts the message its data completes.
 static void charon_ble_status(CharonBLEParser *parser, uint8_t byte, uint8_t *out, size_t *count)
 {
     parser->inSysex = 0;
@@ -529,8 +477,6 @@ size_t CharonBLEMIDIParse(CharonBLEParser *parser, const uint8_t *data, size_t l
     for (size_t i = 1; i < length; i++) {
         uint8_t byte = data[i];
         if (byte & 0x80) {
-            // Inside a SysEx the framing puts a timestamp before the F7 that ends it and before a real-time byte, so a
-            // status-class byte that is not F7 or real-time, and does not follow a timestamp, is that timestamp.
             int sysexTimestamp = parser->inSysex && !parser->afterTimestamp && byte != 0xF7 && byte < 0xF8;
             if (parser->timestampDue || sysexTimestamp) {
                 parser->timestampDue = 0;
@@ -539,8 +485,6 @@ size_t CharonBLEMIDIParse(CharonBLEParser *parser, const uint8_t *data, size_t l
             }
             parser->afterTimestamp = 0;
             if (byte >= 0xF8) {
-                // Real-time: one message of its own, sent inside a SysEx as well, and it neither changes the running
-                // status nor closes the SysEx. Outside a SysEx the next message has its own timestamp.
                 out[count++] = byte;
                 if (!parser->inSysex)
                     parser->timestampDue = 1;
@@ -550,7 +494,6 @@ size_t CharonBLEMIDIParse(CharonBLEParser *parser, const uint8_t *data, size_t l
                 parser->need = 0;
                 out[count++] = byte;
             } else if (byte == 0xF7) {
-                // The end of an open SysEx; a stray F7 is not a message.
                 if (parser->inSysex) {
                     out[count++] = byte;
                     parser->inSysex = 0;
@@ -567,7 +510,6 @@ size_t CharonBLEMIDIParse(CharonBLEParser *parser, const uint8_t *data, size_t l
             continue;
         }
         if (parser->need == 0) {
-            // Running status: a data byte after a timestamp, with the last channel status to carry it. Without one it is dropped.
             if (parser->running == 0)
                 continue;
             parser->need = charon_data_bytes(parser->running);

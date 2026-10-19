@@ -1,5 +1,3 @@
-// The container: a schema, the stores a configuration opened, and the context a program holds.
-
 import Foundation
 import CoreData
 
@@ -8,22 +6,13 @@ public final class ModelContainer: Equatable, @unchecked Sendable {
     public let migrationPlan: (any SchemaMigrationPlan.Type)?
     public var configurations: Set<ModelConfiguration>
 
-    /// The store, which is the Core Data one for every configuration: a `ModelConfiguration` is a
-    /// `DataStoreConfiguration` whose `Store` is `DefaultStore`, so a container's store and its
-    /// configuration are the same objects.
     public let store: DefaultStore
 
-    /// The models this container has made, by the row they are stored as. A model is made over a
-    /// row and the row is what remembers it, so a save that changes a row's identity can find
-    /// the model again.
     var models: [ObjectIdentifier: any PersistentModel] = [:]
 
     private var contexts: [ModelContext] = []
 
     @MainActor public var mainContext: ModelContext {
-        // The first context made is the main one, and a container has one main context for as
-        // long as it lives, the way Apple's does: `mainContext` is a property, not a new context
-        // per read.
         if let made = contexts.first { return made }
         let made = ModelContext(self)
         return made
@@ -76,9 +65,6 @@ public final class ModelContainer: Equatable, @unchecked Sendable {
 
     public static func == (lhs: ModelContainer, rhs: ModelContainer) -> Bool { lhs === rhs }
 
-    /// Everything the stores hold, gone. Deprecated in Apple's own name of it, and it says so:
-    /// `erase` is what a program should call, and this is here so that a program written against
-    /// the old name still runs.
     public func deleteAllData() {
         try? erase()
     }

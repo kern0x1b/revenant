@@ -1,20 +1,3 @@
-// distinct.m: can any public construction make a second CIImage of the same extent?
-//
-// -[CIImage imageBySettingProperties:] returns a distinct object and the release's
-// properties are readonly, so the question this probe answers is whether a port can
-// reach that identity from outside the framework. The answer is what the facts file
-// records, and this is the measurement: one image, seven public constructions, the
-// pointer each of them hands back compared with the pointer it was given.
-//
-// Built and run by hand - it is a measurement, not part of the differential:
-//
-//   xcrun clang -fobjc-arc -Wno-deprecated-declarations distinct.m \
-//       -framework CoreImage -framework CoreGraphics -framework Foundation -o distinct
-//   ./distinct
-//
-// The last line is the one that settles the question: a gamma of 2 visibly changes the
-// image and still hands back the same CIImage *, so no construction reaches the identity.
-
 #import <CoreImage/CoreImage.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import <Foundation/Foundation.h>

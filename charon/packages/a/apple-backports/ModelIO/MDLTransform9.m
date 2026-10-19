@@ -3,11 +3,6 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-// A transform is a translation, a rotation, a shear and a scale applied in that order, which is the
-// order MDLTransform's own accessors read a matrix back in. The rotation is a product of the three
-// axis rotations in X, Y, Z order. The samples themselves are held as an MDLAnimatedMatrix4x4, so
-// the times between them are interpolated the way every other animated value's are.
-
 static matrix_float4x4 CharonMDLRotationMatrix(vector_float3 radians)
 {
     float cx = cosf(radians.x), sx = sinf(radians.x);
@@ -32,12 +27,6 @@ static matrix_float4x4 CharonMDLRotationMatrix(vector_float3 radians)
 }
 
 
-// The identity, written by assigning its columns.  A braced initialiser of a simd matrix does not
-// build one: matrix_float4x4 is a struct of four vector_float4 columns, so {{1,0,0,0}, {0,1,0,0},
-// {0,0,1,0}, {0,0,0,1}} initialises the first column with the first group and warns
-// "excess elements in struct initializer" for the other three.  Measured, the four groups written
-// that way give col0 1 1 1 1 and columns 1 to 3 all zero, and the port's MDLTransformStack product
-// of a translate and a rotate came out with a zero bottom row where the system's is 0 0 0 1.
 static matrix_float4x4 CharonMDLIdentityFloat4x4(void)
 {
     matrix_float4x4 identity;
@@ -65,7 +54,6 @@ static matrix_float4x4 CharonMDLIdentityFloat4x4(void)
     if ((self = [super init])) {
         _samples = [[MDLAnimatedMatrix4x4 alloc] init];
         _resetsTransform = resetsTransform;
-        // The four components a new transform has: nothing moved, nothing turned, and a scale of one.
         _translation = (vector_float3){0, 0, 0};
         _rotation = (vector_float3){0, 0, 0};
         _shear = (vector_float3){0, 0, 0};
@@ -120,9 +108,6 @@ static matrix_float4x4 CharonMDLIdentityFloat4x4(void)
     [self setMatrix:CharonMDLIdentityFloat4x4() forTime:0];
 }
 
-// A sample at a time already held replaces that sample rather than standing beside it, and a time
-// before the first or after the last sample falls on the first or the last, as every animated value
-// of the port and of the host reads there.
 - (void)setMatrix:(matrix_float4x4)matrix forTime:(NSTimeInterval)time
 {
     [_samples setFloat4x4:matrix atTime:time];
@@ -160,9 +145,6 @@ static matrix_float4x4 CharonMDLIdentityFloat4x4(void)
     return _samples.keyTimes;
 }
 
-// The accessors answer the four components the transform was given, not a reading of the matrix: a
-// matrix set outright leaves them where they were, which is what the system answers and what a
-// caller that sets a rotation and reads a scale is entitled to.
 - (vector_float3)translationAtTime:(NSTimeInterval)time
 {
     return _translation;
@@ -196,8 +178,6 @@ static matrix_float4x4 CharonMDLIdentityFloat4x4(void)
     return _shear;
 }
 
-// One of the four components changed: the matrix at time zero is composed from the four again, so a
-// caller that sets a translation and reads the matrix sees it move.
 - (void)charon_recompose
 {
     _matrix = [self matrixForTranslation:_translation rotation:_rotation shear:_shear scale:_scale];
@@ -283,8 +263,6 @@ static matrix_float4x4 CharonMDLIdentityFloat4x4(void)
         id<MDLTransformComponent> transform = at.transform;
         if (!transform)
             continue;
-        // A transform that carries its own samples is asked for the time given; one that is a plain
-        // matrix has the same matrix at every time.
         matrix_float4x4 local = [transform respondsToSelector:@selector(localTransformAtTime:)] ? [transform localTransformAtTime:time]
                                                                                               : transform.matrix;
         global = simd_mul(global, local);

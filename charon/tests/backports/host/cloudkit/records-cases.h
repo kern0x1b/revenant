@@ -1,21 +1,5 @@
-// The record value half, asked once of whichever CloudKit this binary was compiled against.
-//
-// One file, two builds: record.m compiles it against the host's own CloudKit, and the port's runner
-// compiles it against packages/a/apple-backports/CloudKit with no framework linked at all. The port
-// ships the real CK names - it *is* the CloudKit backport - so the two cannot be in one binary, and
-// running the same cases against both is what makes the comparison a statement about behaviour
-// rather than about a re-implementation.
-//
-// Nothing here asks for a container, a database, a fetch or a save, so nothing here touches the
-// network or anyone's own iCloud account. Every case builds its objects in memory and reads them
-// back: the record names, the zones, the fields, the equality, the copy and the archive round trip.
-
 #import <Foundation/Foundation.h>
 
-// The surface, declared here rather than imported, so this one file compiles the same way against
-// the host's framework and against the port: the host build links CloudKit and gets the classes from
-// the runtime, the port build links nothing and gets them from packages/a/apple-backports. The
-// declarations are the device SDK's, which is the release the port carries.
 @class CKRecordZoneID, CKRecordID, CKRecordZone, CKReference, CKAsset, CKRecord;
 
 @interface CKRecordZoneID : NSObject <NSSecureCoding, NSCopying>
@@ -108,9 +92,6 @@ static NSString *CharonProbeDescribe(id value)
     return [NSString stringWithFormat:@"<%@: %p>", [value class], value];
 }
 
-// The archive round trip, and what it does to each class. The one-argument archiver and unarchiver
-// are used rather than the inits that take an NSError, because the macOS SDK's Foundation - the one a
-// Mac Catalyst binary compiles against - has no initRequiringSecureCoding:error:.
 static void CharonProbeRoundTrip(Class cls, id object, NSMutableDictionary *out)
 {
     NSString *key = [NSString stringWithFormat:@"archive.%@", NSStringFromClass(cls)];
@@ -128,8 +109,6 @@ static void CharonProbeRoundTrip(Class cls, id object, NSMutableDictionary *out)
     out[[key stringByAppendingString:@".bytes"]] = [NSString stringWithFormat:@"%lu", (unsigned long)data.length];
 }
 
-// A call that may refuse, recorded either way: what the host raises is the answer the port owes, and
-// a case that lets an exception out of the probe records nothing at all.
 static id CharonProbeTry(NSMutableDictionary *out, NSString *key, id (^body)(void))
 {
     @try {
@@ -142,8 +121,6 @@ static id CharonProbeTry(NSMutableDictionary *out, NSString *key, id (^body)(voi
 
 static void CharonProbeRefusals(NSMutableDictionary *out)
 {
-    // The initializers the headers mark NS_UNAVAILABLE. What the host actually does is the thing the
-    // port has to answer, and a header is not a measurement.
     struct { NSString *name; id (^make)(void); } cases[] = {
         {@"CKRecordID.new", ^{ return [[NSClassFromString(@"CKRecordID") alloc] init]; }},
         {@"CKRecordZoneID.new", ^{ return [[NSClassFromString(@"CKRecordZoneID") alloc] init]; }},
@@ -170,7 +147,6 @@ static void CharonProbeRefusals(NSMutableDictionary *out)
 static void CharonRecordCases(NSMutableDictionary *out)
 {
     @autoreleasepool {
-        // --- the zone identifiers, which every other value is named inside
         CKRecordZoneID *zone = [[CKRecordZoneID alloc] initWithZoneName:@"widgets" ownerName:@"_defaultOwner"];
         out[@"zoneID.zoneName"] = zone.zoneName;
         out[@"zoneID.ownerName"] = zone.ownerName;
@@ -182,7 +158,6 @@ static void CharonRecordCases(NSMutableDictionary *out)
         CKRecordZoneID *otherOwner = [[CKRecordZoneID alloc] initWithZoneName:@"widgets" ownerName:@"someone-else"];
         out[@"zoneID.otherOwner.equal"] = [zone isEqual:otherOwner] ? @"equal" : @"different";
 
-        // --- the record name, and the zone a name lands in when none is given
         CKRecordID *named = [[CKRecordID alloc] initWithRecordName:@"a-record"];
         out[@"recordID.recordName"] = named.recordName;
         out[@"recordID.zoneID"] = CharonProbeDescribe(named.zoneID);
@@ -199,7 +174,6 @@ static void CharonRecordCases(NSMutableDictionary *out)
         out[@"recordID.sameInZone.equal"] = [named isEqual:sameElsewhere] ? @"equal" : @"different";
         out[@"recordID.sameInZone.inZone.equal"] = [inZone isEqual:sameElsewhere] ? @"equal" : @"different";
 
-        // --- the default zone, and the constant that names it
         CKRecordZone *defaultZone = [CKRecordZone defaultRecordZone];
         out[@"defaultRecordZone.zoneName"] = defaultZone.zoneID.zoneName;
         out[@"defaultRecordZone.ownerName"] = defaultZone.zoneID.ownerName;
@@ -220,7 +194,6 @@ static void CharonRecordCases(NSMutableDictionary *out)
         out[@"zone.otherOwner.equal"] = [byID isEqual:byIDagain] ? @"equal" : @"different";
         out[@"zone.copy.equal"] = [[byID copy] isEqual:byID] ? @"equal" : @"different";
 
-        // --- a reference, and the two things it can point at
         CKReference *ref = [[CKReference alloc] initWithRecordID:inZone action:CKReferenceActionDeleteSelf];
         out[@"reference.action"] = @(ref.referenceAction);
         out[@"reference.recordID.recordName"] = ref.recordID.recordName;
@@ -235,7 +208,6 @@ static void CharonRecordCases(NSMutableDictionary *out)
         out[@"reference.fromRecord.zoneName"] = fromRecord.recordID.zoneID.zoneName;
         out[@"reference.copy.equal"] = [[ref copy] isEqual:ref] ? @"equal" : @"different";
 
-        // --- an asset, with a file behind it and without one
         NSURL *missing = [NSURL fileURLWithPath:@"/private/tmp/cloudkit-does-not-exist.bin"];
         CKAsset *nilAsset = CharonProbeTry(out, @"asset.nilURL", ^{ return [[CKAsset alloc] initWithFileURL:nil]; });
         out[@"asset.nilURL.fileURL"] = CharonProbeDescribe(nilAsset.fileURL);
@@ -248,14 +220,11 @@ static void CharonRecordCases(NSMutableDictionary *out)
         out[@"asset.realURL.name"] = [real.fileURL lastPathComponent];
         out[@"asset.realURL.exists"] = [[NSFileManager defaultManager] fileExistsAtPath:real.fileURL.path] ? @"yes" : @"no";
         out[@"asset.same.equal"] = [real isEqual:missingAsset] ? @"equal" : @"different";
-        // CKAsset is not NSCopying on iOS - its @interface says plain NSObject - so what -copy does is
-        // part of the surface and is recorded rather than assumed
         CharonProbeTry(out, @"asset.copy", ^{
             id copied = [real copy];
             return [NSString stringWithFormat:@"%@", CharonProbeDescribe(copied)];
         });
 
-        // --- a record, and every field it answers before anything has been saved
         CKRecord *record = [[CKRecord alloc] initWithRecordType:@"Widget"];
         out[@"record.recordType"] = record.recordType;
         out[@"record.recordID.recordName"] = record.recordID.recordName;
@@ -282,7 +251,6 @@ static void CharonRecordCases(NSMutableDictionary *out)
         out[@"record.sameType.equal"] = [record isEqual:byZone] ? @"equal" : @"different";
         out[@"record.sameTypeAndID.equal"] = [inZoneRecord isEqual:byZone] ? @"equal" : @"different";
 
-        // --- the field store, which is the part with the most to answer
         CKRecord *fields = [[CKRecord alloc] initWithRecordType:@"Widget" recordID:inZone];
         [fields setObject:@"a string" forKey:@"name"];
         [fields setObject:[NSNumber numberWithInt:42] forKey:@"count"];
@@ -303,7 +271,6 @@ static void CharonRecordCases(NSMutableDictionary *out)
         out[@"fields.count.class"] = NSStringFromClass([[fields objectForKey:@"count"] class]);
         out[@"fields.blob.class"] = NSStringFromClass([[fields objectForKey:@"blob"] class]);
 
-        // overwriting keeps one key, setting nil removes it
         [fields setObject:@"another" forKey:@"name"];
         out[@"fields.overwritten"] = CharonProbeDescribe([fields objectForKey:@"name"]);
         out[@"fields.afterOverwrite.count"] = [NSString stringWithFormat:@"%lu", (unsigned long)fields.allKeys.count];
@@ -313,11 +280,9 @@ static void CharonRecordCases(NSMutableDictionary *out)
         out[@"fields.afterRemoval.sorted"] =
             CharonProbeDescribe([fields.allKeys sortedArrayUsingSelector:@selector(compare:)]);
 
-        // changedKeys: what the record says it has touched
         out[@"fields.changedKeys.afterRemoval"] =
             CharonProbeDescribe([fields.changedKeys sortedArrayUsingSelector:@selector(compare:)]);
 
-        // the subscript spelling of the same two methods
         CKRecord *sub = [[CKRecord alloc] initWithRecordType:@"Widget" recordID:inZone];
         sub[@"viaSubscript"] = @"set";
         out[@"fields.subscriptRead"] = CharonProbeDescribe(sub[@"viaSubscript"]);
@@ -325,7 +290,6 @@ static void CharonRecordCases(NSMutableDictionary *out)
         sub[@"viaSubscript"] = nil;
         out[@"fields.subscriptAfterNil"] = CharonProbeDescribe(sub[@"viaSubscript"]);
 
-        // the field key grammar, which is not "any string": what the host refuses is the answer
         for (NSString *bad in @[@"via-subscript", @"", @"with space", @"with.dot", @"1leading"]) {
             NSString *label = [NSString stringWithFormat:@"fields.badKey.%@", bad.length ? bad : @"empty"];
             CKRecord *probe = [[CKRecord alloc] initWithRecordType:@"Widget" recordID:inZone];
@@ -335,20 +299,15 @@ static void CharonRecordCases(NSMutableDictionary *out)
             });
         }
 
-        // allTokens: the field type names, and whether it has them
         out[@"fields.allTokens.count"] = [NSString stringWithFormat:@"%lu", (unsigned long)fields.allTokens.count];
         out[@"fields.allTokens.sorted"] = CharonProbeDescribe([fields.allTokens sortedArrayUsingSelector:@selector(compare:)]);
 
-        // a copy carries the fields
         CKRecord *copied = [fields copy];
         out[@"fields.copy.count"] = [NSString stringWithFormat:@"%lu", (unsigned long)copied.allKeys.count];
         out[@"fields.copy.blob"] = CharonProbeDescribe([copied objectForKey:@"blob"]);
         out[@"fields.copy.equal"] = [copied isEqual:fields] ? @"equal" : @"different";
 
-        // the parent, set both ways
         CKRecord *parented = [[CKRecord alloc] initWithRecordType:@"Widget" recordID:inZone];
-        // a parent in the default zone for a record in widgets, and one in widgets: which of the two
-        // the host takes, and what it says to the other
         CKRecord *crossZone = [[CKRecord alloc] initWithRecordType:@"Widget" recordID:inZone];
         CharonProbeTry(out, @"record.parent.crossZone", ^{
             [crossZone setParentReferenceFromRecordID:otherName];
@@ -372,10 +331,8 @@ static void CharonRecordCases(NSMutableDictionary *out)
         });
         out[@"record.parent.cleared"] = CharonProbeDescribe(sameZone.parent);
 
-        // and the parent read back off a record that has one
         out[@"record.parent.isReadable"] = sameZone.parent ? @"yes" : @"no";
 
-        // --- the refusals, and the copy and the archive for each class
         CharonProbeRefusals(out);
         out[@"copy.zoneID"] = [[zone copy] isEqual:zone] ? @"equal" : @"different";
         out[@"copy.recordID"] = [[inZone copy] isEqual:inZone] ? @"equal" : @"different";
@@ -385,8 +342,6 @@ static void CharonRecordCases(NSMutableDictionary *out)
         CharonProbeRoundTrip([CKReference class], ref, out);
         CharonProbeRoundTrip([CKRecord class], fields, out);
 
-        // The token cannot be made - every initializer refuses - so what it conforms to is asked of the
-        // runtime rather than guessed, and its archive is left unmeasured rather than claimed.
         out[@"token.conforms"] = CharonProbeDescribe([CKServerChangeToken class]);
         out[@"token.new"] = CharonProbeDescribe(CharonProbeTry(out, @"token.newCall", ^{
             return [[NSClassFromString(@"CKServerChangeToken") alloc] init];

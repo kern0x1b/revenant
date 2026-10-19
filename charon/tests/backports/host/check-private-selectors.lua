@@ -1,28 +1,5 @@
--- Lua port of check-private-selectors.py, the same check with the same output and the same exit status.
---
---    xmake l tests/backports/host/check-private-selectors.lua [--prefix PREFIX]... [--source SOURCE]... <test object or binary> <port object>...
---
--- Check that every selector a host differential renames for its own port is one the port defines.
---
--- A differential compiles the backport's sources into the same process as the framework they sit beside, so
--- the port's classes and the selectors its categories carry are renamed and the test drives the port's answer
--- and the host's side by side. Nothing checks the two halves against each other: a selector the test declares
--- in its own category and calls, and that no port object defines, is a link-time no-op and an
--- "unrecognized selector sent to instance" at run time - after the build, and with nothing in the gate to see
--- it, because the gate reads the registry of what the backports carry, not what a test asks for.
---
--- So this asks the two binaries themselves. The test holds every selector it names as a string; the port
--- objects hold every selector they define in their method symbols. A string with one of the renaming prefixes
--- that no port object defines is the failure above, and it is reported with the selector and the objects it
--- was looked for in. Prefixes default to the four this tree renames with; a differential that renames with
--- another one passes it. `--source` names a source of the test, and a prefixed literal that source concatenates
--- (`[@"charonHostSet" stringByAppendingString:...]`) is a piece of a name rather than a name of its own, so it
--- is not judged: see fragments() for the measurement that made that distinction necessary.
-
 local DEFAULT_PREFIXES = {"charonHost", "charonHost_", "charon_host_", "CharonHost"}
 
--- The first -[Class(Category) selector] or +[Class selector] on a line: the selector, or nil. The category part
--- is optional and the selector is what follows the single space.
 local function defined_selector(line)
     for sign_at in line:gmatch("()[-+]%[") do
         local at = sign_at + 2
@@ -44,23 +21,17 @@ local function defined_selector(line)
     return nil
 end
 
--- A renamed class is a class, not a selector: the test holds its name as a string too, and it is answered.
 local function class_symbol(stripped)
     return stripped:match("_OBJC_CLASS_%$_([%a_][%w_]*)$") or stripped:match("_OBJC_METACLASS_%$_([%a_][%w_]*)$")
 end
 
--- A name a C symbol carries as well as a method does: dlsym(RTLD_DEFAULT, "CharonHostUICommandTagShare") finds a
--- renamed constant, which is what a test asks for when it looks a constant up that way.
 local function defined_symbol(stripped)
     return stripped:match("^%x*%s*%a%s+_?([%a_][%w_:]*)$")
 end
 
--- Every selector the objects define, whole, every selector they send, and every selector name they hold as a
--- string - which is how a test that builds a name at run time spells it.
 local function selectors(paths)
     local defined, named, sent_by = {}, {}, {}
     for _, path in ipairs(paths) do
-        -- a tool that fails stops the check: an object read as empty would pass as a clean run
         local symbols = os.iorunv("xcrun", {"nm", path})
         do
             for line in symbols:gmatch("[^\n]+") do
@@ -91,9 +62,6 @@ local function selectors(paths)
     return defined, named, sent_by
 end
 
--- Whether a string that starts with a prefix is a whole selector rather than a piece of one. A differential that
--- builds selector names at run time holds the prefix and the format in the test's strings, and those are not
--- selectors anything has to define.
 local function whole(name, prefixes)
     for _, prefix in ipairs(prefixes) do
         if name:sub(1, #prefix) == prefix and #name > #prefix then
@@ -110,15 +78,6 @@ local function whole(name, prefixes)
     return false
 end
 
--- The prefixed strings the sources build a longer name out of, which are not selectors of their own.
---
--- A differential that renames with a prefix often spells the name it sends at run time, and the pieces of it are
--- literals in the source: `[@"charonHostSet" stringByAppendingString:...]` builds
--- charonHostSetAllowsExpensiveNetworkAccess: and never sends the bare charonHostSet. The strings pass cannot tell
--- a whole selector from a piece of one - both are a token that starts with a prefix - so it reported "names the
--- selector charonHostSet, which none of ... defines", which is a name nothing sends. Only a literal the source
--- concatenates is dropped: every other prefixed string is judged as before, so a test that names a selector no
--- port object defines is still reported.
 local function fragments(sources)
     local found = {}
     for _, path in ipairs(sources) do
@@ -147,8 +106,6 @@ local function set_of(keys)
     return out
 end
 
--- Parses the arguments the way argparse would: --prefix and --source take one value, either as the next word or
--- after an equals sign; everything else is an object, the test first.
 local function parse(args)
     local options = {prefix = {}, source = {}, objects = {}}
     local index = 1
@@ -176,7 +133,6 @@ local function parse(args)
 end
 
 function main(...)
-    -- the status is the process's, as the Python tool's sys.exit was: a red run must fail the caller
     os.exit(check(parse({...})))
 end
 
@@ -191,8 +147,6 @@ function check(options)
     for _, prefix in ipairs(DEFAULT_PREFIXES) do
         table.insert(prefixes, prefix)
     end
-    -- the test is asked what it names, every object is asked what it defines: a selector the test's own code
-    -- defines is answered as legitimately as one the port's is
     local defined, named, sent_by = selectors(options.objects)
     local pieces = fragments(options.source)
     local renamed = {}

@@ -28,8 +28,6 @@
         else if ([kind isEqual:@"axis"])
             elementClass = [GCControllerAxisInput class];
         else if ([kind isEqual:@"trigger"])
-            // the DualSense's adaptive trigger: a button the application commands a mode into, which
-            // is why it has a class of its own rather than being a plain button
             elementClass = [GCDualSenseAdaptiveTrigger class];
         else
             elementClass = [GCControllerButtonInput class];

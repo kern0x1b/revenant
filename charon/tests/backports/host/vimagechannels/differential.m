@@ -1,16 +1,3 @@
-// The port's channel moves held against the host's own vImage, case by case.
-//
-// **Every expected destination in this file is computed here, from Conversion.h's own statement, before the
-// host is asked** - the runs are moved by loops written in this file, not by calling the port's - and then
-// the host's answer and the port's are each compared against it, byte for byte, including the bytes either
-// side must NOT write: the padding of every row is filled with a guard and compared afterwards, so a
-// destination written past its own width is a difference rather than an invisible overrun.
-//
-// These are data movements, so there is nothing here about rounding to disagree about: a wrong channel
-// order, a wrong mask bit, a wrong width and a wrong refusal are the whole space of possible mistakes, and
-// all four are asked for directly. The refusals are asked twice over - the two sides must agree, and where
-// the header names the answer the run says which one it got.
-
 #import <Accelerate/Accelerate.h>
 #import <Foundation/Foundation.h>
 #include <stdarg.h>
@@ -75,18 +62,10 @@ static void report(int passed, const char *name, const char *why, ...)
     fflush(stdout);
 }
 
-// One call in a child process, for the inputs a header invites and an implementation may not survive: a
-// NULL map on the three-channel permute is the identity according to its own comment, and whether the host
-// answers that or dies on it is a measurement, not something to find out by taking the differential down
-// with it. The child exits with the return code it got, or dies with whatever signal the call raised; the
-// parent says which, and the port's own answer is asked in this process beside it.
 #define CHARON_CHILD_CRASHED (-1)
 
 static int in_child(vImage_Error (*call)(void *), void *context)
 {
-    // The child's answer comes back through a pipe rather than through its exit status: an exit status is
-    // one bit wide and every refusal here is a different number, so a run that folded them together would
-    // report -21775 for a NULL pointer argument and for a map value of 4 alike.
     int channel[2];
     if (pipe(channel) != 0)
         return CHARON_CHILD_CRASHED;
@@ -111,9 +90,6 @@ static int in_child(vImage_Error (*call)(void *), void *context)
     return got == (ssize_t)sizeof answer ? (int)answer : CHARON_CHILD_CRASHED;
 }
 
-// One call of any of the shapes the refusals use, so every refusal can be asked of the host in a child: a
-// NULL buffer or a NULL map is a thing the host may survive or may not, and which of the two it is has to
-// be a line in the run rather than the end of it.
 enum { ShapePermute4, ShapePermute4F, ShapePermute3, ShapeMaskedInsert16U, ShapeMaskedInsert8888,
        ShapeMaskedInsertFFFF, ShapeExtract, ShapeExtractFFFF, ShapeOverwritePixel, ShapeFill16U, ShapeFill16S,
        ShapeFill16F };
@@ -172,8 +148,6 @@ static int host_asks(const struct Call *call)
     return in_child(call_shape, (void *)call);
 }
 
-// The same shapes against the port, in this process: a port that dies on a NULL argument is a defect the run
-// has to show as a crash, so it is deliberately not put in a child where it would be a number.
 static vImage_Error call_shape_port(void *context)
 {
     struct Call *call = (struct Call *)context;
@@ -223,8 +197,6 @@ static vImage_Buffer buffer_of(void *data, vImagePixelCount width, vImagePixelCo
     return buffer;
 }
 
-// The source: a gradient where every byte is a function of its own position, so a channel that lands in the
-// wrong place is a difference and not a coincidence.
 static void fill_source(uint8_t *data, size_t bytes)
 {
     for (size_t i = 0; i < bytes; i++)
@@ -236,12 +208,6 @@ static void fill_dest(uint8_t *data, size_t bytes)
     memset(data, GUARD, bytes);
 }
 
-// **The expectation, computed here from Conversion.h's statement**: destination pixel x's run `i` is the
-// source's run `map[i]`, and where an insert is given and the mask bit for channel `i` is SET, the
-// insert's run `i` instead. Written over runs of `channelBytes`, which is what the header means by a
-// "channel" and the only thing that differs between the widths. The sense is the header's: its pseudocode
-// is `if (mask & copyMask) result[i] = backgroundColor[i]`, and the parameter is commented "Copy
-// backgroundColor into 0x8 -- alpha".
 static void expect_runs(uint8_t *dest, const uint8_t *src, vImagePixelCount width, const uint8_t *map,
                         int channels, int channelBytes, const uint8_t *insert, uint8_t copyMask)
 {
@@ -257,7 +223,6 @@ static void expect_runs(uint8_t *dest, const uint8_t *src, vImagePixelCount widt
     }
 }
 
-// The first byte at which two buffers differ, and both values, so a difference says where it is.
 static int first_difference(const uint8_t *a, const uint8_t *b, size_t bytes)
 {
     for (size_t i = 0; i < bytes; i++)
@@ -266,9 +231,6 @@ static int first_difference(const uint8_t *a, const uint8_t *b, size_t bytes)
     return -1;
 }
 
-// Three comparisons of one run's destination against the header's rule, named so a failure says which side
-// is wrong: the rule is what the header states, so the host is the one measured against it and the port is
-// the one that has to agree with both.
 static void compare_row(const char *label, const uint8_t *hostDest, const uint8_t *portDest, const uint8_t *want,
                         size_t bytes)
 {
@@ -283,9 +245,6 @@ static void compare_row(const char *label, const uint8_t *hostDest, const uint8_
            at < 0 ? 0 : portDest[at], at < 0 ? 0 : hostDest[at]);
 }
 
-// ============================================================================================
-// A permute of `channels` runs of `channelBytes`, over five maps, then in place.
-// ============================================================================================
 typedef vImage_Error (*PermuteFn)(const vImage_Buffer *, const vImage_Buffer *, const uint8_t *, vImage_Flags);
 
 static void permute_case(const char *what, PermuteFn host, PermuteFn port, int channels, int channelBytes)
@@ -321,7 +280,6 @@ static void permute_case(const char *what, PermuteFn host, PermuteFn port, int c
         report(first_difference(src, pristine, srcBytes) < 0, label, "the port wrote into the source");
         free(src); free(pristine); free(hostDest); free(portDest); free(want);
 
-        // In place: one buffer on both sides, which the header says works and the corpus asks for.
         size_t sharedRow = W * pixel + (SRC_PAD > DEST_PAD ? SRC_PAD : DEST_PAD);
         size_t sharedBytes = (size_t)H * sharedRow;
         uint8_t *shared = malloc(sharedBytes), *sharedWant = malloc(sharedBytes);
@@ -341,9 +299,6 @@ static void permute_case(const char *what, PermuteFn host, PermuteFn port, int c
     }
 }
 
-// The three-channel eight-bit permute, whose header adds a case the four-channel ones do not have: a NULL map
-// is the identity. Conversion.h says so directly: a NULL map gives the same destination pixels as the source,
-// so it is asked with a NULL map and compared against the identity.
 static void permute3_case(void)
 {
     size_t pixel = 3;
@@ -368,9 +323,6 @@ static void permute3_case(void)
         vImage_Error portAnswer = charon_host_vImagePermuteChannels_RGB888(&s, &pd, m < 0 ? NULL : map, kvImageNoFlags);
         vImage_Error hostAnswer;
         if (m < 0) {
-            // Per the header, a NULL map gives the same destination pixels as the identity map.
-            // The host's own answer to that sentence is measured in a child, because a host that dereferences
-            // the map takes this differential down with it and the measurement is worth more than the run.
             struct Call call = {ShapePermute3, &s, &hd, NULL, 0, 0, NULL, kvImageNoFlags};
             hostAnswer = (vImage_Error)host_asks(&call);
             printf("     vImagePermuteChannels_RGB888 with a NULL map: the host's own process ended %s\n",
@@ -388,9 +340,6 @@ static void permute3_case(void)
             report(hostAnswer == kvImageNoError, label, "the host answered %d", (int)hostAnswer);
             compare_row(label, hostDest, portDest, want, destBytes);
         } else {
-            // The host died on it and wrote nothing, so there are no bytes to compare: what is compared is
-            // that the port refused rather than answering an identity the release does not implement, and
-            // that it wrote nothing either.
             report(portDest[0] == GUARD, label, "the port wrote into the destination of a refused call");
             report(hostDest[0] == GUARD, label, "the host wrote into the destination before it died");
         }
@@ -398,9 +347,6 @@ static void permute3_case(void)
     }
 }
 
-// ============================================================================================
-// The masked insert: a permute, then the channels the mask clears replaced by the given pixel's.
-// ============================================================================================
 static void masked_insert_case(const char *what, vImage_Error (*host)(const vImage_Buffer *, const vImage_Buffer *,
                                                                      const uint8_t *, uint8_t, const void *,
                                                                      vImage_Flags),
@@ -436,8 +382,6 @@ static void masked_insert_case(const char *what, vImage_Error (*host)(const vIma
     }
 }
 
-// Three thin adapters, so the masked-insert case above can be one loop over sixteen masks whatever the
-// pixel's own type is. Nothing is compared here: each passes its own type's pixel straight through.
 static vImage_Error host_masked_16u(const vImage_Buffer *s, const vImage_Buffer *d, const uint8_t *map,
                                     uint8_t mask, const void *background, vImage_Flags flags)
 {
@@ -477,9 +421,6 @@ static vImage_Error port_masked_ffff(const vImage_Buffer *s, const vImage_Buffer
                                                                       *(const Pixel_FFFF *)background, flags);
 }
 
-// ============================================================================================
-// An extract, one channel at a time.
-// ============================================================================================
 typedef vImage_Error (*ExtractFn)(const vImage_Buffer *, const vImage_Buffer *, long, vImage_Flags);
 
 static void extract_case(const char *what, ExtractFn host, ExtractFn port, int channels, int channelBytes)
@@ -515,9 +456,6 @@ static void extract_case(const char *what, ExtractFn host, ExtractFn port, int c
     }
 }
 
-// ============================================================================================
-// A fill: the given value in every pixel of a one-channel destination, and nothing written past its width.
-// ============================================================================================
 typedef vImage_Error (*FillFn)(const uint8_t *value, const vImage_Buffer *dest, vImage_Flags);
 
 static void fill_case(const char *what, FillFn host, FillFn port, const uint8_t *value, int channelBytes)
@@ -543,9 +481,6 @@ static void fill_case(const char *what, FillFn host, FillFn port, const uint8_t 
     free(hostDest); free(portDest); free(want);
 }
 
-// Six adapters, one per side per width: the three fill functions take their own scalar type and this file
-// keeps one case for all of them. Each hands its own type's bytes straight through, so the case is still
-// asking the host and the port the same question.
 static vImage_Error host_fill_16u(const uint8_t *value, const vImage_Buffer *d, vImage_Flags f)
 {
     Pixel_16U scalar;
@@ -588,12 +523,6 @@ static vImage_Error port_fill_16f(const uint8_t *value, const vImage_Buffer *d, 
     return charon_host_vImageOverwriteChannelsWithScalar_Planar16F(scalar, d, f);
 }
 
-// ============================================================================================
-// The overwrite with one pixel: each channel of each destination pixel is either the source's own or the
-// given pixel's, decided by the copyMask bit for that channel. Conversion.h writes it a word at a time
-// (`destRow[x] = (srcRow[x] & mask) | the_pixel`) and names the mask's meaning, so both readings are
-// computed and the run says which one the host answers.
-// ============================================================================================
 static void overwrite_pixel_case(const char *what, vImage_Error (*host)(const uint8_t *, const vImage_Buffer *,
                                                                         const vImage_Buffer *, uint8_t, vImage_Flags),
                                  vImage_Error (*port)(const uint8_t *, const vImage_Buffer *, const vImage_Buffer *,
@@ -611,12 +540,6 @@ static void overwrite_pixel_case(const char *what, vImage_Error (*host)(const ui
         fill_dest(hostDest, destBytes);
         fill_dest(portDest, destBytes);
         fill_dest(want, destBytes);
-        // The expectation, and the sense is the measured one: the copyMask bit names the channels the given
-        // PIXEL is copied into ("Copy plane into 0x8 -- alpha"), and every other channel is conserved from
-        // the source. CopyMask 0 therefore conserves the whole source and copyMask 0xF writes the whole
-        // pixel, which is what the host answers and what the port now does - Conversion.h's sentence about
-        // "0xFFFF where the pixels should be conserved" reads the other way round and is not what the host
-        // does; see facts/Accelerate/vImageChannels.md.
         for (vImagePixelCount row = 0; row < H; row++) {
             const uint8_t *in = src + row * srcRow;
             uint8_t *out = want + row * destRow;
@@ -658,27 +581,11 @@ static vImage_Error port_overwrite_pixel(const uint8_t *pixel, const vImage_Buff
     return charon_host_vImageOverwriteChannelsWithPixel_ARGB16U(value, s, d, mask, flags);
 }
 
-// ============================================================================================
-// The refusals, asked twice over: every bit of the flag word on its own for every function of the family,
-// then the arguments the headers name - a NULL buffer, a destination larger than the source, a map value, a
-// channel index or a copyMask outside the range the header gives for it.
-//
-// **The flag word, one bit at a time, for every function.** The headers name kvImageUnknownFlagsBit for "a
-// flag which was not among the approved set" without ever saying which bits are approved, the tree's other
-// vImage files each measured their own set, and this is the survey that decides what these three files
-// accept. Agreement between the two sides is the gate and the accepted set is what the run prints, with the
-// value in every line - "one flag bit" without it cannot say which bit the two sides disagreed about.
-// A legal flag does not crash the host, so both sides are asked in this process and the bytes are left to
-// the cases above; what is at stake here is only which bits are a refusal.
-// ============================================================================================
 static void refusal_case(const char *what, const char *inputs, vImage_Error hostAnswer, vImage_Error portAnswer,
                          vImage_Error expected, int namesOne)
 {
     char label[200];
     snprintf(label, sizeof label, "%s, %s", what, inputs);
-    // A host that died on the call is a measurement, not a disagreement: a process that ends on a signal
-    // against a port that refused a NULL argument is the right answer on both sides, and comparing the two
-    // numbers would call that a difference.
     int hostAlive = hostAnswer != CHARON_CHILD_CRASHED;
     report(hostAlive ? hostAnswer == portAnswer : portAnswer != kvImageNoError, label,
            "the host %s, the port %d", hostAlive ? "answers a different code" : "died on a signal and the port answers",
@@ -694,25 +601,13 @@ static void refusal_case(const char *what, const char *inputs, vImage_Error host
 
 static void flag_survey(const char *what, int shape, int portShape)
 {
-    // **The buffers are laid out for the widest shape of the family**, four channels of four bytes, because
-    // this survey asks all twelve functions with one buffer each: laid out for the narrowest, the ARGBFFFF
-    // masked insert reads sixteen bytes a pixel out of a row eight bytes a pixel wide, which AddressSanitizer
-    // reports as a heap-buffer-overflow in this file (measured, and the rowBytes a caller passes is not what
-    // decides how much of it is read - the width and the pixel type are).
     size_t pixel = 4 * 4;
     size_t srcRow = W * pixel + SRC_PAD, destRow = W * pixel + DEST_PAD;
     uint8_t *src = malloc((size_t)H * srcRow), *hostDest = malloc((size_t)H * destRow);
     uint8_t *portDest = malloc((size_t)H * destRow);
-    // **A three-entry map for the three-channel permute.** Asked with the four-entry map of the four-channel
-    // forms it answers kvImageInvalidParameter on the map (its entry 0 is 3, which is out of range for three
-    // channels), and that would be read as a refusal of the flag - the very thing the survey is measuring.
     static const uint8_t map4[4] = {3, 2, 1, 0};
     static const uint8_t map3[3] = {2, 1, 0};
     const uint8_t *map = shape == ShapePermute3 ? map3 : map4;
-    // **The widest insert of the family, because this survey asks every shape**: an ARGBFFFF masked insert
-    // reads sixteen bytes of it and an ARGB16U one reads eight, so a narrower object here is a stack
-    // overflow in the survey rather than a measurement - measured, as an AddressSanitizer report of
-    // "stack-buffer-overflow, READ of size 4, in CharonChannelsPermuteRow" from this function.
     Pixel_FFFF background = {{0.25f, 0.5f, 0.75f, 1.0f}};
     fill_source(src, (size_t)H * srcRow);
     vImage_Buffer s = buffer_of(src, W, H, srcRow);
@@ -733,9 +628,6 @@ static void flag_survey(const char *what, int shape, int portShape)
     free(portDest);
 }
 
-// The copyMask, one value at a time, the way the flag survey asks the flag word. **Conversion.h names a
-// range for it - "kvImageInvalidParameter when copyMask > 0x0F" - and the measurement is what decides**,
-// because this host is the oracle for these rows and a header is not.
 static void maskmask_survey(const char *what, int shape, int portShape)
 {
     size_t pixel = 4 * 2;
@@ -758,18 +650,11 @@ static void maskmask_survey(const char *what, int shape, int portShape)
         vImage_Buffer pd = buffer_of(portDest, W, H, destRow);
         struct Call host = {shape, &s, &hd, map, 0, (uint8_t)values[i], &background, kvImageNoFlags};
         struct Call port = {portShape, &s, &pd, map, 0, (uint8_t)values[i], &background, kvImageNoFlags};
-        // **Asked in this process, not in a child**: the child's writes land in the child's own copy-on-write
-        // pages and are gone by the time it exits, so a child cannot be compared byte for byte. A legal mask
-        // does not crash the host - only the NULL map does, and that one is asked elsewhere in a child - so
-        // there is nothing to isolate here.
         vImage_Error hostAnswer = call_shape(&host);
         vImage_Error portAnswer = call_shape_port(&port);
         char inputs[32];
         snprintf(inputs, sizeof inputs, "the copyMask 0x%02X alone", values[i]);
         refusal_case(what, inputs, hostAnswer, portAnswer, kvImageNoError, 0);
-        // And the bytes, so "the bits above 0x0F are carried and ignored" is measured rather than inferred
-        // from the fact that the call was accepted: the expectation is the same rule with the mask masked
-        // down to its four channel bits, which is what both sides are asked to agree with.
         if (shape == ShapeOverwritePixel) {
             for (vImagePixelCount row = 0; row < H; row++)
                 for (vImagePixelCount x = 0; x < W; x++)

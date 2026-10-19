@@ -1,6 +1,5 @@
 #import <UIKit/UIKit.h>
 #include <stdio.h>
-// Host-only probe of the TextKit 2 members that the port has not built. A bundled Mac Catalyst app with a window and the iPad idiom.
 static FILE *out;
 static void report(const char *check, NSString *value) { fprintf(out, "%s\t%s\n", check, value ? [value UTF8String] : "nil"); }
 static NSString *yes_no(BOOL a) { return a ? @"yes" : @"no"; }

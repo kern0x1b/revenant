@@ -1,6 +1,3 @@
-// MPSCommandBuffer, from the header of the SDK of iOS 16.4. One object per release: the band machinery keeps an
-// object whole or drops it whole, so a file here carries the API of exactly one release.
-
 #import "CharonMPS.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
@@ -8,21 +5,12 @@
 
 id<MTLDevice> MPSGetPreferredDevice(MPSDeviceOptions options)
 {
-    // The release walks its devices and returns the first that matches the options. This port has one
-    // device and no removable or low-power choice among several, so the options have nothing to
-    // choose between and the one device is the preferred one. MPSDeviceOptionsDefault is 0, and a
-    // caller may pass any combination; none of them names a device this port does not have.
     (void)options;
     return MTLCreateSystemDefaultDevice();
-}// -commitAndContinue arrived in iOS 14 and the SDK this package compiles against names it on
-// MPSCommandBuffer but not on MTLCommandBuffer, so a wrapped command buffer is asked for it through
-// this. The release forwards the message when the wrapped buffer has one and commits otherwise.
+}
 @protocol CharonMPSCommitAndContinuing <NSObject>
 - (void)commitAndContinue;
 @end
-// The debug group, buffer label and memory barrier surface of MTLCommandBuffer arrived after the
-// SDK this package compiles against declares it, so the wrapped buffer is asked for each of them
-// through this, and a buffer that has none of them is not asked at all.
 @protocol CharonMPSCommandBufferDebugging <NSObject>
 - (void)setDebugMarker:(NSString *)string;
 - (void)insertDebugMarker:(NSString *)string;
@@ -60,9 +48,6 @@ id<MTLDevice> MPSGetPreferredDevice(MPSDeviceOptions options)
 
 - (instancetype)init
 {
-    // The header marks -init unavailable, so there is no command buffer to make without one to wrap.
-    // This port answers a caller that reaches it anyway the way it answers every other unusable
-    // request: nil, and a line in the log that says which initialiser is the one to use.
     NSLog(@"MPSCommandBuffer: -init makes no command buffer; use +commandBufferWithCommandBuffer: or -initWithCommandBuffer:");
     return nil;
 }
@@ -74,7 +59,6 @@ id<MTLDevice> MPSGetPreferredDevice(MPSDeviceOptions options)
 
 - (id<MTLCommandBuffer>)rootCommandBuffer
 {
-    // MPSCommandBuffers may wrap MPSCommandBuffers, so the root is the bottom of that stack.
     id<MTLCommandBuffer> root = _buffer;
     while ([root isKindOfClass:[MPSCommandBuffer class]])
         root = [(MPSCommandBuffer *)root commandBuffer];
@@ -111,10 +95,6 @@ id<MTLDevice> MPSGetPreferredDevice(MPSDeviceOptions options)
 
 - (void)prefetchHeapForWorkloadSize:(size_t)size
 {
-    // The release warms its heap cache with a heap of at least this size. Every temporary matrix,
-    // vector, image and state in this port is a device buffer made when its -data is asked for, and
-    // the device's own allocator is what a heap here would be, so there is nothing to pre-warm: the
-    // storage is the storage the device would have given the heap's sub-allocation.
     (void)size;
 }
 

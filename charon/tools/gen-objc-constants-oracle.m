@@ -1,9 +1,3 @@
-// Host oracle for gen-objc-constants.py: reads the value of each named exported object constant
-// (an NSString or CFString, toll-free bridged) from a framework of the running macOS, through
-// dlopen and dlsym. Prints one line per name, tab separated:
-//   name <TAB> found|missing|not-object <TAB> class <TAB> value
-// The value is the UTF-8 text with \\, \" and \uXXXX (ASCII only) escapes, so the line is ASCII.
-// Usage: oracle <framework binary path> <name> [<name> ...]   (the names are arguments: no file is read)
 #import <Foundation/Foundation.h>
 #include <dlfcn.h>
 

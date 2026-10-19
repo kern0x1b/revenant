@@ -4,10 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// The broadcast family, one case per process, chosen by DIFF_CASE. The same source is compiled against the host's ReplayKit
-// (the windowed Catalyst app) and against the port's sources, and each case prints what an application can see. run.sh
-// compares the two outputs. No case starts a broadcast or a recording: the host would capture the screen (facts/ReplayKit/).
-
 static void line(NSString *s)
 {
     printf("%s\n", [s UTF8String]);
@@ -25,7 +21,6 @@ static NSString *errText(NSError *error)
     return [NSString stringWithFormat:@"%@/%ld", error.domain, (long)error.code];
 }
 
-// The port's classes are compiled under a prefix (run.sh), so a name is printed without it: the two sides then print the same.
 static NSString *plain(NSString *name)
 {
     return [name hasPrefix:@"Charon"] ? [name substringFromIndex:6] : name;
@@ -185,7 +180,6 @@ static void caseExtensionContext(void)
     line(@"returned completeRequestWithBroadcastURL:broadcastConfiguration:setupInfo:");
 }
 
-// The recorder starts nothing: no case calls startRecordingWithHandler: or a capture, so the host never records the screen.
 static void caseRecorder(void)
 {
     RPScreenRecorder *r = [RPScreenRecorder sharedRecorder];
@@ -220,7 +214,6 @@ static void caseRecorder(void)
     line([NSString stringWithFormat:@"discard calls=%d within 2 s", discards]);
 }
 
-// available is NO in the port until the recorder works (ruling 5). It is its own case so run.sh reports the difference as KNOWN.
 static void caseRecorderAvailable(void)
 {
     line([NSString stringWithFormat:@"available=%d", [RPScreenRecorder sharedRecorder].available]);

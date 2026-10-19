@@ -1,16 +1,3 @@
-// probe.m - what the host RUNTIME does with -[INDateComponentsRange initWithEKRecurrenceRule:] and its getter
-// -[INDateComponentsRange EKRecurrenceRule], asked for a set of rule shapes, and with the Intents rules the EventKit
-// rule cannot name (minute and hourly).
-//
-// Every Intents selector is looked up by name at run time, so the framework's header does not decide the answer. The
-// answers printed are the ones that do not depend on the clock: which date components are set (the weekday's value
-// is printed, the others are only named), the frequency, the interval, the weekday option, which days come back, and
-// whether the getter raises and why.
-//
-//   xcrun clang -fno-objc-arc -framework Foundation -framework Intents -framework EventKit probe.m -o probe   (macOS)
-//   xcrun clang -fno-objc-arc -target arm64-apple-ios15.0-macabi -isysroot $(xcrun --show-sdk-path) \
-//       -iframework $(xcrun --show-sdk-path)/System/iOSSupport/System/Library/Frameworks \
-//       -framework Foundation -framework Intents -framework EventKit probe.m -o probe-catalyst
 #import <Foundation/Foundation.h>
 #import <EventKit/EventKit.h>
 #import <objc/runtime.h>
@@ -18,8 +5,6 @@
 #include <stdio.h>
 #include <string.h>
 
-// The port's classes are the same classes with the prefix run.sh renames them to (the port build, -DPORT); the host's
-// are the framework's own, with no prefix.
 #ifdef PORT
 #define PREFIX "CharonHost"
 #else
@@ -31,7 +16,6 @@ static Class charonClass(NSString *name)
     return NSClassFromString([NSString stringWithFormat:@"%s%@", PREFIX, name]);
 }
 
-// The class's name as Apple's, with the port's prefix taken off, so the two builds print the same line.
 static const char *className(id object)
 {
     const char *name = class_getName([object class]);
@@ -39,7 +23,6 @@ static const char *className(id object)
     return strncmp(name, PREFIX, prefix) == 0 ? name + prefix : name;
 }
 
-// The value of a property by its key, if the object has it; "absent" if it does not.
 static void key(const char *label, id owner, const char *name)
 {
     if (!owner) {
@@ -62,7 +45,6 @@ static void key(const char *label, id owner, const char *name)
     }
 }
 
-// Which fields of a date-components object are set: the weekday with its value, the others by name.
 static void setFields(const char *label, NSDateComponents *components)
 {
     if (!components) {
@@ -100,7 +82,6 @@ static void endOf(const char *label, id end)
     key("    endDate", end, "endDate");
 }
 
-// The getter, read on a range. Its raise is printed by name and reason; nothing is caught silently.
 static void readGetter(id range, id rule)
 {
     @try {
@@ -145,7 +126,6 @@ static void rangeCase(const char *name, id rule)
     readGetter(range, rule);
 }
 
-// A range made from an Intents rule by its own designated initialiser, read through the EventKit getter.
 static void intentsCase(const char *name, NSInteger frequency, NSInteger interval)
 {
     Class ruleClass = charonClass(@"INRecurrenceRule");
@@ -159,7 +139,6 @@ static void intentsCase(const char *name, NSInteger frequency, NSInteger interva
     readGetter(range, nil);
 }
 
-// A range given a start weekday with an Intents rule, through the designated initialiser, read through the getter.
 static void startedCase(const char *name, NSInteger frequency, NSInteger interval, NSInteger weekday)
 {
     Class ruleClass = charonClass(@"INRecurrenceRule");
@@ -203,7 +182,6 @@ int main(void)
         rangeCase("monthly, Friday, the second", [[EKRecurrenceRule alloc] initRecurrenceWithFrequency:EKRecurrenceFrequencyMonthly interval:1 daysOfTheWeek:@[[EKRecurrenceDayOfWeek dayOfWeek:6 weekNumber:2]] daysOfTheMonth:nil monthsOfTheYear:nil weeksOfTheYear:nil daysOfTheYear:nil setPositions:nil end:nil]);
         rangeCase("nil rule", nil);
 
-        // Intents frequencies with no EventKit name: minute is 1, hourly 2, daily 3.
         intentsCase("minute, interval 1", 1, 1);
         intentsCase("hourly, interval 1", 2, 1);
         intentsCase("daily, interval 1, made by the Intents rule", 3, 1);
@@ -211,7 +189,6 @@ int main(void)
         startedCase("weekly, interval 2, starts on Friday", 4, 2, 6);
         startedCase("monthly, interval 1, starts on Monday", 5, 1, 2);
 
-        // A range made by its plain initialiser, read through the EventKit getter.
         id plain = [[rangeClass alloc] init];
         printf("plain range\t%s\n", plain ? className(plain) : "nil");
         key("  plain EKRecurrenceRule", plain, "EKRecurrenceRule");

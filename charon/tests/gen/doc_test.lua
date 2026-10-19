@@ -1,8 +1,3 @@
--- Behaviour of `doc`: the page writer on a fixture framework. The header facts and the ObjC rows are injected (no SDK, no header
--- parse, no objc table), and the tree and the corpus are small folders written here. Run:
---   xmake l tests/gen/doc_test.lua
--- The folders live under the system temp directory and are removed when the test ends.
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 local FIXTURE = "FixtureKit"
 local files = import("gen.files", {rootdir = TOOLS, anonymous = true})
@@ -23,22 +18,17 @@ local function checks()
     return check, function() return failures end
 end
 
--- The text of a page, or nil when the page is absent.
 local function page_text(filepath)
     return files.read_text(filepath)
 end
 
--- True when text holds the plain substring.
 local function has(text, plain)
     return text ~= nil and string.find(text, plain, 1, true) ~= nil
 end
 
--- The crash demand of the fixture's method setName:age: (rank 3, high, 40 apps); its file lists are empty, so it has no impl-lead.
 local DEMAND = "rank\tseverity\tapi\tkind\tframework\tapps\tcrash_callers\n"
     .. "3\thigh\t-[FKThing setName:age:]\tmethod\tFixtureKit\t40\t-\n"
 
--- A fixture tree and corpus: the spec, the protocols, the registry, the pins, the trace's skipped list, the bucket, and the corpus
--- tables the pages read.
 local function write_fixture(tree, corpus)
     local corpus_fixture = import("surface_corpus", {rootdir = os.scriptdir(), anonymous = true})
     local shards = import("surface_shards", {rootdir = os.scriptdir(), anonymous = true})
@@ -47,8 +37,6 @@ local function write_fixture(tree, corpus)
     os.cp(TOOLS, path.join(tree, "tools"))
     os.cp(path.join(TOOLS, "..", "modules"), path.join(tree, "modules"))
     local package = path.join(tree, "packages", "a", "apple-backports")
-    -- The surface of the fixture is its declaration shard (the model reads it): a method, a method and a protocol, each at 12.0. The
-    -- members' header facts are injected (headers.use below). The constant is in the framework's constant record.
     shards.write(tree, FIXTURE, {
         shards.objc_row("method", "c:objc(cs)FKThing(im)setName:age:", nil, nil, nil, "ios=12.0/-/-/0"),
         shards.objc_row("method", "c:objc(cs)FKThing(im)reset", nil, nil, nil, "ios=12.0/-/-/0"),
@@ -66,7 +54,6 @@ local function write_fixture(tree, corpus)
         {"FKDelegate", "12.0", "transcribed", "", "NSObject", "required", "method", "yes", "didFinish", "- (void)didFinish;", "yes"},
         {"FKDelegate", "12.0", "transcribed", "", "NSObject", "required", "method", "no", "make", "+ (instancetype)make;", "yes"},
         {"FKDelegate", "12.0", "transcribed", "", "NSObject", "optional", "property", "yes", "name", "@property NSString *name;", "no"},
-        -- a protocol and a class of one name
         {"FKShape", "12.0", "transcribed", "", "NSObject", "-", "-", "-", "-", "-", "-"},
         {"FKShape", "12.0", "transcribed", "", "NSObject", "required", "method", "yes", "area", "- (double)area;", "yes"},
     }))
@@ -99,8 +86,6 @@ local function write_fixture(tree, corpus)
     }))
 end
 
--- The ObjC rows the fixture's pages read: a class row twice (the last one of the owner wins), a method row twice (the first wins),
--- a property row, and a class row of an owner the spec does not name.
 local function fixture_rows(fw, fn)
     local function row(entity, owner, section, name, decl, types, address, superclass, protocols)
         return {entity = entity, owner = owner, section = section, name = name, decl = decl, types = types, address = address,
@@ -110,10 +95,8 @@ local function fixture_rows(fw, fn)
         return
     end
     fn(fw, row("class", "FKThing", "class", "FKThing", "@interface FKThing : NSObject", "", "0x1", "NSObject"))
-    -- the same key again: the first row of a key wins
     fn(fw, row("class", "FKThing", "class", "FKThing", "@interface FKThing : NSObject <FKDelegate>", "", "0x2", "NSObject",
                "FKDelegate"))
-    -- a second key of the owner: the last class row of the owner wins (its protocols show)
     fn(fw, row("class", "FKThing", "instance", "FKThing", "@interface FKThing (Extra)", "", "0x7", "NSObject", "FKDelegate"))
     fn(fw, row("method", "FKThing", "instance", "reset", "- (void)reset", "v16@0:8", "0x3"))
     fn(fw, row("method", "FKThing", "instance", "reset", "- (void)reset", "v16@0:8", "0x4"))
@@ -121,10 +104,6 @@ local function fixture_rows(fw, fn)
     fn(fw, row("class", "Unrelated", "class", "Unrelated", "@interface Unrelated", "", "0x6", "NSObject"))
 end
 
--- The header facts the fixture injects: a superclass. The pages take their comments and declarations from the doc rows below (the
--- extractor's doc mode), and the spec's decl column is never shown.
--- The fixture's members as its shard gives them (members.rows reads cls, kind, api, text, type and hash): a method, a method with an
--- availability text, a property and a class method. The shard file holds the header only; these facts are what it would give.
 local function fixture_headers(fw, sdk)
     local function member(cls, kind, api, text, typ, hash)
         return {cls = cls, kind = kind, api = api, text = text, type = typ, hash = hash}
@@ -135,7 +114,6 @@ local function fixture_headers(fw, sdk)
             member("FKThing", "method", "-[FKThing setName:age:]", "API_AVAILABLE(ios(12.0))", "void", "2222222222222222"),
             member("FKThing", "property", "-[FKThing title]", "", "NSString *", "3333333333333333"),
             member("FKThing", "method", "+[FKThing make]", "", "instancetype", "4444444444444444"),
-            -- a class named as a protocol; two classes that differ in case only; a class named as the index page
             member("FKShape", "method", "-[FKShape draw]", "", "void", "5555555555555555"),
             member("FKcase", "method", "-[FKcase lower]", "", "void", "6666666666666666"),
             member("FKCase", "method", "-[FKCase upper]", "", "void", "7777777777777777"),
@@ -145,12 +123,10 @@ local function fixture_headers(fw, sdk)
     }
 end
 
--- The extractor's escaping of a cell (decls.cc): a backslash, a tab, a line feed and a carriage return.
 local function escape(text)
     return (string.gsub(text, "[\\\t\n\r]", {["\\"] = "\\\\", ["\t"] = "\\t", ["\n"] = "\\n", ["\r"] = "\\r"}))
 end
 
--- A doc row of the fixture as the extractor writes it: ten escaped cells, tab separated.
 local function doc_row(usr, kind, name, side, params, brief, comment, decl)
     local cells = {FIXTURE, kind, usr, "-", name, side, params, brief, comment, decl}
     for i, cell in ipairs(cells) do
@@ -159,37 +135,27 @@ local function doc_row(usr, kind, name, side, params, brief, comment, decl)
     return table.concat(cells, "\t")
 end
 
--- The raw comment of reset: a tab, a line feed, a backslash and a non-ASCII apostrophe (UTF-8).
 local RESET_COMMENT = "/// Resets the thing.\n/// Keeps a\\b and a\tTAB\n/// Don\226\128\153t"
 
--- The doc rows the fixture's extractor gives (the rows of FixtureKit; nil for any other framework, which it does not list). The
--- literal row has a tab, a line feed and a backslash in its comment, written as the extractor writes them.
 local function fixture_doc_rows(fw, sdk)
     if fw ~= FIXTURE then
         return nil
     end
     return {
         doc_row("c:objc(cs)FKThing(im)reset", "method", "reset", "-", "", "Resets the thing.", RESET_COMMENT, "- (void)reset"),
-        -- the same USR again: the first row of a USR is the one kept
         doc_row("c:objc(cs)FKThing(im)reset", "method", "reset", "-", "", "", "", "- (void)reset NS_SWIFT_UNAVAILABLE(\"x\")"),
-        -- no raw comment: the brief is the comment
         doc_row("c:objc(cs)FKThing(im)setName:age:", "method", "setName:age:", "-", "n | a", "Sets the name.", "",
                 "- (void)setName:(NSString *)n age:(int)a | pipe"),
-        -- a declaration that quotes backticks, as an API_DEPRECATED message does
         doc_row("c:objc(cs)FKThing(py)title", "property", "title", "-", "", "", "",
                 "@property (nonatomic, copy) NSString *title API_DEPRECATED(\"Use `other`\", ios(1.0, 2.0))"),
-        -- a row with no USR is no member
         doc_row("-", "super", "NSObject", "-", "", "", "", "-"),
-        -- a class property: its side is "+" as the shard reader gives it, whatever the extractor's side column says
         doc_row("c:objc(cs)FKThing(cpy)shared", "property", "shared", "-", "", "", "", "@property (class, readonly) FKThing *shared"),
         doc_row("c:objc(pl)FKDelegate(im)didFinish", "method", "didFinish", "-", "", "", "", "- (void)didFinish;"),
         doc_row("c:objc(pl)FKDelegate(cm)make", "method", "make", "+", "", "", "/// Makes one.", "+ (instancetype)make;"),
-        -- the literal row: its comment holds a tab, a line feed and a backslash
         "FixtureKit\tmethod\tc:objc(cs)FKThing(im)tabbed\t-\ttabbed\t-\t\t\t/// one\\ttwo\\nthree\\\\four\t- (void)tabbed",
     }
 end
 
--- The text of a page, or nil when the page is absent.
 local function page_of(dir, name)
     return page_text(path.join(dir, name))
 end
@@ -205,7 +171,6 @@ local function test_pages(check)
     headers.use(fixture_headers)
     cmd_doc.use_objc(function(_, _, frameworks, fn) fixture_rows(FIXTURE, fn) end)
 
-    -- the decoding of the escaped cells: the literal row's comment is its tab, line feed and backslash
     local fixture_rows_list = fixture_doc_rows(FIXTURE)
     local literal = fixture_rows_list[#fixture_rows_list]
     local cells = doc_text.decode(literal)
@@ -242,9 +207,6 @@ local function test_pages(check)
           "the index lists the protocol with its members, and its own page")
     check(has(index, "## Protocols (2)"), "the index counts its protocols")
 
-    -- the page names (pages.lua): a class and a protocol of one name are two pages, names that differ in case only are two pages
-    -- under a suffix of their own (sha256 of "class <Name>", first eight digits, computed outside of the code), and a class named as
-    -- the index page does not replace the index
     check(has(index, "| FKShape | NSObject | 1 | 0 | 1 | [FKShape.md](FKShape.md) |"), "a class of the name of a protocol keeps <Name>.md")
     check(has(index, "| FKShape | transcribed | 1 | [FKShape.protocol.md](FKShape.protocol.md) |"), "the protocol of that name is <Name>.protocol.md")
     check(page_of(dir, "FKShape.md") ~= nil and has(page_of(dir, "FKShape.md"), "# FKShape (FixtureKit)"),
@@ -308,12 +270,10 @@ local function test_pages(check)
     check(has(swift_page, "- Whether an armv7 Swift module or runtime loads on iOS 6.1.3: only a device run can show it."),
           "the Swift page ends with the overlay needs")
 
-    -- a second run on the unchanged output writes nothing: the pages are compared before they are written
     local before = emit.count()
     check(cmd_doc.run({tree = tree, framework = FIXTURE, sdk = sdk, coordination = corpus, out = out}) == 0
           and emit.count() == before, "a second doc run on the same output writes no file")
 
-    -- a framework the extractor gives no rows for keeps the marked text
     doc_text.use(function() return nil end)
     check(cmd_doc.run({tree = tree, framework = FIXTURE, sdk = sdk, coordination = corpus, out = out_marked}) == 0,
           "doc --all with no doc rows succeeds")
@@ -328,7 +288,6 @@ local function test_pages(check)
     check(has(marked_protocol, "## Header comments\n\n- not derived: the extractor does not run for this framework\n"),
           "without doc rows the protocol's header comments are marked, not derived")
 
-    -- an extractor that is not built is an error, not marked text: the tree has no tools/found project to build it from
     doc_text.use(nil)
     local raised = false
     try {
@@ -343,7 +302,6 @@ local function test_pages(check)
     }
     check(raised, "a doc run with no built extractor raises: the pages do not take marked text for it")
 
-    -- the page names are a function of the entities, not of their order, and a name that cannot be made unique raises
     local pages = import("gen.pages", {rootdir = TOOLS, anonymous = true})
     local group = {{kind = "class", name = "Ab"}, {kind = "class", name = "aB"}, {kind = "protocol", name = "Ab"}, {kind = "class", name = "Zed"}}
     local reversed = {group[4], group[3], group[2], group[1]}

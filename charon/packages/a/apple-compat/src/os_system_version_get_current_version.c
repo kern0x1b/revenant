@@ -19,9 +19,6 @@ static void charon_resolve_system_version(void)
     charon_system_function(&charon_system_version, CHARON_LIBSYSTEM, "os_system_version_get_current_version");
 }
 
-/* The release's own record of its version: the ProductVersion of SystemVersion.plist, which Swift's runtime read below iOS 8
-   (stdlib/public/stubs/Availability.mm up to swift-5.0) and compiler-rt's check for #available reads where the release has
-   no _availability_version_check (lib/builtins/os_version_check.c). */
 static int charon_version_from_plist(struct os_system_version_s *version)
 {
     FILE *file = fopen("/System/Library/CoreServices/SystemVersion.plist", "rb");
@@ -59,8 +56,6 @@ static int charon_version_from_plist(struct os_system_version_s *version)
     return answered;
 }
 
-/* os_system_version_get_current_version arrived in iOS 10, where the system's answers; before it the version is read from the
-   file the system's own answer comes from. */
 __attribute__((visibility("hidden")))
 int charon_os_system_version_get_current_version(struct os_system_version_s *version)
 {

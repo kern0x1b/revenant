@@ -1,28 +1,12 @@
--- registry_json.lua - the JSON the registry files are made of, read and written the way Python's json
--- module does it: json.load on the text, and json.dump(value, handle, indent=1) with ensure_ascii.
---
--- Python dicts keep their insertion order and json.dump writes the keys in that order, so an object here
--- is a Lua table whose string keys are its fields, and whose key order is kept beside it in a table that
--- maps the object to its keys. An object is therefore made with new_object (or read with parse_tree), and
--- a table without a key order is an array. Values are strings, arrays, objects, booleans, numbers and
--- null (null() is a sentinel, because a Lua table cannot hold nil). The registry files hold strings,
--- arrays and objects only; the other kinds are here so a parse of any valid document does not fail.
---
--- A malformed document is a Python exception in json.load, so it fails with the exit status of an
--- uncaught exception (1), through vtlib's fail.
-
 local V = import("vtlib", {rootdir = os.scriptdir()})
 
--- object table -> its keys, in order
 local KEYS_OF = {}
--- the sentinel for JSON null
 local NULL = {}
 
 function null()
     return NULL
 end
 
--- An object from { {key, value}, ... }, in that order.
 function new_object(pairs_list)
     local obj = {}
     local keys = {}
@@ -34,12 +18,9 @@ function new_object(pairs_list)
     return obj
 end
 
--- The keys of an object, in order.
 function object_keys(obj)
     return KEYS_OF[obj]
 end
-
--- Parses a JSON document. The positions are 1-based byte indices into text.
 
 local function fail_at(text, i, what)
     V.fail("json.JSONDecodeError: " .. what .. " at char " .. (i - 1) .. " of document of " .. #text .. " bytes")
@@ -64,7 +45,6 @@ local function hex4(text, i)
     return tonumber(digits, 16)
 end
 
--- The string beginning at the '"' at i: returns its bytes and the index after the closing quote.
 local function parse_string(text, i)
     local out = {}
     local j = i + 1
@@ -198,7 +178,6 @@ parse_value = function(text, i)
     fail_at(text, i, "Expecting value")
 end
 
--- The value of a JSON document held in text, as json.loads gives it.
 function parse_tree(text)
     local value, j = parse_value(text, skip(text, 1))
     j = skip(text, j)
@@ -208,10 +187,6 @@ function parse_tree(text)
     return value
 end
 
--- Writes: json.dump(value, handle, indent=1), without the newline the caller adds.
-
--- A string as json.dumps writes it with ensure_ascii: escapes, and \uXXXX for every byte outside
--- space to tilde, with a surrogate pair for a code point above 0xFFFF.
 local SIMPLE_ESCAPE = {
     [34] = '\\"', [92] = "\\\\", [8] = "\\b", [12] = "\\f", [10] = "\\n", [13] = "\\r", [9] = "\\t",
 }
@@ -269,7 +244,6 @@ end
 
 local encode_value
 
--- The text of a value at nesting level `level`, with the indent Python's indent=1 uses.
 encode_value = function(value, level)
     if value == NULL then
         return "null"
@@ -305,7 +279,6 @@ encode_value = function(value, level)
     return "[\n" .. table.concat(parts, ",\n") .. "\n" .. outer .. "]"
 end
 
--- The document text json.dump(value, handle, indent=1) writes.
 function write_tree(value)
     return encode_value(value, 0)
 end

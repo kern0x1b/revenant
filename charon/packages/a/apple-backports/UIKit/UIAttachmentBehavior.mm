@@ -1,10 +1,5 @@
 #import "CharonDynamics.h"
 
-// 7.0's attachment is a distance joint between the item and a static anchor body or a second item,
-// with its anchors in the items' own axes; a rigid anchor attachment shorter than 1 pt, whose length
-// was never set, becomes a pin at the anchor instead. The joint is built at the distance the anchors
-// are at, and a length set afterwards takes over on the next turn of the main queue (7.0; the host
-// applies it at once). The 9.0 factories build a weld, a pin, a slider or a rope, measured on the host.
 typedef NS_ENUM(NSInteger, CharonAttachmentKind) {
     CharonAttachmentDistance,
     CharonAttachmentFixed,
@@ -114,15 +109,9 @@ enum {
     behavior->_anchorPoint = point;
     behavior->_axis = axis;
     behavior->_attachmentRange = (UIFloatRange){-INFINITY, INFINITY};
-    // The private type is 1, the public attachedBehaviorType stays Items as for every other initializer: the host
-    // answers 0 for this factory (tests/backports/host/dynamics structure T12), where the specification had read 1
-    // (facts/UIKit/UIDynamicAnimator.md §6.4).
     return behavior;
 }
 
-// The rope's limit is the distance of its anchors when the joint is made, not at the factory: the factory keeps the
-// centres' distance as the length it answers until then (facts/UIKit/UIDynamicAnimator.md M4). The offsets are the
-// host's: negated, in the reference view's axes (facts/UIKit/UIDynamicAnimator.md §6.4).
 + (instancetype)limitAttachmentWithItem:(id<UIDynamicItem>)item offsetFromCenter:(UIOffset)offset attachedToItem:(id<UIDynamicItem>)other offsetFromCenter:(UIOffset)otherOffset
 {
     UIAttachmentBehavior *behavior = [[self alloc] charon_initWithItems:@[item, other] kind:CharonAttachmentLimit type:0];
@@ -171,7 +160,6 @@ enum {
     return _anchorBody ? _anchorBody.position : _anchorPoint;
 }
 
-// The anchor body moves; the joint and its rest length stay.
 - (void)setAnchorPoint:(CGPoint)point
 {
     if (CGPointEqualToPoint(point, self.anchorPoint))
@@ -252,7 +240,6 @@ enum {
     return _frictionTorque;
 }
 
-// A pin's friction is a motor held at speed 0 with this much torque; no other kind has one (host).
 - (void)setFrictionTorque:(CGFloat)torque
 {
     if (_kind != CharonAttachmentPin || torque == _frictionTorque)
@@ -268,7 +255,6 @@ enum {
     return _attachmentRange;
 }
 
-// A pin's range is in radians, a slider's in points; the other kinds have none (host).
 - (void)setAttachmentRange:(UIFloatRange)range
 {
     if (_kind != CharonAttachmentPin && _kind != CharonAttachmentSliding)
@@ -331,7 +317,6 @@ enum {
     _joint = NULL;
 }
 
-// -[UIAttachmentBehavior _reevaluateJoint] (7.0), and the joints of the 9.0 factories.
 - (void)charon_reevaluateJoint
 {
     UIDynamicAnimator *context = [self charon_context];

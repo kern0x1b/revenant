@@ -8,8 +8,6 @@ static void charon_resolve_ffsll(void)
     charon_system_function(&charon_system_ffsll, CHARON_LIBSYSTEM_PLATFORM, "ffsll");
 }
 
-/* The index, counted from 1, of the least significant set bit of the mask, and 0 for a mask with no bit set. iOS 7.0.6 has
-   ffsll in libsystem_platform, and the held releases before it (6.1.6 and below) have none, so the system's answers when it is there. */
 __attribute__((visibility("default")))
 int ffsll(long long mask)
 {

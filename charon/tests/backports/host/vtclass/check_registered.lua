@@ -1,30 +1,3 @@
--- check_registered.lua - The stand-in for what modules/apple/backports.lua:1811 prints in the gate.
---
---     xmake l check_registered.lua [--control]
---
--- A MAIN script: xmake calls main(...). Port of check-registered.py.
---
--- It answers one question with two halves, over the DELIVERY's own files: every class the VideoToolbox
--- value files implement, and every selector and property they implement, against the rows the registry
--- records. Then it prints
---
---     built, but no entry in registry   the .m files export a name the registry does not record
---     registered, but not built         the registry records a name no .m file exports
---
--- The first is the one the gate fails on, and for this family it was the whole family: sixteen VT*.m files
--- and zero rows. The second is the mirror of it, because a row for a member nobody implements is a row
--- that will stop describing the code the day it is deleted.
---
--- THIS IS A STAND-IN, not the gate. It reads the same two sides the gate reads - the symbols the built
--- objects carry and the rows in the registry json - and it cannot do what the gate does: it does not link
--- the dylib, so it compares NAMES and not whether the linker agrees. A name here that is not a real
--- definition would be caught by the gate, not by this.
---
--- --control copies the registry to a scratch directory under .agent-work, DELETES one row, and requires
--- this script to name the member that row described. A check that cannot be made to fail is not a check.
---
--- Needs no SDK: every input is in the worktree (the port's header, the value files and the registry).
-
 local M = import("members", {rootdir = os.scriptdir()})
 local V = import("vtlib", {rootdir = os.scriptdir()})
 local S = import("pystr", {rootdir = os.scriptdir()})
@@ -34,7 +7,6 @@ local function REGISTRY()
     return M.WORKTREE() .. "/packages/a/apple-backports/registry/VideoToolbox"
 end
 
--- Python's open(path).read() for a file that must exist: a missing file is an uncaught exception (exit 1).
 local function read_checked(path)
     if not os.isfile(path) then
         V.fail("FileNotFoundError: [Errno 2] No such file or directory: '" .. path .. "'")
@@ -42,10 +14,6 @@ local function read_checked(path)
     return V.read_text(path)
 end
 
--- Python: re.findall(r'^@implementation\s+(\w+)', text, re.M), as a list of names.
--- Hand-matched: each "@implementation" that opens a line (position 1, or just after a "\n"), then one or
--- more whitespace bytes (\s takes newlines too), then the maximal word run, which must hold a byte.
--- findall resumes after the word.
 local function implementation_names(text)
     local names = {}
     local start = 1
@@ -73,9 +41,6 @@ local function implementation_names(text)
     return names
 end
 
--- Python's built_names(): (entries, accessors). entries is the set of (kind, registry name) the value
--- files' classes carry, from members_of(); it is returned as a map keyed by kind and name, with the
--- {kind, name} pair as the value.
 local function built_names()
     local classes = {}
     local paths = V.sort_bytes(os.files(M.VT_DIR() .. "/*.m"))
@@ -98,8 +63,6 @@ local function built_names()
     return entries, accessors
 end
 
--- Python's registered_names(registry_dir): every api the registry records, split by its kind, as sets
--- (maps from api to true). A row without an api is recorded as "", as row.get("api", "") gives.
 local function registered_names(registry_dir)
     local out = {class = {}, method = {}, property = {}}
     local paths = V.sort_bytes(os.files(registry_dir .. "/*.json"))
@@ -117,11 +80,9 @@ local function registered_names(registry_dir)
     return out
 end
 
--- Python's bare(name): a selector with its parentheses and its leading sign, and a property with its class.
 local function bare(name)
     name = S.strip(name)
     if S.starts_with(name, "-[") or S.starts_with(name, "+[") then
-        -- head, _, rest = name[2:].partition(" "); "%s %s" % (head, rest.rstrip("]"))
         local inner = string.sub(name, 3)
         local space = string.find(inner, " ", 1, true)
         local head, rest
@@ -139,13 +100,10 @@ local function bare(name)
     return name
 end
 
--- The part of a string before its first ':', as Python's s.split(":")[0].
 local function before_colon(text)
     return (string.match(text, "^([^:]*)"))
 end
 
--- Python's report(label, lines): prints the count and the first twenty lines in sorted order, and returns
--- the number of lines.
 local function report(label, lines)
     if #lines == 0 then
         print("  " .. label .. ": nothing")
@@ -166,7 +124,6 @@ local function report(label, lines)
     return #lines
 end
 
--- The built entries as {kind, name} pairs sorted by kind and then name (Python's sorted(set of tuples)).
 local function sorted_pairs(map)
     local list = {}
     for _, pair in pairs(map) do
@@ -181,7 +138,6 @@ local function sorted_pairs(map)
     return list
 end
 
--- The registry's rows as {kind, api} pairs sorted by kind and then api.
 local function sorted_registry_pairs(registry)
     local list = {}
     for kind, set in pairs(registry) do
@@ -198,11 +154,6 @@ local function sorted_registry_pairs(registry)
     return list
 end
 
--- The number of initialisers the header declares, counted a second way: grep-like, with no reference to
--- members.lua. Python: len(re.findall(r'^[+-]\s*\([^)]*instancetype[^)]*\)\s*init\w*[:\w]*', header, re.M)).
--- Hand-matched: each sign that opens a line; then '(' after whitespace; the text up to the FIRST ')' must
--- contain "instancetype"; then whitespace, then "init", then the maximal run of word bytes and ':' (the
--- \w* and [:\w]* together). findall resumes after that run.
 local function initialiser_count(text)
     local count = 0
     local i = 1
@@ -281,7 +232,6 @@ function main(...)
         end
     end
 
-    -- A SECOND COUNT, INDEPENDENT of members_of(): grep over the header, the same question by another rule.
     local header = read_checked(M.VT_DIR() .. "/CharonVideoToolbox.h")
     local grepped = initialiser_count(header)
     local declared = V.count_entries(registry.method)
@@ -292,9 +242,6 @@ function main(...)
         os.exit(1)
     end
 
-    -- THE TWO CHEAP CHECKS, on a selector's SHAPE: a row that is a strict prefix of another selector of the
-    -- same class has its argument list cut short, and a selector with a colon that does not end in one is
-    -- cut off mid-keyword.
     local problems = {}
     local method_rows = V.sorted_keys(registry.method)
     for _, api in ipairs(method_rows) do
@@ -362,8 +309,6 @@ function main(...)
                 scratch_registered[kind .. "\0" .. api] = true
             end
         end
-        -- the comparison is RE-RUN against the scratch copy, because asserting that the row is absent from
-        -- the copy I deleted it from proves nothing
         local scratch_missing = {}
         for _, pair in ipairs(built_list) do
             if not scratch_registered[pair[1] .. "\0" .. pair[2]] then

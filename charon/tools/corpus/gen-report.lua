@@ -1,10 +1,3 @@
--- Generate the corpus deliverable: corpus-report.md and the per-band TSVs, from store.json.
--- Unions Katabasis's cleaned `class` rows (absent/*.absent.tsv) as a cross-check column. Run after a full re-ingest.
---
--- usage: xmake l tools/corpus/gen-report.lua
---
--- The punctuation the report prints (dashes, arrows, minus) is written as \u{...} escapes, so this file is ASCII
--- and the report keeps its bytes.
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 import("aggregate", {rootdir = os.scriptdir()})
 
@@ -16,7 +9,6 @@ local built, built_canon = aggregate.load_built_exports()
 local DROP = path.join(CORPUS, "absent")
 local is_gap = aggregate.is_gap
 
--- Katabasis class rows per app (cleaned system-only)
 local kata = {}
 if os.isdir(DROP) then
     for _, file in ipairs(os.files(path.join(DROP, "*.absent.tsv"))) do
@@ -35,7 +27,6 @@ end
 
 local apps = byteorder.keys(store.apps)
 
--- The demand of every app, one row per (category, kind, name, framework, band), in the order first seen.
 local order, by_key = {}, {}
 for _, app in ipairs(apps) do
     for _, r in ipairs(store.apps[app].demand) do
@@ -63,7 +54,6 @@ local function count(set)
     return n
 end
 
--- Every row's status, computed once: the registry is read through the same rule as every other tool.
 for _, e in ipairs(order) do
     e.status = aggregate.carried_status(reg, e.kind, e.name, e.framework)
     e.nstrong, e.napps = count(e.strong), count(e.apps)
@@ -106,8 +96,6 @@ local function full_symbol(kind, name)
     return name
 end
 
--- The rows of one band in report order: gaps first, then carried, then n/a-A5; more strong imports first,
--- then more apps; then framework, name and first appearance. The composite key is compared in byte order.
 local function ranked(rows, rank)
     local keyed = {}
     for _, row in ipairs(rows) do
@@ -122,8 +110,6 @@ local function ranked(rows, rank)
     return out
 end
 
--- The lumped "13+" band is split into 13-16 vs 17-18 using the 16.0 cache (no 14/15 cache to isolate 13-14
--- exactly; consumers filter to their window with their own introduced-version data).
 local function write_band_files()
     local in16 = load_cache_set("16.0")
     local buckets, bucket_order = {}, {}
@@ -149,7 +135,6 @@ local function write_band_files()
         local file = assert(io.open(path.join(CORPUS, "band-" .. ob .. ".tsv"), "w"))
         file:write("strong\tapps\tblocker\tcarried\tframework\tkind\tname\tapplist\n")
         for _, row in ipairs(rows) do
-            -- launch-blocker: a strong (hard-linked) import the band does not export => dyld aborts pre-main
             local blocker = aggregate.launch_blocks(row.nstrong, row.status, row.kind, row.name, built) and "LAUNCH-BLOCK" or ""
             file:write(string.format("%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\n", row.nstrong, row.napps, blocker, row.status,
                 row.framework, row.kind, row.name, table.concat(byteorder.keys(row.apps), ",")))
@@ -158,7 +143,6 @@ local function write_band_files()
     end
 end
 
--- The most-apps-first gaps in the given bands: strong imports first, then apps, band, framework, name.
 local function top_rows(bands, n)
     local rows = {}
     for _, e in ipairs(order) do
@@ -218,7 +202,6 @@ function main()
         w(string.format("| %s | %s | %d | %d | %d |\n", b, aggregate.band_route(b), g7[b] or 0, c7[b] or 0, n7[b] or 0))
     end
     w(string.format("| **7" .. EN .. "12 total** | | **%d** | **%d** | **%d** |\n", sum(g7, BANDS_7_12), sum(c7, BANDS_7_12), sum(n7, BANDS_7_12)))
-    -- launch-blocker tally: strong imports the 6.1.3 band does not export, which abort dyld pre-main
     local lb = {}
     for _, e in ipairs(order) do
         if e.cat == "FRAMEWORK" and BAND_SET_7_12[e.band] then

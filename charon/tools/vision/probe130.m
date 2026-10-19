@@ -1,8 +1,3 @@
-// The 13.0 API this slice carries, measured against the system's own Vision: which image each
-// answer comes from, the truth table of +revision:supportsConstellation:, what VNElementTypeSize
-// answers for every argument, the two animal identifiers' values, whether the progress protocol is
-// reachable by name, and each request's own revision table. A name this Vision does not carry is the
-// control: a reader that cannot find one cannot read a zero.
 #import <Foundation/Foundation.h>
 #import <Vision/Vision.h>
 #import <objc/runtime.h>
@@ -61,9 +56,6 @@ int main(void)
            yesno([text conformsToProtocol:@protocol(VNRequestProgressProviding)]));
     printf("VNRecognizeTextRequest indeterminate = %s\n", yesno(text.indeterminate));
 
-    // The three methods these three observation classes declare over NSObject or themselves, asked
-    // of a fresh instance of each: what a class with nothing in it answers. The port's objects of
-    // the same three classes are held to the same records by tools/vision/conforms130.m.
     {
         VNRecognizedText *word = [[VNRecognizedText alloc] init];
         NSError *error = nil;
@@ -91,8 +83,6 @@ int main(void)
                ([print_ respondsToSelector:@selector(computeDistance:toFeaturePrintObservation:error:)]
                     ? "responds" : "no selector"));
 
-        // The three selectors spelled as the runtime holds them, so that a "no selector" above can
-        // be told apart from a spelling this host's Vision has moved on from.
         for (Class cls in @[[VNRecognizedText class], [VNRecognizedTextObservation class],
                             [VNFeaturePrintObservation class]]) {
             unsigned int count = 0;
@@ -103,10 +93,6 @@ int main(void)
             printf("\n");
         }
 
-        // Which of these five classes hands back an object from alloc/init at all. A class that
-        // does not makes every question above a question to nil, and nil answers 0, NO and nil --
-        // so this line is what tells a real answer from a nil one, and the name that is no class
-        // is the control for the reader.
         for (Class cls in @[[VNRecognizedText class], [VNRecognizedTextObservation class],
                             [VNFeaturePrintObservation class], [VNSaliencyImageObservation class],
                             [VNRecognizeTextRequest class]]) {
@@ -116,17 +102,12 @@ int main(void)
         printf("alloc/init %-34s %s\n", "VNNoClassOfThisName (the control)",
                NSClassFromString(@"VNNoClassOfThisName") ? "found" : "no class, nil either way");
 
-        // The three catalogue class methods these requests declare. Apple's own answers, so that
-        // what the port answers for them can be read against a real one and not against a memory.
         for (NSUInteger revision = 1; revision <= 3; revision++) {
             error = nil;
             NSArray *classes = [VNClassifyImageRequest knownClassificationsForRevision:revision error:&error];
             printf("knownClassificationsForRevision:%lu = %lu name(s), error = %s\n", (unsigned long)revision,
                    (unsigned long)classes.count,
                    error ? [NSString stringWithFormat:@"%@ %ld", error.domain, (long)error.code].UTF8String : "none");
-            // The list itself is thousands of names long and is not printed: the count is the whole
-            // of what a port that carries no classifier can be compared against, and a reader who
-            // wants the names asks Vision for them.
             if (classes.count)
                 printf("    the first is \"%s\" and the last is \"%s\"\n",
                        [classes.firstObject identifier].UTF8String,

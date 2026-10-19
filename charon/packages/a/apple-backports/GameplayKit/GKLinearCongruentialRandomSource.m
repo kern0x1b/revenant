@@ -1,10 +1,3 @@
-// GKLinearCongruentialRandomSource.m - the seeded linear congruential source.
-//
-// NOT the release's transition, and the ledger says so: recovering (a, c) from the host's own
-// consecutive outputs gives a=3096923468 c=3630308989, which predicts a fourth draw the host
-// contradicts, so the release's state transition is not x = a*x + c over the full 32 bits.  Neither
-// classic matches either (1664525/1013904223 and glibc's 1103515245/12345, both measured).  Carried:
-// the glibc multiplier and increment over the low 32 bits, seeded the way the header's -init does (1).
 #import "CharonGKRandomCommon.h"
 #import <GameplayKit/GameplayKit.h>
 

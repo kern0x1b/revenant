@@ -2,11 +2,6 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-// A submesh is one index range of a mesh together with what its faces are made of and the material
-// they are drawn with. Its index buffer is read at the depth it declares, and asking for it at
-// another depth re-reads it into a new buffer rather than reinterpreting the bytes in place, which
-// is what a 16-bit and a 32-bit index mean by the same number.
-
 static NSUInteger CharonMDLIndexSize(MDLIndexBitDepth depth)
 {
     switch (depth) {
@@ -91,11 +86,7 @@ static NSUInteger CharonMDLIndexSize(MDLIndexBitDepth depth)
     NSUInteger from = CharonMDLIndexSize(_indexType), to = CharonMDLIndexSize(indexType);
     if (!from || !to || !_indexBuffer)
         return nil;
-    // Every index of the submesh, read at the depth it is stored at and written at the one asked for.
     NSUInteger wanted = to * _indexCount;
-    // A buffer that came from a zone or an allocator of its own is re-read through it; one that came
-    // from a caller with neither is re-read into a buffer of the port's own, because the indices are
-    // there to be read either way.
     id<MDLMeshBuffer> buffer = [_indexBuffer.allocator newBuffer:wanted type:MDLMeshBufferTypeIndex];
     if (!buffer)
         buffer = [[MDLMeshBufferData alloc] initWithType:MDLMeshBufferTypeIndex length:wanted];
@@ -130,8 +121,6 @@ static NSUInteger CharonMDLIndexSize(MDLIndexBitDepth depth)
 
 @end
 
-// The topology of a submesh is the subdivision structure above its faces: the creases and the holes
-// that cut it. Each of those is an index buffer of its own with a count beside it.
 @implementation MDLSubmeshTopology {
     id<MDLMeshBuffer> _faceTopology;
     NSUInteger _faceCount;
@@ -160,8 +149,6 @@ static NSUInteger CharonMDLIndexSize(MDLIndexBitDepth depth)
 {
     if ((self = [super init])) {
         _faceTopology = submesh.indexBuffer;
-        // The faces of a submesh are its faces, not its indices: three of a triangle, four of a
-        // quad, and one index each for the topologies that are not made of faces.
         switch (submesh.geometryType) {
             case MDLGeometryTypeTriangles:
             case MDLGeometryTypeTriangleStrips:

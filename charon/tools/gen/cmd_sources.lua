@@ -1,10 +1,6 @@
--- `sources`: prints the sources the generator reads and the open-source leads it may read as references, as aligned tables
--- (the README of each framework takes the same rows from tools/gen/sources.lua).
-
 local sources = import("sources", {anonymous = true})
 local sdk = import("sdk", {anonymous = true})
 
--- Prints rows as a table: every cell padded to the widest cell of its column, the columns joined by " | ".
 local function print_table(rows, columns)
     local width = {}
     for column = 1, columns do
@@ -22,7 +18,6 @@ local function print_table(rows, columns)
     end
 end
 
--- Returns the exit status.
 function run(args)
     assert(args.sdk, "sources needs --sdk: the iPhoneOS SDK whose release names the rows")
     local rows = {{"source", "kind", "licence", "loader", "status", "adds"}}

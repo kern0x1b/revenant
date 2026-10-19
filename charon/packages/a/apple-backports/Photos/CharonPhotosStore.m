@@ -88,8 +88,6 @@ static NSString *const CharonPhotosErrorDomain = @"PHPhotosErrorDomain";
     return status == ALAuthorizationStatusAuthorized || status == ALAuthorizationStatusNotDetermined;
 }
 
-// nil, with the library's error, when the release refuses the enumeration: a denied or restricted application, or a
-// library whose data is unavailable.
 + (NSArray *)groupsOfTypes:(ALAssetsGroupType)types error:(NSError **)error
 {
     __block NSMutableArray *groups = [NSMutableArray array];
@@ -196,8 +194,6 @@ static NSString *const CharonPhotosErrorDomain = @"PHPhotosErrorDomain";
         return @[];
     NSError *error = nil;
     NSArray *groups = [self groupsOfTypes:types error:&error];
-    // A fetch has no way to report an error: the result is empty, as it is for an application that may not read, and the
-    // refusal is said in the log.
     if (!groups)
         NSLog(@"Photos: the photo library refused to list its albums, so the fetch is empty: %@", error);
     NSMutableArray *found = [NSMutableArray array];

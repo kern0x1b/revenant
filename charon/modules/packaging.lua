@@ -96,7 +96,6 @@ function write(opt)
             os.tryrm(stage)
             local depends = {}
             for _, target in ipairs(described.targets) do
-                -- What the program links against is read from the program, so it is built first.
                 task.run("build", {target = target:name()})
                 local dependencies = {}
                 local backports, shared = platform.backport_package(target), platform.shared_runtime(target)
@@ -111,8 +110,6 @@ function write(opt)
                         local outputdir = opt.outputdir or config.builddir()
                         local copied
                         if dependency.meta then
-                            -- A package of the shared runtime is written here and signed with the program's own ldid: the
-                            -- recipe that staged it has no ldid, whose dependencies would reach every package depending on it.
                             copied = import("apple.shared_runtime").deb(dependency.meta, dependency.root, platform.ldid(target),
                                                                         path.join(config.builddir(), ".charon", "shared", dependency.name), outputdir)
                         else

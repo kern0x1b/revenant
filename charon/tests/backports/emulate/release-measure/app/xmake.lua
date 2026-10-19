@@ -1,8 +1,5 @@
 set_project("charonreleasemeasure")
 set_version("0.0.1")
--- The release measurement of tests/backports/emulate/release-measure: an application that links only the 6.1.3 release's own
--- frameworks (no apple-backports package), so its answers are the release's, not the port's. Every class it names is looked up
--- at run time, so a class the release lacks answers nil instead of failing the load.
 local root = os.getenv("CHARPHOTOBRACKET_ROOT") or path.join(os.scriptdir(), "../../../../..")
 add_repositories("charon " .. root)
 add_addons("charon v0.8.17")

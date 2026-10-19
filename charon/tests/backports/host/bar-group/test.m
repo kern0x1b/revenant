@@ -1,10 +1,6 @@
 #import <UIKit/UIKit.h>
 #include <stdio.h>
 
-// UIBarButtonItemGroup's storage for alwaysAvailable, menuRepresentation and hidden, checked on the same values in two processes: the
-// host's classes in one, and the port's (renamed by run.sh, so this file's names mean the port's classes in that build) in the other. Each
-// line is "check<TAB>value"; the two outputs must match line for line.
-
 static void report(const char *check, NSString *value)
 {
     printf("%s\t%s\n", check, value ? [value UTF8String] : "nil");
@@ -43,7 +39,6 @@ int main(void)
         group.hidden = NO;
         report("group-hidden-cleared", yes_no(group.isHidden));
 
-        // The menu representation is copied on set, as the header says: a change to the menu afterwards does not reach the group.
         UIMenu *menu = [UIMenu menuWithTitle:@"menu" children:@[]];
         group.menuRepresentation = menu;
         report("group-menu-same-object", yes_no(group.menuRepresentation == menu));
@@ -51,7 +46,6 @@ int main(void)
         group.menuRepresentation = nil;
         report("group-menu-cleared", group.menuRepresentation ? @"set" : @"nil");
 
-        // The three values are independent of the items and of each other.
         group.menuRepresentation = menu;
         group.alwaysAvailable = YES;
         group.hidden = YES;

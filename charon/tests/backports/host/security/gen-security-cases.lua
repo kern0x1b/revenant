@@ -1,9 +1,3 @@
--- gen-security-cases.lua - generates cases.m from the names list, so a constant cannot go unasked. --check says whether the file
--- on disk is what the list says. The 18 are the kSecKeyAlgorithm constants; their VALUES are measured on the host and are not in
--- this file, which is the point: a name is not a value.
---
---    xmake l gen-security-cases.lua [--check]
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
 local function render(names)

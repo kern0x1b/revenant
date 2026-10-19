@@ -2,12 +2,6 @@
 #import <QuartzCore/QuartzCore.h>
 #include <notify.h>
 
-// The other side of CharonCallScreen (CallKit/CharonCallScreen.m, libCallKitBackports.dylib): that side is the
-// application's, filed into a process no library can draw SpringBoard's own screen from; this side is SpringBoard's,
-// and is what actually raises the screen and turns what the person does with it back into the same file-and-notification
-// protocol the application already answers. Neither side knows the other library's source, only the wire: a folder both
-// may reach, a Darwin notification that carries nothing, and a file that carries the call.
-
 static NSString *const charon_call_screen_folder = @"/var/mobile/Library/Caches/org.charon.callkit";
 static const char *const charon_call_incoming = "org.charon.callkit.incoming";
 static const char *const charon_call_ended = "org.charon.callkit.ended";
@@ -42,8 +36,6 @@ static NSString *charon_call_file(NSString *name)
     return shared;
 }
 
-// Built once, on the first call this process is ever shown: nothing about the window depends on which call it is
-// showing, only the two labels and whether it is on screen do.
 - (void)makeWindow
 {
     if (_window)
@@ -102,9 +94,6 @@ static NSString *charon_call_file(NSString *name)
     [_window makeKeyAndVisible];
 }
 
-// The application ending the call for a reason of its own - a timeout, a cellular interruption, the caller hanging up
-// first - takes the screen down exactly as answering or declining does; only the reply this side owes back is different,
-// which here is none, since the application already knows why.
 - (void)ended
 {
     _UUID = nil;

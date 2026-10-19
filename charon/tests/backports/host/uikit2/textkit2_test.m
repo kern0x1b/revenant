@@ -1,19 +1,11 @@
-// The range layer of TextKit 2 beside the host's own UIKit, in one process: the backport's classes are renamed
-// by uikit2/run.sh, so each case asks the port and the system the same question and holds the answers to each
-// other. What is compared is what facts/UIKit/NSTextRange15.md records, so a change in either is a failure here
-// rather than a difference noticed later.
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 #import "check.h"
 
 #define NAMED(...) ([NSString stringWithFormat:__VA_ARGS__].UTF8String)
 
-// Three of the members under test are declared for iOS 16 and the harness builds for 15.0, which is the point:
-// the port carries them from 6.0 and the host has them, so asking is the case rather than a mistake.
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
-// A location over an offset, which is all NSTextLocation asks for, once for each side. The two sides are the
-// same class under two names, because the harness renames the port's classes and not the test's own.
 @interface RangeLayerLocation : NSObject <NSTextLocation>
 @property (nonatomic, readonly) NSInteger rangeOffset;
 - (instancetype)initWithRangeOffset:(NSInteger)offset;
@@ -51,9 +43,6 @@ static id<NSTextLocation> at(NSInteger offset)
     return [[RangeLayerLocation alloc] initWithRangeOffset:offset];
 }
 
-// The port's classes, as run.sh renames them, with the members the cases ask of them: the harness renames a
-// class but not a declaration in this file, so the two sides are two types and a case that forgets which is
-// which would not compile.
 @interface CharonHostNSTextRange : NSObject
 - (instancetype)initWithLocation:(id<NSTextLocation>)location;
 - (instancetype)initWithLocation:(id<NSTextLocation>)location endLocation:(id<NSTextLocation>)endLocation;
@@ -108,8 +97,6 @@ static id<NSTextLocation> at(NSInteger offset)
 @property (nullable, strong, readonly) NSTextRange *paragraphSeparatorRange;
 @end
 
-// The navigation object on the two sides. Its answers are all questions for a data source, so the cases below
-// ask only what it answers with none: what it says about itself, and what it does to a selection.
 @interface CharonHostNSTextSelectionNavigation : NSObject
 - (instancetype)initWithDataSource:(id)dataSource;
 - (instancetype)init;
@@ -175,9 +162,6 @@ static CharonHostNSTextSelection *port_pair(NSInteger from, NSInteger to, NSText
     return [[CharonHostNSTextSelection alloc] initWithRange:port_range(from, to) affinity:affinity granularity:granularity];
 }
 
-// A description with the addresses taken out of it, because the two sides are two objects in two heaps and an
-// address is the one part of a description that cannot be equal. What is left is the class, the formatting and
-// the values, which is what the cases are about.
 static NSString *described(id object)
 {
     if (!object)
@@ -221,8 +205,6 @@ static void compare_ranges(void)
     charon_check([systemEmpty containsLocation:at(3)] == [portEmpty containsLocation:at(3)],
                  "an empty range contains its own start, or neither does", @"the two sides disagree");
 
-    // Containment and intersection over a grid, because each is a rule about two ranges rather than about one
-    // and a single pair does not pin a rule down. The grid is the one facts/UIKit/NSTextRange15.md records.
     NSArray *bounds = @[ @0, @5, @10, @15, @20, @25 ];
     for (NSNumber *outerFrom in bounds) {
         for (NSNumber *outerTo in bounds) {
@@ -252,7 +234,6 @@ static void compare_ranges(void)
             }
         }
     }
-    // The empty range takes part in a union like any other, which is the case a rule that skipped it gets wrong.
     compare_text(described([systemA textRangeByFormingUnionWithTextRange:systemEmpty]),
                  described([portA textRangeByFormingUnionWithTextRange:portEmpty]),
                  @"0...10 with an empty range, unioned");
@@ -268,7 +249,6 @@ static void compare_ranges(void)
         charon_check([systemA isEqualToTextRange:system] == [portA isEqualToTextRange:port],
                      NAMED(@"0...10 isEqualToTextRange %@", described(system)), @"the two sides disagree");
     }
-    // The header types the argument nonnull, so it goes through an id to ask the question at all.
     id nothing = nil;
     charon_check([systemA isEqualToTextRange:nothing] == [portA isEqualToTextRange:nothing],
                  "isEqualToTextRange: nil is NO on both sides", @"one side says YES");
@@ -281,15 +261,10 @@ static void compare_ranges(void)
                  "both sides are an NSTextRange", @"one side is not");
     charon_check([systemA superclass] == [NSObject class] && [portA superclass] == [NSObject class],
                  "both sides derive from NSObject", @"one side does not");
-    // The host's own hash is not a function of the range's value: two equal ranges measured with different
-    // hashes. The port's is, and the check fails if the host ever starts making it consistent, so the divergence
-    // is noticed rather than copied.
     charon_check([systemA hash] != [system_range(0, 10) hash], "the host still hashes two equal ranges differently",
                  @"the host's hash is now by value");
     charon_check([portA hash] == [port_range(0, 10) hash], "the port hashes a range by its value",
                  @"two equal ranges on the port hash differently");
-    // Neither side's -init is an answer: the host faults and the port raises, which the case below holds to the
-    // port alone because the host cannot be asked in this process.
     charon_check(![systemA respondsToSelector:@selector(initWithCoder:)] && ![portA respondsToSelector:@selector(initWithCoder:)],
                  "neither side decodes a range", @"one side has an initWithCoder:");
     charon_check(![system_range_class() respondsToSelector:@selector(supportsSecureCoding)] &&
@@ -301,9 +276,6 @@ static void compare_ranges(void)
 
 static void compare_unavailable_initializers(void)
 {
-    // What the headers mark unavailable, held to the port alone: the host faults on all of them (M9), and a
-    // fault cannot be caught, so asking the host here would take the process down and lose the whole run. The
-    // host's answer is recorded from a separate process in facts/UIKit/NSTextRange15.md.
     @try {
         (void)[[port_range_class() alloc] init];
         charon_check(NO, "a port range refuses a bare -init", @"it made one");
@@ -331,7 +303,6 @@ static void compare_unavailable_initializers(void)
                      "a port navigation object refuses a bare -init and says which initialiser to use",
                      [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
     }
-    // +new is the same refusal, because it is +[NSObject new] sending -init.
     @try {
         (void)[port_range_class() new];
         charon_check(NO, "a port range refuses +new", @"it made one");
@@ -349,8 +320,6 @@ static void compare_unavailable_initializers(void)
     }
 }
 
-// The two answers a selection is asked that the host's own text for it is worth holding to, and the two the
-// header's comment and the system disagree about.
 static void compare_selections(void)
 {
     NSTextSelection *systemOne = [[NSTextSelection alloc] initWithRange:system_range(0, 5)
@@ -368,8 +337,6 @@ static void compare_selections(void)
     charon_check([systemOne isLogical] == [portOne isLogical], "neither side is logical to begin with", @"one side is");
     charon_check([systemOne anchorPositionOffset] == [portOne anchorPositionOffset], "the anchor offset starts at zero",
                  @"one side does not");
-    // The host answers nil for a selection that was never given any typing attributes, and an empty dictionary
-    // from the moment the setter is called at all (M6).
     charon_check(systemOne.typingAttributes == nil && [portOne typingAttributes] == nil,
                  "a selection with no typing attributes answers nil on both sides", @"one side answers a dictionary");
     id noAttributes = nil;
@@ -379,8 +346,6 @@ static void compare_selections(void)
                      systemOne.typingAttributes.count == 0 && [portOne typingAttributes].count == 0,
                  "and a setter handed nil leaves an empty dictionary on both sides", @"one side answers nil");
 
-    // The header says ranges handed in out of order or overlapping are normalised. The host keeps them, in the
-    // order it was given them, and the port does the same; the check fails if the host ever starts normalising.
     NSArray *messy = @[ system_range(20, 25), system_range(0, 10), system_range(5, 15) ];
     NSArray *portMessy = @[ port_range(20, 25), port_range(0, 10), port_range(5, 15) ];
     NSTextSelection *systemUntidy = [[NSTextSelection alloc] initWithRanges:messy
@@ -432,8 +397,6 @@ static void compare_selections(void)
     NSTextSelection *systemOther = [systemOne textSelectionWithTextRanges:@[ system_range(1, 2) ]];
     CharonHostNSTextSelection *portOther = [portOne textSelectionWithTextRanges:@[ port_range(1, 2) ]];
     compare_text(described(systemOther), described(portOther), @"a selection with new ranges, described");
-    // The copy carries the secondary location and the logical flag the selection had, so a copy of a logical
-    // selection with a secondary location is still logical (M7).
     charon_check(systemOther.isLogical == [portOther isLogical] && systemOther.isLogical,
                  "a copy of a logical selection with a secondary location is still logical", @"one side differs");
     charon_check([systemOther secondarySelectionLocation] != nil && [[portOther secondarySelectionLocation] isEqual:at(8)],
@@ -470,9 +433,6 @@ static void compare_selections(void)
                      systemCopied.typingAttributes.count == 1,
                  "the typing attributes are copied, not held", @"one side holds the caller's dictionary");
 
-    // Equality is by value on both sides, over the keys that were measured (M8). Each pair below is two
-    // separately made selections that agree on everything except the one key named, so each case says which key
-    // it is holding.
     NSTextSelection *systemEqual = system_pair(0, 5, NSTextSelectionAffinityDownstream,
                                                NSTextSelectionGranularityCharacter);
     CharonHostNSTextSelection *portEqual = port_pair(0, 5, NSTextSelectionAffinityDownstream,
@@ -521,7 +481,6 @@ static void compare_selections(void)
                      NAMED(@"two selections differing in %s are not equal", differing[index].key), @"one side says they are");
     }
 
-    // The host takes anything in the ranges array, including something that is not a range at all.
     NSTextSelection *systemForeign = nil;
     CharonHostNSTextSelection *portForeign = nil;
     @try {
@@ -563,10 +522,7 @@ static void compare_elements(void)
     charon_check(systemNone.attributedString == nil && [portNone attributedString] == nil,
                  "a paragraph made with no string keeps none on either side", @"one side has one");
 
-    // The two derived ranges are nil until the paragraph is in a document, and nothing this port carries yet
-    // makes one, so both sides answer nil - whatever the string, and whatever element range is set (M4).
     for (NSString *text in @[ @"Hello", @"Hello\n", @"Hello\r\n", @"\n", @"a\nb" ]) {
-        // A check name with a newline in it splits the log line in two, so the string under test is spelled out.
         NSString *spelled = [text stringByReplacingOccurrencesOfString:@"\r\n" withString:@"<CR><LF>"];
         spelled = [spelled stringByReplacingOccurrencesOfString:@"\n" withString:@"<LF>"];
         NSTextParagraph *system = [[NSTextParagraph alloc] initWithAttributedString:[[NSAttributedString alloc] initWithString:text]];
@@ -583,7 +539,6 @@ static void compare_elements(void)
                      NAMED(@"%@ derives no range even with an element range", spelled), @"one side derives one");
     }
 
-    // The base element: a represented element on both sides, no children, no parent, and a range it keeps.
     NSTextElement *systemElement = [[NSTextElement alloc] initWithTextContentManager:nil];
     CharonHostNSTextElement *portElement = [[CharonHostNSTextElement alloc] initWithTextContentManager:nil];
     charon_check([systemElement isRepresentedElement] == [portElement isRepresentedElement],
@@ -605,7 +560,6 @@ static void compare_elements(void)
     compare_text(described(systemElement), described(portElement), @"an element, described");
     charon_check(systemElement.textContentManager == nil && [portElement textContentManager] == nil,
                  "an element with no manager keeps none on either side", @"one side has one");
-    // An element is equal to itself and to nothing else, on both sides: identity is what the host answers.
     charon_check([systemElement isEqual:systemElement] && ![systemElement isEqual:[[NSTextElement alloc] initWithTextContentManager:nil]] &&
                      [portElement isEqual:portElement] && ![portElement isEqual:[[CharonHostNSTextElement alloc] initWithTextContentManager:nil]],
                  "an element is equal to itself and to no other element", @"one side is not");
@@ -613,18 +567,12 @@ static void compare_elements(void)
 
 static void compare_navigation(void)
 {
-    // Every answer in this class is a question for a data source, and nothing this port carries yet makes one,
-    // so what is compared here is the port against the header's rule and against the host's answer in the same
-    // state. The two differ, and the differences are held here rather than copied: each case checks what the
-    // port answers and, separately, that the host still answers the other thing, so a host that starts agreeing
-    // is noticed.
     id noDataSource = nil;
     NSTextSelectionNavigation *system = [[NSTextSelectionNavigation alloc] initWithDataSource:noDataSource];
     CharonHostNSTextSelectionNavigation *port = [[CharonHostNSTextSelectionNavigation alloc] initWithDataSource:noDataSource];
     charon_check(system != nil && port != nil, "a navigation object is made with no data source", @"one side is not");
     charon_check(system.textSelectionDataSource == nil && [port textSelectionDataSource] == nil, "and it holds none",
                  @"one side has one");
-    // The two flags start at the host's own values: allowed to make disjoint ranges, not rotating (M10).
     charon_check([system allowsNonContiguousRanges] && [port allowsNonContiguousRanges],
                  "both sides allow non-contiguous ranges to begin with", @"one side does not");
     charon_check(!system.rotatesCoordinateSystemForLayoutOrientation &&
@@ -661,8 +609,6 @@ static void compare_navigation(void)
                          NAMED(@"a movement over destination %ld in direction %ld is nil with no data source",
                                (long)destination, (long)direction),
                          @"the port answered a movement it could not make");
-            // The host hands the selection straight back, for every destination and direction. It is never made
-            // without a data source, so this is not an answer about a movement, and the port does not copy it.
             charon_check(systemMoved == systemCursor,
                          NAMED(@"the host still hands destination %ld direction %ld the selection back",
                                (long)destination, (long)direction),
@@ -675,15 +621,12 @@ static void compare_navigation(void)
                                                                direction:how
                                                              destination:where
                                                    allowsDecomposition:YES];
-            // What a delete removes with nothing to move over is nothing, and the range that comes back is the
-            // cursor's own, which is the 0-length range the header asks for afterwards.
             charon_check(portDeleted.count == 1 && systemDeleted.count == 1,
                          NAMED(@"a deletion over destination %ld in direction %ld removes the cursor's own range",
                                (long)destination, (long)direction),
                          @"one side answered something else");
         }
     }
-    // A selection with contents deletes itself whatever the destination is, which is the header's own rule.
     NSTextSelection *systemWith = system_pair(0, 5, NSTextSelectionAffinityDownstream,
                                               NSTextSelectionGranularityCharacter);
     CharonHostNSTextSelection *portWith = port_pair(0, 5, NSTextSelectionAffinityDownstream,
@@ -718,8 +661,6 @@ static void compare_navigation(void)
                                                             inContainerAtLocation:at(0)];
     charon_check(systemEnclosingPoint == nil && portEnclosingPoint == nil, "and there is no word to enclose it in",
                  @"one side found one");
-    // Around a selection the host answers the selection's own range, unexpanded; the port answers nil, because
-    // there are no boundaries to expand to and an unexpanded range would claim an expansion that did not happen.
     id systemEnclosingSelection =
         [system textSelectionForSelectionGranularity:NSTextSelectionGranularityWord enclosingTextSelection:systemCursor];
     id portEnclosingSelection =
@@ -728,9 +669,6 @@ static void compare_navigation(void)
                  @"the port claimed a range it could not expand to");
     charon_check(systemEnclosingSelection == systemCursor, "the host still answers the selection unexpanded",
                  @"the host now expands it");
-    // The insertion location is the header's own rule and the port follows it: the secondary location of a
-    // selection that is not logical, and nil otherwise. The host answers the selection's own location for a
-    // logical selection, which is held here as the divergence it is.
     for (NSInteger writing = 0; writing < 2; writing++) {
         id<NSTextLocation> systemBefore = [system resolvedInsertionLocationForTextSelection:systemCursor
                                                                           writingDirection:(NSTextSelectionNavigationWritingDirection)writing];
@@ -740,9 +678,6 @@ static void compare_navigation(void)
                      NAMED(@"a logical selection has no insertion location in writing direction %ld on the port",
                            (long)writing),
                      @"the port answered one");
-        // The host's own answer is the selection's own location for the left-to-right writing direction and nil
-        // for the right-to-left one, measured (M10). The port answers the header's rule instead, which is nil
-        // either way for a selection with no secondary location, and which is recorded rather than copied.
         id expected = writing == 0 ? at(4) : nil;
         charon_check((systemBefore == nil) == (expected == nil) && (expected == nil || [systemBefore isEqual:expected]),
                      NAMED(@"and the host still answers %@ in writing direction %ld",

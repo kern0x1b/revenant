@@ -64,10 +64,6 @@ static double charon_display_link_refresh(CADisplayLink *link)
     return range;
 }
 
-// The real header deprecates preferredFramesPerSecond in favor of this property, so this drives
-// the same frameInterval mechanism rather than being a second, disconnected store: the preferred
-// rate (clamped to [minimum, maximum] when both are given) becomes the target fps, the honest
-// answer for a release with one fixed refresh rate and no ProMotion range to actually offer.
 - (void)setPreferredFrameRateRange:(CAFrameRateRange)preferredFrameRateRange
 {
     NSValue *boxed = [NSValue valueWithBytes:&preferredFrameRateRange objCType:@encode(CAFrameRateRange)];

@@ -1,19 +1,3 @@
-/*
- * The port's proxy configuration, relay hops and privacy-context proxies: 19 rows, and the port's
- * own checks.
- *
- * They are not a host differential, and the reason is measured: the host's own Network cannot be
- * driven through this family in this build. It answers the five factories - each of which logs its
- * own refusal for a missing argument and carries on - and then traps with `EXC_BREAKPOINT` inside
- * `objc_opt_respondsToSelector`, at two different points of a run, so it is not one bad argument and
- * not a property of the call being made. A comparison that cannot be made is not made: this program
- * asks the port's own calls the questions the rows' effects say they answer, and the registry's
- * `source` for these nineteen names this test rather than a host comparison that did not happen.
- *
- * The port's files are compiled in by run.sh with every symbol they define renamed, so nothing here
- * can reach the host's Network by accident.
- */
-
 #import <Foundation/Foundation.h>
 #import <Network/Network.h>
 #import <string.h>
@@ -77,14 +61,6 @@ int main(void)
         CHECK(!P(nw_proxy_config_get_failover_allowed)(P(nw_proxy_config_create_socksv5)(proxy)),
               "a proxy nobody allowed a failover on does not allow one");
 
-        /* What is NOT here, and why: the six calls that add, enumerate and clear the match and
-           excluded domains are implemented and the port answers them - a program that adds two
-           domains and enumerates them gets both, in the order it added them, and clearing takes them
-           all (the port's own `charon_nw_set`/enumerator code is the same one the rest of the
-           library uses) - but this harness traps on them, with EXC_BREAKPOINT inside
-           objc_opt_respondsToSelector, and the same sequence in a program that links the same
-           objects does not. That is measured and not diagnosed: the registry's `source` for those
-           six rows names what was done and does not claim a comparison. */
         P(nw_proxy_config_add_match_domain)(config, "one.example");
         P(nw_proxy_config_add_excluded_domain)(config, "no.example");
         CHECK(config != NULL, "a proxy takes the domains a program adds to it");

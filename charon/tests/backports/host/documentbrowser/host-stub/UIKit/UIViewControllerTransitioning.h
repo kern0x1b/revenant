@@ -1,7 +1,3 @@
-// The stand-in for the header the SDK declares the transitioning protocol in. The port's class
-// conforms to it, so this file has to exist and has to declare the protocol with the two required
-// methods -- the SDK's real header is <UIKit/UIViewControllerTransitioning.h>, and a stub named
-// after the protocol rather than after the header it lives in is a file no build will ever find.
 #import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN

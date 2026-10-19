@@ -1,5 +1,3 @@
-// Host probe: what macOS CoreMIDI's MIDI-CI and MIDI-UMP classes answer for the shared managers, a value object, and
-// a client-created endpoint. Each line is one measured answer; nothing here is a value of the port.
 #import <CoreMIDI/CoreMIDI.h>
 #import <Foundation/Foundation.h>
 int main(void) {

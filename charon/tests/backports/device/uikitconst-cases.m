@@ -1,9 +1,6 @@
 #import <UIKit/UIKit.h>
 #import "uikitconst-cases.h"
 
-// The value of every exported string constant and the one dimension this backport carries, and what
-// a rotor answers for its name, its search block and the element it stops on. The host records these
-// and the device is held to them; a value that is not in this file is not carried at all.
 void uikitconst_run(UIKitConstantsRecorder record)
 {
     record(@"NSTextListMarkerBox", @"{box}");
@@ -51,8 +48,6 @@ void uikitconst_run(UIKitConstantsRecorder record)
     record(@"UIUserNotificationTextInputActionButtonTitleKey", @"UIUserNotificationTextInputActionButtonTitleKey");
     record(@"UIViewControllerShowDetailTargetDidChangeNotification", @"UIViewControllerShowDetailTargetDidChangeNotification");
     record(@"UISplitViewControllerAutomaticDimension", NSStringFromCGPoint(CGPointMake(UISplitViewControllerAutomaticDimension, 0)));
-    // What a string constant is, not only what it says: a constant an application compares with
-    // isEqualToString: must be an NSString and not a tagged pointer or some other object.
     record(@"NSTextListMarkerBox.class", NSStringFromClass([NSTextListMarkerBox class]));
     record(@"UIContentSizeCategoryDidChangeNotification.class", NSStringFromClass([UIContentSizeCategoryDidChangeNotification class]));
     record(@"UIActivityTypeAirDrop.isKindOfString", [UIActivityTypeAirDrop isKindOfClass:[NSString class]] ? @"yes" : @"no");
@@ -63,15 +58,10 @@ static UIAccessibilityCustomRotorItemResult *CharonRotorResult(id element)
     return [[UIAccessibilityCustomRotorItemResult alloc] initWithTargetElement:element targetRange:nil];
 }
 
-// A rotor holds a name, a search block and the type it was made for, and an item result holds the
-// element it stops on and the range inside it, weakly. The system rotor type defaults to None and
-// an item made by hand holds what it was given.
 void uikitrotor_run(UIKitConstantsRecorder record)
 {
     UIAccessibilityCustomRotorSearchPredicate *predicate = [[UIAccessibilityCustomRotorSearchPredicate alloc] init];
     record(@"predicate.currentItemAtStart", predicate.currentItem ? @"set" : @"nil");
-    // Previous is the first case of the enum, so a fresh predicate is searching backwards, not
-    // forwards: recorded by name in both directions so the case is unambiguous.
     record(@"predicate.directionAtStart", predicate.searchDirection == UIAccessibilityCustomRotorDirectionPrevious ? @"previous"
                                   : predicate.searchDirection == UIAccessibilityCustomRotorDirectionNext ? @"next" : @"other");
 
@@ -88,13 +78,11 @@ void uikitrotor_run(UIKitConstantsRecorder record)
     record(@"rotor.itemSearchBlock.isSet", rotor.itemSearchBlock ? @"yes" : @"no");
     record(@"rotor.systemRotorType", rotor.systemRotorType == UIAccessibilityCustomSystemRotorTypeNone ? @"none" : @"other");
 
-    // The block the rotor holds is the one it was given, and it is called with the predicate.
     rotor.itemSearchBlock ? rotor.itemSearchBlock(predicate) : (void)0;
     record(@"rotor.searchBlockCalls", [NSString stringWithFormat:@"%lu", (unsigned long)calls]);
     record(@"rotor.searchBlockSawThePredicate", seen == predicate ? @"same" : @"other");
     record(@"rotor.itemSearchBlock.isSet", rotor.itemSearchBlock ? @"yes" : @"no");
 
-    // The name and the attributed name are two faces of one thing, as the header says of them.
     rotor.name = @"Headings";
     record(@"rotor.nameAfterSet", rotor.name);
     record(@"rotor.attributedNameAfterNameSet", rotor.attributedName ? rotor.attributedName.string : @"(nil)");
@@ -122,7 +110,6 @@ void uikitrotor_run(UIKitConstantsRecorder record)
     predicate.searchDirection = UIAccessibilityCustomRotorDirectionPrevious;
     record(@"predicate.directionAfterSet", predicate.searchDirection == UIAccessibilityCustomRotorDirectionPrevious ? @"previous" : @"other");
 
-    // Every object can expose rotors, not only accessibility elements.
     NSObject *exposer = [[NSObject alloc] init];
     record(@"rotors.unset", exposer.accessibilityCustomRotors ? @"set" : @"nil");
     exposer.accessibilityCustomRotors = @[rotor, typed];
@@ -131,9 +118,6 @@ void uikitrotor_run(UIKitConstantsRecorder record)
     exposer.accessibilityCustomRotors = nil;
     record(@"rotors.afterClear", exposer.accessibilityCustomRotors ? @"set" : @"nil");
 
-    // A custom action's attributed name, which is the rotor's arrangement again on the other of the
-    // two objects an assistive technology is handed: a custom action is made with a name and this
-    // release's own carries one, so what the host answers for it is what the port answers for it.
     NSObject *actionTarget = [[NSObject alloc] init];
     UIAccessibilityCustomAction *action = [[UIAccessibilityCustomAction alloc] initWithName:@"Links"
                                                                                        target:actionTarget
@@ -151,10 +135,6 @@ void uikitrotor_run(UIKitConstantsRecorder record)
                                                                                                   selector:@selector(description)];
     record(@"action.attributedInitName", attributed.name ?: @"(nil)");
     record(@"action.attributedInitString", attributed.attributedName ? attributed.attributedName.string : @"(nil)");
-    // the port's getter answers nil for an action with no name, so the host is asked what it answers
-    // there too; nothing in the port is a guess when the host has an answer
-    // named the way the recorder can tell nil from an empty string: record() stores a nil as "",
-    // so each is asked whether it is there first
     UIAccessibilityCustomAction *nameless = [[UIAccessibilityCustomAction alloc] initWithName:nil target:nil selector:NULL];
     record(@"action.attributedNameWhenUnset", nameless.attributedName ? @"set" : @"nil");
 
@@ -165,10 +145,6 @@ void uikitrotor_run(UIKitConstantsRecorder record)
     record(@"action.attributedInitNameAfterSet", attributed.name ?: @"(nil)");
     record(@"action.attributedInitStringAfterNameSet", attributed.attributedName ? attributed.attributedName.string : @"(nil)");
 
-    // The two iOS 14 initialisers that take an ATTRIBUTED name AND an image: the ones the header
-    // declares beside the 11.0 attributed form and the 14.0 plain forms. What they add over the 11.0
-    // form is the image, and what they answer for the target and the handler is what the plain forms
-    // answer, so both are read against those here in the same run.
     UIImage *badge = [UIImage new];
     UIAccessibilityCustomActionHandler handler = ^BOOL(UIAccessibilityCustomAction *a) { return NO; };
 
@@ -185,7 +161,6 @@ void uikitrotor_run(UIKitConstantsRecorder record)
     record(@"action.attributedImage.targetIsSame", attributedImage.target == actionTarget ? @"same" : @"other");
     record(@"action.attributedImage.selector", NSStringFromSelector(attributedImage.selector));
     record(@"action.attributedImage.actionHandlerIsNil", attributedImage.actionHandler ? @"set" : @"nil");
-    // the two names are one name in two spellings here too, so setting the plain one moves the string
     attributedImage.name = @"Renamed";
     record(@"action.attributedImage.attributedStringAfterNameSet", attributedImage.attributedName ? attributedImage.attributedName.string : @"(nil)");
     record(@"action.attributedImage.keepsAttributesAfterNameSet",
@@ -201,15 +176,12 @@ void uikitrotor_run(UIKitConstantsRecorder record)
            [attributedImageHandler.attributedName attribute:NSForegroundColorAttributeName atIndex:0 effectiveRange:NULL] != nil ? @"keeps" : @"drops");
     record(@"action.attributedImageHandler.imageIsSame", attributedImageHandler.image == badge ? @"same" : @"other");
     record(@"action.attributedImageHandler.actionHandlerIsSet", attributedImageHandler.actionHandler ? @"set" : @"nil");
-    // the host carries no target and no selector on a handler form, and this records that the plain
-    // handler form does not either, so the port's two handler forms agree with each other
     record(@"action.attributedImageHandler.targetIsNil", attributedImageHandler.target ? @"set" : @"nil");
     record(@"action.attributedImageHandler.selectorIsNull", attributedImageHandler.selector ? @"set" : @"null");
     UIAccessibilityCustomAction *plainImageHandler =
         [[UIAccessibilityCustomAction alloc] initWithName:@"Links" image:badge actionHandler:handler];
     record(@"action.plainImageHandler.targetIsNil", plainImageHandler.target ? @"set" : @"nil");
     record(@"action.plainImageHandler.selectorIsNull", plainImageHandler.selector ? @"set" : @"null");
-    // and the 11.0 form `attributed` above answers no image, which is what these two add and nothing else
     record(@"action.attributedOnly.imageIsNil", attributed.image ? @"set" : @"nil");
     record(@"action.attributedOnly.actionHandlerIsNil", attributed.actionHandler ? @"set" : @"nil");
 }

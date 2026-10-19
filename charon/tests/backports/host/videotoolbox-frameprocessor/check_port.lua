@@ -1,35 +1,5 @@
--- check_port.lua - hold the port's frame processor to what the host measured and to the registry.
---
---     xmake l check_port.lua <host-answers output> <apple-backports dir> <build dir>
---
--- Two halves, and they are separate because they are separate kinds of evidence:
---
---   1. the HOST half. The domain string the host printed must be the string the port's own constant holds,
---      read out of the port's compiled armv7 object rather than out of its source - a source check alone
---      would pass on a constant the compiler never emitted. The fourteen codes the host printed must be
---      the values the port's header enumerates, which is what catches a transcription typo of -19739.
---
---   2. the PORT half. Every selector the new registry rows claim must be in the armv7 objects, and every
---      selector an `absent` row names must NOT be in them: the second is the half that catches an
---      "absent" row that quietly carries the method anyway, which check_registry would also catch but only
---      at gate time.
---
--- WHAT IT DELIBERATELY DOES NOT CLAIM. +isSupported answers 1 on this host, because this host is an M4 Pro
--- with the Neural Engine these processors need, while the port answers NO because no armv7 release has
--- one. That difference is the documented behaviour for hardware a device lacks and the release
--- measurement - no VTFrameProcessor class and no VTFrameProcessor* symbol in the 6.1.3 cache - is what
--- stands behind the port's side of it. This file prints both numbers and asserts neither against the
--- other; pretending the host were the oracle for that value would be a false check, not a strict one.
---
--- A port of the Python checker it replaced, assertion for assertion. Python is not run by the workspace's
--- tests any more, so the helpers here read the same things the Python read: otool for the method lists and
--- the string table, nm for the HDR session's symbols, and the JSON of the registry through xmake's own module.
-
 import("core.base.json")
 
--- The seven configuration classes and the one parameters class + the two value holders, in the host's
--- own order. Sixteen of the seventeen declare -init NS_UNAVAILABLE, and VTFrameProcessor is the
--- exception - so this is what separates the `absent` rows from the one `implemented` one.
 local NS_UNAVAILABLE_CLASSES = {
     "VTFrameProcessorFrame", "VTFrameProcessorOpticalFlow", "VTFrameRateConversionConfiguration",
     "VTFrameRateConversionParameters", "VTLowLatencyFrameInterpolationConfiguration",
@@ -40,25 +10,17 @@ local NS_UNAVAILABLE_CLASSES = {
     "VTTemporalNoiseFilterParameters",
 }
 
--- The six methods SDK 26.2 declares on VTFrameProcessor that the port carries. -init is NOT among them:
--- Apple's own class implements none, so the port's must not either - the same rule the sixteen
--- NS_UNAVAILABLE classes are held to, for the same measured reason.
 local PROCESSOR_METHODS = {
     "startSessionWithConfiguration:error:", "processWithParameters:error:",
     "processWithParameters:completionHandler:", "processWithParameters:frameOutputHandler:",
     "processWithCommandBuffer:parameters:", "endSession",
 }
 
--- The two methods of the other two classes this series adds.
 local OTHER_METHODS = {
     { "VTLowLatencySuperResolutionScalerConfiguration", { "supportedScaleFactorsForFrameWidth:frameHeight:" } },
     { "VTSuperResolutionScalerConfiguration", { "downloadConfigurationModelWithCompletionHandler:" } },
 }
 
--- Which protocol each class declares conformance to, as CharonVideoToolbox.h writes it: the six
--- configuration classes conform to VTFrameProcessorConfiguration and the six parameters classes to
--- VTFrameProcessorParameters. Asking a configuration class for -sourceFrame would be the check
--- asserting something the header does not say.
 local CONFORMS = {
     VTFrameRateConversionConfiguration = "VTFrameProcessorConfiguration",
     VTLowLatencyFrameInterpolationConfiguration = "VTFrameProcessorConfiguration",
@@ -76,18 +38,12 @@ local CONFORMS = {
     VTMotionBlurParameters = "VTFrameProcessorParameters",
 }
 
--- The units whose object is not named after the class: VTMotionBlurConfiguration is carried by
--- VideoToolboxValue26.m, and asking for a VTMotionBlurConfiguration.o the port never wrote would make the
--- check skip the one class it most needs to look at.
 local OBJECT_OF = { VTMotionBlurConfiguration = "VideoToolboxValue26" }
 
 local function unit_of(cls)
     return OBJECT_OF[cls] or cls
 end
 
--- The protocols themselves carry no registry row, and they need none: check_registry reads a protocol row
--- as answered by a declaration a caller compiles against. What is checked here is the OTHER half: that the
--- accessor exists on every class that declares the conformance.
 local PROTOCOL_METHODS = {
     VTFrameProcessorParameters = { "destinationFrame", "destinationFrames", "sourceFrame" },
     VTFrameProcessorConfiguration = { "destinationPixelBufferAttributes", "frameSupportedPixelFormats",
@@ -95,7 +51,6 @@ local PROTOCOL_METHODS = {
         "sourcePixelBufferAttributes" },
 }
 
--- Plain lines of a string, the last one included whether or not it ends in a newline.
 local function lines_of(text)
     local out = {}
     for line in (text .. "\n"):gmatch("(.-)\n") do
@@ -133,12 +88,6 @@ local function contains_plain(text, needle)
     return text:find(needle, 1, true) ~= nil
 end
 
--- The methods the object DEFINES for one class, instance and class, out of the class's own baseMethods
--- list.
---
--- Not the selector strings: __objc_methname holds every selector an object MENTIONS, and `[super init]` in
--- any initialiser puts the four letters of "init" in there whatever the class declares. baseMethods is the
--- list a message dispatch walks, and it is the same list modules/apple/objc.lua's binary_inventory reads.
 local function own_methods(obj)
     local out = os.iorunv("otool", { "-oV", obj })
     local instance, klass = {}, {}
@@ -156,8 +105,6 @@ local function own_methods(obj)
     return { instance = instance, class = klass }
 end
 
--- The string literals the object carries, read out of __TEXT,__cstring. Apple's and the port's error
--- domain are both constant strings, and the port's own lives here.
 local function literal_strings(obj)
     local out = os.iorunv("otool", { "-v", "-s", "__TEXT", "__cstring", obj })
     local found = {}
@@ -170,7 +117,6 @@ local function literal_strings(obj)
     return found
 end
 
--- Every integer the header enumerates as a VTFrameProcessor code, so a transcription typo shows.
 local function numbers_in_header(path)
     local file = assert(io.open(path, "r"), "cannot read " .. path)
     local text = file:read("a")
@@ -182,9 +128,6 @@ local function numbers_in_header(path)
     return found
 end
 
--- Every row VideoToolbox's registry holds, over all of its files - ios26.json for the frame processor and
--- ios18.json for the HDR per-frame metadata session. Reading one file would have made this check blind to
--- a family it is meant to hold.
 local function read_registry(backports)
     local folder = path.join(backports, "registry", "VideoToolbox")
     local files = os.files(path.join(folder, "*.json"))
@@ -286,11 +229,6 @@ function main(...)
         end
     end
 
-    -- -init is the other half of the same rule: Apple's VTFrameProcessor implements none, so the port's must
-    -- not either. The row is `implemented` because the answer is NSObject's, inherited by both classes and
-    -- measured the same way on each. SDK 26.2 declares it WITHOUT the NS_UNAVAILABLE the other sixteen carry,
-    -- which is why this assertion exists separately - the annotation is not what decides it, the host
-    -- measurement is.
     if processor["init"] then
         fail(failures, "VTFrameProcessor.o defines -init; the host's class implements none of its own, so "
             .. "the port's class must not differ from Apple's in which class owns the method")
@@ -301,9 +239,6 @@ function main(...)
             .. "NSObject's -init, which the port inherits too")
     end
 
-    -- Every class the SDK marks -init NS_UNAVAILABLE: its compiled object must carry neither -init nor +new,
-    -- and the registry must say implemented for both: the answer is NSObject's, inherited, as on the host. An
-    -- `implemented` row whose class defined the method itself is the failure this half exists for.
     for _, cls in ipairs(NS_UNAVAILABLE_CLASSES) do
         for _, pair in ipairs({ { "-[%s init]", "implemented" }, { "+[%s new]", "implemented" } }) do
             local api = string.format(pair[1], cls)
@@ -328,8 +263,6 @@ function main(...)
         end
     end
 
-    -- +isSupported is the property's own renamed accessor on all seven configuration classes: the selectors
-    -- must be `isSupported`, never a second `supported` added to satisfy a spelling.
     local configuration_classes = { "VTFrameRateConversionConfiguration",
         "VTLowLatencyFrameInterpolationConfiguration", "VTLowLatencySuperResolutionScalerConfiguration",
         "VTOpticalFlowConfiguration", "VTSuperResolutionScalerConfiguration",
@@ -350,10 +283,6 @@ function main(...)
         end
     end
 
-    -- The host's own answer about -init, held to the row's claim rather than to the header. The row says
-    -- Apple's class implements no -init of its own and that nothing raises; if the host ever starts raising,
-    -- or grows its own -init, the row's reason is no longer what it says it is and the check must say so
-    -- rather than let a stale claim stand.
     for _, pair in ipairs(raised) do
         fail(failures, string.format("the host RAISES on %s: %s. The absent rows for this family claim it does "
             .. "not, and that claim is now false", pair[1], pair[2]))
@@ -375,8 +304,6 @@ function main(...)
         end
     end
 
-    -- processorSupported is API_UNAVAILABLE(ios) on three classes, so it is not iOS API: the registry has no row
-    -- for it, and the three objects must not carry either spelling of the accessor.
     for _, cls in ipairs({ "VTFrameRateConversionConfiguration", "VTMotionBlurConfiguration",
         "VTOpticalFlowConfiguration" }) do
         if row_of(registry, cls .. ".processorSupported", "property") ~= nil then
@@ -391,7 +318,6 @@ function main(...)
         end
     end
 
-    -- The two methods this series adds to the other two classes, and the selectors they need.
     for _, pair in ipairs(OTHER_METHODS) do
         local cls, methods = pair[1], pair[2]
         local obj = path.join(build, cls .. ".o")
@@ -414,9 +340,6 @@ function main(...)
         end
     end
 
-    -- The eleven properties the two PROTOCOLS own, plus VTMotionBlurConfiguration.supported. The protocol
-    -- object itself must carry the selectors SDK 26.2 declares on it, and every conforming class must carry
-    -- the accessor too.
     for _, cls in ipairs({ "VTFrameProcessorParameters", "VTFrameProcessorConfiguration" }) do
         for _, method in ipairs(PROTOCOL_METHODS[cls]) do
             local api = string.format("%s.%s", cls, method ~= "isSupported" and method or "supported")
@@ -444,9 +367,6 @@ function main(...)
         end
     end
 
-    -- The HDR per-frame metadata session: the constant's string in the compiled object, and the three functions
-    -- as symbols. nm, not otool: these are C functions, and a C function has no ObjC method list to read, so
-    -- the only place its name lives is the symbol table.
     local hdr = path.join(build, "VTHDRPerFrameMetadataGenerationSession18_0.o")
     if not os.isfile(hdr) then
         fail(failures, "no compiled object for the HDR per-frame metadata session")
@@ -479,9 +399,6 @@ function main(...)
         end
     end
 
-    -- What the host said about +isSupported, and what the port answers, side by side and asserted against
-    -- neither: this host is an M4 Pro and the port's releases are armv7, so the two numbers are SUPPOSED to
-    -- differ and a check that demanded they agree would be demanding a lie.
     print("supported (host=1 on this M4 Pro; the port answers NO because no armv7 release has the "
         .. "hardware, and that difference is the documented answer):")
     for _, cls in ipairs(sorted_keys(supported)) do

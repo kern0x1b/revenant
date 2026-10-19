@@ -1,5 +1,3 @@
--- surface.lua DYLIB: the names the gate's own check_registry reads out of a built dylib, printed one
--- per line, so that a registered row can be looked for in exactly the set the gate compares against.
 import("apple.backports", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 local backports = import("apple.backports", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 function main(dylib)

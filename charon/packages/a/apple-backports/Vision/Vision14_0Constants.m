@@ -1,10 +1,5 @@
 #import <Vision/Vision.h>
 
-/* The string constants iOS 14 added to Vision: the joint and landmark keys of the pose observations, the groups of
- * their joints and the video processing options. Each value is the one the host Vision of macOS 27.0.1 gives; the
- * probe that read them is described in facts/Vision/Constants14.md. The requests that answer with these keys are
- * not carried yet (their rows say what each needs), so these are the names an application compares against. */
-
 VNRecognizedPointKey const VNBodyLandmarkKeyLeftAnkle = @"left_foot_joint";
 VNRecognizedPointKey const VNBodyLandmarkKeyLeftEar = @"left_ear_joint";
 VNRecognizedPointKey const VNBodyLandmarkKeyLeftElbow = @"left_forearm_joint";

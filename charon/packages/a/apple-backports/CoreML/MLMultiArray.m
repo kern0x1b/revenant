@@ -1,21 +1,8 @@
-/* MLMultiArray: a typed, strided array of numbers, over the C array the interpreter reads.
- *
- * The array the model was given is a window into its bytes: a stride is not necessarily one,
- * and a caller may hand over a view of a larger buffer. What this class does is keep that
- * window and answer the elements through it, so a weight matrix is never copied to be read and
- * a caller writing through `dataPointer` writes the model's own buffer.
- */
 #import <CoreML/CoreML.h>
 
 #include "CharonMLBridge.h"
 #include "CharonMLTensor.h"
 
-/* The array, and whether its buffer is this object's to free. An array handed over from a value
- * or built here is owned; one that came with a buffer and a deallocator block belongs to
- * whoever gave it, and is only released when the block is. */
-/* The array the object keeps, and the block that gives a caller's buffer back, and the pixel
- * buffer a pixel-buffer array is a window into. The array is reached by a method because the
- * bridge in CharonMLBridge.c has to reach it and key-value coding cannot reach a struct ivar. */
 @interface MLMultiArray () {
 @public
     charon_ml_array _array;
@@ -67,10 +54,6 @@
         return nil;
     }
     {
-        /* Measured against a real Core ML: an empty shape is a single element -- there is no
-         * dimension to multiply, so what is left is the one scalar -- and a dimension of zero is an
-         * array of no elements rather than a failure. Only a negative length is refused, because
-         * there is no such thing as an array of less than nothing. */
         int axis;
         for (axis = 0; axis < rank; axis++) {
             if (dimensions[axis] < 0) {
@@ -107,9 +90,6 @@
     if (!charon_ml_shape_from_array(strides, steps, CHARON_ML_MAX_RANK, &stride_rank) || stride_rank != rank) {
         return nil;
     }
-    /* The strides are the ones the caller asked for, in elements, and they are checked against
-     * the shape: strides that do not reach every element of a full array would make some of
-     * them unreadable, and an array a caller can read only in part is not an array. */
     for (index = 0; index < rank; index++) {
         if (steps[index] < 0) {
             return nil;
@@ -154,9 +134,6 @@
                         @"the strides of a multi array are one number per dimension of its shape");
         return nil;
     }
-    /* The caller's buffer replaces the one this object made for itself, and the block is what
-     * gives it back: an array that owns a buffer it was handed would free memory it never
-     * allocated, and one that dropped the block would leak it. */
     free(_array.data);
     _array = charon_ml_array_make(charon_ml_type_of_array(dataType), _array.shape, _array.rank, dataPointer);
     _deallocator = deallocator;
@@ -187,7 +164,7 @@
         break;
     default:
         CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
-        return nil; /* a format this port does not unpack, and it says so rather than guessing */
+        return nil;
     }
     bytes = CVPixelBufferGetBaseAddress(pixelBuffer);
     free(_array.data);
@@ -196,9 +173,6 @@
     return self;
 }
 
-/* A window over an array the C already has, which is how an MLFeatureValue's array becomes an
- * MLMultiArray without copying it: the two then name one buffer, and writing through either
- * writes the same bytes. The window is not owned, so the object frees no buffer. */
 - (instancetype)initWithWindowOf:(charon_ml_array)array
 {
     self = [super init];
@@ -242,10 +216,6 @@
     return _pixelBuffer;
 }
 
-/* The two addressing forms Core ML has. The indexed one is a linear index in C order, the
- * last dimension varying fastest; the keyed one is an array of numbers, one per dimension.
- * Both answer nil and do nothing outside the array: an application addressing past the end of
- * an array is told, not served from whatever lies next. */
 - (NSNumber *)objectAtIndexedSubscript:(NSInteger)idx
 {
     if (idx < 0 || (size_t)idx >= _array.count) {
@@ -254,12 +224,6 @@
     return @(charon_ml_array_get(&_array, (int64_t)idx));
 }
 
-/* The two ways Core ML asks a caller to read an array's bytes without the deprecated
- * `dataPointer`: the block is handed the buffer and the length in bytes, and the buffer is only
- * valid for as long as the block runs. Both answer the array's own buffer rather than a copy, so a
- * caller that writes through the mutable one writes the array -- and, for an array over a pixel
- * buffer, the buffer is locked for the length of the block, which is what Core ML's own
- * documentation asks of a caller doing that. */
 - (void)getBytesWithHandler:(void (NS_NOESCAPE ^)(const void *bytes, NSInteger size))handler
 {
     BOOL locked = NO;
@@ -284,9 +248,6 @@
     if (_pixelBuffer != NULL) {
         locked = CVPixelBufferLockBaseAddress(_pixelBuffer, 0) == kCVReturnSuccess;
     }
-    /* The strides go with the buffer because the framework may hand over a different backing store
-     * with different ones: a caller indexing with the strides it read from the property would read
-     * the wrong elements. The port's buffer is the array's own, so they are the array's own. */
     handler(_array.data, (NSInteger)(_array.count * charon_ml_type_size(_array.data_type)), self.strides);
     if (locked) {
         CVPixelBufferUnlockBaseAddress(_pixelBuffer, 0);
@@ -347,9 +308,6 @@
     if (count == 0 || charon_ml_type_size(charon_ml_type_of_array(dataType)) == 0) {
         return nil;
     }
-    /* Every input must have the same rank, must agree on every dimension but the one joined
-     * along, and the axis must be one of that rank: values that do not line up cannot be
-     * concatenated, and saying so is better than placing them where they do not belong. */
     for (index = 0; index < count; index++) {
         int64_t one[CHARON_ML_MAX_RANK];
         int one_rank = 0;
@@ -379,9 +337,6 @@
         return nil;
     }
     out = [joined charonArray];
-    /* Each input's values are written at its own position along the joined axis and the same
-     * position on every other one, element by element through the input's own strides, so a
-     * strided or a windowed input concatenates where it lies. */
     for (index = 0; index < count; index++) {
         charon_ml_array *one = [arrays[index] charonArray];
         size_t element;
@@ -390,8 +345,6 @@
             int64_t destination;
             charon_ml_unravel((int64_t)element, one->rank, one->shape, position);
             destination = charon_ml_ravel(position, out->rank, out->strides);
-            /* Only the joined axis moves: every other position is the same one, which is what
-             * makes the elements line up. */
             destination += (at_axis + position[axis] - position[axis]) * out->strides[axis];
             charon_ml_array_set(out, destination, charon_ml_array_get(one, (int64_t)element));
         }

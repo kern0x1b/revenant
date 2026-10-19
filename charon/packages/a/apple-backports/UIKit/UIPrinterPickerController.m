@@ -1,16 +1,9 @@
 #import <UIKit/UIKit.h>
 
-// The printer picker. AirPrint printers advertise over Bonjour as _ipp._tcp with the _universal subtype, so the picker
-// browses that subtype with NSNetServiceBrowser (public in Foundation since iOS 2), resolves each service it finds, and
-// lists the printers in the release's own UITableView inside a UINavigationController. Selecting one completes with a
-// UIPrinter whose URL is built from the resolved service: ipp://<host>:<port>/<rp>, rp being the TXT record's resource
-// path. The host's picker selects a placeholder at once instead; the port does not (facts/UIKit/UIPrinterPickerController.md).
-
 static NSString *const kCharonPickerServiceType = @"_universal._sub._ipp._tcp.";
 static NSString *const kCharonPickerDomain = @"local.";
 static const NSTimeInterval kCharonPickerResolveTimeout = 10;
 
-// The URL a resolved service is reached at, or nil when it has no host yet.
 static NSURL *charon_printerURL(NSNetService *service)
 {
     NSString *host = [service hostName];
@@ -30,7 +23,6 @@ static NSURL *charon_printerURL(NSNetService *service)
     return [NSURL URLWithString:[NSString stringWithFormat:@"ipp://%@:%ld/%@", host, (long)[service port], escaped]];
 }
 
-// One row of the list: the service it was found as, and the printer it completes with.
 @interface CharonPrinterPickerRow : NSObject
 @property (nonatomic, strong) NSNetService *service;
 @property (nonatomic, strong) UIPrinter *printer;
@@ -41,7 +33,6 @@ static NSURL *charon_printerURL(NSNetService *service)
 @synthesize printer = _printer;
 @end
 
-// What the list calls back on its picker; the picker implements them below.
 @interface UIPrinterPickerController (CharonList)
 - (void)charon_selectPrinter:(UIPrinter *)printer;
 - (void)charon_cancelWithError:(NSError *)error;
@@ -49,7 +40,6 @@ static NSURL *charon_printerURL(NSNetService *service)
 - (BOOL)charon_shouldShowPrinter:(UIPrinter *)printer;
 @end
 
-// The list: the table, the browser and the resolutions, shown inside the navigation controller.
 @interface CharonPrinterPickerList : UIViewController <UITableViewDataSource, UITableViewDelegate,
     NSNetServiceBrowserDelegate, NSNetServiceDelegate, UIPopoverControllerDelegate>
 @property (nonatomic, weak) UIPrinterPickerController *picker;
@@ -119,7 +109,6 @@ static NSURL *charon_printerURL(NSNetService *service)
     [_table reloadData];
 }
 
-// Browser: each service found is resolved before it can be listed.
 - (void)netServiceBrowser:(NSNetServiceBrowser *)browser didFindService:(NSNetService *)service moreComing:(BOOL)more
 {
     [_resolving addObject:service];
@@ -145,7 +134,6 @@ static NSURL *charon_printerURL(NSNetService *service)
     [self.picker charon_cancelWithError:error];
 }
 
-// Resolution: a resolved service with a URL is listed, unless the delegate filters it out.
 - (void)netServiceDidResolveAddress:(NSNetService *)service
 {
     [_resolving removeObject:service];
@@ -167,7 +155,6 @@ static NSURL *charon_printerURL(NSNetService *service)
     [_resolving removeObject:service];
 }
 
-// Table: no rows until a service resolves, so a picker with no printer on the network lists nothing.
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     return 1;
@@ -194,7 +181,6 @@ static NSURL *charon_printerURL(NSNetService *service)
     [self.picker charon_selectPrinter:[[_rows objectAtIndex:indexPath.row] printer]];
 }
 
-// A popover dismissed by a tap outside it is a cancel.
 - (void)popoverControllerDidDismissPopover:(UIPopoverController *)popover
 {
     [self.picker charon_popoverDidDismiss];
@@ -244,7 +230,6 @@ static NSURL *charon_printerURL(NSNetService *service)
     return YES;
 }
 
-// On the phone there is no popover, so the picker is presented as presentAnimated: presents it.
 - (BOOL)presentFromRect:(CGRect)rect inView:(UIView *)view animated:(BOOL)animated completionHandler:(UIPrinterPickerCompletionHandler)completion
 {
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
@@ -277,7 +262,6 @@ static NSURL *charon_printerURL(NSNetService *service)
     return YES;
 }
 
-// A dismissal made by the caller is not a selection: the completion says userDidSelect NO.
 - (void)dismissAnimated:(BOOL)animated
 {
     if (!_up)
@@ -297,7 +281,6 @@ static NSURL *charon_printerURL(NSNetService *service)
     _navigation = [[UINavigationController alloc] initWithRootViewController:_list];
 }
 
-// Presentation that failed: nothing was shown, so nothing is reported.
 - (void)charon_abandon
 {
     [_list stopBrowsing];
@@ -346,7 +329,6 @@ static NSURL *charon_printerURL(NSNetService *service)
     [self charon_finish:YES error:nil animated:_animated];
 }
 
-// A cancel, or a browse that failed: the completion gets userDidSelect NO and the error (nil for a cancel).
 - (void)charon_cancelWithError:(NSError *)error
 {
     [self charon_finish:NO error:error animated:_animated];
@@ -357,7 +339,6 @@ static NSURL *charon_printerURL(NSNetService *service)
     [self charon_finish:NO error:nil animated:NO];
 }
 
-// The one way the picker ends: the picker is taken down, then the completion runs once.
 - (void)charon_finish:(BOOL)selected error:(NSError *)error animated:(BOOL)animated
 {
     if (!_up)

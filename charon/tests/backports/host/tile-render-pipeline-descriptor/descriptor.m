@@ -1,18 +1,3 @@
-/* descriptor.m - MTLTileRenderPipelineDescriptor (iOS 11.0), compared property by property with Apple's own object.
- *
- * Four moments are compared, each as a snapshot of the members both sides can be asked without harm: a fresh
- * descriptor, one with its settable members set away from their defaults, the same one after -reset, and a copy
- * of the set one. A disagreement names the member and both values.
- *
- * TILE BUFFERS ARE NOT IN THE SNAPSHOT, and Apple's are never touched by this case. Measured on the macOS host
- * (tests/backports/host/tile-render-pipeline-descriptor/run.sh, the "apple-tile-reset" child): once Apple's
- * tileBuffers has been read or set, its -reset crashes the process, so a differential that reset Apple's object
- * after touching its tile buffers would measure a crash, not a default. The port's tile buffers are checked by
- * their own expectations below instead, and the child proves the crash is Apple's.
- *
- * NO DEVICE IS CREATED. A descriptor asks a device nothing (facts/Metal/DeviceOnThisMachine.md). The tile function
- * is a device's object, so it is never set and reads as nil on both sides.
- */
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
@@ -49,7 +34,6 @@ static NSDictionary *snapshot(MTLTileRenderPipelineDescriptor *d)
     return s;
 }
 
-/* Sets every settable member away from its default, except the tile buffers (see the file's comment). */
 static void setEverything(MTLTileRenderPipelineDescriptor *d)
 {
     d.label = @"charon";
@@ -82,7 +66,6 @@ int main(int argc, char **argv)
     setvbuf(stdout, NULL, _IONBF, 0);
     @autoreleasepool {
         if (argc > 1 && strcmp(argv[1], "apple-tile-reset") == 0) {
-            /* The child: Apple's tile buffers touched, then -reset. Apple's process is expected to die here. */
             MTLTileRenderPipelineDescriptor *apple = [[MTLTileRenderPipelineDescriptor alloc] init];
             MTLPipelineBufferDescriptor *slot = [[MTLPipelineBufferDescriptor alloc] init];
             [apple.tileBuffers setObject:slot atIndexedSubscript:2];

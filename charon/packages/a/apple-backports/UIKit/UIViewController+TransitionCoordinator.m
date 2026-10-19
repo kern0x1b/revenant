@@ -84,10 +84,6 @@ static id<UIViewControllerAnimatedTransitioning> charon_dismiss_animator(id<UIVi
     return [delegate animationControllerForDismissedController:presented];
 }
 
-/* A page or form sheet presented in a compact width is the sheet's own presentation (UISheetPresentationController.m).
-   The sheet is made only when the presentation is one: asking for it makes it and the controller holds it, so a
-   controller that is not presented as a sheet asks for none. The class is asked by name, and by a selector only the port's
-   own carries, as this file is linked into releases that do not carry it and into those whose sheet is the release's. */
 static UIPresentationController *charon_sheet_for(UIViewController *presented, UIViewController *presenting)
 {
     if (!charon_sheet_style(presented.modalPresentationStyle) || presenting.traitCollection.horizontalSizeClass != UIUserInterfaceSizeClassCompact)
@@ -105,18 +101,11 @@ static id<UIViewControllerInteractiveTransitioning> charon_interactor_for(id<UIV
     return presenting ? [delegate interactionControllerForPresentation:animator] : [delegate interactionControllerForDismissal:animator];
 }
 
-/* This file is linked into every band, UIPresentationController.m only into those below 8.0: from 8.0 on the class is the
-   release's, which has none of the methods the port's engine sends a presentation controller, and the release presents
-   the custom styles itself (asking the transitioning delegate for the controller and the animators). */
 static BOOL charon_release_presents(void)
 {
     return ![UIPresentationController instancesRespondToSelector:@selector(charon_setContainerView:)];
 }
 
-/* From 8.0 on the port's sheet is presented by the release, through its public custom presentation: while the sheet is
-   presented, its view controller's style is Custom only for the release's present call and its transitioning delegate is
-   this object, which gives the sheet, and the sheet's animator where the caller's delegate gives none; the caller's
-   delegate is put back when the sheet is gone. */
 @interface CharonSheetHandover : NSObject <UIViewControllerTransitioningDelegate>
 @property (nonatomic, weak) UIPresentationController *sheet;
 @property (nonatomic, weak) id<UIViewControllerTransitioningDelegate> original;
@@ -132,8 +121,6 @@ static BOOL charon_release_presents(void)
     return self.sheet;
 }
 
-/* The caller's delegate is asked first for the animators and the interactive controllers, as the release asks it for a
-   sheet and as the engine below 8.0 does; the sheet's animator is the one used when it gives none. */
 - (id<UIViewControllerAnimatedTransitioning>)animationControllerForPresentedController:(UIViewController *)presented presentingController:(UIViewController *)presenting sourceController:(UIViewController *)source
 {
     return charon_present_animator(self.original, presented, presenting, source) ?: [self.sheet charon_transitionAnimator];
@@ -158,8 +145,6 @@ static BOOL charon_release_presents(void)
 
 static const void *const charon_sheet_handover_key = &charon_sheet_handover_key;
 
-/* Puts the caller's delegate back once the sheet is gone: when its dismissal ends, or at the next presentation of the
-   controller when the presentation the handover was made for never happened. */
 static void charon_sheet_handover_end(UIViewController *presented, CharonSheetHandover *handover)
 {
     if (presented.transitioningDelegate == handover)
@@ -169,11 +154,6 @@ static void charon_sheet_handover_end(UIViewController *presented, CharonSheetHa
 
 @implementation UIViewController (CharonSheetHold)
 
-/* The sheet a dismissal took away is not kept for the controller: UIKit's controller has none after its dismissal and
-   makes another, with the default detents, when asked again, and a sheet kept is a sheet the release's presentation
-   controller holds the controller for (from 8.0 on its class is the release's, whose init holds it strongly). The sheet
-   says so when its dismissal ends, which the release does on every route: the controller's own dismiss, its presenter's,
-   and the dismissal of an ancestor that takes it down with it. */
 - (void)charon_sheetDidDismiss:(UIPresentationController *)sheet
 {
     CharonSheetHandover *handover = objc_getAssociatedObject(self, charon_sheet_handover_key);
@@ -198,10 +178,6 @@ static UIPresentationController *charon_presentation_for(UIViewController *prese
     UIPresentationController *custom = nil;
     if ([delegate respondsToSelector:@selector(presentationControllerForPresentedViewController:presentingViewController:sourceViewController:)])
         custom = [delegate presentationControllerForPresentedViewController:presented presentingViewController:presenting sourceViewController:source];
-    /* A custom presentation whose delegate gives no controller, or that has no delegate, gets a plain
-       UIPresentationController (-_presentViewController:withAnimationController:completion:
-       0x1891a8fe0 in UIKitCore of 16.0, after -_customPresentationControllerForPresentedController:
-       0x1890dafa0 answers nil): the presented view fills the container over the presenter's. */
     if (!custom && style == UIModalPresentationCustom)
         custom = [[UIPresentationController alloc] initWithPresentedViewController:presented presentingViewController:presenting];
     return custom;

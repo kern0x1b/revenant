@@ -1,12 +1,3 @@
-// probe.m - the reader sessions of CoreNFC, asked what they answer on a device with no radio: the initializers for each kind of
-// delegate, the properties, and the callback a begun session makes. The same source is built for the host (Catalyst, where the
-// classes are CoreNFC's) and for the port (the classes of CoreNFC/NFCReaderSession.m, renamed CharonHost<Name>).
-//
-// The classes are found by name at run time and every answer is read through its selector, so no header decides it. A callback
-// is counted after the run loop has turned, and a session is kept alive where the callback is wanted: the framework does not
-// keep a session that nothing holds, and that is measured too (the last case).
-//
-//   sh run.sh
 #import <Foundation/Foundation.h>
 #import <CoreNFC/CoreNFC.h>
 #import <objc/runtime.h>
@@ -48,7 +39,6 @@ static void spinUntilCalled(NSTimeInterval limit)
     }
 }
 
-// Each delegate has the methods one case needs, and no more.
 @interface FullDelegate : NSObject
 @end
 @implementation FullDelegate
@@ -110,7 +100,6 @@ int main(void)
         line("iso init invalid-only delegate", [[(id)iso alloc] initWithDelegate:[[InvalidOnlyDelegate alloc] init] queue:nil]);
         line("iso init nil delegate", [[(id)iso alloc] initWithDelegate:nil queue:nil]);
 
-        // The session the properties and the callbacks are asked of: nil queue, the framework's own.
         id s1 = [[(id)ndef alloc] initWithDelegate:full queue:nil invalidateAfterFirstRead:NO];
         [keep addObject:s1];
         printf("ready %d\n", askBOOL(s1, @"isReady"));
@@ -125,8 +114,6 @@ int main(void)
                [ndef instancesRespondToSelector:@selector(isReady)],
                [ndef instancesRespondToSelector:NSSelectorFromString(@"ready")]);
 
-        // A begun session calls back with the unsupported-feature error, on the queue it was given; an invalidate after the
-        // begin calls back again; a second begin calls back again.
         dispatch_queue_t queue = dispatch_queue_create("charon.nfc.test", DISPATCH_QUEUE_SERIAL);
         dispatch_queue_set_specific(queue, kQueue, (void *)kQueue, NULL);
         id s2 = [[(id)ndef alloc] initWithDelegate:full queue:queue invalidateAfterFirstRead:NO];
@@ -145,7 +132,6 @@ int main(void)
         spinUntilCalled(3.0);
         printf("second begin: calls %d\n", calls);
 
-        // A session invalidated before it is begun is dead: the begin that follows calls nothing.
         id s6 = [[(id)ndef alloc] initWithDelegate:full queue:nil invalidateAfterFirstRead:NO];
         [keep addObject:s6];
         calls = 0;
@@ -156,7 +142,6 @@ int main(void)
         spin(1.0);
         printf("begin after invalidate: calls %d\n", calls);
 
-        // The delegate is held weakly: once it is gone, the session answers nil for it.
         id s3 = nil;
         @autoreleasepool {
             FullDelegate *gone = [[FullDelegate alloc] init];
@@ -166,7 +151,6 @@ int main(void)
         printf("delegate after release nil %d\n", [s3 valueForKey:@"delegate"] == nil);
         [keep addObject:s3];
 
-        // A session nothing holds is not kept by the framework, so its callback is not made.
         calls = 0;
         @autoreleasepool {
             id s4 = [[(id)ndef alloc] initWithDelegate:full queue:nil invalidateAfterFirstRead:NO];

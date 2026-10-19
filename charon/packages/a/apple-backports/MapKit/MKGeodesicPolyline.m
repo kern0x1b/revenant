@@ -1,28 +1,14 @@
-// MKGeodesicPolyline: a polyline that follows the shortest path over the earth's surface rather than
-// a straight line in the projected plane. The two differ by the great-circle flattening the header
-// describes, and the release's own MKPolyline cannot do it, so the points are computed here: the
-// great-circle interpolation between each pair of the caller's own points, sampled finely enough
-// that the drawn line is the curve to within a pixel at any zoom scale the map view will use.
-//
-// The instance is a real MKPolyline -- the header's own superclass -- filled through the release's
-// own -[MKMultiPoint setCoordinates:count:], which is in the armv7 dyld shared cache of 6.1.3
-// (measured) and is how the release's own +[MKPolyline polylineWithCoordinates:count:] builds one.
-// So the object is a subclass of MKPolyline in the runtime's own terms, and a caller that hands it
-// to an MKPolylineRenderer or an MKMultiPolyline gets an MKPolyline.
 #import <MapKit/MKGeodesicPolyline.h>
 #import <CoreLocation/CoreLocation.h>
 #import <math.h>
 #import "CharonMapKit.h"
 
-// The release's own mutating setter, measured present in the armv7 cache of 6.1.3. Declared here and
-// not implemented: the class it names is the release's, and so is the method.
 @interface MKMultiPoint (CharonCoordinates)
 - (void)setCoordinates:(const CLLocationCoordinate2D *)coords count:(NSUInteger)count;
 @end
 
 @implementation MKGeodesicPolyline
 
-// The angular distance between two coordinates on the sphere, in radians.
 + (double)charon_angleFromCoordinate:(CLLocationCoordinate2D)from toCoordinate:(CLLocationCoordinate2D)to
 {
     static const double pi = 3.14159265358979323846;
@@ -35,9 +21,6 @@
     return 2.0 * asin(fmin(1.0, sqrt(a)));
 }
 
-// The point a fraction of the way along the great circle from one coordinate to another, by the
-// spherical formula: the angle from the start, and the great-circle destination formula applied
-// to the two endpoints with the weights sin of the two remaining angles.
 + (CLLocationCoordinate2D)charon_coordinateFromCoordinate:(CLLocationCoordinate2D)from
                                              toCoordinate:(CLLocationCoordinate2D)to
                                                 fraction:(double)fraction
@@ -85,9 +68,6 @@
     if (!coords || count == 0) {
         return nil;
     }
-    // Sampled so the drawn curve stays within about a pixel of the true arc at any zoom scale the
-    // map view reaches: two degrees of arc per sample, at least one per caller's own segment, and
-    // never more than 2048 for one segment so a caller cannot make this unbounded.
     static const double pi = 3.14159265358979323846;
     NSUInteger capacity = count * 64 + 1;
     CLLocationCoordinate2D *flat = (CLLocationCoordinate2D *)malloc(capacity * sizeof(CLLocationCoordinate2D));
@@ -119,9 +99,6 @@
     }
     [line setCoordinates:flat count:sampled];
     free(flat);
-    // The release's own setter is what filled the object; if it took the points the object is a
-    // polyline of them, and if it did not there is no polyline to hand back and nil is the honest
-    // answer rather than an object that draws nothing.
     if (!line || line.pointCount != sampled) {
         return nil;
     }

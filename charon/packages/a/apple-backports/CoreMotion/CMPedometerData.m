@@ -1,8 +1,5 @@
 #import <CoreMotion/CoreMotion.h>
 
-// The data of the pedometer of iOS 8. No pedometer on this device ever produces one, so the port never hands one over: an
-// application can allocate one, and the answers below are the ones a fresh instance gives on the host, where every property
-// reads nil and the copy and the secure archive both work (facts/CoreMotion/CMPedometer.md).
 @implementation CMPedometerData {
     NSDate *_startDate;
     NSDate *_endDate;

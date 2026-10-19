@@ -36,9 +36,6 @@
     return _UUID;
 }
 
-// A transaction is complete when every action of it is, which makes a
-// transaction with no actions complete from the start - that is what CallKit
-// answers for one.
 - (BOOL)isComplete
 {
     for (CXAction *action in _actions) {
@@ -61,10 +58,6 @@
     [_actions addObject:action];
 }
 
-// A transaction is done once every action of it is, and the provider is told
-// then and not before: an application that answers a call and takes another
-// off hold in one transaction sees both changes at once, as CallKit gives
-// them.
 - (void)charon_actionCompleted:(CXAction *)action
 {
     (void)action;

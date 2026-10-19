@@ -1,9 +1,5 @@
 set_project("seckeyecraw")
 set_version("0.0.1")
--- The probe of tests/backports/device/seckey-ecraw.m, built for the release and run in the emulator
--- with `xmake emulate -d iPhone4,1 -r 6.1.3 run /usr/libexec/seckeyecraw`. It needs no package of this
--- repository's: it asks the release's own Security what it does with an elliptic key, which is what
--- facts/Security/SecKeyElliptic.md's release side is read from.
 add_repositories("charon https://github.com/kern0x1b/charon.git charon-repo-0.8.10")
 add_addons("charon v0.8.10")
 set_config("apple_minimum", "6.1.3")

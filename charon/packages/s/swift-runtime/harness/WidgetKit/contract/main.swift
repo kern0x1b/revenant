@@ -1,8 +1,3 @@
-// Contract check for the three WidgetKit values the macOS host does not have (LevelOfDetail, WidgetLocation,
-// WidgetMountingStyle) and for the accessory families' raw values. There is no host to differ from, so this
-// probe is built against files/WidgetKit/Values.swift only, and it prints what the file answers. The expected
-// lines are the contract: equality and hashing per the spec rows, and raw values by the 26.2 declaration order
-// (facts/WidgetKit/Values.md, "Taken from the contract, not a host").
 import Foundation
 
 print("family-raw-accessory", (5...8).map { WidgetFamily(rawValue: $0).map { "\($0)" } ?? "nil" }.joined(separator: " "))

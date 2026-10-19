@@ -1,10 +1,3 @@
-// canload.m — the one measurement that decides the shape of the whole compute path: does a real Metal
-// runtime accept the hand-authored AIR compute kernel in fixtures/sum.ll, and what does it compute?
-//
-// If it does, the host is an oracle for the port's own AIR-to-C translation of the same bitcode, and
-// the two can be compared on one input. If it does not, the fixture has to come from a real
-// application's metallib instead, and that is a different plan. This program answers it either way and
-// says which happened.
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
@@ -22,7 +15,6 @@ int main(int argc, const char **argv)
             printf("REFUSED %s: %s\n", argv[1], error.localizedDescription.UTF8String);
             return 1;
         }
-        // The names of a library, read the way an application does before it asks for a function.
         NSArray<NSString *> *names = [library functionNames];
         printf("LOADED %s with %lu functions\n", argv[1], (unsigned long)names.count);
         for (NSString *name in names)
@@ -41,8 +33,6 @@ int main(int argc, const char **argv)
         printf("PIPELINE ok, maxTotalThreadsPerThreadgroup=%zu threadExecutionWidth=%zu\n",
                pipeline.maxTotalThreadsPerThreadgroup, pipeline.threadExecutionWidth);
 
-        // Sixteen values in, sixteen sums out: the kernel reads four from the group's window and writes
-        // its sum after them, so the whole threadgroup's work is visible in the tail of the buffer.
         const NSUInteger count = 16;
         float *values = calloc(count, sizeof(float));
         for (NSUInteger index = 0; index < count; index++)

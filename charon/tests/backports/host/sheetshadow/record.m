@@ -4,13 +4,6 @@
 #import <objc/message.h>
 #include "CharonSheetShadow.h"
 
-/* The magic shadow of UIKit's sheet, asked of the host's own UIKit and Core Animation under Mac Catalyst (a probe of the
-   oracle: private classes are asked by name here, never in the port). It checks what the port's shadow
-   (packages/a/apple-backports/UIKit/CharonSheetShadow.c) rests on: a vibrant colour matrix set with -[CALayer setFilters:]
-   (what 16.0's -[_UIShadowView _updateShadowVisualStyling] sets) computes its colour from what lies behind the layer, not
-   from the layer's own content, and a view's alpha scales it as the content's does; the port's matrix, cap insets and
-   generated image are the host shadow view's; and the port's pixel, laid over a destination, leaves what the filter
-   leaves. It writes the host's image along an edge and its matrix where the device test reads them (SHADOW_RECORDS). */
 typedef struct { float m11, m12, m13, m14, m15, m21, m22, m23, m24, m25, m31, m32, m33, m34, m35, m41, m42, m43, m44, m45; } Matrix;
 @interface NSValue (Matrix)
 + (NSValue *)valueWithCAColorMatrix:(Matrix)matrix;
@@ -75,9 +68,6 @@ static void check(BOOL ok, NSString *what)
     printf("%s %s\n", ok ? "ok" : "FAIL", what.UTF8String);
 }
 
-/* The destination a vibrant matrix is expected to leave, per the model the checks hold: the matrix applied to the
-   destination pixel (opaque, unpremultiplied) and clamped to 0...1, laid over it with the layer's alpha times the
-   matrix's own alpha. */
 static void expected(const Matrix *m, float alpha, const float d[3], float out[3])
 {
     const float *r = &m->m11;
@@ -149,8 +139,6 @@ static void expected(const Matrix *m, float alpha, const float d[3], float out[3
         [shadow removeFromSuperview];
     }
 
-    /* The port's corner against the host's image, pixel by pixel at its scale, and at 1x against the mean of each 2 x 2
-       block, which is what drawing the 2x image at 1x gives. The bound is the fit's error (CharonSheetShadow.c). */
     CGSize kitPixels = CGSizeMake(kit.size.width * kit.scale, kit.size.height * kit.scale);
     pixels(kit, kitPixels, ^(const uint8_t *d, size_t w, size_t h) {
         const uint8_t *two = charon_sheet_shadow_corner((unsigned)kit.scale), *one = charon_sheet_shadow_corner(1);
@@ -177,9 +165,6 @@ static void expected(const Matrix *m, float alpha, const float d[3], float out[3
 
     NSArray *backgrounds = @[[UIColor redColor], [UIColor blueColor], [UIColor colorWithWhite:0.5 alpha:1], [UIColor whiteColor]];
     UIView *root = self.window.rootViewController.view;
-    /* Per background: a black layer at 0.5 plain, with a reddening matrix, with the vibrant matrix; then the vibrant
-       matrix over an opaque layer in a view at alpha 0.5, as UIKit sets the magic alpha on its view; then the port's pixel
-       for that background in a view at alpha 0.5. */
     for (NSUInteger b = 0; b < backgrounds.count; b++)
         for (NSUInteger k = 0; k < 5; k++) {
             UIView *back = [[UIView alloc] initWithFrame:CGRectMake(10 + k * 60, 10 + b * 60, 50, 50)];
@@ -201,7 +186,6 @@ static void expected(const Matrix *m, float alpha, const float d[3], float out[3
         }];
         pixels(shot, size, ^(const uint8_t *d, size_t w, size_t h) {
             for (NSUInteger b = 0; b < backgrounds.count; b++) {
-                /* The capture's full value: the background alone (the capture reads 249 for 1.0). */
                 const uint8_t *alone = d + ((10 + b * 60 + 2) * w + 10 + 25) * 4;
                 float full = MAX(MAX(alone[0], alone[1]), alone[2]) / (b == 0 ? colours[0][0] : b == 1 ? colours[1][2] : colours[b][0]);
                 const uint8_t *plain = d + ((10 + b * 60 + 25) * w + 10 + 25) * 4;

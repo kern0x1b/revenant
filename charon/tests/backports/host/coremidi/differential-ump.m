@@ -1,6 +1,3 @@
-// The iOS 18 classes, held to macOS (oracle/umpclasses.m and umpclasses2.m, recorded in umpclasses-macos.txt and
-// umpclasses2-macos.txt). The names are the renamed ones run.sh gives the port's objects. This file is its own translation
-// unit: the 26.2 typedefs of the MIDI-UMP headers would clash with the visitor's on the host (differential.m).
 #import <Foundation/Foundation.h>
 #include <stdio.h>
 #include "CharonMIDIUMP18.h"
@@ -21,7 +18,6 @@ static void check(int passed, const char *name, const char *detail)
     }
 }
 
-// The MIDI-CI 1.x classes, held to macOS (oracle/micicapability.m, micicapability-macos.txt).
 static void check_mici_classes(void)
 {
     charon_host_MIDICIDiscoveryManager *manager = [charon_host_MIDICIDiscoveryManager sharedInstance];
@@ -30,7 +26,6 @@ static void check_mici_classes(void)
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1.0, false);
     check(handlerCalls == 0, "MIDI-CI discovery: the handler is never called, as macOS (refused client)", "");
 
-    // A device info needs a destination and the four fixed sizes: manufacturer 3, family 2, model 2, revision 4 bytes.
     MIDIClientRef client = 0;
     MIDIClientCreateWithBlock(CFSTR("ci-check"), &client, NULL);
     MIDIEndpointRef destination = 0;
@@ -48,21 +43,15 @@ static void check_mici_classes(void)
     check([[charon_host_MIDICIDeviceInfo alloc] initWithDestination:0 manufacturer:man3 family:fam2 model:mod2 revision:rev4] == nil,
           "MIDI-CI device info refused for no destination, as macOS", "");
 
-    // A profile made from the standard profile bytes is named from them, as macOS names it.
     charon_host_MIDICIProfile *profile = [[charon_host_MIDICIProfile alloc] initWithData:[NSData dataWithBytes:"\x7e\x00\x01\x02\x03" length:5]];
     check(profile != nil && [profile.name isEqualToString:@"Standard Profile Bank 0x00 Number 0x01, Version: 0x02 Level: 0x03"] &&
           profile.profileID.length == 5, "MIDI-CI profile named from its standard bytes, as macOS", "");
 
-    // A responder with no profile delegate is not made, as macOS. The delegate parameter is nonnull in the header, so the nil is
-    // passed through a variable: the call is the one macOS was measured to refuse.
     id noDelegate = nil;
     check([[charon_host_MIDICIResponder alloc] initWithDeviceInfo:info profileDelegate:noDelegate profileStates:@[] supportProperties:NO] == nil,
           "MIDI-CI responder with no delegate is not made, as macOS", "");
 }
 
-// MIDISendUMPSysex and MIDISendUMPSysex8, held to macOS (oracle/umpsysend.m, umpsysend-macos.txt): the words reach a
-// destination of this process verbatim, the request's count is used up, it is marked complete, its completion runs once,
-// and the answer is noErr for every destination, a missing one included.
 static int gSendCompletions;
 static void charon_send_completed(MIDISysexSendRequestUMP *request)
 {
@@ -142,13 +131,11 @@ static void check_ump_sysex_sends(void)
 
 static void check_ump_classes(void)
 {
-    // The managers list no MIDI-CI device and, before anything is made, no endpoint.
     check([[charon_host_MIDICIDeviceManager sharedInstance] discoveredCIDevices].count == 0,
           "MIDI-CI: no device discovered, as macOS (umpclasses-macos.txt)", "");
     check([[charon_host_MIDIUMPEndpointManager sharedInstance] UMPEndpoints].count == 0,
           "UMP: no endpoint listed before one is made, as macOS", "");
 
-    // A value object keeps what it was given.
     MIDI2DeviceManufacturer man = {{0x12, 0x34, 0x56}};
     MIDI2DeviceRevisionLevel rev = {{0x03, 0x04, 0x05, 0x06}};
     charon_host_MIDI2DeviceInfo *info = [[charon_host_MIDI2DeviceInfo alloc] initWithManufacturerID:man family:0x1234
@@ -157,8 +144,6 @@ static void check_ump_classes(void)
           info.revisionLevel.revisionLevel[3] == 0x06,
           "MIDI2DeviceInfo keeps its values, as macOS prints them", "");
 
-    // A function block is made with any group, direction and stream values macOS was asked for, and answers NO to
-    // its setters until an endpoint registers it.
     charon_host_MIDIUMPMutableFunctionBlock *fb = [[charon_host_MIDIUMPMutableFunctionBlock alloc]
         initWithName:@"fb" direction:kMIDIUMPFunctionBlockDirectionInput firstGroup:0 totalGroupsSpanned:1
         maxSysEx8Streams:0 MIDI1Info:kMIDIUMPFunctionBlockMIDI1InfoNotMIDI1 UIHint:kMIDIUMPFunctionBlockUIHintUnknown isEnabled:YES];
@@ -168,7 +153,6 @@ static void check_ump_classes(void)
           "function block not registered: setters answer NO, as macOS (umpclasses2-macos.txt)", "");
     check(fb.UMPEndpoint == nil, "function block not registered has no endpoint", "");
 
-    // A client-made endpoint is made disabled, is listed while disabled, and takes the setters macOS answers YES to.
     charon_host_MIDI2DeviceInfo *endpointInfo = info;
     charon_host_MIDIUMPMutableEndpoint *ep = [[charon_host_MIDIUMPMutableEndpoint alloc] initWithName:@"ep" deviceInfo:endpointInfo
         productInstanceID:@"pid" MIDIProtocol:kMIDIProtocol_2_0 destinationCallback:^(const MIDIEventList *list, void *ref) {}];
@@ -180,7 +164,6 @@ static void check_ump_classes(void)
               "the manager lists the disabled client endpoint, as macOS (umpclasses2-macos.txt: 1)", "");
         check([ep setName:@"renamed" error:NULL] && [ep.name isEqualToString:@"renamed"],
               "endpoint setName answers YES, as macOS", "");
-        // The release's own name of the endpoint's destination, read back through kMIDIPropertyName: the name the library set.
         CFStringRef serverName = NULL;
         OSStatus serverStatus = MIDIObjectGetStringProperty(ep.MIDIDestination, kMIDIPropertyName, &serverName);
         check(serverStatus == noErr && serverName && [(__bridge NSString *)serverName isEqualToString:@"renamed"],
@@ -190,12 +173,9 @@ static void check_ump_classes(void)
         check([ep setEnabled:YES error:NULL] && ep.isEnabled, "endpoint setEnabled:YES answers YES, as macOS", "");
         check([ep registerFunctionBlocks:@[fb] markAsStatic:NO error:NULL] && ep.functionBlocks.count == 1,
               "endpoint registers a block and lists it, as macOS", "");
-        // The static answer follows the registration's argument, as macOS's own endpoint answers (oracle/umpstatic-macos.txt:
-        // NO after markAsStatic:NO, YES after markAsStatic:YES).
         check(!ep.hasStaticFunctionBlocks, "endpoint is not static after markAsStatic:NO, as macOS", "");
         check([ep registerFunctionBlocks:@[fb] markAsStatic:YES error:NULL] && ep.hasStaticFunctionBlocks,
               "endpoint is static after markAsStatic:YES, as macOS", "");
-        // Three blocks in one registration are numbered 1, 2, 3 in order (oracle/umpgate-macos.txt).
         charon_host_MIDIUMPMutableFunctionBlock *b1 = [[charon_host_MIDIUMPMutableFunctionBlock alloc]
             initWithName:@"b1" direction:kMIDIUMPFunctionBlockDirectionInput firstGroup:0 totalGroupsSpanned:1
             maxSysEx8Streams:0 MIDI1Info:kMIDIUMPFunctionBlockMIDI1InfoNotMIDI1 UIHint:kMIDIUMPFunctionBlockUIHintUnknown isEnabled:YES];

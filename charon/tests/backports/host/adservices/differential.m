@@ -3,12 +3,6 @@
 #import <AdServices/AdServices.h>
 #import "check.h"
 
-// The port's AAAttribution against the host's own. The host is macOS, which Apple's attribution
-// service does not support; iOS 6.1.3 carries no AdServices at all, so the port has to answer the
-// same question the host answers: no token, and the error the framework documents for a platform the
-// service does not support. The domain and the code must be the host's own; the description is the
-// port's, and the test fails if it ever stops being the one that tells the truth about this device.
-
 @interface CharonHostAAAttribution : NSObject
 + (NSString *)attributionTokenWithError:(NSError *__autoreleasing *)error;
 @end
@@ -40,8 +34,6 @@ int main(void)
     charon_check(port_error.code == 3, "that code is 3, as the header gives it",
                  [NSString stringWithFormat:@"port %ld", (long)port_error.code]);
 
-    // The host's text says the service is "only available on iOS and iPadOS", which is false on a
-    // device that is iOS: the port says the fact in its own words, and this fails if that changes.
     charon_check(![port_error.localizedDescription isEqualToString:system_error.localizedDescription],
                  "the description is the port's own, not the host's sentence about iOS",
                  [NSString stringWithFormat:@"both say %@", port_error.localizedDescription]);

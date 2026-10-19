@@ -1,20 +1,3 @@
-//
-//  app/main.m
-//  The bracketed capture probe, as an application on the emulated 6.1.3 device (run-app.sh installs and launches it).
-//
-// What it checks, against the header's own statements and the port's own behaviour (there is no host oracle: the macOS build
-// of AVCapturePhotoBracketSettings raises from every factory, API_UNAVAILABLE(macos)):
-//   - the settings: the factories, their members, their refusals (nil, empty, mixed classes), lens stabilization, copies;
-//   - the output: maxBracketedCapturePhotoCount is the port's limit (three members), lens stabilization is not supported,
-//     a bracket with lens stabilization YES is refused, a delegate with no photo callback is refused;
-//   - a bracket capture on the camera: one photo per member, in order, each delivered with its own bracket setting and photo
-//     count, willBeginCapture once before the first, didFinishCapture once after the last;
-//   - a single capture through the 10.0 sample-buffer callback: the same request with no bracket;
-//   - the AVCapturePhoto object (11.0) made from a BGRA buffer, a JPEG and an error, through the port's own initializer.
-// The emulator's camera captures end in AVFoundationErrorDomain -11800 (facts/AVFoundation/AVCapturePhotoOutput.md), so the
-// captures here check the sequence of callbacks, not the pixels: the photos are error photos on the emulator, and the probe says so.
-//
-// Output: one line per check ("check <name> ok" or "check <name> FAIL <detail>"), then "checks: N failed: F". The exit status is F.
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMedia/CoreMedia.h>
 #import <CoreVideo/CoreVideo.h>
@@ -23,8 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// The internal constructors of the port (AVCapturePhoto11.m, AVCaptureResolvedPhotoSettings.m), declared here as the test's own
-// categories: the probe reaches them through the Objective-C runtime, as the port's own tests do.
 @interface AVCaptureResolvedPhotoSettings (CharonProbe)
 - (instancetype)initCharonWithUniqueID:(int64_t)uniqueID photoDimensions:(CMVideoDimensions)photoDimensions
                      previewDimensions:(CMVideoDimensions)previewDimensions
@@ -51,7 +32,6 @@ static void check(BOOL ok, NSString *name, NSString *detail)
     fflush(stdout);
 }
 
-// The name of the exception the block raises, or nil when it returns.
 static NSString *RaisedBy(void (^block)(void))
 {
     @try {
@@ -61,8 +41,6 @@ static NSString *RaisedBy(void (^block)(void))
         return exception.name;
     }
 }
-
-// --- The settings -----------------------------------------------------------------------------------------------------------
 
 static void SettingsChecks(void)
 {
@@ -117,9 +95,6 @@ static void SettingsChecks(void)
           @"refuse-mixed-classes-11", nil);
 }
 
-// --- The output -------------------------------------------------------------------------------------------------------------
-
-// The delegate of the 11.0 callback: it records the order of the callbacks and the photos it is given.
 @interface ProbeRecorder : NSObject <AVCapturePhotoCaptureDelegate>
 @property (nonatomic, strong) NSMutableArray<NSString *> *events;
 @property (nonatomic, strong) NSMutableArray<AVCapturePhoto *> *photos;
@@ -169,7 +144,6 @@ static void SettingsChecks(void)
 
 @end
 
-// The delegate of the 10.0 callback: the sample-buffer one, with the bracket setting it is given.
 @interface ProbeSampleRecorder : NSObject <AVCapturePhotoCaptureDelegate>
 @property (nonatomic, strong) NSMutableArray<NSString *> *events;
 @property (nonatomic, strong) id bracketSeen;
@@ -205,7 +179,6 @@ static void SettingsChecks(void)
 
 @end
 
-// Waits for a request's last callback, or 60 seconds: the probe is not allowed to hang on an emulator that never answers.
 static BOOL Wait(dispatch_semaphore_t finished)
 {
     return dispatch_semaphore_wait(finished, dispatch_time(DISPATCH_TIME_NOW, 60 * NSEC_PER_SEC)) == 0;
@@ -213,7 +186,6 @@ static BOOL Wait(dispatch_semaphore_t finished)
 
 static void OutputChecks(AVCapturePhotoOutput *output)
 {
-    // The port's limit: the count its bracket path delivers and its capture enforces (CharonBracketedCapturePhotoLimit).
     check(output.maxBracketedCapturePhotoCount == 3, @"max-count-is-port",
           [NSString stringWithFormat:@"%lu", (unsigned long)output.maxBracketedCapturePhotoCount]);
     check(!output.lensStabilizationDuringBracketedCaptureSupported, @"lens-stabilization-unsupported", nil);
@@ -235,7 +207,6 @@ static void OutputChecks(AVCapturePhotoOutput *output)
           @"refuse-delegate-without-photo-callback", nil);
 }
 
-// The bracket of three auto exposures on the camera: one photo per member, in order.
 static void BracketChecks(AVCapturePhotoOutput *output)
 {
     NSArray *members = @[[AVCaptureAutoExposureBracketedStillImageSettings autoExposureSettingsWithExposureTargetBias:-1.0f],
@@ -249,7 +220,6 @@ static void BracketChecks(AVCapturePhotoOutput *output)
     BOOL returned = Wait(recorder.finished);
     NSArray *events = nil;
     @synchronized (recorder) { events = [recorder.events copy]; }
-    // Each photo: will, did, photo. begin before the first, finish once after the last.
     NSMutableArray *want = [NSMutableArray arrayWithObject:@"begin"];
     for (NSUInteger i = 0; i < members.count; i++)
         [want addObjectsFromArray:@[@"will", @"did", @"photo"]];
@@ -268,7 +238,6 @@ static void BracketChecks(AVCapturePhotoOutput *output)
     check(photos.count > 0 && ((AVCapturePhoto *)photos[0]).resolvedSettings != nil, @"bracket-error-photos-carry-resolved", nil);
 }
 
-// A single capture through the 10.0 callback: the sample buffer, with no bracket setting.
 static void SingleSampleChecks(AVCapturePhotoOutput *output)
 {
     AVCapturePhotoSettings *single = [AVCapturePhotoSettings photoSettingsWithFormat:@{AVVideoCodecKey: AVVideoCodecJPEG}];
@@ -285,8 +254,6 @@ static void SingleSampleChecks(AVCapturePhotoOutput *output)
           [NSString stringWithFormat:@"%@", [events componentsJoinedByString:@" "]]);
 }
 
-// --- The AVCapturePhoto object ----------------------------------------------------------------------------------------------
-
 static CMVideoDimensions Dimensions(int32_t w, int32_t h)
 {
     return (CMVideoDimensions){w, h};
@@ -294,7 +261,6 @@ static CMVideoDimensions Dimensions(int32_t w, int32_t h)
 
 static CMSampleBufferRef BGRASample(int32_t w, int32_t h)
 {
-    // IOSurface-backed, as the camera's buffers are: CoreImage makes no image from a plain buffer on 6.1.3 (facts).
     CVPixelBufferRef pixels = NULL;
     NSDictionary *surface = @{(__bridge NSString *)kCVPixelBufferIOSurfacePropertiesKey: @{}};
     CVPixelBufferCreate(kCFAllocatorDefault, w, h, kCVPixelFormatType_32BGRA, (__bridge CFDictionaryRef)surface, &pixels);
@@ -378,9 +344,6 @@ static void PhotoObjectChecks(void)
           @"photo-error-object", nil);
 }
 
-// --- The run ----------------------------------------------------------------------------------------------------------------
-
-// Runs one capture check; an exception it raises is a failed check with its reason, and the probe goes on.
 static void CheckCapture(void (^block)(void), NSString *name)
 {
     NSString *raised = nil;
@@ -418,7 +381,6 @@ static int RunProbe(void)
 
     OutputChecks(output);
     PhotoObjectChecks();
-    // The captures need a connection; without one each is a failed check, and a raise from a capture is one too. Neither ends the probe.
     if (connection) {
         CheckCapture(^{ BracketChecks(output); }, @"bracket");
         CheckCapture(^{ SingleSampleChecks(output); }, @"single-sample");
@@ -430,10 +392,6 @@ static int RunProbe(void)
     return failed;
 }
 
-// The probe is an application installed on the emulator and run through its executable (xmake emulate run
-// /Applications/charonphotobracketprobe.app/charonphotobracketprobe). The daemon form failed to package: the daemon link pulls
-// GraphicsBackports, whose weak __sincos_stret (a 7.0 symbol) the 6.1.3 platform rejects. Its checks run on a background queue,
-// so the main queue stays free for the platform while the captures are waited on.
 int main(int argc, char *argv[])
 {
     @autoreleasepool {

@@ -1,27 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-/* The eight configuration settings of iOS 9 to 26 that the port's own configuration did not carry.
-   Each is kept beside the configuration, which is what the header promises: a configuration carries
-   them and a session built from it reads them.
-
-   Which of them the port can act on is a question with a different answer each way, and the answer is
-   here rather than in the reader's head:
-
-   - `shouldUseExtendedBackgroundIdleMode` is read by the port's own session, which is the only thing
-     that could idle a background session at all: the release has no such mode and the port's session
-     is the code that would enter it.
-   - The two TLS versions are read by the port's *stream* task, which negotiates its own TLS over the
-     release's CFStream, and by nothing else: the port's data path runs over the release's own
-     NSURLConnection, which is the system's TLS and takes no version from a port.
-   - `requiresDNSSECValidation`, `allowsUltraConstrainedNetworkAccess` and `usesClassicLoadingMode`
-     are kept and answered. The release's resolver validates what it validates, the release has no
-     such validation to ask for, and the release's connection is not a port's to change; the value the
-     application sets is the value it reads back.
-   - `enablesEarlyData` and `multipathServiceType` are kept and answered for the same reason, and for a
-     second one: 6.1.3 has neither early data nor multipath, so there is nothing here to switch on,
-     and the header's own answer on a system without them is the default. */
-
 static char CharonConfigurationExtendedBackgroundKey;
 static char CharonConfigurationTLSMaximumKey;
 static char CharonConfigurationTLSMinimumKey;

@@ -1,11 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-/* A protocol that serves a session's task. The task is the request's owner: -canInitWithTask: asks
-   the protocol the question it asks for a request, with the task's current request, and
-   -initWithTask:cachedResponse:client: is -initWithRequest:cachedResponse:client: with the task kept
-   beside it, so that the code a protocol runs can ask which task it is serving. */
-
 static char CharonProtocolTaskKey;
 
 @implementation NSURLProtocol (CharonTask)

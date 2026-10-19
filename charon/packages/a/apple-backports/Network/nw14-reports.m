@@ -1,14 +1,3 @@
-/*
- * The resolution report of iOS 14: one resolution of a connection's establishment, in full - how
- * long it took, where the answer came from, how many addresses there were, and which of them the
- * connection settled on.
- *
- * The connection fills each of them from its own resolution: the addresses getaddrinfo gave, the
- * one that took, and the time between the question and the answer. The source says which of the
- * three the answer came from - asked again, or out of a cache, or out of a cache that had expired -
- * because that is the difference between a name looked up now and a name looked up before.
- */
-
 #import "CharonNW.h"
 
 uint64_t nw_resolution_report_get_milliseconds(nw_resolution_report_t resolution_report)

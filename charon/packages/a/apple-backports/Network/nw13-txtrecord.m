@@ -1,23 +1,8 @@
-/*
- * The TXT record of a Bonjour service, and every call of txt_record.h.
- *
- * A TXT record is what RFC 6763 calls a TXT-DATA: a run of length-prefixed strings, each of them a
- * key or a key=value pair. So a record made from bytes is parsed into those pairs, a record made as
- * a dictionary is the same thing built from what a program set, and a record handed back as bytes is
- * put together again in the form the wire wants - each string no longer than 255 bytes, which is
- * what the length byte can count.
- *
- * A key that is empty, that is longer than 255 bytes, or that holds a byte outside ASCII is invalid
- * as RFC 6764 requires, and is refused by every call that takes one: a set that names it does
- * nothing, a find of it answers `invalid`, and it is never in a record's key count.
- */
-
 #import "CharonNW.h"
 #import "CharonNWSupport.h"
 
 #include <string.h>
 
-/* RFC 6763: a character-string is at most 255 bytes, and a key is printable US-ASCII. */
 static bool charon_key_valid(const char *key)
 {
     if (!key)
@@ -42,8 +27,6 @@ static CharonNWTxtRecord *charon_txt_record(BOOL dictionary)
     return record;
 }
 
-/* A key with no value at all is kept as the null, so that the pairs of a record stay in step: a
-   dictionary cannot hold a nil, and the value of such a key is not an empty string but no value. */
 static BOOL charon_has_no_value(id value)
 {
     return !value || [value isKindOfClass:[NSNull class]];
@@ -69,16 +52,11 @@ nw_txt_record_t nw_txt_record_create_dictionary(void)
 
 nw_txt_record_t nw_txt_record_create_with_bytes(const uint8_t *txt_bytes, size_t txt_len)
 {
-    /* Nothing at all is not a record: a TXT record carries at least the empty string, which is the
-       single zero byte the wire form of a record with no keys is. The host's own Network refuses a
-       record made of no bytes (tests/backports/host/network-objects). */
     if (!txt_len)
         return NULL;
     if (!txt_bytes)
         return NULL;
     CharonNWTxtRecord *record = charon_txt_record(YES);
-    /* Each string is a length byte and that many bytes; a length of zero is the empty string, which
-       RFC 6763 allows and which carries no key, so it contributes nothing to the record. */
     size_t offset = 0;
     while (offset < txt_len) {
         size_t length = txt_bytes[offset++];
@@ -237,13 +215,8 @@ bool nw_txt_record_access_bytes(nw_txt_record_t txt_record, nw_txt_record_access
     CharonNWTxtRecord *record = (CharonNWTxtRecord *)txt_record;
     if (!record || !access_bytes)
         return false;
-    /* Put back what the wire carries: for each pair the length byte and the string. A pair longer
-       than 255 bytes cannot be written, and RFC 6763 asks for the record to be empty rather than
-       truncated, which is what an empty record is. */
     NSMutableData *bytes = [NSMutableData data];
     if (!record->_keys.count) {
-        /* A record with no keys is the single zero byte: that is what a service that says nothing
-           publishes, and what the host's own Network hands back (tests/backports/host/network-objects). */
         uint8_t empty = 0;
         [bytes appendBytes:&empty length:1];
         return access_bytes((const uint8_t *)bytes.bytes, bytes.length);

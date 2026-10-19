@@ -1,6 +1,3 @@
-// The store: an NSPersistentStoreCoordinator, the model made from a schema, and the history the
-// store keeps of what was saved.
-
 import Foundation
 import CoreData
 import FoundationEssentials
@@ -12,10 +9,6 @@ public final class DefaultStore: DataStore, DataStoreBatching, @unchecked Sendab
     public typealias HistoryType = DefaultHistoryTransaction
     public typealias TokenType = DefaultHistoryToken
 
-    /// A CloudKit container is an NSPersistentContainer, so a store that names a CloudKit
-    /// container is that subclass and one that names none is the base class. No release this port
-    /// runs on has CloudKit, so nothing mirrors; the class is still what a store of this
-    /// configuration is, and its identifier is what the configuration is asked for.
     public let name: String
     public let schema: Schema
     public let configuration: ModelConfiguration
@@ -43,9 +36,6 @@ public final class DefaultStore: DataStore, DataStoreBatching, @unchecked Sendab
         self.coordinator = container.persistentStoreCoordinator
         let description = NSPersistentStoreDescription(url: configuration.url)
         description.type = configuration.isStoredInMemoryOnly ? NSInMemoryStoreType : NSSQLiteStoreType
-        // A store that keeps history says so with the key the release reads, and the history
-        // tracking itself is a backport (registry/CoreData/ios11.json); without it the release
-        // ignores the option and the store answers every history fetch with nothing.
         description.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
         description.shouldMigrateStoreAutomatically = true
         description.shouldInferMappingModelAutomatically = true
@@ -62,12 +52,8 @@ public final class DefaultStore: DataStore, DataStoreBatching, @unchecked Sendab
         }
     }
 
-    /// What `loadPersistentStores` hands back, which arrives after the closure has run.
     private static var lastLoadError: Error?
 
-    /// The Core Data model a schema describes: one entity per schema entity, one property per
-    /// schema property, and the indexes the schema names. A relationship's far end is filled in
-    /// after every entity exists, because Core Data needs both ends to point at something.
     static func model(from schema: Schema) throws -> NSManagedObjectModel {
         let model = NSManagedObjectModel()
         var entities = [NSEntityDescription]()
@@ -92,7 +78,6 @@ public final class DefaultStore: DataStore, DataStoreBatching, @unchecked Sendab
             entities.append(entity)
         }
         model.entities = entities
-        // The far ends, now that every entity has a description to point at.
         for (index, schemaEntity) in schema.entities.enumerated() {
             for property in schemaEntity.relationships {
                 guard let relationship = property as? Schema.Relationship,
@@ -120,10 +105,6 @@ public final class DefaultStore: DataStore, DataStoreBatching, @unchecked Sendab
         return model
     }
 
-    /// One schema attribute as a Core Data attribute. The type is the one the Swift value has, by
-    /// the table in `AttributeMapping`; a value with no column of its own - a struct, an array, a
-    /// `UUID`, a `URL` on a release whose `NSUUIDAttributeType` is iOS 11 and later - is stored as
-    /// the transformable Core Data has had since iOS 3.0, which keeps the type.
     static func attribute(from attribute: Schema.Attribute) -> NSAttributeDescription {
         let description = NSAttributeDescription()
         description.name = attribute.name
@@ -145,18 +126,10 @@ public final class DefaultStore: DataStore, DataStoreBatching, @unchecked Sendab
         }
     }
 
-    /// A store that is already at the schema it is opened with has nothing to migrate.
     private func migrate(from last: any VersionedSchema.Type, to schema: Schema,
                           plan: any SchemaMigrationPlan.Type) throws {
         let target = Schema(versionedSchema: last)
         guard target != schema else { return }
-        // The release's own -migratePersistentStore:toURL:options:withType:error: takes no
-        // mapping model, so the migration this performs is the store's own: a column the new
-        // schema adds and the old one lacks is added to the table. A migration that renames a
-        // column, or changes a column's type, needs a mapping model and the release has no
-        // signature that takes one - which is what `MigrationStage.custom` is for, and why a
-        // rename in a plan is written as one. The signature also takes the file a store is
-        // migrated to, not a store, so the store is migrated beside itself and put in place.
         if let store = coordinator.persistentStores.first, let url = store.url {
             let moved = url.deletingLastPathComponent()
                 .appendingPathComponent(url.lastPathComponent + ".migrating")
@@ -168,8 +141,6 @@ public final class DefaultStore: DataStore, DataStoreBatching, @unchecked Sendab
             case .lightweight:
                 break
             case .custom(_, _, let willMigrate, let didMigrate):
-                // A custom stage's two closures are handed a context over the store being
-                // migrated, so that what they change is what the migration writes.
                 let container = ModelContainer(self, schema: schema)
                 try willMigrate?(ModelContext(container))
                 try didMigrate?(ModelContext(container))
@@ -177,16 +148,11 @@ public final class DefaultStore: DataStore, DataStoreBatching, @unchecked Sendab
         }
     }
 
-    /// The entity a model type is stored as, in this store's model.
     public func entityDescription(for name: String) -> NSEntityDescription {
         coordinator.managedObjectModel.entitiesByName[name]
             ?? NSEntityDescription()
     }
 
-    /// Which Swift type an entity holds, as far as this store has been told. A model type is
-    /// recorded here the first time a row of its entity is read as that model, which is the only
-    /// place the type is statically known; the schema holds the entities and this holds the types
-    /// the rows of each have been read as.
     private var modelTypes: [String: any PersistentModel.Type] = [:]
 
     func remember<T>(_ type: T.Type, for entityName: String) where T: PersistentModel {
@@ -196,8 +162,6 @@ public final class DefaultStore: DataStore, DataStoreBatching, @unchecked Sendab
     public func modelType(for entityName: String) -> (any PersistentModel.Type)? {
         modelTypes[entityName]
     }
-
-    // MARK: The DataStore
 
     public func erase() throws {
         for store in coordinator.persistentStores {
@@ -226,8 +190,6 @@ public final class DefaultStore: DataStore, DataStoreBatching, @unchecked Sendab
 
     public func save(_ request: DataStoreSaveChangesRequest<DefaultSnapshot>) throws
     -> DataStoreSaveChangesResult<DefaultSnapshot> {
-        // A context holds the rows; a save of snapshots is a context's own save, which the
-        // context does. What a store has to answer is which identities changed.
         var remapped = [PersistentIdentifier: PersistentIdentifier]()
         for snapshot in request.inserted + request.updated where snapshot.persistentIdentifier.id.object == nil {
             remapped[snapshot.persistentIdentifier] = snapshot.persistentIdentifier
@@ -244,10 +206,6 @@ public final class DefaultStore: DataStore, DataStoreBatching, @unchecked Sendab
         try context.execute(delete)
     }
 
-    /// The uniqueness constraints the schema names, checked against the rows of the store. The
-    /// store of the port cannot enforce them - `NSEntityDescription.uniquenessConstraints` is
-    /// registered `absent` for iOS 6 - so this is where they are checked, and a duplicate is
-    /// refused rather than written.
     func checkUniqueness(in context: ModelContext) throws {
         for schemaEntity in schema.entities where !schemaEntity.uniquenessConstraints.isEmpty {
             for constraint in schemaEntity.uniquenessConstraints {
@@ -259,11 +217,6 @@ public final class DefaultStore: DataStore, DataStoreBatching, @unchecked Sendab
                         String(describing: row.value(forKey: name) ?? NSNull())
                     }.joined(separator: "\u{1}")
                     if let first = seen[key], first !== row {
-                        // A uniqueness constraint the store of the port cannot enforce, broken.
-                        // `NSEntityDescription.uniquenessConstraints` is registered `absent` for
-                        // iOS 6, and `NSConstraintConflict` is an Objective-C class this module
-                        // cannot throw, so the refusal is a Swift error that carries both the
-                        // constraint that was broken and Core Data's own value for the conflict.
                         let conflict = NSConstraintConflict(constraint: constraint, database: row,
                                                             databaseSnapshot: nil,
                                                             conflicting: [first, row],
@@ -278,9 +231,6 @@ public final class DefaultStore: DataStore, DataStoreBatching, @unchecked Sendab
     }
 }
 
-/// The Core Data type a Swift value is stored as. The table is the whole of it, and a type with
-/// no row in it is transformable, which is the one type that can hold anything: what the value
-/// *is* is kept by the transformer or, with none, by `NSCoding`.
 enum AttributeMapping {
     static func coreDataType(of type: any Any.Type, transformable: Bool) -> NSAttributeType {
         typealias Date = Foundation.Date
@@ -301,56 +251,25 @@ enum AttributeMapping {
     }
 }
 
-/// A uniqueness constraint the store of the port cannot enforce, broken. `NSEntityDescription.
-/// uniquenessConstraints` is registered `absent` for iOS 6, and `NSConstraintConflict` is an
-/// Objective-C class this module cannot throw, so the refusal is a Swift error that carries both
-/// the constraint that was broken and Core Data's own value for the conflict.
 public struct UniquenessViolation: Error {
     public let entity: String
     public let constraint: [String]
     public let conflict: NSConstraintConflict
 }
 
-// MARK: - The history
-//
-// A history is what the store remembers of what was saved to it, over the backports'
-// NSPersistentHistory*: NSPersistentHistoryChangeRequest, NSPersistentHistoryToken,
-// NSPersistentHistoryTransaction, NSPersistentHistoryChange, NSPersistentHistoryResult,
-// NSPersistentHistoryTrackingKey, NSPersistentHistoryTokenKey,
-// -[NSPersistentStoreCoordinator currentPersistentHistoryTokenFromStores:] and
-// NSManagedObjectContext.transactionAuthor, all `implemented` with `minimum: 6.0` in
-// registry/CoreData/ios11.json. A store that sets NSPersistentHistoryTrackingKey keeps them, and
-// this store's on_install sets it, so there is something below to read.
-//
-// What a descriptor can ask for is what its three members are: a predicate, a limit and an order.
-// There is no token and no date on it, so a fetch is the store's whole history, newest last, and a
-// delete is everything before the newest transaction. A reader that wants to resume from where it
-// was holds the token itself - `DefaultHistoryToken.tokenValue` carries the transaction number per
-// store - and this is stated here because the interface says the same thing and nothing more.
-
 extension DefaultStore: HistoryProviding {
     public static var historyType: DefaultHistoryTransaction.Type { DefaultHistoryTransaction.self }
 
     public func fetchHistory(_ descriptor: HistoryDescriptor<DefaultHistoryTransaction>)
     throws -> [DefaultHistoryTransaction] {
-        // The release declares fetchHistoryAfterDate:, AfterToken: and AfterTransaction:, and the
-        // importer gives all three the SAME name, `fetchHistory(after:)`, so the overload is chosen
-        // by the argument's type and a nil literal picks none of them. A token that holds nothing
-        // is the whole history, and a descriptor has no token on it to say otherwise, so that is
-        // the spelling.
         let request = NSPersistentHistoryChangeRequest.fetchHistory(after: NSPersistentHistoryToken())
         if descriptor.fetchLimit > 0 {
-            // The release's transaction is not an NSFetchRequestResult, so the fetch is untyped and
-            // the limit is the fetch's own.
             let fetch = NSFetchRequest<NSFetchRequestResult>(entityName: "NSPersistentHistoryTransaction")
             fetch.fetchLimit = Int(descriptor.fetchLimit)
             request.fetchRequest = fetch
         }
         let rows = try execute(request)
         var transactions = rows.map { DefaultHistoryTransaction($0) }
-        // The predicate is compiled by the compiler and answers a transaction's own values, and the
-        // store cannot be told about it, so it is run here. That is what
-        // `DataStoreError.preferInMemoryFilter` documents.
         if let predicate = descriptor.predicate {
             transactions = try transactions.filter { try predicate.evaluate($0) }
         }
@@ -387,9 +306,6 @@ extension DefaultStore: HistoryProviding {
 }
 
 extension DefaultHistoryTransaction {
-    /// One of the backports' transactions, read. The release declares `transactionNumber`, which is
-    /// a transaction's identity: it is its place in the store's history, it is comparable, and it
-    /// is what a token points at.
     init(_ transaction: NSPersistentHistoryTransaction) {
         let number = transaction.transactionNumber
         let when = StoredValue.cast(transaction.timestamp, to: Foundation.Date.self)
@@ -404,10 +320,6 @@ extension DefaultHistoryTransaction {
         self.changes = (transaction.changes ?? []).map { DefaultHistoryChange($0, in: number) }
     }
 
-    /// A named property of a transaction, for a sort key path. A history transaction's own
-    /// properties are the ones the release declares, and a key path naming another is not one of
-    /// them, so it answers nil and the sort leaves that key alone rather than sorting by something
-    /// nobody named.
     static func sortValue(of name: String, _ lhs: DefaultHistoryTransaction,
                           _ rhs: DefaultHistoryTransaction) -> Foundation.ComparisonResult? {
         switch name {
@@ -430,9 +342,6 @@ extension DefaultHistoryTransaction {
     }
 }
 
-/// One of the backports' changes, read. The release's `NSPersistentHistoryChangeType` is three
-/// cases, and a change is an insert, an update or a delete; a delete carries a tombstone, which is
-/// what a reader still sees of the row it held.
 func DefaultHistoryChange(_ change: NSPersistentHistoryChange,
                            in transaction: Int64) -> HistoryChange {
     let identifier = PersistentIdentifier(change.changedObjectID,

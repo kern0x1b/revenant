@@ -283,8 +283,6 @@ static void charon_interactive_transition(CharonTransitionKind kind, UIViewContr
     if (kind == CharonTransitionPresent)
         finalTo = [window convertRect:window.screen.applicationFrame fromWindow:nil];
     else if (kind == CharonTransitionDismiss)
-        /* The release frames the presenter's view again in its own dismissal, which runs when the interaction
-           has finished; until then the frame it gave the view before taking it out of the window stands for it. */
         finalTo = toView.superview ? [toView.superview convertRect:toView.frame toView:host] : toView.frame;
 
     NSMutableArray *controllers = [NSMutableArray array];
@@ -378,7 +376,6 @@ static void charon_interactive_transition(CharonTransitionKind kind, UIViewContr
             [fromView removeFromSuperview];
         void (^settle)(void) = ^{
             if (toView.superview == container) {
-                /* A dismissal keeps the frame the release's own gave the presenter's view when it put it back. */
                 CGRect frame = kind == CharonTransitionDismiss ? [container convertRect:toView.frame toView:window] : finalTo;
                 [toView removeFromSuperview];
                 if (kind == CharonTransitionDismiss)
@@ -632,8 +629,6 @@ static void charon_presentation_run(BOOL presenting, UIViewController *from, UIV
         container.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         [window addSubview:container];
         [presentation charon_setContainerView:container];
-        /* The presenter's view keeps its place on the screen inside the container: the release framed it for its
-           controller, and on iOS 6 a root view sits under the status bar, not over the window's bounds. */
         CGRect presenterFrame = [container convertRect:presenterView.frame fromView:presenterView.superview];
         if (removes) {
             [presenterView removeFromSuperview];
@@ -700,12 +695,8 @@ static void charon_presentation_run(BOOL presenting, UIViewController *from, UIV
                 [presenterView removeFromSuperview];
         } else {
             [presentation dismissalTransitionDidEnd:didComplete];
-            /* A dismissal the user took back (a sheet dragged down and let go above its
-               smallest detent) leaves the controller presented. */
             if (didComplete) {
                 native();
-                /* The release's dismissal frames the presenter's view for its controller and puts it where the
-                   presented view was, in this container: it keeps that place on the screen when the container goes. */
                 if (presenterView.superview == container && window) {
                     presenterView.frame = [container convertRect:presenterView.frame toView:window];
                     [window insertSubview:presenterView belowSubview:container];

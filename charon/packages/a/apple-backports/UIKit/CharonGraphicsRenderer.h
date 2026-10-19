@@ -10,10 +10,6 @@ CG_EXTERN CGFloat CGContextGetLineWidth(CGContextRef context);
 @end
 
 @interface UIGraphicsRenderer (CharonRenderer)
-// The release's own variant, which takes the format to draw with: a renderer that writes somewhere
-// names the destination on that format and runs the drawing through this one, so the copy the
-// renderer keeps is the one that carries it. The two context members are what a subclass pushes and
-// pops with, and what it calls back into around its own page bookkeeping.
 - (BOOL)runDrawingActions:(NS_NOESCAPE UIGraphicsDrawingActions)drawingActions
          completionActions:(NS_NOESCAPE UIGraphicsDrawingActions)completionActions
                     format:(UIGraphicsRendererFormat *)format

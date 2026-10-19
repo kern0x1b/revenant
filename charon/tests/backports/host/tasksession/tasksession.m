@@ -1,29 +1,3 @@
-/* tasksession.m - what the host's own NSURLSession does with a task's delegate.
-
-   The three things asked, about the task delegate property that SDK 16.4 NSURLSession.h declares at
-   :296-304:
-
-       a selector the task delegate does not implement is forwarded on to the session delegate;
-       the delegate cannot change once the task has resumed, and a background session does not take one;
-       the task holds the delegate strongly until it completes, and then clears it.
-
-   Each is asked of the system's own Foundation, not of the port: the port's objects are armv7
-   iOS 6.1.3 and this program is macOS. Nothing here reads the port.
-
-   Four runs, in this order, and each is worthless if the control before it did not pass:
-
-     1. control   - the reader can see the property, the protocol and a live task, and a task with
-                    no delegate of its own reports nil. A reader that could not see them would
-                    report every rule as "does not happen".
-     2. forwarding- the task's delegate implements NOTHING, the session's implements
-                    URLSession:task:didCompleteWithError:. Who hears the completion?
-     3. partial   - the task's delegate implements exactly that one selector. Who hears it now?
-     4. lifetime  - is -setDelegate: after -resume accepted or refused, and with what; and does
-                    -delegate read nil once the task has completed.
-
-   Nothing leaves the machine: every task is http://127.0.0.1:1/, which is refused by the loopback
-   stack immediately, so the completion fires locally and no name is resolved. */
-
 #import <Foundation/Foundation.h>
 
 static int failures = 0;
@@ -38,15 +12,11 @@ static void charon_check(int passed, const char *name, NSString *detail)
     }
 }
 
-/* The delegate that implements NOTHING of the protocol. A class with no method at all is the
-   strongest form of "not implemented on this delegate": nothing can be forwarded to it by
-   accident. */
 @interface CharonBareDelegate : NSObject <NSURLSessionTaskDelegate>
 @end
 @implementation CharonBareDelegate
 @end
 
-/* The delegate that implements exactly one task-scoped selector and nothing else. */
 @interface CharonOneDelegate : NSObject <NSURLSessionTaskDelegate>
 @property (atomic, assign) NSUInteger completions;
 @property (atomic, assign) NSUInteger bareCompletions;
@@ -70,7 +40,6 @@ static void charon_check(int passed, const char *name, NSString *detail)
 
 @end
 
-/* The session's delegate: it implements the two selectors and counts who was asked. */
 @interface CharonSessionDelegate : NSObject <NSURLSessionDelegate, NSURLSessionTaskDelegate>
 @property (atomic, assign) NSUInteger completions;
 @property (atomic, assign) NSUInteger metrics;
@@ -97,7 +66,6 @@ static NSURL *CharonUnreachable(void)
     return [NSURL URLWithString:@"http://127.0.0.1:1/"];
 }
 
-/* One task, run to completion, and what the three delegates heard. */
 static void CharonRun(id<NSURLSessionTaskDelegate> taskDelegate, CharonSessionDelegate *sessionDelegate,
                       CharonOneDelegate *oneDelegate, BOOL setDelegate, BOOL *refused,
                       NSString **refusal, NSString **afterCompletion, BOOL *wasSet)
@@ -113,8 +81,6 @@ static void CharonRun(id<NSURLSessionTaskDelegate> taskDelegate, CharonSessionDe
         [task setDelegate:taskDelegate];
     *wasSet = task.delegate == taskDelegate;
     [task resume];
-    /* The FIRST rule the header states about -setDelegate: after -resume. The refusal, if there is
-       one, is an exception and the question is which. */
     @try {
         [task setDelegate:taskDelegate];
         *refused = NO;
@@ -124,7 +90,6 @@ static void CharonRun(id<NSURLSessionTaskDelegate> taskDelegate, CharonSessionDe
         *refused = YES;
         *refusal = [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason];
     }
-    /* Run the queue dry so the completion has been delivered before anything is read. */
     [queue waitUntilAllOperationsAreFinished];
     NSCondition *done = [[NSCondition alloc] init];
     (void)done;
@@ -143,7 +108,6 @@ int main(void)
         NSLog(@"[tasksession] host %@ %@ %@", NSProcessInfo.processInfo.operatingSystemVersionString,
               @(NSProcessInfo.processInfo.processorCount), @"");
 
-        /* 1. the control: this reader can see the property, the protocol and a live task. */
         {
             NSURLSession *plain = [NSURLSession sessionWithConfiguration:
                                   [NSURLSessionConfiguration ephemeralSessionConfiguration]];
@@ -166,8 +130,6 @@ int main(void)
             [plain finishTasksAndInvalidate];
         }
 
-        /* 2. the task's delegate implements NOTHING: this step checks that the completion is still
-              forwarded to the session delegate. */
         {
             CharonBareDelegate *bare = [[CharonBareDelegate alloc] init];
             CharonOneDelegate *one = [[CharonOneDelegate alloc] init];
@@ -192,8 +154,6 @@ int main(void)
                          [NSString stringWithFormat:@"reads %@", after]);
         }
 
-        /* 3. the task's delegate implements exactly that selector: it is asked, and the session's
-              is not. */
         {
             CharonOneDelegate *one = [[CharonOneDelegate alloc] init];
             CharonSessionDelegate *sessionDelegate = [[CharonSessionDelegate alloc] init];

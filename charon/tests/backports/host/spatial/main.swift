@@ -1,34 +1,12 @@
-// main.swift - the host differential of the Spatial overlay: the same expressions, run against
-// Apple's Spatial.framework and against the module built from packages/s/swift-runtime/files/Spatial,
-// each in its own binary, and the two transcripts compared number by number by check.lua.
-//
-// One file, built twice (run.sh): an expression only one of the two modules can answer is a
-// difference the comparison cannot see, so every expression below is spelled in the surface the two
-// share. What is in Apple's surface and not in this module's is measured by the two compiles: the
-// coordinate-space family, swingTwist/slerp/spline, changeBasis, Point3D.clamp, and the C-level
-// __SPEulerAngleOrder.pitchYawRoll. What is in this module's surface and not in Apple's is measured
-// by the same two compiles, and each of those is named in the commit message.
-//
-// What this is not: a test of the module against itself. Every number on the right-hand side is
-// Apple's own answer for the same input, and the checker's tolerance is the only slack: 1e-12
-// relative for the Double half, 1e-6 for the Float half, nothing at all for a flag or a string.
-
 import Foundation
 import Spatial
-// Apple's module re-exports simd (`@_exported import simd` in its interface) and this one imports
-// it without re-exporting it, so the harness names it itself: the matrix types below are the C
-// library's in both builds, and without this line only Apple's side sees them.
 import simd
 
-// A fixed width, so that equal numbers print identically on both sides: Swift's own `print` writes
-// the shortest representation that round-trips, which differs for two values one ulp apart.
 func say(_ name: String, _ value: Double) { print("\(name)\t\(String(format: "%.17g", value))") }
 func say(_ name: String, _ value: Float) { print("\(name)\t\(String(format: "%.9g", value))") }
 func say(_ name: String, _ value: Bool) { print("\(name)\t\(value ? 1 : 0)") }
 func say(_ name: String, _ value: String) { print("\(name)\tstr:\(value)") }
 
-// The value types and the vectors behind them, one expression per component: a difference then
-// names the component that differs and not a struct's description.
 func say(_ name: String, _ value: SIMD3<Double>) {
     say(name + ".x", value.x)
     say(name + ".y", value.y)
@@ -116,8 +94,6 @@ func say(_ name: String, _ value: RotationAxis3DFloat) {
     say(name + ".z", value.z)
 }
 
-// MARK: - Angle2D and the free functions over it
-
 let angle = Angle2D.degrees(30)
 say("d.angle.radians", angle.radians)
 say("d.angle.degrees", angle.degrees)
@@ -140,8 +116,6 @@ say("d.cosh", cosh(angle))
 say("d.sinh", sinh(angle))
 say("d.tanh", tanh(angle))
 say("d.description", angle.description)
-
-// MARK: - Vector3D
 
 let vector = Vector3D(x: 3, y: -4, z: 12)
 let other = Vector3D(x: -2, y: 5, z: 1)
@@ -171,8 +145,6 @@ say("d.vector.up", Vector3D.up)
 say("d.vector.rotation.to", vector.rotation(to: other).angle.radians)
 say("d.vector.rotation.to.axis", vector.rotation(to: other).axis)
 
-// MARK: - Point3D and Size3D
-
 let point = Point3D(x: 3, y: -4, z: 12)
 let size = Size3D(width: 2, height: 3, depth: 4)
 say("d.point.x", point.x)
@@ -194,8 +166,6 @@ say("d.size.scaledBy", size.scaledBy(x: 2, y: 2, z: 2))
 say("d.size.uniformlyScaled", size.uniformlyScaled(by: 3))
 say("d.size.sheared", size.sheared(.yAxis(xShearFactor: 0.5, zShearFactor: 0.25)))
 
-// MARK: - Rect3D
-
 let rect = Rect3D(origin: Point3D(x: -1, y: -2, z: -3), size: size)
 say("d.rect.minX", rect.minX)
 say("d.rect.midY", rect.midY)
@@ -215,8 +185,6 @@ for (index, corner) in rect.cornerPoints.enumerated() {
     say("d.rect.corner\(index)", corner)
 }
 
-// MARK: - Ray3D
-
 let ray = Ray3D(origin: point, direction: Vector3D(x: 1, y: 2, z: 3))
 say("d.ray.origin", ray.origin)
 say("d.ray.direction", ray.direction)
@@ -225,8 +193,6 @@ say("d.ray.translated", ray.translated(by: Vector3D(x: 1, y: 0, z: 0)))
 say("d.ray.intersectsSphere", ray.intersects(sphereOrigin: .zero, sphereRadius: 10))
 say("d.ray.intersectsRect", ray.intersects(rect))
 say("d.ray.rotated", ray.rotated(by: Rotation3D(angle: .radians(0.4), axis: RotationAxis3D(x: 0, y: 1, z: 0))))
-
-// MARK: - Rotation3D
 
 let axis = RotationAxis3D(x: 1, y: 2, z: 3)
 let rotation = Rotation3D(angle: .radians(0.7), axis: axis)
@@ -247,8 +213,6 @@ say("d.rotation.vectorRotated", Vector3D(x: 1, y: 0, z: 0).rotated(by: rotation)
 say("d.rotation.vectorRotatedQuaternion", Vector3D(x: 1, y: 0, z: 0).rotated(by: rotation.quaternion))
 say("d.rotation.pointRotatedAroundPivot",
     Point3D(x: 1, y: 0, z: 0).rotated(by: rotation, around: Point3D(x: 1, y: 1, z: 1)))
-
-// MARK: - AffineTransform3D
 
 let affine = AffineTransform3D(scale: Size3D(width: 2, height: 3, depth: 4))
     .rotated(by: rotation)
@@ -280,8 +244,6 @@ say("d.affine.size", size.applying(affine))
 say("d.affine.rotationTo", point.applying(affine).rotation(to: point).angle.radians)
 say("d.affine.isApproximatelyEqual", affine.isApproximatelyEqual(to: affine, tolerance: 1e-9))
 
-// MARK: - ProjectiveTransform3D
-
 let projective = ProjectiveTransform3D(scale: Size3D(width: 2, height: 2, depth: 2))
     .rotated(by: rotation)
     .translated(by: Vector3D(x: 1, y: 2, z: 3))
@@ -292,8 +254,6 @@ say("d.projective.point", point.applying(projective))
 say("d.projective.point.unapplying", point.applying(projective).unapplying(projective))
 say("d.projective.inverse.isNil", projective.inverse == nil)
 say("d.projective.product", (projective * projective).matrix)
-
-// MARK: - Pose3D and ScaledPose3D
 
 let pose = Pose3D(position: point, rotation: rotation)
 let scaledPose = ScaledPose3D(position: point, rotation: rotation, scale: 1.5)
@@ -318,8 +278,6 @@ say("d.scaledPose.point.unapplying", point.applying(scaledPose).unapplying(scale
 say("d.scaledPose.vector", vector.applying(scaledPose))
 say("d.scaledPose.size", size.applying(scaledPose))
 
-// MARK: - SphericalCoordinates3D
-
 let spherical = SphericalCoordinates3D(vector)
 say("d.spherical.radius", spherical.radius)
 say("d.spherical.inclination", spherical.inclination.radians)
@@ -329,14 +287,6 @@ say("d.spherical.vector.y", spherical.vector.y)
 say("d.spherical.vector.z", spherical.vector.z)
 say("d.spherical.fromXYZ", SphericalCoordinates3D(x: 1, y: 2, z: 3).vector)
 
-// MARK: - The Codable shapes
-
-// A transformation is four named columns and a rotation is four numbers, so a round trip through
-// JSON measures the shape as well as the value. Sorted keys, so the two encodings are comparable
-// as strings.
-/// The keys of a Codable shape, and what the first of them holds, as one string: the shape is
-/// compared exactly and the values are compared as numbers by the lines above it, which is what a
-/// tolerance is for. Two modules that agree to 1e-12 need not print the same last bit of a Double.
 func shape(of data: Data) -> String {
     guard let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
         return "not an object"
@@ -376,8 +326,6 @@ if let data = try? encoder.encode(pose), let back = try? decoder.decode(Pose3D.s
 } else {
     say("d.codable.pose.failed", true)
 }
-
-// MARK: - The Float half: the same expressions, the same inputs, the type's own precision
 
 let fangle = Angle2DFloat.degrees(30)
 say("f.angle.radians", fangle.radians)

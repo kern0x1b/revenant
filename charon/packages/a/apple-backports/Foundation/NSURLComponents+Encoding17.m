@@ -1,19 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-/* The two ways of reading a components string that percent-encode what a URL cannot carry, and the
-   host of a components object in the form a URL needs.
-
-   The header: with encodingInvalidCharacters:NO a character a URL cannot carry makes the whole read
-   answer nil (measured: "https://example.com/a b" is nil both ways round, and "https://example.com/a
-   %20b" with NO). The rule the port uses is the release's own URL grammar: a character is written as
-   a percent escape when it is not one a URL may carry unescaped, and the escape is upper case.
-
-   encodedHost is the host as a URL writes it, which is not the host as a property reads it: a host
-   that came in with a percent escape reads back decoded and keeps the escape in encodedHost
-   (measured: "ex%61mple.com" reads as the host "example.com" and the encoded host "ex%61mple.com"),
-   and a host set with a space in it is written "a%20b". */
-
 extern BOOL charon_url_parse(NSString *string, NSRange *ranges);
 extern BOOL charon_url_valid(int part, NSString *string);
 extern NSString *charon_url_compose(NSURLComponents *components, NSRange *ranges);
@@ -83,7 +70,6 @@ static NSString *charon_whole_escaped(NSString *text)
         return nil;
     NSString *raw = objc_getAssociatedObject(self, &CharonURLComponentsRawKey);
     if (raw) {
-        /* The host as it was written, when the string still carries it. */
         NSRange schemeRange = [raw rangeOfString:@"://"];
         if (schemeRange.location != NSNotFound) {
             NSString *rest = [raw substringFromIndex:NSMaxRange(schemeRange)];

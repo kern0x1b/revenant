@@ -2,21 +2,6 @@
 
 static BOOL ur_port_mode;
 
-// A prefixed selector for the port's copy of a name, spelled the way prefix_selectors.py's prefixed()
-// spells it, which is not simply "charonHost" in front of the name. An Objective-C family keyword keeps
-// its own spelling and the prefix goes after it, so the method is still an initializer and clang's family
-// rules still see one: initWithDynamicProvider: becomes initCharonHostWithDynamicProvider:, not
-// charonHostInitWithDynamicProvider:. Measured on this group, linking the port's own object:
-//
-//   $ nm colors13/UIColorDynamic.m.o | grep DynamicProvider
-//   00000000000001a8 t +[UIColor(CharonDynamicColor) charonHostColorWithDynamicProvider:]
-//   0000000000000444 t -[UIColor(CharonDynamicColor) initCharonHostWithDynamicProvider:]
-//
-// and with that object linked, [UIColor alloc] - whose class the host names UIPlaceholderColor, and which
-// IS a UIColor subclass - answers initWithDynamicProvider: and not the name this header was asking for:
-// "unrecognized selector sent to instance", exit 134. Four other groups carry family keywords too
-// (controlactions, controlmenus, views13), which is why the rule is spelled once and here rather than
-// patched per group.
 static SEL ur_sel(const char *name)
 {
     if (!ur_port_mode)
@@ -42,20 +27,6 @@ static UIColor *ur_dynamic(UIColor *(^provider)(UITraitCollection *))
     return ((UIColor * (*)(Class, SEL, id))objc_msgSend)([UIColor class], ur_sel("colorWithDynamicProvider:"), provider);
 }
 
-// The port's own spelling of -initWithDynamicProvider:, declared so that the send below is a real message
-// send. An initializer consumes its receiver: [UIColor alloc] is +1 and -initWithCGColor: gives it back, which
-// is why ARC emits no release for a typed `[[UIColor alloc] init...]`. Through an objc_msgSend cast the
-// compiler cannot see the family, so it treats the call as an ordinary function returning an unretained object
-// and releases the [UIColor alloc] result as well - one release too many. UIColor on this host is a class
-// cluster whose +allocWithZone: hands back ONE shared placeholder (measured: two allocations answer the same
-// pointer, and a fresh one answers retainCount 2), so the extra release destroys it and the next [UIColor
-// alloc] returns freed memory:
-//
-//   #0 objc_retainAutoreleaseReturnValue  #1 +[UIColor allocWithZone:]  #2 charon_dynamic UIColorDynamic.m:22
-//
-// which is the SIGSEGV (exit 139) this group died on. Measured on both sides of the differential, with the
-// port's object linked and with none: the placeholder's retainCount is 3 before the call and 2 after it, the
-// system's own -[UIColor initWithDynamicProvider:] included. With the send spelled out, the group is green.
 @interface UIColor (UrHostDynamicInit)
 - (instancetype)initCharonHostWithDynamicProvider:(UIColor *(^)(UITraitCollection *))provider;
 @end

@@ -1,17 +1,3 @@
-/* cases.m - MPSCNNDepthWiseConvolutionDescriptor and MPSCNNSubPixelConvolutionDescriptor (iOS 11.0), and the two
- * TensorFlow average-pooling factories of MPSNNDefaultPadding (11.0 and 11.3), each compared with Apple's own object
- * on the same inputs, in one process.
- *
- * The port's classes are built by run.sh for Catalyst with every class they define renamed CharonHost<Name>, so
- * NSClassFromString(@"CharonHost<Name>") is the port's and the bare name is Apple's. Every value a side answers is
- * compared with the value the other side answers, and a disagreement names the member and both values.
- *
- * NOT A FIXED TABLE. The expectations are what Apple's objects answer on this host when the case runs. The one place
- * a number is written here is the channelMultiplier pairs, and each of those was measured the same way first.
- *
- * NOTHING IS STUBBED. A member the port does not carry is printed as a "note" and is not counted, and the note says
- * which member and why. A member the port carries and answers differently is a FAIL.
- */
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>
@@ -36,7 +22,6 @@ static NSString *className(id object)
 
 static NSString *num(NSUInteger value) { return [NSString stringWithFormat:@"%lu", (unsigned long)value]; }
 
-/* The members MPSCNNConvolutionDescriptor declares, read from either side. */
 static NSMutableDictionary *shape(id object)
 {
     MPSCNNConvolutionDescriptor *c = (MPSCNNConvolutionDescriptor *)object;
@@ -83,7 +68,6 @@ static void compare(NSDictionary *apple, NSDictionary *port, NSString *moment)
     }
 }
 
-/* The shape members and the neuron, set away from the defaults. */
 static void setShape(id object)
 {
     MPSCNNConvolutionDescriptor *c = (MPSCNNConvolutionDescriptor *)object;
@@ -104,20 +88,16 @@ static void descriptorSection(NSString *title, Class apple, Class port, BOOL isS
     printf("%s\n", [title UTF8String]);
     NSMutableDictionary *(*read)(id) = isSubpixel ? subpixel : depthwise;
 
-    /* The defaults: a fresh object from alloc and init, on each side. */
     compare(read([[apple alloc] init]), read([[port alloc] init]), @"defaults");
     printf("  note %s: fusedNeuronDescriptor is not carried. Apple's fresh object has a non-nil MPSNNNeuronDescriptor,\n"
            "       an iOS 11.3 class the port does not have (MPSCNNElements10.m:278), so the port answers the base's nil. Not compared.\n",
            [className([apple new]) UTF8String]);
 
-    /* The four-argument factory the header declares (MPSCNNConvolution.h:177). */
     id appleFactory = [apple cnnConvolutionDescriptorWithKernelWidth:3 kernelHeight:5 inputFeatureChannels:4 outputFeatureChannels:8];
     id portFactory = [port cnnConvolutionDescriptorWithKernelWidth:3 kernelHeight:5 inputFeatureChannels:4 outputFeatureChannels:8];
     check([portFactory isKindOfClass:port], @"factory: the port's four-argument factory answers an object of its own class");
     compare(read(appleFactory), read(portFactory), @"factory");
 
-    /* The set members: every shape member and the neuron away from its default, and for the sub-pixel class the
-     * factor, set after the channel count it must divide (as the release's own rule requires). */
     id appleSet = [[apple alloc] init];
     id portSet = [[port alloc] init];
     setShape(appleSet);
@@ -128,7 +108,6 @@ static void descriptorSection(NSString *title, Class apple, Class port, BOOL isS
     }
     compare(read(appleSet), read(portSet), @"set");
 
-    /* A copy of the set object: its class and members, equality, and the rule that a copy does not share. */
     id appleCopy = [appleSet copy];
     id portCopy = [portSet copy];
     compare(read(appleCopy), read(portCopy), @"copy");
@@ -146,14 +125,11 @@ static void descriptorSection(NSString *title, Class apple, Class port, BOOL isS
     compare(appleBefore, read(appleCopy), @"copy after the original changed (apple's copy)");
     compare(portBefore, read(portCopy), @"copy after the original changed (port's copy)");
 
-    /* Equality for unset values: two fresh objects, and a fresh one against a set one. */
     check([[apple new] isEqual:[apple new]] == NO && [[port new] isEqual:[port new]] == NO,
           @"equality: two fresh objects are not equal, on either side");
     check([[apple new] isEqual:appleSet] == NO && [[port new] isEqual:portSet] == NO,
           @"equality: a fresh object is not equal to a set one, on either side");
 
-    /* channelMultiplier is derived from the channel counts, so it is compared over pairs. The expectations are the
-     * values Apple's object answered when measured (whole-number division; 0 with no input channels). */
     if (!isSubpixel) {
         NSUInteger pairs[][2] = {{1, 1}, {4, 8}, {4, 4}, {4, 6}, {6, 4}, {3, 4}, {4, 12}, {0, 4}};
         NSUInteger expect[] = {1, 2, 1, 1, 0, 1, 3, 0};
@@ -173,8 +149,6 @@ static void descriptorSection(NSString *title, Class apple, Class port, BOOL isS
         }
     }
 
-    /* Coding: a secure archive round-trips. The base writes the shape members and not the neuron, so the neuron is
-     * left out of the comparison on both sides; the sub-pixel factor and the derived multiplier are compared. */
     NSError *error = nil;
     NSData *appleData = [NSKeyedArchiver archivedDataWithRootObject:appleCopy requiringSecureCoding:YES error:&error];
     NSError *appleError = error;
@@ -204,8 +178,6 @@ static void descriptorSection(NSString *title, Class apple, Class port, BOOL isS
     }
 }
 
-/* ---------- the padding factories ---------- */
-
 typedef id (*PaddingFactory)(Class);
 
 static id averageFor(Class padding) { return [padding paddingForTensorflowAveragePooling]; }
@@ -221,8 +193,6 @@ static NSString *policyLine(id policy)
     return [NSString stringWithFormat:@"paddingMethod 0x%lx, label %@", (unsigned long)[policy paddingMethod], [policy label]];
 }
 
-/* The destination for one set of inputs, as one line: the object returned, its size, and the kernel's edge mode and
- * offset before and after the call. */
 static NSString *destinationLine(id policy, id<MTLDevice> device, NSUInteger sourceW, NSUInteger sourceH,
                                  NSUInteger suggestedW, NSUInteger suggestedH, NSUInteger window, NSUInteger stride)
 {
@@ -247,7 +217,6 @@ static NSString *destinationLine(id policy, id<MTLDevice> device, NSUInteger sou
             (long)before.x, (long)before.y, (long)after.x, (long)after.y];
 }
 
-/* The base convolution descriptor, which the two subclasses build on: its own plain init is what they inherit. */
 static void baseSection(Class apple, Class port)
 {
     printf("MPSCNNConvolutionDescriptor (base, plain init)\n");
@@ -276,7 +245,6 @@ static void paddingSection(NSString *title, PaddingFactory make, id<MTLDevice> d
     check(sameObjectEachCall(apple, make) && sameObjectEachCall(port, make),
           @"sharing: each side answers the same object on every call");
 
-    /* The destination, for the same inputs, on each side. */
     struct { NSUInteger sw, sh, gw, gh, window, stride; } cases[] = {
         {3, 3, 3, 3, 2, 2}, {3, 3, 2, 2, 2, 2}, {5, 5, 5, 5, 3, 1}, {5, 5, 4, 4, 3, 1}, {7, 7, 3, 3, 3, 2},
     };

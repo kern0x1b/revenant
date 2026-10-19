@@ -1,6 +1,3 @@
--- What a port declares and, above all, what Charon refuses to guess: the Lua port of tests/spec_test.py, check for
--- check. failures(opts) takes opts.driver (the folder holding spec.lua and toml.lua) and opts.scratch (a folder the
--- test may fill with manifests), and returns the list of what did not hold.
 function failures(opts)
     local found = {}
     local S = import("spec", {rootdir = opts.driver, anonymous = true})
@@ -100,7 +97,6 @@ system = ["task:audit", "build:engine"]
 
     local KNOWN = {build = "/port/build/system", sdk = "/sdks/iPhoneOS16.4.sdk"}
 
-    -- implicit variants
     do
         local root = folder_with({["charon.toml"] = '[port]\nname = "p"\nversion = "1"\n'
                                   .. '[pipeline]\nsystem = ["build:device-library"]\n'})
@@ -116,7 +112,6 @@ system = ["task:audit", "build:engine"]
               "declared [variants] must not gain the pipeline names: got " .. table.concat(listed, ","))
     end
 
-    -- the declaration reader
     do
         local root = folder_with({["charon.toml"] = MANIFEST})
         local declared = spec_load(root)
@@ -179,7 +174,6 @@ system = ["task:audit", "build:engine"]
               "a required key that is absent must be refused")
     end
 
-    -- platforms
     do
         local PLATFORMED = [==[
 [port]
@@ -279,7 +273,6 @@ os-version = "7.0"
         end
     end
 
-    -- variants
     do
         local VARIANTS = [==[
 [port]

@@ -1533,9 +1533,6 @@ NSDictionary *session_expected_transcripts(void)
     };
 }
 
-/* What the HOST's own release answers where the transcript carries the device's. Applied to the
-   system's transcript only, never to the port's: the port is held to the record byte for byte, and a
-   host difference is a fact about the host's release that the record cannot carry. */
 NSArray *session_normalize_host_system(NSArray *transcript)
 {
     NSMutableArray *normalized = [NSMutableArray array];
@@ -1547,15 +1544,6 @@ NSArray *session_normalize_host_system(NSArray *transcript)
             adjusted = [adjusted stringByReplacingOccurrencesOfString:@" body=stream " withString:@" body=3 "];
         if ([adjusted isEqualToString:@"accept never stored=1"])
             adjusted = @"accept never stored=0";
-        /* The task's state as the download callback reads it is not one value on this host. Measured
-           2026-10-04, this scenario alone over eight runs: three runs had the system read 3 (completed)
-           where the transcript carries 0 (running), a different sub-run each time - no-date in one, past
-           in the next, no-delegate in the third - and the other five read 0 throughout. The five are the
-           common answer and the record carries it; the three are the host's release having settled the
-           task before it calls back, which is its own answer rather than a difference to hold the port
-           to. The port answered 0 in every one of the eight runs, which is what the record says a
-           device does. Scoped to this row and to this one value: state=1 and state=2 on a finished row
-           still fail, and no other row is touched. */
         if ([adjusted hasPrefix:@"finished "])
             adjusted = [adjusted stringByReplacingOccurrencesOfString:@" state=3" withString:@" state=0"];
         adjusted = [adjusted stringByReplacingOccurrencesOfString:@" removed=0" withString:@" removed=1"];

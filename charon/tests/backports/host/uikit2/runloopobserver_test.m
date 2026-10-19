@@ -12,8 +12,6 @@ typedef CFRunLoopObserverRef (*charon_maker)(CFAllocatorRef, CFOptionFlags, Bool
 @implementation CharonProbe
 @end
 
-// What one observer of a maker sees over a run of the loop: every activity, in order, and whether the block it was
-// given is still alive once the observer is gone.
 static NSDictionary *observe(charon_maker make, CFOptionFlags activities, Boolean repeats, CFIndex order)
 {
     NSMutableArray *seen = [NSMutableArray array];

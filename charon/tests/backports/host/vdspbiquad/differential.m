@@ -1,15 +1,3 @@
-// The port's biquad and DFT objects held against the host's own vDSP, case by case: the same inputs
-// through each, comparing every element either of them wrote.
-//
-// The port's sources are compiled with every API name they define renamed, so this translation unit can
-// hold the port's objects and the host's side by side. The names come from the port's registry, not from a
-// list kept here, so a name added to either file is renamed too.
-//
-// Every case is one the measurement in facts/Accelerate/vDSPBiquad.md and facts/Accelerate/vDSPDFT.md rests
-// on, and the inputs are the ones that can tell the readings apart: the coefficients are distinct values so
-// their order shows, the channels differ so the layout shows, the targets are far from the coefficients so
-// the interpolation shows, and a second call follows every first one so the delay shows.
-
 #import <Accelerate/Accelerate.h>
 #import <Foundation/Foundation.h>
 #include <math.h>
@@ -18,7 +6,6 @@
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-// The port's twenty-four entry points, through the names this file renames them to.
 vDSP_biquadm_Setup charon_host_vDSP_biquadm_CreateSetup(const double *coeffs, vDSP_Length M, vDSP_Length N);
 void charon_host_vDSP_biquadm_DestroySetup(vDSP_biquadm_Setup setup);
 void charon_host_vDSP_biquadm_ResetState(vDSP_biquadm_Setup setup);
@@ -68,12 +55,6 @@ static int checks;
 static int failures;
 static char detail[512];
 
-// The tolerance is the tightest the measured worst difference supports, and the measurement is in the facts.
-// Tracked over every check in this file the worst relative difference between the port and the host is
-// **1.49012e-08**, and all of the checks pass at 1e-6, 1e-7, 3e-8 and 2e-8; the worst one is a *float* biquad
-// output, whose own precision is 1.2e-7, so the float half of this file is the part that needs a tolerance at
-// all. The DFT half agrees to about 1e-15 and is compared at the same number, which its own arithmetic
-// (facts/Accelerate/vDSPDFT.md).
 static const double kBiquadTolerance = 2e-8;
 
 static int agrees(double mine, double theirs)
@@ -94,9 +75,6 @@ static void report(int passed, const char *name, const char *why)
     fflush(stdout);
 }
 
-// One run of the filter, on both sides at once: the same coefficients into a setup of each, the same
-// inputs, and every element of every output compared. The inputs and the outputs are filled with a value
-// neither side writes, so an element only one of them wrote is a difference.
 #define SLOTS 16
 static const float kFill = -987654.0f;
 
@@ -134,8 +112,6 @@ static void filter_case(const char *name, const double *coefficients, vDSP_Lengt
             charon_host_vDSP_biquadmD(port_setup, x, istride, port_y, ostride, length);
             vDSP_biquadmD(host_setup, x, istride, host_y, ostride, length);
         }
-        // each side frees its own setup with its own destroy, which is the one thing a pair of libraries
-        // sharing a symbol table will not do for you
         vDSP_biquadm_DestroySetupD(host_setup);
         charon_host_vDSP_biquadm_DestroySetupD(port_setup);
         for (channel = 0; channel < channels; channel++) {
@@ -192,7 +168,6 @@ int main(void)
 {
     setbuf(stdout, NULL);
     @autoreleasepool {
-        // 1. the coefficient order and the sign convention, one section, and a cascade of two.
         {
             double order[5] = {0.1, 0.2, 0.3, 0.4, 0.5};
             filter_case("vDSP_biquadm of one section, five distinct coefficients", order, 1, 1, 8, 1, 1, 1, 0);
@@ -203,7 +178,6 @@ int main(void)
             double cascade[10] = {1, 0, 0, 0.5, 0, 2, 0, 0, 0.25, 0};
             filter_case("vDSP_biquadm of two sections in a cascade", cascade, 2, 1, 8, 1, 1, 1, 0);
         }
-        // 2. the layout of the caller's coefficients: section-major, channel-minor.
         {
             double two_channels[10] = {1, 0, 0, 0.5, 0, 2, 0, 0, 0.25, 0};
             filter_case("vDSP_biquadm, one section and two channels", two_channels, 1, 2, 8, 1, 1, 1, 0);
@@ -212,8 +186,6 @@ int main(void)
             filter_case("vDSP_biquadm, two sections and two channels", two_by_two, 2, 2, 8, 1, 1, 1, 0);
             filter_case("vDSP_biquadmD, two sections and two channels", two_by_two, 2, 2, 8, 1, 1, 1, 1);
         }
-        // 3. the delay: a second call with the same input answers something else, and only on the channel
-        //    the impulse was on.
         {
             double iir[5] = {1, 0, 0, 0.5, 0};
             filter_case("vDSP_biquadm twice, the delay live", iir, 1, 1, 8, 1, 1, 2, 0);
@@ -221,7 +193,6 @@ int main(void)
             filter_case("vDSP_biquadmD twice, the delay live", iir, 1, 1, 8, 1, 1, 2, 1);
             filter_case("vDSP_biquadm, two channels twice, the delay live", iir, 1, 2, 8, 1, 1, 2, 0);
         }
-        // 4. the strides and the length.
         {
             double one[5] = {1, 0.5, 0.25, 0.125, 0.0625};
             filter_case("vDSP_biquadm with a stride of two in and out", one, 1, 1, 6, 2, 2, 1, 0);
@@ -230,10 +201,7 @@ int main(void)
             filter_case("vDSP_biquadm of no samples at all", one, 1, 1, 0, 1, 1, 1, 0);
             filter_case("vDSP_biquadm of one sample", one, 1, 1, 1, 1, 1, 3, 0);
         }
-        // 5. ResetState and CopyState, on both precisions.
         {
-            // The state pair, on a setup a side of its own: a second setup is made to copy the first one's
-            // delay into, because a copy into itself would be a copy of nothing.
             double iir[5] = {1, 0, 0, 0.5, 0};
             vDSP_biquadm_Setup port_one = charon_host_vDSP_biquadm_CreateSetup(iir, 1, 1);
             vDSP_biquadm_Setup port_two = charon_host_vDSP_biquadm_CreateSetup(iir, 1, 1);
@@ -243,7 +211,6 @@ int main(void)
             const float *x[1] = {input};
             float *my_y[1] = {mine}, *their_y[1] = {theirs};
             input[0] = 1.0f;
-            // one call into each of the four, so all four delays hold something
             charon_host_vDSP_biquadm(port_one, x, 1, my_y, 1, 6);
             charon_host_vDSP_biquadm(port_two, x, 1, my_y, 1, 6);
             vDSP_biquadm(host_one, x, 1, their_y, 1, 6);
@@ -265,8 +232,6 @@ int main(void)
                          mine[1], mine[2], theirs[0], theirs[1], theirs[2]);
                 report(agreed, "vDSP_biquadm after vDSP_biquadm_ResetState", agreed ? "" : detail);
             }
-            // and now the copy: the second setup of each side takes the first one's delay, and both then
-            // answer with no input at all, which is the delay talking
             charon_host_vDSP_biquadm_CopyState(port_two, (const struct vDSP_biquadm_SetupStruct *)port_one);
             vDSP_biquadm_CopyState(host_two, (const struct vDSP_biquadm_SetupStruct *)host_one);
             memset(mine, 0, sizeof mine);
@@ -291,7 +256,6 @@ int main(void)
             vDSP_biquadm_DestroySetup(host_two);
         }
         {
-            // the same two calls in double
             double iir[5] = {1, 0, 0, 0.5, 0};
             vDSP_biquadm_SetupD port_one = charon_host_vDSP_biquadm_CreateSetupD(iir, 1, 1);
             vDSP_biquadm_SetupD port_two = charon_host_vDSP_biquadm_CreateSetupD(iir, 1, 1);
@@ -345,11 +309,6 @@ int main(void)
             vDSP_biquadm_DestroySetupD(host_one);
             vDSP_biquadm_DestroySetupD(host_two);
         }
-        // 5b. The cascade of a SetTargets walk, which is the case a single-section check cannot see: the
-        // first section's distance reaches the threshold a sample before the second's, and the release
-        // holds it until the second lands too. These are the review's eleven cases, unchanged - a rate of
-        // 0.25, 0.5 and 0.75, a threshold of 0.1 to 0.5, and two targets that never land on a round
-        // number - and each is asked of both sides and compared element by element.
         {
             static const struct {
                 double a0, t0, a1, t1;
@@ -402,10 +361,6 @@ int main(void)
                 vDSP_biquadm_DestroySetup(theirs);
             }
         }
-        // 6. the refused setup calls. The host cannot be asked about a NULL coefficient array: it reads
-        //    through it and stops the process (measured - a NULL reaches a memmove inside the host's own
-        //    CreateSetup), so those three are the port's answers alone and the facts file says so. The
-        //    shapes with no sections and no channels it can be asked about, and those two agree.
         {
             double iir[5] = {1, 0, 0, 0.5, 0};
             report(charon_host_vDSP_biquadm_CreateSetup(NULL, 1, 1) == NULL,
@@ -414,8 +369,6 @@ int main(void)
             report(charon_host_vDSP_biquadm_CreateSetupD(NULL, 1, 1) == NULL,
                    "vDSP_biquadm_CreateSetupD of no coefficients answers NULL, which the host cannot be asked about",
                    "");
-            // No sections and no channels are not refusals on either side, and what a call over such a setup
-            // does is the answer worth comparing: the input through unchanged, and nothing written at all.
             {
                 vDSP_biquadm_Setup port = charon_host_vDSP_biquadm_CreateSetup(iir, 0, 1);
                 vDSP_biquadm_Setup host = vDSP_biquadm_CreateSetup(iir, 0, 1);
@@ -456,14 +409,9 @@ int main(void)
                 charon_host_vDSP_biquadm_DestroySetup(port);
                 vDSP_biquadm_DestroySetup(host);
             }
-            // DestroySetup of nothing: the port takes it and does nothing, and the host cannot be asked
-            // because the header does not declare that argument nullable and the host reads through it
-            // (measured: a NULL reaches the first load inside the host's own vDSP_biquadm_DestroySetup and
-            // stops the process). So this is a difference in care, and it is recorded as one.
             charon_host_vDSP_biquadm_DestroySetup(NULL);
             charon_host_vDSP_biquadm_DestroySetupD(NULL);
             report(1, "vDSP_biquadm_DestroySetup of NULL does nothing, which the host cannot be asked about", "");
-            // and a setup of a real shape is destroyed without a crash on either side
             {
                 vDSP_biquadm_Setup port = charon_host_vDSP_biquadm_CreateSetup(iir, 1, 1);
                 vDSP_biquadm_Setup host = vDSP_biquadm_CreateSetup(iir, 1, 1);
@@ -473,8 +421,6 @@ int main(void)
                        "");
             }
         }
-        // 7. SetActiveFilters, SetCoefficients and SetTargets, each through a filter case so the answer the
-        //    port gives is compared element by element and not only in a setup's own fields.
         {
             double two[10] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0};
             vDSP_biquadm_Setup one = charon_host_vDSP_biquadm_CreateSetup(two, 2, 1);
@@ -502,7 +448,6 @@ int main(void)
                 snprintf(detail, sizeof detail, "with the second section inactive the port says %g, the host %g",
                          mine[1], theirs[1]);
                 report(agreed, "vDSP_biquadm with the second section inactive", agreed ? "" : detail);
-                // and active again, with whatever delay the inactive run left
                 states[1] = true;
                 charon_host_vDSP_biquadm_SetActiveFilters(one, states);
                 vDSP_biquadm_SetActiveFilters(two_setup, states);
@@ -520,7 +465,6 @@ int main(void)
                          theirs[1]);
                 report(agreed, "vDSP_biquadm with the second section active again", agreed ? "" : detail);
             }
-            // SetCoefficients over a window: one section, two channels, and the (0, 1, 1, 1) window.
             {
                 double channels[10] = {1, 0, 0, 0.5, 0, 2, 0, 0, 0.25, 0};
                 vDSP_biquadm_Setup a = charon_host_vDSP_biquadm_CreateSetup(channels, 1, 2);
@@ -562,41 +506,20 @@ int main(void)
                 charon_host_vDSP_biquadm_DestroySetup(a);
                 vDSP_biquadm_DestroySetup(b);
 
-        // A window that names channels the setup does not have. The header forbids it; the release answers
-        // it anyway, and what it answers is that the cells the window does cover change and the rest of the
-        // setup is left alone (the review measured a two-section four-channel setup with a (2, 2) window at
-        // (1, 2): the host answers 0 for the channels the window names and does not crash, where the port
-        // answered 2 4 6 8 and 3 6 9 12 having written into cells 10 and 11 of an eight-cell block).
-        // CharonBiquadCellOf answers NULL for a channel the setup has not and the setters write nothing for
-        // one, which is the same answer without writing past the block.
-        //
-        // **The host cannot be asked about this shape**: with a two-by-two setup and a (1, 4) window at
-        // (0, 2) it answers the setter and then stops the process inside the next vDSP_biquadm, so the case
-        // below asserts the port's own answer - the one the review's measurement gives - rather than
-        // comparing against a host that cannot be asked. It has teeth without AddressSanitizer, which the
-        // armv7 bands do not have, because the window is placed so that an unclamped index lands on a cell the
-        // setup *does* have: a channel past the setup's own count at a section that exists indexes the next
-        // section's first cells, and those two are read back through the channels that own them. With the guard
-        // the second section keeps what CreateSetup gave it and the answers are 70 and 160; without it the
-        // second section takes the window's last two blocks and the answers are 63 and 80.
         {
             double coeffs[5 * 2 * 2];
             double values[5 * 1 * 4];
             memset(coeffs, 0, sizeof coeffs);
-            // section 0 over channels 0 and 1 is a gain of 1 and 2, section 1 over the same channels 10 and 20,
-            // so a channel's answer is the product of its two b0s and every cell is distinct
             coeffs[0] = 1.0;
             coeffs[5] = 2.0;
             coeffs[10] = 10.0;
             coeffs[15] = 20.0;
             for (int at = 0; at < 5 * 1 * 4; at++) {
-                values[at] = 7.0 + (double)at;    // four distinct blocks, of which the last two name no channel
+                values[at] = 7.0 + (double)at;
             }
             vDSP_biquadm_Setup setup = charon_host_vDSP_biquadm_CreateSetup(coeffs, 2, 2);
             charon_host_vDSP_biquadm_SetCoefficientsDouble(setup, values, 0, 1, 1, 4);
             {
-                // A setup of two channels is called with two pointers, one per channel, which is the shape
-                // every case here uses.
                 float in[2] = {1.0f, 1.0f};
                 float out[2] = {0.0f, 0.0f};
                 const float *x[2] = {&in[0], &in[1]};
@@ -615,7 +538,6 @@ int main(void)
             charon_host_vDSP_biquadm_DestroySetup(setup);
         }
             }
-            // SetTargets on a float setup: the interpolation, with the parameters the facts name.
             {
                 static const struct {
                     double rate;
@@ -666,7 +588,6 @@ int main(void)
             charon_host_vDSP_biquadm_DestroySetup(one);
             vDSP_biquadm_DestroySetup(two_setup);
         }
-        // 8. the same three setters on a double setup, where the targets are in place at once.
         {
             double one_section[5] = {1, 0, 0, 0, 0};
             static const struct {
@@ -714,7 +635,6 @@ int main(void)
                 charon_host_vDSP_biquadm_DestroySetupD(a);
                 vDSP_biquadm_DestroySetupD(b);
             }
-            // SetCoefficients and SetActiveFilters on a double setup
             {
                 vDSP_biquadm_SetupD a = charon_host_vDSP_biquadm_CreateSetupD(one_section, 1, 1);
                 vDSP_biquadm_SetupD b = vDSP_biquadm_CreateSetupD(one_section, 1, 1);
@@ -749,7 +669,6 @@ int main(void)
                 vDSP_biquadm_DestroySetupD(b);
             }
         }
-        // 9. the DFT: which lengths have a setup, and what each transform answers.
         {
             vDSP_Length lengths[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 15, 16, 24, 40, 48, 120, 192, 200, 256};
             for (unsigned at = 0; at < sizeof lengths / sizeof *lengths; at++) {
@@ -781,7 +700,6 @@ int main(void)
             report(1, "vDSP_DFT_DestroySetupD of NULL does nothing", "");
         }
         {
-            // Complex to complex, forward and inverse, over inputs whose transforms are known.
             static const vDSP_Length lengths[] = {2, 4, 8, 12, 16};
             for (unsigned which = 0; which < sizeof lengths / sizeof *lengths; which++) {
                 for (int inverse = 0; inverse < 2; inverse++) {
@@ -821,7 +739,6 @@ int main(void)
             }
         }
         {
-            // Real to complex, forward: the input is the even and the odd samples, the output the packing.
             static const vDSP_Length lengths[] = {2, 4, 8, 16};
             for (unsigned which = 0; which < sizeof lengths / sizeof *lengths; which++) {
                 vDSP_DFT_SetupD port_setup =
@@ -855,11 +772,6 @@ int main(void)
                 vDSP_DFT_DestroySetupD(host_setup);
                 charon_host_vDSP_DFT_DestroySetupD(port_setup);
             }
-            // and the inverse, where the packing is the input and the even and the odd samples the
-            // output. The input is a packed spectrum that came out of the forward transform, which is the
-            // case a caller has, and the round trip is what the header's two layouts between them say: a
-            // forward that is twice the transform times an unnormalised inverse is 2N times the signal
-            // (measured at the host: a real signal of N = 8 comes back as 16 times itself).
             for (unsigned which = 0; which < sizeof lengths / sizeof *lengths; which++) {
                 vDSP_Length length = lengths[which], half = length / 2;
                 vDSP_DFT_SetupD port_forward = charon_host_vDSP_DFT_zrop_CreateSetupD(NULL, length, vDSP_DFT_FORWARD);

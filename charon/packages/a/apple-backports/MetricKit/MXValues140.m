@@ -1,8 +1,5 @@
 #import "CharonMetricKit.h"
 #import "CharonMetricValue.h"
-// The value classes of this framework that arrived in iOS 14.0, one file for that release alone: an
-// object carries API that arrived in one release, so this is the iOS 14.0 half and no two of them are one
-// object.
 
 @implementation MXAnimationMetric
 @dynamic scrollHitchTimeRatio;
@@ -10,9 +7,6 @@
 CHARON_VALUE_PROPERTY(NSMeasurement *, scrollHitchTimeRatio)
 
 @end
-// The properties the lowered SDK does not declare, in a category because a property a
-// category declares is implemented in a category - and only there: a host build takes the
-// host's own, newer, declarations, and the host's own class supplies these accessors.
 @implementation MXAnimationMetric (CharonMetricKit)
 #ifndef CHARON_HOST_DIFFERENTIAL
 @dynamic hitchTimeRatio;
@@ -72,9 +66,6 @@ CHARON_VALUE_PROPERTY(NSNumber *, exceptionCode)
 CHARON_VALUE_PROPERTY(NSNumber *, signal)
 
 @end
-// The properties the lowered SDK does not declare, in a category because a property a
-// category declares is implemented in a category - and only there: a host build takes the
-// host's own, newer, declarations, and the host's own class supplies these accessors.
 @implementation MXCrashDiagnostic (CharonMetricKit)
 #ifndef CHARON_HOST_DIFFERENTIAL
 @dynamic exceptionReason;
@@ -86,10 +77,6 @@ CHARON_VALUE_PROPERTY(MXCrashDiagnosticObjectiveCExceptionReason *, exceptionRea
 @implementation MXDiagnostic
 @end
 @implementation MXDiagnosticPayload
-// Its own header gives it the two representations, and it is the fifth class the ledger names them on
-// that the port did not implement them for - the same class of defect as MXMetricPayload and MXMetaData,
-// found by the value differential asking for -dictionaryRepresentation and being told the selector is
-// unrecognised, and caught before delivery by the check in tests/backports/host/metricvalue.
 - (NSData *)JSONRepresentation { return [CharonMetricValue jsonOf:self]; }
 - (NSDictionary *)dictionaryRepresentation { return [CharonMetricValue dictionaryOf:self]; }
 @dynamic cpuExceptionDiagnostics, diskWriteExceptionDiagnostics, hangDiagnostics, appLaunchDiagnostics, crashDiagnostics, timeStampBegin, timeStampEnd;

@@ -1,12 +1,6 @@
 #import "CharonMetal.h"
 
 
-// A fence on this device is a signal value the CPU holds, and the work a fence stands for was
-// already issued as it was encoded: the port has no queue of commands in flight, because a command is
-// a call into OpenGL ES 2.0 that has already been made. So -updateFence: records how many commands
-// this encoder has encoded, which is how far the fence has been brought, and -waitForFence: waits
-// for the value the fence carries.
-
 @implementation CharonMetalBlitEncoder (Fence)
 
 - (void)updateFence:(id<MTLFence>)fence

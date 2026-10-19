@@ -1,23 +1,5 @@
 #import <Foundation/Foundation.h>
 
-/* NEProxyServer, NEProxySettings, NEIPv4Route, NEIPv4Settings, NEIPv6Route and NEIPv6Settings, as the
-   iOS 26.2 SDK's own headers
-   declare them. The build resolves charon@iphoneos-sdk to 16.4, which has no NetworkExtension.h at
-   all, so these declarations are this package's; the member names, the ownership and the availability
-   come from `NEProxySettings.h` and `NEIPv4Settings.h` at that tag.
-
-   All six are pure state, as the headers say of them: the system reads a settings object when a
-   configuration is applied, so what a port object holds is what a release's own object would hold.
-   The two IPv6 class methods the 26.2 header marks API_UNAVAILABLE on every platform are declared here
-   anyway, because the header's own text declares them and a caller that reads them compiles against
-   this header; tests/backports/host/netext-proxy/ checks the names against the header rather than
-   against the host, since Apple's own class does not carry them.
-   Two names are capitalised in the SDK and in the ledger alike - **HTTPEnabled**, **HTTPSEnabled** and
-   **HTTPSServer** - and are spelled that way here.
-
-   The names are checked against the 26.2 headers by tests/backports/host/netext-settings/, and the
-   ones the host also carries are compared with the host's own answers, in two binaries, with dladdr
-   naming which implementation answered. */
 NS_ASSUME_NONNULL_BEGIN
 
 @interface NEProxyServer : NSObject <NSSecureCoding, NSCopying>

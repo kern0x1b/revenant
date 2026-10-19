@@ -1,6 +1,3 @@
-// MPSkipIntervalCommandEvent's contract: the class is a kind of the base the port carries, the base's command answers what
-// the event was built with, the property reads back what was set, and an event nothing set answers the
-// type's zero. The mutation's verdict is printed on both sides, because mutate.lua cannot enforce that.
 #import "MPMediaItemStandin.h"
 
 @implementation MPRemoteCommandEvent
@@ -19,8 +16,6 @@
 @implementation MPRemoteCommand
 @end
 
-// The stand-in declares the 9.0 event's option type, which the 8.0 and 7.1 headers pull in; it is unused
-// here and has to exist for the link.
 @implementation MPNowPlayingInfoLanguageOption
 @end
 

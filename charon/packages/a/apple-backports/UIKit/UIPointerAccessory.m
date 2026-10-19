@@ -1,8 +1,5 @@
 #import <UIKit/UIKit.h>
 
-// A pointer accessory, from iOS 15: a shape drawn beside the pointer at a position. The shape is copied on creation, as the host copies it
-// (tests/backports/host/pointer-accessory). The orientation is NO for a custom accessory and keeps the value set; a copy does not carry it,
-// which the host's copy does not either.
 @implementation UIPointerAccessory {
 @private
     UIPointerShape *_shape;
@@ -18,9 +15,6 @@
     return accessory;
 }
 
-// The arrow the system vends: its path is the same at every position, and its bounds' origin is the pointer's location (measured by
-// tests/backports/host/pointer-accessory). The orientation is YES for it, as the header says system vended accessories' is; a copy does not
-// carry it, as for a custom accessory.
 static UIBezierPath *charon_arrowPath(void)
 {
     UIBezierPath *path = [UIBezierPath bezierPath];

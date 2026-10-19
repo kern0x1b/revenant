@@ -1,29 +1,3 @@
--- make-text-fixtures.lua - the twenty-two fixtures the -string table in facts/PDFKit/Document11.md was measured on.
---
---     xmake l tools/make-text-fixtures.lua <directory>
---
--- Every row of that table is generated here, so the table is reproducible and not a claim in a message that scrolls
--- away. tools/verify-table.sh regenerates, asks the host through tools/host-string.m, and diffs what came out against
--- what the facts file says.
---
---     row name | content stream | what the table is asking
---
---   the four the first table was measured on
---   kern-20  kern-50  kern-100  kern-150  kern-250  kern-500  kern-1000  kern-plus250
---       a TJ kerning between the same two strings, from -20 to -1000 and one positive: where does a space start,
---       does magnitude buy more than one, and does the sign matter
---   td-x-only  td-small-y  td-y--0.4  td-y--14  td-y--40
---       movement between two shows, in each axis and by magnitude
---   op-TD-next-line  op-quote-operator  op-TD-star-between
---       the other positioning and quoting operators
---   size-6  size-12  size-24
---       the same kerning at three font sizes: is the threshold relative to the em?
---   op-Tm-set  op-TD-star-next-line  op-dquote-operator
---       the three the reader rejects, kept in the table as the VOID cases they are
---
--- Every xref offset and the stream's /Length is measured from the object bytes, never typed.
--- Prints one line per fixture: name, the content stream, and the note, tab separated.
-
 local pdfwrite = import("pdfwrite", {rootdir = os.scriptdir()})
 
 local FONT = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"
@@ -84,7 +58,6 @@ local function build(file, content)
     return content
 end
 
--- Python's str.strip() on the stream's text: the spaces and line breaks off both ends.
 local function strip(text)
     return (text:gsub("^%s+", ""):gsub("%s+$", ""))
 end

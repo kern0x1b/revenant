@@ -3,10 +3,6 @@
 #include <unistd.h>
 #import "wsserver.h"
 
-/* The answers of iOS 13 and 14 Foundation members, one string per index. The host records them from its own
-   Foundation into foundation14-expectations.h; the device computes them with the port and compares. A case that
-   needs data the host makes (a compressed stream, an archive) has it in f14_artifacts[] as text. */
-
 #define F14_LISTS 240
 #define F14_UNITS 300
 #define F14_BYTES 240

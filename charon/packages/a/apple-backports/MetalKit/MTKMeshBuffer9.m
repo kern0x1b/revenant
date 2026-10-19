@@ -4,26 +4,6 @@
 
 #include <string.h>
 
-// MTKMesh's three supporting types, which MetalKit's MTKModel.h declares and the port was missing:
-// an allocator that hands out buffers, a buffer that is a window onto one of them, and a submesh that
-// says which part of a mesh a draw covers.
-//
-// The header states the shape of all three and the port follows it. MTKMeshBufferAllocator's
-// initWithDevice: is "The designated initializer for this class" and its device is "used to create
-// buffers" (@property device), so the allocator holds the device and every buffer it makes comes from
-// it. MTKMeshBuffer's -init is NS_UNAVAILABLE with the header's own words - "Only an MTKMeshBuffer-
-// Allocator object can initilize a MTKMeshBuffer object" - so there is no -init here either and the
-// allocator is the only way one is made. Its length is "Size in bytes of the buffer allocation", its
-// buffer is the "Metal Buffer backing vertex/index data", its offset is the "Byte offset of the data
-// within the metal buffer", and its allocator is stored because the header says Model I/O needs it
-// "for copy and relayout".
-
-// One MTLBuffer per zone, which is what the header describes: a single buffer is allocated for each zone, and each zone
-// could have many MTKMeshBuffers (@property zone). The port's buffers are CPU-resident,
-// so a zone is one MTLBuffer and each buffer carved out of it is a window at its own offset - which is
-// what the header says about many MTKMeshBuffers sharing one buffer at different offsets (@property buffer).
-// The header already declares MTKMeshBuffer, so its initializer is added as a category rather than a
-// second @interface: the header makes an allocator the only way to create an MTKMeshBuffer, so this is not public API.
 @interface MTKMeshBuffer (CharonAllocator)
 - (instancetype)initWithBuffer:(id<MTLBuffer>)buffer
                         offset:(NSUInteger)offset
@@ -65,7 +45,6 @@
     return _charonUsed;
 }
 
-// MDLMeshBufferZone: "The allocator that allocated this zone" (@property allocator).
 - (MTKMeshBufferAllocator *)allocator
 {
     return _charonAllocator;
@@ -82,9 +61,6 @@
     return self;
 }
 
-// The next window in this zone: its own offset, its own length, and the used count moved on. The
-// offset is the zone's business because two buffers from one zone must not overlap, which is what
-// the header's point about many MTKMeshBuffers sharing one buffer at different offsets is about.
 - (id<MDLMeshBuffer>)charonBufferTakingLength:(NSUInteger)length type:(MDLMeshBufferType)type
 {
     NSUInteger offset = _charonUsed;
@@ -116,7 +92,6 @@
     return _charonDevice;
 }
 
-// MDLMeshBufferAllocator: a zone of the given capacity, backed by one MTLBuffer of that many bytes.
 - (id<MDLMeshBufferZone>)newZone:(NSUInteger)capacity
 {
     id<MTLBuffer> buffer = [_charonDevice newBufferWithLength:capacity options:0];
@@ -144,9 +119,6 @@
     return [self newBufferFromZone:nil data:data type:type];
 }
 
-// A buffer from a zone: the zone's own buffer at the zone's current end, which is the offset the
-// header's "each with its own offset" is about. A nil zone means a default zone of exactly this
-// buffer's size, which is what the header's "in a default zone" says for the two methods above.
 - (id<MDLMeshBuffer>)newBufferFromZone:(id<MDLMeshBufferZone>)zone length:(NSUInteger)length type:(MDLMeshBufferType)type
 {
     if (!zone) {
@@ -157,15 +129,10 @@
     }
     MTKMeshBufferZone *own = (MTKMeshBufferZone *)zone;
     if (own.used + length > own.capacity)
-        return nil;  // MDLMeshBufferAllocator: the header's nil answer, for a request the given zone cannot satisfy
-    // takeOffset:length: is the zone's own method, so the bump of its used count stays inside it
+        return nil;
     return [own charonBufferTakingLength:length type:type];
 }
 
-// The port's MTLBuffer is CPU-resident and its contents are reachable through the pointer
-// getBytes:, which is the path facts/Metal/Blits.md measures: a copy on this device is a copy on the
-// CPU between the bytes of a buffer and the pixels of a texture. There is no replaceRegion: on a
-// buffer in this port - it is a texture's member - so the bytes are written through it.
 - (id<MDLMeshBuffer>)newBufferFromZone:(id<MDLMeshBufferZone>)zone data:(NSData *)data type:(MDLMeshBufferType)type
 {
     MTKMeshBuffer *buffer = (MTKMeshBuffer *)[self newBufferFromZone:zone length:data.length type:type];
@@ -247,8 +214,6 @@
     (void)name;
 }
 
-// MDLMeshBuffer's fill method fills data.length bytes of its data and will not write beyond the length of the buffer,
-// with an offset giving the byte at which filling begins.
 - (void)fillData:(NSData *)data offset:(NSUInteger)offset
 {
     void *contents = [_charonBuffer contents];
@@ -258,23 +223,13 @@
     memcpy((uint8_t *)contents + _charonOffset + offset, data.bytes, MIN(room, data.length));
 }
 
-// MDLMeshBuffer's -map is "CPU access to buffer's memory ... to read or modify a buffer's memory",
-// and MDLMeshBufferMap says of its data pointer: "Data to be modified directly. NULL if buffer is
-// not mapped". The port's buffer is CPU-resident, so it is always mapped and the pointer is the
-// window's own bytes; the map object is what keeps it that way for as long as it exists.
 - (MDLMeshBufferMap *)map
 {
     void *contents = [_charonBuffer contents];
-    // MDLMeshBufferMap's initializer is the one an implementor of the MDLMeshBuffer protocol calls to build the map and set up
-    // unmapping on deallocation - initWithBytes:deallocator:. There is no
-    // unmapping to arrange for here: the port's buffer is CPU-resident memory that is never mapped
-    // and never unmapped, so the deallocator is nil rather than a lie about work that is not done.
     return [[MDLMeshBufferMap alloc] initWithBytes:contents ? (uint8_t *)contents + _charonOffset : NULL
                                             deallocator:nil];
 }
 
-// MDLMeshBuffer inherits NSCopying, and a copy of a window is a window onto the same bytes at the
-// same offset - the header says that many MTKMeshBuffers may share one buffer, each with its own offset, and that the sharing is the point.
 - (id)copyWithZone:(NSZone *)zone
 {
     (void)zone;

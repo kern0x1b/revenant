@@ -1,36 +1,3 @@
-/* object-constant -- the value a built object gives a `NSString *const`.
- *
- * host-probe asks the *host* what a release holds for a name. This asks a *built object* what this port
- * gives that name, which is the other half of the question: a registry row and the host can agree
- * perfectly while the source in the tree defines something else, and a check that only ever compares
- * text with the host cannot see that at all. The two questions are asked of two different artefacts and
- * both answers have to be the same as the row's.
- *
- * **The artefact has to be a linked binary, not a relocatable object.** In a `.o` the pointer a
- * `NSString *const` holds is a relocation the linker fills in, so the value is not in the file at all
- * and every name reads as unresolved. The gate's `libHomeKitBackports.dylib` is the artefact that
- * carries the values, and that is what this is pointed at.
- *
- * The walk is a Mach-O one, read straight out of the file:
- *
- *   1. the symbol table gives the address of `_NAME` within the object;
- *   2. the load commands give every section, and the symbol's address must be in a data one;
- *   3. the four bytes at that address are a pointer to a `__CFConstantString` in the same object;
- *   4. that object's layout is isa, flags, char *characters, length -- and the width of each field is
- *      the object's own: four bytes in a 32-bit object, eight in a 64-bit one. Reading a 64-bit object's
- *      constant with 32-bit offsets yields a pointer into the middle of the flags, which is a string
- *      that is not the one the source writes.
- *
- * Everything is bounds-checked against the sections it came from, and the bytes are read at each
- * section's own file offset rather than at its address: a section's address is a VM address, which in
- * a relocatable object is not the number where its bytes sit in the file.
- *
- * Usage:
- *   object-constant <object-dir-or-file> <names-file> > values.tsv
- *
- * Names it cannot resolve are reported, not skipped, and a name in the list that resolves to nothing is
- * a difference for the caller's purposes rather than a quiet pass.
- */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,26 +5,17 @@
 #include <mach-o/loader.h>
 #include <mach-o/fat.h>
 
-/* A nlist is 12 bytes in a 32-bit object and 16 in a 64-bit one: uint32 strx, uint8 type,
- * uint8 sect, uint16 desc, uint32 value, and uint64 value in the wide form. Spelled out
- * rather than taken from <mach-o/nlist.h>, which is not the same header on every SDK and
- * a reader of a file should not depend on one that moves. */
 #define CHARON_NLIST_32 12
 #define CHARON_NLIST_64 16
 
 typedef struct {
-    uint64_t address;   /* the section's VM address, which is not where its bytes are in the file */
-    uint64_t offset;    /* where its bytes are, which is what a reader wants */
+    uint64_t address;
+    uint64_t offset;
     uint64_t size;
     int isCode;
     char name[32];
 } Section;
 
-/* The three fields this tool needs out of a mach_header, by offset. ncmds sits after the 64-bit
- * reserved word in the wide header and straight after magic in the thin one; the symbol table's counts
- * and its string table's offset sit in that order at the end of both. Spelled out because the struct
- * that carries them is spelled differently across SDKs -- this one has no symtab member at all -- and a
- * reader of a file should not depend on a header that moves. */
 static uint32_t field32(const uint8_t *at, size_t offset)
 {
     uint32_t value = 0;
@@ -72,10 +30,6 @@ static void header_fields(const uint8_t *header, int is64, uint32_t *ncmds, uint
         *nsyms = field32(header, 64);
         *stroff = field32(header, 68);
     } else {
-        /* A thin mach_header is magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds, flags --
-         * so filetype sits where the wide header's ncmds does, and reading ncmds at 12 reads the file
-         * type. That is what the first version did, and it found one load command in an object that
-         * has six, which is how every name came back unresolved. */
         *ncmds = field32(header, 16);
         *nsyms = field32(header, 56);
         *stroff = field32(header, 60);
@@ -91,7 +45,6 @@ typedef struct {
     size_t sectionCount;
 } Object;
 
-/* Where the bytes of `length` bytes at a section-relative address `at` are in the file. */
 static int file_offset_of(const Object *object, const Section *section, uint64_t at, uint64_t length, uint64_t *out)
 {
     if (at < section->address || at + length > section->address + section->size)
@@ -128,8 +81,6 @@ static int read_file(const char *path, uint8_t **out, size_t *outLength)
     return 1;
 }
 
-/* A fat binary: the first architecture this host can read is taken, and the offsets in its header are
- * relative to the slice rather than to the file. */
 static const uint8_t *slice_of(const uint8_t *bytes, size_t length, size_t *sliceLength)
 {
     uint32_t magic = 0;
@@ -180,7 +131,6 @@ static int open_object(const char *path, Object *object)
     header_fields(start, object->is64, &ncmds, &nsyms, &stroff);
     const uint8_t *cursor = start + (object->is64 ? sizeof(struct mach_header_64) : sizeof(struct mach_header));
 
-    /* Count the sections first, so the table is sized once. */
     size_t count = 0;
     cursor = start + (object->is64 ? sizeof(struct mach_header_64) : sizeof(struct mach_header));
     for (uint32_t index = 0; index < ncmds; ++index) {
@@ -246,7 +196,6 @@ static const Section *section_holding(const Object *object, uint64_t address, in
     return NULL;
 }
 
-/* The value a `NSString *const` in this object carries, or NULL. */
 static const char *value_in(const Object *object, uint64_t symbolAddress)
 {
     const Section *holding = section_holding(object, symbolAddress, 0);
@@ -262,7 +211,6 @@ static const char *value_in(const Object *object, uint64_t symbolAddress)
     const Section *constant = section_holding(object, pointer, 0);
     if (!constant)
         return NULL;
-    /* isa, flags, characters, length -- with the object's own field width. */
     uint64_t charactersAt = 0, lengthAt = 0;
     if (!file_offset_of(object, constant, pointer + object->pointerSize * 2, object->pointerSize, &charactersAt) ||
         !file_offset_of(object, constant, pointer + object->pointerSize * 3, object->pointerSize, &lengthAt))
@@ -283,7 +231,6 @@ static const char *value_in(const Object *object, uint64_t symbolAddress)
     return value;
 }
 
-/* The address of `_name` in this object, or 0. */
 static uint64_t symbol_address(const Object *object, const char *name)
 {
     char wanted[512];
@@ -307,10 +254,6 @@ static uint64_t symbol_address(const Object *object, const char *name)
                 const uint8_t *entry = symbols + (size_t)part * (is64 ? CHARON_NLIST_64 : CHARON_NLIST_32);
                 uint32_t strx;
                 uint64_t value;
-                /* A nlist is strx, type, sect, desc, value -- four one-byte-or-less fields between
-                 * the name index and the value, so the value is at offset 8 in both the thin and the
-                 * wide form and the difference is its width. Reading it at 4 in the thin form lands
-                 * inside the type/sect/desc fields, which is why every name resolved to nothing. */
                 memcpy(&strx, entry, 4);
                 if (is64)
                     memcpy(&value, entry + 8, 8);
@@ -349,7 +292,6 @@ int main(int argc, char **argv)
         if (!length || line[0] == '#')
             continue;
         ++asked;
-        /* A directory is searched for the object that defines the name; a file is the one object. */
         char path[4096];
         Object object;
         int opened = 0;
@@ -357,8 +299,6 @@ int main(int argc, char **argv)
             snprintf(path, sizeof path, "%s", argv[1]);
             opened = open_object(path, &object);
         } else {
-            /* The object whose name says which file it came from, plus every other object in the
-             * directory, because a name can be defined by a file this tool has not been told about. */
             snprintf(path, sizeof path, "%s/%s.o", argv[1], line);
             opened = open_object(path, &object);
             if (!opened) {

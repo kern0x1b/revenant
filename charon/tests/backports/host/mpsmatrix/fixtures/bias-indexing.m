@@ -2,16 +2,11 @@
 #import <Metal/Metal.h>
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>
 #define P(...) do { printf(__VA_ARGS__); fflush(stdout); } while (0)
-// How does the release index MPSMatrixSum's bias? The same sum with four bias vectors: the
-// difference from an all-zero bias says the rule directly.
 static float runWith(id<MTLDevice> d, id<MTLCommandQueue> q, const float *bias, NSUInteger biasLen, int transpose) {
     float A[6] = {1,2,3,4,5,6}, B[6] = {10,20,30,40,50,60};
     float out[6]; memset(out, 0, sizeof(out));
     id<MTLBuffer> ab=[d newBufferWithBytes:A length:24 options:MTLResourceStorageModeShared];
     id<MTLBuffer> bb=[d newBufferWithBytes:B length:24 options:MTLResourceStorageModeShared];
-    // A sentinel in every element, so a zero in the answer is a value the release wrote and a -1 is a
-    // byte it never touched. The transposed case's third column reads zero, and zero is what a fresh
-    // buffer already contains, so without this the two cannot be told apart.
     float sentinel[6] = {-1, -1, -1, -1, -1, -1};
     id<MTLBuffer> ob=[d newBufferWithBytes:sentinel length:24 options:MTLResourceStorageModeShared];
     MPSMatrixDescriptor *md=[MPSMatrixDescriptor matrixDescriptorWithRows:2 columns:3 matrices:1 rowBytes:12 matrixBytes:24 dataType:MPSDataTypeFloat32];

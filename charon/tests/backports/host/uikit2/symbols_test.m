@@ -464,7 +464,6 @@ static NSArray *lines_of(NSString *file)
     return lines;
 }
 
-// How much of the union of two drawings is in both, the drawings placed in the middle of one canvas.
 static double overlap(UIImage *port, UIImage *host)
 {
     CGSize canvas = CGSizeMake(MAX(port.size.width, host.size.width), MAX(port.size.height, host.size.height));

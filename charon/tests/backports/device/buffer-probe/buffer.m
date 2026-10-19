@@ -1,15 +1,3 @@
-/* buffer.m - the buffer's debug markers and its GPU address, asked the same questions on Apple's own Metal
- * (the host, macOS) and on the port (the iPhone 4S guest, iOS 6.1.3). The output is one line per answer, and
- * the two outputs are compared line for line: a difference is the finding, whichever side is right.
- *
- *     host:  clang -fobjc-arc -framework Foundation -framework Metal buffer.m
- *     port:  the same source, built the way tests/backports/device/commandbuffer-probe is built (xmake, armv7, 6.1.3)
- *
- * A marker names a range for a capture and changes no byte of the buffer, so the probe compares the bytes
- * before and after each call. The GPU address is asked as a relation (nonzero, the same on every read, and
- * different for two live buffers), never as a value: the port's address is a CPU address and Metal's is a
- * GPU one, and those are not the same numbers.
- */
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
@@ -43,16 +31,12 @@ int main(void)
             original[i] = (uint8_t)(i * 3 + 1);
         memcpy(buffer.contents, original, length);
 
-        /* The GPU address: nonzero, the same on every read for as long as the buffer lives, and different
-         * from another live buffer's. */
         uint64_t address = buffer.gpuAddress;
         answer("buffer.gpuAddress.nonzero", address != 0);
         answer("buffer.gpuAddress.stable", buffer.gpuAddress == address);
         id<MTLBuffer> other = [device newBufferWithLength:length options:MTLResourceStorageModeShared];
         answer("other.gpuAddress.differs", other.gpuAddress != address);
 
-        /* Debug markers: one over a range, one over the whole buffer, then the bulk removal. Each leaves the
-         * bytes as they were, and the address as it was. */
         [buffer addDebugMarker:@"window" range:NSMakeRange(8, 16)];
         answer("marker.add.bytesUnchanged", sameBytes(buffer, original, length));
         answer("marker.add.addressUnchanged", buffer.gpuAddress == address);
@@ -64,7 +48,6 @@ int main(void)
         [buffer removeAllDebugMarkers];
         answer("marker.removeAll.twice.bytesUnchanged", sameBytes(buffer, original, length));
 
-        /* A marker on a buffer nothing has been written to is no different from one on a written buffer. */
         id<MTLBuffer> empty = [device newBufferWithLength:length options:MTLResourceStorageModeShared];
         uint8_t zeros[length];
         memset(zeros, 0, length);

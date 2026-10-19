@@ -1,24 +1,3 @@
-// The store: one SQLite database of the health data the process saves, its authorization, its
-// characteristics, the order of its sources, the background-delivery registrations and the anchors
-// of its running queries.
-//
-// The release runs no healthd and ships no health database, so there is no service to ask and no
-// store of Apple's to read. This is that store: SQLite, through the device's own
-// /usr/lib/libsqlite3.dylib. Measured, the armv7 shared cache of iOS 4.3 and the one of iOS 6.1.3
-// both export all twenty-six of sqlite3_open, sqlite3_open_v2, sqlite3_close, sqlite3_exec,
-// sqlite3_prepare_v2, sqlite3_step, sqlite3_finalize, sqlite3_reset, sqlite3_bind_text,
-// sqlite3_bind_double, sqlite3_bind_int64, sqlite3_bind_blob, sqlite3_bind_null, sqlite3_column_text,
-// sqlite3_column_double, sqlite3_column_int64, sqlite3_column_blob, sqlite3_column_type,
-// sqlite3_column_bytes, sqlite3_column_count, sqlite3_errmsg, sqlite3_last_insert_rowid,
-// sqlite3_changes, sqlite3_busy_timeout and sqlite3_extended_result_codes
-// (~/.charon/dyld/4.3/dyld_shared_cache_armv7, ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7).
-//
-// A row holds the object itself, archived by its own NSSecureCoding, beside the few facts SQLite has
-// to narrow by: the type, the dates, the source and a sequence number that is the store's own
-// clock. Nothing an application writes reaches SQLite as SQL: every statement here is one fixed
-// string with positional bindings, and the search arguments of a query are handed to the release's
-// own NSPredicate, which decides them over the objects read back.
-
 #import <sqlite3.h>
 
 #import "CharonHKStore.h"
@@ -95,7 +74,6 @@ NSString *CharonHKStorePath(void)
 
 #pragma mark - The store
 
-// The bits of the authorization a type is recorded with, as the store's own column holds them.
 typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
     CharonHKAuthorizationShare = 1u << 0,
     CharonHKAuthorizationRead = 1u << 1,
@@ -218,7 +196,6 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
 
 #pragma mark SQL
 
-// One statement, positional bindings, no interpolation of anything an application wrote.
 - (BOOL)charon_runLocked:(NSString *)sql bindings:(NSArray *)bindings error:(NSError **)error
 {
     sqlite3_stmt *statement = NULL;
@@ -475,7 +452,6 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
         return HKAuthorizationStatusNotDetermined;
     if (bits & CharonHKAuthorizationShare)
         return HKAuthorizationStatusSharingAuthorized;
-    // Asked for and refused: the store records the refusal where a release's own sheet records it.
     return HKAuthorizationStatusSharingDenied;
 }
 
@@ -557,12 +533,6 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
                                                                       NSStringFromClass([object class])], nil);
                     return NO;
                 }
-                // The gate is asked about the type the object carries, not about the row this save has
-                // not written yet. -typeWithIdentifier: returns nil for a type the type table has no row
-                // for, and that row is inserted further down, after this check - so a type the store had
-                // never seen was asked about as nil and refused as unauthorised, and could then never be
-                // saved at all. The workout path below already asks with the type the object carries; this
-                // is the same question asked the same way.
                 HKObjectType *type = [storable respondsToSelector:@selector(charon_typeForSaving)]
                                        ? [(id)storable charon_typeForSaving]
                                        : [self typeWithIdentifier:identifier];
@@ -732,10 +702,6 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
     return row;
 }
 
-// The source revision and the device a read object is given, from the row it was read from: the
-// revision is the source the object was saved with and the version the process was at when it saved it,
-// which is what the header says a retrieved object's sourceRevision is, and the device is the one the
-// sample named.
 - (void)charon_annotate:(id)object source:(CharonHKRow *)row
 {
     if (![object respondsToSelector:@selector(charon_setSourceRevision:device:)])
@@ -746,9 +712,6 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
     [object charon_setSourceRevision:revision device:nil];
 }
 
-// The correlation or the workout a sample belongs to, filled in from the table that records it, so
-// that a predicate built with HKPredicateKeyPathCorrelation or HKPredicateKeyPathWorkout walks a
-// real relationship over the objects the store read back.
 - (void)charon_linkMembershipOf:(id)object uuid:(NSString *)uuid
 {
     if (![object respondsToSelector:@selector(charon_setCorrelation:)])
@@ -794,9 +757,6 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
         NSMutableString *sql = [NSMutableString stringWithString:@"SELECT * FROM object WHERE type = ?"];
         NSMutableArray *bindings = [NSMutableArray arrayWithObject:type.identifier];
         if (startDate && endDate) {
-            // A sample is inside the period when its end is at or after the start of the period and
-            // its start before the end of it. The strict options ask for one of the two dates to be
-            // in the period on its own, which is what the header says they change.
             if (strictStartDate)
                 [sql appendString:@" AND start >= ? AND start < ?"];
             else if (strictEndDate)
@@ -909,8 +869,6 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
 
 #pragma mark Workout routes
 
-// The metadata of a route, as a property list, or NULL where it is not one - the header types the
-// dictionary as strings, and anything else is not a route's metadata and is not stored.
 static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
 {
     if (!metadata)
@@ -952,12 +910,8 @@ static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
         *error = failure;
 }
 
-// The bytes of a route, read back out of the archive it was made with, so that what a query hands its
-// caller is what the builder inserted.
 + (NSData *)charon_routeDataOf:(HKWorkoutRoute *)route
 {
-    // The bytes are read back out of the route's own archive, which is the same round trip the release
-    // makes, so what a query hands its caller is what the builder inserted.
     NSData *archive = [NSKeyedArchiver archivedDataWithRootObject:route];
     if (!archive.length)
         return [NSData data];
@@ -974,10 +928,6 @@ static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
 
 #pragma mark Documents
 
-// The documents of one type. A document sample is a sample, so it is read back out of the same table
-// through the same archive; what a document query adds is the flag that says whether the data of the
-// document comes back with it, which the header's -includeDocumentData asks for and which a caller
-// that reads the data needs.
 - (NSArray *)documentsOfType:(HKDocumentType *)type
                    predicate:(nullable NSPredicate *)predicate
                       limit:(NSUInteger)limit
@@ -1001,8 +951,6 @@ static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
         return found;
     NSMutableArray *without = [NSMutableArray arrayWithCapacity:found.count];
     for (HKDocumentSample *sample in found) {
-        // The same sample with its document's facts left out, which is what the flag asks for: the
-        // sample and its type are kept, and the data, the title and the three names are not sent.
         NSMutableDictionary *facts = [NSMutableDictionary dictionaryWithDictionary:[sample metadata]];
         [facts removeObjectForKey:@"_charon_document"];
         [without addObject:[sample charon_copyWithoutDocument:facts]];
@@ -1012,9 +960,6 @@ static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
 
 #pragma mark Activity summaries
 
-// The days the store holds a ring for. Nothing writes that table on this release - see the header's
-// note on it - and it is read the same way every other object is: the archive of the object, beside the
-// day it is for so that a query can be narrowed by date before anything is read back.
 - (NSArray *)activitySummariesMatching:(nullable NSPredicate *)predicate error:(NSError **)error
 {
     __block NSMutableArray *summaries = [NSMutableArray array];
@@ -1235,9 +1180,6 @@ static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
     }
 }
 
-// Every write and every delete tells the observers what changed, as this database's own did: an
-// observer query is answered with everything written since it last ran, an anchored query with the
-// objects that changed and the sequence past them.
 - (void)charon_publishChanged:(NSArray<NSString *> *)uuids
 {
     if (!uuids.count)

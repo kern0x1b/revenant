@@ -82,8 +82,6 @@ ARRIVED = {
     _os_signpost_emit_with_name_impl = {iOS = "12.0", Macos = "10.14", tvOS = "12.0", watchOS = "5.0"}
 }
 
--- Calls whose state every image in a process shares: a lock one image takes and another releases waits and wakes through one
--- table. apple-compat does not link these into each image; libc++abi of charon@libcxx exports them once for the process.
 PROCESS_WIDE = {
     os_unfair_lock_lock = true,
     os_unfair_lock_trylock = true,
@@ -92,9 +90,6 @@ PROCESS_WIDE = {
     os_unfair_recursive_lock_unlock = true
 }
 
--- Calls every release exports whose meaning grew later: an older release has the symbol, so an import of it is no finding,
--- but a caller that relies on what the call learned needs the shim, reached by name through its header.
--- The calls that submit a block read its flags from the release that brought dispatch_block_create, a barrier among them.
 CHANGED = {
     dispatch_get_global_queue = {iOS = "8.0", Macos = "10.10", tvOS = "9.0", watchOS = "2.0"},
     dispatch_async = {iOS = "8.0", Macos = "10.10", tvOS = "9.0", watchOS = "2.0"},
@@ -102,9 +97,6 @@ CHANGED = {
     dispatch_group_async = {iOS = "8.0", Macos = "10.10", tvOS = "9.0", watchOS = "2.0"},
     dispatch_group_notify = {iOS = "8.0", Macos = "10.10", tvOS = "9.0", watchOS = "2.0"},
     dispatch_after = {iOS = "8.0", Macos = "10.10", tvOS = "9.0", watchOS = "2.0"},
-    -- A barrier source's handler, which libdispatch-703 (iOS 10) runs as a barrier on its target queue and every release
-    -- before it runs beside that queue's other blocks, and the two records that answer as 10.0 does: the width of the queue
-    -- a queue is made with, and whether a source has been activated.
     dispatch_queue_create = {iOS = "10.0", Macos = "10.12", tvOS = "10.0", watchOS = "3.0"},
     dispatch_resume = {iOS = "10.0", Macos = "10.12", tvOS = "10.0", watchOS = "3.0"},
     dispatch_source_set_event_handler = {iOS = "10.0", Macos = "10.12", tvOS = "10.0", watchOS = "3.0"}
@@ -126,8 +118,6 @@ EMITTED = {
      symbols = {"_tlv_atexit", "_tlv_bootstrap"}}
 }
 
--- Weak imports the toolchain's own code links into an image and calls only behind a test of the symbol, answering the same
--- question without it: no release lacking the symbol reaches NULL, and none needs a copy of it.
 GUARDED = {
     {by = "compiler-rt's os_version_check.c, which the toolchain links into every image with an #available or @available: " ..
           "__isPlatformVersionAtLeast calls it only after testing the pointer it keeps, and below the release that has it reads " ..

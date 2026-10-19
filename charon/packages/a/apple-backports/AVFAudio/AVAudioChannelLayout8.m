@@ -1,17 +1,5 @@
 #import "CharonAVFAudio.h"
 
-// AVAudioChannelLayout over the AudioChannelLayout of CoreAudioTypes, with the channel count the
-// release's own AudioFormat answers for a tag and the canonical tag it answers for a count (see
-// CharonAVFAudioCommon.m: kAudioFormatProperty_ChannelLayoutForTag and
-// kAudioFormatProperty_TagsForNumberOfChannels, both answered by AudioFormatGetProperty on iOS 6.1.3).
-//
-// The header's two refusals are honoured as refusals: -initWithLayoutTag: answers nil for
-// kAudioChannelLayoutTag_UseChannelDescriptions and kAudioChannelLayoutTag_UseChannelBitmap, which
-// name a layout only by what the caller supplies. -initWithLayout: answers nil for a NULL layout, as
-// the release's own AVFAudio does on this host; every other layout, tag 0 and an unknown tag included,
-// is kept, and an allocation failure aborts (facts/AVFAudio/AVAudioChannelLayout.md, "Host answers for
-// -initWithLayout:").
-
 @implementation AVAudioChannelLayout {
     AudioChannelLayoutTag _charon_tag;
     AudioChannelLayout *_charon_layout;
@@ -36,9 +24,6 @@
     }
     self = [super init];
     AudioChannelLayoutTag tag = layout->mChannelLayoutTag;
-    // The header: a layout of kAudioChannelLayoutTag_UseChannelDescriptions is converted to a more
-    // specific tag where one exists. The release knows the counts of its own tags, so the conversion
-    // is the release's: the count of the descriptions, asked of the tag list for that count.
     if (tag == kAudioChannelLayoutTag_UseChannelDescriptions) {
         AudioChannelLayoutTag specific = CharonTagForChannelCount(layout->mNumberChannelDescriptions);
         if (specific != kAudioChannelLayoutTag_UseChannelDescriptions) {
@@ -56,7 +41,7 @@
     _charon_length = sizeof(AudioChannelLayout) + (layout->mNumberChannelDescriptions > 0 ? (layout->mNumberChannelDescriptions - 1) * sizeof(AudioChannelDescription) : 0);
     _charon_layout = calloc(1, _charon_length);
     if (!_charon_layout) {
-        abort(); // Out of memory is a crash, not a refusal: the nonnull declaration holds for every other input.
+        abort();
     }
     _charon_layout->mChannelLayoutTag = tag;
     if (layout->mNumberChannelDescriptions > 0) {
@@ -125,17 +110,11 @@
         return _charon_layout->mNumberChannelDescriptions;
     }
     NSUInteger channels = CharonChannelsForLayoutTag(_charon_tag);
-    // A tag neither the release nor the table names carries its count in its low 16 bits, as the SDK's
-    // AudioChannelLayoutTag_GetNumberOfChannels reads it; the host answers that count for the unknown tag
-    // the differential in tests/backports/host/avfaudio/port.m measures.
     return (AVAudioChannelCount)(channels != 0 ? channels : (_charon_tag & 0x0000FFFF));
 }
 
 #pragma mark NSSecureCoding
 
-// The header declares NSSecureCoding on the class, and the secure archiver of iOS 6 reads and writes
-// it, so the two members are answered with the tag and the channel count the instance holds: a layout
-// is a value, and a decoded one is the same layout.
 + (BOOL)supportsSecureCoding
 {
     return YES;

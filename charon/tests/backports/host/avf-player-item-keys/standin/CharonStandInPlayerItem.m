@@ -1,7 +1,3 @@
-//
-//  CharonStandInPlayerItem.m
-//  See CharonStandInPlayerItem.h. The item is Apple's own: the stand-in adds no behaviour of its own, so every
-//  difference between the two runs is in the port's category.
 #import "CharonStandInPlayerItem.h"
 
 @implementation CharonStandInPlayerItem

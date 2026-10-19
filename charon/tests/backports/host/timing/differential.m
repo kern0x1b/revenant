@@ -31,10 +31,6 @@ static void same_double(double ours, double theirs, NSString *what)
         fail(@"%@: ours %.17g, UIKit %.17g", what, ours, theirs);
 }
 
-/* A settling duration is not held to the last bit: UIKit computes it in the width
-   of a CGFloat, which is a float where this package is built and a double on the
-   host, so the two round differently in the ninth digit. Everything else here is
-   compared exactly. */
 static void near_double(double ours, double theirs, NSString *what)
 {
     checks++;
@@ -50,8 +46,6 @@ static void same_point(CGPoint ours, CGPoint theirs, NSString *what)
         fail(@"%@: ours %@, UIKit %@", what, NSStringFromCGPoint(ours), NSStringFromCGPoint(theirs));
 }
 
-/* A description carries the class name and the address, neither of which can match;
-   what is compared is the shape and the values between them. */
 static NSString *shape_of(NSString *description)
 {
     NSString *text = [description stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
@@ -89,8 +83,6 @@ static NSString *reason_of(void (^block)(void))
     return nil;
 }
 
-/* The four control points of whatever curve a timing function stands for, which is
-   what the mapping from a UIViewAnimationCurve has to get right. */
 static NSString *curve_of(id function)
 {
     if (!function)
@@ -253,8 +245,6 @@ static void compare_spring(void)
 }
 
 
-/* How long the spring takes to settle, over a grid wide enough to reach both
-   branches of the formula and both ends of the damping ratio's clamp. */
 static void compare_settling(void)
 {
     Class theirs = [UISpringTimingParameters class], mine = ours_of(@"UISpringTimingParameters");
@@ -280,8 +270,6 @@ static void compare_settling(void)
                              masses[a], stiffnesses[b], dampings[c], velocities[d].dx, velocities[d].dy,
                              ourSettling, theirSettling);
                 }
-    /* A spring given only a damping ratio carries no mass, stiffness or damping,
-       and settles in no time at all rather than in an infinity. */
     UISpringTimingParameters *themRatio = [[theirs alloc] initWithDampingRatio:0.5];
     id usRatio = ((id (*)(id, SEL, CGFloat))objc_msgSend)([mine alloc], @selector(initWithDampingRatio:), (CGFloat)0.5);
     near_double(((double (*)(id, SEL))objc_msgSend)(usRatio, @selector(settlingDuration)),

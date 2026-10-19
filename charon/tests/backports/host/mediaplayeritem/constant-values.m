@@ -1,11 +1,3 @@
-// What this Mac's own MediaPlayer says each MPMediaItem property constant is, read and nothing else:
-// no library, no query, no item - the constants are `NSString * const` data symbols, so linking against
-// the framework answers the question the port's convention has been standing in for.
-//
-// The older constants are here as the witness: the port already carries those members, so if the host's
-// values follow "the constant is the property's own name" then the convention holds and the five new
-// values can be measured rather than assumed, and if they do not, the host is the authority and the
-// port's list follows it.
 #import <Foundation/Foundation.h>
 #import <MediaPlayer/MediaPlayer.h>
 

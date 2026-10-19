@@ -1,11 +1,8 @@
-/* record.m - the cases of run.sh: the port's installer (UIViewController+TransitionCoordinator.m) presenting and dismissing
-   on the host's UIKit. */
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 #import "check.h"
 #import "CharonCustomTransition.h"
 
-/* Stands in for the port's sheet class, which the installer asks for a selector only it carries. */
 @implementation UISheetPresentationController (CharonHostStandIn)
 - (id<UIViewControllerAnimatedTransitioning>)charon_transitionAnimator
 {
@@ -15,8 +12,6 @@
 
 static int asked;
 
-/* Counts the asks, and keeps what it answers for the controller as the port's getter does (UISheetPresentationController.m),
-   which the host does not carry. */
 @implementation UIViewController (CharonHostCount)
 - (UISheetPresentationController *)charonHost_sheetPresentationController
 {
@@ -27,16 +22,12 @@ static int asked;
 }
 @end
 
-/* The categories of the installer file are attached to the host's classes under a prefix (host-attach.c), as the host's UIKit
-   has some of their selectors already: the one the sheet sends its controller is then charonHost_charon_sheetDidDismiss:. */
 void host_attach_prefixed(const char *prefix);
 
 @interface UIViewController (CharonHostSheetHold)
 - (void)charonHost_charon_sheetDidDismiss:(UIPresentationController *)sheet;
 @end
 
-/* What the port's sheet does when its dismissal ends (UISheetPresentationController.m, dismissalTransitionDidEnd:): it says so to
-   its controller. The host's class of that name is the release's, so its method is exchanged for one that says the same. */
 @implementation UISheetPresentationController (CharonHostEnd)
 - (void)charonHost_dismissalTransitionDidEnd:(BOOL)completed
 {
@@ -74,8 +65,6 @@ void host_attach_prefixed(const char *prefix);
 @property (nonatomic, strong) UIWindow *window;
 @end
 
-/* UIKit finishes a presentation or a dismissal on the main run loop after the block that began it returns, so the cases
-   are steps, each run in a turn of its own. */
 static NSMutableArray<void (^)(void)> *steps;
 
 static void step(void (^body)(void))
@@ -102,7 +91,6 @@ static void advance(void)
 
 static __weak UIPresentationController *sheetSeen;
 
-/* One controller, presented from a presenter of the given width class and dismissed. */
 static UIViewController *presenter(UIViewController *root, UIUserInterfaceSizeClass width)
 {
     UIViewController *child = [[UIViewController alloc] init];
@@ -133,9 +121,7 @@ static void run(UIViewController *root)
     controller.transitioningDelegate = caller;
     __block UIPresentationController *first = nil;
 
-    /* A page sheet from a compact width: the sheet is asked for and the release presents it through the handover. */
     step(^{
-        /* The caller configures the sheet before presenting, as the sheet's own API asks. */
         controller.sheetPresentationController.detents = @[ [UISheetPresentationControllerDetent mediumDetent] ];
         asked = 0;
         [compact presentViewController:controller animated:YES completion:nil];
@@ -159,11 +145,9 @@ static void run(UIViewController *root)
         CHECK(controller.transitioningDelegate == caller, "compact.delegate.back");
         CHECK(caller.dismissed >= 1, "compact.caller.asked.dismiss");
         CHECK(charon_presentation_controller_of(controller) == nil, "compact.sheet.dropped");
-        /* UIKit's controller has none either: asked again after its dismissal it makes another, with the default detents. */
         CHECK([controller.sheetPresentationController.detents.firstObject.identifier isEqual:UISheetPresentationControllerDetentIdentifierLarge], "host.sheet.detents.not.kept");
         first = nil;
         asked = 0;
-        /* Presented again, it is another sheet, as UIKit's controller makes another after its dismissal. */
         [compact presentViewController:controller animated:NO completion:nil];
     });
     step(^{
@@ -173,7 +157,6 @@ static void run(UIViewController *root)
         [compact dismissViewControllerAnimated:NO completion:nil];
     });
 
-    /* Neither a regular width nor another style asks for a sheet. */
     step(^{
         asked = 0;
         [regular presentViewController:controller animated:NO completion:nil];
@@ -196,8 +179,6 @@ static void run(UIViewController *root)
         [compact dismissViewControllerAnimated:NO completion:nil];
     });
 
-    /* A controller presented on top of another (compact -> ancestor -> chained) that goes down with its ancestor: the dismissal is the
-       ancestor's, not its own, and the release ends the sheet's dismissal all the same. */
     UIViewController *ancestor = [[UIViewController alloc] init];
     ancestor.modalPresentationStyle = UIModalPresentationFullScreen;
     UIViewController *chained = [[UIViewController alloc] init];

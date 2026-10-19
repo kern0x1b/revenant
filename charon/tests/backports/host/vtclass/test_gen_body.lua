@@ -1,18 +1,8 @@
--- test_gen_body.lua - checks gen_body on the declarations whose spelling broke it, before anything is generated
--- from it. A port of test-gen-body.py: the same assertions, the same printed lines, the same exit status.
---
--- The star was absorbed by the pattern's own `\*?`, so a property the SDK writes `NSIndexSet*` was read as a
--- scalar and generated as a by-value return of an interface type. The SDK writes both spellings, so both are
--- here.
---
---     xmake l test_gen_body.lua        (VT_SDK set: also the SDK checks, run through the heavy queue)
-
 local G = import("gen_body", {rootdir = os.scriptdir()})
 local V = import("vtlib", {rootdir = os.scriptdir()})
 
 local HERE = os.scriptdir()
 
--- Python's repr() for the values the messages print: None, True/False, str, and a list of str.
 local function py_repr(v)
     if v == nil then return "None" end
     if v == true then return "True" end
@@ -49,7 +39,6 @@ local function py_repr(v)
     return table.concat(out)
 end
 
--- Python's %s of a value that may be None, True or False.
 local function py_str(v)
     if v == nil then return "None" end
     if v == true then return "True" end
@@ -57,19 +46,16 @@ local function py_str(v)
     return tostring(v)
 end
 
--- Python str.strip() on ASCII.
 local function strip_ws(s)
     return (s:gsub("^[ \t\n\r\f\v]+", ""):gsub("[ \t\n\r\f\v]+$", ""))
 end
 
--- Python str.splitlines()[0] for text whose line breaks are \n (the only break the generated bodies contain).
 local function first_line(s)
     local p = s:find("[\n\r\v\f\28\29\30]")
     if p then return s:sub(1, p - 1) end
     return s
 end
 
--- Python's s.split("\n"), as a list of lines.
 local function lines_of(s)
     local out, start = {}, 1
     while true do
@@ -84,8 +70,6 @@ local function lines_of(s)
     return out
 end
 
--- The test's own copy of  (\w+):\s*\(([^)]*)\)\s*(\w+)  (findall), as the Python writes it inline.
--- Returns {word, type, arg} triples.
 local function piece_triples(text)
     local out = {}
     local function is_word(c)
@@ -128,7 +112,6 @@ local function piece_triples(text)
     return out
 end
 
--- Python's open(f) iteration: each line keeps its "\n" (text mode, so CR and CRLF become "\n").
 local function lines_keeping_newline(path)
     local text = V.read_text(path)
     local out, start = {}, 1
@@ -158,12 +141,10 @@ local function split_tab(s)
     return out
 end
 
--- Python's glob.glob(join(headers, "*.h")) sorted: the absolute paths in byte order.
 local function sorted_headers(dir)
     return V.sort_bytes(os.files(dir .. "/*.h"))
 end
 
--- One test case: the declaration, the expected name, type, obj, class, getter.
 local CASES = {
     {'@property (nonatomic, readonly) NSIndexSet* supportedRevisions;',
      "supportedRevisions", "NSIndexSet", true, false, nil},
@@ -184,25 +165,17 @@ local CASES = {
      "maximumDimensions", "CMVideoDimensions", false, false, nil},
     {'@property (nonatomic, readonly) CMTime presentationTimeStamp;',
      "presentationTimeStamp", "CMTime", false, false, nil},
-    -- A CFTypeRef is NOT an object property and NOT a scalar either: it is a reference the accessor
-    -- retains out of the store, which is the branch that wanted CVPixelBufferRetain.
     {'@property (nonatomic, readonly) CVPixelBufferRef buffer;',
      "buffer", "CVPixelBufferRef", false, false, nil},
-    -- the SDK's own spelling of an absent-on-iOS property: the strip has to leave the name behind.
-    -- The nested parens here are the point: API_DEPRECATED_WITH_REPLACEMENT("isSupported", macos(15.4,
-    -- 26.0)) used to leave a trailing ')' and the property vanished from the parse altogether.
     {'@property (class, nonatomic, readonly) Boolean processorSupported '
      .. 'API_DEPRECATED_WITH_REPLACEMENT("isSupported", macos(15.4, 26.0)) API_UNAVAILABLE(ios);',
      "processorSupported", "Boolean", false, true, nil},
 }
 
--- The one-line form of an odict used in the expected-value tables below.
 local function props(text)
     return G.props_of(text)
 end
 
--- The SDK declaration of the selector whose pieces differ from its argument names (VTFrameProcessor_
--- FrameRateConversion.h:166-171), as the Python test holds it.
 local SDK_DECLARATION = table.concat({
     "- (nullable instancetype) initWithSourceFrame:(VTFrameProcessorFrame *)sourceFrame",
     "                                                                 nextFrame:(VTFrameProcessorFrame *)nextFrame",
@@ -212,8 +185,6 @@ local SDK_DECLARATION = table.concat({
     "                                                         destinationFrames:(NSArray<VTFrameProcessorFrame *> *)destinationFrame NS_REFINED_FOR_SWIFT;",
 }, "\n")
 
--- The branch each argument type must take, per the SDK's own types. A type the SDK adds has no entry, and the
--- test is red until someone says which branch it takes.
 local EXPECTED_BRANCH = {
     CVPixelBufferRef = "CF",
     CMTime = "struct",
@@ -252,7 +223,6 @@ local EXPECTED_BRANCH = {
     id = "object",
 }
 
--- The Python's set of property names passed as `properties` to init_body: a Lua odict with those names.
 local function name_set(names)
     local od = G.odict_new()
     for _, n in ipairs(names) do G.odict_set(od, n, true) end
@@ -283,8 +253,6 @@ local function run_checks()
         end
     end
 
-    -- and the accessor it generates for the two spellings of the same property must be the SAME, or the
-    -- port would have one accessor for the spaced spelling and another for the unspaced one
     local spaced = G.body("supportedRevisions", G.odict_get(
         props('@property (nonatomic, readonly) NSIndexSet * supportedRevisions;'), "supportedRevisions"))
     local unspaced = G.body("supportedRevisions", G.odict_get(
@@ -295,8 +263,6 @@ local function run_checks()
         print("  both spellings generate one accessor: " .. strip_ws(first_line(spaced)))
     end
 
-    -- The generated accessor is checked as TEXT, not only for agreeing with itself: a doubled star in the cast
-    -- is `(NSArray<NSNumber *> * *)`, which ARC rejects, and only the exact text shows it.
     local EXPECTED = {
         ["object"] = "CHARON_VALUE_PROPERTY(NSIndexSet *, supportedRevisions)\n",
         ["class-object"] = "+ (NSIndexSet *)supportedRevisions\n{\n"
@@ -327,8 +293,6 @@ local function run_checks()
         end
     end
 
-    -- And the exclusion is a RULE, not a side effect of a regex: parse() must leave every property the SDK
-    -- marks API_UNAVAILABLE(ios) out of the class, and name it.
     local sdk = os.getenv("VT_SDK") or ""
     if sdk == "" then
         print("  VT_SDK unset: the API_UNAVAILABLE(ios) rule is NOT checked here")
@@ -365,7 +329,6 @@ local function run_checks()
         end
     end
 
-    -- THE SELECTOR PIECE AND THE ARGUMENT NAME ARE NOT ALWAYS THE SAME WORD (VTFrameProcessor_FrameRateConversion.h).
     local pieces = piece_triples(G.strip(SDK_DECLARATION))
     local expected_pieces = {"initWithSourceFrame", "nextFrame", "opticalFlow", "interpolationPhase",
                              "submissionMode", "destinationFrames"}
@@ -386,7 +349,6 @@ local function run_checks()
     print(string.format("  the declaration yields %d pieces, the last two differing: %s / %s",
         #pieces, py_repr(last[1]), py_repr(last[3])))
 
-    -- and the declaration built from them must spell the SDK's selector, ending in destinationFrames:
     local selector_parts = {}
     for i, pt in ipairs(pieces) do selector_parts[i] = pt[1] .. ":" end
     local selector = table.concat(selector_parts)
@@ -410,7 +372,6 @@ local function run_checks()
     end
     print("  the declaration's last piece: " .. last_piece_line)
 
-    -- ONE TEST PER BRANCH of the initialiser's store line, because the branch is chosen by the argument's TYPE.
     local SCALAR_ARGS = {{"frameWidth", "NSInteger", "frameWidth"},
                          {"frameHeight", "NSInteger", "frameHeight"},
                          {"usePrecomputedFlow", "BOOL", "usePrecomputedFlow"}}
@@ -435,12 +396,10 @@ local function run_checks()
         end
     end
 
-    -- and the CF branch is chosen by the TYPE: the same property name with a different type is a different branch
     if G.init_body("initWithX:", {{"buffer", "NSInteger", "buffer"}}, name_set({"buffer"}), nil):find("self->_buffer", 1, true) then
         bad[#bad + 1] = "a NSInteger named buffer took the CF branch - the branch is following the NAME"
     end
 
-    -- and the accessor for a CF property reads the ivar, not the store
     local cf_accessor = G.body("buffer", G.odict_get(props("@property(nonatomic,readonly) CVPixelBufferRef buffer;"),
                                                      "buffer"))
     if not cf_accessor:find("self->_buffer", 1, true) or cf_accessor:find("CharonValueStore", 1, true) then
@@ -449,8 +408,6 @@ local function run_checks()
         print("  the CF accessor reads the ivar: " .. strip_ws(first_line(cf_accessor)))
     end
 
-    -- THE MANDATORY WALK. Every argument type of all seventeen initialisers, the branch each one takes, and a
-    -- FAILURE for any type with no expected branch.
     if sdk == "" then
         print("  VT_SDK unset: the branch walk is NOT checked here")
     else
@@ -471,8 +428,6 @@ local function run_checks()
                 end
             end
         end
-        -- The probe's rows as the TEST reads them: a line keeps its newline, so the objc flag of a line that
-        -- ends in "\n" compares false here. Kept as the Python reads it, not "fixed".
         local signals = {}
         for _, line in ipairs(lines_keeping_newline(HERE .. "/../../../../.agent-work/runs/vt/type-branches.tsv")) do
             local r = split_tab(line)
@@ -505,7 +460,6 @@ local function run_checks()
                 print(string.format("     %-58s %-38s %s", type_name, canon, got))
             end
         end
-        -- the two cases named on their own, with the compiler's answer beside them
         local named = {{"CVPixelBufferRef", "CF"}, {"OSType", "scalar"},
                        {"NSArray<NSNumber *> *", "object"}, {"CMTime", "struct"}}
         for _, nc in ipairs(named) do
@@ -532,7 +486,6 @@ function main(...)
         end,
         catch {
             function(err)
-                -- Python's uncaught exception: the traceback is not reproduced; the exit status is the same, 1.
                 V.fail(tostring(err))
             end
         }

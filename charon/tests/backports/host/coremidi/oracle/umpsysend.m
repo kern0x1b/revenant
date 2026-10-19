@@ -1,5 +1,3 @@
-// Host probe: MIDISendUMPSysex and MIDISendUMPSysex8 on macOS, to a 1.0 and a 2.0 virtual destination. Prints the status
-// each call answers, the request's wordsToSend and complete flag after the call, and what each destination receives.
 #import <CoreMIDI/CoreMIDI.h>
 #import <Foundation/Foundation.h>
 #include <stdio.h>

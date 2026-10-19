@@ -1,7 +1,3 @@
-// scenekit-animation <case> : the port's series of one of Telegram's animations, the cases and the output of
-// host/scenekit/animation/series.swift, for host/scenekit/animation/compare.py. Every ~15 ms the view draws a frame
-// with -snapshot; the time of a sample is the one the view's delegate hears in renderer:updateAtTime:, just before the
-// port evaluates the animations of the frame. Needs OpenGL ES 2.0, so a device.
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <SceneKit/SceneKit.h>
@@ -160,7 +156,6 @@ int main(int argc, char **argv)
             a.fromValue = [NSValue valueWithSCNVector3:SCNVector3Make(0, 0.4f, 0)];
             a.toValue = [NSValue valueWithSCNVector3:SCNVector3Make(0, 2 * (float)M_PI, 0)];
             a.mass = 1; a.stiffness = 21; a.damping = 5.8;
-            // in PremiumStarComponent's order: the duration from the spring without its velocity, then the velocity
             a.duration = a.settlingDuration * 0.75;
             a.initialVelocity = 1.7;
             a.delegate = recorder;

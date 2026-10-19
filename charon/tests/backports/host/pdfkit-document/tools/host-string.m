@@ -1,11 +1,3 @@
-// What the HOST's -[PDFPage string] answers for each fixture, with the control characters VISIBLE: a
-// trailing newline or a space between two runs is the whole question and %s would hide both.
-//
-//   xcrun clang -fobjc-arc -Wall host-string.m -framework Foundation -framework PDFKit -o host-string
-//   ./host-string <fixtures-dir>/<name>.pdf ...
-//
-// Prints  <row name>\t<the string, controls shown>  so tools/verify-table.sh can diff it against the
-// table in facts/PDFKit/Document11.md.
 #import <Foundation/Foundation.h>
 #import <PDFKit/PDFKit.h>
 #include <stdio.h>

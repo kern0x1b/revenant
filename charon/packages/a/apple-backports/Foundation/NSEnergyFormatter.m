@@ -2,18 +2,6 @@
 
 #import "CharonUnitFormat.h"
 
-/* NSEnergyFormatter, iOS 8.0, the class whole from the 26.2 header: the number formatter and the
-   unit style that say how an energy is written, the flag that says an energy is a food energy,
-   the four methods that write one, and the method that reads one back and is documented never to.
-
-   The measurements are the system's own, held against it by tests/backports/host/unitformat, and
-   what the release can and cannot be asked for is written down in
-   facts/Foundation/NSUnitFormat.md. The one rule of this class that is its own is the flag: a
-   kilocalorie of food energy is written "C", "Cal" or "Calories" where it is "kcal", "kcal" or
-   "kilocalorie" otherwise, and the flag changes the name and nothing else - measured over ten
-   decades in both directions, the unit a food energy is written in is the unit any other energy
-   is written in. */
-
 @implementation NSEnergyFormatter {
     NSNumberFormatter *_numbers;
     NSFormattingUnitStyle _unitStyle;
@@ -89,9 +77,6 @@
     _forFoodEnergyUse = forFoodEnergyUse;
 }
 
-/* The name of a unit, which for a kilocalorie of food energy is not the name of a kilocalorie: the
-   flag writes "C" where a name is asked for and "Cal" where a value and a name are written
-   together. */
 - (NSString *)charon_nameOfUnit:(NSInteger)unit value:(double)value system:(CharonUnitSystem)system written:(BOOL)written
 {
     NSNumberFormatter *numbers = self.numberFormatter;
@@ -107,9 +92,6 @@
 - (NSString *)stringFromValue:(double)value unit:(NSEnergyFormatterUnit)unit
 {
     CharonUnitSystem system = charon_unit_system([NSLocale currentLocale]);
-    /* A kilocalorie of food energy has a name of its own, and every other unit is written as the
-       shared machine writes it - including a unit outside the enumeration, which the system writes
-       with the name of the gram-force. */
     NSString *food = _forFoodEnergyUse ? charon_unit_food_name(unit, _unitStyle, value, YES, self.numberFormatter) : nil;
     if (food) {
         NSString *number = charon_unit_number(value, self.numberFormatter);

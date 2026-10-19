@@ -1,17 +1,3 @@
-// probe.m - AVAudioFile, one program, built twice: against Apple's AVFAudio on the host (run.sh's
-// first half) and against the port's own classes in the same binary (run.sh's second half, with
-// every class name renamed). Its output is the whole measurement: the two outputs must be equal.
-//
-// It prints only what a caller can see - field values, frame counts, a checksum of the PCM frames,
-// and the NSError domain and code of each failure - never a path, a pointer or a timestamp, so
-// the two runs can be compared byte for byte.
-//
-//   probe <scratch-directory>
-//
-// The lossless file is written as CAF, PCM 16-bit mono at 44.1 kHz, and read back through both
-// read forms. The AAC file is written as M4A and only its shape is printed (frame count, length and
-// fields), since two decoders are not required to agree on the samples.
-
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 #include <math.h>
@@ -42,7 +28,6 @@ static void describeError(const char *label, NSError *error)
         printf("%s: error domain=%s code=%ld\n", label, error.domain.UTF8String, (long)error.code);
 }
 
-// FNV-1a over the bytes of a buffer's first channel, which is the only channel of a mono file.
 static unsigned long checksumBytes(const void *bytes, size_t count, unsigned long hash)
 {
     const unsigned char *p = bytes;
@@ -72,7 +57,6 @@ static NSDictionary *aacSettings(void)
              AVEncoderBitRateKey: @64000};
 }
 
-// Fills a mono float buffer with a 440 Hz sine at half scale.
 static AVAudioPCMBuffer *sineBuffer(AVAudioFormat *format, AVAudioFrameCount frames)
 {
     AVAudioPCMBuffer *buffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:frames];
@@ -83,8 +67,6 @@ static AVAudioPCMBuffer *sineBuffer(AVAudioFormat *format, AVAudioFrameCount fra
     return buffer;
 }
 
-// Reads a whole file through readIntoBuffer:error: and returns the frames read and a checksum of the
-// first channel's samples, as the file's own processing format lays them out.
 static void readAll(AVAudioFile *file, const char *label)
 {
     AVAudioFormat *format = file.processingFormat;
@@ -92,8 +74,6 @@ static void readAll(AVAudioFile *file, const char *label)
     unsigned long frames = 0, hash = 2166136261UL;
     NSError *error = nil;
     for (;;) {
-        // The host reports the end of the file as an error, not as an empty buffer; that is part of
-        // what is measured here, so it is printed and the totals are still reported after it.
         if (![file readIntoBuffer:buffer error:&error]) {
             describeError(label, error);
             break;
@@ -128,7 +108,6 @@ int main(int argc, const char *argv[])
 
         NSError *error = nil;
 
-        // The lossless file: write, release (which closes it), then read it back both ways.
         @autoreleasepool {
             AVAudioFile *writer = [[AVAudioFile alloc] initForWriting:caf settings:linearPCMSettings() error:&error];
             describeError("write caf", error);
@@ -152,7 +131,6 @@ int main(int argc, const char *argv[])
                    (long long)reader.length, (long long)reader.framePosition);
             readAll(reader, "read caf float all");
 
-            // A seek, then a bounded read of 500 frames through readIntoBuffer:frameCount:error:.
             reader.framePosition = 1000;
             printf("seek caf framePosition=%lld\n", (long long)reader.framePosition);
             AVAudioPCMBuffer *buffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:reader.processingFormat frameCapacity:BLOCK_FRAMES];
@@ -172,7 +150,6 @@ int main(int argc, const char *argv[])
             readAll(reader, "read caf int16 all");
         }
 
-        // The AAC file: its shape only.
         @autoreleasepool {
             AVAudioFile *writer = [[AVAudioFile alloc] initForWriting:m4a settings:aacSettings() error:&error];
             describeError("write m4a", error);
@@ -203,7 +180,6 @@ int main(int argc, const char *argv[])
             printf("read m4a frames=%lu\n", frames);
         }
 
-        // A read into a buffer of another format, and a read asking for more frames than the buffer holds.
         @autoreleasepool {
             AVAudioFile *reader = [[AVAudioFile alloc] initForReading:caf error:&error];
             AVAudioFormat *stereo = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:SAMPLE_RATE channels:2];
@@ -223,7 +199,6 @@ int main(int argc, const char *argv[])
             }
         }
 
-        // The failures: a missing file, and a format that cannot be written.
         error = nil;
         AVAudioFile *absent = [[AVAudioFile alloc] initForReading:missing error:&error];
         printf("missing file: %s\n", absent ? "opened" : "nil");

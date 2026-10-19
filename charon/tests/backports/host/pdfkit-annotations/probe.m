@@ -1,8 +1,3 @@
-// The same source, built against the host's PDFKit (no CHARON_PORT) and against the port's own CharonPDFKit.h
-// (-DCHARON_PORT). One key=value line per fact, so the two outputs can be diffed.
-//
-// The facts are the three annotation members the port answers from the annotation's own dictionary, and the
-// action class behind the URL, for every annotation the first page of each fixture carries.
 #import <Foundation/Foundation.h>
 #ifdef CHARON_PORT
 #import "CharonPDFKit.h"

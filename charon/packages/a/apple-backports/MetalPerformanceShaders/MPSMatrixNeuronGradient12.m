@@ -1,8 +1,3 @@
-// MPSMatrixNeuronGradient, from the header of the SDK of iOS 16.4. One object per release: the band machinery keeps an
-// object whole or drops it whole, so a file here carries the API of exactly one release.
-
-// The state every one of the neural network matrix kernels carries, and the accessors each of them
-// declares. A macro defines no symbol, so a file that uses one needs nothing from another.
 #define CHARON_MPS_NEURON_IVARS \
     MPSCNNNeuronType _neuronType; \
     float _neuronParameterA, _neuronParameterB, _neuronParameterC; \
@@ -118,8 +113,6 @@ CHARON_MPS_NEURON_COMMON
         CharonMPSRefuse(@"MPSMatrixNeuronGradient: a matrix of a data type that is not one of the eight element types was given");
         return;
     }
-    // The gradient of y = neuron(alpha * x + bias) with respect to x is the neuron's own derivative at
-    // the intermediate value, times alpha; with respect to the bias it is the incoming gradient itself.
     NSUInteger available = in.rows - _secondarySourceMatrixOrigin.x;
     NSUInteger vectors = _sourceNumberOfFeatureVectors < available ? _sourceNumberOfFeatureVectors : available;
     NSUInteger columns = in.columns - _secondarySourceMatrixOrigin.y;
@@ -143,12 +136,6 @@ CHARON_MPS_NEURON_COMMON
     }
     CharonMPSNeuron neuron = [self charon_mps_neuron];
     for (NSUInteger b = start; b < start + count; b++) {
-        // The bias gradient is the incoming gradient weighted by the neuron's own derivative at the
-        // intermediate value, and the data gradient is that same quantity times alpha: the two differ by
-        // exactly the scale factor, because alpha is what scales the input and not the bias. Read off
-        // the release with a one-hot incoming gradient and with a general one, element by element, in
-        // tests/backports/host/mpsmatrix/bias-probe.m; it is the plain column sum only when the
-        // derivative is one everywhere, which is true of the identity and of nothing else.
         for (NSUInteger column = 0; column < channels; column++) {
             double total = 0.0;
             for (NSUInteger row = 0; row < vectors; row++) {

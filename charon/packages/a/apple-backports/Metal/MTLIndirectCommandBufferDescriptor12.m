@@ -1,27 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
-// THE INDIRECT COMMAND BUFFER DESCRIPTOR, the class MTLIndirectCommandBuffer.h declares at iOS 12.0.
-//
-// A plain data holder, like the descriptors beside it: it says which commands an indirect command buffer may hold,
-// which state each command inherits from its encoder, and how many buffer bindings a command may make per stage.
-// It asks no device anything. The buffer it describes is a device's, and this port has no indirect command buffer
-// to hand back, so nothing here creates one; the descriptor is carried so that a caller building one reads back what
-// it wrote.
-//
-// THE MEMBERS CARRY THE RELEASE THEY ARRIVED IN, and this file holds them all. The members the SDK this package
-// compiles against does not declare (the 26.0 inheritance flags, and the 17.0 threadgroup, object and mesh bind
-// counts) are implemented here as explicit accessors, the way the compute descriptor carries its 26.0 members.
-//
-// FRESH DEFAULTS, measured on the host (tests/backports/host/indirect-command-buffer-descriptor): no command type,
-// the pipeline and buffer inheritance OFF, the six 26.0 inheritance flags ON, every bind count 0 except the kernel
-// threadgroup memory bind count, which is 31.
-//
-// NOTHING IS VALIDATED, measured: a command type with bits Apple does not name, and a bind count of 99999, are read
-// back as set.
-//
-// COPY is a new object with the same members, and EQUALITY is by value, with a hash that agrees with it.
-
 @implementation MTLIndirectCommandBufferDescriptor {
     MTLIndirectCommandType _commandTypes;
     BOOL _inheritPipelineState;
@@ -61,7 +40,6 @@
 @synthesize maxFragmentBufferBindCount = _maxFragmentBufferBindCount;
 @synthesize maxKernelBufferBindCount = _maxKernelBufferBindCount;
 
-// The accessors for the members the SDK this package compiles against does not declare.
 - (BOOL)inheritDepthStencilState { return _inheritDepthStencilState; }
 - (void)setInheritDepthStencilState:(BOOL)inherit { _inheritDepthStencilState = inherit; }
 - (BOOL)inheritDepthBias { return _inheritDepthBias; }

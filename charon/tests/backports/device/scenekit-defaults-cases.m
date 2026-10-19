@@ -10,7 +10,6 @@
 
 static NSString *number(double value)
 {
-    // Six significant digits: a CGFloat is a float on armv7 and a double on the host.
     NSString *text = [NSString stringWithFormat:@"%.6g", value];
     return [text isEqualToString:@"-0"] ? @"0" : text;
 }
@@ -48,7 +47,6 @@ static NSString *colour(id value)
     } else {
         return nil;
     }
-    // iOS 6 answers getRed: only for an RGB colour; a white one answers getWhite:.
     CGFloat red, green, blue, alpha;
     if (![colour getRed:&red green:&green blue:&blue alpha:&alpha]) {
         if (![colour getWhite:&red alpha:&alpha]) {
@@ -74,8 +72,6 @@ static NSString *text(id value)
         return value;
     }
     if ([value isKindOfClass:[NSNumber class]]) {
-        // A mask of every bit is NSUIntegerMax, whose width is the platform's; it is said, not printed. armv7 boxes
-        // it as a signed 64-bit number, so it is told by its value, not its type.
         if ([value doubleValue] > 0 && [value unsignedLongLongValue] == (unsigned long long)NSUIntegerMax) {
             return @"all bits";
         }
@@ -135,7 +131,6 @@ void charon_scenekit_default_cases(void (^report)(NSString *name, NSString *valu
     for (NSString *slot in slots) {
         [slotKeys addObject:[slot stringByAppendingString:@".contents"]];
         [slotKeys addObject:[slot stringByAppendingString:@".intensity"]];
-        // a material's own properties sample differently from a property made alone (mipFilter)
         for (NSString *key in @[@"minificationFilter", @"magnificationFilter", @"mipFilter", @"wrapS", @"wrapT", @"mappingChannel",
                                 @"contentsTransform"]) {
             [slotKeys addObject:[NSString stringWithFormat:@"%@.%@", slot, key]];
@@ -164,7 +159,6 @@ void charon_scenekit_default_cases(void (^report)(NSString *name, NSString *valu
                                             @"renderingOrder", @"castsShadow", @"categoryBitMask", @"movabilityHint"], report);
     read_keys(@"SCNPlane", [SCNPlane planeWithWidth:1 height:1], @[@"widthSegmentCount", @"heightSegmentCount", @"cornerRadius",
                                                                   @"cornerSegmentCount"], report);
-    // the scene's own background and lighting environment are properties made with their scene, as a material's slots are
     NSMutableArray *sceneKeys = [NSMutableArray array];
     for (NSString *slot in @[@"background", @"lightingEnvironment"]) {
         for (NSString *key in @[@"contents", @"intensity", @"minificationFilter", @"magnificationFilter", @"mipFilter", @"wrapS", @"wrapT",

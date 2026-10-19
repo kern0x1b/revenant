@@ -15,8 +15,6 @@ static void charon_group_barrier_invoke(void *context)
     free(work);
 }
 
-/* dispatch_group_async reads a block's flags from iOS 8 and submits a barrier block as a barrier; before, the release's
-   runs it as an ordinary one. The group is entered when the block is submitted and left once it has run, as libdispatch does. */
 __attribute__((visibility("hidden")))
 void charon_dispatch_group_async(dispatch_group_t group, dispatch_queue_t queue, dispatch_block_t block)
 {

@@ -1,10 +1,3 @@
--- The record rules of gen (design-spec-driven.md, "Records"), on a fixture tree under .agent-work/runs of this checkout: a pinned member
--- whose declaration changed is refused and named; gen --record re-records exactly that pin (pinned-by repin) and changes no other row;
--- a member with no pin whose declaration changed is not refused; a constant of the constant record whose shard declaration changed is
--- not refused (the constant record is input's output, with no declaration hash to compare). The
--- shard's members are injected (headers.use), so no SDK is read; the shard's var rows are read from its file.
--- Run: xmake l tests/gen/record_test.lua
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 local FRAMEWORK = "FixKit"
 local OUT = "packages/a/apple-backports"
@@ -22,7 +15,6 @@ local function checks()
     return check, function() return failures end
 end
 
--- The members of the fixture's shard, as headers.shard_facts reads them, with the declaration hash each one has now.
 local function members(hashes)
     return {
         {cls = "FKThing", kind = "method", api = "-[FKThing reset]", text = "", hash = hashes.reset},
@@ -36,14 +28,11 @@ local function read(filepath)
     return files.read_text(filepath)
 end
 
--- The fixture's shard file: its header and one var row for the constant FKConst, declared with the given declaration hash. The row
--- has the cells of a shard row (kind, usr, container, name, side, type, params, attrs, availability, message, declhash).
 local function shard_text(constant_declhash)
     return "#libclang=fixture\tsdk=fixture\tcolumns=" .. SHARD_COLUMNS .. "\n"
         .. "var\tc:@FKConst\t-\t\t-\tNSString *const\t-\t-\t-\t-\t" .. constant_declhash .. "\n"
 end
 
--- The fixture's constant record: FKConst (declared, recorded against CONSTANT_HASH) and FKNoDecl (no shard declares it: "-").
 local function constant_record()
     local tsv = import("gen.tsv", {rootdir = TOOLS, anonymous = true})
     local layout = import("gen.layout", {rootdir = TOOLS, anonymous = true})
@@ -58,8 +47,6 @@ local function constant_record()
     return tsv.table_text(columns, {row("FKConst"), row("FKNoDecl")})
 end
 
--- Writes the fixture's committed inputs: the shard, the registry (two implemented overrides), the pins of the two overridden members,
--- and the constant record. count has no override and no pin.
 local function write_inputs(tree)
     local emit = import("gen.emit", {rootdir = TOOLS, anonymous = true})
     local layout = import("gen.layout", {rootdir = TOOLS, anonymous = true})
@@ -76,7 +63,6 @@ local function write_inputs(tree)
     emit.file(layout.constant_record_path(tree, FRAMEWORK), constant_record())
 end
 
--- The rows of a text as lines, and the rows that differ between two texts (by line position).
 local function differing(before, after)
     local tsv = import("gen.tsv", {rootdir = TOOLS, anonymous = true})
     local a, b = tsv.lines(before), tsv.lines(after)
@@ -113,13 +99,11 @@ function main()
     local spec_path = layout.spec_path(tree, FRAMEWORK, "26.2")
     local constants_path = layout.constant_record_path(tree, FRAMEWORK)
 
-    -- Baseline: the pins and the constant record match the shard, so gen writes and nothing is refused.
     check(gen.run({sdk = sdk, tree = tree, framework = FRAMEWORK}) == 0, "gen with every pin and constant matching the shard succeeds")
     check(#snapshot.refused(tree, FRAMEWORK) == 0, "no pin and no constant is refused at the baseline")
     local pins_before = read(pins_path)
     local constants_before = read(constants_path)
 
-    -- (c) An unpinned member changes: it is not refused, it regenerates from the shard.
     current = members({reset = "bbbbbbbbbbbbbbbb", setLevel = "aaaaaaaaaaaaaaaa", count = "c2c2c2c2c2c2c2c2"})
     snapshot.forget()
     check(#snapshot.refused(tree, FRAMEWORK) == 0, "an unpinned member whose declaration changed is not refused")
@@ -128,7 +112,6 @@ function main()
     check(string.find(spec_text, "c2c2c2c2c2c2c2c2", 1, true) ~= nil, "the unpinned member's new hash is in the generated spec")
     check(read(pins_path) == pins_before, "the pins are unchanged by an unpinned change")
 
-    -- (a) A pinned member changes: refused, the key named, nothing written for the framework.
     current = members({reset = "bbbbbbbbbbbbbbbb", setLevel = "a2a2a2a2a2a2a2a2", count = "c2c2c2c2c2c2c2c2"})
     snapshot.forget()
     local refused = snapshot.refused(tree, FRAMEWORK)
@@ -147,7 +130,6 @@ function main()
     check(string.find(read(spec_path) or "", "aaaaaaaaaaaaaaaa", 1, true) ~= nil
           and string.find(read(spec_path) or "", "a2a2a2a2a2a2a2a2", 1, true) == nil, "a refused framework writes nothing: the spec is the baseline's")
 
-    -- (b) gen --record re-records exactly that pin: its row takes the new hash and pinned-by repin, and no other row changes.
     check(gen.run({sdk = sdk, tree = tree, framework = FRAMEWORK, record = true}) == 0, "gen --record re-records the refused pin and succeeds")
     local registry = path.join(layout.registry_dir(FRAMEWORK), "ios.json")
     local diff = differing(pins_before, read(pins_path))
@@ -156,11 +138,8 @@ function main()
           "gen --record changes exactly the refused pin's row, to the new hash with pinned-by repin (got " .. table.concat(diff, "; ") .. ")")
     check(#snapshot.refused(tree, FRAMEWORK) == 0, "after the re-record nothing is refused")
     check(gen.run({sdk = sdk, tree = tree, framework = FRAMEWORK}) == 0, "gen succeeds after the re-record, with no --record")
-    -- the members change above is re-recorded by the pins only: the constant record still matches, so it is unchanged
     check(read(constants_path) == constants_before, "the constant record is unchanged by the member changes")
 
-    -- (d) A constant's shard declaration changes: it is not refused, and gen leaves the constant record as input wrote it (the record
-    -- has no declaration hash to compare, as the Python it ports had none; input --all rewrites it).
     local pins_mid = read(pins_path)
     emit.file(layout.shard_path(tree, FRAMEWORK), shard_text("3333333333333333"))
     snapshot.forget()

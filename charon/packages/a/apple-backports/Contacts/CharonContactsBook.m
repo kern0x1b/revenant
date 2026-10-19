@@ -19,8 +19,6 @@
     return self;
 }
 
-// The factory each match is made by, the "kind" the release's own predicates name in their
-// -description (measured on the macOS 26 host's Contacts, facts/Contacts/Fetching.md).
 static NSString *CharonContactPredicateKind(CharonContactMatch match)
 {
     switch (match) {
@@ -40,8 +38,6 @@ static NSString *CharonContactPredicateKind(CharonContactMatch match)
     return [NSString stringWithFormat:@"match %ld", (long)match];
 }
 
-// The release answers a format only for the three identifier-list predicates
-// (`identifier IN {"A", "B"}`), and nil, without raising, for the rest (measured on the host).
 - (NSString *)predicateFormat
 {
     switch (_match) {
@@ -85,8 +81,6 @@ static NSString *CharonContactPredicateKind(CharonContactMatch match)
     [coder encodeObject:_value forKey:@"value"];
 }
 
-// Every value a factory stores is an NSString or an NSArray of them (CNContact9.m, CNGroup9.m,
-// CNContainer9.m).
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init])) {

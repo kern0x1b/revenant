@@ -1,19 +1,3 @@
-// scenekit-frames <scene.scn> <points> <out.png> [switch...] : the port's SCNView snapshot of a scene at scale 1, for
-// host/scenekit/frames.sh to hold against macOS SceneKit's frame of the same scene. The switches change the scene
-// through the public API before it is drawn, the same way host/scenekit/render.swift changes it on macOS:
-//   noparticles   every particle system removed
-//   nosubdiv      every geometry's subdivisionLevel 0
-//   noclearcoat   every material's clearCoat intensity 0
-//   nonormal      every material's normal contents nil
-//   nometalness, noselfillumination, noemission
-//                 that slot's intensity 0 in every material
-//   flatdiffuse   every material's diffuse contents the sRGB grey 0.5 instead of an image
-//   nolight+T     every light of type T (ambient, omni, directional, spot) removed
-//   metalness=V, roughness=V
-//                 that slot of every material the number V, intensity 1
-//   roughness+D   every material's roughness, a colour or a number, D larger: what a renderer whose roughness is off
-//                 by D would draw, the negative control of the frame tolerance (only this side takes it)
-// Prints the delegate messages -snapshot sent and the time it took. Needs OpenGL ES 2.0, so a device.
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <SceneKit/SceneKit.h>
@@ -60,7 +44,6 @@ static void each_material(SCNScene *scene, void (^block)(SCNMaterial *material))
     });
 }
 
-// A scalar slot's value is a number, or a colour's first component as it is (facts/SceneKit/SCNView.md).
 static BOOL raise_scalar(SCNMaterialProperty *property, double by)
 {
     id contents = property.contents;

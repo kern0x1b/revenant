@@ -1,9 +1,3 @@
-/*
- * What a browse answers about itself: the calls of browse_descriptor.h that arrived after the browse
- * itself - the type and the domain it is for, and whether the records a browser finds come with their
- * TXT record.
- */
-
 #import "CharonNW.h"
 
 const char *nw_browse_descriptor_get_bonjour_service_type(nw_browse_descriptor_t descriptor)

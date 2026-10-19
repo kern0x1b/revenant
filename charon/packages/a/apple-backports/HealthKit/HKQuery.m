@@ -1,18 +1,7 @@
-// HKQuery: what every query of this framework is asked, and the predicates one builds to ask it.
-//
-// The predicates are the release's own: a real NSPredicate over a real key path, which the store
-// then hands to the release's own NSPredicate to decide over the objects it read back. Every key
-// path here is one of the HKPredicateKeyPath constants, whose values were read out of iOS 8.0's own
-// image, and every one of them is a path a sample of this framework answers: UUID, startDate,
-// endDate, source, metadata, value, quantity and - through the correlation a sample belongs to -
-// correlation.source, correlation.UUID, correlation.metadata and correlation.workout.
-
 #import <HealthKit/HealthKit.h>
 
 #import "CharonHKStore.h"
 
-// The four operators of HKComparisonOperator as NSPredicate spells them. An operator the header does
-// not name raises, as the release raises for a comparison it cannot make.
 static NSString *CharonHKOperatorSpelling(NSPredicateOperatorType type)
 {
     switch (type) {
@@ -34,12 +23,6 @@ static NSString *CharonHKOperatorSpelling(NSPredicateOperatorType type)
     }
 }
 
-// Every query of this library is answered by the store through -charon_run, and the store's
-// -executeQuery: asks each one whether it conforms to <CharonHKRunnableQuery> before running it. No
-// class adopted that protocol, so -executeQuery: raised "is not a query this store can execute" for
-// every query this port has, and the six of 8.0 to 11.0 were never executed by anything that checked.
-// The base class adopts it once, here, and every subclass inherits the conformance: the members are the
-// four the protocol names, and HKQuery implements all four.
 @interface HKQuery (CharonHKRunnable) <CharonHKRunnableQuery>
 @end
 
@@ -60,9 +43,6 @@ static NSString *CharonHKOperatorSpelling(NSPredicateOperatorType type)
     return [super init];
 }
 
-// The type of the samples a query is for. It is not always one: an activity summary query's type is
-// not a sample type, which is what iOS 9.3 deprecated this name for and gave -objectType instead, and
-// the release answers nil here for such a query.
 - (nullable HKSampleType *)sampleType
 {
     return [_objectType isKindOfClass:[HKSampleType class]] ? (HKSampleType *)_objectType : nil;
@@ -73,23 +53,11 @@ static NSString *CharonHKOperatorSpelling(NSPredicateOperatorType type)
     return _predicate;
 }
 
-// The header declares -predicate strong and not copy, and a copied HealthKit predicate does not
-// evaluate as the one it was copied from: the measured answer for the port's copy was NO where the
-// host's own predicate gave YES for the same object. It is held as given, which is what the header says.
 - (void)charon_setPredicate:(nullable NSPredicate *)predicate
 {
     _predicate = predicate;
 }
 
-// -init is NS_UNAVAILABLE on this class, so the allocation is the port's own, and the name is in the
-// init family so that a subclass may write `self = [super initWithCharonObjectType:...]` and set its
-// own ivars after. It is an instance method rather than a class method because a category's class
-// method is not visible through a subclass type and a class extension declared in a header is visible
-// only to the one file that implements this class, so neither would reach the five subclass files that
-// call it.
-//
-// An initialiser that wrote `self = [super initWithCharonObjectType:...]` before this existed was left
-// as the bare allocation, with no type, no predicate and no handler.
 - (instancetype)initWithCharonObjectType:(nullable HKObjectType *)objectType
 {
     self = [super init];
@@ -103,10 +71,6 @@ static NSString *CharonHKOperatorSpelling(NSPredicateOperatorType type)
     return [self initWithCharonObjectType:sampleType];
 }
 
-// Where a query's handlers are called. The release delivers them on the queue the caller chose with
-// the private -setClientQueue:, and on the main queue where it chose none; the header says a handler
-// is called on an arbitrary background queue, so the main queue is what this port uses, being the one
-// queue a caller can rely on being the one it drew its own handlers in.
 - (void)charon_perform:(dispatch_block_t)block
 {
     dispatch_async(_charonQueue ?: dispatch_get_main_queue(), block);
@@ -127,10 +91,6 @@ static NSString *CharonHKOperatorSpelling(NSPredicateOperatorType type)
     return _charonExecuted;
 }
 
-// Where a query's handlers are called. The release delivers them on a queue the caller chose with the
-// private -setClientQueue:, and on the main queue where it chose none; the header says a handler is
-// called on an arbitrary background queue, so the main queue is what this port uses, as it is the one
-// queue a caller can rely on being the one it drew its own handlers in.
 - (nullable NSPredicate *)charon_predicate
 {
     return _predicate;
@@ -265,9 +225,6 @@ static NSString *CharonHKOperatorSpelling(NSPredicateOperatorType type)
                                          CharonHKOperatorSpelling(type), energy];
 }
 
-// The base class has no store of its own to run against: a query is a request, and only a subclass
-// knows what to ask the store for. HKHealthStore refuses a query of the base class as the release
-// refuses to execute one it has no results for.
 - (void)charon_run
 {
     [NSException raise:NSInvalidArgumentException

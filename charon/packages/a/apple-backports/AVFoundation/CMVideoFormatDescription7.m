@@ -231,9 +231,6 @@ static void charon_parse_sequence(const uint8_t *nal, size_t size, CharonSequenc
         if (charon_ue(r) > 12)
             goto done;
     } else if (order == 1) {
-        // H.264 7.4.2.1.1 lets these three offsets range over -2^31+1 to 2^31-1, but the host's CoreMedia refuses
-        // an SPS with any of them past -4095 to 4095 (-12710), the most 12 leading zeros can say, and the port
-        // answers as it does (facts/CoreMedia/H264ParameterSets.md).
         charon_bits(r, 1);
         charon_se(r);
         charon_se(r);

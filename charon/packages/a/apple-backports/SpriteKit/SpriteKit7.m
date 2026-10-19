@@ -1,27 +1,14 @@
-// SpriteKit7.m - SKNode of iOS 7, carried for the releases that have no SpriteKit at all.
-//
-// A node is a value in a tree: a name, a place (position, scale and rotation relative to its parent), a z order and a
-// list of children. Its behaviour is measured against the host's own SpriteKit in facts/SpriteKit/SKNode.md, and the
-// oracle is tests/backports/host/spritekit-node, one program built against each side.
-//
-// Nothing here draws. A node has no content, so its frame is empty, its hit tests answer nothing and its accumulated
-// frame is its own; a subclass with content overrides frame and containsPoint:. The name search follows the host's
-// grammar: a name is an fnmatch(3) pattern, "//" searches descendants breadth first, "." is the node itself and ".."
-// its parent, and a path that ends in a separator finds nothing.
 #import "CharonSpriteKit.h"
 #include <fnmatch.h>
 
-// The exception names the host raises, which an application matches on.
 static NSString *const CharonSKInvalidArgument = @"NSInvalidArgumentException";
 static NSString *const CharonSKNilNode = @"Attemped to add nil node";
 
 static BOOL CharonSKNameMatches(NSString *name, NSString *pattern)
 {
-    // A node with no name matches no pattern: the host gives nothing for it, and nothing here claims otherwise.
     return name != nil && fnmatch([pattern UTF8String], [name UTF8String], 0) == 0;
 }
 
-// The node's own transform: scale first, then rotation, then the position, all in its parent's coordinates.
 static CGAffineTransform CharonSKLocalTransform(SKNode *node)
 {
     CGAffineTransform scale = CGAffineTransformMakeScale(node.xScale, node.yScale);
@@ -30,7 +17,6 @@ static CGAffineTransform CharonSKLocalTransform(SKNode *node)
     return CGAffineTransformConcat(CGAffineTransformConcat(scale, rotation), place);
 }
 
-// The transform from the node's own coordinates to the root's: the node's, then each ancestor's.
 static CGAffineTransform CharonSKAbsoluteTransform(SKNode *node)
 {
     CGAffineTransform transform = CGAffineTransformIdentity;
@@ -40,8 +26,6 @@ static CGAffineTransform CharonSKAbsoluteTransform(SKNode *node)
     return transform;
 }
 
-// The transform from the node's parent's coordinates to the root's: the absolute transform of the parent, or the
-// identity when the node has none.
 static CGAffineTransform CharonSKParentTransform(SKNode *node)
 {
     return node.parent != nil ? CharonSKAbsoluteTransform(node.parent) : CGAffineTransformIdentity;
@@ -218,14 +202,11 @@ static CGAffineTransform CharonSKParentTransform(SKNode *node)
     return [_children copy];
 }
 
-// The frame of a node with no content is the zero-size rectangle at its position, in its parent's coordinates.
 - (CGRect)frame
 {
     return CGRectMake(_position.x, _position.y, 0, 0);
 }
 
-// The union of the node's frame and its children's accumulated frames, in the node's parent's coordinates. A child
-// whose frame is empty adds nothing: the host unions the non-empty frames only (measured on the zero-size tree).
 - (CGRect)calculateAccumulatedFrame
 {
     CGRect accumulated = self.frame;
@@ -240,9 +221,6 @@ static CGAffineTransform CharonSKParentTransform(SKNode *node)
     return accumulated;
 }
 
-// The host's reason for a nil node names the node it was added to, described as the host describes a node: the class,
-// the name, the position, the scale and the accumulated frame (measured for a named node at (3,4), scale (2,0.5), in
-// facts/SpriteKit/SKNode.md).
 - (NSString *)charon_describe
 {
     CGRect accumulated = [self calculateAccumulatedFrame];
@@ -251,9 +229,6 @@ static CGAffineTransform CharonSKParentTransform(SKNode *node)
             accumulated.origin.x, accumulated.origin.y, accumulated.size.width, accumulated.size.height];
 }
 
-// An index past the end is not checked here: the array raises its own NSRangeException for an index of 2^31 or more,
-// and the host gives that same exception for those indices (facts/SpriteKit/SKNode.md). For the indices below 2^31 past
-// the end the host crashes instead, and the port raises the same exception, since a crash is not an answer to keep.
 - (void)insertChild:(SKNode *)node atIndex:(NSUInteger)index
 {
     if (node == nil) {
@@ -277,7 +252,6 @@ static CGAffineTransform CharonSKParentTransform(SKNode *node)
     [self insertChild:node atIndex:_children.count];
 }
 
-// The nodes of the list that are children of this node leave it; the others are not children and are ignored.
 - (void)removeChildrenInArray:(NSArray *)nodes
 {
     for (SKNode *node in nodes) {
@@ -316,8 +290,6 @@ static CGAffineTransform CharonSKParentTransform(SKNode *node)
     for (NSUInteger i = 0; i < count; i++) {
         NSString *component = components[i];
         if (component.length == 0) {
-            // A leading single slash is relative to this node; a separator between names searches the descendants of
-            // the name before it; a separator at the end of the path finds nothing.
             if (i == 0 && count > 1 && [components[1] length] > 0) {
                 continue;
             }
@@ -388,14 +360,11 @@ static CGAffineTransform CharonSKParentTransform(SKNode *node)
     return NO;
 }
 
-// The point is in the node's parent's coordinates, and a node with no content contains none.
 - (BOOL)containsPoint:(CGPoint)point
 {
     return CGRectContainsPoint(self.frame, point);
 }
 
-// The point is in this node's coordinates. The descendants that contain it are found in breadth-first order, and the
-// last of them is the frontmost. A node with no descendant there answers itself, which is what the host answers too.
 - (NSArray *)nodesAtPoint:(CGPoint)point
 {
     CGPoint absolute = CGPointApplyAffineTransform(point, CharonSKAbsoluteTransform(self));
@@ -429,13 +398,10 @@ static CGAffineTransform CharonSKParentTransform(SKNode *node)
     return [node convertPoint:point fromNode:self];
 }
 
-// The two frames, carried to the root's coordinates, meet where their non-empty rectangles overlap.
 - (BOOL)intersectsNode:(SKNode *)node
 {
     CGRect mine = CGRectApplyAffineTransform([self calculateAccumulatedFrame], CharonSKParentTransform(self));
     CGRect theirs = CGRectApplyAffineTransform([node calculateAccumulatedFrame], CharonSKParentTransform(node));
-    // The host never intersects an empty frame, zero-size ones included (differential.m); CGRectIntersectsRect says yes
-    // to two zero-size rects at one point.
     if (CGRectIsEmpty(mine) || CGRectIsEmpty(theirs)) {
         return NO;
     }

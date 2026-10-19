@@ -1,8 +1,5 @@
 #include <MobileCoreServices/MobileCoreServices.h>
 
-// A dynamic identifier is "dyn." in any case, then one or more components joined by single dots,
-// each of ASCII letters, digits and hyphens, neither starting nor ending with a hyphen: what the
-// host answers, measured by tests/backports/host/uttype.
 Boolean UTTypeIsDynamic(CFStringRef inUTI)
 {
     if (!inUTI || CFGetTypeID(inUTI) != CFStringGetTypeID())
@@ -32,8 +29,6 @@ Boolean UTTypeIsDynamic(CFStringRef inUTI)
     return previous != '.' && previous != '-';
 }
 
-// Declared means the release's LaunchServices has a declaration for the identifier, which a
-// dynamic identifier never has.
 Boolean UTTypeIsDeclared(CFStringRef inUTI)
 {
     if (!inUTI || CFGetTypeID(inUTI) != CFStringGetTypeID())

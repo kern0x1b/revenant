@@ -1,8 +1,5 @@
 #import "CharonNEHotspot.h"
 
-/* The Hotspot 2.0 settings object: property storage, `copy` and the keyed archive, as the host answers them
-   (tests/backports/host/netext-hotspot/probe.m, ops hs20 and wiring). The domain name is set by the initializer
-   and read only; the Boolean is a value; the three lists are copied on set and by -copy. */
 @implementation NEHotspotHS20Settings {
     NSString *_domainName;
     BOOL _roamingEnabled;

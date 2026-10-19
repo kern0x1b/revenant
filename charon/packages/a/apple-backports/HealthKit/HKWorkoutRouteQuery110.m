@@ -1,28 +1,9 @@
-// The workout route of iOS 11.0: the class, the builder that makes it and the query that reads it.
-//
-// Each of the three is made the way the release makes it, because the header closes off -init on all
-// three and the way past that is the declared path:
-//   - HKWorkoutRoute has no initialiser at all and its superclass HKSeriesSample has none either, so the
-//     only path the release offers is the archive: it is constructed through -initWithCoder: over a real
-//     archive of its own facts, which is what the release's own round trip does.
-//   - HKWorkoutRouteBuilder's designated initialiser is -initWithHealthStore:device: and its
-//     superclass's -init is closed off with the header's "Use only subclass initializer methods", so
-//     the base allocation is a port-private one and the public entry point is the declared initialiser.
-//   - HKWorkoutRouteQuery's designated initialiser is -initWithRoute:dataHandler:.
-//
-// The route data is Apple's own encoded path, which this port does not parse: the builder keeps the
-// bytes in the order they were inserted, and the route a query reads is that sequence. That is what the
-// header's own -insertRouteData: takes, so nothing is invented.
-
 #import <objc/runtime.h>
 
 #import <HealthKit/HealthKit.h>
 
 #import "CharonHKStore.h"
 
-// A bare allocation of the builder, for the base its closed-off -init would have made. The class is
-// abstract in the header and has no coder path, so this is the only way its storage comes into
-// existence, and the declared initialiser fills it in the step after.
 static id CharonHKAllocateBuilder(Class cls)
 {
     return class_createInstance(cls, 0);
@@ -43,9 +24,6 @@ static id CharonHKAllocateBuilder(Class cls)
     return YES;
 }
 
-// The route the archive describes. An archive is the release's own way of making one of these, because
-// there is no other: -init is unavailable on the class and on its superclass, and -initWithCoder: is
-// the path NSCoding gives every NSSecureCoding class.
 + (instancetype)charon_routeWithData:(NSData *)routeData
 {
     NSData *data = [routeData isKindOfClass:[NSData class]] ? routeData : [NSData data];
@@ -99,17 +77,11 @@ static id CharonHKAllocateBuilder(Class cls)
     return YES;
 }
 
-// The class is abstract in the header - "-init NS_UNAVAILABLE, use only subclass initializer
-// methods" - so the port's own base allocation is reached by name and the declared initialiser below
-// is the only way a caller makes one, which is what the release offers.
 - (instancetype)charon_init
 {
     return (HKWorkoutRouteBuilder *)CharonHKAllocateBuilder([self class]);
 }
 
-// The release's own designated initialiser. Its superclass HKSeriesBuilder closes off -init with the
-// header's "Use only subclass initializer methods", so the base allocation is the port's own
-// charon_init and the public entry point is this one, which is the path the release hands a caller.
 - (instancetype)initWithHealthStore:(HKHealthStore *)healthStore device:(nullable HKDevice *)device
 {
     HKWorkoutRouteBuilder *builder = [self charon_init];
@@ -127,9 +99,6 @@ static id CharonHKAllocateBuilder(Class cls)
     return YES;
 }
 
-// The builder's own facts in an archive, and nothing from a superclass: HKSeriesBuilder is not
-// NSSecureCoding, so there is no superclass archive to call and the builder's two collections are all
-// its state is.
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [coder encodeObject:_inserted forKey:@"inserted"];
@@ -150,7 +119,6 @@ static id CharonHKAllocateBuilder(Class cls)
     return builder;
 }
 
-// The path of the workout, as the bytes Apple encoded it, kept in the order they were inserted.
 - (void)insertRouteData:(NSData *)routeData completion:(void (^)(BOOL success, NSError *_Nullable error))completion
 {
     if (![routeData isKindOfClass:[NSData class]] || !routeData.length) {
@@ -176,8 +144,6 @@ static id CharonHKAllocateBuilder(Class cls)
         completion(YES, nil);
 }
 
-// The route the inserted data and the metadata make, kept in the store against the workout so that the
-// query of that route can be answered from it.
 - (void)finishRouteWithWorkout:(HKWorkout *)workout
                        metadata:(nullable NSDictionary<NSString *, NSString *> *)metadata
                      completion:(void (^)(HKWorkoutRoute *_Nullable route, NSError *_Nullable error))completion
@@ -204,7 +170,6 @@ static id CharonHKAllocateBuilder(Class cls)
         completion(route, nil);
 }
 
-// Nothing may be collected after a route is finished, which is what the release's -discard says.
 - (void)discard
 {
     [_inserted removeAllObjects];
@@ -238,8 +203,6 @@ static id CharonHKAllocateBuilder(Class cls)
 
 - (void)charon_run
 {
-    // The route's bytes, as the builder inserted them, handed to the caller's handler on the queue
-    // the query was given, and the release's own error where there is nothing to hand.
     NSData *data = _route ? [[CharonHKStore sharedStore] routeDataOf:_route] : nil;
     NSError *error = data ? nil : CharonHKError(HKErrorNoData, @"The route has no data.", nil);
     [self charon_perform:^{

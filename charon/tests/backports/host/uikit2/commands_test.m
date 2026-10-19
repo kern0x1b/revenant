@@ -174,8 +174,6 @@ static NSArray *command_lines(Class command, Class alternate)
     return lines;
 }
 
-// One image, made once and handed to both sides, so a comparison of what a command answers is a
-// comparison of the two classes and not of two pictures.
 static UIImage *one_pixel_image(void)
 {
     unsigned char pixels[4] = {255, 0, 0, 255};
@@ -223,9 +221,6 @@ static NSArray *key_lines(Class key, Class command, Class alternate, UIImage *im
     [lines addObject:line(@"later members", @[yes([key instancesRespondToSelector:@selector(wantsPriorityOverSystemBehavior)]), yes([key instancesRespondToSelector:@selector(allowsAutomaticLocalization)]), yes([key instancesRespondToSelector:@selector(allowsAutomaticMirroring)])])];
     [lines addObject:line(@"superclass", @[NSStringFromClass(class_getSuperclass(key)).length ? yes(class_getSuperclass(key) == command) : @""])];
 
-    // The eight properties UIKeyCommand's own header declares, UIKeyCommand.h:56-82. Each writable
-    // one written and read back here, on the class the factory above returned, so the row that says
-    // implemented rests on a read of both sides rather than on a reading of the port's source.
     UIKeyCommand *written = [key commandWithTitle:@"before" image:nil action:@selector(foo:) input:@"i" modifierFlags:0 propertyList:nil];
     [written setTitle:@"after"];
     [written setImage:image];
@@ -248,24 +243,11 @@ int main(void)
         agree(@"command values", command_lines(ourCommand, ourAlternate), command_lines([UICommand class], [UICommandAlternate class]));
         UIImage *image = one_pixel_image();
         agree(@"key command values", key_lines(ourKey, ourCommand, ourAlternate, image), key_lines([UIKeyCommand class], [UICommand class], [UICommandAlternate class], image));
-        // The two factories of 7.0 cannot be compared here, and the reason is worth a check of its own:
-        // UIKeyCommand's initializer is unavailable on the platform this differential builds for, so the host
-        // raises NSInternalInconsistencyException "Initializer is unavailable" and has no answer to compare
-        // with. Measured on this host, both spellings:
-        //   +[UIKeyCommand commandWithTitle:image:action:propertyList:]        -> raised, Initializer is unavailable
-        //   +[UIKeyCommand commandWithTitle:image:action:propertyList:alternates:] -> the same
-        // The port answers both, from its UICommand: nm over this group's objects shows
-        // +[CharonHostUICommand commandWithTitle:image:action:propertyList:] and the alternates: form, and the
-        // key command's superclass is that command. So this asserts the port's answers and records the host's
-        // refusal, rather than pretending the two sides could be compared.
         UIImage *keyImage = one_pixel_image();
         UICommandAlternate *ourAlt = [ourAlternate alternateWithTitle:@"alt" action:@selector(foo:) modifierFlags:UIKeyModifierShift];
         UICommandAlternate *theirAlt = [[UICommandAlternate class] alternateWithTitle:@"alt" action:@selector(foo:) modifierFlags:UIKeyModifierShift];
         {
             UIKeyCommand *ours = [ourKey commandWithTitle:@"t7" image:keyImage action:@selector(foo:) propertyList:@"pl"];
-            // Through the runtime, and inside raised(), because the SDK marks the factory unavailable on this
-            // platform - which is what the host raises NSInternalInconsistencyException for - so a direct send
-            // does not compile here and the send has to be where the exception can be caught.
             NSString *refusal = raised(^id {
                 return ((id (*)(Class, SEL, id, id, SEL, id))objc_msgSend)([UIKeyCommand class],
                            NSSelectorFromString(@"commandWithTitle:image:action:propertyList:"), @"t7", keyImage, @selector(foo:), @"pl");

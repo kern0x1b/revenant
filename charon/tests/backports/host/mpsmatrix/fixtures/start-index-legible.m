@@ -1,11 +1,3 @@
-// start-index-legible.m — what does MPSMatrixSum's startIndex move into, in numbers a float16 can hold.
-//
-// The earlier table's products reached 2^62 and the host evaluated them in float16, so the answers were
-// not whole powers of two and nothing could be read off them. Here every value is small: four sources of
-// {1, 1, 1, 1} scaled by four factors of {2, 4, 8, 16}, so every product is 2, 4, 8 or 16, the largest is
-// 64 against float16's 65504, and a sum of terms reads as a set of powers of two that can be attributed
-// to pairs. Three sources and four factors as well, so "the factors stop" and "the pairs stop" cannot
-// both fit.
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>

@@ -3,11 +3,6 @@
 #include <dlfcn.h>
 #import "check.h"
 
-/* The second N-Z Foundation batch on the device: every implemented member of the progress's state,
-   the number formatter, the request flags, the URL encoders and promised items, the cache and the
-   credential storage, the XML parser's policy, an operation, the platform flags, a protocol's task,
-   the term of address, the person name keys, the two XPC members and a user activity's own two. */
-
 static void progress_state(void)
 {
     NSProgress *progress = [[NSProgress alloc] initWithParent:nil userInfo:nil];
@@ -125,7 +120,6 @@ static void cache_and_credentials(void)
           "the cache has the three data task methods");
     if (![cache respondsToSelector:store])
         return;
-    /* A data task of the port's own session, which carries the request the cache is asked about. */
     NSURLSession *session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration ephemeralSessionConfiguration]];
     NSURLSessionDataTask *task = [session dataTaskWithRequest:request];
     ((void (*)(id, SEL, id, id))objc_msgSend)(cache, store, cached, task);

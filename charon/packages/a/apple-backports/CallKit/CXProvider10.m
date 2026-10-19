@@ -58,11 +58,6 @@
     }
 }
 
-// A delegate is told the provider began once the provider is ready to be used.
-// On a release with CallKit that is when the connection to callservicesd is
-// up; here there is nothing to connect to, so it is the next turn of the
-// delegate's queue, which keeps the order an application relies on: setting
-// the delegate returns before providerDidBegin: is called.
 - (void)setDelegate:(id<CXProviderDelegate>)delegate queue:(dispatch_queue_t)queue
 {
     BOOL begin;
@@ -189,9 +184,6 @@
         [[CharonCallBroker shared] callConnected:call];
 }
 
-// Invalidating a provider ends every call it holds and drops every
-// transaction it has not finished, and the delegate is told the provider
-// reset, which is how an application learns its calls are gone.
 - (void)invalidate
 {
     NSArray<CXTransaction *> *dropped;
@@ -265,11 +257,6 @@
     });
 }
 
-// A transaction reaches the delegate whole if it takes it - that is what
-// executeTransaction: answering YES means - and action by action if it does
-// not. An action whose perform method the delegate does not answer fails at
-// once: nothing is going to perform it, and a call left waiting on it would
-// never end.
 - (void)charon_execute:(CXTransaction *)transaction
 {
     id<CXProviderDelegate> delegate = [self charon_delegate];
@@ -303,9 +290,6 @@
             }
         }
     });
-    // Each action runs out on its own deadline, which it has carried since it
-    // was made, so a transaction that starts a call and mutes it has ten
-    // minutes for the one and five seconds for the other.
     for (CXAction *action in actions) {
         NSTimeInterval left = [action.timeoutDate timeIntervalSinceNow];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(MAX(left, 0.0) * NSEC_PER_SEC)), queue, ^{

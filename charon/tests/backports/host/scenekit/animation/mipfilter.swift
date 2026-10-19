@@ -1,6 +1,3 @@
-// mipfilter : on macOS SceneKit, the mipFilter a property made alone and a new material's slots answer, and what the
-// animation cases' gradient draws at the initial transforms of `gradient` and `shimmer` (and the shimmer's end) under
-// each mipFilter, at 8 pixels, as scenekit-animation samples it, and at 256, where only level 0 is read. Prints "[red, green]".
 import SceneKit
 import AppKit
 import Metal

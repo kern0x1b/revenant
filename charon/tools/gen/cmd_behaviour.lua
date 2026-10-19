@@ -1,14 +1,8 @@
--- `behaviour`: the behaviour summaries of a framework's objc methods, one method at a time through coordination/heavy.sh (--limit N
--- takes the first N of the methods, --selector takes the methods of one name). The summaries go to the tree's untracked spec-docs
--- folder, one page per class, through emit. The cost of each call (wall seconds and peak memory) is printed, not written.
--- --coordination is the corpus folder; --ipsw-cache is the on-disk iOS 26.2 cache that ipsw reads.
-
 local behaviour = import("behaviour", {anonymous = true})
 local order = import("order", {anonymous = true})
 local emit = import("emit", {anonymous = true})
 local sdk_info = import("sdk", {anonymous = true})
 
--- The methods to run: the framework's, filtered by --selector, and the first --limit of them.
 local function chosen_methods(args, corpus, sdk_release, fw)
     local limit = args.limit and tonumber(args.limit) or behaviour.default_limit()
     assert(limit, "--limit needs a number")
@@ -21,7 +15,6 @@ local function chosen_methods(args, corpus, sdk_release, fw)
     return out
 end
 
--- Returns the exit status.
 function run(args)
     local fw = args.framework
     local corpus = args.coordination
@@ -60,6 +53,5 @@ function run(args)
         emit.file(behaviour.page_path(args.tree, fw, files, cls), behaviour.page_text(fw, cls, pages[cls], sdk_release))
     end
     print(string.format("behaviour %s: %d methods, %d summarised, %d failed", fw, #methods, done, failed))
-    -- A failed method is a failed run: the pages of the methods that did summarise are written, and the status says the run failed.
     return failed > 0 and 1 or 0
 end

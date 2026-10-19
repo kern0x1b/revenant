@@ -1,10 +1,3 @@
--- A checkout whose own backports.lua does not load must be named, skipped, and its cache left whole: the
--- sweep cannot know what a checkout it cannot read needs, so it must neither guess nor delete. The other
--- two modules of the fixture are written by this suite and do load, so the broken backports.lua is the only
--- thing that can fail - otherwise the catch would pass for the wrong reason and prove nothing. The cache
--- root is a directory of this suite's own under the temp dir, never the sweep's ~/.charon, and it goes when
--- the run does.
-
 local function write_checkout(dir)
     os.mkdir(dir)
     os.mkdir(path.join(dir, "modules"))
@@ -19,7 +12,6 @@ local function write_checkout(dir)
         "return {\n"
         .. "    names = function () return {\"arm64\"} end,\n"
         .. "}\n")
-    -- the one that does not load: a function that is never closed, so importing it is a syntax error
     io.writefile(path.join(dir, "modules", "apple", "backports.lua"),
         "-- a module the sweep must survive\nfunction (\n")
 end
@@ -39,9 +31,6 @@ function failures(opts)
         return out
     end
 
-    -- The run's own folder: this suite writes a checkout and a cache under it and removes the folder when it is done,
-    -- so a name two concurrent runs agree on is one run's files gone (a deleted test of that shape, measured
-    -- 2026-10-04: eight of nine concurrent runs red with clang unable to open the fixture under its path).
     local scratch = path.join(os.tmpdir(), "charon-cache-sweep-test-" .. os.getpid())
     if os.isdir(scratch) then os.tryrm(scratch) end
     local checkout = path.join(scratch, "broken")
@@ -49,8 +38,6 @@ function failures(opts)
     write_checkout(checkout)
     os.mkdir(cache)
 
-    -- no pcall in the xmake sandbox: a checkout that raises must come back as a value, not as a failed
-    -- run of this suite, or the check cannot tell the two apart
     local outcome, raised
     try {
         function ()

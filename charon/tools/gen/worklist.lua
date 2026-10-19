@@ -1,11 +1,3 @@
--- The work list of an sdk run (design-sdk-generator.md step 3d): one row per surface declaration of each framework, with its state. The
--- state is the one cmd_scope gives the row: its row_state (over the context of the framework, cmd_scope's context_of) and, for an
--- open state, the work queue_item names. The design's state of the row ("in 6.1.3", "overridden", "generated stub", "header only") is
--- read from that state by design_of; "-" where the state names none of the four. Writes --out/<module>.tsv per module (a "/" of a nested
--- framework's name is written "+"), and --out/totals.tsv: per module and in all, the rows, each design state's count, the queued rows
--- and by_hand (the generated stubs and the queued rows: the rows somebody writes or decides by hand). The per-state counts tie to the
--- scope's v-gen-scope.tsv of the same run (--scope): a difference fails the step. Returns the exit status and a line of counts.
-
 local surface = import("surface", {anonymous = true})
 local scope = import("cmd_scope", {anonymous = true})
 local coverage = import("coverage", {anonymous = true})
@@ -15,12 +7,8 @@ local strings = import("strings", {anonymous = true})
 local sdk_info = import("sdk", {anonymous = true})
 local project = import("project", {anonymous = true})
 
--- The kinds a row is counted under (cmd_scope's SCOPE_KINDS): a surface row of another kind has no state.
 local SCOPE_KINDS = strings.set({"class", "method", "property", "constant", "function", "enum", "struct", "typealias", "protocol"})
--- The state of a row the framework has no snapshot for (cmd_scope's NO_SNAPSHOT).
 local NO_SNAPSHOT = "no snapshot"
--- The design's four states, and the scope states each one reads. A scope state no prefix here names is "-" (the design names it no
--- category): "not checked at 6.1.3" and "absent at 6.1.3" are such states, so their rows count as "-" in the design, not in a category.
 local DESIGN_IN_RELEASE = "in 6.1.3"
 local DESIGN_OVERRIDDEN = "overridden"
 local DESIGN_GENERATED = "generated stub"
@@ -37,7 +25,6 @@ local function starts_with(text, prefix)
     return string.sub(text, 1, #prefix) == prefix
 end
 
--- The design's state of a scope state, one of the four design states or DESIGN_NONE.
 function design_of(state)
     if state == IN_RELEASE_STATE then
         return DESIGN_IN_RELEASE
@@ -58,7 +45,6 @@ function design_of(state)
     return DESIGN_NONE
 end
 
--- Counts one row into a module's counts: its scope state, its design state, and whether it is queued.
 local function count_row(counts, state, design, queued)
     counts.rows = counts.rows + 1
     counts.states[state] = (counts.states[state] or 0) + 1
@@ -73,7 +59,6 @@ local function new_counts()
                                              [DESIGN_HEADER_ONLY] = 0, [DESIGN_NONE] = 0}, queued = 0}
 end
 
--- The rows of one module as its TSV text, and the module's counts. The states are scope's (row_state, queue_item), never a guess.
 local function module_of(args, group, states, skipped, lines)
     local owner = group.owner or group.fw
     local ctx = scope.context_of(args, group.fw, group.rows, owner, states, skipped)
@@ -92,8 +77,6 @@ local function module_of(args, group, states, skipped, lines)
     return counts
 end
 
--- The scope's per-framework counts, read from its v-gen-scope.tsv: framework -> {rows, states = state -> n}. The columns are found by
--- their header names (scope adds columns, so a position moves).
 function scope_counts_of(filepath)
     local out = {}
     local columns = nil
@@ -111,8 +94,6 @@ function scope_counts_of(filepath)
             local fw = cells[1]
             out[fw] = out[fw] or {rows = 0, states = {}}
             out[fw].rows = out[fw].rows + tonumber(cells[columns.surface_rows])
-            -- the states are "state=count" joined by "; ", and a state's own text may hold "; " (a class object's state does): a piece
-            -- that ends in "=count" closes the entry, a piece that does not is the start of the next one
             local pending = nil
             for piece in string.gmatch((cells[columns.states] or "") .. "; ", "(.-); ") do
                 local whole = pending and (pending .. "; " .. piece) or piece
@@ -129,7 +110,6 @@ function scope_counts_of(filepath)
     return out
 end
 
--- The first difference between the worklist's counts and the scope's, as text, or nil when they tie.
 function difference_of(worklist, from_scope)
     local names = order.keys(worklist)
     for _, fw in ipairs(order.keys(from_scope)) do
@@ -163,14 +143,12 @@ end
 
 local TOTALS_HEADER = "framework\trows\tin_6_1_3\toverridden\tgenerated_stub\theader_only\tnot_named\tqueued\tby_hand"
 
--- One totals line: the module's name and its counts, by_hand being the generated stubs and the queued rows.
 function totals_line(name, counts)
     local d = counts.design
     return table.concat({name, counts.rows, d[DESIGN_IN_RELEASE], d[DESIGN_OVERRIDDEN], d[DESIGN_GENERATED], d[DESIGN_HEADER_ONLY],
                          d[DESIGN_NONE], counts.queued, d[DESIGN_GENERATED] + counts.queued}, "\t")
 end
 
--- Adds a module's counts into the run's total.
 local function add_counts(total, counts)
     total.rows = total.rows + counts.rows
     total.queued = total.queued + counts.queued
@@ -179,7 +157,6 @@ local function add_counts(total, counts)
     end
 end
 
--- Returns the exit status and a line of counts; 0 when the counts tie to the scope, else 1 (the files are written either way).
 function run(args)
     assert(args.sdk, "worklist needs --sdk: the iPhoneOS SDK (the release names the surface table)")
     assert(args.coordination, "worklist needs --coordination: the corpus folder (the surface table and the ledgers)")

@@ -1,18 +1,3 @@
-// probe.m - what the host's IntentsUI answers for the six initialisers the rows of IntentsUI's 12.0 group name, and what
-// the port answers for the same six, from one source compiled twice by run.sh.
-//
-// The six rows: -[INUIAddVoiceShortcutButton initWithFrame:] and -[INUIAddVoiceShortcutButton init], the same two
-// for INUIAddVoiceShortcutViewController and INUIEditVoiceShortcutViewController, with initWithNibName:bundle: for
-// the two view controllers in place of initWithFrame:. Each is called through objc_msgSend, not by a compile-time
-// send, because the headers mark some of them NS_UNAVAILABLE and the measurement is what the runtime does.
-//
-// Each line is one row: the class the answer is (or nil), whether it is an instance of the class the row names, and
-// whether the answer's own class is the row's class (not a superclass). The port's classes are named with the
-// CharonHost prefix that run.sh renames them to, and the printed name is Apple's.
-//
-// Nothing here depends on the clock or on an address.
-//
-//   sh run.sh   (Catalyst only: the classes are UIKit subclasses, and macOS has no UIKit to subclass)
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
@@ -59,7 +44,6 @@ int main(void)
             return 2;
         }
 
-        // Every initialiser, called through its own selector's IMP on a fresh allocation.
         id buttonInit = ((id (*)(id, SEL))objc_msgSend)([button alloc], @selector(init));
         row("INUIAddVoiceShortcutButton", "init", buttonInit, button);
         id buttonFrame = ((id (*)(id, SEL, CGRect))objc_msgSend)([button alloc], @selector(initWithFrame:), CGRectZero);

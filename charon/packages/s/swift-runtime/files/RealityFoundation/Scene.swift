@@ -1,18 +1,10 @@
-// Scene: the root a set of anchors hangs from, and the anchoring component that makes an
-// entity one of them.
-
 import simd
 import CoreMedia
 import SceneKit
 import Foundation
 
-// MARK: - BoundingBox
-
-/// An axis-aligned bounding box, given by two of its corners.
 @frozen public struct BoundingBox: Equatable {
-    /// The corner with the smallest coordinate on every axis.
     public var min: SIMD3<Float>
-    /// The corner with the largest coordinate on every axis.
     public var max: SIMD3<Float>
 
     public init(min: SIMD3<Float>, max: SIMD3<Float>) {
@@ -25,14 +17,10 @@ import Foundation
         max = SIMD3<Float>(repeating: -.greatestFiniteMagnitude)
     }
 
-    /// The centre of the box.
     public var center: SIMD3<Float> { (min + max) / 2 }
 
-    /// The size of the box along each axis.
     public var extents: SIMD3<Float> { max - min }
 
-    /// The eight corners of the box, which is what a ray/box test and a corner-wise transform
-    /// both need.
     public var corners: [SIMD3<Float>] {
         [SIMD3<Float>(min.x, min.y, min.z), SIMD3<Float>(max.x, min.y, min.z),
          SIMD3<Float>(min.x, max.y, min.z), SIMD3<Float>(max.x, max.y, min.z),
@@ -40,7 +28,6 @@ import Foundation
          SIMD3<Float>(min.x, max.y, max.z), SIMD3<Float>(max.x, max.y, max.z)]
     }
 
-    /// Grows the box, if `corner` lies outside it.
     public mutating func extend(with corner: SIMD3<Float>) {
         min = simd_min(min, corner)
         max = simd_max(max, corner)
@@ -51,14 +38,8 @@ import Foundation
     }
 }
 
-// MARK: - AnchoringComponent
-
-/// A component that makes the entity it is on an anchor, and says what the anchor is for.
 @frozen public struct AnchoringComponent: Component, Equatable {
-    /// What an entity is anchored to: a point in the world, a plane, a real-world object, or a
-    /// target an AR session names.
     public enum Target: Hashable {
-        /// Which of a plane's directions an anchor's alignment may choose.
         public struct Alignment: OptionSet, Hashable {
             public let rawValue: UInt8
             public init(rawValue: UInt8) { self.rawValue = rawValue }
@@ -68,7 +49,6 @@ import Foundation
             public static let any: Alignment = [.horizontal, .vertical]
         }
 
-        /// Which of the kinds of real-world surface an anchor may bind to.
         public struct Classification: OptionSet, Hashable {
             public let rawValue: UInt64
             public init(rawValue: UInt64) { self.rawValue = rawValue }
@@ -81,22 +61,13 @@ import Foundation
             public static let any: Classification = [.wall, .floor, .ceiling, .table, .seat]
         }
 
-        /// The camera's own frame of reference.
         case camera
-        /// A fixed transform in the world.
         case world(transform: float4x4)
-        /// A target an AR session of this device names by its identifier. A device with no AR
-        /// session of its own has no target to name, and an anchor to it stays where it is.
         case anchor(identifier: UUID)
-        /// A detected plane of the given classification, at least the given size in metres.
         case plane(Alignment, classification: Classification, minimumBounds: SIMD2<Float>)
-        /// A feature the session has detected in an image.
         case image(group: String, name: String)
-        /// A real-world object.
         case object(group: String, name: String)
-        /// The user's face.
         case face
-        /// The user's body.
         case body
 
         public static func == (a: Target, b: Target) -> Bool {
@@ -135,7 +106,6 @@ import Foundation
         }
     }
 
-    /// What the entity this component is on is anchored to.
     public let target: Target
 
     public init(_ target: Target) {
@@ -147,16 +117,12 @@ import Foundation
     }
 }
 
-// MARK: - AnchorEntity
-
-/// An entity that is anchored to a target in the world, and that a scene roots.
 @MainActor
 open class AnchorEntity: Entity, HasAnchoring {
     public required init(_coreEntity: __EntityRef) {
         super.init(_coreEntity: _coreEntity)
     }
 
-    /// The component that says what this entity is anchored to.
     public var anchoring: AnchoringComponent {
         get { components[AnchoringComponent.self] ?? AnchoringComponent(.world(transform: float4x4(diagonal: SIMD4<Float>(1, 1, 1, 1)))) }
         set { components[AnchoringComponent.self] = newValue }
@@ -174,16 +140,11 @@ open class AnchorEntity: Entity, HasAnchoring {
         position = world
     }
 
-    /// The identifier of the target in an AR session this entity is anchored to, when the
-    /// device has a session that names one. A device without one answers nil, which is what a
-    /// device with no ARSession of its own does.
     public var anchorIdentifier: UUID? {
         if case .anchor(let identifier) = anchoring.target { return identifier }
         return nil
     }
 
-    /// Whether a session still sees this anchor's target. An anchor to the world or to a plane
-    /// is not something a session tracks, and says so rather than claiming to.
     public var isTracked: Bool = true
 
     public init(plane: AnchoringComponent.Target.Alignment,
@@ -195,35 +156,24 @@ open class AnchorEntity: Entity, HasAnchoring {
                                                                         minimumBounds: minimumBounds))
     }
 
-    /// Anchors this entity to `target` again. A device with no AR session of its own has no
-    /// target to anchor to, and the entity keeps the one it has.
     public func reanchor(_ target: AnchoringComponent.Target, preservingWorldTransform: Bool = true) {
         anchoring = AnchoringComponent(target)
         if !preservingWorldTransform { transform = Transform() }
     }
 }
 
-// MARK: - SynchronizationComponent
-
-/// A component every entity carries, and the one a synchronizing session owns: the identifier
-/// its participants agree on and who among them may change it.
 @frozen public struct SynchronizationComponent: Component, Equatable {
-    /// Whether the ownership of the entity's synchronized state moves on its own or only when a
-    /// participant asks for it.
     public enum OwnershipTransferMode: Hashable {
         case autoAccept
         case manual
     }
 
-    /// How a request for ownership ended.
     public enum OwnershipTransferCompletionResult: Hashable {
         case granted
         case timedOut
     }
 
-    /// The number the participants agree on.
     public let identifier: UInt64
-    /// Whether this participant may change the synchronized state.
     public var isOwner: Bool
     public var ownershipTransferMode: OwnershipTransferMode
 
@@ -246,7 +196,6 @@ open class AnchorEntity: Entity, HasAnchoring {
 
 @MainActor
 extension HasSynchronization {
-    /// The component that carries this entity's synchronized state, which every entity has.
     public var synchronization: SynchronizationComponent? {
         get { coreEntity.component(of: SynchronizationComponent.self) }
         set {
@@ -258,18 +207,10 @@ extension HasSynchronization {
         }
     }
 
-    /// Whether this participant may change the entity's synchronized state.
     public var isOwner: Bool {
         synchronization?.isOwner ?? false
     }
 
-    /// Asks for the ownership of the entity's synchronized state, answering when the request
-    /// ended.
-    ///
-    /// Nothing on this device arbitrates between participants: a session does, and this port
-    /// carries no session. A request made by a participant that already owns the state is
-    /// granted at once, which is what the single-participant case is, and anything else times
-    /// out rather than inventing an answer.
     public func requestOwnership(timeout: TimeInterval = 15,
                                  _ callback: @escaping (SynchronizationComponent.OwnershipTransferCompletionResult) -> Void) {
         guard var component = synchronization else {
@@ -285,26 +226,17 @@ extension HasSynchronization {
         callback(.granted)
     }
 
-    /// Runs `changes` with the entity's synchronized state held, so that a session sends the
-    /// change as one update. With no session there is nothing to hold, and the changes run.
     public func withUnsynchronized(_ changes: () -> Void) {
         changes()
     }
 }
 
-// MARK: - Scene
-
-/// A container for the entities of a world, and the anchors they are rooted in.
 @MainActor
 open class Scene {
-    /// A number that identifies this scene for the life of the process.
     public typealias ID = UInt64
 
-    /// A reference to this scene's state.
     public var __coreScene: __SceneRef { __SceneRef(coreScene) }
 
-    /// The scene's state. A renderer in another module - RealityKit's own view - reads and
-    /// steps it, so it is public rather than internal.
     public let coreScene: __REScene
 
     public init(_coreScene: __SceneRef) {
@@ -312,47 +244,24 @@ open class Scene {
         if coreScene.wrapper == nil { coreScene.wrapper = self }
     }
 
-    /// The name of the scene, which is what a serialized scene and a test name it by.
     public var name: String {
         get { coreScene.name }
         set { coreScene.name = newValue }
     }
 
-    /// A number that identifies this scene for the life of the process.
     public var id: ID { coreScene.identifier }
 
-    /// The view this scene is shown in, set by `ARView` when it puts the scene into its own.
-    ///
-    /// Weak on both sides' account: a view does not keep a scene alive, and a scene that outlived
-    /// the view that showed it would keep a handle on a view whose camera and frame are gone. A
-    /// scene with no view is a scene that is not shown, and the things that need a camera - a pixel
-    /// cast, and nothing else this module has - answer nil for it, as the interface does for a scene
-    /// that is not on screen.
     public weak var view: SCNView?
 
-    /// The timebase the scene's time is read from: `CMTimebase`, CoreMedia's own, reached through
-    /// the SDK's clang module because the port builds no CoreMedia overlay of its own.
-    ///
-    /// It is made on the first use, against the host clock, and kept: a timebase that were made and
-    /// dropped on each read would jump back to the clock every time, and a scene that steps would
-    /// lose the time it had accumulated. Apple's is a getter too (26.2:12118-12122), so there is no
-    /// way to set a scene's timebase from outside, only to read the one it has.
     public var timebase: CMTimebase {
         if let existing = coreScene.timebase { return existing }
         var timebase: CMTimebase?
-        // A timebase with no master clock of its own is still a timebase: it counts from zero, which
-        // is what a scene that is stepped by its caller wants, and the host clock is what makes it
-        // move on its own for a scene that is not.
         if CMTimebaseCreateWithMasterClock(allocator: kCFAllocatorDefault,
                                            masterClock: CMClockGetHostTimeClock(),
                                            timebaseOut: &timebase) == noErr, let made = timebase {
             coreScene.timebase = made
             return made
         }
-        // CoreMedia would not give this scene a timebase of its own, so it shares the one that is
-        // made once for the process. A timebase is a few kilobytes of CoreMedia state, and a second
-        // failure here is the allocator failing, which is not something a scene can carry on with: it
-        // is said so rather than handed a value that is not a timebase.
         coreScene.timebase = __REScene.sharedTimebase()
         return coreScene.timebase!
     }
@@ -370,38 +279,26 @@ open class Scene {
         coreScene.wrapper = self
     }
 
-    // MARK: Anchors
-
-    /// The anchors this scene roots. Setting the collection replaces them, and an anchor taken
-    /// out of the collection is taken out of the scene with it.
     public var anchors: Scene.AnchorCollection {
         get { Scene.AnchorCollection(coreScene) }
         set { newValue.replaceAll(newValue) }
     }
 
-    /// Roots `anchor` in this scene, taking it out of the scene it was in.
     public func addAnchor(_ anchor: any HasAnchoring) {
         coreScene.add(anchor: anchor.coreEntity)
     }
 
-    /// Takes `anchor` out of this scene, whether or not it is one of its anchors.
     public func removeAnchor(_ anchor: any HasAnchoring) {
         coreScene.remove(anchor: anchor.coreEntity)
     }
 
-    // MARK: Finding
-
-    /// The first entity of this scene, its anchors and everything below them, with the given name.
     public func findEntity(named name: String) -> Entity? {
         coreScene.firstNode(named: name)?.entity
     }
 
-    /// The entity of this scene with the given identifier, when there is one.
     public func findEntity(id: Entity.ID) -> Entity? {
         coreScene.node(withIdentifier: id)?.entity
     }
-
-    // MARK: Identity
 
     public static func == (lhs: Scene, rhs: Scene) -> Bool {
         lhs.coreScene === rhs.coreScene
@@ -416,10 +313,7 @@ extension Scene: Hashable {}
 
 extension Scene: Identifiable {}
 
-// MARK: - The anchor collection
-
 extension Scene {
-    /// The anchors of one scene, in the order they were added.
     @MainActor
     public struct AnchorCollection: Collection {
         public typealias Element = any HasAnchoring
@@ -427,8 +321,6 @@ extension Scene {
         public typealias Indices = DefaultIndices<AnchorCollection>
         public typealias SubSequence = Slice<AnchorCollection>
 
-        /// The iterator of a collection whose indices are its positions; see
-        /// `Entity.ChildCollection.IndexingIterator`.
         public typealias Iterator = Entity.ChildCollection.IndexingIterator<AnchorCollection>
 
         let coreScene: __REScene
@@ -495,9 +387,6 @@ extension Scene {
 }
 
 extension Scene.AnchorCollection: CustomStringConvertible {
-    /// The anchors' own trees, one after another between brackets. Measured on the host
-    /// (2026-09-27): two anchors print as `[` then the first anchor's `debugDescription`, then
-    /// `,` and a line break and the second's, then a line break and `]`.
     public var description: String {
         "[" + map { $0.debugDescription }.joined(separator: ",\n") + "\n]"
     }
@@ -505,15 +394,11 @@ extension Scene.AnchorCollection: CustomStringConvertible {
 
 @MainActor
 extension __REEntity {
-    /// The component that says what this node is anchored to, which a renderer in another
-    /// module needs to tell one anchor's target from another's. A node with no component is
-    /// anchored to the world, which is what an anchor with nothing set means.
     public var anchoring: AnchoringComponent {
         component(of: AnchoringComponent.self)
             ?? AnchoringComponent(.world(transform: float4x4(diagonal: SIMD4<Float>(1, 1, 1, 1))))
     }
 
-    /// Whether a session still sees this node's target, and whether the node is one it tracks.
     public var isTracked: Bool {
         get { tracked ?? true }
         set { tracked = newValue }

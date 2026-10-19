@@ -1,12 +1,3 @@
--- A declaration a private (underscored) framework owns is imported, by the headers of another framework, as the public framework whose
--- umbrella re-exports that private framework (CLLocation is owned by _LocationEssentials, and CoreLocation's umbrella includes it, so
--- CloudKit's header imports <CoreLocation/CoreLocation.h>, as the SDK's own header does). The port has no private framework's header
--- to import. On a fixture SDK (a public umbrella that includes a private framework's umbrella) and a hand-built IR, the user framework's
--- header imports the public umbrella, and never the private framework's path.
--- Run:
---   xmake l tests/gen/reexport_import_test.lua
--- The fixture lives under build/ in the tree and is removed when the test ends.
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 local SCRATCH = path.join(os.scriptdir(), "..", "..", "build", "reexport-import-test")
 
@@ -17,8 +8,6 @@ local function write(filepath, text)
     handle:close()
 end
 
--- One IR row of the twenty-one columns (see usr_headers_test): the framework, the kind, the usr, the name, the header, the type and the
--- parameters; the columns the renderer reads and this fixture leaves empty are "-".
 local function row(framework, kind, usr, name, header, typ, params)
     local out = {framework, kind, usr, "-", name, "-", header, "1", "ios=13.0/-/-/0", "-", typ, params}
     for column = 13, 21 do
@@ -40,7 +29,6 @@ local function run()
     os.rm(SCRATCH)
     local sdk = path.join(SCRATCH, "sdk")
     local frameworks = path.join(sdk, "System", "Library", "Frameworks")
-    -- the public umbrella includes the private framework's umbrella: that is the re-export the generator reads
     write(path.join(frameworks, "FixPublic.framework", "Headers", "FixPublic.h"),
           "#pragma clang system_header\n#import <_FixPrivate/FixPrivate.h>\n")
     write(path.join(frameworks, "_FixPrivate.framework", "Headers", "FixPrivate.h"), "#pragma clang system_header\n")
@@ -60,7 +48,6 @@ local function run()
     os.mkdir(path.join(tree, "packages", "a", "apple-backports", "registry"))
 
     local out = path.join(SCRATCH, "out")
-    -- the write mode takes the port's enumerator values: an empty run, so the port keeps the IR's values
     local port_values = path.join(SCRATCH, "port-values-empty.tsv")
     write(port_values, "# triple=armv7-apple-ios6.1.3 (no values)\n")
     cmd.run({tree = tree, ir = ir, sdk = sdk, out = out, port_values = port_values})

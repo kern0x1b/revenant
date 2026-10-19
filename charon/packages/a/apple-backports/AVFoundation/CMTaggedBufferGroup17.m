@@ -6,26 +6,12 @@
 #import <stdlib.h>
 #import <string.h>
 
-// The CMTaggedBufferGroup of iOS 17: two parallel arrays - tag collections and CVBuffers - which every
-// accessor walks together, and a copy of every entry's tags held by value so the six lookups can test
-// membership without asking the collection's object anything.
-//
-// The lookups' rule, measured on the host over disjoint collections and over one that repeats a tag: an
-// entry matches when its collection carries every one of the tags asked for, and a lookup answers the
-// entry only when exactly one matches - more than one is NULL, and so is none, and indexOut is left as
-// the caller passed it in both cases (facts/CoreMedia/TagCollection.md).
-
 @implementation CharonCMTaggedBufferGroup {
-    CMTag *_tags;          // by value, one run per entry, owned and freed in -dealloc
-    CMItemCount *_offsets; // where each entry's run starts
+    CMTag *_tags;
+    CMItemCount *_offsets;
     NSUInteger _entries;
 }
 
-// Named, because the package builds with -Werror=objc-missing-property-synthesis: the two readonly
-// properties are the ivars the initialiser fills. -Wobjc-missing-property-synthesis is -Werror in the
-// gate, so both properties are bound explicitly to the ivars that really hold them. No hand-written
-// accessor for either: a @synthesize beside a getter is the rootObject trap, and the initialiser's
-// _charon_collections = [collections copy] is the assignment through the synthesized ivar.
 @synthesize charon_collections = _charon_collections;
 @synthesize charon_buffers = _charon_buffers;
 
@@ -40,9 +26,6 @@
     if (_entries) {
         _offsets = calloc(_entries + 1, sizeof *_offsets);
         for (NSUInteger index = 0; index < _entries; index++) {
-            // One read per collection, through the C API, with the length coming back with the tags:
-            // the group never holds an element as an object, so a host collection and a port one are the
-            // same thing to it, and the two counts cannot disagree because there is only one read.
             CMItemCount held = 0;
             CMTag *run = charon_copy_all_tags((CMTagCollectionRef)(__bridge void *)[collections objectAtIndex:index], &held);
             size_t room = (size_t)(_offsets[index] + held) * sizeof *_tags;
@@ -70,8 +53,6 @@
     _entries = 0;
 }
 
-// The flat array, laid once in the initialiser from one read per collection, so this is a getter and
-// nothing here can read past what was written.
 - (const CMTag *)charon_tags
 {
     return _tags;
@@ -111,8 +92,6 @@
     return (__bridge CVBufferRef)_charon_buffers[(NSUInteger)index];
 }
 
-// The one entry that carries every wanted tag, when there is exactly one. More than one and none are
-// both NULL, and indexOut is not written in either case, which is the host's own behaviour.
 - (CVBufferRef)charon_bufferForTags:(const CMTag *)tags count:(CMItemCount)count index:(NSInteger *)index
 {
     if (!tags || !count)
@@ -140,9 +119,6 @@
     const CMTag *all = [self charon_tags];
     NSInteger matches = 0;
     for (NSInteger entry = 0; entry < [self charon_count]; entry++) {
-        // An empty run is carried by every entry - the host answers 1 for a group of one empty
-        // collection, and 0 for a group with no entries - and charon_tag_carries never dereferences a
-        // zero count, so a NULL run is passed as it is rather than as an offset from a NULL base.
         CMItemCount at = _offsets[entry], held = _offsets[entry + 1] - at;
         if (charon_tag_carries(all ? all + at : NULL, held, tags, count))
             matches++;
@@ -162,15 +138,11 @@ static CharonCMTaggedBufferGroup *charon_to(CMTaggedBufferGroupRef group)
     return (__bridge CharonCMTaggedBufferGroup *)group;
 }
 
-// A collection's tags, through the helper rather than the collection object's API: on the 16.4 SDK
-// those functions are this package's and another object may not call them.
 static CMTag *charon_copy_tags(CMTagCollectionRef collection, CMItemCount *countOut)
 {
     return charon_copy_all_tags(collection, countOut);
 }
 
-// -15780 is the host's answer when the two arrays differ in length, and no SDK on this machine names
-// it, so the number is carried with the condition that produces it.
 #define charon_param_err ((OSStatus)-15780)
 
 CFTypeID CMTaggedBufferGroupGetTypeID(void)

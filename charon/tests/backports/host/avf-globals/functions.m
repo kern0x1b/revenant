@@ -1,19 +1,3 @@
-/* functions.m - the four AVFoundation functions this worker's list holds, the port against the host.
- *
- * One binary, as in probe.m: the port's AVFoundationFunctions180.m is compiled with each function name
- * defined to its `charon_host_` spelling and linked beside this probe, so the bare name is Apple's own
- * symbol and the prefixed name is the port's own definition, and one process prints both.
- *
- * The three constructors return a struct of two fields out of two arguments, so the whole comparison is
- * over the field values and there is nowhere for a difference to hide. The reaction lookup is compared
- * for every reaction type the port carries, and for a type it does not carry: the host's own answer for
- * a string it has never heard of is what the port has to answer too.
- *
- * Controls, so a run that examined nothing cannot pass:
- *   AVCaptionNoSuchConstructor      a planted function name                     -> LACKS
- *   AVCaptionDimensionMake(0,Percent)   fixed by arithmetic: 0 and 2         -> 0 and 2
- *   AVCaption                       the class the constants' header names    -> HAS
- */
 #import <Foundation/Foundation.h>
 #import <CoreMedia/CoreMedia.h>
 #import <CoreGraphics/CoreGraphics.h>
@@ -22,15 +6,6 @@
 #include <objc/runtime.h>
 #include <stdio.h>
 #include <string.h>
-
-// THE PORT'S OWN TYPES ARE NOT USED HERE, and the first version of this file declared its own
-// CharDimension/CharPoint/CharSize with the same field types and the same widths. It segfaulted on the
-// first call, before a single row was written, so nothing could have compared anything.
-//
-// The SDK's own AVCaptionDimension, AVCaptionPoint and AVCaptionSize are used on BOTH sides instead.
-// They are 26.2's layout, which is what the port's CharonAVFoundationCaption18.h transcribes, so the
-// port's function returns exactly what the host's does; a second, private spelling of a struct this file
-// then calls through a function pointer is a way to get an ABI mismatch with no compiler to notice.
 
 static void *lookup(const char *name)
 {
@@ -69,9 +44,6 @@ int main(void)
         void *hostImage = lookup("AVCaptureReactionSystemImageNameForType");
         void *portImage = lookup("charon_host_AVCaptureReactionSystemImageNameForType");
 
-        /* the port's structs are laid out by its own header, which is 26.2's own layout, so the two
-           sides can be read with ONE pair of types: a C function pointer is called through a signature
-           this file declares, and the values come back in registers and on the stack. */
         AVCaptionDimension (*make)(CGFloat, AVCaptionUnitsType) =
             (AVCaptionDimension (*)(CGFloat, AVCaptionUnitsType))hostMake;
         AVCaptionDimension (*portDimension)(CGFloat, AVCaptionUnitsType) =
@@ -135,8 +107,6 @@ int main(void)
             printf("%s\thost=[%s]\tport=[%s]\n", reactions[i], [image(kind) UTF8String],
                    [portLookup(kind) UTF8String]);
         }
-        /* a type the port does not carry: both sides must answer the same thing for a string neither
-           knows, and the host's own answer for that is measured, not assumed. */
         printf("PLANTED-TYPE\timage host=[%s] port=[%s]\n",
                [image(@"ReactionNoSuchType") UTF8String],
                [portLookup(@"ReactionNoSuchType") UTF8String]);

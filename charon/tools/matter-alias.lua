@@ -1,18 +1,5 @@
--- The Apple-prefixed spellings of the Aliro feature, as forwards to the methods this library carries.
---
--- Apple's own Matter.framework spells a command `apple<Command>` and an attribute access
--- `read/write/subscribeAttributeApple<Attribute>`, over the Aliro feature the open-source model declares under its own
--- name (measured: `AppleAliro` and `appleClearAliro` have zero occurrences in connectedhomeip master as well as in the
--- 1.6.1.0 this package builds, and master's templates/availability.yaml lists the names unprefixed). So every such row
--- is one selector forwarding to another over the same attribute or command id, and the forwarders are generated here
--- from the selectors the library actually carries rather than written out: a rename, and a rename has no per-row
--- judgement in it.
---
--- A target that the library does not carry is *not* emitted and is named here, because a forward to nothing is a
--- method that lies.
 local objc = import("apple.objc", {rootdir = path.join(os.scriptdir(), "..", "modules"), anonymous = true})
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "modules")})
--- Apple's two spellings, as the rename the SDK's surface shows.
 local function target_of(selector)
     local renamed = selector:gsub("^(%a+Attribute)Apple", "%1"):gsub("^(%a+Attribute)", "%1")
     if renamed == selector then
@@ -22,9 +9,6 @@ local function target_of(selector)
     return renamed
 end
 
--- Every header of the framework, read whole: the zap-generated ones put a class's declarations in one file
--- (MTRClusters.h holds the attribute and command methods of every cluster) and wrap a long declaration over several
--- physical lines, so a declaration is everything up to its semicolon and not one line.
 local function headers_of(framework)
     local found = {}
     for _, directory in ipairs({"", "zap-generated", "ServerEndpoint"}) do
@@ -39,7 +23,6 @@ local function headers_of(framework)
     return found
 end
 
--- The declaration of one selector, as the framework's own headers write it, or nil when none of them declares it.
 local function signature_in(headers, selector)
     local wanted = {}
     for token in (selector .. ":"):gmatch("([%a_][%w_]*:)") do
@@ -81,9 +64,6 @@ local function signature_in(headers, selector)
     return nil
 end
 
--- The Apple spelling of a selector, which is what the SDK's surface asks for over the model's own name: the prefix
--- goes inside the attribute accesses (readAttributeAppleX) and in front of the command name (appleClearX, the first
--- word capitalised because it now follows a prefix).
 local function apple_selector(selector)
     local renamed = selector:gsub("^(%a+Attribute)(%a+)", "%1Apple%2")
     if renamed == selector then
@@ -93,9 +73,6 @@ local function apple_selector(selector)
     return renamed
 end
 
--- The unprefixed declaration with the Apple prefix put back into its selector: the method a caller sends, and the one
--- that forwards. The return type, the parameter types, the parameter names and whatever the declaration adds are the
--- unprefixed ones, unchanged, because it is the same command over the same ids.
 local function rename(declaration)
     local head = declaration:match("^[-+]%s*%b()%s*")
     local cursor = #head + 1
@@ -112,8 +89,6 @@ local function rename(declaration)
     if #renamed == 0 then
         return nil
     end
-    -- The parameters keep the unprefixed declaration's own text, from the character after the last selector token, so
-    -- the type and the name of each are the framework's and not this script's.
     return declaration:sub(1, #head) .. table.concat(renamed, " ") .. declaration:sub(cursor)
 end
 
@@ -121,10 +96,6 @@ function main(binary, corpus, diff, out, framework)
     assert(binary and corpus and diff and out and framework,
            "five paths: the dylib, the corpus, the differential, the output directory, the framework's CHIP directory")
     local inventory = objc.binary_inventory(binary, "armv7")
-    -- A member is answered by the class or by any superclass, and by either sign: objc.lua keys a class's own method
-    -- list by sign and selector, and when the same selector is a method of both kinds - which is what the zap
-    -- generator writes for an attribute read with a cluster-state cache - the sign that lands in the map is whichever
-    -- was recorded last, so asking for one sign and being told no is not an answer about the method.
     local function carried(owner, sign, selector)
         local seen, name = {}, owner
         while name and inventory.classes[name] and not seen[name] do
@@ -170,7 +141,6 @@ function main(binary, corpus, diff, out, framework)
     end
     table.sort(forwards, function (a, b) return byteorder.less(a.owner .. a.selector, b.owner .. b.selector) end)
 
-    -- One category per class, so a class that gains a spelling gains only its own.
     local byowner = {}
     for _, f in ipairs(forwards) do
         byowner[f.owner] = byowner[f.owner] or {}
@@ -194,8 +164,7 @@ function main(binary, corpus, diff, out, framework)
             " */",
             "",
             "#import <Foundation/Foundation.h>",
-            "#import <Matter/Matter.h>",   -- the zap-generated classes are declared in MTRBaseClusters.h, not in a header
-                                             -- of their own, so the umbrella is what names them
+            "#import <Matter/Matter.h>",
             "",
             "@interface " .. owner .. " (CharonAppleSpelling)",
             "@end",
@@ -203,30 +172,18 @@ function main(binary, corpus, diff, out, framework)
             "@implementation " .. owner .. " (CharonAppleSpelling)",
             ""
         }
-        -- The signature of the apple-prefixed method is the unprefixed method's, with the prefix put back: the same
-        -- parameters and the same types, because it is the same command over the same ids. So it is read out of the
-        -- framework's own header, which declares the unprefixed one, rather than assembled from the selector - a
-        -- selector carries no types, and a forward with untyped parameters is not the same method.
         for _, f in ipairs(byowner[owner]) do
             local declaration = signature_in(headers, f.to)
             if not declaration then
                 table.insert(absent, f.api .. "  ->  " .. f.to .. "  (no declaration in the header to copy the types from)")
             else
-                -- The availability suffix is the declaration's, for the declaration; a definition of the same method
-                -- does not need it, and the framework is compiled with the marks off in any case.
                 local spelled = rename(declaration):gsub("%s+MTR_AVAILABLE%b%(%b%)*.-%)", ""):gsub("%s+;$", ";")
                 table.insert(lines, spelled)
                 table.insert(lines, "{")
-                -- The argument names are the unprefixed declaration's own parameter names: the apple-prefixed method
-                -- takes the same parameters under the same names, so it forwards them by name.
                 local arguments = {}
                 for name in declaration:gmatch("%)%s*([%a_][%w_]*)%s") do
                     table.insert(arguments, name)
                 end
-                -- The return type of the forward is the unprefixed declaration's: an appleClearAliroReaderConfigWith
-                -- completion: returns the same MTRStatus the model does, because it is the same command.
-                -- A forward returns what the method it forwards to returns, which is the declaration's own return
-                -- type; for a void command that is a call and not a returned value.
                 local returns = declaration:match("^%s*[-+]%s*%b()%s*([%w_%* ]*)%s*%(")
                 if returns and returns:match("^void$") then
                     returns = nil
@@ -243,14 +200,9 @@ function main(binary, corpus, diff, out, framework)
         io.writefile(path.join(out, owner .. ".mm"), table.concat(lines, "\n"))
         classes = classes + 1
     end
-    -- Two things this xmake's Lua does that cost a session, both measured here rather than assumed: a gsub in an
-    -- argument position hands io.lines the substitution count as its start offset, and print does format its arguments
-    -- (print("%d forwards", 33) prints "33 forwards"), so a count read back from a formatted print is the count.
     print(string.format("%d forwards over %d classes, each to a selector the library carries; %d rows with no carried target:",
                         written, classes, #absent))
     for _, row in ipairs(absent) do
         print("  no target: " .. row)
     end
 end
-
--- The paths, in the order xmake l passes them, with the output directory last.

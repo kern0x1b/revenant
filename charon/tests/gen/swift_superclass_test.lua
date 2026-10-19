@@ -1,12 +1,5 @@
--- A class's superclass in the Swift skeleton (tools/gen/swift_render.lua inheritance_of): the model's superclass cell lists the chain above the
--- class, direct superclass first ("UIKit.UIView,UIKit.UIResponder,ObjectiveC.NSObject"), and a skeleton that declares the whole list
--- fails with "multiple inheritance from classes 'UIView' and 'UIResponder'" (502 errors in 37 modules of the coordinator's sdk run). A
--- class has one superclass: the skeleton declares the first name of the cell, then its conformances. Checked here on a class with a
--- three-name chain and one conformance. Run: xmake l tests/gen/swift_superclass_test.lua (pure Lua: no toolchain)
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 
--- A model row with every cell the renderer reads, "-" where the row says nothing.
 local function row(fields)
     local out = {kind = "-", usr = "-", container = "-", name = "-", side = "-", type = "-", params = "-", generic_sig = "-",
                  conformances = "-", superclass = "-", throwing = "-", async = "-", mutating = "-", attributes = "-", accessors = "-",

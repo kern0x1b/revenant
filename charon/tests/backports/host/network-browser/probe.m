@@ -1,17 +1,3 @@
-/*
- * The browser differential: one binary registers a Bonjour service and browses for it with Apple's own
- * nw_browser, the other does the same with the port's browser compiled beside it under renamed symbols,
- * and run.sh compares what each found.
- *
- * Both sides register the service themselves, through the release's own DNSServiceRegister, so the thing
- * on the link is one thing on the link and the only difference between the two runs is the browser. The
- * comparison is of what a program can observe: that the service was found, what its endpoint says, the
- * port it publishes, the record it advertises, and the interfaces it was found on.
- *
- * The browse is asynchronous on both sides, so the program runs its own run loop with a deadline and
- * prints what it has when the deadline passes. A line the other side also prints is a comparison; a line
- * only one side prints is a difference the harness reports.
- */
 #import <Foundation/Foundation.h>
 #include <arpa/inet.h>
 #include <dns_sd.h>
@@ -35,8 +21,6 @@ static void emit(const char *name, const char *value)
 #define NS_DESCRIPTOR       nw_browse_descriptor_t
 #define NS_RESULT           nw_browse_result_t
 #else
-/* The port's browser, renamed. The rename set is read out of the port's objects by run.sh, so a call the
-   port adds is renamed with it. */
 typedef id NS_BROWSER;
 typedef id NS_DESCRIPTOR;
 typedef id NS_RESULT;
@@ -65,10 +49,6 @@ static volatile int printed = 0;
 static DNSServiceRef registered = NULL;
 static DNSServiceRef browsed = NULL;
 
-/* Withdraw the registration before the process leaves, so the name the harness gave this run is free
-   for the next process in that same run to take: `DNSServiceRefDeallocate` is what makes mDNSResponder
-   send the goodbye, and a process that exits without it leaves the record on the link for as long as
-   its timeouts run - which is why two runs of one harness used to collide on the name. */
 static void withdraw(void)
 {
     if (registered) {
@@ -77,9 +57,6 @@ static void withdraw(void)
     }
 }
 
-/* The work, with the two sides' own types; the blocks that reach it are spelled with each side's own
-   signature at the call site below, because a C function is not a block and the two sides' nw_* types
-   differ. */
 static void report_result(id old_result, id new_result)
 {
     (void)old_result;
@@ -96,8 +73,6 @@ static void report_result(id old_result, id new_result)
     char number[32];
     emit("found", "yes");
 #ifdef HOST_SIDE
-    /* nw_endpoint_get_type and nw_browse_result_get_changes return numbers, not strings: casting them to
-       char * and printing them with %s is what segfaulted this probe on its first run. */
     snprintf(number, sizeof number, "%d", (int)nw_endpoint_get_type(endpoint));
     emit("endpoint.type", number);
     emit("endpoint.name", nw_endpoint_get_bonjour_service_name(endpoint));
@@ -143,14 +118,6 @@ static void registered_svc(DNSServiceRef sdRef, DNSServiceFlags flags, DNSServic
 int main(int argc, char *argv[])
 {
     @autoreleasepool {
-        /* one service, registered by this process. The name is the harness's, so that the two processes
-           of one run register and browse for the SAME instance and `endpoint.name` is a comparison at
-           all; it used to be the pid, which made the two sides answer two different names by
-           construction. The harness's name carries its own pid, so two runs on one machine never
-           collide either. */
-        /* a TXT record on the wire is length-prefixed: one byte naming the length of each entry, then the
-           entry. A bare { 'k', '=', 'v' } reads as an entry of 107 bytes and DNSServiceRegister refuses it
-           with kDNSServiceErr_Invalid, which is what it did before this line. */
         const uint8_t txt[] = { 3, 'k', '=', 'v' };
         char name[64];
         snprintf(name, sizeof name, "charon-diff-%d", (int)getpid());

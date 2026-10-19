@@ -1,13 +1,3 @@
--- Per app: selectors the bundle DEFINES (method_t entries: name, then types, then imp), from
--- `otool -arch arm64 -oV` over every Mach-O. A method entry is `name` immediately followed by a `types`
--- line; ivars carry `type` and properties `attributes`, so they do not match. Selectors an app defines
--- are override points/callbacks (UIKit calls them, the app does not send them) -> used to separate SENDS
--- from IMPLEMENTS.
---
--- Usage:
---   defined(binary)             (import this file: scan-selectors.lua does) -> set of selectors
---   xmake l tools/corpus/defined-methods.lua    batch over the apps that have an extracted bundle under
---                                               corpus/<app>/extracted/Payload, written to corpus/defcache/<app>.json
 import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 import("aggregate", {rootdir = os.scriptdir()})
@@ -15,7 +5,6 @@ import("aggregate", {rootdir = os.scriptdir()})
 local NAME = "^%s+name%s+0x[0-9a-f]+%s+(%S.*)$"
 local TYPES = "^%s+types%s+0x"
 
--- The selectors one binary defines, as a set.
 function defined(binary)
     local names, pending = {}, nil
     for line in (os.iorunv("otool", {"-arch", "arm64", "-oV", binary}) .. "\n"):gmatch("(.-)\n") do
@@ -32,7 +21,6 @@ function defined(binary)
     return names
 end
 
--- The batch the script runs with no arguments. The app list is the set of extracted bundles it knew of.
 local BATCH_APPS = {"ish", "ppsspp", "pojav", "provenance", "delta", "utm", "aidoku", "yattee", "session", "telegram"}
 
 function main(...)

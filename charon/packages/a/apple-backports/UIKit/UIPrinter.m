@@ -7,16 +7,8 @@
 #import <sys/socket.h>
 #import <unistd.h>
 
-// A printer is the URL it is reached at. The release has no printer object: the print system that knows the printers
-// is not reached from here, so the descriptive properties are the host's answers for a printer it cannot describe
-// (facts/UIKit/UIPrinter.md). contactPrinter: sends an IPP Get-Printer-Attributes request (RFC 8011) over HTTP to the
-// printer's host and port, over TLS for ipps and https, and answers YES only when the printer answers with a successful
-// IPP status.
-
 static const NSTimeInterval kCharonContactTimeout = 30;
 
-// The operation, and the tags its attributes are written with (RFC 8010, section 3.5). IPP status codes below 0x0100
-// are successful (RFC 8011, section 4.1.8).
 static const uint16_t kCharonIPPGetPrinterAttributes = 0x000B;
 static const uint8_t kCharonIPPOperationGroup = 0x01;
 static const uint8_t kCharonIPPEndOfAttributes = 0x03;
@@ -31,7 +23,6 @@ static void charon_appendUInt16(NSMutableData *data, uint16_t value)
     [data appendBytes:bytes length:2];
 }
 
-// One attribute: its value tag, then its name and its value, each with a 16-bit length (RFC 8010, section 3.1.5).
 static void charon_appendAttribute(NSMutableData *data, uint8_t tag, NSString *name, NSString *value)
 {
     NSData *nameBytes = [name dataUsingEncoding:NSUTF8StringEncoding];
@@ -43,7 +34,6 @@ static void charon_appendAttribute(NSMutableData *data, uint8_t tag, NSString *n
     [data appendData:valueBytes];
 }
 
-// The IPP request: version 1.1, the operation, request-id 1, and the operation attributes (RFC 8010, section 3.1).
 static NSData *charon_ippRequest(NSString *printerURI)
 {
     NSMutableData *data = [NSMutableData data];
@@ -59,7 +49,6 @@ static NSData *charon_ippRequest(NSString *printerURI)
     return data;
 }
 
-// The HTTP request that carries it: one POST of application/ipp to the URL's path, one exchange per connection.
 static NSData *charon_httpRequest(NSURL *url, NSString *host, NSString *port)
 {
     NSString *target = [[url path] length] ? [url path] : @"/";
@@ -74,7 +63,6 @@ static NSData *charon_httpRequest(NSURL *url, NSString *host, NSString *port)
     return request;
 }
 
-// The IPP response in an HTTP response that has a 200 status, de-chunked when the server chunks it; nil for any other.
 static NSData *charon_ippResponseBody(NSData *response)
 {
     NSData *separator = [@"\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding];
@@ -116,7 +104,6 @@ static NSData *charon_ippResponseBody(NSData *response)
     }
 }
 
-// Waits until the descriptor is ready for the events, or the deadline has passed; YES when it is ready.
 static BOOL charon_waitReady(int fd, short events, NSDate *deadline)
 {
     NSTimeInterval left = [deadline timeIntervalSinceNow];
@@ -126,7 +113,6 @@ static BOOL charon_waitReady(int fd, short events, NSDate *deadline)
     return poll(&wait, 1, (int)(left * 1000)) == 1;
 }
 
-// A connected descriptor to the first address that accepts, or -1. The name lookup is not bounded by the deadline.
 static int charon_connect(NSString *host, NSString *port, NSDate *deadline)
 {
     struct addrinfo hints = { 0 }, *addresses = NULL;
@@ -161,8 +147,6 @@ static int charon_connect(NSString *host, NSString *port, NSDate *deadline)
     return connected;
 }
 
-// Writes the request, then reads the response until the server closes the connection. nil when the deadline passes or
-// the connection fails.
 static NSData *charon_exchange(int fd, NSData *request, NSDate *deadline)
 {
     const uint8_t *bytes = [request bytes];
@@ -194,8 +178,6 @@ static NSData *charon_exchange(int fd, NSData *request, NSDate *deadline)
     }
 }
 
-// The state of one TLS exchange. The stream callbacks run on the run loop of the thread that waits in
-// charon_tlsExchange, so the fields need no lock.
 struct charon_tlsExchange {
     const uint8_t *bytes;
     CFIndex length;
@@ -236,10 +218,6 @@ static void charon_writeEvent(CFWriteStreamRef stream, CFStreamEventType event, 
     }
 }
 
-// Writes the request over TLS on the connected descriptor, then reads the response until the server closes the
-// connection. The streams do not close the descriptor; the caller does. The certificate is validated against the default
-// trust, and must match the URL's host: nothing in the SSL settings but that name. nil when validation fails, the
-// connection fails, or the deadline passes.
 static NSData *charon_tlsExchange(int fd, NSString *host, NSData *request, NSDate *deadline)
 {
     CFReadStreamRef readStream = NULL;
@@ -283,10 +261,6 @@ static NSData *charon_tlsExchange(int fd, NSString *host, NSData *request, NSDat
     return exchange.finished && !exchange.failed ? exchange.response : nil;
 }
 
-// Blocking, so it runs on a background queue. Only an ipp, ipps, http or https URL with a host is contacted; every other
-// URL, and one with no host, answers NO without a connection. ipps and https are validated against the release's default
-// trust, with the URL's host as the name the certificate must match; an untrusted or mismatched certificate answers NO,
-// and validation is never turned off (facts/UIKit/UIPrinter.md).
 static BOOL charon_printerAnswers(NSURL *url)
 {
     NSString *scheme = [[url scheme] lowercaseString];
@@ -368,8 +342,6 @@ static BOOL charon_printerAnswers(NSURL *url)
     return NO;
 }
 
-// The handler runs once. A printer with no URL answers at once, before this method returns, as the host does; any
-// other printer answers later, on the main queue.
 - (void)contactPrinter:(void (^)(BOOL available))completionHandler
 {
     if (!completionHandler)

@@ -7,11 +7,6 @@
 #import "callkit-cases.h"
 #import "callkit-expectations.h"
 
-// The host cannot run a transaction - a tool without the VoIP entitlement
-// never gets past CallKit's own check - so the machinery is held here: a
-// provider, a call controller and an observer of one process, the calls they
-// make between them, and the order the delegate is called in.
-
 static NSString *image_of(Class cls)
 {
     Dl_info info;
@@ -328,8 +323,6 @@ static void a_failed_action(void)
 
 static void an_unanswered_method(void)
 {
-    // The delegate answers no performPlayDTMFCallAction:, so nothing is going
-    // to perform it and the action fails at once rather than hanging.
     CharonCallDelegate *delegate = [[CharonCallDelegate alloc] init];
     CXProvider *provider = provider_with(delegate);
     CXCallController *controller = [[CXCallController alloc] init];
@@ -374,10 +367,6 @@ static void a_timeout(void)
 }
 
 
-// CallKit activates the audio session when a call of the application connects
-// and deactivates it when the last one has gone, and tells the delegate each
-// time; the application sets its own category and mode, and nothing here
-// touches those.
 static void the_audio_session(void)
 {
     CharonCallDelegate *delegate = [[CharonCallDelegate alloc] init];
@@ -410,11 +399,6 @@ static void the_audio_session(void)
     spin(0.1);
 }
 
-// The observer watches the release's own calls as well. Nothing here can
-// place a cellular call, so what is held is that the watch is live, that it
-// reports nothing when there is no call, and that an action on a call no
-// provider of this process owns is refused rather than handed to a delegate
-// that never made it.
 static void the_release_own_calls(void)
 {
     CHECK(NSClassFromString(@"CTCallCenter") != Nil, "the release has CTCallCenter, which is what the observer watches");

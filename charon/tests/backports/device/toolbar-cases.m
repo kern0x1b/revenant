@@ -5,9 +5,6 @@ static BOOL near(CGFloat a, CGFloat b)
     return fabs(a - b) < 0.5;
 }
 
-// The toolbar class a navigation controller is asked to make, which counts the bars it makes: the controller's own `toolbar`
-// getter makes one on first use, and a bar that exists is told apart from one that does not only by making it, so the
-// count is read without touching the getter.
 static int toolbars_made;
 
 @interface CountedToolbar : UIToolbar
@@ -23,7 +20,6 @@ static int toolbars_made;
 
 @end
 
-// Every UIToolbar below a view, found through the subview tree. Mac Catalyst keeps a navigation controller's toolbar out of it.
 static int toolbars_in(UIView *view)
 {
     int found = [view isKindOfClass:[UIToolbar class]] ? 1 : 0;
@@ -40,7 +36,6 @@ static void settle(UIWindow *window, UINavigationController *navigation, UIViewC
     [root.view layoutIfNeeded];
 }
 
-// How much of the bottom of `view` the toolbar covers, from its own frame; zero when the system keeps it out of the tree.
 static CGFloat toolbar_cover(UIView *view, UIToolbar *bar)
 {
     if (!bar.superview || bar.hidden || bar.alpha <= 0)
@@ -67,7 +62,6 @@ void toolbar_run(UIWindow *window, ToolbarRecorder record)
     record(@"neverAskedFlag", [NSString stringWithFormat:@"hidden=%d made=%d", navigation.toolbarHidden, toolbars_made]);
     record(@"neverAskedInsets", [NSString stringWithFormat:@"bottom=%d innerBottom=%d", near(insets.bottom, 0), near(innerInsets.bottom, 0)]);
 
-    // A translucent toolbar the view extends under: what it covers is what the safe area has to answer.
     root.wantsFullScreenLayout = YES;
     [navigation setToolbarHidden:NO animated:NO];
     UIToolbar *bar = navigation.toolbar;

@@ -1,18 +1,4 @@
--- objects.lua --sdk SDK_262 --out DIR [--port-sdk PORT_SDK] [--work DIR]: write the Intents class objects (IN<group>.m and the
--- files a group writes alone) into DIR. The build calls it for the Intents folder, with DIR under .gen, so the objects are built
--- at build time and not committed (modules/apple/backports.lua generate()). generate.sh runs it for its object step too, so
--- there is one mechanism for the objects and the registry rows stay with generate.sh.
---
---   --sdk       the iPhoneOS 26.2 SDK the surface is read from for the names PORT_SDK does not declare (CHARON_GEN_SDK in the build)
---   --port-sdk  the SDK the port compiles against, read for every class it declares (default: the toolchain's iPhoneOS 16.4)
---   --out       the folder the objects are written into; created if missing
---   --work      where the two AST dumps and the reports go (default: .agent-work/intents-generation of the checkout)
---
--- The two ASTs are clang's, not python's. Each is read once per SDK and umbrella: a dump is reused while its key (the SDK path,
--- the newest header's mtime and count, and the umbrella's text) is unchanged, because the parse is the whole cost of a run.
-
 local GROUPS = {
-    -- group, release, the SDK the group's own declarations are read from ("port" or "newer"), and the group's class list
     {"10_0_1", "10.0.1", "port"},
     {"10_3", "10.3", "port"},
     {"11_0", "11.0", "port"},
@@ -32,13 +18,11 @@ local function sdk_version(sdk)
     return (path.basename(sdk):gsub("^iPhoneOS", ""):gsub("%.sdk$", ""))
 end
 
--- The newest header's mtime and the number of headers, read by find and stat (read only), then the umbrella's text.
 local function ast_key(sdk, umbrella_text)
     local out = os.iorunv("/bin/sh", {"-c", "find \"$1/System/Library/Frameworks\" -name '*.h' | wc -l; find \"$1/System/Library/Frameworks\" -name '*.h' -print0 | xargs -0 stat -f '%m' | sort -rn | head -1", "sh", sdk})
     return sdk .. "|" .. out:gsub("%s+", " ") .. "|" .. umbrella_text
 end
 
--- The AST of the umbrella under one SDK, written to out_file; a dump whose key matches the one beside it is reused.
 local function ast_dump(sdk, umbrella, umbrella_text, out_file)
     local key = ast_key(sdk, umbrella_text)
     local key_file = out_file .. ".key"

@@ -181,11 +181,6 @@ static NSArray<SCNGeometrySourceSemantic> *CharonSCNKnownSemantics(void)
 - (void)charon_replaceSources:(NSArray<SCNGeometrySource *> *)sources
                      elements:(NSArray<SCNGeometryElement *> *)elements
 {
-    // The class keeps no array of sources: `-geometrySources` is built from the by-semantic index,
-    // which is what `-geometrySourcesForSemantic:` answers from, and an index that is not rebuilt when
-    // the sources change is an index that lies. So the index is rebuilt here, and it is rebuilt the
-    // way the initialiser builds it - keyed by the semantic itself, which is the dictionary's own key
-    // type, and each semantic's sources in the order they were given.
     NSMutableDictionary<SCNGeometrySourceSemantic, NSArray<SCNGeometrySource *> *> *bySemantic =
             [NSMutableDictionary dictionary];
     for (SCNGeometrySource *source in sources) {

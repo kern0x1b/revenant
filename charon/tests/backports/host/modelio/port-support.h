@@ -1,6 +1,3 @@
-// The two places where the iOS header the port is written against and the macOS header the system's
-// ModelIO comes from disagree, declared so the port's own spelling can be asked. Both are the iOS
-// spelling, which is the one the port carries.
 #import <Foundation/Foundation.h>
 #import <ModelIO/ModelIO.h>
 #import <simd/simd.h>

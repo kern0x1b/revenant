@@ -1,6 +1,3 @@
-// Write the GIF and PNG fixtures both builds of the animation harness read, so the port and the host are
-// asked about the same bytes. Built and run by run.sh, not by cases.m: a fixture written twice could be two
-// files, and the whole comparison rests on the input being one.
 #import <Foundation/Foundation.h>
 #import <ImageIO/ImageIO.h>
 #import <CoreGraphics/CoreGraphics.h>
@@ -68,17 +65,13 @@ int main(int argc, const char **argv)
         NSString *build = argc > 1 ? @(argv[1]) : @"/tmp";
         NSFileManager *fm = [NSFileManager defaultManager];
         [fm createDirectoryAtPath:build withIntermediateDirectories:YES attributes:nil error:NULL];
-        // the three-frame fixture: each frame its own delay, which is what the timing cases compare
         BOOL ok = writeFixture([build stringByAppendingPathComponent:@"three.gif"], kUTTypeGIF,
                         @[ @0.1, @0.3, @0.5 ], YES);
         ok = writeFixture([build stringByAppendingPathComponent:@"one.gif"], kUTTypeGIF, @[ @0.1 ], YES) && ok;
         ok = writeFixture([build stringByAppendingPathComponent:@"one.png"], kUTTypePNG, @[ @0.1 ], NO) && ok;
-        // three pages and no GIF dictionary: the case that shows a frame count is not what decides
         ok = writeFixture([build stringByAppendingPathComponent:@"three.tiff"], kUTTypeTIFF, @[ @0.1, @0.1, @0.1 ], NO) && ok;
         if (!ok)
             return 1;
-        // the fixtures have to be what the cases assume, or the comparison is of nothing: read the delays
-        // back out of the file that was written
         CGImageSourceRef source = CGImageSourceCreateWithURL(
             (__bridge CFURLRef)[NSURL fileURLWithPath:[build stringByAppendingPathComponent:@"three.gif"]], NULL);
         if (!source) {

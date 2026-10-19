@@ -1,19 +1,3 @@
-// measure.m -- what the host's own GameplayKit answers, for the families this differential holds.
-//
-// This is the oracle. run.sh does not load the host's framework beside the port's, because the two
-// carry the same selectors and ld64 binds each objc_msgSend$selector stub to one implementation of it,
-// so a side-by-side process would answer the host's method where the port's was meant. Instead this
-// prints what the host answers and differential.m holds the port to those numbers, and run.sh prints
-// this output beside the checks so every expectation can be re-measured rather than trusted.
-//
-// Every family prints its own block. The distributions and the shuffle are measured through a written
-// script (CharonGKScriptedSource.h) rather than through a seeded source, because the port's own
-// generators are not the host's -- see facts/GameplayKit/GKRandomSource.md -- and what has to agree
-// between the two is which protocol methods a family calls and how it combines the answers, not what a
-// generator draws.
-//
-// Run it by hand after a change on the host's side. macOS 27 (26A428), 2026-10-04.
-
 #import <Foundation/Foundation.h>
 #import <GameplayKit/GameplayKit.h>
 #import <objc/runtime.h>
@@ -66,7 +50,6 @@ static NSString *floats(NSArray<NSNumber *> *numbers)
 
 int main(void)
 {
-    // line buffered: a run that traps must leave the lines before it, not a four-kilobyte buffer
     setvbuf(stdout, NULL, _IOLBF, 0);
     @autoreleasepool {
         printf("== state machines ==\n");
@@ -267,10 +250,6 @@ int main(void)
             } @catch (NSException *exception) {
                 printf("nil weights: %s\n", [[exception name] UTF8String]);
             }
-            // The three factories that take ONE agent refuse nil, so a goal of each kind needs an
-            // agent of the host's own class -- which the differential cannot build, because the port
-            // carries no GKAgent. What both sides can measure is the refusal itself, and the nine
-            // factories that answer for nil.
             @try {
                 [GKGoal goalToSeekAgent:nil];
                 printf("a seek goal with no agent: no exception\n");
@@ -449,8 +428,6 @@ int main(void)
                    (long)overMoments.highestValue, (unsigned long)overMoments.numberOfPossibleOutcomes);
         }
         {
-            // What each distribution asks of its source, over a written script. The trace is the
-            // proof that the two sides call the same protocol methods in the same order.
             CharonGKScriptedSource *source = [[CharonGKScriptedSource alloc]
                                               initWithScript:@[@"bounded:6=2", @"bounded:6=5", @"bounded:6=1",
                                                                @"bounded:6=4", @"bounded:6=0", @"bounded:6=3",
@@ -507,9 +484,6 @@ int main(void)
             }
             printf("nextIntWithUpperBound over -2..2: %s\n", [[underBounds componentsJoinedByString:@" "] UTF8String]);
             printf("  asked: %s\n", [below.log UTF8String]);
-            // One fresh source per call over a range whose lowest is above zero and whose whole range is
-            // a single outcome, so that the span rule is measured where min(bound - lowest, outcomes)
-            // and bound - lowest come apart most.
             for (NSUInteger bound = 0; bound <= 8; bound++) {
                 CharonGKScriptedSource *fresh = [[CharonGKScriptedSource alloc] initWithScript:@[]];
                 GKRandomDistribution *single = [[GKRandomDistribution alloc] initWithRandomSource:fresh

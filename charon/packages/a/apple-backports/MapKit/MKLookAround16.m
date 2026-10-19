@@ -1,32 +1,7 @@
-// MKLookAroundScene, MKLookAroundSceneRequest, MKLookAroundSnapshot, MKLookAroundSnapshotOptions,
-// MKLookAroundSnapshotter and MKLookAroundViewController: the six classes of a feature this port
-// has no source for.
-//
-// Look Around is Apple's own street-level imagery, captured by Apple's own vehicles and served by
-// Apple's own service. There is no public web API for it, no open equivalent, and nothing on this
-// device that holds a panorama. So the seam is real and it is Apple's, and the answer is the one
-// Apple gives where it has no coverage: a nil, with the documented error, and nothing invented.
-//
-// What each of the six does, exactly:
-//
-//   - a scene request answers nil and MKErrorUnknown's neighbour, and says so through the error;
-//   - a scene has no coverage, so every part of it is the empty answer;
-//   - a snapshotter answers nil with the same error and -cancel is real;
-//   - a snapshot options object is a value, and builds for real, but the snapshot it asks for is nil;
-//   - a view controller is a real view controller, and its delegate is told the update and the
-//     dismissal the header describes, with the scene it was given (none).
-//
-// The honest check a caller can make is exactly the one Apple offers: there is no scene, so there is
-// no coverage. `isAvailable` on a request of this port's own says NO, for the same reason and in the
-// same terms the rest of this library uses.
-
 #import <MapKit/MapKit.h>
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 
-// The one error every answer here carries: no coverage, in Apple's own error domain and Apple's own
-// code for an unknown failure, with the reason in the description. It is a function so that the six
-// answers are literally the same error. Charon's own, so it carries no API.
 static NSError *MKCharonNoCoverage(NSString *what)
 {
     return [NSError errorWithDomain:@"MKErrorDomain" code:1
@@ -38,8 +13,6 @@ static NSError *MKCharonNoCoverage(NSString *what)
                                            @"that holds a panorama, so there is no scene to give", what]}];
 }
 
-// The one thing this port adds that the SDK's headers do not: whether a Look Around request could
-// ever have an answer here, which is what Apple calls coverage. Declared and not implemented below.
 @interface MKLookAroundSceneRequest (CharonCoverage)
 + (BOOL)isAvailable;
 @end
@@ -54,7 +27,6 @@ static NSError *MKCharonNoCoverage(NSString *what)
 @synthesize loading = _loading;
 @synthesize cancelled = _cancelled;
 
-// Coverage, and the answer: there is none here, for the reason MKCharonNoCoverage gives.
 + (BOOL)isAvailable
 {
     return NO;
@@ -95,8 +67,6 @@ static NSError *MKCharonNoCoverage(NSString *what)
     return self;
 }
 
-// The answer, on the main queue as the header says: nil and the reason. No delay, because there is
-// nothing to wait for -- and nothing here pretends to be a network round trip.
 - (void)getSceneWithCompletionHandler:(void (^)(MKLookAroundScene *, NSError *))completionHandler
 {
     if (!completionHandler) {
@@ -167,8 +137,6 @@ static NSError *MKCharonNoCoverage(NSString *what)
     return self;
 }
 
-// The image of a snapshot that was never taken: nil, which is what a class with no coverage gives and
-// what the header's own image is documented to be when there is no snapshot to take.
 - (UIImage *)image
 {
     return nil;
@@ -189,9 +157,6 @@ static NSError *MKCharonNoCoverage(NSString *what)
     return [super init];
 }
 
-// The header's own designated initialiser for the snapshotter: the scene and the options. A scene
-// that exists is still a scene with no coverage, so the snapshot is the same nil either way; the
-// options are kept, so a caller that reads them back gets what it set.
 - (instancetype)initWithScene:(MKLookAroundScene *)scene
 {
     return [self initWithScene:scene options:[[MKLookAroundSnapshotOptions alloc] init]];
@@ -244,8 +209,6 @@ static NSError *MKCharonNoCoverage(NSString *what)
 @synthesize badgePosition = _badgePosition;
 @synthesize showsRoadLabels = _showsRoadLabels;
 
-// The header's own designated initialiser: a real view controller, with the scene it was given (of
-// which there is none) and the delegate told about it.
 - (instancetype)initWithScene:(MKLookAroundScene *)scene
 {
     self = [super initWithNibName:nil bundle:nil];
@@ -278,8 +241,6 @@ static NSError *MKCharonNoCoverage(NSString *what)
 
 - (void)charon_reportTheUpdate
 {
-    // The delegate's own messages, sent for real: it will be told there is no scene, which is the
-    // truth, and the view controller is a real view controller it can present and dismiss.
     id<MKLookAroundViewControllerDelegate> delegate = _delegate;
     void (*send)(id, SEL, id) = (void (*)(id, SEL, id))objc_msgSend;
     if ([delegate respondsToSelector:@selector(lookAroundViewControllerWillUpdateScene:)]) {

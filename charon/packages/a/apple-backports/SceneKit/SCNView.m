@@ -6,11 +6,6 @@
 #import <OpenGLES/ES2/glext.h>
 #import <QuartzCore/QuartzCore.h>
 
-// SCNView over OpenGL ES 2.0 (facts/SceneKit/SCNView.md). Defaults and the order of the delegate's messages are
-// macOS SceneKit's, measured: preferredFramesPerSecond 0 (the display's own rate), jittering off, the point of view
-// the scene's first camera node once a scene is set; -snapshot sends the delegate the whole sequence of a frame on
-// the calling thread.
-
 @implementation SCNView
 {
     EAGLContext *_context;
@@ -97,7 +92,6 @@
     [EAGLContext setCurrentContext:previous];
 }
 
-// The layer's drawable at the view's size in pixels; NO when the view has no area to draw into.
 - (BOOL)charonPrepareDrawable
 {
     GLint width = (GLint)lroundf(self.bounds.size.width * self.contentScaleFactor);
@@ -148,7 +142,6 @@
     UIColor *background = self.backgroundColor;
     CGFloat r, g, b, a;
     if (background && [background getRed:&r green:&g blue:&b alpha:&a]) {
-        // the view clears to its background colour, premultiplied as the layer composites it
         c[0] = (float)(r * a); c[1] = (float)(g * a); c[2] = (float)(b * a); c[3] = (float)a;
     } else if (background && [background getWhite:&r alpha:&a]) {
         c[0] = c[1] = c[2] = (float)(r * a); c[3] = (float)a;
@@ -158,7 +151,6 @@
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-// One frame, the way SceneKit sends it to the delegate: update, animations, physics, constraints, then the render.
 - (void)charonRenderAtTime:(NSTimeInterval)time width:(GLint)width height:(GLint)height
 {
     id<SCNSceneRendererDelegate> delegate = _delegate;
@@ -167,7 +159,6 @@
         [delegate renderer:self updateAtTime:time];
     }
     if (scene) {
-        // animations run on media time, also for a snapshot, whose delegate time is 0
         [CharonSCNAnimations evaluateScene:scene atTime:CACurrentMediaTime()];
     }
     if ([delegate respondsToSelector:@selector(renderer:didApplyAnimationsAtTime:)]) {
@@ -218,11 +209,9 @@
         return;
     }
     if (_displayLink == nil) {
-        // the link holds its target strongly; the view invalidates it when it leaves its window
         _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(charonDisplayLinkFired:)];
         [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
     }
-    // the link's interval is in frames of the 60 Hz display; 0 asks for every frame
     NSInteger fps = _preferredFramesPerSecond;
     _displayLink.frameInterval = fps <= 0 || fps >= 60 ? 1 : MAX(1, (NSInteger)lround(60.0 / (double)fps));
 }
@@ -255,11 +244,9 @@
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth);
     UIImage *image = nil;
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
-        // macOS SceneKit's snapshot renders at scene time 0 and sends the delegate the frame's messages
         [self charonRenderAtTime:0 width:width height:height];
         NSMutableData *pixels = [NSMutableData dataWithLength:(NSUInteger)(width * height * 4)];
         glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels.mutableBytes);
-        // GL's first row is the bottom one
         NSMutableData *flipped = [NSMutableData dataWithLength:pixels.length];
         size_t row = (size_t)width * 4;
         for (GLint y = 0; y < height; y++) {
@@ -358,7 +345,6 @@
     return (__bridge void *)_context;
 }
 
-// A renderer that is not Metal answers nil for Metal's objects, as SceneKit's own OpenGL renderer does.
 - (id<MTLRenderCommandEncoder>)currentRenderCommandEncoder
 {
     return nil;

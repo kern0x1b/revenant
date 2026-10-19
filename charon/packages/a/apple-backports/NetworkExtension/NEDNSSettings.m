@@ -1,13 +1,5 @@
 #import "CharonNEDNSSettings.h"
 
-/* The DNS settings object: property storage, `copy` and the keyed archive, all of which the 26.2
-   header declares on the class (`<NSSecureCoding,NSCopying>`). The host's own NetworkExtension was
-   measured for exactly these answers - a fresh NEDNSSettings answers servers=nil, searchDomains=nil,
-   matchDomains=nil and dnsProtocol 0, -copy returns a NEDNSSettings, and an NSKeyedArchiver round trip
-   returns data with no error - and tests/backports/host/netext-hosts/ compares them name by name.
-
-   `dnsProtocol` is stored rather than answered: it arrived in 14.0, the rest in 9.0, and a fresh object
-   answers the enumeration's own zero (NEDNSProtocolCleartext is 1), which is what the host does. */
 @implementation NEDNSSettings {
     NSArray<NSString *> *_servers;
     NEDNSProtocol _dnsProtocol;
@@ -22,10 +14,7 @@
 {
     self = [super init];
     if (self) {
-        _dnsProtocol = (NEDNSProtocol)0;   /* the enumeration's own zero, before Cleartext */
-        /* Measured: a fresh NEDNSSettings on the host answers matchDomainsNoSearch = YES, so the
-           default is YES and not the zero a fresh BOOL ivar would give. The differential caught it:
-           the port answered NO until this line. */
+        _dnsProtocol = (NEDNSProtocol)0;
         _matchDomainsNoSearch = YES;
     }
     return self;

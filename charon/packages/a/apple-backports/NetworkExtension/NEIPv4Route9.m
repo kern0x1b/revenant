@@ -1,8 +1,5 @@
 #import "CharonNetworkExtensionSettings.h"
 
-/* NEIPv4Route, from iOS 9.0, apart from NEIPv4Settings.m (iOS 8.0): an object carries one release.
-   The route the IPv4 settings hold: state, with `+defaultRoute` the fixed route whose destination
-   is 0.0.0.0 with a zero mask, which is what the 26.2 header's own description of it says. */
 @implementation NEIPv4Route {
     NSString *_destinationAddress;
     NSString *_destinationSubnetMask;

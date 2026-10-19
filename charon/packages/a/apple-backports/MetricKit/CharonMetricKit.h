@@ -4,22 +4,8 @@
 #import <Foundation/Foundation.h>
 #import <MetricKit/MetricKit.h>
 
-// The build compiles against the lowered 16.4 SDK, and MetricKit grew past it: three of the classes of
-// SDK 26.2 and four of its properties are not in those headers at all. They are declared here the way
-// SecurityUI's SFCertificatePresentation is - the same superclass, the same selectors, the same property
-// types and no ivars, so an application compiled against the real 26.2 headers finds exactly the classes
-// and properties this library exports. Only the availability annotations are left out, which is what the
-// other redeclarations in this package do (CharonSecurityUI.h, CharonAVAudioBuffer.h, CharonCallKit.h): they
-// would be refused against this deployment target and mean nothing in a translation unit that is not the
-// application's.
-
 NS_ASSUME_NONNULL_BEGIN
 
-// The host's own MetricKit is newer than the SDK this package builds against and already declares
-// these, so a host comparison compiles with -DCHARON_HOST_DIFFERENTIAL and takes the host's
-// declarations instead of ours. That is the same macro Foundation/NSDirectoryEnumerator+PostOrder13.m
-// uses for exactly this - a source built differently for a host comparison, and here is what differs -
-// and it is why this header is the port's for the armv7 build and not for anybody's.
 #ifndef CHARON_HOST_DIFFERENTIAL
 
 @interface MXSignpostRecord : NSObject <NSSecureCoding>
@@ -80,7 +66,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly, strong) NSMeasurement<NSUnit *> *hitchTimeRatio;
 @end
 
-#endif // CHARON_HOST_DIFFERENTIAL
+#endif
 
 NS_ASSUME_NONNULL_END
 

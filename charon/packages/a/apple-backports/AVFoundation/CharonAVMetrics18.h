@@ -1,19 +1,3 @@
-// CharonAVMetrics18.h - AVFoundation's metric event surface: declarations of the iOS 26.2 interface, written
-// for this port. SDK 16.4 ships no AVMetrics.h at all, so every class, protocol and method below is declared
-// here; this is what CoreMedia's CharonCMTag26.h, Intents' CharonIntents262.h, CloudKit's
-// CharonCKSyncEngine26.h, CarPlay's and WebKit's, and this package's own CharonAVFoundationCaption18.h do for
-// surface that arrived after the SDK the toolchain resolves.
-//
-//   reference, not copied: iPhoneOS26.2.sdk/System/Library/Frameworks/AVFoundation.framework/Headers/AVMetrics.h
-//
-// The names, types, signatures and availability are the interface's. The header's prose and doc comments are
-// not carried. One change from the interface, stated here rather than made silently:
-// all 26 `, visionos(<version>)` are DROPPED from the availability annotations.
-// SDK 16.4's availability.h does not know the word, and expanding it there is `error: expected ','` on
-// the line after the macro's own argument - one error per annotation. Nothing is lost: the annotation
-// marks platforms this port does not build for.
-//
-// The names the port adds beyond the SDK are listed in the delivery for rule R4.
 #if !__has_include(<AVFCore/AVMetrics.h>)
 #ifndef AVMETRICS_H
 #define AVMETRICS_H
@@ -332,7 +316,7 @@ AV_INIT_UNAVAILABLE
 
 NS_ASSUME_NONNULL_END
 
-#endif /* AVMETRICS_H */
+#endif
 
 #else
 #import <AVFCore/AVMetrics.h>

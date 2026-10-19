@@ -1,10 +1,3 @@
-/* Run a model over a flat list of inputs and print its outputs. This is the harness the
- * interpreter is measured with: the numbers it prints are compared with what coremltools' own
- * runtime prints for the same model and the same input.
- *
- *   ml-predict --kind <model>
- *   ml-predict <model> --set <name> <count> <value> ...
- */
 #include "CharonMLModel.h"
 #include "CharonMLPredict.h"
 
@@ -27,8 +20,6 @@ int main(int argc, char **argv)
         if (strcmp(argv[index], "--kind") == 0) {
             want_kind = 1;
         } else if (strcmp(argv[index], "--set") == 0 || strcmp(argv[index], "--setr") == 0) {
-            /* --set gives a flat vector of n values; --setr gives a shape followed by the count
-             * and the values, for the model whose input is a channels-first array. */
             int ranked = strcmp(argv[index], "--setr") == 0;
             const char *name;
             long count, at;

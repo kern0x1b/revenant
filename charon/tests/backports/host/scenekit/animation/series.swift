@@ -1,11 +1,3 @@
-// series <case> : macOS SceneKit's values for one of Telegram's animations on a node or a material property (from
-// PremiumStarComponent and PremiumCoinComponent), sampled every ~4 ms (so that a straight line between samples cuts no corner of the curve by more
-// than the tolerance of compare.py) by rendering: the presentation node's value,
-// or for a material property the pixel (4, 4) of a constant-lit quad whose image's red is u and green is v; with the
-// delegate's calls and animationKeys. Times are from the first frame after the add; abs= is media time. The -mutant
-// cases are the same animations a little wrong (a duration 5% long, a spring 22 stiff instead of 21): the negative
-// control of tests/backports/host/scenekit/animation/compare.py. tests/backports/device/scenekit-animation.m runs the
-// same cases through the port.
 import SceneKit
 import Metal
 import AppKit
@@ -33,9 +25,6 @@ func gradient() -> CGImage {
 node.geometry = plane
 let material = SCNMaterial(); plane.materials = [material]
 material.lightingModel = .constant
-// gradient and shimmer: the image as an MTLTexture holding the levels of srgblevels.swift's rule, which SceneKit
-// samples as they are under mipFilter linear (at the cases' constant scale, lambda 5, the same level alone as nearest);
-// the -metal cases: the image itself, whose levels SceneKit has Metal make (the release's own bytes, reported beside)
 let image: Any = which.hasSuffix("-metal") ? gradient() : { () -> MTLTexture in
     var bytes = [UInt8](repeating: 0, count: 256 * 256 * 4)
     gradient().dataProvider.map { CFDataGetBytes($0.data!, CFRange(location: 0, length: bytes.count), &bytes) }
@@ -51,7 +40,6 @@ scene.rootNode.addChildNode(node)
 let r = SCNRenderer(device: MTLCreateSystemDefaultDevice(), options: nil); r.scene = scene; r.pointOfView = cam
 let delegate = Delegate()
 var lastPixel = [Int](repeating: 0, count: 4)
-// SceneKit evaluates the animations at the time a frame is rendered for; each sample records exactly that time
 var renderedAt: CFTimeInterval = 0
 func render() {
     renderedAt = CACurrentMediaTime()
@@ -71,7 +59,6 @@ render()
 let addedAt = CACurrentMediaTime()
 switch which {
 case "euler-basic", "euler-basic-mutant":
-    // PremiumStarComponent tap: 0.25 s ease-out, fill forwards, the model set to the target right after
     let a = CABasicAnimation(keyPath: "eulerAngles")
     a.fromValue = NSValue(scnVector3: SCNVector3(0, 0, 0)); a.toValue = NSValue(scnVector3: SCNVector3(0.3, -0.5, 0))
     a.duration = which.hasSuffix("mutant") ? 0.2625 : 0.25; a.timingFunction = CAMediaTimingFunction(name: .easeOut); a.fillMode = .forwards; a.delegate = delegate
@@ -79,7 +66,6 @@ case "euler-basic", "euler-basic-mutant":
     sample = { let e = node.presentation.eulerAngles; return String(format: "%.4f %.4f %.4f model %.4f", e.x, e.y, e.z, node.eulerAngles.x) }
     duration = 0.5
 case "euler-spring", "euler-spring-mutant":
-    // PremiumStarComponent: the spring back from the tap target, the model set to the initial value first
     node.eulerAngles = SCNVector3(0, 0, 0)
     let a = CASpringAnimation(keyPath: "eulerAngles")
     a.fromValue = NSValue(scnVector3: SCNVector3(0.3, -0.5, 0)); a.toValue = NSValue(scnVector3: SCNVector3(0, 0, 0))
@@ -88,7 +74,6 @@ case "euler-spring", "euler-spring-mutant":
     sample = { let e = node.presentation.eulerAngles; return String(format: "%.4f %.4f %.4f", e.x, e.y, e.z) }
     duration = a.duration + 0.3
 case "euler-spring-velocity":
-    // PremiumStarComponent pan end: velocity-driven spring to a full turn
     let a = CASpringAnimation(keyPath: "eulerAngles")
     a.fromValue = NSValue(scnVector3: SCNVector3(0, 0.4, 0)); a.toValue = NSValue(scnVector3: SCNVector3(0, 2 * Float.pi, 0))
     a.mass = 1; a.stiffness = 21; a.damping = 5.8; a.duration = a.settlingDuration * 0.75; a.initialVelocity = 1.7; a.delegate = delegate
@@ -123,7 +108,6 @@ case "shimmer", "shimmer-metal":
     sample = { "pixel \(lastPixel[0]) \(lastPixel[1])" }
     duration = 9.0
 case "opacity-later":
-    // the appearance flash: begins 0.1 s after now in media time, fades over 0.7 s, stays, then its delegate fires
     let a = CABasicAnimation(keyPath: "opacity")
     a.beginTime = addedAt + 0.1; a.duration = 0.7; a.fromValue = 1.0; a.toValue = 0.0
     a.fillMode = .forwards; a.isRemovedOnCompletion = false; a.delegate = delegate

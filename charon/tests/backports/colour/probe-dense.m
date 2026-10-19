@@ -1,21 +1,3 @@
-// probe-dense.m - the host's own AXNameFromColor over a dense sample, and what it answers.
-//
-// This is the fit set: a regular grid over sRGB, random colours, the named edge cases, and the
-// neighbours of every grid point whose answer differs from one of its six neighbours, which is where a
-// decision boundary is.
-//
-// There is no held-out set, and there is no probe-heldout.m. The rule is not identified - the two models
-// the fit tried are both measured and both wrong - so nothing has been measured against a sample the
-// rule did not see, and a held-out probe written before the rule would be a file that asserts nothing.
-// What is owed, and what run.sh's known-answer check holds in the meantime, is in this directory's README.
-//
-// The function is the host's, named at compile time and resolved through dlsym before anything is
-// asked of it, so a reader can see which implementation answered - the same care the braille map's
-// probe needed after the two of them turned out to be one class in one binary.
-//
-// Nothing is read out of the framework's binary or its resources: every name here is the string the
-// function returned, for a colour this file makes.
-
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import <dlfcn.h>
@@ -34,8 +16,6 @@ static NSString *nameFor(unsigned r, unsigned g, unsigned b)
     return name ?: @"(nil)";
 }
 
-// A deterministic generator, so the fit set and the held-out set are the same set on every machine
-// and a disagreement is a fact about the rule rather than about the draw.
 static uint64_t state;
 static uint32_t next(void)
 {
@@ -61,8 +41,6 @@ int main(int argc, char **argv)
         if (!file) { perror("fopen"); return 1; }
         fprintf(file, "#probe\tAXNameFromColor in %s\tseed %s\n", info.dli_fname, argv[2]);
 
-        // A regular 17x17x17 grid over sRGB. 17 points a side, so every grid point is sixteen steps
-        // from its neighbour and the middle of the cube is on it.
         NSMutableDictionary<NSString *, NSString *> *first = [NSMutableDictionary dictionary];
         NSMutableSet<NSString *> *vocabulary = [NSMutableSet set];
         const unsigned side = 17;
@@ -79,8 +57,6 @@ int main(int argc, char **argv)
                                                 rgb[0], rgb[1], rgb[2]]];
                     grid++;
                 }
-        // The neighbours of every grid point whose answer differs from one of its six neighbours: a
-        // decision boundary is where two names meet, and those are the points the fit needs.
         for (unsigned r = 0; r < side; r++)
             for (unsigned g = 0; g < side; g++)
                 for (unsigned b = 0; b < side; b++) {
@@ -106,7 +82,6 @@ int main(int argc, char **argv)
                                 }
                     }
                 }
-        // Random colours, from the same generator the held-out set uses and a different seed.
         unsigned random = 0;
         for (unsigned i = 0; i < 20000; i++) {
             unsigned rgb[3] = {next() & 0xFF, next() & 0xFF, next() & 0xFF};
@@ -115,7 +90,6 @@ int main(int argc, char **argv)
             fprintf(file, "r\t%u\t%u\t%u\t%s\n", rgb[0], rgb[1], rgb[2], name.UTF8String);
             random++;
         }
-        // The edge cases, which are where a nearest-prototype rule and a lookup disagree first.
         struct { unsigned r, g, b; } edges[] = {
             {0,0,0},{255,255,255},{128,128,128},{200,200,200},{1,1,1},{254,254,254},
             {255,0,0},{0,255,0},{0,0,255},{255,255,0},{0,255,255},{255,0,255},

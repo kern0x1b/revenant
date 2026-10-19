@@ -1,16 +1,3 @@
-/* gen.c - writes an updatable Core ML model and its training data, for the update differential.
- *
- * The network is one convolution (3x3, valid padding, two output channels, a bias), a flatten, and an
- * inner product to three values, with a mean squared error loss of "y" against the training feature "t".
- * The optimiser, its hyperparameters, the epochs and the mini-batch size come from the command line, so
- * one generator makes the SGD and the Adam cases. Shuffle is off, so the data is used in the order the file
- * holds it; the seed is written as the specification's own field and has no effect with shuffle off.
- *
- * usage: gen OUTDIR sgd|adam LEARNING_RATE MOMENTUM_OR_BETA1 BETA2 EPS MINIBATCH EPOCHS SAMPLES SEED
- *
- * It writes OUTDIR/model.mlmodel (the container, written here from the field numbers CoreML.proto gives),
- * OUTDIR/input.f32 (SAMPLES * 36 float32, the 1x6x6 images) and OUTDIR/target.f32 (SAMPLES * 3 float32).
- * This file is the test's own description of the model; the host and the port are both held to it. */
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -94,7 +81,6 @@ static void f_varints_packed(buf *b, int field, const uint64_t *v, size_t count)
     free(inner.p);
 }
 
-/* DoubleParameter and Int64Parameter and BoolParameter carry their value as defaultValue, field 1. */
 static void double_parameter(buf *out, int field, double v)
 {
     buf p = {0, 0, 0};
@@ -111,7 +97,6 @@ static void int_parameter(buf *out, int field, uint64_t v)
     free(p.p);
 }
 
-/* A weight tensor: its floats, and isUpdatable (WeightParams field 50). */
 static void weights(buf *out, int field, const float *v, size_t count)
 {
     buf w = {0, 0, 0};
@@ -121,12 +106,11 @@ static void weights(buf *out, int field, const float *v, size_t count)
     free(w.p);
 }
 
-/* A feature description: its name and a float32 multi-array of the given shape. */
 static void feature(buf *out, int field, const char *name, const uint64_t *shape, size_t rank)
 {
     buf array = {0, 0, 0}, type = {0, 0, 0}, feat = {0, 0, 0};
     f_varints_packed(&array, 1, shape, rank);
-    f_varint(&array, 2, 65568); /* ArrayFeatureType.ArrayDataType FLOAT32 */
+    f_varint(&array, 2, 65568);
     f_bytes(&type, 5, &array);
     f_string(&feat, 1, name);
     f_bytes(&feat, 3, &type);
@@ -138,7 +122,6 @@ static void feature(buf *out, int field, const char *name, const uint64_t *shape
 
 static uint64_t rng_state;
 
-/* A number in [-0.5, 0.5): a 64-bit linear congruence, which is the same on every machine. */
 static float next_unit(void)
 {
     rng_state = rng_state * 6364136223846793005ULL + 1442695040888963407ULL;
@@ -159,8 +142,6 @@ int main(int argc, char **argv)
         fprintf(stderr, "usage: gen OUTDIR sgd|adam LEARNING_RATE MOMENTUM_OR_BETA1 BETA2 EPS MINIBATCH EPOCHS SAMPLES SEED [CONV_OUTPUT_CHANNELS]\n");
         return 2;
     }
-    /* the convolution's output channels: two unless the caller asks for another count, which the oversized-model
-     * refusal test does, with the weights of two channels left as they are */
     uint64_t conv_out = argc == 12 ? (uint64_t)atoll(argv[11]) : 2;
     const char *outdir = argv[1];
     int adam = strcmp(argv[2], "adam") == 0;
@@ -173,15 +154,12 @@ int main(int argc, char **argv)
     size_t samples = (size_t)atoll(argv[9]);
     rng_state = (uint64_t)atoll(argv[10]) * 2654435761ULL + 1;
 
-    /* The updatable tensors, in their CoreML layouts: the convolution's weights are [out, in, kh, kw],
-     * the inner product's are [out, in] row by row. */
     float conv_w[2 * 1 * 3 * 3], conv_b[2], ip_w[3 * 32], ip_b[3];
     for (size_t i = 0; i < sizeof conv_w / sizeof conv_w[0]; i++) conv_w[i] = 0.5f * next_unit();
     for (size_t i = 0; i < 2; i++) conv_b[i] = 0.2f * next_unit();
     for (size_t i = 0; i < sizeof ip_w / sizeof ip_w[0]; i++) ip_w[i] = 0.4f * next_unit();
     for (size_t i = 0; i < 3; i++) ip_b[i] = 0.2f * next_unit();
 
-    /* conv: 1x6x6 -> 2x4x4 */
     buf conv = {0, 0, 0};
     f_varint(&conv, 1, conv_out);
     f_varint(&conv, 2, 1);
@@ -199,7 +177,6 @@ int main(int argc, char **argv)
     f_varint(&layer_conv, 10, 1);
     f_bytes(&layer_conv, 100, &conv);
 
-    /* flatten, channel first: 2x4x4 -> 32 */
     buf flat = {0, 0, 0};
     f_varint(&flat, 1, 0);
     buf layer_flat = {0, 0, 0};
@@ -208,7 +185,6 @@ int main(int argc, char **argv)
     f_string(&layer_flat, 3, "f");
     f_bytes(&layer_flat, 301, &flat);
 
-    /* inner product: 32 -> 3 */
     buf ip = {0, 0, 0};
     f_varint(&ip, 1, 32);
     f_varint(&ip, 2, 3);
@@ -222,7 +198,6 @@ int main(int argc, char **argv)
     f_varint(&layer_ip, 10, 1);
     f_bytes(&layer_ip, 140, &ip);
 
-    /* the loss: mean squared error of y against t */
     buf mse = {0, 0, 0};
     f_string(&mse, 1, "y");
     f_string(&mse, 2, "t");
@@ -230,7 +205,6 @@ int main(int argc, char **argv)
     f_string(&loss, 1, "mse");
     f_bytes(&loss, 11, &mse);
 
-    /* the optimiser: SGD with a momentum, or Adam with beta1, beta2 and eps */
     buf optimiser = {0, 0, 0};
     buf opt = {0, 0, 0};
     double_parameter(&opt, 1, learning_rate);
@@ -246,7 +220,6 @@ int main(int argc, char **argv)
     }
     free(opt.p);
 
-    /* the update parameters of the network */
     buf update = {0, 0, 0};
     f_bytes(&update, 1, &loss);
     f_bytes(&update, 2, &optimiser);
@@ -254,14 +227,12 @@ int main(int argc, char **argv)
     { buf shuffle = {0, 0, 0}; f_varint(&shuffle, 1, 0); f_bytes(&update, 10, &shuffle); free(shuffle.p); }
     int_parameter(&update, 20, 7);
 
-    /* the network: its layers, then its update parameters */
     buf network = {0, 0, 0};
     f_bytes(&network, 1, &layer_conv);
     f_bytes(&network, 1, &layer_flat);
     f_bytes(&network, 1, &layer_ip);
     f_bytes(&network, 10, &update);
 
-    /* the model's description: the image input, the output and the training target */
     uint64_t in_shape[3] = {1, 6, 6}, out_shape[1] = {3};
     buf description = {0, 0, 0};
     feature(&description, 1, "x", in_shape, 3);
@@ -279,7 +250,6 @@ int main(int argc, char **argv)
     snprintf(path, sizeof path, "%s/model.mlmodel", outdir);
     write_file(path, model.p, model.n);
 
-    /* the data: samples of the image and of the target, from the same generator */
     float *input = malloc(samples * 36 * sizeof(float));
     float *target = malloc(samples * 3 * sizeof(float));
     for (size_t i = 0; i < samples * 36; i++) input[i] = next_unit();

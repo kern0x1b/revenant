@@ -1,4 +1,3 @@
-// Pixel probes of SceneKit's lighting on macOS: one quad facing an orthographic camera, one light.
 import SceneKit
 import AppKit
 import Metal
@@ -41,7 +40,6 @@ for t in [0.9, 1.1, 1.25, 1.35] {
     for rough in [0.2, 0.45, 0.8] {
         for (met, alb) in [(0.0, 0.0), (0.0, 0.5), (1.0, 0.5), (0.45, 0.8)] {
             for la in [-0.4, 0.0, 0.4, 0.8] {
-                // light rotated about x by (t + la) so it sweeps around the tilted surface normal
                 let v = probe { s, m in m.lightingModel = .physicallyBased; m.diffuse.contents = gray(alb); m.metalness.contents = met; m.roughness.contents = rough; light(s, .directional, 250, .white, euler: SCNVector3(Float(t + la), 0, 0)) }
                 print("graze tilt=\(t) rough=\(rough) met=\(met) alb=\(alb) la=\(la) \(v[0])")
             }

@@ -3,15 +3,6 @@
 #include <objc/runtime.h>
 #include <stdio.h>
 
-/* One reader, two binaries, the shape the NEDNSSettings slice established: Apple's framework alone on
-   the host side, the port's objects with Apple's framework *not linked* on the port side, and a dladdr
-   line per class so nothing can be read as the port's answer when Apple's is what answered.
-
-   Every property name of these six classes that the host's own NetworkExtension carries is comparable,
-   and the run measures that rather than assuming it: the header oracle is only used for the two names
-   the 26.2 header marks API_UNAVAILABLE on every platform, which Apple's class therefore cannot answer.
-   The two IPv6 class methods fall into that group, and tests/backports/host/netext-proxy/run.sh checks
-   them against this package's own header instead. */
 #ifdef HOST_SIDE
 #import <NetworkExtension/NetworkExtension.h>
 #else
@@ -21,8 +12,7 @@
 static void emit(const char *name, const char *value)
 {
     printf("%s\t%s\n", name, value ? value : "(nil)");
-    fflush(stdout);   /* the harness reads a file, where stdout is fully buffered and a crash would
-                          take every line printed so far with it */
+    fflush(stdout);
 }
 
 static void emit_object(const char *name, id value)
@@ -30,9 +20,6 @@ static void emit_object(const char *name, id value)
     emit(name, value ? "an object" : "(nil)");
 }
 
-/* An array, with what is in it. "an array" is not an answer a mutation can move: a planted value and
-   the value it replaced both print "an array", so every mutation of a collection went unnoticed until
-   this printed the count and the elements. */
 static void emit_array(const char *name, id value)
 {
     if (!value) {
@@ -42,9 +29,6 @@ static void emit_array(const char *name, id value)
     NSArray *array = value;
     NSMutableArray *parts = [NSMutableArray array];
     for (id element in array) {
-        /* A value's own text, and for anything else only its class: an object's description carries its
-           address, which is different in every process and would make the comparison a comparison of
-           addresses. The count and the values are what a mutation of a collection moves. */
         if ([element isKindOfClass:[NSString class]] || [element isKindOfClass:[NSNumber class]]) {
             [parts addObject:[element description]];
         } else {
@@ -55,8 +39,6 @@ static void emit_array(const char *name, id value)
                  [parts componentsJoinedByString:@","]]).UTF8String);
 }
 
-/* A value the caller reads back, as its own text: what a property holds is the answer, and "an object"
-   is not it. */
 static void emit_value(const char *name, id value)
 {
     emit(name, value ? [[value description] UTF8String] : "(nil)");
@@ -73,11 +55,6 @@ static void prove(NSString *label, Class cls, SEL selector)
     IMP imp = m ? method_getImplementation(m) : NULL;
     Dl_info info;
     memset(&info, 0, sizeof info);
-    /* The proof, stated plainly: dladdr fills dli_fname or it does not, and either way the answer is
-       written down rather than summarised. A method in the dyld shared cache is Apple's, and the path
-       it reports is the cache's own - which is the strongest statement this proof can make: the
-       implementation is not in this process's image at all. An unresolved one is printed as
-       unresolved, and the harness fails on it rather than reading a green verdict out of an empty. */
     const char *where;
     if (!imp) {
         where = "no IMP: the class does not carry the selector in this binary";
@@ -164,16 +141,11 @@ int main(void)
         emit_value("NEIPv6Route.destinationNetworkPrefixLength", [freshRoute6 valueForKey:@"destinationNetworkPrefixLength"]);
         emit_object("NEIPv6Route.gatewayAddress", [freshRoute6 valueForKey:@"gatewayAddress"]);
 
-        /* the IPv6 default route, which is a fixed answer and the one place the port guessed: the header
-           only says "the route that matches everything", and the host says what its own object is */
         id default6 = [route6 performSelector:@selector(defaultRoute)];
         emit_value("NEIPv6Route.defaultRoute.destinationAddress", [default6 valueForKey:@"destinationAddress"]);
         emit_value("NEIPv6Route.defaultRoute.prefixLength", [default6 valueForKey:@"destinationNetworkPrefixLength"]);
         emit_object("NEIPv6Route.defaultRoute.gatewayAddress", [default6 valueForKey:@"gatewayAddress"]);
 
-        /* the two class methods the 26.2 header marks API_UNAVAILABLE everywhere: Apple's class does not
-           answer them, so what is checked is that the port's objects do, and that they answer the empty
-           arrays their read-only properties answer */
         id automatic = [v6 performSelector:@selector(settingsWithAutomaticAddressing)];
         id linkLocal = [v6 performSelector:@selector(settingsWithLinkLocalAddressing)];
         emit_object("NEIPv6Settings.settingsWithAutomaticAddressing", automatic);
@@ -182,13 +154,9 @@ int main(void)
         emit_object("NEIPv6Settings.settingsWithLinkLocalAddressing", linkLocal);
         emit_array("NEIPv6Settings.linkLocal.addresses", [linkLocal valueForKey:@"addresses"]);
 
-        /* and the answers a caller can change, which is what makes them state rather than a constant */
         NEProxySettings *filled = [[NEProxySettings alloc] init];
         [filled setHTTPEnabled:YES];
         [filled setExceptionList:@[@"example.com"]];
-        /* the value, not the pointer: `? YES : NO` on an NSNumber is a test of whether it is there, and
-           that made this line print YES for a NO, which is how the mutation that inverts the setter went
-           unnoticed */
         emit_bool("roundTrip.HTTPEnabled", [[filled valueForKey:@"HTTPEnabled"] boolValue] ? YES : NO);
         [filled setValue:@[@"planted.example"] forKey:@"matchDomains"];
         emit_array("roundTrip.matchDomains", [filled valueForKey:@"matchDomains"]);

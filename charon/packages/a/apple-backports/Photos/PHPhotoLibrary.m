@@ -15,23 +15,6 @@ static void charon_deliver_authorization(void (^handler)(PHAuthorizationStatus s
 
 @implementation PHPhotoLibrary
 
-// Both are dynamic, and the second one is the reason this line is worth reading.
-//
-// currentChangeToken is of iOS 16 and the port does not carry it (registry/Photos/ios8.json), so the
-// class declares the property the header declares and answers no selector.
-//
-// unavailabilityReason is of iOS 13 and IS implemented, in PHPhotoLibraryAvailability13.m. Leaving it
-// off this line makes clang auto-synthesize it here: a `_unavailabilityReason` instance variable, a
-// getter, and a property the class claims. The category's getter then overrides that one at link time,
-// which is what the build printed --
-//   ld: warning: method '-unavailabilityReason' in category from .../17.o overrides method from class
-//       in .../16.o
-//   PHPhotoLibraryAvailability13.m:88: warning: category is implementing a method which will also be
-//       implemented by its primary class [-Wobjc-protocol-method-implementation]
-// -- and which worked only because ld64 merges a category over the class in the same image. That is a
-// warning on every build and an override whose winner is the linker's, not the runtime's: a subclass
-// would resolve the class's own nil-returning getter ahead of the category's. Measured on 2026-10-01,
-// building the four programs for the device.
 @dynamic currentChangeToken, unavailabilityReason;
 
 + (PHPhotoLibrary *)sharedPhotoLibrary
@@ -72,9 +55,6 @@ static void charon_deliver_authorization(void (^handler)(PHAuthorizationStatus s
     }];
 }
 
-// The release says a change of the library with ALAssetsLibraryChangedNotification, posted by the
-// ALAssetsLibrary the port reads through; each observer is told on a serial queue off the main thread,
-// and it is held weakly, as the library of iOS 8 holds it (facts/Photos/Changes.md).
 - (void)registerChangeObserver:(id<PHPhotoLibraryChangeObserver>)observer
 {
     @synchronized(self) {
@@ -99,8 +79,6 @@ static void charon_deliver_authorization(void (^handler)(PHAuthorizationStatus s
     }
 }
 
-// Every notification is passed on: 6.1.3 posts an empty user info for a write of the application itself,
-// a real change, and the change reads again whatever it is asked about.
 - (void)charon_libraryChanged:(NSDictionary *)userInfo
 {
     NSArray *observers;

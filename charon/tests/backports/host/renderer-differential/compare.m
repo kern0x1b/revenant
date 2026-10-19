@@ -1,21 +1,7 @@
 #import <UIKit/UIKit.h>
 
-// The renderer's five properties and its one arithmetic question, asked of the system's own
-// UITextDragPreviewRenderer and of this port's, over the same laid-out text, in one process.
-//
-// The port's class is compiled under a second name (see the -D in the build), so both answers are
-// live at once: UITextDragPreviewRenderer is the system's and CharonPortTextDragPreviewRenderer is
-// the port's. The same cases run through each, and every answer is compared as it is produced, so a
-// disagreement is named rather than found later.
-//
-// The text is laid out by the release's own layout manager in both halves, so the glyph positions are
-// the release's and the only thing compared is the renderer's arithmetic over them.
-
 typedef void (^Answer)(NSString *name, NSString *value);
 
-// The port's renderer, which the build compiles under this name from its own file alone. It is
-// reached by name at run time, so this translation unit never sees the rename and the class it
-// names is the one that is actually linked.
 static NSString *const kPortRendererName = @"CharonHostCopyTextDragPreviewRenderer";
 
 static NSString *CharonRect(CGRect rect)
@@ -24,9 +10,6 @@ static NSString *CharonRect(CGRect rect)
             rect.origin.x, rect.origin.y, rect.size.width, rect.size.height];
 }
 
-// Which of the three ways a rectangle can be nothing it is: null, empty, or neither. A null rectangle
-// has infinite origin and zero size; an empty one is all zeros. The adjust question turns on which of
-// them the renderer leaves alone, so the record says which.
 static NSString *CharonShape(CGRect rect)
 {
     return [NSString stringWithFormat:@"null=%d empty=%d",
@@ -35,9 +18,6 @@ static NSString *CharonShape(CGRect rect)
 
 static NSLayoutManager *CharonMakeLayout(void)
 {
-    // Appended rather than assigned: a text storage that is set an attributed string in one go is
-    // fine, but appending is the form both runtimes take without complaint, and the fonts are
-    // checked because a nil attribute value is what a text storage refuses hardest.
     UIFont *body = [UIFont systemFontOfSize:14];
     UIFont *bold = [UIFont boldSystemFontOfSize:20];
     if (!body || !bold)
@@ -54,15 +34,11 @@ static NSLayoutManager *CharonMakeLayout(void)
     NSTextContainer *container = [[NSTextContainer alloc] initWithSize:CGSizeMake(200, 1000)];
     container.lineFragmentPadding = 5;
     NSLayoutManager *layout = [[NSLayoutManager alloc] init];
-    // One addTextContainer: with the container, not a nil one and then a second: a nil container is
-    // what -insertTextContainer:atIndex: refuses, and the throw names this line.
     [layout addTextContainer:container];
     [layout ensureLayoutForTextContainer:container];
     return layout;
 }
 
-// One line, three lines, and a range starting mid-line rather than at a line's origin, over both
-// unify settings: the cases where a rect is zero, where the body is empty and where it is not.
 static NSArray<NSValue *> *CharonCases(void)
 {
     NSMutableArray *cases = [NSMutableArray array];
@@ -72,9 +48,6 @@ static NSArray<NSValue *> *CharonCases(void)
     return cases;
 }
 
-// The two renderers answer the same questions, and the questions are named by a protocol both
-// already conform to in their own right -- the system's by the SDK and the port's by the file it
-// implements -- so one body of questions can be asked of either.
 @protocol CharonAsksRenderer <NSObject>
 @property (nonatomic, readonly) CGRect firstLineRect;
 @property (nonatomic, readonly) CGRect bodyRect;
@@ -129,8 +102,6 @@ int main(void)
                 CharonAsk(system, tag, ^(NSString *n, NSString *v) {
                     host[n] = v;
                 });
-                // The port's class, by name: this translation unit is compiled without the rename,
-                // so the name it gives is the one that is actually linked in port.o.
                 Class portClass = NSClassFromString(kPortRendererName);
                 id ours = [[portClass alloc] initWithLayoutManager:portLayout range:range unifyRects:unify.boolValue];
                 if (ours)
@@ -140,13 +111,9 @@ int main(void)
             }
         }
 
-        // The third shape, handed in directly: a null rectangle is a rectangle the caller has not
-        // filled in, and the renderer is asked about it so that CGRectIsNull and CGRectIsEmpty are
-        // told apart on the record rather than only the empty one being seen.
         host[@"nullrect.shape"] = CharonShape(CGRectNull);
         port[@"nullrect.shape"] = host[@"nullrect.shape"];
 
-        // The two answers a renderer with nothing to measure gives, which must not be a picture.
         UITextDragPreviewRenderer *systemEmpty = [[UITextDragPreviewRenderer alloc]
             initWithLayoutManager:nil range:NSMakeRange(0, 10) unifyRects:NO];
         host[@"empty.firstLineRect"] = CharonRect(systemEmpty.firstLineRect);

@@ -61,8 +61,6 @@ static UIConfigurationColorTransformer charon_alpha_block(CGFloat alpha)
     UIViewContentMode _imageContentMode;
 }
 
-// The image is held as given, not copied, and the content mode is kept as set; a configuration with no image answers nil and mode 0,
-// which is what the host answers (tests/backports/host/storage-config). The archive does not carry them.
 - (UIImage *)image
 {
     return _image;
@@ -103,19 +101,6 @@ static UIConfigurationColorTransformer charon_alpha_block(CGFloat alpha)
     return [self charon_configurationWithStyle:CharonBackgroundStyleListPlainCell];
 }
 
-// The 18.0 spelling of the cell style this file already has.  Measured: the 16.4 SDK's own
-// UIBackgroundConfiguration.h declares listPlainCellConfiguration and does NOT declare listCellConfiguration,
-// so this is a new name and not a rename.  CharonBackgroundStyleListCell is a style the drawing path already
-// carries - -initCharonWithStyle: gives it the same systemBackground colour as ListPlainCell (:144-145),
-// -charon_styleColor: returns the same colour for it (:366-367) and -updatedConfigurationForState: counts it
-// plain (:382) - and UICollectionViewListCell.m:40 and :52 already build it.  So the style exists and is used;
-// what 18.0 added is the public door, and this is the one-line shape every other class method here is.
-//
-// NOT listHeaderConfiguration and NOT listFooterConfiguration, and the reason is measured rather than
-// stylistic: this port's nine background styles name headers but no footer at all - ListPlainHeaderFooter,
-// ListGroupedHeaderFooter and ListSidebarHeader, and nothing that is a footer alone (CharonLists.h:21-31).
-// A listHeaderConfiguration would have a style to name and a listFooterConfiguration would not, so the first
-// gets a method and the second keeps its absent row rather than being answered with a header's colours.
 + (instancetype)listCellConfiguration
 {
     return [self charon_configurationWithStyle:CharonBackgroundStyleListCell];

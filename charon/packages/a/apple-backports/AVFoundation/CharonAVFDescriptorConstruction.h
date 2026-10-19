@@ -1,17 +1,3 @@
-// The port's own construction of the configuration and descriptor classes.
-//
-// The same shape as CharonHomeKitConstruction.h and CharonAVMetadataConstruction.h: a method may
-// only assign `self` when it is in the `init` method family, and clang decides that from the
-// attribute and not the spelling, so a port-owned selector needs `objc_method_family(init)` under a
-// name the port owns.
-//
-// **The storage is associated and keyed on a string, not an ivar and not a property.** The classes
-// below belong to the release from their own rung up, and a port may not add an ivar to a release's
-// class - and a property declared in a category cannot be synthesized in the class implementation,
-// which is the error this header's first version produced. So each value is reached through a
-// getter/setter pair implemented with objc_getAssociatedObject, keyed on a string, and the category
-// that carries the members which arrived AFTER the rung reads and writes the same pair. Two files,
-// one value, and no way for them to disagree.
 #ifndef CHARON_AVF_DESCRIPTOR_CONSTRUCTION_H
 #define CHARON_AVF_DESCRIPTOR_CONSTRUCTION_H
 

@@ -1,16 +1,3 @@
-/* descriptor.m - MTLArgumentDescriptor (iOS 11.0), compared member by member with Apple's own object.
- *
- * Four snapshots are compared, as in the other descriptor cases: a fresh descriptor, one with every member set away
- * from its default, a copy of that one, and the set one after the copy was taken (the copy must not share). Equality
- * and the hash are compared the same way. A disagreement names the member and both values.
- *
- * THE VALIDATOR IS COMPARED IN CHILD PROCESSES. Apple's validator aborts the process on a data type or access it does
- * not accept, so each value is tried in a fork of this process, on Apple's object and on the port's, and the exit
- * status of the two must agree for every value from 0 to 255 (data type) and 0 to 4 (access). A child that aborted is
- * not a failure of this case, it is the answer.
- *
- * NO DEVICE IS CREATED. An argument descriptor asks a device nothing.
- */
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #include <sys/wait.h>
@@ -38,7 +25,6 @@ static NSDictionary *snapshot(MTLArgumentDescriptor *d)
     return s;
 }
 
-/* Sets every member away from its default. */
 static void setEverything(MTLArgumentDescriptor *d)
 {
     d.dataType = MTLDataTypeTexture;
@@ -62,7 +48,6 @@ static void compareSides(MTLArgumentDescriptor *apple, MTLArgumentDescriptor *po
     }
 }
 
-/* Runs the block in a child process; returns the child's status (0 for a clean exit, the signal number for a crash). */
 static int inChild(void (^block)(void))
 {
     fflush(stdout);

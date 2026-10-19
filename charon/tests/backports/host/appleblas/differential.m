@@ -1,13 +1,3 @@
-// The port's AppleBLAS8.m held against the host's own Accelerate, case by case.
-//
-// C = alpha * op(A) + beta * op(B) in the caller's own layout. The port's two entry points are compiled
-// with their names renamed, so this one can run both on the same inputs and compare every element of C.
-//
-// A bad parameter ends the process - that is what the release's own cblas_xerbla does, and what the
-// host's own accelerated BLAS does too (measured: a child given lda = 1 with m = 2 prints a BLAS error
-// and exits with status 255) - so each of those cases runs in a child and the two messages and the two
-// statuses are compared there.
-
 #import <Accelerate/Accelerate.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,15 +38,6 @@ static int close_enough(double x, double y)
     return difference <= 1e-6 * scale;
 }
 
-// One case, run through both. C starts as the same bytes on both sides, so a call that reads less than
-// the other - an alpha of zero, an m of zero - shows up as a difference in what was left alone.
-//
-// When both sides are handed the *same* buffer - which fifteen of the eighteen call sites do, to keep the
-// case in one - that is not an oracle at all: the array is compared with itself and any arithmetic that
-// differs on the two sides cancels. So when the two buffers are one, each side gets a copy of it and the
-// comparison is between two different arrays. Measured: with the two sharing one buffer, dropping the
-// multiplication by beta in AppleBLAS8.m leaves the run at 22 checks and 0 failures; with a copy each, the
-// same mutation fails.
 static void same(const char *name, int is_double, int order, int trans_a, int trans_b, int m, int n, double alpha,
                  const void *a, int lda, double beta, const void *b, int ldb, const void *before, void *mine, void *theirs,
                  int ldc, int count)
@@ -104,10 +85,6 @@ static void same(const char *name, int is_double, int order, int trans_a, int tr
     report(1, name, "");
 }
 
-// A case where the process must not survive: a child runs each side, and the two statuses and the two
-// messages are what is compared. The two messages differ in wording - the release's public cblas_xerbla
-// against the private handler inside Apple's own accelerated BLAS - so what is compared is that both
-// ended the same way and that both named the routine.
 static int run_child(void (*body)(void), char *message, size_t room)
 {
     int pipe_fds[2];
@@ -223,7 +200,6 @@ int main(void)
     bad_a = a;
     bad_b = b;
 
-    // row major, no transpose, in place over B
     memcpy(start, b, sizeof start);
     same("row major 2x3, 2*A + 1*B, in place over B", 0, CblasRowMajor, CblasNoTrans, CblasNoTrans, 2, 3, 2.0, a, 3, 1.0, b,
          3, start, start, start, 3, 6);
@@ -234,7 +210,6 @@ int main(void)
         same("row major 2x3, 2*A + 1*B, C separate from B", 0, CblasRowMajor, CblasNoTrans, CblasNoTrans, 2, 3, 2.0, a,
              3, 1.0, b, 3, b, mine, theirs, 3, 6);
     }
-    // a padded row stride, and the padding left alone
     {
         float mine[8], theirs[8];
         memset(mine, 0, sizeof mine);
@@ -242,7 +217,6 @@ int main(void)
         same("row major 2x3 with a row stride of 4", 0, CblasRowMajor, CblasNoTrans, CblasNoTrans, 2, 3, 2.0, a, 3, 1.0, b, 3,
              mine, mine, theirs, 4, 8);
     }
-    // transposed operands
     memcpy(start, b, sizeof start);
     same("row major 3x2 with A transposed", 0, CblasRowMajor, CblasTrans, CblasNoTrans, 3, 2, 1.0, a, 3, 1.0, b, 2, start,
          start, start, 2, 6);
@@ -252,14 +226,12 @@ int main(void)
     memcpy(start, b, sizeof start);
     same("row major 3x2 with both transposed", 0, CblasRowMajor, CblasTrans, CblasTrans, 3, 2, 1.0, a, 3, 1.0, b, 3,
          start, start, start, 3, 6);
-    // column major, in its own layout
     memcpy(start, b, sizeof start);
     same("column major 3x2", 0, CblasColMajor, CblasNoTrans, CblasNoTrans, 3, 2, 1.0, a, 3, 1.0, b, 3, start, start,
          start, 3, 6);
     memcpy(start, b, sizeof start);
     same("column major 3x2 with A transposed", 0, CblasColMajor, CblasTrans, CblasNoTrans, 3, 2, 1.0, a, 2, 1.0, b, 3,
          start, start, start, 3, 6);
-    // an operand that is not read at all
     memcpy(start, b, sizeof start);
     same("alpha zero with A NULL", 0, CblasRowMajor, CblasNoTrans, CblasNoTrans, 2, 3, 0.0, NULL, 3, 1.0, b, 3, start,
          start, start, 3, 6);
@@ -269,14 +241,12 @@ int main(void)
     memcpy(start, b, sizeof start);
     same("alpha and beta zero with both NULL", 0, CblasRowMajor, CblasNoTrans, CblasNoTrans, 2, 3, 0.0, NULL, 3, 0.0,
          NULL, 3, start, start, start, 3, 6);
-    // nothing to do
     memcpy(start, a, sizeof start);
     same("m of zero leaves C alone", 0, CblasRowMajor, CblasNoTrans, CblasNoTrans, 0, 3, 1.0, a, 3, 1.0, b, 3, start,
          start, start, 3, 6);
     memcpy(start, a, sizeof start);
     same("n of zero leaves C alone", 0, CblasRowMajor, CblasNoTrans, CblasNoTrans, 2, 0, 1.0, a, 3, 1.0, b, 3, start,
          start, start, 3, 6);
-    // in place, which the header allows when the pointers and the leading dimensions all match
     memcpy(start, a, sizeof start);
     same("in place over A, square", 0, CblasRowMajor, CblasNoTrans, CblasNoTrans, 2, 2, 2.0, a, 2, 0.0, NULL, 2, start,
          start, start, 2, 4);
@@ -288,7 +258,6 @@ int main(void)
         same("in place over A and B at once, square", 0, CblasRowMajor, CblasNoTrans, CblasNoTrans, 2, 2, 1.0, square, 2,
              1.0, square, 2, square, mine, theirs, 2, 4);
     }
-    // the double version
     memcpy(startd, bd, sizeof startd);
     same("double 2x2, 3*A + 0.5*B", 1, CblasRowMajor, CblasNoTrans, CblasNoTrans, 2, 2, 3.0, ad, 2, 0.5, bd, 2, startd,
          startd, startd, 2, 4);
@@ -299,7 +268,6 @@ int main(void)
     same("double 2x2 with A transposed", 1, CblasRowMajor, CblasTrans, CblasNoTrans, 2, 2, 1.0, ad, 2, 1.0, bd, 2, startd,
          startd, startd, 2, 4);
 
-    // a bad parameter, in a child each
     both_end_the_process("a leading dimension too short ends the process", port_bad_lda, host_bad_lda);
     both_end_the_process("a transpose outside the four values ends the process", port_bad_trans, host_bad_trans);
     both_end_the_process("a column-major leading dimension too short ends the process", port_bad_ldb, host_bad_ldb);

@@ -1,26 +1,5 @@
--- gen-constant-cases.lua [--check] - writes cases.m: a declaration and a read for each constant the ladder places and the
--- port defines, so the list cannot go stale against ladder.tsv.
---
---    xmake l gen-constant-cases.lua            writes cases.m
---    xmake l gen-constant-cases.lua --check    says whether the cases.m on disk is what this would write; exits 1 when not
---
--- THE CONSTANT LIST WAS HAND-COPIED into cases.m once, and a hand-copied list goes stale: twelve kVTProfileLevel constants
--- the port must carry were measured by the ladder and nothing asked the host for them, because cases.m did not name them.
---
--- WHAT IT COVERS, and what it deliberately does not: the list is the constants the ladder PLACES and the port DEFINES. A
--- constant with no rung is not read, because the host's VideoToolbox may not export it and the differential would then
--- compare against a symbol that is not there.
---
--- The two locals in each block are not tidiness, and they are reproduced exactly: -[NSString UTF8String] is
--- NS_RETURNS_INNER_POINTER, and casting the symbol inline inside the brackets makes the compiler read the whole expression as
--- a message to a non-Objective-C pointer. That is twenty errors, so a local of the right type comes first.
---
--- The generated text is kept byte for byte what gen-constant-cases.py wrote, comments included, so the committed cases.m is
--- what this writes.
-
 local lib = import("vtlib", {rootdir = os.scriptdir(), anonymous = true})
 
--- The generated prologue: the text of cases.m above its first declaration, each line ending in a newline.
 local PROLOGUE = [==[
 #import <Foundation/Foundation.h>
 #import <VideoToolbox/VideoToolbox.h>
@@ -40,14 +19,12 @@ local PROLOGUE = [==[
 // and the message on it is what compiles.
 ]==]
 
--- Where the ladder, the objects and the cases live, from this script's own place in the checkout.
 local HERE = os.scriptdir()
 local WORKTREE = path.join(HERE, "..", "..", "..", "..")
 local PACKAGE = path.join(WORKTREE, "packages", "a", "apple-backports", "VideoToolbox")
 local TABLE = path.join(HERE, "ladder.tsv")
 local CASES = path.join(HERE, "cases.m")
 
--- The constants to ask about: the ladder places them, and an object of ours defines them.
 local function wanted()
     local placed, native = {}, {}
     for _, row in ipairs(lib.ladder_rows(lib.read_text(TABLE))) do

@@ -1,18 +1,10 @@
--- The stubs of the trace layer for one framework: which declared members get one, the members left out with their reasons, and
--- the text of each stub. A stub logs its selector once to stderr, returns the zero of its return type, and sets an NSError **
--- parameter it names to an error in the framework's own domain. Its block parameters are not invoked. The inputs are the typed
--- fields of the shard (type, params, attrs: decl.lua reads them) and the selector of each spec row's api; the declaration text of a
--- stub is composed here from those fields (signature), and no declaration text is read.
-
 local decl = import("decl", {anonymous = true})
 local surface = import("surface", {anonymous = true})
 local order = import("order", {anonymous = true})
 
 
--- Name prefixes of the macros and constants a type can spell: a capitalised word with one of them is not a type it needs.
 local MACRO_PREFIXES = {"NS_", "API_", "CF_"}
 
--- Adds a member to a class, the class taking its place in the order the spec first names it.
 local function add_member(found, cls, member)
     if found.members[cls] == nil then
         found.members[cls] = {}
@@ -29,7 +21,6 @@ local function has_hand(hand, cls, selector)
     return hand[cls] ~= nil and hand[cls][selector] ~= nil
 end
 
--- The capitalised words of the types a member spells that the framework does not declare, sorted (UNDECLARED_CHECK of tools/gen.py@52253c0650).
 local function undeclared_types(text, declared)
     local seen, out = {}, {}
     for word in string.gmatch(text, "[%w_]+") do
@@ -46,13 +37,10 @@ local function undeclared_types(text, declared)
     return out
 end
 
--- A parameter of a method, as its selector part spells it: (TYPE)NAME.
 local function method_parameter(p)
     return "(" .. p.type .. ")" .. p.name
 end
 
--- A parameter of a C function: TYPE NAME, the name inside a block's (^) when the type is one, after the element of an array, and the type
--- alone when it is unnamed.
 local function function_parameter(p)
     if p.name == nil then
         return p.type
@@ -61,7 +49,6 @@ local function function_parameter(p)
     if at then
         return string.sub(p.type, 1, at + 1) .. p.name .. string.sub(p.type, at + 2)
     end
-    -- an array parameter names its element and keeps its brackets after the name ("CGSize name[]")
     local bracket = string.find(p.type, "[", 1, true)
     if bracket then
         return string.sub(p.type, 1, bracket - 1) .. " " .. p.name .. string.sub(p.type, bracket)
@@ -70,9 +57,6 @@ local function function_parameter(p)
     return p.type .. sep .. p.name
 end
 
--- The selector of a method with its parameters: each word of the api's selector with its colon, then its parameter. The words are the
--- api's; the types and the names are the parameters' (the count of the two is checked before a member is kept). A word may be empty
--- (an empty keyword, as in size::format:): its piece is the bare colon, and it takes its parameter all the same.
 local function method_selector(selector, params)
     local pieces = {}
     for piece in string.gmatch(selector, "[^:]*:") do
@@ -84,9 +68,6 @@ local function method_selector(selector, params)
     return table.concat(pieces, " ")
 end
 
--- The declaration text of a member: the head of its stub and its line in a category's @interface. It is composed from the member's
--- typed fields: the kind, the sign of a method (the api's), the selector, the return or property type, and the parameters. C functions
--- take the name, the parameters and the return type; the setter of a property is "- (void)setX:(T)value".
 function signature(m)
     if m.kind == "function" then
         local params = {}
@@ -104,7 +85,6 @@ function signature(m)
     return m.sign .. " (" .. m.type_text .. ")" .. method_selector(m.selector, m.params)
 end
 
--- One spec row of a method or property: the member it gives, or the reason it is left out. The typed fact of the row's api is env.members.
 local function consider_property(r, fact, env, found, skipped, seen)
     local cls = r.cls
     local name = decl.member_name(r.api)
@@ -121,8 +101,6 @@ local function consider_property(r, fact, env, found, skipped, seen)
         return leave_out(skipped, r.api, "type not resolved: " .. type_text)
     end
     local readwrite = not decl.has_attribute(fact.attrs, "readonly")
-    -- a class property ("+" in its api) is a class accessor: its getter and setter take the sign of the api, and a class and an instance
-    -- member may share a selector (the sign is part of the key)
     local sign = string.sub(r.api, 1, 1)
     local key = sign .. cls .. "\t" .. selector
     if seen[key] then
@@ -173,7 +151,6 @@ local function consider_method(r, fact, params, env, found, skipped, seen)
                             zero = zero, params = params, error_arg = error_arg, availability = fact.availability})
 end
 
--- One spec row: the stub it gets, or the reason it is left out.
 local function consider(r, env, found, skipped, seen)
     if env.release_missing ~= nil then
         local ledger_api = r.kind == "method" and r.api or (r.cls .. "." .. decl.member_name(r.api))
@@ -200,13 +177,6 @@ local function consider(r, env, found, skipped, seen)
     return consider_method(r, fact, params, env, found, skipped, seen)
 end
 
--- The stubs of one framework from its spec rows. env: members (api -> the typed fact of the member, from headers.shard_facts), index
--- (typedef name -> the underlying type, headers.typedef_index), declared (set of names the iOS build sees), overridden (set of canonical
--- keys a registry row covers), hand (cls -> selector -> true, from the hand sources), and release_missing (key(kind, api) -> status of the
--- 6.1.3 ledger, or nil for a framework absent from 6.1.3: every member is then considered). Returns found = {order = the classes in the order
--- the spec names them, members = cls -> list of members}, and skipped = the list of {api, reason} the members left out got, in the order
--- they were decided. A member is {api, kind (method, property-get, property-set), sign, selector, type_text, zero (void, object, scalar or
--- struct), params ({type, name} in order), error_arg (the name of the NSError ** parameter, or nil), name (a property's)}.
 function members(spec, env)
     local found = {order = {}, members = {}}
     local skipped, seen = {}, {}
@@ -218,10 +188,6 @@ function members(spec, env)
     return found, skipped
 end
 
--- The stubs of the C functions the snapshot marks generable (rows: each with its api, from functions.lua), from the typed fields of
--- env.functions (name -> {type, params}). A function the registry covers, whatever its status, or the hand sources define gets no stub:
--- the rule consider_method applies to a method. Returns the members, and appends the functions left out to skipped (keyed "name()", the
--- key of the stub and of the registry row).
 function functions(rows, env, skipped)
     local out = {}
     for _, row in ipairs(rows) do
@@ -255,7 +221,6 @@ function functions(rows, env, skipped)
     return out
 end
 
--- The text of one stub (stub_text of tools/gen.py@52253c0650): the signature of the member, then its body. m is a member of members or functions.
 function stub_text(fw, m)
     local log = 'static BOOL charon_logged = NO; if (!charon_logged) { charon_logged = YES; fprintf(stderr, "unimplemented: '
         .. fw .. ' %s\\n", "' .. m.api .. '"); }'

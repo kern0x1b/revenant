@@ -1,11 +1,3 @@
-// SpriteKitView7.m - SKView of iOS 7, carried for the releases that have no SpriteKit at all. iOS only.
-//
-// The view is a UIView over a CAEAGLLayer, with an OpenGL ES 2 context and a framebuffer of the layer's size. A display
-// link steps the presented scene once per frame, in the order the SDK documents (update:, the delegate's update, the
-// actions, the physics, then the constraints and the frame, which the two iOS 8 hooks are called for when the scene
-// answers them), and then clears the framebuffer to the scene's background colour and presents it. The nodes draw
-// nothing yet: their content is the step that carries it. The host's frame order is not measured (the host's view has
-// no public step), so the order is the documented one. Device-unverified: this object is compiled for armv7 only.
 #if TARGET_OS_IPHONE
 #import "CharonSpriteKit.h"
 #import "CharonSpriteKitProtocols.h"
@@ -72,8 +64,6 @@
     _frameInterval = 1;
 }
 
-// The framebuffer is made once the context is current, and its colour buffer takes the layer's storage. It is made
-// again when the view changes size, so the storage follows the layer.
 - (void)charon_makeBuffers
 {
     if (_context == nil) {
@@ -97,7 +87,6 @@
     [self charon_makeBuffers];
 }
 
-// The display link runs while the view is in a window, and stops when it leaves.
 - (void)didMoveToWindow
 {
     [super didMoveToWindow];
@@ -146,8 +135,6 @@
     [self charon_draw];
 }
 
-// The scene's update order: its update:, then its delegate's, then the actions, the physics, the constraints and the
-// frame. The delegate and the iOS 8 hooks are called only where the scene answers them.
 - (void)charon_stepScene:(SKScene *)scene time:(NSTimeInterval)time
 {
     [scene update:time];
@@ -176,7 +163,6 @@
     }
 }
 
-// The background colour of the presented scene is the colour the frame clears to; with no scene the frame clears to black.
 - (void)charon_draw
 {
     if (_context == nil || _framebuffer == 0) {

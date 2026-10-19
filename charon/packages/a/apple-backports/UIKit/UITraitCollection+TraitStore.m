@@ -1,16 +1,3 @@
-// UITraitCollection+TraitStore.m - the table the twenty-two traits of iOS 17, 18 and 26 are read out of, and
-// the three readers a trait collection's own description asks it for.
-//
-// The three readers are here, apart from UITraitCollection+Traits17.m, because they are used by two files of two
-// different releases: UITraitCollection+Appearance13.m, which is carried from 5.0, prints a collection's traits
-// and asks the table what a name means, and UITraitCollection+Traits17.m, which is carried from 6.0, is where
-// the table itself is filled in. An object is carried from one release on, and a 5.0 object may not name a 6.0
-// symbol - the 4.3 gate refused the appearance file for exactly that - so the readers the 5.0 file needs are in an
-// object that is carried from 5.0, which is what its three registry entries say.
-//
-// Nothing here changed behaviour: the table, its registrar, the by-class lookup and the three readers are the
-// same code in a different file, and the traits17 differential is the check on that.
-
 #import <UIKit/UIKit.h>
 #import "CharonTraits17.h"
 #import "CharonTraitStyle.h"
@@ -106,13 +93,6 @@ NSArray *charon_trait_classes(void)
     return classes;
 }
 
-// The reader a 5.0 object asks the table through. known answers whether the port has a definition for the name
-// at all, which is what tells a caller with an extras dictionary of its own that this trait is not one of that
-// dictionary's. isDefault answers whether the value is the trait class's own default, which the host prints as
-// nothing. Measured before and after this file moved out of UITraitCollection+Traits17.m, and the lookup answers
-// the same thing either way: a definition for every name the description uses, with its own home - so the
-// header's note that the older traits have no class of their own is stale, and this reader is the one thing
-// that has to know it.
 NSString *charon_read_trait_value(UITraitCollection *collection, NSString *name, BOOL *known, BOOL *isDefault)
 {
     if (known)
@@ -131,4 +111,3 @@ NSString *charon_read_trait_value(UITraitCollection *collection, NSString *name,
     }
     return charon_trait_value_text(definition, charon_trait_value(collection, definition));
 }
-

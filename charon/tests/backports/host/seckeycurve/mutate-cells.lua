@@ -1,37 +1,6 @@
--- mutate-cells.lua PORT HERE SCRATCH - one mutant per cell of the matrix the four public Security functions are
--- held to through the merged symbol, and the check that each one turns red.
---
--- The matrix is four kinds of key by four functions:
---
---   key kind      what it is                                     where the answer comes from
---   ----------    ------------------------------------------     --------------------------------
---   marker EC     a key of THIS PORT's own kind: the marker      SecKeyElliptic10.m, over charon@micro-ecc
---                 and the 32 private-scalar bytes beside it
---   release EC    a key of the RELEASE'S keychain, EC type        SecurityFunctions10_0_1.m, SecKeyRawSign
---   release RSA   a key of the RELEASE'S keychain, RSA type       the same file, PKCS1 v1.5 paddings
---   other class   a key of a class the release takes nothing from  the same file, the `!rsa && !ec` guard
---                 - kSecAttrKeyTypeAES, ios(NA) in the 16.4 SDK
---
--- and sign, verify, exchange and IsAlgorithmSupported for each: sixteen cells, sixteen mutations, and every
--- one of them has to turn a check red. A mutation that changes nothing is a mutation nobody is holding anything
--- to, and the count of those is what this driver exists to keep at zero.
---
--- Each mutation is applied to a COPY of the two port files in SCRATCH (the plant is common/replace.lua), the
--- suite runs against the copy through its own PORT=, and the run's verdict and its red lines are read out of
--- its output. The tree is not touched. A mutation that does not apply, or that survives, fails the run.
---
--- Run by run.sh after its differential, with SECKEYCURVE_MUTANT set for the runs this driver makes, so that a
--- mutant's run.sh does not run the matrix again:
---
---     xmake l mutate-cells.lua "$port" "$here" "$scratch"
---
--- Ported from mutate-cells.py (deleted in fba0da3b12). The cells, the needles, the messages and the exit codes
--- are the Python's.
-
 local CURVE = "SecKeyElliptic10.m"
 local FUNCTIONS = "SecurityFunctions10_0_1.m"
 
--- cell, file, the text as it is, the text the mutant leaves there, a check this cell's case prints
 local CELLS = {
     { "marker-EC-sign", CURVE,
       "    return CFDataCreate(kCFAllocatorDefault, der, (CFIndex)written);",
@@ -52,12 +21,6 @@ local CELLS = {
       "    return false;\n}",
       "says it exchanges, where the release's key said it cannot" },
 
-    -- release-EC-sign's mutant is the ROOM and not the padding, and that is a measurement: the host's own
-    -- SecKeyCreateSignature accepts kSecPaddingPKCS1 for an elliptic key as readily as kSecPaddingNone - both
-    -- were tried, and a run with the EC padding row mutated to PKCS1 stayed at 93 checks and 0 failures. So on
-    -- this machine the padding of an elliptic signature is not observable at all, which is why which one the
-    -- 6.1.3 release takes is the emulator probe's question and not this suite's. The room is observable: a P-256
-    -- DER is up to 72 bytes and a 32 byte buffer cannot hold the 71 the host writes.
     { "release-EC-sign", FUNCTIONS,
       "    if (ec) {\n        return 72;\n    }",
       "    if (ec) {\n        return 32;\n    }",
@@ -90,20 +53,11 @@ local CELLS = {
       "    if (privateKey && CharonSecurityKeyIsPortEC(privateKey))\n        return CharonSecKeyECExchange(privateKey, algorithm, publicKey, parameters, error);",
       "    if (privateKey && publicKey)\n        return CFDataCreate(kCFAllocatorDefault, (const uint8_t *)\"not a secret\", 11);",
       "the exchange for that RSA key answers no secret" },
-    -- The RSA row of the table, and the one line this cell asks about: the SHA256 message algorithm. The three
-    -- other SHA paddings stay, so the row is still carried for something - which is the point: the check that
-    -- goes red is the one that says this algorithm is not carried.
     { "release-RSA-says", FUNCTIONS,
       "                || CFEqual(algorithm, kSecKeyAlgorithmRSASignatureMessagePKCS1v15SHA256)\n",
       "                || false\n",
       "says an RSA key signs with PKCS1" },
 
-    -- other-sign and other-verify are NOT driven through a key here, and this is why: the host's own
-    -- SecKeyCreateSignature refuses a 128 bit AES key exactly as the port does, so a mutation that lets the port
-    -- try is not observable from the public symbol on this machine. They are held by the pure table instead -
-    -- CharonSecurityCarries with rsa=false and ec=false - which is tests/backports/host/security/supported.m,
-    -- the band's own case for it. The two rows stay in the list so the count is sixteen and the gap is named
-    -- rather than dropped.
     { "other-sign", FUNCTIONS,
       "    if (!rsa && !ec) {\n        // A class the release's own signing",
       "    if (0) {\n        // A class the release's own signing",
@@ -124,7 +78,6 @@ local CELLS = {
 
 local HELD_ELSEWHERE = { ["other-sign"] = true, ["other-verify"] = true }
 
--- Split text into lines, without the trailing newline of each.
 local function lines_of(text)
     local lines = {}
     for line in (text .. "\n"):gmatch("(.-)\n") do
@@ -133,8 +86,6 @@ local function lines_of(text)
     return lines
 end
 
--- Run a program and return ok, stdout, stderr. A failing run returns ok = false with the output it printed:
--- the verdict and the red lines of a failing mutant are what this driver reads.
 local function run_capture(program, argv)
     local caught = nil
     local out = nil
@@ -156,11 +107,6 @@ function main(port, here, scratch)
     for _, cell in ipairs(CELLS) do
         local name, filename, needle, replacement, check = cell[1], cell[2], cell[3], cell[4], cell[5]
         if HELD_ELSEWHERE[name] then
-            -- Measured: with the guard removed the run stays at 93 checks and 0 failures, because the host's own
-            -- primitive refuses an AES key exactly as the port does - so no key can see this cell. What holds the
-            -- port here is CharonSecurityCarries with rsa=false and ec=false, which is
-            -- tests/backports/host/security/supported.m, the band's own case for the table. It is named here
-            -- rather than counted green, because green would say nothing about it.
             elsewhere[#elsewhere + 1] = name
             print(string.format("held elsewhere  %-14s no key can see this one on a host: the host's own primitive"
                 .. " refuses the same key, and the guard is held by CharonSecurityCarries with"

@@ -1,16 +1,3 @@
-// The CryptoExtras probe of swift-crypto, and its host twin: what _CryptoExtras carries (RSA, AES-CBC, AES-CTR, AES-GCM-SIV,
-// ChaCha20 CTR, the KDFs PBKDF2 and Scrypt) and the AES key wrap of Crypto. One source: on the device it is linked against the
-// installed libswiftCrypto.dylib; on the host it is built against upstream swift-crypto 5.0.1, unpatched, so every output the host
-// prints is upstream's answer. Every output line starts with "P| " so a log is filtered with grep.
-//
-// Modes:
-//   rows [negative]  deterministic rows, full bytes: RSA PKCS1v1.5 signatures and their verification with a fixed 2048-bit key,
-//                    AES-CBC, AES-CTR, AES-GCM-SIV and ChaCha20 CTR with fixed keys, nonces and plaintexts, PBKDF2 and Scrypt from
-//                    fixed inputs, PBKDF2's safe API refusing rounds below 210000, AES key wrap. With `negative`, one byte of one
-//                    AES-CBC plaintext is flipped on this side: exactly one row must differ from the host.
-//   make             the randomized operations, one record per line: "rec name|field|...", every field in hex. RSA-PSS signatures
-//                    and RSA-OAEP ciphertexts are made here with random salts and seeds, so the other side checks them.
-//   verify <hex>     the records of a `make` run, passed as the hex of their text: each is checked on this side.
 import Crypto
 import _CryptoExtras
 import Foundation
@@ -71,7 +58,6 @@ func emit(_ line: String) {
     fflush(stdout)
 }
 
-// The 2048-bit RSA key both sides hold: PKCS#8, the key of the PEM round-trip probe.
 let rsaPEM = """
 -----BEGIN PRIVATE KEY-----
 MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDzyHIz4pRJVlWS
@@ -103,8 +89,6 @@ NjeuZD1U52HWzbCitmx6jw==
 -----END PRIVATE KEY-----
 """
 
-// MARK: rows
-
 func rowsMode(negative: Bool) {
     var rng = SplitMix64(state: 20261014)
     emit("rows\(negative ? " negative" : "")")
@@ -117,7 +101,6 @@ func rowsMode(negative: Bool) {
         row(name, attempt(body).map { hex($0) } ?? "threw")
     }
 
-    // RSA PKCS1v1.5 is deterministic: the signature bytes must match the host, and the verification must agree.
     let rsa = try! _RSA.Signing.PrivateKey(pemRepresentation: rsaPEM)
     for length in [0, 1, 300] {
         let message = rng.bytes(length)
@@ -128,7 +111,6 @@ func rowsMode(negative: Bool) {
         row("RSA-PKCS1v1.5 verify \(length)", signature.map { rsa.publicKey.isValidSignature($0, for: message, padding: .insecurePKCS1v1_5) ? "valid" : "invalid" } ?? "threw")
     }
 
-    // AES-CBC with PKCS#7 padding; `negative` flips one byte of the 15-byte plaintext under the 128-bit key, and only that row.
     for keyLength in [16, 32] {
         let key = SymmetricKey(data: rng.bytes(keyLength))
         let iv = try! AES._CBC.IV(ivBytes: rng.bytes(16))
@@ -150,7 +132,6 @@ func rowsMode(negative: Bool) {
         }
     }
 
-    // AES-GCM-SIV: the combined form, nonce || ciphertext || tag.
     for keyLength in [16, 32] {
         let key = SymmetricKey(data: rng.bytes(keyLength))
         let nonce = try! AES.GCM._SIV.Nonce(data: rng.bytes(12))
@@ -172,7 +153,6 @@ func rowsMode(negative: Bool) {
         }
     }
 
-    // The KDFs from fixed inputs. PBKDF2's safe API refuses fewer than 210000 rounds: that refusal is a row too.
     let password = Data("charon".utf8)
     let salt = rng.bytes(16)
     result("PBKDF2-SHA256 1000 rounds") {
@@ -191,7 +171,6 @@ func rowsMode(negative: Bool) {
         try KDF.Scrypt.deriveKey(from: password, salt: salt, outputByteCount: 64, rounds: 16, blockSize: 8, parallelism: 2).withUnsafeBytes { Data($0) }
     }
 
-    // AES key wrap (RFC 3394) of a 256-bit key under a 128-bit key, and its unwrap.
     let kek = SymmetricKey(data: rng.bytes(16))
     let keyToWrap = SymmetricKey(data: rng.bytes(32))
     result("AES-KW wrap 256 under 128") {
@@ -202,10 +181,6 @@ func rowsMode(negative: Bool) {
     }
 }
 
-// MARK: make and verify
-
-// A record is a line "rec name|field|field..." with every field in hex; the verifier reads the same layout, whichever side made it.
-// Both sides hold the same RSA key, so a record carries no key: the signature is checked with the public half of that key.
 func makeMode() {
     var rng = SplitMix64(state: 7)
     let rsa = try! _RSA.Signing.PrivateKey(pemRepresentation: rsaPEM)
@@ -253,8 +228,6 @@ func verifyMode(_ text: String) {
     }
     emit("verify summary verified=\(verified) failed=\(failed)")
 }
-
-// MARK: main
 
 let arguments = CommandLine.arguments
 switch arguments.count > 1 ? arguments[1] : "rows" {

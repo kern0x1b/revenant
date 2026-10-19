@@ -1,17 +1,3 @@
--- xmake l tools/sdk-markers.lua SDKDIR OLDSDKDIR [OUTPUT]
---
--- Which symbols of libSystem an SDK has that an older SDK of the same platform has not, and the first
--- release the held dyld caches (dyld.held_ladder) export each from. The `iphoneos-sdk` package gives an SDK
--- whose stubs carry no `$ld$` markers the markers of the older one (packages/i/iphoneos-sdk), and for a
--- symbol the older one does not know, the hide markers this file's release implies: one for each release
--- below it that the older SDK's markers name. OUTPUT is what the package reads,
--- packages/i/iphoneos-sdk/markers/iPhoneOS<version>.tsv: `symbol<TAB>release` per line, `-` for a symbol
--- none of the held caches exports (it is newer than they are).
---
--- SDKDIR and OLDSDKDIR are iPhoneOS SDK folders as their archives extract them, OLDSDKDIR untouched by
--- the package's own additions. Reading the caches takes a few minutes, so run it through
--- coordination/heavy.sh; what it measured is kept in $CHARON_HOME/cache like release-split's.
-
 import("apple.dyld", {rootdir = path.join(os.scriptdir(), "..", "modules")})
 import("apple.sdkstubs", {rootdir = path.join(os.scriptdir(), "..", "modules")})
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "modules")})

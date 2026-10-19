@@ -3,9 +3,6 @@
 static void P(NSString *f, ...) NS_FORMAT_FUNCTION(1,2);
 static void P(NSString *f, ...) { va_list a; va_start(a,f); NSString *s=[[NSString alloc] initWithFormat:f arguments:a]; va_end(a); printf("%s\n", s.UTF8String); }
 
-/* What the host can be asked about NSBundleResourceRequest, and what it cannot, now that the class's
-   initialisers have been measured as raising. This step is the other half: the bundle side, which is
-   where the port's real work is. */
 int main(void) { setvbuf(stdout, NULL, _IONBF, 0); @autoreleasepool {
     Class request = NSClassFromString(@"NSBundleResourceRequest");
     P(@"class %s, methods:", class_getName(request));

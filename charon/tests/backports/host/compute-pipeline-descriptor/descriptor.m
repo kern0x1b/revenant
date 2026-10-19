@@ -1,17 +1,3 @@
-/* descriptor.m - MTLComputePipelineDescriptor, compared property by property against Apple's own object.
- *
- * Four moments are compared, each as a snapshot of every readable member on both sides: a fresh
- * descriptor, one with every settable member set away from its default, the same one after -reset, and a
- * copy of the set one. A snapshot is a dictionary of member name to its description, so a disagreement names
- * the member and both values.
- *
- * NO DEVICE IS CREATED. A descriptor asks a device nothing (facts/Metal/DeviceOnThisMachine.md), and the
- * compute function, which is a device's object, is never set, so its member is read as nil on both sides.
- *
- * The port's class is reached by the name run.sh gives it (CharonHost<Name>) because its object file is
- * built beside Apple's Metal in this process. The mutant in run.sh changes -reset and must turn the reset
- * snapshot red.
- */
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
@@ -27,7 +13,6 @@ static void check(int ok, NSString *line)
 
 static NSString *describeBool(BOOL b) { return b ? @"YES" : @"NO"; }
 
-/* Every readable member of the descriptor, as a string, so the two sides can be compared whole. */
 static NSDictionary *snapshot(MTLComputePipelineDescriptor *d)
 {
     NSMutableDictionary *s = [NSMutableDictionary dictionary];
@@ -52,7 +37,6 @@ static NSDictionary *snapshot(MTLComputePipelineDescriptor *d)
     return s;
 }
 
-/* Sets every settable member away from its default, on whichever side it is given. */
 static void setEverything(MTLComputePipelineDescriptor *d, Class slotClass)
 {
     d.label = @"charon";
@@ -68,7 +52,6 @@ static void setEverything(MTLComputePipelineDescriptor *d, Class slotClass)
     [d.buffers setObject:slot atIndexedSubscript:2];
 }
 
-/* The four moments for one side, compared with the other side's. */
 static void compareSides(MTLComputePipelineDescriptor *apple, MTLComputePipelineDescriptor *port, NSString *moment)
 {
     NSDictionary *a = snapshot(apple), *p = snapshot(port);

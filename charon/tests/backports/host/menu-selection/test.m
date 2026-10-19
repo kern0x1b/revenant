@@ -2,11 +2,6 @@
 #include <stdio.h>
 #import "CharonMenus.h"
 
-// The host's own menus and the port's, run on the same checks. A line is "side<TAB>check<TAB>value": "host" and "port" lines are compared.
-// The port's classes are compiled with UIMenu and UIMenuElement renamed, so [UIMenu class] here is the port's; the host's are reached by name.
-// The host's items are real actions; the port's are a subclass of the port's element that carries a state, because the port's selection
-// asks an element for its state and the port's own action is not compiled into this check.
-
 typedef id (*PlainFn)(id, SEL);
 
 static void report(const char *side, const char *check, NSString *value)
@@ -61,8 +56,6 @@ static id make_base_element(BOOL portSide)
 
 static void run(const char *side, BOOL portSide, Class menuClass)
 {
-    // The default and the set size, measured on the host: -1 until set, the value kept as given (even one the enum does not name),
-    // a copy and a menu made with other children keeping the value.
     id menu = [menuClass menuWithTitle:@"root" children:@[]];
     report(side, "size-default", number([menu preferredElementSize]));
     [menu setPreferredElementSize:2];
@@ -76,7 +69,6 @@ static void run(const char *side, BOOL portSide, Class menuClass)
     id fresh = [menuClass menuWithTitle:@"x" image:nil identifier:@"id.x" options:UIMenuOptionsDisplayInline children:@[]];
     report(side, "size-fresh-default", number([fresh preferredElementSize]));
 
-    // The selected elements: the on ones of the menu and of its sub-menus, in order; a mixed one and an off one are not selected.
     id on = make_item(portSide, @"on", UIMenuElementStateOn);
     id off = make_item(portSide, @"off", UIMenuElementStateOff);
     id mixed = make_item(portSide, @"mixed", UIMenuElementStateMixed);
@@ -91,8 +83,6 @@ static void run(const char *side, BOOL portSide, Class menuClass)
     report(side, "selected-none", titles([fresh selectedElements]));
     report(side, "selected-nested-deep", titles([[menuClass menuWithTitle:@"r" children:@[onlySub, mixed]] selectedElements]));
 
-    // The subtitle of an element: nil until set, a copy of the value given, and nil clears it. A menu keeps its subtitle through a copy
-    // and through a menu made with other children.
     id base = make_base_element(portSide);
     report(side, "element-subtitle-default", [base subtitle]);
     NSMutableString *given = [NSMutableString stringWithString:@"sub"];
@@ -110,7 +100,6 @@ static void run(const char *side, BOOL portSide, Class menuClass)
     report(side, "menu-replaced-identifier", yes_no([[titled menuByReplacingChildren:@[]] identifier] && [[[titled menuByReplacingChildren:@[]] identifier] isEqualToString:[titled identifier]]));
 }
 
-// The port's own checks: a plain element, one that has no state, is never selected; a menu nothing has sized answers -1 through its archive.
 static void runPortOnly(void)
 {
     id plain = make_base_element(YES);

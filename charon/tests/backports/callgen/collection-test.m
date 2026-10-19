@@ -1,25 +1,3 @@
-//
-//  collection-test.m
-//  What a resolution result's collection factory answers, beside the host's own answer.
-//
-//  `+successesWithResolved<Items>:` and its four siblings answer an **array** of resolution
-//  results, one per item, each made by the class's own single-item factory. That was measured on
-//  the host through objc_msgSend into all five of them (macOS 26's Intents.framework, 2026-09-28):
-//
-//      two items  -> __NSArrayM, count 2, each element an instance of the class asked
-//      one item   -> count 1, one element of that class
-//      empty      -> count 0, an array
-//      nil        -> count 0, an array - not nil, because a caller counts what it is given
-//
-//  and each element's resolvedValue is the item it was made from. This test prints the same table
-//  for the port's own body, so a reader can put the two side by side, and the mutation below is
-//  there to show the table goes red rather than drifting: a factory that returns **one element
-//  fewer** than the host's answer is built as well, and the counts are printed for it too.
-//
-//  It is built twice: once with the generated objects, once with a mutant of them
-//  (tests/backports/callgen/collection-test.sh), and the mutant's counts are the ones that differ.
-//
-
 #import <Foundation/Foundation.h>
 #import <Intents/Intents.h>
 #import <objc/message.h>
@@ -44,14 +22,9 @@ static void probe(Class cls, SEL factory, SEL single, NSArray *input)
     (void)charon_countsOnly;
 }
 
-// The class to ask, because the port's own classes are renamed when they are built into a macOS
-// binary for this test: the system has INMediaItemResolutionResult of its own, and without the
-// rename that one answers and the port's body never runs - which is what the first version of this
-// test measured, two identical tables and a mutation that changed nothing.
 int main(int argc, const char *argv[])
 {
     @autoreleasepool {
-        // "counts" prints the numbers alone, so two runs can be diffed.
         BOOL countsOnly = argc > 1 && strcmp(argv[1], "counts") == 0;
         charon_countsOnly = countsOnly;
         const char *title = countsOnly ? "counts" : (argc > (countsOnly ? 1 : 2)

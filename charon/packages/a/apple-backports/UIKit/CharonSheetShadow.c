@@ -10,15 +10,9 @@ const float charon_sheet_shadow_matrix[20] = {
     -0.25f, -0.5f, -0.09375f, 1, 0,
 };
 
-/* The image is 400 points on a side: the corner drawn four times (-_loadImageIfNecessary). */
 static const double charon_shadow_image = 400;
 static const double charon_shadow_corner_points = 200;
 
-/* _UIPopoverShadow is an image, not a formula; its alpha is two blurred rounded quadrants laid over each other,
-   alpha = 1 - (1 - k1 G(s1) * Q(e1, r1)) (1 - k2 G(s2) * Q(e2, r2)), with Q the quadrant x >= e, y >= e (points from the
-   outer edge) whose corner has the radius r, and G(s) a Gaussian blur of s points. The values are fitted to the host's
-   image (Mac Catalyst, macOS 27, 400 x 400 pixels at scale 2; tests/backports/host/sheetshadow holds the generated
-   corner to it pixel by pixel). */
 typedef struct {
     double k, e, s, r;
 } CharonShadowTerm;
@@ -38,9 +32,6 @@ static double charon_clamp01(double x)
     return x < 0 ? 0 : x > 1 ? 1 : x;
 }
 
-/* One term at n pixels per side: the blurred quadrant is the product of two blurred edges, less the blur of what the
-   rounded corner cuts off (the r x r square outside the arc). That cut-off is blurred along x exactly, one thin row at
-   a time, and the rows, gathered per pixel row, along y. 0 when the memory could not be had. */
 static int charon_shadow_term(const CharonShadowTerm *t, size_t n, double scale, double *out)
 {
     size_t first = (size_t)floor(t->e * scale), last = (size_t)ceil((t->e + t->r) * scale);
@@ -86,8 +77,6 @@ static int charon_shadow_term(const CharonShadowTerm *t, size_t n, double scale,
     return 1;
 }
 
-/* Made once per scale, on whichever thread first asks: the sheet shades off the main thread, and a test reads the corner
-   on it. */
 static uint8_t *charon_shadow_make_corner(unsigned scale)
 {
     size_t n = (size_t)(charon_shadow_corner_points * scale);
@@ -123,7 +112,6 @@ const uint8_t *charon_sheet_shadow_corner(unsigned scale)
     return corner;
 }
 
-/* A shadow view smaller than the image on either side gets a smaller cap, from the corner radius (0x188efdd08). */
 double charon_sheet_shadow_cap(double width, double height, double radius, double scale)
 {
     double cap = charon_shadow_corner_points - 1 / scale;
@@ -135,11 +123,6 @@ double charon_sheet_shadow_cap(double width, double height, double radius, doubl
     return cap;
 }
 
-/* In single precision and without lround: it runs once per pixel of a reading, up to 768 x 992 of them on the device that
-   shades (an iPad 2 spent 261 to 432 ms a reading on it in doubles), and the matrix (multiples of 1/64) and the pixels
-   (0 to 255) are exact in a float. The rows are scaled by 255 so the destination stays in bytes: 255 * clamp01(m . d + c)
-   is clamp255(m . (255 d) + 255 c), and the result's byte is the shadow's alpha times that, a positive number rounded by
-   adding a half. */
 static inline float charon_clamp255(float x)
 {
     return x < 0 ? 0 : x > 255 ? 255 : x;
@@ -160,8 +143,6 @@ void charon_sheet_shadow_pixel(uint8_t *pixel, double alpha)
     charon_shadow_pixel(pixel, (float)alpha);
 }
 
-/* Where a point of the shadow view falls in the corner, in the corner's pixels: the caps keep their size, the middle of
-   the image repeats (a resizable image tiles by default), and the far half is the corner mirrored. */
 static double charon_shadow_corner_coordinate(double x, double length, double cap, unsigned scale)
 {
     double u;

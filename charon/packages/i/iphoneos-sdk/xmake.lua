@@ -4,8 +4,6 @@ package("iphoneos-sdk")
     set_description("The iPhoneOS SDK a build compiles and links against, fetched and verified on the machine that uses it, laid out as an Xcode developer folder with what Xcode once shipped and dropped: Csu's startup objects and libgcc_s.1 in usr/lib, and libarclite in the toolchain")
     set_license("LicenseRef-Apple-SDK")
 
-    -- 16.4 is the theos archive of the 16.5 SDK; 26.2 is the SDK Telegram 12.9.2 is pinned to (versions.json, xcode 26.2), from the
-    -- archive xybp888/iOS-SDKs publishes: a zip that carries a __MACOSX folder beside the SDK's own.
     add_urls("https://github.com/$(version)", {version = function (version)
         return ({["16.4"] = "theos/sdks/releases/download/master-146e41f/iPhoneOS16.5.sdk.tar.xz",
                  ["26.2"] = "xybp888/iOS-SDKs/releases/download/iOS26.2-SDKs/iPhoneOS26.2.sdk.zip"})[tostring(version)]
@@ -13,8 +11,6 @@ package("iphoneos-sdk")
     add_versions("16.4", "5e0fd3f01266cce4ce012d4a99b38eb56578fca40d09edc81cd83dee958202fb")
     add_versions("26.2", "581b16f4f8902355364bd20f84cd46eb055b131c9b8cc2c7d6d229e36fd5067f")
     add_patches("16.4", "patches/16.4-driverkit-22-availability.patch")
-    -- the stubs of 26.2 carry no `$ld$` marker, so what an older release lacks, and where it kept what it has, is told by those of
-    -- the 16.5 SDK, the newest that has them, and by markers/iPhoneOS26.2.tsv for what 16.5 did not have
     add_resources("26.2", "markers", "https://github.com/theos/sdks/releases/download/master-146e41f/iPhoneOS16.5.sdk.tar.xz",
                   "5e0fd3f01266cce4ce012d4a99b38eb56578fca40d09edc81cd83dee958202fb")
     for _, version in ipairs({"16.4", "26.2"}) do
@@ -57,7 +53,6 @@ package("iphoneos-sdk")
         local stubs = import("apple.sdkstubs", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
         local markers = package:resourcedir("markers")
         if markers then
-            -- an SDK whose stubs carry none takes those of an older one, and the release each symbol it lacks came with
             local older = os.isfile(path.join(markers, "SDKSettings.json")) and markers or assert(os.dirs(path.join(markers, "iPhoneOS*.sdk"))[1], "the older SDK's archive holds no SDK")
             local first = stubs.releases(io.readfile(path.join(package:scriptdir(), "markers", "iPhoneOS" .. package:version_str() .. ".tsv")))
             local carried, versions, seen = {}, {}, {}
@@ -83,19 +78,10 @@ package("iphoneos-sdk")
             versions = table.keys(versions)
             table.sort(versions, function (a, b) return stubs.older(a, b) end)
 
-            -- libSystem, and the Objective-C runtime beside it: the two libraries every image links unconditionally and
-            -- the compiler itself emits direct calls into (a struct-returning message send lowers to _objc_msgSend_stret
-            -- with no source-level reference to it), so their 32-bit ABI is fixed across every release this project
-            -- targets, unlike a framework's own surface. libobjc is not in_libsystem (libSystem never re-exports it -
-            -- it is force-loaded and linked on its own), so it needs naming here beside it.
             local function is_runtime(install)
                 return stubs.in_libsystem(install) or install == "/usr/lib/libobjc.A.dylib"
             end
 
-            -- Those two families' own documents of the older SDK, by install name, read whether or not they carry a
-            -- marker: a 32-bit-only symbol (SjLj unwinding, the compiler-rt helpers, the struct-return message sends, ...)
-            -- an armv7/armv7s device still exports and this SDK's own stub of the same library has simply stopped
-            -- naming, because no 26.2 device is 32-bit.
             local older_runtime = {}
             for _, file in ipairs(os.files(path.join(older, "**.tbd"))) do
                 if not file:find("/DriverKit/", 1, true) then
@@ -137,7 +123,6 @@ package("iphoneos-sdk")
             vprint("%d stubs of %s took markers from %s", changed, folder, older)
         end
 
-        -- what iPhone OS 2 to 4.3 took from libgcc_s the libSystem stubs hide from 3.0 to 4.3; the package extends that to iPhone OS 2
         local extended = 0
         for _, stub in ipairs(table.join(os.files(path.join(libraries, "libSystem*.tbd")), os.files(path.join(libraries, "system", "*.tbd")))) do
             local text, count = io.readfile(stub):gsub("'%$ld%$hide%$os3%.0%$([%w_]+)'", function (symbol)
@@ -168,7 +153,6 @@ package("iphoneos-sdk")
                             end
                         end
                         if #wanted > 0 then
-                            -- tbd 4 names targets (arm64-ios), tbd 3 architectures (arm64)
                             local names = key == "targets" and "arm64-ios, arm64e-ios" or "arm64, arm64e"
                             table.insert(lines, "  - " .. key .. ": [ " .. names .. " ]")
                             table.insert(lines, "    symbols: [ " .. table.concat(wanted, ", ") .. " ]")

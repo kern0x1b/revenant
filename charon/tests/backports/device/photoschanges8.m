@@ -6,11 +6,6 @@
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
-// PHPhotoLibrary's change observers over ALAssetsLibraryChangedNotification (facts/Photos/Changes.md).
-// Each run adds three 8-by-8 solid-blue images to the saved photos, the fixtures the fleet keeps.
-// An application of its own (photoschanges8-Info.plist): iOS 6 gives the photo library to a bundle
-// identifier the user allowed, and a bare executable has none, so every write of it is refused.
-
 static NSString *const results_folder = @"/private/var/backports";
 
 @interface CharonChangeObserver : NSObject <PHPhotoLibraryChangeObserver>
@@ -40,7 +35,6 @@ static UIImage *fixture(void)
     return image;
 }
 
-// The identifier the asset is known by once the change is done: the placeholder's, read after the write.
 static NSString *write_fixture(void)
 {
     __block PHObjectPlaceholder *placeholder = nil;
@@ -61,8 +55,6 @@ static void wait_until(double seconds, BOOL (^done)(void))
 
 static void check_raw_notification(void)
 {
-    // What the release itself posts for a write of the application, before any port code is asked: how
-    // often, from which library, on which thread, and with what user info.
     ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
     __block NSDictionary *info = nil;
     __block BOOL onMain = NO, nilInfo = NO;
@@ -172,8 +164,6 @@ static void run_checks(void)
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
-    // Off the main thread, so that the main thread stays free for what the release answers on it and
-    // for the observer check that the change is not told there.
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{ run_checks(); });
     return YES;
 }

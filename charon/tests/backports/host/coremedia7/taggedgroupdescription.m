@@ -9,17 +9,6 @@
 #import <dlfcn.h>
 #import <string.h>
 
-// The five CMTaggedBufferGroup format-description and sample-buffer functions, against the host.
-//
-// The chain is the one facts/CoreMedia/cmtag-fixtures/taggedgroup-measure.m measured: a subset chain of
-// three entries - {video}, {video,track}, {video,track,gone} - over three pixel buffers. It is built
-// twice, once from the host's own collections and once from the port's, and every case is asked of both,
-// because Matches reads a representation only its own side wrote: the port's reads the key the port
-// writes, so a description made by one and matched by the other is not a case, it is a type error.
-//
-// Every expected answer below was taken from the host first, in taggedgroup-answers.txt, commit 2fbdb758c.
-// Nothing here is an expectation invented at the port.
-
 static void *port = NULL;
 static long checks = 0, different = 0;
 
@@ -60,13 +49,10 @@ int main(int argc, char **argv)
         CMTag e0[1] = { video }, e1[2] = { video, track }, e2[3] = { video, track, gone };
         CMTag f0[1] = { gone }, f1[2] = { gone, track }, f2[3] = { gone, track, video };
 
-        // The three pixel buffers, made once and shared, so "the same tags over different buffers" and
-        // "the same buffers over the same tags" are two different groups and not one alias of the other.
         CVPixelBufferRef made[6];
         for (CFIndex i = 0; i < 6; i++)
             CVPixelBufferCreate(kCFAllocatorDefault, 8, 8, kCVPixelFormatType_32BGRA, NULL, &made[i]);
 
-        // the host's family
         CMTagCollectionRef hc[3], hsame[3], hshaped[3];
         CMTagCollectionCreate(kCFAllocatorDefault, e0, 1, &hc[0]);
         CMTagCollectionCreate(kCFAllocatorDefault, e1, 2, &hc[1]);
@@ -77,7 +63,6 @@ int main(int argc, char **argv)
         CMTagCollectionCreate(kCFAllocatorDefault, f0, 1, &hshaped[0]);
         CMTagCollectionCreate(kCFAllocatorDefault, f1, 2, &hshaped[1]);
         CMTagCollectionCreate(kCFAllocatorDefault, f2, 3, &hshaped[2]);
-        // the port's family
         CMTagCollectionRef pc[3], psame[3], pshaped[3];
         port_CMTagCollectionCreate(kCFAllocatorDefault, e0, 1, &pc[0]);
         port_CMTagCollectionCreate(kCFAllocatorDefault, e1, 2, &pc[1]);
@@ -124,7 +109,6 @@ int main(int argc, char **argv)
         #define hshapedAlt pshaped
         GROUP(portGroups, port_CMTaggedBufferGroupCreate, pc, made)
 
-        // 1. the description, and what it is
         CMTaggedBufferGroupFormatDescriptionRef hDesc = NULL, pDesc = NULL;
         OSStatus hMade = CMTaggedBufferGroupFormatDescriptionCreateForTaggedBufferGroup(
             kCFAllocatorDefault, hostGroups[0], &hDesc);
@@ -143,7 +127,6 @@ int main(int argc, char **argv)
              [NSString stringWithFormat:@"%ld", hostGroups[0] ? (long)CMTaggedBufferGroupGetCount(hostGroups[0]) : -1L],
              [NSString stringWithFormat:@"%ld", portGroups[0] ? (long)port_CMTaggedBufferGroupGetCount(portGroups[0]) : -1L]);
 
-        // 2. Matches, over the four groups and NULL
         #define MATCHES(label, hostGroup, portGroup) \
             same(label, \
                  [NSString stringWithFormat:@"%d", (int)CMTaggedBufferGroupFormatDescriptionMatchesTaggedBufferGroup(hDesc, hostGroup)], \
@@ -154,7 +137,6 @@ int main(int argc, char **argv)
         MATCHES("matches same entry sizes over different tags", hostGroups[3], portGroups[3]);
         MATCHES("matches NULL", NULL, NULL);
 
-        // 3. the description a NULL group gives: real, and matching nothing
         CMTaggedBufferGroupFormatDescriptionRef hFromNull = NULL, pFromNull = NULL;
         OSStatus hNull = CMTaggedBufferGroupFormatDescriptionCreateForTaggedBufferGroup(
             kCFAllocatorDefault, NULL, &hFromNull);
@@ -171,7 +153,6 @@ int main(int argc, char **argv)
              [NSString stringWithFormat:@"%d", (int)CMTaggedBufferGroupFormatDescriptionMatchesTaggedBufferGroup(hFromNull, NULL)],
              [NSString stringWithFormat:@"%d", (int)port_CMTaggedBufferGroupFormatDescriptionMatchesTaggedBufferGroup(pFromNull, NULL)]);
 
-        // 4. WithExtensions, with nothing and with a dictionary
         const void *eKeys[] = { CFSTR("charon.test") };
         const void *eVals[] = { CFSTR("value") };
         CFDictionaryRef ext = CFDictionaryCreate(NULL, eKeys, eVals, 1, &kCFTypeDictionaryKeyCallBacks,
@@ -198,7 +179,6 @@ int main(int argc, char **argv)
              [NSString stringWithFormat:@"%d", (int)CMTaggedBufferGroupFormatDescriptionMatchesTaggedBufferGroup(hNoExt, hostGroups[0])],
              [NSString stringWithFormat:@"%d", (int)port_CMTaggedBufferGroupFormatDescriptionMatchesTaggedBufferGroup(pNoExt, portGroups[0])]);
 
-        // 5. the sample buffer round trip
         CMSampleBufferRef hSbuf = NULL, pSbuf = NULL;
         OSStatus hSB = CMSampleBufferCreateForTaggedBufferGroup(
             kCFAllocatorDefault, hostGroups[0], CMTimeMake(1, 2), CMTimeMake(2, 1), hDesc, &hSbuf);
@@ -221,7 +201,6 @@ int main(int argc, char **argv)
         same("duration", [NSString stringWithFormat:@"%lld/%d", (long long)hDur.value, (int)hDur.timescale],
                           [NSString stringWithFormat:@"%lld/%d", (long long)pDur.value, (int)pDur.timescale]);
 
-        // 6. a sample buffer that did not come from a group
         CMVideoFormatDescriptionRef vfd = NULL;
         CMVideoFormatDescriptionCreateForImageBuffer(kCFAllocatorDefault, made[0], &vfd);
         CMSampleTimingInfo timing = { CMTimeMake(0, 1), CMTimeMake(1, 1), kCMTimeInvalid, kCMTimeInvalid, 1 };

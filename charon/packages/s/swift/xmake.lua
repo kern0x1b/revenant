@@ -4,15 +4,12 @@ package("swift")
     set_description("The Swift compiler of a release, built from its sources with the changes an iOS older than the compiler's own minimum needs: the frontend takes a Swift runtime the program carries, and the driver stops refusing those releases")
     set_license("Apache-2.0 WITH Swift-exception")
 
-    -- The tag of the release; every repository it is built from is cloned by the download below, each at its own pin.
     add_urls("https://github.com/swiftlang/swift.git")
     add_versions("6.4.0", "b8189d766d86ad7fc8106787d6ce9e402f38dd72")
 
     add_deps("charon@swift-bootstrap 6.4.0", {host = true, private = true, system = false})
     add_deps("cmake", "ninja", {kind = "binary", host = true})
 
-    -- Every repository the compiler is built from, at the tag of the release, with the commit that tag names when this
-    -- package was written: a tag that moved is not the release it names.
     local sources = {
         ["6.4.0"] = {
             {name = "swift", url = "https://github.com/swiftlang/swift.git", tag = "swift-6.4.0-RELEASE",
@@ -38,7 +35,6 @@ package("swift")
         }
     }
 
-    -- The compiler runs on this machine, so it is built for the macOS the Swift build itself targets.
     local host_deployment = "13.0"
 
     local digests = {"xmake.lua=" .. hash.sha256(path.join(os.scriptdir(), "xmake.lua"))}
@@ -81,8 +77,6 @@ package("swift")
                                      {"-DCMARK_THREADING=ON", "-DBUILD_TESTING=OFF"}))
         os.vrunv("ninja", {"-C", path.join(build, "cmark"), "-j" .. jobs})
 
-        -- clang's own tools are built because Swift's CMake makes libSwiftScan depend on the clang driver; the rest of
-        -- LLVM's tools, its tests and everything it can link against optionally are left out.
         os.vrunv("cmake", table.join({"-S", path.join("llvm-project", "llvm"), "-B", path.join(build, "llvm")}, common, {
             "-DLLVM_ENABLE_ASSERTIONS=OFF", "-DLLVM_TARGETS_TO_BUILD=AArch64;ARM", "-DLLVM_ENABLE_PROJECTS=clang",
             "-DLLVM_ENABLE_RUNTIMES=", "-DLLVM_TOOL_SWIFT_BUILD=FALSE", "-DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=OFF",
@@ -94,8 +88,6 @@ package("swift")
             "-DCLANG_VENDOR_UTI=com.apple.compilers.llvm.clang", "-DPACKAGE_VERSION=21.0.0"}))
         os.vrunv("ninja", {"-C", path.join(build, "llvm"), "-j" .. jobs})
 
-        -- Only the compiler is built: the standard library and the SDK overlays of this release are for the machine's own
-        -- platform, and what an iOS port runs is charon@swift-runtime, built for its architecture and oldest release.
         os.vrunv("cmake", table.join({"-S", "swift", "-B", path.join(build, "swift")}, common, {
             "-DCMAKE_Swift_COMPILER=" .. path.join(bootstrap:installdir("bin"), "swiftc"),
             "-DCMAKE_INSTALL_PREFIX=" .. prefix,
@@ -122,8 +114,6 @@ package("swift")
             "-DSWIFT_VENDOR=Apple", "-DSWIFT_VERSION=" .. package:version():major() .. "." .. package:version():minor(),
             "-DSWIFT_PARALLEL_LINK_JOBS=" .. math.max(math.floor(jobs / 2), 1),
             "-DSWIFT_INSTALL_COMPONENTS=compiler;compiler-swift-syntax-lib;swift-syntax-lib;clang-resource-dir-symlink;clang-builtin-headers-in-clang-resource-dir;stdlib"}))
-        -- "compiler" does not build the macro plugins and "stdlib" does not copy the shim headers, although the install
-        -- rules of those components lay both down.
         os.vrunv("ninja", {"-C", path.join(build, "swift"), "-j" .. jobs, "compiler", "compiler-swift-syntax-lib",
                            "swift-syntax-lib", "stdlib", "copy_shim_headers", "SwiftMacros", "ObservationMacros",
                            "clang-resource-dir-symlink", "clang-builtin-headers-in-clang-resource-dir"})
@@ -132,8 +122,6 @@ package("swift")
             os.vrunv("cmake", {"--install", path.join(build, "swift"), "--component", component})
         end
 
-        -- The driver is a Swift package; its dependencies are checked out beside it and SWIFTCI_USE_LOCAL_DEPS makes it
-        -- build against those instead of resolving the versions its Package.resolved pins.
         os.tryrm(path.join("swift-driver", "Package.resolved"))
         os.vrunv(path.join(bootstrap:installdir("bin"), "swift-build"), {"-c", "release", "--product", "swift-driver",
                  "--package-path", path.absolute("swift-driver"), "--scratch-path", path.join(build, "driver")},
@@ -144,7 +132,6 @@ package("swift")
         os.tryrm(path.join(package:installdir("bin"), "swift"))
         os.ln("swift-driver", path.join(package:installdir("bin"), "swift"))
 
-        -- The sources of the same tag, for the packages that build a module or a runtime from them.
         local source = path.join(package:installdir("share"), "swift-source")
         local copied = {}
         for _, kept in ipairs(table.join(swift.runtime_source_paths(), swift.source_paths())) do
@@ -165,8 +152,6 @@ package("swift")
         end
         os.vcp(path.join("swift", "LICENSE.txt"), path.join(source, "LICENSE.txt"))
 
-        -- The regular expression libraries are a repository of their own, and the runtime's resync of the standard
-        -- library's sources looks for it beside the release's, under the name it has in a checkout of Swift.
         local regex = path.join(package:installdir("share"), "swift-experimental-string-processing")
         os.mkdir(regex)
         os.vcp(path.join("swift-experimental-string-processing", "Sources"), path.join(regex, "Sources"), {symlink = true})
@@ -184,12 +169,8 @@ package("swift")
         assert(os.isdir(path.join(package:installdir("share", "swift-experimental-string-processing", "Sources"), "_RegexParser")),
                "the regular expression sources are not beside the release's, and a runtime built from these would have no Regex")
 
-        -- The driver compiles for a release older than the one it used to refuse, and the frontend takes the features of
-        -- this Swift release at that deployment target only when the runtime is said to come with the program.
         local folder = os.tmpfile() .. ".dir"
         os.mkdir(folder)
-        -- Parsed as the standard library itself, so the file brings the one type it needs; the feature under test is the
-        -- value generic, which this Swift release has and the deployment target's own runtime would not.
         io.writefile(path.join(folder, "generic.swift"),
                      "public struct Int { public var _value: Builtin.Word }\npublic struct Held<let count: Int> { public var value: Int }\n")
         local argv = {"-frontend", "-typecheck", "-parse-stdlib", "-module-name", "Swift", "-target", "armv7-apple-ios6.0",

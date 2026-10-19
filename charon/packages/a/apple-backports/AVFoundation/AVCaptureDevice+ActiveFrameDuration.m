@@ -70,7 +70,6 @@ static void charon_apply_frame_durations(AVCaptureSession *session)
 
 - (void)setActiveVideoMinFrameDuration:(CMTime)activeVideoMinFrameDuration
 {
-    // 7.0 asks the release's own -isLockedForConfiguration first, as 6.1.3's setters of the device do.
     if (![self isLockedForConfiguration])
         @throw [NSException exceptionWithName:NSGenericException
                                        reason:@"activeVideoMinFrameDuration cannot be set without first successfully gaining exclusive ownership of the device using -lockForConfiguration:"
@@ -88,7 +87,6 @@ static void charon_apply_frame_durations(AVCaptureSession *session)
 
 - (void)setActiveVideoMaxFrameDuration:(CMTime)activeVideoMaxFrameDuration
 {
-    // 7.0 asks the release's own -isLockedForConfiguration first, as 6.1.3's setters of the device do.
     if (![self isLockedForConfiguration])
         @throw [NSException exceptionWithName:NSGenericException
                                        reason:@"activeVideoMaxFrameDuration cannot be set without first successfully gaining exclusive ownership of the device using -lockForConfiguration:"

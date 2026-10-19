@@ -1,13 +1,5 @@
--- The members of a protocol in the Swift skeleton (tools/gen/swift_render.lua): a protocol's requirements take no access modifier (the compiler
--- refuses "'public' modifier cannot be used in protocols" on a typealias or any other member), and a subscript states its accessors, as
--- the compiler requires ("subscript in protocol must have explicit { get } or { get set } specifier": 40 errors in the coordinator's sdk
--- run, CoreML). The model here is a protocol with a read-write subscript, a read-only one, an associated type, a typealias and a
--- method; the rendered protocol body must hold each in its kind's form, with no `public` at any depth inside it. Run:
--- xmake l tests/gen/swift_protocol_members_test.lua (pure Lua: no toolchain)
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 
--- A model row with every cell the renderer reads, "-" where the row says nothing.
 local function row(fields)
     local out = {kind = "-", usr = "-", container = "-", name = "-", side = "-", type = "-", params = "-", generic_sig = "-",
                  conformances = "-", superclass = "-", throwing = "-", async = "-", mutating = "-", attributes = "-", accessors = "-",
@@ -47,7 +39,6 @@ function main()
         table.insert(lines, line)
     end
 
-    -- the subscripts: read-write is get and set, read-only is get, each with its parameter and result
     local has_rw, has_ro = false, false
     for _, line in ipairs(lines) do
         if line == "    subscript(_ p0: Swift.Int) -> Swift.String { get set }" then
@@ -59,7 +50,6 @@ function main()
     check(has_rw, "a read-write protocol subscript states get and set")
     check(has_ro, "a read-only protocol subscript states get")
 
-    -- the other members, and no access modifier anywhere in the protocol's body
     local inside, body, closed = false, {}, false
     for _, line in ipairs(lines) do
         if line == "public protocol Store {" then

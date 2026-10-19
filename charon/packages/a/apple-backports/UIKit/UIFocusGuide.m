@@ -1,9 +1,5 @@
 #import <UIKit/UIKit.h>
 
-// A focus guide is a layout guide the focus engine reads: a focus move that crosses its frame goes to
-// preferredFocusedView, or to the first of preferredFocusEnvironments that can take focus. iOS 6 has no focus
-// engine, so the values are kept exactly as they were set and nothing in the release ever reads them. The
-// defaults are the ones the host gives: enabled, no preferred view, and an empty environment list.
 @implementation UIFocusGuide {
     BOOL _enabled;
     __weak UIView *_preferredFocusedView;

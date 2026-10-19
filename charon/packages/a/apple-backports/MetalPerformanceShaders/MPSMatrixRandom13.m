@@ -1,6 +1,3 @@
-// MPSMatrixRandom, from the header of the SDK of iOS 16.4. One object per release: the band machinery keeps an
-// object whole or drops it whole, so a file here carries the API of exactly one release.
-
 #import "CharonMPS.h"
 
 
@@ -24,9 +21,6 @@
     return nil;
 }
 
-// The two generators share one construction. -initWithDevice: is unavailable on MPSMatrixRandom itself
-// because a random kernel is always one of the two subclasses, and this is how each of them reaches
-// MPSKernel's own initialiser: it is in the init family, so it may build the object.
 - (id)initWithDevice:(id<MTLDevice>)device charonRandom:(BOOL)philox
 {
     if ((self = [super initWithDevice:device]))
@@ -34,9 +28,6 @@
     return self;
 }
 
-// What the two generators share after that: the data type, the distribution and the seed. A caller that
-// changes the data type or the distribution after the kernel is made gets a kernel that draws from the
-// new ones with the same seed, which is what the release's own properties do.
 - (id)charon_mps_configureWithDataType:(MPSDataType)dataType
                                   seed:(uint32_t)seed
                             distribution:(MPSMatrixRandomDistributionDescriptor *)distribution
@@ -60,11 +51,6 @@
     return self;
 }
 
-// Philox4x32-10, the counter based generator of Salmon, Moraes, Dror and Shaw: two 32 bit multipliers,
-// a Weyl sequence on the key and ten rounds. The counter is (0, 0, 0, block) for the caller's seed as
-// the key's first word, and the four words of a block are four consecutive elements of the stream.
-// Measured against the release's own MPSMatrixRandomPhilox, which produces exactly this, for the seeds
-// and the lengths in tests/backports/host/mpsmatrix/run.sh.
 static inline void CharonMPSPhiloxBlock(uint32_t block, uint32_t seed, uint32_t out[4])
 {
     uint32_t c0 = 0, c1 = 0, c2 = 0, c3 = block;
@@ -85,9 +71,6 @@ static inline void CharonMPSPhiloxBlock(uint32_t block, uint32_t seed, uint32_t 
     out[3] = c3;
 }
 
-// The Mersenne Twister of Matsumoto and Nishimura, the recurrence MTGP32 belongs to: the same 624 word
-// state and the same tempering, seeded from the caller's word. See facts/MetalPerformanceShaders/Solve.md
-// for what this does and does not reproduce of the release's own MTGP32 stream.
 static inline uint32_t CharonMPSMersenne(uint32_t state[624], NSUInteger *index)
 {
     if (*index >= 624) {
@@ -113,11 +96,6 @@ static void CharonMPSMersenneSeed(uint32_t state[624], uint32_t seed)
         state[i] = (uint32_t)(1812433253u * (state[i - 1] ^ (state[i - 1] >> 30)) + i);
 }
 
-// The value a random word takes for a distribution, in the release's own arithmetic: the default
-// distribution hands the word over untouched, a uniform one takes the top 23 bits as a fraction and
-// scales it into the range, and a normal one takes the inverse normal of that fraction. The uniform's
-// scale and add are done once, at the precision of the expression, which is what the release's own
-// lerp does and what the differential's bits confirm.
 static inline double CharonMPSRandomValue(MPSMatrixRandomDistribution type, uint32_t word, double minimum, double maximum, double mean, double standardDeviation)
 {
     if (type == MPSMatrixRandomDistributionDefault)
@@ -158,9 +136,6 @@ static inline double CharonMPSRandomValue(MPSMatrixRandomDistribution type, uint
     _batchSize = batchSize;
 }
 
-// One word of the stream, by position. Philox is counter based and so can be asked for any position
-// directly, which is what lets a batch range start in the middle of a destination; the Mersenne
-// Twister can only be walked, so the state is advanced to the batch's first word and then runs on.
 - (uint32_t)charon_mps_wordAtIndex:(NSUInteger)index
 {
     if (_philox) {
@@ -179,9 +154,6 @@ static inline double CharonMPSRandomValue(MPSMatrixRandomDistribution type, uint
     return _mersenneHeld;
 }
 
-// The batch a random kernel walks is its destination's batch dimension - the matrices of an MPSMatrix,
-// the vectors of an MPSVector - and within the batch the elements are the destination's own order. A
-// batchSize of zero, or a range past the end, is the whole of it, as the headers say.
 - (void)charon_mps_batchOver:(NSUInteger)available first:(NSUInteger *)first count:(NSUInteger *)count
 {
     NSUInteger begin = _batchStart < available ? _batchStart : available;

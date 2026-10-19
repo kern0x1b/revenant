@@ -1,10 +1,3 @@
-// MKScaleView: the bar in the corner of a map that says how long a piece of the map is.
-//
-// The bar is drawn from the release's own projection: a round number of metres that fits the width
-// the legend was given, and then that many metres' worth of the map view's own visible map rect,
-// which is the bar's own length. A scale view needs MapKit's iOS-only MKScaleView.h, which is why it
-// is in its own object: the distance formatter beside it must stay compilable for a macOS host probe,
-// which has the class but no such header.
 #import <MapKit/MapKit.h>
 #import <MapKit/MKScaleView.h>
 #import <UIKit/UIKit.h>
@@ -75,8 +68,6 @@
     [self charon_update];
 }
 
-// The bar: a round number of metres that fits the width of the view, and then the map points that
-// many metres stand for, which is the bar's own length. Charon's own, so it carries no API.
 - (void)charon_update
 {
     MKMapView *mapView = _mapView;
@@ -86,8 +77,6 @@
         _legend.hidden = YES;
         return;
     }
-    // The map view's own scale, out of the two things its 16.4 header declares: the visible map rect
-    // is so many map points across, and the view is so many points across.
     MKMapRect visible = mapView.visibleMapRect;
     double pointsWide = 0.0;
     if (mapView.bounds.size.width > 0.0 && visible.size.width > 0.0) {
@@ -99,7 +88,6 @@
         _legend.hidden = YES;
         return;
     }
-    // The largest 1, 2 or 5 times a power of ten of metres that leaves room for the legend above.
     double target = metresWide / 2.5;
     double scale = pow(10.0, floor(log10(target)));
     double multiple = 1.0;

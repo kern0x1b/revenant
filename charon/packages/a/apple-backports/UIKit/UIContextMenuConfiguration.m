@@ -25,13 +25,11 @@
 {
     if ((self = [super init])) {
         _identifier = [NSUUID UUID];
-        // No badge is shown until a count is set: the host answers NSIntegerMax, and so does the port (tests/backports/host/storage-config).
         _badgeCount = NSIntegerMax;
     }
     return self;
 }
 
-// The identifiers are copied on set, as the header says, so a set changed afterwards does not change the configuration; nil clears them.
 - (NSSet<NSString *> *)secondaryItemIdentifiers
 {
     return _secondaryItemIdentifiers;

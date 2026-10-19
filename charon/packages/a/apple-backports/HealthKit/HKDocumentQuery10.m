@@ -1,5 +1,3 @@
-// The iOS 10.0 members of the classes of iOS 8.0 and 9.0, and the document query of that release.
-
 #import <HealthKit/HealthKit.h>
 
 #import "CharonHKStore.h"
@@ -51,8 +49,6 @@
     return _sortDescriptors;
 }
 
-// Whether the documents themselves come back with the samples, which is what the header's flag asks
-// for and what a caller that reads the data of each document needs.
 - (BOOL)includeDocumentData
 {
     return _includeDocumentData;
@@ -89,8 +85,6 @@
     return [self charon_totalSwimmingStrokeCount];
 }
 
-// The release's own factory of 10.0: the form of 9.0 with the length of the swim added. The stroke
-// count is kept as it is given and read back, and the duration is the one the factory is given.
 + (instancetype)workoutWithActivityType:(HKWorkoutActivityType)activityType
                               startDate:(NSDate *)startDate
                                 endDate:(NSDate *)endDate
@@ -138,7 +132,6 @@
 
 @implementation HKQuery (CharonIOS100)
 
-// A predicate over the length of a swim, over the key path that names it.
 + (NSPredicate *)predicateForWorkoutsWithOperatorType:(NSPredicateOperatorType)type
                               totalSwimmingStrokeCount:(HKQuantity *)count
 {

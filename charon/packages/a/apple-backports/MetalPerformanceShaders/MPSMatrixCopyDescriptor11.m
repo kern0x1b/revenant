@@ -1,6 +1,3 @@
-// MPSMatrixCopyDescriptor, from the header of the SDK of iOS 16.4. One object per release: the band machinery keeps an
-// object whole or drops it whole, so a file here carries the API of exactly one release.
-
 #import "CharonMPS.h"
 
 
@@ -17,9 +14,6 @@
     return nil;
 }
 
-// A copy descriptor holds no storage and runs on no device, so it is made from its count alone; the
-// initialiser its header declares takes a device because the release's descriptor is a kernel-adjacent
-// object, and this one takes the device and does not keep it.
 - (id)charon_mps_withCount:(NSUInteger)count
 {
     _sources = [NSMutableArray array];
@@ -69,8 +63,6 @@
     for (NSUInteger index = 0; index < count; index++) {
         MPSMatrixCopyOffsets zero = {0, 0, 0, 0};
         if (offsets) {
-            // A packed array of MPSMatrixOffset, one per copy, whose elements the header says begin at
-            // the vector's own offset plus the byte offset given here.
             const MPSMatrixOffset *packed = (const MPSMatrixOffset *)((const char *)[offsets.data contents] + offsets.offset + byteOffset) + index;
             zero.sourceRowOffset = packed->rowOffset;
             zero.sourceColumnOffset = packed->columnOffset;

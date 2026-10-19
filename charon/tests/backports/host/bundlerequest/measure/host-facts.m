@@ -1,12 +1,8 @@
-// bundle-resource-request-facts.m - what the host's own NSBundleResourceRequest answers, step by step.
-// Every number this prints is a value the port has to reproduce.
 #import <Foundation/Foundation.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
 #import <dlfcn.h>
 
-/* -loadingPriority is a double, so it is read through an invocation like every other member: the
-   release's own header does not declare this class and the SDK's is behind an availability. */
 static double charon_priority(id object)
 {
     SEL selector = NSSelectorFromString(@"loadingPriority");
@@ -63,7 +59,7 @@ int main(int argc, char **argv)
         int step = argc > 1 ? atoi(argv[1]) : 0;
         Class request = NSClassFromString(@"NSBundleResourceRequest");
 
-        if (step == 0) {  // the class, the keys and the constant
+        if (step == 0) {
             P(@"class %s", request ? class_getName(request) : "(no class)");
             P(@"  super %s", request ? class_getName(class_getSuperclass(request)) : "(no class)");
             P(@"  +alloc gives %s", request ? class_getName([request alloc]) : "(no class)");
@@ -93,7 +89,7 @@ int main(int argc, char **argv)
             return 0;
         }
 
-        if (step == 1) {  // the initialisers and the four properties
+        if (step == 1) {
             NSSet *tags = [NSSet setWithObjects:@"one", @"two", nil];
             id bare = [[request alloc] init];
             P(@"-init          -> %s", bare ? class_getName([bare class]) : "(nil)");
@@ -147,7 +143,7 @@ int main(int argc, char **argv)
             return 0;
         }
 
-        if (step == 2) {  // the priority, the copy, the equality
+        if (step == 2) {
             NSSet *tags = [NSSet setWithObjects:@"one", nil];
             id one = [request alloc];
             one = ((id (*)(id, SEL, id))objc_msgSend)(one, @selector(initWithTags:), tags);
@@ -174,7 +170,7 @@ int main(int argc, char **argv)
             return 0;
         }
 
-        if (step == 3) {  // the three resource methods, which touch the system
+        if (step == 3) {
             NSSet *tags = [NSSet setWithObjects:@"one", nil];
             id one = [request alloc];
             one = ((id (*)(id, SEL, id))objc_msgSend)(one, @selector(initWithTags:), tags);
@@ -212,7 +208,7 @@ int main(int argc, char **argv)
             return 0;
         }
 
-        if (step == 4) {  // the archive, and the setters the header declares as read-only
+        if (step == 4) {
             NSSet *tags = [NSSet setWithObjects:@"one", @"two", nil];
             id one = [request alloc];
             one = ((id (*)(id, SEL, id, id))objc_msgSend)(one, @selector(initWithTags:bundle:), tags, [NSBundle mainBundle]);
@@ -234,7 +230,7 @@ int main(int argc, char **argv)
             return 0;
         }
 
-        if (step == 5) {  // the two NSBundle additions, which the ledger does not list
+        if (step == 5) {
             P(@"NSBundle +setPreservationPriority:forTags: %s, -preservationPriorityForTag: %s",
               [NSBundle instancesRespondToSelector:@selector(setPreservationPriority:forTags:)] ? "answers" : "NO",
               [NSBundle instancesRespondToSelector:@selector(preservationPriorityForTag:)] ? "answers" : "NO");

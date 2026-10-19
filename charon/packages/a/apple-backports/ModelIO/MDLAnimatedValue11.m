@@ -3,10 +3,6 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-// One sample of an animated value: a time and the components of the value at it. Every concrete
-// class keeps its samples in this one shape, so the base's keyTimes, its interpolation between two
-// samples and its lookup are written once and each class only converts to and from its own type.
-
 typedef struct {
     NSTimeInterval time;
     double component[16];
@@ -47,7 +43,6 @@ typedef struct {
     return copy;
 }
 
-// A private setter, so the copy above and the setters of the concrete classes share one append.
 - (void)charon_setSamples:(CharonMDLSample *)samples count:(NSUInteger)count
 {
     free(self.charon_samples);
@@ -58,9 +53,6 @@ typedef struct {
     self.charon_sampleCount = count;
 }
 
-// The index of the sample at or before the time, and how far the time lies between it and the next
-// one. A time before the first sample or after the last one is the first or the last sample, which
-// is what the host's animated values hold past their own range.
 - (void)charon_locate:(NSTimeInterval)time atIndex:(NSUInteger *)index fraction:(double *)fraction
 {
     NSUInteger count = self.charon_sampleCount;
@@ -96,14 +88,12 @@ typedef struct {
 {
     NSUInteger components = self.charon_componentCount;
     if (!components) {
-        // The base class itself holds no value of a shape of its own; a sample of it is one component.
         components = 1;
         self.charon_componentCount = 1;
     }
     NSUInteger index;
     double fraction;
     [self charon_locate:time atIndex:&index fraction:&fraction];
-    // A sample already at this time is this value, not a second one beside it.
     if (self.charon_sampleCount && self.charon_samples[index].time == time) {
         for (NSUInteger k = 0; k < components; k++)
             self.charon_samples[index].component[k] = value[k];

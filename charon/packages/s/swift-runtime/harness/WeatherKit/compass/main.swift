@@ -1,6 +1,3 @@
-// Differential probe for Wind.CompassDirection: built once against the host's WeatherKit (no -DOURS) and
-// once against packages/s/swift-runtime/files/WeatherKit/Wind.swift (-DOURS). The two outputs must match
-// line for line (facts/WeatherKit/CompassDirection.md).
 import Foundation
 #if !OURS
 import WeatherKit

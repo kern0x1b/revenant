@@ -1,19 +1,3 @@
-// seckey-ecraw.m - what the release's own Security does with an elliptic key, measured on the release
-// itself (xmake emulate -d iPhone4,1 -r 6.1.3 run /usr/libexec/seckey-ecraw). Everything in
-// facts/Security/SecKeyElliptic.md about the release side is what this prints, and the port's four
-// SecKey calls are written from it.
-//
-// A command-line program, no UIApplicationMain: build it as a daemon target (@addon/charon/daemon;
-// Security, Foundation; -fobjc-arc) and run it as above. It needs no OpenGL, no network and no
-// package of this repository's, so it runs on the emulated 6.1.3 and on a device alike.
-//
-// It asks, and prints one line per answer so two runs can be diffed:
-//   1. can the release make a P-256 pair at all (SecKeyGeneratePair), and what does it publish of it;
-//   2. what does SecKeyRawSign answer for a 32 byte digest - the two 32 byte halves, or their DER;
-//   3. with which padding does it take that call, and does it hash the digest itself;
-//   4. does SecKeyRawVerify accept what SecKeyRawSign produced;
-//   5. is there an elliptic key agreement on the release at all (dlsym over the names Security of that
-//      era had), and what does the finite-field one say for an EC key.
 #include <Security/Security.h>
 #include <dlfcn.h>
 #include <stdio.h>
@@ -32,7 +16,6 @@ int main(void)
 {
     setvbuf(stdout, NULL, _IONBF, 0);
 
-    // 1. A P-256 pair, from the release's own generator.
     NSDictionary *attributes = @{@"class": (__bridge id)kSecClassKey,
                                  @"type": (__bridge id)kSecAttrKeyTypeECSECPrimeRandom,
                                  @"size": @256};
@@ -53,7 +36,6 @@ int main(void)
         CFRelease(serialized);
     }
 
-    // 2. The release's own signing, over a digest, with each padding it might take.
     uint8_t digest[32];
     for (int index = 0; index < 32; index++) {
         digest[index] = (uint8_t)(index * 7 + 1);
@@ -81,7 +63,6 @@ int main(void)
             hex("release signature:", signature, length);
             OSStatus verified = SecKeyRawVerify(publicKey, paddings[which], digest, sizeof digest, signature, length);
             printf("release SecKeyRawVerify padding %s of it: %d\n", names[which], (int)verified);
-            // A different digest must not verify, so a YES above is about this message and not a shape.
             uint8_t other[32];
             memcpy(other, digest, sizeof other);
             other[0] ^= 0xff;
@@ -89,7 +70,6 @@ int main(void)
                    (int)SecKeyRawVerify(publicKey, paddings[which], other, sizeof other, signature, length));
         }
     }
-    // 3. Whether the release hashes the digest itself: 32 bytes is a digest, 40 is a SHA-1 of one.
     if (bestLength) {
         uint8_t forty[40];
         memset(forty, 0x5a, sizeof forty);
@@ -99,9 +79,6 @@ int main(void)
                (int)SecKeyRawSign(privateKey, kSecPaddingNone, forty, sizeof forty, signature, &length));
     }
 
-    // 4. Is there an elliptic key agreement on this release at all? The names Security of that era
-    // had, asked one by one: the two the SecKey API of iOS 10 uses, and the finite-field family that
-    // is the release's own key agreement.
     static const char *exchangeNames[] = {
         "SecKeyCopyExchangeKey", "SecKeyExchangeKey", "SecKeyECDHExchange", "SecKeyComputeSharedSecret",
         "SecKeyCreateFromData", "SecKeyECDH", "SecKeyExchange", NULL};

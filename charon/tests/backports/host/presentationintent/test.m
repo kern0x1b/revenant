@@ -2,16 +2,6 @@
 #import <objc/message.h>
 #import "check.h"
 
-/* NSPresentationIntent: the port's class and the system's in one process.
-   The port's sources are compiled with their class and their selectors renamed, so the two
-   implementations never meet: every case below builds one intent with each and holds the answers
-   side by side. The class is a value, so a case is a chain of kinds, and the whole chain is
-   compared: every property the header declares, the raise the table factory makes, equality
-   against identity, the archive's keys and the round trip. */
-
-/* The keys an intent's archive carries, read back out of a real keyed archive. Each side writes
-   through its own -encodeWithCoder:, because the two classes are two classes and each carries the
-   method of its own name. */
 static NSArray *keysInArchive(id intent)
 {
     NSError *error = nil;
@@ -29,8 +19,6 @@ static NSArray *keysInArchive(id intent)
 
 static Class ourClass;
 
-/* With the port's class compiled under a name of its own and its selectors left alone (the "*"
-   of uikit2/renames.sh), the two classes never collide, so both sides are called the same way. */
 static id makeIn(Class kind, NSString *factory, NSInteger identity, NSInteger number, id parent, NSArray *alignments)
 {
     SEL selector = NSSelectorFromString(factory);
@@ -40,9 +28,6 @@ static id makeIn(Class kind, NSString *factory, NSInteger identity, NSInteger nu
     NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
     invocation.selector = selector;
     invocation.target = kind;
-    /* The arguments go in by the name of the selector's part, since a factory's two numbers and its
-       two objects come in a different order in each of the twelve. */
-    /* Every part of a selector ends in a colon, so splitting leaves an empty piece at the end. */
     NSMutableArray *parts = [NSMutableArray array];
     for (NSString *part in [factory componentsSeparatedByString:@":"])
         if (part.length)
@@ -65,9 +50,6 @@ static id makeIn(Class kind, NSString *factory, NSInteger identity, NSInteger nu
         [invocation setArgument:&value atIndex:index + 2];
     }
     [invocation invoke];
-    /* The return value of an object-returning method read through an invocation is +0 and the
-       invocation may have put it in the pool itself; taking it unretained and letting the caller's
-       ARC own it is what keeps one release and not two. */
     id __unsafe_unretained read = nil;
     [invocation getReturnValue:&read];
     return read;
@@ -125,8 +107,6 @@ static NSString *answer(id intent)
     for (NSUInteger index = 0; index < 3; index++) {
         SEL selector = NSSelectorFromString(@(objects[index]));
         id value = ((id (*)(id, SEL))objc_msgSend)(intent, selector);
-        /* The parent is compared by presence, not by its description: the two classes describe
-           themselves differently, which says nothing about the intent. */
         if (index == 2)
             value = value ? (id)@"some" : nil;
         [text appendFormat:@"%s=%@ ", objects[index], value ? [value description] : @"nil"];
@@ -147,7 +127,6 @@ int main(void)
         ourClass = NSClassFromString(@"CharonHostNSPresentationIntent");
         CHECK(ourClass != Nil, "the port defines NSPresentationIntent under its own name");
 
-        /* Every chain of two kinds, and every chain of three: the level is what the chain decides. */
         for (NSInteger first = 0; first < 8; first++) {
             for (NSInteger second = 0; second < 8; second++) {
                 id ourParent = build(YES, first, nil, 10, 1), systemParent = build(NO, first, nil, 10, 1);
@@ -165,7 +144,6 @@ int main(void)
                 }
             }
         }
-        /* The table kinds, with a column count and the alignments that have to match it. */
         for (NSInteger columns = 0; columns < 4; columns++) {
             id ourTable = build(YES, 8, nil, 30, columns), systemTable = build(NO, 8, nil, 30, columns);
             compare([NSString stringWithFormat:@"table with %ld columns", (long)columns], ourTable, systemTable);
@@ -175,7 +153,6 @@ int main(void)
                 compare([NSString stringWithFormat:@"table %ld columns, kind %ld", (long)columns, (long)kind], ourIntent, systemIntent);
             }
         }
-        /* Runs of spans, where the level is above two. */
         for (NSInteger length = 1; length <= 6; length++) {
             id ourNode = nil, systemNode = nil;
             for (NSInteger step = 0; step < length; step++) {
@@ -184,11 +161,9 @@ int main(void)
             }
             compare([NSString stringWithFormat:@"a run of %ld spans", (long)length], ourNode, systemNode);
         }
-        /* Identities out of the ordinary, kept as they are. */
         for (NSInteger identity = -3; identity < 3; identity++)
             compare([NSString stringWithFormat:@"identity %ld", (long)identity], build(YES, 4, nil, identity, 0), build(NO, 4, nil, identity, 0));
 
-        /* The check the table factory makes, on both sides. */
         for (NSInteger columns = -1; columns < 3; columns++) {
             for (NSInteger given = 0; given < 3; given++) {
                 NSMutableArray *alignments = [NSMutableArray array];
@@ -213,8 +188,6 @@ int main(void)
             }
         }
 
-        /* Equality, and equivalence with the identity left out. Every pair is one case, held on
-           both sides at once, and the port's two answers are compared with the system's two. */
         id ourParagraph = build(YES, 0, nil, 70, 0), systemParagraph = build(NO, 0, nil, 70, 0);
         id ourOtherParagraph = build(YES, 0, nil, 71, 0), systemOtherParagraph = build(NO, 0, nil, 71, 0);
         id ourQuote = build(YES, 6, nil, 72, 0), systemQuote = build(NO, 6, nil, 72, 0);
@@ -250,10 +223,6 @@ int main(void)
                           [NSString stringWithFormat:@"the system answers %d, the backport answers %d", systemEquivalent,
                            ((BOOL (*)(id, SEL, id))objc_msgSend)(ourLeft, @selector(isEquivalentToPresentationIntent:), ourRight)]);
             if (systemEqual && [ourLeft isEqual:ourRight]) {
-                /* -hash owes one thing and one thing only: two equal intents hash equal, which is
-                   what a set or a dictionary of intents needs. The number itself is the host's own
-                   mixing of private fields, which no API fixes, so the two numbers are printed
-                   rather than held equal -- facts/Foundation/NSPresentationIntent.md says so. */
                 NSUInteger systemHash = ((NSUInteger (*)(id, SEL))objc_msgSend)(systemLeft, @selector(hash));
                 NSUInteger ourHash = ((NSUInteger (*)(id, SEL))objc_msgSend)(ourLeft, @selector(hash));
                 NSUInteger ourOtherHash = ((NSUInteger (*)(id, SEL))objc_msgSend)(ourRight, @selector(hash));
@@ -271,7 +240,6 @@ int main(void)
         charon_check(![[NSObject class] isKindOfClass:[systemList class]], "the system's class is its own",
                      @"the system's class is not what the test thinks it is");
 
-        /* The archive: the keys, then the round trip through the backport's own coder. */
         id ourTable = build(YES, 8, build(YES, 0, nil, 90, 0), 91, 3);
         id systemTable = build(NO, 8, build(NO, 0, nil, 90, 0), 91, 3);
         NSArray *systemKeys = keysInArchive(systemTable);
@@ -279,7 +247,6 @@ int main(void)
         charon_check([systemKeys isEqualToArray:ourKeys], "the archive's keys",
                      [NSString stringWithFormat:@"the system writes %@, the backport writes %@", systemKeys, ourKeys]);
 
-        /* And a round trip: the port's own archive, read back by the port's own decoder. */
         id read = nil;
         @try {
             NSError *readError = nil;

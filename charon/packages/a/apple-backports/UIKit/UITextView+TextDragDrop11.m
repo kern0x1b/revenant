@@ -10,29 +10,6 @@
 #import "CharonDragSession.h"
 #import "CharonTextDragDrop11.h"
 
-// The caller: a text view that can be dragged from and dropped onto, through the port's own drag
-// and drop interactions.
-//
-// The release has a text view and neither of these, so the port supplies the three properties
-// `UITextDraggable` and `UITextDroppable` declare on a text control, and the interactions that ask
-// the two text delegates' questions in the order their headers give. A drag begins by asking the
-// drag delegate what the text is; a drop asks the drop delegate whether the control will take it,
-// what it proposes, and then performs it.
-//
-// The order is Apple's, from the headers, as a fact rather than a copy:
-//   * `itemsForDrag:` is what a drag is, asked first, and a delegate that answers nothing is a drag
-//     that does not begin;
-//   * `dragPreviewForLiftingItem:session:` is the picture the lift animates, and
-//     `willAnimateLiftWithAnimator:session:` is where an application animates alongside it, so the
-//     preview comes before the animator and both before the session begins;
-//   * `dragSessionWillBegin:` is once the items exist and the lift is about to run;
-//   * on the drop side `willBecomeEditableForDrop:` is the gate -- a delegate that says no is a drop
-//     that is not allowed, and then nothing else is asked -- so it comes before `proposalForDrop:`,
-//     which is what the drop would do where it is now, and both before `willPerformDrop:` and the
-//     preview for dropping all the items;
-//   * the four session messages then report the drag as it moves over this control: enter, update,
-//     exit, end.
-
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 #pragma clang diagnostic ignored "-Wobjc-property-implementation"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -48,8 +25,6 @@ static const char CharonTextDropInteractionKey;
 
 @implementation UITextView (CharonTextDragDropAdaptors)
 
-// One adaptor per control, made once, so a control that is asked twice has one delegate and the
-// interaction's is not replaced under itself.
 - (CharonTextDragAdaptor *)charon_textDragDelegateAdaptor
 {
     static const char key;
@@ -74,17 +49,6 @@ static const char CharonTextDropInteractionKey;
 
 @end
 
-// -------------------------------------------------------------------------------------------
-// The bodies, once. A text view and a text field are unrelated classes, so a category on one
-// cannot be called from the other; the seven members are the SDK's two protocols' members and
-// they are written once here, against the protocols, and both categories below forward to them.
-// The one place the two delegates are stored, and it is the reason this class exists. Both headers
-// declare their delegate weak (UITextDragging.h:35, UITextDropping.h:24), and an associated object
-// held with OBJC_ASSOCIATION_ASSIGN does not zero: a delegate deallocated before the control leaves
-// a dangling slot that the adaptors then message, which is a crash and a wrong answer to what the
-// header says. The library is built with ARC and the port's minimum for these members is 6.0, so
-// weak references exist, and a box is what holds one: the association retains the box, the box's
-// target is weak, and reading target after the delegate is gone is nil rather than a stale address.
 @interface CharonWeakDelegateBox : NSObject
 @property (nonatomic, weak) id target;
 @end
@@ -101,8 +65,6 @@ static id CharonTextDragDelegateOf(id<UITextDraggable> control)
 
 static void CharonSetTextDragDelegate(id<UITextDraggable> control, id<UITextDragDelegate> delegate)
 {
-    // A fresh box each time, so a replaced or cleared delegate leaves nothing pointing at the old
-    // one; nil clears the slot outright rather than storing an empty box.
     if (!delegate) {
         objc_setAssociatedObject(control, &CharonTextDragDelegateKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         return;
@@ -117,8 +79,6 @@ static UIDragInteraction *CharonTextDragInteraction(id<UITextDraggable> control)
     UIDragInteraction *interaction = objc_getAssociatedObject(control, &CharonTextDragInteractionKey);
     if (interaction)
         return interaction;
-    // The adaptor accessors are the port's own and are declared on UIView, which both
-    // UITextView and UITextField are; the protocols do not carry them and do not need to.
     id<UIDragInteractionDelegate> delegate =
         (id<UIDragInteractionDelegate>)[(UIView *)control charon_textDragDelegateAdaptor];
     interaction = [[UIDragInteraction alloc] initWithDelegate:delegate];
@@ -181,8 +141,6 @@ static BOOL CharonIsTextDropActive(id<UITextDroppable> control)
     return interaction ? interaction.currentDrop != nil : NO;
 }
 
-// The forwarders, twice. Each category is the SDK's class adopting the SDK's protocol, and each
-// body is the one above with the class's own type.
 #define CHARON_TEXT_DRAG_DROP_MEMBERS(ControlType)                                                              \
     - (id<UITextDragDelegate>)textDragDelegate { return CharonTextDragDelegateOf(self); }                        \
     - (void)setTextDragDelegate:(id<UITextDragDelegate>)d { CharonSetTextDragDelegate(self, d); }                  \
@@ -195,18 +153,14 @@ static BOOL CharonIsTextDropActive(id<UITextDroppable> control)
     - (UIDropInteraction *)textDropInteraction { return CharonTextDropInteraction(self); }                         \
     - (BOOL)isTextDropActive { return CharonIsTextDropActive(self); }
 
-// UITextDraggable and UITextDroppable are adopted by UITextView in the SDK's class extension.
 @implementation UITextView (CharonTextDragDrop11)
 CHARON_TEXT_DRAG_DROP_MEMBERS(UITextView)
 @end
 
-// And by UITextField, in its own class extension, which is why a text field is a drag and drop
-// surface in exactly the way a text view is and gets the same members from the same bodies.
 @implementation UITextField (CharonTextDragDrop11)
 CHARON_TEXT_DRAG_DROP_MEMBERS(UITextField)
 @end
 
-// The two adaptors, and the questions they ask in the order the two headers give.
 @implementation CharonTextDragAdaptor
 @synthesize control = _control;
 
@@ -217,16 +171,12 @@ CHARON_TEXT_DRAG_DROP_MEMBERS(UITextField)
     return self;
 }
 
-// The interaction asks the adaptor what is being dragged, and the adaptor asks the text's own drag
-// delegate, which is the answer the SDK's protocol wants. Nothing is dragged when there is no
-// delegate, which is why the session this receives may be nil and is never relied on here.
 - (NSArray<UIDragItem *> *)dragInteraction:(UIDragInteraction *)interaction
                    itemsForBeginningSession:(id<UIDragSession>)session
 {
     return [self charon_itemsForDragSession:session];
 }
 
-// What the text is: the drag delegate's own answer, and nothing is dragged when it gives none.
 - (NSArray<UIDragItem *> *)charon_itemsForDragSession:(id<UIDragSession>)session
 {
     id<UITextDragDelegate> delegate = self.control.textDragDelegate;
@@ -235,8 +185,6 @@ CHARON_TEXT_DRAG_DROP_MEMBERS(UITextField)
         return nil;
     CharonTextDragRequest *request = [[CharonTextDragRequest alloc] initWithSession:session];
     if ([self.control isKindOfClass:[UITextView class]]) {
-        // The text range the selection covers, which is what the protocol calls the drag range: a
-        // range in the text, not an NSRange into a string.
         UITextView *text = (UITextView *)self.control;
         UITextPosition *start = [text positionFromPosition:text.beginningOfDocument offset:0];
         request.range = [text textRangeFromPosition:start toPosition:[text positionFromPosition:start offset:text.selectedRange.length]];
@@ -247,8 +195,6 @@ CHARON_TEXT_DRAG_DROP_MEMBERS(UITextField)
     return items.count ? items : nil;
 }
 
-// The picture the lift animates, from the drag delegate, and from the text itself when it has none:
-// the release's own text is drawn into an image of the range, which is what a text drag shows.
 - (UITargetedDragPreview *)charon_previewForLiftingItem:(UIDragItem *)item session:(id<UIDragSession>)session
 {
     id<UITextDragDelegate> delegate = self.control.textDragDelegate;
@@ -269,15 +215,9 @@ CHARON_TEXT_DRAG_DROP_MEMBERS(UITextField)
     UIImage *image = renderer.image;
     if (!image)
         return nil;
-    // A view is the preview and the control is the target, so the picture is the text and it is
-    // aimed at the control it came from: the preview's view and its target are the same control, and
-    // the lift animates from the range's own place because the parameters carry the visible path.
     UIDragPreviewParameters *parameters = [[UIDragPreviewParameters alloc] init];
     parameters.visiblePath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, image.size.width, image.size.height)];
     UIImageView *picture = [[UIImageView alloc] initWithImage:image];
-    // A picture of the text, aimed at the control it came from: the picture is what travels and the
-    // control is where it goes back to, and the parameters carry the visible path so the lift
-    // animates from the range's own place.
     return [[UITargetedDragPreview alloc] initWithView:picture
                                        parameters:parameters
                                             target:[[UIDragPreviewTarget alloc] initWithContainer:text
@@ -285,7 +225,6 @@ CHARON_TEXT_DRAG_DROP_MEMBERS(UITextField)
                                                                                                           CGRectGetMidY([text bounds]))]];
 }
 
-// The lift, in the header's order: the preview, then the animator, then the session beginning.
 - (void)charon_willAnimateLiftWithSession:(id<UIDragSession>)session
 {
     id<UITextDragDelegate> delegate = self.control.textDragDelegate;
@@ -321,8 +260,6 @@ CHARON_TEXT_DRAG_DROP_MEMBERS(UITextField)
     return self;
 }
 
-// Whether this control will take the drop at all. A delegate that says no ends the sequence here,
-// which is the header's own rule and why the gate comes first.
 - (BOOL)charon_canHandleSession:(id<UIDropSession>)session
 {
     id<UITextDropDelegate> delegate = self.control.textDropDelegate;
@@ -334,7 +271,6 @@ CHARON_TEXT_DRAG_DROP_MEMBERS(UITextField)
     return editability == UITextDropEditabilityYes;
 }
 
-// What the drop would do where it is now, asked on every move, and then the drop itself.
 - (void)charon_updateForSession:(id<UIDropSession>)session
 {
     id<UITextDropDelegate> delegate = self.control.textDropDelegate;
@@ -378,7 +314,6 @@ CHARON_TEXT_DRAG_DROP_MEMBERS(UITextField)
 
 @end
 
-// The two request objects.
 @implementation CharonTextDragRequest
 @synthesize session = _session;
 @synthesize range = _range;

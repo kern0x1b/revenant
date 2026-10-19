@@ -47,9 +47,6 @@ static const char CharonMovementKey;
     [view performBatchUpdates:^{
         ((void (*)(id, SEL, id, id, id))objc_msgSend)(source, @selector(collectionView:moveItemAtIndexPath:toIndexPath:), view, from, target);
         [view moveItemAtIndexPath:from toIndexPath:target];
-        // The layout is invalidated through the context it makes for a movement in progress, so a
-        // layout that answers that question is laying the cells out, and the cells that moved are
-        // the ones it re-lays.
         UICollectionViewLayout *layout = view.collectionViewLayout;
         [layout invalidateLayoutWithContext:[layout invalidationContextForInteractivelyMovingItems:@[target]
                                                                                withTargetPosition:_position
@@ -67,11 +64,6 @@ static const char CharonMovementKey;
     NSIndexPath *hit = [view indexPathForItemAtPoint:_position];
     if (!hit)
         return nil;
-    // The layout is asked where the item being moved would land at this point. Its own answer to
-    // that question is the index path it was asked about, which is no opinion at all, so the item
-    // is left where the finger is over it; a layout that arranges its items differently answers
-    // otherwise and that answer stands. The delegate is asked after it, so it still has the last
-    // word, which is where it was before.
     NSIndexPath *proposed = [view.collectionViewLayout targetIndexPathForInteractivelyMovingItem:_current withPosition:_position];
     if (proposed && ![proposed isEqual:_current])
         hit = proposed;
@@ -171,9 +163,6 @@ static const char CharonMovementKey;
     movement.ending = YES;
     [movement.scroller invalidate];
     movement.scroller = nil;
-    // The layout is told the movement came to its end, at the index paths it ended at and the one
-    // it began at, and whether it was called off, so a layout that lays its cells out around a
-    // movement can put them back.
     UICollectionView *view = movement.view;
     UICollectionViewLayout *layout = view.collectionViewLayout;
     [layout invalidateLayoutWithContext:[layout invalidationContextForEndingInteractiveMovementOfItemsToFinalIndexPaths:@[movement.current]

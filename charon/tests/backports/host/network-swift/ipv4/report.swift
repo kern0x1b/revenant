@@ -1,7 +1,3 @@
-// Test-only, shared by the IPv4Address differential. Zones are en0, which the host path lists on every run: the test seam reads the
-// names the first path lists, and lo0 is missing from that list on some runs, so a loopback zone is measured by probe, not here.
-// The strings, the Data lengths and the pairs of the corpus, and the lines
-// each one prints. Built against Apple's Network and against this tree's Network, and the two outputs must be identical.
 import Foundation
 import Network
 

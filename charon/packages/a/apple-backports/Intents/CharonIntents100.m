@@ -1,20 +1,3 @@
-//
-//  CharonIntents100.m
-//  Intents
-//
-//  The ten Intents classes whose behaviour is more than storage, and the two stores an
-//  application on this release can really keep: the interactions it donates and the vocabulary
-//  it offers. Everything here is hand written; the rest of the framework's 10.0.1 classes are
-//  generated into IN10_0.m from the SDK's own declarations.
-//
-//  What this release cannot do, and what it answers instead, is written down in
-//  facts/Intents/Intents.md, which every registry entry of this framework points at. In short:
-//  there is no assistant daemon here, so nothing is ever asked of the user, no interaction is
-//  ever read by the system, and every one of those seams says so — by storing what the
-//  application gave it in a real per-application store, or by answering with the value Apple's
-//  own documentation gives a system that cannot reach the service.
-//
-
 #import <Intents/Intents.h>
 #import <Intents/INIntentHandlerProviding.h>
 #import <Intents/INParameter.h>
@@ -22,10 +5,6 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-// The SDK marks each class's initialiser as the designated one, in a header this package does
-// not own, so clang reads the -initWithCoder: and -copyWithZone: below as convenience
-// initialisers of classes that have a designated one. The warning is about a convention and not
-// about behaviour: each of them is the header's own chain.
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
 #import "../../../c/charon-coding/files/CharonCoding.h"
@@ -46,8 +25,6 @@
     return [NSString stringWithFormat:@"<INImage %@%@>", _name ?: @"", _data ? @" data" : @""];
 }
 
-// The bytes the image carries, for IntentsUI's category on INImage (INImage+IntentsUI100.m and
-// INImage+IntentsUI110.m), which needs them to encode, decode and hand them back. Not an SDK name.
 - (NSData *)charon_imageData
 {
     return _data;
@@ -58,9 +35,6 @@
     if (!name.length) {
         return nil;
     }
-    // The app's own asset catalogue is the release's, and an Intents image is one of the app's
-    // images: it is resolved through UIKit, which is where the catalogue lives on every release
-    // this port covers, and carried afterwards as the data itself so nothing holds a UIImage.
     UIImage *image = [UIImage imageNamed:name];
     NSData *data = image ? UIImagePNGRepresentation(image) : nil;
     if (!data) {
@@ -71,9 +45,6 @@
 
 + (instancetype)systemImageNamed:(NSString *)name
 {
-    // The answer is UIKit's own, the same name for name: +[UIImage systemImageNamed:] draws from the one symbol
-    // table of the UIKit band (UIKit/UIImage+Symbols.m), and answers nil for every name outside it. Nothing here keeps
-    // a second list, so the two cannot disagree. The image is carried as its PNG, as imageNamed: carries one.
     if (!name.length) {
         return nil;
     }
@@ -154,9 +125,6 @@
     INIntentDonationMetadata *_donationMetadata;
 }
 
-// The phrase the system offers to speak for this intent, which the system reads and the
-// application sets: kept as given, and nil until it is set, which is what the header's
-// readwrite, copy, nullable says.
 - (NSString *)suggestedInvocationPhrase
 {
     return _suggestedInvocationPhrase;
@@ -177,12 +145,6 @@
     _shortcutAvailability = shortcutAvailability;
 }
 
-// donationMetadata is the metadata the system reads when the intent is donated. The class it names,
-// INIntentDonationMetadata, arrived with iOS 15 and IS carried by this delivery - IN16_0.m defines
-// it - so the property is answered here rather than left dynamic. It was @dynamic with the reason
-// "a class of a later group of this same delivery", which was false: the class is in the 16.0
-// group of this same delivery, and a getter that answers nil and a setter that keeps what it is
-// given are what the header's own copy/nullable wording says this is.
 - (INIntentDonationMetadata *)donationMetadata
 {
     return _donationMetadata;
@@ -196,10 +158,6 @@
 - (instancetype)init
 {
     if ((self = [super init])) {
-        // The system assigns an intent's identifier when the interaction carrying it is donated;
-        // this release donates nothing to a system, and the interaction store below is keyed by
-        // this value, so it is made where the intent is made. It is the same UUID string the
-        // system would have written, and a port that reads it back sees a stable key.
         _identifier = [[NSUUID UUID] UUIDString];
     }
     return self;
@@ -215,10 +173,6 @@
     if (_intentDescription) {
         return _intentDescription;
     }
-    // The SDK does not document how the framework derives this from the intent's class, and
-    // this release has no framework to ask. The class name is the whole of what an intent
-    // knows about itself, so the words of the class are the description, with the framework's
-    // own IN prefix and Intent suffix off: INSendMessageIntent reads "Send message".
     NSString *name = [NSString stringWithCString:class_getName([self class]) encoding:NSUTF8StringEncoding];
     if ([name hasPrefix:@"IN"]) {
         name = [name substringFromIndex:2];
@@ -230,7 +184,6 @@
     for (NSUInteger index = 0; index < name.length; index++) {
         unichar letter = [name characterAtIndex:index];
         unichar before = index ? [name characterAtIndex:index - 1] : 0;
-        // A class name is ASCII, and a capital that follows a lower-case letter starts a word.
         BOOL startsWord = index > 0 && letter >= 'A' && letter <= 'Z' &&
             before >= 'a' && before <= 'z';
         if (startsWord && words.length > 0) {
@@ -264,8 +217,6 @@
 
 - (INImage *)keyImage
 {
-    // The image of the first parameter that has one. The parameters are read in name order so
-    // the answer is the same on every call, which a dictionary's own order would not promise.
     for (NSString *name in [_imagesByParameter.allKeys sortedArrayUsingSelector:@selector(compare:)]) {
         INImage *image = _imagesByParameter[name];
         if (image) {
@@ -337,8 +288,6 @@
                               valueToConfirm:nil];
 }
 
-// The two factories the header declares with a reason, which the host runtime answers as measured in
-// facts/Intents/Intents.md: the reason is kept as given, and the item to confirm is the item given.
 + (instancetype)unsupportedWithReason:(NSInteger)reason
 {
     return [self charon_resolutionWithStatus:CharonIntentsResolutionUnsupported
@@ -376,15 +325,9 @@
                              valueToConfirm:(id)valueToConfirm
                          unsupportedReason:(NSInteger)unsupportedReason
 {
-    // A disambiguation of nothing is no answer: the host's factories return nil for an empty array (measured by
-    // tests/backports/host/resolution-factories), and every generated disambiguation factory builds through here.
     if (status == CharonIntentsResolutionDisambiguation && valuesToDisambiguate.count == 0) {
         return nil;
     }
-    // A success, or a notRequired, of no object is no answer: the generated successWith...: factories of an object pass
-    // a nil object with the notRequired status (or success), and the host's factories return nil for it (measured by
-    // tests/backports/host/resolution-factories). The enumeration factories pass their zero as a number, not nil, so
-    // they are not caught here, and +notRequired builds through charon_answerWithStatus: and is not caught either.
     if (resolvedValue == nil && (status == CharonIntentsResolutionSuccess || status == CharonIntentsResolutionNotRequired)) {
         return nil;
     }
@@ -395,7 +338,6 @@
                        unsupportedReason:unsupportedReason];
 }
 
-// The answer as it is built, with no rule of the answers that are no answer above.
 + (instancetype)charon_answerWithStatus:(CharonIntentsResolutionStatus)status
                           resolvedValue:(id)resolvedValue
                    valuesToDisambiguate:(NSArray *)valuesToDisambiguate
@@ -411,10 +353,6 @@
     return result;
 }
 
-// The allocation both builders above share, reached through objc_msgSendSuper for the reason the
-// class's own header marks -init unavailable (see CharonCoding.h). The receiver is an instance: the
-// helper's super -init answers its receiver, so passing the class would write the result's state into
-// the class object itself.
 + (instancetype)charon_adopted:(INIntentResolutionResult *)inner
 {
     INIntentResolutionResult *result = [self alloc];
@@ -451,9 +389,6 @@
     return _unsupportedReason;
 }
 
-// The readers the host's own class answers by these names (tests/backports/host/intents-resolution-reason). The codes
-// are the host's: success 0, unsupported 1, disambiguation 2, confirmation required 3, needs value 4, not required 5.
-// A disambiguation of one item is answered as a confirmation of that item, and the host does the same.
 - (NSInteger)resolutionResultCode
 {
     switch (_status) {
@@ -549,9 +484,6 @@
 @synthesize vocabularyIdentifier = _vocabularyIdentifier;
 @synthesize alternativeSpeakableMatches = _alternativeSpeakableMatches;
 
-// INSpeakable's identifier is the vocabulary identifier, and the header says so in as many
-// words ("Please use vocabularyIdentifier"), so the deprecated accessor answers it from the same
-// value rather than keeping a second one.
 - (NSString *)identifier
 {
     return _vocabularyIdentifier;
@@ -573,9 +505,6 @@
                       spokenPhrase:(NSString *)spokenPhrase
                  pronunciationHint:(NSString *)pronunciationHint
 {
-    // Deprecated in iOS 11 in favour of the initialiser that takes a vocabulary identifier,
-    // and the identifier is where the vocabulary identifier has been ever since, which is what
-    // a release that answers this call at all has to do with it.
     if ((self = [self initWithVocabularyIdentifier:identifier
                                       spokenPhrase:spokenPhrase
                                  pronunciationHint:pronunciationHint]))
@@ -585,9 +514,6 @@
 
 - (instancetype)initWithSpokenPhrase:(NSString *)spokenPhrase
 {
-    // The header's own second initialiser, and the only one that gives a phrase with no
-    // vocabulary: the state is the phrase alone, and no vocabulary identifier is invented for
-    // it, which the designated initialiser above would have had to invent one for.
     if ((self = [super init])) {
         _spokenPhrase = [spokenPhrase copy];
     }
@@ -622,20 +548,10 @@
 
 #pragma mark - INExtension
 
-// INExtension's own surface is empty: everything it is asked for comes from
-// INIntentHandlerProviding, whose one requirement is the handler for an intent. The handlers an
-// extension vends are the extension's own classes, so this looks them up in the loaded classes
-// by the protocol each intent's handling declares, and answers nil where there is none - which is
-// what a release with no assistant daemon to launch the extension has to say.
-
 @implementation INExtension
 
 + (NSString *)charon_handlingProtocolNameForIntent:(INIntent *)intent
 {
-    // The handling protocol of an intent is named after it: INBookRestaurantReservationIntent is
-    // handled by something conforming to INBookRestaurantReservationIntentHandling. The class is
-    // asked for its own name rather than the string being guessed, so a class named differently
-    // than its protocol is simply not found.
     NSString *name = [NSString stringWithCString:class_getName([intent class]) encoding:NSUTF8StringEncoding];
     return [name stringByAppendingString:@"Handling"];
 }
@@ -669,8 +585,6 @@
     if (!candidate) {
         return nil;
     }
-    // A handler is a new object the caller owns, and a method whose name does not begin with
-    // alloc, new, copy or init has to hand it over autoreleased, which is what this returns.
     id instance = [[self class] charon_newHandlerOfClass:candidate];
     return [instance respondsToSelector:@selector(handleIntent:)] ? instance : nil;
 }
@@ -712,9 +626,6 @@
 
 + (instancetype)applePayPaymentMethod
 {
-    // The one payment method the system itself provides, so it is the same object every time:
-    // the type is the one the header gives, and the name, the hint and the icon are the
-    // system's own, which this release has no image of and no name for.
     static INPaymentMethod *method;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
@@ -827,9 +738,6 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
 
 + (instancetype)canceledByUser
 {
-    // The header tells a canceled status apart from a service cancellation and from a missed
-    // pickup, and exposes nothing else about it, so the two answers differ only in what a
-    // reader of the class can already see: both are canceled, neither missed the pickup.
     return [self canceledByService];
 }
 
@@ -903,18 +811,11 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
 
 + (INSiriAuthorizationStatus)siriAuthorizationStatus
 {
-    // The header's own words for this value: not authorized to use Siri, and unable to change
-    // that answer, because Siri services are restricted on this release. There is no assistant
-    // daemon here to ask, so this is the status, and it is the last of the four that is not a
-    // statement about the user.
     return INSiriAuthorizationStatusRestricted;
 }
 
 + (void)requestSiriAuthorization:(void (^)(INSiriAuthorizationStatus status))handler
 {
-    // There is no authorization to ask for: the same restriction is already in force, so the
-    // handler is answered with it rather than left waiting for a prompt this release cannot
-    // show. A handler of nil is not called, as everywhere else in this package.
     if (handler) {
         handler([self siriAuthorizationStatus]);
     }
@@ -922,9 +823,6 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
 
 + (NSString *)siriLanguageCode
 {
-    // The code Siri is configured to speak with. This release has no Siri and therefore no such
-    // setting, and the language the release itself is set to is the one a voice would use, so
-    // that is what it answers, read from the same list every other part of the system reads.
     return [[[NSLocale preferredLanguages] firstObject] copy];
 }
 
@@ -951,8 +849,6 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
 
 - (void)setVocabulary:(NSOrderedSet *)vocabulary ofType:(INVocabularyStringType)type
 {
-    // The same store, read out of the speakable values it is given rather than out of plain
-    // strings: what a voice says for a term is the term's spoken phrase.
     NSMutableArray *phrases = [NSMutableArray arrayWithCapacity:vocabulary.count];
     for (id<INSpeakable> value in vocabulary) {
         NSString *phrase = value.spokenPhrase;
@@ -987,11 +883,6 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
     NSString *_groupIdentifier;
 }
 
-// The header declares these seven, and the ivars above are where the class keeps them; the
-// synthesised accessors are the ones the compiler would have made from the declarations, written
-// out so that a reader of this file - and the registry this file is measured into - can see that
-// each member has one. The three copy properties copy on the way in, which is what the header's
-// ownership means.
 @synthesize intent = _intent;
 @synthesize intentResponse = _intentResponse;
 @synthesize intentHandlingStatus = _intentHandlingStatus;
@@ -1013,12 +904,6 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
 
 - (void)donateInteractionWithCompletion:(void (^)(NSError *))completion
 {
-    // The system reads a donation and learns the interaction from it. This release runs no
-    // assistant daemon, so there is nothing to hand it to, and what the application meant is
-    // kept instead: the interaction is archived into this application's own store, stamped
-    // with the moment it was donated, and read back through the two accessors below. The
-    // donation is reported as the completion handler is given a nil error, because the store
-    // took it — never a fabricated error and never silence.
     if (!_dateInterval) {
         _dateInterval = [[NSDateInterval alloc] initWithStartDate:[NSDate date] endDate:[NSDate date]];
     }
@@ -1051,11 +936,6 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
 
 - (id)parameterValueForParameter:(INParameter *)parameter
 {
-    // The value the interaction's intent carries for that parameter: a parameter names a class and
-    // a key path into it, and the value is read out of the intent by that path. It is read one
-    // component at a time, each asked for by name first, because a key-value lookup of a path the
-    // object has no accessor for raises, and an API must not crash its caller: a path the intent
-    // does not have answers nil.
     id value = _intent;
     for (NSString *part in [parameter.parameterKeyPath componentsSeparatedByString:@"."]) {
         if (![value respondsToSelector:NSSelectorFromString(part)]) {
@@ -1105,17 +985,8 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
 
 @end
 
-// INRideDriver's two deprecated initialisers. The 16.4 header no longer declares them and the runtime still carries
-// both, so they are written here and not in IN10_0_1.m, which is generated from the header. Measured on the Catalyst
-// host (tests/backports/host/intents-ride-driver; facts/Intents/Intents.md, "INRideDriver's deprecated initialisers"):
-// the handle is kept as the value of a person handle of type Unknown, even when it is nil; a nil displayName is the
-// handle, or "" when there is none; and with components the displayName is the name the components make, or the
-// handle when they make none. Both chain to the designated initialiser.
 @implementation INRideDriver (CharonDeprecatedInitialisers)
 
-// The name a driver is shown by when the name is given as components: the given name and the family name, each only
-// when it is not nil and not empty, joined by one space in that order. The middle name, prefix, suffix and nickname
-// are not in it. Nil when neither part is there, so the caller falls back to the handle.
 static NSString *CharonRideDriverNameFromComponents(NSPersonNameComponents *components)
 {
     NSMutableArray *parts = [NSMutableArray array];
@@ -1144,12 +1015,6 @@ static NSString *CharonRideDriverNameFromComponents(NSPersonNameComponents *comp
 
 @end
 
-// The EventKit recurrence rule of a range. Measured on the Catalyst and macOS hosts (tests/backports/host/intents-ek;
-// facts/Intents/Intents.md, "EventKit's recurrence rule"): the frequency is mapped and the interval kept; the first day
-// of the rule's days becomes the weekday and the week number (the weekday ordinal) of the start components, for any
-// frequency, and the other days and the end are not kept; a nil rule is a daily rule of interval 0. The getter builds
-// the rule from the same things, and raises where the host raises: a range with no weekday asks EventKit for day 0,
-// which it refuses.
 static INRecurrenceFrequency CharonRecurrenceFrequencyFromEventKit(EKRecurrenceFrequency frequency)
 {
     switch (frequency) {
@@ -1165,8 +1030,6 @@ static INRecurrenceFrequency CharonRecurrenceFrequencyFromEventKit(EKRecurrenceF
     }
 }
 
-// The EventKit frequency of an Intents one. Minute and hourly have no EventKit rule, and the host answers nil for them
-// (measured), so there is no frequency to give and the caller answers nil.
 static BOOL CharonEventKitFrequencyFromRecurrence(INRecurrenceFrequency frequency, EKRecurrenceFrequency *eventKit)
 {
     switch (frequency) {
@@ -1222,7 +1085,6 @@ static BOOL CharonEventKitFrequencyFromRecurrence(INRecurrenceFrequency frequenc
     if (ordinal == NSDateComponentUndefined) {
         ordinal = 0;
     }
-    // EventKit refuses day 0 with "Invalid day number", which the host's getter raises as well: that raise is kept.
     EKRecurrenceDayOfWeek *day = [EKRecurrenceDayOfWeek dayOfWeek:weekday weekNumber:ordinal];
     return [[EKRecurrenceRule alloc] initRecurrenceWithFrequency:frequency interval:self.recurrenceRule.interval daysOfTheWeek:@[day] daysOfTheMonth:nil monthsOfTheYear:nil weeksOfTheYear:nil daysOfTheYear:nil setPositions:nil end:nil];
 }

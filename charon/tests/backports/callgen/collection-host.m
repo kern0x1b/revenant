@@ -1,4 +1,3 @@
-// The host's own answer for the five +successesWithResolved…: factories, through objc_msgSend.
 #import <Foundation/Foundation.h>
 #import <Intents/Intents.h>
 #import <objc/message.h>

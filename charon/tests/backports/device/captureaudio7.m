@@ -2,10 +2,6 @@
 #import <AVFoundation/AVFoundation.h>
 #import "check.h"
 
-// What a capture session of 6.1.3 does with the application's audio session (facts/AVFoundation/CaptureZoomAudioSession.md):
-// the application sets Playback, which cannot record, and a capture of the microphone still delivers audio. Then
-// the port's AVCaptureSession+ApplicationAudioSession7.m, built in, answers as that measurement says.
-
 static BOOL wait_until(BOOL (^done)(void), NSTimeInterval seconds)
 {
     NSDate *limit = [NSDate dateWithTimeIntervalSinceNow:seconds];
@@ -62,7 +58,6 @@ int main(int argc, char **argv)
         wait_until(^BOOL { return NO; }, 1);
         state("after capture");
         printf("measure interruptions %d\n", interruptions);
-        // The port: the session answers what 6.1.3 did above, and asking for more leaves it so.
         CHECK(!capture.usesApplicationAudioSession && !capture.automaticallyConfiguresApplicationAudioSession, "the capture session uses and configures no application session");
         capture.usesApplicationAudioSession = YES;
         capture.automaticallyConfiguresApplicationAudioSession = YES;

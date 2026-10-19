@@ -39,7 +39,6 @@
     return result;
 }
 
-// The system hands the prepared image to the handler from a queue of its own.
 - (void)prepareForDisplayWithCompletionHandler:(void (^)(UIImage *))completionHandler
 {
     void (^handler)(UIImage *) = [completionHandler copy];
@@ -50,8 +49,6 @@
     });
 }
 
-// A bitmap of exactly the size asked, in pixels at scale 1, with the image drawn
-// upright and stretched to fill it.
 - (UIImage *)imageByPreparingThumbnailOfSize:(CGSize)size
 {
     size_t width = (size_t)ceil(size.width), height = (size_t)ceil(size.height);

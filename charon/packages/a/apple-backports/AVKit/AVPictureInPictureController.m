@@ -3,34 +3,6 @@
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 
-// Rank 18 of coordination/corpus/crash-demand-top.tsv, LOAD-FAIL, class_confirmed against both
-// telegram and yattee's own trees - five of telegram's own submodules confirm this is real
-// picture-in-picture for calls, not merely an availability check. Two-step check first:
-// apple.objc.inventory() against the armv7 shared cache of 6.1.3 found no
-// AVPictureInPictureController/AVPictureInPictureControllerDelegate under any name - a genuine
-// gap - while AVPlayerLayer, the real class -initWithPlayerLayer: takes, is already real and
-// exported. grep of this tree's own .m files found no orphaned implementation.
-//
-// AVKit.framework does not exist at all on this release - not merely missing this one class, the
-// way MediaPlayer.framework carries older API around its missing command surface. Nor does any
-// cross-app window-compositing surface exist for a third-party dylib to draw into: the real
-// system's picture-in-picture floats a window SpringBoard itself owns and composites above every
-// app, the same wall CoreSpotlightBackports' own search bundle hit trying to reach the system
-// search UI, and the same one CallKitBackports' CharonCallScreen answers by shipping only the
-// application's own half of a two-process design (Darwin notifications and a shared file), never
-// pretending its process alone can draw the other side. No SpringBoard-side companion exists in
-// this tree for picture-in-picture, so this port cannot make the video survive the host app
-// leaving the foreground - that dimension is out of reach without one.
-//
-// What is real and in reach: everything picture-in-picture does *while the host app stays in the
-// foreground*, which is what a call screen actually needs. This class floats the real
-// AVPlayerLayer the caller already owns into a draggable UIWindow above the host app's own
-// content - the same CALayer, still attached to the same AVPlayer, still decoding and rendering
-// real frames - and reparents it back exactly where it came from on -stopPictureInPicture. This
-// is not a stub: video keeps playing, the user can drag the window around, and closing it restores
-// the original layout, all for real. What differs from the system feature, honestly, is that it
-// does not outlive the app losing focus.
-
 @interface AVPictureInPictureController ()
 @property (nonatomic, strong, readwrite) AVPlayerLayer *playerLayer;
 @end
@@ -65,21 +37,6 @@
 
 @end
 
-// AVKitErrorDomain, ios(9.0) - the one constant this library declares.
-//
-// The VALUE is measured, not assumed, and the measurement is in
-// facts/AVKit/AVPictureInPictureController.md. The point of measuring it is that the name is not the
-// value: coordination/corpus/queue's header records three constants whose value is not their name, and
-// the same header's rule is that a name is never a value. Read out of Apple's own data - the AVKit
-// image out of the armv7 shared cache of 9.0, through tools/corpus/cache-value.lua (the reader of
-// modules/apple/dyld.lua), its symbol AVKitErrorDomain read as a constant string:
-//
-//     $ CHARON_ROOT=$PWD xmake l tools/corpus/cache-value.lua ~/.charon/dyld/9.0/dyld_shared_cache_armv7 symbols.tsv
-//       (symbols.tsv holds the line "AVKitErrorDomain<TAB>p<TAB>p<TAB>s"; the reply's text column is the string)
-//
-// so the two do coincide here, and now that is a reading rather than a hope. The 8.0 image is the
-// control for the date: it carries the cstring but no _AVKitErrorDomain symbol at all, which is what
-// AVError.h's own ios(9.0) says.
 NSString * const AVKitErrorDomain = @"AVKitErrorDomain";
 
 @implementation AVPictureInPictureController
@@ -93,28 +50,15 @@ NSString * const AVKitErrorDomain = @"AVKitErrorDomain";
 
 @synthesize playerLayer = _playerLayer;
 @synthesize requiresLinearPlayback = _requiresLinearPlayback;
-// Declared by the header, not carried: without @dynamic clang synthesizes accessors that store a
-// value and do nothing with it (measured with nm on the object). canStopPictureInPicture is tvOS's.
-//
-// `contentSource` and `-initWithContentSource:` are implemented, in
-// AVPictureInPictureControllerContentSource15.m, the object that owns the 15.0 API - and they stay on
-// this @dynamic line for the reason the 8.0 object gives for `speeds`: with the name dropped, this
-// object synthesizes its own `contentSource` and `setContentSource:` over the 15.0 category's, and a
-// class's own methods beat a category's. Measured with otool -ov, same shape.
 @dynamic contentSource, canStartPictureInPictureAutomaticallyFromInline, canStopPictureInPicture;
 
 - (BOOL)isPictureInPictureSuspended
 {
-    // The floating window is the application's own and is never suspended while the application
-    // runs; when the application leaves the foreground, nothing of it runs to ask.
     return NO;
 }
 
 + (BOOL)isPictureInPictureSupported
 {
-    // Real, unconditionally YES: unlike the system feature this substitutes for, an in-app
-    // floating window needs no hardware entitlement or background-video capability - it works on
-    // every device this release runs on.
     return YES;
 }
 
@@ -154,10 +98,6 @@ NSString * const AVKitErrorDomain = @"AVKitErrorDomain";
     CALayer *layer = self.playerLayer;
     CALayer *superlayer = layer.superlayer;
     if (!superlayer || !self.isPictureInPicturePossible) {
-        // -1001 is AVKitErrorPictureInPictureStartFailed, the code AVError.h:31 gives for exactly
-        // this failure; the -1000 that was here before is AVKitErrorUnknown, which is what the
-        // framework answers when it does not know which error it is, and this port does know. The
-        // domain is the measured constant above, not a literal.
         NSError *error = [NSError errorWithDomain:AVKitErrorDomain code:-1001
                                           userInfo:@{NSLocalizedDescriptionKey: @"Picture in Picture could not be started"}];
         if ([_charonDelegate respondsToSelector:@selector(pictureInPictureController:failedToStartPictureInPictureWithError:)])

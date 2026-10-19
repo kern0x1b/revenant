@@ -1,16 +1,6 @@
--- The import cycles of the Swift skeletons (tools/gen/swift_model.lua import_graph, dependents_of; tools/gen/swift_render.lua attributed_row):
--- a module whose skeleton names a module that imports it back is a cycle ("circular dependency between modules 'CoreFoundation' and
--- 'CoreGraphics'": six pairs in the coordinator's sdk run, and the module's other errors are not reached). In the SDK the declaration
--- belongs to the module that depends on the other: CoreGraphics imports CoreFoundation, so CoreFoundation's rows that name CoreGraphics
--- are CoreGraphics's. Checked here: the graph reads the import lines of a fixture swiftinterface (an @_exported import, a plain one, a
--- submodule that is its module), the dependents of a module are the modules that reach it through imports (transitively, itself
--- excepted), a row that names one is left out of the skeleton, and the compare counts the SDK's row as attributed, not missing. Run:
--- xmake l tests/gen/swift_attribution_test.lua (pure Lua: no toolchain)
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 local SCRATCH = path.join(os.scriptdir(), "..", "..", "build", "swift-attribution-test")
 
--- A model row with every cell the renderer reads, "-" where the row says nothing.
 local function row(fields)
     local out = {kind = "-", usr = "-", container = "-", name = "-", side = "-", type = "-", params = "-", generic_sig = "-",
                  conformances = "-", superclass = "-", throwing = "-", async = "-", mutating = "-", attributes = "-", accessors = "-",
@@ -41,7 +31,6 @@ function main()
         end
     end
 
-    -- the graph: Fix imports CoreFoundation (re-exported), Foundation and Metal (a submodule), and nothing else
     os.rm(SCRATCH)
     local sdk = path.join(SCRATCH, "sdk")
     write(path.join(sdk, "System", "Library", "Frameworks", "Fix.framework", "Modules", "Fix.swiftmodule", "arm64e-apple-ios.swiftinterface"),
@@ -53,14 +42,12 @@ function main()
     check(graph.Fix ~= nil and graph.Fix.RelevanceKit, "an export with an access level (@_exported public import) is read")
     check(graph.Fix ~= nil and graph.Fix.MTLDevice == nil, "a submodule is its module, not a module of its own")
 
-    -- the dependents: a chain A imports B, C imports A; D imports nothing
     local chain = {A = {B = true}, C = {A = true}, D = {}, B = {}}
     local of_b = model.dependents_of(chain, "B")
     check(of_b.A and of_b.C and not of_b.D and not of_b.B, "the dependents of B are A (direct) and C (through A), not D, not B itself")
     local of_c = model.dependents_of(chain, "C")
     check(next_is_empty(of_c), "a module nothing imports has no dependents")
 
-    -- the skeleton: CoreFoundation depends on nothing here; a row naming CoreGraphics, which depends on CoreFoundation, is left out
     local rows = {
         row({kind = "swift-struct", name = "Fixed", usr = "s:Fixed"}),
         row({kind = "swift-property", container = "Fixed", name = "size", side = "-", type = "CoreGraphics.CGFloat", accessors = "get",
@@ -74,7 +61,6 @@ function main()
     check(string.find(text, "import CoreGraphics", 1, true) == nil, "the dependent module is not imported")
     check(string.find(text, "var count: Swift.Int", 1, true) ~= nil, "a row of this module's own names is declared")
 
-    -- the compare: the SDK's size row is attributed, not missing; the rest is equal
     local sdk_rows = {rows[1], rows[2], rows[3]}
     local ours = {rows[1], rows[3]}
     local result = roundtrip.compare(sdk_rows, ours, nil, dependents)
@@ -82,8 +68,6 @@ function main()
     local strict = roundtrip.compare(sdk_rows, ours, nil, nil)
     check(#strict.missing == 1 and strict.attributed == 0, "without the dependents the same row is missing")
 
-    -- the public name: RealityFoundation is the implementation of RealityKit (its public module re-exports it), so a row that names
-    -- RealityFoundation's own types imports nothing: "import RealityKit" would be the cycle RealityFoundation <-> RealityKit
     local own = {rows[1], row({kind = "swift-property", container = "Fixed", name = "twin", side = "-",
                                type = "RealityFoundation.Thing", accessors = "get", usr = "s:Fixed.twin"})}
     local public_text = render.render(own, "RealityFoundation", {RealityFoundation = true, RealityKit = true}, nil,
@@ -97,7 +81,6 @@ function main()
     end
 end
 
--- Whether a set holds no key.
 function next_is_empty(set)
     for _ in pairs(set) do
         return false

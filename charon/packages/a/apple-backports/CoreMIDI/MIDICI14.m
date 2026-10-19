@@ -1,13 +1,5 @@
-// The MIDI-CI 1.x classes of iOS 14: a profile made from its bytes alone, the profile state with enabled and disabled lists, a
-// session's profile send, the discovered node, the discovery manager and the responder. Measured on macOS
-// (oracle/micicapability.m, micicapability-macos.txt, 2026-10-09): a profile made from its bytes alone is named from them when
-// the first byte is the standard profile's (0x7E); the discovery manager never answers, since its MIDI-CI client is refused
-// (-10844), so its handler is never called; a responder with no profile delegate is not made. A discovered node is never
-// produced by this port, since it has no MIDI-CI transport (facts/CoreMIDI/MIDICI.md).
 #import "CharonMIDICI.h"
 
-// The MIDI-CI actions have no transport: each does nothing, and says so once, the first time it is used (the registry's inert
-// state). The names are the methods' own, as __PRETTY_FUNCTION__ gives them.
 void charon_ci_inert(const char * _Nonnull action)
 {
     static NSMutableSet *said;
@@ -51,7 +43,6 @@ void charon_ci_inert(const char * _Nonnull action)
 
 @implementation MIDICISession (CharonMIDI14)
 
-// No MIDI-CI transport: the profile is not sent, so the answer is NO, as for enable and disable.
 - (BOOL)sendProfile:(MIDICIProfile *)profile onChannel:(MIDIChannelNumber)channel profileData:(NSData *)profileSpecificData
 {
     charon_ci_inert(__PRETTY_FUNCTION__);
@@ -88,8 +79,6 @@ void charon_ci_inert(const char * _Nonnull action)
     return manager;
 }
 
-// Measured: the handler is never called when the discovery's client is refused, which is the answer this port gives on
-// every run, as it has no MIDI-CI transport to discover through.
 - (void)discoverWithHandler:(MIDICIDiscoveryResponseBlock)completedHandler
 {
     charon_ci_inert(__PRETTY_FUNCTION__);
@@ -121,7 +110,6 @@ void charon_ci_inert(const char * _Nonnull action)
 - (id<MIDICIProfileResponderDelegate>)profileDelegate { return _profileDelegate; }
 - (MIDICIDeviceInfo *)deviceInfo { return _deviceInfo; }
 
-// No MIDI-CI transport: no initiator connects to the responder, and no profile is notified or sent.
 - (BOOL)notifyProfile:(MIDICIProfile *)aProfile onChannel:(MIDIChannelNumber)channel isEnabled:(BOOL)enabledState { charon_ci_inert(__PRETTY_FUNCTION__); return NO; }
 - (BOOL)sendProfile:(MIDICIProfile *)aProfile onChannel:(MIDIChannelNumber)channel profileData:(NSData *)profileSpecificData { charon_ci_inert(__PRETTY_FUNCTION__); return NO; }
 - (BOOL)start { charon_ci_inert(__PRETTY_FUNCTION__); return NO; }

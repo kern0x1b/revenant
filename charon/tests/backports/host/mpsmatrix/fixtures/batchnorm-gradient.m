@@ -1,8 +1,3 @@
-// batchnorm-gradient.m — does the host compute MPSMatrixBatchNormalizationGradient at all?
-//
-// The three gradient cases come back zeros from the release against real values here, which is not
-// rounding. So: does the encode report an error, is the destination the buffer being read back, and
-// does the host need a state object from the forward pass before the gradient means anything?
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>
@@ -20,8 +15,6 @@ int main(void) { @autoreleasepool {
     id<MTLBuffer> vb   = [d newBufferWithBytes:var length:12 options:MTLResourceStorageModeShared];
     id<MTLBuffer> gb   = [d newBufferWithBytes:gam length:12 options:MTLResourceStorageModeShared];
     id<MTLBuffer> outb = [d newBufferWithLength:48 options:MTLResourceStorageModeShared];
-    // A sentinel in both per-parameter destinations: a fresh buffer is already zero, so writing zero
-    // and writing nothing are indistinguishable without it.
     float sentinel[3] = {-1.0f, -1.0f, -1.0f};
     id<MTLBuffer> ggb  = [d newBufferWithBytes:sentinel length:sizeof(sentinel) options:MTLResourceStorageModeShared];
     id<MTLBuffer> gbb  = [d newBufferWithBytes:sentinel length:sizeof(sentinel) options:MTLResourceStorageModeShared];
@@ -40,7 +33,6 @@ int main(void) { @autoreleasepool {
     P("identity: out.data == outb %d, gg.data == ggb %d, gbeta.data == gbb %d\n",
       out.data == outb, gg.data == ggb, gbeta.data == gbb);
 
-    // The forward first, and its status, so the gradient is asked after a pass that ran.
     id<MTLCommandBuffer> fwd = [q commandBufferWithUnretainedReferences];
     MPSMatrixBatchNormalization *f = [[MPSMatrixBatchNormalization alloc] initWithDevice:d];
     f.epsilon = 0.001f;
@@ -50,7 +42,6 @@ int main(void) { @autoreleasepool {
     float fv[12] = {0}; memcpy(fv, [outb contents], 48);
     P("forward wrote:"); for (int i = 0; i < 12; i++) P(" %g", fv[i]); P("\n");
 
-    // The gradient, and its status.
     id<MTLCommandBuffer> cb = [q commandBufferWithUnretainedReferences];
     MPSMatrixBatchNormalizationGradient *g = [[MPSMatrixBatchNormalizationGradient alloc] initWithDevice:d];
     g.epsilon = 0.001f;

@@ -1,10 +1,6 @@
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 
-// UIFocusHaloEffect, iOS 15. A halo is the focus outline an effect draws around a view. The port keeps the three ways of making one and the
-// three public properties, and draws nothing: the focus engine that draws the halo is not built (facts/UIKit/UIFocusEffects.md). The position is
-// stored as set, and its values are the header's: Automatic 0, Outside 1, Inside 2 (measured on the host). The container and the reference view
-// are weak, as the header says, and start nil.
 @implementation UIFocusHaloEffect {
     __weak UIView *_containerView;
     __weak UIView *_referenceView;

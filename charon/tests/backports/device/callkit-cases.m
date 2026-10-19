@@ -2,21 +2,11 @@
 #import <objc/runtime.h>
 #import "callkit-cases.h"
 
-// Every case here has to answer the same in the host's CallKit and in the
-// port's classes, so nothing may depend on a call service being there: the
-// host runs these without the VoIP entitlement, and a request that reaches
-// callservicesd comes back refused. What is left is what an application reads
-// off the objects themselves, which is most of what CallKit is before a call
-// starts.
-
 static NSString *flag(BOOL value)
 {
     return value ? @"1" : @"0";
 }
 
-// The host test compiles the port's classes under names of their own, so a
-// class name is recorded without that prefix and the two sides can be
-// compared.
 static NSString *named(Class cls)
 {
     NSString *name = NSStringFromClass(cls);
@@ -61,11 +51,6 @@ static void configuration(CallKitRecorder record)
                                    flag(copied == titled), (unsigned long)copied.maximumCallGroups,
                                    (unsigned long)copied.maximumCallsPerCallGroup, flag(copied.supportsVideo), flag(copied.includesCallsInRecents),
                                    (unsigned long)copied.supportedHandleTypes.count]);
-    // Two fields the host answers for as the CallKit of iOS 14 and later,
-    // which no longer carries them: the localized name is deprecated and a
-    // ringtone is kept as a resolved URL. The port follows the iOS 10 header
-    // it implements, so these two are expected to differ and run.sh holds
-    // them apart by name.
     record(@"configuration.deprecatedName", [NSString stringWithFormat:@"set=%@ copied=%@", titled.localizedName, copied.localizedName]);
     record(@"configuration.ringtone", [NSString stringWithFormat:@"set=%@ copied=%@", titled.ringtoneSound, copied.ringtoneSound]);
     titled.maximumCallGroups = 1;
@@ -88,9 +73,6 @@ static void handles(CallKitRecorder record)
     CXHandle *mail = [[CXHandle alloc] initWithType:CXHandleTypeEmailAddress value:@"a@b.c"];
     record(@"handle.values", [NSString stringWithFormat:@"%ld %@ %ld %@ %ld %@", (long)phone.type, phone.value,
                               (long)other.type, other.value, (long)mail.type, mail.value]);
-    // The hashes themselves are each implementation's own, so what is recorded
-    // is that equal handles hash alike and unequal ones do not - which is all
-    // a hash owes.
     record(@"handle.equality", [NSString stringWithFormat:@"same=%@ isEqual=%@ hash=%@ type=%@ self=%@",
                                 flag([phone isEqualToHandle:same]), flag([phone isEqual:same]), flag(phone.hash == same.hash),
                                 flag([phone isEqualToHandle:other]), flag([phone isEqualToHandle:phone])]);
@@ -119,8 +101,6 @@ static void actions(CallKitRecorder record)
     record(@"action.defaults", [NSString stringWithFormat:@"complete=%@ video=%@ contact=%@ handle=%@",
                                 flag(start.isComplete), flag(start.isVideo), flag(start.contactIdentifier != nil), start.handle.value]);
 
-    // The deadline is the action's own, from the moment it was made, and it is
-    // there before any provider has seen the action.
     NSUUID *another = fixed(9);
     NSArray *timed = @[[[CXAction alloc] init],
                        [[CXStartCallAction alloc] initWithCallUUID:another handle:[[CXHandle alloc] initWithType:CXHandleTypeGeneric value:@"t"]],
@@ -135,8 +115,6 @@ static void actions(CallKitRecorder record)
         [deadlines addObject:[NSString stringWithFormat:@"%@=%ld", named([action class]), (long)([action.timeoutDate timeIntervalSinceNow] + 0.5)]];
     record(@"action.timeouts", [deadlines componentsJoinedByString:@" "]);
 
-    // Nothing holds this action, so nothing performs it, and fulfilling or
-    // failing it leaves it as it was.
     [start fulfill];
     record(@"action.fulfillUnheld", flag(start.isComplete));
     [start fail];
@@ -246,9 +224,6 @@ static NSString *described(NSError *error)
     return error ? [NSString stringWithFormat:@"%@ %ld", error.domain, (long)error.code] : @"none";
 }
 
-// A call directory is an extension the host's CallKit manages through a service of its own, which macOS does not
-// run: its answers for an identifier are what a process with no such service gets, and are named divergent in the
-// host test. The queue the answers come on is the host's to tell.
 static void directoryManager(CallKitRecorder record)
 {
     CXCallDirectoryManager *manager = [CXCallDirectoryManager sharedInstance];
@@ -289,8 +264,6 @@ static void directoryManager(CallKitRecorder record)
     }
 }
 
-// What an extension's principal class and its context are without a host to hand them a request: the host's own
-// answer for a context an application makes itself.
 static void directoryExtension(CallKitRecorder record)
 {
     CXCallDirectoryExtensionContext *context = [[CXCallDirectoryExtensionContext alloc] init];
@@ -323,8 +296,6 @@ static void directoryExtension(CallKitRecorder record)
     record(@"directoryProvider.begin", [NSString stringWithFormat:@"class=%@ super=%@ returned", named([provider class]), named(class_getSuperclass([provider class]))]);
 }
 
-// The VoIP push report of iOS 14.5 belongs to a Notification Service Extension; the host answers a process that is
-// none and holds no notification filtering entitlement, as every caller on iOS 6 is.
 static void voipPush(CallKitRecorder record)
 {
     for (NSDictionary *payload in @[@{@"aps": @{}}, @{}]) {

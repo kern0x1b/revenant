@@ -1,15 +1,3 @@
-// differential.m - the port's sparse mapping refusals beside Metal's own, on the macOS 26 host.
-//
-// Metal's side runs in a child process per case, made after fork() and creating every object inside the child:
-// an object made before fork() and used after it crashed the child with a signal in the measurement that
-// facts/Metal/SparseMapping26.md records. The child's stderr goes to a file in this run's folder, and the
-// parent reads the reason from there. Metal's refusal is an assertion that aborts (status 134); a call Metal
-// accepts exits 0.
-//
-// The port's side is the three decision functions of packages/a/apple-backports/Metal/MTL4SparseMapping26.m,
-// compiled beside this file. The port's MTL4CommandQueue methods are not compiled here: their file needs the
-// port's OpenGL ES queue, which the host has no way to make. The method's only job is to raise the reason the
-// function returns, and the case where the function returns no reason is the one the method refuses anyway.
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #include <fcntl.h>
@@ -37,16 +25,15 @@ static void fail(NSString *format, ...)
     failures++;
 }
 
-// The Metal cases. Each one builds its objects in the child and makes the one call; `which` names the case.
 typedef enum {
-    CaseBufferPlain = 0,          // plain buffer, automatic heap: buffer refusal
-    CaseBufferSparseAutoHeap,     // sparse buffer, automatic heap: heap refusal
-    CaseBufferSparsePlacement,    // sparse buffer, placement heap, map: accepted (the requirements hold)
-    CaseBufferSparseNilHeapMap,   // sparse buffer, nil heap, map: nil-heap refusal
-    CaseBufferCopySparseSource,   // sparse source, plain destination: destination refusal
-    CaseBufferCopyPlainSource,    // plain source, plain destination: source refusal
-    CaseTextureUpdatePlain,       // plain texture, automatic heap: accepted by Metal
-    CaseTextureCopyPlain,         // plain textures: accepted by Metal
+    CaseBufferPlain = 0,
+    CaseBufferSparseAutoHeap,
+    CaseBufferSparsePlacement,
+    CaseBufferSparseNilHeapMap,
+    CaseBufferCopySparseSource,
+    CaseBufferCopyPlainSource,
+    CaseTextureUpdatePlain,
+    CaseTextureCopyPlain,
 } Case;
 
 static int run_metal(Case which, const char *name)
@@ -135,8 +122,6 @@ static int run_metal(Case which, const char *name)
     return WEXITSTATUS(status);
 }
 
-// The reason Metal printed, read back from the child's stderr: the text between the backquote and the quote of
-// Metal's assertion, as the child wrote it.
 static NSString *reason_of(const char *name)
 {
     char path[1024];
@@ -150,8 +135,6 @@ static NSString *reason_of(const char *name)
     return close.location == NSNotFound ? nil : [rest substringToIndex:close.location];
 }
 
-// A case Metal refuses: its status is the abort, its reason is the port's refusal text, and the port must
-// return that exact text from its decision.
 static void same_refusal(const char *name, Case which, NSString *portReason, NSString *what)
 {
     checks++;
@@ -165,8 +148,6 @@ static void same_refusal(const char *name, Case which, NSString *portReason, NSS
         fail(@"%@: Metal says <%@> and the port says <%@>", what, metal ?: @"nothing", portReason ?: @"nothing");
 }
 
-// A case Metal accepts. The port's decision must return no refusal for the inputs Metal was given, which
-// is the arithmetic of the requirements, and the divergence is named: the method refuses the call anyway.
 static void same_acceptance(const char *name, Case which, NSString *portReason, NSString *what)
 {
     checks++;
@@ -188,7 +169,6 @@ int main(int argc, const char *argv[])
         }
         folder = argv[1];
 
-        // Buffer update, the three refusals Metal measured and the one it accepts.
         same_refusal("buffer-plain", CaseBufferPlain,
                      CharonMetal4SparseBufferUpdateRefusal(NO, YES, NO, YES),
                      @"a plain buffer, automatic heap");
@@ -202,7 +182,6 @@ int main(int argc, const char *argv[])
                         CharonMetal4SparseBufferUpdateRefusal(YES, YES, YES, YES),
                         @"a sparse buffer, placement heap, map");
 
-        // Buffer copy: the source is named before the destination.
         same_refusal("copy-sparse-source", CaseBufferCopySparseSource,
                      CharonMetal4SparseBufferCopyRefusal(YES, NO),
                      @"a sparse source, plain destination");
@@ -210,8 +189,6 @@ int main(int argc, const char *argv[])
                      CharonMetal4SparseBufferCopyRefusal(NO, NO),
                      @"a plain source, plain destination");
 
-        // Texture forms: Metal accepts both with plain textures, so the port's refusal is its own, and the
-        // check is that the port refuses with its own text and Metal's status is recorded as accepted.
         checks++;
         if (run_metal(CaseTextureUpdatePlain, "texture-update-plain") != 0)
             fail(@"texture update: Metal did not accept a plain texture with an automatic heap");
@@ -223,8 +200,6 @@ int main(int argc, const char *argv[])
         if (!CharonMetal4SparseTextureCopyRefusal(NO, NO))
             fail(@"texture copy: the port's decision accepts plain textures, and the port cannot map a tile");
 
-        // The decision's order, pinned without Metal: a placement sparse buffer with a placement heap is the
-        // only input the requirements accept, and the port's buffers never are sparse.
         checks++;
         if (CharonMetal4SparseBufferUpdateRefusal(YES, YES, YES, YES) != nil)
             fail(@"the requirements hold for a sparse buffer and a placement heap, and the decision refuses them");

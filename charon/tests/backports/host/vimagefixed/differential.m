@@ -1,10 +1,3 @@
-// The port's scalar fixed-point conversions held against the host's own vImage, case by case, over the
-// tables the mappings were read from: a table that brackets both ends of each range and a spread between,
-// for every conversion, plus the refusals.
-//
-// The inputs are the ones .agent-work/runs/vimage/probe-fixedpoint.m used to read the mappings off the
-// host, so a mapping that drifts shows up as a difference rather than as a table nobody re-reads.
-
 #import <Accelerate/Accelerate.h>
 #import <Foundation/Foundation.h>
 #include <stdarg.h>
@@ -45,8 +38,6 @@ static void report(int passed, const char *name, const char *why, ...)
     fflush(stdout);
 }
 
-// One conversion over one input table, the port's and the host's each with their own buffers, every byte
-// of the answer compared - and the first byte that differs named, which is what a rounding difference is.
 static void compare(const char *name, vImage_Error (*mine)(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags),
                     vImage_Error (*theirs)(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags),
                     const void *inputs, size_t in_width, size_t out_width, size_t at_offset)
@@ -88,20 +79,10 @@ int main(void)
 {
     setbuf(stdout, NULL);
     @autoreleasepool {
-        // the input tables, in the wide form the host was asked with, and narrowed where the row is narrower
         const uint32_t ramp32[COUNT] = {0,        1,        2,        15,       16,       127,      128,      255,
                                         256,      1023,     1024,     2047,     2048,     4095,     4096,     16383,
                                         16384,    32767,    32768,    49151,    49152,    57343,    57344,    61439,
                                         61440,    64511,    64512,    65023,    65024,    65535,    65534,    65473};
-        // The Q12 table, and the three points that decide how 1.0 is rounded: 2049 and 4094 are a little
-        // over and under it and 4095 is the largest value that is still under it, so a mapping that rounded
-        // the other way, or that used the neighbouring power of two, answers differently at all three.
-        // - 2049, 4094 and 4095 decide how 1.0 is rounded, one a little over, one a little under and one the
-        //   largest value still under it;
-        // - 265, 522 and 1036 are values where the eight-bit answer differs if the scale is 255/4095 rather
-        //   than 255/4096, which no other value in the table would catch;
-        // - -4, -5 and -8 are the values whose scaled answer lands in (-0.5, 0], which is the only place the
-        //   saturation's own bounds can be told from one another.
         const int16_t q12[COUNT] = {0,     16,    -4,     -5,     -8,     265,    522,     1036,
                                     2048,  2049,  4094,   4095,   4096,   8192,    16384,   16385,
                                     0x7FFF, 0x8000, 0x8001, 0xC000, 0x3C00, 0x3800, 0x4000,  0x0400,
@@ -118,7 +99,6 @@ int main(void)
                                      -0.3332519531f, 0.0009765625f, -0.0009765625f, 16777216.0f, -16777216.0f,
                                      1.0e-7f,    -1.0e-7f,     0.99999988f, -0.99999988f, 65535.0f,    -65535.0f,
                                      0.000244140625f, 4096.0f,   -4096.0f,   0.001f,      1000.0f,     -0.5f};
-        // the sixteen-bit tables, as sixteen-bit words
         uint8_t ramp16[COUNT * 2], half8[COUNT * 2], q12_8[COUNT * 2], small8[COUNT], float8[COUNT * 4];
         for (int at = 0; at < COUNT; at++) {
             memcpy(ramp16 + at * 2, &ramp32[at], 2);
@@ -132,34 +112,22 @@ int main(void)
         compare("vImageConvert_16Q12to8", vImageConvert_16Q12to8, charon_host_vImageConvert_16Q12to8, q12_8, 2, 1, 2);
         compare("vImageConvert_16Q12toF", vImageConvert_16Q12toF, charon_host_vImageConvert_16Q12toF, q12_8, 2, 4, 2);
         compare("vImageConvert_16Q12to16F", vImageConvert_16Q12to16F, charon_host_vImageConvert_16Q12to16F, q12_8, 2, 2, 2);
-        // vImageConvert_16Fto16U is not carried, and the one thing the host does reproduce is kept here so
-        // the record stays checkable: over a row with no infinity in it, the answer for 0.5. The buffer was
-        // checked before any of this was called a difference in the oracle - rowBytes, alignment, a guard
-        // past the row and five widths all leave the behaviour as it is (facts/Accelerate/vImageFixedPoint.md).
         {
-            // The host's own answers for this conversion depend on where the buffers are: the same row on the
-            // stack gives one element and the same row on the heap gives the whole of it, so the row is asked
-            // on the heap, where the host answers it. That is the host's behaviour and the facts file says so.
-            // with a guard past the row, which is what the host needs to answer the whole of it - the same
-            // requirement the delivered vDSP facts record for vDSP_vswmax
             uint16_t *halves = calloc(64, sizeof(uint16_t));
             uint16_t *out = calloc(64, sizeof(uint16_t));
             for (int at = 0; at < 64; at++) {
                 halves[at] = 0xAAAA;
                 out[at] = 0xAAAA;
             }
-            halves[0] = 0x3800;   // 0.5, which the host rounds to 32768
-            halves[1] = 0x3C00;   // 1.0, which is 65535
-            halves[2] = 0x0400;   // the smallest normal, which is 4
+            halves[0] = 0x3800;
+            halves[1] = 0x3C00;
+            halves[2] = 0x0400;
             vImage_Buffer src = {halves, 32, 1, 64}, dest = {out, 32, 1, 64};
             vImageConvert_16Fto16U(&src, &dest, 0);
             {
                 uint16_t first = out[0], second = out[1];
                 free(halves);
                 free(out);
-                // the host writes one element of this row in every shape tried - rowBytes, alignment, a
-                // guard past the row, the stack against the heap, five widths - and stops the process when
-                // an infinity sits beside a subnormal. The one number it does give is the 0.5.
                 report(first == 32768, "the host's 16Fto16U rounds 0.5 up to 32768, which is what the port writes",
                        "the host wrote %u and %u", first, second);
             }
@@ -171,7 +139,6 @@ int main(void)
         compare("vImageConvert_8to16Q12", vImageConvert_8to16Q12, charon_host_vImageConvert_8to16Q12, small8, 1, 2, 1);
         compare("vImageConvert_Fto16Q12", vImageConvert_Fto16Q12, charon_host_vImageConvert_Fto16Q12, float8, 4, 2, 4);
 
-        // the refusals, which are the release's own
         {
             vImage_Buffer small_buf = {ramp16, 1, 1, 8};
             vImage_Buffer large_buf = {ramp16, 4, 1, 8};

@@ -2,11 +2,6 @@
 #include <CoreVideo/CoreVideo.h>
 #include <AudioToolbox/AudioToolbox.h>
 
-// The three make-data-ready variants of iOS 12.2. This release's CMSampleBuffer is a system object
-// with no place to keep a block, so the handler runs at the moment the buffer is made: on this release
-// a buffer built from a CMBlockBuffer or a CVImageBuffer that already holds its data is ready as soon
-// as it exists, which is the only moment the data is ready. facts/CoreMedia/SampleBufferCreateReady.md
-
 static OSStatus charon_ready(CMSampleBufferMakeDataReadyHandler handler, CMSampleBufferRef buffer, Boolean dataReady)
 {
     if (dataReady)

@@ -1,5 +1,3 @@
-// Host probe: the MIDI-CI 1.x classes (MIDICapabilityInquiry.h) on macOS: a device info with a real destination, a profile
-// without a name, the discovery manager's handler, and the responder's start and stop. Each answer is printed in turn.
 #import <CoreMIDI/CoreMIDI.h>
 #import <Foundation/Foundation.h>
 int main(void) {

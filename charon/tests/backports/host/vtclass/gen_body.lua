@@ -1,32 +1,4 @@
--- gen_body.lua - the generator core for the VideoToolbox value classes. A port of gen_body.py, function by
--- function. It is a MODULE: a consumer reaches it as
---     local G = import("gen_body", {rootdir = os.scriptdir()})
---     G.parse(text)
---
--- CONTRACT FOR CONSUMERS
---   * Python constants are exported as functions:  G.ORDER(), G.STRUCTS(), G.BRANCH_TABLE(), ...
---   * Python dicts whose iteration order is observable are ODICTS:  {keys = {...}, map = {...}, has = {...}}
---     keys is the insertion-order array, map the values. Use odict_get / odict_has / odict_set /
---     odict_items / odict_keys / odict_copy / odict_setdefault. Dicts whose order is never observed are plain
---     Lua tables (e.g. parse's protocols and classes, BRANCH_TABLE, probe_types' result).
---   * Python tuples are arrays: an initialisers() entry is {selector, arguments, returns}; an argument is
---     {name, type, piece} (Python's (keyword, type_name, piece), where the Python name `keyword` is the
---     ARGUMENT NAME); a DECLARED_KEYS entry is a record {class, keyword, property, getter, line}.
---   * A property record is {type = string, obj = bool, class = bool, getter = string|nil,
---     unavailable_ios = bool}. A class record is {sup, protocols (sorted array), own (odict), redeclared
---     (sorted array), unavailable_ios (sorted array)}.
---   * Every Python `raise SystemExit(msg)` and every uncaught Python exception is `raise(msg)` here, so a
---     caller can catch it. A main script that does not catch it must wrap its work in try/catch and call
---     fail(err) to get Python's exit status 1.
---   * Python's `None` is Lua nil; a Python str is a Lua string; Python's `"x" in d` is odict_has.
---   * Python regular expressions are hand-written. Each matcher says what regex it replaces. They assume
---     ASCII input, as the brief states: \w is [A-Za-z0-9_] and \s is space, \t, \n, \r, \f, \v.
---   * Sorting uses vtlib's byte order (V.sort_bytes, V.sorted_keys), never the locale.
-
 local V = import("vtlib", {rootdir = os.scriptdir()})
-
--- ---------------------------------------------------------------------------------------------------------
--- Module-level constants (not exported; each is returned by an exported function of the same name).
 
 local ORDER_LIST = {"VTFrameProcessor", "VTFrameProcessorFrame", "VTFrameProcessorOpticalFlow",
     "VTFrameRateConversionConfiguration", "VTFrameRateConversionParameters",
@@ -39,27 +11,21 @@ local ORDER_LIST = {"VTFrameProcessor", "VTFrameProcessorFrame", "VTFrameProcess
 
 local STRUCTS_SET = {CMTime = true, CMVideoDimensions = true}
 
--- Python: SCALAR_CANONICAL. Read by nothing in the family; ported as the constant it is.
 local SCALAR_CANONICAL_SET = {}
 for _, t in ipairs({"long", "long long", "unsigned int", "unsigned char", "unsigned long", "int",
                     "bool", "float", "double", "short", "char", "long double"}) do
     SCALAR_CANONICAL_SET[t] = true
 end
 
--- __builtin_classify_type's class number -> branch. See branch_of.
 local CLASS_BRANCH_MAP = {[12] = "struct", [5] = "CF", [1] = "scalar", [2] = "scalar", [3] = "scalar",
     [4] = "scalar", [6] = "scalar", [7] = "scalar", [8] = "scalar"}
 
--- type -> {class number, objc flag}. Filled by store_branch on first use from the probe's file; emit-registry
--- also updates this same table, so it is one table, held here and returned by BRANCH_TABLE().
 local BRANCH_TABLE_MAP = {}
 
 local PROTO_NAMES_LIST = {"VTFrameProcessorConfiguration", "VTFrameProcessorParameters"}
 
 local PRIVATE_KEYS_SET = {sourcePixelFormat = true}
 
--- Python: DECLARED_KEYS. A dict keyed by (class, keyword) with values (property, getter, sdk_line). Its
--- iteration order is observable (emit.py walks it), so it is an ordered array of records.
 local DECLARED_KEYS_LIST = {
     {class = "VTSuperResolutionScalerConfiguration", keyword = "usePrecomputedFlow",
      property = "precomputedFlow", getter = "usesPrecomputedFlow",
@@ -75,12 +41,6 @@ local MACRO_TYPEDEFS_MAP = {
 }
 
 local CASTS = {BOOL = "BOOL", NSInteger = "NSInteger", float = "float"}
-
--- The regular expression READBACK_PROPERTY of the Python has no Lua form and is not exported; readback_property
--- below is its hand-written matcher.
-
--- ---------------------------------------------------------------------------------------------------------
--- Ordered dictionaries. Python dict semantics: assigning an existing key keeps its first position.
 
 function odict_new()
     return {keys = {}, map = {}, has = {}}
@@ -102,14 +62,12 @@ function odict_has(od, k)
     return od.has[k] == true
 end
 
--- The keys in insertion order (a copy).
 function odict_keys(od)
     local out = {}
     for i, k in ipairs(od.keys) do out[i] = k end
     return out
 end
 
--- The entries in insertion order, as {key, value} pairs.
 function odict_items(od)
     local out = {}
     for i, k in ipairs(od.keys) do out[i] = {k, od.map[k]} end
@@ -122,14 +80,10 @@ function odict_copy(od)
     return c
 end
 
--- Python dict.setdefault: returns the value now stored under k.
 function odict_setdefault(od, k, v)
     if not od.has[k] then odict_set(od, k, v) end
     return od.map[k]
 end
-
--- ---------------------------------------------------------------------------------------------------------
--- Private helpers: byte classes, Python str methods on ASCII text, and the hand-written matchers.
 
 local function at(s, i)
     return s:sub(i, i)
@@ -140,42 +94,35 @@ local function byte_of(c)
     return string.byte(c)
 end
 
--- \s on ASCII: space, \t, \n, \r, \f, \v
 local function is_ws(c)
     return c == " " or c == "\t" or c == "\n" or c == "\r" or c == "\f" or c == "\v"
 end
 
--- [A-Z_]
 local function is_upper_us(c)
     local b = byte_of(c)
     return (b >= 65 and b <= 90) or b == 95
 end
 
--- [A-Z_0-9]
 local function is_upper_digit_us(c)
     local b = byte_of(c)
     return (b >= 65 and b <= 90) or b == 95 or (b >= 48 and b <= 57)
 end
 
--- [A-Za-z_]
 local function is_alpha_us(c)
     local b = byte_of(c)
     return (b >= 65 and b <= 90) or (b >= 97 and b <= 122) or b == 95
 end
 
--- \w on ASCII: [A-Za-z0-9_]
 local function is_word(c)
     local b = byte_of(c)
     return (b >= 65 and b <= 90) or (b >= 97 and b <= 122) or (b >= 48 and b <= 57) or b == 95
 end
 
--- Index of the first character at or after i that is not \s.
 local function skip_ws(s, i)
     while is_ws(s:sub(i, i)) do i = i + 1 end
     return i
 end
 
--- Python str.strip() with no argument, on ASCII.
 local function py_strip(s)
     local i, j = 1, #s
     while i <= j and is_ws(s:sub(i, i)) do i = i + 1 end
@@ -183,7 +130,6 @@ local function py_strip(s)
     return s:sub(i, j)
 end
 
--- Python str.split() with no argument: runs of whitespace separate, empty pieces are dropped.
 local function py_split_ws(s)
     local out, i, n = {}, 1, #s
     while true do
@@ -197,7 +143,6 @@ local function py_split_ws(s)
     return out
 end
 
--- Python str.split(sep) for a non-empty plain separator. "" gives {""}.
 local function split_plain(s, sep)
     local out, start = {}, 1
     while true do
@@ -212,14 +157,12 @@ local function split_plain(s, sep)
     return out
 end
 
--- Python s.rstrip(c) for one character c.
 local function rstrip_char(s, c)
     local j = #s
     while j >= 1 and s:sub(j, j) == c do j = j - 1 end
     return s:sub(1, j)
 end
 
--- Python str.replace(old, new) for plain text, every occurrence.
 local function replace_plain(s, old, new)
     local out, start = {}, 1
     while true do
@@ -235,7 +178,6 @@ local function replace_plain(s, old, new)
     return table.concat(out)
 end
 
--- Python repr() of a str, for the %r in messages.
 local function py_repr(s)
     local quote = "'"
     if s:find("'", 1, true) and not s:find('"', 1, true) then quote = '"' end
@@ -263,7 +205,6 @@ local function py_repr(s)
     return table.concat(out)
 end
 
--- Python %s of a value that may be None.
 local function py_str(v)
     if v == nil then return "None" end
     if v == true then return "True" end
@@ -276,7 +217,6 @@ local function path_join(a, b)
     return a .. "/" .. b
 end
 
--- os.makedirs(path) for a path that may need its parents made.
 local function makedirs(path)
     if os.isdir(path) then return end
     local parent = path:match("^(.*)/[^/]+$")
@@ -284,7 +224,6 @@ local function makedirs(path)
     os.mkdir(path)
 end
 
--- Python dict-or-list truthiness for the JSON values the probe reads.
 local JSON_NULL = {}
 
 local function is_odict(v)
@@ -300,10 +239,6 @@ local function py_truthy(v)
     return true
 end
 
--- The end (exclusive index) of the one-level parenthesised group that starts at k, or nil. It is the
--- regex \((?:[^()]|\([^()]*\))*\), with at most one nesting level, which the Python uses for macro arguments.
--- The star cannot consume ')' except as the closing one, so the first ')' that is not inside a nested
--- group is the only possible end; no backtracking can find another.
 local function paren_group_end(s, k)
     if at(s, k) ~= "(" then return nil end
     local m = k + 1
@@ -322,8 +257,6 @@ local function paren_group_end(s, k)
     end
 end
 
--- The alternation at j of  API_[A-Z_]+ | NS_REFINED_FOR_SWIFT | NS_SWIFT_NAME | NS_SWIFT_UNAVAILABLE |
--- NS_SWIFT_SENDABLE | API_DEPRECATED_WITH_REPLACEMENT . Returns the exclusive end, or nil.
 local SWIFT_LITERALS = {"NS_REFINED_FOR_SWIFT", "NS_SWIFT_NAME", "NS_SWIFT_UNAVAILABLE",
                         "NS_SWIFT_SENDABLE", "API_DEPRECATED_WITH_REPLACEMENT"}
 
@@ -339,7 +272,6 @@ local function token_end(s, j)
     return nil
 end
 
--- One match of  \s*(?:TOKENS)\s*(\(...\))?  - the first in the text. Returns start and exclusive end, or nil.
 local function strip_once(s)
     for i = 1, #s do
         local j = skip_ws(s, i)
@@ -352,9 +284,6 @@ local function strip_once(s)
     end
     return nil
 end
-
--- ---------------------------------------------------------------------------------------------------------
--- Exported constants.
 
 function ORDER()
     return ORDER_LIST
@@ -372,7 +301,6 @@ function CLASS_BRANCH()
     return CLASS_BRANCH_MAP
 end
 
--- The shared table. store_branch fills it on first use, and emit-registry adds the probe's rows to it.
 function BRANCH_TABLE()
     return BRANCH_TABLE_MAP
 end
@@ -385,7 +313,6 @@ function PRIVATE_KEYS()
     return PRIVATE_KEYS_SET
 end
 
--- The records {class, keyword, property, getter, line}, in Python's order.
 function DECLARED_KEYS()
     return DECLARED_KEYS_LIST
 end
@@ -394,16 +321,12 @@ function MACRO_TYPEDEFS()
     return MACRO_TYPEDEFS_MAP
 end
 
--- The record for (class_name, keyword) in DECLARED_KEYS, or nil. Python: DECLARED_KEYS.get((class, keyword)).
 function declared_key(class_name, keyword)
     for _, rec in ipairs(DECLARED_KEYS_LIST) do
         if rec.class == class_name and rec.keyword == keyword then return rec end
     end
     return nil
 end
-
--- ---------------------------------------------------------------------------------------------------------
--- The type probe's output: the concatenated JSON documents the compiler prints, read with raw_decode.
 
 local json_value
 
@@ -418,7 +341,6 @@ local function json_skip(s, i)
     end
 end
 
--- Python json.JSONDecoder.raw_decode for a string, at i (1-based). Returns the string and the index after it.
 local function json_string(s, i)
     local parts = {}
     local j = i + 1
@@ -482,8 +404,6 @@ local function json_number(s, i)
     return tonumber(tok), j
 end
 
--- Returns the value and the index after it. Objects are odicts (document key order), arrays are Lua arrays,
--- null is JSON_NULL.
 json_value = function(s, i)
     local c = at(s, i)
     if c == "{" then
@@ -532,11 +452,6 @@ json_value = function(s, i)
     return json_number(s, i)
 end
 
--- ---------------------------------------------------------------------------------------------------------
--- Exported functions.
-
--- The canonical type of each of `types`, by asking clang. Python returns {type: desugaredQualType}; this
--- returns a plain map (its order is never read). A value is nil where the Python would hold None.
 function probe_types(sdk, types, workdir)
     if not os.isdir(workdir) then makedirs(workdir) end
     local source = path_join(workdir, "type-probe.m")
@@ -547,8 +462,6 @@ function probe_types(sdk, types, workdir)
     end
     V.write_file(source, table.concat(lines, "\n") .. "\n")
 
-    -- The command, as the Python's list. stdout is returned by os.iorunv; stderr goes to a file beside
-    -- the source (removed again), because os.iorunv cannot give both streams and a failing exit raises.
     local err_path = path_join(workdir, "type-probe.err")
     local args = {"-c", 'err="$1"; shift; xcrun "$@" 2>"$err"', "sh", err_path,
                   "clang", "-fsyntax-only", "-isysroot", sdk,
@@ -571,7 +484,6 @@ function probe_types(sdk, types, workdir)
     }
     if os.isfile(err_path) then os.rm(err_path) end
 
-    -- the filtered dump is SEVERAL concatenated JSON documents; each is read in turn
     local prefix = "charon_probe_"
     local found = {}
     local function visit(node)
@@ -618,8 +530,6 @@ function probe_types(sdk, types, workdir)
     return result
 end
 
--- The branch of a class number and an objc flag, from the two signals. nil when the class is one this
--- toolchain has not shown.
 function branch_of(class_number, objc_pointer)
     if objc_pointer or class_number == -1 then
         return "object"
@@ -627,7 +537,6 @@ function branch_of(class_number, objc_pointer)
     return CLASS_BRANCH_MAP[class_number]
 end
 
--- type -> {class, objc} from the probe's file. The default path is beside this file, and TRACKED.
 function load_branch_table(path)
     if path == nil then
         path = path_join(os.scriptdir(), "type-branches.tsv")
@@ -651,15 +560,10 @@ function load_branch_table(path)
     return table_out
 end
 
--- The branch a value of this type takes, from the compiler's two signals. Raises for a type the probe has
--- not classified, and for a class the map does not know.
 function store_branch(type_name)
     if V.count_entries(BRANCH_TABLE_MAP) == 0 then
         for k, v in pairs(load_branch_table()) do BRANCH_TABLE_MAP[k] = v end
     end
-    -- re.sub(r'\s*_(?:Nullable|Nonnull|null_unspecified)\b|\s*__nonnull\b', '', type_name), then .strip()
-    -- Scanned left to right: at each character, a match is \s* then one of the two alternatives with a
-    -- word boundary after it; a match is removed, otherwise the character is kept.
     local bare_parts = {}
     local i, n = 1, #type_name
     local function boundary_after(e)
@@ -697,12 +601,6 @@ function store_branch(type_name)
     return branch
 end
 
--- re.sub(r'\s*_(?:Nullable|Nonnull|null_unspecified)\b|\s*__nonnull\b', ...) is the code in store_branch.
-
--- Python: re.sub(r'\s*(?:API_[A-Z_]+|NS_REFINED_FOR_SWIFT|NS_SWIFT_NAME|NS_SWIFT_UNAVAILABLE'
---                r'|NS_SWIFT_SENDABLE|API_DEPRECATED_WITH_REPLACEMENT)'
---                r'\s*(\((?:[^()]|\([^()]*\))*\))?', ...)  applied until no match, then
--- ' '.join(decl.split()).rstrip(',').strip().
 function strip(decl)
     while true do
         local a, b = strip_once(decl)
@@ -712,11 +610,6 @@ function strip(decl)
     return py_strip(rstrip_char(table.concat(py_split_ws(decl), " "), ","))
 end
 
--- Python: re.match(r'^(.*?)\s*(\*?)\s*(\w+)$', s). Returns the type (group 1, stripped by the caller as
--- Python does), the star flag, and the name; nil when there is no match.
--- The name is the whole trailing run of word characters N..n (the regex's \w+ must reach $). The lazy group 1
--- is the shortest prefix whose remainder is \s*\*?\s* followed by the name, which is the first p for which
--- the segment between p and the name is whitespace, at most one star, and whitespace.
 local function split_declarator(s)
     local n = #s
     if not is_word(at(s, n)) then return nil end
@@ -739,7 +632,6 @@ local function split_declarator(s)
     return nil
 end
 
--- re.search(r'getter=(\w+)', attrs).group(1), or nil.
 local function getter_eq(attrs)
     local pos = 1
     while true do
@@ -753,7 +645,6 @@ local function getter_eq(attrs)
     end
 end
 
--- re.search(r'getter\s*=\s*(\w+)', attrs).group(1), or nil. Used by readback_property.
 local function getter_ws(attrs)
     local pos = 1
     while true do
@@ -770,9 +661,6 @@ local function getter_ws(attrs)
     end
 end
 
--- Python: {name: {type, obj, class, getter, unavailable_ios}} from the text of a class or protocol body, as an
--- odict in the order the properties appear. Matches  @property\s*\(([^)]*)\)([^;]*);  (re.S), and a later
--- declaration of a name replaces the earlier one in place, as a Python dict does.
 function props_of(text)
     local out = odict_new()
     local pos = 1
@@ -793,7 +681,6 @@ function props_of(text)
             end
         end
         if after then
-            -- The pointer belongs to the TYPE, so it is captured rather than absorbed (see the Python).
             local typ, star, name = split_declarator(strip(decl))
             if name then
                 odict_set(out, name, {
@@ -812,8 +699,6 @@ function props_of(text)
     return out
 end
 
--- The first occurrence at or after `from` of  @interface\s+CLASS\b . Returns the index of '@interface' and
--- the index just past the class name, or nil.
 local function next_interface(text, classname, from)
     local pos = from
     while true do
@@ -828,7 +713,6 @@ local function next_interface(text, classname, from)
     end
 end
 
--- The body of  @protocol\s+NAME\s*(?:<[^>]*>)?(.*?)@end  (re.search, re.S), or nil.
 local function protocol_body(text, name)
     local pos = 1
     while true do
@@ -848,8 +732,6 @@ local function protocol_body(text, name)
     end
 end
 
--- The part of  @interface\s+C\b\s*(?:\([^)]*\))?\s*(?::\s*\w+\s*(?:<([^>]*)>)?)?  after the class name, from
--- index q. Returns the protocol list inside <...> (or nil) and the index where the body starts.
 local function interface_head(text, q)
     q = skip_ws(text, q)
     if at(text, q) == "(" then
@@ -873,8 +755,6 @@ local function interface_head(text, q)
     return nil, q
 end
 
--- The class declarations of one class name: {angle = string|nil, body = string} for each match of
--- @interface\s+C\b...(.*?)@end, in order.
 local function class_blocks(text, classname)
     local out = {}
     local pos = 1
@@ -893,7 +773,6 @@ local function class_blocks(text, classname)
     return out
 end
 
--- Python: {protocols: {name: props}, classes: {name: record}} from the SDK text.
 function parse(alltext)
     local protocols = {}
     for _, p in ipairs(PROTO_NAMES_LIST) do
@@ -923,8 +802,6 @@ function parse(alltext)
             for _, k in ipairs(props.keys) do odict_set(own, k, props.map[k]) end
         end
         V.sort_bytes(proto_names)
-        -- Python iterates a set here, whose order is not fixed between runs; sorted order is used instead,
-        -- and the two only differ where two adopted protocols declare the same name with different class-ness.
         local pnames = {}
         for _, pr in ipairs(proto_names) do
             local pm = protocols[pr]
@@ -932,8 +809,6 @@ function parse(alltext)
                 for _, k in ipairs(pm.keys) do pnames[k] = pm.map[k] end
             end
         end
-        -- A property the SDK marks API_UNAVAILABLE(ios) does not exist on iOS, so it is left out, and the
-        -- reason is recorded per class.
         local unavailable = {}
         for _, k in ipairs(own.keys) do
             if own.map[k].unavailable_ios then unavailable[#unavailable + 1] = k end
@@ -946,8 +821,6 @@ function parse(alltext)
             if not unavailable_set[k] then odict_set(own_kept_unavailable, k, own.map[k]) end
         end
         own = own_kept_unavailable
-        -- A protocol property re-declared with DIFFERENT class-ness is not redundant: the class's own
-        -- declaration is the one an app is compiled against.
         local kept = odict_new()
         for _, k in ipairs(own.keys) do
             local pn = pnames[k]
@@ -964,7 +837,6 @@ function parse(alltext)
     return protocols, classes
 end
 
--- The matches of  ([-+])\s*\(([^)]*)\)([^;]*);  in a class body, as {returns, decl} pairs.
 local function method_decls(body)
     local out = {}
     local pos = 1
@@ -989,7 +861,6 @@ local function method_decls(body)
     return out
 end
 
--- The matches of  (\w+):\s*\(([^)]*)\)\s*(\w+)  in s, as {word, type, arg} triples (findall's three groups).
 local function parts_of(s)
     local out = {}
     local i = 1
@@ -1020,8 +891,6 @@ local function parts_of(s)
     return out
 end
 
--- Python: [(selector, [(name, type, piece), ...], returns)] for the class's initialisers, in the SDK's order.
--- The initialisers are matched per class, in each @interface...@end block, and one body per FULL selector.
 function initialisers(alltext, classname)
     local out = {}
     local pos = 1
@@ -1051,7 +920,6 @@ function initialisers(alltext, classname)
     return out
 end
 
--- The declaration, in the SDK's own spelling: one keyword per argument, the type each one carries.
 function init_signature(selector, arguments, returns)
     if #arguments == 0 then
         return "- (nullable instancetype)" .. selector .. ";"
@@ -1066,13 +934,10 @@ function init_signature(selector, arguments, returns)
     return table.concat(lines, "\n") .. ";"
 end
 
--- Whether this argument's value is kept in an IVAR rather than the keyed store. One predicate, used by every
--- caller (see the Python for why there is only one).
 function is_private_key(class_name, keyword)
     return PRIVATE_KEYS_SET[keyword] == true
 end
 
--- The ivar declarations an implementation needs: {"_" .. key, type} for each argument that is private or CF.
 function ivars_for(arguments, properties, selector, class_name)
     local out = {}
     for _, arg in ipairs(arguments) do
@@ -1084,9 +949,6 @@ function ivars_for(arguments, properties, selector, class_name)
     return out
 end
 
--- The property this class's header declares for `argument`, found from the header text by its own matcher.
--- Hand-written from  @property\s*\(([^)]*)\)\s*([A-Za-z_][\w\s*<>,]*?)\s*(\w+)\s*(?:[A-Z_][A-Z_0-9]*\s*(?:\([^)]*\))?)?;
--- (findall over the first @interface block of the class). Returns the name or nil.
 local function readback_matches(block_text)
     local out = {}
     local pos = 1
@@ -1101,11 +963,9 @@ local function readback_matches(block_text)
                 attrs = block_text:sub(k + 1, close - 1)
                 local a = skip_ws(block_text, close + 1)
                 if is_alpha_us(at(block_text, a)) then
-                    -- the type group grows one character at a time (lazy); at each size the rest must match
                     local e = a + 1
                     while true do
                         local rest_name, rest_end = nil, nil
-                        -- \s*(\w+)\s*(?:MACRO)?;  with the name taken greedily, then shorter
                         local q = skip_ws(block_text, e)
                         if is_word(at(block_text, q)) then
                             local t = q
@@ -1159,8 +1019,6 @@ local function readback_matches(block_text)
     return out
 end
 
--- The property the header declares for `argument`: the one NAMED after it, else the one whose getter= is it.
--- nil when the header declares neither (a failure at the call site, not a default).
 function readback_property(sdk_text, class_name, argument)
     local s, after = next_interface(sdk_text, class_name, 1)
     if not s then return nil end
@@ -1176,9 +1034,6 @@ function readback_property(sdk_text, class_name, argument)
     return nil
 end
 
--- The key an argument's value belongs under, from THIS class's own property declarations (an odict).
--- Order: a DECLARED_KEYS entry first; then a property with the argument's name, or a private key (spelled as
--- itself); then the first property whose getter is the argument; else an error.
 function store_key(keyword, properties, where, class_name)
     local declared = declared_key(class_name, keyword)
     if declared then
@@ -1199,8 +1054,6 @@ function store_key(keyword, properties, where, class_name)
         py_str(where), py_repr(keyword), py_str(class_name)))
 end
 
--- The body of one initialiser. Each argument is stored under the property it is named after, by the branch its
--- TYPE takes.
 function init_body(selector, arguments, properties, class_name)
     local head = init_signature(selector, arguments, "instancetype")
     head = replace_plain(head, "(nullable instancetype)", "(instancetype)")
@@ -1212,7 +1065,6 @@ function init_body(selector, arguments, properties, class_name)
         local key = store_key(keyword, properties, selector, class_name)
         local branch = store_branch(type_name)
         if is_private_key(class_name, keyword) or branch == "CF" then
-            -- a CFTypeRef is an ivar, and it is retained: the SDK declares the property with no ownership
             lines[#lines + 1] = string.format("    self->_%s = (%s)%s;", key, type_name, keyword)
             if branch == "CF" and not is_private_key(class_name, keyword) then
                 lines[#lines + 1] = string.format("    if (self->_%s)", key)
@@ -1234,15 +1086,12 @@ function init_body(selector, arguments, properties, class_name)
     return table.concat(lines, "\n")
 end
 
--- Types with a comma cannot be arguments of the property macros, so they are spelled by a file-local typedef.
--- The spelling the macro takes: the typedef where one exists, else the type itself.
 local function macro_type(type_name)
     local alias = MACRO_TYPEDEFS_MAP[type_name]
     if alias then return alias .. " *" end
     return type_name
 end
 
--- The typedef lines a .m needs, for the comma-carrying types its accessors name.
 function macro_typedefs(type_names)
     local lines = {"",
         "// A file-local spelling for the types the property macros cannot take. Each of these carries a",
@@ -1263,7 +1112,6 @@ function macro_typedefs(type_names)
     return lines
 end
 
--- The @property line for one property.
 function prop_line(n, p)
     local typ = p.type .. (p.obj and " *" or "")
     local parts = {}
@@ -1290,9 +1138,6 @@ local function cast_of(typ)
     return CASTS[typ] or typ
 end
 
--- The accessor for one property. Shapes: a CF reference (ivar), a class property (written out, reading the
--- class's store), an instance property with a getter that differs from its name (written out), an object (the
--- store macro), a scalar or float (the store macro), a struct or CVPixelBufferRef (written out).
 function body(n, p)
     local store = p.class and "CharonValueStoreOfClass([self class])" or "CharonValueStore(self)"
     local ret = p.type .. (p.obj and " *" or "")
@@ -1328,8 +1173,6 @@ function body(n, p)
     return string.format("%s\n{\n    return (%s)[%s[%s] longLongValue];\n}\n", sig, cast_of(p.type), store, key)
 end
 
--- Writes <outdir>/<class>.h and .m for each class, in sorted class-name order (the files do not depend on the
--- order). Raises on a write failure, as Python would.
 function emit(classes, outdir)
     makedirs(outdir)
     for _, c in ipairs(V.sorted_keys(classes)) do

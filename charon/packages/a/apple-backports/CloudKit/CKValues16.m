@@ -1,22 +1,8 @@
-// What iOS 16 added to the sharing surface that is a value: the options a share says who may be
-// added with what permission, and under which access.
-//
-// CKAllowedSharingOptions is what an application sets on a share it is about to save, and what the
-// share carries afterwards: which permissions a participant may be given, whether a participant may
-// look the share's owner up, and - the members of iOS 26 - whether a share may ask for access at all
-// and whether a participant may bring others in. A share that has not been told is a share that
-// invites nobody, which is what a new one of this class answers.
-//
-// The request the share is saved in, and the transfer representation of iOS 16 that carries it out
-// of the process, are the transport and a later delivery.
-
 #import <Foundation/Foundation.h>
 #import <CloudKit/CloudKit.h>
 
 #import "CharonCKValue.h"
 
-// The two members iOS 26 added. The SDK this package builds against is 16.4 and does not declare
-// them, and they are the share's own state, so they are declared here rather than answered as nil.
 @interface CKAllowedSharingOptions ()
 @property (nonatomic, assign) BOOL allowsAccessRequests;
 @property (nonatomic, assign) BOOL allowsParticipantsToInviteOthers;
@@ -46,9 +32,6 @@
                                         allowedParticipantAccessOptions:CKSharingParticipantAccessOptionSpecifiedRecipientsOnly];
 }
 
-// What a share gets when an application has not said otherwise: read-only participants, no discovery
-// of who else is in the share, and no access requests. CloudKit's own standard options are the
-// read-only and no-discovery pair, and a share with no options at all invites nobody.
 + (CKAllowedSharingOptions *)standardOptions
 {
     return [[self alloc] initWithAllowedParticipantPermissionOptions:CKSharingParticipantPermissionOptionReadOnly

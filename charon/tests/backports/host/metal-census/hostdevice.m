@@ -1,14 +1,3 @@
-/* hostdevice.m - is there a Metal device on the machine these host cases run on?
- *
- * Several pages in this folder used to say, as the reason a case creates no device, that
- * `MTLCreateSystemDefaultDevice()` HANGS on a machine with no GPU, and one of them said it was
- * measured hanging and killed. That is a statement about a machine, and this case is the measurement
- * of the machine: it creates the device, prints what it is, and does one real thing with it so a
- * reader can see it is not a stub.
- *
- * It also asks the question the old claim was really about - whether a descriptor needs a device at
- * all - and answers it by making one on both sides with no device anywhere.
- */
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
@@ -39,8 +28,6 @@ int main(void)
                (int)[device isLowPower], (int)[device isHeadless], (int)[device hasUnifiedMemory],
                (unsigned long)[device maxThreadsPerThreadgroup].width);
 
-        /* ONE REAL USE, so "it answers" is not the same as "it works": a texture is made, written and
-           read back, and the byte comes back. */
         MTLTextureDescriptor *descriptor =
             [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm
                                                                 width:4 height:4 mipmapped:NO];
@@ -58,12 +45,6 @@ int main(void)
                   @"a texel written to that texture reads back unchanged, first and last");
         }
 
-        /* THE QUESTION THE OLD CLAIM WAS ABOUT: does a descriptor need a device? Both sides here are
-           `[[X alloc] init]` and no device is asked of either, which is why the descriptor families
-           need none - the false reason does not change the answer. */
-        // The attachment array has no -count of its own - its two members are the indexed getter and
-        // the indexed setter - so "needs no device" is shown by the array answering at a legal index
-        // rather than by a number the header does not give.
         MTLRenderPipelineDescriptor *descriptorOnly = [MTLRenderPipelineDescriptor new];
         check(descriptorOnly != nil && descriptorOnly.colorAttachments != nil,
               @"a fresh MTLRenderPipelineDescriptor answers with no device at all");

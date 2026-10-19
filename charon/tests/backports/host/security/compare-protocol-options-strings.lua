@@ -1,7 +1,3 @@
--- compare-protocol-options-strings.lua - the server name and the ALPN list, read back, differences NAMED.
---
---    xmake l compare-protocol-options-strings.lua <the binary's output>
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
 local SURVIVED = {{"server-name-survives-dead-frame", 1}, {"alpn-survives-dead-frame", 1}}
@@ -9,7 +5,6 @@ local VALUES = {
     {"alpn-count", 3}, {"alpn-past-end", 0}, {"alpn-after-null", 3}, {"name-cleared", 0},
     {"null-options", 1}, {"alive-in-scope", 1}, {"deallocated-after-scope", 0},
 }
--- the ALPN list is a LIST, and the order is the order it was offered in
 local LIST = {{"alpn-0", "h2"}, {"alpn-1", "http/1.1"}, {"alpn-2", "spdy/2"}, {"name-after-second", "second.invalid"}}
 
 function main(...)

@@ -1,11 +1,3 @@
--- Write what a port declared as the CMake files the build expects: the static library, device library, executable and
--- application projects, the cross toolchain, and the project include that finds the engine's packages. The Lua port
--- of generate.py's CMake half. Every function returns text and touches no disk, so what it produces can be compared
--- in a test rather than inspected after a build. The Conan recipe and profile that generate.py also wrote are not
--- here: Conan is replaced by xmake, and its recipe was the one place the packages were named.
---
--- Call generate_bind(folder) first, with the folder holding spec.lua and toml.lua.
-
 local GENERATED = "# Written by Charon from charon.toml. Edits here are lost on the next build."
 local CMAKE_MINIMUM = "3.24"
 local PORT = "${CHARON_PORT}"
@@ -29,7 +21,6 @@ function generate_bind(folder)
     S.spec_bind(folder)
 end
 
--- The spec module this generator reads declarations with, so a caller and the generator share one toml reader.
 function generate_spec()
     return S
 end
@@ -105,7 +96,6 @@ local function manifest_of(declared)
     return path.join(declared.root, "charon.toml")
 end
 
--- A file's language, read from its last suffix; a source Charon cannot name a language for is refused.
 local function languages_of(sources)
     local found = {}
     for _, pattern in ipairs(sources) do
@@ -126,7 +116,6 @@ local function languages_of(sources)
     return ordered_languages(found)
 end
 
--- One path segment against one glob segment: * matches any run of characters, ? one, [..] a class.
 local function segment_matches(glob, name)
     local lua = {"^"}
     local index = 1
@@ -155,7 +144,6 @@ local function segment_matches(glob, name)
     return name:match(table.concat(lua)) ~= nil
 end
 
--- Path.glob's rules: a ** segment matches zero or more directory levels; every other segment matches one level.
 local function parts_match(globs, glob_at, parts, part_at)
     if glob_at > #globs then
         return part_at > #parts
@@ -191,7 +179,6 @@ local function relative_under(root, found)
     return path.relative(found, root):gsub("\\", "/")
 end
 
--- Files under root that a pattern matches, relative to root and sorted, as Path.glob gives them.
 local function files_matching(root, pattern, name)
     if root == nil then
         raise("%s names %s as a pattern, which needs the port folder to expand", name, pattern)
@@ -207,7 +194,6 @@ local function files_matching(root, pattern, name)
     return found
 end
 
--- Folders under root that a pattern matches. A trailing /** also names the folder it starts from.
 local function folders_matching(root, pattern, name)
     if root == nil then
         raise("%s names %s as a pattern, which needs the port folder to expand", name, pattern)
@@ -297,8 +283,6 @@ local function folders_of(target, key, root)
     return expanded
 end
 
--- A table keyed by language, as (CMake language, value) pairs in the file's order. A value for a language no source
--- is in would apply to nothing, and a key that is no language is refused.
 local function per_language(target, key, compiled)
     local table_value = target[key] or {}
     if not is_map(table_value) then
@@ -521,7 +505,6 @@ local function install_block(target, kind)
     return lines
 end
 
--- The targets of one kind that Charon generates (those without cmake=), as a CMake project; nil when there are none.
 function generate_cmake_project(declared, kind, project)
     local targets = {}
     for _, target in ipairs(S.decl_targets(declared, kind)) do
@@ -596,7 +579,6 @@ function generate_cmake_project(declared, kind, project)
     return table.concat(lines, "\n"):gsub("\n+$", "") .. "\n"
 end
 
--- Replace {name} with its value and {{ and }} with their braces, as Python's str.format does for these templates.
 local function format_template(text, values)
     local out = {}
     local index = 1
@@ -646,7 +628,6 @@ function generate_cross_toolchain(declared)
     })
 end
 
--- The file that finds the engine's packages through config, or nil when the engine names none.
 function generate_project_include(declared)
     local packages = S.decl_get(declared, "engine", "config-packages", {})
     if #packages == 0 then
@@ -659,8 +640,6 @@ function generate_project_include(declared)
     return table.concat(lines, "\n") .. "\n"
 end
 
--- Every CMake file a declaration asks for, by its path in the build tree. The cross toolchain is written unless the
--- declaration names a toolchain of its own or an engine user-toolchain; a declaration that asks for nothing is refused.
 function generate_written(declared, required)
     if required == nil then
         required = true
@@ -690,7 +669,6 @@ function generate_written(declared, required)
     return produced
 end
 
--- true when a table has at least one key; the sandbox has no next(), so this walks pairs.
 function next_key(map)
     for key in pairs(map) do
         return key

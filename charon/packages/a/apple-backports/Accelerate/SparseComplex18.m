@@ -1,56 +1,8 @@
-// The complex sparse BLAS of vecLib/Sparse/BLAS.h: the 58 entry points that arrived in iOS 18.5, in
-// the float complex and the double complex of each.
-//
-// No release this port supports has any of them - measured over the fifty-one rungs of the release
-// ladder this port holds (1.1.4 through 18.0), the first held rung carrying any of the fifty-eight is
-// NONE, and the 26.2 header that declares them puts all of them at 18.5 - so this is a library
-// written here, over the same storage the sixty-nine real entry points use (CharonSparseBLAS.h) and
-// over the release's own complex BLAS and LAPACK, which every band exports.
-//
-// What the arithmetic is made of, and why each piece is where it is:
-//
-//   - A matrix is a list of rows, each a run of (column, value) pairs kept sorted by column, and a
-//     value of a complex row is a pair stored in the row's own width. That is the whole storage, and
-//     it is what makes every operation below either a walk of the stored entries or a call into the
-//     release's BLAS over one row.
-//   - The arithmetic is on pairs of doubles (CharonSparseComplex.h) and never on a `_Complex`
-//     operator, because the two operations that would need one - a complex product and a complex
-//     quotient - are the only two the compiler would hand to a helper, and the arithmetic is spelled
-//     out instead. A value is rounded to the width its row stores when it is written, which is the
-//     same rule the real entry points follow when they store a float through a double.
-//   - The products - y = alpha * op(A) * x + y and C = alpha * op(A) * B + C for a dense B or a sparse
-//     one - are the textbook sparse level-2 and level-3 kernels: one multiply-add per stored entry of
-//     op(A), each over the row of x or of B the entry names, with the multiply-add and the gather the
-//     release's own cblas_caxpy / cblas_zaxpy and cblas_ccopy / cblas_zcopy. That is the same choice the
-//     real family makes with cblas_saxpy / cblas_daxpy, and it is measured that a complex alpha is done
-//     properly by those (facts/Accelerate/SparseComplex.md).
-//   - The operator-two norm, the largest singular value, is the release's own LAPACK: the Hermitian
-//     Gram matrix A * A' formed here and its eigenvalues read with cheev_ / zheev_.
-//   - The triangular solves are the sparse substitution itself, over the stored entries, because a
-//     dense cblas_ctrsv would throw the sparsity away: the solve is O(nnz) and the dense one is
-//     O(n^2), which is the whole reason a caller reached for a sparse matrix.
-//   - The norms, the trace, the inner products, the permutations and the vector utilities have no
-//     dense BLAS form - irregular indices, a max, a diagonal - and are the arithmetic the header
-//     writes out.
-//
-// Two measured rules are not the same as the real entry points' and are called out below where they
-// are used: the inner products do not conjugate (measured, for x = {3+4i, 1} and y = {1+i, 2} the
-// host answers 1+7i, which is x.y, and 9-i, which is conj(x).y), and the one-norm is the sum of the
-// parts of the values rather than the sum of their moduli (measured, the same vector's one norm is 8
-// and the sum of its moduli is 6).
-//
-// Behaviour is the host's own, measured case by case by tests/backports/host/sparseblas, which runs
-// this file and the host's Accelerate over the same inputs and compares the status, the count and
-// every element; facts/Accelerate/SparseComplex.md carries the measurements, the three cases the host
-// answers in a way that is not reproducible from the header, and which side of each one the port is on.
-
 #import <Accelerate/Accelerate.h>
 #include "CharonSparseComplex26.h"
 #include "CharonSparseBLAS.h"
 #include "CharonSparseComplex.h"
 
-
-// ---------------------------------------------------------------- shape of a matrix
 
 sparse_matrix_float_complex sparse_matrix_create_float_complex(sparse_dimension M, sparse_dimension N)
 {
@@ -124,8 +76,6 @@ sparse_matrix_double_complex sparse_matrix_variable_block_create_double_complex(
     return (sparse_matrix_double_complex)matrix;
 }
 
-// ---------------------------------------------------------------- writing a matrix
-
 sparse_status sparse_insert_entry_float_complex(sparse_matrix_float_complex A, float _Complex val, sparse_index i,
                                                 sparse_index j)
 {
@@ -176,10 +126,6 @@ sparse_status sparse_insert_entries_double_complex(sparse_matrix_double_complex 
     return SPARSE_SUCCESS;
 }
 
-// A column of a point-wise matrix, and a row of one, both appended and overwriting what is there: the
-// same rule the real entry points follow, and measured the same way on the host for the complex ones -
-// inserting into a column that already holds values raises the matrix's nonzero count rather than
-// replacing the column, and an entry written twice is counted once.
 sparse_status sparse_insert_col_float_complex(sparse_matrix_float_complex A, sparse_index j, sparse_dimension nz,
                                               const float _Complex *__restrict val,
                                               const sparse_index *__restrict indx)
@@ -248,10 +194,6 @@ sparse_status sparse_insert_row_double_complex(sparse_matrix_double_complex A, s
     return SPARSE_SUCCESS;
 }
 
-// A block entry of a block matrix: the k x l values at block index (bi, bj), read at the strides the
-// caller gives, written to the k x l elements of the matrix the block covers. A block index outside the
-// matrix is SPARSE_ILLEGAL_PARAMETER, and a scalar entry into a block matrix and a block entry into a
-// point-wise one are both refused, all measured on the host.
 static sparse_status CharonSparsePutBlockComplex(void *matrix, uint32_t magic, const void *val,
                                                  sparse_dimension rowStride, sparse_dimension colStride, sparse_index bi,
                                                  sparse_index bj, size_t size)
@@ -305,14 +247,6 @@ sparse_status sparse_insert_block_double_complex(sparse_matrix_double_complex A,
                                        sizeof(double _Complex));
 }
 
-// ---------------------------------------------------------------- reading a matrix
-
-// The first nz stored entries of a row from column_start onwards, and the column of the next one: the
-// row extraction of the real family, over the complex values, with the same answer for column_end and
-// the same refusals (measured on the host for the complex type: from column_start = 2 the indices
-// written are the absolute columns 2 and 3, column_end is the column of the next stored entry or the
-// number of columns, and a row, a column_start outside the matrix or a negative one all answer
-// SPARSE_ILLEGAL_PARAMETER).
 static long CharonSparseExtractRowComplex(void *matrix, uint32_t magic, sparse_index row, sparse_index columnStart,
                                           sparse_index *columnEnd, sparse_dimension nz, void *val, sparse_index *jndx,
                                           size_t size)
@@ -363,8 +297,6 @@ sparse_status sparse_extract_sparse_row_double_complex(sparse_matrix_double_comp
                                                         column_end, nz, val, jndx, sizeof(double _Complex));
 }
 
-// The first nz stored entries of a column from row_start onwards, and the row of the next one: the
-// transpose of the row extraction, with the same refusals.
 static long CharonSparseExtractColumnComplex(void *matrix, uint32_t magic, sparse_index column, sparse_index rowStart,
                                              sparse_index *rowEnd, sparse_dimension nz, void *val, sparse_index *jndx,
                                              size_t size)
@@ -426,9 +358,6 @@ sparse_status sparse_extract_sparse_column_double_complex(sparse_matrix_double_c
                                                           row_end, nz, val, indx, sizeof(double _Complex));
 }
 
-// The k x l values of block (bi, bj), read at the strides the caller gives, written to val. A block
-// that was never inserted reads as zeros, and a point-wise matrix and a block index outside the matrix
-// answer SPARSE_ILLEGAL_PARAMETER, all measured on the host.
 static sparse_status CharonSparseExtractBlockComplex(void *matrix, uint32_t magic, sparse_index bi, sparse_index bj,
                                                      sparse_dimension rowStride, sparse_dimension colStride, void *val,
                                                      size_t size)
@@ -476,14 +405,6 @@ sparse_status sparse_extract_block_double_complex(sparse_matrix_double_complex A
                                            sizeof(double _Complex));
 }
 
-// ---------------------------------------------------------------- level 1
-
-// The inner product of a sparse vector and a dense one, in the caller's order, and of two sparse ones.
-//
-// It does not conjugate, and that is a measurement and not an oversight: for x = {3+4i, 1} and
-// y = {1+i, 2} the host answers 1+7i, which is x.y term by term, and 9-i is what conj(x).y gives. So
-// the value is the bilinear form and not the Hermitian one, on both this and the two sparse-sparse
-// forms, and the difference is a caller's whole problem when it matters.
 static CharonComplex CharonSparseInnerDenseComplex(sparse_dimension nz, const void *x, const sparse_index *indx,
                                                    const void *y, sparse_stride incy, size_t size)
 {
@@ -516,8 +437,6 @@ double _Complex sparse_inner_product_dense_double_complex(sparse_dimension nz, c
     return CharonComplexAsDouble(sum);
 }
 
-// The inner product of two sparse vectors: a walk of the two index runs against each other. A count of
-// zero on either side answers zero, measured on the host for the complex type as for the real one.
 static CharonComplex CharonSparseInnerSparseComplex(sparse_dimension nzx, sparse_dimension nzy, const void *x,
                                                     const sparse_index *indx, const void *y, const sparse_index *indy,
                                                     size_t size)
@@ -564,8 +483,6 @@ double _Complex sparse_inner_product_sparse_double_complex(sparse_dimension nzx,
     return CharonComplexAsDouble(sum);
 }
 
-// y = alpha * x + y for a sparse x, one stored entry at a time. An alpha of exactly zero or a count of
-// zero leaves y as it was, measured on the host for the complex type as for the real one.
 static void CharonSparseAddScaleComplex(sparse_dimension nz, CharonComplex alpha, const void *x, const sparse_index *indx,
                                         void *y, sparse_stride incy, size_t size)
 {
@@ -602,17 +519,6 @@ void sparse_vector_add_with_scale_dense_double_complex(sparse_dimension nz, doub
                                 sizeof(double _Complex));
 }
 
-// The three norms of a sparse vector, over the values the header gives them to be measured on.
-//
-// The one norm is the sum of the parts of each value and not the sum of the moduli, which is the one
-// place where this family is not the real family's arithmetic: measured on the host, for the values
-// {3+4i, 1} the one norm answers 8 - 3 + 4 and then 1 - where the sum of the moduli is 5 + 1 = 6. The
-// two norm and the infinity norm are over the moduli: the same vector answers sqrt(26) and 5.
-//
-// The two fallbacks are the real family's, measured on the host for the complex type as well: a norm
-// the enumeration does not name is answered as SPARSE_NORM_INF, and SPARSE_NORM_R1 - which the header
-// says a vector does not support - is answered as SPARSE_NORM_TWO. A count of zero answers 0 for all
-// three.
 static double CharonSparseVectorNormComplex(sparse_dimension nz, const void *x, const sparse_index *indx, sparse_norm norm,
                                             size_t size)
 {
@@ -662,11 +568,6 @@ double sparse_vector_norm_double_complex(sparse_dimension nz, const double _Comp
     return CharonSparseVectorNormComplex(nz, x, indx, norm, sizeof(double _Complex));
 }
 
-// ---------------------------------------------------------------- the vector utilities
-
-// The elements a strided dense vector has: the N of them at base + i * incx. A value is nonzero when
-// neither of its parts is, which is what the count below counts and what the host's own count counts:
-// measured, a vector of {0, 1i, 2} has two nonzero elements and not one.
 static long CharonSparseVectorNonzeroComplex(sparse_dimension N, const void *x, sparse_stride incx, size_t size)
 {
     if (N == 0) {
@@ -695,10 +596,6 @@ long sparse_get_vector_nonzero_count_double_complex(sparse_dimension N, const do
     return CharonSparseVectorNonzeroComplex(N, x, incx, sizeof(double _Complex));
 }
 
-// The first nz nonzero elements of a dense vector, with their indices, and how many there were: the
-// real family's rule, measured the same way on the host for the complex type - fewer nonzeros than nz
-// leaves the tail of both arrays untouched and the count is what was written, and a count of nz or an N
-// of zero writes nothing.
 static long CharonSparsePackComplex(sparse_dimension N, sparse_dimension nz, const void *x, sparse_stride incx, void *y,
                                      sparse_index *indy, size_t size)
 {
@@ -735,10 +632,6 @@ long sparse_pack_vector_double_complex(sparse_dimension N, sparse_dimension nz, 
     return CharonSparsePackComplex(N, nz, x, incx, y, indy, sizeof(double _Complex));
 }
 
-// The entries of a sparse vector written into a dense one, optionally zeroing the rest. The zeroing walk
-// visits the strided elements only - the padding between them is left alone, measured - and an index
-// at or past N is not written, also measured: it is not an error, and the element it names is left as
-// the zeroing left it.
 static void CharonSparseUnpackComplex(sparse_dimension N, sparse_dimension nz, bool zero, const void *x,
                                       const sparse_index *indx, void *y, sparse_stride incy, size_t size)
 {
@@ -771,26 +664,6 @@ void sparse_unpack_vector_double_complex(sparse_dimension N, sparse_dimension nz
     CharonSparseUnpackComplex(N, nz, zero, x, indx, y, incy, sizeof(double _Complex));
 }
 
-// ---------------------------------------------------------------- level 2
-
-// The two kernels the products below are made of: a multiply-add over n elements of a dense vector at an
-// element offset with the caller's increments, and a gather of n elements of a dense row.
-//
-// Both are the release's own: cblas_caxpy / cblas_zaxpy for the multiply-add and cblas_ccopy /
-// cblas_zcopy for the gather. That is the same choice the real family makes with cblas_saxpy /
-// cblas_daxpy and for the same reason - the arithmetic belongs to the BLAS the release exports, not to a
-// loop of ours. A complex alpha is measured to be done properly by all four: on the host, with
-// alpha = 2+i and the vector element 3+4i, cblas_caxpy and cblas_zaxpy both answer 2+11i, and with
-// alpha = 0+i both answer -4+3i, each of them the product (facts/Accelerate/SparseComplex.md).
-//
-// from and to count elements of the caller's vector and incX and incY are its increments, so one body
-// serves both layouts: the level-3 kernel below hands the leading dimension of B and of C as their
-// increments, which is what makes a column-major C step by ldc and not by one.
-//
-// An increment of zero or a negative one is never handed here: the level-2 kernel folds its increments
-// into the addresses itself and passes one for both, exactly as the real family does and for the reason
-// its comment gives - measured on the host, cblas_saxpy with an increment that is not positive treats it
-// as one, so an increment of that shape cannot be given to a BLAS at all.
 static void CharonComplexAxpy(long n, CharonComplex alpha, const void *x, long from, long incX, void *y, long to,
                               long incY, size_t size)
 {
@@ -816,9 +689,6 @@ static void CharonComplexCopy(long n, const void *b, long from, long inc, void *
     }
 }
 
-// y = alpha * op(A) * x + y. One entry of the matrix at a time, the sparse level-2 kernel, with the
-// multiply-add the release's own cblas_caxpy / cblas_zaxpy over the single product. A transpose the
-// enumeration does not name is SPARSE_ILLEGAL_PARAMETER and y is left alone.
 static sparse_status CharonSparseVectorProductComplex(void *matrix, uint32_t magic, int transposed, CharonComplex alpha,
                                                       const void *x, sparse_stride incx, void *y, sparse_stride incy,
                                                       size_t size)
@@ -869,19 +739,6 @@ sparse_status sparse_matrix_vector_product_dense_double_complex(enum CBLAS_TRANS
                                            sizeof(double _Complex));
 }
 
-// The triangular solve, over the stored entries, which is the reason a caller reached for a sparse
-// matrix at all: O(nnz) rather than the O(n^2) a dense cblas_ctrsv would spend.
-//
-// Two rules, and both of them the real family's, measured the same way on the host. A matrix with no
-// triangular property is refused and the vector is left alone. And alpha DIVIDES the right-hand side
-// rather than scaling the solution: measured on the host for the complex type, the lower triangular
-// [[2,0,0],[1,3,0],[0,0,4]] against (2, 5, 4) answers (0.5, 0.666667) for the first two elements at
-// alpha = 2, which is the solution of T x = b / alpha and not of T x = alpha b. The third element is
-// where the host's own answer is not reproducible and is named in facts/Accelerate/SparseComplex.md;
-// the port divides and does what the arithmetic says.
-//
-// A pivot of exactly zero divides, so both parts become a NaN, which is what the host gives: measured,
-// the lower [[0,0],[0,1]] against (1,1) answers a NaN in both parts of both elements.
 static sparse_status CharonSparseTriangularComplex(void *matrix, uint32_t magic, int transposed, CharonComplex alpha,
                                                    void *b, long iStep, long rightStep, sparse_dimension nrhs, size_t size)
 {
@@ -892,8 +749,6 @@ static sparse_status CharonSparseTriangularComplex(void *matrix, uint32_t magic,
     if (!(asFloat->property & (SPARSE_UPPER_TRIANGULAR | SPARSE_LOWER_TRIANGULAR))) {
         return SPARSE_ILLEGAL_PARAMETER;
     }
-    // A transposed triangular matrix is the other triangle, read out of the matrix's own storage, and
-    // the transposed case builds the column lists once so that the whole solve stays O(nnz).
     int upper = (asFloat->property & SPARSE_UPPER_TRIANGULAR) != 0;
     sparse_dimension n = asFloat->rows;
     sparse_index *lists = NULL;
@@ -933,7 +788,7 @@ static sparse_status CharonSparseTriangularComplex(void *matrix, uint32_t magic,
                 for (sparse_index at = 0; at < asFloat->row[i].count; at++) {
                     sparse_index j = asFloat->row[i].column[at];
                     if (j == (sparse_index)i || (j < (sparse_index)i) == backwards) {
-                        continue; // the diagonal, or the triangle the caller did not declare
+                        continue;
                     }
                     double otherRe = 0.0, otherIm = 0.0;
                     CharonSparseReadComplexValue(asFloat->row[i].value, at, size, &otherRe, &otherIm);
@@ -1044,16 +899,6 @@ sparse_status sparse_matrix_triangular_solve_dense_double_complex(enum CBLAS_ORD
                                         nrhs, sizeof(double _Complex));
 }
 
-// ---------------------------------------------------------------- level 3
-
-// C = alpha * op(A) * B + C, with B dense. One stored entry of op(A) at a time: the release's own
-// cblas_ccopy gathers the row of B the entry names and cblas_caxpy adds alpha times the entry's value
-// times it to the row of C - the sparse level-3 kernel, one rank-one update per nonzero.
-//
-// What is refused, measured on the host for the complex type as for the real one: an order or a
-// transpose the enumeration does not name, a leading dimension below what the layout needs, and a
-// matrix that is not one of ours, each SPARSE_ILLEGAL_PARAMETER with C untouched. A count of columns
-// of zero and an alpha of exactly zero both answer SPARSE_SUCCESS and leave C as it was.
 static sparse_status CharonSparseProductDenseComplex(void *matrix, uint32_t magic, int order, int transposed,
                                                       sparse_dimension n, CharonComplex alpha, const void *B,
                                                       sparse_dimension ldb, void *C, sparse_dimension ldc, size_t size)
@@ -1067,8 +912,6 @@ static sparse_status CharonSparseProductDenseComplex(void *matrix, uint32_t magi
     const struct sparse_m_float *asFloat = (const struct sparse_m_float *)matrix;
     sparse_dimension m = transposed ? asFloat->columns : asFloat->rows;
     sparse_dimension k = transposed ? asFloat->rows : asFloat->columns;
-    // The two increments of the caller's layout: a row of B steps by one in row-major and by ldb in
-    // column-major, and so does a row of C, which is what CharonComplexAxpy and CharonComplexCopy take.
     sparse_dimension bStep = order == CblasRowMajor ? 1 : ldb;
     sparse_dimension cStep = order == CblasRowMajor ? 1 : ldc;
     if (ldb < (order == CblasRowMajor ? (n ? n : 1) : (k ? k : 1)) ||
@@ -1134,18 +977,6 @@ sparse_status sparse_matrix_product_dense_double_complex(enum CBLAS_ORDER order,
                                            sizeof(double _Complex));
 }
 
-// C = alpha * x * y' for a dense x and a sparse y, as a new matrix, and **x is indexed by the row and y
-// by the column**, because C[i, j] = alpha * x[i] * y[k] for the k whose indy[k] is j: the outer product
-// is a column of x scaled into a row. An earlier version read x at k and wrote the same value into every
-// row, which answers the right number only where x is constant down its length; the host does not do that
-// (measured, for M = N = 3, nz = 2, alpha = 1, x = {1, 2+i, -1} and y = {5+i, -6+2i} at the columns {0, 2}
-// it answers C[0] = (9+7i, -14-2i), C[1] = (11+8i, -18-3i) and C[2] = (8+6i, -12+4i), which is
-// alpha * x[i] * y[k] row by row), and the differential's case and its mutant are in
-// tests/backports/host/sparseblas/differential-complex.m.
-//
-// A count of nonzeros above N is SPARSE_ILLEGAL_PARAMETER and the caller's matrix pointer is left alone,
-// and a count of zero and an alpha of exactly zero both answer a matrix of the right shape with nothing in
-// it, all measured on the host for the complex type as for the real one.
 static sparse_status CharonSparseOuterComplex(sparse_dimension M, sparse_dimension N, sparse_dimension nz,
                                                CharonComplex alpha, const void *x, sparse_stride incx, const void *y,
                                                const sparse_index *indy, void **C, uint32_t magic, size_t size,
@@ -1204,16 +1035,6 @@ sparse_status sparse_outer_product_dense_double_complex(sparse_dimension M, spar
                                     sizeof(struct sparse_m_double_complex));
 }
 
-// C = alpha * op(A) * B + C with B sparse too, written out into a dense C: the complex counterpart of
-// Accelerate/SparseProduct10.m, over the same storage and with the same refusals. The same rank-one
-// update per nonzero, with the row of B taken from its own stored entries and the multiply-add the
-// release's own cblas_caxpy / cblas_zaxpy.
-//
-// Note where the two families of this header put the same name. The real sparse-sparse product arrived
-// in 10.0.1 and has an object file of its own because the release ladder measures it there while the
-// other sixty-seven names of the real family are at 9.0 (facts/Accelerate/SparseBLAS.md). The complex
-// ones did not exist before 18.5, all fifty-eight of them, so one object file holds all of them and no
-// split is called for.
 static sparse_status CharonSparseProductSparseComplex(void *A, uint32_t magicA, int order, int transposed,
                                                       CharonComplex alpha, void *B, uint32_t magicB, void *C,
                                                       sparse_dimension ldc, size_t size)
@@ -1248,7 +1069,6 @@ static sparse_status CharonSparseProductSparseComplex(void *A, uint32_t magicA, 
             if (c >= (sparse_index)asA->columns) {
                 continue;
             }
-            // A[r, c] in both cases, read through the same lookup the rest of the family uses.
             double valueRe = 0.0, valueIm = 0.0;
             CharonSparseElementComplexAt(&asA->row[r], c, size, &valueRe, &valueIm);
             if (CharonComplexIsZero(CharonComplexMake(valueRe, valueIm))) {
@@ -1270,8 +1090,6 @@ static sparse_status CharonSparseProductSparseComplex(void *A, uint32_t magicA, 
                 if (CharonComplexIsZero(CharonComplexMake(re, im))) {
                     continue;
                 }
-                // The gathered value is the vector and alpha times the entry's own value is the factor,
-                // so the product is formed once and by the release's BLAS rather than here.
                 CharonComplexAxpy(1, CharonComplexMul(alpha, CharonComplexMake(valueRe, valueIm)), row, j, 1, C,
                                   to + (long)(j * cStep), 1, size);
             }
@@ -1307,11 +1125,6 @@ sparse_status sparse_matrix_product_sparse_double_complex(enum CBLAS_ORDER order
                                            CHARON_SPARSE_MAGIC_DOUBLE_COMPLEX, C, ldc, sizeof(double _Complex));
 }
 
-// ---------------------------------------------------------------- the permutations, the norms, the trace
-
-// The two permutations below are CharonSparsePermuteRows and CharonSparsePermuteColumnsComplex, in
-// CharonSparseBLAS.h, which SparseBLAS9.m runs over the same storage for the real types.
-
 sparse_status sparse_permute_rows_float_complex(sparse_matrix_float_complex A, const sparse_index *__restrict perm)
 {
     if (!CharonSparseIsFloatComplex(A)) {
@@ -1344,17 +1157,10 @@ sparse_status sparse_permute_cols_double_complex(sparse_matrix_double_complex A,
     if (!CharonSparseIsDoubleComplex(A)) {
         return SPARSE_ILLEGAL_PARAMETER;
     }
-    // The element width, and not sizeof(float _Complex): this helper branches on it to read and write
-    // every value, so a double's values passed as the float one were read and written half as many
-    // bytes as they occupy.
     CharonSparsePermuteColumnsComplex((struct sparse_m_float *)A, perm, sizeof(double _Complex));
     return SPARSE_SUCCESS;
 }
 
-// The four elementwise norms of a matrix, over its stored entries. The one norm is the sum of the parts
-// of the values and the two and the infinity norm are over their moduli, which is the same split the
-// vector norms above have and is measured the same way. A norm the enumeration does not name is
-// answered as SPARSE_NORM_INF, and an empty matrix answers zero for all four, both measured on the host.
 static double CharonSparseElementwiseComplex(void *matrix, uint32_t magic, sparse_norm norm, size_t size)
 {
     if (!CharonSparseIsMatrix(matrix, magic)) {
@@ -1385,8 +1191,6 @@ static double CharonSparseElementwiseComplex(void *matrix, uint32_t magic, spars
         return sqrt(sum);
     }
     if (norm == SPARSE_NORM_R1) {
-        // sum over j of the modulus of column j: a square root per column, which is why the column
-        // sums are kept apart.
         double total = 0.0;
         for (sparse_index j = 0; j < (sparse_index)asFloat->columns; j++) {
             double sum = 0.0;
@@ -1424,18 +1228,6 @@ double sparse_elementwise_norm_double_complex(sparse_matrix_double_complex A, sp
     return CharonSparseElementwiseComplex(A, CHARON_SPARSE_MAGIC_DOUBLE_COMPLEX, norm, sizeof(double _Complex));
 }
 
-// The operator-one norm, the largest column sum, and the operator-infinity norm, the largest row sum:
-// both over the parts of the values, as the elementwise one norm is. A matrix that is not one of ours,
-// or an empty one, answers zero.
-//
-// The operator-two norm, the largest singular value, is the release's own LAPACK: the Hermitian Gram
-// matrix A * A' formed here, and the largest of its eigenvalues read with cheev_ / zheev_. That is the
-// same route the real entry points take through ssyev_ / dsyev_, and it is the exact answer: measured
-// on the host for [[3+4i,0,0],[1,0,-2+i],[0,0,0]] it answers 5.12196, which is the square root of the
-// larger root of t^2 - 31t + 125, the characteristic polynomial of A * A'.
-//
-// SPARSE_NORM_R1 is not supported for a matrix and answers NaN, measured on the host for the complex
-// type as for the real one.
 static double CharonSparseOperatorComplex(void *matrix, uint32_t magic, sparse_norm norm, size_t size)
 {
     if (!CharonSparseIsMatrix(matrix, magic)) {
@@ -1479,12 +1271,6 @@ static double CharonSparseOperatorComplex(void *matrix, uint32_t magic, sparse_n
     if (norm == SPARSE_NORM_R1) {
         return (double)NAN;
     }
-    // A * A' as a dense m x m Hermitian matrix, and the largest of its eigenvalues through the
-    // release's own LAPACK. A is taken conjugated on the right of the product, which is what makes the
-    // Gram matrix Hermitian and the eigen-decomposition a real one: the element (i, k) is the sum over j
-    // of A[i, j] * conj(A[k, j]). cheev_ and zheev_ read one triangle by default, which is the half the
-    // product below fills, and both take the count and the leading dimension in the header's own
-    // __CLPK_integer, which is a long int on the 32-bit target this library is built for.
     if (size == sizeof(float _Complex)) {
         __CLPK_complex *gram = (__CLPK_complex *)calloc((size_t)m * m, sizeof(__CLPK_complex));
         if (!gram) {
@@ -1579,9 +1365,6 @@ double sparse_operator_norm_double_complex(sparse_matrix_double_complex A, spars
     return CharonSparseOperatorComplex(A, CHARON_SPARSE_MAGIC_DOUBLE_COMPLEX, norm, sizeof(double _Complex));
 }
 
-// The sum along one diagonal: A[i, i + offset] for an offset above the main one and A[i - offset, i]
-// for one below, as a pair. An offset that names no element of the matrix answers a zero pair,
-// measured, and so does a matrix that is not one of ours.
 static CharonComplex CharonSparseTraceComplex(void *matrix, uint32_t magic, sparse_index offset, size_t size)
 {
     CharonComplex sum = CharonComplexMake(0.0, 0.0);

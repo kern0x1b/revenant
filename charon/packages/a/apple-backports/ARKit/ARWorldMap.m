@@ -1,9 +1,3 @@
-// ARWorldMap.m - the world a session has mapped, saved and given back.
-//
-// A world map is what an application stores and hands to a later session so that the same room is
-// the same room twice. What goes in it is the anchors the session found and the application added,
-// and what comes out is those anchors, so restoring one is giving a session the anchors to carry.
-
 #import <ARKit/ARKit.h>
 
 #import "CharonARKitPrivate.h"
@@ -34,7 +28,6 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    // a map copied is the same map somewhere else, and the anchors go with it because the map is them
     ARWorldMap *copy = [[ARWorldMap allocWithZone:zone] initWithAnchors:_anchors featurePoints:_rawFeaturePoints];
     copy.trackerState = _trackerState;
     return copy;
@@ -44,8 +37,6 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    // the anchors are the map, so they go across as themselves - each one is secure-coding in its
-    // own right - and the points behind them go as the buffer the framework names itself
     [coder encodeObject:_anchors forKey:@"anchors"];
     [coder encodeObject:_trackerState forKey:@"trackerState"];
     [coder encodeInteger:(NSInteger)_rawFeaturePoints.count forKey:@"pointCount"];
@@ -75,9 +66,6 @@
     return self;
 }
 
-/// The centre of the map is the middle of what the anchors cover, and its extent is half as large in
-/// each direction. A map with no anchors has no centre to speak of, which is Apple's own answer: the
-/// middle of the world, with no extent at all.
 - (simd_float3)center
 {
     if (_anchors.count == 0)

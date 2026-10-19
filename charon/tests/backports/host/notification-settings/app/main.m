@@ -2,12 +2,6 @@
 #import <UserNotifications/UserNotifications.h>
 #include <stdio.h>
 
-// A bundled Mac Catalyst app that has never asked for notification authorization. Its scene delegate asks the notification center for the
-// settings, and each setting the notification settings answer is written as one "side<TAB>check<TAB>value" line to the file named by
-// CHARON_SCENE_OUT, then the app quits. getNotificationSettings does not prompt: a bundle that never asked reads "not determined", with the
-// per-setting values the host gives it. In the port's build the classes are compiled with their names renamed to CharonPort<name>, so the
-// host's class is still the one the center is, and the port's is the one measured there. run.sh builds both and diffs them.
-
 static FILE *out;
 static const char *side;
 

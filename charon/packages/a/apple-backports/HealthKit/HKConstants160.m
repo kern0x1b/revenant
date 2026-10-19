@@ -1,34 +1,3 @@
-// The 125 exported string constants the held ladder first sees exported by iOS 16.0. The 20 the held
-// iOS 13.4 cache first exports are in HKConstants134.m, and the two objects together are the 145 of
-// the framework's constants that the ladder places in the 13.4 and 16.0 bands.
-//
-// The headers name releases from 12.2 to 26.0 for these constants. The release is measured rather than
-// read off a header: `dyld.first_releases()` over the held ladder, which is what
-// modules/apple/backports.lua's releases_in() asks and what tools/release-split.lua makes. The 13.4 cache
-// does not export these 125, and the 16.0 cache is the first held rung that does. Each object is one
-// release's API, because an object carries the API of one release. Their registry rows keep the release
-// each header names, one file per release, and the two are different questions; the facts file writes
-// down both where they differ.
-//
-// The two whose header marks them 26.0 are here and not with the other seven of that release:
-// HKMedicationDoseEventTypeIdentifierMedicationDoseEvent and HKPredicateKeyPathStatus. Both are exported by
-// the 16.0 image and both are declared by the 26.2 header with API_AVAILABLE(ios(26.0)) - HKTypeIdentifiers.h:338
-// and HKMedicationDoseEvent.h:104 - while neither is declared by the 16.4 build SDK's headers, so for these
-// two the header has no date before 26.0 to give and the image has the only earlier one. Their rows are
-// filed in ios260.json with the 26.0 their headers say, and putting them in the 26.0 object beside the
-// other seven would give that object two releases, which the release check refuses.
-//
-// 34 of the 125 hold a value that is not their own name - a predicate key path, a metadata key, a FHIR
-// resource type or release, a verifiable-record credential type - so a value spelled from the constant's
-// name would be wrong for them. Every value is Apple's own, read out of the host's HealthKit and recorded
-// per constant in coordination/corpus/ledger/constant-values-HealthKit.tsv: 386 rows, each a dlsym through
-// CFStringGetCString as UTF-8 out of /System/Library/Frameworks/HealthKit.framework/HealthKit on
-// macOS 26A428, with that binary and that build on every row. All 125 are declared by the 26.2 header and
-// the corpus ledger's `introduced` agrees with the header's own availability for all 125.
-//
-// Every definition is spelled with the typedef the 16.4 build SDK declares for its type, so a caller that
-// compiles against the same header reads the declaration it expects.
-
 #import <HealthKit/HealthKit.h>
 
 HKCategoryTypeIdentifier const HKCategoryTypeIdentifierAbdominalCramps = @"HKCategoryTypeIdentifierAbdominalCramps";

@@ -1,13 +1,3 @@
-// probe.m - +[INImage systemImageNamed:] against +[UIImage systemImageNamed:], name by name.
-//
-// Reads one name per line from the file given as the argument, and prints one line per name:
-//   name <TAB> UIImage YES|NO <TAB> INImage YES|NO
-// The UIImage column is the host's UIKit in both builds, so it is the same in both. The INImage column is the
-// class under test: the host's own in the host build, the port's (renamed CharonHost*) in the port build. The two
-// runs must print the same lines. The INImage class is looked up by name and sent the selector at run time, so the
-// header of the framework does not decide the answer.
-//
-//   xcrun clang -fno-objc-arc -framework Foundation -framework UIKit -framework Intents probe.m -o probe
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>

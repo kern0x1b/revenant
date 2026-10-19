@@ -1,14 +1,3 @@
-// The notification of CloudKit's first release and the two of its three kinds that came with it: the
-// identifier that names one, the query notification and the record zone notification. The database
-// notification is iOS 10 and is in CKValues10.m with the subscriptions.
-//
-// A CKNotification is only ever made by the service and read by an application: the factory that
-// builds one from a remote notification payload is the only way in, and a caller that makes one
-// directly is told so, which is what the host's own +[CKNotification new] answers with its own
-// exception and its own words. What the payload says - the container, the subscription, the alert
-// fields, the badge, the sound and the category - is read out of it under the names the CloudKit
-// service writes, and facts/CloudKit/Values.md lists them.
-
 #import <Foundation/Foundation.h>
 #import <CloudKit/CloudKit.h>
 
@@ -16,11 +5,6 @@
 
 #pragma mark - CKNotificationID
 
-// CKNotificationID is an empty class in the SDK: it declares no property and no method, only that it
-// is copyable and archivable. A notification identifier is the name CloudKit gives a notification and
-// the object it was sent to, and the header has nowhere to keep either, so they are the port's own
-// state here. An identifier with no name is the one a notification that has not been delivered yet
-// carries, and it is not equal to one that has a name.
 @implementation CKNotificationID
 {
     NSString *_name;
@@ -112,11 +96,6 @@
 @property (nonatomic, copy, nullable) CKNotificationID *notificationID;
 @end
 @interface CKNotification ()
-// The fifteen members the SDK declares readonly and a payload fills in. They are readwrite here
-// because CloudKit makes a notification by reading one rather than by setting anything, and a
-// class that owns the reading is the only place that can - which is also why the three kinds
-// below read the identifier through this property and not through an ivar: an ivar declared in an
-// @implementation block is private to its class, and a subclass of one class cannot reach it.
 @end
 
 @implementation CKNotification
@@ -147,18 +126,12 @@
 @synthesize subtitleLocalizationKey = _subtitleLocalizationKey;
 @synthesize subtitleLocalizationArgs = _subtitleLocalizationArgs;
 @synthesize notificationID = _notificationID;
-// A notification is only ever made by the service and read by an application: the factory that
-// builds one from a remote notification payload is the only way in, and a caller that makes one
-// directly is told so, which is what the host's own +[CKNotification new] answers.
 + (instancetype)notificationFromRemoteNotificationDictionary:(NSDictionary *)userInfo
 {
     CKNotification *notification = [[self alloc] initWithUserInfo:userInfo];
     return notification;
 }
 
-// The identifier a payload names, read by the base class and by each of the three notifications: the
-// state of a notification is per class, so a subclass reads it into its own rather than reaching into
-// the base class's.
 + (NSString *)CharonCKIdentifierInUserInfo:(NSDictionary *)userInfo
 {
     NSDictionary *notification = [userInfo[@"ck-notification"] isKindOfClass:[NSDictionary class]] ? userInfo[@"ck-notification"] : nil;
@@ -196,9 +169,6 @@
     return [[self class] notificationType];
 }
 
-// The payload a CloudKit notification arrives in: the keys CloudKit's own service writes under
-// "aps" are the alert fields, and the notification's own fields sit beside them. The names are the
-// ones the service documents, not this port's, and facts/CloudKit/Values.md lists them.
 - (void)readUserInfo:(NSDictionary *)userInfo
 {
     if (![userInfo isKindOfClass:[NSDictionary class]]) {
@@ -334,4 +304,3 @@
 }
 
 @end
-

@@ -2,9 +2,6 @@
 #include <stdio.h>
 #include "CharonCalendar.h"
 
-// The host's own multi-date selection and the port's, run on the same checks. A line is "side<TAB>check<TAB>value": "host" and "port" lines
-// are compared, and "only" lines are the port's own tap checks, which the host cannot be asked without a window; run.sh asserts those.
-
 typedef id (*PlainFn)(id, SEL);
 
 static void report(const char *side, const char *check, NSString *value)
@@ -36,7 +33,6 @@ static NSString *days_text(NSArray *days)
     return [parts componentsJoinedByString:@","];
 }
 
-// The delegate both sides are given: it counts what it is told, and refuses the days it is set to refuse.
 @interface CharonMultiProbe : NSObject <UICalendarSelectionMultiDateDelegate>
 @property (nonatomic) NSInteger selectedCalls;
 @property (nonatomic) NSInteger deselectedCalls;
@@ -98,7 +94,6 @@ static void run(const char *side, Class baseClass, Class multiClass)
     report(side, "multi-plain-init-selected", [plain_init([multiClass alloc]) selectedDates] ? @"set" : @"nil");
 }
 
-// The port's own tap path: a tap takes a day in and a chosen day out, each when the delegate allows it, and the delegate is told of each.
 static void runPortOnly(void)
 {
     CharonMultiProbe *probe = [[CharonMultiProbe alloc] init];

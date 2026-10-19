@@ -1,17 +1,6 @@
--- compare-certificate-name.lua - the port's Name DER against the HOST'S OWN accessors, and the difference NAMED.
---
---    xmake l compare-certificate-name.lua <the binary's output>
---
--- The host's copy is reached by dlopen of the system framework and dlsym off that handle, NOT by calling the name: the case defines
--- the same function, so a call to the name resolves to the port and the first version of this case compared the port with itself
--- and passed. Both lengths are printed, because "the bytes are not the host's" does not say whether the host has different bytes or
--- a different NUMBER of them - and that is how the two-byte header came to be found.
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
--- label, the length the port must carry. In the order they are named.
 local SAME = {{"issuer", 68}, {"subject", 68}}
--- label: must be refused
 local REFUSED = {"malformed-runs-out", "malformed-wrong-tag", "malformed-indefinite", "malformed-long-form", "malformed-short-tbs"}
 local NULLS = {"null-cert", "null-subject"}
 

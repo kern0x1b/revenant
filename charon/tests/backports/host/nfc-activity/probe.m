@@ -1,9 +1,3 @@
-// probe.m - the NDEF message NSUserActivity answers for an activity no NFC tag launched, asked of the host (Catalyst's CoreNFC)
-// and of the port's category (CoreNFC/NSUserActivity+CoreNFC.m). The property is read-only in the header, so only the reads
-// are asked: the message's class, its records, the record's type-name format, its type, identifier and payload lengths, and the
-// message's length. The classes are not named by the probe, so one source serves both builds.
-//
-//   sh run.sh
 #import <Foundation/Foundation.h>
 #import <CoreNFC/CoreNFC.h>
 #include <stdio.h>

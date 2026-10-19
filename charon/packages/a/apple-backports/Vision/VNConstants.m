@@ -1,9 +1,5 @@
 #import <Vision/Vision.h>
 
-/* The domain every Vision error is in, measured from the Vision of this host: com.apple.Vision.
- * A port that answered com.apple.vis would be answering in a domain no release has ever used, and
- * an application that switches on the domain of a Vision error -- which is how a caller tells a
- * Vision failure from any other -- would take the other branch. */
 NSString *const VNErrorDomain = @"com.apple.Vision";
 
 VNImageOption const VNImageOptionProperties = @"VNImageOptionProperties";

@@ -18,7 +18,6 @@
 + (NSString *)writeImage:(UIImage *)image error:(NSError **)error;
 + (NSString *)writeVideoAtURL:(NSURL *)url error:(NSError **)error;
 + (NSError *)errorWithCode:(NSInteger)code reason:(NSString *)reason;
-// NO, with the library's error, when the albums cannot be listed; otherwise YES, and whether one has the name.
 + (BOOL)findAlbumWithName:(NSString *)name found:(BOOL *)found error:(NSError **)error;
 + (ALAssetsGroup *)createAlbumWithName:(NSString *)name error:(NSError **)error;
 + (BOOL)addAsset:(ALAsset *)asset toGroupWithURL:(NSURL *)url error:(NSError **)error;
@@ -33,13 +32,6 @@
 - (void)refuseWithReason:(NSString *)reason;
 @end
 
-// PHPhotoLibrary's own instance variables, in a class extension rather than in the @implementation:
-// a category cannot add an ivar, so the names the class's own methods read have to be visible here.
-// The layout is still the class's own, emitted by its @implementation, and only PHPhotoLibrary.m reads
-// them - which is the whole of why the extension names three and not seven: the availability members
-// of 13.0 live in PHPhotoLibraryAvailability13.m, which is a category and is in every band, and a band
-// from iOS 8.0 does not link the object that lays the class out (the release has carried PHPhotoLibrary
-// since 8.0), so that file keeps its state beside the library in an object of its own instead.
 @interface PHPhotoLibrary () {
     NSHashTable *_observers;
     dispatch_queue_t _delivery;

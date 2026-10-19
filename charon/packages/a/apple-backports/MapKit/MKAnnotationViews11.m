@@ -1,11 +1,3 @@
-// What iOS 11 added for a map's annotations: the marker pin with a glyph, the cluster of markers
-// that stands for several, the reuse identifiers the map view hands a delegate when it asks for an
-// annotation view, and the register/dequeue pair that goes with them.
-//
-// The marker is drawn here rather than fetched: a pin is a circle on a stalk, the glyph is drawn
-// centred in it in the colour the caller gave, and the three title visibilities say which of the
-// annotation's own title and subtitle are drawn under it -- which is what the pin colour of the
-// release's own MKPinAnnotationView did, and the whole of what a marker adds to it.
 #import <MapKit/MapKit.h>
 #import <MapKit/MKMarkerAnnotationView.h>
 #import <MapKit/MKClusterAnnotation.h>
@@ -13,12 +5,6 @@
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 #import "CharonMapKit.h"
-
-// The identifiers the map view asks for when the program has registered no class of its own are
-// MKMapViewDefaultAnnotationViewReuseIdentifier and MKMapViewDefaultClusterAnnotationViewReuseIdentifier,
-// carried in MKMapItemNames11.m: iOS 11 brought them and the other iOS 11 constants of MapKit, and an
-// object carries the API of one release. The release's own MKMapView has no reuse at all, so the map
-// view here answers those two identifiers with its own marker.
 
 @implementation MKMarkerAnnotationView {
     UIColor *_markerTintColor;
@@ -44,8 +30,6 @@
 {
     self = [super initWithAnnotation:annotation reuseIdentifier:reuseIdentifier];
     if (self) {
-        // The documented defaults: a red pin, a white glyph, a title and no subtitle, and no
-        // animation when the view is added to the map.
         _markerTintColor = [UIColor redColor];
         _glyphTintColor = [UIColor whiteColor];
         _titleVisibility = MKFeatureVisibilityAdaptive;
@@ -73,8 +57,6 @@
     [self setNeedsDisplay];
 }
 
-// The pin with its glyph, drawn here because the release's own MKPinAnnotationView draws its own
-// red pin and has no place to put a glyph: a circle on a stalk, the glyph centred in the circle.
 - (void)drawRect:(CGRect)rect
 {
     CGContextRef context = UIGraphicsGetCurrentContext();
@@ -121,8 +103,6 @@
 }
 
 @synthesize memberAnnotations = _memberAnnotations;
-// A cluster has no title of its own: the two are the header's own properties, and the answers are
-// nil rather than a synthesised ivar that says something the map does not know.
 @dynamic title, subtitle;
 
 - (instancetype)initWithMemberAnnotations:(NSArray<id <MKAnnotation>> *)memberAnnotations
@@ -146,9 +126,6 @@
 
 - (CLLocationCoordinate2D)coordinate
 {
-    // The middle of the members, which is what a cluster is drawn at: the average of their own
-    // coordinates, through the release's own projection so it is the same point a map view would
-    // put them at.
     NSUInteger count = 0;
     MKMapPoint sum = MKMapPointMake(0.0, 0.0);
     for (id <MKAnnotation> member in _memberAnnotations) {
@@ -178,7 +155,6 @@
     [self charon_setRegisteredClasses:registered];
 }
 
-// The registered class of an identifier, or nil where the program registered none.
 - (NSMutableDictionary *)charon_registeredClasses
 {
     static NSMutableDictionary *registered;
@@ -203,8 +179,6 @@
     if (identifier.length == 0 || !annotation) {
         return nil;
     }
-    // The two identifiers the header declares are the two this map view answers itself with: its
-    // own marker for an ordinary annotation and its own cluster for a cluster annotation.
     Class viewClass = [self charon_registeredClasses][identifier];
     if (!viewClass) {
         if ([annotation isKindOfClass:[MKClusterAnnotation class]]) {

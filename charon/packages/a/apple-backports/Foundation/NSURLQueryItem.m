@@ -2,10 +2,6 @@
 
 @implementation NSURLQueryItem {
 @private
-    // 16.4/16.5's own header still declares an ivar block of its own for this class (@private NSString *_name;
-    // NSString *_value;) that 26.2's does not; naming ours the same as the header's would collide there
-    // ("instance variable is already declared"). Prefixed instead, so this compiles unchanged whichever the
-    // SDK's own header carries.
     NSString *_charonName;
     NSString *_charonValue;
 }

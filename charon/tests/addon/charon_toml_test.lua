@@ -1,5 +1,3 @@
--- The TOML reader the Charon driver reads charon.toml with, checked on planted cases whose expected values come from
--- the TOML rules, not from any other reader. failures() returns the list of what did not hold.
 function failures(opts)
     local toml = import("toml", {rootdir = opts.driver, anonymous = true})
     local found = {}

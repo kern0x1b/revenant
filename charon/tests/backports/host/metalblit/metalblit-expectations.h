@@ -1,6 +1,3 @@
-// metalblit-expectations.h — what macOS Metal answers, read off a real device on this host by
-// tests/backports/host/metalblit/oracle.m. tests/backports/device/metalblit.m holds the port to it.
-// Nothing here is the port's answer; it is Apple's, measured.
 #ifndef METALBLIT_EXPECTATIONS_H
 #define METALBLIT_EXPECTATIONS_H
 

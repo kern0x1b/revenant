@@ -1,10 +1,6 @@
 #include <math.h>
 #include "CharonSpatial.h"
 
-// The SPAngle functions of iOS 16.0. An angle is held in radians; the conversions are the two expressions measured
-// bit-for-bit against the host's own Spatial on one million generated inputs (tests/backports/host/spatial-angle,
-// facts/Spatial/SPAngle.md). A value is never clamped or wrapped: 2 pi stays 2 pi.
-
 SPAngle SPAngleMakeWithDegrees(double degrees)
 {
     SPAngle angle = {degrees / 180.0 * M_PI};

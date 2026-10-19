@@ -2,13 +2,6 @@
 #import <objc/runtime.h>
 #include <string.h>
 
-// AVCaptureResolvedPhotoSettings of the port (built under the name CharonHostAVCaptureResolvedPhotoSettings) against
-// the host's own class: every member the SDK the package builds with declares (read from its header by run.sh, one
-// selector per line in the file given as argument 1) is answered by the port with the host's type encoding, and the
-// port holds no ivar the compiler synthesized for a header property, the sign of a member answered by a zero nobody
-// wrote. Values are not compared here: the host's class is made only by a capture, and a capture on the host needs a
-// camera and its permission; tests/backports/device/photooutput10.m holds the values to real captures.
-
 static int checks, failures;
 
 static void check(BOOL passed, NSString *what)
@@ -49,7 +42,6 @@ int main(int argc, char **argv)
                   [NSString stringWithFormat:@"%@ is answered by the port as by the host: %s / %s", name, hostTypes, portTypes]);
         }
 
-        // Every property the host's class has that the SDK header declares: the port answers it too.
         unsigned int count = 0;
         objc_property_t *properties = class_copyPropertyList(system, &count);
         for (unsigned int i = 0; i < count; i++) {
@@ -64,7 +56,6 @@ int main(int argc, char **argv)
         }
         free(properties);
 
-        // No ivar the compiler synthesized for a declared property: its getter would answer a zero.
         unsigned int ivars = 0;
         Ivar *list_ = class_copyIvarList(ours, &ivars);
         for (unsigned int i = 0; i < ivars; i++) {
@@ -76,8 +67,6 @@ int main(int argc, char **argv)
             BOOL synthesized = [declared containsObject:bare] || [declared containsObject:getter];
             BOOL own = [ivar hasPrefix:@"_charon"] || [ivar isEqualToString:@"_internal"];
             if (!synthesized && !own) {
-                // A property of the host's newer SDK, synthesized in this host build only: the package's SDK does not
-                // declare it, so the package build has no such ivar.
                 printf("note the port's ivar %s is synthesized for a property the SDK header does not declare\n", ivar.UTF8String);
                 continue;
             }

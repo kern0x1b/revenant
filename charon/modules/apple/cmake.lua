@@ -27,10 +27,6 @@ function toolchain_file(package, opt)
             table.insert(linker, flag)
         end
     end
-    -- CMake has one set of linker flags for every language, and Swift's driver takes neither clang's spelling of the
-    -- sysroot and the deployment target nor its spelling of the linker. Where a build has Swift, each language carries
-    -- those itself - C and C++ in their own flags, which CMake also puts on their link lines, and Swift in its own - and
-    -- what stays here is only what a link of any language takes.
     local linked = opt.swift and {} or table.join(common, linker, opt.ldflags or {})
     local roots = {sdk}
     for _, dep in ipairs(package:orderdeps()) do
@@ -59,8 +55,6 @@ function toolchain_file(package, opt)
         table.insert(lines, string.format("set(CMAKE_%s_LINKER_FLAGS_INIT \"%s\")", kind, quoted(table.join(linked, kind ~= "EXE" and opt.shflags or {}))))
     end
     if opt.swift then
-        -- CMake cannot run a test binary for the phone, and Swift's linker driver takes its own spelling of the linker,
-        -- so each language names the linker it uses.
         local linker = ""
         for _, flag in ipairs(table.wrap(chosen:get("shflags"))) do
             if flag:startswith("-fuse-ld=") then
@@ -105,9 +99,6 @@ function install(package, configs, opt)
     end
     local cmake = assert(find_tool("cmake"), "cmake is needed to build " .. package:name())
     local ninja = assert(find_tool("ninja"), "ninja is needed to build " .. package:name())
-    -- One build tree per configuration. CMake takes a toolchain file's flags only while their cache entries are unset, and
-    -- the sources of a package are one directory for every architecture it is built for, so a shared tree would build the
-    -- second architecture - or the next version of a recipe - with the flags of the first.
     local builddir = path.absolute(opt.builddir or ("build_charon-" .. package:buildhash()))
     os.mkdir(builddir)
     local argv = {"-G", "Ninja", "-S", path.absolute(opt.sourcedir or "."), "-B", builddir,

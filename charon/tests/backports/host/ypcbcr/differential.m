@@ -201,10 +201,6 @@ static void run_refusals(void)
                ([NSString stringWithFormat:@"the system answers %ld, the backport answers %ld", (long)cases[index].theirs, (long)cases[index].ours]));
 
     vImage_YpCbCrPixelRange wideRange = {4096, 32768, 60160, 61440, 65535, 0, 65535, 1};
-    /* The port used to carry only the 420 8-bit types and refused the rest as unsupported; it carries the
-       whole of Conversion.h's set now, and tests/backports/host/ypcbcr8 asks every Y'CbCr type against
-       every ARGB type and holds both to the system's answers. What is left here is the pair neither
-       carries: a sixteen-bit Y'CbCr type with a Q12 destination, and the same with a Q12 source. */
     report(charonHost_vImageConvert_YpCbCrToARGB_GenerateConversion(charonHost_kvImage_YpCbCrToARGBMatrix_ITU_R_601_4, &wideRange, &ourBackward, kvImage422CbYpCrYp16, kvImageARGB16Q12, kvImageNoFlags) == vImageConvert_YpCbCrToARGB_GenerateConversion(kvImage_YpCbCrToARGBMatrix_ITU_R_601_4, &wideRange, &theirBackward, kvImage422CbYpCrYp16, kvImageARGB16Q12, kvImageNoFlags),
            "a sixteen-bit Y'CbCr type into a Q12 destination is refused alike", @"one side answered something else");
     report(charonHost_vImageConvert_ARGBToYpCbCr_GenerateConversion(charonHost_kvImage_ARGBToYpCbCrMatrix_ITU_R_601_4, &wideRange, &ourForward, kvImageARGB16Q12, kvImage444AYpCbCr16, kvImageNoFlags) == vImageConvert_ARGBToYpCbCr_GenerateConversion(kvImage_ARGBToYpCbCrMatrix_ITU_R_601_4, &wideRange, &theirForward, kvImageARGB16Q12, kvImage444AYpCbCr16, kvImageNoFlags),

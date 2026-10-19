@@ -1,19 +1,8 @@
--- The Swift interface reader (tools/gen/swift_interface.lua) on a fixture interface text: the records it reads from a module's
--- .swiftinterface, each with its kind, its api (qualified by the types it sits in, with the labels the interface spells), its iOS
--- introduction, deprecation, obsoletion and unavailability, and where the introduction came from (own, container, none). The rules
--- under test: the availability forms (a version, a keyed version, a bare deprecated, the 100000 sentinel, an unavailable on another
--- platform); an @available line before a declaration; the attributes before a declaration's keyword; the #if lines; a string or an arrow
--- inside an attribute or a parameter type; the labels of a parameter (an unlabelled one is _); a nested type and an enum case; a
--- non-ASCII name written as the corpus writes it. The expectations are the Swift the fixture states, read by hand.
--- Run: xmake l tests/gen/swift_interface_test.lua (exits 1 on any failure).
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 local reader = import("gen.swift_interface", {rootdir = TOOLS, anonymous = true})
 
--- A non-ASCII identifier, written with its UTF-8 bytes (a long string does not read escapes, so the name is spliced in).
 local NAME = "norwegianBokm\195\165l"
 
--- The fixture: one module, named Fixture. The lines are the forms the SDK's texts use.
 local FIXTURE = [[
 // swift-interface-format-version: 1.0
 // swift-module-flags: -module-name Fixture
@@ -65,7 +54,6 @@ public class Hidden {
 }
 ]]
 
--- The record of each declaration, as line_of writes it: kind, api, introduced, deprecated, obsoleted, unavailable, via.
 local EXPECTED = {
     "struct Outer 8.0 - - - own",
     "property Outer.shown 8.0 - - - container",
@@ -92,7 +80,6 @@ local EXPECTED = {
     "method Hidden.hiddenMember() - - - yes none",
 }
 
--- The fixture's cell values read as the table's: an empty cell is "-", a yes is yes.
 local function line_of(record)
     local function cell(value)
         return (value == nil or value == "") and "-" or value
@@ -134,7 +121,6 @@ function main()
     end
     check(#records == #want, "the fixture has " .. #want .. " declarations (got " .. #records .. ")")
 
-    -- the shard's text: the header and the rows, with the non-ASCII name escaped as the corpus writes it
     local text, count = reader.shard_text(FIXTURE, "Fixture")
     check(count == #records, "shard_text counts the declarations it writes")
     local header = string.match(text, "^[^\n]*")

@@ -1,9 +1,3 @@
-// The port's interleaved and planar moves held against the host's own vImage, case by case: the same
-// channels in, the same channels out, and every byte of every destination row compared.
-//
-// The inputs are a gradient and the ends of each range, so a channel that lands in the wrong row is a
-// difference rather than a coincidence, and the destinations are filled with a value neither side writes.
-
 #import <Accelerate/Accelerate.h>
 #import <Foundation/Foundation.h>
 #include <stdarg.h>
@@ -74,8 +68,6 @@ static vImage_Buffer row_of(void *data, vImagePixelCount width, vImagePixelCount
     return buffer;
 }
 
-// One interleaved row of `channels` values, at `bytes` bytes each, and the same values split into rows - so
-// a channel that lands in the wrong place is a difference and not a coincidence.
 static void spread_values(uint8_t *interleaved, uint8_t rows[4][W * 2], int channels, int bytes)
 {
     for (int channel = 0; channel < channels; channel++) {

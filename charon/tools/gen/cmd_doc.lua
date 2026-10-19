@@ -1,13 +1,3 @@
--- `doc`: the worker's page set, written into --out (default: .agent-work/spec-docs under --tree). For each framework: an index, one
--- page per class (its members with the 6.1.3 and 4.3 status, demand, registry and pin, and stub; the host oracle's defaults; the
--- binary's ObjC metadata), one page per protocol (<Name>.protocol.md; pages.lua names the pages), Constants.md, and Swift.md when the bucket has rows. The inputs: the spec, the
--- registry, the pins and the trace's skipped list of the tree; the surface, ledgers, oracle defaults and ObjC table of the corpus
--- (--coordination); the superclasses of the committed declaration shards (headers.shard_facts: no Python runs here). Pages go through
--- emit, and nothing else is written. The header comments and the declaration text of a class or protocol member are re-derived from
--- clang at doc time (ruling 2, ruling D8): the extractor's doc mode gives them (doc_text.lua, decls --doc, read through a pipe). A
--- member the extractor does not list is marked, and a framework the extractor does not list keeps the marked text; a framework it
--- lists whose rows cannot be produced fails the run. Every other part is the oracle's, byte for byte.
-
 local snapshot = import("spec", {anonymous = true})
 local surface = import("surface", {anonymous = true})
 local headers = import("headers", {anonymous = true})
@@ -24,26 +14,17 @@ local tsv = import("tsv", {anonymous = true})
 local sdk_info = import("sdk", {anonymous = true})
 local project = import("project", {anonymous = true})
 
--- The ObjC rows are read through this function: objc.each by default, replaced by tests with a fixture.
 local objc_each = objc.each
 
--- The default output folder, under the tree.
 local DOC_OUT = {".agent-work", "spec-docs"}
--- The ledgers of the two releases the pages show: 6.1.3 (ledger-w45) and 4.3.
 local LEDGER_6_1_3 = surface.ledger_6_1_3()
 local LEDGER_4_3 = surface.ledger_4_3()
 local NO_VALUE = "-"
--- The pages of a framework folder besides the class and protocol pages.
 local FIXED_PAGES = {"index.md", "Constants.md", "Swift.md"}
 local MEMBER_KINDS = {method = true, property = true}
--- The text of what the extractor's doc mode does not give: a framework it cannot run for keeps the marked text for its comments and its
--- declarations (ruling 2 and ruling D8), and a member it does not list is marked as such. Nothing is taken from the spec's or the
--- protocols' decl column.
 local COMMENTS_NOT_DERIVED = "- not derived: the extractor does not run for this framework"
 local DECL_NOT_DERIVED = "not derived: decl (ruling D8)"
 local NOT_IN_ROWS = "not derived: not in the doc rows"
--- What the Behaviour summary section of a page says: the page holds none, and what writes one. The text is true whether or not a
--- `behaviour` run has been made for the framework (the page does not depend on one: a run of doc is a function of its inputs).
 local function behaviour_note(release)
     return "Not part of this page. `xmake l tools/gen.lua behaviour --framework <framework> --coordination <corpus> "
                        .. "--ipsw-cache <cache>` writes the summary of the methods it is run on (the calls in the order the code makes "
@@ -54,17 +35,13 @@ local function behaviour_note(release)
 end
 local NO_COMMENT = "no comment in the doc rows"
 local doc_text = import("doc_text", {anonymous = true})
--- The host oracle's rows a class page shows, and the cell length a markdown cell is cut to.
 local ORACLE_ROWS_SHOWN = 60
 local CELL_LIMIT = 400
--- The ObjC table's sections: an instance method or property, and a class method.
 local SECTION_INSTANCE = "instance"
 local SECTION_CLASS = "class"
 local DEFAULT_SUPERCLASS = "NSObject"
--- The page text names the command that writes it.
 local REGENERATE_COMMAND = "tools/gen.lua doc"
 
--- The Swift overlay needs the index's Swift page lists at the end (the oracle's SWIFT_OVERLAY_NEEDS, word for word).
 local function swift_overlay_needs(release)
     return {
         "Declarations with types: the " .. release .. " .swiftinterface text of each module (241 files in the SDK). No table in v-cache26 carries types.",
@@ -76,17 +53,14 @@ local function swift_overlay_needs(release)
     }
 end
 
--- Replaces the ObjC row source (tests): source(corpus, frameworks, fn) calls fn(framework, row) like objc.each.
 function use_objc(source)
     objc_each = source or objc.each
 end
 
--- Python's truthiness of a cell: a missing or an empty cell is false.
 local function present(value)
     return value ~= nil and value ~= ""
 end
 
--- Python's `value or fallback`.
 local function either(value, fallback)
     if present(value) then
         return value
@@ -94,7 +68,6 @@ local function either(value, fallback)
     return fallback
 end
 
--- A value in a markdown cell: str(value) with the pipes escaped and the newlines and the length capped. None (a missing cell) is "None".
 local function md_cell(value)
     local text = value == nil and "None" or tostring(value)
     text = string.gsub(text, "|", "\\|")
@@ -102,7 +75,6 @@ local function md_cell(value)
     return string.sub(text, 1, CELL_LIMIT)
 end
 
--- The UTF-8 sequence at byte i of text: its length and its code point, or nil when the bytes there are not one well-formed sequence.
 local function sequence_at(text, i)
     local lead = string.byte(text, i)
     local count, code
@@ -128,7 +100,6 @@ local function sequence_at(text, i)
     return count, code
 end
 
--- The text as ASCII, which emit requires: a UTF-8 character is written \u{hex}, and a byte that is not UTF-8 is written \xhh.
 local function ascii_text(text)
     return (string.gsub(text, "[\128-\255]+", function(run)
         local out, i = {}, 1
@@ -146,12 +117,10 @@ local function ascii_text(text)
     end))
 end
 
--- A declaration in a markdown table cell: ASCII, with its pipes escaped. It is not cut (a declaration shows whole).
 local function decl_text(text)
     return (string.gsub(ascii_text(text), "|", "\\|"))
 end
 
--- A fence for a block that holds the text: three backticks, or one more than the longest run of backticks in it.
 local function fence_of(text)
     local longest = 0
     for run in string.gmatch(text, "`+") do
@@ -160,8 +129,6 @@ local function fence_of(text)
     return string.rep("`", math.max(3, longest + 1))
 end
 
--- Text as a markdown code span: the delimiter is one backtick longer than the longest run in the text (a declaration can quote
--- backticks, as an API_DEPRECATED message does), and the text is padded when the delimiter is longer than one backtick.
 local function code_span(text)
     local longest = 0
     for run in string.gmatch(text, "`+") do
@@ -174,8 +141,6 @@ local function code_span(text)
     return delimiter .. " " .. text .. " " .. delimiter
 end
 
--- The declaration cell of a member: the extractor's declaration as a code span, or the marked text when the framework has no doc
--- rows (docs is nil) or the extractor does not list the member.
 local function decl_cell(docs, kind, api)
     if docs == nil then
         return code_span(DECL_NOT_DERIVED)
@@ -187,10 +152,6 @@ local function decl_cell(docs, kind, api)
     return code_span(decl_text(row.decl))
 end
 
--- The header comments section of a class or a protocol, as lines: the heading, a blank line, then the body. docs is nil when the
--- framework has no doc rows (the marked text). Otherwise a member with a comment has a heading (its api) and its raw comment text in a
--- block, and a member with no comment, or that the extractor does not list, is one bullet after the blocks. entries are {kind, api}
--- in the page's order.
 local function comments_section(docs, entries)
     local page = {"## Header comments", ""}
     if docs == nil then
@@ -238,29 +199,24 @@ local function comments_section(docs, entries)
     return page
 end
 
--- api.rstrip("]") of the oracle.
 local function strip_brackets(api)
     return (string.gsub(api, "%]+$", ""))
 end
 
--- A method's selector: api.rstrip("]").split(" ", 1)[1].
 local function selector_of(api)
     local text = strip_brackets(api)
     local space = string.find(text, " ", 1, true)
     return space and string.sub(text, space + 1) or ""
 end
 
--- A property's name: api.rstrip("]").split(" ")[-1].
 local function name_of(api)
     return string.match(strip_brackets(api), "([^ ]*)$")
 end
 
--- The row of a map keyed by surface.key(kind, api), or nil.
 local function row_of(map, kind, api)
     return map[surface.key(kind, api)]
 end
 
--- A stable sort of a list by before(a, b): equal items keep their order, as Python's sorted does.
 local function sorted_stable(list, before)
     local indexed = {}
     for i, item in ipairs(list) do
@@ -282,7 +238,6 @@ local function sorted_stable(list, before)
     return out
 end
 
--- The comparison of records by the named string fields, in order (Python's tuple sort, with byte order).
 local function by_fields(names)
     return function(a, b)
         for _, name in ipairs(names) do
@@ -294,7 +249,6 @@ local function by_fields(names)
     end
 end
 
--- The path of a page as the printed line gives it: relative to the tree when it is under it.
 local function relative_to(tree, filepath)
     local prefix = tree .. "/"
     if string.sub(filepath, 1, #prefix) == prefix then
@@ -303,7 +257,6 @@ local function relative_to(tree, filepath)
     return filepath
 end
 
--- The ObjC keys a framework's pages read: the key of each method and property the spec names, and the owners of its classes.
 local function needs_of(tree, fw)
     local need = {keys = {}, owners = {}}
     for _, r in ipairs(snapshot.load(tree, fw)) do
@@ -322,9 +275,6 @@ local function needs_of(tree, fw)
     return need
 end
 
--- One pass over the ObjC table for every framework of the run: per framework, the first row of each member key the spec names
--- (objc.facts keeps the first row of a key) and the last class row of each owner the spec names (the oracle's dict keeps the last
--- class key of an owner, in the table's order). Returns framework -> {index, meta}.
 local function read_objc(corpus, sdk_release, needs)
     local frameworks, state = {}, {}
     for fw, need in pairs(needs) do
@@ -346,7 +296,6 @@ local function read_objc(corpus, sdk_release, needs)
     return state
 end
 
--- The page of one class: its members in (kind, api) order, the oracle's table, and the header comments (from the doc rows, or marked).
 local function class_page(parsed, fw, cls, members, ctx)
     local led, led43, surf, regs, pins = ctx.led, ctx.led43, ctx.surf, ctx.regs, ctx.pins
     local stubs_skipped, oracle, meta_of, objc_index = ctx.stubs_skipped, ctx.oracle, ctx.meta_of, ctx.objc_index
@@ -436,8 +385,6 @@ local function class_page(parsed, fw, cls, members, ctx)
     return page
 end
 
--- The page of one protocol: its record from the snapshot, its members in (section, kind, selector) order, and the header comments
--- (from the doc rows, or marked). A member's doc row is keyed by its sign: "-" for an instance member, "+" for a class member.
 local function protocol_page(fw, name, record, ctx)
     local led, surf, regs = ctx.led, ctx.surf, ctx.regs
     local page = {"# " .. name .. " (" .. fw .. ", protocol)", "",
@@ -475,7 +422,6 @@ local function protocol_page(fw, name, record, ctx)
     return page
 end
 
--- Writes the pages of one framework. Returns the number of class pages.
 local function write_framework(ctx, fw, objc_state)
     local tree, corpus, sdk_release = ctx.tree, ctx.corpus, ctx.sdk_release
     local spec = snapshot.load(tree, fw)
@@ -502,7 +448,6 @@ local function write_framework(ctx, fw, objc_state)
     for _, pin in ipairs(snapshot.pins(tree, fw)) do
         pins[pin.api] = pin
     end
-    -- the doc-time rows of the extractor (one pipe per framework); none for a framework it does not list: the marked text
     local doc, why = doc_text.rows(tree, fw, ctx.sdk)
     if doc == nil then
         print(string.format("doc %s: no doc rows (%s): its comments and declarations keep the marked text", fw, why))
@@ -622,13 +567,10 @@ local function write_framework(ctx, fw, objc_state)
     return #classes
 end
 
--- Returns the exit status.
 function run(args)
     assert(args.coordination, "doc needs --coordination: the corpus folder")
     assert(args.sdk, "doc needs --sdk: the iOS SDK directory")
     local tree = args.tree
-    -- The Swift page is read from the bucket the swift command writes. Without that file no framework has Swift rows, and doc would
-    -- drop 104 Swift pages without a sign (measured: 6840 pages on a checkout where swift had not run, 6944 with it).
     assert(files.read_text(swift.bucket_path(tree)) ~= nil,
            "doc needs the Swift bucket " .. swift.bucket_path(tree) .. ": run the swift command first")
     local targets = args.all and gen.frameworks(tree) or {args.framework}

@@ -1,10 +1,3 @@
-// mlc-inference.m - what this host's own MLCompute answers for MLCInferenceGraph and MLCTrainingGraph: what
-// the factories answer, what addInputs:, addOutputs:, linkWithGraphs:, compileWithOptions:device: and the
-// execute family answer, what deviceMemorySize is before and after a compile, and what the gradient and
-// optimizer members answer.
-//
-// Read once, before the port's own answers are written down. Every case here is one the harness can ask of
-// both sides, and the two that raise on this host are named in the facts rather than asked.
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <MLCompute/MLCompute.h>
@@ -60,7 +53,6 @@ int main(void)
         MLCTensor *other = tensor(@[@2, @3]);
         MLCLayer *relu = [MLCActivationLayer layerWithDescriptor:[MLCActivationDescriptor descriptorWithType:MLCActivationTypeReLU]];
 
-        // What the two factories answer about a graph that has one node in it.
         MLCGraph *graph = [MLCGraph graph];
         MLCTensor *output = [graph nodeWithLayer:relu source:input];
         MLCInferenceGraph *inference = [MLCInferenceGraph graphWithGraphObjects:@[graph]];
@@ -77,7 +69,6 @@ int main(void)
         num(@"training deviceMemorySize before", training.deviceMemorySize);
         key(@"training optimizer", training.optimizer ? @"kept" : @"(nil)");
 
-        // addInputs: and addOutputs:, over a name the graph knows and one it does not.
         yes(@"inference addInputs known", [inference addInputs:@{@"a": input}]);
         yes(@"inference addInputs unknown", [inference addInputs:@{@"zz": input}]);
         yes(@"inference addInputs empty", [inference addInputs:@{}]);
@@ -90,7 +81,6 @@ int main(void)
             [training addInputs:@{@"a": input} lossLabels:@{@"a": input} lossLabelWeights:@{@"a": input}]);
         yes(@"training addOutputs", [training addOutputs:@{@"y": output}]);
 
-        // linkWithGraphs: with nothing, with itself, and with another of its own kind.
         yes(@"inference link empty", [inference linkWithGraphs:@[]]);
         yes(@"inference link itself", [inference linkWithGraphs:@[inference]]);
         yes(@"inference link another",
@@ -100,7 +90,6 @@ int main(void)
         yes(@"training link another",
             [training linkWithGraphs:@[[MLCTrainingGraph graphWithGraphObjects:@[graph] lossLayer:nil optimizer:nil]]]);
 
-        // compileWithOptions:device: and its two shorter forms.
         num(@"inference deviceMemorySize after inputs", inference.deviceMemorySize);
         yes(@"inference compile", [inference compileWithOptions:0 device:device]);
         num(@"inference deviceMemorySize after compile", inference.deviceMemorySize);
@@ -121,7 +110,6 @@ int main(void)
                                                                                               regularizationType:MLCRegularizationTypeNone
                                                                                                      regularizationScale:0.0f]]]);
 
-        // The gradient and the optimizer members, over an input the graph was given.
         shape(@"training gradientTensorForInput", [training gradientTensorForInput:input]);
         shape(@"training gradientTensorForOutput", [training gradientTensorForInput:output]);
         shape(@"training gradientTensorForUnknown", [training gradientTensorForInput:other]);
@@ -138,7 +126,6 @@ int main(void)
         yes(@"training bindOptimizerData unknown", [training bindOptimizerData:@[dataFor(input)] deviceData:nil withTensor:other]);
         [training synchronizeUpdates];
 
-        // The training execute family, one form each, so the shape of the answer is measured and not guessed.
         yes(@"training executeForward", [training executeForwardWithBatchSize:2 options:0 completionHandler:nil]);
         yes(@"training executeForward outputsData",
             [training executeForwardWithBatchSize:2 options:0 outputsData:@{@"y": dataFor(output)} completionHandler:nil]);
@@ -160,7 +147,6 @@ int main(void)
                          completionHandler:nil]);
         num(@"training deviceMemorySize at the end", training.deviceMemorySize);
 
-        // What a training graph answers for a nil optimizer and a nil loss layer.
         MLCTrainingGraph *bare = [MLCTrainingGraph graphWithGraphObjects:@[graph] lossLayer:nil optimizer:nil];
         key(@"bare optimizer", bare.optimizer ? @"kept" : @"(nil)");
         yes(@"bare compile", [bare compileWithOptions:0 device:device]);

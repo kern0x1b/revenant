@@ -52,10 +52,6 @@ FOUNDATION_EXPORT UTType *UTTypeUTF8PlainText;
 FOUNDATION_EXPORT UTType *UTTypeImage;
 FOUNDATION_EXPORT UTType *UTTypePDF;
 
-// Charon's own index of the catalogue above, filled by each UTTypeCatalogue<BAND>.m and read by
-// -[UTType supertypes]; declared here because the catalogue files and the class are separate
-// objects. Not API: no SDK header declares either name, and both begin `charon_`, which is how
-// modules/apple/backports.lua reads a symbol of this library's own.
 FOUNDATION_EXPORT void charon_uttype_catalogue_add(NSArray *types);
 FOUNDATION_EXPORT NSArray *charon_uttype_catalogue_types(void);
 
@@ -63,9 +59,6 @@ FOUNDATION_EXPORT NSString *const UTTagClassFilenameExtension;
 FOUNDATION_EXPORT NSString *const UTTagClassMIMEType;
 
 
-// The system type catalogue UniformTypeIdentifiers declares, transcribed from the
-// `UTI:` line of each constant's own doc comment in SDK 26.2's UTCoreTypes.h; see
-// facts/UIKit/UTTypeCatalog.md for the table and for the one identifier the header gets wrong.
 FOUNDATION_EXPORT UTType *UTTypeCompositeContent;
 FOUNDATION_EXPORT UTType *UTTypeDiskImage;
 FOUNDATION_EXPORT UTType *UTTypeResolvable;

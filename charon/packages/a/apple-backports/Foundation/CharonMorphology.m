@@ -4,12 +4,6 @@
 
 #import "CharonMorphology.h"
 
-/* The five iOS 17.0 grammatical settings are a **category** on NSMorphology, and a category cannot add
-   an ivar, so their storage is one associated object per instance holding a box with the five. The
-   16.5 SDK the port compiles against declares the class and its three 15.0 settings and neither the
-   17.0 properties nor their five enums, so those are in CharonMorphology.h and the three that are the
-   class's own ivars are here (CharonMorphology.m exports no API symbol of its own: the five classes
-   are one file each, NSMorphology.m holding the class, its category and the table they share). */
 typedef struct {
     NSGrammaticalCase case_;
     NSGrammaticalDetermination determination;
@@ -20,19 +14,10 @@ typedef struct {
 
 static char CharonGrammatical17Key;
 
-/* An associated object is retained by the runtime, so it has to be an Objective-C object and not a
-   calloc'd pointer - a raw pointer retained under OBJC_ASSOCIATION_RETAIN_NONATOMIC faults on the
-   first touch - and it has to be **mutable**, because a getter that hands back a copy of the box
-   throws its write away and the five settings stay at zero. It is an NSMutableData of the struct's
-   bytes, and the accessors read and write it in place. */
 static CharonGrammatical17 *charon_grammatical17(NSMorphology *morphology, BOOL create)
 {
     NSMutableData *boxed = objc_getAssociatedObject(morphology, &CharonGrammatical17Key);
     if (!boxed && !create) {
-        // A read of an object with no box - a fresh one, and every copy before it has written - is
-        // zero, not a NULL to dereference. -[NSMorphology copyWithZone:] reads grammaticalCase on the
-        // copy it has just made, and the box is attached on the first *write*, so the getter is asked
-        // for a value that does not exist yet. It faulted on that NULL.
         static const CharonGrammatical17 empty;
         return (CharonGrammatical17 *)&empty;
     }
@@ -46,9 +31,6 @@ static CharonGrammatical17 *charon_grammatical17(NSMorphology *morphology, BOOL 
 }
 
 
-/* The three custom-pronoun helpers, moved here from NSMorphologyCustomPronoun.m. They are C functions
-   called from this file and from the class's own object; a shared C function that lives in an object a
-   band leaves out is an undefined symbol in every band that keeps this one. */
 static NSArray *CharonCustomPronounLanguages(void)
 {
     static NSArray *languages;
@@ -130,20 +112,13 @@ BOOL CharonCustomPronounSupportedLanguage(NSString *language)
     return copy;
 }
 
-/* YES only when all eight settings are NotSet, which is what a fresh object is: every one of them
-   reads back written, 40 included, so this is a question about the eight and nothing else. */
 - (BOOL)isUnspecified
 {
-    // Only the three iOS 15.0 settings decide it, measured one at a time: grammaticalGender,
-    // partOfSpeech or number at 1 or 2 answers NO, and grammaticalCase, determination,
-    // grammaticalPerson, pronounType and definiteness at 1 or 2 leave it YES (7777ac79's finding, checked
-    // here: grammaticalCase=1 unspecified 1, number=1 unspecified 0). The 17.0 settings are not read.
     return _grammaticalGender == 0 && _partOfSpeech == 0 && _number == 0;
 }
 
 + (NSMorphology *)userMorphology
 {
-    // A fresh one, which is what the host answers: unspecified YES and every setting NotSet.
     return [[NSMorphology alloc] init];
 }
 
@@ -154,9 +129,6 @@ BOOL CharonCustomPronounSupportedLanguage(NSString *language)
     return _customPronouns[language];
 }
 
-/* nil clears and is accepted anywhere; a complete pronoun is stored for a supported language; anything
-   else is refused with the code and the wording the host uses, naming the first required key that is
-   missing - "self" when the language is not one the host supports. */
 - (BOOL)setCustomPronoun:(NSMorphologyCustomPronoun *)features forLanguage:(NSString *)language error:(NSError **)error
 {
     if (!features) {
@@ -167,7 +139,6 @@ BOOL CharonCustomPronounSupportedLanguage(NSString *language)
     if (!CharonCustomPronounSupportedLanguage(language)) {
         missing = @"self";
     } else if ((missing = [features charon_firstMissingKey]) != nil) {
-        /* named */
     }
     if (missing) {
         if (error)
@@ -211,14 +182,10 @@ BOOL CharonCustomPronounSupportedLanguage(NSString *language)
     return self;
 }
 
-/* One setting as the system writes it in a description: the enumeration's **name**, and, where the
-   value is outside the enumeration, the name in parentheses before it - "Feminine",
-   "(NSGrammaticalGender)(-2)", "(NSGrammaticalCase)(40)" (measured, and the eight tables are the
-   enumerations of the 26.2 header in their declared order, which is the portability of the API). */
 static NSString *charon_grammatical(NSString *enumName, NSString *const *names, NSUInteger count, NSInteger value)
 {
     if (value >= 0 && (NSUInteger)value < count)
-        return names[value];  // already an NSString, not a byte string to be converted
+        return names[value];
     return [NSString stringWithFormat:@"(%@)(%ld)", enumName, (long)value];
 }
 
@@ -235,8 +202,6 @@ static NSString *charon_grammatical(NSString *enumName, NSString *const *names, 
     static NSString *const determination[] = {@"NotSet", @"Independent", @"Dependent"};
     static NSString *const persons[] = {@"NotSet", @"First", @"Second", @"Third"};
     static NSString *const pronounTypes[] = {@"NotSet", @"Personal", @"Reflexive", @"Possessive"};
-    /* The order the system writes the eight in is its own and not the header's: number before
-       partOfSpeech, and definiteness before determination (measured). */
     return [NSString stringWithFormat:@"<%@: %p> { grammaticalGender = %@, number = %@, partOfSpeech = %@, "
                                       @"case = %@, definiteness = %@, determination = %@, grammaticalPerson = %@, "
                                       @"pronounType = %@, customPronouns = %@ }",

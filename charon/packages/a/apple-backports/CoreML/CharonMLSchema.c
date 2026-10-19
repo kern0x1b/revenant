@@ -1,10 +1,8 @@
-/* The schema table of CharonMLSchema.h, and the lookup over it. */
 #include "CharonMLSchema.h"
 #include <string.h>
 
 #include "CharonMLSchema.inc"
 
-/* The messages are sorted by name, so a lookup is a binary search. */
 const charon_ml_message *charon_ml_message_named(const char *name)
 {
     unsigned low = 0, high = charon_ml_message_count;

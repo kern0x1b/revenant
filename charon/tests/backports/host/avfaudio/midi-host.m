@@ -1,15 +1,3 @@
-// The host's answers for the list form of a MIDI send, measured on the host's own AVAudioUnitSampler, and the scalings
-// the port's walk (CharonMIDIEventList.h) uses for the type-4 messages the sampler can hear.
-//
-// Each measurement renders the sampler offline into a fresh engine (the same state every time, which is what makes a
-// bit-exact comparison mean something: a reused sampler carries its notes into the next render). A type-4 message
-// is sent through -sendMIDIEventList:, and its render is compared bit for bit with the render of the type-2 message the
-// port's rule gives. Equal renders are the host's answer, and the rule is checked against it.
-//
-// Not observable on the sampler, so not checked here, only reported: the note-off velocity, the program change (the
-// sampler ignores MIDI program changes, type 2 or type 4), the channel and poly pressure, system messages (the reset
-// is not seen either), and sysex (the sampler ignores the universal sysex the test sends). For these the port follows
-// the UMP definition, and the facts file says so.
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMIDI/MIDIServices.h>
 #include <math.h>
@@ -75,7 +63,6 @@ static void sendType4(uint32_t word0, uint32_t word1)
     [sampler sendMIDIEventList:list];
 }
 
-// Renders one note on the sampler after the given sends, from a fresh engine.
 static NSData *render_(void (^send)(void))
 {
     [engine stop];
@@ -115,7 +102,6 @@ int main(void)
             return 1;
         }
 
-        // Note on: velocity = max(1, velocity16 >> 9).
         const uint32_t velocities16[] = {0xFFFF0000u, 0x80000000u, 0x7FFF0000u, 0x01000000u, 0x00010000u, 0xFE000000u, 0x3F000000u, 0xC0000000u, 0x00000000u};
         for (size_t i = 0; i < sizeof velocities16 / sizeof velocities16[0]; i++) {
             uint32_t word1 = velocities16[i];
@@ -131,7 +117,6 @@ int main(void)
             equivalent(name, list, want);
         }
 
-        // Control change 7: value32 >> 25.
         const uint32_t values32[] = {0xFFFFFFFFu, 0x80000000u, 0x40000000u, 0x7FFFFFFFu, 0x00000001u};
         for (size_t i = 0; i < sizeof values32 / sizeof values32[0]; i++) {
             uint32_t word1 = values32[i];
@@ -143,7 +128,6 @@ int main(void)
             equivalent(name, list, want);
         }
 
-        // Pitch bend: value32 >> 18 as 14 bits, low seven bits then high seven bits.
         const uint32_t bends32[] = {0xFFFFFFFFu, 0x00000000u, 0xC0000000u, 0x80000001u};
         for (size_t i = 0; i < sizeof bends32 / sizeof bends32[0]; i++) {
             uint32_t word1 = bends32[i];

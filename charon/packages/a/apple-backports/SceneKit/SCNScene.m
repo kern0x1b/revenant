@@ -19,8 +19,6 @@ NSString *const SCNSceneUpAxisAttributeKey = @"SCNSceneUpAxisAttributeKey";
         _rootNode = [SCNNode node];
         _attributes = [NSMutableDictionary dictionary];
         _physicsWorld = [[SCNPhysicsWorld alloc] init];
-        // made with their scene, as a material's slots are: they sample the nearest mipmap level (mipFilter 1 on macOS,
-        // tests/backports/device/scenekit-defaults-expectations.h), a property made alone does not
         _background = [SCNMaterialProperty new];
         _background.mipFilter = SCNFilterModeNearest;
         _lightingEnvironment = [SCNMaterialProperty new];
@@ -115,7 +113,6 @@ NSString *const SCNSceneUpAxisAttributeKey = @"SCNSceneUpAxisAttributeKey";
         if (physicsWorld) {
             _physicsWorld = physicsWorld;
         }
-        // the archive keys are background and environment (star2.scn)
         SCNMaterialProperty *background = [coder decodeObjectOfClass:[SCNMaterialProperty class] forKey:@"background"];
         if (background) {
             _background = background;

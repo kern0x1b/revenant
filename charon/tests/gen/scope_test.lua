@@ -1,7 +1,3 @@
--- Fixture-free checks of the scope command's rules: the state of a row, the gap reason of a member (the extractor's skipped list, read
--- from a text), the work queue's order, the tie-out arithmetic, and the escape of non-ASCII text. No SDK is read or parsed. Run:
--- xmake l tests/gen/scope_test.lua (exits 1 on any failure).
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 
 local scope = import("gen.cmd_scope", {rootdir = TOOLS, anonymous = true})
@@ -21,7 +17,6 @@ local function checks()
     return check, function() return failures end
 end
 
--- A framework's facts with nothing in them: each test sets the fields it reads.
 local function empty_context()
     return {
         states = scope.states_of("26.2", "16.4"), led6 = {}, registry = {}, protocols = {}, proto = {}, functions = {}, class_decisions = {}, spec_by_api = {},
@@ -159,9 +154,6 @@ local function test_coverage(check)
     check(count == 2, "the comment line is no entry (got " .. count .. ")")
 end
 
--- A member the trace layer left out reports the reason it recorded. A class property is recorded by its class accessor (+[Cls name]) and
--- the surface names it by its dotted name, which keys as the instance form (-[Cls name]): the recorded reason is reported under both.
--- A generable C function reports the reason the trace layer recorded for it: a hand implementation, or another reason.
 local function test_function_reasons(check)
     local ctx = empty_context()
     local recorded = {["CFHand()"] = "override or hand implementation", ["CFBad()"] = "type not resolved: kern_return_t"}
@@ -178,9 +170,6 @@ local function test_function_reasons(check)
           "a generable C function with no recorded reason is a stub of the trace layer")
 end
 
--- A Swift row is declared when its framework's Swift shard names it. The seeded row is a row of the committed AVFAudio shard (read through
--- swift_shard.index): with that row removed from the shard, this check turns red (the mutant run; the shard is restored by a new edit).
--- A framework with no shard says so, and a row no shard names is no snapshot.
 local function test_swift_rows(check)
     local tree = path.join(TOOLS, "..")
     local api = "AVAudioSession.Location.orientationTop"
@@ -190,7 +179,6 @@ local function test_swift_rows(check)
     local declared = scope.row_state("property", api, "swift", ctx)
     check(declared == "swift: declared in the 26.2 Swift shard (not generated: no Swift generator)",
           "a seeded Swift row named by the committed shard gets the declared state, got: " .. declared)
-    -- a row the skeleton declares (the keys swiftcode wrote) is a generated stub, whatever the shard says
     ctx.rendered[surface.key("property", swift_shard.canonical_api(api))] = true
     check(scope.row_state("property", api, "swift", ctx) == "swift: rendered by the Swift skeleton (generated stub)",
           "a Swift row the skeleton renders is a generated stub")
@@ -202,7 +190,6 @@ local function test_swift_rows(check)
     ctx.swift = nil
     check(scope.row_state("property", api, "swift", ctx) == "no snapshot: no Swift shard for the framework",
           "a framework with no Swift shard says so")
-    -- an enum case is a constant of its enum (the surface's kind): the committed ARKit shard names it as constant, not property
     local case_api = "ARCamera.TrackingState.Reason.excessiveMotion"
     local case_ctx = empty_context()
     case_ctx.led6[surface.key("constant", case_api)] = "missing"
@@ -212,7 +199,6 @@ local function test_swift_rows(check)
           "a Swift enum case the committed shard names as constant gets the declared state")
     check(scope.row_state("property", case_api, "swift", case_ctx) == "no snapshot: the Swift shard names no declaration for this api",
           "an enum case is not a property row")
-    -- an operator is keyed by its arity: the surface's ==(a:b:) is the digester's ==(_:_:) the committed ARKit shard names
     local op_api = "ARCamera.TrackingState.Reason.==(a:b:)"
     local op_ctx = empty_context()
     op_ctx.led6[surface.key("method", op_api)] = "missing"
@@ -228,9 +214,6 @@ local function test_swift_rows(check)
           "a subscript is keyed by its arity (TabularData's subscript(position:) is the dump's subscript(_:))")
     check(swift_shard.canonical_api("subscript(_:)") == "subscript(_:)", "a subscript keeps its labels")
     check(swift_shard.canonical_api("count") == "count", "a property is its own key")
-    -- the shard is the two digester modes' rows together: a declaration only the ABI dump carries is a row of the committed SwiftUI shard.
-    -- `_UIHostingView` is `open class` in the SDK's interface (SwiftUI.swiftmodule/arm64e-apple-ios.swiftinterface line 21822) and in no API dump
-    -- (the plain dump of the module holds no printedName for it); with the ABI dump left out of the shard, this check turns red.
     local underscore_api = "_UIHostingView._viewDebugData()"
     local underscore_ctx = empty_context()
     underscore_ctx.led6[surface.key("method", underscore_api)] = "missing"
@@ -257,8 +240,6 @@ local function test_recorded_reasons(check)
           "a class property the trace layer left out reports its recorded reason")
 end
 
--- An umbrella's C rows go to the nested target whose shard declares them (Accelerate: vImage declares vImageConvert_BGRAFFFFtoRGBFFF, and
--- the Swift row and a name no target declares stay under the umbrella). The owner of a moved row stays the umbrella.
 local function test_counted_groups(check)
     local ROOT = path.absolute(path.join(os.scriptdir(), "..", ".."))
     local all = {

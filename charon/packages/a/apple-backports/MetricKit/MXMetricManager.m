@@ -6,38 +6,6 @@
 #import <objc/runtime.h>
 #import <sys/time.h>
 
-// The manager, the subscriber protocol and the one measurement the port can really take.
-//
-// Everything else in this framework is a value the *system* fills in: it counts what the application
-// did, samples its memory footprint, reads its disk I/O and hands the result to a subscriber at the next
-// launch. None of that exists on iOS 6.1.3 - there is no MetricKit, nothing counts, nothing samples,
-// and no payload was ever produced. So:
-//
-//   - the manager, its subscriber list, -addSubscriber:, -removeSubscriber: and the two payload
-//     properties are real. The payloads are read out of a real per-application store under Application
-//     Support, which is the same convention CoreSpotlightBackports already keeps its index in, and which
-//     is empty until something writes into it. An application can write into it - the payloads are
-//     NSSecureCoding and the port decodes them - so a payload the port never produced can still be a
-//     payload the manager hands over, which is the whole of what the API is for on a release that
-//     produces none;
-//   - +extendLaunchMeasurementForTaskID:error: and +finishExtendedLaunchMeasurementForTaskID:error: are
-//     real measurements, not stubs: the first takes a monotonic reading and the second takes another and
-//     records the interval as a real MXAppLaunchMetric. That is exactly what a launch measurement is, and
-//     the clock is the release's own;
-//   - and +makeLogHandleWithCategory: is real. It returns an os_log_t, which is a subsystem and a
-//     category, and this package already carries the log it is made of (registry/Foundation/oslog.json):
-//     os_log_create, _os_log_internal and os_log_type_enabled are implemented from 6.0 by
-//     Foundation/OSLog9.m and OSLog10.m. So the handle this returns is a real one over that log, named
-//     with the subsystem Apple uses for this framework's own log.
-//
-// And the signposts an application marks are real too, which is what makes the snapshot below real:
-// os_signpost is a software subsystem (iOS 12) that the port now carries over the same log
-// (Foundation/CharonOSSignpost.m), and it *records* the intervals an application emits rather than
-// throwing them away.
-
-// The domain of the two launch-measurement errors. The public constant of that name arrived in iOS 16.0
-// and is in MXError160.m; this object is the iOS 13.4 one, so it spells the same string under its own
-// name, and no band that lacks the 16.0 object is left with a reference to a symbol it does not define.
 static NSString *const CharonMXErrorDomain = @"MXErrorDomain";
 
 static NSString *const CharonPayloadsKey = @"org.charon.apple-backports.MetricKit.payloads";
@@ -62,17 +30,11 @@ static double CharonMonotonicSeconds(void)
 {
     struct timeval now;
     gettimeofday(&now, NULL);
-    // The base the numbers are differences from, so that a measurement is a duration and not a wall
-    // clock reading: the boot time is where mach_absolute_time's origin is, and gettimeofday's is the
-    // same instant.
     return (double)now.tv_sec + (double)now.tv_usec / 1000000.0;
 }
 
 @implementation MXMetricManager
 
-// The log handle, which is a subsystem and a category: Apple's own subsystem string for this
-// framework, and the category the caller names. Over the port's own log, so the handle is a real one
-// and its own -description names the subsystem and the category it was made with.
 + (os_log_t)makeLogHandleWithCategory:(NSString *)category
 {
     return os_log_create("com.apple.metrickit.log", category.UTF8String);
@@ -98,9 +60,6 @@ static double CharonMonotonicSeconds(void)
     return [self charon_payloadsOfClass:[MXDiagnosticPayload class] extension:@"diagnostic"];
 }
 
-// The store, read: every file in the payload folder that decodes as the class asked for, newest first by
-// the time stamp its own name carries. A file that does not decode is left where it is and skipped - the
-// store is a real directory and something else may be in it.
 - (NSArray *)charon_payloadsOfClass:(Class)cls extension:(NSString *)extension
 {
     NSString *folder = CharonPayloadFolder();
@@ -143,7 +102,6 @@ static double CharonMonotonicSeconds(void)
     [[self charon_subscriberTable] removeObject:subscriber];
 }
 
-// The one delivery: the two callbacks the protocol declares, each with what its own store read.
 - (void)charon_deliverTo:(id<MXMetricManagerSubscriber>)subscriber
 {
     if ([subscriber respondsToSelector:@selector(didReceiveMetricPayloads:)]) {
@@ -160,8 +118,6 @@ static double CharonMonotonicSeconds(void)
     }
 }
 
-// The subscribers, held weakly: a manager outlives the objects that subscribe to it, and holding one
-// strongly would keep a view controller alive for as long as the process lives.
 - (NSHashTable *)charon_subscriberTable
 {
     static const char key;
@@ -173,9 +129,6 @@ static double CharonMonotonicSeconds(void)
     return table;
 }
 
-// The one real measurement. The first call remembers when the launch was extended for, the second takes
-// the difference and hands the caller an MXAppLaunchMetric whose histogrammedExtendedLaunch holds it. An
-// interval is a measurement this release can take: a monotonic clock, twice.
 + (BOOL)extendLaunchMeasurementForTaskID:(MXLaunchTaskID)taskID error:(NSError **)error
 {
     if (!taskID) {
@@ -208,8 +161,6 @@ static double CharonMonotonicSeconds(void)
     [measurements removeObjectForKey:key];
     [[NSUserDefaults standardUserDefaults] setObject:measurements forKey:CharonLaunchMeasurementsKey];
 
-    // The measured interval as a real launch metric: one histogram with one bucket holding the whole
-    // interval, which is what a measurement that happened once looks like.
     MXAppLaunchMetric *metric = [[MXAppLaunchMetric alloc] init];
     MXHistogram<NSUnitDuration *> *histogram = [[MXHistogram alloc] init];
     NSMeasurement<NSUnitDuration *> *duration =
@@ -226,30 +177,6 @@ static double CharonMonotonicSeconds(void)
 
 @end
 
-// The signpost snapshot, over the intervals the port's own os_signpost family recorded
-// (Foundation/CharonOSSignpost.m).
-//
-// The SDK ships the declaration - MetricKit.framework/Headers/MXSignpost_Private.h, the header whose
-// own comment marks it as implementation detail reserved for internal callers, and it has to
-// be public so that clients still compile - and the declaration is
-// `void* _Nonnull _MXSignpostMetricsSnapshot(void)`. What the macros beside it say the pointer is for
-// is exact: every signpost MetricKit emits has `\n%{public, signpost:metrics}@` appended to its format
-// and the snapshot passed as that one argument, so the signpost stream carries the metrics and the
-// signpost that is marked carries it with it.
-//
-// So this returns the port's own snapshot object as the non-NULL opaque pointer that declaration
-// types, and the port's emit path records that pointer as the public field on every signpost it takes
-// - which is what makes the pointer mean something rather than merely be a valid address.
-// The port's own snapshot, and the one object both libraries can see. The store that holds the
-// intervals is looked up by its own name rather than named in a link: a library of this package
-// exports only the names the registry lists, and the registry lists only names an SDK header
-// declares, so nothing of ours is linkable from another of our libraries. That is the port's own
-// idiom for a class in another image - NSClassFromString in AVFoundation/AVCaptureDevice+Authorization.m,
-// in CoreSpotlight/CSSearchableIndex.m, in CallKit/CharonCallAudio.m.
-// The snapshot, and the object _MXSignpostMetricsSnapshot returns. It is the metric library's own
-// class rather than the store's, for the one reason there is: a library of this package exports only
-// the names the registry lists, so a class defined in the Foundation library cannot be named from the
-// metric library at all.
 @interface CharonMetricSnapshot : NSObject
 @property (nonatomic, copy) NSArray<CharonSignpostInterval *> *intervals;
 @end
@@ -283,9 +210,6 @@ void *_Nonnull _MXSignpostMetricsSnapshot(void)
     return (__bridge_retained void *)snapshot;
 }
 
-// The metrics themselves, read out of the same store: one per signpost name and category, with the
-// duration of every interval of that name in the interval data's histogram, as the header's own
-// -signpostName, -signpostCategory, -signpostIntervalData and -totalCount say.
 NSArray<MXSignpostMetric *> *CharonSignpostMetrics(void)
 {
     NSMutableArray<MXSignpostMetric *> *metrics = [NSMutableArray array];
@@ -300,8 +224,6 @@ NSArray<MXSignpostMetric *> *CharonSignpostMetrics(void)
             byKey[key] = metric;
             [metrics addObject:metric];
         }
-        // The histogram of the durations is the interval data's own, as the header says: the metric
-        // carries the name, the category, the data and the count, and the data carries the histogram.
         MXSignpostIntervalData *data = [metric charon_signpostIntervalData] ?: ({
             MXSignpostIntervalData *made = [[MXSignpostIntervalData alloc] init];
             [metric charon_setValue:made forKey:@"signpostIntervalData"];

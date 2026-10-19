@@ -1,11 +1,7 @@
--- `swift`: writes spec/swift/bucket.tsv, one row per Swift bucket row (see swift.lua), through emit. --coordination is the corpus folder;
--- --sdk names the release (sdk.discover) whose tables are read.
-
 local swift = import("swift", {anonymous = true})
 local emit = import("emit", {anonymous = true})
 local sdk = import("sdk", {anonymous = true})
 
--- Returns the exit status.
 function run(args)
     assert(args.coordination, "--coordination (the corpus folder) is required")
     assert(args.sdk, "swift needs --sdk: the iPhoneOS SDK whose release names the corpus tables")

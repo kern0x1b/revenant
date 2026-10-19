@@ -5,17 +5,6 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-// The zoom of iOS 7 is a centred crop for all image outputs, scaled as necessary to keep the output
-// dimensions (the header, AVCaptureDevice.h:1922-1923), made from what 6.1.3 has (facts/AVFoundation/CaptureZoomAudioSession.md):
-// - a connection that scales and crops itself (the still image output's, videoMaxScaleAndCropFactor
-//   above 1) is given the factor as its videoScaleAndCropFactor;
-// - a preview layer, whose video is a sublayer of its own inside bounds it masks, is given the factor as
-//   its sublayerTransform, and its point conversions are held to the zoomed picture;
-// - the buffers a video data output hands its delegate are cropped to the centre and scaled back up.
-// The largest factor is the release's own for its scale and crop, a crop of no less than 16 pixels on the
-// short side (6.1.3 sets videoMaxScaleAndCropFactor to min(width, height) * 0.0625 of what it captures),
-// and 7.0's checks and exception texts are kept, the lock read as 7.0 reads it, -isLockedForConfiguration.
-
 @interface AVCaptureDevice (CharonReleaseLock)
 - (BOOL)isLockedForConfiguration;
 @end
@@ -26,7 +15,6 @@ static const char charon_ramp_key;
 static NSString *const CharonZoomRangeReason = @"videoZoomFactor out of range";
 static NSString *const CharonZoomLockReason = @"You must call lockForConfiguration and successfully obtain the configuration lock before modifying zoom factor";
 
-// A ramp in progress: the factor it goes to, the rate, and the timer that moves it.
 @interface CharonZoomRamp : NSObject
 @property (nonatomic) CGFloat target;
 @property (nonatomic) float rate;
@@ -90,7 +78,6 @@ static void charon_apply_zoom(AVCaptureDevice *device)
         charon_apply_zoom_to_session(session);
 }
 
-// Sets the factor and says so to an observer of videoZoomFactor, as 7.0 does.
 static void charon_store_zoom(AVCaptureDevice *device, CGFloat factor)
 {
     [device willChangeValueForKey:@"videoZoomFactor"];
@@ -101,8 +88,6 @@ static void charon_store_zoom(AVCaptureDevice *device, CGFloat factor)
 
 static void charon_check_zoom(AVCaptureDevice *device, CGFloat factor)
 {
-    // As 7.0: the range first, against the active format's maximum, then the lock. 6.1.3 has no active format
-    // outside a running session, where 7.0 always has one; the range is 1 to 1 there.
     CGFloat maximum = device.activeFormat ? device.activeFormat.videoMaxZoomFactor : 1;
     if (!(factor >= 1) || factor > maximum)
         @throw [NSException exceptionWithName:NSRangeException reason:CharonZoomRangeReason userInfo:nil];
@@ -125,7 +110,6 @@ static void charon_end_ramp(AVCaptureDevice *device)
 
 @synthesize target = _target, rate = _rate, last = _last, timer = _timer, device = _device;
 
-// "The zoom factor is continuously scaled by pow(2, rate * time)" towards the target, and stops there.
 - (void)step
 {
     AVCaptureDevice *device = self.device;
@@ -172,7 +156,6 @@ static void charon_end_ramp(AVCaptureDevice *device)
         ramp = [[CharonZoomRamp alloc] init];
         ramp.device = self;
         ramp.last = CACurrentMediaTime();
-        // Sixty steps a second on the main queue, where the zoom is applied to the preview layers.
         ramp.timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
         dispatch_source_set_timer(ramp.timer, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC / 60), NSEC_PER_SEC / 60, NSEC_PER_SEC / 240);
         __weak CharonZoomRamp *weakRamp = ramp;
@@ -210,7 +193,6 @@ static void charon_end_ramp(AVCaptureDevice *device)
     return MAX((CGFloat)1, (CGFloat)MIN(size.width, size.height) * (CGFloat)0.0625);
 }
 
-// The crop is of the format's own frames, so any factor above 1 scales up.
 - (CGFloat)videoZoomFactorUpscaleThreshold
 {
     return 1;
@@ -220,8 +202,6 @@ static void charon_end_ramp(AVCaptureDevice *device)
 
 #pragma mark - Video data output
 
-// The crop of one buffer: the centre 1/factor of each plane scaled back to the whole plane. 32BGRA and the
-// two bi-planar 4:2:0 formats, the ones a video data output of 6.1.3 delivers.
 static BOOL charon_crop_plane(vImage_Buffer source, vImage_Buffer destination, CGFloat factor, size_t bytesPerPixel)
 {
     size_t width = (size_t)MAX(1.0, round(source.width / factor)), height = (size_t)MAX(1.0, round(source.height / factor));
@@ -233,7 +213,6 @@ static BOOL charon_crop_plane(vImage_Buffer source, vImage_Buffer destination, C
     } else if (bytesPerPixel == 1) {
         error = vImageScale_Planar8(&crop, &destination, NULL, kvImageHighQualityResampling);
     } else {
-        // Interleaved Cb and Cr: each is scaled as a plane of its own and put back together.
         vImage_Buffer cb = {malloc(crop.width * crop.height), crop.height, crop.width, crop.width};
         vImage_Buffer cr = {malloc(crop.width * crop.height), crop.height, crop.width, crop.width};
         vImage_Buffer cbOut = {malloc(destination.width * destination.height), destination.height, destination.width, destination.width};
@@ -300,7 +279,6 @@ static CVPixelBufferRef charon_create_cropped(CVPixelBufferRef source, CGFloat f
     return destination;
 }
 
-// Not static: tests/backports/device/zoom7.m holds it to buffers of a known picture.
 CMSampleBufferRef charon_create_zoomed_sample(CMSampleBufferRef sample, CGFloat factor);
 
 CMSampleBufferRef charon_create_zoomed_sample(CMSampleBufferRef sample, CGFloat factor)
@@ -322,10 +300,6 @@ CMSampleBufferRef charon_create_zoomed_sample(CMSampleBufferRef sample, CGFloat 
     return zoomed;
 }
 
-// Stands between a video data output and the application's delegate: a proxy that forwards every message to
-// the delegate, the class, equality and what it answers included, but the one that carries a frame, which it
-// crops first. The release asks the output's sampleBufferDelegate for the delegate each frame
-// (-[AVCaptureVideoDataOutput _AVCaptureVideoDataOutput_VideoDataBecameReady]), so the getter answers the proxy.
 @interface CharonZoomSampleRelay : NSProxy <AVCaptureVideoDataOutputSampleBufferDelegate>
 @property (nonatomic, weak) id<AVCaptureVideoDataOutputSampleBufferDelegate> delegate;
 @property (atomic) BOOL refusalLogged;
@@ -435,9 +409,6 @@ static const char charon_relay_key;
         ((void (*)(id, SEL, id, dispatch_queue_t))originalSet)(self, setDelegate, relay, queue);
     }));
 
-    // The release converts between the layer and the device ignoring the sublayer transform the zoom puts on
-    // the layer: a point of the layer is taken back through the zoom before the release's conversion, and a
-    // point the release gives is taken out through it.
     Class preview = [AVCaptureVideoPreviewLayer class];
     SEL toDevice = @selector(captureDevicePointOfInterestForPoint:);
     Method toDeviceMethod = class_getInstanceMethod(preview, toDevice);

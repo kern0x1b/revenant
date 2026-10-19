@@ -1,20 +1,3 @@
-// What a caller gets from the 13.0 classes about the protocols their own headers declare, and about
-// the defaults their headers state. The port's classes are compiled here under names of their own, so
-// every answer comes from the port and not from the Vision of this host -- the same check
-// tests/backports/host/vision/run.sh makes, and a name that is no class at all is asked for as the
-// control.
-//
-// It needs the rename header the way tests/backports/host/vision/run.sh makes it, so that the port's
-// own classes are the ones being asked and an answer cannot come from the Vision of this host:
-//
-//   sdk=$(xcrun --show-sdk-path)
-//   clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" \
-//       -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" -fobjc-arc -w \
-//       -include rename.h -I packages/a/apple-backports/Vision \
-//       -framework Foundation -framework Vision -framework CoreGraphics -framework CoreImage \
-//       -framework CoreVideo -framework CoreML -framework ImageIO \
-//       tools/vision/conforms130.m packages/a/apple-backports/Vision/*.c \
-//       packages/a/apple-backports/Vision/*.m -o conforms130 && ./conforms130
 #import <Foundation/Foundation.h>
 #import <Vision/Vision.h>
 #import <objc/runtime.h>
@@ -58,9 +41,6 @@ int main(void)
     printf("VNGenerateImageFeaturePrintRequest imageCropAndScaleOption = %lu (ScaleFill is 2, CenterCrop is 0)\n",
            (unsigned long)[[[VNGenerateImageFeaturePrintRequest alloc] init] imageCropAndScaleOption]);
 
-    // The four methods the headers of these classes declare and clang does not synthesise, asked of
-    // the port's own classes. Each line prints where the answer came from, so a reader can tell the
-    // port's answer from this host's Vision even where the two spell the selector the same way.
     {
         NSError *error = nil;
         NSArray *animals = [VNRecognizeAnimalsRequest knownAnimalIdentifiersForRevision:1 error:&error];
@@ -95,10 +75,6 @@ int main(void)
                [featurePrint respondsToSelector:@selector(computeDistance:toFeaturePrintObservation:error:)]
                    ? "responds" : "no selector");
 
-        // The three catalogue methods the 13.0 headers declare and this object does NOT define, and
-        // what a caller gets for them. Asked by name so that the question compiles against a class
-        // that does not declare them, and answered by instancesRespondToSelector: because that is
-        // what a caller resolves a selector through before it sends one.
         struct { const char *class; const char *selector; } missing[] = {
             {"VNClassifyImageRequest", "knownClassificationsForRevision:error:"},
             {"VNRecognizeAnimalsRequest", "supportedIdentifiersAndReturnError:"},

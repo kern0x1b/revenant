@@ -881,11 +881,6 @@ static CGFloat sized_text_height(NSString *text, UIFont *font, CGFloat width)
     return [label sizeThatFits:CGSizeMake(width, CGFLOAT_MAX)].height;
 }
 
-// The recorded answers were written on the host, where the system and the port measure the same
-// labels in the same font. A device draws them in its own system font, and a text that ends near
-// the label's edge wraps differently in the two. For a list of label cells, this gives each
-// element the height the device's font gives its text at the width the system laid it out at,
-// and moves what the system put below it by the difference; everything else stays as recorded.
 NSString *compositional_sized_expected(NSUInteger index, NSString *recorded, NSMutableArray *differences)
 {
     SizedCase spec = sized_cases[index];
@@ -1159,4 +1154,3 @@ NSArray *compositional_orthogonal_lines(CompositionalKit kit, UIWindow *window, 
     K = kit;
     return [orthogonal_lines(window, system) arrayByAddingObjectsFromArray:modified_lines(window, system)];
 }
-

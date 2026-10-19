@@ -1,23 +1,7 @@
--- availability_test.lua - checks availability_of() against a table READ BY HAND from the seventeen windows.
---
---     VT_SDK=<an iPhoneOS*.sdk> xmake l availability_test.lua [<an iPhoneOS*.sdk>]
---
--- A MAIN script: xmake calls main(...). Port of availability_test.py.
---
--- The table below was written by reading the windows in .agent-work/runs/vtclass/avail-windows.txt, one
--- class at a time - NOT by running the function and recording what it said. That is the whole point: a
--- function checked against itself proves it agrees with itself. All seventeen declare ios(26.0), and the
--- line numbers are the ones the windows showed, so a change in the SDK's spelling moves the function away
--- from a table a person read.
---
--- The control deletes the availability macro from one header and requires the function to RAISE. A version
--- rule that cannot fail is a version rule that will quietly return the wrong release.
-
 local A = import("availability", {rootdir = os.scriptdir()})
 local V = import("vtlib", {rootdir = os.scriptdir()})
 local S = import("pystr", {rootdir = os.scriptdir()})
 
--- (class, ios version) - read from the windows, by hand
 local TABLE = {
     {"VTFrameProcessor", "26.0"},
     {"VTFrameProcessorFrame", "26.0"},
@@ -38,7 +22,6 @@ local TABLE = {
     {"VTTemporalNoiseFilterParameters", "26.0"},
 }
 
--- Python's headers(sdk): the VideoToolbox headers as {basename, text} pairs, in path order.
 local function headers(sdk)
     local directory = sdk .. "/System/Library/Frameworks/VideoToolbox.framework/Headers"
     local paths = V.sort_bytes(os.files(directory .. "/*.h"))
@@ -49,7 +32,6 @@ local function headers(sdk)
     return out
 end
 
--- Python's str.replace(old, new, 1): the first occurrence only.
 local function replace_first(text, old, new)
     local at = string.find(text, old, 1, true)
     if at == nil then
@@ -89,7 +71,6 @@ function main(...)
             }
         }
         if failure ~= nil then
-            -- str(error).split("\n")[0]
             bad[#bad + 1] = name .. ": " .. S.split_newlines(failure)[1]
         elseif got ~= wanted then
             bad[#bad + 1] = string.format("%s: the header says ios %s and the hand-read table says %s",
@@ -98,8 +79,6 @@ function main(...)
             print(string.format("  %-48s ios %-5s from line %d", name, got, line))
         end
     end
-    -- THE CONTROL: one header with its availability macro renamed, and the function must refuse rather
-    -- than find some other API_AVAILABLE above it and report a version anyway.
     local victim = nil
     for _, pair in ipairs(texts) do
         if S.contains(pair[2], "VTTemporalNoiseFilterConfiguration") then

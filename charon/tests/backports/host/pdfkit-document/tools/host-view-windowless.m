@@ -1,7 +1,3 @@
-// The iOS PDFView's own members, answered by the host with NO WINDOW.  The plan's cases
-// (pageCount, canDisplayPage:, usePageViewController:, scaleToFit, goToPage:) are macOS-only or not
-// this API at all: the iOS header declares none of them, and the host's PDFView has no -pageCount, so
-// a comparison on them would be a comparison of things neither side is asked for.
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
 #import <PDFKit/PDFKit.h>

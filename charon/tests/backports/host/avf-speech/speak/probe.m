@@ -1,18 +1,11 @@
-// probe.m -- VSSpeechSynthesizer on the 6.1.3 image, driven in the guest. VoiceServices is loaded by path and the class is
-// looked up by name, as voices/probe.m does. The probe sends the selectors AVSpeechSynthesizer will use and prints
-// every delegate callback with its time from the call (guest seconds, the guest's own clock) and the synthesizer's
-// isSpeaking flag. The waits are on the callbacks themselves, not on fixed times: the guest runs slower than its clock
-// when the host is loaded, so a fixed sleep measures the load. Every line starts with "probe:" so the log can be read.
-// The selectors' types are the image's (the inventory and the probe's own dump of class_copyMethodList, reviewed in
-// facts/AVFoundation/AVSpeech.md); the delegate's method names are the ones the image calls, measured in run 1.
 #import <Foundation/Foundation.h>
 #include <dlfcn.h>
 #include <objc/runtime.h>
 #include <objc/message.h>
 
 static NSTimeInterval t0;
-static int gEvents;          // every delegate callback, so a wait can see that one arrived
-static int gFinishes;        // didFinish callbacks (the phonemes variant, the one the image calls)
+static int gEvents;
+static int gFinishes;
 static NSTimeInterval gStartedAt;
 static NSTimeInterval gFinishedAt;
 static id gSynth;
@@ -33,7 +26,6 @@ static void spin(NSTimeInterval seconds)
     }
 }
 
-// Spins until cond() holds or the limit (guest seconds) passes; returns whether cond() held.
 static BOOL waitUntil(int (^cond)(void), NSTimeInterval limit)
 {
     NSDate *until = [NSDate dateWithTimeIntervalSinceNow:limit];
@@ -53,8 +45,6 @@ static void sendFloat(SEL sel, float arg) { ((void (*)(id, SEL, float))objc_msgS
 static float getFloat(NSString *name) { return ((float (*)(id, SEL))objc_msgSend)(gSynth, NSSelectorFromString(name)); }
 static id getId(NSString *name) { return ((id (*)(id, SEL))objc_msgSend)(gSynth, NSSelectorFromString(name)); }
 
-// The delegate. Each method logs its call and counts it. VoiceServices calls the phonemes variant of didFinish (run 1
-// printed no call to the three-argument one), so that is the one the port answers.
 @interface SpeakDelegate : NSObject
 @end
 
@@ -141,7 +131,6 @@ int main(int argc, char **argv)
             line([NSString stringWithFormat:@"rate %g: start to finish %.3f guest s", rates[r], gFinishedAt - gStartedAt]);
         }
 
-        // stop: three forms. The boundary is an int; synchronously: is the image's second argument.
         for (int v = 0; v < 3; v++) {
             line([NSString stringWithFormat:@"scenario stop form %d", v]);
             newSynth();

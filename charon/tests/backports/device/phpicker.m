@@ -81,10 +81,6 @@ static void spin(NSTimeInterval seconds)
     PHPickerFilter *any = [PHPickerFilter anyFilterMatchingSubfilters:@[[PHPickerFilter imagesFilter], [PHPickerFilter videosFilter]]];
     CHECK(any != nil, "a filter of several kinds is made");
 
-    // The filters of iOS 15 and 16, the compositions, and the two properties of iOS 15. Every one of
-    // them is called here, so a name the library does not carry is an exception rather than a line
-    // nobody reads; what each of them answers is in facts/PhotosUI/Filters.md, and the comparison
-    // with the host's own framework is tests/backports/host/photosui/run.sh.
     NSArray *kinds = @[@"panoramasFilter", @"screenshotsFilter", @"screenRecordingsFilter", @"slomoVideosFilter",
                        @"timelapseVideosFilter", @"depthEffectPhotosFilter", @"burstsFilter", @"cinematicVideosFilter"];
     for (NSString *kind in kinds) {
@@ -174,10 +170,6 @@ static void spin(NSTimeInterval seconds)
     CHECK(live.calls == 1 && live.results.count == 0, "and reports no results once it has appeared");
     [self dismiss];
 
-    // What a composed filter shows is asked of the picker itself, which is the only public way to
-    // ask it: the release's picker is given the media types the filter names, and reading them back
-    // off the child is what the 14.0 rows were proved with. Three compositions, each presented and
-    // dismissed, and the two methods of iOS 16 called on a picker that is really there.
     NSArray *both = @[@"public.image", @"public.movie"];
     NSArray *composed = @[
         @[@"a conjunction of no filters shows everything", [PHPickerFilter allFilterMatchingSubfilters:@[]], both],
@@ -205,8 +197,6 @@ static void spin(NSTimeInterval seconds)
         [self dismiss];
     }
 
-    // The two methods of iOS 16, on a picker that is really there, and the two forms of the limited
-    // library picker on the library this port carries.
     PHPickerConfiguration *plainAgain = [[PHPickerConfiguration alloc] init];
     PHPickerViewController *fourth = [[PHPickerViewController alloc] initWithConfiguration:plainAgain];
     Receiver *fourthReceiver = [[Receiver alloc] init];

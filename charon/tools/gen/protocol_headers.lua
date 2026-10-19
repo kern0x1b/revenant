@@ -1,37 +1,16 @@
--- The protocol headers of a framework (Charon<F>Protocols.h): the declarations the generated protocol sources and the folder's own
--- sources import. Written from the snapshot's protocol rows (protocols.tsv: each protocol's bases, introduced release and members)
--- and the declaration table (spec/protocol-headers.tsv), one row per line of a header, in order:
---
---   line     a line the snapshot does not hold (an import, a @class or typedef line, an #if guard), kept as written in value;
---   forward  a protocol the header declares (@protocol X;);
---   body     a protocol the header defines from the snapshot, with API_AVAILABLE at its introduced release; the members'
---            nullability is taken out, as the transcriber wrote them;
---   bare     a body without the API_AVAILABLE line;
---   body-keep, bare-keep
---            a body whose members keep the nullability the snapshot holds (the committed header writes it so);
---   replace  a member of the body above, by its selector (value), written as decl instead of the snapshot's member;
---   insert   a member of the body above that the snapshot does not hold, written as decl after the member named by value
---            (an empty value puts it first).
---
--- The prose of each header is in facts/<F>/protocol-headers.md, not in the header.
-
 local tsv = import("tsv", {anonymous = true})
 local protocols = import("protocols", {anonymous = true})
 local files = import("files", {anonymous = true})
 
--- The words a declaration carries for nullability, which a body's members do not write (NS_ASSUME_NONNULL or the header's own
--- macros give the default) unless the body is a keep kind.
 local NULLABILITY = {"_Nonnull", "_Nullable", "_Null_unspecified", "nullable", "nonnull"}
 
 local BODY_KINDS = {body = {api = true, keep = false}, bare = {api = false, keep = false},
                     ["body-keep"] = {api = true, keep = true}, ["bare-keep"] = {api = false, keep = true}}
 
--- The declaration table of the package, spec/protocol-headers.tsv.
 local function table_path(tree)
     return path.join(tree, "packages", "a", "apple-backports", "spec", "protocol-headers.tsv")
 end
 
--- The rows of a framework's header in file order: each {kind, value, decl}.
 function rows(tree, fw)
     local text = files.read_text(table_path(tree))
     local out = {}
@@ -46,7 +25,6 @@ function rows(tree, fw)
     return out
 end
 
--- A member's declaration with its nullability taken out and its spacing normalized (the committed headers' form).
 function member_text(decl)
     local text = decl
     for _, word in ipairs(NULLABILITY) do
@@ -59,7 +37,6 @@ function member_text(decl)
     return text
 end
 
--- The base list of a protocol: its bases as the snapshot holds them (comma-separated), or NSObject when it has none.
 local function bases_text(bases)
     if bases == nil or bases == "" or bases == "-" then
         return "NSObject"
@@ -67,7 +44,6 @@ local function bases_text(bases)
     return (string.gsub(bases, ",", ", "))
 end
 
--- The lines of one protocol body. overrides: the replace rows by selector and the insert rows by the selector they follow ("" first).
 local function body_lines(name, record, kind, overrides)
     local out = {}
     if BODY_KINDS[kind].api then
@@ -100,7 +76,6 @@ local function body_lines(name, record, kind, overrides)
     return out
 end
 
--- The text of a framework's protocol header, or nil when the table has no rows for the framework.
 function header_text(tree, fw)
     local decl_rows = rows(tree, fw)
     if #decl_rows == 0 then
@@ -144,7 +119,6 @@ function header_text(tree, fw)
     return table.concat(lines, "\n") .. "\n"
 end
 
--- The generated header of a framework: name -> text, empty when the framework has no header in the table.
 function protocol_header_files(tree, fw)
     local text = header_text(tree, fw)
     if text == nil then

@@ -1,26 +1,3 @@
-// CarPlay's templates, on iOS 6, as real in-app view controllers, in the shapes the SDK declares.
-//
-// There is no CarPlay class of any name in this release (apple.objc.inventory against the armv7 cache
-// of 6.1.3), and there is no car: a CarPlay scene is a connection to a head unit, and without a car
-// there is no scene, which is Apple's own behaviour without a car. So this file is the half of CarPlay
-// that draws, and the half that needs the car is `CPTemplateApplicationScene` and its two siblings in
-// the registry as `absent`, one reason each.
-//
-// What is here, and how it draws:
-//
-//   CPWindow            a window the application owns, which is what a car's window is here;
-//   CPTemplate          a screen's own values, and the tab it is reached by;
-//   CPBarButton,        NSObject subclasses, not views, exactly as the SDK declares them, so each
-//   CPGridButton,       is DRAWN BY THE TEMPLATE THAT HOLDS IT: a bar button in a navigation bar,
-//   CPMapButton         a grid button in a collection view cell, a map button over the map;
-//   CPListItem          a row, conforming to CPSelectableListItem, whose own handler is called when
-//                       the row is chosen;
-//   CPListTemplate      a UITableViewController over the template's own sections and rows;
-//   CPGridTemplate      a UICollectionViewController over the template's own buttons;
-//   CPMapTemplate       the release's own MKMapView, with this port's own renderers on it;
-//   CPTravelEstimates   the port's own NSMeasurement and NSUnitLength, which libFoundationBackports
-//                       carries and the release has not (both registered implemented, minimum 6.0);
-//   CPInterfaceController  the object that owns the window, pushes and pops, and tells its delegate.
 #import <CarPlay/CarPlay.h>
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
@@ -28,8 +5,6 @@
 #import "CharonCarPlayTemplate.h"
 #import "CharonCarPlay174.h"
 
-// The header's own rect of a given aspect ratio inside another, which UIKit does not export and this
-// file needs three times to draw a button's own image at its own shape. Charon's own, so no API.
 static CGRect CharonAspectFit(CGSize size, CGRect rect)
 {
     if (size.width <= 0.0 || size.height <= 0.0) {
@@ -40,8 +15,6 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     return CGRectMake(CGRectGetMidX(rect) - fitted.width / 2.0, CGRectGetMidY(rect) - fitted.height / 2.0,
                        fitted.width, fitted.height);
 }
-
-// ============================ the window ============================
 
 @implementation CPWindow {
     __weak id _templateApplicationScene;
@@ -56,9 +29,6 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     return self;
 }
 
-// The scene this window belongs to. There is no car, so there is no scene: the getter is nil, which
-// is what the header's own weak property is, and the registry carries the scene classes as absent at
-// the seam with the reason.
 - (id)templateApplicationScene
 {
     return _templateApplicationScene;
@@ -70,14 +40,6 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
 }
 
 @end
-
-// ============================ the template ============================
-
-// CPTemplate has NO title, and that is measured rather than assumed: the 26.2 SDK's own
-// CPTemplate.h mentions "the template's title" in a note and declares no such property, and the
-// templates that do have one -- CPListTemplate, CPGridTemplate, CPMapTemplate -- declare it on
-// themselves. So a name no header declares is not carried here (rule R4); the tab's own name is this
-// template's tabTitle, which is the header's own.
 
 @implementation CPTemplate {
     id _userInfo;
@@ -103,8 +65,6 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     return self;
 }
 
-// The image the tab is drawn with: the caller's own, and otherwise the system item's own mark drawn
-// here, so a template that names a system item is reached by something a bar can draw.
 - (UIImage *)charon_tabMark
 {
     if (_tabImage) {
@@ -126,7 +86,6 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     return drawn;
 }
 
-// The header's own tab system items, by the name each of them carries. Charon's own, so no API.
 + (NSString *)charon_nameForSystemItem:(UITabBarSystemItem)item
 {
     switch (item) {
@@ -168,17 +127,12 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     return YES;
 }
 
-// The view controller this template draws itself in, which the interface controller asks for when it
-// pushes it. A template with no view controller of its own has nothing to show, and the interface
-// controller says so rather than pushing an empty screen.
 - (UIViewController *)charon_viewControllerForInterfaceController:(CPInterfaceController *)controller
 {
     return nil;
 }
 
 @end
-
-// ============================ the bar button ============================
 
 @implementation CPBarButton {
     UIImage *_image;
@@ -272,9 +226,6 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     return YES;
 }
 
-// The button, DRAWN. A CPBarButton is an NSObject and not a view, so the drawing is here and the
-// template that holds it puts this into its own bar. The handler is a program's own block, called
-// when the drawn mark is tapped. Charon's own, so it carries no API.
 - (void)charon_drawInRect:(CGRect)rect alpha:(CGFloat)alpha
 {
     if (rect.size.width <= 0.0 || rect.size.height <= 0.0) {
@@ -297,8 +248,6 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
                                          CGRectGetMinY(rect) + (CGRectGetHeight(rect) - text.height) / 2.0)
             withAttributes:attributes];
     } else {
-        // A button with no image and no title and a type is the type's own mark: a square with a
-        // chevron, drawn here rather than left blank.
         UIBezierPath *mark = [UIBezierPath bezierPath];
         CGFloat inset = 8.0;
         [mark moveToPoint:CGPointMake(CGRectGetMinX(rect) + inset, CGRectGetMinY(rect) + inset)];
@@ -323,15 +272,11 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
 
 @end
 
-// ============================ the grid button and the map button ============================
-
 @implementation CPGridButton {
     NSArray<NSString *> *_titleVariants;
     UIImage *_image;
     BOOL _enabled;
     void (^_handler)(CPGridButton *);
-    // The 26.0 members' storage, reached from CarPlayGrid260.m through the charon_ accessors below. See
-    // the comment on those accessors for why it is here and not there.
     CPMessageGridItemConfiguration *_charon_messageConfiguration;
 }
 
@@ -362,21 +307,11 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     _enabled = enabled;
 }
 
-// The 26.0 object's storage, reached from CarPlayGrid260.m. A category cannot add an ivar and the class's
-// @implementation is this file, so the value lives here behind Charon-prefixed accessors - the same shape
-// CarPlayNavigationSession12.m uses for _turnCardColor. Every name is Charon-prefixed, so none of it is
-// API and none of it appears in this object's exports: this file is 12.0 and stays 12.0, and the 26.0
-// selectors live in their own object.
-//
-// The 26.0 `-updateImage:` writes the image, and the class's own drawing is what reads it, so the
-// image stays where the class's own @implementation keeps it.
 - (void)charon_setImage:(UIImage *)image
 {
     _image = image;
 }
 
-// The message configuration is held as given: CPGridButton.h:71 declares it `readonly, nullable` with no
-// copy attribute, so a nil in is a nil out and nothing is duplicated.
 - (CPMessageGridItemConfiguration *)charon_messageConfiguration
 {
     return _charon_messageConfiguration;
@@ -389,13 +324,9 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
 
 - (void)charon_setTitleVariants:(NSArray<NSString *> *)titleVariants
 {
-    // CPGridButton.h:88 declares titleVariants `readonly, copy`, so the copy happens here and a later
-    // change to the caller's array does not change the button.
     _titleVariants = [titleVariants copy] ?: @[];
 }
 
-// The button, drawn by the grid template that holds it: its image above the first of its own title
-// variants, which is the variant this port has a name for. Charon's own, so it carries no API.
 - (void)charon_drawInRect:(CGRect)rect
 {
     if (CGRectIsEmpty(rect) || !_enabled) {
@@ -491,7 +422,6 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     _hidden = hidden;
 }
 
-// The button, drawn by the map template over its map, inside the window's own map button safe area.
 - (void)charon_drawInRect:(CGRect)rect
 {
     if (_hidden || !_enabled || CGRectIsEmpty(rect)) {
@@ -537,23 +467,15 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
 
 @end
 
-// ============================ the maneuver and the estimates ============================
-
 @implementation CPTravelEstimates {
     NSMeasurement<NSUnitLength *> *_distanceRemaining;
     NSTimeInterval _timeRemaining;
-    // The 17.4 member's storage, reached from CarPlayTravelEstimates174.m through the charon_ accessors
-    // below. See the comment on those accessors for why it is here and not there.
     NSMeasurement<NSUnitLength *> *_charon_distanceRemainingToDisplay;
 }
 
 @synthesize distanceRemaining = _distanceRemaining;
 @synthesize timeRemaining = _timeRemaining;
 
-// The header's own initialiser, and the distance is the port's own NSMeasurement of a distance in a
-// length unit: libFoundationBackports carries NSUnitLength and NSMeasurement (both registered
-// implemented, minimum 6.0) precisely because the release has neither, and this is the member that
-// needs them.
 - (instancetype)initWithDistanceRemaining:(NSMeasurement<NSUnitLength *> *)distanceRemaining
                             timeRemaining:(NSTimeInterval)timeRemaining
 {
@@ -593,11 +515,6 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
             [_distanceRemaining doubleValue], _timeRemaining];
 }
 
-// The 17.4 member's storage, reached from CarPlayTravelEstimates174.m. A category cannot add an ivar and
-// the class's @implementation is this file, so the value lives here behind a Charon-prefixed accessor -
-// the same shape CarPlayNavigationSession12.m uses for _turnCardColor. The name is Charon-prefixed, so
-// none of it is API and none of it appears in this object's exports: this file is 12.0 and stays 12.0,
-// and the 17.4 selectors live in their own object.
 - (NSMeasurement<NSUnitLength *> *)charon_distanceRemainingToDisplay
 {
     return _charon_distanceRemainingToDisplay;
@@ -626,8 +543,6 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     UIColor *_cardBackgroundColor;
     CPTravelEstimates *_initialTravelEstimates;
     id _userInfo;
-    // The 17.4 members' storage, reached from CarPlayManeuver174.m through the charon_ accessors below.
-    // See the comment on those accessors for why it is here and not there.
     CPManeuverType _charon_maneuverType;
     CPTrafficSide _charon_trafficSide;
     CPJunctionType _charon_junctionType;
@@ -705,19 +620,6 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     return YES;
 }
 
-// The 17.4 members of CPManeuver, kept here and reached from CarPlayManeuver174.m. A category cannot
-// add an ivar and the class's @implementation is this file, so the values those eight properties hold
-// live here behind Charon-prefixed accessors - the same shape CarPlayNavigationSession12.m already uses
-// for _turnCardColor through -charon_pauseWithReason:description:turnCardColor: and the one
-// CarPlayTemplatesView12.m uses for CPListTemplate's 18.4 and 26.0 members. Every name is
-// Charon-prefixed, so none of it is API and none of it appears in this object's exports: this file is
-// 12.0 and stays 12.0, and the 17.4 selectors live in their own object.
-//
-// The defaults are the zero of each type, which is what a fresh -init leaves behind and what the
-// headers' own numbering makes: CPManeuverTypeNoTurn = 0 and CPJunctionTypeIntersection = 0 and
-// CPTrafficSideRight = 0 (CharonCarPlay174.h, from CPManeuver.h:14-79). So a maneuver with nothing set
-// is a maneuver with no turn, at an intersection, with traffic on the right - and nil for the four
-// objects, which is what the header's own `nullable, copy` promises.
 - (CPManeuverType)charon_maneuverType { return _charon_maneuverType; }
 - (void)charon_setManeuverType:(CPManeuverType)type { _charon_maneuverType = type; }
 
@@ -759,8 +661,6 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
 
 @end
 
-// ============================ the alert ============================
-
 @implementation CPAlertAction {
     NSString *_title;
     CPAlertActionStyle _style;
@@ -775,12 +675,6 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
 
 - (instancetype)initWithTitle:(NSString *)title style:(CPAlertActionStyle)style handler:(CPAlertActionHandler)handler
 {
-    // CPAlertAction.h:40, the header's own 12.0 initialiser: a title, a display style and the callback
-    // the header says is "invoked when the user taps this action". The title is copied, which is the
-    // header's own `copy` on the title property at :57, and the handler with it - a block copied under
-    // ARC is the same block, so this is the header's `copy` on the handler property at :59 and not a
-    // second copy of anything. A nil title becomes the empty string, because the title is nonnull and a
-    // nil in would otherwise be stored and answered.
     self = [super init];
     if (self) {
         _title = [title copy] ?: @"";
@@ -792,10 +686,6 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
 
 - (instancetype)initWithTitle:(NSString *)title handler:(CPAlertActionHandler)handler style:(CPAlertActionStyle)style color:(UIColor *)color
 {
-    // The port's own four-value spelling, which the header has no declaration for: it is the header's
-    // 12.0 initialiser and its 16.0 colour in one, and the 16.0 half is CarPlayAlertAction160.m's. Kept
-    // because it was already here and something may call it; it now says so rather than filling the
-    // fields twice.
     self = [self initWithTitle:title style:style handler:handler];
     if (self) {
         [self charon_setColor:color];
@@ -803,13 +693,8 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     return self;
 }
 
-// The 16.0 object's storage, reached from CarPlayAlertAction160.m. It is declared in
-// CharonCarPlayTemplate.h, and the name is Charon-prefixed, so none of it is API and none of it appears
-// in this object's exports.
 - (void)charon_setColor:(UIColor *)color
 {
-    // CPAlertAction.h:60 declares color `copy, readonly, nullable`, so the copy is what the property's own
-    // attribute asks for and a nil in stays nil.
     _color = [color copy];
 }
 
@@ -881,8 +766,6 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
                primaryAction:(CPAlertAction *)newPrimaryAction
              secondaryAction:(CPAlertAction *)newSecondaryAction
 {
-    // The header's own update: what the alert now says, which is the map template's own alert and
-    // not a copy of it.
     _titleVariants = [newTitleVariants copy] ?: @[];
     _subtitleVariants = [newSubtitleVariants copy] ?: @[];
     _imageSet = newImageSet;
@@ -892,10 +775,6 @@ _duration = newDuration;
         _secondaryAction = newSecondaryAction;
 }
 
-// CPNavigationAlert.h:58-63, the header's own 12.0 initialiser with a CPImageSet, deprecated in 13.0 in
-// favour of the image overload below it. It is here because the header's own deprecated declaration is
-// still a declaration an application may compile against, and the argument order is the header's:
-// imageSet, primaryAction, secondaryAction, duration.
 - (instancetype)initWithTitleVariants:(NSArray<NSString *> *)titleVariants
                      subtitleVariants:(NSArray<NSString *> *)subtitleVariants
                              imageSet:(CPImageSet *)imageSet
@@ -903,11 +782,6 @@ _duration = newDuration;
                       secondaryAction:(CPAlertAction *)secondaryAction
                              duration:(NSTimeInterval)duration
 {
-    // The image set is kept as given and the standalone image stays nil, which is the header's own
-    // reading of the deprecation: when an animated image is provided, the header says only the first image of each
-    // set is used (CPNavigationAlert.h:46-47), so a set and an image are two ways of saying
-    // the same picture and this one says it with the set. The title and subtitle variants are copied and
-    // a nil in becomes empty, as the header's own `copy` properties would.
     self = [super init];
     if (self) {
         _titleVariants = [titleVariants copy] ?: @[];
@@ -920,8 +794,6 @@ _duration = newDuration;
     return self;
 }
 
-// CPNavigationAlert.h:65-70, the header's own 12.0 initialiser with a UIImage - the one the deprecation
-// above points at, and the one an application on 13.0 or later writes.
 - (instancetype)initWithTitleVariants:(NSArray<NSString *> *)titleVariants
                      subtitleVariants:(NSArray<NSString *> *)subtitleVariants
                                 image:(UIImage *)image
@@ -929,10 +801,6 @@ _duration = newDuration;
                       secondaryAction:(CPAlertAction *)secondaryAction
                              duration:(NSTimeInterval)duration
 {
-    // The image goes to the class's own -image, which CPNavigationAlert.h:87 declares `copy, readonly,
-    // nullable`, and the image set stays nil because this overload does not take one. Animated images
-    // are not supported by the header either, and this stores the image as given rather than stepping
-    // through its frames.
     self = [super init];
     if (self) {
         _titleVariants = [titleVariants copy] ?: @[];
@@ -945,9 +813,6 @@ _duration = newDuration;
     return self;
 }
 
-// CPNavigationAlert.h:81-82, the header's own update of the two variant arrays. Updating an alert that was dismissed
-// earlier has no effect (:74), which is the template's business - the port has no
-// dismissal state on an alert - and what a caller can observe here is the two arrays it just gave.
 - (void)updateTitleVariants:(NSArray<NSString *> *)newTitleVariants
            subtitleVariants:(NSArray<NSString *> *)newSubtitleVariants
 {

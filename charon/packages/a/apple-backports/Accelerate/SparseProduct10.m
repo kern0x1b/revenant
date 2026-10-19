@@ -1,13 +1,3 @@
-// The two sparse-times-sparse products of vecLib/Sparse/BLAS.h, and the object file of their own.
-//
-// They are here alone because of what the release ladder measured and no header says: of the sixty-nine
-// names of this family sixty-seven are first exported by iOS 9.0 and these two by 10.0.1, measured symbol
-// by symbol over the armv7 and armv7s caches this port holds, with the whole ladder as the control -
-// every cblas_ and LAPACK name the port imports is exported from 4.0, the oldest rung held. One object
-// file may not carry two releases' symbols: the gate refuses a file that does and tools/release-split.lua
-// names it. So these two are 10.0.1 and the other sixty-seven are 9.0.
-// facts/Accelerate/SparseBLAS.md carries the measurement.
-
 #import <Accelerate/Accelerate.h>
 #include "CharonSparseBLAS.h"
 
@@ -15,9 +5,6 @@
 #pragma clang diagnostic ignored "-Wunguarded-availability"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-// C = alpha * op(A) * B + C with B sparse too, written out into a dense C. The same rank-one update
-// per nonzero, with the row of B taken from its own stored entries. A leading dimension below what
-// the layout needs and a matrix that is not one of ours are SPARSE_ILLEGAL_PARAMETER, measured.
 static sparse_status CharonSparseProductSparse(void *A, uint32_t magicA, int order, int transposed, double alpha, void *B,
                                                uint32_t magicB, void *C, sparse_dimension ldc, size_t size)
 {
@@ -51,8 +38,6 @@ static sparse_status CharonSparseProductSparse(void *A, uint32_t magicA, int ord
             if (c >= (sparse_index)asA->columns) {
                 continue;
             }
-            // A[r, c] in both cases, read through the same lookup the rest of the family uses: the
-            // first version bound the row to NULL on the transposed path and then read through it.
             double value = CharonSparseElementAt(&asA->row[r], c, size);
             if (value == 0.0) {
                 continue;
@@ -70,9 +55,6 @@ static sparse_status CharonSparseProductSparse(void *A, uint32_t magicA, int ord
                     continue;
                 }
                 long at2 = to + (long)(j * cStep);
-                // The release's own cblas_saxpy does the one multiply-add: the gathered value is the
-                // vector and alpha times the entry's own value is the factor, so the product is formed
-                // once and by the release's BLAS rather than here.
                 if (size == sizeof(float)) {
                     float one = (float)row[j];
                     cblas_saxpy(1, (float)(alpha * value), &one, 1, (float *)C + at2, 1);

@@ -1,7 +1,3 @@
-// MKPolylineRenderer: a polyline drawn through its own points, and the partial-stroke range iOS 14
-// added (strokeStart and strokeEnd, each a fraction of the line's points from its start, 0 to 1).
-// The fraction is taken over the line's own point count, so a stroke that starts half way through
-// a ten-point polyline starts at its sixth point.
 #import <MapKit/MapKit.h>
 #import <UIKit/UIKit.h>
 #import <math.h>
@@ -36,8 +32,6 @@
     [self invalidatePath];
 }
 
-// The indices of the points a stroke from start to end of the line covers, for MKPolyline and for
-// the sub-polylines of an MKMultiPolyline. Charon's own, so it carries no API.
 - (void)charon_indicesForStrokeStart:(double)start end:(double)end
                                 count:(NSUInteger)count
                                 first:(NSUInteger *)outFirst
@@ -89,7 +83,6 @@
         CGPathAddLineToPoint(path, NULL, point.x, point.y);
     }
     if (first == last) {
-        // A stroke of no length is a point: MapKit draws the cap there, so the path says so too.
         CGPathAddLineToPoint(path, NULL, point.x, point.y);
     }
     free(coordinates);

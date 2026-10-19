@@ -3,11 +3,6 @@
 #include <unistd.h>
 #import "check.h"
 
-// The owner thread enumerates the keys of each table while other threads drop the keys and values: a read of every entry's
-// key, which the port's contract (facts) does not promise to survive before 5.0. A probe of the first round of this work,
-// kept in the tree for what the facts say of it (5.1.1 clean, 4.3 SIGSEGV within 1.1 guest seconds; on the host the port before
-// the __weak read ended in SIGSEGV 3 of 3); differential.m's enumeration_checks is the test that holds it now.
-// Built and run by probes.sh (MAPTABLE6_PROBES=1 adds it to emulate/xmake.lua).
 @interface NSMapTable (H)
 + (instancetype)charonHost_weakToStrongObjectsMapTable;
 + (instancetype)charonHost_strongToWeakObjectsMapTable;

@@ -1,11 +1,3 @@
-/* The kinds of layer, each read out of the message the specification declares for it.
- * CharonMLLayerKinds.h says what is shared; this is what each kind does with it.
- *
- * Every kind here takes the one input it names, computes the one output it names, and either
- * succeeds or writes a line naming the layer and the reason. A kind that would need a shape
- * or a parameter this file does not read is refused rather than approximated: a wrong answer
- * from a network is harder to see than no answer.
- */
 #include "CharonMLLayerKinds.h"
 
 #include <math.h>
@@ -13,8 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* The input a layer names, and nothing else: the kinds here read one input and write one
- * output, and a layer that names several is not one of them. */
 charon_ml_tensor *charon_ml_input(charon_ml_bindings *bindings, const charon_ml_node *layer)
 {
     char name[256];
@@ -27,8 +17,6 @@ charon_ml_tensor *charon_ml_input(charon_ml_bindings *bindings, const charon_ml_
     return charon_ml_bindings_find(bindings, name);
 }
 
-/* The one output a layer names, written as a tensor. Nothing is put when the name is not
- * there or there is more than one, and the layer's own error says so. */
 static int take_output(const charon_ml_node *layer, charon_ml_bindings *bindings, charon_ml_tensor tensor,
                        char *error, size_t error_size)
 {
@@ -46,11 +34,6 @@ static int take_output(const charon_ml_node *layer, charon_ml_bindings *bindings
     return 1;
 }
 
-/* The padding of a convolution or a pool, as the specification's oneof gives it. Neither case
- * being present is the specification's default: a valid region, which is no padding at all.
- * `valid` may still carry amounts -- it is a "valid complete" padding, where the amounts are
- * given -- and `same` is the padding that makes the output the same size as the input, with an
- * asymmetry mode for the extra row or column. */
 typedef enum { CHARON_ML_PAD_VALID = 0, CHARON_ML_PAD_SAME } charon_ml_pad_kind;
 
 static int read_padding(const charon_ml_node *params, charon_ml_pad_kind *kind, int64_t pad[4])
@@ -82,10 +65,6 @@ static int read_padding(const charon_ml_node *params, charon_ml_pad_kind *kind, 
     return 1;
 }
 
-/* How much to pad each side of a spatial extent of `size` for the "same" padding of a kernel
- * of `kernel` with a `stride`: the total is kernel - 1, and the specification's asymmetry mode
- * says which side gets the extra when the total is odd. BOTTOM_RIGHT_HEAVY is 0, which is what
- * a model that names no mode gets. */
 static int64_t same_padding(int64_t size, int64_t kernel, int64_t stride, int end)
 {
     int64_t out = (size + stride - 1) / stride;
@@ -93,11 +72,6 @@ static int64_t same_padding(int64_t size, int64_t kernel, int64_t stride, int en
     return end ? (total + 1) / 2 : total / 2;
 }
 
-/* --- convolution ------------------------------------------------------------------------------ */
-
-/* The specification's ConvolutionLayerParams: a kernel over the two spatial dimensions of a
- * channels-first input, with a stride, a dilation and either a valid region or explicit pads
- * on each side. The output is a whole number of positions: the ones the kernel reaches. */
 int charon_ml_layer_convolution(const charon_ml_node *layer, const charon_ml_node *params,
                                 charon_ml_bindings *bindings, char *error, size_t error_size)
 {
@@ -108,8 +82,6 @@ int charon_ml_layer_convolution(const charon_ml_node *layer, const charon_ml_nod
     int out_channels, groups, has_bias, channels, index;
     charon_ml_tensor output;
 
-    /* Every pad is zero unless the padding oneof gives one: a "valid" region with no amounts
-     * of its own is no padding, and reading an unset side would be reading a stack. */
     for (index = 0; index < 4; index++) {
         pad[index] = 0;
     }
@@ -123,9 +95,6 @@ int charon_ml_layer_convolution(const charon_ml_node *layer, const charon_ml_nod
     out_channels = charon_ml_integer_of(params, "outputChannels", 0);
     groups = charon_ml_integer_of(params, "nGroups", 1);
     has_bias = charon_ml_integer_of(params, "hasBias", 0) != 0;
-    /* The kernel, the stride and the dilation are each one repeated field of two: the height's
-     * and the width's. A model that names one of them names one number, and a one number for
-     * two is the one number for both. */
     kernel[0] = charon_ml_int_at(params, "kernelSize", 0, 1);
     kernel[1] = kernel[0] == charon_ml_int_at(params, "kernelSize", 0, 1)
                    ? charon_ml_int_at(params, "kernelSize", 1, kernel[0])
@@ -188,9 +157,6 @@ int charon_ml_layer_convolution(const charon_ml_node *layer, const charon_ml_nod
         return 0;
     }
     {
-        /* The weights are laid out as the specification writes them: one group, then for each
-         * output channel the whole kernel over the channels of its group, the input channel
-         * varying slowest and the kernel's own row fastest. */
         int64_t in_per_group = channels / groups, out_per_group = out_channels / groups;
         int64_t out_y, out_x, out_channel, group, in_channel, k_y, k_x;
         for (out_y = 0; out_y < shape[1]; out_y++) {
@@ -227,8 +193,6 @@ int charon_ml_layer_convolution(const charon_ml_node *layer, const charon_ml_nod
     return take_output(layer, bindings, output, error, error_size);
 }
 
-/* --- pooling ---------------------------------------------------------------------------------- */
-
 int charon_ml_layer_pooling(const charon_ml_node *layer, const charon_ml_node *params,
                             charon_ml_bindings *bindings, char *error, size_t error_size)
 {
@@ -237,7 +201,6 @@ int charon_ml_layer_pooling(const charon_ml_node *layer, const charon_ml_node *p
     int kind, global, ceil_mode, index;
     charon_ml_tensor output;
 
-    /* Every pad is zero unless the padding oneof gives one. */
     for (index = 0; index < 4; index++) {
         pad[index] = 0;
     }
@@ -250,8 +213,6 @@ int charon_ml_layer_pooling(const charon_ml_node *layer, const charon_ml_node *p
     }
     kind = charon_ml_integer_of(params, "type", 0);
     global = charon_ml_integer_of(params, "globalPooling", 0) != 0;
-    /* "includeLastPixel" is the specification's round mode: a window that does not divide the
-     * extent evenly keeps its last position rather than dropping it. */
     ceil_mode = charon_ml_integer_of(params, "includeLastPixel", 0) != 0;
     if (global) {
         kernel[0] = input->shape[1];
@@ -331,11 +292,6 @@ int charon_ml_layer_pooling(const charon_ml_node *layer, const charon_ml_node *p
     return take_output(layer, bindings, output, error, error_size);
 }
 
-/* --- the dense layers ------------------------------------------------------------------------- */
-
-/* The specification's InnerProductLayerParams: the input is a vector of inputChannels
- * numbers, or an image whose channels are the same count, and the output is a vector of
- * outputChannels numbers, each a dot product with a row of the weights and a bias. */
 int charon_ml_layer_inner_product(const charon_ml_node *layer, const charon_ml_node *params,
                                   charon_ml_bindings *bindings, char *error, size_t error_size)
 {
@@ -357,15 +313,7 @@ int charon_ml_layer_inner_product(const charon_ml_node *layer, const charon_ml_n
                  charon_ml_layer_name(layer));
         return 0;
     }
-    /* A spatial input is taken channel by channel: the specification's inner product over an
-     * image multiplies the channels, and the number of features is the channel count times
-     * the area, so the input is flattened and the weights are read over all of it. */
     {
-        /* The features of a dense layer are the values of the input taken in order, so their
-         * number is the product of the input's dimensions whatever rank it has: a vector of
-         * four, an array of one by one by four and an array of three by two by two are four,
-         * four and twelve features. The specification's own inputChannels is what a converter
-         * wrote down, and it is read to say what the model expected, not to decide the count. */
         int64_t features = 1;
         int axis;
         for (axis = 0; axis < input->rank; axis++) {
@@ -449,8 +397,6 @@ int charon_ml_layer_softmax(const charon_ml_node *layer, const charon_ml_node *p
     return take_output(layer, bindings, output, error, error_size);
 }
 
-/* The specification's BatchnormLayerParams: per channel, y = (x - mean) * gamma / sqrt(variance
- * + epsilon) + beta, which is the order the specification writes the four in. */
 int charon_ml_layer_batchnorm(const charon_ml_node *layer, const charon_ml_node *params,
                               charon_ml_bindings *bindings, char *error, size_t error_size)
 {
@@ -489,8 +435,6 @@ int charon_ml_layer_batchnorm(const charon_ml_node *layer, const charon_ml_node 
         return 0;
     }
     if (instance_normalization || input->rank < 2) {
-        /* Instance normalisation is the same arithmetic over each channel's own values, which
-         * is what the per-channel form reduces to when there is one value to speak of. */
         for (index = 0; index < input->count; index++) {
             int64_t position[CHARON_ML_MAX_RANK];
             size_t channel, at;
@@ -573,7 +517,7 @@ int charon_ml_layer_mvn(const charon_ml_node *layer, const charon_ml_node *param
             output.data[index] = (float)(((double)input->data[index] - average) / (spread + epsilon));
         }
     }
-    (void)across_channels; /* the whole tensor is normalised, which is what CoreML's mvn does */
+    (void)across_channels;
     return take_output(layer, bindings, output, error, error_size);
 }
 
@@ -594,10 +538,6 @@ int charon_ml_layer_l2normalize(const charon_ml_node *layer, const charon_ml_nod
         snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
         return 0;
     }
-    /* The whole value is divided by one length: the L2 norm of every value of the input
-     * together, not one norm per channel. Measured against coremltools' own runtime on a
-     * two-channel input: dividing each channel by its own norm gives (1, -1) and the runtime
-     * gives (0.9915, -0.1302), which is the single norm of the two together. */
     for (at = 0; at < input->count; at++) {
         total += (double)input->data[at] * (double)input->data[at];
     }
@@ -637,8 +577,6 @@ int charon_ml_layer_lrn(const charon_ml_node *layer, const charon_ml_node *param
         snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
         return 0;
     }
-    /* y_c = x_c / (k + alpha/n * sum_{c' in the window} x_c'^2)^beta, the window being the
-     * localSize channels centred on c and clipped at the ends. */
     for (channel = 0; channel < (int)input->shape[0]; channel++) {
         int first = channel - local_size, last = channel + local_size, count = 0, neighbour;
         if (first < 0) {
@@ -687,10 +625,6 @@ int charon_ml_layer_embedding(const charon_ml_node *layer, const charon_ml_node 
         snprintf(error, error_size, "the layer '%s' has a dimension of no length", charon_ml_layer_name(layer));
         return 0;
     }
-    /* The table is laid out per output channel: the whole row of the table for that channel,
-     * across every index. Measured against coremltools' own runtime on a three-row table: with
-     * the index as the outer dimension the second value of the row came out of the wrong
-     * channel, and with it the first. */
     if (!charon_ml_read_numbers(charon_ml_get(params, "weights"), &weights, &weight_count) ||
         weight_count != (size_t)input_dim * (size_t)output_channels) {
         free(weights);
@@ -704,8 +638,6 @@ int charon_ml_layer_embedding(const charon_ml_node *layer, const charon_ml_node 
         snprintf(error, error_size, "the layer '%s' says it has a bias and has none", charon_ml_layer_name(layer));
         return 0;
     }
-    /* The input is a vector of indices and the output is a stack of one row of the weights per
-     * index, which is what a text model's word vectors come out as. */
     shape[0] = input->count;
     shape[1] = output_channels;
     output = charon_ml_tensor_make(2, shape);
@@ -737,12 +669,6 @@ int charon_ml_layer_embedding(const charon_ml_node *layer, const charon_ml_node 
     return take_output(layer, bindings, output, error, error_size);
 }
 
-/* A per-channel scale and a per-channel shift, each either a whole array of its own or one
- * number for all the channels, which is the two shapes the specification allows. */
-/* A layer's own numbers, out of the WeightParams the specification's parameters hold, or out of
- * a value the layer names as one of its other inputs. The specification allows both: a scale
- * written with its values in the layer, and one written as a second and a third input that
- * earlier layers produced. `field` is the WeightParams field inside the parameters. */
 static int own_numbers(const charon_ml_node *params, const char *field, const charon_ml_node *layer,
                        charon_ml_bindings *bindings, size_t input_index, double **out, int *count,
                        char *error, size_t error_size)
@@ -816,9 +742,6 @@ int charon_ml_layer_scale(const charon_ml_node *layer, const charon_ml_node *par
     }
     for (channel = 0; channel < input->shape[0]; channel++) {
         double by_channel = scale_count == 1 ? scale[0] : (channel < scale_count ? scale[channel] : scale[0]);
-        /* A scale layer's own offset, one per channel, added after the multiplication: the
-         * two are the specification's scale and bias, and a layer that declares a bias and is
-         * given none is a model that has none rather than one to be invented. */
         double add = shift_count == 0 ? 0.0
                                   : (shift_count == 1 ? shift[0] : (channel < shift_count ? shift[channel] : 0.0));
         for (at = 0; at < area; at++) {
@@ -851,8 +774,6 @@ int charon_ml_layer_bias(const charon_ml_node *layer, const charon_ml_node *para
         offset = charon_ml_bindings_find(bindings, name);
     }
     if (offset == NULL) {
-        /* No second input: the offset is the layer's own, in the parameters the
-         * specification gives it. */
         double *numbers = NULL;
         size_t total = 0;
         charon_ml_tensor own;
@@ -889,8 +810,6 @@ int charon_ml_layer_bias(const charon_ml_node *layer, const charon_ml_node *para
     return take_output(layer, bindings, output, error, error_size);
 }
 
-/* --- padding, constants, and the shape layers --------------------------------------------------- */
-
 int charon_ml_layer_padding(const charon_ml_node *layer, const charon_ml_node *params,
                             charon_ml_bindings *bindings, char *error, size_t error_size)
 {
@@ -909,9 +828,6 @@ int charon_ml_layer_padding(const charon_ml_node *layer, const charon_ml_node *p
         return charon_ml_layer_bad_shape(layer, "an input that is not channels by height by width", input,
                                          error, error_size);
     }
-    /* The four amounts are one BorderAmounts -- a list of EdgeSizes, the first the height's
-     * beginning and end and the second the width's -- and the value a constant pad fills with is
-     * the message that says the padding is a constant at all. */
     {
         const charon_ml_node *fill = charon_ml_get(params, "constant");
         read_padding(params, &how, pad);
@@ -947,9 +863,6 @@ int charon_ml_layer_padding(const charon_ml_node *layer, const charon_ml_node *p
 int charon_ml_layer_load_constant(const charon_ml_node *layer, const charon_ml_node *params,
                                   charon_ml_bindings *bindings, char *error, size_t error_size)
 {
-    /* A constant the model carries whole, which a network uses for a fixed table of weights
-     * and for the one-hot vector of a class. The specification's LoadConstantLayerParams holds
-     * a shape and the numbers, in the same WeightParams oneof as every other weight. */
     const charon_ml_node *data = charon_ml_get(params, "data");
     double *numbers = NULL;
     size_t count = 0, index;
@@ -980,7 +893,6 @@ int charon_ml_layer_load_constant(const charon_ml_node *layer, const charon_ml_n
         }
         free(numbers);
     } else {
-        /* A constant written as bytes rather than as a list of numbers. */
         const charon_ml_node *entry = charon_ml_get(data, "rawValue");
         if (entry == NULL) {
             entry = charon_ml_get(data, "float16Value");
@@ -1063,8 +975,6 @@ int charon_ml_layer_reshape(const charon_ml_node *layer, const charon_ml_node *p
     for (index = 0; index < rank; index++) {
         shape[index] = charon_ml_int_at(params, "targetShape", (size_t)index, -1);
         if (shape[index] < 0) {
-            /* A -1 is the dimension the specification leaves to the arithmetic: the product of
-             * the rest of the target, or the input's own count when the rest leaves nothing. */
             if (wildcard >= 0) {
                 snprintf(error, error_size, "the layer '%s' leaves two of its target dimensions open",
                          charon_ml_layer_name(layer));
@@ -1146,7 +1056,7 @@ int charon_ml_layer_concat(const charon_ml_node *layer, const charon_ml_node *pa
     {
         charon_ml_tensor *first = charon_ml_bindings_find(bindings, names[0]);
         int rank = first->rank;
-        int position = 0; /* the channels: the specification gives a concat no other axis */
+        int position = 0;
         if (rank != 1 && rank != 3) {
             snprintf(error, error_size,
                      "the layer '%s' joins values of %d dimensions, and Core ML joins the channels of three or a whole one",
@@ -1390,7 +1300,6 @@ int charon_ml_layer_upsample(const charon_ml_node *layer, const charon_ml_node *
         return charon_ml_layer_bad_shape(layer, "an input that is not channels by height by width", input,
                                          error, error_size);
     }
-    /* The factors are one repeated field, the height's and then the width's. */
     scale_y = charon_ml_int_at(params, "scalingFactor", 0, 1);
     scale_x = charon_ml_int_at(params, "scalingFactor", 1, 1);
     mode = charon_ml_integer_of(params, "mode", 0);
@@ -1471,9 +1380,6 @@ int charon_ml_layer_reduce(const charon_ml_node *layer, const charon_ml_node *pa
     operation = charon_ml_integer_of(params, "mode", 0);
     axis_kind = charon_ml_integer_of(params, "axis", 0);
     rank = input->rank;
-    /* The reduce axis is named by which dimensions it covers, not by a position: 0 is the
-     * channels and height and width, 1 the height and width, 2 the channels, 3 the height, 4
-     * the width. */
     for (index = 0; index < rank; index++) {
         int covered = (axis_kind == 0) || (axis_kind == 1 && index > 0) ||
                       (axis_kind == 2 && index == 0) || (axis_kind == 3 && index == 1) ||
@@ -1541,7 +1447,6 @@ int charon_ml_layer_reduce(const charon_ml_node *layer, const charon_ml_node *pa
             output.data[along] = (float)sqrt(total);
             break;
         case 3:
-            /* LOGSUM is the log of one plus the sum, which is what the accumulation takes. */
             output.data[along] = (float)log1p(exp(total));
             break;
         default:
@@ -1553,8 +1458,6 @@ int charon_ml_layer_reduce(const charon_ml_node *layer, const charon_ml_node *pa
     return take_output(layer, bindings, output, error, error_size);
 }
 
-/* SPACE_TO_DEPTH moves each block of 2 by 2 into the channels; DEPTH_TO_SPACE is its inverse,
- * which is what the specification's two reorganization cases are. */
 int charon_ml_layer_reorganize(const charon_ml_node *layer, const charon_ml_node *params,
                                charon_ml_bindings *bindings, char *error, size_t error_size)
 {
@@ -1626,8 +1529,6 @@ int charon_ml_layer_reorganize(const charon_ml_node *layer, const charon_ml_node
     return take_output(layer, bindings, output, error, error_size);
 }
 
-/* --- the elementwise layer of the one input ---------------------------------------------------- */
-
 int charon_ml_layer_unary_math(const charon_ml_node *layer, const charon_ml_node *params,
                                charon_ml_bindings *bindings, char *error, size_t error_size)
 {
@@ -1644,8 +1545,6 @@ int charon_ml_layer_unary_math(const charon_ml_node *layer, const charon_ml_node
         snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
         return 0;
     }
-    /* Which of the mathematics layers this is, is the case of the oneof the document holds;
-     * the switch is written on the number of that case. */
     {
         size_t at, total = charon_ml_count(layer);
         for (at = 0; at < total; at++) {
@@ -1660,7 +1559,7 @@ int charon_ml_layer_unary_math(const charon_ml_node *layer, const charon_ml_node
         double x = input->data[index];
         double value;
         switch (which) {
-        case 660: /* clip, whose parameters the specification names minVal and maxVal */
+        case 660:
             value = fmin(fmax(x, charon_ml_number_of(params, "minVal", 0.0)),
                          charon_ml_number_of(params, "maxVal", 1.0));
             break;
@@ -1719,9 +1618,6 @@ int charon_ml_layer_unary_math(const charon_ml_node *layer, const charon_ml_node
             value = erf(x);
             break;
         case 795: {
-            /* The exact GELU is x * Phi(x), and Phi is the error function; the specification
-             * also names a hyperbolic and a logistic approximation of it, which this port
-             * reads only in its exact form and refuses the other two. */
             int mode = charon_ml_integer_of(params, "mode", 0);
             if (mode != 0) {
                 charon_ml_tensor_free(&output);
@@ -1748,9 +1644,6 @@ int charon_ml_layer_clip(const charon_ml_node *layer, const charon_ml_node *para
     return charon_ml_layer_unary_math(layer, params, bindings, error, error_size);
 }
 
-/* A copy of a tensor along a subset of its dimensions: `kept[k]` is the dimension of the
- * source that becomes the kth of the result, and the dimensions left out read as zero. Both
- * squeeze and expand dims are this, and differ only in which side the kept list is read from. */
 static charon_ml_tensor gather_axes(const charon_ml_node *layer, const charon_ml_bindings *bindings,
                                     const int *kept, int kept_count, int source_rank,
                                     char *error, size_t error_size)
@@ -1801,8 +1694,6 @@ static charon_ml_tensor gather_axes(const charon_ml_node *layer, const charon_ml
 int charon_ml_layer_squeeze(const charon_ml_node *layer, const charon_ml_node *params,
                             charon_ml_bindings *bindings, char *error, size_t error_size)
 {
-    /* The axes the specification names are positions in the input, and each one named drops
-     * that dimension; squeezeAll drops every dimension of length one instead. */
     charon_ml_tensor *input = charon_ml_input(bindings, layer);
     int kept[CHARON_ML_MAX_RANK];
     int kept_count = 0, all, axis;
@@ -1827,7 +1718,7 @@ int charon_ml_layer_squeeze(const charon_ml_node *layer, const charon_ml_node *p
         kept[kept_count++] = axis;
     }
     if (kept_count == 0) {
-        kept[0] = -1; /* everything was dropped: the result is the single value of the input */
+        kept[0] = -1;
         kept_count = 1;
     }
     return take_output(layer, bindings, gather_axes(layer, bindings, kept, kept_count, input->rank, error, error_size),
@@ -1837,8 +1728,6 @@ int charon_ml_layer_squeeze(const charon_ml_node *layer, const charon_ml_node *p
 int charon_ml_layer_expand_dims(const charon_ml_node *layer, const charon_ml_node *params,
                                 charon_ml_bindings *bindings, char *error, size_t error_size)
 {
-    /* The axes the specification names are positions in the output, each of which becomes a
-     * dimension of length one; the input's own dimensions fill the positions left over. */
     charon_ml_tensor *input = charon_ml_input(bindings, layer);
     int added[CHARON_ML_MAX_RANK], kept[CHARON_ML_MAX_RANK];
     int added_count, kept_count = 0, rank, index, k;
@@ -1931,12 +1820,6 @@ int charon_ml_layer_tile(const charon_ml_node *layer, const charon_ml_node *para
     return take_output(layer, bindings, output, error, error_size);
 }
 
-/* --- the recurrent layers ---------------------------------------------------------------------- */
-
-/* The specification's SimpleRecurrentLayerParams: a matrix times the input, then an
- * activation, then a matrix times the previous state, then a bias -- y = f(Wx + Rh + b), the
- * order the specification's own documentation gives. The state is carried from step to step
- * along the first dimension, which is the sequence. */
 int charon_ml_layer_simple_recurrent(const charon_ml_node *layer, const charon_ml_node *params,
                                      charon_ml_bindings *bindings, char *error, size_t error_size)
 {
@@ -1960,8 +1843,6 @@ int charon_ml_layer_simple_recurrent(const charon_ml_node *layer, const charon_m
     has_bias = charon_ml_integer_of(params, "hasBiasVector", 0) != 0;
     has_state = charon_ml_name_count(layer, "input") > 1;
     if (has_state) {
-        /* The second input is the state the recurrence starts from, which the specification
-         * requires of the layer: a network that gives none starts from a state of zeros. */
         if (charon_ml_name_at(layer, "input", 1, initial_name, sizeof initial_name) != NULL) {
             initial = charon_ml_bindings_find(bindings, initial_name);
         }

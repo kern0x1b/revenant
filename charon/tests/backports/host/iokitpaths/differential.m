@@ -2,12 +2,6 @@
 #import <IOKit/IOKitLib.h>
 #import "check.h"
 
-// The port's two registry lookups and its two main-port names against the host's own IOKit. The port
-// writes them over the same two functions the host has, so for every question the host can answer the
-// answers must be the same. Two answers of the port's are not the host's and are checked as such: the
-// main port, which is a real port on the host and the default on a release that has none, and the two
-// nil arguments the host reads through and dies on.
-
 extern const mach_port_t charonHost_kIOMainPortDefault;
 extern kern_return_t charonHost_IOMainPort(mach_port_t bootstrapPort, mach_port_t *mainPort);
 extern io_registry_entry_t charonHost_IORegistryEntryCopyFromPath(mach_port_t mainPort, CFStringRef path);
@@ -34,9 +28,6 @@ int main(void)
     charon_check(port_kr == host_kr, "with the kern_return_t the host gives", [NSString stringWithFormat:@"port %d, host %d", port_kr, host_kr]);
     charon_check(port_main == charonHost_kIOMainPortDefault, "and hands back the default main port",
                  [NSString stringWithFormat:@"port %u", port_main]);
-    // The host has a real main port of its own, and this is the one documented difference: a release
-    // that reaches IOKit through the task's port has none to hand out. It is written down here so the
-    // test fails if the port ever starts answering with something else.
     charon_check(host_main != MACH_PORT_NULL, "the host, on the other hand, has a main port of its own",
                  [NSString stringWithFormat:@"host %u", host_main]);
     charon_check(charonHost_IOMainPort(MACH_PORT_NULL, NULL) == KERN_INVALID_ARGUMENT,

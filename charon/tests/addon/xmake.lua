@@ -28,8 +28,6 @@ local function suite(name)
     target_end()
 end
 
--- A test that only reads the repository's own Lua needs none of the toolchain
--- packages, so it runs without building anything.
 local function light(name)
     target(name)
         set_kind("phony")

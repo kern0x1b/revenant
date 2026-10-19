@@ -1,6 +1,3 @@
-// MPSMatrixCopy, from the header of the SDK of iOS 16.4. One object per release: the band machinery keeps an
-// object whole or drops it whole, so a file here carries the API of exactly one release.
-
 #import "CharonMPS.h"
 
 
@@ -60,10 +57,6 @@
 {
     if (!CharonMPSCommandBufferPermits(commandBuffer))
         return;
-    // The copy moves a copyRows x copyColumns window from each source into its destination, transposing
-    // on the way in or out as the kernel's two flags say, from the offsets the descriptor holds. The
-    // per-column and per-row permute vectors reorder the columns and rows of the result; a permute
-    // index names the source position of the destination column or row.
     for (NSUInteger index = 0; index < [copyDescriptor charon_mps_count]; index++) {
         MPSMatrix *source = [copyDescriptor charon_mps_sourceAtIndex:index];
         MPSMatrix *destination = [copyDescriptor charon_mps_destinationAtIndex:index];

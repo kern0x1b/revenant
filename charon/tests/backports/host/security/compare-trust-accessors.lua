@@ -1,22 +1,5 @@
--- compare-trust-accessors.lua - the port's fourteen answers against the HOST'S OWN, difference by difference.
---
---    xmake l compare-trust-accessors.lua <the binary's output>
---
--- Every line the case prints is `key<TAB>port<TAB>host`, so this reads both sides and holds the DIFFERENCES it expects. A difference
--- the port does NOT have is a failure and a failure the port does have that this file does not name is also a failure - which is the
--- shape that matters here, because most of these rows differ on purpose and a comparison that only ever said "the same" would be
--- worthless.
---
--- THE SAME ROWS MUST MATCH: the three constants' values, the OID a created basic X.509 policy carries, the chain's length and its
--- leaf, the result's verdict and the type of its date, both async status codes, both async verdicts, and both setter status codes.
--- Those are cases where 6.1.3 and this Mac answer alike and the port must answer alike too.
---
--- THE ROWS THAT MUST DIFFER, and why, one line each: the policy properties of a policy the port never made, the anchors and the
--- policies a trust reports, the result dictionary's key count, and the two identifiers the release cannot build a policy for.
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
--- key and what a match means, in the order the keys are named
 local SAME = {
     {"constant-persistentref", "both spellings carry the host's own value for the attribute"},
     {"constant-persistantref", "the misspelled spelling carries the same value"},
@@ -51,7 +34,6 @@ local DIFFER = {
     {"ac-type-id", "each side's type ID is its own, and the port's names the port's private class"},
 }
 
--- Python's %r of halves[0] when a half-line has nothing in it: the repr of its first field, or None for an empty one
 local function first_repr(half)
     if #half == 0 then
         return "None"
@@ -65,16 +47,12 @@ function main(...)
         io.stderr:write("compare-trust-accessors.lua: pass the binary's output\n")
         os.exit(1)
     end
-    -- rows[key] is the list of the entries printed under that key, one per line; an entry is the fields after the key
     local rows, bad, missing = {}, {}, {}
     for _, line in ipairs(tsv.text_lines(tsv.read_text(args[1]))) do
         if line ~= "" then
             if tsv.starts_with(line, "MISSING") then
                 bad[#bad + 1] = line
             else
-                -- A key printed once per side - created-oid, which the case asks twice, once per side - lands as two half-lines,
-                -- and a key asked once arrives as one. Both are comparisons, and a half-line with nothing to compare against is
-                -- reported rather than unpacked.
                 local parts = tsv.split_on(line, "\t")
                 rows[parts[1]] = rows[parts[1]] or {}
                 local entries = rows[parts[1]]
@@ -125,7 +103,6 @@ function main(...)
         end
     end
 
-    -- Python's rows.get("ac-type-id-stable", [[None]])[0][0]: absent gives None; a row with no field at all ended the run
     local stable = rows["ac-type-id-stable"]
     local stable_value = nil
     if stable ~= nil then

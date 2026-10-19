@@ -1,7 +1,3 @@
-// FORBIDDEN ON THE HOST. Do not run: with the first setup device it added an entity "x" (protocol 1) to the device "Network"
-// and left it there (reverted on 2026-10-10 with MIDIDeviceRemoveEntity; see facts/CoreMIDI/Devices.md). It is kept as the
-// record of the measurement. Probes must not create or edit persistent host MIDI objects.
-// Host probe: MIDIDeviceNewEntity on the devices an application can name: none (0), and the first device of the setup.
 #import <CoreMIDI/CoreMIDI.h>
 #include <stdio.h>
 int main(void) {

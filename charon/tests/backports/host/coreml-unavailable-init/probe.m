@@ -1,9 +1,3 @@
-/* probe.m - for each Core ML class whose header declares -init or +new NS_UNAVAILABLE, does the class answer with NSObject's
- * own implementation, and does a class that really overrides the selector show as different? Printed one line per question,
- * so the host framework's answer and the port's can be compared line by line.
- *
- * Compiled once against the host's CoreML framework and once against the port's CoreML objects (no framework linked on the
- * port side). The controls are the same probe on a class that overrides -init, and on a name no framework has. */
 #import <Foundation/Foundation.h>
 #import <CoreML/CoreML.h>
 #import <objc/runtime.h>
@@ -15,7 +9,6 @@
 - (instancetype)init { return [super init]; }
 @end
 
-/* 1 when the class's own IMP for sel is NSObject's, 0 when it differs, -1 when the class does not exist. */
 static int inherits_nsobject(const char *name, BOOL classMethod, SEL sel)
 {
     Class cls = NSClassFromString([NSString stringWithUTF8String:name]);

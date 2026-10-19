@@ -1,20 +1,7 @@
-// contentunavailable_test.m - the empty-state property bags and the state object, port against host.
-//
-// The host's own UIKit and the port's in one process: uikit2/run.sh renames the backport's classes, so
-// each case asks the two sides the same question and holds the answers to each other. What is compared
-// is what facts/UIKit/UIContentUnavailable17.md records, and every default is read from the host rather
-// than assumed, so a wrong default in the port is a red run and not a row that claims otherwise.
-//
-// Both sides are typed: the system side with the SDK's own class, the port side with the renamed
-// declaration below, which the SDK has none of on a macCatalyst 15.0 target. That is the point of a
-// differential against the port's own objects: the host framework cannot answer for these classes, the
-// port can, and the comparison is between the two.
 #import <UIKit/UIKit.h>
 #import "check.h"
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
-// The port's own classes are renamed, so their declarations here carry the prefixed names.  The system side
-// is the SDK's own class throughout, and that is the point: this file asks the two the same question.
 #define port_config CharonHostUIContentUnavailableConfiguration
 
 @interface CharonHostUIContentUnavailableTextProperties : NSObject
@@ -52,10 +39,6 @@
 @end
 
 
-// The configuration and the content view.  Both are classes the port DEFINES, so the port's own copies are
-// the CharonHost-prefixed ones and the system's are the SDK's own; the two sets live side by side in this
-// process and every case below asks both.  The bag types are the port's, because a port configuration hands
-// out port bags.
 @interface CharonHostUIContentUnavailableConfiguration : NSObject <UIContentConfiguration>
 + (instancetype)emptyConfiguration;
 + (instancetype)loadingConfiguration;
@@ -90,8 +73,6 @@
 @property (nonatomic, getter=isScrollEnabled) BOOL scrollEnabled;
 @end
 
-// Each check names the question and takes the two answers already reduced to strings, so a red run says
-// which property differed rather than printing two objects.
 static void BOTH(NSString *what, NSString *ours, NSString *theirs)
 {
     charon_check([ours isEqualToString:theirs], what.UTF8String,
@@ -110,7 +91,6 @@ static void check_text_bag(void)
     UIContentUnavailableTextProperties *system = [[UIContentUnavailableTextProperties alloc] init];
     charon_check(ours != nil && system != nil, "both sides make a text bag", @"one of the two answered nothing");
 
-    // the defaults, read rather than assumed
     BOTH(@"a fresh text bag holds the same line break mode",
          [@(ours.lineBreakMode) stringValue], [@(system.lineBreakMode) stringValue]);
     BOTH(@"a fresh text bag holds the same line count",
@@ -122,26 +102,16 @@ static void check_text_bag(void)
     BOTH(@"a fresh text bag holds the same default tightening flag",
          [@(ours.allowsDefaultTighteningForTruncation) stringValue],
          [@(system.allowsDefaultTighteningForTruncation) stringValue]);
-    // The two releases name their system font differently - the host answers .AppleSystemUIFont, which does not
-    // exist on 6.1.3 - so what is compared is the size and the role, and the family names are recorded in the
-    // facts rather than held equal, because holding them equal would ask the port to answer a name it has no
-    // way to produce.
     charon_check(ours.font != nil && system.font != nil, "a fresh text bag holds a font on both sides",
                  [NSString stringWithFormat:@"port %@ system %@", ours.font, system.font]);
     if (ours.font && system.font) {
         BOTH(@"a fresh text bag's default font is the same size",
              [@(ours.font.pointSize) stringValue], [@(system.font.pointSize) stringValue]);
-        // the review measured a fresh bag holding a colour as well as a font; this asks that here rather
-        // than assuming it, and it is the check that is red until the port sets one
-        // The two sides name their label colour differently - the host's is a dynamic catalog entry called
-        // labelColor, the release's is darkTextColor - and neither name is the other's, so what is compared is
-        // the role: a colour that is there and is not the clear colour. Both names are in the facts.
         BOTH(@"a fresh text bag holds a labelled colour, not none and not clear",
              (ours.color != nil && ![ours.color isEqual:[UIColor clearColor]]) ? @"labelled" : @"other",
              (system.color != nil && ![system.color isEqual:[UIColor clearColor]]) ? @"labelled" : @"other");
     }
 
-    // the writes, then the reads
     UIFont *font = [UIFont systemFontOfSize:19];
     UIColor *color = [UIColor redColor];
     ours.font = font; system.font = font;
@@ -259,7 +229,6 @@ static void check_state(void)
     ours.searchText = @"a search"; system.searchText = @"a search";
     BOTH(@"a state reads back the search text it was given", ours.searchText, system.searchText);
 
-    // the keyed pair UIConfigurationState declares
     [ours setObject:@"held" forKeyedSubscript:@"k"];
     [system setObject:@"held" forKeyedSubscript:@"k"];
     BOTH(@"a state holds what was keyed into it", [ours objectForKeyedSubscript:@"k"], [system objectForKeyedSubscript:@"k"]);
@@ -273,9 +242,6 @@ static void check_state(void)
     BOTH(@"a state's copy keeps the search text", ourCopy.searchText, systemCopy.searchText);
 }
 
-// +new and -init of the state class. Its header marks both NS_UNAVAILABLE and the release defines neither, so
-// both sides answer them through NSObject; the case sends them through id, as the factories above do, and asks
-// that each side answer an instance of its own class.
 static void check_state_new_and_init(void)
 {
     id ourClass = NSClassFromString(@"CharonHostUIContentUnavailableConfigurationState");
@@ -284,13 +250,11 @@ static void check_state_new_and_init(void)
          [systemClass respondsToSelector:@selector(new)] ? @"yes" : @"no");
     BOTH(@"the state class answers -init on both sides", [ourClass instancesRespondToSelector:@selector(init)] ? @"yes" : @"no",
          [systemClass instancesRespondToSelector:@selector(init)] ? @"yes" : @"no");
-    // the two class names differ by the port's prefix, so each side is asked whether it made its own class
     id ourNew = [ourClass new];
     id systemNew = [systemClass new];
     BOTH(@"+new makes an instance of the state class on both sides",
          [ourNew isKindOfClass:ourClass] ? @"instance" : @"other",
          [systemNew isKindOfClass:systemClass] ? @"instance" : @"other");
-    // what the state holds when NSObject builds it: the facts file says no trait collection and no search text
     BOTH(@"a state made by +new holds no trait collection on either side",
          [ourNew traitCollection] == nil ? @"nil" : @"set", [systemNew traitCollection] == nil ? @"nil" : @"set");
     BOTH(@"a state made by +new holds no search text on either side",
@@ -302,7 +266,6 @@ static void check_state_new_and_init(void)
          [systemInit isKindOfClass:systemClass] ? @"instance" : @"other");
 }
 
-// The three factories, asked side by side.  kind 0 empty, 1 loading, 2 search.
 static void check_one_configuration(NSInteger kind)
 {
     NSArray *names = @[@"empty", @"loading", @"search"];
@@ -319,7 +282,6 @@ static void check_one_configuration(NSInteger kind)
     charon_check(ours != nil && system != nil, "both sides build the configuration",
                  [NSString stringWithFormat:@"port %@ system %@", ours, system]);
 
-    // The four scalar metrics, which are numbers both sides hold.
     BOTH([NSString stringWithFormat:@"the %@ image-to-text padding", label],
          [@(ours.imageToTextPadding) stringValue], [@(system.imageToTextPadding) stringValue]);
     BOTH([NSString stringWithFormat:@"the %@ text-to-secondary-text padding", label],
@@ -342,7 +304,6 @@ static void check_one_configuration(NSInteger kind)
     BOTH([NSString stringWithFormat:@"the %@ bottom margin", label],
          [@(ours.directionalLayoutMargins.bottom) stringValue], [@(system.directionalLayoutMargins.bottom) stringValue]);
 
-    // The text.  These are strings, so both sides are held to the same characters, byte for byte.
     BOTH([NSString stringWithFormat:@"the %@ primary text", label],
          ours.text ? ours.text : @"(nil)", system.text ? system.text : @"(nil)");
     BOTH([NSString stringWithFormat:@"the %@ secondary text", label],
@@ -353,10 +314,6 @@ static void check_one_configuration(NSInteger kind)
          ours.secondaryAttributedText == nil ? @"nil" : @"set",
          system.secondaryAttributedText == nil ? @"nil" : @"set");
 
-    // The primary text properties.  The point size is a number both sides hold; the family name is the
-    // host's own (.SFNS-Bold, .AppleSystemUIFont) and the port asks for the release's system font, so what
-    // is compared is the size and the fact that both sides answered a font - exactly the comparison the
-    // text bag above makes, for the same reason.
     charon_check(ours.textProperties.font != nil && system.textProperties.font != nil,
                  "both sides hold a primary font", [NSString stringWithFormat:@"port %@ system %@",
                                                      ours.textProperties.font, system.textProperties.font]);
@@ -364,8 +321,6 @@ static void check_one_configuration(NSInteger kind)
         BOTH([NSString stringWithFormat:@"the %@ primary font size", label],
              [@(ours.textProperties.font.pointSize) stringValue], [@(system.textProperties.font.pointSize) stringValue]);
     }
-    // The colour names are the host's dynamic catalog entries and neither exists on 6.1.3, so the role is
-    // what is compared: a colour that is there and is not the clear colour.
     BOTH([NSString stringWithFormat:@"the %@ primary colour is a label colour", label],
          (ours.textProperties.color != nil && ![ours.textProperties.color isEqual:[UIColor clearColor]]) ? @"labelled" : @"other",
          (system.textProperties.color != nil && ![system.textProperties.color isEqual:[UIColor clearColor]]) ? @"labelled" : @"other");
@@ -374,7 +329,6 @@ static void check_one_configuration(NSInteger kind)
     BOTH([NSString stringWithFormat:@"the %@ primary line count", label],
          [@(ours.textProperties.numberOfLines) stringValue], [@(system.textProperties.numberOfLines) stringValue]);
 
-    // The secondary text properties are the 15 point body bag on all three factories.
     charon_check(ours.secondaryTextProperties.font != nil && system.secondaryTextProperties.font != nil,
                  "both sides hold a secondary font", @"one side answered none");
     if (ours.secondaryTextProperties.font && system.secondaryTextProperties.font) {
@@ -386,7 +340,6 @@ static void check_one_configuration(NSInteger kind)
          [@(ours.secondaryTextProperties.lineBreakMode) stringValue],
          [@(system.secondaryTextProperties.lineBreakMode) stringValue]);
 
-    // The image properties: the symbol configuration is a point size and a tint role.
     charon_check(ours.imageProperties.preferredSymbolConfiguration != nil && system.imageProperties.preferredSymbolConfiguration != nil,
                  "both sides hold a symbol configuration", @"one side answered none");
     BOTH([NSString stringWithFormat:@"the %@ image corner radius", label],
@@ -395,7 +348,6 @@ static void check_one_configuration(NSInteger kind)
          (ours.imageProperties.tintColor != nil && ![ours.imageProperties.tintColor isEqual:[UIColor clearColor]]) ? @"labelled" : @"other",
          (system.imageProperties.tintColor != nil && ![system.imageProperties.tintColor isEqual:[UIColor clearColor]]) ? @"labelled" : @"other");
 
-    // The buttons and their property bags.
     BOTH([NSString stringWithFormat:@"the %@ primary button exists", label], ours.button ? @"set" : @"nil", @"set");
     BOTH([NSString stringWithFormat:@"the %@ secondary button exists", label], ours.secondaryButton ? @"set" : @"nil", @"set");
     BOTH([NSString stringWithFormat:@"the %@ primary button base style is plain", label],
@@ -413,12 +365,9 @@ static void check_one_configuration(NSInteger kind)
          ours.background != nil && ![ours.background.backgroundColor isEqual:[UIColor blackColor]] ? @"set" : @"other",
          system.background != nil && ![system.background.backgroundColor isEqual:[UIColor blackColor]] ? @"set" : @"other");
 
-    // The image: only the search factory has one, and there the question is which symbol, not its pixels -
-    // the port draws its own glyph for the name, which is a different image from the host's by construction.
     BOTH([NSString stringWithFormat:@"the %@ has the same image presence", label],
          ours.image == nil ? @"none" : @"some", system.image == nil ? @"none" : @"some");
 
-    // Every write is read back, so the storage is held and not just the defaults.
     NSString *primary = [NSString stringWithFormat:@"%@ primary", label];
     ours.text = primary; system.text = primary;
     ours.secondaryText = @"s"; system.secondaryText = @"s";
@@ -450,8 +399,6 @@ static void check_one_configuration(NSInteger kind)
     BOTH([NSString stringWithFormat:@"a written %@ bottom margin reads back", label],
          [@(ours.directionalLayoutMargins.bottom) stringValue], [@(system.directionalLayoutMargins.bottom) stringValue]);
 
-    // The copy is deep, which the bags are what makes interesting: writing one side's bag must not reach the
-    // other side's, and that is a comparison both objects answer.
     CharonHostUIContentUnavailableConfiguration *ourCopy = [ours copy];
     UIContentUnavailableConfiguration *systemCopy = [system copy];
     BOTH([NSString stringWithFormat:@"a %@ copy keeps the text", label], ourCopy.text, systemCopy.text);
@@ -466,8 +413,6 @@ static void check_one_configuration(NSInteger kind)
     BOTH([NSString stringWithFormat:@"a %@ copy's bag write leaves the original alone", label],
          [@(ours.textProperties.numberOfLines) stringValue], [@(system.textProperties.numberOfLines) stringValue]);
 
-    // The archive round trip, which is what NSSecureCoding is claimed for.  Both sides encode and both
-    // sides read back, and what is compared is what came back.
     NSError *error = nil;
     NSData *ourArchive = [NSKeyedArchiver archivedDataWithRootObject:ours requiringSecureCoding:YES error:&error];
     NSData *systemArchive = [NSKeyedArchiver archivedDataWithRootObject:system requiringSecureCoding:YES error:&error];
@@ -503,10 +448,6 @@ static void check_configurations(void)
         check_one_configuration(kind);
 }
 
-// The three factories differ from each other in six measured values, and this is what holds each factory to
-// its own kind: the loading configuration is the only one whose primary text is the 15 point body face and
-// the only one with an 8 point image-to-text padding, and the search configuration is the only one with a
-// secondary text.  Both sides are asked, so a port that gave all three the same shape would be red.
 static void check_the_three_differ(void)
 {
     CharonHostUIContentUnavailableConfiguration *oursEmpty = [CharonHostUIContentUnavailableConfiguration emptyConfiguration];
@@ -530,8 +471,6 @@ static void check_the_three_differ(void)
          oursSearch.image ? @"set" : @"none", systemSearch.image ? @"set" : @"none");
 }
 
-// The content view.  Its rows are its accessors, so what is compared is the configuration it holds, the
-// copy it hands out, and the scroll flag - and the fact that its makeContentView builds one on each side.
 static void check_configuration_view(void)
 {
     CharonHostUIContentUnavailableConfiguration *oursConfiguration = [CharonHostUIContentUnavailableConfiguration searchConfiguration];
@@ -570,10 +509,6 @@ static void check_configuration_view(void)
     system.scrollEnabled = NO;
     BOTH(@"a cleared scroll flag reads back", ours.isScrollEnabled ? @"yes" : @"no", @"no");
 
-    // Laying the view out draws its content: both sides are given the same frame and asked how tall the
-    // content they lay out is.  The two are the port's own layout and the host's, so what is compared is
-    // that both produce a content taller than the margins and the text, not that they agree on a number -
-    // the host's frames are private subviews and reading them would be reading a private class.
     ours.frame = CGRectMake(0, 0, 320, 480);
     system.frame = CGRectMake(0, 0, 320, 480);
     [ours layoutIfNeeded];

@@ -1,10 +1,5 @@
-// The two error types of the framework, and the coding keys a store's snapshot is written with.
-
 import Foundation
 
-/// What a store refuses, and why. The cases are Apple's, so a program that catches one of them
-/// keeps working here; the payload is a sentence, because `Error` gives a type name and nothing
-/// else and a store that cannot say what it refused has said nothing.
 public struct SwiftDataError: Error, Hashable {
     let message: String
 
@@ -48,9 +43,6 @@ public struct SwiftDataError: Error, Hashable {
         return hasher.finalize()
     }
 
-    /// What a program writes in a `catch`, and what this answers to: the store's own
-    /// `SwiftDataError.historyTokenExpired` answers to any error that says the same thing, which
-    /// is what lets a caller catch its own error type through this one.
     public static func ~= (lhs: SwiftDataError, rhs: any Error) -> Bool {
         guard let other = rhs as? SwiftDataError else { return false }
         return other == lhs
@@ -64,8 +56,6 @@ public enum DataStoreError: Error, Equatable, Hashable {
     case invalidPredicate
 }
 
-/// The keys a store's snapshot is written under: the row's own identifier, and one key per
-/// modelled property, named by the property.
 public enum DataStoreSnapshotCodingKey: CodingKey {
     case persistentIdentifier
     case modeledProperty(String)

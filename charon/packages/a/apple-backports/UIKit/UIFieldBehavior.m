@@ -3,40 +3,15 @@
 #include <math.h>
 #include <stddef.h>
 
-// A physics field (9.0), written once over the public 7.0 animator API (facts/UIKit/UIFieldBehavior.md §10.7): the
-// same code runs over Apple's 7.0 classes on iOS 7.0-8.x, where this file is kept and the 7.0 files are not, and over
-// the port's own below 7.0. So it sends no message the 7.0 classes do not answer: no charon_ method, no Box2D.
-//
-// 9.0's field lives in PhysicsKit and is evaluated inside b2Island::Solve, once per 1/120 s sub-step, before the
-// velocity solver (§0). The public 7.0 API has no such hook. Here a field is a composite behavior owning a child
-// UIDynamicItemBehavior, the carrier, which holds the field's items (so each gets a body, as 9.0's field items do,
-// §10.4) and sets none of its properties (so it pushes nothing to the bodies); the carrier's action, run once per
-// animator step after the world step, gives each item in the region the velocity the field's force would have given
-// it over that step, through -addLinearVelocity:forItem:. The force itself is 9.0's, float for float (§10.2, M7, and
-// the host listings of each PKCField*::evalForce named below); the trajectory is approximate: the velocity arrives
-// one step late and is evaluated once per step instead of once per sub-step (§10.7, measured: 0.09 to 2.1 pt over 60
-// frames against Apple's field; radial gravity only away from its centre). Where 9.0 answers from the body and the
-// 7.0 API has no getter, the emulation reads what the animator's behaviours give the item (charon_field_material).
-//
-// A parameter change does not wake a paused animator here, as 9.0's -_changedParameter does: the 7.0 API has no call
-// that only wakes one. While the field acts, its items never rest, so the animator does not pause under it.
-
-// Built without fused multiply-add contraction: the host's field code has none outside srdnoise3_sincos, and there
-// every fused operation of the host listing is written below as fmaf(), so arm64 and armv7 (Cortex-A9, no fused
-// multiply-add) compute the same floats as the host (M7: without the fused sites 15293 of 60000 noise forces exact).
 #pragma STDC FP_CONTRACT OFF
 
-// PKGet_PTM_RATIO and PKGet_INV_PTM_RATIO under UIKit Dynamics: 100 points per metre, as float (§10.1).
 static const float CharonFieldPTM = 100.0f;
 static const float CharonFieldInversePTM = 0.01f;
 
-// Every kind's first test: a force whose scale is below 2^-15 is zero (host listings: movi.2s #0x38, lsl #24).
 static const float CharonFieldEpsilon = 0x1p-15f;
 
-// A new PKCField's minimum radius, in metres: 2^-15 (§10.1, measured: the getter reads 0.00305175781).
 static const float CharonFieldDefaultMinimumRadius = 0x1p-15f;
 
-// UIKit's _availableFieldCategories holds 32 indexes (§10.4, M5).
 static const NSUInteger CharonFieldCategories = 32;
 
 typedef NS_ENUM(NSInteger, CharonFieldKind) {
@@ -53,8 +28,6 @@ typedef NS_ENUM(NSInteger, CharonFieldKind) {
     CharonFieldCustom,
 };
 
-// A PKCField's parameters, in its own units: position and minimum radius in metres, the rest as UIKit hands them over,
-// each rounded to float (host listings of the UIFieldBehavior setters: fcvt to single before the PKPhysicsField call).
 typedef struct {
     CharonFieldKind kind;
     float positionX, positionY;
@@ -69,13 +42,7 @@ typedef struct {
 
 #pragma mark srdnoise3
 
-// Stefan Gustavson's public-domain simplex noise with rotating gradients (srdnoise3), as PhysicsKit's
-// srdnoise3_sincos has it (M7: bit-exact over 200000 samples). The tables are the ones read from the host's memory
-// (the band's oracle run, m_srd_tables.txt): Gustavson's published gradients and Ken Perlin's permutation, twice. They
-// are laid out as the host lays them out, the u gradients, then the v gradients, then the permutation, because the
-// host's index (i + 512) % 256 keeps C's sign and so reads up to 255 bytes before the permutation for a coordinate
-// below -512 (M7).
-#define CharonNoiseA 0x1.a20bd6p-1f // 0.816496551f, 0x3f5105eb in the host's table
+#define CharonNoiseA 0x1.a20bd6p-1f
 
 static const struct {
     float u[16][3];
@@ -154,7 +121,6 @@ static const struct {
     },
 };
 
-// The permutation, indexed as the host does, with a signed index that may reach back into the gradients.
 static unsigned char charon_noise_permutation(int index)
 {
     const unsigned char *base = (const unsigned char *)&charon_noise_tables + offsetof(__typeof__(charon_noise_tables), permutation);
@@ -163,7 +129,6 @@ static unsigned char charon_noise_permutation(int index)
 
 static int charon_noise_floor(float value)
 {
-    // Gustavson's FASTFLOOR: an integral value that is not positive is one too low, as on the host (cset le).
     return value > 0 ? (int)value : (int)value - 1;
 }
 
@@ -172,13 +137,11 @@ static int charon_noise_wrap(int value)
     return (value + 512) % 256;
 }
 
-// 0.6 - x*x - y*y - z*z, three fused multiply-subtracts on the host.
 static float charon_noise_falloff(float x, float y, float z)
 {
     return fmaf(-z, z, fmaf(-y, y, fmaf(-x, x, 0.6f)));
 }
 
-// gradrot3: the gradient of the hash turned by the angle whose sine and cosine are given; each component fused.
 static void charon_noise_gradient(int hash, float sine, float cosine, float *gx, float *gy, float *gz)
 {
     int h = hash & 15;
@@ -187,13 +150,11 @@ static void charon_noise_gradient(int hash, float sine, float cosine, float *gx,
     *gz = fmaf(cosine, charon_noise_tables.u[h][2], sine * charon_noise_tables.v[h][2]);
 }
 
-// graddotp3, fused as the host fuses it: the y product first, then x and z added onto it.
 static float charon_noise_dot(float gx, float gy, float gz, float x, float y, float z)
 {
     return fmaf(gz, z, fmaf(gx, x, gy * y));
 }
 
-// One corner: its attenuation t, t^2, t^4, gradient and contribution, all zero outside the corner's radius.
 typedef struct {
     float t, t2, t4, gx, gy, gz, n;
 } CharonNoiseCorner;
@@ -212,8 +173,6 @@ static CharonNoiseCorner charon_noise_corner(float x, float y, float z, int hash
     return corner;
 }
 
-// srdnoise3_sincos(x, y, z, sin t, cos t, &dx, &dy, &dz): the noise and its gradient, in the host's operation order
-// (host listing of srdnoise3_sincos, 413 instructions, 58 fused).
 static float charon_noise(float x, float y, float z, float sine, float cosine, float *dx, float *dy, float *dz)
 {
     const float F3 = 0.333333343f, G3 = 0.166666672f;
@@ -283,8 +242,6 @@ static float charon_noise(float x, float y, float z, float sine, float cosine, f
 
 #pragma mark Forces
 
-// PKCField::calculatedFalloff: |k| < 2^-15 is no falloff; else the distance from the field's position, clamped up to
-// the minimum radius, to the power -k (host listing: z^2 + (x^2 + y^2), fsqrt, fcsel mi, powf).
 static float charon_field_falloff(const CharonField *field, float r)
 {
     if (fabsf(field->falloff) < CharonFieldEpsilon)
@@ -297,8 +254,6 @@ static float charon_field_distance(float dx, float dy)
     return sqrtf(0.0f * 0.0f + (dx * dx + dy * dy));
 }
 
-// PKCFieldNoise::evalForce (M7): the gradient of the noise at the time-shifted position, times the falloff of the
-// unshifted one, the noise value and the strength.
 static CharonFieldForce charon_field_noise(const CharonField *field, float px, float py, double time)
 {
     CharonFieldForce zero = {0, 0};
@@ -314,9 +269,6 @@ static CharonFieldForce charon_field_noise(const CharonField *field, float px, f
     return force;
 }
 
-// The force 9.0's field of this kind exerts on a body at (px, py) m, moving at (vx, vy) m/s, of mass m kg and charge
-// q, at world time t s: newtons, which the island divides by the mass. Each kind as its host listing computes it
-// (PKCField<Kind>::evalForce; the field's scale factor at +0xc0 is 1 in UIKit and left out, §10.2).
 static CharonFieldForce charon_field_force(const CharonField *field, float px, float py, float vx, float vy, float m, float q, double time)
 {
     CharonFieldForce zero = {0, 0};
@@ -342,7 +294,6 @@ static CharonFieldForce charon_field_force(const CharonField *field, float px, f
         return force;
     }
     case CharonFieldElectric: {
-        // No guard at r = 0: the host divides by it too.
         float charged = q * S;
         if (fabsf(charged) < CharonFieldEpsilon)
             return zero;
@@ -352,7 +303,6 @@ static CharonFieldForce charon_field_force(const CharonField *field, float px, f
         return force;
     }
     case CharonFieldMagnetic: {
-        // v x (0, 0, 1): the charge takes part in the zero test only.
         if (fabsf(q * S) < CharonFieldEpsilon)
             return zero;
         float scale = S * charon_field_falloff(field, charon_field_distance(dx, dy));
@@ -370,7 +320,6 @@ static CharonFieldForce charon_field_force(const CharonField *field, float px, f
         return force;
     }
     case CharonFieldVortex: {
-        // Divided by the mass once more, as the host does, so the acceleration goes with 1/m^2.
         if (fabsf(m * S) < CharonFieldEpsilon)
             return zero;
         float r = charon_field_distance(dx, dy);
@@ -380,7 +329,6 @@ static CharonFieldForce charon_field_force(const CharonField *field, float px, f
         return force;
     }
     case CharonFieldDrag: {
-        // The direction is the medium's velocity; a relative speed at most 2^-15 is no drag.
         if (fabsf(S) < CharonFieldEpsilon)
             return zero;
         float ux = vx - field->directionX, uy = vy - field->directionY;
@@ -404,7 +352,6 @@ static CharonFieldForce charon_field_force(const CharonField *field, float px, f
     }
     case CharonFieldVelocity:
     case CharonFieldCustom:
-        // A velocity field sets the velocity instead (§10.3); a custom field asks its block (-charon_accelerationAt:).
         return zero;
     }
     return zero;
@@ -412,12 +359,6 @@ static CharonFieldForce charon_field_force(const CharonField *field, float px, f
 
 #pragma mark Items
 
-// What 9.0 reads from an item's body and the 7.0 API does not answer: its density, charge and whether it is anchored.
-// The animator gives a body the value of the last item behaviour in its hierarchy order that set it; the public API
-// cannot tell a value set to the default from one never set, so the last behaviour holding the item whose value
-// differs from the default stands for it (§10.7: exact when one behaviour sets it). charge and anchored exist only on
-// a class that answers them (the port's; Apple's 7.0-8.x class has neither, so charge is 0 there and electric and
-// magnetic fields do nothing, as Apple's would with charge 0).
 typedef struct {
     CGFloat density;
     CGFloat charge;
@@ -451,7 +392,6 @@ static CharonFieldMaterial charon_field_material(UIDynamicAnimator *animator, id
 - (UIDynamicAnimator *)charon_registeredAnimator;
 @end
 
-// The fields an animator has taken a category for: those of its hierarchy that were let in by -willMoveToAnimator:.
 static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnimator *animator, UIFieldBehavior *except)
 {
     NSUInteger count = 0;
@@ -471,7 +411,6 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
     NSTimeInterval _lastElapsedTime;
 }
 
-// The host's -init raises: a field is made only by a factory (measured).
 - (instancetype)init
 {
     [[NSException exceptionWithName:@"Invalid initialization" reason:@"Use one of the supplied convenience initializers" userInfo:nil] raise];
@@ -495,7 +434,6 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
     return self;
 }
 
-// Falloff defaults per kind (§10.1): radial gravity 2, spring -1, electric and magnetic 1, the others 0.
 + (instancetype)dragField
 {
     return [[self alloc] charon_initWithKind:CharonFieldDrag falloff:0];
@@ -565,7 +503,6 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
     return field;
 }
 
-// The host's: the class and the address, nothing of the composite underneath (measured).
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<%@: %p>", NSStringFromClass([self class]), self];
@@ -588,8 +525,6 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
     return [_carrier items];
 }
 
-// 9.0's field is a primitive behavior: it has no children and takes none (measured: -addChildBehavior: leaves
-// childBehaviors empty). The carrier is a child only for the animator.
 - (NSArray *)childBehaviors
 {
     return @[];
@@ -608,10 +543,6 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
     return _registeredAnimator;
 }
 
-// An animator holds at most 32 fields, one category each (§10.4). 9.0 counts in -_registerBehavior:, before the field
-// has a context; over the 7.0 API the count can only be made here, after the animator set the context, so after the
-// exception the field answers the animator as its dynamicAnimator and does nothing, where 9.0's answers nil (M5). The
-// carrier joins with the field and leaves with it, so a field that was refused holds nothing the animator registered.
 - (void)willMoveToAnimator:(UIDynamicAnimator *)animator
 {
     [super willMoveToAnimator:animator];
@@ -632,10 +563,6 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
 
 #pragma mark The step
 
-// The acceleration, in pt/s^2, the field gives an item whose center is `center` (reference coordinates), moving at
-// `velocity` pt/s, of mass `mass` kg and charge `charge`, at time `time`: 9.0's force over the mass, in points. The
-// body's position and velocity are taken in metres as the animator converts them (float, times 0.01f); the host's
-// island multiplies the force by the float inverse mass. The region is not asked here.
 - (CGVector)charon_accelerationAt:(CGPoint)center velocity:(CGPoint)velocity mass:(CGFloat)mass charge:(CGFloat)charge time:(NSTimeInterval)time
 {
     float px = (float)((double)CharonFieldInversePTM * center.x), py = (float)((double)CharonFieldInversePTM * center.y);
@@ -643,9 +570,6 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
     float m = (float)mass, q = (float)charge;
     CharonFieldForce force;
     if (_field.kind == CharonFieldCustom) {
-        // PKCFieldUser::evalForce: the block gets the position in field-local points, the velocity in m/s, the mass,
-        // the charge and the time, and its answer is the force in newtons, not scaled by the strength; a strength
-        // below 2^-15 turns it off (measured with p3.m; host listing).
         force.x = force.y = 0;
         if (_evaluator && fabsf(_field.strength) >= CharonFieldEpsilon) {
             CGPoint local = CGPointMake((double)((px - _field.positionX) * CharonFieldPTM), (double)((py - _field.positionY) * CharonFieldPTM));
@@ -660,7 +584,6 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
     return CGVectorMake((double)(inverseMass * force.x) * CharonFieldPTM, (double)(inverseMass * force.y) * CharonFieldPTM);
 }
 
-// PKCField::contains: the region is asked in the field's local space, in points; no region contains everything.
 - (BOOL)charon_regionContains:(CGPoint)center
 {
     if (!_region)
@@ -669,8 +592,6 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
     return [_region containsPoint:CGPointMake((double)((px - _field.positionX) * CharonFieldPTM), (double)((py - _field.positionY) * CharonFieldPTM))];
 }
 
-// The carrier's action, once per animator step after the world step (§10.7). dt is the step's time; 9.0 evaluates
-// with the clock after each sub-step, the emulation with the animator's elapsed time after the step.
 - (void)charon_applyToItems
 {
     UIDynamicAnimator *animator = _registeredAnimator;
@@ -687,12 +608,10 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
         if (![self charon_regionContains:center])
             continue;
         CharonFieldMaterial material = charon_field_material(animator, item);
-        // An anchored body is static and no field moves it (§10.4).
         if (material.anchored)
             continue;
         CGPoint velocity = [_carrier linearVelocityForItem:item];
         if (_field.kind == CharonFieldVelocity) {
-            // The velocity becomes the direction, in m/s (§10.3).
             [_carrier addLinearVelocity:CGPointMake((double)(_field.directionX * CharonFieldPTM) - velocity.x,
                                                     (double)(_field.directionY * CharonFieldPTM) - velocity.y)
                                 forItem:item];
@@ -707,8 +626,6 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
 
 #pragma mark Properties
 
-// Stored as float metres, answered in double points: (30, 40) reads back (29.9999982, 39.9999976) (§10.1; host listings
-// of -setPosition: (fcvtn, fmul by the inverse ratio) and -position (fcvtl, fmul.2d by the ratio)).
 - (CGPoint)position
 {
     return CGPointMake((double)_field.positionX * (double)CharonFieldPTM, (double)_field.positionY * (double)CharonFieldPTM);
@@ -750,8 +667,6 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
     _field.falloff = (float)falloff;
 }
 
-// Stored as (float)r * 0.01f and answered as stored / 0.01f, both in float (host listings of -[PKPhysicsField
-// setMinimumRadius:] and -minimumRadius: fmul and fdiv by PKGet_INV_PTM_RATIO).
 - (CGFloat)minimumRadius
 {
     return _field.minimumRadius / CharonFieldInversePTM;
@@ -762,7 +677,6 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
     _field.minimumRadius = (float)minimumRadius * CharonFieldInversePTM;
 }
 
-// Not scaled by the ratio: a linear gravity's direction is m/s^2, a velocity's and a drag's m/s (§10.1).
 - (CGVector)direction
 {
     return CGVectorMake(_field.directionX, _field.directionY);
@@ -774,8 +688,6 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
     _field.directionY = (float)direction.dy;
 }
 
-// Only a noise or turbulence field keeps a smoothness and an animation speed; the others answer 0 and ignore a set
-// (§10.1; host listings test _fieldFlags.fieldIsKindOfNoiseField).
 - (BOOL)charon_isNoise
 {
     return _field.kind == CharonFieldNoise || _field.kind == CharonFieldTurbulence;

@@ -5,27 +5,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-// NSJSONSerialization arrived in iOS 5.0 (facts/Foundation/NSJSONSerialization.md); below that the class itself is
-// missing, so this file carries it whole, from the 26.2 SDK header, every method at once: +isValidJSONObject:,
-// +dataWithJSONObject:options:error:, +JSONObjectWithData:options:error:, +writeJSONObject:toStream:options:error:
-// and +JSONObjectWithStream:options:error: (both from 7.0, in this same file since neither has an exported symbol
-// of its own for band() to split on - only the class's own _OBJC_CLASS_$_NSJSONSerialization is, and that is native
-// from 5.0). From 5.0 on, band() reexports the release's own class instead of this one, the same way it does for
-// NSUUID and NSProgress; a caller on 5.0 and later gets the release's own answers, not this file's, including the
-// release's own gap (registry/Foundation/ios11.json, NSJSONWritingSortedKeys ignored below iOS 11).
-//
-// Every rule below is measured against the host's own Foundation by tests/backports/host/json1, not read from the JSON
-// RFC and not guessed: the byte-order marks are read in the order the host reads them, the wording of every error and
-// exception is the host's own, the position an error carries is the host's own, the number that comes out of a literal
-// is the host's own, and the depth limit and the number of exponent digits the host accepts are the host's own.
-// The two places this file knowingly differs from the host are named where they are.
-
-// Encoding detection (the data may be in any of the 5 the header documents: UTF-8, UTF-16LE, UTF-16BE, UTF-32LE,
-// UTF-32BE), by a byte-order mark first, else by the zero-byte pattern of the first four bytes - valid JSON always
-// opens with an ASCII structural character below 0x80, so a zero in an odd position identifies a wide encoding and its
-// endianness. The marks are read shortest first, which is what the host does and what decides the one case where two
-// of them share a prefix: FF FE 00 00 is a UTF-16LE mark (measured - the host parses the bytes after it as UTF-16LE and
-// then refuses the text, where a UTF-32LE reading would have parsed it), so there is no UTF-32LE mark here at all.
 static NSStringEncoding CharonJSONDetectEncoding(NSData *data, NSUInteger *bomLength)
 {
     const unsigned char *b = (const unsigned char *)data.bytes;
@@ -48,10 +27,6 @@ static NSStringEncoding CharonJSONDetectEncoding(NSData *data, NSUInteger *bomLe
     return NSUTF8StringEncoding;
 }
 
-// A parse failure carries the reason the host words it with, the line and the column it counts from 0 within that
-// line, and the index into the text. Empty data is the one failure that carries no position and no index (measured:
-// the host's userInfo for it holds NSDebugDescription alone), and it is built here rather than through -fail: so that
-// the difference is in one place.
 static NSError *CharonJSONError(NSString *reason, NSUInteger line, NSUInteger column, NSUInteger index)
 {
     NSString *debug = [NSString stringWithFormat:@"%@ around line %lu, column %lu.", reason, (unsigned long)line, (unsigned long)column];
@@ -65,17 +40,11 @@ static NSError *CharonJSONEmptyDataError(void)
                             userInfo:@{NSDebugDescriptionErrorKey: @"Unable to parse empty data."}];
 }
 
-// How deep a container may be: 512 containers that hold something, measured (a 513th one is refused with "Too many
-// nested arrays or dictionaries"). A container that is closed again straight away is not counted, which is why the
-// host accepts 513 levels of [[...]] ending in an empty [] and refuses the same 513 ending in a [1].
 static const NSUInteger CharonJSONMaximumDepth = 512;
 
-static const NSUInteger CharonJSONJSON5Allowed = 1UL << 3;         // NSJSONReadingJSON5Allowed
-static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSONReadingTopLevelDictionaryAssumed
+static const NSUInteger CharonJSONJSON5Allowed = 1UL << 3;
+static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4;
 
-// One parse over one buffer of UTF-16 code units: object/array/string/number/literal, trailing commas tolerated
-// (measured, unconditional, not gated by any option), the depth limit above, and - only under NSJSONReadingJSON5Allowed
-// - the wider grammar the host reads under that option.
 @interface CharonJSONReader : NSObject
 @property (nonatomic) const unichar *buffer;
 @property (nonatomic) NSUInteger length;
@@ -89,7 +58,7 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
 @property (nonatomic) BOOL endsWithSpace;
 @property (nonatomic) BOOL inBody;
 @property (nonatomic) NSJSONReadingOptions options;
-@property (nonatomic) BOOL assumedTopLevel; // the text is the body of an object, with an implicit } at its end
+@property (nonatomic) BOOL assumedTopLevel;
 @property (nonatomic) BOOL unterminatedComment;
 @property (nonatomic, strong) NSError *error;
 @end
@@ -121,12 +90,6 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
     return 0;
 }
 
-/* The character at an offset with the whitespace and, under JSON5, the comments skipped as well, which is what tells an
-   empty container from one that has content: a bracket pair holding nothing but a block or a line comment is the empty
-   container of the host's JSON5, measured for both spellings and for two comments in a row, and the whitespace-only
-   skipper reads the slash of the comment as content. Nothing is moved and no failure is raised: this only looks, and a
-   comment that runs to the end of the text leaves the slash as the character, which is the character the caller then
-   refuses in its own words. */
 - (unichar)peekAfterSpaceAndComments:(NSUInteger)offset
 {
     NSUInteger at = self.position + offset;
@@ -144,10 +107,6 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
             while (at < self.length && self.buffer[at] != '\n')
                 at++;
             if (at >= self.length) {
-                // A line comment that runs to the end of the text leaves nothing for the container to
-                // close: the host refuses the text where the comment is inside one, and reads a body
-                // that is nothing but a comment as the empty object (measured for "{//c}" and for "/*c",
-                // "//c" and "//" on their own).
                 if (!self.inBody)
                     [self fail:@"Unexpected end of file" at:self.length];
                 return 0;
@@ -182,11 +141,6 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
     self.error = CharonJSONError(reason, self.line, index - self.lineStart, index);
 }
 
-// The text ran out. The host words it two ways - a value that never arrived and a delimiter that never arrived - and
-// each carries its own position: the delimiter that introduced the slot a value was wanted in, and the end of the
-// text otherwise (measured over the fourteen truncated texts tests/backports/host/json1 reads). A value slot whose
-// text ends in whitespace is the delimiter case, not the value case (measured: "{", "[", "{\"a\":" and "\n\n{"
-// are one, "  {  " is the other).
 - (void)failAtEndOfTextWantingValue:(BOOL)wantsValue
 {
     if (self.error)
@@ -225,9 +179,6 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
             while (self.position + 1 < self.length && !([self peek] == '*' && [self peekAt:1] == '/'))
                 [self advance];
             if (self.position + 1 >= self.length) {
-                // The host holds this back: a comment that runs to the end of the text is only a failure where
-                // something was still to come (measured: at the top level it reads as no content at all, inside an
-                // object as an unterminated comment).
                 self.unterminatedComment = YES;
                 self.position = self.length;
                 return;
@@ -239,8 +190,6 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
     }
 }
 
-// A value is wanted here. The host words the ways of not having one: at the end of the text, with the reason the
-// text itself decides, and nowhere near a value at all.
 - (id)parseValue
 {
     [self skipWhitespaceAndComments];
@@ -264,8 +213,6 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
         NSString *word = c == 't' ? @"true" : (c == 'f' ? @"false" : @"null");
         if ([self literal:word])
             return c == 'n' ? (id)[NSNull null] : [NSNumber numberWithBool:c == 't'];
-        // A fragment at the top level that runs out of text is the end of the text (measured); the same literal
-        // inside a container is the literal it looked like (measured: "[tru]" and a bare "tru" differ).
         if (self.depth == 0)
             [self fail:@"Unexpected end of file during JSON parse." at:self.startOfValue];
         else
@@ -273,12 +220,8 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
         return nil;
     }
     if (self.json5 && c == 'N') {
-        // The host reads an upper case N as the start of NaN and words the two ways it can end as it does, keeping
-        // the %lu of its own message unexpanded (measured: "[N]" is a partial NaN, "[Na]" and "[None]" an invalid
-        // one, both with the %lu still in the text).
         if ([self matchesWord:@"NaN"]) {
             [self literal:@"NaN"];
-            // A double, which is what the host's own objCType says it reads; @(NAN) alone is a float.
             double notANumber = NAN;
             return @(notANumber);
         }
@@ -288,8 +231,6 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
         return nil;
     }
     if (self.json5 && [self literal:@"NaN"]) {
-        // A double, which is what the host's own objCType says it reads (measured on the NaN and the
-        // infinities of "[NaN, Infinity, -Infinity]"). @(NAN) alone would be a float.
         double notANumber = NAN;
         return @(notANumber);
     }
@@ -319,9 +260,6 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
     return (self.options & NSJSONReadingMutableContainers) ? container : [container copy];
 }
 
-// An object. With NSJSONReadingTopLevelDictionaryAssumed the text is the body of the object rather than an object
-// literal: there is no brace of our own to read and the } is implied by the end of the text, and the positions the
-// host reports for such a text are the positions of that text (measured).
 - (id)parseObject
 {
     BOOL body = self.inBody;
@@ -330,9 +268,9 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
     BOOL empty = !body && [self peekAfterSpaceAndComments:1] == '}';
     NSMutableDictionary *dict = [NSMutableDictionary new];
     if (empty) {
-        [self advance]; // '{'
+        [self advance];
         [self skipWhitespaceAndComments];
-        [self advance]; // '}'
+        [self advance];
         return [self finishedContainer:dict];
     }
     if (++self.depth > CharonJSONMaximumDepth) {
@@ -341,14 +279,14 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
     }
     if (!body) {
         self.lastDelimiter = self.position;
-        [self advance]; // the brace of an object of its own
+        [self advance];
     }
     BOOL hadMember = NO;
     for (;;) {
         [self skipWhitespaceAndComments];
         if (self.error) { self.depth = counted; return nil; }
         if (self.position >= self.length) {
-            if (body) break; // the } the body implies
+            if (body) break;
             [self failAtEndOfTextWantingValue:!hadMember];
             self.depth = counted;
             return nil;
@@ -372,9 +310,6 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
         if (self.error) { self.depth = counted; return nil; }
         BOOL quotedKey = (k == '"' || k == '\'');
         if (self.position >= self.length || [self peek] != ':') {
-            // The body of an assumed top level object reads a key with no colon after it as a string that never
-            // closed (measured: a bare "x" in a body is an unterminated string at the key, a quoted "\"a\"" is the
-            // end of the text). The host's own body scanner, not a rule of the grammar.
             if (self.position >= self.length && !quotedKey)
                 [self fail:@"Unterminated string" at:keyStart];
             else if (self.position >= self.length)
@@ -388,20 +323,13 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
         [self advance];
         id value = [self parseValue];
         if (self.error) { self.depth = counted; return nil; }
-        // A repeated key is read twice and which of the two values the object holds follows the container
-        // and not the option: an immutable object keeps the first (measured for {"a":1,"a":2},
-        // {"a":1,"a":2,"a":3}, {"b":0,"a":1,"b":2}, a nested {"a":{"b":1,"b":2}}, and for a first value that is
-        // null, false, 0 or "", so the test is for the key and not for the value) and a mutable one keeps
-        // the last, which is what an ordinary dictionary assignment does. The regime is therefore the bit
-        // this object was made under - NSJSONReadingMutableLeaves keeps the first, because the dictionary
-        // is immutable, and JSON5 on its own keeps it too.
         if ((self.options & NSJSONReadingMutableContainers) || [dict objectForKey:key] == nil)
             dict[key] = value;
         hadMember = YES;
         [self skipWhitespaceAndComments];
         if (self.error) { self.depth = counted; return nil; }
         if (self.position >= self.length) {
-            if (body) break; // the } the body implies
+            if (body) break;
             [self failAtEndOfTextWantingValue:NO];
             self.depth = counted;
             return nil;
@@ -411,7 +339,7 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
             self.lastDelimiter = self.position;
             [self advance];
             [self skipWhitespaceAndComments];
-            if (!self.error && [self peek] == '}') { [self advance]; break; } // trailing comma (measured, unconditional)
+            if (!self.error && [self peek] == '}') { [self advance]; break; }
             continue;
         }
         if (c == '}') { [self advance]; break; }
@@ -429,9 +357,9 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
     BOOL empty = [self peekAfterSpaceAndComments:1] == ']';
     NSMutableArray *array = [NSMutableArray new];
     if (empty) {
-        [self advance]; // '['
+        [self advance];
         [self skipWhitespaceAndComments];
-        [self advance]; // ']'
+        [self advance];
         return [self finishedContainer:array];
     }
     if (++self.depth > CharonJSONMaximumDepth) {
@@ -439,7 +367,7 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
         return nil;
     }
     self.lastDelimiter = self.position;
-    [self advance]; // '['
+    [self advance];
     for (;;) {
         id value = [self parseValue];
         if (self.error) { self.depth = counted; return nil; }
@@ -456,7 +384,7 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
             self.lastDelimiter = self.position;
             [self advance];
             [self skipWhitespaceAndComments];
-            if (!self.error && [self peek] == ']') { [self advance]; break; } // trailing comma (measured, unconditional)
+            if (!self.error && [self peek] == ']') { [self advance]; break; }
             continue;
         }
         if (c == ']') { [self advance]; break; }
@@ -468,8 +396,6 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
     return [self finishedContainer:array];
 }
 
-// json5Allowed's bare object key: an identifier - a leading letter, '_' or '$', then letters, digits, '_' or '$'. Not
-// the fuller ECMAScript IdentifierName (no Unicode escapes, no non-ASCII letters) - not reached by anything measured.
 - (NSString *)parseIdentifier
 {
     NSUInteger start = self.position;
@@ -490,7 +416,7 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
 {
     NSUInteger opening = self.position;
     self.stringStart = opening;
-    [self advance]; // opening quote
+    [self advance];
     NSMutableString *out = [NSMutableString new];
     for (;;) {
         if (self.position >= self.length) { [self fail:@"Unterminated string" at:opening]; return nil; }
@@ -499,7 +425,7 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
         if (c < 0x20) { [self fail:@"Unescaped control character" at:self.position]; return nil; }
         if (c != '\\') { [out appendFormat:@"%C", c]; [self advance]; continue; }
         NSUInteger escape = self.position;
-        [self advance]; // backslash
+        [self advance];
         if (self.position >= self.length) { [self fail:@"Unterminated string" at:opening]; return nil; }
         unichar e = self.buffer[self.position];
         switch (e) {
@@ -521,14 +447,6 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
                 [out appendString:@"\n"];
                 break;
             case '\r': {
-                // A backslash before a line terminator continues the line, and the terminator stays in
-                // the string: the host reads "a\<newline>b" as the three characters a, newline, b and
-                // not as "ab" (measured). A lone CR and a lone LF are one newline each whatever
-                // follows them, and a CRLF pair is one as well unless the pair ends the string, where
-                // it is two. Without JSON5 the pair is still read as a continuation and the LF that
-                // follows it is then refused as the unescaped control character it is, which is what
-                // the host answers for "a\<CR><LF>b"; a lone CR with nothing after it is an invalid
-                // escape at the backslash, as a lone LF is.
                 if (!self.json5) {
                     if (self.position + 1 >= self.length || self.buffer[self.position + 1] != '\n') {
                         [self fail:@"Invalid escape sequence" at:escape];
@@ -539,13 +457,7 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
                 }
                 [self advance];
                 [out appendString:@"\n"];
-                // A CRLF pair is one newline unless the pair ends the string, where the host writes
-                // two: "a\<CR><LF>b" is a, newline, b and "a\<CR><LF>" is a, newline, newline, while a
-                // lone CR and a lone LF are one each whatever follows them (measured). So the second
-                // newline is the LF's alone, and only when nothing is left in the string after it.
                 if (self.position < self.length && self.buffer[self.position] == '\n') {
-                    // The LF is always part of the pair and always consumed; whether it is also a
-                    // newline of its own is the question.
                     [self advance];
                     if (self.position < self.length && self.buffer[self.position] == '"')
                         [out appendString:@"\n"];
@@ -564,9 +476,6 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
                     high = high * 16 + digit;
                     [self advance];
                 }
-                // A null spelled as a hex escape is refused under JSON5, as a null spelled "\0" and
-                // "\u0000" are, and with the wording of its own: "Unsupported escaped (hex) null",
-                // against "Unsupported escaped null" and "Unsupported escaped (unicode) null" (measured).
                 if (high == 0 && self.json5) { [self fail:@"Unsupported escaped (hex) null" at:escape]; return nil; }
                 [out appendFormat:@"%C", (unichar)high];
                 break;
@@ -575,9 +484,6 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
                 [self advance];
                 unichar u1 = [self readHex4];
                 if (self.error) return nil;
-                // A null spelled as a unicode escape is refused under JSON5 with the wording of its own
-                // path, "Unsupported escaped (unicode) null", at the string's opening quote and not at
-                // the backslash (measured for "[\"\u0000\"]", "[\"a\u0000\"]" and "{k:\"\u0000\"}").
                 if (u1 == 0 && self.json5) { [self fail:@"Unsupported escaped (unicode) null" at:self.stringStart]; return nil; }
                 if (u1 >= 0xD800 && u1 <= 0xDBFF) {
                     if (self.position + 1 >= self.length || self.buffer[self.position] != '\\' || self.buffer[self.position + 1] != 'u') {
@@ -604,7 +510,6 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
     }
 }
 
-// Whether the text at the reader's position begins with this word, without consuming it.
 - (BOOL)matchesWord:(NSString *)word
 {
     NSUInteger n = word.length;
@@ -624,9 +529,6 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
     return -1;
 }
 
-// The four hex digits of a \u escape. The text running out, or the quote that closes the string, is the string that
-// never closed and is reported where its opening quote is; any other character that is not a hex digit is reported
-// where it is (measured: "[\"\\u00zz\"]" names the z, "[\"\\u00\"]" names the quote).
 - (unichar)readHex4
 {
     unichar value = 0;
@@ -642,17 +544,6 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
     return value;
 }
 
-// Number classification (facts/Foundation/NSJSONSerialization.md, measured against the host): an integer literal
-// becomes a long long if it fits, else an unsigned long long if it fits, else an NSDecimalNumber; a literal with a '.'
-// or an exponent becomes a double when it has 17 or fewer significant digits (the digits of the int and fraction parts,
-// a lone leading "0" not counted), else an NSDecimalNumber - measured at the exact boundary, 17 stays a double and 18
-// becomes an NSDecimalNumber. Three rules about the magnitude are the host's own and not the RFC's: a leading zero
-// followed by a digit is refused; the exponent field is a field and not a value, and it is refused when it carries
-// five digits or more however small its value (1e00000 is a 1 and is refused, 1e0000000 is a 1 and is refused) and
-// when it carries four digits with a sign (1e-0001 is a 0.1 and is refused, 1e+0000 is a 1 and is refused), while
-// four digits without a sign are read whatever they say (1e0001 is a 10, 1e0123 is a 1e+123) and three digits are read
-// under any sign; and a positive exponent that overflows a double is refused while a negative one is not (-1e400 is
-// a -inf, 1e400 is refused).
 - (id)parseNumber
 {
     NSUInteger numberStart = self.position;
@@ -664,7 +555,6 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
     if (!digit && !dot) {
         if (self.json5 && [self matchesWord:@"Infinity"]) {
             [self literal:@"Infinity"];
-            // A double, which is what the host's own objCType says it reads (measured).
             double infinite = negative ? -INFINITY : INFINITY;
             return @(infinite);
         }
@@ -685,7 +575,7 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
     NSUInteger intDigits = 0;
     BOOL leadingDot = NO;
     if (self.json5 && [self peek] == '.') {
-        leadingDot = YES; // json5 only (measured: .5 is a 0.5, and only under NSJSONReadingJSON5Allowed)
+        leadingDot = YES;
     } else if ([self peek] == '0') {
         [self advance];
         if ([self peek] >= '0' && [self peek] <= '9') { [self fail:@"Number with leading zero" at:self.position]; return nil; }
@@ -701,9 +591,6 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
         [self advance];
         NSUInteger before = self.position;
         while ([self peek] >= '0' && [self peek] <= '9') { fracDigits++; [self advance]; }
-        // A dot with nothing after it is a dot, not a fraction: the host reads "1." under JSON5 as a
-        // long long and not as a double (measured), so the literal only becomes fractional when a digit
-        // follows the dot or one came before it.
         isFractional = leadingDot || fracDigits > 0;
         if (self.position == before && !self.json5) {
             [self fail:@"Number with decimal point but no additional digits" at:self.position];
@@ -724,8 +611,6 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4; // NSJSO
         }
         if (digits >= 5 || (digits == 4 && signed_)) { [self fail:@"Number wound up as NaN" at:numberStart]; return nil; }
     }
-    // "1." is a dot with nothing after it, and the host reads the 1 as a long long (measured), so the
-    // integer path is given the digits and not the dot.
     BOOL trailingDot = fracDigits == 0 && self.position > numberStart && self.buffer[self.position - 1] == '.';
     NSUInteger literalEnd = trailingDot ? self.position - 1 : self.position;
     NSString *literal = [NSString stringWithCharacters:self.buffer + numberStart length:literalEnd - numberStart];
@@ -778,19 +663,15 @@ static id CharonJSONParse(NSData *data, NSJSONReadingOptions opt, NSError **erro
     reader.length = length;
     reader.line = 1;
     reader.options = opt;
-    // The host reads NSJSONReadingTopLevelDictionaryAssumed as "this text is the body of an object", not as a wrap of
-    // the text in braces: the positions it reports for a text that is not already an object are the positions of that
-    // text (measured: "a=1;b=2" reports column 0, where a wrap would have moved every position by one).
     reader.assumedTopLevel = (opt & CharonJSONTopLevelDictionaryAssumed) != 0;
     id result = nil;
     [reader skipWhitespaceAndComments];
     if (!reader.error) {
         if (reader.assumedTopLevel && (reader.position >= reader.length || reader.buffer[reader.position] != '{')) {
-            // inBody is the one-shot mark: parseObject reads the } as the end of the text and no other object does.
             reader.inBody = YES;
             result = [reader parseObject];
         } else {
-            BOOL fragmentsOK = (opt & NSJSONReadingFragmentsAllowed) != 0; // == the deprecated NSJSONReadingAllowFragments, the same bit
+            BOOL fragmentsOK = (opt & NSJSONReadingFragmentsAllowed) != 0;
             if (!fragmentsOK && reader.position < reader.length && reader.buffer[reader.position] != '{' && reader.buffer[reader.position] != '[') {
                 [reader fail:@"JSON text did not start with array or object and option to allow fragments not set." at:reader.position];
             } else {
@@ -909,10 +790,6 @@ static void CharonJSONWriteValue(id obj, NSMutableString *out, NSJSONWritingOpti
     if (obj == nil || [obj isKindOfClass:[NSNull class]]) { [out appendString:@"null"]; return; }
     if ([obj isKindOfClass:[NSNumber class]]) {
         if ([obj isKindOfClass:[NSDecimalNumber class]]) {
-            // A decimal that is not a number is refused, and the host words it its own way and not the double path's
-            // (measured: "NaN number in JSON write" where a double is "Invalid number value (NaN) in JSON write"), for
-            // the value in an array, under a key, pretty printed, nested and at the top under
-            // NSJSONWritingFragmentsAllowed alike. +isValidJSONObject: already answers NO for the object.
             NSDecimal decimal = [obj decimalValue];
             if (NSDecimalIsNotANumber(&decimal))
                 [NSException raise:NSInvalidArgumentException format:@"NaN number in JSON write"];
@@ -933,7 +810,6 @@ static void CharonJSONWriteValue(id obj, NSMutableString *out, NSJSONWritingOpti
     BOOL pretty = (opt & NSJSONWritingPrettyPrinted) != 0;
     NSString *indent = pretty ? [@"" stringByPaddingToLength:(depth + 1) * 2 withString:@" " startingAtIndex:0] : @"";
     NSString *closeIndent = pretty ? [@"" stringByPaddingToLength:depth * 2 withString:@" " startingAtIndex:0] : @"";
-    // A pretty-printed empty container is a bracket, a newline and the closing indent - not "[]" (measured).
     if ([obj isKindOfClass:[NSArray class]]) {
         NSArray *array = obj;
         [out appendString:@"["];
@@ -957,10 +833,6 @@ static void CharonJSONWriteValue(id obj, NSMutableString *out, NSJSONWritingOpti
         for (id key in keys)
             if (![key isKindOfClass:[NSString class]])
                 [NSException raise:NSInvalidArgumentException format:@"Invalid (non-string) key in JSON dictionary"];
-        // Without NSJSONWritingSortedKeys the host of this port's releases writes the keys in the dictionary's own
-        // order, which is what this does: an unsorted dictionary has no order of its own to reproduce. The Foundation
-        // of the host this is measured against sorts them anyway, a difference of a generation of CoreFoundation and
-        // not of the API (facts/Foundation/NSJSONSerialization.md).
         if ((opt & NSJSONWritingSortedKeys) != 0)
             keys = [keys sortedArrayUsingSelector:@selector(localizedStandardCompare:)];
         [out appendString:@"{"];
@@ -992,9 +864,6 @@ static void CharonJSONWriteValue(id obj, NSMutableString *out, NSJSONWritingOpti
 
 + (nullable NSData *)dataWithJSONObject:(id)obj options:(NSJSONWritingOptions)opt error:(NSError **)error
 {
-    // With NSJSONWritingFragmentsAllowed the top level may be any value the writer knows, and one it does not know
-    // is refused by the writer with its own reason (measured: an NSObject at the top level of a fragment write is an
-    // invalid type in JSON write, not an invalid top-level type).
     BOOL fragmentsOK = (opt & NSJSONWritingFragmentsAllowed) != 0;
     if (!fragmentsOK && ![obj isKindOfClass:[NSArray class]] && ![obj isKindOfClass:[NSDictionary class]])
         [NSException raise:NSInvalidArgumentException format:@"*** +[NSJSONSerialization dataWithJSONObject:options:error:]: Invalid top-level type in JSON write"];
@@ -1022,8 +891,6 @@ static void CharonJSONWriteValue(id obj, NSMutableString *out, NSJSONWritingOpti
     while (remaining > 0) {
         NSInteger written = [stream write:bytes + total maxLength:(NSUInteger)remaining];
         if (written <= 0) {
-            // The host answers -1 and an NSFileWriteUnknownError of its own with no userInfo, not the stream's own
-            // error (measured: a stream opened on a directory that is not there gives NSCocoaErrorDomain 512 and -1).
             if (error) *error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:nil];
             return -1;
         }
@@ -1040,9 +907,6 @@ static void CharonJSONWriteValue(id obj, NSMutableString *out, NSJSONWritingOpti
     NSInteger read;
     while ((read = [stream read:buffer maxLength:sizeof(buffer)]) > 0)
         [data appendBytes:buffer length:(NSUInteger)read];
-    // A stream that will not read is not the stream's error to report: the host reads what came, which is nothing,
-    // and answers as it answers empty data (measured: a stream on a file that is not there is "Unable to parse empty
-    // data.", not the stream's NSPOSIXErrorDomain 2).
     return CharonJSONParse(data, opt, error);
 }
 

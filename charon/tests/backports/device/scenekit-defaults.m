@@ -1,6 +1,3 @@
-// The port's new SceneKit objects against the host's: every property the port carries, read by key-value coding
-// through scenekit-defaults-cases.m, must answer what macOS SceneKit answers (scenekit-defaults-expectations.h,
-// written by host/scenekit-defaults/refresh.sh). Needs no OpenGL: runs on the emulator as well as on a device.
 #import <Foundation/Foundation.h>
 #include <math.h>
 #import "check.h"
@@ -10,8 +7,6 @@ static const char *expectations[][2] = {
 #include "scenekit-defaults-expectations.h"
 };
 
-// Numbers are printed to six significant digits, and a CGFloat is a float here and a double on the host, so two
-// equal values may differ by one in the last printed digit; anything more is a different value.
 static BOOL agrees(NSString *actual, NSString *expected)
 {
     if ([actual isEqualToString:expected]) {

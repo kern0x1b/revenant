@@ -1,6 +1,3 @@
-// MPSMatrixDescriptor, from the header of the SDK of iOS 16.4. One object per release: the band machinery keeps an
-// object whole or drops it whole, so a file here carries the API of exactly one release.
-
 #import "CharonMPS.h"
 
 
@@ -29,10 +26,6 @@
     descriptor.columns = columns;
     descriptor.rowBytes = rowBytes;
     descriptor.dataType = dataType;
-    // One matrix, and its stride is the rows' own: the header makes matrixBytes a multiple of rowBytes, and no
-    // less than rows * rowBytes, and the release's own answer for a single matrix is exactly that. Both
-    // are fixed here and are not worked out again when rows or the stride change afterwards, which is
-    // what the release does too (measured, tests/backports/host/mpsmatrix/run.sh).
     descriptor->_matrices = 1;
     descriptor->_matrixBytes = rows * rowBytes;
     return descriptor;

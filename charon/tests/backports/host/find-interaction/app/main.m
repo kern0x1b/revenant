@@ -1,18 +1,11 @@
 #import <UIKit/UIKit.h>
 #include <stdio.h>
 
-// A bundled Mac Catalyst app with the iPad idiom and a key window, which is how a find navigator is shown. The scene delegate runs the checks
-// on the host's own UIFindInteraction and, in the port's build, on the port's (compiled with the classes renamed, so the host's is still
-// reached by name). Each check writes one "side<TAB>check<TAB>value" line to the file named by CHARON_SCENE_OUT, then the app quits. The
-// delegate's calls are written in order with a number, so the order is part of the answer. The text view's own find interaction is a
-// host-only observation (CHARON_HOST_ONLY_OUT): the port does not build it yet. run.sh builds both and diffs the checks.
-
 static FILE *out;
 static FILE *hostOnly;
 static const char *side;
 static int sequence;
 
-// The view the checks add the interaction to, and the session the delegate gives back once one is set.
 static UIView *expectedView;
 static UIFindSession *givenSession;
 
@@ -21,7 +14,6 @@ static void report(const char *check, NSString *value)
     fprintf(out, "%s\t%s\t%s\n", side, check, value ? [value UTF8String] : "nil");
 }
 
-// The text view's own find interaction, which the port does not build: written to the host-only file, not compared.
 static void report_host(const char *check, NSString *value)
 {
     if (hostOnly)
@@ -91,7 +83,6 @@ static void checks(UIView *view, UITextView *text)
     report("options-menu-provider-default", interaction.optionsMenuProvider ? @"set" : @"nil");
     report("view-before-add", yes_no(interaction.view == nil));
 
-    // The text is kept as the object given: the readback follows a change made to it afterwards, so the setter does not copy.
     NSMutableString *query = [NSMutableString stringWithString:@"query"];
     interaction.searchText = query;
     [query appendString:@"-changed"];
@@ -110,14 +101,12 @@ static void checks(UIView *view, UITextView *text)
     [view addInteraction:interaction];
     report("view-after-add", yes_no(interaction.view == view));
 
-    // No session given: the delegate is asked for one, for the view, and the navigator stays hidden.
     [interaction presentFindNavigatorShowingReplace:NO];
     report("find-navigator-visible-after-present", yes_no(interaction.findNavigatorVisible));
     report("active-session-after-present", interaction.activeFindSession ? class_name(interaction.activeFindSession) : @"nil");
     [interaction dismissFindNavigator];
     report("find-navigator-visible-after-dismiss", yes_no(interaction.findNavigatorVisible));
 
-    // A session given: the navigator shows, the session is the active one and is the one the app made, and dismissing ends it.
     givenSession = [[UITextSearchingFindSession alloc] initWithSearchableObject:text];
     [interaction presentFindNavigatorShowingReplace:NO];
     report("session-navigator-visible", yes_no(interaction.findNavigatorVisible));
@@ -134,7 +123,6 @@ static void checks(UIView *view, UITextView *text)
     report("session-active-after-dismiss", interaction.activeFindSession ? class_name(interaction.activeFindSession) : @"nil");
     givenSession = nil;
 
-    // The same session asked to show the replace field: its replacement support is unchanged.
     givenSession = [[UITextSearchingFindSession alloc] initWithSearchableObject:text];
     [interaction presentFindNavigatorShowingReplace:YES];
     report("replace-session-supports-replacement", yes_no(givenSession.supportsReplacement));
@@ -144,7 +132,6 @@ static void checks(UIView *view, UITextView *text)
     [view removeInteraction:interaction];
     report("view-after-remove", yes_no(interaction.view == nil));
 
-    // The delegate is weak: released, the interaction answers nil.
     CharonFindDelegate *gone = [[CharonFindDelegate alloc] init];
     __weak id weakGone = gone;
     UIFindInteraction *lone = [[UIFindInteraction alloc] initWithSessionDelegate:gone];
@@ -152,7 +139,6 @@ static void checks(UIView *view, UITextView *text)
     report("delegate-weak-after-release", yes_no(lone.delegate == nil && weakGone == nil));
 
 #ifndef CHARON_PORT_SIDE
-    // The text view's own find interaction: host-only, since the port does not build it yet.
     report_host("text-find-interaction-default", nil == text.findInteraction ? @"nil" : class_name(text.findInteraction));
     report_host("text-find-enabled-default", yes_no(text.findInteractionEnabled));
     text.findInteractionEnabled = YES;
@@ -190,7 +176,6 @@ static void checks(UIView *view, UITextView *text)
     [root.view addSubview:text];
     self.window.rootViewController = root;
     [self.window makeKeyAndVisible];
-    // The checks run once the window has laid out, into a settled window.
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [self.window layoutIfNeeded];
         checks(view, text);

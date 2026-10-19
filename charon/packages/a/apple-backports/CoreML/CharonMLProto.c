@@ -1,17 +1,8 @@
-/* A reader for the protobuf wire format, and the document it builds for a CoreML container.
- * CharonMLProto.h says what it is for; this is the reading of it.
- *
- * Nothing here trusts the container: a length that runs past the end of the buffer, a varint
- * of more than ten bytes, a nested message naming a type the specification does not hold, and
- * a field written with a wire type the specification does not give it are all refused, because
- * a malformed model has to fail the load with a message an application can read and not be run.
- */
 #include "CharonMLProto.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-/* Ten bytes is the most a 64-bit varint can be: nine groups of seven bits and a last of one. */
 #define MAX_VARINT_BYTES 10
 
 typedef struct {
@@ -76,15 +67,11 @@ static float bits_to_float(uint32_t bits)
     return value;
 }
 
-/* The oneof a field belongs to, or 0 for a field of none. The field's flags carry it as
- * CHARON_ML_ONEOF(index), which is 0x2 * (index + 1), so the low bit is the repeated mark. */
 static unsigned oneof_of(const charon_ml_field *field)
 {
     return field == NULL ? 0 : (field->flags & ~CHARON_ML_REPEATED) >> 1;
 }
 
-/* One value of `field`, already positioned at its bytes: a number, a string's bytes, a packed
- * run flattened into a list, or a submessage read against the type the specification names. */
 static int read_value(wire *w, charon_ml_node *out, const charon_ml_field *field, const char *type)
 {
     uint64_t bits = 0;
@@ -124,9 +111,6 @@ static int read_value(wire *w, charon_ml_node *out, const charon_ml_field *field
         case CHARON_ML_KIND_INT32:
         case CHARON_ML_KIND_SFIXED32:
         case CHARON_ML_KIND_ENUM:
-            /* A 32-bit signed value is written as a varint of its two's complement bits, so
-             * it is the low 32 that carry the sign; a 64-bit one is the whole varint. An enum
-             * is a varint of its case's number, which is likewise 32 bits wide. */
             out->value.integer = (int32_t)low32(bits);
             break;
         case CHARON_ML_KIND_INT64:
@@ -155,8 +139,6 @@ static int read_value(wire *w, charon_ml_node *out, const charon_ml_field *field
         }
         return 1;
     }
-    /* The wire's only other shape is a length and then that many bytes. A packed repeated
-     * field is one of those holding the element's own values back to back. */
     if (!varint(w, &bits) || !take(w, (size_t)bits, &bytes)) {
         return 0;
     }
@@ -187,8 +169,6 @@ static int read_value(wire *w, charon_ml_node *out, const charon_ml_field *field
             width = 0;
             break;
         }
-        /* The element of a run is read at its own width, which is not the run's: the run
-         * arrives length-delimited and each element inside it is a bare value. */
         element.element = CHARON_ML_FIELD_NONE;
         element.flags &= ~(unsigned)CHARON_ML_REPEATED;
         element.wire = width == 0 ? CHARON_ML_WIRE_VARINT
@@ -200,8 +180,6 @@ static int read_value(wire *w, charon_ml_node *out, const charon_ml_field *field
         if (nodes == NULL) {
             return 0;
         }
-        /* The run is read whole before it is kept, so a truncated one is refused rather than
-         * half-read: a model whose weights are short is a model that must not run. */
         while (run.at < run.end) {
             if (count == capacity) {
                 charon_ml_node *grown = (charon_ml_node *)realloc(nodes, capacity * 2 * sizeof *nodes);
@@ -213,10 +191,6 @@ static int read_value(wire *w, charon_ml_node *out, const charon_ml_field *field
                 nodes = grown;
                 capacity *= 2;
             }
-            /* Every element names the field of the run itself, which is a static descriptor
-             * that outlives this call: the local copy above differs from it only in the width
-             * each element is read at, which is what this loop is for and not what a caller
-             * asking about the value wants to see. */
             nodes[count].type = type;
             nodes[count].field = field;
             if (!read_value(&run, &nodes[count], &element, type) || run.failed) {
@@ -242,9 +216,6 @@ static int read_value(wire *w, charon_ml_node *out, const charon_ml_field *field
     return 1;
 }
 
-/* Reads one message of `message`, growing `entries` for its fields. Every field the
- * specification declares is read; a field it does not is stepped over, so a container written
- * by a later version still reads, and what that version adds is simply not there to read. */
 static int read_message(wire *w, charon_ml_node *out, const charon_ml_message *message, const char *type)
 {
     charon_ml_node *entries = (charon_ml_node *)calloc(8, sizeof *entries);
@@ -270,9 +241,6 @@ static int read_message(wire *w, charon_ml_node *out, const charon_ml_message *m
         wire_type = (int)(key & 7);
         field = charon_ml_field_named(message, number);
         if (field == NULL || field->wire != wire_type) {
-            /* A field this specification does not name, or one whose bytes are written with
-             * another wire type than its own: it cannot be read as what it claims, and the
-             * wire type the bytes really have is what decides how to step over them. */
             wire step = {w->at, w->end, 0};
             uint64_t skip = 0;
             const char *at;
@@ -324,10 +292,6 @@ static int read_message(wire *w, charon_ml_node *out, const charon_ml_message *m
             continue;
         }
         {
-            /* A packed run arrived as one node holding a list, and its elements become entries
-             * of this message: a caller then walks one shape for every repeated field, packed
-             * or not. A weight matrix of a few thousand elements is a single run, so the room
-             * for all of them is made at once rather than one doubling at a time. */
             charon_ml_node *run = entry->value.list.nodes;
             size_t elements = entry->value.list.count, inner;
             while (count + elements > capacity) {
@@ -366,10 +330,6 @@ static int read_message(wire *w, charon_ml_node *out, const charon_ml_message *m
     return 1;
 }
 
-/* Whether a node's value is a list of others, which is what decides both how many fields a
- * message has and what there is to free. A node read as a field of a message holds a list
- * only when it is a submessage; a number, a string and a packed run all hold their value in
- * the union, and reading the union as a pointer would be reading a number as an address. */
 static int holds_list(const charon_ml_node *node)
 {
     return node != NULL && (node->field == NULL || node->field->kind == CHARON_ML_KIND_MESSAGE);
@@ -472,8 +432,6 @@ const charon_ml_node *charon_ml_get(const charon_ml_node *node, const char *name
             found = entry;
         }
     }
-    /* A singular field written more than once takes the last, which is what protobuf's own
-     * parser keeps and what a converter that emitted the field twice means. */
     return found;
 }
 
@@ -488,14 +446,11 @@ const charon_ml_node *charon_ml_oneof(const charon_ml_node *node, const char *na
     }
     oneof = oneof_of(want->field);
     if (oneof == 0) {
-        return want; /* not of a oneof: the name alone decides */
+        return want;
     }
     for (index = 0; index < charon_ml_count(node); index++) {
         const charon_ml_node *entry = &node->value.list.nodes[index];
         if (oneof_of(entry->field) == oneof && entry != want) {
-            /* Another case of the same oneof is in the document, so this one is not: a
-             * oneof holds exactly one of its fields, and reading the others would read a
-             * value the writer did not set. */
             return NULL;
         }
     }
@@ -518,7 +473,7 @@ int charon_ml_int(const charon_ml_node *node, int64_t fallback)
     case CHARON_ML_KIND_BOOL:
         return (int)node->value.unsigned_integer;
     case CHARON_ML_FIELD_NONE:
-        return (int)fallback; /* a submessage is not a number: the caller asked wrongly */
+        return (int)fallback;
     default:
         return (int)node->value.integer;
     }

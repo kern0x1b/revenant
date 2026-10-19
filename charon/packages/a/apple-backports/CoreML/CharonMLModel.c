@@ -1,11 +1,3 @@
-/* A Core ML model read from its container: which kind of model it is, what its features are,
- * and the set of values a prediction is made from and answered in.
- * CharonMLModel.h says what it is for; this is the reading of it.
- *
- * Every field is read through the specification (CharonMLProto.h), so a model this port runs
- * is the model its container describes. Nothing here interprets a layer or a weight: it is
- * the document, its description and its class labels, and nothing more.
- */
 #include "CharonMLModel.h"
 #include "CharonMLValue.h"
 
@@ -14,10 +6,6 @@
 #include <string.h>
 #include <sys/stat.h>
 
-/* The cases of the specification's Type oneof, and the kind each is read as. A name the
- * specification has and this list does not is CHARON_ML_KIND_OTHER: the model loads, and the
- * interpreter refuses it with a message naming the kind, rather than the load being refused
- * for a kind that is real. */
 static const struct {
     const char *field;
     charon_ml_model_kind kind;
@@ -116,8 +104,6 @@ char *charon_ml_copy_string(const charon_ml_node *node, const char *field)
     return copy;
 }
 
-/* --- the description of one feature ----------------------------------------------------------- */
-
 static void read_feature(charon_ml_feature *feature, const charon_ml_node *described)
 {
     const charon_ml_node *type;
@@ -137,8 +123,6 @@ static void read_feature(charon_ml_feature *feature, const charon_ml_node *descr
     if (type == NULL) {
         return;
     }
-    /* The FeatureType oneof: which case is in the document is which field the node carries, so
-     * the kind is asked of the field rather than matched by name against a list. */
     for (index = 0; index < (int)charon_ml_count(type); index++) {
         const charon_ml_node *entry = charon_ml_at(type, index);
         const char *name = entry->field->name;
@@ -161,8 +145,6 @@ static void read_feature(charon_ml_feature *feature, const charon_ml_node *descr
             feature->type = CHARON_ML_FEATURE_DICTIONARY;
         } else if (strcmp(name, "sequenceType") == 0) {
             feature->type = CHARON_ML_FEATURE_SEQUENCE;
-            /* A sequence's oneof holds what its elements are -- a whole number or a string --
-             * and the size range beside it is how many of them there may be. */
             {
                 size_t element;
                 for (element = 0; element < charon_ml_count(body); element++) {
@@ -196,12 +178,6 @@ static void read_feature(charon_ml_feature *feature, const charon_ml_node *descr
             feature->image_height = charon_ml_int(charon_ml_get(body, "height"), 0);
             feature->image_color_space = charon_ml_int(charon_ml_get(body, "colorSpace"), CHARON_ML_COLOR_INVALID);
             if (range == NULL && feature->image_width > 0 && feature->image_height > 0) {
-                /* A FIXED size, which the specification writes as ImageFeatureType.width/.height
-                 * and beside no range. The ranges stay FLEXIBLE above, which is right for a
-                 * dimension with no upper bound and wrong here: a size that is fixed has no range at
-                 * all, and leaving FLEXIBLE in made every fixed-size image look like a range whose
-                 * lower bound is -1. Measured against this host's own Core ML, which reports such a
-                 * feature as the enumerated kind with the one size in it (facts/CoreML/CoreML.md). */
                 feature->image_width_range = 0;
                 feature->image_height_range = 0;
             }
@@ -213,10 +189,6 @@ static void read_feature(charon_ml_feature *feature, const charon_ml_node *descr
                 feature->image_height_range = charon_ml_int(charon_ml_get(height, "lowerBound"), 0);
                 feature->image_height = charon_ml_int(charon_ml_get(height, "upperBound"), feature->image_height);
             }
-            /* The set of sizes, which is the third way a model says what size an image is: the
-             * specification writes it beside the range, and it is a set rather than a range
-             * because the sizes a model will take are named ones -- the crops of a detection
-             * model, each of which the caller has to be able to ask for by number. */
             if (sizes != NULL) {
                 size_t total = charon_ml_count_field(sizes, "sizes");
                 if (total > 0) {
@@ -257,9 +229,6 @@ static void read_feature(charon_ml_feature *feature, const charon_ml_node *descr
                     feature->shape_kind = CHARON_ML_SHAPE_RANGE;
                     for (index = 0; index < (int)sizes && index < 8; index++) {
                         const charon_ml_node *bounds = charon_ml_node_at_field(range, "sizeRanges", (size_t)index);
-                        /* SizeRange's lower bound is unsigned and its upper bound is signed,
-                         * and -1 is the specification's "no upper bound": a dimension of no
-                         * fixed length, which is flexible rather than absent. */
                         feature->shape_range[index][0] = charon_ml_int(charon_ml_get(bounds, "lowerBound"), 0);
                         feature->shape_range[index][1] = charon_ml_int(charon_ml_get(bounds, "upperBound"), CHARON_ML_FLEXIBLE);
                         if (feature->shape[index] == 0) {
@@ -289,10 +258,6 @@ static void read_feature(charon_ml_feature *feature, const charon_ml_node *descr
                             }
                         }
                         feature->enumerated_count = total;
-                        /* A set of shapes and a range of them are the two the specification
-                         * writes in the same oneof, so a document that carries both names both;
-                         * the set is the one a caller has to be told about, and it is the one
-                         * that decides. */
                         if (feature->shape_kind != CHARON_ML_SHAPE_RANGE) {
                             feature->shape_kind = CHARON_ML_SHAPE_ENUMERATED;
                         }
@@ -337,10 +302,6 @@ static size_t read_feature_list(charon_ml_feature *into, size_t room, const char
     return kept;
 }
 
-/* --- the class labels ------------------------------------------------------------------------- */
-
-/* A classifier's labels live in the oneof of the model kind, in a StringVector or an
- * Int64Vector, so which vector is asked of the oneof rather than by a name. */
 static size_t read_class_labels(charon_ml_model *model, const charon_ml_node *kind_node)
 {
     const charon_ml_node *labels = charon_ml_oneof(kind_node, "stringClassLabels");
@@ -364,10 +325,6 @@ static size_t read_class_labels(charon_ml_model *model, const charon_ml_node *ki
     for (index = 0; index < count; index++) {
         const charon_ml_node *entry = charon_ml_node_at_field(labels, "vector", index);
         if (model->class_labels_are_numbers) {
-            /* A whole number is written as a number on the wire and has no text to copy, so it
-             * is formatted into the same string the labels are held in and read back as a
-             * number by the Objective-C half: one place holds them, and the flag says which kind
-             * of value each string is. */
             char text[32];
             snprintf(text, sizeof text, "%lld",
                      (long long)(entry != NULL ? entry->value.integer : 0));
@@ -381,8 +338,6 @@ static size_t read_class_labels(charon_ml_model *model, const charon_ml_node *ki
     model->class_label_count = count;
     return count;
 }
-
-/* --- reading the container --------------------------------------------------------------------- */
 
 static char *slurp(const char *path, size_t *length)
 {
@@ -427,9 +382,6 @@ static void join(char *out, size_t size, const char *directory, const char *name
     snprintf(out, size, "%s%s%s", directory, used > 0 && directory[used - 1] == '/' ? "" : "/", name);
 }
 
-/* The field of the Type oneof this document carries. The kind is asked of the document rather
- * than matched against a list of names at each call site, so the interpreter and the errors
- * read the same one. */
 const char *charon_ml_node_kind_name(const charon_ml_node *document)
 {
     int index;
@@ -441,12 +393,6 @@ const char *charon_ml_node_kind_name(const charon_ml_node *document)
     return NULL;
 }
 
-/* --- the model's own parameters ------------------------------------------------------------- */
-
-/* One parameter out of the specification's own update parameters. A DoubleParameter and an
- * Int64Parameter both carry a default and a range, a BoolParameter a default and nothing else,
- * and a StringParameter a default string; the key is not in the parameter at all but in the
- * field the parameter was reached by, which is why the name is passed in rather than read. */
 static void read_parameter(charon_ml_parameter *parameter, const char *key, const charon_ml_node *node)
 {
     const charon_ml_node *range, *set;
@@ -496,9 +442,6 @@ static void put_parameter(charon_ml_model *model, const char *key, const charon_
     }
 }
 
-/* The named functions of a model that has them. Each is a description of its own -- its own
- * name, its own inputs and its own outputs -- and the specification's own list is read in order,
- * so a caller asking for the third function of a model gets the third one it wrote. */
 static void read_functions(charon_ml_model *model, const charon_ml_node *description)
 {
     size_t total = charon_ml_count_field(description, "functions"), index;
@@ -539,11 +482,6 @@ const charon_ml_function *charon_ml_model_function_named(const charon_ml_model *
     return NULL;
 }
 
-/* The parameters of the model itself, which the specification writes beside the optimizer: the
- * number of epochs a training runs for, whether it shuffles, the seed it starts from, and -- for
- * a nearest neighbours model -- how many neighbours it looks at. A model that is not updatable
- * carries none of them, and a model whose container was written without them carries none
- * either, which is the same answer. */
 static void read_update_parameters(charon_ml_model *model, const charon_ml_node *kind_node)
 {
     const charon_ml_node *update = charon_ml_get(kind_node, "updateParams");
@@ -558,9 +496,6 @@ static void read_update_parameters(charon_ml_model *model, const charon_ml_node 
     if (optimizer == NULL) {
         return;
     }
-    /* The optimizer is one of two shapes, and which one decides which parameters exist: the
-     * adaptive one has no momentum and two betas, the plain one the other way round. Both name
-     * their learning rate and their batch the same way. */
     chosen = charon_ml_get(optimizer, "adamOptimizer");
     if (chosen != NULL) {
         put_parameter(model, "learningRate", charon_ml_get(chosen, "learningRate"));
@@ -652,11 +587,6 @@ int charon_ml_model_from_node(charon_ml_model *model, const charon_ml_node *docu
     return 1;
 }
 
-/* The same read out of bytes the caller already has, which is what a model built in memory is:
- * an asset holds a container that was never a file, and the model it makes is read out of the
- * same message a file would have held. The bytes are copied, because the model keeps its own
- * for as long as it lives: a node is a window into them, and a node that outlived a buffer the
- * caller had freed would read memory that has moved. */
 int charon_ml_model_read_data(charon_ml_model *model, const void *bytes, size_t length, char *error,
                               size_t error_size)
 {
@@ -706,9 +636,6 @@ int charon_ml_model_read(charon_ml_model *model, const char *path, char *error, 
         return 0;
     }
     if (is_directory(path)) {
-        /* A compiled model is a bundle, and its program is the coremldata.bin inside it. A
-         * bundle that does not hold one is not a model this port can read, and the error says
-         * so rather than reading whatever file is there. */
         join(container, sizeof container, path, "coremldata.bin");
         if (!file_exists(container)) {
             snprintf(error, error_size,
@@ -731,8 +658,6 @@ int charon_ml_model_read(charon_ml_model *model, const char *path, char *error, 
         free(bytes);
         return 0;
     }
-    /* The buffer becomes the model's own: every node of the document is a window into it, so
-     * the model frees the two together and a node never outlives the bytes it points into. */
     model->bytes = bytes;
     model->borrowed = 0;
     if (is_directory(path)) {

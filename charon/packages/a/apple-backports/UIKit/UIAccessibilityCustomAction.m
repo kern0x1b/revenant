@@ -53,10 +53,6 @@
     _selector = selector;
 }
 
-// The invocation an action gets when it is performed, as the accessibility system makes it: a handler is called with
-// the action and answers whether the action was performed; a target gets its selector with the action as the one
-// argument, and a selector the target does not answer performs nothing. The send goes through the IMP the target
-// answers, so the selector is not sent by name.
 - (BOOL)charonPerform
 {
     UIAccessibilityCustomActionHandler handler = self.actionHandler;
@@ -76,8 +72,6 @@ static const void *CharonCustomActionsKey = &CharonCustomActionsKey;
 static const void *CharonElementsKey = &CharonElementsKey;
 static const void *CharonNavigationStyleKey = &CharonNavigationStyleKey;
 
-// The port's own accessors of accessibilityCustomActions, taken when this image starts, before any framework is opened.
-// They are put back in front of the release's by the setter, see CharonReassertCustomActions.
 static IMP CharonCustomActionsGetter;
 static IMP CharonCustomActionsSetter;
 static BOOL CharonCustomActionsArmed;
@@ -129,13 +123,6 @@ static BOOL CharonInThisImage(const void *address)
     return strcmp(here.dli_fname, there.dli_fname) == 0;
 }
 
-// The release's UIAccessibility.framework attaches its own accessibilityCustomActions getter to NSObject when it is
-// opened, in front of the port's: set then get reads nil (measured on the 6.1.3 guest by
-// tests/backports/emulate/nsobject-custom-actions). The port's two accessors are put back in front in two places:
-// when the setter runs, and once UIAccessibility.framework is added. The add-image hook runs before objc attaches the
-// release's category, so the put-back is queued on the main queue and runs after the attach. Until the main queue
-// turns, the release's getter still answers. If the release's getter was already on NSObject when this image started,
-// the captured IMPs are not the port's, and nothing is put back.
 static void CharonReassertCustomActions(void)
 {
     if (!CharonCustomActionsArmed) {

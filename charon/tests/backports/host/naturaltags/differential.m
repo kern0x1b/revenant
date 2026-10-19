@@ -3,25 +3,6 @@
 #import <dlfcn.h>
 #import <objc/runtime.h>
 
-// The value behind each of NaturalLanguage's 71 string constants the port carries, against the host's
-// own NaturalLanguage.
-//
-// The host is the oracle and nothing else is. These constants are `NSString * const` in every SDK
-// header and no header states a value: NLTagScheme.h, NLScript.h and NLLanguage.h declare the name and
-// the release it arrived in and nothing else, so a value read out of the header would be an
-// invention. Each one is a data symbol in the framework, so dlsym reaches it and the host's own
-// framework answers with the string the system's tagger, script table and language table use.
-//
-// This run is what wrote the table the port's own definitions came from
-// (values.tsv, beside this file), and it is re-run against that table so a value that moved, or a
-// constant the port spells wrongly, is caught.
-//
-// It also checks that each constant really is a string, and it reports which names share a value.
-// NLTagScheme.h says a tag is used with == comparison, so two names with one value are two spellings
-// of one tag -- and the host has two such pairs, which is Apple's own answer and the reason this
-// reports them instead of refusing them: NLTagOtherPunctuation is the string NLTagPunctuation is, and
-// NLTagOtherWhitespace is the string NLTagWhitespace is.
-
 static int different = 0;
 static long checks = 0;
 

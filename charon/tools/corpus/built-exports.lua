@@ -1,11 +1,3 @@
--- Write what the canon's 6.1.3 band exports to the built-exports file, for gen-report.lua's LAUNCH-BLOCK.
---
--- usage: xmake l tools/corpus/built-exports.lua <canon-run>
---
--- <canon-run> is the output directory of coordination/canon-build.lua (workspace skill canon-install):
--- it holds one org.charon.apple-backports_*.deb and build/stage. The list is every name `nm -gUj` gives
--- over the stage's bands/6.1.3/*.dylib, under a first line naming the deb's Version, so a list older than
--- the canon it is read against says so in the report.
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 import("aggregate", {rootdir = os.scriptdir()})
 

@@ -1,35 +1,7 @@
-/* coreml-cases.m -- the questions the Core ML host differential asks, and the answers it records.
- *
- * The containers are the ones tools/coreml/make-models.lua writes: a GLM, a GLM classifier, a
- * neural network classifier, a convolutional one, an embedding, a pipeline, a tree ensemble and
- * two shape cases. For each of them this records what a release that has Core ML answers, so the
- * port's own classes can be held to exactly the same record:
- *
- *   - every input and output description: the name, the kind, whether it may be left out, and the
- *     whole of the constraint its type carries -- the shape or the ranges or the set of shapes, the
- *     element type, the image size, the dictionary's key type, a sequence's element and count;
- *   - `-isAllowedValue:` over a battery of values: the right one, the wrong shape, the wrong
- *     element type, the wrong type altogether, an undefined value, an empty array;
- *   - the model's own description: its metadata, the two names a classifier answers under, its
- *     class labels, whether it is updatable, its parameters;
- *   - the two providers: what `featureNames` holds and in what order, what a value comes back as,
- *     what a keyed subscript gives, what fast enumeration walks, and the same for a batch;
- *   - the keys: the name of each, its scope, whether two reads are the same object, and what
- *     scoping one gives;
- *   - a prediction per model, recorded as the type and shape of every answer and, separately, as
- *     its numbers.
- *
- * The numbers of a prediction are recorded under names the comparison treats as informational:
- * one container, nn_image, is a recorded divergence between the port and the host for reasons
- * facts/CoreML/CoreML.md sets out, and the check fails if a difference appears in any other.
- */
 #import <CoreML/CoreML.h>
 
 #import "coreml-cases.h"
 
-/* An error as the two things an application switches on: the domain it is in and the code it
- * carries. The message is the port's own wording and is not compared -- what has to match is the
- * case an application handles, and that is the code. */
 static NSString *error_of(NSError *error)
 {
     if (error == nil) {
@@ -81,9 +53,6 @@ static NSString *sizes(NSArray<MLImageSize *> *values)
     return [parts componentsJoinedByString:@","];
 }
 
-/* A value of the kind and shape a description names, filled with a pattern that depends only on
- * where each element sits, so that the two runs are handed the same numbers and any difference in
- * the answers is a difference in what the framework did with them. */
 static MLFeatureValue *value_for(MLFeatureDescription *described)
 {
     switch (described.type) {
@@ -114,8 +83,6 @@ static MLFeatureValue *value_for(MLFeatureDescription *described)
     }
 }
 
-/* The battery of values `-isAllowedValue:` is asked about, named by what they are rather than by
- * what they hold, so a difference says which rule differs. */
 static void allowed_values(MLFeatureDescription *described, NSString *prefix, CoreMLRecorder record)
 {
     NSString *(^name)(NSString *) = ^(NSString *what) {
@@ -128,8 +95,6 @@ static void allowed_values(MLFeatureDescription *described, NSString *prefix, Co
     record(name(@"string"), [described isAllowedValue:[MLFeatureValue featureValueWithString:@"x"]] ? @"YES" : @"NO");
     if (constraint.shape.count > 0) {
         NSError *failure = nil;
-        /* The shape the feature names, and one dimension off it: the two cases that tell a fixed
-         * shape from a range, and an element type that is not the one the feature names. */
         MLMultiArray *right = [[MLMultiArray alloc] initWithShape:constraint.shape
                                                           dataType:constraint.dataType
                                                              error:&failure];
@@ -155,13 +120,6 @@ static void allowed_values(MLFeatureDescription *described, NSString *prefix, Co
     }
 }
 
-/* The model, as the framework under test reads it.
- *
- * This host's Core ML no longer reads an uncompiled container: handed a .mlmodel it answers nil and
- * says to compile it with Xcode. So the system run compiles each container with the framework's own
- * compiler and loads the bundle that comes out, and the port reads the same container uncompiled --
- * two frameworks, one model, in the two forms each of them reads. Everything compared below is the
- * model's own answer, not the container's. */
 static MLModel *load_model(NSString *path, NSError **error)
 {
 #if COREML_HOST
@@ -222,8 +180,6 @@ static void describe(MLFeatureDescription *described, NSString *prefix, CoreMLRe
     allowed_values(described, prefix, record);
 }
 
-/* The prediction of one model over a value for each of its inputs, recorded as the kind and shape
- * of every answer, and its numbers under a name the comparison treats as informational. */
 static void predict(MLModel *model, NSString *label, CoreMLRecorder record)
 {
     NSDictionary<NSString *, MLFeatureDescription *> *inputs = model.modelDescription.inputDescriptionsByName;
@@ -257,8 +213,6 @@ static void predict(MLModel *model, NSString *label, CoreMLRecorder record)
             kind = [kind stringByAppendingFormat:@" shape=%@ count=%ld", numbers(array.shape), (long)array.count];
         }
         if (dictionary.count > 0) {
-            /* The scores are numbers like any other, and they are compared as numbers: the kind
-             * of the answer says it is a dictionary, and the numbers themselves go under value/. */
             NSMutableArray *parts = [NSMutableArray array];
             for (NSString *key in [dictionary.allKeys sortedArrayUsingSelector:@selector(compare:)]) {
                 [parts addObject:[NSString stringWithFormat:@"%@", key]];
@@ -303,8 +257,6 @@ static void providers(CoreMLRecorder record)
     record(@"provider/c.int64", [NSString stringWithFormat:@"%ld", (long)[provider featureValueForName:@"c"].int64Value]);
     record(@"provider/subscript", [NSString stringWithFormat:@"%.4f", [provider[@"a"] doubleValue]]);
     record(@"provider/missing", [provider featureValueForName:@"nope"] == nil ? @"(nil)" : @"not nil");
-    /* Fast enumeration walks the names, in the order the dictionary holds them, which is the order
-     * a caller building a request by hand writes them in. */
     {
         NSMutableArray *walked = [NSMutableArray array];
         for (NSString *name in provider) {
@@ -313,8 +265,6 @@ static void providers(CoreMLRecorder record)
         [[walked sortedArrayUsingSelector:@selector(compare:)] description];
         record(@"provider/enumerated.sorted", [walked componentsJoinedByString:@","]);
     }
-    /* A value that cannot be a feature value is refused, with the name of the feature in the
-     * message: a caller with fifty inputs and one that will not convert needs to know which. */
     {
         MLDictionaryFeatureProvider *refused = [[MLDictionaryFeatureProvider alloc]
             initWithDictionary:@{ @"good" : @1, @"bad" : [[NSObject alloc] init] }
@@ -322,7 +272,6 @@ static void providers(CoreMLRecorder record)
         record(@"provider/refused", refused == nil ? @"nil" : @"not nil");
         record(@"provider/refused.error", error_of(failure));
     }
-    /* A batch over the same values, built from a dictionary of arrays. */
     {
         MLArrayBatchProvider *batch = [[MLArrayBatchProvider alloc]
             initWithDictionary:@{ @"x" : @[@1.0, @2.0], @"y" : @[@3.0, @4.0] }
@@ -332,10 +281,6 @@ static void providers(CoreMLRecorder record)
         record(@"batch/0.x", [NSString stringWithFormat:@"%.4f", [[batch featuresAtIndex:0] featureValueForName:@"x"].doubleValue]);
         record(@"batch/1.x", [NSString stringWithFormat:@"%.4f", [[batch featuresAtIndex:1] featureValueForName:@"x"].doubleValue]);
         record(@"batch/1.y", [NSString stringWithFormat:@"%.4f", [[batch featuresAtIndex:1] featureValueForName:@"y"].doubleValue]);
-        /* An index past the end is what the array raises, and the port has to raise the same
-         * exception rather than answer nil: a caller walking a count it has just read is not making
-         * a mistake, and one that indexes past the end on a release with Core ML gets an
-         * NSRangeException, so a nil here would be a difference an application could tell. */
         @try {
             id<MLFeatureProvider> past = [batch featuresAtIndex:9];
             record(@"batch/past-the-end", past == nil ? @"(nil)" : @"not nil");
@@ -344,13 +289,6 @@ static void providers(CoreMLRecorder record)
                                                                      raised.reason ?: @"(no reason)"]);
         }
     }
-    /* A batch whose features are not of one length is refused, and the message names the one. The
-     * construction is asked through @try for the reason the index past the end above is: which of
-     * the two answers a framework gives for a batch that is not a rectangle is a measurement and
-     * not something the corpus may assume, and a corpus that dies on an answer it did not expect
-     * records nothing at all -- not the difference, and not the rest of the run. Measured on this
-     * host: a nil and an error, which is what the port answers. The name of a raise is recorded
-     * and not its reason, for the reason the coding round trip above gives. */
     {
         MLArrayBatchProvider *ragged = nil;
         NSString *raised = nil;
@@ -395,7 +333,6 @@ static void keys(CoreMLRecorder record)
     record(@"keys/lossValue.class", [NSStringFromClass([MLMetricKey.lossValue class]) containsString:@"MLMetricKey"]
                                         ? @"a metric key"
                                         : @"not a metric key");
-    /* Two keys of the same name are the same key, which is what a dictionary of parameters needs. */
     record(@"keys/equal", [MLParameterKey.learningRate isEqual:MLParameterKey.learningRate] ? @"YES" : @"NO");
     record(@"keys/equalScoped",
            [MLParameterKey.learningRate isEqual:[MLParameterKey.learningRate scopedTo:@"inner"]] ? @"YES" : @"NO");
@@ -435,8 +372,6 @@ static void constants(CoreMLRecorder record)
                                                                          (long)MLImageSizeConstraintTypeUnspecified,
                                                                          (long)MLImageSizeConstraintTypeEnumerated,
                                                                          (long)MLImageSizeConstraintTypeRange]);
-    /* A fresh configuration and a fresh options object, which an application reads before it sets
-     * anything: the defaults are part of what the port has to answer. */
     {
         MLModelConfiguration *configuration = [[MLModelConfiguration alloc] init];
         record(@"config/default.computeUnits", [NSString stringWithFormat:@"%ld", (long)configuration.computeUnits]);
@@ -462,20 +397,6 @@ static void constants(CoreMLRecorder record)
     }
 }
 
-/* The archive round trip, for every kind of value there is: written, read back, and compared with
- * what went in. An archive that loses a value is a coder advertised and not delivered, and this is
- * the case that catches it -- the review of the value types found one, where the writer wrote the
- * array and the string and the reader read the type alone. */
-/* Three things a prediction answers that the cases above do not reach, each of which a rule in the
- * port could quietly stop applying:
- *
- *   - a batch: one provider per element, each naming the features the model answered, so a batch
- *     that answered nothing, or one element for three, is a different record;
- *   - an array of numbers and an array of strings handed to a provider: both are sequences, and the
- *     kind of the elements is the sequence's own;
- *   - a required input that the caller left out: the prediction fails, and the failure is
- *     Core ML's own feature-type code with the name of the input in it.
- */
 static void batch_case(MLModel *model, CoreMLRecorder record)
 {
     NSMutableArray *providers = [NSMutableArray array];
@@ -530,9 +451,6 @@ static void missing_input(MLModel *model, CoreMLRecorder record)
     if (name == nil || described == nil) {
         return;
     }
-    /* A feature the model does not mark optional, given to it as the undefined value a caller
-     * leaves out by sending nothing for it at all: the prediction cannot be made, and the error
-     * says which input was missing rather than that something was. */
     answer = [model predictionFromFeatures:[[MLDictionaryFeatureProvider alloc] initWithDictionary:@{}
                                                                                                error:&failure]
                                     error:&failure];
@@ -570,17 +488,11 @@ static void round_trips(CoreMLRecorder record)
             archive = [NSKeyedArchiver archivedDataWithRootObject:before];
             after = [NSKeyedUnarchiver unarchiveObjectWithData:archive];
         } @catch (NSException *raised) {
-            /* Every key is still written, with the raise as its value: the two records then have
-             * the same keys and the comparison shows where they differ rather than reporting half
-             * of them missing, and the reason is in the value. */
             NSArray *rest = @[ @"type", @"undefined", @"int64", @"double", @"string", @"array",
                                 @"dictionary", @"sequence", @"equal" ];
             NSUInteger each;
             BOOL secure = [raised.reason ?: @"" rangeOfString:@"only supports secure coding"].location != NSNotFound;
             for (each = 0; each < rest.count; each++) {
-                /* The name, and whether the reason is the secure-coding refusal: the reason
-                 * itself carries the coder's class name, which each build spells the way its own
-                 * Foundation spells it, and that spelling is not a behaviour. */
                 record([key stringByAppendingFormat:@"/%@", rest[each]],
                        [NSString stringWithFormat:@"raised %@%@", raised.name,
                                                     secure ? @" (the secure-coding refusal)" : @""]);
@@ -613,13 +525,6 @@ static void round_trips(CoreMLRecorder record)
                [before isEqualToFeatureValue:after] ? @"YES" : @"NO");
     }
 
-    /* The same values through a *secure* unarchiver, for every kind including the one the plain
-     * path refused: a value over a multi array comes back through a secure unarchiver on the
-     * framework, and it has to come back here too. This is the only place the array's own round
-     * trip can be seen at all, because the plain path raises on both sides -- so a rule that
-     * quietly stopped writing or reading the array would leave the plain path unable to notice,
-     * and the mutants that break it exactly that way would survive.
-     */
     for (index = 0; index < values.count; index++) {
         NSString *key = [NSString stringWithFormat:@"archive/%@/secure", names[index]];
         MLFeatureValue *before = values[index];
@@ -712,7 +617,6 @@ void coreml_run(NSString *models, CoreMLRecorder record)
             batch_case(model, record);
             missing_input(model, record);
         }
-        /* A parameter the model does not have is the model's own error, not a missing answer. */
         {
             NSError *missing = nil;
             id value = [model parameterValueForKey:MLParameterKey.learningRate error:&missing];
@@ -721,8 +625,6 @@ void coreml_run(NSString *models, CoreMLRecorder record)
                                 : [NSString stringWithFormat:@"error %ld", (long)missing.code]);
         }
     }
-    /* A file that is not there, and a file that is there and is not a model: the two refusals a
-     * caller meets before it has a model at all, recorded as the domain and code they answer. */
     {
         NSError *absent = nil;
         MLModel *none = [MLModel modelWithContentsOfURL:[NSURL fileURLWithPath:@"/nonexistent.mlmodel"]
@@ -740,6 +642,5 @@ void coreml_run(NSString *models, CoreMLRecorder record)
     providers(record);
     keys(record);
     constants(record);
-    /* The compute device family, which needs no container: see devices-cases.m. */
     coreml_device_cases(record);
 }

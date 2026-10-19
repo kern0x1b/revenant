@@ -10,14 +10,14 @@ static const char charon_image_key;
 - (instancetype)initWithName:(NSString *)name image:(UIImage *)image actionHandler:(UIAccessibilityCustomActionHandler)actionHandler
 {
     if ((self = [self initWithName:name actionHandler:actionHandler]))
-        [self setImage:image];  // a send, not a dot-syntax write: see UIAccessibilityCustomAction+Handler13.m
+        [self setImage:image];
     return self;
 }
 
 - (instancetype)initWithName:(NSString *)name image:(UIImage *)image target:(id)target selector:(SEL)selector
 {
     if ((self = [self initWithName:name target:target selector:selector]))
-        [self setImage:image];  // a send, not a dot-syntax write: see UIAccessibilityCustomAction+Handler13.m
+        [self setImage:image];
     return self;
 }
 

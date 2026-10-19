@@ -9,7 +9,6 @@ static void charon_resolve_assert(void)
     charon_system_function(&charon_system_assert, CHARON_LIBSYSTEM_PLATFORM, "os_unfair_lock_assert_not_owner");
 }
 
-/* Reads the lock word and never writes it, so a copy in each image agrees with the one lock the process shares. */
 __attribute__((visibility("hidden")))
 void os_unfair_lock_assert_not_owner(const charon_unfair_lock *lock)
 {

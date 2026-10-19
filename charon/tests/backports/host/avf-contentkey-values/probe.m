@@ -1,8 +1,3 @@
-// probe.m - AVContentKeySpecifier (14.5) and AVContentKeyResponse (10.3, factories 10.3, 11.0, 13.0), asked of the
-// host's own AVFoundation and of the port's classes in one binary (run.sh builds it both ways and diffs the output).
-// Every line is one answer, labelled, and the labels are what run.sh compares. Nothing here names a class in an
-// answer: a class name differs between the host's private subclasses and the port's one class, so each answer is a
-// yes or no about the class the header names.
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 
@@ -44,7 +39,6 @@ int main(void)
         spec("S10 empty identifier", @"ClearKeySystem", @"", nil);
         spec("S11 non-string option key", @"ClearKeySystem", @"skd://example", @{ @1: @"v" });
 
-        // The stored values are copies: a mutable argument changed afterwards changes nothing the object reports.
         NSMutableString *system = [NSMutableString stringWithString:@"ClearKeySystem"];
         NSMutableString *identifier = [NSMutableString stringWithString:@"skd://x"];
         NSMutableDictionary *options = [NSMutableDictionary dictionaryWithDictionary:@{ @"k": @"v" }];
@@ -64,7 +58,6 @@ int main(void)
                [c.identifier isEqual:m.identifier], [c.options isEqual:m.options]);
         printf("C3 specifier is NSCopying %d\n", [m conformsToProtocol:@protocol(NSCopying)]);
 
-        // The factory's own nil options and the initializer the header declares answer the same way.
         AVContentKeySpecifier *n = [AVContentKeySpecifier contentKeySpecifierForKeySystem:@"ClearKeySystem" identifier:@"a" options:nil];
         printf("N1 nil options %s\n", [[n.options description] UTF8String]);
         AVContentKeySpecifier *i = [[AVContentKeySpecifier alloc] initForKeySystem:@"ClearKeySystem" identifier:@"b" options:@{ @"x": @1 }];

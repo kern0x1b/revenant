@@ -1,9 +1,5 @@
 set_project("vdspprobe")
 set_version("0.1.0")
--- The biquad on the guest: the release's own vDSP_biquad against this band's kernel, both on the target's
--- arithmetic. The port's file is compiled in with its six names renamed, so the probe holds the release's
--- answers and the port's side by side - and the renames have to come from the same list the host
--- differential uses, or the two builds are not the same shape.
 local root = os.getenv("VDSPPROBE_ROOT") or path.join(os.scriptdir(), "../../../..")
 add_repositories("charon " .. root)
 add_addons("charon v0.8.13")

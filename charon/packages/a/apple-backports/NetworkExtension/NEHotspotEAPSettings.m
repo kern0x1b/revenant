@@ -1,13 +1,5 @@
 #import "CharonNEHotspot.h"
 
-/* The enterprise settings object: property storage, `copy` and the keyed archive, as the host answers them
-   (tests/backports/host/netext-hotspot/probe.m, op eap). Every value is kept by -copy and by the archive round
-   trip. The lists and strings are copied on set; the enumerations and the Boolean are values. The password is
-   archived (the host's archive holds it, unlike the configuration's passphrase).
-
-   setIdentity: and setTrustedServerCertificates: answer NO for nil and for an empty array, as the host does. The
-   host's answer for a non-nil SecIdentity needs a keychain item, and for a certificate array needs a certificate,
-   and the test imports neither: those answers are not measured, so the port keeps nothing and answers NO. */
 @implementation NEHotspotEAPSettings {
     NSArray<NSNumber *> *_supportedEAPTypes;
     NSString *_username;

@@ -1,15 +1,3 @@
-// The classes a release carries without exporting them, which the port exports as aliases
-// (packages/a/apple-backports/charon_alias.h): NSTextTab until iOS 7.0 and NSTextList until 9.0.
-// The name links, +class is the release's class, what is made is the release's class, the
-// class answers every question about itself as the release's class does, a subclass inherits
-// the release's class, and the categories written on the name reach the release's class
-// through the library's loader.
-//
-// Built with packages/a/apple-backports/attach.c beside it, the process is also an image with
-// aliases of its own, of two more classes 6.1.3 carries in UIFoundation without exporting:
-// NSTextBlock, with a category that writes a method the release has and one it lacks, and
-// NSTextTable, whose subclass here has a +load, so the runtime lays the alias out before the
-// loader of this image runs.
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 #include <asl.h>
@@ -154,14 +142,11 @@ static void check_text_list(void)
     CHECK_EQUAL(image_of_method(class_getInstanceMethod(release, three)), @"libUIKitBackports.dylib",
                 "NSTextList: the category's three-argument initializer is on the release's class");
     CHECK(objc_getClass("CharonTextListInit16") == Nil, "NSTextList: no class of the library adds the initializer by name");
-    // The format as a string: iOS 6 exports none of the NSTextListMarker constants.
     NSTextList *list = [[NSTextList alloc] initWithMarkerFormat:@"{decimal}" options:0 startingItemNumber:5];
     CHECK(object_getClass(list) == release && [list isKindOfClass:[NSTextList class]], "NSTextList: a list made through the name is the release's");
     CHECK(list.startingItemNumber == 5 && [list.markerFormat isEqualToString:@"{decimal}"], "NSTextList: the list keeps its format and its starting number");
 }
 
-// What the name answers about itself, sent as an application sends it, against what the
-// release's class answers.
 #define CHECK_INTROSPECTION(Name, member, protocol)                                                                       \
     do {                                                                                                               \
         Class release = objc_getClass(#Name);                                                                          \
@@ -186,7 +171,6 @@ static void check_text_list(void)
         CHECK_EQUAL(NSStringFromClass([Name class]), @#Name, #Name ": NSStringFromClass of +class is the release's name"); \
     } while (0)
 
-// A subclass of the name inherits the release's class and is laid out after its instance variables.
 static void check_subclasses(void)
 {
     Class list = objc_getClass("NSTextList"), tab = objc_getClass("NSTextTab");
@@ -215,8 +199,6 @@ static void check_subclasses(void)
           "subclass of NSTextTab: +alloc makes the subclass, and it inherits the release's tab");
 }
 
-// This image's own aliases: a method the release has stays the release's for a subclass, one it
-// lacks is given to the release's class; an alias laid out before the loader ran stays under NSObject.
 static void check_loader(void)
 {
     Class block = objc_getClass("NSTextBlock"), table = objc_getClass("NSTextTable");
@@ -248,9 +230,6 @@ static void check_loader(void)
     asl_free(query);
     CHECK(logged, "NSTextTable: the log names the alias laid out before the loader");
 
-    // The one public function that changes a superclass, on this alias the runtime has already laid out:
-    // it links the release's class in, and the size stays NSObject's, so the subclass laid out after it
-    // has its instance variables where the release's are. Nothing is made of either afterwards.
     Class proxy = objc_getClass("CharonNSTextTable");
     size_t before = class_getInstanceSize(proxy);
     ptrdiff_t mark = ivar_getOffset(class_getInstanceVariable([TextAliasTable class], "_mark"));

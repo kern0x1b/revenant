@@ -6,15 +6,6 @@
 #pragma clang diagnostic ignored "-Wobjc-property-implementation"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-// What a drop is given to do: the items it carries, where they would land, what it proposes, and the
-// session they came from — and the four ways a delegate can move one of them. The coordinators, the
-// drop items and the placeholder contexts are protocols in the header, not classes, so the port
-// supplies the objects that answer them; the release has none, because it has no drop at all.
-//
-// Moving an item is a real move: the destination is where the item goes, a placeholder is where it
-// will be, and a target is the view it is dropped onto. What the data is comes from the item's own
-// provider and is loaded by the delegate; nothing here copies a payload.
-
 @implementation CharonCollectionDropItem
 @synthesize item = _item;
 @synthesize source = _source;
@@ -57,8 +48,6 @@
 }
 @end
 
-// A proposal that also says where the item would land: into a section, at an index path, or
-// wherever the delegate means by "unspecified", which is what it says when it has not decided.
 @implementation UICollectionViewDropProposal {
 @private
     UICollectionViewDropIntent _intent;
@@ -97,9 +86,6 @@
 
 @end
 
-// A placeholder: where an item will be once the data source has been told about it. It knows the
-// index path it stands at and can hand the cell it is standing in to a block, which is how a
-// delegate draws a cell for a row that does not exist yet.
 @implementation UICollectionViewPlaceholder {
 @private
     NSIndexPath *_insertionIndexPath;
@@ -183,8 +169,6 @@
 
 @end
 
-// A placeholder that is a drop target: the same placeholder, plus the preview parameters its preview
-// is built from.
 @implementation UICollectionViewDropPlaceholder {
 @private
     UIDragPreviewParameters *(^_previewParametersProvider)(__kindof UICollectionViewCell *);

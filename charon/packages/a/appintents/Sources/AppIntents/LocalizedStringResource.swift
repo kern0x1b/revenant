@@ -1,36 +1,11 @@
-// Foundation's `LocalizedStringResource`, carried here for the API to be written in.
-//
-// Every title, description and dialog of AppIntents is a `LocalizedStringResource`: a key into a
-// string table, a default value, a table, a locale and a bundle. The port's Foundation is the
-// swift-5.4.3 overlay, which predates the type, and it belongs to the Foundation band
-// (24 rows of `coordination/corpus/ledger/Foundation.tsv`, `missing`/`code`: `LocalizedStringResource`,
-// `LocalizedStringResource.BundleDescription`, `CustomLocalizedStringResourceConvertible` and their
-// members). AppIntents cannot be declared without it, so the module carries the type its own API is
-// written in, and this file is the whole of it: when Foundation has the type, this file goes away and
-// nothing else here changes, because the declarations name `LocalizedStringResource` unqualified.
-//
-// The semantics are the ones the header of iOS 16 gives: the resource is a key, and the value shown
-// is `defaultValue` when the caller gave one and the key is not in the table, otherwise the string the
-// key maps to in `table` of `bundle` for `locale`, otherwise the key itself.
-
 import Foundation
 
-/// A string that is localized: a key, the table to look it up in, a value to show when the key is not
-/// there, the locale to look it up for and the bundle that holds the table.
-///
-/// `@unchecked Sendable` because the release's own `Locale` and `URL` are not `Sendable` in the
-/// port's Foundation; the value type holds no mutable state, which is what the conformance is for.
 public struct LocalizedStringResource: Hashable, Codable, CustomLocalizedStringResourceConvertible, @unchecked Sendable {
-    /// Where the string table is found, the framework's own three cases: the running program's
-    /// bundle, the bundle of a class, and the bundle at a URL.
     public enum BundleDescription: Sendable {
         case main
         case forClass(AnyClass)
         case atURL(URL)
 
-        /// The bundle the case names, over the release's own `Bundle(for:)` and `Bundle(url:)`. The
-        /// framework's own `BundleDescription` is `Sendable` and nothing else - a class, a main bundle
-        /// and a URL are compared by the URL they name, which is what this does.
         public var url: URL {
             switch self {
             case .main: return Bundle.main.bundleURL
@@ -42,17 +17,10 @@ public struct LocalizedStringResource: Hashable, Codable, CustomLocalizedStringR
 
     public typealias Comment = StaticString
 
-    /// The key this resource names.
     public var key: String
-    /// The value to show when `key` is not in the table, when the caller gave one. The framework
-    /// types it as `String.LocalizationValue`, which is a Foundation type this release's overlay
-    /// predates and the Foundation band carries; here it is the text itself.
     public var defaultValue: String?
-    /// The name of the string table, `nil` for the table the key itself names.
     public var table: String?
-    /// The locale to look the key up for, the program's own unless the caller named one.
     public var locale: Locale
-    /// The bundle the table is in, the program's own unless the caller named one.
     public var bundle: BundleDescription
 
     public init(key: String) {
@@ -85,17 +53,12 @@ public struct LocalizedStringResource: Hashable, Codable, CustomLocalizedStringR
         self = stringInterpolation.value
     }
 
-    /// The framework's own convenience: a resource out of another one.
     public init(localized resource: LocalizedStringResource) {
         self = resource
     }
 
-    /// The resource is its own localized string: what a `CustomLocalizedStringResourceConvertible`
-    /// hands back is a resource, and here that is this one.
     public var localizedStringResource: LocalizedStringResource { return self }
 
-    /// The value to show, in the order the type's own documentation gives: what the key maps to in the
-    /// table for the locale, and the default value or the key when the table has no entry.
     public func localizedString() -> String {
         if let found = CharonLookup.localizedString(key: key, table: table, locale: locale, bundle: bundle) {
             return found
@@ -144,8 +107,6 @@ public struct LocalizedStringResource: Hashable, Codable, CustomLocalizedStringR
         case bundle
     }
 
-    /// The string interpolation of a resource: a literal with holes, each hole a resource of its own
-    /// or a value written into the default value.
     public struct StringInterpolation: StringInterpolationProtocol {
         public typealias StringLiteralType = String
 
@@ -194,7 +155,6 @@ public struct LocalizedStringResource: Hashable, Codable, CustomLocalizedStringR
     }
 }
 
-/// A type whose own string is a localized string, so that it can be a title or a description.
 public protocol CustomLocalizedStringResourceConvertible {
     var localizedStringResource: LocalizedStringResource { get }
 }
@@ -203,9 +163,6 @@ extension String: CustomLocalizedStringResourceConvertible {
     public var localizedStringResource: LocalizedStringResource { return LocalizedStringResource(self) }
 }
 
-/// The bundle lookup, in one place: `Bundle` is what the release has for a table, and an entry the
-/// table does not hold comes back as the key, which is what makes the fallback the caller's own
-/// default value.
 enum CharonLookup {
     static func localizedString(key: String, table: String?, locale: Locale?,
                                 bundle: LocalizedStringResource.BundleDescription?) -> String? {

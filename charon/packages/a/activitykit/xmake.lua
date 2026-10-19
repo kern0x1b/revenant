@@ -19,9 +19,6 @@ package("activitykit")
     on_load("iphoneos", function (package)
         package:add("deps", "charon@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
                     backports = package:config("backports") or nil, backports_uikit = package:config("backports_uikit") or nil}})
-        -- the module's own API is written in terms of Foundation's LocalizedStringResource; where the
-        -- runtime's Foundation predates that type, the AppIntents package carries it, and this one
-        -- takes it from there (see the recipe's probe)
         package:add("deps", "charon@appintents", {alias = "appintents", configs = {shared = package:config("shared") or nil,
                     backports = package:config("backports") or nil, backports_uikit = package:config("backports_uikit") or nil}})
         package:add("links", "ActivityKit")
@@ -45,10 +42,6 @@ package("activitykit")
         os.mkdir(swiftdir)
         os.mkdir(probe_dir)
 
-        -- Whether this runtime's Foundation has `LocalizedStringResource`, measured: where it has not,
-        -- the AppIntents package carries the type and this module takes it from there, and the block of
-        -- ActivityKit that is written in terms of it is compiled in. The probe is the same one
-        -- AppIntents runs, and the flag is the same name.
         local platform_resource = path.join(probe_dir, "localized.swift")
         io.writefile(platform_resource, "import Foundation\npublic func probe() -> LocalizedStringResource { return LocalizedStringResource(\"\") }")
         local has = try {function ()
@@ -74,17 +67,8 @@ package("activitykit")
                   package:name())
         end
 
-        -- One module, as Styx's Combine is one module and AppIntents is one: the whole framework in a
-        -- single compile, so a declaration of one file sees every other.
         local module = path.join(swiftdir, "ActivityKit.swiftmodule")
         os.mkdir(module)
-        -- Absolute, and refused when it matches nothing: `modules/apple/sources.lua` is where the
-        -- C-family sources go and it raises "compiles %s, which matches no file" for a pattern
-        -- that matches none, and the Swift side had neither -- a relative glob resolved against
-        -- the *compiler's* working directory, which is how charon@appintents' install failed with
-        -- "error opening input file 'Sources/AppIntents/LocalizedStringResource.swift'"
-        -- (kits r2), and a glob that matched nothing compiles an empty module and calls it a
-        -- pass (kits r3).
         local sources_activitykit = os.files(path.join(package:scriptdir(), "Sources", "ActivityKit", "**.swift"))
         if #sources_activitykit == 0 then
             raise("%s compiles Sources/ActivityKit/**.swift, which matches no file", package:name())

@@ -2,16 +2,6 @@
 
 #include <string.h>
 
-// The decoder reads the symbol in the order the standard gives: the format information (BCH(15,5), both copies, the
-// nearest of the 32 valid words if it is within 3 bit errors), the version information of versions 7 and up (BCH(18,6),
-// both copies), the data modules unmasked with the mask the format names, walked in the placement order (two columns at
-// a time, upward and downward alternately, the timing column skipped), the blocks de-interleaved and each corrected with
-// Reed-Solomon over GF(256) with the 0x11D polynomial and the roots alpha^0 ... alpha^(n-1) (syndromes, Berlekamp-Massey,
-// Chien, Forney), and then the segments read: numeric, alphanumeric and byte. Kanji, ECI, FNC1 and structured append are
-// not read: a symbol that carries one fails with CharonQRDecodeUnsupported. The tables are the standard's own, and the
-// layout check after the walk holds them to it: the data modules must number the codewords of the version plus its
-// remainder bits, or the decoder refuses the symbol.
-
 #define CHARON_QR_MAX_BLOCKS 81
 #define CHARON_QR_MAX_BLOCK 150
 #define CHARON_QR_MAX_CODEWORDS 3706
@@ -23,10 +13,10 @@ typedef struct {
 } charon_qr_gf;
 
 typedef struct {
-    uint8_t ec;     // error-correction codewords per block, the same for every block of the version and level
-    uint8_t b1;     // blocks of the first group
-    uint8_t d1;     // data codewords per block, first group
-    uint8_t b2;     // blocks of the second group, each with one more data codeword
+    uint8_t ec;
+    uint8_t b1;
+    uint8_t d1;
+    uint8_t b2;
     uint8_t d2;
 } charon_qr_blocks;
 
@@ -36,7 +26,6 @@ typedef struct {
     size_t pos;
 } charon_qr_reader;
 
-// The block structure by version (row 0 unused), then by level in the order L, M, Q, H.
 static const charon_qr_blocks kBlocks[41][4] = {
     {{0}},
     {{7,1,19,0,0}, {10,1,16,0,0}, {13,1,13,0,0}, {17,1,9,0,0}},
@@ -81,7 +70,6 @@ static const charon_qr_blocks kBlocks[41][4] = {
     {{30,19,118,6,119}, {28,18,47,31,48}, {30,34,24,34,25}, {30,20,15,61,16}},
 };
 
-// The remainder modules after the codewords, by version: none, 7, 3 or 4 of them.
 static const uint8_t kRemainder[41] = {
     0,
     0, 7, 7, 7, 7, 7,
@@ -92,7 +80,6 @@ static const uint8_t kRemainder[41] = {
     0, 0, 0, 0, 0, 0,
 };
 
-// The alignment pattern centres of each version: the count, then the centres along one axis.
 static const uint8_t kAlignment[41][8] = {
     {0},
     {0},
@@ -137,10 +124,8 @@ static const uint8_t kAlignment[41][8] = {
     {7, 6, 30, 58, 86, 114, 142, 170},
 };
 
-// The format word's level bits, 00 M, 01 L, 10 H, 11 Q, as an index into kBlocks' level order L, M, Q, H.
 static const uint8_t kLevelIndex[4] = {1, 0, 3, 2};
 
-// The alphanumeric mode's character set: the value of a character is its index.
 static const char kAlphanumeric[] ="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
 
 static int popcount32(uint32_t value)
@@ -172,14 +157,12 @@ static uint8_t gf_mul(const charon_qr_gf *gf, uint8_t a, uint8_t b)
     return gf->exp[gf->log[a] + gf->log[b]];
 }
 
-// b must be non-zero.
 static uint8_t gf_div(const charon_qr_gf *gf, uint8_t a, uint8_t b)
 {
     if (a == 0) return 0;
     return gf->exp[gf->log[a] + 255 - gf->log[b]];
 }
 
-// The format word of a five-bit value: BCH(15,5) with generator 0x537, then the 0x5412 mask the standard XORs on.
 static uint32_t format_word(uint32_t data)
 {
     uint32_t rem = data << 10;
@@ -188,7 +171,6 @@ static uint32_t format_word(uint32_t data)
     return ((data << 10) | (rem & 0x3FFu)) ^ 0x5412u;
 }
 
-// The version word of a six-bit version: BCH(18,6) with generator 0x1F25.
 static uint32_t version_word(uint32_t version)
 {
     uint32_t rem = version << 12;
@@ -197,7 +179,6 @@ static uint32_t version_word(uint32_t version)
     return (version << 12) | (rem & 0xFFFu);
 }
 
-// The mask of the standard's eight: 1 where the module is inverted. i is the row, j the column.
 static int mask_inverts(int mask, int i, int j)
 {
     switch (mask) {
@@ -212,8 +193,6 @@ static int mask_inverts(int mask, int i, int j)
     }
 }
 
-// Marks every module that is not data: the finder patterns with their separators and the format information, the timing
-// patterns, the alignment patterns, and the version information of version 7 and up.
 static void mark_function(int size, int version, uint8_t *function)
 {
     memset(function, 0, (size_t)size * size);
@@ -244,8 +223,6 @@ static void mark_function(int size, int version, uint8_t *function)
     }
 }
 
-// The format information: the copy around the top-left finder, then the copy split between the top-right and bottom-left.
-// Each copy is read most significant bit first, and the nearest valid word within 3 errors is the answer.
 static int read_format(const uint8_t *modules, int size, int *level, int *mask)
 {
     static const uint8_t first[15][2] = {
@@ -275,9 +252,6 @@ static int read_format(const uint8_t *modules, int size, int *level, int *mask)
     return CharonQRDecodeOK;
 }
 
-// The version information of version 7 and up: the copy beside the top-right finder and the copy above the bottom-left
-// one, transposes of each other. The first module of each copy is the word's least significant bit (the reverse of the
-// format copies, which are read most significant bit first); measured on the host's version 7 symbol.
 static int read_version(const uint8_t *modules, int size, int version)
 {
     uint32_t top = 0, left = 0;
@@ -299,8 +273,6 @@ static int read_version(const uint8_t *modules, int size, int version)
     return best <= 3 && bestVersion == version ? CharonQRDecodeOK : CharonQRDecodeBadVersion;
 }
 
-// Reed-Solomon over GF(256): cw holds n bytes, the first of degree n - 1, and nsym of them are error correction. Corrects
-// the codeword in place and returns 0, or 1 when it has more errors than nsym / 2 or the correction does not check.
 static int rs_correct(const charon_qr_gf *gf, uint8_t *cw, int n, int nsym)
 {
     uint8_t syndrome[32] = {0}, lambda[33] = {0}, previous[33] = {0}, saved[33];
@@ -314,7 +286,6 @@ static int rs_correct(const charon_qr_gf *gf, uint8_t *cw, int n, int nsym)
     }
     if (!any) return 0;
 
-    // Berlekamp-Massey: the error locator lambda, of degree L.
     lambda[0] = 1;
     previous[0] = 1;
     int L = 0, m = 1;
@@ -340,7 +311,6 @@ static int rs_correct(const charon_qr_gf *gf, uint8_t *cw, int n, int nsym)
     }
     if (2 * L > nsym) return 1;
 
-    // The error evaluator omega = syndrome(x) * lambda(x) mod x^nsym.
     uint8_t omega[32];
     for (int i = 0; i < nsym; i++) {
         uint8_t o = 0;
@@ -348,8 +318,6 @@ static int rs_correct(const charon_qr_gf *gf, uint8_t *cw, int n, int nsym)
         omega[i] = o;
     }
 
-    // Chien search and Forney: byte idx has degree p = n - 1 - idx, so its locator is alpha^p and the root is alpha^-p.
-    // With the first root alpha^0 the magnitude is X * omega(X^-1) / lambda'(X^-1).
     int found = 0;
     for (int idx = 0; idx < n; idx++) {
         int p = n - 1 - idx;
@@ -371,7 +339,6 @@ static int rs_correct(const charon_qr_gf *gf, uint8_t *cw, int n, int nsym)
     }
     if (found != L) return 1;
 
-    // The corrected word must have zero syndromes; a correction that does not reach them is not a correction.
     for (int j = 0; j < nsym; j++) {
         uint8_t root = gf->exp[j];
         uint8_t s = 0;
@@ -400,7 +367,6 @@ static int emit(uint8_t *out, size_t capacity, size_t *length, uint8_t byte)
     return 1;
 }
 
-// The n decimal digits of v, most significant first, leading zeros included.
 static int emit_digits(uint8_t *out, size_t capacity, size_t *length, uint32_t v, int n)
 {
     uint32_t place = 1;
@@ -410,8 +376,6 @@ static int emit_digits(uint8_t *out, size_t capacity, size_t *length, uint32_t v
     return 1;
 }
 
-// The segments of the data codewords, in order, until a terminator or the end of the data. Numeric and alphanumeric
-// segments are written as the ASCII characters they stand for, so the message is always bytes.
 static int parse_segments(const uint8_t *data, size_t count, int version, uint8_t *out, size_t capacity, size_t *length,
                           int *mode)
 {
@@ -506,9 +470,6 @@ int CharonQRDecode(const uint8_t *modules, int size, uint8_t *out, size_t capaci
     int blocks = spec->b1 + spec->b2;
     int total = spec->b1 * (spec->d1 + spec->ec) + spec->b2 * (spec->d2 + spec->ec);
 
-    // The placement walk: columns in pairs from the right, each pair read upward or downward alternately, the timing
-    // column (6) skipped. The first total * 8 data bits are the codewords, and the walk counts every data module, so the
-    // layout is held to the standard's count before a bit of it is trusted.
     uint8_t stream[CHARON_QR_MAX_CODEWORDS] = {0};
     int bits = 0, dataModules = 0, upward = 1;
     for (int col = size - 1; col > 0; col -= 2) {
@@ -529,7 +490,6 @@ int CharonQRDecode(const uint8_t *modules, int size, uint8_t *out, size_t capaci
     }
     if (dataModules != total * 8 + kRemainder[version]) return CharonQRDecodeLayout;
 
-    // De-interleave: the data codewords by column across the blocks, then the error correction the same way.
     uint8_t block[CHARON_QR_MAX_BLOCKS][CHARON_QR_MAX_BLOCK];
     int dataLength[CHARON_QR_MAX_BLOCKS], blockLength[CHARON_QR_MAX_BLOCKS];
     int maxData = 0;

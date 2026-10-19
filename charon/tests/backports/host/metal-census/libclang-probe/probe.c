@@ -1,15 +1,3 @@
-/* libclang's cursor children, walked from C, against the same translation unit probe.py walks.
- *
- * Built on demand by probe.py into .agent-work/runs/metal-census/; never into the checkout. The
- * libclang C API is declared here by hand because this machine has no clang-c/Index.h - there is
- * none under /Library/Developer/CommandLineTools, and no Xcode - so the probe carries the six
- * declarations it needs rather than pulling a header it cannot find.
- *
- * The point of the C side is that it rules a cause out. The likeliest reason a visitor never fires
- * through ctypes on arm64 is a CXCursor whose layout does not match clang-c/Index.h, since the
- * struct is 32 bytes and is passed by value. So this file prints sizeof and the three offsets, and
- * the claim under test is that they agree with ctypes AND that the children are still zero.
- */
 #include <stddef.h>
 #include <stdio.h>
 
@@ -42,16 +30,13 @@ static int on_child(CXCursor cursor, CXCursor parent, void *data)
 	visited++;
 	printf("      child %s %s\n", clang_getCursorKindSpelling(cursor.kind),
 	       clang_getCursorSpelling(cursor));
-	return 2; /* CXChildVisit_Continue */
+	return 2;
 }
 int main(int argc, char **argv)
 {
 	CXTranslationUnit unit;
 	CXToken tokens[256];
 	unsigned number = 0;
-	/* the file comes from argv, because a hand-built binary run from another directory otherwise
-	 * names a file that is not there and reports no translation unit at all - which reads like a
-	 * broken libclang rather than like a missing argument */
 	const char *source = argc > 1 ? argv[1] : "decl.m";
 
 	setvbuf(stdout, NULL, _IONBF, 0);

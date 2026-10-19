@@ -7,9 +7,6 @@
 @synthesize keyboardLanguage = _keyboardLanguage;
 @synthesize sourceOptions = _sourceOptions;
 
-// The host starts with no attributes to fetch, an empty list, and no filter queries, nil. A nil list of attributes
-// is stored as the empty list; a nil filter list is stored as nil, which its copy attribute gives on its own.
-// Nothing else is coerced: the keyboard language is kept as given, and sourceOptions is the value written.
 - (instancetype)init
 {
     if ((self = [super init])) {

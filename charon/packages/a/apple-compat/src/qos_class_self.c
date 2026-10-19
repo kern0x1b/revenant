@@ -25,10 +25,6 @@ static int charon_runs_on_root(dispatch_queue_t current, long priority)
            current == dispatch_get_global_queue(priority, CHARON_QUEUE_OVERCOMMIT);
 }
 
-/* Before iOS 8 a thread has a dispatch priority, not a class of service. The main thread is user-interactive, as iOS 8 answers;
-   a worker of a global queue has the class its priority became in iOS 8 (DISPATCH_QUEUE_PRIORITY_* in queue.h); any other
-   thread has the default class a thread started with pthread_create has. iOS 8 also carries a submitter's class into the
-   blocks it submits to other queues, which no release before it records. */
 __attribute__((visibility("hidden")))
 unsigned int qos_class_self(void)
 {

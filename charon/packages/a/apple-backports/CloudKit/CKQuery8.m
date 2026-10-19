@@ -1,13 +1,3 @@
-// The query of CloudKit's first release and the three classes that describe it: the query itself, the
-// cursor its answer is continued with, and the one sort descriptor that is not a field name.
-//
-// A CKQuery is a record type, an NSPredicate and a list of sort descriptors, and nothing else. The
-// predicate is kept as it was given and printed as NSPredicate prints itself - the host's own
-// -description output is `recordType=Thing, predicate=name == "bob"`, which is the predicate's own
-// description and not a translation of it. Turning a predicate into the query document the service
-// reads, and a cursor back into a token, is a later delivery with the transport; what is here is
-// everything a caller can see before a request is made.
-
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
 #import <CloudKit/CloudKit.h>
@@ -102,9 +92,6 @@
     NSData *_serverChangeToken;
 }
 
-// Measured: the host answers +[CKQueryCursor new] with CKException and exactly these words, and the
-// same for -[CKQueryCursor init]. The cursor is the service's own token and nothing else, so a
-// cursor this port has not been given a token for is not a cursor.
 + (instancetype)cursorWithToken:(NSData *)token
 {
     CKQueryCursor *cursor = [[self alloc] initWithToken:token];
@@ -212,7 +199,6 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    // ascending is readonly on NSSortDescriptor, so the copy is built with it rather than set.
     CKLocationSortDescriptor *copy = self.ascending
         ? [[CKLocationSortDescriptor allocWithZone:zone] initWithKey:self.key relativeLocation:_relativeLocation]
         : [[CKLocationSortDescriptor allocWithZone:zone] initWithKey:self.key ascending:NO];

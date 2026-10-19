@@ -1,12 +1,3 @@
-// The six query subclasses of iOS 8, and the two result classes: what a query is asked and how the
-// store answers it.
-//
-// Every query is answered out of the store, in the order its handler expects: a sample query delivers
-// its results in batches with the handler's final flag set, a statistics query delivers one
-// statistics object, a statistics collection delivers its first statistics and then each interval's,
-// a source query delivers the sources, an observer query is answered when the store changes, and an
-// anchored query delivers the objects that changed and the anchor past them.
-
 #import <HealthKit/HealthKit.h>
 
 #import "CharonHKStore.h"
@@ -35,8 +26,6 @@
     return self;
 }
 
-// The handler is called once, when the query has finished, with the results or with the error, as the SDK's HKSampleQuery.h
-// documents; a query that failed has no results, so they are nil.
 - (void)charon_run
 {
     CharonHKStore *store = [CharonHKStore sharedStore];
@@ -122,9 +111,6 @@
     void (^_statisticsUpdateHandler)(HKStatisticsCollection *_Nullable, NSError *_Nullable);
 }
 
-// The form of iOS 8.0: a type, a predicate, the options, the anchor and the interval, and the handler
-// set on the property afterwards. -init is NS_UNAVAILABLE on this class, so these two are the only
-// ways the release makes one, and the one below is this one with the handler in the same call.
 - (instancetype)initWithQuantityType:(HKQuantityType *)quantityType
                 quantitySamplePredicate:(nullable NSPredicate *)quantitySamplePredicate
                              options:(HKStatisticsOptions)options
@@ -162,9 +148,6 @@
     _statisticsCollection = statisticsCollection;
 }
 
-// Apple's own private member: no SDK header of 16.4 or 26.2 declares -lastAnchor on
-// HKStatisticsCollectionQuery, so the port answers it under its own name and the public-shaped getter
-// is not in the method list of the exported class.
 - (nullable NSDate *)charon_lastAnchor
 {
     return _lastAnchor;
@@ -195,8 +178,6 @@
     _statisticsUpdateHandler = [statisticsUpdateHandler copy];
 }
 
-// The intervals of a collection, from its anchor to the end of what the store holds, and the
-// statistics of each. A collection with no anchor runs from the first sample the store has.
 - (void)charon_run
 {
     CharonHKStore *store = [CharonHKStore sharedStore];
@@ -358,9 +339,6 @@
 
 - (void)charon_run
 {
-    // An observer query is answered when the store changes, not at once: the release answers its
-    // handler from the notification the health daemon posts, and this store's own write is what
-    // posts it. The anchor it is answered with is the sequence the store has reached.
     CharonHKStore *store = [CharonHKStore sharedStore];
     _anchor = [HKQueryAnchor charon_anchorWithSequence:store.highestSequence];
     [store addObserver:self forTypes:self.sampleType ? [NSSet setWithObject:self.sampleType] : nil];
@@ -371,13 +349,6 @@
     [[CharonHKStore sharedStore] removeObserver:self];
 }
 
-// The handler is called with the anchor the store's own write sequence has reached, and with a
-// completion the application calls when it has caught up. The change this is reporting is written before
-// the handler is called, so this store has nothing outstanding by the time the handler returns, and the
-// completion is therefore called when it does: an application that called it itself inside the handler
-// has already said so and is not called a second time, and one that never calls it has still been told
-// that there is nothing left to wait for. The completion is not a way to stop the next change from
-// coming - that is -stopQuery: - and the handler is told of every change while the query runs.
 - (void)charon_storeDidChange:(NSArray<NSUUID *> *)identifiers
 {
     CharonHKStore *store = [CharonHKStore sharedStore];
@@ -409,18 +380,12 @@
     HKQueryAnchor *_anchor;
     void (^_resultsHandler)(HKAnchoredObjectQuery *query, NSArray<HKSample *> *_Nullable results, NSUInteger newAnchor,
                             NSError *_Nullable error);
-    // The handler of the initialiser of iOS 9.0, which is a different selector and a different shape
-    // from the one of iOS 8.0: an object anchor in, the deletions as objects out.
     void (^_charonResultsHandler9)(HKAnchoredObjectQuery *query, NSArray<HKSample *> *_Nullable sampleObjects,
                                    NSArray<HKDeletedObject *> *_Nullable deletedObjects, HKQueryAnchor *_Nullable newAnchor,
                                    NSError *_Nullable error);
 }
 @synthesize charon_limit = _charonLimit;
 
-// The form of iOS 8.0, whose anchor is the integer an earlier query answered with rather than an
-// object, and whose handler is told the new anchor as that same integer. iOS 9.0 made the anchor an
-// object and the handler take the deletions as HKDeletedObject instances, and +[HKQueryAnchor
-// anchorFromValue:] is how an integer of this form is carried across to that one.
 - (instancetype)initWithType:(HKSampleType *)type
                    predicate:(nullable NSPredicate *)predicate
                       anchor:(NSUInteger)anchor
@@ -439,9 +404,6 @@
     return fresh;
 }
 
-// The form of iOS 9.0, with an object anchor and a handler that takes the deletions as the deleted
-// objects themselves. With no update handler set the query answers once and stops itself, which is
-// what the header says it does; with one it keeps running and is told of every change the store makes.
 - (void)charon_setResultsHandler:(void (^)(HKAnchoredObjectQuery *query, NSArray<HKSample *> *_Nullable sampleObjects,
                                            NSArray<HKDeletedObject *> *_Nullable deletedObjects, HKQueryAnchor *_Nullable newAnchor,
                                            NSError *_Nullable error))handler
@@ -450,9 +412,6 @@
     _charonResultsHandler9 = [handler copy];
 }
 
-// The form of iOS 9.0: with an update handler the query keeps running and is answered with every
-// change the store makes while it runs, and with none it answers once and stops itself. That is the
-// difference the header draws between the two initialisers, and it is what the store is asked for.
 - (void)charon_storeDidChange:(NSArray<NSUUID *> *)identifiers
 {
     void (^update)(HKAnchoredObjectQuery *, NSArray<HKSample *> *_Nullable, NSArray<HKDeletedObject *> *_Nullable,

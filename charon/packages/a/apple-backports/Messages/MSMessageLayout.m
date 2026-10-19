@@ -2,16 +2,6 @@
 #import <Messages/MSMessageLayout.h>
 #import <Messages/MSMessageTemplateLayout.h>
 
-// The layout is how a message is drawn in the transcript, and MSMessageLayout is the bare class: a
-// subclass says what the bubble looks like. It carries nothing itself, so what is here is the object's
-// identity, its copy, and the two subclasses the port carries.
-//
-// The two subclasses are value objects, and a value object is copied property by property: an
-// MSMessageTemplateLayout's captions, its image and its media file all travel with a copy, and the
-// copy compares equal to what it was copied from. What neither can do is be *drawn*: the transcript is
-// the Messages app's own view, and on this release that app has no iMessage transcript to draw it in
-// (facts/Messages/MSMessage.md).
-
 @implementation MSMessageLayout
 
 - (id)copyWithZone:(NSZone *)zone

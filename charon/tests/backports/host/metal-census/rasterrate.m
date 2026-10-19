@@ -1,27 +1,3 @@
-/* The 13.0 rasterization-rate holders, measured against Apple's own objects where Apple answers.
- *
- * THERE WAS NO RUNTIME FAULT, and what hid it was a PRINT FORMAT. MTLSize is
- * { NSUInteger width, height, depth } - INTEGERS - and this case first printed those fields with %g,
- * so a width of 1920 was read as the DOUBLE whose bit pattern is 1920: 9.48606e-321. The round trip
- * was working throughout; the number was not. Every width and height here is printed and compared as
- * an unsigned long.
- *
- * TWO REAL DEFECTS WERE FOUND WHILE GETTING HERE, and both are in the port, not the print:
- *   MTLRasterizationRateLayerArray had no -init, so its NSMutableArray ivar was never created and
- *   -setLayer:atIndex: spun forever in its grow loop - a message to nil does not advance the count.
- *   layerCount is the LEADING CONTIGUOUS RUN of written layers, which is what Apple's own map
- *   answers; it is not the array's length. Both were measured against Apple and copied.
- *
- * WHERE APPLE IS THE ORACLE: the whole map, including the contiguous-run count - measured above.
- * WHERE IT IS NOT: the layer's own counters, which initWithSampleCount: is IGNORED for on a host
- * with no device and which then read back 9.88131e-324, so those two are compared against the
- * HEADER - the count a caller built the layer with - and not against an uninitialised value. There is
- * also a MEASURED DIVERGENCE that is recorded rather than asserted equal: Apple answers 0 for a
- * sample index past the end of a layer's array, where the header declares the element nullable and
- * the port answers nil.
- *
- * NO DEVICE IS CREATED. The port is compiled with the four classes RENAMED and this case is not.
- */
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
@@ -60,7 +36,6 @@ static void check(BOOL ok, NSString *what)
     else { printf("  FAIL %s\n", [what UTF8String]); failures++; }
 }
 
-/* MTLSize's fields are NSUInteger, so they are printed and compared as unsigned long. */
 static void same_size(MTLSize a, MTLSize b, NSString *what)
 {
     check(a.width == b.width && a.height == b.height && a.depth == b.depth,
@@ -73,7 +48,7 @@ int main(void)
 {
     setvbuf(stdout, NULL, _IONBF, 0);
     @autoreleasepool {
-        {   /* THE MAP, against Apple's own map, fresh. */
+        {
             MTLRasterizationRateMapDescriptor *h = [[MTLRasterizationRateMapDescriptor alloc] init];
             charonHost_MTLRasterizationRateMapDescriptor *p =
                 [[charonHost_MTLRasterizationRateMapDescriptor alloc] init];
@@ -88,7 +63,7 @@ int main(void)
             h.label = @"host"; p.label = @"host";
             check([[p.label copy] isEqualToString:[h.label copy]], @"MTLRasterizationRateMapDescriptor.label");
         }
-        {   /* THE CONTIGUOUS-RUN COUNT, which is what Apple answers and was measured. */
+        {
             MTLRasterizationRateLayerDescriptor *hl =
                 [[MTLRasterizationRateLayerDescriptor alloc] initWithSampleCount:MTLSizeMake(4, 4, 1)];
             charonHost_MTLRasterizationRateLayerDescriptor *pl =
@@ -111,7 +86,7 @@ int main(void)
             check([h layerCount] == [p layerCount] && [p layerCount] == 3,
                   @"a write far past the run leaves the count alone, and both sides agree");
         }
-        {   /* THE LAYER'S OWN COUNTERS, against the HEADER and not against Apple. */
+        {
             charonHost_MTLRasterizationRateLayerDescriptor *p =
                 [[charonHost_MTLRasterizationRateLayerDescriptor alloc] initWithSampleCount:MTLSizeMake(7, 5, 1)];
             same_size([p sampleCount], MTLSizeMake(7, 5, 1),
@@ -122,7 +97,7 @@ int main(void)
             same_size([fresh maxSampleCount], [fresh sampleCount],
                       @"maxSampleCount answers what sampleCount does, both the enumeration's zero");
         }
-        {   /* THE SAMPLE ARRAYS, and the ONE MEASURED DIVERGENCE. */
+        {
             charonHost_MTLRasterizationRateLayerDescriptor *p =
                 [[charonHost_MTLRasterizationRateLayerDescriptor alloc] initWithSampleCount:MTLSizeMake(2, 2, 1)];
             check([p.horizontal objectAtIndexedSubscript:0] == nil, @"a fresh layer's horizontal array is empty");

@@ -1,7 +1,3 @@
-/* Records what the SYSTEM's WebKit answers for the extension family, with no port code in the process, so
- * the file it writes is the host's own answers. Compiled WITHOUT renames.sh's flags. The manifest is the
- * committed fixture, named by WEBEXT_MANIFEST, and both sides are handed the same one.
- */
 #import "webextension-extension_scenario.h"
 
 int main(void)

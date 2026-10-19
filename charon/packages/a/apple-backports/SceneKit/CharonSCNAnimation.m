@@ -5,19 +5,12 @@
 #import "../CharonSpring.h"
 #import <QuartzCore/QuartzCore.h>
 
-// SceneKit's evaluation of Core Animation objects added to a node or a material property, as measured against macOS
-// SceneKit (facts/SceneKit/SCNView.md, "Animations"): an animation whose beginTime is 0 begins at the first frame
-// drawn after it was added, any other beginTime is absolute media time; the delegate hears animationDidStart: at
-// that first frame and animationDidStop:finished: when the active duration ends (YES) or the animation is removed
-// before (NO), both on the main queue after the frame; the curves are Core Animation's, and a CASpringAnimation
-// follows the damped spring of its mass, stiffness, damping and initial velocity.
-
 @interface CharonSCNAnimationEntry : NSObject
 {
 @public
     NSString *_key;
     CAAnimation *_animation;
-    CFTimeInterval _begin;      // resolved at the first frame for a beginTime of 0
+    CFTimeInterval _begin;
     BOOL _committed, _stopped, _paused;
     CFTimeInterval _pausedLocal;
 }
@@ -40,14 +33,12 @@ static double CharonSCNTimed(CAMediaTimingFunction *function, double fraction)
 }
 
 typedef struct {
-    BOOL active;      // the animation contributes a value
-    BOOL finished;    // its active duration is over
-    double time;      // local time within one iteration, 0 to duration
+    BOOL active;
+    BOOL finished;
+    double time;
     double duration;
 } CharonSCNPhase;
 
-// Core Animation's timing: begin, speed, time offset, duration (0 is 0.25 s), repeat count or duration,
-// autoreverses, fill mode.
 static CharonSCNPhase CharonSCNPhaseAt(CAAnimation *animation, double parentTime)
 {
     CharonSCNPhase phase = {NO, NO, 0, 0};
@@ -128,7 +119,6 @@ static NSValue *CharonSCNValueOf(const float *c, NSUInteger count)
     return nil;
 }
 
-// from + (to - from) * t, component by component; nil when the two are not the same kind of value
 static NSValue *CharonSCNInterpolate(NSValue *from, NSValue *to, double t)
 {
     float a[16], b[16], out[16];
@@ -191,8 +181,6 @@ static void CharonSCNSendStop(CAAnimation *animation, BOOL finished)
     }
 }
 
-// The timing members the measured series do not cover, said once when an animation that sets one is added: evaluated
-// by the port (Core Animation's rules) but not held to macOS SceneKit, or not evaluated at all.
 static void CharonSCNSayUnmeasured(CAAnimation *animation)
 {
     NSString *(^member)(NSString *, NSString *) = ^(NSString *name, NSString *how) {
@@ -230,7 +218,6 @@ static void CharonSCNSayUnmeasured(CAAnimation *animation)
     [self removeAnimationForKey:key];
     CharonSCNAnimationEntry *entry = [CharonSCNAnimationEntry new];
     entry->_key = [key copy];
-    // Core Animation copies an animation when it is added: later changes to the caller's object change nothing
     entry->_animation = [(CAAnimation *)animation copy];
     CharonSCNSayUnmeasured(entry->_animation);
     [_entries addObject:entry];
@@ -313,7 +300,6 @@ static void CharonSCNSayUnmeasured(CAAnimation *animation)
     return copy;
 }
 
-// The value one animation gives a key path at a local time, or nil when it gives none.
 - (NSValue *)valueOf:(CAAnimation *)animation keyPath:(NSString *)keyPath atTime:(double)time model:(id<CharonSCNAnimatable>)model
                 into:(NSMutableDictionary<NSString *, NSValue *> *)values
 {
@@ -322,7 +308,6 @@ static void CharonSCNSayUnmeasured(CAAnimation *animation)
         return nil;
     }
     if ([animation isKindOfClass:[CAAnimationGroup class]]) {
-        // children run in the group's local time; the group's timing function bends that time
         double local = phase.duration > 0 ? CharonSCNTimed(animation.timingFunction, phase.time / phase.duration) * phase.duration : phase.time;
         for (CAAnimation *child in [(CAAnimationGroup *)animation animations]) {
             if ([child isKindOfClass:[CAPropertyAnimation class]]) {
@@ -394,7 +379,6 @@ static void CharonSCNSayUnmeasured(CAAnimation *animation)
                 });
             }
         }
-        // the entry's begin replaces the animation's own: a beginTime of 0 means the first frame
         CFTimeInterval local = entry->_paused ? entry->_pausedLocal : now - entry->_begin;
         CFTimeInterval time = local + animation.beginTime;
         NSString *keyPath = [animation isKindOfClass:[CAPropertyAnimation class]] ? [(CAPropertyAnimation *)animation keyPath] : nil;

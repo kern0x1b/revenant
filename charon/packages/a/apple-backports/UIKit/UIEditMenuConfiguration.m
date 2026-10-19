@@ -1,7 +1,5 @@
 #import <UIKit/UIKit.h>
 
-// The SDK marks -init and +new unavailable: the only public constructor is the factory. -init still answers
-// the runtime's state (a nil identifier, a zero point, an automatic arrow), which the ivars' zero values give.
 @implementation UIEditMenuConfiguration {
 @private
     id<NSCopying> _identifier;

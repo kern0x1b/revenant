@@ -1,47 +1,7 @@
--- The declaration IR of the iOS SDK (section 5.1 of coordination/wave-2026-10-03/design-foundation.md): one row per declaration,
--- read by the decls extractor (libclang) from every framework of the SDK and every framework nested in one (Accelerate's vImage
--- and vecLib; the helper bundles outside Frameworks/ are not followed). Each framework is one translation unit, parsed one at a time
--- under a timeout.
---
--- What is committed is the spec's shard per framework, packages/a/apple-backports/spec/<Framework>/declarations.tsv (a nested
--- framework's is spec/<Outer>/<Inner>/declarations.tsv): only the columns the generator reads (SHARD_NAMES), uncompressed, with a
--- header line that records the libclang and the SDK that made it. The full 21-column IR, for documentation, is a build product: write
--- it to IR_FULL when that is set.
---
--- usage (from the repository root): IR_SDK=<iPhoneOS26.2.sdk> [IR_MODE=write|check|conflicts] xmake l ./tools/found/ir.lua
---   IR_MODE=write (default) regenerates the shards whose content changed, removes the shards of frameworks decls no longer lists,
---                 and rewrites tools/found/unparsed.tsv. It fails, and writes nothing, when decls fails on a framework (a timeout or a
---                 crash; decls' own unparsed row is a result, not a failure), when a framework decls still lists has a committed shard
---                 and no shard this run gives it, or when a conflict is not listed in tools/found/conflicts.tsv (or a listed one is no
---                 longer a conflict).
---   IR_MODE=check the same regeneration in memory: it fails naming the difference when decls fails, when the extractor's libclang
---                 differs from the one the shards record (a re-pin is a reviewed event), when a shard differs, when a shard is stale,
---                 or on a conflict list mismatch.
---   IR_MODE=conflicts prints every conflict the extractor found, for review, and writes nothing.
---   IR_MODE=gaps prints each framework of IR_SNAPSHOT (one folder per framework) that has no shard, with the category the
---                 extractor's own result gives it, and writes nothing.
---   IR_MODE=docs runs the doc-time pass (decls --doc) over every framework and prints its rows to stdout, one line per declaration,
---                 and writes nothing; the last line is a # comment with the counts and the time. The doc generator reads the same
---                 rows from decls directly; this mode is the measurement of the pass over the whole SDK.
---   IR_SPEC    the spec folder (default packages/a/apple-backports/spec).
---   IR_CONFLICTS and IR_UNPARSED the reviewed conflict list and the unparsed list (default tools/found/conflicts.tsv and
---                 tools/found/unparsed.tsv; the tests use their own). The list has a line per framework the extractor does not parse as
---                 C or Objective-C: name, class (parsed (Swift interface), no declarations, or unparsed), evidence. The summary counts
---                 the classes; a framework no step reads is unparsed, and the count is 0 when every module has a source.
---   IR_FULL    if set, the full 21-column IR is written there (a build product, not committed).
---   IR_DECLS   the extractor binary (default: the xmake build product of tools/found).
---   IR_TIMEOUT seconds per framework (default 300).
---   IR_NO_SHARD the derived table of the frameworks with no shard that declare nothing of their own, written beside unparsed.tsv
---                 (default tools/found/no-shard.tsv): name, class, targets, reason, computed by the sweep from the frameworks' own headers and the census of the declarations they reach
---                 (scan_no_shard), never listed. write and check fail when it differs from the regenerated table.
---   IR_REPIN   if set, write mode re-records the shards whose libclang identity differs from this machine's (the version, the
---                 digest of the dylib it loads, and the target). Without it a difference is refused in both modes: a re-pin is a
---                 reviewed event (review F8).
 local SDK = os.getenv("IR_SDK")
 if not SDK then raise("IR_SDK must name the iPhoneOS SDK (for example .../iPhoneOS<version>.sdk)") end
 SDK = path.absolute(SDK)
 local MODE = os.getenv("IR_MODE") or "write"
--- The repository this script belongs to: every default below is a path in it, whatever folder the script runs from.
 local FOUND = path.absolute(os.scriptdir())
 local TOOLS = path.directory(FOUND)
 local REPO = path.directory(TOOLS)
@@ -54,9 +14,6 @@ local NO_SHARD = os.getenv("IR_NO_SHARD") or path.join(FOUND, "no-shard.tsv")
 local stream = import("gen.stream", {rootdir = TOOLS, anonymous = true})
 local host = import("gen.host", {rootdir = TOOLS, anonymous = true})
 local byteorder = import("byteorder", {rootdir = path.join(REPO, "modules"), anonymous = true})
--- The extractor: the decls target of tools/found, configured and built from the repository first. xmake reports the product's folder
--- from the configuration: build/macosx/arm64/release/decls once tools/found is configured, build/macosx/arm64/decls before, and no
--- product exists until it is built, so the lookup comes after the configuration and the build (a fresh tree has neither).
 local function build_decls()
     os.execv("xmake", {"f", "-P", FOUND, "-y", "-q"}, {curdir = REPO})
     os.execv("xmake", {"build", "-P", FOUND, "-y", "decls"}, {curdir = REPO})
@@ -66,9 +23,6 @@ if not DECLS then
     build_decls()
     DECLS = host.target_product(REPO, FOUND, "decls")
 end
--- decls, through a pipe (no temporary file): the lines it printed. A run that exits non-zero raises with its own message, so a failed
--- extractor never reaches a write. decls' exit codes: 2 for a configuration, file system or refusal error (each names its path), 1 for
--- a doc-mode parse failure.
 local function decls_run(args)
     local lines = {}
     local status, errors = stream.run("/usr/bin/env", table.join({"IR_SDK=" .. SDK, DECLS}, args), function (line)
@@ -83,21 +37,13 @@ local function decls(args)
     end
     return lines
 end
--- the target the extractor compiles for (decls owns it: decls --target)
 local TRIPLE = (decls({"--target"})[1]:gsub("%s+$", ""))
-local COLUMNS = 21  -- the 18 of section 5.1 with the declaration and messages, then the three renderer facts (decls.cc kFullColumns)
--- The columns a shard keeps: kind, usr, container, name, side, type (typedef rows only), avail, message, declhash, value (an enum constant's
--- value as clang evaluates it: the other rows leave it "-", ruling 2). The IR's other columns are derived or are
--- build products: framework is the folder, availhash is derived from avail, header and line are for documentation, decl is for the
--- docs (ruling D8: re-derived from clang at doc time), and type, params, nullab, attrs and value are inside the declaration hash.
--- name and side are stored only where the USR does not give them (shard.lua). avail and message are rendered by the generator
--- (avail.lua, ruling D7).
+local COLUMNS = 21
 local SHARD_NAMES = "kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value"
 local shard = import("shard", {rootdir = FOUND})
 local avail = import("avail", {rootdir = FOUND})
--- the one atomic writer of the generators (tools/atomic.lua, shared with tools/gen/emit.lua)
 local atomic = import("atomic", {rootdir = TOOLS, anonymous = true})
-local SDK_NAME  -- the SDK's name without its path or .sdk suffix, as the shards record it
+local SDK_NAME
 
 SDK = path.absolute(SDK)
 SPEC = path.absolute(SPEC)
@@ -109,21 +55,16 @@ local function trim(s)
     return (s:gsub("^%s+", ""):gsub("%s+$", ""))
 end
 
--- The tab-separated cells of one line.
 local function cells_of(line)
     local out = {}
     for cell in (line .. "\t"):gmatch("([^\t]*)\t") do table.insert(out, cell) end
     return out
 end
 
--- The redacted SDK path is what the rows carry: the rows must not depend on where the SDK is installed.
 local function redact(s)
     return (s:gsub(SDK:gsub("%p", "%%%0"), "<sdk>"))
 end
 
--- The rows of one framework (COLUMNS cells each, newline-terminated), or the extractor's own unparsed row. A run of decls that fails
--- (a timeout ends it by SIGALRM, a crash, a usage error) raises in every mode: it is not a result, and nothing is written after it.
--- A run that prints no rows at all raises for the same reason.
 local function parse(f)
     local lines, status, errors = decls_run({"--timeout", TIMEOUT, f.name})
     if status ~= 0 then
@@ -136,7 +77,6 @@ local function parse(f)
     return table.concat(lines, "\n") .. "\n"
 end
 
--- The extractor writes one row of kind unparsed, instead of rows, for a framework that does not parse.
 local function is_unparsed(out)
     return cells_of(out:match("^[^\n]*"))[2] == "unparsed"
 end
@@ -147,7 +87,6 @@ local function unparsed_row(name, reason)
     return table.concat(row, "\t") .. "\n"
 end
 
--- The header line of a shard: what made it, so a re-pin is visible in the file.
 local function shard_header(libclang)
     return "#libclang=" .. libclang .. "\tsdk=" .. SDK_NAME .. "\tcolumns=" .. SHARD_NAMES .. "\n"
 end
@@ -156,7 +95,6 @@ local function shard_path(label)
     return path.join(SPEC, label, "declarations.tsv")
 end
 
--- The reviewed conflicts: key -> the cells of its line in tools/found/conflicts.tsv. The key is the first seven cells of a line.
 local function listed_conflicts()
     local listed = {}
     if not os.isfile(CONFLICTS) then return listed end
@@ -170,22 +108,16 @@ local function listed_conflicts()
 end
 
 local started = os.mclock()
--- decls resolves the SDK from IR_SDK, so every extractor run below sees the absolute path the sweep uses
 os.setenv("IR_SDK", SDK)
--- the identity of the extractor: its libclang version, the digest of the dylib it loads, and the target (decls --version)
 local libclang = (decls({"--version"})[1]:gsub("%s+$", ""))
 SDK_NAME = (path.basename(SDK):gsub("%.sdk$", ""))
 
--- The frameworks the sweep covers, as decls lists them (its name and its root): the one code path for the list, the headers and the
--- doc mode.
 local frameworks = {}
--- a usr/include module's root is the include folder itself (decls lists it so); a framework's root is its own .framework folder
 local USR_INCLUDE = path.join(SDK, "usr", "include")
 for _, line in ipairs(decls({"--list"})) do
     local name, root = line:match("^([^\t]+)\t(.+)$")
     table.insert(frameworks, {name = name, root = root, usr = root == USR_INCLUDE})
 end
--- The doc-time rows of one framework (decls --doc), or nil when the extractor does not parse it (its own status is an error).
 local function doc_rows(f)
     local out
     try {
@@ -197,7 +129,6 @@ local function doc_rows(f)
     return out
 end
 
--- The doc-time pass over the SDK (IR_MODE=docs): the rows of every framework that parses, on stdout; nothing is written.
 if MODE == "docs" then
     local started = os.mclock()
     local seen, parsed, rows, bytes = 0, 0, 0, 0
@@ -220,7 +151,7 @@ local parsed, rows = 0, 0
 local full = {table.concat({"-", "meta", "-", "-", "-", "-", "-", "-", "-", "-", "libclang=" .. libclang, "triple=" .. TRIPLE,
     "sdk=" .. SDK_NAME, "-", "-", "-", "-", "-", "-", "-", "-"}, "\t") .. "\n"}
 local shards, unparsed, conflicts = {}, {}, {}
-local census_of = {}  -- framework -> {own, foreign, files}: the extractor's count of the declarations its translation unit reaches, and per header file
+local census_of = {}
 for _, f in ipairs(frameworks) do
     local out = parse(f)
     if not is_unparsed(out) then
@@ -233,10 +164,8 @@ for _, f in ipairs(frameworks) do
                 census_of[f.name] = {own = tonumber(c[5]:match("own=(%d+)")), foreign = tonumber(c[11]:match("foreign=(%d+)")), files = {}}
                 table.insert(full, line .. "\n")
             elseif c[2] == "census-file" then
-                -- the header file a foreign declaration is written in (under the SDK root) and its declaration count: the census only
                 census_of[f.name].files[c[5]] = tonumber(c[11]:match("count=(%d+)"))
             elseif c[2] == "conflict" then
-                -- the marker names the key (kind, usr, container, name, side) and how the extractor resolved it
                 table.insert(marks, {key = table.concat({c[1], c[7], c[3], c[4], c[5], c[6], c[9]}, "\t"), resolution = c[9],
                     variants = c[11], entity = table.concat({c[7], c[3], c[4], c[5], c[6]}, "\t")})
             else
@@ -250,7 +179,6 @@ for _, f in ipairs(frameworks) do
         end
         local resolution_of = {}
         for _, mark in ipairs(marks) do resolution_of[mark.entity] = mark.resolution end
-        -- one row per declaration: the variants of a key are merged by the rule of avail.lua, and only a key marked merged has any
         local written, result_of = {}, {}
         for _, key in ipairs(order) do
             local variants = group[key]
@@ -280,14 +208,6 @@ for _, f in ipairs(frameworks) do
             if back_name ~= name or back_side ~= side then
                 raise(f.name .. ": the name or side of a " .. kind .. " row does not round trip: " .. usr)
             end
-            -- an accessor is derived from its property, so the shards leave it out; the full IR keeps it
-            -- the typed set: a column is in a shard only when a committed stage reads it (ruling of 2026-10-10, per column). The type is
-            -- the return type of a method or a function, the field or variable type (with its qualifiers), the underlying type of a
-            -- typedef; the parameters are the parameter types and names, which the trace stubs read (the NSError ** detection, named by
-            -- v-gen); the attributes are the property's, which the property stubs read. The nullability has no committed
-            -- reader and stays in the full IR; the value is an enum constant's (ruling 2); decl and the locations are not in a shard.
-            -- the value is an enum constant's (the constants record reads it); a row of any other kind has none, and the write refuses one
-            -- that has (the declaration hash covers the value cell as written, so the file must not leave out a value the hash covers)
             if kind ~= "enumconst" and row[14] ~= "-" then
                 raise(f.name .. ": a " .. kind .. " row has a value; only an enum constant has one: " .. usr)
             end
@@ -301,16 +221,11 @@ for _, f in ipairs(frameworks) do
         if #lines > 1 then shards[f.name] = table.concat(lines, "\n") .. "\n" end
     else
         local reason = cells_of(out:match("^[^\n]*"))[5]
-        -- classified after the loop, once the helpers that read the SDK are defined (source_of)
         table.insert(unparsed, {f.name, reason, f = f})
         table.insert(full, unparsed_row(f.name, reason))
     end
 end
 
--- The facts of a framework with no shard, read from its own headers (rule 2 of v-gen-rules): the headers are read as text, comments are
--- stripped and the preprocessor lines are read as directives. Its targets are not read from them: they are the owners of the
--- declarations its census names (scan_no_shard). Nothing of the headers is copied: the table holds the class, the targets and the
--- reason, and the sweep writes it.
 local function strip_comments(text)
     text = text:gsub("/%*.-%*/", " ")
     return (text:gsub("//[^\n]*", ""))
@@ -322,15 +237,11 @@ local function lines_of(text)
     return out
 end
 
--- The facts of one header: whether it holds code outside the preprocessor, whether a Metal macro names its conditions (the file is
--- then Metal code: a file-level reading), whether it defines macros (an include guard's own #define is not one), and the names its
--- #include, #include_next and #import lines give.
 local header_facts_of = {}
 local function header_facts(file)
     if header_facts_of[file] then return header_facts_of[file] end
     local info = {code = false, metal = false, define = false, includes = {}}
     local guard
-    -- a line that ends in a backslash continues the directive or the macro it starts: the lines are read as one
     for _, line in ipairs(lines_of((strip_comments(io.readfile(file)):gsub("\\\n", " ")))) do
         if line:match("^%s*#") then
             local ifndef = line:match("^%s*#%s*ifndef%s+([%w_]+)")
@@ -355,10 +266,6 @@ local function header_facts(file)
     return info
 end
 
--- The headers a usr/include module's map names, relative to the map: header, umbrella header, textual header, and an umbrella
--- directory's headers. Only the module's own block counts, and the map is the one that declares the module as a top-level module (the
--- same rule as decls). Its submodules' headers are the module's own only when nested is set (the owners of the declarations a census
--- names); decls reads them as their own submodule's.
 local function usr_module_headers(name, nested)
     local include = path.join(SDK, "usr", "include")
     local maps = os.files(path.join(include, "*.modulemap"))
@@ -401,9 +308,6 @@ local function usr_module_headers(name, nested)
     return out
 end
 
--- The owners of the headers: the Headers/ folder of each framework names it (nested frameworks included), and a usr/include module's
--- headers are the ones its map names. base_owner names the framework an include such as <UIKit/UIKit.h> means: the top-level one first.
--- A framework whose folder is a symbolic link is an alias of the framework it links to (alias_of): its headers are that framework's.
 local sweep_by_name, owner_dir, usr_owner, usr_nested_owner, base_owner, alias_of = {}, {}, {}, {}, {}, {}
 local by_root = {}
 for _, f in ipairs(frameworks) do
@@ -428,7 +332,6 @@ for _, f in ipairs(frameworks) do
     if not f.usr and base_owner[base] == nil then base_owner[base] = f.name end
 end
 
--- The owner of a header file: the innermost Headers/ folder above it, else the usr/include module whose map names it.
 local function owner_of(file)
     local dir = path.directory(file)
     while dir ~= "" and dir ~= "/" do
@@ -440,15 +343,10 @@ local function owner_of(file)
     return usr_owner[file]
 end
 
--- The owner of a header a census names: owner_of, else the usr/include module whose map names it in a submodule (decls reads a
--- submodule's header as the submodule's own, so the top-level module that holds it is the owner here). Nil when no framework holds it.
 local function declaration_owner(file)
     return owner_of(file) or usr_nested_owner[file]
 end
 
--- The header file an include names, read as the compiler reads it: beside the including header (not for #include_next, which skips its
--- folder), then in usr/include, then as a framework header (<Name/Header.h> is Name's Headers/Header.h, the top-level framework first).
--- Nil when the SDK has no such file.
 local function file_of_include(from, include)
     local near = path.normalize(path.join(path.directory(from), include.name))
     if not include.next and os.isfile(near) then return near end
@@ -463,7 +361,6 @@ local function file_of_include(from, include)
     return nil
 end
 
--- The header files one header reaches by its include lines (memoized).
 local reached_of_file = {}
 local function reached(file)
     if reached_of_file[file] == nil then
@@ -487,9 +384,6 @@ local function own_files(f)
     return own_files_of[f.name]
 end
 
--- The owners of the declarations a census names: the framework whose headers hold the header each foreign declaration is written in
--- (declaration_owner), with the declaration count of each. A header no framework or module map holds leaves its declarations unresolved,
--- with their count and the headers. Used where the include lines reach no framework with a shard (scan_no_shard).
 local function census_owners(census)
     local counts, unowned, unowned_count = {}, {}, 0
     for file, count in pairs(census.files) do
@@ -521,11 +415,6 @@ local function census_owners(census)
     return "umbrella", names, "its headers declare nothing; its declarations belong to " .. table.concat(parts, ", ")
 end
 
--- The class, the targets and the reason of a framework with no shard. The targets are the owners with shards of the headers its own
--- headers reach: the include lines are followed file by file, a header of a framework with a shard is a target and is not followed, and
--- a header of a framework with no shard is followed through its own includes. The census's foreign count decides which reading applies:
--- a framework whose unit reaches no declaration of another header is judged by its own headers, and a framework that reaches some is
--- judged by its targets. When the include lines reach no framework with a shard, the census names the owners (census_owners).
 local function scan_no_shard(f, census)
     if alias_of[f.name] then
         return "alias", {alias_of[f.name]}, "its folder is a symbolic link to " .. alias_of[f.name] .. "'s"
@@ -565,9 +454,6 @@ local function scan_no_shard(f, census)
         return "empty", {}, "its headers hold no code, no macro and no include"
     end
     if code then return "unexplained", {}, "its headers hold code outside the Metal guards; declarations of other headers reach the unit too" end
-    -- the census names the header each foreign declaration is written in: when every such header has an owner, the owners are the
-    -- targets (census_owners). Otherwise the include walk's targets are kept only where the census confirms them: the walk reads every
-    -- include line (it does not evaluate #if), and it stops at a shard, which may hold only part of a header's declarations
     local class, owners, reason = census_owners(census)
     if class ~= "unresolved" then return class, owners, reason end
     local confirmed = {}
@@ -586,7 +472,6 @@ local function scan_no_shard(f, census)
     return "umbrella", names, "its headers declare nothing; the declarations are those of " .. table.concat(names, ", ")
 end
 
--- The Swift interfaces of the SDK, by module name (read once, on the first framework that needs one).
 local swift_interface_of_memo
 local function swift_interface_of(module)
     if swift_interface_of_memo == nil then
@@ -599,11 +484,6 @@ local function swift_interface_of(module)
     return swift_interface_of_memo[module]
 end
 
--- The source of a framework the extractor does not parse as C or Objective-C, read from the SDK (every module is accounted for by its
--- source: unparsed is a class of no step). Two sources:
---   parsed (Swift interface): decls says the module is Swift only and the SDK holds its Swift interface, which the swift shard step reads;
---   no declarations: its own headers are none (a framework's Headers/ folder holds no header; a usr/include module's map names none).
--- Returns the class and the evidence, or nil when neither holds: the framework stays unparsed.
 local function source_of(f, reason)
     if string.find(reason, "Swift", 1, true) then
         local interface = swift_interface_of(f.name:match("([^/]+)$"))
@@ -642,9 +522,6 @@ do
     table.sort(sources, function (a, b) return byteorder.less(a[1], b[1]) end)
 end
 
--- The contract (ruling 5, rule 2): every framework of the sweep with no shard is classified, none silently: it is in the unparsed list
--- (the extractor's reason), or its census gives it no declaration of its own and the sweep computes its class, targets and reason
--- (no-shard.tsv, written beside unparsed.tsv). A framework with declarations of its own and no shard is refused.
 local no_shard_text
 if MODE == "write" or MODE == "check" then
     local classified = {}
@@ -676,9 +553,6 @@ if MODE == "write" or MODE == "check" then
     no_shard_text = table.concat(rows, "\n") .. "\n"
 end
 
--- The gaps: each framework of the snapshot (IR_SNAPSHOT, one folder per framework) that has no shard, named with the extractor's own
--- result: not an SDK framework, no public header, Swift only, skipped by the extractor (its parse failed, with the reason), or parsed
--- with no declaration of its own (its translation unit reaches declarations of other frameworks, or none at all).
 if MODE == "gaps" then
     local snapshot = os.getenv("IR_SNAPSHOT") or raise("IR_SNAPSHOT must name the snapshot folder whose frameworks are classified")
     local skipped, sdk_framework = {}, {}
@@ -702,7 +576,6 @@ if MODE == "gaps" then
             count = usr_headers
             detail = "usr/include headers " .. usr_headers .. ", Swift stdlib module " .. (swift_stdlib and "yes" or "no")
         else
-            -- a framework with no header is a row of the extractor's unparsed list, with its reason (decls writes that row)
             local reason = skipped[name]
             local no_header = reason ~= nil and (reason:find("Swift interface only", 1, true) ~= nil
                 or reason:find("no public header", 1, true) ~= nil or reason:find("no module map header", 1, true) ~= nil)
@@ -727,7 +600,6 @@ if MODE == "gaps" then
     return
 end
 
--- The conflicts: every one must be listed, and every listed one must be a conflict.
 local listed = listed_conflicts()
 if MODE == "conflicts" then
     for _, c in ipairs(conflicts) do print(c.key .. "\t" .. c.variants .. "\t" .. c.result) end
@@ -755,8 +627,6 @@ if #unlisted > 0 or #stale > 0 or #wrong > 0 then
         #wrong > 0 and ("\n" .. table.concat(wrong, "\n")) or ""))
 end
 
--- The shards that exist now. The shard of a framework decls no longer lists is stale. A committed shard of a framework decls still
--- lists is never removed here: when this run gives that framework no shard, the change is raised, and a reviewed change removes it.
 local listed_names = {}
 for _, f in ipairs(frameworks) do listed_names[f.name] = true end
 local existing = {}
@@ -793,8 +663,6 @@ for label, text in pairs(shards) do
 end
 byteorder.sort(changed)
 
--- every framework the extractor does not parse as C or Objective-C, with its source (the class) and the evidence; a framework no step reads
--- is a line of class unparsed, and the summary counts them
 local unparsed_rows = {}
 for _, s in ipairs(sources) do table.insert(unparsed_rows, {s[1], s[2], s[3]}) end
 for _, u in ipairs(unparsed) do table.insert(unparsed_rows, {u[1], "unparsed", redact(u[2])}) end
@@ -804,8 +672,6 @@ local unparsed_text = {"# the frameworks of the SDK the extractor does not parse
 for _, r in ipairs(unparsed_rows) do table.insert(unparsed_text, r[1] .. "\t" .. r[2] .. "\t" .. r[3]) end
 unparsed_text = table.concat(unparsed_text, "\n") .. "\n"
 
--- The identity the shards record must be this machine's: every committed shard is compared, in both modes (review F8). A difference
--- is refused, unless write mode is re-recording with IR_REPIN (the reviewed re-pin).
 if MODE == "check" or MODE == "write" then
     local differs = {}
     for file in pairs(existing) do

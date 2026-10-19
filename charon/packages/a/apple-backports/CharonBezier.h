@@ -1,7 +1,5 @@
 #include <math.h>
 
-// The progress along a cubic Bezier timing curve through (0,0), (x1,y1), (x2,y2), (1,1): solve x(s) = x, answer y(s).
-// One solver for the port: UIKit's cubic timing parameters and SceneKit's CAMediaTimingFunction both take it from here.
 static inline double charon_bezier_progress(double x1, double y1, double x2, double y2, double x)
 {
     if (x <= 0) return 0;

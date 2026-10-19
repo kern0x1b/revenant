@@ -1,8 +1,3 @@
-// What ModelIO itself exports that a release without it does not: the three vertex-attribute names
-// the port's own meshes and readers use, and the protocol objects those names and the header's
-// conformances are looked up by. On a release that has ModelIO the framework supplies both; on one
-// that does not, the port has to - this file is the probe's copy of that, so the port process can be
-// linked without the system framework. A line here marked TODO belongs in the port itself.
 #import <Foundation/Foundation.h>
 #import <ModelIO/ModelIO.h>
 
@@ -22,8 +17,6 @@ NSString *const MDLVertexAttributeShadingBasisU = @"shadingBasisU";
 NSString *const MDLVertexAttributeShadingBasisV = @"shadingBasisV";
 NSString *const MDLVertexAttributeSubdivisionStencil = @"subdivisionStencil";
 
-// The protocols of MDLTypes.h, restated so the probe's own objects have protocol objects to conform
-// to and compare with when the framework is not in the process.
 @protocol MDLComponent <NSObject>
 @end
 

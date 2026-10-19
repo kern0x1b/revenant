@@ -1,6 +1,3 @@
-// Host probe: whether macOS's own MIDIUMPMutableEndpoint delivers to its destination's callback while it is disabled, and the
-// function block IDs it gives the endpoint's blocks. The endpoint and a MIDI 2.0 output port are made in this process; the
-// endpoint is not disposed by the API and lives until the process exits. Nothing persistent is created.
 #import <Foundation/Foundation.h>
 #import <CoreMIDI/CoreMIDI.h>
 #include <stdio.h>

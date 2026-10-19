@@ -1,13 +1,7 @@
-// HKSourceRevision and HKDeletedObject: which revision of which source wrote an object, and that an
-// object of the store is gone. Both arrived in iOS 9.0, so both are files of their own.
-
 #import <HealthKit/HealthKit.h>
 
 #import "CharonHKStore.h"
 
-// The 11.0 members' storage, added here beside the 9.0 one's: the properties that read them are in
-// HKWorkoutRoute110.m, of the release that declares them, and the port's own accessors below are what
-// reach it from this file.
 @implementation HKSourceRevision {
     HKSource *_source;
     NSString *_version;
@@ -16,8 +10,6 @@
 }
 CHARON_HEALTHKIT_UNCREATABLE_INIT
 
-// The port's own constructor, which the 11.0 initialiser of the class goes through, so that the two
-// release's forms share one path and the facts of the 9.0 one are set in one place.
 - (instancetype)charon_initWithSource:(HKSource *)source version:(nullable NSString *)version
 {
     return [self initWithSource:source version:version];
@@ -39,8 +31,6 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 {
     return _charonOperatingSystemVersion;
 }
-// iOS 11.0 added -productType and -operatingSystemVersion, and this delivery carries the 9.0 group,
-// so both are @dynamic and the compiler emits no accessor for either.
 @dynamic productType;
 @dynamic operatingSystemVersion;
 
@@ -69,10 +59,6 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 {
     HKSource *source = [coder decodeObjectOfClass:[HKSource class] forKey:@"source"];
     NSString *version = [coder decodeObjectOfClass:[NSString class] forKey:@"version"];
-    // The two members of 11.0, which -encodeWithCoder: below writes under these four keys and which
-    // this was not reading, so an archive round trip lost them: measured by
-    // tests/backports/host/healthkit, where the round trip answered nil and 0 for a product type and
-    // an operating system version this port had been given iPhone and 15 for.
     NSString *productType = [coder decodeObjectOfClass:[NSString class] forKey:@"productType"];
     NSOperatingSystemVersion operatingSystem = {
         (NSInteger)[coder decodeDoubleForKey:@"osMajor"],
@@ -106,9 +92,6 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return _source;
 }
 
-// The version of the source, which the header says is taken from the source's CFBundleVersion and
-// "may be nil for older data". Nil stays nil, so a caller can tell a source that reported no version
-// from one that reported an empty one.
 - (nullable NSString *)version
 {
     return _version;
@@ -142,8 +125,6 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     NSUUID *_UUID;
     NSDictionary *_charonDeletedMetadata;
 }
-// iOS 11.0 added -metadata, and this delivery carries the 9.0 group, so the member is @dynamic and
-// the compiler emits no accessor for it.
 @dynamic metadata;
 
 
@@ -152,9 +133,6 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return YES;
 }
 
-// The store makes one of these for every object it removed, out of its own deleted table, so that an
-// anchored query can hand an application the identifier of what is gone as the release hands it an
-// HKDeletedObject rather than a bare UUID.
 - (instancetype)charon_initWithUUID:(NSUUID *)uuid
 {
     HKDeletedObject *deleted = [super init];
@@ -186,7 +164,6 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return _UUID;
 }
 
-// 11.0's metadata, read by the property of that name in HKWorkoutRoute110.m
 - (nullable NSDictionary<NSString *, id> *)charon_deletedMetadata
 {
     return _charonDeletedMetadata;

@@ -5,16 +5,6 @@
 #import <MediaPlayer/MediaPlayer.h>
 #import "check.h"
 
-/* The release's own view controllers presented without a style, in a program linked with SDK 13 or later: the style
-   resolves as iOS 13 resolves it (facts/UIKit/UIModalPresentationAutomatic.md), so the ones that prefer no style of
-   their own are shown in the port's sheet. A controller whose own initializer on 6.1.3 sets a style keeps it and is the
-   release's own presentation (the activity view controller sets 17, the preview controller full screen: measured on
-   the iPad 2, 2026-09-24); for those the check is that the port's sheet stays out of it. Each is presented, and after a
-   moment it must be the presented controller, in the window, with its view at the sheet's frame when it is in the
-   sheet; dismissed, the presenter must be itself again. The composers are skipped where the device cannot send (no account). An iPhone application
-   (UIDeviceFamily 1), so that the iPad 2 runs it phone-sized. Nothing of what the controllers show is read or logged:
-   only their classes, frames and the presentation's state. */
-
 static NSString *const results_folder = @"/private/var/backports";
 
 static NSString *rect_text(CGRect r)
@@ -101,7 +91,6 @@ static NSString *rect_text(CGRect r)
         printf("record %s.presented: presented=%d window=%d frame=%s presentation=%s\n", name.UTF8String, root.presentedViewController == controller, view.window != nil,
                rect_text(frame).UTF8String, NSStringFromClass([controller.presentationController class]).UTF8String);
         charon_check(root.presentedViewController == controller && view.window != nil, [[name stringByAppendingString:@".presented"] UTF8String], nil);
-        /* The sheet's large detent: 320 wide from y 40 to the bottom of a 320 x 480 window. */
         BOOL sheetFrame = frame.origin.x == 0 && frame.origin.y == 40 && frame.size.width == 320 && frame.size.height == 440;
         BOOL inSheet = [controller.presentationController isKindOfClass:[UISheetPresentationController class]];
         if (ownStyle)

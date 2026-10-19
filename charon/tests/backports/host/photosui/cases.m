@@ -1,29 +1,3 @@
-// The same questions asked of the host's PhotosUI and of the port's, one "name<TAB>answer" line each,
-// so that the two runs can be compared line by line. This file is compiled twice: once against the
-// host's own framework (run.sh passes -DCHARON_HOST_REFERENCE and links -framework PhotosUI) and
-// once against the port's own objects, built from the port's sources and the transcribed header
-// beside this one.
-//
-// Every question is asked in a forked child, because the host's own implementation does not answer
-// all of them: +[PHPickerFilter allFilterMatchingSubfilters:@[]] takes the process down with it, and
-// a probe that dies on the third question answers nothing about the other forty. A question the child
-// does not come back from is an answer - "aborted" - and both sides are asked the same question the
-// same way, so a refusal is compared like any other answer.
-//
-// What is asked, and what can be compared at all:
-//
-//   - every filter the queue names answers a non-nil PHPickerFilter, and none of them aborts. The
-//     class of the answer is the class the header declares. That is the whole of what can be asked of
-//     a filter: the header's API has no query for what a filter matches, on this port or on the host,
-//     so what a filter matches is not something this differential compares and it does not pretend to.
-//   - the three compositions, over the inputs the header allows and one it does not.
-//   - a configuration: what it starts with, and what a copy holds of what was set on it.
-//   - the two methods of iOS 16, on a picker made with a plain configuration.
-//
-// The two methods of PHPhotoLibrary are not here: the host's own PHPhotoLibrary+PhotosUISupport.h
-// declares both inside `#if TARGET_OS_IPHONE || TARGET_OS_MACCATALYST` and API_UNAVAILABLE(macos,
-// tvos, watchos), so macOS cannot be asked about them at all. facts/PhotosUI/LimitedLibrary.md says
-// what the port answers for them and on what grounds.
 #import <PhotosUI/PhotosUI.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,10 +11,6 @@ static void answer(NSString *name, NSString *value)
     fflush(stdout);
 }
 
-// One question, in a child of its own, and the answer whichever way it goes: the class of what came
-// back, "(nil)" for nothing, "raised <name>" for a refusal it survives, and "aborted" for one it does
-// not. run.sh compares the lines the two sides print, and a line on one side and not the other is a
-// difference rather than a pass.
 static void ask(NSString *name, void (^block)(void))
 {
     fflush(stdout);
@@ -79,8 +49,6 @@ static void ask(NSString *name, void (^block)(void))
         answer(name, @"aborted");
         return;
     }
-    // The child printed its own line, name and all; take it as the answer so that the two sides'
-    // files hold the same names in the same order whatever each of them did.
     if (used == 0) {
         answer(name, @"no answer");
         return;
@@ -89,7 +57,6 @@ static void ask(NSString *name, void (^block)(void))
     fflush(stdout);
 }
 
-// The answer a question about a filter gives: the class of the filter, or what it did instead.
 static void ask_filter(NSString *label, id (^block)(void))
 {
     NSString *name = [@"filter." stringByAppendingString:label];
@@ -125,7 +92,6 @@ int main(int argc, char **argv)
         ask_filter(@"bursts", ^id { return PHPickerFilter.burstsFilter; });
         ask_filter(@"cinematicVideos", ^id { return PHPickerFilter.cinematicVideosFilter; });
 
-        // The three compositions, over the inputs the header allows and one it does not.
         ask(@"all.ofBoth", ^{
             PHPickerFilter *filter = [PHPickerFilter allFilterMatchingSubfilters:@[PHPickerFilter.imagesFilter, PHPickerFilter.videosFilter]];
             answer(@"all.ofBoth", filter ? NSStringFromClass([filter class]) : @"(nil)");
@@ -160,8 +126,6 @@ int main(int argc, char **argv)
             answer(@"not.ofNil", filter ? NSStringFromClass([filter class]) : @"(nil)");
         });
 
-        // Every case of the enum, because a filter of a style the release cannot know is still a
-        // filter and must answer rather than raise.
         for (NSInteger style = PHAssetPlaybackStyleUnsupported; style <= PHAssetPlaybackStyleVideoLooping; style++) {
             NSString *name = [NSString stringWithFormat:@"playbackStyle.%ld", (long)style];
             ask(name, ^{
@@ -170,7 +134,6 @@ int main(int argc, char **argv)
             });
         }
 
-        // A configuration: what it starts with, and what a copy holds.
         ask(@"config", ^{
             PHPickerConfiguration *fresh = [[PHPickerConfiguration alloc] init];
             PHPickerConfiguration *freshCopy = [fresh copy];
@@ -195,7 +158,6 @@ int main(int argc, char **argv)
             answer(@"config.copy.filter.nonnull", copy.filter ? @"yes" : @"no");
         });
 
-        // The two methods of iOS 16, on a picker with a plain configuration.
         ask(@"picker.selection.methods", ^{
             PHPickerViewController *picker = [[PHPickerViewController alloc] initWithConfiguration:[[PHPickerConfiguration alloc] init]];
             [picker deselectAssetsWithIdentifiers:@[@"nonesuch"]];

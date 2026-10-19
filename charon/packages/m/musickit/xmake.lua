@@ -6,14 +6,6 @@ package("musickit")
 
     add_links("MusicKit")
 
-    -- Styx is compiled against the runtime a port takes, and the port links one build of it: what the
-    -- port asks of the runtime it asks here too, and MusicKit passes it on, so that the modules are
-    -- read against that runtime's own resource directory. (charon@styx, xmake.lua:10-15.)
-    --
-    -- The compiler is the runtime's own SWIFT_EXEC and never a path: the store holds two builds of
-    -- swift 6.4.0, one of which still carries the driver's own "minimum deployment target of iOS 7.0"
-    -- check, and only the patched one reaches the port's own release. Resolving it through the
-    -- runtime is what makes that a fact about the build rather than a thing to get wrong by hand.
     add_configs("shared", {description = "Compile against a shared swift-runtime and its packaged libc++, for a port that requires them so.", default = false, type = "boolean"})
     add_configs("backports", {description = "Compile against the swift-runtime built with the backports, for a port that requires it so.", default = false, type = "boolean"})
 
@@ -33,8 +25,6 @@ package("musickit")
         package:add("deps", "charon@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
                     backports = package:config("backports") or nil}})
         package:add("frameworks", "Foundation", "CoreGraphics")
-        -- The developer token is signed with the same P-256 implementation the CloudKit family links,
-        -- so the curve arithmetic exists once in the port rather than twice.
         package:add("deps", "charon@micro-ecc", {alias = "micro-ecc"})
     end)
 
@@ -56,8 +46,6 @@ package("musickit")
         local files = os.files(path.join("files", "MusicKit", "**.swift"))
         assert(#files > 0, "the module has no sources")
         os.mkdir(path.absolute("objects"))
-        -- The C shim, against micro-ecc's headers: the ES256 signature of a developer token is the
-        -- same curve work the CloudKit family does, and one implementation of it is the point.
         local micro = assert(package:dep("micro-ecc"), "MusicKit signs its developer token with charon@micro-ecc")
         os.vrunv(toolchain:tool("cc"), table.join(target, {"-I" .. path.join(os.scriptdir(), "files", "include"),
                  "-I" .. path.join(micro:installdir("include")), "-I" .. path.join("files"),

@@ -1,37 +1,7 @@
-// UIAccessibilityBlocks17.m - the 33 block-form accessibility properties of iOS 17.0, on NSObject,
-// so they are reachable from every object that already inherits the release's own accessibility API.
-//
-// What the host answers was measured first (facts/UIKit/UIKit17Absence.md, M2), and the measurement
-// decided this file's whole shape:
-//
-//   * The host carries the SETTER of all 33 and the GETTER of none. Read from the runtime, not from a
-//     header: on NSObject, UIResponder and UIView alike, -instancesRespondToSelector: answers YES for
-//     e.g. setAccessibilityLabelBlock: and NO for accessibilityLabelBlock, isAccessibilityLabelBlock
-//     and _accessibilityLabelBlock. So the port implements both halves anyway - a property whose
-//     setter the host has and whose getter it does not is a property a caller can set and cannot read,
-//     and a port that carried only the setter would be a worse API than the host's. What the port does
-//     NOT do is invent a third spelling to explain the missing getter.
-//
-//   * A block set through the setter does NOT reach the plain property. Measured on the host: a UIView
-//     whose accessibilityLabel is "plain" still answers "plain" after
-//     setAccessibilityLabelBlock: takes a block returning "from-block". So this file stores the block
-//     and does not bridge it into accessibilityLabel, because the host does not either and a bridge
-//     here would be the port answering something the system does not. The plain properties stay the
-//     release's own; a caller that wants VoiceOver to read a label sets accessibilityLabel, which is
-//     what this release's VoiceOver reads.
-//
-// Storage is one associated object per property, with the copy policy the header states, so a mutable
-// block the caller goes on editing does not change what the object answers - the same rule the port
-// already keeps for the attributed label, hint and value in NSObject+AccessibilityAttributedStrings.m.
-// The key is a distinct address per property, which is what keeps -accessibilityElementsBlock from
-// reading what -accessibilityHeaderElementsBlock stored.
-
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 #import "UIAccessibilityBlocks17.h"
 
-// One address per property. Declared file-static so the addresses are distinct from one another and
-// cannot collide with another translation unit's, and const so a caller cannot take one.
 static const char CharonAXAccessibilityActivateBlockKey;
 static const char CharonAXAccessibilityActivationPointBlockKey;
 static const char CharonAXAccessibilityAttributedHintBlockKey;
@@ -75,8 +45,6 @@ static id charon_block_get(id object, const void *key)
 
 static void charon_block_set(id object, const void *key, id block)
 {
-    // copy, not retain: the header says `copy`, and a stack block that has returned must not be left
-    // reachable through the object.
     objc_setAssociatedObject(object, key, block, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
@@ -448,9 +416,6 @@ static void charon_block_set(id object, const void *key, id block)
 
 - (UIAccessibilityDirectTouchOptions)accessibilityDirectTouchOptions API_AVAILABLE(ios(17.0))
 {
-    // Not a block and not a plain stored value: the host answers the getter with a real value, so the
-    // port keeps one. A fresh object has no direct-touch area, which is the header's own None = 0, and
-    // the setter stores what it is given under a key of its own.
     return (UIAccessibilityDirectTouchOptions)[charon_block_get(self, &CharonAXDirectTouchOptionsKey) unsignedIntegerValue];
 }
 

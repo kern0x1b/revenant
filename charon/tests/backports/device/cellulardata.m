@@ -87,9 +87,6 @@ static void diagnose_bridge(void)
 
 typedef CTError (*CharonCTServerConnectionSetCellularDataIsDisallowed)(CTServerConnectionRef connection, Boolean disallowed);
 
-// Toggles the daemon's own restriction flag directly through the private setter this release
-// exports, since iOS 6 has no Settings UI for this iOS-9 feature to drive it through - this is
-// the only way to raise a real state change on this hardware and prove the notifier fires for it.
 static void toggle_real_state(CTCellularData *data)
 {
     void *handle = dlopen("/System/Library/Frameworks/CoreTelephony.framework/CoreTelephony", RTLD_LAZY);
@@ -153,9 +150,6 @@ int main(int argc, char *argv[])
         CHECK_EQUAL(image_of_method([CTCellularData class], @selector(cellularDataRestrictionDidUpdateNotifier)), @"libCoreTelephonyBackports.dylib",
                     "-[CTCellularData cellularDataRestrictionDidUpdateNotifier] comes from the backports");
 
-        // Not [[CTCellularData alloc] init]: that literal pattern is what ARC's codegen
-        // rewrites into a call to _objc_alloc, an entry point iOS 6.1.3's libobjc does not
-        // have - real iOS 6 runs only what a plain objc_msgSend send does.
         id allocated = ((id (*)(id, SEL))objc_msgSend)((id)[CTCellularData class], sel_registerName("alloc"));
         CTCellularData *data = ((id (*)(id, SEL))objc_msgSend)(allocated, sel_registerName("init"));
         CTCellularDataRestrictedState first = data.restrictedState;

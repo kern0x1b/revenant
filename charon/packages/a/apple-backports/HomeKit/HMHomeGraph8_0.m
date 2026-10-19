@@ -1,33 +1,13 @@
-// The home graph of iOS 8.0: HMHome and the objects it holds -- HMRoom, HMZone, HMUser,
-// HMServiceGroup -- with the triggers and action sets a home automates with: HMTrigger, HMTimerTrigger,
-// HMActionSet.
-//
-// iOS 6 runs no home hub, no homekitd and no accessories daemon, so there is no system service to ask
-// for a home graph and the port keeps it itself, in CharonHomeKitStore. What an application builds
-// through -addHomeWithName:completionHandler: is there for the next launch, and every method that
-// changes the graph writes the store before it calls back.
-//
-// Every class here is made through the port's own designated initialiser, `charon_initWithStore:`,
-// because the release marks -init and +new unavailable on all of them; see CharonHomeKitConstruction.h
-// for why, and for the pair of functions every graph edge is written with, because Apple's headers give
-// the uniqueIdentifier family an NSUUID while the store's keys are strings.
-//
-// One release's API per object file, which is what the band machinery needs.
 #import "CharonHomeKitInternal.h"
 
 #pragma mark - HMRoom
 
 @implementation HMRoom
 
-// -init, as the release's own class answers it: the body read out of the
-// arm64e cache of iOS 16.0, and what it does is written down in
-// facts/HomeKit/HMAccessoryProfile.md. The header closes -init; Apple's class does not.
 @synthesize charon_identifier = _charon_identifier, charon_homeIdentifier = _charon_homeIdentifier;
 
 CHARON_HOMEKIT_NIL_INIT
 
-// The port's own designated initialiser; see CharonHomeKitConstruction.h for why this is
-// not -init and what the method-family attribute is for.
 - (instancetype)charon_initWithStore:(CharonHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
 {
     self = [super init];
@@ -50,8 +30,6 @@ CHARON_HOMEKIT_NIL_INIT
 
 - (NSArray<HMAccessory *> *)accessories
 {
-    // A room's accessories are the ones the home's own ordering says are in it: the graph, not a second
-    // copy of the membership, is what answers, and it answers the same on every launch.
     NSMutableDictionary *home = [[CharonHomeKitStore shared] tableNamed:@"homes"][_charon_homeIdentifier];
     if (!home)
         return @[];
@@ -89,15 +67,10 @@ HMRoom *CharonHomeKitRoom(NSString *identifier, NSString *homeIdentifier)
 
 @implementation HMZone
 
-// -init, as the release's own class answers it: the body read out of the
-// arm64e cache of iOS 16.0, and what it does is written down in
-// facts/HomeKit/HMAccessoryProfile.md. The header closes -init; Apple's class does not.
 @synthesize charon_identifier = _charon_identifier, charon_homeIdentifier = _charon_homeIdentifier;
 
 CHARON_HOMEKIT_NIL_INIT
 
-// The port's own designated initialiser; see CharonHomeKitConstruction.h for why this is
-// not -init and what the method-family attribute is for.
 - (instancetype)charon_initWithStore:(CharonHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
 {
     self = [super init];
@@ -142,8 +115,6 @@ CHARON_HOMEKIT_NIL_INIT
         CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeNilParameter, @"a room is needed"));
         return;
     }
-    // A room already in another zone of the same home is refused rather than moved out of it, which is
-    // what HomeKit does and what an application that lays out zones would be surprised by.
     NSString *identifier = CharonHomeKitUUIDString(room.uniqueIdentifier);
     NSMutableDictionary *home = [[CharonHomeKitStore shared] tableNamed:@"homes"][_charon_homeIdentifier];
     for (NSString *zoneIdentifier in home[@"zoneOrder"] ?: @[]) {
@@ -193,15 +164,10 @@ HMZone *CharonHomeKitZone(NSString *identifier, NSString *homeIdentifier)
 
 @implementation HMUser
 
-// -init, as the release's own class answers it: the body read out of the
-// arm64e cache of iOS 16.0, and what it does is written down in
-// facts/HomeKit/HMAccessoryProfile.md. The header closes -init; Apple's class does not.
 @synthesize charon_identifier = _charon_identifier, charon_homeIdentifier = _charon_homeIdentifier;
 
 CHARON_HOMEKIT_UNAVAILABLE_INIT
 
-// The port's own designated initialiser; see CharonHomeKitConstruction.h for why this is
-// not -init and what the method-family attribute is for.
 - (instancetype)charon_initWithStore:(CharonHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
 {
     self = [super init];
@@ -240,15 +206,10 @@ HMUser *CharonHomeKitUser(NSString *identifier, NSString *homeIdentifier)
 
 @implementation HMServiceGroup
 
-// -init, as the release's own class answers it: the body read out of the
-// arm64e cache of iOS 16.0, and what it does is written down in
-// facts/HomeKit/HMAccessoryProfile.md. The header closes -init; Apple's class does not.
 @synthesize charon_identifier = _charon_identifier, charon_homeIdentifier = _charon_homeIdentifier;
 
 CHARON_HOMEKIT_NIL_INIT
 
-// The port's own designated initialiser; see CharonHomeKitConstruction.h for why this is
-// not -init and what the method-family attribute is for.
 - (instancetype)charon_initWithStore:(CharonHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
 {
     self = [super init];
@@ -271,8 +232,6 @@ CHARON_HOMEKIT_NIL_INIT
 
 - (NSArray<HMService *> *)services
 {
-    // A service belongs to an accessory, so the group walks the accessories' own service lists to find
-    // the ones it holds: the graph answers, and it answers the same on every launch.
     NSMutableDictionary *accessories = [[CharonHomeKitStore shared] tableNamed:@"accessories"];
     NSMutableArray *found = [NSMutableArray array];
     for (NSString *serviceIdentifier in CharonHomeKitStringListField(CharonHomeKitRecord(@"servicegroups", _charon_identifier), @"services")) {
@@ -347,9 +306,6 @@ HMServiceGroup *CharonHomeKitServiceGroup(NSString *identifier, NSString *homeId
 
 @implementation HMActionSet
 
-// -init, as the release's own class answers it: the body read out of the
-// arm64e cache of iOS 16.0, and what it does is written down in
-// facts/HomeKit/HMAccessoryProfile.md. The header closes -init; Apple's class does not.
 @synthesize charon_identifier = _charon_identifier, charon_homeIdentifier = _charon_homeIdentifier;
 
 CHARON_HOMEKIT_NIL_INIT
@@ -359,8 +315,6 @@ CHARON_HOMEKIT_NIL_INIT
     self.charon_homeIdentifier = homeIdentifier;
 }
 
-// The port's own designated initialiser; see CharonHomeKitConstruction.h for why this is
-// not -init and what the method-family attribute is for.
 - (instancetype)charon_initWithStore:(CharonHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
 {
     self = [super init];
@@ -468,8 +422,6 @@ HMActionSet *CharonHomeKitActionSet(NSString *identifier, NSString *homeIdentifi
 
 @synthesize charon_identifier = _charon_identifier, charon_homeIdentifier = _charon_homeIdentifier;
 
-// The port's own designated initialiser; see CharonHomeKitConstruction.h for why this is not
-// -init and what the method-family attribute is for.
 - (instancetype)charon_initWithStore:(CharonHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
 {
     (void)store;
@@ -573,14 +525,9 @@ HMTrigger *CharonHomeKitTrigger(NSString *identifier, NSString *homeIdentifier)
 
 @implementation HMTimerTrigger
 
-// -init, as the release's own class answers it: the body read out of the
-// arm64e cache of iOS 16.0, and what it does is written down in
-// facts/HomeKit/HMAccessoryProfile.md. The header closes -init; Apple's class does not.
 CHARON_HOMEKIT_NIL_INIT
 - (instancetype)initWithName:(NSString *)name fireDate:(NSDate *)fireDate recurrence:(NSDateComponents *)recurrence
 {
-    // HMTrigger's -init is unavailable in the release's header, so the timer trigger is built through
-    // the port's own designated initialiser and the three initialisers above it are its arguments.
     self = [super charon_initWithStore:[CharonHomeKitStore shared] identifier:nil];
     if (self) {
         [self charon_applyName:name];
@@ -599,9 +546,6 @@ CHARON_HOMEKIT_NIL_INIT
         [self charon_applyFireDate:fireDate];
         CharonHomeKitSetField(@"triggers", self.charon_identifier, @"timeZone", timeZone.name);
         [self charon_applyRecurrence:recurrence];
-        // The calendar is stored by its identifier, which is what crosses a property list: a calendar
-        // object is not one of a value's properties, and a store that held one would hold a different
-        // object each launch.
         NSString *identifier = nil;
         if ([recurrenceCalendar respondsToSelector:@selector(calendarIdentifier)])
             identifier = [recurrenceCalendar valueForKey:@"calendarIdentifier"];
@@ -636,8 +580,6 @@ CHARON_HOMEKIT_NIL_INIT
 
 - (void)updateFireDate:(NSDate *)fireDate completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
-    // A fire date in the past is refused, the way HomeKit refuses it: a trigger that fires where it
-    // cannot is one that will never fire again.
     if (!fireDate) {
         CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeNilParameter, @"a fire date is needed"));
         return;
@@ -684,9 +626,6 @@ CHARON_HOMEKIT_NIL_INIT
 
 - (void)charon_applyRecurrence:(NSDateComponents *)recurrence
 {
-    // A recurrence is a set of fields, and it is stored as the numbers themselves so that it crosses a
-    // property list, and read back the same way. A field that is not set is left out rather than
-    // written as zero, because a zero is a real value for a day and a real value for an hour.
     if (!recurrence)
         return;
     NSMutableDictionary *fields = [NSMutableDictionary dictionary];

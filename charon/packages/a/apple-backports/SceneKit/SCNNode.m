@@ -9,14 +9,9 @@
     SCNVector3 _boundingBoxMin;
     SCNVector3 _boundingBoxMax;
     BOOL _hasExplicitBoundingBox;
-    // The orientation is the one truth for rotation, orientation and eulerAngles. Angles that were set are kept as
-    // they were given, the way SceneKit answers eulerAngles (2.0, 0.2, -2.5) back unchanged; any other change of the
-    // orientation drops them and the angles are derived again.
     SCNQuaternion _orientation;
     SCNVector3 _eulerAngles;
     BOOL _hasEulerAngles;
-    // A matrix that was set as the transform is kept as it was given (a shear stays); position, scale, orientation
-    // and rotation are then its decomposition, and setting any one of them composes the transform from the parts again.
     SCNMatrix4 _matrix;
     BOOL _hasMatrix;
     SCNNode *_presentation;
@@ -177,8 +172,6 @@
     return [_animations isAnimationForKeyPaused:key];
 }
 
-// The key paths measured against macOS SceneKit are eulerAngles, scale and opacity; position is animated the same way
-// and not measured (no series records it); others are said and left.
 - (NSValue *)charonModelValueForKeyPath:(NSString *)keyPath
 {
     if ([keyPath isEqualToString:@"eulerAngles"]) return [NSValue valueWithSCNVector3:self.eulerAngles];
@@ -212,10 +205,6 @@
     return parent ? CharonSCNMatrixMultiply(local, [parent charonPresentedWorldTransform]) : local;
 }
 
-// The node that answers what the last frame drew: the model's own values with the animations' applied, over the same
-// geometry, light and camera. There is one for each node, held and brought up to date here, and its children are the
-// presentation nodes of the model's children, so it has a parent and a world transform of its own, as macOS SceneKit's
-// has. macOS brings it up to date when a frame is committed; here it is brought up to date when it is asked for.
 - (SCNNode *)presentationNode
 {
     if (_isPresentation) {
@@ -378,7 +367,6 @@
         _geometry = [coder decodeObjectOfClass:[SCNGeometry class] forKey:@"geometry"];
         _physicsField = [coder decodeObjectOfClass:[SCNPhysicsField class] forKey:@"physicsField"];
         _position = [coder containsValueForKey:@"position"] ? [CharonSCNCoding decodeVector3:coder forKey:@"position"] : SCNVector3Make(0, 0, 0);
-        // star2.scn's nodes carry both: an all-zero rotation and the orientation quaternion, which is the one to read
         if ([coder containsValueForKey:@"orientation"]) {
             _orientation = [CharonSCNCoding decodeVector4:coder forKey:@"orientation"];
         } else if ([coder containsValueForKey:@"rotation"]) {
@@ -451,7 +439,6 @@
     for (SCNParticleSystem *system in _particleSystems) {
         [copy->_particleSystems addObject:system];
     }
-    // a copy has no children (clone has them) and keeps the animations, as macOS SceneKit's copy does
     copy->_animations = [_animations charonCopy];
     return copy;
 }

@@ -1,8 +1,5 @@
 #import "CharonCallKit.h"
 
-// iOS 6 loads no application extensions (facts/Foundation/CloudAndExtensions.md), so no identifier names a call
-// directory extension here: each one is answered as the system answers an identifier it has no extension for, on a
-// queue of its own, as the system's answers come.
 @implementation CXCallDirectoryManager
 
 + (CXCallDirectoryManager *)sharedInstance

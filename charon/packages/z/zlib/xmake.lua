@@ -12,8 +12,6 @@ package("zlib")
     add_configs("recipe", {description = "The digest of this recipe, so a changed flag is a different library.", default = hash.strhash128(table.concat(digest, ";")), type = "string", readonly = true})
 
     local FLAGS = {"-Os", "-fvisibility=hidden", "-fno-strict-aliasing"}
-    -- The deflate and inflate core. The gz* file layer and compress.c/uncompr.c are the zlib API's file and one-shot
-    -- helpers, which the Compression backport does not call: it drives deflate and inflate directly, with raw windows.
     local SOURCES = {"adler32.c", "crc32.c", "deflate.c", "infback.c", "inffast.c", "inflate.c", "inftrees.c", "trees.c", "zutil.c"}
 
     on_install("iphoneos", function (package)

@@ -7,22 +7,6 @@
 extern OSStatus CharonPlayerRenderCallback(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, const AudioTimeStamp *inTimeStamp,
                                            UInt32 inBusNumber, UInt32 inNumberFrames, AudioBufferList *ioData);
 
-// The real topology this port builds, matching Apple's own default engine wiring: mainMixerNode
-// is connected to outputNode from the moment the engine exists, before any application code runs.
-// This port's engine does the same - AUGraphConnectNodeInput(mixer -> output) happens in -init,
-// not left for a caller to do by hand.
-//
-// A player node carries no AudioUnit (see AVAudioPlayerNode.m); connecting one installs
-// CharonPlayerRenderCallback on the destination's real input bus via AUGraphSetNodeInputCallback
-// instead of AUGraphConnectNodeInput - the callback *is* the connection for that side.
-//
-// Test-only offline output: kAudioUnitSubType_GenericOutput needs no mediaserverd (confirmed via
-// AudioComponentFindNext on a real 6.1.3 device - see facts/AVFoundation/AVAudioEngine.md) and
-// pulls by hand through AudioUnitRender rather than a hardware I/O thread, which is exactly what
-// proves a real application's node graph, format negotiation and buffer scheduling move real
-// samples without needing a device. A real application still gets kAudioUnitSubType_RemoteIO -
-// this switch is off by default and only ever set by a test binary.
-
 static BOOL CharonOfflineOutput = NO;
 
 @implementation AVAudioEngine {
@@ -34,13 +18,8 @@ static BOOL CharonOfflineOutput = NO;
     AVAudioOutputNode *_charon_output;
     AVAudioInputNode *_charon_input;
     NSMutableSet<AVAudioNode *> *_charon_attached;
-    // player node (NSValue-wrapped pointer identity) -> (destination node, destination bus):
-    // tracked so disconnectNodeOutput: knows which real graph entry point a callback source
-    // actually landed on.
     NSMutableDictionary<NSValue *, NSArray *> *_charon_playerRoutes;
     BOOL _charon_offline;
-    // Manual rendering. The mode itself, the format the offline render is in, the largest pull the
-    // caller may ask for, the block that does the rendering, and the sample time the next pull is at.
     AUNode _charon_outputAUNode;
     AUNode _charon_mainMixerAUNode;
     AudioUnit _charon_outputUnit;
@@ -93,7 +72,7 @@ static OSStatus CharonAddUnit(AUGraph graph, OSType type, OSType subtype, AUNode
         _charon_mainMixer = [AVAudioMixerNode new];
         [_charon_mainMixer charon_setEngine:self auNode:mixerAUNode audioUnit:mixerUnit];
 
-        _charon_input = [AVAudioInputNode new];   // real capture path is out of this port's scope for now; see facts
+        _charon_input = [AVAudioInputNode new];
     }
     return self;
 }
@@ -115,10 +94,6 @@ static OSStatus CharonAddUnit(AUGraph graph, OSType type, OSType subtype, AUNode
         return;
     }
     if ([node isKindOfClass:[AVAudioUnit class]]) {
-        // The graph is already open (AUGraphOpen ran in -init) - AUGraphAddNode instantiates the
-        // real component immediately, exactly like the output/mixer nodes created in -init, so
-        // AUGraphNodeInfo already returns a real, usable AudioUnit right here, before the graph as
-        // a whole is ever initialized.
         AudioComponentDescription desc = [(AVAudioUnit *)node audioComponentDescription];
         AUNode auNode = 0;
         CharonAddUnit(_charon_graph, desc.componentType, desc.componentSubType, &auNode);
@@ -152,20 +127,11 @@ static OSStatus CharonAddUnit(AUGraph graph, OSType type, OSType subtype, AUNode
     if (useFormat && destImpl->audioUnit)
         AudioUnitSetProperty(destImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, bus2, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
 
-    // The mixer's own output bus (towards the fixed mixer -> output connection made in -init) is
-    // never itself the destination of a -connect:to:format: call, so nothing upstream would ever
-    // otherwise set it - propagate here, once, so the whole offline chain shares one format.
     if (node2 == _charon_mainMixer && useFormat) {
         AudioUnitSetProperty(destImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
         CharonAudioNodeImpl *outImpl = [_charon_output charon_impl];
         if (outImpl->audioUnit) {
             AudioUnitSetProperty(outImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
-            // The output unit's own Output scope is what AudioUnitRender actually formats `ioData`
-            // by - measured, not assumed: every setup call here can return noErr while only the
-            // Input scope is set, and AudioUnitRender still fails with -50 (paramErr) on the very
-            // first pull. Setting Output scope too is what turned a real signal loss into an exact
-            // sample match end to end (a raw AUGraph probe outside this class confirmed it before
-            // this fix landed here - see facts/AVFoundation/AVAudioEngine.md).
             AudioUnitSetProperty(outImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
         }
         [_charon_output charon_setFormat:useFormat];
@@ -215,8 +181,6 @@ static OSStatus CharonAddUnit(AUGraph graph, OSType type, OSType subtype, AUNode
         }
         return;
     }
-    // Disconnecting the output of a real (non-player) node beyond the mixer/output pair this pass
-    // wires is future work - see facts/AVFoundation/AVAudioEngine.md.
 }
 
 - (void)disconnectNodeOutput:(AVAudioNode *)node
@@ -245,12 +209,6 @@ static OSStatus CharonAddUnit(AUGraph graph, OSType type, OSType subtype, AUNode
     }
 }
 
-// A GenericOutput-terminated graph has no I/O thread for AUGraphStart to hand control to -
-// AUGraphStart expects a real hardware output driving the pull, which offline rendering never has
-// by definition; calling it anyway measured as `AudioUnitRender` returning -50 (paramErr) on every
-// following manual pull. AUGraphInitialize is still real work (readies every unit in the graph);
-// only the "hand it to a hardware thread" step is specific to a live RemoteIO output and skipped
-// here - see facts/AVFoundation/AVAudioEngine.md.
 - (BOOL)startAndReturnError:(NSError **)outError
 {
     [self prepare];
@@ -316,18 +274,6 @@ static OSStatus CharonAddUnit(AUGraph graph, OSType type, OSType subtype, AUNode
 }
 
 
-// ---- manual rendering, iOS 11 ----
-//
-// The engine's output is a real unit either way, and the difference is which one. In realtime it is
-// the release's RemoteIO and an I/O thread drives it; in manual rendering it is a
-// kAudioUnitSubType_GenericOutput, which needs no mediaserverd and is never started - the caller
-// pulls it, and the pull is the release's own AudioUnitRender, the same call this file's offline
-// output already made by hand through CharonAudioEngineTestSupport. The switch replaces the output
-// node of the live graph, so an application gets manual rendering by calling the header's method and
-// not by setting a flag first.
-
-// Swaps the graph's output node for a generic output, re-connecting the main mixer to it. The mixer
-// is the only node the engine connects to its output in -init, so that is the one connection to make.
 - (BOOL)charon_replaceOutputWithGeneric
 {
     if (_charon_outputAUNode == 0) {
@@ -351,9 +297,6 @@ static OSStatus CharonAddUnit(AUGraph graph, OSType type, OSType subtype, AUNode
     _charon_outputUnit = unit;
     UInt32 maxFrames = 1024;
     AudioUnitSetProperty(unit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &maxFrames, sizeof(maxFrames));
-    // The new output takes the format the chain is already carrying, asked of the main mixer, which is
-    // the node this graph connects to the output in -init. Both scopes are set, because AudioUnitRender
-    // formats ioData by the Output scope and a pull with only the Input scope set fails with -50.
     AVAudioFormat *carried = [_charon_mainMixer outputFormatForBus:0];
     if (carried != nil) {
         AudioStreamBasicDescription described = *carried.streamDescription;
@@ -428,15 +371,9 @@ static OSStatus CharonAddUnit(AUGraph graph, OSType type, OSType subtype, AUNode
 
 - (void)setManualRenderingBlock:(AVAudioEngineManualRenderingBlock)manualRenderingBlock
 {
-    // The block takes over the rendering: the caller's block is what the pull runs, and the output
-    // unit's own pull is not used while one is set. It is kept in the caller's thread and is called
-    // from the caller's pull, never from a thread of ours.
     _charon_manualBlock = [manualRenderingBlock copy];
 }
 
-// The offline pull: the release's AudioUnitRender on the engine's own output unit, with the frame
-// count the caller asked for, and the sample time advanced by what was rendered. Nothing here is
-// started: the output unit is a generic output, which has no I/O thread to start.
 - (AVAudioEngineManualRenderingStatus)renderOffline:(AVAudioFrameCount)numberOfFrames
                                           toBuffer:(AVAudioPCMBuffer *)buffer
                                              error:(NSError **)outError
@@ -458,9 +395,6 @@ static OSStatus CharonAddUnit(AUGraph graph, OSType type, OSType subtype, AUNode
         return AVAudioEngineManualRenderingStatusError;
     }
     if (_charon_manualBlock != nil) {
-        // The caller's block does the rendering, in the header's own shape - a frame count, a buffer
-        // and an out error - so it is called on the caller's thread with the caller's buffer, and the
-        // engine's own pull is not used while one is set.
         OSStatus blockError = noErr;
         AVAudioEngineManualRenderingStatus status = _charon_manualBlock(numberOfFrames, destination, &blockError);
         if (status == AVAudioEngineManualRenderingStatusSuccess) {

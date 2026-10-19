@@ -1,20 +1,3 @@
-// gradient-separating.m — identify which formula the host uses for the batch-norm data gradient.
-//
-// The case the differential uses cannot separate the variants: its given mean and its batch mean are
-// both 4. This program chooses inputs where they differ, and where the given and batch variances
-// differ, so every distinction is live:
-//
-//     given mean   2  5  4      against a batch mean of  3.25  5  6
-//     given var    7  3  9      against a batch var of   3.6875  7  3
-//
-// The family is 64: sixteen of the standard form, and sixteen of the form that is not the standard
-// formula at all, dX = gamma / sigma * dY with no mean terms. The check is two, not one, because a form
-// with no mean terms cannot depend on which mean or which aggregation was chosen: the sixteen standard
-// variants must be distinct from each other, and the plain sixteen distinct from the standard ones.
-// Asking for sixty-four distinct is unaskable.
-//
-// The host is then run on the same inputs and every variant's answer for element (0, 0) is printed
-// beside it, so the match is read off and not chosen.
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>
@@ -35,9 +18,6 @@ static double meanOf(const double *v, int n) { double s = 0; for (int i = 0; i <
 static double varOf(const double *v, int n, double m) { double s = 0; for (int i = 0; i < n; i++) { double d = v[i] - m; s += d * d; } return s / n; }
 static double sumOf(const double *a, const double *b, int n) { double s = 0; for (int i = 0; i < n; i++) s += a[i] * (b ? b[i] : 1.0); return s; }
 
-// One variant at element (row, column). ms/vs choose the mean and variance between the given vector
-// and the batch's own; ug the gamma; ag mean against sum; ax the axis the mean terms run over; and fm
-// the standard formula against no mean terms at all.
 static double variant(int c, int r, int ms, int vs, int ug, int ag, int ax, int fm)
 {
     double dy[N], xh[N];
@@ -91,7 +71,6 @@ int main(int argc, char **argv) { @autoreleasepool {
     for (int ms = 0; ms < 2; ms++) for (int vs = 0; vs < 2; vs++) for (int ug = 0; ug < 2; ug++)
     for (int ag = 0; ag < 2; ag++)
         plain16[k++] = variant(0, 0, ms, vs, ug, ag, 0, 1);
-    // and the sixteen with the mean terms on the other axis, in both forms
     static double axisVectors[16], axisColumns[16];
     k = 0;
     for (int ms = 0; ms < 2; ms++) for (int vs = 0; vs < 2; vs++) for (int ug = 0; ug < 2; ug++)
@@ -111,7 +90,6 @@ int main(int argc, char **argv) { @autoreleasepool {
     P("self-check: the plain and axis forms distinct from the standard: %s (%d collisions)\n",
       cross ? "NO" : "yes", cross);
 
-    // The host, on the same inputs.
     id<MTLDevice> d = MTLCreateSystemDefaultDevice();
     id<MTLCommandQueue> q = [d newCommandQueue];
     float sb[12], ib[12], mb[3], vb[3], gb[3];
@@ -120,9 +98,8 @@ int main(int argc, char **argv) { @autoreleasepool {
     memcpy(mb, gmean, sizeof(mb)); memcpy(vb, gvar, sizeof(vb)); memcpy(gb, gam, sizeof(gb));
     id<MTLBuffer> inb = [d newBufferWithBytes:sb length:48 options:MTLResourceStorageModeShared];
     id<MTLBuffer> incb = [d newBufferWithBytes:ib length:48 options:MTLResourceStorageModeShared];
-    // the four argument slots, permuted as the mode asks
-    id<MTLBuffer> A = swappedXY ? incb : inb;   // inputMatrix slot
-    id<MTLBuffer> B = swappedXY ? inb : incb;    // gradientMatrix slot
+    id<MTLBuffer> A = swappedXY ? incb : inb;
+    id<MTLBuffer> B = swappedXY ? inb : incb;
     id<MTLBuffer> mbuf = [d newBufferWithBytes:swappedMV ? vb : mb length:12 options:MTLResourceStorageModeShared];
     id<MTLBuffer> vbuf = [d newBufferWithBytes:swappedMV ? mb : vb length:12 options:MTLResourceStorageModeShared];
     id<MTLBuffer> gbuf = [d newBufferWithBytes:gb length:12 options:MTLResourceStorageModeShared];

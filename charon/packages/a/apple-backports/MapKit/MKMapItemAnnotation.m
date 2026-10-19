@@ -1,46 +1,13 @@
-// MKMapItem's own later members, as a CATEGORY on the release's class, and MKMapItemAnnotation.
-//
-// Measured on the host first, on the host's own MapKit.framework, and every member's shape is the
-// host's: all seven of MKMapItem's answer an object (`@16@0:8`), and MKMapItemAnnotation carries
-// `-mapItem` `@16@0:8`, `-initWithMapItem:` `@24@0:8@16`, and the MKAnnotation members `-coordinate`
-// and `-title`.
-//
-// What the port answers, and from where:
-//
-//   -timeZone                  the release's own CLTimeZone of the item's own placemark, which the
-//                              release has carried since 3.2
-//   -pointOfInterestCategory  the item's own category, out of the release's own
-//                              -[MKMapItem dictionaryRepresentation], and nil where the pass does not
-//                              declare one
-//   -identifier               the release's own -placeID, which is in the armv7 cache of 6.1.3
-//                              (measured with apple.objc.inventory). **The host's own class no longer
-//                              has -placeID and has -identifier instead**, so the port reads the
-//                              release's name and the two are the same idea on each release
-//   -alternateIdentifiers     one identifier here, which is the truth on this release: the release
-//                              has no second place to name
-//   -address, -addressRepresentations, -location
-//                              the 26.0 trio, and the honest answer is built from the release's own
-//                              placemark address vocabulary (country, administrative area, locality,
-//                              postal code, the thoroughfare and the formatted lines) -- a real address
-//                              out of the release's own data, or nil where the item has no placemark
-//
-// MKMapItemAnnotation is the release's own MKAnnotation shape: it holds the item and answers the
-// annotation members from the item's own placemark, so it is a real annotation a map can show and not
-// a wrapper around nothing.
 #import <MapKit/MapKit.h>
 #import <CoreLocation/CoreLocation.h>
 #import <objc/message.h>
 #import "CharonMapKit.h"
 
-// The release's own placemark vocabulary, which is what an address here is built from. The 16.4
-// headers declare these, so nothing here is a port's own name.
 @interface MKPlacemark (CharonMapItemAddress)
 @end
 
 @interface MKMapItem (CharonMembers)
 
-// The release's own JSON for a pass, which is in the armv7 cache of 6.1.3 (measured) and which the
-// 16.4 headers do not declare. Declared and not implemented: the method is the release's.
 - (nullable NSDictionary *)dictionaryRepresentation;
 
 - (nullable NSTimeZone *)timeZone;
@@ -55,7 +22,6 @@
 
 @implementation MKMapItem (CharonMembers)
 
-// The release's own place identifier, asked of the item itself by its own name on this release.
 - (NSString *)identifier
 {
     SEL placeID = NSSelectorFromString(@"placeID");
@@ -72,12 +38,9 @@
 - (NSArray<NSString *> *)alternateIdentifiers
 {
     NSString *identifier = self.identifier;
-    // One identifier, and that is the truth on this release: there is no second place to name, and a
-    // list padded with a repeat would be a list that says there are two.
     return identifier.length > 0 ? @[identifier] : @[];
 }
 
-// The time zone of the place, from the release's own placemark, and nil where it has none.
 - (NSTimeZone *)timeZone
 {
     MKPlacemark *placemark = self.placemark;
@@ -91,8 +54,6 @@
     return nil;
 }
 
-// The category of the place, out of the release's own JSON for it, and nil where the pass does not
-// declare one. The key is Apple's own, from the release's own dictionaryRepresentation.
 - (NSString *)pointOfInterestCategory
 {
     NSDictionary *json = self.dictionaryRepresentation;
@@ -103,8 +64,6 @@
     return nil;
 }
 
-// Where the place is, as a CLLocation the release can work with, built from the release's own
-// placemark rather than from the item's own geometry.
 - (CLLocation *)location
 {
     MKPlacemark *placemark = self.placemark;
@@ -118,8 +77,6 @@
     return [[CLLocation alloc] initWithLatitude:coordinate.latitude longitude:coordinate.longitude];
 }
 
-// The address, out of the release's own placemark vocabulary: the country, the administrative area,
-// the locality, the postal code and the thoroughfare, each the release's own accessor's own value.
 - (MKAddress *)address
 {
     MKPlacemark *placemark = self.placemark;
@@ -147,12 +104,6 @@
 
 @end
 
-// MKMapItemAnnotation: a map item ON the map, which is the release's own annotation shape with the
-// item behind it. The coordinate and the title come from the item's own placemark, so a map that shows
-// this annotation shows the place, and where there is no placemark there is no coordinate and the
-// annotation says so rather than pointing at (0,0).
-// MKMapItemAnnotation, the iOS 18 annotation for a map item, which the 16.4 headers do not declare.
-// Apple's own name, under the same host guard as the rest of the port's own declarations.
 #if !CHARON_HOST_PROBE
 @interface MKMapItemAnnotation : NSObject
 - (instancetype)initWithMapItem:(MKMapItem *)mapItem;

@@ -1,14 +1,3 @@
-// mps-cases.m — the matrix and vector operations of Metal Performance Shaders, run twice: once
-// against the system's own MPS and once against this port's classes compiled under names of their own.
-// Every operation writes its result into a buffer, and the program prints those buffers as bytes, so
-// the two runs are compared exactly rather than through a tolerance this file chooses.
-//
-// The port build is compiled with -include rename.h, which maps every MPS class name this library
-// carries to a Charon name, and with prefix_selectors.py's prefixed declarations, so the port's
-// implementations are reached through names of their own and do not replace the system's.
-//
-// Every case's data is at file scope, because a block cannot capture a C array.
-
 #import <Foundation/Foundation.h>
 #include <string.h>
 #import <objc/runtime.h>
@@ -17,10 +6,6 @@
 
 static id<MTLDevice> gDevice;
 
-// Every matrix and vector a case is built from a C array, and a kernel writes into the MTLBuffer behind
-// it, never into that array. So each one remembers where it came from, and every result is read back out
-// of the buffer into its array before it is printed. Without this a case prints the values it went in
-// with and both runs agree whatever the kernel did.
 typedef struct {
     id object;
     void *source;
@@ -39,11 +24,6 @@ static void remember(id object, void *source, size_t bytes)
     }
 }
 
-// Which image every compared class came out of, printed before anything else. A class of the port's
-// with the same name as one of the host's is registered once and a message sent to it reaches whichever
-// loaded first, so the run says which that was rather than leaving it to be inferred from a number that
-// came out wrong - which is exactly how the unrenamed generators went on comparing the host with itself
-// for a whole band.
 static void printClassImages(void)
 {
     NSString *names[] = {
@@ -81,13 +61,6 @@ static void pullResults(void)
     }
 }
 
-// Flushed after every case: the oracle's own teardown crashes, and an unflushed stream loses every
-// answer printed since the last flush.
-// The name of the case about to run, written unbuffered and on its own, so that a process which dies
-// mid-case still leaves behind the name of the case that killed it. The differential's own message
-// used the last line the oracle PRINTED, which is the last case in the file and not the one that
-// died: the release's own kernel crashes at the eleventh neuron type and the message named a philox
-// case, which sent the reading of it entirely wrong for several turns.
 static void mark(const char *name)
 {
     const char *path = getenv("CHARON_CASE_MARKER");
@@ -117,10 +90,6 @@ static void put(const char *name, const void *bytes, size_t length)
     fflush(stdout);
 }
 
-// The batch-normalisation gradient, computed by hand from the formula in the header so the comparison
-// has a third opinion that is neither the host's nor this port's:
-//     gradGamma[c] = sum over i of dY[i][c] * (x[i][c] - mean[c]) / sqrt(variance[c] + epsilon)
-//     gradBeta[c]  = sum over i of dY[i][c]
 static void referenceGradient(const float *source, const float *incoming, const float *mean,
                              const float *variance, float epsilon, int rows, int channels,
                              float *gradGamma, float *gradBeta)
@@ -154,8 +123,6 @@ static MPSMatrix *matrixOf(const void *values, MPSDataType type, NSUInteger rows
     id<MTLBuffer> buffer = [gDevice newBufferWithBytes:values length:bytes options:MTLResourceStorageModeShared];
     MPSMatrixDescriptor *descriptor = [MPSMatrixDescriptor matrixDescriptorWithRows:rows columns:columns matrices:matrices rowBytes:rowBytes matrixBytes:matrixBytes dataType:type];
     MPSMatrix *matrix = [[MPSMatrix alloc] initWithBuffer:buffer descriptor:descriptor];
-    // The contract, checked rather than assumed: the matrix wraps the buffer it was made from and does
-    // not copy it, so the two are the same object and a kernel that writes one writes the other.
     if (matrix.data != buffer)
         printf("CONTRACT matrix.data is not the buffer it was made from\n");
     remember(matrix, (void *)values, bytes);
@@ -175,10 +142,6 @@ static MPSVector *vectorOf(const void *values, MPSDataType type, NSUInteger leng
     return vector;
 }
 
-// A command buffer from a queue, not from the device: on macOS 26.5 -newCommandBuffer answers an
-// MTL4 command buffer, and the MPS of that release asks it for a method it does not carry, so the
-// oracle would be the host's own crash rather than the host's own arithmetic. The queue's
-// -commandBufferWithUnretainedReferences answers the classic one every MTLCommandBuffer conforms to.
 static id<MTLCommandBuffer> freshCommandBuffer(void)
 {
     static id<MTLCommandQueue> queue;
@@ -264,8 +227,6 @@ static void casesMultiplication(void)
             multiplyOut[1][0] = multiplySeed[1][0];
             multiplyOut[1][1] = multiplySeed[1][1];
             run("multiply %d %d", ^(id<MTLCommandBuffer> commandBuffer) {
-                // A 3x3 descriptor for all three, so the same matrices serve whichever way round they
-                // are read: MPS refuses a matrix whose row stride cannot hold the columns asked of it.
                 MPSMatrix *a = matrixOf(&multiplyLeft[0][0], MPSDataTypeFloat32, 3, 3, 1, 3 * sizeof(float), 9 * sizeof(float));
                 MPSMatrix *b = matrixOf(&multiplyRight[0][0], MPSDataTypeFloat32, 3, 3, 1, 3 * sizeof(float), 9 * sizeof(float));
                 MPSMatrix *c = matrixOf(&multiplyOut[0][0], MPSDataTypeFloat32, 3, 3, 1, 3 * sizeof(float), 9 * sizeof(float));
@@ -300,8 +261,6 @@ static void casesMultiplication(void)
         MPSMatrix *b = matrixOf(&batchRight[0][0][0], MPSDataTypeFloat32, 2, 2, 3, 2 * sizeof(float), 4 * sizeof(float));
         MPSMatrix *c = matrixOf(&batchOut[0][0][0], MPSDataTypeFloat32, 2, 2, 3, 2 * sizeof(float), 4 * sizeof(float));
         MPSMatrixMultiplication *kernel = [[MPSMatrixMultiplication alloc] initWithDevice:gDevice resultRows:2 resultColumns:2 interiorColumns:2];
-        // The origin's z names a matrix, which the release requires to be zero: the batch is the
-        // batchStart/batchSize range, and the origin moves the window inside each matrix of it.
         kernel.leftMatrixOrigin = MTLOriginMake(0, 0, 0);
         kernel.batchStart = 1;
         kernel.batchSize = 2;
@@ -566,8 +525,6 @@ static float normGradientGamma[3];
 static float normGradientBeta[3];
 
 
-// The forward normalisation, computed by hand from the header's formula: gamma * (x - mean) /
-// sqrt(variance + epsilon) + beta, one channel at a time, so the comparison has a third opinion.
 static void referenceForward(const float *source, const float *mean, const float *variance,
                              const float *gamma, const float *beta, float epsilon,
                              int rows, int channels, float *out)
@@ -625,11 +582,6 @@ static void casesBatchNormalization(void)
     put("batch-normalization-statistics-variance", normVariance, sizeof(normVariance));
     put("batch-normalization-statistics-result", &normOut[0][0], sizeof(normOut));
 
-    // A sentinel, not a zero: 0x7f7f7f7f in every element, so a buffer the release leaves alone is
-    // distinguishable from a buffer it fills with zero. The command buffer's status and error are
-    // printed with the results.
-    // The per-parameter gradient destinations go in with a sentinel rather than a zero, so a side that
-    // leaves them alone is distinguishable from a side that writes zero.
     {
         float untouched[3] = {-1.0f, -1.0f, -1.0f};
         memcpy(normGradientGamma, untouched, sizeof(untouched));
@@ -641,7 +593,6 @@ static void casesBatchNormalization(void)
     normGammaBuffer = NULL;
     normBetaBuffer = NULL;
     {
-        // The buffers the two result vectors are made from, so the print below can name them.
         id<MTLBuffer> probe = [gDevice newBufferWithLength:1 options:MTLResourceStorageModeShared];
         (void)probe;
     }
@@ -663,8 +614,6 @@ static void casesBatchNormalization(void)
         normError = commandBuffer.error;
     });
     {
-        // Read straight back from the buffers, with no view and before any put: what is here now is
-        // what the kernel left.
         printf("sentinel-readback gamma\n");
         for (unsigned i = 0; i < sizeof(normGradientGamma) / sizeof(float); i++)
             printf(" %02x", ((unsigned char *)normGradientGamma)[i]);
@@ -679,15 +628,11 @@ static void casesBatchNormalization(void)
         float referenceGamma[3] = {0, 0, 0}, referenceBeta[3] = {0, 0, 0};
         referenceGradient(&normSource[0][0], &normIncoming[0][0], &normGivenMean[0], &normGivenVariance[0],
                           0.001f, 4, 3, referenceGamma, referenceBeta);
-        // A case of its own, so the comparison reads host, port and reference rather than host and
-        // port, and the values are printed as text beside the hex because a hex read in the wrong byte
-        // order has already produced three confident wrong numbers in this file.
         put("gradient-reference-text-gamma", referenceGamma, sizeof(referenceGamma));
         put("gradient-reference-text-beta", referenceBeta, sizeof(referenceBeta));
         printf("  REF-CASE filled  gamma %g %g %g  beta %g %g %g\n",
                (double)referenceGamma[0], (double)referenceGamma[1], (double)referenceGamma[2],
                (double)referenceBeta[0], (double)referenceBeta[1], (double)referenceBeta[2]);
-        // What the kernel's own result vectors hold, read from their buffers, for the same run.
         pullResults();
         printf("  REF-CASE kernel  gamma %g %g %g  beta %g %g %g\n", (double)normGradientGamma[0],
                (double)normGradientGamma[1], (double)normGradientGamma[2], (double)normGradientBeta[0],
@@ -746,8 +691,6 @@ static void casesSum(void)
     });
     put("sum-start-index", &sumOut[0][0], sizeof(sumOut));
 
-    // The boundary: a startIndex that leaves exactly one factor in the list and then none at all, so
-    // the scale guard's edge is exercised rather than assumed.
     for (NSUInteger start = 1; start <= 3; start++) {
         memset(sumOut, 0, sizeof(sumOut));
         run("sum-start-index-boundary %lu", ^(id<MTLCommandBuffer> commandBuffer) {
@@ -768,7 +711,6 @@ static void casesSum(void)
     run("casesSum line 768", ^(id<MTLCommandBuffer> commandBuffer) {
         MPSMatrix *a = matrixOf(&sumFirst[0][0], MPSDataTypeFloat32, 3, 4, 1, 4 * sizeof(float), 12 * sizeof(float));
         MPSMatrix *out = matrixOf(&sumOut[0][0], MPSDataTypeFloat32, 2, 3, 1, 3 * sizeof(float), 6 * sizeof(float));
-        // The release requires at least two matrices to sum, so the transposed source is given twice.
         MPSMatrixSum *kernel = [[MPSMatrixSum alloc] initWithDevice:gDevice count:2 rows:2 columns:3 transpose:YES];
         [kernel encodeToCommandBuffer:commandBuffer sourceMatrices:@[a, a] resultMatrix:out scaleVector:nil offsetVector:nil biasVector:nil startIndex:0];
     });
@@ -776,8 +718,6 @@ static void casesSum(void)
 
     memset(sumOut, 0, sizeof(sumOut));
     run("casesSum line 778", ^(id<MTLCommandBuffer> commandBuffer) {
-        // A two by three window read from each of two four column sources, the second from column one,
-        // which is where the offset vector's second entry puts it.
         MPSMatrix *a = matrixOf(&sumFirst[0][0], MPSDataTypeFloat32, 3, 4, 1, 4 * sizeof(float), 12 * sizeof(float));
         MPSMatrix *b = matrixOf(&sumSecond[0][0], MPSDataTypeFloat32, 3, 4, 1, 4 * sizeof(float), 12 * sizeof(float));
         MPSMatrix *out = matrixOf(&sumOut[0][0], MPSDataTypeFloat32, 2, 3, 1, 3 * sizeof(float), 6 * sizeof(float));
@@ -811,8 +751,6 @@ static void casesState(void)
     });
     printf("state-batch-synchronized 1\n");
 
-    // The read count belongs to a temporary state: the release asserts on adjusting one that is not
-    // temporary, so the batch's read counts are read from temporaries made against a command buffer.
     run("casesState line 816", ^(id<MTLCommandBuffer> commandBuffer) {
         MPSState *a = [MPSState temporaryStateWithCommandBuffer:commandBuffer bufferSize:32];
         MPSState *b = [MPSState temporaryStateWithCommandBuffer:commandBuffer bufferSize:64];
@@ -820,16 +758,10 @@ static void casesState(void)
         printf("temporary %d %d %d\n", (int)a.isTemporary, (int)b.isTemporary, (int)c.isTemporary);
         printf("temporary-read-count %lu %lu %lu\n", (unsigned long)a.readCount, (unsigned long)b.readCount, (unsigned long)c.readCount);
         NSArray<MPSState *> *temporaries = @[a, b, c];
-        // Up by two, then down by one: the release asserts on a decrement that would take a count
-        // below zero, so the case stays inside the range a read count can take.
-        // The function's answer is the size of the batch, whatever it did to the counts: three states
-        // answer three both times. The counts themselves are printed around it.
         printf("temporary-batch-up %lu\n", MPSStateBatchIncrementReadCount(temporaries, 2));
         printf("temporary-counts-up %lu %lu %lu\n", (unsigned long)a.readCount, (unsigned long)b.readCount, (unsigned long)c.readCount);
         printf("temporary-batch-down %lu\n", MPSStateBatchIncrementReadCount(temporaries, -1));
         printf("temporary-counts-down %lu %lu %lu\n", (unsigned long)a.readCount, (unsigned long)b.readCount, (unsigned long)c.readCount);
-        // Synchronizing a temporary is not a case the release accepts: a temporary's storage is not
-        // readable from the CPU, which is the whole of what synchronizing is for.
     });
 
     uint32_t predicate = 7;
@@ -860,9 +792,6 @@ static float singularResult[3][3];
 static uint32_t singularPivots[3];
 static int32_t singularStatus[1];
 
-// The solver cases. They are not called from main yet: MPSMatrixSolve.m is not in the tree, because
-// its results do not yet match the release's (see the handoff in .agent-work). They are here so the
-// cases are ready and reviewable, and they are run the moment the sources are.
 static void casesDecomposition(void)
 {
     {
@@ -964,8 +893,6 @@ static void casesSolveTriangular(void)
                     float (*source)[3] = upper ? triangularUpper : triangularLower;
                     run("solve-triangular %d %d %d %d", ^(id<MTLCommandBuffer> commandBuffer) {
                         MPSMatrix *in = matrixOf(&source[0][0], MPSDataTypeFloat32, 3, 3, 1, 3 * sizeof(float), 9 * sizeof(float));
-                        // The right hand side is order x sides, or sides x order when the right hand
-                        // side is on the right, which is the shape the release insists on.
                         NSUInteger rhsRows = right ? 2 : 3, rhsColumns = right ? 3 : 2;
                         MPSMatrix *rhs = matrixOf(&triangularRight[0][0], MPSDataTypeFloat32, rhsRows, rhsColumns, 1, 3 * sizeof(float), 9 * sizeof(float));
                         MPSMatrix *out = matrixOf(&triangularSolution[0][0], MPSDataTypeFloat32, rhsRows, rhsColumns, 1, 3 * sizeof(float), 9 * sizeof(float));
@@ -1041,8 +968,6 @@ static void casesRandom(void)
         snprintf(name, sizeof(name), "philox-uint32 %u", seed);
         put(name, randomWords, sizeof(randomWords));
 
-        // A Float32 destination, which the release does answer, through the twenty-three bit fraction
-        // and the scale and add of facts/MetalPerformanceShaders/Random.md.
         for (int which = 0; which < 2; which++) {
             memset(randomFloats, 0, sizeof(randomFloats));
             run("philox-float32-uniform %u %d", ^(id<MTLCommandBuffer> commandBuffer) {
@@ -1056,8 +981,6 @@ static void casesRandom(void)
             snprintf(name, sizeof(name), "philox-float32-uniform %u %d", seed, which);
             put(name, randomFloats, sizeof(randomFloats));
         }
-        // The normal distribution goes through the release's own single precision inverse normal, which
-        // a sixteen digit one does not land on to the bit; named as a divergence, not compared.
         memset(randomFloats, 0, sizeof(randomFloats));
         run("divergent philox-float32-normal %u", ^(id<MTLCommandBuffer> commandBuffer) {
             MPSMatrix *out = matrixOf(&randomFloats[0], MPSDataTypeFloat32, 4, 4, 1, 4 * sizeof(float), 16 * sizeof(float));
@@ -1067,13 +990,7 @@ static void casesRandom(void)
         });
         snprintf(name, sizeof(name), "divergent philox-float32-normal %u", seed);
         put(name, randomFloats, sizeof(randomFloats));
-
-        // The MPSVector destination is the one the release does not answer: its own random kernel sends
-        // -[MPSVector rowBytes], a selector MPSVector does not declare, and takes the process down. The
-        // batch range over a matrix destination it refuses in its own validation, saying the range runs
-        // past the image. Both are measurements, kept in crash-probe.m and named in Random.md.
     }
-    // The uniform descriptor's own moments, which the release fills in.
     {
         float pairs[][2] = {{-2, 3}, {0, 1}, {1.5f, 2.5f}, {-10, 10}};
         for (unsigned i = 0; i < 4; i++) {

@@ -1,13 +1,5 @@
--- The Swift skeleton's extensions are declared at file scope (tools/gen/swift_render.lua): an extension of a protocol nested in a type is
--- refused by the compiler inside that type ("declaration is only valid at file scope", Accelerate's BNNSGraph.Builder.OperationParameter,
--- AppIntents' Intent, measured on the coordinator's sdk run). The model here is a protocol P nested in Outer.Inner, with one requirement
--- and one member of its extension; the rendered text must declare the extension at brace depth 0, under the protocol's qualified name,
--- after the types, and the requirement must stay in the protocol. A renderer that leaves the extension inside Inner turns the test red.
--- Run: xmake l tests/gen/swift_file_scope_test.lua (pure Lua: no toolchain)
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 
--- A model row with every cell the renderer reads, "-" where the row says nothing.
 local function row(fields)
     local out = {kind = "-", usr = "-", container = "-", name = "-", side = "-", type = "-", params = "-", generic_sig = "-",
                  conformances = "-", superclass = "-", throwing = "-", async = "-", mutating = "-", attributes = "-", accessors = "-",
@@ -19,8 +11,6 @@ local function row(fields)
     return out
 end
 
--- The brace depth at the start of each line: the number of { opened and not yet closed above it. The rendered text has no brace in a
--- string or a comment (the fatalError labels are names), so a count is the nesting.
 local function depths_of(text)
     local depths, depth = {}, 0
     for line in string.gmatch(text, "[^\n]*") do
@@ -64,7 +54,6 @@ function main()
     check(at_extension ~= nil, "the extension of the nested protocol is declared under its qualified name: " .. text)
     check(extension_depth == 0, "the extension is at file scope (depth 0), not inside the type (depth " .. tostring(extension_depth) .. ")")
 
-    -- the extension's member is in the extension, and the requirement stays in the protocol
     local twice_depth, req_depth = nil, nil
     for _, entry in ipairs(lines) do
         if string.find(entry.line, "func twice()", 1, true) then
@@ -76,7 +65,6 @@ function main()
     check(twice_depth == 1, "the extension member is inside the extension: depth " .. tostring(twice_depth))
     check(req_depth == 3, "the protocol's requirement stays in the protocol (Outer, Inner, P): depth " .. tostring(req_depth))
 
-    -- the declarations come before the extension: the extension is the last declaration of the text
     check(at_extension ~= nil and at_extension > #lines - 5, "the extension follows the types: line " .. tostring(at_extension))
 
     print("swift file scope test: " .. (failures == 0 and "OK" or ("FAIL " .. failures)))

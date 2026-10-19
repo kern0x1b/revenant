@@ -10,8 +10,6 @@ static void charon_resolve_voucher_adopt(void)
     charon_system_function(&charon_system_voucher_adopt, CHARON_LIBDISPATCH, "voucher_adopt");
 }
 
-/* Before iOS 8 nothing adopted a voucher, so the previous one is none; and the only voucher a caller can hold is the none that
-   voucher_copy answered, so a real one handed in did not come from this system. */
 __attribute__((visibility("hidden")))
 void *voucher_adopt(void *voucher)
 {

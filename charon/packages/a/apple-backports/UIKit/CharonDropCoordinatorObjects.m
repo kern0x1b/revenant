@@ -8,13 +8,6 @@
 
 #pragma clang diagnostic ignored "-Wobjc-property-implementation"
 
-// What a drop delegate is handed, and the two placeholder contexts it commits through.
-//
-// The coordinators are protocols in the header and there is no drop on this release, so the objects
-// that answer them are the port's own. What they do is the release's own work: an insertion goes
-// through the data source's own callback and the view's own insert, a delete through its own delete,
-// and a cell that is showing a placeholder is handed to the delegate's own block.
-
 @implementation CharonCollectionPlaceholderContext {
 @private
     UICollectionViewDropPlaceholder *_placeholder;
@@ -39,9 +32,6 @@
     return _item;
 }
 
-// The index path and identifier the placeholder stands at, read out of the placeholder itself. They
-// are its own properties, on a class whose header the 16.4 umbrella does not carry, so they are
-// asked for by their selectors rather than written out here.
 - (NSIndexPath *)insertionIndexPath
 {
     SEL ask = @selector(insertionIndexPath);
@@ -58,9 +48,6 @@
     return nil;
 }
 
-// The cell for the placeholder, given to the delegate's block. The 26.2 header says this is a no-op
-// today and could change; it is implemented as the block being run, which is what the release's own
-// comment describes the method's purpose as.
 - (void)setNeedsCellUpdate
 {
     if (!_collectionView || !_placeholder)
@@ -75,8 +62,6 @@
         update(cell);
 }
 
-// The insertion, with the changes the data source made: the block is where the delegate says what it
-// inserted, and the view is told afterwards, in the release's own order.
 - (BOOL)commitInsertionWithDataSourceUpdates:(void (NS_NOESCAPE ^)(NSIndexPath *insertionIndexPath))dataSourceUpdates
 {
     if (!_collectionView || !_placeholder)
@@ -95,7 +80,6 @@
     return YES;
 }
 
-// The placeholder is done with, and the view is told to take it out.
 - (BOOL)deletePlaceholder
 {
     if (!_collectionView || !_placeholder)
@@ -178,9 +162,6 @@
 
 @end
 
-// The two coordinators. What they do is the release's own work: an insertion goes through the data
-// source's own callback and the view's own insert, so the cells, the layout and anything watching
-// the data source all see one move, and a drop onto a target that is not a cell inserts nothing.
 @implementation CharonCollectionDropCoordinator
 @synthesize dropItems = _dropItems;
 @synthesize destination = _destination;

@@ -1,19 +1,5 @@
--- gen-schema.lua: the CoreML model specification as the C schema table CharonMLSchema.c reads.
---   xmake l tools/coreml/gen-schema.lua <coremltools directory> <out> [--check]
---
--- Apple's model format is open: coremltools (BSD-3-Clause, Apple Inc.) ships the protobuf specification the
--- .mlmodel container is written in, as one generated module per .proto file under coremltools/proto/. Every one
--- of those modules registers its own file descriptor with `AddSerializedFile(b'...')`, so the specification is
--- read here from the descriptors themselves - field number, wire type, name, and the type of a message or enum
--- field - rather than transcribed by hand. Nothing in the emitted table is invented; it is what protoc was given.
---
--- --check writes nothing and fails if the checked-in table differs, so a change of coremltools is a diff the
--- reviewer reads rather than a silent regeneration.
-
--- Lua's `<` on strings follows the locale; byteorder sorts by bytes, as Python's sorted() did.
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 
--- The protobuf enum of FieldDescriptorProto.Type, by value.
 local TYPE_NAMES = {
     [1] = "TYPE_DOUBLE", [2] = "TYPE_FLOAT", [3] = "TYPE_INT64", [4] = "TYPE_UINT64", [5] = "TYPE_INT32",
     [6] = "TYPE_FIXED64", [7] = "TYPE_FIXED32", [8] = "TYPE_BOOL", [9] = "TYPE_STRING", [10] = "TYPE_GROUP",
@@ -21,10 +7,6 @@ local TYPE_NAMES = {
     [15] = "TYPE_SFIXED32", [16] = "TYPE_SFIXED64", [17] = "TYPE_SINT32", [18] = "TYPE_SINT64",
 }
 
--- charon_ml_kind_*, in the order CharonMLSchema.h declares them, with the protobuf type each names and the wire
--- type a value of it is written with. 0 is CHARON_ML_KIND_NONE, which names a field that is neither a number nor
--- a submessage: a repeated field of strings, bytes or messages is one entry per element, a packed repeated
--- number is one run.
 local KIND = {
     TYPE_DOUBLE = {1, 1}, TYPE_FLOAT = {2, 5}, TYPE_INT64 = {3, 0}, TYPE_UINT64 = {4, 0},
     TYPE_INT32 = {5, 0}, TYPE_FIXED64 = {6, 1}, TYPE_FIXED32 = {7, 5}, TYPE_BOOL = {8, 0},
@@ -33,14 +15,11 @@ local KIND = {
     TYPE_SFIXED64 = {15, 1}, TYPE_SINT32 = {16, 0}, TYPE_SINT64 = {17, 0},
 }
 
--- A field of one of these kinds carries a number of the wire type the reader reads directly; a string, bytes,
--- message or group does not (an enum is a varint of its case's number).
 local NUMERIC = {[1] = true, [2] = true, [3] = true, [4] = true, [5] = true, [6] = true, [7] = true, [8] = true,
                  [12] = true, [14] = true, [15] = true, [16] = true, [17] = true}
 
 local LABEL_REPEATED = 3
 
--- The varint at pos, and the position after it.
 local function read_varint(data, pos)
     local result, shift = 0, 0
     while true do
@@ -58,8 +37,6 @@ local function read_varint(data, pos)
     return result, pos
 end
 
--- The fields of one serialized message, in order: {number, value}, a varint as an integer and a
--- length-delimited field as its bytes. The fixed-width wire types are skipped; the descriptor has none.
 local function read_fields(data)
     local out = {}
     local pos = 1
@@ -87,7 +64,6 @@ local function read_fields(data)
     return out
 end
 
--- proto2 semantics for a singular field: the last one written wins, and an absent one is the default.
 local function last(fields, number, default)
     local value = default
     for _, field in ipairs(fields) do
@@ -120,9 +96,6 @@ local function read_field(data)
     if present(parts, 9) then
         oneof = last(parts, 9, -1)
     end
-    -- protobuf3 packs a repeated field of a packable number type: every numeric one, but no string, no bytes,
-    -- no message and no group. A packed field is one length-delimited run, so the wire type the reader matches
-    -- is the run's, and the element's own width is in `element`.
     local packed = repeated and NUMERIC[kind] or false
     return {
         name = last(parts, 1, ""),
@@ -136,7 +109,6 @@ local function read_field(data)
     }
 end
 
--- messages[name] = the fields, keyed by the name relative to CoreML.Specification, nested ones dotted.
 local function walk(data, prefix, messages)
     local parts = read_fields(data)
     local name = last(parts, 1, "")
@@ -154,7 +126,6 @@ local function walk(data, prefix, messages)
     end
 end
 
--- The bytes of a Python bytes literal, with the escapes protoc writes: \xHH, \ooo, and the one-letter ones.
 local function decode_literal(body)
     local simple = {n = "\n", r = "\r", t = "\t", a = "\a", b = "\b", f = "\f", v = "\v",
                     ["\\"] = "\\", ["'"] = "'", ['"'] = '"', ["\n"] = ""}
@@ -178,7 +149,6 @@ local function decode_literal(body)
                 table.insert(out, simple[e])
                 i = i + 2
             else
-                -- an unknown escape is the backslash and its character, as Python keeps them
                 table.insert(out, "\\" .. e)
                 i = i + 2
             end
@@ -214,9 +184,6 @@ local function emit(messages, source)
     end
     byteorder.sort(names)
     local layout, index = {}, 0
-    -- Every message of the specification is in the table, including the ones with no fields: a message that
-    -- declares none is still a message an empty submessage of that type is, and a reader that had no row for
-    -- it would refuse the container that carries one.
     for _, name in ipairs(names) do
         local fields = messages[name]
         table.insert(layout, {name = name, first = index, count = #fields})
@@ -256,8 +223,6 @@ function main(coremltools, out, mode)
     for _, file in ipairs(files) do
         local text = io.readfile(file)
         local start = text:find("AddSerializedFile(b'", 1, true)
-        -- NamedParameters_pb2.py carries no file of its own: it only re-exports messages the model files
-        -- already define, so it adds no descriptor to read.
         if start ~= nil then
             local open = start + #"AddSerializedFile("
             local close = text:find("')\n", open + 2, true)

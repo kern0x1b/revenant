@@ -1,8 +1,3 @@
-// constvalues.m : the value of every CoreImage constant name the port carries, read out of the
-// host's own CoreImage. Each name is referenced strongly, so a name the SDK does not declare is a
-// link error here rather than a row nobody checked, and the value printed is the string the real
-// symbol points at. registry/CoreImage/constants10.json names this run as the source of every value
-// it carries, so a value that is not what Apple's symbol holds is a difference, not an assumption.
 #import <Foundation/Foundation.h>
 #import <CoreImage/CoreImage.h>
 

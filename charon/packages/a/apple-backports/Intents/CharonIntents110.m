@@ -1,12 +1,3 @@
-//
-//  CharonIntents110.m
-//  Intents
-//
-//  The one class of the iOS 11.0 group whose behaviour is more than storage, and the one member
-//  of the iOS 10.0 group that takes it. What each of them answers, and what this release cannot,
-//  is in facts/Intents/Intents.md.
-//
-
 #import <Intents/Intents.h>
 #import <Intents/INParameter.h>
 #import <objc/runtime.h>
@@ -26,9 +17,6 @@
 
 + (instancetype)parameterForClass:(Class)aClass keyPath:(NSString *)keyPath
 {
-    // The parameter is a class and a key path into it, and nothing else: that is what the header's
-    // own two properties say, and an application that donates an interaction with this parameter
-    // has said which of its values the parameter is and where in it the value is.
     INParameter *parameter = [[self alloc] init];
     parameter->_parameterClass = aClass;
     parameter->_parameterKeyPath = [keyPath copy];
@@ -37,8 +25,6 @@
 
 - (BOOL)isEqualToParameter:(INParameter *)parameter
 {
-    // Two parameters are the same parameter when they name the same class and the same key path,
-    // which is the whole of what a parameter is.
     if (parameter == self) {
         return YES;
     }
@@ -63,8 +49,6 @@
 
 - (NSUInteger)indexForSubKeyPath:(NSString *)subKeyPath
 {
-    // No index is NSNotFound's own answer: a sub key path that was never given an index has no
-    // index, and the header's NSUInteger return has no other way of saying so.
     return subKeyPath ? [_indicesBySubKeyPath[subKeyPath] unsignedIntegerValue] : NSNotFound;
 }
 

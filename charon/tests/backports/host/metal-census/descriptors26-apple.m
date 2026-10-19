@@ -1,23 +1,3 @@
-/* descriptors26-apple.m - APPLE'S OWN ANSWERS to the value-equality questions, in a binary of its own.
- *
- * WHY A SEPARATE BINARY. descriptors26.m carries the port's classes under other names, and asking
- * Apple's -[MTL4PipelineOptions isEqual:] in THAT binary traps: measured, a Trace/BPT trap inside
- * objc_opt_respondsToSelector at the first such call, reproducibly, with the port's classes linked and
- * not linked being the only difference. So Apple's side is asked here, where no class of the port's is
- * present at all, and descriptors26.sh compares this file's output with the port's.
- *
- * Both sides are therefore MEASURED, and neither is assumed: the script diffs two runs rather than one
- * case asking both, and the trap that forced this shape is recorded rather than avoided by asking a
- * weaker question of Apple.
- *
- * ONE LINE PER CLASS AND QUESTION, so the comparison is a diff and a reader can see what each side said:
- *   <class> fresh-equal <yes|no>     two freshly made objects of Apple's class
- *   <class> fresh-hash-same <yes|no>
- *   <class> copy-equal <yes|no>      a copy against its source
- *   <class> own-isEqual <yes|no>     whether the class carries an -isEqual: OF ITS OWN, which is what
- *                                    decides whether the port adds one: measured, the sixteen MTL4*
- *                                    classes do and the two 11.0 tile classes do not.
- */
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <objc/runtime.h>
@@ -33,9 +13,6 @@ static BOOL hasOwnIsEqual(Class c)
     return found;
 }
 
-/* $2 is NO for the one class whose declaration does not adopt NSCopying: asking it to copy RAISES an
- * NSException on Apple's side too, which is what its own method list says, so it is not asked and the
- * copy line for it is printed as "not asked" on both sides rather than answered. */
 static void report(Class c, const char *name, BOOL copies)
 {
     id a = [[c alloc] init];
@@ -77,8 +54,6 @@ int main(void)
         report([MTL4AccelerationStructureMotionTriangleGeometryDescriptor class], "MTL4AccelerationStructureMotionTriangleGeometryDescriptor", YES);
         report([MTL4AccelerationStructureMotionBoundingBoxGeometryDescriptor class], "MTL4AccelerationStructureMotionBoundingBoxGeometryDescriptor", YES);
         report([MTL4AccelerationStructureMotionCurveGeometryDescriptor class], "MTL4AccelerationStructureMotionCurveGeometryDescriptor", YES);
-        /* AND THE THREE NAMED MEMBERS the port-side case changes one of, asked here on Apple's side so
-         * the diff of the two runs covers them too. */
         {
             MTL4PipelineDescriptor *one = [[MTL4PipelineDescriptor alloc] init];
             MTL4PipelineDescriptor *two = [[MTL4PipelineDescriptor alloc] init];
@@ -107,9 +82,6 @@ int main(void)
             two.requiredThreadsPerThreadgroup = MTLSizeMake(0, 0, 3);
             printf("MTL4ComputePipelineDescriptor threadsize-differs %s\n", [one isEqual:two] ? "no" : "yes");
         }
-        /* The tile ATTACHMENT is measured on Apple's side and NOT printed here, because the port's
-         * object cannot carry it under a renamed name - the 16.4 SDK already declares that class, so the
-         * rename cannot reach it. Its three answers are in facts/Metal/Descriptors26.md. */
         report([MTLTileRenderPipelineColorAttachmentDescriptorArray class], "MTLTileRenderPipelineColorAttachmentDescriptorArray", NO);
     }
     return 0;

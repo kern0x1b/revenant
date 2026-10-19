@@ -1,10 +1,5 @@
--- compare-protocol-options-blocks.lua - the block-taking setters, read back, differences NAMED.
---
---    xmake l compare-protocol-options-blocks.lua <the binary's output>
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
--- In the order the values are named.
 local VALUES = {
     {"key-update-alone", 1}, {"challenge-still-unset", 0}, {"verify-still-unset", 0},
     {"all-three-set", 3}, {"p-has-verify", 1}, {"p-has-no-key-update", 0}, {"p-has-no-challenge", 0},

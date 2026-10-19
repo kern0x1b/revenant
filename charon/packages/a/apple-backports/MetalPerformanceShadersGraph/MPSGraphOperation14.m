@@ -1,7 +1,3 @@
-// MPSGraphOperation, from the header of MPSGraphOperation.h in the SDK of iOS 16.4: what an operation
-// reads, what it writes, what it is called and which graph it belongs to. What it *does* is a kind the
-// interpreter in MPSGraph14.m dispatches on.
-
 #import "CharonMPSGraph.h"
 
 @implementation MPSGraphOperation {
@@ -67,8 +63,6 @@
     return _kind;
 }
 
-// What a constant operation carries, and what an operation with a second operand and a scalar carries:
-// the operands themselves are already the operation's inputs, so only what is not a tensor is here.
 - (NSDictionary *)charon_mps_parameters
 {
     return _parameters;

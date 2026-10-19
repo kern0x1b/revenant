@@ -1,8 +1,3 @@
-// fall_ios70_test.m — facts/UIKit/UIDynamicAnimator.md §12 T1c: our animator as shipped, with iOS 7.0's integrator
-// (0.004 s sub-steps with the fmod accumulator, a box 1 pt inside the item with a 0.001 m skin), against the
-// trajectory facts/UIKit/UIDynamicAnimator.md §1.3 predicts for 7.0 from its listing (w_sim7.c: the same float
-// program, a prediction, not a device measurement).
-// T1b's scene: a 100x100 item at (150,50), gravity only, default resistance, 5 steps of 1/60 s.
 #import "dynamics.h"
 
 int main(void)
@@ -14,7 +9,6 @@ int main(void)
         [animator addBehavior:[MAKE(Ours, UIGravityBehavior) initWithItems:@[item]]];
         for (int index = 0; index < 5; index++) {
             animator_step(animator, 1.0 / 60.0);
-            // 1e-5 pt: the prediction is of the same float program, so only its printed digits separate them.
             check_near(item.center.y, predicted[index], 1e-5, "T1c 7.0's integrator falls as w_sim7 predicts",
                        [NSString stringWithFormat:@"step %d", index]);
         }

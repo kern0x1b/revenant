@@ -1,8 +1,3 @@
--- The SDK discovery (tools/gen/sdk.lua): the name, the version and the triple come from the SDK's SDKSettings.json alone. Two fixture SDK
--- folders (tests/gen/sdk_fixture): a complete one, and one whose SDKSettings.json has no Version, which must fail naming the file, and a
--- folder with no SDKSettings.json at all, which must fail as not an SDK. Pure Lua, no clang, no SDK on this machine.
--- A mutant of discover (Version read from CanonicalName) must make this test fail. Run: xmake l tests/gen/sdk_test.lua (exits 1 on failure).
-
 local ROOT = path.absolute(path.join(os.scriptdir(), "..", ".."))
 local TOOLS = path.join(ROOT, "tools")
 local FIXTURES = path.join(os.scriptdir(), "sdk_fixture")
@@ -24,7 +19,6 @@ function main()
     check(good.triple == "arm64e-apple-ios9.9", "the triple is built from DefaultDeploymentTarget: " .. tostring(good.triple))
     check(good.path == path.join(FIXTURES, "good"), "the path is the one given")
 
-    -- a failure is an error raised by assert: the test reads its message
     local function failure_of(folder)
         local message = nil
         try {

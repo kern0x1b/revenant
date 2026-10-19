@@ -3,27 +3,11 @@
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-// The handle's two private members, declared beside the class: the SDK's own @interface for
-// MTLSharedEventHandle has no room for a state, and the port's build is ARC, so there is no retain
-// and no release to write.
 @interface MTLSharedEventHandle (Charon)
 - (instancetype)initWithState:(CharonMetalEventState *)state label:(NSString *)label;
 - (CharonMetalEventState *)charonState;
 @end
 
-
-// A shared event is a signal value and the wait that blocks until it is reached. The port keeps the
-// value and the wait as real state on the CPU: a fence on this device is not a piece of work in
-// flight, since the port issues each command as it is encoded, so the value an encoder captures is
-// the value the work it had encoded has already reached, and a wait for it returns at once. What a
-// caller can still do with a real event is signal a value itself and wait for a value another thread
-// signals, and both of those are what this implements.
-//
-// The value and the wait live in a state of their own, and a handle names that state rather than the
-// event: -newSharedEventWithHandle: hands back a different object over the same value, which is what
-// opening an event elsewhere is. What a handle cannot do here is cross a process, because the port
-// runs one; that is the whole of what it cannot do, and -newSharedEventWithHandle: on a handle of
-// another device's event is refused with a line in the log rather than silently opening nothing.
 
 @implementation CharonMetalEventState {
     uint64_t _signaledValue;
@@ -112,7 +96,6 @@
     return self;
 }
 
-// An event over a state that is not its own, which is what a handle names.
 + (instancetype)charonEventWithState:(CharonMetalEventState *)state
 {
     CharonMetalSharedEvent *event = [[CharonMetalSharedEvent alloc] init];
@@ -127,9 +110,6 @@
 
 - (id<MTLDevice>)device
 {
-    // The device property of a shared event is nil when the event is shared across devices, and this
-    // one is the port's own event on the port's own device: nil is what Metal answers for a shared
-    // event, so the port answers the same.
     return nil;
 }
 
@@ -148,8 +128,6 @@
     return [self charonWaitForValue:value timeout:0.0];
 }
 
-// A wait of 0 seconds in the timeout means no timeout: a fence the port's own encoder never lowered
-// is a value that will not come, and waiting for it is what the caller asked for.
 - (BOOL)charonWaitForValue:(uint64_t)value timeout:(NSTimeInterval)seconds
 {
     [_state waitForValue:value timeout:seconds];
@@ -161,9 +139,6 @@
     [_state notifyValue:value queue:listener.dispatchQueue block:block];
 }
 
-// A handle names the state of this event, and nothing else: the value and the wait that go with it.
-// What it cannot do is be opened in another process, because there is no other process to open it
-// in; within this one, -newSharedEventWithHandle: hands back an event over the very same state.
 - (MTLSharedEventHandle *)newSharedEventHandle
 {
     return [[MTLSharedEventHandle alloc] initWithState:_state label:self.label];
@@ -171,8 +146,6 @@
 
 @end
 
-// The handle is the SDK's own class, and iOS 6 carries no class of this name, so the port carries it.
-// Its one job is to name the state of an event, which is what -newSharedEventWithHandle: opens.
 @implementation MTLSharedEventHandle {
     __strong CharonMetalEventState *_state;
     NSString *_label;
@@ -199,10 +172,6 @@
     return [[MTLSharedEventHandle alloc] initWithState:_state label:_label];
 }
 
-// Apple's class of this name is NSSecureCoding. A handle here names a signal value and a condition
-// that exist in this process, and there is nothing of them to write into an archive, so the class
-// says it does not do secure coding and an encode is refused through the archive's own error rather
-// than left to reach a method this class does not have.
 + (BOOL)supportsSecureCoding
 {
     return NO;
@@ -229,8 +198,6 @@
 - (instancetype)initWithDispatchQueue:(dispatch_queue_t)dispatchQueue
 {
     if ((self = [super init])) {
-        // The port's backports build with ARC, and a dispatch object of a deployment this old is an
-        // Objective-C object under it, so the queue is held by the ivar and needs no retain of its own.
         _queue = dispatchQueue;
     }
     return self;

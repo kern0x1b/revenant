@@ -1,8 +1,3 @@
-// MKOverlayPathRenderer: the fill and stroke of a shape, on top of the coordinate arithmetic of
-// MKOverlayRenderer. This is where MapKit's own path renderers are built, so the line defaults
-// here are the ones the iOS 7 header documents: a line width of 0 means the road width at the
-// current zoom scale (MKRoadWidthAtZoomScale, the release's own function, which has been in
-// MapKit.framework since iOS 4.0), round joins and caps, a miter limit of 10 and no dashes.
 #import <MapKit/MapKit.h>
 #import <UIKit/UIKit.h>
 #import "CharonMapKit.h"
@@ -53,10 +48,6 @@
     [self invalidatePath];
 }
 
-// The shape's own path, in the renderer's point space. Subclasses answer by overriding
-// -createPath and assigning the path they build to self.path, which is the header's own extension
-// point; a path renderer whose subclass builds nothing draws nothing, which is the shape-less
-// renderer's honest answer rather than an empty stroke.
 - (void)createPath
 {
 }
@@ -93,7 +84,6 @@
     if (_lineWidth > 0.0) {
         return _lineWidth;
     }
-    // The release's own road width at this zoom scale, which is what a line width of 0 means.
     return MAX(MKRoadWidthAtZoomScale(zoomScale), 1.0);
 }
 
@@ -155,10 +145,6 @@
     CGContextRestoreGState(context);
 }
 
-// shouldRasterize is the header's own switch between drawing the shape as vector geometry and
-// compositing it as a bitmap. It is real here: YES renders the path once into a bitmap at the
-// screen's own scale and draws that image, which is what the release's map view does with a
-// rasterized overlay, and NO strokes and fills the path itself.
 - (void)charon_drawRasterizedInContext:(CGContextRef)context zoomScale:(MKZoomScale)zoomScale
 {
     CGPathRef path = self.path;
@@ -216,8 +202,6 @@
         [self charon_drawRasterizedInContext:context zoomScale:zoomScale];
         return;
     }
-    // The path is in the renderer's own points; MapKit's context for an overlay is already
-    // transformed into that space, so the path is added as it stands.
     if (_fillColor) {
         [self applyFillPropertiesToContext:context atZoomScale:zoomScale];
         CGContextBeginPath(context);

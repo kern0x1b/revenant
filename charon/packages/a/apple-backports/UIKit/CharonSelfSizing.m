@@ -107,12 +107,6 @@ UICollectionViewLayoutAttributes *charon_preferred_attributes(UICollectionReusab
 
 void charon_layout_perform(UICollectionViewLayout *layout, void (^work)(UICollectionViewLayout *layout))
 {
-    // A plain dispatch_async, not CFRunLoopPerformBlock/CFRunLoopWakeUp: the latter forces the
-    // main run loop to service the block on its very next pass, ahead of whatever else the run
-    // loop already had queued for that pass, including a dispatch_after fired around the same
-    // deferred measurement. Every other deferred-to-main-thread spot in this package already uses
-    // dispatch_async; this one was the sole outlier, and forcing it made this settle pass compete
-    // for the run loop's attention with other main-queue work rather than simply taking a turn.
     __weak UICollectionViewLayout *weak = layout;
     dispatch_async(dispatch_get_main_queue(), ^{
         UICollectionViewLayout *strong = weak;

@@ -1,14 +1,3 @@
--- The full Swift declaration model of the SDK's Swift modules: the same digester dump swift_shard.lua reads, run once per run as one
--- batch (prefetch) and read from its cache, walked into one row per declaration, holding every field the dump gives that a compilable
--- declaration needs and the shard has no column for: the mangled name, the generic signature, the conformances, the superclass,
--- throws/async/mutating, the accessors, attributes, protocol-requirement and extension state, storage and raw type. The committed
--- shard (spec/<F>/swift.tsv) is NOT touched: this is a build product, never committed (like ir.lua's IR_FULL). The container and
--- name of a row are the same the shard computes, so the declhash column is the shard's own digest.
---
--- async has no key of its own in the dump: the mangled name carries it, and it is read from there by swift-demangle in one batch per
--- module (the ABI encoding is the model's own data, not the interface text). A declaration the digester lists whose mangled name has
--- the async marker gets async="yes".
-
 local swift_shard = import("swift_shard", {anonymous = true})
 local swift_canonical = import("swift_canonical", {anonymous = true})
 local sdk_info = import("sdk", {anonymous = true})
@@ -21,29 +10,21 @@ local DEMANGLER = "swift-demangle"
 local NO_VALUE = "-"
 local KIND_PREFIX = "swift-"
 local ASYNC_MARKER = " async"
--- The digester's declaration kinds that are types, and the surface kind each is.
 local TYPE_KINDS = {Class = "class", Struct = "struct", Enum = "enum", Protocol = "protocol", TypeAlias = "typealias"}
--- The platform names the digester writes as intro_<name> (lower-cased; the Mac is "Macosx" there).
 local PLATFORM_NAMES = {macosx = "macos"}
--- The full model's columns: the shard's eleven (framework, kind, usr, container, name, side, type, params, availability, message,
--- declhash) first, so a model row carries the shard row as its prefix, then the fields the shard has no column for.
 local MODEL_COLUMNS = {"framework", "kind", "usr", "container", "name", "side", "type", "params", "availability", "message",
                        "declhash", "mangled", "generic_sig", "conformances", "superclass", "throwing", "async", "mutating",
                        "attributes", "accessors", "storage", "is_let", "is_open", "requirement", "in_extension", "owner_module",
                        "raw", "alias", "overriding", "init_kind", "implicit"}
 
--- The model's columns, in order.
 function columns()
     return MODEL_COLUMNS
 end
 
--- The Swift module names of the SDK, in byte order (the same list the shard's command uses).
 function modules(sdk)
     return swift_shard.modules(sdk)
 end
 
--- The -public-module-name a swiftinterface's flags name, read from its first lines, or nil. The compiler reads this flag for
--- "module X is an implementation detail of Y": the flags sit in the header, before the first declaration.
 local FLAG_LINES = 12
 local function public_name_of(filepath)
     local handle = io.open(filepath, "rb")
@@ -65,9 +46,6 @@ local function public_name_of(filepath)
     return found
 end
 
--- The implementation modules of the SDK, as a map from each to its public module: a module whose interface names another module
--- as its public one (the SDK's SwiftUICore names SwiftUI). A module that names none, or itself, is not in the map. The digester's
--- own re-export list is not the rule: SwiftUI re-exports UIKit, which is no implementation module.
 function public_modules(sdk)
     local out, seen = {}, {}
     for _, filepath in ipairs(files.glob(path.join(sdk, "**", "*.swiftinterface"))) do
@@ -83,9 +61,6 @@ function public_modules(sdk)
     return out
 end
 
--- The SDK's import graph: each module's direct imports (a set of module names), read from the import lines of its swiftinterface. A
--- submodule is its module (Metal.MTLDevice is Metal), an @_exported import counts as an import. A module with no interface (a C-only
--- module, CoreFoundation) imports none. Returns the map from module to its set.
 function import_graph(sdk)
     local out = {}
     for _, filepath in ipairs(files.glob(path.join(sdk, "**", "*.swiftinterface"))) do
@@ -94,7 +69,6 @@ function import_graph(sdk)
             local imports = {}
             local handle = assert(io.open(filepath, "rb"), "cannot read " .. filepath)
             for line in handle:lines() do
-                -- an import line may carry the export attribute and an access level before its keyword (@_exported public import X)
                 local rest = string.gsub(line, "^@_exported%s+", "")
                 rest = string.gsub(rest, "^public%s+", "")
                 local target = string.match(rest, "^import%s+([%w_]+)")
@@ -109,9 +83,6 @@ function import_graph(sdk)
     return out
 end
 
--- The modules that depend on a module in the import graph: every module that reaches it through imports (the module itself excepted).
--- A declaration of this module cannot name one of them: in the SDK the declaration belongs to the dependent module (CoreFoundation's
--- rows that name CoreGraphics are CoreGraphics's, since CoreGraphics imports CoreFoundation). Returns the set (name -> true).
 function dependents_of(graph, module)
     local reverse = {}
     for from, targets in pairs(graph) do
@@ -136,12 +107,6 @@ function dependents_of(graph, module)
     return out
 end
 
--- The associated types of the SDK's protocols, read from their swiftinterfaces: the digester's dump names an associated type and none of
--- its inheritance, so "associatedtype Transformer : CreateMLComponents.TabularTransformer" was rendered bare (Transformer.Input is "is not
--- a member type": 424 errors in CreateMLComponents), and it names no primary associated types, so "public protocol Supervised<Transformer,
--- Annotation>" was rendered without them (protocol 'X' does not have primary associated types: 164 errors there). Returns
--- bounds[module][protocol] = {associated = {name = the text after the colon, up to a where clause}, primaries = "A, B" or nil}. A protocol
--- block is the lines from "public protocol" to its closing brace at column 0.
 function associated_bounds(sdk)
     local out = {}
     for _, filepath in ipairs(files.glob(path.join(sdk, "**", "*.swiftinterface"))) do
@@ -174,9 +139,6 @@ function associated_bounds(sdk)
     return out
 end
 
--- The clang modules of the SDK a Swift file imports by name (name -> true) and that have no swiftinterface: a framework's modulemap
--- (_LocationEssentials, Matter, whose frameworks are .tbd only) and the modules the SDK's usr/include modulemap declares (os_object).
--- The skeleton names them in its types and needs them imported.
 function clang_modules(sdk)
     local out = {}
     for _, filepath in ipairs(files.glob(path.join(sdk, "System", "Library", "Frameworks", "*.framework", "Modules", "module.modulemap"))) do
@@ -203,9 +165,6 @@ function clang_modules(sdk)
     return out
 end
 
--- The Swift module names of the SDK as a set (name -> true): the names an import of the rendered code may name. The swiftinterface
--- modules, the clang modules (clang_modules), and the compiler's Builtin module: the stdlib modules name its types (Distributed's
--- Builtin.Executor), and it is importable with -enable-builtin-module (swift_roundtrip.compile_item) and has no interface in the SDK.
 function module_set(sdk)
     local out = {Builtin = true}
     for _, name in ipairs(modules(sdk)) do
@@ -217,12 +176,10 @@ function module_set(sdk)
     return out
 end
 
--- The target triple of the SDK's deployment target, read by the SDK's discovery (sdk.lua), as the shard plan reads it.
 function triple_of(sdk)
     return sdk_info.discover(sdk).triple
 end
 
--- The path of coordination/heavy.sh: beside the coordination folder when one is given, else the workspace's.
 function heavy_path(coordination)
     if coordination then
         return path.join(coordination, "heavy.sh")
@@ -230,20 +187,14 @@ function heavy_path(coordination)
     return path.join(os.getenv("HOME"), "Git", "projects", "ios", "coordination", "heavy.sh")
 end
 
--- The digester's dumps of the named modules, run as one batch in one heavy slot before any model is read (swift_shard.dump_batch, the
--- model's variant): a dump run per call queued each module's dumps behind the whole queue. Returns the cache folder the models read from.
 function prefetch(tree, heavy, sdk, triple, names)
     return swift_shard.dump_batch(tree, heavy, sdk, triple, names, "model")
 end
 
--- The digester's JSON root of one module from the batch's cache: its API dump (mode nil), or its ABI dump when mode is "-abi". Returns the
--- root, or nil and the reason the digester gave none. A module the digester cannot load gets an empty tree and an exit 0, so an empty
--- root is a reason, not a failure.
 local function dump(folder, framework, mode)
     return swift_shard.cached_root(folder, "model", framework, mode or "")
 end
 
--- A cell as the model writes it: an absent field is "-".
 local function dash(value)
     if value == nil or value == "" then
         return NO_VALUE
@@ -254,7 +205,6 @@ local function dash(value)
     return value
 end
 
--- The platform introductions of a declaration, as "platform=version" tokens in byte order; "-" when it has none.
 local function availability_of(node)
     local tokens = {}
     for key, value in pairs(node) do
@@ -270,8 +220,6 @@ local function availability_of(node)
     return table.concat(tokens, ",")
 end
 
--- The surface kind of a digester declaration, or nil when the snapshot holds no row for it. in_type says whether the declaration
--- sits in a type: a function there is a method, a variable a property (the same rule as the shard).
 local function surface_kind(decl, in_type)
     if TYPE_KINDS[decl] then
         return TYPE_KINDS[decl]
@@ -294,10 +242,6 @@ local function surface_kind(decl, in_type)
     return nil
 end
 
--- The payload of an enum case, as its parameter types ("-" for a case with none). The digester gives the case as a function from its
--- payload to the enum (a generic enum's case is inside a generic function). The function that returns the enum is the one whose first
--- child is the enum's own type, the type's usr being a prefix of the case's usr; the children after its result are the payload (a
--- tuple's elements are the payload, and the metatype is no payload).
 local function enum_payload(node)
     local usr = node.usr or ""
     local function returns_enum(fn)
@@ -338,8 +282,6 @@ local function enum_payload(node)
     return #types > 0 and table.concat(types, " | ") or NO_VALUE
 end
 
--- The declared type and the parameter types of a signed declaration, the shard's own rule (a variable's type, a function's result
--- then its parameters, a constructor's children are its parameters); an enum case's payload is its parameters.
 local function signature_of(node, decl)
     if decl == "EnumElement" then
         return NO_VALUE, enum_payload(node)
@@ -361,7 +303,6 @@ local function signature_of(node, decl)
     return children[1] or NO_VALUE, #params > 0 and table.concat(params, " | ") or NO_VALUE
 end
 
--- The conformances a type declares, as their printed names in the dump's order; "-" when it declares none.
 local function conformances_of(node)
     local out = {}
     for _, c in ipairs(node.conformances or {}) do
@@ -370,7 +311,6 @@ local function conformances_of(node)
     return #out > 0 and table.concat(out, ",") or NO_VALUE
 end
 
--- The superclass of a class, from the dump's superclassNames (the qualified spelling the uses print), or "-".
 local function superclass_of(node)
     local names = node.superclassNames
     if type(names) == "table" and #names > 0 then
@@ -379,7 +319,6 @@ local function superclass_of(node)
     return NO_VALUE
 end
 
--- The accessor kinds of a variable or subscript, as "get,set"; "-" when the dump lists none.
 local function accessors_of(node)
     local out = {}
     for _, a in ipairs(node.accessors or {}) do
@@ -390,7 +329,6 @@ local function accessors_of(node)
     return #out > 0 and table.concat(out, ",") or NO_VALUE
 end
 
--- The attributes the dump lists, in its order; "-" when there are none.
 local function attributes_of(node)
     local out = {}
     for _, a in ipairs(node.declAttributes or {}) do
@@ -399,7 +337,6 @@ local function attributes_of(node)
     return #out > 0 and table.concat(out, ",") or NO_VALUE
 end
 
--- The qualified names of the types the dump spells, the shard's own reading.
 local function qualified_names(node, out)
     if node.kind == "TypeNominal" and node.usr and node.printedName and out[node.usr] == nil then
         local name = string.match(node.printedName, "^[^.]+%.(.+)$")
@@ -413,8 +350,6 @@ local function qualified_names(node, out)
     return out
 end
 
--- The api of a type declaration: its qualified name when the dump's uses give one whose last part is the declaration's own name,
--- else the container and the name (the shard's type_api).
 local function type_api(node, label, container, qualified)
     local name = node.usr and qualified[node.usr]
     if name and string.match(name, "([^.]+)$") == label then
@@ -423,8 +358,6 @@ local function type_api(node, label, container, qualified)
     return container ~= NO_VALUE and (container .. "." .. label) or label
 end
 
--- The owner module of a declaration: the dump's moduleName, or the framework when it carries none. "-" when it is the framework's
--- own (not an extension of another module).
 local function owner_module(node, framework)
     local module = node.moduleName
     if module == nil or module == framework then
@@ -433,7 +366,6 @@ local function owner_module(node, framework)
     return module
 end
 
--- The type a typealias aliases, from its single child; "-" otherwise.
 local function alias_of(node, decl)
     if decl ~= "TypeAlias" then
         return NO_VALUE
@@ -442,7 +374,6 @@ local function alias_of(node, decl)
     return child and (child.printedName or child.name) or NO_VALUE
 end
 
--- The row of one declaration, a record keyed by MODEL_COLUMNS. decl is the digester's declKind.
 local function row_of(framework, decl, node, container, kind, name, async)
     local usr = node.usr or NO_VALUE
     local side = node.static and "+" or "-"
@@ -466,8 +397,6 @@ local function row_of(framework, decl, node, container, kind, name, async)
     }
 end
 
--- Walks the declarations of a node list, appending a row for each. container is the api of the type the declarations sit in, or
--- "-". A clang importer's declaration (moduleName "__ObjC", "__C") is left out (the shard's rule).
 local function walk(framework, nodes, container, qualified, rows)
     for _, node in ipairs(nodes or {}) do
         local decl = node.declKind
@@ -489,7 +418,6 @@ local function walk(framework, nodes, container, qualified, rows)
     end
 end
 
--- The full model of one module's dump: a list of rows (records), or nil and the reason the module has none.
 function rows(root, framework)
     local out = {}
     walk(framework, root.children, NO_VALUE, qualified_names(root, {}), out)
@@ -499,10 +427,6 @@ function rows(root, framework)
     return out
 end
 
--- Fills each row's async cell from the demangled signature of its mangled name: the ABI encoding is where the dump keeps the async
--- marker. The demangler is given the mangled spelling ("$s...") and echoes one line per name, in order. It runs in chunks, so an
--- argument list stays under the system's limit whatever a module's count; the lines are joined in order. A row with no mangled name
--- keeps "-".
 local DEMANGLE_CHUNK = 500
 function annotate_async(rows, batch)
     local demangle = batch or function(names)
@@ -542,9 +466,6 @@ function annotate_async(rows, batch)
     return rows
 end
 
--- The identifiers of the model that are not ASCII (a Swift identifier the SDK spells in another script, such as a Foundation
--- property whose name has a macron), as a list. The digester's canonical generic parameters (tau_D_I) are not identifiers of
--- the SDK and are left out: a rendered file never spells one.
 function non_ascii_identifiers(rows)
     local seen, out = {}, {}
     for _, r in ipairs(rows) do
@@ -564,7 +485,6 @@ function non_ascii_identifiers(rows)
     return out
 end
 
--- The row as a list of cells, in MODEL_COLUMNS order.
 local function cells(row)
     local out = {}
     for i, name in ipairs(MODEL_COLUMNS) do
@@ -573,7 +493,6 @@ local function cells(row)
     return out
 end
 
--- The TSV text of a model: the header, then one line per row, in ASCII.
 function text(rows)
     local out = {}
     for _, r in ipairs(rows) do
@@ -582,9 +501,6 @@ function text(rows)
     return tsv.table_text(MODEL_COLUMNS, out)
 end
 
--- The model of one module: the API dump's rows, and then the ABI dump's rows whose usr the API dump does not carry. This is the union the
--- Swift shard holds (swift_shard.dump_rows): the API dump drops the underscore-prefixed declarations the interface declares public, and
--- the ABI dump drops others, so the skeleton of a module declares what the shard names. Returns the rows, or nil and the reason.
 function model(folder, framework)
     local root, reason = dump(folder, framework)
     if root == nil then
@@ -612,7 +528,6 @@ function model(folder, framework)
     return out
 end
 
--- The union of two comma-joined lists, in order, each item once; "-" when neither has one.
 local function union_list(a, b)
     if a == NO_VALUE then
         return b
@@ -632,9 +547,6 @@ local function union_list(a, b)
     return table.concat(out, ",")
 end
 
--- The class row one key holds once a second module's row for the same class is in: the conformances are the union (a module
--- adds a conformance to another module's class in an extension, and that module's dump lists it), and the superclass is the one
--- named.
 local function merged_class(existing, row)
     if existing == nil then
         return row
@@ -650,10 +562,6 @@ local function merged_class(existing, row)
     return copy
 end
 
--- Adds the class rows of one module's model (name is the module) to a class index, keyed by "Module.Api" (the spelling a
--- superclass takes in a row). A class is keyed by the module that declares it: a row whose owner is another module is that
--- module's class, so Foundation's extension of ObjectiveC's NSObject is keyed "ObjectiveC.NSObject", the spelling its subclasses
--- name. Returns the index.
 function add_classes(classes, name, rows)
     for _, row in ipairs(rows) do
         if row.kind == "swift-class" then
@@ -666,9 +574,6 @@ function add_classes(classes, name, rows)
     return classes
 end
 
--- The class rows of the given modules, keyed by their qualified name (see add_classes): a class's superclass chain is read from
--- this index (swift_render.lua). Returns the index and the modules with no model, each with its reason (a module whose heavy job
--- fails is one of these, and the chain through it is missing).
 function class_index(folder, names)
     local classes, missing = {}, {}
     for _, name in ipairs(names) do
@@ -692,7 +597,6 @@ function class_index(folder, names)
     return classes, missing
 end
 
--- Writes the model of one module under out_dir/<F>.tsv through emit. Returns the number of rows, or nil and the reason.
 function write_model(folder, out_dir, framework)
     local out, reason = model(folder, framework)
     if out == nil then
@@ -702,7 +606,6 @@ function write_model(folder, out_dir, framework)
     return #out
 end
 
--- emit is imported lazily so the model can be tested without the writer.
 local emit_module = nil
 function emit_file(filepath, contents)
     if emit_module == nil then

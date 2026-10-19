@@ -1,8 +1,3 @@
-/*
- * The application service a listener advertises, as iOS 16 names it: one name that stands for the
- * whole service, with no type and no domain of its own.
- */
-
 #import "CharonNW.h"
 
 nw_advertise_descriptor_t nw_advertise_descriptor_create_application_service(const char *application_service_name)

@@ -1,6 +1,3 @@
-// What the host does for CMTag's group format description and the two sample-buffer functions, over the
-// chain the 464/0 fixture already builds: a subset chain of three entries - {video}, {video,track},
-// {video,track,gone} - and three pixel buffers.
 #import <CoreMedia/CoreMedia.h>
 #import <CoreMedia/CMTaggedBufferGroup.h>
 #import <CoreVideo/CoreVideo.h>
@@ -41,14 +38,11 @@ int main(void)
     OSStatus created = CMTaggedBufferGroupCreate(kCFAllocatorDefault, tags, bufs, &group);
     printf("group create %d count %ld\n", created, (long)CMTaggedBufferGroupGetCount(group));
 
-    // 1. the plain create
     CMTaggedBufferGroupFormatDescriptionRef desc = NULL;
     OSStatus made1 = CMTaggedBufferGroupFormatDescriptionCreateForTaggedBufferGroup(
         kCFAllocatorDefault, group, &desc);
     printf("\ncreate: status %d out %s\n", made1, desc ? "non-null" : "NULL");
     if (desc) {
-        // what is it, and is it opaque? Compare its type against ones this file can name, and ask the
-        // format-description entry points whether they recognise it.
         CFTypeID type = CFGetTypeID(desc);
         printf("  its CFTypeID %lu; is a CMFormatDescription %d, is a CFDictionary %d, is a CFData %d\n",
             (unsigned long)type,
@@ -59,7 +53,6 @@ int main(void)
         printf("  CMFormatDescriptionGetMediaSubType on it answers %u\n", (unsigned)sub);
     }
 
-    // 2. Matches: the group it came from, a different group, and NULL
     if (desc) {
         printf("\nmatches: same group %d\n",
             (int)CMTaggedBufferGroupFormatDescriptionMatchesTaggedBufferGroup(desc, group));
@@ -71,7 +64,6 @@ int main(void)
         CMTaggedBufferGroupCreate(kCFAllocatorDefault, otherTags, otherBufs, &other);
         printf("matches: two entries %d\n",
             (int)CMTaggedBufferGroupFormatDescriptionMatchesTaggedBufferGroup(desc, other));
-        // a group of the same shape but different buffers
         CFMutableArrayRef sameShape = CFArrayCreateMutable(NULL, 3, &kCFTypeArrayCallBacks);
         CFMutableArrayRef sameShapeBufs = CFArrayCreateMutable(NULL, 3, &kCFTypeArrayCallBacks);
         CVPixelBufferRef other3[3];
@@ -86,8 +78,6 @@ int main(void)
             (int)CMTaggedBufferGroupFormatDescriptionMatchesTaggedBufferGroup(desc, twin));
         printf("matches: NULL group %d\n",
             (int)CMTaggedBufferGroupFormatDescriptionMatchesTaggedBufferGroup(desc, NULL));
-        // the control: three entries of the SAME SIZES but different tags. If Matches only counted,
-        // this would answer 1.
         CMTag f0[1] = { gone };
         CMTag f1[2] = { gone, track };
         CMTag f2[3] = { gone, track, video };
@@ -99,15 +89,12 @@ int main(void)
         CMTaggedBufferGroupCreate(kCFAllocatorDefault, st, sb, &sameSizes);
         printf("matches: same entry sizes, different tags %d\n",
             (int)CMTaggedBufferGroupFormatDescriptionMatchesTaggedBufferGroup(desc, sameSizes));
-        // and the out-parameter for a NULL group
         CMTaggedBufferGroupFormatDescriptionRef fromNull = (void *)0x1;
         OSStatus nullStatus = CMTaggedBufferGroupFormatDescriptionCreateForTaggedBufferGroup(
             kCFAllocatorDefault, NULL, &fromNull);
         printf("create from a NULL group: status %d out %s\n", nullStatus,
             fromNull == NULL ? "set to NULL" : (fromNull == (void *)0x1 ? "left alone" : "non-null"));
         if (fromNull && fromNull != (void *)0x1) {
-            // is it a real object? ask before touching it, then release it under ASan: a host that
-            // writes a pointer it does not own would say so here rather than in a crash later.
             CFTypeID t = CFGetTypeID(fromNull);
             printf("  and it is a CFTypeID %lu, a CMFormatDescription %d, subtype %u\n", (unsigned long)t,
                 (int)(t == CMFormatDescriptionGetTypeID()),
@@ -120,7 +107,6 @@ int main(void)
         }
     }
 
-    // 3. the 26.0 one, with and without extensions
     CMTaggedBufferGroupFormatDescriptionRef withExt = NULL;
     OSStatus made2 = CMTaggedBufferGroupFormatDescriptionCreateForTaggedBufferGroupWithExtensions(
         kCFAllocatorDefault, group, NULL, &withExt);
@@ -138,7 +124,6 @@ int main(void)
         withExt2 ? "non-null" : "NULL",
         withExt2 ? (int)CMTaggedBufferGroupFormatDescriptionMatchesTaggedBufferGroup(withExt2, group) : -1);
 
-    // 4. the sample buffer round trip
     if (desc) {
         CMSampleBufferRef sbuf = NULL;
         OSStatus sb = CMSampleBufferCreateForTaggedBufferGroup(
@@ -157,8 +142,6 @@ int main(void)
                 (long long)CMSampleBufferGetDuration(sbuf).value,
                 (int)CMSampleBufferGetDuration(sbuf).timescale);
             CFIndex idx = -1;
-            // video is in all three collections, so the unique-match rule the group already implements
-            // says NULL; 'gone' is only in the third, so it is the tag that answers.
             printf("  through the group, video (in all three) %s\n",
                 CMTaggedBufferGroupGetCVPixelBufferForTag(back, kCMTagMediaTypeVideo, &idx) ? "non-null" : "NULL");
             idx = -1;
@@ -170,7 +153,6 @@ int main(void)
                 (int)(CMTaggedBufferGroupGetCVPixelBufferForTag(group, gone, &idx) == made[2]));
         }
     }
-    // 5. a sample buffer that did not come from a group
     {
         CMSampleBufferRef plain = NULL;
         CVPixelBufferRef one = NULL;

@@ -3,14 +3,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-// A material is a set of named properties, each of one semantic (what it means to a renderer) and of
-// one type (how its value is written). A property's value is a string, a URL, a texture, a colour, a
-// float or a vector, or a 4x4 matrix, and the type says which: a property written as a float read
-// back as a float3 is three floats of it, which is what a renderer wants from a scalar.
-
 @implementation MDLMaterialPropertyConnection {
-    // Weak, which under this port's manual reference counting is the unsafe form: the connection
-    // names the two properties rather than owning them, and the graph keeps them alive.
     __unsafe_unretained MDLMaterialProperty *_output, *_input;
     NSString *_name;
 }
@@ -120,8 +113,6 @@
     return _connections;
 }
 
-// The connections are the graph's own order, so every output of every node has been written by the
-// time the evaluation returns, which is what a caller then reads.
 - (void)evaluate
 {
     for (MDLMaterialPropertyNode *node in _nodes)

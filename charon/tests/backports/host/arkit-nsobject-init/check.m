@@ -1,13 +1,3 @@
-// check.m - the -init and +new rows of the carried ARKit and SensorKit classes, on the host's own frameworks.
-//
-// Each row in rows.inc names a class, whether the selector is a class method (1) or an instance method (0), and
-// the selector. The release answers that selector with the superclass's own IMP and the class defines none of its
-// own. This measures both on Mac Catalyst (the iOSSupport copies of ARKit and SensorKit in the macOS SDK).
-// run.sh then reads the port's sources and checks the same rows against them: the port's classes cannot be
-// compiled for the host here, because ARKit's tracker imports CoreMotion, which the Catalyst SDK does not carry.
-//
-// Controls: a class that overrides -init has its own IMP, and a name that no framework has is not a class.
-
 #import <Foundation/Foundation.h>
 #import <ARKit/ARKit.h>
 #import <SensorKit/SensorKit.h>
@@ -30,7 +20,6 @@ static void check(BOOL ok, NSString *line)
 - (instancetype)init { return [super init]; }
 @end
 
-// The selector the class defines itself (not inherited). A class method lives on the metaclass.
 static BOOL definesOwn(Class c, SEL sel, BOOL classMethod)
 {
     Class where = classMethod ? object_getClass(c) : c;

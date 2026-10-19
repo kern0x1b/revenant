@@ -1,11 +1,3 @@
--- The known differences of the whole-SDK verify: the committed table tools/gen/verify-known.tsv, one row per difference the verify
--- measures and cannot remove, each row a key, the count measured for it, and its cause (tab-separated; a # line is a comment). A row
--- explains a measured difference only at its own count: a key the run measures at another count is unexplained, and a row the run
--- does not measure at all is stale. Both fail the verify, so the table cannot hide a change. Keys are written by verify.lua:
--- "headers <framework> <cause>" and "swift <module> <item>". Pure Lua: no SDK, no clang.
-
--- The rows of the table's text, keyed by their key: {count = n, cause = text}. Returns the rows and, when the text is malformed (a line
--- that is not key, count and cause, or a key named twice), the number of that line.
 function parse(text)
     local rows, malformed, number = {}, nil, 0
     for line in (text .. "\n"):gmatch("(.-)\n") do
@@ -22,8 +14,6 @@ function parse(text)
     return rows, malformed
 end
 
--- The problems of one run: each measured key no row explains at its count, and each row the run does not measure. measured maps a key
--- to its count (above zero). Returns the lines to print, in key order; an empty list is a run every difference of which is known.
 function problems(measured, rows)
     local keys = {}
     for key in pairs(measured) do keys[#keys + 1] = key end

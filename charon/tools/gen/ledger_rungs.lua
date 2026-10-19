@@ -1,22 +1,7 @@
--- The ledger rung measurement: a framework's ledger rows whose needs are code or code+lift, ordered by the crash-demand list, each
--- placed at the first HELD release that exports its symbol, and one manifest that names every rung searched. It replaces
--- tools/corpus/generate-ledger-objects.py, and its output is byte-equal to that script's on the same inputs.
---
---     xmake l tools/gen/ledger_rungs.lua <out dir> [--cache DIR] [--demand TSV] [--ledger NAME=PATH ...] [--limit N] [--all] [--dry-run]
---
--- The split is by MEASUREMENT and never by the corpus's `introduced`, and the two disagree: a name whose header annotation is later
--- than the release that exports it costs the port the band, because `carried` is `introduced <= deployment`. So the emitted
--- `introduced` is the rung for a row whose header annotation is later, and the row's `reason` says which rung and why.
---
--- Every rung searched is named in the output, with the planted control, so a run that measured nothing is visible rather than silent.
--- The inputs are the caller's: cache-<release>.tsv dumps of each held release (--cache), the demand list (--demand), and the ledgers.
--- Only the manifest is written; the objects are written from it by the caller.
-
 local tsv = import("tsv", {anonymous = true})
 local pyjson = import("pyjson", {anonymous = true})
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 
--- The held releases the dumps are read for, oldest first, with the architecture each is read in.
 local RUNG_ARCH = {
     {"4.3", "armv7"}, {"6.1.3", "armv7"}, {"7.0", "armv7"}, {"7.1", "armv7"},
     {"7.1.1", "armv7"}, {"7.1.2", "armv7"}, {"8.0", "armv7"}, {"8.1.3", "armv7s"},
@@ -27,7 +12,6 @@ local CONTROL = "_NSFileSize"
 local NONSENSE = "_AVNoSuchSymbolForAReviewerControl"
 local NONE_OF_THE_15 = "NONE-OF-THE-15"
 
--- The Python repr of a list of strings, which the reports print: ['4.3', '6.1.3'].
 local function list_repr(items)
     local quoted = {}
     for _, item in ipairs(items) do
@@ -36,7 +20,6 @@ local function list_repr(items)
     return "[" .. table.concat(quoted, ", ") .. "]"
 end
 
--- The Python repr of a dict of counts, in the order its keys were first seen: {'class': 3, 'method': 1}.
 local function counts_repr(order, counts)
     local items = {}
     for _, key in ipairs(order) do
@@ -45,7 +28,6 @@ local function counts_repr(order, counts)
     return "{" .. table.concat(items, ", ") .. "}"
 end
 
--- Counts keys in the order they are first seen, as Counter does.
 local function counter(values)
     local order, counts = {}, {}
     for _, value in ipairs(values) do
@@ -58,7 +40,6 @@ local function counter(values)
     return order, counts
 end
 
--- The number of keys of a set.
 local function set_size(set)
     local count = 0
     for _ in pairs(set) do
@@ -67,7 +48,6 @@ local function set_size(set)
     return count
 end
 
--- The release -> set of exported symbol names, from the dumps on disk: one name per line, the first field of a line that has two.
 local function load_dumps(cache)
     local dumps, present, missing = {}, {}, {}
     for _, rung in ipairs(RUNG_ARCH) do
@@ -95,8 +75,6 @@ local function load_dumps(cache)
     return dumps, present, missing
 end
 
--- The symbols that prove a release carries this row: a class and its metaclass, a method's _OBJC_METHOD_$_ name, a property's
--- _OBJC_IVAR_$_ name, a function's own name. Every test runs, as the Python's did: the branches are not elif.
 local function symbols_for(api, kind)
     local out = {}
     if kind == "class" or kind == "protocol" then
@@ -122,7 +100,6 @@ local function symbols_for(api, kind)
     return out
 end
 
--- The first held release, in ladder order, that exports one of the symbols; NONE_OF_THE_15 when none does.
 local function carried_at(symbols, dumps)
     for _, rung in ipairs(RUNG_ARCH) do
         for _, symbol in ipairs(symbols) do
@@ -134,7 +111,6 @@ local function carried_at(symbols, dumps)
     return NONE_OF_THE_15
 end
 
--- The owning class, or the name itself, of a row.
 local function owner_of(api, kind)
     if kind == "class" or kind == "protocol" then
         return api
@@ -145,7 +121,6 @@ local function owner_of(api, kind)
         or api
 end
 
--- The rows of a ledger as records. A line with fewer fields than the header is skipped, and so is a blank line.
 local function read_ledger(filepath)
     local handle = io.open(filepath, "rb")
     local lines = tsv.lines(handle:read("a"))
@@ -165,7 +140,6 @@ local function read_ledger(filepath)
     return rows
 end
 
--- The demand order of each (framework, api): the rank of its first row, or a rank past every ranked row when it has none.
 local function read_demand(filepath)
     local order = {}
     if not filepath or not os.isfile(filepath) then
@@ -192,8 +166,6 @@ local function read_demand(filepath)
     return order
 end
 
--- The sort key of a chosen row: the demanded rows first, by rank, then framework and api. The row's position is the last key, so a
--- tie keeps the order the rows were read in, as Python's stable sort does.
 local function chosen_before(a, b)
     if (a.demand_rank == nil) ~= (b.demand_rank == nil) then
         return b.demand_rank == nil
@@ -211,7 +183,6 @@ local function chosen_before(a, b)
     return a.position < b.position
 end
 
--- The order of a rung's members: owner, then api, and then their position, as a stable sort gives.
 local function member_before(a, b)
     if a.owner ~= b.owner then
         return byteorder.less(a.owner, b.owner)
@@ -222,7 +193,6 @@ local function member_before(a, b)
     return a.position < b.position
 end
 
--- Sorts a list of records with a before function, the sort being stable through each record's position.
 local function sorted_by(items, before)
     local ordered = table.join(items)
     table.sort(ordered, before)

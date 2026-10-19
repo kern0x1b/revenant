@@ -1,8 +1,3 @@
--- The known table of the whole-SDK verify (tools/gen/known.lua, the committed tools/gen/verify-known.tsv): a row is key, count and cause;
--- a malformed line and a key named twice are named; a measured difference is explained only at its row's count; a difference with no
--- row, and a row the run does not measure, are problems. The committed table must parse. Run: xmake l tests/gen/verify_test.lua (exits
--- 1 on failure). Pure Lua: no SDK, no clang, no heavy job.
-
 local ROOT = path.absolute(path.join(os.scriptdir(), "..", ".."))
 local TOOLS = path.join(ROOT, "tools")
 

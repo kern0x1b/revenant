@@ -1,4 +1,3 @@
-// The port half of the NWInterface differential: the same lines, for the interfaces this tree's C monitor reports.
 import Network
 
 func report(_ scenario: String, _ interfaces: [NWInterface]) {

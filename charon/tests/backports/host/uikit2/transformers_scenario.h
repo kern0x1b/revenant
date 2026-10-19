@@ -1,18 +1,8 @@
 #import <UIKit/UIKit.h>
 
-// What the three colour transformers of iOS 14 answer, for both the host's own UIKit and the port's,
-// as one string per line so the two can be compared line by line.
-//
-// The transformers are `NSString * const`-shaped symbols whose value is a block, so they are renamed
-// like any other member of their group: the backport's three are the only ones renamed, and the test
-// names each of them through the header, which is what the port's own header gives.
-
 NSArray<NSString *> *transformers_scenario(void)
 {
     NSMutableArray<NSString *> *lines = [NSMutableArray array];
-    // The chromatic cases, and a grey sweep and a one-channel sweep: a grey says how the transform
-    // maps a colour that is already grey, and the one-channel cases separate its three weights,
-    // which is what identifies it rather than a fit to three points.
     NSMutableArray<UIColor *> *inputs = [NSMutableArray arrayWithArray:
         @[[UIColor colorWithRed:0.2 green:0.6 blue:0.9 alpha:1.0],
           [UIColor colorWithRed:1.0 green:0.3 blue:0.1 alpha:1.0],

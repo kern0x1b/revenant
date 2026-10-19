@@ -317,7 +317,6 @@ static const NSUInteger CharonShapeDefaultRadius = 8;
     return _axes;
 }
 
-// Copied on set, as the header says and the host does: nil by default, and the accessories inside are the same objects (tests/backports/host/pointer-accessory).
 - (NSArray<UIPointerAccessory *> *)accessories
 {
     return _accessories;

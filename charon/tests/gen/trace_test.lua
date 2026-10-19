@@ -1,16 +1,3 @@
--- Run test for the trace layer. The layer writes the stubs of a fixture framework, the host compiler builds them into a program, and
--- the program calls each stub through the Objective-C runtime. Each call logs its selector once to stderr and returns the safe
--- default: nil for an object, 0 for a scalar, NO for BOOL, a zeroed struct, and an NSError in the framework's own domain for an
--- NSError ** parameter. Setters are the selector the property names (setScope:). FKWidget is a class the release lacks: its class
--- object is generated, since every member is a stub. The fixture's typed facts (the type, params and attrs columns of each member, the
--- functions, the typedefs, the declared names and the superclasses) are injected through headers.use, so no header is parsed; the
--- fixture header is written only so that the program compiles. The surface the stubs come from is the framework's declaration shard
--- (surface_shards.lua), which the model reads. The typed rules (the spelling of a type, the kind a type is, the parameters, the NSError
--- ** test) and the stub text are checked case by case.
--- Run: xmake l tests/gen/trace_test.lua (needs clang; exits 1 on any failure). Scratch files live in a folder under
--- .agent-work/runs of this checkout, removed when the test ends. The compile runs with warnings on: its warnings are listed below and
--- any other warning fails the test.
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 local shards = import("surface_shards", {rootdir = os.scriptdir(), anonymous = true})
 
@@ -18,8 +5,6 @@ local FRAMEWORK = "FixtureKit"
 local FUNCTION_COLUMNS = {"api", "introduced", "status", "reasons", "returns", "params", "decl"}
 local LEDGER_COLUMNS = {"kind", "lang", "api", "introduced", "header-introduced", "status", "needs", "reason"}
 
--- The declaration row of a ledger row, introduced in 7.0: a class (its interface), a property (Class.name) or a method (-[Class sel]
--- or +[Class sel]), with the USR the dump writes for it.
 local function objc_row(kind, api)
     if kind == "class" then
         return shards.objc_row("interface", "c:objc(cs)" .. api, nil, nil, nil, "ios=7.0/-/-/0")
@@ -59,8 +44,6 @@ NSInteger FKCountThings(NSInteger count, NSError **error);
 @end
 ]==]
 
--- The members the header declares, as the shard's typed columns give them: class, kind, api, type, params and attrs (the spelling of
--- the shard: nullability words inside the types, and the parameters as "TYPE NAME | TYPE NAME").
 local MEMBERS = {
     {"FKThing", "property", "-[FKThing scope]", "NSInteger", "-", "nonatomic"},
     {"FKThing", "property", "-[FKThing enabled]", "BOOL", "-", "nonatomic,getter=isEnabled"},
@@ -70,18 +53,13 @@ local MEMBERS = {
     {"FKThing", "method", "-[FKThing reset]", "void", "-", "-"},
     {"FKWidget", "property", "-[FKWidget count]", "NSInteger", "-", "nonatomic"},
     {"FKWidget", "method", "-[FKWidget refreshWithError:]", "BOOL", "NSError * _Nullable * error", "-"},
-    -- the 7th column is the shard's availability text: an init the headers flag unavailable on every platform, or none
     {"FKWidget", "method", "-[FKWidget init]", "instancetype", "-", "-", "-"},
     {"FKRetired", "method", "-[FKRetired init]", "instancetype", "-", "-", "*unavailable ios=-/-/-/1"},
 }
 
--- The C function the fixture declares: its type text ("RET (PARAMS)") and its params, as the shard's function row gives them.
 local FUNCTION_TYPE = "NSInteger (NSInteger, NSError * _Nullable *)"
 local FUNCTION_PARAMS = "NSInteger count | NSError * _Nullable * error"
 
--- More C functions of the fixture, each a generable row of the snapshot with its typed fact: {name, type text, params, declaration}. The
--- hand sources (HAND_SOURCE) define FKHandMade and FKMultiLine, so no stub; FKOwed has an owed registry row and no definition, so no stub
--- either; FKStatic is static and FKProto a prototype only, so the trace layer stubs both.
 local EXTRA_FUNCTIONS = {
     {"FKHandMade", "NSInteger (void)", "-", "NSInteger FKHandMade(void)"},
     {"FKMultiLine", "NSInteger (NSInteger, NSInteger)", "NSInteger a | NSInteger b", "NSInteger FKMultiLine(NSInteger a, NSInteger b)"},
@@ -120,13 +98,11 @@ local OWED_REGISTRY = [==[{"framework": "FixtureKit", "entries": [
 ]}
 ]==]
 
--- The typed function facts the headers give: the fixture's declared function and each of EXTRA_FUNCTIONS.
 local FUNCTIONS = {FKCountThings = {type = FUNCTION_TYPE, params = FUNCTION_PARAMS}}
 for _, f in ipairs(EXTRA_FUNCTIONS) do
     FUNCTIONS[f[1]] = {type = f[2], params = f[3]}
 end
 
--- The ledger rows of the release that lacks every member: the class and each member, by the api the ledger spells.
 local LEDGER = {
     {"property", "FKThing.scope"}, {"property", "FKThing.enabled"}, {"property", "FKThing.name"},
     {"method", "-[FKThing setLevel:error:]"}, {"method", "-[FKThing items]"}, {"method", "-[FKThing reset]"},
@@ -134,7 +110,6 @@ local LEDGER = {
     {"method", "-[FKWidget init]"}, {"method", "-[FKRetired init]"},
 }
 
--- The lines the program must log, each once, and nothing else.
 local EXPECTED_LOG = {
     "unimplemented: FixtureKit -[FKWidget count]", "unimplemented: FixtureKit -[FKWidget setCount:]",
     "unimplemented: FixtureKit -[FKWidget refreshWithError:]", "unimplemented: FixtureKit -[FKWidget init]",
@@ -145,10 +120,6 @@ local EXPECTED_LOG = {
     "unimplemented: FixtureKit FKCountThings",
 }
 
--- The warnings the compile gives, by flag, with the reason each is expected (the test fails on any other). -Wincomplete-implementation: the
--- program's @implementation FKThing has none of the three methods, which the stubs define in their category in another unit. -Wobjc-
--- protocol-method-implementation: the stub category implements the three methods the header declares for FKThing (the trace layer
--- overrides a class's own method by a category, one per stub). Neither is a fault of the fixture's values; a new flag fails the test.
 local EXPECTED_WARNINGS = {["-Wincomplete-implementation"] = 3, ["-Wobjc-protocol-method-implementation"] = 3}
 
 local PROGRAM = [==[#import <FixtureKit/FixtureKit.h>
@@ -195,9 +166,6 @@ int main(void) {
 }
 ]==]
 
--- The member records the stub rule gives each case (the fields stubs.members and stubs.functions keep), and the text the stub of each
--- must have: the signature composed from the typed fields, then the body (the log line once, the error in the framework's domain, the
--- zero of the type).
 local function log_of(api)
     return 'static BOOL charon_logged = NO; if (!charon_logged) { charon_logged = YES; fprintf(stderr, "unimplemented: FixtureKit %s\\n", "' .. api .. '"); }'
 end
@@ -207,8 +175,6 @@ local STUB_CASES = {
                zero = "scalar", params = {{type = "NSInteger", name = "level"}, {type = "NSError **", name = "error"}}, error_arg = "error"},
      text = '- (BOOL)setLevel:(NSInteger)level error:(NSError **)error { ' .. log_of("-[FKThing setLevel:error:]")
             .. " " .. string.format(ERROR, "-[FKThing setLevel:error:]") .. "return 0; }"},
-    -- an empty keyword (the header's ":(NSInteger)h" after "resizeTo:(NSInteger)w"): the selector keeps the empty word, and each
-    -- parameter stays with its own word
     {member = {api = "-[FKThing resizeTo::scale:]", kind = "method", sign = "-", selector = "resizeTo::scale:", type_text = "BOOL",
                zero = "scalar", params = {{type = "NSInteger", name = "w"}, {type = "NSInteger", name = "h"}, {type = "NSInteger", name = "s"}}},
      text = "- (BOOL)resizeTo:(NSInteger)w :(NSInteger)h scale:(NSInteger)s { " .. log_of("-[FKThing resizeTo::scale:]") .. " return 0; }"},
@@ -258,8 +224,6 @@ local function checks()
     return check, function() return failures end, function() return count end
 end
 
--- The typed rules: the canonical spelling of a type, the kind a type is through the typedefs, the parameters of a method or a
--- function, the NSError ** test, the return type of a C function, and the attributes of a property.
 local function test_typed_rules(check)
     local decl = import("gen.decl", {rootdir = TOOLS, anonymous = true})
     local function same(label, got, want)
@@ -282,15 +246,12 @@ local function test_typed_rules(check)
     local kinds = {
         {"void", "void"}, {"NSInteger", "scalar"}, {"NSString *", "object"}, {"id", "object"}, {"instancetype", "object"},
         {"CGRect", "struct"}, {"FKFlags", "scalar"}, {"FKBox", "struct"}, {"FKAlias", "scalar"},
-        -- a chain of seven typedefs (A through G, then long) is followed to its end: there is no depth cap
         {"A", "scalar"},
-        -- a typedef cycle is not followed: the kind is unknown (nil), and the walk stops
         {"LOOP_A", nil}, {"SELF", nil},
         {"NSUInteger", "scalar"}, {"CBLAS_TRANSPOSE", "scalar"}, {"FKCount", "scalar"}, {"FKTypedefObj", "object"},
         {"const NSInteger", "scalar"}, {"NSArray<NSString *> *", "object"}, {"BOOL", "scalar"}, {"_Bool", "scalar"},
         {"char *", "object"}, {"enum Thing", "scalar"}, {"struct Thing", "struct"}, {"void (^)(int)", "object"},
         {"NoSuchType", nil}, {"CFStringRef", "object"},
-        -- a vector typedef (simd's float3, and a typedef of it) is a value a compound literal zeroes as a struct is; a chain to int is a scalar
         {"FKVector3", "struct"}, {"FKVectorAlias", "struct"}, {"float __attribute__((ext_vector_type(3)))", "struct"},
         {"FKKernel", "scalar"},
     }
@@ -320,7 +281,6 @@ local function test_typed_rules(check)
     same("member_name", decl.member_name("-[FKThing scope]"), "scope")
 end
 
--- The selectors of the hand sources (hand.lua reads them through selector_of).
 local function test_selectors(check)
     local decl = import("gen.decl", {rootdir = TOOLS, anonymous = true})
     local function same(label, got, want)
@@ -337,7 +297,6 @@ local function test_selectors(check)
         {"- (NSString *)nameWithNullable:(nullable NSString *)s", "nameWithNullable:"},
         {"- (void)9abc:(int)q", "abc:"},
         {"- (int)x3 y_z:(int)q", "y_z:"},
-        -- an empty keyword: the name before it is the previous parameter's, not a keyword
         {"+ (CIImage *)imageWithImageProvider:(id)provider size:(size_t)width :(size_t)height format:(CIFormat)format",
          "imageWithImageProvider:size::format:"},
         {"- (void)resizeTo:(int)w :(int)h scale:(int)s", "resizeTo::scale:"},
@@ -349,14 +308,10 @@ local function test_selectors(check)
     end
 end
 
--- A class with every member stubbed is generated unless its superclass is one of the framework's candidates that is not generated (the
--- oracle's rule: a superclass the framework does not list is taken to be in the release). The class decisions read the superclass
--- the header parse names (the injected supers), not a header.
 local function test_superclass(check)
     local classes = import("gen.classes", {rootdir = TOOLS, anonymous = true})
     local surface = import("gen.surface", {rootdir = TOOLS, anonymous = true})
     local function decide(super)
-        -- C1 has a stubbed member; Base, a candidate of the framework, has a member no stub answers, so Base is not generated
         local rows = {{kind = "method", api = "-[C1 m]", lang = "objc"}, {kind = "method", api = "-[Base m]", lang = "objc"}}
         local led6 = {[surface.key("class", "C1")] = "missing", [surface.key("method", "-[C1 m]")] = "missing",
                       [surface.key("class", "Base")] = "missing", [surface.key("method", "-[Base m]")] = "missing"}
@@ -370,8 +325,6 @@ local function test_superclass(check)
     check(decide("NSObject").C1.generated == true, "a class under a superclass the framework does not list is generated")
 end
 
--- A class whose member the 6.1.3 ledger does not list is not generated: the member is not checked, so the class cannot claim it is a
--- stub (the member has no stub, and its reason is the stubs' not checked at 6.1.3).
 local function test_unchecked_member(check)
     local classes = import("gen.classes", {rootdir = TOOLS, anonymous = true})
     local surface = import("gen.surface", {rootdir = TOOLS, anonymous = true})
@@ -385,7 +338,6 @@ local function test_unchecked_member(check)
           "a class with a member the ledger does not list is not generated: " .. decision.reason)
 end
 
--- The stub text is composed from the typed fields: the signature and the body of each case.
 local function test_stub_text(check)
     local stubs = import("gen.stubs", {rootdir = TOOLS, anonymous = true})
     for _, case in ipairs(STUB_CASES) do
@@ -394,8 +346,6 @@ local function test_stub_text(check)
     end
 end
 
--- Writes the fixture: the SDK header, the spec and the functions snapshot, the ledger and the surface table of the corpus, and the
--- injected facts. Returns the tree, the SDK and the corpus.
 local function write_fixture(root)
     local emit = import("gen.emit", {rootdir = TOOLS, anonymous = true})
     local layout = import("gen.layout", {rootdir = TOOLS, anonymous = true})
@@ -448,7 +398,6 @@ local function write_fixture(root)
             table.insert(members, {cls = m[1], kind = m[2], api = m[3], type = m[4], params = m[5], attrs = m[6],
                                    availability = m[7] or "-"})
         end
-        -- the base types the members spell are declared by the SDK's own shards (ObjectiveC, Foundation), so the fixture declares them too
         return {members = members, declared = {FKThing = true, FKWidget = true, FKRetired = true, NSObject = true, BOOL = true,
                 NSInteger = true, NSError = true, NSArray = true, NSString = true},
                 typedefs = {NSInteger = "long", NSUInteger = "unsigned long", BOOL = "signed char"},
@@ -458,8 +407,6 @@ local function write_fixture(root)
     return tree, sdk, corpus
 end
 
--- Compiles the stubs with the program, runs it, and returns the compile status, the compiler's diagnostics (its standard error), the run
--- status and the program's lines (stdout and stderr together).
 local function build_and_run(root, tree, sdk)
     local emit = import("gen.emit", {rootdir = TOOLS, anonymous = true})
     local stream = import("gen.stream", {rootdir = TOOLS, anonymous = true})
@@ -482,8 +429,6 @@ local function build_and_run(root, tree, sdk)
     return compiled, diagnostics, ran, output
 end
 
--- The warnings of a compile, counted by their flag ("[-Wincomplete-implementation]" -> "-Wincomplete-implementation"). A warning with no
--- flag is counted as "(none)".
 local function warnings_by_flag(diagnostics)
     local counts = {}
     for line in string.gmatch(diagnostics or "", "[^\n]+") do

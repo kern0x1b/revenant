@@ -1,34 +1,3 @@
-// init-classes.inc - the class population this harness keeps honest, with the properties the port
-// synthesizes for each. Generated; the two derivations are:
-//
-//   the class list, from the registry - every status `implemented` row that names `-[<class> init]`,
-//   read from packages/a/apple-backports/registry/Intents/ios*.json by registry_classes() in
-//   tools/intents/gen-init-classes.lua:
-//
-//   the properties, from the port's own objects - the `@synthesize NAME = _NAME;` lines inside
-//   each class's @implementation in packages/a/apple-backports/Intents/IN*.m, CharonIntents100.m
-//   and CharonIntents110.m, read by synthesised() in the same file:
-//
-//     xmake l tools/intents/gen-init-classes.lua -o tests/backports/host/intents-init/init-classes.inc
-//
-// The class list is read from the registry and not from the SDK headers, because the claim under
-// test is the registry's: the header says which classes mark -init NS_UNAVAILABLE, the registry
-// says which rows claim the port answers one, and this harness measures the second.
-//
-// The properties are read from the port and not from the runtime, because those are the ones the
-// row claims stay nil. Asking the runtime instead yields NSObject's hash/description/debugDescription/
-// superclass repeated four times over plus the framework's private accessors - measured, 48
-// properties for INActivateCarSignalIntentResponse - which is neither the population the claim is
-// about nor safe to call. A class that synthesizes nothing is listed with an empty set and its
-// -init is measured on the IMP and the call alone.
-//
-// A class added to the registry and not here is invisible to the harness. run.sh prints the
-// registry's own count of these rows beside this file's, and fails when the two disagree, which is
-// what keeps this file honest: both this file and expected.txt are written from here, so comparing
-// them with each other would only show that they agree.
-//
-// 112 classes, 7 of which synthesize no property: INGetRideStatusIntent, INIntentDonationMetadata, INListCarsIntent, INRelevanceProvider, INRelevantShortcutStore, INUserContext, INVoiceShortcutCenter
-
     { "INActivateCarSignalIntentResponse", { "code", "signals", NULL } },
     { "INAddMediaIntentResponse", { "code", NULL } },
     { "INAddTasksIntentResponse", { "addedTasks", "code", "modifiedTaskList", NULL } },

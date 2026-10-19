@@ -1,18 +1,5 @@
 #import "CharonMenus.h"
 
-// UIPencilInteraction, iOS 12.1. An interaction the port carries because an application strong-imports
-// its class symbol, and whose event no device of this release can produce: the Apple Pencil is a stylus
-// with its own radio and sensors, and no device this package runs on has one. The class is made, added to
-// a view and removed like any other interaction, keeps its delegate weakly, and never calls back - the
-// same shape UIScribbleInteraction carries for the same wall (facts/UIKit/UIInertInteractions.md).
-//
-// The two class properties answer the capability honestly. +preferredTapAction is the action to perform
-// when the user taps the side of the pencil; with no pencil there is no tap and so no action, which is
-// what UIPencilPreferredActionIgnore says in the SDK, namely that there is no action, or that pencil interactions
-// are disabled in the accessibility settings. It is not read from a preference: iOS 6 has no
-// Settings pane for it, so there is nothing to read and Ignore is the only answer that is true.
-// +prefersPencilOnlyDrawing is NO, which is what the host's own UIKit answers
-// (facts/UIKit/UIPencilInteraction12.md).
 @implementation UIPencilInteraction {
 @private
     __weak id<UIPencilInteractionDelegate> _delegate;

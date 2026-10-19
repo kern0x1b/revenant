@@ -1,9 +1,3 @@
--- Writes the header of the visitor's expectations (run.sh generates it into its build folder, at every run; no copy of it is
--- committed) from the recorded visitor output of oracle/visit.m (visit-macos.txt) and of the utility
--- probe (visit-jr.txt). Usage (from this directory): xmake l ./visit-expectations.lua <out.h>
--- The files are read from the current directory, so run it from oracle/.
-
--- The words of a "<8 hex> <8 hex> ..." list, each group of eight upper-case hex digits and an optional space after it.
 local function hexwords(text)
     local values = {}
     local i = 1

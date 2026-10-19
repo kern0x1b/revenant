@@ -21,20 +21,7 @@ static const CGFloat CharonMaximumScale = 0.25;
     BOOL _installing;
     CALayer *_backdrop;
     CharonBackdrop *_reader;
-    /* Where the box blur and the colour matrix run. The read has to be on the main thread -- the
-       display link is on the main run loop and CoreAnimation is not thread-safe for a layer read --
-       but the shading is arithmetic over a buffer this view owns, and it was the whole cost of a
-       refresh: on the iPad 2 a whole-screen refresh measured 172 ms, 5.8 frames a second, of which
-       the read is 21 to 33 ms. That is a property of the device and is the figure to reason from.
-       What the shading costs on any one machine is not, and is not put here: it moves by a factor of
-       2.6 with the machine's load, and
-       tests/backports/host/blurcost measures it here for whoever wants the number with the load it
-       was taken at. The reasoning and the measurements, including the load, are in
-       facts/UIKit/UIVisualEffect.md. The sheet's shadow already shades off the main thread for the
-       same reason (UISheetPresentationController.m:795-796). */
     dispatch_queue_t _shadeQueue;
-    /* Set while a reading is being shaded, so a second reading does not queue up behind the first: the
-       same guard the shadow's client uses for the same reason. */
     BOOL _shading;
 }
 
@@ -48,7 +35,6 @@ static const CGFloat CharonMaximumScale = 0.25;
     return _reader;
 }
 
-/* Reads what lies under the view now; the picture is made again only when that changed. */
 - (void)charon_refresh
 {
     [[self charon_reader] refresh];
@@ -77,9 +63,6 @@ static const CGFloat CharonMaximumScale = 0.25;
     CharonBlurParameters parameters = charon_blur_parameters([(UIBlurEffect *)_effect charon_style]);
     CGFloat sx = width / captured.size.width, sy = height / captured.size.height;
 
-    /* The layer is made here, on the main thread, because inserting it touches self.layer. Everything
-       the shading needs that comes off the view is read here too, for the same reason: bounds and the
-       effect's style are UIView state and are not read from the queue. */
     if (!_backdrop) {
         _backdrop = [CALayer layer];
         _backdrop.magnificationFilter = kCAFilterLinear;
@@ -91,14 +74,6 @@ static const CGFloat CharonMaximumScale = 0.25;
     CGRect bounds = self.bounds;
     size_t bytes = rowBytes * height;
 
-    /* The box blur and the colour matrix, and the picture made from them, run off the main thread;
-       the main thread only puts the result on the layer. This is the shadow's arrangement and for the
-       same reason: charon_sheet_shadow_shade is "a pass over each of them that took an iPad 2 hundreds
-       of milliseconds" and is shaded on a queue of its own (UISheetPresentationController.m:795-796).
-       The pixels are this view's to free (CharonBackdrop.h) and the provider frees them when the image
-       is released, so the buffer's lifetime does not depend on this method returning.
-       Building the CGImage here rather than on the main thread is the same choice: it is not a layer
-       operation, and it is what the shadow does. */
     _shading = YES;
     dispatch_async(_shadeQueue, ^{
         charon_blur_pixels(pixels, width, height, rowBytes, parameters.radius * sx, parameters.saturation, parameters.tintRed, parameters.tintGreen, parameters.tintBlue, parameters.tintAlpha);
@@ -110,9 +85,6 @@ static const CGFloat CharonMaximumScale = 0.25;
         CGRect crop = CGRectMake(floor((CGRectGetMinX(bounds) - captured.origin.x) * sx), floor((CGRectGetMinY(bounds) - captured.origin.y) * sy), ceil(bounds.size.width * sx), ceil(bounds.size.height * sy));
         CGImageRef cropped = CGImageCreateWithImageInRect(image, CGRectIntersection(crop, CGRectMake(0, 0, width, height)));
         dispatch_async(dispatch_get_main_queue(), ^{
-            /* The layer may have gone while the queue was busy: -charon_removeBackdrop takes it out
-               and the view may be gone with it. A picture nobody will look at is released, not
-               handed to a layer that is no longer there. */
             if (_backdrop == backdropLayer) {
                 [CATransaction begin];
                 [CATransaction setDisableActions:YES];

@@ -1,11 +1,6 @@
 #import <UIKit/UIKit.h>
 #include <stdio.h>
 
-// The compositional layout section's insets references, checked on the same values in two processes: the host's classes in one, and the
-// port's (renamed by run.sh, so this file's names mean the port's classes in that build) in the other. Each line is "check<TAB>value"; the
-// two outputs must match line for line. The supplementary reference is iOS 16. The deprecated supplementariesFollowContentInsets and the
-// reference are mixed in the host, which raises when one is set after the other, so each setter's outcome is recorded.
-
 static void report(const char *check, NSString *value)
 {
     printf("%s\t%s\n", check, value ? [value UTF8String] : "nil");
@@ -30,7 +25,6 @@ static NSCollectionLayoutSection *make_section(void)
     return [NSCollectionLayoutSection sectionWithGroup:group];
 }
 
-// A setter may raise. The outcome is "ok", or the exception's name and reason.
 static NSString *outcome(void (^change)(void))
 {
     @try {
@@ -46,13 +40,11 @@ int main(void)
     @autoreleasepool {
         setvbuf(stdout, NULL, _IONBF, 0);
 
-        // The default: automatic for the supplementaries, which follow the section's insets.
         NSCollectionLayoutSection *section = make_section();
         report("section-supplementary-default", number(section.supplementaryContentInsetsReference));
         report("section-follow-default", yes_no(section.supplementariesFollowContentInsets));
         report("section-content-default", number(section.contentInsetsReference));
 
-        // Each scenario starts from a fresh section.
         section = make_section();
         report("none-set", outcome(^{ section.supplementaryContentInsetsReference = UIContentInsetsReferenceNone; }));
         report("none-reference", number(section.supplementaryContentInsetsReference));
@@ -165,7 +157,6 @@ int main(void)
         report("flag-yes-then-automatic-reference", number(section.supplementaryContentInsetsReference));
         report("flag-yes-then-automatic-follow", yes_no(section.supplementariesFollowContentInsets));
 
-        // The content reference is separate, and a copy keeps the references it had.
         section = make_section();
         section.contentInsetsReference = UIContentInsetsReferenceSafeArea;
         report("content-set-safe", number(section.contentInsetsReference));
@@ -176,7 +167,6 @@ int main(void)
         report("copy-supplementary", number(copied.supplementaryContentInsetsReference));
         report("copy-content", number(copied.contentInsetsReference));
 
-        // Equality: a copy equals the section it was made from; a change to the reference of one of them makes them differ.
         section = make_section();
         NSCollectionLayoutSection *twin = [section copy];
         report("equal-copy", yes_no([section isEqual:twin]));

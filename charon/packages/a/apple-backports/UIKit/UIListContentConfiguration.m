@@ -73,12 +73,6 @@ static UIConfigurationColorTransformer charon_thirty_percent(void)
     return [self charon_configurationWithStyle:CharonListStyleCell];
 }
 
-// The 18.0 spelling of the two header/footer styles this file already has.  Measured: the 16.4 SDK's own
-// UIListContentConfiguration.h declares plainHeaderConfiguration and plainFooterConfiguration and does NOT
-// declare headerConfiguration or footerConfiguration, so these are new names and not renames - and the port
-// already carries the two styles they name, CharonListStyleHeader and CharonListStyleFooter, in the
-// -initCharonWithStyle: switch above and in the coder, -copyWithZone: and -isEqual: below.  What 18.0 added
-// is the door, not the style, so each is the one-line shape every other class method in this file is.
 + (instancetype)headerConfiguration
 {
     return [self charon_configurationWithStyle:CharonListStyleHeader];
@@ -301,14 +295,6 @@ static UIConfigurationColorTransformer charon_thirty_percent(void)
     return _alpha;
 }
 
-// The public spelling of the alpha this object already stored, encoded, copied and applied.  The ivar, the
-// -initCharonWithStyle: default (0 for a bare configuration, 1 otherwise), the NSCoding key, -copyWithZone:,
-// -isEqual: and the three views UIListContentView.m sets the alpha on are all this file's own and all
-// predate the accessors below; what 18.0 added is only that a caller can reach the value, and the storage
-// it would write is the storage the drawing path already reads.  So the accessors are the same
-// -image/-setImage:/ -textProperties pair this file already writes, and -charon_alpha is kept beside them
-// because UIListContentView.m:187 reads it and the registry check counts selectors, not which of two
-// spellings a caller prefers.
 - (CGFloat)alpha
 {
     return _alpha;

@@ -1,12 +1,3 @@
-// The host oracle for PHASE's value types: the spatial-audio parameter classes, asked of the host's
-// own PHASE.framework, which is the same framework the port's headers are rendered from.
-//
-// The classes here are the attenuation and directivity maths - a cone's and a cardioid's subband
-// gains, a distance fade's cull distance, geometric spreading's rolloff factor, a pair of numbers -
-// so each is a value the host holds and answers, and the port's answer can be held to it. Nothing
-// here is a guess: the control is that the host must be able to construct and read each one, and a
-// class the host does not carry is reported as such rather than skipped quietly.
-
 #import <Foundation/Foundation.h>
 #import <PHASE/PHASE.h>
 #import <dlfcn.h>
@@ -32,7 +23,6 @@ static void checkClose(NSString *what, double got, double want, double tolerance
 static BOOL hostHas(Class cls)
 {
     if (cls != Nil) { return YES; }
-    // the framework is present on this host but a class may not be, and nil is the honest answer
     for (NSString *name in @[@"PHASENumericPair", @"PHASEDistanceModelFadeOutParameters",
                              @"PHASEGeometricSpreadingDistanceModelParameters",
                              @"PHASECardioidDirectivityModelSubbandParameters",
@@ -47,7 +37,6 @@ static BOOL hostHas(Class cls)
     return YES;
 }
 
-// The port's own classes, renamed by run.sh so they sit beside Apple's in this binary.
 @interface charon_host_PHASECardioidDirectivityModelSubbandParameters : NSObject
 - (instancetype)init;
 - (double)frequency;
@@ -74,8 +63,6 @@ static BOOL hostHas(Class cls)
 - (double)second;
 @end
 
-// A fresh object of each kind, from the port and from the host, and the eight documented numbers
-// compared between them. This is the half that fails when the port's defaults are wrong.
 static void compareDefaults(void)
 {
     Class portCardioid = NSClassFromString(@"charon_host_PHASECardioidDirectivityModelSubbandParameters");
@@ -116,7 +103,6 @@ static void compareDefaults(void)
     }
 }
 
-// The port's engine, renamed.
 @interface charon_host_PHASEEnvelopeSegment : NSObject
 - (instancetype)initWithEndPoint:(simd_double2)endPoint curveType:(NSInteger)curveType;
 @property(nonatomic, assign) simd_double2 endPoint;
@@ -152,9 +138,6 @@ static void compareDefaults(void)
 - (id)assetRegistry;
 @end
 
-// The engine's own state, held between the port's fresh object and the host's fresh one. The six
-// documented defaults and the six empty answers, and a fresh engine is the only thing either can be
-// asked for: these are the values of an engine nobody has added anything to.
 static void compareEngine(void)
 {
     Class portEngine = NSClassFromString(@"charon_host_PHASEEngine");
@@ -166,11 +149,6 @@ static void compareEngine(void)
     }
     printf("stage the host's engine: %s / the port's: %s\n",
            NSStringFromClass(hostEngine).UTF8String, NSStringFromClass(portEngine).UTF8String);
-    // The host's engine is constructed inside a @try: Apple's PHASEEngine raises when a bare process
-    // makes one, because the engine expects a host that owns the audio system. That is a fact about
-    // the oracle's own circumstances and not about the port, so it is reported and the comparison is
-    // skipped rather than being allowed to take the value-type checks down with it - the same shape
-    // the avfaudio harness uses for a host unit that will not initialize outside an AUGraph.
     id theirs = nil;
     NSString *refused = nil;
     @try {
@@ -195,11 +173,6 @@ static void compareEngine(void)
           [[mine valueForKey:@"outputSpatializationMode"] integerValue] == [[theirs valueForKey:@"outputSpatializationMode"] integerValue]);
     check(@"a fresh engine's default reverb preset is the same on both",
           [[mine valueForKey:@"defaultReverbPreset"] integerValue] == [[theirs valueForKey:@"defaultReverbPreset"] integerValue]);
-    // The two are not the same kind of thing and the difference is deliberate: the port holds the
-    // preset as a number because PHASEMedium is a separate family of the corpus it does not carry,
-    // while the host holds a PHASEMedium object. So the *preset* is compared - the host's through its
-    // own medium - which is the value the header documents, and it is also the check that would catch
-    // the port answering the wrong preset.
     id theirMedium = [theirs valueForKey:@"defaultMedium"];
     NSInteger theirPreset = [theirMedium respondsToSelector:@selector(preset)]
         ? [[theirMedium valueForKey:@"preset"] integerValue]
@@ -207,17 +180,12 @@ static void compareEngine(void)
     check(@"a fresh engine's default medium is the header's air preset on both",
           [[mine valueForKey:@"defaultMedium"] integerValue] == theirPreset);
 
-    // and the six that are the empty set, which a fresh engine really is
     check(@"a fresh engine has no sound events on either",
           [[mine soundEvents] count] == 0 && [[theirs valueForKey:@"soundEvents"] count] == 0);
     check(@"a fresh engine has no groups on either",
           [[mine groups] count] == 0 && [[theirs valueForKey:@"groups"] count] == 0);
     check(@"a fresh engine has no duckers on either",
           [[mine duckers] count] == 0 && [[theirs valueForKey:@"duckers"] count] == 0);
-    // The declared behaviour, not the class name: the property is declared PHASEObject *, and the
-    // host's root is a PHASERootObject - a subclass with no row in the corpus and a framework-internal
-    // name. So what is compared is that the port's root is a PHASEObject and that it stands as a root:
-    // no parent, no children, the identity transform.
     id myRoot = [mine rootObject];
     id theirRoot = [theirs valueForKey:@"rootObject"];
     Class declared = NSClassFromString(@"charon_host_PHASEObject") ?: NSClassFromString(@"PHASEObject");
@@ -233,16 +201,12 @@ static void compareEngine(void)
           simd_length(mineT.columns[0] - simd_make_float4(1, 0, 0, 0)) < 1e-6 &&
           simd_length(mineT.columns[1] - simd_make_float4(0, 1, 0, 0)) < 1e-6 &&
           simd_length(mineT.columns[2] - simd_make_float4(0, 0, 1, 0)) < 1e-6);
-    // and the host agrees about the three things that are declared behaviour
     check(@"the host's root object has no parent either", [[theirRoot valueForKey:@"parent"] isEqual:[NSNull null]] || [theirRoot valueForKey:@"parent"] == nil);
     check(@"the host's root object has no children either", [[theirRoot valueForKey:@"children"] count] == 0);
     check(@"a fresh engine has no active group preset on either",
           [mine activeGroupPreset] == nil && [theirs valueForKey:@"activeGroupPreset"] == nil);
 }
 
-// The distance model that holds an envelope, and the envelope it holds. The header's contract is that
-// x is distance and y is gain, so the model is only as good as the envelope behind it - and the two
-// are compared on both counts.
 static void compareEnvelopeDistanceModel(void)
 {
     Class portModel = NSClassFromString(@"charon_host_PHASEEnvelopeDistanceModelParameters");
@@ -253,7 +217,6 @@ static void compareEnvelopeDistanceModel(void)
         printf("skip the envelope distance model: the host's PHASE does not carry it, or the port's is not here\n");
         return;
     }
-    // the envelope x is distance over 0..10 m, y is gain over 0..1
     id theirSegment = [[hostEnv alloc] initWithStartPoint:simd_make_double2(0.0, 0.0) segments:@[
         [[NSClassFromString(@"PHASEEnvelopeSegment") alloc] initWithEndPoint:simd_make_double2(10.0, 1.0)
                                                                      curveType:PHASECurveTypeInverseSquared]]];
@@ -265,15 +228,12 @@ static void compareEnvelopeDistanceModel(void)
     check(@"the host's distance model holds the envelope it was made with", [theirs envelope] == theirSegment);
     check(@"the port's distance model holds the envelope it was made with",
           [mine valueForKey:@"envelope"] == mySegment);
-    // and the gain it reports at a distance is the envelope's, so the two agree on the whole point
     double theirGain = [[theirs envelope] evaluateForValue:5.0];
     double myGain = [[mine valueForKey:@"envelope"] evaluateForValue:5.0];
     printf("stage the gain at 5 m: host %g, port %g\n", theirGain, myGain);
     checkClose(@"the gain at 5 m is the same on both", myGain, theirGain, 1e-9);
 }
 
-// The envelope, held to the host's own evaluation of the same eleven curve types. The two are asked
-// the same questions at the same points, and the difference is the value, not the class.
 static void compareEnvelope(void)
 {
     Class portEnvelope = NSClassFromString(@"charon_host_PHASEEnvelope");
@@ -284,7 +244,6 @@ static void compareEnvelope(void)
         printf("skip the envelope: the host's PHASE does not carry it, or the port's is not here\n");
         return;
     }
-    // every case of the enumeration, by the four-character value the port carries
     const NSInteger curves[] = {
         PHASECurveTypeLinear, PHASECurveTypeSquared, PHASECurveTypeInverseSquared,
         PHASECurveTypeCubed, PHASECurveTypeInverseCubed, PHASECurveTypeSine, PHASECurveTypeInverseSine,
@@ -313,7 +272,6 @@ static void compareEnvelope(void)
         checkClose([NSString stringWithFormat:@"curve 0x%08x agrees with the host", (unsigned)curves[curve]],
                    worst, 0.0, 1e-6);
     }
-    // the extent, which is the envelope's own arithmetic rather than a curve
     id theirSegment = [[hostSegment alloc] initWithEndPoint:simd_make_double2(4.0, 2.0) curveType:PHASECurveTypeLinear];
     id mySegment = [[portSegment alloc] initWithEndPoint:simd_make_double2(4.0, 2.0) curveType:PHASECurveTypeLinear];
     id theirs = [[hostEnvelope alloc] initWithStartPoint:simd_make_double2(1.0, 0.5) segments:@[theirSegment]];
@@ -326,8 +284,6 @@ static void compareEnvelope(void)
     check(@"the port's range is the same", [[[mine valueForKey:@"range"] valueForKey:@"first"] isEqual:@(0.5)] && [[[mine valueForKey:@"range"] valueForKey:@"second"] isEqual:@(2.0)]);
 }
 
-// What a call that raises says, with the class name taken out of the port's side and the instance address
-// taken out of both: the exception and the message, which is the answer being compared.
 static NSString *shapeOfRaise(void (^call)(void))
 {
     @try {
@@ -339,9 +295,6 @@ static NSString *shapeOfRaise(void (^call)(void))
     return @"no raise";
 }
 
-// -init and +new are NS_UNAVAILABLE on the envelopes. The host does not hand back an object for them: it raises
-// NSInvalidArgumentException, and respondsToSelector: still answers yes. Each is asked of the host and of the port,
-// so a port that returns an empty object from NSObject's own -init is a difference, not a comment.
 static void compareUnavailableInits(void)
 {
     Class portEnvelope = NSClassFromString(@"charon_host_PHASEEnvelope");
@@ -386,8 +339,6 @@ int main(void)
         }
         printf("stage the host's PHASE: %s\n", [[NSBundle bundleForClass:NSClassFromString(@"PHASEEngine")] bundlePath].UTF8String ?: "(path unknown)");
 
-        // PHASENumericPair: a box of two numbers, and the whole of its contract is that it holds
-        // them and gives them back.
         Class pairClass = NSClassFromString(@"PHASENumericPair");
         if (pairClass != Nil) {
             id pair = [[pairClass alloc] initWithFirstValue:2.5 secondValue:-3.25];
@@ -401,8 +352,6 @@ int main(void)
             printf("skip PHASENumericPair: the host's PHASE does not carry it\n");
         }
 
-        // PHASEDistanceModelFadeOutParameters: one double, the cull distance, with the header's own
-        // default when it is not given one.
         Class fadeClass = NSClassFromString(@"PHASEDistanceModelFadeOutParameters");
         if (fadeClass != Nil) {
             id fade = [[fadeClass alloc] initWithCullDistance:42.5];
@@ -412,16 +361,12 @@ int main(void)
             printf("skip PHASEDistanceModelFadeOutParameters: the host's PHASE does not carry it\n");
         }
 
-        // PHASEGeometricSpreadingDistanceModelParameters: the rolloff factor, the gain law 1/r^d.
         Class spreadingClass = NSClassFromString(@"PHASEGeometricSpreadingDistanceModelParameters");
         if (spreadingClass != Nil) {
             id spreading = [[spreadingClass alloc] init];
             [spreading setValue:@(1.0) forKey:@"rolloffFactor"];
             double rolloff = [[spreading valueForKey:@"rolloffFactor"] doubleValue];
             checkClose(@"the host's geometric spreading holds the rolloff factor", rolloff, 1.0, 0.0);
-            // a fresh object, and its default, which is the thing the review found the port wrong
-            // about. The old check 6 was tautological: it compared 1.0/pow(d,rolloff) with
-            // 1.0/pow(d,rolloff), so it could not fail and taught nothing.
             id fresh = [[spreadingClass alloc] init];
             checkClose(@"a fresh geometric spreading object holds the header's default rolloff factor",
                        [[fresh valueForKey:@"rolloffFactor"] doubleValue], 1.0, 0.0);
@@ -429,13 +374,10 @@ int main(void)
             printf("skip PHASEGeometricSpreadingDistanceModelParameters: the host's PHASE does not carry it\n");
         }
 
-        // The subband parameter classes: each is a set of (frequency, level) pairs, and the directivity
-        // gain for a band is the level of the band that frequency falls in.
         Class cardioidSubband = NSClassFromString(@"PHASECardioidDirectivityModelSubbandParameters");
         Class coneSubband = NSClassFromString(@"PHASEConeDirectivityModelSubbandParameters");
         if (cardioidSubband != Nil) {
             printf("stage the host's cardioid subband class: %s\n", NSStringFromClass(cardioidSubband).UTF8String);
-            // A fresh cardioid subband holds three documented defaults: 1000.0, 0.0 and 1.0.
             id fresh = [[cardioidSubband alloc] init];
             checkClose(@"a fresh cardioid subband's frequency is the header's 1000.0",
                        [[fresh valueForKey:@"frequency"] doubleValue], 1000.0, 0.0);
@@ -448,7 +390,6 @@ int main(void)
         }
         if (coneSubband != Nil) {
             printf("stage the host's cone subband class: %s\n", NSStringFromClass(coneSubband).UTF8String);
-            // and four: 1000.0, 360.0, 360.0 and 1.0
             id fresh = [[coneSubband alloc] init];
             checkClose(@"a fresh cone subband's frequency is the header's 1000.0",
                        [[fresh valueForKey:@"frequency"] doubleValue], 1000.0, 0.0);

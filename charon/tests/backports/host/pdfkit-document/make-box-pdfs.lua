@@ -1,15 +1,6 @@
--- make-box-pdfs.lua - the three box fixtures, written with every offset and length computed rather than typed.
---
---     xmake l make-box-pdfs.lua <directory>
---
--- A page that names every box, one with no /CropBox at all, and one rotated 90 - the three cases that decide what
--- -[PDFPage boundsForBox:] answers. The content stream is `q Q`, a valid one: these fixtures are about geometry.
--- /Contents is an indirect reference, so the reader resolves it through the xref; every offset is measured from the
--- object bytes as they are written, and /Length is the byte count of the stream itself.
-
 local pdfwrite = import("pdfwrite", {rootdir = path.join(os.scriptdir(), "tools")})
 
-local TEXT = "q Q"          -- a valid content stream: these fixtures are read for their boxes
+local TEXT = "q Q"
 local FONT = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"
 
 local function build(file, crop, boxes, rotate)

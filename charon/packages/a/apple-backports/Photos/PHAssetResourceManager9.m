@@ -1,12 +1,5 @@
 #import "CharonPhotos.h"
 
-// -[NSURL fileSystemRepresentation] is of iOS 7.0 (NSURL.h:118, API_AVAILABLE(macos(10.9), ios(7.0),
-// watchos(2.0), tvos(9.0))) and this port builds for 4.3 and 6.1.3, so calling it raises
-// "unrecognized selector sent to instance" on the device -- measured on an iPad 2 running 6.1.3 on
-// 2026-10-01, where a creation request's move and a resource write both reached it. NSString's
-// -fileSystemRepresentation has no such floor, and -[NSURL path] is of iOS 2, so the path comes
-// through it. The index cannot settle this one by name: fileSystemRepresentation reads first-rung
-// 3.0, which is some other class's selector of that name in a 32-bit cache.
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -26,8 +19,6 @@
 
 @end
 
-// The data requests not yet completed. A request cancelled before its read has handed data over is taken out
-// here, and its read completes with PHPhotosErrorUserCancelled instead of delivering.
 @implementation PHAssetResourceManager
 {
     NSMutableSet<NSNumber *> *_charonPending;
@@ -59,14 +50,8 @@
     }
 }
 
-// Photos of iOS 9 and later hands a resource over in chunks of a size of its own, which only a library holding real
-// assets could show, and the one library of this machine is the owner's. The size here is the port's: a read holds
-// one chunk at a time, so a video of any length stays within a small part of a 512 MB device's memory.
 static const NSUInteger CharonResourceChunkLength = 1024 * 1024;
 
-// Reads the representation of the resource's asset one chunk after another and hands each to deliver, which answers
-// NO to stop the read. NO, with the error, when the asset or its data is gone or the library gives no more bytes before
-// the representation's own size; a read stopped by deliver answers NO and leaves the error as it was.
 - (BOOL)charon_readResource:(PHAssetResource *)resource
                    progress:(PHAssetResourceProgressHandler)progress
                     deliver:(BOOL (^)(NSData *chunk))deliver
@@ -123,8 +108,6 @@ static const NSUInteger CharonResourceChunkLength = 1024 * 1024;
                 return [self->_charonPending containsObject:key];
             }
         };
-        // A cancel is looked at before every chunk: a request cancelled before its first one delivers nothing, one
-        // cancelled during the read stops there. Either completes once, with PHPhotosErrorUserCancelled.
         NSError *error = nil;
         BOOL read = pending() && [self charon_readResource:resource progress:options.progressHandler deliver:^BOOL(NSData *chunk) {
             if (!pending())
@@ -145,10 +128,6 @@ static const NSUInteger CharonResourceChunkLength = 1024 * 1024;
     return requestID;
 }
 
-// Photos writes the data into the file as it reads it. This writes it one chunk at a time into a file of its own
-// beside the given one and renames that into place once every chunk is in, and leaves the given file as it was when
-// the read or a write fails. A file already there is replaced on success: the port's choice, not measured against
-// Photos (facts/Photos/Changes.md).
 - (void)writeDataForAssetResource:(PHAssetResource *)resource
                             toFile:(NSURL *)fileURL
                            options:(PHAssetResourceRequestOptions *)options

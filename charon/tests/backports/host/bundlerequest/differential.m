@@ -1,16 +1,3 @@
-// differential.m - NSBundleResourceRequest against the host's own, and the two rules the host cannot
-// be asked about against the header's own words.
-//
-// The host's private -initWithTag: is not an oracle and this test does not send it. Tried, in this
-// order, with what each attempt said: the invocation's target was the class, so the message reached
-// +[NSObject doesNotRecognizeSelector:] and the pointer authentication failure was inside
-// CoreFoundation's format path; with the target an instance, -retainArguments retained the target,
-// which is not an argument, and faulted in objc_retain; and with neither, -getReturnValue: faults in
-// objc_autoreleaseReturnValue, so the host's private initialiser does not describe an object return
-// on this platform. So the class is held to the header's own words - the tags, the bundle, the 0.5
-// default, a progress complete at once, the urgent priority - and the two NSBundle additions, whose
-// host copies are inert, the same way. That is nine of the fifteen rows held to something, and two
-// constants and the two plist key names that are documented and not measurable.
 #import <Foundation/Foundation.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
@@ -62,8 +49,6 @@ static void same_string(NSString *ours, NSString *theirs, NSString *what)
         fail(@"%@: the port says |%@|, Foundation |%@|", what, ours ?: @"(nil)", theirs ?: @"(nil)");
 }
 
-// Where the probe writes: run.sh's own build directory when it set one, and the worktree otherwise.
-// Band output never goes to /tmp, and one constant is where the path is written down.
 static NSString *charon_run_path(void)
 {
     const char *fromEnvironment = getenv("BUILD");
@@ -72,7 +57,6 @@ static NSString *charon_run_path(void)
     return @".agent-work/runs/bundlerequest/fresh";
 }
 
-// the one thing the port's installed functions read from the object they are called on
 static NSString *charon_bundlePath(id self, SEL selector)
 {
     (void)self;
@@ -80,9 +64,6 @@ static NSString *charon_bundlePath(id self, SEL selector)
     return charon_run_path();
 }
 
-// The port's own class, declared here under the name run.sh gives it, so the calls are typed and reach
-// its accessors by name. It is the release that has none of this, so nothing here relies on a
-// declaration the SDK owns.
 @interface CharonHostNSBundleResourceRequest : NSObject <NSProgressReporting>
 - (instancetype)init;
 - (instancetype)initWithTags:(NSSet<NSString *> *)tags;
@@ -97,15 +78,9 @@ static NSString *charon_bundlePath(id self, SEL selector)
 @end
 
 extern double const CharonHostNSBundleResourceRequestLoadingPriorityUrgent;
-/* the port's install, taking the class to install on - the only way the *decision* is testable, since
-   on a host that already has both methods the two queries agree whatever the port does */
 extern void CharonInstallNSBundleAdditions(Class bundle);
 extern NSString *const CharonHostNSBundleResourceRequestLowDiskSpaceNotification;
 
-// The host's private initialiser, called the way a direct send reaches it: an NSInvocation's
-// -getReturnValue: into a __strong id is the well-known ARC pitfall (ARC releases bytes it never
-// retained), and -retainArguments retains the target, which is not an argument. One objc_msgSend, no
-// invocation, nothing ARC has an opinion about.
 static id host_initWithTag(Class subject, NSString *tag)
 {
     return ((id (*)(id, SEL, id))objc_msgSend)([subject alloc], NSSelectorFromString(@"initWithTag:"), tag);
@@ -165,15 +140,12 @@ int main(void)
         NSSet *known = [NSSet setWithObjects:@"level1", @"level2", nil];
         NSSet *unknown = [NSSet setWithObject:@"level9"];
 
-        // the oracle, once, by a direct send, and out of the verdict until it has answered
         for (NSString *tag in @[ @"level1", @"level9" ]) {
             id theirs = host_initWithTag(theirs, tag);
             NSString *shown = theirs ? [theirs description] : @"(nil)";
             printf("note: the host private -initWithTag: with %s -> %s\n", [tag UTF8String], [shown UTF8String]);
         }
 
-        // the four properties, held to the header's own words: the tags it was given, the bundle it
-        // resolves in, the default priority, and a progress that is complete the moment it exists
         for (NSSet *tags in @[ known, unknown ])
             for (NSBundle *bundle in @[ withManifest, withoutManifest ]) {
                 id request = [[ours alloc] initWithTags:tags bundle:bundle];
@@ -213,8 +185,6 @@ int main(void)
                 same_double([request loadingPriority], 1.0, [what stringByAppendingString:@" the urgent priority"]);
             }
 
-        // the two things the header says about the initialisers that no check held before: no bundle
-        // means the main bundle, and the set is the caller's own, not what the caller keeps
         for (Class subject in @[ ours, theirs ]) {
             id noBundle = nil;
             if (subject == ours)
@@ -231,7 +201,6 @@ int main(void)
         same_integer((long long)[[copied tags] count], 1,
                      @"a request keeps its own set, not the caller's after it changes");
 
-        // -init, which the header marks unavailable on every platform and both answer by refusing
         for (Class subject in @[ ours, theirs ]) {
             NSString *reason = nil, *name = nil;
             @try {
@@ -246,7 +215,6 @@ int main(void)
                         [NSString stringWithFormat:@"%s -init's reason", class_getName(subject)]);
         }
 
-        // the three resource methods, for tags the manifest names and one it does not
         for (NSSet *tags in @[ known, unknown ])
             for (NSBundle *bundle in @[ withManifest, withoutManifest ]) {
                 id ourRequest = [[ours alloc] initWithTags:tags bundle:bundle];
@@ -279,8 +247,6 @@ int main(void)
                 [ourRequest endAccessingResources];
             }
 
-        // the two NSBundle additions, held to the header: macOS ships them as stubs that answer
-        // where the header promises an exception, so the host cannot be the oracle for either
         SEL setPriority = NSSelectorFromString(@"setPreservationPriority:forTags:");
         SEL priorityFor = NSSelectorFromString(@"preservationPriorityForTag:");
         Class bundleClass = objc_getClass("NSBundle");
@@ -299,17 +265,9 @@ int main(void)
             }
             double level1 = ((double (*)(id, SEL, id))objc_msgSend)(bundle, priorityFor, @"level1");
             double level9 = ((double (*)(id, SEL, id))objc_msgSend)(bundle, priorityFor, @"level9");
-            /* Recorded, not compared: on a host that already has these two the port installs nothing,
-               so these sends reach the host's own methods. What the port's own copies must reproduce
-               on a release that has none is what this prints. */
             printf("note: %s - a refusal: %s, level1 reads %g, an unnamed tag reads %g\n",
                    [what UTF8String], reason ? [reason UTF8String] : "(none)", level1, level9);
         }
-        /* the install, on a class of the test's own that has neither selector: both are added, and
-           the behaviour they carry is the port's and not the host's */
-        /* a class of the test's own that has the two selectors *absent* and the one the port's
-           functions read -bundlePath- present, so what is under test is the decision and not a
-           forward to a method this class never had */
         Class fresh = objc_allocateClassPair([NSObject class], "CharonHostFreshBundle", 0);
         class_addMethod(fresh, NSSelectorFromString(@"bundlePath"), (IMP)charon_bundlePath, "@@:");
         objc_registerClassPair(fresh);
@@ -338,7 +296,6 @@ int main(void)
         printf("note: the host's two NSBundle additions are the same selectors on the same class and read back 0,\n"
                "  so the port's two are held to the header and differ from macOS on purpose.\n");
 
-        // the two constants: present, and of the header's own values - macOS does not emit either
         same_double(CharonHostNSBundleResourceRequestLoadingPriorityUrgent, 1.0,
                     @"NSBundleResourceRequestLoadingPriorityUrgent");
         same_string(CharonHostNSBundleResourceRequestLowDiskSpaceNotification,

@@ -1,6 +1,3 @@
-// MPSState, from the header of the SDK of iOS 16.4. One object per release: the band machinery keeps an
-// object whole or drops it whole, so a file here carries the API of exactly one release.
-
 #import "CharonMPS.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
@@ -104,10 +101,6 @@ static inline NSUInteger CharonMPSResourceLength(id<MTLResource> resource)
 
 - (instancetype)init
 {
-    // The header marks -init unavailable: a state without a resource is not a state a kernel can
-    // read or write, and MPSStateResourceList is how a caller says what it should hold. A caller
-    // that reaches -init anyway is told so in the log and given nothing, rather than an object that
-    // answers every question about its storage with zero.
     NSLog(@"MPSState: -init makes a state with no storage; use -initWithResource:, -initWithResources:, -initWithDevice:bufferSize:, -initWithDevice:textureDescriptor: or -initWithDevice:resourceList:");
     return nil;
 }
@@ -140,12 +133,6 @@ static inline NSUInteger CharonMPSResourceLength(id<MTLResource> resource)
     } commandBuffer:cmdBuf];
 }
 
-// A temporary state is one the release takes from its own heap and reuses for the next kernel that
-// wants the same shape. This port has no MPS heap, so the state is an ordinary state marked
-// temporary: its storage is a device buffer made when -resourceAtIndex:allocateMemory: is asked for
-// it, which is the same storage the release's sub-allocation would have been, and -readCount is the
-// count the release's is. Nothing is returned to a cache, so nothing is invalidated by a read count
-// reaching zero; facts/MetalPerformanceShaders/State.md says so.
 + (instancetype)charon_mps_temporaryWithBlock:(MPSState *(^)(id<MTLDevice>))block commandBuffer:(id<MTLCommandBuffer>)cmdBuf
 {
     id<MTLDevice> device = [cmdBuf respondsToSelector:@selector(device)] ? [cmdBuf device] : MTLCreateSystemDefaultDevice();
@@ -206,9 +193,6 @@ static inline NSUInteger CharonMPSResourceLength(id<MTLResource> resource)
     id object = [_resources objectAtIndex:index];
     if (object != (id)[NSNull null])
         return object;
-    // The storage a state was described with but not given. The release draws it from its heap; this
-    // port draws it from the device, which is where the heap's own storage comes from, and only when
-    // the caller asks for it with allocateMemory:YES or through -resource.
     id<MTLDevice> device = _device;
     if (!device)
         device = MTLCreateSystemDefaultDevice();
@@ -230,9 +214,6 @@ static inline NSUInteger CharonMPSResourceLength(id<MTLResource> resource)
 - (id<MTLResource>)resource
 {
     if (_resources.count != 1) {
-        // The release deprecated -resource for exactly this reason and points at
-        // -resourceAtIndex:allocateMemory:. A state of any other shape has no single resource, and
-        // the release's own would not have had one either.
         return nil;
     }
     return [self resourceAtIndex:0 allocateMemory:YES];
@@ -285,9 +266,6 @@ static inline NSUInteger CharonMPSResourceLength(id<MTLResource> resource)
 
 - (void)synchronizeOnCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
 {
-    // Every resource of this port is host memory the CPU and the device share, so there is no cache
-    // to flush and nothing to wait for. The release flushes a managed buffer here; this port has no
-    // managed resource, which is the same answer.
     (void)commandBuffer;
 }
 

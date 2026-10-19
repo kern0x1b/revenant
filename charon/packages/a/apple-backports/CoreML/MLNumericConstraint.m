@@ -1,11 +1,3 @@
-/* MLNumericConstraint, in a file of its own for the same reason: it is a class of its own and the
- * release that introduced it is not the one the constraints beside it arrived in.
- *
- * The bound a model's own parameter values sit in, which is how an updatable model says that a
- * learning rate is one of these numbers rather than any. This port reads no updatable model --
- * facts/CoreML/CoreML.md says why -- so no description of the port's own carries such a constraint,
- * and a parameter description answers nil for it rather than a bound of nothing.
- */
 #import <CoreML/CoreML.h>
 
 #include "CharonMLConstraints.h"
@@ -20,10 +12,6 @@
                 enumeratedNumbers:(NSSet<NSNumber *> *)enumeratedNumbers;
 @end
 
-/* The bound a model's own parameter values sit in, which is how an updatable model says that a
- * learning rate is one of these numbers rather than any. This port reads no updatable model --
- * facts/CoreML/CoreML.md says why -- so no description of the port's own carries such a
- * constraint, and a parameter description answers nil for it rather than a bound of nothing. */
 @implementation MLNumericConstraint
 
 - (instancetype)charon_initWithMinNumber:(NSNumber *)minNumber

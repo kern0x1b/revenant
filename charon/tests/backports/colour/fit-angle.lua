@@ -1,13 +1,3 @@
--- xmake l tests/backports/colour/fit-angle.lua <fit.tsv>
---
--- Is the hue word a partition of the hue angle?
---
--- Nearest prototype in four spaces gives 37-40%, so that is not the rule. The 28 words include the
--- neighbouring pairs - blue green, spring green, pink magenta, magenta pink, red pink, red orange,
--- yellow orange - which is what a hue circle divided into named sectors looks like. This asks whether the
--- answer is a contiguous interval of the hue angle, and how well a one-dimensional partition of that angle
--- predicts it.
-
 import("sample_floor", {rootdir = os.scriptdir()})
 
 local MODIFIERS = { very = true, light = true, dark = true, pastel = true, grayish = true,
@@ -57,7 +47,6 @@ local function oklab(r, g, b)
         0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_
 end
 
--- The hue angle in OKLab, with the chroma it was read at, and the lightness.
 local function angle(r, g, b)
     local L, a, bb = oklab(r, g, b)
     return math.atan(bb, a) % TAU, math.sqrt(a * a + bb * bb), L
@@ -68,7 +57,6 @@ function main(sample)
         os.exit(1)
     end
 
-    -- Deduplicated colours, in first-seen order; a later row for the same colour overwrites the word.
     local keys, points = {}, {}
     for line in io.lines(sample) do
         if line:sub(1, 1) ~= "#" then
@@ -82,7 +70,6 @@ function main(sample)
     end
     print(string.format("distinct colours: %d", #keys))
 
-    -- The neutral names are not a hue at all: they are what a colour with almost no chroma answers.
     local neutral = { gray = true, black = true, white = true }
     local chromatic = {}
     local neutralCount = 0
@@ -97,8 +84,6 @@ function main(sample)
     end
     print(string.format("chromatic points: %d   neutral: %d", #chromatic, neutralCount))
 
-    -- Sort by angle and look for runs: a partition of the angle is a set of contiguous intervals. The
-    -- sort is stable in the Python this replaces, so an angle tie keeps the order the colours came in.
     for i, item in ipairs(chromatic) do
         item.order = i
     end
@@ -123,8 +108,6 @@ function main(sample)
         print(string.format("  %-16s %6.3f .. %6.3f  %6d", run.hue, run.low, run.high, run.count))
     end
 
-    -- How many points does a one-dimensional partition explain? Take the angle midpoints between
-    -- consecutive runs and classify by the run whose interval the angle falls in.
     if #runs > 1 then
         local edges = {}
         for i, run in ipairs(runs) do
@@ -138,7 +121,6 @@ function main(sample)
             for i, edge in ipairs(edges) do
                 local nextEdge = edges[i % #edges + 1]
                 if (a - edge) % TAU < (nextEdge - edge) % TAU then
-                    -- the run is i if the angle is at or after edge[i]
                     if runs[i].hue == item.hue then
                         agree = agree + 1
                     end

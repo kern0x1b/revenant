@@ -1,4 +1,3 @@
-// Host probe: what macOS CoreMIDI answers for a NULL block and for a protocol that is neither 1.0 nor 2.0.
 #import <CoreMIDI/CoreMIDI.h>
 #include <stdio.h>
 

@@ -1,6 +1,3 @@
-// differential.m - the PDF names and colour conversion keys of the Graphics objects CGPDFNames11, 12 and 16 and CGColorConversionNames1001 and 11,
-// held to the host's CoreGraphics: each constant's string, and CGPDFTagTypeGetName for every value from 0 to 1000.
-// The port's symbols carry the charon_host_ prefix (run.sh renames them), the host's are the framework's own.
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import "check.h"
@@ -28,7 +25,6 @@ static void constants(void)
     CONSTANTS(CHECK_CONSTANT)
 }
 
-/* The release's enumeration has one value past iOS 26: CGPDFTagTypeArtifact (900) is iOS 27, so the port answers NULL for it. */
 static void tag_names(void)
 {
     int named = 0;

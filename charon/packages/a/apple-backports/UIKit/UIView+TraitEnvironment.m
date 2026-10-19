@@ -11,9 +11,6 @@
 
 @implementation UIView (CharonTraitEnvironment)
 
-// A view's trait collection is what its superview answers, or the controller whose view it is answers. A view's own
-// override of the style is not in it: the host does not apply a view's override to the view's trait collection, nor to
-// the views under it (darkstyle group), so neither does the port.
 - (UITraitCollection *)traitCollection
 {
     UIResponder *next = self.nextResponder;

@@ -1,8 +1,3 @@
-// MKGradientPolylineRenderer: a polyline whose colour changes along its length, which the iOS 14
-// header adds to the polyline renderer. The gradient is drawn for real: the line's own path is
-// clipped to, and a linear gradient with the caller's own colours at the caller's own fractions runs
-// along the line from its first point to its last, so a two-colour gradient on a two-point polyline
-// is that polyline's two ends in those two colours.
 #import <MapKit/MKGradientPolylineRenderer.h>
 #import <UIKit/UIKit.h>
 #import "CharonMapKit.h"
@@ -49,8 +44,6 @@
     [self setNeedsDisplay];
 }
 
-// The first and the last point of the line, which is the run the gradient follows. Charon's own,
-// so it carries no API.
 - (BOOL)charon_gradientFromPoint:(CGPoint *)outFrom toPoint:(CGPoint *)outTo
 {
     MKPolyline *polyline = self.polyline;
@@ -77,8 +70,6 @@
         return;
     }
     if (CGPointEqualToPoint(from, to)) {
-        // A line whose two ends are at the same point has no direction to run the gradient along,
-        // so the first colour is drawn along it, which is what a gradient of zero length collapses to.
         [[self charon_colorAtIndex:0] setStroke];
         CGContextBeginPath(context);
         CGContextAddPath(context, path);
@@ -121,8 +112,6 @@
     free(stops);
 }
 
-// The colour of one end of the gradient, with the linear fall-off the header describes: with no
-// locations given, the colours run evenly along the line. Charon's own, so it carries no API.
 - (UIColor *)charon_colorAtIndex:(NSUInteger)index
 {
     NSUInteger count = _colors.count;

@@ -128,8 +128,6 @@ static NSString *run(API api, nw_interface_type_t type, BOOL typed, int prohibit
     }
     usleep(300000);
     @synchronized (updates) {
-        // The count of updates is returned apart from the log: how many a start delivers is compared with a floor where
-        // the host varies (facts/Network/NWPathMonitor.md, How many updates a start delivers), and exactly elsewhere.
         *delivered = (int)updates.count;
         *log = [NSString stringWithFormat:@"inline=%d cancels=%d wrongQueue=%d quietAfterCancel=%d", inline_calls, cancels, wrongQueue, after == (int)updates.count];
         return updates.count ? updates.lastObject : @"none";
@@ -140,8 +138,6 @@ int main(void)
 {
     @autoreleasepool {
         API system = system_api(), port = port_api();
-        // floor: how many updates a start delivers when the host's count varies (facts/Network/NWPathMonitor.md); -1 where the
-        // host's count is the same every run, and then the port's count must equal it.
         struct { const char *name; nw_interface_type_t type; BOOL typed; int prohibited; BOOL twice; BOOL early; int floor; } cases[] = {
             {"general", 0, NO, -1, NO, NO, -1}, {"general twice", 0, NO, -1, YES, NO, 2}, {"general cancelled at once", 0, NO, -1, NO, YES, -1},
             {"type other", nw_interface_type_other, YES, -1, NO, NO, 1}, {"type wifi", nw_interface_type_wifi, YES, -1, NO, NO, 1}, {"type cellular", nw_interface_type_cellular, YES, -1, NO, NO, -1},

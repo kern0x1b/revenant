@@ -1,11 +1,5 @@
 #import "CharonNetworkExtensionSettings.h"
 
-/* The IPv4 settings object and the route it holds. State again: the system reads them when a
-   configuration is applied, and the addresses and masks the object was built over are readonly, as
-   the 26.2 header declares them. `settingsWithAutomaticAddressing` and `+defaultRoute` are the two
-   class answers the header declares, and each is a fixed value rather than a call into a daemon:
-   automatic addressing means "the system fills these in", and the default route is the route whose
-   destination is 0.0.0.0 with a zero mask, which is what the header's own description of it says. */
 @implementation NEIPv4Settings {
     NSArray<NSString *> *_addresses;
     NSArray<NSString *> *_subnetMasks;
@@ -14,8 +8,6 @@
     NSArray<NEIPv4Route *> *_excludedRoutes;
 }
 
-/* Measured: a fresh NEIPv4Settings answers `addresses` and `subnetMasks` as **empty arrays** on the
-   host, not nil. The differential caught it: this object answered nil until these two lines. */
 - (instancetype)init
 {
     return [self initWithAddresses:@[] subnetMasks:@[]];

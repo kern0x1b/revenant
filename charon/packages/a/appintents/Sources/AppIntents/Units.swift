@@ -1,16 +1,10 @@
-// The units a measurement parameter is asked in, the control styles it is asked with, and the kind
-// of a date it takes: the framework's own lists, in the framework's own order, each case the unit
-// the release's own `Measurement` writes it as.
-
 import Foundation
 
 extension IntentParameter {
-    /// The units of an acceleration a parameter takes.
     public enum Acceleration: Hashable {
         case gravity
         case metersPerSecondSquared
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .gravity: return 0
@@ -26,7 +20,6 @@ extension IntentParameter {
     }
 
 
-    /// The units of an angle a parameter takes.
     public enum Angle: Hashable {
         case arcMinutes
         case arcSeconds
@@ -35,7 +28,6 @@ extension IntentParameter {
         case radians
         case revolutions
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .arcMinutes: return 0
@@ -55,7 +47,6 @@ extension IntentParameter {
     }
 
 
-    /// The units of an area a parameter takes.
     public enum Area: Hashable {
         case acres
         case ares
@@ -72,7 +63,6 @@ extension IntentParameter {
         case squareNanometers
         case squareYards
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .acres: return 0
@@ -100,12 +90,10 @@ extension IntentParameter {
     }
 
 
-    /// The units of a concentration of mass a parameter takes.
     public enum ConcentrationMass: Hashable {
         case gramsPerLiter
         case milligramsPerDeciliter
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .gramsPerLiter: return 0
@@ -121,11 +109,9 @@ extension IntentParameter {
     }
 
 
-    /// The units of a dispersion a parameter takes.
     public enum Dispersion: Hashable {
         case partsPerMillion
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .partsPerMillion: return 0
@@ -140,7 +126,6 @@ extension IntentParameter {
     }
 
 
-    /// The units of a duration a parameter takes.
     public enum Duration: Hashable {
         case hours
         case microseconds
@@ -150,7 +135,6 @@ extension IntentParameter {
         case picoseconds
         case seconds
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .hours: return 0
@@ -171,7 +155,6 @@ extension IntentParameter {
     }
 
 
-    /// The units of an electric charge a parameter takes.
     public enum ElectricCharge: Hashable {
         case ampereHours
         case coulombs
@@ -180,7 +163,6 @@ extension IntentParameter {
         case microampereHours
         case milliampereHours
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .ampereHours: return 0
@@ -200,7 +182,6 @@ extension IntentParameter {
     }
 
 
-    /// The units of an electric current a parameter takes.
     public enum ElectricCurrent: Hashable {
         case amperes
         case kiloamperes
@@ -208,7 +189,6 @@ extension IntentParameter {
         case microamperes
         case milliamperes
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .amperes: return 0
@@ -227,7 +207,6 @@ extension IntentParameter {
     }
 
 
-    /// The units of an electric potential difference a parameter takes.
     public enum ElectricPotentialDifference: Hashable {
         case kilovolts
         case megavolts
@@ -235,7 +214,6 @@ extension IntentParameter {
         case millivolts
         case volts
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .kilovolts: return 0
@@ -254,7 +232,6 @@ extension IntentParameter {
     }
 
 
-    /// The units of an electric resistance a parameter takes.
     public enum ElectricResistance: Hashable {
         case kiloohms
         case megaohms
@@ -262,7 +239,6 @@ extension IntentParameter {
         case milliohms
         case ohms
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .kiloohms: return 0
@@ -281,7 +257,6 @@ extension IntentParameter {
     }
 
 
-    /// The units of an energy a parameter takes.
     public enum Energy: Hashable {
         case calories
         case joules
@@ -289,7 +264,6 @@ extension IntentParameter {
         case kilojoules
         case kilowattHours
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .calories: return 0
@@ -308,7 +282,6 @@ extension IntentParameter {
     }
 
 
-    /// The units of a frequency a parameter takes.
     public enum Frequency: Hashable {
         case framesPerSecond
         case gigahertz
@@ -320,7 +293,6 @@ extension IntentParameter {
         case nanohertz
         case terahertz
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .framesPerSecond: return 0
@@ -343,13 +315,11 @@ extension IntentParameter {
     }
 
 
-    /// The units of a fuel efficiency a parameter takes.
     public enum FuelEfficiency: Hashable {
         case litersPer100Kilometers
         case milesPerGallon
         case milesPerImperialGallon
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .litersPer100Kilometers: return 0
@@ -366,11 +336,9 @@ extension IntentParameter {
     }
 
 
-    /// The units of an illuminance a parameter takes.
     public enum Illuminance: Hashable {
         case lux
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .lux: return 0
@@ -385,7 +353,6 @@ extension IntentParameter {
     }
 
 
-    /// The units of an amount of information a parameter takes.
     public enum InformationStorage: Hashable {
         case bits
         case bytes
@@ -423,7 +390,6 @@ extension IntentParameter {
         case zettabits
         case zettabytes
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .bits: return 0
@@ -472,7 +438,6 @@ extension IntentParameter {
     }
 
 
-    /// The units of a length a parameter takes.
     public enum Length: Hashable {
         case astronomicalUnits
         case centimeters
@@ -497,7 +462,6 @@ extension IntentParameter {
         case scandinavianMiles
         case yards
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .astronomicalUnits: return 0
@@ -533,7 +497,6 @@ extension IntentParameter {
     }
 
 
-    /// The units of a mass a parameter takes.
     public enum Mass: Hashable {
         case carats
         case centigrams
@@ -552,7 +515,6 @@ extension IntentParameter {
         case slugs
         case stones
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .carats: return 0
@@ -582,7 +544,6 @@ extension IntentParameter {
     }
 
 
-    /// The units of a power a parameter takes.
     public enum Power: Hashable {
         case femtowatts
         case gigawatts
@@ -596,7 +557,6 @@ extension IntentParameter {
         case terawatts
         case watts
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .femtowatts: return 0
@@ -621,7 +581,6 @@ extension IntentParameter {
     }
 
 
-    /// The units of a pressure a parameter takes.
     public enum Pressure: Hashable {
         case bars
         case gigapascals
@@ -634,7 +593,6 @@ extension IntentParameter {
         case newtonsPerMetersSquared
         case poundsForcePerSquareInch
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .bars: return 0
@@ -658,14 +616,12 @@ extension IntentParameter {
     }
 
 
-    /// The units of a speed a parameter takes.
     public enum Speed: Hashable {
         case kilometersPerHour
         case knots
         case metersPerSecond
         case milesPerHour
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .kilometersPerHour: return 0
@@ -683,13 +639,11 @@ extension IntentParameter {
     }
 
 
-    /// The units of a temperature a parameter takes.
     public enum Temperature: Hashable {
         case celsius
         case fahrenheit
         case kelvin
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .celsius: return 0
@@ -706,7 +660,6 @@ extension IntentParameter {
     }
 
 
-    /// The units of a volume a parameter takes.
     public enum Volume: Hashable {
         case acreFeet
         case bushels
@@ -740,7 +693,6 @@ extension IntentParameter {
         case tablespoons
         case teaspoons
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .acreFeet: return 0
@@ -785,12 +737,10 @@ extension IntentParameter {
     }
 
 
-    /// The control an integer parameter is asked with.
     public enum IntControlStyle: Hashable {
         case stepper
         case field
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .stepper: return 0
@@ -805,13 +755,11 @@ extension IntentParameter {
         public var hashValue: Int { return ordinal }
     }
 
-    /// The way a placemark parameter is shown.
     public enum PlacemarkDisplayStyle: Hashable {
         case name
         case address
         case city
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .name: return 0
@@ -827,13 +775,11 @@ extension IntentParameter {
         public var hashValue: Int { return ordinal }
     }
 
-    /// The control a floating-point parameter is asked with.
     public enum DoubleControlStyle: Hashable {
         case stepper
         case field
         case slider
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .stepper: return 0
@@ -849,13 +795,11 @@ extension IntentParameter {
         public var hashValue: Int { return ordinal }
     }
 
-    /// What a date parameter takes: a date, a time, or both.
     public enum DateKind: Hashable {
         case date
         case time
         case dateTime
 
-        /// The place of a case in the framework's own list, which is what a case hashes as.
         public var ordinal: Int {
             switch self {
             case .date: return 0
@@ -875,8 +819,6 @@ extension IntentParameter {
 
 }
 
-// The units whose whole list a caller may choose from, added in iOS 18: the framework's own
-// `CaseIterable` conformances, which list every case in the framework's order.
 extension IntentParameter.Acceleration: CaseIterable {
     public typealias AllCases = [IntentParameter.Acceleration]
 

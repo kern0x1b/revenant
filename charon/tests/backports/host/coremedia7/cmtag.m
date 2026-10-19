@@ -4,13 +4,6 @@
 #import <dlfcn.h>
 #include <stdio.h>
 
-// Every CMTag function the port's object defines, against the host's own. The object is reached through
-// dlopen, so the port keeps Apple's names and no system header is touched.
-//
-// Seven of CMTag's 25 are CF_INLINE in 26.2's header and the port's header carries those bodies, so
-// the image exports no symbol for them and there is nothing to compare - the same reason a value the
-// header carries needs no registry row. They are: CMTagIsValid, CMTagGetCategory, CMTagGetValue,
-// CMTagGetValueDataType, CMTagHasCategory, CMTagCategoryEqualToTagCategory, CMTagCategoryValueEqualToValue.
 static int failures, checks;
 static void *port;
 
@@ -58,10 +51,6 @@ int main(int argc, char **argv)
             tag(0, kCMTagDataType_SInt64, -1),
             tag(2147483647, kCMTagDataType_SInt64, 18446744073709551615ULL),
             tag(kCMTagCategory_StereoViewInterpretation, kCMTagDataType_OSType, 'lfrt'),
-            // The tags the two subtlest rules were derived from, which this probe did not have and should
-            // have: without them CMTagCompare's NaN tie and its int64's unsigned order are never reached,
-            // and both mutants of them stay green. All four share one category and data type with the
-            // tags above, so the value is what gets compared.
             tag(kCMTagCategory_TrackID, kCMTagDataType_Float64, 0xBFE0000000000000ULL),
             tag(kCMTagCategory_TrackID, kCMTagDataType_Float64, 0x8000000000000000ULL),
             tag(kCMTagCategory_TrackID, kCMTagDataType_Float64, 0x7FF8000000000000ULL),
@@ -108,11 +97,6 @@ int main(int argc, char **argv)
                           CMTagHasFlagsValue(one), CMTagHasFloat64Value(one)],
                  [NSString stringWithFormat:@"%d %d %d %d", port_CMTagHasOSTypeValue(one), port_CMTagHasSInt64Value(one),
                   port_CMTagHasFlagsValue(one), port_CMTagHasFloat64Value(one)]);
-            // CMTagHash is a *consistent* hash, not the host's mixing: the host's values are about forty
-            // bits (242338807774 for kCMTagInvalid, 930911443662 for the 'vide' tag) and the port's are a
-            // CFHash of the three decimal fields, 11562196563089929323 for the same tag. What matters and
-            // is measured below: equal tags hash equal and distinct tags do not collide. The difference
-            // from the host is recorded in facts/CoreMedia/CMTag.md, as -12894 is.
             snprintf(label, sizeof label, "Hash consistent %zu", index);
             CFHashCode myHash = port_CMTagHash(one);
             BOOL collision = NO, equalSeen = NO;
@@ -120,18 +104,15 @@ int main(int argc, char **argv)
                 if ([fields(all[seen]) isEqualToString:fields(one)]) {
                     equalSeen = YES;
                     if (port_CMTagHash(all[seen]) != myHash)
-                        collision = YES;   // the same tag hashed two ways
+                        collision = YES;
                 } else if (port_CMTagHash(all[seen]) == myHash) {
-                    collision = YES;       // two different tags, one hash
+                    collision = YES;
                 }
             }
             (void)equalSeen;
             same(label, [NSString stringWithFormat:@"%d", collision ? 1 : 0], @"0");
             for (size_t other = 0; other < count; other++) {
                 snprintf(label, sizeof label, "Compare %zu vs %zu", index, other);
-                // The one pair the fitter's candidates cannot explain: print the sixteen bytes of each
-                // argument, and the order the call is made in, so the table can be asked about the
-                // same bytes rather than about tags either side retyped.
                 if (index == 3 && other == 7) {
                     for (int side = 0; side < 2; side++) {
                         CMTag which = side ? all[other] : one;

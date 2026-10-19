@@ -1,41 +1,16 @@
--- make-models.lua: write the .mlmodel containers the C reader is measured against, and their reference dumps.
---
---   xmake l tools/coreml/make-models.lua [--out <directory>] [--check]
---   xmake l tools/coreml/make-models.lua --unmeasured <directory>
---
--- One model per model kind the port interprets. Each container is the specification written with the protobuf of
--- tools/coreml/proto.lua, from the committed schema, so a container has the bytes the Core ML writer gives the same
--- model. The model is data: each builder below is the tree the specification's own builders make for that kind
--- (the builder defaults are written out as fields, and a field a builder leaves at its zero is not written, as
--- proto3 does not write it).
---
--- Two artefacts per model:
---   <name>.mlmodel      the container
---   <name>.ref          the tree as the reflection print of the file that was written, read back: a difference
---                       between the tree that was built and the tree the file carries is a loss in the writer.
---   manifest.json       the model's own prediction for a fixed input, from the host's Core ML (see predict below)
---
--- The specification version is the model's own field, and it is set here: a model declares the specification it was
--- written against and nothing else may declare one for it.
---
--- --check writes nothing and fails unless the containers already in --out are byte for byte the ones written here.
-
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 local proto = import("proto", {rootdir = os.scriptdir()})
 
-local FLOAT32 = 65568 -- ArrayFeatureType: float32 (0x10020)
-local DOUBLE = 65600 -- ArrayFeatureType: double (0x10040)
-local INT32 = 131104 -- ArrayFeatureType: int32 (0x20020)
+local FLOAT32 = 65568
+local DOUBLE = 65600
+local INT32 = 131104
 
 local SPEC_11_2, SPEC_12_0, SPEC_12_2, SPEC_13_0 = 3, 4, 5, 6
 local SPEC_1 = 1
 
--- A float32 value: what the specification's float fields hold, and what numpy's float32 arithmetic gives.
 local function f32(value)
     return (string.unpack("<f", string.pack("<f", value)))
 end
-
--- The feature descriptions the specification gives --------------------------------------------------
 
 local function array(shape, data_type)
     return {shape = shape, dataType = data_type or FLOAT32}
@@ -58,7 +33,7 @@ local function probabilities(name)
 end
 
 local function image(name, width, height)
-    return {name = name, type = {imageType = {width = width, height = height, colorSpace = 20}}} -- 20: RGB
+    return {name = name, type = {imageType = {width = width, height = height, colorSpace = 20}}}
 end
 
 local function description(inputs, outputs, predicted, probabilities_name)
@@ -70,7 +45,6 @@ local function description(inputs, outputs, predicted, probabilities_name)
     return out
 end
 
--- The class labels of a classifier: the classifier's own ClassLabels oneof, and the description's two outputs.
 local function class_labels(spec, classifier, labels, name)
     name = name or "classLabel"
     classifier.stringClassLabels = {vector = labels}
@@ -80,10 +54,6 @@ local function class_labels(spec, classifier, labels, name)
     table.insert(spec.description.output, probabilities(name .. "Probability"))
 end
 
--- The kernel of a 4 x 3 x 3 x 3 convolution. The arithmetic is taken over (output, input, height, width) as an array
--- of 108 numbers, with each step in float32: (index / 97) - 0.5. The builder writes the kernel to the container in
--- the order width, height, output, input, the input varying fastest, which is the order the reference holds the
--- values in; the axis order was found by trying all 24 against the reference, and only one matches.
 local function sawtooth_kernel()
     local values = {}
     for width = 0, 2 do
@@ -99,10 +69,6 @@ local function sawtooth_kernel()
     return values
 end
 
--- The models -------------------------------------------------------------------------------------------
-
--- A dense classifier: 3 -> 4 dense, ReLU, 4 -> 2 dense, softmax. One model that holds at once every layer kind the
--- reader has to see: a weight matrix, a bias vector, an activation oneof and a layerType oneof.
 local function build_nn_classifier()
     local spec = {specificationVersion = SPEC_12_2}
     spec.description = description({vector("x", {3})}, {vector("p", {2})})
@@ -128,8 +94,6 @@ local function build_nn_classifier()
     return spec
 end
 
--- A convolutional classifier over an image-shaped input: one convolution, a ReLU, a global max pool, and the
--- preprocessing that gives the input its scale and its per-channel bias.
 local function build_nn_image()
     local spec = {specificationVersion = SPEC_12_2}
     spec.description = description({vector("img", {3, 8, 8})}, {vector("p", {4})})
@@ -157,8 +121,6 @@ local function build_nn_image()
     return spec
 end
 
--- A tree ensemble, the shape a converted random forest has: three depth-two trees over two features. A prediction is
--- the base prediction plus the value of the leaf each tree reaches, then a softmax over the classes.
 local function build_tree_classifier()
     local spec = {specificationVersion = SPEC_11_2}
     spec.description = description({vector("a", {1}), vector("b", {1})}, {}, "classLabel", "classLabelProbability")
@@ -182,13 +144,12 @@ local function build_tree_classifier()
     end
     spec.treeEnsembleClassifier = {
         treeEnsemble = {nodes = nodes, numPredictionDimensions = 2, basePredictionValue = {0.0, 0.0}},
-        postEvaluationTransform = 1, -- Classification_SoftMax
+        postEvaluationTransform = 1,
         stringClassLabels = {vector = {"low", "high"}},
     }
     return spec
 end
 
--- A GLM: one weight per input element and an offset beside it, with a post-evaluation transform.
 local function build_glm()
     local spec = {specificationVersion = SPEC_11_2}
     spec.description = description({vector("x", {2}, DOUBLE)}, {scalar_double("y")})
@@ -196,12 +157,11 @@ local function build_glm()
     spec.glmRegressor = {
         weights = {{value = {1.5, -2.5}}},
         offset = {-0.5},
-        postEvaluationTransform = 1, -- Logit, as the regressor's enumeration numbers it
+        postEvaluationTransform = 1,
     }
     return spec
 end
 
--- A pipeline of a scaler and a neural network, the shape a converted tabular classifier has.
 local function build_pipeline()
     local scaler = {
         specificationVersion = SPEC_11_2,
@@ -226,8 +186,6 @@ local function build_pipeline()
     }
 end
 
--- The dense half of the layer set, in one chain: a dense layer, a scale with its own offset, a bias, an L2
--- normalisation. Each is on the answer of the one before, so a wrong answer in any of them shows at the end.
 local function build_nn_layers()
     local spec = {specificationVersion = SPEC_12_2}
     spec.description = description({vector("x", {1, 1, 4})}, {vector("out", {1, 1, 2})})
@@ -247,13 +205,11 @@ local function build_nn_layers()
             }},
             {name = "l2", input = {"bi"}, output = {"out"}, l2normalize = {epsilon = 1e-6}},
         },
-        arrayInputShapeMapping = 1, -- EXACT_ARRAY_MAPPING
+        arrayInputShapeMapping = 1,
     }
     return spec
 end
 
--- The shape half of the layer set: an upsample, an elementwise product, a clamp, a reduction, a tile and a second
--- reduction, on one channel.
 local function build_nn_layers_shape()
     local spec = {specificationVersion = SPEC_12_2}
     spec.description = description({vector("x", {1, 1, 2})}, {vector("out", {1, 1, 1})})
@@ -263,15 +219,14 @@ local function build_nn_layers_shape()
             {name = "mul", input = {"uu", "uu"}, output = {"mu"}, multiply = {alpha = 1.0}},
             {name = "clip", input = {"mu"}, output = {"cl"}, clip = {minVal = 0.1, maxVal = 0.9}},
             {name = "tile", input = {"cl"}, output = {"tl"}, tile = {reps = {1, 1, 2}}},
-            {name = "sum", input = {"tl"}, output = {"rd"}, reduce = {}}, -- SUM is 0, not written
-            {name = "avg", input = {"rd"}, output = {"out"}, reduce = {mode = 1}}, -- AVG
+            {name = "sum", input = {"tl"}, output = {"rd"}, reduce = {}},
+            {name = "avg", input = {"rd"}, output = {"out"}, reduce = {mode = 1}},
         },
         arrayInputShapeMapping = 1,
     }
     return spec
 end
 
--- An embedding over three rows: the input is one word index and the output is that row of the table.
 local function build_nn_embedding()
     local spec = {specificationVersion = SPEC_12_2}
     spec.description = description({vector("index", {1, 1, 1}, INT32)}, {vector("vector", {1, 1, 2}, FLOAT32)})
@@ -285,8 +240,6 @@ local function build_nn_embedding()
     return spec
 end
 
--- A GLM classifier in the one-against-rest encoding: one weight vector per class but the first, which is the
--- reference class and scores the total of the rest.
 local function build_glm_classifier()
     local spec = {specificationVersion = SPEC_11_2}
     spec.description = description({vector("x", {2}, DOUBLE)}, {})
@@ -295,7 +248,6 @@ local function build_glm_classifier()
     spec.description.predictedFeatureName = "classLabel"
     spec.description.predictedProbabilitiesName = "classLabelProbability"
     spec.glmClassifier = {
-        -- ReferenceClass and Logit are both zero in their enumerations, so neither is written
         weights = {{value = {1.0, -0.5}}, {value = {-0.25, 0.75}}},
         offset = {0.1, -0.1},
         stringClassLabels = {vector = {"first", "second", "third"}},
@@ -303,30 +255,6 @@ local function build_glm_classifier()
     return spec
 end
 
--- An image in, an image out: a picture of 32 by 32 through one 1x1 convolution, which is the smallest model a Vision
--- request can be run on, and the shape Vision's own transform exists for. A VNCoreMLRequest hands the handler's
--- picture to a model that takes one, brings it to the size the model declares, and answers with the model's own
--- output: for this model an image again, a VNPixelBufferObservation. The convolution is 1x1 on one channel, so the
--- arithmetic is one weight on the red channel; what the case measures is the path -- the size the picture was brought
--- to, and the observation that comes back.
---
--- The input is the specification's imageType, not the three-channel array the convolutional model beside it uses: an
--- image input is a picture with a colour space and a size, and it is the only kind a VNCoreMLRequest will hand a
--- picture to. The colour space is 20, the specification's own RGB.
---
--- Both ends declare a FIXED 32 by 32, which is what Core ML's own compiler accepts here. Measured 2026-10-03 on this
--- host (an M4 Pro, Core ML and Vision both present): an image input declared as an imageSizeRange of 16..256 is
--- refused outright -- "compiler error: Invalid height and width for the image input." -- while the same network with a
--- fixed size compiles and predicts. The refusal is about the container, not about this host running image models: a
--- ranged image input needs a network with flexible blob shapes, and this one has fixed shapes. The range was believed
--- to be what Vision's crop-and-scale is for. It is not: a VNCoreMLRequest brings the picture to whatever size the model
--- declares, so the request path this container exists to measure is unchanged by fixing the size.
---
--- The preprocessing is the scale and bias a picture's bytes go through before a layer sees them: what Core ML's own
--- compiler writes for an image input, and what Vision's transform is built around. Without it the model has no image
--- processing to run. There is no host input recorded for this model (SAMPLES has none): this host's Core ML compiles
--- and loads the container, and tests/backports/host/coreml/run.sh checks all ten containers, while the picture is fed
--- by tests/backports/host/vision/run.sh. The shapes that were tried before this one are in facts/CoreML/CoreML.md.
 local function build_vision_image()
     local spec = {specificationVersion = SPEC_12_2}
     spec.description = description({image("image", 32, 32)}, {image("out", 32, 32)})
@@ -348,16 +276,6 @@ local function build_vision_image()
     return spec
 end
 
--- Written, not in the set. The spatial half of the layer set: a convolution, a ReLU, a padding, an average pool over
--- the whole map and a batch normalisation over three channels of eight by eight. This host's Core ML refuses to
--- compile it: the validator says "Layer 'conv' of type 'Convolution' has input rank 3 but expects rank at least 4"
--- (measured by --unmeasured, 2026-10-16). A rank-five input is refused as a network input ("must have dimension 1 or
--- 3", measured when the Python builder was written). nn_image runs the same arithmetic and is what the port's
--- convolution and pooling are measured against. The batch normalisation and the padding layer are carried and are
--- listed as not measured in facts/CoreML/CoreML.md rather than counted as a pass.
---
--- No oracle exists for these two: the python generator they were ported from never wrote their containers. The only
--- check is that they encode, decode, and get a verdict from this host's Core ML (make-models.lua --unmeasured <dir>).
 local function build_nn_layers_image()
     local weights = {}
     for at = 0, 4 * 3 * 3 * 3 - 1 do
@@ -380,7 +298,6 @@ local function build_nn_layers_image()
                     paddingAmounts = {borderAmounts = {{startEdgeSize = 1, endEdgeSize = 1},
                                                        {startEdgeSize = 1, endEdgeSize = 1}}},
                 }},
-                -- 1 is the specification's AVERAGE pooling type (MAX is 0)
                 {name = "pool", input = {"pd"}, output = {"gp"}, pooling = {
                     type = 1, globalPooling = true, avgPoolExcludePadding = true,
                 }},
@@ -393,17 +310,11 @@ local function build_nn_layers_image()
                 }},
             },
             preprocessing = {{featureName = "x", scaler = {channelScale = 2.0}}},
-            arrayInputShapeMapping = 1, -- EXACT_ARRAY_MAPPING
+            arrayInputShapeMapping = 1,
         },
     }
 end
 
--- Written, not in the set. A simple recurrent layer over three steps: y_t = tanh(W x_t + R h_t + b), with the state
--- carried from step to step and taken at the start from the second input. A recurrent layer takes a sequence, and
--- coremltools' runtime refused every multiArray shape for it (measured: the height must be one, then the width must
--- be one), and this host's Core ML refuses this one's compile: "Recurrent layer: 'rnn': width dimension of the input
--- blob must be 1" (measured by --unmeasured, 2026-10-16). The layer is carried and not measured, and
--- facts/CoreML/CoreML.md says so.
 local function build_nn_recurrent()
     return {
         specificationVersion = SPEC_12_2,
@@ -423,7 +334,6 @@ local function build_nn_recurrent()
     }
 end
 
--- The builders that are written and not measured: they are not in the corpus, and nothing reads them but --unmeasured.
 local UNMEASURED = {
     nn_layers_image = build_nn_layers_image,
     nn_recurrent = build_nn_recurrent,
@@ -446,10 +356,6 @@ local function write_lines(file, lines)
     io.writefile(file, table.concat(lines, "\n") .. "\n", {encoding = "binary"})
 end
 
--- The inputs each model is run on: the name, the shape, and the values in row-major order. The values are the
--- ones the reference predictions were recorded for. A model whose input is a picture has none, and the probe only
--- compiles and loads it. The tree's sample is the first of the four the earlier recording gave, which is the one
--- its prediction was taken for.
 local SAMPLES = {
     glm = {{"x", {2}, {-1.5, 0.0}}},
     glm_classifier = {{"x", {2}, {0.5, -0.5}}},
@@ -468,19 +374,14 @@ local SAMPLES = {
     tree_classifier = {{"a", {1}, {0.25}}, {"b", {1}, {1.0}}},
 }
 
--- The tolerance each model's prediction is compared with, and why, where a model needs more than the default. The third
--- item is the mode: "half_ulp" bounds each answer by half an ulp of float16 at its own magnitude, 2^-11 of it, which is
--- what a correctly rounded float16 answer can differ from the exact one by; nothing else needs a mode.
 local TOLERANCES = {
     nn_embedding = {2 ^ -11, "Core ML on this host answers the embedding in float16 (0.60009765625 for 0.6, which is the "
         .. "float16 nearest to 0.6, measured by predict-host); the port answers the exact sum, so each answer may differ "
         .. "from the host's by half a float16 ulp at its magnitude and no more", "half_ulp"},
 }
 
--- A model whose answers the port differs from the host's on, with what is known about the difference. None now.
 local DIVERGENCES = {}
 
--- A JSON object is a table with this key set, which no field name of a manifest can be; a list is a table without it.
 local OBJECT = "\0object"
 local NULL = {}
 
@@ -493,8 +394,6 @@ local function json_string(text)
     return '"' .. text:gsub("\\", "\\\\"):gsub('"', '\\"') .. '"'
 end
 
--- json.dump(value, indent=1, sort_keys=True): one space an indent, a key and its value on one line, and an empty
--- list or object as [] or {}.
 local function json_text(value, depth)
     depth = depth or 0
     if value == NULL or value == nil then
@@ -538,8 +437,6 @@ local function json_text(value, depth)
     return "[\n" .. table.concat(lines, ",\n") .. "\n" .. close .. "]"
 end
 
--- The answer's nested lists for an array of this shape: the flat values are row-major, so the last extent varies
--- fastest.
 local function nested(values, shape, axis, offset)
     if axis > #shape then
         return values[offset]
@@ -555,7 +452,6 @@ local function nested(values, shape, axis, offset)
     return list
 end
 
--- Reads the probe's answer: one feature a line, as predict-host.m prints it.
 local function read_answer(file)
     local prediction = object({})
     for line in io.lines(file) do
@@ -597,8 +493,6 @@ local function read_answer(file)
     return prediction
 end
 
--- The probe: predict-host.m, compiled once with the host's own Core ML. Its compiled model is written under the
--- scratch directory, through TMPDIR, so nothing lands in the system's temporary folder.
 local function build_probe(scratch)
     local probe = path.join(scratch, "predict-host")
     local source = path.join(os.scriptdir(), "predict-host.m")
@@ -611,10 +505,6 @@ local function build_probe(scratch)
     return probe
 end
 
--- Runs the probe on one container: compile and load it, and predict when it has inputs. Returns the prediction
--- (nil when the model has no host input).
--- With refusable set, a compile this host's Core ML refuses is returned as the reason, not raised: the unmeasured
--- containers are written to be refused where they are, and the refusal is what is recorded.
 local function probe_model(probe, name, container, scratch, refusable)
     local tmp = path.join(scratch, "tmp")
     os.mkdir(tmp)
@@ -667,7 +557,6 @@ function main(...)
             out = path.absolute(arguments[index + 1])
             index = index + 2
         elseif argument == "--unmeasured" and index < #arguments then
-            -- the written-not-measured containers (UNMEASURED), with their reference dumps: no manifest, no check
             out = path.absolute(arguments[index + 1])
             unmeasured = true
             index = index + 2
@@ -701,7 +590,6 @@ function main(...)
         local bytes = proto.encode(schema, "Model", built)
         local container = path.join(target, name .. ".mlmodel")
         io.writefile(container, bytes, {encoding = "binary"})
-        -- the reference is the tree as the file that was written reads back, not the tree as it was built
         local written = proto.decode(schema, "Model", bytes)
         write_lines(path.join(target, name .. ".ref"), proto.dump(schema, "Model", written))
         local prediction, refusal = probe_model(probe, name, container, runs, unmeasured)
@@ -742,8 +630,6 @@ function main(...)
     end
 end
 
--- The inputs a model is run on, as make-models.lua writes them into the probe's input file: {name, shape, values}
--- for each input, or nil for a model with no host input. check-predict.lua runs the port on the same inputs.
 function samples_of(name)
     return SAMPLES[name]
 end

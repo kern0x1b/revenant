@@ -1,19 +1,6 @@
-/*
- * The QUIC calls of iOS 16: how large a datagram frame may be, whether a stream is a datagram, and
- * how much of such a frame is left to send on a connection.
- *
- * The port has no QUIC transport (facts/Network/NWQUIC.md), so these answer from the options and
- * the metadata a program configured: a datagram frame size of 0 and a stream that is not a datagram
- * until a program says otherwise, and a usable size that is what the program set.
- */
-
 #import "CharonNW.h"
 #import "CharonNWSupport.h"
 
-/* Every call here asks whether the options are QUIC's before it writes, the way the metadata calls of
-   nw16-quic-options.m do: asked of the options of another protocol they change nothing and answer the
-   default, which is what the host's own Network does with them (tests/backports/host/network-objects).
-   A datagram frame size set on TCP options would otherwise read back true and mean nothing. */
 static BOOL charon_quic_options(nw_protocol_options_t options, CharonNWProtocolOptions **out)
 {
     if (!nw_protocol_options_is_quic(options))

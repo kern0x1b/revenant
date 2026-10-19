@@ -1,15 +1,3 @@
--- pdfwrite.lua - what the PDF fixture generators share: a file writer, a writer that measures every xref offset and
--- the trailer from the object bytes as they are written, and zlib (deflate at Python's zlib.compress settings, and the
--- one-shot inflate of zlib.decompress) without a temporary file.
---
--- Lua has no zlib, and the generators need it byte for byte, so zlib goes through /usr/bin/perl, whose Compress::Zlib
--- is the system zlib: deflateInit at level 6 with MemLevel 8, which is what zlib.compress() uses (Compress::Zlib's own
--- compress() picks MemLevel 9 and writes different bytes). The data crosses the process boundary as hex in argv, so no
--- file is written anywhere. The perl prints "K" and the hex of the result, or "E" when the stream is not a whole zlib
--- stream, and exits 0 either way, because os.iorunv raises on a failed run and a decompress that fails is a value here.
---
--- Imported by the generators: import("pdfwrite", {rootdir = path.join(os.scriptdir(), "tools")}).
-
 local PERL_DEFLATE = [[
 use Compress::Zlib;
 my $data = pack("H*", $ARGV[0]);
@@ -38,7 +26,6 @@ local function from_hex(hex)
     return (hex:gsub("%x%x", function(pair) return string.char(tonumber(pair, 16)) end))
 end
 
--- zlib.compress(raw), as bytes.
 function zlib_compress(raw)
     local answer = os.iorunv("/usr/bin/perl", {"-MCompress::Zlib", "-e", PERL_DEFLATE, to_hex(raw)})
     if answer:sub(1, 1) ~= "K" then
@@ -47,7 +34,6 @@ function zlib_compress(raw)
     return from_hex(answer:sub(2))
 end
 
--- zlib.decompress(data), as bytes, or nil when Python's would have raised (a truncated or invalid stream).
 function zlib_decompress(data)
     local answer = os.iorunv("/usr/bin/perl", {"-MCompress::Zlib", "-e", PERL_INFLATE, to_hex(data)})
     if answer:sub(1, 1) == "K" then
@@ -56,21 +42,16 @@ function zlib_decompress(data)
     return nil
 end
 
--- os.makedirs(directory, exist_ok=True)
 function make_dirs(directory)
     os.iorunv("/bin/mkdir", {"-p", directory})
 end
 
--- open(path, "wb").write(data)
 function write_file(path, data)
     local handle = assert(io.open(path, "wb"))
     handle:write(data)
     handle:close()
 end
 
--- The file the generators write: %PDF-1.4, each object as "N 0 obj" .. body .. "endobj", the xref with every
--- offset measured, the trailer and startxref. objects is a list of bodies, object 1 first. Returns the object count,
--- the file's size in bytes, and the list of object offsets.
 function write_pdf(path, objects)
     local parts = { "%PDF-1.4\n" }
     local length = #parts[1]

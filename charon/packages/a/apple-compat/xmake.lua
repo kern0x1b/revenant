@@ -42,8 +42,6 @@ package("apple-compat")
         local objects = {}
         for _, symbol in ipairs(package:data("provided")) do
             local object = path.absolute(symbol .. ".o")
-            -- -fno-builtin: at -Os LLVM merges a sin and a cos of one argument into a call to __sincos_stret, which for a
-            -- shim of __sincos_stret is a call to itself. The shim's sin and cos are the library's, called as two calls.
             os.vrunv(toolchain:tool("cc"), {"-target", triple, "-miphoneos-version-min=" .. toolchain:config("deployment"), "-isysroot", toolchain:config("sdkdir"), "-Os",
                                "-fno-builtin", "-fvisibility=hidden", "-c", path.join(package:scriptdir(), "src", symbol .. ".c"), "-o", object})
             table.insert(objects, object)
@@ -55,10 +53,6 @@ package("apple-compat")
         if #objects > 0 then
             os.vrunv("xcrun", table.join({"libtool", "-static", "-o", path.join(package:installdir("lib"), "libapple-compat.a")}, objects))
         end
-        -- The same declarations as one module, so that Swift reaches a shim: a forced include reaches the C file being
-        -- compiled and not the Swift one, and a declaration has to be in a module to be seen at all. The modulemap names
-        -- the headers it has, which are the ones this release needed -- the module is written from what was installed,
-        -- so a shim a newer release does not need is not in it, and no caller can reach one it does not have.
         local module = path.join(package:installdir("include"), "CharonCompat")
         os.mkdir(module)
         local lines = {"// Written by charon@apple-compat: the shims this release needs, as one module a Swift file can import."}

@@ -6,8 +6,6 @@ void charon_windowed_run(UIWindow *window);
 
 void charon_windowed_run(UIWindow *window)
 {
-    // The host rounds a self-sized cell to the pixels of the display the window is on, and device/flowauto.m holds
-    // a phone at scale 2 to these answers within 0.01: answers taken on a display at scale 1 are not written.
     if (window.screen.scale != 2) {
         printf("FAIL: the window is on a display at scale %g, not 2; nothing recorded\n", window.screen.scale);
         charon_failures++;

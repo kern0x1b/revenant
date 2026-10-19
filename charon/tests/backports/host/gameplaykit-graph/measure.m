@@ -1,16 +1,3 @@
-// measure.m -- what the host's own GameplayKit answers for the pathfinding graphs.
-//
-// The host is the oracle and it is measured, not called: the port's classes and the host's have the same
-// names, so loading both into one process would answer one of the two for the other. Every number in
-// differential.m is one of the lines printed here, and each line says the call it came from. Run by
-// run.sh, which also prints this file's output beside the checks.
-//
-// One of the calls on the host TRAPS rather than answering -- -[GKGraphNode findPathFromNode:] raises
-// SIGBUS inside GameplayKit on every input tried, including a node asked for a path to itself and a node
-// in no graph at all (m4 below). That is the host's own behaviour, recorded rather than worked around,
-// and it is why -findPathFromNode: is held here against what the header says it does rather than against
-// a host number: it is the one member of this family with no host answer to compare against.
-
 #import <Foundation/Foundation.h>
 #import <GameplayKit/GameplayKit.h>
 #import <objc/runtime.h>

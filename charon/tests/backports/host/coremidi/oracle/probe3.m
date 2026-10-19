@@ -1,4 +1,3 @@
-// MIDIEventListAdd's packet rules on macOS: merging by timestamp, the 64-word limit, byte limits.
 #import <CoreMIDI/CoreMIDI.h>
 #include <stdio.h>
 #include <string.h>
@@ -69,7 +68,6 @@ int main(void) {
         printf("G 0 words -> %s numPackets=%u\n", q ? "accepted" : "NULL", l->numPackets);
     }
     {
-        // Byte budget: how many 1-word packets fit in a 40 byte buffer, timestamps distinct.
         Byte small[40];
         MIDIEventList *l = (MIDIEventList *)small;
         MIDIEventPacket *p = MIDIEventListInit(l, kMIDIProtocol_1_0);

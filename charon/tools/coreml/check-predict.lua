@@ -1,14 +1,3 @@
--- check-predict.lua: the CoreML interpreter, measured against the host's own Core ML.
---
---   xmake l tools/coreml/check-predict.lua <run directory> <tolerance>
---
--- check-predict.sh builds the interpreter (ml-predict) and runs it on the flat inputs. This runs it on the inputs that
--- are not one flat vector, through the same harness, and then compares every answer with the manifest that
--- make-models.lua wrote from the host's own Core ML (predict-host).
---
--- The inputs of those models are read from make-models.lua's own samples, so the check and the recording cannot
--- disagree about what was fed.
-
 import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 local make_models = import("make-models", {rootdir = os.scriptdir()})
@@ -21,7 +10,6 @@ local function is_null(value)
     return value == nil or value == json.null
 end
 
--- The keys of a table, sorted by byte as Python's sorted() sorts them.
 local function keys_of(tbl)
     local keys = {}
     for key in pairs(tbl) do
@@ -31,7 +19,6 @@ local function keys_of(tbl)
     return keys
 end
 
--- A decoded JSON object has string keys. An array has none, and an empty one counts as an array.
 local function is_object(value)
     for key in pairs(value) do
         return type(key) == "string"
@@ -39,7 +26,6 @@ local function is_object(value)
     return false
 end
 
--- The numbers of a text, in order, as re.findall(r"-?\d+\.?\d*(?:e[-+]?\d+)?") finds them.
 local function numbers(text)
     local found, at = {}, 1
     while true do
@@ -53,7 +39,6 @@ local function numbers(text)
     end
 end
 
--- Every number of a JSON value, in order.
 local function flatten(value, out)
     out = out or {}
     if type(value) == "table" then
@@ -66,7 +51,6 @@ local function flatten(value, out)
     return out
 end
 
--- The answer line that begins "key = ", or nil.
 local function line_of(text, key)
     for line in text:gmatch("[^\n]+") do
         if line:sub(1, #key + 3) == key .. " = " then
@@ -76,7 +60,6 @@ local function line_of(text, key)
     return nil
 end
 
--- A dictionary answer's entries: each label and its score, as the line writes them.
 local function entries_of(line)
     local got = {}
     for label, score in line:gmatch("'([^']*)':%s*(%-?[%d%.eE%+%-]+)") do
@@ -85,13 +68,11 @@ local function entries_of(line)
     return got
 end
 
--- The numbers an answer line gives after its "=", with any dictionary labels left out.
 local function values_of(line, key)
     local after = line:sub(#key + 4)
     return numbers((after:gsub("'[^']*':", " ")))
 end
 
--- What a manifest answer is: a string, a dictionary of labels to scores, or a list of numbers.
 local function wanted_of(value)
     if type(value) == "string" then
         return {kind = "string", value = value}
@@ -106,7 +87,6 @@ local function wanted_of(value)
     return {kind = "list", value = flatten(value)}
 end
 
--- The last line of a text, which is where the interpreter says why it refused a model.
 local function last_line(text)
     local last = ""
     for line in text:gmatch("[^\n]+") do
@@ -115,8 +95,6 @@ local function last_line(text)
     return last
 end
 
--- The inputs that are not one flat vector: an embedding's index and a channels-first array. Each is run through the
--- harness the way a shape is given, and its answer is written beside the others, as <name>.actual.
 local function run_shaped(harness, models, out, manifest)
     for _, name in ipairs({"nn_embedding", "nn_image"}) do
         local entry = manifest[name]
@@ -140,9 +118,6 @@ local function run_shaped(harness, models, out, manifest)
     end
 end
 
--- How far an answer may be from the host's. The default is limit relative to the host's value, with an absolute floor of
--- limit at magnitude 1. "half_ulp" is half an ulp of float16 at the value's own magnitude: 2^-11 of it, and for zero half
--- the smallest float16 subnormal, 2^-25.
 local function bound(limit, mode, theirs)
     if mode == "half_ulp" then
         return limit * math.abs(theirs) + 2 ^ -25
@@ -150,7 +125,6 @@ local function bound(limit, mode, theirs)
     return limit * math.max(1.0, math.abs(theirs))
 end
 
--- Compares one manifest answer with the interpreter's, within limit. Prints each difference; returns whether they agree.
 local function check_answer(name, key, want, text, limit, mode)
     if not text:find(key, 1, true) then
         print(string.format("%-15s FAIL - no answer named '%s'", name, key))
@@ -169,7 +143,6 @@ local function check_answer(name, key, want, text, limit, mode)
         return false
     end
     if want.kind == "dict" then
-        -- a dictionary is a mapping: its keys are compared as a set, and each score under the same key
         local got = entries_of(line)
         local count = 0
         for _ in pairs(got) do
@@ -212,7 +185,6 @@ local function check_answer(name, key, want, text, limit, mode)
     return ok
 end
 
--- Whether an answer differs from the host's beyond the tolerance. A dictionary's missing label counts as zero.
 local function differs_from(text, key, want, tolerance, mode)
     if want.kind == "string" then
         return false
@@ -251,8 +223,6 @@ function main(out, tolerance_text)
     for _, name in ipairs(keys_of(manifest)) do
         local entry = manifest[name]
         local expected = entry.prediction
-        -- a model may state its own bound and the mode it is read in; the default is the global one, relative with an
-        -- absolute floor of one
         local model_tolerance, mode = tolerance, nil
         if entry.tolerance ~= nil and not is_null(entry.tolerance) then
             model_tolerance = entry.tolerance[1]
@@ -281,8 +251,6 @@ function main(out, tolerance_text)
                     end
 
                     if divergence then
-                        -- a model whose difference from the host is recorded: the check says what the difference is,
-                        -- and fails if the two agree, so a stale explanation is caught
                         local differs = false
                         for _, key in ipairs(keys) do
                             if differs_from(text, key, wanted[key], tolerance) then

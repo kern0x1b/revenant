@@ -1,19 +1,3 @@
-// The morphology family against the host's own, one process, 172 cases: tests/backports/host/morphology/expected.txt holds
-// the host's answers and this walks the same table beside it. The port's five classes are renamed with -D, so both the port's and
-// the host's own class are in the process and every case is two answers for one input.
-//
-//   xcrun clang -fobjc-arc -Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-nullability-completeness \
-//       -DNSMorphology=charonHostNSMorphology -DNSMorphologyCustomPronoun=charonHostNSMorphologyCustomPronoun \
-//       -DNSMorphologyPronoun=charonHostNSMorphologyPronoun -DNSInflectionRule=charonHostNSInflectionRule \
-//       -DNSInflectionRuleExplicit=charonHostNSInflectionRuleExplicit \
-//       -I ../../../../packages/a/apple-backports/Foundation \
-//       differential.m ../../../../packages/a/apple-backports/Foundation/CharonMorphology.m \
-//                      ../../../../packages/a/apple-backports/Foundation/NSMorphologyCustomPronoun.m \
-//                      ../../../../packages/a/apple-backports/Foundation/NSMorphologyPronoun.m \
-//                      ../../../../packages/a/apple-backports/Foundation/NSInflectionRule.m \
-//                      ../../../../packages/a/apple-backports/Foundation/NSInflectionRuleExplicit.m \
-//       -framework Foundation -o differential && ./differential expected.txt
-
 #import <Foundation/Foundation.h>
 #import <dlfcn.h>
 #import "CharonMorphology26.h"
@@ -29,9 +13,6 @@ static void expect(BOOL ok, NSString *what, NSString *detail)
     printf("FAIL %s: %s\n", what.UTF8String, detail.UTF8String);
 }
 
-/* A -description carries the object's address and a raise carries the class's name, and the port's
-   classes are renamed into charonHost* for this differential - so both are normalised before the
-   comparison and before the golden file. */
 static NSString *charon_normalised(NSString *text)
 {
     if (!text)
@@ -45,8 +26,6 @@ static NSString *charon_normalised(NSString *text)
     return out;
 }
 
-/* The one field a -description writes for a property, from the text "name = value" up to the next
-   comma or space. */
 static NSString *charon_field(NSString *description, NSString *property)
 {
     NSRange at = [description rangeOfString:[property stringByAppendingString:@" = "]];
@@ -60,8 +39,6 @@ static NSString *charon_field(NSString *description, NSString *property)
 
 static void expectEqual(NSString *ours, NSString *theirs, NSString *what)
 {
-    // [nil isEqualToString:nil] is NO, so two absent answers - an accepted set has no error - compared
-    // unequal and were read as a difference in the answer rather than in the comparison.
     if (ours == theirs || [ours isEqualToString:theirs]) {
         checks++;
         return;
@@ -80,10 +57,6 @@ static void expectEqualInt(long ours, long theirs, NSString *what)
     printf("FAIL %s: ours %ld host %ld\n", what.UTF8String, ours, theirs);
 }
 
-// The frame above the -encodeWithCoder: that raises names who archives the options object. The host's
-// NSAttributedStringMarkdownParsingOptions has no coding - +supportsSecureCoding is NO and
-// -encodeWithCoder: is an unrecognized selector - and the port must not invent any, so the fault is a
-// caller archiving the wrong object and it is here to be read, not guessed at.
 static void charon_report_uncaught(NSException *exception)
 {
     fprintf(stderr, "\nuncaught %s: %s\n", exception.name.UTF8String, exception.reason.UTF8String);
@@ -112,7 +85,6 @@ int main(int argc, char **argv)
             expected[fields[0]] = [rest componentsJoinedByString:@"\t"];
         }
 
-        // The eight settings, read and written, and the two answers that are not storage.
         static const char *settingNames[] = {"grammaticalGender", "partOfSpeech", "number", "grammaticalCase",
                                              "determination", "grammaticalPerson", "pronounType", "definiteness", NULL};
         for (int s = 0; settingNames[s]; s++) {
@@ -139,7 +111,6 @@ int main(int argc, char **argv)
                        == [NSMorphology userMorphology].isUnspecified,
                    @"userMorphology.unspecified", @"+userMorphology");
         }
-        // -isUnspecified, one property at a time: which of the eight it reads.
         for (int s = 0; settingNames[s]; s++) {
             const char *name = settingNames[s];
             for (NSInteger value = 0; value <= 2; value++) {
@@ -155,7 +126,6 @@ int main(int argc, char **argv)
                                (long)[expected[label] integerValue], [label stringByAppendingString:@".golden"]);
             }
         }
-        // the description, in the host's own field order, and for values outside each enumeration
         {
             const char *names[] = {"grammaticalGender", "number", "partOfSpeech", "grammaticalCase", "definiteness",
                                    "determination", "grammaticalPerson", "pronounType", NULL};
@@ -185,10 +155,6 @@ int main(int argc, char **argv)
             expectEqual((charon_normalised([odd description])),
                         (charon_normalised(expected[@"description.outOfRange"])), @"description.outOfRange.golden");
         }
-        // Every enumeration name, the case the host's own -description writes for each value of each
-        // of the eight, and the parenthesised form for the value one past the last. A table with a
-        // single wrong entry - "Neuter" as "Neutral" - answered 344/0 before these were here, because
-        // nothing compared the names.
         {
             static const struct { const char *property; NSInteger count; } sets[] = {
                 {"grammaticalGender:grammaticalGender", 4}, {"partOfSpeech:partOfSpeech", 12},
@@ -213,7 +179,6 @@ int main(int argc, char **argv)
             }
         }
 
-        // the custom pronoun pair, over the same languages the golden file has
         {
             NSArray *languages = @[@"en", @"en_US", @"en_GB", @"fr", @"fr_FR", @"de", @"ru", @"ja", @"ar", @"es", @"pt",
                                    @"zh", @"it", @"nl", @"pl", @"tr", @"ko", @"he", @"th", @"hi", @"und", @"", @"xx_YY",
@@ -233,7 +198,6 @@ int main(int argc, char **argv)
                             expected[[NSString stringWithFormat:@"required.%@", language]],
                             [NSString stringWithFormat:@"required.%@.golden", language]);
             }
-            // and what the setter accepts and refuses
             charonHostNSMorphologyCustomPronoun *full = [[charonHostNSMorphologyCustomPronoun alloc] init];
             full.subjectForm = @"she"; full.objectForm = @"her"; full.possessiveForm = @"hers";
             full.possessiveAdjectiveForm = @"her"; full.reflexiveForm = @"herself";
@@ -281,7 +245,6 @@ int main(int argc, char **argv)
                 BOOL theirsNilOK = [theirsNil setCustomPronoun:nil forLanguage:language error:&theirNil];
                 expect(oursNilOK == theirsNilOK, [NSString stringWithFormat:@"setNil.%@", language], @"the same verdict");
             }
-            // the five forms, each written and read back
             charonHostNSMorphologyCustomPronoun *oursForms = [[charonHostNSMorphologyCustomPronoun alloc] init];
             NSMorphologyCustomPronoun *theirForms = [[NSMorphologyCustomPronoun alloc] init];
             expectEqual((charon_normalised([oursForms description])),
@@ -293,7 +256,6 @@ int main(int argc, char **argv)
             expectEqual((charon_normalised([oursForms description])),
                         (charon_normalised([theirForms description])), @"forms.four");
         }
-        // a pronoun
         {
             charonHostNSMorphologyPronoun *ours = [[charonHostNSMorphologyPronoun alloc] initWithPronoun:@"she"
                                                                                              morphology:[[charonHostNSMorphology alloc] init]
@@ -306,7 +268,6 @@ int main(int argc, char **argv)
             expect((ours.dependentMorphology == nil) == (theirs.dependentMorphology == nil), @"pronoun.dependent",
                    @"both nil");
         }
-        // the inflection rules, over the same languages
         {
             NSArray *languages = @[@"en", @"en_US", @"en_GB", @"fr", @"fr_FR", @"de", @"ru", @"ja", @"ar", @"es", @"pt",
                                    @"zh", @"it", @"nl", @"pl", @"tr", @"ko", @"he", @"th", @"hi", @"und", @"", @"xx_YY",
@@ -323,7 +284,6 @@ int main(int argc, char **argv)
             expectEqualInt((long)[charonHostNSInflectionRule canInflectPreferredLocalization],
                            (long)[NSInflectionRule canInflectPreferredLocalization], @"canInflectPreferredLocalization");
         }
-        // an explicit rule, and the host's refusal to copy it
         {
             charonHostNSMorphology *morphology = [[charonHostNSMorphology alloc] init];
             morphology.number = 2;
@@ -342,7 +302,6 @@ int main(int argc, char **argv)
             expectEqual(charon_normalised(oursCopy), charon_normalised(theirCopy), @"explicit.copy");
             expectEqual(charon_normalised(oursCopy), expected[@"explicit.copy"], @"explicit.copy.golden");
         }
-        // the archives
         {
             charonHostNSMorphology *ours = [[charonHostNSMorphology alloc] init];
             ours.number = 2;
@@ -366,12 +325,6 @@ int main(int argc, char **argv)
                 [ourPronounUnarchiver decodeObjectForKey:NSKeyedArchiveRootObjectKey];
             expectEqual(ourPronounBack.subjectForm, @"she", @"archive.pronoun.subjectForm");
         }
-        // the seven attribute constants, and the five class names
-        // The attribute constants, read from the PORT's own definition: the port object is in this
-        // link, so an extern reference binds to the port's copy and not to the system's, which is what
-        // `dlsym(RTLD_DEFAULT, …)` could not tell - it found the system's symbol whether or not the
-        // port defines one, and a golden line for a name the port does not define is the host
-        // answering. dladdr on the pointer says which image the value came from.
         {
             extern NSAttributedStringKey const NSMorphologyAttributeName;
             extern NSAttributedStringKey const NSInflectionRuleAttributeName;
@@ -404,12 +357,6 @@ int main(int argc, char **argv)
             expect(NSClassFromString(name) != Nil, key, @"the class is there");
             expectEqual(expected[key], @"1", [key stringByAppendingString:@".golden"]);
         }
-        // The members that were held absent because no case reached them. Each is the port's renamed
-        // class beside the host's, one value compared, one golden line.
-        //
-        // +userMorphology is a class property, so it is read on the class; NSMorphologyPronoun's -init is
-        // NS_UNAVAILABLE in the port's own header, so its three properties are read on an object built
-        // through the designated initialiser, which is the construct-and-read case for that member too.
         {
             NSMorphology *ours = [[charonHostNSMorphology class] userMorphology];
             NSMorphology *theirs = [NSMorphology userMorphology];

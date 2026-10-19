@@ -1,7 +1,3 @@
-// A collection view shows an element whose frame reaches past both ends of the rectangle it checks.
-// iOS 6's UICollectionViewData files the attributes a layout answers under the pages of its frame's
-// corners inside that rectangle and so loses such an element; the compositional layout gives it a
-// second attributes first, its frame cut to the rectangle (facts/UIKit/UICollectionViewCompositionalLayout.md).
 #import <UIKit/UIKit.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import "check.h"
@@ -73,8 +69,6 @@ static UICollectionViewLayout *tall_layout(void)
     return [[UICollectionViewCompositionalLayout alloc] initWithSection:[NSCollectionLayoutSection sectionWithGroup:group]];
 }
 
-// The release's own answer for a plain layout, the cause the compositional layout works around. Only
-// reported: on a release that files no such way the element is shown and this says so.
 static void release_files_by_pages(void)
 {
     CharonPagesSource *source = [[CharonPagesSource alloc] init];
@@ -96,7 +90,6 @@ static void spanning_items(void)
     CHECK_EQUAL(NSStringFromCGRect(cell_at(view, 0).frame), NSStringFromCGRect(CGRectMake(0, 0, 320, 700)), "at the top the first item is 320 x 700");
     CHECK(cell_at(view, 1) == nil, "at the top the second item, below the bounds, has no view");
 
-    // The item reaches past both ends of the bounds: 0 to 700 against 100 to 580.
     view.contentOffset = CGPointMake(0, 100);
     settle(view);
     CHECK(cell_at(view, 0) != nil, "an item reaching past both ends of the bounds has its view");

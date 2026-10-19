@@ -3,12 +3,6 @@
 #import <AppTrackingTransparency/AppTrackingTransparency.h>
 #import "check.h"
 
-// The port's ATTrackingManager against the host's own, asked the same questions. The host is macOS,
-// which does not run the tracking authorization system: the header itself says a status asked in
-// macOS is always notDetermined, and a request is answered at once. That is the answer a release
-// without the system gives, so the two must agree on the status, on the thread the handler runs on
-// and on the fact that it runs before the call returns.
-
 @interface CharonHostATTrackingManager : NSObject
 + (ATTrackingManagerAuthorizationStatus)trackingAuthorizationStatus;
 + (void)requestTrackingAuthorizationWithCompletionHandler:(void (^)(ATTrackingManagerAuthorizationStatus status))completion;

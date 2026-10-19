@@ -286,11 +286,6 @@ function fetch(settings, remote, localfile)
     end }
 end
 
--- The shell that removes packages and then the packages of the shared runtime nothing is left to depend on: the runtime, the
--- UI overlays and the C++ runtime are named after a build and kept by dpkg for as long as a program needs them, so the last
--- program to go takes them with it. Each pass removes the ones no installed package names in its Depends, and a pass that
--- removes one can free another (the UI package holds the runtime), so it repeats until a pass removes nothing.
--- apple-backports is not among them: ports built without the shared runtime use it too.
 function uninstall_command(packages, opt)
     for _, name in ipairs(packages) do
         if not name:match("^[%w%.%+%-]+$") then

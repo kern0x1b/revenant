@@ -1,4 +1,3 @@
-// Glyph scripts: see UIImageSymbolGlyphs.m for the language. Every drawing is original geometry.
 static const struct { const char *name; const char *script; } CharonGlyphs[] = {
     {"arrow.2.squarepath", "m 8 44 l 8 34 c 8 20 16 12 30 12 l 84 12 h 84 12 0 20 m 92 56 l 92 66 c 92 80 84 88 70 88 l 16 88 h 16 88 180 20 S"},
     {"arrow.down", "m 50 2 l 50 98 m 6 54 l 50 98 l 94 54 S"},

@@ -1,14 +1,3 @@
-// The iOS 7 to 15 AudioToolbox functions this round carries (packages/a/apple-backports/AVFAudio/AudioToolboxFunctions{7,9,11,15}.m),
-// each checked against the host's own function of the same name, called through dlsym, for the same input.
-//
-// The port's functions are compiled into this file under a CharonTest name (functions.sh passes -D<Name>=CharonTest<Name>),
-// so the host's symbol and the port's definition can sit in one process. The host's answers are the oracle; a port answer
-// that differs from the host's on any case fails the check.
-//
-// Not checked here, and why: AudioOutputUnitGetHostIcon, AudioComponentGetIcon and AudioComponentCopyIcon have port definitions
-// that are iOS-only (their return type is UIImage, which macOS does not have), so the port's icons are not compiled on the host;
-// the host's own answers are printed for the record. The two configuration and work-interval functions of the round are owed
-// (facts/AVFAudio/AudioToolboxFunctions.md), so they have no port definition to check.
 #import <Foundation/Foundation.h>
 #import <AudioToolbox/AudioToolbox.h>
 #import <AudioToolbox/AUComponent.h>
@@ -60,9 +49,6 @@ typedef OSStatus (*PublishFn)(const AudioComponentDescription *, CFStringRef, UI
 typedef OSStatus (*BankNameFn)(CFURLRef, CFStringRef *);
 typedef OSStatus (*BankInfoFn)(CFURLRef, CFArrayRef *);
 
-// The port's definitions, compiled from packages/a/apple-backports/AVFAudio/AudioToolboxFunctions{7,9,11,15}.m under these
-// names (functions.sh). The SDK's own declarations of these names are not used here: the macOS header marks some of them
-// unavailable, and the port's definitions are the ones under test.
 CFAbsoluteTime CharonTestAudioComponentGetLastActiveTime(AudioComponent comp);
 CFArrayRef CharonTestAudioUnitExtensionCopyComponentList(CFStringRef extensionIdentifier);
 OSStatus CharonTestAudioUnitExtensionSetComponentList(CFStringRef extensionIdentifier, CFArrayRef audioComponentInfo);
@@ -117,7 +103,6 @@ static AudioComponent genericOutput(void)
     return AudioComponentFindNext(NULL, &description);
 }
 
-// The last-active time: the host's answer for a component before and after it is instantiated and initialized.
 static void checkLastActive(void)
 {
     LastActiveFn hostLastActive = hostSymbol("AudioComponentGetLastActiveTime");
@@ -133,8 +118,6 @@ static void checkLastActive(void)
     AudioComponentInstanceDispose(instance);
 }
 
-// The host application icon: the host's answer is nil for a unit it has in this process (printed; the port's
-// definition is iOS-only, see the comment above).
 static void printHostIcon(void)
 {
     HostIconFn hostIcon = hostSymbol("AudioOutputUnitGetHostIcon");
@@ -145,8 +128,6 @@ static void printHostIcon(void)
     AudioComponentInstanceDispose(instance);
 }
 
-// The extension lists: the host's status and the port's are the same for an unknown identifier, a NULL identifier, an empty
-// list and a list with one component description.
 static void checkExtensionLists(void)
 {
     CopyListFn hostCopy = hostSymbol("AudioUnitExtensionCopyComponentList");
@@ -168,8 +149,6 @@ static void checkExtensionLists(void)
           "AudioUnitExtensionCopyComponentList: a NULL identifier answers what the host answers");
 }
 
-// AudioComponentInstantiate: the handler is called before the call returns, on the calling thread, with an instance and status
-// 0 for a component, and with no instance and -3000 for no component. The host's answers are the same.
 static void checkInstantiate(void)
 {
     InstantiateFn hostInstantiate = hostSymbol("AudioComponentInstantiate");
@@ -218,8 +197,6 @@ static void checkInstantiate(void)
           "AudioComponentInstantiate: no component answers what the host answers (no instance, the same status)");
 }
 
-// The sound functions: the completion runs once, off the main thread, after the play call, for a valid and an invalid sound
-// ID. The host's answer is the same, so the port's is checked against the same limits.
 static void checkSoundCompletions(void)
 {
     PlaySoundFn hostPlaySystem = hostSymbol("AudioServicesPlaySystemSoundWithCompletion");
@@ -256,15 +233,11 @@ static void checkSoundCompletions(void)
         }
     }
 
-    // A NULL block plays the sound and returns; nothing is called.
     CharonTestAudioServicesPlaySystemSoundWithCompletion(1104, NULL);
     CharonTestAudioServicesPlayAlertSoundWithCompletion(1104, NULL);
     check(1, "AudioServices*WithCompletion: a NULL block plays and returns");
 }
 
-// MusicDeviceMIDIEventList: the port's list walk and the host's list call render the sampler the same, bit for bit, for each
-// list; the status is the same too. Each render is from a fresh engine with one sampler (the sound bank is the host's
-// General MIDI bank).
 typedef struct {
     AVAudioEngine *engine;
     AVAudioUnitSampler *sampler;
@@ -291,7 +264,6 @@ static SamplerRig makeRig(void)
 
 static const AVAudioFrameCount kFrames = 4096;
 
-// The render after one list is sent to the sampler, and the status the send returned.
 static NSData *renderAfterList(MIDIListFn send, const uint32_t *words, int count, OSStatus *status)
 {
     SamplerRig rig = makeRig();
@@ -326,12 +298,9 @@ static double energy(NSData *data)
 static void checkMIDIList(void)
 {
     MIDIListFn hostList = hostSymbol("MusicDeviceMIDIEventList");
-    // Type 2: note on, middle C, velocity 100.
     uint32_t noteOn2[] = { (0x2u << 28) | (0x90u << 16) | (60u << 8) | 100u };
-    // Type 4: note on, middle C, velocity16 0x8000 (velocity 64) and 0xFFFF (velocity 127).
     uint32_t noteOn4Half[] = { (0x4u << 28) | (0x9u << 20) | (60u << 8), 0x80000000u };
     uint32_t noteOn4Full[] = { (0x4u << 28) | (0x9u << 20) | (60u << 8), 0xFFFF0000u };
-    // Type 4: control change 7, value32 0xFFFFFFFF (127), and pitch bend, value32 0xFFFFFFFF (16383), each after the note.
     uint32_t noteThenControl[] = { noteOn2[0], (0x4u << 28) | (0xBu << 20) | (7u << 8), 0xFFFFFFFFu };
     uint32_t noteThenBend[] = { noteOn2[0], (0x4u << 28) | (0xEu << 20), 0xFFFFFFFFu };
 
@@ -357,8 +326,6 @@ static void checkMIDIList(void)
     }
 }
 
-// The user data functions, on a WAV file with one 10-byte chunk ("0123456789") and no other. Each call is made on a fresh copy of
-// the same inputs, once through the host and once through the port, and the status, the size and the bytes written must match.
 typedef OSStatus (*Size64Fn)(AudioFileID, UInt32, UInt32, UInt64 *);
 typedef OSStatus (*AtOffsetFn)(AudioFileID, UInt32, UInt32, SInt64, UInt32 *, void *);
 
@@ -408,7 +375,6 @@ static void checkUserData(const char *folder)
         check(portSize == hostSize, label);
     }
 
-    // The offsets run from before the chunk to its end, with a request shorter than the chunk, longer than what is left, and empty.
     SInt64 offsets[] = { -1, 0, 2, 6, 8, 10, 12 };
     UInt32 sizes[] = { 0, 4, 32 };
     for (size_t o = 0; o < sizeof offsets / sizeof offsets[0]; o++) {
@@ -454,7 +420,6 @@ typedef OSStatus (*FillFn)(AudioConverterRef, AudioConverterComplexInputDataProc
                            AudioStreamPacketDescription *);
 typedef OSStatus (*QueueOutputFn)(AudioQueueRef *, const AudioStreamBasicDescription *, UInt32, dispatch_queue_t, AudioQueueOutputCallbackBlock);
 
-// AudioComponentValidate: the generic output is passed, with result 1 and an empty dictionary (the host's answer, and the port's).
 static void checkValidate(void)
 {
     ValidateFn hostValidate = hostSymbol("AudioComponentValidate");
@@ -494,7 +459,6 @@ static void checkValidate(void)
     }
 }
 
-// A converter input: one callback's worth of 32-bit float samples, given once.
 typedef struct {
     int given;
     float samples[64];
@@ -534,8 +498,6 @@ static OSStatus supplyConverterInputRealtime(AudioConverterRef converter, UInt32
     return supplyConverterInput(converter, ioNumberDataPackets, ioData, outDataPacketDescription, inUserData);
 }
 
-// The converters, on linear PCM (32-bit float to 16-bit integer), and the converter made for an ALAC encoder, which is not PCM.
-// Every call gets its own input, so the host's and the port's see the same bytes.
 static void checkConverters(void)
 {
     NewWithOptionsFn hostNew = hostSymbol("AudioConverterNewWithOptions");
@@ -563,7 +525,6 @@ static void checkConverters(void)
     alac.mChannelsPerFrame = 1;
     alac.mFramesPerPacket = 4096;
 
-    // The option-free converter: the port's and the host's convert the same eight frames to the same bytes.
     AudioConverterRef portConverter = NULL, hostConverter = NULL;
     OSStatus portNew = CharonTestAudioConverterNewWithOptions(&source, &destination, 0, &portConverter);
     OSStatus hostNewStatus = hostNew(&source, &destination, 0, &hostConverter);
@@ -584,9 +545,6 @@ static void checkConverters(void)
     check(portFill == hostFillStatus && portPackets == hostPackets && memcmp(portOut, hostOut, sizeof portOut) == 0,
           "the port's converter converts as the host's does, bit for bit");
 
-    // The unbuffered option: the status of making the converter is the host's. The host refuses FillComplexBuffer on the unbuffered
-    // converter; the port's converter is buffered and does not refuse (see the port's comment on AudioConverterNewWithOptions), so
-    // only the host's refusal is printed.
     AudioConverterRef unbufferedPort = NULL, unbufferedHost = NULL;
     OSStatus unbufferedPortStatus = CharonTestAudioConverterNewWithOptions(&source, &destination, kAudioConverterOption_Unbuffered, &unbufferedPort);
     OSStatus unbufferedHostStatus = hostNew(&source, &destination, kAudioConverterOption_Unbuffered, &unbufferedHost);
@@ -597,7 +555,6 @@ static void checkConverters(void)
     OSStatus unbufferedFill = hostFill(unbufferedHost, supplyConverterInput, &unbufferedInput, &unbufferedPackets, &hostList, NULL);
     printf("host: AudioConverterFillComplexBuffer on the unbuffered converter is %d (the port's converter is buffered)\n", (int)unbufferedFill);
 
-    // The prepare: the completion runs once with noErr, off the main thread, on both sides.
     for (int side = 0; side < 2; side++) {
         dispatch_semaphore_t done = dispatch_semaphore_create(0);
         __block OSStatus status = -1;
@@ -619,7 +576,6 @@ static void checkConverters(void)
         check(fired && status == noErr && !onMain, label);
     }
 
-    // The realtime-safe conversion of PCM to PCM is the host's, bit for bit.
     ConverterInput portRealtimeInput, hostRealtimeInput;
     resetInput(&portRealtimeInput, 8);
     resetInput(&hostRealtimeInput, 8);
@@ -635,7 +591,6 @@ static void checkConverters(void)
     check(portRealtime == hostRealtimeStatus && portRealtime == noErr && memcmp(portOut, hostOut, sizeof portOut) == 0,
           "AudioConverterFillComplexBufferRealtimeSafe, PCM to PCM: the status and the output are the host's, bit for bit");
 
-    // The realtime-safe conversion to ALAC, which is not PCM: the host refuses it with kAudioConverterErr_OperationNotSupported.
     AudioConverterRef portEncoder = NULL, hostEncoder = NULL;
     OSStatus portEncoderStatus = CharonTestAudioConverterNewWithOptions(&source, &alac, 0, &portEncoder);
     OSStatus hostEncoderStatus = hostNew(&source, &alac, 0, &hostEncoder);
@@ -654,8 +609,6 @@ static void checkConverters(void)
     check(portEncode == hostEncode && portEncode == kAudioConverterErr_OperationNotSupported,
           "AudioConverterFillComplexBufferRealtimeSafe, PCM to ALAC: refused with kAudioConverterErr_OperationNotSupported, as the host refuses");
 
-    // The packet-dependency conversion of PCM: both arrays given, the output is the host's and the dependency array is left as it was
-    // (the host fills it only for a format with dependent packets). NULL descriptions are refused with -50 by both.
     ConverterInput portDependencyInput, hostDependencyInput;
     resetInput(&portDependencyInput, 8);
     resetInput(&hostDependencyInput, 8);
@@ -694,8 +647,6 @@ static void checkConverters(void)
     AudioConverterDispose(hostEncoder);
 }
 
-// AudioFileWritePacketsWithDependencies: the status and the packets written are the host's, on a PCM WAV file, with the dependency
-// array NULL and given.
 static void checkFileDependencies(const char *folder)
 {
     WriteDependenciesFn hostWrite = hostSymbol("AudioFileWritePacketsWithDependencies");
@@ -732,8 +683,6 @@ static void checkFileDependencies(const char *folder)
     }
 }
 
-// The dispatch variants: a NULL dispatch queue is refused with -50 by both, and an output queue calls its block on the queue it was
-// given, off the main thread, when a buffer has played (the host's answer). The input variant is not run here (it needs a microphone).
 static void checkQueueDispatch(void)
 {
     QueueOutputFn hostOutput = hostSymbol("AudioQueueNewOutputWithDispatchQueue");
@@ -787,7 +736,6 @@ static void checkQueueDispatch(void)
     }
 }
 
-// CFRelease for a result that a failed call leaves NULL.
 static void releaseCF(CFTypeRef ref)
 {
     if (ref != NULL) {
@@ -795,8 +743,6 @@ static void releaseCF(CFTypeRef ref)
     }
 }
 
-// The icons: the host's answers, printed for the record (the port's icons are iOS-only, see the comment above).
-// The host answers an image of 32 by 32 points for the generic output at every size asked, and nil for NULL.
 static void printIcons(void)
 {
     IconFn hostGetIcon = hostSymbol("AudioComponentGetIcon");
@@ -815,9 +761,6 @@ static void printIcons(void)
     printf("host: AudioComponentCopyIcon(NULL) is %s\n", hostCopyIcon(NULL) == nil ? "nil" : "an image");
 }
 
-// AudioOutputUnitPublish: the port's answer is the host's for each input. The description is one no other unit uses, so the
-// host's registration in this process cannot change the generic output's answers. The host's answer for the new description
-// is printed: it is not findable in this process after the call.
 static void checkPublish(void)
 {
     PublishFn hostPublish = hostSymbol("AudioOutputUnitPublish");
@@ -845,9 +788,6 @@ static void checkPublish(void)
     AudioComponentInstanceDispose(instance);
 }
 
-// The sound banks, read from the host's own gs_instruments.dls and from copies of it in the folder this test writes. The
-// host's name and instrument list are the oracle; the port's must equal them. A few inputs are printed and not counted, where
-// the host's answer is not one the port can give (a truncated bank) or where the host traps or hangs, so the host is not called.
 static void checkSoundBanks(const char *folder)
 {
     static const char *gmBank = "/System/Library/Components/CoreAudio.component/Contents/Resources/gs_instruments.dls";
@@ -861,7 +801,6 @@ static void checkSoundBanks(const char *folder)
         exit(1);
     }
 
-    // The DLS bank: name and instrument list.
     CFURLRef bank = (__bridge CFURLRef)[NSURL fileURLWithPath:[NSString stringWithUTF8String:gmBank]];
     CFStringRef hostNameValue = NULL;
     CFStringRef portNameValue = NULL;
@@ -891,8 +830,6 @@ static void checkSoundBanks(const char *folder)
     releaseCF(hostList);
     releaseCF(portList);
 
-    // The same DLS bytes under a .sf2 name: the host reads the bank by its content, and so does the port (instrument list only;
-    // the host traps on the name call for this file, so it is not made).
     NSString *sf2Path = [dir stringByAppendingPathComponent:@"copy.sf2"];
     [bankBytes writeToFile:sf2Path atomically:NO];
     CFURLRef sf2 = (__bridge CFURLRef)[NSURL fileURLWithPath:sf2Path];
@@ -906,7 +843,6 @@ static void checkSoundBanks(const char *folder)
     releaseCF(hostSf2List);
     releaseCF(portSf2List);
 
-    // A missing file: the name is kAudioUnitErr_InvalidFile with the last path component, and the list is fnfErr.
     CFURLRef missing = (__bridge CFURLRef)[NSURL fileURLWithPath:[dir stringByAppendingPathComponent:@"absent.dls"]];
     CFStringRef hostMissingName = NULL;
     CFStringRef portMissingName = NULL;
@@ -926,7 +862,6 @@ static void checkSoundBanks(const char *folder)
     check(hostMissingListStatus == -43 && portMissingListStatus == hostMissingListStatus,
           "CopyInstrumentInfoFromSoundBank: a missing file's status is the host's (fnfErr)");
 
-    // A directory, and a text file: kAudioUnitErr_InvalidFile for the list. The host's name call is not made for the text file.
     NSString *directory = [dir stringByAppendingPathComponent:@"bankdir.dls"];
     [files createDirectoryAtPath:directory withIntermediateDirectories:YES attributes:nil error:NULL];
     CFURLRef dirURL = (__bridge CFURLRef)[NSURL fileURLWithPath:directory];
@@ -952,8 +887,6 @@ static void checkSoundBanks(const char *folder)
     OSStatus portTextStatus = CharonTestCopyInstrumentInfoFromSoundBank(text, &portTextList);
     check(portTextStatus == -10871, "CopyInstrumentInfoFromSoundBank: a text file is kAudioUnitErr_InvalidFile, as the host answers");
 
-    // A truncated bank (the first 100 bytes): the host reads the instruments that are whole in part of the bank; the port reads
-    // only the whole ones, so the counts are printed, not compared.
     NSString *truncatedPath = [dir stringByAppendingPathComponent:@"truncated.dls"];
     [[bankBytes subdataWithRange:NSMakeRange(0, 100)] writeToFile:truncatedPath atomically:NO];
     CFURLRef truncated = (__bridge CFURLRef)[NSURL fileURLWithPath:truncatedPath];

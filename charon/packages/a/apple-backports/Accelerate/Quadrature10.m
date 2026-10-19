@@ -1,64 +1,12 @@
-// quadrature_integrate, iOS 10.0: the one entry point of vecLib/Quadrature/Integration.h.
-//
-// The header (Integration.h:120-122) names the three integrators: QNG is a non-adaptive Gauss-Kronrod rule, QAG
-// an adaptive one, and both are C ports of QUADPACK routines; QAGS covers what QUADPACK's QAGS and QAGI routines
-// do. So the port's answer has to be QUADPACK's algorithms and QUADPACK's node tables, and
-// this is a C translation of them, not an adaptive integrator of our own: the numbers only agree if the
-// rules, the subdivision order and the epsilon extrapolation are the same.
-//
-// **What was read, and where from.** The QUADPACK originals from netlib, fetched for this file and not
-// from a package cache: quadpack/dqng.f, dqagse.f, dqagie.f, dqk15.f, dqk15i.f, dqk21.f, dqk31.f, dqk41.f,
-// dqk51.f, dqk61.f, dqelg.f, dqpsrt.f, dqresc.f (2 546 lines). QUADPACK is public domain. The two drivers
-// and the six rules are translated statement for statement; the table below is generated from the DATA
-// statements of those files rather than typed, so a digit cannot be mistyped on the way.
-//
-// **Measured against the host, which is a full oracle here.** `vecLib/Quadrature/Quadrature.h` includes
-// `Integration.h`, so the umbrella carries the declaration and the 16.4 SDK this package builds against has
-// the whole of it. Every mapping below was measured on the host's own function and is written down where it
-// is used; the two that are not QUADPACK's own are the options' spelling and the status codes:
-//
-//   - `qag_points_per_interval` takes 0, 15, 21, 31, 41, 51 and 61, and 0 is the 21-point rule - measured by
-//     the number of points the caller's callback sees, 63 for 21, 105 for 15 and 61 for 61 on the same
-//     integral. Anything else (10, 20, 100 measured) answers 0 with QUADRATURE_INVALID_ARG_ERROR.
-//   - `max_intervals` is the subdivision limit, and a workspace overrides it: the limit is
-//     `workspace_size / QUADRATURE_INTEGRATE_QAG_WORKSPACE_PER_INTERVAL` for QAG and the same over 152 bytes
-//     for QAGS, and a workspace too small for one interval answers QUADRATURE_INVALID_ARG_ERROR (measured at
-//     31 bytes for QAG and 100 for QAGS, against 32 and 152 for one interval). Without a workspace a
-//     `max_intervals` of zero is the same refusal, and QNG ignores the field entirely.
-//   - QUADPACK's `ier` is mapped to the header's codes: 0 to QUADRATURE_SUCCESS, 6 to
-//     QUADRATURE_INVALID_ARG_ERROR (a zero absolute tolerance with a relative one below 50 * DBL_EPSILON -
-//     measured: both tolerances zero answers 0 with status -2), 1 and 5 to
-//     QUADRATURE_INTEGRATE_MAX_EVAL_ERROR (-101) and 2, 3 and 4 to
-//     QUADRATURE_INTEGRATE_BAD_BEHAVIOUR_ERROR (-102). Measured at 1e-300 tolerances: QNG and QAGS answer
-//     -101 and QAG answers -102.
-//   - An `integrator` the enumeration does not name answers 0 with QUADRATURE_ERROR (-1) and leaves
-//     `abs_error` untouched (measured: 3 and -1, with the caller's -1 still there).
-//   - A bound of a wrong infinity is a refusal: QNG over an infinite bound answers
-//     QUADRATURE_INVALID_ARG_ERROR, and only QAGS takes one: the header (Integration.h:124-126) allows an
-//     infinite bound on one or both sides of the interval for QAGS alone.
-//
-// **The callback is called the way the host calls it**: one call per rule pass, with every abscissa of that
-// pass in one array. Measured on the host for the same integral: QAG makes one call of 21, 15 or 61 points
-// per pass, and QNG makes a call of 21 and then one of 22 - the 43-point rule reuses the 21 the first pass
-// already had and asks only for the 22 it does not, which is what dqng's `savfun` is for.
-//
-// This is alone in its file because the two names are 10.0 and nothing else in the package is: measured from
-// the release's armv7 caches, 10.0 is the first held release that exports quadrature_integrate, so an object
-// carrying it beside a 9.0 or a 15.0 symbol would hold two releases and the gate refuses that.
-
 #import <Accelerate/Accelerate.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
-// The three machine constants d1mach answers, named as dqng and dqk21 name them.
 #define CHARON_EPMACH 2.2204460492503131e-16
 #define CHARON_UFLOW 2.2250738585072014e-308
 #define CHARON_OFLOW 1.7976931348623157e+308
 
-    // The Gauss-Kronrod-Patterson abscissae and weights of dqng.f: x1 is common to the 10-, 21-, 43-
-    // and 87-point rules, x2 to the 21-, 43- and 87-point ones, x3 to the 43- and 87-point ones and x4 is
-    // the 87-point rule's own. L. W. Fullerton calculated them with 101-digit arithmetic in 1981.
 static const double x1[5] = {
     9.73906528517171743430935748619959e-01, 8.65063366688984536345685683045303e-01, 6.79409568299024435589217318920419e-01,
     4.33395394129247213399480642692652e-01, 1.48874338981631215705903059642878e-01,
@@ -127,10 +75,6 @@ static const double w87b[23] = {
     3.73342287519350390923023041978013e-02, 3.73610737626790256893372088597971e-02,
 };
 
-    // The 15-point Gauss-Kronrod rule of dqk15.f, in the order its DATA statements give: xgk
-    // holds the 8 abscissae from the outermost pair down to the centre, wgk the 8 weights that
-    // multiply them, and wg the 3 Gauss weights for the pairs and wg[3] the centre point's own. The weight at
-    // wgk[j] multiplies the pair at abscissa xgk[j]; the Gauss pairs are the odd j.
 static const double k15_wg[4] = {
     1.29484966168869702896060402963485e-01, 2.79705391489276644634287549706642e-01, 3.81830050505118923087621851664153e-01,
     4.17959183673469403252909160073614e-01,
@@ -146,10 +90,6 @@ static const double k15_xgk[8] = {
     2.07784955007898480827677190063696e-01, 0.00000000000000000000000000000000e+00,
 };
 
-    // The 21-point Gauss-Kronrod rule of dqk21.f, in the order its DATA statements give: xgk
-    // holds the 11 abscissae from the outermost pair down to the centre, wgk the 11 weights that
-    // multiply them, and wg the 5 Gauss weights for the pairs and none for the centre. The weight at
-    // wgk[j] multiplies the pair at abscissa xgk[j]; the Gauss pairs are the odd j.
 static const double k21_wg[5] = {
     6.66713443086881379917585377370415e-02, 1.49451349150580586888636958065035e-01, 2.19086362515982041587747630728700e-01,
     2.69266719309996349629443557205377e-01, 2.95524224714752870024625508449390e-01,
@@ -167,10 +107,6 @@ static const double k21_xgk[11] = {
     1.48874338981631215705903059642878e-01, 0.00000000000000000000000000000000e+00,
 };
 
-    // The 31-point Gauss-Kronrod rule of dqk31.f, in the order its DATA statements give: xgk
-    // holds the 16 abscissae from the outermost pair down to the centre, wgk the 16 weights that
-    // multiply them, and wg the 7 Gauss weights for the pairs and wg[7] the centre point's own. The weight at
-    // wgk[j] multiplies the pair at abscissa xgk[j]; the Gauss pairs are the odd j.
 static const double k31_wg[8] = {
     3.07532419961172691358353148416427e-02, 7.03660474881081243747615872052847e-02, 1.07159220467171939494832599848451e-01,
     1.39570677926154324000052042720199e-01, 1.66269205816993920210578039586835e-01, 1.86161000015562211329367414691660e-01,
@@ -193,10 +129,6 @@ static const double k31_xgk[16] = {
     0.00000000000000000000000000000000e+00,
 };
 
-    // The 41-point Gauss-Kronrod rule of dqk41.f, in the order its DATA statements give: xgk
-    // holds the 21 abscissae from the outermost pair down to the centre, wgk the 21 weights that
-    // multiply them, and wg the 10 Gauss weights for the pairs and none for the centre. The weight at
-    // wgk[j] multiplies the pair at abscissa xgk[j]; the Gauss pairs are the odd j.
 static const double k41_wg[10] = {
     1.76140071391521178811867542890468e-02, 4.06014298003869386621822457072994e-02, 6.26720483341090678353069165495981e-02,
     8.32767415767047547436874310733401e-02, 1.01930119817240441570938003224001e-01, 1.18194531961518412011002965300577e-01,
@@ -222,10 +154,6 @@ static const double k41_xgk[21] = {
     1.52605465240922666403378116228851e-01, 7.65265211334973383117130651953630e-02, 0.00000000000000000000000000000000e+00,
 };
 
-    // The 51-point Gauss-Kronrod rule of dqk51.f, in the order its DATA statements give: xgk
-    // holds the 26 abscissae from the outermost pair down to the centre, wgk the 26 weights that
-    // multiply them, and wg the 12 Gauss weights for the pairs and wg[12] the centre point's own. The weight at
-    // wgk[j] multiplies the pair at abscissa xgk[j]; the Gauss pairs are the odd j.
 static const double k51_wg[13] = {
     1.13937985010262882862308586595645e-02, 2.63549866150321367153086526968764e-02, 4.09391567013063159552466174773144e-02,
     5.49046959758351937885834104235983e-02, 6.80383338123569103572663152590394e-02, 8.01407003350010221920385333760350e-02,
@@ -256,10 +184,6 @@ static const double k51_xgk[26] = {
     6.15444830056850814004043570548674e-02, 0.00000000000000000000000000000000e+00,
 };
 
-    // The 61-point Gauss-Kronrod rule of dqk61.f, in the order its DATA statements give: xgk
-    // holds the 31 abscissae from the outermost pair down to the centre, wgk the 31 weights that
-    // multiply them, and wg the 15 Gauss weights for the pairs and none for the centre. The weight at
-    // wgk[j] multiplies the pair at abscissa xgk[j]; the Gauss pairs are the odd j.
 static const double k61_wg[15] = {
     7.96819249616660500723508420151120e-03, 1.84664683110909583207970285911870e-02, 2.87847078833233689654225173626401e-02,
     3.87991925696270500978357631538529e-02, 4.84026728305940526220219055630878e-02, 5.74931562176190652513341206031328e-02,
@@ -294,10 +218,6 @@ static const double k61_xgk[31] = {
     0.00000000000000000000000000000000e+00,
 };
 
-// ---------------------------------------------------------------- the caller's integrand
-
-// The header's callback is the array form, `fun(arg, n, x, y)`, and the drivers below ask for one rule's
-// worth of abscissae at a time - which is one call, as the host makes it.
 typedef void (*CharonIntegrand)(void *arg, size_t n, const double *x, double *y);
 
 static void charon_call(CharonIntegrand fun, void *arg, const double *x, double *y, int n)
@@ -305,26 +225,13 @@ static void charon_call(CharonIntegrand fun, void *arg, const double *x, double 
     fun(arg, (size_t)n, x, y);
 }
 
-// ---------------------------------------------------------------- one Gauss-Kronrod pass
-
-// dqk15, dqk21, dqk31, dqk41, dqk51 and dqk61 are the same routine with three different tables, so they are
-// one here. Each table runs from the outermost pair down to the centre, so the array holds (n + 1) / 2
-// abscissae and as many Kronrod weights.
-//
-// Which of those abscissae the Gauss rule takes is dqk21's own statement about its table: "xgk(2), xgk(4),
-// ... abscissae of the 10-point gauss rule, xgk(1), xgk(3), ... abscissae which are optimally added". Its
-// indices are 1-based, so the Gauss pairs are the odd 0-based ones and the added ones are the even. The Gauss
-// weights wg(1..) run from the largest Gauss abscissa inwards, and where the Gauss order is odd - 7, 15, 25 -
-// its centre point is the Kronrod rule's own, which is why dqk15 and dqk31 start resg from fc and dqk21,
-// dqk41 and dqk61 start it from zero. `gauss_pairs` is how many pairs it takes and `gauss_centre` says
-// whether wg[gauss_pairs] is the centre point's weight.
 typedef struct CharonRule {
     const double *wg;
     const double *wgk;
     const double *xgk;
-    int n;            // the Kronrod order
-    int gauss_pairs;  // the Gauss rule's pairs, at the odd abscissa indices
-    int gauss_centre; // 1 when the Gauss rule also has a weight for the centre point
+    int n;
+    int gauss_pairs;
+    int gauss_centre;
 } CharonRule;
 
 static const CharonRule charon_k15 = {k15_wg, k15_wgk, k15_xgk, 15, 3, 1};
@@ -341,9 +248,9 @@ static void charon_dqk(const CharonRule *rule, CharonIntegrand fun, void *arg, d
     double centr = 0.5 * (b + a);
     double dhlgth = fabs(hlgth);
     const int n = rule->n;
-    const int pairs = (n - 1) / 2;        // the symmetric pairs; the centre point is the last of the n
-    const int gp = rule->gauss_pairs;     // how many of them the Gauss rule takes, the odd table indices
-    const int added = pairs - gp;         // and how many only the Kronrod rule takes, the even ones
+    const int pairs = (n - 1) / 2;
+    const int gp = rule->gauss_pairs;
+    const int added = pairs - gp;
     double fv1[32], fv2[32];
     double resg = 0.0, resk, resabs_value, resasc, reskh, fsum, absc, fval1, fval2;
     double *x = (double *)malloc(sizeof(double) * (size_t)n);
@@ -361,13 +268,6 @@ static void charon_dqk(const CharonRule *rule, CharonIntegrand fun, void *arg, d
         }
         return;
     }
-    // The n abscissae in one array and one call, which is what the host makes (measured, one call per pass,
-    // over the whole integral and over each subinterval alike: 15, 21, 31, 41, 51 or 61 points each time).
-    // The order is the host's own, measured by asking which point of which table each one is: the Gauss
-    // pairs above the centre in table order, then the pairs only the Kronrod rule takes above it, then the
-    // same two groups below the centre, then the centre itself. So point k of the array is
-    // centr + hlgth * xgk[2k + 1] for k < gp, centr + hlgth * xgk[2(k - gp)] for gp <= k < pairs, and the
-    // same two groups mirrored from index pairs on.
     for (int k = 0; k < gp; k++) {
         absc = hlgth * rule->xgk[2 * k + 1];
         x[k] = centr + absc;
@@ -385,9 +285,6 @@ static void charon_dqk(const CharonRule *rule, CharonIntegrand fun, void *arg, d
     if (rule->gauss_centre) {
         resg = rule->wg[gp] * y[n - 1];
     }
-    // The pairs the Gauss rule takes, so resg is the 7-, 10-, 15-, 21-, 25- or 31-point answer. dqk21 calls
-    // the pair's own table index jtw = 2 * j and weighs it with wgk(jtw); its 1-based jtw is the odd 0-based
-    // index here.
     for (int k = 0; k < gp; k++) {
         fval1 = y[k];
         fval2 = y[pairs + k];
@@ -398,8 +295,6 @@ static void charon_dqk(const CharonRule *rule, CharonIntegrand fun, void *arg, d
         resk += rule->wgk[2 * k + 1] * fsum;
         resabs_value += rule->wgk[2 * k + 1] * (fabs(fval1) + fabs(fval2));
     }
-    // And the pairs only the Kronrod rule takes, which dqk21 reaches with jtwm1 = 2 * j - 1. fv1 and fv2 are
-    // filled here too, because resasc below reads every one of them.
     for (int k = 0; k < added; k++) {
         fval1 = y[gp + k];
         fval2 = y[pairs + gp + k];
@@ -434,17 +329,6 @@ static void charon_dqk(const CharonRule *rule, CharonIntegrand fun, void *arg, d
     free(y);
 }
 
-// ---------------------------------------------------------------- QNG, the non-adaptive rule
-
-// dqng: the 10-, 21-, 43- and 87-point rules over the whole interval, escalating until the error is inside
-// the tolerance. `savfun` is the array of sums already computed, which is what makes the 43- and 87-point
-// passes ask only for the points the 21-point one did not.
-//
-// The callback is asked for one pass's abscissae in one call, which is what the host does (measured: over
-// 1/(1+x^2) from 0 to 1 at 1e-8 the host's calls are 21 then 22, and at 1e-10 they are 21, 22 and 44 - the
-// 43-point rule reuses the 21 the first pass already had and asks for the 22 it does not, and the 87-point
-// rule the 44 it does not). QUADPACK itself evaluates the integrand one point at a time, so the batches here
-// are the port's own arrangement of the same points.
 static int charon_dqng(CharonIntegrand fun, void *arg, double a, double b, double epsabs, double epsrel,
                        double *result, double *abserr, int *neval)
 {
@@ -466,8 +350,6 @@ static int charon_dqng(CharonIntegrand fun, void *arg, double a, double b, doubl
     for (int pass = 1; pass <= 3; pass++) {
         if (pass == 1) {
             res10 = 0.0;
-            // The 21 points of the first pass: the centre, then the ten of x1 and the ten of x2, which is
-            // one call of 21 where QUADPACK walks them one at a time.
             x[0] = centr;
             for (int k = 0; k < 5; k++) {
                 absc = hlgth * x1[k];
@@ -494,8 +376,6 @@ static int charon_dqng(CharonIntegrand fun, void *arg, double a, double b, doubl
                 fv1[k] = fval1;
                 fv2[k] = fval2;
             }
-            // dqng.f's ipx is 1-based and is incremented before each store, so the five x2 pairs land in
-            // savfun(6..10) and the eleven x3 pairs in savfun(11..21) - 0-based 5..9 and 10..20 here.
             ipx = 5;
             for (int k = 0; k < 5; k++) {
                 fval1 = y[11 + 2 * k];
@@ -535,9 +415,6 @@ static int charon_dqng(CharonIntegrand fun, void *arg, double a, double b, doubl
             }
             *result = res43 * hlgth;
             *abserr = fabs((res43 - res21) * hlgth);
-            // resasc is the first pass's, and dqng.f leaves it there: its label 65 shrinks every pass's error
-            // estimate with it, which is where the quadratic reduction comes from. Zeroing it here made the
-            // 43- and 87-point passes report the raw difference and escalate past what the host stops at.
         } else {
             res87 = w87b[22] * fcentr;
             *neval = 87;
@@ -568,11 +445,6 @@ static int charon_dqng(CharonIntegrand fun, void *arg, double a, double b, doubl
     return ier;
 }
 
-// ---------------------------------------------------------------- the two pieces the adaptive driver calls
-
-// dqpsrt: keep the error estimates in descending order and say which subinterval to bisect next. The shape
-// is dqpsrt.f's, labels and all: the indices it names are 0-based, and iord holds interval numbers 1-based, so
-// iord[i] is the interval i + 1.
 static void charon_dqpsrt(int limit, int last, int *maxerr, double *errmax, const double *elist, int *iord, int *nrmax)
 {
     int ido, isucc, i, j, k, jupbn, jbnd, ibeg;
@@ -582,8 +454,6 @@ static void charon_dqpsrt(int limit, int last, int *maxerr, double *errmax, cons
         iord[1] = 2;
         goto done;
     }
-    // This part runs only when subdivision raised the error estimate. Normally the insertion below starts
-    // after the nrmax-th largest, and this takes errmax back to where it belongs.
     *errmax = elist[*maxerr - 1];
     if (*nrmax != 1) {
         ido = *nrmax - 1;
@@ -597,7 +467,6 @@ static void charon_dqpsrt(int limit, int last, int *maxerr, double *errmax, cons
         }
     }
 count_kept:
-    // How many estimates stay in descending order, which depends on the subdivisions still allowed.
     jupbn = last;
     if (last > (limit / 2 + 2)) {
         jupbn = limit + 3 - last;
@@ -608,7 +477,6 @@ count_kept:
     if (ibeg > jbnd) {
         goto insert_both_at_the_end;
     }
-    // Insert errmax top down, comparing from elist(iord(nrmax+1)).
     for (i = ibeg; i <= jbnd; i++) {
         isucc = iord[i - 1];
         if (*errmax >= elist[isucc - 1]) {
@@ -619,7 +487,6 @@ count_kept:
     goto insert_both_at_the_end;
 insert_errmax:
     iord[i - 2] = *maxerr;
-    // Make room for last, walking the list from the bottom up.
     k = jbnd;
     for (j = i; j <= jbnd; j++) {
         isucc = iord[k - 1];
@@ -635,13 +502,11 @@ insert_errmax:
 insert_both_at_the_end:
     iord[jbnd - 1] = *maxerr;
     iord[jupbn - 1] = last;
- done:  // dqpsrt.f's 90
+ done:
     *maxerr = iord[*nrmax - 1];
     *errmax = elist[*maxerr - 1];
 }
 
-// dqelg: Peter Wynn's epsilon algorithm over the table of results, which is the "acceleration by Peter
-// Wynn's epsilon algorithm" the header names for QAGS.
 static void charon_dqelg(int n, double *epstab, double *result, double *abserr, double *res3la, int *nres)
 {
     const int limexp = 50;
@@ -658,8 +523,6 @@ static void charon_dqelg(int n, double *epstab, double *result, double *abserr, 
     epstab[n - 1] = CHARON_OFLOW;
     num = n;
     k1 = n;
-    // `drop` is dqelg.f's label 20: the table is irregular at this step, so n is shortened and the shift
-    // below runs. `conv` is its `go to 100` from the convergence test, which leaves without shifting.
     drop = 0;
     for (i = 0; i < newelm; i++) {
         k2 = k1 - 1;
@@ -676,7 +539,6 @@ static void charon_dqelg(int n, double *epstab, double *result, double *abserr, 
         err3 = fabs(delta3);
         tol3 = fmax(e1abs, fabs(e0)) * CHARON_EPMACH;
         if (err2 <= tol2 && err3 <= tol3) {
-            // e0, e1 and e2 agree to within machine accuracy: the table has converged.
             *result = res;
             *abserr = err2 + err3;
             goto final;
@@ -687,13 +549,13 @@ static void charon_dqelg(int n, double *epstab, double *result, double *abserr, 
         err1 = fabs(delta1);
         tol1 = fmax(e1abs, fabs(e3)) * CHARON_EPMACH;
         if (err1 <= tol1 || err2 <= tol2 || err3 <= tol3) {
-            drop = 1;  // two elements too close: omit part of the table
+            drop = 1;
             break;
         }
         ss = 1.0 / delta1 + 1.0 / delta2 - 1.0 / delta3;
         epsinf = fabs(ss * e1);
         if (epsinf <= 1e-3) {
-            drop = 1;  // an irregular table
+            drop = 1;
             break;
         }
         res = e1 + 1.0 / ss;
@@ -706,12 +568,7 @@ static void charon_dqelg(int n, double *epstab, double *result, double *abserr, 
         *abserr = error;
         *result = res;
     }
-    // dqelg.f's label 50, the shift. It is reached from label 20 and from the end of the loop, and on the
-    // second of those `n` is the n the caller arrived with: label 20 is the only statement in the routine
-    // that assigns it, so a loop that ran all newelm iterations out carries the caller's n unchanged into
-    // the shift and into `if (num == n)`, which then takes the table as it stands.
     if (drop) {
-        // Label 20's `n = i + i - 1`, with i one-based.
         n = 2 * i + 1;
     }
     if (n == limexp) {
@@ -734,37 +591,25 @@ static void charon_dqelg(int n, double *epstab, double *result, double *abserr, 
         epstab[i] = epstab[indx - 1];
         indx += 1;
     }
- last:  // dqelg.f's 80
+ last:
     if (*nres < 4) {
         res3la[*nres - 1] = *result;
         *abserr = CHARON_OFLOW;
         goto final;
     }
-    // dqelg.f's 90: the error estimate from the last three results.
     *abserr = fabs(*result - res3la[2]) + fabs(*result - res3la[1]) + fabs(*result - res3la[0]);
     res3la[0] = res3la[1];
     res3la[1] = res3la[2];
     res3la[2] = *result;
- final:  // dqelg.f's 100
+ final:
     *abserr = fmax(*abserr, 5.0 * CHARON_EPMACH * fabs(*result));
 }
 
-// ---------------------------------------------------------------- the adaptive driver
-
-// dqk15i: the 15-point rule over an interval with a bound at infinity, mapped onto (0,1). QUADPACK reaches it
-// through dqagie only; QAGS with an infinite bound is this.
 static void charon_dqk15i(CharonIntegrand fun, void *arg, double boun, int inf, double a, double b, double *result,
                           double *abserr, double *resabs, double *defabs)
 {
     double hlgth = 0.5 * (b - a);
     double centr = 0.5 * (b + a);
-    // dqk15i.f's `dinf = min0(1, inf)`: inf is 1 for a bound at one end and 2 for a bound at each end, so the
-    // minimum is 1 for both and the mapping below is always the one it names. Reading it the other way round -
-    // 1 where the caller's bound is finite - made the one-bound case skip the mapping altogether, so
-    // tabsc1 and tabsc2 came out at boun and all fifteen abscissae were the same point. Measured before the
-    // fix, QAGS over 1/(1+x^2) from 0 to infinity answered -1.4415465026818126 with a status of -101 where the
-    // host answers 1.5707963267948966 with a status of 0, and over exp(-x) from 0 to infinity 1430740.6159842864
-    // against 1.0000000000000002.
     const double dinf = 1.0;
     double fv1[8], fv2[8];
     double resg = 0.0, resk, resabs_value, resasc, fc, reskh, fsum, absc, absc1, absc2, tabsc1, tabsc2;
@@ -781,10 +626,6 @@ static void charon_dqk15i(CharonIntegrand fun, void *arg, double boun, int inf, 
         fval1 += ys[0];
     }
     fc = (fval1 / centr) / centr;
-    // dqk15i.f has its own xgk and wgk - the 15-point rule's, which it spells out again - and its own wg,
-    // with the 7-point Gauss weights at the even indices so that `resg = wg(8)*fc` is the centre and
-    // `resg = resg + wg(j)*fsum` weighs the pair at abscissa xgk(j) directly. So the Gauss pairs are the odd
-    // j here, as in charon_dqk, and the centre weight is wg[3].
     resg = k15_wg[3] * fc;
     resk = k15_wgk[pairs] * fc;
     resabs_value = fabs(resk);
@@ -847,16 +688,11 @@ static void charon_dqk15i(CharonIntegrand fun, void *arg, double boun, int inf, 
     }
 }
 
-// dqagse and dqagie are one driver: the same subdivision, the same error bookkeeping and the same epsilon
-// extrapolation, over either the caller's interval with the chosen rule or (0,1) with dqk15i. `inf` is
-// 0 for the finite case and 1 or 2 for a bound at infinity, as dqagie names it.
 static int charon_dqags(CharonIntegrand fun, void *arg, double a, double b, double epsabs, double epsrel,
                         size_t limit, const CharonRule *rule, int inf, int extrapolate, double *result,
                         double *abserr, int *neval, double *work, int *iwork)
 {
 double alist[2 * 1000], blist[2 * 1000], rlist[2 * 1000], elist[2 * 1000];
-    // rlist2 is dqelg's own table: dqagse.f declares no epstab at all and hands rlist2 to dqelg as its
-    // epstab, so the sequence of results the extrapolation reads and the one the driver keeps are one array.
     double rlist2[53], res3la[3];
     int iord[2 * 1000];
     int last, k, ier = 0, ierro = 0, maxerr, nrmax, nres, ktmin, numrl2, iroff1, iroff2, iroff3, ksgn;
@@ -883,10 +719,6 @@ double alist[2 * 1000], blist[2 * 1000], rlist[2 * 1000], elist[2 * 1000];
     if (epsabs <= 0.0 && epsrel < fmax(50.0 * CHARON_EPMACH, 0.5e-28)) {
         return 6;
     }
-    // dqagie.f's `boun = bound; if(inf.eq.2) boun = 0.0d0`, named once and handed to every dqk15i of the run
-    // - the transformed abscissa is boun + (1 - t) / t against the caller's bound, not against the
-    // subinterval being split, so the same bound has to be used for every pass. Zero where the finite case
-    // has nothing to name.
     double boun = 0.0;
     if (inf == 0) {
         charon_dqk(rule, fun, arg, a, b, result, abserr, &resabs, &defabs);
@@ -900,34 +732,12 @@ double alist[2 * 1000], blist[2 * 1000], rlist[2 * 1000], elist[2 * 1000];
     rlist[0] = *result;
     elist[0] = *abserr;
     iord[0] = 1;
-    // dqagse.f raises ier = 2 here for both integrators - `if(abserr.le.1.0d+02*epmach*defabs.and
-    // .abserr.gt.errbnd) ier = 2` - and so does QUADPACK's dqags, which is dqagse and nothing else. The host
-    // raises it for QAG and does not for QAGS, on every integrand measured: over 0..1 at a 1e-300 tolerance,
-    // where the first pass's estimate is inside 100 * DBL_EPSILON * defabs and outside the tolerance, QAG
-    // answers QUADRATURE_INTEGRATE_BAD_BEHAVIOUR_ERROR after one pass of 21 points and QAGS subdivides to
-    // max_intervals and answers QUADRATURE_INTEGRATE_MAX_EVAL_ERROR - x^2, sin, 1/(1+x^2) and exp(-x) all
-    // 199 passes over 4179 points at max_intervals 100, and 1/(1+100 x^2) nineteen passes for the QAG half,
-    // where its estimate 1.6332757290306007e-15 is inside 3.2659e-15. The threshold itself is the Fortran's
-    // own: at 4e-15 both integrators stop after one pass with QUADRATURE_SUCCESS and at 1e-15 they part
-    // company. This follows the host, as the two tests below do, and dqagse.f's line is named here so a
-    // reviewer can read the original.
     if (!extrapolate && *abserr <= 100.0 * CHARON_EPMACH * defabs && *abserr > errbnd) {
         ier = 2;
     }
     if (limit == 1) {
         ier = 1;
     }
-    // dqagse.f stops here when ier is set, or when the first pass's error estimate is zero. It asks for more
-    // than that: `if (ier.ne.0.or.(abserr.le.errbnd.and.abserr.ne.resabs).or.abserr.eq.0.0d+00) go to 140`,
-    // so a first pass whose estimate is already inside the tolerance still subdivides once, because
-    // abserr.ne.resabs is nearly always true - resabs is the integral of |f|, and abserr is 1e-13 beside it.
-    // The host does not ask it, and does stop. Measured over 1/(1+x^2) from -1 to 1 at 1e-12: the 21-point
-    // rule's first pass estimates 7.1215e-08 and the host subdivides once, three calls of 21 points; the
-    // 31-point rule's estimates 1.30239e-13 and the host stops there, one call of 31; the 51-point rule's
-    // estimates 1.74393e-14 and the host stops there, one call of 51. At 1e-14, where the tolerance is
-    // below all three estimates, the host subdivides on the 21- and 31-point rules (fifteen calls) and stops
-    // on the 51-point one, which is the roundoff test above firing: 1.74393e-14 is inside
-    // 100 * DBL_EPSILON * 1.5707963267948966 = 3.4885e-14 and outside 1.5708e-14.
     if (ier != 0 || *abserr <= errbnd || *abserr == 0.0) {
         goto exit;
     }
@@ -958,7 +768,6 @@ double alist[2 * 1000], blist[2 * 1000], rlist[2 * 1000], elist[2 * 1000];
             charon_dqk(rule, fun, arg, a1, b1, &area1, &error1, &resabs, &defab1);
             charon_dqk(rule, fun, arg, a2, b2, &area2, &error2, &resabs, &defab2);
         } else {
-            // boun, not a1 and not a2: dqagie.f hands the same bound to both halves' dqk15i calls.
             charon_dqk15i(fun, arg, boun, inf, a1, b1, &area1, &error1, &resabs, &defab1);
             charon_dqk15i(fun, arg, boun, inf, a2, b2, &area2, &error2, &resabs, &defab2);
         }
@@ -981,25 +790,12 @@ double alist[2 * 1000], blist[2 * 1000], rlist[2 * 1000], elist[2 * 1000];
         rlist[maxerr - 1] = area1;
         rlist[last - 1] = area2;
         errbnd = fmax(epsabs, epsrel * fabs(area));
-        // dqagse.f's `if(iroff1+iroff2.ge.10.or.iroff3.ge.20) ier = 2`, with the same QAGS exclusion the first-pass
-        // test above carries and the same measurement: over 1/(1+100 x^2) from 0 to 1 at a 1e-300 tolerance
-        // the host's QAG stops at nrmax-th pass 10 with QUADRATURE_INTEGRATE_BAD_BEHAVIOUR_ERROR over 399
-        // points in 19 batches and answers the same at every limit from 10 to 100, while its QAGS answers
-        // QUADRATURE_INTEGRATE_MAX_EVAL_ERROR at every limit and runs to it - nine passes at limit 5,
-        // nineteen at 10, thirty-nine at 20, a hundred and ninety-nine at 100. So the host's QAGS raises
-        // neither of dqagse.f's two roundoff flags, and QUADPACK's dqags, which is dqagse and nothing else,
-        // raises both.
         if (!extrapolate && (iroff1 + iroff2 >= 10 || iroff3 >= 20)) {
             ier = 2;
         }
         if (iroff2 >= 5) {
             ierro = 3;
         }
-        // Reaching the limit answers QUADRATURE_INTEGRATE_MAX_EVAL_ERROR. dqagse.f raises the flag here,
-        // before the tolerance test further down, and the host does for QAGS: over 1/(1+x^2) from -1 to 1 at
-        // 1e-12 with max_intervals 2 QAGS makes the same three calls of 21 points, ends inside the tolerance
-        // with an error of 1.74393e-14, and still answers -101. For QAG the host answers 0 on the same call,
-        // so its flag is raised after the tolerance test - see the other site below.
         if (extrapolate && (size_t)last == limit) {
             ier = 1;
         }
@@ -1025,11 +821,6 @@ double alist[2 * 1000], blist[2 * 1000], rlist[2 * 1000], elist[2 * 1000];
         if (errsum <= errbnd) {
             goto sum_up;
         }
-        // QAG's own limit flag, after the tolerance test rather than before it. Measured over 1/(1+x^2) from
-        // -1 to 1 at 1e-12: at max_intervals 1 it makes one call of 21 and answers -101, at 2 and at 3 three
-        // calls of 63 and answers 0, ending at an error of 1.74393e-14 inside a tolerance of 1.5708e-12. Over
-        // 1/(1+100 x^2) on the same interval, where the error stays outside, it answers -101 at every limit
-        // from 1 to 4 with 1, 3, 5 and 7 calls and errors 0.347449, 0.000410498, 0.000205763 and 1.028e-06.
         if (!extrapolate && last == (int)limit) {
             ier = 1;
         }
@@ -1108,15 +899,7 @@ do_extrapolate:
     next_interval:;
     }
     goto final;
-    // dqagse.f's final block, label for label. Label 100 is its own test and its 115 is its own sum: the
-    // three `go to 115` in the routine - after the tolerance test in the loop, after `abserr.gt.errsum`
-    // here and after the comparison at 105 - all reach the SUM and not the test, and 100's own
-    // `if(abserr.eq.oflow) go to 115` is the only way into the sum from there. Merging the two is what left
-    // a run that never ends: 105 reaches the sum, the sum's first line sends it back to 100, 105 decides the
-    // same thing again, and QUADPACK's 100 - unlike 105 - falls through to 130, the exit, instead of
-    // returning to its own first line. Its 140 is the exit too, and the accuracy test in the loop jumps
-    // straight to 100.
-final:  // dqagse.f's 100
+final:
     if (*abserr == oflow) {
         goto sum_up;
     }
@@ -1139,11 +922,11 @@ final:  // dqagse.f's 100
         goto exit;
     }
     goto divergence;
-compare:  // dqagse.f's 105
+compare:
     if (*abserr / fabs(*result) > errsum / fabs(area)) {
         goto sum_up;
     }
-divergence:  // dqagse.f's 110
+divergence:
     if (ksgn == -1 && fmax(fabs(*result), fabs(area)) <= defabs * 0.01) {
         goto exit;
     }
@@ -1151,7 +934,7 @@ divergence:  // dqagse.f's 110
         ier = 6;
     }
     goto exit;
-sum_up:  // dqagse.f's 115, which falls into 130, the exit
+sum_up:
     *result = 0.0;
     for (k = 0; k < last; k++) {
         *result += rlist[k];
@@ -1165,10 +948,6 @@ exit:
     return ier;
 }
 
-// ---------------------------------------------------------------- quadrature_integrate
-
-// QUADPACK's ier as the header's codes. Measured at 1e-300 tolerances: QNG and QAGS answer -101 and QAG -102,
-// so 1 and 5 are the accuracy codes and 2, 3 and 4 the behaviour ones.
 static quadrature_status charon_status_of(int ier)
 {
     switch (ier) {
@@ -1202,9 +981,6 @@ double quadrature_integrate(const quadrature_integrate_function *__f, double __a
     const size_t per_interval = __options->integrator == QUADRATURE_INTEGRATE_QAGS
                                     ? QUADRATURE_INTEGRATE_QAGS_WORKSPACE_PER_INTERVAL
                                     : QUADRATURE_INTEGRATE_QAG_WORKSPACE_PER_INTERVAL;
-    // The rule the caller named, and whether it named one at all: 0 and 21 are the 21-point rule, and a count
-    // the header does not list is the refusal (measured: 10, 20 and 100 answer 0 with status -2, and 15, 31,
-    // 41, 51 and 61 each make the callback see its own count).
     const CharonRule *rule = NULL;
     switch (__options->integrator) {
         case QUADRATURE_INTEGRATE_QNG:
@@ -1239,14 +1015,11 @@ double quadrature_integrate(const quadrature_integrate_function *__f, double __a
             }
             break;
         default:
-            // An integrator the enumeration does not name leaves abs_error as the caller left it (measured:
-            // 3 and -1 both answer 0 with QUADRATURE_ERROR and the caller's -1 is still there).
             if (__status) {
                 *__status = QUADRATURE_ERROR;
             }
             return 0.0;
     }
-    // An infinite bound is QAGS's alone (measured: QNG over one answers QUADRATURE_INVALID_ARG_ERROR).
     int inf = 0;
     double a = __a;
     double b = __b;
@@ -1257,7 +1030,6 @@ double quadrature_integrate(const quadrature_integrate_function *__f, double __a
         if (__options->integrator != QUADRATURE_INTEGRATE_QAGS) {
             return 0.0;
         }
-        // QUADPACK's QAGI: -inf and +inf on the same side is 1, and a bound at each end is 2.
         if (isinf(__a) && isinf(__b)) {
             inf = 2;
             a = 0.0;
@@ -1278,13 +1050,8 @@ double quadrature_integrate(const quadrature_integrate_function *__f, double __a
     int neval = 0;
     int ier;
     if (__options->integrator == QUADRATURE_INTEGRATE_QNG) {
-        // QNG needs no workspace and ignores max_intervals (measured: 0, 1, 2, 10, 100 and 1000 all answer
-        // the same, and 43 evaluations).
         ier = charon_dqng(fun, arg, a, b, __options->abs_tolerance, __options->rel_tolerance, &result, &abserr, &neval);
     } else {
-        // The limit is max_intervals, unless a workspace was given, in which case it is what the workspace
-        // holds (measured: a QAG workspace of 32 bytes gives one interval and answers -101, 100 bytes gives
-        // three and succeeds, and 31 bytes answers -2; QAGS needs 152 for one).
         size_t limit = __options->max_intervals;
         if (__workspace) {
             limit = __workspace_size / per_interval;

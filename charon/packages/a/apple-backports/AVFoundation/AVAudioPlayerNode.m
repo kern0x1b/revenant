@@ -1,17 +1,6 @@
 #import "CharonAVAudioEngine.h"
 #import "CharonAVAudioBuffer.h"
 
-// AVAudioPlayerNode carries no AudioUnit of its own - see CharonAVAudioEngine.h for why. What it
-// really is: a queue of scheduled buffers, read frame-by-frame by CharonPlayerRenderCallback,
-// which AVAudioEngine wires directly onto whatever real node the player is connected to via
-// AUGraphSetNodeInputCallback. Silence-on-empty is deliberate and matches the real class: an
-// unscheduled or exhausted player renders silence, not an error, exactly like the underlying
-// AudioUnit render contract already works.
-
-// A raw byte copy is correct here, not merely convenient: -connect:to:format: only ever completes
-// when the destination's format has already been forced to match the source (the same rule the
-// real class documents), so the buffer being read here and the AudioBufferList being written into
-// are the same PCM layout - same bytes-per-frame, same channel count, same (non-)interleaving.
 OSStatus CharonPlayerRenderCallback(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, const AudioTimeStamp *inTimeStamp,
                                     UInt32 inBusNumber, UInt32 inNumberFrames, AudioBufferList *ioData)
 {

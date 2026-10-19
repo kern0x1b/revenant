@@ -3,14 +3,6 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-// The meshes of the port's own generators. Every one of them lays down real vertices - a position, a
-// normal and a texture coordinate each - in one interleaved buffer of three floats, twelve and eight
-// bytes, and real indices into it, so what comes out is a mesh a caller can measure and draw rather
-// than a count of something.
-
-// The interleaved buffer the generators write, and the mesh around it. The normals of a generator
-// that is asked for inward normals are the ones turned the other way, which is a change of the
-// triangles' order, not of the directions, so the surface stays the same one.
 typedef struct {
     vector_float3 position;
     vector_float3 normal;
@@ -66,8 +58,6 @@ typedef struct {
 
 @end
 
-// The append-only side of a generated surface: a vertex per position, normal and coordinate, and
-// triangles or quads over them.
 typedef struct {
     CharonMDLGeneratedVertex *vertex;
     NSUInteger vertexCount, vertexCapacity;
@@ -116,8 +106,6 @@ static void CharonMDLBuilderFree(CharonMDLBuilder *builder)
 
 @implementation MDLMesh (Generators)
 
-// A grid over the XZ plane, centred on the origin, its normal up the Y axis: the plane ModelIO makes
-// lies flat with Y up, and the winding of the quads is the one that faces upwards.
 + (instancetype)newPlaneWithDimensions:(vector_float2)dimensions
                               segments:(vector_uint2)segments
                           geometryType:(MDLGeometryType)geometryType
@@ -173,9 +161,6 @@ static void CharonMDLBuilderFree(CharonMDLBuilder *builder)
                              submeshes:mesh.submeshes];
 }
 
-// A sphere of the given radii, its rings of latitude from the pole to the pole and its columns of
-// longitude around it, each vertex's normal the direction from the centre, so an ellipsoid of three
-// different radii is the same surface with its normals turned accordingly.
 + (instancetype)newEllipsoidWithRadii:(vector_float3)radii
                        radialSegments:(NSUInteger)radialSegments
                      verticalSegments:(NSUInteger)verticalSegments
@@ -186,10 +171,6 @@ static void CharonMDLBuilderFree(CharonMDLBuilder *builder)
 {
     CharonMDLBuilder builder = {0};
     NSUInteger around = MAX((NSUInteger)3, radialSegments), down = MAX((NSUInteger)2, verticalSegments);
-    // The ring of quads, and one ring more than that at each end: at every size measured the system
-    // has four rings of vertices for two rings of quads, five for three and eight for six, with the
-    // index count of the quads alone. So the poles are rings of their own, and the ring after the last
-    // ring of quads repeats the pole so the seam has a texture coordinate all the way round.
     NSUInteger rows = down + 2;
     for (NSUInteger row = 0; row < rows; row++) {
         BOOL pole = row == 0 || row >= down;
@@ -199,8 +180,6 @@ static void CharonMDLBuilderFree(CharonMDLBuilder *builder)
             float u = (float)column / (float)around, theta = u * 2 * (float)M_PI;
             vector_float3 sphere = {ring * cosf(theta), y, ring * sinf(theta)};
             vector_float3 position = {sphere.x * radii.x, sphere.y * radii.y, sphere.z * radii.z};
-            // The normal of a sphere of radii r at a point p is (p.x/r.x, p.y/r.y, p.z/r.z), which for
-            // equal radii is the point itself, and at a pole is the axis the pole is on.
             vector_float3 normal = radii.x && radii.y && radii.z
                                        ? simd_normalize((vector_float3){sphere.x / radii.x, sphere.y / radii.y, sphere.z / radii.z})
                                        : sphere;
@@ -211,8 +190,6 @@ static void CharonMDLBuilderFree(CharonMDLBuilder *builder)
             CharonMDLBuilderVertex(&builder, position, normal, (vector_float2){u, v});
         }
     }
-    // The quads run between the rings the poles bound, so the surface is down rings of them and the
-    // index count is the one the system gives.
     for (NSUInteger row = 0; row < down; row++)
         for (NSUInteger column = 0; column < around; column++) {
             uint32_t a = (uint32_t)(row * (around + 1) + column), b = a + 1, c = a + (uint32_t)(around + 1), d = c + 1;
@@ -232,8 +209,6 @@ static void CharonMDLBuilderFree(CharonMDLBuilder *builder)
     return mesh;
 }
 
-// The box of an extent, the form every other generator has: the same six faces, built once here and
-// reached from both the extent form and the dimensions form.
 - (instancetype)initBoxWithExtent:(vector_float3)extent
                          segments:(vector_uint3)segments
                     inwardNormals:(BOOL)inwardNormals
@@ -282,7 +257,6 @@ static void CharonMDLBuilderFree(CharonMDLBuilder *builder)
                              submeshes:mesh.submeshes];
 }
 
-// The sphere of an extent, which is the ellipsoid of the half-extent on each axis.
 - (instancetype)initSphereWithExtent:(vector_float3)extent
                             segments:(vector_uint2)segments
                        inwardNormals:(BOOL)inwardNormals
@@ -307,24 +281,13 @@ static void CharonMDLBuilderFree(CharonMDLBuilder *builder)
                         allocator:allocator];
 }
 
-// A tube between two radii, of the height given, with the caps it is asked for: a ring of vertices at
-// each end, a fan of triangles over the tube and one over each cap. The cylinder of the public surface
-// is this, with its own radii and caps.
 static void CharonMDLTaperedTube(CharonMDLBuilder *builder, float lower, float upper, float height, NSUInteger around,
                                  NSUInteger up, BOOL inwardNormals, BOOL topCap, BOOL bottomCap)
 {
     float halfHeight = height * 0.5f;
-    // The same sharing the ellipsoid has: one ring more than the number of rings of quads at each end,
-    // and one ring of quads more than the caller asked for. Fitted to the system's own counts over ten
-    // sizes, where rings = vertical + 3 and columns = radial + 1 give every one of them exactly.
     NSUInteger rings = up + 3;
     for (NSUInteger ring = 0; ring < rings; ring++) {
         BOOL pole = ring == 0 || ring >= up + 1;
-        // v runs 0 .. (up+2)/(up+1) over the rings, because there is a pole ring beyond each end,
-        // and the extra rings are AT the ends and not past them: a cylinder of height 4 measured
-        // 5.33333 tall against the system's 4.00000, which is (4/3 - 1/2) * 4 - the fourth ring of
-        // five placed a third of a height above the top of the tube. Clamped, the last ring is the
-        // top one and the cylinder is the height that was asked for.
         float v = (float)ring / (float)(up + 1), y, radius;
         if (v > 1.0f)
             v = 1.0f;
@@ -349,9 +312,6 @@ static void CharonMDLTaperedTube(CharonMDLBuilder *builder, float lower, float u
             CharonMDLBuilderIndex(builder, c);
             CharonMDLBuilderIndex(builder, d);
         }
-    // A cap is a centre vertex on the axis and a fan of triangles over the ring at that end. The two
-    // centre vertices are what the vertex count is short of the rings by, and they are the two the
-    // system has.
     for (int end = 0; end < 2; end++) {
         if (end ? !topCap : !bottomCap)
             continue;
@@ -409,8 +369,6 @@ static void CharonMDLTaperedTube(CharonMDLBuilder *builder, float lower, float u
                              submeshes:mesh.submeshes];
 }
 
-// A cone: a tube whose upper radius is nothing, which is the same fan over the ring and the one
-// vertex at the apex, with the optional cap at its base.
 - (instancetype)initConeWithExtent:(vector_float3)extent
                           segments:(vector_uint2)segments
                      inwardNormals:(BOOL)inwardNormals
@@ -424,7 +382,6 @@ static void CharonMDLTaperedTube(CharonMDLBuilder *builder, float lower, float u
     for (NSUInteger column = 0; column <= around; column++) {
         float u = (float)column / (float)around, theta = u * 2 * (float)M_PI;
         vector_float3 outward = {cosf(theta), 0, sinf(theta)};
-        // A cone's own normal leans out of its slope, by the angle the slope makes with the axis.
         vector_float3 normal = simd_normalize((vector_float3){outward.x, radius / halfHeight, outward.z});
         if (inwardNormals)
             normal = (vector_float3){-normal.x, -normal.y, -normal.z};

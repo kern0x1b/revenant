@@ -1,9 +1,3 @@
-// crash.m - one host case of the SKNode tree that crashes or raises, run in its own process. The shell harness (run.sh)
-// starts this program once per case, so a crash ends only that process: the output of the case and its exit status are
-// compared between the host's SpriteKit and the port's objects.
-//
-// Each case prints one line: the exception's name and reason when one is raised and caught, or what the call returned.
-// A case that the runtime kills prints nothing, and the harness records the signal instead.
 #import <Foundation/Foundation.h>
 #include <objc/message.h>
 #include <stdio.h>

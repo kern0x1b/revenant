@@ -1,6 +1,3 @@
-// Differential probe for the AuthenticationServices error structs: built once against the host's
-// AuthenticationServices (no -DOURS) and once against packages/s/swift-runtime/files/AuthenticationServices/Errors.swift
-// (-DOURS). The two outputs must match line for line (facts/AuthenticationServices/Errors.md).
 import Foundation
 #if !OURS
 import AuthenticationServices

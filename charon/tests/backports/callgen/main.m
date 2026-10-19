@@ -1,22 +1,7 @@
-//
-//  main.m
-//  The generated call test's entry point, on the host and in the port alike.
-//
-//  It walks the case table the generator wrote — a label and a function each — and reports what
-//  the process answered. The same file runs in a Mac Catalyst binary, where the calls go to the
-//  system's own Intents.framework and the run is the oracle, and in a charon port at 6.1.3, where
-//  they go to libIntentsBackports; nothing in it knows which, because the names it looks up are
-//  the names the registry carries.
-//
-//  Exit status is zero only when every class and every member the registry carries is answered
-//  and every call returned.
-//
-
 #import "harness.h"
 
 #import <Foundation/Foundation.h>
 
-// One case: the label that names it in the report, and the function that performs it.
 typedef struct {
     const char *label;
     void (*run)(CharonCallLog *log);

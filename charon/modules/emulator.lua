@@ -11,37 +11,16 @@ RESULTS = "private/var/charon"
 REPORTS = "private/var/logs/CrashReporter"
 RUNNER = "usr/libexec/charon-runner"
 LAUNCHER = "usr/libexec/charon-sblaunch"
--- MobileInstallation's cache of the installed applications, which SpringBoard
--- lists and launches from.
 INSTALLATION_CACHE = "private/var/mobile/Library/Caches/com.apple.mobile.installation.plist"
 RUNNER_JOB = "System/Library/LaunchDaemons/org.charon.emulator.runner.plist"
--- launchd reads launchd.conf at boot through iOS 6.1; from 7 it does not, and
--- from 6.1 it ignores a LaunchDaemons plist its prebuilt job cache does not
--- list, so the runner starts from launchd.conf up to 6.x and from its plist
--- from 7.
 LAUNCHD_CONF = "private/etc/launchd.conf"
 RUNNER_TASK = RESULTS .. "/job"
 MIGRATOR = "System/Library/PrivateFrameworks/DataMigration.framework/Support/DataMigrator"
 SETUP_KEYS = {{"SetupDone", "-bool", "YES"}, {"SetupFinishedAllSteps", "-bool", "YES"}, {"AssistantPresented", "-bool", "YES"}}
--- Setup.app stores a SetupVersion when it finishes, and below the one it
--- stores it runs again at every boot as "Update Completed", while SpringBoard
--- launches nothing else. The number is a constant in Setup's own code and in no
--- file: Setup stores [NSNumber numberWithInt:N] under @"SetupVersion" (10A403
--- stores 2, 10B329 3), and the Setup of 5.0, 5.1.1 and 9.3.6 has no such key.
 SETUP = "Applications/Setup.app/Setup"
--- What Setup.app leaves with lockdownd when it finishes, which iOS 6.1 asks
--- instead of the preferences; plutil reads a dot as a key-path separator, so
--- the dots are escaped.
 LOCKDOWN_KEYS = {{"com\\.apple\\.purplebuddy-SetupState", "-string", "DONE"}}
 CRASH_LOOP = 3
--- The registers a stopped guest is read by, in the order the debugger lays
--- them out; charon prints them in that order too.
 REGISTERS = {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12", "sp", "lr", "pc", "cpsr"}
--- A guest second takes this many host seconds. The emulator is one to two
--- orders of magnitude slower than the device it emulates, so at 1 the guest's
--- own watchdogs and RPC deadlines expire before it finishes: iOS 6.1.3 loses
--- SpringBoard every 100 s to a mediaserverd RPC timeout and loses every app
--- backboardd's launch watchdog reaches. See README for the measurements.
 TIME_SCALE = 10
 
 function directory(folder)
@@ -56,11 +35,6 @@ end
 
 function remove(folder)
     if os.isdir(folder) or os.isfile(folder) or os.islink(folder) then
-        -- u+rwX, not u+w: a directory needs execute as well as write for the entries in it to be unlinked,
-        -- and a root filesystem holds read-only directories - the dyld cache ships as one. Measured
-        -- 2026-09-27 on the CommandLineTools host: u+w left
-        -- rootfs/System/Library/Caches/com.apple.dyld at rw-r--r-- and rm answered "Permission denied" for
-        -- the cache inside it, so every image that holds one could not be removed and stayed.
         os.execv("chmod", {"-R", "u+rwX", folder}, {try = true})
         os.tryrm(folder)
         if os.isdir(folder) or os.isfile(folder) or os.islink(folder) then
@@ -169,10 +143,6 @@ function guest_path(rootfs, relative, opt)
     return resolved
 end
 
--- What the guest has loaded, asked of the guest itself: dyld keeps the list at
--- _dyld_all_image_infos, and the copy of dyld in the image says where that is.
--- The list carries the cache's libraries as well as the port's own, so an
--- address in a backtrace is named without reading the shared cache at all.
 local function loaded_images(connection, rootfs)
     local file = path.join(rootfs, "usr", "lib", "dyld")
     if not os.isfile(file) then
@@ -201,9 +171,6 @@ local function loaded_images(connection, rootfs)
     return held
 end
 
--- A symbol table for the images the rootfs holds as files - dyld, the port and
--- what it carries - so their frames are named and not only placed. What lives
--- only in the shared cache is placed by image and offset.
 local function image_symbols(install, rootfs, architecture)
     local file = path.join(rootfs, install)
     if not os.isfile(file) or os.filesize(file) > 16 * 1024 * 1024 then
@@ -215,9 +182,6 @@ local function image_symbols(install, rootfs, architecture)
             local named = {}
             for _, image in ipairs(macho.images(data)) do
                 if not architecture or image.architecture == architecture then
-                    -- A symbol stands at the address the image was linked for,
-                    -- and the guest loaded it wherever it did, so both are read
-                    -- as offsets from the image's own first segment.
                     local first
                     for _, segment in ipairs(image.segments) do
                         if segment.name ~= "__PAGEZERO" and (not first or segment.vmaddr < first) then
@@ -262,13 +226,6 @@ function named_address(address, images, symbols)
     return named
 end
 
--- A crash in the guest says only where it stopped, and where is a number. The
--- emulator answers a debugger on a port, so charon starts the program as the
--- guest's first process, asks the debugger for the registers and the frames the
--- moment the guest stops, and names the addresses with what the guest itself
--- says it has loaded. The program runs as pid 1: nothing else boots, so what
--- the report holds is the program and what it loads, and no service of the
--- release is between them.
 function debugged(opt)
     local run = directory(opt.run)
     local log = path.join(run, "emulator.log")
@@ -290,8 +247,6 @@ function debugged(opt)
         function ()
             local connection = gdb.connect(port, {patience = opt.patience or 120})
             local stopped = gdb.ask(connection, "c")
-            -- A program that does not crash answers with its exit status
-            -- instead of a signal, and there is nothing to read of it.
             if stopped and (stopped:startswith("W") or stopped:startswith("X")) then
                 gdb.close(connection)
                 return {stopped = stopped, exited = tonumber(stopped:sub(2, 3), 16) or 0, frames = {}, images = {}, log = log}
@@ -334,12 +289,6 @@ function clone(source, destination)
     os.vrunv("cp", {"-c", "-R", source, destination})
 end
 
--- The integers a 32-bit ARM image stores as NSNumbers under the constant
--- string key, read by following its registers through its Thumb-2 code from one
--- message send to the next, and the stores under that key it could not follow.
--- Only the few instructions such a store is made of are decoded; any other one
--- forgets every register, so a form this does not know is reported as not
--- followed, never guessed at.
 local function stored_numbers(data, found, key)
     local sections = {}
     for _, section in ipairs(found.sections) do
@@ -374,7 +323,6 @@ local function stored_numbers(data, found, key)
             local second = string.unpack("<I2", data, at + 3)
             local kind = first & 0xfbf0
             if (kind == 0xf240 or kind == 0xf2c0) and second & 0x8000 == 0 then
-                -- movw / movt rd, #imm16
                 local immediate = ((first & 0xf) << 12) | (((first >> 10) & 1) << 11) | (((second >> 12) & 7) << 8) | (second & 0xff)
                 local destination, known = (second >> 8) & 0xf, registers[(second >> 8) & 0xf]
                 if kind == 0xf240 then
@@ -385,7 +333,6 @@ local function stored_numbers(data, found, key)
                     registers[destination] = nil
                 end
             elseif first & 0xf800 == 0xf000 and second & 0xc000 == 0xc000 then
-                -- bl / blx: a message send, whose r0 is the receiver, r1 the selector, r2 and r3 the arguments
                 local selector, value, stored = registers[1], registers[2], registers[3]
                 if selector and selector.selector == "setObject:forKey:" and stored and stored.address and
                    inside("__cfstring", stored.address) and text(word(stored.address + 8)) == key then
@@ -403,7 +350,6 @@ local function stored_numbers(data, found, key)
                 kept[0] = {sent = selector and selector.selector, argument = value}
                 registers = kept
             elseif first & 0xfff0 == 0xf8d0 then
-                -- ldr.w rt, [rn, #imm12]
                 registers[(second >> 12) & 0xf] = nil
             else
                 registers = {}
@@ -411,20 +357,16 @@ local function stored_numbers(data, found, key)
             at = at + 4
         else
             if first & 0xff78 == 0x4478 then
-                -- add rdn, pc
                 local destination = (first & 7) | ((first >> 4) & 8)
                 local known = registers[destination]
                 registers[destination] = known and known.immediate and {address = (known.immediate + address + 4) & 0xffffffff} or nil
             elseif first & 0xffc0 == 0x6800 then
-                -- ldr rt, [rn]: a selector when rn points into the selector references
                 local known = registers[(first >> 3) & 7]
                 registers[first & 7] = known and known.address and inside("__objc_selrefs", known.address) and
                                        {selector = text(word(known.address))} or nil
             elseif first & 0xf800 == 0x2000 then
-                -- movs rd, #imm8
                 registers[(first >> 8) & 7] = {immediate = first & 0xff}
             elseif first & 0xff00 == 0x4600 then
-                -- mov rd, rm
                 registers[(first & 7) | ((first >> 4) & 8)] = registers[(first >> 3) & 0xf]
             else
                 registers = {}
@@ -435,8 +377,6 @@ local function stored_numbers(data, found, key)
     return numbers, unfollowed
 end
 
--- The SetupVersion the firmware's own Setup stores, nil when its Setup stores
--- none; raises when it stores one that cannot be read.
 function setup_version(rootfs, build)
     local file = guest_path(rootfs, SETUP, {follow = true})
     if not os.isfile(file) then
@@ -485,12 +425,6 @@ function home(rootfs, build)
         os.vrunv("xattr", {"-w", "hfsfuse.record.owner_id", "501", file})
         os.vrunv("xattr", {"-w", "hfsfuse.record.group_id", "501", file})
     end
-    -- iOS 6.1 asks lockdownd instead of the preferences above: SpringBoard
-    -- reads com.apple.purplebuddy/SetupState, which Setup.app sets to DONE
-    -- when it finishes. 6.0 reads the preferences, so both are written. A
-    -- firmware's root filesystem has no lockdownd store until lockdownd first
-    -- runs, and lockdownd and the emulator both keep the keys they find in it,
-    -- so it is started here with the setup state in it.
     local ark = guest_path(rootfs, "private/var/root/Library/Lockdown/data_ark.plist")
     os.mkdir(path.directory(ark))
     if not os.isfile(ark) then
@@ -503,8 +437,6 @@ function home(rootfs, build)
     os.vrunv("xattr", {"-w", "hfsfuse.record.group_id", "0", ark})
 end
 
--- The guest writes a report for every process it kills or that crashes, and
--- the report names the reason, which no emulator-side line can.
 function reports(rootfs)
     local folder = guest_path(rootfs, REPORTS)
     local collected = {}
@@ -572,11 +504,6 @@ local function place(tree, rootfs)
     end
 end
 
--- dpkg runs a package's maintainer scripts with DPKG_ROOT naming the root it
--- installs into, and Charon's own scripts are written for it: the backports
--- package reads the release out of that root and links the libraries built for
--- it. The image is such a root, so the scripts run against it here exactly as
--- they run on a device.
 local function maintainer_script(work, members, name, rootfs, deb, stage)
     local control
     for member, content in pairs(members) do
@@ -611,10 +538,6 @@ local function maintainer_script(work, members, name, rootfs, deb, stage)
     end
 end
 
--- What a package put in, and how big each file is, so an install can be compared with the build that
--- fed it. The hashes are printed and are not to be compared across installs: a binary Charon installs is
--- stripped and signed, and ldid's signature is not reproducible - two signatures of one input are the
--- same size and different bytes. The size and the build's own output are what a caller can compare.
 function describe_files(folder)
     local described = {}
     for _, file in ipairs(os.files(path.join(folder, "**"))) do
@@ -652,11 +575,6 @@ function install_deb(deb, rootfs)
     return applications
 end
 
--- What uicache does on a device, left to MobileInstallation itself: its cache
--- of the installed applications is removed from the image, and it builds the
--- cache again from /Applications at boot, as it does on a firmware's first
--- boot, whose root filesystem has none. SpringBoard then lists the application
--- and launches it by the bundle identifier this answers.
 function register_application(rootfs, relative)
     local info = path.join(guest_path(rootfs, relative), "Info.plist")
     if not os.isfile(info) then
@@ -676,9 +594,6 @@ function install_launcher(rootfs, guest)
     os.vrunv("cp", {"-p", path.join(guest, LAUNCHER), launcher})
 end
 
--- The runner's command for launch: charon-sblaunch waits up to seconds for
--- SpringBoard to take the launch, and the application's output goes beside
--- the verdict.
 function launch_command(identifier, seconds)
     return {"/" .. LAUNCHER, "--wait", tostring(seconds), "--stdout", "/" .. RESULTS .. "/app.stdout",
             "--stderr", "/" .. RESULTS .. "/app.stderr", identifier}
@@ -688,8 +603,6 @@ local function escaped(text)
     return (text:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;"))
 end
 
--- The runner's job as it reads it: the deadline, the program and its
--- arguments, each word ended by a NUL, so no argument needs quoting.
 function runner_task(argv, deadline)
     local words = {tostring(deadline)}
     for _, argument in ipairs(argv) do
@@ -701,8 +614,6 @@ function runner_task(argv, deadline)
     return table.concat(words, "\0") .. "\0"
 end
 
--- launchd.conf's line for the runner: launchctl splits it on whitespace, so it
--- names only the job file.
 function runner_launch()
     return "bsexec .. /" .. RUNNER .. " --job /" .. RUNNER_TASK .. "\n"
 end
@@ -757,8 +668,6 @@ function scan(state, line)
     elseif line:startswith("[display] frame=") then
         state.frames = (state.frames or 0) + 1
     end
-    -- An input and a settle each start a transition, numbered in order, which
-    -- is stable once the screen has stopped changing after it.
     local started = line:match("^%[transition%] input%-complete id=(%d+)") or line:match("^%[transition%] settle id=(%d+)")
     if started then
         state.transition = math.max(state.transition or 0, tonumber(started))
@@ -804,9 +713,6 @@ function scan(state, line)
             state.crashes[name] = (state.crashes[name] or 0) + 1
         end
     end
-    -- A thread that sent a request and is still receiving its reply when the
-    -- run ends waited for an answer that never came. A daemon parked on its
-    -- service port is not that, and the emulator only reports the former.
     local stalled, request, seconds = line:match(
         "^%[mach%] stalled pid=(%d+) thread=%d+ request=(%d+).* guest%-seconds=(%d+)")
     if stalled then
@@ -841,9 +747,6 @@ function crash_loop(state)
     return looping
 end
 
--- A target that measures time cannot be measured against a guest clock that
--- runs slower than the host's, and a converted number would be a guess about
--- what the target meant. Such a target says so and the run refuses instead.
 function timing_refusal(timing, scale)
     if timing ~= "strict" or scale == 1 then
         return nil
@@ -884,8 +787,6 @@ end
 function verdict(state, results, opt)
     opt = opt or {}
     local file = path.join(results, "verdict.json")
-    -- Guest seconds are the guest's own clock, which runs scale times slower
-    -- than the host's; a test that measures time reads both and the scale.
     local timing = {scale = opt.scale or TIME_SCALE, host_seconds = opt.host_seconds, reports = opt.reports}
     if not os.isfile(file) then
         return table.join2({state = "boot-blocked", milestone = milestone(state), frame = opt.frame,
@@ -921,14 +822,8 @@ function verdict(state, results, opt)
     return result
 end
 
--- What a run's program said, and which of the three states that is, so silence is never read as a
--- program that printed nothing: it wrote something, it wrote nothing, or its output was not captured
--- because the runner could not open the file. The last is the runner's own verdict field, so a lost
--- output is told apart from an empty one instead of both printing nothing.
 function report_output(folder, output)
     if output == 0 then
-        -- The runner's own word is the one to believe: it could not open the file, so whatever is
-        -- there is not the program's, and printing it would put the wrong text under its name.
         cprint("${color.warning}the program's output was not captured${clear}: the runner could not open it, and it says why in %s",
                path.join(folder, "results", "runner.stderr"))
         return false
@@ -971,11 +866,6 @@ function describe(result)
     return result.state
 end
 
--- The steps launch takes after the application is up, each followed by a
--- snapshot once the screen settles: the word and how many numbers follow it.
--- until-exit is the one step the emulator is not asked for: it is the driver's own, and holds the
--- guest until the application has ended, so a port whose application produces its result over
--- time is given the time to produce it and the frame kept is the one it ended on.
 function parse_steps(words)
     local arity = {tap = 2, drag = 4, home = 0, ["until-exit"] = 0}
     local steps, index = {}, 1
@@ -999,20 +889,6 @@ function parse_steps(words)
     return steps
 end
 
--- What launch does while the guest runs, as the stop function of boot. It
--- unlocks the screen while charon-sblaunch says screen=locked, one unlock at a
--- time; once the launch is done and the application frontmost, it has the
--- emulator settle and takes a snapshot when the screen has stopped changing,
--- then takes each step, settles and takes a snapshot after it. A step of
--- until-exit holds instead of sending anything: it waits for the application to
--- end, and for the run's own budget to be spent if it never does, and says in
--- held which of the two happened. The budget is -s, the guest seconds the application
--- may run from the moment it is frontmost, which the host's clock counts at the time
--- scale (one guest second takes that many host seconds). The runner's verdict is not
--- the budget's end: it is written when charon-sblaunch returns, which is at launch.
--- Settling is the emulator's own measure, in
--- guest time: [transition] settle id=N, then internal-stable id=N. The driver
--- keeps where it ended in shots, failure, exit, held, held_seconds and application.
 function launch_driver(opt)
     local driver = {phase = "launching", shots = {}, step = 0, unlocks = 0}
     local clock = opt.clock or os.mclock
@@ -1020,7 +896,6 @@ function launch_driver(opt)
     if table.contains(opt.steps, "until-exit") and not opt.seconds then
         raise("until-exit holds for the run's budget, and the run gave no seconds")
     end
-    -- Guest seconds the application has run since SpringBoard made it frontmost.
     local function running()
         return (clock() - driver.launched) / 1000 / scale
     end
@@ -1038,9 +913,6 @@ function launch_driver(opt)
             end
         end
         local exited = driver.application and (state.exits or {})[driver.application.pid]
-        -- An application that ends is the run's failure, unless the run asked for it with until-exit:
-        -- then its ending is what the run was waiting for, and the holding step says so. Once it has said
-        -- so (held), the exit is in the log for every tick that follows, through the settle and the snapshot.
         if exited and driver.phase ~= "holding" and not driver.held then
             driver.failure, driver.exit = "exited", exited
             return true
@@ -1059,11 +931,7 @@ function launch_driver(opt)
             end
             local stdout = path.join(opt.results, "test.stdout")
             local last = (os.isfile(stdout) and io.readfile(stdout) or ""):match("([^\n]*)\n$") or ""
-            -- The unlock gesture is the next transition; another is sent only
-            -- once that one has settled and the screen is still locked.
             local idle = not driver.unlocking or (state.stable or {})[driver.unlocking]
-            -- charon-sblaunch names the lock state of a refusal as the token screen=locked, or screen=passcode when
-            -- nothing can unlock it.
             if idle and last:find("screen=locked", 1, true) then
                 send("unlock")
                 driver.unlocks = driver.unlocks + 1
@@ -1094,8 +962,6 @@ function launch_driver(opt)
                 driver.phase, driver.after = "stepping", state.transition or 0
             end
         elseif driver.phase == "holding" then
-            -- The application's own end, or the run's budget spent, the first of the two; the exit is looked
-            -- at first, so an application that ended is never reported as one that ran out of time.
             if driver.application and (state.exits or {})[driver.application.pid] then
                 driver.held, driver.held_seconds = "exited", running()
                 settle(state, send)
@@ -1186,17 +1052,6 @@ function capacity()
     return math.max(1, math.min(cores // 3, gigabytes // 5))
 end
 
--- The machine runs more than this factory: several sessions build packages at
--- the same time, and a run started on top of that measures the queue, not the
--- guest. A run waits for the machine to quiet down, but only for a while - a
--- busy machine must still make progress, and a slot held forever would be the
--- worse failure.
--- Builds of several sessions at once are what makes this machine slow, and a
--- build cannot be limited from the outside: a session opts in by starting its
--- build through the queue. The slot is taken by the outermost xmake only - a
--- build that starts another one passes this marker down, and the inner one
--- runs inside the slot the outer one holds, so a nested build cannot wait for
--- a slot its own parent is holding.
 BUILD_SLOT = "CHARON_BUILD_SLOT"
 
 function build_slot_name()
@@ -1208,14 +1063,6 @@ function build_capacity()
     return math.max(2, cores // 4)
 end
 
--- A slot stands for a share of the machine, not for a machine: a build that
--- takes every core inside one puts three times the cores to work when three
--- slots are held. xmake passes -j down to the cmake and ninja a package builds
--- with, and takes every core when it is not told otherwise, so a queued xmake
--- is told the share of its slot. A command that already says how many jobs it
--- wants keeps its own answer, a task that has no -j is left alone, and so is a
--- program that is not xmake: the queue holds the slot, it does not rewrite what
--- runs in it.
 JOBS_TASKS = {build = true, test = true, require = true, pack = true, install = true}
 
 function build_jobs(cores, capacity)
@@ -1335,10 +1182,8 @@ function retire(parent, opt, kept)
     end
 end
 
--- How long an image, an owner's images, or the root filesystem one run booted is kept unused, in hours.
 PRUNE_HOURS = 24
 
--- A folder another xmake emulate holds the lock of is in use, whatever its age.
 function unlocks(folder)
     local lock = io.openlock(folder .. ".lock")
     if not lock then
@@ -1352,9 +1197,6 @@ function unlocks(folder)
     return held
 end
 
--- A folder counts as used when it or any direct child is newer than the age. One stat per child, never a
--- walk of a root filesystem: a run creates and removes the image's run/ and debug/ folder, so the image's
--- own mtime is the last time it was booted, and an owner's mtime follows the images under it.
 function used(folder, hours)
     local limit = os.time() - (hours or PRUNE_HOURS) * 3600
     local newest = os.mtime(folder)
@@ -1367,12 +1209,6 @@ function used(folder, hours)
     return newest >= limit
 end
 
--- The root filesystems runs booted that nothing has removed, the images nothing has booted for the age, and
--- the owners nothing has used for the age. A run that was killed cannot clean up after itself: there is no
--- signal handler in Lua and the process is gone, so the next xmake emulate is what bounds the cache. The
--- owner is a hash of the project directory, so every worktree and every scratch project keeps its own and
--- a clean of one project never reaches the others' - measured 2026-09-27, 125 root filesystems of about
--- 205 GB under images.noindex, one per run, across owners no clean had visited.
 function prune(opt)
     opt = opt or {}
     local base = path.join(opt.root or root(), "images.noindex")
@@ -1380,20 +1216,11 @@ function prune(opt)
     if not os.isdir(base) then
         return removed
     end
-    -- Judge an image by the lock a running xmake emulate really takes, plugins/emulate/main.lua:283's
-    -- ctx.image .. ".lock", and the owner only by what is left of it. An owner has no lock anything takes,
-    -- so asking for one judged nothing and then removed the images inside a live run's image, and asking
-    -- created a stray <owner>.lock beside every owner it visited.
     for _, owner in ipairs(os.dirs(path.join(base, "*"))) do
-        -- the owner's own staleness, read before anything is removed from it: deleting an image updates the
-        -- owner's mtime, so a check after the pass sees a fresh owner and keeps it
         local stale_owner = not used(owner, opt.hours)
         local empty = true
         for _, image in ipairs(os.dirs(path.join(owner, "*"))) do
             empty = false
-            -- the image first: an image nothing holds is removed as a directory, and its run/ and debug/
-            -- clones go with it as part of it, not as a second thing removed. A held image is a live run's
-            -- own working copy, and nothing inside it is touched.
             if unlocks(image) then
                 if used(image, opt.hours) then
                     for _, name in ipairs({"run", "debug"}) do
@@ -1410,8 +1237,6 @@ function prune(opt)
                 end
             end
         end
-        -- empty as it is *after* the pass: an image removed above left nothing, and the owner's age was read
-        -- before that, because removing from a directory updates its mtime
         if #os.dirs(path.join(owner, "*")) == 0 and stale_owner then
             remove(owner)
             table.insert(removed, owner)
@@ -1457,8 +1282,6 @@ function clean(opt)
 end
 
 function golden(opt)
-    -- The image is what the emulator and the home step made of the firmware, so
-    -- it is keyed by both: a change to what home writes is another image.
     local written = {}
     for _, key in ipairs(table.join(setup_keys(opt.firmware, opt.build), LOCKDOWN_KEYS)) do
         table.insert(written, table.concat(key, " "))

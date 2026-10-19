@@ -1,28 +1,17 @@
--- The reconciliation of a module's Swift rows (tools/gen/swift_match.lua): the digester's rows (swift.tsv) with the interface text's
--- (swiftinterface.tsv). The rules under test: an exact match takes the interface's introduction, deprecation, obsoletion, unavailability
--- and via; a digester row the interface names under its outer types takes the qualified api when one fits; a digester row the interface
--- names with other labels takes the interface's labels when exactly one fits (and none when two do); an api the interface states twice
--- is one row with the earliest introduction; an interface api no digester row names is a row of its own (usr "-"); a digester row no
--- interface api fits keeps its own availability and takes nothing from a container. Run: xmake l tests/gen/swift_match_test.lua
--- (exits 1 on any failure).
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 local match = import("gen.swift_match", {rootdir = TOOLS, anonymous = true})
 
--- A digester row of the Swift shard, as swift_model.lua's reader gives it to the model.
 local function digester(kind, api, usr, introduced)
     return {framework = "Fixture", kind = kind, lang = "swift", api = api, usr = usr or "s:x", container = "-",
             introduced = introduced, deprecated = "-", obsoleted = "-", unavailable = "", getter = "-",
             via = introduced and "own" or "none"}
 end
 
--- An interface row, as the interface shard's cells give it.
 local function interface(kind, api, introduced, via, deprecated, unavailable)
     return {kind = kind, api = api, introduced = introduced or "", deprecated = deprecated or "", obsoleted = "",
             unavailable = unavailable or "", via = via or (introduced and "own" or "none")}
 end
 
--- What a row reads as: kind, api, usr, introduced, via, deprecated, unavailable.
 local function line_of(record)
     local function cell(value)
         return (value == nil or value == "") and "-" or value
@@ -79,7 +68,6 @@ function main()
         "property Own.kept s:kept 9.0 own - -",
         "property Nothing.there s:x - none - -",
         "property Extra.renamed - 18.0 own - -",
-        -- Twin.n and Tie.==(_:_:) fit several interface apis: the digester row is kept, and each interface api is a row of its own
         "property A.Twin.n - 11.0 own - -",
         "property B.Twin.n - 12.0 own - -",
         "method Tie.==(a:b:) - 13.0 own - -",
@@ -100,7 +88,6 @@ function main()
     check(counts.ambiguous == 2, "two digester rows fit several interface apis, and are counted (got " .. counts.ambiguous .. ")")
     check(counts.interface_only == 5, "five interface apis are rows of their own (got " .. counts.interface_only .. ")")
 
-    -- the module with no interface text: the digester's rows stand as they were, with their own availability only
     local alone, alone_counts = match.reconcile("Fixture", {digester("property", "Own.kept", "s:kept", "9.0")}, {})
     check(#alone == 1 and alone[1].api == "Own.kept" and alone[1].introduced == "9.0" and alone_counts.digester_only == 1,
           "a digester row with no interface text keeps its own introduction")

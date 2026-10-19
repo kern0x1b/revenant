@@ -233,20 +233,8 @@ static id charon_session_delegate(NSURLSession *session)
     }
 }
 
-/* A task's own delegate answers the task-scoped messages in place of the session's, which is what
-   -[NSURLSessionTask setDelegate:] is for (iOS 15.0), and the session's answers the rest. One place
-   decides, so the -respondsToSelector: that guards a send and the send itself cannot disagree about
-   who was asked: a caller that sets one and implements nothing on the session hears nothing at all,
-   which is what the system's own does. */
 static id charon_task_delegate(NSURLSession *session, NSURLSessionTask *task, SEL selector)
 {
-    /* Per SELECTOR, and the header says so: methods the task delegate does not implement still reach the
-       session delegate (SDK 16.4 NSURLSession.h:296-297). Returning the task's
-       delegate whole made that a per OBJECT answer, so a caller that set one and implemented nothing
-       of the protocol heard nothing at all. Measured on the system's own NSURLSession by
-       tests/backports/host/tasksession/run.sh: a task delegate implementing nothing left the session
-       delegate hearing URLSession:task:didCompleteWithError: once, and a task delegate implementing
-       exactly that selector heard it once with the session delegate hearing zero. */
     if (task) {
         id<NSURLSessionTaskDelegate> own = [task delegate];
         if (own && [own respondsToSelector:selector])
@@ -669,8 +657,6 @@ static void charon_task_release_slot(NSURLSessionTask *task)
         if (waiting->_finished)
             continue;
         waiting->_holdsSlot = YES;
-        /* The table knows whether this host was already being talked to, and that is the whole of
-           -isReusedConnection: a connection that was not the first the session opened to this host. */
         NSInteger already = [session->_connectionsPerHost[host] integerValue];
         [waiting->_metricsTransactions.lastObject charon_noteConnectionReused:already > 0];
         session->_connectionsPerHost[host] = @(already + 1);
@@ -693,9 +679,6 @@ static void charon_metrics_response(NSURLSessionTask *task, NSURLResponse *respo
     @synchronized (task) {
         NSURLSessionTaskTransactionMetrics *transaction = task->_metricsTransactions.lastObject;
         [transaction charon_receivedResponse:response];
-        /* The interface, at the point the response arrives: the port's own cellular answer, and the
-           two link flags a session of its own cannot observe, which are answered as the release's
-           own connection would -- nothing to say. */
         [transaction charon_noteInterfaceFlags:charon_network_cellular() expensive:NO constrained:NO proxy:NO];
     }
 }
@@ -745,19 +728,6 @@ static void charon_task_complete_event(NSURLSessionTask *task, NSError *error)
             if ([delegate respondsToSelector:@selector(URLSession:task:didCompleteWithError:)])
                 [delegate URLSession:session task:task didCompleteWithError:error];
         }
-        /* The header's third sentence about this delegate: the delegate is kept alive until the
-           task completes, and is then reset to nil (SDK 16.4 NSURLSession.h:303-304).
-           Measured on the system's own NSURLSession by tests/backports/host/tasksession/run.sh: after
-           the completion had been delivered, -delegate read nil in both of its runs - the task's
-           delegate implementing nothing, and implementing exactly the completion selector.
-
-           It goes through the associated object rather than through -setDelegate:, which is
-           deliberate and is the one thing here that is not the system's own path: -setDelegate: now
-           refuses a task that has resumed, and a task being completed HAS resumed, so calling the
-           setter here would raise on every completion. The system resets the storage, and so does
-           this; a caller that holds the delegate keeps it alive, which is what "strongly referenced
-           until the task completes" says and what the port's OBJC_ASSOCIATION_RETAIN_NONATOMIC
-           already gave before this line existed. */
         [task charon_resetTaskDelegate];
         charon_perform(^{
             [session->_tasks removeObjectIdenticalTo:task];
@@ -1074,13 +1044,6 @@ static void charon_task_sent(NSURLSessionTask *task, int64_t written, int64_t to
     int64_t expected = 0;
     @synchronized (task) {
         task->_countOfBytesSent = total;
-        /* "Before encoding" is the body the caller handed over, which is a property of the
-           request rather than of the connection: the connection reports what went and what it
-           expected, and the two are not the same number. It is read from the task's own body,
-           under the same lock and with the same function the expected-total path reads at
-           charon_task_start, so a file body answers its size and a stream with no
-           Content-Length answers NSURLSessionTransferSizeUnknown - and it is read before the
-           note, because the note used to be given an int64_t that had not been assigned yet. */
         int64_t beforeEncoding = charon_expected_body_length(task, task->_currentRequest);
         [task->_metricsTransactions.lastObject charon_noteBytesSent:total
                                                      beforeEncoding:beforeEncoding

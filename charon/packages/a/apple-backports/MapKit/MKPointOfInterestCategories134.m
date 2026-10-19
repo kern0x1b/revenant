@@ -1,17 +1,3 @@
-// The point of interest categories iOS 13.4 added, and the camera's default zoom distance of iOS 13.4. Apple's
-// map knows a place by one of these strings, so a filter built against them is the filter Apple's
-// own map understands; the values are Apple's, read from Apple's own image. The two iOS 16.0 names of
-// the same header are in MKPointOfInterestCategories16.m.
-//
-// The values are Apple's own, read out of the MapKit.framework of macOS 27.0 (build 26A428): a
-// generated probe declares each of these as the extern its own SDK header declares, links against
-// that framework, and prints what the symbol holds. The measurement is in
-// tests/backports/host/mapkit-constants, which fails the moment a name is missing there, so a
-// value this file gets wrong is a value the host disagrees with.
-//
-// MKMapCameraZoomDefault is -1 in the macOS image and -1.0 read out of the MapKit image dyld.extract
-// took of the arm64e dyld shared cache of 18.0, so the two agree.
-
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
 #import <MapKit/MapKit.h>

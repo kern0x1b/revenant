@@ -1,65 +1,9 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-/* The Markdown of iOS 15.0: the parsing options class and the three initialisers that read a document.
-
-   The release's own answer is a tree of NSPresentationIntent, one per block, hanging off the block that
-   holds it, and the span spans carry NSInlinePresentationIntentAttributeName beside it. What the system's
-   own Foundation does with a document, measured by tests/backports/host/attributed15/run.sh where the
-   port's parser and the system's are one process and every document is compared run for run:
-
-     a heading is a header intent with its level, a paragraph a paragraph intent, a fenced or indented
-     code block a code block intent with the info string as its language hint, "***" a thematic break
-     intent and the two-em dash U+2E3B as its text, "> " a block quote intent with a paragraph inside
-     it, a list a list intent with an item intent per entry carrying its ordinal from 1;
-     the identities are numbered from 1 in document order, a container before the things it holds;
-     a link carries NSLinkAttributeName with its URL resolved against the baseURL, an image
-     NSImageURLAttributeName likewise, and a table is a table intent with its column count and the
-     alignments of its header, a header row intent, a row intent per body row from 1 and a cell intent
-     per cell with its column from 0 - the cells of a row follow one another with nothing between them;
-     the span spans are NSInlinePresentationIntent: emphasized 1, strongly 2, code 4, strikethrough 32,
-     a soft break 64 and a hard break 128, and the extended syntax is interpreted with the default
-     options even though allowsExtendedAttributes answers NO.
-
-   The key a link's URL rides under is the release's own string and not the C name that spells it, and
-   this object carries that string under a name of its own. NSLinkAttributeName is declared in UIKit's
-   copy of NSAttributedString.h and in no Foundation header, the 16.4 SDK exports it from UIKit and not
-   from Foundation, and the device carries it in UIFoundation: read out of the armv7 dyld cache of
-   6.1.3 itself, /System/Library/PrivateFrameworks/UIFoundation.framework/UIFoundation holds
-   _NSLinkAttributeName among its external defined symbols, and its __TEXT,__cstring holds the family
-   NSFontName NSFontSize NSFontTrait NSBaselineOffset NSAttachment NSLink NSCharacterShape - one string
-   per attribute name, and the link's is NSLink and not NSLinkAttributeName.
-
-   So the name is the release's and this library must not define it: a second definition of a data
-   symbol the device already exports is a collision in a flat namespace. The Foundation library links
-   Foundation, CoreFoundation and SystemConfiguration and nothing that carries the name, which is why
-   a reference to it does not link here while the device has it all the same, and which is why the
-   string is taken instead. The string is what an attributed string holds and what a caller reads back
-   through the release's own NSLinkAttributeName, so carrying it is what makes the round trip answer.
-   The shape is NSBundleResourceRequest.m's charon_manifest_tags_key - an Apple string under a name of
-   our own - and the reason is the one NSLanguageIdentifierAttributeName already has here: for this
-   key the name is not the value.
-
-   What the port does not carry, measured and named rather than faked: NSListItemDelimiterAttributeName,
-   which the system puts on a list item's run and which the SDK this port builds against (iPhoneOS16.5)
-   does not declare, so the item's run carries its intent and not the delimiter. A
-   NSAttributedStringMarkdownSourcePosition, which is 16.0 and not this release's, is carried in
-   Foundation/NSAttributedStringMarkdownSourcePosition.m. The block kinds and
-   the span spans above are what facts/Foundation/AttributedStrings15.md and the differential's own
-   cases cover. */
-
 #pragma mark - the options class
 
-/* The options class whole, and no @interface beside it: the SDK this port builds against declares it
-   with its five properties, and a redeclaration is a duplicate definition the gate fails on. What the
-   class does is a copy of five values and a keyed archive of the same five - the keys are the SDK's own
-   property names, read out of an archive the system's own class wrote. */
 @implementation NSAttributedStringMarkdownParsingOptions
-
-/* -init is the SDK's own declaration and NSObject's answer: an options object with everything at the
-   default, which is measured - allowsExtendedAttributes NO, interpretedSyntax full, failurePolicy
-   return the error, languageCode nil and appliesSourcePositionAttributes NO - and which is why the
-   defaults are answered by allocation and not written out here. */
 
 - (instancetype)init
 {
@@ -108,9 +52,6 @@
 
 #pragma mark - the document
 
-/* One block of the tree, with the text that belongs to it and the intent that names it. The tree is built
-   in one pass over the lines, so a container's intent exists before the blocks it holds ask for it and
-   the identities come out in document order without a second numbering pass. */
 typedef NS_ENUM(NSInteger, CharonMarkdownKind) {
     CharonMarkdownParagraph,
     CharonMarkdownHeader,
@@ -122,15 +63,15 @@ typedef NS_ENUM(NSInteger, CharonMarkdownKind) {
 };
 
 typedef struct {
-    NSUInteger start;          /* the first line of the block */
-    NSUInteger end;            /* one past its last line */
-    NSUInteger indent;         /* the columns of block structure above it */
+    NSUInteger start;
+    NSUInteger end;
+    NSUInteger indent;
     CharonMarkdownKind kind;
-    NSInteger level;           /* a heading's level */
-    BOOL ordered;              /* a list's */
-    NSString *language;        /* a code block's info string, its language hint */
+    NSInteger level;
+    BOOL ordered;
+    NSString *language;
     NSPresentationIntent *intent;
-    NSMutableArray *children;  /* the blocks it holds, each an NSValue of a CharonMarkdownBlock pointer */
+    NSMutableArray *children;
 } CharonMarkdownBlock;
 
 static BOOL CharonMarkdownBlank(NSString *line)
@@ -141,8 +82,6 @@ static BOOL CharonMarkdownBlank(NSString *line)
     return YES;
 }
 
-/* The columns of leading spaces, a tab counting as the next multiple of four, which is what the release
-   counts and what makes a tab-indented fence a fence. */
 static NSUInteger CharonMarkdownIndent(NSString *line)
 {
     NSUInteger columns = 0, limit = line.length;
@@ -218,7 +157,6 @@ static NSInteger CharonMarkdownHeading(NSString *trimmed, NSString **text)
     return (NSInteger)level;
 }
 
-/* A list marker at the head of a line: the bullet, or an ordered number with its delimiter. */
 static BOOL CharonMarkdownBullet(NSString *trimmed, BOOL *ordered, NSUInteger *width)
 {
     unichar first = trimmed.length ? [trimmed characterAtIndex:0] : 0;
@@ -273,8 +211,6 @@ static NSArray *CharonMarkdownCells(NSString *line, NSArray **alignments)
             continue;
         }
         if (c == '|') {
-            /* A C call is not written inside a message's argument: [receiver addObject:[f(x)]] reads as a
-               cast to the compiler, so the value is named first. The tree's own files hoist every one. */
             NSString *finished = CharonMarkdownTrimmed(cell);
             [cells addObject:finished];
             [cell setString:@""];
@@ -287,10 +223,6 @@ static NSArray *CharonMarkdownCells(NSString *line, NSArray **alignments)
         [cells addObject:last];
     }
     if (alignments) {
-        /* The alignment is the one the divider declares, as the number the intent carries: 0 left, 1
-           centre, 2 right, which is NSTextAlignment's own enumeration. The name of the enumeration is
-           UIKit's on iOS and this file is Foundation's, and the intent takes an NSNumber either way.
-           A table of "| - | - |" answers "left,left" on both sides, measured. */
         for (NSString *one in cells) {
             BOOL left = [one hasPrefix:@":"], right = [one hasSuffix:@":"];
             [found addObject:@(left && right ? 1 : right ? 2 : 0)];
@@ -336,8 +268,6 @@ static NSArray *CharonMarkdownCells(NSString *line, NSArray **alignments)
     return _options.interpretedSyntax == NSAttributedStringMarkdownInterpretedSyntaxFull;
 }
 
-/* The one option that keeps the source's own spacing between two lines; the other two collapse it to a
-   single separator space, which is what the release does with the default options (measured). */
 - (BOOL)keepsSourceSpacing
 {
     return _options.interpretedSyntax == NSAttributedStringMarkdownInterpretedSyntaxInlineOnlyPreservingWhitespace;
@@ -359,8 +289,6 @@ static NSArray *CharonMarkdownCells(NSString *line, NSArray **alignments)
 
 #pragma mark the span spans
 
-/* The key a link's URL rides under, which is the release's own "NSLink" and not the C name that spells
-   it. Why the name is not taken and where the string was read is at the head of this file. */
 static NSString *const CharonMarkdownLinkKey = @"NSLink";
 
 - (NSURL *)urlFor:(NSString *)text
@@ -372,8 +300,6 @@ static NSString *const CharonMarkdownLinkKey = @"NSLink";
     return [NSURL URLWithString:text relativeToURL:_baseURL];
 }
 
-/* The link or image destination: everything up to whitespace is the target and the rest, in quotes, is
-   the title, which no attribute carries and which is dropped the way the release drops it. */
 - (NSString *)targetIn:(NSString *)body
 {
     NSString *trimmed = [body stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
@@ -399,9 +325,6 @@ static NSString *const CharonMarkdownLinkKey = @"NSLink";
                                                                                              extra:extra]]];
 }
 
-/* Where a bracketed run opened at `start` is closed, counting the nesting so a link inside a link's
-   text is one run. Links nest ("[a [b](c)](d)"), so the depth is counted and not the first bracket
-   taken, and an escaped bracket is not one. */
 static NSUInteger CharonMarkdownBracketEnd(NSString *text, NSUInteger start, unichar open, unichar close, NSUInteger limit)
 {
     NSUInteger depth = 0, index = start;
@@ -420,9 +343,6 @@ static NSUInteger CharonMarkdownBracketEnd(NSString *text, NSUInteger start, uni
     return NSNotFound;
 }
 
-/* Where a run of `runLength` copies of a marker opened at `start` is closed, the way emphasis and the
-   extended strikethrough close: an escaped marker is not one, and a run of a different length is not
-   this one's. */
 static NSUInteger CharonMarkdownMarkerEnd(NSString *text, NSUInteger start, unichar mark, NSUInteger runLength, NSUInteger limit)
 {
     NSUInteger index = start;
@@ -446,7 +366,6 @@ static NSUInteger CharonMarkdownMarkerEnd(NSString *text, NSUInteger start, unic
     return NSNotFound;
 }
 
-/* Where a link or image destination opened after a `(` at `body` is closed. */
 static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger limit, NSUInteger *at)
 {
     NSUInteger depth = 1, index = body;
@@ -467,10 +386,6 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
     return NO;
 }
 
-/* One emphasis-like span, and whether there was one: the character and how many copies of it open the
-   span decide the value, so "*x*" is 1, "**x**" and "__x__" are 2 and "~~x~~" is 32. A marker that opens
-   nothing - a lone "*", or a "~~" with no closing pair - is text, and the scan moves on by the run it
-   did see so a following character is not skipped. */
 - (BOOL)parseMarkerIn:(NSString *)text
                index:(NSUInteger *)index
                plain:(NSUInteger *)plain
@@ -498,8 +413,6 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
     innerEnd = close;
     [self appendInline:text from:*plain to:*index intent:intent span:0 extra:nil];
     [self parseInlines:text from:inner to:innerEnd intent:intent];
-    /* the span is one attribute over the runs inside it, which keep their own block intent and the
-       nested spans among them */
     [_result addAttribute:NSInlinePresentationIntentAttributeName
                    value:@(value)
                    range:NSMakeRange(_result.length - (innerEnd - inner), innerEnd - inner)];
@@ -516,9 +429,6 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
     NSUInteger index = start, plain = start, limit = end;
     while (index < limit) {
         unichar c = [text characterAtIndex:index];
-        /* A hard break is two spaces or a backslash at the end of a line and a soft break is the newline
-           itself. Neither the spaces nor the backslash is text: the release's own drops them, and a run
-           that kept them would carry the break's marker as characters. */
         if (c == '\n' || c == '\r') {
             NSUInteger at = index, after = index + 1, spaces, cut;
             BOOL backslash, hard;
@@ -531,11 +441,6 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
             cut = backslash ? spaces - 1 : spaces;
             hard = backslash || at - spaces >= 2;
             [self appendInline:text from:plain to:cut intent:intent span:0 extra:nil];
-            /* A soft break is one separator space and not the newline, measured: "one\ntwo" answers
-               "one two" with a run of one space carrying NSInlinePresentationIntentSoftBreak. The
-               options' own InlineOnlyPreservingWhitespace is the one that keeps the source's spacing,
-               and there the newline is what the source has. A hard break is a line break in the answer
-               either way. */
             [_result appendAttributedString:
                 [[NSAttributedString alloc] initWithString:hard ? @"\n" : ([self keepsSourceSpacing] ? @"\n" : @" ")
                                                attributes:[self blockAttributes:intent
@@ -546,7 +451,6 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
             plain = index;
             continue;
         }
-        /* a backslash escape: the escaped character is text and the backslash is not */
         if (c == '\\' && index + 1 < limit) {
             [self appendInline:text from:plain to:index intent:intent span:0 extra:nil];
             [_result appendAttributedString:
@@ -556,8 +460,6 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
             plain = index;
             continue;
         }
-        /* a code span: the shortest run of backticks, closed by a run of the same length, with one space
-           stripped from each end of the content the way the release strips it */
         if (c == '`') {
             NSUInteger run = 0, close = index, search, found = NSNotFound, here;
             while (close < limit && [text characterAtIndex:close] == '`')
@@ -597,13 +499,10 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
             index = close;
             continue;
         }
-        /* emphasis and strong emphasis, and the extended strikethrough, which differ only in the
-           character and in how many copies of it open the span */
         if (c == '*' || c == '_' || c == '~') {
             if ([self parseMarkerIn:text index:&index plain:&plain limit:limit intent:intent])
                 continue;
         }
-        /* an image: its alt text is text and the run carries NSImageURLAttributeName */
         if (c == '!' && index + 1 < limit && [text characterAtIndex:index + 1] == '[') {
             NSUInteger close = CharonMarkdownBracketEnd(text, index + 1, '[', ']', limit), at;
             if (close != NSNotFound && close + 1 < limit && [text characterAtIndex:close + 1] == '('
@@ -623,7 +522,6 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
             index++;
             continue;
         }
-        /* a link */
         if (c == '[') {
             NSUInteger close = CharonMarkdownBracketEnd(text, index, '[', ']', limit), at;
             if (close != NSNotFound && close + 1 < limit && [text characterAtIndex:close + 1] == '('
@@ -643,7 +541,6 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
             index++;
             continue;
         }
-        /* an autolink: <https://example.com> is a link whose text is its own address */
         if (c == '<') {
             NSUInteger close = index + 1;
             NSString *inside;
@@ -678,8 +575,6 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
 
 #pragma mark - the blocks
 
-/* The lines of a document, split once. A line keeps its own trailing newline so a paragraph's text can
-   be handed to the span pass with the breaks it really has. */
 - (NSArray *)linesOf:(NSString *)markdown
 {
     NSMutableArray *lines = [NSMutableArray array];
@@ -706,8 +601,6 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
 {
     NSUInteger at = start;
     NSMutableString *paragraph = [NSMutableString string];
-    /* a paragraph ends at the first line that starts another block, so the text is only handed on once
-       the block that follows it is known */
     #define CharonFlushParagraph() do { \
         if (paragraph.length) { \
             NSPresentationIntent *intent = [NSPresentationIntent paragraphIntentWithIdentity:[self nextIdentity] nestedInsideIntent:item ?: parent]; \
@@ -731,13 +624,10 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
             at++;
             continue;
         }
-        /* a thematic break: three or more of one marker and nothing else, which is a paragraph's "---"
-           only when it is a whole line of its own */
         if (CharonMarkdownThematic(trimmed)) {
             CharonFlushParagraph();
             NSPresentationIntent *intent = [NSPresentationIntent thematicBreakIntentWithIdentity:[self nextIdentity]
                                                                             nestedInsideIntent:parent];
-            /* the release's own text for a break is the two-em dash and not three asterisks */
             [_result appendAttributedString:[[NSAttributedString alloc] initWithString:@"\u2E3B"
                                                                            attributes:[self blockAttributes:intent
                                                                                               span:0
@@ -821,7 +711,6 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
             at = last + 1;
             continue;
         }
-        /* a table: a divider line under a header line, and the divider is what makes it one */
         if ([trimmed hasPrefix:@"|"] && at + 1 < end && CharonMarkdownDivider(CharonMarkdownTrimmed([lines objectAtIndex:at + 1]))) {
             CharonFlushParagraph();
             NSArray<NSNumber *> *alignments = nil;
@@ -870,9 +759,6 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
             NSPresentationIntent *list = ordered
                 ? [NSPresentationIntent orderedListIntentWithIdentity:[self nextIdentity] nestedInsideIntent:parent]
                 : [NSPresentationIntent unorderedListIntentWithIdentity:[self nextIdentity] nestedInsideIntent:parent];
-            /* the items of one list are the consecutive lines that open with the same kind of marker at
-               the same indent, and a blank line or a line of other text ends it the way the release
-               ends it */
             {
                 NSUInteger item = 0, body = at;
                 while (body < end) {
@@ -883,7 +769,6 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
                     NSPresentationIntent *itemIntent;
                     NSMutableArray *inner = [NSMutableArray array];
                     if (!candidateTrimmed.length) {
-                        /* a blank line ends the list unless the line after it is an item of it */
                         NSUInteger look = body + 1;
                         if (look >= end)
                             break;
@@ -905,16 +790,11 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
                                                                    nestedInsideIntent:list];
                     [inner addObject:[candidateTrimmed substringFromIndex:candidateWidth]];
                     body++;
-                    /* a continuation line is one indented to the item's content, and a lazy paragraph
-                       line is one that is not a block of its own */
                     while (body < end) {
                         NSString *next = [lines objectAtIndex:body];
                         NSString *nextTrimmed = CharonMarkdownTrimmed(next);
                         BOOL nextOrdered, nextIsItem;
                         NSUInteger nextWidth;
-                        /* a line that opens the next item of this same list ends this one: without that
-                           every entry would be one paragraph and the list would have an intent of its own
-                           per entry, which is not the shape the release numbers them in (measured). */
                         nextIsItem = CharonMarkdownBullet(nextTrimmed, &nextOrdered, &nextWidth)
                                      && nextOrdered == ordered && CharonMarkdownIndent(next) == indent;
                         if (nextIsItem)
@@ -938,7 +818,6 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
             }
             continue;
         }
-        /* anything else is a paragraph line, and a blank line or a block of its own ends it */
         if (paragraph.length)
             [paragraph appendString:@"\n"];
         [paragraph appendString:trimmed];
@@ -948,9 +827,6 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
     #undef CharonFlushParagraph
 }
 
-/* The document, whole. The result is built once, in document order, so the intents' identities come out
-   numbered from 1 with a container before the things it holds - which is the order the release numbers
-   them in, measured. */
 - (NSAttributedString *)parse:(NSString *)markdown
 {
     _result = [[NSMutableAttributedString alloc] init];
@@ -966,20 +842,8 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
 
 #pragma mark - the three initialisers
 
-/* The three ways a document arrives: a file, data, a string. All three read the same parser and answer
-   the same string; they differ only in where the bytes come from and in what an unreadable one says.
-
-   A document that cannot be read or decoded is a refusal, and the refusal is the release's own shape: nil
-   and an NSError under NSURLErrorDomain / NSFileReadUnknownError, which is what
-   -[NSString initWithContentsOfFile:encoding:error:] answers for bytes that are not text. The options'
-   failurePolicy decides what happens instead: NSAttributedStringMarkdownParsingFailureReturnPartially
-   ParsedIfPossible keeps the text that was read, and the default returns the error. */
 static NSError *CharonMarkdownError(NSInteger code, NSString *reason)
 {
-    /* The release's own shape for a document it cannot read: NSCocoaErrorDomain and
-       NSFileReadUnknownError, which is what -[NSString initWithContentsOfFile:encoding:error:] answers
-       for bytes that are not text. A file that cannot be opened answers the reader's own error instead,
-       passed through rather than rebuilt. */
     return [NSError errorWithDomain:NSCocoaErrorDomain
                                code:code
                            userInfo:@{NSLocalizedDescriptionKey: reason ?: @"The data could not be read."}];

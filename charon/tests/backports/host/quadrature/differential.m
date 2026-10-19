@@ -1,37 +1,3 @@
-// The port's quadrature_integrate held against the host's own Accelerate, case by case: the same integrand
-// through each, comparing the integral, the status, the absolute error and the number of points the
-// caller's callback saw.
-//
-// The header says the integrators are "C ports of the QUADPACK library corresponding routines", so the
-// numbers are expected to agree to the last few bits and not merely to the tolerance: two implementations
-// that both integrate x^2 from 0 to 1 agree to fifteen digits whether or not either is QUADPACK's, and the
-// per-case tolerance here is one part in 1e12 of the answer, which a different rule or a different
-// subdivision order cannot reach.
-//
-// The cases are chosen so each one can only pass by being the same algorithm:
-//
-//   - the point counts the header lists, each of which makes the callback see its own count (measured on the
-//     host: 63 points for 21 and 105 for 15 on the same integral), so a case that passed all six with one
-//     rule would be a check that cannot fail;
-//   - max_intervals of one and two, where QAG and QAGS part company because the epsilon extrapolation
-//     needs more intervals than QAG's plain bisection (measured: QAG with two answers QUADRATURE_SUCCESS
-//     and QAGS answers -101);
-//   - the subdivision limit from a workspace of exactly one interval's bytes and of one byte less, which is
-//     the boundary the header's QUADRATURE_INTEGRATE_QAG_WORKSPACE_PER_INTERVAL names;
-//   - an infinite bound, which only QAGS takes. There the contract is the answer and the batching is not part
-//     of it, so the two batch sequences are printed and recorded and not asserted; the two integrands with no
-//     finite integral over an unbounded range are checked against QUADPACK's promise of an error and nothing
-//     else. Both are said where they are compared, with the measurements that forced them.
-//   - the refusals: a NULL function, a NULL options, a count the header does not list, an integrator the
-//     enumeration does not name, both tolerances zero, and an unreachable tolerance.
-//
-// There is no red control case in here, and there never was: the check that the comparison can fail is a
-// mutation of the port, run and pasted in the report rather than built in - one ULP-class weight mixup in
-// charon_dqk goes to 53 failures of 86, and dqagse's loop roundoff flag put back for QAGS takes the 1e-300
-// case red on its own. The comment above used to claim a last case that compared the port's answer with a
-// rule one node out against the host's; no such case exists, and the claim is withdrawn rather than
-// implemented, because a second copy of the node tables in the test is a thing this tree does not do.
-
 #import <Accelerate/Accelerate.h>
 #import <Foundation/Foundation.h>
 #include <math.h>
@@ -39,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// The port's one, through the name the runner renames it to.
 double charon_host_quadrature_integrate(const quadrature_integrate_function *f, double a, double b,
                                         const quadrature_integrate_options *options, quadrature_status *status,
                                         double *abs_error, size_t workspace_size, void *workspace);
@@ -59,7 +24,6 @@ static void report(int passed, const char *name, const char *why)
     }
 }
 
-// The integrands, each one named by its exact integral where it has one.
 enum { SQUARE = 0, SINE, LORENTZ, EXPONENT, RUNGE };
 static const char *const kNames[] = {"x^2", "sin", "1/(1+x^2)", "exp(-x)", "1/(1+100 x^2)"};
 
@@ -106,9 +70,6 @@ static void build_function(void)
     theFunction.fun_arg = NULL;
 }
 
-// The exact integral of each integrand over [a, b], in the closed form of the integrand itself, so that the
-// header's own claim can be checked against something neither side can move. NAN where a bound is at
-// infinity, where the case's contract is the status and the batching alone.
 static double exact_integral(int integrand, double a, double b)
 {
     if (isinf(a) || isinf(b)) {
@@ -128,18 +89,11 @@ static double exact_integral(int integrand, double a, double b)
     }
 }
 
-// Whether the integrand has a finite integral over an unbounded range. x^2 and sin do not: sin over 0 to
-// infinity has no limit at all, so a quadrature of it walks out to max_intervals and QUADPACK answers one of
-// its two codes for exactly that - ier = 1, "the number of subintervals reached LIMIT", or ier = 3, "the
-// integral is divergent, or the absolute error is maximal" - which the header maps to -101 and -102. There is
-// no answer for the two sides to agree on, so the case below asserts that the port reports an error and
-// records the host's.
 static int converges_at_infinity(int integrand)
 {
     return integrand != SQUARE && integrand != SINE;
 }
 
-// One call on each side, with the same options, and the comparison of everything both of them answer.
 static void one(const char *name, int integrand, double a, double b, quadrature_integrator integrator,
                 double abstol, double reltol, size_t points_per_interval, size_t max_intervals, size_t workspace_size)
 {
@@ -177,21 +131,8 @@ static void one(const char *name, int integrand, double a, double b, quadrature_
     int theirCount = batch_count < 64 ? batch_count : 64;
     memcpy(theirSizes, batch_sizes, sizeof(size_t) * (size_t)theirCount);
 
-    // The same arithmetic on both sides, and the count of points, which is what tells the rules apart. Over a
-    // bound at infinity the counts are recorded and not asserted: the header's contract for this call is the
-    // answer - the value, the estimate and the status - and the batching is not part of it, because a
-    // callback sees the same points however they are grouped. The host does not group them the way a QUADPACK
-    // port does: over 1/(1+x^2) from 0 to infinity it alternates a call of 15 transformed abscissae with a call
-    // of 21 abscissae over (0,1) itself, 15 21 15 over 51 points, where dqagie makes one 15-point pass and asks
-    // for nothing else. Both sequences are printed on every failure of such a case, and on every pass, so the
-    // difference is on the record per case rather than asserted.
     double scale = fabs(theirs) > 1.0 ? fabs(theirs) : 1.0;
     int unbounded = isinf(a) || isinf(b);
-    // Over an infinite bound and an integrand with no finite integral there, the two sides have no common
-    // answer to compare: QUADPACK answers ier = 1 or ier = 3, the header maps those to -101 and -102, and the
-    // host answers QUADRATURE_SUCCESS with 5.5384500034908009e+34 over x^2 and -647.55276816795913 over sin.
-    // What is checked is QUADPACK's own promise for a divergent integral - an error, never success - and both
-    // answers are printed.
     int divergent = unbounded && !converges_at_infinity(integrand);
     int ok = divergent ? (myStatus != QUADRATURE_SUCCESS)
                        : (myStatus == theirStatus && fabs(mine - theirs) <= 1e-12 * scale);
@@ -201,20 +142,6 @@ static void one(const char *name, int integrand, double a, double b, quadrature_
             ok = mySizes[k] == theirSizes[k];
         }
     }
-    // And the estimate, which is checked against the integral rather than against the host's own estimate of
-    // it. Comparing the two estimates was this file's rule until it was measured to be unreachable: QUADPACK's
-    // estimate is resasc*hlgth*min(1,(200*raw/resasc)^1.5) with raw = |resk-resg|*hlgth, and for these
-    // integrands raw cancels four digits against resk, so one ULP in the 21-point answer moves the estimate
-    // by 8.7e-12 relative - measured on 1/(1+100 x^2) over 0..1, where the 21 abscissae and all 29 tables are
-    // bit-identical on the two sides and dq21.f's own statements, computed by the compiler in a separate
-    // program, give the port's 0.14711276428245135 and 0.00020524906934811635 against the host's
-    // 0.14711276428245137 and 0.00020524906934901214. The host does not agree with itself: over 1/(1+100 x^2)
-    // from -1 to 1 at 1e-12 its QAG reports 0.29422553486074693 with an error of 3.276688748373941e-15 and its
-    // QAGS 0.29422553486074687 with 3.2661123246874664e-15, so its two estimates sit 3.2e-3 relative apart -
-    // four hundred thousand times further apart than the port is from either, and its two values two ULP
-    // apart as well. What is asserted instead is what the header states: on success the answer verifies
-    // abs(S - S') <= max(abs_tolerance, rel_tolerance*abs(S)) with S the integral computed above, and an
-    // estimate of the absolute error does not come back below the error it reports.
     double exact = exact_integral(integrand, a, b);
     if (ok && myStatus == QUADRATURE_SUCCESS && exact == exact) {
         double wanted = fmax(abstol, reltol * fabs(exact));
@@ -236,8 +163,6 @@ static void one(const char *name, int integrand, double a, double b, quadrature_
         }
     }
     if (ok && unbounded) {
-        // A passing case over an infinite bound still prints both answers and its two batch sequences, so the
-        // recorded difference is on the line rather than only in this file's comment.
         printf("     %s: port %.17g status %d | host %.17g status %d | batches port", name, mine, (int)myStatus,
                theirs, (int)theirStatus);
         for (int k = 0; k < myCount; k++) {
@@ -259,7 +184,6 @@ int main(void)
     setvbuf(stdout, NULL, _IONBF, 0);
     build_function();
     const char *integrators[3] = {"QNG", "QAG", "QAGS"};
-    // Every integrand, every integrator, three intervals and three tolerances.
     for (int i = 0; i < 3; i++) {
         for (int k = 0; k < 5; k++) {
             char name[160];
@@ -271,8 +195,6 @@ int main(void)
             one(name, k, -1.0, 1.0, (quadrature_integrator)i, 1e-12, 1e-12, 0, 100, 0);
         }
     }
-    // The point counts the header lists, each of which is its own rule: a case that passed all six with one
-    // rule would be a check that cannot fail, so the callback's count is compared too.
     {
         const size_t counts[6] = {15, 21, 31, 41, 51, 61};
         for (int k = 0; k < 6; k++) {
@@ -282,8 +204,6 @@ int main(void)
             one(name, LORENTZ, -1.0, 1.0, QUADRATURE_INTEGRATE_QAG, 1e-12, 1e-12, counts[k], 100, 0);
         }
     }
-    // The subdivision limit: one and two intervals, where QAG and QAGS part company, and the boundary a
-    // workspace of exactly one interval's bytes sits on.
     for (size_t limit = 1; limit <= 3; limit++) {
         char name[160];
         for (int k = 1; k <= 2; k++) {
@@ -310,13 +230,11 @@ int main(void)
         one(name, LORENTZ, -1.0, 1.0, QUADRATURE_INTEGRATE_QAGS, 1e-12, 1e-12, 0, 0,
             3 * QUADRATURE_INTEGRATE_QAGS_WORKSPACE_PER_INTERVAL);
     }
-    // A bound at infinity, which only QAGS takes.
     for (int k = 0; k < 5; k++) {
         char name[160];
         snprintf(name, sizeof name, "QAGS over %s from 0 to infinity", kNames[k]);
         one(name, k, 0.0, INFINITY, QUADRATURE_INTEGRATE_QAGS, 1e-8, 1e-8, 0, 200, 0);
     }
-    // The refusals, each of which both sides have to answer the same way.
     {
         quadrature_integrate_options o;
         quadrature_status myStatus = QUADRATURE_SUCCESS, theirStatus = QUADRATURE_SUCCESS;
@@ -326,9 +244,6 @@ int main(void)
         o.abs_tolerance = 1e-10;
         o.rel_tolerance = 1e-10;
         which = SQUARE;
-        // The header declares both pointers nonnull; these two cases ask what each side does when a caller
-        // passes NULL anyway, so the NULL is handed over through a variable rather than written as a literal
-        // the compiler would refuse on the header's word.
         const quadrature_integrate_function *noFunction = NULL;
         const quadrature_integrate_options *noOptions = NULL;
         double mine = charon_host_quadrature_integrate(noFunction, 0.0, 1.0, &o, &myStatus, &myError, 0, NULL);
@@ -350,8 +265,6 @@ int main(void)
         report(mine == 0.0 && theirs == 0.0 && myStatus == theirStatus && myStatus == QUADRATURE_INVALID_ARG_ERROR,
                "a NULL options", detail);
     }
-    // A count the header does not list, an integrator the enumeration does not name, both tolerances zero and
-    // an unreachable tolerance: each is one case, and the host's answers are in facts/Accelerate/Quadrature.md.
     {
         char name[160];
         const size_t bad_counts[3] = {10, 20, 100};
@@ -375,11 +288,9 @@ int main(void)
                     100, 0);
             }
         }
-        // An infinite bound to the integrator that does not take one.
         snprintf(name, sizeof name, "QNG over 0..infinity, which only QAGS takes");
         one(name, LORENTZ, 0.0, INFINITY, QUADRATURE_INTEGRATE_QNG, 1e-8, 1e-8, 0, 100, 0);
     }
-    // The bounds themselves: a == b, and a > b, which the header says "do not need to verify a <= b".
     {
         char name[160];
         snprintf(name, sizeof name, "QAG over x^2 with a == b");

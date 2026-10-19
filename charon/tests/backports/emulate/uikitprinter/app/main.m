@@ -1,20 +1,9 @@
-//
-//  app/main.m
-//  The Bonjour printer picker (UIPrinterPickerController, libUIKitBackports) as an application on the emulated iPhone 4S at
-//  6.1.3. The application starts a bare NSNetServiceBrowser as a control, then presents the picker over its key window. What
-//  the emulator can show: the presentation, and the completion when the browse fails. What it cannot: a list. On this guest
-//  the browse reports "did not search" (NSNetServicesErrorDomain -72004) for the bare browser as well as for the picker, so
-//  the picker dismisses with userDidSelect NO before any list is shown, and the empty-list case is not measured here. The
-//  application's standard output is the verdict; run-app.sh reads it.
-//
-
 #import <UIKit/UIKit.h>
 
 static NSObject *charon_delegate;
 static UIPrinterPickerController *charon_picker;
 static int charon_completions;
 
-// The delegate's calls are printed in the order the picker makes them, so the run's order can be read off the log.
 @interface CharonPickerDelegate : NSObject <UIPrinterPickerControllerDelegate>
 @end
 
@@ -52,8 +41,6 @@ static int charon_completions;
 
 @end
 
-// A browse made with no picker: the control for the picker's own browse. If the release's Bonjour cannot browse in the
-// guest, this one reports it too, and the picker's failure is the guest's and not the port's.
 @interface CharonBareBrowser : NSObject <NSNetServiceBrowserDelegate>
 @end
 

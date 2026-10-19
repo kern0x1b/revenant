@@ -1,7 +1,3 @@
-// The value Apple's own MediaPlayer holds for MPMediaPlaylistPropertySeedItems, read and nothing else:
-// the constants are `NSString * const` data symbols, so linking the framework answers the question. This
-// Mac HAS the framework; the 6.1.3 release does not export any of MediaPlayer's 36 constants, so the port
-// carries the value itself and the only honest source for it is Apple's own copy.
 #import <Foundation/Foundation.h>
 #import <MediaPlayer/MediaPlayer.h>
 

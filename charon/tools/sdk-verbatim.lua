@@ -1,32 +1,3 @@
--- xmake l tools/sdk-verbatim.lua [--words N] SDKROOT FILE...
---
--- Finds the comment text of FILE... that occurs verbatim among the comments of the SDK at SDKROOT.
--- A comment copied from an SDK header is Apple's expression in our tree, which the workspace rule keeps
--- out of a repository (2026-10-12). This is the mechanical half of that rule: it names each hit by file
--- and line, and a person decides whether the line is a fact (a declaration, a measured value) or prose.
---
--- A comment run is the text one comment holds on a source line: the part of `//` or `///` after the
--- marker, or the part of a `/* */` comment on the line, outside string and character literals. Both sides
--- are read the same way: the comment markers (`/`, `!`, `*`) and a trailing `*/` are dropped, whitespace
--- runs collapse to one space, the text is trimmed and lower-cased. Declarations are not comment text and
--- are not read: a signature is a fact, and a port comment that repeats one is not a copy of Apple's prose.
---
--- Two modes run on every call:
---   run     one of our comment runs equals one of the SDK's. Compared when it has a letter or digit and is
---           at least 19 characters OR at least 4 words: the floor is "19 characters or 4 words", so a run of
---           four words is compared at any length, and a run of up to three words only at 19 characters or
---           more. Shorter runs are too common to mean a copy, and a ruler is a shape.
---   wordsN  N consecutive words of our comment text occur inside the SDK's comment text, N being --words N
---           (8 by default; the report and its hit labels say which). Comment text is
---           read in blocks here: the maximal run of consecutive comment lines of one file, joined by one
---           space, so a sentence that Apple wraps over several lines still matches. The windows are exact
---           Lua strings, not hashes, so there is no collision to count; the summary prints how many distinct
---           windows our files have.
---
--- Exit status (status()): 2 when an input cannot be read (the SDK root, one of our files, one SDK header);
--- otherwise 1 when a mode hit, whatever else the scan did, because a hit is never an error; otherwise 2 when
--- a mode compared nothing on either side, since a run that compared nothing is not a pass; otherwise 0.
--- The text of a hit is not printed, only its places.
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "modules")})
 
 local MIN_CHARS, MIN_WORDS = 19, 4
@@ -47,15 +18,11 @@ local function words_of(text)
     return list
 end
 
--- A ruler (a line of dashes or stars) has no letter or digit and is not compared: it is a shape, not prose.
 local function compared(text)
     if not text:find("%w") then return false end
     return #text >= MIN_CHARS or #words_of(text) >= MIN_WORDS
 end
 
--- The comment runs of one line, given whether the line starts inside a block comment. Returns the runs
--- and whether the line ends inside a block comment. String and character literals are skipped, so a
--- `//` inside a string is not read as a comment.
 local function comment_runs(line, in_block)
     local runs, i, n = {}, 1, #line
     while i <= n do
@@ -88,9 +55,6 @@ local function comment_runs(line, in_block)
     return runs, in_block
 end
 
--- Reads one file: on_run(text, line) for each comment run that has a letter or digit, and
--- on_block(text, first, last) for each block of consecutive comment lines, after its last line.
--- Returns false when the file cannot be read.
 local function read_comments(file, on_run, on_block)
     local handle = io.open(file, "r")
     if not handle then return false end
@@ -124,7 +88,6 @@ local function read_comments(file, on_run, on_block)
     return true
 end
 
--- Our side: the comment runs and the 8-word windows of every file, with the places each occurs.
 local function read_ours(files, report, window)
     local runs, windows = {}, {}
     for _, file in ipairs(files) do
@@ -168,7 +131,6 @@ function scan(root, files, window)
     for _ in pairs(windows) do report.keys_ours = report.keys_ours + 1 end
     local run_hits, words_hits = {}, {}
 
-    -- The SDK's comment runs and 8-word windows, each header read once.
     local headers = {}
     for _, dir in ipairs(SDK_DIRS) do
         for _, header in ipairs(os.files(path.join(root, dir, "**.h"))) do headers[#headers + 1] = header end
@@ -213,8 +175,6 @@ function scan(root, files, window)
     return report
 end
 
--- The exit status of a report (see the header): a hit is 1 even when a mode compared nothing, and an input
--- that could not be read is 2 even when there is a hit.
 function status(report)
     if #report.errors > 0 then return 2 end
     if #report.hits > 0 then return 1 end
@@ -223,7 +183,6 @@ function status(report)
 end
 
 function main(...)
-    -- --words N may come anywhere before the files; the first argument left is the SDK root.
     local args, rest, window, i = {...}, {}, DEFAULT_WORDS, 1
     while i <= #args do
         if args[i] == "--words" then

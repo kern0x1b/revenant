@@ -1,10 +1,5 @@
 set_project("entropyprobe")
 set_version("0.0.1")
--- The guest's random sources on the armv7 iOS 6.1.3 emulator (entropy.c): SecRandomCopyBytes, CCRandomGenerateBytes from
--- libCommonCryptoBackports, CCRandomCopyBytes, and reads of /dev/random and /dev/urandom, in one process per run. Run from this
--- folder, once per boot (each `run` boots the image afresh):
---   xmake f -p iphoneos -a armv7 -y && xmake build -y entropyprobe && xmake emulate -d iPhone4,1 -r 6.1.3 install
---   xmake emulate -d iPhone4,1 -r 6.1.3 run /usr/libexec/entropyprobe 2
 local root = path.join(os.scriptdir(), "../../../../..")
 add_repositories("charon " .. root)
 add_addons("charon v0.8.17")

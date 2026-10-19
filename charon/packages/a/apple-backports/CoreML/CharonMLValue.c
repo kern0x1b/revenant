@@ -1,5 +1,3 @@
-/* The value a Core ML feature holds, and the array it holds it in. CharonMLValue.h says what
- * it is for; this is the arithmetic of it. */
 #include "CharonMLValue.h"
 
 #include <stdlib.h>
@@ -8,8 +6,6 @@
 
 char *charon_ml_strndup(const char *bytes, size_t length)
 {
-    /* The value reader's own copy of a string, for a dictionary's keys and a classifier's
-     * label: both outlive the frame that wrote them, so both own their bytes. */
     char *copy = (char *)malloc(length + 1);
     if (copy == NULL) {
         return NULL;
@@ -84,7 +80,7 @@ int charon_ml_count_of_shape(const int64_t *shape, int rank)
     }
     for (index = 0; index < rank; index++) {
         if (shape[index] < 0) {
-            return 0; /* a flexible dimension: the count is not known from the shape */
+            return 0;
         }
         if (shape[index] == 0) {
             return 0;
@@ -94,8 +90,6 @@ int charon_ml_count_of_shape(const int64_t *shape, int rank)
     return count > 0 && count <= (int64_t)(1u << 30) ? (int)count : 0;
 }
 
-/* The strides of a shape laid out in row-major order, which is the order the specification's
- * weights and every MLMultiArray are in: the last dimension varies fastest. */
 static void strides_of(const int64_t *shape, int rank, int64_t *strides)
 {
     int index;
@@ -158,8 +152,6 @@ charon_ml_array charon_ml_array_subview(const charon_ml_array *array, const int6
     memcpy(view.shape, shape, (size_t)rank * sizeof *shape);
     strides_of(shape, rank, view.strides);
     view.count = (size_t)charon_ml_count_of_shape(shape, rank);
-    /* The data is the same buffer: only the offset moves, so a weight matrix is never copied
-     * out of the model, and a layer that reads one row of it reads that row where it lies. */
     view.data = array->data == NULL ? NULL : (char *)array->data + at * (int64_t)charon_ml_type_size(array->data_type);
     view.owns_data = 0;
     return view;
@@ -173,9 +165,6 @@ int charon_ml_array_as(const charon_ml_array *array, int data_type, charon_ml_ar
     if (array->data_type == data_type) {
         return 1;
     }
-    /* Only a re-typed view over the same bytes, which is sound only when the widths agree:
-     * a layer that wants float32 weights out of a double array has to convert, and refusing
-     * is what keeps it from reading a double as two floats. */
     return charon_ml_type_size(array->data_type) == charon_ml_type_size(data_type);
 }
 
@@ -189,11 +178,8 @@ float charon_ml_half_to_float(uint16_t half)
 
     if (exponent == 0) {
         if (mantissa == 0) {
-            bits = sign << 31; /* a signed zero */
+            bits = sign << 31;
         } else {
-            /* A subnormal half is a normal float with the exponent shifted down: the value is
-             * mantissa * 2^-24, which is what putting it at exponent 1 with the mantissa's
-             * own leading bit at 2^-10 gives. */
             exponent = 1;
             while ((mantissa & 0x400u) == 0) {
                 mantissa <<= 1;
@@ -203,7 +189,7 @@ float charon_ml_half_to_float(uint16_t half)
             bits = (sign << 31) | ((uint32_t)(exponent - 15 + 127) << 23) | (mantissa << 13);
         }
     } else if (exponent == 31) {
-        bits = (sign << 31) | 0x7f800000u | (mantissa << 13); /* an infinity, or a NaN */
+        bits = (sign << 31) | 0x7f800000u | (mantissa << 13);
     } else {
         bits = (sign << 31) | ((uint32_t)(exponent - 15 + 127) << 23) | (mantissa << 13);
     }
@@ -222,19 +208,16 @@ uint16_t charon_ml_float_to_half(float value)
     exponent = (bits >> 23) & 0xffu;
     mantissa = bits & 0x7fffffu;
     if (exponent == 0xff) {
-        /* An infinity, or a NaN whose payload is kept as far as a half can hold one. */
         return (uint16_t)((sign << 15) | 0x7c00u | (mantissa != 0 ? 0x200u : 0u));
     }
     unbiased = (int)exponent - 127;
     if (unbiased > 15) {
-        return (uint16_t)((sign << 15) | 0x7c00u); /* larger than a half holds: an infinity */
+        return (uint16_t)((sign << 15) | 0x7c00u);
     }
     if (unbiased < -14) {
         if (unbiased < -25) {
-            return (uint16_t)(sign << 15); /* smaller than a subnormal half: a signed zero */
+            return (uint16_t)(sign << 15);
         }
-        /* A subnormal half: the mantissa carries the value, shifted so the leading bit lands
-         * where the exponent of a normal half would have put it. */
         mantissa |= 0x800000u;
         {
             int shift = -unbiased - 14 + 13;

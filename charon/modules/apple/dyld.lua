@@ -50,10 +50,6 @@ function compare_versions(a, b)
     return compare(a, b)
 end
 
--- Where a release's libraries outside its shared cache are kept, taken from the same firmware as the
--- cache. A release can ship a public framework as a file beside the cache rather than in it -
--- PushKit on iPad2,4 8.0 and 8.1.3, in the cache of 8.1 to 8.1.2 - and what it exports is both.
--- The folder exists, possibly empty, once those libraries were taken.
 function outside_source(folder, architecture)
     return path.join(folder, "outside_" .. architecture)
 end
@@ -81,10 +77,6 @@ function held_releases(architecture)
     return releases
 end
 
--- Every held release, oldest first, with the cache that measures it: the first of the preferred
--- architectures the release is held for, and otherwise arm64 or arm64e -- the only caches held for
--- the releases after armv7's last, so a ladder of the preferred ones alone stops at iOS 10 and every
--- symbol of 11.0 and later reads as exported by no release at all.
 function held_ladder(preferred)
     local candidates = table.join(preferred, {"arm64", "arm64e"})
     local ladder = {}
@@ -234,10 +226,6 @@ local function assemble(architecture, libraries)
     return {architecture = architecture, exports = exports, images = images, libraries = libraries, count = count}
 end
 
--- The libraries of architecture in the Mach-O files under folder, into libraries. A library is
--- named by its install name, or with by_path by where it lies under folder: dyld loads a client's
--- dependency from that path, whatever the file names itself (PushKit beside the cache of 8.0 and
--- 8.1.3 names itself @rpath/PushKit.framework/PushKit). A name keep holds is left as it is.
 local function read_libraries(folder, architecture, libraries, keep, by_path)
     for _, binary in ipairs(macho.binaries_under(folder)) do
         local data = macho.read(binary)
@@ -645,8 +633,6 @@ local function exports_symbol(lookup, install, symbol, seen)
     return false
 end
 
--- Whether the library installed at install exports symbol in a loaded cache, itself or through a
--- library it re-exports: what dyld binds a client's two-level import of symbol from install to.
 function exported_by(cache, install, symbol)
     return exports_symbol(function (name) return cache.libraries[name] end, install, symbol, {})
 end
@@ -655,19 +641,10 @@ local OWNERS = {}
 local LISTED_KEYS = {["symbols"] = "", ["weak-symbols"] = "", ["objc-classes"] = "class", ["objc-eh-types"] = "_OBJC_EHTYPE_$_", ["objc-ivars"] = "_OBJC_IVAR_$_"}
 local SCRIPTDIR = os.scriptdir()
 
--- Where what the measurements below found is kept between runs, beside the caches it was read from.
--- Every file is named by a key over everything its content depends on, this code included, so a
--- changed SDK, rung or reader is simply a different file and nothing is ever invalidated by hand.
--- The key of the code comes first in the name, so tools/cache-sweep.lua can tell which code wrote a
--- file and remove what no live checkout reads any more; nothing here removes a file.
--- A caller may name where the kept files live; none does today, and a test that must not touch the machine's
--- cache does. Without one this is what every other caller already gets.
 local function stored(name, under)
     return path.join(under or path.directory(root()), "cache", name)
 end
 
--- The text of a kept file, or nil when there is none: a sweep that removes it between a check and a
--- read leaves a measurement to be made again, not a failure.
 local function kept_text(file)
     if not os.isfile(file) then
         return nil
@@ -686,7 +663,6 @@ local function kept_text(file)
     }
 end
 
--- A whole file or none: a reader running beside a writer sees the old file or the new one.
 local function store(file, text)
     local partial = file .. "." .. hash.uuid4()
     io.writefile(partial, text)
@@ -699,8 +675,6 @@ end
 
 local SDK_KEYS = {}
 
--- The code a measurement runs: this file and every module beside it that it imports, followed through
--- their own imports, by name and content, so the same code reads the same wherever it is checked out.
 local function code_lines(name, lines)
     local file = path.join(SCRIPTDIR, name .. ".lua")
     if lines[name] or not os.isfile(file) then
@@ -715,7 +689,6 @@ end
 
 local CODE_KEY
 
--- The code that reads the SDK and the caches, by content.
 local function code_key()
     if not CODE_KEY then
         local lines = table.values(code_lines("dyld", {}))
@@ -725,12 +698,10 @@ local function code_key()
     return CODE_KEY
 end
 
--- A kept file of family (sdk-owners, first-release) under the current code and key.
 local function kept_file(family, key, under)
     return stored(family .. "-" .. code_key() .. "-" .. key .. ".tsv", under)
 end
 
--- What the owners of an SDK's symbols depend on besides the code: every .tbd it holds, by content.
 local function sdk_key(sdkdir)
     if not SDK_KEYS[sdkdir] then
         local lines = {}
@@ -777,10 +748,6 @@ local function read_owners(text)
     return owners
 end
 
--- The library a client of the SDK links each symbol against: the install name of the first document
--- of the .tbd that lists it, which is the public framework or library, even where the symbol itself
--- is listed under a library that one re-exports (UIKitCore under UIKit). Only exports and re-exports
--- count, never undefineds. Reading every .tbd takes most of a minute; what it gives is kept on disk.
 function sdk_owners(sdkdir)
     if not OWNERS[sdkdir] then
         local kept = owners_file(sdkdir)
@@ -833,9 +800,6 @@ function sdk_owners(sdkdir)
                 end
             end
         end
-        -- A framework's API that a library of /usr/lib also lists (libSystem re-exporting libnetwork's
-        -- nw_* calls, from 9.0, three releases before Network.framework) is bound through the framework
-        -- by a client of its header, and the framework is where it counts.
         for symbol, found in pairs(owners) do
             local frameworks = {}
             for _, install in ipairs(found) do
@@ -853,10 +817,6 @@ function sdk_owners(sdkdir)
     return OWNERS[sdkdir]
 end
 
--- Whether a loaded cache exports symbol where a client binds it: from one of owners, the libraries the
--- SDK puts it in, when there are any, and anywhere in the cache otherwise. Without that, a same-named
--- symbol of another image reads as the API: CNLabelHome is exported by AddressBookUI from iOS 7.0,
--- and by Contacts.framework, where a client binds it, only from 9.0.
 function exported_at(cache, symbol, owners)
     if not owners then
         return cache.exports[symbol] ~= nil
@@ -871,10 +831,6 @@ end
 
 local SIGNATURES = {}
 
--- A ladder as it lies on disk: each rung's release and the files it is read from, with their sizes
--- and modification times. Two runs that agree on it read files of the same names, sizes and times:
--- a cache fetched again has a new time, and only a copy that keeps both the size and the time of
--- the file it replaces goes unseen.
 local function ladder_signature(ladder)
     local rungs = {}
     for _, entry in ipairs(ladder) do
@@ -900,16 +856,10 @@ local function first_release_file(ladder, sdkdir, under)
     return kept_file("first-release", hash.strhash128(sdk_key(sdkdir) .. " " .. ladder_signature(ladder)), under)
 end
 
--- What first_releases(ladder, sdkdir, ...) answers from: the code that measures, the SDK's .tbd files
--- by content and the ladder's rungs. A caller that keeps an answer of its own keys it on this, so a
--- change to any of the three is a new key and not a stale answer.
 function first_release_key(ladder, sdkdir)
     return code_key() .. "-" .. sdk_key(sdkdir) .. "-" .. ladder_signature(ladder)
 end
 
--- The kept files this code reads for each of sdkdirs and ladders: what tools/cache-sweep.lua keeps
--- of this checkout's measurements. It computes names only, and measures nothing.
--- What a checkout reads, under the cache root its caller names - the machine's own unless it says otherwise.
 function kept_files(sdkdirs, ladders, under)
     local files = {}
     for _, sdkdir in ipairs(sdkdirs) do
@@ -923,13 +873,6 @@ end
 
 local FIRST = {}
 
--- The rung of ladder from which each of symbols stays exported where a client of the SDK binds it
--- (exported_at), {symbol = release}, with no entry for a symbol no rung exports: the first rung of
--- the last run of rungs that export it, since a release between two that export a symbol may lack
--- it (CoreLocation exports CLGeocoder in 4.0, neither exports nor carries it in 4.3 and 4.3.5, and
--- exports it again from 5.0), and a release there needs what a backport carries. Loading the rungs
--- takes most of a minute, so every answer is kept on disk under the SDK and the ladder it was
--- measured on, and only symbols never measured on them load a cache at all.
 function first_releases(ladder, sdkdir, symbols)
     local kept = first_release_file(ladder, sdkdir)
     local function read()
@@ -965,7 +908,6 @@ function first_releases(ladder, sdkdir, symbols)
         for _, symbol in ipairs(missing) do
             known[symbol] = known[symbol] or false
         end
-        -- Another run may have added answers since this one read the file; keep theirs too.
         for symbol, release in pairs(read()) do
             if known[symbol] == nil then
                 known[symbol] = release
@@ -1001,15 +943,6 @@ local function undefined_imports(data, image)
     return imported
 end
 
--- The imports of the given images, by file name and with each symbol marked weak or strong, and what every image
--- given here exports: what an image has to guard in every release it runs on, since no release is asked. A runtime's
--- libraries and the ones the program carries with them (the C++ runtime, the backports) are given together, so what
--- one of them exports to another is no import to guard and no load to fail.
---
--- Two readers: unexported_weak_imports below, which is the first half narrowed to the imports that are both weak and
--- unexported, and apple.runtime_guards' compare, which needs the strong ones too - an import the build made
--- strongly is a symbol the process must have, so it is a load failure when nothing the process carries exports it,
--- and a row that records it is a claim to satisfy rather than a difference.
 function image_imports(binaries, others, architecture)
     local loaded, exported = {}, {}
     for _, binary in ipairs(table.join(binaries, others or {})) do
@@ -1032,9 +965,6 @@ function image_imports(binaries, others, architecture)
     return {imports = imports, exported = exported}
 end
 
--- The weak imports of the given images that none of them and none of the others exports, by file name: what an image has to
--- guard in every release it runs on, since no release is asked. A runtime's libraries (and the C++ runtime they link) are
--- given together, so what one of them exports to another is no import to guard.
 function unexported_weak_imports(binaries, others, architecture)
     local read = image_imports(binaries, others, architecture)
     local found = {}
@@ -1149,30 +1079,16 @@ function check(cachefile, binaries, folder, opt)
     local emitted = compat.emitted()
     local tested = compat.guarded()
     local guarded = {}
-    -- What another package provides is checked, and reported, but it is that package's image and not this one's to refuse.
-    -- The images are named as the check names them, relative to the folder when there is one.
     local exempt = {}
-    -- xmake shows only the first wprint of a whole run without -v, and a build checks several releases in one run
-    -- (stage_bands, both ends of every band), so the check prints its warnings itself, as the build prints its notes.
     local warnings = {}
     for _, binary in ipairs(opt.exempt or {}) do
         exempt[folder and path.relative(binary, folder) or binary] = true
     end
-    -- A copy of a runtime's library that the program carries is that runtime's image, and so is a copy of a package's library
-    -- whose package declares guard rows for it: a weak import the guard table (opt.guards, by file name, then symbol) records
-    -- is guarded in the source of the library's own build and is reported; any other is the program's to answer for, as an
-    -- import of its own image is.
     local runtime = {}
     for _, binary in ipairs(opt.runtime or {}) do
         runtime[folder and path.relative(binary, folder) or binary] = (opt.guards or {})[path.filename(binary)] or {}
     end
     local unguarded = 0
-    -- A link order that puts a system library in front of the one carrying the symbol is answered where that image is built.
-    -- In another package's image it is that package's to answer for, so it is reported and not a reason to refuse this program.
-    -- A weak import of a runtime's image that the runtime's guard table records is called only behind its guard in that
-    -- runtime's source: where the release lacks the symbol the guard is false and nothing reaches the NULL, whether the
-    -- image binds it to the system library that lacks it or to the library of the build that carries it. So for such an
-    -- import the order is reported and is not a reason to refuse; any other import of the image is held to it.
     for _, entry in ipairs(ordering) do
         local guard = (runtime[entry[1]] or {})[entry[3]]
         if exempt[entry[1]] then
@@ -1474,9 +1390,6 @@ local function local_symbols(cache, address, wide)
     return found
 end
 
--- Which image of a held cache holds an address, and under what install name. The __LINKEDIT of an image
--- is skipped: it holds no code and no address a caller would ask about, and its vmaddr range would
--- otherwise answer for a code address that sits below it.
 function image_at(cache, address)
     for _, loaded in ipairs(cache.images) do
         for _, segment in ipairs(loaded.image.segments) do
@@ -1489,22 +1402,6 @@ function image_at(cache, address)
     return nil
 end
 
--- The name of the symbol at an address in a held cache, and the image that holds it: the image's own
--- export trie first, which is the only answer for an address in another image, then the local symbols
--- of the cache's symbol file for the static helpers a release calls inside its own image - which is
--- where a method body usually points, and which no export trie carries.
---
--- nil when no image of the cache holds the address at all. A local symbol is the one at or below the
--- address (`at` says which), because a body rarely begins on the exact byte a name sits on; a name
--- further below than the instruction the caller asked about is not that call's target, and `at` is
--- what lets the caller say so.
---
--- The local half is empty for some of the caches this tree holds and is not for others, and a caller
--- cannot tell which without asking: the arm64e cache of iOS 16.0 carries no local symbol table at all
--- (measured: the localSymbolsOffset and localSymbolsSize of its header are 0 and no .symbols file sits
--- beside it), so for that cache the export trie is the whole answer and every address inside HomeKit's
--- own text that the ten -init bodies call is anonymous - which is why a caller that needs those bodies
--- read has to reach past the name and look at the code (tools/objc-method-imps.lua).
 function symbol_at(cache, address)
     local loaded = image_at(cache, address)
     if not loaded then
@@ -1514,8 +1411,6 @@ function symbol_at(cache, address)
     local names = cache.named[loaded.address]
     if not names then
         names = {}
-        -- image_symbols hands its exports back as {address, name} pairs, which tools/cicontext-bounds.lua
-        -- reads the other way round; here the address is the key, because the question is an address.
         for _, entry in ipairs(image_symbols(cache, loaded).exports) do
             names[entry[1]] = names[entry[1]] or {}
             table.insert(names[entry[1]], entry[2])

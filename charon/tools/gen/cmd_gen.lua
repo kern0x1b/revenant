@@ -1,9 +1,3 @@
--- `gen`: writes the derived files of a framework (or of every framework with a declaration shard) under .gen, through emit, so a file
--- the build directory already holds is not rewritten. The inputs are committed: the declaration shards, the overrides and registry
--- rows and the pin sidecars (the constant record is input's output, and gen reads it). A pinned member whose shard declaration hash differs
--- from its pin is refused, unless --record re-records it: gen --record writes each new hash into its pin (pinned-by repin) and writes
--- nothing else into the tree.
-
 local layout = import("layout", {anonymous = true})
 local snapshot = import("spec", {anonymous = true})
 local render = import("render", {anonymous = true})
@@ -17,12 +11,10 @@ local sdk = import("sdk", {anonymous = true})
 local MEMBERS_NAME = "members.tsv"
 local MANIFEST_NAME = "manifest.tsv"
 
--- The frameworks that have a declaration shard, in byte order, nested frameworks included (spec.frameworks).
 function frameworks(tree)
     return snapshot.frameworks(tree)
 end
 
--- The constants objects a previous generation wrote and this one no longer emits.
 function stale_constants(base, fw, emitted)
     local out = {}
     for _, found in ipairs(files.glob(path.join(base, path.filename(fw) .. "Constants*.m"))) do
@@ -35,7 +27,6 @@ function stale_constants(base, fw, emitted)
     return out
 end
 
--- The members listing: the api and declaration hash of each member row and each constant row.
 local function members_text(rows)
     local out = {}
     for _, r in ipairs(rows) do
@@ -46,15 +37,10 @@ local function members_text(rows)
     return tsv.table_text({"api", "hash"}, out)
 end
 
--- The spec file of an SDK release: the spec table of the layout, named with the release's headers id.
 local function spec_name(sdk_release)
     return "spec." .. sdk.names(sdk_release).sdk_id .. ".tsv"
 end
 
--- Every file of a framework's build directory that check compares: what the generator emits (render), the spec table built in memory
--- from the shard and the constant record, and the members listing. Nothing is written here. sdk_release is the SDK's version (sdk.discover),
--- which names the release's corpus and the spec file. The members' tbd column is not read from the SDK here: it is "-" as it was before
--- the release was taken from --sdk, and the tbd of a member is filled by no consumer (members.lua).
 function derived(tree, fw, corpus, sdk_release)
     local emitted = render.render(tree, fw, corpus, sdk_release)
     local spec = snapshot.load(tree, fw)
@@ -63,8 +49,6 @@ function derived(tree, fw, corpus, sdk_release)
     return emitted
 end
 
--- The manifest: the SHA-256 of each rendered file (the files render emits, not the spec or the listing). gen writes it; no command
--- compares it, so check does not hash.
 local function manifest_text(emitted, sdk_release)
     local manifest = {}
     for _, name in ipairs(order.keys(emitted)) do
@@ -75,8 +59,6 @@ local function manifest_text(emitted, sdk_release)
     return tsv.table_text({"file", "sha256"}, manifest)
 end
 
--- Re-records the refused pins of a framework: each new hash goes into its pin, marked repin. Every other row is kept as it is, and a file
--- is written only when its bytes change (emit). The constant record is not re-recorded here: input writes it.
 local function rerecord(tree, fw, refused)
     local pinned_changes = {}
     for _, change in ipairs(refused) do
@@ -93,7 +75,6 @@ local function rerecord(tree, fw, refused)
     emit.file(layout.pins_path(tree, fw), snapshot.pins_text(list))
 end
 
--- Writes one framework's derived files into its build directory.
 local function write_framework(args, fw, sdk_release)
     local emitted = derived(args.tree, fw, args.coordination, sdk_release)
     emitted[MANIFEST_NAME] = manifest_text(emitted, sdk_release)
@@ -109,15 +90,11 @@ local function write_framework(args, fw, sdk_release)
     print(string.format("gen %s: %d files in %s (%d written)", fw, #names, layout.constants().OUT_ROOT .. "/" .. fw, emit.count() - before))
 end
 
--- The message of one refused pin: its key and api, the pinned and the shard's declaration hash, and the command that re-records it.
 function refusal(tree, fw, change)
     return string.format("REFUSED %s %s: pinned declaration hash %s, the shard has %s. Review the override, then re-record it: "
         .. "xmake l tools/gen.lua gen --tree %s --framework %s --record", change.key, change.api, change.old, change.new, tree, fw)
 end
 
--- Returns the exit status: 1 when a pinned member's declaration changed and --record was not given. The refusal is decided before anything
--- is written for a framework: a refused framework writes nothing, and a run over every framework (--all) goes on to the others and then
--- names every refused framework, so a single change does not stop the others from being written.
 function run(args)
     assert(args.sdk, "gen needs --sdk: the iPhoneOS SDK whose release names the corpus and the spec file")
     local sdk_release = sdk.discover(args.sdk).version

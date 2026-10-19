@@ -2,13 +2,6 @@
 #include <dlfcn.h>
 #import "check.h"
 
-// AVAudioFormat and AVAudioPCMBuffer, the value types the rest of AVFAudio's node graph is built
-// on (see facts/AVFoundation/AVFAudio.md). The one thing a passing build cannot show is whether a
-// graph that compiles and runs actually moves sound: an AudioBufferList that links and stays
-// silent raises no exception and no error code. This writes a known, non-zero waveform through
-// floatChannelData and reads every sample back through the same pointers AND through the raw
-// AudioBufferList, checking for an exact match rather than a non-nil pointer.
-
 static NSString *image_of(Class cls)
 {
     Dl_info info;
@@ -43,12 +36,6 @@ int main(void)
         AVAudioFormat *tooManyChannels = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:44100.0 channels:6];
         CHECK(tooManyChannels == nil, "more than 2 channels without a channel layout is refused, matching the real class");
 
-        // A malloc'd C struct field typed as an Objective-C pointer is NOT retained by ARC just
-        // because of its declared type - only a real ivar or local is. This was a genuine latent
-        // dangling-pointer bug here (format stored in the struct, not an ivar) until fixed. Proven
-        // by dropping every other reference, forcing the freed memory to be reused by unrelated
-        // allocations, then reading the buffer's own values back through its strong reference: a
-        // dangling pointer would read garbage or a wrong, reused object's data, not what was set.
         AVAudioPCMBuffer *retainCheck;
         @autoreleasepool {
             AVAudioFormat *temporary = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:22050.0 channels:1];

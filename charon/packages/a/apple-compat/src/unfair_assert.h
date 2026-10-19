@@ -3,8 +3,6 @@
 
 #include "unfair_lock.h"
 
-/* libplatform's OS_ULOCK_IS_OWNER: the word names this thread, whether or not a waiter cleared the low bit. An unlocked word
-   names nobody. */
 static inline bool charon_unfair_holds(const charon_unfair_lock *lock)
 {
     uint32_t current = atomic_load_explicit(&lock->value, memory_order_relaxed);

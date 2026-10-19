@@ -1,8 +1,5 @@
 #import <UIKit/UIKit.h>
 
-// A printer destination is the URL a print service extension found a printer at, with the name and the TXT record it
-// was advertised with. It archives with keyed secure coding, as the header asks. The host's own archive does not decode
-// (facts/UIKit/UIPrinterDestination.md), so these keys are the port's: the property names.
 static NSString *const kCharonDestinationURLKey = @"URL";
 static NSString *const kCharonDestinationDisplayNameKey = @"displayName";
 static NSString *const kCharonDestinationTXTRecordKey = @"txtRecord";

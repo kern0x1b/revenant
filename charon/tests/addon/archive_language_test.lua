@@ -1,26 +1,7 @@
--- archive_language_test.lua: is every library's static library reachable by a band that keeps no
--- C++ object?
---
--- `link()` used to link a library's archives only when the band had kept an Objective-C++ object,
--- because every archive in these packages was C++ and a C++ archive needs the C++ runtime. A C
--- archive is the case that rule gets wrong: charon-coding holds the secure coding and the copying
--- the Intents, IntentsUI and Accessibility classes share, and none of those libraries keeps a .mm
--- object in any band, so an unmarked archive entry would be dropped from every band and the classes
--- would be built with no implementation behind them - which is what the link said, on
--- `_charon_intents_decode` referenced from -[AXBrailleTable initWithCoder:].
---
--- So an archive entry may say `c = true`, and this test fails on any library whose archives cannot
--- be reached that way: a band keeps the library's objects, so the link must keep the library's
--- archives too, whatever language the band's objects are written in.
-
 function main()
     local root = os.scriptdir() .. "/../.."
-    -- Loaded the way backports_test.lua loads it: as a module of the repository's own modules
-    -- folder.
     local backports = import("apple.backports", {rootdir = path.join(root, "modules"),
                                                 anonymous = true})
-    -- The module lives beside this file, under the repository's modules/ folder, which the
-    -- import above finds only when the test is run from the checkout the light guard runs.
     local failures = {}
     for _, library in ipairs(backports.libraries()) do
         local entries = library.archives or {}

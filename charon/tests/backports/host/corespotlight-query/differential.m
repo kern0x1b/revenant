@@ -1,8 +1,3 @@
-// differential.m - the same program, built once against the host's CoreSpotlight and once against the port's CSSearchQuery.m,
-// CSSearchableIndex.m and the attribute classes. It indexes three items in the default index, runs each query of the measured
-// grammar, and prints what the query found: the identifiers, how many batches the found handler got, the count at completion,
-// the error, and the attributes the first result carries. The query strings are the ones facts/CoreSpotlight/SearchQuery.md
-// records. Every line must be the same on both sides, after run.sh has replaced the store path on the port side.
 #import <Foundation/Foundation.h>
 #import <CoreSpotlight/CoreSpotlight.h>
 
@@ -39,7 +34,6 @@ static void query(NSString *label, NSString *text, NSArray<NSString *> *attribut
     };
     [search start];
     dispatch_semaphore_wait(done, dispatch_time(DISPATCH_TIME_NOW, 30 * NSEC_PER_SEC));
-    // The attributes shown are those of the result with the lowest identifier: the order results arrive in is not measured.
     NSArray<NSString *> *sorted = [identifiers sortedArrayUsingSelector:@selector(compare:)];
     NSString *first = sorted.count > 0 ? described[sorted.firstObject] : @"-";
     printf("%-22s | found=%s | batches=%lu | count=%lu | error=%s | first=%s\n", label.UTF8String,

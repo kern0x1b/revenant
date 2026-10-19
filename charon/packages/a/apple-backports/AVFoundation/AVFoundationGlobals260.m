@@ -1,23 +1,5 @@
 #import <AVFoundation/AVFoundation.h>
 
-// The AVFoundation constants this object carries, one release's worth: an object may only hold API of
-// one release, and which release that is was MEASURED with tools/symbol-first-release.lua - the first
-// release whose AVFoundation EXPORTS the name - not read off a header's API_AVAILABLE.
-// Every name here measures the same, so this file is one object: no held cache exports any of them, so each row's own introduced places this object.
-//
-// Every value below was read on this machine and none was typed. tests/backports/host/avf-globals/run.sh
-// is the differential: it compiles this object with each constant's DEFINITION renamed to a charon_host_
-// spelling, links it beside a probe that reads Apple's own symbol under the bare name, and compares the
-// two in one process - 54 of 54 here, and 62 of the 116 the port carries, agree with the host.
-// No name here is in a cache this machine holds - the ladder ends at 18.0 and these are above it - so the host is the only oracle that reaches them, which is why the differential has to be right.
-// facts/AVFoundation/Globals.md has the run, its four controls, the planted value that proves
-// the check can fail and the clean control that proves the red is the mutation, the correction of an
-// earlier wrong claim about this host, and the five AVCaptureWhiteBalanceTemperatureAndTintValues
-// presets no oracle on this machine can answer.
-//
-// None of this is the port's minimum release own: it does not export these names, so an application
-// that names one loads this string rather than a missing symbol, and where it hands the string to
-// the release the release treats it as it treats any string it does not know.
 NSString *const AVAssetExportPresetHEVC4320x2160 = @"AVAssetExportPresetHEVC4320x2160";
 NSString *const AVAssetExportPresetMVHEVC4320x4320 = @"AVAssetExportPresetMVHEVC4320x4320";
 NSString *const AVAssetExportPresetMVHEVC7680x7680 = @"AVAssetExportPresetMVHEVC7680x7680";

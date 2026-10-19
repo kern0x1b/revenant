@@ -5,7 +5,7 @@
 @end
 
 static const char CharonDragDropKey;
-static BOOL CharonDragInteractionDefault = NO;  // replaced at +initialize by the class's own
+static BOOL CharonDragInteractionDefault = NO;
 
 CharonDragDropBox *charon_drag_drop_box(id object)
 {
@@ -17,11 +17,6 @@ CharonDragDropBox *charon_drag_drop_box(id object)
     return box;
 }
 
-// The flag the application set, and the class default when it set none. This helper is carried by
-// every band, so it names no symbol that only exists from iOS 11: the default is supplied by
-// +[UIDragInteraction initialize], where the class is available, through
-// charon_set_drag_interaction_enabled_default(). The value handed over is the class's own answer
-// and not a literal, so the two cannot drift apart.
 BOOL charon_drag_interaction_enabled(id object)
 {
     CharonDragDropBox *box = objc_getAssociatedObject(object, &CharonDragDropKey);

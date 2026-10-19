@@ -1,7 +1,5 @@
 #include "dispatch_block.h"
 
-/* dispatch_sync reads a block's flags from iOS 8 and runs a barrier block as dispatch_barrier_sync does; before, the
-   release's runs it beside the queue's other blocks. */
 __attribute__((visibility("hidden")))
 void charon_dispatch_sync(dispatch_queue_t queue, dispatch_block_t block)
 {

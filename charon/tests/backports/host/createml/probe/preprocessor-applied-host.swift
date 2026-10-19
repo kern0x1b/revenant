@@ -1,25 +1,8 @@
-// Does a pipeline apply the preprocessor it was given, or pass its input through?
-//
-// The earlier three probes used `LinearTransformer(scale: 1, offset: 0)` — the identity — so they could
-// not tell "the host transformed the values" from "the host ignored the preprocessor and handed the
-// input back". A **non-identity** preprocessor tells them apart: `scale: 2` doubles, an `offset` shifts,
-// and if the values come back changed then the host transforms through the caller's transformer, which
-// is the difference between "does not fit" and "does not use".
-//
-// Same instrument as the three before it, and all three pipelines in one program: the two the port
-// diverges on (`PreprocessingEstimator`, `PreprocessingUpdatableEstimator`) and the one it agrees with
-// (`PreprocessingUpdatableSupervisedEstimator`). Nothing is transcribed from Apple's source; every value
-// is read out of the running framework.
-//
-//     xcrun swiftc -O -o preprocessor-applied-host preprocessor-applied-host.swift
-//     ./preprocessor-applied-host
 import CreateMLComponents
 import Foundation
 
 typealias TransformerProtocol = CreateMLComponents.Transformer
 
-/// An unsupervised estimator that records nothing it can mislead with: this probe is about the
-/// preprocessor's effect on `preprocessed(from:)`, not about the inner estimator.
 struct Recorder: Estimator {
     struct Transformer: TransformerProtocol, Equatable {
         typealias Input = Double
@@ -33,7 +16,6 @@ struct Recorder: Estimator {
     func decode(from decoder: inout any EstimatorDecoder) throws -> Transformer { Transformer() }
 }
 
-/// The supervised-updatable estimator, so the third pipeline can be asked the same question.
 struct SupervisedRecorder: UpdatableSupervisedEstimator {
     struct Transformer: TransformerProtocol, Equatable {
         typealias Input = Double
@@ -56,8 +38,6 @@ struct SupervisedRecorder: UpdatableSupervisedEstimator {
     func decodeWithOptimizer(from decoder: inout any EstimatorDecoder) throws -> Transformer { Transformer() }
 }
 
-// The input is 1...8, so a doubling preprocessor answers [2, 4, 6, 8, 10, 12, 14, 16] and a
-// scale-1-offset-100 one answers [101, 102, ..., 108]. A passthrough answers [1, 2, ..., 8].
 let batch = (1...8).map(Double.init)
 let annotated = (1...8).map { AnnotatedFeature(feature: Double($0), annotation: 0.0) }
 

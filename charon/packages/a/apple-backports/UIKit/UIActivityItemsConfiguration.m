@@ -28,8 +28,6 @@ NSString *const UIActivityItemsConfigurationPreviewIntentThumbnail = @"thumbnail
     return [[self alloc] initWithItemProviders:itemProviders];
 }
 
-// The header redeclares -init NS_UNAVAILABLE. A configuration made by -init holds no objects and no providers,
-// which is what -initWithItemProviders: makes of an empty array.
 - (instancetype)init
 {
     return [self initWithItemProviders:@[]];

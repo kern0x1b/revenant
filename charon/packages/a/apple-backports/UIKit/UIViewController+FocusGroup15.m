@@ -3,8 +3,6 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-// UIViewController's focusGroupIdentifier, iOS 15. Kept as set, copied, and nil to start, as the view's own identifier is. No focus engine
-// reads it on the port.
 static char charon_vc_focus_group_key;
 
 @implementation UIViewController (CharonFocusGroup15)

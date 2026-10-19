@@ -1,7 +1,3 @@
-/* The HAP crypto against the published vectors of each primitive it wraps:
-     RFC 7748 section 5.2 for X25519, RFC 8032 section 7.1 TEST 2 for Ed25519,
-     RFC 8439 section 2.8.2 for ChaCha20-Poly1305, RFC 5869 test case 1 for HKDF-SHA256 and
-     test case 1 of the SHA-256 vectors for SHA-256 itself. */
 #include <stdio.h>
 #include <string.h>
 #include "CharonHapCrypto.h"
@@ -18,7 +14,6 @@ static void check(const char *what, const uint8_t *got, const char *want, size_t
 }
 int main(void) {
     setvbuf(stdout, NULL, _IONBF, 0);
-    /* RFC 7748 5.2, the first X25519 test vector. */
     {
         uint8_t a[32], b[32], shared[32];
         unhex(a, "77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a", 32);
@@ -27,7 +22,6 @@ int main(void) {
         check("X25519 (RFC 7748 5.2 vector 1)", shared,
               "4a5d9d5ba4ce2de1728e3bf480350f25e07e21c947d19e3376f09b3c1e161742", 32);
     }
-    /* RFC 8032 7.1 TEST 2. */
     {
         uint8_t sk[64], publicKey[32], signature[64];
         const char *seed = "4ccd089b28ff96da9db6c346ec114e0f5b8a319f35aba624da8cf6ed4fb8a6fb";
@@ -40,7 +34,6 @@ int main(void) {
               "085ac1e43e15996e458f3613d0f11d8c387b2eaeb4302aeeb00d291612bb0c00", 64);
         charon_hap_ed25519_verify(signature, (const uint8_t *)"r", 1, publicKey);
     }
-    /* RFC 8439 2.8.2, the AEAD test vector. */
     {
         uint8_t key[32], nonce[12], aad[12], plain[114], cipher[114], tag[16], back[114];
         unhex(key, "808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f", 32);
@@ -59,7 +52,6 @@ int main(void) {
         printf("%s ChaCha20-Poly1305 opens its own ciphertext\n", opened == 0 ? "ok  " : "FAIL");
         if (opened != 0) failed++;
     }
-    /* RFC 5869 test case 1: HKDF-SHA256. */
     {
         uint8_t ikm[22], salt[13], info[10], out[42];
         unhex(ikm, "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b", 22);
@@ -70,7 +62,6 @@ int main(void) {
               "3cb25f25faacd57a90434f64d0362f2a2d2d0a90cf1a5a4c5db02d56ecc4c5bf"
               "34007208d5b887185865", 42);
     }
-    /* RFC 5869 test case 3: HKDF-SHA256 with no salt. */
     {
         uint8_t ikm[22], out[42];
         unhex(ikm, "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b", 22);
@@ -79,14 +70,12 @@ int main(void) {
               "8da4e775a563c18f715f802a063c5a31b8a11f5c5ee1879ec3454e5f3c738d2d"
               "9d201395faa4b61a96c8", 42);
     }
-    /* FIPS 180-4, SHA-256 of "abc". */
     {
         uint8_t out[32];
         charon_hap_sha256(out, (const uint8_t *)"abc", 3);
         check("SHA-256(\"abc\")", out,
               "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", 32);
     }
-    /* FIPS 180-4, SHA-512 of "abc". */
     {
         uint8_t out[64];
         charon_hap_sha512(out, (const uint8_t *)"abc", 3);

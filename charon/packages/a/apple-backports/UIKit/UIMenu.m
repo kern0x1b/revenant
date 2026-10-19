@@ -3,7 +3,6 @@
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-// Adds the on elements in a list, and those in the sub-menus in it, in order.
 static void charon_collect_selected(NSArray<UIMenuElement *> *elements, NSMutableArray<UIMenuElement *> *selected)
 {
     for (UIMenuElement *element in elements) {
@@ -19,13 +18,8 @@ static void charon_collect_selected(NSArray<UIMenuElement *> *elements, NSMutabl
     NSString *_identifier;
     UIMenuOptions _options;
     NSArray<UIMenuElement *> *_children;
-    // The delegate a menu forces automatic selection on, which UIKit's own button machinery sets on a menu it
-    // is about to show. It is a private pair - no header declares it - and the host's own UIMenu answers it, so
-    // a menu this port replaces has to answer it too or the host's machinery sends it into nothing. Measured:
-    // the setter holds what it is given, nil clears it, and a second set replaces it.
     id _forcedAutomaticSelectionDelegate;
     BOOL _forceAutomaticSelection;
-    // The size of the menu's child elements. -1 until set, which is the host's answer for a menu nothing has sized.
     UIMenuElementSize _preferredElementSize;
 }
 
@@ -94,8 +88,6 @@ static void charon_collect_selected(NSArray<UIMenuElement *> *elements, NSMutabl
     return copy;
 }
 
-// A copy and a menu made with other children keep the size and the subtitle; measured on the host, where both survive -copy and
-// -menuByReplacingChildren:.
 - (void)charon_carryTo:(UIMenu *)menu
 {
     menu.preferredElementSize = _preferredElementSize;
@@ -112,8 +104,6 @@ static void charon_collect_selected(NSArray<UIMenuElement *> *elements, NSMutabl
     _preferredElementSize = preferredElementSize;
 }
 
-// The on elements of this menu and of its sub-menus, in the order they appear. A mixed element is not selected. Only an action has
-// a state, so the test is for the state, not the class; measured on the host in tests/backports/host/menu-selection.
 - (NSArray<UIMenuElement *> *)selectedElements
 {
     NSMutableArray<UIMenuElement *> *selected = [NSMutableArray array];
@@ -181,9 +171,6 @@ static void charon_collect_selected(NSArray<UIMenuElement *> *elements, NSMutabl
 }
 
 
-// The host's own private pair, measured rather than guessed: -setForcedAutomaticSelectionDelegate: is declared
-// on UIMenu and on no superclass, it holds the delegate it is given, nil clears it, a second set replaces it,
-// and a menu that never had one answers the getter with nil.
 - (id)forcedAutomaticSelectionDelegate
 {
     return _forcedAutomaticSelectionDelegate;
@@ -195,9 +182,6 @@ static void charon_collect_selected(NSArray<UIMenuElement *> *elements, NSMutabl
 }
 
 
-// The second of the same private pair, measured the same way: the host's UIMenu carries both
-// -setForceAutomaticSelection: and -forceAutomaticSelection, and a menu that never had either answers the
-// getter with NO. The value is what the caller set.
 - (BOOL)forceAutomaticSelection
 {
     return _forceAutomaticSelection;

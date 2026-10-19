@@ -1,8 +1,3 @@
--- The shard reader of the header interface: rows are read by the column names of the shard's own header line, so a reordered or
--- extended column list reads the same. Run: xmake l tests/gen/headers_test.lua. The fixture tree is a scratch directory under
--- .agent-work/runs of this checkout, removed when the test ends; the real AVFAudio shard is read from this repository and must give the counts
--- it gave when the reader was checked against an independent pass (656 members, 567 declared names).
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 
 local function raises(fn)
@@ -26,7 +21,6 @@ function main()
         end
     end
 
-    -- A fixture shard whose columns come in a different order from the extractor's, with a comment line before the header.
     local root = path.join(os.scriptdir(), "..", "..", ".agent-work", "runs", "headers-test-" .. tostring(os.time()) .. "-"
                            .. tostring(math.random(1000000)))
     local folder = path.join(root, "packages", "a", "apple-backports", "spec", "Fixture")
@@ -46,7 +40,6 @@ function main()
     check(rows[2].kind == "typedef" and rows[2].declhash == "2222222222222222", "a second row reads its own cells")
     check(#headers.shard_records(root, "NoSuchFramework") == 0, "a framework with no shard has no rows")
 
-    -- The real AVFAudio shard, against the counts of the independent pass.
     local repo = path.join(os.scriptdir(), "..", "..")
     local real = headers.shard_facts(repo, "AVFAudio")
     local members, declared = 0, 0
@@ -64,7 +57,6 @@ function main()
     end
 end
 
--- The number of keys of a set.
 function next_free_count(set)
     local n = 0
     for _ in pairs(set) do

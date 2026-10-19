@@ -3,9 +3,6 @@
 #import "toolbar-cases.h"
 #import "toolbar-expectations.h"
 
-// An application: a navigation controller that never asked for a toolbar, and one that shows one, in a window, held to what the
-// host's own UIKit does (host/toolbar/run.sh writes toolbar-expectations.h), and to the geometry of the toolbar where the host has none.
-// The log goes to /var/charon where there is one (the emulator keeps it with the run) and to /private/var/backports otherwise.
 @interface ToolbarDelegate : UIResponder <UIApplicationDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
@@ -40,8 +37,6 @@
         else
             charon_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", records[name], expected[name]]);
     }
-    // The host's windows keep a toolbar out of the view tree, so the shown toolbar's cover is the device's own measurement: the bar
-    // has to cover something, or the case does not tell a safe area that reads the bar from one that does not.
     int cover = -1, bottom = -2;
     sscanf([records[@"measuredShown"] UTF8String], "cover=%d bottom=%d", &cover, &bottom);
     charon_check(cover > 0, "shownToolbarCoversTheView", [NSString stringWithFormat:@"cover=%d", cover]);

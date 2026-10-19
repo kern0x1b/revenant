@@ -1,12 +1,3 @@
-//===--- WeatherCondition.swift ---------------------------------------*- swift -*-===//
-//
-// The condition a forecast is described by. Its raw values are the case names and its descriptions
-// are the English strings the host's WeatherKit gives in the en locale (facts/WeatherKit/WeatherCondition.md,
-// measured with harness/WeatherKit/main.swift); the accessibility description is the same string
-// lowercased for every case, which the same measurement shows.
-//
-//===----------------------------------------------------------------------===//
-
 import Foundation
 
 public enum WeatherCondition: String, CaseIterable, Codable, CustomStringConvertible, Hashable, Sendable {

@@ -1,20 +1,11 @@
-// The values a result hands back: an item, a collection of items, a section of them, a file, a
-// person, a payment method and an amount of money.
-
 import Foundation
 
-/// A value a result hands on, shown with its own display representation.
 public struct IntentItem<Value> where Value: _IntentValue {
-    /// The value the item carries.
     public let value: Value.ValueType
-    /// The title the item is shown with.
     public let title: LocalizedStringResource
     public let subtitle: LocalizedStringResource?
     public let image: DisplayRepresentation.Image?
 
-    /// The builder of a list of items, which is what a result's collection is written with. It is the
-    /// framework's own builder, reached through the file-scope one the initializers name: a nested
-    /// builder of a generic type cannot be named as an attribute without its arguments.
     public typealias Builder = IntentItemBuilder<Value>
 
     public init(_ value: Value.ValueType) {
@@ -32,21 +23,13 @@ public struct IntentItem<Value> where Value: _IntentValue {
         self.image = image
     }
 
-    /// What the item is described as, which is its own string.
     public var description: String { return CharonLocalized.string(of: title) }
-
-    /// The builder of a list of items, which is what a result's collection is written with.
 }
 
-/// The builder of a list of items, which is what a result's collection is written with.
 @resultBuilder
 public enum IntentItemBuilder<Value> where Value: _IntentValue {
     public static func buildBlock() -> [IntentItem<Value>] { return [] }
 
-    /// The framework's overload is **variadic** -- `buildBlock(_ items: AppIntents::IntentItem<Value>...)`
-    /// (arm64e-apple-ios.swiftinterface:4954) -- and the port's took a single item, which is the
-    /// difference the two-sided check found. A list is written as several items, so the caller
-    /// shapes are `buildBlock(a, b, c)` and the empty `buildBlock()`.
     public static func buildBlock(_ items: IntentItem<Value>...) -> [IntentItem<Value>] { return items }
 
     public static func buildExpression(_ expression: IntentItem<Value>) -> IntentItem<Value> { return expression }
@@ -54,7 +37,6 @@ public enum IntentItemBuilder<Value> where Value: _IntentValue {
     public static func buildArray(_ items: [IntentItem<Value>]) -> [IntentItem<Value>] { return items }
 }
 
-/// Writing a value as the text a title is made of, which is what the release's own description gives.
 enum CharonIntentItemText {
     static func write(_ value: Any) -> String {
         if let describable = value as? CustomStringConvertible { return describable.description }
@@ -65,7 +47,6 @@ enum CharonIntentItemText {
     }
 }
 
-/// A list of items a result hands back, or a list of them in sections.
 public struct IntentItemCollection<Item>: ResultsCollection where Item: _IntentValue {
     public typealias Result = Item
 
@@ -101,13 +82,11 @@ public struct IntentItemCollection<Item>: ResultsCollection where Item: _IntentV
         self.sections = sections
     }
 
-    /// A list with nothing in it, which is what a result with nothing to show returns.
     public static var empty: IntentItemCollection<Item> {
         return IntentItemCollection(promptLabel: nil, usesIndexedCollation: false, items: [])
     }
 }
 
-/// A section of a list of items a result hands back.
 public struct IntentItemSection<Item> where Item: _IntentValue {
     public let title: LocalizedStringResource?
     public let subtitle: LocalizedStringResource?
@@ -115,12 +94,6 @@ public struct IntentItemSection<Item> where Item: _IntentValue {
     public let items: [Item.ValueType]
 
 
-    /// The builder of a list of sections, under the name the framework nests it by: the
-    /// framework declares `IntentItemSection.Builder` as an enum inside the type
-    /// (`arm64e-apple-macos.swiftinterface:5003-5007`), and this module keeps one builder and
-    /// names it here the way `IntentItem.Builder` already is (`Items.swift:18`). A typealias
-    /// and not a second declaration: it is the same `IntentItemSectionBuilder`, and the row
-    /// the ledger carries is a name this module has to answer to.
     public typealias Builder = IntentItemSectionBuilder<Item>
     public init(_ title: LocalizedStringResource, items: () -> [IntentItem<Item>]) {
         self.title = title
@@ -159,15 +132,11 @@ public struct IntentItemSection<Item> where Item: _IntentValue {
         self.items = items
     }
 
-    /// What the section is described as, which is its own title.
     public var description: String { return title.map { CharonLocalized.string(of: $0) } ?? "" }
 
 }
 
-/// A file a result hands back or an intent asks for: the bytes, or a file, with the name and the
-/// content type the app gave.
 public struct IntentFile: Hashable, Sendable {
-    /// Why a file could not be read.
     public enum IntentFileError: Error, Hashable, Sendable {
         case failedToLoadFile
         case failedToLoadData
@@ -191,15 +160,10 @@ public struct IntentFile: Hashable, Sendable {
 
     }
 
-    /// The bytes of the file, when the app gave bytes.
     public let data: Data?
-    /// The file, when the app gave one.
     public let fileURL: URL?
-    /// The name the file is shown with.
     public let filename: String
-    /// The content type of the file, which is the identifier the app named.
     public let type: String?
-    /// Whether the framework removes the file when the run that made it ends.
     public let removedOnCompletion: Bool
 
     public init(data: Data, filename: String, type: String? = nil) {
@@ -218,14 +182,8 @@ public struct IntentFile: Hashable, Sendable {
         self.removedOnCompletion = false
     }
 
-    /// The content types the framework may write the file as, which is the type the app gave.
     public var availableContentTypes: [String] { return type.map { [$0] } ?? [] }
 
-    /// A file of the given content type that the caller fills in. The framework's own declaration
-    /// names only the content type (`IntentFile.data(contentType:)` in the ledger, the 26.2 row), so
-    /// this is that shape: an empty file of the type, which the caller writes before it hands the
-    /// file on. The form with the bytes is the one below, and is what a caller that already has them
-    /// writes.
     public static func data(contentType: String) -> IntentFile {
         return IntentFile(data: Data(), filename: "file", type: contentType)
     }
@@ -235,14 +193,6 @@ public struct IntentFile: Hashable, Sendable {
         return IntentFile(data: (try? data()) ?? Data(), filename: filename, type: contentType)
     }
 
-    /// The file the intent hands on, written by the caller's own handler into a file the framework
-    /// names. The row the framework's own declaration carries is `file(contentType:)`, so the
-    /// destination and the handler are the ones a caller passes after it.
-    /// A file of the given content type, at a URL the caller writes to. The framework's own
-    /// declaration names the content type and the directory and no handler
-    /// (`IntentFile.file(contentType:destinationDirectory:)` in the ledger, the 26.2 row): the file
-    /// is *at* that URL, so this is the same path the form below computes, and the caller fills it
-    /// in. The file is created there, so a caller that writes to it writes to a file that exists.
     public static func file(contentType: String, destinationDirectory: URL? = nil) -> IntentFile {
         let directory = destinationDirectory ?? URL(fileURLWithPath: NSTemporaryDirectory())
         let url = directory.appendingPathComponent("charon-intent-file")
@@ -317,18 +267,14 @@ extension IntentFile: DisplayRepresentable, _IntentValue {
     public var localizedStringResource: LocalizedStringResource { return title }
 }
 
-/// A person a parameter carries: a name, a handle, and what the app knows about the person.
 public struct IntentPerson: Hashable, Sendable, DisplayRepresentable, _IntentValue {
-    /// A handle of a person: what it is and what it is for.
     public struct Handle: Hashable, Sendable, Codable {
-        /// What a handle is, which the framework's own labels name.
         public enum Value: String, Hashable, Sendable, Codable {
             case phoneNumber
             case emailAddress
             case applicationDefined
         }
 
-        /// What a handle is for, which the framework's own labels name.
         public enum Label: String, Hashable, Sendable, Codable {
             case main
             case iPhone
@@ -343,11 +289,8 @@ public struct IntentPerson: Hashable, Sendable, DisplayRepresentable, _IntentVal
             case custom
         }
 
-        /// What the handle is, which the app named.
         public let value: Value
-        /// What the handle is for, which the app named.
         public let label: Label
-        /// What the handle is, when the app named its own kind of handle.
         public let applicationDefined: String?
 
         public init(_ value: String, label: Label) {
@@ -395,21 +338,18 @@ public struct IntentPerson: Hashable, Sendable, DisplayRepresentable, _IntentVal
         }
     }
 
-    /// What is known about a person.
     public enum Identifier: String, Hashable, Sendable, Codable {
         case contact
         case applicationDefined
         case unknown
     }
 
-    /// Which parts of a person's name are known.
     public enum Name: String, Hashable, Sendable, Codable {
         case displayName
         case components
         case unknown
     }
 
-    /// How a person parameter is asked for.
     public enum ParameterMode: String, Hashable, Sendable, Codable {
         case contact
         case email
@@ -421,17 +361,11 @@ public struct IntentPerson: Hashable, Sendable, DisplayRepresentable, _IntentVal
         }
     }
 
-    /// What is known about the person.
     public let identifier: Identifier
-    /// Which parts of the name are known.
     public let name: Name
-    /// The handle the person is reached by.
     public let handle: Handle?
-    /// The other names the person is known by.
     public let aliases: [String]
-    /// Whether the person is the owner of the device.
     public let isMe: Bool
-    /// The picture of the person.
     public let image: DisplayRepresentation.Image?
 
     public init(identifier: Identifier, name: Name, handle: Handle? = nil, aliases: [String] = [],
@@ -507,9 +441,7 @@ public struct IntentPerson: Hashable, Sendable, DisplayRepresentable, _IntentVal
     public static var defaultResolverSpecification: Specification { return Specification() }
 }
 
-/// A way of paying, which an intent carries and a confirmation shows.
 public struct IntentPaymentMethod: Sendable, DisplayRepresentable, _IntentValue {
-    /// What kind of payment it is.
     public enum PaymentType: String, Hashable, Sendable {
         case unknown
         case debit
@@ -523,13 +455,9 @@ public struct IntentPaymentMethod: Sendable, DisplayRepresentable, _IntentValue 
         case brokerage
     }
 
-    /// What kind of payment it is.
     public let paymentType: PaymentType
-    /// The name the payment method is shown with.
     public let name: String
-    /// What the app shows the user to tell the method apart.
     public let identificationHint: String?
-    /// The picture of the method.
     public let icon: DisplayRepresentation.Image?
 
     public init(type: PaymentType, name: String, identificationHint: String? = nil,
@@ -559,11 +487,8 @@ public struct IntentPaymentMethod: Sendable, DisplayRepresentable, _IntentValue 
     public static var defaultResolverSpecification: Specification { return Specification() }
 }
 
-/// An amount of money in a currency, which an intent carries and a confirmation shows.
 public struct IntentCurrencyAmount: Equatable, Hashable, Sendable, DisplayRepresentable, _IntentValue {
-    /// The amount, in the currency's own unit.
     public let amount: Decimal
-    /// The currency, as the ISO code the app named.
     public let currencyCode: String
 
     public init(amount: Decimal, currencyCode: String) {
@@ -599,14 +524,10 @@ public struct IntentCurrencyAmount: Equatable, Hashable, Sendable, DisplayRepres
     public static var defaultResolverSpecification: Specification { return Specification() }
 }
 
-/// The builder of a list of sections, which is what a collection is written with.
 @resultBuilder
 public enum IntentItemSectionBuilder<Item> where Item: _IntentValue {
     public static func buildBlock() -> [IntentItemSection<Item>] { return [] }
 
-    /// Both variadic overloads the framework declares for a section builder
-    /// (arm64e-apple-ios.swiftinterface:5005-5006): a list of sections, and a list of the items
-    /// inside one.
     public static func buildBlock(_ sections: IntentItemSection<Item>...) -> [IntentItemSection<Item>] {
         return sections
     }

@@ -1,15 +1,3 @@
-//===--- Errors.swift -------------------------------------------*- swift -*-===//
-//
-// The error structs of AuthenticationServices: ASAuthorizationError, ASCredentialIdentityStoreError,
-// ASExtensionError and ASWebAuthenticationSessionError. Each is a value over the NSError that the
-// framework delivers in its domain. The domains are the strings charon@apple-backports defines
-// (AuthenticationServices/ASConstants13_0.m, ASConstants12_0.m, ASWebAuthenticationSession.m); the
-// codes are the raw values the 26.2 SDK's declarations give (the enumconst rows of
-// packages/a/apple-backports/spec/AuthenticationServices/declarations.tsv). What the host does with
-// them is measured in facts/AuthenticationServices/Errors.md.
-//
-//===----------------------------------------------------------------------===//
-
 import Foundation
 
 public struct ASAuthorizationError: _BridgedStoredNSError {

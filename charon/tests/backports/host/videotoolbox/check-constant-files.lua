@@ -1,22 +1,3 @@
--- check-constant-files.lua [--control DIR] - each VideoToolbox string constant is defined in the object of the release its
--- registry row names.
---
--- An object carries the API of one release (the gate refuses one that holds several), so the constants are split into
--- VideoToolboxConstants<release>.m, one file per release. This holds the split both ways:
---
---   * every constant a file defines has a registry row (kind constant) whose `introduced` is the release in that file's
---     name, and
---   * every constant is defined exactly once.
---
--- This does not check the other direction: a registry row with no definition is check-registered.lua's question.
---
---    xmake l check-constant-files.lua                     the tree
---    xmake l check-constant-files.lua --control DIR      and the control below, on a copy made in DIR
---
--- The control works on a scratch copy in DIR (never on the tree): it moves one constant's line into the file of another
--- release and requires the check to go red NAMING that constant, and it requires the copy to be green before the move, so
--- a check that is red for another reason cannot pass it. The Python this replaces was check-constant-files.py.
-
 local lib = import("vtlib", {rootdir = os.scriptdir(), anonymous = true})
 local json = import("core.base.json")
 
@@ -26,8 +7,6 @@ local PACKAGE = path.join(WORKTREE, "packages", "a", "apple-backports")
 
 local PREFIX = "VideoToolboxConstants"
 
--- The release a constants file names: VideoToolboxConstants<digits>(_<digits>)+.m, read as dotted. nil when the name
--- does not say one.
 local function file_release(file)
     local name = path.filename(file)
     local middle = name:match("^" .. PREFIX .. "(.*)%.m$")
@@ -46,7 +25,6 @@ local function file_release(file)
     return table.concat(parts, ".")
 end
 
--- {api = introduced} for every constant row of every registry file, later files overwriting earlier ones.
 local function registry_releases(registry)
     local found = {}
     for _, file in ipairs(lib.files_matching(registry, "*.json")) do
@@ -60,7 +38,6 @@ local function registry_releases(registry)
     return found
 end
 
--- The problems the constants files have, in the order the Python found them, and the count line it printed first.
 local function check(objects, registry)
     local releases = registry_releases(registry)
     local problems, defined = {}, {}

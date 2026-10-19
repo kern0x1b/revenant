@@ -1,12 +1,8 @@
-// Differential probe for WidgetKit's value types: built once against the host's WidgetKit (no -DOURS) and once
-// against packages/s/swift-runtime/files/WidgetKit/Values.swift (-DOURS). The two outputs must match line for line
-// (facts/WidgetKit/Values.md).
 import Foundation
 #if !OURS
 import WidgetKit
 #endif
 
-// The host has the four small and large families and raw values 0 to 4 only (facts/WidgetKit/Values.md).
 let families: [WidgetFamily] = [.systemSmall, .systemMedium, .systemLarge, .systemExtraLarge]
 for f in families {
     print("family", "\(f)", f.rawValue, f.description, f.debugDescription)

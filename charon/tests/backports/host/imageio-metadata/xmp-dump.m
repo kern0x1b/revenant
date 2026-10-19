@@ -19,7 +19,6 @@ int main(void) { @autoreleasepool {
     dump("array", two);
     CGMutableImageMetadataRef empty = CGImageMetadataCreateMutable();
     dump("empty", empty);
-    // and the other direction: Apple's own parse of a packet we write by hand
     const char *packet = "<?xpacket begin=\"\xef\xbb\xbf\" id=\"W5M0MpCehiHzreSzNTczkc9d\"?>\n"
                          "<x:xmpmeta xmlns:x=\"adobe:ns:meta/\">\n"
                          " <rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">\n"

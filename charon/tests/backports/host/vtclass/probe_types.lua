@@ -1,19 +1,6 @@
--- probe_types.lua - asks the compiler what each type is, and writes the table the generator reads. A port of
--- probe-types.py, which says what the two signals are and why the probe is built for the host.
---
---     VT_SDK=<an iPhoneOS*.sdk> xmake l probe_types.lua
---
--- The table is written beside this script, as type-branches.tsv, and it is committed: the generator reads
--- that file. A run overwrites it, which is what the Python did. The probe's own build output goes under the
--- worktree's .agent-work/runs/vt, which is four levels above this directory (the worktree root).
---
--- Subprocesses are run through sh, so the exit status of the compile and the stderr of the compile can be
--- read: os.iorunv raises on a nonzero exit, and the Python did not stop on the run's exit status at all.
-
 local G = import("gen_body", {rootdir = os.scriptdir()})
 local V = import("vtlib", {rootdir = os.scriptdir()})
 
--- os.path.abspath: an absolute path with "." and ".." resolved as text, which is what Python does.
 local function abspath(p)
     if string.sub(p, 1, 1) ~= "/" then
         p = (os.getenv("PWD") or ".") .. "/" .. p
@@ -29,7 +16,6 @@ local function abspath(p)
     return "/" .. table.concat(parts, "/")
 end
 
--- os.makedirs: every missing directory on the way to path.
 local function makedirs(path)
     local current = ""
     for piece in string.gmatch(path, "[^/]+") do
@@ -40,7 +26,6 @@ local function makedirs(path)
     end
 end
 
--- Writes a file, or ends the run with exit 1 where the Python's open(path, "w") raised.
 local function write_or_fail(path, text)
     try {
         function()
@@ -54,13 +39,11 @@ local function write_or_fail(path, text)
     }
 end
 
--- A word in single quotes for sh, with any single quote in it written as '\''.
 local function shell_quote(s)
     local escaped = string.gsub(s, "'", "'\\''")
     return "'" .. escaped .. "'"
 end
 
--- Python's str.split(sep) for a one-character sep: every piece, empty ones included.
 local function split_on(s, sep)
     local out = {}
     local start = 1
@@ -76,9 +59,6 @@ local function split_on(s, sep)
     return out
 end
 
--- Python: collect_types(gen_body, sdk). Every type the store line will be asked about, from the SDK's own
--- declarations: the argument types of the initialisers, then the type of every property, each once, in
--- order. A property's type is its type, with " *" when it is an object.
 local function collect_types(sdk)
     local headers = V.join_path(sdk, "System/Library/Frameworks/VideoToolbox.framework/Headers")
     local text = V.header_text(headers)
@@ -105,7 +85,6 @@ local function collect_types(sdk)
     end
     for _, cls in ipairs(G.ORDER()) do
         local entry = classes[cls]
-        -- inherited = [protocols[proto][name] for proto in entry["protocols"] for name in protocols[proto]]
         local inherited = {}
         for _, proto in ipairs(entry.protocols) do
             local pm = protocols[proto]
@@ -116,8 +95,6 @@ local function collect_types(sdk)
                 inherited[#inherited + 1] = pm.map[name]
             end
         end
-        -- list(entry["own"].items()) + list(zip(entry["own"], inherited)): the own properties, then each own
-        -- name paired with the inherited property at the same position, for as far as both go
         for _, name in ipairs(entry.own.keys) do
             add(property_type(entry.own.map[name]))
         end
@@ -145,7 +122,6 @@ function main()
         }
     }
 
-    -- HERE and WORKTREE as Python computed them: abspath of this directory, and of four levels above it
     local here = abspath(os.scriptdir())
     local worktree = abspath(here .. "/../../../..")
     local out_dir = worktree .. "/.agent-work/runs/vt"
@@ -176,8 +152,6 @@ function main()
     lines[#lines + 1] = "}"
     write_or_fail(source, table.concat(lines, "\n") .. "\n")
 
-    -- The build is the Python's subprocess.run: no shell, the compiler's stdout discarded, its stderr kept,
-    -- and a nonzero status is the "did not build" exit. The status is printed by the shell and read back.
     local status_text = os.iorunv("sh", {"-c", "xcrun clang -framework CoreMedia -framework CoreVideo "
         .. shell_quote(source) .. " -o " .. shell_quote(classify) .. " >/dev/null 2>" .. shell_quote(build_err)
         .. "; echo $?"})
@@ -187,7 +161,6 @@ function main()
         V.fail("the probe did not build:\n" .. string.sub(stderr, 1, 2000))
     end
 
-    -- The run's stdout, whatever its status: the Python ignored the run's returncode too.
     local stdout = os.iorunv("sh", {"-c", "\"$0\" 2>/dev/null; true", classify})
     local text = string.match(stdout, "^%s*(.-)%s*$")
     local rows, disagree = {}, {}
@@ -221,7 +194,6 @@ function main()
         os.exit(1)
     end
 
-    -- classes: how many rows each __builtin_classify_type class has, in numeric order of the class
     local counts, class_numbers = {}, {}
     for _, row in ipairs(rows) do
         if counts[row[2]] == nil then

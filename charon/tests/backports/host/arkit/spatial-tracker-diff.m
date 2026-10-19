@@ -1,19 +1,3 @@
-// The offline differential for the tracker.
-//
-// The host has no ARKit to compare against, so the ground truth is constructed: a camera is walked
-// along a path it is also *shown*, each frame rendered by hand from where the surface point of
-// each pixel really is, and the pose the tracker reports for that frame compared with the pose that
-// produced it. The gyroscope's own error is added to the attitude it is driven with, because a
-// gyroscope on a real device is never exact.
-//
-// What is measured is therefore the tracker's accuracy: the rotation it recovers against the
-// rotation it was given, and the distance it walked against the distance it was told it walked.
-//
-// Built and run with the host's toolchain:
-//   clang -o spatial-tracker-diff CharonARTracker.m spatial-tracker-diff.m \
-//         -framework Foundation -framework CoreVideo -framework CoreMedia -framework CoreGraphics
-//   ./spatial-tracker-diff
-
 #import "CharonARTracker.h"
 
 #import <CoreVideo/CoreVideo.h>
@@ -24,17 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/// The calibration of the synthetic camera above.
-///
-/// `CharonRenderFrame` projects with a tangent of half an angle of 0.5773502692 to the frame's half
-/// width, which is a 30-degree half angle - a 60-degree horizontal field of view. That fixes the
-/// focal length in pixels at `halfWidth / 0.5773502692` and the principal point at the middle of
-/// the frame.
-///
-/// This is handed to the tracker because a capture records the calibration of its camera beside its
-/// frames, and the tracker reads a device's from `AVCaptureDeviceFormat` instead; offline there is
-/// no device, and a camera and a gyroscope cannot recover a metric depth without the focal length,
-/// so this is what the measurement is being made with and it is stated here rather than assumed.
 static simd_float3x3 CharonSyntheticIntrinsics(NSUInteger width, NSUInteger height)
 {
     const float halfAngleTangent = 0.5773502692f;
@@ -49,13 +22,11 @@ static simd_float3x3 CharonSyntheticIntrinsics(NSUInteger width, NSUInteger heig
 
 #pragma mark - The ground truth
 
-/// One step of a camera that turns a fixed angle about `y` and walks a fixed distance forwards.
 typedef struct {
     simd_quatf rotation;
     simd_float3 translation;
 } CharonTruth;
 
-/// The truth for step `i`: the attitude and the position, in closed form.
 static CharonTruth CharonTruthAt(int i, float stepAngle, float stepLength)
 {
     CharonTruth truth;
@@ -71,16 +42,8 @@ static CharonTruth CharonTruthAt(int i, float stepAngle, float stepLength)
     return truth;
 }
 
-/// The specific force an accelerometer reads for the fixture's own motion, in the device's axes.
-///
-/// An accelerometer reads the acceleration the device is undergoing with gravity still in it, because
-/// gravity is an acceleration too: at rest it reads exactly -g along its own z. So the reading for a
-/// device that is both turning and moving is `R * (a_world - g)`, where `R` is the attitude and `g` is
-/// gravity in the world. The tracker removes gravity from that with the same attitude, which is what
-/// makes the removal exact rather than a subtraction that leaves a bias behind.
 static simd_float3 CharonSpecificForceAt(int i, float stepAngle, float stepLength, float dt)
 {
-    // the truth's own first difference is the acceleration, taken in closed form from the path
     CharonTruth before = CharonTruthAt(i - 1 >= 0 ? i - 1 : 0, stepAngle, stepLength);
     CharonTruth after = CharonTruthAt(i, stepAngle, stepLength);
     simd_float3 step = { after.translation.x - before.translation.x,
@@ -96,7 +59,6 @@ static simd_float3 CharonSpecificForceAt(int i, float stepAngle, float stepLengt
     simd_float3 worldAcceleration = { (step.x - earlier.x) / (dt * dt), (step.y - earlier.y) / (dt * dt),
                                       (step.z - earlier.z) / (dt * dt) };
     simd_float4x4 worldFromDevice = CharonQuaternionMatrix(after.rotation);
-    // a_world - g, then R, which is the reading
     simd_float3 inWorld = { worldAcceleration.x, worldAcceleration.y, worldAcceleration.z + 9.80665f };
     return simd_make_float3(
             worldFromDevice.columns[0][0] * inWorld.x + worldFromDevice.columns[1][0] * inWorld.y +
@@ -108,7 +70,6 @@ static simd_float3 CharonSpecificForceAt(int i, float stepAngle, float stepLengt
 }
 
 
-/// A vector turned by a quaternion, the same three cross products the tracker uses.
 static float clampf(float value, float low, float high)
 {
     return value < low ? low : (value > high ? high : value);
@@ -123,9 +84,6 @@ static simd_float3 CharonRotated(simd_float3 v, simd_quatf q)
 
 #pragma mark - The frame the camera would see
 
-/// Draw the surface into a luma plane: every pixel's ray is turned by the camera's own attitude, put
-/// back into the world, and the brightness is a hash of where it lands, so a turn really does move
-/// texture across the frame.
 static void CharonRenderFrame(uint8_t *luma, NSUInteger width, NSUInteger height,
                               CharonTruth truth, float rotationNoise)
 {
@@ -143,18 +101,6 @@ static void CharonRenderFrame(uint8_t *luma, NSUInteger width, NSUInteger height
             simd_float3 turned = CharonRotated(direction, attitude);
             float distance = 2.0f / (turned.z < -0.01f ? -turned.z : 0.01f);
             simd_float3 hit = turned * distance + truth.translation;
-            // A surface with real two-dimensional structure. A hash of the world position is the
-            // wrong scene for this test and the first version of this file used one: a hash has a large
-            // gradient energy but almost none of it across both directions at once, so the Shi-Tomasi
-            // score - which takes the *smaller* of the two eigenvalues of the structure tensor, and so
-            // rejects a stripe however strong it is - rightly finds no corners in it. Three sines of
-            // the world coordinates give the corners a corner detector is looking for.
-            // The band matters, and it was measured rather than guessed. Below about 15 per metre
-            // the detail is wider than the sampling and a frame carries no corner for a corner
-            // detector to find - 3 positions above the threshold at 7..13, and none at all in the
-            // worst frame. Above about 45 the surface aliases: at 2 m those frequencies project to
-            // roughly ten cycles per pixel, and a turn walks the sampling through it. Between 20
-            // and 30 every frame of the driven path carries corners: 694 in the worst frame at 20.
             float value = 0.6f * sinf(hit.x * 25.0f) + 0.5f * cosf(hit.y * 25.0f)
                          + 0.4f * sinf((hit.x + hit.z) * 25.0f) + 0.3f * cosf(hit.z * 25.0f);
             luma[y * width + x] = (uint8_t)clampf(128.0f + value * 100.0f, 0.0f, 255.0f);
@@ -164,7 +110,6 @@ static void CharonRenderFrame(uint8_t *luma, NSUInteger width, NSUInteger height
 
 #pragma mark - The comparison
 
-/// The angle between two attitudes, which is the rotation error.
 static float CharonAngleBetween(simd_quatf a, simd_quatf b)
 {
     float dot = fabsf(a.vector.x * b.vector.x + a.vector.y * b.vector.y +
@@ -172,14 +117,6 @@ static float CharonAngleBetween(simd_quatf a, simd_quatf b)
     return 2.0f * acosf(fminf(1.0f, dot));
 }
 
-/// The attitude the reported camera transform carries, read back out of its three-by-three.
-/// A pose's attitude, from its matrix.
-///
-/// Column-major: the element at row `r`, column `c` is `pose.columns[c][r]`, so the usual
-/// `R[2][1] - R[1][2]` for the quaternion's x is `columns[1][2] - columns[2][1]`. The two terms the
-/// other way round give the conjugate, and the angle between a rotation and its inverse is exactly
-/// twice its angle - on every axis alike, which is what told this apart from a pose that was
-/// genuinely turning the wrong way.
 static simd_quatf CharonAttitudeOf(simd_float4x4 pose)
 {
     float trace = pose.columns[0][0] + pose.columns[1][1] + pose.columns[2][2];
@@ -210,13 +147,9 @@ int main(void)
     const int count = 100;
     const float stepAngle = 0.10f;
     const float stepLength = 0.05f;
-    const float rotationNoise = 0.002f;   // what a gyroscope really says, and never exactly
+    const float rotationNoise = 0.002f;
     const float translationNoise = 0.002f;
 
-    // The frames, one per step, kept so the same sequence can be replayed. The store is sized from the
-    // step count and not a constant beside it: this was a literal 64 with a 30-step count, and
-    // raising the count wrote past it - a stack-buffer-overflow the sanitizers name exactly. The
-    // frames themselves are far too many to sit on the stack at a longer sequence anyway.
     uint8_t **planes = calloc((size_t)count, sizeof *planes);
     if (!planes) {
         printf("no memory for the frame list\n");
@@ -259,10 +192,6 @@ int main(void)
                              deviceRotation:truth.rotation];
         CVPixelBufferRelease(buffer);
 
-        // Frame 0 is measured, and it is the frame that says whether the conventions agree: the
-        // tracker is handed the ground truth's own attitude, so a first frame that does not read 0
-        // degrees is a convention error - an axis, a handedness, a camera frame against the dataset's -
-        // and not a tracking error, and no amount of the latter will move it.
         simd_float3 walked = (simd_float3){got.columns[3].x, got.columns[3].y, got.columns[3].z};
         double rotation = CharonAngleBetween(CharonAttitudeOf(got), truth.rotation);
         if (step < 4 || step == count - 1)

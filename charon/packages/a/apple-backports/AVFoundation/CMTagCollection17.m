@@ -4,21 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-// The CMTagCollection of iOS 17. A CMTag is three machine words with no lifetime of its own, so a
-// collection is a sorted array of them and everything here is a search, an insert or a run over it; the
-// class is the port's own behind 26.2's bridged CMTagCollectionRef. facts/CoreMedia/TagCollection.md
-
 static void charon_insert_all(CharonCMTagCollection *into, CharonCMTagCollection *from);
-
-// The class and its storage are in CharonCMTagSupport.m: on the 16.4 SDK the collection's tags can
-// only be read through the functions below, which live in this object, so an object that needs them has
-// to be able to reach the storage without calling this object's API. The rules the class and the group
-// share - the comparison and the "every wanted tag is carried" test - are there too.
 
 const CMTag kCMTagInvalid = {kCMTagCategory_Undefined, kCMTagDataType_Invalid, 0};
 
-// CharonCMTag26.h declares the three keys extern, so a definition that repeated it would be the
-// -Wextern-initializer warning: the header says extern, this says what.
 const CFStringRef kCMTagCategoryKey = CFSTR("category");
 const CFStringRef kCMTagValueKey = CFSTR("value");
 const CFStringRef kCMTagDataTypeKey = CFSTR("flags");
@@ -28,9 +17,6 @@ CFTypeID CMTagCollectionGetTypeID(void)
     return (CFTypeID)objc_getClass("CharonCMTagCollection");
 }
 
-// A plain __bridge cast hands the reference to the caller without transferring ownership, so ARC
-// releases the collection at the end of the statement and every later use is a use-after-free. The
-// reference types are CF_RETURNS_RETAINED, so the +1 belongs to the caller and CFRelease balances it.
 static CMTagCollectionRef charon_from(CharonCMTagCollection *collection)
 {
     return (__bridge_retained CMTagCollectionRef)collection;
@@ -84,8 +70,6 @@ OSStatus CMTagCollectionCreateMutableCopy(CMTagCollectionRef tagCollection, CFAl
     OSStatus status = CMTagCollectionCreateMutable(allocator, (CFIndex)(source ? source.charon_count : 0), &out);
     if (status)
         return status;
-    // A copy carries the tags: this one made an empty collection, which is what made a union built on
-    // it lose the first collection entirely.
     charon_insert_all(charon_to((CMTagCollectionRef)out), source);
     *newMutableCollectionCopyOut = out;
     return noErr;
@@ -163,8 +147,6 @@ CMItemCount CMTagCollectionGetCountOfCategory(CMTagCollectionRef tagCollection, 
 
 Boolean CMTagCollectionContainsCategory(CMTagCollectionRef tagCollection, CMTagCategory category)
 {
-    // Measured on the host over empty and non-empty collections: the Undefined category is always
-    // contained, even by an empty collection, and every other category only when it has tags of it.
     if (category == kCMTagCategory_Undefined)
         return true;
     return CMTagCollectionGetCountOfCategory(tagCollection, category) != 0;
@@ -267,8 +249,6 @@ OSStatus CMTagCollectionAddTag(CMMutableTagCollectionRef tagCollection, CMTag ta
     CharonCMTagCollection *collection = charon_to((CMTagCollectionRef)tagCollection);
     if (!collection)
         return kCMTagCollectionError_ParamErr;
-    // Measured: the host answers noErr for kCMTagInvalid and stores it - the count goes up, and the tag
-    // sorts first because its category is 0. It is an ordinary tag with no data type, not a refusal.
     return [collection charon_insert:tag] ? noErr : kCMTagCollectionError_AllocationFailed;
 }
 
@@ -321,7 +301,6 @@ OSStatus CMTagCollectionAddTagsFromArray(CMMutableTagCollectionRef tagCollection
     return noErr;
 }
 
-// Shared by CreateMutableCopy and the union: copy every tag of one collection into another.
 static void charon_insert_all(CharonCMTagCollection *into, CharonCMTagCollection *from)
 {
     if (!into || !from)
@@ -331,10 +310,6 @@ static void charon_insert_all(CharonCMTagCollection *into, CharonCMTagCollection
         [into charon_insert:tags[index]];
 }
 
-// The host's answers, on a one-tag collection against a two-tag one that shares a tag with it:
-// Difference answers nothing, which is the first minus the second, and ExclusiveOr answers one tag,
-// which is the symmetric difference - a tag in one and not the other, counted once. Stacking the two
-// differences answers two there, which is what the port did before this was measured.
 OSStatus CMTagCollectionCreateDifference(CMTagCollectionRef tagCollectionMinuend, CMTagCollectionRef tagCollectionSubtrahend, CMTagCollectionRef *tagCollectionOut)
 {
     CharonCMTagCollection *minuend = charon_to(tagCollectionMinuend), *subtrahend = charon_to(tagCollectionSubtrahend);
@@ -375,10 +350,6 @@ OSStatus CMTagCollectionCreateExclusiveOr(CMTagCollectionRef tagCollection1, CMT
     return noErr;
 }
 
-// The set algebra, the category filter, the two appliers and the dictionary form. Measured on the
-// host's own CoreMedia (facts/CoreMedia/TagCollection.md); the binary …AsData form is Apple's own
-// layout and is not written here.
-
 
 OSStatus CMTagCollectionCreateUnion(CMTagCollectionRef tagCollection1, CMTagCollectionRef tagCollection2, CMTagCollectionRef *tagCollectionOut)
 {
@@ -386,7 +357,6 @@ OSStatus CMTagCollectionCreateUnion(CMTagCollectionRef tagCollection1, CMTagColl
     OSStatus status = CMTagCollectionCreateMutableCopy(tagCollection1, NULL, (CMMutableTagCollectionRef *)&out);
     if (status)
         return status;
-    // A union is both, not the first one: the host's answers carry the second collection's tags too.
     charon_insert_all(charon_to(out), charon_to(tagCollection2));
     *tagCollectionOut = out;
     return noErr;
@@ -415,8 +385,6 @@ OSStatus CMTagCollectionCopyTagsOfCategories(CFAllocatorRef allocator, CMTagColl
 {
     (void)allocator;
     CharonCMTagCollection *collection = charon_to(tagCollection);
-    // Measured: a category count of zero is kCMTagCollectionError_ParamErr on the host, not an empty
-    // collection.
     if (!collection || !categories || !newCollectionOut || !categoriesCount)
         return kCMTagCollectionError_ParamErr;
     CMTagCollectionRef out = NULL;
@@ -463,8 +431,6 @@ CFDictionaryRef CMTagCollectionCopyAsDictionary(CMTagCollectionRef tagCollection
     const CMTag *tags = [collection charon_tags];
     CFMutableArrayRef list = CFArrayCreateMutable(allocator, collection.charon_count, &kCFTypeArrayCallBacks);
     for (NSUInteger index = 0; index < collection.charon_count; index++) {
-        // CFNumber, not an int: CFDictionaryCreate retains what it is given, and an int on the stack is
-        // retained as a CF object, which is the SEGV ASan named in objc_retain from this line.
         CFNumberRef category = CFNumberCreate(allocator, kCFNumberSInt32Type, &(int){(int)tags[index].category});
         CFNumberRef value = CFNumberCreate(allocator, kCFNumberSInt32Type, &(int){(int)tags[index].value});
         CFNumberRef flags = CFNumberCreate(allocator, kCFNumberSInt32Type, &(int){(int)tags[index].dataType});
@@ -511,24 +477,6 @@ OSStatus CMTagCollectionCreateFromDictionary(CFDictionaryRef dict, CFAllocatorRe
     *newCollectionOut = out;
     return noErr;
 }
-
-// The binary form, measured off the host's own CoreMedia over collections of 0, 1, 2 and 3 tags and
-// every data type (facts/CoreMedia/TagCollection.md). A 44-byte header, then 16 bytes per tag:
-//
-//   uint32  the whole record's length, big endian
-//   char4   "tgco"
-//   uint32  20
-//   char4   "tgin"
-//   uint32  0
-//   char8   "tag coll"
-//   uint32  16 * (count + 1)
-//   char4   "tgli"
-//   uint32  0
-//   uint32  the number of tags
-//   per tag: uint32 the category as four characters, uint32 the data type, uint32 zero, uint64 the value
-//
-// An OSType's value sits in the low 32 bits of that 8-byte field and a Float64's is a big-endian
-// double in all of it, both straight from the host's own bytes.
 
 #define charon_data_tag 16
 #define charon_data_header 44
@@ -594,18 +542,6 @@ OSStatus CMTagCollectionCreateFromData(CFDataRef data, CFAllocatorRef allocator,
     *newCollectionOut = NULL;
     const uint8_t *bytes = CFDataGetBytePtr(data);
     size_t length = (size_t)CFDataGetLength(data);
-    // Every one of these answers is the host's own, measured over a whole record, eight truncations of
-    // it and every one of its eleven header fields flipped (facts/CoreMedia/TagCollection.md):
-    //   shorter than the header            kCMTagCollectionError_ParamErr (-15740)
-    //   the length, the sub-length or 20    -12894, which the host does not name
-    //   either of the two zero fields       kCMTagCollectionError_InvalidTagCollectionDataVersion (-15747)
-    //   "tag coll"                          kCMTagCollectionError_InvalidTagCollectionData (-15745)
-    //   a count the length does not fit     kCMTagCollectionError_InvalidTagCollectionData (-15745)
-    // The three magic tags are not compared: the host answers 0 for a record whose "tgco", "tgin" or
-    // "tgli" first byte is flipped, so a port that refused one would refuse a record the host reads.
-    // Measured over every length from 0 to 48: below 8 bytes the host answers
-    // kCMTagCollectionError_ParamErr, and from 8 up it answers -12894 - it reads the total length out of
-    // the first four bytes and finds a record that is not the one it was handed.
     if (length < 8)
         return kCMTagCollectionError_ParamErr;
     if (length < charon_data_header)
@@ -613,8 +549,6 @@ OSStatus CMTagCollectionCreateFromData(CFDataRef data, CFAllocatorRef allocator,
     uint32_t count = charon_data_get32(bytes + 40);
     if (charon_data_get32(bytes) != length || charon_data_get32(bytes + 8) != 20)
         return (OSStatus)-12894;
-    // A count the length cannot fit is -15745 and is decided *before* the sub-length, which is the whole
-    // of the difference between a flipped count and a flipped sub-length.
     if (length != charon_data_header + (size_t)count * charon_data_tag)
         return kCMTagCollectionError_InvalidTagCollectionData;
     if (charon_data_get32(bytes + 28) != charon_data_tag * (count + 1))

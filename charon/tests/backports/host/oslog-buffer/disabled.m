@@ -1,5 +1,3 @@
-// disabled.m - what OS_LOG_DISABLED answers for each type, from the host's own object and from the port's.
-// The same program is built both ways (-DCHARON_PORT for the port), and its two outputs are compared whole.
 #import <Foundation/Foundation.h>
 #import <os/log.h>
 #include <stdio.h>

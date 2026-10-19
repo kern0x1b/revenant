@@ -2,12 +2,6 @@
 #include <stdio.h>
 #include <objc/message.h>
 
-// A bundled Mac Catalyst app with the iPad idiom and a window. The scene delegate runs the same checks on the host's pointer interaction, the
-// button's pointer members and the pointer lock state, and, in the port's build, on the port's (the interaction and the lock state are compiled
-// renamed, and the button and scene and view-controller categories have the host's method names, so in that process they replace the host's
-// and the checks read the port's answers). Each check writes one "side<TAB>check<TAB>value" line to the file named by CHARON_SCENE_OUT, then the
-// app quits. The host has a pointing device, which a bundled application cannot drive: no hover, no region and no animator are measured.
-
 static FILE *out;
 static const char *side;
 
@@ -29,7 +23,6 @@ static NSString *class_name(id object)
     return [name hasPrefix:@"CharonPort"] ? [name substringFromIndex:10] : name;
 }
 
-// A delegate for the interaction, which the test holds weakly and then lets go.
 @interface CharonPointerDelegate : NSObject <UIPointerInteractionDelegate>
 @end
 
@@ -83,7 +76,6 @@ static void button_checks(UIViewController *root)
 
 static void lock_checks(UIViewController *root)
 {
-    // +new and -init are unavailable to the compiler, as the header says; the runtime answers them.
     UIPointerLockState *made = ((id (*)(id, SEL))objc_msgSend)(UIPointerLockState.class, @selector(new));
     report("lock-class", class_name(made));
     id initialised = ((id (*)(id, SEL))objc_msgSend)(((id (*)(id, SEL))objc_msgSend)(UIPointerLockState.class, @selector(alloc)), @selector(init));

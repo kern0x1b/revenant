@@ -1,7 +1,3 @@
-// A second, narrower probe: the two level-3 questions the first probe could not separate, each with
-// a case small enough that every element of the answer is forced by the arithmetic, and each with a
-// negative control - a dense cblas_sgemm over the same numbers, printed next to the sparse answer.
-
 #import <Accelerate/Accelerate.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,8 +20,6 @@ static void show(const char *tag, const float *c, int count)
     P("\n");
 }
 
-// permute_rows and permute_cols, one permutation at a time, on a matrix whose six values are all
-// different, printing after every single call so no step can hide behind another.
 static void permute(void)
 {
     P("== permute, one call at a time ==\n");
@@ -33,14 +27,11 @@ static void permute(void)
     sparse_index rowsets[][3] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 0}, {1, 1, 0}, {0, 1, 1}};
     for (size_t k = 0; k < sizeof(sets) / sizeof(sets[0]); k++) {
         for (int mode = 0; mode < 2; mode++) {
-            // A row permutation has one entry per row and a column permutation one per column: the
-            // header says an index outside the matrix is undefined, so each gets a list of its own length.
             const sparse_index *perm = mode ? sets[k] : rowsets[k < sizeof(rowsets) / sizeof(rowsets[0]) ? k : 0];
             if (mode == 0 && k >= sizeof(rowsets) / sizeof(rowsets[0])) continue;
             sparse_matrix_float B = build(2, 3, 6, (float[]){1, 2, 3, 4, 5, 6},
                                           (sparse_index[]){0, 0, 0, 1, 1, 1}, (sparse_index[]){0, 1, 2, 0, 1, 2});
             sparse_status s = mode ? sparse_permute_cols_float(B, perm) : sparse_permute_rows_float(B, perm);
-            // read every element through the entry point the host offers, one at a time
             float got[6] = {9, 9, 9, 9, 9, 9};
             for (sparse_dimension r = 0; r < 2; r++) {
                 sparse_index c = 0;
@@ -60,7 +51,6 @@ static void permute(void)
     }
 }
 
-// The 2x2 by 2x2 product, then the 2x3 by 3x2 one, each against cblas_sgemm over the same numbers.
 static void gemm(void)
 {
     P("== 2x2 by 2x2, ldb=ldc=2 ==\n");
@@ -157,7 +147,6 @@ static void gemm(void)
         show("", y4, 3);
         sparse_matrix_destroy(A);
     }
-    // The trsv alpha question, with a right-hand side that is not a solution of its own right.
     P("== trsv alpha, a b that is not a solution ==\n");
     {
         sparse_matrix_float L = sparse_matrix_create_float(3, 3);
@@ -183,7 +172,6 @@ static void gemm(void)
         show("", b5, 3);
         sparse_matrix_destroy(L);
     }
-    // And the matrix form, same matrix, same b.
     P("== mat trsv alpha, a b that is not a solution ==\n");
     {
         sparse_matrix_float L = sparse_matrix_create_float(3, 3);
@@ -200,7 +188,6 @@ static void gemm(void)
         show("", b2, 6);
         sparse_matrix_destroy(L);
     }
-    // The inner product with a negative stride, with values that separate the two readings.
     P("== negative strides, separable values ==\n");
     {
         float y[6] = {10, 20, 30, 40, 50, 60};

@@ -1,19 +1,7 @@
--- compare-protocol-metadata-accessors.lua - the fourteen accessors, differences NAMED - and the handler count is the one that
--- matters most.
---
---    xmake l compare-protocol-metadata-accessors.lua <the binary's output>
---
--- Every block-taking accessor must answer false AND leave the handler count at 0. A handler that ran would hand the caller a
--- certificate chain, an OCSP response, a signature algorithm or a distinguished name that were never negotiated, and the caller
--- would act on them. `handler-calls` is therefore checked as its own row rather than folded into the four return values, because a
--- single shared counter is what makes one run tell you a handler fired.
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
--- every block-taking accessor's row, and handler-calls, which must read 0
 local NULLS = {"negotiated-protocol", "server-name", "peer-public-key", "create-secret", "create-secret-ctx",
     "early-data", "chain-access", "ocsp-access", "sigalg-access", "dn-access", "handler-calls"}
--- the two enums that HAVE a member meaning none, so 0 is documented and not a port-invented sentinel
 local ENUMS = {{"protocol-version", 0}, {"ciphersuite", 0}}
 local COMPARE = {{"peers-same-object", 1}, {"peers-two-objects", 1}, {"peers-one-null", 0}, {"peers-both-null", 1},
     {"challenge-same", 1}, {"challenge-one-null", 0},

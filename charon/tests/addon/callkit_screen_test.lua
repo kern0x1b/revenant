@@ -1,12 +1,5 @@
 import("fixtures")
 
--- Proves the CallKit call screen's SpringBoard side (packages/a/apple-callkit-screen) builds and packages for real,
--- the way a port building it would: against the charon addon already installed on this machine and this checkout's own
--- package repository, read directly off disk rather than cloned. tweak_test already proves the tweak rule itself works
--- from a fresh, isolated addon install; that dance is also where tests/addon's own pre-existing flakiness lives
--- (documented in fixtures.repository's callers), so a package that only needs to be built, not the rule's own install
--- path re-proven, does not pay for it again here.
-
 local PROJECT = [[
 add_repositories("charon %s")
 add_addons("charon")

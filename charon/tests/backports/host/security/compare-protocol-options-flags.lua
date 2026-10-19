@@ -1,12 +1,7 @@
--- compare-protocol-options-flags.lua - the eight flags, each read alone against all eight, and the flags set together, differences
--- NAMED.
---
---    xmake l compare-protocol-options-flags.lua <the binary's output>
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
 local NAMES = {"tickets", "fallback", "resumption", "falsestart", "ocsp", "sct", "reneg", "peerauth"}
-local ALONE = 8 * 8          -- each of the eight, read against all eight
+local ALONE = 8 * 8
 local CLEARED = {{"cleared-ocsp", 0}, {"neighbour-sct", 1}, {"neighbour-tickets", 1}, {"deallocated", 0}}
 
 function main(...)
@@ -27,7 +22,6 @@ function main(...)
     if tsv.first_field(rows, "port-class") ~= "found" then
         bad[#bad + 1] = "port-class: the port's CharonSecProtocolFlags was not found"
     end
-    -- the alone-pass reports through WRONG lines only; if none appeared, all 64 reads agreed
     if #wrong == 0 and row_count < #NAMES + #CLEARED then
         bad[#bad + 1] = "the case printed only " .. row_count .. " rows, so the alone-pass did not run"
     end

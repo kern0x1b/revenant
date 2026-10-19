@@ -1,15 +1,3 @@
-// The port's five sixteen-bit alpha placement moves against the host's own, in the table form: one loop over
-// the rows and the cases, so a case is a line of a table and not a block of code.
-//
-// The cases are chosen to pin the parts that are decisions rather than transcriptions:
-//   - a NULL alpha buffer against a plane, because the header marks neither non-NULL and the host takes the
-//     fill as the alpha rather than refusing;
-//   - all three orders, because ARGB puts the alpha first and BGRA puts blue first and one table row cannot
-//     serve both;
-//   - premultiply on and off, and a pair of values whose product is exactly x.5 so the rounding of the
-//     multiply is decided rather than assumed;
-//   - two rows, and a width that ends mid-byte, so a stride mistake cannot pass.
-
 #import <Foundation/Foundation.h>
 #import <Accelerate/Accelerate.h>
 #include <stdint.h>
@@ -28,8 +16,6 @@ vImage_Error charon_host_vImageConvert_RGB16UtoBGRA16U(const vImage_Buffer *, co
 vImage_Error charon_host_vImageConvert_RGBA16UtoRGB16U(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
 vImage_Error charon_host_vImageConvert_BGRA16UtoRGB16U(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
 
-// A width that ends in the middle of a two-byte pixel, and two rows, so a rowBytes mistake has somewhere to
-// show itself.
 #define WIDTH ((vImagePixelCount)7)
 #define ROWS ((vImagePixelCount)2)
 
@@ -40,9 +26,6 @@ typedef vImage_Error (*widen_fn)(const vImage_Buffer *, const vImage_Buffer *, P
                                  bool, vImage_Flags);
 typedef vImage_Error (*narrow_fn)(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
 
-// The source values, per pixel, so the host and the port read the same row and a difference is the move and not
-// the input. The sixteen values are deliberately unlike each other and not in ascending order, so a swap of two
-// channels cannot pass as a match.
 static const uint16_t rgb_values[16] = {
     0x1111, 0x2222, 0x4444, 0x5a5a, 0x8000, 0xffff, 0x0100, 0x00ff,
     0x0f0f, 0xf0f0, 0x8001, 0x7fff, 0x1234, 0x4321, 0x0000, 0xfffe,
@@ -50,7 +33,6 @@ static const uint16_t rgb_values[16] = {
 
 static void fill(uint8_t *buffer, size_t bytes, vImagePixelCount channels, int plane)
 {
-    // plane 0 is the three-channel source, plane 1 the alpha plane; the two are never the same bytes
     memset(buffer, 0, bytes);
     for (vImagePixelCount row = 0; row < ROWS; row++) {
         uint16_t *out = (uint16_t *)(buffer + row * channels * WIDTH * 2);
@@ -133,9 +115,6 @@ static void run_narrow(const char *name, narrow_fn mine, narrow_fn theirs)
     printf("ok %s dropping the alpha\n", name);
 }
 
-// The rounding of the premultiply, asked directly: 0xffff times 0x8000 is 32767.5, and floor and round-to-
-// nearest disagree about it by one. A separate table row, because it is a question about one instruction and
-// not about the move.
 static void run_rounding(void)
 {
     static const uint16_t values[2] = { 0xffff, 0x8001 };
@@ -160,7 +139,7 @@ static void run_rounding(void)
             dest.data = their_out;
             vImageConvert_RGB16UtoARGB16U(&src_buffer, &plane_buffer, 0, &dest, true, 0);
             uint16_t mine_value, their_value;
-            memcpy(&mine_value, mine_out + 2, sizeof mine_value);   // red, the premultiplied channel
+            memcpy(&mine_value, mine_out + 2, sizeof mine_value);
             memcpy(&their_value, their_out + 2, sizeof their_value);
             if (mine_value != their_value) {
                 failures++;
@@ -179,9 +158,6 @@ int main(void)
 {
     setbuf(stdout, NULL);
     @autoreleasepool {
-        // one table, five rows, three cases each: a plane, a NULL plane and the fill, and premultiply on top of
-        // the plane. The fill is 0x1234, which appears nowhere in the source, so a row that read the wrong
-        // channel for its alpha could not pass.
         static const struct { const char *name; widen_fn mine; widen_fn theirs; } widen[3] = {
             { "vImageConvert_RGB16UtoARGB16U", charon_host_vImageConvert_RGB16UtoARGB16U, vImageConvert_RGB16UtoARGB16U },
             { "vImageConvert_RGB16UtoRGBA16U", charon_host_vImageConvert_RGB16UtoRGBA16U, vImageConvert_RGB16UtoRGBA16U },

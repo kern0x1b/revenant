@@ -1,30 +1,13 @@
--- Join surface-diff's static candidate list (undecided API, from Backports 7-10) with corpus demand. Lua port of the
--- former static-candidates.py.
---
--- Input: the file `surface-diff.py --release 6.0 --list` writes, path given as argument 1. Its lines are
--- `<version|?> <kind> <api>` under per-framework headers ("UIKit: N declared"). A version means the SDK gives the
--- member's availability; `?` means it has none recorded.
---
--- For every listed method/property, count the corpus apps that SEND its selector (bundle carries the string and does
--- not define it) and, from the app deployment targets, how many can call it without a guard. Output
--- corpus/static-candidates-demand.tsv (or argument 2 / $CHARON_STATIC_CANDIDATES_OUT, to redirect a one-off or test
--- run away from the real file), then compare with the crash-demand list, which is built by a different route (SDK
--- dump + registry join): the two should agree on the undecided rows that apps send, and where they differ one of the
--- two has a bug.
---
--- usage: xmake l tools/corpus/static-candidates.lua <surface-diff --list output> [output-path]
 import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 local aggregate = import("aggregate", {rootdir = os.scriptdir(), anonymous = true})
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
--- The minimum deployment target of each corpus app, as the version tuple the candidate's version is compared with.
 local MINOS = {ish = {11, 0}, ppsspp = {11, 0}, pojav = {12, 2}, provenance = {16, 0}, delta = {14, 0}, utm = {14, 0},
                aidoku = {15, 0}, yattee = {14, 0}, session = {15, 0}, telegram = {11, 0}}
 local APP_ORDER = {"ish", "ppsspp", "pojav", "provenance", "delta", "utm", "aidoku", "yattee", "session", "telegram"}
 local KINDS = {method = true, property = true, class = true, protocol = true, constant = true, ["function"] = true}
 
--- A version text as a list of numbers; nil for "?".
 local function version_of(text)
     if text == "?" then
         return nil
@@ -36,7 +19,6 @@ local function version_of(text)
     return parts
 end
 
--- Python's tuple comparison a >= b: element by element, and a tuple that is a prefix of the other is the smaller.
 local function at_least(a, b)
     for index = 1, math.max(#a, #b) do
         local x, y = a[index], b[index]
@@ -53,7 +35,6 @@ local function at_least(a, b)
     return true
 end
 
--- The selector names an api line stands for: a method's selector, or a property's getter and setter pair.
 local function selectors(api, kind)
     local name = api:match("^[-+]%[[%w_]+ (.+)%]$")
     if name then
@@ -67,8 +48,6 @@ local function selectors(api, kind)
     return {}
 end
 
--- The crash-demand list, keyed by api. The rows name an api with a "(+N owners)" suffix when several classes share it;
--- the suffix is dropped for the key.
 local function load_crash_list()
     local mine = {}
     for _, r in ipairs(tsv.body(path.join(aggregate.corpus_dir(), "crash-demand-top.tsv"))) do
@@ -77,8 +56,6 @@ local function load_crash_list()
     return mine
 end
 
--- The apps that send a selector: the caches the extract step wrote, minus what the app defines itself, minus what
--- the stock 6.0 universe already has (the same rule as the crash list).
 local function sends_by_selector(universe)
     local sends = {}
     for _, app in ipairs(APP_ORDER) do
@@ -139,7 +116,6 @@ function main(list, out_override)
             local apps = {}
             for _, s in ipairs(selectors(cand.api, cand.kind)) do
                 local dotted = cand.kind == "property" and cand.api:find(".", 1, true) and cand.api:sub(cand.api:find(".", 1, true) + 1)
-                -- a property whose name is only the getter of "is<Name>" in the stock universe is not its own selector
                 local skip = dotted and s == dotted and universe["is" .. dotted:sub(1, 1):upper() .. dotted:sub(2)] and not universe[s]
                 if not skip then
                     for app in pairs(sends[s] or {}) do
@@ -164,7 +140,6 @@ function main(list, out_override)
             end
         end
     end
-    -- sorted by unguarded callers, then apps, then api: crash and apps are both below 100, so one number orders them
     local ordered = aggregate.ranked(rows, function (row) return row.crash * 100 + row.apps end,
                                      function (row) return row.api end)
 
@@ -196,8 +171,6 @@ function main(list, out_override)
                         #cands, methods, #ordered, dest))
     print(string.format("  of those with a known version: %d; unversioned ('?'): %d", known, unversioned))
 
-    -- compare with the crash-demand list (a different route to the same question). Its columns, 1-based here: 3 api,
-    -- 4 kind, 5 framework, 9 apps, 10 crash_apps, 15 registry status.
     local mine = load_crash_list()
     local theirs = {}
     for _, row in ipairs(ordered) do

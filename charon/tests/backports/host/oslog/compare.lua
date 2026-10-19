@@ -1,19 +1,3 @@
--- compare.lua SYSTEM OURS [EXPECTATIONS LIMIT] - the backport's os_log answers against the system's, case by case.
---
--- SYSTEM is the system's own log text, one record per case, each record starting with a time stamp, the process, and a
--- "[cN] " case tag. OURS is the backport's output: NUL-separated records of "<index>\x1f<text>". Every case the backport
--- answered is compared with the system's text for the same index: an "ok" line when they are equal, a FAIL line when not.
--- With EXPECTATIONS and LIMIT given and no failure, the header of the expectations is written: every system case up to LIMIT,
--- as a C table, with its text escaped one byte at a time (printable ASCII as itself, every other byte as an octal escape).
---
--- Exit 1 when any case fails, 0 otherwise. The text is handled as Python handles it: the system's file is read in text mode
--- (\r\n and \r become \n), a valid UTF-8 sequence is one character, and any other byte is a character of its own (as
--- surrogateescape makes it). The FAIL line prints the two texts with the repr Python gives a string.
---
--- Usage: xmake l ./compare.lua <system.txt> <ours.bin> [<expectations.h> <limit>]
-
--- A time stamp, the process, and the case tag that starts each record of the system's log, as the regular expression of the
--- original: the captured digits are the case index.
 local HEADER = "^%d%d%d%d%-%d%d%-%d%d %d%d:%d%d:%d%d%.%d+[+-]%d%d%d%d %S+%[%d+:%d+%] %[c(%d+)%] "
 
 local function read_bytes(file)
@@ -23,7 +7,6 @@ local function read_bytes(file)
     return text
 end
 
--- The records of the system's log, keyed by the index of their case: the text up to the next record, without trailing newlines.
 local function system_cases(text)
     local starts = { 1 }
     for position in text:gmatch("()\n") do
@@ -48,7 +31,6 @@ local function system_cases(text)
     return cases
 end
 
--- The records of the backport's output: NUL-separated, each "<index>\x1f<text>"; empty records are skipped.
 local function ours_cases(bytes)
     local cases = {}
     local start = 1
@@ -56,7 +38,6 @@ local function ours_cases(bytes)
         local stop = bytes:find("\0", start, true) or (#bytes + 1)
         local record = bytes:sub(start, stop - 1)
         if record ~= "" then
-            -- A record with no separator is all index, and its text is empty, as Python's partition gives it.
             local separator = record:find("\31", 1, true)
             local index = tonumber(separator and record:sub(1, separator - 1) or record)
             if not index then
@@ -69,8 +50,6 @@ local function ours_cases(bytes)
     return cases
 end
 
--- The characters of a byte string as Python reads it with surrogateescape: a valid UTF-8 sequence is one character, and any
--- other byte is a character of its own.
 local function characters(bytes)
     local out = {}
     local i = 1
@@ -95,9 +74,6 @@ local function characters(bytes)
     return out
 end
 
--- Python's repr of a string, for the FAIL lines: a quote chosen as Python chooses it, the escapes Python uses, and a byte that
--- is not a character of its own as \udcNN, the way surrogateescape shows it. A printable character of more than one byte is
--- kept as it is.
 local function repr(text)
     if text == nil then
         return "None"
@@ -125,7 +101,6 @@ local function repr(text)
     return table.concat(out)
 end
 
--- The first n characters of a byte string.
 local function first_characters(text, n)
     local chars = characters(text)
     local out = {}
@@ -135,8 +110,6 @@ local function first_characters(text, n)
     return table.concat(out)
 end
 
--- The text of a case as the C table writes it: printable ASCII as itself except the quote and the backslash, every other byte
--- as a three-digit octal escape.
 local function escaped(text)
     local out = {}
     for i = 1, #text do

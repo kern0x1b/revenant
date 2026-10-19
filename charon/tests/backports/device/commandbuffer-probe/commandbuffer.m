@@ -1,14 +1,3 @@
-/* commandbuffer.m - the command queue and the command buffer, asked the same questions on Apple's own Metal
- * (the host, macOS) and on the port (the iPhone 4S guest, iOS 6.1.3). The output is one line per answer, and
- * the two outputs are compared line for line: a difference is the finding, whichever side is right.
- *
- *     host:  clang -fobjc-arc -framework Foundation -framework Metal -framework QuartzCore commandbuffer.m
- *     port:  the same source, built by tests/backports/device/commandbuffer-probe (xmake, armv7, 6.1.3)
- *
- * Only what both sides can answer is asked. A time is compared as a relation (zero, positive, ordered),
- * never as a value, because the two clocks are not the same clock. A question the host answers only by
- * hanging (a wait for a buffer that was never committed) is not asked: it is written down in facts instead.
- */
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <QuartzCore/QuartzCore.h>
@@ -28,9 +17,6 @@ static long countOf(id<MTLLogContainer> logs)
     return count;
 }
 
-/* A handler added AFTER the point it names has passed. Apple's Metal asserts here (measured on the host:
- * "Completed handler provided after commit call", the process aborts), so the host run of this form ends
- * at the handler and prints nothing after it. Each form is its own process, because the abort ends one. */
 static void lateHandler(const char *form, id<MTLCommandQueue> queue)
 {
     id<MTLCommandBuffer> buffer = [queue commandBuffer];
@@ -66,7 +52,6 @@ int main(int argc, const char **argv)
         answer("queue.insertDebugCaptureBoundary.responds", [queue respondsToSelector:@selector(insertDebugCaptureBoundary)]);
         answer("queue.commandBufferWithDescriptor.responds", [queue respondsToSelector:@selector(commandBufferWithDescriptor:)]);
 
-        /* A plain buffer: the factory's defaults, and the status before anything happened. */
         id<MTLCommandBuffer> plain = [queue commandBuffer];
         answer("buffer.present", plain != nil);
         answer("buffer.status.fresh", plain.status);
@@ -84,11 +69,9 @@ int main(int argc, const char **argv)
         answer("buffer.pushDebugGroup.responds", [plain respondsToSelector:@selector(pushDebugGroup:)]);
         answer("buffer.popDebugGroup.responds", [plain respondsToSelector:@selector(popDebugGroup)]);
 
-        /* The unretained factory: the same buffer, with the one setting the factory names changed. */
         id<MTLCommandBuffer> unretained = [queue commandBufferWithUnretainedReferences];
         answer("unretained.retainedReferences", unretained.retainedReferences);
 
-        /* The descriptor factory: the two settings the descriptor names come back as it gave them. */
         MTLCommandBufferDescriptor *descriptor = [[MTLCommandBufferDescriptor alloc] init];
         answer("descriptor.retainedReferences.default", descriptor.retainedReferences);
         descriptor.retainedReferences = NO;
@@ -98,7 +81,6 @@ int main(int argc, const char **argv)
         answer("described.retainedReferences", described.retainedReferences);
         answer("described.errorOptions", described.errorOptions);
 
-        /* Status through a commit, the order of the two handlers, and the answers at each point. */
         order = [NSMutableArray array];
         id<MTLCommandBuffer> run = [queue commandBuffer];
         [run addCompletedHandler:^(id<MTLCommandBuffer> cb) {
@@ -119,10 +101,6 @@ int main(int argc, const char **argv)
         [compute endEncoding];
         answer("run.status.beforeCommit", run.status);
         [run commit];
-        /* The status straight after the commit is asked as it is. Metal answers Committed here; the port has
-         * finished its work inside the encoders by this point and answers Completed, a difference the
-         * expectations file names. The times are read only once the buffer has completed, the one point
-         * Metal answers them. */
         answer("run.status.afterCommit", run.status);
         [run waitUntilCompleted];
         answer("run.status.afterWait", run.status);
@@ -136,14 +114,12 @@ int main(int argc, const char **argv)
         for (NSString *entry in order)
             printf("run.order.%s\n", [entry UTF8String]);
 
-        /* The capture boundary, with no capture running, is answered and the buffer after it completes. */
         [queue insertDebugCaptureBoundary];
         id<MTLCommandBuffer> after = [queue commandBuffer];
         [after commit];
         [after waitUntilCompleted];
         answer("after.boundary.status", after.status);
 
-        /* A blit encoder inside a buffer that commits: the blit path is unchanged by the buffer's new state. */
         id<MTLCommandBuffer> blitting = [queue commandBuffer];
         id<MTLBlitCommandEncoder> blit = [blitting blitCommandEncoder];
         answer("blitting.encoder.present", blit != nil);

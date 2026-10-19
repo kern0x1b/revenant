@@ -1,7 +1,3 @@
-/* speech.m - the host's answers for the speech recognizer's state before any permission is asked: the authorization status
- * (read, never requested, so no prompt), and whether the en-US recognizer is available, supports on-device recognition,
- * and what its delegate and queue are. The supported-locale count is left out: it changes with the OS release.
- * facts/Speech/Authorization.md has the reading. */
 #import <Foundation/Foundation.h>
 #import <Speech/Speech.h>
 

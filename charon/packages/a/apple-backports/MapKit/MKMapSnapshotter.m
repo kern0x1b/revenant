@@ -1,19 +1,9 @@
-// MKMapSnapshotOptions, MKMapSnapshot and MKMapSnapshotter: a map drawn once, off screen, with no
-// map view on screen and nothing asked of the user.
-//
-// The snapshotter is built on the release's own MKMapView, which is the only map this port has: a
-// map view the size the options ask for, put in a window of its own off screen, given the region
-// and the map type the options ask for, asked to draw itself, and then the pixels it drew are read
-// out. That is a real map, drawn by the release's own renderer, with the release's own tiles --
-// not a reimplementation of one. The map view is torn down as soon as the pixels are in hand, so a
-// program that takes many snapshots does not accumulate map views.
 #import <MapKit/MapKit.h>
 #import <MapKit/MKMapSnapshotter.h>
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 #import "CharonMapKit.h"
 
-// The 16.0 configuration the 16.4 header does not declare: which map the snapshot is a snapshot of.
 @interface MKMapSnapshotOptions ()
 @property (nonatomic, copy) MKMapConfiguration *preferredConfiguration;
 @end
@@ -97,8 +87,6 @@
 
 @synthesize image = _image;
 
-// The snapshot of an image of a known map rect, which is the pair the point-for-coordinate answer
-// needs. Charon's own, so it carries no API.
 - (instancetype)initWithImage:(UIImage *)image mapRect:(MKMapRect)mapRect
 {
     self = [super init];
@@ -112,8 +100,6 @@
 
 - (CGPoint)pointForCoordinate:(CLLocationCoordinate2D)coordinate
 {
-    // Where a coordinate ended up in the image: the release's own projection puts it in the
-    // snapshot's map rect, and the map rect fills the image.
     MKMapRect rect = _charon_rect_set ? _charon_rect : MKMapRectWorld;
     MKMapPoint point = MKMapPointForCoordinate(coordinate);
     CGFloat width = _image ? (CGFloat)_image.size.width * _image.scale : 0.0;
@@ -155,10 +141,6 @@
     return self;
 }
 
-// The work, off the caller's thread: the header says the snapshotter starts the work on a queue of
-// the caller's choosing and answers on the main queue, and a queue of nil means the snapshotter's
-// own, so both are honoured here -- the drawing happens on the queue that was given, and the answer
-// comes back on the main queue.
 - (void)startWithQueue:(dispatch_queue_t)queue completionHandler:(void (^)(MKMapSnapshot *, NSError *))completionHandler
 {
     if (!completionHandler) {
@@ -205,8 +187,6 @@
                            userInfo:@{NSLocalizedDescriptionKey: reason}];
 }
 
-// The snapshot itself: the release's own map view, off screen, drawn. Charon's own, so it carries
-// no API.
 - (MKMapSnapshot *)charon_snapshot
 {
     MKMapSnapshotOptions *options = _options;
@@ -230,25 +210,17 @@
     } else {
         [mapView setNeedsDisplay];
     }
-    // A camera, when the options carry one, and a region otherwise: the two say the same thing on
-    // a map view whose own region is what the release lays its tiles out from.
     MKMapCamera *camera = options.camera;
     if (camera) {
         [mapView setCamera:camera animated:NO];
     } else {
         [mapView setRegion:options.region animated:NO];
     }
-    // The renderer draws its tiles as they arrive, so the map is given a moment of its own to do it
-    // before the pixels are read. One run loop turn is what the release's own map view needs for a
-    // tile it already has; a snapshot of tiles it has not asked for yet is a snapshot of the map
-    // with the tiles it had, which is what a map view off screen can be.
     [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.35]];
     CGSize drawn = CGSizeMake(size.width * scale, size.height * scale);
     UIGraphicsBeginImageContextWithOptions(drawn, NO, scale);
     CGContextRef context = UIGraphicsGetCurrentContext();
     if (context) {
-        // The map view's own layer tree is what is drawn into the context, so what lands in the
-        // image is what the release's map view drew and not a copy of it.
         [mapView.layer renderInContext:context];
     }
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();

@@ -28,11 +28,6 @@
     return _callObserver;
 }
 
-// What a transaction is refused for, in the order CallKit refuses it. The
-// completion of a request says whether the transaction was taken, not whether
-// its actions were performed: an action that was taken and then failed is
-// told to the delegate of the provider, and the completion has already run
-// with no error by then.
 - (NSError *)charon_refuse:(CXTransaction *)transaction provider:(CXProvider *)provider
 {
     if (transaction.actions.count == 0)
@@ -56,10 +51,6 @@
         } else if (!call) {
             return charon_callkit_error(CXErrorDomainRequestTransaction, CXErrorCodeRequestTransactionErrorUnknownCallUUID);
         } else if (call.charon_provider != provider) {
-            // A cellular call of the release, which the observer reports and
-            // no provider of this process owns. CallKit would take the action
-            // to whatever is hosting the call; here there is nothing to take
-            // it to, and saying no provider knows the call is what is true.
             return charon_callkit_error(CXErrorDomainRequestTransaction, CXErrorCodeRequestTransactionErrorUnknownCallProvider);
         }
     }

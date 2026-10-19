@@ -1,8 +1,3 @@
-// FORBIDDEN ON THE HOST. Do not run: it calls MIDIDeviceCreate, which would persist a device in the host's MIDI setup if
-// the release ever accepted it (it answered -50 here, newentity-macos.txt). Probes must not create or edit persistent host
-// MIDI objects (facts/CoreMIDI/Devices.md).
-// Host probe: MIDIDeviceNewEntity on macOS. Creates a device, adds an entity with a protocol, and reads back the
-// entity count, the entity's endpoints and its protocol property.
 #import <CoreMIDI/CoreMIDI.h>
 #import <Foundation/Foundation.h>
 #include <stdio.h>

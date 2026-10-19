@@ -43,18 +43,6 @@ static NSString *walk(id enumerator, BOOL port, NSString *root, uint64_t skips)
 {
     NSMutableString *out = [NSMutableString string];
     SEL nextSelector = @selector(nextObject), levelSelector = @selector(level);
-    // The port's enumerator answers the PLAIN name, and the measurement says why. prefix_selectors.py leaves a
-    // member of a class the port itself defines alone - the class is renamed, so nothing of it can reach the
-    // host's - and that is what the built objects show:
-    //
-    //   $ nm foundation14directoryenumerator/NSDirectoryEnumerator+PostOrder13.m.o | grep -i postorder
-    //   -[CharonHostCharonPostOrderEnumerator isEnumeratingDirectoryPostOrder]      <- the enumerator's own
-    //   -[NSDirectoryEnumerator(CharonPostOrder) charonHostIsEnumeratingDirectoryPostOrder]  <- the category
-    //
-    // So the prefixed name is the CATEGORY's, which answers NO for every receiver, and asking it of the port's
-    // enumerator reported no entry as post-order while the host's answered YES - "174 of 300 trees differ" with
-    // identical order and identical levels on both sides. The enumerator is a port-defined class, so its own
-    // member keeps its name; asking each side for the name its own class defines is what compares them.
     SEL postSelector = @selector(isEnumeratingDirectoryPostOrder);
     NSURL *url;
     NSUInteger index = 0;

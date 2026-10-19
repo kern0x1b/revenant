@@ -1,5 +1,3 @@
-// The versioned schema and the plan that migrates between two of them.
-
 import Foundation
 
 public protocol VersionedSchema: SendableMetatype {

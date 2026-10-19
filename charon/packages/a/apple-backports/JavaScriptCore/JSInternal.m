@@ -3,26 +3,6 @@
 #import <objc/message.h>
 #import <pthread.h>
 
-/*
- * Every symbol this file defines is Charon's own (the charon_/Charon prefix modules/apple/
- * backports.lua's internal_symbol() keys on), never a real SDK name, and that is deliberate: it
- * is the one place in this package that must be kept whole on every band regardless of whether
- * JSValue, JSContext or any other class here gets reexported from the release instead of carried.
- * A helper functions like these two ever needed unconditionally - charon_js_box/unbox, the string
- * bridge, the block- and opaque-object JSClassRefs, the callback frame stack - used to live inside
- * JSValue.m and JSContext.m, the same object files as the JSValue/JSContext classes themselves.
- * Once a band's release genuinely carries JavaScriptCore (iOS 7.0 and later), those two classes
- * are reexported from the system instead of kept, and band() in backports.lua drops their whole
- * object file - taking these helpers down with it, even though JSExportBridge.m (whose own class,
- * CharonExportBinding, is never a real SDK name and so is always kept) calls them unconditionally
- * on every band. That produced "Undefined symbols: _charon_js_box" etc. at write_deb's
- * multi-band link step only - never at a single-release build(), which never reexports anything -
- * confirmed by instrumenting link() directly: kept every JavaScriptCore object on the 6.1.3 band,
- * kept only JSExportBridge.o on the 7.0 band. Moving them here, where nothing but Charon's own
- * names is defined, means band() always keeps this object regardless of what else in the library
- * gets reexported.
- */
-
 
 JSStringRef charon_js_string(NSString *string)
 {
@@ -39,17 +19,6 @@ static BOOL IsCFBoolean(id value)
     return value && CFGetTypeID((__bridge CFTypeRef)value) == CFBooleanGetTypeID();
 }
 
-/*
- * A block's Objective-C type encoding, read as the documented clang Block ABI lays it out
- * (clang's docs/Block-ABI-Apple.rst): a block literal is {isa, flags, reserved, invoke,
- * descriptor}; the descriptor is {reserved, size}, then {copy, dispose} when
- * BLOCK_HAS_COPY_DISPOSE (1 << 25) is set, then the encoding when BLOCK_HAS_SIGNATURE (1 << 30)
- * is. The compiler that built the block writes it there, not the runtime, so the release's
- * libsystem_blocks has no say in it. This is the pointer _Block_signature (an SPI of
- * Block_private.h) answers - measured equal on the host for a global, a capturing and a
- * primitive-typed block - read without the SPI. A block with no signature (built by a compiler
- * older than blocks' extended encodings) answers NULL.
- */
 struct CharonBlockDescriptor { unsigned long reserved; unsigned long size; void *rest[]; };
 struct CharonBlockLayout { void *isa; int flags; int reserved; void *invoke; struct CharonBlockDescriptor *descriptor; };
 enum { CharonBlockHasCopyDispose = 1 << 25, CharonBlockHasSignature = 1 << 30 };
@@ -68,7 +37,6 @@ static const char *BlockSignature(id block)
 typedef enum { CharonTypeVoid, CharonTypeJSValue, CharonTypeId, CharonTypeClass, CharonTypeScalar, CharonTypeUnsupported } CharonTypeKind;
 typedef struct { CharonTypeKind kind; __unsafe_unretained Class objcClass; } CharonType;
 
-/* The end of the one type at `cursor`, qualifiers, nesting and trailing offset included. */
 static const char *SkipType(const char *cursor)
 {
     while (*cursor && strchr("rnNoORVA", *cursor))
@@ -110,7 +78,6 @@ static const char *SkipType(const char *cursor)
     return cursor;
 }
 
-/* Which of the four structs JSValue converts `type` (`{CGPoint=dd}`) is, by its name. */
 typedef enum { CharonStructNone, CharonStructPoint, CharonStructSize, CharonStructRect, CharonStructRange } CharonStruct;
 
 static CharonStruct StructKind(const char *type)
@@ -127,15 +94,6 @@ static CharonStruct StructKind(const char *type)
     return CharonStructNone;
 }
 
-/*
- * One type of a block's extended encoding (`@"NSString"` names the class), classified as the
- * release's own JSContext treats it (measured against the host's, tests/backports/host/jscontext):
- * JSValue, id, any other class - `@"Class<Protocol>"` counts as the class, a bare `@"<Protocol>"`
- * as id; a C number, bool, CGPoint, CGSize, CGRect or NSRange is a scalar; anything else - a
- * block, Class, SEL, a pointer, another struct, a class the runtime does not know - is
- * unsupported, and the release does not make such a block a function at all (`typeof` answers
- * "object").
- */
 static const char *SkipQualifiers(const char *cursor)
 {
     while (*cursor && strchr("rnNoORVA", *cursor))
@@ -172,7 +130,6 @@ static CharonType ClassifyType(const char *cursor)
         type.kind = CharonTypeScalar;
         break;
     case '{':
-        /* the four structs JSValue converts; any other struct makes no function (measured) */
         if (StructKind(cursor) != CharonStructNone)
             type.kind = CharonTypeScalar;
         break;
@@ -180,19 +137,16 @@ static CharonType ClassifyType(const char *cursor)
     return type;
 }
 
-/* Whether a block is a function to JavaScript, from its encoding: its return is void, an object
- * or a scalar, and every argument is a class, id or a scalar. */
 static BOOL BlockIsFunction(id block)
 {
     const char *cursor = BlockSignature(block);
     if (!cursor)
         return NO;
     CharonTypeKind returned = ClassifyType(cursor).kind;
-    /* any object, a block included, is returned boxed */
     if (returned != CharonTypeVoid && returned != CharonTypeScalar && *SkipQualifiers(cursor) != '@')
         return NO;
     cursor = SkipQualifiers(SkipType(cursor));
-    if (cursor[0] != '@' || cursor[1] != '?') /* argument 0 is the block itself */
+    if (cursor[0] != '@' || cursor[1] != '?')
         return NO;
     for (cursor = SkipType(cursor); *cursor; cursor = SkipType(cursor)) {
         CharonTypeKind kind = ClassifyType(cursor).kind;
@@ -202,8 +156,6 @@ static BOOL BlockIsFunction(id block)
     return YES;
 }
 
-/* One JavaScript argument as its declared class wants it, per the release: JSValue takes the
- * value itself, id takes -toObject, a class goes through charon_js_to_class. */
 static id ObjectArgument(JSContextRef ctx, JSContext *context, CharonType type, JSValueRef value, JSValueRef *exception)
 {
     switch (type.kind) {
@@ -227,15 +179,6 @@ const char *charon_js_skip_type(const char *type)
     return SkipType(type);
 }
 
-/*
- * A C number, bool or one of the four structs, as the release's bridge converts it for a block's or
- * JSExport method's argument (ObjCCallbackFunction.mm, CallbackArgument*; measured on the host for
- * thirteen types against twenty-seven values): char, short, int, long and their unsigned forms take
- * ECMAScript ToInt32 of the number, cast to the type; long long, unsigned long long, float and
- * double take the number cast to the type; bool takes ToBoolean; CGPoint, CGSize, CGRect and
- * NSRange take -toPoint, -toSize, -toRect and -toRange. A number whose valueOf or toString throws
- * leaves the exception in *exception and sets nothing. NO for any other type.
- */
 BOOL charon_js_set_scalar_argument(NSInvocation *invocation, NSUInteger index, const char *type, JSContextRef ctx, JSValueRef value, JSValueRef *exception)
 {
     type = SkipQualifiers(type);
@@ -256,7 +199,6 @@ BOOL charon_js_set_scalar_argument(NSInvocation *invocation, NSUInteger index, c
     case 'S': CHARON_SET(unsigned short, integer); return YES;
     case 'I': CHARON_SET(unsigned int, integer); return YES;
     case 'L': CHARON_SET(unsigned long, integer); return YES;
-    /* the release's own cast, out of range and NaN included, as its compiler makes it for this architecture */
     case 'q': CHARON_SET(long long, number); return YES;
     case 'Q': CHARON_SET(unsigned long long, number); return YES;
     case 'f': CHARON_SET(float, number); return YES;
@@ -279,11 +221,6 @@ BOOL charon_js_set_scalar_argument(NSInvocation *invocation, NSUInteger index, c
     return YES;
 }
 
-/*
- * What an invocation returned, as the release's bridge gives it to JavaScript (CallbackResult*):
- * void is undefined, an object is boxed, a C number is that number (a char included), bool is a
- * boolean, the four structs are JSValue's +valueWithPoint:... objects.
- */
 JSValueRef charon_js_invocation_result(NSInvocation *invocation, const char *type, JSContextRef ctx)
 {
     type = SkipQualifiers(type);
@@ -326,10 +263,6 @@ JSValueRef charon_js_invocation_result(NSInvocation *invocation, const char *typ
     return JSValueMakeUndefined(ctx);
 }
 
-/*
- * The block's encoding as NSMethodSignature documents its input: plain Objective-C type encodings,
- * without the class names (`@"NSString"`) and block signatures (`@?<v@?>`) of the extended form.
- */
 static NSMethodSignature *BlockMethodSignature(const char *extended)
 {
     size_t length = strlen(extended);
@@ -361,13 +294,6 @@ static NSMethodSignature *BlockMethodSignature(const char *extended)
     return signature;
 }
 
-/*
- * A block is exported as a JS function through one shared JSClassRef, whose private data on
- * each JSObjectRef is the retained block. It is called as the release calls it: through an
- * NSInvocation whose target is the block (ObjCCallbackFunction.mm, CallbackBlock), which carries
- * every C type the encoding names. Object arguments are converted by the class the encoding
- * declares, the others by charon_js_set_scalar_argument; a missing argument is undefined.
- */
 static JSValueRef CallBlock(JSContextRef ctx, JSObjectRef function, JSObjectRef _Nullable thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception)
 {
     id block = (__bridge id)JSObjectGetPrivate(function);
@@ -375,10 +301,9 @@ static JSValueRef CallBlock(JSContextRef ctx, JSObjectRef function, JSObjectRef 
     const char *encoding = BlockSignature(block);
     NSMethodSignature *signature = BlockMethodSignature(encoding);
     NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
-    /* -setArgument:atIndex: copies bytes only; an object converted below must outlive -invoke */
     [invocation retainArguments];
     invocation.target = block;
-    const char *cursor = SkipType(SkipType(encoding)); /* past the return type and the block itself */
+    const char *cursor = SkipType(SkipType(encoding));
     for (NSUInteger index = 1; index < signature.numberOfArguments; index++, cursor = SkipType(cursor)) {
         JSValueRef value = index - 1 < argumentCount ? arguments[index - 1] : JSValueMakeUndefined(ctx);
         JSValueRef failure = NULL;
@@ -421,8 +346,6 @@ static JSValueRef BlockCallAsFunction(JSContextRef ctx, JSObjectRef function, JS
     return CallBlock(ctx, function, thisObject, argumentCount, arguments, exception);
 }
 
-/* `new` on a block, as the release allows it: the block runs with no `this`, and what it returns
- * must be an object. */
 static JSObjectRef BlockCallAsConstructor(JSContextRef ctx, JSObjectRef constructor, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception)
 {
     JSValueRef failure = NULL;
@@ -444,15 +367,6 @@ static void DefineHidden(JSContextRef ctx, JSObjectRef object, const char *name,
     JSStringRelease(string);
 }
 
-/*
- * A block's function is a function to script, as the release's is (measured on the host): it has
- * a read-only `length` of 0 and `name` of "" and a `prototype` object of its own, and its
- * prototype is the context's Function.prototype, so call, apply and bind work. The properties go
- * on first, while nothing read-only of that prototype's shadows them. Function.prototype is read
- * off a function the engine itself makes, so a script that replaced the global Function changes
- * nothing. JSObjectMake sets a new object's prototype after the class's initialize callback, so
- * this runs once the wrapper is made (charon_js_wrapper_made).
- */
 static void MakeBlockFunction(JSContextRef ctx, JSObjectRef object)
 {
     DefineHidden(ctx, object, "length", JSValueMakeNumber(ctx, 0), kJSPropertyAttributeReadOnly);
@@ -478,8 +392,6 @@ static JSClassRef BlockClass(void)
     return blockClass;
 }
 
-/* An opaque wrapper for a plain Objective-C object that JSExport does not describe: it round
- * trips through -toObject, but exposes no properties or methods to JavaScript. */
 static void OpaqueFinalize(JSObjectRef object)
 {
     charon_js_release_soon(JSObjectGetPrivate(object));
@@ -522,8 +434,6 @@ JSValueRef charon_js_box(JSContextRef context, id object)
 {
     if (!object)
         return JSValueMakeUndefined(context);
-    /* a JSValue passed back in as a plain `id` is already a JavaScript value - unwrap it rather
-     * than wrapping the wrapper as a fresh opaque object */
     if ([object isKindOfClass:[JSValue class]])
         return ((JSValue *)object).JSValueRef;
     if (object == (id)kCFNull || [object isKindOfClass:[NSNull class]])
@@ -573,8 +483,6 @@ JSValueRef charon_js_type_error(JSContextRef context, NSString *message)
     return [wrapper[@"TypeError"] constructWithArguments:@[message]].JSValueRef;
 }
 
-/* Object.prototype.toString of the object `value` (classOf) or Array.isArray(value), both the
- * virtual machine's own. Neither can throw for an object (ES5 15.2.4.2, 15.4.3.2). */
 static JSValueRef AskOwnContext(JSContextRef context, JSValueRef value, BOOL classOf)
 {
     JSVirtualMachine *machine = [JSContext charon_wrapperForGlobalContext:JSContextGetGlobalContext(context) create:YES].virtualMachine;
@@ -606,22 +514,11 @@ uint32_t charon_js_uint32(double value)
     return (uint32_t)(int64_t)fmod(trunc(value), 4294967296.0);
 }
 
-/*
- * JSValue's container conversion, walked as the release's JSContainerConvertor walks it: every
- * object met is recorded once against the Objective-C object made for it, so a cycle or a shared
- * reference answers that same object (`d[@"self"] == d`), and containers are filled from a
- * worklist rather than by recursion, so depth costs no stack. null is NSNull wherever it stands;
- * undefined is nil at the top, NSNull in an array, and left out of a dictionary. An array is read
- * by its length, anything else by its enumerable property names, inherited ones included. A
- * getter that throws is passed over and the exception reported nowhere, as the release does
- * (measured: its handler is not called). Each recorded value is protected until the walk ends,
- * since the map and worklist live on the heap where the collector does not look.
- */
 typedef struct {
     JSContextRef context;
-    NSMapTable *seen;              /* JSValueRef -> the Objective-C object made for it */
-    NSPointerArray *pendingValues; /* worklist: the containers still to fill ... */
-    NSMutableArray *pendingObjects; /* ... and their JavaScript objects, by index */
+    NSMapTable *seen;
+    NSPointerArray *pendingValues;
+    NSMutableArray *pendingObjects;
 } CharonConvertor;
 
 static void ConvertorRecord(CharonConvertor *convertor, JSValueRef value, id object, BOOL fill)
@@ -701,7 +598,6 @@ static void ConvertorFill(CharonConvertor *convertor, JSObjectRef object, id con
     JSPropertyNameArrayRelease(names);
 }
 
-/* Convert `value`; a non-nil `container` is the top's container, filled as `value` read that way. */
 static id Convert(JSContextRef context, JSValueRef value, id container)
 {
     CharonConvertor convertor = {
@@ -727,8 +623,6 @@ id charon_js_unbox(JSContextRef context, JSValueRef value)
     return value ? Convert(context, value, nil) : nil;
 }
 
-/* -toArray and -toDictionary: any object is read as the container asked for, undefined and null
- * are nil, and any other primitive is a TypeError, as the release words it. */
 static id ToContainer(JSContextRef context, JSValueRef value, Class containerClass, JSValueRef *exception)
 {
     id wrapped = charon_js_wrapped_object(context, value);
@@ -805,13 +699,6 @@ id charon_js_to_class(JSContextRef context, JSValueRef value, Class objcClass, J
     return nil;
 }
 
-/*
- * +currentContext, +currentThis, +currentCallee and +currentArguments only answer from inside a
- * callback JavaScript makes into Objective-C - a block or a JSExport method. A pthread key holds
- * a small stack of frames, one push per nested callback, so a callback that itself calls back
- * into JavaScript which calls back into Objective-C again still answers correctly for its own
- * frame once the inner one pops.
- */
 static pthread_key_t charon_frame_key;
 static pthread_once_t charon_frame_once = PTHREAD_ONCE_INIT;
 
@@ -826,11 +713,6 @@ CharonJSFrame *CharonCurrentFrame(void)
     return pthread_getspecific(charon_frame_key);
 }
 
-/*
- * One queue of contexts with jobs per thread, and the level of calls into script the thread is
- * at. A context and its drain function are kept (JSGlobalContextRetain, JSValueProtect) from the
- * moment its first job is queued until its drain has run.
- */
 typedef struct CharonPendingJobs {
     struct CharonPendingJobs *next;
     JSGlobalContextRef context;
@@ -843,12 +725,12 @@ typedef struct CharonReleaseNode {
 } CharonReleaseNode;
 
 typedef struct CharonJobState {
-    unsigned depth;   /* every level of script on this thread's stack: ours and a callback's */
-    unsigned entered; /* the levels this port entered itself (charon_js_enter), which a leave ends */
-    BOOL scheduled;   /* a run loop turn of this thread is to drain the queue */
+    unsigned depth;
+    unsigned entered;
+    BOOL scheduled;
     CharonPendingJobs *first;
     CharonPendingJobs *last;
-    CharonReleaseNode *releases; /* what this thread's finalizers gave up, oldest first */
+    CharonReleaseNode *releases;
     CharonReleaseNode *lastRelease;
 } CharonJobState;
 
@@ -886,19 +768,6 @@ static CharonJobState *CharonJobs(void)
     return state;
 }
 
-/*
- * Objects whose wrappers the collector finalized, waiting to be released outside the collection.
- * A finalizer must call nothing that may collect or allocate, "all functions that have a
- * JSContextRef parameter" included (JSObjectRef.h, JSObjectFinalizeCallback), and on the release's
- * engine (2012) a finalizer runs inside whichever allocation sweeps its block (measured on the iPad
- * 2: inside JSObjectMake); the last release of a wrapped object runs its -dealloc, which may reach
- * the C API (a JSValue, a JSManagedValue, a graph token of JSVirtualMachine). The release's bridge
- * hands such objects to the heap to release after the collection, on the thread that collected
- * (WebKit's Heap::releaseSoon); the C API has no end-of-collection hook, so each thread keeps its
- * own queue here, and releases what its finalizers queued at its own next outermost leave or next
- * run loop turn, whichever comes first, and at its exit. A thread that has no run loop and never
- * calls into script again keeps what it queued until it exits.
- */
 void charon_js_release_soon(const void *object)
 {
     CharonJobState *state = CharonJobs();
@@ -920,7 +789,6 @@ void charon_js_release_soon(const void *object)
     }
 }
 
-/* Each release in a pool of its own; a -dealloc that finalizes more queues it here, taken in turn. */
 static void ReleaseQueued(CharonJobState *state)
 {
     while (state->releases) {
@@ -980,13 +848,6 @@ void charon_js_enter(void)
     state->entered++;
 }
 
-/*
- * Script this port did not enter - a direct C API call, a web view's own page - has no leave of
- * ours to run its jobs at, and neither has a callback such script makes: the callback's own calls
- * into script are levels of ours, but the last of them ends with the caller's script still on the
- * stack, where no job may run. The thread's run loop runs them on its next turn instead. The
- * release runs them as the outermost C API call returns, which nothing outside the engine sees.
- */
 static void ScheduleDrain(CharonJobState *state)
 {
     if (state->scheduled)
@@ -1026,7 +887,6 @@ void charon_js_leave(void)
             ScheduleDrain(state);
         return;
     }
-    /* The drains run a level deep, so a call they make into script and back leaves them alone. */
     state->depth++;
     state->entered++;
     while (state->first) {

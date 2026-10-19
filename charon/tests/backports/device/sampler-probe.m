@@ -1,15 +1,3 @@
-// Sampler probe: does the emulated iOS 6.1.3 carry the Apple sampler as an audio component?
-//
-// The question is a registration, not an export, so the answer can only come from asking the release:
-// AudioComponentFindNext for {kAudioUnitType_MusicDevice, kAudioUnitSubType_Sampler, kAudioUnitManufacturer_Apple},
-// and then the same walk with a wildcard manufacturer and with 'aumu', in case the component is there
-// under a code this port would not have guessed. Every answer is printed with the code that produced
-// it, and the component list is walked whole so a sampler under any name shows up.
-//
-// The distinction this settles: a grep for a Sampler *symbol* in the 6.1.3 cache proves nothing, because
-// a component is registered rather than exported. facts/AVFAudio/AVAudioUnitMIDI.md records that, and
-// this is the measurement it asks for.
-
 #import <Foundation/Foundation.h>
 #import <AudioToolbox/AudioToolbox.h>
 
@@ -61,7 +49,6 @@ int main(void)
     anySampler.componentSubType = kAudioUnitSubType_Sampler;
     report(@"anyType/Sampler/any", anySampler);
 
-    // The whole list, so a sampler under a name this probe would not have guessed is still seen.
     AudioComponentDescription any = {0};
     AudioComponent component = NULL;
     for (UInt32 index = 0; index < AudioComponentCount(&any); index++) {

@@ -38,8 +38,6 @@ static const char charon_action_key, charon_menu_key, charon_proxy_key;
 static void charon_wire(UIBarButtonItem *item)
 {
     CharonItemProxy *proxy = objc_getAssociatedObject(item, &charon_proxy_key);
-    // A menu does not take the tap from an action of the application's own:
-    // UIKit shows it on a long press then, which an item of the release has none of.
     BOOL own = item.action != NULL && !(proxy && item.target == proxy);
     BOOL wanted = item.primaryAction != nil || (item.menu != nil && !own);
     if (wanted && !proxy) {

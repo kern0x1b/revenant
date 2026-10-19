@@ -4,13 +4,6 @@
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #include <pthread.h>
 
-// A compute pipeline of the port is a translated kernel and the threadgrid it wants: the C function
-// tools/air2cpu wrote for the AIR of the library, found in the image that was loaded, which is where
-// the generated C ends up because air2cpu's output is compiled into the application and RTLD_DEFAULT
-// is the only handle a process has on its own code. A kernel the tool refused is not in that table, so
-// the pipeline answers the documented error naming the function - never a pipeline that would compute
-// something else.
-
 #include <dlfcn.h>
 
 @implementation CharonMetalComputePipeline {
@@ -25,10 +18,6 @@
 - (instancetype)initWithFunction:(id<MTLFunction>)function error:(NSError **)error
 {
     NSString *name = function.name;
-    // The table air2cpu emits: { name, function, bufferCount, hasThreadgroup, reserved }.
-    // The table air2cpu emits: { name, function, bufferCount, threadgroupBytes, reserved }. The block
-    // field is the length the kernel declares in its threadgroup argument, read out of the AIR, so the
-    // default below is the kernel's own declaration and not a number from a fixture.
     struct KernelEntry { const char *name; void *function; uint32_t buffers; uint32_t block; uint32_t reserved; };
     static const struct KernelEntry *table;
     static unsigned count;
@@ -52,9 +41,6 @@
         if ((self = [super init])) {
             _kernel = name;
             _function = table[index].function;
-            // The block the kernel declares, as air2cpu read it out of the AIR; the encoder is told the
-            // real length by -setThreadgroupMemoryLength:atIndex: before a dispatch, so this is the
-            // default the kernel gets when the application says nothing.
             _blockBytes = table[index].block;
         }
         return self;

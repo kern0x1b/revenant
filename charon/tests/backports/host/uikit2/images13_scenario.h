@@ -1,14 +1,7 @@
 #import "uirest.h"
 
-// Which side this binary drives. The recorder (images13_system.m) links no port object and leaves it NO; the
-// test sets it YES before it runs the same scenario. One header, two spellings, and the comparison is between
-// the port's answers and the system's - which is the only reason the port's names appear at all.
 static BOOL ur_img_port_mode;
 
-// A prefixed selector for the port's copy of a name, spelled the way prefix_selectors.py's prefixed() spells it,
-// which is not simply "charonHost" in front of the name: an Objective-C family keyword keeps its own spelling and
-// the prefix goes after it. None of the names this scenario sends begins with one, and the rule is here so that
-// a name added later cannot be spelled wrongly.
 static SEL ur_img_sel(const char *name)
 {
     static const char *families[] = {"mutableCopy", "copy", "init", "new", "alloc"};
@@ -29,20 +22,6 @@ static SEL ur_img_sel(const char *name)
     return sel_registerName(renamed);
 }
 
-// The port's members are asked by their own names on the port's side and the system's on the system's, which is
-// what this differential is: the group's port sources add categories to UIImage and UIImageView, and on the
-// prefixed path those categories carry prefixed selectors, so a send that reaches the port has to name one.
-// Measured on this group, over the objects the prefixed build produces, the declarations header names 23 of them
-// - charonHostImageWithTintColor:, charonHostHasBaseline, charonHostConfiguration, charonHostImageNamed:
-// inBundle:withConfiguration:, charonHostCheckmarkImage and the rest - and a send left with the bare name
-// reaches the system instead. That is not always harmless: with the port's symbol configuration in hand,
-// -[UIImage imageWithConfiguration:] (the system's, iOS 17) completes it with
-// +[UIImageConfiguration _completeConfiguration:fromConfiguration:], which sends _initWithConfiguration: to its
-// argument, and the port's class does not answer that:
-//   -[CharonHostUIImageSymbolConfiguration _initWithConfiguration:]: unrecognized selector.
-// The two helpers below are the send shapes the scenario needs; the port's own classes (the renamed
-// UIImageConfiguration and UIImageSymbolConfiguration) keep the plain names, which is why those sends are
-// written as they are.
 static id ur_img0(id receiver, const char *name)
 {
     return ((id (*)(id, SEL))objc_msgSend)(receiver, ur_img_sel(name));
@@ -68,9 +47,6 @@ static id ur_img3(id receiver, const char *name, id first, id second, id third)
     return ((id (*)(id, SEL, id, id, id))objc_msgSend)(receiver, ur_img_sel(name), first, second, third);
 }
 
-// The two members whose answer is used as a number rather than as an object, which a send through a cast
-// answers as `id`: -hasBaseline is a BOOL and -baselineOffsetFromBottom a CGFloat, and both are read often
-// enough here to be worth naming.
 static BOOL image_has_baseline(UIImage *image)
 {
     return (BOOL)((long (*)(id, SEL))objc_msgSend)(image, ur_img_sel("hasBaseline"));
@@ -151,10 +127,6 @@ static NSArray *images_scenario(NSString *folder, Class symbolClass, Class confi
     [lines addObject:ur_line(@"tinted empty image", @[NSStringFromCGSize(emptyTinted.size)])];
 
     [lines addObject:ur_line(@"baseline", @[ur_yes(image_has_baseline(image)), @(image_baseline_offset(image))])];
-    // The argument is a CGFloat, so it goes as one: ur_img1 would pass the NSNumber's POINTER, and the method reads
-    // that pointer's bits as the double it returns. Measured before this line was spelled correctly: the port
-    // answered 1.976262583364986e-323 and the system 3.458459520888726e-323 - two denormals, each one a heap
-    // address reinterpreted, and the whole scenario was reading the port's own arguments back.
     UIImage *based = ur_imgd(image, "imageWithBaselineOffsetFromBottom:", 3);
     [lines addObject:ur_line(@"with baseline", @[ur_yes(image_has_baseline(based)), @(image_baseline_offset(based)), NSStringFromCGSize(based.size), @(based.scale), ur_yes(based != image), ur_yes(image_has_baseline(image))])];
     UIImage *without = ur_img0(based, "imageWithoutBaseline");

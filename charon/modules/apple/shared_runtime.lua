@@ -6,18 +6,10 @@ import("byteorder", {rootdir = path.join(os.scriptdir(), "..")})
 
 local ADDON = path.join(os.scriptdir(), "..", "..", "addons", "c", "charon", "xmake.lua")
 
--- A runtime that programs share instead of carrying: its libraries live in /usr/lib/charon/<package> under absolute
--- install names, and a package of its own holds them. The package and its folder are named after the build (see charon@swift-runtime),
--- and a program depends on exactly that one: by default the libraries are built without library evolution, so two builds do not
--- answer for each other, and with the library_evolution config, which is a build of its own, the mark still names it.
-
--- The packages of the shared runtime: the C++ runtime, the Swift libraries, and the ones that pull UIKit in. Each is named
--- after the build it holds, and each names the ones it needs by exact version.
 function package_name(kind, buildhash)
     return "org.charon." .. kind .. "-" .. buildhash:sub(1, 8)
 end
 
--- The version of such a package: the Charon release the recipe belongs to, and the build.
 function package_version(buildhash)
     local released
     for version in io.readfile(ADDON):gmatch('add_versions%("v(%d[%d%.]*)"') do
@@ -32,12 +24,6 @@ function folder_of(name)
     return "/usr/lib/charon/" .. name
 end
 
--- The libraries an image names to the loader that nothing of it is bound to, by the file name the image lists them under:
--- ld64 keeps a dylib that is named on its command line (or by an overlay's own autolink entry that something used) whether
--- or not any symbol resolves to it, and the loader then opens it, and the ones it names in turn, for nothing. What the
--- image names is read from `otool -L` (the first line it lists is the image's own install name) and what each undefined
--- symbol is bound to from `nm -m`, which says "(from <library>)" for a two-level namespace; both give a library by its
--- file name up to the first dot, so that is how the two are matched.
 function unbound_dependencies(image, architecture)
     local function stem(name)
         return path.filename(name):match("^[^.]+")
@@ -62,16 +48,6 @@ function unbound_dependencies(image, architecture)
     return unbound
 end
 
--- Gives the libraries of one or more packages their absolute names, and leaves each package's tree and what a Debian package
--- of it needs to be written from. The libraries are not signed here: signing needs ldid, a tool of the host whose own
--- dependencies (openssl, libplist) reach every package that depends on a package that has it, and the wrong openssl - the
--- host's - reached the C++ packages that link openssl. The program that depends on these packages signs them when it writes
--- their Debian packages (deb below).
---   opt.packages: each {name, version, title, description, depends, libraries, extra}: the package, the packages it needs as
---     Debian writes them, the libraries it holds, and {source, leaf} for the ones that come from elsewhere (libc++)
---   opt.root: where the packages' trees are built, and stay, since a program links against the libraries in them
---   opt.metadata: the folder that holds a file of what each package is, named after it
---   opt.strip: the strip arguments
 function stage(opt)
     os.tryrm(opt.root)
     os.tryrm(opt.metadata)
@@ -97,8 +73,6 @@ function stage(opt)
         end
         table.insert(held, entry)
     end
-    -- Every reference the libraries make to one another is by absolute name afterwards, into their own package or into
-    -- another of these, and retarget refuses a library that still says @rpath.
     for _, entry in ipairs(held) do
         local others = {}
         for _, other in ipairs(held) do
@@ -118,7 +92,6 @@ function stage(opt)
     end
 end
 
--- What stage left of a package: {name, version, title, description, depends, folder}.
 function metadata(folder, name)
     local file = path.join(folder, name .. ".json")
     if not os.isfile(file) then
@@ -127,14 +100,11 @@ function metadata(folder, name)
     return json.loadfile(file)
 end
 
--- The Debian package of one staged package: its own folder of the tree, every library in it signed with the program's ldid,
--- and the control file stage described it with. root is the tree stage built; ldid is the program's own.
 function deb(described, root, ldid, workdir, outputdir)
     local debian = import("debian", {rootdir = path.join(os.scriptdir(), ".."), anonymous = true})
     os.tryrm(workdir)
     local tree = path.join(workdir, "tree")
     os.mkdir(path.directory(path.join(tree, described.folder)))
-    -- The package holds its own folder and nothing of the others'.
     os.vcp(path.join(root, described.folder), path.directory(path.join(tree, described.folder)) .. "/")
     for _, library in ipairs(os.files(path.join(tree, described.folder, "*.dylib"))) do
         signing.sign(ldid, library)

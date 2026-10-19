@@ -1,4 +1,3 @@
-// The answers of the host's vImage, written by host/accelerate7/refresh.sh from accelerate7-cases.m.
     {"ARGB premult first 2x2 bg0 error", "0"},
     {"ARGB premult first 2x2 bg0 pixels", "255,0,40,90,57,15,15,20,|81,4,43,14,0,0,0,0,|"},
     {"ARGB premult first 2x2 bg0 image error", "0"},

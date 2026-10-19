@@ -1,24 +1,3 @@
-// The offline-render differential: the port's arithmetic against the host's own 3D mixer and the
-// host's own offline engine render.
-//
-// The port's code is armv7 and cannot run on this host, so what is compared here is the *arithmetic
-// the port writes*, against a real AudioUnit of the host's and a real host engine: the distance
-// attenuation law, the listener transform's round trip, and the shape of an offline pull. Each has a
-// host answer, and each is a closed form the port implements rather than looks up.
-//
-// What this does and does not prove, stated so a reader need not guess:
-//   * it DOES show the three distance laws behave as the port's header describes - in range, falling
-//     with distance, and three different laws - against the mixer that applies the gain;
-//   * it DOES show the mixer's spherical source position survives the round trip the port's listener
-//     transform performs;
-//   * it DOES show a real offline pull through a real engine fills the frames asked for, is not
-//     silent and is not clipping, and advances the sample time - which is what -renderOffline:
-//     is written to promise;
-//   * it does NOT run the port's armv7 code. Comparing a *port* render sample for sample is the
-//     emulator call test's job, and this file says so rather than implying otherwise.
-//
-// A control is required: with no host unit, every check below would pass vacuously.
-
 #import <Foundation/Foundation.h>
 #import <math.h>
 #import <AudioToolbox/AudioToolbox.h>
@@ -41,7 +20,6 @@ static void check(NSString *what, BOOL held)
     else { failures++; printf("FAIL %s\n", what.UTF8String); }
 }
 
-// The port's law, written as the port writes it (AVAudioEnvironmentNode8.m, -charon_gainForDistance:).
 static double PortGainForDistance(double distance, double reference, double rolloff, AVAudioEnvironmentDistanceAttenuationModel model)
 {
     switch (model) {
@@ -78,8 +56,6 @@ int main(void)
         memcpy(sub, &subtype, 4);
         printf("stage host mixer: subtype '%s'\n", sub);
 
-        // The distance law, against the mixer that applies the gain: in range, falling with distance,
-        // and the three models are three different curves.
         struct { double distance; double reference; double rolloff; } cases[] = {
             {1.0, 1.0, 1.0}, {2.0, 1.0, 1.0}, {5.0, 1.0, 1.0}, {10.0, 1.0, 2.0},
         };
@@ -102,8 +78,6 @@ int main(void)
               PortGainForDistance(5, 1, 1, AVAudioEnvironmentDistanceAttenuationModelExponential) !=
               PortGainForDistance(5, 1, 1, AVAudioEnvironmentDistanceAttenuationModelLinear));
 
-        // The listener transform's round trip: a source's position is the mixer's own spherical
-        // triple, so writing it and reading it back is the identity the port's transform relies on.
         struct { double azimuth; double elevation; double distance; } triples[] = {
             {0, 0, 1}, {45, 0, 2}, {90, 0, 3}, {-90, 30, 4}, {180, -30, 5},
         };
@@ -120,7 +94,6 @@ int main(void)
                   status == noErr && fabs((double)back - triples[index].distance) < 0.5);
         }
 
-        // The offline pull, on the host's own engine, which has the same trio the port implements.
         AVAudioEngine *engine = [[AVAudioEngine alloc] init];
         AVAudioFormat *format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:44100.0 channels:2];
         NSError *error = nil;
@@ -141,18 +114,12 @@ int main(void)
             source.frameLength = 11025;
             [player scheduleBuffer:source completionHandler:nil];
             [engine prepare];
-            // an engine in manual rendering mode is still started: the mode removes the hardware,
-            // not the engine. A pull before the start is refused by the host with -80802. The player
-            // is started after the engine, because a player started before it is playing is not
-            // running when the first pull comes.
             NSError *startError = nil;
             BOOL started = [engine startAndReturnError:&startError];
             check(@"an engine in manual rendering mode starts", started && startError == nil);
             [player play];
 
             AVAudioPCMBuffer *out = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:512];
-            // the caller says how many frames it wants: -renderOffline: fills what the buffer's
-            // frameLength asks for, and a zero-length buffer is a zero-frame pull
             out.frameLength = 512;
             AVAudioEngineManualRenderingStatus status = [engine renderOffline:512 toBuffer:out error:&error];
             printf("stage offline pull: status %ld error %s (domain %s code %ld)\n", (long)status,
@@ -166,11 +133,8 @@ int main(void)
                 peak = MAX(peak, fabsf(rendered[frame]));
             }
             printf("stage offline render: peak %g over %u frames, asked for 512\n", (double)peak, out.frameLength);
-            // The peak is compared with the 0.5 the sine was written at, not merely bounded: a render
-            // that came out at a quarter of it, or at twice it, is wrong and a bound would pass it.
             checkClose(@"the rendered peak is the amplitude that went in", peak, 0.5, 0.01);
             check(@"the offline pull filled exactly the frames it was asked for", out.frameLength == 512);
-            // and a second pull of a different length, to show the count comes from the request
             AVAudioPCMBuffer *second = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:512];
             second.frameLength = 128;
             AVAudioEngineManualRenderingStatus shorter = [engine renderOffline:128 toBuffer:second error:NULL];

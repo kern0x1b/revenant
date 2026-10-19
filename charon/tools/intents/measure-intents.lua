@@ -1,12 +1,3 @@
--- measure-intents.lua: the release each Intents class symbol first appears exporting.
---
--- The band machinery places an object by the release its exported API arrived in, measured
--- against the release caches (modules/apple/backports.lua's introduced_in -> dyld.first_releases)
--- and not by the availability annotation the header carries. This answers the same question for
--- the whole Intents class list at once, so the generated object files are grouped by the measured
--- release from the start rather than by the header's, which would be a guess.
--- Usage: xmake lua <this> <class-list> <sdkdir> <output> <modules>
-
 function main(list, sdkdir, output, modules)
     local dyld = import("apple.dyld", {rootdir = modules, anonymous = true})
     local symbols = {}

@@ -1,8 +1,6 @@
 #import "CharonTimingParameters.h"
 #include <math.h>
 
-/* A CGFloat is a float on the architectures this is built for and a double on the
-   64-bit ones, and the archive carries whichever it is, as Apple's own does. */
 #if CGFLOAT_IS_DOUBLE
 #define charon_encode_scalar(coder, value, key) [(coder) encodeDouble:(value) forKey:(key)]
 #define charon_decode_scalar(coder, key) ((CGFloat)[(coder) decodeDoubleForKey:(key)])
@@ -12,10 +10,6 @@
 #endif
 
 
-/* How long the spring takes to come to rest, for one component of the initial
-   velocity. Read off +[UIView _durationOfSpringAnimationWithMass:stiffness:damping:velocity:],
-   which iOS 6 has not got. The damping ratio is clamped to at most one, so a
-   spring damped past critical settles as a critically damped one does. */
 static double charon_settling(double mass, double stiffness, double damping, double velocity)
 {
     double zeta = damping / (2 * sqrt(mass * stiffness));

@@ -1,26 +1,11 @@
 #import <CoreNFC/CoreNFC.h>
 #import "CharonNDEF.h"
 
-// The members iOS 13.0 added to NFCNDEFPayload and NFCNDEFMessage: the initialisers that take a
-// record's fields, the chunked one, the well-known URI and text helpers, +ndefMessageWithData: and
-// -length. They are a separate object because an object carries the API of one release.
-//
-// The encoding and the parsing are the record shape of CharonNDEF.h, the NFC Forum NDEF Technical
-// Specification: the header byte with MB, ME, SR, IL, TNF and CF, a one-byte type length, a one- or
-// four-byte payload length, a one-byte ID length, then the type, the ID and the payload. A record that
-// does not add up is refused, never repaired.
-//
-// **The buffer the encoder writes into is a parameter, not a property.** A category cannot reach the
-// 11.0 object's own ivar, so the one that reads the bytes back does it through the property of the
-// class extension - and an append that *fetched* the buffer through that property would be the encoder
-// calling the builder that called the append. The builder owns the buffer, the append is handed it.
-
 static NSData *CharonNDEFRTD(const char *rtd, size_t length)
 {
     return [NSData dataWithBytes:rtd length:length];
 }
 
-// The two well-known types this file builds by name: the URI RTD "U" and the text RTD "T".
 static NSData *CharonNDEFURIRTD(void)
 {
     static NSData *type;
@@ -51,7 +36,6 @@ static NSData *CharonNDEFTextRTD(void)
 {
     self = [super init];
     if (self) {
-        // The class's own setters, because a category cannot reach the class's ivars.
         self.typeNameFormat = format;
         self.type = type;
         self.identifier = identifier;
@@ -64,8 +48,6 @@ static NSData *CharonNDEFTextRTD(void)
 {
     self = [self initWithFormat:format type:type identifier:identifier payload:payload];
     if (self && chunkSize > 0) {
-        // A chunk size of zero, or none at all, means the payload is not chunked, and the port keeps
-        // that as no chunk size rather than as one of zero.
         [self setValue:[NSData dataWithBytes:&chunkSize length:sizeof chunkSize] forKey:@"chunkSize"];
     }
     return self;
@@ -88,9 +70,6 @@ static NSData *CharonNDEFTextRTD(void)
 
 @implementation NFCNDEFPayload (ConvenienceHelpers)
 
-// The prefix byte of a URI payload is the index of the longest entry of the URI RTD's table the URI
-// begins with, which is the specification's own rule; index 0 is the empty prefix and is what a URI
-// with none of them gets.
 static uint8_t CharonNDEFPrefixIndex(NSString *uri, NSUInteger *rest)
 {
     uint8_t table = 0x00;
@@ -153,9 +132,6 @@ static NSData *CharonNDEFURIPayloadData(NSString *uri)
     return [NSURL URLWithString:[NSString stringWithFormat:@"%@%@", @(CharonNDEFURIPrefixes[bytes[0]]), text]];
 }
 
-// The text RTD: the status byte carries the encoding in its top bit and the length of the language code
-// in its low six, and the text follows the code. The port writes UTF-8 for every language, and its
-// status byte says so; facts/CoreNFC/NDEF.md says why and what that costs.
 static NSData *CharonNDEFTextPayloadData(NSString *text, NSString *language)
 {
     const char *code = language.UTF8String ?: "en";
@@ -185,8 +161,6 @@ static NSData *CharonNDEFTextPayloadData(NSString *text, NSString *language)
 
 + (instancetype)wellKnowTypeTextPayloadWithString:(NSString *)text locale:(NSLocale *)locale
 {
-    // The spelling Apple deprecated in the release that replaced it. Carried, so code written against
-    // either name links, and both answer the same.
     return [self wellKnownTypeTextPayloadWithString:text locale:locale];
 }
 
@@ -226,9 +200,6 @@ static NSData *CharonNDEFTextPayloadData(NSString *text, NSString *language)
 
 @implementation NFCNDEFMessage (CharonRecord)
 
-// One record, written into `into`. `marker` is the chunk marker and is placed as the first byte of the
-// payload, which is where a chunked payload's marker belongs; a continuation carries no type and no ID
-// of its own, which is what the CF flag is for.
 static size_t CharonNDEFRender(NFCNDEFPayload *payload, BOOL first, BOOL last, BOOL continuation,
                                uint8_t marker, BOOL withMarker, NSMutableData *into)
 {
@@ -238,7 +209,6 @@ static size_t CharonNDEFRender(NFCNDEFPayload *payload, BOOL first, BOOL last, B
     record.first = first;
     record.last = last;
     record.continuation = continuation;
-    // An empty identifier is written with no ID field, as the host writes it (tests/backports/host/nfc-activity).
     record.hasIdentifierField = payload.identifier.length != 0;
     if (!continuation) {
         record.typeLength = MIN(payload.type.length, (NSUInteger)CharonNDEFMaxTypeLength);
@@ -253,7 +223,7 @@ static size_t CharonNDEFRender(NFCNDEFPayload *payload, BOOL first, BOOL last, B
     const uint8_t *body = payload.payload.bytes;
     size_t payloadLength = payload.payload.length;
     if (withMarker) {
-        ++payloadLength;   // the marker is the first byte of a chunked payload
+        ++payloadLength;
     }
     record.payload = body;
     record.payloadLength = payloadLength;
@@ -278,7 +248,6 @@ static size_t CharonNDEFRender(NFCNDEFPayload *payload, BOOL first, BOOL last, B
     return length;
 }
 
-// The records one payload expands into: itself, and one continuation per further chunk.
 - (void)charonAppendPayload:(NFCNDEFPayload *)payload into:(NSMutableData *)into first:(BOOL *)first last:(BOOL)last
 {
     size_t chunkSize = [payload charonChunkSize];
@@ -299,10 +268,6 @@ static size_t CharonNDEFRender(NFCNDEFPayload *payload, BOOL first, BOOL last, B
                                                                 payload:[payload.payload subdataWithRange:NSMakeRange(offset, take)]];
         BOOL starts = marker == 0x00;
         BOOL ends = offset + take >= payload.payload.length;
-        // The marker is written here and nowhere else: the payload object carries the bytes of the
-        // chunk and not the marker, the renderer puts the marker as the first byte of the payload, and
-        // the parser reads that byte back. A chunk after the first has no type and no ID of its own,
-        // which is what the CF flag is for.
         CharonNDEFRender(chunk, *first, ends, !starts, marker, YES, into);
         *first = NO;
         offset += take;
@@ -310,8 +275,6 @@ static size_t CharonNDEFRender(NFCNDEFPayload *payload, BOOL first, BOOL last, B
     }
 }
 
-// The message's own bytes, made once and kept: -length is what they weigh, and +ndefMessageWithData: is
-// the other direction.
 - (NSData *)charonEncodedRecords
 {
     NSData *already = [self valueForKey:@"charonEncoded"];
@@ -332,9 +295,6 @@ static size_t CharonNDEFRender(NFCNDEFPayload *payload, BOOL first, BOOL last, B
     return [self charonEncodedRecords].length;
 }
 
-// The bytes a message encodes to. KVC would stop at the class extension's own getter, which answers
-// nothing before the first encoding, so the private method is called here and the function is what the
-// port's own header declares for it.
 NSData *CharonNDEFEncodedRecords(NFCNDEFMessage *message)
 {
     return [(id)message performSelector:@selector(charonEncodedRecords)];
@@ -344,7 +304,7 @@ NSData *CharonNDEFEncodedRecords(NFCNDEFMessage *message)
 {
     self = [super init];
     if (self) {
-        [self setValue:records forKey:@"records"];   // the class's own property, which a category cannot reach as an ivar
+        [self setValue:records forKey:@"records"];
     }
     return self;
 }
@@ -368,14 +328,10 @@ NSData *CharonNDEFEncodedRecords(NFCNDEFMessage *message)
         memset(&record, 0, sizeof record);
         size_t used = CharonNDEFRecordDecode(bytes + offset, length - offset, &record);
         if (used == 0) {
-            // A record that does not add up ends the message: what was read is a message, and the rest
-            // is not one. Nothing is repaired and nothing is guessed at.
             break;
         }
         offset += used;
         if (record.continuation) {
-            // A continuation belongs to the group before it and says which chunk it is, so a
-            // continuation out of order, or without a group, is not a message this parser will answer.
             if (!groupPayload || record.payloadLength < 1 || record.payload[0] != expected) {
                 return nil;
             }
@@ -389,13 +345,9 @@ NSData *CharonNDEFEncodedRecords(NFCNDEFMessage *message)
             continue;
         }
         NSData *type = [NSData dataWithBytes:record.type length:record.typeLength];
-        // No ID field at all is nil, not an empty data: an empty one would make the encoder write the
-        // field back and the round trip would weigh a byte more than the bytes it was given.
         NSData *identifier = record.hasIdentifierField
             ? [NSData dataWithBytes:record.identifier length:record.identifierLength] : nil;
         NSMutableData *payload = [NSMutableData dataWithBytes:record.payload length:record.payloadLength];
-        // A record whose payload begins with the zero marker opens a chunked group, which the
-        // specification spells as a well-known record with the marker and continuations after it.
         BOOL chunked = record.format == NFCTypeNameFormatNFCWellKnown && record.payloadLength >= 1
             && record.payload[0] == 0x00;
         if (chunked) {

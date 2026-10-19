@@ -1,21 +1,12 @@
--- compare-padding.lua - the padding each algorithm must map to, and the broken pair NAMED on a difference.
---
---    xmake l compare-padding.lua <the binary's output>
---
--- The expectation is the SDK's OWN enumerator, read by the case at run time and compared here against the same enumerator - so
--- the numbers are the header's and not a spelling copied out of a document. The case also prints a WRONG line of its own, and a
--- run that produced one of those is a failure whatever this script says.
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
--- In the order the algorithms are named, so the DIFFERS lines come out in that order.
 local EXPECTED = {
-    {"pkcs1-sha1", 32770},     -- 0x8002
-    {"pkcs1-sha224", 32771},   -- 0x8003
-    {"pkcs1-sha256", 32772},   -- 0x8004
-    {"pkcs1-sha384", 32773},   -- 0x8005
-    {"pkcs1-sha512", 32774},   -- 0x8006
-    {"ecdsa-sha256", 0},       -- kSecPaddingNone: the release cannot carry it
+    {"pkcs1-sha1", 32770},
+    {"pkcs1-sha224", 32771},
+    {"pkcs1-sha256", 32772},
+    {"pkcs1-sha384", 32773},
+    {"pkcs1-sha512", 32774},
+    {"ecdsa-sha256", 0},
 }
 
 function main(...)

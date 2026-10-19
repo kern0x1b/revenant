@@ -1,13 +1,3 @@
-// csvreading.swift - the port's CSV reader and Apple's, in one process, over the same bytes.
-//
-// Each case is read by Apple's `TabularData` and by the port's `PortTabularData` (the sources renamed by
-// run.sh, as tabularframe.swift is), and the two renderings must be equal: the columns, their element
-// types, their values, or the error's text and its row and column. A mismatch is a failure.
-//
-// The OPEN cases are printed and not counted. They are readings the host gives and the port does not
-// yet: a line of spaces among the records, which the host folds into the header; they are listed with
-// what the host answers, so the gap stays visible in the run.
-
 import Foundation
 import PortTabularData
 import TabularData
@@ -28,7 +18,6 @@ struct Case {
 
 func bytes(_ text: String) -> [UInt8] { Array(text.utf8) }
 
-// The two modules both declare the names the reader uses, so every name from each is qualified.
 func appleKind(_ name: String) -> TabularData.CSVType {
     switch name {
     case "boolean": return .boolean
@@ -95,7 +84,6 @@ func portRendering(_ c: Case) -> String {
     }
 }
 
-// The two modules' columns are read through the same members, so one cell renderer serves both.
 func cells(_ count: Int, _ value: (Int) -> Any?) -> [String] {
     (0..<count).map { i in
         guard let cell = value(i) else { return "nil" }
@@ -213,9 +201,6 @@ let cases: [Case] = [
 
 for c in cases { check(c) }
 
-// OPEN: a line of spaces among the records. The host folds it into the header (its cell is the header
-// `a` followed by a newline and the spaces), and with blank lines kept it reads the line as nil. Neither
-// is carried yet; printed, not counted.
 let openCases: [Case] = [
     Case(label: "a line of spaces", bytes: bytes("a\n \n1\n")),
     Case(label: "a line of spaces, blank lines kept", bytes: bytes("a\n \n1\n"), ignoresEmptyLines: false),

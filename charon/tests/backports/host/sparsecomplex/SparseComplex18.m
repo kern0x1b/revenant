@@ -1,29 +1,4 @@
-// The complex half of vecLib/Sparse/BLAS.h: the fifty-eight entry points of iOS 18.5, over the same
-// storage and the same arithmetic as the sixty-nine real ones of iOS 9.
-//
-// No release this port supports exports any of them: measured with the ladder, symbol by symbol over
-// every cache the port holds, all fifty-eight are exported by no release at all - not by 16.0, not by
-// 18.0. So this is a library written here, the complex face of the one beside it, and it is the object
-// file of its own because the sixty-nine beside it are 9.0 and 10.0.1 while these are 18.5.
-//
-// The arithmetic is the real one with a pair of reals for a value, and the BLAS is the release's own
-// complex BLAS where it has a form:
-//   - the products gather and accumulate with cblas_ccopy and cblas_caxpy, which the ladder puts at 4.0;
-//   - the largest singular value is A' A formed with cblas_cherk (4.0) and the largest eigenvalue of the
-//     real Hermitian result read with ssyev_ / dsyev_ (4.0);
-//   - the two entry points with no complex form in the release's BLAS are written here, and the ladder
-//     says why: cblas_cger, cblas_zger, cblas_cdotu, cblas_cdotc and cblas_zdotu are exported by no
-//     release at all, so a rank-one update is an axpy and an inner product is a loop. The real half has
-//     the same two gaps and answers them the same way.
-//
-// Behaviour is the host's own, held against this file by tests/backports/host/sparseblas, which runs
-// both over the same inputs and compares every status, every count and every element of every value.
-// facts/Accelerate/SparseBLAS.md carries the measurements.
-
 #import <Accelerate/Accelerate.h>
-// creal, cimag and the imaginary unit, which is how a value's two halves are named. A complex value is
-// two adjacent reals, and the compiler lays them out that way in every ABI this port builds for, so
-// these are the accessors and nothing else in this file knows how a complex is stored.
 #include <complex.h>
 #include "CharonSparseComplex.h"
 
@@ -31,7 +6,6 @@
 #pragma clang diagnostic ignored "-Wunguarded-availability"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-// Which of the two complex types a matrix is, and the element size that goes with it.
 static int CharonComplexIsDouble(const void *matrix)
 {
     return CharonSparseIsDoubleComplex(matrix);
@@ -87,8 +61,6 @@ static sparse_status CharonComplexMake(void **out, uint32_t magic, sparse_dimens
     *out = matrix;
     return SPARSE_SUCCESS;
 }
-
-// ---------------------------------------------------------------- creation
 
 sparse_matrix_float_complex sparse_matrix_create_float_complex(sparse_dimension M, sparse_dimension N)
 {
@@ -164,8 +136,6 @@ sparse_matrix_double_complex sparse_matrix_variable_block_create_double_complex(
                ? (sparse_matrix_double_complex)matrix
                : NULL;
 }
-
-// ---------------------------------------------------------------- insertion
 
 static sparse_status CharonComplexPutEntry(void *matrix, uint32_t magic, double re, double im, sparse_index i,
                                            sparse_index j)
@@ -355,8 +325,6 @@ sparse_status sparse_insert_block_double_complex(sparse_matrix_double_complex A,
     return CharonComplexPutBlock(A, CHARON_SPARSE_MAGIC_DOUBLE_COMPLEX, val, row_stride, col_stride, bi, bj);
 }
 
-// ---------------------------------------------------------------- extraction
-
 static long CharonComplexExtractRow(void *matrix, uint32_t magic, sparse_index row, sparse_index columnStart,
                                     sparse_index *columnEnd, sparse_dimension nz, void *val, sparse_index *jndx)
 {
@@ -374,8 +342,6 @@ static long CharonComplexExtractRow(void *matrix, uint32_t magic, sparse_index r
     sparse_dimension written = 0;
     while (at < source->count && written < nz) {
         if (val) {
-            // One memcpy of the entry: a complex value is the two scalars the row holds, laid out
-            // contiguously, so nothing has to be converted on the way out.
             memcpy((char *)val + (size_t)written * size, (const char *)source->value + (size_t)at * size, size);
         }
         if (jndx) {
@@ -510,12 +476,6 @@ sparse_status sparse_extract_block_double_complex(sparse_matrix_double_complex A
     return CharonComplexExtractBlock(A, CHARON_SPARSE_MAGIC_DOUBLE_COMPLEX, bi, bj, row_stride, col_stride, val);
 }
 
-// ---------------------------------------------------------------- level 1
-
-// The release's complex BLAS has no dot product: cblas_cdotu, cblas_cdotc and cblas_zdotu are exported by
-// no release at all (measured, the ladder over every cache the port holds), so the inner product is the
-// sum the header writes out, in the caller's order. A complex product a * b is (ar br - ai bi) + i (ar bi +
-// ai br), and the real half sums the same way.
 static void CharonComplexConjugate(double re, double im, double *outRe, double *outIm)
 {
     *outRe = re;
@@ -658,19 +618,6 @@ void sparse_vector_add_with_scale_dense_double_complex(sparse_dimension nz, doub
     CharonComplexAddScale(nz, creal(alpha), cimag(alpha), x, indx, y, incy, 2 * sizeof(double));
 }
 
-// The three norms of a complex sparse vector are NOT the moduli-based ones the real half uses, and the
-// host's own answers fix all of them. Measured, on {1, 0, 3 - i} at columns {0, 2, 3} with nz = 3 the one,
-// two, infinity, R1 and an unenumerated name answer 5, 3.31662, 3.16228, 3.31662 and 3.16228, and on a
-// single value {3 - i} they answer 4, 3.16228 and 3.16228:
-//
-//   SPARSE_NORM_ONE  the sum over the values of |re| + |im|       1 + 0 + (3 + 1) = 5, and 3 + 1 = 4
-//   SPARSE_NORM_TWO  the root sum of the squared moduli          sqrt(1 + 0 + 9 + 1) = 3.31662
-//   SPARSE_NORM_INF  the LARGEST MODULUS, sqrt(9 + 1) = 3.16228 - which is not the root sum of the
-//                    squared moduli, which would be 3.31662 for that vector and does not match
-//   SPARSE_NORM_R1   the two-norm, which the header says a vector does not support
-//   any other name   the infinity norm, as the real half is measured to answer
-//
-// A count of zero answers zero, as in the real half.
 static double CharonComplexVectorNorm(sparse_dimension nz, const void *x, const sparse_index *indx, sparse_norm norm,
                                       size_t size)
 {
@@ -718,8 +665,6 @@ double sparse_vector_norm_double_complex(sparse_dimension nz, const double _Comp
 {
     return CharonComplexVectorNorm(nz, x, indx, norm, 2 * sizeof(double));
 }
-
-// ---------------------------------------------------------------- the vector utilities
 
 static long CharonComplexVectorNonzero(sparse_dimension N, const void *x, sparse_stride incx, size_t size)
 {
@@ -817,11 +762,6 @@ void sparse_unpack_vector_double_complex(sparse_dimension N, sparse_dimension nz
     CharonComplexUnpack(N, nz, zero, x, indx, y, incy, 2 * sizeof(double));
 }
 
-// ---------------------------------------------------------------- level 2
-
-// y = alpha * op(A) * x + y. One stored entry at a time, the address of the element computed here and the
-// release's own cblas_caxpy doing the one multiply-add at it, which is what makes an increment of zero or
-// a negative one work - the same rule and the same reason as the real half, and cblas_caxpy is at 4.0.
 static sparse_status CharonComplexVectorProduct(void *matrix, uint32_t magic, int transposed, double alphaRe,
                                                  double alphaIm, const void *x, sparse_stride incx, void *y,
                                                  sparse_stride incy, size_t size)
@@ -880,10 +820,6 @@ sparse_status sparse_matrix_vector_product_dense_double_complex(enum CBLAS_TRANS
                                       cimag(alpha), x, incx, y, incy, 2 * sizeof(double));
 }
 
-// The sparse substitution, over the stored entries, with alpha dividing the right-hand side - the rule
-// the host's answers fix for the real types and the one this half follows for the same reason
-// (facts/Accelerate/SparseBLAS.md: an alpha of zero answers an infinity and then a NaN where scaling the
-// solution would answer zeros).
 static sparse_status CharonComplexTriangular(void *matrix, uint32_t magic, int transposed, double alphaRe,
                                               double alphaIm, void *b, long iStep, long rightStep,
                                               sparse_dimension nrhs, size_t size)
@@ -929,8 +865,6 @@ static sparse_status CharonComplexTriangular(void *matrix, uint32_t magic, int t
             long here = (long)i * iStep + (long)right * rightStep;
             double re = 0.0, im = 0.0;
             CharonComplexLoadAt(b, size, here, &re, &im);
-            // b / alpha, which for a complex alpha is b * conj(alpha) / |alpha|^2. An alpha of zero
-            // divides, so every element comes back an infinity or a NaN, as it does in the real half.
             if (alphaNorm2 == 0.0) {
                 double zero = 0.0;
                 re = (re == 0.0 && im == 0.0) ? 0.0 / zero : re / zero;
@@ -970,7 +904,6 @@ static sparse_status CharonComplexTriangular(void *matrix, uint32_t magic, int t
             }
             double diagRe = 0.0, diagIm = 0.0;
             CharonComplexElementAt(&asComplex->row[i], i, size, &diagRe, &diagIm);
-            // A pivot of exactly zero divides, and so does a pivot that is exactly zero in one half only.
             double norm2 = diagRe * diagRe + diagIm * diagIm;
             if (norm2 == 0.0) {
                 double zero = 0.0;
@@ -1060,7 +993,6 @@ sparse_status sparse_matrix_triangular_solve_dense_double_complex(enum CBLAS_ORD
                                    order == CblasRowMajor ? 1 : (long)ldb, nrhs, 2 * sizeof(double));
 }
 
-// C = alpha * x * y' for a dense x and a sparse y, as a new matrix.
 static sparse_status CharonComplexOuter(sparse_dimension M, sparse_dimension N, sparse_dimension nz, double alphaRe,
                                         double alphaIm, const void *x, sparse_stride incx, const void *y,
                                         const sparse_index *indy, void **C, uint32_t magic, size_t size)
@@ -1116,8 +1048,6 @@ sparse_status sparse_outer_product_dense_double_complex(sparse_dimension M, spar
                               CHARON_SPARSE_MAGIC_DOUBLE_COMPLEX, 2 * sizeof(double));
 }
 
-// The header's swap loop, as in the real half: a permutation is not a gather, and the two are not the
-// same function. Measured on the host for the real types; asked for both in the differential.
 static sparse_status CharonComplexPermuteRows(void *matrix, uint32_t magic, const sparse_index *perm, size_t size)
 {
     if (!CharonSparseIsMatrix(matrix, magic)) {
@@ -1188,8 +1118,6 @@ sparse_status sparse_permute_cols_double_complex(sparse_matrix_double_complex A,
     return CharonComplexPermuteCols(A, CHARON_SPARSE_MAGIC_DOUBLE_COMPLEX, perm, 2 * sizeof(double));
 }
 
-// ---------------------------------------------------------------- the norms and the trace
-
 static double CharonComplexElementwise(void *matrix, uint32_t magic, sparse_norm norm, size_t size)
 {
     if (!CharonSparseIsMatrix(matrix, magic)) {
@@ -1197,9 +1125,6 @@ static double CharonComplexElementwise(void *matrix, uint32_t magic, sparse_norm
     }
     const struct sparse_m_float_complex *asComplex = (const struct sparse_m_float_complex *)matrix;
     if (norm == SPARSE_NORM_ONE) {
-        // The sum of |re| + |im| over the stored entries, not the sum of the moduli: measured, for
-        // [[-1, 2 + i, -3i], [4, 0, -5 + 2i]] the host answers 18, which is 1 + 3 + 3 + 4 + 0 + 7, and the
-        // moduli would give 15.6213.
         double sum = 0.0;
         for (sparse_dimension i = 0; i < asComplex->rows; i++) {
             for (sparse_index at = 0; at < asComplex->row[i].count; at++) {
@@ -1258,11 +1183,6 @@ double sparse_elementwise_norm_double_complex(sparse_matrix_double_complex A, sp
     return CharonComplexElementwise(A, CHARON_SPARSE_MAGIC_DOUBLE_COMPLEX, norm, 2 * sizeof(double));
 }
 
-// The operator-one and operator-infinity norms are the largest column sum and the largest row sum of the
-// moduli, and an unenumerated name is the infinity norm, exactly as in the real half. The operator-two
-// norm is the largest singular value, which for a complex matrix is the largest eigenvalue of A' A: a
-// real Hermitian matrix, formed here with the release's own cblas_cherk (4.0) and read with ssyev_ or
-// dsyev_ (4.0). SPARSE_NORM_R1 is not supported for a matrix and answers NaN.
 static double CharonComplexOperator(void *matrix, uint32_t magic, sparse_norm norm, size_t size)
 {
     if (!CharonSparseIsMatrix(matrix, magic)) {
@@ -1274,12 +1194,6 @@ static double CharonComplexOperator(void *matrix, uint32_t magic, sparse_norm no
         return 0.0;
     }
     if (norm == SPARSE_NORM_ONE || (norm != SPARSE_NORM_TWO && norm != SPARSE_NORM_R1)) {
-        // |re| + |im| in both, as the elementwise one norm is measured to be: for
-        // [[-1, 2 + i, -3i], [4, 0, -5 + 2i]] the host answers 10 for the one norm and 11 for the
-        // infinity norm, which are the largest column and row sums of 5, 3, 10 and of 7, 0, 11. The one
-        // norm walks a column and the infinity norm a row, and the row sum is over the row's own
-        // stored entries - reading the diagonal of a row is what the first version did, and it
-        // answered 1 where the host answers 11.
         if (norm == SPARSE_NORM_ONE) {
             double largest = 0.0;
             for (sparse_index j = 0; j < (sparse_index)n; j++) {
@@ -1312,15 +1226,12 @@ static double CharonComplexOperator(void *matrix, uint32_t magic, sparse_norm no
     if (norm == SPARSE_NORM_R1) {
         return (double)NAN;
     }
-    // A' A, as a dense m x m matrix of reals through cblas_cherk, and its largest eigenvalue.
     int single = size == 2 * sizeof(float);
     size_t entrySize = single ? sizeof(float) : sizeof(double);
     void *dense = calloc((size_t)m * n, 2 * entrySize);
     if (!dense) {
         return 0.0;
     }
-    // One pass over the stored entries into the dense form cblas_cherk takes, converting from the
-    // matrix's own scalar type once per entry.
     for (sparse_dimension i = 0; i < m; i++) {
         for (sparse_index at = 0; at < asComplex->row[i].count; at++) {
             double re = 0.0, im = 0.0;
@@ -1385,9 +1296,6 @@ double sparse_operator_norm_double_complex(sparse_matrix_double_complex A, spars
     return CharonComplexOperator(A, CHARON_SPARSE_MAGIC_DOUBLE_COMPLEX, norm, 2 * sizeof(double));
 }
 
-// The sum along one diagonal, of complex values: A[i, i + offset] above the main diagonal and
-// A[i - offset, i] below it, which is the header's own spelling (measured on the host for the real
-// types: on a 3x4 whose diagonal is 2, 4 and 0 the offsets 0, 1 and -1 answer 6, 8 and 0).
 static void CharonComplexTrace(void *matrix, uint32_t magic, sparse_index offset, size_t size, double *outRe,
                                 double *outIm)
 {
@@ -1425,12 +1333,6 @@ double _Complex sparse_matrix_trace_double_complex(sparse_matrix_double_complex 
     return re + im * (double _Complex)_Complex_I;
 }
 
-// ---------------------------------------------------------------- level 3
-
-// C = alpha * op(A) * B + C, one stored entry of op(A) at a time: the release's own cblas_ccopy gathers
-// the row of B the entry names and cblas_caxpy adds alpha times the entry's value times it to the row of
-// C. cblas_cger is exported by no release at all (measured), so the rank-one update is an axpy, which is
-// the same shape the real half has.
 static sparse_status CharonComplexProductDense(void *matrix, uint32_t magic, int order, int transposed,
                                                 sparse_dimension n, double alphaRe, double alphaIm, const void *B,
                                                 sparse_dimension ldb, void *C, sparse_dimension ldc, size_t size)
@@ -1515,8 +1417,6 @@ sparse_status sparse_matrix_product_dense_double_complex(enum CBLAS_ORDER order,
                                       cimag(alpha), B, ldb, C, ldc, 2 * sizeof(double));
 }
 
-// C = alpha * op(A) * B + C with B sparse too, the same update per nonzero with B's row out of its own
-// stored entries.
 static sparse_status CharonComplexProductSparse(void *A, uint32_t magicA, int order, int transposed, double alphaRe,
                                                  double alphaIm, void *B, uint32_t magicB, void *C,
                                                  sparse_dimension ldc, size_t size)

@@ -1,6 +1,3 @@
-// Host probe: the static and JRTS answers of macOS's own MIDIUMPMutableEndpoint, and the effect of markAsStatic:YES on them.
-// Creates one virtual UMP endpoint in this process (never disposed by the API; it lives until the process exits) and
-// registers one function block on it. No device, entity or setup is created or changed.
 #import <Foundation/Foundation.h>
 #import <CoreMIDI/CoreMIDI.h>
 #include <stdio.h>

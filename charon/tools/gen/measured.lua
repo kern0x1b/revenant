@@ -1,28 +1,6 @@
--- The measured constants of a framework: the objects that carry values read out of the held dyld caches, not out of a header. The table
--- is tools/corpus/uikit-constants.tsv (one row per constant: its api, the node's own C type, its value as the cache holds it, the first
--- held release that exports it, and the floor a typedef's own release needs). Each release of it is one object, written by gen beside
--- the spec-derived objects into .gen/<F>/, so the build produces the sources and nothing of them is committed.
---
--- It replaces the python writer that stood here before. Its objects are the same bytes as that writer's, except the producer line
--- of the header. Its literal rules and its clean_type are kept. What it does not do is the registry write: the python rewrote the
--- framework's registry rows and removed the objects it no longer needed, one time, and the registry those writes left is committed
--- (registry/UIKit/uikit-constants.json and the rest). The facts files of each release (facts/UIKit/UIKitConstants<tag>.md) are
--- committed too: the registry cites them.
---
--- The same file writes the constants table's objects (tools/corpus/cfconst.tsv, the NSString, CFString and number constants of the
--- other frameworks, which were committed before the table existed): one object per name in the table, its header, its imports and its
--- declarations, from the rows. They share this file's record reader, its csv rows and its one entry point, objects(tree, fw). The
--- constants' values are read out of the held caches by tools/corpus/cache-value.lua, and tools/corpus/cfconst-check.lua reads each
--- one back.
-
 local order = import("order", {anonymous = true})
 local files = import("files", {anonymous = true})
 
--- The framework's table, relative to the tree, and the committed objects whose names the table must not repeat.
--- extras: the hand-written text a release's object carries beside its rows. A function in one object that reaches a constant in another
--- breaks in exactly the bands where the two land on opposite sides of the release split (charon/AGENTS.md, "A C function shared between
--- backport files"), so the 13.4 object carries the function that reads UIGuidedAccessErrorDomain, which is in the same object, and the
--- text is the file's own, read as it is.
 local SOURCES = {
     UIKit = {
         table = "tools/corpus/uikit-constants.tsv",
@@ -30,10 +8,6 @@ local SOURCES = {
     },
 }
 
--- The constants table of the committed objects that carried measured values before the table existed (tools/corpus/cfconst.tsv): one row
--- per declaration, with the object it is in, the headers that object imports, the cache its value was read from, and the declaration. Each
--- object is written from its rows: its own header, its imports, and its declarations sorted by name. The facts are tools/corpus/cfconst.md,
--- beside the table. The frameworks are named here, as SOURCES names its one, so a tree without the table (a fixture) reads none of it.
 local CONSTANTS = {
     table = "tools/corpus/cfconst.tsv",
     facts = "tools/corpus/cfconst.md",
@@ -43,9 +17,6 @@ local CONSTANTS = {
 local ATTRS = {"API_AVAILABLE", "API_UNAVAILABLE", "API_DEPRECATED", "NS_SWIFT_NAME", "NS_REFINED_FOR_SWIFT", "NS_SWIFT_UNAVAILABLE",
                "UIKIT_AVAILABLE", "NS_CLASS_AVAILABLE", "NS_AVAILABLE", "API_DEPRECATED_WITH_REPLACEMENT"}
 
--- The rows of a tab-separated table with CSV quoting, as Python's csv reader reads it with delimiter "\t": a field that starts with a
--- quote runs to the closing quote, a doubled quote inside it is one quote, and a line that holds no field is no row. The table holds
--- no carriage return and no quoted newline, which is checked by the caller's column count.
 local function csv_rows(text)
     local rows, row, field = {}, {}, {}
     local state = "start"
@@ -96,7 +67,6 @@ local function csv_rows(text)
                 table.insert(field, c)
             end
         else
-            -- after a closing quote: a delimiter or a line end closes the field, anything else is kept as the field's text
             if c == "\t" then
                 end_field()
                 state = "start"
@@ -116,7 +86,6 @@ local function csv_rows(text)
     return rows
 end
 
--- The table's rows as records keyed by its header, a missing trailing field read as "" (the header row names the keys).
 local function records(text)
     local rows = csv_rows(text)
     local header = table.remove(rows, 1)
@@ -131,9 +100,6 @@ local function records(text)
     return out
 end
 
--- The declaration's type, with the attribute macros off and nothing else: each attribute, with the parenthesised argument that follows it
--- directly, is replaced by a space (re.sub(r"\b%s\b(\([^)]*\))?")), then the whitespace is collapsed. The nullability stays: it is part of
--- the type clang compares a redefinition against, and dropping it makes every _Nonnull declaration in the SDK a redefinition of ours.
 local function is_word(c)
     return c ~= "" and string.find(c, "^[%w_]") ~= nil
 end
@@ -173,8 +139,6 @@ local function clean_type(text)
     return text
 end
 
--- A C string literal's body: the backslash, the double quote, newline and tab escaped, every other control byte as a three-digit octal.
--- Bytes above 0x7f pass through, as the python wrote the characters' utf-8.
 local function c_quote(text)
     return (string.gsub(text, "[%c\\\"]", function(c)
         if c == "\127" then
@@ -192,7 +156,6 @@ local function c_quote(text)
     end))
 end
 
--- An optionally signed decimal with an optional fraction of at least one digit and an optional exponent: [0-9]+(\.[0-9]+)?([eE][+-]?[0-9]+)?
 local function is_number(text)
     local rest = string.match(text, "^%-?%d+(.*)$")
     if rest == nil then
@@ -208,8 +171,6 @@ local function is_number(text)
     return rest == "" or string.match(rest, "^[eE][+-]?%d+$") ~= nil
 end
 
--- The C literal a row carries, or nil when the value is not one: a string, a number, a constant name, or a struct of numbers and names.
--- A block's value is the address of the release's own code, which is not a value, so it is refused here rather than written out as one.
 local function literal(row)
     local value = row["value"]
     if row["kind"] == "constant string" then
@@ -251,8 +212,6 @@ local function literal(row)
     return nil
 end
 
--- The rows of the constants table, read once per run. Each row is a record keyed by the header. The checker (tools/corpus/cfconst-check.lua)
--- reads the same rows, so a row the writer would write is a row the check judges.
 local constant_cache = nil
 function constant_rows(tree)
     if constant_cache == nil then
@@ -267,7 +226,6 @@ function constant_rows(tree)
     return constant_cache
 end
 
--- The names the constants table gives a framework's objects: the release table does not write them again.
 local function carried_elsewhere(tree, fw)
     local found = {}
     if CONSTANTS.frameworks[fw] then
@@ -280,7 +238,6 @@ local function carried_elsewhere(tree, fw)
     return found
 end
 
--- The release's sort key, its dotted numbers as numbers.
 local function release_key(release)
     local key = {}
     for part in string.gmatch(release, "[^%.]+") do
@@ -303,7 +260,6 @@ local function api_less(a, b)
     return order.less(a.api, b.api)
 end
 
--- The guard of a floor: __IPHONE_OS_VERSION_MAX_ALLOWED for the floor's major and minor, as 10000 * major + 100 * minor.
 local function floor_guard(floor)
     local major, minor = string.match(floor, "^(%d+)%.(%d+)")
     if major == nil then
@@ -312,8 +268,6 @@ local function floor_guard(floor)
     return tonumber(major) * 10000 + tonumber(minor) * 100
 end
 
--- The object of one release: the header, the rows of the release sorted by name, the extra text the release carries (extra, or nil),
--- and a final newline.
 local function object_text(release, items, extra)
     local tag = string.gsub(release, "%.", "")
     local source = "UIKitConstants" .. tag .. ".m"
@@ -341,8 +295,6 @@ local function object_text(release, items, extra)
         assert(written ~= nil, string.format("the table's %s carries %q, which is not a C literal: a block or a function has no value to carry, "
             .. "and its implementation is a hand-written file", item.api, item.value))
         if item.floor ~= "" then
-            -- A typedef the SDK being built against may not have: the release it arrived in is the SDK's own API_AVAILABLE on the typedef,
-            -- and the two spellings differ only in the type, so the value is written once under a guard on __IPHONE_OS_VERSION_MAX_ALLOWED.
             table.insert(lines, "#if __IPHONE_OS_VERSION_MAX_ALLOWED >= " .. floor_guard(item.floor))
             table.insert(lines, clean_type(item["c-type"]) .. " " .. item.api .. " = " .. written .. ";")
             table.insert(lines, "#else")
@@ -360,7 +312,6 @@ local function object_text(release, items, extra)
     return source, table.concat(lines, "\n")
 end
 
--- The header comment of a constant object: what it is, the release and cache its values come from, and where the facts are.
 local function constant_header(row)
     return {
         "// The measured constants of " .. row.object .. " (" .. CONSTANTS.facts .. ").",
@@ -374,7 +325,6 @@ local function constant_header(row)
     }
 end
 
--- The text of a constant object: its header comment, its imports, then its declarations sorted by name.
 local function constant_text(object_rows)
     local first = object_rows[1]
     local lines = constant_header(first)
@@ -398,7 +348,6 @@ local function constant_text(object_rows)
     return table.concat(lines, "\n")
 end
 
--- The constant objects of a framework: name -> text, each name a file of .gen/<F>/. Empty for a framework the table does not name.
 local function constant_objects(tree, fw)
     local out = {}
     if not CONSTANTS.frameworks[fw] then
@@ -420,9 +369,6 @@ local function constant_objects(tree, fw)
     return out
 end
 
--- The objects of a framework that the measured tables define: name -> text, each name a file of .gen/<F>/. Empty for a framework with
--- neither table. The release objects (the UIKit release table's) and the constant objects (the constants table's) share one namespace,
--- so a name both define is an error, not an overwrite.
 function objects(tree, fw)
     local out = release_objects(tree, fw)
     for name, text in pairs(constant_objects(tree, fw)) do
@@ -432,7 +378,6 @@ function objects(tree, fw)
     return out
 end
 
--- The release objects of a framework (the UIKit release table's), name -> text. The names the constants table gives are left out.
 function release_objects(tree, fw)
     local spec = SOURCES[fw]
     local out = {}
@@ -458,7 +403,6 @@ function release_objects(tree, fw)
         if (spec.extras or {})[release] ~= nil then
             extra = files.read_text(path.join(tree, spec.extras[release]))
             assert(extra ~= nil, "the extra text of " .. release .. " is missing: " .. spec.extras[release])
-            -- the file ends with its line feed, which the object's last line does not carry
             extra = string.gsub(extra, "\n$", "")
         end
         local name, body = object_text(release, by_release[release], extra)

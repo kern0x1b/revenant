@@ -1,20 +1,3 @@
--- `headers`: the SDK-shaped headers of the frameworks, rendered from the declaration IR by render_headers.lua (design-sdk-generator.md
--- step 3a). Two modes:
---   xmake l tools/gen.lua headers --tree T --ir FULL --sdk SDK --out D [--framework F]
---     writes D/Frameworks/<F>.framework/Headers/<header> and, where the SDK's framework has a module map, its Modules/module.modulemap
---     (a SubFramework goes under D/SubFrameworks, as the SDK has it; a nested Outer/Inner under Outer's Frameworks/). Every framework
---     of the IR is written unless --framework names one. A framework the SDK does not hold as a framework (usr/include modules) is
---     counted and not written.
---     The same frameworks are written again under D/port/<release>/ with the port's availability: the rows, copied, with the release
---     rule applied (target_availability.lua), and each enumerator's value taken from the port's triple's run (--port-values, the
---     file tools/found/port_values.lua writes; tools/gen/port_enums.lua joins it by USR). The faithful output in D is the SDK's as
---     it says, and neither changes it.
---   xmake l tools/gen.lua headers --tree T --ir FULL --framework F --compare DECLS
---     compares the IR's rows of F with DECLS, the rows decls prints for F over the tree (IR_FRAMEWORKS=D, IR_SDK=SDK), and prints
---     the counts and every difference grouped by its cause.
--- --tree is required by the driver; nothing is written into the tree. The IR is the full 21-column file (IR_FULL of ir.lua).
--- Returns the exit status: 0, or 2 for a bad argument. The compare also returns its differences and their causes (label -> count).
-
 local render = import("render_headers", {anonymous = true})
 local emit = import("emit", {anonymous = true})
 local target = import("target_availability", {anonymous = true})
@@ -29,7 +12,6 @@ local function read_text(filepath)
     return text
 end
 
--- The rows of an IR grouped by framework (each list in the order of the rows).
 local function group_by_framework(rows)
     local by_framework = {}
     for _, row in ipairs(rows) do
@@ -40,7 +22,6 @@ local function group_by_framework(rows)
     return by_framework
 end
 
--- The IR's rows, grouped by framework (the meta row left out), and the rows of every framework for the definitions an import needs.
 local function read_ir(filepath)
     local rows = {}
     for _, row in ipairs(render.rows_of(read_text(filepath))) do
@@ -51,7 +32,6 @@ local function read_ir(filepath)
     return rows, group_by_framework(rows)
 end
 
--- Where the SDK holds a framework: "Frameworks" or "SubFrameworks" and the top-level folder, or nil when the SDK has no such framework.
 local function location_of(sdk, framework)
     local top = string.match(framework, "^([^/]+)")
     for _, folder in ipairs({"Frameworks", "SubFrameworks"}) do
@@ -61,7 +41,6 @@ local function location_of(sdk, framework)
     return nil
 end
 
--- The SDK's folder of a framework, nested ones under their outer framework's Frameworks/ folder.
 local function sdk_folder(dir, framework)
     local base = dir
     for segment in string.gmatch(framework, "/([^/]+)") do
@@ -70,9 +49,6 @@ local function sdk_folder(dir, framework)
     return base
 end
 
--- The Swift names the SDK's apinotes give the classes and protocols of each framework (swift[framework][kind][name], kind "interface" for
--- Classes and "protocol" for Protocols). Only the top-level sections count: a SwiftVersions entry is indented under its own version and
--- is not the default name. The apinotes sit beside the headers (a framework's Headers/ folder) or in usr/include.
 local function swift_names_of(sdk)
     local swift = {}
     local files = {}
@@ -106,14 +82,6 @@ local function swift_names_of(sdk)
     return swift
 end
 
--- Tables read from the usr/include module maps, not from any header. prefix: the import prefix of each module, the umbrella folder
--- its top-level module map line names (ObjectiveC's is objc, so its NSObject.h is imported as <objc/NSObject.h>). umbrella: the
--- folder's own umbrella header, where a module lists it (Dispatch lists dispatch/dispatch.h, and its other headers refuse a direct
--- import: "Please #include <dispatch/dispatch.h> instead of this file directly"). bare: a module with a header named without a folder,
--- which is imported by that name (dnssd's dns_sd.h is <dns_sd.h>, a module without an umbrella).
--- folder: the usr/include subfolder holding a header of each basename, where one subfolder holds it (false where two do). It is the
--- prefix of a module no module map names: the 16.4 SDK has objc/NSObject.h and no ObjectiveC module map, so NSObject.h is <objc/...>.
--- sdk_framework(name): whether the SDK holds the name as a framework, so a framework's header is never resolved from usr/include.
 local function usr_dirs_of(sdk)
     local dirs, umbrellas, bare, modules, paths, any, own_folder = {}, {}, {}, {}, {}, {}, {}
     for _, file in ipairs(os.files(path.join(sdk, "usr", "include", "*.modulemap"))) do
@@ -128,10 +96,7 @@ local function usr_dirs_of(sdk)
             if module and umbrella and dirs[module] == nil then dirs[module] = umbrella end
             local folder, base = string.match(line, '^%s*header%s+"([^"/]+)/([^"/]+)"')
             if folder and base == folder .. ".h" then umbrellas[folder] = folder .. "/" .. base end
-            -- a header named without a folder sits at usr/include's top level (the module map's folder): dnssd's dns_sd.h
             if module and string.match(line, '^%s*header%s+"[^"/]+"') then bare[module] = true end
-            -- the path each header of a module has under usr/include, as its map names it (dispatch/queue.h, os/atomic.h): a
-            -- submodule's headers count for their top-level module
             local rel = string.match(line, '^%s*header%s+"([^"]+)"')
             if module and rel then
                 local base = string.match(rel, "([^/]+)$")
@@ -139,8 +104,6 @@ local function usr_dirs_of(sdk)
                 paths[module] = paths[module] or {}
                 paths[module][base] = paths[module][base] or rel
                 if folder and own_folder[module] == nil then own_folder[module] = folder end
-                -- every map's path of each basename: a header the IR gives a module that its own map does not name (os/lock.h is
-                -- Darwin's map's, the IR gives it to os) is found here
                 any[base] = any[base] or {}
                 if not table.contains(any[base], rel) then table.insert(any[base], rel) end
             end
@@ -153,13 +116,8 @@ local function usr_dirs_of(sdk)
             local base = path.filename(file)
             if folders[base] == nil then folders[base] = folder else folders[base] = false end
         end
-        -- a folder's own umbrella (dispatch/dispatch.h) where no module map names one; kept apart from umbrellas, which imports of the
-        -- module map's headers read (objc/ and simd/ have an umbrella file, and their headers are imported as they are)
         if os.isfile(path.join(dir, folder .. ".h")) then folder_umbrellas[folder] = folder .. "/" .. folder .. ".h" end
     end
-    -- the public framework that re-exports a private (underscored) one: its umbrella includes the private framework's umbrella, so a
-    -- declaration the private framework owns (CLLocation, owned by _LocationEssentials) is imported as the public umbrella
-    -- (<CoreLocation/CoreLocation.h>). The module maps name no such link, so the umbrella's include lines are the evidence.
     local reexport = {}
     local frameworks = os.dirs(path.join(sdk, "System", "Library", "Frameworks", "*.framework"))
     table.sort(frameworks)
@@ -174,8 +132,6 @@ local function usr_dirs_of(sdk)
         end
     end
     local function exists(rel) return os.isfile(path.join(sdk, "usr", "include", rel)) end
-    -- the header a usr/include header is imported as: the folder's umbrella where the header refuses a direct import ("Please #include
-    -- <dispatch/dispatch.h> instead of this file directly"), else the header itself
     local function target(rel)
         local umbrella = umbrellas[path.directory(rel)] or folder_umbrellas[path.directory(rel)]
         if umbrella and string.find(io.readfile(path.join(sdk, "usr", "include", rel)) or "", "instead of this file directly", 1, true) then
@@ -188,7 +144,6 @@ local function usr_dirs_of(sdk)
         sdk_framework = function (name) return location_of(sdk, name) ~= nil end}
 end
 
--- The tree folder a framework is written to: <folder>/<top>.framework, nested frameworks under their outer one's Frameworks/.
 local function destination_of(folder, framework)
     local out = folder .. "/" .. string.match(framework, "^([^/]+)") .. ".framework"
     for segment in string.gmatch(framework, "/([^/]+)") do
@@ -204,13 +159,9 @@ local function write_all(out, folder, framework, result)
     end
 end
 
--- A usr/include module (XPC, os, Dispatch): the SDK holds no framework folder for it, so its headers are written under usr/include, in
--- the folder of its import prefix (or of the header's basename, where one folder holds it), and the overlay replaces the SDK's file there.
 local function write_usr_module(root, sdk, framework, result, usr_dirs, entries, totals)
     for relative, text in pairs(result.files) do
         local base = string.gsub(relative, "^Headers/", "")
-        -- the header's path: the module's own map's, else the one under the module's prefix among the maps', else the only one of the
-        -- maps', else the folder the listing gives (where one folder holds the basename)
         local rel = usr_dirs.paths[framework] and usr_dirs.paths[framework][base]
         local prefix = usr_dirs.prefix[framework] or usr_dirs.own_folder[framework]
         local found = usr_dirs.any[base] or {}
@@ -261,9 +212,6 @@ local function compare_mode(args, by_framework)
     return 0, differences, report.causes
 end
 
--- Writes the frameworks named (the IR's rows of each by framework) under root: root/Frameworks/<F>.framework, or root/SubFrameworks.
--- Returns the totals of what was written and counted. entries, when given, collects what each written file replaces in the SDK: the
--- SDK's folder (Headers or Modules) -> {name, external} for each file, which overlay_text turns into the overlay.
 local function write_frameworks(root, sdk, rows, by_framework, names, usr_dirs, entries)
     local defs = render.defs_of(rows)
     local totals = {frameworks = 0, not_in_sdk = 0, files = 0, lines = 0, declarations = {}, skipped = {}}
@@ -301,10 +249,6 @@ local function write_frameworks(root, sdk, rows, by_framework, names, usr_dirs, 
     return totals
 end
 
--- The VFS overlay text of the entries write_frameworks collected: one directory per SDK folder the port replaces, each file named as the
--- SDK names it, so the compiler reads the port's file where the SDK's would be (the runtime's port overlay has the same shape). roots
--- and contents are arrays even when empty: clang rejects an overlay whose roots is an object ({}), and json.encode writes an empty
--- table as {}.
 function overlay_text(entries)
     local roots = {}
     for folder, files in pairs(entries) do
@@ -319,7 +263,6 @@ function overlay_text(entries)
     return json.encode({["case-sensitive"] = "false", version = 0, roots = json.mark_as_array(roots)})
 end
 
--- Prints the totals of one written set under its label, and returns the line the command's summary names.
 local function print_totals(label, totals, seconds)
     local kinds = {}
     for kind in pairs(totals.declarations) do kinds[#kinds + 1] = kind end
@@ -357,10 +300,8 @@ local function write_mode(args, rows, by_framework)
     end
     local usr_dirs = usr_dirs_of(sdk)
     local started = os.time()
-    -- the SDK as it says: rendered from the rows as the IR has them
     local faithful = write_frameworks(out, sdk, rows, by_framework, names, usr_dirs)
     print_totals("headers", faithful, os.time() - started)
-    -- the port's: the same frameworks from copies of the rows, with the release rule and the port's enumerator widths applied to the copies
     local release = project.port_release(args)
     local listed = target.read_registry(path.join(args.tree, "packages", "a", "apple-backports"))
     local port_rows, lowered = target.lowered_copy(rows, listed, release)

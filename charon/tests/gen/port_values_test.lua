@@ -1,15 +1,7 @@
--- The port's enumerator values file (tools/found/port_values.lua): the driver runs the extractor over every framework it lists with the
--- port's triple in IR_TARGET, writes the enumerators and the enum types it gives a value, and names each module the extractor does not
--- parse for the triple with its first error. A stand-in extractor (tests/gen/fake_decls.lua) answers for two frameworks: Fixture, which
--- gives its enumerator 2147483647 when IR_TARGET is the port's triple and 9223372036854775807 otherwise, and Broken, which does not
--- parse. The file it writes is read back by tools/gen/port_enums.lua. Run:
---   xmake l tests/gen/port_values_test.lua
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 local REPO = path.join(os.scriptdir(), "..", "..")
 local fake = import("fake_decls", {rootdir = path.join(REPO, "tests", "gen"), anonymous = true})
 
--- The cells of an IR row, the 21 of them, with the given ones by column number (the rest "-"); a value cell may be "%s" (a format).
 local function cells(given)
     local out = {}
     for column = 1, 21 do
@@ -31,7 +23,6 @@ local function run()
     os.mkdir(root)
     local decls = path.join(root, "decls")
     local out = path.join(root, "port-values.tsv")
-    -- the body answers for the framework it is asked about (the third argument: --timeout SECONDS NAME)
     local enumconst = cells({"Fixture", "enumconst", "c:@E@FixtureLimit@FixtureLimitMax", "FixtureLimit", "FixtureLimitMax", "-",
                              "Fixture.h", "1", "-", "-", "-", "-", "-", "%s"})
     local enum = cells({"Fixture", "enum", "c:@E@FixtureLimit", "-", "FixtureLimit", "-", "Fixture.h", "1", "-", "-", "NSInteger"})

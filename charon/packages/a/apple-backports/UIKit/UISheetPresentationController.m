@@ -12,34 +12,23 @@
 #pragma clang diagnostic ignored "-Wobjc-property-implementation"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-/* Every value below is UIKitCore's of the iOS 16.0 cache unless it says otherwise; the
-   addresses and the reading are in facts/UIKit/UISheetPresentationController.md. */
-
 NSString *const UISheetPresentationControllerDetentIdentifierMedium = @"com.apple.UIKit.medium";
 NSString *const UISheetPresentationControllerDetentIdentifierLarge = @"com.apple.UIKit.large";
 const CGFloat UISheetPresentationControllerAutomaticDimension = CGFLOAT_MAX;
 
-/* +[_UISheetPresentationMetrics _defaultMetrics]. */
 static const CGFloat charon_sheet_corner_radius = 10;
 static const CGFloat charon_sheet_top_offset = 10;
 static const CGFloat charon_sheet_top_offset_compact_height = 8;
 static const CGFloat charon_sheet_maximum_depth = 2;
 static const NSTimeInterval charon_sheet_transition_duration = 0.4;
-/* -[_UISheetPresentationMetrics transitionSpringParametersHighSpeed:], read at run time. */
 static const CGFloat charon_sheet_spring_response = 0.3441442326;
 static const CGFloat charon_sheet_spring_damping = 1;
-/* The medium detent: the fraction of the largest value, by the container's height. */
 static const CGFloat charon_sheet_medium_threshold = 568;
 static const CGFloat charon_sheet_medium_small = 0.63;
 static const CGFloat charon_sheet_medium_large = 0.56;
-/* -[_UIGrabber _intrinsicSizeWithinSize:] 0x189128e4c and the layout info's _grabberSpacing,
-   5 in -initWithMetrics: 0x1895e8da0 (the host's 6 is its own idiom's). */
 static const CGFloat charon_sheet_grabber_width = 36;
 static const CGFloat charon_sheet_grabber_height = 5;
 static const CGFloat charon_sheet_grabber_spacing = 5;
-/* The drag, _UISheetInteraction: the touch rubber band coefficient, the deceleration rate
-   the release of a drag is projected with, the speed that makes it a flick, the extents of
-   the rubber band above the largest detent and below the smallest one. */
 static const CGFloat charon_sheet_rubber_band_coefficient = 0.55;
 static const CGFloat charon_sheet_deceleration_rate = 0.99;
 static const CGFloat charon_sheet_flick_speed = 1000;
@@ -48,8 +37,6 @@ static const CGFloat charon_sheet_bottom_extent = 200;
 static const CGFloat charon_sheet_bottom_extent_fraction = 0.25;
 static const CGFloat charon_sheet_spring_damping_fast = 0.8;
 static const CGFloat charon_sheet_minimum_speed = 250;
-/* A pan that starts within this long of the last one, while the sheet is not moving, scrolls
-   (MinimumSheetSwipeInterval). */
 static const NSTimeInterval charon_sheet_swipe_interval = 0.4;
 
 static CGFloat charon_clamp01(CGFloat value)
@@ -57,9 +44,6 @@ static CGFloat charon_clamp01(CGFloat value)
     return value < 0 ? 0 : value > 1 ? 1 : value;
 }
 
-/* +[UIViewController _horizontalContentMarginForView:ofWidth:] 0x188f67350: the scene's
-   canvas margin when it has one (a release without scenes has none), else 20 above a width
-   of 393 unless the window has insets on both sides, and 16 (+_slimHorizontalContentMargin). */
 static CGFloat charon_sheet_content_margin(UIWindow *window, CGFloat width)
 {
     UIEdgeInsets insets = window ? window.safeAreaInsets : UIEdgeInsetsZero;
@@ -67,20 +51,11 @@ static CGFloat charon_sheet_content_margin(UIWindow *window, CGFloat width)
     return width > 393 && !both ? 20 : 16;
 }
 
-/* -[UIDevice _hasHomeButton] has no public counterpart (SDK 16.4 declares none). A device
-   without one keeps a bottom safe area in every window for its home indicator, from iOS 11,
-   the first release such a device runs; before 11 every device has a home button, and the
-   port's safeAreaInsets answers no bottom inset there. */
 static BOOL charon_sheet_has_home_button(UIWindow *window)
 {
     return !(window && window.safeAreaInsets.bottom > 0);
 }
 
-/* The display's corner radius, which UIKit reads from the scene's settings (cornerRadiusConfiguration
-   of -_effectiveUISettings, 0x188f93318); no public API answers it (SDK 16.4 declares none). A
-   device with a home button has a display with square corners. One without runs iOS 11 or later,
-   whose own -[UIScreen _displayCornerRadius] answers it (in UIKit of the 11.0 cache at 0x18a4df430
-   and UIKitCore of 16.0 at 0x188f8f06c: the main screen's radius, else 0), and the port asks that. */
 static CGFloat charon_sheet_display_corner_radius(UIWindow *window)
 {
     if (charon_sheet_has_home_button(window))
@@ -90,22 +65,16 @@ static CGFloat charon_sheet_display_corner_radius(UIWindow *window)
     return [screen respondsToSelector:selector] ? ((CGFloat (*)(id, SEL))objc_msgSend)(screen, selector) : 0;
 }
 
-/* +[UIColor _alertControllerDimmingViewColor], which the sheet gives its dimming view
-   (-presentationTransitionWillBegin 0x1890ff3b4) and its shadow: black at 0.2, and 0.48
-   in the dark style. */
 static UIColor *charon_sheet_dimming_color(UITraitCollection *traits)
 {
     return [UIColor colorWithWhite:0 alpha:traits.userInterfaceStyle == UIUserInterfaceStyleDark ? 0.48 : 0.2];
 }
 
-/* The grabber's colour, -[_UIGrabber initWithFrame:] 0x188f9512c. */
 static UIColor *charon_sheet_grabber_color(void)
 {
     return [UIColor tertiaryLabelColor];
 }
 
-/* -[_UIHyperInteractor _constrainedFraction] 0x18906bcc0: the overshoot x shown as
-   d (1 - 1 / (x c / d + 1)), UIScrollView's rubber band. */
 static CGFloat charon_sheet_rubber_band(CGFloat overshoot, CGFloat extent)
 {
     if (extent <= 0 || overshoot <= 0)
@@ -113,16 +82,11 @@ static CGFloat charon_sheet_rubber_band(CGFloat overshoot, CGFloat extent)
     return extent * (1 - 1 / (overshoot * charon_sheet_rubber_band_coefficient / extent + 1));
 }
 
-/* -[_UIHyperInteractor _effectiveVelocity] 0x18906d4d0: none below the minimum speed. */
 static CGFloat charon_sheet_effective_velocity(CGFloat velocity)
 {
     return fabs(velocity) < charon_sheet_minimum_speed ? 0 : velocity;
 }
 
-/* -[UIDimmingView updateBackgroundColor] 0x189006a60: the dimming colour at its alpha times
-   the fraction shown, over the lightening colour at its alpha times the fraction lightened.
-   The lightening colour is the dark systemBackgroundColor at the elevated level (C function
-   0x189061814), each component over the largest, with the largest as its alpha. */
 static UIColor *charon_sheet_dimming_background(UITraitCollection *traits, CGFloat displayed, CGFloat lightened)
 {
     CGFloat dimAlpha = (traits.userInterfaceStyle == UIUserInterfaceStyleDark ? 0.48 : 0.2) * displayed;
@@ -145,7 +109,6 @@ static UIColor *charon_sheet_dimming_background(UITraitCollection *traits, CGFlo
 }
 
 
-/* The first responder among a view and its descendants, found the public way. */
 static UIView *charon_sheet_first_responder(UIView *view)
 {
     if (view.isFirstResponder)
@@ -230,9 +193,6 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     return _identifier;
 }
 
-/* The medium detent asks the context for _containerBounds, as UIKit's block (0x189d322b4)
-   does, whether or not the context answers it: a context of the caller's own without it raises
-   there, as it does on the host (host/sheet, resolve.bare). */
 - (CGFloat)charon_resolvedValueInContext:(id)context
 {
     CharonSheetDetentContext *known = context;
@@ -251,8 +211,6 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     return CGFLOAT_MAX;
 }
 
-/* The host's answer: a medium or large detent equals another of its type, a custom one only
-   itself, whatever its identifier and resolver; the hash stays NSObject's. */
 - (BOOL)isEqual:(id)object
 {
     if (object == self)
@@ -273,15 +231,10 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
 
 #pragma mark - Layout
 
-/* The port of _UISheetLayoutInfo: one node per sheet, and one for the window's root view,
-   which UIKit presents with a full-screen sheet of its own (_UIRootPresentationController)
-   and so scales behind the first sheet by the same rule. A sheet is only made here in a
-   compact width, where UIKit's sheet is always edge-attached (-_isEdgeAttached). */
 @interface CharonSheetLayoutInfo : NSObject
 @property (nonatomic, weak) CharonSheetLayoutInfo *parent;
 @property (nonatomic, weak) CharonSheetLayoutInfo *child;
 @property (nonatomic, weak) UIView *container;
-/* The view the depth transform goes on: the sheet's own view, or the root view. */
 @property (nonatomic, weak) UIView *view;
 @property (nonatomic, weak) UISheetPresentationController *sheet;
 @property (nonatomic, assign) BOOL root;
@@ -291,15 +244,10 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
 @property (nonatomic, assign) BOOL widthFollowsPreferredContentSize;
 @property (nonatomic, assign) CGFloat preferredWidth;
 @property (nonatomic, assign) CGFloat preferredCornerRadius;
-/* The y of the sheet's top edge in the container. */
 @property (nonatomic, assign) CGFloat offset;
-/* The offsets of the active detents, the largest detent (smallest offset) first, and the
-   index of the one the sheet is dimmed from (NSNotFound: never dimmed). */
 @property (nonatomic, copy) NSArray *detentOffsets;
 @property (nonatomic, assign) NSUInteger dimmingIndex;
-/* Where the release puts the root view: under its status bar, not the whole window. */
 @property (nonatomic, assign) CGRect rootFrame;
-/* What the root view had before it was stacked, given back when the sheet goes. */
 @property (nonatomic, assign) CGAffineTransform savedTransform;
 @property (nonatomic, assign) CGFloat savedCornerRadius;
 @property (nonatomic, assign) BOOL savedMasksToBounds;
@@ -342,24 +290,16 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     return _container.safeAreaInsets;
 }
 
-/* -_isForcedFullScreen 0x189051bd0 in a compact width, and -_isFunctionallyFullScreen
-   0x189051b6c, where the root's presentation is the one that wants the full screen. */
 - (BOOL)forcedFullScreen
 {
     return !_root && [self verticallyCompact] && !_edgeAttachedInCompactHeight;
 }
 
-/* The root's presentation wants the full screen: -[UIWindow _didCreateRootPresentationController]
-   sets it. */
 - (BOOL)functionallyFullScreen
 {
     return _root || [self forcedFullScreen];
 }
 
-/* The C function 0x1890cab64 for an edge-attached sheet: the safe area plus, on top and
-   bottom, topOffsetInCompactHeight in a compact height and else twice topOffset, except
-   for a phone without a home button in a compact width, which gets topOffset once
-   (0x1890cad1c: -[UIDevice _hasHomeButton], then the horizontal size class). */
 - (UIEdgeInsets)margins
 {
     UIEdgeInsets insets = [self safeInsets];
@@ -371,9 +311,6 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     return insets;
 }
 
-/* -[_UISheetLayoutInfo _stackAlignmentFrame] 0x189051544: centred, the container's width
-   less the side margins (or the preferred width when asked, which a compact width with a
-   regular height ignores), from the top margin down to the container's bottom edge. */
 - (CGRect)stackAlignmentFrame
 {
     CGRect bounds = _container.bounds;
@@ -383,7 +320,6 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     return CGRectMake(margins.left + (available - width) / 2, margins.top, width, CGRectGetHeight(bounds) - margins.top);
 }
 
-/* -_fullHeightUntransformedFrame 0x188f947d0. */
 - (CGRect)fullHeightFrame
 {
     if (_root)
@@ -391,7 +327,6 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     return [self forcedFullScreen] ? _container.bounds : [self stackAlignmentFrame];
 }
 
-/* -_untransformedFrame 0x188f93bb0: the full-height frame at the current offset. */
 - (CGRect)untransformedFrame
 {
     CGRect frame = [self fullHeightFrame];
@@ -400,7 +335,6 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     return frame;
 }
 
-/* -[_UISheetLayoutInfo maximumDetentValue] 0x1895e9958. */
 - (CGFloat)maximumDetentValue
 {
     return CGRectGetHeight([self fullHeightFrame]) - [self safeInsets].bottom;
@@ -426,7 +360,6 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     return _root ? CGRectGetMinY(_rootFrame) : _offset;
 }
 
-/* -_activeDetents 0x1895e9c24: a full-screen one has a single detent at its full height. */
 - (NSArray *)activeDetentOffsets
 {
     if ([self functionallyFullScreen])
@@ -439,7 +372,6 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     return [self functionallyFullScreen] ? 0 : _dimmingIndex;
 }
 
-/* -_percentFullHeight 0x1890512f4. */
 - (CGFloat)percentFullHeight
 {
     CGFloat full = CGRectGetMinY([self stackAlignmentFrame]);
@@ -452,7 +384,6 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     return charon_clamp01(([self currentOffset] - next) / (full - next));
 }
 
-/* -_percentPresented 0x189035f04. */
 - (CGFloat)percentPresented
 {
     NSArray *detents = [self activeDetentOffsets];
@@ -463,13 +394,11 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     return charon_clamp01(([self currentOffset] - dismiss) / (smallest - dismiss));
 }
 
-/* -_stacksWithChild 0x189051454. */
 - (BOOL)stacksWithChild
 {
     return _child && CGRectEqualToRect([self stackAlignmentFrame], [_child stackAlignmentFrame]);
 }
 
-/* -_scalesDownBehindDescendants 0x18905123c. */
 - (BOOL)scalesDownBehindDescendants
 {
     if (UIAccessibilityIsReduceMotionEnabled() || [self verticallyCompact])
@@ -477,10 +406,6 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     return CGRectGetHeight(_container.bounds) == CGRectGetHeight(_container.window.screen.bounds) || !_root;
 }
 
-/* -_proposedDepthLevelIncrement 0x189050fc8 and -_proposedDepthLevel 0x1890511a0. A sheet
-   hides underneath its descendant only when the descendant names it through UIKit's private
-   _setHiddenAncestorSheetID: (-_isHidingUnderneathDescendant 0x188f94690), which nothing
-   public does, so the child's height is always the increment. */
 - (CGFloat)proposedDepthLevel
 {
     if (![self stacksWithChild] || ![self scalesDownBehindDescendants])
@@ -488,7 +413,6 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     return [_child proposedDepthLevel] + [_child percentFullHeight];
 }
 
-/* -_depthLevel 0x1890510e4. */
 - (CGFloat)depthLevel
 {
     if (!_presented)
@@ -499,7 +423,6 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     return [self proposedDepthLevel];
 }
 
-/* -_percentFullScreen 0x188f940cc. */
 - (CGFloat)percentFullScreen
 {
     if ([self forcedFullScreen])
@@ -514,7 +437,6 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     return [self fullHeightFrame];
 }
 
-/* -_transform 0x188f93de4 and the C function 0x1895e88b0, edge-attached. */
 - (CGAffineTransform)transform
 {
     CGFloat depth = [self depthLevel];
@@ -531,7 +453,6 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     return CGAffineTransformConcat(CGAffineTransformMakeTranslation(0, -sum / scale), CGAffineTransformMakeScale(scale, scale));
 }
 
-/* -_percentDimmedFromOffset 0x188f93878. */
 - (CGFloat)percentDimmedFromOffset
 {
     NSArray *detents = [self activeDetentOffsets];
@@ -546,8 +467,6 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     return own < child ? child : own;
 }
 
-/* -_percentDimmed 0x188f936bc: the dimming over the whole container, and the one confined
-   to the parent's card. */
 - (CGFloat)percentDimmed
 {
     CGFloat p = [self percentDimmedFromOffset];
@@ -569,23 +488,17 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     return [_parent percentFullScreen] == 1 ? p : 0;
 }
 
-/* -_grabberAlpha 0x188f94a90. */
 - (CGFloat)grabberAlpha
 {
     CGFloat g = !_wantsGrabber ? 0 : _child ? 1 - [_child percentDimmedFromOffset] : 1;
     return g * (1 - [self percentFullScreen]);
 }
 
-/* -_shadowOpacity 0x188f94848. */
 - (CGFloat)shadowOpacity
 {
     return 0.5 * (1 - [self percentDimmedFromOffset]) * [self percentPresented];
 }
 
-/* -_magicShadowOpacity 0x188f92204, which -_percentDimmed 0x188f936bc sets: none under a
-   parent that stacks with the sheet or while the sheet itself fills the screen, else the
-   dimming. A sheet over a full-screen or custom presentation has no parent here, and
-   [nil _stacksWithChild] is NO in UIKit too, so it has the shadow. */
 - (CGFloat)magicShadowOpacity
 {
     if (_parent && [_parent stacksWithChild])
@@ -593,8 +506,6 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     return [self percentFullScreen] == 1 ? 0 : [self percentDimmedFromOffset];
 }
 
-/* -_cornerRadii 0x188f930e8, where "match the display" is the display's corner radius
-   (0x188f93318). _dismissCornerRadius is the automatic value, so the metrics' 10. */
 - (void)getTopCornerRadius:(CGFloat *)top bottomCornerRadius:(CGFloat *)bottom
 {
     CGFloat automatic = UISheetPresentationControllerAutomaticDimension, display = charon_sheet_display_corner_radius(_container.window);
@@ -619,10 +530,6 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
 
 #pragma mark - The sheet's view
 
-/* UIKit's _UIGrabber is a control that sends its action on a touch up inside
-   (-_controlEventsForActionTriggered 0x1896b7964) and takes touches in at least 44 x 44
-   points around itself (-layoutSubviews 0x188e8c3e4 sets negative touch insets of half of
-   44 less its size). */
 @interface CharonSheetGrabber : UIControl
 @end
 
@@ -637,14 +544,9 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
 
 @end
 
-/* The magic shadow view of -[UIDropShadowView initWithFrame:] 0x189100234: a
-   _UIRoundedRectShadowView of corner radius 10, reaching 150 points beyond the card
-   (+_expansionInsetForShadowImage -150). */
 static const CGFloat charon_sheet_magic_shadow_outset = 150;
 static const CGFloat charon_sheet_magic_shadow_radius = 10;
 
-/* What UIKit calls the drop shadow view: the sheet's frame, its shadow and grabber, and a
-   clipping view with the corners that holds the presented controller's view. */
 @interface CharonSheetView : UIView <CharonBackdropClient>
 @property (nonatomic, readonly) UIView *clippingView;
 @property (nonatomic, readonly) UIControl *grabber;
@@ -720,18 +622,11 @@ static void charon_sheet_free_pixels(void *info, const void *data, size_t size)
     [CATransaction setDisableActions:YES];
     _mask.frame = bounds;
     _mask.path = path.CGPath;
-    /* The shadow follows the card's corners: a layer's shadow drawn from its path ignores what the
-       mask leaves transparent, and a rectangle would show dark corners outside the arcs. */
     self.layer.shadowPath = [path CGPath];
     [CATransaction commit];
     _grabber.center = CGPointMake(CGRectGetMidX(self.bounds), charon_sheet_grabber_spacing + charon_sheet_grabber_height / 2);
 }
 
-/* -[UIDropShadowView hitTest:withEvent:] 0x189041df4: the grabbers first, so that their touch
-   area reaches beyond the card, then the view's own; the view itself takes no touch. A hit in
-   the content is kept only inside the content touch insets, which _containerViewLayoutSubviews
-   sets from -[_UISheetLayoutInfo _touchInsets] 0x189035fc8: the untransformed frame less the
-   hosted one, which is the same frame for a sheet that is not hosting another, as none is here. */
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
     UIView *hit = [_grabber hitTest:[self convertPoint:point toView:_grabber] withEvent:event];
@@ -741,11 +636,6 @@ static void charon_sheet_free_pixels(void *info, const void *data, size_t size)
     return hit == self ? nil : hit;
 }
 
-/* The magic shadow is a vibrant colour matrix over what lies under the sheet, which the
-   release cannot composite: the view reads what lies under it (CharonBackdrop) and lays the
-   matrix of it, masked by the shadow's image, over it (CharonSheetShadow.c). Its view is
-   made on the first alpha above zero, below everything, as -setMagicShadowAlpha: 0x188f94b48
-   sets the alpha of UIKit's. */
 - (void)setMagicShadowAlpha:(CGFloat)alpha
 {
     if (!_magicShadowView && alpha <= 0)
@@ -780,8 +670,6 @@ static void charon_sheet_free_pixels(void *info, const void *data, size_t size)
     [self charon_updateMagicShadowReader];
 }
 
-/* A reading is not worth taking while the last one is being shaded: it would wait behind it, and the read is what holds the
-   main thread. */
 - (BOOL)backdropIsWanted:(CharonBackdrop *)backdrop
 {
     return !self.hidden && _magicShadowView.alpha > 0 && !_magicShadowShading;
@@ -792,8 +680,6 @@ static void charon_sheet_free_pixels(void *info, const void *data, size_t size)
     return _magicShadowView.frame;
 }
 
-/* The reading is shaded on a queue of its own (charon_sheet_shadow_shade is a function of the pixels and what places them,
-   a pass over each of them that took an iPad 2 hundreds of milliseconds), and the main thread only shows the result. */
 - (void)backdrop:(CharonBackdrop *)backdrop captured:(uint8_t *)pixels width:(size_t)width height:(size_t)height rowBytes:(size_t)rowBytes rect:(CGRect)captured
 {
     CGRect frame = _magicShadowView.frame;
@@ -1021,8 +907,6 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     [self charon_moveToSelectedDetent];
 }
 
-/* A change made outside -animateChanges: shows at once; one made inside it waits for the
-   animation that ends the block. */
 - (void)charon_changed
 {
     if (_changing == 0 && self.containerView)
@@ -1106,9 +990,6 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     _layout.offset = [self charon_dismissOffset];
     [self charon_layoutStack];
 
-    /* -presentationTransitionWillBegin 0x1890ff9cc: UIKit hears its private keyboard
-       notifications (UIKeyboardPrivateWillShow, WillHide, WillChangeFrame); the release posts
-       the public ones, with the same frame, duration and curve. */
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
     [center addObserver:self selector:@selector(charon_keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
     [center addObserver:self selector:@selector(charon_keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
@@ -1148,8 +1029,6 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     [self charon_tearDownRemovingViews:NO];
     if (_userDismissed) {
         _userDismissed = NO;
-        /* After the release has taken the controller down: the delegate is told in the
-           dismissal's completion, as UIKit does. */
         __weak UISheetPresentationController *weakSelf = self;
         dispatch_async(dispatch_get_main_queue(), ^{
             UISheetPresentationController *strongSelf = weakSelf;
@@ -1158,9 +1037,6 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
                 [delegate presentationControllerDidDismiss:strongSelf];
         });
     }
-    /* Where the release presents the sheet through the handover, the controller lets go of it now (its association is
-       the last thing that may hold it); the reference kept here goes a turn later, after the delegate's block above,
-       as this method is still running on the sheet. */
     UIPresentationController *sheet = self;
     [self.presentedViewController charon_sheetDidDismiss:self];
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -1175,17 +1051,11 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
         [self charon_invalidateDetents];
 }
 
-/* UIKit's sheet made before its presentation has no presenting controller until it is
-   presented; the release names it once it has presented the controller. */
 - (UIViewController *)presentingViewController
 {
     return [super presentingViewController] ?: self.presentedViewController.presentingViewController;
 }
 
-/* The parent a sheet stacks on: the sheet that presents it, or the window's root view
-   when the window's root view controller presents it (UIKit's root presentation is a sheet
-   too); nothing when a full-screen or custom presentation is between them, as
-   -_parentSheetPresentationController (0x1891ab8e8) answers. */
 - (void)charon_linkParent
 {
     if (_layout.parent || !self.containerView)
@@ -1219,12 +1089,6 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     _layout.parent = _rootLayout;
 }
 
-/* A finished dismissal leaves the card and the presented controller's view in the container:
-   the release's own dismissal runs after this, and UIKit 6.1.3 ends it (presentingViewController
-   and presentedViewController cleared, isBeingDismissed back to NO) only when that view is in
-   the window then. Taken out here, the release kept the controller presented, and the next
-   dismissal from it reached nothing (measured on an iPad 2, 6.1.3). The container goes after the
-   release's dismissal, and the views with it. */
 - (void)charon_tearDownRemovingViews:(BOOL)removesViews
 {
     [_animator stopAnimation:YES];
@@ -1297,8 +1161,6 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     _layout.detentOffsets = _resolvedOffsets;
 }
 
-/* Each detent resolved against the container, the inactive ones left out, the largest
-   first. */
 - (void)charon_resolveDetents
 {
     UIView *container = self.containerView;
@@ -1318,19 +1180,12 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
         [offsets addObject:entry[0]];
         [identifiers addObject:entry[1]];
     }
-    /* -_indexOfActiveDimmingDetent 0x188f94ba8: the smallest detent, or the one above the
-       largest undimmed detent. */
     NSUInteger dimming = identifiers.count ? identifiers.count - 1 : NSNotFound;
     if (_largestUndimmedDetentIdentifier) {
         NSUInteger undimmed = [identifiers indexOfObject:_largestUndimmedDetentIdentifier];
         if (undimmed != NSNotFound)
             dimming = undimmed == 0 ? NSNotFound : undimmed - 1;
     }
-    /* -[_UISheetLayoutInfo _activeDetents] 0x1895ea0e0: while a first responder in the sheet
-       that needs the keyboard has it, the sheet stands at its first detent; when that is below
-       the large detent, a detent with no identifier is put first, the first one raised by the
-       height of the keyboard over the sheet's full-height frame, no higher than the large
-       detent, and the dimming detent moves down one. */
     CGRect keyboard = CGRectIntersection(_keyboardFrame, [_layout fullHeightFrame]);
     _keyboardAdjusted = _firstResponderRequiresKeyboard && offsets.count && !CGRectIsNull(keyboard)
         && charon_sheet_first_responder_in(self.presentedViewController.view);
@@ -1354,7 +1209,6 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     return [_layout dismissOffset];
 }
 
-/* The selected detent, or the smallest one when none of the active detents has that name. */
 - (CGFloat)charon_selectedOffset
 {
     [self charon_updateLayoutInputs];
@@ -1363,8 +1217,6 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     return [_resolvedOffsets[[self charon_indexOfCurrentDetent]] doubleValue];
 }
 
-/* -_indexOfCurrentActiveDetent 0x189036a90: the first detent while the keyboard holds the
-   sheet there, else the selected one, else the smallest. */
 - (NSUInteger)charon_indexOfCurrentDetent
 {
     if (_keyboardAdjusted)
@@ -1406,15 +1258,11 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     UITraitCollection *traits = self.containerView.traitCollection;
     _sheetView.grabber.backgroundColor = [charon_sheet_grabber_color() resolvedColorWithTraitCollection:traits];
 
-    /* -_containerViewLayoutSubviews: both dimming views take touches while the sheet is dimmed
-       (-_isDimmingEnabled) and act on a tap unless -_shouldDimmingIgnoreTouches. */
     BOOL enabled = [_layout percentDimmedFromOffset] > 0;
     _dimmingView.frame = self.containerView.bounds;
     _dimmingView.backgroundColor = charon_sheet_dimming_background(traits, [_layout percentDimmed], 0);
     _dimmingView.userInteractionEnabled = enabled;
 
-    /* The confined dimming view is the parent card's overlay in UIKit; here it lies over
-       the parent in this container, with the parent's frame, transform and corners. */
     CharonSheetLayoutInfo *parent = _layout.parent;
     _confinedDimmingView.hidden = !parent;
     _confinedDimmingView.userInteractionEnabled = enabled;
@@ -1431,9 +1279,6 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     }
 }
 
-/* -_shouldDimmingIgnoreTouches 0x188f942f8 for an edge-attached sheet: below its top position
-   a tap counts unless the sheet is being dragged; at the top, a sheet as wide as the
-   container ignores it. */
 - (BOOL)charon_dimmingIgnoresTouches
 {
     if (_layout.offset > [_layout margins].top)
@@ -1441,9 +1286,6 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     return YES;
 }
 
-/* -dimmingViewWasTapped: 0x189d33ff8 -> -_dismissFromGrabberOrDimmingViewIfPossible
-   0x189d33ffc: dismiss when the sheet may be dismissed, else go to the largest undimmed
-   detent when there is one. */
 - (void)charon_dimmingTapped:(UITapGestureRecognizer *)tap
 {
     if (tap.state != UIGestureRecognizerStateEnded || [self charon_dimmingIgnoresTouches] || _interactiveDismissal)
@@ -1472,12 +1314,6 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
         [delegate sheetPresentationControllerDidChangeSelectedDetentIdentifier:self];
 }
 
-/* -_dropShadowViewGrabberDidTriggerPrimaryAction: 0x189d33e74 by -[_UISheetLayoutInfo
-   _grabberAction] 0x1895ea700: while the keyboard holds the sheet at its first detent the
-   presented view ends editing; otherwise the detent before the current one, the last after the
-   first (-_indexOfActiveDetentForTappingGrabber 0x1895ea69c), becomes the selected one in an
-   animation, and the delegate hears of it; with one detent the sheet is dismissed if it may be,
-   as a tap on the dimming view does. */
 - (void)charon_grabberTapped
 {
     if (_interactiveDismissal || !_resolvedOffsets.count)
@@ -1521,10 +1357,6 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
         [self charon_keyboardChanged:notification hiding:NO];
 }
 
-/* -_handleKeyboardNotification:aboutToHide: 0x18938274c: the keyboard's end frame in the
-   container (CGRectNull when it hides), whether the window's first responder needs the
-   keyboard, then the sheet moves to its current detent in an animation of the keyboard's
-   duration and curve (block 0x189323d7c: options are the curve shifted by 16). */
 - (void)charon_keyboardChanged:(NSNotification *)notification hiding:(BOOL)hiding
 {
     UIView *container = self.containerView;
@@ -1535,11 +1367,8 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     CGRect end = [info[UIKeyboardFrameEndUserInfoKey] CGRectValue];
     _keyboardFrame = hiding || !window ? CGRectNull : [container convertRect:[window convertRect:end fromWindow:nil] fromView:window];
     UIResponder *responder = charon_sheet_first_responder(window);
-    /* -[UIResponder _requiresKeyboardWhenFirstResponder] 0x18910488c: a responder that takes
-       key input, unless it answers isEditable and is not. */
     _firstResponderRequiresKeyboard = [responder conformsToProtocol:@protocol(UIKeyInput)] && (![responder respondsToSelector:@selector(isEditable)] || [(id)responder isEditable]);
     _resolvedOffsets = nil;
-    /* A spring or a drag under way settles on the detents as they now are when it ends. */
     if (_animator || _interactiveDismissal || _pan.state == UIGestureRecognizerStateBegan || _pan.state == UIGestureRecognizerStateChanged)
         return;
     NSTimeInterval duration = [info[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
@@ -1551,9 +1380,6 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     } completion:nil];
 }
 
-/* The sheet's container lets a touch that lands on it and on none of its views through to
-   the presenting view (UITransitionView's ignoreDirectTouchEvents, set when the sheet is
-   made), which is what a sheet at an undimmed detent shows. */
 - (BOOL)charon_containerIgnoresDirectTouches
 {
     return YES;
@@ -1561,9 +1387,6 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
 
 #pragma mark The drag
 
-/* -[UIPresentationController _shouldDismiss] 0x189189a70 as the sheet asks it
-   (-sheetInteraction:didChangeOffset: 0x188f922cc): not while the controller presents
-   another, not when it is modal in presentation, else what the delegate says. */
 - (BOOL)charon_shouldDismiss
 {
     UIViewController *presented = self.presentedViewController;
@@ -1581,15 +1404,11 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     return layer.position.y - CGRectGetHeight(_sheetView.bounds) / 2;
 }
 
-/* -_rubberBandExtentBeyondMaximumOffset 0x189212d04: a quarter of the full height, at most 200. */
 - (CGFloat)charon_bottomExtent
 {
     return MIN(MAX(charon_sheet_bottom_extent_fraction * CGRectGetHeight([_layout fullHeightFrame]), 0), charon_sheet_bottom_extent);
 }
 
-/* The finger's offset held to the detents: past the largest one it is rubber-banded over the
-   gap to the safe area's top, at most 100 (-_rubberBandExtentBeyondMinimumOffset 0x18904f798);
-   past the smallest one, when the sheet cannot be dismissed, over the bottom extent. */
 - (CGFloat)charon_constrainedOffset:(CGFloat)offset
 {
     CGFloat top = [_resolvedOffsets.firstObject doubleValue], bottom = [_resolvedOffsets.lastObject doubleValue];
@@ -1629,8 +1448,6 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
                 [self charon_beginInteractiveDismissal];
         }
         CGFloat offset = [self charon_constrainedOffset:unconstrained];
-        /* A sheet that may not be dismissed tells the delegate once a drag has pulled it a
-           quarter of the bottom extent past its smallest detent (block 0x189d34a14). */
         if (_dismissalDecided && !_dismissible && !_attemptSent && offset - bottom > 0.25 * [self charon_bottomExtent]) {
             _attemptSent = YES;
             __weak UISheetPresentationController *weakSelf = self;
@@ -1661,13 +1478,6 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     }
 }
 
-/* -[_UISheetInteraction _shouldInteractWithDescendentScrollView:startOffset:maxTopOffset:]
-   0x18906b1b8: the sheet takes a pan that starts in a scroll view only when the scroll view is
-   at its top edge, has no refresh control, cannot scroll sideways, does not dismiss the
-   keyboard interactively around the first responder, and the pan is not a quick repeat of the
-   last one while the sheet rests. Which way it then goes is the documented rule of
-   prefersScrollingExpandsWhenScrolledToEdge (not read from the cache): down moves the sheet,
-   up expands it only when that is set and the sheet is not at its largest detent. */
 - (BOOL)charon_takesPanFromScrollView:(UIScrollView *)scrollView velocity:(CGPoint)velocity
 {
     UIEdgeInsets inset = scrollView.adjustedContentInset;
@@ -1711,7 +1521,6 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     return gesture == _pan && [other.view isKindOfClass:[UIScrollView class]] && [other.view isDescendantOfView:_sheetView];
 }
 
-/* While the sheet has the pan, the scroll view stays at its top edge. */
 - (void)charon_holdTrackedScrollView
 {
     UIScrollView *scrollView = _trackedScrollView;
@@ -1728,10 +1537,6 @@ static NSUInteger charon_sheet_closest(NSArray *offsets, CGFloat offset)
     return best;
 }
 
-/* The block 0x189069f70 of -draggingEndedInSource: 0x18906ac48: the release is projected with
-   the deceleration rate; the detent nearest the projection wins, and a flick that lands back on
-   the detent nearest the finger moves one detent further its way. The dismiss detent is there
-   while the dismissal the drag started is running. */
 - (void)charon_endDragAt:(CGFloat)unconstrained velocity:(CGFloat)velocity
 {
     NSMutableArray *regions = [_resolvedOffsets mutableCopy];
@@ -1758,7 +1563,6 @@ static NSUInteger charon_sheet_closest(NSArray *offsets, CGFloat offset)
     }
     id identifier = _resolvedIdentifiers[index];
     NSString *before = _selectedDetentIdentifier;
-    /* The keyboard's detent has no identifier and changes no selection. */
     BOOL keyboardDetent = identifier == [NSNull null];
     BOOL wasThere = keyboardDetent || [identifier isEqualToString:before] || (![_resolvedIdentifiers containsObject:before ?: @""] && (NSUInteger)index == _resolvedIdentifiers.count - 1);
     if (!keyboardDetent)
@@ -1775,7 +1579,6 @@ static NSUInteger charon_sheet_closest(NSArray *offsets, CGFloat offset)
         [delegate sheetPresentationControllerDidChangeSelectedDetentIdentifier:self];
 }
 
-/* The dismissal starts when the drag passes the smallest detent, and the drag carries it. */
 - (void)charon_beginInteractiveDismissal
 {
     _interactiveDismissal = YES;
@@ -1828,8 +1631,6 @@ static NSUInteger charon_sheet_closest(NSArray *offsets, CGFloat offset)
 
 @implementation UIViewController (CharonSheetPresentation)
 
-/* UIKit makes the presentation controller of a page or form sheet when it is first asked
-   for, and it is the sheet; another style has none. */
 - (UISheetPresentationController *)sheetPresentationController
 {
     UIPresentationController *current = charon_presentation_controller_of(self);

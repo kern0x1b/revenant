@@ -19,7 +19,6 @@
 
 import Foundation
 
-/// One field of a message, as it came off the wire.
 public enum ProtoField {
     case varint(UInt64)
     case fixed64(UInt64)
@@ -27,7 +26,6 @@ public enum ProtoField {
     case fixed32(UInt32)
 }
 
-/// A reader over a protobuf message: the whole message is walked, field by field.
 public struct ProtoReader {
     private let bytes: [UInt8]
     private var offset: Int
@@ -37,7 +35,6 @@ public struct ProtoReader {
         self.offset = 0
     }
 
-    /// The next field, or nil at the end.
     public mutating func next() throws -> (number: Int, field: ProtoField)? {
         guard offset < bytes.count else { return nil }
         let key = try readVarint()
@@ -60,7 +57,6 @@ public struct ProtoReader {
         }
     }
 
-    /// Every field of a message, as `(number, field)` pairs, in wire order.
     public static func fields(_ bytes: [UInt8]) throws -> [(Int, ProtoField)] {
         var reader = ProtoReader(bytes)
         var out = [(Int, ProtoField)]()
@@ -106,14 +102,11 @@ public struct ProtoReader {
     }
 }
 
-/// A builder for a protobuf message: fields are appended in number order, as the schema does.
 public struct ProtoWriter {
     public private(set) var bytes: [UInt8] = []
 
     public init() {}
 
-    /// A field carrying a varint: an int32, an int64, a bool or an enum, all of which are varints on
-    /// the wire and are written the same way.
     public mutating func varint(_ number: Int, _ value: Int) {
         putVarintKey(number, wire: 0)
         putVarint(UInt64(bitPattern: Int64(value)), into: &bytes)
@@ -129,15 +122,12 @@ public struct ProtoWriter {
         putVarint(value ? 1 : 0, into: &bytes)
     }
 
-    /// A field carrying a `double`, which is wire type 1, little-endian.
     public mutating func double(_ number: Int, _ value: Double) {
         putVarintKey(number, wire: 1)
         let bits = value.bitPattern.littleEndian
         for index in 0..<8 { bytes.append(UInt8((bits >> UInt64(index * 8)) & 0xFF)) }
     }
 
-    /// A field carrying a `repeated float` written **packed**, which is what Core ML's weight blobs
-    /// use: a length-delimited run of little-endian 32-bit values, not one field per element.
     public mutating func packedFloat(_ number: Int, _ values: [Float]) {
         var packed = [UInt8]()
         packed.reserveCapacity(values.count * 4)
@@ -162,21 +152,18 @@ public struct ProtoWriter {
         bytes.append(contentsOf: packed)
     }
 
-    /// A field carrying a `string`, which is a length-delimited run of UTF-8.
     public mutating func string(_ number: Int, _ value: String) {
         putVarintKey(number, wire: 2)
         putVarint(UInt64(value.utf8.count), into: &bytes)
         bytes.append(contentsOf: Array(value.utf8))
     }
 
-    /// A field carrying a submessage, or a `bytes` one: both are length-delimited.
     public mutating func message(_ number: Int, _ inner: ProtoWriter) {
         putVarintKey(number, wire: 2)
         putVarint(UInt64(inner.bytes.count), into: &bytes)
         bytes.append(contentsOf: inner.bytes)
     }
 
-    /// A repeated `int64` written packed, which is what Core ML's dimensions use.
     public mutating func packedInt64(_ number: Int, _ values: [Int]) {
         var packed = [UInt8]()
         for value in values { putVarint(UInt64(bitPattern: Int64(value)), into: &packed) }
@@ -201,7 +188,6 @@ public struct ProtoWriter {
     }
 }
 
-/// Why a message could not be read.
 public enum ProtoError: Error, CustomStringConvertible, Equatable {
     case truncated
     case varintTooLong
@@ -219,7 +205,6 @@ public enum ProtoError: Error, CustomStringConvertible, Equatable {
 }
 
 extension ProtoField {
-    /// A varint field as a signed integer, which is how proto2 spells `int32` and `int64`.
     public var intValue: Int? {
         if case .varint(let value) = self { return Int(Int64(bitPattern: value)) }
         return nil
@@ -230,13 +215,11 @@ extension ProtoField {
         return nil
     }
 
-    /// A fixed64 field as a `double`.
     public var doubleValue: Double? {
         if case .fixed64(let value) = self { return Double(bitPattern: value) }
         return nil
     }
 
-    /// A length-delimited field as its bytes.
     public var bytesValue: [UInt8]? {
         if case .lengthDelimited(let value) = self { return value }
         return nil
@@ -247,7 +230,6 @@ extension ProtoField {
         return String(data: Data(bytes), encoding: .utf8)
     }
 
-    /// A packed repeated float field, read back into its values.
     public var floatValues: [Float]? {
         guard let bytes = bytesValue else { return nil }
         var out = [Float]()

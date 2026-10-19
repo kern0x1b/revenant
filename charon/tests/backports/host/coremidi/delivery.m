@@ -1,17 +1,3 @@
-// The in-process deliveries of this library's destinations against the dispose of their endpoint, on the host's own CoreMIDI
-// (process-lifetime virtual endpoints; nothing persists, which prefs-bracket.sh checks). The release's destinations run nothing
-// after their dispose has returned; a destination this library made must not either, and the library checks each delivery's object
-// right before its call, so a delivery whose check begins after the dispose returned is not called. Three cases:
-//   - test E: one call held inside its block, two deliveries queued behind it, the dispose issued and returned while the call is
-//     held, then the call released. The queued deliveries must not be called. The release's destination is the control: its dispose
-//     waits for the held read.
-//   - the hold rounds: test E repeated over 200 rounds with 31 deliveries queued behind the held call. Asserted: no call after its dispose.
-//   - the race: 200 trials of 32 fast messages, the dispose issued once the first call has begun, nothing held. A dispose can land
-//     between a delivery's check and its call, the gap the code does not bound. The count and the latest lateness are recorded, not
-//     asserted: the code gives no bound to assert.
-//   - the drain cost: 20000 messages to a live destination, the pipeline's ns per message, median of five runs (recorded, not asserted).
-// A wait for the queue to be served uses a sentinel: a live destination of the library whose delivery is queued last, so its call
-// means every earlier delivery has been served. A wait that times out fails the run.
 #import <CoreMIDI/CoreMIDI.h>
 #import <Foundation/Foundation.h>
 #include <mach/mach_time.h>
@@ -38,9 +24,6 @@ static void expect(int passed, const char *what, long value)
         gFailures++;
 }
 
-// What the receive procedures record: the calls begun, the calls begun after the dispose returned, and how long after it the latest
-// such call began. The dispose time is set by the disposing thread when its dispose has returned (0 before that). A call that is armed
-// (the first call of a round) signals that it is inside its block, and waits to be released.
 typedef struct {
     dispatch_semaphore_t entered;
     dispatch_semaphore_t go;
@@ -85,8 +68,6 @@ static void release_read(const MIDIPacketList *packets, void *refCon, void *srcC
     record_call();
 }
 
-// The disposing thread: it disposes, records when the dispose returned, and signals `done` when it has one (NULL for a dispose made
-// on the calling thread).
 typedef struct {
     MIDIEndpointRef endpoint;
     OSStatus status;
@@ -106,7 +87,6 @@ static void *dispose_thread(void *argument)
     return NULL;
 }
 
-// One 2.0 note, as a list of one packet, for the library's sends.
 static MIDIEventList *note(uint8_t *storage, size_t size)
 {
     MIDIEventList *list = (MIDIEventList *)storage;
@@ -125,8 +105,6 @@ static void reset_probe(void)
     gP.armed = 0;
 }
 
-// Waits until the library's queue has served every delivery queued before this call: the sentinel is queued last, and its call is the
-// answer. A wait that times out fails the run.
 static int drain_queue(void)
 {
     CharonMIDISend(gOut, gSentinel, gSentinelList);
@@ -136,8 +114,6 @@ static int drain_queue(void)
     return 0;
 }
 
-// Waits until a call has begun (the first of a burst), so that the dispose is issued while the deliveries behind it are queued.
-// Gives up after three seconds; the caller counts the begun calls, so a give-up is a failed count.
 static int wait_started(void)
 {
     for (int i = 0; i < 30000; i++) {
@@ -148,10 +124,6 @@ static int wait_started(void)
     return 0;
 }
 
-// One round of the hold: the first delivery is blocked inside its call, `queued` more are sent behind it, and the dispose is issued
-// from another thread. The library's dispose returns while the call is blocked (it does not wait for a call it did not make); the
-// blocked call is released after that; the queue is then served. Adds the calls begun and those begun after the dispose returned.
-// Returns 0 when the round could not be run (the failure is printed).
 static int hold_round(int queued, long *started, long *afterDispose)
 {
     reset_probe();
@@ -190,7 +162,6 @@ static int hold_round(int queued, long *started, long *afterDispose)
     return d.status == noErr;
 }
 
-// Test E: one round with two deliveries queued behind the blocked call. Only the blocked call is made, and none after the dispose.
 static void test_e(void)
 {
     long started = 0;
@@ -202,10 +173,6 @@ static void test_e(void)
     expect(started == 1, "E library: the two queued deliveries are not called (the one blocked call is)", started);
 }
 
-// The release's destination, the control of test E: its dispose waits for the blocked read, and no read begins after it returns. The
-// release's reads are not visible to a sentinel, so the wait after the dispose is a fixed bound of this control, not a timing of the
-// release. Its assertions: the dispose was entered, it was still running at the check while the read was held (the wait), and the
-// count after the dispose is zero. A mutant that releases the read before the check (DELIVERY_MUTANT_NO_WAIT) must fail the wait.
 static void test_release_control(void)
 {
     reset_probe();
@@ -228,10 +195,6 @@ static void test_release_control(void)
         expect(0, "E release: the first read is inside its call", 0);
         return;
     }
-    // The dispose thread sets `entered` before it calls the release's dispose. The wait is evidenced, not assumed: the dispose was
-    // entered (the flag is seen, polled for up to five seconds), and it had not returned when the check ran, 20 ms later, while the
-    // read was still held. A dispose that did not wait would have returned by then, and the mutant below (the read released and
-    // the dispose joined before the check) is the red for that case.
     int entered = 0;
     disposer d = {dest, noErr, NULL, &entered};
     pthread_t thread;
@@ -257,7 +220,6 @@ static void test_release_control(void)
     expect(gP.afterDispose == 0, "E release (control): no read begins after the dispose returned", gP.afterDispose);
 }
 
-// The hold rounds: test E repeated over 200 rounds, each with 31 deliveries queued behind the blocked call.
 static void test_hold_rounds(void)
 {
     long started = 0;
@@ -275,7 +237,6 @@ static void test_hold_rounds(void)
     expect(afterDispose == 0, "hold: no queued delivery begins after its dispose returned, in 200 rounds", afterDispose);
 }
 
-// The race: fast calls and the dispose issued once the first call of a trial has begun. Recorded, not asserted (the code gives no bound).
 static void test_race(void)
 {
     long began = 0;
@@ -311,10 +272,6 @@ static void test_race(void)
     expect(began == 200, "race: the first call of every trial begins before its dispose (so the race is measured)", began);
 }
 
-// The drain's cost per message: a live destination of the library gets BENCH_MESSAGES fast messages, and the sentinel is queued last.
-// The pipeline time is the first block call to the last one, divided by the messages after the first. Each delivery reads the owner
-// stamp on the drain thread (charon_drain), so the figure includes that read. Recorded as the median of BENCH_RUNS runs, not asserted
-// (the count of calls per run is asserted).
 #define BENCH_MESSAGES 20000
 #define BENCH_RUNS 5
 static uint64_t gBenchFirst;

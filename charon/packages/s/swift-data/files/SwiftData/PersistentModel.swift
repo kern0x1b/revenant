@@ -1,11 +1,3 @@
-// The model side of the framework: what a `@Model` type is, where its values live, and the
-// versions a migration compares.
-//
-// A SwiftData model is not an NSManagedObject. A model is a Swift object; its values live in an
-// NSManagedObject the context owns, and the object reaches them through `persistentBackingData`.
-// That is what this file is: the protocol a `@Model` type conforms to, the storage behind it, and
-// the conversion between a Swift value and what Core Data can hold.
-
 import Foundation
 import CoreData
 import Observation
@@ -41,9 +33,6 @@ extension PersistentModel {
 
     public var hasChanges: Bool { persistentBackingData.hasChanges }
 
-    // The value-reading and value-writing a `@Model` type's generated accessors call. The key path
-    // is a Swift key path into the model; its name is what a Core Data property is called, and
-    // `_kvcKeyPathString` is the standard library's own way of reading that name off a key path.
     @_disfavoredOverload
     public func getValue<Value>(forKey keyPath: KeyPath<Self, Value>) -> Value where Value: Decodable {
         persistentBackingData.getValue(forKey: keyPath)
@@ -99,8 +88,6 @@ extension PersistentModel {
     }
 }
 
-/// The types a relationship can hold. `@Model` writes the conformance for an `Array` of models
-/// and for an optional one; a `Set` cannot be stored, so it does not get one.
 public protocol RelationshipCollection {
     associatedtype PersistentElement: PersistentModel
 }
@@ -112,8 +99,6 @@ extension Array: RelationshipCollection where Element: PersistentModel {
 extension Optional: RelationshipCollection where Wrapped: Sequence, Wrapped.Element: PersistentModel {
     public typealias PersistentElement = Wrapped.Element
 }
-
-// MARK: - Where a model's values live
 
 public protocol BackingData<Model> {
     associatedtype Model: PersistentModel
@@ -138,18 +123,11 @@ public protocol BackingData<Model> {
         where Value: Encodable, Value: RelationshipCollection, OtherModel == Value.PersistentElement
     func setTransformableValue<Value>(forKey: KeyPath<Model, Value>, to newValue: Value)
 
-    /// The same row, read through a subclass's properties, and the same row read as the class the
-    /// object really is. Apple's are extension members on a class hierarchy iOS 26 added; here
-    /// they are requirements, because the answer is the same Core Data object seen through
-    /// another type's properties and a conformer that could not answer that has to say so rather
-    /// than trap at run time.
     func _generateCurrentClassBackingData<CurrentClass>() -> any BackingData<CurrentClass> where CurrentClass: PersistentModel
     func _superClassBackingData<SuperClass>(of givenType: any PersistentModel.Type) -> any BackingData<SuperClass> where SuperClass: PersistentModel
 }
 
 extension BackingData {
-    /// The entity the model is stored as. A store names an entity by a string, and this is where
-    /// that string comes from for a model that has not been inserted anywhere yet.
     public var entityName: String { Schema.entityName(for: Model.self) }
 
     public var modelContext: ModelContext? { nil }
@@ -158,21 +136,9 @@ extension BackingData {
 }
 
 extension PersistentIdentifier {
-    /// The identifier of a model that has no row yet: a model built with `init()` and not
-    /// inserted. Apple's is the same kind of value - a model is `Identifiable` before it is
-    /// stored, and an identifier that names nothing is what it has.
     public static let unregistered = PersistentIdentifier(uri: URL(fileURLWithPath: "/dev/null"), entityName: "")
 }
 
-// MARK: - The values themselves
-
-/// Between a Swift value and what Core Data holds. Core Data's own types are the boxed ones
-/// (`NSString`, `NSNumber`, `NSDate`, `NSUUID`, `NSData`), so every read goes through here rather
-/// than through a cast that would fail on a number stored as a string; and a value Core Data
-/// cannot hold in a column of its own - a struct, an array, an enum - is written as JSON, which
-/// is what `NSTransformableAttributeType` stores when it is given no transformer of its own.
-/// `JSONEncoder.encode` takes an `Encodable`, and a value of any type is what a store is asked
-/// to write; this is the one place the two meet.
 struct AnyEncodable: Encodable {
     let value: Any
 
@@ -185,9 +151,6 @@ struct AnyEncodable: Encodable {
     }
 }
 
-/// `JSONDecoder.decode` the other way, for a value whose Swift type the reader only learns at the
-/// call. What a transformable column keeps is JSON, so what comes back is one of the types JSON
-/// carries; a Swift type that is not one of them is a type the column does not hold.
 struct AnyDecodable: Decodable {
     let value: Any
 
@@ -212,8 +175,6 @@ struct AnyDecodable: Decodable {
 }
 
 enum StoredValue {
-    /// The boxed form of a value Core Data has a column for, and nil for one it has not, which is
-    /// what tells the writer to fall through to JSON.
     static func box(_ value: Any) -> Any? {
         switch value {
         case let value as String: return value as NSString
@@ -235,9 +196,6 @@ enum StoredValue {
         }
     }
 
-    /// A value read back as the type the model asked for. `as?` first, because a value that is
-    /// already of the type is the common case; then the boxed types Core Data answers with; then
-    /// JSON, for what a store kept as data.
     static func cast<T>(_ value: Any?, to type: T.Type) -> T? {
         guard let value else { return nil }
         if let typed = value as? T { return typed }
@@ -268,9 +226,6 @@ enum StoredValue {
         }
     }
 
-    /// The value a column of a type holds when it holds none: Core Data's own types have a
-    /// defined zero, and a Swift optional one is nil. Nothing else has a value to answer with,
-    /// and a store that is asked for one is saying its schema and its rows disagree.
     static func zero<T>(of type: T.Type) -> T? {
         switch type {
         case is String.Type: return "" as? T
@@ -287,7 +242,6 @@ enum StoredValue {
         }
     }
 
-    /// A value written into a store: the boxed forms, and JSON for what has no column of its own.
     static func store<T>(_ value: T) -> Any {
         if let boxed = box(value as Any) { return boxed }
         if let encoded = try? JSONEncoder().encode(AnyEncodable(value)) { return encoded as NSData }

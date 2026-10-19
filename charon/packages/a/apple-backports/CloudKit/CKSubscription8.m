@@ -1,14 +1,3 @@
-// The subscription of CloudKit's first release and the notification information it carries.
-//
-// A CKSubscription is a name and a type: the three subclasses of iOS 10 give the type something to
-// mean, and the base class refuses to be instantiated directly, which is what the host's own
-// +[CKSubscription new] answers with. What a subscription does - what it is saved into, and what it
-// fires on - belongs to the transport and is a later delivery; what this file holds is everything a
-// caller can build, name and compare before then.
-//
-// CKNotificationInfo is a plain value: it is what a subscription is told to put in the notification
-// it causes, and it is kept, copied, compared and archived exactly as it was given.
-
 #import <Foundation/Foundation.h>
 #import <CloudKit/CloudKit.h>
 
@@ -41,9 +30,6 @@
     return nil;
 }
 
-// The base class is a record zone subscription as far as the type goes, which is what a saved
-// subscription with no more said about it is: the host's own -subscriptionType of a plain
-// subscription answers CKNotificationTypeRecordZone.
 + (CKSubscriptionType)subscriptionType
 {
     return CKNotificationTypeRecordZone;

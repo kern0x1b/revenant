@@ -1,15 +1,3 @@
-// MPSRNNDescriptor, from the header of MPSRNNLayer.h in the SDK of iOS 16.4: the shape and the switches
-// every recurrent layer descriptor shares, as a plain object with no storage of its own beyond its members.
-//
-// The declared members are the five the 16.4 header gives, and nothing else. The host's own MPS also
-// carries inputTransform, outputTransform, recurrentOutputTransform and internalKernelSelector on this
-// class; the 16.4 header does not declare them, so this port does not either (see facts/MetalPerformanceShaders/MPSRNNDescriptor.md).
-//
-// The defaults are the host's, read from Apple's own object: inputFeatureChannels and outputFeatureChannels
-// are 1, the two flags are NO and layerSequenceDirection is MPSRNNSequenceDirectionForward. The object is
-// not NSCopying and not NSSecureCoding on the host, so this port is not either: copy raises there, and it
-// raises here, because no copyWithZone: is defined. Equality and hash are NSObject's, identity, as there.
-
 #import "CharonMPS.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -33,9 +21,6 @@
     }
     return self;
 }
-
-// The members are plain values the header declares as properties: a getter and a setter over one field
-// each, written out so the compiler checks every spelling against the header rather than a macro hiding them.
 
 - (NSUInteger)inputFeatureChannels
 {

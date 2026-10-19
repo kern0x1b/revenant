@@ -1,7 +1,3 @@
-// differential.m - the same program, built once against the host's CoreSpotlight and once against the port's CSCustomAttributeKey.m.
-// Every line it prints must be the same on both sides, after run.sh has replaced object addresses. The lines are the answers the
-// host was measured to give: which key names it refuses, one ASCII character at a time, with the non-ASCII and the length edges;
-// the flags of each initializer; equality, hashing and copying; the text of description; coding; and the exception a plain init raises.
 #import <Foundation/Foundation.h>
 #import <CoreSpotlight/CoreSpotlight.h>
 #import <objc/message.h>

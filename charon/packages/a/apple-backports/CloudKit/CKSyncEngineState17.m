@@ -1,19 +1,3 @@
-// The state group of CloudKit's sync engine: the two scopes, the two options, the two contexts, the
-// state and its serialization.
-//
-// This is the bookkeeping CKSyncEngine adds over the operations below it, and it is all values: a
-// scope says which zones a fetch or a send is about, the options carry it and the group, the contexts
-// are what the delegate is handed, and the state is what survives a process being killed mid-sync.
-//
-// The refusals are the header's own, and one of them is measured and worse than a refusal: the host's
-// +[CKSyncEngineState new] and -[CKSyncEngineState init] call __builtin_trap behind its private
-// __CKSyncEngine class, so a caller who writes them loses the process. This port raises instead, which
-// is the one written-down difference in this family and one in the port's favour.
-//
-// Every @implementation carries an explicit @synthesize for each of its properties: the build
-// compiles with -Werror=objc-missing-property-synthesis, which fires on implicit synthesis, and the
-// declarations live in CharonCKSyncEngine26.h with the implementations of the other groups.
-
 #import "CharonCloudKit.h"
 #import "CharonCKConstants.h"
 #import "CharonCKSubscription.h"
@@ -56,8 +40,6 @@
     if (!zoneID) {
         return NO;
     }
-    // A scope of zones says whether that zone is in it, and a scope of exclusions says whether it is
-    // out of it. There is no third case: a scope is one or the other, never both.
     return _zoneIDs ? [_zoneIDs containsObject:zoneID] : ![_excludedZoneIDs containsObject:zoneID];
 }
 
@@ -138,8 +120,6 @@
     if (pendingRecordZoneChange.recordID) {
         return [self containsRecordID:pendingRecordZoneChange.recordID];
     }
-    // A zone save or a zone delete is about a zone and not about a record, so a scope of records
-    // does not contain it: there is no record to be in the set of.
     return _zoneIDs ? [_zoneIDs containsObject:pendingRecordZoneChange.zoneID] : NO;
 }
 
@@ -253,8 +233,6 @@
 
 + (instancetype)new
 {
-    // The header marks both spellings unavailable: a context is made by the engine and handed to the
-    // delegate, and one a caller made would be a context the engine never ran.
     [NSException raise:NSInvalidArgumentException
                 format:@"You must not make a CKSyncEngineFetchChangesContext; one is handed to the delegate", nil];
     return nil;
@@ -336,9 +314,6 @@
 
 + (instancetype)new
 {
-    // Measured: the host traps here, behind its private class. A trap takes the process down and a
-    // caller can do nothing about it, so this port refuses with the words that name the two ways a
-    // state is had.
     [NSException raise:NSInvalidArgumentException
                 format:@"You must use the -state of a CKSyncEngine, or restore one with +[CKSyncEngineStateSerialization stateWithCoder:]", nil];
     return nil;
@@ -386,9 +361,6 @@
     return [_zoneIDsWithUnfetchedServerChanges copy];
 }
 
-// The three collections the header declares as copies rather than as storage, so that a caller cannot
-// add to the state behind the engine's back: the only way in is the four add and remove methods, and
-// the only way out is the same four.
 - (void)charon_setZoneIDsWithUnfetchedServerChanges:(NSArray<CKRecordZoneID *> *)zoneIDs
 {
     [_zoneIDsWithUnfetchedServerChanges removeAllObjects];
@@ -431,8 +403,6 @@
 {
     self = [super init];
     if (self) {
-        // A serialization is the state's own archive, and it is archivable so that a caller who
-        // persists it with a coder of their own gets the same bytes back.
         NSMutableData *data = [NSMutableData data];
         NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
         [archiver encodeObject:state.pendingRecordZoneChanges forKey:@"pendingRecordZoneChanges"];

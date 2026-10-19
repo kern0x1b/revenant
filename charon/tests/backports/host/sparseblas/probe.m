@@ -1,13 +1,3 @@
-// What the host's own Accelerate answers for the sparse_* family of vecLib/Sparse/BLAS.h.
-//
-// A discovery probe, not a check. Every line is one measured case; tests/backports/host/sparseblas
-// differential.m then runs the port's own SparseBLAS9.m through the same cases and compares. The
-// cases that end the process (an invalid transpose reaches the release's cblas_xerbla, which exits)
-// are each asked in a child, with a case name, so the probe can print the host's own exit status
-// and message for them rather than dying in the middle of the rest.
-//
-// Usage: probe [case-name ...]   - with names, only those cases run. No names runs every safe case.
-
 #import <Accelerate/Accelerate.h>
 #include <math.h>
 #include <stdio.h>
@@ -32,8 +22,6 @@ static int wanted(const char *name)
 
 #define CASE(name) int run_##name(void)
 
-// The matrix reader: one value at a time through the host's own extract, so nothing here knows
-// anything about a layout of ours.
 static long extract_row(sparse_matrix_float A, sparse_index i, sparse_index from, float *val, sparse_index *ind, long cap)
 {
     sparse_index end = 0;
@@ -67,7 +55,6 @@ static void print_matrix(const char *tag, sparse_matrix_float A, sparse_dimensio
     free(d);
 }
 
-// A 3x3 point-wise matrix, [[1,0,2],[0,3,0],[4,0,0]].
 static sparse_matrix_float make3(void)
 {
     sparse_matrix_float A = sparse_matrix_create_float(3, 3);
@@ -78,7 +65,6 @@ static sparse_matrix_float make3(void)
     return A;
 }
 
-// A 3x3 lower triangular matrix, [[2,0,0],[1,3,0],[0,0,4]].
 static sparse_matrix_float makelow(void)
 {
     sparse_matrix_float L = sparse_matrix_create_float(3, 3);
@@ -89,8 +75,6 @@ static sparse_matrix_float makelow(void)
     sparse_insert_entry_float(L, 4, 2, 2);
     return L;
 }
-
-// ---------------------------------------------------------------- creation and shape
 
 CASE(create_pointwise)
 {
@@ -322,8 +306,6 @@ CASE(insert_block)
     return 0;
 }
 
-// ---------------------------------------------------------------- level 1
-
 CASE(vector_level1)
 {
     float x[4] = {1, 0, 3, 4};
@@ -413,8 +395,6 @@ CASE(utilities)
     return 0;
 }
 
-// ---------------------------------------------------------------- level 2
-
 CASE(level2)
 {
     sparse_matrix_float A = make3();
@@ -477,8 +457,6 @@ CASE(level2)
     sparse_matrix_destroy(A);
     return 0;
 }
-
-// ---------------------------------------------------------------- norms, trace, permutations, outer
 
 CASE(norms)
 {
@@ -620,8 +598,6 @@ CASE(outer)
     if (D) { print_matrix("  outer double", D, 2, 2); sparse_matrix_destroy(D); }
     return 0;
 }
-
-// ---------------------------------------------------------------- level 3
 
 CASE(level3_dense)
 {

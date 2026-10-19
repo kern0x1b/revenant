@@ -10,18 +10,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// The port's CMTagCollection, built as its own image, against the host's own CoreMedia. The port keeps
-// Apple's names, so the two are two definitions of one name: the calls below reach the system
-// framework, and the same names reached through the port's handle - opened RTLD_LOCAL | RTLD_FIRST, so
-// dlsym searches that image alone - are the port's. Nothing is renamed and no system header is touched.
-//
-// __typeof__ gives every binding the host's own type, so the twenty-four lines of BIND cannot drift from
-// the header and there is no second spelling of a name to shadow or to prefix twice.
-
 static int failures, checks;
 static void *port;
 
-// The three serialisation keys, from the host, read once through the default handle.
 static void readKeys(void)
 {
     static const char *names[] = {"kCMTagCategoryKey", "kCMTagValueKey", "kCMTagDataTypeKey"};
@@ -48,9 +39,6 @@ static NSString *shown(CMTag one)
 typedef OSStatus (*GetTagsFn)(CMTagCollectionRef, CMTag *, CMItemCount, CMItemCount *);
 typedef CMItemCount (*GetCountFn)(CMTagCollectionRef);
 
-// A port's collection only ever goes to the port's own entry points and a host's only to the host's:
-// one collection object is the host's CoreMedia's to interpret or the port's, never both, and handing
-// the port's to the host's is the objc_msgSend fault the differential first died of.
 static NSString *listed(CMTagCollectionRef collection, GetTagsFn getTags, GetCountFn getCount)
 {
     if (!collection)
@@ -74,8 +62,6 @@ static void same(const char *name, NSString *system, NSString *ported)
     }
 }
 
-// ARC will not let a block literal be cast to a C function pointer, so the appliers and filters are
-// plain C functions with their state in file-scope variables, as the two filters above already are.
 static NSMutableString *charonSeen;
 
 static void charonAppend(CMTag value, void *context)
@@ -300,7 +286,6 @@ int main(int argc, char **argv)
                       (unsigned)portInvalid->dataType, (unsigned long long)portInvalid->value]);
             }
             {
-                // the set algebra, the category filter, the two appliers and the dictionary form
                 CMTagCollectionRef systemOther = NULL, portOther = NULL, systemLeft = NULL, portLeft = NULL;
                 CMItemCount half = counts[index] < 3 ? counts[index] : 3;
                 CMTagCollectionCreate(kCFAllocatorDefault, tags, half, &systemLeft);
@@ -334,8 +319,6 @@ int main(int argc, char **argv)
                     if (portOut) CFRelease(portOut);
                 }
                 {
-                    // The binary form, both ways: the port's bytes against the host's byte for byte,
-                    // and each side's reader against the other side's writer.
                     CFDataRef systemData = CMTagCollectionCopyAsData(systemLeft, NULL);
                     CFDataRef portData = port_CMTagCollectionCopyAsData(portLeft, NULL);
                     same("CopyAsData", [NSString stringWithFormat:@"%@", systemData ? (__bridge NSData *)systemData : @"(null)"],
@@ -384,8 +367,6 @@ int main(int argc, char **argv)
                     if (portFromHost) CFRelease(portFromHost);
                 }
 
-                // CMTaggedBufferGroup: three disjoint collections, then a fourth entry that repeats a
-                // tag already in the second, so both a unique match and an ambiguous one are asked for.
                 {
                     printf("  at creation: portLeft %ld, portOther %ld, portCopy %ld\n",
                            (long)CMTagCollectionGetCount(portLeft), (long)CMTagCollectionGetCount(portOther),
@@ -418,9 +399,6 @@ int main(int argc, char **argv)
                     OSStatus b = port_CMTaggedBufferGroupCreate(kCFAllocatorDefault, rightTags, rightBuffers, &portGroup);
                     same("group create", [NSString stringWithFormat:@"%d count %lu", a, (unsigned long)CMTaggedBufferGroupGetCount(systemGroup)],
                          [NSString stringWithFormat:@"%d count %lu", b, (unsigned long)port_CMTaggedBufferGroupGetCount(portGroup)]);
-                    // Which image each name actually resolves to. A differential cannot detect a name
-                    // that only the port declares: both pointers would land in the port's image and the
-                    // comparison would be the port against itself. So it is checked, not assumed.
                     {
                         static const char *names[] = {"CMTagCollectionCreateDifference", "CMTagCollectionCreateUnion",
                                                       "CMTagCollectionCreateExclusiveOr", "CMTagCollectionCreateIntersection",
@@ -445,13 +423,6 @@ int main(int argc, char **argv)
                     printf("  systemGroup is %s\n", object_getClassName((__bridge id)systemGroup)); fflush(stdout);
                     for (CFIndex which = 0; which < 3; which++)
                         printf("  system collection %ld is %s\n", (long)which, object_getClassName((__bridge id)disjoint[which]));
-                    // A group holding a collection the host made is NOT constructible on the 16.4 SDK,
-                    // and that is a limit of the SDK rather than of the group: reading a collection's
-                    // tags needs CMTagCollectionGetTags, and on this SDK that name is this package's
-                    // own symbol in CMTagCollection17.o, so charon_copy_all_tags can read a port
-                    // collection and cannot read a host one - the port's own reader, reached through a
-                    // bridge, is what __NSCFType rejects. The case was written, run and removed rather
-                    // than left to abort the suite; the limit is in the facts.
                     same("group type id", [NSString stringWithFormat:@"%d", CMTaggedBufferGroupGetTypeID() != 0],
                          [NSString stringWithFormat:@"%d", CMTaggedBufferGroupGetTypeID() != 0]);
                     for (CFIndex index = -1; index < 4; index++) {
@@ -464,7 +435,6 @@ int main(int argc, char **argv)
                         same("group sample at", [NSString stringWithFormat:@"%@", CMTaggedBufferGroupGetCMSampleBufferAtIndex(systemGroup, index) ? @"sample" : @"(null)"],
                              [NSString stringWithFormat:@"%@", port_CMTaggedBufferGroupGetCMSampleBufferAtIndex(portGroup, index) ? @"sample" : @"(null)"]);
                     }
-                    // three disjoint collections: every tag has one match
                     for (CFIndex which = 0; which < 3; which++) {
                         CFIndex theirIndex = 99, myIndex = 99;
                         CVPixelBufferRef theirFound = CMTaggedBufferGroupGetCVPixelBufferForTagCollection(systemGroup, disjoint[which], &theirIndex);
@@ -474,7 +444,6 @@ int main(int argc, char **argv)
                              [NSString stringWithFormat:@"%@ %ld %lu", myFound ? @"found" : @"NULL", (long)myIndex,
                               (unsigned long)port_CMTaggedBufferGroupGetNumberOfMatchesForTagCollection(portGroup, mineDisjoint[which])]);
                     }
-                    // a fourth entry repeating a tag, so two entries match and the answer must be NULL
                     CFMutableArrayRef more = CFArrayCreateMutable(NULL, 4, &kCFTypeArrayCallBacks);
                     for (CFIndex index = 0; index < 3; index++) CFArrayAppendValue(more, disjoint[index]);
                     CFArrayAppendValue(more, disjoint[1]);
@@ -528,10 +497,6 @@ int main(int argc, char **argv)
                     }
                     {
                         CMTaggedBufferGroupRef systemCombined = NULL, portCombined = NULL;
-                        // Each side's own groups, for the same reason as the collections: the port's
-                        // CreateCombined messages each group it is handed, and a host group has no
-                        // charon_collections for it. The one array both sides may share is the buffers,
-                        // which are CoreVideo's own on both sides.
                         CFMutableArrayRef theirGroups = CFArrayCreateMutable(NULL, 2, &kCFTypeArrayCallBacks);
                         CFArrayAppendValue(theirGroups, systemGroup);
                         CFArrayAppendValue(theirGroups, systemGroup);
@@ -549,9 +514,6 @@ int main(int argc, char **argv)
                         for (CFIndex index = 0; index < 2; index++) CFArrayAppendValue(shorterBuffers, made[index]);
                         same("group mismatched", [NSString stringWithFormat:@"%d", CMTaggedBufferGroupCreate(kCFAllocatorDefault, shorter, shorterBuffers, &systemShort) != 0],
                              [NSString stringWithFormat:@"%d", port_CMTaggedBufferGroupCreate(kCFAllocatorDefault, shorter, shorterBuffers, &portShort) != 0]);
-                        // The two FormatDescriptionCreate functions are not carried by this family yet,
-                        // so there is nothing to compare; the row is in the registry as absent and the
-                        // host's own answers are in the work area (facts/CoreMedia/TagCollection.md).
                     }
                 }
 

@@ -1,29 +1,5 @@
-// The port's SparseBLAS9.m held against the host's own Accelerate, case by case.
-//
-// The port's translation unit is compiled with every API name it defines renamed, so this one holds
-// the port's objects and the host's side by side and compares what each answers: a status, a count,
-// and every element of a matrix or a vector. The declarations here are the ones of the header the
-// port is compiled against, so the two sides are called through one set of prototypes.
-//
-// Three rules the cases follow, each of them a measurement rather than a convenience:
-//
-//   - Nothing is asked through a pointer the host would read outside of. A strided vector is given a
-//     buffer of N * |stride| elements, and a dense B in a level-3 product a buffer of the size its
-//     leading dimension and shape require. The host reads what the header says it reads; a case that
-//     under-fills a buffer measures the bytes after it.
-//   - A negative stride is asked the way the header says to ask it: the pointer is the LAST element.
-//   - The two cases the host answers by ending the process, and the two where it reads or writes
-//     outside the caller's buffer, are named in facts/Accelerate/SparseBLAS.md and are not compared
-//     here; each of them is checked against the header's own rule instead, in the case marked
-//     "header" below.
-//   - A destination is never smaller than the strides reach. sparse_extract_block's own header says
-//     the buffer is "of size K x L", which is not what row_stride and col_stride reach: measured on the
-//     host, a 2x3 block with row stride 1 and column stride 3 writes eight elements and leaves two
-//     gaps (facts/Accelerate/SparseBLAS.md has the measurement). The cases here give the buffer
-//     the strides reach.
-
 #import <Accelerate/Accelerate.h>
-#include <complex.h>   // the complex header's own types, which the real cases read through the same prototypes
+#include <complex.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,8 +11,6 @@
 
 #define RENAME(name) charon_host_##name
 
-// The storage of the port's matrices is its own, so its queries are asked through the port's own
-// entry points rather than through the host's, which would read the host's own objects.
 sparse_matrix_float RENAME(sparse_matrix_create_float)(sparse_dimension, sparse_dimension);
 sparse_matrix_double RENAME(sparse_matrix_create_double)(sparse_dimension, sparse_dimension);
 sparse_matrix_float RENAME(sparse_matrix_block_create_float)(sparse_dimension, sparse_dimension, sparse_dimension, sparse_dimension);
@@ -163,9 +137,6 @@ static int same_doubles(const double *mine, const double *theirs, int count, dou
     return 1;
 }
 
-// The same question with nothing said about it: a mutant check wants to say "these two differ", and
-// same_floats and same_doubles answer that by printing a FAIL line and counting a failure, which is the
-// opposite of what a passing mutant check means.
 static int differs(const double *one, const double *other, int count, double tolerance)
 {
     for (int k = 0; k < count; k++) {
@@ -174,10 +145,6 @@ static int differs(const double *one, const double *other, int count, double tol
     return 0;
 }
 
-// ---------------------------------------------------------------- the same matrix on both sides
-
-// One matrix, built through the port on one side and through the host on the other, from the same
-// entries: the two objects are then asked the same question and their answers compared.
 typedef struct Pair {
     void *mine;
     void *theirs;
@@ -208,16 +175,6 @@ static Pair pointwise(sparse_dimension M, sparse_dimension N, sparse_dimension c
     return pair;
 }
 
-// A dense reading of a matrix, through each side's own row extraction, one value at a time. Nothing
-// here knows either side's layout.
-//
-// The walk is the one sparse_extract_sparse_row's own header describes (BLAS.h:1533): when nz comes back set, a second
-// extract can resume from the column where the first left off. So a second call is made only while the buffer came back full, and a row ends at the
-// first answer short of one element. Walking the start column past the end instead is what the host
-// cannot answer: on a matrix that holds nothing at all, every start column past 0 ends the process
-// (32 calls, one per process, 12 of them SIGSEGV at 0x8; facts/Accelerate/SparseBLAS.md has the table),
-// while the same matrix answers 0 at start 0 and a matrix whose rows are partly filled answers at
-// every start.
 static void readf(void *matrix, int is_double, int mine, sparse_dimension M, sparse_dimension N, double *out)
 {
     for (sparse_dimension i = 0; i < M * N; i++) out[i] = 0.0;
@@ -240,7 +197,6 @@ static void readf(void *matrix, int is_double, int mine, sparse_dimension M, spa
             }
             if (got != 1) break;
             if (j >= 0 && j < (sparse_index)N) out[i * N + j] = value;
-            // The header's iteration: continue from column_end, and stop if it did not move.
             if (e <= c) break;
             c = e;
         }
@@ -271,8 +227,6 @@ static long count_of(void *matrix, int is_double)
                      : RENAME(sparse_get_matrix_nonzero_count)((sparse_matrix_float)matrix);
 }
 
-// ---------------------------------------------------------------- the cases
-
 static void creation(void)
 {
     struct { sparse_dimension M, N, k, l; } shapes[] = {{4, 3, 0, 0}, {0, 5, 0, 0}, {5, 0, 0, 0}, {0, 0, 0, 0},
@@ -292,7 +246,6 @@ static void creation(void)
                      RENAME(sparse_get_matrix_number_of_columns)(a) == sparse_get_matrix_number_of_columns(b) &&
                      RENAME(sparse_get_matrix_nonzero_count)(a) == sparse_get_matrix_nonzero_count(b);
         report(passed, "block create", name);
-        // The block dimensions, per element row and column, over the whole shape.
         for (sparse_index i = 0; i < 8; i++) {
             int passed = RENAME(sparse_get_block_dimension_for_row)(a, i) == sparse_get_block_dimension_for_row(b, i) &&
                          RENAME(sparse_get_block_dimension_for_col)(a, i) == sparse_get_block_dimension_for_col(b, i);
@@ -309,7 +262,6 @@ static void creation(void)
         RENAME(sparse_matrix_destroy)(a);
         sparse_matrix_destroy(b);
     }
-    // The variable-block form, whose dimensions are per block.
     {
         sparse_dimension K[3] = {2, 1, 3}, L[3] = {1, 2, 1};
         sparse_matrix_float a = RENAME(sparse_matrix_variable_block_create_float)(3, 3, K, L);
@@ -323,7 +275,6 @@ static void creation(void)
         report(passed, "variable block create", "rows, columns and every block dimension");
         RENAME(sparse_matrix_destroy)(a);
         sparse_matrix_destroy(b);
-        // A zero in either array is accepted, and so is a zero count of blocks.
         sparse_dimension zero[3] = {2, 0, 3};
         sparse_matrix_float c = RENAME(sparse_matrix_variable_block_create_float)(3, 3, zero, L);
         sparse_matrix_float d = sparse_matrix_variable_block_create_float(3, 3, zero, L);
@@ -331,9 +282,6 @@ static void creation(void)
                "variable block with a zero", "both answer a matrix and the same row count");
         if (c) RENAME(sparse_matrix_destroy)(c);
         if (d) sparse_matrix_destroy(d);
-// The double twin of the whole case, which the review found was declared and never called:
-        // every one of the sixty-nine rows has to be reached, and a declared-but-uncalled entry point is
-        // a row the registry calls implemented and nothing tests.
         sparse_matrix_double e = RENAME(sparse_matrix_variable_block_create_double)(3, 3, K, L);
         sparse_matrix_double f = sparse_matrix_variable_block_create_double(3, 3, K, L);
         int both = RENAME(sparse_get_matrix_number_of_rows)(e) == sparse_get_matrix_number_of_rows(f) &&
@@ -346,7 +294,6 @@ static void creation(void)
         if (e) RENAME(sparse_matrix_destroy)(e);
         if (f) sparse_matrix_destroy(f);
     }
-    // A point-wise matrix has no block dimensions, and a NULL has none either.
     {
         sparse_matrix_float a = RENAME(sparse_matrix_create_float)(3, 3);
         sparse_matrix_float b = sparse_matrix_create_float(3, 3);
@@ -373,7 +320,6 @@ static void properties(void)
 {
     sparse_matrix_property names[4] = {SPARSE_UPPER_TRIANGULAR, SPARSE_LOWER_TRIANGULAR, SPARSE_UPPER_SYMMETRIC,
                                        SPARSE_LOWER_SYMMETRIC};
-    // Every subset of the four properties, then a name outside the enumeration.
     for (int set = 0; set < 16; set++) {
         sparse_matrix_float a = RENAME(sparse_matrix_create_float)(3, 3);
         sparse_matrix_float b = sparse_matrix_create_float(3, 3);
@@ -418,7 +364,6 @@ static void properties(void)
         }
         if (!passed && !detail[0]) snprintf(detail, sizeof detail, "set %d, no single read or status named it", set);
         report(passed, "a property set", detail);
-        // After an insertion the property can no longer be set, which is SPARSE_CANNOT_SET_PROPERTY.
         sparse_status afterA = RENAME(sparse_insert_entry_float)(a, 1, 0, 0);
         sparse_status afterB = sparse_insert_entry_float(b, 1, 0, 0);
         report(afterA == afterB && RENAME(sparse_set_matrix_property)(a, SPARSE_LOWER_SYMMETRIC) ==
@@ -427,7 +372,6 @@ static void properties(void)
         RENAME(sparse_matrix_destroy)(a);
         sparse_matrix_destroy(b);
     }
-    // A negative name is refused, and it is refused for every negative value, not only for -1.
     for (int p = -9; p < 0; p++) {
         sparse_matrix_float a = RENAME(sparse_matrix_create_float)(2, 2);
         sparse_matrix_float b = sparse_matrix_create_float(2, 2);
@@ -443,8 +387,6 @@ static void properties(void)
 
 static void insertion(void)
 {
-    // What counts as a stored entry: an exact zero is one, and a second write to the same place is not
-    // a second entry.
     {
         sparse_matrix_float a = RENAME(sparse_matrix_create_float)(4, 4);
         sparse_matrix_float b = sparse_matrix_create_float(4, 4);
@@ -467,7 +409,6 @@ static void insertion(void)
                  RENAME(sparse_get_matrix_nonzero_count_for_row)(a, -1) ==
                      sparse_get_matrix_nonzero_count_for_row(b, -1);
         report(passed, "the counts per row and column", "including an index outside the matrix");
-        // A commit changes nothing, because everything is already where it belongs.
         report(RENAME(sparse_commit)(a) == sparse_commit(b) && RENAME(sparse_get_matrix_nonzero_count)(a) ==
                    sparse_get_matrix_nonzero_count(b),
                "a commit", "the same status and the same count");
@@ -475,16 +416,11 @@ static void insertion(void)
         RENAME(sparse_matrix_destroy)(a);
         sparse_matrix_destroy(b);
     }
-    // The batch forms, each overwriting and each appending.
     {
         float values[3] = {1, 2, 3};
         sparse_index rows[3] = {0, 2, 1}, columns[3] = {3, 0, 2};
         sparse_matrix_float a = RENAME(sparse_matrix_create_float)(4, 4);
         sparse_matrix_float b = sparse_matrix_create_float(4, 4);
-        // Each step is a statement of its own: the order && happens to evaluate its operands in is
-        // unspecified, and the host's column and row insertions do not commute (measured: inserting a
-        // column and then a row and the other way round leave different matrices), so a chain would
-        // compare two different sequences.
         static const float column1[2] = {5, 6}, column2[1] = {9}, rowValues[2] = {7, 8};
         static const sparse_index rowsOfColumn1[2] = {0, 2}, rowOfColumn2[1] = {3};
         int passed = 1;
@@ -499,14 +435,8 @@ static void insertion(void)
         report(passed, "the batch insertions", "the statuses on both sides");
         report(RENAME(sparse_get_matrix_nonzero_count)(a) == sparse_get_matrix_nonzero_count(b), "the batch count",
                "the same nonzero count");
-        // The matrix after this sequence is NOT compared, and the reason is in
-        // facts/Accelerate/SparseBLAS.md: the host applies a column insertion lazily, so when the two
-        // sides' calls interleave over the same arrays the host's column 0 keeps its first value where
-        // the port's has the last. Each insertion kind is compared on a matrix of its own below, and
-        // the host's own answers for the whole sequence are recorded there too.
         RENAME(sparse_matrix_destroy)(a);
         sparse_matrix_destroy(b);
-        // The row insertion on its own matrix, twice over the same row, so the two are merged.
         {
             sparse_matrix_float c = RENAME(sparse_matrix_create_float)(4, 4);
             sparse_matrix_float d = sparse_matrix_create_float(4, 4);
@@ -519,7 +449,6 @@ static void insertion(void)
             RENAME(sparse_matrix_destroy)(c);
             sparse_matrix_destroy(d);
         }
-        // And a batch of entries written over what a column already holds.
         {
             sparse_matrix_float c = RENAME(sparse_matrix_create_float)(4, 4);
             sparse_matrix_float d = sparse_matrix_create_float(4, 4);
@@ -534,7 +463,6 @@ static void insertion(void)
             sparse_matrix_destroy(d);
         }
     }
-    // A point-wise matrix and a block matrix each refuse the other's entries.
     {
         sparse_matrix_float point = RENAME(sparse_matrix_create_float)(4, 4);
         sparse_matrix_float hostpoint = sparse_matrix_create_float(4, 4);
@@ -550,7 +478,6 @@ static void insertion(void)
         RENAME(sparse_matrix_destroy)(block);
         sparse_matrix_destroy(hostblock);
     }
-    // A block entry, read back with two different stride pairs, and an absent block.
     {
         sparse_matrix_float a = RENAME(sparse_matrix_block_create_float)(2, 2, 2, 3);
         sparse_matrix_float b = sparse_matrix_block_create_float(2, 2, 2, 3);
@@ -567,12 +494,6 @@ static void insertion(void)
         passed = passed && RENAME(sparse_insert_block_float)(a, block, 3, 1, 5, 0) ==
                              sparse_insert_block_float(b, block, 3, 1, 5, 0);
         report(passed, "a block entry", "the status, the counts and an index outside the matrix");
-        // Eight elements, not the six of the block: with row stride 1 and column stride 3 the strides
-        // reach (2 - 1) * 1 + (3 - 1) * 3 + 1 = 8, and the host writes all eight of them (measured,
-        // 1 4 - 2 5 - 3 6, the two gaps untouched - facts/Accelerate/SparseBLAS.md). A six-element buffer
-        // made the port write two elements past it - AddressSanitizer's stack-buffer-overflow at
-        // SparseBLAS9.m:439, from this very call - and the case compared only the six both sides
-        // happened to agree on.
         float mine[8] = {9, 9, 9, 9, 9, 9, 9, 9}, theirs[8] = {9, 9, 9, 9, 9, 9, 9, 9};
         RENAME(sparse_extract_block_float)(a, 0, 0, 3, 1, mine);
         sparse_extract_block_float(b, 0, 0, 3, 1, theirs);
@@ -592,7 +513,6 @@ static void insertion(void)
         RENAME(sparse_matrix_destroy)(a);
         sparse_matrix_destroy(b);
     }
-    // A variable-block matrix.
     {
         sparse_dimension K[2] = {2, 1}, L[2] = {2, 1};
         sparse_matrix_float a = RENAME(sparse_matrix_variable_block_create_float)(2, 2, K, L);
@@ -620,7 +540,6 @@ static void extraction(void)
     sparse_matrix_float b = sparse_matrix_create_float(4, 4);
     RENAME(sparse_insert_entries_float)(a, 5, values, rows, columns);
     sparse_insert_entries_float(b, 5, values, rows, columns);
-    // Every row from every starting column, with a count of zero, one, two and four.
     for (sparse_index row = 0; row < 4; row++) {
         for (sparse_index start = 0; start < 4; start++) {
             for (int count = 0; count < 4; count += 3) {
@@ -640,7 +559,6 @@ static void extraction(void)
             }
         }
     }
-    // A row or a column outside the matrix, and a NULL.
     {
         float mine[1] = {9}, theirs[1] = {9};
         sparse_index mi[1] = {9}, ti[1] = {9};
@@ -655,7 +573,6 @@ static void extraction(void)
                        sparse_extract_sparse_row_float(b, 9, 0, &te, 1, theirs, ti),
                "a row extracted outside the matrix", "the same status on both sides");
     }
-    // The column extraction, which is the header's other reading entry point.
     for (sparse_index column = 0; column < 4; column++) {
         for (sparse_index start = 0; start < 4; start++) {
             float mine[4] = {9, 9, 9, 9}, theirs[4] = {9, 9, 9, 9};
@@ -678,7 +595,6 @@ static void vectors(void)
 {
     float x[4] = {1, 0, 3, 4};
     sparse_index ix[4] = {0, 2, 3, 3};
-    // The inner product with a dense vector, over a buffer of N * |stride| elements as the header says.
     for (sparse_dimension nz = 0; nz <= 4; nz++) {
         for (sparse_stride stride = 1; stride <= 2; stride++) {
             float y[9] = {10, 20, 30, 40, 50, 60, 70, 80, 90};
@@ -688,7 +604,6 @@ static void vectors(void)
                    "the same value to the precision of the type");
         }
     }
-    // A negative stride, with the pointer at the last element as the header says to pass it.
     {
         float y[6] = {10, 20, 30, 40, 50, 60};
         float mine = RENAME(sparse_inner_product_dense_float)(3, x, ix, y + 5, -1);
@@ -696,7 +611,6 @@ static void vectors(void)
         report(same_double(mine, theirs, 1e-6), "an inner product, negative stride",
                "the pointer at the last element, as the header says");
     }
-    // The inner product of two sparse vectors.
     {
         float y[2] = {4, 2};
         sparse_index iy[2] = {1, 3};
@@ -707,7 +621,6 @@ static void vectors(void)
             report(same_double(mine, theirs, 1e-6), "an inner product of two sparse vectors", "the same value");
         }
     }
-    // y = alpha * x + y.
     {
         for (sparse_dimension nz = 0; nz <= 3; nz++) {
             for (int alpha = 0; alpha <= 2; alpha++) {
@@ -717,9 +630,6 @@ static void vectors(void)
                 report(same_floats(y1, y2, 8, "a scaled addition"), "a scaled addition", "every element");
             }
         }
-        // Eight elements: the largest index asked of here is ix[2] * 2 = 6, so the strides reach seven of
-        // them. Six left the port writing one element past y1 and y2 - AddressSanitizer's
-        // stack-buffer-overflow at SparseBLAS9.m:701 through this very call.
         float y1[8] = {10, 20, 30, 40, 50, 60, 70, 80}, y2[8] = {10, 20, 30, 40, 50, 60, 70, 80};
         RENAME(sparse_vector_add_with_scale_dense_float)(3, 1.0f, x, ix, y1, 2);
         sparse_vector_add_with_scale_dense_float(3, 1.0f, x, ix, y2, 2);
@@ -730,7 +640,6 @@ static void vectors(void)
         report(same_floats(y3, y4, 6, "a scaled addition, negative stride"),
                "a scaled addition, negative stride", "the pointer at the last element");
     }
-    // The three norms of a sparse vector, and the two the enumeration does not name.
     {
         sparse_norm norms[6] = {SPARSE_NORM_ONE, SPARSE_NORM_TWO, SPARSE_NORM_INF, SPARSE_NORM_R1, (sparse_norm)0,
                                 (sparse_norm)-1};
@@ -743,7 +652,6 @@ static void vectors(void)
             }
         }
     }
-    // The vector utilities.
     {
         float v[6] = {0, 2, 0, 4, 5, 0};
         for (sparse_stride stride = 1; stride <= 2; stride++) {
@@ -801,7 +709,6 @@ static void vectors(void)
                    "an unpacked vector with a repeated index", "every element");
         }
     }
-    // The double side of the three of them that have one.
     {
         double v[2] = {3, 4};
         sparse_index ix2[2] = {0, 1};
@@ -861,7 +768,6 @@ static sparse_matrix_float port_upper(void)
     return U;
 }
 
-// [[1,0,2],[0,3,0],[4,0,0]], a matrix with no triangular property.
 static sparse_matrix_float host_plain(void)
 {
     sparse_matrix_float A = sparse_matrix_create_float(3, 3);
@@ -887,7 +793,6 @@ static void level2(void)
     sparse_matrix_float ha = host_plain(), pa = port_plain();
     sparse_matrix_float hl = host_lower(), pl = port_lower();
     sparse_matrix_float hu = host_upper(), pu = port_upper();
-    // Computes y as alpha times op(A) times x plus y, over both triangles and a plain matrix, three alphas, both transposes.
     for (int which = 0; which < 3; which++) {
         sparse_matrix_float host = which == 0 ? ha : (which == 1 ? hl : hu);
         sparse_matrix_float port = which == 0 ? pa : (which == 1 ? pl : pu);
@@ -904,34 +809,22 @@ static void level2(void)
                        "a matrix-vector product", "the same status and every element");
             }
         }
-        // A stride, and the negative of one, whose case is the header's own rather than the host's.
         {
             float x[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9}, y1[9] = {0}, y2[9] = {0};
             sparse_status ma = RENAME(sparse_matrix_vector_product_dense_float)(CblasNoTrans, 1.0f, port, x, 3, y1, 3);
             sparse_status mb = sparse_matrix_vector_product_dense_float(CblasNoTrans, 1.0f, host, x, 3, y2, 3);
             report(ma == mb && same_floats(y1, y2, 9, "a matrix-vector product, stride 3"),
                    "a matrix-vector product, stride 3", "the same status and every element");
-            // A negative increment, with the pointer at the last element as the header says to pass
-            // it. The port and the host disagree here and the port's answer is the header's: measured,
-            // for the 2x3 [[1,0,2],[0,3,4]] with x = (5,6,7) and an increment of -1 the host writes 28
-            // and 24 where the header's rule gives 17 and 38, and it is the only entry point of the
-            // level-2 and level-1 forms that does not agree (facts/Accelerate/SparseBLAS.md). So the two
-            // sides are asked for their own numbers and the port's is checked against the header's.
             memset(y1, 0, sizeof(y1));
             memset(y2, 0, sizeof(y2));
             float xs[3] = {5, 6, 7};
             RENAME(sparse_matrix_vector_product_dense_float)(CblasNoTrans, 1.0f, port, xs + 2, -1, y1 + 2, -1);
             sparse_matrix_vector_product_dense_float(CblasNoTrans, 1.0f, host, xs + 2, -1, y2 + 2, -1);
-            // The header's rule puts logical element 0 at the pointer and walks down from it, so the
-            // answer for the matrix at hand is A * (7, 6, 5) written from the pointer down.
-            // A * (7, 6, 5) for each of the three matrices, written from the pointer down.
             static const float want[3][2] = {{17, 18}, {14, 25}, {32, 6}};
             snprintf(detail, sizeof detail, "port %g %g, wanted %g %g", y1[2], y1[1], want[which][0], want[which][1]);
             report(y1[2] == want[which][0] && y1[1] == want[which][1],
                    "a matrix-vector product, negative stride (header)", detail);
         }
-        // The triangular solve, whose alpha divides the right-hand side: measured, and both sides
-        // are asked the same question, so the two numbers being compared are the host's.
         if (which > 0) {
             for (int tr = 0; tr < 2; tr++) {
                 for (int alpha = 0; alpha <= 3; alpha++) {
@@ -941,13 +834,6 @@ static void level2(void)
                     sparse_status mb = sparse_vector_triangular_solve_dense_float((enum CBLAS_TRANSPOSE)(tr ? 112 : 111),
                                                                                   (float)alpha / 2.0f, host, b2, 1);
                     if (alpha == 0) {
-                        // An alpha of zero divides the right-hand side, so every element is an infinity
-                        // or a NaN on both sides. Which element is which depends on the order the terms
-                        // are summed in, and the two orders differ: measured, the host answers
-                        // (inf, nan, nan) for the lower matrix and (nan, nan, inf) for the upper one,
-                        // where the port's walk of the stored entries answers (inf, nan, inf) and
-                        // (nan, nan, inf) - facts/Accelerate/SparseBLAS.md carries all six numbers. So
-                        // the case is compared on what both agree: a status, and no element a number.
                         int finite = 1;
                         for (int k = 0; k < 3; k++) {
                             finite = finite && !isfinite(b1[k]) && !isfinite(b2[k]);
@@ -965,17 +851,6 @@ static void level2(void)
                 }
                 }
             }
-            // A negative increment is not compared here, and facts/Accelerate/SparseBLAS.md says why:
-            // the host reads and writes the buffer backwards for this entry point and therefore outside
-            // it - measured, for the lower [[2,0,0],[1,3,0],[0,0,4]] with the right-hand side (5,4,2) at
-            // the last element of a three-element block and an increment of -1 the host writes 0.5,
-            // 0.333333 and 1 ABOVE the pointer, three elements past the end of the caller's block. The
-            // port answers the header's rule instead, which stays inside it, and the arithmetic that
-            // rule gives is exercised above with an increment of 1 on the same matrix.
-            // The one guard of the port's that no case held: a transpose outside the enumeration. The header
-    // says SPARSE_ILLEGAL_PARAMETER, and the host's own answer for the level-2 product is to hand the
-    // parameter to cblas_cgemv and end the process, so the port's status is the header's and the host's
-    // fate is asked in a child (the child asks of the host, and the port's own status is the header's).
     {
         float x[3] = {1, 1, 1}, y[3] = {1, 1, 1};
         sparse_status port = RENAME(sparse_matrix_vector_product_dense_float)((enum CBLAS_TRANSPOSE)9, 1.0f, pa, x, 1, y, 1);
@@ -991,7 +866,6 @@ static void level2(void)
         report(tri == SPARSE_ILLEGAL_PARAMETER, "a transpose outside the enumeration, the triangular solve",
                "the port answers the status the header names, and x is left alone");
     }
-    // A matrix with no triangular property is refused and the vector is left alone.
             {
                 float b1[3] = {2, 5, 4}, b2[3] = {2, 5, 4};
                 sparse_status ma = RENAME(sparse_vector_triangular_solve_dense_float)(CblasNoTrans, 1.0f, pa, b1, 1);
@@ -1002,7 +876,6 @@ static void level2(void)
         }
         (void)inner;
     }
-    // A zero on the diagonal divides, so an infinity and then a NaN.
     {
         sparse_matrix_float hz = sparse_matrix_create_float(2, 2), pz = RENAME(sparse_matrix_create_float)(2, 2);
         sparse_set_matrix_property(hz, SPARSE_LOWER_TRIANGULAR);
@@ -1014,25 +887,12 @@ static void level2(void)
         float b1[2] = {1, 1}, b2[2] = {1, 1};
         sparse_status ma = RENAME(sparse_vector_triangular_solve_dense_float)(CblasNoTrans, 1.0f, pz, b1, 1);
         sparse_status mb = sparse_vector_triangular_solve_dense_float(CblasNoTrans, 1.0f, hz, b2, 1);
-        // A pivot of exactly zero divides, so the answer is an infinity and then a NaN on both sides.
-        // Which element is which is an artefact of the order the terms are summed in: the host
-        // multiplies a row's structural zeros and the port walks only the stored entries, and the two
-        // agree wherever the answer is a number. So the case is compared on what both agree: a status,
-        // and no element a number.
-        // Only the first element is compared: both sides answer an infinity there, from the division
-        // by the zero pivot. The second is 1 on the port and a NaN on the host - the host multiplies a
-        // row's structural zeros and so computes (1 - 0 * inf) / 1, where the port walks the stored
-        // entries and never forms that product. Neither is a number and which is which is an artefact
-        // of the order the terms are summed in; the host's own three answers are in
-        // facts/Accelerate/SparseBLAS.md.
         snprintf(detail, sizeof detail, "port %g %g, host %g %g", b1[0], b1[1], b2[0], b2[1]);
         report(ma == mb && isinf(b1[0]) && isinf(b2[0]) && b1[0] == b2[0],
                "a triangular solve with a zero pivot", detail);
         RENAME(sparse_matrix_destroy)(pz);
         sparse_matrix_destroy(hz);
     }
-    // The matrix form of the solve, over both layouts, both transposes and a leading dimension above
-    // the count of right-hand sides.
     for (int which = 1; which <= 2; which++) {
         sparse_matrix_float host = which == 1 ? hl : hu;
         sparse_matrix_float port = which == 1 ? pl : pu;
@@ -1052,18 +912,12 @@ static void level2(void)
             }
         }
     }
-    // A leading dimension below what the layout needs. The port answers SPARSE_ILLEGAL_PARAMETER,
-    // which is what the header names; the host hands the parameter to cblas_strsm, which prints its own
-    // message and ends the process. The host's answer is therefore asked in a child, and the child's
-    // status is what is compared - the same arrangement tests/backports/host/appleblas uses for the
-    // release's own cblas_xerbla.
     {
         float b1[6] = {2, 5, 4, 1, 2, 3};
         sparse_status ma = RENAME(sparse_matrix_triangular_solve_dense_float)(CblasRowMajor, CblasNoTrans, 2, 1.0f, pl, b1, 1);
         fflush(stdout);
         pid_t child = fork();
         if (child == 0) {
-            // The child's own message is the host's and is not this run's output.
             freopen("/dev/null", "w", stdout);
             float b2[6] = {2, 5, 4, 1, 2, 3};
             sparse_matrix_triangular_solve_dense_float(CblasRowMajor, CblasNoTrans, 2, 1.0f, hl, b2, 1);
@@ -1071,8 +925,6 @@ static void level2(void)
         }
         int status = 0;
         waitpid(child, &status, 0);
-        // Measured: the host's cblas_strsm prints "LDB must be >= MAX(N,1): LDB=1 N=2 BLAS error:
-        // Parameter number 12 passed to cblas_strsm had an invalid value" and takes the process with it.
         int ended = WIFSIGNALED(status) || (WIFEXITED(status) && WEXITSTATUS(status) != 0);
         snprintf(detail, sizeof detail, "port %d, host child %s", ma,
                  WIFSIGNALED(status) ? "was killed" : (WIFEXITED(status) ? "exited" : "is unknown"));
@@ -1092,10 +944,6 @@ static void outer(void)
         {2, 3, 2, 0.0f, {0, 2, 0}, {3, 4, 0}, 1},
         {2, 3, 4, 1.0f, {0, 1, 2}, {3, 4, 5}, 0},
     };
-    // x of three different values, and the mutant that reads it at the wrong index. Every case below
-    // passes x = {1, 1}, where reading x at k instead of at the row gives the same number, so this is the
-    // case that can see that bug: C[i, indy[k]] = alpha * x[i] * y[k], and the mutant answers
-    // alpha * x[k] * y[k] for every row.
     {
         const sparse_index indy[2] = {0, 2};
         const float x[3] = {1, 2, 3}, y[2] = {5, -6};
@@ -1126,8 +974,6 @@ static void outer(void)
             mb = sparse_extract_sparse_row_float(theirs, i, 0, &theirsEnd, 4, theirsValues, theirsIndices);
             passed = ma == mb && mineEnd == theirsEnd;
             for (int k = 0; k < 2 && passed; k++) {
-                // The expectation, computed by the compiler here from the same inputs and with the indices
-                // named: row i, nonzero k.
                 float want = x[i] * y[k];
                 passed = mineValues[k] == want && theirsValues[k] == want;
             }
@@ -1153,11 +999,6 @@ static void outer(void)
             passed = RENAME(sparse_get_matrix_number_of_rows)(mine) == sparse_get_matrix_number_of_rows(theirs) &&
                      RENAME(sparse_get_matrix_number_of_columns)(mine) == sparse_get_matrix_number_of_columns(theirs) &&
                      RENAME(sparse_get_matrix_nonzero_count)(mine) == sparse_get_matrix_nonzero_count(theirs);
-            // The elements are read only when the matrix holds any. Measured: the host's own matrix from
-            // an outer product with an alpha of zero cannot be read - the first row extraction answers 0
-            // with an end of 0 and the second takes the process - because the host has not materialised
-            // the product, and facts/Accelerate/SparseBLAS.md records it. An empty matrix has no element
-            // to disagree about, so the shape and the count are what this case compares.
             if (passed && RENAME(sparse_get_matrix_nonzero_count)(mine) > 0) {
                 compare_matrix("an outer product, the matrix", (Pair){mine, theirs}, cases[k].M, cases[k].N, 0);
             }
@@ -1213,15 +1054,12 @@ static void norms_and_trace(void)
         float one = RENAME(sparse_operator_norm_float)((sparse_matrix_float)pair.mine, norms[k]);
         float other = sparse_operator_norm_float((sparse_matrix_float)pair.theirs, norms[k]);
         if (norms[k] == SPARSE_NORM_TWO) {
-            // The one tolerance in this family: the host computes the largest singular value by an
-            // iteration and the port by an eigen-decomposition, and they differ in the fourth place.
             report(same_double(one, other, 5e-3), "an operator norm, two", "within 5e-3, the stated tolerance");
         } else {
             snprintf(detail, sizeof detail, "norm %d: port %g, host %g", (int)norms[k], one, other);
             report(same_double(one, other, 1e-6), "an operator norm", detail);
         }
     }
-    // An empty matrix, and one that is a diagonal.
     {
         Pair empty = pointwise(3, 3, 0, NULL, NULL, NULL, 0);
         for (int k = 0; k < 4; k++) {
@@ -1244,7 +1082,6 @@ static void norms_and_trace(void)
         RENAME(sparse_matrix_destroy)(diagonal.mine);
         sparse_matrix_destroy(diagonal.theirs);
     }
-    // The trace, over every offset from one past the matrix to one before it.
     {
         float v[6] = {1, 2, 3, 4, 5, 6};
         sparse_index r[6] = {0, 0, 0, 1, 1, 1}, c[6] = {0, 0, 1, 1, 2, 3};
@@ -1255,10 +1092,6 @@ static void norms_and_trace(void)
             snprintf(detail, sizeof detail, "offset %lld: port %g, host %g", (long long)offset, ta, tb);
             report(same_double(ta, tb, 1e-6), "a trace", detail);
         }
-        // An offset that names no element of the matrix at all is answered 0, which is what the header
-        // says. The host is asked for one of its own only up to the last column: measured, on this 3x4
-        // the host answers 0 for the offsets -5 to 4 and reads outside the matrix for 5, which is a
-        // host defect on an argument the header bounds (facts/Accelerate/SparseBLAS.md).
         int past = 1;
         for (sparse_index offset = 5; offset <= 9; offset++) {
             past = past && RENAME(sparse_matrix_trace_float)((sparse_matrix_float)p.mine, offset) == 0.0f;
@@ -1270,7 +1103,6 @@ static void norms_and_trace(void)
         RENAME(sparse_matrix_destroy)(p.mine);
         sparse_matrix_destroy(p.theirs);
     }
-    // The double side.
     {
         double v[5] = {-1, 2, -3, 4, -5};
         sparse_index r[5] = {0, 0, 0, 1, 1}, c[5] = {0, 1, 2, 0, 2};
@@ -1295,7 +1127,6 @@ static void norms_and_trace(void)
 
 static void level3(void)
 {
-    // A 2x3 and a 3x2, both exactly sized for every leading dimension asked of them.
     float aValues[4] = {1, 2, 3, 4};
     sparse_index aRows[4] = {0, 0, 1, 1}, aColumns[4] = {0, 2, 1, 2};
     Pair A = pointwise(2, 3, 4, aValues, aRows, aColumns, 0);
@@ -1303,7 +1134,6 @@ static void level3(void)
     sparse_index bRows[6] = {0, 0, 1, 1, 2, 2}, bColumns[6] = {0, 1, 0, 1, 0, 1};
     Pair S = pointwise(3, 2, 6, bValues, bRows, bColumns, 0);
     for (int order = 0; order < 2; order++) {
-        // A dense B, padded so the buffer holds every element the leading dimension reaches.
         float B[12] = {1, 2, 9, 9, 3, 4, 9, 9, 5, 6, 9, 9};
         for (int alpha = 0; alpha <= 2; alpha++) {
             float c1[8] = {7, 7, 7, 7, 7, 7, 7, 7}, c2[8] = {7, 7, 7, 7, 7, 7, 7, 7};
@@ -1321,7 +1151,6 @@ static void level3(void)
                 report(0, "a dense product", detail);
             } else report(1, "a dense product", "");
         }
-        // n = 0 and an alpha of zero leave C as it was.
         {
             float c1[8] = {7, 7, 7, 7, 7, 7, 7, 7}, c2[8] = {7, 7, 7, 7, 7, 7, 7, 7};
             sparse_status ma = RENAME(sparse_matrix_product_dense_float)((enum CBLAS_ORDER)(order ? 102 : 101), CblasNoTrans, 0,
@@ -1331,8 +1160,6 @@ static void level3(void)
             report(ma == mb && same_floats(c1, c2, 8, "a dense product with no columns"),
                    "a dense product with no columns", "the same status and C untouched");
         }
-        // The refusals: an order and a transpose the enumeration does not name, and a leading
-        // dimension below what the layout needs.
         {
             float c1[8] = {7, 7, 7, 7, 7, 7, 7, 7}, c2[8] = {7, 7, 7, 7, 7, 7, 7, 7};
             sparse_status ma = RENAME(sparse_matrix_product_dense_float)((enum CBLAS_ORDER)9, CblasNoTrans, 2, 1.0f,
@@ -1354,7 +1181,6 @@ static void level3(void)
             report(ma == mb && same_floats(c1, c2, 8, "a dense product with an output stride of 1"),
                    "a dense product with an output stride of 1", "the same status and C untouched");
         }
-        // The sparse-sparse product.
         for (int alpha = 0; alpha <= 2; alpha++) {
             float c1[4] = {7, 7, 7, 7}, c2[4] = {7, 7, 7, 7};
             sparse_status ma = RENAME(sparse_matrix_product_sparse_float)((enum CBLAS_ORDER)(order ? 102 : 101), CblasNoTrans,
@@ -1381,8 +1207,6 @@ static void level3(void)
                    "a sparse product with an output stride of 1", "the same status and C untouched");
         }
     }
-    // The transposed operands, over both layouts, with A shaped so the transpose is a legal shape:
-    // a 3x2 A and a 2xN B, so op(A) is 2x3 and B is 3xN.
     {
         float tValues[6] = {1, 2, 3, 4, 5, 6};
         sparse_index tRows[6] = {0, 0, 0, 1, 1, 1}, tColumns[6] = {0, 1, 2, 0, 1, 2};
@@ -1407,29 +1231,16 @@ static void level3(void)
         RENAME(sparse_matrix_destroy)(T.mine);
         sparse_matrix_destroy(T.theirs);
     }
-    // The transposed sparse-sparse product, with A 3x2 so op(A) = A' is 2x3 and B is 3x2.
     {
-        // float, not double: pointwise reads its values at the width the flag says, and this case asked
-        // for the float pair out of a double array. Every double is exactly representable as a float
-        // and its low 32 bits are zero, so the six values the port inserted were six zeros and the case
-        // compared two zero matrices - which is why it passed, and why it proved nothing about a
-        // transposed product.
         float tValues[6] = {1, 2, 3, 4, 5, 6};
         sparse_index tRows[6] = {0, 0, 1, 1, 2, 2}, tColumns[6] = {0, 1, 0, 1, 0, 1};
         Pair T = pointwise(3, 2, 6, tValues, tRows, tColumns, 0);
-        // The values, read back from the port's own matrix, so the case cannot go on comparing zeros:
-        // the transposed pair is the only place the port's own answer can be checked against the header's
-        // product rule, C[i, j] = alpha * sum over k of op(A)[i, k] * S[k, j].
         {
             double seen[6] = {0, 0, 0, 0, 0, 0};
             readf(T.mine, 0, 1, 3, 2, seen);
             report(same_doubles(seen, (double[]){1, 2, 3, 4, 5, 6}, 6, 1e-6, "x"),
                    "the transposed operand's own six values", "1 2 3 / 4 5 6 on the port");
         }
-        // A 3x2 A with a 3x2 B is a legal pair only for the transposed operand: with op(A) = A' the inner
-        // dimensions are 3 and 3, and without the transpose they would be 2 and 3, which the header calls
-        // undefined. So the transposed case is compared on both layouts, and the other is the refusal the
-        // port makes and the host does not - recorded rather than made to agree.
         for (int order = 0; order < 2; order++) {
             float c1[4] = {7, 7, 7, 7}, c2[4] = {7, 7, 7, 7};
             sparse_status ma = RENAME(sparse_matrix_product_sparse_float)((enum CBLAS_ORDER)(order ? 102 : 101),
@@ -1462,45 +1273,14 @@ static void level3(void)
     RENAME(sparse_matrix_destroy)(S.mine); sparse_matrix_destroy(S.theirs);
 }
 
-// The double twin of the sparse-sparse product, the third row the review found called by nobody: its
-// float twin is compared three times over, so this is the same case at the other precision.
-//
-// It used to sit in creation(), and it passed a `double complex` matrix and a `double complex` array to
-// the REAL sparse_matrix_product_sparse_double - sixteen -Wincompatible-pointer-types warnings from
-// run.sh, and a comparison of the first four doubles of an array the function had never been told was
-// one. It is here now, over real matrices, with the values real, and the header's own rule as the
-// expectation: the header of sparse_matrix_product_sparse_double (BLAS.h:1010) defines it as a product of the sparse B with the sparse A, accumulated onto the dense C. Writing op(A) for A or its transpose, the result is alpha times op(A) times B plus C. If A is M by K, then B is K by N and C is M by N.
-//
-// The rule is computed here by the compiler, from the same inputs, with the indices named - C[i][j]
-// over i and j, the inner index k, and the layout's own place in the output - and both sides are asked
-// to answer it. Three mutants of that rule are computed beside it and each must differ from the rule on
-// this data, or the case above proves nothing:
-//
-//   - the product without the "+ C": the header adds the result to C, and C comes in holding 7, 8, 9
-//     and 10 here, so an implementation that overwrites it is caught;
-//   - the product without alpha, which is the rule itself at alpha 1 and the rule again at alpha 0
-//     (the product is multiplied by zero either way), so it is checked at alpha 2;
-//   - the product with A read at (k, i) instead of (i, k), which is the transposition a rank-one
-//     update over A's rows makes if it takes the row index where the column one belongs; it is the
-//     rule at alpha 0, so it is checked at alpha 1 and 2.
-//
-// The values are 1.1 to 9.9, none of them a whole number and none of them exact in float, so a case
-// built of powers of two could not see a value read or written at the wrong width.
 static void theDoubleProduct(void)
 {
-    // A is 2x3 with entries in rows 0 and 1; S is 3x2 with entries in rows 0, 1 and 2. The inner
-    // dimension is 3 on both sides, so op(A) = A conforms.
     double aValues[5] = {1.1, 2.2, 3.3, 4.4, 5.5};
     sparse_index aRows[5] = {0, 0, 1, 1, 1}, aColumns[5] = {0, 2, 0, 1, 2};
     double sValues[6] = {6.6, 7.7, 8.8, 9.9, 1.1, 2.2};
     sparse_index sRows[6] = {0, 0, 1, 1, 2, 2}, sColumns[6] = {0, 1, 0, 1, 0, 1};
     Pair A = pointwise(2, 3, 5, aValues, aRows, aColumns, 1);
     Pair S = pointwise(3, 2, 6, sValues, sRows, sColumns, 1);
-    // The expectation, from the header's rule, for every alpha asked of. C starts at 7, 8, 9, 10
-    // because the header adds the product to C, and the layout decides where element (i, j) of it goes:
-    // i * ldc + j row major, i + j * ldc column major. With a 2x2 result and ldc 2 the two layouts put
-    // the off-diagonal pair in different places, which is what the second layout of each case below is
-    // for.
     const double start[4] = {7.0, 8.0, 9.0, 10.0};
     for (int alpha = 0; alpha <= 2; alpha++) {
         for (int order = 0; order < 2; order++) {
@@ -1508,10 +1288,8 @@ static void theDoubleProduct(void)
             double want[4] = {0, 0, 0, 0}, noAdd[4] = {0, 0, 0, 0}, noAlpha[4] = {0, 0, 0, 0}, transposed[4] = {0, 0, 0, 0};
             for (int i = 0; i < 2; i++) {
                 for (int j = 0; j < 2; j++) {
-                    // `order` is this file's 0 or 1 for the two layouts, as everywhere above it.
                     sparse_dimension at = order ? (sparse_dimension)(i + j * ldc) : (sparse_dimension)(i * ldc + j);
                     double sum = 0.0, wrong = 0.0;
-                    // C[i][j] = C[i][j] + alpha * sum over k of A[i][k] * S[k][j], k the inner dimension.
                     for (sparse_dimension k = 0; k < 3; k++) {
                         double left = 0.0, transposedLeft = 0.0, right = 0.0;
                         for (sparse_index q = 0; q < 5; q++) {
@@ -1530,14 +1308,9 @@ static void theDoubleProduct(void)
                     transposed[at] = start[at] + alpha * wrong;
                 }
             }
-            // Each mutant has to differ from the rule on this data, or the comparison below cannot see
-            // the bug it stands for.
             report(differs(noAdd, want, 4, 1e-12),
                    "the mutant that overwrites C instead of adding to it differs from the header",
                    "the mutant agrees with the header's rule, so the case cannot see that bug");
-            // The other two multiply the product by alpha, so at alpha 0 they answer exactly what the
-            // rule answers and there is nothing for them to show; the alpha mutant is the rule itself
-            // at alpha 1.
             if (alpha != 0) {
                 report(differs(transposed, want, 4, 1e-12),
                        "the mutant that reads A at (k, i) instead of (i, k) differs from the header",
@@ -1572,7 +1345,6 @@ static void theDoubleProduct(void)
             report(ok, "a double sparse product against the header's rule and the host, both layouts", detail);
         }
     }
-    // A leading dimension below what the layout needs is refused, and C is left alone.
     for (int order = 0; order < 2; order++) {
         double c1[4] = {7, 8, 9, 10}, c2[4] = {7, 8, 9, 10};
         sparse_status ma = RENAME(sparse_matrix_product_sparse_double)((enum CBLAS_ORDER)(order ? 102 : 101), CblasNoTrans,
@@ -1585,7 +1357,6 @@ static void theDoubleProduct(void)
         report(ma == mb && same_doubles(c1, c2, 4, 1e-12, "x"), "a double sparse product with a leading dimension of 1",
                detail);
     }
-    // The transposed operand, over both layouts: A is 3x2 here, so op(A) = A' is 2x3 and S is 3x2.
     {
         double tValues[5] = {3.3, 4.4, 5.5, 6.6, 7.7};
         sparse_index tRows[5] = {0, 1, 2, 0, 2}, tColumns[5] = {0, 1, 0, 0, 1};
@@ -1598,7 +1369,6 @@ static void theDoubleProduct(void)
                     for (int j = 0; j < 2; j++) {
                         sparse_dimension at = order ? (sparse_dimension)(i + j * ldc) : (sparse_dimension)(i * ldc + j);
                         double sum = 0.0;
-                        // C[i][j] = C[i][j] + alpha * sum over k of T[k][i] * S[k][j].
                         for (sparse_dimension k = 0; k < 3; k++) {
                             double left = 0.0, right = 0.0;
                             for (sparse_index q = 0; q < 5; q++) {
@@ -1636,9 +1406,6 @@ static void theDoubleProduct(void)
                 report(ok, "a double sparse product, CblasTrans, against the header's rule and the host", detail);
             }
         }
-        // Without the transpose the inner dimensions are 2 and 3, which the header's discussion makes
-        // undefined; the port refuses it and the host computes, which is the one recorded divergence in
-        // the family.
         double c1[4] = {7, 8, 9, 10}, c2[4] = {7, 8, 9, 10};
         sparse_status ma = RENAME(sparse_matrix_product_sparse_double)(CblasRowMajor, CblasNoTrans, 1.0,
                                                                         (sparse_matrix_double)T.mine,
@@ -1656,24 +1423,12 @@ static void theDoubleProduct(void)
     RENAME(sparse_matrix_destroy)(S.mine); sparse_matrix_destroy(S.theirs);
 }
 
-// The double twins of cases the float half already compares, each the same case at the other precision
-// - and `sparse_permute_cols_double` and the four level-3 transposes are where the review found the
-// faults, so they are here on purpose and not as an afterthought.
-//
-// This function was written and never called: `main` named nine other functions and stopped. Every row
-// below is one the registry calls implemented and nothing asked, including sparse_outer_product_dense_double
-// and the double twin of every level-3 case.
 static void theSixteen(void)
 {
     char detail[512];
-    // sparse_insert_row_double and sparse_insert_col_double
     {
         double v[2] = {7, 8};
         sparse_index at[2] = {1, 3};
-        // One pair, not two: the case inserted into `a.mine` and `b.theirs` and then compared `a.mine`
-        // with `a.theirs`, which is a matrix nothing was ever inserted into, so every element it read
-        // was zero and the comparison was the port against nothing. On the host's own empty matrix the
-        // second row read ended the process; that is what the walk in readf no longer does.
         Pair a = pointwise(4, 4, 0, NULL, NULL, NULL, 1);
         sparse_status ma = RENAME(sparse_insert_row_double)((sparse_matrix_double)a.mine, 0, 2, v, at);
         sparse_status mb = sparse_insert_row_double((sparse_matrix_double)a.theirs, 0, 2, v, at);
@@ -1684,8 +1439,6 @@ static void theSixteen(void)
         compare_matrix("a double row and column inserted, the matrix", a, 4, 4, 1);
         RENAME(sparse_matrix_destroy)(a.mine); sparse_matrix_destroy(a.theirs);
     }
-    // sparse_matrix_block_create_double, sparse_insert_block_double and sparse_extract_block_double, on a
-    // 2x3 block read back at two stride pairs, and one that was never inserted.
     {
         double block[6] = {1, 2, 3, 4, 5, 6};
         sparse_matrix_double a = RENAME(sparse_matrix_block_create_double)(2, 2, 2, 3);
@@ -1717,7 +1470,6 @@ static void theSixteen(void)
                "a double block matrix's block dimensions", "the same on both sides");
         RENAME(sparse_matrix_destroy)(a); sparse_matrix_destroy(b);
     }
-    // sparse_extract_sparse_column_double, every column and every start
     {
         double v[5] = {1, 2, 3, 4, 5};
         sparse_index rows[5] = {0, 0, 1, 2, 3}, columns[5] = {1, 2, 0, 2, 1};
@@ -1736,8 +1488,6 @@ static void theSixteen(void)
         }
         RENAME(sparse_matrix_destroy)(p.mine); sparse_matrix_destroy(p.theirs);
     }
-    // sparse_inner_product_sparse_double, sparse_get_vector_nonzero_count_double, sparse_pack_vector_double
-    // and sparse_unpack_vector_double
     {
         double x[3] = {1, 0, 3}, y[2] = {4, 2};
         sparse_index ix[3] = {0, 2, 3}, iy[2] = {1, 3};
@@ -1776,7 +1526,6 @@ static void theSixteen(void)
                    "every element");
         }
     }
-    // sparse_matrix_vector_product_dense_double, both transposes and three alphas
     {
         double v[4] = {1, 2, 3, 4};
         sparse_index rows[4] = {0, 0, 1, 1}, columns[4] = {0, 1, 0, 1};
@@ -1795,8 +1544,6 @@ static void theSixteen(void)
         }
         RENAME(sparse_matrix_destroy)(A.mine); sparse_matrix_destroy(A.theirs);
     }
-    // sparse_vector_triangular_solve_dense_double and sparse_matrix_triangular_solve_dense_double, over both
-    // layouts, both transposes and three leading dimensions
     {
         double v[4] = {2, 1, 3, 4};
         sparse_index rows[4] = {0, 1, 1, 2}, columns[4] = {0, 0, 1, 2};
@@ -1832,7 +1579,6 @@ static void theSixteen(void)
         }
         RENAME(sparse_matrix_destroy)(a.mine); sparse_matrix_destroy(b.theirs);
     }
-    // sparse_outer_product_dense_double
     {
         double x[2] = {1, 2}, y[3] = {3, 4, 5};
         sparse_index indy[2] = {0, 2};
@@ -1847,7 +1593,6 @@ static void theSixteen(void)
         report(ok, "a double outer product", detail);
         if (a) RENAME(sparse_matrix_destroy)(a);
         if (b) sparse_matrix_destroy(b);
-        // and a count of nonzeros above N, which is refused
         a = NULL; b = NULL;
         ma = RENAME(sparse_outer_product_dense_double)(2, 3, 4, 1.0, x, 1, y, (sparse_index[]){0, 1, 2, 3}, &a);
         mb = sparse_outer_product_dense_double(2, 3, 4, 1.0, x, 1, y, (sparse_index[]){0, 1, 2, 3}, &b);
@@ -1856,12 +1601,6 @@ static void theSixteen(void)
         if (a) RENAME(sparse_matrix_destroy)(a);
         if (b) sparse_matrix_destroy(b);
     }
-    // sparse_permute_rows_double and sparse_permute_cols_double. The values are 1.1, 2.2, 3.3, 4.4,
-    // 5.5 and 6.6 for the reason the review gives: a double whose low 32 mantissa bits are zero reads
-    // as 0.0f, so a case of powers of two cannot see a value read at the wrong width.
-    // The permutation is a sequence of swaps, not a gather: with {2, 0, 1} on the columns of a 2x3 the
-    // host answers 2.2 1.1 3.3 / 5.5 4.4 6.6 - swap column 0 with 2, then 1 with 0, then 2 with 1 -
-    // and {1, 0, 2} answers the matrix unchanged for the same reason (measured, facts/Accelerate/SparseBLAS.md, every permutation of three columns and of two rows). Both sides are asked the same way here.
     {
         double v[6] = {1.1, 2.2, 3.3, 4.4, 5.5, 6.6};
         sparse_index rows[6] = {0, 0, 0, 1, 1, 1}, columns[6] = {0, 1, 2, 0, 1, 2};

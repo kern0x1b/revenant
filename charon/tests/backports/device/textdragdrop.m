@@ -4,12 +4,6 @@
 
 static NSString *const results_folder = @"/private/var/backports";
 
-// Drives a text control's drag and drop through the port's own interactions with a delegate that
-// records every question it is asked and in what order, and asserts that order against Apple's.
-//
-// The order is a literal in textdragdrop-cases.m beside the reason from the two headers; nothing here
-// reads the port's own sequence, so a change in the order it asks in fails this rather than agreeing
-// with itself.
 @interface TextProbe : NSObject <UITextDragDelegate, UITextDropDelegate>
 @property (nonatomic, strong) NSMutableArray<NSString *> *log;
 @property (nonatomic, strong) UITextView *control;
@@ -28,7 +22,6 @@ static NSString *const results_folder = @"/private/var/backports";
     [_log addObject:line];
 }
 
-// The drag delegate, in the header's order.
 - (NSArray<UIDragItem *> *)textDraggableView:(UIView<UITextDraggable> *)view itemsForDrag:(id<UITextDragRequest>)request
 {
     [self note:[NSString stringWithFormat:@"%@.itemsForDrag", self.host]];
@@ -63,8 +56,6 @@ static NSString *const results_folder = @"/private/var/backports";
     [self note:[NSString stringWithFormat:@"%@.dragSessionDidEnd", self.host]];
 }
 
-// The drop delegate, in the header's order. The gate is answered yes, so the questions after it are
-// asked: a control that would not take the text is never asked what it would do with it.
 - (UITextDropEditability)textDroppableView:(UIView<UITextDroppable> *)view willBecomeEditableForDrop:(id<UITextDropRequest>)drop
 {
     [self note:[NSString stringWithFormat:@"%@.willBecomeEditableForDrop", self.host]];
@@ -111,16 +102,6 @@ static NSString *const results_folder = @"/private/var/backports";
 
 @end
 
-// The two order lists, as a fact about the two headers rather than a copy of their text.
-//
-// UITextDragging.h: itemsForDrag: is what a drag is and is asked first; the preview comes before the
-// animator because an application that has a preview animates it, and the session beginning is last of
-// the three because it is once the items exist and the lift is about to run. dragSessionDidEnd comes
-// when the drag is over and is not part of the beginning.
-//
-// UITextDropping.h: willBecomeEditableForDrop: is the gate, so a control that will not take the text
-// is never asked what it would do with it, and the proposal and the drop and the all-items preview
-// follow; the four session messages then report the drag moving over the control.
 NSArray *textdragdrop_documented_order(NSString *host)
 {
     return @[[NSString stringWithFormat:@"%@.itemsForDrag", host],
@@ -166,8 +147,6 @@ static NSMutableArray<NSString *> *_asked = nil;
     probe.log = [NSMutableArray array];
     _asked = [NSMutableArray array];
 
-    // A text control with a selected range, so a drag has something to carry and the renderer has
-    // glyphs to measure.
     UITextView *control = [[UITextView alloc] initWithFrame:CGRectMake(0, 0, 320, 200)];
     control.text = @"a line of text to drag";
     control.selectedRange = NSMakeRange(2, 6);
@@ -178,7 +157,6 @@ static NSMutableArray<NSString *> *_asked = nil;
     control.textDropDelegate = probe;
     control.textDragOptions = UITextDragOptionsNone;
 
-    // The interactions the port installs through the two protocols' properties, and what they say.
     charon_check(control.textDragInteraction != nil,
                  "a text control has the drag interaction the header describes", nil);
     charon_check(control.textDropInteraction != nil,
@@ -186,11 +164,8 @@ static NSMutableArray<NSString *> *_asked = nil;
     charon_check(!control.isTextDragActive, "no drag is under way before one is begun", nil);
     charon_check(!control.isTextDropActive, "no drop is under way before one arrives", nil);
 
-    // Ask the adaptor for the drag, then the drop, through the same public path an application
-    // would use, and record what the delegates heard.
     CharonTextDragAdaptor *dragAdaptor = [control charon_textDragDelegateAdaptor];
     CharonTextDropAdaptor *dropAdaptor = [control charon_textDropDelegateAdaptor];
-    // the port's own session, made the way the drop side makes one
     CharonTestDropSession *session = [[CharonTestDropSession alloc] initWithPoint:CGPointMake(20, 20)];
 
     [dragAdaptor charon_itemsForDragSession:nil];

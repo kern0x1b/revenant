@@ -1,13 +1,3 @@
--- The surface of the SDK, computed from the model: every framework's committed declaration shard (spec/<F>/declarations.tsv, ObjC
--- and C), Swift shard (spec/<F>/swift.tsv) and Swift interface shard (spec/<F>/swiftinterface.tsv, the interface text's declarations,
--- written by swiftiface), read through the same readers the generator uses. A row is in the surface when its introduction on iOS is
--- after 6.1, with the columns the surface table has (framework, kind, lang, api, introduced, deprecated, obsoleted, unavailable, via,
--- getter). via says where the introduction came from: `own` (the declaration's own availability), `container` (the class, protocol,
--- enum or type it sits in: a member with none of its own), and `class-floor` (an ObjC category member: the class it extends, a floor).
--- The Swift rows are reconciled with the interface text (swift_match.lua). A nested framework's shards (spec/<Outer>/<Inner>) are the
--- rows of its outer framework, as the ledgers and the table name them. The rows come out sorted as the table is.
--- surface.lua reads these rows where it read the corpus table; the scope, the trace layer and the docs keep their logic.
-
 local layout = import("layout", {anonymous = true})
 local headers = import("headers", {anonymous = true})
 local files = import("files", {anonymous = true})
@@ -18,35 +8,25 @@ local surface_impl = import("surface_impl", {anonymous = true})
 local swift_match = import("swift_match", {anonymous = true})
 local strings = import("strings", {anonymous = true})
 
--- The release the surface starts after: a row is in the surface when its iOS introduction is later than this.
 local AFTER = "6.1"
 local NO_VALUE = "-"
 local SWIFT_SHARD_FILE = "swift.tsv"
 local INTERFACE_FILE = "swiftinterface.tsv"
 local SWIFT_PREFIX = "swift-"
--- The surface kind of each ObjC declaration kind the shard holds. An enum constant is a constant of its enum, as the table has it. A
--- row of any other kind (a category, a super, a field, a typedef) is in no surface.
 local OBJC_KINDS = {interface = "class", protocol = "protocol", method = "method", property = "property", var = "constant",
                     enumconst = "constant", ["function"] = "function", enum = "enum", struct = "struct"}
--- The surface kinds a Swift shard row can have (swift_shard.lua's surface_kind, without the accessors it leaves out).
 local SWIFT_KINDS = {class = true, struct = true, enum = true, protocol = true, typealias = true, method = true, property = true,
                      constant = true, ["function"] = true}
--- The columns the project's own inputs add to a row: the crash demand (corpus/crash-demand-top.tsv) and the implementation leads
--- (surface_impl.lua). An absent value is an empty cell, as the table has it.
 local ENRICHED = {"demand-rank", "demand-severity", "demand-apps", "demand-telegram", "impl-lead", "impl-file-lead"}
--- The columns of a surface row, in the order the surface table writes them: the model's own, then the enrichment's.
 local COLUMNS = {"framework", "kind", "lang", "api", "usr", "introduced", "deprecated", "obsoleted", "unavailable", "via", "getter"}
 for _, name in ipairs(ENRICHED) do
     table.insert(COLUMNS, name)
 end
 
--- The shard readers of the foundation (tools/found), imported from the tree being read, as headers.lua does.
 local function found(tree, name)
     return import("found." .. name, {rootdir = path.join(tree, "tools"), anonymous = true})
 end
 
--- The shard folders of the tree, nested ones included ("Outer/Inner"), in byte order: each a folder with a declaration shard or a Swift
--- shard. A folder with a Swift shard only is one too.
 function shard_folders(tree)
     local root = path.join(tree, layout.constants().SNAP_ROOT)
     local seen, names = {}, {}
@@ -65,13 +45,10 @@ function shard_folders(tree)
     return names
 end
 
--- The surface framework a shard folder's rows belong to: its outermost folder (MetalPerformanceShaders/MPSCore is
--- MetalPerformanceShaders), which is the name the ledgers give the framework.
 local function surface_name(fw)
     return string.match(fw, "^[^/]+")
 end
 
--- The surface frameworks of the tree, in byte order: the outermost folder of every shard folder, each once.
 function frameworks(tree)
     local seen, names = {}, {}
     for _, fw in ipairs(shard_folders(tree)) do
@@ -85,9 +62,6 @@ function frameworks(tree)
     return names
 end
 
--- The ObjC record of one declaration row of a framework's shard, or nil when the row is not a surface kind. The record carries the
--- row's own iOS availability; a member carries its owner class and whether it sits in a category; a constant carries the enum it sits
--- in (its container), when it has one.
 local function objc_record(fw, r, shard, avail)
     local kind = OBJC_KINDS[r.kind]
     if kind == nil then
@@ -137,10 +111,6 @@ local function objc_record(fw, r, shard, avail)
             unavailable = unavailable and "yes" or "", getter = getter, via = intro and "own" or "none"}
 end
 
--- The Swift record of one row of a framework's Swift shard, or nil when the row is not a surface kind. The api is the shard's name as
--- the digester gives it (the container, a dot, the name; an operator's labels are the digester's `_:` form), with a non-ASCII name
--- written as the corpus writes it; the availability cell holds the platform introductions only. swift_match.lua reconciles the api and
--- the rest with the interface text.
 local function swift_record(fw, r)
     local kind = string.sub(r.kind or "", #SWIFT_PREFIX + 1)
     if not SWIFT_KINDS[kind] then
@@ -154,9 +124,6 @@ local function swift_record(fw, r)
             via = intro and "own" or "none"}
 end
 
--- Refuses a folder whose declaration shard was written for another SDK: the header's sdk field is the SDK's name (iPhoneOS<release>,
--- written by found/ir.lua), so the surface of one release is never read from the shards of another. A folder with no declaration
--- shard has nothing to check.
 local function check_release(tree, folder, release)
     local file = path.join(tree, layout.constants().SNAP_ROOT, folder, layout.constants().SHARD_FILE)
     if not os.isfile(file) then
@@ -172,8 +139,6 @@ local function check_release(tree, folder, release)
            .. ", not iPhoneOS" .. release .. ": the surface of a release reads its own shards")
 end
 
--- The records of every surface framework, read once: framework -> the records of its shards (a nested folder's in the outer
--- framework's list), in the shards' order.
 local function records(tree, avail, release)
     local shard = found(tree, "shard")
     local out, totals = {}, {}
@@ -214,8 +179,6 @@ local function records(tree, avail, release)
     return out, totals
 end
 
--- The class floor of the ObjC categories: class or protocol name -> the earliest introduction of its own rows, whatever the framework
--- (a category may sit in another framework than its class, as sdk-introduced.py's inherit_class_floor looks it up).
 local function class_floors(all, number)
     local floor = {}
     for _, list in pairs(all) do
@@ -231,10 +194,6 @@ local function class_floors(all, number)
     return floor
 end
 
--- Fills the introduction of the ObjC rows that have none of their own. An ObjC member takes its class's introduction in the same
--- framework (via container), and a category member, or a member whose class has none there, the class floor. An enum constant takes
--- its enum's. A Swift row takes no introduction from anything but its own interface declaration: the interface text states each
--- declaration's own (or its enclosing type's, via container), and a row it does not state has none.
 local function inherit(list, floor)
     local own = {}
     for _, record in ipairs(list) do
@@ -257,7 +216,6 @@ local function inherit(list, floor)
     end
 end
 
--- The crash-demand rows of the corpus by api, the first row that names an api winning (sdk-surface.py's load_demand).
 local function demand_index(corpus)
     local text = files.read_text(path.join(corpus, "crash-demand-top.tsv"))
     assert(text, "no crash demand table in the corpus: " .. path.join(corpus, "crash-demand-top.tsv"))
@@ -270,8 +228,6 @@ local function demand_index(corpus)
     return out
 end
 
--- The demand row of a record: its api, or for a function or a constant the row of its linker symbol, which the demand file writes with
--- a leading underscore and without the "()" (sdk-surface.py's demand_for).
 local function demand_for(demand, kind, api)
     local row = demand[api]
     if row == nil and (kind == "constant" or kind == "function") then
@@ -280,8 +236,6 @@ local function demand_for(demand, kind, api)
     return row
 end
 
--- Sets the demand and the implementation leads of a record, as sdk-surface.py's enrich does (without the registry columns, which no
--- reader takes from the surface: the readers take the registry from the tree).
 local function enrich(record, demand, corpus)
     local row = demand_for(demand, record.kind, record.api)
     record["demand-rank"] = row and row.rank or ""
@@ -304,8 +258,6 @@ local function enrich(record, demand, corpus)
     record["impl-file-lead"] = table.concat(locations, ";")
 end
 
--- The module a Swift usr names: "s:" then the module's name with its length in front ("s:10Foundation11JSONEncoderC" names Foundation).
--- nil for any other usr.
 local function swift_module(usr)
     local digits = string.match(usr, "^s:(%d+)")
     if digits == nil then
@@ -315,8 +267,6 @@ local function swift_module(usr)
     return string.sub(usr, start, start + tonumber(digits) - 1)
 end
 
--- The frameworks whose own declarations name each ObjC or C usr: fw -> the set of usrs of its objc records (its declaration file, which
--- is the IR's own declarations of the framework, whatever their introduction).
 local function own_usrs(all)
     local out = {}
     for fw, list in pairs(all) do
@@ -331,9 +281,6 @@ local function own_usrs(all)
     return out
 end
 
--- The framework that owns a usr more than one framework's rows hold, or nil when the model cannot tell. A Swift usr is owned by the
--- framework of the module it names; an ObjC or C usr by the one framework whose own declarations name it. holders: the frameworks, in
--- order, whose rows hold the usr; own: own_usrs.
 local function owner_of(usr, holders, own)
     local module = swift_module(usr)
     local owner, count = nil, 0
@@ -354,15 +301,6 @@ local function owner_of(usr, holders, own)
     return nil
 end
 
--- The surface rows of the tree, every framework: a list of records with the COLUMNS of the surface table, sorted as the table is (by
--- the introduction, the framework, the language, the kind and the api; the shards' order last). One row is one declaration. Two rules
--- make it so. A row whose usr an earlier row of its framework holds is dropped (an exact repeat: a category member the class declares
--- too; overloads and a class property beside an instance one have their own usrs, and a row with no usr, an interface-only Swift
--- declaration, is its own). A usr more than one framework's rows hold is kept in the framework that owns it (owner_of), and the other
--- frameworks' rows of it are dropped; a usr no one framework owns keeps all its rows. Returns the rows, the count of the within-framework
--- repeats dropped, the totals of the Swift reconciliation and cross: {usrs = the usrs more than one framework holds, dropped = the rows
--- of the other frameworks dropped for them, undecided_usrs and undecided_rows = those the model cannot give to one framework}. corpus
--- is the coordination folder's corpus (the demand table and the file lists).
 function rows(tree, corpus, release)
     local avail = found(tree, "avail")
     local number = avail.version_number
@@ -445,11 +383,6 @@ function rows(tree, corpus, release)
     return out, repeats, totals, cross
 end
 
--- Every declaration of the model, before the surface's introduction filter, for the readers that ask what a framework declares whatever
--- its introduction (the ledger's absence rule). Returns framework -> its records, in the shards' order, each with claimed_by: the
--- framework the model gives the declaration. A usr only one framework holds is that framework's; a usr several hold goes to the framework
--- that owns it (owner_of, the same rule rows uses), and is nil where the model cannot tell. A record with no usr is its framework's own.
--- Shared usrs (an os_unfair_lock_* that several units declare) therefore count for their owner alone.
 function declarations(tree, release)
     local all = records(tree, found(tree, "avail"), release)
     local holders = {}
@@ -481,7 +414,6 @@ function declarations(tree, release)
     return out
 end
 
--- The surface table's text for a list of rows: the header line, then one line per row with its cells in COLUMNS order.
 function table_text(list)
     local lines = {table.concat(COLUMNS, "\t")}
     for _, record in ipairs(list) do

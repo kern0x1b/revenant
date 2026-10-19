@@ -3,11 +3,6 @@
 #import <dlfcn.h>
 #import "check.h"
 
-// The port's IOSurface property keys against the host's own IOSurface, which exports every one of
-// them. Each value was read out of the arm64e shared cache of iOS 18.0 through the symbol; this asks
-// the running system for the same keys and compares, so a key mistyped between the cache and the
-// source is a failure here rather than a key no surface answers to.
-
 static void check_named(BOOL passed, NSString *name, NSString *detail)
 {
     charon_check(passed, [name UTF8String], detail);
@@ -18,7 +13,6 @@ static NSString *plain(void *value)
     if (!value) {
         return @"(not exported here)";
     }
-    // dlsym gives the address of the variable, which holds the NSString *.
     NSString *string = *(NSString * __unsafe_unretained *)value;
     return string ? [string description] : @"(nil)";
 }

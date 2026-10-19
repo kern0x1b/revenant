@@ -1,15 +1,3 @@
-//
-//  writer.m
-//  Two small movies, made by the HOST's AVAssetWriter, for the AVMovie differential.
-//
-//  Each movie has one H.264 video track and one AAC audio track, and a fixed duration. The two movies differ
-//  on purpose, so the probe's answers can differ between them: movie-a is 1.0 s at 24 fps, movie-b is 2.0 s
-//  at 30 fps. Both are written with the host's own encoders, so the tracks the probe reads are the host's.
-//
-//  Usage: writer <output directory>. It writes movie-a.mov and movie-b.mov there and exits 0 on success.
-//  Each input is fed from its own requestMediaDataWhenReady callback on one serial queue, which is the way
-//  AVAssetWriter is meant to be fed: the writer decides when each input is ready, so neither input can wait
-//  on the other. A failure ends the run with the writer's error; nothing waits on a ready flag forever.
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMedia/CoreMedia.h>
 #import <CoreVideo/CoreVideo.h>

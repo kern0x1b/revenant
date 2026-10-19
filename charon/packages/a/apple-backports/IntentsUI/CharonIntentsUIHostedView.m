@@ -1,23 +1,3 @@
-//
-//  CharonIntentsUIHostedView.m
-//  IntentsUI
-//
-//  A view controller that really does what INUIHostedViewControlling asks of the class that
-//  conforms to it, so the protocol is not an empty declaration on this release.
-//
-//  The two methods the protocol declares are implementable here in full, and this is why: the
-//  `context` argument is an **enumeration** (a Siri snippet or a Maps place card),
-//  not an NSExtensionContext, and the parameters come from the interaction itself - which the port
-//  carries, donation and all. What a release with Siri shows *beside* this view is the system's,
-//  and this class does not pretend to be it: it answers with the size it wants and the parameters
-//  it set up on its own, which is the whole of what the completion blocks carry.
-//
-//  The class is named as Charon's own (`CharonIntentsUIHostedViewController`) because no SDK
-//  header declares it: the SDK declares the *protocol*, and the class that conforms to it is the
-//  application's. This one is the port's, so that an application has a conforming class to build
-//  on, and it is named so that nothing collides with a class Apple may add.
-//
-
 #import <Intents/Intents.h>
 #import <IntentsUI/IntentsUI.h>
 #import <UIKit/UIKit.h>
@@ -60,10 +40,6 @@
                          context:(INUIHostedViewContext)context
                       completion:(void (^)(CGSize desiredSize))completion
 {
-    // The interaction is the input; the context says which of the two hosts this view is sitting
-    // in, and is kept so the view knows which of the two it is answering for. The parameters
-    // come out of the interaction the port carries, one label per parameter, and the completion is
-    // answered with the size that content wants to be.
     _interaction = interaction;
     _hostedViewContext = context;
     NSArray<INParameter *> *parameters = [self charon_parametersOfInteraction:interaction];
@@ -82,9 +58,6 @@
                         completion:(void (^)(BOOL success, NSSet<INParameter *> *configuredParameters,
                                             CGSize desiredSize))completion
 {
-    // Only the parameters asked for are applied, and only those are reported back: the completion
-    // carries the set this view was successfully configured for, and a parameter the interaction
-    // does not carry cannot be configured from it.
     _interaction = interaction;
     _hostedViewContext = context;
     _interactiveBehavior = interactiveBehavior;
@@ -105,9 +78,6 @@
 
 #pragma mark - What the view does with them
 
-// The parameters of an interaction are the parameters of its intent, which is how
-// -[INInteraction parameterValueForParameter:] reads them: the parameter names a class and a key
-// path into it, and the value is the intent's own.
 - (NSArray<INParameter *> *)charon_parametersOfInteraction:(INInteraction *)interaction
 {
     INIntent *intent = interaction.intent;
@@ -122,8 +92,6 @@
         if (!name || name[0] != '_') {
             continue;
         }
-        // The class the parameter names is the intent's own, and the key path is the ivar's
-        // name: that is exactly what -[INInteraction parameterValueForParameter:] reads from.
         [parameters addObject:[INParameter parameterForClass:[intent class]
                                                      keyPath:[NSString stringWithUTF8String:name + 1]]];
     }
@@ -140,8 +108,6 @@
             continue;
         }
         if (!value) {
-            // A parameter the interaction carries nothing for is left out of the configured set
-            // rather than shown empty, so the completion says what was really configured.
             [_configured removeObject:parameter];
             continue;
         }
@@ -157,17 +123,11 @@
     }
 }
 
-// The two contexts are the two hosts the header names, and they are told apart by the row they
-// lay their content out in: a Siri snippet is one column, a place card within Maps is the width
-// it was given.
 - (void)charon_applyContext:(INUIHostedViewContext)context
 {
     self.view.hidden = context == INUIHostedViewContextSiriSnippet && _labelsByParameter.count == 0;
 }
 
-// The four behaviours of the header, four different things on the view: none shows nothing, a
-// navigation chevron for the next view, a button for leaving the context, and a large tap target
-// for a follow-on action inside it.
 - (void)charon_applyBehavior:(INUIInteractiveBehavior)behavior
 {
     [_behaviorButton removeFromSuperview];
@@ -188,7 +148,6 @@
         }
         case INUIInteractiveBehaviorNone:
         default:
-            // None is the absence of a behaviour, and the header's own first case: no button.
             break;
     }
     if (_behaviorButton) {
@@ -228,7 +187,6 @@
 
 - (CGSize)charon_desiredSize
 {
-    // The size the view asks the host for: what its content needs, and not more.
     CGSize fitted = [self.view sizeThatFits:CGSizeMake(CGRectGetWidth(self.view.bounds), CGFLOAT_MAX)];
     return CGSizeMake(CGRectGetWidth(self.view.bounds) > 0 ? CGRectGetWidth(self.view.bounds) : 320.0f,
                       fitted.height > 0 ? fitted.height : 44.0f);

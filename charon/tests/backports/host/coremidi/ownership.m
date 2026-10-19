@@ -1,8 +1,3 @@
-// The request of MIDISendUMPSysex belongs to its completion once the release has queued the bytes: the release may run the
-// completion before MIDISendSysex returns, and the completion may free the request. This test stands in for the release
-// with a MIDISendSysex that completes on the calling thread before it returns (run.sh renames the call in MIDISysex17.m to
-// charon_test_MIDISendSysex), and the completion frees the request. A library that touches the request after the call
-// writes into freed memory, which AddressSanitizer reports (COREMIDI_SANITIZE=address).
 #import <CoreMIDI/CoreMIDI.h>
 #import <Foundation/Foundation.h>
 #include <stdio.h>

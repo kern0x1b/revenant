@@ -1,11 +1,3 @@
-// MIDIEventListForEachEvent, of iOS 15: the parser that hands a visitor each Universal MIDI Packet of an event list as
-// a MIDIUniversalMessage. The release has no event list, so the list is this library's own (MIDIEventList14.m), and the
-// visitor parses it here.
-//
-// The fields are the header's, with what macOS CoreMIDI was measured to hand the visitor where the header is silent
-// (oracle/visit.m, oracle/visit-jr.txt, facts/CoreMIDI/Visitor.md): a utility message has no group and gets 0xFF, its
-// jitter clock is the low byte of the word's 16-bit field, a real-time message and every word of a type the header does
-// not name arrive as type 0xFF with the raw words, and a SysEx8 stream's data is copied from byte 3 of the first word.
 #import <CoreMIDI/CoreMIDI.h>
 
 #import "CharonCoreMIDI.h"
@@ -13,7 +5,6 @@
 #include <stdio.h>
 #include <string.h>
 
-// The type a message gets when the visitor cannot name it: the release's own unknown value.
 static const UInt32 charon_unknown_type = 0xFF;
 
 static void charon_fill_unknown(MIDIUniversalMessage *message, UInt32 group, const UInt32 *words, int count)
@@ -24,8 +15,6 @@ static void charon_fill_unknown(MIDIUniversalMessage *message, UInt32 group, con
         message->unknown.words[i] = i < count ? words[i] : 0;
 }
 
-// A UMP of one word or more, parsed into the message the visitor is handed. words points at the first word and the
-// message is words[0...size-1].
 static void charon_parse(const UInt32 *words, int size, MIDIUniversalMessage *message)
 {
     memset(message, 0, sizeof(*message));
@@ -139,7 +128,6 @@ static void charon_parse(const UInt32 *words, int size, MIDIUniversalMessage *me
         return;
     }
     case 0x5: {
-        // A SysEx8 stream: measured, the data is the bytes of the words from byte 3 of the first word.
         message->type = (MIDIMessageType)kMIDIMessageTypeData128;
         message->group = (UInt8)group;
         message->data128.status = (MIDISysExStatus)((first >> 20) & 0x0F);

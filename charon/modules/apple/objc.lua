@@ -184,14 +184,6 @@ local function section_entries(read, image, wanted)
     return entries
 end
 
--- The classes, protocols and categories every image of a source carries, one entry per class: its own method
--- lists, the class methods of its metaclass, the protocols it adopts, and the selectors every category in
--- every image adds to it. Both category sections are read, and they answer two different questions, so the
--- caller decides what to do with the answer: `__objc_catlist` is a category Apple's or the port's own image
--- carries, and `__charon_catlist` is the same section renamed by the link in backports.lua, so it holds
--- nothing but this repository's own categories. A class of a release is read by inventory(), which refuses an
--- image carrying the second (release_only below); a class of a band is read by binary_inventory and
--- binary_categories, where the port's own categories are the answer the caller asked for.
 local function collect(cache)
     local read = reader(cache)
     function read.raw(address, count)
@@ -344,16 +336,6 @@ local function gather(into, found)
     table.join2(into.port, found.port)
 end
 
--- A release's own Objective-C metadata, or the reading is not one. An image this repository built renames its
--- category section to __charon_catlist (backports.lua links every library that way), and collect() reads that
--- section beside __objc_catlist because a built object is the port's own code: every caller of binary_inventory
--- and binary_categories reads an object of a band and wants both. Fed a folder that holds such a library,
--- inventory() would answer "the release and the port" for every class the port extends, and a registry row
--- written from that claims of the release a method only the backport defines - which is the reading
--- modules/apple/backports.lua keeps and the tests/addon/objc_test.lua cases object_failures and
--- selector_failures require. Measured 2026-10-03: none of the 354 images of the held 4.3 armv7 cache carries
--- the section, so this refuses nothing the tree reads today. Read a built library with binary_inventory, or
--- take it out of the folder that holds the release's own libraries.
 local function release_only(source, found)
     if #found.port > 0 then
         raise("%s holds %d image%s this repository built, whose category section is renamed to __charon_catlist: a release's own metadata is what inventory() reads, and the port's categories merged into it would make every class the port extends look like the release's own. Read such a library with binary_inventory, or take it out of the folder that holds the release's libraries",
@@ -436,13 +418,6 @@ function binary_inventory(binary, architecture)
     return found
 end
 
--- The categories of a binary with the class each one names: `class` when the binary
--- defines the class itself, `bound` (the symbol) when dyld binds the reference. A
--- reference under chained fixups is neither: this reads classic bind opcodes only.
--- `instance` and `class_methods` hold the selectors each adds, keyed as the inventory keys them.
--- A binary here is an object of a band, so its own renamed categories are part of the answer: the check in
--- backports.lua that reads this asks whether each of them is attached at all, which is a question about the
--- port's own code and not about the release.
 function binary_categories(binary, architecture)
     local source, image = file_source(binary, architecture)
     if not source then
@@ -460,8 +435,6 @@ function binary_categories(binary, architecture)
     return found
 end
 
--- The aliases of charon_alias.h a binary records: the release's class name each of its
--- own classes stands in for.
 function binary_aliases(binary, architecture)
     local source, image = file_source(binary, architecture)
     if not source then
@@ -484,8 +457,6 @@ function binary_aliases(binary, architecture)
     return found
 end
 
--- What the reader itself is, as a short key: the three files whose code decides which name a byte pattern is
--- read as. Memoised, because known_selectors() is on the path of every binary the platform checks.
 local READER_KEY
 local function reader_key()
     if not READER_KEY then
@@ -498,22 +469,6 @@ local function reader_key()
     return READER_KEY
 end
 
--- Every selector name the release's own Objective-C metadata carries, keyed "-name". The names are kept in a
--- file beside the release, and the mtime of the source decides that the file is current - but a shared cache
--- taken out of a firmware keeps that firmware's own mtime (2011 for the held 4.3 one, 2013 for 6.1.3), so the
--- comparison stays true for the machine's lifetime and a reader that has changed is never read at all. The
--- file therefore carries the key of the reader that wrote it, beside it in a file of its own: the name stays
--- what it is, because tools/corpus/{crash-demand,observed}.py and tests/backports/host/mediaplayeritem/README.md
--- read it by that name, and what a
--- reader may answer with is the question the key settles. Measured 2026-10-03: the list beside the held 4.3
--- armv7 cache holds 70062 names and answers exactly what a fresh reading of that cache answers, and it names
--- isPaused, deviceName, isAsynchronous and distance - which the cache's own images do carry, on
--- AVCaptureVideoPreviewLayer and SSDownloadStatus, on CADisplay, ISDevice, UIHardware,
--- PLAirPlayBackgroundView, GKDevice and CAWindowServerDisplay, on NSOperation, and on MKRouteStep,
--- MKMapViewPositioningChange, SCRCGestureFactory and two OfficeImport classes. A selector belongs to no named
--- class, so a name the platform carries is no evidence about a class of it, and no image of a release carries
--- a __charon_catlist: none of the 354 images of the held 4.3 armv7 cache, none of the 524 of 6.1.3, and none
--- of the 581 files the store keeps in the four libraries_<arch> folders it has (1.1.4, 2.2.1 and 3.0).
 function known_selectors(source)
     local architecture = path.filename(source):match("^dyld_shared_cache_([%w_]+)") or path.filename(source):match("^libraries_([%w_]+)$")
     local list = path.join(path.directory(source), "selectors_" .. architecture .. ".txt")
@@ -681,14 +636,6 @@ function code_map(cachefile)
     return {architecture = header.architecture, images = images}
 end
 
--- The code address of every method the named classes define themselves, keyed by class then selector,
--- with the bytes sitting at that address. inventory() answers WHICH selectors a class carries and drops
--- the address, because a corpus row asks that; a question about what a method DOES needs the code, and
--- the code is in the cache beside the metadata - measured 2026-10-03 on the arm64e cache of iOS 16.0 for
--- the ten HomeKit classes whose -init the port had to decide by.
---
--- One pass for the whole set of names: a pass over an arm64e cache costs minutes (8 measured on the cache
--- of iOS 18.0), so ten classes must not be ten passes. `count` is how many bytes to carry per method.
 function method_imps(source, asked, count)
     count = count or 512
     local wanted = {}

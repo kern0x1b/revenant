@@ -1,23 +1,5 @@
--- check.lua APPLE OURS - compares the two transcripts of the Spatial differential (Lua port of the former check.py).
--- Every line is `name<TAB>value`. A value that starts with `str:` is a string and is compared exactly; every other value
--- is a number, compared with the tolerance the name's scalar asks for: 1e-12 relative for the `d.` half, 1e-6 for the `f.`
--- half. `nan`, `inf` and `-inf` are compared as the strings they print as. A name on one side and not the other is a
--- difference, and so is a repeated name.
---
--- Three values are not compared but recorded in DIVERGENCES below: the port's answer is written down beside the host's,
--- with the reason, and both are then compared exactly against what this run produced. A difference anywhere else still
--- fails, and one of the three moving - in either column - fails as well, so a recorded divergence is a measurement that
--- cannot quietly become another one. No tolerance is widened for them and none is widened anywhere.
---
--- Prints one `ok ` line per value, one `NAMED` line per recorded divergence with its reason, and one `DIFFER` line per
--- difference, and exits 1 if anything differs. The largest relative difference over the values that were compared is
--- printed last, so a commit message can quote a number this run produced.
-
 local TOLERANCE = {d = 1e-12, f = 1e-6}
 
--- The port's answers that are not the host's, each recorded with the host's beside it and the reason. Measured on
--- 2026-10-04; the decision these three are decided by is the coordinator's (coordination/wave-2026-10-03/QUEUE.md, the
--- v-fin-spatial ruling): named, measured divergences, not a widened tolerance.
 local DIVERGENCES = {
     ["d.rotation.eulerAngles.xyz.z"] = {
         "0.61327141523361206",

@@ -1,5 +1,3 @@
-// The apple-compat calls against the host's own libc, on the same generated inputs (seed printed).
-// The charon functions are declared here by hand, so the oracle calls below stay the host's.
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -53,7 +51,6 @@ int main(int argc, char **argv)
         int same = a == b && ea == eb && (a != 0 || (mine.st_ino == theirs.st_ino && mine.st_mode == theirs.st_mode && mine.st_size == theirs.st_size));
         printf("fstatat[%d] fd=%d name=%s flags=%d ours=%d/%d theirs=%d/%d %s\n", i, fd, name, flags, a, ea, b, eb, same ? "same" : "DIFFERENT");
     }
-    // fdopendir: the entries of the directory, read through a descriptor opened on it.
     for (int i = 0; i < 3; i++) {
         int d = open(i == 0 ? "sub" : ".", O_RDONLY);
         int copy = dup(d);
@@ -63,7 +60,6 @@ int main(int argc, char **argv)
         if (mine) closedir(mine);
         if (theirs) closedir(theirs);
     }
-    // unlinkat: create a file, remove it with each implementation, check it is gone.
     for (int i = 0; i < 20; i++) {
         char name[64];
         snprintf(name, sizeof name, "u-%d.txt", i);

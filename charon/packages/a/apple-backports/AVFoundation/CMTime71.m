@@ -162,10 +162,6 @@ static uint64_t charon_ratio_gcd64(uint64_t left, uint64_t right)
     return left;
 }
 
-// What the host does when the exact numerator is past an int64: it divides numerator and denominator by
-// their greatest common divisor until the value fits, and only when that runs out does it fall back on
-// truncating the value against the timescale. 4611686018427387904/1073741824 * 3 / 1 is 12884901888/1
-// that way, and 9223372036854775807/3 * 1 / 1 is 3074457345618258602/1.
 static int charon_ratio_reduce(CharonRatioWide *numerator, int64_t *denominator)
 {
     BOOL divided = NO;
@@ -221,8 +217,6 @@ CMTime CMTimeMultiplyByRatio(CMTime time, int32_t multiplier, int32_t divisor)
     if (!time.value || !multiplier)
         return charon_ratio_time(0, time.timescale < 0 ? -time.timescale : time.timescale, rounded, time.epoch);
     int32_t common = (int32_t)charon_ratio_gcd(multiplier, divisor);
-    // The pair is reduced and the sign is normalised in 64 bits: a multiplier or a divisor of INT32_MIN
-    // cannot be negated in 32, and the host answers 1/1 * -2147483648 / -1 as 2147483648/1.
     int64_t reducedMultiplier = (int64_t)multiplier / common, reducedDivisor = (int64_t)divisor / common;
     if (reducedDivisor < 0) {
         reducedMultiplier = -reducedMultiplier;
@@ -238,8 +232,6 @@ CMTime CMTimeMultiplyByRatio(CMTime time, int32_t multiplier, int32_t divisor)
         negative = !negative;
     }
     if (denominator == 0) {
-        // A valid CMTime with a zero timescale: the host multiplies the value through and leaves the
-        // timescale at 0, never dividing, so 5/0 * 1 / 3 is 5/0 and 5/0 * -1 / 1 is -5/0.
         if (charon_ratio_fits(numerator))
             return charon_ratio_time(charon_ratio_value(numerator, negative), 0, rounded, time.epoch);
         return charon_ratio_infinite(negative);
@@ -266,8 +258,6 @@ CMTime CMTimeMultiplyByRatio(CMTime time, int32_t multiplier, int32_t divisor)
     }
     if (charon_ratio_reduce(&numerator, &denominator) && charon_ratio_fits(numerator) && denominator > 0 && denominator <= CharonRatioTimescaleLimit)
         return charon_ratio_time(charon_ratio_value(numerator, negative), (int32_t)denominator, rounded, time.epoch);
-    // Nothing left to reduce: the host truncates the value against the input timescale, multiplies, and
-    // answers at timescale 1. 4611686018427387903/1 * 3 / 2 is 6917529027641081855/1 that way.
     int64_t whole = time.value / time.timescale;
     CharonRatioWide product = charon_ratio_wide(whole < 0 ? ~(uint64_t)whole + 1 : (uint64_t)whole);
     charon_ratio_multiply(&product, factor);

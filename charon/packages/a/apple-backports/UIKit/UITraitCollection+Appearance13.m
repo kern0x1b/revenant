@@ -56,9 +56,6 @@ NSDictionary *charon_trait_extras(UITraitCollection *collection)
 
 NSInteger charon_trait_extra(UITraitCollection *collection, NSString *name)
 {
-    // A trait whose value is an object, which the object traits of iOS 17 store in the same dictionary, reads as
-    // no number at all rather than as a message a string does not answer, so a numeric accessor asked for one of
-    // them is a trait kind mismatch and the port's own table refuses it before it gets here.
     id held = charon_trait_extras(collection)[name];
     return [held isKindOfClass:[NSNumber class]] ? [held integerValue] : -1;
 }
@@ -123,16 +120,12 @@ NSUInteger charon_trait_extras_hash(UITraitCollection *collection)
     NSUInteger hash = 0;
     NSDictionary *extras = charon_trait_extras(collection);
     for (NSString *name in extras) {
-        // A number hashes by its value, as it always did; anything else, which is what an object trait stores,
-        // hashes by the object, which agrees with the equality the dictionary comparison above gives it.
         id value = extras[name];
         hash ^= name.hash + ([value isKindOfClass:[NSNumber class]] ? (NSUInteger)[value unsignedIntegerValue] * 2654435761u : [(NSObject *)value hash]);
     }
     return hash;
 }
 
-// The name one trait's enumeration gives one value, or nil where it has none: the name lists the registered kinds
-// hold, read by the trait's own stored name.
 static NSString *charon_trait_value_text_for_name(NSString *name, NSInteger number)
 {
     if (!name)
@@ -155,21 +148,13 @@ NSString *charon_trait_value_text(const CharonTraitDefinition *definition, id va
 {
     if (!value)
         return nil;
-    // A kind with no trait class behind it - one of the older traits that has no class of its own yet - is a
-    // number, which is what it was before the traits of 17 and what its own entry already prints.
     if (definition && definition->kind == CharonTraitValueObject)
         return [value description];
     NSInteger number = [value integerValue];
-    // A value the trait's enumeration has no name for, and a name that is an empty entry in a list with a hole
-    // in it, are both the number the value is, which is what the host prints (M7).
     NSString *name = charon_trait_value_text_for_name(definition ? definition->name : nil, number);
     return name.length ? name : [NSString stringWithFormat:@"%ld", (long)number];
 }
 
-// What a collection prints for a trait, measured on the host (facts/UIKit/UITrait17.md, M7): a trait whose value
-// is the one its own class calls the default is not printed at all, and any other value is printed as the name
-// the trait's enumeration gives that case, or as the number where the enumeration has no name for it. The name
-// list of a kind is therefore read only for the values that are in it, and every other value prints as a number.
 static CharonTraitValueReader *charon_trait_value_readers;
 static NSUInteger charon_trait_value_reader_count;
 
@@ -189,19 +174,11 @@ static void charon_add_trait(UITraitCollection *collection, NSMutableArray *trai
 {
     if (!kind.described)
         return;
-    // The trait table knows where each trait lives, and this object is carried from 5.0 while the table is
-    // carried from 6.0, so a 5.0 object may not name a 6.0 symbol. The table therefore registers a reader and
-    // this one asks it; with no reader registered there are no traits of the table, which is what a 5.x release
-    // has. A trait the table has a definition for is read through that definition's own home and nowhere else -
-    // four of them are not in the extras dictionary at all, and a value read from the wrong place is no value -
-    // so the reader says whether it knows the name, and the extras below is only for the names it does not.
     for (NSUInteger index = 0; index < charon_trait_value_reader_count; index++) {
         BOOL known = NO, isDefault = NO;
         NSString *printed = charon_trait_value_readers[index](collection, kind.name, &known, &isDefault);
         if (!known)
             continue;
-        // A trait whose value is its own class default is a collection that sets nothing for it, and the host
-        // prints nothing for that: the two paths that reach one value must print the same, whichever set it.
         if (printed && !isDefault)
             [traits addObject:[NSString stringWithFormat:@"%@ = %@", kind.name, printed]];
         return;
@@ -210,21 +187,9 @@ static void charon_add_trait(UITraitCollection *collection, NSMutableArray *trai
     if (!stored)
         return;
     if (kind.described == 3) {
-        // The object traits of iOS 17: what a collection carries for a language or for the one BOOL, printed as
-        // the value is held.
         [traits addObject:[NSString stringWithFormat:@"%@ = %@", kind.name, stored]];
         return;
     }
-    // A trait of a release that has no trait class of its own - the three of 13.0 - keeps its value in the
-    // extras dictionary and its enumeration's names on its own KIND, and there is no definition to read
-    // those names from: charon_trait_value_text() finds them through definition->name and prints the bare
-    // number when the definition is NULL, which is what it is here. So the host's
-    // "AccessibilityContrast = Normal" came back as "AccessibilityContrast = 0" and
-    // "UserInterfaceLevel = Base" as "UserInterfaceLevel = 0", for all 195 description comparisons of the
-    // traits13 group - the group whose sources are this file and NOT the 17.0 objects, which register a
-    // trait value reader for these three names and take the branch above, which is why traits17 printed them
-    // symbolically all along. The name list is read from the kind, and the number is what is left when the
-    // enumeration has no name for the value.
     NSString *text = charon_trait_value_text_for_name(kind.name, [stored integerValue]);
     if (!text.length)
         text = [NSString stringWithFormat:@"%ld", (long)[stored integerValue]];
@@ -244,9 +209,6 @@ void charon_encode_trait_extras(UITraitCollection *collection, NSCoder *coder)
     NSDictionary *extras = charon_trait_extras(collection);
     for (NSString *name in extras) {
         NSString *key = [@"UITraitCollectionBuiltinTrait-_UITraitName" stringByAppendingString:name];
-        // A number is coded as the integer the older collections have always coded, under the same key, so an
-        // archive written by either is read by the other. An object trait's value is an object, and is coded as
-        // one under the same key, which the decoder below reads back.
         id value = extras[name];
         if ([value isKindOfClass:[NSNumber class]])
             [coder encodeInteger:[value integerValue] forKey:key];
@@ -261,7 +223,6 @@ void charon_decode_trait_extras(UITraitCollection *collection, NSCoder *coder)
         NSString *key = [@"UITraitCollectionBuiltinTrait-_UITraitName" stringByAppendingString:kind.name];
         if (![coder containsValueForKey:key])
             return;
-        // The three code styles of one key, because the value a trait holds decides which it was written as.
         if (kind.described == 3) {
             id object = [coder decodeObjectForKey:key];
             charon_set_trait_extra_object(collection, kind.name, object);

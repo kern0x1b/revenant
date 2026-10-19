@@ -1,11 +1,8 @@
 set_project("textalias")
 set_version("0.0.1")
--- The working copy under test (TEXTALIAS_ROOT overrides it); the addon is the tag already in the store
--- (charon/AGENTS.md, Traps: a working copy is never installed as the addon).
 local root = os.getenv("TEXTALIAS_ROOT") or path.join(os.scriptdir(), "../../../..")
 add_repositories("charon " .. root)
 add_addons("charon v0.8.17")
--- The binary links the built package's libUIKitBackports.dylib, which carries the categories on NSTextTab and NSTextList.
 add_requires("charon@apple-backports", {alias = "apple-backports", configs = {uikit = true}})
 set_config("apple_minimum", os.getenv("TEXTALIAS_MINIMUM") or "6.1.3")
 includes("@addon/charon/apple-ios")
@@ -15,8 +12,6 @@ set_allowedarchs("iphoneos|armv7")
 set_defaultplat("iphoneos")
 set_defaultarchs("iphoneos|armv7")
 
--- attach.c is compiled into the test itself, so the process is an image with aliases of its own (the test's header says
--- why). The rename moves the test image's categories into __charon_catlist, where attach.c attaches them.
 target("textalias")
     add_rules("@addon/charon/daemon")
     add_files(path.join(root, "tests/backports/device/textalias.m"), path.join(root, "tests/backports/device/check.m"))

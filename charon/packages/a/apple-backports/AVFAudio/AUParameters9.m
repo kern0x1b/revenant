@@ -12,10 +12,6 @@
     __weak AUParameterNode *_charon_parent;
 }
 
-// A token is the address of the observer block the dictionary holds, so a token handed to
-// -removeParameterObserver: finds exactly the block it named and two callers can never be given the
-// same one. The blocks are kept in an array, not a dictionary, so the order they are called in is the
-// order they were added in.
 - (AUParameterObserverToken)charon_addObserver:(id)observer to:(NSMutableArray<NSValue *> *)table
 {
     if (observer == nil) {
@@ -38,11 +34,6 @@
     [_charon_touchedTokens removeObject:key];
 }
 
-// A change reaches the observers of the parameter it happened to, and then the observers of every
-// node above it, which is the header's notion of observing one parameter or a whole group (AUParameters.h:162-166).
-// The recursion stops at the root, and each node is visited once per change
-// because a group notifies its own observers and then asks its children to notify theirs only for a
-// change of their own.
 - (void)charon_notifyValue:(AUValue)value atAddress:(AUParameterAddress)address
 {
     for (NSValue *token in [_charon_valueObservers copy]) {
@@ -101,7 +92,6 @@
 
 - (NSString *)displayNameWithLength:(NSInteger)maximumLength
 {
-    // The header's own default: "The default implementation simply returns displayName."
     return _charon_displayName;
 }
 
@@ -126,10 +116,6 @@
     _charon_keyPath = [keyPath copy];
 }
 
-// The tokens the node holds, which -charon_apply:... walks to see whether the change it is about to
-// announce was the originator's own. Declared in the CharonImpl category and never defined for the
-// same reason -[AUParameter charon_parameterWithImpl:] was, and found by the same harness: a send of a
-// declared selector that nothing implements, which no build step in the repository sees.
 - (NSArray<NSValue *> *)charon_observerTokens
 {
     if (_charon_valueObservers == nil) {
@@ -168,10 +154,6 @@
     return _charon_children;
 }
 
-// The header (AUParameters.h:236-240) makes a parameter group key-value compliant for its children: looking up
-// a child's identifier as a key returns that child, so the group's own key answers for a
-// child, and only for a child - a key it does not hold is left to NSObject, which is how a
-// KVC-compliant-by-convention object behaves.
 - (id)valueForKey:(NSString *)key
 {
     for (AUParameterNode *child in _charon_children) {
@@ -208,9 +190,6 @@
 
 #pragma mark NSSecureCoding
 
-// The tree of a unit is the unit's own list of parameter identifiers, scopes, elements and ranges:
-// that is what is written, and reading it back rebuilds the same tree, so an archive made on one
-// machine answers the same on another.
 + (BOOL)supportsSecureCoding
 {
     return YES;
@@ -254,9 +233,6 @@
     return nil;
 }
 
-// The header's v2 lookup. An address is its three coordinates packed identifier-then-scope-then-
-// element, so a tree of a v2 unit finds a parameter from an id, a scope and an element directly; the
-// packing is undone the same way it is done, and a unit that publishes no parameters answers nil.
 - (AUParameter *)parameterWithID:(AudioUnitParameterID)paramID scope:(AudioUnitScope)scope element:(AudioUnitElement)element
 {
     for (AUParameter *parameter in [self allParameters]) {
@@ -267,9 +243,6 @@
     return nil;
 }
 
-// The keyPath of a node is the identifiers of its parents joined with periods, so this is how a host
-// gets back the node a key path names. AUParameters.h:146 says the keyPath of a node, passed to
-// valueForKeyPath: on the tree, returns that same node.
 - (id)valueForKeyPath:(NSString *)keyPath
 {
     AUParameterNode *node = self;

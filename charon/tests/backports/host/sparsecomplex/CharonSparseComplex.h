@@ -1,36 +1,11 @@
-// The complex half of vecLib/Sparse/BLAS.h: the fifty-eight entry points of iOS 18.5, and the
-// declarations they are written against.
-//
-// The declarations below are transcribed from the header of iOS 26.2, at
-// $HOME/Git/projects/ios/charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk,
-// System/Library/Frameworks/Accelerate.framework/Frameworks/vecLib.framework/Headers/Sparse/BLAS.h, with
-// the API_AVAILABLE annotations left off because this is the port's own header and the port's build
-// already compiles with -Wno-unguarded-availability. Nothing here is an interface of the port's own
-// invention: every prototype is the one the SDK declares, and every one is `ios(18.5)`.
-//
-// Sparse/Types.h of iOS 26.2 adds two more opaque matrix types to the two the real half completes:
-//
-//   typedef struct sparse_m_float_complex*  sparse_matrix_float_complex;
-//   typedef struct sparse_m_double_complex* sparse_matrix_double_complex;
-//
-// and CharonSparseBLAS.h carries the same body for both, with a magic word of its own for each, which is
-// what lets the entry points the SDK takes a void * matrix for - sparse_matrix_destroy, sparse_commit,
-// sparse_get_matrix_number_of_rows and the rest of the counts, sparse_get_block_dimension_for_row and
-// _col, sparse_set_matrix_property and sparse_get_matrix_property - answer on a complex matrix on the
-// same terms as on a real one. There is no second row structure, no second search and no second growth
-// here: the complex half below walks the rows CharonSparseBLAS.h defines.
-
 #pragma once
 
 #import <Accelerate/Accelerate.h>
-#include "CharonSparseBLAS.h"   // the carried real half's shared storage, found through -I"$ACCELERATE"
+#include "CharonSparseBLAS.h"
 
 typedef struct sparse_m_float_complex *sparse_matrix_float_complex;
 typedef struct sparse_m_double_complex *sparse_matrix_double_complex;
 
-// The value of a stored entry, read or written. A complex value is two adjacent scalars, and which two
-// says whether the matrix is of float or of double complex, so a row's value array is addressed through
-// the element size alone - 2 * sizeof(float) or 2 * sizeof(double) - and the two halves are named here.
 static inline void CharonComplexStore(void *at, int isDouble, double re, double im)
 {
     if (isDouble) {
@@ -58,17 +33,6 @@ static inline size_t CharonComplexSize(int isDouble)
     return isDouble ? 2 * sizeof(double) : 2 * sizeof(float);
 }
 
-// A[i, j] = re + i * im, the complex form of CharonSparsePut - and the one place the complex half does
-// NOT answer as the real half does. Measured on the host: a batch of five distinct entries of which one
-// is exactly zero leaves a real matrix's nonzero count at 5 and a complex one's at 4, so the complex
-// half does not keep a value of exactly zero in the structure at all. The real half does (measured: an
-// entry of 0.0 inserted into an empty matrix leaves its count at 1) and answers SPARSE_SUCCESS either
-// way, so the only difference a caller sees is the count and what a later extraction walks.
-//
-// Writing a value of exactly zero therefore leaves the entry out, and writing zero over an entry that
-// is there leaves it out too - the one rule that gives the measured count in both directions. The
-// overwrite case is not separately measured and is answered by the same rule, which is the reading
-// that makes the count the host's.
 static inline sparse_status CharonComplexPut(CharonSparseRow *row, sparse_index column, double re, double im,
                                              size_t size)
 {
@@ -99,7 +63,6 @@ static inline sparse_status CharonComplexPut(CharonSparseRow *row, sparse_index 
     return SPARSE_SUCCESS;
 }
 
-// A[i, j], read: the stored value, or zero for a column the row does not hold.
 static inline void CharonComplexElementAt(const CharonSparseRow *row, sparse_index column, size_t size, double *re,
                                           double *im)
 {
@@ -111,8 +74,6 @@ static inline void CharonComplexElementAt(const CharonSparseRow *row, sparse_ind
     }
     CharonComplexLoad((const char *)row->value + (size_t)at * size, size == 2 * sizeof(double), re, im);
 }
-
-// ---------------------------------------------------------------- the fifty-eight declarations
 
 sparse_matrix_float_complex sparse_matrix_create_float_complex(sparse_dimension M, sparse_dimension N);
 sparse_matrix_double_complex sparse_matrix_create_double_complex(sparse_dimension M, sparse_dimension N);

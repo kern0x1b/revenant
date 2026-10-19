@@ -131,7 +131,6 @@ function image(data, base)
         elseif command == LC_FUNCTION_STARTS then
             found.function_starts = {string.unpack("<I4I4", data, at + 9)}
         elseif command == LC_MAIN then
-            -- The entry as an offset from the header, and where that 8-byte field sits in the file.
             found.entryoff = string.unpack("<I8", data, at + 9)
             found.entryoff_at = at + 8
         elseif command == LC_SUB_FRAMEWORK then
@@ -139,7 +138,6 @@ function image(data, base)
         elseif command == LC_SUB_UMBRELLA or command == LC_SUB_LIBRARY then
             table.insert(found.sub_names, cstring(data, at + string.unpack("<I4", data, at + 9)))
         elseif command == LC_LINKER_OPTION then
-            -- What the compiler asks the linker for on behalf of the modules the object imports, one argument list per command.
             local count, arguments, cursor = string.unpack("<I4", data, at + 9), {}, at + 12
             for _ = 1, count do
                 local text = cstring(data, cursor)
@@ -228,8 +226,6 @@ function images(data)
             else
                 _, _, offset = string.unpack(">i4i4I4", data, 9 + index * 20)
             end
-            -- A universal static library is fat around ar archives, not images (libQMIParser.a
-            -- beside the shared cache of 7.0): such a slice holds nothing to load.
             if data:sub(offset + 1, offset + 8) ~= "!<arch>\n" then
                 table.insert(found, image(data, offset))
             end
@@ -358,8 +354,6 @@ function bound_slots(data, found)
             end
         end
     end
-    -- An object file has no bind opcodes yet: a pointer to a symbol another file defines is an
-    -- external relocation of the pointer's size, which the static linker turns into the bind.
     if found.filetype == OBJECT and found.symtab then
         local symoff, stroff = found.symtab[1], found.symtab[3]
         local entry = found.wide and 16 or 12
@@ -461,9 +455,6 @@ local function each_symbol(data, found, callback)
     end
 end
 
--- The address a named symbol stands at, for the few that are looked up by name
--- rather than walked over: dyld's own _dyld_all_image_infos among them, which
--- is how a debugger asks a process what it has loaded.
 function symbol(data, found, wanted)
     local address
     each_symbol(data, found, function (name, kind, section, desc, value)
@@ -570,9 +561,6 @@ function pagezero_problems(binary)
     return problems
 end
 
--- dyld calls the LC_MAIN entry exactly as the command gives it (dyldMain.cpp adds nothing), so a Thumb entry has to carry
--- bit 0 in the command. Without it dyld calls the first halfword in ARM state, where a Thumb instruction is undefined.
--- ld64 keeps the bit; a linker that drops it writes this shape.
 function entry_problems(binary)
     local problems = {}
     local data = read(binary)
@@ -584,7 +572,6 @@ function entry_problems(binary)
                     text = segment
                 end
             end
-            -- Without __TEXT there is no header address to add the entry to; pagezero_problems names that.
             local entry = text and text.vmaddr - text.fileoff + found.entryoff
             local named, thumb, arm = nil, false, false
             for _, symbol in ipairs(entry and code_symbols(data, found)[entry & ~1] or {}) do

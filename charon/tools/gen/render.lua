@@ -1,6 +1,3 @@
--- The generated outputs of a framework, built in memory from the snapshot: text in, files out. Nothing here writes a file; the
--- commands hand the result to emit.
-
 local layout = import("layout", {anonymous = true})
 local snapshot = import("spec", {anonymous = true})
 local releases = import("releases", {anonymous = true})
@@ -36,8 +33,6 @@ local function sorted_by_key(list, field)
     return out
 end
 
--- The release a constant is placed and registered at: the first release the held caches export it in (measured), else the
--- header's introduced release where no held cache exports it (`none`).
 function release_of(r)
     local measured = r.measured
     if measured ~= "-" and measured ~= "none" and measured ~= "" then
@@ -46,9 +41,6 @@ function release_of(r)
     return r.introduced
 end
 
--- The constants a framework's constant files hold, grouped by the release each is placed at (release_of, the same key release-split
--- checks a file's symbols by), and the sorted list of those releases. `named` holds the constants the registry names in any
--- status (surface.registry_constants).
 function constant_groups(spec, named)
     local by_release, release_list = {}, {}
     for _, r in ipairs(spec) do
@@ -64,7 +56,6 @@ function constant_groups(spec, named)
     return by_release, releases.sorted(release_list)
 end
 
--- The first identifier of a declaration, skipping const and volatile: the type of the constant.
 function constant_base(decl)
     for word in string.gmatch(decl, "[%a_][%w_]*") do
         if word ~= "const" and word ~= "volatile" then
@@ -74,14 +65,10 @@ function constant_base(decl)
     return "NSString"
 end
 
--- Whether a declaration's words hold const.
 local function has_const(text)
     return string.find(text, "%f[%w_]const%f[^%w_]") ~= nil
 end
 
--- The two const qualifiers of a declared type, read from where the const stands relative to the pointer's star (the last one): a
--- const before it qualifies the string (`const NSString *`, the SDK's `NSString const *`), a const after it qualifies the variable
--- (`NSString *const`). A type with no star is a typedef of a pointer (`NSErrorDomain const`), so its const is the variable's.
 function constant_qualifiers(decl)
     local before, after = string.match(decl, "^(.*)%*(.*)$")
     if before == nil then
@@ -90,17 +77,11 @@ function constant_qualifiers(decl)
     return has_const(before), has_const(after)
 end
 
--- The type of an NSString constant as its declaration spells it: NSString *, with the string's const in front of it and the
--- variable's after the star (constant_qualifiers). `NSString const *` is `const NSString *`, the same type to the compiler.
 function ns_type(decl)
     local pointee, variable = constant_qualifiers(decl)
     return (pointee and "const " or "") .. "NSString *" .. (variable and "const" or "")
 end
 
--- The definition of one constant, in the canonical type of its shape: the qualifiers are the declaration's. A typedef of NSString
--- defines as NSString *, which is the same type to the compiler and needs no SDK typedef that a build SDK may lack; a CFStringRef
--- typedef defines as CFStringRef through a bridging cast from the literal, and its pointee const is already in the typedef, so only
--- the variable's const is written.
 function constant_definition(r)
     local literal = '@"' .. r.value .. '"'
     if r.shape == "cf" then
@@ -110,7 +91,6 @@ function constant_definition(r)
     return string.format("%s %s = %s;", ns_type(r.type or "-"), r.api, literal)
 end
 
--- The README of a framework's build directory: what the generated files are, their counts, and the sources the generator reads.
 local function readme(fw, spec, pins, stale, removed, new, by_release, release_list, sdk_release)
     local sdk_id = sdk.names(sdk_release).sdk_id
     local counts, kinds = {}, {}
@@ -168,14 +148,10 @@ local function readme(fw, spec, pins, stale, removed, new, by_release, release_l
     return table.concat(out, "\n")
 end
 
--- The release list without its dots, as a file name carries it: 16.4 -> 164.
 local function release_tag(release)
     return (string.gsub(release, "%.", ""))
 end
 
--- Whether the spec holds an api: its own row, or, for a class's member, the same property of a protocol the class conforms to (a class
--- does not repeat a property its protocol declares, so the protocol's declaration is the one held). conformances maps a class or
--- protocol to the protocols it conforms to, followed transitively; protocol_members is the set of Protocol.property names.
 function held(api, index, conformances, protocol_members)
     if index[api] ~= nil then
         return true
@@ -200,8 +176,6 @@ function held(api, index, conformances, protocol_members)
     return through(class)
 end
 
--- The files the generator emits for a framework: name -> text. corpus is the coordination corpus when the command has it (nil in the
--- build): the protocol set is then checked against the rule (protocols.generation_set).
 function render(tree, fw, corpus, sdk_release)
     local sdk_id = sdk.names(sdk_release).sdk_id
     local spec = snapshot.load(tree, fw)
@@ -209,8 +183,6 @@ function render(tree, fw, corpus, sdk_release)
     local facts = headers.shard_facts(tree, fw)
     local pins = snapshot.pins(tree, fw)
     local overrides, override_order = snapshot.overrides(tree, fw)
-    -- a constant the registry names, in any status, is defined by hand or refused by the registry check: the generator emits no
-    -- definition or row for it (the registry row is the fact; the hand-written file is the definition)
     local named = surface.registry_constants(tree, fw)
     local files = {}
 
@@ -275,8 +247,6 @@ function render(tree, fw, corpus, sdk_release)
     files["removed.tsv"] = tsv.table_text({"api", "reason", "registry"}, removed)
     files["README.md"] = readme(fw, spec, pins, stale, removed, new, by_release, release_list, sdk_release)
 
-    -- The per-row index the registry check reads (registry() in modules/apple/backports.lua): the fields of a registry row.
-    -- Paths are relative to the package root, where registry/ and gen/ both live.
     local index_rows = {}
     for _, release in ipairs(release_list) do
         local source = ".gen/" .. fw .. "/" .. fw .. "Constants" .. release_tag(release) .. ".m"
@@ -291,36 +261,26 @@ function render(tree, fw, corpus, sdk_release)
     for name, text in pairs(protocols.protocol_files(tree, fw, corpus, sdk_release)) do
         files[name] = text
     end
-    -- the protocol header of the framework (Charon<F>Protocols.h), declared from the snapshot and the declaration table
-    -- (tools/gen/protocol_headers.lua): the generated sources and the folder's own sources import it from .gen/<F>/
     for name, text in pairs(protocol_headers.protocol_header_files(tree, fw)) do
         assert(files[name] == nil, name .. " is also emitted from the spec of " .. fw)
         files[name] = text
     end
-    -- the objects of the measured tables (tools/gen/measured.lua): the release objects of the UIKit table and the constant objects of the
-    -- constants table (tools/corpus/cfconst.tsv), written in place of the committed files. Their names are the framework's own, so a name
-    -- the spec already emits is a collision and not an overwrite
     for name, text in pairs(measured.objects(tree, fw)) do
         assert(files[name] == nil, "measured object " .. name .. " is also emitted from the spec of " .. fw)
         files[name] = text
     end
-    -- the band objects of the framework's committed spec (tools/gen/bands.lua): one object per band tag, named by the spec's own tags
     for name, text in pairs(bands.objects(tree, fw)) do
         assert(files[name] == nil, "band object " .. name .. " is also emitted from the spec of " .. fw)
         files[name] = text
     end
-    -- the property table of ImageIO's CGImageMetadata (tools/gen/property_map.lua): the rows of its measured table in its object's text
     for name, text in pairs(property_map.objects(tree, fw)) do
         assert(files[name] == nil, "property object " .. name .. " is also emitted from the spec of " .. fw)
         files[name] = text
     end
-    -- the CIFilter convenience constructors of CoreImage (tools/gen/filter_builders.lua): one object per band of the measured table
     for name, text in pairs(filter_builders.objects(tree, fw)) do
         assert(files[name] == nil, "constructor object " .. name .. " is also emitted from the spec of " .. fw)
         files[name] = text
     end
-    -- the ModelIO band objects (tools/gen/mio_objects.lua): one object per release band of the SDK's surface rows, which are the
-    -- framework's committed input and not the SDK's headers, so the rows' release names the file
     for name, text in pairs(mio_objects.objects(tree, fw, sdk_release)) do
         assert(files[name] == nil, "ModelIO object " .. name .. " is also emitted from the spec of " .. fw)
         files[name] = text

@@ -2,10 +2,6 @@
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-// CallKit gives its errors no user info at all: a caller reads the domain and
-// the code, and -localizedDescription falls back to Foundation's wording for
-// a domain it does not know. The port answers the same, rather than putting a
-// text of its own where the release has none.
 NSError *charon_callkit_error(NSString *domain, NSInteger code)
 {
     return [NSError errorWithDomain:domain code:code userInfo:nil];
@@ -22,11 +18,6 @@ NSError *charon_callkit_error(NSString *domain, NSInteger code)
 @synthesize charon_provider = _charon_provider;
 @synthesize charon_transaction = _charon_transaction;
 
-// An action carries its deadline from the moment it is made, not from the
-// moment it is requested: CallKit answers a timeoutDate that is already there
-// before any provider has seen the action. How long it is belongs to the
-// class - five seconds for most of them, ten minutes for starting a call and
-// a minute for answering one, which is how long a user may take over each.
 + (NSTimeInterval)charon_timeout
 {
     return 5.0;
@@ -76,12 +67,6 @@ NSError *charon_callkit_error(NSString *domain, NSInteger code)
     return _charon_fulfilled;
 }
 
-// Fulfilling or failing an action is a message to whatever is performing it,
-// and an action no provider holds has nobody to send it to: CallKit leaves
-// such an action incomplete, and so does the port. Once a provider does hold
-// it the action is done once - the broker reads the state off it, the
-// transaction learns it finished - and a second fulfil or fail changes
-// nothing.
 - (void)charon_finish:(BOOL)fulfilled
 {
     if (_complete || !_charon_provider)

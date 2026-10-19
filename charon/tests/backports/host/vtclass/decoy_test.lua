@@ -1,20 +1,6 @@
--- decoy_test.lua - A NAME THAT IS IN NEITHER TABLE, so the rule can be shown refusing it. A port of decoy_test.py.
---
---     xmake l decoy_test.lua
---
--- DECLARED_KEYS is the one place a class may say that an argument is spelled differently from its property, and
--- it is the ONLY way past the check that the property exists. So the table carries a DECOY, and this test
--- requires store_key() to REFUSE it. A rule that cannot be made to fail on a nonsense name is a rule that will
--- pass one.
---
--- It is a control rather than a row: a row in the table would break every ordinary run. The decoy lives here,
--- in neither PRIVATE_KEYS nor DECLARED_KEYS, and the refusal is printed on every run.
-
 local G = import("gen_body", {rootdir = os.scriptdir()})
 local V = import("vtlib", {rootdir = os.scriptdir()})
 
--- A class that does not exist, and an argument that is not a property of anything. Nothing in the SDK declares
--- either, so a rule that accepts this accepts a mistake.
 local DECOY_CLASS = "VTDecoyFrameProcessorConfiguration"
 local DECOY_ARGUMENT = "charonNotAProperty"
 
@@ -32,8 +18,6 @@ local function run_checks()
         end
     end
 
-    -- The refusal, and the message: the rule must name the class and the argument, because "no property" with
-    -- neither is a message nobody can act on.
     local accepted = false
     local refusal = nil
     try {
@@ -43,8 +27,6 @@ local function run_checks()
         end,
         catch {
             function(err)
-                -- The Python catches only SystemExit. The DECLARED_KEYS check is an AssertionError there, which
-                -- is not caught: the test dies before printing anything, with exit status 1.
                 if tostring(err):find("DECLARED_KEYS names the property", 1, true) then
                     V.fail(tostring(err))
                 end

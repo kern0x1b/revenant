@@ -25,9 +25,6 @@ NSArray *charon_capture_devices(NSArray *deviceTypes, NSString *mediaType, AVCap
     }];
 }
 
-// Which sessions a device is in and which preview layers show a session: the release answers neither, and
-// the backports that act on every connection of a device (the frame durations, the zoom) need both. Every
-// change of a session is announced once, after the release has made it.
 static const char charon_sessions_key;
 static const char charon_preview_layers_key;
 
@@ -88,9 +85,6 @@ static void charon_wrap_session(SEL selector)
 
 + (void)load
 {
-    // A session that starts running says so publicly; a configuration committed, an input or an output added and a
-    // preview layer given a session are said by nothing public of 6.x, and are taken from the release's own methods
-    // (facts/AVFoundation/CaptureZoomAudioSession.md, "What is replaced, and why").
     [[NSNotificationCenter defaultCenter] addObserverForName:AVCaptureSessionDidStartRunningNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
         charon_session_changed(note.object);
     }];
@@ -118,7 +112,6 @@ static void charon_wrap_session(SEL selector)
         charon_session_changed(self);
     }));
 
-    // -initWithSession: gives the layer its session through -setSession: as well.
     SEL setSession = @selector(setSession:);
     Method layerMethod = class_getInstanceMethod([AVCaptureVideoPreviewLayer class], setSession);
     IMP originalSetSession = method_getImplementation(layerMethod);

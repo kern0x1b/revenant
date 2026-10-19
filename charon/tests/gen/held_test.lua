@@ -1,8 +1,3 @@
--- The removed-override check (tools/gen/render.lua, held): a class's member that a protocol the class conforms to declares is held by
--- the spec, since the spec's row is the protocol's, so an override of it is not removed. The fixture is the UIKit case: UIAction
--- conforms to UIMenuLeaf, which declares presentationSourceItem; the class's own members and a member no protocol declares are as
--- before. Run: xmake l tests/gen/held_test.lua
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 
 function main()
@@ -15,8 +10,6 @@ function main()
         end
     end
 
-    -- the spec's index: UIAction's own member; the protocols' properties are the protocol_members set (shard_facts records them, since
-    -- a protocol's property is not a class member)
     local index = {["UIAction.title"] = {}}
     local protocol_members = {["UIMenuLeaf.presentationSourceItem"] = true, ["NSObject.description"] = true}
     local conformances = {UIAction = {"UIMenuLeaf"}, UIMenuLeaf = {"NSObject"}}

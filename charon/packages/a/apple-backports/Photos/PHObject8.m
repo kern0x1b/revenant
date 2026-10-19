@@ -27,8 +27,6 @@
     return self;
 }
 
-// An object read again after a change of the library; the subclasses that ALAssetsLibrary can read again
-// answer with a fresh object, or nil once it is gone.
 - (PHObject *)charon_refetched
 {
     return self;

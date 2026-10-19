@@ -1,10 +1,3 @@
--- Dump Objective-C classes (name, superclass, instance/class selectors, protocols) from a built
--- binary or a whole dyld shared cache, via the driver's own apple.objc reader.
--- Usage: CHARON_ROOT=<worktree> xmake l objc-inventory.lua <binary-or-cache> [architecture]
--- Prints one TSV line per class: class\t<name>\t<superclass-or-empty>\t<image>\t<instance selectors, comma-joined>\t<class selectors, comma-joined>\t<protocols, comma-joined>
--- With no architecture argument, <binary-or-cache> is read as a dyld shared cache file (apple.objc.inventory);
--- with one, it is read as a single Mach-O binary for that architecture (apple.objc.binary_inventory).
-
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 
 function main(source, architecture)

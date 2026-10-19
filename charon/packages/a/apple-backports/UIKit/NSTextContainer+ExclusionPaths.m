@@ -165,13 +165,6 @@ static NSArray<NSValue *> *charon_free_intervals(NSArray<NSValue *> *spans, CGFl
 
 + (void)load
 {
-    // NSTextContainer is TextKit's, from iOS 7, so a band below it links this object with the class
-    // symbol weak and NULL - the 4.3 gate names _OBJC_CLASS_$_NSTextContainer among the weak imports
-    // the release it is checked against does not export. +load runs whatever the runtime has, so
-    // messaging a NULL class here is a NULL send before the program starts. The class is looked up
-    // once and the answer for a release that has no TextKit is the one the release itself gives: it
-    // lays out its line fragments from the text container's own rectangle, which is what an NSTextContainer
-    // without exclusion paths already does, and this installer has nothing to install onto.
     Class container = NSClassFromString(@"NSTextContainer");
     if (!container)
         return;

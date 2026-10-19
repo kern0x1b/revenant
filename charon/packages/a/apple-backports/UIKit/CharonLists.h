@@ -42,11 +42,6 @@ typedef NS_ENUM(NSInteger, CharonSemanticColor) {
     CharonSemanticColorSeparator
 };
 
-// `static inline` in the header and not a function in CharonLists.m, for the reason the three geometry
-// helpers above give: a C function a file that DEFINES A CLASS calls has to be linked from a file that
-// exports no API symbol of its own, and a host differential group compiles a class file with its own
-// sources and links that group alone. UIListSeparatorConfiguration145.m calls this and did not link. The
-// body is the one CharonLists.m had, unchanged.
 static inline UIColor *charon_semantic_color(CharonSemanticColor which)
 {
     static const SEL selectors[] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
@@ -74,15 +69,6 @@ static inline UIColor *charon_semantic_color(CharonSemanticColor which)
     return nil;
 }
 NSString *charon_elided_text(NSString *text);
-// These three are `static inline` in the header and not functions in CharonLists.m, and that is a
-// deliberate change: a C function a file that DEFINES A CLASS calls has to be linked from a file that
-// exports no API symbol of its own, because a file whose exports a band's release already has is left
-// out of that band and the call is then undefined symbols in exactly those bands (AGENTS.md, "A C
-// function shared between backport files").  UIListContentView.m, UICellAccessory.m and
-// UICollectionViewListCell.m already called all three, and a host differential that compiles one of them
-// with its own sources alone - tests/backports/host/uikit2/run.sh's group dispatcher - could not link them
-// at all.  `static inline` gives every translation unit its own copy and no cross-file symbol to miss.
-// The bodies are the ones CharonLists.m had, unchanged.
 static inline CGFloat charon_screen_scale(void)
 {
     CGFloat scale = [UIScreen mainScreen].scale;
@@ -214,19 +200,6 @@ UICollectionView *charon_owning_collection_view(UIView *view);
 - (void)charon_toggleExpansion;
 @end
 
-// UIListSeparatorConfiguration's visual effect (15.0), reached from the 14.5 object that DEFINES the
-// class.  Three seams, and the reason there is no other shape is measured rather than chosen: a category's
-// `[super copyWithZone:]` resolves against NSObject, not against the class it is a category of, so a 15.0
-// category could not extend the 14.5 object's own copy or archive - it could only replace them and lose the
-// six fields.  The direction that works is the one this file's neighbours use: the older object calls, and
-// the newer object implements.  Declared here because both objects import this header.
-//
-// These are internal plumbing between two objects of this library and nothing outside it reads them: the
-// case in tests/backports/host/uikit2/listseparator_test.m reads the public -visualEffect and
-// -setVisualEffect:, which the 15.0 object defines.  Nothing here is API and nothing here is a registry row.
-//
-// There are four, not three: the equality the 14.5 object answers includes the visual effect, and that
-// comparison is over a member the 15.0 object owns.
 @interface UIListSeparatorConfiguration (CharonVisualEffect15)
 - (void)charon_takeVisualEffectFrom:(UIListSeparatorConfiguration *)other;
 - (BOOL)charon_visualEffectIsEqualTo:(UIListSeparatorConfiguration *)other;

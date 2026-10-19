@@ -16,8 +16,6 @@ static char charon_overrides_key;
 
 @implementation UIViewController (CharonTraitEnvironment)
 
-// The controller's own override of the style is the last word on it, and its children and views inherit it through
-// the collection this one answers, as they do every other trait.
 - (UITraitCollection *)traitCollection
 {
     UITraitCollection *inherited = [self charon_environmentTraitCollection];

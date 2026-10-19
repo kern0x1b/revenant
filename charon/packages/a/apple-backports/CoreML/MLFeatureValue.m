@@ -1,28 +1,17 @@
-/* MLFeatureValue: one value of one feature, over the C value the interpreter passes about.
- *
- * The value the interpreter produces is a charon_ml_value and this holds it: a number, a
- * string, an array, a dictionary or an image. What the accessors do is answer in the form
- * Core ML documents -- a number, a string, an MLMultiArray, a dictionary -- and what a caller
- * asks for a value does not hold is nil, because that is what the documentation says and an
- * application is written to test for it.
- */
 #import <CoreML/CoreML.h>
 
 #include "CharonMLBridge.h"
 #include "CharonMLTensor.h"
 #include "CharonMLValue.h"
 
-/* The value, and the type it is. An undefined value has a type and no contents: that is what
- * `undefinedFeatureValueWithType:` builds, and an optional input the caller left out is
- * answered as one. */
 @interface MLFeatureValue () {
 @public
     charon_ml_value _value;
     MLFeatureType _type;
-    MLMultiArray *_multiArray; /* the MLMultiArray over _value, built once and kept */
-    MLSequence *_sequence;     /* the sequence over _value, built once and kept */
+    MLMultiArray *_multiArray;
+    MLSequence *_sequence;
     CVPixelBufferRef _pixelBuffer;
-    NSDictionary *_given;   /* the dictionary a dictionary value was built from, as it was given */
+    NSDictionary *_given;
 }
 - (charon_ml_value *)charonValue;
 @end
@@ -45,11 +34,6 @@
 
 #pragma mark - the constructors
 
-/* One constructor for each of the specification's own cases, all of them the same thing: a value
- * of a kind holding one thing. The type is the constructor's to say rather than the kind's,
- * because the C holds a number as one kind whatever it is: an int64 and a double are the same four
- * kinds of value in the interpreter, and a caller asking `type` has to be told which one it is
- * looking at, or a model that wants a whole number would be handed a real and neither would know. */
 + (instancetype)valueOfKind:(charon_ml_value_kind)kind type:(MLFeatureType)type
 {
     MLFeatureValue *value = [[MLFeatureValue alloc] init];
@@ -83,8 +67,6 @@
 {
     MLFeatureValue *value = [self valueOfKind:CHARON_ML_VALUE_STRING type:MLFeatureTypeString];
     if (value != nil) {
-        /* The bytes are the value's own: a string an application holds after the prediction
-         * has gone has to still be there, and a view of a buffer that did not is not. */
         value->_value = charon_ml_value_string_copy(string.UTF8String, strlen(string.UTF8String));
     }
     return value;
@@ -101,8 +83,6 @@
     if (value == nil) {
         return nil;
     }
-    /* The value is a window on the array's own buffer, not a copy of it: an application that
-     * writes through the multi array it handed over must see the change in the model. */
     backing = [array charonArray];
     value->_value = charon_ml_value_array(*backing);
     value->_value.array.owns_data = 0;
@@ -129,8 +109,6 @@
         data_type = CHARON_ML_ARRAY_FLOAT32;
         break;
     default:
-        /* A format this port does not unpack. The image is answered as an undefined value of
-         * the image type rather than as a buffer of bytes that are not an image. */
         CVPixelBufferUnlockBaseAddress(buffer, 0);
         return [self undefinedFeatureValueWithType:MLFeatureTypeImage];
     }
@@ -150,14 +128,6 @@
     return value;
 }
 
-/* A dictionary of a feature value. Core ML keeps the objects it is handed rather than a copy of
- * them, and it refuses nothing: a dictionary whose values are not numbers, or are not values at
- * all, becomes a dictionary value whose `dictionaryValue` answers exactly what was given. Only the
- * numbers go into the C, because only numbers are what the interpreter reads out of a dictionary
- * feature -- a classifier's probabilities -- and a value that is not a number is a caller's own
- * object that belongs to the caller. So the error is left alone: there is no failure here to
- * report, and an error an application had to clear before it could use its own dictionary would be
- * one it has no way to satisfy. */
 + (instancetype)featureValueWithDictionary:(NSDictionary<id, NSNumber *> *)dictionary
                                      error:(NSError **)error
 {
@@ -184,11 +154,6 @@
     return value;
 }
 
-/* A value of the invalid type, which is what an object a feature value cannot be made of becomes.
- * It is not an undefined value: an undefined value is one a caller left out on purpose and keeps
- * the type it was given, while this one holds nothing and says its type is the invalid one, so a
- * caller reading `type` can tell the two apart -- which is the whole of what a caller holding an
- * object it cannot convert has to go on. */
 + (instancetype)charon_featureValueOfInvalidType
 {
     MLFeatureValue *value = [self valueOfKind:CHARON_ML_VALUE_NUMBER type:MLFeatureTypeInvalid];
@@ -208,11 +173,6 @@
     if (value == nil) {
         return nil;
     }
-    /* The sequence is held, not flattened: it is an ordered list of numbers or of strings with
-     * no shape of its own, and the value keeps it as it was given. The value's own type stays the
-     * sequence type, which is what a caller switches on -- the sequence's type is the kind of its
-     * *elements*, and a value whose type read 1 here would be an int64 value to everything that
-     * asks, and a value holding three numbers is not one. */
     value->_value.kind = CHARON_ML_VALUE_SEQUENCE;
     value->_sequence = sequence;
     return value;
@@ -224,12 +184,6 @@
     return value;
 }
 
-/* A value out of one the interpreter produced. The C's value moves into the object rather than
- * being copied: the interpreter built it for this answer and gives up owning it, and a copy
- * would be a second buffer holding the same numbers while the first was leaked or freed twice.
- * The type is the model's own -- what the description of that output names -- and not the C's
- * kind, because a number the model declared as a whole number is a whole number to a caller
- * even though both kinds are the same struct in the C. */
 + (instancetype)charon_featureValueWithOwned:(charon_ml_value *)value type:(MLFeatureType)type
 {
     MLFeatureValue *feature = [[MLFeatureValue alloc] init];
@@ -258,12 +212,6 @@
     return _value.kind == CHARON_ML_VALUE_NONE;
 }
 
-/* The numeric forms, each for the type it names and zero for every other. Measured against a real
- * Core ML: `int64Value` of a double value is 0 and `doubleValue` of a whole number is 0, not the
- * number the value holds. The two are separate types, not two spellings of one, and the accessors
- * are how a caller tells which it has -- reading the wrong one and getting the right number back
- * would hide a mistake in the model or in the caller, which is the one thing these accessors are
- * there to catch. */
 - (int64_t)int64Value
 {
     if (_type != MLFeatureTypeInt64 || _value.kind != CHARON_ML_VALUE_NUMBER) {
@@ -280,10 +228,6 @@
     return _value.number;
 }
 
-/* The forms that answer an object: nil for a value that is not of that type, which is what a
- * release that has Core ML answers and what an application written against it tests for. A value
- * that holds a string does not answer an empty string to a caller asking for an array, because
- * "not an array" and "an array of no strings" are different facts. */
 - (NSString *)stringValue
 {
     if (_value.kind != CHARON_ML_VALUE_STRING) {
@@ -300,17 +244,11 @@
         return nil;
     }
     if (_multiArray == nil) {
-        /* An array that arrived as a value becomes an MLMultiArray over the same buffer, so
-         * an application that reads it and an application that wrote it see one array. */
         _multiArray = [[MLMultiArray alloc] initWithWindowOf:_value.array];
     }
     return _multiArray;
 }
 
-/* The dictionary, as the caller gave it where the value was built from one: Core ML keeps the
- * objects it was handed rather than a copy of them, so a value made of a dictionary of numbers
- * answers that dictionary and one made of anything else answers whatever else it holds. A value
- * that is not a dictionary answers nil. */
 - (NSDictionary<id, NSNumber *> *)dictionaryValue
 {
     size_t index;
@@ -374,7 +312,7 @@
         }
         return YES;
     default:
-        return YES; /* two undefined values, or two images of the same type, are equal */
+        return YES;
     }
 }
 
@@ -392,8 +330,6 @@
         copy->_value = charon_ml_value_string_copy(_value.string.bytes, _value.string.length);
         break;
     case CHARON_ML_VALUE_ARRAY:
-        /* A copy is its own buffer and its own values: a copy that shared the buffer would
-         * change under the caller that made it. */
         copy->_value = charon_ml_value_array(
             charon_ml_array_alloc(_value.array.data_type, _value.array.shape, _value.array.rank));
         {
@@ -426,19 +362,6 @@
     return YES;
 }
 
-/* What a value is archived as, and what it is built back from.
- *
- * Every kind of value is written under a key of its own and read back from the same one, and the
- * kind is written beside them: a value of a real type that is *undefined* and a value of that type
- * that holds something are different facts, and the type alone cannot tell them apart -- which is
- * why the previous round trip lost the array and came back with an empty string where the archive
- * had written one.
- *
- * The keys are this port's own. An archive written by Apple's Core ML is a private format this
- * port does not read, and the other way round; what a caller may do is write with one and read with
- * the other on the same release, which is what tests/backports/host/coreml checks for every kind of
- * value, against the framework's own round trip.
- */
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     NSNumber *type = [coder decodeObjectOfClass:[NSNumber class] forKey:@"type"];
@@ -448,9 +371,6 @@
         return nil;
     }
     if (type == nil) {
-        /* An archive that carries no type is not a value. A coder that handed back a value of the
-         * invalid type holding nothing would be a thing this port makes of an object it cannot
-         * convert, and not a thing a half-written archive means. */
         return nil;
     }
     _type = (MLFeatureType)type.integerValue;
@@ -468,26 +388,8 @@
         break;
     }
     case CHARON_ML_VALUE_ARRAY: {
-        /* Read through the collection API, the way Core ML's own coder reads the array: an
-         * MLMultiArray is a collection of numbers, and a coder asked to decode one that does not
-         * require secure coding refuses it -- which is what the framework does, and what this
-         * port's own Foundation does with the same name and the same reason, because
-         * NSCoder+Collections14 raises it. Measured: on Apple's Core ML a plain
-         * +[NSKeyedUnarchiver unarchiveObjectWithData:] of a value over a multi array raises
-         * NSInvalidUnarchiveOperationException, and a secure unarchiver brings the array back.
-         * Decoding it any other way here would have made the port succeed where the release
-         * refuses, which is the difference this delivery was asked to match. */
         MLMultiArray *array = nil;
         if (!coder.requiresSecureCoding) {
-            /* Core ML's own coder reads the array through a private unarchiver selector that
-             * refuses a coder which does not require secure coding, and a caller that archives a
-             * value over a multi array and reads it back with
-             * +[NSKeyedUnarchiver unarchiveObjectWithData:] therefore gets this exception --
-             * measured against Apple's Core ML, on every release that has a coder at all. The
-             * private selector is not reachable from here and is not the sort of thing this port
-             * calls, so the port refuses on the same condition with the same name and the same
-             * reason, which is also the exact string the port's own Foundation raises from
-             * NSCoder+Collections14 when a collection is decoded from a coder of this kind. */
             [NSException raise:NSInvalidUnarchiveOperationException
                         format:@"*** -[%@ _decodeCollectionOfClass:allowedClasses:forKey:]: This method only "
                                @"supports secure coding.",
@@ -530,10 +432,6 @@
         break;
     }
     default:
-        /* An image value's numbers are its pixel buffer's, and a pixel buffer is not something a
-         * secure archive carries, so an image comes back of the image type and undefined. An
-         * undefined value of any type comes back as it was, which is the difference the kind
-         * records and the type alone could not. */
         _value.kind = CHARON_ML_VALUE_NONE;
         break;
     }

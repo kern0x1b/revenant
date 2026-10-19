@@ -1,46 +1,9 @@
-/* chain-commit.m - ONE Metal 4 commit, in a process of its own, and Apple's documented sequence around
- * it.
- *
- *     chain-commit.m ended | open
- *
- * WHY THIS IS A SEPARATE BINARY AND NOT A BRANCH OF chain-oracle.m. Metal is NOT fork-safe: a child
- * forked from a process that already holds a device, a queue, an allocator and a buffer dies on a signal
- * that says something about the fork and nothing about the commit. That is not a guess - it is what two
- * earlier attempts measured, and it is why those attempts are retracted. So this is a fresh process per
- * form, EXECed by chain-commit.sh, and this file creates every Metal object itself.
- *
- * THE SEQUENCE IS APPLE'S OWN, IN THE ORDER THE HEADERS GIVE IT:
- *
- *   -[MTLDevice newCommandAllocator]                      MTLDevice.h:1240
- *   -[MTLDevice newMTL4CommandQueue]                       MTLDevice.h:1262ff
- *   -[MTLDevice newCommandBuffer]                          MTLDevice.h:1278
- *   -[MTL4CommandBuffer beginCommandBufferWithAllocator:]  MTL4CommandBuffer.h:71
- *   ... work ...
- *   -[MTL4CommandBuffer endCommandBuffer]                  MTL4CommandBuffer.h:103
- *   -[MTL4CommandQueue commit:count:]                      MTL4CommandQueue.h:231
- *
- * THE ALLOCATOR IS KEPT ALIVE UNTIL AFTER THE COMMIT, in a local that is still in scope at the call and
- * is read afterwards, because a Metal 4 buffer records its work into the allocator's storage and an
- * allocator that has been released before the commit is exactly the sort of thing that would make the
- * answer about this probe rather than about Metal. The form is "ended" - the header's own path, begun
- * then ended then committed - or "open", a buffer that was begun and committed without being ended, so
- * that the two are different questions and a reader who commits a buffer they forgot to end sees which
- * one Metal answers.
- *
- * EVERYTHING THIS PROCESS PRINTS IS ITS OWN. What the framework writes to stderr is NOT captured,
- * reformatted or summarised here: it goes where the framework put it, and chain-commit.sh records that
- * stream and this process's exit status as they are. An earlier version of this file family printed a
- * line beginning "Assertion failed:" from a fixed string on any signal - typing Apple's words and calling
- * them a capture - and that is retracted in facts/Metal/CommandChain26.md.
- */
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <objc/message.h>
 
 int main(int argc, const char **argv)
 {
-    /* BOTH STREAMS UNBUFFERED, so that whatever this process writes has reached the harness before it
-     * dies however it dies - a buffered answer lost to an abort is no answer at all. */
     setvbuf(stdout, NULL, _IONBF, 0);
     setvbuf(stderr, NULL, _IONBF, 0);
 
@@ -65,8 +28,6 @@ int main(int argc, const char **argv)
             return 2;
         }
 
-        /* THE ALLOCATOR IS A LOCAL THAT OUTLIVES THE COMMIT, and it is touched after it, so that nothing
-         * can release it before the commit: this is the whole point of the "kept alive" line. */
         id allocator = plain(device, allocatorSelector);
         id queue = plain(device, queueSelector);
         id buffer = plain(device, bufferSelector);
@@ -88,7 +49,6 @@ int main(int argc, const char **argv)
             printf("  endCommandBuffer DELIBERATELY NOT CALLED - this is the \"open\" form\n");
         }
 
-        /* THE CALL, EXACTLY AS MTL4CommandQueue.h:231 DECLARES IT: a C ARRAY of buffers, and a count. */
         printf("  about to call: id<MTL4CommandBuffer> list[1] = { buffer }; [queue commit:list count:1];\n");
         fflush(stdout);
         id<MTL4CommandBuffer> list[1];
@@ -99,8 +59,6 @@ int main(int argc, const char **argv)
         printf("  commit:count: returned\n");
         fflush(stdout);
 
-        /* AND THE WAIT FOR COMPLETION, which is the other half of a commit: a caller has to be able to
-         * find out that the work finished, and this asks the queue rather than assuming it. */
         if ([queue respondsToSelector:NSSelectorFromString(@"waitForCommandBuffers:")]) {
             void (*wait)(id, SEL, const void *, NSUInteger) =
                 (void (*)(id, SEL, const void *, NSUInteger))objc_msgSend;
@@ -110,7 +68,6 @@ int main(int argc, const char **argv)
             printf("  the queue has no -waitForCommandBuffers:, so nothing was waited on\n");
         }
 
-        /* THE ALLOCATOR IS STILL ALIVE HERE, and that is a check rather than a hope. */
         printf("  the allocator is still alive after the commit: %s\n",
                allocator ? "yes" : "no");
         printf("chain-commit: form %s reached the end of main\n", form);

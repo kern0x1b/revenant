@@ -9,8 +9,6 @@ local SOURCE_PATHS = {"/stdlib/public/core/", "/stdlib/public/SwiftShims/", "/st
                       "/utils/gyb.py", "/utils/SwiftIntTypes.py", "/utils/SwiftFloatingPointTypes.py", "/utils/GYBUnicodeDataUtils.py",
                       "/utils/availability-macros.def", "/LICENSE.txt"}
 
--- What a runtime build reads beside the Embedded module's sources: the standalone runtime build itself, the headers, the
--- demangler and threading sources it compiles, and the CMake modules and generators they use.
 local RUNTIME_SOURCE_PATHS = {"/Runtimes/", "/include/", "/lib/Demangling/", "/lib/Threading/", "/stdlib/", "/cmake/", "/utils/"}
 
 function source_paths()
@@ -90,8 +88,6 @@ function availability(source)
     return flags
 end
 
--- The availability macros of the standard library, every one of them always available: a macro names the OS releases whose
--- Swift runtime a library may rely on, and a runtime that ships with the program is there whatever the release.
 function bundled_availability(source)
     local lines = {"# Rewritten by charon@swift-runtime: the runtime ships with the program, so every release has it."}
     for line in io.readfile(path.join(source, "utils", "availability-macros.def")):gmatch("[^\n]+") do
@@ -165,11 +161,6 @@ function compile_flags(opt)
     return flags
 end
 
--- The flags a port compiles with against the runtime it carries. The features of this Swift release are available
--- whatever the deployment target, because the runtime ships with the program, while the SDK's own availability is
--- checked as before; the clang importer is told the same target, or it would read the SDK's headers for the release the
--- compiler was built against. The compatibility libraries of the Swift runtimes that shipped in an OS are not linked:
--- there is no OS Swift here to be compatible with.
 function runtime_flags(opt)
     local flags = {"-target", triple(opt.architecture, opt.deployment), "-clang-target", triple(opt.architecture, opt.deployment),
                    "-sdk", opt.sdk, "-resource-dir", opt.resources, "-Xfrontend", "-bundled-swift-runtime",

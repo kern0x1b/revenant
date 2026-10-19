@@ -1,13 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-// The three measurement formatters of packages/a/apple-backports/Foundation/{NSLengthFormatter,
-// NSMassFormatter,NSEnergyFormatter}.m and CharonUnitFormat.m, compiled for the host with the three
-// classes renamed, against the host's own three. Every comparison is between what the two produced
-// for one input, never against a recorded answer: the unit a value is written in, the number, the
-// name, the plural, the space, the flag, the number formatter and the parse that is documented never
-// to answer anything.
-
 @interface CharonHostLengthFormatter : NSObject
 @property (copy) NSNumberFormatter *numberFormatter;
 @property NSFormattingUnitStyle unitStyle;
@@ -43,7 +36,6 @@
 
 static int checks, failures;
 
-// The three text helpers, in the order they read best rather than the order they are written in.
 static NSString *withoutNames(NSString *written);
 static NSString *charon_number_of(NSString *written);
 static NSString *charon_digits_of(NSString *written)
@@ -58,23 +50,10 @@ static NSString *charon_digits_of(NSString *written)
 
 static BOOL charon_written_agrees(NSString *ours, NSString *theirs);
 
-/* Whether the locale the process runs in writes its unit names in English. The port carries the
-   system's English names and nothing else - the CLDR table they come from arrived in the ICU of
-   iOS 8.0 and no release the port carries has it - so in a locale that writes its names in another
-   language the name text is a stated difference, and everything else about the answer, the unit, the
-   number, the plural, the space and the shape, is still compared exactly. */
 static BOOL englishNames;
 
-/* Whether the locale's system of units is the U.S. one, which is where the plural suffix of the narrow
-   form of a unit outside the enumeration is written: en_US and en_CA write "0Gs" and en_GB, en_AU,
-   en_001 and de_DE write "0G". That suffix is the locale's own plural data, so where it is not the
-   U.S.'s the pair is compared with it taken off rather than the case left out. */
 static BOOL unitedStates;
 
-/* The units each dimension has, so a value outside the enumeration - where the host answers its own
-   internal lookup key, "MILLIMETER_(null)_OTHER_UNKNOWN" in English and its own fallback text in any
-   other language, and the port answers nil because it has no name for a unit that is not one - is only
-   compared where the names are English. */
 static BOOL knownUnit(NSString *dimension, NSInteger unit)
 {
     if ([dimension isEqualToString:@"length"])
@@ -84,9 +63,6 @@ static BOOL knownUnit(NSString *dimension, NSInteger unit)
     return unit == 11 || unit == 14 || (unit >= 1793 && unit <= 1794);
 }
 
-// One line per failing check is more than a terminal wants when a whole table is out by one digit,
-// so each kind of check prints its first failure and the rest are counted; the count is what says
-// how much of the table it is, and no failure is dropped from the verdict.
 static NSMutableDictionary<NSString *, NSNumber *> *reported;
 
 static void expect(BOOL ok, NSString *what, NSString *detail)
@@ -113,7 +89,6 @@ static void report(void)
             printf("FAIL %s: and %ld more of this kind\n", what.UTF8String, (long)(reported[what].integerValue - 1));
 }
 
-// Two answers that may both be absent, compared as such.
 static BOOL sameText(NSString *ours, NSString *theirs)
 {
     if ((ours == nil) != (theirs == nil))
@@ -121,20 +96,10 @@ static BOOL sameText(NSString *ours, NSString *theirs)
     return ours == nil || [ours isEqualToString:theirs];
 }
 
-/* The number a written form carries, with the mark of a number style taken off: for the currency, percent,
-   scientific, spelled-out and ordinal styles the class does not take the caller's formatter as it stands -
-   it writes the value as a plain decimal and puts the style's own mark on that - and the mark itself is
-   the system's, including an ordinal suffix table of its own that reads four as "rd" on the scaled path of
-   a mass and the ordinary way everywhere else (measured: stringFromValue:unit: writes 1st, 2nd, 3rd, 4th and
-   stringFromJoules: writes 0th, 2nd, 3rd, 4th, while stringFromKilograms: writes 1st, 2st, 3nd, 4rd for the
-   same values). That table is not reproduced, and the number under it is compared here. */
 static NSString *charon_number_of(NSString *written)
 {
     if (!written)
         return nil;
-    /* Everything from the last digit of the number onwards is the style's mark and the unit's name,
-       so the number is what is left when those are dropped from the end: a group separator and a
-       decimal point are part of it and are kept. */
     written = [written stringByReplacingOccurrencesOfString:@"\u2212" withString:@"-"];
     NSUInteger end = written.length;
     while (end > 0) {
@@ -148,18 +113,6 @@ static NSString *charon_number_of(NSString *written)
     return end ? [written substringToIndex:end] : nil;
 }
 
-/* Whether two written forms agree. In a locale that writes its unit names in English the whole text is
-   compared with the name left out; in one that does not, only the number is, because the name and the
-   space the short style puts before it are the locale's own unit pattern - German writes "0 mm" where
-   English writes "0mm" - and the port carries the English ones (facts/Foundation/NSUnitFormat.md). */
-/* The number under a number style. In a locale that writes its unit names in English the digits of
-   the written form are compared exactly. In one that does not, the words of a spelled-out number and
-   the notation of a scientific one are that locale's own data - German spells 3.8742 out as "drei
-   Komma acht sieben vier zwei" where the host spells out every digit of its binary value, and the
-   host's own comes back nil for some of them - and a locale may write a name in a form that carries
-   no digits at all, Arabic writing the dual of a unit as the word "متران" for two metres where the
-   port writes "2 m". So there the comparison is the digits where both sides wrote digits and that
-   both wrote something where either did not. */
 static BOOL charon_number_agrees(NSString *ours, NSString *theirs, NSNumberFormatterStyle style)
 {
     if (englishNames)
@@ -184,15 +137,6 @@ static BOOL charon_written_agrees(NSString *ours, NSString *theirs)
     theirs = [theirs stringByReplacingOccurrencesOfString:@"\u00a0" withString:@" "];
     if (englishNames)
         return [withoutNames(ours) isEqualToString:withoutNames(theirs)];
-    /* What the port is held to where the names are not English is the number, and the digits of it in
-       the locale's own: the unit pattern of the locale decides the space between the number and the
-       name (Arabic writes "\u0660 \u0645\u0645" where the port writes "\u0660mm") and where the sign of
-       a currency goes (Japanese writes "XXX mm0", after the name, where the port writes "\u00a40mm").
-       Both are that pattern and not the number, so the digits are what is compared. */
-    /* A locale may write the name in a form that carries no digits at all - Arabic writes the dual
-       of a unit as a word, "متران" for two metres, where the port writes "2 m" - and its own
-       spelled-out form of a number may come back nil. Both are that locale's data and not the number,
-       so what is compared there is that both sides wrote something. */
     if (ours == nil || theirs == nil)
         return YES;
     NSString *mine = charon_digits_of(ours), *yours = charon_digits_of(theirs);
@@ -201,8 +145,6 @@ static BOOL charon_written_agrees(NSString *ours, NSString *theirs)
     return [mine isEqualToString:yours];
 }
 
-/* Whether a written form carries the mark its number style asks for, which is the part of the answer that
-   is the style's own and that the port does reproduce. */
 static BOOL charon_style_mark(NSNumberFormatterStyle style, NSString *written)
 {
     switch (style) {
@@ -217,9 +159,6 @@ static BOOL charon_style_mark(NSNumberFormatterStyle style, NSString *written)
     }
 }
 
-/* The number and the shape of a written form, with the unit name left out: what the port is held to
-   in a locale whose unit names it does not carry. The name is the last token, or the last two for
-   the two-unit forms, and it is dropped from both sides. */
 static NSString *withoutNames(NSString *written)
 {
     if (!written)
@@ -237,11 +176,6 @@ static NSString *withoutNames(NSString *written)
     return [kept componentsJoinedByString:@" "];
 }
 
-// The unit names of the system, the three the port carries, for the style it is asked for. An
-// NSxxxFormatterUnit value outside the enumeration is not a unit: the system answers its own
-// internal lookup key for it - "(null)_WIDE_OTHER_UNKNOWN" and its two siblings - and a written
-// form built from a pattern it could not resolve, so the port answers nil and this check says so
-// rather than passing over it.
 static BOOL sameUnitName(NSString *ours, NSString *theirs)
 {
     if (theirs != nil && [theirs hasSuffix:@"_UNKNOWN"])
@@ -253,16 +187,6 @@ static BOOL sameUnitName(NSString *ours, NSString *theirs)
     return [ours isEqualToString:theirs];
 }
 
-// The written form of a unit the enumeration does not have. The system builds it from a pattern
-// it could not resolve - the gram, with the plural suffix in the short style ("1G" for one, "0Gs"
-// for any other value) and the gram's own long name in the long one - so it writes a mass for a
-// length. The port answers nil, and this checks that the host's answer is one of the forms
-// measured for the style, rather than passing the case over.
-/* The narrow form of a unit outside the enumeration carries a plural suffix that is the locale's own
-   plural data and that neither the system of units nor the language predicts: en_US and en_CA write
-   "0Gs", en_GB, en_AU, en_001 and de_DE write "0G", and the port carries the U.S. form. So the pair
-   is compared with that one suffix taken off, and the U.S. is held to it exactly - the port and the
-   system must both write it there. */
 static BOOL sameFallbackWritten(NSString *ours, NSString *theirs)
 {
     if (unitedStates)
@@ -293,15 +217,10 @@ static BOOL sameWritten(NSString *ours, NSString *theirs, NSFormattingUnitStyle 
 
 static void checkWritten(NSString *what, NSString *ours, NSString *theirs, NSFormattingUnitStyle style, BOOL unknownUnit)
 {
-    // The U.S. is held to the suffix exactly and everywhere else it is taken off both sides, so the
-    // U.S. form is a real check and the rest is the locale's own plural data and not a gap.
     expect(unknownUnit ? sameFallbackWritten(ours, theirs) : sameWritten(ours, theirs, style), what,
            [NSString stringWithFormat:@"ours %@, host %@", ours ? [ours description] : @"(nil)", theirs ? [theirs description] : @"(nil)"]);
 }
 
-/* The name of the unit a value is written in, compared the way every other name is: for a value of
-   exactly zero the host answers its own internal lookup key ("YARD_(null)_OTHER_UNKNOWN" and its
-   siblings) where the port answers the real name, and that is a stated difference. */
 static BOOL sameChosenName(NSString *ours, NSString *theirs)
 {
     return sameUnitName(ours, theirs);
@@ -316,9 +235,6 @@ static void checkName(NSString *what, NSString *ours, NSString *theirs)
 int main(void)
 {
     @autoreleasepool {
-        // The three formatters read the current locale, which the process is started with, so
-        // run.sh runs this once per locale with -AppleLocale: the port and the system are then in
-        // front of the same one, and the identifier and the system of units are printed with it.
         {
             NSLocale *locale = [NSLocale currentLocale];
             NSString *current = locale.localeIdentifier;
@@ -379,8 +295,6 @@ int main(void)
                 }
             }
 
-            // The three methods that pick a unit, over the same values and every style, and the
-            // unit each one reports.
             for (NSNumber *styleNumber in styles) {
                 NSFormattingUnitStyle style = (NSFormattingUnitStyle)styleNumber.integerValue;
                 for (NSNumber *value in values) {
@@ -444,15 +358,7 @@ int main(void)
                 }
             }
 
-            // Every switch the system has, held to the last bit: each stored threshold itself, the
-            // double below it and the double above it, and the same three on the other side of zero.
-            // The stored threshold is the pivot where it is one double past the reciprocal of its own
-            // figure, which is how the metric tables hold a value that is exactly one (a metre is
-            // written "1,000 mm"), so a threshold that moved one double up would otherwise be blind
-            // here: comparing only v and the double below it fed neither the stored threshold nor the
-            // one above it.
             {
-                // The port's own thresholds, read out of the helper so the two cannot drift apart.
                 const double pivots[] = {0.30479999024640036, 0.91441111923921015, 1609.3470878864448,
                                          0.010000000000000002, 1.0000000000000002, 1000.0000000000001,
                                          0.4535923700100355, 1.0000000000000002, 1000.0000000000001,
@@ -493,17 +399,12 @@ int main(void)
                 }
             }
 
-            // The number formatter the caller set, and the default one after nil.
             for (NSNumber *styleNumber in @[@1, @2, @3]) {
                 for (NSNumber *styleKind in @[@0, @1, @2, @3, @4, @5, @6]) {
                     NSFormattingUnitStyle style = (NSFormattingUnitStyle)styleNumber.integerValue;
                     NSNumberFormatter *ourNumbers = [[NSNumberFormatter alloc] init];
                     NSNumberFormatter *theirNumbers = [[NSNumberFormatter alloc] init];
                     ourNumbers.numberStyle = theirNumbers.numberStyle = (NSNumberFormatterStyle)styleKind.integerValue;
-                    // A currency formatter is left as a caller would have it: the system writes the
-                    // currency as the generic sign, and pinning a code or a symbol on the caller's own
-                    // formatter changes what it writes, which is a property of that formatter and not of
-                    // the class (measured both ways).
                     if ((NSNumberFormatterStyle)styleKind.integerValue == NSNumberFormatterCurrencyStyle) {
                         ourNumbers.locale = theirNumbers.locale = locale;
                         theirNumbers.locale = locale;
@@ -549,7 +450,6 @@ int main(void)
                        [NSString stringWithFormat:@"ours %ld, host %ld", (long)ourLength.unitStyle, (long)theirLength.unitStyle]);
             }
 
-            // The parse the header documents never to answer anything.
             CharonHostLengthFormatter *ourLength = [[CharonHostLengthFormatter alloc] init];
             NSLengthFormatter *theirLength = [[NSLengthFormatter alloc] init];
             for (NSString *text in @[@"", @"1", @"1.5 km", @"nonsense", @"1,5 km", @"   ", @"1e400"]) {
@@ -580,7 +480,6 @@ int main(void)
                        @"energy getObjectValue:forString:errorDescription:", text);
             }
 
-            // The defaults, and a copy and an archive of each formatter keeping them.
             {
                 CharonHostLengthFormatter *a = [[CharonHostLengthFormatter alloc] init];
                 NSLengthFormatter *b = [[NSLengthFormatter alloc] init];

@@ -1,13 +1,5 @@
 #import <Foundation/Foundation.h>
 
-/* CFDateFormatterCreateISO8601Formatter arrived after iOS 6, but everything it is
-   built out of - CFDateFormatterCreate, CFDateFormatterSetFormat and the rest - was
-   there already, so the formatter is assembled here instead. The pattern fragments
-   and the locale are Apple's, read out of that function; which of them go together
-   is held to the answers the real one gives for every one of the 1024 combinations
-   of the options. */
-
-/* An offset at the end of a written date, with its colon taken out or put back. */
 static NSString *charon_without_offset_colon(NSString *written)
 {
     NSUInteger length = written.length;
@@ -41,9 +33,6 @@ static NSString *charon_iso_date_pattern(NSISO8601DateFormatOptions options)
 {
     BOOL year = (options & NSISO8601DateFormatWithYear) != 0;
     BOOL month = (options & NSISO8601DateFormatWithMonth) != 0;
-    /* Asked for the whole internet date and time, the formatter writes the calendar
-       date and drops the week, even where the week was asked for beside it. Those
-       two combinations are the only ones in all 1024 that do. */
     BOOL week = (options & NSISO8601DateFormatWithWeekOfYear) != 0
              && (options & NSISO8601DateFormatWithInternetDateTime) != NSISO8601DateFormatWithInternetDateTime;
     BOOL day = (options & NSISO8601DateFormatWithDay) != 0;
@@ -60,11 +49,6 @@ static NSString *charon_iso_date_pattern(NSISO8601DateFormatOptions options)
     return [pieces componentsJoinedByString:dashes ? @"-" : @""];
 }
 
-/* The letter X, which writes an offset and a plain Z at Greenwich, is younger than
-   the oldest release this is built for: an ICU that does not know it writes nothing
-   at all where the zone should be. ZZZZZ says the same thing in the extended shape
-   there - Z at Greenwich, +09:00 elsewhere - so that is used instead, and the colon
-   is taken out again where the basic shape was asked for. */
 static BOOL charon_icu_writes_offsets(void)
 {
     static BOOL known;
@@ -106,8 +90,6 @@ static NSString *charon_iso_time_pattern(NSISO8601DateFormatOptions options)
 
 NSString *charon_iso8601_pattern(NSISO8601DateFormatOptions options)
 {
-    /* One option alone asks for nothing the formatter will write - not even the
-       field it names - and the real one answers an empty pattern for it. */
     NSUInteger asked = 0;
     for (NSISO8601DateFormatOptions bit = 1; bit; bit <<= 1)
         if (options & bit)
@@ -119,8 +101,6 @@ NSString *charon_iso8601_pattern(NSISO8601DateFormatOptions options)
         return time;
     if (!time.length)
         return date;
-    /* The letter between the date and the time belongs to the time of day, not to
-       the zone: a date followed by an offset alone runs straight on. */
     if (!(options & NSISO8601DateFormatWithTime))
         return [date stringByAppendingString:time];
     return [NSString stringWithFormat:@"%@%@%@", date,
@@ -197,16 +177,6 @@ NSString *charon_iso8601_pattern(NSISO8601DateFormatOptions options)
 {
     if (_formatter)
         CFRelease(_formatter);
-    /* Apple's own formatter is built on en_US_POSIX with a gregorian calendar whose
-       week starts on Monday and whose first week is the one with four days in it -
-       the ISO 8601 rule. Core Foundation will not take that calendar from
-       CFDateFormatterSetProperty: it reads straight back as Sunday with one day, so
-       the rule has to come from the locale. Asking for the ISO calendar by name
-       brings the rule but changes what a pattern without a date parses to - the year
-       comes back as 12000 - so what is used is the POSIX-invariant locale whose own
-       week rule is already the ISO one. Every pattern here is numeric, so nothing
-       else of a locale shows through, and all 1024 of them are held to the real
-       formatter's answers. */
     CFLocaleRef locale = CFLocaleCreate(kCFAllocatorSystemDefault, CFSTR("en_GB_POSIX"));
     _formatter = CFDateFormatterCreate(kCFAllocatorSystemDefault, locale,
                                        kCFDateFormatterNoStyle, kCFDateFormatterNoStyle);
@@ -270,7 +240,6 @@ NSString *charon_iso8601_pattern(NSISO8601DateFormatOptions options)
     return [self charon_basicZoneWanted] ? charon_without_offset_colon(written) : written;
 }
 
-/* Whether the offset this formatter writes has to lose its colon again. */
 - (BOOL)charon_basicZoneWanted
 {
     return (_formatOptions & NSISO8601DateFormatWithTimeZone)

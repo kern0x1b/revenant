@@ -1,7 +1,3 @@
--- The check's protocol-set rule (review r4 F16): a protocol-set record must not name a protocol a registry row implements. The fixture is
--- a small tree under .agent-work/runs (removed at the start and at the end); nothing is read from the corpus. Run:
--- xmake l tests/gen/protocol_set_test.lua (exits 1 on failure).
-
 local ROOT = path.absolute(path.join(os.scriptdir(), "..", ".."))
 local TOOLS = path.join(ROOT, "tools")
 local FIXTURE = path.join(ROOT, ".agent-work", "runs", "protocol-set-test")

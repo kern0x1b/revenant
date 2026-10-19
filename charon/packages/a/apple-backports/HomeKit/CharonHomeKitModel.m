@@ -1,7 +1,3 @@
-// The shared machinery of the HomeKit model: the store's record access, the main queue HomeKit
-// delivers on, its errors and its delegate dispatch. Nothing in this file is API, so every band keeps
-// it. The behaviour it implements is the one facts/HomeKit/HMHome.md describes and the host
-// differential in tests/backports/host/homekit checks.
 #import "CharonHomeKitModel.h"
 #import "CharonHomeKitInternal.h"
 
@@ -93,8 +89,6 @@ void CharonHomeKitTell(id delegate, SEL selector, void (^work)(id target))
     if (!delegate || ![delegate respondsToSelector:selector])
         return;
     CharonHomeKitOnMainQueue(^{
-        // The delegate is asked again on the queue: an application that released it between the call
-        // and the delivery must not be messaged, which is the same check every framework makes.
         if ([delegate respondsToSelector:selector])
             work(delegate);
     });
@@ -109,8 +103,6 @@ void CharonHomeKitFinish(void (^handler)(id, NSError *), id result, NSError *err
     });
 }
 
-// A method whose handler takes only the error: the same one call on the main queue, with nothing in
-// the result position, so a caller that passes nil hears nothing rather than hearing a nil result.
 void CharonHomeKitFinishError(void (^handler)(NSError *), NSError *error)
 {
     CharonHomeKitFinish(^(id result, NSError *reported) {
@@ -119,19 +111,6 @@ void CharonHomeKitFinishError(void (^handler)(NSError *), NSError *error)
     }, nil, error);
 }
 
-// The graph's own entry point for a home: the port's model keeps no HMHome objects, it keeps records,
-// and every home a caller meets is rebuilt from the one this returns. It is here, and not in
-// HMHomeManager8_0.m beside the class's own designated initializer, because that object is one band's
-// API: a band from iOS 8.0 on does not link it, since the release exports HMHome and HMHomeManager
-// from 8.0, and two files that no band drops call this - HMAccessoryHome10_0.m, which answers
-// -[HMAccessory home] from it, and CharonHomeKitDelegate.m, which delivers a delegate callback through
-// it. Moving it here is what every band needs; nothing else moved with it.
-//
-// The initialiser is reached as a message, not as a definition: -charon_initWithStore:identifier: is
-// the port's own and lives in the class's own object, so on a band where HMHome is the release's class
-// this function answers a home the release built, and it is only reached there by a caller that has a
-// home identifier to begin with (CharonHomeKitDelegate.m reads one with -valueForKey: and stops without
-// it), which no band above 7.x produces.
 HMHome *CharonHomeKitHome(NSString *identifier)
 {
     return [[HMHome alloc] charon_initWithStore:[CharonHomeKitStore shared] identifier:nil];

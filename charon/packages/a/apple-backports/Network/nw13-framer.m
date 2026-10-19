@@ -1,19 +1,3 @@
-/*
- * The framer of iOS 13: a program's own protocol, put between a connection's transport and its
- * application, and every call of framer_options.h.
- *
- * A framer is given the bytes a connection received and hands back the bytes to send, so the port
- * keeps what it has not parsed yet (`_input`), what the program has produced (`_output`) and the
- * messages it has delivered (`_delivered`), which is where a connection picks the three up. The
- * contract of the three calls that move bytes is the SDK's own: `nw_framer_parse_input` runs the
- * parse block inline exactly once, with a contiguous buffer of at least the minimum asked for or
- * with none, and takes back as many bytes as the block says it read; `nw_framer_deliver_input` hands
- * a whole message on; `nw_framer_write_output` adds what is to be sent.
- *
- * The pass-through flags are the SDK's: once a side is passing through, its bytes are no longer
- * parsed or built but go on as they are, and the framer says so.
- */
-
 #import "CharonNW.h"
 #import "CharonNWSupport.h"
 
@@ -28,11 +12,6 @@ nw_protocol_definition_t nw_framer_create_definition(const char *identifier, uin
     if (!identifier || !*identifier)
         return NULL;
     CharonNWProtocolDefinition *definition = [[CharonNWProtocolDefinition alloc] init];
-    /* A framer is named by the program that writes it, and it is made afresh every time: the start
-       handler it was given is what makes it that program's protocol, so two definitions of one name
-       and one set of flags are two protocols and do not compare equal. The host's own Network answers
-       the same (tests/backports/host/network-objects), and nw_protocol_definition_is_equal is where
-       that is decided. */
     definition->_family = @(identifier);
     definition->_identifier = @(identifier);
     definition->_flags = flags;
@@ -77,9 +56,6 @@ bool nw_protocol_metadata_is_framer_message(nw_protocol_metadata_t metadata)
     if (!value)
         return false;
     CharonNWProtocolDefinition *definition = value->_definition;
-    /* A framer's message is one of two kinds: a message of a protocol a program wrote, whose
-       definition carries the start handler, or a WebSocket frame, which the system itself carries as
-       one. The messages of the built-in protocols are not. */
     return definition->_payload != nil || [definition->_family isEqualToString:@"nw_ws"];
 }
 
@@ -90,8 +66,6 @@ void nw_framer_message_set_value(nw_framer_message_t message, const char *key, v
         return;
     NSString *name = @(key);
     held->_objects[name] = [NSValue valueWithPointer:value];
-    /* The block that frees the value is kept under the same name with `dispose:` in front of it,
-       and is run when the message goes away: what a value was made with is what frees it. */
     if (dispose_value)
         held->_objects[[@"dispose:" stringByAppendingString:name]] = [dispose_value copy];
 }
@@ -223,8 +197,6 @@ bool nw_framer_prepend_application_protocol(nw_framer_t framer, nw_protocol_opti
     CharonNWProtocolOptions *protocol = (CharonNWProtocolOptions *)protocol_options;
     if (!value || !protocol)
         return false;
-    /* Only an application protocol can go above a framer: a transport or an internet protocol is
-       part of the connection itself, and the header refuses those. */
     NSString *family = protocol->_definition ? protocol->_definition->_family : nil;
     if (!family || [family isEqualToString:@"nw_tcp"] || [family isEqualToString:@"nw_udp"] || [family isEqualToString:@"nw_ip"])
         return false;
@@ -241,7 +213,6 @@ void nw_framer_schedule_wakeup(nw_framer_t framer, uint64_t milliseconds)
         return;
     uint64_t generation = ++value->_wakeupGeneration;
     if (milliseconds == UINT64_MAX) {
-        /* The SDK's way of taking a wakeup back: the largest number there is. */
         [value->_pendingWakeups removeAllObjects];
         return;
     }
@@ -265,9 +236,6 @@ bool nw_framer_parse_input(nw_framer_t framer, size_t minimum_incomplete_length,
     if (!value || !parse)
         return false;
     size_t available = value->_input.length;
-    /* The parse block is run inline exactly once, with a contiguous buffer of at least the minimum
-       asked for, or with none when there is not that much - which is what the header says a framer
-       that has not enough does. */
     size_t length = available < maximum_length ? available : maximum_length;
     if (length < minimum_incomplete_length) {
         parse(temp_buffer, 0, false);
@@ -320,8 +288,6 @@ void nw_framer_write_output_data(nw_framer_t framer, dispatch_data_t output_data
     size_t length = dispatch_data_get_size(output_data);
     if (!length)
         return;
-    /* The data is copied out region by region, which is what a dispatch_data_t is: a list of
-       disjoint ranges of bytes that together are the message. */
     __block size_t written = 0;
     dispatch_data_apply(output_data, ^bool(dispatch_data_t region, size_t offset, const void *buffer, size_t size) {
         [value->_output appendBytes:buffer length:size];
@@ -336,11 +302,6 @@ bool nw_framer_write_output_no_copy(nw_framer_t framer, size_t output_length)
     CharonNWFramer *value = (CharonNWFramer *)framer;
     if (!value || !output_length)
         return false;
-    /* The room is made here and the program writes into it, which is what a write without a copy is:
-       the framer's output is its own and grows, so there is room for as much as the program asks for,
-       and the answer is whether the connection is still there to take it. The framer is torn down when
-       the connection stops using it (nw_framer_set_stop_handler), and a stopped framer has nowhere to
-       put the bytes, which is the one way this is false. */
     if (value->_failed)
         return false;
     [value->_output increaseLengthBy:output_length];
@@ -354,9 +315,6 @@ bool nw_framer_parse_output(nw_framer_t framer, size_t minimum_incomplete_length
     CharonNWFramer *value = (CharonNWFramer *)framer;
     if (!value || !parse)
         return false;
-    /* The same contract as the input side, over what the program has written and the connection has
-       not sent yet: the parse block is run inline exactly once, with a contiguous buffer of at least
-       the minimum asked for or with none. */
     size_t available = value->_output.length;
     size_t length = available < maximum_length ? available : maximum_length;
     if (length < minimum_incomplete_length) {

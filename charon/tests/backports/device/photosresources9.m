@@ -6,11 +6,6 @@
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-// PHAssetResourceManager's cancellation over the release's AssetsLibrary (facts/Photos/Changes.md), in a process of
-// its own, with the Photos sources built in. A resource made with no asset behind it reads as "the asset is gone", so
-// the answer of a request that is not cancelled is known without a photo library the process may read: it is the
-// control for the answer of one that is.
-
 @interface CharonRequestRecord : NSObject
 @property (atomic) int completions, deliveries;
 @property (atomic) BOOL completedBeforeCancel;
@@ -47,7 +42,6 @@ int main(int argc, char **argv)
         printf("not cancelled: %s\n", plain.error.description.UTF8String ?: "no error");
         CHECK(plain.error && plain.error.code != PHPhotosErrorUserCancelled && plain.deliveries == 0, "with the asset's error and no data");
 
-        // Every request cancelled right after the call: one not completed by then completes once, cancelled, with no data.
         NSMutableArray<CharonRequestRecord *> *records = [NSMutableArray array];
         for (int i = 0; i < 50; i++) {
             CharonRequestRecord *record = [[CharonRequestRecord alloc] init];
@@ -83,7 +77,6 @@ int main(int argc, char **argv)
                 error = record.error;
         printf("cancelled: %s\n", error.description.UTF8String ?: "none");
 
-        // A cancel of a request that has completed, or of one never made, changes nothing.
         [manager cancelDataRequest:plain.completions ? 1 : 0];
         [manager cancelDataRequest:-5];
         CharonRequestRecord *after = [[CharonRequestRecord alloc] init];

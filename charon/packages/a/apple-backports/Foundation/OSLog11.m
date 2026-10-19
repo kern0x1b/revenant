@@ -1,9 +1,6 @@
 #import "CharonOSLog.h"
 #include <errno.h>
 
-// OS_LOG_DISABLED is the address of this object in a program built for 11.0 or later. Its class is the port's
-// own, and its subsystem is the marker the core reads: a log made of it writes nothing and answers NO to every
-// type, which is what the release's object does for every message.
 struct os_log_s _os_log_disabled;
 
 __attribute__((constructor)) static void charon_os_log_disabled(void)

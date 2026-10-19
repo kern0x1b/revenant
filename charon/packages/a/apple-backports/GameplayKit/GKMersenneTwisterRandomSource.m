@@ -1,9 +1,3 @@
-// GKMersenneTwisterRandomSource.m - the seeded Mersenne Twister, carried as the standard MT19937.
-//
-// The release's own sequence is NOT MT19937 and the ledger says so: four seeds measured, and the
-// scalings (raw, & 0x7fffffff, >> 1, a signed cast) and the seedings (init_genrand, init_by_array,
-// init_by_array with four words) all differ.  What is carried is the standard algorithm, seeded the
-// way the header's own -init does, and deterministic from there.  facts/GameplayKit/GKRandomSource.md.
 #import "CharonGKRandomCommon.h"
 #import <GameplayKit/GameplayKit.h>
 

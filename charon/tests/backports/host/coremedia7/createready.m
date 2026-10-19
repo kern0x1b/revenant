@@ -28,22 +28,11 @@ OSStatus CharonHostCMAudioSampleBufferCreateReadyWithPacketDescriptions(CFAlloca
                                                                       const AudioStreamPacketDescription *packetDescriptions,
                                                                       CMSampleBufferRef *sampleBufferOut);
 
-// The claim (registry/CoreMedia/ios8.json): a sample buffer built with a timing entry for every sample is
-// the host's own, byte for byte, and every iteration of CallBlockForEachSample hands the block the same
-// per-sample buffer and the same bytes for that sample. The temporary buffer's *total* length is not part
-// of it: the host's spans the whole data buffer, the port's is exactly the sample
-// (facts/CoreMedia/SampleBufferCreateReady.md). A buffer built with fewer timing entries than samples is outside it - the host
-// answers for the first sample and fails for the rest, which the port does not reproduce - and there the
-// agreement is measured rather than asserted.
 static int insideClaim(CMItemCount samples, CMItemCount timings)
 {
     return timings >= samples;
 }
 
-// CMAudioSampleBufferCreateReadyWithPacketDescriptions: for a format with no per-frame byte size of its
-// own (AAC) and a packet description whose mDataByteSize is zero, the host's sizing array depends on the
-// packet count in a way this grid could not pin down - one packet gets a zero size entry, two get none -
-// so that shape is outside the claim and its agreement is measured (facts/CoreMedia/SampleBufferCreateReady.md).
 static int audioClaim(UInt32 packets, const AudioStreamPacketDescription *descriptions, BOOL perFrameSize)
 {
     if (perFrameSize)
@@ -224,8 +213,6 @@ int main(void)
             compare("CreateReadyWithImageBuffer with no format", CMSampleBufferCreateReadyWithImageBuffer(kCFAllocatorDefault, pixels, NULL, &timing, &system), system,
                     CharonHostCMSampleBufferCreateReadyWithImageBuffer(kCFAllocatorDefault, pixels, NULL, &timing, &port), port, 1, 0);
         }
-        // CMAudioSampleBufferCreateReadyWithPacketDescriptions: a packet description is a start offset, a
-        // frame count and a byte size, and the port lays the sample buffer out from those three.
         {
             static const UInt32 frameCounts[] = {1, 1024, 0};
             static const UInt32 byteSizes[] = {0, 3, 211, 65536};

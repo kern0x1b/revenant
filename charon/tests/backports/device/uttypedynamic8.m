@@ -2,10 +2,6 @@
 #import <MobileCoreServices/MobileCoreServices.h>
 #import "check.h"
 
-// UTTypeIsDynamic and UTTypeIsDeclared of iOS 8 against the release's own declarations
-// (facts/MobileCoreServices/UTTypeDynamic.md). Built with packages/a/apple-backports/UIKit/UTTypeDynamic8.m
-// compiled in: 6.1.3 exports neither function.
-
 int main(int argc, char **argv)
 {
     @autoreleasepool {

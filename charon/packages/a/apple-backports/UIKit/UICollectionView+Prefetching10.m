@@ -3,23 +3,11 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-// Prefetching: as a collection view is about to bring items on screen it asks a prefetch data
-// source for them before they are asked for as cells, and tells it when it has changed its mind.
-// The release's collection view has no prefetching at all, so the port asks itself: after the view
-// has laid out, the items just outside what is on screen are the candidates, ordered by how far
-// they are from it, and the ones that were asked for last time and are no longer candidates are
-// cancelled.
-//
-// A prefetch data source is held weakly, as the header says, and prefetching is off until it is
-// both on and set, which is what the host's own UIKit does: measured under Mac Catalyst, a freshly
-// made collection view answers NO for isPrefetchingEnabled and nil for the data source.
 static const char CharonPrefetchDataSourceKey;
 static const char CharonPrefetchEnabledKey;
 static const char CharonPrefetchAskedKey;
 static const NSUInteger CharonPrefetchDistance = 1;
 
-// Declared here because the installer's +load runs before this category is attached, and it calls
-// this on the view.
 @interface UICollectionView (CharonPrefetching10)
 - (void)charon_prefetch;
 @end
@@ -31,7 +19,6 @@ static const NSUInteger CharonPrefetchDistance = 1;
 
 + (void)load
 {
-    // Nothing to install where the release already prefetches.
     if ([UICollectionView instancesRespondToSelector:@selector(isPrefetchingEnabled)])
         return;
     [CharonPrefetchInstaller charon_install];
@@ -39,9 +26,6 @@ static const NSUInteger CharonPrefetchDistance = 1;
 
 + (void)charon_install
 {
-    // One message on the class, added here rather than by a category on the class itself, because
-    // +load runs before the library's own categories are attached and a method added from a
-    // category would not be there yet.
     Class view = [UICollectionView class];
     IMP original = class_getMethodImplementation(view, @selector(layoutSubviews));
     if (!original)
@@ -76,9 +60,6 @@ static const NSUInteger CharonPrefetchDistance = 1;
     objc_setAssociatedObject(self, &CharonPrefetchEnabledKey, @(prefetchingEnabled), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-// The index paths the view would bring on screen next: the items just past what is on screen, on
-// both sides, in the sections on screen. Ordered by their distance from the visible area, nearest
-// first, which is the order the header asks the data source to receive them in.
 - (NSArray<NSIndexPath *> *)charon_prefetchCandidates
 {
     NSArray<NSIndexPath *> *visible = self.indexPathsForVisibleItems;
@@ -94,7 +75,6 @@ static const NSUInteger CharonPrefetchDistance = 1;
                 if (item < 0 || item >= [self numberOfItemsInSection:path.section])
                     continue;
                 NSIndexPath *candidate = [NSIndexPath indexPathForItem:item inSection:path.section];
-                // One index path is one entry however many visible cells led to it.
                 NSNumber *key = @(candidate.section * 1000000 + candidate.item);
                 if ([seen containsObject:key])
                     continue;
@@ -127,8 +107,6 @@ static const NSUInteger CharonPrefetchDistance = 1;
         asked = [NSMutableSet set];
         objc_setAssociatedObject(self, &CharonPrefetchAskedKey, asked, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
-    // What was asked for last time and is no longer a candidate is called off, so a data source
-    // fetching images does not keep fetching the ones scrolled past.
     NSArray<NSIndexPath *> *cancelled = [asked.allObjects filteredArrayUsingPredicate:
                                          [NSPredicate predicateWithBlock:^BOOL(NSIndexPath *path, NSDictionary *bindings) {
                                              return ![wants containsObject:path];

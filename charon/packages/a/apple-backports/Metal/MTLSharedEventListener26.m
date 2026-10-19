@@ -1,10 +1,6 @@
 #import "CharonMetal.h"
 
 
-// The shared listener of 26.0: one listener for short notifications, on a serial queue of its own,
-// built once and kept. A listener is a dispatch queue and nothing else, so this is the same object a
-// caller gets from -initWithDispatchQueue:, made once.
-
 @implementation MTLSharedEventListener (Shared)
 
 + (MTLSharedEventListener *)sharedListener

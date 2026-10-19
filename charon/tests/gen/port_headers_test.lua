@@ -1,14 +1,5 @@
--- The two outputs of the headers command (tools/gen/cmd_headers.lua): the faithful headers under D/Frameworks, as the SDK says, and the
--- port's under D/port/<release>/Frameworks, with the release rule applied to copies of the rows. On a hand-built IR and a fixture SDK
--- and registry, the port's mark is the release, the faithful mark is the SDK's, and the faithful headers are the same bytes whether or
--- not the registry names the declaration (the rule never reaches the rows the SDK's rendering reads). Run:
---   xmake l tests/gen/port_headers_test.lua
--- Pure Lua: the fixture lives under the system's temporary folder and is removed when the test ends.
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 
--- One IR row of the twenty-one columns: framework, kind, usr, container, name, side, header, line, availability, nullability, type,
--- params, then the columns the renderer reads and this fixture leaves empty.
 local function row(kind, usr, name, avail, typ, params)
     local out = {"Fixture", kind, usr, "-", name, "-", "Fixture.h", "1", avail, "-", typ, params}
     for column = 13, 21 do
@@ -17,7 +8,6 @@ local function row(kind, usr, name, avail, typ, params)
     return out
 end
 
--- One enumerator of an enum: its enum's name in the container column, its value in the value column (column 14).
 local function constant(enum, name, value)
     local out = row("enumconst", "c:@E@" .. enum .. "@" .. name, name, "-", "-", "-")
     out[4], out[14] = enum, value
@@ -48,7 +38,6 @@ local function run()
     local ir_rows = {
         row("function", "c:@F@FixtureFn", "FixtureFn", "ios=13.0/-/-/0", "void", "(void)"),
         row("function", "c:@F@FixtureOther", "FixtureOther", "ios=13.0/-/-/0", "void", "(void)"),
-        -- an NSInteger-like enum: its fixed type is a long, 64 bits in the IR's host and 32 on the port's armv7
         row("typedef", "c:@T@FixtureInteger", "FixtureInteger", "-", "long", "-"),
         row("enum", "c:@E@FixtureLimit", "FixtureLimit", "-", "FixtureInteger", "-"),
         constant("FixtureLimit", "FixtureLimitMax", "9223372036854775807"),
@@ -62,7 +51,6 @@ local function run()
     local ir = path.join(root, "full.tsv")
     write(ir, table.concat(lines, "\n") .. "\n")
 
-    -- the same registry in two trees: one names FixtureFn (implemented from 6.0), the other names nothing
     local named = path.join(root, "named")
     local bare = path.join(root, "bare")
     write(path.join(named, "packages", "a", "apple-backports", "registry", "Fixture.json"),
@@ -74,8 +62,6 @@ local function run()
         return io.readfile(path.join(dir, "Frameworks", "Fixture.framework", "Headers", "Fixture.h"))
     end
 
-    -- the port's enumerator values, as tools/found/port_values.lua writes them: the triple's values of the two enumerators the fixture's
-    -- long-based enum declares (FixtureLimitWide is not declared for the triple, so it keeps the IR's value)
     local port_values = path.join(root, "port-values.tsv")
     write(port_values, "# triple=armv7-apple-ios6.1.3 (fixture)\n"
           .. "enumconst\tFixture\tc:@E@FixtureLimit@FixtureLimitMax\t2147483647\n"
@@ -96,7 +82,6 @@ local function run()
           "the faithful header keeps the SDK's mark for the declaration the registry names")
     check(string.find(ported or "", "introduced=6.1.3", 1, true) ~= nil, "the port's header carries the release for the implemented one")
     check(string.find(ported or "", "FixtureOther", 1, true) ~= nil, "a declaration no entry names is in the port's header too")
-    -- the overlay maps the SDK's Headers folder to the port's file of the same name, and it is there beside the port folder
     local overlay = io.readfile(path.join(root, "out-named", "port", "6.1.3", "vfs.yaml"))
     local vfs = json.decode(overlay)
     local mapped = nil
@@ -112,8 +97,6 @@ local function run()
     local other_mark = string.match(ported or "", "FixtureOther[^\n]*")
     check(other_mark ~= nil and string.find(other_mark, "introduced=13.0", 1, true) ~= nil,
           "a declaration no entry names keeps the SDK's mark in the port's header")
-    -- the enum keeps its fixed type; its enumerators take the port's triple's values from the run, the faithful header keeps the IR's,
-    -- and an enumerator the run does not declare keeps the IR's
     check(string.find(ported or "", "enum FixtureLimit : FixtureInteger {", 1, true) ~= nil, "the port's enum keeps its fixed type")
     check(string.find(ported or "", "FixtureLimitMax = 2147483647,", 1, true) ~= nil,
           "the port's enumerator takes the triple's value 2147483647 from the run")

@@ -1,31 +1,3 @@
--- The emit rule for the generated Matter classes (v-matter12). A generated class is emitted only when BOTH hold:
---
---   (1) the real stack (charon@matter, libMatterBackports) does not carry it: class-overlap.tsv says `no`;
---   (2) it is in the closure of the app-usable SDK 26.2 Matter API.
---
--- The closure starts from the class rows of the SDK 26.2 corpus (framework Matter, kind class) whose @interface in the
--- shipped headers is not marked unavailable (MTR_PROVISIONALLY_AVAILABLE, MTR_UNSTABLE_API, NS_UNAVAILABLE and
--- API_UNAVAILABLE count, as in matter-absent-proof.lua). It adds, until nothing new is added:
---
---   * the superclass of a class in the closure;
---   * every Matter class named by an available member of a class in the closure: a parameter, return or property type,
---     or a collection element type (NSArray<T *>, NSDictionary<K, V>), which the token scan finds as a class name in the
---     declaration. A typedef a member uses (a completion block, a value type) is followed to the classes it names.
---
--- Members are those of every @interface block of the class (its categories and extensions included). Protocols are not
--- followed: a protocol names no class row of its own, and the rule above names classes. Facts are read from the
--- headers (names and types); no header text is copied into the output.
---
--- Output: one row per class of the generator's input (class-overlap.tsv): class, real-stack (yes|no, as class-overlap
--- says), in-closure (yes|no), reason (the root row, or "A -> member -> B" for the edge that first reached the class,
--- in BFS order over the sorted roots; "none" when not reached), emit (yes when real-stack is no and in-closure is yes).
--- The first line is "# inputs: class-overlap.tsv <digest>; corpus <digest>; headers <digest>", the digests of the three
--- inputs, so a stale file is named. The guard (tests/addon/matter_closure_test.lua) re-checks class-overlap.tsv's digest
--- and the rows; the corpus and the headers are outside the repository, so re-run this tool to check those.
---
--- Usage: xmake l tools/matter-closure.lua <Matter/Headers dir> <class-overlap.tsv> <corpus.tsv> <out.tsv>
--- Order is byte order everywhere: the strings are sorted with byteorder.less, never with Lua's locale-following `<`.
-
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "modules")})
 
 local UNAVAILABLE_MARKS = {"MTR_PROVISIONALLY_AVAILABLE", "MTR_UNSTABLE_API", "NS_UNAVAILABLE", "API_UNAVAILABLE"}
@@ -34,7 +6,6 @@ for _, mark in ipairs(UNAVAILABLE_MARKS) do
     UNAVAILABLE[mark] = true
 end
 
--- Block comments become spaces (line numbers survive), line comments and preprocessor lines go.
 local function strip(text)
     text = text:gsub("/%*.-%*/", function(comment)
         return (comment:gsub("[^\n]", " "))
@@ -44,7 +15,6 @@ local function strip(text)
     return text
 end
 
--- Tokens with their line numbers: identifiers, @keywords, numbers, string literals, and single punctuation characters.
 local function tokenize(text)
     local toks, lines = {}, {}
     local line, i, n = 1, 1, #text
@@ -81,7 +51,6 @@ local function is_ident(token)
     return token ~= nil and token:match("^[%a_][%w_]*$") ~= nil
 end
 
--- The index of the ')' that closes the '(' at st[j].
 local function skip_group(st, j)
     local depth = 0
     for k = j, #st do
@@ -97,8 +66,6 @@ local function skip_group(st, j)
     return #st
 end
 
--- A member declaration's kind, key and unavailable mark, read from its tokens (the same reading as
--- matter-absent-proof.lua): a method gives its sign and selector, a property its name.
 local function read_member(st)
     local mark
     for _, t in ipairs(st) do
@@ -156,8 +123,6 @@ local function read_member(st)
     return "method", sign .. " " .. sel, mark
 end
 
--- The name a typedef declares: the ^Name of a block type, else the last identifier outside any parentheses or braces
--- (a struct's tag and an NS_ENUM's name are skipped; an enum names no class and needs no name here).
 local function typedef_name(td)
     for k = 1, #td - 2 do
         if td[k] == "^" and is_ident(td[k + 1]) and td[k + 2] == ")" then
@@ -178,8 +143,6 @@ local function typedef_name(td)
     return name
 end
 
--- The blocks of one header: each @interface with its name, its superclass or category, the unavailable mark on the
--- @interface line (the tokens since the last ';', '@end' or '}'), and its member declarations. Also the typedefs.
 local function parse(file, text)
     local toks, lines = tokenize(strip(text))
     local blocks, typedefs = {}, {}
@@ -257,7 +220,6 @@ local function parse(file, text)
     return blocks, typedefs
 end
 
--- A pure-Lua digest for the staleness line: FNV-like over the bytes, enough to notice a changed input.
 local function digest(text)
     local h = 0
     for k = 1, #text, 4096 do
@@ -284,8 +246,6 @@ local function cells_of(line)
     return out
 end
 
--- Every class the headers define (the @interface without a category), with its members from all of its blocks,
--- its superclass and its own mark; and every typedef, by name.
 local function load_headers(dir)
     local classes, typedefs = {}, {}
     for _, file in ipairs(os.files(path.join(dir, "*.h"))) do
@@ -322,7 +282,6 @@ local function load_headers(dir)
     return classes, typedefs
 end
 
--- The Matter classes a token list names, following typedefs (visited once each).
 local function classes_in(toks, classes, typedefs, out, seen)
     for _, t in ipairs(toks) do
         if classes[t] and classes[t].defined then
@@ -335,7 +294,6 @@ local function classes_in(toks, classes, typedefs, out, seen)
     return out
 end
 
--- The api a member's row carries, in the form the registry spells it: -[Class sel] or Class.prop.
 local function member_api(owner, m)
     if m.kind == "property" then
         return owner .. "." .. m.key
@@ -346,7 +304,6 @@ end
 function main(headers, overlap_path, corpus_path, outfile)
     local classes, typedefs = load_headers(headers)
 
-    -- the generator's input: every class of class-overlap.tsv, and whether the real stack carries it
     local overlap_text = io.readfile(overlap_path)
     local input, real = {}, {}
     local first = true
@@ -361,7 +318,6 @@ function main(headers, overlap_path, corpus_path, outfile)
     end
     table.sort(input, byteorder.less)
 
-    -- the roots: the corpus's Matter class rows that the headers define and do not mark unavailable
     local roots, corpus_rows, not_in_headers, provisional = {}, 0, 0, 0
     for index, line in ipairs(read_lines(corpus_path)) do
         local cells = cells_of(line)
@@ -380,7 +336,6 @@ function main(headers, overlap_path, corpus_path, outfile)
     end
     table.sort(roots, byteorder.less)
 
-    -- the closure, breadth first over the sorted roots; the reason is the edge that first reached a class
     local reason = {}
     local queue, head = {}, 1
     for _, name in ipairs(roots) do
@@ -426,7 +381,6 @@ function main(headers, overlap_path, corpus_path, outfile)
         end
     end
 
-    -- the digests of the three inputs, so a stale file is named (the guard re-checks class-overlap.tsv)
     local texts = {}
     for _, file in ipairs(os.files(path.join(headers, "*.h"))) do
         texts[#texts + 1] = path.filename(file) .. "\0" .. io.readfile(file)
@@ -436,7 +390,6 @@ function main(headers, overlap_path, corpus_path, outfile)
     local stamp = "# inputs: class-overlap.tsv " .. digest(overlap_text) .. "; corpus " .. digest(corpus_text)
         .. "; headers " .. digest(table.concat(texts))
 
-    -- one row per generator input class
     local rows = {stamp, "class\treal-stack\tin-closure\treason\temit"}
     local counts = {emit = 0, closure = 0, real_no = 0}
     for _, name in ipairs(input) do

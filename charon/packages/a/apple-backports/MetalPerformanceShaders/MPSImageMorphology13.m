@@ -1,46 +1,9 @@
-// MPSImageMorphology, from MPSImageMorphology.h of the iPhoneOS 26.2 surface. One object per release:
-// every class in this file is MPS_CLASS_AVAILABLE_STARTING ios(9.0) (:21, :71, :95, :173).
-//
-// Four classes, and all four are the same thing with two choices in it: the maximum or the minimum over a
-// window centred on each pixel.
-//
-//   :17-18 MPSImageAreaMax : MPSUnaryImageKernel takes the maximum pixel value over a rectangular region
-//        centred on each pixel of the source. With several channels, each one is processed on its own, so the
-//        window is rectangular and centred, and each channel is reduced separately.
-//   :72 MPSImageAreaMin : MPSImageAreaMax - the minimum over the same window.
-//   :94 MPSImageDilate : MPSUnaryImageKernel - the maximum over the same window, but with the caller's probe:
-//        :129 -initWithDevice:kernelHeight:kernelWidth:values: takes the values that make up the dilate probe,
-//        and :116 says each probe describes a 3D surface of values, so the probe is a height per tap and the
-//        result is the maximum of source plus probe.
-//   :174 MPSImageErode : MPSImageDilate - the minimum over the same probe.
-//
-// THE EDGE IS CLAMPED HERE, and that is the one fact that makes this family unlike the convolution's:
-// :69 and :93 both state the edgeMode is fixed to clamp for this filter.
-// So a window reaching off the edge REPLICATES the border rather than reading zero, and this file clamps
-// rather than multiplying by zero. Getting that wrong would be invisible on an interior pixel and wrong on
-// every edge pixel, which is why the case runs a window wider than the image on purpose.
-//
-// The odd-dimension rule is stated at :117-119 for Dilate's kernelWidth and kernelHeight and is applied
-// here to both pairs of classes, since a window that is not odd has no centre pixel to sit on and the
-// header calls the window "centered around each pixel" (:17).
-//
-// EXACT, and compared exactly. A maximum and a minimum SELECT a value the source already holds - nothing
-// is added and nothing is multiplied - so the answer is bit-for-bit one of the inputs and a tolerance would
-// hide a real defect rather than absorb a rounding. That is the opposite of the convolution family, which
-// accumulates in double and stores float32 and so carries one ulp, and the reference states which of the
-// two it is doing.
-
 #import "CharonMPS.h"
 #import "CharonMPSImage.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
-// The same one the reduction and convolution families carry, recorded in coordination/crutches.md: the
-// SDK marks each class's -initWithDevice: NS_UNAVAILABLE (:60, :132) and makes its parameterised
-// initializer designated, so clang wants a superclass designated call this path cannot make.
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-// Which of the two, and the probe. AreaMax and AreaMin are Dilate and Erode with a probe of all ones, so
-// they share the walk rather than having a second copy of it.
 typedef NS_ENUM(NSInteger, CharonMPSMorphologyPick) {
     CharonMPSMorphologyMax = 0,
     CharonMPSMorphologyMin,
@@ -70,8 +33,6 @@ static void CharonMPSMorphologyRegion(MPSImage *source, MPSImage *destination, M
                         (unsigned long)read.size.width, (unsigned long)read.size.height);
         return;
     }
-    // Each channel is reduced on its own, per :18 - "each channel is processed in" its own window - so the
-    // channel is a third loop and not a divide of the buffer.
     for (NSUInteger channel = 0; channel < in.channels; channel++) {
         for (NSUInteger y = 0; y < read.size.height; y++) {
             for (NSUInteger x = 0; x < read.size.width; x++) {
@@ -80,8 +41,6 @@ static void CharonMPSMorphologyRegion(MPSImage *source, MPSImage *destination, M
                     for (NSUInteger kx = 0; kx < kernelWidth; kx++) {
                         long sy = (long)(read.origin.y + y + ky) - (long)halfH;
                         long sx = (long)(read.origin.x + x + kx) - (long)halfW;
-                        // MPSImageMorphology.h:69 and :93 - the edge mode is fixed at clamp for this filter, so an off-edge tap takes the nearest edge
-                        // value rather than zero. This is the difference from the convolution family.
                         if (sy < 0) sy = 0;
                         if (sx < 0) sx = 0;
                         if (sy >= (long)in.height) sy = (long)in.height - 1;
@@ -96,8 +55,6 @@ static void CharonMPSMorphologyRegion(MPSImage *source, MPSImage *destination, M
                             best = candidate;
                     }
                 }
-                // A maximum and a minimum select: the answer is one of the values that went in, so it is
-                // stored without arithmetic and is bit-for-bit comparable.
                 answer[(y * read.size.width + x) * in.channels + channel] = (float)best;
             }
         }
@@ -114,8 +71,6 @@ static void CharonMPSMorphologyRegion(MPSImage *source, MPSImage *destination, M
 @synthesize kernelWidth = _kernelWidth;
 @synthesize kernelHeight = _kernelHeight;
 
-// :42 - initWithDevice:kernelHeight:kernelWidth: is the designated initializer, and :117-119's "Must be an
-// odd number" is applied to both, since the window is "centered around each pixel" (:17).
 - (instancetype)initWithDevice:(id<MTLDevice>)device
                   kernelHeight:(NSUInteger)kernelHeight
                    kernelWidth:(NSUInteger)kernelWidth
@@ -140,7 +95,6 @@ static void CharonMPSMorphologyRegion(MPSImage *source, MPSImage *destination, M
     return nil;
 }
 
-// The probe is this object's: a base class takes an operation and its subclass supplies the other half.
 - (CharonMPSMorphologyPick)charon_pick
 {
     return CharonMPSMorphologyMax;
@@ -159,7 +113,6 @@ static void CharonMPSMorphologyRegion(MPSImage *source, MPSImage *destination, M
         CharonMPSRefuse(@"%@: no destination image, so nothing was written", what);
         return;
     }
-    // NULL probe: an area filter has no probe at all, it is the bare maximum or minimum of the window.
     CharonMPSMorphologyRegion(sourceImage, destinationImage,
                               CharonMPSImageResolvedRegion(destinationImage, self.clipRect),
                               _kernelWidth, _kernelHeight, NULL, [self charon_pick], what);
@@ -167,7 +120,6 @@ static void CharonMPSMorphologyRegion(MPSImage *source, MPSImage *destination, M
 
 @end
 
-// MPSImageAreaMin : MPSImageAreaMax (:72) - the same window, the other half of the choice.
 @implementation MPSImageAreaMin
 - (CharonMPSMorphologyPick)charon_pick
 {
@@ -183,9 +135,6 @@ static void CharonMPSMorphologyRegion(MPSImage *source, MPSImage *destination, M
 @synthesize kernelWidth = _kernelWidth;
 @synthesize kernelHeight = _kernelHeight;
 
-// :129 - initWithDevice:kernelHeight:kernelWidth:values: is the designated initializer. Its values argument is
-// the set of values the dilate probe is built from, and :116 says each probe describes a 3D surface of values,
-// so it is one height per tap, row-major over kernelWidth like the convolution family's weights.
 - (instancetype)initWithDevice:(id<MTLDevice>)device
                   kernelHeight:(NSUInteger)kernelHeight
                    kernelWidth:(NSUInteger)kernelWidth
@@ -250,7 +199,6 @@ static void CharonMPSMorphologyRegion(MPSImage *source, MPSImage *destination, M
 
 @end
 
-// MPSImageErode : MPSImageDilate (:174) - the same probe, the other half of the choice.
 @implementation MPSImageErode
 - (CharonMPSMorphologyPick)charon_pick
 {

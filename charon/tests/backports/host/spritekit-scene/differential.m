@@ -1,10 +1,3 @@
-// differential.m - the SKScene surface of iOS 7 and 8, and SKNode's scene, run against the host's own SpriteKit and against
-// the port's objects, with one source. It is runtime only: no SpriteKit header, typed objc_msgSend casts, and
-// NSClassFromString for the class, so the same program links either side. The view (SKView) is iOS only and is not
-// built on the host here: it is compiled for armv7 by the library's gate.
-//
-// Each line is printed to stdout and compared line by line. The scene's refusals are logged by the framework on stderr
-// (NSLog); the harness compares that log with its timestamp removed.
 #import <Foundation/Foundation.h>
 #include <objc/message.h>
 #include <objc/runtime.h>
@@ -49,7 +42,6 @@ static void point(const char *label, CGPoint p)
     printf("%s=(%g,%g)\n", label, p.x, p.y);
 }
 
-// The logging delegate and the logging subclass of the scene: the callbacks print what the scene reports.
 static void loggedDidChangeSize(id self, SEL _cmd, CGSize old)
 {
     (void)_cmd;
@@ -99,13 +91,11 @@ int main(void)
     point("position", ((PointGetter)objc_msgSend)(scene, S("position")));
     printf("userData nil=%d\n", ((ObjectGetter)objc_msgSend)(scene, S("userData")) == nil);
 
-    // The initialisers: init gives a size of 1 by 1 (measured), and initWithSize: gives the size it is given.
     id bare = ((ObjectGetter)objc_msgSend)(((ObjectGetter)objc_msgSend)(sceneClass, S("alloc")), S("init"));
     size("init size", ((SizeGetter)objc_msgSend)(bare, S("size")));
     id sized = ((ObjectWithSize)objc_msgSend)(((ObjectGetter)objc_msgSend)(sceneClass, S("alloc")), S("initWithSize:"), CGSizeMake(100, 50));
     size("initWithSize size", ((SizeGetter)objc_msgSend)(sized, S("size")));
 
-    // The anchor point sets the frame: the origin is the negative anchor times the size.
     ((VoidPoint)objc_msgSend)(sized, S("setAnchorPoint:"), CGPointMake(0.5, 0.25));
     rect("frame with anchor (0.5,0.25)", ((RectGetter)objc_msgSend)(sized, S("frame")));
     ((VoidSize)objc_msgSend)(sized, S("setSize:"), CGSizeMake(40, 20));
@@ -113,7 +103,6 @@ int main(void)
     ((VoidPoint)objc_msgSend)(sized, S("setAnchorPoint:"), CGPointMake(0, 0));
     rect("frame at anchor zero", ((RectGetter)objc_msgSend)(sized, S("frame")));
 
-    // The scene refuses its position and its scale: the values stay, and the framework logs the refusal (on stderr).
     ((VoidPoint)objc_msgSend)(scene, S("setPosition:"), CGPointMake(7, 9));
     point("position after set", ((PointGetter)objc_msgSend)(scene, S("position")));
     ((VoidFloat)objc_msgSend)(scene, S("setXScale:"), 3);
@@ -135,7 +124,6 @@ int main(void)
     printf("speed after set=%g\n", ((FloatGetter)objc_msgSend)(scene, S("speed")));
     printf("scale refusal done\n");
 
-    // The size setter calls didChangeSize: with the size it had, even when the size does not change (measured).
     Class logClass = objc_allocateClassPair(sceneClass, "LogScene", 0);
     class_addMethod(logClass, S("didChangeSize:"), (IMP)loggedDidChangeSize, "v@:{CGSize=dd}");
     class_addMethod(logClass, S("update:"), (IMP)loggedUpdate, "v@:d");
@@ -155,8 +143,6 @@ int main(void)
     ((VoidObject)objc_msgSend)(scene, S("setBackgroundColor:"), ((ColorMaker)objc_msgSend)(NSClassFromString(@"NSColor"), S("colorWithDeviceRed:green:blue:alpha:"), 1, 0, 0, 1));
     printf("backgroundColor after set=%s\n", [[((ObjectGetter)objc_msgSend)(scene, S("backgroundColor")) description] UTF8String]);
 
-    // SKNode's scene: a child in a scene has the scene, a node outside any scene has none (measured), and the scene is
-    // reached through the whole ancestry.
     id plainNode = ((ObjectGetter)objc_msgSend)(nodeClass, S("node"));
     printf("plain node scene nil=%d\n", ((ObjectGetter)objc_msgSend)(plainNode, S("scene")) == nil);
     id child = ((ObjectGetter)objc_msgSend)(nodeClass, S("node"));
@@ -168,7 +154,6 @@ int main(void)
     ((VoidObject)objc_msgSend)(scene, S("removeChildrenInArray:"), @[child]);
     printf("removed child scene nil=%d\n", ((ObjectGetter)objc_msgSend)(child, S("scene")) == nil);
 
-    // The delegate (iOS 8): stored and read back, and weak - the scene does not keep it, so it reads nil once it is gone.
     Class delegateClass = objc_allocateClassPair([NSObject class], "LogDelegate", 0);
     class_addMethod(delegateClass, S("update:forScene:"), (IMP)delegateUpdate, "v@:d@");
     objc_registerClassPair(delegateClass);

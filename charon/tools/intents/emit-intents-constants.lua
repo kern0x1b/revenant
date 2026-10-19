@@ -1,35 +1,3 @@
--- emit-intents-constants.lua LEDGER VALUES OUTDIR
---
---   xmake l tools/intents/emit-intents-constants.lua <ledger> <values> <outdir> [measured]
---
--- The Intents extern constants the ledger says the port has to export, one object file per release rung, the way the
--- tree already carries the AVFoundation metadata key-spaces (AVFoundation/MetadataKeyspacesNN.m).
---
--- Three inputs and what each is for:
---
---   LEDGER  coordination/corpus/ledger/Intents.tsv, rows kind == "constant", status == "missing" and "code" in needs.
---           83 of them, and every one's reason is the same sentence: "declared extern in the lifted headers and there
---           is no such symbol in the built libraries or the 6.1.3 cache -- the port has to export it".
---   VALUES  the values the host dump read: every name looked up in the host's own
---           /System/Library/Frameworks/Intents.framework with dlsym and dereferenced once. A value is what the host
---           holds, not what a header spells.
---   OUTDIR  packages/a/apple-backports/Intents, where the files are written.
---   MEASURED  optional: the release each name is first exported by, measured by release-split (its output, with the
---           symbol and the release on each line) or the measured.held-caches.tsv snapshot of that output. A name it names
---           is placed at the measured release, and the ledger's introduced is used for the rest.
---
--- A file is named IntentsConstants<NN>.m for the rung its names first appear in, and it holds only that rung:
--- backports.lua's band() raises on an object that mixes a name a band already exports with one it does not, and a
--- single-band 6.1.3 gate cannot see that, which is why AVFoundation's own key-space objects are split the same way. A
--- constant whose introduced is later than the highest rung this package carries would be a claim no release can
--- answer, and the tool refuses it rather than writing it.
---
--- The manifest, tools/intents/constants.json, is this tool's own output beside it: gen-registry reads it so a
--- regeneration does not drop the rows of these names.
---
--- The ledger is read as tab-separated with its header line naming the columns, so no column is addressed by its
--- number. A ledger with a quote character in it is refused, because the reader does not implement the quoting.
-
 import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 
@@ -55,7 +23,6 @@ local HEADER = [==[
 // the 6.1.3 cache -- the port has to export it".
 ]==]
 
--- The rung of a release version as numbers: "10.0.1" is {10, 0, 1}.
 local function rung_of(text)
     local parts = {}
     for part in text:gmatch("[^%.]+") do
@@ -64,7 +31,6 @@ local function rung_of(text)
     return parts
 end
 
--- Python's tuple order: component by component, and a prefix sorts first.
 local function rung_less(a, b)
     for index = 1, math.max(#a, #b) do
         if a[index] == nil then
@@ -94,7 +60,6 @@ local function rung_key(rung)
     return table.concat(parts, "_")
 end
 
--- The ledger's rows as dictionaries keyed by its own header names, the way csv.DictReader reads them.
 local function read_ledger(file)
     local rows = {}
     local columns = nil
@@ -116,8 +81,6 @@ local function read_ledger(file)
     return rows
 end
 
--- The measured release of each name: release-split's output (object, symbol, release, with the symbol's leading underscore) or a
--- snapshot (symbol, release). A MIXED-RELEASES line names no symbol. Without a path, nothing is measured.
 local function measured_rungs(path)
     local out = {}
     if path == nil then
@@ -176,7 +139,6 @@ function main(ledger, values_path, outdir, measured_path)
         end
         table.insert(by_rung[key].rows, row)
     end
-    -- An insertion sort by rung: a handful of rungs, compared as integers, so the order is the same in every locale.
     for index = 2, #rungs do
         local group = rungs[index]
         local at = index - 1
@@ -206,7 +168,6 @@ function main(ledger, values_path, outdir, measured_path)
         table.insert(written, {name = name, count = #rows, rung = rung_text(group.rung)})
     end
 
-    -- The manifest: the names this package defines, with the release each first appears in. gen-registry reads it.
     local manifest_entries = {}
     for _, row in ipairs(wanted) do
         manifest_entries[row.api] = {introduced = row.introduced, rung = rung_text(rung_of(measured[row.api] or row.introduced))}
@@ -224,8 +185,6 @@ function main(ledger, values_path, outdir, measured_path)
     return 0
 end
 
--- json.dump(indent=2, sort_keys=True) of the manifest, the way the Python wrote it: two spaces an indent, a
--- key and its value on one line, the object's keys sorted.
 function manifest_text(entries)
     local names = {}
     for name in pairs(entries) do

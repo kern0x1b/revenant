@@ -1,10 +1,5 @@
--- compare-protocol-options-ciphersuite.lua - the ciphersuite list, read back, differences NAMED.
---
---    xmake l compare-protocol-options-ciphersuite.lua <the binary's output>
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
--- In the order the values are named.
 local VALUES = {
     {"count", 2}, {"first-as-given", 0x0001}, {"second-as-given", 0x002F}, {"past-end", 0},
     {"group-as-given", 1}, {"list-unchanged-by-group", 2}, {"first-unchanged-by-group", 0x0001},

@@ -1,17 +1,3 @@
-/*
- * The privacy context of iOS 14 and the resolver configuration beside it: what a program says about
- * the names a connection looks up.
- *
- * A privacy context is a name for one program's lookups: it says whether the names must be resolved
- * in an encrypted way, which resolver to fall back on, and whether the system may log them. The
- * release this port builds for resolves names with the resolver the system gives it and has no log
- * of its own to switch off, so what is kept is what a program said - the context is carried, its
- * description is what it was given, and a connection reads the demands from it the way it reads
- * every other setting of its parameters.
- *
- * A resolver configuration is one resolver: over TLS or over HTTPS, with the addresses to ask.
- */
-
 #import "CharonNW.h"
 #import "CharonNWSupport.h"
 
@@ -48,9 +34,6 @@ void nw_privacy_context_flush_cache(nw_privacy_context_t privacy_context)
     CharonNWPrivacyContext *value = (CharonNWPrivacyContext *)privacy_context;
     if (!value || !value->_fallbackResolver)
         return;
-    /* The cache of names a context resolved is the system's, and the release has none of its own to
-       clear, so asking is answered by doing nothing: a name resolved now is resolved now either
-       way, which is the state the call is for. */
 }
 
 void nw_parameters_set_privacy_context(nw_parameters_t parameters, nw_privacy_context_t privacy_context)

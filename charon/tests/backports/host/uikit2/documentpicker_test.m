@@ -35,7 +35,6 @@ static NSString *raised(id (^block)(void))
         id result = block();
         return [NSString stringWithFormat:@"made %ld", (long)[[result valueForKey:@"documentPickerMode"] integerValue]];
     } @catch (NSException *exception) {
-        /* the reason carries an NSError, whose description names the underlying error by address */
         NSString *reason = [exception.reason stringByReplacingOccurrencesOfString:@"0x[0-9a-f]+" withString:@"0x" options:NSRegularExpressionSearch range:NSMakeRange(0, exception.reason.length)];
         return [NSString stringWithFormat:@"%@: %@", exception.name, reason];
     }

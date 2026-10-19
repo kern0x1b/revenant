@@ -9,26 +9,6 @@ void charon_windowed_run(UIWindow *window)
         } probes[] = {{"UIView", "transform3D"}, {"UIView", "overrideUserInterfaceStyle"}, {"UIView", "focusGroupIdentifier"}, {"UIViewController", "isModalInPresentation"}, {"UISwitch", "preferredStyle"},
                       {"UIPageControl", "indicatorImageForPage:"}, {"UILabel", "lineBreakStrategy"}, {"NSLayoutManager", "usesDefaultHyphenation"}, {"UIDatePicker", "preferredDatePickerStyle"}, {"NSObject", "accessibilityUserInputLabels"},
                       {"UIAccessibilityCustomAction", "actionHandler"}, {"UIScreen", "calibratedLatency"}, {"UISegmentedControl", "selectedSegmentTintColor"}, {"UIResponder", "validateCommand:"}};
-        // Both halves, because on this path the port does not override the system any more - it answers beside
-        // it under a prefixed name, which is what prefixed_build exists for. Measured on this group over the
-        // fourteen probes, dladdr of the two IMPs:
-        //
-        //   UIView transform3D   bare -> /System/iOSSupport/.../UIKitCore.framework/UIKitCore
-        //                        prefixed -> .../views13.app/Contents/MacOS/app
-        //
-        // for every probe whose member the port carries, which is why asking the BARE name (what this check did
-        // while the group was on the plain path) reported all thirteen: there the port's method had taken the
-        // system's name, and here it has not. So: the prefixed name must be the app's own implementation, and
-        // the bare name must NOT be - the second half is the statement that the override is gone, and it is the
-        // half that was true by accident before.
-        //
-        // `modalInPresentation` is not in the list and `isModalInPresentation` is: the port's UIViewController
-        // (CharoniOS13) carries -isModalInPresentation and -setModalInPresentation: and nothing named
-        // modalInPresentation, so the old probe asked a selector no object defines and passed only because both
-        // answers landed in libobjcMsgSend.dylib.
-        // The port's image is this binary, named once from a function of its own: dladdr answers a path, and
-        // comparing it with this executable's path is what says "the port's implementation" rather than "not
-        // UIKit" - the harness also links Foundation and AppKit, and a member could live in either.
         Dl_info self_info;
         memset(&self_info, 0, sizeof(self_info));
         dladdr((void *)&charon_windowed_run, &self_info);

@@ -1,11 +1,3 @@
--- compare-certificate-fields.lua - the common name and the addresses, against the HOST'S OWN accessors, differences NAMED.
---
---    xmake l compare-certificate-fields.lua <the binary's output>
---
--- The host's copies come off the system framework handle, not by calling the name - this case defines the same names, and a case
--- that called them would compare the port with itself. Every address the port produced is printed against the host's at the same
--- index, so a missing one and an extra one are different failures and are named differently.
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
 local EXPECTED_CN = "charon-der-test"

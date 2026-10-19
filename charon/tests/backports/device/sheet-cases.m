@@ -2,7 +2,6 @@
 #import "sheet-cases.h"
 #import "sheet-shadow-expectations.h"
 
-/* A context of the test's own, with the container bounds the medium detent asks for. */
 @interface SheetContext : NSObject <UISheetPresentationControllerDetentResolutionContext>
 @property (nonatomic, strong) UITraitCollection *containerTraitCollection;
 @property (nonatomic, assign) CGFloat maximumDetentValue;
@@ -13,8 +12,6 @@
 - (CGRect)_containerBounds { return self.bounds; }
 @end
 
-/* A context of the caller's own with the protocol's members only: UIKit's medium detent sends it _containerBounds all the
-   same (0x189d322b4). */
 @interface BareSheetContext : NSObject <UISheetPresentationControllerDetentResolutionContext>
 @property (nonatomic, strong) UITraitCollection *containerTraitCollection;
 @property (nonatomic, assign) CGFloat maximumDetentValue;
@@ -48,7 +45,6 @@ static NSString *flag(BOOL value)
     return value ? @"1" : @"0";
 }
 
-/* The description without its address. */
 static NSString *detent_text(UISheetPresentationControllerDetent *detent)
 {
     NSString *text = detent.description;
@@ -118,8 +114,6 @@ void sheet_api_run(SheetRecorder record)
     }
     record(@"resolve.bare", [NSString stringWithFormat:@"%@ large=%@", bareMedium, number([[UISheetPresentationControllerDetent largeDetent] resolvedValueInContext:bare])]);
 
-    /* A controller owns the sheet it was asked for and the sheet does not own it back; a presentation controller the
-       caller made holds both of its controllers. */
     __weak UIViewController *ownerGone = nil;
     __weak UIViewController *heldGone = nil;
     __weak UIViewController *customPresented = nil;
@@ -216,8 +210,6 @@ static NSString *window_rect(UIView *view)
 }
 @end
 
-/* The sheet's grabber: the one control among the sheet view's own subviews, as UIKit's drop
-   shadow view holds its _UIGrabber. */
 static UIControl *sheet_grabber(UIView *sheetView)
 {
     for (UIView *view in sheetView.subviews)
@@ -226,7 +218,6 @@ static UIControl *sheet_grabber(UIView *sheetView)
     return nil;
 }
 
-/* A responder that takes key input and says it is not editable, as a text view that is not. */
 @interface SheetReadOnlyInput : UIView <UIKeyInput>
 @end
 
@@ -250,7 +241,6 @@ static NSString *hits(UIWindow *window, CGPoint point, UIView *view)
     return flag([window hitTest:point withEvent:nil] == view);
 }
 
-/* One pixel of the window at the screen's scale, its top left corner at a point. */
 static void window_pixel(UIWindow *window, CGPoint point, uint8_t pixel[4])
 {
     CGFloat scale = window.screen.scale;
@@ -265,10 +255,6 @@ static void window_pixel(UIWindow *window, CGPoint point, uint8_t pixel[4])
     CGContextRelease(context);
 }
 
-/* The magic shadow 20 points above a sheet's card, over what lies under it, per the host's shadow view
-   (host/sheetshadow/run.sh): the alpha of its image along an edge at the pixel's distance from the shadow's outer
-   edge, 150 points above the card, and its vibrant matrix of the destination laid over it with the matrix's alpha.
-   The destination is read 162 points above the card, beyond the shadow. */
 static NSString *magic_shadow(UIWindow *window, UIView *card, SheetRecorder record)
 {
     NSDictionary *host = [NSJSONSerialization JSONObjectWithData:[NSData dataWithBytes:sheet_shadow_expectations length:strlen(sheet_shadow_expectations)] options:0 error:NULL];
@@ -316,7 +302,6 @@ void sheet_layout_run(UIWindow *window, SheetRecorder record, void (^done)(void)
     second.modalPresentationStyle = UIModalPresentationFormSheet;
     SheetReadOnlyInput *input = [[SheetReadOnlyInput alloc] initWithFrame:CGRectMake(20, 100, 100, 30)];
     [first.view addSubview:input];
-    /* A sheet over a full-screen presentation has no parent to stack with, so it has the magic shadow. */
     UIViewController *under = [[UIViewController alloc] init];
     under.view.backgroundColor = [UIColor redColor];
     under.modalPresentationStyle = UIModalPresentationFullScreen;
@@ -342,7 +327,6 @@ void sheet_layout_run(UIWindow *window, SheetRecorder record, void (^done)(void)
            sheet.prefersGrabberVisible = YES;
            [sheet_grabber(sheet.presentedView) sendActionsForControlEvents:UIControlEventTouchUpInside]; },
         ^{ state(@"grabberFromLarge");
-           /* The grabber takes touches in 44 points around itself, beyond the card's top edge too. */
            UIControl *grabber = sheet_grabber(sheet.presentedView);
            CGPoint centre = [grabber convertPoint:CGPointMake(CGRectGetMidX(grabber.bounds), CGRectGetMidY(grabber.bounds)) toView:nil];
            CGFloat top = [sheet.presentedView convertRect:sheet.presentedView.bounds toView:nil].origin.y;
@@ -361,7 +345,6 @@ void sheet_layout_run(UIWindow *window, SheetRecorder record, void (^done)(void)
         ^{ UIControl *grabber = sheet_grabber(sheet.presentedView);
            CGFloat top = [sheet.presentedView convertRect:sheet.presentedView.bounds toView:nil].origin.y;
            record(@"layout.hit.hidden", [NSString stringWithFormat:@"above=%@", hits(window, CGPointMake(CGRectGetMidX(window.bounds), top - 10), grabber)]);
-           /* Whether the release lets a text view that is not editable hold the keyboard: a note, not a check. */
            UITextView *text = [[UITextView alloc] initWithFrame:CGRectMake(20, 140, 100, 40)];
            text.editable = NO;
            [first.view addSubview:text];
@@ -389,6 +372,5 @@ void sheet_layout_run(UIWindow *window, SheetRecorder record, void (^done)(void)
         ^{ [under dismissViewControllerAnimated:NO completion:nil]; },
         ^{ done(); },
         nil];
-    /* The delayed perform keeps the steps alive until the last one has run. */
     [steps next];
 }

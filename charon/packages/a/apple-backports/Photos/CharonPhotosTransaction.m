@@ -2,9 +2,6 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-// Photos applies a change block as one unit, so a request may name an object another request of the block creates, in
-// whichever order the block made them. A change writes what it makes in charon_commit; what relates it to another
-// object (an album's assets) waits for charon_commitRelations, which runs once every change of the block has committed.
 @protocol CharonPhotosChange <NSObject>
 - (BOOL)charon_validate:(NSError **)error;
 - (BOOL)charon_commit:(NSError **)error;

@@ -1,11 +1,3 @@
--- `impl-index`: the file lists of the reference implementations that surface_impl.lua reads as implementation leads. For each
--- repository in surface_impl's REPOS it asks GitHub for the tree of the repository's branch (`gh api`, names only, nothing cloned)
--- and writes {repo, branch, sha, files} to <corpus>/impl-source-trees/<owner>_<name>.json. A tree GitHub truncates is refused: a
--- list with files missing from it would drop leads without a word. Port of the former sdk-surface.py impl-index.
---
--- usage: xmake l tools/gen.lua impl-index --tree T [--coordination <corpus folder>]
--- The corpus folder defaults to $CHARON_CORPUS_ROOT/corpus (CHARON_CORPUS_ROOT defaults to ~/Git/projects/ios/coordination).
-
 local json = import("core.base.json")
 local emit = import("emit", {anonymous = true})
 local surface_impl = import("surface_impl", {anonymous = true})
@@ -15,7 +7,6 @@ local function default_corpus()
     return path.join(root, "corpus")
 end
 
--- The blob paths of a tree listing, in the order GitHub gives them.
 local function blobs(tree)
     local out = {}
     for _, item in ipairs(tree.tree or {}) do
@@ -26,7 +17,6 @@ local function blobs(tree)
     return out
 end
 
--- Returns the exit status: 0 when every repository's list is written.
 function run(args)
     local corpus = args.coordination or default_corpus()
     local trees = path.join(corpus, "impl-source-trees")

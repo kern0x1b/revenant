@@ -1,10 +1,3 @@
-// render <scene.scn> <points> <time> <out.png> [switch...] : macOS SceneKit's frame of a scene from its first
-// camera, transparent background, no antialiasing, read back as SceneKit stores it (sRGB, premultiplied). The
-// switches change the scene the way device/scenekit-frames.m changes it on the port: noparticles, nosubdiv (every
-// geometry's subdivisionLevel 0), noclearcoat (every material's clearCoat intensity 0), nonormal (every material's
-// normal contents nil), and, one slot of every material at a time: nometalness, noselfillumination, noemission (the
-// slot's intensity 0), flatdiffuse (the diffuse contents the sRGB grey 0.5 instead of an image), nolight+<type> (every
-// light of that type off), metalness=<v> and roughness=<v> (every material's slot the number v).
 import SceneKit
 import AppKit
 import Metal

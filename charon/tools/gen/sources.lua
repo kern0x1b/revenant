@@ -1,6 +1,3 @@
--- The sources the generator reads and the open-source leads it may read as references: the tables the README of each
--- framework prints. One place for the rows; the generated README takes its tables from here.
-
 local sdk = import("sdk", {anonymous = true})
 
 local OSS_LEADS = {
@@ -12,8 +9,6 @@ local OSS_LEADS = {
     {"gnustep", "GNUstep base and gui", "LGPL / GPL", "reference-only", "reference only"},
 }
 
--- The rows of the sources table for one SDK release (the version sdk.discover reads): name, kind, licence, loader, status, what it adds.
--- The rows that name the release take it here, so the table of a release bump is the same table with its own release.
 function sources(release)
     local names = sdk.names(release)
     return {
@@ -27,7 +22,6 @@ function sources(release)
     }
 end
 
--- The rows of the open-source leads table: lead, library, licence, use, status.
 function oss_leads()
     return OSS_LEADS
 end

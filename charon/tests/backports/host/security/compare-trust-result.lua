@@ -1,7 +1,3 @@
--- compare-trust-result.lua - the verdict as a status and result pair against the host's own function, differences NAMED.
---
---    xmake l compare-trust-result.lua <the binary's output>
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
 function main(...)

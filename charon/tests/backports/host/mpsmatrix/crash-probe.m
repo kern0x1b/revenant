@@ -1,18 +1,3 @@
-// crash-probe.m — the two destinations MPSMatrixRandom has that the MPS of macOS 26.5 does not answer.
-// Run on its own, never from the differential: the first of these cases takes the process down inside
-// the system framework, and an oracle that dies cannot answer the rest of a comparison.
-//
-//   xcrun clang -fobjc-arc -Wno-unguarded-availability-new crash-probe.m \
-//       -framework Foundation -framework Metal -framework MetalPerformanceShaders -o crash-probe
-//   ./crash-probe vector    # MPSVector destination
-//   ./crash-probe batch     # a batch range over a matrix destination
-//   ./crash-probe float32   # a Float32 destination, which the release does answer, kept as a control:
-//                            # a run of this that answers is what says the others are the release's own
-//                            # refusals rather than this harness's mistake.
-//   ./crash-probe batch     # a batch range over a matrix destination
-//
-// Each prints what it asked for and then either the words the release produced or the line it died on.
-
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>

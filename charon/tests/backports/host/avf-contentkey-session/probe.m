@@ -1,11 +1,3 @@
-// probe.m - AVContentKeySession, AVContentKeyRequest and AVContentKey (10.3 to 14.5), asked of the host's own
-// AVFoundation and of the port's classes in one binary (run.sh builds it both ways and diffs the output). Each line is one
-// answer with a label; no answer names a class, since the host's private subclasses are not the port's, and a class is
-// asked about with isKindOfClass: where the answer is a class.
-//
-// What is not asked here, and why: -expire (the host forwards it to its delegate and raises when the delegate lacks it,
-// a host behaviour the port does not reproduce), and the persistable paths that need a key to persist (no ClearKey or
-// FairPlay request in this probe can be made persistable; facts/AVFoundation/ContentKeySession.md).
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 
@@ -23,10 +15,6 @@ static NSString *Describe(NSError *e)
             underlying ? [NSString stringWithFormat:@"%@ %ld", underlying.domain, (long)underlying.code] : @"none"];
 }
 
-// The host's refusals of a key response are not stable: the same vector gets CoreMedia -12160 in some runs and AVFoundation
-// -11800 wrapping -12160 in others (ten runs, facts/AVFoundation/ContentKeySession.md). So stdout records that the request
-// was refused, which is stable, and the shape goes to stderr as a measurement that run.sh does not diff. The probe's own
-// error (domain "probe") is stable, so it is printed in full.
 static BOOL RefusalShapeVaries(NSError *e)
 {
     return e && ![e.domain isEqualToString:@"probe"];
@@ -38,9 +26,6 @@ static NSString *Stable(NSError *e)
     return RefusalShapeVaries(e) ? @"refused" : Describe(e);
 }
 
-// The success callback and the recipient's key callback are delivered in an order the host varies run to run (ten runs:
-// the recipient first in some, the delegate first in others). While a case runs they are collected here; Case prints them
-// sorted, so the diff does not depend on that order, and the order that happened goes to stderr.
 static NSMutableArray<NSString *> *Events;
 
 static void Emit(NSString *line)
@@ -49,10 +34,9 @@ static void Emit(NSString *line)
     else printf("%s\n", [line UTF8String]);
 }
 
-// The delegate records what it hears and answers the request it is handed with the response the case asks for.
 @interface Delegate : NSObject <AVContentKeySessionDelegate>
 @property (nonatomic, copy) NSString *tag;
-@property (nonatomic, copy) NSString *answer;     // clear-16, clear-iv:<n>, clear-key:<n>, fairplay, token, error, none
+@property (nonatomic, copy) NSString *answer;
 @property (nonatomic) BOOL batch;
 @property (nonatomic, strong) AVContentKeyRequest *held;
 @end
@@ -129,7 +113,6 @@ static void Emit(NSString *line)
 
 @end
 
-// A recipient that asks for keys and records the key it is given.
 @interface Recipient : NSObject <AVContentKeyRecipient>
 @property (nonatomic, copy) NSString *tag;
 @end
@@ -152,7 +135,6 @@ static void Emit(NSString *line)
 
 @end
 
-// One case: a session for a key system, a delegate that answers as asked, a request with the initialization data given.
 static Delegate *Case(NSString *tag, NSString *system, NSString *answer, NSData *initData, BOOL batch, BOOL recipient)
 {
     AVContentKeySession *session = [AVContentKeySession contentKeySessionWithKeySystem:system];
@@ -184,7 +166,6 @@ int main(void)
 {
     setvbuf(stdout, NULL, _IONBF, 0);
     @autoreleasepool {
-        // Session creation and refusals.
         for (NSString *system in @[AVContentKeySystemClearKey, AVContentKeySystemFairPlayStreaming, AVContentKeySystemAuthorizationToken]) {
             AVContentKeySession *s = [AVContentKeySession contentKeySessionWithKeySystem:system];
             printf("create %s keySystem=%s\n", [system UTF8String], [[s.keySystem description] UTF8String]);
@@ -195,9 +176,6 @@ int main(void)
         } @catch (NSException *e) {
             printf("unknown system raised %s: %s\n", [e.name UTF8String], [[e reason] UTF8String]);
         }
-        // A storage directory: FairPlay keeps it (its storageURL is the directory given); ClearKey and the token system
-        // refuse one with their own reason. The path is printed by its last component, so the output does not depend on
-        // the working directory.
         NSURL *storageDirectory = [NSURL fileURLWithPath:@"avf-contentkey-session-storage"];
         for (NSString *system in @[AVContentKeySystemClearKey, AVContentKeySystemAuthorizationToken]) {
             @try {
@@ -211,17 +189,14 @@ int main(void)
                                                                     storageDirectoryAtURL:storageDirectory];
         printf("stored storageURL last=%s\n", [[stored.storageURL lastPathComponent] UTF8String]);
 
-        // Callbacks: singular, batch, and the initialization-data refusal to call back at all.
         Case(@"C1 clear singular", AVContentKeySystemClearKey, @"clear-16", nil, NO, NO);
         Case(@"C2 clear batch", AVContentKeySystemClearKey, @"clear-16", nil, YES, NO);
         Case(@"C3 clear init-data", AVContentKeySystemClearKey, @"clear-16", [@"init" dataUsingEncoding:NSUTF8StringEncoding], YES, NO);
         Case(@"C4 fairplay singular", AVContentKeySystemFairPlayStreaming, @"fairplay", nil, NO, NO);
         Case(@"C5 token singular", AVContentKeySystemAuthorizationToken, @"token", nil, NO, NO);
 
-        // The clear key success path, with a recipient that receives the key.
         Case(@"R1 clear recipient", AVContentKeySystemClearKey, @"clear-16", nil, NO, YES);
 
-        // The clear key vectors, 0 to 34 (measured table), and the key lengths the host accepts.
         for (NSUInteger n = 0; n <= 34; n++) {
             Case([NSString stringWithFormat:@"V%02lu iv", (unsigned long)n], AVContentKeySystemClearKey,
                  [NSString stringWithFormat:@"clear-iv:%lu", (unsigned long)n], nil, NO, NO);
@@ -230,11 +205,9 @@ int main(void)
         Case(@"K4 clear key 4", AVContentKeySystemClearKey, @"clear-key:4", nil, NO, NO);
         Case(@"K32 clear key 32", AVContentKeySystemClearKey, @"clear-key:32", nil, NO, NO);
 
-        // FairPlay refused responses, and the error the request reports.
         Case(@"F1 fairplay response", AVContentKeySystemFairPlayStreaming, @"fairplay", nil, NO, NO);
         Case(@"E1 error given", AVContentKeySystemClearKey, @"error", nil, NO, NO);
 
-        // The streaming request data a FairPlay and a ClearKey request make, which the host refuses without the key services.
         for (NSString *system in @[AVContentKeySystemFairPlayStreaming, AVContentKeySystemClearKey]) {
             AVContentKeySession *s = [AVContentKeySession contentKeySessionWithKeySystem:system];
             Delegate *d = [Delegate new];
@@ -256,7 +229,6 @@ int main(void)
             printf("%s streaming answered=%d\n", [d.tag UTF8String], answered);
         }
 
-        // Persistence, renewal and invalidation: refused by the ClearKey system, each with its reason.
         AVContentKeySession *p = [AVContentKeySession contentKeySessionWithKeySystem:AVContentKeySystemClearKey];
         Delegate *pd = [Delegate new];
         pd.tag = @"P";
@@ -299,7 +271,6 @@ int main(void)
             printf("invalidateAll raised %s: %s\n", [e.name UTF8String], [[e reason] UTF8String]);
         }
 
-        // The storage's reports: none pending in an empty directory.
         NSData *app = [@"app" dataUsingEncoding:NSUTF8StringEncoding];
         NSURL *dir = [NSURL fileURLWithPath:NSTemporaryDirectory()];
         printf("pending reports=%lu\n", (unsigned long)[[AVContentKeySession pendingExpiredSessionReportsWithAppIdentifier:app storageDirectoryAtURL:dir] count]);

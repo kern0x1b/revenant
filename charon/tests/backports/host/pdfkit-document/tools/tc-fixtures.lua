@@ -1,16 +1,3 @@
--- tc-fixtures.lua - the fixtures whose content stream sets a NON-ZERO character spacing (Tc), printed one name per line.
---
---     xmake l tools/tc-fixtures.lua <fixtures directory>
---
--- Read the way the fixture checker reads one: for each .pdf in name order, the first stream that draws text (" Tf" in it,
--- inflated first when its dictionary says /FlateDecode) is read for its Tc, and a fixture whose Tc is not zero is printed.
--- This is the list the comparison reads as its stated boundary, so it is computed here rather than written out.
---
--- The regex this replaces, applied by Python's finditer over each file's bytes:
---     stream\r?\n(.*?)\nendstream        (with re.S: the body is lazy, the first "\nendstream" ends it)
--- and then, on the inflated stream,
---     ([-\d.]+)\s+Tc                     (re.search: the leftmost run of [-\d.] that is followed by whitespace and "Tc")
-
 local pdfwrite = import("pdfwrite", {rootdir = os.scriptdir()})
 
 local function read_file(file)
@@ -20,7 +7,6 @@ local function read_file(file)
     return data
 end
 
--- Byte order, which is Python's order for these ASCII names.
 local function byte_less(a, b)
     for i = 1, math.min(#a, #b) do
         local x, y = a:byte(i), b:byte(i)
@@ -31,7 +17,6 @@ local function byte_less(a, b)
     return #a < #b
 end
 
--- Python's float() of the run: a run float() refuses (such as "-" or "1.2.3") is the ValueError Python raises.
 local function float_of(text)
     local value = tonumber(text)
     if value == nil then
@@ -40,8 +25,6 @@ local function float_of(text)
     return value
 end
 
--- re.search(rb"([-\d.]+)\s+Tc", raw): the run, or nil. The run at a position is maximal: a shorter one could only be
--- followed by another run character, which is never whitespace.
 local function tc_value(raw)
     local at = 1
     while at <= #raw do
@@ -63,7 +46,6 @@ local function tc_value(raw)
     return nil
 end
 
--- The first stream of a file that draws text, read for its Tc: true when that Tc is non-zero.
 local function has_spacing(data)
     local search = 1
     while true do

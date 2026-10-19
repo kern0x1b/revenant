@@ -1,10 +1,3 @@
--- What the package index must serve: every folder packages/<letter>/<name> holds an xmake.lua that declares
--- package("<name>") under the same name, filed under the letter the name starts with. A folder that breaks one of
--- these serves no version of its package, so every package requiring it fails to resolve. index_findings(root)
--- returns the findings as sorted strings, empty when the index is sound.
---
--- Replaces indexes.py, whose trim_conandata checks have no xmake equivalent: a Conan local index trimmed each
--- conandata.yml, and xmake keeps versions in the package file itself.
 function index_findings(root)
     local found = {}
     for _, folder in ipairs(os.dirs(path.join(root, "*", "*"))) do

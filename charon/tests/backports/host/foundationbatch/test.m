@@ -3,35 +3,8 @@
 #import <objc/runtime.h>
 #import "check.h"
 
-/* The second N-Z batch against the system's own, in one process.
-
-   Each source is compiled once plain, tests/backports/host/prefix_selectors.py renames the selectors
-   it defines by their place in the AST, and the renamed objects are attached beside the system's
-   Foundation through foundation2/host-attach.c. A category needs that mechanism rather than a -D
-   rename, which would rename the same selector in an SDK header where it carries an attribute.
-
-   What is here: the progress's -isIndeterminate, -isPaused, -resume and its resuming handler, the
-   number formatter's minimum grouping digits and its formatting, the two URL encoders, and the three
-   promised-item methods.
-
-   What is not, and why: the progress's -pause and the other members of NSProgress.m, because that file
-   is the port's own *class* -- it replaces the release's, and the rewriter deliberately leaves a class
-   implementation's methods unrenamed (its object defines -[NSProgress pause] with no prefix), so a host
-   differential cannot hold those two side by side. tests/backports/device/foundation15batch.m holds
-   them on the device. The credential storage's and the cache's task half are not here either: the
-   host's own Catalyst headers predate that API. The request flags, the parser's policy, an
-   operation's name and the platform flags are stored values with no host behaviour to measure
-   against, and the device test calls them. */
-
 void host_attach_prefixed(const char *prefix);
 
-/* Three counts, and the exit reads one of them.
-   checks       the comparisons the two sides answered alike
-   failures     the comparisons the two sides answered differently -- charon_failures, and the exit
-   divergences  the places the two sides deliberately differ, each named and each asserted rather
-                than compared, so that a difference which is written down is not also a failure
-   The count of divergences is here rather than in check.m because check.m is shared with every other
-   host test, and a third count in it would be a third thing for every one of them to mean. */
 static int charon_divergences;
 
 static SEL ported(const char *selector)
@@ -67,8 +40,6 @@ static void progress_state(void)
                        (int)system.isIndeterminate,
                        (int)((BOOL (*)(id, SEL))objc_msgSend)(ours, ported("isIndeterminate"))]);
     }
-    /* The paused flag and the resuming handler, on both sides. -pause is the release's here: the
-       port's lives in NSProgress.m, which this build cannot carry renamed (see the header). */
     NSProgress *system = [[NSProgress alloc] initWithParent:nil userInfo:nil];
     [system pause];
     NSProgress *ours = [[NSProgress alloc] initWithParent:nil userInfo:nil];
@@ -76,8 +47,6 @@ static void progress_state(void)
     charon_check(((BOOL (*)(id, SEL))objc_msgSend)(ours, ported("isPaused")) == NO,
                  "a fresh progress is not paused on the backport side",
                  @"the backport says a fresh progress is paused");
-    /* The resuming handler runs only when the progress was paused. The port's -pause is not here, so
-       the flag is set through the port's own reader and the pair is compared on what -resume does. */
     __block int systemRan = 0, ourRan = 0;
     system.resumingHandler = ^{ systemRan++; };
     ((void (*)(id, SEL, id))objc_msgSend)(ours, ported("setResumingHandler:"), ^{ ourRan++; });
@@ -143,8 +112,6 @@ static void url_encoding(void)
                      [[NSString stringWithFormat:@"the escaped URL of %@", text] UTF8String],
                      [NSString stringWithFormat:@"the system answers %@, the backport answers %@",
                       system.absoluteString, ours.absoluteString]);
-        /* The same string with the flag off, which is the case that was left open: what the host
-           answers for a string it cannot read, and whether the backport agrees. */
         NSURL *systemRaw = [NSURL URLWithString:text encodingInvalidCharacters:NO];
         NSURL *ourRaw = ((id (*)(id, SEL, id, BOOL))objc_msgSend)([NSURL class],
                          ported("URLWithString:encodingInvalidCharacters:"), text, (BOOL)NO);
@@ -191,8 +158,6 @@ static void promised_item(void)
 int main(void)
 {
     @autoreleasepool {
-        /* prefix_selectors.py has already renamed the methods, and host_attach_prefixed prepends what
-           it is given: a prefix here would look for charonHost_charonHost_isIndeterminate. */
         host_attach_prefixed("");
         progress_state();
         number_formatter();

@@ -1,21 +1,14 @@
--- compare-protocol-options.lua - the defaults and the comparisons of the options object, differences NAMED.
---
---    xmake l compare-protocol-options.lua <the binary's output>
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
--- label and the value the default must read
 local DEFAULTS = {
     {"default-min-tls", 0x0301}, {"default-max-tls", 0x0303},
     {"default-min-dtls", 0xfeff}, {"default-max-dtls", 0xfeff},
 }
--- label and the value the comparison must give
 local COMPARE = {
     {"both-empty-equal", 1}, {"same-range-equal", 1}, {"different-range", 0},
     {"same-object", 1}, {"null-a", 0}, {"null-both", 1},
     {"alive-in-scope", 1}, {"deallocated-after-scope", 0},
 }
--- label and the reason a default must not answer
 local NOT_HONOURED = {
     {"no-tls13", "TLSv13 0x0304, which 6.1.3 cannot negotiate"},
     {"no-dtls12", "DTLSv12 0xfefd, which 6.1.3 cannot negotiate"},

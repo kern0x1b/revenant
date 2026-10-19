@@ -1,9 +1,3 @@
-// Holds CSSearchableIndex.m's file store to what its completion handlers answer: a write that fails
-// hands back CSIndexErrorCodeIndexUnavailableError with the Foundation cause under
-// NSUnderlyingErrorKey, and leaves nothing of the failed call in memory - neither for
-// -fetchLastClientState nor for the next save that succeeds. run.sh builds the port's own
-// CoreSpotlight sources with the store root moved into its build directory and takes the write
-// permission away from the store's directory for the first half.
 #import <CoreSpotlight/CoreSpotlight.h>
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,16 +1,10 @@
-// CCRandomGenerateBytes: status codes and write bounds per input class, the port against the host's own
-// function. The oracle is the host: nothing here writes an expected value. What is compared is the status,
-// whether the canary bytes past count survived, and whether count bytes were written at all. It does NOT test
-// the randomness of the bytes, which is not an oracle for a generator (facts/CommonCrypto/CCRandomGenerateBytes.md).
 #include <CommonCrypto/CommonRandom.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-// the port, compiled with its symbol renamed (run.sh)
 extern CCRNGStatus charon_host_CCRandomGenerateBytes(void *bytes, size_t count);
 
-// the control: always succeeds. The comparison must notice it on the NULL class with count 1, or it cannot fail.
 static CCRNGStatus always_ok(void *bytes, size_t count)
 {
     (void)bytes;
@@ -25,10 +19,6 @@ static const size_t canary = 64;
 static int cases = 0;
 static int failures = 0;
 
-// One call over a buffer of count bytes followed by a canary tail. The buffer is filled before the call, so a
-// write is visible; the tail must be unchanged (a write past count is a failure), and the body must have a changed
-// byte when count is 16 or more (a call that wrote nothing is a failure). The second is a write check, not a test
-// of the bytes' randomness.
 static CCRNGStatus call(generator fn, unsigned char *buffer, int null_pointer, size_t count, int *tail_intact,
                         int *written)
 {
@@ -53,7 +43,6 @@ static CCRNGStatus call(generator fn, unsigned char *buffer, int null_pointer, s
     return status;
 }
 
-// Returns 1 when the port and the host agree on the class.
 static int check(const char *label, generator port, generator host, size_t count, int null_pointer)
 {
     unsigned char *a = malloc(count + canary + 1), *b = malloc(count + canary + 1);
@@ -78,7 +67,6 @@ int main(void)
         failures += !check("port", charon_host_CCRandomGenerateBytes, CCRandomGenerateBytes, counts[i], 0);
         failures += !check("port", charon_host_CCRandomGenerateBytes, CCRandomGenerateBytes, counts[i], 1);
     }
-    // The control must DIFFER from the host. If it agrees, the comparison is blind to the NULL class.
     if (check("control", always_ok, CCRandomGenerateBytes, 1, 1)) {
         printf("CONTROL NOT NOTICED: the comparison cannot fail on the NULL class\n");
         failures++;

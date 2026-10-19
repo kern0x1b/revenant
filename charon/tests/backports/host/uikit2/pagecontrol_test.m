@@ -1,9 +1,5 @@
 #import "uirest.h"
 
-// The indicator images of a page control, drawn where its dots are: a page with its own image shows that image at its
-// dot's centre, a page with none keeps the release's dot, and the preferred image shows on a page with no image of its
-// own. The control's layer is rendered into a bitmap and the pixel at each dot's centre is read back.
-
 static UIImage *solid_image(UIColor *color)
 {
     UIGraphicsBeginImageContextWithOptions(CGSizeMake(6, 6), YES, 1);
@@ -50,20 +46,17 @@ void charon_windowed_run(UIWindow *window)
         size_t last_x = (size_t)lround(CGRectGetMidX(control.bounds) + pitch);
         uint8_t pixel[4];
 
-        // No image yet: the release's dots are what is drawn, so no page shows a colour of the test's own.
         [control layoutSubviews];
         pixel_at(control.layer, width, height, first_x, centre_y, pixel);
         charon_check(!is_red(pixel) && !is_blue(pixel), "a page with no image keeps the release's dot",
                      [NSString stringWithFormat:@"pixel %d %d %d", pixel[0], pixel[1], pixel[2]]);
 
-        // The page's own image, at its dot's centre.
         [control setIndicatorImage:solid_image([UIColor blueColor]) forPage:1];
         [control layoutSubviews];
         pixel_at(control.layer, width, height, middle_x, centre_y, pixel);
         charon_check(is_blue(pixel), "a page's own image is drawn at its dot's centre",
                      [NSString stringWithFormat:@"pixel %d %d %d", pixel[0], pixel[1], pixel[2]]);
 
-        // The preferred image shows on every page with none of its own, and a page's own image still wins over it.
         control.preferredIndicatorImage = solid_image([UIColor redColor]);
         [control layoutSubviews];
         pixel_at(control.layer, width, height, first_x, centre_y, pixel);

@@ -1,14 +1,3 @@
-/* descriptor.m - MTLIndirectCommandBufferDescriptor (iOS 12.0), compared member by member with Apple's own object.
- *
- * Four snapshots are compared, as in the other descriptor cases: a fresh descriptor, one with every member set away
- * from its default, a copy of that one, and the original after the copy was taken (the copy must not share).
- * Equality and the hash are compared the same way. A disagreement names the member and both values.
- *
- * NOTHING IS VALIDATED, measured on the host: a command type with bits Apple does not name, and a bind count far past
- * any device's, are read back as set on both sides. That is checked with the same values on both sides below.
- *
- * NO DEVICE IS CREATED. An indirect command buffer descriptor asks a device nothing.
- */
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
@@ -45,7 +34,6 @@ static NSDictionary *snapshot(MTLIndirectCommandBufferDescriptor *d)
     return s;
 }
 
-/* Sets every member away from its default. */
 static void setEverything(MTLIndirectCommandBufferDescriptor *d)
 {
     d.commandTypes = MTLIndirectCommandTypeDraw | MTLIndirectCommandTypeDrawIndexed;

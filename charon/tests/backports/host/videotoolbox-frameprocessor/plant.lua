@@ -1,11 +1,3 @@
--- plant.lua - replace one exact line of one file, or report that the needle is not there.
---
---     xmake l plant.lua FILE FROM TO
---
--- Exits non-zero when the needle is absent. That is the whole point: a plant that quietly did not apply
--- measures the unmutated tree and reports the mutant as caught, which is the same shape of output a real
--- catch has.
-
 function main(...)
     local args = { ... }
     if #args ~= 3 then

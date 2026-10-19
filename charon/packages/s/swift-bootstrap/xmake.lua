@@ -13,7 +13,6 @@ package("swift-bootstrap")
     local kept = {
         "usr/bin/swift-frontend", "usr/bin/swift-driver", "usr/bin/swift-package", "usr/lib/swift/host", "usr/lib/swift/shims",
         "usr/lib/swift/apinotes", "usr/lib/swift/module.modulemap", "usr/lib/swift/pm", "usr/lib/swift/macosx", "usr/lib/clang",
-        -- The package manager of this release builds through SwiftBuild, which reads its own resource bundles from share/pm.
         "usr/share/pm"
     }
 
@@ -45,7 +44,6 @@ package("swift-bootstrap")
             os.vcp(from, path.join(toolchain, item), {symlink = true})
         end
         os.ln("swift-driver", path.join(toolchain, "usr", "bin", "swiftc"))
-        -- swift-package is the Swift package manager under every name it answers to; the driver of the release is built with it.
         os.ln("swift-package", path.join(toolchain, "usr", "bin", "swift-build"))
         local clang = path.filename(assert(os.dirs(path.join(toolchain, "usr", "lib", "clang", "*"))[1], "the toolchain has no clang resource folder"))
         os.ln(path.join("..", "clang", clang), path.join(toolchain, "usr", "lib", "swift", "clang"))
@@ -57,7 +55,6 @@ package("swift-bootstrap")
     end)
 
     on_install("@macosx", function (package)
-        -- A download that holds one directory is entered by the build, so the toolchain is either here or below.
         local base = os.isdir(path.join("toolchain", "usr")) and "toolchain" or "."
         os.vcp(path.join(base, "usr", "*"), package:installdir() .. "/", {symlink = true})
         assert(os.isfile(path.join(package:installdir("bin"), "swift-frontend")),

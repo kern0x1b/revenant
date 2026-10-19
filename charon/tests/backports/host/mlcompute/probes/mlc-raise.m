@@ -1,10 +1,3 @@
-// mlc-raise.m - which binding of an inference execute raises on this host, one variant per process.
-//
-// The one that matters for the harness is MLCExecutionOptionsSkipWritingInputDataToDevice, which makes the
-// plain execute form raise an NSRangeException inside the host; every case therefore passes
-// MLCExecutionOptionsNone or MLCExecutionOptionsSynchronous. The other three variants are here so the
-// negative is measured rather than assumed: the data of an input may be shorter than the tensor, longer than
-// it, and a tensor may be of rank 1, and none of those raises on this host.
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <MLCompute/MLCompute.h>

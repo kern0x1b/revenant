@@ -1,43 +1,15 @@
-// The operations of CloudKit's first release: the base and the database it runs against, the three
-// that modify, the three that fetch by name, and the two that fetch changes.
-//
-// An operation is an NSOperation of the scheduler this package carries, and its -main is where the
-// request goes. What the base class is for is the four things every one of them needs and none of
-// them should decide for itself: the container, the configuration (or the two timeouts and the
-// cellular flag that predate it), the group, and the promise of one completion.
-//
-// The three promises this makes, because they are the ones a caller writes code against:
-//
-//  * The per-item blocks are called on the transport's queue, in the order the service answered, and
-//    the operation's own completion is called last and exactly once - with a partial failure as
-//    CKErrorPartialFailure and the per-item errors under CKPartialErrorsByItemIDKey, which is where
-//    the header puts them.
-//  * A query whose predicate the service has no form for never leaves the process: the completion is
-//    called with CKErrorInvalidArguments, which is the code the header names for a malformed
-//    predicate, and no per-item block is called at all.
-//  * An operation that is cancelled answers its completion with CKErrorOperationCancelled, the code
-//    the header names for it, and sends nothing further.
-
 #import "CharonCloudKit.h"
 #import "CharonCKConstants.h"
 #import "CharonCKSubscription.h"
 
-// object_getClass, for -init's one question: which class the object really is.
 #import <objc/runtime.h>
 
-// The end of an operation, and the name the port uses for it: this release keeps NSOperation's own
-// -finish private, so an operation of this package ends through a name of its own and the queue is
-// released by the one below.
 @interface CKOperation (CharonCKShared)
 - (void)charon_finish;
 @end
 
 #pragma mark - CKOperation
 
-// The two timeouts and the cellular flag, for the operations built before there was a
-// configuration to read them from. A CKOperationConfiguration of iOS 11 is the port's own and
-// holds the same five, and an operation reads the members that exist on it and the two that predate
-// it, so an operation built either way answers the same.
 @implementation CKOperation
 {
     CKOperationID _operationID;
@@ -47,30 +19,6 @@
     NSTimeInterval _timeoutIntervalForResource;
 }
 
-// Measured against the host's own CloudKit, for both spellings and through objc_msgSend so the
-// header's own marking could not stop the call: the base class refuses to be instantiated at all, with
-// NSInternalInconsistencyException and these words, and the two spellings answer the same way. Every
-// concrete subclass answers with a working instance for both spellings, because its -init is the
-// designated initializer the header declares -- a modify built with -init is a modify with nothing in
-// it, and its -main declines to send it.
-//
-// THE REFUSAL IS ABOUT THE RECEIVER, and that is what the host's own words say: "You must use a
-// concrete subclass of CKOperation" is a statement about which class was instantiated, not about which
-// initializer was reached. A CKModifyRecordsOperation IS a concrete subclass of CKOperation, and
-// measured on the host it answers, so an -init that refused every subclass would be refusing sixteen
-// classes the framework builds. So this one initializer does both halves: for the abstract base itself
-// it raises with the host's exception and words, and for anything below it it is the ordinary
-// designated initializer NSOperation's -init plus the four members every operation needs. A subclass
-// therefore writes [super init] and gets its own object, which is what the header says to write.
-//
-// object_getClass, not [self class]: the question is which class the object really is, and -class is a
-// method a subclass may answer with something else.
-//
-// There is no +new of this class's own, and that is the host's shape too: the 26.2 header marks -init
-// as the designated initializer and says nothing about +new, so +[CKOperation new] is NSObject's and
-// reaches this -init -- which is why it refuses with these words and not with others. A +new here
-// would be inherited by CKDatabaseOperation, which is concrete on the host, and would refuse a class
-// the host builds.
 - (instancetype)init
 {
     if (object_getClass(self) == [CKOperation class]) {
@@ -85,8 +33,6 @@
     return self;
 }
 
-// The four members every operation needs and none of them should decide for itself, kept in a method
-// of their own so that the refusal above and the set-up are two things a reader can see separately.
 - (void)charon_setUp
 {
     _operationID = (CKOperationID)[[NSUUID UUID] UUIDString];
@@ -103,15 +49,9 @@
 
 - (void)charon_finish
 {
-    // This release's NSOperation declares no -finish of its own, so the operation tells the
-    // scheduler it is done and the scheduler removes it. An operation that has been cancelled is
-    // already out of the queue and this is a no-op.
     [CharonCKOPScheduler complete:self];
 }
 
-// One request, and the operation ends when the answer is in. The completion is called on the
-// transport's own queue, which is where a caller's own completion would run, and the operation is
-// finished there so that a caller waiting on -waitUntilFinished is not held past the answer.
 - (void)runMethod:(NSString *)method path:(NSString *)path body:(NSDictionary *)body
       completion:(void (^)(id body, NSError *error))completion
 {
@@ -146,9 +86,6 @@
     }];
 }
 
-// The per-item failures of a partial answer, keyed the way the header keys them, and the error that
-// carries them. The service answers a batch that failed in part with 200 and the per-item errors
-// beside it, so an operation that only looked at the status would tell a caller everything worked.
 - (NSError *)partialFailureWithItems:(NSDictionary *)items
 {
     if (!items.count) {
@@ -171,9 +108,6 @@
 
 - (void)setContainer:(CKContainer *)container
 {
-    // The container is the database's, and a database's is its container's: an operation added to a
-    // database is run against that database's container, and one that was given a configuration
-    // with a container is run against that one when it has no database.
     CKOperationConfiguration *configuration = self.configuration;
     if (configuration) {
         configuration.container = container;
@@ -226,8 +160,6 @@
         document[@"zoneID"] = CharonCKZoneIDDocument(record.recordID.zoneID);
         document[@"fields"] = CharonCKFieldsToJSON(CharonCKFieldsSnapshot(record));
         if (self.savePolicy == CKRecordSaveAllKeys) {
-            // All keys is the service clearing the record and writing the fields it is given, which
-            // is a document without a merge hint rather than a different set of fields.
             document[@"fields"] = document[@"fields"];
         } else if (self.savePolicy == CKRecordSaveIfServerRecordUnchanged && record.recordChangeTag) {
             document[@"recordChangeTag"] = record.recordChangeTag;
@@ -240,8 +172,6 @@
         [deletes addObject:@{@"operationType": @"forceDelete", @"recordID": CharonCKRecordIDDocument(recordID)}];
     }
     if (!saves.count && !deletes.count) {
-        // A modify with nothing in it is not a request: the service would answer 200 with an empty
-        // list, and a caller's per-item blocks would be called for work nobody asked for.
         if (self.modifyRecordsCompletionBlock) {
             self.modifyRecordsCompletionBlock(@[], @[], nil);
         }
@@ -257,8 +187,6 @@
         [body[@"records"] addObjectsFromArray:deletes];
     }
     if (self.atomic) {
-        // An atomic modify is all of it or none of it, and the service says so with a flag rather
-        // than with a transaction of its own.
         body[@"atomic"] = @YES;
     }
     if (self.clientChangeTokenData) {
@@ -460,8 +388,6 @@
         for (CKSubscription *subscription in self.subscriptionsToSave) {
             NSDictionary *document = CharonCKSubscriptionDocument(subscription);
             if (!document) {
-                // A query subscription whose predicate the service has no form for is refused here
-                // rather than saved as one that would never fire.
                 if (self.modifySubscriptionsCompletionBlock) {
                     self.modifySubscriptionsCompletionBlock(nil, nil,
                         CharonCKError(CKErrorInvalidArguments,
@@ -564,9 +490,6 @@
 {
     NSArray<CKRecordID *> *ids = self.recordIDs;
     if (!ids.count) {
-        // No identifiers is the header's own factory, -fetchCurrentUserRecordOperation: the record
-        // of the user the credentials are signed in as, which is under the current owner in the
-        // default zone and needs no lookup.
         CKContainer *container = [self.database ck_container];
         CKRecordID *current = [container currentUserRecordID];
         if (!current) {
@@ -620,9 +543,6 @@
                 }
                 continue;
             }
-            // A record that was asked for and not found is the header's own code for a record that
-            // does not exist, and it arrives in the per-item failures rather than as the operation's
-            // error: the fetch itself did not fail.
             NSError *missing = CharonCKError(CKErrorUnknownItem, @"The record does not exist", nil);
             failures[recordID.recordName] = missing;
             if (strongSelf.perRecordCompletionBlock) {
@@ -833,8 +753,6 @@
     if (query) {
         document = CharonCKQueryDocument(query, self.zoneID.zoneName, self.desiredKeys, self.resultsLimit, &refused);
         if (!document) {
-            // A predicate the service has no form for never leaves this process, and the code is
-            // the header's for a malformed predicate.
             if (self.queryCompletionBlock) {
                 self.queryCompletionBlock(nil, refused);
             }
@@ -915,8 +833,6 @@
 
 @implementation CKFetchRecordChangesOperation
 {
-    // moreComing is the service's own answer to whether there is more, and the header declares it
-    // readonly: it is kept and read back rather than derived.
     BOOL _moreComing;
 }
 
@@ -929,9 +845,6 @@
     return self;
 }
 
-// moreComing is the service's own answer to whether there is more, and the header declares it
-// readonly: it is kept here and read back, and it is the one member of this operation the port
-// holds rather than derives.
 - (BOOL)moreComing
 {
     return _moreComing;
@@ -958,8 +871,6 @@
     return [[self alloc] init];
 }
 
-// The changes of a zone, from the token the last fetch ended at, which is `records/changes` under
-// the zone's own root and not under the database's.
 - (void)main
 {
     if (!self.recordZoneID) {

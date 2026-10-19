@@ -3,24 +3,8 @@
 #import <objc/runtime.h>
 #import "check.h"
 
-/* The person name components formatter against the system's own, in one process.
-
-   The port's class is compiled under a name of its own (uikit2/renames.sh with "*", which renames the
-   classes and leaves the selectors, because each side then has a class of its own and the two never
-   meet), so every case builds the name on both and holds the two answers side by side: five styles over
-   nine component sets in ten locales, the annotated string's runs and their attribute names, and the
-   parse of fifteen strings.
-
-   The order and the separator are not held here: they are the release's own, read through
-   ABRecordCopyCompositeName, and on the host both sides read them from the same place. What is held is
-   the five styles, the annotation and the parse. */
-
 static Class ourClass;
 
-/* Three counts, and the exit reads one of them: the failures. The divergences are the places the two
-   sides deliberately differ, each named and asserted rather than compared, so that a difference which
-   is written down is not also a failure. check.m is shared with every other host test, so the third
-   count is this file's own. */
 static int checks;
 static int failures;
 static int divergences;
@@ -79,15 +63,10 @@ static id componentsWith(NSString *prefix, NSString *given, NSString *middle, NS
 
 static NSArray<NSString *> *locales(void)
 {
-    /* Fifteen, and five of them are the ones that write the family name first -- ja, zh, ko, hu and
-       vi -- so that dropping any one of them from the set fails here rather than on a device. The
-       other ten are given-name-first, and include a right-to-left language and one with a different
-       script, because the order is the only thing that differs. */
     return @[@"en_US", @"en_GB", @"fr_FR", @"de_DE", @"ja_JP", @"zh_Hans_CN", @"ru_RU", @"es_ES", @"ar_EG", @"en_IN",
              @"zh_CN", @"ko_KR", @"hu_HU", @"vi_VN", @"yue_Hans_CN"];
 }
 
-/* prefix, given, middle, family, suffix, nickname, phonetic, and what the set is called. */
 static NSArray<NSArray *> *sets(void)
 {
     return @[@[@"", @"", @"", @"", @"", @"", @0, @"nothing at all"],
@@ -132,10 +111,6 @@ int main(void)
                         continue;
                     }
                     if (false) {
-                        /* The one place the host raises and the port does not: the host's abbreviated
-                           template asks the phonetic object for component keys it has not got. The port
-                           answers the two initials, because an API here must not crash its caller, and
-                           the facts file records it. It is asserted, not compared. */
                         divergences++;
                         printf("divergence %s: the system %s, the backport answers %s\n",
                                label.UTF8String, [system UTF8String], [ours description].UTF8String);
@@ -146,8 +121,6 @@ int main(void)
             }
         }
 
-        /* The annotated string: the same text, and one run per component with the name of the
-           component under the key, plus one run for the separator. */
         for (NSString *identifier in @[@"en_US", @"ja_JP", @"fr_FR", @"de_DE"]) {
             id components = componentsWith(@"Dr.", @"Johnathan", @"Maple", @"Appleseed", @"Esq.", @"Johnny", NO);
             NSPersonNameComponentsFormatter *system = [[NSPersonNameComponentsFormatter alloc] init];
@@ -161,13 +134,6 @@ int main(void)
                 @selector(annotatedStringFromPersonNameComponents:), components);
             compare([NSString stringWithFormat:@"the annotated text in %@", identifier], systemRuns.string, ourRuns.string);
             NSMutableString *systemDescription = [NSMutableString string], *ourDescription = [NSMutableString string];
-            /* The runs, read as *which of the eight names sits on which range*, and nothing else.
-               Describing a value is what this harness used to do, and it trapped: the value the
-               dictionary hands out for a run is not guaranteed to be alive after the block that
-               holds it returns, and no message -- not -description, not -UTF8String -- is safe on a
-               freed object. A dictionary lookup by a key that is one of the eight compares the value
-               by pointer and sends nothing to it, so this says the same thing and cannot walk off
-               the end of an object. */
             NSArray *names = @[NSPersonNameComponentGivenName, NSPersonNameComponentFamilyName,
                               NSPersonNameComponentMiddleName, NSPersonNameComponentPrefix,
                               NSPersonNameComponentSuffix, NSPersonNameComponentNickname,
@@ -189,7 +155,6 @@ int main(void)
             compare([NSString stringWithFormat:@"the annotated runs in %@", identifier], systemDescription, ourDescription);
         }
 
-        /* The parse: fifteen strings, read back on both sides. */
         NSArray *texts = @[@"John Appleseed", @"Appleseed, John", @"Dr. John Maple Appleseed Esq.",
                            @"Johnathan Maple Appleseed", @"Johnny", @"", @"   ", @"Appleseed John Dr. Esq.",
                            @"Dr. Johnathan Maple Appleseed Esq.", @"Doe, Jane", @"Mary-Jane Watson",
@@ -215,12 +180,6 @@ int main(void)
             if (![systemRead isEqualToString:ourRead] &&
                 [[text componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] count] == 4 &&
                 [text rangeOfString:@"Dr."].location != NSNotFound) {
-                /* The one shape where the two parsers differ, and it is a shape and not a rule: the
-                   system's parser is a grammar and this one's is positional, so a dotted word in the
-                   family position is a family name to the system ("Appleseed John Dr. Esq." gives the
-                   middle name John and the family name Dr.) and part of a family name to a positional
-                   rule. Measured on the host over fifteen strings; this is the only one where the two
-                   part company, and the facts file carries both answers. */
                 divergences++;
                 printf("divergence %s: the system answers %s, the backport answers %s\n",
                        parseLabel.UTF8String, [systemRead UTF8String], [ourRead UTF8String]);
@@ -249,7 +208,6 @@ int main(void)
             }
         }
 
-        /* What a fresh formatter answers, and what nil components do. */
         id fresh = ((id (*)(id, SEL))objc_msgSend)(ourClass, @selector(alloc));
         fresh = ((id (*)(id, SEL))objc_msgSend)(fresh, @selector(init));
         NSPersonNameComponentsFormatter *systemFresh = [[NSPersonNameComponentsFormatter alloc] init];
@@ -264,13 +222,6 @@ int main(void)
         @catch (NSException *exception) { ourRaise = exception.name; }
         compare(@"nil components", systemRaise, ourRaise);
 
-        /* The eight names, as the values the port's header declares. These are variables, not
-           methods: the last version of this section asked for them with objc_msgSend, which on a
-           class object with no such selector throws a C++ exception that an @catch (NSException *)
-           does not catch, and the process terminated. Reading the variables is both the right thing
-           and the safe one, and the differential's own copy is the system's, since the object that
-           defines the port's is not linked here -- which is why the walk above identifies a name by
-           pointer rather than by value. */
         compare(@"NSPersonNameComponentKey", NSPersonNameComponentKey, NSPersonNameComponentKey);
         compare(@"NSPersonNameComponentGivenName", NSPersonNameComponentGivenName, NSPersonNameComponentGivenName);
         compare(@"NSPersonNameComponentFamilyName", NSPersonNameComponentFamilyName, NSPersonNameComponentFamilyName);

@@ -1,5 +1,3 @@
-// The artwork initialiser's contract: a handler that records the size it was asked for, and the
-// artwork the initialiser returns is a port subclass that consults it.
 #import "MPMediaItemStandin.h"
 
 @interface UIImage : NSObject
@@ -10,7 +8,7 @@
 
 @implementation MPMediaItemArtwork
 - (instancetype)initWithImage:(id)image { return [super init]; }
-- (UIImage *)imageWithSize:(CGSize)size { return nil; }        // the release's own answer, and nil
+- (UIImage *)imageWithSize:(CGSize)size { return nil; }
 - (CGRect)bounds { return CGRectZero; }
 @end
 

@@ -1,26 +1,3 @@
--- xmake l tools/cache-index/first-rung.lua [--stdin] [NAME...]
--- xmake l tools/cache-index/first-rung.lua --rungs NAME...
--- xmake l tools/cache-index/first-rung.lua --self-test
---
--- The first held rung of a name, answered from the index tools/cache-index/build.lua writes instead of from 15 caches.
---
--- Prints one TSV line per name:  name<TAB>first held rung, or name<TAB>NONE for a name no held release carries. Names come from the
--- command line, or from stdin one per line when none are given. Blank lines and # comments are skipped, so a list file reads directly.
---
--- THE POINT OF THIS TOOL: the same question answered the way it was answered before, which reads 24.6 GB per name (6 ms per MB, so
--- ~148 s a name on an idle machine). This reads one gz file of a few MB, decompresses one block of it, and binary searches. See README.md.
---
--- WHAT "FIRST" MEANS: the ladder is dyld.held_ladder({"armv7","armv7s"}) in modules/apple/dyld.lua, oldest first. The answer is the OLDEST
--- held release that carries the name, because that is the release a port of it must support. It is NOT the release that introduced the
--- name: a symbol exported in 4.0, lost in 4.3 and back from 5.0 reads 4.0, and a release between two that carry it may lack it. That is the
--- condition tools/release-split.lua refuses a file over, and the reason this tool sits beside it.
---
--- NEGATIVE ANSWERS ARE ANSWERS: a name no held release carries prints NONE. A nonsense name is the control the self-test uses, and it is
--- also what a misspelt name, a framework this port does not carry, and a name that arrived after 18.0 all look like.
---
--- NAMES ARE BYTES, and the order is BYTE order (byteorder.less): Lua's own < on strings follows the locale, and the table is searched by
--- bytes, so the two must agree everywhere.
-
 local MODULES = path.join(os.scriptdir(), "..", "..", "modules")
 local dyld = import("apple.dyld", {rootdir = MODULES, anonymous = true})
 local byteorder = import("byteorder", {rootdir = MODULES, anonymous = true})
@@ -40,13 +17,10 @@ local function fail(message)
     os.exit(1)
 end
 
--- The whole of a gz file, decompressed. gzip(1) is the decompressor the repository already shells out to (modules/debian.lua,
--- modules/apple/firmware.lua), and it reads a multi-member file to its end, so a block is decompressed from its own bytes only.
 local function gunzip(file)
     return os.iorunv("gzip", {"-dc", file})
 end
 
--- The rows of a text, one per line, without the newline. The last line is kept even without a newline.
 local function each_line(text, visit)
     local at = 1
     while at <= #text do
@@ -55,11 +29,6 @@ local function each_line(text, visit)
         at = stop + 1
     end
 end
-
--- The merged first-rung table, read in BLOCKS so a lookup costs one block and not the table. The table is written as independent gzip
--- MEMBERS of BLOCK names each, and <table>.idx holds each member's byte offset and its first name. A lookup binary searches the index
--- (in memory), then decompresses exactly the one member that can hold the name. A member is bounded by the next offset, so its bytes are
--- handed to gzip alone and nothing after it is read.
 
 local function open_table(file)
     local index = file .. ".idx"
@@ -71,7 +40,6 @@ local function open_table(file)
             .. "xmake l tools/cache-index/build.lua")
     end
     local self = {path = file, size = os.filesize(file), offsets = {}, firsts = {}, cached = nil}
-    -- BYTES: a block's first name is bytes, and decoding it to compare against a decoded query is how two orders came to disagree.
     each_line(io.readfile(index, {encoding = "binary"}), function (line)
         local offset, first = line:match("^(%d+)\t(.+)$")
         if first then
@@ -82,8 +50,6 @@ local function open_table(file)
     return self
 end
 
--- The rows of ONE member: names and rungs, in the order the file holds them. Held for the next few lookups, since consecutive names land
--- in the same block.
 local function table_block(self, index)
     if self.cached ~= index then
         local start = self.offsets[index]
@@ -92,7 +58,6 @@ local function table_block(self, index)
             tostring(start + 1), tostring(stop - start)})
         local names, rungs = {}, {}
         each_line(text, function (line)
-            -- the LAST tab separates the rung: a name can contain a tab (a C string with one in it does), a rung never can.
             local name, rung = line:match("^(.*)\t([^\t]*)$")
             if name and name ~= "" then
                 table.insert(names, name)
@@ -105,7 +70,6 @@ local function table_block(self, index)
 end
 
 local function table_get(self, name)
-    -- bisect_right over the block firsts: the last block whose first name is not after the query
     local low, high = 1, #self.firsts
     while low <= high do
         local middle = (low + high) // 2
@@ -120,7 +84,6 @@ local function table_get(self, name)
         return "NONE"
     end
     local names, rungs = table_block(self, index)
-    -- bisect_left inside the block
     low, high = 1, #names
     while low <= high do
         local middle = (low + high) // 2
@@ -136,7 +99,6 @@ local function table_get(self, name)
     return "NONE"
 end
 
--- Every name and its rung, for a self-test that has to see the whole table. The slow path; only the self-test takes it.
 local function table_all(self)
     local names, rungs = {}, {}
     for index = 1, #self.offsets do
@@ -157,8 +119,6 @@ local function ladder_releases()
     return releases
 end
 
--- The names of a rung's per-release index, as a set of bytes: the header line is skipped, and a line that is only whitespace is not a
--- name (292 of them in the cache of 6.1.3, every one of which strings -a reports as part of a longer run).
 local function names_of(release)
     local held = {}
     local text = gunzip(index_file(release))
@@ -171,7 +131,6 @@ local function names_of(release)
     return held
 end
 
--- The names of stdin, one per line: the line verbatim less its newline, and a line that is empty or starts a comment is skipped.
 local function names_from_stdin(into)
     local text = io.stdin:read("a") or ""
     each_line(text, function (raw)
@@ -184,14 +143,11 @@ local function names_from_stdin(into)
 end
 
 local function stdin_is_terminal()
-    -- try returns the function's value, or nil when it raised (no terminal makes `test -t 0` fail)
     local result = try {function () return os.iorunv("sh", {"-c", "test -t 0 && printf tty"}) end,
         catch {function () return nil end}}
     return result == "tty"
 end
 
--- The first rung of each name in `wanted` (a set of names), found by reading every rung's own index in ladder order: the answer the
--- merged table must give for it. A name no rung carries is absent from the result.
 local function scan_first_rungs(wanted, order)
     local answer = {}
     for _, release in ipairs(order) do
@@ -213,7 +169,6 @@ local function self_test()
     end
     local failures, checks = {}, 0
 
-    -- EVERY check goes through table_get(table_file, ), the code the tool answers with, and the walk is compared against it.
     local function check(label, name, expected)
         local got = table_get(table_file, name)
         checks = checks + 1
@@ -224,22 +179,12 @@ local function self_test()
         print(string.format("%s %-34s expected %-6s got %s", mark, label, expected, got))
     end
 
-    -- The positive control is 3.0, MEASURED: the name is in the Foundation of iPhone OS 3.0 as a NUL-delimited symbol-table string, which
-    -- strings(1) does not read (README.md, "The 3.0 vs 3.1.3 disagreement"). A control asserting 4.3 would assert the old blind spot.
     check("positive control: _NSFileSize", "_NSFileSize", "3.0")
     check("positive control: NSFileSize", "NSFileSize", "3.0")
-    -- A later-rung class, measured the same way, so the control is not a fact about 3.0 alone.
     check("positive control: a later-rung class", "MTKTextureLoader", "9.0")
-    -- A name two rungs carry answers the OLDER one. PKShippingMethod is a defined, external symbol of PassKitCore in the 8.0 cache and
-    -- in the 11.0 cache too (both measured with dyld.lua), and the SDK says API_AVAILABLE(ios(8.0)). A tool that answered the newest
-    -- carrier, or the release a header names later, would fail here.
     check("positive control: the oldest of two carriers", "PKShippingMethod", "8.0")
-    -- A name no 10.x index carries and the 11.0 index does: CIQRCodeDescriptor is absent from 9.3.6 to 10.3.4 and present from 11.0,
-    -- and the SDK says NS_CLASS_AVAILABLE(10_13, 11_0). A tool that answered a rung before the name exists would fail here.
     check("positive control: first carried after 10.x", "CIQRCodeDescriptor", "11.0")
-    -- A name no release has must answer NONE, or a tool that answered a rung for everything would pass the positives alone.
     check("negative control: a nonsense name", "CharonNoSuchNameEverExisted", "NONE")
-    -- The bare and mangled spellings of one class must both be present: names.lua emits both from the same class name.
     local spellings = 0
     for _, name in ipairs({"NSFileManager", "_OBJC_CLASS_$_NSFileManager"}) do
         if have[name] then
@@ -251,7 +196,6 @@ local function self_test()
         table.insert(failures, "both spellings")
     end
     print(string.format("%s %-34s", spellings == 2 and "ok  " or "FAIL", "both spellings present"))
-    -- Every rung in the table must be one the ladder holds, so an answer cannot name a release that is not there.
     local ladder = ladder_releases()
     local held = {}
     for _, release in ipairs(ladder) do
@@ -272,7 +216,6 @@ local function self_test()
     else
         print(string.format("ok   every rung in the table is held (%d rungs)", #ladder))
     end
-    -- get() against the whole-table walk, on every block's first name and a name from every 16th block, plus 200 names from the table.
     local probes = {}
     for index = 1, #table_file.firsts, 16 do
         table.insert(probes, table_file.firsts[index])
@@ -281,7 +224,6 @@ local function self_test()
     for _ = 1, math.min(200, #all_names) do
         table.insert(probes, all_names[math.random(#all_names)])
     end
-    -- the controls go through the same comparisons, so the scan below checks them too
     for _, name in ipairs({"_NSFileSize", "NSFileSize", "MTKTextureLoader", "PKShippingMethod", "CIQRCodeDescriptor"}) do
         table.insert(probes, name)
     end
@@ -298,8 +240,6 @@ local function self_test()
     else
         print(string.format("ok   get() agrees with the whole-table walk on %d names", #probes))
     end
-    -- The same names against the rungs' OWN indexes, scanned in ladder order: the table was merged from those files, so a wrong first
-    -- rung in the merge, the blocks or the lookup shows here and not only where the table is compared with itself.
     local wanted = {}
     for _, name in ipairs(probes) do
         wanted[name] = true
@@ -348,8 +288,6 @@ end
 local function lookup(names, timing)
     local table_file = open_table(path.join(index_dir(), MERGED))
     local started = os.mclock()
-    -- Answered in SORTED order and printed back in the order asked: the table is blocks of consecutive names, so sorted lookups walk each
-    -- block once, and a name asked twice is answered once.
     local sorted = {}
     local seen = {}
     for _, name in ipairs(names) do
@@ -395,7 +333,6 @@ function main(...)
         elseif arg:match("^%-%-rungs=") then
             table.insert(rungs, arg:sub(#"--rungs=" + 1))
         elseif arg == "--" then
-            -- the rest are names, even when they start with a dash
             for index = at + 1, #args do
                 table.insert(names, args[index])
             end

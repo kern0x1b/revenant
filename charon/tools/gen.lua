@@ -1,8 +1,3 @@
--- The generator of apple-backports, in Lua: `xmake l tools/gen.lua <command> [--tree T] [options]`. --tree T is the checkout the
--- command reads and writes; without it, the checkout this script is in.
--- A command is tools/gen/cmd_<command>.lua: it has run(args) and returns the exit status. Every command in COMMANDS has its module; the
--- driver names a command that has none. The design is in coordination/wave-2026-10-03/design-spec-driven.md.
-
 local BOOLEAN_OPTIONS = {all = true, record = true, members = true, catalyst = true, doc = true, verify = true}
 local VALUE_OPTIONS = {tree = true, framework = true, ledger = true, sdk = true, owned = true, measured = true,
                        ["ios-constants"] = true, repin = true, class = true, out = true, limit = true, selector = true,
@@ -13,7 +8,6 @@ local COMMANDS = {"input", "pin", "gen", "check", "trace", "diff", "sources", "d
                   "functions", "objc", "swift", "swiftshard", "swiftmodel", "swiftcode", "roundtrip", "behaviour", "members",
                   "headers", "sdk", "surface", "swiftiface", "ledger", "worklist", "verify", "protocolheaders", "impl-index"}
 
--- The options after the command: --name value, or a flag. Returns a table keyed by the option's name with dashes as underscores.
 local function parse(argv)
     local args = {}
     local i = 1
@@ -35,7 +29,6 @@ local function parse(argv)
     return args
 end
 
--- Which commands take one framework, and which of those also take every framework with --all (the oracle's rule).
 local FRAMEWORK = {input = true, pin = true, gen = true, check = true, trace = true, diff = true, doc = true, protocols = true,
                    functions = true, behaviour = true}
 local EVERY_FRAMEWORK = {input = true, gen = true, check = true, trace = true, doc = true, protocols = true, functions = true}
@@ -61,9 +54,7 @@ function main(command, ...)
         os.exit(2)
     end
     local args = parse({...})
-    -- the checkout this script is in (tools/ is its folder): a command that reads and writes a tree defaults to it
     args.tree = args.tree or path.normalize(path.join(os.scriptdir(), ".."))
-    -- an SDK path with ".." segments makes decls emit no declaration (it compares the header's path with the framework root as text)
     if args.sdk then
         args.sdk = path.normalize(path.absolute(args.sdk))
     end

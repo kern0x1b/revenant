@@ -4,9 +4,6 @@
 #import <dispatch/dispatch.h>
 #import <stdio.h>
 
-// The fourteen accessors, on metadata objects the PORT made. The point of this case is not that they
-// answer an absence - it is that the four block-taking ones answer it WITHOUT RUNNING THE HANDLER,
-// because a handler that ran would hand the caller values that were never negotiated.
 static int failures = 0;
 static void want(const char *what, long got, long expect)
 {
@@ -16,9 +13,6 @@ static void want(const char *what, long got, long expect)
 
 int main(void)
 {
-    // UNBUFFERED, so output SURVIVES A CRASH: a mutant that segfaults mid-case would otherwise lose every
-    // row printed before it, and the comparator would then say the rows "did not measure" and name the
-    // wrong thing. This is what lets a crash name the assertion it reached.
     setvbuf(stdout, NULL, _IONBF, 0);
     __weak id weakA = nil, weakB = nil;
     @autoreleasepool {
@@ -28,7 +22,6 @@ int main(void)
         sec_protocol_metadata_t m = (sec_protocol_metadata_t)[[cls alloc] init];
         sec_protocol_metadata_t n = (sec_protocol_metadata_t)[[cls alloc] init];
 
-        // the pointer returns, where _Nullable makes NULL the header's own answer
         want("negotiated-protocol", sec_protocol_metadata_get_negotiated_protocol(m) ? 1 : 0, 0);
         want("server-name", sec_protocol_metadata_get_server_name(m) ? 1 : 0, 0);
         want("peer-public-key", sec_protocol_metadata_copy_peer_public_key(m) ? 1 : 0, 0);
@@ -36,14 +29,12 @@ int main(void)
         want("create-secret-ctx",
              sec_protocol_metadata_create_secret_with_context(m, 3, "lab", 0, NULL, 4) ? 1 : 0, 0);
 
-        // the two enums that HAVE a member meaning none, so 0 is documented rather than invented
         want("protocol-version", sec_protocol_metadata_get_negotiated_protocol_version(m),
              (long)kSSLProtocolUnknown);
         want("ciphersuite", sec_protocol_metadata_get_negotiated_ciphersuite(m),
              (long)SSL_NULL_WITH_NULL_NULL);
         want("early-data", sec_protocol_metadata_get_early_data_accepted(m) ? 1 : 0, 0);
 
-        // THE FOUR BLOCK-TAKING ONES: false, and the handler must NOT run
         __block int calls = 0;
         want("chain-access", sec_protocol_metadata_access_peer_certificate_chain(m,
              ^(sec_certificate_t c) { (void)c; calls++; }) ? 1 : 0, 0);
@@ -55,7 +46,6 @@ int main(void)
              ^(dispatch_data_t d) { (void)d; calls++; }) ? 1 : 0, 0);
         want("handler-calls", calls, 0);
 
-        // the two comparators: a real answer about objects the caller made
         want("peers-same-object", sec_protocol_metadata_peers_are_equal(m, m) ? 1 : 0, 1);
         want("peers-two-objects", sec_protocol_metadata_peers_are_equal(m, n) ? 1 : 0, 1);
         want("peers-one-null", sec_protocol_metadata_peers_are_equal(m, NULL) ? 1 : 0, 0);

@@ -1,6 +1,3 @@
-// MPSMatrixFindTopK, from the header of the SDK of iOS 16.4. One object per release: the band machinery keeps an
-// object whole or drops it whole, so a file here carries the API of exactly one release.
-
 #import "CharonMPS.h"
 
 
@@ -73,9 +70,6 @@
         CharonMPSRefuse(@"MPSMatrixFindTopK: a matrix of a data type that is not one of the eight element types was given");
         return;
     }
-    // The k largest values of each row, largest first. The index matrix holds the column each value
-    // came from, counted from indexOffset, and the value matrix the values themselves. A row narrower
-    // than k gives the whole row.
     NSUInteger rows = _sourceRows == NSUIntegerMax ? in.rows : _sourceRows;
     NSUInteger columns = _sourceColumns == NSUIntegerMax ? in.columns : _sourceColumns;
     NSUInteger wanted = _numberOfTopKValues < columns ? _numberOfTopKValues : columns;
@@ -93,9 +87,6 @@
     }
     for (NSUInteger b = 0; b < count; b++) {
         for (NSUInteger row = 0; row < rows; row++) {
-            // The k largest of the row, in order. Each column is inserted into the list the row has
-            // built so far, which keeps the order exact where a partial sort of equal values would not
-            // decide it, and what falls off the end is the k-th largest seen so far.
             NSUInteger *order = (NSUInteger *)calloc(wanted ? wanted : 1, sizeof(NSUInteger));
             double *best = (double *)calloc(wanted ? wanted : 1, sizeof(double));
             NSUInteger filled = 0;

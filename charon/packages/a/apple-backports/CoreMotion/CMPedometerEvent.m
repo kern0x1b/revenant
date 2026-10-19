@@ -1,8 +1,5 @@
 #import <CoreMotion/CoreMotion.h>
 
-// The event of the pedometer of iOS 10. No pedometer on this device reports one, so the port never hands one over: an
-// application can allocate one, and the answers below are the ones a fresh instance gives on the host, a nil date and the
-// pause type, with the copy and the secure archive both working (facts/CoreMotion/CMPedometer.md).
 @implementation CMPedometerEvent {
     NSDate *_date;
     CMPedometerEventType _type;

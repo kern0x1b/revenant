@@ -1,8 +1,5 @@
 #import "CharonDynamics.h"
 
-// Gravity is the world's, not a force on each item: the behavior writes its vector, times 10 m/s^2
-// (1000 pt/s^2), as the world gravity, and marks its items' bodies affected by it. So an animator has
-// one gravity, the last one written, and removing any gravity behavior sets it to zero (7.0).
 @implementation UIGravityBehavior {
     CGVector _gravity;
 }
@@ -110,7 +107,6 @@
     [self setAngle:self.angle magnitude:magnitude];
 }
 
-// 7.0 takes the sine and cosine in float.
 - (void)setAngle:(CGFloat)angle magnitude:(CGFloat)magnitude
 {
     float sine = sinf((float)angle), cosine = cosf((float)angle);

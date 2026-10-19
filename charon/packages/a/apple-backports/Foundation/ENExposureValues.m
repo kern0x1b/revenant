@@ -1,32 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <ExposureNotification/ExposureNotification.h>
 
-// ExposureNotification's value types, iOS 12.5.
-//
-// Seven of the framework's nine classes are values the framework itself produces and hands an
-// application: a temporary exposure key, a scan instance, a summary item, an exposure window, a day's
-// summary, the summary of a detection pass, and the information about one exposure. The ninth,
-// ENExposureConfiguration, is the one an application writes and ENManager reads; it is ENExposure-
-// Configuration.m.
-//
-// None of the seven declares a public initialiser in any SDK header -- SDK 26.2's ENCommon.h gives each
-// class's properties and nothing else -- because on a system that runs Exposure Notification they only
-// ever come out of the framework's own service. On this release that service does not exist (see
-// ENManager.m), so these classes are reached the other way round: as NSSecureCoding, the protocol every
-// one of them adopts in Apple's own header, over the release's own NSKeyedArchiver and NSKeyedUnarchiver.
-// That is the whole surface then -- the properties, and the coding that carries them.
-//
-// The archive keys are the property names. That is the shape a keyed archive of an object with these
-// properties has, and it round-trips: what one of these writes, another reads back with every property
-// answering what it was given. Nothing on this release produces Apple's own archive of these objects, so
-// there is no second archive to agree with; what would make it one is ENManager answering with real
-// values, which needs the exposure-notification service this release does not run.
-//
-// One release per object file: every property below arrived in iOS 12.5 and none of them is a member of
-// anything this release carries. ENExposureWindow's variantOfConcernType arrived in 15.2 and is carried
-// by ENExposureWindowVariant15.m, whose associated object holds the value. This class is @dynamic for
-// the property so that the 12.5 object exports no symbol for a member of a later release.
-
 
 @implementation ENExposureSummaryItem {
     double _scoreSum;
@@ -98,8 +72,6 @@
     ENCalibrationConfidence _calibrationConfidence;
 }
 
-// variantOfConcernType arrived in 15.2 and is carried by ENExposureWindowVariant15.m, so the
-// auto-synthesis of this class's own properties has to be told that one is not among them.
 @dynamic variantOfConcernType;
 
 + (BOOL)supportsSecureCoding

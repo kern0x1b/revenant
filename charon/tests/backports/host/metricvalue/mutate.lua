@@ -1,9 +1,3 @@
--- One mutation of the shared value machinery, for the differential to catch. The conversion table and the one place every value
--- class passes through, so a change to it changes every representation in every framework that includes the header - which is
--- the point of sharing it and the reason the mutants below are the ones to run.
--- Usage: xmake l ./mutate.lua <file> <old text> <new text>
-
--- The number of places the text stands, counted the way Python's str.count counts: without overlap.
 local function occurrences(text, needle)
     local n, start = 0, 1
     while true do

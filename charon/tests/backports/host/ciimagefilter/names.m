@@ -1,14 +1,3 @@
-// The host's own answer to one thing: for every zero-argument class method of CIFilter, which filter it
-// gives. Read from the runtime, so nothing here is transcribed, and printed as
-//
-//     <selector> TAB <filter name> TAB <input keys, comma-joined>
-//
-// which is the table spec/CoreImage/filter-builders.tsv that tools/gen/filter_builders.lua writes the port's constructors from. The
-// names are the measurement; a naming convention would have been wrong for several of them, which is the
-// point of reading them out instead of deriving them.
-//
-// Build and run:
-//     xcrun clang -fobjc-arc names.m -framework Foundation -framework CoreImage -o names && ./names
 #import <Foundation/Foundation.h>
 #import <CoreImage/CoreImage.h>
 #import <objc/runtime.h>
@@ -27,7 +16,7 @@ int main(void)
         const char *types = method_getTypeEncoding(methods[i]);
         const char *keyword = sel_getName(sel);
         if (!types || types[0] != '@') continue;
-        if (strchr(keyword, ':')) continue;  // a method that takes nothing
+        if (strchr(keyword, ':')) continue;
         CIFilter *filter = ((CharonMsgSend0)objc_msgSend)((id)[CIFilter class], sel);
         if (![filter isKindOfClass:[CIFilter class]]) continue;
         [lines addObject:[NSString stringWithFormat:@"%s\t%@\t%@", keyword, filter.name,

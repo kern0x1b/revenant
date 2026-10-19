@@ -11,10 +11,6 @@
     UIMenuElementAttributes _attributes;
     UIMenuElementState _state;
     UIActionHandler _handler;
-    // The three the host's own UIAction carries and a menu built by the host's machinery sets on an action it is
-    // about to show. Measured on the host, in probe-uiaction.m, before implementing: each is what the caller
-    // set, a second set replaces, nil clears an object and no - the selected image is held by reference and not
-    // copied, and the subtitle is copied as the header declares.
     NSString *_subtitle;
     UIImage *_selectedImage;
     UIActionRepeatBehavior _repeatBehavior;
@@ -129,10 +125,6 @@
     _state = state;
 }
 
-// The header's own method, and the one UIControl sends an action: UIMenuLeaf.h declares
-// -performWithSender:target: publicly, so an action a control drives is asked for it by that name, and an action
-// that does not implement it leaves the host's own UIControl sending an unrecognized selector. The port's own
-// callers use the charon_ spelling so that a send is not renamed twice, and it lands here.
 - (void)performWithSender:(id)sender target:(id)target
 {
     [self charon_performWithSender:sender];
@@ -175,8 +167,6 @@
 }
 
 
-// The handler, which the port stores from the initializer and which the host lets a caller replace: measured, a
-// second -setHandler: replaces the first and the getter reads back what was last set.
 - (UIActionHandler)handler
 {
     return _handler;
@@ -197,8 +187,6 @@
     _subtitle = [subtitle copy];
 }
 
-// Held by reference and not copied: the host's -setSelectedImage: answers the very image it was given, and
-// nil clears it.
 - (UIImage *)selectedImage
 {
     return _selectedImage;

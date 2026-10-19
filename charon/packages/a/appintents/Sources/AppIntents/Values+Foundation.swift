@@ -1,21 +1,9 @@
-// What the release's own value types are when a parameter carries one, and the builder that turns a
-// list of resolvers into the specification a parameter carries.
-//
-// Each conformance is the real conversion, not a marker: `String`'s resolver is the identity, `Int`'s
-// reads the string the release's own `Int.init` reads, `URL`'s is `URL(string:)`, and a parameter that
-// asks for a value gets the value the release's type would give.
-
 import Foundation
 
-/// A resolver that hands a value through unchanged, which is what a type that is already its own
-/// string form needs.
 struct IdentityResolver: Resolver {
     func resolve(from input: String, context: IntentParameterContext<String>) async throws -> String? { return input }
 }
 
-/// The specification of the resolvers of a parameter, built by `ResolverSpecificationBuilder` and
-/// carrying the resolvers themselves, so that a query reading a parameter runs the same resolvers the
-/// parameter was declared with.
 @resultBuilder
 public enum ResolverSpecificationBuilder<Property> where Property: _IntentValue {}
 
@@ -135,8 +123,6 @@ extension ResolverSpecificationBuilder {
         return Specification<Property>([r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14])
     }
 
-    /// The specification a set of resolvers makes, carrying them so that a query runs the same
-    /// resolvers the parameter was declared with.
     public struct Specification<Output>: ResolverSpecification where Output: _IntentValue {
         public typealias Element = any Resolver
 
@@ -171,8 +157,6 @@ extension ResolverSpecificationBuilder {
     }
 }
 
-// MARK: - The values a parameter can carry
-
 extension String: _IntentValue {
     public typealias ValueType = String
     public typealias UnwrappedType = String
@@ -193,9 +177,7 @@ extension Int: _IntentValue, RangeComparableProperty {
         return Specification([IntResolver()])
     }
 
-    /// The string an entity identifier of this type is written as, which is the release's own number.
     public static var entityIdentifierString: String { return String(0) }
-    /// The entity identifier of a value of this type, which is the value written as a string.
     public static func entityIdentifier(for value: Int) -> EntityIdentifier {
         return EntityIdentifier(for: String(value), identifier: String(value))
     }
@@ -210,9 +192,7 @@ extension Float: _IntentValue {
         return Specification([FloatResolver()])
     }
 
-    /// The string an entity identifier of this type is written as, which is the release's own number.
     public static var entityIdentifierString: String { return String(Float(0)) }
-    /// The entity identifier of a value of this type, which is the value written as a string.
     public static func entityIdentifier(for value: Float) -> EntityIdentifier {
         return EntityIdentifier(for: String(value), identifier: String(value))
     }
@@ -258,10 +238,7 @@ extension UUID: _IntentValue {
         return Specification([UUIDResolver()])
     }
 
-    /// The string an entity identifier of this type is written as, which is the release's own
-    /// `uuidString`.
     public static var entityIdentifierString: String { return UUID().uuidString }
-    /// The entity identifier of a value of this type, which is the value's own `uuidString`.
     public static func entityIdentifier(for value: UUID) -> EntityIdentifier {
         return EntityIdentifier(for: value.uuidString, identifier: value.uuidString)
     }
@@ -287,7 +264,6 @@ extension DateComponents: _IntentValue, @unchecked Sendable {
     }
 }
 
-/// Reads a `String` into a `UUID`, with the release's own `UUID(uuidString:)`.
 struct UUIDResolver: Resolver {
     func resolve(from input: String, context: IntentParameterContext<UUID>) async throws -> UUID? {
         return UUID(uuidString: input)
@@ -295,7 +271,6 @@ struct UUIDResolver: Resolver {
 
 }
 
-/// Reads a `String` into a `Float`.
 struct FloatResolver: Resolver {
     func resolve(from input: String, context: IntentParameterContext<Float>) async throws -> Float? {
         return Float(input)
@@ -303,7 +278,6 @@ struct FloatResolver: Resolver {
 
 }
 
-/// Reads a `String` into a `Date`, with the spellings the release's own `Date` parsers take.
 struct DateResolver: Resolver {
     func resolve(from input: String, context: IntentParameterContext<Date>) async throws -> Date? {
         let formatter = DateFormatter()
@@ -317,7 +291,6 @@ struct DateResolver: Resolver {
 
 }
 
-/// Reads a `String` into `DateComponents`, by the same parsers `DateResolver` uses.
 struct DateComponentsResolver: Resolver {
     func resolve(from input: String,
                  context: IntentParameterContext<DateComponents>) async throws -> DateComponents? {
@@ -357,8 +330,6 @@ extension Array: _IntentValue where Element: _IntentValue {
     }
 }
 
-/// Reads the elements of a list parameter out of the string the caller wrote, one element per line and
-/// after a comma, which is how a Shortcuts list of values is written.
 struct ElementResolver<Element: _IntentValue>: Resolver {
     func resolve(from input: String,
                  context: IntentParameterContext<[Element.UnwrappedType]>) async throws -> [Element.UnwrappedType]? {
@@ -370,8 +341,6 @@ struct ElementResolver<Element: _IntentValue>: Resolver {
 
 }
 
-/// Writing a value of a type back as the string a caller would write for it, which is what the port's
-/// own entity and enum identifiers and the resolvers' tests both go through.
 public enum CharonIntentValueParser {
     public static func parse<T>(_ text: String, as type: T.Type) -> T? {
         switch type {
@@ -393,10 +362,6 @@ public enum CharonIntentValueParser {
     }
 }
 
-/// A set of values, which the framework's own conformance takes over the set's element type rather
-/// than the element's value type: a set's value is a set of the values themselves, and its resolver
-/// specification is the empty one, the release's own `Set` writing itself out being what a caller
-/// reads.
 extension Set: _IntentValue where Element: _IntentValue, Element: Hashable {
     public typealias ValueType = Set<Element>
     public typealias UnwrappedType = Set<Element>
@@ -420,14 +385,9 @@ extension Never: _IntentValue {
 
     public static var defaultResolverSpecification: Specification { return Specification() }
     public static var title: LocalizedStringResource { return LocalizedStringResource("Never") }
-    /// The value of a parameter of this type, added in iOS 17: there is none, and it is asked for as
-    /// often as one is.
     public static var value: Never { fatalError("Never has no value") }
 }
 
-/// The summary of an intent that is `Never`: there is no such intent, and its summary is the name the
-/// framework gives it. It is a type of its own because `IntentParameterSummary<Never>` would need
-/// `Never` to be an intent, which is the conformance this is part of.
 public struct NeverSummary: ParameterSummary {
     public let summary: String
 
@@ -441,9 +401,6 @@ extension Never: AppIntent {
     public typealias SummaryContent = NeverSummary
     public typealias Dependency = Never
 
-    /// `Never` is the value an intent result carries when the app returned nothing, and the intent
-    /// that runs nothing. There is no value of this type to make, so a call traps: the framework's own
-    /// `init()` is the declaration this satisfies.
     public init() {
         fatalError("Never has no value to make")
     }

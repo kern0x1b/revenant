@@ -1,33 +1,14 @@
--- The Swift declarations of a module's interface text (its .swiftinterface file, the SDK's own text): one record per public declaration,
--- with the surface kind, the api the surface names it by (Outer.Inner.name, the extended type's module prefix dropped) and its iOS
--- introduction, deprecation, obsoletion and unavailability. via says where the introduction came from: "own" (an @available on the
--- declaration), "container" (the nearest enclosing type or extension that has one), or "none".
---
--- Why the text and not the digester dump: the dump does not carry the @available of an extension, so a nested type, or a member of an
--- extension, has no introduction of its own in swift.tsv; the surface then took its outer type's introduction. The text has it.
---
--- The text is read line by line. A brace opens a scope (a type, an extension, or an accessor block) and a closing brace closes it. A
--- declaration takes the @available written on its line, or alone on the line before it. Each api is spelled as the ledgers spell it: a
--- method is name(label:...), with each parameter's label as the interface prints it ("_" when unlabelled); an init is init(...), a
--- subscript is subscript(...); an enum case is a constant; a global variable or let is a constant, a member one a property.
-
 local tsv = import("tsv", {anonymous = true})
 local strings = import("strings", {anonymous = true})
 
--- The declaration keywords and the surface kind of the types they declare.
 local TYPE_KEYWORDS = {class = "class", struct = "struct", enum = "enum", protocol = "protocol", actor = "class"}
--- The words an interface puts before a declaration keyword: access, storage and dispatch modifiers.
 local MODIFIERS = {public = true, open = true, final = true, static = true, class = true, convenience = true, required = true,
                    override = true, dynamic = true, mutating = true, nonmutating = true, indirect = true, lazy = true,
                    weak = true, unowned = true, distributed = true, nonisolated = true}
--- The platforms the surface reads: iOS, and * (every platform).
 local PLATFORMS = {iOS = true, ["*"] = true}
--- The platforms the attributes name, so that a key given after one of them (introduced: 14.0) is read for that platform.
 local KNOWN_PLATFORMS = {iOS = true, macOS = true, macCatalyst = true, tvOS = true, watchOS = true, visionOS = true, swift = true,
                          ["*"] = true}
 
--- The position after the token that starts at i. A string literal (its quotes and escapes) and an arrow (->) are one token each: the
--- brackets and commas in a message or a closure type do not count.
 function token_end(text, i)
     if string.sub(text, i, i) == "\"" then
         local j = i + 1
@@ -42,13 +23,10 @@ function token_end(text, i)
     return i + 2
 end
 
--- Whether the character at i starts a token that counts as one (a string literal or an arrow).
 function is_token(text, i)
     return string.sub(text, i, i) == "\"" or string.sub(text, i, i + 1) == "->"
 end
 
--- The text between the open parenthesis at position open and its match: the inner text, and the position of the match. nil when the
--- parentheses do not balance.
 function balanced(text, open)
     local depth, i = 0, open
     while i <= #text do
@@ -70,7 +48,6 @@ function balanced(text, open)
     return nil
 end
 
--- The top-level comma-separated pieces of a text: commas inside parentheses, brackets and angle brackets do not split.
 function split_top(text)
     local out, depth, start, i = {}, 0, 1, 1
     while i <= #text do
@@ -96,8 +73,6 @@ function split_top(text)
     return out
 end
 
--- The iOS availability of the arguments of one @available: {introduced, deprecated, obsoleted, unavailable}, with a key only when the
--- argument gives it. An argument that names a platform (iOS, *, macOS ...) sets the platform the keys after it belong to.
 function available_args(inner)
     local own = {}
     local current = nil
@@ -126,7 +101,6 @@ function available_args(inner)
             if key == "introduced" then
                 own.introduced = value
             elseif key == "deprecated" then
-                -- 100000 is the SDK's "deprecated, no release named" version: the corpus writes it as yes
                 own.deprecated = (value == "100000" or value == "100000.0") and "yes" or value
             elseif key == "obsoleted" then
                 own.obsoleted = value
@@ -136,7 +110,6 @@ function available_args(inner)
     return own
 end
 
--- The @available attributes of a line: the iOS availability they give (nil when there is none) and the line without them.
 function take_available(line)
     local own = nil
     local rest = line
@@ -158,8 +131,6 @@ function take_available(line)
     return own, rest
 end
 
--- The availability of two @available attributes that apply to one declaration (one on the line before it, one on its line): the keys
--- of both, the later one's winning. nil when neither has any.
 function merge_available(earlier, later)
     if earlier == nil then
         return later
@@ -177,7 +148,6 @@ function merge_available(earlier, later)
     return out
 end
 
--- The text without its leading attributes (@nonobjc, @inlinable, @_spi(X), @discardableResult ...).
 function strip_attributes(text)
     while true do
         local word = string.match(text, "^%s*(@[%w_%.]+)")
@@ -193,8 +163,6 @@ function strip_attributes(text)
     end
 end
 
--- The name of an extended type: its module prefix dropped when the prefix is this module or an imported one; the generic arguments
--- and the optionality dropped.
 function extended_name(text, module, imports)
     local name = string.match(text, "^%s*([%w_%.\128-\255]+)")
     if name == nil then
@@ -207,11 +175,9 @@ function extended_name(text, module, imports)
     return name
 end
 
--- The labels of a parameter list (the text inside the parentheses), each as the interface prints it.
 function labels_of(inner)
     local labels = {}
     for _, piece in ipairs(split_top(inner)) do
-        -- a parameter's attributes (@ViewBuilder, @escaping) come before its label, and are not part of it
         local text = string.gsub(strip_attributes(piece), "^%s+", "")
         local head = string.match(text, "^([^:]*):")
         local label = head and string.match(head, "^%s*([^%s]+)") or string.match(text, "^%s*([^%s:]+)")
@@ -220,7 +186,6 @@ function labels_of(inner)
     return table.concat(labels)
 end
 
--- The declaration text after its keyword (name and parameter list, with the labels spelled): name(labels) or name when it takes none.
 function callable_api(name, after)
     local open = string.find(after, "(", 1, true)
     if open == nil then
@@ -233,8 +198,6 @@ function callable_api(name, after)
     return name .. "(" .. labels_of(inner) .. ")"
 end
 
--- Parses one declaration's text (its attributes and @available already removed). Returns the declaration or nil when the text is not
--- one the reader keeps: {kind = extension | class | struct | enum | protocol | typealias | method | variable | case, name, api}.
 function declaration(text)
     local keyword = nil
     while true do
@@ -266,7 +229,6 @@ function declaration(text)
         local name = string.match(after, "^%s*([%a_\128-\255][%w_\128-\255]*)")
         return name and {kind = "typealias", name = name, type = true} or nil
     elseif keyword == "func" then
-        -- a name is an identifier, or an operator (its characters are no letters, digits, brackets or spaces: <, ==, ..<)
         local name = string.match(after, "^%s*([%a_\128-\255][%w_\128-\255]*)") or string.match(after, "^%s*([^%s%(%w_\128-\255]+)")
         if name == nil then
             return nil
@@ -297,7 +259,6 @@ function declaration(text)
     return nil
 end
 
--- The record of one declaration: its kind and api, and its iOS fields from its own @available or the nearest enclosing one.
 function record_of(kind, api, own, container, hidden)
     local introduced, via = nil, "none"
     if own and own.introduced then
@@ -310,7 +271,6 @@ function record_of(kind, api, own, container, hidden)
             obsoleted = own and own.obsoleted or nil, unavailable = unavailable and "yes" or "", via = via}
 end
 
--- Whether an enclosing type or extension is unavailable: its members are unavailable too.
 function hidden_of(stack)
     for i = #stack, 1, -1 do
         if stack[i].type and stack[i].own and stack[i].own.unavailable then
@@ -320,13 +280,11 @@ function hidden_of(stack)
     return false
 end
 
--- The number of times a character occurs in a text.
 function brace_count(text, c)
     local _, n = string.gsub(text, c, "")
     return n
 end
 
--- The qualified name of the nearest enclosing type or extension, or nil at the top level.
 function qual_of(stack)
     for i = #stack, 1, -1 do
         if stack[i].type then
@@ -336,7 +294,6 @@ function qual_of(stack)
     return nil
 end
 
--- The availability of the nearest enclosing type or extension that has one, or nil.
 function container_of(stack)
     for i = #stack, 1, -1 do
         if stack[i].type and stack[i].own and stack[i].own.introduced then
@@ -346,7 +303,6 @@ function container_of(stack)
     return nil
 end
 
--- Reads an interface text for a module: the list of records, in the file's order.
 function parse_interface(text, module)
     local imports = {}
     for name in string.gmatch(text, "import%s+([%w_]+)") do
@@ -405,7 +361,6 @@ function parse_interface(text, module)
                         local api = qual and (qual .. "." .. decl.api) or decl.api
                         table.insert(records, record_of(kind, api, decl_own, container, hidden))
                     end
-                    -- the braces the line opens beyond a type's own, and closes; a line's { get } opens and closes one
                     local net = brace_count(body, "{") - brace_count(body, "}") - opened
                     for _ = 1, net do
                         table.insert(stack, {type = false})
@@ -429,11 +384,8 @@ function parse_interface(text, module)
     return records
 end
 
--- The columns of a module's interface shard (spec/<F>/swiftinterface.tsv), as the surface model reads them.
 local SHARD_COLUMNS = {"module", "kind", "api", "introduced", "deprecated", "obsoleted", "unavailable", "via"}
 
--- The shard's text for one interface text: the header, then one line per declaration; and the number of declarations. A non-ASCII
--- name (Swift identifiers may be Unicode) is written as the corpus writes it: backslash escapes.
 function shard_text(text, module)
     local rows = {}
     for _, record in ipairs(parse_interface(text, module)) do

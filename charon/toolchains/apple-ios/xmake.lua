@@ -36,15 +36,6 @@ toolchain("apple-ios")
     end
 
     on_check(function (toolchain)
-        -- Resolved, not installed: package.lua checks a package's toolchain before installing its own
-        -- dependencies (its own comment, xmake PR #5466), so on_check runs against a package graph that
-        -- may name the SDK but not yet hold its files on disk - the first build after any change to a
-        -- digest input of iphoneos-sdk's own recipe hits exactly this, every time, since that always
-        -- means a fresh installdir with nothing in it yet. found.sdk itself is deterministic either way
-        -- (installdir() is a hash of the resolved config, not a check that it exists), so this only tests
-        -- what on_check can answer before installing anything: the graph has the packages a build needs.
-        -- Whether the SDK is actually there is on_load's question, once the packages this toolchain names
-        -- have had their chance to install - it already raises a specific, useful error if not (below).
         local found = parts(toolchain, import("core.project.project"))
         if not found.sdk or not toolchain:config("minimum") or not found.clang then
             return false

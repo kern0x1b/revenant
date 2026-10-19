@@ -3,31 +3,6 @@
 #import <objc/runtime.h>
 #import "CharonMetal26Types.h"
 
-// THE ACCELERATION STRUCTURE GEOMETRY DESCRIPTORS of Metal 4, and they are the same kind of thing as
-// the sixteen classes in MTL4Descriptors26.m: plain data holders that say what a geometry is built FROM
-// and ask the device nothing.
-//
-// EVERY DEFAULT BELOW IS APPLE'S OWN, measured against a fresh object of Apple's class, and two of them
-// are the ones a guess gets wrong:
-//
-//   * the base's allowDuplicateIntersectionFunctionInvocation is YES on a fresh object, not NO;
-//   * the triangle's vertexFormat is MTLVertexFormatFloat3 - the enumeration's 30 - and the curve's
-//     controlPointFormat is the same 30 while its radiusFormat is 28, MTLVertexFormatFloat, ONE component;
-//   * a triangle's indexType is MTLIndexTypeUInt32, the enumeration's 1, not its own zero;
-//   * a bounding box's stride is 24 and not 0.
-//
-// The measurement is tests/backports/host/metal-census/descriptors26.sh, which asks both sides.
-//
-// WHAT A RAY TRACING UNIT WOULD DO WITH ONE OF THESE IS NOT HERE, and that is the same half
-// facts/Metal/Metal16Absence.md records for the 16.0 family: this port vends no acceleration structure
-// and no ray tracing unit, so an application that fills one gets an object it can read, copy and
-// compare - and no object to hand it to. facts/Metal/Descriptors26.md carries that forward and every
-// row's `effect` says it.
-
-// THE BASE'S SEVEN MEMBERS, compared by every subclass as well, because a subclass's value is its
-// shape AND what it inherits. A helper that emits the comparison keeps the seven in one place: a
-// subclass that spelled them out would be seven places to forget one, and a forgotten member is an
-// equality that says two different geometries are the same.
 static BOOL CharonMetal4GeometryBaseEqual(MTL4AccelerationStructureGeometryDescriptor *mine,
                                           MTL4AccelerationStructureGeometryDescriptor *theirs)
 {
@@ -79,9 +54,6 @@ static NSUInteger CharonMetal4GeometryBaseHash(MTL4AccelerationStructureGeometry
     _label = [label copy];
 }
 
-// Two of these are Apple's own and not this file's choice: the duplicate-invocation flag is YES on a
-// fresh object, and the primitive data range is {0, 0} - not (uint64_t)-1, which the header says means
-// "to the end of the buffer".
 - (instancetype)init
 {
     if ((self = [super init])) {
@@ -119,15 +91,6 @@ static NSUInteger CharonMetal4GeometryBaseHash(MTL4AccelerationStructureGeometry
 
 @end
 
-// THE SIX SHAPES, and each one's own members over the base's seven. The three motion ones are the same
-// shapes with a second buffer per vertex, because a moving vertex has a position and a velocity; the
-// header spells that with a plural and this file keeps the spelling.
-
-// THE TWO FORMATS, by the enumeration's own values, and the second one is the case a reader would not
-// guess: the fresh triangle and the fresh curve's CONTROL POINT read 30, which is MTLVertexFormatFloat3
-// - a position - and the fresh curve's RADIUS reads 28, which is MTLVertexFormatFloat, ONE component,
-// because a radius is one number. (It is not 29, MTLVertexFormatFloat2: the differential's first
-// assertion for it said Float2 and was wrong, and the measurement corrected the assertion.)
 enum { CharonMetal4Float3 = 30, CharonMetal4Float1 = 28 };
 
 @implementation MTL4AccelerationStructureTriangleGeometryDescriptor {
@@ -150,7 +113,6 @@ enum { CharonMetal4Float3 = 30, CharonMetal4Float1 = 28 };
 @synthesize transformationMatrixBuffer = _transformationMatrixBuffer;
 @synthesize transformationMatrixLayout = _transformationMatrixLayout;
 
-// MTLVertexFormatFloat3 and MTLIndexTypeUInt32 are Apple's own fresh values, measured.
 - (instancetype)init
 {
     if ((self = [super init])) {
@@ -229,8 +191,6 @@ enum { CharonMetal4Float3 = 30, CharonMetal4Float1 = 28 };
 @synthesize boundingBoxStride = _boundingBoxStride;
 @synthesize boundingBoxCount = _boundingBoxCount;
 
-// 24 is Apple's own fresh stride, measured - a bounding box is three float32s, which is what the
-// number is, and a zero here would be a geometry of no boxes.
 - (instancetype)init
 {
     if ((self = [super init]))
@@ -278,8 +238,6 @@ enum { CharonMetal4Float3 = 30, CharonMetal4Float1 = 28 };
 
 @end
 
-// THE CURVE, which is the biggest of the six: fourteen members over the base's seven, and the three
-// curve enumerations are this port's own transcription in CharonMetal26Types.h.
 @implementation MTL4AccelerationStructureCurveGeometryDescriptor {
     MTL4BufferRange _controlPointBuffer;
     NSUInteger _controlPointCount;
@@ -312,8 +270,6 @@ enum { CharonMetal4Float3 = 30, CharonMetal4Float1 = 28 };
 @synthesize curveBasis = _curveBasis;
 @synthesize curveEndCaps = _curveEndCaps;
 
-// The two formats are Apple's own and they are not the same: a control point is a float3 and a radius
-// is a float, measured.
 - (instancetype)init
 {
     if ((self = [super init])) {
@@ -406,10 +362,6 @@ enum { CharonMetal4Float3 = 30, CharonMetal4Float1 = 28 };
 
 @end
 
-// THE THREE MOTION ONES, which are the same shapes with a second buffer per vertex. They keep the
-// header's plural spelling - vertexBuffers, boundingBoxBuffers, controlPointBuffers - and their
-// defaults are their shape's own: a motion triangle's vertexFormat is float3 as a triangle's is, and
-// Apple's fresh motion bounding box reads the same 24 stride.
 @implementation MTL4AccelerationStructureMotionTriangleGeometryDescriptor {
     MTL4BufferRange _vertexBuffers;
     MTLAttributeFormat _vertexFormat;

@@ -1,20 +1,3 @@
--- Selector-level corpus demand (methods/properties on classes iOS 6 already has). Lua port of the former
--- selector-demand.py.
---
--- Per app: the ObjC selector STRINGS in the bundle (__TEXT,__objc_methname across every Mach-O) that are NOT in
--- the stock iOS 6.0 selector universe => "new" selectors (added >=7.0, or app/3rd-party private). Aggregated by
--- corpus app-count. Cross-app frequency (>=2 apps) denoises app-private names (unlikely shared across unrelated
--- apps). Each new selector is annotated against the current registry's method rows -[Class sel] to give
--- framework:class:status where catalogued.
---
--- CAVEATS to state: __objc_methname mixes referenced and app-defined selectors (otool can't resolve
--- __objc_selrefs on chained-fixup arm64), so this over-approximates; frequency>=2 and the registry join filter
--- it. Not class-bound except via the registry match. Precise per-class resolved selectors come from Katabasis
--- runtime collect.
---
--- usage: xmake l tools/corpus/selector-demand.lua [extract|report]
---   extract : (re)build per-app selector caches (slow: otool over all bundle binaries)
---   report  : aggregate + annotate + write selector-demand-7-10.tsv and selector-demand-FUIKit.tsv (default)
 import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 local aggregate = import("aggregate", {rootdir = os.scriptdir(), anonymous = true})
@@ -27,7 +10,6 @@ local function cache_dir()
     return path.join(aggregate.corpus_dir(), "selcache")
 end
 
--- The output of a program as text, or "" when it fails (Python's `except Exception: continue`).
 local function output_of(program, argv)
     local out = ""
     try {
@@ -47,7 +29,6 @@ local function trim(text)
     return (text:gsub("^%s+", ""):gsub("%s+$", ""))
 end
 
--- The selector names of every Mach-O under an app bundle, as a set.
 local function bundle_selectors(appdir)
     local sels = {}
     for _, file in ipairs(os.files(path.join(appdir, "**"))) do
@@ -87,7 +68,6 @@ local function extract()
     print("EXTRACT-DONE")
 end
 
--- selector -> list of {framework, class, status} from -[Class sel] / +[Class sel] method rows, in the export's order.
 local function registry_selectors()
     local index = {}
     local file = aggregate.registry_export()
@@ -142,7 +122,6 @@ local function report()
             app_count = app_count + 1
         end
     end
-    -- selector -> set of apps that send it, for every selector the stock 6.0 universe lacks
     local freq, names = {}, {}
     for _, app in ipairs(APPS) do
         for name in pairs(app_sel[app] or {}) do
@@ -174,7 +153,6 @@ local function report()
     end
     file:close()
 
-    -- the F+UIKit-matched view: a selector that matches a registry method row in F or UIKit, by app count
     local fui_rows = {}
     for _, row in ipairs(rows) do
         local matched = {}
@@ -187,9 +165,6 @@ local function report()
             table.insert(fui_rows, {n = #row.apps, selector = row.selector, matches = matched, apps = row.apps})
         end
     end
-    -- "kind" heuristic: a selector whose ONLY registry classes are protocols the app IMPLEMENTS (*Delegate/*DataSource/
-    -- *Observer) is a harmless-if-absent callback (the framework just won't call it), not a method the app SENDS. Flagged
-    -- so consumers prioritise SENT methods. Definitive sent/implements split = Katabasis runtime collect.
     local function is_impl(matches)
         for _, m in ipairs(matches) do
             local c = m.class

@@ -1,18 +1,8 @@
--- The literal test of the generator's steps: no string literal in tools/gen or tools/found names an SDK release (26.2, 16.4, iphoneos26)
--- or a machine path (/Users/, the xmake package folder, the platform folder). The release comes from the SDK (sdk.discover), and the
--- machine paths are the project's options in tools/gen/project.lua, the one file exempt here. Comments are not literals: a comment may
--- name a release. The scanner reads Lua tokens (strings and comments, long brackets too), so a pattern inside a comment is not a hit.
--- A mutant must make this test fail: a real step file with one release literal added is scanned, and the scan must report it.
--- Run: xmake l tests/gen/literal_test.lua (exits 1 on failure). Pure Lua: no SDK, no clang.
-
 local ROOT = path.absolute(path.join(os.scriptdir(), "..", ".."))
 local TOOLS = path.join(ROOT, "tools")
 
--- The patterns a step's string literal must not match (Lua patterns over the literal's value).
 local FORBIDDEN = {"26%.2", "16%.4", "iphoneos%d", "iPhoneOS%d", "/Users/", "%.xmake", "iPhoneOS%.platform"}
 
--- The string literals of a Lua source: {line, value} for each quoted or long-bracket string. Comments are skipped whole: a "--" to the
--- end of its line, or a "--[[ ... ]]" block.
 local function literals_of(text)
     local out = {}
     local i, n, line = 1, #text, 1
@@ -63,7 +53,6 @@ local function literals_of(text)
     return out
 end
 
--- The hits of a source text: each string literal a FORBIDDEN pattern matches, as "line: value".
 local function hits_of(text)
     local hits = {}
     for _, lit in ipairs(literals_of(text)) do
@@ -77,7 +66,6 @@ local function hits_of(text)
     return hits
 end
 
--- The step files: every .lua under the step folders, except the project's options and the tests of the folders.
 local function step_files()
     local out = {}
     for _, folder in ipairs({path.join(TOOLS, "gen"), path.join(TOOLS, "found")}) do
@@ -103,7 +91,6 @@ function main()
         end
     end
 
-    -- the scanner itself: a literal is a hit, a comment is not, a long string is read, an escaped quote does not end the string
     check(#hits_of('local x = "iPhoneOS26.2.sdk"') == 1, "a release in a string is a hit")
     check(#hits_of('-- the 26.2 headers and 16.4 body\nlocal x = 1') == 0, "a release in a line comment is not a hit")
     check(#hits_of('--[[ 26.2 ]] local x = 1') == 0, "a release in a block comment is not a hit")
@@ -111,7 +98,6 @@ function main()
     check(#hits_of('local x = "a \\" 26.2"') == 1, "an escaped quote does not end the string")
     check(#hits_of('local x = "--sdk 26.2"') == 1, "a -- inside a string is not a comment")
 
-    -- the real steps: no literal names a release or a machine path
     local files = step_files()
     check(#files > 0, "the step files are found")
     for _, file in ipairs(files) do
@@ -120,7 +106,6 @@ function main()
         end
     end
 
-    -- the mutant: a step file with one release literal added is reported (the test would fail on the mutant)
     local step = path.join(TOOLS, "gen", "cmd_scope.lua")
     local mutant = io.readfile(step) .. '\nlocal MUTANT_RELEASE = "iphoneos26.2"\n'
     local found = hits_of(mutant)

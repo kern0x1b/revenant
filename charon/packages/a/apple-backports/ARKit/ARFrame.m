@@ -1,32 +1,11 @@
-// ARFrame.m, ARCamera.m and ARLightEstimate.m - what one frame of a session carries.
-//
-// A frame is the camera's pose, the device's pose, when each was true, how large the picture is, how
-// bright the light is, and the anchors that were in the world when it was taken. All of it comes
-// from the tracker's own pipeline; none of it is a constant.
-
 #import <ARKit/ARKit.h>
 #import <AVFoundation/AVFoundation.h>
 
 #import "CharonARTracker.h"
 #import "CharonARKitPrivate.h"
 
-// The projection arithmetic and the hit-test vocabulary are declared by the 11.x headers and are
-// implemented here for a runtime that predates them, which is the whole point of the file: a caller
-// reaching one of these is by definition on a release new enough for the answer.
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
-/// The projection arithmetic, written once.
-///
-/// `ARFrame` and `ARCamera` are two classes that both know where they are and how they see, and the
-/// framework declares the same questions of each: where a world point lands in the picture, where a
-/// pixel meets a plane, which way the camera looks, what the projection matrix is, and what a ray
-/// from a pixel hits. It is one computation - a pinhole camera's intrinsics composed with its pose -
-/// and these headers give the two classes no superclass to share (neither is an `ARObject` here), so
-/// it is a set of static functions and each class's method forwards to them. There is no second copy
-/// of the arithmetic anywhere in the library.
-
-/// A device's attitude in the Z-Y-X order the framework documents. A C simd carries no quat and no
-/// euler-angle helper - those are the Swift overlay's - so the angles are read out of the matrix.
 static simd_float3 CharonEulerAngles(simd_float4x4 transform)
 {
     simd_float3x3 rotation;
@@ -45,9 +24,6 @@ static simd_float3 CharonEulerAngles(simd_float4x4 transform)
                             atan2f(rotation.columns[1][0], rotation.columns[0][0]));
 }
 
-/// The intrinsics in the viewport's own pixels. A viewport and the camera's image are the same
-/// picture at different scales, so the focal length and the principal point are what they are in the
-/// camera's own pixels, scaled by how much of the image the viewport shows.
 static simd_float3x3 CharonScaledIntrinsics(simd_float3x3 intrinsics, CGSize image, CGSize viewport)
 {
     if (image.width <= 0 || image.height <= 0)
@@ -67,8 +43,6 @@ static simd_float3x3 CharonScaledIntrinsics(simd_float3x3 intrinsics, CGSize ima
     return scaled;
 }
 
-/// The matrix a renderer hands to a GPU: the intrinsics, then the near and far planes folded into the
-/// third and fourth rows so a point at the near plane maps to zero and one at the far plane to one.
 static simd_float4x4 CharonProjectionMatrix(simd_float3x3 intrinsics, CGSize image, CGSize viewport,
                                             CGFloat zNear, CGFloat zFar)
 {
@@ -88,17 +62,12 @@ static CGPoint CharonProjectPoint(simd_float3x3 intrinsics, CGSize image, CGSize
 {
     simd_float3x3 scaled = CharonScaledIntrinsics(intrinsics, image, viewport);
     simd_float4 camera = simd_mul(transform, (simd_float4){ point.x, point.y, point.z, 1 });
-    // The depth along the optical axis decides whether there is a pixel to answer with at all: a
-    // point behind the camera projects to a mirror image of where it really is, so the origin is
-    // what a caller is given rather than a plausible-looking wrong place.
     if (camera.z >= 0)
         return CGPointZero;
     return CGPointMake((CGFloat)((camera.x * scaled.columns[0][0] + camera.z * scaled.columns[2][0]) / -camera.z),
                        (CGFloat)((camera.y * scaled.columns[1][1] + camera.z * scaled.columns[2][1]) / -camera.z));
 }
 
-/// The same projection run backwards. A plane arrives as the transform that carries it into the
-/// world, whose fourth column is its origin and whose third column is its normal.
 static simd_float3 CharonUnprojectPoint(simd_float3x3 intrinsics, simd_float4x4 transform, CGPoint point,
                                         simd_float4x4 planeTransform)
 {
@@ -120,7 +89,7 @@ static simd_float3 CharonUnprojectPoint(simd_float3x3 intrinsics, simd_float4x4 
                                               transform.columns[3][2] - planeOrigin.z);
     float denominator = simd_dot(planeNormal, direction);
     if (denominator == 0)
-        return planeOrigin;   // the ray lies in the plane and never meets it
+        return planeOrigin;
     float along = simd_dot(planeNormal, fromCamera) / denominator;
     return simd_make_float3(planeOrigin.x + direction.x * along,
                             planeOrigin.y + direction.y * along,
@@ -132,14 +101,10 @@ static simd_float3 CharonRayOrigin(simd_float4x4 transform)
     return simd_make_float3(transform.columns[3][0], transform.columns[3][1], transform.columns[3][2]);
 }
 
-/// A hit test is the detector answering about a ray, and the answers are the framework's own objects.
 static NSArray<ARHitTestResult *> *CharonHitTest(CharonARTracker *tracker, simd_float3x3 intrinsics,
                                                 simd_float4x4 transform, CGPoint point,
                                                 ARHitTestResultType types)
 {
-    // The types a caller asks for are the features this library detects. A plane and a point are what
-    // a camera and a gyroscope find; the two the framework names for what it alone can see - a face
-    // and a body - are asked of their own classes, not of a frame.
     if (!tracker)
         return @[];
     NSMutableArray<CharonARValue *> *found = [NSMutableArray array];
@@ -207,8 +172,6 @@ static NSArray<ARHitTestResult *> *CharonHitTest(CharonARTracker *tracker, simd_
     _trackingState = state;
     _trackingStateReason = (state == ARTrackingStateNormal) ? ARTrackingStateReasonNone
                                                             : ARTrackingStateReasonRelocalizing;
-    // The focal length and the principal point are the camera's own, from the field of view it states
-    // and the size of the frame that field of view is being shown in.
     _intrinsics = [CharonARTracker cameraIntrinsicsForResolution:resolution];
     _hitTestTracker = hitTestTracker;
     return self;
@@ -271,8 +234,6 @@ static NSArray<ARHitTestResult *> *CharonHitTest(CharonARTracker *tracker, simd_
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    // A camera is a reading of one instant, so a copy of it is a reading of the same instant: the
-    // same pose, the same intrinsics, the same exposure, at a new address.
     ARCamera *copy = [[ARCamera allocWithZone:zone] initWithTransform:_transform
                                                   deviceEulerAngles:_eulerAngles
                                                  transformTimestamp:_transformTimestamp
@@ -361,8 +322,6 @@ static NSArray<ARHitTestResult *> *CharonHitTest(CharonARTracker *tracker, simd_
     if (!self)
         return nil;
     _timestamp = timestamp;
-    // The framework's estimate is an object carrying both numbers the tracker measured, and the
-    // frame hands out that object rather than the raw floats.
     _lightEstimate = [[ARLightEstimate alloc] initWithAmbientIntensity:lightEstimate
                                                ambientColorTemperature:temperature];
     _anchors = [NSMutableArray array];
@@ -406,14 +365,12 @@ static NSArray<ARHitTestResult *> *CharonHitTest(CharonARTracker *tracker, simd_
 
 - (NSDictionary<NSString *, id> *)capturedDepthData:(AVCaptureDepthDataOutput *)output
 {
-    // No depth sensor, so no depth photograph: the answer is the empty dictionary the header's
-    // contract gives, not a fabricated image.
     return @{};
 }
 
 - (BOOL)updateWithDictionary:(NSDictionary<NSString *, id> *)dictionary
 {
-    return NO;   // a frame from a run other than this one cannot be applied to this one
+    return NO;
 }
 
 - (ARLightEstimate *)lightEstimate { return _lightEstimate; }
@@ -460,10 +417,6 @@ static NSArray<ARHitTestResult *> *CharonHitTest(CharonARTracker *tracker, simd_
 - (CGAffineTransform)displayTransformForOrientation:(UIInterfaceOrientation)orientation
                                         viewportSize:(CGSize)viewportSize
 {
-    // The display transform puts the camera's image into the shape a screen wants, and it exists for
-    // the depth-sensor geometries the framework uses to see a real surface at any distance. This
-    // frame reports no display geometry, so the picture is the camera's own and the transform is the
-    // identity, which is the same answer `-hasDisplayGeometry` already gives.
     return CGAffineTransformIdentity;
 }
 
@@ -484,9 +437,6 @@ static NSArray<ARHitTestResult *> *CharonHitTest(CharonARTracker *tracker, simd_
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    // A frame is a reading of one instant, and copying it gives the same reading at a new address:
-    // the same camera, the same anchors, the same estimate, so a caller holding a copy holds the
-    // frame it copied and not a later one.
     ARFrame *copy = [[ARFrame allocWithZone:zone] initWithCameraTransform:_camera.transform
                                                           deviceTransform:_deviceTransform
                                                         cameraTransformTime:_timestamp

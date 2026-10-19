@@ -22,7 +22,6 @@
     if ((self = [super init])) {
         _appearance = appearance;
         _showsSeparators = YES;
-        // The header padding's default is the sentinel of the host's, the largest CGFloat (tests/backports/host/list-config).
         _headerTopPadding = CGFLOAT_MAX;
     }
     return self;
@@ -48,8 +47,6 @@
     return copy;
 }
 
-// Unset, the separator configuration is built for the appearance on each read, which is what the host answers (each read is a new object);
-// once set, the configuration holds a copy of the one given. The host refuses nil, with NSInvalidArgumentException, and keeps what it held.
 - (UIListSeparatorConfiguration *)separatorConfiguration
 {
     return _separatorConfiguration ?: [[UIListSeparatorConfiguration alloc] initWithListAppearance:_appearance];

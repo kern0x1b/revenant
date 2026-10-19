@@ -10,38 +10,8 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-// The two views' own drag and drop delegates, which are not the interactions' delegates.
-//
-// A collection view and a table view each carry a drag delegate and a drop delegate of their own,
-// and they are asked different questions from the UIDragInteraction and UIDropInteraction delegates:
-// the view asks its drag delegate what an item at an index path *is*, and its drop delegate whether a
-// session will be handled, what it proposes for it, and to perform it. The release's collection view
-// and table view ask none of them, so an application that implemented them was never asked, and the
-// drag this port already had was only ever an interaction's drag.
-//
-// The order and the arguments are the host's own, held by tests/backports/host/viewdragdrop. The
-// sequence, for one drop, is:
-//
-//   canHandleDropSession:            will it be handled at all
-//   dropSessionDidUpdate:withDestinationIndexPath:   what it proposes, once per move
-//   performDropWithCoordinator:      the drop, with the coordinator the items move through
-//   dropSessionDidEnd:               the session is over
-//
-// and for one drag, itemsForBeginningDragSession:atIndexPath: is asked before anything is lifted.
-// A drop session is also told when it enters and leaves: dropSessionDidEnter: before the first
-// update, dropSessionDidExit: when it leaves the view.
-//
-// The drag delegate's own session questions are asked at the points they describe:
-// dragSessionWillBegin: once the items exist and before the lift animation, dragSessionDidEnd: once
-// the drag is over, and the move and restriction questions whenever the answer is needed.
-
 @implementation UICollectionView (CharonViewDragDrop11)
 
-// ---- the drag delegate
-
-// What an item at this index path is. The view asks its own drag delegate, and an application that
-// has set one gets asked; a view with none lifts the item under the touch, which is what the
-// interaction's own delegate would have been asked for.
 - (NSArray<UIDragItem *> *)charon_itemsForBeginningDragAtIndexPath:(NSIndexPath *)indexPath
 {
     id<UICollectionViewDragDelegate> delegate = charon_drag_drop_box(self)->dragDelegate;
@@ -52,7 +22,6 @@
     return ((NSArray<UIDragItem *> * (*)(id, SEL, id, id, id))objc_msgSend)(delegate, ask, self, session, indexPath);
 }
 
-// The preview an item is lifted with, which is the drag delegate's to choose.
 - (UIDragPreviewParameters *)charon_dragPreviewParametersForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     id<UICollectionViewDragDelegate> delegate = charon_drag_drop_box(self)->dragDelegate;
@@ -62,8 +31,6 @@
     return ((UIDragPreviewParameters * (*)(id, SEL, id, id))objc_msgSend)(delegate, ask, self, indexPath);
 }
 
-// Whether a session may move its items, and whether it is confined to this application. Both are
-// asked when the answer is needed rather than once, so a delegate can change its mind mid-drag.
 - (BOOL)charon_dragSessionAllowsMoveOperation:(id<UIDragSession>)session
 {
     id<UICollectionViewDragDelegate> delegate = charon_drag_drop_box(self)->dragDelegate;
@@ -78,7 +45,7 @@
     id<UICollectionViewDragDelegate> delegate = charon_drag_drop_box(self)->dragDelegate;
     SEL ask = @selector(collectionView:dragSessionIsRestrictedToDraggingApplication:);
     if (![delegate respondsToSelector:ask])
-        return YES;   // a drag on this release stays in the application that began it
+        return YES;
     return ((BOOL (*)(id, SEL, id, id))objc_msgSend)(delegate, ask, self, session);
 }
 
@@ -108,8 +75,6 @@
     CGPoint point = attributes ? CGPointMake(CGRectGetMidX(attributes.frame), CGRectGetMidY(attributes.frame)) : CGPointZero;
     return ((NSArray<UIDragItem *> * (*)(id, SEL, id, id, id, CGPoint))objc_msgSend)(delegate, ask, self, session, indexPath, point);
 }
-
-// ---- the drop delegate
 
 - (BOOL)charon_canHandleDropSession:(id<UIDropSession>)session
 {
@@ -144,9 +109,6 @@
         ((void (*)(id, SEL, id, id))objc_msgSend)(delegate, ask, self, session);
 }
 
-// What a session would do at this point. The destination is the item under the finger, from the
-// release's own hit test, and a delegate that answers nothing has the session cancelled rather than
-// moved, so nothing is dropped that the delegate did not agree to.
 - (UICollectionViewDropProposal *)charon_dropProposalForSession:(id<UIDropSession>)session
                                                 atIndexPath:(NSIndexPath *)destination
 {
@@ -168,9 +130,6 @@
     return ((UIDragPreviewParameters * (*)(id, SEL, id, id))objc_msgSend)(delegate, ask, self, indexPath);
 }
 
-// The drop itself, with the coordinator the delegate moves the items through: the items, where they
-// would land, what was proposed and the session. The destination is the item under the finger, and
-// the item sizes are the ones the layout gives that item, so a preview is the size it will be drawn.
 - (void)charon_performDropOfSession:(id<UIDropSession>)session
 {
     id<UICollectionViewDropDelegate> delegate = charon_drag_drop_box(self)->dropDelegate;
@@ -203,8 +162,6 @@
 @end
 
 @implementation UITableView (CharonViewDragDrop11)
-
-// ---- the drag delegate
 
 - (NSArray<UIDragItem *> *)charon_itemsForBeginningDragAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -239,7 +196,7 @@
     id<UITableViewDragDelegate> delegate = charon_drag_drop_box(self)->dragDelegate;
     SEL ask = @selector(tableView:dragSessionIsRestrictedToDraggingApplication:);
     if (![delegate respondsToSelector:ask])
-        return YES;   // a drag on this release stays in the application that began it
+        return YES;
     return ((BOOL (*)(id, SEL, id, id))objc_msgSend)(delegate, ask, self, session);
 }
 
@@ -269,8 +226,6 @@
     CGPoint point = CGPointMake(CGRectGetMidX(row), CGRectGetMidY(row));
     return ((NSArray<UIDragItem *> * (*)(id, SEL, id, id, id, CGPoint))objc_msgSend)(delegate, ask, self, session, indexPath, point);
 }
-
-// ---- the drop delegate
 
 - (BOOL)charon_canHandleDropSession:(id<UIDropSession>)session
 {

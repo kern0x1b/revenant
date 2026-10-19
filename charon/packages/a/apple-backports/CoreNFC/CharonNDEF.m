@@ -1,7 +1,3 @@
-// CharonNDEF.m - the record shape of CharonNDEF.h, per the NFC Forum NDEF Technical Specification.
-// Every field is written and read where the specification puts it, and a record that does not add up is
-// refused rather than repaired.
-
 #import "CharonNDEF.h"
 
 const char *const CharonNDEFURIPrefixes[CharonNDEFURIPrefixCount] = {
@@ -29,8 +25,6 @@ size_t CharonNDEFRecordLength(const CharonNDEFRecord *record)
     if (record->typeLength > CharonNDEFMaxTypeLength || record->identifierLength > CharonNDEFMaxIDLength) {
         return 0;
     }
-    // The header, the type length, the payload length of one or four bytes, and the ID length byte
-    // exactly when the header's IL says it is there.
     size_t head = (record->payloadLength < 0x100 ? 3 : 6) + (record->hasIdentifierField ? 1 : 0);
     return head + record->typeLength + record->identifierLength + record->payloadLength;
 }
@@ -52,8 +46,6 @@ size_t CharonNDEFRecordEncode(const CharonNDEFRecord *record, uint8_t *out, size
     if (shortRecord) {
         header |= 0x20;
     }
-    // IL: the ID length field is present whenever the record carries one - which for a record with no
-    // identifier at all is not, and which is why the text RTD's own worked example is twelve bytes.
     if (record->hasIdentifierField) {
         header |= 0x10;
     }

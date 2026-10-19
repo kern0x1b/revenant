@@ -1,7 +1,3 @@
-// MPSGraphDevice, from the header of MPSGraphDevice.h in the SDK of iOS 16.4: the compute device a graph
-// runs on. MPSGraphDeviceTypeMetal is 0, which is the only kind there is here, because every device this
-// port has is charon's own Metal device.
-
 #import "CharonMPSGraph.h"
 
 @implementation MPSGraphDevice {

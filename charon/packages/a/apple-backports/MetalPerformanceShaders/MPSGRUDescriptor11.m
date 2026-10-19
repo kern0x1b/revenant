@@ -1,10 +1,3 @@
-// MPSGRUDescriptor, from the header of MPSRNNLayer.h in the SDK of iOS 16.4: a gated recurrent unit's
-// descriptor. It adds seven weight sources, the p-norm value and the output-gate switch to MPSRNNDescriptor.
-//
-// The defaults are the host's, read from Apple's own object (see facts/MetalPerformanceShaders/MPSGRUDescriptor.md):
-// every weight source is nil, gatePnormValue is 1 and flipOutputGates is NO. The base class's defaults stand for
-// the rest. The object is not NSCopying on the host, so this class is not either.
-
 #import "CharonMPS.h"
 
 @implementation MPSGRUDescriptor {
@@ -37,8 +30,6 @@
     return self;
 }
 
-// The input gate: Wz, Uz and the gate's own neuron.
-
 - (id <MPSCNNConvolutionDataSource>)inputGateInputWeights
 {
     return _inputGateInputWeights;
@@ -59,8 +50,6 @@
     _inputGateRecurrentWeights = weights;
 }
 
-// The recurrent gate: Wr and Ur.
-
 - (id <MPSCNNConvolutionDataSource>)recurrentGateInputWeights
 {
     return _recurrentGateInputWeights;
@@ -80,8 +69,6 @@
 {
     _recurrentGateRecurrentWeights = weights;
 }
-
-// The proposed output: Wh, Uh and Vh.
 
 - (id <MPSCNNConvolutionDataSource>)outputGateInputWeights
 {

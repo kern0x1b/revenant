@@ -1,12 +1,3 @@
-// The order of a run: is the firmware loaded when the program begins? A program `xmake emulate run`
-// starts is the guest's first process of its own, and on a device a process launched after boot finds
-// launchd's jobs loaded: every Mach service a LaunchDaemons plist declares is registered with launchd,
-// whether or not the daemon behind it runs yet. This program asks for com.apple.cvmsServ before anything
-// else, then for every service those plists declare, and polls the missing ones. It passes when nothing
-// it asks for first is registered later.
-//
-// A service a plist marks HideUntilCheckIn is registered only when its daemon checks in, which is the
-// daemon's own time and not launchd's loading; those are counted apart and never fail the run.
 #include <CoreFoundation/CoreFoundation.h>
 #include <dirent.h>
 #include <mach/mach.h>
@@ -17,7 +8,6 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-// bootstrap_look_up is not in the SDK's public headers.
 extern kern_return_t bootstrap_look_up(mach_port_t bootstrap, const char* name, mach_port_t* service);
 
 #define MAX_SERVICES 2048
@@ -41,8 +31,6 @@ static int registered(const char* name)
     return bootstrap_look_up(bootstrap_port, name, &port) == KERN_SUCCESS;
 }
 
-// Apple's plists do not agree on the key's case: com.apple.mediastream.mstreamd.plist spells it
-// HideUntilCheckin for one service, and that service is registered when mstreamd checks in, like the rest.
 static void flag(const void* key, const void* value, void* context)
 {
     char name[32];

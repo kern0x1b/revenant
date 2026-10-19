@@ -12,8 +12,6 @@ function failures(opt)
     local gdb = import("gdb", {rootdir = opt.modules, anonymous = true})
     local found = {}
 
-    -- The registers come as one run of little endian words in the order they
-    -- are named, and an error where the guest cannot be read is not a register.
     local answer = ""
     for index = 1, 17 do
         answer = answer .. word_of(index == 16 and 0x3314dfe8 or index * 0x10)
@@ -27,9 +25,6 @@ function failures(opt)
         table.insert(found, "a guest that cannot be read has no registers")
     end
 
-    -- iOS keeps the frame pointer in r7, and a frame holds the one before it
-    -- and where to return to, so the stack is a chain until a frame does not
-    -- read - which is where the walk stops rather than inventing a caller.
     local memory = {[0x1000] = 0x1020, [0x1004] = 0xaaaa, [0x1020] = 0x1040, [0x1024] = 0xbbbb, [0x1040] = 0, [0x1044] = 0xcccc}
     local walked = gdb.chain(function (address) return memory[address] end, {pc = 0x1111, lr = 0x2222, r7 = 0x1000})
     local told = {}

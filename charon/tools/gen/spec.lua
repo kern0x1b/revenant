@@ -1,8 +1,3 @@
--- The spec of a framework as the generator reads it, built in memory: the member rows from its declaration shard (members.rows over
--- headers.shard_facts, the same rows the members command reads), the constant rows from the constant record (layout.lua), the
--- hand-written overrides (registry rows the generator skips), and the pins that name the declaration each override was written
--- against. Nothing here writes a file: the spec table gen writes is derived under .gen and is never read back.
-
 local layout = import("layout", {anonymous = true})
 local tsv = import("tsv", {anonymous = true})
 local files = import("files", {anonymous = true})
@@ -14,8 +9,6 @@ local tbd = import("tbd", {anonymous = true})
 local digest = import("digest", {anonymous = true})
 local json = import("core.base.json")
 
--- The frameworks of the tree that have a declaration shard, in byte order, nested frameworks included (spec/<F>/declarations.tsv
--- and spec/<Outer>/<Inner>/declarations.tsv, named "Outer/Inner").
 function frameworks(tree)
     local root = path.join(tree, layout.constants().SNAP_ROOT)
     local names = {}
@@ -28,7 +21,6 @@ function frameworks(tree)
     return names
 end
 
--- A constant record row, with every spec column present ("-" where the record has none).
 local function complete(r)
     for _, name in ipairs(layout.constants().SPEC_COLUMNS) do
         if r[name] == nil then
@@ -38,8 +30,6 @@ local function complete(r)
     return r
 end
 
--- The rows of the constant record (constants.tsv: the measured constant rows, one record per framework, committed as data), or none.
--- An enumerator the shard declares is a found row with the shard's value (input writes it so; round 16).
 local function constant_rows(tree, fw)
     local out = {}
     local text = files.read_text(layout.constant_record_path(tree, fw))
@@ -54,19 +44,12 @@ local function constant_rows(tree, fw)
     return out
 end
 
--- The member rows of a framework's shard (method and property rows), and whether the framework has a shard file at all. The tbd
--- column is "-" unless the SDK is given: then each member's class is looked up in the classes the SDK's .tbd chain exports.
 local function shard_rows(tree, fw, sdk)
     local facts = headers.shard_facts(tree, fw)
     local classes = sdk and tbd.class_exports(sdk, fw) or nil
     return members.rows(facts.members, classes, fw), #facts.members
 end
 
--- The spec rows of a framework, in memory: its members from the shard, then its constants from the constant record. A framework with
--- no shard file and no members (a fixture of a test) keeps the member rows of its legacy spec file, so such a fixture reads its rows
--- as before. Two rows of one key get a digest of their api, as cmd_members does, so every key is one identifier.
--- The last framework built is kept (one slot): a command reads each framework's spec several times, and the shard is read once.
--- forget() drops it, and a command calls it first, so a change of the inputs between two runs in one process is seen.
 local last_key, last_rows = nil, nil
 
 function forget()
@@ -99,7 +82,6 @@ function build(tree, fw, sdk)
     return rows
 end
 
--- The member rows (method and property) of a framework's spec, in the shard's order.
 function member_rows(tree, fw)
     local out = {}
     for _, r in ipairs(load(tree, fw)) do
@@ -110,7 +92,6 @@ function member_rows(tree, fw)
     return out
 end
 
--- The spec table as the generator writes it under .gen: the header line of the spec columns, then one line per row.
 function table_text(rows)
     local lines = {}
     for _, r in ipairs(rows) do
@@ -123,8 +104,6 @@ function table_text(rows)
     return tsv.table_text(layout.constants().SPEC_COLUMNS, lines)
 end
 
--- Every spec row under its own api and, for a property, under the dotted name the registry uses (Class.name). The first row
--- of a key wins, as the oracle's setdefault does.
 function index(rows)
     local found = {}
     local function add(key, row)
@@ -144,8 +123,6 @@ end
 
 local OVERRIDE_KINDS = {method = true, property = true, class = true}
 
--- The hand-written registry rows of a framework that are implemented: api -> {registry = path, entry = row}, with the first row
--- of an api winning, and order = the apis in the order they were found (files sorted by name, rows in file order).
 function overrides(tree, fw)
     local found, order_of = {}, {}
     for _, filepath in ipairs(files.glob(path.join(tree, layout.registry_dir(fw), "*.json"))) do
@@ -164,7 +141,6 @@ function overrides(tree, fw)
     return found, order_of
 end
 
--- The pins of a framework, in the sidecar's order; none when no sidecar is committed.
 function pins(tree, fw)
     local text = files.read_text(layout.pins_path(tree, fw))
     if not text then
@@ -173,7 +149,6 @@ function pins(tree, fw)
     return tsv.records(text)
 end
 
--- The pins as the sidecar holds them, sorted by key.
 function pins_text(list)
     local sorted = table.move(list, 1, #list, 1, {})
     table.sort(sorted, function(a, b) return order.less(a.key, b.key) end)
@@ -184,9 +159,6 @@ function pins_text(list)
     return tsv.table_text(layout.constants().PIN_COLUMNS, rows)
 end
 
--- The pinned members whose declaration changed since their pin: {key, api, old, new}, in key order. Only a pinned member is here: a
--- member with no pin has none, and regenerates from the shard, its change reviewed through the shard diff. gen refuses these unless
--- it re-records them (gen --record writes each new hash into its pin, pinned-by repin).
 function refused(tree, fw)
     local current = {}
     for _, r in ipairs(member_rows(tree, fw)) do
@@ -201,8 +173,6 @@ function refused(tree, fw)
             table.insert(out, {key = p.key, api = p.api, old = p.pinned, new = r.hash, kind = "pinned"})
         end
     end
-    -- The constant record has no refusal: it is input's output (input --all rewrites it from the ledger, the headers and the corpus),
-    -- and the Python it ports kept no declaration hash per row to refuse on (round 15: the declhash column is gone with the owner's rule).
     table.sort(out, function(a, b) return order.less(a.key, b.key) end)
     return out
 end

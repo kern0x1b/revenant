@@ -2,19 +2,6 @@
 #import <math.h>
 #import "CharonMethodProem.h"
 
-// The compiler folds a literal array, dictionary or boxed number that is itself made of
-// compile-time constants into a static instance in the binary's own __DATA_CONST, rather than
-// building it at runtime. The instance's isa is bound to a class by name, and its remaining bytes
-// are the fields below, exactly as clang lays them out for three of the four classes here -
-// measured by reading the __objc_intobj, __objc_arrayobj and __objc_dictobj sections of a real
-// shipped binary (UTM.app, arm64) that imports NSConstantArray, NSConstantDictionary and
-// NSConstantIntegerNumber as strong symbols: each field's chained-fixup rebase target was followed
-// to its real destination (a type-encoding C string, an inline pointer pool) to confirm what it
-// holds, not assumed from the class's public behaviour. The fourth, NSConstantDoubleNumber, is
-// reasoned by analogy to the measured integer layout rather than independently read - see the
-// comment at its own layout struct below. iOS 6 never emits such instances itself; carrying the
-// class is what lets it host the ones an application already brings.
-
 typedef struct {
     Class isa;
     uint64_t count;
@@ -35,15 +22,6 @@ typedef struct {
     int64_t value;
 } CharonConstantIntegerNumberLayout;
 
-// NSConstantDoubleNumber's layout is reasoned by analogy to NSConstantIntegerNumber's measured
-// one above, not independently read off a binary: no shipped binary importing this class as a
-// strong symbol was available to this band to disassemble. The analogy is narrow - it is the same
-// clang codegen path (a boxed literal, @(expr), that clang can fold at compile time because expr
-// is itself constant), emitting the same isa-bound __DATA_CONST instance, with the same
-// objCType-then-value shape; only the trailing field's width and encoding character change, from
-// the integer class's int64_t/"i" or "q" to this class's double/"d" or "f". Confirming the exact
-// byte offsets against a real binary is future work for whichever band next holds one that imports
-// this class strongly; see facts/Foundation/NSConstantLiterals.md.
 typedef struct {
     Class isa;
     const char *objCType;
@@ -238,11 +216,6 @@ typedef struct {
         return @"nan";
     if (isinf(value))
         return value > 0 ? @"+inf" : @"-inf";
-    // The shortest decimal that reads back to the same double, matching what a real NSNumber's
-    // description promises (a round-tripping value) without reproducing CFNumber's own formatter
-    // byte for byte - not held against a host oracle, since no UIKit/Foundation host test exercises
-    // this class (it takes a compile-time-constant literal a host-side test cannot construct the
-    // same way a real binary's isa-bound instance does).
     for (int precision = 1; precision <= 17; precision++) {
         NSString *candidate = [NSString stringWithFormat:@"%.*g", precision, value];
         if (candidate.doubleValue == value)

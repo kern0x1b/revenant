@@ -1,6 +1,3 @@
-// Test-only, built into the port's module for the differential and into no shipped module: the interfaces of the first path the
-// C monitor reports, read through the same calls the backports answer with, as NWInterface values. A required type is passed
-// as the InterfaceType the test names, and maps to the C type of the same meaning.
 import Dispatch
 
 func cInterfaceType(_ kind: NWInterface.InterfaceType) -> nw_interface_type_t {
@@ -41,9 +38,6 @@ public func _testFirstPathInterfaces(_ required: NWInterface.InterfaceType?) -> 
     return found ?? []
 }
 
-// The zone lookup the address types read (Foundation/NWPathMonitor.m, charon_interface_named), for the host: the interface of
-// the first path that has the name, nil when the path has none. The seam of the device is the C function; the test's module
-// defines it here so the port's address types read the same name the host's monitor lists.
 @_cdecl("charon_interface_named")
 public func _testInterfaceNamed(_ name: UnsafePointer<CChar>) -> nw_interface_t? {
     let wanted = String(cString: name)

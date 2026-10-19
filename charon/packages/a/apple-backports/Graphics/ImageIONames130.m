@@ -1,21 +1,5 @@
 #import <ImageIO/ImageIO.h>
 
-// The iOS 13.0 band's ImageIO name constants, 22 of them.
-//
-// EVERY VALUE WAS READ FROM THE HOST'S OWN ImageIO, with dlsym, and printed as text and as bytes by
-// tests/backports/host/imageio-names, which runs one symbol per process on purpose. The port's own
-// convention would have been wrong for 50 of these 22: the value is not the symbol's name and not
-// its trailing component either. kCGImagePropertyAPNGFrameInfoArray is "FrameInfo" and not
-// "FrameInfoArray"; kCGImagePropertyGroupTypeAlternate is "Alternate"; kCGImagePropertyHEICSDictionary is
-// "{HEICS}"; and kCGImageAuxiliaryDataTypeSemanticSegmentationHairMatte is its own full name, so the same
-// group holds both shapes and neither rule picks the right one.
-//
-// A name is plain data - a caller looks a key up with it - so the port answers it itself and the release
-// is never asked. They are const CFStringRef like every other in this family.
-
-// A control of the same shape is in the harness: a name the host does not export must be reported, and a
-// run that compared nothing must fail.
-
 extern CFStringRef const kCGImageAnimationDelayTime;
 extern CFStringRef const kCGImageAnimationLoopCount;
 extern CFStringRef const kCGImageAnimationStartIndex;

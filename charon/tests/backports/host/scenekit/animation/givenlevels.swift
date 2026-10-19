@@ -1,8 +1,3 @@
-// givenlevels : whether SceneKit samples the mip levels of an MTLTexture it is given as a property's contents, or
-// makes its own. Every level of an rgba8Unorm_srgb texture is one solid marker colour (red 10 + 28 k, green 240 - 28 k
-// in level k); the gradient case's quad (constant lighting, a new material's nearest mip filter) is drawn at sizes
-// where level 0, 2, 5 and 7 are read. Prints "size S level L red green", the centre pixel, and whether it is level L's
-// marker: SceneKit regenerating the levels from level 0 would draw level 0's marker at every size.
 import SceneKit
 import AppKit
 import Metal

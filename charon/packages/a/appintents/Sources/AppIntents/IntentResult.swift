@@ -1,15 +1,5 @@
-// What an intent answers with, and what it can refuse with.
-//
-// The result is a value type the app fills in: a value to hand on, a dialog to say, another intent to
-// open, a snippet to show. The `result(...)` overloads are the factories the framework names, and each
-// one names the container's own generic arguments, so `some IntentResult` is what an intent's
-// `perform()` gives back.
-
 import Foundation
 
-// MARK: - Results
-
-/// What an intent's `perform()` gives back.
 public protocol IntentResult: Sendable {
     associatedtype Value: _IntentValue = Never
     associatedtype Snippet = Never
@@ -18,23 +8,16 @@ public protocol IntentResult: Sendable {
     var value: Value? { get }
 }
 
-/// A result that hands a value on.
 public protocol ReturnsValue<Value>: IntentResult {}
 
-/// A result that opens another app.
 public protocol OpensIntent: IntentResult {}
 
-/// A result that says something.
 public protocol ProvidesDialog: IntentResult where Dialog == IntentDialog {}
 
-/// A result that shows a view of the app's own.
 public protocol ShowsSnippetView: IntentResult where Snippet == _SnippetViewContainer {}
 
-/// A result that shows another intent's snippet.
 public protocol ShowsSnippetIntent: IntentResult where Snippet == _SnippetIntentContainer {}
 
-/// The result every `perform()` returns: a value, a dialog, an intent to open, a snippet and the
-/// activity it belongs to, each of the five being nothing when the intent returned none.
 public struct IntentResultContainer<Value, OpensAppIntent, Snippet, Dialog>: IntentResult, @unchecked Sendable
     where Value: _IntentValue, OpensAppIntent: AppIntent {
     public var value: Value?
@@ -216,9 +199,6 @@ extension IntentResult {
     }
 }
 
-/// The view of the app's own that a result shows, added in iOS 26. The framework's own view is a
-/// SwiftUI bridge; the release this port builds for has no such bridge, so the container carries the
-/// intent that asked for the view and nothing pretends to have drawn it.
 public struct _SnippetViewContainer {
     public let intent: any SnippetIntent
 
@@ -227,7 +207,6 @@ public struct _SnippetViewContainer {
     }
 }
 
-/// The intent whose snippet a result shows, added in iOS 26.
 public struct _SnippetIntentContainer {
     public let intent: any SnippetIntent
 
@@ -236,13 +215,10 @@ public struct _SnippetIntentContainer {
     }
 }
 
-/// An intent whose result shows a view of the app's own, added in iOS 26.
 public protocol SnippetIntent: AppIntent where PerformResult: ShowsSnippetView {
-    /// Ask the snippet to load itself again.
     func reload() async
 }
 
-/// An intent that shows nothing at all, added in iOS 26: the snippet of an app that has none.
 public struct EmptySnippetIntent: SnippetIntent {
     public typealias PerformResult = IntentResultContainer<Never, Never, _SnippetViewContainer, Never>
     public typealias SummaryContent = IntentParameterSummary<EmptySnippetIntent>
@@ -258,30 +234,21 @@ public struct EmptySnippetIntent: SnippetIntent {
         return IntentResultContainer()
     }
 
-    /// An empty snippet has nothing to load again.
     public func reload() async {}
 }
 
-/// The bridge that loads the app's own view of a snippet. The framework's own bridge is a SwiftUI loader;
-/// the port has no SwiftUI on these releases, so no conformer is carried here.
 public protocol _ViewBridgeLoader: AnyObject, Escapable, Copyable {
     static func loadBridge()
 }
 
-// MARK: - Errors
-
-/// Why an intent could not do what it was asked.
 public struct AppIntentError: Error {
-    /// The error that asks the framework to run the intent again from the beginning.
     public static var restartPerform: AppIntentError { return AppIntentError() }
 
-    /// The action the user has to take before the intent can run.
     public enum UserActionRequired: Error {
         case accountSetup
         case signin
         case confirmation
 
-        /// The text the framework's own error prints, measured against the host for `signin`.
         public var errorDescription: String? {
             switch self {
             case .signin: return AppIntentError.preamble + "You need to be signed in to complete this action"
@@ -290,7 +257,6 @@ public struct AppIntentError: Error {
         }
     }
 
-    /// A permission the intent needs, which the user has to give.
     public enum PermissionRequired: Error {
         case bluetooth
         case contacts
@@ -299,8 +265,6 @@ public struct AppIntentError: Error {
         case photos
         case siri
 
-        /// The text the framework's own error prints, measured against the host for
-        /// `location(precise: true)`.
         public var errorDescription: String? {
             switch self {
             case .location(let precise):
@@ -311,7 +275,6 @@ public struct AppIntentError: Error {
         }
     }
 
-    /// Why the intent could not do what it was asked and asking again would not help.
     public enum Unrecoverable: Error {
         case entityNotFound
         case featureCurrentlyRestricted
@@ -321,8 +284,6 @@ public struct AppIntentError: Error {
         case unknown
         case unsupportedOnDevice
 
-        /// The text the framework's own error prints, measured against the host for the two cases
-        /// measured (`unknown`, `notAllowed`); the rest carry their own name until they are measured.
         public var errorDescription: String? {
             switch self {
             case .unknown: return AppIntentError.preamble + "Something went wrong"
@@ -332,22 +293,13 @@ public struct AppIntentError: Error {
         }
     }
 
-    /// What has to happen before the intent runs again, when the error is about one parameter.
     public var localizedStringResource: LocalizedStringResource? { return parameterTitle }
 
-    /// The text the framework's own errors carry, which is what a caller reads in a log. The four
-    /// sentences here are the ones measured against the host (`Unrecoverable.unknown` and
-    /// `.notAllowed`, `UserActionRequired.signin`, `PermissionRequired.location(precise: true)`); the
-    /// rest of the cases carry their own name until they are measured too.
     public static let preamble = "AppIntent encountered the following predefined error: "
 
-    /// The parameter the error is about, when the error is about one.
     public var parameterTitle: LocalizedStringResource?
-    /// The dialog the error would have shown, when the caller named one.
     public var dialog: IntentDialog?
-    /// Whether the parameter may have no value, which is what says whether asking again would help.
     public var optional: Bool = false
-    /// How many values the caller had to choose between.
     public var disambiguationCount: Int = 0
 
     public init() {}
@@ -386,7 +338,6 @@ extension AppIntentError: CustomStringConvertible {
     }
 }
 
-/// The conditions under which a confirmation is worth asking for.
 public struct ConfirmationConditions: OptionSet, Sendable {
     public let rawValue: Int
 
@@ -394,12 +345,9 @@ public struct ConfirmationConditions: OptionSet, Sendable {
         self.rawValue = rawValue
     }
 
-    /// The framework is not sure the source is the right one, so the user is asked.
     public static let lowConfidenceSource = ConfirmationConditions(rawValue: 1 << 0)
 }
 
-/// The name on the button that confirms an action. The names the framework names are the ones it
-/// shows in the confirmation; a name of the app's own is a `custom` one, with its own labels.
 public struct ConfirmationActionName: Sendable {
     private let value: String
 
@@ -407,7 +355,6 @@ public struct ConfirmationActionName: Sendable {
         self.value = value
     }
 
-    /// A name the app writes itself, with the labels its own buttons carry.
     public static func custom(acceptLabel: LocalizedStringResource, acceptAlternatives: [LocalizedStringResource] = [],
                               denyLabel: LocalizedStringResource, denyAlternatives: [LocalizedStringResource] = [],
                               destructive: Bool = false) -> ConfirmationActionName {
@@ -449,9 +396,7 @@ public struct ConfirmationActionName: Sendable {
     public static var view: ConfirmationActionName { return ConfirmationActionName("view") }
 }
 
-/// One of the options an intent asks the user to pick from, added in iOS 26.
 public struct IntentChoiceOption: Equatable {
-    /// How an option is shown.
     public struct Style: Hashable {
         public var rawValue: Int
 
@@ -477,17 +422,9 @@ public struct IntentChoiceOption: Equatable {
     }
 }
 
-// MARK: - Dialogs and descriptions
-
-/// What an intent says while it runs, or instead of a value: a line, a line and a supporting one, and
-/// from iOS 17.2 the system image shown beside them.
 public struct IntentDialog: ExpressibleByStringInterpolation, Sendable {
-    // The framework declares no public property here, only the four initialisers below: what a caller
-    // has of a dialog is the resource it built and the text it resolves to. These are the module's own
-    // storage, and the port's own code is what reads them.
     let full: LocalizedStringResource
     let supporting: LocalizedStringResource?
-    /// The system image shown beside the dialog, added in iOS 17.2.
     let systemImageName: String?
 
     public init(_ string: LocalizedStringResource) {
@@ -526,8 +463,6 @@ public struct IntentDialog: ExpressibleByStringInterpolation, Sendable {
     public typealias ExtendedGraphemeClusterLiteralType = String
     public typealias UnicodeScalarLiteralType = String
 
-    /// The interpolation of a dialog: a line with holes, each hole a resource or a value written into
-    /// the line.
     public struct StringInterpolation: StringInterpolationProtocol {
         public typealias StringLiteralType = String
 
@@ -578,13 +513,10 @@ public struct IntentDialog: ExpressibleByStringInterpolation, Sendable {
     }
 }
 
-/// What an intent does, in the words the app writes: the description itself, the category it sits in,
-/// the words a search finds it by, and from iOS 17 the name of the value it returns.
 public struct IntentDescription: ExpressibleByStringLiteral {
     public let descriptionText: String
     public let categoryName: String?
     public let searchKeywords: [String]
-    /// The name of the value the intent returns, added in iOS 17.
     public let resultValueName: String?
 
     public init(_ description: String, categoryName: String? = nil, searchKeywords: [String] = []) {
@@ -611,15 +543,12 @@ public struct IntentDescription: ExpressibleByStringLiteral {
     public typealias UnicodeScalarLiteralType = String
 }
 
-/// Where an intent runs, as the framework sees it: when the run started, and how it may carry on.
 public struct IntentSystemContext {
-    /// When the run started, which is the port's own clock read at the moment the run began.
     public let preciseTimestamp: Date
 
     public init(preciseTimestamp: Date = Date()) {
         self.preciseTimestamp = preciseTimestamp
     }
 
-    /// The mode the run is in, added in iOS 26.
     public var currentMode: IntentModes.Current { return CharonForeground.mode }
 }

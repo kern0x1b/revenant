@@ -1,6 +1,3 @@
-// MPSCNNConvolutionDescriptor, from the header of MPSCNNConvolution.h in the SDK of iOS 16.4: the
-// shape of a convolution, as a plain object with no storage of its own.
-
 #import "CharonMPS.h"
 #import "CharonMPS26.h"
 
@@ -26,9 +23,6 @@
                                    outputFeatureChannels:(NSUInteger)outputFeatureChannels
                                            neuronFilter:(const MPSCNNNeuron *)neuronFilter
 {
-    // The header marks this initialiser deprecated in favour of the type and the three parameters, and
-    // the neuron it took is a whole kernel object, which this port does not carry for it. The shape is
-    // the same either way, and the neuron is left as the descriptor's own.
     (void)neuronFilter;
     return [self cnnConvolutionDescriptorWithKernelWidth:kernelWidth
                                            kernelHeight:kernelHeight
@@ -63,9 +57,6 @@
     return descriptor;
 }
 
-// A plain init gives the defaults Apple's does, measured on the macOS host (tests/backports/host/mps-cnn-descriptors):
-// a 1 x 1 kernel with one input and one output channel, stride 1, one group, dilation 1, no neuron with parameters
-// A and B of 1, and a fused neuron descriptor that is a fresh object of type none with A, B and C of 1.
 - (instancetype)init
 {
     if ((self = [super init])) {
@@ -90,8 +81,6 @@
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder
 {
-    // A descriptor is a shape: every member of it is a number the header enumerates, and the one
-    // object it holds is a neuron descriptor this port reads back as its type and three parameters.
     if ((self = [self init])) {
         _kernelWidth = (NSUInteger)[aDecoder decodeInt64ForKey:@"kernelWidth"];
         _kernelHeight = (NSUInteger)[aDecoder decodeInt64ForKey:@"kernelHeight"];
@@ -147,10 +136,6 @@
     copy->_normalizationCount = _normalizationCount;
     return copy;
 }
-
-// The nine shape members are plain numbers the header declares as properties: a getter and a
-// setter over one field each, written out so the compiler checks every spelling against the
-// header rather than a macro hiding them.
 
 - (NSUInteger)kernelWidth
 {
@@ -257,10 +242,6 @@
     return _hasBatchNormalization;
 }
 
-// The folded normalisation, a = beta - gamma * mean / sqrt(variance + epsilon) and
-// b = gamma / sqrt(variance + epsilon), applied as a * x + b. ncnn folds the same algebra at load
-// time (BatchNorm::load_model, c6b351b5, BSD 3-Clause); here it is folded when the descriptor is given
-// the parameters and applied per value, so the loop has no division and no square root in it.
 - (void)charon_mps_fold:(float)value x:(NSUInteger)x y:(NSUInteger)y channel:(NSUInteger)channel
 {
     (void)x;
@@ -316,10 +297,6 @@
                                                      beta:(const float *)beta
                                                   epsilon:(float)epsilon
 {
-    // Folded once, here, rather than per call: the normalised value is gamma*(x - mean)/sqrt(variance
-    // + epsilon) + beta, and ncnn folds the same algebra at load time into a and b (its
-    // BatchNorm::load_model, c6b351b5, BSD 3-Clause). Keeping a and b means an inference pass multiplies
-    // and adds once per value, with no division and no square root in the loop.
     _hasBatchNormalization = YES;
     _epsilon = epsilon;
     _normalizationCount = MAX(MAX(gamma ? _outputFeatureChannels : 0, mean ? _outputFeatureChannels : 0),
@@ -337,7 +314,7 @@
         float b = beta ? beta[c] : 0.0f;
         float root = (float)sqrt((double)(v + epsilon));
         if (root == 0.0f)
-            root = 0.0001f;   // the divisor a zero variance would otherwise make, as ncnn sanitises it
+            root = 0.0001f;
         _gamma[c] = g / root;
         _beta[c] = b - g * m / root;
     }

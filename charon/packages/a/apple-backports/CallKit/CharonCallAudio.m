@@ -1,18 +1,6 @@
 #import "CharonCallKit.h"
 #import <AVFoundation/AVAudioSession.h>
 
-// CallKit does not configure an application's audio: the application sets its
-// own category and mode while it performs the answer or start action, and the
-// system activates the session for it and says so. That is the whole of the
-// contract, and the whole of what is done here - iOS 6 has AVAudioSession,
-// with the category, the mode and -setActive:withOptions:error: the contract
-// needs.
-//
-// The session is activated when a call of the provider first connects and
-// deactivated when the provider's last call has gone, in that order, so an
-// application that starts its audio in didActivateAudioSession: and stops it
-// in didDeactivateAudioSession: is called exactly as the release calls it.
-
 @implementation CharonCallAudio {
     NSUInteger _connected;
 }

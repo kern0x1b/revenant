@@ -10,9 +10,6 @@ package("eidolon")
     add_versions("2026.10.15", "f324b949eb3bac3fc4ef73e08712ff0a528b11b7")
     add_versions("2026.10.16", "12a737b35ae64e1f4c4f1964197367841fe588d3")
 
-    -- Eidolon is compiled against the runtime a port takes, and against Styx built against that same runtime: what the
-    -- port asks of the runtime it asks here too, and Eidolon passes it on to both. (charon@swift rule refuses a link with
-    -- two builds.)
     add_configs("shared", {description = "Compile against a shared swift-runtime and its packaged libc++, for a port that requires them so.", default = false, type = "boolean"})
     add_configs("backports", {description = "Compile against the swift-runtime built with the backports, for a port that requires it so.", default = false, type = "boolean"})
     add_configs("backports_uikit", {description = "With backports: the runtime whose UIKit overlay is linked to the UIKit backports.", default = false, type = "boolean"})
@@ -41,8 +38,6 @@ package("eidolon")
         os.mkdir(objects)
         os.mkdir(swiftdir)
 
-        -- The one SwiftUI module, as Eidolon's own build compiles it: whole-module, exclusivity checked statically only.
-        -- Availability checking stays on, so what a later release adds stays behind #available.
         local combine = {}
         for _, folder in ipairs(table.wrap((styx:envs() or {}).CHARON_SWIFT_MODULES)) do
             table.join2(combine, {"-I", folder})
@@ -60,7 +55,6 @@ package("eidolon")
         os.vrunv(swiftc, argv)
         os.vrunv(toolchain:tool("ar"), {"-rcs", path.join(package:installdir("lib"), "libSwiftUI.a"), path.join(objects, "SwiftUI.o")})
 
-        -- A port that imports SwiftUI imports Combine through it, so it finds Styx's module folders here too.
         package:setenv("CHARON_SWIFT_MODULES", swiftdir, table.unpack(table.wrap((styx:envs() or {}).CHARON_SWIFT_MODULES)))
         os.cp("LICENSE", package:installdir("licenses"))
     end)

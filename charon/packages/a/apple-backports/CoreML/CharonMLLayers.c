@@ -1,13 +1,3 @@
-/* The layers of a Core ML neural network, each one as the specification describes it.
- * CharonMLLayers.h says what it is for; this is the layer by layer reading of it.
- *
- * A layer's kind is the case of the specification's NeuralNetworkLayer oneof the document
- * carries, and the field number of that case is what the dispatch at the bottom is written
- * against: 100 is convolution, 140 is an inner product, 175 a softmax, by the specification's
- * own numbering rather than by a name matched at run time. A kind this file does not carry is
- * refused by name and number, so the caller can say which one it is -- a network that quietly
- * skipped a layer would answer something other than what the model says.
- */
 #include "CharonMLLayerKinds.h"
 
 #include <math.h>
@@ -18,8 +8,6 @@
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
-
-/* --- the bindings ---------------------------------------------------------------------------- */
 
 void charon_ml_bindings_init(charon_ml_bindings *bindings, size_t room)
 {
@@ -66,8 +54,6 @@ int charon_ml_bindings_put(charon_ml_bindings *bindings, const char *name, charo
 {
     charon_ml_tensor *existing = charon_ml_bindings_find(bindings, name);
     if (existing != NULL) {
-        /* A name written twice is the later value: a network's output may share a name with an
-         * intermediate, and the last layer to write it is the one that counts. */
         charon_ml_tensor_free(existing);
         *existing = tensor;
         return 1;
@@ -82,8 +68,6 @@ int charon_ml_bindings_put(charon_ml_bindings *bindings, const char *name, charo
     return 1;
 }
 
-/* --- reading the specification's own messages -------------------------------------------------- */
-
 const char *charon_ml_layer_name(const charon_ml_node *layer)
 {
     static char buffer[256];
@@ -91,9 +75,6 @@ const char *charon_ml_layer_name(const charon_ml_node *layer)
     return name != NULL ? name : "(unnamed)";
 }
 
-/* A layer that cannot be run: the error names the layer, the kind and the specification's
- * number for that kind, so an application is told what is missing rather than only that
- * something is. */
 int charon_ml_layer_refuse(const charon_ml_node *layer, const char *kind, int number, char *error, size_t error_size)
 {
     snprintf(error, error_size, "the layer '%s' is a %s, kind %d of the specification's layer oneof, "
@@ -102,8 +83,6 @@ int charon_ml_layer_refuse(const charon_ml_node *layer, const char *kind, int nu
     return 0;
 }
 
-/* A layer that names an input no earlier layer wrote: the name is in the message, because
- * which name is missing is what tells a caller what to fix. */
 int charon_ml_layer_missing_input(const charon_ml_node *layer, const char *what, char *error,
                                   size_t error_size)
 {
@@ -111,8 +90,6 @@ int charon_ml_layer_missing_input(const charon_ml_node *layer, const char *what,
     return 0;
 }
 
-/* A layer whose inputs or outputs are not the shape the layer needs: the error names the
- * layer and the shapes, because "a convolution failed" says nothing an application can act on. */
 int charon_ml_layer_bad_shape(const charon_ml_node *layer, const char *what, const charon_ml_tensor *found,
                               char *error, size_t error_size)
 {
@@ -134,10 +111,6 @@ int charon_ml_integer_of(const charon_ml_node *node, const char *field, int fall
     return charon_ml_int(charon_ml_get(node, field), fallback);
 }
 
-/* The numbers of a weights field, out of whichever case of its oneof the document holds. The
- * cases are four ways of writing the same numbers -- packed floats, packed halves, the same
- * as bytes, or 8-bit integers beside a scale -- and a converter picks between them, so the
- * case is read and not assumed. `out` is malloc'd and the caller frees it. */
 int charon_ml_read_numbers(const charon_ml_node *params, double **out, size_t *count)
 {
     size_t index, total;
@@ -211,8 +184,6 @@ int charon_ml_read_numbers(const charon_ml_node *params, double **out, size_t *c
     }
 }
 
-/* The name of an input or an output, copied out into the caller's buffer: a layer reads
- * several names in a row and one buffer per name would overwrite the last with the last. */
 const char *charon_ml_name_at(const charon_ml_node *layer, const char *field, size_t index, char *buffer,
                               size_t size)
 {
@@ -228,9 +199,6 @@ size_t charon_ml_name_count(const charon_ml_node *layer, const char *field)
     return charon_ml_count_field(layer, field);
 }
 
-/* --- the arithmetic the layers share ----------------------------------------------------------- */
-
-/* The activation cases of the specification's ActivationParams oneof, by their own numbers. */
 int charon_ml_activation_kind(const charon_ml_node *params)
 {
     size_t index, total = charon_ml_count(params);
@@ -309,8 +277,6 @@ double charon_ml_activate(int kind, double x, const charon_ml_node *params)
     case 31:
         return charon_ml_number_of(params, "alpha", 1.0) * tanh(charon_ml_number_of(params, "beta", 1.0) * x);
     case 40:
-        /* The logistic 1/(1+e^-x), with the two halves each written so that neither
-         * exponential overflows: e^-x above zero, e^x below. */
         return x >= 0.0 ? 1.0 / (1.0 + exp(-x)) : exp(x) / (1.0 + exp(x));
     case 41:
         return x > charon_ml_number_of(params, "beta", 0.0) ? 1.0 : 0.0;
@@ -342,9 +308,6 @@ void charon_ml_row_major_strides(const int64_t *shape, int rank, int64_t *stride
     }
 }
 
-/* A softmax along one axis, as CoreML's softmax layer does it: the largest value on the axis
- * is taken out first, so that no exponential of it can overflow, and the sum is over the same
- * exponentials. */
 void charon_ml_softmax_axis(charon_ml_tensor *tensor, int axis)
 {
     int64_t strides[CHARON_ML_MAX_RANK];
@@ -388,7 +351,6 @@ void charon_ml_softmax_axis(charon_ml_tensor *tensor, int axis)
     }
 }
 
-/* The activation of every value of a tensor, into a new one of the same shape. */
 charon_ml_tensor charon_ml_map_unary(const charon_ml_tensor *input, int kind, const charon_ml_node *params)
 {
     charon_ml_tensor output = charon_ml_tensor_make(input->rank, input->shape);
@@ -462,8 +424,6 @@ charon_ml_tensor charon_ml_binary(int operation, const charon_ml_tensor *left, c
     if (output.data == NULL) {
         return output;
     }
-    /* A dimension of 1 in an operand gets a stride of 0, which is what stretches that
-     * operand's single value along the whole dimension. */
     {
         int64_t base[CHARON_ML_MAX_RANK];
         charon_ml_row_major_strides(left->shape, rank, base);
@@ -486,9 +446,6 @@ charon_ml_tensor charon_ml_binary(int operation, const charon_ml_tensor *left, c
 }
 
 
-/* The two-input elementwise layers: the plain ones read two tensors, the broadcastable ones
- * read shapes that differ by dimensions of one, which the binary operation already stretches.
- * A layer the port cannot combine says so rather than reading past an end. */
 static int elementwise(int operation, const charon_ml_node *layer, charon_ml_bindings *bindings,
                        char *error, size_t error_size)
 {
@@ -512,10 +469,6 @@ static int elementwise(int operation, const charon_ml_node *layer, charon_ml_bin
         snprintf(error, error_size, "the layer '%s' names an input that is not there", charon_ml_layer_name(layer));
         return 0;
     }
-    /* The specification gives some of these layers a third input, the other operand of a
-     * combination such as a + alpha*b where it is a number rather than a whole array. This
-     * port takes that shape as not carried, and says so, rather than reading a tensor's first
-     * value as though the model had written a number there. */
     if (charon_ml_name_count(layer, "input") > 2) {
         char third[256];
         if (charon_ml_name_at(layer, "input", 2, third, sizeof third) != NULL &&
@@ -548,11 +501,6 @@ static int elementwise(int operation, const charon_ml_node *layer, charon_ml_bin
     return 1;
 }
 
-/* --- the dispatch ------------------------------------------------------------------------------ */
-
-/* The kinds this port runs, by the field number of the case of the specification's
- * NeuralNetworkLayer oneof that is the kind. A number not listed is a kind the port does not
- * carry, and is refused with its name read off the field itself. */
 int charon_ml_run_layer(const charon_ml_node *layer, charon_ml_bindings *bindings, char *error,
                         size_t error_size)
 {
@@ -584,8 +532,6 @@ int charon_ml_run_layer(const charon_ml_node *layer, charon_ml_bindings *binding
     for (index = 0; index < total; index++) {
         const charon_ml_node *entry = charon_ml_at(layer, index);
         unsigned flags = entry->field->flags & ~CHARON_ML_REPEATED;
-        /* The name, the input and output lists and the weight fields are not the kind: the kind
-         * is a case of the oneof, and the oneof's cases carry a oneof flag. */
         if (flags != 0 && flags >= CHARON_ML_ONEOF(0)) {
             kind = entry;
             break;
@@ -601,12 +547,10 @@ int charon_ml_run_layer(const charon_ml_node *layer, charon_ml_bindings *binding
         }
     }
     switch (kind->field->number) {
-    /* The mathematics layers, one function over the case that names them. */
     case 665: case 670: case 680: case 685: case 700: case 710: case 715: case 720:
     case 730: case 735: case 740: case 750: case 755: case 760: case 770: case 775:
     case 780: case 790: case 795:
         return charon_ml_layer_unary_math(layer, kind, bindings, error, error_size);
-    /* The two-input elementwise layers, the plain and the broadcasting kinds alike. */
     case 230:
         return elementwise(CHARON_ML_BINARY_ADD, layer, bindings, error, error_size);
     case 231:

@@ -1,20 +1,3 @@
-/*
- * The host differential for the connection: the port's own `nw_connection_t` against a listener and a
- * connection of the host's Network.framework, over the loopback, in both directions.
- *
- * The host is the peer on purpose. A port listener is its own file and would only prove that the port
- * agrees with the port; the host's listener accepts the port's connection, and the connection the host
- * hands back sends into the port's connection. So every byte the port sends is read by Apple's own
- * Network and every byte Apple's own Network sends is read by the port, through one loopback pair -
- * a real socket, the real SecureTransport of the host above it where the test asks for TLS, and the
- * real state machine on both sides.
- *
- * What is compared: the state a connection reaches and in which order, what its description says,
- * the largest datagram its path carries, what a refused connection's error is, and the bytes each side
- * receives from the other. The port's files are compiled into this program by run.sh with every symbol
- * they define renamed, so the two sides never meet by accident.
- */
-
 #import <Foundation/Foundation.h>
 #import <Network/Network.h>
 #import <arpa/inet.h>
@@ -72,7 +55,6 @@ extern nw_endpoint_t P(nw_endpoint_create_host)(const char *, const char *);
 extern nw_protocol_definition_t P(nw_protocol_copy_tcp_definition)(void);
 extern bool P(nw_protocol_metadata_is_udp)(nw_protocol_metadata_t);
 
-/* The two sentinel blocks of the port's own parameters, which a factory compares by pointer. */
 extern const nw_parameters_configure_protocol_block_t charonhost__nw_parameters_configure_protocol_default_configuration;
 extern const nw_parameters_configure_protocol_block_t charonhost__nw_parameters_configure_protocol_disable;
 #define PORT_DISABLE ((nw_parameters_configure_protocol_block_t)charonhost__nw_parameters_configure_protocol_disable)
@@ -84,21 +66,11 @@ static NSString *states_of(NSMutableArray *states)
     return [states componentsJoinedByString:@">"];
 }
 
-/* The peer of both connections, which is a plain BSD listener in this program.
- *
- * It has to be: the host's own Network will not start a listener in this environment - asked for one,
- * on a port of its choosing and on a port this program names, it answers `failed` with the POSIX error
- * EINVAL (measured, and written down in facts/Network/NWConnection.md) - while its *connection* works
- * here and sends and receives normally (the same measurement). So both the host's connection and the
- * port's connect to this listener, which relays what one writes to the other: every byte the port
- * sends is read by Apple's own Network, and every byte Apple's own Network sends is read by the port,
- * over real sockets on both sides.
- */
 typedef struct {
     int listener;
     uint16_t port;
-    int host_side;   /* the socket the host's connection reached */
-    int port_side;   /* the socket the port's connection reached */
+    int host_side;
+    int port_side;
 } Peer;
 
 static BOOL peer_start(Peer *peer)
@@ -123,8 +95,6 @@ static BOOL peer_start(Peer *peer)
     return peer->port != 0;
 }
 
-/* The two connections arrive in whichever order the kernel hands them over, and each is told apart by
-   what it writes first: the port's connection is recognised by the byte it sends when it is ready. */
 static void peer_relay(Peer *peer, int from, int to)
 {
     char buffer[4096];
@@ -149,7 +119,6 @@ static NSData *bytes_of(dispatch_data_t payload, size_t *length)
     return bytes;
 }
 
-/* The port of a port number, as the text an endpoint of a host and a port wants. */
 static const char *port_text_of(uint16_t port)
 {
     static char text[16];
@@ -168,7 +137,6 @@ int main(void)
         snprintf(port_text, sizeof port_text, "%u", peer.port);
         printf("ok the program's listener is on 127.0.0.1:%u\n", peer.port);
 
-        /* both connections, to the same peer */
         nw_parameters_t system_parameters = nw_parameters_create_secure_tcp(NW_PARAMETERS_DISABLE_PROTOCOL,
                                                                               NW_PARAMETERS_DEFAULT_CONFIGURATION);
         nw_connection_t system = nw_connection_create(nw_endpoint_create_host("127.0.0.1", port_text), system_parameters);
@@ -198,9 +166,6 @@ int main(void)
         CHECK(port_ready, "the port's connection reaches ready over the loopback");
         CHECK(system_ready, "and so does the host's");
 
-        /* the peer takes both connections; which is which is settled by what each writes first */
-        /* The peer takes the two connections, and it does not wait for ever for them: a port that
-           never connects is a failure this program must report, not a hang a gate waits on. */
         int first = -1, second = -1;
         for (int side = 0; side < 2; side++) {
             struct pollfd waiting = {peer.listener, POLLIN, 0};
@@ -220,8 +185,6 @@ int main(void)
             else
                 second = handle;
         }
-        /* The two sockets the peer holds are non-blocking: the relay reads them in a loop and must not
-           sit in one of them waiting for a byte the other side has not written yet. */
         for (int handle = first; handle >= 0; handle = handle == first ? second : -1)
             fcntl(handle, F_SETFL, fcntl(handle, F_GETFL, 0) | O_NONBLOCK);
         CHECK(first >= 0 && second >= 0, "the peer accepted both connections");
@@ -246,7 +209,6 @@ int main(void)
             }
         });
 
-        /* the port writes, the host reads */
         const char *from_port = "from the port";
         __block int port_send_error = 1, port_send_code = -1, port_send_done = 0;
         P(nw_connection_send)(mine, dispatch_data_create(from_port, strlen(from_port), port_queue, DISPATCH_DATA_DESTRUCTOR_DEFAULT),
@@ -281,7 +243,6 @@ int main(void)
                         "and the host's own Network read it through the port's socket");
         }
 
-        /* the host writes, the port reads: one message, then another */
         nw_connection_send(system, dispatch_data_create("one", 3, NULL, DISPATCH_DATA_DESTRUCTOR_DEFAULT),
                            nw_content_context_create("test"), true, ^(nw_error_t error) {});
         nw_connection_send(system, dispatch_data_create("two", 3, NULL, DISPATCH_DATA_DESTRUCTOR_DEFAULT),
@@ -295,8 +256,6 @@ int main(void)
                 usleep(25000);
         }
         @synchronized(port_got) {
-            /* A stream delivers what arrived, so the two sends may arrive as one read; what the port
-               must hand back is the bytes the host wrote, in that order. */
             CHECK(port_receives >= 1, "the port received what the host sent");
             if (port_receives >= 1 && port_got.length >= 6) {
                 NSData *one = [port_got subdataWithRange:NSMakeRange(0, 3)];
@@ -308,7 +267,6 @@ int main(void)
             }
         }
 
-        /* what each side says about the connection it has */
         {
             char *system_description = nw_connection_copy_description(system);
             char *port_description = P(nw_connection_copy_description)(mine);
@@ -339,22 +297,9 @@ int main(void)
             CHECK(P(nw_connection_copy_current_path)(NULL) == NULL, "and nothing is a path");
         }
 
-        /* What is NOT checked here, and why. The four scenarios that would follow - a data transfer
-           report and its collect, cancelling and that nothing more is taken, a connection to nothing
-           listening, and a datagram connection - are in the port's file and are measured on the
-           emulator at 6.1.3 (tests/backports/device). They are not compared here because the host's
-           own objects and the port's own objects cannot be passed to one another's calls - a report of
-           the port read by the host's accessor reads Apple's layout of a port object, and the other way
-           round - so each scenario needs its own port-only check, and the loopback peer in this
-           program cannot stand in for one. What this differential does compare is the transport
-           itself: a real socket, a real state machine, and the bytes each side reads from the other
-           through Apple's own Network on one end. */
-
         close(first);
         close(second);
         close(peer.listener);
-        /* A last look: a cancelled connection's handler runs on the queue the connection was given,
-           and that queue outlives main, so nothing is touched after this point. */
         usleep(300000);
         printf("checks=%d failures=%d\n", charon_checks, charon_failures);
     }

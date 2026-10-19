@@ -1,13 +1,6 @@
--- The associated types of a protocol carry the bound the SDK's swiftinterface states (tools/gen/swift_model.lua associated_bounds,
--- tools/gen/swift_render.lua with_bounds): the digester's dump names an associated type and not its inheritance, so the skeleton's
--- "associatedtype Transformer : Fix.Transformer" was bare, and Transformer.Input was "is not a member type" (424 errors in
--- CreateMLComponents). Checked on a fixture interface: a bound, a bound with a where clause (the clause is not part of the bound), a bare
--- associated type, and the render. Run: xmake l tests/gen/swift_associated_test.lua (pure Lua: no toolchain)
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 local SCRATCH = path.join(os.scriptdir(), "..", "..", "build", "swift-associated-test")
 
--- A model row with every cell the renderer reads, "-" where the row says nothing.
 local function row(fields)
     local out = {kind = "-", usr = "-", container = "-", name = "-", side = "-", type = "-", params = "-", generic_sig = "-",
                  conformances = "-", superclass = "-", throwing = "-", async = "-", mutating = "-", attributes = "-", accessors = "-",
@@ -69,12 +62,9 @@ function main()
     local text = render.render(rows, "Fix", {Fix = true, Swift = true}, nil, nil, nil, fix)
     check(string.find(text, "public protocol Estimator<Annotation> {", 1, true) ~= nil, "the primary associated types are in the protocol's signature")
     check(string.find(text, "associatedtype Transformer : Fix.Transformer", 1, true) ~= nil, "the rendered Transformer carries its bound")
-    -- the qualifier stays: Fix declares Transformer (a row of its own), so the bound names the protocol, not the associated type
     check(string.find(text, "associatedtype Annotation\n", 1, true) ~= nil, "a bare associated type stays bare")
     check(string.find(text, "associatedtype Transformer\n", 1, true) == nil, "the bound is not dropped")
 
-    -- a generic parameter named like the protocol it conforms to shadows it: the conformance is spelled with the framework's qualifier
-    -- (shadowed_rows; CreateMLComponents' PreprocessingEstimator<Preprocessor, Estimator>: Estimator)
     local shadow = {row({kind = "swift-protocol", name = "Estimator", usr = "s:3Fix9EstimatorP"}),
                     row({kind = "swift-struct", name = "Pre", usr = "s:3Fix3PreV", conformances = "Estimator",
                          generic_sig = "<Preprocessor, Estimator>"})}

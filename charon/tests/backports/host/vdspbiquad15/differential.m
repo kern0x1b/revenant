@@ -1,33 +1,3 @@
-// The port's vDSP_biquad_SetCoefficientsDouble and _Single held against the host's own vDSP, case by case.
-//
-// **Both setups are opaque and neither is ever read.** vDSP.h declares `struct vDSP_biquad_SetupStruct` with
-// no published layout, says the contents may change between releases and are to be touched only through the
-// setup routines, and this case never looks inside either one. What is observable, and is what a caller
-// depends on, is what comes out of the filter afterwards. So every case builds a setup with each side's own
-// `vDSP_biquad_CreateSetup`, calls each side's own setter on it, and reads the result back through that
-// same side's own `vDSP_biquad`. Nothing crosses between the sides, so nothing needs a layout they agree on
-// - which is why these two rows are ordinary host cases and not the guest probe
-// facts/Accelerate/vDSPPlacement.md recorded them as blocked for want of.
-//
-// **One delay per side, saved and restored, and every run starts from it.** A run advances the filter's
-// state, so a case that ran one setup twice and compared the two answers would be comparing two different
-// states. Each case therefore warms both setups once with the old coefficients, keeps that delay, and hands
-// every run below a fresh copy of it - the run after the setter, the run of a setup made from the new
-// coefficients, and the run of the same setup with no setter at all. Then:
-//
-//   after     the setup the setter ran on, over the saved delay
-//   fresh     a setup made from the window's blocks in the old ones' places, over the same delay
-//   old       the same setup with no setter at all, over the same delay
-//   zeroed    a setup made from the window over a zero delay - the mutant
-//
-// so "the setter replaced the coefficients and kept the delay" is answered when `after` equals `fresh` on
-// both sides, and it differs from both `old` and `zeroed`. The mutant has to differ from `fresh` before any
-// of it is believed: a port that also reset the caller's delay answers `zeroed`.
-//
-// The inputs are the ones that can tell the readings apart: the five coefficients of a section are distinct
-// and not in ascending order, every section's five differ from every other's, and the input is neither flat
-// nor alternating.
-
 #import <Accelerate/Accelerate.h>
 #import <Foundation/Foundation.h>
 #include <math.h>
@@ -37,7 +7,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-// The port's five, through the names the runner renames them to.
 vDSP_biquad_Setup charon_host_vDSP_biquad_CreateSetup(const double *coeffs, vDSP_Length M);
 void charon_host_vDSP_biquad_DestroySetup(vDSP_biquad_Setup setup);
 void charon_host_vDSP_biquad(const struct vDSP_biquad_SetupStruct *setup, float *delay, const float *x, vDSP_Stride ix,
@@ -64,17 +33,11 @@ static void report(int passed, const char *name, const char *why)
 
 #define SAMPLES 24
 #define MAX_SECTIONS 3
-// The header's pseudocode runs its delay loop `for (s = 0; s <= S; ++s)`, so a cascade of M sections has
-// M+1 rows of two: this is the delay length every setup here needs, and the port writes every one of it.
 #define DELAY_SLOTS (2 * (MAX_SECTIONS + 1))
 
-// One side's filter: the port's own, renamed, or the host's own. The two are never interchanged - a setup a
-// side made is only ever handed to that side's filter and that side's setters, which is the whole point.
 typedef void (*Filter)(const struct vDSP_biquad_SetupStruct *, float *, const float *, vDSP_Stride, float *, vDSP_Stride,
                        vDSP_Length);
 
-// One run of one side's own filter, over a copy of the saved delay so every run of a case starts from the
-// same state, with the output pre-filled so a run that wrote nothing shows as the pre-fill.
 static void run_over(Filter filter, vDSP_biquad_Setup setup, const float *saved_delay, const float *x, float *y)
 {
     float delay[DELAY_SLOTS];
@@ -85,8 +48,6 @@ static void run_over(Filter filter, vDSP_biquad_Setup setup, const float *saved_
     filter(setup, delay, x, 1, y, 1, SAMPLES);
 }
 
-// One run whose delay the caller keeps. This is the warm-up, and the delay it leaves is the state every other
-// run of the case starts from - which is why it is the one run that does not work on a copy.
 static void run_warm(Filter filter, vDSP_biquad_Setup setup, float *delay, const float *x, float *y)
 {
     for (int k = 0; k < SAMPLES; k++) {
@@ -95,7 +56,6 @@ static void run_warm(Filter filter, vDSP_biquad_Setup setup, float *delay, const
     filter(setup, delay, x, 1, y, 1, SAMPLES);
 }
 
-// The same over a zero delay, which is what a setter that also cleared the caller's state would answer.
 static void run_from_zero(Filter filter, vDSP_biquad_Setup setup, const float *x, float *y)
 {
     float delay[DELAY_SLOTS];
@@ -111,9 +71,6 @@ static void run_from_zero(Filter filter, vDSP_biquad_Setup setup, const float *x
 #define zero_mine(setup, x, y) run_from_zero(charon_host_vDSP_biquad, setup, x, y)
 #define zero_theirs(setup, x, y) run_from_zero(vDSP_biquad, setup, x, y)
 
-// Five coefficients a section: distinct, unordered, and different for every section, so a permutation, a
-// sign and a section-index error each show. The poles are inside the unit circle, so these cases measure the
-// API and not an amplification race.
 static void fill_coeffs(double *coeffs, vDSP_Length sections)
 {
     for (vDSP_Length section = 0; section < sections; section++) {
@@ -168,8 +125,6 @@ static void show(const char *tag, const float *y)
     }
 }
 
-// One window, in one precision, over a setup of `sections` sections. The setup each side made is warmed with
-// the old coefficients once; the delay that leaves is the state every run below starts from.
 static void one_window(int is_single, vDSP_Length sections, vDSP_Length start, vDSP_Length nsec)
 {
     char name[160];
@@ -180,8 +135,6 @@ static void one_window(int is_single, vDSP_Length sections, vDSP_Length start, v
     for (int k = 0; k < 5 * (int)nsec; k++) {
         windowF[k] = (float)window[k];
     }
-    // `patched` is the coefficients the setup would hold if the window had been given at creation: the old
-    // five of every section outside the window, the window's blocks inside it.
     memcpy(patched, coeffs, sizeof coeffs);
     for (vDSP_Length at = 0; at < nsec; at++) {
         for (int k = 0; k < 5; k++) {
@@ -202,7 +155,6 @@ static void one_window(int is_single, vDSP_Length sections, vDSP_Length start, v
         report(0, is_single ? "a single coefficient window" : "a double coefficient window", detail);
         return;
     }
-    // The warm-up, and the delay it leaves. Both sides run it with their own filter over their own delay.
     float myDelay[DELAY_SLOTS], theirDelay[DELAY_SLOTS], savedMine[DELAY_SLOTS], savedTheirs[DELAY_SLOTS];
     float after[SAMPLES], afterHost[SAMPLES], fresh[SAMPLES], freshHost[SAMPLES], old[SAMPLES], oldHost[SAMPLES];
     float zeroed[SAMPLES], zeroedHost[SAMPLES], ignored[SAMPLES];
@@ -213,10 +165,8 @@ static void one_window(int is_single, vDSP_Length sections, vDSP_Length start, v
     memcpy(savedMine, myDelay, sizeof savedMine);
     memcpy(savedTheirs, theirDelay, sizeof savedTheirs);
 
-    // The rule, asked of both sides: a setup made from the window over the same delay.
     run_mine(mineFresh, savedMine, x, fresh);
     run_theirs(theirsFresh, savedTheirs, x, freshHost);
-    // The mutant: the same setup over a zero delay. It has to differ from the rule on this data.
     zero_mine(mineFresh, x, zeroed);
     zero_theirs(theirsFresh, x, zeroedHost);
     detail[0] = 0;
@@ -230,7 +180,6 @@ static void one_window(int is_single, vDSP_Length sections, vDSP_Length start, v
         report(mutantDiffers, mutantName, detail);
     }
 
-    // The control: the same setup with no setter at all over the same delay.
     run_mine(mine, savedMine, x, old);
     run_theirs(theirs, savedTheirs, x, oldHost);
 
@@ -291,17 +240,6 @@ static void every_window_inside_the_setup(void)
     }
 }
 
-// The windows that reach past the setup are not asked of the host: it reads and writes outside its own
-// object, and answers coefficients the setup never had, uninitialised memory, a trap or a segfault
-// depending on the window (measured, one call per process). So each is asked of the port alone, and what it
-// has to answer is the rule the multiple-biquad setters of this package already answer for a cell outside
-// the window: **the sections the window names and the setup has change, and the ones it does not have do
-// not.** A window that names nothing the setup has therefore writes nothing at all.
-//
-// The rule is asked of the port as a setup made from the coefficients the window should leave behind - the
-// old five of every section the window does not reach, the window's blocks of the ones it does - so this is
-// the port against itself with the arithmetic spelled out, and not against the host. The setup is read back
-// through the port's own filter, which is the only way there is to see it.
 static void outside_the_setup(void)
 {
     struct {
@@ -320,7 +258,6 @@ static void outside_the_setup(void)
         char name[160];
         double coeffs[5 * MAX_SECTIONS], patched[5 * MAX_SECTIONS];
         fill_coeffs(coeffs, cases[k].sections);
-        // The coefficients the rule leaves behind, and whether the window names any section at all.
         memcpy(patched, coeffs, sizeof patched);
         int overlaps = 0;
         for (vDSP_Length at = 0; at < cases[k].nsec; at++) {
@@ -358,7 +295,6 @@ static void outside_the_setup(void)
         snprintf(name, sizeof name, "a double coefficient window that reaches past the setup: %s (%s)", cases[k].name,
                  overlaps ? "it changes the one section it names" : "it names no section the setup has");
         report(ok, name, detail);
-        // And the other half of the rule: a window that names nothing must leave the setup exactly as it was.
         detail[0] = 0;
         report(overlaps || same_run(y, other, "a window that names nothing"), name, detail);
         charon_host_vDSP_biquad_DestroySetup(moved);
@@ -367,10 +303,6 @@ static void outside_the_setup(void)
     }
 }
 
-// A NULL setup and a NULL array are undefined by the declaration's __nonnull. Each is asked of the port
-// alone, in a child, so that a port which wrote through either ends a process this case sees and reports
-// rather than the whole run. The second is asked again in this process, so the case also says the
-// coefficients did not move.
 static void null_arguments(void)
 {
     double coeffs[5], window[5];
@@ -408,7 +340,6 @@ static void null_arguments(void)
         run_over(charon_host_vDSP_biquad, s, saved, x, after);
         detail[0] = 0;
         report(same_run(after, before, "a NULL array"), "a NULL array leaves the coefficients alone", detail);
-        // And the same for the single setter, whose array is the other width.
         run_over(charon_host_vDSP_biquad, s, saved, x, before);
         charon_host_vDSP_biquad_SetCoefficientsSingle(s, NULL, 0, 1);
         run_over(charon_host_vDSP_biquad, s, saved, x, after);
@@ -418,9 +349,6 @@ static void null_arguments(void)
     }
 }
 
-// A setup of no sections: the port's own vDSP_biquad_CreateSetup answers NULL for M = 0, which is that
-// function's own row and not this one's, so there is nothing to ask the setter about and the case says so
-// rather than inventing a setup.
 static void no_sections(void)
 {
     double coeffs[5];

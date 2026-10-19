@@ -1,4 +1,3 @@
-// Fixture: one declaration of each kind the extractor emits, and the branches it must choose.
 #import "Sub.h"
 #import "Repeat.h"
 #import <fixture_types.h>
@@ -10,7 +9,6 @@ typedef struct FXOpaque FXOpaque;
 enum FXState;
 enum FXState { FXStateOn = 1, FXStateOff = 2 };
 enum { FXLimit = 9 };
-// the value of an enum constant is clang's own for the enum's integer type: an unsigned enum is not sign-extended
 enum FXByte : unsigned char { FXByteTop = 255 };
 enum FXWord : unsigned long { FXWordAll = ~0UL };
 enum FXWide : unsigned long long { FXWideTop = 1ULL << 63 };

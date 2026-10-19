@@ -4,20 +4,6 @@
 #include <pthread.h>
 #include <stdio.h>
 
-/* Does the release's dispatch_resume call a source's registration handler before it returns, or only
-   enqueue it? That is what the registration half of the barrier source entry rests on
-   (coordination/crutches.md, "apple-compat: a barrier source handler below iOS 10"), where the port's own
-   dispatch_resume would take the handler off and run it inside a dispatch_barrier_sync of its own - which
-   only answers as the release does if the release runs the handler before it returns.
-
-   The experiment holds the target queue with a block that never returns until told, so nothing can run on
-   it. A handler the release runs before returning must then run on the resuming thread, and
-   dispatch_resume cannot return before the handler has finished: either the flag is already set when it
-   returns, or the call itself is still blocked. Both are read, and the call is made on a thread of its own
-   with a timeout, so a release that waits cannot hang the run.
-
-   Read, not asserted: the verdicts are what this prints. Built and run by probes.sh (MAPTABLE6_PROBES=1). */
-
 static volatile int handlerRan;
 static volatile long handlerAtMs;
 static dispatch_semaphore_t held, release, handlerEntered;
@@ -44,7 +30,6 @@ static void case_for(const char *label, int concurrent)
         handlerRan = 1;
         dispatch_semaphore_signal(handlerEntered);
     });
-    /* The queue is held, and nothing is on it but this. */
     dispatch_async(target, ^{ dispatch_semaphore_wait(release, DISPATCH_TIME_FOREVER); });
     dispatch_semaphore_wait(held, DISPATCH_TIME_FOREVER);
     handlerRan = 0;
@@ -52,10 +37,8 @@ static void case_for(const char *label, int concurrent)
     long before = now_ms();
     pthread_t thread;
     pthread_create(&thread, NULL, resume_on_its_own_thread, NULL);
-    /* Has the handler run while the queue is held? */
     usleep(300000);
     int duringQueueHeld = handlerRan;
-    /* Did dispatch_resume return? */
     long waited = 0;
     while (waited < 2000 && !handlerRan) { usleep(50000); waited += 50; }
     printf("%s target, the queue held: the registration handler ran while the queue was held: %s\n",
@@ -73,7 +56,6 @@ static void case_for(const char *label, int concurrent)
         dispatch_source_cancel(source);
         return;
     }
-    /* It ran while the queue was held, so the resume is either finished or blocked on the queue; let it go. */
     dispatch_semaphore_signal(release);
     pthread_join(thread, NULL);
     printf("  dispatch_resume returned %s while the queue was held\n", duringQueueHeld ? "before the handler" : "after it");

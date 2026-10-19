@@ -1,11 +1,3 @@
-// vImage's quarter turns, held against the host's own: the same buffers through both, every sample
-// compared, over the eight shapes the mapping was measured on and both destination shapes for each.
-//
-// The point of the comparison is that a quarter turn moves pixels and does not resample, so the two answers
-// have to be equal sample for sample - there is no rounding to allow. Where they differ by more than
-// nothing, the mapping is wrong; where the two shapes of the destination disagree with each other, the
-// centring is wrong.
-
 #import <Foundation/Foundation.h>
 #import <Accelerate/Accelerate.h>
 #include <stdio.h>
@@ -49,8 +41,6 @@ static vImage_Buffer make(vImagePixelCount width, vImagePixelCount height, size_
 
 static void fill(vImage_Buffer buffer)
 {
-    // A fixed sequence, so a run is reproducible: every channel of every pixel a different value, and the
-    // three halves a set that spans the whole half range including the subnormals and the infinities.
     uint64_t seed = 0x9E3779B97F4A7C15ull;
     static const uint16_t halves[] = {0x0000, 0x8000, 0x3C00, 0xBC00, 0x0100, 0x7BFF, 0x0400, 0xC001,
                                       0x3555, 0xB555, 0x7C00, 0xFC00, 0x0200, 0x8200, 0x3AAA, 0xF800};
@@ -60,7 +50,6 @@ static void fill(vImage_Buffer buffer)
             seed = seed * 6364136223846793005ull + 1442695040888963407ull;
             line[at] = (seed >> 33) & 0xFFFFu;
         }
-        // and the halves drawn from the table, so a float shape is not all finite normals
         for (size_t at = 0; at < buffer.rowBytes / 2; at++)
             if ((at % 3) == 0)
                 line[at] = halves[(at + row) % (sizeof halves / sizeof *halves)];
@@ -82,7 +71,6 @@ static NSString *compare(vImage_Buffer theirs, vImage_Buffer ours)
     return nil;
 }
 
-// One shape, one destination shape, one constant, and whichever of the five functions the caller names.
 static void one(NSString *label, vImagePixelCount srcW, vImagePixelCount srcH, vImagePixelCount destW,
                 vImagePixelCount destH, size_t bytes, uint8_t constant, vImage_Flags flags)
 {
@@ -90,7 +78,6 @@ static void one(NSString *label, vImagePixelCount srcW, vImagePixelCount srcH, v
     vImage_Buffer theirDest = make(destW, destH, bytes);
     vImage_Buffer ourDest = make(destW, destH, bytes);
     fill(source);
-    // the same backColor for both, a value in the middle of the range that is not in the source sequence
     uint8_t back[8];
     for (size_t at = 0; at < bytes; at++)
         back[at] = (uint8_t)(0xA5u ^ (at * 31u));
@@ -132,8 +119,6 @@ int main(void)
         for (unsigned shape = 0; shape < sizeof shapes / sizeof *shapes; shape++) {
             vImagePixelCount w = (vImagePixelCount)shapes[shape].w, h = (vImagePixelCount)shapes[shape].h;
             for (uint8_t constant = 0; constant < 4; constant++) {
-                // both destination shapes: the one the constant wants, and the other one, which the system
-                // answers by centring the turned picture
                 one(@"ARGB16U", w, h, w, h, 8, constant, kvImageBackgroundColorFill);
                 one(@"ARGB16U", w, h, h, w, 8, constant, kvImageBackgroundColorFill);
                 one(@"ARGB16S", w, h, w, h, 8, constant, kvImageBackgroundColorFill);
@@ -141,16 +126,11 @@ int main(void)
                 one(@"CbCr16F", w, h, h, w, 4, constant, kvImageBackgroundColorFill);
                 one(@"Planar16F", w, h, h, w, 2, constant, kvImageBackgroundColorFill);
             }
-            // the edging mode the header documents and the accumulation flag the half shapes take
             one(@"ARGB16U", w, h, h, w, 8, 1, kvImageEdgeExtend);
             one(@"ARGB16F", w, h, h, w, 8, 1, kvImageBackgroundColorFill | kvImageUseFP16Accumulator);
             one(@"Planar16F", w, h, h, w, 2, 3, kvImageDoNotTile);
         }
 
-        // The refusals. A constant outside the four the header names, and a NULL buffer. There is no flag
-        // check on either side, and the run below is why: the system answers kvImageNoError for every one
-        // of the thirty-two bits, so a port that refused one would be refusing something the system never
-        // refuses.
         vImage_Buffer source = make(4, 4, 8), dest = make(4, 4, 8);
         Pixel_ARGB_16U black = {0, 0, 0, 0xffff};
         for (unsigned bad = 4; bad < 8; bad++) {
@@ -172,7 +152,6 @@ int main(void)
         ours = RENAME(vImageRotate90_ARGB16U)(&source, &dest, 0, black, kvImageGetTempBufferSize);
         report(theirs == ours, @"kvImageGetTempBufferSize, which the header does not list here, is answered",
                ([NSString stringWithFormat:@"the system answers %ld, the port %ld", (long)theirs, (long)ours]));
-        // every bit on its own, which is the measurement the port's missing flag check rests on
         for (int bit = 0; bit < 32; bit++) {
             vImage_Flags flag = (vImage_Flags)(1u << bit);
             vImage_Error a = vImageRotate90_ARGB16U(&source, &dest, 1, black, flag);

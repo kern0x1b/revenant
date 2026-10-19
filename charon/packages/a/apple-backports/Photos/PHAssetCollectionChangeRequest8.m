@@ -109,8 +109,6 @@ static CharonPhotosTransaction *charon_transaction(void)
     [charon_transaction() refuseWithReason:@"iOS 6 albums through AssetsLibrary carry no order to move within"];
 }
 
-// An album name is unique on iOS 6: addAssetsGroupAlbumWithName: answers nil for one in use. The name
-// is checked here, before any request of the change writes, so a refused album leaves nothing behind.
 - (BOOL)charon_validate:(NSError **)error
 {
     if (!_title)
@@ -122,7 +120,6 @@ static CharonPhotosTransaction *charon_transaction(void)
         if ([change isKindOfClass:[PHAssetCollectionChangeRequest class]] && [((PHAssetCollectionChangeRequest *)change)->_title isEqualToString:_title])
             taken = YES;
     }
-    // An album list the library refuses is no answer: the change fails with the library's error rather than write on.
     if (!taken && ![CharonPhotosStore findAlbumWithName:_title found:&taken error:error])
         return NO;
     if (taken) {
@@ -148,8 +145,6 @@ static CharonPhotosTransaction *charon_transaction(void)
     return YES;
 }
 
-// The assets are added once every change of the block has committed, so a placeholder of an asset created in the same
-// block resolves whether its creation request came before this one or after.
 - (BOOL)charon_commitRelations:(NSError **)error
 {
     for (id addedAsset in _addedAssets) {

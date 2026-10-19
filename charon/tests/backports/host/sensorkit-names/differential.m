@@ -1,16 +1,3 @@
-// The port's own values, printed from its own LINKED symbols.
-//
-// This object links TWO port-side sources, so every name below resolves to THIS PACKAGE'S definition
-// and not to the host framework's - the port's object wins at link time, and the host's values come
-// from the other process, which is what makes the two independent:
-//
-//   packages/a/apple-backports/SensorKit/SensorKitNames14.m   the 39 names of iOS 14.0
-//   names-extra.m, which imports CharonSensorKitNames.h       the 18 names of 15.0 .. 26.0
-//
-// The second is a harness file rather than a release object because those eighteen constants are split
-// across six objects, one release each, and their values live in one header behind one guard per
-// release. Linking all six guards here walks that header whole; it is the same list the six objects
-// carry between them, read through one definition rather than six copies.
 #import <Foundation/Foundation.h>
 #import <CoreFoundation/CoreFoundation.h>
 

@@ -205,8 +205,6 @@ local function input_minimum_failures(macho, folder)
     return found
 end
 
--- What an object asks the linker for on behalf of what it imports (a Swift object does it for every module) is read back
--- as the libraries and frameworks, in the order the compiler wrote them.
 local function linker_option_failures(macho, folder)
     local found = {}
     io.writefile(path.join(folder, "asks.c"), "int kept;\n")
@@ -221,8 +219,6 @@ local function linker_option_failures(macho, folder)
     return found
 end
 
--- A Thumb main linked by charon's ld64 keeps bit 0 in LC_MAIN. The same binary with the bit cleared is the shape Apple's
--- ld writes for it; the check refuses it, and only that shape.
 local function entry_failures(macho, folder, ld64)
     local found = {}
     io.writefile(path.join(folder, "libSystem.tbd"), fixtures.system_stub())

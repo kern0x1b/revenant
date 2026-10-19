@@ -1,15 +1,9 @@
-// The host's own MLCompute, asked what each of the twenty-one activation types computes for a 2x2 image
-// of one channel holding 1, 2, 3, 4. This is the side the port is held to, and it is the same question
-// tests/backports/host/mlcompute/engine.m asked when the measurements were taken.
 #import <Foundation/Foundation.h>
 #include <stdint.h>
 #include <string.h>
 #import <MLCompute/MLCompute.h>
 #import "cases.h"
 
-// The four values, each as the bits of the float rather than as a decimal: %g is six significant
-// digits and the GELU's constant differs in the seventh, so a decimal comparison cannot see the error
-// this differential exists to catch.
 static uint32_t charon_bits(float value)
 {
     uint32_t bits;
@@ -35,9 +29,6 @@ int main(void)
             [result bindAndWriteData:[MLCTensorData dataWithBytesNoCopy:calloc(1, 4 * sizeof(float)) length:4 * sizeof(float)] toDevice:nil];
             MLCActivationLayer *layer = [MLCActivationLayer layerWithDescriptor:[MLCActivationDescriptor descriptorWithType:type]];
 
-            // The result of an execute is written into the buffer named in outputsData:, and the graph's own
-            // tensor holds nothing - measured on the host while the engine's numbers were taken. So the
-            // buffer is kept and read, not the tensor.
             float *out = calloc(1, 4 * sizeof(float));
             MLCTensorData *outData = [MLCTensorData dataWithBytesNoCopy:out length:4 * sizeof(float)];
 

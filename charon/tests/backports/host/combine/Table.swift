@@ -1,13 +1,3 @@
-//
-//  Table.swift
-//
-//  The behaviour table. One entry per case, each returning the lines a subscriber was
-//  given, in order; the two runs are compared line for line, so anything the host's own
-//  Combine does differently from the module this port builds shows up as a differing
-//  line. The groups are the four the work is grouped by: the operators, the schedulers,
-//  the demand and the backpressure, and cancellation.
-//
-
 #if APPLE_COMBINE
 import Combine
 #else
@@ -27,8 +17,6 @@ let table: [Case] = mergeCases
   + valueCases
 
 private let mergeCases: [Case] = [
-
-    // MARK: The merge family
 
     ("merge/two/interleaved", { () -> [String] in
         let a = PassthroughSubject<Int, TestError>()
@@ -55,8 +43,6 @@ private let mergeCases: [Case] = [
     }),
 
     ("merge/two/holds-until-demanded", { () -> [String] in
-        // A publisher that sends at subscription time, before the merged publisher has
-        // been told about the subscription: the value must still arrive.
         let trace = Trace()
         trace.sink(Publishers.Merge(Just(1), Just(2)))
         return trace.lines
@@ -115,8 +101,6 @@ private let mergeCases: [Case] = [
 
 private let combineLatestCases: [Case] = [
 
-    // MARK: The combineLatest family
-
     ("combineLatest/two/waits-for-both", { () -> [String] in
         let a = PassthroughSubject<Int, TestError>()
         let b = PassthroughSubject<Int, TestError>()
@@ -167,8 +151,6 @@ private let combineLatestCases: [Case] = [
     }),
 
     ("combineLatest/demand/one-per-upstream", { () -> [String] in
-        // A combined value is only sent once the downstream asks for one, so each
-        // upstream holds one value; the demand each is given says so.
         let a = ManualPublisher<Int>()
         let b = ManualPublisher<Int>()
         let trace = Trace()
@@ -184,8 +166,6 @@ private let combineLatestCases: [Case] = [
 ]
 
 private let collectCases: [Case] = [
-
-    // MARK: collect(byTime:)
 
     ("collect/byTime/on-the-tick", { () -> [String] in
         let scheduler = TestScheduler()
@@ -234,8 +214,6 @@ private let collectCases: [Case] = [
 ]
 
 private let schedulerCases: [Case] = [
-
-    // MARK: The schedulers
 
     ("scheduler/immediate/strides", { () -> [String] in
         let trace = Trace()
@@ -288,8 +266,6 @@ private let schedulerCases: [Case] = [
 
 private let demandCases: [Case] = [
 
-    // MARK: Demand and backpressure
-
     ("demand/map/limited", { () -> [String] in
         let publisher = ManualPublisher<Int>()
         let trace = Trace()
@@ -303,8 +279,6 @@ private let demandCases: [Case] = [
     }),
 
     ("demand/map/additional-demand", { () -> [String] in
-        // A subscriber that asks for more from inside receive(_:) has that demand reach
-        // the publisher.
         let publisher = ManualPublisher<Int>()
         let trace = Trace()
         let subscriber = GrowingSubscriber(trace: trace, growth: 2, ceiling: 5)
@@ -379,8 +353,6 @@ private let demandCases: [Case] = [
 ]
 
 private let cancelCases: [Case] = [
-
-    // MARK: Cancellation
 
     ("cancel/stops-values", { () -> [String] in
         let publisher = ManualPublisher<Int>()
@@ -478,8 +450,6 @@ private let switchCase: [Case] = [
 private let sequenceCase: [Case] = [
     ("operators/first-where-and-reduce", { () -> [String] in
         let trace = Trace()
-        // The failure type of a sequence publisher comes from its use, so each chain
-        // says it with setFailureType.
         let first = Publishers.Sequence(sequence: [1, 2, 3, 4, 5])
             .first(where: { $0 > 2 })
             .setFailureType(to: TestError.self)
@@ -538,8 +508,6 @@ private let futureCase: [Case] = [
 ]
 
 private let valueCases: [Case] = [
-
-    // MARK: The equality and hashing Apple's interface declares in the open
 
     ("equality/publishers", { () -> [String] in
         let trace = Trace()
@@ -622,8 +590,6 @@ private let valueCases: [Case] = [
     }),
 ]
 
-/// A subscriber that asks for more from inside `receive(_:)`, so the demand it returns
-/// has to reach the publisher.
 final class GrowingSubscriber: Subscriber {
     typealias Input = Int
     typealias Failure = TestError
@@ -657,7 +623,6 @@ final class GrowingSubscriber: Subscriber {
     }
 }
 
-/// A place to write a value, for the `assign(to:on:)` case.
 final class Box {
     var value: Int = 0
 }

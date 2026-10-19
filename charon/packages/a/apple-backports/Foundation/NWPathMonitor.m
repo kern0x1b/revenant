@@ -35,28 +35,10 @@
 @implementation CharonNWPathMonitor
 @end
 
-/* What an interface *is*, from the number the kernel classifies it with.
- *
- * `getifaddrs` gives every interface a second entry whose address family is `AF_LINK`, and the
- * `struct if_data` behind that address carries `ifi_type`: the IANA ifType number the interface was
- * created with (the public registry, ianaiftype-mib). That is the classification the release itself
- * reads, and this port reads the same number rather than a name. Measured on the host with
- * `getifaddrs` beside `ifconfig -v`, and the table is in facts/Network/NWPath.md:
- *
- *   lo0       24  softwareLoopback   the loopback
- *   en0       6  ethernetCsmacd     the Wi-Fi radio, on a release with no wired Ethernet
- *   utun0     1  other              a tunnel - the kernel does *not* call it IANA `tunnel` (131)
- *   bridge100 209 bridge             a bridge, and a Personal Hotspot hands one out over it
- *
- * The cellular radio is the one number the registry does not carry: it is Apple's own
- * `IFT_CELLULAR`, 0xff, in XNU's `net/if_types.h` (open source, APSL, the same header this port
- * reads the SDK's own `net/if_types.h` for - and that file in the SDK has none of the constants in
- * it, which is why this one is spelled out here and cited rather than taken).
- */
-#define CHARON_IFI_TYPE_OTHER       1     /* IANA other, and what a utun carries */
-#define CHARON_IFI_TYPE_ETHERNET    6     /* IANA ethernetCsmacd */
-#define CHARON_IFI_TYPE_SOFT_LOOPBACK 24  /* IANA softwareLoopback */
-#define CHARON_IFI_TYPE_CELLULAR    0xff  /* XNU's IFT_CELLULAR, which IANA does not carry */
+#define CHARON_IFI_TYPE_OTHER       1
+#define CHARON_IFI_TYPE_ETHERNET    6
+#define CHARON_IFI_TYPE_SOFT_LOOPBACK 24
+#define CHARON_IFI_TYPE_CELLULAR    0xff
 
 static BOOL charon_path_wants(nw_interface_type_t required, nw_interface_type_t type, BOOL reachable, BOOL cellular,
                               BOOL hasAddress)
@@ -67,13 +49,6 @@ static BOOL charon_path_wants(nw_interface_type_t required, nw_interface_type_t 
         return NO;
     if (!reachable)
         return NO;
-    /* An `other` interface - a tunnel, a bridge - is on the path when the path actually goes through it,
-       which is whether it carries an address the path can be over, and not what the kernel calls it.
-       That is the release's own answer, measured on this machine: with 44 interfaces up,
-       `nw_path_enumerate_interfaces` on a live path returns en0, en0 and **utun21**, a tunnel the
-       classifier types `other` (its ifi_type is 1, IANA other - not 131, tunnel), stable over three
-       runs. So an `other` interface is dropped for having no address - which is what happens to a
-       bridge, and not what happens to a tunnel with one. */
     if (type == nw_interface_type_other)
         return hasAddress;
     return (type == nw_interface_type_cellular) == cellular;
@@ -93,16 +68,9 @@ static nw_interface_type_t charon_type_of(const struct ifaddrs *item)
         case CHARON_IFI_TYPE_ETHERNET:
             return nw_interface_type_wifi;
         default:
-            /* Everything else keeps its own kind and is `other` to a program: a tunnel and a bridge are
-               the interfaces a VPN and a Personal Hotspot put a path on, and a path that dropped them
-               would be a path that could not describe itself. */
             return nw_interface_type_other;
         }
     }
-    /* No AF_LINK entry, so the kernel classified nothing: where `ifi_type` cannot decide, this asks
-     * whether the interface is a point-to-point link with a gateway, which is the cellular radio on
-     * this release. A tunnel is point-to-point too and has no gateway, so it answers `other` - the
-     * same answer its `ifi_type` gives, from the other end. */
     if (item->ifa_flags & IFF_POINTOPOINT) {
         int probe = socket(AF_INET, SOCK_DGRAM, 0);
         BOOL gateway = NO;
@@ -115,16 +83,11 @@ static nw_interface_type_t charon_type_of(const struct ifaddrs *item)
         }
         return gateway ? nw_interface_type_cellular : nw_interface_type_other;
     }
-    /* IFF_LOOPBACK stays as the cross-check it always was: the flag and the number agree, and where
-       they do not, the flag is what the release's own path has always used. */
     if (item->ifa_flags & IFF_LOOPBACK)
         return nw_interface_type_loopback;
     return nw_interface_type_wifi;
 }
 
-/* The classifier, named for the objects differential: it is the only place the port decides what kind
-   of interface something is, and the differential asks it with the numbers measured on the host
-   (CHARON_TRACE_PATH aside) so that each branch of it is a check that can fail. */
 nw_interface_type_t charon_path_interface_type(const struct ifaddrs *item);
 
 static BOOL charon_usable_v4(const struct sockaddr *address)
@@ -170,9 +133,6 @@ static CharonNWInterface *charon_interface(const char *name, nw_interface_type_t
     return interface;
 }
 
-/* The interface a zone names: the `%en0` of an IP address, which the Swift value types read (files/Network, IPv4Address). It
-   is nil when the kernel has no interface of that name, which is what if_nametoindex answers for one that does not exist.
-   The kind is the one the path gives the first record of that name in getifaddrs, so an address and a path agree on it. */
 CHARON_SEAM nw_interface_t charon_interface_named(const char *name)
 {
     if (if_nametoindex(name) == 0)
@@ -215,10 +175,6 @@ static CharonNWPath *charon_path(SCNetworkReachabilityRef reachability, CharonNW
                 if ((nw_interface_type_t)prohibited.unsignedIntegerValue == type)
                     goto next;
             }
-            /* An `other` monitor is the default one, and it takes every usable interface that is not
-               the loopback. What makes an interface the kernel names `other` - a tunnel, a bridge - part
-               of the path is its ADDRESS, not its type: the predicate below is asked with the address
-               known, because a live tunnel has one and a bridge has none. */
             BOOL address4 = item->ifa_addr->sa_family == AF_INET && charon_usable_v4(item->ifa_addr);
             BOOL address6 = item->ifa_addr->sa_family == AF_INET6 && charon_usable_v6(item->ifa_addr);
             if (!charon_path_wants(monitor->_required, type, reachable, cellular, address4 || address6))
@@ -434,8 +390,6 @@ nw_interface_type_t charon_path_interface_type(const struct ifaddrs *item)
     return charon_type_of(item);
 }
 
-/* The path's own decision, named for the objects differential: it is asked about synthetic interfaces
-   there, so that a filter on the path can be a check that can fail rather than a line in a comment. */
 BOOL charon_path_wants_interface(nw_interface_type_t required, nw_interface_type_t type, BOOL reachable, BOOL cellular,
                                  BOOL hasAddress)
 {

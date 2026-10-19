@@ -24,8 +24,6 @@ NSString *charon_trait_summary(UITraitCollection *traits)
     return YES;
 }
 
-// The header redeclares -init NS_UNAVAILABLE. A configuration made by -init specifies nothing, which is the
-// configuration with no trait collection that the designated initialiser gives.
 - (instancetype)init
 {
     return [self initCharonWithTraitCollection:nil];

@@ -1,14 +1,3 @@
-// A command-line test of the multiple-biquad filter and the double-precision DFT of Accelerate on the device:
-// every one of the twenty-four entry points called, and every answer compared with the host's own vDSP, which
-// tests/backports/host/vdspbiquad records in the same order these cases run in.
-//
-// The values below are the host's, and the checks ask the port's own accessors and the port's own functions, so
-// a case that fails here and passed there is a difference between the host and the armv7 build of the
-// release rather than a difference in the port's own arithmetic. The elements are compared with the
-// tolerance the host differential uses, which is the precision of the arithmetic.
-//
-// It needs the package built with accelerate = true.
-
 #import <Accelerate/Accelerate.h>
 #import <Foundation/Foundation.h>
 #include <dlfcn.h>
@@ -18,7 +7,6 @@
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-// Whether a name in this process comes from the backports' own library and not from the release.
 static BOOL fromBackports(const char *name)
 {
     void *symbol = dlsym(RTLD_DEFAULT, name);
@@ -55,7 +43,6 @@ int main(int argc, char **argv)
         CHECK(fromBackports("vDSP_DFT_zop_CreateSetupD"), "vDSP_DFT_zop_CreateSetupD comes from the backports");
         CHECK(fromBackports("vDSP_DFT_zrop_CreateSetupD"), "vDSP_DFT_zrop_CreateSetupD comes from the backports");
 
-        // 1. the coefficient order and the cascade, one section and two
         {
             const double order[5] = {0.1, 0.2, 0.3, 0.4, 0.5};
             const double want[4] = {0.1, 0.16, 0.186, -0.1544};
@@ -78,7 +65,6 @@ int main(int argc, char **argv)
             CHECK(sameDoubles(out2, want2, 2), "vDSP_biquadmD of two sections in a cascade");
             vDSP_biquadm_DestroySetupD(two);
         }
-        // 2. the layout: one section and two channels, the coefficients 1..10
         {
             const double channels[10] = {1, 0, 0, 0.5, 0, 2, 0, 0, 0.25, 0};
             vDSP_biquadm_SetupD setup = vDSP_biquadm_CreateSetupD(channels, 1, 2);
@@ -90,7 +76,6 @@ int main(int argc, char **argv)
                   "vDSP_biquadmD of one section and two channels: the block of section s and channel c is at (s * N + c) * 5");
             vDSP_biquadm_DestroySetupD(setup);
         }
-        // 3. the delay, the reset and the copy
         {
             const double iir[5] = {1, 0, 0, 0.5, 0};
             vDSP_biquadm_SetupD one = vDSP_biquadm_CreateSetupD(iir, 1, 1);
@@ -115,7 +100,6 @@ int main(int argc, char **argv)
             vDSP_biquadm_DestroySetupD(one);
             vDSP_biquadm_DestroySetupD(two);
         }
-        // 4. the refused setup calls
         {
             const double iir[5] = {1, 0, 0, 0.5, 0};
 #pragma clang diagnostic push
@@ -130,7 +114,6 @@ int main(int argc, char **argv)
             CHECK(YES, "vDSP_biquadm_DestroySetup of NULL does nothing, which the host cannot be asked about");
 #pragma clang diagnostic pop
         }
-        // 5. the setters: the active filter, the coefficients over a window, and the interpolation
         {
             const double two[10] = {1, 0, 0, 0, 0, 2, 0, 0, 0, 0};
             vDSP_biquadm_Setup setup = vDSP_biquadm_CreateSetup(two, 2, 1);
@@ -162,7 +145,6 @@ int main(int argc, char **argv)
             vDSP_biquadm_DestroySetup(setup);
         }
         {
-            // the interpolation, on a single-precision setup: the samples of one call are the coefficients
             const double gain[5] = {1, 0, 0, 0, 0};
             vDSP_biquadm_Setup setup = vDSP_biquadm_CreateSetup(gain, 1, 1);
             const float target[5] = {9.0f, 0, 0, 0, 0};
@@ -184,7 +166,6 @@ int main(int argc, char **argv)
             vDSP_biquadm_DestroySetup(setup);
         }
         {
-            // and the double form, whose two rate arguments change nothing
             const double gain[5] = {1, 0, 0, 0, 0};
             vDSP_biquadm_SetupD setup = vDSP_biquadm_CreateSetupD(gain, 1, 1);
             const double target[5] = {9.0, 0, 0, 0, 0};
@@ -218,7 +199,6 @@ int main(int argc, char **argv)
                   "vDSP_biquadmD with every section inactive answers zero, where vDSP_biquadm answers the input");
             vDSP_biquadm_DestroySetupD(setup);
         }
-        // 6. the DFT: which lengths have a setup, and what the transforms answer
         {
             CHECK(vDSP_DFT_zop_CreateSetupD(NULL, 4, vDSP_DFT_FORWARD) != NULL, "a complex setup of length 4");
             CHECK(vDSP_DFT_zop_CreateSetupD(NULL, 3, vDSP_DFT_FORWARD) == NULL, "and none of length 3");
@@ -242,7 +222,6 @@ int main(int argc, char **argv)
                   "vDSP_DFT_ExecuteD, real to complex, a unit impulse on channel 0: twice the transform, packed");
             vDSP_DFT_DestroySetupD(real_setup);
 
-            // the round trip, which is the scaling: a real signal of N comes back as 2N times itself
             vDSP_DFT_SetupD forward = vDSP_DFT_zrop_CreateSetupD(NULL, 8, vDSP_DFT_FORWARD);
             vDSP_DFT_SetupD inverse = vDSP_DFT_zrop_CreateSetupD(NULL, 8, vDSP_DFT_INVERSE);
             double signal_even[4] = {1, 0.5, 0.25, 0.125}, signal_odd[4] = {0, 0, 0, 0};

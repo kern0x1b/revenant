@@ -1,6 +1,3 @@
-// selfIllumination in Lambert, Blinn and Phong on macOS SceneKit: one quad facing an orthographic camera, pixel (4, 4)
-// of an 8x8 snapshot. Prints "model diffuse selfIllumination lights pixel"; fitselfillumination.py holds every line to
-// diffuse * (ambient + sum of N.L + selfIllumination), with the sum taken as 1 when no light but ambient ones is there.
 import SceneKit
 import AppKit
 import Metal
@@ -33,7 +30,6 @@ func render(_ model: String, _ diffuse: Double, _ lights: [Light], _ setup: (SCN
     var px = [Int](repeating: 0, count: 4); rep.getPixel(&px, atX: 4, y: 4)
     return px[0]
 }
-// name -> lights; a directional light at angle a has N.L = cos(a)
 let lightSets: [(String, [Light])] = [
     ("none", []), ("dir0", [(.directional, 1000, 0)]), ("dir1", [(.directional, 1000, 1)]), ("away", [(.directional, 1000, Double.pi)]),
     ("amb", [(.ambient, 1000, 0)]), ("amb+dir1", [(.ambient, 1000, 0), (.directional, 1000, 1)]), ("dir1x0.5", [(.directional, 500, 1)]),
@@ -46,7 +42,6 @@ for model in ["Constant", "Lambert", "Blinn", "Phong"] {
             }
         }
     }
-    // beside the other terms: "model term selfIllumination pixel"
     for si in [0.0, 0.5] {
         print(model, "specular", si, render(model, 0.5, [(.directional, 1000, 0.2)]) { m in m.selfIllumination.contents = grey(si); m.specular.contents = grey(0.5) })
         print(model, "emission", si, render(model, 0.5, [(.directional, 1000, 1)]) { m in m.selfIllumination.contents = grey(si); m.emission.contents = grey(0.25) })

@@ -1,11 +1,6 @@
 import("core.base.socket")
 import("core.base.bytes")
 
--- The emulator answers a debugger on a port with the protocol gdb speaks:
--- $<body>#<checksum of the body>, acknowledged with +. What charon asks of it
--- is small - where the guest stopped, its registers, the memory it can read -
--- and it asks it itself, because no debugger on an arm64 host talks to an
--- armv7 guest.
 local function checksum(body)
     local total = 0
     for index = 1, #body do
@@ -14,9 +9,6 @@ local function checksum(body)
     return string.format("%02x", total)
 end
 
--- The emulator opens the port as it starts, so a connection made a moment too
--- early is accepted by nothing and dies unread: the debugger is connected when
--- it has asked where the guest stopped and been answered, and not before.
 function connect(port, opt)
     opt = opt or {}
     local deadline = os.mclock() + (opt.patience or 60) * 1000
@@ -68,11 +60,8 @@ function ask(connection, body)
     return receive(connection)
 end
 
--- Sixteen registers and the flags, little endian, as the stub lays them out.
 NAMES = {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12", "sp", "lr", "pc", "cpsr"}
 
--- The stub answers with the registers as one run of little endian words, and
--- what they are called is the order they come in.
 function decode(answer)
     if not answer or answer:startswith("E") then
         return nil
@@ -126,9 +115,6 @@ function text(connection, address, limit)
     return (held:match("^([^%z]*)")) or ""
 end
 
--- Where the guest is and how it got there. iOS keeps the frame pointer in r7
--- and a frame holds the one before it and the address to return to, so the
--- stack is walked by reading pairs of words until one does not read.
 function chain(reader, held, limit)
     local walked = {{kind = "pc", address = held.pc}, {kind = "lr", address = held.lr}}
     local pointer, seen = held.r7, {}

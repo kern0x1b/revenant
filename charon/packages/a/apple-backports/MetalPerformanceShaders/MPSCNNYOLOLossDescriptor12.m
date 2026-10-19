@@ -1,8 +1,3 @@
-// MPSCNNYOLOLossDescriptor, from the header of MPSCNNLoss.h in the SDK of iOS 16.4: four loss descriptors, one
-// per output of the object detector's loss, and the scales, thresholds and anchor boxes around them. A plain shape
-// object. The class is declared at iOS 12.0. Its reduceAcrossBatch (iOS 14.0 in the header) is outside that
-// declaration and is not carried here, as facts/MetalPerformanceShaders/MPSCNNYOLOLossDescriptor.md records.
-
 #import "CharonMPS.h"
 
 @implementation MPSCNNYOLOLossDescriptor {
@@ -23,8 +18,6 @@
     NSData *_anchorBoxes;
 }
 
-// -init is NS_UNAVAILABLE in the header and is not overridden here: a caller that reaches NSObject's -init gets the
-// zeroed object the release answers too, with no sub-descriptors and no anchor boxes (measured on the host).
 + (MPSCNNYOLOLossDescriptor *)cnnLossDescriptorWithXYLossType:(MPSCNNLossType)XYLossType
                                                    WHLossType:(MPSCNNLossType)WHLossType
                                            confidenceLossType:(MPSCNNLossType)confidenceLossType
@@ -33,9 +26,6 @@
                                                   anchorBoxes:(NSData *)anchorBoxes
                                           numberOfAnchorBoxes:(NSUInteger)numberOfAnchorBoxes
 {
-    // The release asserts on a reduction type past MPSCNNReductionTypeCount (measured: 4 aborts). The four loss
-    // types are checked by MPSCNNLossDescriptor's own factory, which refuses them by name (measured: a loss type of
-    // 10 aborts the release here too), so a refused type makes this factory return nil as well.
     if (reductionType >= MPSCNNReductionTypeCount) {
         CharonMPSRefuse(@"MPSCNNYOLOLossDescriptor: reduction type %d is not an MPSCNNReductionType, so no descriptor is made",
                         (int)reductionType);
@@ -62,8 +52,6 @@
     descriptor->_scaleClass = 2.0f;
     descriptor->_minIOUForObjectPresence = 0.7f;
     descriptor->_maxIOUForObjectAbsence = 0.3f;
-    // The anchor boxes are retained as given, not copied, and the count is stored as given: the release checks
-    // neither against the other (measured: five anchors over sixteen bytes reads back as five).
     descriptor->_numberOfAnchorBoxes = numberOfAnchorBoxes;
     descriptor->_anchorBoxes = anchorBoxes;
     return descriptor;
@@ -116,7 +104,6 @@
 
 - (void)setReductionType:(MPSCNNReductionType)reductionType
 {
-    // Not checked on the setter (measured: 4 is accepted here, and refused only by the factory).
     _reductionType = reductionType;
 }
 
@@ -223,8 +210,6 @@
 - (id)copyWithZone:(NSZone *)zone
 {
     MPSCNNYOLOLossDescriptor *copy = [[[self class] allocWithZone:zone] init];
-    // The four sub-descriptors are copied, not shared: a change made to the original's loss afterwards does not reach
-    // the copy (measured). The anchor boxes are shared, as the release shares them (measured: the same object).
     copy->_XYLossDescriptor = [_XYLossDescriptor copy];
     copy->_WHLossDescriptor = [_WHLossDescriptor copy];
     copy->_confidenceLossDescriptor = [_confidenceLossDescriptor copy];

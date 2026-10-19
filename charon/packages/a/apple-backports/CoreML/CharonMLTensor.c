@@ -1,5 +1,3 @@
-/* A float tensor and the shape arithmetic a neural network's layers need.
- * CharonMLTensor.h says what it is for; this is the arithmetic of it. */
 #include "CharonMLTensor.h"
 
 #include <stdio.h>
@@ -80,8 +78,6 @@ int charon_ml_tensor_from_value(charon_ml_tensor *tensor, const charon_ml_value 
         tensor->count = 0;
         return 0;
     }
-    /* A stride is not necessarily 1: a caller may hand over a view of a larger array, and a
-     * layer reads what it is given rather than what it assumes. */
     for (index = 0; index < tensor->count; index++) {
         int64_t position[CHARON_ML_MAX_RANK];
         int64_t offset = 0;
@@ -162,8 +158,6 @@ int charon_ml_broadcast_shape(const int64_t *left, int left_rank, const int64_t 
 void charon_ml_broadcast_strides(const int64_t *shape, int rank, const int64_t *out_shape,
                                  int64_t *strides)
 {
-    /* Row-major strides of the result shape, with a dimension of 1 in `shape` given a stride
-     * of 0: that is what makes a single value stretch along the whole dimension. */
     int64_t stride = 1;
     int index;
     for (index = rank - 1; index >= 0; index--) {

@@ -1,7 +1,3 @@
-/* Records what the SYSTEM's WebKit answers for the tab configuration, the window configuration and the
- * message port, with no port code in the process at all. Compiled WITHOUT renames.sh's flags, so every
- * name in the scenario is Apple's.
- */
 #import "webextension-configuration_scenario.h"
 
 int main(void)

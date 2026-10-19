@@ -1,38 +1,10 @@
--- xmake l tools/cache-index/build.lua [--only RELEASE]... [--force] [--no-merge]
---
--- One name index per held release, read once each, and the merged table tools/cache-index/first-rung.lua answers from.
---
--- Each held rung's cache is read ONCE, by tools/cache-index/names.lua (which reuses modules/apple/dyld.lua and modules/apple/macho.lua for
--- every byte of Mach-O and cache parsing), and written to
---     $HOME/.charon/cache-index/<release>.names.gz     sorted by BYTE, deduplicated, one name per line
---     $HOME/.charon/cache-index/first-rung.tsv.gz      every name -> the first held rung that carries it, as blocked gzip members
---     $HOME/.charon/cache-index/first-rung.tsv.gz.idx  each member's byte offset and its first name
---
--- Each per-release file opens with one header line naming what it was read from and when, which is the staleness key: a file whose
--- header's mtime (nanoseconds) and size still match the cache is left alone, so a second run costs a header read per rung and nothing else.
---
--- THE LADDER IS THE PORT'S OWN: dyld.held_ladder({"armv7","armv7s"}) in modules/apple/dyld.lua, oldest first.
---
--- READ-ONLY TOWARDS THE CACHES. Nothing here writes under ~/.charon/dyld. The output is a separate directory.
---
--- COST: a full cold build over the 50 held rungs reads 24.6 GB once and takes minutes. It is not a build, so it does not need a slot of
--- coordination/heavy.sh, but it is not free: the child names.lua is started under nice here, and the driver is not reniced, so on a busy
--- machine start it as `nice -n 19 xmake l tools/cache-index/build.lua`.
---
--- Every file this writes is sorted by sort(1) under LC_ALL=C, which is byte order. Lua's own < on strings follows the locale, so no
--- comparison in this file uses it.
-
 local MODULES = path.join(os.scriptdir(), "..", "..", "modules")
 local dyld = import("apple.dyld", {rootdir = MODULES, anonymous = true})
 
 local NAMES_SCRIPT = path.join(os.scriptdir(), "names.lua")
 
--- How many name rows go in one gzip member: 500 answers, each decompressing one member of this many rows. 65536 rows is about half a
--- megabyte uncompressed, so 9.2 million rows make about 140 members, and an answer decompresses half a megabyte.
 local BLOCK = 65536
 
--- `format` is the file's PROMISE, and the order is part of it: format 1 sorted by code point, format 2 sorts by BYTE. A file that says 1 is
--- not stale, it is in the old order, and is re-sorted in place rather than re-read from 24.6 GB of cache.
 local HEADER = "# charon-cache-index 2 format=2 order=byte release=%s arch=%s source=%s mtime=%d size=%d names=%d\n"
 
 local USAGE = "usage: xmake l tools/cache-index/build.lua [--only RELEASE]... [--force] [--no-merge]"
@@ -54,19 +26,15 @@ local function ends_with(text, suffix)
     return suffix == "" or text:sub(-#suffix) == suffix
 end
 
--- The whole text of a gz file, decompressed. gzip(1) reads a multi-member file to its end.
 local function gunzip(file)
     return os.iorunv("gzip", {"-dc", file})
 end
 
--- The body of a gz index: everything after its header line.
 local function body_of(text)
     return text:sub((text:find("\n", 1, true) or #text) + 1)
 end
 
--- The fields of an index's header line, or nil when the file does not read (the caller rebuilds it, as build.py did).
 local function header_of(file)
-    -- try returns the function's value, or nil when it raised
     local first = try {function ()
         return os.iorunv("sh", {"-c", 'gzip -dc "$1" | head -n 1', "sh", file})
     end, catch {function () return nil end}}
@@ -84,8 +52,6 @@ local function header_of(file)
     return fields
 end
 
--- The newest mtime in nanoseconds and the total size of some files. stat(1) prints the mtime with nine decimals, which is the value
--- os.stat gives as st_mtime_ns, so the key is the one the index headers hold.
 local function stat_of(files)
     if #files == 0 then
         return 0, 0
@@ -101,8 +67,6 @@ local function stat_of(files)
     return newest, total
 end
 
--- What the index depends on: the cache's own mtime and size, both, because a copy that keeps only one of them goes unseen. A libraries
--- folder has many files: the newest mtime and the total size change when any of them does.
 local function key_of(source)
     if os.isfile(source) then
         return stat_of({source})
@@ -124,8 +88,6 @@ local function is_current(release, arch, source)
         and ends_with(fields.source or "", path.filename(source))
 end
 
--- Writes `file`: the header, then the names sorted by byte and deduplicated by sort(1), gzip-compressed. `header_for` is given the number
--- of names, which the sort has just made, so the header is written once and is right.
 local function write_index(file, header_for, names_text)
     local raw = file .. ".raw"
     local sorted = file .. ".sorted"
@@ -138,13 +100,10 @@ local function write_index(file, header_for, names_text)
     os.iorunv("sh", {"-c", 'cat "$1" >> "$2"', "sh", sorted, partial})
     os.tryrm(sorted)
     os.iorunv("gzip", {"-6", "-n", "-f", partial})
-    -- a reader beside a writer sees the old file or the new one, never half of one
     os.mv(partial .. ".gz", file)
     return count
 end
 
--- Puts an index that holds the right names in the current order, without reading a cache: only the ORDER is wrong, so this rewrites the
--- file byte-sorted and stamps the current format on it. It is not a rebuild and does not claim to be one.
 local function resorted(release, arch, source)
     local file = index_file(release)
     local fields = header_of(file) or {}
@@ -155,7 +114,6 @@ local function resorted(release, arch, source)
     end, body)
 end
 
--- Reads one rung once and writes its index. Returns the number of names and the seconds, or nil when the index was current.
 local function build_one(release, arch, source, force)
     if not force and is_current(release, arch, source) then
         return nil
@@ -168,7 +126,6 @@ local function build_one(release, arch, source, force)
             return resorted(release, arch, source), 0
         end
     end
-    -- the key of this rung's cache, taken once, before the read, for the header
     local mtime, size = key_of(source)
     local started = os.mclock()
     local names = os.iorunv("nice", {"-n", "19", "xmake", "l", NAMES_SCRIPT, source, arch})
@@ -180,8 +137,6 @@ local function build_one(release, arch, source, force)
     return count, elapsed
 end
 
--- The merged table: the first held rung of every name, written as blocked gzip members, with an index of their offsets. A missing rung
--- is a refusal, not a silent skip: a table over a subset of the ladder would key every name to the wrong rung.
 local function merge(full_ladder)
     local missing = {}
     for _, entry in ipairs(full_ladder) do
@@ -195,8 +150,6 @@ local function merge(full_ladder)
             .. " name in it would be keyed to the wrong rung.", #missing, #full_ladder, table.concat(missing, ", ")))
     end
 
-    -- The ladder's order decides it: the first rung that carries a name is the release that must carry the API.
-    -- `keys` holds each name once, in the order it was first seen: sort(1) puts them in byte order below.
     local first, keys = {}, {}
     for _, entry in ipairs(full_ladder) do
         local body = body_of(gunzip(index_file(entry.release)))
@@ -213,7 +166,6 @@ local function merge(full_ladder)
     end
     local count = #keys
 
-    -- Every name, one per line, sorted and deduplicated by sort(1) under LC_ALL=C, then streamed back block by block.
     local base = path.join(index_dir(), "first-rung.tsv.gz")
     local names_raw = base .. ".names.raw"
     local names_sorted = base .. ".names.sorted"
@@ -226,7 +178,6 @@ local function merge(full_ladder)
     local block_raw = base .. ".block"
     io.writefile(partial, "", {encoding = "binary"})
     local offsets, batch, offset, first_name = {}, {}, 0, nil
-    -- one member per block, appended to the file: gzip(1) with -n writes the member without a name or a time, so it is the same on every run
     local function flush()
         io.writefile(block_raw, table.concat(batch), {encoding = "binary"})
         os.iorunv("gzip", {"-6", "-n", "-f", block_raw})
@@ -236,7 +187,6 @@ local function merge(full_ladder)
     end
     for name in io.lines(names_sorted) do
         if #batch == 0 then
-            -- the offset is taken BEFORE the member is written: the size of the file so far is where the member starts
             first_name = name
             offset = os.filesize(partial)
         end

@@ -1,8 +1,3 @@
-// MPSMatrixSum, from the header of the SDK of iOS 16.4. One object per release: the band machinery keeps an
-// object whole or drops it whole, so a file here carries the API of exactly one release.
-
-// The state every one of the neural network matrix kernels carries, and the accessors each of them
-// declares. A macro defines no symbol, so a file that uses one needs nothing from another.
 #define CHARON_MPS_NEURON_IVARS \
     MPSCNNNeuronType _neuronType; \
     float _neuronParameterA, _neuronParameterB, _neuronParameterC; \
@@ -111,10 +106,6 @@ CHARON_MPS_NEURON_COMMON
         CharonMPSRefuse(@"MPSMatrixSum: the result matrix has a data type that is not one of the eight element types");
         return;
     }
-    // A = sum over the sources of alpha[i] * B[i], with alpha the scale vector's components from
-    // startIndex, then the bias broadcast across each row, then the neuron, as MPSMatrixSum.h writes
-    // the operation out. The offset vector is a packed array of MPSMatrixOffset, each naming where in
-    // its source to start reading in rows and in columns.
     CharonMPSVectorView scales = {0, 0, 0, 0, 0, 0};
     if (scaleVector)
         scales = CharonMPSVectorViewOf(scaleVector);
@@ -125,21 +116,11 @@ CHARON_MPS_NEURON_COMMON
     if (offsetVector)
         offsets = (const MPSMatrixOffset *)((const char *)[offsetVector.data contents] + offsetVector.offset);
     CharonMPSNeuron neuron = [self charon_mps_neuron];
-    // Under transpose the answer is the columns-by-rows shape, and the release writes only what the
-    // result descriptor has room for - min(rows, columns) in each direction - and leaves the rest of
-    // the destination alone. Measured with a -1 sentinel in every element: for a 2 x 3 result the
-    // release writes 11 44 -1 / 22 55 -1, so the third column is a byte it never touched and not a
-    // zero it wrote.
     NSUInteger extent = _transpose ? (_rows < _columns ? _rows : _columns) : _rows;
     NSUInteger extentAcross = _transpose ? extent : _columns;
     for (NSUInteger row = 0; row < extent; row++) {
         for (NSUInteger column = 0; column < extentAcross; column++) {
             double sum = 0.0;
-            // The factors left from startIndex, and as many sources as there are of them. Measured in
-            // tests/backports/host/mpsmatrix/fixtures/start-index-legible.m: with four factors of 2, 4, 8,
-            // 16 and sources of 1, 2, 3, 4, start 0 answers 10 = 1*2 + 2*4, start 1 answers 20 = 1*4 + 2*8,
-            // start 2 answers 40 = 1*8 + 2*16, start 3 answers 16 = 1*16 alone, and start 4 answers 0.
-            // Three sources give the same answers, so the factors are the bound and not the sources.
             NSUInteger factors = scales.length * scales.vectors ? scales.length * scales.vectors : _count;
             NSUInteger pairs = startIndex < factors ? factors - startIndex : 0;
             if (pairs > _count)
@@ -166,20 +147,7 @@ CHARON_MPS_NEURON_COMMON
                     return;
                 }
                 double value = CharonMPSLoad(CharonMPSMatrixElement(&view, 0, sourceRow, sourceColumn), view.dataType, 0);
-                // startIndex + index is a position in the flat list of scale factors - the header says
-                // startIndex is "the starting index into the scale and offset vectors" - so it is the
-                // component, and the vector it belongs to is the one holding this many factors. Read as
-                // a vector index it walked past the end of a single-vector scale buffer, which is why
-                // sum-start-index answered all zeros and no refusal fired.
                 double scale = 1.0;
-                // The extent, not the count: the scale factors are a run of values in the vector's
-                // data, and startIndex + count of them has to fit in the bytes the vector holds. The
-                // guard tested scales.length, which is a number of factors somewhere in the vector and
-                // not a byte count, so a startIndex at the end of the list passed it and read past.
-                // Per factor, not for the whole list: the release uses the factors that are there and
-                // stops at the end of the list. With three factors and two sources, startIndex 1 leaves
-                // one and the release uses it, and startIndex 2 leaves none and the release answers
-                // zeros - so a factor past the end is not read, and its scale stays one.
                 {
                     NSUInteger which = (startIndex + index) / MAX((NSUInteger)1, scales.length);
                     NSUInteger component = (startIndex + index) % MAX((NSUInteger)1, scales.length);

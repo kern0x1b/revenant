@@ -57,6 +57,5 @@ void charon_windowed_run(UIWindow *window)
     controller.automaticallyShowsScopeBar = NO;
     BOOL system_off = controller.automaticallyShowsScopeBar;
     controller.automaticallyShowsScopeBar = YES;
-    // Measured on the iPad idiom in a bundled Catalyst app: the flag starts NO (the activation is Manual).
     charon_check(!first && !off && on && !system_off && controller.automaticallyShowsScopeBar, "the scope bar flag starts off, as an iPad app measures it, and is kept as the system's is", @"it differs");
 }

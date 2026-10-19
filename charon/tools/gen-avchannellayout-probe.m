@@ -1,12 +1,3 @@
-// Host probe for the nonnull contract of -[AVAudioChannelLayout initWithLayout:] (review R1): calls the macOS framework's own
-// initializer with one input and prints one line, tab separated:
-//   input <TAB> nil|object <TAB> class <TAB> layoutTag <TAB> channels <TAB> exception
-// The inputs are fixed names: null (a NULL layout), tag0 (kAudioChannelLayoutTag_UseChannelDescriptions with no descriptions),
-// unknown (a tag no release defines, 0xFFFF0003) and stereo (kAudioChannelLayoutTag_Stereo, the valid control).
-// One input per run: an input the framework cannot take may end the process, and the exit status then says so.
-// Usage: avchannellayout-probe null|tag0|unknown|stereo
-// Built by xmake (tools/gen/host/xmake.lua, target channellayout). It creates a layout object and reads it; nothing else.
-
 #import <AVFAudio/AVFAudio.h>
 #import <Foundation/Foundation.h>
 #include <string.h>

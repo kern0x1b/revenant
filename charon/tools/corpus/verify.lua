@@ -1,13 +1,3 @@
--- Certify a list of symbols/selectors against BOTH the registry export and the source tree. A row is only
--- real work when the registry does not carry it AND no definition exists in the tree.
---
--- The list goes through check(name, rows), rows being {api, kind, extra} triples; main() reads a TSV of
--- api, kind and extra per line, for the same check from the command line:
---   xmake l tools/corpus/verify.lua <name> <rows.tsv>
---
--- status() key expansion is kept in sync BY HAND with crash-demand.lua's status_one(): both look up a
--- dotted `Owner.property` api under its method-form registry keys (getter/setter/is-getter, both +/-),
--- because the registry writes some rows only in method form. If status_one()'s key list changes, mirror it here.
 import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 local text = import("objc_text", {rootdir = os.scriptdir()})
@@ -16,9 +6,8 @@ local aggregate = import("aggregate", {rootdir = os.scriptdir(), anonymous = tru
 local EXPORT = aggregate.registry_export()
 local CORPUS_ROOT = os.getenv("CHARON_CORPUS_ROOT") or path.join(os.getenv("HOME"), "Git", "projects", "ios", "coordination")
 local CORPUS = path.join(CORPUS_ROOT, "corpus")
-local CHARON = path.directory(path.directory(os.scriptdir()))   -- tools/corpus -> tools -> the checkout
+local CHARON = path.directory(path.directory(os.scriptdir()))
 
--- The tree: packages/a/apple-backports of this checkout, unless CHARON_TREE_DIR names another.
 local TREE = nil
 for _, candidate in ipairs({os.getenv("CHARON_TREE_DIR") or false,
                             path.join(CHARON, "packages", "a", "apple-backports")}) do
@@ -32,7 +21,6 @@ if not TREE then
         .. "packages/a/apple-backports -- without it every check reports false positives.")
 end
 
--- Every file under dir, sorted. Directories named in `prune` are not entered.
 local function walk(dir, prune, out)
     for _, file in ipairs(os.files(path.join(dir, "*"))) do
         table.insert(out, file)
@@ -45,7 +33,6 @@ local function walk(dir, prune, out)
     return out
 end
 
--- Objective-C sources: every .m, .mm and .h under the tree, read as one text, the way crash-demand reads them.
 local sources = {}
 for _, file in ipairs(walk(TREE, {}, {})) do
     local extension = file:match("%.([^./]+)$")
@@ -61,7 +48,6 @@ end
 local BLOB = table.concat(parts)
 local IMPLS = text.implementations(BLOB)
 
--- The registry export: api -> status (the last row of an api wins, as the Python did), and api -> kind.
 local reg, reg_kinds = {}, {}
 do
     local lines = io.lines(EXPORT)
@@ -88,8 +74,6 @@ do
     end
 end
 
--- The registries of Swift packages in the tree (a registry.json inside a directory named registry) and the
--- .swift sources under a `files` directory. A package's registry is read like the apple-backports one.
 local pkg_reg = {}
 local SWIFT = {}
 do
@@ -121,7 +105,6 @@ for api, kind in pairs(reg_kinds) do
     if kind == "protocol" then PROTOCOLS[api] = true end
 end
 
--- The concrete classes the corpus apps import: the only classes a protocol member is looked for in.
 local ADOPTERS = {}
 do
     local store_path = path.join(CORPUS, "store.json")
@@ -148,7 +131,6 @@ do
     end
 end
 
--- Whether the registry or a Swift package carries api, by the key forms status_one() also tries.
 local function strip_owners(api)
     return (api:gsub(" %(%+%d+ owners%)$", ""))
 end
@@ -157,7 +139,6 @@ local function status(api)
     local a = strip_owners(api)
     local candidates = {a, a .. "()", (a:gsub("^_+", "")), (a:gsub("^_+", "")) .. "()",
                         (a:gsub("_OBJC_CLASS_%$_", ""))}
-    -- A dotted property api may be carried only under its method form.
     if a:find(".", 1, true) and a:sub(1, 1) ~= "-" and a:sub(1, 1) ~= "+" and a:sub(1, 1) ~= "_" then
         local dot = a:find(".", 1, true)
         local owner, name = a:sub(1, dot - 1), a:sub(dot + 1)
@@ -181,8 +162,6 @@ local function body_of(class)
     return table.concat(IMPLS[class] or {}, "\n")
 end
 
--- Whether SEL is carried by the tree: a definition in the owner's @implementation (or, for a protocol
--- owner, in the corpus classes that adopt it), or a free C name when there is no owner.
 local function in_tree(api, kind, owner)
     local a = strip_owners(api)
     if a:sub(1, 14) == "_OBJC_CLASS_$_" or kind == "class" then
@@ -201,7 +180,6 @@ local function in_tree(api, kind, owner)
     end
     if owner and owner ~= "" then own = owner end
     if own ~= nil and SWIFT_TEXT ~= "" then
-        -- A Swift module declares members with a public modifier, not an @interface: look for the first label.
         local first = sel:match("^[^:]*")
         if first ~= "" and text.whole_word(SWIFT_TEXT, first) then
             return true
@@ -240,15 +218,12 @@ local function in_tree(api, kind, owner)
     local up = sel:sub(1, 1):upper() .. sel:sub(2)
     if text.declares(scope, sel) then return true end
     if text.declares_keyword(scope, "set" .. up) then return true end
-    -- `@dynamic name` is an explicit statement that there is NO implementation here: negative evidence.
-    -- A bare @property is not proof either; only a real body or an explicit @synthesize counts.
     if text.directive_names(scope, "@dynamic", sel) then return false end
     if text.directive_names(scope, "@synthesize", sel) then return true end
     if own == nil and text.c_declares(BLOB, sel) then return true end
     return false
 end
 
--- Prints the verdict for one list and returns the rows that are real work.
 function check(name, rows)
     local real, carried, intree = {}, {}, {}
     for _, row in ipairs(rows) do
@@ -257,8 +232,6 @@ function check(name, rows)
         if st == "implemented" or st == "inert" then
             table.insert(carried, {api, st, extra})
         elseif st == "absent" or st == "ignored" then
-            -- An explicit decision by the owner of the class, with a reason and a facts file: a sighting in the
-            -- tree does not overturn it.
             table.insert(real, {api, st, extra})
         elseif in_tree(api, kind) then
             table.insert(intree, {api, st, extra})

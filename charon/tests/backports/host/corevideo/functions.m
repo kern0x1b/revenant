@@ -1,22 +1,11 @@
-// functions.m - what the host's own CoreVideo answers for the six functions of iOS 10 and 15, and,
-// when the port's objects are linked in, what the port answers for the same call.
-//
-// The port's functions are compiled with their names renamed to charonHost_* (run.sh) and linked
-// into this binary, so both implementations are callable in one process and every case prints two
-// answers side by side. Nothing here compares against a recorded expectation: the criterion is the
-// host, and a case the host answers NULL for prints its own NULL, so the line is still there to read.
 #import <CoreVideo/CoreVideo.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import <CoreFoundation/CoreFoundation.h>
 #include <stdio.h>
 #include <string.h>
 
-// Exported by the armv7 shared cache of iOS 6.1.3 and declared by no SDK header, so it is declared
-// here: it is how the whole registered format set is enumerated rather than a hand-picked list.
 extern CFArrayRef CVPixelFormatDescriptionGetPixelFormatTypes(void);
 
-// The port's own six functions, renamed by run.sh through -D<name>=charonHost_<name> and linked into
-// this binary, so each case below can ask both implementations the same question.
 extern CFDictionaryRef charonHost_CVBufferCopyAttachments(CVBufferRef buffer, CVAttachmentMode mode);
 extern CFTypeRef charonHost_CVBufferCopyAttachment(CVBufferRef buffer, CFStringRef key, CVAttachmentMode *mode);
 extern Boolean charonHost_CVBufferHasAttachment(CVBufferRef buffer, CFStringRef key);
@@ -39,9 +28,6 @@ static void cstr(CFStringRef s, char *out, size_t n)
     if (!CFStringGetCString(s, out, (CFIndex)n, kCFStringEncodingUTF8)) snprintf(out, n, "(unprintable)");
 }
 
-// The keys of a dictionary, comma-joined, so two answers to the same question are comparable as text.
-// A dictionary with more keys than the buffer holds would be silently truncated here, and two
-// truncated answers compare equal, so the cap says so instead of hiding it.
 enum { kMaxKeys = 64 };
 static void keys_of(CFDictionaryRef d, char *out, size_t n)
 {
@@ -80,7 +66,6 @@ int main(void)
 
     char hostKeys[512], portKeys[512], h[160], p[160];
 
-    // --- CVBufferCopyAttachments ------------------------------------------------------------
     keys_of(CVBufferCopyAttachments(buffer, kCVAttachmentMode_ShouldPropagate), hostKeys, sizeof(hostKeys));
 #ifdef HAVE_PORT
     keys_of(charonHost_CVBufferCopyAttachments(buffer, kCVAttachmentMode_ShouldPropagate), portKeys, sizeof(portKeys));
@@ -92,7 +77,6 @@ int main(void)
     keys_of(CVBufferCopyAttachments(buffer, kCVAttachmentMode_ShouldNotPropagate), h, sizeof(h));
     printf("     CVBufferCopyAttachments mode ShouldNotPropagate: %s\n", h);
 
-    // --- CVBufferCopyAttachment -------------------------------------------------------------
     CVAttachmentMode hostMode = kCVAttachmentMode_ShouldNotPropagate;
     CVAttachmentMode portMode = kCVAttachmentMode_ShouldNotPropagate;
     CFTypeRef hostOne = CVBufferCopyAttachment(buffer, kCVImageBufferColorPrimariesKey, &hostMode);
@@ -118,7 +102,6 @@ int main(void)
     printf("host CVBufferCopyAttachment absent: %s\n", h);
 #endif
 
-    // --- CVBufferHasAttachment --------------------------------------------------------------
     {
         Boolean hostHas = CVBufferHasAttachment(buffer, kCVImageBufferColorPrimariesKey);
         Boolean hostHasNot = CVBufferHasAttachment(buffer, absentKey);
@@ -135,7 +118,6 @@ int main(void)
 #endif
     }
 
-    // --- CVPixelBufferCopyCreationAttributes ------------------------------------------------
     keys_of(CVPixelBufferCopyCreationAttributes(buffer), hostKeys, sizeof(hostKeys));
 #ifdef HAVE_PORT
     keys_of(charonHost_CVPixelBufferCopyCreationAttributes(buffer), portKeys, sizeof(portKeys));
@@ -144,8 +126,6 @@ int main(void)
     printf("host CVPixelBufferCopyCreationAttributes keys: %s\n", hostKeys);
 #endif
 
-    // --- CVImageBufferCreateColorSpaceFromAttachments ----------------------------------------
-    // The cases the header names, and the two that are not the header's cases at all.
     {
         CGColorSpaceRef profile = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
         CFDataRef icc = profile ? CGColorSpaceCopyICCData(profile) : NULL;
@@ -212,9 +192,6 @@ int main(void)
 #endif
         if (empty) CFRelease(empty);
 
-        // The other two shapes the header's second case can take: the triple with a gamma level
-        // beside it, which the header names as possibly present, and the whole attachment set of a
-        // pixel buffer that already has a colour space of its own.
         {
             int g = 0;
             CFNumberRef gamma = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &g);
@@ -239,7 +216,6 @@ int main(void)
             if (t709) CFRelease(t709);
         }
         {
-            // the attachments a pixel buffer really has: an ICC profile and the three code points
             CFDataRef icc2 = CGColorSpaceCopyICCData(CGColorSpaceCreateWithName(kCGColorSpaceSRGB));
             CFStringRef p709 = CFStringCreateWithCString(kCFAllocatorDefault, "ITU_R_709", kCFStringEncodingUTF8);
             const void *keys[] = { kCVImageBufferICCProfileKey, kCVImageBufferColorPrimariesKey,
@@ -261,10 +237,6 @@ int main(void)
         }
     }
 
-    // --- CVIsCompressedPixelFormatAvailable -------------------------------------------------
-    // Every format asked about, with the host's own answer and, beside it, whether the release's own
-    // format description reports any component for that format. The rule the port uses is the
-    // component count, so this table is what the rule is measured against and not a list believed.
     {
         static const OSType kAsked[] = {
             kCVPixelFormatType_32BGRA, kCVPixelFormatType_420YpCbCr8BiPlanarFullRange,
@@ -278,9 +250,6 @@ int main(void)
         for (int i = 0; i < kAskedCount; i++) {
             OSType fmt = kAsked[i];
             Boolean host = CVIsCompressedPixelFormatAvailable(fmt);
-            // The release's own description of the format. A format that has to be decoded
-            // carries the codec that decodes it and an uncompressed one carries no codec at all;
-            // that is the whole rule, and the table below is what it is measured against.
             CFDictionaryRef description = CVPixelFormatDescriptionCreateWithPixelFormatType(NULL, fmt);
             CFTypeRef codec = description ? CFDictionaryGetValue(description, kCVPixelFormatCodecType) : NULL;
             Boolean hasDescription = description != NULL;
@@ -305,9 +274,6 @@ int main(void)
         printf("     compressed: asked=%d host_yes=%d rule_matches_host=%d rule_disagreements=%d\n",
                kAskedCount, hostYes, ruleMatches, mismatches);
 
-        // The whole registered set, not the hand-picked spread above: a rule checked only against a
-        // column that is false in every row has been checked against nothing, so every format the
-        // release itself registers is asked about and both counts are printed.
         {
             CFArrayRef all = CVPixelFormatDescriptionGetPixelFormatTypes();
             CFIndex total = all ? CFArrayGetCount(all) : 0;
@@ -322,10 +288,6 @@ int main(void)
                 if (!d) { unknown++; continue; }
                 CFTypeRef codec = CFDictionaryGetValue(d, kCVPixelFormatCodecType);
                 if (codec) withCodec++; else noCodec++;
-                // Two candidate rules, both measured over the whole registered set rather than
-                // argued for: the description naming a codec, and the FourCC's own convention, which
-                // the header writes out as kCVPixelFormatType_Lossless_420YpCbCr8BiPlanarFullRange
-                // = '&8f0', the lossless-compressed form of the format below it.
                 Boolean ruleCodec = codec != NULL;
                 Boolean ruleAmp = ((fmt >> 24) & 0xff) == '&';
                 if (host) yes++; else no++;

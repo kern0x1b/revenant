@@ -1,20 +1,6 @@
 #include <MobileCoreServices/MobileCoreServices.h>
 #include <stdlib.h>
 
-// UTTypeCopyAllTagsWithClass, iOS 8.0. The SDK deprecates it from 8.0 to 15.0 in favour of the UTType class.
-//
-// A declared identifier answers its declaration's UTTypeTagSpecification for the class: a string as a one-element
-// array, an array as it is, NULL when the declaration names no such class. Tags are not inherited from a parent: the
-// host answers NULL for public.zip-archive's ostype, which public.data declares as sbFl. Measured by
-// tests/backports/host/uttypetags.
-//
-// A dynamic identifier carries its tags in its name: "dyn.a", then a base-32 tail whose digits are five bits each,
-// in the alphabet below, and whose bits are read in eight-bit bytes. The bytes are records: a key up to the next '=',
-// then a value up to the next ':', and the value is a list split by ','. A key is a class name, or a code for one of
-// the classes (see KeyClass). A backslash escapes the byte after it. A key with no '=' after it ends the records. A
-// value that is empty is skipped; a value that is not UTF-8 is dropped, and a class with a non-empty value answers an
-// array even when every value was dropped. Measured case by case on the host (tests/backports/host/uttypetags).
-
 static const char kDynamicAlphabet[] = "abcdefghkmnpqrstuvwxyz0123456789";
 
 static int DynamicDigitValue(UniChar character)
@@ -28,7 +14,6 @@ static int DynamicDigitValue(UniChar character)
     return -1;
 }
 
-// The identifier's tail as bytes; NULL when a character is outside the alphabet.
 static unsigned char *DynamicTailBytes(CFStringRef inUTI, CFIndex start, CFIndex *outLength)
 {
     CFIndex length = CFStringGetLength(inUTI);
@@ -54,7 +39,6 @@ static unsigned char *DynamicTailBytes(CFStringRef inUTI, CFIndex start, CFIndex
     return bytes;
 }
 
-// The first byte at or after `from` and before `limit` that is `target` and not escaped, or `limit`.
 static CFIndex FindUnescaped(const unsigned char *bytes, CFIndex limit, CFIndex from, unsigned char target)
 {
     for (CFIndex index = from; index < limit;) {
@@ -68,7 +52,6 @@ static CFIndex FindUnescaped(const unsigned char *bytes, CFIndex limit, CFIndex 
     return limit;
 }
 
-// The bytes between start and end with each escape resolved; a backslash that escapes nothing stays.
 static unsigned char *Unescaped(const unsigned char *bytes, CFIndex start, CFIndex end, CFIndex *outLength)
 {
     unsigned char *out = malloc(end - start + 1);
@@ -90,9 +73,6 @@ static int IsHexDigit(unsigned char byte)
     return (byte >= '0' && byte <= '9') || (byte >= 'a' && byte <= 'f') || (byte >= 'A' && byte <= 'F');
 }
 
-// The class a key's code names, or NULL. A code is one or two leading hex digits that make up the whole key, or one hex
-// digit followed by one byte that is not a hex digit: "1", "03", "1x" and "1-" name 1 and 3, while "10" (16), "1A"
-// (26), "03x" and "1xA" name no class.
 static CFStringRef KeyClass(const unsigned char *key, CFIndex length)
 {
     CFIndex digits = 0;

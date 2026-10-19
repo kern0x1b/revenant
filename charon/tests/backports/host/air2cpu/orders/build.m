@@ -1,4 +1,3 @@
-// build.m — compile one Metal Shading Language file at run time and write the metallib.
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <Metal/MTLDynamicLibrary.h>

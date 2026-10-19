@@ -1,6 +1,3 @@
-// Holds SceneKit's matrix functions, a node's rotation conventions and SCNView's defaults and delegate messages to
-// macOS SceneKit's answers (host/scenekit/run.sh writes scenekit-expectations.h). The view part needs an OpenGL ES 2.0
-// context, which the emulator does not have: there it checks what it can and says what it skipped.
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <SceneKit/SceneKit.h>

@@ -1,9 +1,3 @@
-// nsuuid.m - NSUUID on the release it runs on, through the name an application writes. A command-line program: build it as a daemon
-// target that requires charon@apple-backports and run it with `xmake emulate -r 4.3|5.0|6.0 run /usr/libexec/nsuuid`
-// (below6/run.sh does both). Below iOS 6.0 the class is the backports' (libFoundationBackports.dylib), from 6.0 the release's, and
-// the program is held to the same answers on both: what the release's class was measured to answer on iOS 6.0 (facts/Foundation/NSUUID.md)
-// and what the host's did. The `answer` lines are the release's own or the port's, for the runner to compare across releases; the
-// answers where the port follows the newest release and 6.0 does not are checked on the port only, and say so.
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #include <uuid/uuid.h>
@@ -87,13 +81,11 @@ int main(void)
         answer(@"instance class", NSStringFromClass([a class]));
         CHECK_EQUAL(NSStringFromClass([a class]), @"__NSConcreteUUID", "an instance is the concrete class");
         CHECK_EQUAL(NSStringFromClass([[a class] superclass]), @"NSUUID", "the concrete class's superclass");
-        // 6.0 describes a UUID as `<__NSConcreteUUID 0x...> STRING`; the newest release, and the port, as the string alone.
         CHECK([[a description] hasSuffix:@"123E4567-E89B-12D3-A456-426614174000"], "the description ends with the string");
         if (ported)
             CHECK_EQUAL([a description], @"123E4567-E89B-12D3-A456-426614174000", "the port's description is the string");
         answer(@"description ends with", [[[a description] componentsSeparatedByString:@" "] lastObject]);
 
-        // hash: the releases' hash of a UUID is what NSData's hash is of its bytes, measured on 6.0
         const uuid_t *samples[] = {&known, &zero, &ff, &inc};
         const NSUInteger hashes[] = {211469392, 0, 1114095, 183413583};
         for (int i = 0; i < 4; i++) {
@@ -124,7 +116,6 @@ int main(void)
         CHECK([seen count] == 2000, "2000 new UUIDs are distinct");
         CHECK(versions == 0 && variants == 0, "new UUIDs are version 4, variant 2");
 
-        // parsing, measured on 6.0 and the host
         NSString *upper = @"123E4567-E89B-12D3-A456-426614174000";
         NSArray *cases = @[
             @[@"123E4567-E89B-12D3-A456-426614174000", upper], @[@"123e4567-e89b-12d3-a456-426614174000", upper], @[@"", @"nil"],
@@ -143,7 +134,6 @@ int main(void)
             CHECK_EQUAL(u ? u.UUIDString : @"nil", [c objectAtIndex:1], name);
         }
 
-        // equality, copy
         NSUUID *b = [[NSUUID alloc] initWithUUIDBytes:known], *other = [[NSUUID alloc] initWithUUIDBytes:inc];
         CHECK([a isEqual:b] && [b isEqual:a] && [a isEqual:a], "equal bytes are equal");
         CHECK(![a isEqual:other] && ![a isEqual:nil] && ![a isEqual:a.UUIDString], "other bytes, nil and a string are not equal");
@@ -160,7 +150,6 @@ int main(void)
         CHECK_EQUAL([[[NSUUID alloc] initWithUUIDBytes:zero] UUIDString], @"00000000-0000-0000-0000-000000000000", "the zero UUID");
         CHECK_EQUAL([[NSUUID UUID] class], [a class], "+UUID and initWithUUIDBytes: make the same class");
 
-        // compare: (iOS 15), carried from the same band as the class
         CHECK([a respondsToSelector:@selector(compare:)], "compare: is there");
         if ([a respondsToSelector:@selector(compare:)]) {
             NSComparisonResult (*compare)(id, SEL, id) = (NSComparisonResult (*)(id, SEL, id))[a methodForSelector:@selector(compare:)];
@@ -169,7 +158,6 @@ int main(void)
             CHECK(compare([[NSUUID alloc] initWithUUIDBytes:ff], @selector(compare:), a) == NSOrderedDescending, "compare: larger");
         }
 
-        // the archive: the key, and the round trip
         NSData *archive = archived(a);
         NSDictionary *plist = [NSPropertyListSerialization propertyListFromData:archive mutabilityOption:NSPropertyListImmutable format:NULL errorDescription:NULL];
         NSDictionary *object = [[plist objectForKey:@"$objects"] objectAtIndex:1];
@@ -179,7 +167,6 @@ int main(void)
         CHECK_EQUAL(decoded(archive), @"__NSConcreteUUID 123E4567-E89B-12D3-A456-426614174000", "the archive decodes");
         CHECK_EQUAL(decoded(variant(archive, [NSData dataWithBytes:known length:16])), @"__NSConcreteUUID 123E4567-E89B-12D3-A456-426614174000", "a rewritten archive decodes");
         CHECK([decoded(variant(archive, @"123E4567-E89B-12D3-A456-426614174000")) hasPrefix:@"exception"], "a string under the bytes' key is refused");
-        // A damaged archive: 6.0 makes a random UUID of it, the newest release and the port refuse it.
         NSArray *damaged = @[[NSNull null], [NSData dataWithBytes:known length:15], [NSData dataWithBytes:known length:17], [NSData data]];
         for (id damage in damaged) {
             NSString *result = decoded(variant(archive, damage == [NSNull null] ? nil : damage));
@@ -190,7 +177,6 @@ int main(void)
                 CHECK([result hasPrefix:@"__NSConcreteUUID "], "the release's own answer to a damaged archive is a UUID (measured on 6.0)");
         }
 
-        // nil arguments: the newest release and the port answer nil for a nil string and the zero UUID for no bytes; 6.0 answers the zero UUID and crashes
         id fromNil = [[NSUUID alloc] initWithUUIDString:(NSString *_Nonnull)nil];
         if (ported)
             CHECK(fromNil == nil, "a nil string gives nil");
@@ -199,7 +185,6 @@ int main(void)
         if (ported)
             CHECK_EQUAL([[[NSUUID alloc] initWithUUIDBytes:NULL] UUIDString], @"00000000-0000-0000-0000-000000000000", "no bytes give the zero UUID");
 
-        // the class cluster, measured on 6.0 and on the host
         Plain *plain = [[Plain alloc] init];
         CHECK_EQUAL(NSStringFromClass([plain class]), @"Plain", "a subclass keeps its class");
         CHECK([[Plain alloc] initWithUUIDBytes:known] == nil && [[Plain alloc] initWithUUIDString:upper] == nil, "a subclass is not given a UUID to hold");

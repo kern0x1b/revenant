@@ -1,21 +1,3 @@
--- proto.lua: the protobuf of a Core ML container, written and read from the committed schema table.
---
---   local proto = import("proto", {rootdir = os.scriptdir()})
---   local schema = proto.load(path.join(root, "packages", "a", "apple-backports", "CoreML", "CharonMLSchema.inc"))
---   local bytes = proto.encode(schema, "Model", value)     -- value: a Lua table keyed by field name
---   local value = proto.decode(schema, "Model", bytes)     -- only the fields the bytes carry
---   local lines = proto.dump(schema, "Model", value)       -- the reflection print of the tree
---
--- A value is a Lua table. A field is named by its name in the specification; a message field is a table, and a
--- repeated field is an array. A message that is present is a table even when it is empty (SetInParent in the
--- protobuf library), so `ReLU = {}` writes the empty ReLU. A proto3 scalar is written only when it is not zero,
--- which is what the protobuf library does, and a oneof member is written whenever it is set.
---
--- The encoder writes the fields in field-number order, as the protobuf library does, and a repeated numeric field
--- packed, as proto3 does. The dump is the reflection print: the same lines, in the same order and spelling, as the
--- print the Python writer of these containers made. A float is printed the way Python prints a float, the shortest
--- text that reads back as the same double, so a float32 is printed as the double it is.
-
 local KIND = {
     DOUBLE = 1, FLOAT = 2, INT64 = 3, UINT64 = 4, INT32 = 5, FIXED64 = 6, FIXED32 = 7, BOOL = 8, STRING = 9,
     BYTES = 10, MESSAGE = 11, UINT32 = 12, ENUM = 13, SFIXED32 = 14, SFIXED64 = 15, SINT32 = 16, SINT64 = 17,
@@ -28,8 +10,6 @@ end
 local WIRE_VARINT, WIRE_64, WIRE_STRING, WIRE_32 = 0, 1, 2, 5
 local PREFIX = "CoreML.Specification."
 
--- The schema table of CharonMLSchema.inc, read into one structure: every message by its name, with its fields in
--- field-number order and by name.
 function load(file)
     local schema = {messages = {}}
     local rows, messages = {}, {}
@@ -69,8 +49,6 @@ function load(file)
             entry.by_name[field.name] = field
             entry.by_number[field.number] = field
         end
-        -- An insertion sort on the field numbers, which are integers: the order does not depend on the locale, and
-        -- the light guard keeps the sorts of the tools on byteorder or on a plain loop like this one.
         for index = 2, #entry.fields do
             local field = entry.fields[index]
             local at = index - 1
@@ -93,7 +71,6 @@ local function message_of(schema, name)
     return message
 end
 
--- A 64-bit two's complement integer, as an unsigned varint: a negative int32 takes ten bytes, as protobuf writes it.
 local function varint(out, value)
     repeat
         local byte = value & 0x7f
@@ -117,7 +94,6 @@ local function integer_of(name, value)
     return whole
 end
 
--- The bytes of one scalar value, with no tag.
 local function scalar_bytes(out, kind, value, field)
     if kind == KIND.DOUBLE then
         table.insert(out, string.pack("<d", value))
@@ -160,7 +136,6 @@ end
 
 local encode_message
 
--- The bytes of one field, tag included, or nothing when the field is absent or is a proto3 zero.
 local function field_bytes(schema, field, value, out)
     if value == nil then
         return
@@ -175,7 +150,6 @@ local function field_bytes(schema, field, value, out)
                 table.insert(out, body)
             end
         elseif field.element ~= 0 and #value > 0 then
-            -- packed: one run of the element's wire format under one tag
             local run = {}
             for _, item in ipairs(value) do
                 scalar_bytes(run, field.element, item, field)
@@ -218,12 +192,10 @@ function encode_message(schema, name, value)
     return table.concat(out)
 end
 
--- The bytes of the message `name` holding `value`.
 function encode(schema, name, value)
     return encode_message(schema, name, value)
 end
 
--- One value of a scalar kind read from the bytes at `at`; returns the value and the index after it.
 local function read_scalar(bytes, at, kind)
     if kind == KIND.DOUBLE then
         return string.unpack("<d", bytes, at)
@@ -259,7 +231,6 @@ end
 
 local decode_message
 
--- Stores one decoded value of a field in the table of its message.
 local function store(value, field, item)
     if field.repeated then
         value[field.name] = value[field.name] or {}
@@ -291,7 +262,6 @@ function decode_message(schema, name, bytes)
             elseif field.kind == KIND.STRING or field.kind == KIND.BYTES then
                 store(value, field, body)
             elseif field.repeated and field.element ~= 0 then
-                -- packed: the run is read element by element until it is used up
                 local items, inside = value[field.name] or {}, 1
                 while inside <= #body do
                     local item
@@ -300,7 +270,6 @@ function decode_message(schema, name, bytes)
                 end
                 value[field.name] = items
             else
-                -- a packed run of a kind this reader does not expect is a length-delimited value it refuses
                 raise("%s.%s arrives as a length-delimited run of kind %d, which is not packed", name, field.name,
                       field.kind)
             end
@@ -313,12 +282,10 @@ function decode_message(schema, name, bytes)
     return value
 end
 
--- The table of the message `name` that these bytes carry; a field the specification does not declare is refused.
 function decode(schema, name, bytes)
     return decode_message(schema, name, bytes)
 end
 
--- The shortest decimal text that reads back as this double, spelled the way Python's repr spells a float.
 function float_text(x)
     if x ~= x or x == math.huge or x == -math.huge then
         raise("a non-finite value %s is not written", tostring(x))
@@ -357,8 +324,6 @@ function float_text(x)
     return sign .. body
 end
 
--- How a value is printed in the reflection text: a string in Python's repr, a bytes field as its length, a float
--- as Python's float, a bool as True or False, an integer as itself.
 local function spelled(kind, value)
     if kind == KIND.STRING then
         return "'" .. value:gsub("\\", "\\\\"):gsub("'", "\\'") .. "'"
@@ -403,10 +368,8 @@ local function walk(schema, name, value, indent, lines)
     end
 end
 
--- The reflection print of the message `name` holding `value`, one line per entry, as a list of lines.
 function dump(schema, name, value)
     local lines = {}
     walk(schema, name, value, 0, lines)
     return lines
 end
-

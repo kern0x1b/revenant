@@ -1,8 +1,6 @@
 #import "focus_scenario.h"
 #import <dlfcn.h>
 
-// The port's selectionFollowsFocus on each list view is the app's own implementation, checked by the same dladdr
-// test as the views13 group, and the answers agree with the system's, line by line.
 void charon_windowed_run(UIWindow *window)
 {
     @autoreleasepool {

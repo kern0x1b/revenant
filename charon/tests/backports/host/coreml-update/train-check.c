@@ -1,12 +1,3 @@
-/* train-check.c - trains a model with the port's trainer and writes the weights at the same events the host's
- * update reports, in the format dump.c and host-train.m write, so the two can be compared line by line.
- *
- * usage: train-check MODEL.mlmodel INPUT.f32 TARGET.f32 OUTDIR SAMPLES
- *
- * The events are the host's: a training-begin dump (the weights as the model holds them), then for each
- * mini-batch a mini-batch-end dump, and after the last mini-batch of an epoch an epoch-end dump. The mini-batch
- * size and the epoch count come from the model, as they do for the host, and the samples are used in file order.
- * The files are step-NNN.dump, numbered as host-train numbers its steps, and final.dump. */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

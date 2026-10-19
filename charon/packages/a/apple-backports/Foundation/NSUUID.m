@@ -1,15 +1,10 @@
 #import <Foundation/Foundation.h>
 #include <uuid/uuid.h>
 
-// NSUUID is a class cluster in the releases that have it (facts/Foundation/NSUUID.md): NSUUID answers the questions a subclass
-// has not answered itself through -getUUIDBytes:, and +allocWithZone: on NSUUID itself hands out a concrete class that holds
-// the 16 bytes. The concrete class is not exported, as the release's is not.
 __attribute__((visibility("hidden")))
 @interface __NSConcreteUUID : NSUUID
 @end
 
-// The 32-bit hash the releases give an NSUUID: the ELF object file hash over its 16 bytes (the last step of it, the shift of the
-// sum by the length, is not applied), which is what -[NSData hash] gives the same bytes.
 static NSUInteger charon_uuid_hash(const uint8_t *bytes)
 {
     uint32_t hash = 0;
@@ -47,7 +42,6 @@ static NSException *charon_uuid_unreadable(NSString *reason)
     return self;
 }
 
-// A subclass that does not override these two is not given a UUID to hold, as in the releases.
 - (instancetype)initWithUUIDString:(NSString *)string
 {
     return nil;
@@ -104,8 +98,6 @@ static NSException *charon_uuid_unreadable(NSString *reason)
     [coder encodeBytes:bytes length:sizeof(uuid_t) forKey:@"NS.uuidbytes"];
 }
 
-// What the newest release does with an archive whose bytes are absent or not 16: it refuses to decode it. The release of iOS 6
-// makes a random UUID of it instead, which is a UUID nobody archived.
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     NSUInteger length = 0;

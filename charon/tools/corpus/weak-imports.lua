@@ -1,37 +1,15 @@
--- Rank a real app's WEAK imports (Telegram UIStack build on the 4S) by what an absent symbol does.
--- Lua port of the former weak-imports.py.
---
--- A weak import does not stop dyld when the symbol is missing; the address resolves to NULL. What
--- happens next depends on the kind of symbol and on whether the code checks first:
---   constant (data)   read straight  -> load through a NULL address       -> CRASH-ON-USE
---   C function        called         -> call to NULL                      -> CRASH-ON-USE
---   ObjC class        messaged       -> message to nil, a silent no-op    -> SILENTLY DIFFERENT
---                                       (a crash only later, if the nil result is used as an object)
--- The list alone does not say whether each use is guarded (`if (&kSym)`, #available, respondsToSelector:),
--- so nothing here proves a crash. What it can do is: classify each symbol by kind through the SDK dump,
--- say whether it EXISTS now (registry status implemented/inert = present, not NULL), how new it is,
--- and how many corpus apps import it (a second, independent view of the same name).
---
--- usage: xmake l tools/corpus/weak-imports.lua <file, one symbol per line> [output-path]
--- Output: corpus/weak-imports-ranked.tsv (or argv[2] / $CHARON_WEAK_IMPORTS_OUT, to redirect a one-off or
--- test run away from the real file).
 import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 local aggregate = import("aggregate", {rootdir = os.scriptdir(), anonymous = true})
 
--- corpus/ is DATA, in the durable location CHARON_CORPUS_ROOT addresses (default coordination/),
--- independent of this script's own location. See tools/corpus/README.md.
 local CORPUS_ROOT = os.getenv("CHARON_CORPUS_ROOT") or path.join(os.getenv("HOME"), "Git", "projects", "ios", "coordination")
 local CORPUS = path.join(CORPUS_ROOT, "corpus")
 if not os.isdir(CORPUS) then
     raise("weak-imports.lua: no corpus/ data directory found at %s. Set CHARON_CORPUS_ROOT to the directory "
         .. "that contains corpus/.", CORPUS)
 end
--- Coordinator regenerates the shared export after each merge; CHARON_REGISTRY_TSV lets a run read a
--- different one (e.g. regenerated straight from origin/main) WITHOUT touching the shared file.
 local EXPORT = aggregate.registry_export()
--- Already caught in a real Telegram run on the device (read directly, absent -> NULL -> crash), per Coordinator.
 local CAUGHT = {
     AVAudioSessionPortBluetoothLE = true,
     AVAudioSessionMediaServicesWereLostNotification = true,
@@ -42,7 +20,6 @@ local function starts(text, prefix)
     return text:sub(1, #prefix) == prefix
 end
 
--- A version as a list of numbers, or nil when there is none (Python's ver(): empty text is None).
 local function ver(text)
     if text == nil or text == "" then
         return nil
@@ -58,7 +35,6 @@ local function ver(text)
     return parts
 end
 
--- A version as a string that sorts in version order under byte comparison: each number padded to six digits.
 local function version_key(text)
     local parts = ver(text)
     if parts == nil then
@@ -71,7 +47,6 @@ local function version_key(text)
     return table.concat(out, ".")
 end
 
--- A decimal count as a string that sorts the same way: larger first when the key is compared ascending.
 local function descending(n)
     return string.format("%07d", 1000000 - n)
 end
@@ -84,7 +59,6 @@ local function read_json(file)
     return held
 end
 
--- api -> status and api -> introduced, last row winning (the Python dict did the same).
 local function load_registry()
     local reg, intro = {}, {}
     if not os.isfile(EXPORT) then
@@ -102,8 +76,6 @@ local function load_registry()
     return reg, intro
 end
 
--- Provisional decisions handed down by Coordinator that the registry export does not carry yet. Marked
--- "(override)" everywhere they show, and only used when the registry has no row for the symbol.
 local function load_overrides()
     local overrides = {}
     local op = path.join(CORPUS, "decision-overrides.tsv")
@@ -123,8 +95,6 @@ local function load_overrides()
     return overrides
 end
 
--- A tally of keys. `ranked` lists them most frequent first, ties in first-seen order (Python's dict order,
--- which its stable sort kept); `alphabetical` lists them in byte order.
 local function counter()
     local counts, order = {}, {}
     local tally = {}
@@ -191,7 +161,6 @@ local function tier_of(row)
     return "4 swift/c++ (other track)"
 end
 
--- The symbol's kind, and the name it is looked up under (the SDK dump's and the registry's spelling).
 local function kind_of(raw, sdk)
     if starts(raw, "_OBJC_CLASS_$_") then
         return "class", raw:sub(#"_OBJC_CLASS_$_" + 1)
@@ -212,8 +181,6 @@ local function kind_of(raw, sdk)
     elseif type(value) == "table" and value[1] == "constant" then
         return "constant", name
     end
-    -- no SDK row: Apple's k-prefix marks a constant; otherwise lowercase names are almost always
-    -- functions and Capitalised ones constants
     if name:match("^k[A-Z]") then
         return "constant?", name
     elseif name:match("^[a-z]") then
@@ -237,7 +204,6 @@ function main(file, out_override)
     local reg, intro = load_registry()
     local overrides = load_overrides()
     local store = read_json(path.join(CORPUS, "store.json"))
-    -- symbol -> { apps = set, strong = set }, over every app's demand records
     local corpus = {}
     for app, d in pairs(store.apps) do
         for _, r in ipairs(d.demand) do
@@ -263,8 +229,6 @@ function main(file, out_override)
     local rows, keyed = {}, {}
     for index, raw in ipairs(syms) do
         local kind, name = kind_of(raw, sdk)
-        -- the four spellings the registry may hold the symbol under (its base, the method form, the raw
-        -- name and the raw name without the leading underscore)
         local keys = {name, name .. "()", raw, starts(raw, "_") and raw:sub(2) or raw}
         local status = nil
         for _, k in ipairs(keys) do
@@ -306,8 +270,6 @@ function main(file, out_override)
         table.insert(rows, row)
     end
 
-    -- Sorted by tier, then most apps first, then the earliest version, then name; the row's position in the
-    -- input breaks what is left, as Python's stable sort did.
     for _, row in ipairs(rows) do
         local key = table.concat({row.tier, descending(row.apps), version_key(row.introduced), row.name,
                                   string.format("%07d", row.index)}, "\1")
@@ -329,7 +291,6 @@ function main(file, out_override)
     file_out:close()
     print(string.format("%d weak imports -> %s", #rows, out))
 
-    -- per tier, the statuses it holds, most frequent first (ties in first-seen order)
     local tally = {}
     for _, row in ipairs(rows) do
         tally[row.tier] = tally[row.tier] or counter()
@@ -349,7 +310,6 @@ function main(file, out_override)
         print(string.format("  %-28s %4d   %s", tier, t.total(), table.concat(parts, ", ")))
     end
 
-    -- per framework, the rows that would be NULL or nil (tiers 0 to 3), the 14 largest
     local fw, fw_order = {}, {}
     for _, row in ipairs(rows) do
         if row.tier:match("^[0-3]") then

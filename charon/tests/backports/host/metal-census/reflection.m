@@ -1,20 +1,3 @@
-/* The type tree, read back: a round-trip against the property lists air2cpu wrote.
- *
- *     sh tests/backports/host/metal-census/reflection.sh PLIST [PLIST...]
- *
- * Two halves, and both matter:
- *
- *   * The READER is compiled from the port's own MTLTypeReflection.m - the same file the device
- *     builds - and run over real property lists: the one the invented fixture produces, and any the
- *     caller points at. It asserts what the file says: the arguments, their names, their accesses,
- *     the three the header has enumerators for, and the type of each.
- *   * The MUTANT is a scratch copy of the READER under .agent-work/runs/, with one change: it maps
- *     every access it does not recognise to read-write. That is the guess this port is not allowed to
- *     make, and the mutant must FAIL the same assertion the real reader passes.
- *
- * What this is NOT: it does not compare against Apple's kernels, and it asserts nothing about a
- * device. It is a host check that the reader reads what the writer wrote.
- */
 #import <Foundation/Foundation.h>
 #import "MTLTypeReflectionInternal.h"
 #import "MTLTypeReflection11.m"
@@ -58,8 +41,6 @@ int main(int argc, char **argv)
                         named++;
                     if (node[@"type"])
                         typed++;
-                    // The three the header has enumerators for. An argument whose node carries none
-                    // is MTLArgumentAccessReadOnly, the enumeration's zero, and is counted there.
                     switch (argument.access) {
                         case MTLArgumentAccessReadOnly: readOnly++; break;
                         case MTLArgumentAccessWriteOnly: writeOnly++; break;
@@ -67,9 +48,6 @@ int main(int argc, char **argv)
                     }
                 }
             }
-            // The 8.0 reflection classes, built from this file's own argument list: the arguments
-            // are REAL (they are the plist's), and the binding lists are EMPTY, which is the
-            // documented absence the rows record.
             NSMutableArray *reflected = [NSMutableArray array];
             NSMutableArray *nodes = [NSMutableArray array];
             for (NSDictionary *function in functions)
@@ -83,10 +61,6 @@ int main(int argc, char **argv)
             }
             MTLComputePipelineReflection *compute = [[MTLComputePipelineReflection alloc] initWithArguments:reflected];
             check(compute.arguments.count == reflected.count, @"the compute reflection carries every argument");
-            // The BINDING lists are API_AVAILABLE(macCatalyst 16.0) and this host binary targets 15,
-            // so they are not asserted here: a check that calls a member the host cannot reach proves
-            // nothing about it. Their emptiness is recorded in the row and in facts/Metal/TypeTree.md,
-            // and it is the documented absence the plist makes. The ARGUMENTS are 8.0 and are real.
             MTLRenderPipelineReflection *renderReflection = [[MTLRenderPipelineReflection alloc] initWithArguments:reflected];
             check(renderReflection.vertexArguments.count == reflected.count, @"the render reflection's vertex arguments are real");
             MTLVertexAttribute *attribute = [[MTLVertexAttribute alloc] initWithNode:[nodes firstObject]];
@@ -96,9 +70,6 @@ int main(int argc, char **argv)
                   @"a vertex attribute's index is the argument's own index");
             check([attribute isActive], @"a vertex attribute of a bound argument is active");
 
-            // The 10.0 classes, from the same argument node: an MTLAttribute is the stage-input form
-            // of the same thing, and its patch-data getters are the header's NO because the plist has
-            // no patch flag to read.
             MTLAttribute *stageInput = [[MTLAttribute alloc] initWithNode:[nodes firstObject]];
             check(stageInput.attributeIndex == index,
                   @"a stage input attribute's index is the argument's own index");
@@ -108,9 +79,6 @@ int main(int argc, char **argv)
             check([constant isRequired] == NO && constant.name.length == 0,
                   @"a constant with no node is not required and has no name");
 
-            // The 11.0 classes: a fresh buffer descriptor is the enumeration's default and its copy
-            // keeps it. The array answers a descriptor at every one of its 31 slots, as Apple's does
-            // (pipeline-buffer-array measures it against Apple's own array), and a set keeps a copy.
             MTLPipelineBufferDescriptor *buffer = [[MTLPipelineBufferDescriptor alloc] init];
             check(buffer.mutability == MTLMutabilityDefault,
                   @"a fresh buffer descriptor is MTLMutabilityDefault");

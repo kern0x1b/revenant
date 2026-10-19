@@ -66,14 +66,6 @@
 
 @end
 
-/* UIKit carries this class privately, so it exports no symbol for the band to
-   re-export and a release that already has it would end up with two classes of one
-   name. UICubicTimingParameters archives it by name, so the name has to stay: the
-   class is defined under a Charon name and the real one registered for it only
-   where the runtime does not already answer to it. */
-/* an archive names the class, and an unarchiver looks it up by that name, so it
-   has to answer from the moment the library loads rather than from the first time
-   a curve is made */
 static Class charon_registered;
 
 __attribute__((constructor)) static void charon_register_uiviewcubict(void)

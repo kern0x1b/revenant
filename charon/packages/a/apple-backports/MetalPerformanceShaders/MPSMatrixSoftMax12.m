@@ -1,6 +1,3 @@
-// MPSMatrixSoftMax, from the header of the SDK of iOS 16.4. One object per release: the band machinery keeps an
-// object whole or drops it whole, so a file here carries the API of exactly one release.
-
 #import "CharonMPS.h"
 
 
@@ -14,8 +11,6 @@
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
     if ((self = [super initWithDevice:device])) {
-        // NSUIntegerMax is the header's "take the shape from the matrix": a row count of that size
-        // never fits, so a sourceRows of it means the rows of the matrix as it is.
         _sourceRows = NSUIntegerMax;
         _sourceColumns = NSUIntegerMax;
         _sourceMatrixOrigin = MTLOriginMake(0, 0, 0);
@@ -53,10 +48,6 @@
         CharonMPSRefuse(@"MPSMatrixSoftMax: a matrix of a data type that is not one of the eight element types was given");
         return;
     }
-    // Softmax normalises each row: every element becomes its own value over the sum of the exponentials
-    // of its row, and the log form subtracts the row's largest value first, which is what keeps the
-    // exponentials from overflowing and cancels in the ratio. The row is sourceColumns wide, taken
-    // from the matrix's own shape when sourceColumns is the header's "as the matrix is".
     NSUInteger rows = _sourceRows == NSUIntegerMax ? in.rows : _sourceRows;
     NSUInteger columns = _sourceColumns == NSUIntegerMax ? in.columns : _sourceColumns;
     NSUInteger start, count;
@@ -110,8 +101,6 @@
     return copy;
 }
 
-// A log softmax's own flag, which its subclass sets. -logSoftMax is the same kernel with the row's
-// exponentials taken in logarithms, so the flag is the only difference between the two classes.
 - (void)charon_mps_setLogarithmic:(BOOL)logarithmic
 {
     _logarithmic = logarithmic;

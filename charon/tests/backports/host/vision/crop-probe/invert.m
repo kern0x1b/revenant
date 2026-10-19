@@ -1,34 +1,9 @@
-/* invert.m -- the source position of each destination pixel, with the blend inverted analytically
- *
- * Build and run, from the repository root:
- *
- *   SDK=$(xcrun --show-sdk-path)
- *   xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$SDK" \
- *       -iframework "$SDK/System/iOSSupport/System/Library/Frameworks" -fobjc-arc -w \
- *       -Wno-unguarded-availability tests/backports/host/vision/crop-probe/invert.m \
- *       -framework Foundation -framework CoreGraphics -framework CoreVideo -framework CoreML \
- *       -framework Vision -o /tmp/invert && /tmp/invert
- *
- * instead of fitted.
- *
- * The source is a ramp: R = the column and G = the row, so R runs along x and G along y and each
- * channel is a function of one axis alone. A bilinear kernel puts a destination pixel between its
- * two neighbours, so the value that comes out is
- *
- *     (1 - f) * floor(s) + f * ceil(s) = floor(s) + f = s
- *
- * exactly, for a ramp that is the index itself. So the red channel of an output pixel *is* the
- * fractional source column and the green channel *is* the fractional source row: no fit, no
- * staircase, nothing to interpret. Both axes come out of one run, and the crop's start is
- * read off them directly.
- */
 #import <CoreGraphics/CoreGraphics.h>
 #import <CoreVideo/CoreVideo.h>
 #import <CoreML/CoreML.h>
 #import <Vision/Vision.h>
 #import <Foundation/Foundation.h>
 
-/* R = the column, G = the row, both scaled so the largest position fits a byte. */
 static CGImageRef ramp(size_t wide, size_t high, double scale, int k)
 {
     CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
@@ -78,9 +53,6 @@ static void one(size_t sw, size_t sh, size_t tw, size_t th, VNImageCropAndScaleO
         return;
     }
     {
-        /* Three destination pixels, with the source position each one says it sampled from, and
-         * where the crop therefore starts: the first output pixel that is not a bar, minus half a
-         * destination column, is the source position at the target's edge. */
         CVPixelBufferRef buffer = value.imageBufferValue;
         const uint8_t *base;
         size_t stride, dx, dy, firstX = 0, firstY = 0, middleX = 0;

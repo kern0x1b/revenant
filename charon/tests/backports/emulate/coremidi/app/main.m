@@ -1,11 +1,3 @@
-//
-//  app/main.m
-//  The CoreMIDI round trip as an application: the round trip of roundtrip.m (this folder), run from the
-//  application delegate after SpringBoard has launched the process, with the audio background mode the
-//  application declares in its Info.plist and an active audio session, so that a process which the release
-//  treats as an audio client is the one that asks for the endpoints.
-//
-
 #import <UIKit/UIKit.h>
 #include <AudioToolbox/AudioToolbox.h>
 #import <CoreMIDI/CoreMIDI.h>
@@ -16,10 +8,6 @@
 
 int charon_roundtrip_run(void);
 
-// The measurements the 6.1.3 release owes the port (facts/CoreMIDI/Bluetooth.md, CoreMIDI.md "Disposed objects", UMPClasses.md).
-// Every line names what it reads: a "status" is an OSStatus the release returned, a "value" is what the read wrote, and the
-// value is meaningful only with a noErr status. The frameworks are loaded by name, so the build links nothing new. These are
-// built with CHARCOREMIDI_PROBE=1 (a separate run: the round trip's own run must end within the emulator's time budget).
 #ifdef CHARON_6_1_3_PROBE
 #include "../../../host/coremidi/oracle/stamp.h"
 #include "../../../host/coremidi/oracle/disposewait.h"
@@ -112,9 +100,6 @@ static void charon_probe_objects(void)
         charon_probe_unique("input port disposed", port);
     }
 
-    // The entity written by MIDIDeviceNewEntity (the library's, MIDIDevice14.m) on a device of the emulated setup, if the setup
-    // has one: the status of the call, the protocol read back from the entity, and the status of its removal. An application
-    // cannot make a device (MIDIDeviceCreate is the plug-in driver's call), so the setup's own device is the only one there is.
     ItemCount devices = MIDIGetNumberOfDevices();
     printf("probe 6.1.3: setup devices %lu\n", (unsigned long)devices);
     fflush(stdout);
@@ -134,7 +119,6 @@ static void charon_probe_objects(void)
     MIDIClientDispose(client);
     charon_probe_unique("client disposed", client);
 
-    // The reference reuse after a dispose: a new destination's ref against the disposed one's.
     MIDIClientRef notifying = 0;
     if (MIDIClientCreate(CFSTR("charon-probe-notify"), charon_probe_notify, NULL, &notifying) == noErr) {
         MIDIEndpointRef first = 0, second = 0;
@@ -147,8 +131,6 @@ static void charon_probe_objects(void)
         MIDIEndpointRef noted = 0;
         if (MIDISourceCreate(notifying, CFSTR("charon-probe-noted-src"), &noted) == noErr)
             MIDIEndpointDispose(noted);
-        // The release posts a removal to the client's notify proc on the main run loop: the loop is run until the three arrive, or
-        // for 20 s, and the count is printed beside the lines the proc wrote.
         for (int i = 0; i < 200 && gProbeRemovals < 3; i++)
             CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, false);
         printf("probe 6.1.3: removal notifications received: %d (this block disposed two destinations and a source; the release also posts the removals of the objects disposed before it to a client made after them)\n", gProbeRemovals);
@@ -157,9 +139,6 @@ static void charon_probe_objects(void)
     }
 }
 
-// What the release shows of a connection, and what a 2.0 source's 2.0 velocity becomes at a 2.0 input port it is connected to.
-// The properties of the source and of the port are listed before and after MIDIPortConnectSource (their keys, the values are
-// not needed): a connection the release shows would let the library route a 2.0 list to the ports connected to a source.
 static void charon_probe_list_keys(const char *label, MIDIObjectRef object)
 {
     CFPropertyListRef properties = NULL;
@@ -245,10 +224,6 @@ static void charon_probe_connection(void)
 
 #endif
 
-// The armv7 wraps: word counts whose byte sizes wrap the 32-bit size_t. The library must refuse them; before its fix, the
-// send copies or reads far beyond the buffer and the application dies on a signal (the run then fails).
-// MIDISendEventList: one packet of 536870913 words, 8 * count + 26 wraps to 34 bytes, so the capacity is small and the
-// conversion reads the words past the 64-byte list.
 static void charon_probe_wrap_send(void)
 {
     Byte buffer[64];
@@ -264,8 +239,6 @@ static void charon_probe_wrap_send(void)
     fflush(stdout);
 }
 
-// MIDIEventListAdd: end (8) + the packet header and the words (12 + 4 * 1073741819) is 2^32, which wraps to 0, so the room
-// check passes and a 4 GB copy follows into a 64-byte list.
 static void charon_probe_wrap_add(void)
 {
     Byte buffer[64];

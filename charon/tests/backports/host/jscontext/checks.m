@@ -43,22 +43,6 @@ static void check(BOOL condition, NSString *name)
     }
 }
 
-/*
- * The collector scans the stack conservatively, so a value is made in a frame of its own and the
- * stack it used is overwritten before collecting.
- *
- * On the host, JSSynchronousGarbageCollectForDebugging is the engine's own exported collect-now
- * entry point, and JSGarbageCollect only schedules a collection. The release's engine (2012) exports
- * no collect-now entry point (JSSynchronousGarbageCollectForDebugging first appears in 7.0.1's
- * cache, coordination/corpus/caches): its JSGarbageCollect only reports an abandoned object graph,
- * which brings the heap's collection timer on the thread's run loop forward, and that timer's
- * collection marks and then sweeps the whole heap, running every finalizer (JSBase.cpp,
- * Heap::reportAbandonedObjectGraph and GCActivityCallbackCF.cpp in JavaScriptCore-7536.26.7).
- * Measured on the iPad 2: nothing is collected when JSGarbageCollect returns, everything on the next
- * run loop turn, and once the heap has collected before, only seconds later. So there a collection is
- * asked for and the run loop turned until one has run: until an object made unreachable before
- * asking has been finalized. A collection that never comes fails the check that asked for it.
- */
 #if TARGET_OS_IPHONE
 static BOOL sentinelFinalized;
 
@@ -117,14 +101,10 @@ __attribute__((noinline)) static void Collect(JSContext *context)
     for (size_t index = 0; index < sizeof(stack); index++)
         stack[index] = 0;
     CollectNow(context.JSGlobalContextRef);
-    /* the backport releases what finalized wrappers held after the collection, on this turn at the
-     * latest (CheckReleaseAfterCollection); the release has by the time the collection returns */
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, true);
 }
 
 
-/* An Objective-C object that owns a managed value, the pattern JSManagedValue.h documents. */
-/* A JSExport method's and property setter's arguments arrive by their declared class, too. */
 @protocol TypedExport <JSExport>
 @property (nonatomic, strong) NSURL *link;
 - (void)takeValue:(JSValue *)value;
@@ -158,11 +138,6 @@ __attribute__((noinline)) static void Collect(JSContext *context)
 @implementation ManagedOwner
 @end
 
-/*
- * The owner and everything else made here live in this frame only, so that nothing of theirs is
- * left on the stack the collector scans. `global` names a global the owner's wrapper is stored on
- * (reachable from JavaScript), or nil for an owner JavaScript does not reach.
- */
 __attribute__((noinline)) static ManagedOwner *OwnerWithManaged(JSContext *context, NSString *global, NSString *script)
 {
     @autoreleasepool {
@@ -175,7 +150,6 @@ __attribute__((noinline)) static ManagedOwner *OwnerWithManaged(JSContext *conte
     }
 }
 
-/* The documented leak case: the managed value is a closure that references its owner's wrapper. */
 __attribute__((noinline)) static void OwnerOfClosure(JSContext *context, NSString *global, __weak ManagedOwner **weakOwner, __weak JSManagedValue **weakManaged)
 {
     @autoreleasepool {
@@ -198,10 +172,6 @@ __attribute__((noinline)) static void Forget(JSContext *context, NSString *globa
     }
 }
 
-/*
- * What a managed value reads back: its object's `n`, or -1 once it reads nil. The JSValue a read
- * makes is autoreleased and holds its object strongly, so it is read in a pool of its own.
- */
 __attribute__((noinline)) static int ManagedN(JSManagedValue *managed)
 {
     @autoreleasepool {
@@ -210,7 +180,6 @@ __attribute__((noinline)) static int ManagedN(JSManagedValue *managed)
     }
 }
 
-/* Whether a managed closure still answers its owner when called. */
 __attribute__((noinline)) static BOOL ClosureAnswersOwner(JSManagedValue *managed, id owner)
 {
     @autoreleasepool {
@@ -219,7 +188,6 @@ __attribute__((noinline)) static BOOL ClosureAnswersOwner(JSManagedValue *manage
     }
 }
 
-/* The Objective-C object a managed wrapper reads back, or nil. */
 __attribute__((noinline)) static id WrappedObject(JSManagedValue *managed)
 {
     @autoreleasepool {
@@ -284,7 +252,6 @@ __attribute__((noinline)) static void CheckManagedReferences(JSContext *context)
     }
     Collect(context);
     check(ManagedN(other) == 8, @"a second managed value of an owned object reads it back");
-    /* the release's -[JSManagedValue dealloc] reads its own value, autoreleased: release it in a pool */
     @autoreleasepool {
         root.managed = nil;
     }
@@ -303,7 +270,6 @@ __attribute__((noinline)) static void CheckManagedReferences(JSContext *context)
     Forget(context, @"rootOwner");
 }
 
-/* The bridge keeps one wrapper per Objective-C object, so identity and expandos survive. */
 __attribute__((noinline)) static void CheckWrapperIdentity(JSContext *context)
 {
     NSObject *object = [NSObject new];
@@ -321,7 +287,6 @@ static NSString *Run(JSContext *context, NSString *script)
     return [[context evaluateScript:script] toString];
 }
 
-/* Promises, each expectation as the host's JavaScriptCore answers it. */
 static void CheckPromises(JSContext *context)
 {
     __block BOOL ran = NO;
@@ -404,10 +369,6 @@ static void CheckPromises(JSContext *context)
     check([Run(context, @"var caught; try { setsException(); caught = 'no'; } catch (e) { caught = 'caught ' + e.message; } caught") isEqualToString:@"caught from a block"] && handled == 0 && !context.exception, @"an exception a block sets on its context is thrown into the script that called it");
     context.exceptionHandler = previous;
 
-    /* Script run through the C API directly, and a block such script calls: a named divergence.
-     * The release with promises runs the jobs as the outermost C API call returns; the release's
-     * 2012 engine lets nothing outside it see that return, so the backport runs them on the
-     * thread's next run loop turn. Each side is held to its own answer. */
     __weak JSContext *weakContext = context;
     context[@"queueFromBlock"] = ^{
         [weakContext evaluateScript:@"Promise.resolve('ran').then(function (v) { fromBlock = v; })"];
@@ -436,7 +397,6 @@ static void CheckPromises(JSContext *context)
 #endif
     }
 
-    /* The release puts the result or reason into an array literal: nil raises. */
     for (int rejected = 0; rejected < 2; rejected++) {
         NSString *raised = nil;
         @try {
@@ -452,7 +412,6 @@ static void CheckPromises(JSContext *context)
     }
 }
 
-/* What a callback reads of its own call: the callee and `this` it was called with, alive for the call. */
 static void CheckCallbackFrame(JSContext *context)
 {
     __block BOOL blockSaw = NO, methodSaw = NO;
@@ -471,11 +430,6 @@ static void CheckCallbackFrame(JSContext *context)
     check(methodSaw, @"a JSExport method reads the callee and this it was called with");
 }
 
-/*
- * Symbols: a named divergence. The host's engine has symbols; the release's (2012) has none, and
- * the backport refuses at the seam. Each side is held to its own answer, so the check fails if the
- * backport ever stops refusing or the oracle ever stops making one.
- */
 static void CheckSymbols(JSContext *context)
 {
     context.exception = nil;
@@ -488,11 +442,6 @@ static void CheckSymbols(JSContext *context)
     context.exception = nil;
 }
 
-/*
- * The private parts of the release's C API the backport is built on (JSInternal.h), asked directly,
- * so that the device run answers for the release's own engine: private properties take on objects
- * made with a JSClassRef only, and keep what they hold alive; the weak object map holds weakly.
- */
 typedef struct OpaqueJSWeakObjectMap *JSWeakObjectMapRef;
 typedef void (*JSWeakMapDestroyedCallback)(JSWeakObjectMapRef map, void *data);
 extern JSWeakObjectMapRef JSWeakObjectMapCreate(JSContextRef ctx, void *data, JSWeakMapDestroyedCallback destructor);
@@ -502,8 +451,6 @@ extern bool JSObjectSetPrivateProperty(JSContextRef ctx, JSObjectRef object, JSS
 extern bool JSObjectDeletePrivateProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName);
 extern JSValueRef JSObjectGetPrivateProperty(JSContextRef ctx, JSObjectRef object, JSStringRef propertyName);
 
-/* Counts into `data`, if the map was made with a counter: the 2012 engine calls the destroyed callback
- * of every map, the uncounted one below included, when the map's global object is destroyed. */
 static void CountDestroyed(JSWeakObjectMapRef map, void *data)
 {
     (void)map;
@@ -511,7 +458,6 @@ static void CountDestroyed(JSWeakObjectMapRef map, void *data)
         (*(int *)data)++;
 }
 
-/* An object only the weak map knows of, made in a frame of its own; set as `holder`'s private property if given. */
 __attribute__((noinline)) static void MakeWeaklyHeld(JSGlobalContextRef context, JSWeakObjectMapRef weak, void *key, JSObjectRef holder, JSStringRef name)
 {
     JSObjectRef object = JSObjectMake(context, NULL, NULL);
@@ -558,7 +504,6 @@ static void CheckReleaseCAPI(void)
     check(JSWeakObjectMapGet(context, weak, &keptKey) == NULL, @"a deleted private property lets its value go");
     JSValueUnprotect(context, classed);
 
-    /* Measured, not held: the backport's destroyed callback does nothing, so no check needs it. */
     int destroyed = 0;
     JSContextGroupRef group = JSContextGroupCreate();
     JSGlobalContextRef doomed = JSGlobalContextCreateInGroup(group, NULL);
@@ -567,8 +512,6 @@ static void CheckReleaseCAPI(void)
     JSGlobalContextRelease(doomed);
     CollectContext(other);
     printf("measured: the weak object map's destroyed callback ran %d times after its global context was released and its group collected\n", destroyed);
-    /* the group's own reference goes first: the 2012 engine's JSContextGroupRelease dropping a group's
-     * last reference frees its identifiers against the wrong table and crashes (JSVirtualMachine.m) */
     JSContextGroupRelease(group);
     JSGlobalContextRelease(other);
     printf("measured: and %d times after the group was released\n", destroyed);
@@ -578,13 +521,11 @@ static void CheckReleaseCAPI(void)
     JSClassRelease(jsClass);
 }
 
-/* `string` as an NSString the caller owns; "" for NULL. */
 static NSString *Copied(JSStringRef string)
 {
     return string ? CFBridgingRelease(JSStringCopyCFString(kCFAllocatorDefault, string)) : @"";
 }
 
-/* The value of `source` in `context`, or undefined if it threw. */
 static JSValueRef Eval(JSGlobalContextRef context, const char *source)
 {
     JSStringRef script = JSStringCreateWithUTF8CString(source);
@@ -594,7 +535,6 @@ static JSValueRef Eval(JSGlobalContextRef context, const char *source)
     return exception ? JSValueMakeUndefined(context) : value;
 }
 
-/* The value of `source` in `context` as a string, "" if it threw. */
 static NSString *EvalString(JSGlobalContextRef context, const char *source)
 {
     JSValueRef value = Eval(context, source);
@@ -606,13 +546,11 @@ static NSString *EvalString(JSGlobalContextRef context, const char *source)
     return out;
 }
 
-/* A JSStringRef for `text`, for the C API's own string arguments. */
 static JSStringRef Text(const char *text)
 {
     return JSStringCreateWithUTF8CString(text);
 }
 
-/* `object`'s own `key`, as a string. */
 static NSString *Property(JSGlobalContextRef context, JSObjectRef object, const char *key)
 {
     JSStringRef name = Text(key);
@@ -624,20 +562,10 @@ static NSString *Property(JSGlobalContextRef context, JSObjectRef object, const 
     return out;
 }
 
-/*
- * The C API rows the SDK dates after iOS 6, asked directly. Both sides run this: the host's own
- * JavaScriptCore is the oracle and the backport's answers have to be the host's.
- *
- * Four of the twenty-six are asked of nothing here, on purpose. JSGlobalContextSetInspectable and
- * JSGlobalContextIsInspectable are API_UNAVAILABLE(macos) in the SDK, so no line of this file may
- * name them and still link against the oracle; JSGlobalContextSetName and JSGlobalContextCopyName are
- * the Web Inspector's field for a context, which facts/JavaScriptCore/CAPI.md carries instead.
- */
 static void CheckCAPIRows(JSContext *context)
 {
     JSGlobalContextRef ctx = context.JSGlobalContextRef;
 
-    /* JSValueIsArray and JSValueIsDate: what the engine says of a value's own class. */
     check(JSValueIsArray(ctx, Eval(ctx, "[]")) && JSValueIsArray(ctx, Eval(ctx, "[1, 2]")),
           @"JSValueIsArray is true of an array");
     check(JSValueIsDate(ctx, Eval(ctx, "new Date(0)")) && !JSValueIsArray(ctx, Eval(ctx, "new Date(0)")),
@@ -655,15 +583,11 @@ static void CheckCAPIRows(JSContext *context)
     check(JSValueIsArray(ctx, Eval(ctx, "Object.freeze ? Object.freeze([1]) : [1]")),
           @"a frozen array is still an array by class");
 
-    /* JSValueIsSymbol: false of every value an engine without symbols can hold, which is the answer
-     * the host gives for every value that is not a symbol. */
     check(!JSValueIsSymbol(ctx, Eval(ctx, "42")) && !JSValueIsSymbol(ctx, Eval(ctx, "'s'")) && !JSValueIsSymbol(ctx, Eval(ctx, "({})")) &&
           !JSValueIsSymbol(ctx, Eval(ctx, "[]")) && !JSValueIsSymbol(ctx, Eval(ctx, "(function () {})")) &&
           !JSValueIsSymbol(ctx, Eval(ctx, "null")) && !JSValueIsSymbol(ctx, Eval(ctx, "undefined")) &&
           !JSValueIsSymbol(ctx, Eval(ctx, "new Date(0)")), @"JSValueIsSymbol is false of every value a script can make");
 
-    /* The four property functions of a value key: the string-keyed property API of the release,
-     * reached through ToPropertyKey, which is ToString for every value this engine can hold. */
     JSObjectRef object = (JSObjectRef)Eval(ctx, "({a: 1, 0: 'zero', 'true': 'yes'})");
     JSValueRef exception = NULL;
     check(JSValueToNumber(ctx, JSObjectGetPropertyForKey(ctx, object, Eval(ctx, "'a'"), &exception), NULL) == 1 && !exception,
@@ -688,12 +612,9 @@ static void CheckCAPIRows(JSContext *context)
           @"JSObjectSetPropertyForKey writes through a string key");
     check(JSObjectDeletePropertyForKey(ctx, settable, Eval(ctx, "'a'"), NULL) && !JSObjectHasPropertyForKey(ctx, settable, Eval(ctx, "'a'"), NULL),
           @"JSObjectDeletePropertyForKey removes a property and says it did");
-    /* ES5 15.2.5.5 and 8.12.9 both answer true for a property that is not there, and the host
-     * measures so; the port reaches the release's own JSObjectDeleteProperty, which does the same. */
     check(JSObjectDeletePropertyForKey(ctx, settable, Eval(ctx, "'a'"), NULL),
           @"deleting a property that is not there answers true");
 
-    /* A key that throws while naming itself: the exception is the answer and nothing is touched. */
     JSObjectRef thrower = (JSObjectRef)Eval(ctx, "({toString: function () { throw new Error('key'); }})");
     exception = NULL;
     check(JSObjectGetPropertyForKey(ctx, object, (JSValueRef)thrower, &exception) == NULL && exception != NULL,
@@ -709,25 +630,14 @@ static void CheckCAPIRows(JSContext *context)
     check(!JSObjectDeletePropertyForKey(ctx, object, (JSValueRef)thrower, &exception) && exception != NULL,
           @"a key whose toString throws leaves the exception and deletes nothing");
 
-    /* The attributes of a set are the release's own, and the 2012 engine keeps none of them: measured
-     * on the iPad 2 and named in JSValue.m, so a read-only property of the host's engine stays
-     * writable here. Each side is held to its own answer. */
     JSObjectRef flags = (JSObjectRef)Eval(ctx, "({ro: 0})");
     JSObjectSetPropertyForKey(ctx, flags, Eval(ctx, "'ro'"), JSValueMakeNumber(ctx, 1), kJSPropertyAttributeReadOnly, NULL);
     JSStringRef descriptor = Text("Object.getOwnPropertyDescriptor(this, 'ro').writable");
     JSValueRef writable = JSEvaluateScript(ctx, descriptor, flags, NULL, 0, NULL);
     JSStringRelease(descriptor);
-    /* Neither engine keeps the attribute on an object it lays out itself: measured on the host here
-     * and on the iPad 2 for the release, which JSValue.m already names, so the property stays
-     * writable on both sides and the row says so rather than promising an attribute. */
     check(JSValueToBoolean(ctx, writable),
           @"JSObjectSetPropertyForKey's read-only attribute is kept by neither engine, so the property stays writable");
 
-    /* JSObjectMakeDeferredPromise: a promise, the two functions that settle it, and a reaction of
-     * its own. The reaction runs as the outermost call into script returns on the release with a
-     * native promise, and on the next run loop turn on the port's own ES5 one, which the job queue
-     * in JSInternal.m drains where no call of ours is on the stack - the divergence
-     * +[JSValue valueWithNewPromiseInContext:fromExecutor:] already names. */
     Eval(ctx, "var seen = 'unset', why = 'unset';");
     JSObjectRef resolve = NULL, reject = NULL;
     exception = NULL;
@@ -754,7 +664,6 @@ static void CheckCAPIRows(JSContext *context)
           @"a promise JSObjectMakeDeferredPromise resolves runs its reactions as the call returns");
 #endif
 
-    /* And a rejection carries its reason the same way. */
     JSObjectRef second = JSObjectMakeDeferredPromise(ctx, &resolve, &reject, NULL);
     JSObjectRef thenSecond = JSObjectGetProperty(ctx, second, thenName, NULL);
     handler = Eval(ctx, "(function (reason) { why = String(reason); })");
@@ -774,24 +683,11 @@ static void CheckCAPIRows(JSContext *context)
     printf("measured: why reads %s after a script entry and %s after a run loop turn, and the context's exception is %s\n",
            [onReturn UTF8String], [afterTurn UTF8String], [[context.exception toString] UTF8String]);
     JSStringRelease(thenName);
-    /* Measured on both sides and asserted on neither: a promise, a then, a reject answered with a
-     * value and no exception, and the reason still unread after a script entry and a run loop turn.
-     * The host's own engine does exactly what the backport does here, which is the whole of what
-     * this row is held to; the port's own promise carries a rejection to a reaction when one is made
-     * from Objective-C (CheckPromises, above), and this arrangement is the one neither engine runs.
-     * Asserting the host's answer would be asserting a measurement, so it is printed instead. */
     (void)onReturn;
     (void)afterTurn;
     printf("measured: a deferred promise rejected through the C API leaves its reaction unrun on this engine too\n");
 }
 
-/*
- * Where a wrapper's Objective-C object is released: never inside the collection that finalized the
- * wrapper (JSObjectRef.h forbids the C API a -dealloc may call in a finalizer). A named divergence
- * in when: the release hands it to the heap to release as the collection ends, still inside the
- * call that collected; the backport, which has no end-of-collection hook, on the thread's next run
- * loop turn or its next outermost call into script. Each side is held to its own answer.
- */
 static int releasedOwners, releasedWhileCollecting;
 static BOOL collecting;
 
@@ -837,10 +733,6 @@ static void CheckReleaseAfterCollection(JSContext *context)
     int onReturn = releasedOwners;
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, true);
 #if defined(CHARON_PORT) && TARGET_OS_IPHONE
-    /* The release's engine collects only from its run loop timer, and the port's queue runs on the
-     * same run loop, after the timer: which turn released an owner is all the device shows. That it
-     * is outside the collection is held by the host run of the same code, whose collection returns
-     * before the run loop turns. */
     (void)onReturn;
     check(releasedOwners == 4, @"an exported owner whose wrapper was collected is released once the collection has run");
 #elif defined(CHARON_PORT)
@@ -856,12 +748,6 @@ static void CheckReleaseAfterCollection(JSContext *context)
     check(releasedOwners == 8, @"and released by the next call into script at the latest");
 }
 
-/*
- * Which thread releases what a wrapper held: the one whose collection finalized the wrapper, as the
- * release's Heap::releaseSoon does on the thread that collected - never another thread that only
- * happens to call into script, and a thread's run loop turn is not held up by what another thread
- * queued.
- */
 static volatile int32_t releasedOnMain, releasedElsewhere;
 
 @interface ThreadProbe : NSObject
@@ -896,8 +782,6 @@ static void *CallScriptElsewhere(void *unused)
 static dispatch_semaphore_t workerQueued, workerMayExit;
 static int32_t workerReleasedBeforeExit;
 
-/* A thread with no run loop drops its only context and virtual machine: their teardown finalizes the
- * wrappers of its four probes on this thread. It then waits, calling nothing, until told to exit. */
 static void *QueueElsewhere(void *unused)
 {
     (void)unused;
@@ -936,15 +820,12 @@ static void CheckReleaseThread(JSContext *context)
     dispatch_semaphore_signal(workerMayExit);
     pthread_join(thread, NULL);
 #ifdef CHARON_PORT
-    /* the backport has no end-of-collection hook: the worker's queue waits for its next leave, run
-     * loop turn or exit, and it has none of the first two */
     check(workerReleasedBeforeExit == 0 && releasedElsewhere == 4, @"a thread with no run loop that calls nothing more releases what it queued when it exits");
 #else
     check(workerReleasedBeforeExit == 4 && releasedElsewhere == 4, @"a torn-down virtual machine's wrapped objects are released as its teardown ends, on its thread");
 #endif
 }
 
-/* Arrays and Dates are told by the object's own class, as the release asks it. */
 static void CheckOwnClass(void)
 {
     JSVirtualMachine *machine = [JSVirtualMachine new];
@@ -969,7 +850,6 @@ static void CheckOwnClass(void)
           @"script that replaces Array.isArray, Object.prototype.toString and Date does not change the answer");
 }
 
-/* JSValue's conversions, each expectation measured on the host's own JavaScriptCore. */
 static void CheckConversions(void)
 {
     JSContext *context = [JSContext new];
@@ -1021,7 +901,6 @@ static void CheckConversions(void)
     check([[[context evaluateScript:@"'x'"] toDate] isKindOfClass:[NSDate class]] && isnan([[[context evaluateScript:@"'x'"] toDate] timeIntervalSince1970]), @"toDate of a non-number is an NSDate of NaN");
 }
 
-/* A block's arguments arrive as the class its own signature declares (measured on the host). */
 static void CheckBlockArguments(void)
 {
     JSContext *context = [JSContext new];
@@ -1085,10 +964,6 @@ static void CheckBlockArguments(void)
     check([got isEqual:@3], @"currentArguments holds every JavaScript argument, not only the declared ones");
 }
 
-/*
- * Blocks taking and returning C numbers, bool and the four structs JSValue converts, called as the
- * release calls them. The full matrix is PrintBlockMatrix's, which run.sh diffs against the oracle.
- */
 static void CheckBlockScalars(void)
 {
     JSContext *context = [JSContext new];
@@ -1121,7 +996,6 @@ static void CheckBlockScalars(void)
     [context evaluateScript:@"addInts({valueOf: function () { throw 'boom'; }}, 1)"];
     check(!called && [handled isEqualToString:@"boom"], @"an argument whose valueOf throws is thrown before the block runs");
 
-    /* The function a block is, as the release's is. */
     check([Run(context, @"addInts.length + '|' + addInts.name + '|' + (addInts instanceof Function) + '|' + Object.prototype.toString.call(addInts)") isEqualToString:@"0||true|[object Function]"],
           @"a block's function has length 0, an empty name and Function.prototype");
     check([Run(context, @"addInts.call(null, 2, 3) + addInts.apply(null, [2, 3]) + addInts.bind(null, 2)(3)") isEqualToString:@"15"], @"a block's function takes call, apply and bind");
@@ -1134,10 +1008,6 @@ static void CheckBlockScalars(void)
     check([handled isEqualToString:@"TypeError: Objective-C blocks called as constructors must return an object."], @"new on a block that returns no object is a TypeError");
 }
 
-/*
- * The whole matrix of thirteen argument and return types against twenty-seven values, printed for
- * run.sh to diff against the oracle's: what the block received, and what JavaScript got back.
- */
 static void PrintBlockMatrix(void)
 {
     JSContext *context = [JSContext new];

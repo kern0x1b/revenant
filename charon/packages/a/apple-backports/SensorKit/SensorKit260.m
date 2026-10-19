@@ -2,7 +2,6 @@
 #import "CharonSensorKitValue.h"
 #import "../CharonValueStore.h"
 
-// SensorKit of iOS 26.0, the properties that arrived then.
 @implementation SRAcousticSettings
 @dynamic environmentalSoundMeasurementsEnabled, audioExposureSampleLifetime, headphoneSafetyAudioLevel, musicEQSettings, accessibilitySettings;
 CHARON_SCALAR_GETTER(BOOL, environmentalSoundMeasurementsEnabled, isEnvironmentalSoundMeasurementsEnabled)
@@ -63,12 +62,6 @@ CHARON_VALUE_PROPERTY(NSString *, identifier)
 @implementation SRSleepSession (CharonSensorKitValue)
 CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
-
-// The two string constants of iOS 26.0,
-// declared at SRSensors.h:345 and :357,
-// named from CharonSensorKitNames.h rather than written here: an object carries the API of
-// one release alone, while the values are one list that the host comparison in
-// tests/backports/host/sensorkit-names walks whole.
 
 #define CHARON_SENSORKIT_NAMES_26_0
 #import "CharonSensorKitNames.h"

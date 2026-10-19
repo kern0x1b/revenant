@@ -1,13 +1,5 @@
--- A property wrapper's projected value (`$url`, `$isOn`, `$selection`) in the Swift skeleton (tools/gen/swift_render.lua projected): the
--- compiler synthesizes it from the wrapper and refuses a declaration of it ("cannot declare entity named '$url'; the '$' prefix is reserved
--- for implicitly-synthesized declarations", 5 modules of the coordinator's sdk run). The skeleton leaves it out; the round trip's compare
--- counts the SDK's row as projected, not missing, so the measured "missing" key does not move. Checked here on a model with a property
--- `url` and its projected value `$url`: the text declares url and not $url, and the compare of the SDK's two rows against the skeleton's
--- one counts the projected row, with no missing row. Run: xmake l tests/gen/swift_projected_test.lua (pure Lua: no toolchain)
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 
--- A model row with every cell the renderer reads, "-" where the row says nothing.
 local function row(fields)
     local out = {kind = "-", usr = "-", container = "-", name = "-", side = "-", type = "-", params = "-", generic_sig = "-",
                  conformances = "-", superclass = "-", throwing = "-", async = "-", mutating = "-", attributes = "-", accessors = "-",
@@ -40,7 +32,6 @@ function main()
     check(string.find(text, "$url", 1, true) == nil, "the projected value $url is not declared")
     check(render.projected(projected) and not render.projected(url), "projected() tells $url from url")
 
-    -- the SDK's rows: the struct, url and $url; ours: the struct and url only (the renderer's output, read back as its rows)
     local sdk_rows = {field, url, projected}
     local ours = {field, url}
     local result = roundtrip.compare(sdk_rows, ours, nil)

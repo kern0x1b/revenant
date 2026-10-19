@@ -1,8 +1,3 @@
-// ARPlaneGeometry.m - the mesh of a plane, split from ARAnchor.m because an object carries the API
-// of one release: the geometry arrived with 12.0, beside the image and object scanning
-// configurations in ARConfiguration3.m and the reference object's constants in
-// ARKitConstants12.m.
-
 #import <ARKit/ARKit.h>
 #import <string.h>
 
@@ -28,10 +23,6 @@
 
 
 
-/// The geometry of a plane is C buffers, not objects: the framework declares the vertices, the
-/// texture coordinates and the triangle indices as pointers into memory a renderer reads in place,
-/// and a caller walks them with the counts beside them. So the buffers are the storage, they are
-/// filled from the plane the detector found, and they live as long as this object does.
 - (instancetype)initWithPlaneValue:(CharonARValue *)value
 {
     self = [super init];
@@ -41,8 +32,6 @@
     if (![value getValue:&plane])
         return nil;
 
-    // One plane is a quad, and a quad is what a plane detector's rectangle is: four corners, six
-    // indices, and the four texture coordinates that go with the corners.
     _vertexCount = kPlaneQuadCorners;
     _textureCoordinateCount = kPlaneQuadCorners;
     _triangleCount = kPlaneQuadTriangles;
@@ -53,9 +42,6 @@
         {0.0f, 0.0f}, {1.0f, 0.0f}, {0.0f, 1.0f}, {1.0f, 1.0f},
     };
     int16_t indices[kPlaneQuadTriangles] = {0, 2, 1, 1, 2, 3};
-    // The detector gives a centre, a normal and a half-extent, and the quad's corners follow from an
-    // orthonormal pair in the plane. The pair is built out of the normal by crossing it with the
-    // world axis it is least parallel to, so the corners are in the plane for any normal at all.
     simd_float3 seed = fabsf(plane.normal.y) < 0.9f ? (simd_float3){0.0f, 1.0f, 0.0f}
                                                    : (simd_float3){1.0f, 0.0f, 0.0f};
     simd_float3 along = simd_normalize(simd_cross(plane.normal, seed));

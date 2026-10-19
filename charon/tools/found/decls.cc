@@ -1,46 +1,3 @@
-// The declarations of one framework, from clang's own AST through libclang: the source of the spec's Objective-C and C facts.
-//
-// usage: decls --version | --target | --digest TEXT | --list
-//        decls [--doc] [--timeout SECONDS] <framework>
-// The SDK is IR_SDK. <framework> is a name --list prints: a framework of System/Library/Frameworks or System/Library/SubFrameworks (a nested
-// one is Outer/Inner), or a usr/include module the module maps declare (the sweep covers every one), a Swift module of usr/lib/swift that
-// names no framework (no C header: its rows are an unparsed reason), or a framework of Developer/Library/Frameworks. decls resolves the
-// framework's headers itself, from its module map, by the rule of ir.lua's sweep (module_headers below): the sweep and the doc mode share
-// that one code path. A framework's headers become one
-// unsaved buffer of #import lines; a usr/include module is imported as the module its own map declares (-fmodule-map-file, -fmodules,
-// @import), so the module build compiles its headers as the SDK does. Nothing is written to disk. IR_RESOURCE, if set, is the
-// compiler's resource directory (default: libclang's). IR_FRAMEWORKS, if set, is a root shaped like System/Library (Frameworks/ and
-// SubFrameworks/ under it) that the frameworks are read from instead of the SDK's; the SDK stays the sysroot. IR_TARGET, if set, is the
-// triple the headers are parsed for (armv7-apple-ios6.1.3 for the port's values); the SDK's target otherwise.
-// A framework's own declarations are those under its Headers/; a usr/include module's are those written in the directories of its
-// headers, or in its header when that header is in the include root (the root holds other modules' headers). --target prints the target
-// the rows are compiled for.
-// No reviewed list is read here: every usr/include module a module map declares is swept, and every framework is read by its own
-// folder. A framework with no module-map header is read from its Headers/ folder (the umbrella header, else every header there), and a
-// framework with no header at all is an unparsed row.
-//
-// --doc (the doc-time mode, for the doc generator): the same pass and the same keys, but the output is one row per declaration
-// with ten cells instead of the IR's rows: framework, kind, usr, container, name, side (the IR's own values), the parameter names
-// (separated by " | "), the brief of the doc comment and its raw text as clang parses them (libclang's brief and raw comment text),
-// and the declaration as written. Each cell is escaped (a backslash, a tab, a line feed and a carriage return as \\, \t, \n, \r),
-// so a declaration is one line; an empty cell has no such text. Nothing is written to a file, no IR row, conflict or census is
-// written, and a module that does not parse is an error (status 1, its count on stderr, no output).
-//
-// The preprocessor evaluates every #if (TARGET_OS_*, __has_feature, availability macros) the way the iOS compile does, so the
-// AST holds the declarations of the iOS branch and nothing else. A declaration is emitted when its spelling location (or, for a
-// macro, its expansion) is under <framework-root>/Headers.
-//
-// Output: one TSV row per declaration on stdout, 21 columns: the 16 of design-foundation.md section 5.1, the declaration as written
-// (decl, display only: it is not part of any hash), the availability texts (message), and three facts the headers renderer reads
-// and the shards do not keep (typeparams: a generic class's or category's type parameters, name:bound, in order; anon: a field's
-// anonymous struct or union, by USR; category: the category a conforms row is written in). The three are not in the declaration hash.
-// A declaration that is repeated in the framework is resolved here (the rule of section 5.2 and ruling D3): the availability of the
-// defining declaration counts, a forward declaration never does, a category's own availability overrides the class's only when it is
-// later. A key whose declarations still disagree is written as a row of kind conflict and all its variants follow as rows: ir.lua
-// merges them by the rule of avail.lua.
-// "--digest TEXT" prints the availability hash of a text, the one the rows carry.
-// The rows are written only when the parse has no error diagnostic: a header that does not parse yields one unparsed row, with the
-// first diagnostic as its reason. Exit status 1 is a usage or parse failure; a timeout ends the process by SIGALRM.
 #include <clang-c/Index.h>
 #include <CommonCrypto/CommonDigest.h>
 
@@ -73,7 +30,6 @@ std::string text(CXString s) {
   return out;
 }
 
-// A TSV cell: a tab or a line break inside a cell would split the row, so each becomes a space.
 std::string cell(std::string s) {
   for (char& ch : s) {
     if (ch == '\t' || ch == '\n' || ch == '\r') ch = ' ';
@@ -81,7 +37,6 @@ std::string cell(std::string s) {
   return s;
 }
 
-// An empty cell is "-": a class extension has no name, and "-" is what the IR writes for "none".
 std::string filled(std::string s) {
   return s.empty() ? "-" : s;
 }
@@ -89,17 +44,12 @@ std::string filled(std::string s) {
 std::string version(CXVersion v) {
   if (v.Major == -1) return "-";
   char buf[64];
-  // a version written as ios(16) has no minor part: clang reports the minor as -1
   if (v.Minor == -1) std::snprintf(buf, sizeof buf, "%d", v.Major);
   else if (v.Subminor == -1) std::snprintf(buf, sizeof buf, "%d.%d", v.Major, v.Minor);
   else std::snprintf(buf, sizeof buf, "%d.%d.%d", v.Major, v.Minor, v.Subminor);
   return buf;
 }
 
-// platform=introduced/deprecated/obsoleted/unavailable, for every platform clang has a record for.
-// The availability of a declaration as libclang reports it: the two flags, the two messages, and one record per platform. The records
-// are sized from the count clang reports (a first call gives the count; there is no fixed array, so none is dropped: review F24), and
-// they are disposed when this goes out of scope.
 struct PlatformAvailability {
   int always_deprecated = 0, always_unavailable = 0;
   std::string deprecated_message, unavailable_message;
@@ -118,15 +68,10 @@ struct PlatformAvailability {
   }
 };
 
-// The room of the first call: a declaration carries one to four platform records, and the few with more are asked again below.
 constexpr size_t FIRST_PLATFORM_RECORDS = 8;
 
 PlatformAvailability platform_availability(CXCursor c) {
   PlatformAvailability out;
-  // one call with room for the usual records; a declaration with more is asked again with room for exactly the count it reports.
-  // (A call with no room reports a count that the filled array does not match, so the array is the one that is read.) Clang knows
-  // fourteen distinct platforms (measured: seventeen spellings of them in Fixture's FXManyPlatforms give fourteen records), so the
-  // second call is made for such a declaration only, and the extractor suite takes that path with it.
   out.records.resize(FIRST_PLATFORM_RECORDS);
   CXString deprecated, unavailable;
   int n = clang_getCursorPlatformAvailability(c, &out.always_deprecated, &deprecated, &out.always_unavailable, &unavailable,
@@ -151,10 +96,8 @@ std::string availability(CXCursor c) {
   const int always_deprecated = pa.always_deprecated, always_unavailable = pa.always_unavailable;
   const std::vector<CXPlatformAvailability>& records = pa.records;
   int count = (int)records.size();
-  // the platforms in name order: each entry begins with its platform name and '=', which sorts as the name does
   std::vector<std::string> entries;
   for (int i = 0; i < count; ++i) {
-    // the record owns its platform string: it is read here and released by clang_disposeCXPlatformAvailability below
     entries.push_back(std::string(clang_getCString(records[i].Platform)) + "=" + version(records[i].Introduced) + "/" +
                       version(records[i].Deprecated) + "/" + version(records[i].Obsoleted) + "/" +
                       (records[i].Unavailable ? "1" : "0"));
@@ -169,7 +112,6 @@ std::string availability(CXCursor c) {
   return out.empty() ? "-" : out;
 }
 
-// The iOS introduction of a declaration as major * 10000 + minor * 100 + subminor; 0 when it names no iOS version.
 int introduced_ios(CXCursor c) {
   PlatformAvailability pa = platform_availability(c);
   const std::vector<CXPlatformAvailability>& records = pa.records;
@@ -184,7 +126,6 @@ int introduced_ios(CXCursor c) {
   return intro;
 }
 
-// n = nonnull, l = nullable, u = unspecified, L = nullable result, - = no nullability written
 std::string nullability(CXType t) {
   switch (clang_Type_getNullability(t)) {
     case CXTypeNullability_NonNull: return "n";
@@ -195,25 +136,16 @@ std::string nullability(CXType t) {
   }
 }
 
-// The name of a declaration. An anonymous enum, struct or union has none in the header; libclang spells it with the location of
-// its declaration in some versions and not in others, so it is "-" in every version.
 std::string declared_name(CXCursor c) {
   if (clang_Cursor_isAnonymous(c)) return "-";
   return text(clang_getCursorSpelling(c));
 }
 
-// The type without the nullability written on it, which the nullability column holds. The parse keeps the attributed type of a written
-// nullability (CXTranslationUnit_IncludeAttributedTypes); its modified type is the type the spelling names. An instancetype is also
-// attributed, but it has no nullability, so it keeps its spelling.
 CXType unqualified(CXType t) {
   while (t.kind == CXType_Attributed && clang_Type_getNullability(t) != CXTypeNullability_Invalid) t = clang_Type_getModifiedType(t);
   return t;
 }
 
-// clang spells an anonymous type with its location and sometimes its kind: "enum (unnamed at /abs/path/NSString.h:68:1)",
-// "union (unnamed union at /abs/path/...)", and "union (unnamed)" in another version. The location is the host's SDK path and a
-// line of the header, and the words inside the parentheses differ between versions, so every anonymous type is spelled
-// "(unnamed)" (or "(anonymous)"); the kind outside the parentheses is kept.
 std::string without_location(std::string s) {
   for (const char* open : {"(unnamed", "(anonymous"}) {
     for (size_t at = s.find(open); at != std::string::npos; at = s.find(open, at + 1)) {
@@ -227,11 +159,7 @@ std::string without_location(std::string s) {
 
 std::string spelled(CXType t) { return without_location(text(clang_getTypeSpelling(unqualified(t)))); }
 
-// The name of the macro clang prints in front of a type it keeps as a macro-qualified type (CF_REFINED_FOR_SWIFT CFStringRef, API_AVAILABLE
-// NSString *const): a leading word of capitals, then the type. A type name is not all capitals followed by a type, and clang prints a
-// const after such a macro, never before it.
 std::string without_macro_word(std::string s) {
-  // a const can come before the macro (const NS_SWIFT_NAME  const T: the macro's spaces go with it), and the const is kept once
   std::string lead = s.compare(0, 6, "const ") == 0 ? "const " : "";
   s = s.substr(lead.size());
   auto joined = [&lead](const std::string& t) {
@@ -249,24 +177,17 @@ std::string without_macro_word(std::string s) {
     if (word == std::string::npos) return joined(s);
     unsigned char next = (unsigned char)s[word];
     if (!macro || !(std::isalpha(next) || next == '_')) return joined(s);
-    s = s.substr(word);  // a macro can stand in front of another (NS_RETURNS_RETAINED NS_RETURNS_RETAINED id<T>)
+    s = s.substr(word);
   }
 }
 
-// The type of a declared variable or field, as the declaration has it. clang prints attribute sugar in front of the type (an
-// availability macro such as API_AVAILABLE, a Swift attribute, the nullability word after it), and that sugar can drop the top-level
-// const: CG_EXTERN const CFStringRef __nonnull kCGContentAverageLightLevel prints as CF_REFINED_FOR_SWIFT CFStringRef, though the
-// variable is const. So the attributes are taken off, and the const is read from the canonical type (every top-level qualifier
-// of the declared type is in it), not from the printed sugar. The nullability column holds the nullability; a pointer's const follows the star.
 std::string declared_type(CXType t) {
-  // instancetype is an attributed type whose spelling is the keyword (its nullability, if any, is in the nullability column)
   std::string printed = text(clang_getTypeSpelling(t));
   if (printed.compare(0, 12, "instancetype") == 0) return "instancetype";
   CXType bare = t;
   while (bare.kind == CXType_Attributed) bare = clang_Type_getModifiedType(bare);
   std::string s = text(clang_getTypeSpelling(bare));
   if (bare.kind == CXType_Unexposed) s = without_macro_word(s);
-  // the canonical type keeps every qualifier the variable has at its top level; the printed sugar can drop one
   if (clang_isConstQualifiedType(clang_getCanonicalType(t))) {
     bool leading = s.compare(0, 6, "const ") == 0;
     bool trailing = s.size() >= 5 && s.compare(s.size() - 5, 5, "const") == 0;
@@ -275,10 +196,6 @@ std::string declared_type(CXType t) {
   return without_location(s);
 }
 
-// The type of a function as its declaration has it: the result as declared_type gives it, then the rest of the function type as clang
-// spells it (the parameters). The macro in front of a result is the result's sugar, so the result is taken apart and the rest kept.
-// A function type spelled from its declared parts: the result, the marker ("" for a function, ((^)) for a block, the form clang prints),
-// and the parameters, each as declared_type gives it. A function with no prototype is spelled as clang spells it.
 std::string function_spelling(CXType fn, const char* marker) {
   int n = clang_getNumArgTypes(fn);
   if (n < 0) return without_location(text(clang_getTypeSpelling(fn)));
@@ -295,7 +212,6 @@ std::string function_spelling(CXType fn, const char* marker) {
 
 std::string declared_function_type(CXType fn) { return function_spelling(fn, ""); }
 
-// The underlying type of a typedef: a block pointer's function type is spelled with the block marker, anything else is declared_type.
 std::string declared_underlying_type(CXType t) {
   CXType bare = t;
   while (bare.kind == CXType_Attributed) bare = clang_Type_getModifiedType(bare);
@@ -303,7 +219,6 @@ std::string declared_underlying_type(CXType t) {
   return declared_type(t);
 }
 
-// The offset in its file of a source location (the expansion, for a token a macro produced).
 unsigned offset_of(CXSourceLocation loc) {
   CXFile file;
   unsigned line = 0, column = 0, offset = 0;
@@ -311,15 +226,12 @@ unsigned offset_of(CXSourceLocation loc) {
   return offset;
 }
 
-// A token of a declaration as written: its spelling, its offsets in the file, and whether it is a string literal.
 struct Token {
   std::string spelling;
   unsigned start, end;
   bool literal;
 };
 
-// The tokens of a declaration's extent, comments left out. clang splits an Objective-C directive into "@" and its word ("@" "end"):
-// the two are one token when they touch.
 std::vector<Token> tokens_of(CXTranslationUnit tu, CXCursor c) {
   CXToken* tokens = nullptr;
   unsigned count = 0;
@@ -342,12 +254,8 @@ std::vector<Token> tokens_of(CXTranslationUnit tu, CXCursor c) {
   return toks;
 }
 
-// The tokens of a variable as written: from its first token through the attribute macros after its name (NS_AVAILABLE_IOS(8_0),
-// API_AVAILABLE(...)), which clang's extent leaves out, to the ';' that ends it. A variable a macro declares (FOUNDATION_EXPORT) has an
-// extent inside the macro's expansion, which clang_tokenize reads as no tokens at all: its range runs from the expansion site to the same
-// ';' in the file it is written in, read from that file. Empty when no ';' ends the declaration at the top level (a body or a brace).
 std::vector<Token> variable_tokens(CXTranslationUnit tu, CXCursor c) {
-  static std::map<std::string, std::string> files;  // a header is read once per run, however many variables it declares
+  static std::map<std::string, std::string> files;
   CXSourceRange extent = clang_getCursorExtent(c);
   CXFile file = nullptr, end_file = nullptr;
   unsigned line = 0, column = 0, begin = 0, finish = 0;
@@ -387,11 +295,6 @@ std::vector<Token> variable_tokens(CXTranslationUnit tu, CXCursor c) {
   return toks;
 }
 
-// The declaration as written: its tokens, with each run of whitespace or comment as one space and macros as spelled. The head of
-// a class, protocol or category stops before its members; a body in braces is written as "{ ... }"; a trailing ";" is dropped.
-// The deprecation text a declaration writes in its macros: the first string of API_DEPRECATED("TEXT", ...), the replacement of
-// API_DEPRECATED_WITH_REPLACEMENT("NAME", ...) (read as "Use NAME instead"), or the message="TEXT" of an availability attribute.
-// Consecutive string literals are one text. libclang does not report these texts for an availability attribute.
 std::string written_deprecation(const std::vector<Token>& toks) {
   for (size_t i = 0; i + 2 < toks.size(); ++i) {
     const std::string& word = toks[i].spelling;
@@ -407,7 +310,6 @@ std::string written_deprecation(const std::vector<Token>& toks) {
   return "";
 }
 
-// The texts of the availability attributes, for the message column: "deprecated: TEXT" and "unavailable: TEXT", joined by " | ".
 std::string message_of(CXTranslationUnit tu, CXCursor c) {
   PlatformAvailability pa = platform_availability(c);
   std::string out;
@@ -420,7 +322,6 @@ std::string message_of(CXTranslationUnit tu, CXCursor c) {
   return cell(out);
 }
 
-// The key of a source position: its file and offset.
 std::string position_key(CXSourceLocation location) {
   CXFile file = nullptr;
   unsigned line = 0, column = 0, offset = 0;
@@ -430,8 +331,6 @@ std::string position_key(CXSourceLocation location) {
 }
 
 std::string decl_text(CXTranslationUnit tu, const std::map<std::string, std::string>& macro_at, CXCursor c) {
-  // A declaration a macro produced is written as the macro's name, as spelled at the use site (the macro uses come from the
-  // preprocessing record: see collect_macro_uses).
   auto macro = macro_at.find(position_key(clang_getCursorLocation(c)));
   if (macro != macro_at.end()) return cell(macro->second);
   CXCursorKind kind = clang_getCursorKind(c);
@@ -448,7 +347,7 @@ std::string decl_text(CXTranslationUnit tu, const std::map<std::string, std::str
       break;
     }
     if (any && toks[i].start > previous_end) out += ' ';
-    if (spelling == "{") {  // a body of a tag, typedef, function or variable: written, not spelled out
+    if (spelling == "{") {
       out += "{ ... }";
       int depth = 0;
       for (; i < toks.size(); ++i) {
@@ -464,27 +363,19 @@ std::string decl_text(CXTranslationUnit tu, const std::map<std::string, std::str
     any = true;
   }
   if (!out.empty() && out.back() == ';') out.pop_back();
-  // a getter or setter clang synthesises from a property has no declaration of its own: its extent is the property's name, and the
-  // property's row carries the declaration
   bool method = kind == CXCursor_ObjCInstanceMethodDecl || kind == CXCursor_ObjCClassMethodDecl;
   if (method && (out.empty() || (out[0] != '-' && out[0] != '+'))) out = "-";
   return cell(out.empty() ? "-" : out);
 }
 
-// The cells of a full IR row: the 16 of section 5.1, the declaration as written and the messages, then the three facts the renderer
-// reads (typeparams, anon, category; see the header comment).
 constexpr int kFullColumns = 21;
 
-// One declaration's row (the 13 fields the extractor writes per declaration, and the decl text).
 struct Row {
   std::string kind, usr, container, name, side, header, line, avail, nullab, type, params, attrs, value, decl, message;
-  std::string typeparams, anon, category;  // the renderer's facts (cells 19 to 21; an empty one is "-")
-  std::string brief, comment, params_names;  // the doc mode only (--doc): the doc comment and the parameter names
+  std::string typeparams, anon, category;
+  std::string brief, comment, params_names;
 };
 
-// A declaration with the facts resolution needs. defining: it is the defining declaration of its entity (a definition, or a
-// member of the class's or protocol's own @interface or @protocol). extension: it is written in a category or class extension.
-// intro: the iOS introduction of its availability (0 when none).
 struct Record {
   Row row;
   bool defining;
@@ -494,28 +385,23 @@ struct Record {
 
 struct Context {
   std::string framework;
-  std::vector<std::string> own;  // the directories whose headers are the framework's own, each with its trailing slash; or one header, with none
+  std::vector<std::string> own;
   CXTranslationUnit tu;
-  std::vector<Record> records;  // every declaration in source order; resolve() writes them
-  std::set<std::string> tags;   // the tags emitted, by USR: each is one declaration
-  std::map<std::string, std::string> macro_at;  // file:offset of a macro use -> the macro's name
-  std::string out;              // the rows, written only when the parse has no error
-  bool doc = false;             // the doc mode (--doc): the doc rows of the declarations only
+  std::vector<Record> records;
+  std::set<std::string> tags;
+  std::map<std::string, std::string> macro_at;
+  std::string out;
+  bool doc = false;
 };
 
-// The file and line where a declaration is written. A declaration a macro produces (AV_INIT_UNAVAILABLE expands to init and new)
-// is placed at the expansion, where the header uses the macro: the spelling of its tokens is in the macro's header, and the
-// spelling location differs between libclang versions.
 bool in_framework(CXCursor c, const Context& ctx, std::string* file_out, unsigned* line_out) {
   CXSourceLocation loc = clang_getCursorLocation(c);
   CXFile file;
   unsigned line = 0, column = 0, offset = 0;
   clang_getExpansionLocation(loc, &file, &line, &column, &offset);
   if (!file) return false;
-  // the path lexically normal: a header reached as Headers/../Frameworks/Nested.framework/... is the nested framework's, not the umbrella's
   std::string path = std::filesystem::path(text(clang_getFileName(file))).lexically_normal().string();
   for (const std::string& own : ctx.own) {
-    // a directory (with its trailing slash) owns the headers under it; a header with no slash owns that header alone
     bool directory = own.back() == '/';
     if (directory ? path.compare(0, own.size(), own) == 0 : path == own) {
       *file_out = directory ? path.substr(own.size()) : path.substr(path.find_last_of('/') + 1);
@@ -526,7 +412,6 @@ bool in_framework(CXCursor c, const Context& ctx, std::string* file_out, unsigne
   return false;
 }
 
-// The first 8 bytes of SHA-256, as 16 hex digits: the declaration hash and the availability hash.
 std::string digest16(const std::string& s) {
   unsigned char d[CC_SHA256_DIGEST_LENGTH];
   CC_SHA256(s.data(), (CC_LONG)s.size(), d);
@@ -539,10 +424,6 @@ std::string digest16(const std::string& s) {
   return out;
 }
 
-// The declaration hash covers what the declaration says and not where it is written: no header, line, availability or decl text.
-// Fields are joined with the unit separator (0x1f), which no field contains.
-// The fields are the cells as the IR writes them (write_row: an empty cell is "-", a line break is a space), so a reader who recomputes
-// the hash from the printed cells gets the same value (review F9).
 std::string declaration_hash(const Row& r) {
   const std::string fields[] = {r.kind,           filled(cell(r.usr)),  filled(cell(r.container)), filled(cell(r.name)),
                                 r.side,           filled(cell(r.type)), filled(cell(r.params)),    r.nullab,
@@ -555,20 +436,16 @@ std::string declaration_hash(const Row& r) {
   return digest16(canonical);
 }
 
-// The doc-time text of a declaration (--doc): its brief and raw doc comment as clang parses them, and the names of its parameters.
-// It is attached when the record is made, while the cursor is at hand.
 void attach_doc(CXCursor c, Row* r) {
   int n = clang_Cursor_getNumArguments(c);
   for (int i = 0; i < n; ++i) {
     if (i) r->params_names += " | ";
     r->params_names += text(clang_getCursorSpelling(clang_Cursor_getArgument(c, (unsigned)i)));
   }
-  // the doc comment is the one clang attaches to the declaration (its own set: ///, //!, /** */ and /*! and their trailing < forms)
   r->comment = text(clang_Cursor_getRawCommentText(c));
   r->brief = text(clang_Cursor_getBriefCommentText(c));
 }
 
-// A cell of the doc mode with its backslashes, tabs and line breaks escaped, so that a declaration is one line.
 std::string escaped(const std::string& s) {
   std::string out;
   for (char ch : s) {
@@ -583,7 +460,6 @@ std::string escaped(const std::string& s) {
   return out;
 }
 
-// The doc-time row of a declaration (--doc): ten escaped cells, tab separated and newline terminated.
 void write_doc(Context& ctx, const Row& r) {
   const std::string cells[] = {ctx.framework, r.kind, r.usr, r.container, r.name, r.side, r.params_names, r.brief, r.comment, r.decl};
   for (size_t i = 0; i < sizeof cells / sizeof cells[0]; ++i) {
@@ -593,7 +469,6 @@ void write_doc(Context& ctx, const Row& r) {
   ctx.out += '\n';
 }
 
-// The cells of a declaration row, tab separated and newline terminated.
 void write_row(Context& ctx, const Row& r) {
   if (ctx.doc) {
     write_doc(ctx, r);
@@ -613,10 +488,8 @@ void write_row(Context& ctx, const Row& r) {
   ctx.out += '\n';
 }
 
-// A conflict row: the key of a declaration that is declared more than once with different availability, how it was resolved
-// ("defining", "stricter-extension" or "merged"), and the availability variants. ir.lua lists these for review.
 void write_conflict(Context& ctx, const Row& key, const std::string& resolution, const std::string& variants) {
-  if (ctx.doc) return;  // the doc mode writes declarations only
+  if (ctx.doc) return;
   const std::string cells[] = {cell(ctx.framework), "conflict",   filled(cell(key.usr)), filled(cell(key.container)),
                                filled(cell(key.name)), key.side,  key.kind,              "-",
                                resolution,            "-",        variants,              "-",
@@ -636,12 +509,6 @@ void record(Context& ctx, CXCursor c, const Row& r, bool defining, bool extensio
   ctx.records.push_back(Record{kept, defining, extension, intro});
 }
 
-// The rule of section 5.2 and the ruling D3. Records of one key are grouped in source order.
-//  - all the same availability: the first is written (redeclarations that differ only in parameter names are one declaration);
-//  - a defining record exists: its availability counts. A category or extension record with another availability overrides it
-//    only when its iOS introduction is later (the stricter, listed as stricter-extension); an earlier one is ignored (defining).
-//    Any other record with another availability is merged (ir.lua applies the rule of avail.lua to all the variants);
-//  - no defining record: merged, with every availability written.
 void resolve(Context& ctx) {
   std::map<std::string, std::vector<size_t>> groups;
   std::vector<std::string> order;
@@ -703,14 +570,10 @@ void resolve(Context& ctx) {
   }
 }
 
-// A tag is one declaration: the first declaration of its USR in the framework is the one emitted (tag_is_emitted prefers the definition).
 bool first_tag(Context& ctx, CXCursor c) {
   return ctx.tags.insert(text(clang_getCursorUSR(c))).second;
 }
 
-// A tag (enum, struct, union) is one declaration: its definition where this framework writes one, otherwise its first declaration
-// in the framework (an opaque type, or a definition written elsewhere). A forward declaration that the framework's own definition
-// supersedes is not emitted, and neither are its children, which belong to the definition.
 bool tag_is_emitted(CXCursor c, Context& ctx) {
   std::string file;
   unsigned line = 0;
@@ -734,7 +597,6 @@ std::string parameters(CXCursor c, std::string* nullab) {
 
 CXChildVisitResult visit(CXCursor c, CXCursor parent, CXClientData data);
 
-// Every macro use of the translation unit, by position (the preprocessing record is parsed for this).
 CXChildVisitResult collect_macro_uses(CXCursor c, CXCursor parent, CXClientData data) {
   (void)parent;
   if (clang_getCursorKind(c) == CXCursor_MacroExpansion) {
@@ -744,13 +606,12 @@ CXChildVisitResult collect_macro_uses(CXCursor c, CXCursor parent, CXClientData 
   return CXChildVisit_Continue;
 }
 
-// What a member's context says about it: an extension or category statement, or the defining @interface or @protocol of its class.
 struct Nest {
   Context* ctx;
-  std::string name;       // the class, protocol or tag the declarations belong to ("-" at the top level)
-  std::string category;   // the name of the category they are written in ("" for a class extension, an @interface or a @protocol)
-  bool extension;         // written in a category or class extension
-  bool defining_context;  // written in the defining @interface or @protocol (not a forward declaration)
+  std::string name;
+  std::string category;
+  bool extension;
+  bool defining_context;
 };
 
 void method_row(Context& ctx, CXCursor c, bool klass, const Nest& nest) {
@@ -774,14 +635,10 @@ void method_row(Context& ctx, CXCursor c, bool klass, const Nest& nest) {
   r.value = "-";
   r.message = message_of(ctx.tu, c);
   r.decl = decl_text(ctx.tu, ctx.macro_at, c);
-  // a getter or setter clang synthesises from a property is no declaration of its own: it is an accessor row (the spec's members are
-  // the properties, and ir.lua keeps accessors out of the shards)
   if (r.decl == "-") r.kind = "accessor";
   record(ctx, c, r, !nest.extension && nest.defining_context, nest.extension, introduced_ios(c));
 }
 
-// Finds the NSObject attribute under a declaration (a property's __attribute__((NSObject)), which makes a CF pointer an object
-// type, so retain or strong is legal on it), and stops there.
 CXChildVisitResult nsobject_attribute(CXCursor c, CXCursor parent, CXClientData data) {
   (void)parent;
   if (clang_getCursorKind(c) == CXCursor_ObjCNSObject) {
@@ -859,8 +716,6 @@ void function_row(Context& ctx, CXCursor c) {
   record(ctx, c, r, clang_isCursorDefinition(c), false, introduced_ios(c));
 }
 
-// A declaration with one type (a variable, typedef, field, enum or struct) or one value (an enum constant). anon is a field's
-// anonymous struct or union (its USR), "-" for every other declaration.
 void simple_row(Context& ctx, CXCursor c, const char* kind, const std::string& type, const std::string& nullab,
                 const std::string& value, const std::string& container, bool defining, const std::string& anon = "-") {
   std::string file;
@@ -886,7 +741,6 @@ void simple_row(Context& ctx, CXCursor c, const char* kind, const std::string& t
   record(ctx, c, r, defining, false, introduced_ios(c));
 }
 
-// The class a category or class extension extends: the ObjCClassRef among its children.
 CXChildVisitResult class_ref(CXCursor c, CXCursor parent, CXClientData data) {
   (void)parent;
   if (clang_getCursorKind(c) != CXCursor_ObjCClassRef) return CXChildVisit_Continue;
@@ -900,8 +754,6 @@ std::string category_class(CXCursor c) {
   return name;
 }
 
-// A generic class's type parameters in order, each as name:bound (the bound is the declared type the parameter is bounded by, id when it
-// has none). clang's Objective-C type parameter is a typedef-like declaration: its underlying type is the bound.
 CXChildVisitResult type_parameter_visit(CXCursor c, CXCursor parent, CXClientData data) {
   (void)parent;
   if (clang_getCursorKind(c) != CXCursor_TemplateTypeParameter) return CXChildVisit_Continue;
@@ -917,8 +769,6 @@ std::string type_parameters(CXCursor c) {
   return out.empty() ? "-" : out;
 }
 
-// The USR of the anonymous struct or union a field's type is (union { struct {...} x; } gives x the inner struct's USR), or "-" when the
-// type is a named tag or a typedef: the anonymous tag is what the field's type column names only as struct (unnamed ...).
 std::string anonymous_tag(CXType t) {
   CXCursor decl = clang_getTypeDeclaration(t);
   CXCursorKind kind = clang_getCursorKind(decl);
@@ -926,7 +776,6 @@ std::string anonymous_tag(CXType t) {
   return text(clang_getCursorUSR(decl));
 }
 
-// Whether a canonical integer type is unsigned (the character type is unsigned on some targets: Char_U).
 bool is_unsigned_integer(CXTypeKind kind) {
   switch (kind) {
     case CXType_Bool:
@@ -945,10 +794,6 @@ bool is_unsigned_integer(CXTypeKind kind) {
   }
 }
 
-// The value of an enum constant as clang evaluates it for the enum's own integer type, as text. libclang's signed accessor
-// sign-extends from the width of that type, so a constant of an unsigned enum with its top bit set reads as a negative number
-// (ARSegmentationClassPerson = 255 of a uint8_t enum came out as -1, kCTFontTraitClassMask = 15U << 28 as -268435456): an
-// unsigned enum is read through the unsigned accessor, which holds the value the header spells.
 std::string enum_constant_value(CXCursor c) {
   CXType integer = clang_getCanonicalType(clang_getEnumDeclIntegerType(clang_getCursorSemanticParent(c)));
   if (is_unsigned_integer(integer.kind)) return std::to_string(clang_getEnumConstantDeclUnsignedValue(c));
@@ -962,22 +807,17 @@ CXChildVisitResult visit(CXCursor c, CXCursor parent, CXClientData data) {
   CXCursorKind kind = clang_getCursorKind(c);
   std::string file;
   unsigned line = 0;
-  // a declaration outside the framework's headers is not emitted, and its children are not visited (they sit in that file)
   bool own = in_framework(c, ctx, &file, &line);
   switch (kind) {
     case CXCursor_ObjCInterfaceDecl:
     case CXCursor_ObjCCategoryDecl:
     case CXCursor_ObjCProtocolDecl: {
       if (!own) return CXChildVisit_Continue;
-      // a class's @interface is its definition; a protocol is defined by its @protocol ... @end, and a forward declaration
-      // (@protocol P;) is not a declaration of the framework (its definition is written elsewhere)
       bool definition = kind != CXCursor_ObjCProtocolDecl || clang_isCursorDefinition(c);
       if (!definition) return CXChildVisit_Continue;
       Row r;
       r.kind = kind == CXCursor_ObjCInterfaceDecl ? "interface" : kind == CXCursor_ObjCCategoryDecl ? "category" : "protocol";
       r.usr = text(clang_getCursorUSR(c));
-      // a class extension's USR carries the file and offset of its declaration, which move with any edit above it: the class
-      // name alone identifies it (c:objc(ext)Class)
       size_t at = r.usr.find('@', r.usr.find(')'));
       if (r.usr.compare(0, 10, "c:objc(ext") == 0 && at != std::string::npos) r.usr.resize(at);
       r.container = "-";
@@ -995,7 +835,6 @@ CXChildVisitResult visit(CXCursor c, CXCursor parent, CXClientData data) {
       r.message = message_of(ctx.tu, c);
       r.decl = decl_text(ctx.tu, ctx.macro_at, c);
       record(ctx, c, r, kind != CXCursor_ObjCCategoryDecl && definition, kind == CXCursor_ObjCCategoryDecl, introduced_ios(c));
-      // the protocols a category lists belong to the class it extends, not to the category
       std::string owner = kind == CXCursor_ObjCCategoryDecl ? category_class(c) : r.name;
       bool category = kind == CXCursor_ObjCCategoryDecl;
       Nest child{nest->ctx, owner, category ? r.name : "", category, !category};
@@ -1004,11 +843,9 @@ CXChildVisitResult visit(CXCursor c, CXCursor parent, CXClientData data) {
     }
     case CXCursor_ObjCSuperClassRef:
     case CXCursor_ObjCProtocolRef: {
-      // a reference outside any class, category or protocol (a forward declaration @protocol P;) is not a conformance
       if (!own || nest->name == "-") return CXChildVisit_Continue;
       Row r;
       r.kind = kind == CXCursor_ObjCSuperClassRef ? "super" : "conforms";
-      // a conformance's usr is its owner's USR (the class or the protocol it is listed by): a class and a protocol can share a name
       r.usr = kind == CXCursor_ObjCProtocolRef ? text(clang_getCursorUSR(parent)) : "-";
       r.container = nest->name;
       r.name = text(clang_getCursorSpelling(c));
@@ -1079,19 +916,13 @@ CXChildVisitResult visit(CXCursor c, CXCursor parent, CXClientData data) {
   }
 }
 
-// The typedefs the framework's declarations reference that another SDK header declares: the vector types of simd/, the types of
-// sys/ and mach/. decls keeps only the declarations written under Headers/, so none of these has a row, and the generator's typedef
-// index cannot resolve a name a declaration spells. Each one a declaration reaches (through its parameters, result, fields and
-// properties, and the typedef chain it names) is written as a typedef row of the framework's shard, the row a framework's own typedef
-// gets (main runs the walk outside the doc mode, which writes declarations only).
 struct Referenced {
   Context* ctx;
-  std::set<std::string> written;  // the USRs written, so each typedef is one row
+  std::set<std::string> written;
 };
 
 void referenced_type(Referenced& ref, CXType t);
 
-// A typedef another SDK header declares, as a typedef row (simple_row's form, with the file it is written in as the header).
 void write_foreign_typedef(Referenced& ref, CXCursor d, CXType underlying) {
   Context& ctx = *ref.ctx;
   CXSourceLocation loc = clang_getCursorLocation(d);
@@ -1117,8 +948,6 @@ void write_foreign_typedef(Referenced& ref, CXCursor d, CXType underlying) {
   record(ctx, d, r, true, false, introduced_ios(d));
 }
 
-// The typedefs a type reaches. A typedef the framework declares is its own row, so it is not followed here (its own declaration is
-// visited, and its underlying type with it).
 void referenced_type(Referenced& ref, CXType t) {
   switch (t.kind) {
     case CXType_Typedef: {
@@ -1167,8 +996,6 @@ void referenced_type(Referenced& ref, CXType t) {
   }
 }
 
-// Walks the framework's own declarations: the types of a function, a method, a variable, a field, a property, a parameter and a typedef,
-// and the members of a class, a protocol, a category, a struct or a union (the containers the walk descends into).
 CXChildVisitResult referenced_visit(CXCursor c, CXCursor parent, CXClientData data) {
   (void)parent;
   Referenced& ref = *static_cast<Referenced*>(data);
@@ -1207,16 +1034,11 @@ CXChildVisitResult referenced_visit(CXCursor c, CXCursor parent, CXClientData da
   return CXChildVisit_Continue;
 }
 
-// The census of the translation unit: the declarations of the kinds the extractor reads, counted by where they are written: the
-// framework's own, and those of other SDK headers the translation unit reaches. One census row per parsed framework; the gaps mode of
-// ir.lua classifies the frameworks that have no declaration of their own with it.
 struct Census {
   Context* ctx;
   std::string sdk;
   long own;
   long foreign;
-  // the foreign declarations counted by the header file each is written in: the path under the SDK root (so the rows do not depend on
-  // where the SDK is installed), and the number of declarations
   std::map<std::string, long> files;
 };
 
@@ -1247,7 +1069,6 @@ CXChildVisitResult census_visit(CXCursor c, CXCursor parent, CXClientData data) 
   unsigned column = 0, offset = 0;
   clang_getExpansionLocation(clang_getCursorLocation(c), &written, &line, &column, &offset);
   if (!written) return CXChildVisit_Continue;
-  // lexically normal, as in_framework reads it: a header reached as Headers/../Frameworks/Nested.framework/... is the nested framework's
   std::string where = std::filesystem::path(text(clang_getFileName(written))).lexically_normal().string();
   std::string root = std::filesystem::path(census->sdk).lexically_normal().string();
   if (where.compare(0, root.size(), root) != 0) return CXChildVisit_Continue;
@@ -1266,21 +1087,18 @@ void usage() {
                "is the compiler's resource directory; by default libclang finds its own.\n");
 }
 
-}  // namespace
+}
 
-// The frameworks the sweep covers, and the rule that gives each one's headers. The sweep (ir.lua) and the doc mode (--doc) both
-// resolve a framework here, so the rule is written once.
 namespace fs = std::filesystem;
 
 struct Framework {
-  std::string name;  // as the rows carry it: a nested framework is Outer/Inner
-  std::string base;  // the folder's name without .framework (a usr/include module's name)
-  fs::path root;     // the .framework directory (a usr/include module: the usr/include directory)
-  fs::path map;      // a usr/include module's module map
-  bool usr = false;  // a module of usr/include
+  std::string name;
+  std::string base;
+  fs::path root;
+  fs::path map;
+  bool usr = false;
 };
 
-// A path as the rows and the imports carry it: lexically normal (no "." or "x/..").
 std::string normal(const fs::path& p) { return p.lexically_normal().string(); }
 
 std::string trim_space(const std::string& s) {
@@ -1290,8 +1108,6 @@ std::string trim_space(const std::string& s) {
   return s.substr(begin, end - begin + 1);
 }
 
-// A failure to read the SDK's files is an error that names the path (review F11): a shorter framework list or a missing module map must
-// not pass as a result. A path that does not exist is not a failure; the callers ask for that case.
 [[noreturn]] void fail_path(const fs::path& p, const char* what, const std::error_code& ec) {
   std::fprintf(stderr, "decls: %s: %s%s%s\n", what, p.string().c_str(), ec ? ": " : "", ec ? ec.message().c_str() : "");
   std::exit(2);
@@ -1315,13 +1131,12 @@ bool is_dir(const fs::path& p) {
   return result;
 }
 
-// The entries of a folder, sorted by path (none when the folder does not exist).
 std::vector<fs::path> entries_of(const fs::path& dir) {
   std::vector<fs::path> out;
   std::error_code ec;
   if (!fs::exists(dir, ec)) {
     if (ec && !absent(ec)) fail_path(dir, "cannot read the folder", ec);
-    return out;  // a folder that is not there has no entries
+    return out;
   }
   fs::directory_iterator it(dir, ec);
   if (ec) fail_path(dir, "cannot read the folder", ec);
@@ -1333,9 +1148,6 @@ std::vector<fs::path> entries_of(const fs::path& dir) {
   return out;
 }
 
-// The frameworks directly in a folder, then those nested in each one's Frameworks/ folder (named Outer/Inner). A symbolic link to a
-// directory is listed as the framework it names, as it always has been (WebKit.framework links into the Cryptexes; AVFoundation's
-// Frameworks/AVFAudio.framework links to the top-level AVFAudio.framework, and parses to no declaration of its own: it has no shard).
 void frameworks_in(const fs::path& dir, const std::string& outer, std::vector<Framework>* out) {
   const std::string suffix = ".framework";
   for (const fs::path& p : entries_of(dir)) {
@@ -1351,8 +1163,6 @@ void frameworks_in(const fs::path& dir, const std::string& outer, std::vector<Fr
   }
 }
 
-// The name a module map line declares as a top-level module (the line starts at its first column with module or explicit module), or "".
-// The text of a file. A file that cannot be opened or read is an error that names it (review F11).
 std::string text_of(const fs::path& file) {
   std::ifstream in(file, std::ios::binary);
   if (!in) fail_path(file, "cannot open", std::error_code(errno, std::generic_category()));
@@ -1362,16 +1172,12 @@ std::string text_of(const fs::path& file) {
   return all.str();
 }
 
-// The first string value of a JSON key in the text, or "" when the key is not there.
 std::string json_string(const std::string& json, const char* key) {
   const std::regex value(std::string("\"") + key + "\"\\s*:\\s*\"([^\"]*)\"");
   std::smatch m;
   return std::regex_search(json, m, value) ? m[1].str() : std::string();
 }
 
-// The target the rows are compiled for, derived from the SDK's own record (SDKSettings.json, review F10): arm64, the one architecture
-// the spec is written for; the vendor and the system of the iphoneos target; and the SDK's deployment target, which is its version. A
-// record without those keys is an error that names it.
 std::string target_of(const fs::path& sdk) {
   const fs::path record = sdk / "SDKSettings.json";
   const std::string json = text_of(record);
@@ -1385,8 +1191,6 @@ std::string target_of(const fs::path& sdk) {
   return "arm64-" + vendor + "-" + sys_name + version;
 }
 
-// The SHA-256 of the libclang this process runs: the image that holds a libclang function, read through the file it was loaded from
-// (only the digest is printed; the path is not part of any output). Pins the library the shard headers record (review F8).
 std::string libclang_sha256() {
   Dl_info info;
   if (dladdr(reinterpret_cast<const void*>(&clang_getClangVersion), &info) == 0 || info.dli_fname == nullptr) {
@@ -1415,9 +1219,6 @@ std::string libclang_sha256() {
   return hex;
 }
 
-// The enum values this extractor reads (CXCursorKind, CXTypeKind) are numbers from the headers it was built with. Each must name the same
-// kind in the loaded library, or the rows would be decoded wrongly: checked on every start, so the skew between the package's headers and
-// the host's libclang is checked, not assumed (review F8). Returns false with the first mismatch.
 bool check_enum_values(std::string* failure) {
   struct Kind {
     unsigned value;
@@ -1458,8 +1259,6 @@ bool check_enum_values(std::string* failure) {
   return true;
 }
 
-// The lines of a text file. A file that cannot be opened or read is an error that names it (review F11): a module map that is not read
-// must not look like a map that declares nothing.
 std::vector<std::string> lines_of(const fs::path& file) {
   std::ifstream in(file);
   if (!in) fail_path(file, "cannot open", std::error_code(errno, std::generic_category()));
@@ -1470,14 +1269,11 @@ std::vector<std::string> lines_of(const fs::path& file) {
 }
 
 std::string declared_module(const std::string& line) {
-  // the name ends where it does not go on: module Darwin.POSIX declares the submodule Darwin.POSIX, not the top-level Darwin
   static const std::regex declaration(R"re(^(?:explicit\s+)?module\s+([A-Za-z0-9_]+)(?![A-Za-z0-9_.]))re");
   std::smatch m;
   return std::regex_search(line, m, declaration) ? m[1].str() : std::string();
 }
 
-// The top-level modules the usr/include module maps declare: a map is usr/include/<name>.modulemap or usr/include/<dir>/module.modulemap,
-// as usr_module_map reads them. The sweep covers each of them.
 std::set<std::string> usr_modules_declared(const fs::path& include) {
   std::set<std::string> names;
   auto declared_in = [&names](const fs::path& map) {
@@ -1493,8 +1289,6 @@ std::set<std::string> usr_modules_declared(const fs::path& include) {
   return names;
 }
 
-// The module map of a usr/include module: the one map (usr/include/*.modulemap, or usr/include/<dir>/module.modulemap) that declares
-// the module as a top-level module. Two maps that declare it are an error.
 fs::path usr_module_map(const fs::path& include, const std::string& name, std::string* error) {
   std::vector<fs::path> candidates;
   for (const fs::path& p : entries_of(include)) {
@@ -1517,11 +1311,6 @@ fs::path usr_module_map(const fs::path& include, const std::string& name, std::s
   return found.empty() ? fs::path() : found[0];
 }
 
-// The public headers a module map exposes, as paths: the header lines and the umbrella header resolve in header_base, the umbrella
-// directories in dir_base. A framework module nested in this one is its own framework and is skipped, and so is a module that requires
-// x86 (the target is arm64). Textual, private and excluded headers are not public: an exclude removes a header an umbrella directory
-// takes, unless the module names it. wanted, when set, is the one top-level module to take (a usr/include map can declare several); a
-// framework's headers are in path order, a usr/include module's in the order its map names them.
 std::vector<std::string> module_headers(const fs::path& map, const fs::path& header_base, const fs::path& dir_base,
                                         const std::string& wanted) {
   if (!is_file(map)) return {};
@@ -1588,9 +1377,6 @@ std::vector<std::string> module_headers(const fs::path& map, const fs::path& hea
   return out;
 }
 
-// The headers a framework is parsed from: its module map's list. A framework with no module-map header reads every header of its Headers/
-// folder (its umbrella header first): a header the umbrella does not include is the framework's own too (RealityKit and vecLib leave
-// headers out of their umbrella's closure). A usr/include module has its map's list and nothing else. When there are none, *reason says why.
 bool headers_of(const Framework& f, std::vector<std::string>* out, std::string* reason) {
   if (f.usr) {
     *out = module_headers(f.map, f.map.parent_path(), f.map.parent_path(), f.name);
@@ -1623,11 +1409,7 @@ bool headers_of(const Framework& f, std::vector<std::string>* out, std::string* 
   return true;
 }
 
-// The frameworks the sweep covers, sorted by name: System/Library/Frameworks with those nested in each, and every usr/include module the
-// maps declare. Two frameworks of one name are an error.
 bool discover(const std::string& sdk, std::vector<Framework>* out, std::string* error) {
-  // IR_FRAMEWORKS replaces the SDK's System/Library: a root shaped like it, with Frameworks/ and SubFrameworks/ under it (the generated
-  // headers tree). The SDK stays the sysroot of the usr/include modules, which are not read from this root.
   fs::path library = fs::path(sdk) / "System" / "Library";
   if (const char* root_env = std::getenv("IR_FRAMEWORKS")) {
     library = fs::absolute(root_env);
@@ -1637,7 +1419,6 @@ bool discover(const std::string& sdk, std::vector<Framework>* out, std::string* 
     }
   }
   frameworks_in(library / "Frameworks", "", out);
-  // the library also holds its SubFrameworks folder (UIUtilities): the same rule, read from the same layout (ruling 1 of v-gen's open points)
   frameworks_in(library / "SubFrameworks", "", out);
   const fs::path include = fs::path(sdk) / "usr" / "include";
   for (const std::string& name : usr_modules_declared(include)) {
@@ -1646,10 +1427,8 @@ bool discover(const std::string& sdk, std::vector<Framework>* out, std::string* 
     f.base = name;
     f.root = include;
     f.usr = true;
-    out->push_back(f);  // its module map is found when it is the framework asked for (main), not for every listing
+    out->push_back(f);
   }
-  // The modules the SDK holds that no framework or module map names: the Swift modules of usr/lib/swift (a folder per module, with no C
-  // header of its own) and the frameworks of Developer/Library/Frameworks. A name already listed keeps the entry it has.
   std::set<std::string> named;
   for (const Framework& f : *out) named.insert(f.name);
   for (const fs::path& p : entries_of(fs::path(sdk) / "usr" / "lib" / "swift")) {
@@ -1675,9 +1454,6 @@ bool discover(const std::string& sdk, std::vector<Framework>* out, std::string* 
   return true;
 }
 
-// The census rows: a row of kind census, the framework's own and foreign declaration counts in the name and type cells (ir.lua reads
-// them to classify the frameworks that have no shard); then one row of kind census-file per header file a foreign declaration is written
-// in, its path under the SDK root in the name cell and the declaration count in the message cell (ir.lua reads them to name the owners).
 void census_row(Context& ctx, const char* sdk, CXTranslationUnit tu) {
   Census census{&ctx, sdk, 0, 0, {}};
   clang_visitChildren(clang_getTranslationUnitCursor(tu), census_visit, &census);
@@ -1693,8 +1469,6 @@ void census_row(Context& ctx, const char* sdk, CXTranslationUnit tu) {
 }
 
 int main(int argc, char** argv) {
-  // the identity the shard headers record: the libclang version, the SHA-256 of the dylib that runs, and (when IR_SDK names the SDK) the
-  // target derived from the SDK (review F8, F10); the enum values are checked first
   if (argc == 2 && std::strcmp(argv[1], "--version") == 0) {
     std::string failure;
     if (!check_enum_values(&failure)) {
@@ -1706,7 +1480,6 @@ int main(int argc, char** argv) {
     std::printf("\n");
     return 0;
   }
-  // the hash of one text, as the availability hash is computed: ir.lua hashes the availability it merges with this
   if (argc == 3 && std::strcmp(argv[1], "--digest") == 0) {
     std::printf("%s\n", digest16(argv[2]).c_str());
     return 0;
@@ -1720,7 +1493,6 @@ int main(int argc, char** argv) {
     std::printf("%s\n", target_of(fs::absolute(sdk_env)).c_str());
     return 0;
   }
-  // the flags, in any order: --doc (the doc rows), --list (the frameworks), --timeout SECONDS
   int first = 1;
   bool doc = false, list = false;
   for (;;) {
@@ -1781,7 +1553,6 @@ int main(int argc, char** argv) {
   ctx.doc = doc;
   ctx.framework = name;
   if (framework->usr) {
-    // a header of the include root belongs to the module that names it, not to the root: the root holds other modules' headers too
     std::set<std::string> dirs;
     const std::string include = normal(framework->root);
     for (const std::string& h : headers) {
@@ -1801,37 +1572,28 @@ int main(int argc, char** argv) {
       std::fprintf(stderr, "decls: %s: %s\n", name.c_str(), reason.c_str());
       return 1;
     }
-    // a framework with no header is one row of kind unparsed, its reason in the name column, as a framework that does not parse is
     std::string row = name + "\tunparsed\t-\t-\t" + reason;
     for (int i = 5; i < kFullColumns; ++i) row += "\t-";
     std::printf("%s\n", row.c_str());
     return 0;
   }
-  // A usr/include module decls cannot build (its module build is an error: the C standard library's obsolete module, whose map names
-  // headers no module build accepts) is read a second time as plain headers, included one after another without the module build.
   for (int attempt = 0; attempt < 2; ++attempt) {
     const bool plain = attempt == 1;
     std::string imports;
-    // a usr/include module is the SDK's own module, so it is imported as the module its map declares (the module build compiles the
-    // headers the map names, with the conditions the module build sets); a framework's headers are included as they are listed, and so
-    // are a usr/include module's in the plain attempt
     if (framework->usr && !plain) {
       imports = "@import " + name + ";\n";
     } else {
       for (const std::string& h : headers) imports += "#import \"" + h + "\"\n";
     }
     CXUnsavedFile unsaved = {"charon-module.m", imports.c_str(), (unsigned long)imports.size()};
-    // IR_TARGET, if set, is the triple the headers are parsed for (the port's armv7 run, tools/found/port_values.lua); the SDK's own otherwise
     const char* triple = std::getenv("IR_TARGET");
     const std::string target = triple != nullptr ? std::string(triple) : target_of(fs::path(sdk));
     std::vector<const char*> args = {"-x", "objective-c", "-target", target.c_str(), "-isysroot", sdk.c_str()};
-    // the module's own map is the one decls resolved, so the compiler is given that file, not a search of the SDK's maps
     std::string module_map_arg = framework->usr ? "-fmodule-map-file=" + chosen.map.string() : std::string();
     if (framework->usr && !plain) {
       args.push_back("-fmodules");
       args.push_back(module_map_arg.c_str());
     }
-    // a framework of Developer/Library/Frameworks names its own headers as <Name/...>, which that folder (and only it) is searched for
     const std::string developer_folder = (fs::path(sdk) / "Developer" / "Library" / "Frameworks").string();
     const std::string developer_arg = framework->root.string().rfind(developer_folder, 0) == 0 ? "-F" + developer_folder : std::string();
     if (!developer_arg.empty()) args.push_back(developer_arg.c_str());
@@ -1839,9 +1601,6 @@ int main(int argc, char** argv) {
       args.push_back("-resource-dir");
       args.push_back(resource);
     }
-    // The doc mode keeps the doc comments of the SDK's own headers. clang drops the comments of a system header unless the frontend is
-    // told to retain them (the cc1 option -fretain-comments-from-system-headers, which the driver passes on; the SDK's headers are system
-    // headers). The IR does not read comments, so the IR parse keeps the default.
     if (doc) args.push_back("-fretain-comments-from-system-headers");
     args.push_back("-Wno-everything");
     CXIndex index = clang_createIndex(0, 0);
@@ -1852,7 +1611,7 @@ int main(int argc, char** argv) {
         &tu);
     if (code != CXError_Success || !tu) {
       std::fprintf(stderr, "decls: parse failed for %s (code %d)\n", name.c_str(), (int)code);
-      clang_disposeIndex(index);  // every exit releases the index (review F23)
+      clang_disposeIndex(index);
       return 1;
     }
     ctx.tu = tu;
@@ -1863,7 +1622,6 @@ int main(int argc, char** argv) {
       CXDiagnostic d = clang_getDiagnostic(tu, i);
       if (clang_getDiagnosticSeverity(d) >= CXDiagnostic_Error) {
         if (errors == 0) {
-          // the first error, with the file and line it is in (the header that refused the parse)
           CXFile file = nullptr;
           unsigned line = 0, column = 0, offset = 0;
           clang_getSpellingLocation(clang_getDiagnosticLocation(d), &file, &line, &column, &offset);
@@ -1874,7 +1632,6 @@ int main(int argc, char** argv) {
       }
       clang_disposeDiagnostic(d);
     }
-    // a usr/include module whose module build has errors is read as plain headers instead (the second attempt is the last)
     if (errors > 0 && framework->usr && !plain) {
       clang_disposeTranslationUnit(tu);
       clang_disposeIndex(index);
@@ -1897,13 +1654,10 @@ int main(int argc, char** argv) {
       clang_disposeIndex(index);
       return 1;
     } else {
-      // A module that does not parse is one row of kind unparsed, its reason in the name column; no declaration of it is written.
-      // The SDK's absolute path is redacted: the snapshot must not depend on where the SDK is installed.
       for (size_t at = first_error.find(sdk); at != std::string::npos; at = first_error.find(sdk, at)) {
         first_error.replace(at, sdk.size(), "<sdk>");
       }
       std::fprintf(stderr, "decls: %s: %ld error diagnostics, first: %s\n", name.c_str(), errors, first_error.c_str());
-      // the row has the cells of every row: the reason is the name, the rest are "-"
       std::string row = name + "\tunparsed\t-\t-\t" + first_error;
       for (int i = 5; i < kFullColumns; ++i) row += "\t-";
       std::printf("%s\n", row.c_str());

@@ -22,7 +22,6 @@
 
 extern char** environ;
 
-// bootstrap_look_up is not in the SDK's public headers.
 extern kern_return_t bootstrap_look_up(mach_port_t bootstrap, const char* name, mach_port_t* service);
 
 static const char* verdict_directory = "/private/var/charon";
@@ -74,11 +73,6 @@ static void system_version(char* version, size_t size)
     CFRelease(url);
 }
 
-// On iOS 6.1 and earlier the runner is started from launchd.conf, which gives
-// it no output of its own and splits its line on whitespace with no quoting;
-// so the runner keeps its own output next to its verdict, and takes its job -
-// the deadline, the program and its arguments - as NUL-separated words from
-// the file named after --job.
 static void keep_own_output(void)
 {
     int out = open("/private/var/charon/runner.stdout", O_WRONLY | O_CREAT | O_TRUNC, 0644);
@@ -112,13 +106,6 @@ static char** read_job(const char* file, char* self, int* count)
     return job;
 }
 
-// launchctl runs a bsexec line of launchd.conf as itself and waits for it to end before it loads the
-// daemons, so a runner that stays would hold the whole boot - SpringBoard, notifyd, configd - back
-// until its test is over. Started that way its parent is launchctl, not launchd: the runner then
-// leaves at once and carries on in a session of its own. Started by launchd itself it stays put.
-// launchd still counts the process a child of the bootstrap it was started in, and about a minute after
-// launchctl is done it sends that bootstrap's leftovers SIGTERM, which would end the runner - and its
-// verdict with it - in the middle of a test. The runner does not take that, and the test does not inherit it.
 static void detach_from_launchctl(void)
 {
     if (getppid() == 1)
@@ -132,14 +119,6 @@ static void detach_from_launchctl(void)
     signal(SIGTERM, SIG_IGN);
 }
 
-// The runner is started from launchd.conf, which launchctl reads before it loads the LaunchDaemons, so
-// it runs before them (and on iOS 7 and later as a LaunchDaemon of its own, while the rest are still
-// being loaded). A process a device starts after boot finds every one of them loaded: each Mach service
-// their plists declare is registered with launchd, whether or not the daemon behind it runs yet. A test
-// begun earlier would find none of that - com.apple.cvmsServ, which Core Image builds its OpenCL kernels
-// through, among them - and fail on what the firmware does at boot, not on what it tests. So the test
-// starts when launchd has those services. A service a plist marks HideUntilCheckIn is registered only
-// when its daemon checks in, which is the daemon's own time and not the loading, so it is not waited for.
 static const char* daemons_directory = "/System/Library/LaunchDaemons";
 
 typedef struct {
@@ -148,8 +127,6 @@ typedef struct {
     int capacity;
 } services_t;
 
-// Apple's plists do not agree on the key's case: com.apple.mediastream.mstreamd.plist spells it
-// HideUntilCheckin for one service.
 static void is_hidden_until_check_in(const void* key, const void* value, void* context)
 {
     char name[32];
@@ -211,8 +188,6 @@ static void declared_services(services_t* services)
         closedir(directory);
 }
 
-// How many of the services launchd has not registered yet; their names go to the runner's own output
-// when the wait is given up, so a run that did not get them says which.
 static int unregistered(services_t* services, char* first, size_t size)
 {
     int missing = 0;
@@ -227,9 +202,6 @@ static int unregistered(services_t* services, char* first, size_t size)
     return missing;
 }
 
-// Waits for launchd to have loaded the daemons, for as long as the test itself may run. A device that
-// does not register one of them (its plist is for other hardware, say) must not hold the run for ever,
-// and the test then starts with that said in the runner's output and in its verdict.
 static int wait_for_daemons(int seconds, int* declared, double* waited, char* first, size_t size)
 {
     services_t services = {0};
@@ -295,8 +267,6 @@ int main(int argc, char** argv)
         int err = open("/private/var/charon/test.stderr", O_WRONLY | O_CREAT | O_TRUNC, 0644);
         captured = (out >= 0 && err >= 0);
         if (!captured) {
-            // The program's own output has nowhere to go, and a run whose output is lost reads on the
-            // host as a program that printed nothing. Say so where the runner's own output is kept.
             syslog(LOG_ERR, "charon-runner cannot open the program's output in %s: %s",
                    verdict_directory, strerror(errno));
             fprintf(stderr, "charon-runner: cannot open the program's stdout/stderr: %s\n", strerror(errno));
@@ -305,10 +275,6 @@ int main(int argc, char** argv)
             dup2(out, STDOUT_FILENO);
         if (err >= 0)
             dup2(err, STDERR_FILENO);
-        // A program's stdio is block buffered once it is a file, and the deadline ends it with SIGKILL,
-        // which no buffer survives: what it printed between its last flush and the deadline is lost.
-        // libSystem's stdio honours this and the launcher already sets it for the application, so the
-        // program is spawned with it: its output reaches the file as it writes it, killed or not.
         setenv("NSUnbufferedIO", "YES", 1);
         pid_t child;
         posix_spawnattr_t attributes;

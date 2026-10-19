@@ -3,11 +3,6 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-// A material is a set of named properties, each of one semantic (what it means to a renderer) and of
-// one type (how its value is written). A property's value is a string, a URL, a texture, a colour, a
-// float or a vector, or a 4x4 matrix, and the type says which: a property written as a float read
-// back as a float3 is three floats of it, which is what a renderer wants from a scalar.
-
 @implementation MDLTextureFilter {
     MDLMaterialTextureWrapMode _sWrapMode, _tWrapMode, _rWrapMode;
     MDLMaterialTextureFilterMode _minFilter, _magFilter;
@@ -75,7 +70,6 @@
 @synthesize float4Value = _float4Value;
 @synthesize matrix4x4 = _matrix4x4;
 
-// The value a property is given decides its type, so there is one place that reads it back out.
 - (void)charon_setValue:(id)value
 {
     if (!value) {
@@ -219,7 +213,6 @@
 
 - (void)setProperties:(MDLMaterialProperty *)property
 {
-    // The value of the other property, under this property's own name and semantic.
     [self charon_setValue:[property charon_value]];
     if (property.color)
         [self charon_setColor:property.color];
@@ -273,8 +266,6 @@
     if ((self = [super init])) {
         _name = @"";
         _properties = [[NSMutableDictionary alloc] init];
-        // What every scattering function carries: the colour, the emission, the two indices of
-        // refraction, the normal and the ambient occlusion, each of the type a renderer reads it in.
         [self charon_add:@"baseColor" semantic:MDLMaterialSemanticBaseColor type:MDLMaterialPropertyTypeColor value:1];
         [self charon_add:@"emission" semantic:MDLMaterialSemanticEmission type:MDLMaterialPropertyTypeColor value:0];
         [self charon_add:@"specular" semantic:MDLMaterialSemanticSpecular type:MDLMaterialPropertyTypeFloat value:0];
@@ -324,10 +315,8 @@
                type:(MDLMaterialPropertyType)type
               value:(float)value
 {
-    // The value of a property of the framework's own, read on the host rather than chosen here.
     id given = [NSNumber numberWithFloat:value];
     if (type == MDLMaterialPropertyTypeColor) {
-        // A colour of that value, opaque: white where the framework's default is a white.
         CGFloat components[4] = {value, value, value, 1};
         given = (__bridge id)CGColorCreateGenericRGB(components[0], components[1], components[2], components[3]);
     }
@@ -393,11 +382,6 @@
 - (instancetype)init
 {
     if ((self = [super init])) {
-        // The properties a physically based material has that the older function does not: the
-        // metallic-roughness set, the sheen, the clear coat and the subsurface colour.
-        // The ten of a physically plausible material, and the values the framework gives them by
-        // default: zero for most of them, a ninth of a unit of roughness, a twentieth of a unit of
-        // sheen, and no anisotropy.
         [self charon_add:@"subsurface" semantic:MDLMaterialSemanticSubsurface type:MDLMaterialPropertyTypeFloat value:0];
         [self charon_add:@"metallic" semantic:MDLMaterialSemanticMetallic type:MDLMaterialPropertyTypeFloat value:0];
         [self charon_add:@"specular" semantic:MDLMaterialSemanticSpecular type:MDLMaterialPropertyTypeFloat value:0];
@@ -499,8 +483,6 @@
         _bySemantic = [[NSMutableDictionary alloc] init];
         _scatteringFunction = scatteringFunction;
         _materialFace = MDLMaterialFaceFront;
-        // Every property of the scattering function the material was made with, which is what gives a
-        // new material its sixteen: the function's own defaults, not a pair invented here.
         for (MDLMaterialProperty *property in [scatteringFunction charon_allProperties])
             [self setProperty:property];
     }
@@ -539,7 +521,6 @@
     [_properties removeObjectAtIndex:index.unsignedIntegerValue];
     [_byName removeObjectForKey:property.name];
     [_bySemantic removeObjectForKey:@(property.semantic)];
-    // The indices of the properties after it move down by one, so the table is rebuilt.
     [_byName removeAllObjects];
     for (NSUInteger k = 0; k < _properties.count; k++)
         _byName[_properties[k].name] = @(k);

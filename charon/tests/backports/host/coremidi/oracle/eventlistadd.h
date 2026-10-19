@@ -1,9 +1,3 @@
-// The scenario of oracle/eventlistadd.m: what MIDIEventListAdd returns and takes as curPacket, and what it leaves in the list
-// when the words do not fit. It is the one text both programs run: eventlistadd.m runs it against the release of macOS
-// (recorded in eventlistadd-macos.txt), and differential.m runs it against the library's MIDIEventListInit and MIDIEventListAdd
-// and requires the same lines. It touches buffers only: no MIDI object is made. Offsets are from the start of the list buffer.
-// The includes of the program that includes this file provide CoreMIDI, <stdio.h> and <string.h>.
-
 static UInt8 gEventListBuffer[256];
 
 static long eventlistadd_offset(const void *p)

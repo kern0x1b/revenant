@@ -1,37 +1,12 @@
--- protocol_headers_test.lua: is every implemented protocol row of every library declared where that
--- library's generated protocol source can see it?
---
--- modules/apple/backports.lua's protocol_sources() writes one source per release a library's
--- implemented protocol rows arrived in, and each source opens with `#import "Charon<Folder>Protocols.h"`
--- and then names every row of that release with `@protocol(<name>)`. So a row with no declaration
--- reachable from that header is a source the 6.1.3 gate cannot compile, and nothing before it sees
--- it: the row is in the registry, the tool wrote the source, and the header is a file nothing reads
--- until a compiler does. That is what happened to UIKit's eight trait protocols, added with a
--- previous stack while CharonUIKitProtocols.h was last regenerated for another delivery.
---
--- A row passes when Charon<Folder>Protocols.h declares the protocol - forward (`@protocol X;`) or
--- with a body, which is what tools/gen.lua protocols writes for one the 16.4 SDK does not
--- declare - or when it declares it in a header that header imports by name. The imports are followed
--- inside the library's own folder and nowhere else, because that is where the generated source's
--- include path reaches, and an import of a header the folder does not hold is reported as well: the
--- same file that was supposed to supply the declaration would be the one the compiler cannot open.
---
--- A library with implemented protocol rows and no Charon<Folder>Protocols.h at all is a failure and
--- not a skip: the header is what its generated sources import, so its absence is the same defect with
--- no declaration to find.
 import("core.base.json")
 local protocol_headers = import("gen.protocol_headers", {rootdir = path.join(os.scriptdir(), "..", "..", "tools"), anonymous = true})
 
 local function libraries_of(modules)
-    -- Loaded the way archive_language_test.lua loads it: as a module of the repository's own modules
-    -- folder, which the import finds only when the test runs from the checkout the light guard runs.
     local backports = import("apple.backports", {rootdir = modules, anonymous = true})
     return backports.libraries()
 end
 
 local function implemented_protocols(root, folder)
-    -- The same two places protocol_sources() reads: the folder's own registry files and the single
-    -- file named after the folder.
     local found = {}
     local registry = path.join(root, "packages", "a", "apple-backports", "registry")
     local files = os.files(path.join(registry, folder, "*.json"))
@@ -49,9 +24,6 @@ local function implemented_protocols(root, folder)
     return found
 end
 
--- Every protocol a header declares, and the headers of the same folder it imports by name. Followed
--- through, with a visited set, so an import cycle is read once rather than for ever.
--- The lines of a header: the rendered text when the caller has it (the generated header is not in the folder), else the file.
 local function lines_of(header, text)
     if text == nil then return io.lines(header) end
     return string.gmatch(text, "[^\n]*")

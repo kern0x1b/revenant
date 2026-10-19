@@ -1,7 +1,3 @@
--- compare-protocol-options-sslprotocol.lua - the SSL protocol range, read back, differences NAMED.
---
---    xmake l compare-protocol-options-sslprotocol.lua <the binary's output>
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
 local VALUES = {

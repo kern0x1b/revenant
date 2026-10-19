@@ -1,26 +1,9 @@
--- The Swift rows of one module, from its two sources: the digester's dump (swift.tsv: one row per declaration, with its usr, but no
--- availability of an extension and no name of a nested type's outer types) and the interface text (swiftinterface.tsv, written by
--- swiftiface from the .swiftinterface: one row per api, with the availability each declaration has by its own @available or its
--- enclosing one's, and the api qualified by every type it sits in). reconcile() gives one row per declaration:
---   - a digester row the interface names (the same kind and api) takes the interface's introduction, deprecation, obsoletion and
---     unavailability, and its via;
---   - a digester row the interface names under its outer types (Configuration.cornerStyle for UIPasteControl.Configuration.cornerStyle)
---     takes the qualified api and the same fields, when exactly one interface api fits;
---   - a digester row the interface names with other labels (==(_:_:) for ==(a:b:)) takes the interface's api and fields, when exactly
---     one interface api of the same name and arity fits;
---   - an interface api no digester row matched is a row of its own (usr "-"): a member the dump leaves out.
--- A digester row no interface api fits keeps its own availability (the dump's ios=) and no more: nothing is guessed from a container.
--- An api the interface states more than once (the same name in two extensions with different constraints) is one row, with the earliest
--- introduction: the api is there from the first declaration that has it.
-
 local NO_VALUE = "-"
 
--- The api up to its parameter list: "A.b(_:_:)" is "A.b", and an api with no list is itself.
 local function base_of(api)
     return string.match(api, "^([^(]*)")
 end
 
--- The number of parameters of an api's list (its labels, each ending in a colon), or nil when it has no list.
 local function arity_of(api)
     local labels = string.match(api, "%((.*)%)$")
     if labels == nil then
@@ -30,17 +13,14 @@ local function arity_of(api)
     return colons
 end
 
--- The last name of an api's base: "b" for "A.b" and for "A.b(_:)".
 local function last_of(api)
     return string.match(base_of(api), "([^.]*)$")
 end
 
--- The container of an api: the api without its last name, or NO_VALUE for a name with no type around it.
 local function container_of(api)
     return string.match(base_of(api), "^(.*)%.[^.]*$") or NO_VALUE
 end
 
--- Whether interface row a is the earlier introduction of an api than row b: a row with no introduction is later than any with one.
 local function earlier(a, b)
     if a.introduced == "" then
         return false
@@ -51,7 +31,6 @@ local function earlier(a, b)
     return (tonumber(a.introduced) or math.huge) < (tonumber(b.introduced) or math.huge)
 end
 
--- The interface's rows of one module, indexed: by kind and api (the earliest row of an api), and by kind and last name (each api once).
 local function index_interface(interface)
     local by_key, order = {}, {}
     for _, row in ipairs(interface) do
@@ -73,7 +52,6 @@ local function index_interface(interface)
     return by_key, by_last, order
 end
 
--- The one interface row that fits a digester row by the given test, or nil when none or several fit; and how many fit.
 local function unique_fit(candidates, fits)
     local found, count = nil, 0
     for _, row in ipairs(candidates or {}) do
@@ -85,7 +63,6 @@ local function unique_fit(candidates, fits)
     return count == 1 and found or nil, count
 end
 
--- Takes the interface's fields into a digester-shaped row: its api, container, introduction, deprecation, obsoletion, unavailability.
 local function take(record, row)
     record.api = row.api
     record.container = container_of(row.api)
@@ -97,9 +74,6 @@ local function take(record, row)
     record.unavailable = row.unavailable
 end
 
--- The rows of one module. digester is the module's Swift records (framework, kind, lang, api, usr, container, introduced ...), and
--- interface its interface rows (kind, api, introduced, deprecated, obsoleted, unavailable, via: the shard's cells). Returns the rows
--- (the digester's, reconciled, then the interface's own) and the counts of how each row was matched.
 function reconcile(framework, digester, interface)
     local by_key, by_last, order = index_interface(interface)
     local matched_key = {}

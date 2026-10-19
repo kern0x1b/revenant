@@ -2,34 +2,6 @@
 #import <CoreGraphics/CoreGraphics.h>
 #import <objc/runtime.h>
 
-/*
- * JSExport turns a protocol's required properties and instance methods into a JavaScript
- * wrapper's own properties and functions. One JSClassRef, shared by every JSExport-conforming
- * object regardless of its own Objective-C class, does the dispatch: its getProperty callback
- * looks the requested name up in a per-class table (built once, from protocol_copyPropertyList
- * and protocol_copyMethodDescriptionList over every JSExport-incorporating protocol the class or
- * its superclasses conform to) and either reads a property through the real accessor or hands
- * back a bound function that calls the real method - both through the object's own
- * -methodSignatureForSelector:, not a re-derivation of the protocol's encoding, so the argument
- * and return types marshaled are the ones the class actually implements.
- *
- * Supported argument and return types: id and Objective-C instance pointers, BOOL, the C integer
- * types up to 64 bits, float and double, and the four structs JSValue itself converts - CGPoint,
- * CGRect, CGSize, NSRange. A method outside that set is still exported - calling it from
- * JavaScript throws rather than reading an argument off the wrong-sized slot.
- */
-
-/*
- * argumentTypes points at the first argument's type in the entry's extended type encoding - the
- * form that names each argument's class, which the release converts arguments by - or is NULL
- * when there is none, and the arguments are then converted as id. A method's comes from
- * _protocol_getMethodTypeEncoding, an SPI of objc-runtime's private header: the public
- * protocol_getMethodDescription answers the plain encoding, with every class reduced to `@`, and
- * no public call answers the extended one. The release's own bridge (WebKit's ObjCCallbackFunction)
- * reads it the same way; iOS 6's libobjc exports it (coordination/corpus/caches/6.0.tsv). A
- * property setter's is the property's own type, public through property_getAttributes. Both
- * strings belong to the runtime and live as long as the protocol.
- */
 typedef struct {
     SEL selector;
     BOOL isMethod;
@@ -38,7 +10,6 @@ typedef struct {
 
 extern const char *_protocol_getMethodTypeEncoding(Protocol *protocol, SEL selector, BOOL isRequiredMethod, BOOL isInstanceMethod);
 
-/* The first argument's type in a method's extended encoding: past the return type, self and _cmd. */
 static const char *MethodArgumentTypes(Protocol *protocol, SEL selector)
 {
     const char *types = _protocol_getMethodTypeEncoding(protocol, selector, YES, YES);
@@ -73,7 +44,6 @@ static NSMapTable<Class, NSDictionary *> *ExportTables(void)
 
 static NSString *JavaScriptNameForSelector(NSString *selectorName)
 {
-    /* doFoo:withBar: -> doFooWithBar, per JSExport.h's default conversion */
     NSArray<NSString *> *pieces = [selectorName componentsSeparatedByString:@":"];
     if (pieces.count <= 1)
         return selectorName;
@@ -88,14 +58,6 @@ static NSString *JavaScriptNameForSelector(NSString *selectorName)
     return name;
 }
 
-/*
- * JSExportAs(name, selector) expands to an @optional method that is the @required one with one
- * more keyword appended, "__JS_EXPORT_AS__<name>:(id)argument" - so
- * JSExportAs(doFoo, - (void)doFoo:(id)foo withBar:(id)bar) declares the @optional selector
- * doFoo:withBar:__JS_EXPORT_AS__doFoo: alongside the @required doFoo:withBar:. Recovering the
- * rename means finding that trailing keyword and dropping it to name the @required selector it
- * decorates.
- */
 static void CollectRenames(Protocol *protocol, NSMutableDictionary<NSString *, NSString *> *renames)
 {
     unsigned optionalCount = 0;
@@ -118,8 +80,6 @@ static void CollectProtocol(Protocol *protocol, NSMutableDictionary<NSString *, 
 {
     if (!protocol_conformsToProtocol(protocol, @protocol(JSExport)))
         return;
-    /* a property's getter and setter are required methods of the protocol too; as the release
-     * does, they are the property's alone and not exported as methods of their own */
     NSMutableSet<NSString *> *accessors = [NSMutableSet set];
     unsigned propertyCount = 0;
     objc_property_t *properties = protocol_copyPropertyList(protocol, &propertyCount);
@@ -218,9 +178,6 @@ static JSValueRef InvokeSelector(JSContextRef ctx, id target, SEL selector, cons
     NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
     invocation.selector = selector;
     invocation.target = target;
-    /* -setArgument:atIndex: only copies bytes; without this, an object argument set from a local
-     * that goes out of scope once its branch below ends dangles by the time -invoke
-     * actually runs. */
     [invocation retainArguments];
     NSUInteger expected = signature.numberOfArguments - 2;
     for (NSUInteger index = 0; index < expected; index++) {
@@ -230,7 +187,6 @@ static JSValueRef InvokeSelector(JSContextRef ctx, id target, SEL selector, cons
         if (declared)
             argumentTypes = charon_js_skip_type(argumentTypes);
         if (type[0] == '@') {
-            /* converted by its declared class; refused before the method runs, as the release does */
             JSValueRef failure = NULL;
             id object = declared ? charon_js_argument(ctx, declared, value, &failure) : charon_js_unbox(ctx, value);
             if (failure) {

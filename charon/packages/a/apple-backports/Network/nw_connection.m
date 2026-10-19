@@ -1,38 +1,3 @@
-/*
- * The connection of Network: a real socket, on the queue the program gave, with the SDK's whole
- * surface over it.
- *
- * What a connection is here, exactly: the host is resolved with `getaddrinfo` (or taken from the
- * address the endpoint already is), a socket of the transport the stack asks for is opened and
- * connected, the socket options the TCP and IP options ask for are set on it, and the bytes are moved
- * by two dispatch sources on the connection's own queue - so every handler of a connection is called
- * on the queue that was set, and never before `nw_connection_start` has returned to its caller. A
- * connection with a TLS protocol in its stack wraps that socket in the release's own SecureTransport
- * (`SSLCreateContext`, `SSLSetIOFuncs`, `SSLSetPeerDomainName`, `SSLHandshake`, `SSLRead`, `SSLWrite`
- * - all measured exported by the iOS 6.1.3 cache, `facts/Network/NWConnection.md`), driven from the
- * same two sources, so the handshake and the data travel over one engine and the state machine has
- * one place to move.
- *
- * The states are the SDK's: `waiting` while there is no route to the peer or no answer yet, `preparing`
- * once the transport is up and the protocols above it are being set up, `ready` when the connection
- * carries bytes, `failed` with the error that stopped it, and `cancelled` when the program said so.
- * Viability is what the port measured about: the kernel has a route to the address and the release's
- * own reachability says the path is satisfied - a datagram `connect` sends nothing, so nothing here
- * claims the peer answered.
- *
- * Sending and receiving are the SDK's contract: `nw_connection_send` takes the content with the context
- * that describes it and calls the completion when those bytes are on the wire (or have failed, with the
- * error); `nw_connection_receive` takes the bounds of a message and calls the completion with what
- * arrived, `is_complete` telling the program whether more of that message may follow, and
- * `nw_connection_receive_message` is the same with the bounds the connection itself imposes. A
- * connection with a framer in its stack parses with the framer, and one with WebSocket options carries
- * a WebSocket, so a receive is a whole message rather than a run of bytes.
- *
- * What is not here is said in `facts/Network/NWConnection.md`: QUIC has no transport on this release
- * (it needs a TLS 1.3 handshake and this release's SecureTransport has no TLS 1.2, let alone 1.3 -
- * measured), so a parameters of QUIC is a connection over its transport with no QUIC layer on it.
- */
-
 #import "CharonNW.h"
 #import "CharonNWSupport.h"
 
@@ -55,22 +20,8 @@
 #include <Security/Security.h>
 #include <Security/SecureTransport.h>
 
-/* One name the SDK the port compiles against does not declare, declared here because the port's own
-   code needs it and a header cannot be asked for what it does not carry: `nw_connection_state_setup` is
-   the state a connection is in before it is started, the value 0 of the SDK 26.2 enumeration, while the
-   16.4 header starts its own at `invalid` and has no such case.
-
-   The TLS needs no such name, and the claim that it once did was wrong: the release's context call is
-   `SSLCreateContext`, which this SDK declares and the 6.1.3 cache exports - `SSLContextCreate` is
-   exported by no release on this machine (measured; facts/Network/NWConnection.md has the reading). */
 enum { nw_connection_state_setup = 0 };
 
-/* One piece of content on its way out, and one receive waiting for one. */
-/* The class, its state and its implementation are in this one file, and nowhere else: with the fragile
-   ABI a class's ivar offsets are emitted by every file that sees its @interface, so a header that
-   every file of the library read would make the link see each of them twice. The files that need a
-   connection - the listener, which builds one per accepted socket - ask for what they need through the
-   two C functions at the end of this file. */
 @interface CharonNWConnection : NSObject <OS_nw_connection> {
 @public
     CharonNWEndpoint *_endpoint;
@@ -132,10 +83,6 @@ enum { nw_connection_state_setup = 0 };
 @implementation CharonNWReceive
 @end
 
-/* The class is in CharonNW.h: a listener builds one of these per accepted socket. */
-
-/* ---------------------------------------------------------------- the stack, read once */
-
 static CharonNWProtocolOptions *charon_stack_application(CharonNWParameters *parameters, NSString *family)
 {
     for (CharonNWProtocolOptions *options in parameters->_stack->_application) {
@@ -145,8 +92,6 @@ static CharonNWProtocolOptions *charon_stack_application(CharonNWParameters *par
     return nil;
 }
 
-/* The transport a connection of these parameters uses: the one in the stack, or TCP when the stack
-   holds none - which is what nw_parameters_create builds, and what a plain connection is. */
 static BOOL charon_is_datagram(CharonNWParameters *parameters)
 {
     CharonNWProtocolDefinition *transport = parameters->_stack->_transport ? parameters->_stack->_transport->_definition : nil;
@@ -160,8 +105,6 @@ static BOOL charon_is_secure(CharonNWParameters *parameters)
     return charon_stack_application(parameters, @"nw_tls") != nil;
 }
 
-/* A program's own protocol in the stack is the one whose definition carries a start handler, which
-   is what nw_framer_create_definition gives it and what a built-in protocol's does not have. */
 static CharonNWProtocolOptions *charon_stack_framer(CharonNWParameters *parameters)
 {
     for (CharonNWProtocolOptions *options in parameters->_stack->_application) {
@@ -171,9 +114,6 @@ static CharonNWProtocolOptions *charon_stack_framer(CharonNWParameters *paramete
     return nil;
 }
 
-/* The order the file needs: the read path hands what it read to whoever is waiting for it, and the
-   ready path uses both. Both are internal, so both are static and neither is a symbol the registry
-   has to describe. */
 static void charon_deliver_received(CharonNWConnection *connection);
 static void charon_ready(CharonNWConnection *connection);
 static void charon_tls_pump(CharonNWConnection *connection);
@@ -215,7 +155,6 @@ static CharonNWError *charon_error(nw_error_domain_t domain, int code)
     return error;
 }
 
-/* An error whose code is the POSIX one the kernel gave, which is what a failed socket call is. */
 static CharonNWError *charon_posix_error(void)
 {
     return charon_error(nw_error_domain_posix, errno);
@@ -223,8 +162,6 @@ static CharonNWError *charon_posix_error(void)
 
 #pragma mark - the socket
 
-/* The socket options the program's TCP and IP options ask for, applied to the socket that is open.
-   Each one is a real setsockopt: what a program sets is what the socket does. */
 static void charon_apply_options(CharonNWConnection *connection)
 {
     int handle = connection->_socket;
@@ -263,9 +200,7 @@ static void charon_apply_options(CharonNWConnection *connection)
     if (charon_nw_flag((__bridge CFDictionaryRef)values, "use_minimum_mtu", false))
         setsockopt(handle, IPPROTO_IP, IP_DONTFRAG, &on, sizeof on);
     if (charon_nw_flag((__bridge CFDictionaryRef)values, "no_delay", false)) {
-        /* A stream's no-delay is IP-level too when the interface offers to coalesce. */
     }
-    /* A connection bound to a local endpoint binds to it: the address and the port the program gave. */
     CharonNWEndpoint *local = parameters->_localEndpoint;
     if (local && local->_address.length) {
         struct sockaddr_storage address;
@@ -341,17 +276,8 @@ static OSStatus charon_tls_write(SSLConnectionRef connection, const void *data, 
     return errno == EAGAIN || errno == EWOULDBLOCK ? errSSLWouldBlock : errSSLClosedAbort;
 }
 
-/* The context of this release's SecureTransport, under the name both the SDK and the 6.1.3 cache
-   carry: SSLCreateContext (measured - facts/Network/NWConnection.md), and every other call of this TLS
-   is there too: SSLSetIOFuncs,
-   SSLSetPeerDomainName, SSLSetCertificate, SSLSetSessionOption, SSLHandshake, SSLRead, SSLWrite,
-   SSLClose. A connection takes the system's own evaluation of the server's chain - this release has
-   no SSLGetServerTrust, so a program that wants a policy of its own asks to break on server auth with
-   SSLSetSessionOption, which is here. */
 #pragma mark - the bytes
 
-/* Everything a connection received since the last delivery, handed to the WebSocket when it has one,
-   to the framer when the stack has one, and to the pending receive otherwise. */
 static void charon_received(CharonNWConnection *connection, NSData *bytes)
 {
     connection->_receivedBytes += bytes.length;
@@ -366,10 +292,6 @@ static void charon_received(CharonNWConnection *connection, NSData *bytes)
     charon_deliver_received(connection);
 }
 
-/* A message the WebSocket or the framer has produced is what the program receives. */
-/* The first message the framer has delivered and not yet handed on, with whether it is the end of the
-   framer's message. The framer delivers into its own list, which is what nw_framer_deliver_input
-   fills; a connection is what hands those to the program. */
 static NSData *charon_framer_message(CharonNWConnection *connection, BOOL *isComplete)
 {
     CharonNWFramer *framer = connection->_framer;
@@ -381,7 +303,6 @@ static NSData *charon_framer_message(CharonNWConnection *connection, BOOL *isCom
         id complete = entry[2];
         if (isComplete)
             *isComplete = [complete boolValue];
-        /* The metadata the framer gave the message travels with it, when the context can hold it. */
         if ([message isKindOfClass:[CharonNWProtocolMetadata class]])
             connection->_lastFramerMessage = message;
         return bytes;
@@ -451,27 +372,10 @@ static void charon_deliver_received(CharonNWConnection *connection)
     }
 }
 
-/* What decides whether this connection can move a byte at all, at the moment it tries: the
-   descriptor the sources are over, the sources themselves and whether each is live, the queue they
-   and every handler are on, and the state the connection is in. Printed for both paths - a connection
-   of the program's own and one a listener handed over - because that is how the difference between
-   them was found (CHARON_TRACE_CONNECTION=1 in the environment).
- *
- * What the trace showed for a connection a listener handed over, and what it did not settle: the
- * connection reaches `ready` on both sides, the host's own send reports success, the read and the
- * write sources never fire, and - the anomaly this is for - the descriptor the accept produced is
- * not the one the connection holds when its engine runs, with a gap of exactly one on every
- * connection. The descriptors themselves are as they are made: the read source is over
- * `connection->_socket` and resumed, the write source is suspended until there is something to write,
- * and the accepted socket is made non-blocking. So the gap is where to look next, and
- * `tests/backports/host/network-listener` fails on it rather than around it. */
 static void charon_dump(CharonNWConnection *connection, const char *where)
 {
     if (!getenv("CHARON_TRACE_CONNECTION"))
         return;
-    /* dispatch_source_get_data is NOT the descriptor: measured, a source created over a socket's fd
-       answers 0 for it, so this column is the source's own data and not its target, and the only way
-       to see which descriptor a source is over is the one the caller gave it. */
     uintptr_t read_data = connection->_readSource ? dispatch_source_get_data(connection->_readSource) : 0;
     fprintf(stderr, "[charon] %s fd=%d state=%d queue=%p readSource=%p over=%d writeSource=%p over=%d writing=%d "
                     "started=%d cancelled=%d datagram=%d secure=%d sends=%lu receives=%lu\n",
@@ -485,7 +389,6 @@ static void charon_dump(CharonNWConnection *connection, const char *where)
 static void charon_flush(CharonNWConnection *connection)
 {
     charon_dump(connection, "flush");
-    /* What SecureTransport could not take yet goes first, then what the program handed to send. */
     while (connection->_pendingWrite.length) {
         size_t length = connection->_pendingWrite.length;
         if (connection->_ssl) {
@@ -551,7 +454,6 @@ static void charon_flush(CharonNWConnection *connection)
         if (completion)
             completion(NULL);
     }
-    /* The write source is only live while there is something to write. */
     if (connection->_writeSource && !connection->_connecting) {
         if (connection->_pendingWrite.length || connection->_sends.count) {
             if (!connection->_readingSource) {
@@ -565,12 +467,8 @@ static void charon_flush(CharonNWConnection *connection)
     }
 }
 
-/* What SecureTransport still has buffered is read out of it and handed on the same way bytes off the
-   socket are, so a program sees one stream whichever layer is above the socket. */
 static void charon_tls_pump(CharonNWConnection *connection)
 {
-    /* SSLRead is what pulls, and it answers errSSLWouldBlock when SecureTransport has nothing yet -
-       the same contract as read() on the socket, so one loop reads through both layers. */
     uint8_t buffer[16384];
     for (;;) {
         size_t length = sizeof buffer;
@@ -609,7 +507,6 @@ static void charon_readable(CharonNWConnection *connection)
             continue;
         }
         if (got == 0) {
-            /* The peer closed: what arrived is the end of the stream, and the connection is done. */
             connection->_finished = YES;
             charon_deliver_received(connection);
             charon_report_state(connection, nw_connection_state_cancelled, nil);
@@ -639,11 +536,6 @@ static void charon_handshake(CharonNWConnection *connection)
 
 #pragma mark - opening and closing
 
-/* Open a socket of the right kind, connect it to the endpoint, and report how it went. The address
-   list is getaddrinfo's own, so the first address that takes a connect is the one the system would
-   have picked. */
-/* The path a connection is on, and what the program is told about it. The monitor is the Foundation
-   library's own (facts/Network/NWPathMonitor.md): the port does not work the network out twice. */
 static void charon_watch_path(CharonNWConnection *connection)
 {
     if (connection->_monitor)
@@ -659,9 +551,6 @@ static void charon_watch_path(CharonNWConnection *connection)
         if (!self || self->_cancelled)
             return;
         self->_currentPath = path;
-        /* Viable means the kernel has a route to the address and the path is satisfied. For a
-           datagram socket connect() sends nothing - it binds the default peer and returns as soon as
-           the kernel has a route - so this never claims the peer answered. */
         BOOL satisfied = nw_path_get_status(path) == nw_path_status_satisfied;
         if (self->_path)
             self->_path(path);
@@ -675,8 +564,6 @@ static void charon_watch_path(CharonNWConnection *connection)
     nw_path_monitor_start(monitor);
 }
 
-/* A program's own protocol, made for this connection, with the options and the endpoints the stack
-   gives it. It is the object the framer calls of the stack are made on. */
 static void charon_make_framer(CharonNWConnection *connection)
 {
     CharonNWProtocolOptions *options = charon_stack_framer(connection->_parameters);
@@ -700,11 +587,6 @@ static void charon_install_sources(CharonNWConnection *connection)
 {
     if (connection->_readSource || connection->_writeSource)
         return;
-    /* Both sources are on the connection's own queue, so a handler is called there and never before
-       nw_connection_start has returned. The write source stays suspended until there is something to
-       write; a socket is always writable, so an always-live one would spin. */
-    /* The read source is made once the socket is a connection: while a connect is in progress there is
-       nothing to read, and the read source would fire for a hangup the kernel has not decided on yet. */
     if (getenv("CHARON_TRACE_FD"))
         fprintf(stderr, "[charon] sources: fd=%d connecting=%d queue=%p\n", connection->_socket,
                 connection->_connecting, (__bridge void *)connection->_queue);
@@ -724,9 +606,6 @@ static void charon_install_sources(CharonNWConnection *connection)
                 return;
             }
             charon_readable(self);
-            /* Whatever arrived may have made room in the socket, and every event the connection gets
-               is a chance to notice: a write source is the device's own signal for that, and this is
-               the same check on the other side of the same engine. */
             if (!self->_cancelled)
                 charon_flush(self);
         });
@@ -744,8 +623,6 @@ static void charon_install_sources(CharonNWConnection *connection)
             }
             charon_flush(self);
         });
-        /* A connect that is still in progress is finished by the socket becoming writable, and this
-           is the only thing that waits for it - so the write source is live until it is. */
         if (connection->_connecting) {
             dispatch_resume(connection->_writeSource);
             connection->_readingSource = YES;
@@ -755,10 +632,6 @@ static void charon_install_sources(CharonNWConnection *connection)
     charon_flush(connection);
 }
 
-/* Whether a connect() that answered EINPROGRESS has finished, and how it went: the socket is writable
-   when the kernel has connected it, and SO_ERROR is then what the connect() would have answered
-   later. A datagram socket is connected the moment connect() is given an address, so there is never
-   anything to wait for. */
 static void charon_connect_finished(CharonNWConnection *connection)
 {
     if (connection->_readSource)
@@ -779,15 +652,10 @@ static void charon_connect_finished(CharonNWConnection *connection)
     charon_ready(connection);
 }
 
-/* Take a socket that is already connected - one an accept produced - as this connection's own. The
-   engine is the same from here on: the sources, the path, the protocols and the state machine are
-   made exactly as they are for a connection that connected itself. */
 void CharonNWConnectionAttach(nw_connection_t value, int handle, BOOL connected)
 {
     if (getenv("CHARON_TRACE_CONNECTION")) {
         CharonNWConnection *attached = (CharonNWConnection *)value;
-        /* the port the other end connected from, which is what identifies this connection: two
-           connections of one program are told apart by nothing else */
         unsigned peer_port = 0;
         struct sockaddr_storage peer;
         socklen_t peer_length = sizeof peer;
@@ -799,9 +667,6 @@ void CharonNWConnectionAttach(nw_connection_t value, int handle, BOOL connected)
                 attached ? (__bridge void *)attached->_queue : NULL, attached ? attached->_isDatagram : 0,
                 attached ? attached->_secure : 0);
     }
-    /* Taking the socket is all this does. The engine is not started here: the connection is started
-       after it is given its queue, by whoever made it - a listener's new-connection handler, or a
-       program - and `nw_connection_start` is what knows it is already connected. */
     CharonNWConnection *connection = (CharonNWConnection *)value;
     (void)connected;
     if (!connection || handle < 0)
@@ -812,9 +677,6 @@ void CharonNWConnectionAttach(nw_connection_t value, int handle, BOOL connected)
         connection->_socket = handle;
         connection->_acceptedSocket = handle;
         connection->_currentEndpoint = connection->_endpoint;
-        /* The connection's own socket is now the accepted descriptor and nothing else may be standing
-           in for it: the engine below makes its sources over exactly this number, so a connection that
-           reached here with a different one would be reading a descriptor that is not its socket. */
         assert(connection->_socket == handle);
     }
     charon_nw_set_nonblocking(handle);
@@ -823,28 +685,16 @@ void CharonNWConnectionAttach(nw_connection_t value, int handle, BOOL connected)
     connection->_secure = charon_is_secure(parameters);
 }
 
-/* The descriptor a connection object holds, asked for by the files that cannot see its ivars: the
-   listener's accept path says which fd the object it made is holding, so that a start that dialled
-   again instead of adopting it would be visible in one trace. */
 int charon_nw_connection_socket(nw_connection_t value)
 {
     return ((CharonNWConnection *)value)->_socket;
 }
 
-/* The descriptor a connection object holds, for the files that cannot see its ivars: the listener's
-   accept path says which fd the object it made is holding, so a start that dialled again instead of
-   adopting it is one line of trace away. */
-
-/* Whether a program has already given this connection a queue, which is what a listener asks before it
-   starts one: a connection with no queue does nothing at all when it is started. */
 BOOL CharonNWConnectionHasQueue(nw_connection_t value)
 {
     return ((CharonNWConnection *)value)->_queue != NULL;
 }
 
-/* Hand a connection's socket to whoever asks for it - a listener, which becomes a listener of it -
-   and say what the connection was made of. FALSE for a connection with no socket, which is a
-   connection that was cancelled or never started. */
 BOOL CharonNWConnectionTakeSocket(nw_connection_t value, int *out_handle, void *out_endpoint, void *out_parameters)
 {
     CharonNWConnection *connection = (CharonNWConnection *)value;
@@ -864,8 +714,6 @@ BOOL CharonNWConnectionTakeSocket(nw_connection_t value, int *out_handle, void *
     return YES;
 }
 
-/* What a connection is ready: the socket is connected, the path is being watched, the sources are
-   live, and the metadata of each protocol is there for nw_connection_copy_protocol_metadata. */
 static void charon_ready(CharonNWConnection *connection)
 {
     if (connection->_cancelled)
@@ -907,9 +755,6 @@ static void charon_ready(CharonNWConnection *connection)
             return;
         }
         SSLSetIOFuncs(connection->_ssl, charon_tls_read, charon_tls_write);
-        /* As high as this release's TLS goes: it has SSLSetProtocolVersionMin and Max (measured in
-           the 6.1.3 cache) and so speaks TLS 1.2, and TLS 1.3 is not in it at all - which is what
-           picotls is in the library for, when a server insists on 1.3. */
         SSLSetProtocolVersionMin(connection->_ssl, kTLSProtocol1);
         SSLSetProtocolVersionMax(connection->_ssl, kTLSProtocol12);
         NSString *peer = connection->_endpoint->_hostname.length ? connection->_endpoint->_hostname : nil;
@@ -925,9 +770,6 @@ static void charon_ready(CharonNWConnection *connection)
     charon_report_state(connection, nw_connection_state_ready, nil);
 }
 
-/* Take a socket the connect has just made, under the same lock nw_connection_cancel takes: false
-   when the connection was cancelled while the connect ran, and then the caller closes the handle and
-   nothing else happens for a connection nobody wants. */
 static BOOL charon_take_connected_socket(CharonNWConnection *connection, int handle, CharonNWEndpoint *endpoint)
 {
     @synchronized(connection) {
@@ -977,9 +819,6 @@ static void charon_open(CharonNWConnection *connection)
             charon_apply_options(connection);
             if (connect(handle, entry->ai_addr, entry->ai_addrlen) == 0) {
                 freeaddrinfo(list);
-                /* The connect ran on a queue of its own, so a cancel may have landed while it did: the
-                   handle and the endpoint are taken under the lock the cancel takes, and a connection
-                   cancelled in the meantime closes what it made instead of handing it to the sources. */
                 if (!charon_take_connected_socket(self, handle, endpoint)) {
                     close(handle);
                     return;
@@ -996,7 +835,6 @@ static void charon_open(CharonNWConnection *connection)
         }
         freeaddrinfo(list);
     } else if (endpoint->_address.length) {
-        /* An address endpoint is not looked up: it is the address. */
         struct sockaddr_storage address;
         memset(&address, 0, sizeof address);
         memcpy(&address, endpoint->_address.bytes, MIN(endpoint->_address.length, sizeof address));
@@ -1066,15 +904,11 @@ static void charon_stop(CharonNWConnection *connection, nw_connection_state_t st
         nw_path_monitor_cancel(connection->_monitor);
         connection->_monitor = nil;
     }
-    /* The handlers go with the connection: a handler that outlived it would be a block the program
-       cannot release, and the header says no handler is called after a cancel, which is what letting
-       them go makes true of the objects too. */
     connection->_path = nil;
     connection->_viability = nil;
     connection->_betterPath = nil;
     connection->_state = nil;
 
-    /* Every receive and every send still waiting is answered, so no program waits for ever. */
     for (CharonNWReceive *receive in [connection->_receives copy]) {
         [connection->_receives removeObject:receive];
         if (receive->_completion)
@@ -1098,12 +932,7 @@ nw_connection_t nw_connection_create(nw_endpoint_t endpoint, nw_parameters_t par
     connection->_endpoint = (CharonNWEndpoint *)endpoint;
     connection->_parameters = (CharonNWParameters *)parameters;
     connection->_socket = -1;
-    /* No accepted descriptor: this is a connection of a program's own, which has to dial, and the
-       start path decides that on this number. Left at zero it would read as a descriptor and a
-       connection of the program's own would take the listener's path. */
     connection->_acceptedSocket = -1;
-    /* The connect is the one call that has to wait, so it waits on a queue of its own: the connection's
-       queue carries the handlers and must never be held up by a peer that takes its time. */
     connection->_connectQueue = dispatch_queue_create("charon.connect", DISPATCH_QUEUE_SERIAL);
     connection->_sends = [NSMutableArray array];
     connection->_receives = [NSMutableArray array];
@@ -1159,7 +988,6 @@ void nw_connection_start(nw_connection_t connection)
         return;
     CharonNWConnection *self = (CharonNWConnection *)connection;
     @synchronized(self) {
-        /* The queue before the start, as the SDK requires, and a second start is not a new attempt. */
         if (self->_started || self->_cancelled || !self->_queue)
             return;
         self->_started = YES;
@@ -1170,11 +998,6 @@ void nw_connection_start(nw_connection_t connection)
         self->_startedAtMilliseconds = charon_nw_uptime_milliseconds();
         charon_report_state(self, nw_connection_state_waiting, nil);
         if (self->_acceptedSocket >= 0) {
-            /* A connection whose socket came from an accept is connected already. Dialling the
-               endpoint again would be a *client* connection to the listener's own address, on a
-               socket of its own, while the accepted descriptor sat unused: that is what a connection
-               made by a listener used to do, and nothing the program sent to it ever arrived. The
-               engine is made over the accepted descriptor, asserted to be the connection's socket. */
             @synchronized(self) {
                 assert(self->_socket == self->_acceptedSocket);
             }
@@ -1207,8 +1030,6 @@ void nw_connection_force_cancel(nw_connection_t connection)
     if (!connection)
         return;
     CharonNWConnection *self = (CharonNWConnection *)connection;
-    /* Forcibly: on the queue of the caller, not the connection's, and without waiting for what that
-       queue is doing - which is what a force is for. */
     charon_stop(self, nw_connection_state_cancelled, nil);
 }
 
@@ -1235,8 +1056,6 @@ void nw_connection_cancel_current_endpoint(nw_connection_t connection)
     if (!connection)
         return;
     CharonNWConnection *self = (CharonNWConnection *)connection;
-    /* The endpoint of a connection is the one it is connected to; with a Bonjour or a multiplexed
-       peer there may be others, and cancelling this one leaves the connection to try the next. */
     self->_currentEndpoint = nil;
     dispatch_async(self->_queue ?: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         if (self->_cancelled)
@@ -1258,8 +1077,6 @@ void nw_connection_batch(nw_connection_t connection, dispatch_block_t batch_bloc
     CharonNWConnection *self = (CharonNWConnection *)connection;
     if (!batch_block)
         return;
-    /* A batch is the connection's state held still while the block runs, so a program that changes
-       the handlers sees them all take effect together. */
     dispatch_async(self->_queue ?: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         @synchronized(self) {
             batch_block();
@@ -1278,11 +1095,6 @@ uint32_t nw_connection_get_maximum_datagram_size(nw_connection_t connection)
     CharonNWConnection *self = (CharonNWConnection *)connection;
     if (!self || self->_socket < 0)
         return 0;
-    /* The interface *this* connection is on, which is the interface that holds the address the socket
-       bound to - not the first interface the device has up, which is a different link when the
-       connection is over the loopback or over Wi-Fi while the general path is cellular. The system's
-       own answer is the MTU of the path the connection is on, and for a connection over the loopback
-       that is lo0 (measured: 16344 there, where the device's other interface would say 1460). */
     struct sockaddr_storage local;
     memset(&local, 0, sizeof local);
     socklen_t length = sizeof local;
@@ -1317,8 +1129,6 @@ uint32_t nw_connection_get_maximum_datagram_size(nw_connection_t connection)
         break;
     }
     freeifaddrs(list);
-    /* 20 bytes of IP header and 8 of UDP or 20 of TCP, which is what the kernel puts on the wire and
-       is why the largest datagram over an MTU of 1500 is 1500 - 20 - 8. */
     size_t overhead = self->_isDatagram ? 20u + 8u : 20u + 20u;
     return mtu > overhead ? mtu - (uint32_t)overhead : 0;
 }
@@ -1328,9 +1138,6 @@ char *nw_connection_copy_description(nw_connection_t connection)
     CharonNWConnection *self = (CharonNWConnection *)connection;
     if (!self)
         return NULL;
-    /* The description is what the host's own Network writes: the connection's number, the peer, the
-       protocols, the attribution, the path, the viability and the interface - the same pieces, in the
-       same order, for a program that prints it. */
     NSMutableString *text = [NSMutableString string];
     [text appendFormat:@"[C1 %@ ", self->_endpoint->_hostname.length ? self->_endpoint->_hostname : @"?"];
     if (self->_endpoint->_port.length)
@@ -1420,14 +1227,9 @@ void nw_connection_receive(nw_connection_t connection, uint32_t minimum_incomple
 
 void nw_connection_receive_message(nw_connection_t connection, nw_connection_receive_completion_t completion)
 {
-    /* One message, whole: the bounds are the connection's own, so a message is never cut in half. */
     nw_connection_receive(connection, 1, 0, completion);
 }
 
-/* What the protocols of a connection say about it: the IP packet's service class and ECN flag, the
-   transport's available buffers, and the negotiated session of a secure one. Asked of a protocol the
-   connection is not carrying, it is NULL - which is what the SDK says a definition the connection does
-   not have answers. */
 nw_protocol_metadata_t nw_connection_copy_protocol_metadata(nw_connection_t connection, nw_protocol_definition_t definition)
 {
     CharonNWConnection *self = (CharonNWConnection *)connection;
@@ -1442,12 +1244,6 @@ nw_protocol_metadata_t nw_connection_copy_protocol_metadata(nw_connection_t conn
         return self->_secureMetadata;
     return NULL;
 }
-
-/* The report of what establishing this connection took, and the report of what it has moved since.
-   Both are the connection's own measurements, read back through the accessors of NWObjects.md: the
-   times from its first start to the state it reached, the attempts before it, the protocols of its
-   stack and the address it settled on; and the bytes the program sent and received, the bytes the
-   transport moved, and the round trip times the kernel's own TCP_CONNECTION_INFO holds. */
 
 nw_establishment_report_t CharonNWConnectionEstablishmentReport(nw_connection_t connection)
 {

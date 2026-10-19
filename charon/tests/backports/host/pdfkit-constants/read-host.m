@@ -1,13 +1,3 @@
-// The host's PDFKit constants: one row per name, value and the image it came from.
-//
-// The port's side is NOT linked in: the port's values are the string literals in its committed
-// constants object, which the runner reads out of that file, so nothing here has to agree with the
-// port's headers and the two sides cannot collide over them.
-//
-// One fork()ed child per name, because reading a symbol whose pointer is not an object kills the
-// process that reads it in the parent - that cost two runs of the read before the fork went in.
-//
-//   xcrun clang -fobjc-arc -w read-host.m -framework Foundation -o read-host && ./read-host
 #import <Foundation/Foundation.h>
 #import <dlfcn.h>
 #include <stdio.h>

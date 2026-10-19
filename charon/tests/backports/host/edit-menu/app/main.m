@@ -1,12 +1,6 @@
 #import <UIKit/UIKit.h>
 #include <stdio.h>
 
-// A bundled Mac Catalyst app with the iPad idiom (UIDeviceFamily 2) and a window, which is how an edit menu is shown. The scene delegate
-// runs the checks on the host's own UIEditMenuInteraction and, in the port's build, on the port's (compiled with the class renamed, so the
-// host's is still reached by name). Each check writes one "side<TAB>check<TAB>value" line to the file named by CHARON_SCENE_OUT, then the app
-// quits. The delegate's calls are written in the order they happen, with a number, so the order is part of the answer. run.sh builds both
-// and diffs them.
-
 static FILE *out;
 static const char *side;
 static int sequence;
@@ -27,8 +21,6 @@ static NSString *class_name(id object)
     return [name hasPrefix:@"CharonPort"] ? [name substringFromIndex:10] : name;
 }
 
-// The host's own UIKit adds private interactions when one of ours is added, so the counts are host observations only: they go to the file
-// named by CHARON_HOST_ONLY_OUT, and are not compared with the port's.
 static FILE *hostOnly;
 
 static void report_host(const char *check, NSString *value)
@@ -74,7 +66,6 @@ static void call(NSString *what)
 
 @implementation CharonSceneDelegate
 
-// The host's checks, run once the window is up. The delegate is kept by the test until the end, except where a check releases it.
 static void checks(UIView *view, UIEditMenuInteraction *(^make)(id<UIEditMenuInteractionDelegate>))
 {
     CharonEditMenuDelegate *delegate = [[CharonEditMenuDelegate alloc] init];
@@ -123,7 +114,6 @@ static void checks(UIView *view, UIEditMenuInteraction *(^make)(id<UIEditMenuInt
     [root.view addSubview:view];
     self.window.rootViewController = root;
     [self.window makeKeyAndVisible];
-    // The checks run once the window has laid out and become key: a menu is presented into a settled window, not a new one.
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [self.window layoutIfNeeded];
         report("scene-activation-state", [NSString stringWithFormat:@"%ld", (long)self.window.windowScene.activationState]);

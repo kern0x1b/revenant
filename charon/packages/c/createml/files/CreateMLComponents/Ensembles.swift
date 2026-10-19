@@ -1,29 +1,10 @@
-// Ensembles.swift — the random forest and the gradient boosted trees.
-//
-// Both are ensembles of the tree in DecisionTrees.swift, and both differ only in what they vary and
-// what they average:
-//
-//   - a random forest grows its trees on bootstrap samples of the rows and, inside every split
-//     search, on a random subset of the features, and averages their predictions;
-//   - a boosted forest grows its trees one at a time, each on the *gradient* of the loss at the
-//     current ensemble, and adds it with a learning rate.
-//
-// The averaging is a mean over trees for a regression and a mean over label *distributions* for a
-// classification, never a majority vote of labels: a vote throws away the confidence a tree had,
-// and a confidence is what a forest's probabilities are made of.
-
 import Foundation
 
-/// A random forest: a regression's or a classification's.
 public struct RandomForestModel {
     public let trees: [DecisionTreeModel]
     public let featureNames: [String]
     public let isClassification: Bool
     public let labelOrder: [String]
-    /// The share of the features one split search may look at, as a count. Computed once at fit
-    /// time from the configuration and the column count, because a forest with a column count of
-    /// three and `maximumFeatures: .sqrt(3)` looks at two of them and that has to be the same two
-    /// decisions at every node to be reproducible.
     public let featuresPerSplit: Int
 
     public init(trees: [DecisionTreeModel], featureNames: [String], isClassification: Bool,
@@ -40,10 +21,6 @@ public struct RandomForestModel {
         return (0..<design.rows).map { index in
             if isClassification {
                 let distribution = labelProbabilities(design, index: index)
-                // The prediction of a classification forest is the label with the highest mean
-                // probability, and the *first* of them in the label order when two tie — a tie in
-                // floating point must not decide the answer, or the same model would answer two
-                // different labels on two runs of the same data.
                 var bestLabel = labels[0], bestProbability = -Double.infinity
                 for label in labels {
                     let p = distribution[label] ?? 0
@@ -60,7 +37,6 @@ public struct RandomForestModel {
         }
     }
 
-    /// The mean label distribution over the trees, for one row.
     public func labelProbabilities(_ design: RowMatrix, index: Int) -> [String: Double] {
         guard !trees.isEmpty, !labelOrder.isEmpty else { return [:] }
         var totals = [String: Double]()
@@ -75,12 +51,10 @@ public struct RandomForestModel {
         return totals
     }
 
-    /// The mean label distribution over the trees, for a whole design matrix.
     public func labelProbabilities(_ design: RowMatrix) -> [[String: Double]] {
         (0..<design.rows).map { labelProbabilities(design, index: $0) }
     }
 
-    /// The label the forest's mean distribution answers for a row, and the distribution itself.
     public func predictLabel(_ design: RowMatrix, index: Int) -> String {
         let distribution = labelProbabilities(design, index: index)
         var bestLabel = labelOrder.first ?? "", bestProbability = -Double.infinity
@@ -95,7 +69,6 @@ public struct RandomForestModel {
     }
 }
 
-/// How many features one split search of a forest may look at.
 public enum ForestFeatures: Equatable {
     case all
     case sqrt(Int)
@@ -105,7 +78,6 @@ public enum ForestFeatures: Equatable {
 
     public static func all(_ total: Int) -> ForestFeatures { .all }
 
-    /// The count a configuration resolves to for a table of `total` columns.
     public func count(of total: Int) -> Int {
         switch self {
         case .all: return total
@@ -114,22 +86,11 @@ public enum ForestFeatures: Equatable {
             return max(1, Int(Double(factor) * (log(Double(total)) / log(2))))
         case .number(let count): return max(1, min(count, total))
         case .fraction(let share):
-            // Rounded, and never below one: a table of one column must still be splittable, and a
-            // table of ten with a share of 0.1 would otherwise look at no columns at all and answer
-            // a stump for every tree in the forest.
             return max(1, min(total, Int((Double(total) * share).rounded())))
         }
     }
 }
 
-/// What a random forest is allowed to be, in the framework's own parameter names.
-///
-/// `numberOfIterations` is the framework's `maxIterations`, `maximumFeatures` is its
-/// `columnSubsample` as a share, and `rowSubsample` is the share of the rows each tree is grown on:
-/// a share of one is a bootstrap sample, as every forest has always been, and a share below one is
-/// sampling without replacement, which is what the framework's default of 0.8 asks for. The mapping
-/// is written down here because a reader comparing these names with the header's has to be able to
-/// see that nothing was renamed and nothing dropped.
 public struct RandomForestParameters {
     public var numberOfIterations: Int
     public var maximumDepth: Int
@@ -152,22 +113,12 @@ public struct RandomForestParameters {
         self.seed = seed
     }
 
-    /// The tree parameters this forest's trees are grown with.
-    ///
-    /// `minChildWeight` is a sum of absolute deviations rather than a count of rows, which is what
-    /// the framework's own criterion is: a leaf is heavy enough when the total distance of its rows
-    /// from their own mean is at least that. A row's share of the weight is its absolute deviation
-    /// from the *node's* mean at unit scale, so the smallest leaf a weight admits is
-    /// `weight / meanAbsoluteDeviation` rows — and where the column's spread is zero every row has
-    /// zero weight, which is a degenerate case a table of identical values produces and which is
-    /// handled by falling back to a leaf of one row.
     public var treeParameters: TreeParameters {
         TreeParameters(maximumDepth: maximumDepth, minimumSamplesToSplit: 2, minimumSamplesToLeaf: 1,
                        minimumLossReduction: minimumLossReduction, seed: seed)
     }
 }
 
-/// Grows a random forest.
 public enum RandomForestFitter {
     public static func fit(_ training: TabularTrainingSet, parameters: RandomForestParameters) -> RandomForestModel {
         let labelOrder = Array(Set(training.targetLabels)).sorted()
@@ -179,10 +130,6 @@ public enum RandomForestFitter {
         trees.reserveCapacity(iterations)
         let treeParameters = parameters.treeParameters
         for _ in 0..<iterations {
-            // The rows this tree is grown on: a bootstrap sample when every row is used, and a
-            // sample without replacement when the framework's `rowSubsample` is below one. Both
-            // give a tree that has seen some rows twice or not at all, which is what makes the
-            // ensemble's average better than any one of its trees.
             let sample: [Int]
             if parameters.rowSubsample >= 1 {
                 sample = generator.bootstrap(population: training.design.rows, count: training.design.rows)
@@ -203,12 +150,6 @@ public enum RandomForestFitter {
 }
 
 extension DecisionTreeFitter {
-    /// A tree grown on a subset of the features, with the other columns held at their own value so
-    /// that a node's `feature` index still indexes the same design matrix every tree shares.
-    ///
-    /// The subset is applied by hiding the columns a node may not look at, not by compacting the
-    /// matrix: a per-tree column numbering would make every tree's thresholds live in a different
-    /// space, and a forest's prediction would then be a comparison across spaces.
     public static func fit(_ training: TabularTrainingSet, featureSubset: [Int],
                            parameters: TreeParameters, generator: inout SeededGenerator) -> DecisionTreeModel {
         let labelOrder = Array(Set(training.targetLabels)).sorted()
@@ -224,11 +165,6 @@ extension DecisionTreeFitter {
 }
 
 extension TabularTrainingSet {
-    /// A copy of the training set whose columns outside `features` are held at a constant, so a
-    /// split search over it can only choose among the columns it is allowed.
-    ///
-    /// The constant is the column's own mean, so the masked column contributes no variance to a
-    /// regression leaf and the impurity a split is scored by is not moved by the act of hiding it.
     public func masking(features: Set<Int>) -> TabularTrainingSet {
         guard features.count < design.columns else { return self }
         var masked = design

@@ -1,33 +1,3 @@
--- Read the tables inside one image of a real dyld shared cache: a table of names, a constant
--- CFArray of numbers, one class's own method implementations, and the function boundaries the
--- image declares.
---
--- Usage: CHARON_ROOT=<worktree> xmake l skeleton-table.lua <cache> <image substring> names
---        CHARON_ROOT=<worktree> xmake l skeleton-table.lua <cache> <image substring> parents <cfarray>
---        CHARON_ROOT=<worktree> xmake l skeleton-table.lua <cache> <image substring> impls <class> [selector]
---        CHARON_ROOT=<worktree> xmake l skeleton-table.lua <cache> <image substring> functions <lo> <hi>
---        CHARON_ROOT=<worktree> xmake l skeleton-table.lua <cache> <image substring> bytes <lo> <count>
---        CHARON_ROOT=<worktree> xmake l skeleton-table.lua <cache> <image substring> texts <address>...
---
--- The address space is the project's own reader (modules/apple/dyld.lua, through open_cache), so a
--- split cache and the slide a stored pointer carries are handled by the code that already binds
--- them and not by a second parser here. Nothing is written and the cache is opened read only.
---
--- Why this exists: an Objective-C inventory reads a class's selectors, but a selector does not say
--- where its implementation is, and the value behind a getter is often a table rather than a
--- constant. ARKit's body tracking is that case -- ARSkeletonDefinition's two getters are two loads
--- out of an object, and what they load is measured here.
---
--- Two layouts of a method list are in the wild and this reads both, because reading the wrong one
--- returns nothing at all rather than something wrong:
---
---   * the full relative entry, {int32 name, int32 types, IMP imp}: the selector is a 32-bit chained
---     pointer offset from the field, the implementation is a real 64-bit pointer last in the entry;
---   * the small relative entry (entsize_and_flags bit 0 set, twelve bytes on a 64-bit cache),
---     {int32 name, int32 types, int32 imp}: the selector is a direct-selector *index* into the
---     selector table, and the implementation is a 32-bit chained pointer whose target is relative
---     to the field. ARKitCore of the 16.0 arm64e cache is entirely the second shape
---     (entsize_and_flags = 0xc000000f).
 local dyld_module = "apple.dyld"
 
 local function open(root, cachefile)
@@ -35,10 +5,6 @@ local function open(root, cachefile)
     return dyld.open_cache(cachefile)
 end
 
--- Every image whose install name contains the substring, with its sections, so that every address
--- a read produces can be printed with the image and section it belongs to. An address no section
--- covers is printed as such rather than left for the caller to guess: in a shared cache a great deal
--- of code and data belongs to no image, and a value that lands there is a read that went wrong.
 local function images(cache, wanted)
     local found = {}
     for _, loaded in ipairs(cache.images) do
@@ -61,10 +27,6 @@ local function where(sections, address)
     return "no image section"
 end
 
--- A stored pointer in this cache keeps its address bits in the low 40 and drops what the slide info
--- keeps above them; the reader's own pointer_at is the second opinion, for the chained and
--- authenticated encodings the mask does not try to undo. This is the rule tools/corpus/cache-value.lua
--- states and tools/corpus/cache-value.lua applies.
 local function pointer(cache, address)
     local raw = cache.read_address(address, 8)
     if not raw then return nil end
@@ -83,9 +45,6 @@ local function number(cache, address)
     return value
 end
 
--- A run of pointers in one image's data that all name a C string of the same image's __cstring. A
--- table of names is exactly that, and a run that stops is a run that stopped: the output is the
--- run's own address and length, so a reader can see where it began and ended.
 local function names(cache, sections, minimum)
     local lo, hi
     for _, hit in ipairs(sections) do
@@ -125,11 +84,6 @@ local function names(cache, sections, minimum)
     end
 end
 
--- A constant CFArray: {runtime base, count, values, capacity}. Its values are read out of the same
--- image's __objc_intobj, where an NSNumber carries its integer in the third word of the object --
--- read as the third word and printed with the other three, so the layout is shown rather than
--- assumed. The array's own count is printed next to the values, which is the check that the values
--- are this array's.
 local function parents(cache, sections, at)
     local count = number(cache, at + 8)
     local values = pointer(cache, at + 16)
@@ -148,17 +102,10 @@ local function parents(cache, sections, at)
     end
 end
 
--- One class's own instance methods, with the address of each implementation. Both entry layouts are
--- read (see the head of this file); which one a list uses is decided by the list's own flags and
--- printed, so a read that finds nothing says which layout it tried.
 local function impls(cache, wanted, class_wanted, only)
     local wide = cache.architecture:startswith("arm64")
     local size = wide and 8 or 4
     local strings, selector_base = {}, nil
-    -- A selector is a C string in one of the images' __objc_methname sections. The reader's own
-    -- string_at is asked first; the byte-at-a-time reader is the second opinion, because a run that
-    -- stops at a mapping boundary comes back as nothing and a selector at the tail of a mapping then
-    -- reads as absent when it is there. Whichever answers, the address is printed with it.
     local function str(address)
         if address == 0 or not cache.mapped(address) then return nil end
         if strings[address] == nil then
@@ -192,11 +139,6 @@ local function impls(cache, wanted, class_wanted, only)
         end
         return strings[address] ~= false and strings[address] or nil
     end
-    -- A small entry names its selector by a direct-selector index counted from the base the
-    -- Objective-C optimization header records, which the cache header points at; a cache that has no
-    -- such header is read from libobjc.A.dylib's own __objc_opt_ro, which is where the same base
-    -- lives when the header is not there. Neither is a guess: a cache with neither is one whose
-    -- direct selectors cannot be read, and this says so instead of answering with noise.
     if not selector_base then
         local offset = cache.field(cache.main, 0x1d0, "<I8")
         if offset then
@@ -225,11 +167,6 @@ local function impls(cache, wanted, class_wanted, only)
         if not cache.mapped(address, size) then return 0 end
         return cache.pointer_at(address, wide)
     end
-    -- The class object holds its metaclass at isa and its own class-data pointer at the word after
-    -- the flags and the instance size, so the same walk reaches a class's class methods: which is the
-    -- only way to tell a class method the class implements from one it merely inherits. ARPlaneExtent's
-    -- +supportsSecureCoding is such a question -- its own instance list of eleven says nothing about a
-    -- class method.
     local function class_data(class)
         if class == 0 or not cache.mapped(class, 5 * size) then return nil end
         local data = pointer_at(class + 4 * size) & (wide and ~7 or ~3)
@@ -262,12 +199,6 @@ local function impls(cache, wanted, class_wanted, only)
                                     local entry = list + 8 + slot * entry_size
                                     local name
                                     if flags & 1 ~= 0 then
-                                        -- A small entry holds three 32-bit chained-pointer offsets and
-                                        -- names its selector by a direct-selector index counted from
-                                        -- the selector table's base -- not by a relative pointer, which
-                                        -- is why neither of the relative bits in
-                                        -- entsize_and_flags is set for it (ARKitCore's lists are
-                                        -- 0xc000000f: small, direct selector, no relative bit).
                                         name = str(selector_base + string.unpack("<i4", cache.read_address(entry, 4)))
                                     elseif relative and flags & 0x800 ~= 0 then
                                         name = str(pointer_at(entry + string.unpack("<i4", cache.read_address(entry, 4))))
@@ -276,8 +207,6 @@ local function impls(cache, wanted, class_wanted, only)
                                     end
                                     local imp
                                     if flags & 1 ~= 0 then
-                                        -- The implementation is a 32-bit chained pointer relative to
-                                        -- the field it is stored in.
                                         local field = entry + 8
                                         imp = (field + string.unpack("<i4", cache.read_address(field, 4)))
                                     else
@@ -306,9 +235,6 @@ local function impls(cache, wanted, class_wanted, only)
                                 end
                             end
                             list_at(data.methods, "instance")
-                            -- A separate list and its own header line, so a selector that appears in
-                            -- both cannot be read as one entry twice: an instance method and a class
-                            -- method of the same name are different methods.
                             list_at(data.meta or 0, "class")
                         end
                     end
@@ -318,13 +244,6 @@ local function impls(cache, wanted, class_wanted, only)
     end
 end
 
--- The C string at each of a list of addresses, with the image and section it belongs to. The keys a
--- coder method loads are literal `__cstring` bytes rather than `__cfstring` objects, so there is no
--- constant to ask a symbol table about: the address the disassembly computed is the whole of what is
--- known, and the string that answers is what turns it into a key. Every image of the cache is
--- searched, because a method's key can be in another image (a string shared with a framework it
--- calls) and saying "ARKitCore's" when the address is in libFoundation would be a wrong claim that
--- reads as a measurement.
 local function texts(cache, addresses)
     for _, address in ipairs(addresses) do
         local holder = "no image section"
@@ -355,11 +274,6 @@ local function texts(cache, addresses)
     end
 end
 
--- The raw bytes of one function, in the order they sit in the image, so that they can be
--- disassembled with the release's own address added back (see tools/corpus/disasm.sh). A
--- disassembler needs bytes; a reader that printed its own idea of them would be a second parser, so
--- this prints what it read and nothing else: the count is checked against the bytes handed back, and
--- a short read is reported as such rather than padded.
 local function bytes(cache, sections, low, count)
     local data = cache.read_address(low, count)
     if not data then
@@ -376,9 +290,6 @@ local function bytes(cache, sections, low, count)
     end
 end
 
--- The function start addresses the image declares, inside a window, each with the distance to the
--- next. A method's implementation has to be inside one of these spans or the read that found it
--- found nothing, so this is the control the other three are read against.
 local function functions(dyld, cache, wanted, low, high)
     for _, loaded in ipairs(cache.images) do
         if loaded.install:find(wanted, 1, true) then
@@ -398,7 +309,6 @@ local function functions(dyld, cache, wanted, low, high)
 end
 
 function main(cachefile, wanted, what, ...)
-    -- xmake's Lua dialect has no select(), so the trailing arguments are taken as a table.
     local arguments = {...}
     local dyld = import(dyld_module, {rootdir = path.join(os.getenv("CHARON_ROOT"), "modules"), anonymous = true})
     local cache = dyld.open_cache(cachefile)
@@ -422,13 +332,6 @@ function main(cachefile, wanted, what, ...)
         assert(low and high, "usage: skeleton-table.lua <cache> <image> functions <lo> <hi>")
         functions(dyld, cache, wanted, low, high)
     elseif what == "sections" then
-        -- Every image whose install name contains the substring, with its sections and their address
-        -- ranges, and the first and last mapped byte of the cache. A pc-relative reference has to be
-        -- resolved against these: without the ranges there is no way to tell a computed address that
-        -- names a string from one that names nothing.
-        -- The cache's own mappings, from the mapping table its header points at. A computed address
-        -- is only meaningful against the range it is supposed to land in, and the table is what the
-        -- reader itself locates an address with.
         for index = 0, 255, 1 do
             local entry = cache.read(cache.main, cache.main.mapping_offset + index * 32, 24)
             if not entry then break end

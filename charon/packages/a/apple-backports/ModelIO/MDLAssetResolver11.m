@@ -3,8 +3,6 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-// The three asset resolvers, which arrived with iOS 11; MDLAsset and its readers are in
-// MDLAsset9.m, because an object may only carry API that arrived in one release.
 @implementation MDLRelativeAssetResolver {
     __unsafe_unretained MDLAsset *_asset;
 }
@@ -26,8 +24,6 @@
     _asset = asset;
 }
 
-// A name is resolved beside the asset that names it, which is the directory the asset's own file is
-// in, so a mesh's material is found where the mesh's file is.
 - (NSURL *)resolveAssetNamed:(NSString *)name
 {
     if (!name)
@@ -106,7 +102,6 @@
 {
 }
 
-// A bundle is a directory: the path given, or the main bundle's own resource directory.
 - (NSURL *)resolveAssetNamed:(NSString *)name
 {
     if (!name)

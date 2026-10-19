@@ -1,7 +1,3 @@
--- What the swift rule must do for a library of Swift, which no test here builds (a build needs the runtime), so the facts that
--- were found by building one are held in the rule's text: the archiver of xmake's Swift language has flags of its own, empty by
--- default; a program whose Swift is all in libraries needs the runtime its libraries import; and what calls Swift through the header
--- the compiler writes must be compiled after it.
 function failures(opt)
     local found = {}
     local text = io.readfile(path.join(opt.modules, "..", "rules", "swift", "xmake.lua"))
@@ -21,10 +17,6 @@ function failures(opt)
     if not text:find('target:set("policy", "build.fence", true)', 1, true) or not text:find("-emit-objc-header", 1, true) then
         table.insert(found, "a target that has the compiler write an Objective-C header must be built before what depends on it compiles, or the Objective-C finds no header")
     end
-    -- A package that expands a macro of its own - SwiftData's @Model, for one - is a plugin the
-    -- port's compiler has to be pointed at. The runtime's own plugins arrive through
-    -- runtime_flags' `plugins`; a package's own must arrive the way its modules do, from the
-    -- dependencies' environment, or a port can never use the macro it depends on.
     local loop = text:match("for _, dependency in ipairs%(target:orderpkgs%(%)%) do(.-)\n                end") or ""
     if not loop:find("CHARON_SWIFT_MODULES", 1, true) then
         table.insert(found, "a port compiles against every dependency's Swift modules, read from the dependencies' CHARON_SWIFT_MODULES")

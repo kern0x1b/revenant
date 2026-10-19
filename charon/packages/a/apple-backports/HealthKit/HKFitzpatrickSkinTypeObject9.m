@@ -1,6 +1,3 @@
-// HKFitzpatrickSkinTypeObject: the user's Fitzpatrick skin type. It arrived in iOS 9.0, so it is a
-// file of its own.
-
 #import <HealthKit/HealthKit.h>
 
 #import "CharonHKStore.h"

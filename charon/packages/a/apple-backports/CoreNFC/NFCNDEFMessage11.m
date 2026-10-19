@@ -1,23 +1,7 @@
 #import <CoreNFC/CoreNFC.h>
 #import "CharonNDEF.h"
 
-// NFCNDEFPayload and NFCNDEFMessage as iOS 11.0 has them: the records of a message and the message
-// itself, with secure coding. A payload is a type, an identifier and bytes; a message is a list of
-// payloads and knows how long it is once encoded.
-//
-// The record shape is CharonNDEF.h and CharonNDEF.m, the NFC Forum NDEF Technical Specification's and
-// not a description of it. **The members iOS 13.0 added** - the two initialisers that take a record's
-// fields, the chunked one, the well-known helpers, +ndefMessageWithData: and -length - are in
-// NFCNDEFMessage13.m, because an object carries the API of one release.
-//
-// A 4S and an iPad 2 have no NFC radio, so nothing here is ever handed a tag. These two classes are
-// values: a value is made, encoded and parsed without any radio at all, which is why they are carried
-// whole while the sessions of the framework answer as a device without the service
-// (facts/CoreNFC/NDEF.md).
-
 @interface NFCNDEFPayload ()
-// The chunking, kept as the bytes of a size_t so that only the chunked initialiser of 13.0 can set it:
-// a payload with no chunk size is not chunked, which is not the same as chunked by zero.
 @property (nonatomic, copy) NSData *chunkSize;
 @end
 
@@ -87,8 +71,6 @@
 @end
 
 @interface NFCNDEFMessage ()
-// The bytes of the message, made once by the encoder of 13.0 and kept, so that -length is a length and
-// not a second encoding.
 @property (nonatomic, retain) NSMutableData *charonEncoded;
 @end
 

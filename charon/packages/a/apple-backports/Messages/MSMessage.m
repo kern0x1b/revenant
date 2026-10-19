@@ -3,29 +3,6 @@
 #import <Messages/MSMessageLayout.h>
 #import <Messages/MSSession.h>
 
-// The message is the data to be transferred to another device, and every property of it is a value the
-// sender set and the receiver reads: the session it belongs to, the URL the payload rides in, the
-// layout that draws it, the captions the transcript shows, whether it should expire, and the
-// identifier that says who on this device sent it. A value object like this is implemented by keeping
-// each value and answering it back - that is the whole of the contract, and it is not the same thing
-// as a member that promises a change in the system.
-//
-// The three members that are not values are the interesting ones:
-//
-//   -senderParticipantIdentifier is scoped to the device, and the device is the release's own: one
-//   NSUUID, generated once and kept in NSUserDefaults, so it is the same on every launch of this
-//   device and a different one on every other, which is what the header says of it. The release
-//   exports NSUUID (measured in the armv7 6.1.3 cache), so the value is a real one.
-//
-//   -isPending is YES while a message is unsent. Nothing in the port ever sends one: a message would
-//   leave through -[MSConversation insertMessage:completionHandler:], and this release has no
-//   conversation, no iMessage service and no Messages extension host to send it to. So the answer is
-//   YES, and that is the true one - the message is unsent, because it cannot be otherwise - rather
-//   than a flag kept and read by nothing.
-//
-//   -error is nil, because nothing has failed. A message cannot fail to be sent when no send was ever
-//   attempted, and that is the honest reading; -isPending already reports the message's real state.
-
 static NSString *const CharonSenderParticipantKey = @"org.charon.apple-backports.MSMessage.senderParticipant";
 
 @implementation MSMessage
@@ -45,8 +22,6 @@ static NSString *const CharonSenderParticipantKey = @"org.charon.apple-backports
     return self;
 }
 
-// The header marks both initialisers NS_DESIGNATED_INITIALIZER, so each is its own entry point to
-// NSObject's init rather than a convenience on the other.
 - (instancetype)initWithSession:(MSSession *)session
 {
     if ((self = [super init])) {
@@ -56,12 +31,6 @@ static NSString *const CharonSenderParticipantKey = @"org.charon.apple-backports
     return self;
 }
 
-// The one answer in this class that is not a value the caller gave. The header defines pending as a
-// message that has not been sent, and nothing in the port sends one: a message leaves through
-// -[MSConversation insertMessage:completionHandler:], and this release has no conversation, no iMessage
-// service and no Messages extension host to insert it into. So YES is the true answer for a message the
-// port holds - it is unsent, and it cannot be otherwise - rather than a flag kept for a reader that
-// never comes. The day a conversation is carried, this is the line that has to change with it.
 - (BOOL)isPending
 {
     return YES;
@@ -69,8 +38,6 @@ static NSString *const CharonSenderParticipantKey = @"org.charon.apple-backports
 
 - (NSUUID *)senderParticipantIdentifier
 {
-    // The device's own identifier, made once. A participant identifier that changed on every launch
-    // would not identify a participant, and one that was made per message would identify nothing.
     static NSUUID *identifier;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
@@ -103,8 +70,6 @@ static NSString *const CharonSenderParticipantKey = @"org.charon.apple-backports
     [coder encodeObject:[self senderParticipantIdentifier] forKey:@"senderParticipantIdentifier"];
 }
 
-// -initWithCoder: is a secondary initialiser of a class with two designated ones, so it starts from
-// -init rather than from NSObject's, which is what keeps _shouldExpire's default in one place.
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [self init])) {

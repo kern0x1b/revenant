@@ -1,6 +1,5 @@
 #import <CoreSpotlight/CoreSpotlight.h>
 
-// Equal when both are nil, or when isEqual: says so. The host compares nil and @"" as different values.
 static BOOL CharonSpotlightValuesEqual(id a, id b)
 {
     return a == b || [a isEqual:b];
@@ -13,8 +12,6 @@ static BOOL CharonSpotlightValuesEqual(id a, id b)
 @synthesize handleIdentifier = _handleIdentifier;
 @synthesize contactIdentifier = _contactIdentifier;
 
-// The host keeps the three values it is given as they are: a mutable string or array passed in is seen through the
-// person afterwards. contactIdentifier is the one copied, as its declaration says.
 - (instancetype)initWithDisplayName:(NSString *)displayName
                             handles:(NSArray<NSString *> *)handles
                    handleIdentifier:(NSString *)handleIdentifier
@@ -27,7 +24,6 @@ static BOOL CharonSpotlightValuesEqual(id a, id b)
     return self;
 }
 
-// The property is atomic, as the header declares it, so its accessors are both written here and both take the lock.
 - (NSString *)contactIdentifier
 {
     @synchronized (self) {
@@ -51,7 +47,6 @@ static BOOL CharonSpotlightValuesEqual(id a, id b)
     return copy;
 }
 
-// Value equality over the four properties, in the order the handles are kept: a different order is a different person.
 - (BOOL)isEqual:(id)other
 {
     if (self == other)
@@ -70,8 +65,6 @@ static BOOL CharonSpotlightValuesEqual(id a, id b)
     return self.displayName.hash ^ self.handles.hash ^ self.handleIdentifier.hash ^ self.contactIdentifier.hash;
 }
 
-// The host's text is "<CSPerson:ADDRESS NAME <HANDLE, HANDLE>" - a nil name or a nil handle list prints as "(null)", and the closing
-// angle bracket is not there. The debug text is the same text.
 - (NSString *)description
 {
     NSString *handles = [self.handles componentsJoinedByString:@", "];

@@ -4,13 +4,6 @@
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-// A blit on this device is a copy on the CPU. The port's buffers are their own bytes and the port's
-// textures are OpenGL ES 2.0 textures the port reads and writes a region at a time, so a copy is a
-// memcpy, or a read of the source region followed by a write of the destination region. Every range
-// is checked against the resource it names first: a blit that would run off the end of a buffer or a
-// texture writes a line in the log and copies nothing, which is what a caller gets from Metal for a
-// blit it does not allow, rather than a crash inside the copy.
-
 static BOOL CharonMetalBlitRangeFits(NSUInteger offset, NSUInteger count, NSUInteger length, NSString *what)
 {
     if (offset > length || count > length - offset) {
@@ -54,9 +47,6 @@ static BOOL CharonMetalBlit2D(NSUInteger offset, MTLSize size, NSUInteger width,
     return [CharonMetalDevice shared];
 }
 
-// How many commands this encoder has encoded. A fence an application updates through this encoder
-// carries it: the work behind that many commands has already been issued, because a command here is
-// a call into OpenGL ES 2.0 that has already been made.
 - (uint64_t)charonEncodedCount
 {
     return _encoded;
@@ -65,10 +55,6 @@ static BOOL CharonMetalBlit2D(NSUInteger offset, MTLSize size, NSUInteger width,
 - (BOOL)charonBlitTexture:(CharonMetalTexture *)source from:(MTLRegion)from level:(NSUInteger)sourceLevel
                       to:(CharonMetalTexture *)destination region:(MTLRegion)to level:(NSUInteger)destinationLevel
 {
-    // The blit a region copy between two textures is: read the source region with the row layout the
-    // destination wants, then write it in the destination texture's own channel layout. Both steps
-    // are the code the texture's own -getBytes: and -replaceRegion: use, so a blit and a region
-    // access cannot disagree about what a pixel is.
     NSUInteger channels = [source charonChannels];
     if (!channels || channels != [destination charonChannels]) {
         NSLog(@"Metal: blit between textures of %lu and %lu channels is refused: this port copies the bytes of a region, and those two formats hold a different number of them",

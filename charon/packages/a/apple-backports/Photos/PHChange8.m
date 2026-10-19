@@ -5,9 +5,6 @@
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-// A change is what ALAssetsLibraryChangedNotification said, and a fetch result or an object is read
-// again when it is asked about: facts/Photos/Changes.md.
-
 @interface PHObjectChangeDetails (Charon)
 - (instancetype)initWithCharonBefore:(PHObject *)before after:(PHObject *)after contentChanged:(BOOL)contentChanged;
 @end
@@ -24,8 +21,6 @@
 {
     self = [super init];
     if (self) {
-        // With no user info (what 6.1.3 posts for a write of the application itself) nothing is named, and
-        // what the change is asked about is read again all the same.
         NSMutableSet *updated = [NSMutableSet set];
         for (NSString *key in @[ALAssetLibraryUpdatedAssetsKey, ALAssetLibraryUpdatedAssetGroupsKey, ALAssetLibraryInsertedAssetGroupsKey, ALAssetLibraryDeletedAssetGroupsKey]) {
             for (NSURL *url in userInfo[key])
@@ -50,8 +45,6 @@
     return [[PHObjectChangeDetails alloc] initWithCharonBefore:object after:after contentChanged:updated && [object isKindOfClass:[PHAsset class]]];
 }
 
-// Where each object of a fetch is, by identifier: the objects of a fetch are told apart by it (PHObject's
-// isEqual:), and a lookup keeps comparing two fetches linear.
 static NSDictionary *charon_positions(PHFetchResult *result)
 {
     NSMutableDictionary *positions = [NSMutableDictionary dictionaryWithCapacity:result.count];
@@ -133,10 +126,6 @@ static NSDictionary *charon_positions(PHFetchResult *result)
     NSIndexSet *_changed;
 }
 
-// Removals are indexes of the fetch before, insertions and changes indexes of the fetch after, as the
-// header says. The objects both fetches hold must keep their order among themselves for the change to
-// be told incrementally: the release's own order is by date and does not move an asset, so a change
-// that reorders is told as not incremental, which the header lets any change be.
 - (instancetype)initWithCharonBefore:(PHFetchResult *)before after:(PHFetchResult *)after changed:(NSArray *)changed incremental:(BOOL)incremental
 {
     self = [super init];

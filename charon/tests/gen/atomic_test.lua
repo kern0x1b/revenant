@@ -1,9 +1,3 @@
--- The one atomic writer (tools/atomic.lua, review F12) and the writer of tools/gen that delegates to it (tools/gen/emit.lua, review F26).
--- A write of the same bytes is a no-op; a write that fails raises and leaves the old file and no sibling; the sibling of a write is
--- unique to it, so a file another writer holds under a sibling name is never overwritten, and no sibling outlives a write.
--- Run from the repository root: xmake l tests/gen/atomic_test.lua. The fixture tree is under .agent-work/runs and is removed when the
--- test ends.
-
 local REPO = path.absolute(path.join(os.scriptdir(), "..", ".."))
 local TOOLS = path.join(REPO, "tools")
 local ROOT = path.join(REPO, ".agent-work", "runs", "atomic-test")
@@ -19,7 +13,6 @@ local function raises(fn)
     return raised
 end
 
--- The names of the files in a directory, sorted.
 local function names_in(dir)
     local out = {}
     for _, file in ipairs(os.files(path.join(dir, "*"))) do
@@ -29,7 +22,6 @@ local function names_in(dir)
     return out
 end
 
--- Whether two sorted lists of names are equal.
 local function same_names(a, b)
     if #a ~= #b then
         return false
@@ -42,8 +34,6 @@ local function same_names(a, b)
     return true
 end
 
--- Another writer's siblings are not overwritten: the fixed name the old writer used, and the first names this process would take (the
--- process id and a counter), are all held by files. The write must leave them as they are and leave no sibling of its own.
 local function test_foreign_siblings(check)
     local emit = import("gen.emit", {rootdir = TOOLS, anonymous = true})
     local dir = path.join(ROOT, "foreign")
@@ -96,12 +86,10 @@ local function test_atomic(check)
     check(atomic.write(target, "same\n") == true, "atomic: a new file is written")
     check(atomic.write(target, "same\n") == false, "atomic: the same bytes are a no-op")
     check(atomic.write(target, "other\n") == true, "atomic: changed bytes are written")
-    -- two writers of one path, one after the other in this process (the atomic writer and the emit writer)
     check(emit.file(target, "last\n") == true, "two writers of one path: the second writer writes")
     check(io.readfile(target) == "last\n", "two writers of one path: the last bytes are on disk")
     check(same_names(names_in(dir), {"out.txt"}), "two writers of one path leave no sibling")
 
-    -- a write into a read-only directory raises: the old file stays, and no sibling is left
     local ro = path.join(ROOT, "readonly")
     os.mkdir(ro)
     local kept = path.join(ro, "out.txt")

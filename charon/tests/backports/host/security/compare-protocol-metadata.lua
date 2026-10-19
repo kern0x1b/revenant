@@ -1,15 +1,5 @@
--- compare-protocol-metadata.lua - the three sec_protocol_metadata functions on a port metadata object, differences NAMED.
---
---    xmake l compare-protocol-metadata.lua <the binary's output>
---
--- The two enum getters answer 0, and 0 is NOT a member of either enum - the expectation here is 0 because it is the only answer
--- that is not a lie about a negotiation, and the ROW is where that cost is stated. The psk accessor must answer false AND not run
--- the handler: a handler that ran would hand the caller a PSK and an identity that were never negotiated, and that is a different
--- failure from the return value.
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
--- In the order the values are named.
 local VALUES = {
     {"tls-version", 0}, {"tls-ciphersuite", 0}, {"psk-access", 0}, {"psk-handler-calls", 0},
     {"alive-in-scope", 1}, {"deallocated-after-scope", 0},
@@ -29,7 +19,6 @@ function main(...)
             rows[tsv.split_on(line, "\t")[1]] = tsv.split_on(line, "\t")
         end
     end
-    -- the first field of a row, or nil when the row is not there, as Python's rows.get(label, [None])[0]
     local function first(label)
         local row = rows[label]
         if row == nil then

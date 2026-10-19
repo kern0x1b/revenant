@@ -1,13 +1,3 @@
-// assets-extract: writes the images, colours and data of a compiled asset catalogue (Assets.car) as loose files, for an
-// application that runs on a release whose UIKit has no asset catalogue reader.
-//
-//     assets-extract [--scales 1,2,3] [--keep-appearance] CATALOGUE OUTPUT-FOLDER
-//
-// Every image a catalogue names comes out as name.png (1x), name@2x.png, name@3x.png and, where the catalogue has a variant
-// of its own for the iPad, name~ipad.png, name@2x~ipad.png; the stock +[UIImage imageNamed:] of iOS 6 finds those by itself.
-// The rest goes to AssetCatalogImages.plist (sizes, cap insets, template mode), AssetCatalogColors.plist and data/NAME.
-//
-// The catalogue is read by the CoreUI of the machine that runs the tool, which decodes every format Xcode writes.
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import <ImageIO/ImageIO.h>

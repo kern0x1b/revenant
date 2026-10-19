@@ -6,10 +6,6 @@
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
 
-// What SceneKit's lighting does, measured pixel by pixel against macOS SceneKit (facts/SceneKit/SCNView.md,
-// "Lighting"): lighting is done in linear light and written sRGB-encoded; a light of intensity 1000 is 1.0; the view
-// vector runs from the fragment to the camera's position, also for an orthographic camera.
-
 typedef NS_ENUM(int, CharonSCNSlot) {
     CharonSCNSlotDiffuse,
     CharonSCNSlotAmbient,
@@ -23,10 +19,6 @@ typedef NS_ENUM(int, CharonSCNSlot) {
     CharonSCNSlotCount
 };
 
-// The slots the lighting reads. ambientOcclusion and normal holding a colour change nothing (measured), and neither
-// holding an image is drawn yet. The name of each slot and whether its values are sRGB-encoded colours, from the sRGB flag every property of
-// star2.scn and coin.scn carries: set on the colour slots, clear on the data slots. A scalar slot reads the colour's
-// first component as it is (a roughness of grey 0.45 and of the number 0.45 draw the same pixels).
 static const struct {
     const char *name;
     BOOL sRGB;
@@ -52,30 +44,26 @@ static SCNMaterialProperty *CharonSCNSlotProperty(SCNMaterial *material, CharonS
     return nil;
 }
 
-// A half float of a value in [0, 1], rounded to the nearest (ties to even).
 static uint16_t CharonSCNHalf(float value)
 {
     if (!(value > 0)) {
         return 0;
     }
     int exponent;
-    float mantissa = frexpf(value, &exponent); // value = mantissa * 2^exponent, mantissa in [0.5, 1)
-    // a normal half holds 1.m * 2^(e - 15) with e in 1...30; below 2^-14 it is subnormal, in steps of 2^-24
+    float mantissa = frexpf(value, &exponent);
     float steps = exponent - 1 >= -14 ? ldexpf(mantissa, 11) : ldexpf(value, 24);
     uint32_t n = (uint32_t)lrintf(steps);
     if (exponent - 1 < -14) {
-        return (uint16_t)n; // 1024 steps round up into the smallest normal, whose bits these are
+        return (uint16_t)n;
     }
     uint32_t biased = (uint32_t)(exponent - 1 + 15);
-    if (n == 2048) { // rounded up to the next power of two
+    if (n == 2048) {
         n = 1024;
         biased++;
     }
     return (uint16_t)((biased << 10) | (n - 1024));
 }
 
-// The decoding of an sRGB byte's value in doubles, and the linear value from which a byte holds a mean: the decoding
-// of (b - 0.5) / 255, so that a mean is stored as the nearest byte of its encoding, half up.
 static const double *CharonSCNByteBounds(void)
 {
     static double bounds[256];
@@ -104,13 +92,6 @@ static uint8_t CharonSCNByteOfLinear(double linear)
     return (uint8_t)low;
 }
 
-// The image of a colour slot is an sRGB texture in SceneKit: its mip levels are averaged, and every sample filtered,
-// in linear light, and every level is made from the one before it as that is stored, 8-bit sRGB (facts/SceneKit/
-// SCNView.md, "Textures"). The iOS 6 GPUs have no sRGB texture (no GL_EXT_sRGB on the iPad 2's SGX 543) but filter
-// half floats (GL_OES_texture_half_float_linear), so the texture holds each level in linear light, premultiplied, as
-// half floats, and the levels are built here: a texel of level n + 1 is the linear mean of its texels of level n,
-// kept as the bytes an sRGB texture holds (the colour's nearest byte, alpha's nearest byte), all in doubles.
-// pixels are a CGBitmapContext's premultiplied RGBA; width and height powers of two.
 static void CharonSCNUploadLinearLevels(const uint8_t *pixels, size_t width, size_t height)
 {
     size_t count = width * height;
@@ -131,7 +112,6 @@ static void CharonSCNUploadLinearLevels(const uint8_t *pixels, size_t width, siz
         if (width == 1 && height == 1) {
             break;
         }
-        // in place: the texel written is never after one still to be read
         size_t half = width > 1 ? width / 2 : 1, rows = height > 1 ? height / 2 : 1;
         size_t sx = width > 1 ? 2 : 1, sy = height > 1 ? 2 : 1;
         for (size_t y = 0; y < rows; y++) {
@@ -160,7 +140,6 @@ static void CharonSCNUploadLinearLevels(const uint8_t *pixels, size_t width, siz
     free(level);
 }
 
-// The RGBA of a colour, in its sRGB encoding; NO for anything that is not a colour.
 static BOOL CharonSCNColorComponents(id contents, float out[4])
 {
     CGColorRef color = NULL;
@@ -201,8 +180,6 @@ static BOOL CharonSCNColorComponents(id contents, float out[4])
     return NO;
 }
 
-// The value a slot has when its contents are nil: what the slot of a new material holds (-[SCNMaterial init], held to
-// macOS SceneKit's new material by tests/backports/device/scenekit-defaults.m).
 static void CharonSCNSlotDefault(CharonSCNSlot slot, float out[4])
 {
     static SCNMaterial *fresh;
@@ -218,8 +195,6 @@ static void CharonSCNSlotDefault(CharonSCNSlot slot, float out[4])
 
 #pragma mark - Images
 
-// The file a contents value names, or nil when it is not a file or not there. A bare file name is looked for beside
-// the scene first, then in the application's own bundle, so the same name in two folders is two files.
 static NSString *CharonSCNImagePath(id contents, NSURL *sceneURL)
 {
     if ([contents isKindOfClass:[NSURL class]]) {
@@ -354,8 +329,6 @@ static uint32_t CharonSCNIndex(const uint8_t *bytes, NSInteger bytesPerIndex, NS
     }
 }
 
-// The indices an element draws, as GL wants them: a polygon element is its per-polygon vertex counts followed by the
-// indices, and is drawn as a fan per polygon (star2.scn: 777 polygons of three and four vertices).
 static CharonSCNDraw *CharonSCNDrawFor(SCNGeometryElement *element, NSMutableArray<NSNumber *> *buffers)
 {
     NSData *data = element.data;
@@ -479,11 +452,11 @@ enum { CharonSCNMaxLights = 8 };
 
 typedef struct {
     int type;
-    float color[3];      // linear colour times the intensity's scale for the lighting model
+    float color[3];
     float position[3];
-    float direction[3];  // where the light points, for directional and spot lights
-    float attenuation[3]; // start, end, falloff exponent
-    float spot[2];       // cosines of half the outer and inner angles
+    float direction[3];
+    float attenuation[3];
+    float spot[2];
 } CharonSCNLightState;
 
 @interface CharonSCNProgram : NSObject
@@ -519,11 +492,6 @@ static GLuint CharonSCNCompile(GLenum kind, NSString *source)
     return shader;
 }
 
-/// The projection a camera draws through, for a point of view and a viewport. The arithmetic is
-/// what it was inside renderScene:pointOfView:width:height:, moved out whole so that the two share
-/// one matrix; a nil point of view, a zero height and an absent camera answer as they did there,
-/// because the point of view of a scene with no camera is the identity and the defaults are the
-/// defaults a new SCNCamera has.
 SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height)
 {
     SCNCamera *camera = pointOfView.camera;
@@ -553,16 +521,12 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
 @implementation CharonSCNRenderer
 {
     EAGLContext *_context;
-    // Both tables hold their keys strongly, so that an entry goes only through purgeUnused, which deletes its GL names:
-    // a weak key that died would take the entry and leave the buffers and the texture in the context.
     NSMapTable<SCNGeometry *, CharonSCNMesh *> *_meshes;
-    // one texture per image file (or image object) for the data slots, one for the colour slots, which hold theirs in linear light
     NSMapTable<id, CharonSCNTexture *> *_textures[2];
-    // whether the GPU filters half-float textures, which hold the colour slots' images in linear light; -1 not asked yet
     int _linearTextures;
     NSMutableDictionary<NSString *, CharonSCNProgram *> *_programs;
-    NSMutableDictionary<NSString *, id> *_resolvedPaths; // scene folder and contents name -> path, or NSNull for none
-    NSMutableSet<NSString *> *_failedPrograms; // keys whose program did not compile or link: said once, not tried every frame
+    NSMutableDictionary<NSString *, id> *_resolvedPaths;
+    NSMutableSet<NSString *> *_failedPrograms;
     NSUInteger _frame;
     NSURL *_sceneURL;
     NSHashTable<SCNScene *> *_surveyed;
@@ -676,7 +640,6 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
     return mesh;
 }
 
-// The file a name or URL resolves to for the scene being drawn, asked of the file system once for each scene and name.
 - (NSString *)pathForContents:(id)contents
 {
     if (![contents isKindOfClass:[NSString class]] && ![contents isKindOfClass:[NSURL class]]) {
@@ -691,8 +654,6 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
     return path == [NSNull null] ? nil : path;
 }
 
-// Whether a material's alpha reaches the frame: its transparency (which the physically based model ignores), the alpha
-// of the diffuse and the transparent slots. The draw blends on this and the sort puts the item among the transparent ones on it.
 - (BOOL)materialBlends:(SCNMaterial *)material
 {
     if (CharonSCNModelFor(material) != CharonSCNModelPhysicallyBased && material.transparency < 1) {
@@ -717,7 +678,6 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
     if (contents == nil || CharonSCNColorComponents(contents, (float[4]){0})) {
         return 0;
     }
-    // keyed by the file the contents resolve to, so two scenes that both name texture.jpg do not share one image
     NSString *path = [self pathForContents:contents];
     id key = path ?: contents;
     CharonSCNTexture *texture = [_textures[sRGB] objectForKey:key];
@@ -737,7 +697,6 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
     CGImageAlphaInfo alpha = CGImageGetAlphaInfo(image);
     texture.hasAlpha = alpha != kCGImageAlphaNone && alpha != kCGImageAlphaNoneSkipFirst && alpha != kCGImageAlphaNoneSkipLast;
     *hasAlpha = texture.hasAlpha;
-    // GL ES 2.0 repeats, mirrors and mipmaps only textures whose sides are powers of two
     size_t width = 1, height = 1;
     while (width < CGImageGetWidth(image)) width <<= 1;
     while (height < CGImageGetHeight(image)) height <<= 1;
@@ -747,8 +706,6 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
     CGColorSpaceRelease(space);
     CGContextSetBlendMode(bitmap, kCGBlendModeCopy);
     CGContextSetInterpolationQuality(bitmap, kCGInterpolationHigh);
-    // a bitmap context keeps the image's top row first in memory, which GL samples at t = 0: SceneKit's v = 0 is
-    // the image's top
     CGContextDrawImage(bitmap, CGRectMake(0, 0, width, height), image);
     CGContextRelease(bitmap);
     CGImageRelease(image);
@@ -765,8 +722,6 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
     return name;
 }
 
-// A GPU without them gets the encoded image and glGenerateMipmap, the shader decoding after the filter: its levels
-// are the means of the encoded texels and its samples filtered in the encoding, darker than SceneKit's.
 - (BOOL)linearTextures
 {
     if (_linearTextures < 0) {
@@ -821,9 +776,6 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
     }
 
     NSMutableString *vertex = [NSMutableString string];
-    // The normal is highp all the way. Near a narrow specular peak the pixel hangs on its last bits: the device drew 142
-    // with a mediump normal where SceneKit draws 130 (roughness 0.2 seen at 0.9 rad; the grid's
-    // `PBR grazing` and `PBR 0.2` cases hold the highp one). scenekit-lighting prints what the GPU's mediump and highp hold.
     [vertex appendString:@"attribute highp vec3 a_position;\nattribute highp vec3 a_normal;\nattribute mediump vec4 a_color;\n"
                           "attribute highp vec2 a_uv0;\nattribute highp vec2 a_uv1;\n"
                           "uniform highp mat4 u_modelViewProjection;\nuniform highp mat4 u_model;\nuniform highp mat3 u_normalMatrix;\n"
@@ -839,7 +791,6 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
     [vertex appendString:@"}\n"];
 
     NSMutableString *fragment = [NSMutableString string];
-    // a sampler with no qualifier is lowp in a fragment shader (GLSL ES 1.00 4.5.3), whatever `precision ... float` says
     [fragment appendString:@"precision highp float;\nprecision highp sampler2D;\n"
                             "varying highp vec3 v_position;\nvarying highp vec3 v_normal;\nvarying mediump vec4 v_color;\n"
                             "varying highp vec2 v_uv0;\nvarying highp vec2 v_uv1;\n"
@@ -853,14 +804,12 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
             [fragment appendFormat:@"uniform sampler2D u_%s_sampler;\nuniform vec4 u_%s_value;\nuniform mat3 u_%s_transform;\n", name, name, name];
             [fragment appendFormat:@"vec4 charon_%s(vec2 uv0, vec2 uv1, float channel) {\n"
                                     "  vec2 uv = (u_%s_transform * vec3(channel > 0.5 ? uv1 : uv0, 1.0)).xy;\n", name, name];
-            // clamp to border: iOS has no border colour to set, so outside the image is transparent black
             if (bordered & (1u << (2 * slot))) {
                 [fragment appendString:@"  if (uv.x < 0.0 || uv.x > 1.0) return vec4(0.0);\n"];
             }
             if (bordered & (1u << (2 * slot + 1))) {
                 [fragment appendString:@"  if (uv.y < 0.0 || uv.y > 1.0) return vec4(0.0);\n"];
             }
-            // a colour slot's texture holds linear light, premultiplied, where the GPU filters half floats
             [fragment appendFormat:@"  vec4 t = texture2D(u_%s_sampler, uv);\n"
                                     "  vec3 c = t.a > 0.0 ? t.rgb / t.a : vec3(0.0);\n", name];
             [fragment appendString:CharonSCNSlots[slot].sRGB && ![self linearTextures] ? @"  c = charonLinear(c);\n" : @""];
@@ -897,13 +846,6 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
                                 "  vec3 diffuseColor = albedo * (1.0 - metal);\n"
                                 "  vec3 f0 = mix(vec3(0.04), albedo, metal);\n"
                                 "  float NdotV = max(dot(N, V), 0.0001);\n"
-                                // selfIllumination is not the plain diffuse colour times its value: the smooth surface loses
-                                // a Fresnel share of it to its specular coat, the rough one draws a diffuse of its own and
-                                // an interreflection term in the diffuse colour (facts/SceneKit/SCNView.md, "Lighting"; the
-                                // constants are host/scenekit/lighting/fitselfcoat.py's)
-                                // the coat sees the camera in another direction than a light's specular does: on an orthographic
-                                // camera the axis, the same for every point (u_coatView is homogeneous, a position with w 1 or an
-                                // axis with w 0), where the specular term keeps the position (measured on the iPad 2 against the grid)
                                 "  float coatNdotV = max(dot(N, normalize(u_coatView.xyz - u_coatView.w * v_position)), 0.0001);\n"
                                 "  float grazing = clamp(1.0 - coatNdotV, 0.0, 1.0);\n"
                                 "  float grazing2 = grazing * grazing;\n"
@@ -922,8 +864,6 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
         } else {
             [fragment appendFormat:@"    vec3 toLight = u_light%d_position - v_position;\n    float d = length(toLight);\n    vec3 L = toLight / d;\n", i];
             if (model == CharonSCNModelPhysicallyBased) {
-                // PBR: the inverse square of the distance, windowed by (1 - (d / end)^4)^2 when an end is set; the
-                // start and the falloff exponent change nothing (measured from 2 to 18 units, ends 12 and 20)
                 [fragment appendFormat:@"    vec3 radiance = u_light%d_color / (d * d);\n"
                                         "    if (u_light%d_attenuation.y > 0.0) {\n"
                                         "      float w = clamp(1.0 - pow(d / u_light%d_attenuation.y, 4.0), 0.0, 1.0);\n"
@@ -936,7 +876,6 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
                                         "    }\n", i, i, i, i, i, i, i];
             }
             if (type == CharonSCNLightSpot) {
-                // linear in the cosine between the half angles, as measured; not a smoothstep
                 [fragment appendFormat:@"    radiance *= clamp((dot(-L, u_light%d_direction) - u_light%d_spot.x) / max(u_light%d_spot.y - u_light%d_spot.x, 0.0001), 0.0, 1.0);\n", i, i, i, i];
             }
         }
@@ -947,7 +886,7 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
                                     "      float NdotH = max(dot(N, H), 0.0);\n"
                                     "      float VdotH = max(dot(V, H), 0.0);\n"
                                     "      float dd = NdotH * NdotH * (a2 - 1.0) + 1.0;\n"
-                                    "      float D = a2 / (dd * dd);\n" // GGX without its 1/pi: the specular term is scaled by pi
+                                    "      float D = a2 / (dd * dd);\n"
                                     "      float visibility = 0.5 / (NdotL * sqrt(NdotV * NdotV * (1.0 - a2) + a2) + NdotV * sqrt(NdotL * NdotL * (1.0 - a2) + a2));\n"
                                     "      vec3 F = f0 + (1.0 - f0) * pow(1.0 - VdotH, 5.0);\n"
                                     "      color += radiance * NdotL * (diffuseColor + D * visibility * F);\n"
@@ -965,8 +904,6 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
     if (model == CharonSCNModelConstant) {
         [fragment appendString:@"  color = diffuse.rgb;\n"];
     } else if (model != CharonSCNModelPhysicallyBased) {
-        // with no light but ambient ones, the diffuse colour is drawn as it is (u_implicitLight = 1); otherwise
-        // selfIllumination adds to the lights the diffuse colour takes, and does nothing without them
         [fragment appendString:@"  lightDiffuse += mix(selfIllumination.rgb, vec3(1.0), u_implicitLight);\n"
                                 "  color = ambient.rgb * u_ambientLight + diffuse.rgb * lightDiffuse + specular.rgb * lightSpecular;\n"];
     }
@@ -974,13 +911,10 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
                             "  color *= multiply.rgb;\n"
                             "  float outAlpha = u_opacity;\n"];
     if (model == CharonSCNModelPhysicallyBased) {
-        // physically based: the transparent and diffuse alphas; transparency changes nothing
         [fragment appendString:@"  outAlpha *= transparent.a * diffuse.a;\n"];
     } else {
-        // the other models take the diffuse alpha twice: 0.5 is stored as 0.25 (measured on all three)
         [fragment appendString:@"  outAlpha *= u_transparency * transparent.a * diffuse.a * diffuse.a;\n"];
     }
-    // premultiplied in linear light, then encoded, as SceneKit's sRGB target stores it
     [fragment appendString:@"  gl_FragColor = vec4(charonEncode(color * outAlpha), outAlpha);\n}\n"];
 
     GLuint vs = CharonSCNCompile(GL_VERTEX_SHADER, vertex), fs = CharonSCNCompile(GL_FRAGMENT_SHADER, fragment);
@@ -1042,7 +976,6 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
 
 #pragma mark What is not drawn
 
-// Whether a property shows anything: an image, or a colour that is not black (or, for a background, not clear).
 static BOOL CharonSCNPropertyShows(SCNMaterialProperty *property, BOOL alphaMatters)
 {
     id contents = property.contents;
@@ -1062,8 +995,6 @@ static BOOL CharonSCNPropertyIsImage(SCNMaterialProperty *property)
     return property.contents != nil && !CharonSCNColorComponents(property.contents, c);
 }
 
-// Once per scene: everything in it this renderer does not draw yet, by name, so that a scene drawn short of what
-// SceneKit would draw leaves that in the log (facts/SceneKit/SCNView.md, "Not done yet").
 - (void)surveyScene:(SCNScene *)scene
 {
     if ([_surveyed containsObject:scene]) {
@@ -1151,7 +1082,7 @@ typedef struct {
     SCNMatrix4 world;
     float opacity;
     float depth;
-    BOOL transparent; // the node's opacity or one of its materials lets the frame behind it show
+    BOOL transparent;
 } CharonSCNItem;
 
 static void CharonSCNCollect(SCNNode *node, SCNMatrix4 parent, float opacity, NSMutableData *items, NSMutableArray<SCNNode *> *lights)
@@ -1195,19 +1126,10 @@ static void CharonSCNLightColor(SCNLight *light, float scale, float out[3])
     NSMutableArray<SCNNode *> *lightNodes = [NSMutableArray array];
     CharonSCNCollect(scene.rootNode, SCNMatrix4Identity, 1, itemData, lightNodes);
 
-    // the camera: the point of view's world transform inverted, and a projection from its camera.
-    // The projection is CharonSCNProjectionMatrix, shared with the renderer's projectPoint: and
-    // unprojectPoint:, so that what a hit test projects through is the matrix the frame is drawn
-    // with - a second copy of this arithmetic could disagree with the picture, which is the one
-    // thing a projection must not do.
     SCNMatrix4 cameraWorld = pointOfView ? [pointOfView charonPresentedWorldTransform] : SCNMatrix4Identity;
     SCNMatrix4 view = CharonSCNMatrixInvert(cameraWorld);
     SCNCamera *camera = pointOfView.camera;
     SCNMatrix4 projection = CharonSCNProjectionMatrix(pointOfView, width, height);
-    // The viewport this frame was rendered into, kept because that is the viewport a
-    // projectPoint: on the renderer answers with (measured on macOS SceneKit: an SCNRenderer that
-    // has not rendered answers every point unchanged, so before the first render there is no
-    // viewport to answer with and the point comes back as it went in).
     self.lastRenderPointOfView = pointOfView;
     self.lastRenderWidth = width;
     self.lastRenderHeight = height;
@@ -1215,7 +1137,6 @@ static void CharonSCNLightColor(SCNLight *light, float scale, float out[3])
     float cameraPosition[3] = {cameraWorld.m41, cameraWorld.m42, cameraWorld.m43};
     float coatView[4] = {cameraWorld.m41, cameraWorld.m42, cameraWorld.m43, 1};
     if (camera.usesOrthographicProjection) {
-        // an orthographic camera sees every point in the direction of its axis
         float axisLength = sqrtf(cameraWorld.m31 * cameraWorld.m31 + cameraWorld.m32 * cameraWorld.m32 + cameraWorld.m33 * cameraWorld.m33);
         coatView[0] = cameraWorld.m31 / axisLength, coatView[1] = cameraWorld.m32 / axisLength, coatView[2] = cameraWorld.m33 / axisLength, coatView[3] = 0;
     }
@@ -1233,7 +1154,6 @@ static void CharonSCNLightColor(SCNLight *light, float scale, float out[3])
             items[i].transparent = items[i].transparent || [self materialBlends:material];
         }
     }
-    // SceneKit draws by renderingOrder, opaque before transparent, transparent ones back to front
     NSMutableArray<NSValue *> *order = [NSMutableArray array];
     for (NSUInteger i = 0; i < itemCount; i++) {
         [order addObject:@(i)];
@@ -1258,7 +1178,6 @@ static void CharonSCNLightColor(SCNLight *light, float scale, float out[3])
     }
     glDisable(GL_BLEND);
     glDepthMask(GL_TRUE);
-    // buffers and textures no drawn object has used for 120 frames go back to GL
     if (_frame % 60 == 0) {
         [self purgeUnused];
     }
@@ -1274,7 +1193,6 @@ static void CharonSCNLightColor(SCNLight *light, float scale, float out[3])
     NSArray<SCNMaterial *> *materials = geometry.materials;
     SCNMatrix4 world = item->world;
     SCNMatrix4 modelViewProjection = CharonSCNMatrixMultiply(world, viewProjection);
-    // normals go through the inverse transpose of the model matrix's upper 3x3
     SCNMatrix4 inverse = CharonSCNMatrixInvert(world);
     float normalMatrix[9] = {inverse.m11, inverse.m21, inverse.m31, inverse.m12, inverse.m22, inverse.m32, inverse.m13, inverse.m23, inverse.m33};
 
@@ -1317,14 +1235,12 @@ static void CharonSCNLightColor(SCNLight *light, float scale, float out[3])
                 continue;
             }
             if (lightCount == CharonSCNMaxLights) {
-                // the programs are generated for at most eight lights a draw; the rest are named, not dropped quietly
                 charon_say_once_for([NSString stringWithFormat:@"scenekit lights %p", item->node],
                                     [NSString stringWithFormat:@"SceneKit: node %@ is reached by more than %d lights; %@ and the rest are not drawn", item->node.name, CharonSCNMaxLights, lightNode.name]);
                 continue;
             }
             CharonSCNLightState *state = &lights[lightCount++];
             state->type = kind;
-            // PBR: a point light of I lumens gives I / (pi d^2); a directional one I / 1000, as in the other models
             float scale = (physical && kind != CharonSCNLightDirectional) ? (float)light.intensity / (float)M_PI : (float)light.intensity / 1000;
             CharonSCNLightColor(light, scale, state->color);
             SCNMatrix4 lw = [lightNode charonPresentedWorldTransform];
@@ -1373,21 +1289,16 @@ static void CharonSCNLightColor(SCNLight *light, float scale, float out[3])
             float value[4];
             float intensity = (float)property.intensity;
             if (textures[slot]) {
-                // the intensity scales an image's colour and leaves its alpha, as it does a colour's (macOS: an opaque diffuse
-                // image at intensity 0.5 draws the colour's pixel, at alpha 1)
                 value[0] = value[1] = value[2] = intensity;
                 value[3] = 1;
                 glActiveTexture(GL_TEXTURE0 + unit);
                 glBindTexture(GL_TEXTURE_2D, textures[slot]);
                 [self applySampling:property];
                 glUniform1i(program->_slotSampler[slot], unit++);
-                // the contents transform takes (u, v, 0, 1) as a row vector; the last element carries the channel
                 SCNMatrix4 t = [property charonPresentedContentsTransform];
                 float uv[9] = {t.m11, t.m12, 0, t.m21, t.m22, 0, t.m41, t.m42, property.mappingChannel > 0 ? 1 : 0};
                 glUniformMatrix3fv(program->_slotTransform[slot], 1, GL_FALSE, uv);
             } else {
-                // a slot's default is the sRGB encoding of a linear value, and is drawn from that value in every slot,
-                // the scalar ones too (CharonSCN.h, charonDefaultWithContents:)
                 BOOL encoded = CharonSCNSlots[slot].sRGB || property.charonHoldsDefault;
                 if (!CharonSCNColorComponents(property.contents, value)) {
                     CharonSCNSlotDefault((CharonSCNSlot)slot, value);
@@ -1442,7 +1353,6 @@ static void CharonSCNLightColor(SCNLight *light, float scale, float out[3])
     }
 }
 
-// SCNWrapMode: clamp 1, repeat 2, clamp to border 3, mirror 4; SCNFilterMode: none 0, nearest 1, linear 2
 - (void)applySampling:(SCNMaterialProperty *)property
 {
     GLenum wrap[2];

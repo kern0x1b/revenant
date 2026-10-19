@@ -1,18 +1,10 @@
-// SpriteKitLabel7.m - SKLabelNode of iOS 7, carried for the releases that have no SpriteKit at all.
-//
-// A label is a node that shows a text in a font, with its colour, its alignment and its line layout. The text and its
-// members are stored and read back, as the host stores them (measured against the host's own SpriteKit in
-// facts/SpriteKit/SKLabelNode.md). Nothing here is rasterised yet: the text is the renderer's, which is owed.
 #import "CharonSpriteKit.h"
 #if !TARGET_OS_IPHONE
 #import <AppKit/AppKit.h>
 #endif
 
-// The font of a new label: the host's own default (measured on macOS 27.0.1). The iOS default is not measured on a device.
 static NSString *const CharonSKDefaultLabelFont = @"HelveticaNeue-UltraLight";
 
-// The colours of a new label: the font colour is white in the sRGB space and the colour is white in the device space,
-// as the host gives them (measured).
 static CharonSKColor *CharonSKLabelFontColor(void)
 {
 #if TARGET_OS_IPHONE
@@ -31,7 +23,6 @@ static CharonSKColor *CharonSKLabelColor(void)
 #endif
 }
 
-// The font colour as the host keeps it when it is set: in the sRGB space (measured on macOS, facts/SpriteKit/SKLabelNode.md).
 static CharonSKColor *CharonSKLabelSRGBColor(CharonSKColor *colour)
 {
 #if TARGET_OS_IPHONE
@@ -91,7 +82,6 @@ static CharonSKColor *CharonSKLabelSRGBColor(CharonSKColor *colour)
     return self;
 }
 
-// The host gives a label made from text the default font, and the text as given (measured).
 + (instancetype)labelNodeWithText:(NSString *)text
 {
     SKLabelNode *node = [[self alloc] initWithFontNamed:CharonSKDefaultLabelFont];

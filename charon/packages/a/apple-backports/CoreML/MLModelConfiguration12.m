@@ -1,10 +1,3 @@
-/* MLModelConfiguration, in a file of its own because an object may only carry the API of a single
- * release: the configuration arrived in iOS 12 and the model it configures in iOS 11. It holds what
- * a caller asks a model to do with, and it answers it back unchanged: this release has one unit a
- * Core ML model can run on, the CPU, and a configuration that says otherwise is not wrong -- it is a
- * request the run honours by running on that same CPU, which is what the release's own hardware
- * leaves it.
- */
 #import <CoreML/CoreML.h>
 
 #include "CharonMLBridge.h"
@@ -22,12 +15,6 @@
 {
     self = [super init];
     if (self != nil) {
-        /* The units a model runs on are the caller's to choose and the port's to answer, and the
-         * answer is the choice: this release has one unit a Core ML model can run on, the CPU,
-         * and a configuration that says otherwise is not wrong -- it is a request the run
-         * honours by running on that same CPU, which is what the release's own hardware leaves
-         * it. The default is All, as Core ML's own default is, and a caller who wants the CPU
-         * named says CPUOnly. */
         _computeUnits = MLComputeUnitsAll;
     }
     return self;
@@ -60,11 +47,6 @@
 
 - (void)setPreferredMetalDevice:(id<MTLDevice>)device
 {
-    /* Kept as the caller gave it and handed back as it is, which is what a configuration is: the
-     * setting an application made, readable by the application that made it. A Core ML model
-     * here runs on the CPU, so nothing in a prediction reads it -- a caller that wanted the
-     * device to be used would be asking for a Core ML compute engine on a release that has no
-     * Metal driver at all, and that is said in the facts rather than pretended at here. */
     _preferredMetalDevice = device;
 }
 
@@ -130,5 +112,3 @@
 }
 
 @end
-
-/* --- the options for one prediction ------------------------------------------------------------ */

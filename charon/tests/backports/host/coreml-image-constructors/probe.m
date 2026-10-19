@@ -1,8 +1,3 @@
-/* probe.m - the CGImage pixel-size constructors of Core ML, case by case: every orientation, a set of crop rects, two output
- * sizes, the four crop-and-scale answers (nil, 0, 1, 2), and three formats. Each case is one line: its key, then either the
- * error code or the size and every pixel of the answer, so that the host's output and the port's can be compared line by line.
- *
- * The same file compiles against the host's CoreML (the framework, linked) and against the port's sources (no framework). */
 #import <Foundation/Foundation.h>
 #import <CoreML/CoreML.h>
 #import <CoreGraphics/CoreGraphics.h>

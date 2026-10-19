@@ -7,8 +7,6 @@ function main()
         raise("xmake queue runs a command in a build slot: xmake queue -- xmake build")
     end
     local program, arguments = command[1], table.slice(command, 2)
-    -- A build that the queue already started passes its slot down, so a nested
-    -- build runs inside it instead of waiting for one its parent holds.
     if emulator.holds_build_slot() then
         local held = os.execv(program, arguments, {try = true})
         if held ~= 0 then

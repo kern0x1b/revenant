@@ -1,49 +1,14 @@
-// The thirty layer classes, with what each factory keeps, what it refuses and the name it gives the
-// layer. The arithmetic behind them is in CharonMLCEngine.m, which reads the descriptors and the
-// parameters these classes hold.
-//
-// Every default, every refusal and every name here was measured on the host's own MLCompute and is held
-// to it by tests/backports/host/mlcompute (factories.m asks it, cases.m holds the port to it, engine.m
-// asks what the framework computes); facts/MLCompute/Layers.md carries the tables and
-// facts/MLCompute/Engine.md the arithmetic. What the measurement settled, and what is not in the
-// headers:
-//
-//   - a layer's name is its class's own without MLC and Layer, with four shortened: Compare, Concat,
-//     GramMatrix, FullyConnected, and Upsampling for the upsample layer;
-//   - +[MLCConvolutionLayer layerWithWeights:biases:descriptor:] validates the weights against the
-//     descriptor and keeps nothing at all when they do not match - no descriptor, no weights, no
-//     biases and no parameter. A layer with no biases keeps none and has no biases parameter;
-//   - the three normalizations want their parameters in the shape the framework's own per-channel
-//     descriptor gives, which is 1, channels, 1, 1, and the layer normalization wants a one
-//     dimensional beta and gamma. A momentum of 0.99 is what they answer when none is given;
-//   - +[MLCSoftmaxLayer layerWithOperation:] reduces over dimension 1 unless another is given;
-//   - +[MLCPaddingLayer layerWith...Padding:] reads its array as top, bottom, left, right;
-//   - +[MLCSplitLayer layerWithSplitCount:dimension:] answers no section lengths at all, and the form
-//     that takes lengths answers a count of how many there are;
-//   - +[MLCSliceLayer sliceLayerWithStart:end:stride:] answers a stride of 1 for a nil one;
-//   - +[MLCMultiheadAttentionLayer layerWithDescriptor:weights:biases:attentionBiases:] refused every
-//     arrangement of weights tried - four matrices of the model's dimension, one of them, two of half
-//     it, with and without biases, with the biases declared, three of them, a model of 8, a single head
-//     - and answered a layer with nothing every time. This port keeps what it is given instead, and
-//     facts/MLCompute/Layers.md names the divergence; a layer that could not be described would be a
-//     class that exists but does nothing.
-
 #import "CharonMLCompute.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 
-// The two things the thirty layer factories need from their base, declared in MLCTensors14.m beside
-// MLCLayer itself: an initialiser the base's header marks unavailable, and the name a factory gives a
-// layer. Both are private to the port and named Charon* so the gate weighs neither against a release.
 @interface MLCLayer (CharonFactory)
 - (instancetype)charon_init;
 - (instancetype)charon_label:(NSString *)name;
 @end
 
-// The private constructors the factories below reach, declared here because the compiler reads a
-// class's own methods in the order they are written.
 @interface MLCPaddingLayer (CharonPadding)
 + (instancetype)charon_layerWithType:(MLCPaddingType)type
                              padding:(NSArray<NSNumber *> *)padding
@@ -71,15 +36,11 @@
                         outputResultActivation:(MLCActivationDescriptor *)outputResultActivation;
 @end
 
-// The parameter a layer makes for a tensor of its own, which is what the optimizer update writes. The
-// framework's parameter is updatable and holds its tensor (measured for the convolution, the fully
-// connected, the embedding, the three normalizations and the long short-term memory).
 static MLCTensorParameter *CharonMLCParameter(MLCTensor *tensor)
 {
     return tensor ? [MLCTensorParameter parameterWithTensor:tensor] : nil;
 }
 
-// The parameters of a list of tensors, one for each, and nil for a nil list.
 static NSArray<MLCTensorParameter *> *CharonMLCParameters(NSArray<MLCTensor *> *tensors)
 {
     if (!tensors) {
@@ -111,8 +72,6 @@ static NSArray<MLCTensorParameter *> *CharonMLCParameters(NSArray<MLCTensor *> *
     MLCActivationDescriptor *_descriptor;
 }
 
-// The layers of the table in facts/MLCompute/Engine.md: the descriptor each carries, and the name the
-// factory gives the layer, which is the same for all of them.
 static MLCActivationLayer *CharonMLCActivation(MLCActivationDescriptor *descriptor)
 {
     MLCActivationLayer *layer = [[MLCActivationLayer alloc] charon_init];
@@ -253,9 +212,6 @@ static MLCActivationLayer *CharonMLCActivation(MLCActivationDescriptor *descript
 
 + (MLCActivationLayer *)geluLayer
 {
-    // Measured against the host's own descriptor, in bits: a is 0x3f4c422a and b is 0x3d372713, and
-    // 0.7978845608f and 0.044715f are the two values that are those floats. 0.797885f - the rounded
-    // spelling - is 0x3f4c4231 and is not.
     return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeGELU a:0.7978845608f b:0.044715f]);
 }
 
@@ -354,9 +310,6 @@ static MLCActivationLayer *CharonMLCActivation(MLCActivationDescriptor *descript
     MLCTensorParameter *_biasesParameter;
 }
 
-// The weights a convolution of this descriptor carries: one image of the output times the input
-// channels, by the kernel height and width, which is what the framework's own weights descriptor gives
-// and what the factory checks against (measured: anything else is refused whole).
 static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTensor *weights)
 {
     if (!descriptor || !weights || !weights.descriptor) {
@@ -379,8 +332,6 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
     layer->_descriptor = descriptor;
     layer->_weights = weights;
     layer->_weightsParameter = CharonMLCParameter(weights);
-    // The biases, when there are any, are one per output channel, and their absence is not a failure:
-    // a convolution without a bias is the common one and keeps no biases parameter (measured).
     if (biases && biases.descriptor) {
         layer->_biases = biases;
         layer->_biasesParameter = CharonMLCParameter(biases);
@@ -425,8 +376,6 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
     MLCTensorParameter *_biasesParameter;
 }
 
-// The fully connected layer does not check what it is given: the same mismatched weights a convolution
-// refuses are kept here with the descriptor and a parameter (measured).
 + (instancetype)layerWithWeights:(MLCTensor *)weights
                            biases:(MLCTensor *)biases
                        descriptor:(MLCConvolutionDescriptor *)descriptor
@@ -522,14 +471,6 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
     return [self charon_layerWithType:MLCPaddingTypeConstant padding:padding constantValue:constantValue];
 }
 
-// The array is read as one or two pairs, and the two lengths the framework refuses it raises for. What
-// it answers, measured for each length and for each of the three kinds, which behave alike:
-//   one entry  v        top, bottom, left and right all v
-//   two        a, b     left a and right b, and no padding above or below
-//   four       a..d     top a, bottom b, left c, right d
-//   none, or three      NSRangeException
-// Every one of the three factories is measured to answer the same for the same array, so the reading is
-// the layer's and not the kind's.
 + (instancetype)charon_layerWithType:(MLCPaddingType)type
                             padding:(NSArray<NSNumber *> *)padding
                       constantValue:(float)constantValue
@@ -728,8 +669,6 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
     MLCSliceLayer *layer = [[MLCSliceLayer alloc] charon_init];
     layer->_start = [start copy];
     layer->_end = [end copy];
-    // A nil stride is a stride of one, and a shorter one is one for every entry it does not name
-    // (measured: a nil stride answers 1).
     NSUInteger count = MAX(MAX(start.count, end.count), stride.count);
     NSMutableArray *every = [NSMutableArray arrayWithCapacity:count];
     for (NSUInteger index = 0; index < count; index++) {
@@ -862,8 +801,6 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
 
 + (instancetype)layerWithDimension:(NSUInteger)dimension reductionType:(MLCReductionType)reductionType
 {
-    // The reduction has to be one of the two the header names; anything else answers no layer at all
-    // (measured for a reduction of mean).
     if (reductionType != MLCReductionTypeNone && reductionType != MLCReductionTypeSum) {
         return nil;
     }
@@ -962,8 +899,6 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
 
 + (instancetype)layerWithDescriptor:(MLCEmbeddingDescriptor *)descriptor weights:(MLCTensor *)weights
 {
-    // The weights are not checked, exactly as the fully connected layer does not check its own
-    // (measured with a weight tensor of the wrong size: the descriptor and the weights are both kept).
     MLCEmbeddingLayer *layer = [[MLCEmbeddingLayer alloc] charon_init];
     layer->_descriptor = descriptor;
     layer->_weights = weights;
@@ -991,9 +926,6 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
 
 #pragma mark - the three normalizations and the layer normalization
 
-// The parameters of a normalization, which the framework only keeps when each is of the shape its own
-// descriptors give: 1, channels, 1, 1 for the batch, instance and group normalizations, and one
-// dimension for the layer normalization.
 static BOOL CharonMLCPerChannel(MLCTensor *tensor, NSUInteger channels)
 {
     if (!tensor || !tensor.descriptor) {
@@ -1162,9 +1094,6 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
                                        gamma:(MLCTensor *)gamma
                                varianceEpsilon:(float)varianceEpsilon
 {
-    // A normalization with no running mean and no running variance: the framework's own declaration of
-    // the mean and the variance is not optional, so the port's own path is what carries the absence,
-    // and the layer answers no mean and no variance (measured).
     return [self layerWithFeatureChannelCount:featureChannelCount
                                          beta:beta
                                         gamma:gamma
@@ -1178,11 +1107,6 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
                                varianceEpsilon:(float)varianceEpsilon
                                      momentum:(float)momentum
 {
-    // MLCInstanceNormalizationLayer.h:95-99, the momentum overload of the header's own five-argument
-    // form. Same layer with the momentum the caller gave instead of the default the form above uses:
-    // the momentum is what the header sets for smoothing the running statistics (:92). This layer has
-    // no running mean and no running variance to compute, so the
-    // value is kept and is what -momentum answers.
     MLCInstanceNormalizationLayer *layer = [[MLCInstanceNormalizationLayer alloc] charon_init];
     [layer charon_label:@"InstanceNorm"];
     [layer charon_setFeatureChannelCount:featureChannelCount
@@ -1407,8 +1331,6 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
 
 + (instancetype)layerWithDescriptor:(MLCLossDescriptor *)lossDescriptor
 {
-    // The label weights are optional: a loss with none of them is the common one, and the framework's
-    // own declaration is not optional, so the port's own path is what carries the absence.
     MLCLossLayer *layer = [[MLCLossLayer alloc] charon_init];
     layer->_descriptor = lossDescriptor;
     return [layer charon_label:@"Loss"];
@@ -1649,10 +1571,6 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
     NSArray<MLCTensorParameter *> *_biasesParameters;
 }
 
-// The gates of a long short-term memory when the factory is given none: three sigmoids and a tanh - the
-// input, the forget and the output gate are sigmoids and the cell gate a tanh - and the activation of
-// the result is a tanh too. The framework supplies them only when it has weights to supply them for: a
-// layer with no weights at all answers no gate and an identity output (measured, both ways).
 + (instancetype)charon_layerWithDescriptor:(MLCLSTMDescriptor *)descriptor
                              inputWeights:(NSArray<MLCTensor *> *)inputWeights
                             hiddenWeights:(NSArray<MLCTensor *> *)hiddenWeights
@@ -1716,14 +1634,6 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
                      peepholeWeights:(NSArray<MLCTensor *> *)peepholeWeights
                              biases:(NSArray<MLCTensor *> *)biases
 {
-    // nil, as the framework answers. This form and the one that also takes both activation arrays refuse
-    // every peephole weight and gate arrangement tried - four gates of the hidden size, one, three, none,
-    // with and without biases, the biases declared and not - and answer nil every time, while the three
-    // shorter forms keep what they are given (measured, facts/MLCompute/Layers.md). The port answers nil
-    // for the same reason: a factory that answered a layer the framework would not is a row whose
-    // behaviour is not the framework's, and the rule that accepts them is not measured. Both are cases in
-    // tests/backports/host/mlcompute, so a framework that starts accepting weights shows up there rather
-    // than in a silence.
     return nil;
 }
 
@@ -1809,13 +1719,6 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
                               biases:(NSArray<MLCTensor *> *)biases
                       attentionBiases:(NSArray<MLCTensor *> *)attentionBiases
 {
-    // nil, as the framework answers. It refused every arrangement of weights and biases tried - four
-    // matrices of the model's dimension, one of them, two of half it, three of them, with and without
-    // biases, with the biases declared, a model of 8, a single head - and answered a layer with nothing
-    // every time (measured, facts/MLCompute/Layers.md). The port answers nil for the same reason as the two
-    // long short-term memory factories above: a factory that answered a layer the framework would not is a
-    // row whose behaviour is not the framework's. It is a case in tests/backports/host/mlcompute, which
-    // had none.
     return nil;
 }
 

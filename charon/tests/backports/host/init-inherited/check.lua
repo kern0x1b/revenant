@@ -1,28 +1,3 @@
--- check.lua - the -init and +new rows of HomeKit and HealthKit that this group implements.
---
--- Two kinds of row are here. The HomeKit and HKDeletedObject rows name a class whose own list carries neither
--- selector on iOS 16.0 (tools/objc-init-members.lua, arm64e cache, NSObject as the control): the caller reaches
--- NSObject's pair, and the port must define neither. The eight HealthKit -init rows name a class whose own -init
--- raises, measured at run time on the macOS host (tests/backports/host/init-inherited/host.sh): the port defines
--- CHARON_HEALTHKIT_UNCREATABLE_INIT in each of the eight, and nothing in the port reaches -init or +new on any of
--- them or on a class that inherits the raise. Every row must say implemented, with the facts file the row names.
---
--- Four things are asked, and each one has a control:
---   * the REGISTRY: every row named here is implemented. A row that went back to absent would say that
---     respondsToSelector: answers NO, which the NSObject pair contradicts.
---   * the SOURCE, neither: no @implementation block of a class named here defines -init or +new. The control is
---     HMAction, which defines an -init of its own, so a scanner that reads nothing would report 0 for it and
---     the check says so.
---   * the SOURCE, raising: each @implementation block of the eight carries the macro. The control is that the
---     macro is found in exactly these eight blocks and no other, read from the same files.
---   * the SOURCE, construction: no line of a HealthKit source builds one of the eight, or a class that inherits
---     the raise, through -init or +new. The control is HKStatistics, which builds through charon_init, so a
---     scanner that reads nothing would report 0 for it and the check says so.
---
--- What this does NOT check is the object: the built library's own class list. The gate's objects carry it,
--- and it is read with objc.binary_inventory when a gate run is kept; the source check is the one that runs on
--- every light guard.
-
 local json = import("core.base.json")
 
 local failures, checks = 0, 0
@@ -35,8 +10,6 @@ local function expect(name, condition)
     end
 end
 
--- The rows this group closes: the 24 HomeKit rows, HKDeletedObject's -init, HKClinicalRecord's +new, and the eight
--- HealthKit -init rows that raise on the host.
 local rows = {
     "-[HMAccessoryProfile init]", "+[HMAccessorySetupPayload new]", "-[HMAccessorySetupPayload init]",
     "+[HMAccessorySetupResult new]", "-[HMAccessorySetupResult init]", "-[HMCalendarEvent init]",
@@ -51,7 +24,6 @@ local rows = {
     "-[HKSource init]", "-[HKStatistics init]", "-[HKStatisticsCollection init]", "-[HKWorkoutEvent init]",
 }
 
--- The classes whose own lists carry neither selector: no @implementation block of theirs may define one.
 local neither = {
     "HMAccessoryProfile", "HMAccessorySetupPayload", "HMAccessorySetupResult", "HMCalendarEvent", "HMCameraProfile",
     "HMCharacteristicThresholdRangeEvent", "HMCharacteristicWriteAction", "HMDurationEvent", "HMEvent", "HMEventTrigger",
@@ -61,7 +33,6 @@ local neither = {
     "HKDeletedObject",
 }
 
--- Every @implementation block of a class in `wanted`, read line by line, with each -init and +new it defines.
 local function definitions(files, wanted)
     local found = {}
     for name in pairs(wanted) do
@@ -90,15 +61,12 @@ local function definitions(files, wanted)
     return found
 end
 
--- The eight HealthKit classes whose own -init raises on the host, and the classes that inherit that raise: a
--- HealthKit source may not build any of them through -init or +new.
 local raising = {
     "HKCategorySample", "HKObject", "HKObjectType", "HKQuantity", "HKSource", "HKStatistics",
     "HKStatisticsCollection", "HKWorkoutEvent",
 }
 local inheriting = { "HKSample", "HKQuantitySample", "HKWorkout", "HKCorrelation", "HKQuantityType" }
 
--- Every @implementation block of a class in `wanted`, and whether the block carries the uncreatable-init macro.
 local function carries_macro(files, wanted)
     local found = {}
     for name in pairs(wanted) do
@@ -121,7 +89,6 @@ local function carries_macro(files, wanted)
     return found
 end
 
--- The lines of `files` that build one of `classes` through -init or +new: [[X alloc] init] and [X new].
 local function constructions(files, classes)
     local hits = {}
     for _, file in ipairs(files) do
@@ -138,7 +105,6 @@ local function constructions(files, classes)
     return hits
 end
 
--- The lines of `files` that build `name` through charon_init: the control that the scan above reads the sources.
 local function charon_builds(files, name)
     local count = 0
     for _, file in ipairs(files) do
@@ -155,7 +121,6 @@ function main(charon)
     local apple = path.join(charon, "packages", "a", "apple-backports")
     local files = table.join(os.files(path.join(apple, "HomeKit", "*.m")), os.files(path.join(apple, "HealthKit", "*.m")))
 
-    -- REGISTRY: each row named above is implemented
     local status = {}
     for _, file in ipairs(table.join(os.files(path.join(apple, "registry", "HomeKit", "*.json")),
                                      os.files(path.join(apple, "registry", "HealthKit", "*.json")))) do
@@ -171,19 +136,17 @@ function main(charon)
         expect(api .. " is implemented in the registry", status[api] == "implemented")
     end
 
-    -- SOURCE: neither selector is defined by any block of the classes named as carrying neither
     local wanted = {}
     for _, name in ipairs(neither) do
         wanted[name] = true
     end
-    wanted["HMAction"] = true -- the control: this class defines an -init of its own
+    wanted["HMAction"] = true
     local defined = definitions(files, wanted)
     expect("the control HMAction shows its own -init, so the scanner reads blocks", #defined["HMAction"] == 1)
     for _, name in ipairs(neither) do
         expect(name .. " defines neither -init nor +new in the port", #defined[name] == 0)
     end
 
-    -- SOURCE, raising: each of the eight carries the macro in its own @implementation block
     local hk_files = os.files(path.join(apple, "HealthKit", "*.m"))
     local raise_wanted = {}
     for _, name in ipairs(raising) do
@@ -194,8 +157,6 @@ function main(charon)
         expect(name .. " carries CHARON_HEALTHKIT_UNCREATABLE_INIT in its own @implementation block", macros[name])
     end
 
-    -- SOURCE, construction: nothing builds the eight, or a class that inherits the raise, through -init or +new.
-    -- The control is that the scan reads HKStatistics's and HKStatisticsCollection's charon_init sites.
     local hits = constructions(hk_files, table.join(raising, inheriting))
     for _, hit in ipairs(hits) do
         print("  " .. hit)

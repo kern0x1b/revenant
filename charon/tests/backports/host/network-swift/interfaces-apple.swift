@@ -1,5 +1,3 @@
-// The host half of the NWInterface differential: the interfaces of the first path Apple's own monitor reports, one line each,
-// for a monitor of every interface and for monitors that require each interface type.
 import Network
 import Dispatch
 

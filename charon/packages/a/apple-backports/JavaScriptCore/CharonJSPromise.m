@@ -1,47 +1,5 @@
 #import "JSInternal.h"
 
-/*
- * The port's own ES5 promise, in a file of its own, and why it is a file of its own.
- *
- * It was JSValue.m's, and the 6.1.3 gate refused JSValue.m with "JSValue.m defines JSValue from iOS
- * 7.0 and JSObjectMakeDeferredPromise from iOS 16.0; an object carries API that arrived in one
- * release". The split put the JSValue class in JSValue.m and JSObjectMakeDeferredPromise in
- * JSObjectMakeDeferredPromise16.m, and the promise in between is this file.
- *
- * It is here and not promoted into JSInternal.h as a `static inline`, and the reason is that two of
- * these helpers would then be WRONG rather than merely copied. PromiseClass and CaptureClass hold
- * their JSClassRef in a `static` function-local created under `dispatch_once`, so a `static inline`
- * copy in a header gives every translation unit its own class ref under the same class name, and
- * PromiseState answers by IDENTITY - JSValueIsObjectOfClass(ctx, value, PromiseClass()) - so a
- * promise minted through one copy's makePromise reads as "not a promise" through the other copy's
- * promiseState. CharonPromiseSource is a 260-line script and would be a second copy of it per unit.
- * One copy, here, is the shape AGENTS.md names: "define it in a file that exports no API symbol of
- * its own". `nm -gU` on this file reports nothing the release test weighs, so band() keeps this
- * object in EVERY band, and that is what lets the 16.0 object below call it: from iOS 7.0 to 15.x,
- * JSValue.m is re-exported to the release's own JSValue and is not in the library at all.
- *
- * Two entry points, both `charon_js_`-prefixed so modules/apple/backports.lua's internal_symbol()
- * filters them and the release test never has to place them - the same shape as charon_js_enter,
- * charon_js_leave and charon_js_note_jobs in JSInternal.m:
- * charon_js_promise_constructor, which JSValue.m's +charon_installPromiseInContext: calls, and
- * charon_js_deferred_promise, which both JSValue.m's +[JSValue valueWithNewPromiseInContext:
- * fromExecutor:] and JSObjectMakeDeferredPromise16.m call. Everything else in here is `static` and
- * has exactly one caller.
- */
-
-/*
- * Promises. The release's engine (2012) has none, so one is built here, the way the JavaScriptCore
- * that has them builds its own: the algorithms are script (WebKit's PromiseOperations.js and
- * PromiseConstructor.js are too), and the state a promise keeps is a private property of an object
- * made with a JSClassRef whose class name is "Promise", which script cannot see or change and which
- * makes Object.prototype.toString answer "[object Promise]". Reactions run as jobs from the queue in
- * JSInternal.m, when the outermost call into script returns. What the 2012 engine cannot iterate
- * does not exist in it: arrays, strings and arguments objects are all the iterables it has, and
- * Promise.all/race/allSettled take exactly those. The constructor is found again through the
- * virtual machine's weak object map, keyed by the global object, so a context has one for as long
- * as anything can reach it; a context -init makes also gets it as its global Promise, and a context
- * adopted from elsewhere (a web view's page) is left as its owner made it.
- */
 static const char CharonPromiseSource[] =
     "(function (makePromise, promiseState, callFunction, noteJobs, reportError) {\n"
     "'use strict';\n"
@@ -162,8 +120,6 @@ static const char CharonPromiseSource[] =
     "        throw new TypeErrorConstructor('A promise constructor did not supply its resolving functions');\n"
     "    return { promise: made, resolve: resolve, reject: reject };\n"
     "}\n"
-    /* The engine has no @@species; the one thing it stands for that an ES5 script can build is a
-     * constructor whose prototype inherits Promise.prototype, and that is what is kept. */
     "function speciesConstructor(promise) {\n"
     "    var C = promise.constructor;\n"
     "    if (C === undefined)\n"
@@ -221,8 +177,6 @@ static const char CharonPromiseSource[] =
     "    made.reject(reason);\n"
     "    return made.promise;\n"
     "}\n"
-    /* Each iterable this engine has, walked the way its iterator would: an array or arguments object
-     * by index up to a length read before each step, a string by code point. */
     "function forEachOf(iterable, visit) {\n"
     "    var index;\n"
     "    if (typeof iterable === 'string') {\n"
@@ -320,7 +274,6 @@ static JSClassRef PromiseClass(void)
 }
 
 
-/* makePromise(prototype, state): a promise object holding `state` where script cannot reach it. */
 static JSValueRef MakePromise(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception)
 {
     (void)function;
@@ -337,7 +290,6 @@ static JSValueRef MakePromise(JSContextRef ctx, JSObjectRef function, JSObjectRe
     return promise;
 }
 
-/* promiseState(value): the state makePromise gave `value`, or undefined for anything else. */
 static JSValueRef PromiseState(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception)
 {
     (void)function;
@@ -351,8 +303,6 @@ static JSValueRef PromiseState(JSContextRef ctx, JSObjectRef function, JSObjectR
     return state ?: JSValueMakeUndefined(ctx);
 }
 
-/* callFunction(function, thisObject, ...arguments): a call no script can intercept by replacing
- * Function.prototype.call. `thisObject` is always an object here. */
 static JSValueRef CallFunction(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception)
 {
     (void)function;
@@ -370,7 +320,6 @@ static JSValueRef CallFunction(JSContextRef ctx, JSObjectRef function, JSObjectR
     return JSObjectCallAsFunction(ctx, callee, receiver, count, count ? arguments + 2 : NULL, exception);
 }
 
-/* noteJobs(drain): this context has jobs queued; see charon_js_note_jobs. */
 static JSValueRef NoteJobs(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception)
 {
     (void)function;
@@ -381,7 +330,6 @@ static JSValueRef NoteJobs(JSContextRef ctx, JSObjectRef function, JSObjectRef t
     return JSValueMakeUndefined(ctx);
 }
 
-/* reportError(error): a job threw past its own promise, which is the context's uncaught exception. */
 static JSValueRef ReportError(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception)
 {
     (void)function;
@@ -400,7 +348,6 @@ static JSObjectRef PromiseHelper(JSContextRef ctx, const char *name, JSObjectCal
     return helper;
 }
 
-/* The executor's resolving functions, caught by the executor function the constructor calls. */
 typedef struct CharonPromiseCapture {
     JSValueRef resolve;
     JSValueRef reject;
@@ -431,8 +378,6 @@ static JSClassRef CaptureClass(void)
     return captureClass;
 }
 
-/* The context's Promise constructor, made the first time it is asked for; NULL only if making it
- * failed, which the context's exception handler has then been told. */
 JSObjectRef charon_js_promise_constructor(JSContext *context)
 {
     JSGlobalContextRef ctx = context.JSGlobalContextRef;
@@ -467,18 +412,6 @@ JSObjectRef charon_js_promise_constructor(JSContext *context)
     return constructor;
 }
 
-/*
- * The promise and the two functions that settle it, which +valueWithNewPromiseInContext:fromExecutor:
- * below runs its callback against and JSObjectMakeDeferredPromise hands back: the context's own
- * constructor, an executor that captures the resolving functions, and the promise. NULL when the
- * constructor could not be made or the capture came back empty, with *outException left where the
- * caller reads it - nothing is reported here, because the two callers report it their own way.
- *
- * A call that has entered (charon_js_enter, which is what a job queue waits for before it may run)
- * leaves it entered when it hands a promise back, and the caller leaves it once it is done with it:
- * a job queued by a caller's own callback may not run while that callback's script is still on the
- * stack. Both failure paths below leave it themselves, so a caller that gets NULL must not.
- */
 JSObjectRef charon_js_deferred_promise(JSContext *context, JSObjectRef *outResolve, JSObjectRef *outReject, JSValueRef *outException)
 {
     JSGlobalContextRef ctx = context.JSGlobalContextRef;
@@ -507,4 +440,3 @@ JSObjectRef charon_js_deferred_promise(JSContext *context, JSObjectRef *outResol
     *outException = NULL;
     return promise;
 }
-

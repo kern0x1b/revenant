@@ -1,11 +1,3 @@
-// The nine delegate messages, one case each, driven through the PORT'S OWN proxy with a recording
-// delegate: a Catalyst build, because the proxy lives on MKMapView and MKMapView is UIKit's.
-//
-// The recording delegate implements all nine and records each call in order with the value that
-// decides it, so the transcript is the CALLS, their ORDER and their VALUES and nothing else. The
-// port's proxy is a CATEGORY on MKMapView, which merges into the host's own class -- the same
-// mechanism the library's loader uses on a device -- so both the host's map view and the port's
-// proxy are in this one process, and the class is the host's, not a renamed copy.
 #import <Foundation/Foundation.h>
 #import <MapKit/MapKit.h>
 #import <UIKit/UIKit.h>
@@ -38,8 +30,6 @@
     fflush(stdout);
 }
 
-// The nine, each recording the value that decides it: the CLASS of the thing handed over, so a nil
-// and a wrong object cannot look the same.
 - (id)mapView:(MKMapView *)mapView rendererForOverlay:(id<MKOverlay>)overlay
 {
     [self record:[NSString stringWithFormat:@"rendererForOverlay -> %@", [overlay class]]];
@@ -100,10 +90,6 @@ int main(int argc, char **argv)
         if (dylib) {
             dlopen(dylib, RTLD_LOCAL);
         }
-        // the MUTANT: a SUBCLASS of the host's own MKMapView, allocated at run time, whose
-        // -charon_askForRendererOf: hands the program the WRONG ARGUMENT -- nil -- so the delegate
-        // sees nil where the real one sees the overlay's class. A category would lose to the
-        // class's own method, and the port's source is byte-identical in both runs.
         if (getenv("CHARON_MUTANT") != NULL) {
             Class mutant = objc_allocateClassPair([MKMapView class], "CharonMutantMapView", 0);
             IMP wrong = imp_implementationWithBlock(^(id self_, SEL _cmd, id overlay) {
@@ -119,14 +105,11 @@ int main(int argc, char **argv)
             printf("#   (a subclass of the host's own MKMapView, passing the WRONG argument)\n");
         }
 
-        // the HOST's own MKMapView, or the mutant's subclass of it -- a `?:` cannot be a message
-        // receiver, so the class is chosen first and the map view allocated from it after.
         Class mapClass = NSClassFromString(@"CharonMutantMapView") ?: [MKMapView class];
         MKMapView *mapView = [[mapClass alloc] initWithFrame:CGRectMake(0, 0, 320, 480)];
         CharonRecorder *recorder = [[CharonRecorder alloc] init];
         mapView.delegate = (id<MKMapViewDelegate>)recorder;
 
-        // the MUTANT's own method where it has one, the port's own proxy everywhere else
         SEL ask = NSSelectorFromString(@"charon_askForRendererOf:");
         CLLocationCoordinate2D line[2] = {{0.0, 0.0}, {1.0, 1.0}};
         id overlay = [MKPolyline polylineWithCoordinates:line count:2];

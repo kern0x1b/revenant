@@ -184,10 +184,5 @@ void charon_windowed_run(UIWindow *window)
     charon_check([screen userInterfaceStyle] == UIUserInterfaceStyleLight && [screen activeAppearance] == UIUserInterfaceActiveAppearanceActive, "the screen of the port is light and active", @"it is not");
     id config = [darkPort imageConfiguration], systemConfig = [darkSystem imageConfiguration];
     agree(@"image configuration of a collection", [config description], [systemConfig description]);
-    // traitCollection, not charonHostTraitCollection: UIImageConfiguration is a class THIS group defines, so
-    // the class is renamed whole and its members keep their names - which is what prefix_selectors.py's
-    // ported() decides, and why it refuses to carry a member of a class the port defines. The prefixed name
-    // belongs to the UIScreen category two lines above, which is a category on a class the system owns. The
-    // check read the wrong one and raised "unrecognized selector" on CharonHostUIImageConfiguration.
     charon_check([[config performSelector:NSSelectorFromString(@"traitCollection")] isEqual:darkPort], "an image configuration holds the collection", @"it does not");
 }

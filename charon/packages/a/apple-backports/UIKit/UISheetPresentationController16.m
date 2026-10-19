@@ -3,9 +3,6 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-/* What iOS 16.0 added to the sheet: the inactive value, custom detents and the context they
-   are resolved against. The rest of the class is UISheetPresentationController.m's. */
-
 const CGFloat UISheetPresentationControllerDetentInactive = CGFLOAT_MAX;
 
 @interface CharonSheetDetentContext (CharonResolution) <UISheetPresentationControllerDetentResolutionContext>

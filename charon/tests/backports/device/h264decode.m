@@ -2,9 +2,6 @@
 #import <VideoToolbox/VideoToolbox.h>
 #import "check.h"
 
-// CMVideoFormatDescriptionCreateFromH264ParameterSets of iOS 7 feeding the release's own VTDecompressionSession, and
-// VTCompressionSessionPrepareToEncodeFrames and the profile levels against the release's encoder
-// (facts/VideoToolbox/H264Encoding.md). A process linked against the package built with avfoundation = true.
 #import "h264decode-frames.h"
 
 static int decoded;

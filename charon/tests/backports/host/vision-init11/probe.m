@@ -1,9 +1,3 @@
-/* probe.m - what the answers of the iOS 11 Vision initialisers are, class by class, on the host and in the port.
- *
- * Each class's -init (and +new, where the class answers it) and its -initWithCompletionHandler: are called on a fresh allocation,
- * and the class of the answer is printed: a class name for an object, nil for nil. The headers mark each initialiser
- * NS_UNAVAILABLE, so no application calls them through the header; the answer is what the release's own NSObject-inherited
- * initialiser gives, and this probe is the proof that the port answers the same. */
 #import <Foundation/Foundation.h>
 #import <Vision/Vision.h>
 #import <objc/runtime.h>

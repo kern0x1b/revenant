@@ -1,13 +1,3 @@
--- The emit rule's output must match its inputs and the committed Matter objects (v-matter12). The rule is in
--- tools/matter-closure.lua: a generated class is emitted only when the real stack does not carry it (class-overlap.tsv
--- says no) and it is in the closure of the app-usable SDK 26.2 Matter API. facts/Matter/emit-closure.tsv is that rule's
--- output, one row per generator input class. This suite fails when the file is stale against class-overlap.tsv (its
--- digest), when a row disagrees with class-overlap or with the rule, and when any committed Matter/CharonMatter*.m exists:
--- the rule emits none of the inputs and the generator is retired (v-matter13), so no object may be committed. There is no
--- pending list. Pure Lua: it reads committed files and runs no clang. The corpus and the SDK headers are outside the
--- repository: re-run tools/matter-closure.lua to check them.
-
--- The same digest as tools/matter-closure.lua (32-bit, over the bytes in order).
 local function digest(text)
     local h = 0
     for k = 1, #text, 4096 do
@@ -39,7 +29,6 @@ function failures(opt)
         return {"no emit-closure.tsv or class-overlap.tsv under " .. facts}
     end
 
-    -- the generator input and the real stack's verdict, from class-overlap.tsv
     local overlap_text = io.readfile(overlap)
     local real, input = {}, 0
     local first = true
@@ -99,8 +88,6 @@ function failures(opt)
         out[#out + 1] = "emit-closure.tsv has " .. rows .. " rows for " .. input .. " generator input classes"
     end
 
-    -- the committed objects: the generator is retired (v-matter13) and the rule emits none of its inputs, so no
-    -- Matter/CharonMatter*.m may be committed. A class the rule emits would be the generator's to write, and it has none.
     for _, file in ipairs(os.files(path.join(objects, "CharonMatter*.m"))) do
         local impl = io.readfile(file):match("@implementation%s+([%w_]+)")
         local shown = path.filename(file)

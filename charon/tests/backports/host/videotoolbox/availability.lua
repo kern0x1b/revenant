@@ -1,16 +1,3 @@
--- availability.lua [declarations.tsv] - which iOS release each VideoToolbox string constant arrived in, read from the
--- generator's declarations table, spec/VideoToolbox/declarations.tsv. libclang wrote that table from the SDK's own headers,
--- with each declaration's availability in its own column; no band reads SDK header text.
---
---    xmake l availability.lua [declarations.tsv]
---
--- The rows are read as the generator wrote them: the kind column is "var", the type column is "const CFStringRef", the
--- usr column is "c:@" and the constant's name, and the availability column holds one "platform=introduced/..." entry per
--- platform, with "-" where the platform states no release. A constant is stated for iOS when its ios entry names one.
---
--- The self-test reads two constants the table declares, which must give the release the table states, and one name no
--- SDK declares, which must give nothing. A reader that invents a release for the name is the failure this is for.
-
 local SAMPLES = {
     { name = "kVTAlphaChannelMode_PremultipliedAlpha", wanted = "13.0" },
     { name = "kVTCompressionPropertyKey_PreserveDynamicHDRMetadata", wanted = "14.0" },
@@ -19,7 +6,6 @@ local DECOY = "kVTCharonDecoyNameThatIsNotInAnyHeader"
 local CONSTANT_TYPE = "const CFStringRef"
 local USR_PREFIX = "c:@"
 
--- The fields of one tab-separated line.
 local function fields(line)
     local out, start = {}, 1
     while true do
@@ -33,7 +19,6 @@ local function fields(line)
     end
 end
 
--- The iOS release a row's availability column states, or nil: the "ios=" entry's introduced field, where "-" is none.
 local function ios_release(availability)
     for entry in string.gmatch(availability, "[^,]+") do
         local platform, rest = string.match(entry, "^(%w+)=(.*)$")
@@ -48,7 +33,6 @@ local function ios_release(availability)
     return nil
 end
 
--- {name -> release or false} for every constant the table declares; false is a constant with no iOS release stated.
 local function read_constants(path)
     local handle = assert(io.open(path, "rb"), "availability.lua: cannot open " .. path)
     local out, stated = {}, 0

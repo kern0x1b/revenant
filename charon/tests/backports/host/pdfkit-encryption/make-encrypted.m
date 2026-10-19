@@ -1,10 +1,3 @@
-// The encrypted fixtures, written with CGPDFContext's own encryption: the release's writer makes the
-// /Encrypt dictionary, so neither side is asked about a file it could not produce. Built and run by
-// run.sh on the host only, and the three files are the same bytes on both sides.
-//
-//   plain.pdf       no password, no /Encrypt
-//   owner-only.pdf  an OWNER password and no user password: /Encrypt present, opens without a password
-//   user-locked.pdf a USER password "secret": /Encrypt present, and nothing reads a page until it is given
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
 #include <stdio.h>
@@ -20,7 +13,6 @@ static void draw(NSString *path, NSDictionary *aux)
     }
     for (int page = 1; page <= 2; page++) {
         CGPDFContextBeginPage(context, NULL);
-        // a font is selected before any text is shown, or the page carries no text to read back
         CGContextSelectFont(context, "Helvetica", 12.0, kCGEncodingMacRoman);
         CGContextSetRGBFillColor(context, 0, 0, 0, 1);
         NSString *text = [NSString stringWithFormat:@"encrypted page %d", page];

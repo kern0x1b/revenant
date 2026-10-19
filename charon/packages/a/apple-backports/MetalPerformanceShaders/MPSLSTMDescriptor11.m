@@ -1,13 +1,3 @@
-// MPSLSTMDescriptor, from the header of MPSRNNLayer.h in the SDK of iOS 16.4: a long short-term memory
-// layer's descriptor. It adds twelve weight sources (three per gate, the peephole ones included), the
-// memory-diagonal switch and the neuron of the cell-to-output gate to MPSRNNDescriptor.
-//
-// The defaults are the host's, read from Apple's own object (see facts/MetalPerformanceShaders/MPSLSTMDescriptor.md):
-// every weight source is nil, memoryWeightsAreDiagonal is NO, cellToOutputNeuronType is MPSCNNNeuronTypeTanH
-// and its three parameters are 1. The host's object also carries cellClipThreshold and
-// coupleForgetGateToInputGate, which the 16.4 header does not declare, so they are not here. The object is
-// not NSCopying on the host, so this class is not either.
-
 #import "CharonMPS.h"
 
 @implementation MPSLSTMDescriptor {
@@ -61,8 +51,6 @@
     _memoryWeightsAreDiagonal = value;
 }
 
-// The input gate: Wi, Ui and the peephole Vi.
-
 - (id <MPSCNNConvolutionDataSource>)inputGateInputWeights
 {
     return _inputGateInputWeights;
@@ -92,8 +80,6 @@
 {
     _inputGateMemoryWeights = weights;
 }
-
-// The forget gate: Wf, Uf and the peephole Vf.
 
 - (id <MPSCNNConvolutionDataSource>)forgetGateInputWeights
 {
@@ -125,8 +111,6 @@
     _forgetGateMemoryWeights = weights;
 }
 
-// The output gate: Wo, Uo and the peephole Vo.
-
 - (id <MPSCNNConvolutionDataSource>)outputGateInputWeights
 {
     return _outputGateInputWeights;
@@ -157,8 +141,6 @@
     _outputGateMemoryWeights = weights;
 }
 
-// The memory cell gate: Wc, Uc and the peephole Vc.
-
 - (id <MPSCNNConvolutionDataSource>)cellGateInputWeights
 {
     return _cellGateInputWeights;
@@ -188,8 +170,6 @@
 {
     _cellGateMemoryWeights = weights;
 }
-
-// The neuron of the cell-to-output gate, gh, and its three parameters.
 
 - (MPSCNNNeuronType)cellToOutputNeuronType
 {

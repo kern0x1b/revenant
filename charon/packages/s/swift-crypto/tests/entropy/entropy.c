@@ -1,13 +1,3 @@
-/*
- * The guest's random sources, measured one by one: SecRandomCopyBytes (Security), CCRandomGenerateBytes (libCommonCryptoBackports,
- * which fills from SecRandomCopyBytes), CCRandomCopyBytes (libSystem on 6.1.3), and reads of /dev/random and /dev/urandom.
- * Each draw is 16 bytes from each source, in this one process, so a run shows the repetition inside one boot; the boots are
- * separate runs of `xmake emulate run`.
- *
- * Every output line starts with "E| " so a log is filtered with grep:
- *   E| <draw> <source> <status> <hex>
- * status is the call's return value (0 is success) for the three calls, and the read's byte count for the devices.
- */
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,7 +9,6 @@
 
 #define DRAW_BYTES 16
 
-/* The iOS 16 SDK does not declare CCRandomCopyBytes (libSystem exports it on 6.1.3, under the default generator 0). */
 extern int CCRandomCopyBytes(int generator, void *bytes, size_t count);
 #define CC_RANDOM_DEFAULT 0
 

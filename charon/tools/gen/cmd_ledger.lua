@@ -1,19 +1,8 @@
--- `ledger`: the 6.1.3 ledger's cache pass over the whole model. For every framework of the model it reads the declarations the model gives
--- that framework (surface_model.declarations, claimed by the owner rule) and checks each checkable one against the release's own dyld
--- shared cache (ledger.lua): a framework none of whose own declarations is in the cache is absent from the release, with that reason. Writes
--- framework-verdicts-<release>.tsv into --out and prints the counts and the absent list. --sdk gives the SDK whose shards are read, --release
--- the cache's release (6.1.3 by default), --tree the repository (the readers run from it). With --rows DIR --gate GATE, it also writes the
--- ledger's rows (ledger.lua's rows_of) into DIR: one file per unit (a nested unit's slash as an underscore), and one per owner that holds the
--- rows of its nested units too, the file the scope reads them from. A declaration is implemented when the cache or one of the gate's built
--- libraries carries it, missing when neither does, undecided with what decides it. --framework F limits the rows to one file.
--- Returns the exit status: 0 when the files are written.
-
 local emit = import("emit", {anonymous = true})
 local surface_model = import("surface_model", {anonymous = true})
 local sdk_info = import("sdk", {anonymous = true})
 local ledger = import("ledger", {anonymous = true})
 
--- Appends the records of a list to the list kept under name.
 local function append(into, name, records)
     into[name] = into[name] or {}
     for _, record in ipairs(records) do
@@ -21,9 +10,6 @@ local function append(into, name, records)
     end
 end
 
--- The port-header answers of a unit's undecided declarations (header_pass.lua's decide), asked once per unit and kept,
--- since the unit's rows appear in its owner's file too. nil when the run gives no port overlay (--vfs): the undecided
--- rows then stay undecided.
 local function header_asker(args)
     if args.vfs == nil then
         return nil
@@ -45,14 +31,11 @@ local function header_asker(args)
     end
 end
 
--- Writes the rows of every file the model's units name: the unit's own file, and each owner's file (the owner's own rows and its nested
--- units' rows, which the scope reads from it), and prints the state totals of the units' own rows.
 local function write_rows(args, decls, facts, exported)
     assert(args.gate, "ledger --rows needs --gate: the gate's output folder, whose lib*Backports.dylib are the built libraries")
     local built, count = ledger.read_built(args.tree, args.gate)
     local all = ledger.merge(facts, built)
     local header_of = header_asker(args)
-    -- the records in sorted order of framework and unit, so a key two records share takes the same one every run
     local by_unit = {}
     local frameworks = table.keys(decls)
     table.sort(frameworks)
@@ -76,8 +59,6 @@ local function write_rows(args, decls, facts, exported)
             append(files, owner, records)
         end
     end
-    -- the model's ObjC and C rows by usr, from each unit's own records: the Swift imports of a record take their state from them, so a
-    -- declaration imported from another framework is decided in its own row
     local own_rows = {}
     for _, unit in ipairs(unit_names) do
         for _, row in ipairs(ledger.rows_of(by_unit[unit], all, exported, header_of, nil)) do
@@ -95,7 +76,6 @@ local function write_rows(args, decls, facts, exported)
             written = written + 1
         end
     end
-    -- the totals are the units' own rows, each unit once (an owner's file repeats its nested units' rows)
     local totals = {}
     local units = 0
     for unit, records in pairs(by_unit) do
@@ -113,7 +93,6 @@ local function write_rows(args, decls, facts, exported)
                         table.concat(parts, ", ")))
 end
 
--- Returns the exit status: 0 when the verdicts are written.
 function run(args)
     assert(args.out, "ledger needs --out: the folder framework-verdicts-<release>.tsv is written to")
     assert(args.sdk, "ledger needs --sdk: the iPhoneOS SDK whose declaration shards the model is read from")
@@ -127,8 +106,6 @@ function run(args)
     end
     print(string.format("ledger: %s cache %s: %d classes, %d protocols, %d exported symbols", release, cache,
                         #table.keys(facts.classes), #table.keys(facts.protocols), #table.keys(facts.exports)))
-    -- the symbols every .tbd of the SDK exports, read once: a C declaration the cache lacks is absent when the SDK exports it, from whichever
-    -- .tbd holds it (a framework's, a library's or a private framework's). The unit is not asked: the SDK, not the framework, is the test
     local tbd = import("tbd", {anonymous = true})
     local everywhere = nil
     local function exported()

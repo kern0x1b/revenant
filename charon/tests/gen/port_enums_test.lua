@@ -1,17 +1,5 @@
--- The enumerator values of the port's triple (tools/gen/port_enums.lua): the join by USR of a run's values to the IR's rows. The run's
--- values are the three cases the port's headers differ on, as tools/found/port_values.lua measured them with the armv7 triple:
---   MTLStages' MTLStageAll is NSIntegerMax (a 64-bit host's LONG_MAX) in an NSUInteger enum: 2147483647 on armv7;
---   DISPATCH_WALLTIME_NOW is ~1ull: 18446744073709551614 on both triples, but its enum has no fixed type, and clang picks unsigned long
---   for the host and unsigned long long for armv7, so the enum's type is what differs;
---   NSDateComponentUndefined is NSIntegerMax in an NSInteger enum: 2147483647 on armv7.
--- It also checks the rules that do not change a value: an enumerator the run does not declare keeps the IR's, one whose module the run
--- does not parse keeps the IR's and is counted, and a USR the run gives two values is refused. Run:
---   xmake l tests/gen/port_enums_test.lua
--- Pure Lua: the run's file lives under the system's temporary folder and is removed when the test ends.
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 
--- One IR row of the twenty-one columns, the cells named by column number (the rest "-").
 local function row(cells)
     local out = {}
     for column = 1, 21 do
@@ -52,8 +40,6 @@ local function run()
     check(run_values.types["c:@Ea@DISPATCH_WALLTIME_NOW"] == "unsigned long long", "the run gives the enum's type unsigned long long")
     check(run_values.unparsed["Broken"] == "Broken.h:1:1: error: fixture", "the run names the module it does not parse, with its error")
 
-    -- the IR's rows (the SDK's triple's values): the three cases, an enumerator of the module that does not parse, one the run does not
-    -- declare, and an enumerator of the same USR in two modules, which keeps its value when the run gives the same one
     local ir = {
         row({"Metal", "enum", "c:@E@MTLStages", "-", "MTLStages", "-", "MTLCommandEncoder.h", "1", "-", "-", "NSUInteger"}),
         row({"Metal", "enumconst", "c:@E@MTLStages@MTLStageAll", "MTLStages", "MTLStageAll", "-", "MTLCommandEncoder.h", "75",
@@ -83,7 +69,6 @@ local function run()
           .. absent .. ", " .. unparsed .. ")")
     check(value_of(7) == "42" and value_of(8) == "7", "an enumerator the run does not give keeps the IR's value")
 
-    -- a USR the run gives two different values is refused: the file names no value it cannot settle
     write(file, "enumconst\tA\tc:@E@X@Y\t1\nenumconst\tB\tc:@E@X@Y\t2\n")
     local refused = false
     try {

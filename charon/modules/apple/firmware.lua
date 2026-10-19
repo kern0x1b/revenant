@@ -388,10 +388,6 @@ local function plain_image(firmware, file)
     return file
 end
 
--- Copies a file out of a mounted system image with ditto, as rootfs() copies the whole image. The
--- image's files are HFS-compressed, and copyfile(3) with COPYFILE_ALL, which os.cp calls, gives a
--- larger one the compressed flag and no data, so it cannot be read at all (TSReading, iWorkImport
--- and FaceCore's .dat beside the caches of 7.0 to 10.3.4; COPYFILE_DATA alone and ditto keep them).
 local function copy_out(file, target)
     os.vrunv("ditto", {file, target})
 end
@@ -419,8 +415,6 @@ local function cache_folder(mount)
     end
 end
 
--- Whether a Mach-O file is a shared library: one image of it names itself (LC_ID_DYLIB), which no
--- daemon, XPC service or other executable beside the libraries does.
 local function shared_library(file)
     local images = try {
         function ()
@@ -440,40 +434,12 @@ local function shared_library(file)
     return false
 end
 
--- The libraries a system image carries as files beside its shared cache, for each architecture the
--- cache was taken for: on a cache image every library in the cache is gone from the disk, so the
--- shared libraries copy_libraries finds there are exactly what the cache lacks.
--- Empties a tree unpacked from an IPS image, and says whether it could. Those trees carry the
--- permissions the image gave them and `dev` in a 6.1.3 root filesystem is dr-xr-xr-x, so a removal
--- cannot empty it: unlinking an entry inside a directory needs write permission on the directory
--- itself, which that one does not give. Everything is made writable first and only then removed,
--- and the answer is the removal's own, so a caller can say what is left instead of stepping over it.
 local function empty_tree(folder)
-    -- chmod(1) and not os.chmod, which this xmake does not carry. Everything is made writable by its
-    -- owner first, recursively, because a removal cannot unlink an entry inside a directory that does
-    -- not give write permission, and one directory in the tree is enough for the whole removal to
-    -- stop at it.
     os.vrunv("chmod", {"-R", "u+w", folder})
     os.tryrm(folder)
     return not os.exists(folder)
 end
 
--- Puts a staged tree where a tree is expected, over whatever is there. The obvious pair of calls is
--- wrong here on this machine's own store, measured 2026-10-03, where 6.1.3_10B329/ held a nested
--- 6.1.3_10B329.partial/ and a System/ but no SystemVersion.plist:
---
---   * a tree unpacked from an IPS image carries the image's own permissions and `dev` in a 6.1.3 root
---     filesystem is dr-xr-xr-x, so os.tryrm(folder) stops at it and says nothing;
---   * os.mv(staging, folder) with `folder` a directory that is still there moves the staged tree
---     INSIDE it, which is the nesting that was measured -- and the run after that unpacked every
---     image again and nested it once more;
---   * and os.mv of the whole folder is no way out either: measured, moving a tree that holds a
---     read-only directory fails the same way a removal of it does.
---
--- So the tree that is there is emptied FIRST, and the staged tree is moved in only once the folder is
--- gone. A removal that stops half way therefore leaves the store holding what it held, rather than
--- half of one tree beside another or the new one inside the old; and both steps are checked by what
--- the store holds afterwards, because os.mv and os.tryrm answer nothing worth asking.
 local function place_tree(staging, folder)
     if os.exists(folder) and not empty_tree(folder) then
         raise("%s could not be cleared, so %s is not put in place and the store still holds what it held",
@@ -500,13 +466,6 @@ local function same_file(first, second)
     return os.filesize(first) == os.filesize(second) and hash.sha256(first) == hash.sha256(second)
 end
 
--- Takes the shared caches of a mounted system image (or an unpacked root filesystem) into the
--- release's folder, with the libraries beside them. A cache already held is the ladder every gate
--- reads, chosen when it was first taken, and is never written over. Where the folder holds the
--- cache of architecture, the image is refused unless it carries that very cache: refused as absent
--- when it carries none (another system image of the same firmware may), as another when it carries
--- a different one. Another architecture's cache is taken only where none is held. Returns the
--- architectures taken, or nil, the refusal and "absent" or "another".
 function harvest(mount, release, firmware, architecture)
     local folder = path.join(dyld.root(), release)
     local caches = cache_folder(mount)
@@ -550,8 +509,6 @@ local function mount_and_harvest(image, release, architecture, firmware)
     local mount = image .. ".mount"
     os.mkdir(mount)
     os.vrunv("hdiutil", {"attach", "-readonly", "-nobrowse", "-noverify", "-noautoopen", "-mountpoint", mount, image})
-    -- xmake's try without a catch returns nil and drops the error, which then read as "holds no
-    -- shared cache" for every firmware of the release: the error is kept and raised once detached.
     local found, refused, kind, failure
     try {
         function ()
@@ -584,13 +541,6 @@ local function mount_and_harvest(image, release, architecture, firmware)
     return found, refused, kind
 end
 
--- The firmwares that can have carried a held cache, in the order to try them. harvest records the
--- firmware beside each cache it takes (<cache>.source); where it did, that one alone. Otherwise an
--- image carries a cache for each architecture its device runs - a 64-bit device of iOS 10 carries
--- armv7s beside arm64, and the armv7s caches of 10.x came that way - so the firmwares of every
--- architecture whose cache the release's folder holds can be it. Those come first, since a cache
--- held beside another architecture's was most likely taken from the same image; the requested
--- architecture's firmwares follow. The order only saves downloads: the bytes decide.
 local function held_candidates(architecture, release, firmwares, folder, held)
     local recorded = os.isfile(held .. ".source") and io.readfile(held .. ".source"):trim()
     local ordered, seen = {}, {}
@@ -614,7 +564,6 @@ local function held_candidates(architecture, release, firmwares, folder, held)
     return ordered
 end
 
--- Where rootfs() unpacks one firmware's root filesystem, and whether it is complete there.
 local function rootfs_folder(firmware)
     return path.join(home(), "firmware", "rootfs", firmware.identifier, firmware.version .. "_" .. firmware.build)
 end
@@ -632,10 +581,6 @@ function fetch(architecture, minimum, opt)
     if held and (os.isdir(held) or os.isdir(dyld.outside_source(folder, architecture))) then
         return held, release
     end
-    -- A cache taken before the libraries beside it were: they come from the firmware that cache is,
-    -- found by its root filesystem where one is unpacked, else by harvest refusing every image whose
-    -- cache is another. Which firmware a cache was first taken from is not recorded, and the smallest
-    -- is not always it (6.1.3's is iPhone4,1's, from an unpacked root filesystem).
     if held then
         firmwares = held_candidates(architecture, release, firmwares, folder, held)
         for _, firmware in ipairs(firmwares) do
@@ -711,9 +656,6 @@ function fetch(architecture, minimum, opt)
             return dyld.held_source(path.join(dyld.root(), release), architecture), release
         end
         failed(firmware, refusal or broken)
-        -- This image carried the held cache and failed after it was matched. Whether another
-        -- firmware carries the same bytes is known only once it is downloaded (7.0 has fifteen, and
-        -- 6.1.3's iPhone2,1 carries another cache), so fetch stops on this failure rather than try them.
         if broken and firmware.carries_held then
             raise("%s %s carries the cache held for iOS %s and did not yield the %s libraries beside it:\n  %s",
                   firmware.identifier, firmware.build, release, architecture, table.concat(failures, "\n  "))
@@ -817,10 +759,6 @@ function rootfs(identifier, minimum, opt)
     cprint("${bright}unpacking the root filesystem of %s %s (%s)${clear} from %s", firmware.identifier, firmware.version, firmware.build, firmware.url)
     local work = path.join(home(), "firmware", "work", firmware.identifier .. "_" .. firmware.build)
     local staging = folder .. ".partial"
-    -- A staged tree that already holds the release's own SystemVersion.plist is one this store
-    -- unpacked and a run did not move into place, which is what an interrupted run and the nesting
-    -- above both leave. Unpacking every image of the firmware again to arrive at the same tree is the
-    -- whole cost of repairing one, and the images are hundreds of megabytes.
     if os.isfile(path.join(staging, "System", "Library", "CoreServices", "SystemVersion.plist")) then
         print("note the staged root filesystem of %s %s is already unpacked at %s; it is put in place as it is",
               firmware.identifier, firmware.build, staging)
@@ -853,10 +791,6 @@ function rootfs(identifier, minimum, opt)
     end
     place_tree(staging, folder)
     if not os.isfile(path.join(folder, "System", "Library", "CoreServices", "SystemVersion.plist")) then
-        -- the completeness check again, on the folder rather than on the staged tree: a move that
-        -- nested instead of replacing leaves the staged tree inside the folder and the folder's own
-        -- tree beside it, which passes every check made before the move and is a store nothing can
-        -- read. Named here, where the store is, instead of by the next run's symptoms.
         raise("the root filesystem of %s %s is not in place at %s after the move, so the store holds a tree nothing can read",
               firmware.identifier, firmware.build, folder)
     end

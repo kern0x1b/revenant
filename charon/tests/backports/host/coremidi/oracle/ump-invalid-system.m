@@ -1,8 +1,3 @@
-// Host probe: what a MIDI 1.0 protocol destination of this process receives for type-1 (system) UMP words that are
-// invalid or valid. Two virtual destinations are made: one with MIDIDestinationCreateWithProtocol(kMIDIProtocol_1_0)
-// whose block gets MIDIEventLists (the UMP words), and one with the legacy MIDIDestinationCreateWithBlock whose
-// block gets MIDIPacketLists (the MIDI 1.0 bytes). An output port of this process sends each word alone, in its own
-// MIDISendEventList call, to each destination. Each line prints the word, then what each block received, or NONE.
 #import <CoreMIDI/CoreMIDI.h>
 #import <Foundation/Foundation.h>
 #include <stdio.h>

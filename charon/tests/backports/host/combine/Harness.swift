@@ -1,15 +1,3 @@
-//
-//  Harness.swift
-//
-//  What the differential's cases are written against: a scheduler whose time the test
-//  drives, a subscriber that asks for exactly what a case says and writes down what it
-//  was given, and a publisher whose demand the case controls.
-//
-//  Nothing here is a part of the module under test. The scheduler is a type conforming
-//  to the public `Scheduler` protocol, which is how a time-based operator is tested
-//  without a clock; the subscriber and the publisher conform to the public protocols too.
-//
-
 #if APPLE_COMBINE
 import Combine
 #else
@@ -21,16 +9,12 @@ enum TestError: Error, Equatable {
     case replaced
 }
 
-// MARK: - A scheduler whose time the test drives
-
 final class TestScheduler: Scheduler {
 
     typealias SchedulerTimeType = Time
     typealias SchedulerOptions = String
     typealias Stride = Time.Interval
 
-    /// A time the test drives. `Strideable`'s `Stride` has to be a nested type, so the
-    /// interval is nested in the time exactly as Apple's own schedulers nest theirs.
     struct Time: Strideable, Comparable {
         typealias Stride = TestScheduler.Time.Interval
 
@@ -86,8 +70,6 @@ final class TestScheduler: Scheduler {
 
     var minimumTolerance: Stride { return Stride(0) }
 
-    /// Runs everything that has come due, in the order it was scheduled, and moves the
-    /// clock to `seconds`.
     func advance(to seconds: Double) {
         let target = Time(seconds)
         while true {
@@ -136,19 +118,10 @@ final class TestCancellable: Cancellable {
     func cancel() { onCancel() }
 }
 
-// MARK: - What a subscriber saw
-
 final class Trace {
     private(set) var lines: [String] = []
-    /// The subscriptions the trace's cases are holding, so that a subscription is not
-    /// released the moment the expression that made it ends. A case whose only reference
-    /// to a subscription is the result of `sink` measures an empty stream on any
-    /// implementation, which is how the first run of this suite came to compare two
-    /// things that were both doing nothing.
     private(set) var subscriptions: [AnyCancellable] = []
 
-    /// Subscribes to a publisher, writes down everything it delivers, and keeps the
-    /// subscription for as long as the trace is alive.
     func sink<P: Publisher>(_ publisher: P) {
         subscriptions.append(publisher.sink(receiveCompletion: { [weak self] completion in
             switch completion {
@@ -201,7 +174,6 @@ final class Trace {
     }
 }
 
-/// A subscriber that asks for exactly what the case says, and records what it was given.
 final class RecordingSubscriber<Input, Failure: Error>: Subscriber {
     let trace: Trace
     private let initial: Subscribers.Demand
@@ -227,16 +199,10 @@ final class RecordingSubscriber<Input, Failure: Error>: Subscriber {
     }
 }
 
-// MARK: - A publisher the case drives
-
-/// A publisher that keeps what it was asked for and takes what the case sends, so that a
-/// case can write down both what a subscriber saw and what the publisher was asked for.
 final class ManualPublisher<Output>: Publisher {
     typealias Failure = TestError
 
     private(set) var cancelled = false
-    /// The subscription this publisher handed downstream, so a case can read the demand
-    /// the operator asked of it.
     private(set) var subscription: ManualSubscription?
     private var downstream: AnySubscriber<Output, TestError>?
 
@@ -265,8 +231,6 @@ final class ManualPublisher<Output>: Publisher {
     }
 }
 
-/// A subscription that records what it is asked for, so a case can see the demand an
-/// operator passed upstream.
 final class ManualSubscription: Subscription {
     private(set) var requested: Subscribers.Demand = .none
     private let onCancel: () -> Void
@@ -275,8 +239,6 @@ final class ManualSubscription: Subscription {
     func cancel() { onCancel() }
 }
 
-// This toolchain's `Strideable` asks of its `Stride` that it be `SignedNumeric`, so
-// the interval carries the arithmetic witnesses that asks for as well.
 extension TestScheduler.Time.Interval: SignedNumeric {
 
     init?<T: BinaryInteger>(exactly source: T) {

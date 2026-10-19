@@ -27,7 +27,6 @@ int main(void){ @autoreleasepool {
   float v[4]={0,0,0,0};
   if (out) [out readBytes:v dataLayout:MPSDataLayoutHeightxWidthxFeatureChannels imageIndex:0];
   P("through the graph: %g %g %g %g\n", v[0],v[1],v[2],v[3]);
-  // the same addition with no graph at all, through the node's own kernel class
   MPSImageAdd *k = [[MPSImageAdd alloc] initWithDevice:d];
   k.primaryScale = 2.0f;
   MPSImage *c = [[MPSImage alloc] initWithDevice:d imageDescriptor:sd];

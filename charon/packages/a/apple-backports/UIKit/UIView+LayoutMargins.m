@@ -14,10 +14,6 @@ static void charon_margins_changed(UIView *view)
     if ([view respondsToSelector:@selector(charon_updateLayoutMarginsGuide)])
         [view charon_updateLayoutMarginsGuide];
     [view layoutMarginsDidChange];
-    // The same moment seen from the controller the view belongs to, which is where iOS 11 sends it
-    // (UIViewSafeArea.md records the release's own order: the view first, the controller second, at
-    // -_safeAreaInsetsDidChangeFromOldInsets: 0x18a27d178). The controller is the view's next
-    // responder, the same walk UIView+SafeArea.m's charon_view_controller makes.
     UIViewController *controller = nil;
     for (UIResponder *next = view.nextResponder; next; next = next.nextResponder) {
         if ([next isKindOfClass:[UIViewController class]]) {
@@ -25,9 +21,6 @@ static void charon_margins_changed(UIView *view)
             break;
         }
     }
-    // Asked whether it is there first, and that is not defensive: this object is kept in every band
-    // from 6.0 and the member that answers the message arrives in 11.0, so in a lower band the
-    // controller answers NO and the message would raise rather than do nothing.
     if ([controller respondsToSelector:@selector(viewLayoutMarginsDidChange)])
         [controller viewLayoutMarginsDidChange];
     for (UIView *subview in view.subviews) {

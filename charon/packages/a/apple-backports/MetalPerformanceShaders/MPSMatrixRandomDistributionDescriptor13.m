@@ -1,6 +1,3 @@
-// MPSMatrixRandomDistributionDescriptor, from the header of the SDK of iOS 16.4. One object per release: the band machinery keeps an
-// object whole or drops it whole, so a file here carries the API of exactly one release.
-
 #import "CharonMPS.h"
 
 
@@ -15,9 +12,6 @@
     descriptor->_distributionType = MPSMatrixRandomDistributionUniform;
     descriptor->_minimum = minimum;
     descriptor->_maximum = maximum;
-    // A uniform distribution over [minimum, maximum] has its mean at the middle and its standard
-    // deviation the width over the square root of twelve, which is the variance (width squared over
-    // twelve) the distribution's own moments give. The release fills both in as well, measured.
     descriptor->_mean = (minimum + maximum) * 0.5f;
     descriptor->_standardDeviation = (float)((maximum - minimum) / 3.4641016151377544);
     return descriptor;

@@ -1,20 +1,5 @@
--- availability.lua - WHICH IOS RELEASE DECLARES A CLASS, read from the SDK's own headers.
--- A MODULE: import("availability", {rootdir = os.scriptdir()}); its exports are the functions below.
--- Port of availability.py, function for function. Python's regular expressions are matched by hand here
--- (the windows, the paren count and the \bios( search); each is stated in the comment beside its code.
---
--- Four spellings of a class declaration exist in the SDK's headers, and the rule is the same for all of
--- them: the class is found ANYWHERE in the text, and its availability is the LAST API_AVAILABLE in the
--- window between the previous @end or @interface and the class's own @interface. Parentheses are
--- counted, because API_AVAILABLE(macos(15.4), ios(26.0)) carries parentheses of its own.
---
--- Offsets: find_interface and the window arithmetic use Python's 0-based offsets, so each line below
--- that adds or subtracts 1 when it indexes a Lua string says so.
-
 local S = import("pystr", {rootdir = os.scriptdir()})
 
--- The 0-based start of the LAST occurrence of needle that lies wholly inside text, or -1: Python's
--- text.rfind(needle).
 local function last_index(text, needle)
     local found = -1
     local start = 1
@@ -28,11 +13,6 @@ local function last_index(text, needle)
     end
 end
 
--- Python's re.search(r'@interface\s+' + re.escape(name) + r'\b', text), returning the 0-based start of
--- the match, or nil. Hand-matched: each "@interface" occurrence is tried in order, then one or more
--- whitespace bytes (\s+ takes the whole run, since the name begins with a non-space byte), then the name
--- byte for byte, then \b, which holds where the last byte of the name and the byte after it differ in
--- word-ness. Every class name here ends in a word byte, so \b holds exactly when the next byte is not one.
 function interface_at(text, name)
     local start = 1
     while true do
@@ -51,7 +31,6 @@ function interface_at(text, name)
     end
 end
 
--- Python's find_interface(text, name): where this class's @interface is, or raise naming it.
 function find_interface(text, name)
     local at = interface_at(text, name)
     if at == nil then
@@ -60,8 +39,6 @@ function find_interface(text, name)
     return at
 end
 
--- Python's _balanced(text, start): the parenthesised group beginning at the 0-based index start, to its
--- matching ')'. Counts depth; a ')' that returns the depth to 0 ends the group. Raises when it never does.
 function _balanced(text, start)
     local depth = 0
     for i = start, #text - 1 do
@@ -78,11 +55,6 @@ function _balanced(text, start)
     raise("unbalanced parentheses")
 end
 
--- Python's re.search(r'\bios\(\s*([0-9]+(?:\.[0-9]+)*)\s*\)', macro).group(1), or nil.
--- Hand-matched: each "ios(" occurrence is tried in order; it must begin a word (the byte before it is not
--- a word byte, which is what \b means before the 'i'); then whitespace, then digits, then any number of
--- ".digits" groups, then whitespace, then ')'. The digit and dot-group run is maximal: a shorter run would
--- end on a digit or a '.', and neither can be followed by whitespace or ')', so no backtracking is needed.
 local function ios_version(macro)
     local start = 1
     while true do
@@ -113,16 +85,11 @@ local function ios_version(macro)
     end
 end
 
--- Python's availability_of(text, name): (ios version, the line the macro is on), or raise naming the
--- class and printing the window.
 function availability_of(text, name)
     local pos = find_interface(text, name)
     local head = string.sub(text, 1, pos)
-    -- bound = max(head.rfind('@end'), head.rfind('@interface'))
     local bound = math.max(last_index(head, "@end"), last_index(head, "@interface"))
-    -- window = head[bound + 1:]
     local window = string.sub(head, bound + 2)
-    -- hits = [m.start() for m in re.finditer(r'API_AVAILABLE\(', window)], 0-based
     local hits = {}
     local start = 1
     while true do
@@ -137,13 +104,11 @@ function availability_of(text, name)
         raise(name .. ": no API_AVAILABLE above its @interface; window:\n" .. window)
     end
     local last = hits[#hits]
-    -- macro = _balanced(window, hits[-1] + len('API_AVAILABLE'))
     local macro = _balanced(window, last + #"API_AVAILABLE")
     local version = ios_version(macro)
     if version == nil then
         raise(name .. ": no ios() in " .. macro)
     end
-    -- line = head[:bound + 1 + hits[-1]].count('\n') + 1
     local line = S.count_newlines(string.sub(head, 1, bound + 1 + last)) + 1
     return version, line
 end

@@ -24,9 +24,6 @@ static void compare(const char *what, CGColorRef host, CGColorRef port)
         CGColorRelease(port);
 }
 
-// CGColorCreateCopyByMatchingToColorSpace of the port, over the release's private colour transform,
-// against the host's, component for component, over sources and targets of every model the device
-// has and the rendering intents.
 int main(void)
 {
     @autoreleasepool {

@@ -1,31 +1,11 @@
-// vecLib's LinearAlgebra objects, the API of iOS 8, over the BLAS and LAPACK of the release.
-//
-// The release carries the whole of it already: measured from its own armv7 caches, iOS 4.3 through
-// 8.0 all export cblas_sgemm, cblas_dgemm, sgetrf_, sgetrs_, dgetrf_ and dgetrs_, and 6.1.3's
-// Accelerate image adds 415 vDSP and 235 vImage entry points beside vecLib's 148 cblas_* and 290
-// trailing-underscore LAPACK ones. So nothing here replaces a library: every product and every solve
-// below is the release's own cblas_* and LAPACK, which is also what the release's own LinearAlgebra
-// is built on, and it is the release's LAPACK that factorises and solves. Building a second BLAS, or a
-// second factorisation, beside the ones the device already ships would be the slower answer to the
-// same question.
-//
-// Behaviour is the host's own Accelerate, measured case by case by tests/backports/host/linearalgebra
-// and recorded in facts/Accelerate/LinearAlgebra.md, including the three places the host answers
-// differently from the header it ships with.
-
 #import "CharonLinearAlgebra.h"
 #include <math.h>
 #include <objc/message.h>
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 #pragma clang diagnostic ignored "-Wunguarded-availability"
-// clapack.h - where the release declares sgetrf_, sgetrs_ and their double siblings, the two pairs
-// la_solve calls - is deprecated in the SDK the port builds against, which is the release's own
-// header saying so about its own entry points.
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-// An object that carries nothing but a status: what every refused call answers, and what a caller
-// reads the reason out of with la_status.
 static la_object_t CharonLAWithStatus(la_status_t status, la_attribute_t attributes)
 {
     CharonLAValue *value;
@@ -47,9 +27,6 @@ static la_status_t CharonLAStatusOf(la_object_t object)
     return value ? value->status : LA_INVALID_PARAMETER_ERROR;
 }
 
-// rows x cols elements of the object's own scalar type, zeroed. A zero dimension is an object with
-// no elements and no complaint, which is what the host makes of a 0x0 identity and of a vector of no
-// length (measured). The single place an allocation can fail, and the only LA_INTERNAL_ERROR.
 static la_object_t CharonLANewArray(la_count_t rows, la_count_t cols, la_scalar_type_t scalar_type,
                                     la_attribute_t attributes, la_status_t inherited)
 {
@@ -111,17 +88,9 @@ static la_object_t CharonLANewSplat(la_scalar_type_t scalar_type, double element
 
 @end
 
-// The two entry points the release's own library exports beside the macros that reach for them. Which
-// of the two shapes a caller has is decided by <vecLib/LinearAlgebra/object.h> from __OBJC__ and the
-// deployment target alone, not by ARC, so a C client of the 6.1.3 band holds the Objective-C type and
-// counts it the way the runtime counts every object; the count it manipulates is the runtime's, not a
-// field of ours. Sending retain and release through objc_msgSend is how ARC-legal code sends them.
 #undef la_retain
 #undef la_release
 
-// The selector names go through the runtime rather than @selector, because ARC marks retain and
-// release unavailable and forbids naming them; sel_registerName returns the very selector @selector
-// would, the runtime interns names, so this sends the same message to the same implementation.
 static SEL CharonLASelectorNamed(const char *name) { return sel_registerName(name); }
 
 la_object_t la_retain(la_object_t object)
@@ -137,8 +106,6 @@ void la_release(la_object_t object)
 
 #else
 
-// Below iOS 6 the release's own header gives la_object_t the incomplete `struct la_s *` and counts it
-// here, so the exported entry points and the header's declarations are one thing.
 la_object_t la_retain(la_object_t object)
 {
     if (object) {
@@ -196,17 +163,11 @@ la_count_t la_vector_length(la_object_t vector)
     return value ? CharonLALength(value) : 0;
 }
 
-// The constructors from a buffer. matrix_row_stride is measured in elements of the buffer's own type
-// and the elements are read row-major, as the header says; a caller holding column-major data makes
-// the transpose, the recipe the header gives and the one the host's answers confirm.
 static la_object_t CharonLAFromBuffer(const void *buffer, la_scalar_type_t scalar_type, la_count_t rows,
                                       la_count_t cols, la_count_t row_stride, la_hint_t hint, la_attribute_t attributes)
 {
     la_object_t result;
     CharonLAValue *value;
-    // An empty shape and a stride too short to cover a row are both refused, which is what the host
-    // answers for each of them (measured: 0x0, 0x3, 3x0 and 3x1 with a stride of 0 all answer
-    // LA_INVALID_PARAMETER_ERROR, and 3x1 with a stride of 1 is a vector and is made).
     if (!buffer || rows == 0 || cols == 0 || row_stride < cols) {
         return CharonLAWithStatus(LA_INVALID_PARAMETER_ERROR, attributes);
     }
@@ -238,10 +199,6 @@ la_object_t la_matrix_from_double_buffer(const double *buffer, la_count_t matrix
     return CharonLAFromBuffer(buffer, LA_SCALAR_TYPE_DOUBLE, matrix_rows, matrix_cols, matrix_row_stride, matrix_hint, attributes);
 }
 
-// Ownership of the buffer passes to the object, and the caller's deallocator is given it back when the
-// object goes: that is what the header's ownership transfer means, and it is the only way a buffer the
-// caller cannot free itself is accounted for. The elements are read out of the caller's block first,
-// so the object never points into memory whose layout it does not own.
 static la_object_t CharonLAFromBufferNoCopy(void *buffer, la_scalar_type_t scalar_type, la_count_t rows,
                                             la_count_t cols, la_count_t row_stride, la_hint_t hint,
                                             la_deallocator_t deallocator, la_attribute_t attributes)
@@ -255,8 +212,6 @@ static la_object_t CharonLAFromBufferNoCopy(void *buffer, la_scalar_type_t scala
         return result;
     }
     if (row_stride != cols) {
-        // The block's rows are padded, so it cannot be the object's storage: the object keeps its own
-        // copy and hands the caller's buffer straight back.
         if (deallocator) {
             deallocator(buffer);
         }
@@ -284,19 +239,6 @@ la_object_t la_matrix_from_double_buffer_nocopy(double *buffer, la_count_t matri
                                     matrix_hint, deallocator, attributes);
 }
 
-// What the four stores answer for an object they cannot store, before the buffer is touched at all. One
-// order explains all sixteen measured answers: the scalar type is asked first, then the shape.
-//
-//   - An object that carries an error has no scalar type of its own to match, so the type is what
-//     answers and all four refuse LA_PRECISION_MISMATCH_ERROR.
-//   - A splat has a scalar type, so one of the buffer's own type gets as far as the shape and is refused
-//     LA_INVALID_PARAMETER_ERROR - a splat has no shape to store, which is the answer the header gives
-//     for anything that is not a vector or a matrix - while a splat of the other type never gets that
-//     far and answers LA_PRECISION_MISMATCH_ERROR.
-//   - A matrix of the wrong scalar type answers LA_PRECISION_MISMATCH_ERROR.
-//
-// All measured on the host, both splats and both kinds of error object in all four stores; the buffer is
-// left alone in every case (facts/Accelerate/LinearAlgebra.md).
 static la_status_t CharonLAStoreRefused(const CharonLAValue *value, la_scalar_type_t scalar_type)
 {
     if (!value || value->kind != CharonLAArray) {
@@ -308,10 +250,6 @@ static la_status_t CharonLAStoreRefused(const CharonLAValue *value, la_scalar_ty
     return value->scalar_type == scalar_type ? LA_SUCCESS : LA_PRECISION_MISMATCH_ERROR;
 }
 
-// Storing an object out, the writing half of the four. Every caller has asked CharonLAStoreRefused first,
-// so the object here is an array of the buffer's own scalar type and nothing can refuse it but a NULL
-// buffer - which the header declares as not allowed, and which the host therefore cannot be asked about,
-// so it answers the precision mismatch an object of no such type would.
 static la_status_t CharonLAStore(la_scalar_type_t scalar_type, la_count_t stride, la_object_t object, void *buffer)
 {
     const CharonLAValue *value = CHARON_LA_VALUE(object);
@@ -377,8 +315,6 @@ la_status_t la_matrix_to_double_buffer(double *buffer, la_count_t buffer_row_str
     return CharonLAStore(LA_SCALAR_TYPE_DOUBLE, buffer_row_stride, matrix, buffer);
 }
 
-// Whether first + (count-1)*stride stays inside [0, limit), counting the last element the slice
-// reaches and not only its first, so a stride that walks off either end is caught. count is at least 1.
 static int CharonLAInRange(la_index_t first, la_index_t stride, la_count_t count, la_count_t limit)
 {
     la_index_t last = first + (la_index_t)(count - 1) * stride;
@@ -469,11 +405,6 @@ la_object_t la_identity_matrix(la_count_t matrix_size, la_scalar_type_t scalar_t
     return result;
 }
 
-// The splats: one value with no dimensions of its own, out of a vector or a matrix when a caller wants
-// one of theirs. An index the object does not have answers LA_DIMENSION_MISMATCH_ERROR. The host does
-// not answer that for an index below zero: it reads before the buffer and returns whatever lies there,
-// which is not an answer this port can reproduce without reading outside the object, so a negative
-// index is refused the same way one past the end is (facts/Accelerate/LinearAlgebra.md).
 la_object_t la_splat_from_float(float scalar_value, la_attribute_t attributes)
 {
     return CharonLANewSplat(LA_SCALAR_TYPE_FLOAT, scalar_value, attributes);
@@ -554,8 +485,6 @@ la_object_t la_matrix_from_splat(la_object_t splat, la_count_t matrix_rows, la_c
     return result;
 }
 
-// The views a matrix offers of itself: a row, a column, a diagonal, each with the shape the header
-// says, and LA_INVALID_PARAMETER_ERROR for a row, column or diagonal it does not have.
 la_object_t la_vector_from_matrix_row(la_object_t matrix, la_count_t matrix_row)
 {
     const CharonLAValue *value = CHARON_LA_VALUE(matrix);
@@ -626,9 +555,6 @@ la_object_t la_vector_from_matrix_diagonal(la_object_t matrix, la_index_t matrix
     return result;
 }
 
-// A square matrix of size length + |diagonal| with the vector's elements on that diagonal and zeros
-// elsewhere: element i lands at (i + diagonal, i). A diagonal past the end of the vector is not
-// refused, it makes a larger matrix (measured: a diagonal of 9 on a vector of 6 gives 15 x 15).
 la_object_t la_diagonal_matrix_from_vector(la_object_t vector, la_index_t matrix_diagonal)
 {
     const CharonLAValue *value = CHARON_LA_VALUE(vector);
@@ -675,8 +601,6 @@ la_object_t la_transpose(la_object_t matrix)
     return result;
 }
 
-// Scaling by a scalar of the object's own type: a float object scaled with a double answers
-// LA_PRECISION_MISMATCH_ERROR, and a splat, which has no shape to scale, LA_INVALID_PARAMETER_ERROR.
 static la_object_t CharonLAScale(la_object_t object, double scalar, la_scalar_type_t scalar_type)
 {
     const CharonLAValue *value = CHARON_LA_VALUE(object);
@@ -713,10 +637,6 @@ la_object_t la_scale_with_double(la_object_t matrix, double scalar)
     return CharonLAScale(matrix, scalar, LA_SCALAR_TYPE_DOUBLE);
 }
 
-// What an operand is, for the checks the operations share, in the order the host answers them: a
-// parent's own status first, then the two scalar types, then the shapes. Measured: a float and a
-// double splat added together answer LA_PRECISION_MISMATCH_ERROR where two splats of one type answer
-// LA_INVALID_PARAMETER_ERROR, so the type is decided before the shape.
 typedef struct CharonLAOperand {
     la_status_t status;
     la_attribute_t attributes;
@@ -748,11 +668,6 @@ static void CharonLAOperandOf(la_object_t object, CharonLAOperand *operand)
     }
 }
 
-// What two operands of an operation are, refused in the order measured: the left one's own status
-// travels on (LinearAlgebra/base.h: an error propagates to every descendant), then the two scalar
-// types - an object that carries an error has none, which is why a bad operand on the right answers
-// the mismatch rather than its own status - and then, for the operations that want one shape, the
-// shapes. Two splats have no shape to work on and answer LA_INVALID_PARAMETER_ERROR.
 static la_status_t CharonLATypes(la_object_t left, la_object_t right, CharonLAOperand *a, CharonLAOperand *b,
                                  la_attribute_t *attributes)
 {
@@ -792,8 +707,6 @@ static double CharonLAOperandElement(la_object_t object, const CharonLAOperand *
     return CharonLAGet(CHARON_LA_VALUE(object), operand->rows == 1 ? 0 : row, operand->cols == 1 ? 0 : col);
 }
 
-// The same, for an operand a product walks along its length rather than over its shape: the elements
-// of a vector in index order, whichever way round the vector is.
 static double CharonLAOperandAt(la_object_t object, const CharonLAOperand *operand, la_count_t at)
 {
     if (operand->is_splat) {
@@ -804,7 +717,6 @@ static double CharonLAOperandAt(la_object_t object, const CharonLAOperand *opera
 
 typedef enum { CharonLAAdd, CharonLASubtract, CharonLAMultiply } CharonLAElementwise;
 
-// The elementwise operations, where a splat stands for the other operand's whole shape.
 static la_object_t CharonLAElementwiseOp(CharonLAElementwise which, la_object_t left, la_object_t right)
 {
     CharonLAOperand a, b;
@@ -852,15 +764,6 @@ la_object_t la_elementwise_product(la_object_t obj_left, la_object_t obj_right)
     return CharonLAElementwiseOp(CharonLAMultiply, obj_left, obj_right);
 }
 
-// A general matrix product C = A B over the release's own cblas_sgemm / cblas_dgemm, row-major, which
-// is the layout the objects keep. A splat takes the shape the host gives it rather than the one
-// LinearAlgebra/splat.h's table lists: on the left of a product 1 x cols, on the right rows x 1 (the
-// table has the two the other way round, and the measurement contradicts it - facts/Accelerate/
-// LinearAlgebra.md). A splat is materialised into the result's own block first, so the call into the
-// release's BLAS is the plain one.
-// How each side of a product is read: over its own shape, or as a vector walked by one of the
-// product's two indices. A left-hand vector always varies with the summed-over index; a right-hand one
-// varies with the summed-over index for an inner product and with the result's column for an outer one.
 #define CHARON_LA_BY_SHAPE 0
 #define CHARON_LA_BY_INNER 1
 #define CHARON_LA_BY_COLUMN 2
@@ -884,12 +787,8 @@ static la_object_t CharonLAGemm(la_object_t left, la_object_t right, la_count_t 
         return result;
     }
     if (rows == 0 || cols == 0) {
-        // A product with no element to write is a product of nothing, and the release's cblas refuses
-        // a zero dimension outright (measured, in its message: ldc must be >= MAX(N, 1)).
         return result;
     }
-    // A sum over no elements is zero, and the release's cblas still wants a leading dimension of at
-    // least one: MAX(K, 1) is its own rule (measured, in the same message).
     la_count_t left_count = rows * (inner ? inner : 1), right_count = (inner ? inner : 1) * cols;
     int lda = inner ? (int)inner : 1, ldb = inner ? (int)cols : 1;
     if (a.scalar_type == LA_SCALAR_TYPE_FLOAT) {
@@ -959,10 +858,6 @@ la_object_t la_matrix_product(la_object_t matrix_left, la_object_t matrix_right)
     return CharonLAGemm(matrix_left, matrix_right, a.rows, a.cols, b.cols, 0, 0);
 }
 
-// The outer product is a rank one: element (i, j) is left[i] times right[j], which is not a product
-// over a summed-over index and so is not a cblas call (measured on the host: [1..6] against
-// [10,20,...,60] gives 10 20 30 40 50 60 / 20 40 60 80 100 120 / ..., the first row being the right
-// vector scaled by left[0], not by the sum of the left).
 la_object_t la_outer_product(la_object_t vector_left, la_object_t vector_right)
 {
     CharonLAOperand a, b;
@@ -1008,14 +903,9 @@ la_object_t la_inner_product(la_object_t vector_left, la_object_t vector_right)
     if (!a.is_splat && !b.is_splat && a.length != b.length) {
         return CharonLAWithStatus(LA_DIMENSION_MISMATCH_ERROR, attributes);
     }
-    // A splat on either side of an inner product is 1 x length or length x 1, which is the general
-    // product of the two shapes with the other one flattened; the same cblas call answers it.
     return CharonLAGemm(vector_left, vector_right, 1, a.is_splat ? b.length : a.length, 1, 1, CHARON_LA_BY_INNER);
 }
 
-// The norms. A float object asked for in double answers NaN and a double object asked for in float
-// answers NaN, as the host does in both directions (measured), and so does an object that is not an
-// array, or a norm the library does not have.
 static double CharonLANorm(la_object_t object, la_norm_t norm, la_scalar_type_t scalar_type, int *valid)
 {
     const CharonLAValue *value = CHARON_LA_VALUE(object);
@@ -1060,9 +950,6 @@ double la_norm_as_double(la_object_t vector, la_norm_t vector_norm)
     return CharonLANorm(vector, vector_norm, LA_SCALAR_TYPE_DOUBLE, &valid);
 }
 
-// Normalizing divides by the norm, so a zero vector cannot be normalized and comes back as it was
-// (measured: the result has status LA_SUCCESS and norm 0). A norm the library does not have is
-// reported with the status LA_INVALID_PARAMETER_ERROR.
 la_object_t la_normalized_vector(la_object_t vector, la_norm_t vector_norm)
 {
     const CharonLAValue *value = CHARON_LA_VALUE(vector);
@@ -1095,18 +982,6 @@ la_object_t la_normalized_vector(la_object_t vector, la_norm_t vector_norm)
     return result;
 }
 
-// The two solves, one body per scalar type, each of them the release's own pair of entry points and
-// nothing else. The objects hold row-major blocks and LAPACK reads column-major ones, so the system is
-// written into a column-major block in the layout clapack.h declares, factorised there, solved there and
-// read back out of it; that is the same transposition every C caller of a column-major LAPACK makes.
-//
-// The return value is the release's own answer to "is the system singular": sgetrf_ answers a positive
-// info for a pivot of exactly zero, and the solve of such a system is not a number - measured on the
-// host, [[1,1],[1,1]] against [1,2] gives -inf and inf - so the solve is not run and the caller keeps
-// the zeros the result was made with. A negative info, which LAPACK reserves for an argument it was
-// handed, cannot arise here and is not answered for: n and the number of solutions are both at least one
-// by the time this runs (la_solve refuses an empty shape and a right-hand side of no columns), the leading
-// dimensions are those two, and the three pointers are the blocks la_solve just allocated and checked.
 static int CharonLALapackFloat(const CharonLAValue *system, const CharonLAValue *rhs, int vector_rhs,
                                CharonLAValue *to, la_count_t n, la_count_t columns, float *factor, float *right,
                                __CLPK_integer *pivots)
@@ -1173,17 +1048,6 @@ static int CharonLALapackDouble(const CharonLAValue *system, const CharonLAValue
     return 0;
 }
 
-// la_solve: A X = B for a square A, by the release's own LAPACK, sgetrf_ and sgetrs_ for a float object
-// and dgetrf_ and dgetrs_ for a double one. Every band this port supports exports all four - measured
-// from their own armv7 caches, iOS 4.3, 5.1.1, 6.0, 6.1.3, 7.0, 7.1.2 and 8.0 - and they are what the
-// release's own LinearAlgebra is built on, so the factorisation here is the release's and not a second
-// copy of one. There is no cblas_sgesv to call instead: the release's CBLAS has 148 names and none of
-// them is a general solve (measured, 7.1.2 and 8.0), which is why the two LAPACK pairs are the way in.
-//
-// Two answers differ from the header and are recorded in facts/Accelerate/LinearAlgebra.md: a system
-// whose shape la_solve does not take is LA_DIMENSION_MISMATCH_ERROR rather than a least-squares solution,
-// and a matrix with an exactly zero pivot comes back as zeros with status LA_SINGULAR_ERROR rather than
-// with the host's own unstable answer.
 la_object_t la_solve(la_object_t matrix_system, la_object_t obj_rhs)
 {
     CharonLAOperand a, b;
@@ -1230,9 +1094,6 @@ la_object_t la_solve(la_object_t matrix_system, la_object_t obj_rhs)
     if (to->kind != CharonLAArray) {
         return result;
     }
-    // The blocks the release's LAPACK works in, and the pivots it asks for. The pivots are its own
-    // __CLPK_integer, which is what clapack.h declares for it: 32 bits on every band this port supports,
-    // whether the header spells that type int or long.
     factor = calloc((size_t)n * n, CharonLAWidth(a.scalar_type));
     right = calloc((size_t)n * columns, CharonLAWidth(a.scalar_type));
     pivots = calloc(n, sizeof(__CLPK_integer));
@@ -1247,13 +1108,6 @@ la_object_t la_solve(la_object_t matrix_system, la_object_t obj_rhs)
                    : CharonLALapackDouble(system, rhs, vector_rhs, to, n, columns, (double *)factor, (double *)right,
                                           pivots);
     if (singular) {
-        // An exactly zero pivot: the system has no solution, and LA_SINGULAR_ERROR is what
-        // vecLib/LinearAlgebra/linear_systems.h documents for it. The result is left as the zeros it was
-        // made with, because the release's LAPACK answers such a solve with infinities and the host's own
-        // answer here is not stable - in a fresh process la_status answers LA_SUCCESS while a store of
-        // the result answers LA_SINGULAR_ERROR after filling the buffer with NaNs, and after another
-        // solve in the same process it answers LA_SUCCESS and a store succeeds and writes zeros - so the
-        // port answers what the header says (facts/Accelerate/LinearAlgebra.md).
         to->status = LA_SINGULAR_ERROR;
     }
     free(factor);

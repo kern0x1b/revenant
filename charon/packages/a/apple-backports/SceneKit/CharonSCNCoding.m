@@ -2,13 +2,6 @@
 #import "../CharonSRGB.h"
 #import <objc/runtime.h>
 
-// An archived NSColor carries its components in the color space it was authored in (sRGB,
-// linear sRGB, Display P3, a gray profile), with that space's ICC profile alongside. UIColor on
-// this platform has no color space, so the components are brought to sRGB here: through the
-// profile's own matrix/TRC for an ICC-backed color, through the measured Generic Gray (gamma 1.8)
-// for a calibrated white without one. Values are checked against macOS SceneKit's own
-// -[NSColor usingColorSpace:NSColorSpace.sRGB] in facts/SceneKit/SceneKit.md.
-
 static uint32_t CharonICCRead32(const uint8_t *bytes)
 {
     return ((uint32_t)bytes[0] << 24) | ((uint32_t)bytes[1] << 16) | ((uint32_t)bytes[2] << 8) | bytes[3];
@@ -101,7 +94,6 @@ static BOOL CharonICCEvaluateCurve(const uint8_t *tag, uint32_t length, double x
     return NO;
 }
 
-// The sRGB profile's D50-adapted colorants, as carried by the sRGB profiles in real .scn files.
 static const double CharonSRGBColorants[3][3] = {
     {0.436065673828125, 0.3851470947265625, 0.14306640625},
     {0.2224884033203125, 0.7168731689453125, 0.06060791015625},
@@ -124,8 +116,6 @@ static void CharonInvert3x3(const double m[3][3], double out[3][3])
     out[2][2] = (m[0][0] * m[1][1] - m[0][1] * m[1][0]) / det;
 }
 
-// Converts `components` (color channels only, no alpha) through a matrix/TRC or gray ICC profile
-// to sRGB. Anything else (LUT-based profiles, CMYK, Lab) is refused rather than approximated.
 static BOOL CharonICCComponentsToSRGB(NSData *profile, const double *components, NSUInteger count, double rgb[3])
 {
     if (profile.length < 132) {
@@ -248,8 +238,6 @@ static NSUInteger CharonParseComponents(NSCoder *coder, NSString *key, double *o
     _valid = YES;
 }
 
-// NSColorSpace: 1 calibrated RGB, 2 device RGB, 3 calibrated white, 4 device white; a
-// NSCustomColorSpace, when present, names the space NSComponents are expressed in.
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init])) {
@@ -270,7 +258,6 @@ static NSUInteger CharonParseComponents(NSCoder *coder, NSString *key, double *o
         }
         if (model == 1 || model == 2) {
             count = CharonParseComponents(coder, @"NSRGB", components, 4);
-            // Calibrated RGB without a profile is Generic RGB, which no measured archive uses.
             if (model == 2 && count >= 3) {
                 rgb[0] = components[0];
                 rgb[1] = components[1];
@@ -311,10 +298,6 @@ static NSUInteger CharonParseComponents(NSCoder *coder, NSString *key, double *o
 
 @end
 
-// SCNKeyedArchiver writes NSMutableData under `NS.bytes`; current Foundation writes `NS.data`.
-// Measured on 6.1.3: a plain NSKeyedUnarchiver hands the `NS.bytes` form back empty, so every
-// nested color came out as an empty payload. This reads either key itself and stays a real
-// NSMutableData for whatever else decodes one.
 @interface CharonSCNArchivedData : NSMutableData
 @end
 
@@ -408,8 +391,6 @@ static void CharonSCNMapColorClasses(NSKeyedUnarchiver *unarchiver)
     [coder encodeBytes:(const uint8_t *)&vector length:sizeof(SCNVector4) forKey:key];
 }
 
-// SCNMatrix4 is archived the same way as the vectors: its sixteen floats m11..m44 as raw bytes (star2.scn's
-// contentsTransform keys, 64 bytes each).
 + (SCNMatrix4)decodeMatrix4:(NSCoder *)coder forKey:(NSString *)key
 {
     NSUInteger length = 0;
@@ -436,8 +417,6 @@ static void CharonSCNMapColorClasses(NSKeyedUnarchiver *unarchiver)
     if ([decoded isKindOfClass:cls]) {
         return @[decoded];
     }
-    // Only a secure decode holds the value to the two classes asked for; an application's own plain unarchiver
-    // hands back whatever the archive holds.
     if (![decoded isKindOfClass:[NSArray class]]) {
         NSLog(@"SceneKit: the archive's %@ holds a %@ where a %@ or an array of them belongs; it is left out", key, [decoded class], cls);
         return @[];
@@ -453,8 +432,6 @@ static void CharonSCNMapColorClasses(NSKeyedUnarchiver *unarchiver)
     return objects;
 }
 
-// A colour the archive holds and this port cannot read leaves the property at its default; it is said, with the key
-// and the reason, so that a scene drawn in the wrong colour is not silent.
 static void CharonSCNColorFailed(NSString *key, NSString *reason)
 {
     NSLog(@"SceneKit: the colour under %@ is not read, and the property keeps its default: %@", key, reason);
@@ -469,10 +446,6 @@ static UIColor *CharonSCNArchivedColorValue(CharonSCNArchivedColor *color, NSStr
     return [color toUIColor];
 }
 
-// Three shapes reach here: an NSColor object directly in the graph (material property
-// `color`), an NSData holding a separate keyed archive of one (SCNLight/SCNParticleSystem), or a
-// UIColor from an iOS-authored archive. NSColor/NSColorSpace are mapped on whichever unarchiver
-// holds them before the decode, so secure coding never meets a class this platform lacks.
 + (UIColor *)decodeColor:(NSCoder *)coder forKey:(NSString *)key
 {
     if (![coder containsValueForKey:key]) {
@@ -500,7 +473,6 @@ static UIColor *CharonSCNArchivedColorValue(CharonSCNArchivedColor *color, NSStr
         return nil;
     }
     if (![nested isKindOfClass:[NSData class]]) {
-        // only a decode without secure coding hands back an object of another class
         CharonSCNColorFailed(key, [NSString stringWithFormat:@"it holds a %@ where a colour belongs", [decoded class]]);
         return nil;
     }
@@ -540,8 +512,6 @@ static UIColor *CharonSCNArchivedColorValue(CharonSCNArchivedColor *color, NSStr
     if (![coder containsValueForKey:key]) {
         return fallback;
     }
-    // An archive stores a flag either as a boolean or as an integer (facts: castsShadow is 0, hidden is false, in one
-    // file), each decode raises on the other, and NSKeyedUnarchiver answers no question about a value's type.
     @try {
         return [coder decodeBoolForKey:key];
     } @catch (NSException *exception) {

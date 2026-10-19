@@ -30,7 +30,6 @@ static void checkpoint(NSString *name, NSTimeInterval seconds)
     [@"" writeToFile:file atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
-// Three seconds of 320x240 at 30 frames a second: a band that moves across a colour that changes.
 static NSURL *write_video(void)
 {
     NSURL *url = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:@"avplayer.mp4"]];
@@ -284,8 +283,6 @@ static void check_picture(UIViewController *root, NSURL *url)
         layer = [[controller valueForKey:@"charonVideoView"] valueForKey:@"playerLayer"];
     }
     CHECK(wait_until(^BOOL { return root.presentedViewController == nil; }, 5), "picture: the controller dismisses itself");
-    // Every read of weakController autoreleases the controller; a pool around each keeps the run
-    // loop iteration that runs these checks from holding it.
     @autoreleasepool {
         CHECK(weakController != nil, "picture: the controller outlives the application's references");
     }
@@ -356,7 +353,6 @@ static void check_full_screen(UIViewController *root, NSURL *url)
     controller.player = nil;
 }
 
-// The frames come from an AVPlayerItemVideoOutput made with the attributes, drawn over the player layer.
 static void check_pixel_buffer(UIViewController *root, NSURL *url, OSType format, const char *name)
 {
     AVPlayerViewController *controller = [[AVPlayerViewController alloc] init];

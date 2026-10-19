@@ -87,14 +87,6 @@ static CGRect used_rect_for_container(NSLayoutManager *self, SEL selector, NSTex
 
 - (void)setGlyphs:(const CGGlyph *)glyphs properties:(const NSGlyphProperty *)props characterIndexes:(const NSUInteger *)characterIndexes font:(UIFont *)aFont forGlyphRange:(NSRange)glyphRange
 {
-    // The release's own glyph store takes NSGlyph (32-bit) through the pre-7 primitive it already has,
-    // insertGlyphs:length:forStartingGlyphAtIndex:characterIndex: (confirmed present on the iPad 2, 6.1.3;
-    // the iOS 7 form and its siblings are not). That primitive takes one glyph and one character index per
-    // call, not a batch with one starting index for the whole run: a batch call would silently collapse a
-    // ligature, a bidi reorder or any non-monotonic glyph-to-character mapping into "characterIndexes[0]
-    // onward, sequential" and hand back a wrong glyph<->character map to whatever reads it later (hit
-    // testing, selection) with no error anywhere. Calling the primitive once per glyph, each with its own
-    // exact character index, is exactly as cheap an operation and cannot lose a mapping the caller gave us.
     NSUInteger count = glyphRange.length;
     if (count) {
         for (NSUInteger offset = 0; offset < count; offset++) {
@@ -103,14 +95,6 @@ static CGRect used_rect_for_container(NSLayoutManager *self, SEL selector, NSTex
             [self insertGlyphs:&nativeGlyph length:1 forStartingGlyphAtIndex:glyphRange.location + offset characterIndex:characterIndex];
         }
     }
-    // The font argument exists because a custom glyph generator may substitute a font other than the one
-    // the character run carries (the documented reason for the parameter - font fallback for a character
-    // the original font cannot show). Nothing in this port currently reads a font back per glyph index (no
-    // consumer of it was found: showCGGlyphs:positions:count:font:... in NSLayoutManager+Text13.m takes its
-    // own font argument per call and does not consult glyph state), so a divergence cannot be made to affect
-    // drawing or metrics without inventing an untested text-storage mutation mid-layout, which risks
-    // re-entrant invalidation worse than the gap it would close. Divergence is only flagged, once, loudly -
-    // never silently assumed away - so it stays visible instead of becoming a wrong number nobody can trace.
     if (aFont && characterIndexes && count) {
         NSDictionary *attributes = [self.textStorage attributesAtIndex:characterIndexes[0] effectiveRange:NULL];
         UIFont *attributeFont = attributes[NSFontAttributeName];

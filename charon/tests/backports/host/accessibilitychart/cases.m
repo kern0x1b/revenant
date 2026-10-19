@@ -1,48 +1,10 @@
-// accessibilitychart - the chart and data classes of iOS 15.0 against the host's own.
-//
-// One source, two programs. The host half links the system's Accessibility.framework and gets Apple's
-// classes; the port half is built with every class name remapped to a name the system does not use
-// (so renaming one does not rename the system's declaration) and links only Foundation, and its
-// classes are the port's own CharonChartDescriptors.m. Each prints "label<TAB>value" per case in the
-// same order, and the two outputs are diffed by run.sh.
-//
-// Nothing printed here is an address: a pointer differs between the two programs and between two runs.
-// What a pointer is for is *whether two values are the same object*, and that is the same question on
-// both sides, so every shared field is printed as shared-or-copied through a comparison inside the
-// program, and the addresses stay out of the output. A port that handed back copies where the system
-// hands back the very objects is a defect this is here to catch, and it is caught by the
-// `*.shared` and `*.copies` lines rather than by any value.
-//
-// Two things cannot be compared and the script says which, because a diff that pretends to cover them
-// covers nothing:
-//   * the live audio graph publishes sound, and a program cannot read sound. What is held for it is the
-//     shape of the class and how many times each of its three members was called, which both sides can
-//     answer; how many lines those calls wrote is the port's own log, and run.sh counts that against the
-//     call counts printed here.
-//   * a log line is not a value, so the once-only part of it is not a comparison: it is a count the
-//     runner checks for the port alone, and the reason the host has no such log is in the script.
-//
-// Every property of every class is asked of its own setter as well as of its constructor, one line
-// each, so a setter that does nothing is caught by the line that follows the call and not by nothing.
-
 #import <Foundation/Foundation.h>
 #import <Accessibility/Accessibility.h>
 #import <objc/runtime.h>
 
-// The class below prints a class name through name(), which is defined below it with the rest of the
-// helpers, so it is named here first.
 static NSString *name(NSString *spelling);
 
-// A class that adopts the two protocols, at file scope so it is in both halves. It is what makes the
-// protocol cases two-sided: the system's own Accessibility image does not list AXChart in its protocol
-// list, so without a class that adopts it the name resolves on one side and not the other and those
-// cases would be comparing the case's own file with itself. A caller adopts a protocol to get its
-// metadata, and this is that; the port's own generated protocol object is the other half of the same
-// thing, and run.sh gives it to the port half only.
 @interface CharonCaseAdopter : NSObject <AXChart, AXDataAxisDescriptor> {
-    // A class that adopts a protocol has to answer it, so the adopter stores the three members the two
-    // protocols name rather than declaring them and doing nothing. The two cases above the protocol
-    // declarations then ask a class something it really answers, on both sides.
     AXChartDescriptor *_chartDescriptor;
     NSString *_title;
     NSAttributedString *_attributedTitle;
@@ -69,8 +31,6 @@ static NSString *name(NSString *spelling);
 
 @end
 
-// The protocol names are looked up by string, and a string is not remapped by -D, so the port half is
-// told its own spelling.
 #ifndef AXCHART_PROTOCOL
 #define AXCHART_PROTOCOL @"AXChart"
 #endif
@@ -78,10 +38,6 @@ static NSString *name(NSString *spelling);
 #define AXDATAAXISDESCRIPTOR_PROTOCOL @"AXDataAxisDescriptor"
 #endif
 
-// The port half is built with every class name remapped to a name the system does not use, so a class
-// name is the one thing the two halves cannot share. It is compared by the name both of them agree
-// on, which is the one with the port's marker taken off the front - the classes are otherwise the same
-// classes, and the rest of every line in this file is the behaviour rather than the spelling.
 static NSString *name(NSString *spelling)
 {
     if (spelling.length > [@"CharonPort" length] &&
@@ -91,10 +47,6 @@ static NSString *name(NSString *spelling)
     return spelling;
 }
 
-// One case per line: a value is folded onto one line before it is printed, because an attributed
-// string's description carries the line break its (empty) attributes dictionary prints across two
-// lines, and a case that is two lines cannot be lined up with the other side's. What is compared is
-// the characters and the attribute dictionary, not where the line broke.
 static void say(NSString *label, id value)
 {
     NSString *text = [value description] ?: @"(nil)";
@@ -112,14 +64,6 @@ static void sayClass(NSString *label, Class value)
     say(label, name(NSStringFromClass(value)));
 }
 
-// Whether two values are the same object, answered the same way on both sides and printed as a word,
-// so the addresses stay out of the output and a copy of the port cannot be told from a copy of the
-// system by anything but the answer.
-//
-// "both-nil" is a vacuous answer and the six probes that produced it are the reason every copy block
-// sets the fields it will be asked about before it makes the copy: two nils are equal, so a port that
-// dropped the field entirely printed the same line as one that shared it. A probe that answers
-// "both-nil" is not a check, and the six mutants that drop one of the six fields are what says so.
 static void same(NSString *label, id a, id b)
 {
     say(label, (a != nil && a == b) ? @"shared" : (a == nil && b == nil ? @"both-nil" : @"copied"));
@@ -150,7 +94,6 @@ static NSString *(^describer(NSString *format))(double)
 int main(void)
 {
     @autoreleasepool {
-        // --- AXDataPointValue: two independent faces, and the two factories.
         AXDataPointValue *number = [AXDataPointValue valueWithNumber:1.5];
         AXDataPointValue *category = [AXDataPointValue valueWithCategory:@"cat"];
         say(@"value.number.fromNumber", @(number.number));
@@ -167,10 +110,8 @@ int main(void)
         say(@"value.copy.number", @(numberCopy.number));
         say(@"value.copy.category", numberCopy.category ?: @"(nil)");
         sayClass(@"value.copy.class", [numberCopy class]);
-        // The one field a value's copy can be asked about by identity: its category.
         same(@"value.copy.category.shared", numberCopy.category, number.category);
 
-        // --- AXDataPoint: three initialisers, and what each leaves nil.
         AXDataPoint *bare = [[AXDataPoint alloc] initWithX:number y:nil];
         say(@"point.bare.yValue", bare.yValue ? NSStringFromClass([bare.yValue class]) : @"(nil)");
         say(@"point.bare.additionalValues", bare.additionalValues ? @"present" : @"(nil)");
@@ -197,26 +138,18 @@ int main(void)
         say(@"point.additionalValues.set", @(point.additionalValues.count));
         point.additionalValues = nil;
         say(@"point.additionalValues.nilled", point.additionalValues ? @"present" : @"(nil)");
-        // Everything the copy is asked about is set first, because a copy of a point whose label or y
-        // value or additional values was set to nil answers "both-nil" on both sides and the identity
-        // probe asks nothing at all. Six of the twenty-three share probes were vacuous in the first
-        // version for exactly this reason, and a port that dropped any of the six answered the same.
         point.attributedLabel = attributed(@"PA");
         point.yValue = category;
         point.additionalValues = @[number, category];
         AXDataPoint *pointCopy = [point copy];
         sayClass(@"point.copy.xValue.class", [pointCopy.xValue class]);
         say(@"point.copy.label", pointCopy.label ?: @"(nil)");
-        // Five fields, and the one that is not shared: the plain label is the original's own string and
-        // the attributed one is a new string, which is why this class's copy is built through the
-        // setter. A port that shared both would be told apart here.
         same(@"point.copy.xValue.shared", pointCopy.xValue, point.xValue);
         same(@"point.copy.yValue.shared", pointCopy.yValue, point.yValue);
         same(@"point.copy.additionalValues.shared", pointCopy.additionalValues, point.additionalValues);
         same(@"point.copy.label.shared", pointCopy.label, point.label);
         same(@"point.copy.attributedLabel.shared", pointCopy.attributedLabel, point.attributedLabel);
 
-        // --- AXDataSeriesDescriptor: two initialisers, one name in two faces.
         AXDataSeriesDescriptor *series = [[AXDataSeriesDescriptor alloc] initWithName:@"S" isContinuous:YES
                                                                              dataPoints:@[point, bare]];
         say(@"series.name", series.name);
@@ -242,7 +175,6 @@ int main(void)
         same(@"series.copy.name.shared", seriesCopy.name, series.name);
         same(@"series.copy.attributedName.shared", seriesCopy.attributedName, series.attributedName);
 
-        // --- AXNumericDataAxisDescriptor: both initialisers, every property, the block called.
         AXNumericDataAxisDescriptor *numeric = [[AXNumericDataAxisDescriptor alloc] initWithTitle:@"N"
                                                                                     lowerBound:1
                                                                                     upperBound:2
@@ -277,15 +209,10 @@ int main(void)
         say(@"numericNoGridlines.title", numericNoGridlines.title);
         say(@"numericNoGridlines.gridlinePositions", numericNoGridlines.gridlinePositions ? @"present" : @"(nil)");
         sayNumber(@"numericNoGridlines.lowerBound", numericNoGridlines.lowerBound);
-        // The gridline positions were set to nil above, so a copy of that axis has none to share and the
-        // probe answers "both-nil"; they are set back before the copy so the question is real.
         numeric.attributedTitle = attributed(@"NA");
         numeric.gridlinePositions = @[@0, @1];
         AXNumericDataAxisDescriptor *numericCopy = [numeric copy];
         say(@"numeric.copy.title", numericCopy.title);
-        // The scale is the field the system's own copy drops, so this answers the linear case whatever
-        // the original was set to. Nothing declares that difference here any more: the case holds the
-        // parity with a mutant that sets the scale again, and that mutant has to turn this line red.
         say(@"numeric.copy.scaleType", @(numericCopy.scaleType));
         say(@"numeric.copy.lowerBound", @(numericCopy.lowerBound));
         say(@"numeric.copy.upperBound", @(numericCopy.upperBound));
@@ -296,7 +223,6 @@ int main(void)
         same(@"numeric.copy.gridlinePositions.shared", numericCopy.gridlinePositions, numeric.gridlinePositions);
         same(@"numeric.copy.provider.shared", numericCopy.valueDescriptionProvider, numeric.valueDescriptionProvider);
 
-        // --- AXCategoricalDataAxisDescriptor: both initialisers, the order, the copy.
         AXCategoricalDataAxisDescriptor *ordered = [[AXCategoricalDataAxisDescriptor alloc] initWithTitle:@"C"
                                                                                             categoryOrder:@[@"a", @"b"]];
         say(@"categorical.title", ordered.title);
@@ -316,7 +242,6 @@ int main(void)
         same(@"categorical.copy.title.shared", orderedCopy.title, ordered.title);
         same(@"categorical.copy.attributedTitle.shared", orderedCopy.attributedTitle, ordered.attributedTitle);
 
-        // --- AXChartDescriptor: the four initialisers, and the two values none of them takes.
         AXChartDescriptor *chart = [[AXChartDescriptor alloc] initWithTitle:@"Ch" summary:@"S"
                                                             xAxisDescriptor:ordered
                                                            yAxisDescriptor:numeric
@@ -372,9 +297,6 @@ int main(void)
         say(@"chart.axes.additionalAxes.count", @(axesChart.additionalAxes.count));
         say(@"chart.axes.summary", axesChart.summary ?: @"(nil)");
         say(@"chart.axes.series.count", @(axesChart.series.count));
-        // Three more: the summary, the series and the additional axes were all set to nil above, and a
-        // copy of a chart with none of them has nothing to share. The identity probes below are about
-        // whether the copy answers the very objects, and that question needs the objects to be there.
         chart.attributedTitle = attributed(@"CHA");
         chart.summary = @"COPY-S";
         chart.series = @[series, attributedSeries];
@@ -383,10 +305,6 @@ int main(void)
         say(@"chart.copy.title", chartCopy.title);
         say(@"chart.copy.series.count", @(chartCopy.series.count));
         sayClass(@"chart.copy.xAxis.class", object_getClass(chartCopy.xAxis));
-        // The direction and the frame are the two fields the system's own copy drops, so a copy here
-        // answers the zero case and a zero rectangle whatever the original was set to. Two mutants hold
-        // that: one sets the direction again, one sets the frame, and each has to turn these two lines
-        // red.
         say(@"chart.copy.contentDirection", @(chartCopy.contentDirection));
         say(@"chart.copy.contentFrame", NSStringFromRect(chartCopy.contentFrame));
         same(@"chart.copy.series.shared", chartCopy.series, chart.series);
@@ -396,10 +314,6 @@ int main(void)
         same(@"chart.copy.title.shared", chartCopy.title, chart.title);
         same(@"chart.copy.attributedTitle.shared", chartCopy.attributedTitle, chart.attributedTitle);
         same(@"chart.copy.summary.shared", chartCopy.summary, chart.summary);
-
-        // --- Every setter, asked of its own getter and of the object it was given. A setter that does
-        // nothing, or that answers a copy where the system answers the very object, is caught by the
-        // line that follows the call: a case that only read the constructors could not see either.
 
         AXDataPointValue *given = [AXDataPointValue valueWithNumber:42];
         AXDataPoint *setterPoint = [[AXDataPoint alloc] initWithX:number y:nil additionalValues:nil label:nil];
@@ -479,14 +393,6 @@ int main(void)
         say(@"setter.chart.additionalAxes.count", @(setterChart.additionalAxes.count));
         same(@"setter.chart.additionalAxes", setterChart.additionalAxes.firstObject, ordered);
 
-        // --- The two protocols. The two adopter cases are behaviour and come first: they ask whether a
-        // class that adopts a protocol answers conformsToProtocol:, which on the port is the port's own
-        // protocol metadata - the thing the two implemented protocol rows claim - and on the host is the
-        // framework's own. The cases after them check a *declaration* and not the port's code: their
-        // members come from whichever header each side compiled against, so a change to Apple's header
-        // moves them and nothing in packages/ can. They are labelled declaration.* and run.sh counts them
-        // apart from the behaviour cases for that reason, and the adopter class above is what puts each
-        // side's own metadata into the program.
         CharonCaseAdopter *adopter = [[CharonCaseAdopter alloc] init];
         adopter.title = @"AT";
         adopter.attributedTitle = attributed(@"AA");
@@ -507,8 +413,6 @@ int main(void)
             NSMutableArray *names = [NSMutableArray array];
             for (unsigned i = 0; i < count; i++) [names addObject:NSStringFromSelector(members[i].name)];
             [names sortUsingSelector:@selector(compare:)];
-            // Sorted and numbered, so each member is a case of its own and the order is the same on
-            // both sides; a repeated label would leave the two outputs impossible to line up.
             for (unsigned i = 0; i < names.count; i++)
                 say([NSString stringWithFormat:@"declaration.AXChart.member.%u", i], names[i]);
             free(members);
@@ -527,17 +431,12 @@ int main(void)
                 say([NSString stringWithFormat:@"declaration.AXDataAxisDescriptor.member.%u", i], names[i]);
             free(members);
         }
-        // The two axis classes of the port answer the protocol's own members, so the two are held
-        // together here rather than only through the class's own property names.
         id<AXDataAxisDescriptor> asProtocol = numeric;
         say(@"declaration.AXDataAxisDescriptor.title", asProtocol.title);
         say(@"declaration.AXDataAxisDescriptor.attributedTitle", asProtocol.attributedTitle);
         sayYes(@"declaration.AXDataAxisDescriptor.conforms",
                [numeric conformsToProtocol:@protocol(AXDataAxisDescriptor)]);
 
-        // --- AXLiveAudioGraph: the shape of the class, and that its three calls do not raise.
-        // The values it publishes are sound, which a program cannot read, so nothing about them is
-        // compared; what is compared is the class both sides expose and the absence of any state.
         sayYes(@"graph.start.isClassMethod", class_getClassMethod([AXLiveAudioGraph class], @selector(start)) != NULL);
         sayYes(@"graph.updateValue.isClassMethod",
                class_getClassMethod([AXLiveAudioGraph class], @selector(updateValue:)) != NULL);
@@ -547,9 +446,6 @@ int main(void)
         say(@"graph.ivarCount", @(ivars));
         say(@"graph.instanceSize", @(class_getInstanceSize([AXLiveAudioGraph class])));
         sayClass(@"graph.instance.class", [[[AXLiveAudioGraph alloc] init] class]);
-        // Each member called more than once, and the number of calls printed as a number: the once-only
-        // part of the inert contract says one line per member however many times it is called, and
-        // run.sh counts the port's own log lines against exactly these numbers.
         NSUInteger starts = 0, updates = 0, stops = 0;
         for (int i = 0; i < 3; i++) {
             [AXLiveAudioGraph start];
@@ -570,10 +466,6 @@ int main(void)
         say(@"graph.calls.stop", @(stops));
         say(@"graph.calls.survived", @"yes");
 
-        // --- The seven classes the registry rows name are all there, under the name both halves use.
-        // A lookup by string would be nil in the port half, whose classes are the port's own names, so
-        // the class object itself is what is named here and the lookup is on the other side of the gate
-        // (the registry check reads the classes out of the built objects).
         sayClass(@"class.AXChartDescriptor", [AXChartDescriptor class]);
         sayClass(@"class.AXDataSeriesDescriptor", [AXDataSeriesDescriptor class]);
         sayClass(@"class.AXDataPoint", [AXDataPoint class]);

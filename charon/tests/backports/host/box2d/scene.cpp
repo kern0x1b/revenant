@@ -1,7 +1,3 @@
-// One scene over every part of Box2D 2.2.1 UIKit Dynamics reaches: polygons and circles on edges,
-// a stack that falls asleep, a bullet, the five joint types PhysicsKit carries (revolute, distance,
-// weld, prismatic, rope), contacts, damping, and the fixed sub-step loop of PhysicsKit's world.
-// Prints every body's state as hexadecimal floats, so two builds compare bit for bit.
 #include <Box2D/Box2D.h>
 #include <math.h>
 #include <stdio.h>

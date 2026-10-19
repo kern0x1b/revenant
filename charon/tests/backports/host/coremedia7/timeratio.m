@@ -19,10 +19,6 @@ static NSString *shown(CMTime time)
     return [NSString stringWithFormat:@"%lld/%d e%d%s", time.value, time.timescale, time.epoch, CMTIME_HAS_BEEN_ROUNDED(time) ? " rounded" : ""];
 }
 
-// The port's claim (registry/CoreMedia/ios7.json, facts/CoreMedia/CMTimeMultiplyByRatio.md): where a
-// CMTime holds the exact rational, the answer is that rational. Outside that region Apple's own
-// implementation truncates the value against the timescale before it multiplies, so the two are
-// compared there only against the exact value, and how far apart they are is measured and printed.
 static int representable(int64_t value, int32_t timescale, int32_t multiplier, int32_t divisor)
 {
     if (divisor == 0)
@@ -41,8 +37,6 @@ static int representable(int64_t value, int32_t timescale, int32_t multiplier, i
     }
     left /= walk;
     right /= walk;
-    // The product is formed in 128 bits, the width the claim is about: the implementation builds it in
-    // 96 and this must not ask a question in 64.
     __int128 product = (__int128)(value < 0 ? -(__int128)value : (__int128)value) * (__int128)left;
     int64_t denominator = (int64_t)timescale * (int64_t)right;
     return product <= (__int128)0x7FFFFFFFFFFFFFFELL && denominator > 0 && denominator <= 0x7FFFFFFFu;

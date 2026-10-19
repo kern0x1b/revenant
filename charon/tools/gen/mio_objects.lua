@@ -1,23 +1,3 @@
--- The ModelIO objects of render: one object per release band, written from the SDK's surface-diff rows and the hand-written sources of the
--- ModelIO folder. It replaces tools/corpus/gen-mio.py, and it is called by render (tools/gen/render.lua) like every other generated object,
--- so gen --framework ModelIO writes them under .gen/ModelIO, and they are built with the package.
---
--- The rows are committed as spec/ModelIO/surface-rows-<release>.tsv: surface-diff's --rows output, one row per declared API (framework,
--- kind, api, introduced). surface-diff writes NO header line, so every line is a row.
---
--- THE AST IS THE AUTHORITY FOR WHICH SELECTORS EXIST. The member set comes from clang's JSON AST of the headers, so .cxx_destruct,
--- allocator, retain, release and the rest, which the COMPILER generates for a C++ class, are never in the input and cannot be carried.
---
--- ONE BAND PER OBJECT, because release-split refuses a file whose members first appear in more than one release: a class whose own
--- first release is B is declared in B, and a member of an OLDER class whose first release is B goes in a CATEGORY, since two objects
--- cannot both hold @implementation X.
---
--- No @interface is emitted: ModelIO.h already declares the class, and re-declaring it is "duplicate interface definition for class".
--- A carried class is completed with an @implementation.
---
--- THE HAND-WRITTEN SOURCES are read first, so a class they define is not defined again, and a member they implement is dropped. Both are
--- read from the folder's own .m files and never from .gen, which this generator writes. See defined_in_tree().
-
 local tsv = import("tsv", {anonymous = true})
 local layout = import("layout", {anonymous = true})
 local json = import("core.base.json")
@@ -25,9 +5,6 @@ import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")}
 
 local FRAMEWORK = "ModelIO"
 
--- The selectors of NSObject's protocol, and the helpers the rules below drop. The names are matched as the Python matched them: a
--- keyword with its colon, so performSelector:withObject: is matched by its first keyword performSelector: (the rule below it never
--- fires, as it did not in the Python; it is kept so the lists are the same).
 local NSOBJECT_BASICS = {}
 for _, name in ipairs({"init", "dealloc", "retain", "release", "autorelease", "hash", "self", "class", "superclass", "zone",
                        "isEqual:", "copyWithZone:", "doesNotRecognizeSelector:", "respondsToSelector:", "conformsToProtocol:",
@@ -62,7 +39,6 @@ local function count_of(text, character)
     return count
 end
 
--- The bands as numbers, so 9.0 sorts before 10.0: a list of integers compared in turn, a shorter prefix first.
 local function band_before(a, b)
     local left, right = {}, {}
     for number in string.gmatch(a, "%d+") do table.insert(left, tonumber(number)) end
@@ -77,7 +53,6 @@ local function band_before(a, b)
     return false
 end
 
--- The sign, the class, the first keyword (trimmed), the number of colons, and the text after the class. nil when it is not a method.
 local function sel(api)
     local sign, rest = string.match(api, "^([%-+])%[(.*)%]$")
     if not sign then
@@ -92,8 +67,6 @@ local function sel(api)
     return sign, cls, first, count_of(sig, ":"), sig
 end
 
--- The parts the rules and the tree check read: the sign, the class, the name the DROP rules match (the first keyword with its colon
--- when the selector has one), and the whole selector with no spaces, which is what a method's header declares.
 local function parts_of(api)
     local sign, cls, first, count, sig = sel(api)
     if not sign then
@@ -102,7 +75,6 @@ local function parts_of(api)
     return {sign = sign, cls = cls, name = first .. (count > 0 and ":" or ""), selector = (string.gsub(sig, "%s", ""))}
 end
 
--- The text of the block comments of a source, each one a space, as the regular expression /\*.*?\*/ replaces them.
 local function without_comments(text)
     local out, pos = {}, 1
     while true do
@@ -122,7 +94,6 @@ local function without_comments(text)
     return table.concat(out)
 end
 
--- The pieces of a source cut before each line that starts @implementation, as re.split(r'(?=^@implementation)', re.M) cuts it.
 local function blocks_of(text)
     local starts, pos = {}, 1
     while true do
@@ -144,8 +115,6 @@ local function blocks_of(text)
     return blocks
 end
 
--- The selector a method header declares, from its text: each keyword with its colon, or the one name of a unary method. Parenthesised
--- types go first, so the parameter names are the identifiers with no colon after a keyword.
 local function header_selector(header)
     local bare = string.gsub(header, "%b()", " ")
     local selector = ""
@@ -159,7 +128,6 @@ local function header_selector(header)
     return selector
 end
 
--- The sign and the whole selector of each method that starts a line of a block, as "-setName:other:". The header runs to its { or ;.
 local function member_selectors(block)
     local found = {}
     local at = 1
@@ -181,8 +149,6 @@ local function member_selectors(block)
     return found
 end
 
--- The class a block of @implementation names, and whether the block is a category. CHARON_ALIAS_CLASS(Name) names the class Name, the one
--- the release's name stands for (charon_alias.h), so a block of it is a block of Name.
 local function class_of(block)
     local name, rest = string.match(block, "^@implementation%s+CHARON_ALIAS_CLASS%(%s*([A-Za-z_][A-Za-z0-9_]*)%s*%)(.*)")
     if not name then
@@ -194,15 +160,6 @@ local function class_of(block)
     return name, string.match(rest, "^%s*%(") ~= nil
 end
 
--- What the hand-written folder already defines, from its own .m files: the classes it owns, and each method it implements as
--- members["class\t-selector"] = the file that implements it.
---
--- A plain @implementation owns its class in whichever file it sits. A category (@implementation X (Y)) owns nothing, and it does not take
--- the class back: the Python this replaces discarded the class from its set whenever a category of it appeared in the same folder, so
--- MDLAsset (defined in MDLAsset9.m, with a category in the same file) and MDLMesh (defined in MDLMesh9.m, with categories in
--- MDLMeshGenerators9.m) were both declared again in a band object, and the duplicate class symbol killed the load.
--- A class the file declares with CHARON_ALIAS(Name) at the start of a line is owned too: the device build exports its symbol under the
--- release's name from that file, so a band object declares it again only with a second symbol of the same name.
 local function defined_in_tree(folder)
     local owned, members = {}, {}
     if not os.isdir(folder) then
@@ -234,8 +191,6 @@ local function defined_in_tree(folder)
     return owned, members
 end
 
--- The rows of the input, as {kind, api, band, position}: a class or a method with a band. surface-diff writes no header, so every line is
--- a row; a line that is not a class or a method (a constant, a protocol) is skipped.
 local function load(filepath)
     local rows = {}
     for _, line in ipairs(tsv.lines(read_bytes(filepath))) do
@@ -247,8 +202,6 @@ local function load(filepath)
     return rows
 end
 
--- The Objective-C signature of an API string, built from its selector's keywords, every one with its colon and one (id) parameter.
--- Assembled from the keywords and not by pasting the return type next to the name: a return-type-first form is "expected ')'" to clang.
 local function selector_signature(api)
     local sign, _, _, _, sig = sel(api)
     if not sign then
@@ -278,7 +231,6 @@ local function selector_signature(api)
     return sign .. " (id)" .. table.concat(out, " ")
 end
 
--- The methods of one class, from a band's members, as their one-line stubs.
 local function stubs_of(cls, members)
     local out = {}
     for _, member in ipairs(members) do
@@ -293,7 +245,6 @@ local function stubs_of(cls, members)
     return out
 end
 
--- The class-to-header map of the SDK, read from the committed spec beside the rows.
 local function headers_of(snap)
     if not os.isfile(path.join(snap, "hdr-map.json")) then
         return {}
@@ -301,10 +252,6 @@ local function headers_of(snap)
     return json.decode(read_bytes(path.join(snap, "hdr-map.json")))
 end
 
--- The whole plan for one framework and SDK release: the objects' text (files) and the accounting the run reports. objects() returns the
--- files for render; the accounting is for the tests and the run's report.
---
--- sdk_release is the SDK's release, which names the rows file and the objects' text.
 function plan(tree, fw, sdk_release)
     local result = {files = {}, methods = 0, kept = 0, dropped = {}, tree_dropped = {}}
     if fw ~= FRAMEWORK then
@@ -349,7 +296,6 @@ function plan(tree, fw, sdk_release)
     end
     result.kept = #kept
 
-    -- A member the hand-written folder already implements is not emitted again. The key is the class, the sign and the whole selector.
     local by_band, band_order = {}, {}
     for _, row in ipairs(kept) do
         local parts = parts_of(row.api)
@@ -390,7 +336,6 @@ function plan(tree, fw, sdk_release)
         end
         byteorder.sort(own)
 
-        -- a class the tree already owns gets a category here, for the members it is missing
         local members = by_band[band] or {}
         local later_seen, later_all = {}, {}
         for _, member in ipairs(members) do
@@ -490,7 +435,6 @@ function plan(tree, fw, sdk_release)
     return result
 end
 
--- The objects of a framework, as {file name = text}, for render. Only ModelIO has them.
 function objects(tree, fw, sdk_release)
     return plan(tree, fw, sdk_release).files
 end

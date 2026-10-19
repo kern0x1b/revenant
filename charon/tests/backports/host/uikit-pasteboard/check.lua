@@ -1,12 +1,3 @@
--- check.lua - the one reader the harness judges every run with: the clean run's, and each plant's.
---
---    xmake l ./check.lua <output-of-the-harness>
---
--- It reads what the port asked of the release's stand-in and says whether it is what the port must ask. It is written once and
--- run on EVERY output - the clean run and both plants - because a check that is only pointed at the clean run cannot notice a
--- plant, and a comment that says the plants go through it has to be true.
-
--- The text of a file as Python's text mode reads it: "\r\n" and a lone "\r" are line ends, and become "\n".
 local function read_text(path)
     local handle = assert(io.open(path, "rb"))
     local text = handle:read("a")
@@ -14,8 +5,6 @@ local function read_text(path)
     return (text:gsub("\r\n", "\n"):gsub("\r", "\n"))
 end
 
--- Python's repr of a string, for a list in a detail. The output these checks read is ASCII, so only the quote, the backslash and
--- the line ends need care.
 local function py_repr(text)
     local quote = "'"
     if text:find("'", 1, true) and not text:find('"', 1, true) then
@@ -40,7 +29,6 @@ local function starts_with(line, prefix)
     return line:sub(1, #prefix) == prefix
 end
 
--- Prints one verdict line and returns 0 when it holds, 1 when it does not. A detail is printed only when the check fails.
 local function need(ok, why, detail)
     local tail = ""
     if not ok and detail ~= nil then
@@ -69,7 +57,6 @@ local function any_has(lines, needle)
     return false
 end
 
--- The lines of a text, as Python's split("\n") gives them: a text that ends in a newline ends in an empty line.
 local function split_lines(text)
     local out, start = {}, 1
     while true do
@@ -85,7 +72,6 @@ end
 
 function main(...)
     local args = { ... }
-    -- the non-blank lines, as the Python read them
     local lines = {}
     for _, line in ipairs(split_lines(read_text(args[1]))) do
         if line:find("%S") then
@@ -95,7 +81,6 @@ function main(...)
 
     local stored = only(lines, "setObjects: asked the release setValue|")
     local options_calls = only(lines, "setObjects:localOnly: asked the release setItems")
-    -- every field the reader depends on, as a needle, so a plant that corrupts any one of them is caught
     local bad = 0
     bad = bad + need(any_has(lines, "setItems:options: asked the release setItems|2"),
         "the 10.0 member hands both items to the release's own -setItems:")

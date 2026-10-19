@@ -6,16 +6,6 @@
 
 NSErrorDomain const ASWebAuthenticationSessionErrorDomain = @"com.apple.AuthenticationServices.WebAuthenticationSession";
 
-// An ephemeral session isolates the sign-in page's cookies from the rest of the application. iOS
-// 6's UIWebView has one process-wide cookie jar, not a store per web view, so there is no per-view
-// isolation to switch on - what is carried instead is the jar itself, journaled to disk before it
-// is emptied for the flow and restored once the flow ends, which isolates exactly what the release
-// isolates for a UIWebView-backed session (cookies and the URL cache) and nothing beyond it (see
-// facts/AuthenticationServices/ASWebAuthenticationSession.md). The journal is written to disk, not
-// held in memory, because the flow runs behind a modal the user can leave open indefinitely, and a
-// jetsam kill mid-flow must not cost the application every cookie it owned; a leftover journal is
-// restored at the next launch, before anything else in the process can touch the jar.
-
 static NSString *CharonWebAuthJournalPath(void)
 {
     NSArray<NSString *> *directories = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
@@ -91,8 +81,6 @@ __attribute__((constructor)) static void charon_aswebauth_recover_journal(void)
     NSString *path = CharonWebAuthJournalPath();
     CharonWebAuthReplaceCookies(CharonWebAuthReadJournal(path));
     [[NSFileManager defaultManager] removeItemAtPath:path error:NULL];
-    // The URL cache needs no journal: losing an entry only costs a re-fetch, never a lost session,
-    // so whatever the flow cached is simply discarded rather than snapshotted and put back.
     [[NSURLCache sharedURLCache] removeAllCachedResponses];
 }
 

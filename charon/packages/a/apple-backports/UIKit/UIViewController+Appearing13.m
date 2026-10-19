@@ -24,7 +24,6 @@ static void charon_wrap_class(Class cls)
             continue;
         IMP previous = method_getImplementation(methods[index]);
         method_setImplementation(methods[index], imp_implementationWithBlock(^(UIViewController *controller, BOOL animated) {
-            // Keep the controller alive across the whole call, including the callback, whatever the override does.
             UIViewController *held = controller;
             NSInteger depth = [objc_getAssociatedObject(controller, &charon_depth_key) integerValue];
             objc_setAssociatedObject(controller, &charon_depth_key, @(depth + 1), OBJC_ASSOCIATION_RETAIN_NONATOMIC);

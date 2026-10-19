@@ -1,11 +1,3 @@
-// What the host's own AVAudioUnitSampler holds for the three parameters the port has to reach.
-//
-// The release names kAUSamplerParam_Gain 900, _CoarseTuning 901, _FineTuning 902 and _Pan 903 in
-// AudioUnitParameters.h, but it gives no range for any of them there, so the range is asked of the
-// host: a real AVAudioUnitSampler, AudioUnitGetParameterInfo over the global scope for each id, and
-// then the AVFAudio property set and the AU parameter read, which is the mapping the port has to
-// reproduce. The host's audioUnit handle is the same handle the port's is.
-
 #import <Foundation/Foundation.h>
 #import <AVFAudio/AVFAudio.h>
 #import <AudioToolbox/AudioToolbox.h>
@@ -15,9 +7,6 @@ static void report(NSString *label, AudioUnit unit, AudioUnitParameterID identif
 {
     AudioUnitParameterValue defaultValue = 0;
     OSStatus status = AudioUnitGetParameter(unit, identifier, kAudioUnitScope_Global, 0, &defaultValue);
-    // The range is the v2 property kAudioUnitProperty_ParameterInfo with the parameter id as the
-    // element - the same path the port's own parameter tree walks. There is no
-    // AudioUnitGetParameterInfo on this SDK, and the property is the release's own.
     struct AudioUnitParameterInfo info = {0};
     UInt32 size = sizeof(info);
     OSStatus infoStatus = AudioUnitGetProperty(unit, kAudioUnitProperty_ParameterInfo, kAudioUnitScope_Global,
@@ -58,7 +47,6 @@ int main(void)
         report(@"masterGain", unit, kAUSamplerParam_Gain);
         report(@"stereoPan", unit, kAUSamplerParam_Pan);
 
-        // The mapping: set the AVFAudio property, then read the AU parameter the port would set.
         struct { NSString *name; AudioUnitParameterID id; SEL selector; float value; } probes[] = {
             {@"globalTuning", kAUSamplerParam_CoarseTuning, @selector(setGlobalTuning:), 100.0f},
             {@"globalTuning", kAUSamplerParam_CoarseTuning, @selector(setGlobalTuning:), -100.0f},

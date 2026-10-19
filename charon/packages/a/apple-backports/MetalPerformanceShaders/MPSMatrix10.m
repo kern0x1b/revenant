@@ -1,6 +1,3 @@
-// MPSMatrix, from the header of the SDK of iOS 16.4. One object per release: the band machinery keeps an
-// object whole or drops it whole, so a file here carries the API of exactly one release.
-
 #import "CharonMPS.h"
 
 
@@ -50,10 +47,6 @@
 - (id<MTLBuffer>)data
 {
     if (!_buffer) {
-        // The release makes the backing store when -data is first asked for, so that a matrix's
-        // -resourceSize can be asked before anything is allocated. The storage it then makes is the
-        // (matrices - 1) * matrixBytes + (rows - 1) * rowBytes + columns * elementSize bytes its own
-        // header specifies.
         size_t elementSize = MPSSizeofMPSDataType(_descriptor.dataType);
         size_t bytes = (_descriptor.matrices - 1) * _descriptor.matrixBytes + (_descriptor.rows - 1) * _descriptor.rowBytes + _descriptor.columns * elementSize;
         _buffer = [_device newBufferWithLength:bytes options:MTLResourceStorageModeShared];

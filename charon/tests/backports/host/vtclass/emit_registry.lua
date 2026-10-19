@@ -1,24 +1,6 @@
--- emit_registry.lua - EMITS THE VIDEOTOOLBOX REGISTRY ROWS AND THE FACTS FILE, from the SDK's own headers.
--- A MODULE: import("emit_registry", {rootdir = os.scriptdir()}); emit.lua calls build_rows and write.
--- Port of emit-registry.py, function for function, under the Python names. Python's import-by-path loaders
--- (_availability, _members) become import() of the same modules from this directory; the __file__ assertion
--- those loaders made has no counterpart, because a module is reached only by its name in this directory.
---
--- gen_body names used (code written against these; gen_body.lua is being ported by another agent):
---     gen_body.BRANCH_TABLE()        the shared branch table, as a table (Python's dict BRANCH_TABLE)
---     gen_body.load_branch_table()   the table load_branch_table() returns (Python's default path)
---     gen_body.branch_of(a, b)       the branch of a (class number, objc pointer) row
--- _is_cf is the only caller of these, and nothing in this module calls _is_cf.
---
--- sdk_text is Python's dict {path: text}. Both callers build it from a sorted glob, so Python's dict order
--- is path order; here the order is taken as byte order of the paths (sorted_keys), which gives the same
--- order for those callers.
-
 local S = import("pystr", {rootdir = os.scriptdir()})
 local V = import("vtlib", {rootdir = os.scriptdir()})
 local J = import("registry_json", {rootdir = os.scriptdir()})
-
--- Module constants --------------------------------------------------------------------------------------
 
 function PROPERTY()
     return "@property"
@@ -28,9 +10,6 @@ function CLASS_ROW_STATUS()
     return "implemented"
 end
 
--- Helpers -----------------------------------------------------------------------------------------------
-
--- Python's repr() of a str, for the ASCII names this module prints.
 local function py_repr(s)
     local quote = "'"
     if string.find(s, "'", 1, true) and not string.find(s, '"', 1, true) then
@@ -60,7 +39,6 @@ local function py_repr(s)
     return table.concat(out)
 end
 
--- The texts of an sdk_text, in Python's dict order (path byte order).
 local function texts_in_order(sdk_text)
     local out = {}
     for _, path in ipairs(V.sorted_keys(sdk_text)) do
@@ -69,18 +47,14 @@ local function texts_in_order(sdk_text)
     return out
 end
 
--- Python's _availability(): availability.py, loaded from this directory.
 function _availability()
     return import("availability", {rootdir = os.scriptdir()})
 end
 
--- Python's _members(): members.py, loaded from this directory.
 function _members()
     return import("members", {rootdir = os.scriptdir()})
 end
 
--- Python's _is_cf(gen_body, prop): whether a property's type is a CF reference, from the compiler's answer
--- the way the store line asks. The branch table is loaded once when it is empty.
 function _is_cf(gen_body, prop)
     local branch_table = gen_body.BRANCH_TABLE()
     local name = prop.type
@@ -100,16 +74,12 @@ function _is_cf(gen_body, prop)
     return gen_body.branch_of(table.unpack(row)) == "CF"
 end
 
--- Python's _introduction(sdk_text, class_name): (ios version, "file:line") from availability_of() and
--- nothing else. Raises when the class has no availability; the error is raised from here unchanged.
 function _introduction(sdk_text, class_name)
     local joined = table.concat(texts_in_order(sdk_text), "\n")
     local version, line = _availability().availability_of(joined, class_name)
     return version, (_file_holding(sdk_text, class_name) or "?") .. ":" .. line
 end
 
--- Python's _file_holding(sdk_text, class_name): the basename of the first file (in path order) whose text
--- holds "@interface <class_name>" as re.search(r'@interface\s+' + re.escape(name) + r'\b') finds it.
 function _file_holding(sdk_text, class_name)
     for _, path in ipairs(V.sorted_keys(sdk_text)) do
         if _availability().interface_at(sdk_text[path], class_name) ~= nil then
@@ -119,9 +89,6 @@ function _file_holding(sdk_text, class_name)
     return nil
 end
 
--- Python's _header_line(sdk_text, class_name, needle): "file:line" of the declaration `needle` belongs to,
--- for the row's `source`. Not called by build_rows, and ported as written: the window is the 200 bytes
--- before the FIRST occurrence of the line, and 40 after it, which is what text.find(line) gives.
 function _header_line(sdk_text, class_name, needle)
     for _, path in ipairs(V.sorted_keys(sdk_text)) do
         local text = sdk_text[path]
@@ -139,11 +106,6 @@ function _header_line(sdk_text, class_name, needle)
     return nil
 end
 
--- The rows and the facts file --------------------------------------------------------------------------
-
--- Python's build_rows(gen_body, sdk_text, protocols, classes, order): every row, as {release file, row}
--- pairs, in order. The members come from members_of(), the one derivation, so a row cannot describe a
--- member the value file does not implement. gen_body is not used here (as in the Python).
 function build_rows(gen_body, sdk_text, protocols, classes, order)
     local rows = {}
     for _, class_name in ipairs(order) do
@@ -196,12 +158,8 @@ function build_rows(gen_body, sdk_text, protocols, classes, order)
     return rows
 end
 
--- Python's write(registry_dir, facts_dir, rows, order): the group files, and the facts file every row
--- points at. MERGES: it writes only the rows it owns (kind class, method or property), replacing each
--- one in place and carrying every other row through unchanged. Returns {file name, row count} pairs.
 function write(registry_dir, facts_dir, rows, order)
     local OURS = {class = true, method = true, property = true}
-    -- groups: release -> its rows, in row order; group_names: the releases, in first-seen order
     local groups = {}
     local group_names = {}
     for _, pair in ipairs(rows) do
@@ -219,7 +177,6 @@ function write(registry_dir, facts_dir, rows, order)
     for _, release in ipairs(V.sort_bytes(group_names)) do
         local entries = groups[release]
         local path = registry_dir .. "/" .. release
-        -- ORDER IS PRESERVED: the existing order is not this file's to rearrange.
         local existing = {}
         if os.exists(path) then
             local tree = J.parse_tree(V.read_text(path))
@@ -228,7 +185,6 @@ function write(registry_dir, facts_dir, rows, order)
                 V.fail("KeyError: 'entries'")
             end
         end
-        -- mine: (kind, api) -> row; a later row with the same key replaces an earlier one (a Python dict)
         local mine = {}
         local mine_key = {}
         for _, e in ipairs(entries) do
@@ -249,7 +205,6 @@ function write(registry_dir, facts_dir, rows, order)
                 merged[#merged + 1] = row
             end
         end
-        -- the rows still owed, sorted by (kind, api)
         local owed = {}
         for key, e in pairs(mine) do
             owed[#owed + 1] = {mine_key[key][1], mine_key[key][2], e}

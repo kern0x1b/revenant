@@ -3,22 +3,11 @@
 #import <dlfcn.h>
 #import <objc/runtime.h>
 
-// The identifier behind each of the 129 UTType constants the port carries, against the host's own
-// UniformTypeIdentifiers. The expectation is the `UTI:` line of the constant's own doc comment in
-// SDK 26.2's UTCoreTypes.h (expected-identifiers.tsv, beside this file), never the port's answer:
-// the host is asked what each of its constants' identifier is, and the two are compared.
-//
-// The two tag classes are in the same shape, and the third block asks the host the two questions
-// the port's -supertypes, -version and -referenceURL answer differently: what the host says for a
-// system type, and what it says for a type nobody declared.
-
 static int different = 0;
 static long checks = 0;
 
 static UTType *host_constant(NSString *name)
 {
-    // The host's UTType constants are data symbols behind NS_REFINED_FOR_SWIFT, so nothing in the
-    // SDK's own declarations names them: each is read out of the process by its symbol name.
     void *symbol = dlsym(RTLD_DEFAULT, name.UTF8String);
     if (!symbol)
         return nil;
@@ -75,8 +64,6 @@ static void check_tag_classes(void)
     } else {
         printf("UTTagClassMIMEType = %s\n", mime.UTF8String);
     }
-    // The release's own spelling of the same two tag classes, MobileCoreServices' kUTTagClass*, is
-    // what the port's -typeWithTag:tagClass: passes through, so the two have to be one string.
     NSString *release_extension = (__bridge NSString *)kUTTagClassFilenameExtension;
     NSString *release_mime = (__bridge NSString *)kUTTagClassMIMEType;
     checks += 2;
@@ -93,10 +80,6 @@ static void check_tag_classes(void)
 
 static void check_system_answers(void)
 {
-    // What the host says about a type the system declares, for the three members the port answers
-    // from the process's own UTI declarations instead (a release whose UTI database declares no
-    // version and no reference URL for any type). Printed, not asserted: the point is that the
-    // expectation written into the facts file is the host's, read here.
     NSArray<NSString *> *identifiers = @[@"public.png", @"public.plain-text", @"com.adobe.pdf", @"public.data"];
     for (NSString *identifier in identifiers) {
         UTType *type = [UTType typeWithIdentifier:identifier];
@@ -118,11 +101,6 @@ static void check_system_answers(void)
     printf("UTType for the undeclared extension zzqq: %s, declared %d, dynamic %d\n",
            made.identifier.UTF8String, made.isDeclared, made.isDynamic);
 
-    // What the host answers for an identifier its own process declares no export or import for.
-    // UTType.h documents both results as undefined when the identifier is unknown to the system,
-    // so what is asserted is only that the host returns a type carrying that identifier -- which is
-    // the rule the port implements for exported, and the starting point of the rule it implements
-    // for imported (the general case is a type that carries the same identifier).
     NSString *unknown = @"com.example.nothing-declared-here";
     UTType *exported = [UTType exportedTypeWithIdentifier:unknown];
     checks++;
@@ -141,16 +119,6 @@ static void check_system_answers(void)
     printf("exported/importedTypeWithIdentifier: for %s: exported %s, imported %s\n", unknown.UTF8String,
            exported.identifier.UTF8String, imported.identifier.UTF8String);
 
-    // The imported rule the header spells out: a type with a preferred filename extension yields to
-    // the type that is the preferred type for that extension. public.jpeg's preferred extension is
-    // jpeg, and public.jpeg is the preferred type for it, so the two are one type here; the check
-    // that holds is that substituting one that is not preferred returns the preferred one.
-    // The one identifier the header does not get right. Every SDK drop's UTCoreTypes.h documents
-    // UTTypeInternetShortcut as `com.apple.internet-location`, the identifier of the constant above
-    // it in the same file (macOS 26.5, macOS 27 and the port's own 16.4 all repeat it), while the
-    // system's own UniformTypeIdentifiers answers com.microsoft.internet-shortcut for it. The port
-    // takes the measured value; expected-identifiers.tsv carries it and this line proves it is the
-    // system's and not the header's.
     NSString *shortcut = host_constant(@"UTTypeInternetShortcut").identifier;
     NSString *location = host_constant(@"UTTypeInternetLocation").identifier;
     printf("UTTypeInternetShortcut = %s, UTTypeInternetLocation = %s (the header says com.apple.internet-location for both)\n",

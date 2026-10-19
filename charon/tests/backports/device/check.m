@@ -23,9 +23,6 @@ static void charon_uncaught(NSException *exception)
 
 void charon_log_to(NSString *path)
 {
-    // A fresh guest has no folder for the log (no /private/var/backports on the 6.1.3 emulator root), and freopen into a missing
-    // folder fails and closes stdout: every line the program printed after it was lost. The folder is made here, as the log is
-    // written, so the log lands wherever the program names it.
     if (path) {
         NSString *folder = [path stringByDeletingLastPathComponent];
         NSError *error = nil;

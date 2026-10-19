@@ -1,7 +1,3 @@
-// differential.m - the same program, built once against the host's CoreSpotlight and once against the port's CSSearchableIndex.m
-// and the sources it needs. Every line it prints must be the same on both sides. The lines cover the index's delegate
-// property (its default, what it reads back, the weak reference) and the external-provider fetch: the answer for a bundle the
-// caller has no item from, with and without a delegate, and the thread the completion handler runs on.
 #import <Foundation/Foundation.h>
 #import <CoreSpotlight/CoreSpotlight.h>
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
@@ -30,7 +26,6 @@
 
 @end
 
-// The handler's answer is kept and printed by the caller, so the lines come out in order whichever thread answers.
 static void fetch(CSSearchableIndex *index, NSString *name)
 {
     dispatch_semaphore_t done = dispatch_semaphore_create(0);

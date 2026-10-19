@@ -3,10 +3,6 @@
 #import <objc/runtime.h>
 #import "check.h"
 
-/* The two properties answer on the port whether or not it implements them: the class is the SDK's
-   own interface under another name, so the compiler synthesises what nobody wrote, and the answer
-   is NO. Asking respondsToSelector: would prove nothing; every check below is behaviour. */
-
 static Class flavor;
 
 static NSString *state_of(id animator)

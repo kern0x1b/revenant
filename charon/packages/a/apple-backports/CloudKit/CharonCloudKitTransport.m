@@ -1,27 +1,3 @@
-// The transport itself: the request, the connection, the answer.
-//
-// It is NSURLConnection and not the NSURLSession of the Foundation backports, on purpose. A CloudKit
-// client is very often a daemon - an extension, a background agent, a sync process - and a library
-// that can only answer over NSURLSession drags libFoundationBackports' whole session stack, its
-// operation queue and its delegate dispatch, into a process that wanted a container. NSURLConnection
-// is the release's own, it is there, and one CloudKit request is one connection.
-//
-// The contract of the transport is narrow and the whole of it is in `-performContainer:`:
-//
-//  * a request is JSON, under `https://api.apple-cloudkit.com/database/1/<container>/<environment>/…`,
-//    with `Authorization: Bearer <token>` and `Content-Type: application/json`;
-//  * a 2xx answer with a JSON body is handed back decoded, a 2xx one without is handed back nil;
-//  * a 4xx or 5xx answer is a CKError built from the payload's own error members;
-//  * a connection that never completed is CKErrorNetworkUnavailable or CKErrorNetworkFailure, the
-//    two the CKErrorCode header names for it;
-//  * the completion is called exactly once, and never on the caller's thread - the caller's own
-//    thread is the one it called from, and CloudKit's own answer is on another.
-//
-// What is refused before a connection is made: no container identifier answers
-// CKErrorBadContainer, and no token to send with answers CKErrorNotAuthenticated. Both are the codes
-// the header names for those two cases, and both are worth refusing here rather than sending a
-// request that cannot succeed.
-
 #import "CharonCloudKit.h"
 #import "CharonCKConstants.h"
 
@@ -48,11 +24,6 @@
 
 @implementation CharonCKTransport
 
-// The two tables are private, set once by +initialize and read through -containerForDatabase and
-// -environmentForDatabase. The library compiles with -Werror=objc-missing-property-synthesis, so a
-// property the class owns is synthesised EXPLICITLY: @dynamic would be the wrong answer here, because
-// +initialize below writes _containers and _environments, and those ivars exist only if the compiler
-// synthesises them.
 @synthesize containers = _containers;
 @synthesize environments = _environments;
 
@@ -86,10 +57,6 @@
     return self.environments;
 }
 
-// A container is in the production environment when its own environment says so. The key CloudKit's
-// own tooling writes in the Info.plist of a shipped application is `CKContainerEnvironment`; a
-// container that says neither is in development, which is the environment CloudKit creates a
-// container in and the only one a container of a development build can be in.
 - (NSString *)environmentForContainer:(CKContainer *)container
 {
     id declared = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CKContainerEnvironment"];
@@ -112,10 +79,6 @@
     if (!completion) {
         return;
     }
-    // A container with no identifier is a process with no iCloud container entitlement, which is what
-    // the host's own CloudKit answers by raising `containerIdentifier can not be nil`. Raising takes
-    // the process down and leaves a caller nothing to do; the code the header names for an
-    // un-provisioned container does leave it something, so that is what this answers.
     NSString *identifier = container.containerIdentifier;
     if (!identifier.length) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -159,7 +122,6 @@
     [self send:request completion:completion];
 }
 
-// The database root of the interface: `database/1/<container>/<environment>/<scope>`.
 static NSString *containerEnvironmentRoot(NSString *identifier, NSString *environment)
 {
     return [NSString stringWithFormat:@"database/1/%@/%@", identifier, environment];
@@ -173,9 +135,6 @@ static NSString *containerEnvironmentRoot(NSString *identifier, NSString *enviro
     return [NSString stringWithFormat:@"%@/%@", containerEnvironmentRoot(identifier, environment), root];
 }
 
-// The connection, and the one place the answer becomes a completion. `finished` is what makes the
-// promise of exactly one call true: a connection that fails after its delegate was told, and a
-// delegate that is told after a failure, both reach here, and only the first of them gets through.
 - (void)send:(NSURLRequest *)request completion:(CharonCKCompletion)completion
 {
     CharonCKRequest *pending = [[CharonCKRequest alloc] init];
@@ -206,8 +165,6 @@ static NSString *containerEnvironmentRoot(NSString *identifier, NSString *enviro
     }
     self.finished = YES;
     CharonCKCompletion completion = self.completion;
-    // CloudKit's own answer is never on the caller's thread, and a caller that has to check which
-    // thread it is on has been handed something the framework did not.
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         completion(body, error);
     });
@@ -225,8 +182,6 @@ static NSString *containerEnvironmentRoot(NSString *identifier, NSString *enviro
 - (NSURLRequest *)connection:(NSURLConnection *)connection willSendRequest:(NSURLRequest *)request
         redirectResponse:(NSURLResponse *)redirectResponse
 {
-    // A CloudKit service does not redirect a database request, and a redirect that carried the
-    // Authorization header somewhere else would be a token in the wrong place.
     return redirectResponse ? nil : request;
 }
 

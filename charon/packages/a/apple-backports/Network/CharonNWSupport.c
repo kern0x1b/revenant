@@ -1,7 +1,3 @@
-/*
- * The few pieces of C every file of this library needs. See CharonNWSupport.h for why this is C.
- */
-
 #include "CharonNWSupport.h"
 
 #include <arpa/inet.h>
@@ -162,8 +158,6 @@ bool charon_nw_split_url(const char *url, CFStringRef *out_host, uint16_t *out_p
 
     char *userinfo = strchr(text, '@');
     char *host = userinfo ? userinfo + 1 : text;
-    /* An IPv6 literal is written in brackets, and its colons are not the port's: the brackets are
-       part of the text of the URL and not part of the host. */
     char *closing = host[0] == '[' ? strchr(host, ']') : NULL;
     char *port = NULL;
     if (closing) {
@@ -216,8 +210,6 @@ bool charon_nw_resolve_port(const char *text, uint16_t *out)
             *out = (uint16_t)number;
         return true;
     }
-    /* A name: the system's own services file is what says what "http" is, and it is the same file the
-       system's resolver uses, so the answer here is the one a release that has Network gives. */
     struct servent *service = getservbyname(text, "tcp");
     if (!service)
         return false;
@@ -260,8 +252,6 @@ uint64_t charon_nw_uptime_milliseconds(void)
     uint64_t ticks = mach_absolute_time();
     if (base.denom == 0)
         return 0;
-    /* nanoseconds -> milliseconds, without a 128-bit multiply: the quotient and the remainder are
-       scaled apart, which is exact and cannot overflow before the device has run for years. */
     uint64_t quotient = ticks / base.denom, remainder = ticks % base.denom;
     uint64_t nanoseconds = quotient * base.numer + (remainder * base.numer) / base.denom;
     return nanoseconds / 1000000;
@@ -384,8 +374,6 @@ dispatch_source_t charon_nw_write_source(int handle, dispatch_queue_t queue)
     dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_WRITE, (uintptr_t)handle, 0, queue);
     if (!source)
         return NULL;
-    /* A write source over a socket is always ready, so it is kept suspended until there is something
-       to write; resumed it fires, suspended it does not. */
     dispatch_suspend(source);
     return source;
 }
@@ -396,8 +384,6 @@ uint32_t charon_nw_available_send_buffer(int handle)
     socklen_t length = sizeof value;
     if (getsockopt(handle, SOL_SOCKET, SO_SNDBUF, &value, &length) != 0 || value < 0)
         return 0;
-    /* What the kernel holds for the socket, which is twice what it lets a program fill, is the room
-       the transport has; half of what the kernel reports is that room. */
     return (uint32_t)(value / 2);
 }
 

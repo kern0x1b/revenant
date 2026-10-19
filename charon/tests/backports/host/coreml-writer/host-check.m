@@ -1,9 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <CoreML/CoreML.h>
 
-/* Loads the original .mlmodel and the one the port wrote, on the host, and compares what the host reads out of
- * each: the description of every input and output. The written file must load (the host's reader is the test),
- * and its description must be the original's. Usage: host-check <original.mlmodel> <written.mlmodel> */
 static NSString *describe(MLModelDescription *description)
 {
     NSMutableString *text = [NSMutableString string];

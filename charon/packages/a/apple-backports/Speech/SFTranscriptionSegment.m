@@ -1,7 +1,5 @@
 #import <Speech/Speech.h>
 
-// One segment of a transcription, iOS 10. A fresh segment answers as the host answers a fresh one: no substring and no
-// alternatives, an empty range, and zero for the times and the confidence (facts/Speech/recognition-data.md).
 @implementation SFTranscriptionSegment {
     NSString *_substring;
     NSRange _substringRange;

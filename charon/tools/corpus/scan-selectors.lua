@@ -1,29 +1,13 @@
--- Per app: every selector name the bundle carries (__objc_methname strings -> corpus/selcache/<app>.json)
--- and every selector the bundle DEFINES (corpus/defcache/<app>.json, from defined-methods.lua's defined()).
--- crash-demand computes sends = carried - universe(iOS 6.0) - defined from these two files; this is the
--- one script that builds both from a real .app bundle, so the two stay from the same binary by construction.
---
--- Neither half duplicates aggregate.lua's ingest(): those operate on `nm -m`'s external symbol table, the
--- LINKER-visible surface (classes, protocols, C functions/constants) that builds store.json's `demand`.
--- Selector names (__objc_methname) are never linker symbols at all -- Objective-C messaging resolves them
--- dynamically, so `nm` never lists one -- an entirely different Mach-O section this script reads.
---
--- Usage:
---   xmake l tools/corpus/scan-selectors.lua <app-name> <path-to-.app>
 import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 import("aggregate", {rootdir = os.scriptdir()})
 local dm = import("defined-methods", {rootdir = os.scriptdir()})
 
--- The __objc_methname strings one binary's __TEXT carries -- sent OR defined, a name is a name regardless.
--- otool -v resolves each entry to (address, string); a bare address with no trailing text is a null-byte
--- padding continuation, not a second selector, and is skipped.
 local function carried_names(binary)
     local names, index = {}, 0
     for line in (os.iorunv("otool", {"-v", "-s", "__TEXT", "__objc_methname", binary}) .. "\n"):gmatch("(.-)\n") do
         index = index + 1
-        if index > 2 then   -- skip "<binary>:" and "Contents of (...)" header lines
-            -- str.split(None, 1): the first whitespace-separated field, then the rest of the line
+        if index > 2 then
             local rest = line:match("^%s*%S+%s+(.*)$")
             if rest and rest ~= "" then
                 names[rest] = true

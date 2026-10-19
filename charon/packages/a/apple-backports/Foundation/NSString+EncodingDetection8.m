@@ -22,10 +22,6 @@ static NSStringEncoding charon_encoding_from_bom(NSData *data)
     static const uint8_t utf8bom[] = {0xEF, 0xBB, 0xBF};
     static const uint8_t utf16be[] = {0xFE, 0xFF};
     static const uint8_t utf16le[] = {0xFF, 0xFE};
-    /* the generic, non-endian-qualified constants ask NSString to read and consume the
-       byte-order mark itself; the endian-qualified ones treat a leading FE FF/FF FE as an
-       ordinary character, which is what a caller who already knows the endianness wants,
-       but not what a byte-order mark found by sniffing means */
     if (charon_bom(data, utf32be, sizeof utf32be) || charon_bom(data, utf32le, sizeof utf32le))
         return NSUTF32StringEncoding;
     if (charon_bom(data, utf8bom, sizeof utf8bom))

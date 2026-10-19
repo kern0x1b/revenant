@@ -1,25 +1,3 @@
-// predict-host.m: compile a Core ML container with this host's own Core ML, run it once on the inputs it is given,
-// and print every output the model answers, one line each. tools/coreml/make-models.lua uses it to record the
-// predictions in manifest.json, and to show that each container it writes is one Core ML compiles and loads.
-//
-//   predict-host <model.mlmodel> <inputs>
-//   predict-host <model.mlmodel> -            compile and load only, and say so
-//
-// The inputs file has one line per multiArray input:
-//
-//   input <name> <shape> <value> <value> ...        shape is the extents joined by x, e.g. 3x8x8
-//
-// and the answers are printed as
-//
-//   output <name> array <shape> <value> ...         a multiArray, its extents joined by x, then the values in
-//                                                   row-major order
-//   output <name> double <value>                    a double feature
-//   output <name> int64 <value>                     an integer feature
-//   output <name> string <value>                    the rest of the line
-//   output <name> dictionary <key> <value> ...      a string-keyed dictionary of doubles
-//
-// The compiled model is written where NSTemporaryDirectory points, which the caller sets with TMPDIR.
-// A failure prints "predict-host: " and what failed, on stderr, and exits 1.
 #import <CoreML/CoreML.h>
 #import <Foundation/Foundation.h>
 #include <string.h>
@@ -43,8 +21,6 @@ static NSString *text_of(double value) {
     return [NSString stringWithFormat:@"%.17g", value];
 }
 
-// The coordinates of the element at this row-major position in an array of this shape: a multiArray is subscripted
-// by its coordinates, not by a position in its flat storage.
 static NSArray<NSNumber *> *coordinates_of(NSInteger position, NSArray<NSNumber *> *shape) {
     NSMutableArray<NSNumber *> *coordinates = [NSMutableArray arrayWithCapacity:shape.count];
     for (NSInteger axis = (NSInteger)shape.count - 1; axis >= 0; axis--) {
@@ -72,7 +48,6 @@ int main(int argc, const char *argv[]) {
         }
 
         if (strcmp(argv[2], "-") == 0) {
-            // compiled and loaded, and no prediction: a model whose input is a picture has no input this probe makes
             printf("compiled and loaded\n");
             return 0;
         }

@@ -76,13 +76,6 @@
     if ((self = [super initWithStyle:UITableViewStylePlain])) {
         _picker = picker;
         _path = [path copy];
-        // NSMutableOrderedSet arrived in iOS 5, so a band below it links this object with the class
-        // symbol weak and NULL - the 4.3 gate names _OBJC_CLASS_$_NSMutableOrderedSet among the weak
-        // imports the release it is checked against does not export - and this is an initialiser, so
-        // the message goes out whatever the release has. The class is looked up once; a release
-        // without it has no ordered set, and the selection is then nil, which every use below reads
-        // as "nothing selected": the document row shows no check mark and the commit button stays
-        // out, and that is what a release that cannot keep a selection gives.
         static Class orderedSet = nil;
         static dispatch_once_t once;
         dispatch_once(&once, ^{ orderedSet = NSClassFromString(@"NSMutableOrderedSet"); });
@@ -166,10 +159,6 @@
     cell.textLabel.text = shown;
     BOOL enabled = [self selectable:entry];
     cell.textLabel.textColor = enabled ? [UIColor blackColor] : [UIColor grayColor];
-    // NSByteCountFormatter arrived in iOS 6, so a band below it links this object with the class
-    // symbol weak and NULL (the 4.3 gate names it among the four weak imports it does not export).
-    // Where it is not there the size is left off: a count nobody can format is not a number a
-    // document list can show, and the name and the icon are the parts that read.
     static Class byteCountFormatter = nil;
     static dispatch_once_t formatterOnce;
     dispatch_once(&formatterOnce, ^{ byteCountFormatter = NSClassFromString(@"NSByteCountFormatter"); });

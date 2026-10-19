@@ -671,15 +671,6 @@ static const NSCalendarUnit calendar_units[] = {NSCalendarUnitEra, NSCalendarUni
                                                 NSCalendarUnitYearForWeekOfYear, NSCalendarUnitNanosecond, NSCalendarUnitCalendar, NSCalendarUnitTimeZone,
                                                 NSCalendarUnitYear | NSCalendarUnitMonth, 0};
 
-/*
- * -nextDateAfterDate:'s backwardMatch, on a day search whose day already ties the date's own, in
- * New York or Sydney, for exactly these (setup, date) pairs: the host's own answer, not the
- * backport's, is a fixed unrelated date (probed directly against the system class - see
- * facts/Foundation/NSCalendar.md, "Setting a unit, and searching for one"). Named exactly, not by
- * a year boundary, so a host that starts answering these correctly turns into a plain pass, and a
- * host that answers a *different* wrong value here still shows up as newly tolerated instead of
- * silently matching.
- */
 static BOOL calendar_known_host_nextmatch_quirk(NSUInteger setupIndex, NSUInteger dateIndex)
 {
     static const NSUInteger pairs[][2] = {{1, 18}, {1, 22}, {1, 27}, {1, 32}, {1, 51}, {5, 7}, {7, 18}, {7, 22}, {7, 27}, {7, 32}, {7, 51}, {11, 7}, {13, 18}, {13, 22}, {13, 27}, {13, 32}, {13, 51}};

@@ -1,8 +1,5 @@
 set_project("charonphotobracketprobe")
 set_version("0.0.1")
--- The bracketed capture probe of tests/backports/emulate/photobracket, as an application installed on the emulated 6.1.3 device
--- (its executable runs as /Applications/charonphotobracketprobe.app/charonphotobracketprobe). The working copy under test is
--- named by CHARPHOTOBRACKET_ROOT.
 local root = os.getenv("CHARPHOTOBRACKET_ROOT") or path.join(os.scriptdir(), "../../../../..")
 add_repositories("charon " .. root)
 add_addons("charon v0.8.17")

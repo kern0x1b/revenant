@@ -1,23 +1,8 @@
--- xmake l tests/backports/colour/fit.lua <fit.tsv>
---
--- The fit: which space, and what the vocabulary is.
---
--- The host answers 267 distinct names from 28 words, so a name is a modifier plus a hue word rather than
--- a table entry. This splits the names that way, then asks which colour space decides the hue word: for
--- each candidate it takes every fit point answered with a hue word, computes that word's prototype as the
--- mean of its points in that space, and classifies by nearest prototype. The space with the best
--- agreement is the one the port will use.
---
--- Order matters where a tie is broken: the hue words are listed by count with ties in the order they
--- first appear in the sample, and a prototype wins a tie for the one that was first in the points, so
--- the iteration below keeps first-seen order everywhere a table is walked.
-
 import("sample_floor", {rootdir = os.scriptdir()})
 
 local MODIFIERS = { very = true, light = true, dark = true, pastel = true, grayish = true,
     vibrant = true, bright = true }
 
--- A list of the fields of one line, empty fields kept, as Python's str.split("\t") keeps them.
 local function fields(line)
     local out, start = {}, 1
     while true do
@@ -63,7 +48,6 @@ local function split(name)
     return joined
 end
 
--- The colour spaces, each as three numbers per colour.
 local function srgb(r, g, b)
     return r / 255.0, g / 255.0, b / 255.0
 end
@@ -113,7 +97,6 @@ local SPACES = {
     { label = "oklab", space = oklab },
 }
 
--- An ordered map: keys in first-insertion order, as a Python dict keeps them.
 local function ordered()
     return { keys = {}, values = {} }
 end
@@ -152,7 +135,6 @@ function main(sample)
     print(string.format("distinct names: %d", distinctNames))
     print(string.format("distinct hue words: %d", #hues.keys))
 
-    -- Most common first; a tie keeps the order the word first appeared in, as Counter.most_common does.
     local firstSeen = {}
     for i, hue in ipairs(hues.keys) do
         firstSeen[hue] = i
@@ -171,14 +153,10 @@ function main(sample)
         print(string.format("  %-16s %d", hue, counts[hue]))
     end
 
-    -- The three near-neutrals, counted on their own, because they are not hues and a reader looking for
-    -- them in the list above has to add them up.
     for _, name in ipairs({ "gray", "black", "white" }) do
         print(string.format("near-neutral %-6s %d", name, counts[name] or 0))
     end
 
-    -- Deduplicated points, because the boundary block asks the same colour twice. The key is the
-    -- colour; a later row for the same colour overwrites the word, as the Python dict does.
     local points = ordered()
     for _, row in ipairs(rows) do
         put(points, string.format("%d,%d,%d", row.r, row.g, row.b), {

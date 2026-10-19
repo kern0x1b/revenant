@@ -1,7 +1,3 @@
-// The matrix and rotation arithmetic SceneKit's types are defined by, measured against macOS SceneKit
-// (facts/SceneKit/SCNView.md, "Conventions"): an SCNMatrix4 is row-major with the translation in m41..m43 and
-// transforms row vectors, SCNMatrix4Mult(a, b) is a then b, and its memory is the column-major matrix OpenGL ES
-// multiplies column vectors with. Every file of the library takes the arithmetic from here, so there is one copy.
 #import <SceneKit/SceneKit.h>
 #include <math.h>
 
@@ -19,9 +15,6 @@ static inline SCNMatrix4 CharonSCNMatrixMultiply(SCNMatrix4 a, SCNMatrix4 b)
     return result;
 }
 
-// A vector by a matrix, in the same convention as CharonSCNMatrixMultiply: the matrix's memory is
-// the column-major one OpenGL ES multiplies column vectors with, and the transform is a row vector,
-// so a point is multiplied as a row and a direction is multiplied with the translation left out.
 static inline void CharonSCNMatrixMultiplyVector(SCNMatrix4 matrix, const float *v, float *out)
 {
     const float *m = &matrix.m11;
@@ -30,7 +23,6 @@ static inline void CharonSCNMatrixMultiplyVector(SCNMatrix4 matrix, const float 
     }
 }
 
-// The inverse by cofactors; a matrix with no inverse is answered unchanged, as SceneKit answers it.
 static inline SCNMatrix4 CharonSCNMatrixInvert(SCNMatrix4 matrix)
 {
     const float *m = &matrix.m11;
@@ -63,7 +55,6 @@ static inline SCNMatrix4 CharonSCNMatrixInvert(SCNMatrix4 matrix)
     return result;
 }
 
-// Rotation by angle about an axis, normalised first; a zero axis is no rotation (both measured).
 static inline SCNMatrix4 CharonSCNMatrixRotation(float angle, float x, float y, float z)
 {
     float length = sqrtf(x * x + y * y + z * z);
@@ -110,14 +101,11 @@ static inline SCNVector4 CharonSCNAxisAngleFromQuaternion(SCNQuaternion q)
     return SCNVector4Make(q.x / s, q.y / s, q.z / s, 2 * atan2f(s, q.w));
 }
 
-// eulerAngles (pitch x, yaw y, roll z) apply x, then y, then z to a row vector: the node's rotation is
-// Rx * Ry * Rz, which is what macOS SceneKit's transform is for eulerAngles (0.3, 0.5, 0.7).
 static inline SCNQuaternion CharonSCNQuaternionFromEuler(SCNVector3 euler)
 {
     float cx = cosf(euler.x / 2), sx = sinf(euler.x / 2);
     float cy = cosf(euler.y / 2), sy = sinf(euler.y / 2);
     float cz = cosf(euler.z / 2), sz = sinf(euler.z / 2);
-    // qz * qy * qx: rotating a vector by the result applies x first
     return SCNVector4Make(sx * cy * cz - cx * sy * sz,
                           cx * sy * cz + sx * cy * sz,
                           cx * cy * sz - sx * sy * cz,
@@ -127,7 +115,6 @@ static inline SCNQuaternion CharonSCNQuaternionFromEuler(SCNVector3 euler)
 static inline SCNVector3 CharonSCNEulerFromQuaternion(SCNQuaternion q)
 {
     SCNMatrix4 m = CharonSCNMatrixFromQuaternion(q);
-    // m is Rx * Ry * Rz in row-vector form: m13 = -sin(yaw)
     float sinYaw = -m.m13;
     sinYaw = sinYaw > 1 ? 1 : (sinYaw < -1 ? -1 : sinYaw);
     float yaw = asinf(sinYaw), pitch, roll;
@@ -141,7 +128,6 @@ static inline SCNVector3 CharonSCNEulerFromQuaternion(SCNQuaternion q)
     return SCNVector3Make(pitch, yaw, roll);
 }
 
-// scale, then rotate, then translate a row vector
 static inline SCNMatrix4 CharonSCNMatrixCompose(SCNVector3 position, SCNQuaternion orientation, SCNVector3 scale)
 {
     SCNMatrix4 m = CharonSCNMatrixFromQuaternion(orientation);
@@ -174,8 +160,6 @@ static inline SCNQuaternion CharonSCNQuaternionFromMatrix(SCNMatrix4 m)
     return q;
 }
 
-// Split an affine transform into position, orientation and scale. A mirror (negative determinant) gets a negative
-// scale on every axis, as macOS SceneKit splits it, so that the orientation stays a rotation.
 static inline void CharonSCNMatrixDecompose(SCNMatrix4 m, SCNVector3 *position, SCNQuaternion *orientation, SCNVector3 *scale)
 {
     float sx = sqrtf(m.m11 * m.m11 + m.m12 * m.m12 + m.m13 * m.m13);

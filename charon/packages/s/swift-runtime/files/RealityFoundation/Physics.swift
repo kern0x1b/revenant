@@ -1,34 +1,13 @@
-// The physics: the components that make an entity a body, the joints that tie two together, and
-// the CPU solver that moves them.
-//
-// The solver is ours, and what it computes is stated rather than implied: gravity is Apple's
-// documented (0, -9.81, 0) — the host's own `Scene.__gravity` reads nil, which is the engine
-// default and not a per-scene override — a sphere is collided exactly, a box exactly against a
-// sphere and by the separating axis test against another box, a capsule as the chain of three
-// spheres along its axis, and a convex hull as the box its bounds give until the mesh round
-// measures a real hull. The step is semi-implicit Euler: the velocity first, then the position
-// from the new velocity, which is the stable order for an explicit integrator.
-
 import simd
 import Foundation
 
-// MARK: - The components
-
-/// How a body takes part in the simulation.
 public enum PhysicsBodyMode: Hashable {
-    /// Never moves, and is of infinite mass: the world the others move against.
     case `static`
-    /// Moves only when something moves it.
     case kinematic
-    /// Moves under the forces the simulation applies to it.
     case dynamic
 }
 
-/// The mass, the inertia and the centre of mass of a body.
 public struct PhysicsMassProperties: Equatable {
-    /// Mass one, inertia a tenth on each axis, and the centre at the origin. Measured on the
-    /// host 2026-09-27: `PhysicsBodyComponent()` and a static body both report mass 1 and
-    /// inertia (0.1, 0.1, 0.1).
     public static let `default` = PhysicsMassProperties()
 
     public var mass: Float
@@ -48,14 +27,12 @@ public struct PhysicsMassProperties: Equatable {
         self.centerOfMass = centerOfMass
     }
 
-    /// The mass a shape of the given density and volume has, and its inertia from the shape.
     @MainActor
     public init(shape: ShapeResource, density: Float) {
         let mass = shape.shape.volume * density
         self.init(mass: mass, inertia: shape.shape.inertia(forMass: mass))
     }
 
-    /// The mass asked for, and the inertia the shape gives at that mass.
     @MainActor
     public init(shape: ShapeResource, mass: Float) {
         self.init(mass: mass, inertia: shape.shape.inertia(forMass: mass))
@@ -66,8 +43,6 @@ public struct PhysicsMassProperties: Equatable {
     }
 }
 
-/// How much a surface resists sliding, and how much it bounces. The resource is a reference, as
-/// the SDK's is, so that several bodies can share one.
 @MainActor
 open class PhysicsMaterialResource {
     public static let `default` = PhysicsMaterialResource()
@@ -83,26 +58,17 @@ open class PhysicsMaterialResource {
     }
 }
 
-/// The body an entity is: whether it moves, how heavy it is, and what it may not do.
 @frozen public struct PhysicsBodyComponent: Component, Equatable {
     public var mode: PhysicsBodyMode
     public var massProperties: PhysicsMassProperties
     public var material: PhysicsMaterialResource?
-    /// Whether each axis of the translation is held still.
     public var isTranslationLocked: (x: Bool, y: Bool, z: Bool)
-    /// Whether each axis of the rotation is held still.
     public var isRotationLocked: (x: Bool, y: Bool, z: Bool)
-    /// Whether a body fast enough to pass through another one is caught anyway.
     public var isContinuousCollisionDetectionEnabled: Bool
-    /// What the 18.0 `isAffectedByGravity` and the two dampings are; a body that gravity does
-    /// not move is a body the simulation only pushes.
     public var isAffectedByGravity: Bool
     public var linearDamping: Float
     public var angularDamping: Float
 
-    /// A body of mass one under gravity, nothing locked and no continuous detection. Measured on
-    /// the host: `PhysicsBodyComponent()` answers mode .dynamic, mass 1, inertia (0.1, 0.1,
-    /// 0.1), no locks, continuous detection off.
     public init() {
         mode = .dynamic
         massProperties = .default
@@ -127,7 +93,6 @@ open class PhysicsMaterialResource {
     public init(shapes: [ShapeResource], density: Float, material: PhysicsMaterialResource? = nil,
                 mode: PhysicsBodyMode = .dynamic) {
         self.init(material: material, mode: mode)
-        // The mass is the shapes' volume at that density, and the inertia the shapes give.
         var mass: Float = 0
         for shape in shapes { mass += shape.shape.volume * density }
         massProperties = PhysicsMassProperties(mass: mass, inertia: shapes.first?.shape.inertia(forMass: mass) ?? massProperties.inertia)
@@ -147,7 +112,6 @@ open class PhysicsMaterialResource {
     }
 }
 
-/// How a body is moving now.
 @frozen public struct PhysicsMotionComponent: Component, Equatable {
     public var linearVelocity: SIMD3<Float>
     public var angularVelocity: SIMD3<Float>
@@ -180,7 +144,6 @@ extension HasPhysicsBody {
         }
     }
 
-    /// The shapes the body collides as, which are the entity's own collision shapes.
     public var collisionShapes: [ShapeResource] { collision?.shapes ?? [] }
 }
 
@@ -198,15 +161,7 @@ extension HasPhysicsMotion {
     }
 }
 
-// MARK: - Joints
-
-/// A point in an entity, which is what a joint ties together.
-///
-/// The equality is written out rather than synthesised: the `simd_quatf` of an offset is a C
-/// struct of a vector, and a hand-written one is the same answer without depending on whether
-/// the module in use synthesises `Hashable` for it.
 public struct GeometricPin {
-    /// The name of the entity the pin is in, and where in it.
     public let name: String
     public let skeletalJointName: String?
     public var offsetPosition: SIMD3<Float>
@@ -240,8 +195,6 @@ public struct GeometricPin {
 
 extension GeometricPin: Hashable {}
 
-/// What every joint has: the two pins it ties together, whether the joined bodies also collide
-/// with each other, and whether the joint is in force.
 public protocol PhysicsJoint: Equatable {
     var pin0: GeometricPin { get set }
     var pin1: GeometricPin { get set }
@@ -249,7 +202,6 @@ public protocol PhysicsJoint: Equatable {
     var isActive: Bool { get }
 }
 
-/// A joint that holds its two pins in the same place and the same orientation.
 public struct PhysicsFixedJoint: PhysicsJoint {
     public var pin0: GeometricPin
     public var pin1: GeometricPin
@@ -269,13 +221,11 @@ public struct PhysicsFixedJoint: PhysicsJoint {
     }
 }
 
-/// A joint that holds its two pins a distance apart, and no closer.
 public struct PhysicsDistanceJoint: PhysicsJoint {
     public var pin0: GeometricPin
     public var pin1: GeometricPin
     public let checksForInternalCollisions: Bool
     public var isActive: Bool
-    /// The distance the joint holds, and the range it allows.
     public var distance: Float
     public var distanceRange: ClosedRange<Float>?
 
@@ -294,7 +244,6 @@ public struct PhysicsDistanceJoint: PhysicsJoint {
     }
 }
 
-/// The joints an entity holds.
 public struct PhysicsJoints: MutableCollection, RangeReplaceableCollection, ExpressibleByArrayLiteral {
     private var storage: [any PhysicsJoint]
 
@@ -315,8 +264,6 @@ public struct PhysicsJoints: MutableCollection, RangeReplaceableCollection, Expr
     public mutating func removeAll() { storage.removeAll() }
 }
 
-/// Two joints are equal when they are the same value of the same type, which is what a joint's
-/// own `==` answers.
 func __reJointsEqual(_ a: any PhysicsJoint, _ b: any PhysicsJoint) -> Bool {
     if let left = a as? PhysicsFixedJoint, let right = b as? PhysicsFixedJoint { return left == right }
     if let left = a as? PhysicsDistanceJoint, let right = b as? PhysicsDistanceJoint { return left == right }
@@ -329,7 +276,6 @@ extension PhysicsJoints: Equatable {
     }
 }
 
-/// The joints an entity holds, which the solver applies.
 @frozen public struct PhysicsJointsComponent: Component, Equatable {
     public var joints: PhysicsJoints
 

@@ -1,12 +1,3 @@
-// Per-row differential: swift-crypto's Crypto module against Apple's CryptoKit, both in one host process.
-//
-// Usage: differential <seed> [negative]
-//
-// Deterministic operations (digests, MACs, the KDF, AEAD with fixed keys and nonces, key agreement from fixed
-// keys) are compared by their bytes. Randomized operations (Ed25519, ECDSA, ML-KEM encapsulation, HPKE's ephemeral
-// key) are cross-verified: an output made by one side is accepted by the other. Every input is drawn from the seed, which the first line prints. With `negative`, the Crypto side gets one
-// altered input (the SHA256 row of length 1); the run must report that row as DIFF, or it exits 1: the control
-// proves the comparison can fail.
 import CryptoKit
 import Crypto
 import Foundation
@@ -48,7 +39,6 @@ func hex(_ data: Data) -> String {
     data.prefix(16).map { String(format: "%02x", $0) }.joined()
 }
 
-// One deterministic row: the two sides' bytes, or nil where the side threw.
 func row(_ name: String, _ kit: Data?, _ port: Data?) {
     rows += 1
     let same = kit == port
@@ -57,7 +47,6 @@ func row(_ name: String, _ kit: Data?, _ port: Data?) {
     print("\(same ? "same" : "DIFF") \(name) \(shown)")
 }
 
-// One cross-verification row: the other side accepted what one side made.
 func verdict(_ name: String, _ ok: Bool) {
     rows += 1
     if ok { verified += 1 } else { failed += 1 }
@@ -74,7 +63,6 @@ func flipped(_ data: Data) -> Data {
     return copy
 }
 
-// Digests over lengths that straddle the block boundaries. The negative control is the length-1 row's Crypto input.
 for length in [0, 1, 3, 55, 56, 63, 64, 65, 111, 112, 127, 128, 1000] {
     let message = rng.bytes(length)
     let portMessage = negative && length == 1 ? flipped(message) : message
@@ -85,7 +73,6 @@ for length in [0, 1, 3, 55, 56, 63, 64, 65, 111, 112, 127, 128, 1000] {
     row("SHA3-384 \(length)", Data(CryptoKit.SHA3_384.hash(data: message)), Data(Crypto.SHA3_384.hash(data: message)))
 }
 
-// HMAC, with keys shorter than, equal to and longer than the block.
 for keyLength in [16, 64, 200] {
     let key = rng.bytes(keyLength)
     let message = rng.bytes(77)
@@ -100,7 +87,6 @@ for keyLength in [16, 64, 200] {
         Data(Crypto.HMAC<Crypto.SHA512>.authenticationCode(for: message, using: Crypto.SymmetricKey(data: key))))
 }
 
-// HKDF, with and without salt and info.
 for outputLength in [16, 32, 80] {
     let ikm = rng.bytes(32)
     let salt = rng.bytes(16)
@@ -113,7 +99,6 @@ for outputLength in [16, 32, 80] {
         Crypto.HKDF<Crypto.SHA384>.deriveKey(inputKeyMaterial: Crypto.SymmetricKey(data: ikm), salt: Data(), info: Data(), outputByteCount: outputLength).withUnsafeBytes { Data($0) })
 }
 
-// AEAD with fixed keys, nonces and associated data: the sealed box is compared, and each side opens the other's.
 for keyLength in [16, 32] {
     let key = rng.bytes(keyLength)
     let nonce = rng.bytes(12)
@@ -132,7 +117,6 @@ for keyLength in [16, 32] {
         attempt { try Crypto.ChaChaPoly.seal(message, using: Crypto.SymmetricKey(data: key), nonce: Crypto.ChaChaPoly.Nonce(data: nonce), authenticating: aad).combined })
 }
 
-// X25519 from fixed keys: the public key and the shared secret are compared.
 let x25519Mine = rng.bytes(32)
 let x25519Peer = rng.bytes(32)
 row("X25519 public",
@@ -148,8 +132,6 @@ row("X25519 shared",
         return try Crypto.Curve25519.KeyAgreement.PrivateKey(rawRepresentation: x25519Mine).sharedSecretFromKeyAgreement(with: peer).withUnsafeBytes { Data($0) }
     })
 
-// Ed25519 is randomized on both sides (measured: each side's repeat of its own signature differs, see the info lines),
-// so its signatures are cross-verified in both directions, not compared by bytes.
 let edKey = rng.bytes(32)
 let edMessage = rng.bytes(64)
 let edKit = attempt { try CryptoKit.Curve25519.Signing.PrivateKey(rawRepresentation: edKey).signature(for: edMessage) }
@@ -157,8 +139,6 @@ if let signature = edKit,
    let portPublic = try? Crypto.Curve25519.Signing.PublicKey(rawRepresentation: CryptoKit.Curve25519.Signing.PrivateKey(rawRepresentation: edKey).publicKey.rawRepresentation) {
     verdict("Ed25519 kit signature verifies on Crypto", portPublic.isValidSignature(signature, for: edMessage))
 }
-// Whether each side repeats its own signature, and whether the Crypto signature verifies on kit: they decide whether the
-// byte comparison above is a valid expectation for this algorithm on each side.
 if let first = edKit, let again = attempt({ try CryptoKit.Curve25519.Signing.PrivateKey(rawRepresentation: edKey).signature(for: edMessage) }) {
     print("info kit-repeats \(first == again)")
 }
@@ -169,7 +149,6 @@ if let portSignature = attempt({ try Crypto.Curve25519.Signing.PrivateKey(rawRep
     verdict("Ed25519 Crypto signature verifies on kit", kitPublic.isValidSignature(portSignature, for: edMessage))
 }
 
-// NIST curves from fixed scalars: a scalar the curve rejects is drawn again; the draw is the same for both sides.
 func scalar(_ size: Int, _ valid: (Data) -> Bool) -> Data {
     var candidate = rng.bytes(size)
     while !valid(candidate) { candidate = rng.bytes(size) }
@@ -194,7 +173,6 @@ row("P521 shared",
     attempt { try CryptoKit.P521.KeyAgreement.PrivateKey(rawRepresentation: p521Mine).sharedSecretFromKeyAgreement(with: CryptoKit.P521.KeyAgreement.PrivateKey(rawRepresentation: p521Peer).publicKey).withUnsafeBytes { Data($0) } },
     attempt { try Crypto.P521.KeyAgreement.PrivateKey(rawRepresentation: p521Mine).sharedSecretFromKeyAgreement(with: Crypto.P521.KeyAgreement.PrivateKey(rawRepresentation: p521Peer).publicKey).withUnsafeBytes { Data($0) } })
 
-// ECDSA is randomized: each side signs with the same key and the other side verifies, in both directions.
 let ecMessage = rng.bytes(120)
 
 let p256Signer = scalar(32) { (try? CryptoKit.P256.Signing.PrivateKey(rawRepresentation: $0)) != nil }
@@ -239,7 +217,6 @@ if let portSigner = try? Crypto.P521.Signing.PrivateKey(rawRepresentation: p521S
     verdict("P521 Crypto signature verifies on kit", kitPublic.isValidSignature(kitSignature, for: ecMessage))
 }
 
-// ML-KEM-768: the public key from a fixed seed is compared; a capsule made on one side opens on the other.
 let kemSeed = rng.bytes(64)
 row("MLKEM768 public from seed",
     attempt { try CryptoKit.MLKEM768.PrivateKey(seedRepresentation: kemSeed, publicKey: nil).publicKey.rawRepresentation },
@@ -259,7 +236,6 @@ if let kitPublic = try? CryptoKit.MLKEM768.PrivateKey(seedRepresentation: kemSee
     }
 }
 
-// HPKE: a sealed message made by one side opens on the other, both ways, with the P-256 suite.
 let hpkeKey = scalar(32) { (try? CryptoKit.P256.KeyAgreement.PrivateKey(rawRepresentation: $0)) != nil }
 let hpkeInfo = rng.bytes(7)
 let hpkeMessage = rng.bytes(40)
@@ -283,7 +259,6 @@ if let kitRecipient = try? CryptoKit.P256.KeyAgreement.PrivateKey(rawRepresentat
 
 print("summary rows=\(rows) differing=\(differing) verified=\(verified) failed=\(failed)")
 if negative {
-    // The control: the altered input must have produced at least one DIFF and no failed verdict must be hidden by it.
     if differing == 0 { print("negative control NOT detected"); exit(1) }
     print("negative control detected: \(differing) row(s) differ")
     exit(0)

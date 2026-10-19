@@ -1,4 +1,3 @@
--- xmake l symladder.lua <modules> <out> <sym,...> : first release exporting each symbol (6.1.3 must be none)
 function main(modules, output, list)
     local dyld = import("apple.dyld", {rootdir = modules, anonymous = true})
     local SYMBOLS = list:split(",")

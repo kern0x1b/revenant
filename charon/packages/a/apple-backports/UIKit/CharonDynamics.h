@@ -1,20 +1,6 @@
-// The interface between the files of the UIKit Dynamics backport: the animator, which owns the Box2D
-// world (UIDynamicAnimator.mm), and the behaviors, each in its own file. Every file here defines a
-// class iOS 7.0 exports, so a band whose release carries UIKit Dynamics drops them all together;
-// they reach one another only through Objective-C messages, never through a C symbol or a class
-// reference, so no file of a band needs a symbol another file of it lacks.
-//
-// No C++ library container is used: its templates would be instantiated, and exported, in every file
-// that uses one. The C++ here is Box2D's own.
-//
-// Internal: nothing declared here is API. The behaviour it reproduces is iOS 7.0's, measured against
-// the host's UIKit (Mac Catalyst) and read from the 7.0 armv7/arm64 listings; see
-// facts/UIKit/UIDynamicAnimator.md.
-
 #import <UIKit/UIKit.h>
 #include <Box2D/Box2D.h>
 
-// Points per metre (-[UIDynamicAnimator _ptmRatio] is 100 on 7.0 and on the host).
 #define CHARON_DYNAMICS_PTM 100.0f
 #define CHARON_DYNAMICS_INVERSE_PTM 0.01f
 
@@ -28,8 +14,6 @@ static inline CGPoint charon_points(b2Vec2 vector)
     return CGPointMake((double)(CHARON_DYNAMICS_PTM * vector.x), (double)(CHARON_DYNAMICS_PTM * vector.y));
 }
 
-// The shape a body is built with. A box is an item's bounds; an edge or a loop is a boundary; none is
-// the static anchor an attachment or a snap pulls towards.
 typedef NS_ENUM(NSInteger, CharonDynamicsShape) {
     CharonDynamicsShapeNone,
     CharonDynamicsShapeBox,
@@ -38,9 +22,6 @@ typedef NS_ENUM(NSInteger, CharonDynamicsShape) {
     CharonDynamicsShapeLoop,
 };
 
-// One PhysicsKit body: the b2Body while the body is in a world, and everything that has to outlive it
-// (a boundary exists before its behavior joins an animator). The three masks are UIKit's 32-bit ones,
-// which b2Filter's 16 bits cannot hold: the world's contact filter reads them from here.
 @interface CharonDynamicsBody : NSObject
 @property (nonatomic, readonly) b2Body *b2Body;
 @property (nonatomic, strong) id representedObject;
@@ -69,7 +50,6 @@ typedef NS_ENUM(NSInteger, CharonDynamicsShape) {
 - (void)applyImpulse:(CGVector)impulse atPoint:(CGPoint)point;
 @end
 
-// A contact between two bodies, buffered while the world steps and delivered after it.
 @interface CharonDynamicsContact : NSObject
 @property (nonatomic, readonly) CharonDynamicsBody *bodyA;
 @property (nonatomic, readonly) CharonDynamicsBody *bodyB;

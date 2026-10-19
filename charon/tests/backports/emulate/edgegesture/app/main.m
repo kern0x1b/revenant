@@ -1,11 +1,3 @@
-//
-//  tests/backports/emulate/edgegesture/app/main.m
-//  A plain application with one white window, for measuring which gestures from the screen edges the release answers
-//  before the application sees them (facts/UIKit/HomeIndicator.md). It draws nothing that a system gesture could be
-//  confused with, and it logs that it is frontmost, so the snapshots that xmake emulate takes show the release's own
-//  reaction to a drag and nothing of the application's.
-//
-
 #import <UIKit/UIKit.h>
 #include <stdio.h>
 

@@ -1,7 +1,3 @@
-// differential.m - the same program, built once against the host's CoreSpotlight and once against the port's CSLocalizedString.m.
-// Key sets come on stdin, one per line, comma separated; the preferred languages come from the launch arguments (AppleLanguages).
-// For each key set it prints the chosen string, the length, the classes of the object, its copies and its archived form, and
-// whether a mutation of the dictionary after initialisation is seen. Every line must be the same on both sides.
 #import <Foundation/Foundation.h>
 #import <CoreSpotlight/CoreSpotlight.h>
 
@@ -39,7 +35,6 @@ int main(void)
                    [localized isEqualToString:answer ?: @""]);
         }
 
-        // Whether the object follows its dictionary after initialisation.
         NSMutableDictionary *mutableStrings = [NSMutableDictionary dictionaryWithObjects:@[@"one", @"two"] forKeys:@[@"en_US", @"fr"]];
         CSLocalizedString *following = [[CSLocalizedString alloc] initWithLocalizedStrings:mutableStrings];
         NSString *before = [following localizedString];
@@ -47,7 +42,6 @@ int main(void)
         NSString *after = [following localizedString];
         printf("mutation: before=%s after=%s\n", [before UTF8String], [after UTF8String]);
 
-        // The empty dictionary: the object reads as the empty string, and localizedString answers nil.
         CSLocalizedString *empty = [[CSLocalizedString alloc] initWithLocalizedStrings:@{}];
         printf("empty: answer=%s length=%lu class=%s\n", [empty localizedString] ? "string" : "nil", (unsigned long)[empty length],
                describe(empty).UTF8String);

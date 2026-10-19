@@ -1,9 +1,3 @@
--- The ObjC part of a Swift module in its round trip (tools/gen/swift_roundtrip.lua underlying_of, compile_item): a module whose generated
--- headers have a module map is compiled with its own framework on the search path and imported as its underlying clang module, so the
--- skeleton's declarations see the ObjC ones (the ARKit skeleton's ARAnchor, measured: 32 "no type named" errors without it, none with it).
--- A module with no module map gets no such flags, and the folder holds that one framework only (a search path over the whole headers
--- tree shadows the SDK's CoreFoundation). The compiler is not run here (cmd_roundtrip runs it). Run: xmake l tests/gen/swift_underlying_test.lua
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 local SCRATCH = path.join(os.scriptdir(), "..", "..", "build", "swift-underlying-test")
 
@@ -14,7 +8,6 @@ local function write(filepath, text)
     handle:close()
 end
 
--- The words of a compile item's command: its shell text split on the single quotes heavy_batch.quote puts around each word.
 local function words_of(command)
     local words = {}
     for word in string.gmatch(command, "'([^']*)'") do
@@ -23,7 +16,6 @@ local function words_of(command)
     return words
 end
 
--- Whether the words hold the flag, and the word after it (nil when the flag is absent or last).
 local function flag_value(words, flag)
     for i, word in ipairs(words) do
         if word == flag then
@@ -50,7 +42,6 @@ function main()
     write(path.join(headers, "Frameworks", "Fix.framework", "Headers", "Fix.h"), "#pragma clang system_header\n")
     write(path.join(headers, "Frameworks", "Other.framework", "Headers", "Other.h"), "#pragma clang system_header\n")
 
-    -- a module with a module map: its folder holds a link to its own framework, and that link is readable
     local module_dir = path.join(SCRATCH, "out", "Fix", "module")
     os.mkdir(module_dir)
     local folder = roundtrip.underlying_of(headers, module_dir, "Fix")
@@ -62,13 +53,11 @@ function main()
               "the folder holds no other framework of the headers tree")
     end
 
-    -- a module with no module map (only headers): no underlying folder, so the compile gets no flags
     local other_dir = path.join(SCRATCH, "out", "Other", "module")
     os.mkdir(other_dir)
     check(roundtrip.underlying_of(headers, other_dir, "Other") == nil, "a module with no module map has no underlying folder")
     check(roundtrip.underlying_of(headers, other_dir, "Missing") == nil, "a module the headers tree lacks has no underlying folder")
 
-    -- the compile item: the flags are there with the folder, and absent without it
     local source = path.join(SCRATCH, "out", "Fix", "Fix.swift")
     local with = roundtrip.compile_item("arm64e-apple-ios26.2", "/sdk", source, module_dir, "Fix", folder)
     local words = words_of(with.command)
@@ -84,7 +73,6 @@ function main()
     check(not flag_value(bare, "-import-underlying-module") and not flag_value(bare, "-F"),
           "a compile with no underlying folder has no -F and no -import-underlying-module")
 
-    -- a clang module of the SDK's include tree (usr/include/Clangy/module.modulemap, simd's shape) is the underlying module with no -F
     local sdk = path.join(SCRATCH, "sdk")
     write(path.join(sdk, "usr", "include", "Clangy", "module.modulemap"), "module Clangy [system] {\n  umbrella header \"Clangy.h\"\n}\n")
     local sdk_item = roundtrip.compile_item("arm64e-apple-ios26.2", sdk, source, other_dir, "Clangy", nil)

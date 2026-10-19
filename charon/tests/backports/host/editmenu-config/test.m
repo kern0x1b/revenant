@@ -1,10 +1,6 @@
 #import <UIKit/UIKit.h>
 #include <stdio.h>
 
-// One body of checks, run on two classes in one process: the host's own UIEditMenuConfiguration (looked up by its name,
-// which the -D rename in run.sh does not touch) and the port's, which run.sh compiles as the same identifier. Every check
-// is sent by its selector name, so the two sides cannot differ by how they were called. A line is "side<TAB>check<TAB>value".
-
 typedef id (*FactoryFn)(id, SEL, id, CGPoint);
 typedef id (*AllocFn)(id, SEL);
 typedef CGPoint (*PointFn)(id, SEL);

@@ -1,5 +1,3 @@
-// The two characteristic objects of iOS 8: what biological sex and what blood type the user has.
-
 #import <HealthKit/HealthKit.h>
 
 #import "CharonHKStore.h"

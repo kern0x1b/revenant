@@ -1,27 +1,9 @@
--- swiftregistry.lua - every row of packages/s/swift-runtime/registry/ that says `implemented` has a declaration in
--- packages/s/swift-runtime/files/.
---
--- Why this test exists: on 2026-09-28 the family review found `EnvironmentResource` used in five places in `ARView.swift`
--- and declared nowhere, with a registry row calling it `kind: class, status: implemented` - a row with no code behind it, in
--- a module that did not compile. Nothing caught it: a Swift module exports no symbol a dylib inventory sees, so
--- `check_registry` cannot read these rows (registry/README.md says so) and no other check reads them at all.
---
--- This is a declaration-level check, not a behavioural one: a type row must have a `class`/`struct`/`enum`/`protocol`/
--- `actor`/`typealias` declaration by that name in the two overlay source trees. Member rows are not checked here, and a row
--- that is not `implemented` is not checked, because an absent row is supposed to have no declaration.
---
--- Exit 0 when every implemented row has a declaration, 1 with the list of the ones that do not. The word test is the
--- regular expressions' \b, with ASCII letters, digits and underscore as word characters and every byte above 127 counted
--- as a word character too (Python counts only Unicode letters): a name met next to a non-ASCII symbol may therefore differ.
--- Usage: xmake l ./swiftregistry.lua   (SWIFTREGISTRY_PACKAGE names another package root, as before)
-
 import("core.base.json")
 
 local KINDS = { class = true, struct = true, enum = true, protocol = true, actor = true, typealias = true }
 local REGISTRIES = { "RealityFoundation.json", "RealityKit.json" }
 local MODULES = { "RealityFoundation", "RealityKit" }
 
--- Names are sorted by their bytes, as Python sorts strings: the string comparison of Lua follows the locale's collation.
 local function byte_less(a, b)
     for i = 1, math.min(#a, #b) do
         local x, y = a:byte(i), b:byte(i)
@@ -36,7 +18,6 @@ local function is_word(c)
     return c ~= "" and (c:find("^[%w_]") ~= nil or c:byte() >= 128)
 end
 
--- The first place at or after `from` where `word` stands with a word boundary on each side, as \bword\b.
 local function find_bounded(text, word, from)
     local start = from
     while true do
@@ -53,7 +34,6 @@ local function find_bounded(text, word, from)
     end
 end
 
--- Every .swift file of the two overlay modules, as one text, the files in name order and joined by newlines.
 local function sources(root)
     local text = {}
     for _, module in ipairs(MODULES) do
@@ -72,7 +52,6 @@ local function sources(root)
     return table.concat(text, "\n")
 end
 
--- A declaration of `name` is a declaration keyword, then whitespace, then the name at a word boundary: \b(kind)\s+NAME\b.
 local function declares(tree, name)
     for kind in pairs(KINDS) do
         local from = 1
@@ -94,8 +73,6 @@ local function declares(tree, name)
     return false
 end
 
--- True when the owner's name, on its line, is followed by a colon and the provided name follows that colon - the same
--- line, or, past the whitespace after the colon, the first line that has text in it: owner[^\n]*:\s*[^\n]*\bprovided\b.
 local function provides(tree, owner, provided)
     local from = 1
     while true do
@@ -153,12 +130,7 @@ function main(root)
                 if row.status == "implemented" and KINDS[row.kind] then
                     checked = checked + 1
                     local qualified = row.api or raise(name .. ": a row has no api")
-                    -- The row's name is qualified when the type is nested, and a declaration is spelled by the type's own
-                    -- name, so the last piece is the one to look for.
                     local declared = qualified:match("[^%.]*$")
-                    -- A row may name the conformance that provides its name, as `conformance-provided: OptionSet` in its
-                    -- reason: Swift prints a conformance's own typealiases in the interface. The exception is only worth
-                    -- anything if it is still checked, so the owning type must really declare that conformance.
                     local provided = (row.reason or ""):match("conformance%-provided:%s*([A-Za-z][A-Za-z0-9_]*)")
                     if provided then
                         local owner = qualified:find(".", 1, true) and split(qualified, ".")
@@ -174,7 +146,6 @@ function main(root)
                         failures[#failures + 1] = string.format("%s: %s (%s, %s) has no declaration in files/", name, qualified, row.kind, row.status)
                         goto continue
                     end
-                    -- A qualified name is a path, and every step of it has to be a type this tree declares.
                     local steps = split(qualified, ".")
                     for i = 1, #steps - 1 do
                         if not declares(tree, steps[i]) then
@@ -191,7 +162,6 @@ function main(root)
         for _, failure in ipairs(failures) do
             print("FAIL " .. failure)
         end
-        -- A run is reported by its verdict line and nothing else: the verdict is one line, and it is the last one.
         print(string.format("swiftregistry: FAILED - %d implemented type row(s) with no declaration, of %d checked", #failures, checked))
         os.exit(1)
     end

@@ -123,17 +123,6 @@
     _layouts = [[MTLVertexBufferLayoutDescriptorArray alloc] init];
 }
 
-// VALUE EQUALITY, and it is here because of what it makes possible two releases away: Apple's own
-// MTL4RenderPipelineDescriptor compares its vertexDescriptor, and Apple's own MTLVertexDescriptor has
-// value equality - measured, two freshly made ones are equal - so a Metal 4 render pipeline descriptor
-// can compare equal against a fresh one. Without this, two fresh render descriptors on this port are
-// not equal where Apple's are, and the difference is this class's.
-//
-// It compares the two ARRAYS ELEMENT BY ELEMENT through their own getters, member by member, rather
-// than asking the arrays whether they are equal: the two array classes are the SDK's PROTOCOLS here
-// (their instances are objects Apple's own framework makes) and carry no -isEqual: of their own, so
-// there is nothing to ask. The bound is THIRTY ONE, which is what -copyWithZone: above walks and what
-// MTLVertexDescriptor.h's own table has rows for.
 - (BOOL)isEqual:(id)object
 {
     if (self == object) return YES;

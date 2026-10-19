@@ -1,6 +1,3 @@
-// `IntentItemSection.Builder`'s three rows, in the callers' shapes: an empty list, a list of
-// sections, and a list of the items inside one -- the three overloads the framework declares for a
-// section builder (`arm64e-apple-ios.swiftinterface:5004-5006`), two of them variadic.
 import Foundation
 import AppIntents
 

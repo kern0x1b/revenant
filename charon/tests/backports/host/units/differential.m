@@ -6,11 +6,7 @@
 #import <objc/message.h>
 
 static int failures;
-// -v prints the numbers the mapper's host kind cites: both halves, both directions, as %.17g
-// and as the 64-bit pattern, so "equal to the bit" is a thing a reader can see and not a claim
 static int verbose = 0;
-// -v writes what it prints to $HOST_VALUES as well: the mapper's host kind reads that file
-// and a row that claims the port holds Apple's constant has to be able to point at the run that said so
 static FILE *host_values = NULL;
 static int checks;
 

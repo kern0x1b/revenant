@@ -1,20 +1,8 @@
--- Port of make-object-fixtures.py: the fixtures whose pages carry DICTIONARY OBJECTS, written with every
--- xref offset and /Length measured from the bytes as they are written.
---
---   xmake l make-object-fixtures.lua <directory>
---
--- Border (/Border and /BS), appearance characteristics (/MK), destinations (/Dest), actions (/A),
--- outlines (/Outlines), widgets, colours and button states.  Files are written in the order the Python
--- writes them, and the same "  wrote ..." lines are printed.
-
 local FONT = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"
 local TEXT = "BT /F1 12 Tf 72 720 Td (outlined) Tj ET\n"
 local MERGED_TEXT = "BT /F1 12 Tf 72 720 Td (merged) Tj ET\n"
 
--- Definitions are kept in one table, C, so the chunk stays under Lua's per-function local limit.
 local C = {}
-
--- ---- helpers ------------------------------------------------------------------------------------
 
 local function plus(a, b)
   local out = {}
@@ -23,8 +11,6 @@ local function plus(a, b)
   return out
 end
 
--- One annotation dictionary as a string.  `extra` is a list of {key, value}; the key is written as
--- " /" .. key exactly as given (so a key that already starts with "/" yields "//", as the Python does).
 local function annot(kind, extra, name)
   local body = "<< /Type /Annot /Subtype /" .. kind
   for _, pair in ipairs(extra) do
@@ -44,7 +30,6 @@ local function widget(extra, field, rect, name)
   return annot("Widget", pairs_, name)
 end
 
--- The body is ONE dictionary ending in " >>"; the /NM is written into it.
 local function named(name, body)
   if body:sub(-3) ~= " >>" then
     raise("named: body does not end with ' >>'")
@@ -60,13 +45,11 @@ local function link(extra)
   return annot("Link", plus({ { "Rect", "[20 700 220 720]" }, { "Contents", "(link)" }, { "F", "4" } }, extra))
 end
 
--- The four-character-free slug the Python builds: strip("/") then lower().
 local function slug(s)
   local t = s:gsub("^/+", ""):gsub("/+$", "")
   return t:lower()
 end
 
--- Python posixpath.join for a directory and one name.
 local function join(directory, name)
   if directory == "" or directory:sub(-1) == "/" then
     return directory .. name
@@ -83,8 +66,6 @@ local function write_file(path, data)
   handle:close()
 end
 
--- The file image: header, every object, the xref with each offset measured, the trailer.
--- Python's "%%EOF" in a literal is not %-formatted, so it stays two percent signs.
 local function assemble(objects)
   local header = "%PDF-1.4\n"
   local parts = { header }
@@ -106,8 +87,6 @@ local function assemble(objects)
   return table.concat(parts)
 end
 
--- 1 catalog, 1 pages, `page_count` pages, their content streams, the annotations, the font, then the
--- extra indirect objects.  extra_objects is a list of {name, body}.  Returns the object count.
 local function build(path, annotations, extra_objects, catalog_extra, page_count)
   extra_objects = extra_objects or {}
   catalog_extra = catalog_extra or ""
@@ -148,8 +127,6 @@ local function build(path, annotations, extra_objects, catalog_extra, page_count
   return #objects
 end
 
--- One page whose /Annots holds a widget whose /Parent is a FIELD dictionary (object 7); the widget is
--- object 5 and the font object 6.  Returns the object count.
 local function build_merged_field(directory, name, child_extra, field_extra, field_type, child_type)
   field_extra = field_extra or "/T (parent field)"
   field_type = field_type or "/Tx"
@@ -174,8 +151,6 @@ local function build_merged_field(directory, name, child_extra, field_extra, fie
   write_file(join(directory, name), assemble(objects))
   return #objects
 end
-
--- ---- /Border and /BS -----------------------------------------------------------------------------
 
 C.BORDER_PLAIN = square({ { "Border", "[0 0 3]" } })
 C.BORDER_RADII = square({ { "Border", "[5 7 2]" } })
@@ -210,8 +185,6 @@ C.BS_ON_NONTYPE = {
 }
 C.BORDER_RADII_ONLY = square({ { "Border", "[5 7]" } })
 
--- ---- the absent /Border, one fixture per subtype ------------------------------------------------
-
 C.NOBORDER = {}
 for _, kind in ipairs({ "Text", "FreeText", "Line", "Circle", "Highlight", "Underline", "StrikeOut", "Ink", "Stamp", "Popup" }) do
   C.NOBORDER[kind] = annot(kind, { { "Rect", "[40 40 240 140]" }, { "Contents", "(no border)" }, { "F", "4" } })
@@ -225,7 +198,6 @@ C.NOBORDER_WidgetEmptyBC = annot("Widget", { { "Rect", "[40 40 140 70]" }, { "F"
 C.NOBORDER_LineL = annot("Line", { { "Rect", "[40 40 240 140]" }, { "Contents", "(line)" }, { "F", "4" }, { "L", "[40 40 240 140]" } })
 C.NOBORDER_WidgetTm = annot("Widget", { { "Rect", "[40 40 140 70]" }, { "F", "4" }, { "FT", "/Btn" }, { "Tm", "(label)" } })
 
--- The SKIPPED shapes, on one fixture.
 C.DROPS = {
   annot("Line", { { "Contents", "(Line no L)" } }),
   annot("Line", { { "Rect", "[40 40 240 140]" }, { "Contents", "(Line L)" }, { "L", "[40 40 240 140]" } }),
@@ -242,8 +214,6 @@ C.DROPS = {
   annot("Link", { { "Contents", "(Link no Rect)" } }),
 }
 
--- ---- /MK ------------------------------------------------------------------------------------------
-
 C.MK_FULL = annot("Widget", {
   { "Rect", "[40 40 140 70]" }, { "F", "4" }, { "T", "(a field)" },
   { "MK", "<< /BG [1 0 0] /BC [0 0 1] /R 90 /CA (caption) /RC (rollover) /AC (down) >>" },
@@ -258,14 +228,10 @@ C.MK_TWO = annot("Widget", { { "Rect", "[40 40 140 70]" }, { "F", "4" }, { "MK",
 C.MK_ROT_REAL = annot("Widget", { { "Rect", "[40 40 140 70]" }, { "F", "4" }, { "MK", "<< /R 90.5 /CA 7 >>" }, { "FT", "/Btn" } })
 C.MK_R_ZERO = annot("Widget", { { "Rect", "[40 40 140 70]" }, { "F", "4" }, { "MK", "<< /R 0 >>" }, { "FT", "/Btn" } })
 
--- ---- the /BC component count -----------------------------------------------------------------------
-
 C.BC_CMYK = annot("Widget", { { "Rect", "[40 40 140 70]" }, { "F", "4" }, { "FT", "/Btn" }, { "MK", "<< /BC [0 0 0 1] >>" } })
 C.BC_STRING = annot("Widget", { { "Rect", "[40 40 140 70]" }, { "F", "4" }, { "FT", "/Btn" }, { "MK", "<< /BC (a string) >>" } })
 C.BC_NUMBER = annot("Widget", { { "Rect", "[40 40 140 70]" }, { "F", "4" }, { "FT", "/Btn" }, { "MK", "<< /BC 0.5 >>" } })
 C.BC_RGB = annot("Widget", { { "Rect", "[40 40 140 70]" }, { "F", "4" }, { "FT", "/Btn" }, { "MK", "<< /BC [0.25 0.5 0.75] >>" } })
-
--- ---- /Popup flags, and the name keys --------------------------------------------------------------
 
 C.POPUP_F4 = annot("Popup", { { "Rect", "[40 40 140 140]" }, { "F", "4" }, { "Contents", "(f4)" } })
 C.POPUP_F0 = annot("Popup", { { "Rect", "[40 40 140 140]" }, { "F", "0" }, { "Contents", "(f0)" } })
@@ -281,9 +247,6 @@ C.WIDGET_TU_TX = annot("Widget", { { "Rect", "[40 40 140 70]" }, { "F", "4" }, {
 C.WIDGET_NO_T = annot("Widget", { { "Rect", "[40 40 140 70]" }, { "F", "4" }, { "FT", "/Tx" }, { "MK", "<< /BC [0 0 1] >>" } })
 C.SQUARE_T = annot("Square", { { "Rect", "[40 40 140 140]" }, { "F", "4" }, { "T", "(square T)" }, { "MK", "<< /BC [0 0 1] >>" } })
 
--- ---- the widget dictionary, one fixture per group of keys ----------------------------------------
-
--- Each /Ff bit on an annotation of its own (Table 8.39), named for its bit.
 local WIDGET_FLAG_BITS = {
   1, 2, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 1048576, 2097152, 16777216, 33554432,
 }
@@ -294,7 +257,6 @@ for _, bits in ipairs(WIDGET_FLAG_BITS) do
   })
 end
 C.WIDGET_NO_FLAGS = { widget({ { "V", "(value)" }, { "DV", "(default)" }, { "AS", "/Yes" } }) }
--- every bit at once: 1+2+4096+8192+16384+32768+65536+131072+262144+1048576+2097152+16777216+33554432
 C.WIDGET_ALL_FLAGS = { widget({
   { "Ff", string.format("%d", 1 + 2 + 4096 + 8192 + 16384 + 32768 + 65536 + 131072 + 262144 + 1048576 + 2097152 + 16777216 + 33554432) },
 }) }
@@ -320,7 +282,6 @@ C.WIDGET_VALUES = {
   widget({}),
 }
 
--- /T plus one more key, one annotation per fixture; the key "/Opt" is written as given.
 C.T_WITH_ONE_MORE_NAMES = { "nothing", "DAstring", "TU", "Opt", "Q", "MaxLen", "V", "DV", "F" }
 C.T_WITH_ONE_MORE = {}
 for _, extra in ipairs({
@@ -356,18 +317,14 @@ C.SYNTH_COUNT_LINK_MIDDLE = {
   widget({}),
 }
 
--- /AS and /V, one state each, and the /Btn field types ----------------------------------------------
-
 C.BTN_STATES = { false, "/Off", "/On", "/Yes" }
 
--- the (key, value) pairs for one state key; a nil state (false here) gives none
 local function as_pairs(state, key)
   key = key or "AS"
   if not state then return {} end
   return { { key, state } }
 end
 
--- the same one key as the merged writer's bytes: " /AS /On", or "" for no state
 local function as_bytes(state, key)
   key = key or "AS"
   if not state then return "" end
@@ -402,10 +359,7 @@ C.BUTTON_AS_OFF_V_ON = {
   widget({ { "AS", "/On" }, { "V", "/Yes" } }, "/Btn"),
 }
 
--- ---- colours and the font, one annotation per key, each with its own /NM ------------------------
-
 C.COLOUR_SHAPES = {
-  -- -backgroundColor, off /MK /BG, one annotation per component count of Table 8.40
   named("bg-rgb", widget({ { "MK", "<< /BG [1 0 0] >>" } }, "/Tx")),
   named("bg-gray", widget({ { "MK", "<< /BG [0.5] >>" } }, "/Tx")),
   named("bg-cmyk-none", widget({ { "MK", "<< /BG [0 0 0 0] >>" } }, "/Tx")),
@@ -414,14 +368,12 @@ C.COLOUR_SHAPES = {
   named("bg-btn", widget({ { "MK", "<< /BG [0 0 1] >>" } }, "/Btn")),
   named("bg-ch-noopt", widget({ { "MK", "<< /BG [0 0 1] >>" } }, "/Ch")),
   named("bg-bc-beside", widget({ { "MK", "<< /BC [1 0 0] /BG [0 1 0] >>" } }, "/Tx")),
-  -- -interiorColor, off a geometry annotation's own /IC
   named("ic-square-rgb", annot("Square", { { "Rect", "[40 40 240 140]" }, { "F", "4" }, { "IC", "[0 1 0]" } })),
   named("ic-square-gray", annot("Square", { { "Rect", "[40 40 240 140]" }, { "F", "4" }, { "IC", "[0.25]" } })),
   named("ic-square-none", annot("Square", { { "Rect", "[40 40 240 140]" }, { "F", "4" } })),
   named("ic-circle-cmyk", annot("Circle", { { "Rect", "[40 40 240 140]" }, { "F", "4" }, { "IC", "[0.1 0.2 0.3 0.4]" } })),
   named("ic-link", annot("Link", { { "Rect", "[20 700 60 720]" }, { "F", "4" }, { "IC", "[1 0 0]" } })),
   named("ic-widget", annot("Widget", { { "Rect", "[40 40 240 70]" }, { "F", "4" }, { "FT", "/Tx" }, { "IC", "[1 0 0]" } })),
-  -- -fontColor off the FILL operands
   named("da-fill-gray-0", widget({ { "DA", "(/Helv 12 Tf 0 g)" } })),
   named("da-fill-gray-1", widget({ { "DA", "(/Helv 12 Tf 1 g)" } })),
   named("da-fill-rgb", widget({ { "DA", "(/Helv 12 Tf 1 0 0 rg)" } })),
@@ -435,12 +387,10 @@ C.COLOUR_SHAPES = {
   named("da-fill-rgb-then-gray", widget({ { "DA", "(/Helv 12 Tf 1 0 0 rg 0.5 g)" } })),
   named("da-fill-gray-twice", widget({ { "DA", "(/Helv 12 Tf 1 g 0.25 g)" } })),
   named("da-fill-badcount", widget({ { "DA", "(/Helv 12 Tf 0.5 0.25 g)" } })),
-  -- -font's shapes
   named("font-courier-7", widget({ { "DA", "(/Courier 7 Tf 0 g)" } })),
   named("font-size-only", widget({ { "DA", "(12 Tf 0 g)" } })),
   named("font-name-only", widget({ { "DA", "(/Helv Tf 0 g)" } })),
   named("font-unknown", widget({ { "DA", "(/Nonexistent 9 Tf 0 g)" } })),
-  -- the standard fourteen's abbreviations, one per face
   named("font-abbrev-helv", widget({ { "DA", "(/Helv 21 Tf 0 g)" } })),
   named("font-abbrev-hebo", widget({ { "DA", "(/HeBo 11 Tf 0 g)" } })),
   named("font-abbrev-heob", widget({ { "DA", "(/HeOb 12 Tf 0 g)" } })),
@@ -455,10 +405,8 @@ C.COLOUR_SHAPES = {
   named("font-abbrev-tibi", widget({ { "DA", "(/TiBI 22 Tf 0 g)" } })),
   named("font-abbrev-symb", widget({ { "DA", "(/Symb 23 Tf 0 g)" } })),
   named("font-abbrev-zadb", widget({ { "DA", "(/ZaDb 24 Tf 0 g)" } })),
-  -- a face spelled the way PostScript spells it
   named("font-full-oblique", widget({ { "DA", "(/Helvetica-Oblique 25 Tf 0 g)" } })),
   named("font-full-roman", widget({ { "DA", "(/Times-Roman 26 Tf 0 g)" } })),
-  -- the shape of the lookup: prefix, case and exact
   named("font-prefix-h", widget({ { "DA", "(/H 27 Tf 0 g)" } })),
   named("font-prefix-co", widget({ { "DA", "(/Co 28 Tf 0 g)" } })),
   named("font-prefix-ti", widget({ { "DA", "(/Ti 29 Tf 0 g)" } })),
@@ -466,15 +414,10 @@ C.COLOUR_SHAPES = {
   named("font-case-mixed", widget({ { "DA", "(/Hebo 31 Tf 0 g)" } })),
 }
 
--- ---- /T spelled four ways ---------------------------------------------------------------------------
-
 C.T_LITERAL = { widget({ { "T", "(the field)" } }) }
 C.T_NAME = { widget({ { "T", "/TheField" } }) }
 C.T_EMPTY = { widget({ { "T", "()" } }) }
 
--- ---- /Outlines: the linked tree of PDF 1.7 Table 8.2 -------------------------------------------------
-
--- A spec entry is {title, extra, children}: title is false for no /Title, and "" is an empty /Title.
 local function visible_count(entries)
   local total = 0
   for _, entry in ipairs(entries) do
@@ -486,8 +429,6 @@ local function visible_count(entries)
   return total
 end
 
--- The bodies of every item, keyed by object number, and the top-level numbers.  Numbers are handed
--- out to a level's siblings first, then to each item's children as they are reached.
 local function outline_items(spec, root_number, first_number, signs)
   local bodies = {}
   local number = first_number
@@ -639,8 +580,6 @@ C.OUTLINE_TITLE_KEY = {
   { "NoTitleWithDest", { { "F", "4" } }, { { false, { { "F", "4" }, { "Dest", "[3 0 R /Fit]" } }, {} } } },
 }
 
--- ---- /A, the action dictionaries, and the /Dest spellings -------------------------------------------
-
 C.ACT_GOTO_XYZ = link({ { "A", "<< /S /GoTo /D [3 0 R /XYZ 100 200 1.5] >>" } })
 C.ACT_GOTO_FIT = link({ { "A", "<< /S /GoTo /D [3 0 R /Fit] >>" } })
 C.ACT_GOTO_FITB = link({ { "A", "<< /S /GoTo /D [3 0 R /FitB 0 0 612 792] >>" } })
@@ -687,7 +626,6 @@ C.ACT_GOTO_PAGE_ONLY = link({ { "A", "<< /S /GoTo /D [3 0 R] >>" } })
 C.ACT_GOTO_WRONG_NAME = link({ { "A", "<< /S /GoTo /D [3 0 R /Zoom 3] >>" } })
 C.ACT_GOTO_BADPAGE_XYZ = link({ { "A", "<< /S /GoTo /D [99 0 R /XYZ 1 2 3] >>" } })
 
--- the /Flags of a /ResetForm; flags and fields are false when absent
 local function reset(flags, fields)
   local body = "<< /S /ResetForm"
   if flags then body = body .. " /Flags " .. flags end
@@ -706,7 +644,6 @@ C.ACT_GOTOR_HTTP = link({ { "A", "<< /S /GoToR /F (https://example.com/other.pdf
 C.DESTS_TREE = "<< /Names [(chapter1) [3 0 R /XYZ 77 88 0]] >>"
 C.DESTS_DICT = "<< /chapter1 [3 0 R /XYZ 77 88 0] >>"
 
--- every name PDFActionNamed.h's enum declares, and one it does not; false is no /N at all
 C.NAMED_NAMES = { false, "NextPage", "PreviousPage", "FirstPage", "LastPage", "GoBack", "GoForward",
   "GoToPage", "Find", "Print", "ZoomIn", "ZoomOut", "NotAName" }
 C.NAMED_ACTIONS = {}
@@ -720,14 +657,7 @@ C.ACT_GOTOR_INDEX = link({ { "A", "<< /S /GoToR /F (other.pdf) /D 1 >>" } })
 C.ACT_RESET_FLAGS_ONLY = link({ { "A", "<< /S /ResetForm /Flags 1 >>" } })
 C.ACT_RESET_EXCLUDE = link({ { "A", "<< /S /ResetForm /Flags 2 /Fields [(f1)] >>" } })
 
--- ---- the lists, one per fixture file, in the Python's order -------------------------------------
-
 C.WIDGET_BC_LIST = { C.BC_CMYK, C.BC_STRING, C.BC_NUMBER, C.BC_RGB }
-
--- the widget of every button-as-alone and button-merged shape is built above; the /Yes /Off merged
--- field values and states are the loops in main()
-
--- ---- main -------------------------------------------------------------------------------------------
 
 local function shapes_list()
   local shapes = {
@@ -825,7 +755,6 @@ local function shapes_list()
   return shapes
 end
 
--- the outline fixtures: name, spec, sign of the root /Count, the signs by title, and the extra page annotations
 local OUTLINE_FILES = {
   { "outline-collapsed.pdf", C.OUTLINE_OPEN, -1, false, 0 },
   { "outline-expanded.pdf", C.OUTLINE_CLOSED, 1, false, 0 },
@@ -833,7 +762,6 @@ local OUTLINE_FILES = {
   { "outline-signs.pdf", C.OUTLINE_SIGNS, -1, C.OUTLINE_SIGNS_SIGNS, 0 },
   { "outline-nocount.pdf", C.OUTLINE_NO_COUNT, -1, false, 0 },
   { "outline-isopen.pdf", C.OUTLINE_ISOPEN, -1, false, 0 },
-  -- the SAME shapes as outline-shapes.pdf with ONE annotation added to the page
   { "outline-shapes2.pdf", C.OUTLINE_SHAPES, -1, false, 1 },
   { "outline-untitled.pdf", C.OUTLINE_UNTITLED, -1, false, 0 },
   { "outline-titled.pdf", C.OUTLINE_TITLED, -1, false, 0 },
@@ -852,14 +780,12 @@ function main(...)
     print(line)
   end
 
-  -- annotation-colours.pdf
   do
     local name = "annotation-colours.pdf"
     local count = build(join(directory, name), C.COLOUR_SHAPES)
     say(string.format("  wrote %-20s %d objects, %d annotations", name, count, #C.COLOUR_SHAPES))
   end
 
-  -- the button and text /AS and /V files
   local button_files = {
     { "button-asoff-von.pdf", C.BUTTON_AS_OFF_V_ON },
     { "button-v-only.pdf", C.BUTTON_V_ONLY },
@@ -875,7 +801,6 @@ function main(...)
     say(string.format("  wrote %-20s %d objects, %d annotations", name, count, #annotations))
   end
 
-  -- the merged field shape: /V on the field, /AS on the widget
   for _, value in ipairs({ "/Yes", "/Off" }) do
     for _, state in ipairs({ "/Off", "/On", "/Yes" }) do
       local name = "button-merged-v" .. slug(value) .. "-as" .. slug(state) .. ".pdf"
@@ -885,7 +810,6 @@ function main(...)
     end
   end
 
-  -- /T plus one more key
   for index, annotations in ipairs(C.T_WITH_ONE_MORE) do
     local name = "widget-t-extra-" .. C.T_WITH_ONE_MORE_NAMES[index] .. ".pdf"
     local count = build(join(directory, name), annotations)
@@ -926,7 +850,6 @@ function main(...)
     say(string.format("  wrote %-20s %d objects, %d annotations", name, count, #annotations))
   end
 
-  -- one field type per file, numbered by position
   local field_type_one = {
     { "/Btn", { widget({}, "/Btn") } },
     { "/Tx", { widget({}, "/Tx") } },
@@ -951,7 +874,6 @@ function main(...)
       name, count, root, table.concat(item_names, ",")))
   end
 
-  -- the shapes, in order; a later entry of the same name overwrites an earlier one
   for _, shape in ipairs(shapes_list()) do
     local name, annotations = shape[1], shape[2]
     local extra = shape[3] or {}

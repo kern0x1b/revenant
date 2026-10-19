@@ -1,27 +1,7 @@
-/* The 21 string constants of the 14.0 band, compared BYTE FOR BYTE against Apple's own constants.
- *
- * APPLE'S COPY IS READ WITH dlsym, NOT BY NAMING IT. If the case declared the twenty-one externs
- * and read them, the link would bind each name to whichever definition won - the port's or Apple's -
- * and a port that defined all twenty-one wrongly would be compared with itself and pass. So the case
- * opens Apple's Metal by path, dlsyms each name THERE, and reads the bytes of what it finds; the
- * port's value is read from the port's own definition. Two independent answers, compared.
- *
- * THREE ANSWERS ARE DISTINGUISHED, because two of them look alike in a boolean:
- *   - a name that is NOT THERE: dlsym returns NULL, and a planted name that does not exist proves
- *     the lookup can say so;
- *   - a name that IS there and holds NULL;
- *   - a name that is there and holds a string, whose LENGTH and BYTES are then compared. A
- *     comparison of pointer identity, or of the text alone without the length, would pass a string
- *     that is a prefix of Apple's.
- *
- * NO DEVICE IS CREATED. These are strings; a device is not involved and MTLCreateSystemDefaultDevice
- * and a descriptor asks a device nothing (facts/Metal/DeviceOnThisMachine.md measures both).
- */
 #import <Foundation/Foundation.h>
 #import <dlfcn.h>
 #import <string.h>
 
-/* The port's own definitions, read from the object under test. */
 extern NSString * const MTLCommonCounterTimestamp;
 extern NSString * const MTLCommonCounterTessellationInputPatches;
 extern NSString * const MTLCommonCounterVertexInvocations;
@@ -54,12 +34,10 @@ static void check(BOOL ok, NSString *what)
     else { printf("  FAIL %s\n", [what UTF8String]); failures++; }
 }
 
-/* $1 the symbol name, $2 the port's value. Reads APPLE'S by that name, from Apple's own Metal. */
 static void same_bytes(void *apple_metal, const char *name, NSString *port)
 {
     void *sym = dlsym(apple_metal, name);
     if (sym == NULL) {
-        /* NOT A MISSING-VALUE CASE: the symbol is absent from Apple's Metal entirely. */
         check(NO, ([NSString stringWithFormat:@"%s: the symbol is not in Apple's Metal at all", name]));
         return;
     }
@@ -86,9 +64,6 @@ static void same_bytes(void *apple_metal, const char *name, NSString *port)
 int main(void)
 {
     @autoreleasepool {
-        /* APPLE'S METAL, BY PATH. RTLD_NOLOAD first so the already-present one is used, and a plain
-         * load if the process has not brought it in. Either way the handle is Apple's, and dlsym on
-         * it cannot find the port's definitions. */
         void *apple_metal = dlopen("/System/Library/Frameworks/Metal.framework/Metal",
                                    RTLD_LAZY | RTLD_NOLOAD);
         if (apple_metal == NULL) {
@@ -100,8 +75,6 @@ int main(void)
             return 1;
         }
 
-        /* THE PLANTED MISSING-NAME CONTROL, first: a name that does not exist must read NULL, and
-         * that has to be shown BEFORE the twenty-one comparisons, or "NULL" below proves nothing. */
         void *planted = dlsym(apple_metal, "MTLCommonCounterNoSuchNamePlantedForTheControl");
         check(planted == NULL,
               @"the planted control: a name Apple's Metal does not have reads NULL, so a NULL below "

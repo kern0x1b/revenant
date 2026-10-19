@@ -92,7 +92,6 @@ static void failure_key(void)
     CHECK(address && dladdr(address, &info) && [@(info.dli_fname).lastPathComponent isEqualToString:@"libFoundationBackports.dylib"], "the failure key comes from the backports");
     NSError *error = [NSError errorWithDomain:@"charon" code:1 userInfo:@{NSLocalizedFailureErrorKey: @"The file could not be saved.", NSLocalizedFailureReasonErrorKey: @"The disk is full."}];
     CHECK_EQUAL(error.userInfo[NSLocalizedFailureErrorKey], @"The file could not be saved.", "an error keeps the failure in its user info");
-    // The expected descriptions are what the host's Foundation answers, facts/Foundation/NSError.md.
     CHECK_EQUAL(error.localizedDescription, @"The file could not be saved. The disk is full.", "the description is the failure and the reason");
     CHECK_EQUAL([NSError errorWithDomain:@"charon" code:1 userInfo:@{NSLocalizedFailureErrorKey: @"Only the failure."}].localizedDescription, @"Only the failure.", "the failure alone is the description when there is no reason");
     NSError *missing = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:@{NSLocalizedFailureErrorKey: @"Only the failure."}];

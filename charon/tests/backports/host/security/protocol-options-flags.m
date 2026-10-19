@@ -3,10 +3,6 @@
 #import <Security/SecProtocolOptions.h>
 #import <stdio.h>
 
-// The eight boolean flags. The assertion that matters is that they are EIGHT SEPARATE SETTINGS: each is
-// set and read back while its neighbours are set to the OPPOSITE, so a shared "flags" word would show
-// one flag reporting another. Every flag is set TRUE with the rest FALSE, then one is set FALSE with
-// the rest TRUE - and a bit shared between two of them fails in one direction or the other.
 @interface CharonSecProtocolFlags : NSObject <OS_sec_protocol_options>
 - (void)charonSet:(int)flag to:(BOOL)value;
 - (BOOL)charonGet:(int)flag;
@@ -21,9 +17,6 @@ static int failures = 0;
 
 int main(void)
 {
-    // UNBUFFERED, so output SURVIVES A CRASH. A mutant that segfaults mid-case would otherwise lose
-    // every row printed before it, and the comparator would then say those rows "did not measure" and
-    // name a truncated buffer instead of the crash.
     setvbuf(stdout, NULL, _IONBF, 0);
     __weak id weakOptions = nil;
     @autoreleasepool {
@@ -32,7 +25,6 @@ int main(void)
         if (!cls) return 1;
         sec_protocol_options_t o = (sec_protocol_options_t)[[cls alloc] init];
 
-        // one flag at a time, alone against seven unset: each must read back exactly what was set
         for (int i = 0; i < 8; i++) {
             sec_protocol_options_t one = (sec_protocol_options_t)[[cls alloc] init];
             [(CharonSecProtocolFlags *)one charonSet:kFlags[i] to:YES];
@@ -46,13 +38,11 @@ int main(void)
             }
             (void)o;
         }
-        // and all eight set, so a flag that a neighbour's set clobbered is caught the other way
         for (int i = 0; i < 8; i++)
             [(CharonSecProtocolFlags *)o charonSet:kFlags[i] to:YES];
         for (int i = 0; i < 8; i++) {
             printf("all-set-%s\t%d\n", kNames[i], [(CharonSecProtocolFlags *)o charonGet:kFlags[i]] ? 1 : 0);
         }
-        // and one cleared while the rest stay set
         [(CharonSecProtocolFlags *)o charonSet:F_OCSP to:NO];
         printf("cleared-ocsp\t%d\n", [(CharonSecProtocolFlags *)o charonGet:F_OCSP] ? 1 : 0);
         printf("neighbour-sct\t%d\n", [(CharonSecProtocolFlags *)o charonGet:F_SCT] ? 1 : 0);

@@ -9,13 +9,6 @@
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
-// The data of the resources of Photos over ALAssetsLibrary (facts/Photos/Changes.md): a resource read back in chunks
-// and written to a file, and a read cancelled between two chunks. What a chunk holds is held to a direct read of the
-// same asset through the release's ALAssetRepresentation, not to anything of the port.
-// An application of its own (photosdata9-Info.plist): iOS 6 gives the photo library to a bundle identifier the user
-// allowed, and a bare executable has none. Each run adds one video of blue noise, a few megabytes so that it spans
-// more than one read, to the saved photos and to a new album CharonPhotosProbe-<time>, the fixtures the fleet keeps.
-
 static NSString *const results_folder = @"/private/var/backports";
 
 static void wait_until(double seconds, BOOL (^done)(void))
@@ -24,8 +17,6 @@ static void wait_until(double seconds, BOOL (^done)(void))
         [NSThread sleepForTimeInterval:0.05];
 }
 
-// A blue video: noise in the blue channel (no red, no green) at a high bit rate, so the encoder cannot make it small,
-// or a solid blue one.
 static NSURL *blue_video_of_type(NSString *fileType, int frames, int width, int height, BOOL noise)
 {
     NSString *extension = [fileType isEqualToString:AVFileTypeMPEG4] ? @"mp4" : @"mov";
@@ -92,7 +83,6 @@ static NSString *album_name(void)
     return [@"CharonPhotosProbe-" stringByAppendingString:[stamp stringFromDate:[NSDate date]]];
 }
 
-// The bytes of the asset read straight from the release, the oracle of every read of the port.
 static NSData *direct_read(NSString *identifier)
 {
     __block NSData *data = nil;
@@ -206,11 +196,8 @@ static void check_write(PHAssetResource *resource, NSData *direct)
     NSArray *left = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:folder error:NULL];
     CHECK(left.count == 1, "and nothing else beside it");
 
-    // What a write onto a file that is already there does is not checked: the port replaces it, and what Photos itself
-    // does is not measured (facts/Photos/Changes.md).
     NSData *before = [@"a file that was there" dataUsingEncoding:NSUTF8StringEncoding];
     [before writeToURL:url atomically:YES];
-    // A resource with no asset behind it, as photosresources9.m makes one: the header gives the class no public initializer.
     PHAssetResource *orphan = ((id (*)(id, SEL))objc_msgSend)([PHAssetResource alloc], @selector(init));
     error = write_resource(orphan, url);
     printf("write of a resource with no asset: %s\n", error.description.UTF8String ?: "no error");
@@ -242,9 +229,6 @@ static NSError *add_video(NSURL *url, BOOL move, NSString **identifier)
     return added ? nil : (error ?: [NSError errorWithDomain:@"charon.test" code:0 userInfo:nil]);
 }
 
-// shouldMoveFile: the header says the original file goes away once the asset is created, and its hard-linked
-// file that cannot be moved. Each adds a solid-blue video, 640 by 480, the fixture the fleet keeps. Not smaller: the
-// iPad 2's H.264 encoder refuses 64 by 64 (AVAssetWriter fails with OSStatus -12902, 2026-09-24) and writes 640 by 480.
 static void check_move(void)
 {
     NSFileManager *files = [NSFileManager defaultManager];
@@ -260,10 +244,6 @@ static void check_move(void)
 
     NSURL *linked = blue_video(15, 640, 480, NO);
     NSURL *second = [linked URLByAppendingPathExtension:@"link.mov"];
-    // Through -path, not straight: -[NSURL fileSystemRepresentation] is of iOS 7.0 (NSURL.h:118) and
-    // this test runs on 6.1.3, where it raises -- which is what it did on an iPad 2 running 6.1.3 on
-    // 2026-10-01, ten checks into the run and with no figure written. The same call in
-    // PHAssetCreationRequest9.m and PHHAssetResourceManager9.m is fixed the same way in the port.
     CHECK(link(linked.path.fileSystemRepresentation, second.path.fileSystemRepresentation) == 0, "a second hard link to a video is made");
     NSUInteger before = saved_photos_count();
     error = add_video(linked, YES, NULL);
@@ -274,9 +254,6 @@ static void check_move(void)
     [files removeItemAtURL:second error:NULL];
 }
 
-// A video given as data is staged in a file of the process for ALAssetsLibrary, which takes a video only as a file and
-// tells a movie by the file's extension (printed below: the same bytes with and without it); the staged file must be
-// gone once the change is done. Adds one solid-blue video, 640 by 480, of the given container.
 static void check_staged(NSString *fileType)
 {
     NSFileManager *files = [NSFileManager defaultManager];
@@ -315,8 +292,6 @@ static BOOL is_photos_error(NSError *error, NSInteger code)
     return [error.domain isEqualToString:PHPhotosErrorDomain] && error.code == code;
 }
 
-// Each error is the header's code for the case it names (facts/Photos/Changes.md), made to happen here. Nothing of these
-// is written, but the album of the last one, which is this run's own.
 static void check_codes(NSString *albumIdentifier)
 {
     NSUInteger before = saved_photos_count();
@@ -337,7 +312,6 @@ static void check_codes(NSString *albumIdentifier)
     CHECK(is_photos_error(error, PHPhotosErrorInvalidResource), "an image with no pixels is an invalid resource");
     CHECK(saved_photos_count() == before, "and none of the three wrote anything");
 
-    // A placeholder whose change never committed: its change was refused, so no asset stands behind it.
     __block PHObjectPlaceholder *orphan = nil;
     change_error(^{
         orphan = [PHAssetCreationRequest creationRequestForAsset].placeholderForCreatedAsset;
@@ -374,8 +348,6 @@ static void run_checks(void)
     __block NSString *identifier = nil, *albumIdentifier = nil;
     NSString *name = album_name();
     NSError *error = nil;
-    // The album request comes first and is given the placeholder of an asset a later request of the block creates: Photos
-    // names no order for the requests of one block.
     BOOL made = [[PHPhotoLibrary sharedPhotoLibrary] performChangesAndWait:^{
         PHAssetCollectionChangeRequest *album = [PHAssetCollectionChangeRequest creationRequestForAssetCollectionWithTitle:name];
         PHAssetCreationRequest *request = [PHAssetCreationRequest creationRequestForAsset];
@@ -424,7 +396,6 @@ static void run_checks(void)
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
-    // Off the main thread: ALAssetsLibrary and the port over it answer on the main queue, which a wait here would block.
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{ run_checks(); });
     return YES;
 }

@@ -1,4 +1,3 @@
--- A recipe takes the dependency built for its own platform, not whichever of the same name the name-keyed map holds.
 function failures(opt)
     local dependency = import("apple.dependency", {rootdir = opt.modules, anonymous = true})
     local found = {}
@@ -9,12 +8,10 @@ function failures(opt)
     end
     local target, host = fake("openssl", "iphoneos", "armv7"), fake("openssl", "macosx", "arm64")
     local package = fake("tdlib", "iphoneos", "armv7", {target, host, fake("ldid", "macosx", "arm64")})
-    -- the name-keyed lookup the graph does answers the later one, the host's
     package.dep = function (_, name) return host end
     if dependency.target_dependency(package, "openssl") ~= target then
         table.insert(found, "the openssl built for the package's own platform and architecture must be the one taken, not the host's that the name-keyed map holds")
     end
-    -- and whichever comes first in the walk
     local reversed = fake("tdlib", "iphoneos", "armv7", {host, target})
     reversed.dep = package.dep
     if dependency.target_dependency(reversed, "openssl") ~= target then

@@ -2,22 +2,6 @@
 #import <Metal/Metal.h>
 #import <Metal/MTLDynamicLibrary.h>
 
-// link-probe.m - which of the fixture's kernels Apple's own compiler will LINK, one at a time.
-//
-// compare.sh asks for the whole fixture at once: one dynamic library, one serializeToURL:. When that
-// fails, the message names the failure and not the kernel, and "the differential has nothing to
-// compare" is all a reader gets -- which is what left the cause open. This program takes one Metal
-// source per argument, compiles it the way oracle.m compiles the fixture (MTLLibraryTypeDynamic) and
-// then asks for the dynamic library the oracle's step 3 asks for, and prints one line per file:
-//
-//     ok   <path> dynamic library
-//     FAIL <path> <what Metal said>
-//
-// The two steps are separated because they fail differently and only the second one has: a kernel can
-// compile and still not link, and a run that reports only the first would call that a compile error.
-//
-// Usage: link-probe.m one.metal [two.metal ...]
-
 static void probe(id<MTLDevice> device, NSString *path)
 {
     NSError *error = nil;

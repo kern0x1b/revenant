@@ -1,6 +1,3 @@
-// Host probe: the string each CoreMIDI constant of the iOS 14 to 18 surface has on macOS, read from the framework.
-// The three UMP and association property keys are NULL until a MIDI client exists in the process, so they are read
-// twice: before and after MIDIClientCreate (the client is not persistent: it is disposed at exit and creates nothing).
 #import <CoreMIDI/CoreMIDI.h>
 #import <Foundation/Foundation.h>
 #include <stdio.h>

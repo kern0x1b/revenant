@@ -1,20 +1,3 @@
--- compare.lua - the comparison of the host's facts with the port's, and the red control that runs it on a mutated port.
---
---     xmake l tools/compare.lua <host.txt> <port.txt> <catalyst.txt> <mutation> <tc-fixtures> <scratch directory>
---
--- The host side and the port side print one key=value line per fact; the Catalyst side (color.m, a third binary) prints the
--- appearance keys and the annotation colour keys, which override the port's answers for those keys and only those. The
--- verdict is the same code for the plain comparison and for every red control: a control that plants a value in a scratch
--- copy of the port's answers must make THIS comparison go red on that key, or the comparison is blind.
---
--- mutation: "" for the plain comparison; "auto" to plant the first key the two sides agree on; or a key's own name.
--- tc-fixtures: the names of the fixtures whose content stream sets a non-zero Tc (tools/tc-fixtures.lua), space separated.
--- The planted copy is written to <scratch directory>/planted.txt.
---
--- Python's repr() of a string is written by py_repr below, and Python's float() by py_float; the lists and dicts Python
--- prints are walked in the order Python keeps them (the file order of a fact's first line).
-
--- Python's str.split(sep) with the empty pieces kept.
 local function split(text, separator)
     local pieces = {}
     local start = 1
@@ -29,12 +12,10 @@ local function split(text, separator)
     end
 end
 
--- Python's str.strip(): whitespace off both ends.
 local function strip(text)
     return (text:gsub("^%s+", ""):gsub("%s+$", ""))
 end
 
--- Python's str.split() with no argument: the whitespace-separated words, empty ones dropped.
 local function words(text)
     local out = {}
     for word in text:gmatch("%S+") do
@@ -43,7 +24,6 @@ local function words(text)
     return out
 end
 
--- Python's open(path).read() in text mode: "\r\n" and "\r" become "\n".
 local function read_text(file)
     local handle = assert(io.open(file, "rb"))
     local text = handle:read("a")
@@ -53,7 +33,6 @@ local function read_text(file)
     return text
 end
 
--- The lines of a text, each WITH its line end, as Python's `for line in file` gives them (the last may have none).
 local function lines_keep(text)
     local lines = {}
     local start = 1
@@ -69,7 +48,6 @@ local function lines_keep(text)
     return lines
 end
 
--- Byte order, which is Python's order for these strings.
 local function byte_less(a, b)
     for i = 1, math.min(#a, #b) do
         local x, y = a:byte(i), b:byte(i)
@@ -80,8 +58,6 @@ local function byte_less(a, b)
     return #a < #b
 end
 
--- Python's repr() of a str (or None for a nil): single quotes, or double quotes when the text has a single quote and no
--- double one, with the backslash and the quote escaped.
 local function py_repr(value)
     if value == nil then
         return "None"
@@ -97,7 +73,6 @@ local function py_repr(value)
     return quote .. escaped .. quote
 end
 
--- Python's repr() of a list of str.
 local function py_list_repr(items)
     local shown = {}
     for i, item in ipairs(items) do
@@ -106,8 +81,6 @@ local function py_list_repr(items)
     return "[" .. table.concat(shown, ", ") .. "]"
 end
 
--- Python's float() of a str: whitespace is allowed, nan and inf are read, and a hexadecimal form is refused. nil where
--- Python raises ValueError.
 local function py_float(text)
     local s = strip(text)
     local lower = s:lower()
@@ -128,9 +101,6 @@ local function py_float(text)
     return value + 0.0
 end
 
--- read(path, side): the facts of one file. `order` is the keys in the order each first appears, `values` the value of
--- each. A line is read only when it has an "=", is not the "side=" line, and is not a `.image` fact. The side's prefix is
--- taken off a key that carries it.
 local function read_facts(file, side)
     local facts = { order = {}, values = {} }
     for _, line in ipairs(lines_keep(read_text(file))) do
@@ -153,12 +123,10 @@ local function read_facts(file, side)
     return facts
 end
 
--- Python's `name in dict` is facts.values[name] ~= nil.
 local function has(facts, key)
     return facts.values[key] ~= nil
 end
 
--- Python's `name.endswith(suffix)` for any suffix in `suffixes`.
 local function ends_with_any(key, suffixes)
     for _, suffix in ipairs(suffixes) do
         if key:sub(-#suffix) == suffix and #key >= #suffix then
@@ -172,7 +140,6 @@ local function starts_with(key, prefix)
     return key:sub(1, #prefix) == prefix
 end
 
--- A fact's value as Python prints it in an f-string: None for a missing one.
 local function shown(value)
     if value == nil then
         return "None"
@@ -208,8 +175,6 @@ local function merge_catalyst(port, catalyst)
     end
 end
 
--- The copy of the file the value is planted in: every line whose key is `key` is replaced by `name=planted`, and the rest
--- are copied as they are. Returns how many lines were replaced.
 local function plant_copy(source, prefix, key, planted, scratch)
     local replaced = 0
     local out = {}
@@ -243,8 +208,6 @@ function main(host_file, port_file, colour_file, mutation, tc_text, scratch_dir)
     local port = read_facts(port_file, "port")
     local catalyst = read_facts(colour_file, "portcolor")
 
-    -- The Catalyst side may only print the namespaces it exists for: a third binary whose answers reached a document fact
-    -- would be a silent override.
     local unwanted = {}
     for _, key in ipairs(catalyst.order) do
         local inside = false
@@ -288,7 +251,6 @@ function main(host_file, port_file, colour_file, mutation, tc_text, scratch_dir)
     merge_catalyst(port, catalyst)
     local catalyst_facts = #catalyst.order
 
-    -- THE RED CONTROL: one value planted in a scratch copy, on a key the two sides agree on, or the key named.
     if mutation ~= "" then
         if mutation == "plant" then
             print("MUTATION has no key to plant: --mutation was given a flag and no key, and a control"
@@ -350,7 +312,6 @@ function main(host_file, port_file, colour_file, mutation, tc_text, scratch_dir)
             planted = host.values[key] .. "-PLANTED"
         end
 
-        -- WHICH FILE the key is planted in: the one that printed it.
         local in_port = has(port_raw, key)
         local source_file, source_prefix, source_index
         if in_port then
@@ -386,7 +347,6 @@ function main(host_file, port_file, colour_file, mutation, tc_text, scratch_dir)
         end
     end
 
-    -- THE COMPARISON.
     local tc_fixtures = words(tc_text)
     local boundary_names = {}
     for _, name in ipairs(tc_fixtures) do

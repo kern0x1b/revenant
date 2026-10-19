@@ -1,24 +1,6 @@
--- The registry rows for exactly what the ModelIO objects build. It replaces tools/corpus/mio-rows.py, and its output is byte-equal to
--- that script's on the same rows.
---
---     xmake l tools/gen/mio_rows.lua ROWS.TSV SDK_RELEASE
---
--- SDK_RELEASE is the release the rows were read from; the rows name it, so it is passed and not written here.
---
--- ROWS.TSV is surface-diff's rows (tools/corpus/surface-diff-latest.py --rows). The file it writes, mio-rows.tsv, sits beside it.
---
--- Two authorities, and they are different on purpose:
---   - WHICH selectors exist comes from clang's AST (surface-diff's rows), so a compiler-generated helper can never become a row;
---   - minimum comes from the AST's OWN ios introduced, per member, because a class's band does not decide a member's band and
---     release-split splits on the member.
---
--- The band is never taken from the object a member happens to sit in. A member with no usable band is counted and printed, and the
--- count must be ZERO: a non-zero count means the AST lookup missed and every such row would be filed under the band of its file.
-
 local tsv = import("tsv", {anonymous = true})
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 
--- The NSObject basics this file drops. Its own list, shorter than mio_objects' DROP list, as the Python had it.
 local NS_BASICS = {}
 for _, name in ipairs({"init", "dealloc", "retain", "release", "autorelease", "hash", "self", "class", "superclass", "zone",
                        "isEqual:", "copyWithZone:", "description", "debugDescription", "allowsWeakReference",
@@ -36,7 +18,6 @@ local function read_bytes(filepath)
     return text
 end
 
--- The sign, the class, and the first keyword with its colon when the selector has one. nil when it is not a method.
 local function sel(api)
     local sign, rest = string.match(api, "^([%-+])%[(.*)%]$")
     if not sign then
@@ -51,7 +32,6 @@ local function sel(api)
     return sign, cls, first .. (string.find(sig, ":", 1, true) and ":" or "")
 end
 
--- The version of a band as a list of numbers, so 9.0 sorts before 10.0; a shorter prefix sorts first.
 local function band_before(a, b)
     local left, right = {}, {}
     for number in string.gmatch(a, "%d+") do table.insert(left, tonumber(number)) end
@@ -74,8 +54,6 @@ local function count_dots(text)
     return count
 end
 
--- The rows of an input as {kind, api, band}, for a class or a method that has a band. surface-diff writes no header line, so the first
--- line is a row.
 local function load(filepath)
     local rows = {}
     local lines = tsv.lines(read_bytes(filepath))
@@ -88,7 +66,6 @@ local function load(filepath)
     return rows
 end
 
--- Sorts rows by their band, then by their api, keeping the input order for a tie, as a stable sort does.
 local function sorted_by_band(rows)
     local ordered = table.join(rows)
     table.sort(ordered, function (a, b)
@@ -103,7 +80,6 @@ local function sorted_by_band(rows)
     return ordered
 end
 
--- The tab-separated text of a row list: the header, then one line per row.
 local function row_text(cells)
     return table.concat(cells, "\t") .. "\n"
 end

@@ -1,20 +1,3 @@
-// ARKitShim.h - the declarations the port's own ARKit classes need to be compiled for the host.
-//
-// The host has SceneKit and it has no ARKit: ARKit has never shipped on macOS, and the SDK that
-// declares these classes is the iPhoneOS one, whose headers cannot be compiled into a macOS build. So
-// this supplies the *declarations* - the same class names, the same selectors, the same property types -
-// and the port supplies the *implementation*, which is the half under test.
-//
-// Nothing here is ARKit's behaviour and nothing here is invented behaviour. A declaration with no
-// implementation behind it raises, and the test drives only the parts the port implements: the
-// pairing between a node and an anchor, and the geometry sources a plane's update produces. What
-// stays out is exactly what SceneKit cannot observe - the frame's own projection and unprojection -
-// and those rows are carried as documented rather than measured here.
-//
-// The two map properties are the only thing declared that the framework does not declare, because
-// they are the port's own and the test needs to reach them to put a pairing in and take one out. They
-// are declared in the port's own header for the same reason, and the test uses them through that.
-
 #import <Foundation/Foundation.h>
 #import <SceneKit/SceneKit.h>
 #import <UIKit/UIKit.h>
@@ -36,8 +19,6 @@ typedef NS_ENUM(NSInteger, UIInterfaceOrientation) {
     UIInterfaceOrientationLandscapeLeft = 4,
 };
 
-/// The Metal device is the argument the framework names. A protocol of the same name is enough to
-/// compile against: what a caller passes is not what this file tests, and the geometry is.
 @protocol MTLDevice
 @end
 
@@ -51,7 +32,6 @@ typedef NS_ENUM(NSInteger, UIInterfaceOrientation) {
 @class ARPlaneGeometry;
 @class ARGeometryElement;
 
-/// The port's anchor, as far as this test needs it: a name and a pose.
 @interface ARAnchor : NSObject
 @property (nonatomic, copy, nullable) NSString *name;
 @property (nonatomic, assign) simd_float4x4 transform;
@@ -117,9 +97,6 @@ typedef NS_ENUM(NSInteger, UIInterfaceOrientation) {
 @property (nonatomic, assign) BOOL rendersCameraGrain;
 @property (nonatomic, assign) BOOL rendersMotionBlur;
 
-/// The pairing between a node and the anchor it stands for. This is the port's own storage, declared
-/// here for the same reason the port declares it in its own header: a test has to be able to put a
-/// pairing in and take one out, and a category on the SDK's `SCNNode` cannot hold an ivar.
 @property (nonatomic, strong, readonly) NSMapTable<SCNNode *, ARAnchor *> *anchorsByNode;
 @property (nonatomic, strong, readonly) NSMapTable<ARAnchor *, SCNNode *> *nodesByAnchor;
 
@@ -134,7 +111,6 @@ typedef NS_ENUM(NSInteger, UIInterfaceOrientation) {
                                           alignment:(ARRaycastTargetAlignment)alignment;
 @end
 
-/// The 12.0 member, declared here and implemented in the port's 12.0 object.
 @interface ARSCNView (Charon12)
 - (simd_float3)unprojectPoint:(CGPoint)point
          ontoPlaneWithTransform:(simd_float4x4)planeTransform;
@@ -145,11 +121,6 @@ typedef NS_ENUM(NSInteger, UIInterfaceOrientation) {
                      elements:(NSArray<SCNGeometryElement *> *)elements;
 @end
 
-// A reference image, of 11.3, and the only member of its surface a host can measure: the physical size
-// is arithmetic over a picture whose pixels are known, and a group is a folder and a Contents.json.
-// The declarations are the 26.2 header's own, with the orientation spelled as the header spells it -
-// the port's implementation uses CGImagePropertyOrientation, and a shim that said NSInteger would be a
-// second, conflicting declaration of the same selector.
 @interface ARReferenceImage : NSObject
 @property (nonatomic, copy, nullable) NSString *name;
 @property (nonatomic, readonly) CGSize physicalSize;

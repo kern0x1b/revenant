@@ -5,19 +5,6 @@
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-// The negative control of tests/backports/device/photos/run.sh, and the reason that run.sh can say
-// "0 failures" about photosalbums8.m.
-//
-// photosalbums8.m holds the port's album-name check to the release's own answer in a process the
-// release denies: the check must NOT read that refusal as "no such album". This program asserts the
-// opposite -- that the check answers "no such album" -- on the same call, in the same process, on
-// whatever device it is run on. It must report a failure, or the check it guards is not being
-// exercised: a device where the release does not deny this process makes the guarded check vacuous,
-// and that is the one state in which "0 failures" would mean nothing.
-//
-// It reads: it enumerates the release's album list and asks the port's check about one name. It
-// writes nothing, so it is safe on any device.
-
 @interface CharonPhotosStore : NSObject
 + (BOOL)findAlbumWithName:(NSString *)name found:(BOOL *)found error:(NSError **)error;
 @end
@@ -52,7 +39,6 @@ int main(int argc, char **argv)
         BOOL listed = [CharonPhotosStore findAlbumWithName:@"CharonPhotosProbe" found:&found error:&error];
         NSString *answer = error ? error.description : (listed ? @"listed" : @"not listed");
         printf("the port's album check: %s\n", answer.UTF8String);
-        // The wrong answer, on purpose: a failure here is the control working.
         CHECK(listed && found == NO, "CONTROL: the check answers \"no such album\" instead of the release's refusal");
         printf("%d checks, %d failed\n", charon_checks, charon_failures);
     }

@@ -1,23 +1,3 @@
--- Ledger of how the decision hints compare with what the row owners later decided. Lua port of the former
--- hint-track.py.
---
--- Run right after a regeneration, with the PREVIOUS list still saved as crash-demand-prev.tsv:
--- for each row that was UNDECIDED in the previous list, the outcome is
---    carry   - the row left the list (the registry now implements it or carries it inert)
---    absent  - the row is still listed and its registry status became absent
---    pending - still undecided
--- Only decided outcomes are appended to corpus/hint-ledger.tsv (one line per API, never twice).
--- Then prints, per hint tag, how often the decision matched the hint.
---
--- A hint agrees with an outcome when: likely-carry -> carry, likely-absent -> absent.
--- The other tags (no-signal, class-undecided, protocol-owner, band-13+ unstarted) make no prediction; their
--- outcomes are recorded so the base rate is visible.
---
--- Run it on every batch: the previous list is overwritten by the next regeneration, and what was decided in
--- between cannot be reconstructed afterwards. It appends to the shared ledger: point CHARON_CORPUS_ROOT at a
--- scratch copy for a test run.
---
--- usage: xmake l tools/corpus/hint-track.lua [batch-label]     (default: today's date)
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 local aggregate = import("aggregate", {rootdir = os.scriptdir(), anonymous = true})
@@ -31,7 +11,6 @@ if not os.isdir(C) then
         .. "contains corpus/.", C)
 end
 
--- The hint's tag: the hint without its parenthesised detail; "(none)" when there is no hint.
 local function tag_of(hint)
     local tag = (hint or ""):gsub(" %(.*%)$", ""):match("^%s*(.-)%s*$")
     if tag == "" then
@@ -40,7 +19,6 @@ local function tag_of(hint)
     return tag
 end
 
--- Every registry key a row's status may be recorded under (the same spellings crash-demand's status_one tries).
 local function keys_for(api)
     api = (api:gsub(" %(%+%d+ owners%)$", ""))
     local keys = {api}
@@ -62,7 +40,6 @@ local function keys_for(api)
     if owner then
         table.insert(keys, owner)
     end
-    -- link-time names: the registry stores a constant without the linker's leading underscore, and a C function as `name()`.
     if not method and not dot then
         if first == "_" then
             table.insert(keys, api:sub(2))
@@ -73,7 +50,6 @@ local function keys_for(api)
     return keys
 end
 
--- api -> status for the registry file, the last row of an api winning (as the Python dict did).
 local function load_registry(file)
     local reg = {}
     if os.isfile(file) then
@@ -87,7 +63,6 @@ local function load_registry(file)
     return reg
 end
 
--- The rows of a crash-demand list keyed by api (its column 3).
 local function load_keyed(file)
     return tsv.keyed(tsv.body(file), 3)
 end
@@ -105,14 +80,8 @@ local function api_set(file)
     return set
 end
 
--- Columns of crash-demand-top.tsv / -prev.tsv read here (1-based): 3 api, 4 kind, 6 band, 7 route, 9 apps,
--- 10 crash_apps, 15 registry status, 16 hint. The Python this replaced read 12 and 13 for those last two; in the
--- current layout those are class-confirmed counts, so its "undecided" test cannot match a current list.
 function main(batch)
     batch = batch or os.date("%Y-%m-%d")
-    -- A row counts as decided by an owner only if the REGISTRY's status for it (its own rows or its owner
-    -- class) differs between the previous run's snapshot and now. A row can also leave the list because the
-    -- rule changed; that is not a decision and must not enter the ledger.
     local last_path = path.join(C, "registry-last.tsv")
     local last = load_registry(last_path)
     local now = load_registry(EXPORT)
@@ -145,9 +114,6 @@ function main(batch)
             end
         end
     end
-    -- reversals: rows that were decided ABSENT in the previous list and have since left it (implemented or
-    -- inert). Not a hint outcome (absent rows carry no hint) but the measure of how often an absent decision
-    -- is later withdrawn.
     local rev_p = path.join(C, "absent-reversals.tsv")
     local rev_seen = api_set(rev_p)
     local reversed_now = {}

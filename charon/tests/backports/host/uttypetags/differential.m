@@ -1,6 +1,3 @@
-// differential.m - the port's UTTypeCopyAllTagsWithClass against the host's, over the cases measured in probe.m and
-// the write-up's examples, and over generated dynamic identifiers. The port is compiled with its name changed to
-// CharonPortUTTypeCopyAllTagsWithClass (see run.sh), so the host's deprecated function is the oracle here.
 #import <Foundation/Foundation.h>
 #import <CoreServices/CoreServices.h>
 
@@ -11,7 +8,6 @@ static NSArray *classes(void)
     return @[@"public.filename-extension", @"public.mime-type", @"com.apple.ostype", @"public.pathname", @"com.apple.nspboard-type", @"public.url-name", @"com.apple.nspboard-type.x"];
 }
 
-// The identifier's record text as bytes, dyn.a then the base-32 tail.
 static NSString *encodeBytes(const unsigned char *bytes, NSUInteger count)
 {
     static const char alphabet[] = "abcdefghkmnpqrstuvwxyz0123456789";
@@ -86,13 +82,11 @@ static void compareBytes(NSString *label, const unsigned char *bytes, NSUInteger
 int main(int argc, const char **argv)
 {
     @autoreleasepool {
-        // Declared identifiers: the probe's list, plus names that carry several tags or none.
         NSArray *declared = @[@"public.jpeg", @"public.png", @"public.plain-text", @"public.mpeg-4", @"com.adobe.pdf",
                               @"public.data", @"public.folder", @"public.item", @"public.url", @"public.image",
                               @"public.movie", @"public.html", @"public.json", @"public.zip-archive", @"public.mp3",
                               @"public.swift-source", @"public.text", @"public.tiff", @"public.content", @"com.example.nonexistent", @""];
         for (NSString *uti in declared) compareAllClasses(@"declared", uti);
-        // The identifiers of the SDK's constants, one per line as "<constant><TAB><identifier>", from the file argument.
         if (argc > 1) {
             NSString *table = [NSString stringWithContentsOfFile:[NSString stringWithUTF8String:argv[1]] encoding:NSUTF8StringEncoding error:NULL];
             for (NSString *line in [table componentsSeparatedByString:@"\n"]) {
@@ -102,7 +96,6 @@ int main(int argc, const char **argv)
         }
         compare(@"declared upper", @"PUBLIC.JPEG", @"public.filename-extension");
 
-        // Dynamic identifiers: the write-up's examples and the host's own, with the case rules measured.
         compare(@"writeup", @"dyn.ah62d4r3qkk7dgtpyqz6hkp42fzxhe55cfvy042phqy1zuppgsm10esvvhzxhe55c", @"public.mime-type");
         compareAllClasses(@"writeup multi", @"dyn.ah62d4r3qkk7dgtpyqz6hkp42fzxhe55cfvy042phqy1zuppgsm10esvvhzxhe55c");
         compareAllClasses(@"writeup literal", @"dyn.ah62d4r34qr104pxftbu046dqqy1fg6dfqry0c5cytf2gntpgr710e2pw");
@@ -124,7 +117,6 @@ int main(int argc, const char **argv)
         compareAllClasses(@"host pathname", @"dyn.asb40e5dmqq1ha2pyrb1gc5pfhzxhe55c");
         compareAllClasses(@"host conformance apk", @"dyn.ah62d4rv4ge80c6dp");
 
-        // Records, separators, escapes and empties, as text.
         NSArray *texts = @[@"1=frob", @"1=a,b", @"1=a:b", @"1=a\\,b", @"1=a\\:b", @"1=a\\\\b", @"1=a\\=b", @"1=", @"1",
                            @"1=a:1=b", @"1=a:3=b", @"1=a,,b", @"1=,a", @"1=a,", @"com.apple.ostype=ABCD", @"public.pathname=/tmp/x",
                            @"2=ABCD,EFGH", @"3=text/a,image/b", @"1=a\\", @"1=a\\x", @"?0=public.data:1=a", @"9=abc:1=q",
@@ -133,7 +125,6 @@ int main(int argc, const char **argv)
                            @"public.mime-type=a/b", @"1=,,,a", @"1=,", @"1=,,", @"?0=7:3=text/X-frob:1=frob", @"1=a\\\\", @"1=\\"];
         for (NSString *text in texts) compareText(@"text", text);
 
-        // Raw bytes: invalid UTF-8, a truncated sequence, NUL, and high bytes as UTF-8.
         const unsigned char latin[] = {'1', '=', 0xE9};
         compareBytes(@"latin1 alone", latin, 3);
         const unsigned char badThenValue[] = {'1', '=', 0xE9, ',', 'a'};
@@ -153,7 +144,6 @@ int main(int argc, const char **argv)
         const unsigned char badKey[] = {0xE9, '=', 'a'};
         compareBytes(@"bad key", badKey, 3);
 
-        // Generated: records over an alphabet that includes every separator, the escape, digits and a high byte.
         srand(20261017);
         const char pool[] = "1234b=:,\\ax\xC3\xA9\xE9-0000AFfCcdg\x80\x00";
         NSUInteger poolCount = sizeof(pool) - 1;
@@ -163,7 +153,6 @@ int main(int argc, const char **argv)
             for (NSUInteger index = 0; index < length; index++) bytes[index] = (unsigned char)pool[rand() % poolCount];
             compareBytes(@"generated record", bytes, length);
         }
-        // Generated tails: random digits from the alphabet and a few outside it.
         const char digits[] = "abcdefghkmnpqrstuvwxyz0123456789ABCDEFGHKMNPQRSTUVWXYZiloj-.";
         NSUInteger digitCount = sizeof(digits) - 1;
         for (int round = 0; round < 4000; round++) {

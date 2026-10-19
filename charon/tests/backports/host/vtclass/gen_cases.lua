@@ -1,18 +1,6 @@
--- gen_cases.lua [SDK] - writes cases.m, the table the VideoToolbox class differential holds the port to,
--- from the SDK's own headers. A port of gen-cases.py, which says what the table is and why it is generated.
--- Run it as
---
---     xmake l gen_cases.lua "$VT_SDK" > cases.m
---
--- The SDK is the first argument, or VT_SDK when no argument is given (gen-cases.py read VT_SDK only; run.sh
--- passes the SDK). The bytes printed are the bytes gen-cases.py printed: the committed cases.m is what this
--- program writes, and cmp against it is the check. The text inside says "gen-cases.py" and "rename.py" on
--- purpose, because that is what the committed file says.
-
 local G = import("gen_body", {rootdir = os.scriptdir()})
 local V = import("vtlib", {rootdir = os.scriptdir()})
 
--- The first element of the Python's out list: the header of cases.m, up to the first row.
 local H1 = [==[
 #import <Foundation/Foundation.h>
 #import "vtclass-cases.h"
@@ -41,10 +29,6 @@ typedef struct {
 static const VTClassShape vtClassShapes[] = {
 // The class properties, then the instance ones, in the order the SDK declares them.]==]
 
--- The row for each class: {"name", "protocol", "class accessors", "instance accessors"}, the Python's
--- out.append('    {"%s", "%s", "%s", "%s"},' % ...). The accessors are the getter (or the name), the class ones
--- and the instance ones, in the order own then inherited, where inherited is each protocol's properties in
--- its own order and a name that is already there keeps its first entry (Python's inh.setdefault).
 local function class_row(protocols, classes, c)
     local v = classes[c]
     local inh = G.odict_new()
@@ -57,7 +41,6 @@ local function class_row(protocols, classes, c)
             G.odict_setdefault(inh, n, pm.map[n])
         end
     end
-    -- list(own.items()) + list(inh.items())
     local entries = {}
     for _, k in ipairs(v.own.keys) do
         entries[#entries + 1] = {k, v.own.map[k]}
@@ -68,7 +51,6 @@ local function class_row(protocols, classes, c)
     local cp, ip = {}, {}
     for _, entry in ipairs(entries) do
         local n, p = entry[1], entry[2]
-        -- Python: p["getter"] or n, where "" is false
         local name = n
         if p.getter ~= nil and p.getter ~= "" then
             name = p.getter
@@ -84,8 +66,6 @@ local function class_row(protocols, classes, c)
 end
 
 
--- The rest of the Python's out list, after the rows: the lookup table's end, and the code the host and the
--- port both run. It is one string, and it begins with a newline, as the Python's '''...''' did.
 local H3 = "\n" .. [==[
 static NSArray *VTCLASSShapes(void)
 {

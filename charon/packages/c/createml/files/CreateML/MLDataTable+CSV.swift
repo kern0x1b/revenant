@@ -1,32 +1,12 @@
-// MLDataTable+CSV.swift — reading a table from a CSV, and writing one back.
-//
-// The reader implements the options the framework's `MLDataTable.ParsingOptions` and the surface's
-// `CSVReadingOptions` name, because a reader that silently ignored them would answer a different
-// question from the one the caller asked: a file with a comment character in it is a different file
-// depending on whether the comment is honoured.
-//
-// The type inference is the framework's: a column whose every non-missing cell is an integer is an
-// integer column, a column whose every cell parses as a double is a double column, and a column with
-// anything else in it is a string column. A column is never a mixture, and a cell that does not
-// parse is missing rather than a string in a numeric column — which is what makes `dropMissing()`
-// mean what it says.
-
 import Foundation
 
-/// How a CSV is read.
 public struct MLDataTableParsingOptions {
-    /// Whether the first row names the columns. A file without a header is read with the columns
-    /// named by their position, as the framework names them.
     public var containsHeader: Bool
     public var delimiter: Character
     public var comment: Character?
-    /// The escape inside a quoted field: a doubled quote, by CSV's own rule.
     public var doubleQuote: Bool
     public var quote: Character?
     public var skipInitialSpaces: Bool
-    /// The strings that stand for a missing value. The empty string is among them, and not by
-    /// accident: a file that leaves a cell empty means it, and reading it as `""` would make an empty
-    /// category out of a gap.
     public var missingValues: Set<String>
     public var lineTerminator: String
     public var selectColumns: [String]?
@@ -40,11 +20,6 @@ public struct MLDataTableParsingOptions {
                 doubleQuote: Bool = true,
                 quote: Character? = "\"",
                 skipInitialSpaces: Bool = false,
-                // No empty string, and the omission is measured rather than a slip: the host's own
-                // reader on a file whose second cell is empty gives that column the two *strings*
-                // `""` and `"x"` and `dropMissing()` keeps both rows. An empty cell in a CSV is a
-                // value the writer wrote, and the reader that invents a gap there is the reader
-                // that loses it.
                 missingValues: Set<String> = ["NA", "N/A", "null", "NaN", "nan", "-"],
                 lineTerminator: String = "\n",
                 selectColumns: [String]? = nil,
@@ -61,9 +36,6 @@ public struct MLDataTableParsingOptions {
         self.selectColumns = selectColumns
         self.maxRows = maxRows
         self.skipRows = skipRows
-        // The escape is the character a quoted field's own quote is written behind; with `nil` there
-        // is no escape and a doubled quote is what a doubled quote is. Kept as a stored value so the
-        // reader reads one flag rather than two spellings of the same question.
         self.escape = escape
     }
 
@@ -71,19 +43,11 @@ public struct MLDataTableParsingOptions {
 }
 
 extension MLDataTable {
-    /// A table read from a CSV at a URL.
-    ///
-    /// Every option the parser's own names say is honoured, and the ones that change which cells
-    /// exist are the ones that are checked: the delimiter, the comment character, the header, the
-    /// skipped rows, the row limit and the missing values. A file whose rows disagree about how many
-    /// fields they have is refused with the row number rather than padded, because a padded row is a
-    /// row of values nobody wrote.
     public init(contentsOf url: URL, options: MLDataTableParsingOptions = MLDataTableParsingOptions()) throws {
         let text = try String(contentsOf: url, encoding: .utf8)
         try self.init(csv: text, options: options)
     }
 
-    /// A table read from CSV text.
     public init(csv text: String, options: MLDataTableParsingOptions = MLDataTableParsingOptions()) throws {
         var lines = MLDataTable.splitLines(text, terminator: options.lineTerminator)
         if let comment = options.comment {
@@ -104,14 +68,9 @@ extension MLDataTable {
             names = options.selectColumns ?? first
             body = lines[1...]
         } else {
-            // A file with no header is read with the columns named by their position, because a
-            // caller who wants names has to be able to say which is which.
             names = options.selectColumns ?? (0..<first.count).map { "column\($0)" }
             body = lines[...]
         }
-        // A file with a header may be read in part: `selectColumns` names the columns the caller
-        // wants, and the rest of the file is not read into a table. Without a header the same list
-        // names columns the file has not got, and is refused rather than read as empty columns.
         var kept = names
         if let selected = options.selectColumns {
             guard options.containsHeader else {
@@ -126,8 +85,6 @@ extension MLDataTable {
             if line.isEmpty && body.count > 1 { continue }
             if let limit = options.maxRows, read >= limit { break }
             let fields = try MLDataTable.splitFields(line, options: options)
-            // A row of a different width than the header is a file error, not a row to pad: padding
-            // it would put values in cells the file did not have.
             guard fields.count == first.count else {
                 throw MLDataTableError.badCSVRow(read + 1, line)
             }
@@ -143,10 +100,8 @@ extension MLDataTable {
         }
     }
 
-    /// The framework's own reading options, in the type the surface names.
     public typealias ParsingOptions = MLDataTableParsingOptions
 
-    /// A line's fields, with the quoting and escaping the options name.
     private static func splitFields(_ line: String, options: MLDataTableParsingOptions) throws -> [String] {
         var fields = [String]()
         var field = ""
@@ -159,11 +114,7 @@ extension MLDataTable {
         while index < characters.count {
             let character = characters[index]
             if let quote = options.quote, character == quote {
-                // The doubled quote is one quote, and only inside a quoted field — the same rule the
-                // line splitter applies, for the same reason.
                 if quoted, index + 1 < characters.count, characters[index + 1] == quote, options.doubleQuote {
-                    // A doubled quote inside a quoted field is one quote, which is CSV's own rule and
-                    // not an escape character: the field says what it says.
                     field.append(quote)
                     index += 2
                     continue
@@ -206,14 +157,6 @@ extension MLDataTable {
         let terminatorCharacters = Set(terminator)
         var index = 0
         while index < characters.count {
-            // A field may hold the terminator inside quotes, so this split reads the quoting too: a
-            // naive split on newlines cuts a quoted field in half and then reports a row of the
-            // wrong width, which is a file error that is not in the file.
-            // A doubled quote is one quote, and only *inside* a quoted field: outside one, two
-            // quotes are an empty quoted field followed by the start of another, and consuming them
-            // as one leaves the reader inside a string for the rest of the file. The host's reader
-            // found this one — a field whose text ends in a doubled quote swallowed every line
-            // after it.
             if inQuotes, characters[index] == "\"", index + 1 < characters.count,
                characters[index + 1] == "\"" {
                 current.append("\"\"")
@@ -239,9 +182,6 @@ extension MLDataTable {
         return lines
     }
 
-    /// A column of strings read as the kind its cells all agree on, and a string column when they do
-    /// not. A cell that does not parse is missing, not a string, so a numeric column never holds a
-    /// word and `dropMissing()` means what it says.
     private static func typedColumn(_ cells: [String?]) -> [MLDataValue] {
         let present = cells.compactMap { $0 }
         guard !present.isEmpty else { return cells.map { $0 == nil ? .invalid : .string($0!) } }
@@ -263,7 +203,6 @@ extension MLDataTable {
         }
     }
 
-    /// The table written as CSV text, with a header row of the column names.
     public func csvText() -> String {
         var lines = [columnNames.joined(separator: ",")]
         for row in 0..<count {
@@ -284,20 +223,14 @@ extension MLDataTable {
         return lines.joined(separator: "\n") + "\n"
     }
 
-    /// The table written as a CSV at a URL, with the writing options the surface names.
     public func writeCSV(to url: URL) throws {
         try csvText().write(to: url, atomically: true, encoding: .utf8)
     }
 
-    /// The table written as a CSV at a path.
     public func writeCSV(toFile path: String) throws {
         try writeCSV(to: URL(fileURLWithPath: path))
     }
 
-    /// The table written as JSON: an array of objects, one per row, keyed by column name.
-    ///
-    /// Row-major, because a table read back has to have its rows in the order they were written and
-    /// a column-major document would not keep that without a separate index.
     public func jsonText() -> String {
         var out = "["
         for (rowIndex, row) in rows.enumerated() {
@@ -315,7 +248,6 @@ extension MLDataTable {
         return out + "]"
     }
 
-    /// The table read from JSON: an array of objects, one per row.
     public init(json text: String) throws {
         self.init()
         guard let data = text.data(using: .utf8),
@@ -343,7 +275,6 @@ extension MLDataTable {
         }
     }
 
-    /// The table read from a JSON file.
     public init(json url: URL) throws {
         try self.init(json: try String(contentsOf: url, encoding: .utf8))
     }
@@ -355,9 +286,6 @@ extension MLDataTable {
 }
 
 extension MLDataValue {
-    /// A value as the JSON text for it, and the spelling each kind has there: an integer and a
-    /// double both go out as JSON numbers, and a value that is not a number goes out as a string or
-    /// as null, which is the only choice JSON leaves.
     var jsonLiteral: String {
         switch self {
         case .invalid: return "null"

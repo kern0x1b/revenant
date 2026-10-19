@@ -1,9 +1,6 @@
 #import "CharonSCN.h"
 #import "../CharonSayOnce.h"
 
-// Nothing steps a simulation here: no SCNPhysicsBody is carried, so there is nothing for gravity, speed, the time
-// step, a behavior or the contact delegate to act on. The values are kept as given and read back, and the first
-// time an application sets one it is said, once.
 static void CharonSCNPhysicsWorldSay(void)
 {
     charon_say_once_for(@"SCNPhysicsWorld", @"SCNPhysicsWorld: nothing is simulated on this port; gravity, speed, the time step, "
@@ -49,7 +46,6 @@ static void CharonSCNPhysicsWorldSay(void)
     _timeStep = timeStep;
 }
 
-// The property is atomic, so its getter is written beside the setter; a weak load is atomic by itself.
 - (id<SCNPhysicsContactDelegate>)contactDelegate
 {
     return _contactDelegate;

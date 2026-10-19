@@ -1,28 +1,7 @@
-// The catalogue requests: search, and the resource of a type, over the documented Apple Music API.
-//
-// The service is Apple's and the paths are the ones its reference names, under a storefront:
-//
-//     GET /v1/catalog/{storefront}/search?term=…&types=song,album&limit=…&offset=…
-//     GET /v1/catalog/{storefront}/{type}/{id}?include=…&limit=…
-//     GET /v1/catalog/{storefront}/{type}/{id}/relationships/…
-//     GET /v1/catalog/{storefront/charts/{type}
-//
-// every one of them authenticated with `Authorization: Bearer <developer token>`, and every one of
-// them answered with the service's own JSON, which is what the types below are decoded from.
-//
-// What the responses are built from, and what a request cannot do without, are both the service's.
-// A request with no developer token fails with `MusicError.developerTokenUnauthorized` before a byte
-// is sent, because the service would refuse it and a caller that waited for that would be waiting on
-// a round trip to learn nothing.
-
 import Foundation
 
-// MARK: - The catalogue requests
-
-/// A search of the catalogue, of the types the caller names.
 public struct MusicCatalogSearchRequest {
 
-    /// The term the caller is searching for, and the types to search.
     public let term: String
     public let types: [String]
     public var limit: Int?
@@ -37,9 +16,6 @@ public struct MusicCatalogSearchRequest {
         self.includeTopResults = true
     }
 
-    /// The URL this request is, in a storefront. The term and the types are percent-encoded, and
-    /// nothing else about the call is invented: a request the service does not document is not one
-    /// this module sends.
     public func url(storefront: String = MusicCatalogSearchRequest.defaultStorefront) -> URL? {
         guard var components = URLComponents(string: MusicAPIs.catalogURL(storefront: storefront, path: "search")?.absoluteString ?? "") else {
             return nil
@@ -52,21 +28,12 @@ public struct MusicCatalogSearchRequest {
         return components.url
     }
 
-    /// The storefront a request is made in when the caller names none.
-    ///
-    /// A device has a region and the service has a storefront per region, and this release has no
-    /// way to ask the device which one it is: `Locale.current` is iOS 10. So the storefront is the
-    /// one the developer registered, which is what a client of the Apple Music API is given, and
-    /// `us` is the documented default.
     public static let defaultStorefront = "us"
 }
 
-/// One resource of the catalogue - a song, an album, an artist - found by its identifier.
 public struct MusicCatalogResourceRequest {
 
-    /// The type of the resource, as the service names it: `songs`, `albums`, `artists`.
     public let type: String
-    /// The identifier, which is the catalogue's own for the item.
     public let id: MusicItemID
     public var limit: Int?
     public var properties: [String]
@@ -91,7 +58,6 @@ public struct MusicCatalogResourceRequest {
     public static let defaultStorefront = MusicCatalogSearchRequest.defaultStorefront
 }
 
-/// The charts of a storefront, for a type.
 public struct MusicCatalogChartRequest {
 
     public let type: String
@@ -115,16 +81,11 @@ public struct MusicCatalogChartRequest {
     public static let defaultStorefront = MusicCatalogSearchRequest.defaultStorefront
 }
 
-/// A request whose URL the caller has built, which is what `MusicDataRequest` is.
 public struct MusicDataRequest: Hashable {
     public let urlRequest: URLRequest
     public init(urlRequest: URLRequest) { self.urlRequest = urlRequest }
 }
 
-// MARK: - The answers
-
-/// What a search found, per type. A type the caller did not ask for is empty rather than absent,
-/// which is what the service sends and what the interface's own properties say.
 public struct MusicCatalogSearchResponse {
     public let songs: MusicItemCollection<Song>
     public let albums: MusicItemCollection<Album>
@@ -142,7 +103,6 @@ public struct MusicCatalogSearchResponse {
     }
 }
 
-/// A run of items, with the URL of the next page when there is one.
 public struct MusicItemCollection<Item: MusicItem> {
     public let items: [Item]
     public let next: URL?
@@ -163,13 +123,6 @@ public struct MusicItemCollection<Item: MusicItem> {
     }
 }
 
-// MARK: - The catalogue types
-//
-// The fields the service sends for each, and no others: a type that carried a field the service does
-// not send would be a value this port invented, and a caller of MusicKit 26 reading it would be
-// reading something no catalogue has.
-
-/// A song: an identifier, the artwork, and the names it is known by.
 public struct Song: MusicItem {
     public let id: MusicItemID
     public let title: String
@@ -191,7 +144,6 @@ public struct Song: MusicItem {
     }
 }
 
-/// An album: an identifier, a title, the artist and the number of tracks.
 public struct Album: MusicItem {
     public let id: MusicItemID
     public let title: String
@@ -211,7 +163,6 @@ public struct Album: MusicItem {
     }
 }
 
-/// An artist: an identifier, a name, and the genres the service places them in.
 public struct Artist: MusicItem {
     public let id: MusicItemID
     public let name: String
@@ -229,7 +180,6 @@ public struct Artist: MusicItem {
     }
 }
 
-/// A playlist: an identifier, a name, and the curator behind it.
 public struct Playlist: MusicItem {
     public let id: MusicItemID
     public let name: String
@@ -247,7 +197,6 @@ public struct Playlist: MusicItem {
     }
 }
 
-/// The artwork of an item, and the sizes it is served at.
 public struct Artwork: Hashable {
     public let url: URL
     public let width: Int
@@ -259,7 +208,6 @@ public struct Artwork: Hashable {
         self.height = height
     }
 
-    /// The URL of the artwork at a size, which is the service's own `{w}x{h}` form.
     public func url(width: Int, height: Int) -> URL? {
         guard let base = url.absoluteString.split(separator: "{w}").first,
               let tail = url.absoluteString.split(separator: "}").last else { return nil }

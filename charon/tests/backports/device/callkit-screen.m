@@ -2,19 +2,6 @@
 #include <dlfcn.h>
 #import "check.h"
 
-// The one thing no host, and no build gate, can answer: whether the SpringBoard side (packages/a/apple-callkit-screen,
-// filtered to com.apple.springboard) actually raises a window over SpringBoard's own, and whether a tap on it reaches
-// back through the file-and-notification protocol into this application's own CXProvider delegate. Everything else
-// about that path - the protocol, the payload, the two dylibs' packaging - is proven without a device; this is not.
-//
-// Run against a real iPhone 4S (6.1.3) with org.charon.callkit-screen installed and SpringBoard respring'd to pick it
-// up. This is a plain command-line tool: CharonCallScreen's notify_register_dispatch needs a run loop pumped, not a
-// UIApplication, and reporting an incoming call needs no window of its own - the window is SpringBoard's.
-//
-// Nothing here taps anything. `revtouch tap X Y` on the points this test logs, once for each case, is the only way a
-// touch reaches the device; the coordinates are the buttons' centres for a 320x480pt screen (iPhone 4S), fixed because
-// the buttons are drawn at a fixed layout, not measured.
-
 static NSString *image_of(Class cls)
 {
     Dl_info info;

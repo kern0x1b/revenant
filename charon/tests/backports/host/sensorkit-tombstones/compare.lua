@@ -1,16 +1,3 @@
--- compare.lua PORTFILE HOSTFILE - the port's answers against the host's, input by input.
---
---    xmake l ./compare.lua <port out> <host out>
---
--- Prints one DIFFERS line per input the two sides disagree on, then a summary that says how many pairs were compared. Exits 0
--- only when the two files hold the same answer for the same input and nothing is missing from either, so a run that compared
--- fewer pairs than the port printed cannot look green.
---
--- Unlike sensorkit-names' compare.lua there is no separate name list here: the INPUT is the case, so the inputs themselves are
--- what must agree, and a case the host never printed is a case nobody compared.
-
--- Names are sorted by their bytes, as Python sorts strings: the string comparison of Lua follows the locale's collation, which
--- puts "B.x" after "b.x" and "a_b" before "a.c", so it is not used.
 local function byte_less(a, b)
     for i = 1, math.min(#a, #b) do
         local x, y = a:byte(i), b:byte(i)
@@ -21,12 +8,10 @@ local function byte_less(a, b)
     return #a < #b
 end
 
--- The rows of one side: the lines of three tab-separated fields whose first is the tag, keyed by the second.
 local function rows(path, tag)
     local handle = assert(io.open(path, "rb"))
     local out = {}
     for line in handle:lines() do
-        -- handle:lines() keeps the "\n" on each line, so it is taken off here, and the "\r" of a CRLF file with it.
         line = line:gsub("\n$", ""):gsub("\r$", "")
         local tab1 = line:find("\t", 1, true)
         local tab2 = tab1 and line:find("\t", tab1 + 1, true)
@@ -38,7 +23,6 @@ local function rows(path, tag)
     return out
 end
 
--- Python's repr of an input, which the messages print: 'text' between single quotes.
 local function repr(text)
     return "'" .. text .. "'"
 end

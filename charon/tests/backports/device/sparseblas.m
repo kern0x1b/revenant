@@ -1,9 +1,3 @@
-// Every entry point of the sparse BLAS of vecLib/Sparse/BLAS.h, called on the device against the
-// answers facts/Accelerate/SparseBLAS.md records from the host's own Accelerate.
-//
-// The port's objects are linked into this test, so the calls below are the port's own. Nothing here
-// reads a matrix's internals: every answer is read back through the same entry points a caller has.
-
 #import <Accelerate/Accelerate.h>
 #include <math.h>
 #include <stdio.h>
@@ -46,7 +40,6 @@ int main(void)
     setvbuf(stdout, NULL, _IONBF, 0);
     char detail[256];
 
-    // A dimension of zero is accepted, measured: create(0, 5) answers a matrix of 0 rows and 5 columns.
     sparse_matrix_float zero = sparse_matrix_create_float(0, 5);
     expect(zero != NULL, "a matrix of no rows", "create(0,5) answers a matrix");
     matrix_is(zero, 0, 5, 0);
@@ -58,9 +51,6 @@ int main(void)
            "asking a matrix that is not there", "zero for both");
     expect(sparse_get_block_dimension_for_row(NULL, 0) == 0, "a block dimension of nothing", "zero");
 
-    // A block matrix counts its rows and columns in elements, measured: block(3,3,2,2) is 6 by 6.
-    // Two block rows of two elements and two block columns of three, so the matrix is 4 by 6 and a
-    // block entry is 2 by 3 - the shape the host was measured on.
     sparse_matrix_float block = sparse_matrix_block_create_float(2, 2, 2, 3);
     matrix_is(block, 4, 6, 0);
     expect(sparse_get_block_dimension_for_row(block, 0) == 2 && sparse_get_block_dimension_for_row(block, 3) == 2 &&
@@ -85,7 +75,6 @@ int main(void)
            "a block that was never inserted", "SPARSE_SUCCESS with zeros");
     sparse_matrix_destroy(block);
 
-    // A variable-block matrix's block dimension is the size of the block the element is in, measured.
     sparse_dimension heights[3] = {2, 1, 3}, widths[3] = {1, 2, 1};
     sparse_matrix_float variable = sparse_matrix_variable_block_create_float(3, 3, heights, widths);
     matrix_is(variable, 6, 4, 0);
@@ -97,7 +86,6 @@ int main(void)
     expect(colDims[0] == 1 && colDims[1] == 2 && colDims[2] == 2, "a variable matrix's column block dimensions", "1, 2, 2");
     sparse_matrix_destroy(variable);
 
-    // A stored entry and a nonzero value are two different things, measured: an exact zero is stored.
     sparse_matrix_float A = sparse_matrix_create_float(4, 4);
     sparse_insert_entry_float(A, 0.0f, 1, 1);
     expect(sparse_get_matrix_nonzero_count(A) == 1, "an entry of exactly zero", "the count is 1");
@@ -111,7 +99,6 @@ int main(void)
            "the counts per row and column", "one each, and zero outside the matrix");
     expect(sparse_commit(A) == SPARSE_SUCCESS, "a commit", "SPARSE_SUCCESS with nothing left to do");
 
-    // The row extraction returns a count and leaves column_end where the next entry is.
     sparse_index end = 0;
     float values[4] = {0};
     sparse_index indices[4] = {0};
@@ -130,7 +117,6 @@ int main(void)
     expect(got == 1 && end == 4 && indices[0] == 3 && values[0] == -1.5f, "a column extracted",
            "one entry at row 3, end 4");
 
-    // The properties are bits, and any name is remembered.
     sparse_matrix_float triangle = sparse_matrix_create_float(3, 3);
     expect(sparse_set_matrix_property(triangle, SPARSE_UPPER_TRIANGULAR) == SPARSE_SUCCESS &&
                sparse_get_matrix_property(triangle, SPARSE_UPPER_TRIANGULAR) == SPARSE_UPPER_TRIANGULAR,
@@ -144,7 +130,6 @@ int main(void)
     expect(sparse_set_matrix_property(triangle, SPARSE_LOWER_SYMMETRIC) == SPARSE_CANNOT_SET_PROPERTY,
            "a property after an insertion", "SPARSE_CANNOT_SET_PROPERTY");
 
-    // The vector forms. A norm the enumeration does not name is the infinity norm, measured.
     float sparseVector[3] = {1, 0, 3};
     sparse_index where[3] = {0, 2, 3};
     expect(near(sparse_vector_norm_float(3, sparseVector, where, SPARSE_NORM_ONE), 4.0, 1e-6), "the one norm",
@@ -159,14 +144,12 @@ int main(void)
            "a vector norm outside the enumeration", "the infinity norm");
     expect(sparse_vector_norm_float(0, sparseVector, where, SPARSE_NORM_ONE) == 0.0, "the norm of nothing", "0");
     float dense[4] = {10, 20, 30, 40};
-    // The entries are at columns 0, 2 and 3, so the product is 1*10 + 0*20 + 3*40.
     expect(near(sparse_inner_product_dense_float(3, sparseVector, where, dense, 1), 130.0, 1e-6),
            "an inner product with a dense vector", "1*10 + 0*20 + 3*40 = 130");
     expect(near(sparse_inner_product_dense_float(0, sparseVector, where, dense, 1), 0.0, 1e-6),
            "an inner product of nothing", "0");
     float twoSparse[2] = {4, 2};
     sparse_index twoWhere[2] = {1, 3};
-    // The first vector's columns are 0, 2 and 3 and the second's are 1 and 3, so only column 3 meets.
     expect(near(sparse_inner_product_sparse_float(3, 2, sparseVector, where, twoSparse, twoWhere), 6.0, 1e-6),
            "an inner product of two sparse vectors", "3*2 = 6");
     float scaled[4] = {10, 20, 30, 40};
@@ -187,7 +170,6 @@ int main(void)
            "an unpacked vector", "0, 7, 0, 8");
     expect(sparse_get_vector_nonzero_count_float(4, (float[]){0, 2, 0, 4}, 1) == 2, "a nonzero count", "2");
 
-    // The matrix-vector product, over a strided vector with a stride the BLAS would not take.
     sparse_matrix_float plain = sparse_matrix_create_float(3, 3);
     sparse_insert_entry_float(plain, 1, 0, 0);
     sparse_insert_entry_float(plain, 2, 0, 2);
@@ -197,8 +179,6 @@ int main(void)
     expect(sparse_matrix_vector_product_dense_float(CblasNoTrans, 1.0f, plain, x, 1, y, 1) == SPARSE_SUCCESS &&
                y[0] == 4.0f && y[1] == 4.0f && y[2] == 5.0f,
            "a matrix-vector product", "4, 4, 5");
-    // A transposed operand takes x over the matrix's own rows and y over its own columns, so for this
-    // 3x3 both are three: 1*1 + 0*1 + 4*1, 0*1 + 3*1 + 0*1 and 2*1 + 0*1 + 0*1, added to a y of ones.
     y[0] = y[1] = y[2] = 1.0f;
     sparse_status transposed = sparse_matrix_vector_product_dense_float(CblasTrans, 1.0f, plain, (float[]){1, 1, 1}, 1, y, 1);
     snprintf(detail, sizeof detail, "status %d, %g, %g, %g", transposed, y[0], y[1], y[2]);
@@ -209,7 +189,6 @@ int main(void)
            "a transpose outside the enumeration", "SPARSE_ILLEGAL_PARAMETER");
     sparse_matrix_destroy(plain);
 
-    // The triangular solve, whose alpha divides the right-hand side, measured.
     sparse_matrix_float lower = sparse_matrix_create_float(3, 3);
     sparse_set_matrix_property(lower, SPARSE_LOWER_TRIANGULAR);
     sparse_insert_entry_float(lower, 2, 0, 0);
@@ -245,7 +224,6 @@ int main(void)
            "a triangular solve with a leading dimension of one", "SPARSE_ILLEGAL_PARAMETER, not a crash");
     sparse_matrix_destroy(lower);
 
-    // The norms and the trace, measured.
     sparse_matrix_float norms = sparse_matrix_create_float(2, 3);
     sparse_insert_entry_float(norms, -1, 0, 0);
     sparse_insert_entry_float(norms, 2, 0, 1);
@@ -270,7 +248,6 @@ int main(void)
     expect(near(sparse_matrix_trace_float(norms, 5), 0.0, 1e-6), "a trace past the last column", "0");
     sparse_matrix_destroy(norms);
 
-    // The double side of the three that have one, and of the levels 1 to 3.
     sparse_matrix_double D = sparse_matrix_create_double(2, 2);
     sparse_insert_entry_double(D, 1, 0, 0);
     sparse_insert_entry_double(D, 2, 0, 1);
@@ -293,7 +270,6 @@ int main(void)
            "a double inner product", "11");
     sparse_matrix_destroy(D);
 
-    // The level-3 forms, and the permutations, and the outer product.
     sparse_matrix_float A3 = sparse_matrix_create_float(2, 3);
     sparse_insert_entry_float(A3, 1, 0, 0);
     sparse_insert_entry_float(A3, 2, 0, 2);
@@ -301,8 +277,6 @@ int main(void)
     sparse_insert_entry_float(A3, 4, 1, 2);
     float B3[12] = {1, 2, 9, 9, 3, 4, 9, 9, 5, 6, 9, 9};
     float C3[6] = {0, 0, 0, 0, 0, 0};
-    // B is 3x2 with a leading dimension of 3, so its rows are (1,2), (9,3) and (9,5) and the product is
-    // 1*1 + 0*9 + 2*9, 1*2 + 0*3 + 2*5, 0*1 + 3*9 + 4*9 and 0*2 + 3*3 + 4*5.
     sparse_status denseStatus = sparse_matrix_product_dense_float(CblasRowMajor, CblasNoTrans, 2, 1.0f, A3, B3, 3, C3, 2);
     snprintf(detail, sizeof detail, "status %d, %g, %g, %g, %g", denseStatus, C3[0], C3[1], C3[2], C3[3]);
     expect(denseStatus == SPARSE_SUCCESS && C3[0] == 19.0f && C3[1] == 20.0f && C3[2] == 63.0f && C3[3] == 45.0f,
@@ -361,7 +335,6 @@ int main(void)
                outer == NULL,
            "an outer product with more nonzeros than columns", "SPARSE_ILLEGAL_PARAMETER and no matrix");
 
-    // And the batch insertions, measured: appending, overwriting, and a count of zero.
     sparse_matrix_float batch = sparse_matrix_create_float(4, 4);
     expect(sparse_insert_entries_float(batch, 3, (float[]){1, 2, 3}, (sparse_index[]){0, 2, 1},
                                        (sparse_index[]){3, 0, 2}) == SPARSE_SUCCESS &&

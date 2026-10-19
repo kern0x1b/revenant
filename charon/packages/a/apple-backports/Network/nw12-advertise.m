@@ -1,13 +1,3 @@
-/*
- * The Bonjour service a listener advertises, and what it says about itself: the calls of
- * advertise_descriptor.h that arrived in iOS 12.
- *
- * A descriptor is what a program hands a listener to say it is publishing a service of that type
- * under that name, with a TXT record. Nothing here reaches the network: the name is decided, and the
- * record kept, when the listener that is given the descriptor starts, which is nw12-listener.m's
- * business.
- */
-
 #import "CharonNW.h"
 #import "CharonNWSupport.h"
 

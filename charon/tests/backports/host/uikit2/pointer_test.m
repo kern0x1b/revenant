@@ -388,11 +388,6 @@ void charon_windowed_run(UIWindow *window)
                       ^UIPointerShape *(id style) { return [style valueForKey:@"pointerShape"]; }, ^NSInteger(id style) { return [[style valueForKey:@"constrainedAxes"] integerValue]; }));
     agree(@"pointer interaction", interaction_lines(ourInteraction, view), interaction_lines([UIPointerInteraction class], far));
     agree(@"hover gesture recognizer", hover_lines(ourRecognizer, view), hover_lines([UIHoverGestureRecognizer class], far));
-    // What the port answers of the members that arrived after the class did. zOffset (16.1),
-    // altitudeAngle and the two azimuth methods (16.4) are carried by UIHoverGestureRecognizer+Hover16.m
-    // and answer what the header documents for a device that cannot hover, which is what the host's own
-    // class answers too - measured, and the check that says so is the hover16 group. rollAngle is 17.5
-    // and stays with the release.
     charon_check([ourRecognizer instancesRespondToSelector:@selector(zOffset)] && [ourRecognizer instancesRespondToSelector:@selector(altitudeAngle)] &&
                      ![ourRecognizer instancesRespondToSelector:NSSelectorFromString(@"rollAngle")],
                  "the hover recognizer answers the members of 16.1 and 16.4 and leaves rollAngle of 17.5 to the release",

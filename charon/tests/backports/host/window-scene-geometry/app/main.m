@@ -2,12 +2,6 @@
 #import <objc/message.h>
 #include <stdio.h>
 
-// A bundled Mac Catalyst app with the iPad idiom and a window, so a window scene exists the way an app meets one. The scene delegate runs the
-// same checks on the host's own UIWindowScene and, in the port's build, on the port's (compiled with the classes renamed, so the host's is
-// still reached by name): the geometry request's refusal, and the windowing behaviours class the scene's own answer is made of. Each check
-// writes one "side<TAB>check<TAB>value" line to the file named by CHARON_SCENE_OUT, then the app quits. The scene's own windowingBehaviors is
-// host-only evidence (CHARON_HOST_ONLY_OUT): the port answers nil there, as iPhone and iPad do, so it is not compared.
-
 static FILE *out;
 static FILE *hostOnly;
 static const char *side;
@@ -34,7 +28,6 @@ static NSString *class_name(id object)
     return [name hasPrefix:@"CharonPort"] ? [name substringFromIndex:10] : name;
 }
 
-// The refusal the request gives: the handler's error, and whether the handler ran before the request returned.
 static void geometry_checks(id scene, UIWindowSceneGeometryPreferencesIOS *preferences)
 {
     report("geometry-responds", yes_no([scene respondsToSelector:@selector(requestGeometryUpdateWithPreferences:errorHandler:)]));
@@ -49,13 +42,10 @@ static void geometry_checks(id scene, UIWindowSceneGeometryPreferencesIOS *prefe
     report("geometry-error-domain", seen.domain);
     report("geometry-error-code", [NSString stringWithFormat:@"%ld", (long)seen.code]);
     report("geometry-error-description", seen.localizedDescription);
-    // A nil handler is allowed, and the request still returns.
     [scene requestGeometryUpdateWithPreferences:preferences errorHandler:nil];
     report("geometry-nil-handler", @"returned");
 }
 
-// The windowing behaviours class: made at run time (its -init is unavailable to the compiler, as the header says), with both flags NO, and
-// neither flag changed by a set.
 static void windowing_checks(void)
 {
     Class behaviours = [UISceneWindowingBehaviors class];

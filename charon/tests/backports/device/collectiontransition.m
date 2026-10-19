@@ -33,10 +33,6 @@ static NSString *const results_folder = @"/private/var/backports";
 }
 @end
 
-// Records what the collection view answers while it runs a transition between two flow layouts:
-// the progress the transition layout reports, where a cell sits at either end of it, that finishing
-// settles on the layout it was going to and cancelling settles back on the one it came from, and
-// what each completion block is handed.
 @interface TransitionDelegate : UIResponder <UIApplicationDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
@@ -105,9 +101,6 @@ static NSString *const results_folder = @"/private/var/backports";
     NSIndexPath *first = [NSIndexPath indexPathForItem:0 inSection:0];
     CGRect startFrame = [view layoutAttributesForItemAtIndexPath:first].frame;
 
-    // A transition to another layout, driven to its end: the progress ends at the end, the cell
-    // has moved to where the new layout puts it, the view keeps the new layout and the completion
-    // is handed a completed and a finished.
     __block BOOL called = NO, completedSeen = NO, finishedSeen = NO;
     UICollectionViewTransitionLayout *transition = [view startInteractiveTransitionToCollectionViewLayout:large
                                                                                                completion:^(BOOL completed, BOOL finished) {
@@ -131,7 +124,6 @@ static NSString *const results_folder = @"/private/var/backports";
         CGRect endFrame = [view layoutAttributesForItemAtIndexPath:first].frame;
         charon_check(!CGRectEqualToRect(endFrame, startFrame), @"the cell ends where the new layout puts it", nil);
 
-        // A transition that is called off settles back where it started and says it did not complete.
         __block BOOL cancelled = NO, completedSeen2 = NO, finishedSeen2 = NO;
         UICollectionViewFlowLayout *third = [[UICollectionViewFlowLayout alloc] init];
         third.itemSize = CGSizeMake(60, 60);
@@ -149,8 +141,6 @@ static NSString *const results_folder = @"/private/var/backports";
             charon_check(finishedSeen2, @"cancelling hands a finished completion", nil);
             charon_check(view.collectionViewLayout == large, @"cancelling settles back on the layout it came from", nil);
 
-            // Setting the layout with an animation is the transition run to its end, and the
-            // block there is handed a finished alone.
             __block BOOL setCalled = NO, setFinished = NO;
             UICollectionViewFlowLayout *fourth = [[UICollectionViewFlowLayout alloc] init];
             fourth.itemSize = CGSizeMake(70, 70);

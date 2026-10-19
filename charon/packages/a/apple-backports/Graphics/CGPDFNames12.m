@@ -1,14 +1,10 @@
 #import <CoreGraphics/CoreGraphics.h>
 
-// The PDF names that iOS 12.0 adds: the tag property names, and CGPDFTagTypeGetName, which answers the name of a tag type.
-// The strings are the ones the release's CoreGraphics holds (facts/CoreGraphics/PDFNames.md).
 const CFStringRef kCGPDFTagPropertyActualText = CFSTR("CGPDFTagPropertyActualText");
 const CFStringRef kCGPDFTagPropertyAlternativeText = CFSTR("CGPDFTagPropertyAlternativeText");
 const CFStringRef kCGPDFTagPropertyLanguageText = CFSTR("CGPDFTagPropertyLanguageText");
 const CFStringRef kCGPDFTagPropertyTitleText = CFSTR("CGPDFTagPropertyTitleText");
 
-// The name a tag type has in a PDF, as the release's CGPDFTagTypeGetName gives it: the role of the tag with its slash,
-// NULL for a value that is not a tag type. The values are the enumeration's (CGPDFTagType, 13.0).
 const char *CGPDFTagTypeGetName(CGPDFTagType tagType)
 {
     switch (tagType) {

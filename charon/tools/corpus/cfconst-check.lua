@@ -1,38 +1,20 @@
--- Reads each row of tools/corpus/cfconst.tsv back out of the dyld cache it names, and compares it with the initializer the row carries.
--- Usage: CHARON_ROOT=<worktree> xmake l tools/corpus/cfconst-check.lua
---
--- The cache is CACHE_ROOT/<release>/dyld_shared_cache_<arch> (CACHE_ROOT defaults to ~/.charon/dyld). Its symbols are read by
--- tools/corpus/cache-value.lua, which goes through the project's reader (modules/apple/dyld.lua). One call per cache: the rows that name
--- it are asked together, and cache-value answers with one line per symbol, or with dashes for a symbol no image of the cache exports.
---
--- A string row (@"..." or CFSTR("...")) is judged when its text is printable ASCII and the reader resolved the pointer: the text the cache
--- holds must equal the initializer's text. A number row is judged on the four bytes of the cache value: its float32 bits must equal the
--- number's. A struct row (a { n, n, ... } of integers) is judged field by field: the symbol is read as one word per field, at the
--- cache's pointer size (8 on arm64, 4 on armv7), and each word must equal its field. A row is reported by name, with what the cache held,
--- when it differs, when no image exports it, or when the reader gave no value.
---
--- Exits 1 when any row differs or is absent, or when no row was judged at all (a check that judged nothing proves nothing).
-
 local measured = import("gen.measured", {rootdir = path.join(os.scriptdir(), ".."), anonymous = true})
 
 local root = os.getenv("CHARON_ROOT") or path.join(os.scriptdir(), "..", "..")
 local cache_root = os.getenv("CACHE_ROOT") or path.join(os.getenv("HOME"), ".charon", "dyld")
 local cache_value = path.join(os.scriptdir(), "cache-value.lua")
 
--- The file of a cache named "<release> <arch>", as the held ladder keeps it.
 local function cache_file(cache)
     local release, arch = string.match(cache, "^(%S+) (%S+)$")
     assert(release ~= nil, "the cache named in the table is not '<release> <arch>': " .. cache)
     return path.join(cache_root, release, "dyld_shared_cache_" .. arch)
 end
 
--- The pointer size of a cache, by its architecture, as cache-value reads it (a 64-bit architecture's name has "64" in it).
 local function pointer_size_of(cache)
     local arch = string.match(cache, "^%S+ (%S+)$")
     return string.find(arch, "64") and 8 or 4
 end
 
--- The integers of a struct initializer, "{ 0, 0, 0 }" -> {0, 0, 0}, or nil when it is not a braced list of integers.
 local function fields_of(initializer)
     local body = string.match(initializer, "^{(.*)}$")
     if body == nil then
@@ -50,8 +32,6 @@ local function fields_of(initializer)
     return out
 end
 
--- What a row's initializer says it holds: {kind = "string", text = ...}, {kind = "number", value = ...}, {kind = "struct", fields = ...},
--- or nil.
 local function expected_of(initializer)
     local quoted = string.match(initializer, '^@"(.*)"$') or string.match(initializer, '^CFSTR%("(.*)"%)$')
     if quoted ~= nil then
@@ -68,8 +48,6 @@ local function expected_of(initializer)
     return nil
 end
 
--- The symbol file cache-value reads: name, width, pointer and text flags. A struct is read as one word per field, so its width is the
--- field count times the cache's pointer size.
 local function symbol_line(row, expected)
     if expected.kind == "string" then
         return string.format("%s\tp\tp\ts", row.name)
@@ -79,10 +57,8 @@ local function symbol_line(row, expected)
     return string.format("%s\t%d\t-\t-", row.name, #expected.fields * pointer_size_of(row.cache))
 end
 
--- Reads the values of one cache's rows. Returns name -> the reader's fields, or nil for a symbol no image exports.
 local function read_cache(cache, rows)
     local file = cache_file(cache)
-    -- the symbol file goes beside the worktree's other run output, not into the system temp directory
     local runs = path.join(root, ".agent-work", "runs")
     os.mkdir(runs)
     local symbols = path.join(runs, "cfconst-symbols-" .. string.gsub(cache, " ", "-") .. ".tsv")
@@ -111,7 +87,6 @@ local function read_cache(cache, rows)
     return found
 end
 
--- The words of a struct as the cache holds them: the hex column's bytes, one signed integer per pointer-sized field.
 local function words_of(hex, pointer_size, count)
     local bytes = (string.gsub(hex, "%x%x", function (h) return string.char(tonumber(h, 16)) end))
     local out = {}

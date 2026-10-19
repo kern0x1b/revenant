@@ -1,10 +1,5 @@
--- The TOML that charon.toml, the platform facts and the templates use, read into Lua values: TOML 1.0 without
--- dates. A table is a Lua table keyed by name, an array is a sequence, and toml.keys gives a table's keys in the
--- order the file wrote them, because the generated output depends on that order. Anything outside the subset is
--- refused with its line, rather than read as something close to it.
-
-local ORDERS = {}   -- table -> keys in the order they were written
-local ARRAYS = {}   -- table -> true when it came from [...] or [[...]]
+local ORDERS = {}
+local ARRAYS = {}
 
 local function new_table()
     local map = {}
@@ -50,7 +45,6 @@ function is_table(value)
     return type(value) == "table" and not is_array(value)
 end
 
--- The keys of a table in file order, then any the table gained since, sorted.
 function keys(map)
     local listed, seen = {}, {}
     for _, key in ipairs(ORDERS[map] or {}) do
@@ -72,7 +66,6 @@ function keys(map)
     return listed
 end
 
--- A deep copy that keeps order and the array marks.
 function copy(value)
     if type(value) ~= "table" then
         return value
@@ -93,7 +86,6 @@ function copy(value)
     return out
 end
 
--- dict(base, **over): the keys of base in their order, values from over where it names them, then over's new keys.
 function merge(base, over)
     local out = copy(base)
     if not ORDERS[out] then
@@ -152,7 +144,6 @@ local function is_newline(state)
     return peek(state) == "\n" or (peek(state) == "\r" and peek(state, 1) == "\n")
 end
 
--- What may follow a value on its line: blanks, a comment, then the end of the line or of the text.
 local function end_of_line(state)
     skip_blank(state)
     skip_comment(state)
@@ -165,7 +156,6 @@ local function end_of_line(state)
     newline(state)
 end
 
--- Inside an array, blanks, newlines and comments all separate values.
 local function skip_separators(state)
     while true do
         skip_blank(state)
@@ -269,7 +259,6 @@ local function multiline_string(state, quote, escapes)
             return table.concat(parts)
         end
         if escapes and peek(state) == "\\" and state.text:match("^\\[ \t]*\r?\n", state.pos) then
-            -- a backslash at the end of a line joins it with the next non-blank text
             advance(state)
             while peek(state):match("^[ \t\r\n]$") do
                 if peek(state) == "\n" then
@@ -445,7 +434,6 @@ function key_path(state)
     end
 end
 
--- The table a header names, created on the way; an array of tables gets a new element when the header is [[...]].
 local function header_table(state, root, path, element)
     local target = root
     for index = 1, #path do
@@ -478,7 +466,6 @@ local function header_table(state, root, path, element)
     return target
 end
 
--- A new table holding values[name] for each name, in the order given; a name with no value is left out.
 function map_from(names, values)
     local out = new_table()
     for _, key in ipairs(names) do

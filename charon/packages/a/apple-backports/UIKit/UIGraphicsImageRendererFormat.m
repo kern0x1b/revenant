@@ -43,8 +43,6 @@
     _opaque = opaque;
 }
 
-// The deprecated flag is the range: YES makes the range extended; NO takes an extended range down to standard and leaves the others alone.
-// The host behaves so (tests/backports/host/storage-config).
 - (BOOL)prefersExtendedRange
 {
     return _preferredRange == UIGraphicsImageRendererFormatRangeExtended;
@@ -58,7 +56,6 @@
         _preferredRange = UIGraphicsImageRendererFormatRangeStandard;
 }
 
-// The range is kept as set; the host answers automatic (0) by default and keeps what it is given (tests/backports/host/storage-config).
 - (UIGraphicsImageRendererFormatRange)preferredRange
 {
     return _preferredRange;

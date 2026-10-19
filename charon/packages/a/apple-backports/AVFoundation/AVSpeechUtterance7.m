@@ -1,17 +1,5 @@
 #import <AVFAudio/AVSpeechSynthesis.h>
 
-// AVSpeechUtterance is a data class: the text, the voice and the four numbers that shape how the text is
-// spoken, held as the caller set them. Nothing here speaks; the engine that does is AVSpeechSynthesizer,
-// a later slice. What this class answers is what the release's own class answers, measured against the
-// host (tests/backports/host/avf-speech/run.sh) and not typed from the header:
-//
-//   * +speechUtteranceWithString: and -initWithString: give the defaults - rate 0.5, pitch 1, volume 1,
-//     both delays 0. A plain -init does not: it leaves every number at zero.
-//   * rate and volume floor at 0: a negative or NaN value becomes 0. pitchMultiplier floors at 0.5: a
-//     negative, zero or NaN value becomes 0.5. None of the three has a ceiling - 2 stays 2.
-//   * the string is retained, not copied: a caller who appends to its NSMutableString sees the change.
-//   * a copy shares the string and the voice and copies every number.
-
 @implementation AVSpeechUtterance {
     NSString *_speechString;
     AVSpeechSynthesisVoice *_voice;
@@ -22,12 +10,8 @@
     NSTimeInterval _postUtteranceDelay;
 }
 
-// The SDK header also declares two later properties on this class, and clang synthesises an ivar and
-// accessors for any declared property this implementation leaves out: without these lines the port would
-// answer nil and NO for them silently. @dynamic says the port does not carry them, so the selectors are
-// unrecognized, as they are on a release that lacks them (checks.m asserts this).
-@dynamic attributedSpeechString;             // iOS 10
-@dynamic prefersAssistiveTechnologySettings; // iOS 14
+@dynamic attributedSpeechString;
+@dynamic prefersAssistiveTechnologySettings;
 
 + (instancetype)speechUtteranceWithString:(NSString *)string
 {
@@ -45,7 +29,6 @@
     return self;
 }
 
-// NaN fails both comparisons, so it takes the floor as well as a negative value does.
 - (void)setRate:(float)rate
 {
     _rate = (rate >= 0.0f) ? rate : 0.0f;
@@ -143,8 +126,6 @@
     [coder encodeDouble:_postUtteranceDelay forKey:@"postUtteranceDelay"];
 }
 
-// The voice is decoded as NSObject until AVSpeechSynthesisVoice is carried: naming that class here now
-// would make this image import a class the 6.1.3 release does not have.
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init])) {

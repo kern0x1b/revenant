@@ -1,10 +1,3 @@
--- `trace`: the trace-only defaults of a framework, written into its build directory (trace/): the stubs of every declared member it
--- does not implement, one class per category (or one class object where the release lacks the class and every member is a stub),
--- the members left out with their reasons (skipped.tsv), one row per stub (stubs.tsv) and the class-object decisions (classes.tsv).
--- --all: every framework that has a snapshot. The stubs are compiled only with CHARON_TRACE_DEFAULTS and are never shipped.
--- The stubs read the typed fields of the declaration shards (design-foundation.md 5.7), not the header parser and not declaration text;
--- the corpus of ledgers and the surface table is --coordination (required).
-
 local layout = import("layout", {anonymous = true})
 local snapshot = import("spec", {anonymous = true})
 local surface = import("surface", {anonymous = true})
@@ -23,12 +16,9 @@ local targets = import("targets", {anonymous = true})
 local sdk_info = import("sdk", {anonymous = true})
 
 local INHERITED_REASON = "init/new/copy the surface does not list: the inherited NSObject behaviour is what a call reaches"
--- The status of a C function the trace layer stubs.
 local GENERABLE = "generable"
--- The status of a row the 6.1.3 release has: it is not stubbed.
 local IMPLEMENTED = "implemented"
 
--- The first lines of a generated file: the mark, what the stubs are, and the import and the guard.
 local function preamble(fw)
     return {
         layout.constants().MARK,
@@ -43,7 +33,6 @@ local function preamble(fw)
     }
 end
 
--- Sorts a list of records in place by the order.less of their fields, in the order given (the first field that differs decides).
 local function sort_by(list, fields)
     table.sort(list, function(a, b)
         for _, field in ipairs(fields) do
@@ -56,7 +45,6 @@ local function sort_by(list, fields)
     return list
 end
 
--- The stub rows, each {api, kind}, unique and sorted by api and then kind (sorted(set(stub_rows)) of tools/gen.py@52253c0650).
 local function sorted_stub_rows(rows)
     local seen, out = {}, {}
     for _, row in ipairs(rows) do
@@ -69,8 +57,6 @@ local function sorted_stub_rows(rows)
     return sort_by(out, {1, 2})
 end
 
--- The reason an inherited selector is left out, or nil when its stub is kept: the surface does not list it, or the headers declare it
--- unavailable (an override the headers declare unavailable is not one the port needs: NSObject's behaviour is what a call reaches).
 local function inherited_reason(m, surface_methods, sdk_release)
     if not surface_methods[m.api] then
         return INHERITED_REASON
@@ -81,8 +67,6 @@ local function inherited_reason(m, surface_methods, sdk_release)
     return nil
 end
 
--- The members the spec names for one class, after the inherited selectors the surface does not list, or the headers declare unavailable,
--- are left out. Returns the classes in the order the spec names them, each with its members kept, and appends the members left out to skipped.
 local function without_inherited(found, surface_methods, skipped, sdk_release)
     local kept_classes = {}
     for _, cls in ipairs(found.order) do
@@ -105,7 +89,6 @@ local function without_inherited(found, surface_methods, skipped, sdk_release)
     found.order = kept_classes
 end
 
--- The stub keys of the members: a method by its api, a property by the property it belongs to.
 local function stub_keys_of(found)
     local keys = {}
     for _, cls in ipairs(found.order) do
@@ -120,8 +103,6 @@ local function stub_keys_of(found)
     return keys
 end
 
--- The lines of one class: its declarations in a category when the release has the class, or its @implementation when generated,
--- then its stubs. Returns the number of stubs written; the rows of the stubs and the members left out are appended.
 local function class_lines(fw, cls, members, generated, lines, stub_rows, skipped)
     if generated then
         table.insert(lines, "@implementation " .. cls)
@@ -147,15 +128,12 @@ local function class_lines(fw, cls, members, generated, lines, stub_rows, skippe
     return written
 end
 
--- The umbrella a nested target belongs to (Accelerate for Accelerate/vImage), or nil. The umbrella holds the C functions snapshot of its
--- nested targets, so a nested target is stubbed from it.
 local function umbrella_of(tree, fw)
     local umbrellas = targets.umbrellas(tree)
     local names = {}
     for umbrella in pairs(umbrellas) do
         table.insert(names, umbrella)
     end
-    -- byte order: a target named by two frameworks (the libc aliases of xlocale) has one umbrella, the same on every run
     table.sort(names, order.less)
     for _, umbrella in ipairs(names) do
         for _, target in ipairs(umbrellas[umbrella].targets) do
@@ -167,10 +145,6 @@ local function umbrella_of(tree, fw)
     return nil
 end
 
--- The C functions of the snapshot the trace layer stubs, sorted by api. A framework with a snapshot of its own is stubbed from it. A nested
--- target with none (vImage, vecLib) takes the generable functions of its umbrella's snapshot that its own shard declares: the umbrella has
--- no trace folder (it has no shard), so a function the nested target declares is stubbed under that target, and a generable function no
--- nested target declares is left for the reconcile.
 local function generable_functions(tree, fw)
     local own = functions.load(tree, fw)
     local has_own = false
@@ -189,8 +163,6 @@ local function generable_functions(tree, fw)
     return sort_by(rows, {"api"})
 end
 
--- The environment of the stub rule for one framework: the typed facts of its members by api, the functions by name, the typedef index and
--- the declared names (headers), the overrides, and the hand sources.
 local function rule_env(tree, fw, facts, overridden, release_missing)
     local by_api = {}
     for _, m in ipairs(facts.members) do
@@ -210,10 +182,6 @@ local function rule_env(tree, fw, facts, overridden, release_missing)
     }
 end
 
--- The 6.1.3 ledger rows of one framework (the folder --ledger-rows names, gen.lua ledger --rows), as the stub rule reads them: the
--- statuses of the rows the release lacks, and the same map as the release check (nil for a framework absent from 6.1.3, where every
--- member is missing and every member is stubbed). An implemented row is not listed, as ledger-w45 never listed one: it is neither checked
--- nor stubbed. A framework with no rows that is not absent is not checked: it lists no rows, so no member is stubbed.
 local function release_of(tree, corpus, rows_dir, fw)
     if surface.has_ledger(corpus, rows_dir, fw) then
         local lacks = {}
@@ -230,8 +198,6 @@ local function release_of(tree, corpus, rows_dir, fw)
     return {}, {}
 end
 
--- The class properties of a framework's shard, by the dotted name the ledgers and the registry give them (Cls.name): each one's api
--- (+[Cls name]). surface.canonical_member gives the instance form of a dotted name, so the class property is keyed through this map.
 function class_property_apis(facts)
     local out = {}
     for _, m in ipairs(facts.members) do
@@ -242,8 +208,6 @@ function class_property_apis(facts)
     return out
 end
 
--- The overrides of a framework: the canonical keys its registry rows cover, and for a class property the key of its class accessor
--- (both keys: the instance form is what surface.canonical_member names).
 function overrides_of(tree, fw, facts)
     local class_props = class_property_apis(facts)
     local overridden = {}
@@ -256,8 +220,6 @@ function overrides_of(tree, fw, facts)
     return overridden
 end
 
--- The surface rows with the key of each class property (canon, the api of its class accessor): the class decisions compare it with the
--- stub keys. A copy: the surface table is shared.
 local function with_class_keys(rows, facts)
     local class_props = class_property_apis(facts)
     local out = {}
@@ -274,7 +236,6 @@ local function with_class_keys(rows, facts)
     return out
 end
 
--- Writes the trace layer of one framework.
 local function trace_one(args, fw, sdk_release)
     local tree, corpus = args.tree, args.coordination
     local spec = snapshot.load(tree, fw)
@@ -284,7 +245,6 @@ local function trace_one(args, fw, sdk_release)
     local env = rule_env(tree, fw, facts, overridden, release_missing)
     local found, skipped = stubs.members(spec, env)
     local stub_keys = stub_keys_of(found)
-    -- the reasons the class decisions read: taken before the inherited-selector rule adds its own, as the oracle does
     local skip_reasons = {}
     for _, s in ipairs(skipped) do
         skip_reasons[s.api] = s.reason
@@ -335,10 +295,8 @@ local function trace_one(args, fw, sdk_release)
     print(string.format("trace %s: %d stubs in %d classes, %d members left out (skipped.tsv)", fw, stubbed, #found.order, #skipped))
 end
 
--- Returns the exit status.
 function run(args)
     assert(args.coordination, "trace needs --coordination: the corpus folder")
-    -- without --ledger-rows, the corpus's own 6.1.3 ledger is read (surface.ledger_6_1_3, as scope reads it); gen.lua ledger --rows writes another folder
     args.ledger_rows = args.ledger_rows or surface.ledger_6_1_3()
     assert(args.sdk, "trace needs --sdk: the iPhoneOS SDK whose release names the surface table")
     local sdk_release = sdk_info.discover(args.sdk).version

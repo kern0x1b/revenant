@@ -1,9 +1,3 @@
-// listseparator_test.m - the list separator configuration of iOS 14.5, port against host.
-//
-// Same shape as the rest of this suite: the port's class is renamed by uikit2/run.sh and sits beside the
-// system's own in one process. The system side is the SDK's own class - the 16.4 SDK this package compiles
-// against declares UIListSeparatorConfiguration, and so does the Catalyst SDK this links - so nothing here
-// redeclares the system side and this group's other half comes out of a framework.
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 #import "check.h"
@@ -33,10 +27,6 @@ static NSString *insets(NSDirectionalEdgeInsets e)
     return [NSString stringWithFormat:@"%g %g %g %g", (double)e.top, (double)e.leading, (double)e.bottom, (double)e.trailing];
 }
 
-// The colour ROLE, and why it is the role. The host's separator colour and multiple-selection colour are
-// 13.0 dynamic catalog entries with no name on 6.1.3 or 4.3, so neither the name nor the four components
-// are shared between the two releases - the host resolves to 0 0 0 0.098 and the port's row is the iOS one.
-// What is shared is that a colour is there and is not the clear colour, and that is what this asks.
 static NSString *colourRole(UIColor *color)
 {
     if (!color)
@@ -46,15 +36,9 @@ static NSString *colourRole(UIColor *color)
     return @"present";
 }
 
-// One field at a time, the way facts/UIKit/UIListSeparatorConfiguration145.md M5 measured the host: a pair
-// that is identical apart from that one field, and the two answers. The port's class and the system's are
-// asked the same question side by side, so the comparison is between two classes and never between two
-// objects of the same one.
 static void equality(NSString *what, void (^write)(id configuration), Class port, Class system)
 {
     UICollectionLayoutListAppearance appearance = UICollectionLayoutListAppearancePlain;
-    // NSObject-typed, because -isEqual: and -hash are declared there and an `id` has no visible
-    // declaration of either under ARC; the objects themselves are this class on both sides.
     NSObject *written = [[port alloc] initWithListAppearance:appearance];
     NSObject *fresh = [[port alloc] initWithListAppearance:appearance];
     write(written);
@@ -93,7 +77,6 @@ static void check_one_appearance(NSInteger appearance, NSString *label)
     BOTH([NSString stringWithFormat:@"the %@ visual effect is nil until written", label],
          ours.visualEffect ? @"set" : @"nil", theirs.visualEffect ? @"set" : @"nil");
 
-    // Every write, read back on both sides.
     ours.topSeparatorVisibility = 2; theirs.topSeparatorVisibility = 2;
     ours.bottomSeparatorVisibility = 1; theirs.bottomSeparatorVisibility = 1;
     ours.topSeparatorInsets = NSDirectionalEdgeInsetsMake(1, 2, 3, 4);
@@ -118,8 +101,6 @@ static void check_one_appearance(NSInteger appearance, NSString *label)
          ours.multipleSelectionColor == [UIColor greenColor] ? @"same" : @"copied",
          theirs.multipleSelectionColor == [UIColor greenColor] ? @"same" : @"copied");
 
-    // The copy: measured on the host, a DIFFERENT object that holds every written value, including the same
-    // colour instances. Asking for both is what tells a copy from a hand-over of the receiver.
     CharonHostUIListSeparatorConfiguration *ourCopy = [ours copy];
     UIListSeparatorConfiguration *theirCopy = [theirs copy];
     BOTH([NSString stringWithFormat:@"a %@ copy is not its receiver", label], ourCopy == ours ? @"same" : @"other",
@@ -132,10 +113,6 @@ static void check_one_appearance(NSInteger appearance, NSString *label)
     BOTH([NSString stringWithFormat:@"a %@ copy keeps the colour instance", label],
          ourCopy.color == ours.color ? @"same" : @"other", theirCopy.color == theirs.color ? @"same" : @"other");
 
-    // The visual effect, which is 15.0 and is the one member this case asks about by NAME rather than by
-    // value, because its whole shape is the answer (facts/UIKit/UIListSeparatorConfiguration145.md, M4):
-    // nil until written, a copy on the way in so the getter never answers the instance the caller set, carried
-    // by -copyWithZone: as another copy, and archived under the property's own name.
     UIBlurEffect *effect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemThinMaterial];
     ours.visualEffect = effect;
     theirs.visualEffect = effect;
@@ -144,8 +121,6 @@ static void check_one_appearance(NSInteger appearance, NSString *label)
          theirs.visualEffect ? NSStringFromClass([theirs.visualEffect class]) : @"nil");
     BOTH([NSString stringWithFormat:@"the %@ visual effect is copied on the way in", label],
          ours.visualEffect == effect ? @"same" : @"copy", theirs.visualEffect == effect ? @"same" : @"copy");
-    // The copy is taken HERE rather than above: a copy carries what the receiver held when it was made, so a
-    // copy made before the effect was written is the same object on both sides and would say nothing.
     UIListSeparatorConfiguration *ourEffectCopy = [ours copy];
     UIListSeparatorConfiguration *theirEffectCopy = [theirs copy];
     BOTH([NSString stringWithFormat:@"the %@ copy carries the visual effect", label],
@@ -155,16 +130,6 @@ static void check_one_appearance(NSInteger appearance, NSString *label)
          ourEffectCopy.visualEffect == ours.visualEffect ? @"same" : @"other",
          theirEffectCopy.visualEffect == theirs.visualEffect ? @"same" : @"other");
 
-    // The archive. The keys are the host's own, read out of the host's archive plist, so this compares the
-    // round trip rather than the bytes: both sides encode through a secure-coding archiver and read back.
-    // One NSError per call, and the lengths as integers.  The first version of this section shared one
-    // `error` across four calls and printed `ourArchive.length` - an NSUInteger - through a `%@`: CFString
-    // called -respondsToSelector: on the number, and the whole group died with SIGSEGV inside
-    // objc_opt_respondsToSelector before it could report anything.  That is the harness's own format string,
-    // not the archive round trip: the crash was in the string built on the way to reporting a failure, and
-    // it fired whether or not there was one.  Measured under AddressSanitizer, the stack was
-    // objc_opt_respondsToSelector <- __CFSTRING_IS_CALLING_OUT_TO_AN_OBJECT_FORMAT_ARGUMENT_WITH_CONTEXT__ <-
-    // +[NSString stringWithFormat:] <- check_one_appearance at this line.
     NSError *ourError = nil, *theirError = nil, *ourReadError = nil, *theirReadError = nil;
     NSData *ourArchive = [NSKeyedArchiver archivedDataWithRootObject:ours requiringSecureCoding:YES error:&ourError];
     NSData *theirArchive = [NSKeyedArchiver archivedDataWithRootObject:theirs requiringSecureCoding:YES error:&theirError];
@@ -199,8 +164,6 @@ static void check_one_appearance(NSInteger appearance, NSString *label)
     }
 }
 
-// All five appearances the 27.0 header declares. Measured: the host gives the same six values for every one
-// of them, and the case asks all five so that a port which switched on the appearance would be red.
 static void check_every_appearance(void)
 {
     NSArray *names = @[@"plain", @"grouped", @"inset grouped", @"sidebar", @"sidebar plain"];
@@ -208,12 +171,6 @@ static void check_every_appearance(void)
         check_one_appearance(i, names[(NSUInteger)i]);
 }
 
-// -init and +new are NS_UNAVAILABLE and neither refuses; what they answer is NOT the initialiser's shape.
-// The insets are ZERO where the initialiser gives the automatic ones, and both colours are nil. That is
-// measured and it is the whole of what these two rows are.
-// The equality and the hash, field by field (M5). One call each, here, rather than inside
-// check_one_appearance: the answer does not depend on the appearance and ten repetitions of it would be ten
-// copies of one measurement.
 static void check_the_equality(void)
 {
     Class port = [CharonHostUIListSeparatorConfiguration class], system = [UIListSeparatorConfiguration class];
@@ -230,13 +187,10 @@ static void check_the_equality(void)
     equality(@"the visual effect joins the equality and NOT the hash", ^(id c) {
         [c setVisualEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleSystemThinMaterial]];
     }, port, system);
-    // Equal values that are not the same objects, which a value equality must call equal and an identity
-    // cannot: this is the pair the earlier measurement in this tree called unequal.
     equality(@"equal colours from separate objects are equal", ^(id c) {
         [c setColor:[UIColor colorWithRed:1 green:0 blue:0 alpha:1]];
         [c setMultipleSelectionColor:[UIColor colorWithRed:0 green:1 blue:0 alpha:1]];
     }, port, system);
-    // And a configuration is never equal to another class's object.
     NSObject *ours = [[port alloc] initWithListAppearance:UICollectionLayoutListAppearancePlain];
     NSObject *theirs = [[system alloc] initWithListAppearance:UICollectionLayoutListAppearancePlain];
     BOTH(@"a configuration is not equal to a view",

@@ -1,13 +1,7 @@
-// The sqlite3_str string builder of packages/a/apple-backports/SQLite3/StringBuilder.c against the HOST's libsqlite3, in one
-// process. The port's functions are compiled with their names renamed to charon_port_* (run.sh), so each scenario drives a
-// host builder and a port builder with the same steps and compares, after every step, the length, the error code, the text
-// and the finished string. Each scenario prints "ok <name>" or "FAIL <name> step=<step>", and the process exits with the number
-// of failures.
 #include <stdio.h>
 #include <string.h>
 #include <sqlite3.h>
 
-// the host's own, under the names the library exports
 sqlite3_str *sqlite3_str_new(sqlite3 *);
 char *sqlite3_str_finish(sqlite3_str *);
 void sqlite3_str_append(sqlite3_str *, const char *, int);
@@ -19,7 +13,6 @@ int sqlite3_str_errcode(sqlite3_str *);
 int sqlite3_str_length(sqlite3_str *);
 char *sqlite3_str_value(sqlite3_str *);
 
-// the port's, renamed at build time
 sqlite3_str *charon_port_sqlite3_str_new(sqlite3 *);
 char *charon_port_sqlite3_str_finish(sqlite3_str *);
 void charon_port_sqlite3_str_append(sqlite3_str *, const char *, int);
@@ -33,7 +26,6 @@ char *charon_port_sqlite3_str_value(sqlite3_str *);
 
 static int failures;
 
-// one host builder and one port builder, driven together
 struct pair {
     sqlite3_str *host, *port;
     const char *scenario;
@@ -58,7 +50,6 @@ static void same_text(struct pair *x, const char *step, const char *a, const cha
     }
 }
 
-// the observable state of both builders must agree after every step
 static void compare(struct pair *x, const char *step)
 {
     char what[128];
@@ -201,8 +192,6 @@ static void scenario_reset(void)
     report(&x);
 }
 
-// sqlite clamps a length limit to 30 bytes at least, so the smallest limit a database can carry is 30. An append that
-// must grow the buffer past the limit is SQLITE_TOOBIG, and the text is then dropped.
 static void scenario_limit(void)
 {
     sqlite3 *db = NULL;
@@ -220,7 +209,6 @@ static void scenario_limit(void)
     sqlite3_close(db);
 }
 
-// Just under the limit the text is kept, and finishes as it was written.
 static void scenario_limit_under(void)
 {
     sqlite3 *db = NULL;
@@ -234,9 +222,6 @@ static void scenario_limit_under(void)
     sqlite3_close(db);
 }
 
-// The boundary is where the allocator's usable size is, not the length: the host keeps text past the limit while the
-// buffer it already has still holds it (malloc_size), and reaches SQLITE_TOOBIG only on a grow past the limit. Measured
-// on the host: an exact-limit append from empty is TOOBIG, 29 then 1 keeps 30, and 31 single bytes keep 31.
 static void scenario_limit_boundary(void)
 {
     sqlite3 *db = NULL;
@@ -268,7 +253,6 @@ static void scenario_limit_boundary(void)
     sqlite3_close(db);
 }
 
-// Calls on a NULL builder must not crash, and answer what the host answers.
 static void scenario_null(void)
 {
     struct pair x;

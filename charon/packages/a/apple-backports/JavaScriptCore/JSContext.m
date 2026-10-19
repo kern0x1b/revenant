@@ -3,16 +3,10 @@
 static NSMapTable<id, JSContext *> *charon_context_registry;
 static NSLock *charon_context_registry_lock;
 
-/* The registry, made with its lock on first use: take it before taking the lock. */
 static NSMapTable<id, JSContext *> *ContextRegistry(void)
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        /* keyed by the JSGlobalContextRef itself, an opaque C pointer with no Objective-C object
-         * behind it - NSPointerFunctionsOpaqueMemory tells the map table not to send it retain
-         * and release, which is what strongToWeakObjectsMapTable's ordinary object keys do and
-         * would crash on. The value is a real JSContext, held weakly: the registry answers the
-         * same wrapper for as long as one is alive, and stops answering once nothing else is. */
         charon_context_registry = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsOpaqueMemory | NSPointerFunctionsOpaquePersonality
                                                           valueOptions:NSPointerFunctionsWeakMemory | NSPointerFunctionsObjectPersonality];
         charon_context_registry_lock = [NSLock new];
@@ -67,7 +61,6 @@ static NSMapTable<id, JSContext *> *ContextRegistry(void)
 {
     NSMapTable<id, JSContext *> *registry = ContextRegistry();
     [charon_context_registry_lock lock];
-    /* a wrapper made for the same global context once this one's weak entry read nil stays */
     if (![registry objectForKey:(__bridge id)_globalContext])
         [registry removeObjectForKey:(__bridge id)_globalContext];
     [charon_context_registry_lock unlock];
@@ -181,7 +174,6 @@ static NSMapTable<id, JSContext *> *ContextRegistry(void)
     JSStringRelease(body);
     if (url)
         JSStringRelease(url);
-    /* Both are held by a JSValue before the jobs the script queued run and can collect. */
     JSValue *value = [JSValue charon_valueWithJSValueRef:exception ? JSValueMakeUndefined(_globalContext) : result context:self];
     JSValue *thrown = exception ? [JSValue charon_valueWithJSValueRef:exception context:self] : nil;
     charon_js_leave();

@@ -1,14 +1,3 @@
-// The port's vDSP_distancesq against the real Accelerate, in the shape the coordinator asked for:
-// N = 0, N = 1, strides above one on **every** input, and the gaps in C left untouched.
-//
-// The gaps are the point. The header's Maps line is `C[0] = sum((A[n] - B[n]) ** 2, 0 <= n < N)` - one scalar
-// out, a window of N, and no inner count because there is no inner dimension. A port written from the
-// signature alone, with two input strides, one output and no window width, would write one C per element, and
-// no test of the input strides would catch it. So C is pre-filled with a known pattern over more elements than
-// the call has, and **every element outside C[0] must come back exactly as it went in**.
-//
-// Every comparison is on the bit pattern, never `==`.
-
 #import <Foundation/Foundation.h>
 #import <Accelerate/Accelerate.h>
 #include <stdint.h>
@@ -33,13 +22,10 @@ static void report(const char *what, int ok, const char *note)
     printf("FAIL %s%s%s\n", what, note[0] ? " - " : "", note);
 }
 
-// One case: the same strided inputs to both, C pre-filled over more than N elements, and the whole of C
-// compared - the element the call is for, and every gap after it.
 static void run(const char *label, vDSP_Stride ia, vDSP_Stride ib, vDSP_Length n)
 {
     float a[CAP], b[CAP], mine[CAP], theirs[CAP];
     for (vDSP_Length i = 0; i < CAP; i++) {
-        // values that are distinct and not in ascending order, so a swapped stride shows
         a[i] = (float)(0.5 + (i % 5) * 1.25);
         b[i] = (float)(3.0 - (i % 3) * 0.5);
     }
@@ -57,7 +43,6 @@ static void run(const char *label, vDSP_Stride ia, vDSP_Stride ib, vDSP_Length n
         report(label, 1, note);
         return;
     }
-    // name the first difference, and whether it is the answer or a gap
     for (int i = 0; i < CAP; i++)
         if (memcmp(&mine[i], &theirs[i], sizeof mine[i]) != 0) {
             uint32_t m, t;
@@ -76,18 +61,13 @@ int main(void)
     @autoreleasepool {
         printf("the port's vDSP_distancesq against the real Accelerate\n");
         printf("  the formula: C[0] = sum((A[n] - B[n]) ** 2, 0 <= n < N) - one scalar out\n");
-        // N = 0: the release answers 0, and writes nothing past C[0]
         run("no elements", 1, 1, 0);
-        // N = 1: a single window element, where a port that wrote one C per element would still pass
         run("one element", 1, 1, 1);
-        // the ordinary case
         run("six elements, unit strides", 1, 1, 6);
-        // strides above one on every input, independently, which is where a stride mistake shows
         run("strides 3 and 1", 3, 1, 6);
         run("strides 1 and 4", 1, 4, 6);
         run("strides 2 and 5", 2, 5, 6);
         run("strides 7 and 2", 7, 2, 4);
-        // a long window, so the accumulation has room to differ from the host
         run("fourteen elements, stride 2", 2, 3, 14);
         printf("%d checks, %d failures\n", checks, failures);
     }

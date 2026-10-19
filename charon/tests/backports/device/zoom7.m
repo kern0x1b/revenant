@@ -4,16 +4,10 @@
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-// The zoom of iOS 7 over 6.1.3 (facts/AVFoundation/CaptureZoomAudioSession.md). First what the release does
-// with its own scale and crop, then the port: the maximum by the release's rule, 7.0's checks and texts, the
-// still connection's factor, the preview layer and its point conversions, the crop of a video data output's
-// buffers held to a known picture, and the ramp. A process of its own: the camera needs no permission on 6.1.3.
-
 @interface AVCaptureDevice (CharonReleaseLock)
 - (BOOL)isLockedForConfiguration;
 @end
 
-// A frame reduced to a grid of mean luma, whole or its centre half.
 #define GRID_W 32
 #define GRID_H 24
 
@@ -109,9 +103,6 @@ static BOOL take(CharonGrid *frames)
 
 CMSampleBufferRef charon_create_zoomed_sample(CMSampleBufferRef sample, CGFloat factor);
 
-// A 64x48 buffer of a known picture: in 32BGRA blue is 4x, green 5y and red x+y; in 420v luma is 2x+2y,
-// Cb 8 times the chroma column and Cr 10 times the chroma row. Zoomed by 2, the pixel at (X, Y) must be the
-// source's at (16 + X/2, 12 + Y/2), the centre half scaled up, away from the edges the resampling filter reaches.
 static void check_crop(OSType format, const char *name)
 {
     CVPixelBufferRef pixels = NULL;
@@ -179,8 +170,6 @@ static void check_crop(OSType format, const char *name)
     CVPixelBufferRelease(pixels);
 }
 
-// The camera's own frames, at 1 and at 2: measured and printed, not held, since how much the centre half of a
-// frame differs from the whole depends on what the camera looks at.
 static void measure_frames(AVCaptureDevice *camera, CharonGrid *frames, const char *name)
 {
     [camera lockForConfiguration:NULL];
@@ -280,7 +269,6 @@ int main(int argc, char **argv)
                     "a cancel without the lock raises");
         [session stopRunning];
 
-        // What a movie file output's connection can do on this release.
         AVCaptureSession *recording = [[AVCaptureSession alloc] init];
         [recording addInput:[AVCaptureDeviceInput deviceInputWithDevice:camera error:NULL]];
         AVCaptureMovieFileOutput *movie = [[AVCaptureMovieFileOutput alloc] init];

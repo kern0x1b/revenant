@@ -1,62 +1,18 @@
-// probe.m - the oracle for VideoToolbox's pixel rotation family: what this Mac's own
-// VTPixelRotationSession does, per source shape, per pixel format, per stride and per angle, COMPARED
-// AGAINST AN INDEPENDENT EXPECTATION.
-//
-// WHY THE EXPECTATION IS COMPUTED HERE AND NOT READ OFF APPLE: a differential that compares the port
-// with the host proves the port equals the host, and a harness that compares the host with whatever the
-// host did proves nothing. So every cell's expected pixels are derived from the source pattern alone,
-// printed, and only then compared with Apple's.
-//
-// THE FOUR FAULTS THIS FILE EXISTS TO NOT REPEAT, all of which cost a probe earlier in this family:
-//   1. THE PROPERTY'S VALUE IS A CFStringRef, NOT A NUMBER. VTPixelRotationProperties.h:32 says
-//      "Specifies the amount of rotation in degrees" and then, seven lines later, declares the property as
-//      CFStringRef with the valid values kVTRotation_0, kVTRotation_CW90, kVTRotation_180 and
-//      kVTRotation_CCW90. A probe that sets an NSNumber has its set REJECTED, the session keeps its
-//      default of kVTRotation_0, and every angle then reads as the identity. The status the set returns is
-//      printed here, the value is read back, and the three ways of getting this wrong are measured at the
-//      end of the run.
-//   2. ROWS ARE WRITTEN AND READ AT THE BUFFER'S OWN bytesPerRow. CVPixelBufferCreate hands a 2-pixel-wide
-//      BGRA image a bytesPerRow of 64, and writing 16 contiguous bytes puts the second image row at offset
-//      16 - outside the image. A stride the caller forced is asserted, not assumed: see make_buffer.
-//   3. THE EXPECTATION IS AS BIG AS THE DESTINATION. A 2x4 source rotated by 90 or 270 gives a 4x2
-//      destination, which is EIGHT values; sizing the expectation at four compares the top row and calls
-//      the rest agreement. Every cell here is sized by the destination's own geometry.
-//   4. THE FLIPS WERE MIRRORED IN SOURCE SPACE. VTPixelRotationProperties.h:50 and :61 say the flips apply
-//      AFTER the rotation, which has to mean on the DESTINATION axes: transposing and then mirroring the
-//      source is not the same as mirroring the destination. It agreed for 0 and 180, where no axis is
-//      swapped, and disagreed for every quarter turn with ONE flip. The flips invert the DESTINATION
-//      coordinate first.
-//
-// WHAT IS MEASURED AND NOT ASSUMED ABOUT THE BUFFER ITSELF: a same-format rotation is a pure byte
-// permutation. All four channels of every pixel are compared here, not one of them, and the bytes between
-// the end of a row and the start of the next are compared with the fill that was written there - a
-// rotation that wrote into the padding would be a rotation that does not only permute.
-//
-// WHAT THIS FILE DELIBERATELY DOES NOT CLAIM: any biplanar YUV. A 420 image's chroma planes are
-// subsampled by two on each axis, so rotating one is a second contract with its own arithmetic, and the
-// host answers 420 destinations with noErr and a colour CONVERSION (measured at the end of the run), not
-// with a rotation. Those formats are not carried and are not claimed.
 #import <CoreVideo/CoreVideo.h>
 #import <CoreMedia/CoreMedia.h>
 #import <Foundation/Foundation.h>
 #import <VideoToolbox/VideoToolbox.h>
 #import <IOSurface/IOSurface.h>
 
-#define MAX_PIXELS 64   /* the largest source below is 4x3 = 12; 64 leaves room without a heap */
+#define MAX_PIXELS 64
 
-static int b_value(int index) { return 10 * index + 1; }   /* unique per pixel, and never 0xAB */
+static int b_value(int index) { return 10 * index + 1; }
 
-// ---- the shapes, each with the 180 written out longhand -------------------------------------
-//
-// A source of W x H whose display channel runs 1 2 3 4 ... row-major must come back from a 180 upside
-// down, and these are the eight, ten, ... values written out by hand for each shape. They are checked
-// against expected() BEFORE the host is asked for that shape, so a wrong expectation shows as DISAGREE
-// with no comparison having run - which is exactly how the 2x4 geometry fault was caught.
 typedef struct {
     const char *label;
     size_t width, height;
-    size_t padding;        /* extra bytes per row beyond width*4; 0 lets CoreVideo choose the stride */
-    const int *hand180;    /* the destination's display channel, row-major, for kVTRotation_180 */
+    size_t padding;
+    const int *hand180;
     int hand180Count;
 } Shape;
 
@@ -70,16 +26,11 @@ static const int hand180_1x1[] = { 1 };
 static const int hand180_2x2[] = { 31, 21, 11, 1 };
 static const int hand180_4x3[] = { 111, 101, 91, 81, 71, 61, 51, 41, 31, 21, 11, 1 };
 
-// The formats the oracle HOLDS: the ones whose same-format rotation came back a pure permutation of the
-// bytes, all four channels, at every shape and every stride. The display channel is the byte the
-// hand-written arrays above are about: 0 for 32BGRA (B,G,R,A), 1 for 32ARGB (A,R,G,B).
 static const struct { OSType format; const char *name; int displayChannel; } FORMATS[] = {
     {kCVPixelFormatType_32BGRA, "BGRA", 0},
     {kCVPixelFormatType_32ARGB, "ARGB", 1},
 };
 
-// A label is ONE word, with no space in it: run.sh reads the shape out of the SIZE line by field, and a
-// space here would shift every field after it. `+padN` is N bytes of padding the caller forces per row.
 static const Shape SHAPES[] = {
     {"2x4",       2, 4,  0, hand180_2x4,    8},
     {"2x4+pad16", 2, 4, 16, hand180_2x4pad, 8},
@@ -94,8 +45,6 @@ static const Shape SHAPES[] = {
 };
 #define SHAPE_COUNT ((int)(sizeof(SHAPES) / sizeof(SHAPES[0])))
 
-// The sixteen cells: four rotations, and the two flips alone and together. The rotation values are extern
-// CFStringRef variables, not constants, so this table is a local of main() and OP_COUNT is spelled there.
 #define OP_COUNT 16
 
 static void describe(const char *label, CVPixelBufferRef buffer)
@@ -111,9 +60,6 @@ static void describe(const char *label, CVPixelBufferRef buffer)
            CVPixelBufferGetIOSurface(buffer) != NULL);
 }
 
-// A pixel's FOUR bytes, so a permutation of the channels or a change to one of them cannot pass. The
-// display channel carries b_value(index), which is what the hand-written 180s are written in; the other
-// three are distinct per pixel and distinct from it.
 static void pixel_bytes(int displayChannel, int index, uint8_t out[4])
 {
     for (int c = 0; c < 4; c++)
@@ -121,10 +67,6 @@ static void pixel_bytes(int displayChannel, int index, uint8_t out[4])
                                        : 65 + (uint8_t)(((c - displayChannel + 4) % 4 - 1) * 64 + index));
 }
 
-// The destination's GEOMETRY, from the rotation alone. Fault 3's sibling: deriving this from a pixel
-// COUNT gives 4x2 for 0 and 180 as well as for 90 and 270, because a 2x4 source rotated by nothing still
-// has eight pixels. Apple then scale-to-fits instead of rotating, and the result is an interpolated value
-// that made this look like a broken rotation in the first place. Only 90 and 270 transpose.
 static void geometry(const Shape *shape, CFStringRef rotation, size_t *outWidth, size_t *outHeight)
 {
     int quarter = CFEqual(rotation, kVTRotation_CW90) || CFEqual(rotation, kVTRotation_CCW90);
@@ -132,12 +74,6 @@ static void geometry(const Shape *shape, CFStringRef rotation, size_t *outWidth,
     *outHeight = quarter ? shape->width : shape->height;
 }
 
-// Which source pixel a destination pixel must hold, from the source pattern alone.
-//   90  (clockwise):      dest(x,y) = src(y, H-1-x)
-//   180:                 dest(x,y) = src(W-1-x, H-1-y)
-//   270 (counter-clock): dest(x,y) = src(W-1-y, x)
-// The two flips apply AFTER the rotation, on the DESTINATION axes: the destination coordinate is inverted
-// first, and the rotation then takes it to the source.
 static int source_index(const Shape *shape, CFStringRef rotation, int flipH, int flipV,
                         size_t dw, size_t dh, int x, int y)
 {
@@ -163,13 +99,6 @@ static int expected_display(const Shape *shape, CFStringRef rotation, int flipH,
     return (int)(outWidth * outHeight);
 }
 
-// The buffer. `padding` > 0 forces the stride through the PUBLIC mechanism, because there is no public
-// CVPixelBufferAttributeKey for a bytes per row - the MacOSX 27 SDK declares twenty of them and
-// "BytesPerRow" is not among them - and CVPixelBufferCreate ignores kIOSurfaceBytesPerRow when it
-// allocates the surface itself (measured: requested 28, got 64). So the padded stride comes from an
-// IOSurface of the caller's own bytes per row wrapped by CVPixelBufferCreateWithIOSurface, and the result
-// is ASSERTED: a stride the caller did not get is reported, because every cell that claims a padded row
-// would otherwise be a cell measured at 64.
 static CVPixelBufferRef make_buffer(const Shape *shape, OSType format, size_t width, size_t height,
                                     size_t padding, int displayChannel, const uint8_t *pattern)
 {
@@ -225,9 +154,6 @@ static int measure_refusals(void)
     CVPixelBufferRef opaqueBGRA = make_buffer(&threeByFive, kCVPixelFormatType_32BGRA, 3, 5, 0, 0, opaque);
     int unexpected = 0;
 
-    // The property is a CFStringRef and the host says so three ways, all with the same code. This is the
-    // kVTParameterErr the port answers for a parameter it cannot carry, so the run ASSERTS it: a host that
-    // ever answers something else here invalidates the number the port would use.
     {
         VTPixelRotationSessionRef session = NULL;
         VTPixelRotationSessionCreate(kCFAllocatorDefault, &session);
@@ -245,7 +171,6 @@ static int measure_refusals(void)
         CFRelease(session);
     }
 
-    // A destination the session does not take.
     struct { const char *name; OSType format; OSStatus expected; } refusals[] = {
         {"OneComponent8", kCVPixelFormatType_OneComponent8, kVTPixelRotationNotSupportedErr},
         {"444YpCbCr8", kCVPixelFormatType_444YpCbCr8, kVTPixelRotationNotSupportedErr},
@@ -273,12 +198,6 @@ static int measure_refusals(void)
         CFRelease(session);
     }
 
-    // A cross-format destination. The host CONVERTS rather than rotates, and what it does for the one
-    // pair measured here is an exact swap of red and blue - source B G R A in, destination A R G B out,
-    // same numbers, both for an opaque source and for one whose alpha varies. That is a CONVERSION the
-    // header does not describe and one pair does not make a rule: the port carries no colour converter,
-    // so it answers kVTParameterErr for a pair whose two formats differ, and this line is the measurement
-    // that says what the port is not doing.
     {
         CVPixelBufferRef sources[2] = { opaqueBGRA, bgra };
         const char *labels[2] = { "opaque alpha", "varying alpha" };
@@ -309,10 +228,6 @@ static int measure_refusals(void)
         }
     }
 
-    // A destination geometry VTPixelRotationSession.h:79 forbids: for a quarter turn the destination's
-    // width and height must be the inverse of the source's. The host does not refuse - it scale-to-fits
-    // and interpolates, which is what put 9 12 18 21 into an earlier probe's output and made a correct
-    // rotation look broken.
     {
         VTPixelRotationSessionRef session = NULL;
         VTPixelRotationSessionCreate(kCFAllocatorDefault, &session);
@@ -340,7 +255,7 @@ static int measure_refusals(void)
 
 int main(void)
 {
-    setvbuf(stdout, NULL, _IONBF, 0);   /* a run that aborts must still have printed the cell that did it */
+    setvbuf(stdout, NULL, _IONBF, 0);
 
     const struct { CFStringRef rotation; const char *name; int flipH, flipV; } OPS[OP_COUNT] = {
         {kVTRotation_0, "0", 0, 0}, {kVTRotation_CW90, "CW90", 0, 0},
@@ -357,7 +272,6 @@ int main(void)
     for (int s = 0; s < SHAPE_COUNT; s++) {
         const Shape *shape = &SHAPES[s];
 
-        // THE HAND-WRITTEN CHECK, for THIS shape, before the host is asked for anything about it.
         int computed180[MAX_PIXELS];
         int computed = expected_display(shape, kVTRotation_180, 0, 0, 0, computed180);
         int agrees = computed == shape->hand180Count;
@@ -397,8 +311,6 @@ int main(void)
 
                 OSStatus setRotation = VTSessionSetProperty(session, kVTPixelRotationPropertyKey_Rotation,
                                                              OPS[o].rotation);
-                // Read it BACK, so a rejected set is visible as the session's own value rather than
-                // inferred from the pixels. This is the check that would have caught fault 1 at once.
                 CFTypeRef readBack = NULL;
                 OSStatus got = VTSessionCopyProperty(session, kVTPixelRotationPropertyKey_Rotation,
                                                      NULL, &readBack);
@@ -447,8 +359,6 @@ int main(void)
                                                           outWidth, outHeight, x, y), wb);
                         for (int c = 0; c < 4; c++) if (pixel[c] != wb[c]) badChannels++;
                     }
-                    // The bytes between the end of a row and the start of the next. Indexing them through
-                    // the pixel pointer reads past the buffer on the LAST row, so the row is the unit.
                     for (size_t y = 0; y < outHeight; y++)
                         for (size_t k = y * destStride + outWidth * 4; k < (y + 1) * destStride; k++)
                             if (base[k] != 0xAB) { badPadding++; break; }
@@ -477,12 +387,6 @@ int main(void)
             cells += shapeCells;
             differing += shapeDiffering;
             rejected += shapeRejected;
-            // `pixels` is the shape's own pixel count, which is also the length of its hand-written 180.
-            // run.sh uses it to say which shapes a quarter-turn plant can reach at all: a shape of one
-            // pixel maps onto itself, so swapping CW90 with CCW90 is invisible there by arithmetic, not
-            // because the harness missed it.
-            // Every field is one space-separated word, so run.sh can read a per-shape tally out of the
-            // mutant's own line rather than out of a number typed into the script.
             printf("SIZE %-10s %-4s stride=%zu/%zu pixels=%d cells=%d differing=%d set-rejected=%d\n",
                    shape->label, FORMATS[f].name, actual, wanted, shape->hand180Count,
                    shapeCells, shapeDiffering, shapeRejected);

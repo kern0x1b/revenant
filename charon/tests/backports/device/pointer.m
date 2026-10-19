@@ -292,7 +292,6 @@ static BOOL method_from_backports(Class cls, SEL selector)
     CHECK(![inside respondsToSelector:@selector(searchSuggestions)], "and it does not answer the suggestions of iOS 16");
 
     UISearchController *controller = [[UISearchController alloc] initWithSearchResultsController:nil];
-    // The scope bar flag is NO by default on the iPad idiom (measured in a bundled Catalyst app), the activation Manual.
     CHECK(!controller.automaticallyShowsScopeBar && controller.automaticallyShowsCancelButton && controller.automaticallyShowsSearchResultsController && !controller.showsSearchResultsController,
           "a search controller shows the cancel button and the results by itself, and asks for the scope bar");
     controller.automaticallyShowsScopeBar = NO;

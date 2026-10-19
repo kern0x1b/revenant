@@ -1,14 +1,3 @@
-/* fileload.m - what the host answers for a library LOADED FROM A FILE, the case the port serves. The port builds its
- * libraries from a metallib file (newLibraryWithURL: and newLibraryWithFile: read the translated LIB.metallib.es2
- * beside it), so the install name of a library from a file is the one the port must match. library.m asks the
- * same questions of a library built from source, which is the other kind.
- *
- *     host:  clang -fobjc-arc -framework Foundation -framework Metal fileload.m -o fileload
- *            ./fileload PATH [PATH ...]
- *
- * One line per answer per path: the path as given, then its install name (nil spelled out), its type, its
- * function names, and whether the load succeeded. The host's metallib is Apple's own, so the answer is Apple's.
- */
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 

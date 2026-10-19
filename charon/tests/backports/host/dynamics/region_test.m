@@ -1,8 +1,3 @@
-// region_test.m - facts/UIKit/UIFieldBehavior.md §16 row F2 and UIRegion's own behaviour (§10.6): the same regions are
-// built from the host's UIRegion (the oracle) and from ours, and every region is asked about the same points; ours must
-// answer as the oracle does, point for point. The regions cover the primitive shapes with their edges, negative and
-// zero sizes, the inverse, the three operations with plain and inverted operands, operations chained on a composite
-// (the host keeps one second operand only), copies, archives, the shared infinite region and a region made by -init.
 #import "dynamics.h"
 #include <math.h>
 
@@ -103,8 +98,6 @@ static void test_truth_table(void)
     }
 }
 
-// The rows facts/UIKit/UIFieldBehavior.md §10.6 gives as measured (s_reg.m), asked of the oracle, so a change of the
-// host shows here and not as a silent change of what ours is compared with.
 static void test_oracle_as_measured(void)
 {
     UIRegion *round = circle(Oracle, 50), *box = rectangle(Oracle, 100, 50);
@@ -137,8 +130,6 @@ static void test_identities(void)
     }
 }
 
-// The host dereferences the other region's PKRegion unchecked, so a nil operand, or one made with -init, is a bad
-// access there (-[UIRegion regionByUnionWithRegion:] loads [nil + 8]); ours raises instead. Not asked of the oracle.
 static void test_refused_operand(void)
 {
     UIRegion *round = circle(Ours, 5);
@@ -157,11 +148,6 @@ static void test_refused_operand(void)
 int main(void)
 {
     @autoreleasepool {
-        // PhysicsKit's points-per-metre ratio is SpriteKit's 150 until the process makes its first UIDynamicAnimator,
-        // which sets it to UIKit's 100 for good (p4.m: PKGet_PTM_RATIO 150 before, 100 after); a region takes it at
-        // init, so a circle of 0.3 made before any animator is 45 * (1/150f) = 0.300000012 and one made after is
-        // 30 * 0.01f = 0.29999998. Ours always uses 100, the ratio UIKit Dynamics runs with: the oracle is put in that
-        // state first.
         (void)make_animator(Oracle, nil);
         test_truth_table();
         test_oracle_as_measured();

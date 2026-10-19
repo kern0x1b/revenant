@@ -1,19 +1,3 @@
-// ARKitConstants.m - the constants the SDK's headers declare as symbols, with the values they declare.
-//
-// The run options, the plane detections, the raycast targets, the plane alignments, the hit-test
-// types, the error codes, the confidence levels, the tracking reasons and the frame semantics are
-// cases of the SDK's own enumerations, and a case of an enumeration is written into the program by
-// the compiler: there is nothing here to define, and the registry says so too. What this file does
-// define is the three kinds the headers declare with FOUNDATION_EXTERN, which the release carries
-// no definition of: the two string constants and the SceneKit debug options, and the fifty-two
-// blend-shape names and the nine skeleton joint names the face and body geometry are indexed by.
-//
-// The values are the framework's own. `ARErrorDomain` and `ARReferenceObjectArchiveExtension` are
-// read out of ARKit of iOS 12.0 (the strings themselves), and the debug options are the two bits
-// `ARSCNDebugOption` declares. The 52 names and the 9 joints are the strings Apple's own
-// ARFaceAnchor and ARBodyAnchor use as keys into their geometry buffers, written down here because
-// the classes that read them are carried and an application indexes its own mesh with them.
-
 #import <ARKit/ARKit.h>
 #import <SceneKit/SceneKit.h>
 

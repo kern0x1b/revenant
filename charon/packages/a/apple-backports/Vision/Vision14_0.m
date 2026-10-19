@@ -8,35 +8,17 @@
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 #pragma clang diagnostic ignored "-Wprotocol"
 
-/* Everything this file carries arrived in iOS 14.0, and it is the part of that release which is
- * arithmetic rather than a model: a point, a vector, a circle, the smallest circle around a set of
- * points, the base class a request that carries evidence over time is built on, and the two values
- * that say how often a video is analysed. None of it needs a Vision engine, and none of it needs
- * anything iOS 6 does not have - the arithmetic is doubles and the geometry is CoreGraphics, which
- * this library already links.
- *
- * What is NOT here is the part of 14.0 that runs a model: the contour, body pose, hand pose,
- * trajectory and optical flow requests, the observations only those requests produce, and the video
- * processor that would run a request over decoded video. Each of those rows says absent, and says
- * what is missing. */
-
 static double charon_vision_squared_distance(double x1, double y1, double x2, double y2)
 {
     double dx = x1 - x2, dy = y1 - y2;
     return dx * dx + dy * dy;
 }
 
-/* A point as the bounding circle works on it: two doubles, so the same code takes a VNPoint and the
- * simd_float2 buffer a contour is made of. */
 typedef struct {
     double x;
     double y;
 } CharonVisionXY;
 
-/* The smallest circle that holds a set of points, found by the same three cases the algorithm is
- * written as: one point on its own, two as a diameter, three as the circle through them. `count` is
- * zero for a circle nothing has been found for yet, which is how the loops below tell "no circle"
- * from "a circle of radius zero". */
 typedef struct {
     CharonVisionXY center;
     double radius;
@@ -59,8 +41,6 @@ static CharonVisionCircle charon_vision_circle_of_two(CharonVisionXY a, CharonVi
     return circle;
 }
 
-/* Three points on one circle, unless they are on a line - and three points on a line have no circle
- * through them, so the one that holds all three is the one over the two farthest apart. */
 static CharonVisionCircle charon_vision_circle_of_three(CharonVisionXY a, CharonVisionXY b, CharonVisionXY c)
 {
     CharonVisionCircle circle;
@@ -85,9 +65,6 @@ static CharonVisionCircle charon_vision_circle_of_three(CharonVisionXY a, Charon
     return circle;
 }
 
-/* Points are normalized, so the radius is of the order of one and this is the slack a point may sit
- * outside the circle by and still be treated as inside it. Without it the answer depends on the
- * order the points arrive in, which the caller does not choose. */
 static BOOL charon_vision_circle_holds(CharonVisionCircle circle, CharonVisionXY point)
 {
     if (circle.count == 0)
@@ -96,9 +73,6 @@ static BOOL charon_vision_circle_holds(CharonVisionCircle circle, CharonVisionXY
         <= circle.radius * circle.radius + 1e-12;
 }
 
-/* The order the points are visited in is what decides how long the three loops below take, so they
- * are shuffled first. The generator is seeded with a constant on purpose: the same points then
- * answer the same circle on every run and on every device, which a clock-seeded shuffle would not. */
 static void charon_vision_shuffle(CharonVisionXY *points, NSInteger count)
 {
     uint32_t seed = 0x5f3759dfu;
@@ -112,8 +86,6 @@ static void charon_vision_shuffle(CharonVisionXY *points, NSInteger count)
     }
 }
 
-/* The smallest circle holding every point, or a circle of count zero when there is no point. The
- * argument is shuffled, so the caller hands over a copy it does not keep. */
 static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, NSInteger count)
 {
     CharonVisionCircle circle = {{0.0, 0.0}, 0.0, 0};
@@ -230,9 +202,6 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
 
 @end
 
-/* The point classes below are made by the port's own code, which is what their initialisers are for: the header marks
- * every initialiser of VNDetectedPoint and VNRecognizedPoint NS_UNAVAILABLE, and an application receives these points
- * from a request. The factories and setters are charon_ named, so they are not part of the surface the host shows. */
 @interface VNDetectedPoint (CharonFactory)
 + (instancetype)charon_pointWithX:(double)x y:(double)y confidence:(VNConfidence)confidence;
 @end
@@ -327,8 +296,6 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
         return nil;
     }
     length = vector.length;
-    /* A vector of no length has no direction to preserve, so the unit vector of one is the zero
-     * vector rather than a division by zero. */
     if (length == 0.0) {
         return [self zeroVector];
     }
@@ -406,7 +373,6 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
 
 - (double)theta
 {
-    /* The header says the angle of the zero vector is not defined, and says so as NaN. */
     if (_x == 0.0 && _y == 0.0) {
         return NAN;
     }
@@ -481,16 +447,12 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
     if (point == nil || _center == nil) {
         return NO;
     }
-    /* The boundary counts as inside, which is what the header says. */
     return [_center distanceToPoint:point] <= _radius;
 }
 
 - (BOOL)containsPoint:(VNPoint *)point inCircumferentialRingOfWidth:(double)ringWidth
 {
     double distance;
-    /* The header describes the ring as the band between the circles of radius-delta and
-     * radius+delta, and names the argument the width of that band, so the half-width it compares
-     * against is ringWidth/2. */
     if (point == nil || _center == nil) {
         return NO;
     }
@@ -594,8 +556,6 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
         }
         return nil;
     }
-    /* The caller's buffer is const, and the algorithm reorders the points it is given, so the
-     * circle is found over a copy of them. */
     buffer = malloc(sizeof(CharonVisionXY) * (size_t)pointCount);
     if (buffer == NULL) {
         if (error) {
@@ -620,9 +580,6 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
     CMTime _frameAnalysisSpacing;
 }
 
-/* A request that is handed the same buffer over and over and keeps what it learned. The spacing
- * says how often it is allowed to look: a buffer that arrives within one spacing of the last
- * analysis is skipped, and the request says so rather than guessing from a wall clock. */
 - (instancetype)initWithFrameAnalysisSpacing:(CMTime)frameAnalysisSpacing
                            completionHandler:(VNRequestCompletionHandler)completionHandler
 {
@@ -632,9 +589,6 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
     return self;
 }
 
-/* The base class needs no frames before it can report: it carries the evidence a subclass collects
- * and has none of its own to wait for. A request that does need frames says so by overriding this,
- * which is the whole of the interface the header gives it. */
 - (NSInteger)minimumLatencyFrameCount
 {
     return 0;
@@ -716,8 +670,6 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
     VNVideoProcessorCadence *_cadence;
 }
 
-/* The cadence of a request is its own to set, and the video processor reads it per request rather
- * than once for the whole pipeline, which is why it is on the options and not on the processor. */
 - (VNVideoProcessorCadence *)cadence
 {
     return _cadence;
@@ -736,9 +688,6 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
 
 @end
 
-/* The normalized point of an image point, the inverse of VNImagePointForNormalizedPoint. An image with a zero
- * width or height has no normalized coordinates, and the release answers the zero point for it whichever
- * axis is empty (measured on the host, facts/Vision/Coordinates.md). */
 CGPoint VNNormalizedPointForImagePoint(CGPoint imagePoint, size_t imageWidth, size_t imageHeight)
 {
     if (imageWidth == 0 || imageHeight == 0) {
@@ -747,8 +696,6 @@ CGPoint VNNormalizedPointForImagePoint(CGPoint imagePoint, size_t imageWidth, si
     return CGPointMake(imagePoint.x / (double)imageWidth, imagePoint.y / (double)imageHeight);
 }
 
-/* The contours of a picture. A path of the normalised points is held here rather than in the contour itself, so that the
- * contour declares no dealloc of its own: the path is released when the holder is. */
 @interface CharonVisionPath : NSObject
 - (instancetype)initWithPoints:(NSData *)points;
 - (CGPathRef)path;
@@ -797,8 +744,6 @@ CGPoint VNNormalizedPointForImagePoint(CGPoint imagePoint, size_t imageWidth, si
     float _aspectRatio;
 }
 
-/* Made by the contour request, which holds the points as simd_float2 values in walk order. The initialiser is named
- * for the port, since the header's own initialisers are NS_UNAVAILABLE. */
 - (instancetype)initCharonWithIndexPath:(NSIndexPath *)indexPath points:(NSData *)points aspectRatio:(float)aspectRatio
 {
     if ((self = [super init])) {
@@ -861,8 +806,6 @@ CGPoint VNNormalizedPointForImagePoint(CGPoint imagePoint, size_t imageWidth, si
     return _childContours[childContourIndex];
 }
 
-/* Douglas-Peucker on the closed polygon of the points, with the epsilon in normalised units. The release's own
- * simplification is not measured (facts/Vision/Contours14.md), so this is the classic algorithm and not a copy of it. */
 - (nullable VNContour *)polygonApproximationWithEpsilon:(float)epsilon error:(NSError **)error
 {
     NSInteger count = self.pointCount;
@@ -979,9 +922,6 @@ CGPoint VNNormalizedPointForImagePoint(CGPoint imagePoint, size_t imageWidth, si
 
 @end
 
-/* The grey value of each pixel of the picture a request is given, from 0 to 1: a Core Graphics image is drawn into a
- * grey bitmap of the size asked for, and a pixel buffer's blue, green and red are averaged with the weights of the
- * luma that Vision reads (the weights are not measured, and do not matter for a binary picture). */
 static uint8_t *charon_contours_grey(id image, size_t wide, size_t high)
 {
     uint8_t *grey = malloc(wide * high);
@@ -1007,7 +947,6 @@ static uint8_t *charon_contours_grey(id image, size_t wide, size_t high)
     const uint8_t *bytes = CVPixelBufferGetBaseAddress(buffer);
     size_t stride = CVPixelBufferGetBytesPerRow(buffer);
     size_t sourceWide = CVPixelBufferGetWidth(buffer), sourceHigh = CVPixelBufferGetHeight(buffer);
-    // nearest sampling: a buffer scaled down to the maximum dimension takes the pixel at the same place in the source
     for (size_t y = 0; y < high; y++) {
         for (size_t x = 0; x < wide; x++) {
             const uint8_t *pixel = bytes + (y * sourceHigh / high) * stride + (x * sourceWide / wide) * 4;
@@ -1025,7 +964,6 @@ static uint8_t *charon_contours_grey(id image, size_t wide, size_t high)
     NSNumber *_contrastPivotValue;
 }
 
-/* The results are the request's own declaration in the header; the value is the one VNRequest holds, which the accessor reads. */
 @dynamic results;
 
 + (NSIndexSet *)supportedRevisions
@@ -1083,7 +1021,6 @@ static uint8_t *charon_contours_grey(id image, size_t wide, size_t high)
     _maximumImageDimension = maximumImageDimension;
 }
 
-/* The contrast pivot is a 15.0 property: its accessors are in Vision15_0.m, which reads and writes these. */
 - (NSNumber *)charon_contrastPivotValue
 {
     return _contrastPivotValue;
@@ -1110,8 +1047,6 @@ static uint8_t *charon_contours_grey(id image, size_t wide, size_t high)
             *error = charon_vision_error(VNErrorInvalidImage, @"the image has no pixels");
         return nil;
     }
-    /* A picture larger than the maximum dimension is scaled down to it. The release's scaling is not measured, so this one
-     * is a plain bitmap draw, and a picture within the maximum (every test picture) is not scaled at all. */
     size_t largest = wide > high ? wide : high;
     if (largest > _maximumImageDimension && _maximumImageDimension > 0) {
         wide = wide * _maximumImageDimension / largest;
@@ -1147,7 +1082,6 @@ static uint8_t *charon_contours_grey(id image, size_t wide, size_t high)
         else
             [children[curves[i].parent] addObject:@(i)];
     }
-    /* siblings in the raster order of the pixel each one encloses */
     NSComparator byPixel = ^NSComparisonResult(NSNumber *a, NSNumber *b) {
         const charon_contour *ca = &curves[a.intValue], *cb = &curves[b.intValue];
         if (ca->sampleY != cb->sampleY)
@@ -1161,8 +1095,6 @@ static uint8_t *charon_contours_grey(id image, size_t wide, size_t high)
     NSMutableArray<VNContour *> *all = [NSMutableArray array];
     NSMutableArray<VNContour *> *top = [NSMutableArray array];
     NSMutableData *allPoints = [NSMutableData data];
-    /* the contours are built depth-first, a parent before its children, and each one's index path is its parent's with its own
-     * position in the sibling list appended */
     __block void (^build)(NSNumber *, NSIndexPath *, NSMutableArray<VNContour *> *);
     build = ^(NSNumber *index, NSIndexPath *path, NSMutableArray<VNContour *> *into) {
         const charon_contour *c = &curves[index.intValue];

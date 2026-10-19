@@ -1,22 +1,6 @@
-// The annotation fixtures, written as bytes: CGPDFContext cannot put an annotation on a page, so this writes
-// the PDF itself. Every object is written with its own offset, the xref is built from those offsets, and each
-// stream carries its exact /Length, so both sides read the same file. Built and run by run.sh on the host
-// only; no python anywhere.
-//
-// The fixtures, one annotation each unless said otherwise:
-//   annot-square.pdf     /Square with no /AP and no /A
-//   annot-ap.pdf         /Square with an /AP /N appearance stream
-//   annot-uri.pdf        /Link whose /A is a /URI action
-//   annot-link-noa.pdf   /Link with no /A at all
-//   annot-open.pdf       /Text with /Open true
-//   annot-open-no.pdf    /Text with /Open false
-//   annot-highlight.pdf  /Highlight with no /C, so the host's default colour is what answers, and no /H
-//   annot-none.pdf       a page with no /Annots array
 #import <Foundation/Foundation.h>
 #include <stdio.h>
 
-// The body of each object, numbered from 1. Object 3 is the page, object 4 the annotation; object 5 is the
-// appearance stream, which only the /AP fixture uses (the others carry a placeholder object 5 nothing refers to).
 static NSData *pdfBytes(NSArray<NSString *> *bodies)
 {
     NSMutableData *out = [NSMutableData data];
@@ -37,7 +21,6 @@ static NSData *pdfBytes(NSArray<NSString *> *bodies)
     return out;
 }
 
-// The stream a form XObject carries: a filled square the size of its BBox, with its /Length computed here.
 static NSString *appearanceStream(void)
 {
     NSString *content = @"0 g 0 0 100 20 re f";
@@ -45,7 +28,6 @@ static NSString *appearanceStream(void)
                                       (unsigned long)[content length], content];
 }
 
-// The page with the given annotation dictionary, or with no /Annots at all when annotation is nil.
 static NSArray<NSString *> *pageWith(NSString *annotation, NSString *appearance)
 {
     NSString *annots = annotation ? @" /Annots [4 0 R]" : @"";

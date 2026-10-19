@@ -24,10 +24,6 @@ NSString *charon_menu_attributes_text(NSUInteger attributes);
 - (void)charon_setImage:(UIImage *)image;
 @end
 
-// UIActionRepeatBehavior is not declared by any header: no SDK names the type or its cases, and the host's own
-// UIAction carries the property as a private pair. The port declares the two the host answers - measured in
-// probe-uiaction.m, where -setRepeatBehavior: with 1 reads back 1 and with 0 reads back 0 - and no SDK name is
-// introduced by it.
 typedef NS_ENUM(NSInteger, UIActionRepeatBehavior) {
     UIActionRepeatBehaviorDisabled = 0,
     UIActionRepeatBehaviorEnabled = 1,

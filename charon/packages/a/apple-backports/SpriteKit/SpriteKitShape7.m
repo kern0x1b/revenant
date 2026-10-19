@@ -1,17 +1,8 @@
-// SpriteKitShape7.m - SKShapeNode of iOS 7, carried for the releases that have no SpriteKit at all.
-//
-// A shape is a node that draws a path, with a stroke and a fill and a line style. Its path is the one it is given, or the
-// path of a rectangle, rounded rectangle, circle or ellipse, which the constructors build in the measured places: the
-// rectangle and the ellipse at the origin they are given, and the sized forms centred on the origin (measured in
-// facts/SpriteKit/SKShapeNode.md). The defaults are the host's: a white stroke of width 1, a clear fill, a bevel join, a
-// butt cap and a miter limit of 0.5. Nothing here draws: the stroke and fill are the renderer's, which is owed.
 #import "CharonSpriteKit.h"
 #if !TARGET_OS_IPHONE
 #import <AppKit/AppKit.h>
 #endif
 
-// A colour as the host keeps it when it is set: on the host the stroke and the fill are read back in the sRGB space (measured,
-// facts/SpriteKit/SKShapeNode.md). The conversion is measured on macOS only; the iOS colour is stored as given.
 static CharonSKColor *CharonSKSRGBColor(CharonSKColor *colour)
 {
 #if TARGET_OS_IPHONE
@@ -22,8 +13,6 @@ static CharonSKColor *CharonSKSRGBColor(CharonSKColor *colour)
 #endif
 }
 
-// The path of a rectangle with its corners rounded by the radius, as a sequence of lines and quarter arcs. The radius is
-// clamped to half the smaller side, so an oversized radius gives an ellipse-ended rectangle, not a broken path.
 static CGPathRef CharonSKRoundedRectPath(CGRect rect, CGFloat radius)
 {
     CGMutablePathRef path = CGPathCreateMutable();
@@ -38,7 +27,6 @@ static CGPathRef CharonSKRoundedRectPath(CGRect rect, CGFloat radius)
     return path;
 }
 
-// The path of a rectangle of the size, centred on the origin.
 static CGRect CharonSKCentredRect(CGSize size)
 {
     return CGRectMake(-size.width / 2, -size.height / 2, size.width, size.height);
@@ -94,7 +82,6 @@ static CGRect CharonSKCentredRect(CGSize size)
     return [self shapeNodeWithPath:path centered:NO];
 }
 
-// Centred shifts the path so that the centre of its bounding box is the origin (measured for a path at the origin).
 + (instancetype)shapeNodeWithPath:(CGPathRef)path centered:(BOOL)centered
 {
     SKShapeNode *node = [[self alloc] init];
@@ -171,7 +158,6 @@ static CGRect CharonSKCentredRect(CGSize size)
     return _path;
 }
 
-// The path is held: the node keeps its own reference, so the caller may release the path it gave.
 - (void)setPath:(CGPathRef)path
 {
     CGPathRef held = path == NULL ? NULL : CGPathRetain(path);

@@ -5,18 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// UIKit Dynamics over unmodified Box2D 2.2.1, the engine iOS 7.0's PhysicsKit is a fork of. The world
-// lives here, with the bodies, the contact filter and the contact listener; the behaviors are in their
-// own files. Every rule below is iOS 7.0's; facts/UIKit/UIDynamicAnimator.md names the listing or the
-// measurement each comes from.
-//
-// The integrator. 7.0 steps its world in fixed sub-steps of 0.004 s times the speed, while the running
-// total exceeds 0.004, carrying fmod(total, 0.004) to the next call, and builds a box 1 pt smaller on
-// every side than the item, with a skin of 0.001 m. The host's PhysicsKit, the oracle the differential
-// test compares with, sub-steps at (float)1/120 while the accumulator is at least that, and builds the
-// box at full size with no skin. The host test builds these sources with CHARON_HOST_DIFFERENTIAL and
-// so runs the host's integrator; every other rule is the same on both.
-
 #ifdef CHARON_HOST_DIFFERENTIAL
 static const BOOL charon_host_integrator = YES;
 #else
@@ -25,9 +13,6 @@ static const BOOL charon_host_integrator = NO;
 
 static const float charon_shape_radius = charon_host_integrator ? 0.0f : 0.001f;
 
-// UICollectionViewLayout and UICollectionViewLayoutAttributes arrive in iOS 6.0, the animator is carried from 4.3.
-// Named by symbol they would be weak imports that are NULL below 6.0; looked up by name they are Nil there, where no
-// reference system or item can be one of them, and -isKindOfClass: of Nil is NO.
 static Class charon_layout_class(void)
 {
     return NSClassFromString(@"UICollectionViewLayout");
@@ -81,8 +66,6 @@ static Class charon_layout_attributes_class(void)
     _fixtureRestitution = 0.2f;
     _areaFactor = 1.0f;
     if (shape == CharonDynamicsShapeBox && !charon_host_integrator) {
-        // -[PKExtendedPhysicsBody initWithRectangleOfSize:] (7.0): a 2 pt inset, and an area factor
-        // so that a density still gives the mass of the full item.
         CGFloat inset = 0.02 / CHARON_DYNAMICS_INVERSE_PTM;
         CGFloat width = size.width > inset + 1 ? size.width - inset : MAX(size.width - inset, size.width / 2);
         CGFloat height = size.height > inset + 1 ? size.height - inset : MAX(size.height - inset, size.height / 2);
@@ -135,9 +118,6 @@ static Class charon_layout_attributes_class(void)
         fixture.shape = &edge;
         break;
     case CharonDynamicsShapeLoop:
-        // Box2D 2.2.1's CreateLoop asserts three vertices; for two it would store v0 v1 v0 with v1 on either side,
-        // the loop the host builds (items cross it and report contacts, facts/UIKit/UIDynamicAnimator.md M2), so
-        // that is built as a chain.
         if (_vertexCount == 2) {
             b2Vec2 closed[3] = {_vertices[0], _vertices[1], _vertices[0]};
             chain.CreateChain(closed, 3);
@@ -194,8 +174,6 @@ static Class charon_layout_attributes_class(void)
     return _affectedByGravity;
 }
 
-// Box2D 2.2.1 integrates v += h * (gravityScale * gravity + invMass * force): a gravity scale of 1 or
-// 0 is PhysicsKit's affectedByGravity flag.
 - (void)setAffectedByGravity:(BOOL)affected
 {
     _affectedByGravity = affected;
@@ -360,8 +338,6 @@ static Class charon_layout_attributes_class(void)
     return !(_b2Body ? _b2Body->IsFixedRotation() : _definition.fixedRotation);
 }
 
-// SetFixedRotation only toggles the flag and resets the mass data: a spin the body has goes on, as
-// on 7.0.
 - (void)setAllowsRotation:(BOOL)allows
 {
     _definition.fixedRotation = !allows;
@@ -424,8 +400,6 @@ CharonDynamicsBody *body_of(b2Fixture *fixture)
     return (__bridge CharonDynamicsBody *)fixture->GetBody()->GetUserData();
 }
 
-// PhysicsKit's masks work as SpriteKit's: two bodies are in contact when either one's category is in
-// the other's collision mask.
 class ContactFilter : public b2ContactFilter {
 public:
     bool ShouldCollide(b2Fixture *fixtureA, b2Fixture *fixtureB)
@@ -435,14 +409,9 @@ public:
     }
 };
 
-// Contacts are recorded while the world steps and handed to the animator after the last sub-step, so
-// that no delegate runs inside b2World::Step. A body responds to a contact only when the other's
-// category is in its collision mask; a contact no dynamic body responds to is still reported, and
-// disabled.
 class ContactListener : public b2ContactListener {
 public:
     NSMutableArray *records = [NSMutableArray array];
-    // b2Contact pointers, not objects, as keys: opaque, so that nothing sends them retain.
     NSMapTable *live = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsOpaqueMemory | NSPointerFunctionsOpaquePersonality
                                              valueOptions:NSPointerFunctionsStrongMemory];
 
@@ -505,7 +474,7 @@ public:
     }
 };
 
-} // namespace
+}
 
 typedef NS_ENUM(NSInteger, CharonReferenceSystem) {
     CharonReferenceSystemNone,
@@ -535,14 +504,6 @@ typedef NS_ENUM(NSInteger, CharonReferenceSystem) {
 - (void)charon_tickle;
 @end
 
-// +[UIDynamicAnimator _registerAnimator:] and +_referenceViewSizeChanged: (7.0, facts/UIKit/UIDynamicAnimator.md §9):
-// animators made on the main thread are listed, and 7.0's -[UIView setFrame:] and -setBounds: wake those whose
-// reference view's bounds size they changed. Autoresizing and Auto Layout reach it through the two setters; a
-// layer-level resize, center and transform do not (facts/UIKit/UIDynamicAnimator.md M3). iOS 6's setters tell no one, but
-// they are KVO-compliant, and KVO of frame and bounds together fires on exactly the calls that wake on 7.0 (measured on
-// 6.1.3, M3). The observer is an object the reference view holds (an associated object), so it goes with the view: an
-// observer left on a view that deallocates is leaked by KVO with a log line (measured, M3). The list does not retain: an
-// animator leaves it in its -dealloc.
 static CFMutableArrayRef charon_animators;
 static char charon_watch_key;
 
@@ -555,8 +516,6 @@ static void charon_reference_view_size_changed(UIView *view)
     }
 }
 
-// Observes a reference view's frame and bounds until it is deallocated or an animator drops it. The prior notification
-// reads the bounds size before the setter changes it, the notification after compares: 7.0's own test.
 @interface CharonReferenceViewWatch : NSObject
 - (instancetype)initWithView:(UIView *)view;
 @end
@@ -586,7 +545,6 @@ static void charon_reference_view_size_changed(UIView *view)
         charon_reference_view_size_changed(_view);
 }
 
-// Runs from the view's own deallocation when the view holds this object last.
 - (void)dealloc
 {
     [_view removeObserver:self forKeyPath:@"frame"];
@@ -700,11 +658,6 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
     return self;
 }
 
-// Dissociating the behaviors below tickles the animator, which would start a display link whose ticker holds a
-// weak reference to an animator already deallocating; nothing restarts it from here on. A behavior reads the animator
-// through -charon_context, which returns it retained and autoreleased (below iOS 5 nothing cancels the pair), so the
-// dissociation has a pool of its own: the animator is released while it is still there, not by a pool that drains
-// after it is freed.
 - (void)dealloc
 {
     _deallocating = YES;
@@ -721,7 +674,6 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
     delete _contactListener;
 }
 
-// 7.0's private -[UICollectionViewLayout bounds], which 6.x does not have: the content, at the origin.
 - (CGRect)charon_layoutBounds
 {
     UICollectionViewLayout *layout = _referenceSystem;
@@ -729,10 +681,6 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
     return CGRectMake(0, 0, size.width, size.height);
 }
 
-// "<UIDynamicAnimator: 0x…> Stopped (0.250000s) in <UIView: 0x…> {{0, 0}, {400, 300}}": "Stopped " only while no display
-// link runs, the elapsed time, the reference system (a nil one reads "<(null): 0x0>") and its bounds, which are
-// CGRectNull without one. Measured on the host; the reference-system exceptions end with it, and the host test's T9
-// holds their full text to the host's (tests/backports/host/dynamics/structure_test.m).
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<%@: %p> %@(%fs) in <%@: %p> %@", [self class], self, self.running ? @"" : @"Stopped ",
@@ -764,7 +712,6 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
     return _delegate;
 }
 
-// The delegate is asked what it implements when it is set, and not again.
 - (void)setDelegate:(id<UIDynamicAnimatorDelegate>)delegate
 {
     _delegate = delegate;
@@ -814,9 +761,6 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
     [_worldBodies removeObjectIdenticalTo:body];
 }
 
-// -[PKPhysicsWorld stepWithTime:velocityIterations:positionIterations:] (7.0): fixed sub-steps, then
-// the contacts, then the forces cleared once, then every body written back. Answers whether a
-// dynamic body is still awake.
 - (BOOL)charon_stepWorld:(double)dt
 {
     if (_world->GetBodyCount() == 0)
@@ -1012,9 +956,6 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
         [_delegate dynamicAnimatorWillResume:self];
 }
 
-// 7.0's own private switch (facts/UIKit/UIDynamicAnimator.md §1.6): an animator that never starts a display link, so
-// only an explicit step moves it, and no delegate hears a resume. The host test sets it on both animators to step
-// them by hand.
 - (void)_setAlwaysDisableDisplayLink:(BOOL)disable
 {
     _disableDisplayLink = disable;
@@ -1045,8 +986,6 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
     return item ? _bodies[[self charon_keyForItem:item]] : nil;
 }
 
-// -[UIDynamicAnimator _registerBodyForItem:shape:] (7.0): one body per item and animator, shared by
-// every behavior that holds the item and counted by them.
 - (CharonDynamicsBody *)charon_registerBodyForItem:(id<UIDynamicItem>)item shape:(CharonDynamicsShape)shape
 {
     BOOL view = [(id)item isKindOfClass:[UIView class]];
@@ -1068,7 +1007,6 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
     CGPoint position = item.center;
     if (view && _referenceSystemType == CharonReferenceSystemView)
         position = [(UIView *)_referenceSystem convertPoint:position fromView:[(UIView *)item superview]];
-    // Auto Layout arrived in iOS 6.0: below it a view has no constraints to take the item out of and no switch to set.
     if (view && [item respondsToSelector:@selector(setTranslatesAutoresizingMaskIntoConstraints:)]) {
         UIView *itemView = (UIView *)item;
         NSMutableArray *constraints = [NSMutableArray array];
@@ -1148,8 +1086,6 @@ static CGFloat charon_rounded(CGFloat value, CGFloat scale)
     return whole + round(scale * (value - whole)) / scale;
 }
 
-// -[UIDynamicAnimator _defaultMapper:position:angle:itemType:] (7.0): a view's center to the pixel and
-// its angle to 1/5000 rad, a plain item exactly; the transform is replaced by the body's rotation.
 - (void)charon_writeBack:(CharonDynamicsBody *)body
 {
     id<UIDynamicItem> item = body.representedObject;
@@ -1176,8 +1112,6 @@ static CGFloat charon_rounded(CGFloat value, CGFloat scale)
     return _integralization != 2 && !(_integralization == 0 && object);
 }
 
-// A view's body keeps a rotation within the same 1/5000 rad and a center within the same pixel: 7.0
-// compares them rounded, and moves the body only when the center differs.
 - (void)updateItemUsingCurrentState:(id<UIDynamicItem>)item
 {
     CharonDynamicsBody *body = [self charon_bodyForItem:item];
@@ -1277,9 +1211,6 @@ static CGFloat charon_rounded(CGFloat value, CGFloat scale)
 {
     if (!behavior)
         return;
-    // 7.0 (and the host) queue only a registered behavior inside a step, and outside one unregister whatever they are
-    // given: a behavior removeAllBehaviors already dissociated is dissociated again, with no context
-    // (facts/UIKit/UIDynamicAnimator.md M1).
     if (_isInWorldStepMethod) {
         [_behaviorsToAdd removeObject:behavior];
         if ([_registeredBehaviors containsObject:behavior] && ![_behaviorsToRemove containsObject:behavior])
@@ -1297,8 +1228,6 @@ static CGFloat charon_rounded(CGFloat value, CGFloat scale)
 
 - (void)removeAllBehaviors
 {
-    // Inside a step every registered behavior is queued and animator.behaviors is left as it is
-    // (facts/UIKit/UIDynamicAnimator.md M1).
     if (_isInWorldStepMethod) {
         _behaviorsToRemove = _behaviorsToRemove ?: [NSMutableArray new];
         for (UIDynamicBehavior *behavior in _registeredBehaviors) {
@@ -1315,7 +1244,6 @@ static CGFloat charon_rounded(CGFloat value, CGFloat scale)
     [_registeredBehaviors removeAllObjects];
 }
 
-// Depth first, in the order of animator.behaviors, each behavior before its children.
 - (void)charon_traverseBehaviorHierarchy:(void (^)(UIDynamicBehavior *behavior))block
 {
     for (UIDynamicBehavior *behavior in [_topLevelBehaviors copy])
@@ -1362,10 +1290,6 @@ static CGFloat charon_rounded(CGFloat value, CGFloat scale)
 
 @end
 
-// 7.0's UIView adopts UIDynamicItem; its three required members are UIView's own since 2.0, and it implements none of
-// the 9.0 optional ones (measured on 6.1.3, 7.0, 8.4.1 and 9.0: facts/UIKit/UIDynamicAnimator.md §10). The conformance
-// lives with the animator, so a band whose release carries UIKit Dynamics, and with it the conformance, leaves it
-// out with the class.
 @interface UIView (CharonDynamicItem) <UIDynamicItem>
 @end
 

@@ -1,8 +1,3 @@
-//
-//  harness.m
-//  The runtime of the generated call test, in as many words as its header.
-//
-
 #import "harness.h"
 
 #import <fcntl.h>
@@ -13,7 +8,7 @@
 #import <unistd.h>
 
 struct CharonCallLog {
-    NSMutableDictionary *instances;   // the object each class's own case made, by name
+    NSMutableDictionary *instances;
 };
 
 static int charon_call_fd = -1;
@@ -33,8 +28,6 @@ void CharonCallClose(void)
     }
 }
 
-// One line, appended to the shared file: a child writes its own and the parent reads them all
-// back, so neither needs the other's memory and the file is the digest the two runs compare.
 static void charon_call_say(NSString *line)
 {
     if (charon_call_fd >= 0) {
@@ -68,8 +61,6 @@ id CharonCallInstance(CharonCallLog *log, Class cls)
 void CharonCallRemember(CharonCallLog *log, Class cls, id instance)
 {
     if (instance) {
-        // Keyed by the class's name, not by the Class itself: a Class is not an NSCopying key,
-        // and the name is what the report prints anyway.
         [log->instances setObject:instance forKey:NSStringFromClass(cls)];
     }
 }
@@ -135,8 +126,6 @@ void CharonCallProperty(CharonCallLog *log, Class cls, id object, NSString *name
     charon_call_say([NSString stringWithFormat:@"answered %@ -%@ -> %@", NSStringFromClass(cls),
                      name, charon_call_describe(value)]);
     if (writing && [object respondsToSelector:writing]) {
-        // A writable property is written and read back, which the getter-only half of a test
-        // never touches: a setter that stores nothing answers its getter with nil forever.
         ((void (*)(id, SEL, id))objc_msgSend)(object, writing, nil);
         __unsafe_unretained id after = ((id (*)(id, SEL))objc_msgSend)(object, reading);
         charon_call_say([NSString stringWithFormat:@"answered %@ -%@= -> %@", NSStringFromClass(cls),
@@ -176,8 +165,6 @@ unsigned CharonCallReport(NSString *title)
     unsigned checks = 0, refused = 0;
     for (NSString *line in [text componentsSeparatedByString:@"\n"]) {
         if ([line hasPrefix:@"present "]) {
-            // A count of classes, not of lookups: the class case looks its class up and so does
-            // every one of its members, and the number of the former is what a reader wants.
             [present addObject:[line substringFromIndex:8]];
         } else if ([line hasPrefix:@"missing "]) {
             [missing addObject:[line substringFromIndex:8]];

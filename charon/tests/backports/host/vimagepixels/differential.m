@@ -1,14 +1,3 @@
-// The 5, 5, 5, 1, 5, 6, 5 and 1, 5, 5, 5 conversions of vImage, held against the host's own vImage, case by
-// case: the same pixels through each, compared byte for byte.
-//
-// The port's sources are compiled with every API name they define renamed, so this translation unit can
-// hold the port's objects and the host's side by side. The names come from the port's registry.
-//
-// The inputs are the corners of each word - all zero, all one, every channel at its maximum, every channel
-// at its minimum but one, and a mixed value - because a conversion that is right at the ends and wrong in
-// the middle is a rounding rule that a single value would hide, and this family is exactly where the
-// rounding lives.
-
 #import <Accelerate/Accelerate.h>
 #import <Foundation/Foundation.h>
 #include <stdio.h>
@@ -33,17 +22,10 @@ vImage_Error charon_host_vImageConvert_RGBA5551toRGB565(const vImage_Buffer *src
 static int checks;
 static int failures;
 
-// The pixels each direction is asked over, as the words themselves: 0x0000 and 0xFFFF bracket both ends of
-// every channel, 0x07FF is red at its maximum, 0x07E0 green, 0x001F blue, 0xF81F a 1/5/5/5 word with its
-// alpha and red and blue at their maxima, and the rest are mixed.
 static const uint16_t words[] = {0x0000, 0xFFFF, 0x07FF, 0x07E0, 0x001F, 0xF81F, 0xF800, 0x8410, 0x1234, 0x7BDE, 0x0202, 0xFD75};
 #define WORDS ((int)(sizeof words / sizeof *words))
 #define PIXELS 16
 
-// The byte-exact comparison for the conversions whose arithmetic Conversion.h writes out, and the
-// divergence check for the two that take a dither - where the host's answer is what its own noise source
-// gives and this port has no copy of that source, so the case passes while the two answers differ and fails
-// on anything else.
 static void report(int passed, const char *name, const char *why)
 {
     checks++;
@@ -58,10 +40,6 @@ static void report(int passed, const char *name, const char *why)
 
 static char detail[256];
 
-// The words each direction is asked over: 0x0000 and 0xFFFF bracket both ends of every channel, 0x07FF is
-// red at its maximum, 0x07E0 green, 0x001F blue, 0xF81F a 1/5/5/5 word with its alpha, red and blue at
-// their maxima, and the rest are mixed. A conversion that is right at the ends and wrong in the middle is a
-// rounding rule a single value would hide, and this family is where the rounding lives.
 static void fill16(uint16_t *mine, uint16_t *theirs, int count)
 {
     for (int at = 0; at < count; at++)
@@ -103,9 +81,6 @@ int main(void)
         mine_to32 = buffer_of(mine_out, PIXELS * 4, PIXELS, 1);
         theirs_to32 = buffer_of(theirs_out, PIXELS * 4, PIXELS, 1);
 
-        // A 16-bit word in, a 16-bit word out. The two with a dither are asked with a dither of zero,
-        // which is the answer the facts file measures; the host's own dither is a noise source no header
-        // publishes, so a non-zero dither is not something this port can reproduce and says so.
         {
             struct {
                 const char *name;
@@ -136,7 +111,7 @@ int main(void)
                 const char *name;
                 vImage_Error (*mine)(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
                 vImage_Error (*theirs)(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
-                size_t bytes;   // how many of the output the case compares
+                size_t bytes;
             } cases[] = {
                 {"vImageConvert_ARGB1555toRGB565", vImageConvert_ARGB1555toRGB565, charon_host_vImageConvert_ARGB1555toRGB565, PIXELS * 2},
                 {"vImageConvert_RGBA5551toRGB565", vImageConvert_RGBA5551toRGB565, charon_host_vImageConvert_RGBA5551toRGB565,
@@ -158,7 +133,6 @@ int main(void)
                 report(agreed, cases[at].name, agreed ? "" : detail);
             }
         }
-        // A 16-bit word in, four bytes out.
         {
             uint8_t mine_rgb[PIXELS * 3], theirs_rgb[PIXELS * 3];
             vImage_Buffer mine_to24 = buffer_of(mine_rgb, PIXELS * 3, PIXELS, 1);
@@ -206,8 +180,6 @@ int main(void)
                 report(agreed, cases[at].name, agreed ? "" : detail);
             }
         }
-        // Four bytes in, two bytes out - the BGRA8888 pair the 7.0 group already carries, asked again here so
-        // this differential covers the whole shape.
         {
             struct {
                 const char *name;
@@ -243,7 +215,6 @@ int main(void)
                      theirs_out[3]);
             report(agreed, "vImageConvert_RGB565toBGRA8888", agreed ? "" : detail);
         }
-        // The refusals, which are the release's own.
         {
             vImage_Buffer small = buffer_of(mine_out, 8, 1, 1);
             vImage_Buffer large = buffer_of(mine_out, 8, 4, 1);

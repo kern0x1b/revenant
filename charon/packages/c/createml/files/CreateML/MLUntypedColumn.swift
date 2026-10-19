@@ -1,23 +1,5 @@
-// MLUntypedColumn.swift — a column of a training table, typed and untyped.
-//
-// `MLUntypedColumn` is the column the table holds: a name and a vector of `MLDataValue`. `MLDataColumn`
-// is the same column with its element type written down, so a caller reading a prediction column
-// gets `Int` out of it rather than an enum case to unwrap.
-//
-// The signatures here are the framework's own, read from the SDK 26.2 interface and not guessed: the
-// accessors answer *typed* columns and are optional (`ints` is `MLDataColumn<Int>?`, not `[Int?]`),
-// a column of a range is a column of the *indices* in that range, and `materialize()` throws
-// because the release's columns are computed views over another table and this one has to say so
-// rather than pretend the two are the same kind of thing.
-//
-// Neither is lazy here. The release computes a column on demand so a table of a million rows can
-// answer a subscript without materialising the million; a column here is a vector, so
-// `materialize()` is the identity — and it is said to be, in this file, rather than left for a
-// caller to discover by timing it.
-
 import Foundation
 
-/// Why a column cannot be read as what was asked for.
 public enum MLColumnError: Error, CustomStringConvertible, Equatable {
     case wrongType(requested: MLDataValue.ValueType, found: MLDataValue.ValueType)
     case notNumeric(String)
@@ -38,20 +20,11 @@ public enum MLColumnError: Error, CustomStringConvertible, Equatable {
     }
 }
 
-/// A column of a training table whose element type is not written down.
 public struct MLUntypedColumn: Equatable, CustomStringConvertible, CustomDebugStringConvertible {
     public internal(set) var name: String
     public private(set) var values: [MLDataValue]
-    /// Set when a value of a kind the column cannot carry is in it, or when its values are of two
-    /// different kinds. The column stays readable and the failure stays visible: `isValid` answers
-    /// NO and `error` says why, which is what lets a caller find the bad cell instead of training on
-    /// a table that quietly dropped a column.
     public private(set) var error: MLColumnError?
 
-    /// The kind of value this column holds.
-    ///
-    /// Not optional, and `invalid` for a column with no kind: an empty column has none, a column of
-    /// mixed kinds has none, and the framework's enumeration has a case that says exactly that.
     public private(set) var type: MLDataValue.ValueType
 
     public init() {
@@ -85,8 +58,6 @@ public struct MLUntypedColumn: Equatable, CustomStringConvertible, CustomDebugSt
         self.init(out)
     }
 
-    /// A column of the *indices* of a range, which is what the framework's `init(_ range:)` builds:
-    /// a mask over a table's rows, not the values a range of numbers would suggest.
     public init(_ range: Range<Int>) {
         self.init(range.map { MLDataValue.int(Int64($0)) })
     }
@@ -110,8 +81,6 @@ public struct MLUntypedColumn: Equatable, CustomStringConvertible, CustomDebugSt
     public init(dictionaries column: MLUntypedColumn) { self.init(column, convertingTo: .dictionary) }
     public init(multiArrays column: MLUntypedColumn) { self.init(column, convertingTo: .multiArray) }
 
-    /// A column narrowed to one kind, so that `MLUntypedColumn(ints:)` over a column of doubles that
-    /// are whole numbers is the column of those numbers and not a column of the wrong type.
     private init(_ column: MLUntypedColumn, convertingTo wanted: MLDataValue.ValueType) {
         self.name = column.name
         var out = [MLDataValue](repeating: .invalid, count: column.count)
@@ -121,9 +90,6 @@ public struct MLUntypedColumn: Equatable, CustomStringConvertible, CustomDebugSt
             case .double: out[index] = value.doubleValue.map(MLDataValue.double) ?? .invalid
             case .string: out[index] = value.stringValue.map(MLDataValue.string) ?? .invalid
             default:
-                // A sequence, a dictionary and a multi-array are their own kinds and nothing
-                // converts between them, so the column is taken as it is and a cell of another kind
-                // becomes missing rather than being read as one of these.
                 out[index] = value.type == wanted ? value : .invalid
             }
         }
@@ -132,7 +98,6 @@ public struct MLUntypedColumn: Equatable, CustomStringConvertible, CustomDebugSt
         settle()
     }
 
-    /// The kind of the column's values and the reason it cannot be used, decided from its cells.
     private mutating func settle() {
         var found: MLDataValue.ValueType?
         for value in values {
@@ -151,8 +116,6 @@ public struct MLUntypedColumn: Equatable, CustomStringConvertible, CustomDebugSt
     public var count: Int { values.count }
     public var isEmpty: Bool { values.isEmpty }
 
-    /// A column is valid when its values are all of one kind, or when it is empty: an empty column
-    /// has nothing wrong with it, and a column whose name is empty is a column nobody has named yet.
     public var isValid: Bool { error == nil }
 
     public subscript(index: Int) -> MLDataValue { values[index] }
@@ -197,15 +160,6 @@ public struct MLUntypedColumn: Equatable, CustomStringConvertible, CustomDebugSt
         }, name: name)
     }
 
-    /// The column read as a type of its own, or nil when it holds something else.
-    ///
-    /// A *missing* cell becomes the type's own zero and a cell of another kind makes the whole
-    /// accessor answer nil. Both halves are measured: the host's `strings` on a column whose second
-    /// cell is `Missing` answers `["north", "", "", "south", ...]` — the gap reads as the empty
-    /// string — and its `ints` on a *string* column answers nil rather than a column of zeroes. A
-    /// reader that returned nil for the first case would make every join's other-side column
-    /// unreadable, and one that returned zeroes for the second would make a category column look
-    /// like a column of small numbers.
     public func column<T: MLDataValueConvertible>(type: T.Type) -> MLDataColumn<T>? {
         if self.type != .invalid, self.type != T.dataValueType { return nil }
         var out = [T]()
@@ -239,8 +193,6 @@ public struct MLUntypedColumn: Equatable, CustomStringConvertible, CustomDebugSt
 
     public func copy() -> MLUntypedColumn { self }
 
-    /// The column without its missing values. A missing value is a value, and keeping it would make
-    /// a mean over the column a mean over something the caller never wrote.
     public func dropMissing() -> MLUntypedColumn {
         MLUntypedColumn(values.filter { $0.isValid }, name: name)
     }
@@ -249,9 +201,6 @@ public struct MLUntypedColumn: Equatable, CustomStringConvertible, CustomDebugSt
         MLUntypedColumn(values.map { $0.isValid ? $0 : value }, name: name)
     }
 
-    /// The column with each distinct value once, in the order they first appear: the order a
-    /// category column is read in is the order it was written in, so a caller comparing two columns
-    /// sees the same categories in the same places.
     public func dropDuplicates() -> MLUntypedColumn {
         var seen = Set<MLDataValue>()
         return MLUntypedColumn(values.filter { seen.insert($0).inserted }, name: name)
@@ -263,15 +212,11 @@ public struct MLUntypedColumn: Equatable, CustomStringConvertible, CustomDebugSt
         case .int, .double, .string:
             sorted = values.sorted { byIncreasingOrder ? compare($0, $1) < 0 : compare($0, $1) > 0 }
         default:
-            // A sequence, a dictionary, a multi-array and an empty column have no order to sort by.
-            // The column is returned as it was rather than in an order invented for them.
             return self
         }
         return MLUntypedColumn(sorted, name: name)
     }
 
-    /// The order of two values of the same kind, and zero across kinds: there is no order between a
-    /// string and a number, and answering one would be a comparison nobody asked for.
     private func compare(_ lhs: MLDataValue, _ rhs: MLDataValue) -> Int {
         if let a = lhs.intValue, let b = rhs.intValue { return a < b ? -1 : (a > b ? 1 : 0) }
         if let a = lhs.doubleValue, let b = rhs.doubleValue { return a < b ? -1 : (a > b ? 1 : 0) }
@@ -287,10 +232,6 @@ public struct MLUntypedColumn: Equatable, CustomStringConvertible, CustomDebugSt
         MLUntypedColumn(Array(values[Swift.max(0, values.count - maxLength)...]), name: name)
     }
 
-    /// The identity, and said to be: a column here holds its values rather than computing them, so
-    /// there is nothing to materialize and a caller that measured this would measure nothing. The
-    /// release's own throws here because its columns are views; this one's is declared to throw so
-    /// that the same call site compiles against both.
     public func materialize() throws -> MLUntypedColumn { self }
 
     public var description: String {
@@ -299,8 +240,6 @@ public struct MLUntypedColumn: Equatable, CustomStringConvertible, CustomDebugSt
     }
 
     public var debugDescription: String {
-        // The kind's own name, through a local: `type.description` in this line reads as the
-        // *column's* description, which is a sentence about the values rather than a kind's name.
         let kind = self.type
         return "\(kind)[\(count)]: \(description)"
     }
@@ -314,10 +253,6 @@ extension MLUntypedColumn {
     }
 }
 
-// The element-wise operators, because a caller filtering a table reaches for `table["price"] > 3`
-// and not for a `map`. The comparison is the column's own order, and across kinds it is false rather
-// than a coin: "a sequence is greater than 3" has no answer, and answering it either way would make
-// a filter's meaning depend on a type it does not mention.
 extension MLUntypedColumn {
     public static func < (lhs: MLUntypedColumn, rhs: MLDataValue) -> Bool { compare(lhs, rhs) < 0 }
     public static func <= (lhs: MLUntypedColumn, rhs: MLDataValue) -> Bool { compare(lhs, rhs) <= 0 }
@@ -351,9 +286,6 @@ extension MLUntypedColumn {
         return lhs.count < rhs.count
     }
 
-    /// -1, 0 or 1 for a column's order against one value, taken from the column's first cell: a
-    /// column is compared cell by cell and the first cell is the one that decides, which is what
-    /// makes `table["x"] < 3` mean what it looks like it means.
     static func compare(_ lhs: MLUntypedColumn, _ rhs: MLDataValue) -> Int {
         for value in lhs.values {
             return MLDataValue.compareValues(value, rhs)
@@ -363,9 +295,6 @@ extension MLUntypedColumn {
 
     public static func != (lhs: MLUntypedColumn, rhs: MLUntypedColumn) -> Bool { !(lhs == rhs) }
 
-    // The arithmetic operators, over a column and a value, in the same spirit: a filter is written
-    // `table["x"] * 2 > table["y"]`, and the column's own missing value makes the arithmetic one
-    // rather than a value with a hole in it.
     public static func + (lhs: MLUntypedColumn, rhs: Double) -> MLUntypedColumn {
         arithmetic(lhs, rhs.dataValue, +)
     }
@@ -400,7 +329,6 @@ extension MLUntypedColumn {
     }
 }
 
-/// A column of a training table whose element type is written down.
 public struct MLDataColumn<Element>: CustomStringConvertible, CustomDebugStringConvertible {
     public private(set) var name: String
     public private(set) var values: [Element]
@@ -469,14 +397,8 @@ public struct MLDataColumn<Element>: CustomStringConvertible, CustomDebugStringC
 
     public func copy() -> MLDataColumn<Element> { self }
 
-    /// The column without its missing values. An `MLDataColumn<Element>` holds only values of its
-    /// element type, so a cell it could not convert was dropped at the initialiser and there is
-    /// nothing left here to drop; the reason is still on `error`, and a caller that needs the gaps
-    /// reads `untyped`.
     public func dropMissing() -> MLDataColumn<Element> { self }
 
-    /// The identity, for the reason `MLUntypedColumn.materialize()` gives: declared to throw so the
-    /// same call site compiles against the release's views and against this vector alike.
     public func materialize() throws -> MLDataColumn<Element> { self }
 
     public func dropDuplicates() -> MLDataColumn<Element> where Element: Hashable {
@@ -521,10 +443,6 @@ extension MLDataColumn where Element: MLDataValueConvertible {
         var out = [Element]()
         out.reserveCapacity(column.count)
         for value in column.values {
-            // A cell that does not convert is not dropped: an `MLDataColumn<Element>` has no
-            // representation for it, so the column records why it is shorter than it was and
-            // `isValid` says NO. A caller that needs the missing value reads the untyped column,
-            // which has one.
             if let converted = Element(from: value.dataValue) {
                 out.append(converted)
             } else {
@@ -574,14 +492,11 @@ extension MLDataColumn where Element: MLDataValueConvertible {
         map { value in T(from: value.dataValue) ?? T() }
     }
 
-    /// The column as the untyped column, which is the only column that can hold a missing value.
     public var untyped: MLUntypedColumn {
         MLUntypedColumn(values.map { $0.dataValue }, name: name)
     }
 }
 
-// The sums, in the framework's own spellings: `sum()`, `min()`, `max()`, `mean()`, `std()` and
-// `stdev()`, each returning nil for a column it cannot answer for rather than a number it invented.
 extension MLDataColumn where Element: MLDataValueConvertible {
     public func sum() -> Double? {
         guard !values.isEmpty else { return nil }
@@ -616,14 +531,6 @@ extension MLDataColumn where Element: MLDataValueConvertible {
         return best
     }
 
-    /// The standard deviation of the column: the sum of the squared deviations over `n`, and nil for
-    /// a column of one value, which has no spread to speak of.
-    ///
-    /// Over `n` and not over `n - 1`, which is a *measured* choice and not a slip. The host's own
-    /// `stdev()` on the eight prices of the differential answers 36.5718; the unbiased form answers
-    /// 39.0969, and the difference is a factor of `sqrt(8/7)`. The framework divides by the number of
-    /// values it was given, so this does too — a column of a training table is the whole population
-    /// the model will see of that feature, not a sample drawn from a larger one.
     public func stdev() -> Double? {
         guard !values.isEmpty, let mean = mean() else { return nil }
         var total = 0.0
@@ -634,8 +541,6 @@ extension MLDataColumn where Element: MLDataValueConvertible {
         return (total / Double(values.count)).squareRoot()
     }
 
-    /// The name the release deprecated in favour of `stdev()`, kept because the surface has both and
-    /// a caller written against the older one still calls it.
     public func std() -> Double? { stdev() }
 }
 
@@ -644,7 +549,6 @@ extension MLDataColumn where Element: Comparable {
     public func max() -> Element? { values.max() }
 }
 
-/// A typed column's own slice: the elements in a range of the column's rows, under the column's name.
 public struct MLDataColumnSlice<Element>: RandomAccessCollection {
     public let name: String
     public let elements: [Element]
@@ -663,6 +567,5 @@ public struct MLDataColumnSlice<Element>: RandomAccessCollection {
     public func index(after i: Int) -> Int { i + 1 }
     public subscript(index: Int) -> Element { elements[index] }
 
-    /// The slice as a column of its own, so a caller can keep reading it as a column.
     public var column: MLDataColumn<Element> { MLDataColumn(elements, name: name) }
 }

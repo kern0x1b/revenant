@@ -1,15 +1,7 @@
--- metallib2es.lua: every function of a Metal library, as an OpenGL ES 2 shader of its own, into OUT with a
--- library.json naming them, and the library's install name when the metallib carries one.
---   xmake l tools/air2es/metallib2es.lua <air2es> <LIB.metallib> <OUT>
--- A library is a run of AIR bitcode modules, each behind a wrapper of five little-endian words: the magic, the
--- version, the module's offset and its size within the wrapper, and the CPU type. Each module is written out,
--- handed to air2es, and its reflection read back; a module air2es refuses is named by its stdout and left out.
 import("core.base.json")
 
 local binary = {encoding = "binary"}
 
--- json.dump(..., indent=1) of this one shape, written by hand so the file is the one Python wrote: one
--- space of indentation per level, a space after each colon, no trailing newline.
 local function quoted(text)
     local escapes = {['"'] = '\\"', ['\\'] = '\\\\', ['\n'] = '\\n', ['\r'] = '\\r', ['\t'] = '\\t'}
     return '"' .. text:gsub('[%c"\\]', function(c)
@@ -17,11 +9,6 @@ local function quoted(text)
     end) .. '"'
 end
 
--- The install name of the library. Its records are a tag, a 16-bit length and the payload, and the library holds one
--- NAME record that no function has: a function's NAME is followed by its TYPE, and the library's by ENDT. The payload
--- is a C string, so its NUL is dropped. The last such record wins, since the library's comes after its functions.
--- Measured on Apple's own default.metallib, which names default.metallib whatever the file is called (facts/Metal/
--- LibraryDescriptors.md). A library with no such record has no install name, and the key is then left out.
 local function install_name(data)
     local name = nil
     local pos = 1

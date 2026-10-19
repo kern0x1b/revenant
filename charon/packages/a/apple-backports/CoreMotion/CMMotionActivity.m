@@ -1,9 +1,5 @@
 #import <CoreMotion/CoreMotion.h>
 
-// CMMotionActivity is a CMLogItem of iOS 7 and nothing the release has. The release's own
-// activity is measured by a coprocessor this device does not have, so no instance is ever
-// produced by the port: an application can allocate one, and the answers below are the ones
-// a fresh instance gives on the host (facts/CoreMotion/CMMotionActivity.md).
 @implementation CMMotionActivity {
     NSDate *_startDate;
     CMMotionActivityConfidence _confidence;

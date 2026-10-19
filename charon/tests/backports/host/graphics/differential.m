@@ -39,8 +39,6 @@ static void same_data(NSData *ours, NSData *theirs, NSString *what)
          ours.length == theirs.length ? @", contents differ" : @"");
 }
 
-/* Both images drawn into one bitmap of this test's own making, so what came out is compared
-   whatever the renderer used underneath. */
 static NSData *flattened(UIImage *image)
 {
     size_t width = (size_t)(image.size.width * image.scale), height = (size_t)(image.size.height * image.scale);
@@ -66,7 +64,6 @@ static Class ours_of(NSString *name)
     return mine;
 }
 
-/* Everything the drawing block is given, recorded so the two runs can be compared. */
 typedef struct {
     size_t width, height, bitsPerComponent, bitsPerPixel, bytesPerRow;
     uint32_t bitmapInfo, alphaInfo;
@@ -88,10 +85,6 @@ static Shape shape_of(CGContextRef context)
     return shape;
 }
 
-/* The renderer of the host this runs on need not be backed by a bitmap context - a UIKit
-   newer than iOS 10 is not - and then none of a bitmap's properties can be read from it and
-   there is nothing to compare. What the drawing came out as is compared either way, by
-   redrawing both images into one bitmap of this test's own making. */
 static BOOL comparable(Shape theirs)
 {
     return theirs.width != 0 && theirs.height != 0;
@@ -114,9 +107,6 @@ static void same_shape(Shape ours, Shape theirs, NSString *what)
              theirs.transform.a, theirs.transform.b, theirs.transform.c, theirs.transform.d, theirs.transform.tx, theirs.transform.ty);
 }
 
-/* The drawing the two renderers are both given. It uses the rendererContext API rather than
-   CoreGraphics directly wherever there is one, so fillRect:, strokeRect: and clipToRect: are
-   exercised through the backport as an application would reach them. */
 static void draw(id context, CGRect bounds)
 {
     CGContextRef cg = ((CGContextRef (*)(id, SEL))objc_msgSend)(context, @selector(CGContext));
@@ -221,7 +211,6 @@ static void compare_formats(void)
     if (!CGRectEqualToRect(ourBounds, theirBounds))
         fail(@"the base default format's bounds: ours %@, UIKit %@", NSStringFromCGRect(ourBounds), NSStringFromCGRect(theirBounds));
 
-    /* The renderer keeps the bounds it was made with on its own copy of the format. */
     CGRect bounds = CGRectMake(1, 2, 30, 40);
     UIGraphicsImageRenderer *theirRenderer = [[UIGraphicsImageRenderer alloc] initWithBounds:bounds format:theirs];
     id ourRenderer = ((id (*)(id, SEL, CGRect, id))objc_msgSend)([ours_of(@"UIGraphicsImageRenderer") alloc],
@@ -242,8 +231,6 @@ static void compare_formats(void)
 
 static void compare_empty(void)
 {
-    /* A renderer of no size cannot make a context. UIKit answers an empty image, not nil,
-       and an empty NSData, not nil; an application that only checks for nil walks on. */
     Class ourRenderer = ours_of(@"UIGraphicsImageRenderer");
     if (!ourRenderer)
         return;

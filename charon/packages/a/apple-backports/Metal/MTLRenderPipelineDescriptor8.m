@@ -1,8 +1,5 @@
 #import "CharonMetal.h"
 
-// The defaults a new colour attachment has, written into an object that already exists. Apple's nil store into
-// a slot does this in place: the slot's object stays and its fields go back to these (measured on the macOS host,
-// tests/backports/host/color-attachment-nil). The index of the slot is checked by the array, as Apple's is.
 static void CharonResetColorAttachment(MTLRenderPipelineColorAttachmentDescriptor *d)
 {
     d.pixelFormat = MTLPixelFormatInvalid;
@@ -56,8 +53,6 @@ static void CharonResetColorAttachment(MTLRenderPipelineColorAttachmentDescripto
     return self;
 }
 
-// Apple's array has eight slots and asserts on any other index, both to read and to write (measured: status 134,
-// "attachmentIndex(8) must be < 8").
 - (MTLRenderPipelineColorAttachmentDescriptor *)objectAtIndexedSubscript:(NSUInteger)attachmentIndex
 {
     if (attachmentIndex >= 8)
@@ -66,7 +61,6 @@ static void CharonResetColorAttachment(MTLRenderPipelineColorAttachmentDescripto
     return _items[attachmentIndex];
 }
 
-// A nil attachment resets the slot in place, as Apple's does; any other attachment is stored as a copy.
 - (void)setObject:(MTLRenderPipelineColorAttachmentDescriptor *)attachment atIndexedSubscript:(NSUInteger)attachmentIndex
 {
     if (attachmentIndex >= 8)
@@ -81,8 +75,6 @@ static void CharonResetColorAttachment(MTLRenderPipelineColorAttachmentDescripto
 
 @end
 
-// A copy of a linked-functions object, with the same four arrays. MTLLinkedFunctions carries no copy of its own in
-// this port, so the copy is written here, as the mesh descriptor's is.
 static MTLLinkedFunctions *CharonCopyLinkedFunctions(MTLLinkedFunctions *source)
 {
     MTLLinkedFunctions *copy = [[MTLLinkedFunctions alloc] init];
@@ -103,7 +95,6 @@ static MTLLinkedFunctions *CharonCopyLinkedFunctions(MTLLinkedFunctions *source)
 {
     if ((self = [super init])) {
         _colorAttachments = [[MTLRenderPipelineColorAttachmentDescriptorArray alloc] init];
-        // A fresh descriptor answers an empty linked-functions object for each stage, never nil (measured on the host).
         _vertexLinkedFunctions = [[MTLLinkedFunctions alloc] init];
         _fragmentLinkedFunctions = [[MTLLinkedFunctions alloc] init];
         self.rasterSampleCount = 1;
@@ -117,8 +108,6 @@ static MTLLinkedFunctions *CharonCopyLinkedFunctions(MTLLinkedFunctions *source)
     return _colorAttachments;
 }
 
-// null_resettable, as Apple's properties are: a nil store gives a NEW empty object (measured: not the object that
-// was there before, and not the fresh one), and any other store keeps a copy.
 - (MTLLinkedFunctions *)vertexLinkedFunctions
 {
     return _vertexLinkedFunctions;

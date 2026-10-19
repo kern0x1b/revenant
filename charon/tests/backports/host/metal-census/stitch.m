@@ -1,21 +1,3 @@
-/* A round trip through the stitching objects, against the header's own property names.
- *
- * Compiled in ONE clang line together with the port's source, the way
- * tests/backports/host/security/run-cases.sh does it: a test and the port sources it exercises are
- * built together, so there is no second object whose architecture has to match. An earlier version
- * compiled the port's source for the DEVICE and linked that object into a HOST test, and ld ignored it
- * - "building for macOS but attempting to link with file built for iOS" - which surfaced as an
- * undefined _main and looked like a missing test rather than a mismatched object.
- *
- * Every name here is the header's: MTLFunctionStitching.h:50 argumentIndex, :60-62
- * name/arguments/controlDependencies, :75-78 functionName/nodes/outputNode/attributes, :91-92
- * functionGraphs/functions. An earlier version of the OBJECT called the descriptor's property
- * functionsFromGraphs, which the header does not declare, and a test written against the header could
- * not see it - which is how that defect was found.
- *
- * No device: every one of these is a data container that asks nothing of the hardware, which is the
- * property that makes them carried in the first place.
- */
 #import <Foundation/Foundation.h>
 #import "CharonMetal.h"
 
@@ -53,12 +35,10 @@ int main(void)
         check(graph.attributes.count == 1 && graph.attributes[0] == attr,
               @"a graph reads its attribute list back");
 
-        // the header's outputNode is NULLABLE, so a graph built without one must keep nil
         MTLFunctionStitchingGraph *noOutput = [[MTLFunctionStitchingGraph alloc]
             initWithFunctionName:@"charonNoOutput" nodes:@[] outputNode:nil attributes:@[]];
         check(noOutput.outputNode == nil, @"an outputNode that was not set stays nil");
 
-        // a copy is a NEW object with equal values - NSCopying, which every one of these declares
         MTLFunctionStitchingGraph *gcopy = [graph copyWithZone:nil];
         check(gcopy != graph && [gcopy.functionName isEqualToString:graph.functionName] &&
               gcopy.nodes.count == graph.nodes.count && gcopy.outputNode == graph.outputNode &&
@@ -83,8 +63,6 @@ int main(void)
         check(dcopy != descriptor && dcopy.functionGraphs.count == descriptor.functionGraphs.count,
               @"a descriptor's copy is a different object with the same graphs");
 
-        // MTLRenderPipelineFunctionsDescriptor: three nullable lists, carried on every device, and
-        // empty is the header's own nullable answer - the port makes no binary functions.
         MTLRenderPipelineFunctionsDescriptor *binaries = [[MTLRenderPipelineFunctionsDescriptor alloc] init];
         check(binaries.vertexAdditionalBinaryFunctions == nil &&
               binaries.fragmentAdditionalBinaryFunctions == nil &&

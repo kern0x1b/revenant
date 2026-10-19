@@ -25,8 +25,6 @@ function failures(opt)
         end
     end
 
-    -- The slice of a universal target: modules/apple/slices.lua repeats the toolchain's bounds because the toolchain's own
-    -- file is in the digest of every package, so it is held to them here, both ways.
     local slices = import("apple.slices", {rootdir = opt.modules, anonymous = true})
     local floors, lasts = slices.slice_floors()
     local named = {}
@@ -72,7 +70,6 @@ function failures(opt)
                                               tostring(case[3]), tostring(release), tostring(kept), case[4], tostring(case[5])))
         end
     end
-    -- A description cannot import, so the project's includes include it; and the rule imports it.
     local includes = io.readfile(path.join(opt.modules, "..", "includes", "apple-ios", "xmake.lua"))
     local rule = io.readfile(path.join(opt.modules, "..", "rules", "apple-ios", "xmake.lua"))
     if not includes:find('"slices.lua"', 1, true) or not includes:find("slice_minimum(", 1, true) then

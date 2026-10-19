@@ -1,7 +1,3 @@
--- count_records.lua RECORDS.json - prints how many records a records file holds, which is run.sh's
--- "the host answered: N" line, ported from its inline python3 -c len(json.load(...)). A file that is not
--- there, or is not JSON, ends the run with exit 1, as the Python's uncaught exception did.
-
 local V = import("vtlib", {rootdir = os.scriptdir()})
 local R = import("records_json", {rootdir = os.scriptdir()})
 

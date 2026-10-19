@@ -1,9 +1,4 @@
 #if defined(CHARON_MEDIAPLAYER_STANDIN)
-// The host checks compile this file with the stand-in in place of the frameworks, so the port's own
-// source is measured and not this Mac's MediaPlayer - whose MPMediaItem and MPMediaEntityPersistentID
-// collide with the stand-in's. The macro is defined by nothing in the library build, so the armv7 object
-// this file produces is unchanged: the preprocessed text without the macro is byte for byte the same
-// before and after this branch was added.
 #import "MPMediaItemStandin.h"
 #else
 #import <MediaPlayer/MediaPlayer.h>
@@ -11,27 +6,6 @@
 #endif
 #import <objc/runtime.h>
 #import <objc/message.h>
-
-// Rank 7 of coordination/corpus/crash-demand-top.tsv, LOAD-FAIL: a hard, non-weak reference to
-// MPRemoteCommandCenter kills the process at launch. Two-step check before writing code:
-// apple.objc.inventory() against the armv7 shared cache of 6.1.3 confirms none of
-// MPRemoteCommandCenter/MPRemoteCommand/MPRemoteCommandEvent/MPChangePlaybackPositionCommand(Event)
-// exist under any name on this release - no collision, a genuine gap, not a false one; grep of
-// this tree's own .m files found no orphaned implementation already carrying a demanded selector.
-//
-// iOS 6.1.3 has no MediaPlayer.framework remote-command surface, but it has the older mechanism
-// the new one is documented to sit above: UIEventTypeRemoteControl, delivered to the responder
-// chain with a UIEventSubtypeRemoteControl* subtype since iOS 4.0. This port bridges one onto the
-// other for real - play/pause/stop/toggle/next/previous/seek map to their old-style subtypes
-// exactly; nothing invents an event source the release does not have.
-//
-// Split by introduced release, per band()'s own rule (one object, one release): this file holds
-// every class the registry declares "introduced": "7.1" - MPRemoteCommandCenter, MPRemoteCommand,
-// MPRemoteCommandEvent, MPSeekCommandEvent, MPSkipIntervalCommand, MPFeedbackCommand,
-// MPRatingCommand and MPChangePlaybackRateCommand. The 8.0 and 9.0 command subclasses
-// (MPChangePlaybackPositionCommand and friends) live in MPRemoteCommandCenter80.m/90.m; charon_command()
-// creates them lazily by class regardless of which object file defines them, since they all share
-// the same MPRemoteCommand.initCharon this file defines.
 
 typedef MPRemoteCommandHandlerStatus (^MPRemoteCommandHandler)(MPRemoteCommandEvent *event);
 
@@ -127,9 +101,6 @@ typedef MPRemoteCommandHandlerStatus (^MPRemoteCommandHandler)(MPRemoteCommandEv
     return entry;
 }
 
-// Not in the real header - this port's own removal path for the opaque object
-// -addTargetWithHandler: returns, since real MPRemoteCommand answers to -removeTarget: with it
-// too (it is just an object, not typed further by the header).
 - (void)charon_dispatch:(MPRemoteCommandEvent *)event
 {
     if (!self.isEnabled)
@@ -224,12 +195,6 @@ static id charon_command(Class cls, id __strong *storage)
 
 @end
 
-// The bridge from the release's own UIEventTypeRemoteControl to the command center above -
-// swizzles -[UIApplication sendEvent:], the same interception point this project already uses
-// (PushKit's CharonPushBridge swizzles a UIApplication method rather than depending on an
-// override the host application may not implement), and passes every event through to the real
-// implementation afterward so an application's own -remoteControlReceivedWithEvent: still fires
-// exactly as it does today.
 @implementation UIApplication (CharonRemoteCommandBridge)
 
 + (void)load

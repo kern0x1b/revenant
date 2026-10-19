@@ -1,8 +1,3 @@
--- The round trip's comparison and diagnostics (tools/gen/swift_roundtrip.lua), on our own fixture: the model of the fixture is the SDK's
--- side, and the other side is the same model with three known changes (one signature changed, one row dropped, one row added). A
--- compare that ignores a signature cell, or that loses a row, turns the test red. The compiler and the digester are not run here
--- (they need a toolchain); cmd_roundtrip runs them. Run: xmake l tests/gen/swift_roundtrip_test.lua
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 local json = import("core.base.json")
 
@@ -20,11 +15,9 @@ function main()
     local text = io.open(path.join(os.scriptdir(), "input", "fixtures", "swift", "model.json"), "rb"):read("a")
     local sdk_rows = assert(model.rows(json.decode(text).ABIRoot, "Fixture"))
 
-    -- Ours is the same model with three changes: Box.describe() returns Int, Point.x is dropped, and a row nobody declared is added.
     local ours = {}
     for _, row in ipairs(sdk_rows) do
         if row.container == "Point" and row.name == "x" then
-            -- dropped
         else
             local copy = {}
             for k, v in pairs(row) do
@@ -52,7 +45,6 @@ function main()
     check(result.equal == #sdk_rows - 2, "every matched row with no changed cell counts as equal")
     check(result.duplicates == 0, "no duplicate key is counted on a model without one")
 
-    -- A duplicate key on our side is counted, not compared twice.
     local twice = {}
     for _, row in ipairs(sdk_rows) do
         table.insert(twice, row)
@@ -60,8 +52,6 @@ function main()
     table.insert(twice, sdk_rows[1])
     check(roundtrip.compare(sdk_rows, twice).duplicates == 1, "a repeated key on our side is a duplicate")
 
-    -- The measure: a list cell is a set (the dump's order and its repeated platform attribute do not count), and a stored property
-    -- rendered computed is a by-design difference, counted apart; any other difference is still a mismatch.
     local function with(row, changes)
         local copy = {}
         for k, v in pairs(row) do
@@ -80,7 +70,6 @@ function main()
     local stored = roundtrip.compare({with(base, {storage = "yes"})}, {with(base, {storage = "-"})})
     check(stored.by_design == 1 and stored.equal == 1 and stored.causes.storage == nil,
           "a stored property rendered computed is by design: counted apart, not a mismatch")
-    -- a let is stored, and its storage attributes come with it: the same by-design difference, whatever the attribute order
     local let_rows = roundtrip.compare(
         {with(base, {storage = "yes", is_let = "yes", attributes = "HasInitialValue,HasStorage,Final"})},
         {with(base, {storage = "-", is_let = "-", attributes = "Final"})})
@@ -91,7 +80,6 @@ function main()
     local attribute = roundtrip.compare({with(base, {attributes = "Final"})}, {with(base, {attributes = "ObjC"})})
     check(attribute.causes.attributes == 1 and attribute.equal == 0, "a different attribute is still a mismatch")
 
-    -- The compiler's diagnostics: the count of errors and the first one, in order; a note is not an error.
     local count, first = roundtrip.diagnostics("a.swift:1:2: error: boom\nb.swift: note: here\nc.swift:3:4: error: second\n")
     check(count == 2 and first == "a.swift:1:2: error: boom", "the first error and the error count are read in order")
     count, first = roundtrip.diagnostics("")

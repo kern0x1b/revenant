@@ -1,18 +1,7 @@
--- compare.lua PORTFILE HOSTFILE NAMELIST - the port's values against the host's, name by name.
---
---    xmake l ./compare.lua <port out> <host out> <names.txt>
---
--- Three ways it must be red, and all three are run by run.sh: a value that differs, a name one side did not print, and an
--- input with no HOST rows at all - a comparison of nothing is not a comparison, and the summary line says how many pairs were
--- compared so a run that compared nothing cannot look green.
-
--- The rows of one side: the lines of three tab-separated fields whose first is the tag, keyed by the second. A later line
--- for the same name replaces an earlier one, as it did before.
 local function rows(path, tag)
     local handle = assert(io.open(path, "rb"))
     local out = {}
     for line in handle:lines() do
-        -- handle:lines() keeps the "\n" on each line, so it is taken off here, and the "\r" of a CRLF file with it.
         line = line:gsub("\n$", ""):gsub("\r$", "")
         local tab1 = line:find("\t", 1, true)
         local tab2 = tab1 and line:find("\t", tab1 + 1, true)
@@ -24,8 +13,6 @@ local function rows(path, tag)
     return out
 end
 
--- The names of the list: each line of the C array, with the comment, declaration and closing brace lines left out, the
--- trailing comma and the quotes taken off. A closing brace ends the list.
 local function names_of(path)
     local handle = assert(io.open(path, "rb"))
     local names = {}

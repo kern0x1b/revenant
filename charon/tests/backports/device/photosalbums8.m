@@ -5,10 +5,6 @@
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-// The check an album's creation makes for its name, when the release refuses to list the albums
-// (facts/Photos/Changes.md). A daemon is denied the photo library on 6.1.3, so its enumeration fails for real;
-// the Photos sources are built in, and the check is called as the change's own validation calls it.
-
 @interface CharonPhotosStore : NSObject
 + (BOOL)findAlbumWithName:(NSString *)name found:(BOOL *)found error:(NSError **)error;
 @end
@@ -29,7 +25,6 @@ int main(int argc, char **argv)
         ALAuthorizationStatus status = [ALAssetsLibrary authorizationStatus];
         printf("AssetsLibrary authorization %ld\n", (long)status);
 
-        // The control: the release itself refuses this process the list of albums.
         ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
         __block BOOL answered = NO;
         __block NSError *refusal = nil;
@@ -52,7 +47,6 @@ int main(int argc, char **argv)
             CHECK(!listed && [error.domain isEqualToString:refusal.domain] && error.code == refusal.code, "the album check answers the release's refusal, not \"no such album\"");
         }
 
-        // The change's validation, as the transaction runs it; the transaction itself stops earlier, at the authorization.
         __block PHAssetCollectionChangeRequest *request = nil;
         NSError *committed = nil;
         [CharonPhotosTransaction runAndWait:^{

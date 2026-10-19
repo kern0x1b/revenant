@@ -1,7 +1,3 @@
-// Per-row differential: one line per carried row (carried-rows.txt, the 420 names of the surface that upstream 1.8.1
-// implements). Each row is probed on inputs generated from the seed (main.swift prints it) and printed as
-// "row <api> n=<observations> fnv=<hash>"; the observations go to rows-detail.txt so a DIFFERENT row can be read.
-// A row the host cannot reach prints "not-exercised: <reason>", and that line is counted apart from the comparisons.
 #if OURS
 import SystemUnderTest
 #else
@@ -32,7 +28,6 @@ func probe(_ api: String, _ body: () throws -> [String]) {
 
 func notExercised(_ api: String, _ reason: String) { emit(api, ["not-exercised: \(reason)"]) }
 
-// The module name is the only difference the reflection shows (System. against SystemUnderTest.): it is normalised.
 func describeBoth<T>(_ v: T) -> [String] { [String(describing: v), String(reflecting: v)].map { $0.replacing("SystemUnderTest.", with: "System.") } }
 
 func constant<T>(_ api: String, _ v: T) { probe(api) { describeBoth(v) } }
@@ -47,7 +42,6 @@ func shape<T: ~Copyable>(_ api: String, _ t: T.Type) {
 
 func genBytes(_ n: Int) -> [UInt8] { (0..<n).map { _ in UInt8(truncatingIfNeeded: rowRng.next()) } }
 
-// FilePath observations shared by the FilePath rows: the same fields for every generated path.
 func pathObs(_ p: FilePath) -> [String] {
   [p.description, p.debugDescription, "\(p.isAbsolute) \(p.isRelative) \(p.isEmpty) \(p.isLexicallyNormal)",
    "root=\(p.root?.string ?? "nil") length=\(p.length)", "last=\(p.lastComponent?.string ?? "nil") stem=\(p.stem)",
@@ -70,7 +64,6 @@ func runRows(seed: UInt64, runDir: String) {
   rowRunDir = runDir
   constantRows()
 
-  // Errno: the raw values the test reaches, and a generated set.
   probe("Errno.init(rawValue:)") {
     var out: [String] = []
     for raw in Int32(0)...140 { out += describeBoth(Errno(rawValue: raw)) + ["\(raw) \(Errno(rawValue: raw) == .noSuchFileOrDirectory)"] }
@@ -78,7 +71,6 @@ func runRows(seed: UInt64, runDir: String) {
     return out
   }
 
-  // FilePermissions: the instance members and the generated raw values.
   probe("FilePermissions.init(rawValue:)") {
     (0..<64).map { _ in FilePermissions(rawValue: CModeT(truncatingIfNeeded: rowRng.next()) & 0o7777).rawValue.description }
   }
@@ -86,7 +78,6 @@ func runRows(seed: UInt64, runDir: String) {
   probe("FilePermissions.description") { [FilePermissions.ownerRead, .groupWrite, .otherExecute].map { $0.description } }
   probe("FilePermissions.debugDescription") { [FilePermissions.ownerRead, .groupWrite, .otherExecute].map { $0.debugDescription } }
 
-  // FileDescriptor: the raw values, the open modes, and the calls on generated files.
   probe("FileDescriptor.init(rawValue:)") { (0..<8).map { raw in FileDescriptor(rawValue: CInt(raw)).rawValue.description } }
   probe("FileDescriptor.rawValue") { [FileDescriptor.standardInput, .standardOutput, .standardError].map { $0.rawValue.description } }
   probe("FileDescriptor.AccessMode.init(rawValue:)") {
@@ -169,7 +160,6 @@ func runRows(seed: UInt64, runDir: String) {
     let fd = try FileDescriptor.open(rowFile("lseek"), .readWrite, options: [.create, .truncate], permissions: .ownerReadWrite)
     defer { try? fd.close() }
     _ = try genBytes(32).withUnsafeBytes { try fd.write($0) }
-    // 1.8.1 marks lseek unavailable, renamed to seek: the row is probed through seek.
     return ["alias of seek(offset:from:)", "end \(try fd.seek(offset: 0, from: .end))", "start \(try fd.seek(offset: 5, from: .start))"]
   }
 
@@ -213,7 +203,6 @@ func runRows(seed: UInt64, runDir: String) {
     let r = try FileDescriptor.open(rowFile("pread"), .readOnly)
     defer { try? r.close() }
     var back = [UInt8](repeating: 0, count: 50)
-    // 1.8.1 marks pread unavailable, renamed to read: the row is probed through read(fromAbsoluteOffset:into:).
     let n = try back.withUnsafeMutableBytes { try r.read(fromAbsoluteOffset: 10, into: $0) }
     return ["alias of read(fromAbsoluteOffset:into:)", "read \(n)", "equal \(Array(back[0..<n]) == Array(bytes[10..<(10 + n)]))"]
   }
@@ -230,7 +219,6 @@ func runRows(seed: UInt64, runDir: String) {
     let fd = try FileDescriptor.open(rowFile("pwrite"), .readWrite, options: [.create, .truncate], permissions: .ownerReadWrite)
     defer { try? fd.close() }
     let bytes = genBytes(16)
-    // 1.8.1 marks pwrite unavailable, renamed to write: the row is probed through write(toAbsoluteOffset:_:).
     let n = try bytes.withUnsafeBytes { try fd.write(toAbsoluteOffset: 4, $0) }
     return ["alias of write(toAbsoluteOffset:_:)", "written \(n)"]
   }
@@ -277,7 +265,6 @@ func runRows(seed: UInt64, runDir: String) {
     return ["size \(try fd.seek(offset: 0, from: .end))"]
   }
 
-  // FilePath: the initialisers, the members, and the component view, on generated paths.
   probe("FilePath.init()") { pathObs(FilePath()) }
   probe("FilePath.init(_:)") { (0..<40).flatMap { _ in pathObs(FilePath(rowPath())) } }
   probe("FilePath.init(cString:)") { (0..<20).flatMap { _ in pathObs(FilePath(cString: rowPath())) } }
@@ -312,7 +299,6 @@ func runRows(seed: UInt64, runDir: String) {
     (0..<20).map { _ in var p = FilePath(rowPath()); p.removePrefix(FilePath(rowName())); return p.description }
   }
   probe("FilePath.reserveCapacity(_:)") { (0..<10).map { _ in var p = FilePath(rowPath()); p.reserveCapacity(128); return p.description } }
-  // 1.8.1 marks basename and dirname unavailable, renamed to lastComponent and removingLastComponent().
   probe("FilePath.basename") { ["alias of lastComponent"] + (0..<20).map { _ in FilePath(rowPath()).lastComponent?.string ?? "nil" } }
   probe("FilePath.components") { (0..<20).map { _ in FilePath(rowPath()).components.map { $0.string }.joined(separator: "|") } }
   probe("FilePath.dirname") { ["alias of removingLastComponent()"] + (0..<20).map { _ in FilePath(rowPath()).removingLastComponent().description } }
@@ -325,7 +311,6 @@ func runRows(seed: UInt64, runDir: String) {
   probe("FilePath.stem") { (0..<20).map { _ in FilePath(rowPath()).stem ?? "nil" } }
   probe("FilePath.string") { (0..<20).map { _ in FilePath(rowPath()).string } }
 
-  // FilePath.Component, its kinds and the component view.
   probe("FilePath.Component.init(stringLiteral:)") { (0..<20).map { _ in describeBoth(FilePath.Component(stringLiteral: rowName())).joined(separator: " ") } }
   probe("FilePath.Component.withPlatformString(_:)") { (0..<20).map { _ in FilePath.Component(stringLiteral: rowName()).withPlatformString { String(cString: $0) } } }
   probe("FilePath.Component.debugDescription") { (0..<20).map { _ in FilePath.Component(stringLiteral: rowName()).debugDescription } }
@@ -355,13 +340,11 @@ func runRows(seed: UInt64, runDir: String) {
   probe("FilePath.Root.description") { [FilePath.Root(stringLiteral: "/").description] }
   probe("FilePath.Root.string") { [FilePath.Root(stringLiteral: "/").string] }
 
-  // String: the conversions from FilePath and from the platform string.
   probe("String.init(_:)") { (0..<20).map { _ in String(FilePath(rowPath())) } }
   probe("String.init(decoding:)") { (0..<20).map { _ in String(decoding: FilePath(rowPath())) } }
   probe("String.init(platformString:)") { (0..<20).map { _ in rowName().withCString { String(platformString: $0) } } }
   probe("String.withPlatformString(_:)") { (0..<20).map { _ in rowName().withPlatformString { String(cString: $0) } } }
 
-  // Types: the layout of each type the rows name.
   shape("Errno", Errno.self)
   shape("FileDescriptor", FileDescriptor.self)
   shape("FileDescriptor.AccessMode", FileDescriptor.AccessMode.self)
@@ -387,10 +370,8 @@ func runRows(seed: UInt64, runDir: String) {
   shape("Mach.SendRight", Mach.SendRight.self)
   shape("Mach.SendOnceRight", Mach.SendOnceRight.self)
   shape("Mach.Port", Mach.Port<Mach.ReceiveRight>.self)
-  // A marker protocol with no requirements and no value: the compiler checks the constraint Mach.Port<RightType: MachPortRight>.
   notExercised("MachPortRight", "marker protocol with no requirements and no value to probe; the Mach.Port constraint is checked by the compiler in both builds")
 
-  // Mach ports: the receive and send rights on the host; the port guard paths are not run here.
   probe("Mach.Port.init()") {
     let port = Mach.Port<Mach.ReceiveRight>()
     return [port.withBorrowedName { "named \($0 != 0)" }]

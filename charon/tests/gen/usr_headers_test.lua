@@ -1,11 +1,3 @@
--- The headers command writes a usr/include module (a module map under usr/include, with no framework folder) where the SDK has its headers:
--- usr/include/<folder of the header as the module map names it>, not at the top of usr/include and not in Frameworks/. The port's
--- overlay maps the SDK's file to the port's copy. On a hand-built IR and a fixture SDK, a header of the module that the module map names
--- under a folder is written there, and so is the header the IR names by its basename only.
--- Run:
---   xmake l tests/gen/usr_headers_test.lua
--- The fixture lives under build/ in the tree and is removed when the test ends.
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 local SCRATCH = path.join(os.scriptdir(), "..", "..", "build", "usr-headers-test")
 
@@ -16,8 +8,6 @@ local function write(filepath, text)
     handle:close()
 end
 
--- One IR row of the twenty-one columns: the framework, the kind, the usr, the name, the header's basename, the availability, the type
--- and the parameters; the columns the renderer reads and this fixture leaves empty are "-".
 local function row(framework, kind, usr, name, header, typ, params)
     local out = {framework, kind, usr, "-", name, "-", header, "1", "ios=13.0/-/-/0", "-", typ, params}
     for column = 13, 21 do
@@ -39,7 +29,6 @@ local function run()
 
     os.rm(SCRATCH)
     local sdk = path.join(SCRATCH, "sdk")
-    -- the module map names the module's headers under their folder; the headers themselves are empty (the render reads the IR)
     write(path.join(sdk, "usr", "include", "fixture.modulemap"),
           'module Fixture [system] {\n  header "fixture/fixture.h"\n  header "fixture/inner.h"\n  export *\n}\n')
     write(path.join(sdk, "usr", "include", "fixture", "fixture.h"), "")
@@ -58,12 +47,10 @@ local function run()
     os.mkdir(path.join(tree, "packages", "a", "apple-backports", "registry"))
 
     local out = path.join(SCRATCH, "out")
-    -- the write mode takes the port's enumerator values: an empty run, so the port keeps the IR's values
     local port_values = path.join(SCRATCH, "port-values-empty.tsv")
     write(port_values, "# triple=armv7-apple-ios6.1.3 (no values)\n")
     cmd.run({tree = tree, ir = ir, sdk = sdk, out = out, port_values = port_values})
 
-    -- the SDK's folder holds the headers: the faithful copy goes there, and never at the top of usr/include
     local fixture_h = path.join(out, "usr", "include", "fixture", "fixture.h")
     local inner_h = path.join(out, "usr", "include", "fixture", "inner.h")
     check(os.isfile(fixture_h), "fixture/fixture.h is written under usr/include/fixture")
@@ -73,7 +60,6 @@ local function run()
     check(string.find(io.readfile(fixture_h) or "", "FixtureFn", 1, true) ~= nil, "the header carries its declaration")
     check(string.find(io.readfile(inner_h) or "", "FixtureInner", 1, true) ~= nil, "the basename-only header carries its declaration")
 
-    -- the port's copy and the overlay: the SDK's usr/include/fixture folder maps to the port's folder, file by file
     local port_fixture = path.join(out, "port", "6.1.3", "usr", "include", "fixture", "fixture.h")
     check(os.isfile(port_fixture), "the port's fixture.h is written under port/<release>/usr/include/fixture")
     local overlay = json.decode(io.readfile(path.join(out, "port", "6.1.3", "vfs.yaml")))

@@ -118,7 +118,6 @@ static NSString *const CharonCustomKey = @"customStates";
     return [self charon_flag:8];
 }
 
-// Pinned is the bit above the four states; the host answers NO by default and keeps what it is given (tests/backports/host/storage-config).
 - (BOOL)isPinned
 {
     return [self charon_flag:16];

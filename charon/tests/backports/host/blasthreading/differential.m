@@ -1,12 +1,3 @@
-// The port's BLASThreading18.m held against the host's own Accelerate, case by case, and the one thing
-// neither side's answers can show: whether the model changes how the library threads. So the checks are
-// the four answers the API gives (the default a thread starts with, a set, a refused value, and a second
-// thread that has set none), and then a measurement, printed, of the thread count of the process with four
-// workers inside cblas_sgemm under each model - which is the answer to "does the setting take effect".
-//
-// The port's sources are compiled with every API name they define renamed, so this translation unit can
-// hold the port's answers and the host's side by side. The names come from the port's registry.
-
 #import <Accelerate/Accelerate.h>
 #import <Foundation/Foundation.h>
 #include <mach/mach.h>
@@ -14,10 +5,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-// The host's own <Accelerate/Accelerate.h> reaches <vecLib/thread_api.h> and declares the enumeration
-// and the two entry points, so this side needs no declaration of its own. The port's translation unit
-// declares them, because the SDK the port builds against has no such header (facts/Accelerate/
-// BLASThreading.md); the two are compiled separately and both are called through one set of types.
 int charon_host_BLASSetThreading(const enum BLAS_THREADING threading);
 enum BLAS_THREADING charon_host_BLASGetThreading(void);
 
@@ -76,10 +63,6 @@ static void *worker(void *ignored)
     return NULL;
 }
 
-// The most threads the process has had while four workers are inside cblas_sgemm under one model. The
-// window is long enough for a library's own worker pool to appear at all - a short one measures a
-// library that had not started its threads yet, which would make the two models look alike for the wrong
-// reason.
 static int threads_while_working(enum BLAS_THREADING model)
 {
     pthread_t threads[4];
@@ -115,7 +98,6 @@ static void *reads_both(void *ignored)
 int main(void)
 {
     @autoreleasepool {
-        // A thread that has set nothing answers the model a thread starts with, on both sides.
         answer("a thread that has set nothing", -1, (int)charon_host_BLASGetThreading(), -1,
                (int)BLASGetThreading());
         answer("a set to single-threaded is kept", charon_host_BLASSetThreading(BLAS_THREADING_SINGLE_THREADED),
@@ -128,8 +110,6 @@ int main(void)
                charon_host_BLASSetThreading((enum BLAS_THREADING)99), (int)charon_host_BLASGetThreading(),
                BLASSetThreading((enum BLAS_THREADING)99), (int)BLASGetThreading());
 
-        // The setting is per thread: a thread that has set none answers the default, even while the
-        // thread that set one is still set.
         pthread_t other;
         charon_host_BLASSetThreading(BLAS_THREADING_SINGLE_THREADED);
         BLASSetThreading(BLAS_THREADING_SINGLE_THREADED);
@@ -140,14 +120,9 @@ int main(void)
         charon_host_BLASSetThreading(BLAS_THREADING_MULTI_THREADED);
         BLASSetThreading(BLAS_THREADING_MULTI_THREADED);
 
-        // And the measurement: what the model does to the library, on the host's own.
         int multi = threads_while_working(BLAS_THREADING_MULTI_THREADED);
         int single = threads_while_working(BLAS_THREADING_SINGLE_THREADED);
         BLASSetThreading(BLAS_THREADING_MULTI_THREADED);
-        // A reading, not a bound: the count moves by one or two between runs of this test with the load
-        // on the machine, so what it shows is that the single-threaded model does not bring it down -
-        // which is the whole question. It is printed rather than checked, because the count is the
-        // library's business and the port cannot make it anything else.
         printf("note threads in the process with four workers inside cblas_sgemm: %d multi-threaded, %d "
                "single-threaded - the model does not bring the count down\n",
                multi, single);

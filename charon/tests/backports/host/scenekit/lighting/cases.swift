@@ -1,9 +1,3 @@
-// cases <out.json> [ladder] : the lighting grid as data, with macOS SceneKit's pixel for each case. One quad facing an
-// orthographic camera at z = 5 (scale 1), 8x8 pixels, the pixel at (4, 4) read as SceneKit stores it (sRGB,
-// premultiplied). tests/backports/device/scenekit-lighting.m builds the same scenes from the same data through the
-// port and holds its shader to these pixels. Each case whose result depends on the specular exponent or the roughness
-// also carries the pixel of a known-wrong renderer (the exponent 132/128 too large, the roughness 0.02 too large), which
-// the device's pixel must miss: the negative control of the check.
 import SceneKit
 import AppKit
 import Metal
@@ -22,7 +16,6 @@ func quad() -> SCNGeometry {
 func colour(_ c: [Double]) -> NSColor { NSColor(srgbRed: c[0], green: c[1], blue: c[2], alpha: c.count > 3 ? c[3] : 1) }
 func grey(_ g: Double) -> NSColor { colour([g, g, g, 1]) }
 func d(_ c: Case, _ k: String) -> Double? { c[k] as? Double }
-// an opaque image of one colour, for the cases that put an image in the diffuse slot
 func solid(_ c: [Double]) -> NSImage {
     let space = CGColorSpace(name: CGColorSpace.sRGB)!
     let context = CGContext(data: nil, width: 4, height: 4, bitsPerComponent: 8, bytesPerRow: 0, space: space, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
@@ -94,7 +87,6 @@ var cases: [Case] = []
 let models = ["Constant", "Lambert", "Blinn", "Phong", "PhysicallyBased"]
 let half: [Double] = [0.5, 0.5, 0.5, 1]
 
-// the rules of facts/SceneKit/SCNView.md, "Lighting", one case each
 for model in models {
     add("\(model) no light", model, half, [])
     for g in [0.25, 1.0] { add("\(model) ambient diffuse \(g)", model, [g, g, g, 1], [light("ambient", 1000)]) }
@@ -105,7 +97,6 @@ for model in models {
     add("\(model) coloured light", model, [1, 1, 1, 1], [light("directional", 1000, euler: [0.5, 0, 0], colour: [0.5, 0, 0])])
     add("\(model) emission and multiply", model, half, [light("ambient", 1000)], ["emission": 0.25, "multiply": 0.5])
     add("\(model) diffuse intensity", model, [1, 1, 1, 1], [light("directional", 1000, euler: [0.5, 0, 0])], ["diffuseIntensity": 0.5])
-    // an image in the diffuse slot: its intensity scales the colour and leaves the alpha, as a colour's does
     add("\(model) diffuse image", model, half, [light("directional", 1000, euler: [0.5, 0, 0])], ["diffuseImage": true])
     add("\(model) diffuse image intensity 0.5", model, half, [light("directional", 1000, euler: [0.5, 0, 0])], ["diffuseImage": true, "diffuseIntensity": 0.5])
     add("\(model) transparency", model, [1, 1, 1, 1], [light("directional", 1000, euler: [0.5, 0, 0])], ["transparency": 0.5])
@@ -119,8 +110,6 @@ for model in models {
         add("\(model) self illumination \(si)", model, half, [light("directional", 1000, euler: [1, 0, 0])], ["selfIllumination": si])
         add("\(model) self illumination \(si) metal", model, half, [light("ambient", 1000), light("directional", 1000, euler: [1, 0, 0])], ["selfIllumination": si, "metalness": 0.45])
     }
-    // selfIllumination adds to the lights the diffuse colour takes: facing away from the only light, with an ambient
-    // light alone or no light at all (where it adds nothing), and at half intensity
     add("\(model) self illumination 0.5 light away", model, half, [light("directional", 1000, euler: [Double.pi, 0, 0])], ["selfIllumination": 0.5])
     add("\(model) self illumination 0.5 ambient only", model, half, [light("ambient", 1000)], ["selfIllumination": 0.5])
     add("\(model) self illumination 0.5 no light", model, half, [], ["selfIllumination": 0.5])
@@ -136,20 +125,16 @@ for model in models {
         add("\(model) spot \(inner)-\(outer) off \(off)", model, [1, 1, 1, 1], [light("spot", model == "PhysicallyBased" ? 4 : 1000, euler: [off, 0, 0], position: [0, 0, 2], extra: ["inner": inner, "outer": outer])], ["roughness": 1.0])
     }
 }
-// the physically based point light's window, 2 to 18 units from the quad
 for (start, end, exponent) in [(0.0, 20.0, 2.0), (5.0, 20.0, 1.0), (0.0, 12.0, 4.0)] {
     for dist in stride(from: 2.0, through: 18.0, by: 4.0) {
         add("PBR omni window \(start)-\(end)^\(exponent) at \(dist)", "PhysicallyBased", [1, 1, 1, 1],
             [light("omni", 0.5 * dist * dist, position: [0, 0, dist], extra: ["start": start, "end": end, "exponent": exponent])], ["roughness": 1.0])
     }
 }
-// the default roughness is drawn from its linear value, 0.2; the colour `contents` answers for it, assigned back, is read
-// as it is, 0.484529; an intensity scales the default
 for a in [0.0, 0.3, 0.5, 1.0] {
     add("PBR default roughness assigned back at \(a)", "PhysicallyBased", half, [light("directional", 1000, euler: [a, 0, 0])], ["roughnessDefaultAssigned": true])
     add("PBR default roughness intensity 0.5 at \(a)", "PhysicallyBased", half, [light("directional", 1000, euler: [a, 0, 0])], ["roughnessIntensity": 0.5])
 }
-// the specular fits: 24 angles of a directional light (stride's 0 to 1.15 in 0.05)
 let angles = stride(from: 0.0, through: 1.2, by: 0.05).map { $0 }
 for model in ["Blinn", "Phong"] {
     for sh in [0.25, 0.5, 1.0, 2.0] {
@@ -165,10 +150,6 @@ for rough in [0.1, 0.2, 0.3, 0.45, 0.6, 0.8, 1.0] {
         }
     }
 }
-// the smallest roughnesses: 0 and 0.05, where the shader's alpha = roughness^2 is exact to the last bit and the port's GGX holds, and
-// 0.01 and 0.02 between them, where macOS's own answer leaves the formula (`cases ladder`, below, prints it, and
-// facts/SceneKit/SCNView.md, "Open", says how). The seven cases of 0.01 and 0.02 the port does not draw as macOS does are named in
-// device/scenekit-lighting.m as known open, not left out of the grid
 for rough in [0.0, 0.01, 0.02, 0.05] {
     for a in [0.0, 0.02, 0.05, 0.1, 0.2, 0.4] {
         for (met, alb) in [(1.0, 1.0), (0.0, 1.0)] {
@@ -176,8 +157,6 @@ for rough in [0.0, 0.01, 0.02, 0.05] {
         }
     }
 }
-// dark colours in the diffuse slot as an image, beside the same colour as a colour: the image is read by a sampler, whose precision
-// (lowp unless the shader says otherwise) holds a dark linear value in coarser steps than the colour's uniform does
 for dark in [0.01, 0.03, 0.06, 0.1] {
     for a in [0.0, 0.1, 0.2] {
         for image in [false, true] {
@@ -187,7 +166,6 @@ for dark in [0.01, 0.03, 0.06, 0.1] {
         }
     }
 }
-// grazing views: the quad tilted away from the camera, the light swept around its normal
 for t in [0.9, 1.1, 1.25, 1.35] {
     for rough in [0.2, 0.45, 0.8] {
         for (met, alb) in [(0.0, 0.0), (0.0, 0.5), (1.0, 0.5), (0.45, 0.8)] {
@@ -197,8 +175,6 @@ for t in [0.9, 1.1, 1.25, 1.35] {
         }
     }
 }
-// selfIllumination with no light, beside the roughness, the metalness, the albedo and the view angle it depends on: the
-// share of it the coat takes, and the diffuse a rough surface gives it (fitselfcoat.py)
 for t in [0.0, 1.0, 1.3] {
     for rough in [0.0, 0.45, 1.0] {
         for (met, alb) in [(0.0, 0.2), (0.0, 0.5), (0.45, 0.5), (0.0, 0.8)] {
@@ -208,8 +184,6 @@ for t in [0.0, 1.0, 1.3] {
     }
 }
 
-// `cases <out.json> ladder`: macOS's pixel for a metal quad under a directional light at the smallest roughnesses, face-on
-// and at two angles, printed (nothing is written)
 if CommandLine.arguments.count > 2 && CommandLine.arguments[2] == "ladder" {
     for rough in [0.0, 0.005, 0.01, 0.0125, 0.015, 0.0175, 0.02, 0.03, 0.04, 0.05, 0.07, 0.1] {
         let row = [0.0, 0.05, 0.2].map { a -> String in

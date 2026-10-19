@@ -1,18 +1,3 @@
-// MPSCNNBatchNormalization, from the header of MPSCNNBatchNormalization.h in the SDK of iOS 16.4: the
-// normalisation of each feature channel by its own mean, variance, gamma and beta.
-//
-// The algebra is ncnn's, read from BatchNorm::load_model at
-// c6b351b56fbe32e0381ae00331e3df649b20d7b7 (BSD 3-Clause), which folds it once when the parameters are
-// given rather than per call:
-//
-//     a = beta  - gamma * mean / sqrt(variance + epsilon)
-//     b = gamma /               sqrt(variance + epsilon)
-//     value = b * value + a
-//
-// So the loop that normalises an image is a multiply and an add per value, with no division and no
-// square root in it, and the divisor a zero variance would otherwise make is sanitised the way ncnn
-// sanitises it.
-
 #import "CharonMPSCnn.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
@@ -21,7 +6,7 @@
 @implementation MPSCNNBatchNormalization {
     NSUInteger _channels;
     float _epsilon;
-    double *_a, *_b;             // the folded pair, per feature channel
+    double *_a, *_b;
     MPSNNNeuronDescriptor *_fusedNeuronDescriptor;
     id<MPSCNNBatchNormalizationDataSource> _dataSource;
     MPSCNNNeuronType _neuronType;
@@ -69,11 +54,8 @@
     return nil;
 }
 
-// The fold, once, from the data source's four per-channel arrays. What the loop below then applies is
-// two numbers per channel, and this is where they come from.
 - (void)charon_mps_foldFromDataSource:(id<MPSCNNBatchNormalizationDataSource>)dataSource
 {
-    // The data source's own four per-channel arrays, under the names the protocol gives them.
     const float *mean = [dataSource mean];
     const float *variance = [dataSource variance];
     const float *gamma = [dataSource gamma];
@@ -89,7 +71,7 @@
         double be = beta ? beta[c] : 0.0;
         double root = sqrt(v + (double)_epsilon);
         if (root == 0.0)
-            root = 0.0001;    // the divisor a zero variance would otherwise make, as ncnn sanitises it
+            root = 0.0001;
         _b[c] = g / root;
         _a[c] = be - g * m / root;
     }
@@ -117,10 +99,6 @@
 
 - (void)setEpsilon:(float)epsilon
 {
-    // Epsilon is inside the square root the fold divides by, so changing it after the state is made
-    // has to fold again - otherwise the value a caller sets has no effect on what is written, which
-    // the host differential caught: with epsilon 0.25 the release answers -4.0356 for the first value
-    // and a fold made with the default epsilon answers -4.3990.
     if (_epsilon == epsilon)
         return;
     _epsilon = epsilon;

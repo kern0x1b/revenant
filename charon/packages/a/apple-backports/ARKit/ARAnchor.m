@@ -1,20 +1,9 @@
-// ARAnchor.m, ARPlaneGeometry.m, ARPlaneAnchor.m, ARPointCloud.m, ARHitTestResult.m,
-// ARRaycastQuery.m, ARRaycastResult.m and ARTrackedRaycast.m - the things a session hands back
-// about the world it is tracking.
-//
-// The anchors are the application's own: an application adds one at a pose, the session carries it
-// into every frame at that pose, and removes it when the application says so. The plane anchors are
-// the ones the detector found, and a plane's alignment stays at Apple's "not determined" because
-// there is no depth sensor here to determine it from - it is a detection, and it says so.
-
 #import <ARKit/ARKit.h>
 #import <string.h>
 
 #import "CharonARTracker.h"
 #import "CharonARKitPrivate.h"
 
-// `-[ARAnchor initWithName:transform:]` and `name` are the 12.0 vocabulary; they are served here for
-// a runtime that predates them, and a caller reaching them is by definition on a release new enough.
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
 @interface ARAnchor (CharonConforms) <ARAnchorCopying>
@@ -44,8 +33,6 @@
 
 - (instancetype)initWithAnchor:(ARAnchor *)anchor
 {
-    // Copying an anchor gives a new identity at the same place: a new name, a new UUID, and the
-    // transform it was at, which is what a caller duplicating an anchor expects it to mean.
     if (![anchor isKindOfClass:[ARAnchor class]])
         return nil;
     return [self initWithName:anchor.name transform:anchor.transform];
@@ -60,8 +47,6 @@
     return copy;
 }
 
-/// The header declares an anchor secure-coding, and an anchor is a name, a pose and nothing else, so
-/// the two are all there is to encode.
 - (ARAnchor *)anchorByApplyingOrigin:(simd_float4x4)origin
 {
     ARAnchor *moved = [[ARAnchor alloc] initWithName:_name transform:simd_mul(origin, _transform)];
@@ -83,8 +68,6 @@
     self = [super init];
     if (!self)
         return nil;
-    // The 6.1.3 release's own coder has no keyed `decodeValue:forKey:objCType:`, so the pose is
-    // read back the way that release writes a structure: as the four columns of the matrix.
     _identifier = [coder decodeObjectOfClass:[NSUUID class] forKey:@"identifier"] ?: [NSUUID UUID];
     _name = [coder decodeObjectOfClass:[NSString class] forKey:@"name"];
     CharonDecodeStruct(coder, @"transform", &_transform, sizeof _transform);
@@ -130,8 +113,6 @@
 
 
 
-// `ARPlaneAnchor.geometry` is declared by the 11.3 headers and is implemented here for a runtime
-// that predates them; a caller reaching it is by definition on a release new enough for the answer.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
@@ -155,16 +136,9 @@
     self = [super initWithIdentifier:[NSUUID UUID] transform:CharonARKitIdentityFloat4x4];
     if (!self)
         return nil;
-    // What the detector actually found, which is a level surface: the alignment is horizontal
-    // because that is the surface, and it is a detection rather than a measurement because there is
-    // no depth sensor here to measure one. The C surface has no "not determined" case; the Swift
-    // one does, and a caller that wants it asks the framework's own question of the geometry.
     _alignment = ARPlaneAnchorAlignmentHorizontal;
     _center = plane.center;
     _extent = plane.extent;
-    // The detector's own confidence in the plane is what says whether the session is still tracking
-    // it: a plane it no longer has any confidence in is not being seen, and the anchor stays in the
-    // world anyway because the framework keeps anchors the session has lost track of.
     _isTracked = plane.alignment > 0.0f;
     return self;
 }
@@ -173,7 +147,6 @@
 - (simd_float3)center { return _center; }
 - (simd_float3)extent { return _extent; }
 
-/// Whether the session is still tracking this plane, which is the detector's confidence in it.
 - (BOOL)isTracked
 {
     return _isTracked;
@@ -181,8 +154,6 @@
 
 + (BOOL)isClassificationSupported
 {
-    // A plane's classification - floor, wall, table, ceiling - is read out of a depth sensor's
-    // geometry, and this device has none, so a detector's plane is a plane and not one of those.
     return NO;
 }
 
@@ -253,8 +224,6 @@
     self = [super init];
     if (!self)
         return nil;
-    // the tracker's samples are the same three floats a point cloud is, so the buffer is copied into
-    // one this object owns and hands out in place
     _count = MIN(count, points.length / sizeof(simd_float3));
     _points = malloc(_count * sizeof * _points);
     if (!_points)
@@ -298,8 +267,6 @@
 
 - (const simd_float3 *)points
 {
-    // The framework hands out a pointer into a buffer it names itself, and a caller walks it with
-    // `count` beside it; the buffer lives as long as this object does.
     return _points;
 }
 
@@ -307,7 +274,7 @@
 {
     (void)identifier;
     (void)index;
-    return NO;   // a point cloud of a monocular system has no stable indices to give back
+    return NO;
 }
 
 @end
@@ -346,7 +313,6 @@
 - (ARHitTestResultType)type { return _type; }
 - (simd_float4x4)worldTransform
 {
-    // a hit's transform is a pose, and a pose of a point is the point with no rotation
     return CharonARKitIdentityFloat4x4;
 }
 - (simd_float3)localPosition { return _worldPosition; }

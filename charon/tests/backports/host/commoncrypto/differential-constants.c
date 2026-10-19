@@ -1,8 +1,3 @@
-// The CFStringRef constants the port carries that the host's Security also exports (the "both" rows of the Security
-// ledger, facts/Security and coordination/wave-2026-10-03/v-int-c-report.md). Each one is compared with the host's own
-// value, read through a dlopen handle of the host's Security.framework (dlsym with that handle does not see the
-// executable's own definition, so the port's value and the host's are both read). A constant is a name; its value is
-// a string the host's own function answers with, so it is compared as a string, not by pointer.
 #include <Security/Security.h>
 #include <dlfcn.h>
 #include <stdio.h>
@@ -103,7 +98,6 @@
 #define DECLARE(name) extern const CFStringRef name;
 CONSTANTS(DECLARE)
 
-// the value of a CFString as bytes, for a line of output
 static const char *text(CFStringRef value, char *buffer, size_t size)
 {
     if (!value)
@@ -142,7 +136,6 @@ int main(void)
     }
     CONSTANTS(COMPARE)
 #undef COMPARE
-    // The control: two different constants must NOT compare equal, or the comparison cannot fail.
     {
         const CFStringRef *other = (const CFStringRef *)dlsym(host, "kSecKeyAlgorithmECDHKeyExchangeStandard");
         if (other && CFEqual(kSecKeyAlgorithmECDHKeyExchangeCofactor, *other)) {

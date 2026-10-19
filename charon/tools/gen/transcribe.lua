@@ -1,14 +1,3 @@
--- The transcriber, the port of tools/transcribe-protocols.py@52253c0650 (the oracle until its deletion in round 15, after the protocols proof): the Charon headers that declare the protocols the SDK the
--- package compiles against does not declare, from the SDK that does. run(args) takes the two SDKs, the tree and the wanted protocols
--- ({name, framework, introduced}, sorted by name), dumps the 26.2 and 16.4 ASTs through the pipe (stream.text: no temp file), and
--- returns each protocol's facts (what protocols.tsv records), the header text of each framework, and the refusals. Nothing is
--- written here.
---
--- The dumps are decoded by cjson, which does not keep the order of an object's keys. The oracle's file of a location depends on that
--- order (clang writes a location's file only when it changes, in document order), so annotate() writes the file into each location
--- before the decode: an offset whose next line is a "file" key takes that file, and every other offset takes the file the last one
--- gave. A "file" with no offset before it (includedFrom) is no location, and the oracle does not read it either.
-
 local stream = import("stream", {anonymous = true})
 local strings = import("strings", {anonymous = true})
 local files = import("files", {anonymous = true})
@@ -17,9 +6,6 @@ local json = import("core.base.json")
 local sdk_info = import("sdk", {anonymous = true})
 local sdk_imports = import("sdk_imports", {anonymous = true})
 
--- The C and ObjC type words the header may spell without a declaration of them in either AST (the oracle's BUILTIN). A word that no
--- AST declares as a class, typedef, enum or record is one of these, or the port refuses it. Committed data: the spellings the
--- Foundation and CoreGraphics headers use for types that clang declares as builtins or that the 16.4 SDK declares only as aliases.
 local BUILTIN = {}
 for _, word in ipairs({"id", "SEL", "Class", "BOOL", "instancetype", "IMP", "NSInteger", "NSUInteger", "CGFloat", "double",
                        "float", "int", "unsigned", "long", "char", "void", "NSString", "NSData", "NSArray", "NSDictionary",
@@ -28,31 +14,18 @@ for _, word in ipairs({"id", "SEL", "Class", "BOOL", "instancetype", "IMP", "NSI
     BUILTIN[word] = true
 end
 
--- The words a qualType spells that name no type: the C keywords the oracle drops (KEYWORDS).
 local KEYWORDS = {struct = true, enum = true, union = true, signed = true, short = true, bool = true, _Bool = true, const = true,
                   volatile = true, _Nullable_result = true}
--- The nullability, ownership and kindof words the oracle takes out of a qualType before it reads the names in it.
 local QUALIFIERS = {"_Nullable_result", "_Nullable", "_Nonnull", "_None", "_Null_unspecified", "_null_unspecified", "__kindof",
                     "__strong", "__weak", "__unsafe_unretained", "__autoreleasing"}
--- The property attributes the header writes, in the order the oracle writes them.
 local ATTRIBUTES = {"class", "nonatomic", "atomic", "readonly", "readwrite", "copy", "strong", "weak", "assign", "retain",
                     "unsafe_unretained", "null_resettable"}
--- The bytes str.lstrip() strips from a latin-1 text (the oracle reads a header as latin-1, one character per byte).
 local SPACE_BYTES = {[9] = true, [10] = true, [11] = true, [12] = true, [13] = true, [28] = true, [29] = true, [30] = true,
                      [31] = true, [32] = true, [133] = true, [160] = true}
--- The keyword that declares a type the 26.2 SDK declares and the 16.4 SDK does not (TYPES26), by the kind of declaration it is.
 local KEYWORD_OF_KIND = {RecordDecl = "struct", EnumDecl = "enum"}
 
--- The macro spellings a qualType carries: a name the type lookup must not see, because the header writes it as a macro (a
--- property's availability or refinement macro in front of its type), not as a type. The oracle drops every name with an API_, NS_,
--- CF_ or __ prefix; this table is what that filter removes from the 89 frameworks, measured (not the prefixes): a probe of names_of
--- over every framework's wanted protocols (.agent-work/runs/v-gen3c/drops-all.out) found API_AVAILABLE in BrowserEngineKit and
--- NS_REFINED_FOR_SWIFT in AuthenticationServices, and no other name with those prefixes. A macro spelling the table does not list is
--- an undeclared name, and the refusal check refuses it by name, so a new one from a later SDK fails loudly rather than being dropped.
 local MACRO_SPELLINGS = {API_AVAILABLE = true, NS_REFINED_FOR_SWIFT = true}
 
--- The text of a header with its comments blanked (the oracle's source()): each "//" to the end of its line, and each "/*" to the next
--- "*/", becomes spaces except its newlines, so every offset stays where it was.
 local function strip_comments(text)
     local out, last, at = {}, 1, 1
     while true do
@@ -84,8 +57,6 @@ local function strip_comments(text)
     return table.concat(out)
 end
 
--- name -> the first header of the package tree that declares it: "@protocol NAME" on a line that is not a forward declaration
--- ("@protocol NAME;" on the same line). The headers the transcriber writes (Charon<X>Protocols.h) are not read.
 local function have_of(tree)
     local have = {}
     for _, filepath in ipairs(files.glob(path.join(tree, "packages", "**.h"))) do
@@ -102,12 +73,9 @@ local function have_of(tree)
     return have
 end
 
--- The dump's text with the file written into each location (see the header comment). A location is an "offset" line; its file is the
--- "file" line right after it, when there is one. The file is written as the JSON text it has, so the decode reads it as clang wrote it.
 local function annotate(text)
     local current = nil
     local annotated = string.gsub(text, '()"offset": (%d+)', function(at, digits)
-        -- the match is '"offset": ' and its digits: the line after it ends at the position the digits end, plus the comma
         local ends = at + 9 + #digits
         local _, _, file = string.find(text, '^,\n%s*"file": ("[^"]*")', ends + 1)
         if file then
@@ -121,8 +89,6 @@ local function annotate(text)
     return annotated
 end
 
--- The AST of one SDK's umbrella headers, as a document. The frameworks are included in an empty translation unit (-include, not an
--- import in a file: the declarations and their locations are the oracle's). Raises when clang gives no translation unit.
 local function dump(clang, sdk, frameworks, target)
     local argv = {"-target", target, "-isysroot", sdk, "-fobjc-arc", "-w", "-fsyntax-only", "-Xclang", "-ast-dump=json"}
     for _, framework in ipairs(frameworks) do
@@ -143,8 +109,6 @@ local function dump(clang, sdk, frameworks, target)
     return document
 end
 
--- The declarations of a document, in one walk (pre-order, objects only): the protocol declarations with a range, per name, in
--- document order; the class names; and each record, enum and typedef name with the kind that declares it (the first kind a name has).
 local function gather(document)
     local protocols, classes, types = {}, {}, {}
     local function visit(node)
@@ -178,7 +142,6 @@ local function gather(document)
     return protocols, classes, types
 end
 
--- The file and byte offset a location stands for: the expansion when it is a macro's. Raises when the location has no file.
 local function place(loc)
     loc = loc.expansionLoc or loc
     if loc._file == nil then
@@ -187,7 +150,6 @@ local function place(loc)
     return loc._file, loc.offset or 0
 end
 
--- The comment-stripped text of a header, read once (the oracle's source()). The file is read as bytes: offsets are byte offsets.
 local SOURCES = {}
 local function source(file)
     if SOURCES[file] == nil then
@@ -196,7 +158,6 @@ local function source(file)
     return SOURCES[file]
 end
 
--- The members of a node: its methods that are not implicit, and its properties, in document order (the oracle's members_of()).
 local function members_of(node)
     local out = {}
     for _, inner in ipairs(node.inner or {}) do
@@ -207,7 +168,6 @@ local function members_of(node)
     return out
 end
 
--- The sorted members of a node, as a key: two nodes with equal keys name the same members with the same kinds (the oracle's shape()).
 local function shape(node)
     local keys = {}
     for _, m in ipairs(members_of(node)) do
@@ -217,8 +177,6 @@ local function shape(node)
     return table.concat(keys, "\2")
 end
 
--- Whether a protocol node is a definition: it has members, or, with none, the source after its name is not the ";" or "," of a
--- forward declaration (the oracle's defines()).
 local function defines(node)
     if #members_of(node) > 0 then
         return true
@@ -233,8 +191,6 @@ local function defines(node)
     return not (first == ";" or first == ",")
 end
 
--- The section of a member, "optional" or "required": the last "@optional" or "@required" between the definition's start and the member,
--- in the header (clang's JSON carries a property's control and not a method's). The oracle's section_of().
 local function section_of(member, begin)
     local file, offset = place(member.loc)
     if file ~= begin[1] or offset < begin[2] then
@@ -253,8 +209,6 @@ local function section_of(member, begin)
     return found
 end
 
--- The bases of a protocol and its members, from the one declaration that has members (or from the first declaration, for a
--- protocol with none). Raises when declarations with members differ in their member shapes.
 local function definition(name, nodes)
     local full = {}
     for _, node in ipairs(nodes) do
@@ -296,8 +250,6 @@ local function definition(name, nodes)
     return bases, members
 end
 
--- The type names a qualType spells that the header has to be able to write: without nullability, __kindof, the ownership qualifiers
--- and the protocols of id<...>, and without C keywords and macro spellings (the oracle's names_of()).
 local function names_of(qual)
     local text = qual
     for _, word in ipairs(QUALIFIERS) do
@@ -313,7 +265,6 @@ local function names_of(qual)
     return out
 end
 
--- The qualTypes of a member: its own (a method's return type, a property's type) and each parameter's (the oracle's types_of()).
 local function types_of(member)
     local own
     if member.kind == "ObjCMethodDecl" then
@@ -330,7 +281,6 @@ local function types_of(member)
     return out
 end
 
--- The protocols a member's types name in id<...> (the oracle's protocols_of()).
 local function protocols_of(member)
     local named = {}
     for _, qual in ipairs(types_of(member)) do
@@ -341,8 +291,6 @@ local function protocols_of(member)
     return named
 end
 
--- The text of a qualType without its "__name" words (the oracle's spelled_of()), except __kindof: it is part of the type the header
--- writes (`__kindof UITab *`), and the ARC ownership words are not.
 local function spelled_of(qual)
     return (string.gsub(qual, "%s*__[%w_]+", function (word)
         if string.match(word, "^%s*__kindof$") then
@@ -352,7 +300,6 @@ local function spelled_of(qual)
     end))
 end
 
--- A property's type and name: a block or a function pointer holds its name inside its own parentheses (the oracle's declarator()).
 local function declarator(qual, name)
     local spelled = spelled_of(qual)
     local at = nil
@@ -383,7 +330,6 @@ local function declarator(qual, name)
     raise(name .. ": no closing parenthesis in " .. qual)
 end
 
--- A property's declaration (the oracle's render_property()).
 local function render_property(member)
     local attributes = {}
     for _, key in ipairs(ATTRIBUTES) do
@@ -399,7 +345,6 @@ local function render_property(member)
     return "@property (" .. table.concat(attributes, ", ") .. ") " .. declarator(member.type.qualType, member.name) .. ";"
 end
 
--- A method's declaration (the oracle's render_method()): one "piece:(type)name" per selector piece, and ", ..." when variadic.
 local function render_method(member)
     local selector = member.name
     local params = {}
@@ -430,11 +375,6 @@ local function render_method(member)
     return (member.instance and "-" or "+") .. " (" .. spelled_of(member.returnType.qualType) .. ")" .. text .. ";"
 end
 
--- The iOS availability a member carries, from the AvailabilityAttr children the AST gives it (each with its platform and release): the
--- macro the header wrote, API_AVAILABLE(ios(<introduced>)) or API_UNAVAILABLE(ios), and "" when it has none. A deprecation is not
--- written: it is a warning, the declaration stays, and the snapshots have never carried it (UIWritingToolsCoordinatorDelegate's member
--- the 26.2 header deprecates on iOS is the case). A member obsoleted on iOS, or both introduced and unavailable, is refused: this writes
--- neither.
 local function availability_of(member)
     local introduced, unavailable, obsoleted = nil, false, false
     for _, inner in ipairs(member.inner or {}) do
@@ -459,7 +399,6 @@ local function availability_of(member)
     return ""
 end
 
--- The declaration of a member: a property or a method, with its iOS availability before its semicolon.
 local function render_member(member)
     local text
     if member.kind == "ObjCPropertyDecl" then
@@ -470,7 +409,6 @@ local function render_member(member)
     return string.sub(text, 1, -2) .. availability_of(member) .. ";"
 end
 
--- The member lines of a protocol with their section markers (the oracle's render()).
 local function render(members)
     local lines, optional_now = {}, false
     for _, entry in ipairs(members) do
@@ -483,8 +421,6 @@ local function render(members)
     return lines
 end
 
--- The header text of one framework's transcribed or forward-declared protocols (the oracle's per-library loop). entries: in wanted
--- order, each {name, introduced} (forward-declared, from a header or the 16.4 SDK) or {name, introduced, bases, members, typed, named}.
 local function header_text(tree, sdk, framework, entries, defined16, have, protocols16)
     local wants_framework = false
     local transcribed = {}
@@ -506,15 +442,12 @@ local function header_text(tree, sdk, framework, entries, defined16, have, proto
                             .. "this header forward-declares. A file with a forward-declared protocol in it does import <" .. framework
                             .. "/" .. framework .. ".h>, for that one body."),
                    "#import <objc/NSObject.h>"}
-    -- the umbrella headers of the frameworks the framework's headers reach (the SDK's own closure), before the NSObject import
     for _, line in ipairs(sdk_imports.umbrella_imports(sdk, framework, false)) do
         table.insert(lines, #lines, line)
     end
     if wants_framework then
         table.insert(lines, #lines - 1, "#import <" .. framework .. "/" .. framework .. ".h>")
     end
-    -- A protocol a member's type names that the 26.2 SDK declares nowhere is forward-declared here: a type has to be declared to be
-    -- spelled. One this header declares with a body is not declared twice, and one the 16.4 SDK declares is not declared at all.
     local named = {}
     for _, entry in ipairs(entries) do
         if #entry > 2 then
@@ -533,8 +466,6 @@ local function header_text(tree, sdk, framework, entries, defined16, have, proto
             table.insert(lines, "@protocol " .. one .. ";")
         end
     end
-    -- A protocol a header of the library's folder defines is supplied by that header; the generated source reaches it through the folder
-    -- on its include path. Its header has to be in the folder, or the library would import a file of another package.
     local hand = {}
     for _, entry in ipairs(entries) do
         if #entry == 2 and not defined16[entry[1]] then
@@ -585,8 +516,6 @@ local function header_text(tree, sdk, framework, entries, defined16, have, proto
     return table.concat(lines, "\n")
 end
 
--- The facts of the wanted protocols, in wanted order (the oracle's facts_path records): the status the transcriber gave each, the
--- reasons of the refusals that name it, the bases and members the 26.2 AST gives, and the names of the 16.4 body's members.
 local function facts_of(args, result)
     local out = {}
     for _, item in ipairs(args.wanted) do
@@ -635,7 +564,6 @@ local function facts_of(args, result)
                 for _, entry in ipairs(members) do
                     table.insert(names, entry.node.name)
                 end
-                -- the sorted selectors with their repeats (the oracle's list: a protocol the 16.4 SDK declares twice has each twice)
                 table.sort(names, order.less)
                 record.members16 = names
             end
@@ -645,7 +573,6 @@ local function facts_of(args, result)
     return out
 end
 
--- The 26.2 declaration kind of each typed name (a record, an enum or a typedef): the keyword the header writes for it.
 local function typed_kinds(typed, types26)
     local out = {}
     for one in pairs(typed) do
@@ -654,9 +581,6 @@ local function typed_kinds(typed, types26)
     return out
 end
 
--- Runs the transcriber for args.wanted under args.tree with args.sdk26 and args.sdk16. Returns {records, headers, refusals}: records
--- are the facts (facts_of), headers is framework -> the header text, and refusals is the sorted list of refusal lines (the oracle
--- prints them). Raises on a condition the oracle stops on.
 function run(args)
     assert(args.clang, "the transcriber needs args.clang: the clang that dumps the SDK's ASTs (project.clang)")
     local sdk26 = sdk_info.discover(args.sdk26)
@@ -725,7 +649,6 @@ function run(args)
                     for _, qual in ipairs(types_of(m.node)) do
                         for _, base in ipairs(names_of(qual)) do
                             if BUILTIN[base] or classes16[base] then
-                                -- spelled by the 16.4 SDK, or a builtin spelling: nothing to declare
                             elseif classes26[base] then
                                 typed[base] = true
                             else

@@ -1,17 +1,3 @@
--- `check`: regenerates a framework in memory from its committed inputs (the shard, the overrides, the pins and the constant record) and
--- compares the result with the build directory .gen. A drift of the build directory, a stale pin (a pinned member whose declaration
--- differs from its pin), a protocol-set record that names a protocol a registry row implements, or a constants object the generator
--- no longer emits fails the check. A build directory not yet written is a warning, so a fresh checkout checks with no derived file
--- present; a removed override (a registry override the spec no longer holds) is a warning too, and not a failure: the backports exist
--- for exactly the APIs that 26.2 has removed or deprecated but 6.1.3 carries, so the spec does not hold them by design. Each framework's
--- count is on its summary line, and the total is a ceiling the light guard holds (tests/gen/removed_ceiling_test.lua reads
--- tests/gen/removed-overrides.tsv: a total that grows is a failure). A run that finds no framework to check fails: a check that checked
--- nothing is not a pass (review r4 G11; coordinator ruling G11). The registry's targets are checked against their shards too
--- (targets.problems): an umbrella's entries through its nested targets (no-shard.tsv), a product's members through their shards
--- (products.tsv). The gate's half, that the built dylibs export them, is check_registry and needs those dylibs. A constants.tsv that
--- holds no rows fails (input writes none for a framework with no constant), and the snapshots protocols.tsv and functions.tsv are held
--- to their pins in spec/snapshots.tsv (snapshot_pins), so a clean checkout checks them with no build directory.
-
 local layout = import("layout", {anonymous = true})
 local snapshot = import("spec", {anonymous = true})
 local files = import("files", {anonymous = true})
@@ -24,7 +10,6 @@ local gen = import("cmd_gen", {anonymous = true})
 local snapshot_pins = import("snapshot_pins", {anonymous = true})
 local sdk_info = import("sdk", {anonymous = true})
 
--- The data lines of a table's text: every line after the header that is not empty.
 local function data_lines(text)
     local out = {}
     local all = tsv.lines(text)
@@ -36,8 +21,6 @@ local function data_lines(text)
     return out
 end
 
--- The problem of a constant record that holds no rows, or nil. input writes no record for a framework with no constant, so a file of
--- that kind is stale (Round 14, decision 1).
 function constant_record_problem(tree, fw)
     local text = files.read_text(layout.constant_record_path(tree, fw))
     if text ~= nil and #data_lines(text) == 0 then
@@ -46,8 +29,6 @@ function constant_record_problem(tree, fw)
     return nil
 end
 
--- The protocols the protocol-set record of a framework names that a registry row implements, sorted. The rule (protocols.rule_set)
--- names only protocols no registry row implements, so such a record is a contradiction; this check needs no corpus (review r4 F16).
 function record_conflicts(tree, fw)
     local registry = surface.registry_entries(tree, fw)
     local out = {}
@@ -60,7 +41,6 @@ function record_conflicts(tree, fw)
     return out
 end
 
--- The problems and warnings of one framework, in the order the report prints them.
 local function diagnose(tree, fw, corpus, sdk_release)
     local emitted = gen.derived(tree, fw, corpus, sdk_release)
     local base = layout.gen_dir(tree, fw)
@@ -105,8 +85,6 @@ local function diagnose(tree, fw, corpus, sdk_release)
     return problems, warnings, #removed, #new
 end
 
--- The removed-override count of each framework that has one (framework -> count), and their total, with no output: the numbers the
--- light guard holds to the committed ceiling.
 function removed_counts(tree, sdk_release)
     snapshot.forget()
     local counts, total = {}, 0
@@ -120,7 +98,6 @@ function removed_counts(tree, sdk_release)
     return counts, total
 end
 
--- Returns the exit status: 1 when any framework has a problem, or when there is no framework to check.
 function run(args)
     assert(args.sdk, "check needs --sdk: the iPhoneOS SDK whose release names the spec file")
     local sdk_release = sdk_info.discover(args.sdk).version

@@ -1,13 +1,3 @@
-// probe.m - what -[NSObject accessibilityCustomActions] answers on a 6.1.3 guest, and which image answers it.
-//
-// The selector is API of iOS 8 and the SDK declares it for ios(8.0), so it is looked up by name at run time and
-// called through objc_msgSend: the probe compiles against the SDK at any minimum and asks the guest, not the headers.
-// Every line starts with PROBE so the emulator's log can be filtered to it.
-//
-// Two programs, the same source: nsoprobe links nothing of the port, so what it answers is the release's own;
-// nsoprobe-category also compiles the port's UIKit/UIAccessibilityCustomAction.m into its image, so the category is in
-// the process and the image of each accessor names it. Each runs the round trip before and after a framework scan.
-
 #import <Foundation/Foundation.h>
 #import <dlfcn.h>
 #import <objc/runtime.h>
@@ -66,16 +56,12 @@ int main(int argc, char **argv) {
               setM != NULL ? image_of(method_getImplementation(setM)) : @"-"]);
         round_trip(@"before frameworks", getter, setter);
 
-        // A value stored before the framework is opened. The framework's category is attached by the dlopen, and the port
-        // puts its accessors back on the main queue after that, so the value is read straight after the dlopen (the
-        // release's getter may still answer) and again after the main queue has turned.
         NSObject *kept = [[NSObject alloc] init];
         NSArray *keptValue = @[@"kept-before"];
         if (getM != NULL && setM != NULL) {
             ((void (*)(id, SEL, id))objc_msgSend)(kept, setter, keptValue);
         }
 
-        // The framework the release's own getter comes from, opened by name: the round trip after it is the port's claim.
         void *accessibility = dlopen("/System/Library/PrivateFrameworks/UIAccessibility.framework/UIAccessibility", RTLD_LAZY);
         getM = class_getInstanceMethod([NSObject class], getter);
         line([NSString stringWithFormat:@"UIAccessibility.framework dlopen=%@ getter=%@ image=%@",
@@ -95,15 +81,12 @@ int main(int argc, char **argv) {
               getM != NULL ? image_of(method_getImplementation(getM)) : @"-"]);
         round_trip(@"after UIAccessibility dlopen", getter, setter);
 
-        // The release's cache holds every system framework, and the accessors may live in one that UIKit does not load.
-        // Load each accessibility-named framework in the guest and ask again, so the image that answers is named.
         NSArray *roots = @[@"/System/Library/Frameworks", @"/System/Library/PrivateFrameworks"];
         for (NSString *root in roots) {
             NSArray *names = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:root error:NULL];
             for (NSString *name in names) {
                 if (![name hasSuffix:@".framework"]) continue;
                 NSString *lower = [name lowercaseString];
-                // rangeOfString: and not containsString:, which is iOS 8 Foundation and absent on this 6.1.3 guest.
                 if ([lower rangeOfString:@"access"].location == NSNotFound && [lower rangeOfString:@"ax"].location == NSNotFound
                     && [lower rangeOfString:@"voice"].location == NSNotFound && [lower rangeOfString:@"uikit"].location == NSNotFound
                     && [lower rangeOfString:@"speech"].location == NSNotFound) continue;

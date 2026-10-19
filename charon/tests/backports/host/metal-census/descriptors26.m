@@ -1,23 +1,6 @@
-/* descriptors26.m - the Metal 4 descriptors, compared PROPERTY BY PROPERTY against Apple's own
- * objects.
- *
- * NO DEVICE IS CREATED and none is needed: every side of every comparison is `[[X alloc] init]`, and
- * a descriptor asks a device nothing - facts/Metal/DeviceOnThisMachine.md measures that, on a machine
- * that HAS one. The host object is APPLE'S, made by Apple's class, and it is the oracle: the port's
- * value is compared against what Apple's own object answers for the same property on the same fresh
- * object. A round trip of the port's object against ITSELF would prove only that the port agrees with
- * the port, and that is the round trip that let three reviews through.
- *
- * The port's sixteen classes are compiled under other names, so both copies are in one binary and each
- * side is asked by its own name; a case that read the host's class and called it the port's would
- * agree with itself. The binary is asked for the renamed symbols and the run stops if they are absent.
- *
- * Identity is only ever compared WITHIN one side: two objects have no address in common.
- */
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
-/* The port's classes, under the names the harness compiles them with. */
 @interface charonHost_MTL4RenderPassDescriptor : NSObject <NSCopying>
 @property (readonly) MTLRenderPassColorAttachmentDescriptorArray *colorAttachments;
 @property (nonatomic, copy) MTLRenderPassDepthAttachmentDescriptor *depthAttachment;
@@ -75,9 +58,6 @@
 @property (nonatomic) MTLAttributeFormat controlPointFormat;
 @property (nonatomic) MTLAttributeFormat radiusFormat;
 @end
-/* The base the three subclasses below extend: Apple's own declaration gives it no members, so the case
- * declares it the same way and what it compares is that a fresh one is an object, that two are equal and
- * that a copy equals its source. */
 @interface charonHost_MTL4FunctionDescriptor : NSObject <NSCopying>
 @end
 @interface charonHost_MTL4SpecializedFunctionDescriptor : charonHost_MTL4FunctionDescriptor
@@ -234,9 +214,6 @@ static void same_u(unsigned long port, unsigned long host, NSString *what)
                           what, port, host]));
 }
 
-/* A SLOT ASKED AT AN INDEX BOTH SIDES REFUSE MUST BE A CHECK AND NOT A TRAP: the port raises and Apple
- * fails an assertion, and an abort leaves no assertion line for the harness to read. Each reader below
- * is a real call, wrapped. */
 static id hostSlot(id array, NSUInteger index)
 {
     @try { return [(MTL4RenderPipelineColorAttachmentDescriptorArray *)array objectAtIndexedSubscript:index]; }
@@ -276,8 +253,6 @@ int main(void)
             charonHost_MTL4PipelineOptions *port = [[charonHost_MTL4PipelineOptions alloc] init];
             same_l((long)port.shaderValidation, (long)host.shaderValidation, @"fresh: shaderValidation");
             same_u((unsigned long)port.shaderReflection, (unsigned long)host.shaderReflection, @"fresh: shaderReflection");
-            /* A COPY OF A DESCRIPTOR A CALLER CHANGED, not of a fresh one: two copies of two fresh
-             * objects agree whatever the copy does, so a copy that dropped a member would pass. */
             [host setShaderValidation:MTLShaderValidationDisabled];
             [port setShaderValidation:MTLShaderValidationDisabled];
             [host setShaderReflection:MTL4ShaderReflectionBufferTypeInfo];
@@ -334,8 +309,6 @@ int main(void)
             check(host.meshAdditionalBinaryFunctions == nil && port.meshAdditionalBinaryFunctions == nil, @"fresh: mesh is nil on both sides");
             [host setVertexAdditionalBinaryFunctions:@[@"a"]];
             [port setVertexAdditionalBinaryFunctions:@[@"a"]];
-            /* -copyWithZone: answers id, so each side's copy is asked through its OWN class: a cast of
-             * one side's object to the other side's class would be a question about the cast. */
             check([(MTL4RenderPipelineBinaryFunctionsDescriptor *)[host copy] vertexAdditionalBinaryFunctions].count ==
                   [(charonHost_MTL4RenderPipelineBinaryFunctionsDescriptor *)[port copy] vertexAdditionalBinaryFunctions].count,
                   @"after a set: a copy carries the vertex array on both sides");
@@ -372,13 +345,9 @@ int main(void)
         {
             MTL4RenderPipelineColorAttachmentDescriptorArray *host = [[MTL4RenderPipelineColorAttachmentDescriptorArray alloc] init];
             charonHost_MTL4RenderPipelineColorAttachmentDescriptorArray *port = [[charonHost_MTL4RenderPipelineColorAttachmentDescriptorArray alloc] init];
-            /* EIGHT SLOTS, and the bound is measured: indices 0 to 7 answer a descriptor on both sides.
-             * Index 8 is NOT asked here - Apple's own assertion stops the process - so the bound out of
-             * process is what says eight, and this says both sides agree over the legal range. */
             for (NSUInteger index = 0; index < 8; index++)
                 check(hostSlot(host, index) != nil && portSlot(port, index) != nil,
                       ([NSString stringWithFormat:@"read %lu: both sides answer a descriptor", (unsigned long)index]));
-            /* A WRITE COPIES, which the header states, and a NIL RESETS THE SLOT, which it states too. */
             MTL4RenderPipelineColorAttachmentDescriptor *hostAttachment = [[MTL4RenderPipelineColorAttachmentDescriptor alloc] init];
             charonHost_MTL4RenderPipelineColorAttachmentDescriptor *portAttachment = [[charonHost_MTL4RenderPipelineColorAttachmentDescriptor alloc] init];
             hostAttachment.pixelFormat = MTLPixelFormatRGBA8Unorm;
@@ -392,10 +361,6 @@ int main(void)
                    @"a write copies: the copy carries the format");
             [host setObject:nil atIndexedSubscript:2];
             [port setObject:nil atIndexedSubscript:2];
-            /* WHAT A NIL SHOWS, precisely: the slot is empty again, so the getter answers a fresh
-             * descriptor and the format is the default on both sides. The getter is what makes it - a
-             * slot emptied and a slot reset are the same thing through the only way in - which is why
-             * the mutation for this family is the COPY above and not the reset. */
             same_l((long)((MTL4RenderPipelineColorAttachmentDescriptor *)hostSlot(host, 2)).pixelFormat,
                    (long)((charonHost_MTL4RenderPipelineColorAttachmentDescriptor *)portSlot(port, 2)).pixelFormat,
                    @"a nil empties the slot: the format is the default on both sides");
@@ -408,7 +373,6 @@ int main(void)
             MTL4PipelineDescriptor *host = [[MTL4PipelineDescriptor alloc] init];
             charonHost_MTL4PipelineDescriptor *port = [[charonHost_MTL4PipelineDescriptor alloc] init];
             check(host.label == nil && port.label == nil, @"fresh: label is nil on both sides");
-            /* THE ONE A GUESS GETS WRONG: options is NIL on a fresh descriptor, not an object. */
             check(host.options == nil && port.options == nil,
                   @"fresh: options is nil on both sides, and NOT a fresh MTL4PipelineOptions");
             [host setLabel:@"h"]; [port setLabel:@"h"];
@@ -421,12 +385,8 @@ int main(void)
             charonHost_MTL4RenderPipelineDescriptor *port = [[charonHost_MTL4RenderPipelineDescriptor alloc] init];
             check(host.vertexFunctionDescriptor == nil && port.vertexFunctionDescriptor == nil, @"fresh: vertexFunctionDescriptor is nil on both sides");
             check(host.fragmentFunctionDescriptor == nil && port.fragmentFunctionDescriptor == nil, @"fresh: fragmentFunctionDescriptor is nil on both sides");
-            /* AND ITS COUNTERPART: a vertex descriptor IS there, a fresh MTLVertexDescriptor. */
             check(host.vertexDescriptor != nil && port.vertexDescriptor != nil,
                   @"fresh: vertexDescriptor IS an object on both sides");
-            /* The attribute array declares two indexed members and no -count, so "as many as Apple's
-             * own" is asked over the legal range at indices both sides answer rather than at a number
-             * neither header gives. */
             for (NSUInteger index = 0; index < 8; index++)
                 check([host.vertexDescriptor.attributes objectAtIndexedSubscript:index] != nil &&
                       [((MTLVertexDescriptor *)port.vertexDescriptor).attributes objectAtIndexedSubscript:index] != nil,
@@ -440,7 +400,6 @@ int main(void)
                    @"fresh: maxVertexAmplificationCount, and it is Apple's own 1");
             check(host.colorAttachments != nil && port.colorAttachments != nil, @"fresh: colorAttachments is an object on both sides");
             same_l((long)port.inputPrimitiveTopology, (long)host.inputPrimitiveTopology, @"fresh: inputPrimitiveTopology");
-            /* null_resettable: an object on a fresh descriptor on both sides. */
             check(host.vertexStaticLinkingDescriptor != nil && port.vertexStaticLinkingDescriptor != nil,
                   @"fresh: vertexStaticLinkingDescriptor is an object on both sides");
             check(host.fragmentStaticLinkingDescriptor != nil && port.fragmentStaticLinkingDescriptor != nil,
@@ -490,8 +449,6 @@ int main(void)
             compare_size(port.requiredThreadsPerThreadgroup, host.requiredThreadsPerThreadgroup, @"fresh: requiredThreadsPerThreadgroup");
             check(host.staticLinkingDescriptor != nil && port.staticLinkingDescriptor != nil, @"fresh: staticLinkingDescriptor is an object on both sides");
             check(host.supportBinaryLinking == port.supportBinaryLinking, @"fresh: supportBinaryLinking");
-            /* The tile array is the 11.0 class the port carries, and it answers over the same eight
-             * slots Apple's own does - so this asks the port's through Apple's own header. */
             for (NSUInteger index = 0; index < 8; index++)
                 check([host.colorAttachments objectAtIndexedSubscript:index] != nil &&
                       [port.colorAttachments objectAtIndexedSubscript:index] != nil,
@@ -531,19 +488,11 @@ int main(void)
 
         printf("MTL4FunctionDescriptor and the three that extend it\n");
         {
-            /* The base has no members of its own - MTL4FunctionDescriptor.h declares it and ends - so
-             * what is compared is that a fresh one is an object on both sides and that it is the class
-             * the three subclasses below inherit from. */
             MTL4FunctionDescriptor *host = [[MTL4FunctionDescriptor alloc] init];
             check(host != nil, @"fresh MTL4FunctionDescriptor is an object, and it has no members to compare");
             check([host isKindOfClass:[NSObject class]], @"and it is an NSObject, as its declaration says");
         }
 
-        /* THE SEVEN GEOMETRY DESCRIPTORS, and the four defaults here are the ones a guess gets wrong:
-         * the duplicate-invocation flag is YES and not NO, a triangle's vertexFormat is
-         * MTLVertexFormatFloat3 and its indexType MTLIndexTypeUint32, a curve's radius format is
-         * MTLVertexFormatFloat - ONE component - while its control point format is Float3, and a
-         * bounding box's stride is 24 and not 0. */
         printf("the acceleration structure geometry descriptors\n");
         {
             MTL4AccelerationStructureGeometryDescriptor *host = [[MTL4AccelerationStructureGeometryDescriptor alloc] init];
@@ -606,9 +555,6 @@ int main(void)
             same_l((long)port.radiusFormat, (long)host.radiusFormat, @"fresh motion curve: radiusFormat");
         }
 
-        /* THE METAL 4 RENDER PASS DESCRIPTOR, where every measured default is a zero, a nil or one NO -
-         * and the three attachment OBJECTS on a fresh pass are the ones a getter that answered nil would
-         * get wrong. */
         printf("MTL4RenderPassDescriptor\n");
         {
             MTL4RenderPassDescriptor *host = [[MTL4RenderPassDescriptor alloc] init];
@@ -633,27 +579,10 @@ int main(void)
             same_l((long)port.visibilityResultType, (long)host.visibilityResultType, @"fresh: visibilityResultType");
             check(host.supportColorAttachmentMapping == port.supportColorAttachmentMapping &&
                   !host.supportColorAttachmentMapping, @"fresh: supportColorAttachmentMapping is NO on both sides");
-            /* THE TWO SAMPLE-POSITION METHODS, which are this class's only methods and the one member here
-             * that is an array: a write of three positions, a read back into a buffer big enough, a read
-             * into one that is not - which the header says must leave the buffer alone - and a count of 0,
-             * which the header says disables custom positions. */
-            /* TWO AND FOUR, and not three: the header says the count "needs to be a valid sample
-             * count", and Apple's own assertion names the set - measured, from the framework's own
-             * words: "count must be 0, 2, 4 or 8". A case that wrote three would be asking a question
-             * Metal refuses to answer. */
             MTLSamplePosition written[4];
-            // BOTH COORDINATES INSIDE [0, 1), which is a second bound measured off Apple's own assertion:
-            // "Provided sample position y-coodificate (-0.500000) at index 0 is not within the range
-            // [0,1)" - the framework's own words. A negative y is what the first fixture used.
             for (unsigned i = 0; i < 4; i++) { written[i].x = 0.125f * (i + 1); written[i].y = 0.0625f * (i + 1); }
             [host setSamplePositions:written count:4];
             [port setSamplePositions:written count:4];
-            /* THE COUNT MUST MATCH THE NUMBER PROGRAMMED, and that is a third bound measured off
-             * Apple's own assertion rather than read off the header: a get with a count of 8 when four
-             * are programmed asserts "Non-zero count (8) does not match the number of programmed custom
-             * sample positions (4)". So the reads below all pass the count that was written, and the
-             * mismatched ones are NOT asked here: an assertion stops the process, which is why the
-             * eight-slot array bounds are measured out of process too. */
             MTLSamplePosition readBack[8];
             memset(readBack, 0, sizeof(readBack));
             same_u((unsigned long)[host getSamplePositions:readBack count:4],
@@ -661,10 +590,6 @@ int main(void)
                    @"after four positions: how many getSamplePositions:count: answers");
             check(memcmp(readBack, written, sizeof(written)) == 0,
                   @"after four positions: the four positions come back unchanged");
-            /* AND THE COUNT METAL REFUSES, which is a measurement and not a rule this port invented:
-             * Apple's own assertion names 0, 2, 4 and 8 - the framework's own words, and an ASSERTION,
-             * which stops the process rather than raising, so Apple's side of it cannot be asked from
-             * in here. The port's side is asked, and the bound it refuses with is Apple's. */
             @try { [port setSamplePositions:written count:3]; check(NO, @"a count of 3 must be refused"); }
             @catch (NSException *why) {
                 check([[why reason] rangeOfString:@"0, 2, 4 or 8"].location != NSNotFound,
@@ -672,7 +597,6 @@ int main(void)
             }
             same_u((unsigned long)[port getSamplePositions:readBack count:4],
                    (unsigned long)4, @"and the positions programmed before it are still there");
-            /* AND TWO, the other count Metal takes, then the count of zero that disables them. */
             [host setSamplePositions:written count:2];
             [port setSamplePositions:written count:2];
             memset(readBack, 0, sizeof(readBack));
@@ -681,11 +605,6 @@ int main(void)
                    @"after two positions: how many getSamplePositions:count: answers");
             check(memcmp(readBack, written, 2 * sizeof(MTLSamplePosition)) == 0,
                   @"after two positions: the two positions come back unchanged");
-            /* TWO DISABLE SPELLINGS AND THEY DIFFER, which three runs of Apple's own object measured:
-             * with two positions programmed, a set with a NULL pointer and a count of 0 leaves the
-             * object holding TWO - a NULL pointer stores nothing - while the same call with a non-NULL
-             * pointer and a count of 0 leaves it holding NONE, which is what MTL4RenderPass.h:107 means
-             * by "or 0 to disable custom sample positions". */
             [host setSamplePositions:NULL count:0];
             [port setSamplePositions:NULL count:0];
             same_u((unsigned long)[host getSamplePositions:readBack count:0],

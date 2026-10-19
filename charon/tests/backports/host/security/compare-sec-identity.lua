@@ -1,13 +1,5 @@
--- compare-sec-identity.lua - the identity wrapper's ownership and handler rows, differences NAMED.
---
---    xmake l compare-sec-identity.lua <the binary's output>
---
--- copy-ref-retains is the COUNTED +1, not an inference from pointer equality: a mutation that drops the CFRetain in
--- sec_identity_copy_ref leaves every other row here untouched, so without it that mutation is invisible to this case.
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
--- In the order the values are named.
 local VALUES = {
     {"copy-ref-same", 1}, {"copy-ref-retains", 1}, {"create-present", 1}, {"certificates-copied", 1},
     {"copy-survives-source-change", 1}, {"access-true", 1}, {"handler-runs-per-certificate", 1},
@@ -26,7 +18,6 @@ function main(...)
     for _, line in ipairs(wrong) do
         bad[#bad + 1] = line
     end
-    -- holder-class prints found/MISSING rather than a number
     if tsv.first_field(rows, "holder-class") ~= "found" then
         bad[#bad + 1] = "holder-class: the port's options holder was not found"
     end

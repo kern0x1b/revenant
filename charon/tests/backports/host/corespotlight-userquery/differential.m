@@ -1,7 +1,3 @@
-// differential.m - the same program, built once against the host's CoreSpotlight and once against the port's CSUserQueryContext.m
-// and CSSearchQueryContext.m. It prints the class and the defaults of a user query context from each factory and from init, the
-// effect of setting each subclass property alone on a copy and on a decoded archive, and the superclass properties through a copy.
-// Every line must be the same on both sides.
 #import <Foundation/Foundation.h>
 #import <CoreSpotlight/CoreSpotlight.h>
 

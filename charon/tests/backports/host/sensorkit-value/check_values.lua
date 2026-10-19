@@ -1,31 +1,6 @@
--- check_values.lua SRC170 SRC150 OBJ170 OBJ150 - the five value-object accessors, in the source and in the compiled armv7 object.
---
---    xmake l ./check_values.lua <the port's SensorKit170.m> <the port's SensorKit150.m> <SensorKit170.o> <SensorKit150.o>
---
--- Prints the five, one line each, whether the source implements them the way the store works and whether the compiled object
--- carries the selector. Exits 0 only when all five are both, and 1 naming which.
---
--- WHY SOURCE AND OBJECT, and why nothing here is a differential. There is no behavioural oracle for these five on this machine:
--- the host's SensorKit marks SRKeyboardMetrics, SRSpeechMetrics and SRFaceMetrics API_UNAVAILABLE(macos), so a typed call cannot
--- name them, and the port's CharonSensorKit.h cannot be compiled against the host's newer SDK at all (clang: "typedef redefinition
--- with different types ('NSInteger' vs 'enum SRAcousticSettingsSampleLifetime')"). What the host DOES answer was measured once,
--- separately, by host-answers.m in this directory, and its output is what the port's answers have to be: zero for both counts over
--- all ten sentiment categories, and nil for both speech properties. This file holds the port to implementing exactly that - a count
--- out of the store and a property out of the store, which is zero and nil when nothing is stored - and to the compiled object
--- carrying the selectors, which is what the linker binds an @selector() against.
---
--- A source check alone would pass on a method the compiler never emitted; an object check alone would pass on a method that
--- returns a constant. Both are asked for because they fail differently.
---
--- The source is read as bytes, and the patterns are the ones the Python regular expressions spelled, written out by hand: a
--- position after a literal, then the blanks, then the next literal.
-
 local PROPERTIES = { "faceAnchor", "speechRecognition", "soundClassification" }
 local COUNTS = { "wordCountForSentimentCategory:", "emojiCountForSentimentCategory:" }
 
--- What the port has to be doing, as the source has to spell it. The key of a value property is the property's own name
--- (CharonValueStore's own rule), and a count's key carries its category, because a count per category is ten numbers and one
--- key per method would hold one of them.
 local COUNT_SHAPE = "longLongValue"
 
 local function read(path)
@@ -35,8 +10,6 @@ local function read(path)
     return text
 end
 
--- The set of selector names the object's __objc_methname section holds, one otool line per name: an address of six or more hex
--- digits, two spaces, the name.
 local function selectors(obj)
     local out = os.iorunv("otool", { "-v", "-s", "__TEXT", "__objc_methname", obj })
     local found = {}
@@ -49,8 +22,6 @@ local function selectors(obj)
     return found
 end
 
--- Whether the source declares NAME as a store-backed value property: CHARON_VALUE_PROPERTY(id, NAME), with the blanks
--- a regular expression would allow. A name that is the start of a longer one does not count.
 local function declares_value_property(body, name)
     local from = 1
     while true do
@@ -65,8 +36,6 @@ local function declares_value_property(body, name)
     end
 end
 
--- The body of the count method NAME, as -(NSInteger)NAME[^\n]*\n\{(.*?)\n\} finds it: the header's line, then a line that is
--- an open brace alone at the start, then the body up to the first close brace at the start of a line. "" when there is none.
 local function count_body(body, name)
     local head = "-(NSInteger)" .. name
     local from = 1
@@ -86,7 +55,6 @@ local function count_body(body, name)
     end
 end
 
--- The body of CharonKeyboardSentimentKey: static NSString *CharonKeyboardSentimentKey([^)]*)\s*\{(.*?)\n\}. "" when there is none.
 local function key_helper_body(body)
     local head = "static NSString *CharonKeyboardSentimentKey("
     local from = 1
@@ -137,11 +105,6 @@ function main(...)
         end
     end
 
-    -- The key helper a count reads through. It exists in the port's own file, and the harness checks the three things that make
-    -- it right rather than the three words of its name: that the CATEGORY is in it, that the selector is in it, and that both
-    -- reach the string. A count that returned 7, or one whose key forgot the category so all ten categories answered the same
-    -- number, is caught here - and both of those plants SURVIVED the first version of this file, which is why they are checked
-    -- and not assumed.
     local helper_body = key_helper_body(body150)
     local key_ok = helper_body:find("stringWithFormat", 1, true) ~= nil
         and helper_body:find("(long)category", 1, true) ~= nil

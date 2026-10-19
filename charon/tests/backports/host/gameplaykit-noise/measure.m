@@ -1,16 +1,9 @@
-// measure.m -- what the host's own GameplayKit answers for the noise sources.
-//
-// The host is the oracle and it is measured, not called: the port's classes and the host's have the
-// same names, so loading both in one process would answer one of the two for the other. Every number
-// below is printed here and held to in differential.m, and every line says the call it came from.
-
 #import <Foundation/Foundation.h>
 #import <GameplayKit/GameplayKit.h>
 #import <objc/runtime.h>
 
 int main(void)
 {
-    // The factories: what class each one answers, and the numbers it was given.
     {
         GKPerlinNoiseSource *perlin = [GKPerlinNoiseSource perlinNoiseSourceWithFrequency:1.5 octaveCount:3
                                                                                   persistence:0.25 lacunarity:2.5 seed:11];
@@ -41,7 +34,6 @@ int main(void)
         printf("cylinders factory: class=%s frequency=%g\n", class_getName([cylinders class]), cylinders.frequency);
         printf("spheres factory: class=%s frequency=%g\n", class_getName([spheres class]), spheres.frequency);
     }
-    // A property set after the fact, and a negative seed: nothing validates a value.
     {
         GKPerlinNoiseSource *perlin = [[GKPerlinNoiseSource alloc] initWithFrequency:2.0 octaveCount:1
                                                                        persistence:0.5 lacunarity:2.0 seed:9];
@@ -68,14 +60,11 @@ int main(void)
         printf("voronoi set: displacement=%g distanceEnabled=%d seed=%d\n", voronoi.displacement,
                (int)voronoi.isDistanceEnabled, (int)voronoi.seed);
     }
-    // A base instance answers none of them.
     {
         GKNoiseSource *base = [[GKNoiseSource alloc] init];
         printf("base: class=%s frequency=%d value=%d\n", class_getName([base class]),
                (int)[base respondsToSelector:@selector(frequency)], (int)[base respondsToSelector:@selector(value)]);
     }
-    // The hierarchy, as the host answers it. Perlin and ridged are coherent sources here; billow is
-    // not, although its header declares it one, and that is the recorded divergence.
     {
         GKPerlinNoiseSource *perlin = [GKPerlinNoiseSource perlinNoiseSourceWithFrequency:1 octaveCount:1
                                                                                persistence:1 lacunarity:1 seed:0];
@@ -98,7 +87,6 @@ int main(void)
                (int)[cylinders isKindOfClass:[GKNoiseSource class]], (int)[spheres isKindOfClass:[GKNoiseSource class]],
                (int)[checkerboard isKindOfClass:[GKNoiseSource class]]);
     }
-    // Nothing validates a value: a zero of everything is kept as given.
     {
         GKPerlinNoiseSource *perlin = [[GKPerlinNoiseSource alloc] initWithFrequency:0 octaveCount:0
                                                                        persistence:0 lacunarity:0 seed:0];

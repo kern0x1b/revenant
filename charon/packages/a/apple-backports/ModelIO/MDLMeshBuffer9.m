@@ -2,11 +2,6 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-// A mesh buffer is the memory one attribute or one index range of a mesh lives in. The buffers here
-// are backed by an NSMutableData, which is what the port's own allocator hands out and what every
-// mesh the port builds or reads ends up holding: a real addressable range of the length the mesh says
-// it has, copyable, and mappable.
-
 @interface MDLMeshBufferZoneDefault ()
 - (void)charon_setCapacity:(NSUInteger)capacity allocator:(id<MDLMeshBufferAllocator>)allocator;
 @end
@@ -46,8 +41,6 @@
 
 - (instancetype)initWithType:(MDLMeshBufferType)type length:(NSUInteger)length
 {
-    // A buffer of that length and nothing written into it yet holds the zero bytes of that length, so
-    // its length and its map are true before the mesh writes into it.
     return [self initWithType:type data:[NSMutableData dataWithLength:length]];
 }
 
@@ -108,8 +101,6 @@
     return copy;
 }
 
-// What the allocator writes into a buffer it has just made, so a buffer carries the allocator that
-// made it and the zone it was made out of.
 - (void)charon_setAllocator:(id<MDLMeshBufferAllocator>)allocator zone:(id<MDLMeshBufferZone>)zone
 {
     if (_allocator != allocator) {
@@ -157,8 +148,6 @@
 
 - (id<MDLMeshBuffer>)newBufferFromZone:(id<MDLMeshBufferZone>)zone data:(NSData *)data type:(MDLMeshBufferType)type
 {
-    // A zone the port did not make is not one the port can account for, and a buffer asked for out of
-    // a zone with less room than it needs is not one it can make, so both are nil.
     if (zone && ![zone isKindOfClass:[MDLMeshBufferZoneDefault class]])
         return nil;
     if (zone && data.length > zone.capacity)

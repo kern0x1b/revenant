@@ -1,9 +1,3 @@
--- The package index check the Charon driver runs before a build, checked on planted trees whose expected findings are
--- written from the rule, not from the check. failures(opts) takes opts.driver (the folder holding index.lua) and
--- opts.scratch (a folder the test may fill).
---
--- Retired with Conan, and not ported: the version-keyed table checks and the rewritten-conandata report of
--- tests/index_test.py, which described Conan's trim_conandata.
 function failures(opts)
     local index = import("index", {rootdir = opts.driver, anonymous = true})
     local found = {}
@@ -15,7 +9,6 @@ function failures(opts)
         end
     end
 
-    -- files maps a path under the new packages folder to its text; a false text makes an empty folder.
     local function tree(files)
         counter = counter + 1
         local root = path.join(opts.scratch, "index-" .. counter, "packages")

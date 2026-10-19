@@ -44,15 +44,6 @@ vImage_Error vImageConvert_RGB565toBGRA8888(Pixel_8 alpha, const vImage_Buffer *
     return kvImageNoError;
 }
 
-// The rest of the 5, 5, 5, 1 and the 5, 6, 5 families, whose arithmetic Conversion.h also writes out, and
-// which the four below are the two-word and four-word spellings of: expand a channel up to eight bits
-// with (bits * 255 + half) / max, and narrow one down with (bits * max + 127) / 255. The alpha of a
-// one-bit channel is that bit times 255 going up and (bits + 127) / 255 coming down, which is 0 or 1.
-//
-// The conversions between a 5/6/5 word and a 1/5/5/5 or 5/5/5/1 word are the header's own "first at high
-// bitdepth, then convert to lower bitdepth", so they are the composition of one of each and nothing
-// else - which is not the same as shifting the bits across, because the green of one is six bits and of
-// the other five, and the host's answer is what the composition is measured against.
 static uint8_t charon_expand5(uint32_t value) { return (uint8_t)((value * 255 + 15) / 31); }
 static uint8_t charon_expand6(uint32_t value) { return (uint8_t)((value * 255 + 31) / 63); }
 static uint32_t charon_narrow5(uint32_t value) { return (value * 31 + 127) / 255; }

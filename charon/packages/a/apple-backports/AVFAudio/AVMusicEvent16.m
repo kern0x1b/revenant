@@ -1,16 +1,5 @@
 #import "CharonAVFAudio.h"
 
-// AVMusicEvent, AVMusicUserEvent and AVParameterEvent of iOS 16, over the plain values the header
-// describes. In the 26.2 SDK AVMusicEvent is an empty base class (@interface AVMusicEvent : NSObject
-// @end) whose whole job is to be the root of the event hierarchy a track enumerates, so nothing here
-// is a translation of anything: a parameter event is its id, scope, element and value, and a user
-// event is the data the application's own callback is handed.
-//
-// AVMusicEvent, AVMusicUserEvent and AVParameterEvent are the base of the MIDI and sequencer
-// families, which are carried in the same object because all three arrived in 16.0 and an object is
-// carried from one release on (backports.lua's minimums()). What the track does with these events -
-// MusicSequence's own C API, which iOS 6.1.3 exports in full - is the sequencer family's business.
-
 @implementation AVMusicEvent
 @end
 

@@ -1,26 +1,6 @@
-// pair.m — the pairing that makes the release's normal distribution measurable.
-//
-// Two draws of the same shape and the same seed: one uniform over 0..1 and one normal with mean 2 and
-// deviation 3. Both kernels walk the same counter in the same order, so the uniform's fraction at a
-// position is the fraction that position's normal value came from - which is what makes 160000
-// (t, z) pairs available whatever order they fill the destination in. Reconstructing t from the element
-// index instead does not work: the fill is blocked by the shape, so a 4x4 destination pairs by index
-// and a 400x400 one does not.
-//
-//   xcrun clang -fobjc-arc -Wno-unguarded-availability-new pair.m \
-//       -framework Foundation -framework Metal -framework MetalPerformanceShaders -o pair
-//   ./pair > pairs.txt
-//
-// Each line is the uniform value's bits and the normal value's bits, at the same position. What the
-// release's inverse normal is, and how far this port's is from it, is written down in
-// facts/MetalPerformanceShaders/Random.md.
-
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>
-// Two draws of the same shape and the same seed, one uniform over 0..1 and one normal with mean 2 and
-// deviation 3. If both kernels walk the same counter in the same order, the uniform's fraction at a
-// position is the normal's fraction at that position, whatever order they fill in.
 static void draw(id<MTLDevice> d, MPSMatrixRandomDistributionDescriptor *dist, float *out, NSUInteger side)
 {
     id<MTLCommandQueue> q = [d newCommandQueue];

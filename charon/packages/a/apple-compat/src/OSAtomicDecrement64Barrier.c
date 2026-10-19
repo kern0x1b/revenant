@@ -10,8 +10,6 @@ static void charon_resolve_OSAtomicDecrement64Barrier(void)
     charon_system_function(&charon_system_OSAtomicDecrement64Barrier, CHARON_LIBSYSTEM_PLATFORM, "OSAtomicDecrement64Barrier");
 }
 
-/* The barrier variant of OSAtomicDecrement64, which iOS 7.1 brought with it. The exclusive loop is bracketed by dmb, so the
-   answer and the barrier are those of the variant without one: the value after the subtract. */
 __attribute__((visibility("default")))
 int64_t OSAtomicDecrement64Barrier(volatile int64_t *theValue)
 {

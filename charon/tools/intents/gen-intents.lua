@@ -1,53 +1,7 @@
--- gen-intents.lua: emit the Intents backport's data classes from the SDK's own declarations.
---
--- The Intents surface of SDK 26.2 is 3440 rows for the port, 308 of them classes. Writing them by hand would take a
--- month and get most of them wrong in the same way, so they are generated from what the compiler itself says a class
--- is: the Objective-C AST of the SDK the port compiles against, which is the one description of the contract that
--- cannot be a guess.
---
--- What is generated:
---
---   * one object file per release the release caches measure a class symbol first exported in, because an object
---     carries API of exactly one release (modules/apple/backports.lua's check_releases). The release is read from the
---     file the caller passes, which tools/intents/measure-intents.lua measured against the real caches; the header's
---     own availability annotation is not used for it, and it is wrong where the two disagree (INPaymentStatusResolutionResult
---     is exported by iOS 10.3, and the header says 10.0).
---   * for each class: an ivar per stored property, the synthesised properties, the setters with the ownership the
---     header declares, every declared initialiser, NSSecureCoding and NSCopying where the header asks for them, the
---     resolution result's value / values to disambiguate / value to confirm, and a body for every other method the
---     header declares.
---   * the properties a conformed protocol requires and the class does not declare itself, so a class really conforms
---     (INSpeakable's spokenPhrase and the rest).
---
--- What is not generated, because a generated body would be the silent fake the rules forbid: INIntent's identifier and
--- its image parameters, INInteraction's donation and deletion, INVocabulary's store, INPreferences' answers for a
--- release with no Siri, INImage's ways of being made, INPaymentMethod's Apple Pay method, INRideCompletionStatus'
--- derived answers, and INIntentResolutionResult's needsValue / notRequired / unsupported. Those are hand written in
--- CharonIntents100.m and this generator leaves their classes out.
---
--- A member whose type is an Intents class of a group this delivery does not carry is left out with `@dynamic` and
--- takes a registry entry of its own that says so, rather than answering nil or zero: the mark stays on the header, so
--- a port cannot call it, and respondsToSelector: says no instead of crashing.
---
--- Usage:
---     xmake l tools/intents/gen-intents.lua --sdk <iPhoneOS*.sdk> --dump <ast.json> --classes <file> --release <measured>
---         --carried <file> --intents <file> --out <file.m> [--dump-newer <ast.json>] [--report <file.json>]
---
---     --dump is
---         clang -target arm64-apple-ios<ver> -isysroot <sdk> -fsyntax-only
---               -x objective-c -Wno-everything -Xclang -ast-dump=json umbrella.m
---     where umbrella.m holds `#import <Intents/Intents.h>`, and --classes is one class name per line, the classes of
---     exactly one release.
---
--- The tables this reads are in intents-data.lua. The committed objects it writes are the reference
--- the output was checked byte for byte against; the regular expressions it used are the hand-written matchers below.
-
 import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 
 local D = import("intents-data", {rootdir = os.scriptdir()}).data()
-
--- Text helpers ---------------------------------------------------------------------------------------------------------
 
 local function is_word(char)
     return char ~= "" and char:match("[%w_]") ~= nil
@@ -61,7 +15,6 @@ local function starts_with(text, prefix)
     return text:sub(1, #prefix) == prefix
 end
 
--- Python's str.split(":"): every piece, a trailing empty one included.
 local function split_colon(text)
     local pieces, at = {}, 1
     while true do
@@ -75,7 +28,6 @@ local function split_colon(text)
     end
 end
 
--- Python's str.split() with no argument: the whitespace-separated words.
 local function words_of(text)
     local found = {}
     for word in text:gmatch("%S+") do
@@ -84,7 +36,6 @@ local function words_of(text)
     return found
 end
 
--- Replaces every \bword\b, left to right, with repl.
 local function replace_word(text, word, repl)
     local out, at = {}, 1
     while true do
@@ -105,8 +56,6 @@ local function replace_word(text, word, repl)
     return table.concat(out)
 end
 
--- Removes every match of <open>[^<open><close>]*<close>, the innermost bracketed run without another bracket of the
--- same kind inside it, left to right: Python's re.sub(r"<[^<>]*>", "", text) and its (...) twin.
 local function strip_innermost(text, open, close)
     local out, at, length = {}, 1, #text
     local start = 1
@@ -132,7 +81,6 @@ local function strip_innermost(text, open, close)
     return table.concat(out)
 end
 
--- Python's re.sub(r"_\s*(Nonnull|Nullable)\b", "", text).
 local function remove_nullability(text)
     local out, at, length = {}, 1, #text
     local start = 1
@@ -163,8 +111,6 @@ local function remove_nullability(text)
     return table.concat(out)
 end
 
--- Finds the next match of the SDK macro pattern \b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b at or after from, as first and last
--- (inclusive) positions, or nil.
 local function find_macro(text, from)
     local length = #text
     for at = from, length do
@@ -190,7 +136,6 @@ local function find_macro(text, from)
     return nil
 end
 
--- A type as the compiler spells it, without the SDK's macros or its nullability.
 local function clean(text)
     text = remove_nullability(text or "")
     while true do
@@ -198,7 +143,6 @@ local function clean(text)
         if not first then
             return trim(text)
         end
-        -- keep_from is the first character that survives the macro: the one after it, or after its argument list
         local keep_from = last + 1
         if text:sub(keep_from, keep_from) == "(" then
             local depth, index = 0, keep_from
@@ -221,8 +165,6 @@ local function clean(text)
     end
 end
 
--- A type as a definition spells it: the macros off, nullability kept, spacing even. A lightweight generic parameter is
--- the caller's type and not this package's: an INObjectSection<ObjectType> is an INObjectSection here.
 local function spelled(qual)
     local text = clean(qual):gsub("%s+", " ")
     text = trim(text)
@@ -236,7 +178,6 @@ local function spelled(qual)
     return text
 end
 
--- The name a type is written with, its pointers and qualifiers off.
 local function base_type(qual)
     local text = spelled(qual)
     if text:sub(1, 6) == "void (^" or text:sub(1, 5) == "block" then
@@ -287,7 +228,6 @@ local function setter_name(name)
     return "set" .. name:sub(1, 1):upper() .. name:sub(2) .. ":"
 end
 
--- Properties whose ownership is copy: the setter copies, the rest retain.
 local function is_copy(member, kind)
     if member.copy then
         return true
@@ -302,7 +242,6 @@ local function ends_with_pointer(text)
     return text:match("%*%s*$") ~= nil
 end
 
--- Python's sorted() of a set or dict's keys.
 local function sorted_keys(map)
     local keys = {}
     for key in pairs(map) do
@@ -312,7 +251,6 @@ local function sorted_keys(map)
     return keys
 end
 
--- The @synthesize, @dynamic and method-definition lines the answer is read back from.
 local function match_synthesised(line)
     return line:match("^%s*@synthesize ([%a_][%w_]*)%s*=")
 end
@@ -321,13 +259,11 @@ local function match_dynamic(line)
     return line:match("^%s*@dynamic ([%a_][%w_]*)%s*;")
 end
 
--- ^\s*([-+]) \(([^)]*)\)(.*)$ as a triple: the sign, the type, the rest.
 local function match_definition(line)
     local sign, kind, rest = line:match("^%s*([%-%+]) %(([^%)]*)%)(.*)$")
     return sign, kind, rest
 end
 
--- The selector parts of a definition: each identifier followed by ":(", in order.
 local function selector_parts(text)
     local parts, at, length = {}, 1, #text
     while at <= length do
@@ -350,8 +286,6 @@ local function selector_parts(text)
     return parts
 end
 
--- The `ALONE` reason text, from the generator. A class that must be an object file of its own, with the measurement
--- that says why.
 local ALONE_REASON = [==[
 %(name)s is an object file of its own because a release below this group's own already
 exports it: the armv7s cache of iOS %(below)s has it, and the caches of this group's own
@@ -362,12 +296,10 @@ The measurement is tools/intents/measure-group.lua, and the reason is the commen
 ALONE in the generator that wrote this file.
 ]==]
 
--- The three answers a resolution result gives.
 local SUCCESS_VALUE = "successWithResolvedValue:"
 local DISAMBIGUATION_VALUE = "disambiguationWithValueToDisambiguate:"
 local CONFIRMATION_VALUE = "confirmationRequiredWithValueToConfirm:"
 
--- The SYSTEM framework prefixes: a type of one of these names is a class the release carries.
 local SYSTEM_PREFIXES = {"NS", "CL", "CF", "CG", "UI", "WK", "CA", "AV", "SK", "MK", "QL", "AL", "SCN", "PH", "MP"}
 
 local function is_system(name)
@@ -378,8 +310,6 @@ local function is_system(name)
     end
     return false
 end
-
--- Interfaces ---------------------------------------------------------------------------------------------------------
 
 local function new_interface(node)
     local self = {
@@ -405,7 +335,6 @@ local function new_interface(node)
     return self
 end
 
--- The method of this selector the interface declares, or nil.
 local function method_of(interface, selector)
     for _, candidate in ipairs(interface.methods) do
         if candidate.name == selector then
@@ -415,8 +344,6 @@ local function method_of(interface, selector)
     return nil
 end
 
--- The initialiser the header marks as the class's own, and its parameters: a subclass's own designated initialiser is
--- not what a subclass chains to, it chains to the one its superclass declares.
 local function designated(interface, interfaces)
     local seen, name = {}, interfaces[interface.superclass]
     while name and not seen[name.name] do
@@ -431,7 +358,6 @@ local function designated(interface, interfaces)
     return nil
 end
 
--- Where a property of a superclass is declared, and whether it can be written.
 local function ancestor_property(interface, property, interfaces)
     local seen, name = {}, interfaces[interface.superclass]
     while name and not seen[name.name] do
@@ -446,7 +372,6 @@ local function ancestor_property(interface, property, interfaces)
     return nil
 end
 
--- Which class of the chain declares the property.
 local function ancestor_property_owner(interface, property, interfaces)
     local seen, name = {}, interfaces[interface.superclass]
     while name and not seen[name.name] do
@@ -461,8 +386,6 @@ local function ancestor_property_owner(interface, property, interfaces)
     return nil
 end
 
--- The read-only values of a superclass that this class's own initialisers name. The class keeps its own copy, in its
--- own ivar, and answers the getter with it.
 local function inherited_readonly(interface, interfaces, spellings)
     local found = {}
     for _, method in ipairs(interface.methods) do
@@ -483,7 +406,6 @@ local function inherited_readonly(interface, interfaces, spellings)
     return found
 end
 
--- The zero a parameter of this type takes when a superclass initialiser is called without the value.
 local function zero_of(qual)
     local kind = spelled(qual)
     if ends_with_pointer(kind) or kind == "id" or kind == "instancetype" then
@@ -495,7 +417,6 @@ local function zero_of(qual)
     return "0"
 end
 
--- The superclass chain's own -init, reached through its IMP, when the SDK marks it unavailable.
 local function own_init_unavailable(interface, interfaces)
     local seen, name = {}, interface
     while name and not seen[name.name] do
@@ -509,14 +430,12 @@ local function own_init_unavailable(interface, interfaces)
     return false
 end
 
--- Whether the -init a bare -init would chain to is the marked one, and not this class's own.
 local function own_init_blocked_here(interface, interfaces)
     local seen, name = {}, interface
     while name and not seen[name.name] do
         seen[name.name] = true
         local declared = method_of(name, "init")
         if declared and has_attr(declared, "UnavailableAttr") then
-            -- the header's own "params" key is never written by clang, so only its absence is ever seen here
             return name.name ~= interface.name or (declared.params ~= nil and #declared.params == 0)
         end
         name = interfaces[name.superclass]
@@ -524,7 +443,6 @@ local function own_init_blocked_here(interface, interfaces)
     return false
 end
 
--- Which of the two shapes a header has for -init this class is, or nil for no -init at all.
 local function init_shape_of(interface, interfaces)
     if own_init_unavailable(interface, interfaces)
             and (method_of(interface, "init") ~= nil or own_init_blocked_here(interface, interfaces)) then
@@ -537,7 +455,6 @@ local function init_shape_of(interface, interfaces)
     return nil
 end
 
--- Whether a class name is a resolution result, by the superclass chain the SDK gives it.
 local function resolution_result(name, interfaces)
     local seen = {}
     while name and not seen[name] do
@@ -551,7 +468,6 @@ local function resolution_result(name, interfaces)
     return false
 end
 
--- The parameter a superclass initialiser's keyword is for, when the header's own names differ.
 local function parameter_named(cls, selector, parameter)
     for _, entry in ipairs(D.parameter_properties) do
         if entry[1] == cls and entry[2] == selector and entry[3] == parameter then
@@ -570,7 +486,6 @@ local function parameter_stop(message)
     raise("%s", message)
 end
 
--- A method's selector as a definition spells it: each keyword with the type and name of its parameter.
 local function spelled_selector(method)
     local parts = {}
     local parameters = parameters_of(method)
@@ -586,10 +501,6 @@ local function spelled_selector(method)
     return table.concat(parts, " ")
 end
 
--- The body of an initialiser: every parameter kept, in the state the class really has. A parameter that names a
--- property of this class goes in that class's own ivar. One that names a writable property of a superclass goes
--- through its setter, after the class's own state is in place. One that names a read-only property of a superclass
--- can only be kept by the superclass's own designated initialiser, so that is what is called.
 local function initialiser(interface, method, states, spellings, interfaces)
     local selector = method.name or ""
     local lines = {"- (instancetype)" .. spelled_selector(method), "{"}
@@ -641,15 +552,12 @@ local function initialiser(interface, method, states, spellings, interfaces)
         if not parent then
             return nil
         end
-        -- A parameter the header does not mark nullable cannot be handed a nil: the port refuses to chain rather than
-        -- make a call the SDK forbids.
         for _, parameter_entry in ipairs(parameters_of(parent)) do
             if ends_with_pointer(spelled(parameter_entry[1])) then
                 return nil
             end
         end
         local pieces = {}
-        -- the parent's keywords: its selector split at the colons, without the empty piece after the last one
         local keywords = split_colon(parent.name or "")
         table.remove(keywords)
         for index, parameter_entry in ipairs(parameters_of(parent)) do
@@ -688,10 +596,6 @@ local function initialiser(interface, method, states, spellings, interfaces)
     return lines
 end
 
--- Factories -----------------------------------------------------------------------------------------------------------
-
--- The class's own factory for one item, for a factory that answers a collection of them: the singular is looked for by
--- name among the class's own methods, and the whole superclass chain is asked.
 local function single_item_factory(interface, plural, interfaces)
     local stem = plural:match("^([^:]*)")
     if stem:sub(1, 9) ~= "successes" then
@@ -715,8 +619,6 @@ local function single_item_factory(interface, plural, interfaces)
     return nil
 end
 
--- The body of a resolution result's class method, or nothing: a list of lines, or false when a collection has no
--- single-item factory to map with.
 local function factory(interface, method, resolution, interfaces)
     local selector = method.name or ""
     if not resolution or has_attr(method, "UnavailableAttr") then
@@ -797,11 +699,6 @@ local function factory(interface, method, resolution, interfaces)
     return {}
 end
 
--- Reports ---------------------------------------------------------------------------------------------------------------
-
--- What the emitted @implementation of one class carries, read back out of the text. The registry is written from this,
--- not from the declarations the generator read, so an entry can never say a member is implemented when the file does
--- not implement it.
 local function definitions(lines)
     local joined, current = {}, nil
     for _, line in ipairs(lines) do
@@ -868,10 +765,6 @@ local function answer_of(lines, name, causes)
     }
 end
 
--- AST ------------------------------------------------------------------------------------------------------------------
-
--- The translation unit's own declarations, in order. clang writes one JSON object for the whole translation unit, so the
--- declarations are its `inner`, one entry per header.
 local function top_level(file)
     local found = {}
     local node = json.decode(io.readfile(file, {encoding = "binary"}))
@@ -885,8 +778,6 @@ local function top_level(file)
     return found
 end
 
--- Every real @interface, @protocol and typedef name in a dump. A category on a class is part of that class's surface,
--- so its properties and methods are folded into the class here.
 local function collect(file)
     local interfaces, protocols, forward = {}, {}, {}
     local categories, category_owners = {}, {}
@@ -937,7 +828,6 @@ local function collect(file)
     return interfaces, protocols, forward
 end
 
--- The names a property answers to: its own, and the getter the header gives it.
 local function property_names(members)
     local found = {}
     for _, member in ipairs(members) do
@@ -953,7 +843,6 @@ local function property_names(members)
     return found
 end
 
--- The properties a protocol requires, so a conformer really conforms.
 local function required_properties(protocol)
     local found = {}
     for _, member in ipairs(protocol.inner or {}) do
@@ -964,7 +853,6 @@ local function required_properties(protocol)
     return found
 end
 
--- The protocols a class really conforms to, its own and its superclasses'.
 local function conformed_by(interface, interfaces)
     local found, seen, name = {}, {}, interface
     while name and not seen[name.name] do
@@ -985,8 +873,6 @@ local function conformed_by(interface, interfaces)
     return found
 end
 
--- The class a type names that this delivery does not carry, or nil. Two ways a type names a class that is not here: an
--- Intents class of a group this delivery does not carry, and a class the SDK's headers only forward declare.
 local function deferred_type(qual, known, carried, forward)
     local name = base_type(qual)
     if known[name] and not carried[name] then
@@ -998,7 +884,6 @@ local function deferred_type(qual, known, carried, forward)
     return nil
 end
 
--- The file's header: the banner every generated object file opens with.
 local function banner(name, classes, release, deferred)
     local text = [==[
 //
@@ -1048,16 +933,11 @@ local function capitalised(text)
     return text:sub(1, 1):upper() .. text:sub(2)
 end
 
--- The @implementation of one generated class, and what it answers of the class's surface. The second value is the
--- report the registry is written from: what the emitted text carries, read back out of the text.
 local function implementation(interface, protocols, carried, intents, interfaces, forward)
     local resolution = resolution_result(interface.superclass, interfaces)
     local conformed = conformed_by(interface, interfaces)
     local name = interface.name
 
-    -- A class property is dropped here and was dropped silently before: it reached neither `stored`, `dynamic` nor
-    -- `skipped`, so no cause was recorded and the registry fell back to the group's blanket reason. It is recorded as
-    -- dynamic under class_property instead, and an EXTRA_METHODS body that answers it is what makes it not dynamic.
     local class_properties, own = {}, {}
     for _, member in ipairs(interface.properties) do
         if member.name and member["class"] then
@@ -1070,16 +950,12 @@ local function implementation(interface, protocols, carried, intents, interfaces
         end
     end
 
-    -- clang dumps a property's accessors as declarations of their own, so every method in an @interface is a
-    -- declaration: the ones that are a property's getter or setter are never given a body here.
     local accessors = {}
     for _, method in ipairs(interface.methods) do
         local selector = method.name or ""
         if own[selector] ~= nil and #parameters_of(method) == 0 then
             accessors[selector] = true
         else
-            -- The Python pattern is "^set(%a[%w_]*):$" read as a regular expression, whose "%a" is a literal percent
-            -- sign, so it matches a selector that spells one and none does. It is kept as written.
             local captured = selector:match("^set(%%a[%w_]*):$")
             if captured and own[setter_name(captured)] ~= nil and #parameters_of(method) == 1 then
                 accessors[selector] = true
@@ -1099,7 +975,6 @@ local function implementation(interface, protocols, carried, intents, interfaces
         local member = own[pname]
         local kind = type_of(member)
         if base_type(kind) == name then
-            -- The runtime already holds the class, so there is no storage an ivar could keep the class in.
             causes_by_name[pname] = "class_property"
             table.insert(dynamic, {pname, member.category, "class_property"})
         else
@@ -1124,8 +999,6 @@ local function implementation(interface, protocols, carried, intents, interfaces
         end
     end
 
-    -- The read-only values of a superclass that this class's own initialisers take: the class keeps a copy in its own
-    -- ivar, the initialiser stores the value it was given in it, and the getter answers with it.
     local spellings = property_names(interface.properties)
     local kept = {}
     local ivar_names = {}
@@ -1142,10 +1015,8 @@ local function implementation(interface, protocols, carried, intents, interfaces
         end
     end
 
-    -- The properties a conformed protocol requires and the class does not declare itself.
     for _, protocol_name in ipairs(conformed) do
         local protocol = protocols[protocol_name]
-        -- NSObject's own properties are the root superclass's and are not this class's to synthesise.
         if protocol and protocol_name ~= "NSObject" then
             local required = required_properties(protocol)
             for _, pname in ipairs(sorted_keys(required)) do
@@ -1161,8 +1032,6 @@ local function implementation(interface, protocols, carried, intents, interfaces
         end
     end
 
-    -- A property a category of the class declares is carried by a category of Charon's own, because clang will not
-    -- let a class implementation synthesise one.
     local by_category = {}
     for _, entry in ipairs(members) do
         local category = entry[3].category
@@ -1172,8 +1041,6 @@ local function implementation(interface, protocols, carried, intents, interfaces
         end
     end
 
-    -- Every ivar of the class, the ones a category declared included, is in one class extension in this file, so the
-    -- class's own initialisers reach all of them and a category implementation has a place to synthesise from.
     local out = {}
     local extra = D.extra_ivars[name]
     if #stored > 0 or extra then
@@ -1212,8 +1079,6 @@ local function implementation(interface, protocols, carried, intents, interfaces
     end
 
     if D.hand_written[name] then
-        -- A class this package writes by hand: this file emits no method of it, so the shape of its -init is the shape
-        -- its header has, which is what init_shape_of reads here.
         for _, line in ipairs({"", "@end", ""}) do
             table.insert(out, line)
         end
@@ -1233,7 +1098,6 @@ local function implementation(interface, protocols, carried, intents, interfaces
         local ivar, kind, pname = entry[1], entry[2], entry[3]
         local member = own[pname]
         if member == nil and kept[pname] ~= nil then
-            -- a value this class keeps a copy of for a superclass: a pointer is copied, a value is retained
             states[ivar] = ends_with_pointer(kind) and "copy" or "retain"
         else
             states[ivar] = (member and is_copy(member, kind)) and "copy" or "retain"
@@ -1257,15 +1121,8 @@ local function implementation(interface, protocols, carried, intents, interfaces
         end
     end
 
-    -- A class whose own header marks -init NS_UNAVAILABLE still answers one, and the SYSTEM does: measured on the
-    -- host's own Intents, a compile-time call does not build, which is the point, and the marked classes each returned
-    -- an object with every property present and nil. So the port emits -init too: refusing to define the method leaves
-    -- a caller that sends it reaching a NULL IMP. The superclass's own -init is reached through its IMP, not by name.
     local init_shape = init_shape_of(interface, interfaces)
     if init_shape == "designated" then
-        -- The header declares -init as the class's designated initialiser and nothing in the chain marks it unavailable,
-        -- so the ordinary body is the right one: the superclass's own -init, which is what the identifier an
-        -- interaction donated with this intent is keyed by is made by.
         for _, line in ipairs({
             "- (instancetype)init", "{",
             "    // The header declares this -init as the class's designated initialiser, and nothing",
@@ -1292,13 +1149,10 @@ local function implementation(interface, protocols, carried, intents, interfaces
         end
     end
 
-    -- The initialisers: each one a body the generator writes from the header, or one written by hand.
     for _, method in ipairs(interface.methods) do
         local selector = method.name or ""
         if method.instance ~= false and not has_attr(method, "UnavailableAttr") and starts_with(selector, "init")
                 and selector:find(":", 1, true) and selector ~= "initWithCoder:" then
-            -- An initialiser that takes a value this delivery does not carry is not given a body: a body that dropped
-            -- the value would answer with a class that looks filled and is not. The header's mark stays on it.
             local deferred = false
             for _, parameter in ipairs(parameters_of(method)) do
                 if deferred_names[parameter[2]] or deferred_type(parameter[1], intents, carried, forward) then
@@ -1329,10 +1183,8 @@ local function implementation(interface, protocols, carried, intents, interfaces
         end
     end
 
-    -- The methods that are not initialisers.
     for _, method in ipairs(interface.methods) do
         local selector = method.name or ""
-        -- A member the header marks UNAVAILABLE is not answered, and the cause is the mark: a port cannot call it.
         local hand_written = D.extra_methods[name .. " " .. selector] ~= nil
             and not (starts_with(selector, "init") and selector:find(":", 1, true) ~= nil)
         local skip = false
@@ -1342,9 +1194,6 @@ local function implementation(interface, protocols, carried, intents, interfaces
             skip = true
         end
         if not skip then
-            -- An accessor whose return type is a class this package does not carry has nothing to keep its value in,
-            -- so a body would not compile. A hand-written body is not generated from that type and is not subject to
-            -- this guard.
             local withheld = deferred_type(returns_of(method), intents, carried, forward)
             if withheld and not hand_written and method.instance ~= false and not has_attr(method, "UnavailableAttr")
                     and accessors[selector] == nil and own[selector] == nil
@@ -1371,8 +1220,6 @@ local function implementation(interface, protocols, carried, intents, interfaces
     end
 
     if conformed_has(conformed, "NSSecureCoding") then
-        -- A class whose header marks -init unavailable, its own or the one [super init] would reach, cannot spell
-        -- [super init] in a file that reads that header, so the superclass's own -init is called by name instead.
         local parent = interfaces[interface.superclass]
         local own_init = nil
         for _, candidate in ipairs({interface, parent or false}) do
@@ -1416,8 +1263,6 @@ local function implementation(interface, protocols, carried, intents, interfaces
         table.insert(out, "")
     end
 
-    -- Charon's own readers for this class's stores, inside the @implementation and after everything the header
-    -- declares: emitted after the @end, clang reads a method declaration with no @implementation in scope and stops.
     for _, key in ipairs(sorted_keys(D.charon_readers)) do
         if key:match("^(%S+) ") == name then
             for _, line in ipairs(D.charon_readers[key]) do
@@ -1429,7 +1274,6 @@ local function implementation(interface, protocols, carried, intents, interfaces
     table.insert(out, "@end")
     table.insert(out, "")
 
-    -- A property the SDK declares in a category of the class is answered by accessors in a category of Charon's own.
     for _, category in ipairs(sorted_keys(by_category)) do
         local found = by_category[category]
         table.insert(out, string.format("@implementation %s (Charon%s%s)", name, name, category))
@@ -1470,8 +1314,6 @@ local function implementation(interface, protocols, carried, intents, interfaces
     local report = answer_of(out, name)
     report.causes = causes
 
-    -- A class property is answered by its +accessor, the only thing in the emitted text that carries the name. So it is
-    -- matched against an accessor that was actually written: +name is the shape, and it has to be in the emitted methods.
     local written = {}
     for _, entry in ipairs(report.methods) do
         if starts_with(entry, "+[") then
@@ -1490,14 +1332,11 @@ local function implementation(interface, protocols, carried, intents, interfaces
     return out, report
 end
 
--- JSON, as json.dump(indent=1, sort_keys=True) writes the report -----------------------------------------------------
-
 local function json_string(text)
     local escaped = text:gsub("\\", "\\\\"):gsub('"', '\\"')
     return '"' .. escaped .. '"'
 end
 
--- entries are {key, text} pairs, text already rendered; a key sorts in the order the caller gives
 local function json_object(entries, depth)
     if #entries == 0 then
         return "{}"
@@ -1541,8 +1380,6 @@ local function report_json(report, depth)
     return json_object(entries, depth)
 end
 
--- The command line -----------------------------------------------------------------------------------------------------
-
 local function options_of(arguments)
     local options = {}
     local index = 1
@@ -1581,8 +1418,6 @@ function main(...)
 
     local interfaces, protocols, forward = collect(options.dump)
     if options["dump-newer"] then
-        -- The names the port's own SDK does not declare, from the newer SDK that does. A class both declare is taken
-        -- from the port's SDK: its declaration is the one the implementation compiles against.
         local fresh, newer_protocols = collect(options["dump-newer"])
         for name, value in pairs(fresh) do
             if interfaces[name] == nil then
@@ -1645,15 +1480,11 @@ function main(...)
         end
     end
 
-    -- One file per class that must be alone, named for the release below the group's own that already exports it, so
-    -- the name says which band re-exports the object and which keeps it.
     for _, entry in ipairs(alone) do
         local name, below = entry[1], entry[2]
         local file = out_dir .. "/" .. name .. below .. ".m"
         local body, report = implementation(interfaces[name], protocols, carried, intents, interfaces, forward)
         local text = {banner(file:match("([^/]*)$"), 1, options.release, #report.dynamic)}
-        -- The file says why it is alone, in a comment: a line that starts with a hash at column zero would be a
-        -- preprocessing directive, so every line of the reason is prefixed.
         local reason = ("\n" .. ALONE_REASON):gsub("%%%(name%)s", name):gsub("%%%(below%)s", below)
         for line in (reason .. "\n"):gmatch("(.-)\n") do
             table.insert(text, "//  " .. line)
@@ -1674,7 +1505,6 @@ function main(...)
     return 0
 end
 
--- The report of every class, keyed by name, as json.dump(answered, indent=1, sort_keys=True) writes it.
 function report_json_top(answered)
     local entries = {}
     for _, name in ipairs(sorted_keys(answered)) do

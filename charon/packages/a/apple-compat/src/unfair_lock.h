@@ -9,18 +9,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* os_unfair_lock as libplatform keeps it (lock.c in libplatform-126 and later): the lock word holds the owner's Mach thread
-   port name with its low bit set, and a waiter clears that bit so the owner's unlock knows to wake someone. libplatform takes
-   the name as it is, because XNU hands out odd names: the low byte is the entry's generation, which counts 3, 7, 11 and so on
-   (400 threads on this machine, all odd). Setting the bit is therefore the same value on a device, and it also holds where a
-   name is even, which is what iLEmu gives a thread it starts (0x10c00, 0x11e00, spaced by 0x100, generation zero): there the
-   waiter's cleared bit would otherwise be the owner's own value and the unlock would wake nobody. Two live threads whose names
-   differ only in that bit would look like one owner, which XNU's odd names and iLEmu's zero generations both rule out.
-   The kernel's unfair ulock of iOS 10 is not there to wait on, so a waiter parks in __ulock_wait until the unlock wakes it. Waiters and wakes meet
-   in __ulock_wait's table, so every image in a process must reach this one copy: a lock two images take (a Mutex inlined
-   into both) would otherwise park in one table and be woken in another. The locks are therefore not linked into each image
-   but built into libc++abi, which exports them once for the process. */
-
 int __ulock_wait(uint32_t operation, void *address, uint64_t value, uint32_t timeout);
 int __ulock_wake(uint32_t operation, void *address, uint64_t value);
 
@@ -81,7 +69,6 @@ static inline void charon_unfair_lock_slow(charon_unfair_lock *lock, uint32_t se
                                                                          memory_order_relaxed))
             continue;
         __ulock_wait(CHARON_UL_COMPARE_AND_WAIT, lock, waited, 0);
-        /* __ulock_wait cannot say whether others still wait, so the next owner assumes they do and wakes on unlock. */
         waiters = CHARON_UNFAIR_NO_WAITERS;
     }
 }

@@ -1,10 +1,3 @@
-// The four kinds of thing a schema entity can hold: an attribute, a composite of attributes, a
-// relationship, and - on iOS 18 and later - an index or a uniqueness constraint over them.
-//
-// A metatype is not `Encodable`, and a value's type is part of what an attribute says, so a type
-// is written by name and read back through the table of the types this process has: a schema
-// describes the rows of a store, and the process reading one is the one that knows the models.
-
 import Foundation
 
 public protocol SchemaProperty: Decodable, Encodable, Hashable {
@@ -26,22 +19,14 @@ extension SchemaProperty {
     public var isUnique: Bool { false }
 }
 
-/// The property names an index is built over, which is all a store needs of one. A generic
-/// `Schema.Index<T>` cannot be tested for with `is` from outside its own generic parameter, so
-/// the kinds answer this themselves.
 protocol IndexNaming {
     var indexPropertyNames: [[String]] { get }
 }
 
-/// The property names each uniqueness constraint names, likewise.
 protocol UniqueNaming {
     var uniquePropertyNames: [[String]] { get }
 }
 
-/// The type names a written schema carries, and the types this process knows them as. A model type
-/// registers itself when it becomes an entity, which is every model type a program opens a
-/// container with; a name nothing registered reads back as `Any`, and an attribute of `Any` is
-/// transformable, which is the one Core Data type a value of no known type can be stored as.
 enum SchemaTypeNames {
     private static var known: [String: any Any.Type] = [:]
 
@@ -54,13 +39,8 @@ enum SchemaTypeNames {
     }
 }
 
-// MARK: - Attribute
-
 extension Schema {
     public class Attribute: SchemaProperty, CustomDebugStringConvertible {
-        /// What an attribute may carry. A struct and not an enum, because two options are
-        /// answers to the same question - a transformable is named either by the transformer that
-        /// does it or by a name - and Apple's is a struct for the same reason.
         public struct Option: Codable, Hashable, CustomDebugStringConvertible {
             enum Kind: String, Codable {
                 case unique, transformable, externalStorage, allowsCloudEncryption
@@ -68,8 +48,6 @@ extension Schema {
             }
 
             let kind: Kind
-            /// The transformer's name, for `.transformable` only; empty otherwise, which is what
-            /// says the option carries no name.
             let transformer: String
 
             init(kind: Kind, transformer: String = "") {
@@ -84,9 +62,6 @@ extension Schema {
             public static var ephemeral: Option { Option(kind: .ephemeral) }
             public static var spotlight: Option { Option(kind: .spotlight) }
 
-            /// A transformable is named by the transformer's class name, which is the name
-            /// `NSValueTransformer`'s own registry is keyed by and therefore the name
-            /// `NSAttributeDescription.valueTransformerName` takes.
             public static func transformable(by transformerType: ValueTransformer.Type) -> Option {
                 Option(kind: .transformable, transformer: NSStringFromClass(transformerType))
             }
@@ -143,10 +118,6 @@ extension Schema {
         public var isUnique: Bool { options.contains(.unique) }
         public var isTransformable: Bool { options.contains { $0.kind == .transformable } }
 
-        /// The name of the transformer this attribute is stored through, or nil when it is not a
-        /// transformable. `NSAttributeDescription.valueTransformerName` takes this, and a
-        /// transformable with no transformer is stored by `NSCoding`, which is the release's own
-        /// default and not the same thing.
         public var transformerName: String? {
             options.first { $0.kind == .transformable }?.transformer
         }
@@ -225,10 +196,6 @@ extension Schema {
         }
     }
 
-    /// An attribute whose value is built out of others, iOS 17 and later. The store of the port
-    /// has no such type - `NSCompositeAttributeType` is iOS 17.0 and nothing carries it for
-    /// iOS 6 - so a composite is stored as the transformable it is, with the properties it is
-    /// built from named beside it.
     public final class CompositeAttribute: Attribute {
         public final var properties: [Attribute]
 
@@ -261,8 +228,6 @@ extension Schema {
         enum CompositeKeys: String, CodingKey { case properties }
     }
 }
-
-// MARK: - Relationship
 
 extension Schema {
     public final class Relationship: SchemaProperty, CustomDebugStringConvertible {
@@ -320,8 +285,6 @@ extension Schema {
         public var isTransient: Bool { false }
         public var isUnique: Bool { options.contains(.unique) }
 
-        /// A to-one relationship is one whose far end holds at most one row: a maximum of one.
-        /// Apple's `maximumModelCount` of nil is "no bound", and no bound is not a to-one.
         public var isToOneRelationship: Bool { maximumModelCount == 1 }
 
         public init(_ options: Option..., deleteRule: DeleteRule = .nullify, minimumModelCount: Int? = 0,
@@ -374,9 +337,6 @@ extension Schema {
             try container.encodeIfPresent(minimumModelCount, forKey: .minimumModelCount)
             try container.encodeIfPresent(maximumModelCount, forKey: .maximumModelCount)
             try container.encodeIfPresent(hashModifier, forKey: .hashModifier)
-            // A key path is not Encodable, so one is written as the name it reaches its property
-            // by and read back as the same name; `inverseName` and `destination` are what a
-            // store needs, and they are written beside it.
             if let keypath { try container.encode("\(keypath)", forKey: .keypath) }
             if let inverseKeyPath { try container.encode("\(inverseKeyPath)", forKey: .inverseKeyPath) }
         }
@@ -413,8 +373,6 @@ extension Schema {
         }
     }
 }
-
-// MARK: - Index and uniqueness, iOS 18
 
 extension Schema {
     public final class Index<T>: SchemaProperty, CustomDebugStringConvertible where T: PersistentModel {
@@ -531,9 +489,6 @@ extension Schema.Unique: UniqueNaming {
     var uniquePropertyNames: [[String]] { constraints.map { $0.map { "\($0)" } } }
 }
 
-/// A written index, and a written uniqueness constraint, with no model type behind them: what a
-/// decoded schema holds for a property it cannot rebuild, since the key paths of a generic type
-/// are not in the file.
 struct IndexNames: SchemaProperty, IndexNaming {
     var name: String
     var originalName: String = ""
@@ -626,9 +581,6 @@ struct UniqueNames: SchemaProperty, UniqueNaming {
     }
 }
 
-/// A value of any type, written as what `JSONEncoder` can carry. A default value is a literal the
-/// source wrote, so it is a string, a number, a boolean, a null or a list of those - and that is
-/// what it reads back as, which is what `PropertyMetadata.defaultValue` hands a model that asks.
 struct PropertyValue: Codable {
     let value: Any?
 

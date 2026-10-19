@@ -18,8 +18,6 @@
     return self;
 }
 
-// A fetch keeps the query it ran and its options, so that a change of the library can run it again and
-// say what a fetch made now gives instead (PHChange, facts/Photos/Changes.md).
 - (instancetype)initWithCharonQuery:(NSArray *(^)(void))query options:(PHFetchOptions *)options
 {
     NSArray *objects = query();

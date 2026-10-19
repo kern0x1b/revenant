@@ -1,10 +1,3 @@
-/* The constraints Core ML added in iOS 12, in a file of their own because an object may only carry
- * the API of a single release: the multi array shape constraint (which one shape, which range of
- * shapes, or which set of them), the image size and the sizes an image feature will take, and the
- * sequence constraint (what one element is, and how many of them). Each is built from the same
- * fields of the specification's own message as the iOS 11 constraints beside them, and the reading
- * they share is in CharonMLConstraints.h.
- */
 #import <CoreML/CoreML.h>
 
 #include "CharonMLConstraints.h"
@@ -66,9 +59,6 @@
 {
     return _type;
 }
-/* A copy is a constraint of the same kind with the same numbers, and a real copy rather than the
- * same object: a caller that holds a description and copies it must be able to read the copy
- * without the two sharing anything. */
 - (id)copyWithZone:(NSZone *)zone
 {
     return [[[self class] allocWithZone:zone] charon_initWithType:_type
@@ -114,7 +104,6 @@
 
 @end
 
-/* One image size, in the two numbers an image is measured in. */
 @implementation MLImageSize
 
 - (instancetype)charon_initWithPixelsWide:(NSInteger)pixelsWide pixelsHigh:(NSInteger)pixelsHigh
@@ -142,8 +131,6 @@
     return _pixelsHigh;
 }
 
-/* Two sizes are the same size when they are the same two numbers: there is nothing else an
- * image size carries, and a caller putting sizes in a set is asking exactly that. */
 - (BOOL)isEqual:(id)object
 {
     MLImageSize *other = [object isKindOfClass:[MLImageSize class]] ? object : nil;
@@ -186,10 +173,6 @@
 
 @end
 
-/* The sizes an image feature takes: any, a set of them, or a range for each of the two numbers.
- * A range of length zero is the specification's "no upper bound", which is a range that does not
- * stop -- and a range of *location* zero with no length is a range that does not start either,
- * which is the same thing as no range at all. */
 @implementation MLImageSizeConstraint
 
 - (instancetype)charon_initWithType:(MLImageSizeConstraintType)type
@@ -263,10 +246,6 @@
 
 @end
 
-/* A sequence feature: what one element of it is, which is a description of its own, and how many
- * elements it may have. The count range's length of zero is the specification's "no upper
- * bound", so a sequence with a lower bound of two and no upper one answers a range starting at
- * two with no length -- and a sequence with neither answers a range of zero, which is any count. */
 @implementation MLSequenceConstraint
 
 - (instancetype)charon_initWithValueDescription:(MLFeatureDescription *)valueDescription

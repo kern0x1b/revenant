@@ -33,9 +33,6 @@
 {
     SCNMaterialProperty *property = [self materialPropertyWithContents:contents];
     property->_holdsDefault = YES;
-    // a new material's slots, unlike a property made alone, sample the nearest mipmap level: macOS SceneKit answers 1
-    // for every slot and 0 alone (scenekit-defaults-expectations.h), and a 256-texel gradient drawn 16 texels to the
-    // pixel shows 248 at its clamped edge, the mean of the 16 edge texels, where level 0 gives 255 (facts/SceneKit/SCNView.md)
     property->_mipFilter = SCNFilterModeNearest;
     return property;
 }
@@ -122,7 +119,6 @@
     return [_animations isAnimationForKeyPaused:key];
 }
 
-// contentsTransform is the key path measured against macOS SceneKit; others are said and left
 - (NSValue *)charonModelValueForKeyPath:(NSString *)keyPath
 {
     if ([keyPath isEqualToString:@"contentsTransform"]) return [NSValue valueWithSCNMatrix4:_contentsTransform];

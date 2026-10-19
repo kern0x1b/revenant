@@ -1,12 +1,3 @@
-// PDFKit's string constants of iOS 11.0, and the one numeric sentinel beside them.
-//
-// The values are the HOST's own, read out of its PDFKit at generation time with dladdr proving
-// which image each symbol came from: the host framework has no file on disk - it lives in the dyld
-// shared cache - so the image pointer is the only proof, and tests/backports/host/pdfkit-constants
-// reads them the same way.  Each symbol was read in a fork()ed child, so one that cannot be read
-// costs its own row and nothing else: kPDFDestinationUnspecifiedValue is a CGFloat sentinel rather
-// than a string, and that is the one row the host does not answer.
-
 #import <PDFKit/PDFKit.h>
 
 PDFKIT_EXTERN NSString *const PDFAnnotationHighlightingModeInvert;

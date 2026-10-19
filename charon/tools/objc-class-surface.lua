@@ -1,17 +1,3 @@
--- objc-class-surface.lua - the superclass and the own selectors of each class named, read out of a held release.
---
---   xmake l tools/objc-class-surface.lua <release> <architecture> <Class>...
---
--- The same reader as tools/objc-init-members.lua, which answers one question about -init and +new: this one
--- prints the whole own list of each class, instance methods and class methods apart, so a surface can be
--- compared with the header the release shipped with. NSObject is printed first as the control: its own list is
--- never empty, so an empty list for a class is a measurement and not a broken reader.
---
--- A class that is not in the release prints `not in this release`, which is an answer too. The selectors are
--- sorted, and each keeps the leading `-` or `+` the inventory gives it, so the list reads the way a header does.
---
--- Read-only: the cache is opened and closed by apple.objc, and nothing is written.
-
 local modules = path.join(os.scriptdir(), "..", "modules")
 local objc = import("apple.objc", {rootdir = modules, anonymous = true})
 local dyld = import("apple.dyld", {rootdir = modules, anonymous = true})

@@ -8,32 +8,6 @@
 #import "CharonEnvironmentOutput.h"
 #import "CharonEnvironmentFilter.h"
 
-// AVAudioEnvironmentNode on the release's own kAudioUnitSubType_SpatialMixer, and the two
-// parameter classes that go with it.
-//
-// The unit is real and the release's own: AudioComponentFindNext for {kAudioUnitType_Mixer,
-// kAudioUnitSubType_SpatialMixer, 'appl'}, and a parameter set of thirty-odd k3DMixerParam_
-// entries in the release's own AudioUnitParameters.h marked iOS 2.0 - azimuth, elevation, distance,
-// gain, playback rate, bus enable, min and max gain, dry/wet reverb blend, global reverb gain,
-// occlusion and obstruction attenuation, and the InDecibels replacements for the deprecated ones.
-// Nothing here translates that unit.
-//
-// The node carries a graph of its own - the mixer terminated into a generic output - so it can be
-// rendered offline without an engine, which is what makes its own output measurable.
-//
-// The coordinate model is the mixer's: each input bus's parameters are that source's position
-// *relative to the listener*, and the listener is at the mixer's origin. AVAudioEnvironmentNode
-// exposes the listener as a position, which is the same statement the other way round - moving the
-// listener is the inverse transform applied to every source. That is exact, not an approximation: a
-// rigid transform and its inverse compose to the identity on the positions the mixer is given.
-//
-// The algorithms are mapped to what this unit offers. It has no head-related transfer function -
-// nothing in its parameter set says where a listener's ears are - so the two it can be are the sound
-// field and the stereo pass-through, and HRTF and equal-power panning are reported as not applicable
-// rather than offered and quietly equal to the sound field.
-
-// The mixer, asked for once per process: the component is a registration and the release answers it
-// the same way every time.
 static AudioComponent CharonEnvironmentComponent(void)
 {
     static AudioComponent component;
@@ -56,8 +30,6 @@ static AudioComponent CharonEnvironmentComponent(void)
     float _charon_rolloffFactor;
 }
 
-// The header's own documented defaults: the inverse model, one metre of reference distance, one
-// hundred thousand metres of maximum distance, and a rolloff factor of one.
 - (instancetype)initWithCharonOwner:(AVAudioEnvironmentNode *)owner
 {
     if ((self = [super init])) {
@@ -114,12 +86,6 @@ static AudioComponent CharonEnvironmentComponent(void)
     [_charon_owner charon_applyEnvironmentParameters];
 }
 
-// The attenuation each of the header's three models describes, evaluated where the port can: a
-// source's gain as a function of its distance. The unit still renders - this only decides the gain
-// the unit is given, which is exactly the parameter it has. Written from the three definitions in the
-// header's own documentation: the linear model stops attenuating at maximumDistance, the exponential
-// one falls off by the rolloff factor, the inverse one is the reciprocal of the distance in units of
-// the reference distance.
 - (float)charon_gainForDistance:(float)distance
 {
     float reference = _charon_referenceDistance > 0 ? _charon_referenceDistance : 1.0f;
@@ -145,11 +111,6 @@ static AudioComponent CharonEnvironmentComponent(void)
 
 @end
 
-// The reverb's filter band. The header types it as an AVAudioUnitEQFilterParameters, and that class's setters store the value
-// and hand it to an AVAudioUnitEQ owner, which the environment is not. So this subclass takes the environment as its owner,
-// stores each value as the band does, and tells the environment to write the band to the mixer's reverb filter (SpatialMixer
-// parameters 14 to 18). The defaults and the enable mapping are the host's (CharonEnvironmentFilter.h).
-// The band's own initializer, which the AVFoundation backport defines; the EQ it names is not this class's owner, so nil.
 @class AVAudioUnitEQ;
 @interface AVAudioUnitEQFilterParameters (CharonEnvironment)
 - (instancetype)initForCharonEQ:(AVAudioUnitEQ *)eq bandIndex:(NSUInteger)bandIndex;
@@ -163,8 +124,6 @@ static AudioComponent CharonEnvironmentComponent(void)
     __weak AVAudioEnvironmentNode *_charon_owner;
 }
 
-// The host's defaults: 800 Hz, bandwidth 3, gain 0, the parametric type, and not bypassed (enable 1 on the mixer).
-// The setters below run here before the environment has a mixer, and the environment ignores them until it does.
 - (instancetype)initWithCharonOwner:(AVAudioEnvironmentNode *)owner
 {
     if ((self = [super initForCharonEQ:nil bandIndex:0])) {
@@ -178,7 +137,6 @@ static AudioComponent CharonEnvironmentComponent(void)
     return self;
 }
 
-// The band stores the value raw, as the host does, so the value read back is the one written; the mixer clamps it.
 - (void)setFilterType:(AVAudioUnitEQFilterType)filterType
 {
     [super setFilterType:filterType];
@@ -232,10 +190,6 @@ static AudioComponent CharonEnvironmentComponent(void)
     return _charon_filter;
 }
 
-// loadFactoryReverbPreset: is not implemented, and is owed. The host's preset changes none of the mixer's parameters, and its
-// full state (the environment's and the reverb's) carries the preset's index and name but not the values it sets, so there is
-// no table to map (facts/AVFAudio/AVAudioEnvironmentNode.md). Both rows are in registry/AVFAudio/iosaudioenvironment8.json.
-
 - (BOOL)enable
 {
     return _charon_enable;
@@ -252,8 +206,6 @@ static AudioComponent CharonEnvironmentComponent(void)
     return _charon_level;
 }
 
-// The header's range is -40 to 40 dB and its default 0.0; the level is the mixer's own global reverb
-// gain, which is in decibels, so the value goes there unchanged.
 - (void)setLevel:(float)level
 {
     _charon_level = level;
@@ -278,9 +230,6 @@ static AudioComponent CharonEnvironmentComponent(void)
     AVAudioEnvironmentOutputType _charon_outputType;
 }
 
-// One graph, built in -init exactly as the release's own AUGraph calls say: NewAUGraph, AUGraphOpen,
-// AUGraphAddNode for the mixer and for a generic output, AUGraphConnectNodeInput from the mixer to the
-// output, and AUGraphNodeInfo to get each real AudioUnit.
 - (instancetype)init
 {
     if ((self = [super init])) {
@@ -308,8 +257,6 @@ static AudioComponent CharonEnvironmentComponent(void)
                 AUGraphConnectNodeInput(_charon_graph, _charon_mixer, 0, _charon_output, 0);
                 AUGraphNodeInfo(_charon_graph, _charon_mixer, NULL, &_charon_mixerUnit);
                 AUGraphNodeInfo(_charon_graph, _charon_output, NULL, &_charon_outputUnit);
-                // The node's own ivars, so the AVAudioNode plumbing inherited from
-                // libAVFoundationBackports sees a real unit and a real AUNode.
                 [self charon_setEngine:nil auNode:_charon_mixer audioUnit:_charon_mixerUnit];
             }
         }
@@ -327,8 +274,6 @@ static AudioComponent CharonEnvironmentComponent(void)
     }
 }
 
-// The graph is initialized once, the first time anything renders through it, and never before: an
-// AudioUnit needs its formats before AUGraphInitialize, and a node nobody has rendered is not one.
 - (BOOL)charon_prepare
 {
     if (_charon_initialized) {
@@ -340,7 +285,6 @@ static AudioComponent CharonEnvironmentComponent(void)
     _charon_initialized = AUGraphInitialize(_charon_graph) == noErr;
     if (_charon_initialized) {
         [self charon_applyOutputType];
-        // The mixer starts from the values the host gives the object, not from the mixer's own defaults.
         [self charon_applyEnvironmentParameters];
     }
     return _charon_initialized;
@@ -407,9 +351,6 @@ static AudioComponent CharonEnvironmentComponent(void)
     }
 }
 
-// The output type is the value the caller set, Auto by default, and the mixer is told the type the route resolves it
-// to. This release has no route-change notification the port follows, so the route is read when the type is set and
-// when the graph is first initialized; a route change after that is not followed (facts/AVFAudio/AVAudioEnvironmentNode.md).
 - (AVAudioEnvironmentOutputType)outputType
 {
     return _charon_outputType;
@@ -421,9 +362,6 @@ static AudioComponent CharonEnvironmentComponent(void)
     [self charon_applyOutputType];
 }
 
-// The class of the route the audio session reports, read from the release's own AudioSession. The route is a CFString
-// copy, released once compared. A route the port does not name is external, the answer the header gives for a route that
-// is not wired.
 static CharonEnvironmentRouteClass CharonCurrentRouteClass(void)
 {
 #pragma clang diagnostic push
@@ -445,8 +383,6 @@ static CharonEnvironmentRouteClass CharonCurrentRouteClass(void)
 #pragma clang diagnostic pop
 }
 
-// Resolves the set type against the current route and hands the mixer the result. A refusal is recorded as inert rather
-// than raised: the output type is advisory on this release, and the mixer keeps the type it had.
 - (void)charon_applyOutputType
 {
     if (_charon_mixerUnit == NULL) {
@@ -460,9 +396,6 @@ static CharonEnvironmentRouteClass CharonCurrentRouteClass(void)
     }
 }
 
-// AVAudioNodeBus is a bus index - the header's own typedef is NSUInteger - so this answers the index
-// of the first input bus the mixer's own element count leaves unused, and the whole set when it has
-// none. The count is the mixer's, not a number the port chose.
 - (AVAudioNodeBus)nextAvailableInputBus
 {
     UInt32 elements = 0;
@@ -475,9 +408,6 @@ static CharonEnvironmentRouteClass CharonCurrentRouteClass(void)
     return (AVAudioNodeBus)elements;
 }
 
-// The algorithms this unit is. The mixer places a source in a sphere around the listener and sums the
-// buses; it has no head-related transfer function, so the two algorithms that need one are reported
-// as not applicable rather than offered and quietly equal to the sound field.
 - (NSArray<NSNumber *> *)applicableRenderingAlgorithms
 {
     return @[@(AVAudio3DMixingRenderingAlgorithmSoundField),
@@ -491,10 +421,6 @@ static CharonEnvironmentRouteClass CharonCurrentRouteClass(void)
 
 - (void)setRenderingAlgorithm:(AVAudio3DMixingRenderingAlgorithm)renderingAlgorithm
 {
-    // The sound field is the unit's placement, and the pass-through is the unit with its placement off;
-    // those are the two it offers. Anything else cannot be rendered by it, so it is refused the way the
-    // release refuses a format a unit cannot take: the value stays what the unit is, and the refusal is
-    // the one the header documents.
     if (renderingAlgorithm != AVAudio3DMixingRenderingAlgorithmSoundField &&
         renderingAlgorithm != AVAudio3DMixingRenderingAlgorithmStereoPassThrough) {
         return;
@@ -507,11 +433,6 @@ static CharonEnvironmentRouteClass CharonCurrentRouteClass(void)
 
 #pragma mark Applying the listener and the parameters
 
-// Every input bus is a source, and the mixer's own parameters for a bus are that source's azimuth,
-// elevation, distance, gain and rate. The listener transform is applied by giving each source the
-// position it has in the listener's own frame, which is what the mixer already wants: moving the
-// listener by -L is the same statement as moving every source by L, and the port applies the former
-// because that is the property the header exposes.
 - (void)charon_applyListenerTransform
 {
     if (_charon_mixerUnit == NULL) {
@@ -522,10 +443,6 @@ static CharonEnvironmentRouteClass CharonCurrentRouteClass(void)
     float scale = (forward.x != 0 || forward.y != 0 || forward.z != 0)
         ? 1.0f / sqrtf(forward.x * forward.x + forward.y * forward.y + forward.z * forward.z)
         : 1.0f;
-    // The listener's own frame: forward, and up as the angular orientation's yaw and pitch say. The
-    // basis is orthonormal because the forward vector is normalised above and the up vector is taken
-    // from the listener's own angles, so its inverse is the transpose - which is the whole of the
-    // arithmetic, and is why this is exact rather than a fitted approximation.
     float fx = forward.x * scale, fy = forward.y * scale, fz = forward.z * scale;
     float yaw = _charon_listenerAngularOrientation.yaw * (float)M_PI / 180.0f;
     float pitch = _charon_listenerAngularOrientation.pitch * (float)M_PI / 180.0f;
@@ -544,9 +461,6 @@ static CharonEnvironmentRouteClass CharonCurrentRouteClass(void)
         AudioUnitGetParameter(_charon_mixerUnit, k3DMixerParam_Distance, kAudioUnitScope_Input, bus, &distance);
         AudioUnitGetParameter(_charon_mixerUnit, k3DMixerParam_Gain, kAudioUnitScope_Input, bus, &gain);
 
-        // The source in the listener's own coordinates: the unit holds a distance and two angles, so
-        // the position is that spherical point scaled by the distance, and the listener's translation
-        // is removed from it.
         float azimuthRadians = (float)azimuth * (float)M_PI / 180.0f;
         float elevationRadians = (float)elevation * (float)M_PI / 180.0f;
         float x = distance * (float)cos(elevationRadians) * (float)sin(azimuthRadians);
@@ -564,17 +478,12 @@ static CharonEnvironmentRouteClass CharonCurrentRouteClass(void)
             AudioUnitSetParameter(_charon_mixerUnit, k3DMixerParam_Elevation, kAudioUnitScope_Input, bus,
                                   (AudioUnitParameterValue)(asinf(y / r) * 180.0f / (float)M_PI), 0);
         }
-        // The gain is the source's own gain times what the distance attenuation model says about how
-        // far away it now is - which is the whole of what the distance model changes, applied to the
-        // parameter the unit has.
         AudioUnitSetParameter(_charon_mixerUnit, k3DMixerParam_Gain, kAudioUnitScope_Input, bus,
                               (AudioUnitParameterValue)(gain * [_charon_attenuation charon_gainForDistance:r]), 0);
     }
     (void)fx; (void)fy; (void)fz; (void)ux; (void)uy; (void)uz;
 }
 
-// The two parameter classes changed: the distance model is the mixer's gain and distance, and the
-// reverb is its own two parameters.
 - (void)charon_applyEnvironmentParameters
 {
     if (_charon_mixerUnit == NULL) {
@@ -585,7 +494,6 @@ static CharonEnvironmentRouteClass CharonCurrentRouteClass(void)
                           (AudioUnitParameterValue)(_charon_reverb.enable ? 1.0f : 0.0f), 0);
     AudioUnitSetParameter(_charon_mixerUnit, k3DMixerParam_GlobalReverbGainInDecibels, kAudioUnitScope_Global, 0,
                           (AudioUnitParameterValue)_charon_reverb.level, 0);
-    // The reverb filter band, which the mixer clamps (see CharonEnvironmentFilter.h).
     AVAudioUnitEQFilterParameters *filter = _charon_reverb.filterParameters;
     AudioUnitSetParameter(_charon_mixerUnit, kReverbParam_FilterFrequency, kAudioUnitScope_Global, 0,
                           (AudioUnitParameterValue)filter.frequency, 0);
@@ -601,9 +509,6 @@ static CharonEnvironmentRouteClass CharonCurrentRouteClass(void)
 
 #pragma mark Rendering
 
-// The node's own offline pull: the release's AudioUnitRender on its real generic output unit, which is
-// the same call the engine's manual rendering mode makes and the same one a device's own output path
-// would be driven by.
 - (OSStatus)charon_renderOfflineToBuffer:(AudioBufferList *)buffer frames:(AVAudioFrameCount)frames
 {
     if (![self charon_prepare] || buffer == NULL) {
@@ -618,9 +523,6 @@ static CharonEnvironmentRouteClass CharonCurrentRouteClass(void)
 
 
 
-// Each of these is the mixer's own parameter on this node's input scope 0, the same set
-// AVAudioUnitMixing9.m uses for the units. The environment node is where they matter most, because a
-// source's position and the listener's position are what the mixer places against each other.
 - (float)volume
 {
     return [self charon_mixerParameter:k3DMixerParam_Gain];
@@ -766,10 +668,6 @@ static CharonEnvironmentRouteClass CharonCurrentRouteClass(void)
     *distance = (AudioUnitParameterValue)[self charon_mixerParameter:k3DMixerParam_Distance];
 }
 
-// ---- iOS 18: head tracking, answered NO ----
-// Tracking a head needs a head pose, and this release has none: its mixer has no head-tracking parameter and there is no
-// ARKit or CoreMotion head pose to feed one. So the answer is NO whatever is set, and the value is not kept. The host
-// keeps the value it was given (measured on macOS 27), which is recorded as a divergence in facts/AVFAudio/AVAudioEnvironmentNode.md.
 - (BOOL)listenerHeadTrackingEnabled
 {
     return CharonEnvironmentHeadTrackingAnswer(NO);
@@ -781,6 +679,3 @@ static CharonEnvironmentRouteClass CharonCurrentRouteClass(void)
 }
 
 @end
-
-
-// ---- the mixing surface, the node conforms to AVAudioMixing in Apple's header too ----

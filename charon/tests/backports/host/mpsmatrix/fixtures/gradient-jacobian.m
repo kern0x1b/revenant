@@ -1,12 +1,3 @@
-// gradient-jacobian.m — the whole ∂dX/∂dY of the host's batch-normalisation data gradient, by
-// linearity, with no formula assumed.
-//
-// For a fixed source, dX is linear in dY, so running the host once per unit matrix e_ij gives the
-// twelve columns of the Jacobian directly. Its structure is the formula: which entries are non-zero is
-// the axis the operator runs over, whether the diagonal blocks are equal is whether the mean terms are
-// there, and the diagonal itself is gamma over sigma - and which sigma is what the mean and variance
-// arguments decide. Linearity is checked by comparing dY = e_1 + e_2 against the sum of the two
-// single-unit answers.
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>
@@ -36,7 +27,6 @@ static void hostDX(const float *dy, float *out)
     id<MTLBuffer> mbuf = [device newBufferWithBytes:mb length:12 options:MTLResourceStorageModeShared];
     id<MTLBuffer> vbuf = [device newBufferWithBytes:vb length:12 options:MTLResourceStorageModeShared];
     id<MTLBuffer> gbuf = [device newBufferWithBytes:gb length:12 options:MTLResourceStorageModeShared];
-    // A sentinel, so a zero of the formula and a byte the host never wrote are distinguishable.
     float sentinel[12];
     for (int i = 0; i < 12; i++) sentinel[i] = -1.0e30f;
     id<MTLBuffer> outb = [device newBufferWithBytes:sentinel length:48 options:MTLResourceStorageModeShared];
@@ -70,7 +60,6 @@ int main(void) { @autoreleasepool {
         for (int i = 0; i < N * C; i++) J[i][j] = col[i];
     }
 
-    // Linearity: dY = e_0 + e_1 must be the sum of the two columns.
     float two[12] = {0}, sum[12] = {0}, got[12];
     two[0] = 1.0f; two[1] = 1.0f;
     hostDX(two, got);

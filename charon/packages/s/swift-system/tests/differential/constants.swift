@@ -4,8 +4,6 @@ import SystemUnderTest
 import System
 #endif
 
-// The constant rows of carried-rows.txt: static members and enum cases. A name that 1.8.1 marks
-// @available(*, unavailable, renamed:) cannot be called, so its row goes through the renamed member (constantAlias).
 func constantRows() {
   constantAlias("Errno.E2BIG", "argListTooLong", Errno.argListTooLong)
   constantAlias("Errno.EACCES", "permissionDenied", Errno.permissionDenied)

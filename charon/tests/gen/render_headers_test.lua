@@ -1,9 +1,3 @@
--- The round trip of the headers renderer (tools/gen/render_headers.lua, cmd_headers.lua) on a small SDK of our own: its headers are
--- written here (no SDK text), decls reads them to give the IR, the headers command renders the IR into a tree, and decls reads the
--- tree (IR_FRAMEWORKS) and must give back the IR's rows by key and declhash. A mutant, the same IR with one nullability changed,
--- must come back with exactly that difference, named by its cause.
---
--- Needs the extractor built (xmake build -P tools/found). Run, from any folder: xmake l tests/gen/render_headers_test.lua
 local REPO = path.directory(path.directory(path.absolute(os.scriptdir())))
 local TOOLS = path.join(REPO, "tools")
 local FOUND = path.join(TOOLS, "found")
@@ -27,8 +21,6 @@ local function write(filepath, text)
     handle:close()
 end
 
--- The port's enumerator values for the write mode: an empty run (no enumerator declared for the triple), so the port keeps the IR's values.
--- The values of the port's triple are tested by tests/gen/port_enums_test.lua and tests/gen/port_values_test.lua.
 local PORT_VALUES = path.join(SCRATCH, "port-values-empty.tsv")
 
 local function read(filepath)
@@ -38,9 +30,6 @@ local function read(filepath)
     return text
 end
 
--- The fixture SDK: a framework with a module map (its header list), a root class, a protocol with a required and an optional member,
--- a subclass that conforms, a category, a block typedef, an enum with constants, a function with a nullable result, and a variable.
--- Every header is a system header, as the SDK's are (the typedef USRs of the IR depend on it).
 local SYSTEM = "#pragma clang system_header\n"
 local FIXTURE = {
     ["Headers/HFTypes.h"] = SYSTEM .. [[
@@ -186,7 +175,6 @@ framework module HeadersFixture {
 
 local SDK = path.join(SCRATCH, "sdk")
 local IR_SDK_ENV = {IR_SDK = SDK, IR_CONFIG = path.join(SCRATCH, "config")}
--- A framework with no module map (vecLib's kind, listed in fallback.tsv): its umbrella is read first and it reaches a subfolder's header
 local PLAIN = "HeadersPlain"
 local PLAIN_FIXTURE = {
     ["Headers/HeadersPlain.h"] = SYSTEM .. '#import "HPTop.h"\n#import "Sub/HPSub.h"\n',
@@ -213,7 +201,6 @@ write(path.join(SCRATCH, "config", "usr-modules.tsv"), "# no usr/include modules
 write(path.join(SCRATCH, "config", "fallback.tsv"), "# the frameworks with no module map: the umbrella is read first\n"
     .. PLAIN .. "\tfixture: no module map, its umbrella is read first\n")
 
--- 1. the IR of the fixture: decls' own rows for the framework (the census row included)
 local ir_file = path.join(SCRATCH, "ir.tsv")
 local ir_text = os.iorunv(DECLS, {FRAMEWORK}, {envs = IR_SDK_ENV})
 write(ir_file, ir_text)
@@ -223,7 +210,6 @@ for _, row in ipairs(ir_rows) do
     if row[2] ~= "census" then declared = declared + 1 end
 end
 expect(declared > 20, "the fixture's IR has its declarations (got " .. declared .. ")")
--- the hash the comparison recomputes is the extractor's: it reproduces the stored hash of every row whose USR has no offset
 local stored, reproduced = 0, 0
 for _, row in ipairs(ir_rows) do
     local declaration = row[2] ~= "census" and row[2] ~= "unparsed" and row[2] ~= "meta" and row[2] ~= "conflict"
@@ -236,9 +222,7 @@ end
 expect(stored > 20 and reproduced == stored,
     "the recomputed declaration hash is the stored one for every row with no offset in its USR (" .. reproduced .. " of " .. stored .. ")")
 
--- 2. the headers command writes the tree from the IR
 local tree = path.join(SCRATCH, "tree")
--- the framework with no module map is written to the same tree (decls reads the tree's frameworks, and fallback.tsv lists it there)
 local plain_text = os.iorunv(DECLS, {PLAIN}, {envs = IR_SDK_ENV})
 local plain_rows = render.rows_of(plain_text)
 local plain_file = path.join(SCRATCH, "plain.tsv")
@@ -288,8 +272,6 @@ expect(object:find("@interface HFRoot <HFNamed>", 1, true) ~= nil and object:fin
     "the class takes its own protocols, not the one its category lists")
 expect(read(path.join(base, "Headers", "HFExtras.h")):find("@interface HFBox<Element : HFRoot *, Tag> (HFBoxExtras)", 1, true) ~= nil,
     "a category of a generic class declares its own type parameters")
--- an overload (two declarations of one name, one USR each) is written overloadable on each of its declarations; a function of one
--- declaration is not, and the round trip reads the overloads back as the IR has them
 local types_text = read(path.join(base, "Headers", "HFTypes.h"))
 expect(string.find(types_text, "HFOverload(HFInteger a) __attribute__((overloadable))", 1, true) ~= nil
     and string.find(types_text, "HFOverload(double a) __attribute__((overloadable))", 1, true) ~= nil
@@ -321,7 +303,6 @@ expect(optional_at ~= nil and shared_at ~= nil and shared_at > optional_at,
 expect(read(path.join(base, "Headers", "HFTypes.h")):find("HFInteger HFPick(HFInteger values[_Nonnull 4]);", 1, true) ~= nil,
     "an array parameter's nullability is kept in its size's brackets (the SDK's form for a sized array)")
 
--- 3. the round trip: decls reads the tree and gives back the IR's rows by key and declhash
 local decl_text = os.iorunv(DECLS, {FRAMEWORK}, {envs = {IR_SDK = SDK, IR_CONFIG = IR_SDK_ENV.IR_CONFIG, IR_FRAMEWORKS = tree}})
 local report = render.compare(ir_rows, render.rows_of(decl_text))
 expect(report.ir == report.decls and report.equal == report.ir,
@@ -331,7 +312,6 @@ local differences = 0
 for _, n in pairs(report.causes) do differences = differences + n end
 expect(differences == 0, "no difference between the IR and decls over the tree")
 
--- 4. the mutant: the same IR with the nullability of HFRootWithTag's result changed (l to n) is rendered, and the round trip names it
 local mutant_text = ir_text:gsub("[^\n]*\tfunction\t[^\n]*HFRootWithTag[^\n]*", function (line)
     local changed = line:gsub("\tl|", "\tn|", 1)
     expect(changed ~= line, "the mutant changes a nullability cell")
@@ -346,7 +326,6 @@ local mutant_report = render.compare(ir_rows, render.rows_of(mutant_decls))
 expect(mutant_report.causes["declhash differs, function: nullability"] == 1 and mutant_report.equal == mutant_report.ir - 1,
     "the mutant gives exactly one difference, its nullability (got " .. tostring(mutant_report.causes["declhash differs, function: nullability"]) .. ")")
 
--- 5. the renderer takes the bound from the IR's typeparams cell: the same IR with HFBox's Element bounded by id renders it unbounded
 local unbounded_text, bounds_changed = ir_text:gsub("Element:HFRoot %*", "Element:id")
 expect(bounds_changed == 2, "the IR has the bound of HFBox's Element in its class and its category (got " .. bounds_changed .. ")")
 local unbounded_file = path.join(SCRATCH, "unbounded.tsv")
@@ -359,8 +338,6 @@ expect(read(path.join(unbounded_base, "HFObject.h")):find("@interface HFBox<Elem
 expect(read(path.join(unbounded_base, "HFExtras.h")):find("@interface HFBox<Element, Tag> (HFBoxExtras)", 1, true) ~= nil,
     "an unbounded type parameter of a category is written bare, from the IR's bound")
 
--- 6. the framework with no module map: its umbrella is generated from the IR's subfolder headers, and decls reads the subfolder's
--- header back through it (its declarations come back equal)
 local plain_umbrella = read(path.join(tree, "Frameworks", PLAIN .. ".framework", "Headers", PLAIN .. ".h"))
 expect(plain_umbrella:find('#import "Sub/HPSub.h"', 1, true) ~= nil,
     "a framework with no module map gets an umbrella that includes its subfolder headers (the IR's)")
@@ -372,9 +349,6 @@ local plain_report = render.compare(plain_rows, render.rows_of(plain_decls))
 expect(plain_report.ir > 0 and plain_report.decls == plain_report.ir and plain_report.equal == plain_report.ir,
     "the subfolder's rows come back through the umbrella (IR " .. plain_report.ir .. ", decls " .. plain_report.decls .. ", equal " .. plain_report.equal .. ")")
 
--- 7. a typedef's own row can come first in the IR (PDFKit's PDFDocument.h sorts before PDFSelection.h): the same IR with HFMode's
--- typedef row moved before its enum's row. The typedef's header is not the enum's, so the typedef imports the enum's header; the
--- typedef's own definition is not the one it needs
 local ordered = {}
 for line in string.gmatch(ir_text, "[^\n]+") do ordered[#ordered + 1] = line end
 local enum_at, typedef_at

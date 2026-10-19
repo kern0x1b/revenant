@@ -1,9 +1,5 @@
 #import "CharonDynamics.h"
 
-// A push is a force (continuous) or an impulse (instantaneous) in newtons, applied before each world
-// step. The world clears forces only after all sub-steps of a frame, so a continuous push acts in every
-// sub-step of it (7.0). The direction and the angle with the magnitude are kept apart, and each setter
-// derives the other.
 @implementation UIPushBehavior {
     UIPushBehaviorMode _mode;
     BOOL _active;
@@ -118,7 +114,6 @@
     return UIOffsetMake(offset.x, offset.y);
 }
 
-// The offset is kept under the item's pointer; a zero offset removes it.
 - (void)setTargetOffsetFromCenter:(UIOffset)offset forItem:(id<UIDynamicItem>)item
 {
     if (!item)
@@ -172,7 +167,6 @@
     [super charon_dissociate];
 }
 
-// The point a force acts at is the item's center plus the offset, in points, not turned with the item.
 - (void)charon_step
 {
     if (!_active)

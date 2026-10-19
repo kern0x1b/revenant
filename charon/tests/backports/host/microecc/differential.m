@@ -4,14 +4,6 @@
 #import "check.h"
 #import "CharonCKWebAuth.h"
 
-// The port's P-256 signing and verification against the host's own Security, in both directions.
-//
-// The failure this exists to catch is a signature that is not a signature of the message it claims:
-// micro-ecc is handed the hash and its length, and a length that is not 32 produces a signature of the
-// first eight bytes of the hash, which BOTH the host's SecKeyVerifySignature and the port's own verify
-// refuse - every time, with no error and no hint. The measured cause was `sizeof digest` where digest
-// was a pointer.
-
 static void check_named(BOOL passed, NSString *name, NSString *detail)
 {
     charon_check(passed, [name UTF8String], detail);
@@ -19,10 +11,6 @@ static void check_named(BOOL passed, NSString *name, NSString *detail)
 
 static SecKeyRef hostPrivate = NULL, hostPublic = NULL;
 
-// The host's P-256 key, built with a real CFDictionary: a bridge cast of a stack array is the shape
-// that crashes CF, and a CFDictionary from literal keys and a boxed NSNumber is what a CFRelease of
-// one of the *values* can free. Every key and value here is created and owned, and the error is a real
-// CFErrorRef the caller owns.
 static SecKeyRef hostMakeKey(CFErrorRef *outError)
 {
     int bits = 256;
@@ -66,10 +54,6 @@ static NSData *keyPair(uint8_t *scalar, uint8_t *point)
         CFRelease(privateKey);
         return nil;
     }
-    // The private key's external representation is not a shape this port guesses at: measured on the
-    // host, a P-256 private key exports 97 bytes whose scalar is not the last 32. So the scalar is
-    // *found* - every 32 byte window is tried as a private key and the one that derives the published
-    // public point is it - the same rule the port's own extraction uses.
     NSData *scalarData = nil;
     CFErrorRef privateError = NULL;
     CFDataRef privateExternal = SecKeyCopyExternalRepresentation(privateKey, &privateError);
@@ -118,7 +102,6 @@ int main(int argc, char **argv)
     if (hostPoint.length != 65) {
         return charon_failures == 0 ? 0 : 1;
     }
-    // and the point micro-ecc would derive from the same scalar, which is what the port signs with
     uint8_t derived[65];
     check_named(CharonCKPublicKeyES256(scalar, derived) == 65, @"the scalar's public point is derived", nil);
     check_named(memcmp(derived, point, 65) == 0, @"and it is the point the host published for that key", nil);
@@ -135,8 +118,6 @@ int main(int argc, char **argv)
         uint8_t der[72];
         int written = CharonCKDigestSignES256(scalar, digest, der, sizeof der);
         if (mutated) {
-            // the mutation: one byte of r, so the signature is of something else and every check below
-            // must fail rather than quietly pass
             der[5] ^= 0x01;
         }
         if (written <= 0) {
@@ -145,7 +126,6 @@ int main(int argc, char **argv)
         portSigned++;
         NSData *signature = [NSData dataWithBytes:der length:(NSUInteger)written];
 
-        // the host judges it, with its own public key over the digest this test made
         CFErrorRef error = NULL;
         NSData *hostDigest = [NSData dataWithBytes:digest length:sizeof digest];
         BOOL hostOK = SecKeyVerifySignature(hostPublic, algorithm, (__bridge CFDataRef)hostDigest,

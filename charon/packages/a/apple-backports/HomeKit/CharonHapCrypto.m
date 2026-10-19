@@ -20,10 +20,6 @@ void charon_hap_x25519_keypair(uint8_t secret[32], uint8_t public[32])
 
 void charon_hap_ed25519_keypair(uint8_t secret[64], uint8_t public[32])
 {
-    // Monocypher's Ed25519 key pair is grown from a 32-byte seed and derives the second half of the
-    // secret itself, so the seed is the only randomness needed and the source of it is named here:
-    // arc4random_buf, which the release has carried since iOS 4. A caller that wants a key from its
-    // own randomness passes the seed in through charon_hap_ed25519_keypair_from_seed.
     uint8_t seed[32];
     arc4random_buf(seed, sizeof(seed));
     charon_hap_ed25519_keypair_from_seed(secret, public, seed);
@@ -31,9 +27,6 @@ void charon_hap_ed25519_keypair(uint8_t secret[64], uint8_t public[32])
 
 void charon_hap_ed25519_keypair_from_seed(uint8_t secret[64], uint8_t public[32], const uint8_t seed[32])
 {
-    // Monocypher destroys the seed it is given -- crypto_ed25519_key_pair wipes it once it has hashed
-    // it -- so the caller's buffer is copied rather than handed over. A caller who passed a string
-    // literal here would otherwise have the library write zeroes into read-only memory.
     uint8_t owned[32];
     memcpy(owned, seed, sizeof(owned));
     crypto_ed25519_key_pair(secret, public, owned);
@@ -52,10 +45,6 @@ int charon_hap_ed25519_verify(const uint8_t signature[64], const uint8_t *messag
 void charon_hap_seal(uint8_t *cipher, uint8_t tag[16], const uint8_t *plain, size_t length,
                      const uint8_t key[32], const uint8_t nonce[12], const uint8_t *extra, size_t extraLength)
 {
-    // The IETF initialisation is what makes this the 12-byte-nonce construction HAP's session keys
-    // use; Monocypher's own crypto_aead_init_x is the 24-byte XChaCha20 one and would produce a
-    // ciphertext no accessory could read. 4.0 seals through a context, which carries the counter
-    // between the calls, so a one-shot seal is a context that is written once and never read back.
     crypto_aead_ctx context;
     crypto_aead_init_ietf(&context, key, nonce);
     crypto_aead_write(&context, cipher, tag, extra, extraLength, plain, length);
@@ -66,8 +55,6 @@ int charon_hap_open(uint8_t *plain, const uint8_t *cipher, const uint8_t tag[16]
 {
     crypto_aead_ctx context;
     crypto_aead_init_ietf(&context, key, nonce);
-    // Monocypher's read answers 0 on success, so a session that has run out of context reads as a
-    // failure rather than as an empty message, which is what the seam needs.
     return crypto_aead_read(&context, plain, tag, extra, extraLength, cipher, length);
 }
 
@@ -109,8 +96,6 @@ void charon_hap_hmac_sha256(uint8_t out[32], const uint8_t *key, size_t keyLengt
     CCHmac(kCCHmacAlgSHA256, key, keyLength, data, length, out);
 }
 
-// HMAC over whichever SHA-2 the caller names, in one place so the derivation and the proofs read the
-// same whichever they use.
 static void hmac_of(int sha512, const uint8_t *key, size_t keyLength, const uint8_t *data, size_t length, uint8_t *out)
 {
     if (sha512)
@@ -119,8 +104,6 @@ static void hmac_of(int sha512, const uint8_t *key, size_t keyLength, const uint
         CCHmac(kCCHmacAlgSHA256, key, keyLength, data, length, out);
 }
 
-// HKDF (RFC 5869), extract then expand. The output is at most the hash's own length in one go, which
-// is all HAP asks for, and the buffer is bounded by what the caller declared.
 static void hkdf(uint8_t *out, size_t length, const uint8_t *salt, size_t saltLength,
                  const uint8_t *inputKey, size_t inputKeyLength, const uint8_t *info, size_t infoLength,
                  int sha512)
@@ -132,10 +115,8 @@ static void hkdf(uint8_t *out, size_t length, const uint8_t *salt, size_t saltLe
     uint8_t input[512];
     memset(zeros, 0, sizeof(zeros));
 
-    // extract: PRK = HMAC(salt, inputKey). An absent salt is a string of hashLength zeros (RFC 5869 2.2).
     hmac_of(sha512, saltLength ? salt : zeros, saltLength ? saltLength : hashLength, inputKey, inputKeyLength, prk);
 
-    // expand: T(1) = HMAC(PRK, info || 0x01); T(i) = HMAC(PRK, T(i-1) || info || i).
     size_t done = 0, have = 0;
     uint8_t counter = 1;
     while (done < length) {

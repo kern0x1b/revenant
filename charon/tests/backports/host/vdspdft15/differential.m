@@ -1,14 +1,3 @@
-// The port's single-precision vDSP_DFT_Interleaved family held against the host's own vDSP, and both held against a
-// double-precision reference under the error bound the port's facts file states:
-//
-//     |out - ref| <= K * log2(N) * FLT_EPSILON * ||x||_2      with K = 1.538
-//
-// K is the host's own worst ratio over the accepted lengths (facts/Accelerate/vDSPDFTInterleaved.md, section 5), so
-// the host has to sit inside it as well as the port. Two things are checked: which lengths each side accepts, over
-// every length from 1 to 1024, and the transform's values, over the accepted lengths of the header's family.
-//
-// The port's objects are compiled with the charon_host_ names (run.sh), so their functions are declared here under
-// those names and the host's under the real ones, in one binary.
 #import <Foundation/Foundation.h>
 #import <Accelerate/Accelerate.h>
 #include <float.h>
@@ -48,11 +37,9 @@ static void check(NSString *what, BOOL held)
     else { failures++; printf("FAIL %s\n", what.UTF8String); }
 }
 
-// The accepted lengths, the host's set: f * 2**n with f in {2, 3, 5, 9, 15} and n >= 2, 31 of them up to 1024.
 static const vDSP_Length kAccepted[] = {8, 12, 16, 20, 24, 32, 36, 40, 48, 60, 64, 72, 80, 96, 120, 128, 144, 160,
                                         192, 240, 256, 288, 320, 384, 480, 512, 576, 640, 768, 960, 1024};
 
-// Deterministic inputs, so both sides and both runs see the same numbers: a xorshift in [-1, 1).
 static uint32_t rngState = 2463534242u;
 static float nextSample(void)
 {
@@ -62,8 +49,6 @@ static float nextSample(void)
     return (float)(rngState % 20001u) / 10000.0f - 1.0f;
 }
 
-// One transform through one implementation. A setup the implementation refuses is reported as NO and its output left
-// zero, so a refusal cannot read as an answer.
 static BOOL transform(const Impl *impl, vDSP_DFT_Direction direction, vDSP_DFT_RealtoComplex form, vDSP_Length n,
                       const DSPComplex *in, DSPComplex *out)
 {
@@ -77,7 +62,6 @@ static BOOL transform(const Impl *impl, vDSP_DFT_Direction direction, vDSP_DFT_R
     return YES;
 }
 
-// The double-precision references. A complex-to-complex transform of N values, unscaled; the inverse uses e^(+i...).
 static void referenceComplex(const DSPComplex *in, vDSP_Length n, BOOL inverse, double *re, double *im)
 {
     for (vDSP_Length k = 0; k < n; k++) {
@@ -92,8 +76,6 @@ static void referenceComplex(const DSPComplex *in, vDSP_Length n, BOOL inverse, 
     }
 }
 
-// The real-to-complex packing of section 3 of the facts: the 2N real samples x[0..2N-1] are a 2N-point real DFT X,
-// and the N outputs are (2 X_0, 2 X_N) packed in element 0 and 2 X_k in the others, k = 1 .. N-1.
 static void referenceReal(const float *x, vDSP_Length n, double *re, double *im)
 {
     vDSP_Length m = 2 * n;
@@ -110,7 +92,6 @@ static void referenceReal(const float *x, vDSP_Length n, double *re, double *im)
     }
 }
 
-// The worst ratio of |out - ref| to the bound over one output, and whether any element is outside it.
 typedef struct {
     double worst;
     BOOL inside;
@@ -130,8 +111,6 @@ static Ratio ratioAgainst(const DSPComplex *out, const double *refRe, const doub
     return r;
 }
 
-// Which lengths each side accepts, over every length from 1 to 1024, both forms. Each side is checked against the
-// header-free definition of the set in the facts: a length is accepted by one side iff it is accepted by the other.
 static void compareAcceptedLengths(void)
 {
     vDSP_DFT_RealtoComplex forms[] = {vDSP_DFT_Interleaved_ComplextoComplex, vDSP_DFT_Interleaved_RealtoComplex};
@@ -152,8 +131,6 @@ static void compareAcceptedLengths(void)
     }
 }
 
-// The values, over the accepted lengths, for one transform: every trial of every length, held to the bound on both
-// sides. Reported as the worst ratio over the whole sweep, which is the figure the bound was measured from.
 static void compareValues(const char *what, vDSP_DFT_Direction direction, vDSP_DFT_RealtoComplex form)
 {
     const int trials = 8;
@@ -166,7 +143,6 @@ static void compareValues(const char *what, vDSP_DFT_Direction direction, vDSP_D
             double refRe[1024], refIm[1024];
             double norm = 0.0;
             if (form == vDSP_DFT_Interleaved_RealtoComplex) {
-                // 2N real samples packed as N complex values, the same memory the port reads and the host reads
                 float *x = &in[0].real;
                 for (vDSP_Length j = 0; j < 2 * n; j++) { x[j] = nextSample(); norm += (double)x[j] * x[j]; }
                 referenceReal(x, n, refRe, refIm);

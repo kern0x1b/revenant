@@ -1,15 +1,3 @@
-// The arithmetic the vDSP entry points of Accelerate share, in one place.
-//
-// vDSP names the operands of an operation in the order they are used with the accumulator last, and two
-// of the fifty-four functions of this group are one operation in two precisions in two different
-// releases: vDSP_zvma and vDSP_zvmaD (iOS 7.0 and 8.0), vDSP_zvmmaa and vDSP_zvmmaaD (the same two
-// releases). The bodies below are written once and generated per scalar type, so the two precisions and
-// the two releases cannot drift apart.
-//
-// Nothing here is exported: the entry points a caller names live in vDSPFixed7.m and
-// vDSPElementwise8.m, and the gate weighs neither this file nor its symbols against a release
-// (modules/apple/backports.lua, internal_symbol - a name beginning with charon_ is the port's own).
-
 #pragma once
 
 #import <Accelerate/Accelerate.h>

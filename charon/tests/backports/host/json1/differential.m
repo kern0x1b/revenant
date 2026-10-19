@@ -1,8 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-// The port under a name of its own (CharonHostNSJSONSerialization) against the host's own NSJSONSerialization, on the
-// same inputs. Every comparison is between what the two produced for one input, not between a recorded answer.
 @interface CharonHostNSJSONSerialization : NSObject
 + (BOOL)isValidJSONObject:(id)obj;
 + (nullable NSData *)dataWithJSONObject:(id)obj options:(NSJSONWritingOptions)opt error:(NSError **)error;
@@ -14,7 +12,6 @@
 static int failures;
 static int checks;
 
-// Two answers that may both be absent, compared as such (sending a message to nil is not a comparison).
 static BOOL sameText(NSString *ours, NSString *theirs)
 {
     if ((ours == nil) != (theirs == nil))
@@ -31,8 +28,6 @@ static void expect(BOOL ok, NSString *what, NSString *detail)
     printf("FAIL %s: %s\n", what.UTF8String, detail.UTF8String);
 }
 
-// What a failed parse is: the reason the host words it with, without the " around line L, column C." it appends, and
-// the index it carries. Returns nil for a parse that succeeded.
 static NSString *reason(NSError *error)
 {
     if (!error)
@@ -61,9 +56,6 @@ static NSError *withoutIndex(NSError *error)
     return [NSError errorWithDomain:error.domain code:error.code userInfo:info];
 }
 
-// The two answers of one reading, compared where they can be and named where they cannot. comparePosition and
-// compareIndex are off only for the one failure whose position and index are an internal offset of the host (the
-// nesting limit, see run.sh); its wording and whether it happens at all are still compared.
 static void expectSameNumbers(id ours, id theirs, NSString *what);
 
 static void sameReadIn(NSString *what, NSData *data, NSJSONReadingOptions opt, BOOL comparePosition, BOOL compareIndex)
@@ -76,11 +68,6 @@ static void sameReadIn(NSString *what, NSData *data, NSJSONReadingOptions opt, B
         theirs = withoutIndex(theirs);
     }
     NSString *ourReason = reason(ours), *theirReason = reason(theirs);
-    // The two sides are compared on the reason where they refused and on the value where they read,
-    // and neither comparison may be skipped for the other: returning as soon as either side had an
-    // answer made every comparison below unreachable in the one case where a value exists - a read-side
-    // change that is not also a round-trip write case, a repeated key keeping the other value, an
-    // integer coming back as a decimal, a container coming back mutable unasked, was green.
     expect((ourReason == nil) == (theirReason == nil), what,
            [NSString stringWithFormat:@"ours %@, host %@", ourReason ?: @"ok", theirReason ?: @"ok"]);
     if (ourReason == nil && theirReason == nil)
@@ -105,7 +92,6 @@ read:
     if (mine == nil || host == nil)
         return;
     expect([mine isEqual:host], what, [NSString stringWithFormat:@"ours %@, host %@", mine, host]);
-    // Equality alone would not see a container that came back mutable when the caller did not ask for one.
     expect([mine isKindOfClass:[NSMutableArray class]] == [host isKindOfClass:[NSMutableArray class]] &&
            [mine isKindOfClass:[NSMutableDictionary class]] == [host isKindOfClass:[NSMutableDictionary class]],
            what, @"container mutability");
@@ -116,20 +102,12 @@ read:
             expect([ourElements[i] isEqual:theirElements[i]], what,
                    [NSString stringWithFormat:@"element %lu: ours %@, host %@", (unsigned long)i,
                     ourElements[i], theirElements[i]]);
-    // The class of a number is part of the answer: a long long, an unsigned long long, a double and an
-    // NSDecimalNumber are four different answers to the same literal, and a caller asks
-    // [n isKindOfClass:[NSDecimalNumber class]] or strcmp([n objCType], "i") of it. The comparison is
-    // made wherever both sides are numbers and it does not go behind a value comparison, which is what
-    // left it unreachable: a literal that came back as a decimal where the host's is a long long is
-    // [isEqual:] to it, and every earlier version of this check sat inside a !CFEqual guard. The
-    // elements of a nested container are walked too, not only those of a single-element array.
     expectSameNumbers(mine, host, what);
 }
 
 static void expectSameNumbers(id ours, id theirs, NSString *what)
 {
     if ([ours isKindOfClass:[NSNumber class]] && [theirs isKindOfClass:[NSNumber class]]) {
-        // A boolean is a number to isKindOfClass: and its class and its type are its own.
         const char *ta = [ours isKindOfClass:[NSDecimalNumber class]] ? "dec" : [ours objCType];
         const char *tb = [theirs isKindOfClass:[NSDecimalNumber class]] ? "dec" : [theirs objCType];
         expect(strcmp(ta, tb) == 0 && [[ours description] isEqualToString:[theirs description]], what,
@@ -199,7 +177,6 @@ int main(void)
         sameRead([@"deprecated alias " stringByAppendingString:t], text(t), NSJSONReadingAllowFragments, YES);
     }
 
-    // json5's own grammar, where the same text means two different things with and without the option
     for (NSString *t in @[@"{a:1, /*c*/ b:'x',}", @"[+1, 0x10, .5]", @"[NaN, Infinity, -Infinity]",
                           @"{//c\n a:1}", @"['a':1]", @"[.5]", @"[01]", @"[1_000]", @"[+]", @"[0x]", @"[-1]",
                           @"[1.]", @"['a' \"b\"]", @"[\\/]", @"[Infinityx]", @"[+Infinity]", @"[-Infinity]",
@@ -210,7 +187,6 @@ int main(void)
         sameRead([@"opt 0 " stringByAppendingString:t], text(t), 0, YES);
     }
 
-    // NSJSONReadingTopLevelDictionaryAssumed, whose text is the body of an object
     for (NSString *t in @[@"", @" ", @"[1,2]", @"{a:1}", @"{'a':1}", @"1", @"a:1,",
                           @"a:1 b:2", @"null", @"a:", @"a", @"a:1", @"{\"a\":1}", @"{\"a\":1,}", @"{,}",
                           @"a:1, b:2,", @"  a:1  ", @"[", @"{\"a\":{\"b\":1}}", @"a:[1]", @"a:{b:1}"])
@@ -220,8 +196,6 @@ int main(void)
                  NSJSONReadingJSON5Allowed | NSJSONReadingTopLevelDictionaryAssumed, YES);
     }
 
-    // A key the object already carries: the host reads the first value and keeps it, and says so for a first value
-    // that is null, false, 0 or the empty string, so this is a test for the key and not for the value.
     for (NSString *t in @[@"{\"a\":1,\"a\":2}", @"{\"a\":1,\"a\":2,\"a\":3}", @"{\"b\":0,\"a\":1,\"b\":2}",
                           @"{\"a\":{\"b\":1,\"b\":2}}", @"{\"\":1,\"\":2}", @"{\"a\":null,\"a\":1}",
                           @"{\"a\":[1],\"a\":[2]}", @"{\"a\":1,\"a\":false}", @"{\"a\":{\"x\":1},\"a\":1}",
@@ -239,9 +213,6 @@ int main(void)
         sameRead([@"repeat json5 " stringByAppendingString:t], text(t), NSJSONReadingJSON5Allowed, YES);
     }
 
-    // The exponent field is a field and not a value: three digits are read under any sign, four are read only without
-    // one, and five or more are refused however small the value. The overflow of the value is a separate matter and
-    // both sides already hold it (1e309 is refused, 1e-309 is a 0).
     for (NSString *field in @[@"e0", @"e1", @"e9", @"e99", @"e300", @"e308", @"e309", @"e999",
                               @"e-0", @"e-1", @"e-9", @"e-99", @"e-300", @"e-308", @"e-309", @"e-999", @"e-400",
                               @"e+0", @"e+1", @"e+9", @"e+99", @"e+300", @"e+309", @"e+999",
@@ -265,12 +236,6 @@ int main(void)
         sameRead([@"exponent opt 0 " stringByAppendingString:top], text(top), 0, YES);
     }
 
-    // A JSON5 container whose only content is a comment is the empty container: the emptiness test has to skip
-    // comments the way the rest of the reader does, not whitespace alone.
-    // A backslash before a line terminator, the one rule whose shape depends on what follows it: a lone
-    // CR and a lone LF are one newline each, a CRLF pair is one while anything follows it and two where
-    // it ends the string, and without JSON5 the pair is a continuation whose LF is then refused as the
-    // unescaped control character it is (measured on both sides).
     for (NSString *t in @[@"[\"a\\\r\nb\"]", @"[\"a\\\r\n\"]", @"[\"\\\r\n\"]", @"[\"\\\r\nb\"]",
                           @"[\"a\\\rb\"]", @"[\"a\\\r\"]", @"[\"\\\rb\"]", @"[\"\\\r\"]",
                           @"[\"a\\\nb\"]", @"[\"a\\\n\"]", @"[\"\\\n\"]", @"[\"a\\\r\nbb\"]",
@@ -291,9 +256,6 @@ int main(void)
                  NSJSONReadingJSON5Allowed | NSJSONReadingTopLevelDictionaryAssumed, YES);
         sameRead([@"comment only body alone " stringByAppendingString:t], text(t), NSJSONReadingTopLevelDictionaryAssumed, YES);
     }
-    // The one divergence the facts name, pinned rather than passed over: a body of an assumed top level object whose
-    // key is followed by "=" and not by ":" is where the port and the host part company, and both answers are held
-    // here so that a change in either is a failure. Both refuse, so no caller reads a different value.
     for (NSString *t in @[@"a=1", @"a=1;b=2", @"a=\"x\"", @"/*c*/a=1", @"//c\na=1"]) {
         NSData *data = text(t);
         NSError *ours = nil, *theirs = nil;
@@ -312,7 +274,6 @@ int main(void)
                 ours.userInfo[NSDebugDescriptionErrorKey], host, theirs.userInfo[NSDebugDescriptionErrorKey]]);
     }
 
-    // how deep a container may be: the wording and the verdict are compared, the position is not (see run.sh)
     for (int n = 510; n <= 515; n++) {
         NSMutableString *open = [NSMutableString string], *empty = [NSMutableString string], *full = [NSMutableString string];
         for (int i = 0; i < n; i++) { [open appendString:@"["]; [empty appendString:@"]"]; [full appendString:@"]"]; }
@@ -327,7 +288,6 @@ int main(void)
                    text([NSString stringWithFormat:@"%@1%@", dopen, dclose]), 0, NO, NO);
     }
 
-    // the five encodings the header documents, with and without their mark, and text that is none of them
     {
         NSString *doc = @"{\"k\":\"héllo\"}";
         struct { const char *name; NSStringEncoding enc; int bom; const unsigned char *mark; } cases[] = {
@@ -358,7 +318,6 @@ int main(void)
         sameRead(@"latin-1 bytes", [NSData dataWithBytes:latin length:5], 0, YES);
     }
 
-    // +isValidJSONObject:
     for (id v in @[@"s", @1, [NSNull null], @[@1], @{}, @{@"a": @1}, @[@(NAN)], @[@(INFINITY)], @[@(-INFINITY)],
                    [NSDictionary dictionaryWithObject:@1 forKey:@2], [NSDecimalNumber notANumber], [NSObject new],
                    @[[NSObject new]], @[@{@"a": [NSObject new]}], @[@[[NSObject new]]],
@@ -370,8 +329,6 @@ int main(void)
                [NSString stringWithFormat:@"ours %d, host %d", ours, theirs]);
     }
 
-    // +dataWithJSONObject:options:error: - the text is compared exactly wherever the order of keys is the caller's to
-    // choose (sorted, pretty, or a single key), and by parsing it back where it is not.
     NSMutableString *escapes = [NSMutableString stringWithString:@"s/las\\h\"x\ny\rz\t\b\f"];
     [escapes appendFormat:@"%C%C%C", (unichar)0x01, (unichar)0x1F, (unichar)0x7F];
     NSArray *written = @[@{}, @[], @[@1, @2], @[@"x"], @{@"a": @1}, @{@"a": @1, @"b": @2, @"c": @3},
@@ -409,7 +366,6 @@ int main(void)
                 continue;
             NSString *ourText = [[NSString alloc] initWithData:mine encoding:NSUTF8StringEncoding];
             NSString *theirText = [[NSString alloc] initWithData:host encoding:NSUTF8StringEncoding];
-            // A key order nobody asked for is the dictionary's own, so it is compared by what it parses back to.
             BOOL compareText = (o & NSJSONWritingSortedKeys) != 0 || [v isKindOfClass:[NSArray class]] ||
                               ![v isKindOfClass:[NSDictionary class]] ||
                               (o & NSJSONWritingFragmentsAllowed) != 0;
@@ -424,7 +380,6 @@ int main(void)
                    [NSString stringWithFormat:@"round trip ours %@ / %@, host %@ / %@", back1, reason(a), back2, reason(b)]);
         }
     }
-    // the key order the caller's, spelled out
     {
         NSDictionary *mixed = @{@"B": @1, @"a": @2, @"A": @3, @"b": @4, @"é": @5, @"1": @6, @"_": @7};
         NSError *ours = nil, *theirs = nil;
@@ -433,7 +388,6 @@ int main(void)
         expect([a isEqualToString:b], @"sorted keys", [NSString stringWithFormat:@"ours %@, host %@", a, b]);
     }
 
-    // the exceptions a write raises
     for (id v in @[@"str", @1, [NSNull null], [NSDictionary dictionaryWithObject:@2 forKey:@1], @[@(INFINITY)],
                    @[@(-INFINITY)], @[@(NAN)], [NSObject new], @[@[@[@(INFINITY)]]], @[[NSDictionary dictionaryWithObject:@2 forKey:@1]],
                    @[[NSDecimalNumber notANumber]], @{@"k": [NSDecimalNumber notANumber]},
@@ -469,7 +423,6 @@ int main(void)
                [NSString stringWithFormat:@"ours %@ %@, host %@ %@", ourName, ourReason, theirName, theirReason]);
     }
 
-    // the two 7.0 stream methods
     {
         NSString *path = @"/tmp/charon-json1-stream.json";
         [[NSFileManager defaultManager] removeItemAtPath:path error:NULL];

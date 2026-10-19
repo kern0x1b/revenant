@@ -1,7 +1,3 @@
-// MIDIDeviceNewEntity, of iOS 14: adds an entity with a protocol to a device. macOS CoreMIDI answers paramErr and
-// no entity for a device of 0, measured (oracle/newentity2.m); a device that exists is the release's own, and the entity
-// is the release's (MIDIDeviceAddEntity). The protocol is written to the entity, as the port's choice: where macOS keeps
-// it, and whether its endpoints read it, is not measured (facts/CoreMIDI/Devices.md; a crutch in coordination/crutches.md).
 #import <Foundation/Foundation.h>
 #import <CoreMIDI/CoreMIDI.h>
 
@@ -17,8 +13,6 @@ OSStatus MIDIDeviceNewEntity(MIDIDeviceRef device, CFStringRef name, MIDIProtoco
     OSStatus status = MIDIDeviceAddEntity(device, name, embedded, numSourceEndpoints, numDestinationEndpoints, &entity);
     if (status != noErr)
         return status;
-    // The release's answer to the protocol is returned. An entity whose protocol was refused is removed again, so the caller
-    // does not get an entity without the protocol it asked for.
     status = MIDIObjectSetIntegerProperty(entity, CHARON_PROTOCOL_KEY, (SInt32)protocol);
     if (status != noErr) {
         if (MIDIDeviceRemoveEntity(device, entity) != noErr)

@@ -1,10 +1,5 @@
--- compare-protocol-options-data.lua - the data accessors, read back, differences NAMED.
---
---    xmake l compare-protocol-options-data.lua <the binary's output>
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
--- label and the bytes it must read back, in the order they are named.
 local BYTES = {
     {"dh-after-scope", "a finite-field group the caller chose"},
     {"psk-after-scope", "the pre-shared key bytes"},

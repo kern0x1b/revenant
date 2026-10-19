@@ -1,53 +1,30 @@
-// Entity: the node a program builds a scene out of, and the component and child collections
-// that hang off it.
-
 import simd
 import Foundation
 
-// MARK: - The protocols an entity refines
-
-/// An entity that sits in a hierarchy: it has a parent, children, and a place in a scene.
 @MainActor public protocol HasHierarchy: Entity {}
 
-/// An entity that has a transform, and so can be placed.
 @MainActor public protocol HasTransform: Entity {}
 
-/// An entity with a name.
 @MainActor public protocol HasName: Entity {}
 
-/// An entity that is synchronized with other devices and sessions.
 @MainActor public protocol HasSynchronization: Entity {}
 
-/// An entity that can be anchored to a real-world target.
 @MainActor public protocol HasAnchoring: Entity {}
 
-/// An entity that carries a model.
 @MainActor public protocol HasModel: HasTransform {}
 
-/// An entity that takes part in collision.
 @MainActor public protocol HasCollision: Entity {}
 
-/// An entity that a physics body moves.
 @MainActor public protocol HasPhysicsMotion: Entity {}
 
-/// An entity with a collision shape and a physics body.
 @MainActor public protocol HasPhysicsBody: HasCollision {}
 
-/// An entity with both.
 @MainActor public protocol HasPhysics: HasPhysicsBody, HasPhysicsMotion {}
 
-// MARK: - Entity
-
-/// An object in a scene: a position in the hierarchy, a transform, and a set of components.
-///
-/// Every entity is in a hierarchy and has a transform; the protocols that say so are what the
-/// members below are declared on, so a caller that holds an `Entity` reaches all of them.
 @MainActor
 open class Entity: HasHierarchy, HasTransform, HasSynchronization, EventSource, Sendable {
-    /// A reference to this entity's node in the scene graph.
     public var __coreEntity: __EntityRef { __EntityRef(coreEntity) }
 
-    /// The storage every member of this class reads and writes.
     let coreEntity: __REEntity
 
     public required init() {
@@ -55,24 +32,13 @@ open class Entity: HasHierarchy, HasTransform, HasSynchronization, EventSource, 
         coreEntity.wrapper = self
     }
 
-    /// The initializer an entity's own storage is made through, which the scene graph uses when
-    /// it hands back a node it already holds and `clone(recursive:)` uses to make the copy.
-    ///
-    /// It is `required` so that a copy of a subclass is a subclass: a subclass with no
-    /// designated initializer of its own inherits it, and one that has declares its own
-    /// `required` initializer here and forwards to this one, which is what a copy of its own
-    /// type has to do.
     public required init(_coreEntity: __EntityRef) {
         coreEntity = _coreEntity.node
         if coreEntity.wrapper == nil { coreEntity.wrapper = self }
     }
 
-    // MARK: Identity
-
-    /// A number that identifies this entity for the life of the process.
     public typealias ID = UInt64
 
-    /// A number that identifies this entity for the life of the process.
     public var id: UInt64 { coreEntity.identifier }
 
     public var name: String {
@@ -85,7 +51,6 @@ open class Entity: HasHierarchy, HasTransform, HasSynchronization, EventSource, 
         set { coreEntity.components = newValue.coreEntity.components; coreEntity.transform = newValue.coreEntity.transform }
     }
 
-    /// The scene this entity belongs to, or nil when nothing roots it in a scene.
     public var scene: Scene? {
         coreEntity.sceneOfRoot?.entity
     }
@@ -101,7 +66,6 @@ open class Entity: HasHierarchy, HasTransform, HasSynchronization, EventSource, 
 
     public var isEnabledInHierarchy: Bool { coreEntity.isEnabledInHierarchy }
 
-    /// The axis-aligned box of this entity's own unit cube, in the coordinates of its parent.
     public var __boundingBox: __AABBRef {
         let box = coreEntity.boundingBox(recursive: false, excludeInactive: false)
         return __AABBRef(min: box.min, max: box.max)
@@ -111,22 +75,13 @@ open class Entity: HasHierarchy, HasTransform, HasSynchronization, EventSource, 
         coreEntity.__as(Entity.self)
     }
 
-    /// Called on a clone of this entity, with the entity it was cloned from, so that a
-    /// subclass can copy what its own storage holds and the copy is not shared.
     open func didClone(from source: Entity) {}
 
-    /// The first entity of this one and everything below it with the given name.
     public func findEntity(named name: String) -> Entity? {
         guard let found = coreEntity.firstNode(named: name) else { return nil }
         return found === coreEntity ? self : found.entity
     }
 
-    /// A copy of this entity, and with `recursive` of everything below it. The copy has its own
-    /// storage: a later change to either is not a change to the other.
-    ///
-    /// The copy is made through this type's own `init(_coreEntity:)`, so a subclass's copy is a
-    /// subclass; a subclass that also holds state of its own copies that state in
-    /// `didClone(from:)`, which is called on the copy with this entity.
     @discardableResult
     public func clone(recursive: Bool) -> Self {
         let copied = coreEntity.clone(recursive: recursive)
@@ -140,14 +95,7 @@ open class Entity: HasHierarchy, HasTransform, HasSynchronization, EventSource, 
     }
 }
 
-// MARK: - The component set
-
 extension Entity {
-    /// The components of one entity, one of each type at most.
-    ///
-    /// A subscript takes and returns a component by its type, and reading a type the entity
-    /// does not carry gives nil. Setting a component of a type the entity already carries
-    /// replaces it.
     @MainActor
     public struct ComponentSet {
         let coreEntity: __REEntity
@@ -188,26 +136,15 @@ extension Entity {
             coreEntity.removeComponent(of: componentType)
         }
 
-        /// Removes every component the entity carries, the transform among them. Measured on
-        /// the host (2026-09-27): a new entity reports two components, and after this it
-        /// reports none.
         public func removeAll() {
             coreEntity.removeAllComponents()
         }
 
-        /// The number of components the entity carries, the transform among them.
         public var count: Int { coreEntity.componentCount }
     }
 }
 
-// MARK: - The child collection
-
 extension Entity {
-    /// The children of one entity, in the order they were added.
-    ///
-    /// Setting the collection replaces the children; a child that was in both collections
-    /// keeps one place in the new one, and one that was only in the old one is taken out of
-    /// its parent.
     @MainActor
     public struct ChildCollection: Collection {
         public typealias Element = Entity
@@ -216,9 +153,6 @@ extension Entity {
         public typealias Iterator = IndexingIterator<ChildCollection>
         public typealias SubSequence = Slice<ChildCollection>
 
-        /// The iterator of a collection whose indices are its positions: it walks a snapshot of
-        /// the children taken when it was made, which is what a scene graph hands out, so that
-        /// the children can be changed while one walks them.
         public struct IndexingIterator<Base: Collection>: IteratorProtocol {
             public typealias Element = Base.Element
             private let elements: [Element]
@@ -311,14 +245,11 @@ extension Entity {
             for child in wanted where child.parent !== coreEntity {
                 coreEntity.adopt(child, preservingWorldTransform: preservingWorldTransforms)
             }
-            // The order the caller gave, for the children this entity keeps.
             coreEntity.children = wanted.filter { $0.parent === coreEntity }
         }
     }
 }
 
-/// The basis this entity presents in the coordinates of `reference`, which is where its scale
-/// and its orientation are read.
 @MainActor
 @inline(__always)
 internal func __reBasis(_ reference: __REEntity, _ entity: __REEntity) -> simd_float3x3 {
@@ -326,11 +257,7 @@ internal func __reBasis(_ reference: __REEntity, _ entity: __REEntity) -> simd_f
     return simd_float3x3(columns: (__re3(relative.columns.0), __re3(relative.columns.1), __re3(relative.columns.2)))
 }
 
-// MARK: - Identity
-
 extension Entity: Hashable {
-    /// Two entities are equal when they are the same entity: the same node of the scene graph,
-    /// reached through two references.
     public static func == (lhs: Entity, rhs: Entity) -> Bool {
         lhs.coreEntity === rhs.coreEntity
     }
@@ -341,29 +268,17 @@ extension Entity: Hashable {
 }
 
 extension Entity: CustomDebugStringConvertible {
-    /// The entity, its components and everything below it, as a tree.
-    ///
-    /// Measured on the host (2026-09-27, arm64-apple-macos14, MacOSX26.5.sdk) for a new entity
-    /// named `box`: `▿ 'box' : Entity` on the first line, then `  ⟐ Transform` and
-    /// `  ⟐ SynchronizationComponent`; and for an entity with one child, `▿ 'parent' : Entity,
-    /// children: 1`, its own two components, and the child at the same two-space indent with
-    /// its own components two further in.
     public var debugDescription: String {
         coreEntity.debugDescription(typeName: String(describing: type(of: self)))
     }
 }
 
-// MARK: - The hierarchy
-
 @MainActor
 extension HasHierarchy {
-    /// The entity this one is a child of, or nil when it is at the top of its hierarchy.
     public var parent: Entity? {
         coreEntity.parent?.entity
     }
 
-    /// Makes `parent` this entity's parent, or takes it out of the one it has when `parent` is
-    /// nil. An entity has one parent: setting a second one moves it.
     public func setParent(_ parent: Entity?, preservingWorldTransform: Bool = false) {
         if let parent {
             parent.coreEntity.adopt(coreEntity, preservingWorldTransform: preservingWorldTransform)
@@ -372,7 +287,6 @@ extension HasHierarchy {
         }
     }
 
-    /// The children of this entity. Setting the collection replaces them.
     public var children: Entity.ChildCollection {
         get { Entity.ChildCollection(coreEntity) }
         set {
@@ -387,24 +301,19 @@ extension HasHierarchy {
         }
     }
 
-    /// Makes `entity` a child of this one, taking it from the parent it has.
     public func addChild(_ entity: Entity, preservingWorldTransform: Bool = false) {
         coreEntity.adopt(entity.coreEntity, preservingWorldTransform: preservingWorldTransform)
     }
 
-    /// Takes `entity` out of this one's children, whether or not it is one of them.
     public func removeChild(_ entity: Entity, preservingWorldTransform: Bool = false) {
         guard entity.coreEntity.parent === coreEntity else { return }
         entity.coreEntity.detach(preservingWorldTransform: preservingWorldTransform)
     }
 
-    /// Takes this entity out of its parent's children.
     public func removeFromParent(preservingWorldTransform: Bool = false) {
         coreEntity.detach(preservingWorldTransform: preservingWorldTransform)
     }
 }
-
-// MARK: - The transform
 
 @MainActor
 extension HasTransform {
@@ -418,8 +327,6 @@ extension HasTransform {
         set { transform.scale = newValue }
     }
 
-    /// This entity's scale in the coordinates of `referenceEntity`, nil being the top of the
-    /// hierarchy this entity is in.
     public func scale(relativeTo referenceEntity: Entity?) -> SIMD3<Float> {
         guard let referenceEntity, referenceEntity.coreEntity !== coreEntity else { return scale }
         let basis = __reBasis(referenceEntity.coreEntity, coreEntity)
@@ -436,8 +343,6 @@ extension HasTransform {
         set { transform.translation = newValue }
     }
 
-    /// This entity's position in the coordinates of `referenceEntity`, nil being the top of the
-    /// hierarchy this entity is in.
     public func position(relativeTo referenceEntity: Entity?) -> SIMD3<Float> {
         let matrix = coreEntity.transformMatrix(relativeTo: referenceEntity?.coreEntity)
         return SIMD3<Float>(matrix.columns.3.x, matrix.columns.3.y, matrix.columns.3.z)
@@ -470,7 +375,6 @@ extension HasTransform {
         transform.rotation = simd_quatf(__reBasis(referenceEntity.coreEntity, coreEntity))
     }
 
-    /// This entity's transform as a matrix, in the coordinates of `referenceEntity`.
     public func transformMatrix(relativeTo referenceEntity: Entity?) -> float4x4 {
         coreEntity.transformMatrix(relativeTo: referenceEntity?.coreEntity)
     }
@@ -485,9 +389,6 @@ extension HasTransform {
     }
 
     public func convert(position: SIMD3<Float>, from referenceEntity: Entity?) -> SIMD3<Float> {
-        // A position given in the reference's coordinates, read in this entity's. With no
-        // reference the position is already in the coordinates of the root of the hierarchy,
-        // and `from` reads it in this entity's own.
         guard let referenceEntity else { return __reApply(coreEntity.transformMatrixInHierarchy.inverted, position, asPoint: true) }
         let matrix = referenceEntity.coreEntity.transformMatrix(relativeTo: coreEntity)
         return __reApply(matrix, position, asPoint: true)
@@ -511,9 +412,6 @@ extension HasTransform {
 
     public func convert(position: SIMD3<Float>, to referenceEntity: Entity?) -> SIMD3<Float> {
         guard let referenceEntity else { return __reApply(coreEntity.transformMatrixInHierarchy, position, asPoint: true) }
-        // A position given in this entity's own coordinates, read in the reference's. Measured
-        // on the host (2026-09-27): a child at (1, 0, 0) of a parent at (0, 2, 0) answers
-        // (1, 0, 0) for the origin and (2, 0, 0) for (1, 0, 0).
         let matrix = coreEntity.transformMatrix(relativeTo: referenceEntity.coreEntity)
         return __reApply(matrix, position, asPoint: true)
     }
@@ -534,8 +432,6 @@ extension HasTransform {
         return Transform(matrix: matrix * transform.matrix)
     }
 
-    /// Points this entity's negative z axis from `position` at `target`, with `upVector` as
-    /// the up direction, all three in the coordinates of `referenceEntity`.
     public func look(at target: SIMD3<Float>, from position: SIMD3<Float>,
                      upVector: SIMD3<Float> = SIMD3<Float>(0, 1, 0),
                      relativeTo referenceEntity: Entity?) {
@@ -557,28 +453,18 @@ extension HasTransform {
         setTransformMatrix(transform, relativeTo: referenceEntity)
     }
 
-    /// The box around this entity and, with `recursive`, everything below it, in the
-    /// coordinates of `referenceEntity`.
     public func visualBounds(recursive: Bool = true, relativeTo referenceEntity: Entity?,
                              excludeInactive: Bool = false) -> BoundingBox {
         coreEntity.visualBounds(recursive: recursive, reference: referenceEntity?.coreEntity, excludeInactive: excludeInactive)
     }
 }
 
-// MARK: - Cloning
-
 extension __REEntity {
-    /// A copy of this node, and with `recursive` of everything below it. The copy carries the
-    /// same components by value, so a later change to either is not a change to the other.
     public func clone(recursive: Bool) -> __REEntity {
         let copy = __REEntity(name: name)
         copy.transform = transform
         copy.isEnabled = isEnabled
         for (_, component) in components {
-            // Every component is a value, and a value type's copy is the value itself; a
-            // component holding a reference (a mesh, an animation) is shared until the types
-            // that own those come with their own round. The transform is already copied above,
-            // and the node's own is the one that counts.
             if component is Transform { continue }
             copy.putComponent(component)
         }

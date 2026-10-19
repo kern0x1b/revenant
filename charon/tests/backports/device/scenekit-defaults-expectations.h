@@ -1,4 +1,3 @@
-// The answers of the host's SceneKit, written by host/scenekit-defaults/refresh.sh from scenekit-defaults-cases.m.
     {"SCNLight.type", "omni"},
     {"SCNLight.color", "colour 1 1 1 1"},
     {"SCNLight.temperature", "6500"},

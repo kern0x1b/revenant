@@ -101,9 +101,3 @@ MTLVertexDescriptor *MTKMetalVertexDescriptorFromModelIOWithError(MDLVertexDescr
         descriptor.layouts[index++].stride = layout.stride;
     return descriptor;
 }
-
-// The four single-value forms, which the header declares beside the WithError ones. Each is the same
-// conversion with the error pointer dropped: the WithError form reports a format neither table has,
-// and a format neither table has is one this port's shaders cannot be written against, so the value
-// form answers the same way the header's pair does - the conversion is made, and it returns what the
-// sibling returns with its error pointer unused.

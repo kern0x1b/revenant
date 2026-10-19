@@ -1,18 +1,6 @@
--- The header facts of one framework, read from its declaration shard (ir.lua writes the shards; shard.lua decodes them). These are the
--- four kinds headers.lua produces today, so the generator can read the shard in place of the regex parse: members (the class members
--- of the framework's @interface and category declarations, one row per method or property), declared (the names of the framework's
--- declared entities), typedefs (name and underlying type) and superclasses (the superclass and the protocols of each class).
---
--- A member row: cls (the class, from the USR), kind (method or property), api (-[Cls sel], +[Cls sel] or -[Cls prop], the spec's key),
--- alias (the api for a method, Cls.prop for a property), avail and message (the IR's availability fields), text (the spec's
--- availability text, rendered from them by avail.lua, ruling D7), hash (the declaration hash, C++), key (the container: the category a
--- member is written in, or "-").
---
--- usage: facts(spec, framework) where spec is the spec folder (for example packages/a/apple-backports/spec)
 local shard = import("shard", {rootdir = os.scriptdir(), anonymous = true})
 local availability = import("avail", {rootdir = os.scriptdir(), anonymous = true})
 
--- The decoded rows of the framework's shard, or none when the framework has no shard (it has no declaration the extractor reads).
 function rows(spec, framework)
     local file = path.join(spec, framework, "declarations.tsv")
     local out = {}
@@ -29,7 +17,6 @@ function rows(spec, framework)
     return out
 end
 
--- The class a member's USR names: c:objc(cs)Class(im)sel names the class of an instance or class member.
 function class_of(usr)
     return usr:match("^c:objc%(cs%)([^%(]+)")
 end
@@ -37,7 +24,6 @@ end
 function members(spec, framework)
     local out = {}
     for _, r in ipairs(rows(spec, framework)) do
-        -- the accessors clang synthesises from a property are not in the shards: the property is the member
         local cls = (r.kind == "method" or r.kind == "property") and class_of(r.usr)
         if cls then
             local api, alias
@@ -64,8 +50,6 @@ function declared(spec, framework)
     return out
 end
 
--- The typedefs: their names and their underlying types (the type column, which only typedef rows carry). The written definition of a
--- typedef is not in a shard (ruling D8: decl is display only); the underlying type is what the shape needs.
 function typedefs(spec, framework)
     local out = {}
     for _, r in ipairs(rows(spec, framework)) do

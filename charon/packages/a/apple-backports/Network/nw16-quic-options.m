@@ -1,19 +1,3 @@
-/*
- * The QUIC options and metadata of iOS 16.0: every setting a QUIC connection is given, and the two
- * factories that make a parameters of QUIC and its definition. The predicate that says whether options
- * are QUIC's, which the iOS 13.4 cache first exports, is in nw134-quic.m.
- *
- * The port has no QUIC transport (see facts/Network/NWQUIC.md), so these are the configuration and
- * the description of a protocol, kept and answered as the SDK documents: a setting nobody made
- * answers the default the header gives it - an idle timeout of 30 seconds, a maximum UDP payload of
- * 65535, and flow-control limits that are as large as a 64-bit count can be, which is what "no limit
- * of our own" is - and a setting a program makes is read back as it was made.
- *
- * A metadata of QUIC is what a QUIC connection is described by, and only such an object carries
- * these values: asked of any other metadata, the getters answer 0 and the setters do nothing, which
- * is what the host's own Network does with them, measured.
- */
-
 #import "CharonNW.h"
 #import "CharonNWSupport.h"
 
@@ -58,10 +42,6 @@ nw_protocol_options_t nw_quic_create_options(void)
 
 nw_parameters_t nw_parameters_create_quic(nw_parameters_configure_protocol_block_t configure_quic)
 {
-    /* QUIC carries its own transport, so a parameters of QUIC has no stack of its own to show: the
-       copy of its default protocol stack holds no internet protocol, no transport and no application
-       protocol, which is what the host answers (tests/backports/host/network-objects). The stack it
-       does have is the one the configure block was given. */
     CharonNWProtocolStack *stack = [[CharonNWProtocolStack alloc] init];
     stack->_application = [NSMutableArray array];
     if (configure_quic && configure_quic != (nw_parameters_configure_protocol_block_t)_nw_parameters_configure_protocol_default_configuration &&

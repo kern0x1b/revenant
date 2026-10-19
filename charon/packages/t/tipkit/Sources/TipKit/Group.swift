@@ -1,15 +1,8 @@
-// The group, and the error the datastore reports.
-
 import Foundation
 
-/// A group of tips, of which one is shown at a time: the framework's own answer for "show me the first
-/// tip the owner has not seen yet".
 public struct TipGroup {
-    /// Which tip of the group is shown.
     public enum Priority: Sendable {
-        /// The first tip the datastore says may be shown.
         case firstAvailable
-        /// The tips in the order the group wrote them.
         case ordered
 
         public static func == (a: Priority, b: Priority) -> Bool { return a.raw == b.raw }
@@ -23,9 +16,7 @@ public struct TipGroup {
         }
     }
 
-    /// The tips of the group, in the order the group wrote them.
     public let tips: [AnyTip]
-    /// Which of them is shown.
     public let priority: Priority
 
     public init(_ priority: Priority = .firstAvailable, @Tips.GroupBuilder _ builder: () -> [any Tip]) {
@@ -33,8 +24,6 @@ public struct TipGroup {
         self.tips = builder().map { AnyTip($0) }
     }
 
-    /// The tip the group would show now, which is the first one the datastore says may be shown, or
-    /// the first one in order when the group is ordered.
     public var currentTip: AnyTip? {
         switch priority {
         case .firstAvailable: return tips.first { Tips.Store.shared.shouldDisplay($0) }
@@ -42,7 +31,6 @@ public struct TipGroup {
         }
     }
 
-    /// The stream of the tip the group shows as it changes.
     public var currentTipUpdates: AsyncStream<AnyTip?> {
         return AsyncStream { continuation in
             continuation.yield(currentTip)
@@ -51,9 +39,6 @@ public struct TipGroup {
     }
 }
 
-/// The builder a group's tips are written with, which is what the `@GroupBuilder` attribute names.
-
-/// The builder a group's tips are written with, which is what the `@Tips.GroupBuilder` attribute names.
 extension Tips {
     @resultBuilder
     public enum GroupBuilder {

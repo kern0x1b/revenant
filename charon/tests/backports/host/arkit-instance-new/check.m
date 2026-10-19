@@ -1,9 +1,3 @@
-// check.m - the instance -new of the three raycast classes, measured on the Catalyst copy of ARKit.
-//
-// The SDK declares `- (instancetype)new NS_UNAVAILABLE;` on each class (run.sh reads the headers). On the host the
-// class defines no such method of its own, respondsToSelector: answers NO, and a call raises the unrecognised-selector
-// exception that NSObject raises for any selector it does not answer. The port defines no -new either, so its answer
-// is the same: the test prints the three answers, and run.sh compares them with the expected lines.
 #import <Foundation/Foundation.h>
 #import <ARKit/ARKit.h>
 #import <objc/runtime.h>

@@ -1,8 +1,5 @@
 set_project("avfspeechspeak")
 set_version("0.0.1")
--- The guest probe of the speech voices the 6.1.3 image carries (probe.m): the classes and selectors VoiceServices
--- answers and the voice files on the image, read in the guest. The probe names no voice itself. The run script
--- (AVSPEECH_VOICES_ROOT names the working copy) copies this file and control beside the build, as the coreml test does.
 local root = os.getenv("AVSPEECH_VOICES_ROOT") or path.join(os.scriptdir(), "../../../../..")
 add_repositories("charon " .. root)
 add_addons("charon v0.8.16")

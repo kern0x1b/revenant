@@ -1,15 +1,7 @@
--- The digest of a Lua source that a recipe puts into its build hash. What only the reader sees, the comments and the layout
--- of code, is left out of it, so that rewording a comment or breaking a line is not a new build: a compiler or a runtime
--- rebuilt from source for that would be hours of work that changed nothing. Strings, which can hold a script or a flag,
--- count in full.
--- A recipe's description can read no file, so it cannot compute this: the digests live in a digest.lua beside each recipe,
--- which the recipe includes, tools/recipe-digests.lua writes, and a test checks against the sources.
-
 local function long_bracket(source, at)
     return source:match("^%[(=*)%[", at)
 end
 
--- The source with its comments taken out, the blanks around a line of code and the lines left empty dropped, outside of strings.
 function stripped(source)
     local out, line = {}, {}
     local at, size = 1, #source
@@ -49,7 +41,6 @@ function stripped(source)
             local close = "]" .. long_bracket(source, at) .. "]"
             local found = source:find(close, at, true)
             local last = found and found + #close - 1 or size
-            -- a long string is kept as it is, its newlines included
             table.insert(line, source:sub(at, last))
             at = last + 1
         elseif char == "\n" then
@@ -64,9 +55,7 @@ function stripped(source)
     return table.concat(out, "\n")
 end
 
--- The recipes whose build hash covers the Lua they are made of: the variable their digest.lua sets, and the Lua sources.
 local RECIPES = {
-    -- the modules that make the headers the backports variant installs and every port compiles against
     {folder = "packages/s/swift-runtime", variable = "swift_runtime_sources_digest",
      inputs = {"packages/s/swift-runtime/xmake.lua", "modules/apple/shared_runtime.lua",
                "modules/apple/backports.lua", "modules/apple/compat.lua", "modules/apple/dyld.lua",
@@ -80,7 +69,6 @@ function recipes()
     return RECIPES
 end
 
--- The digest of these sources of a recipe, as their names and their digests without comments.
 function sources(root, inputs)
     local digests = {}
     for _, input in ipairs(inputs) do

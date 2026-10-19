@@ -1,40 +1,12 @@
-/* What the host's WebKit answers for the iOS 18.4 web-extension API, family by family, with no web
- * view of ours anywhere. Every value this prints is a measurement, and each is what the registry
- * rows' `source` names: the host's own WebKit under Mac Catalyst.
- *
- * The manifest is named by WEBEXT_MANIFEST and is this directory's manifest/ subdirectory. Nothing
- * here carries an absolute path: the privacy hook refused a probe that hard-coded one, and it was
- * right. Run it through ./run-webextension.sh rather than by hand.
- *
- * A star in a MATCH PATTERN is data, not prose, and a block comment cannot hold one -- the star in a
- * pattern's path ENDS the comment -- so the patterns are built from a hex escape, which is the real
- * character, and the comments above them say "star".
- */
 #import <Foundation/Foundation.h>
 #import <WebKit/WebKit.h>
 #include <stdio.h>
 
 #define STAR "\x2a"
 
-/* WEBEXT_MANIFEST names the manifest.json ITSELF, and the probe uses that path as given: it checks
- * the file is there, and the base URL it loads is the file's own directory, which is deleting the
- * one component and appending NOTHING. The first version deleted the last component and appended
- * "manifest", which guessed at the shape of what it was handed -- a relative invocation resolved
- * elsewhere and the run answered 19 records with no error, because nothing checked how many there
- * should be. The record count is now checked, so that cannot be quiet again. */
 static NSString *manifestPath(void)
 {
     const char *fromEnv = getenv("WEBEXT_MANIFEST");
-    /* RESOLVED, and that is the whole fix for the relative case: a relative path becomes a relative
-     * file URL, and WebKit's extension loader is killed by one rather than answering an error --
-     * exit 137 with only the 19 pattern records printed, and nothing said why. An absolute path to
-     * the manifest.json, either way it is spelled. */
-    /* It must be ABSOLUTE, and the probe says so rather than being killed by the loader: handed a
-     * relative URL, WebKit's extension loader does not answer an error, it takes the process down
-     * (exit 137) with only the 19 pattern records printed and nothing said why. That was measured
-     * twice, with a path that exists and with one that does not, and standardising the path does not
-     * help -- stringByStandardizingPath resolves ~ and . and leaves a relative path relative. So the
-     * check is here, in the probe, where it can be a message. */
     return [(fromEnv ? @(fromEnv) : @"manifest/manifest.json") stringByStandardizingPath];
 }
 
@@ -43,14 +15,6 @@ static NSString *manifestDirectory(void)
     return [manifestPath() stringByDeletingLastPathComponent];
 }
 
-/* How many records this check claims, and it is checked: a run that answers a different number has
- * either lost a case or gained one, and both are silent otherwise.
- *
- * The number belongs to ONE manifest: manifest/manifest.json, committed here beside this program, and the
- * one run.sh hands it. The count was 77 against a manifest that was never committed, so the number
- * described a file nobody else could see and the check could not be reproduced; it is 78 against this one,
- * measured with it. A manifest that changes its permissions, its host permissions or its commands changes
- * this count, and the check is what says so. */
 static const int EXPECTED_RECORDS = 78;
 static int records = 0;
 static int manifestMissed = 0;
@@ -60,7 +24,7 @@ static void line(NSString *key, id value)
     printf("%s\t%s\n", key.UTF8String,
            value == nil ? "(nil)"
                         : [[value isKindOfClass:[NSString class]] ? value : [value description] UTF8String]);
-    fflush(stdout);   /* stdout is fully buffered to a file, and a trap would eat the whole record */
+    fflush(stdout);
     records++;
 }
 
@@ -148,12 +112,6 @@ static void pattern_family(void)
              [all matchesURL:[NSURL URLWithString:u]] ? @"YES" : @"NO");
 }
 
-/* An action and a command cannot be MADE by a program -- both headers mark -init and +new
- * NS_UNAVAILABLE -- and neither is allocated here. [WKWebExtensionAction alloc] answers a pointer
- * and then SEGFAULTS when ARC releases the uninitialised object at the end of the scope, which is the
- * whole of the release's answer to a program that tries, and a harness cannot hold an object that
- * dies on release. The fact a row rests on is the header's NS_UNAVAILABLE, and the host's
- * NSInternalInconsistencyException when a context is asked for something that is not an extension. */
 static void action_family(void)
 {
 }
@@ -218,8 +176,6 @@ int main(void)
         pattern_family();
         action_family();
         context_family();
-        /* the extension and context families answer through completion handlers on the main queue, so
-         * the run loop has to turn or nothing they would print is ever printed */
         [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:20]];
     }
     if (manifestMissed)

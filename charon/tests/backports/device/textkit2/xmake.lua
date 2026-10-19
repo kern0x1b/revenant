@@ -1,8 +1,5 @@
 set_project("textkit2")
 set_version("0.0.1")
--- The working copy under test, named by run.sh (TEXTKIT2_ROOT); the addon is the tag already in the store
--- (charon/AGENTS.md, Traps: a working copy is never installed as the addon). The binary links the built
--- package, so what runs is what the package carries, not a recompile of the sources.
 local root = os.getenv("TEXTKIT2_ROOT") or path.join(os.scriptdir(), "../../..")
 add_repositories("charon " .. root)
 add_addons("charon v0.8.12")

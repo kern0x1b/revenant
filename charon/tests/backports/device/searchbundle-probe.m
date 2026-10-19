@@ -1,10 +1,3 @@
-// Standalone diagnostic: writes one synthetic CSSearchableItem into the shared store, then drives
-// a real SPSearchAgent query against it, exactly the code path SpringBoard's own search uses -
-// -_loadSearchBundles, our datastore, -performQuery:withResultsPipe:, back to this delegate.
-// printf+fflush only: NSLog's ASL channel from a process launched outside the normal app/daemon
-// launch path was already found silent once this session, so nothing here depends on it working -
-// this run also answers, as a side effect, whether NSLog reaches this process at all, printed as
-// its own line rather than assumed.
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
@@ -143,9 +136,6 @@ int main(int argc, char *argv[])
                    queryComplete, resultCount, (unsigned long)delegate.seenResults.count);
             fflush(stdout);
         }
-        // The delegate callbacks never fired even once (checked separately below); resultCount and
-        // -sectionAtIndex: are read directly off the agent instead, since those answered real
-        // numbers above while the delegate stayed silent - two different channels, only one proven.
         [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
         unsigned int sectionCount = ((unsigned int (*)(id, SEL))objc_msgSend)(agent, sel_registerName("sectionCount"));
         printf("probe: sectionCount=%u\n", sectionCount);

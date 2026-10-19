@@ -1,16 +1,3 @@
-/*
- * The reports a connection is asked for once it is up, and every call of connection_report.h that
- * arrived in iOS 13: what a connection measured while it was being established, and what it moved
- * while it was open.
- *
- * Both are filled by the connection out of its own state machine - the times it took, the attempts
- * before it, the addresses it tried, the protocols of the stack, the bytes it moved - and are read
- * back here. A data transfer report is a snapshot: until the block of nw_data_transfer_report_collect
- * has been given it, it is outstanding and every value answers 0, which is what the header says a
- * report that is not collected answers. The connection's counters are in the report all the same,
- * so the numbers appear the moment it is collected and do not change after.
- */
-
 #import "CharonNW.h"
 #import "CharonNWSupport.h"
 
@@ -94,8 +81,6 @@ void nw_data_transfer_report_collect(nw_data_transfer_report_t report, dispatch_
     @synchronized(value) {
         if (value->_state == nw_data_transfer_report_state_collected)
             return;
-        /* Outstanding becomes collecting now, and collected when the block is given it: asking twice
-           is asking once, as the header says. */
         value->_state = nw_data_transfer_report_state_collecting;
     }
     if (!collect_block) {
@@ -112,17 +97,11 @@ void nw_data_transfer_report_collect(nw_data_transfer_report_t report, dispatch_
     });
 }
 
-/* Every value of a data transfer report answers 0 until the report is collected, which is what the
-   header says of a report that is not collected. The counters themselves are already in the report:
-   the connection wrote them when it gave the report out. */
 static bool charon_collected(nw_data_transfer_report_t report, uint32_t path_index)
 {
     CharonNWDataTransferReport *value = (CharonNWDataTransferReport *)report;
     if (!value || value->_state != nw_data_transfer_report_state_collected)
         return false;
-    /* One path for a connection that is not multipath, so the path itself and NW_ALL_PATHS - which
-       is what the header says that sums over paths means for a connection with one - are the same
-       number, and any other index is no path at all. */
     return path_index == 0 || path_index == _nw_data_transfer_report_all_paths;
 }
 

@@ -33,8 +33,6 @@
     UIEventAttribution *_eventAttribution;
 }
 
-// The attribution is held as the object the port was given, and is nil for options an app makes itself, which is what the host answers;
-// measured in tests/backports/host/storage-config. The port does not make one for a URL it opens.
 - (UIEventAttribution *)eventAttribution
 {
     return _eventAttribution;
@@ -408,7 +406,6 @@
 @end
 
 #pragma clang diagnostic push
-// SDK 16.4 marks the enum unavailable on iOS, so the accessors are typed with its underlying NSInteger.
 #pragma clang diagnostic ignored "-Wmismatched-parameter-types"
 #pragma clang diagnostic ignored "-Wmismatched-return-types"
 @implementation UISceneActivationRequestOptions {
@@ -416,7 +413,6 @@
     NSInteger _collectionJoinBehavior;
 }
 
-// The host keeps the value it is given; a request made without one answers 0 (measured in tests/backports/host/storage-config).
 - (NSInteger)collectionJoinBehavior
 {
     return _collectionJoinBehavior;
@@ -464,7 +460,6 @@
     UIEventAttribution *_eventAttribution;
 }
 
-// Copied on set, as the header says and the host does: a value changed after it was set does not show through, and nil clears it.
 - (UIEventAttribution *)eventAttribution
 {
     return _eventAttribution;

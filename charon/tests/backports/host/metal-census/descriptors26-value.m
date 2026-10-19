@@ -1,35 +1,6 @@
-/* descriptors26-value.m - the PORT'S answers to the value-equality questions, one line per class and
- * question, in the same shape descriptors26-apple.m prints for Apple's own objects.
- *
- * WHAT IS MEASURED HERE, and why it is a case of its own:
- *
- *   * two freshly made objects of each class are equal, their hashes agree, and a copy equals its
- *     source - measured on Apple's side too, in descriptors26-apple.m, and the two files are diffed;
- *   * changing ONE NAMED MEMBER makes them differ, on the port's side, which is what holds the
- *     implementation to its member list: a class that compared nothing would answer equal here too;
- *   * the eleven 0 tile classes carry NO -isEqual: of their own on Apple's side, measured, so the port
- *     adds none and two fresh ones are not equal - NSObject's pointer identity, which is Apple's.
- *
- * WHY A SEPARATE BINARY, and the trap that is actually worth naming: asking these questions in the big
- * case's binary printed a Trace/BPT trap inside objc_opt_respondsToSelector at the first such call. The
- * cause was in THIS file and not in the port: three of the messages were built with "%@" and a
- * `[name UTF8String]` - a C string where NSString's formatter expects an object - and the formatter
- * sends -respondsToSelector: to what it is handed. So the trap was a format string, not a difference
- * between two runtimes, and the honest fix is the format string. The two sides still have a binary each
- * because the comparison between them is a diff of two runs, which is easier to read than one case
- * asking both.
- *
- * Asking these questions in the big case's binary also traps: measured, a
- * Trace/BPT trap inside objc_opt_respondsToSelector at the first such call, reproducibly, and the
- * presence of the port's classes in the binary is the only difference that makes it. It traps here as
- * well if Apple's objects are asked in the same binary, so each side has one and the comparison between
- * them is a diff of two runs. The trap is recorded in facts/Metal/Descriptors26.md rather than avoided
- * by asking a weaker question.
- */
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
-/* The port's classes, under the names the harness compiles them with. */
 @interface charonHost_MTL4PipelineOptions : NSObject
 @property (nonatomic) MTLShaderValidation shaderValidation;
 @property (nonatomic) MTL4ShaderReflection shaderReflection;
@@ -87,8 +58,6 @@
 @end
 @interface charonHost_MTLTileRenderPipelineColorAttachmentDescriptor : NSObject <NSCopying>
 @end
-/* The tile ARRAY, whose three answers are the point: no -isEqual: and no -hash of its own on Apple's
- * side, measured, so two fresh ones are not equal and the port adds none. */
 @interface charonHost_MTLTileRenderPipelineColorAttachmentDescriptorArray : NSObject
 @end
 
@@ -106,10 +75,6 @@ static void same_value(NSString *name, id portA, id portB)
 {
     BOOL freshEqual = [portA isEqual:portB];
     BOOL hashSame = [portA hash] == [portB hash];
-    // -copyWithZone: AND NOT -copy: -copy is NSObject's convenience and the declaration's method is
-    // NSCopying's, and asking -copy in a host binary that ALSO carries Apple's class of the same
-    // members traps - measured, a Trace/BPT trap inside objc_opt_respondsToSelector. The protocol's
-    // own method is the question the declaration asks anyway.
     id copied = [portA copyWithZone:NULL];
     BOOL copyEqual = [copied isEqual:portA];
     check(freshEqual, ([NSString stringWithFormat:@"%s: two fresh objects are equal", [name UTF8String]]));
@@ -141,8 +106,6 @@ int main(void)
         same_value(@"MTL4StitchedFunctionDescriptor", (id)[[charonHost_MTL4StitchedFunctionDescriptor alloc] init], (id)[[charonHost_MTL4StitchedFunctionDescriptor alloc] init]);
         same_value(@"MTL4LibraryFunctionDescriptor", (id)[[charonHost_MTL4LibraryFunctionDescriptor alloc] init], (id)[[charonHost_MTL4LibraryFunctionDescriptor alloc] init]);
         same_value(@"MTL4RenderPassDescriptor", (id)[[charonHost_MTL4RenderPassDescriptor alloc] init], (id)[[charonHost_MTL4RenderPassDescriptor alloc] init]);
-        /* ONE NAMED MEMBER PER CLASS, and the two sides of each answer are printed so a reader can see
-         * what the port said and the script can hold it to the member list. */
         {
             charonHost_MTL4PipelineDescriptor *one = [[charonHost_MTL4PipelineDescriptor alloc] init];
             charonHost_MTL4PipelineDescriptor *two = [[charonHost_MTL4PipelineDescriptor alloc] init];
@@ -195,20 +158,6 @@ int main(void)
         same_value(@"MTL4AccelerationStructureMotionTriangleGeometryDescriptor", (id)[[charonHost_MTL4AccelerationStructureMotionTriangleGeometryDescriptor alloc] init], (id)[[charonHost_MTL4AccelerationStructureMotionTriangleGeometryDescriptor alloc] init]);
         same_value(@"MTL4AccelerationStructureMotionBoundingBoxGeometryDescriptor", (id)[[charonHost_MTL4AccelerationStructureMotionBoundingBoxGeometryDescriptor alloc] init], (id)[[charonHost_MTL4AccelerationStructureMotionBoundingBoxGeometryDescriptor alloc] init]);
         same_value(@"MTL4AccelerationStructureMotionCurveGeometryDescriptor", (id)[[charonHost_MTL4AccelerationStructureMotionCurveGeometryDescriptor alloc] init], (id)[[charonHost_MTL4AccelerationStructureMotionCurveGeometryDescriptor alloc] init]);
-        /* THE TILE COLOUR ATTACHMENT'S THREE LINES ARE NOT IN EITHER RUN, and the reason is a harness
-         * limitation rather than a member: the 16.4 SDK this package compiles against already DECLARES
-         * MTLTileRenderPipelineColorAttachmentDescriptor, so the rename that gives the port's classes
-         * another name cannot reach a class the SDK owns and the port's object carries the array but not
-         * the attachment under the renamed name. Apple's own answers for all three are measured and are in
-         * facts/Metal/Descriptors26.md; the port adds no -isEqual: to that class either, so it keeps
-         * NSObject's identity equality like Apple's. */
-        /* THE TILE COLOUR ATTACHMENT'S THREE LINES ARE NOT IN EITHER RUN, and the reason is a harness
-         * limitation rather than a member: the 16.4 SDK this package compiles against already DECLARES
-         * MTLTileRenderPipelineColorAttachmentDescriptor, so the rename that gives the port's classes
-         * another name cannot reach a class the SDK owns. Apple's own three answers are measured and are
-         * in facts/Metal/Descriptors26.md. The tile ARRAY is here, and its three answers are the point:
-         * no -isEqual: and no -hash of its own on Apple's side, measured, so two fresh ones are not equal
-         * and the port adds none. */
         {
             charonHost_MTLTileRenderPipelineColorAttachmentDescriptorArray *one = [[charonHost_MTLTileRenderPipelineColorAttachmentDescriptorArray alloc] init];
             charonHost_MTLTileRenderPipelineColorAttachmentDescriptorArray *two = [[charonHost_MTLTileRenderPipelineColorAttachmentDescriptorArray alloc] init];

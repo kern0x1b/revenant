@@ -1,8 +1,3 @@
--- No generated Matter object is committed (v-matter11, v-matter13). The generator's classes are not built at all: the emit
--- rule emits none of the 1208 inputs (facts/Matter/Matter.md, "The retirement (v-matter13)"), and every row the registry
--- held for them is homed in packages/m/matter/registry, unavailable in the SDK 26.2 headers, or declared nowhere in them
--- (packages/a/apple-backports/facts/Matter/absent-proof.tsv). Pinned at 0: any Matter/CharonMatter*.m object is a failure.
--- Pure Lua: it reads committed files and runs no clang.
 local pinned = 0
 
 function failures(opt)
@@ -29,7 +24,6 @@ function failures(opt)
         end
     end
 
-    -- the classes the real stack's registry carries as class rows
     local real_class = {}
     for _, file in ipairs(os.files(path.join(real, "*.json"))) do
         local text = io.readfile(file)

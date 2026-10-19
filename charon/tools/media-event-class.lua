@@ -1,23 +1,9 @@
--- media-event-class.lua: one command-event class: the port's source, its row, its check, and the mutant's two verdicts.
---
--- Written because three of these were done by hand and each hand-run cost a turn: a class is the same
--- shape every time - new code over the base `MPRemoteCommandCenter71.m` already carries, one property the
--- header names, one row at the header's `MP_API`, one check, one mutant with its verdict on both sides -
--- and the parts that are not the same (the class, the member, the type, the value, whether the release
--- already carries it) are arguments.
---
---   xmake l tools/media-event-class.lua <Class> <member> <type> <release> <value> [--carried]
---
--- The mutant is built in a scratch directory that holds the mutated source and the library's headers: the check
--- includes MPMediaItemStandin.h by name, and a scratch copy without the header does not compile.
-
 local LIBRARY = {"packages", "a", "apple-backports", "MediaPlayer"}
 local HOST = {"tests", "backports", "host", "mediaplayeritem"}
 local RUNS = {".agent-work", "runs", "mutate"}
 
 local USAGE = "usage: xmake l tools/media-event-class.lua <Class> <member> <type> <release> <value> [--carried]"
 
--- str.format on these templates: `{name}` is a field, `{{` and `}}` are the braces themselves.
 local function fill(template, values)
     local out = {}
     local i = 1
@@ -143,7 +129,6 @@ int main(void) {{
 }}
 ]==]
 
--- Runs a program to completion with its stdout and stderr in files, and returns its status and both texts.
 local function run(program, args, scratch)
     local out, err = path.join(scratch, "run.out"), path.join(scratch, "run.err")
     local status = os.execv(program, args, {try = true, stdout = out, stderr = err})
@@ -157,7 +142,6 @@ local function strip(text)
     return (text:gsub("^%s+", ""):gsub("%s+$", ""))
 end
 
--- every occurrence of `from` replaced by `to`, plain text
 local function replace_all(text, from, to)
     local out, at = {}, 1
     while true do
@@ -202,7 +186,6 @@ function main(...)
         io.writefile(path.join(library, source), fill(CLASS, {klass = klass, member = member, type = kind,
                                                                release = release, what = what}))
     end
-    -- not the same name as the class: on a case-insensitive filesystem the check would include itself
     local check_path = path.join(host, tag .. "check.m")
     local check_text = fill(CHECK, {klass = klass, member = member, value = value, shown = shown,
                                     source = source, tag = tag})
@@ -220,16 +203,12 @@ function main(...)
     print(strip(baseline_out))
 
     local scratch = path.join(runs, tag .. "-mutant")
-    -- mutate.lua refuses a mutation that changes nothing, and that refusal stops this run here; the Python
-    -- ignored the exit status, and then the two verdicts were compared against an unmutated source
     local mutate_status, mutate_out, mutate_err = run("xmake", {"l", path.join(host, "mutate.lua"), source,
                                                                 "return _" .. member .. ";", "return 0;", scratch}, runs)
     if mutate_status ~= 0 then
         raise(strip(mutate_err))
     end
     print(strip(mutate_out))
-    -- mutate.lua clears the scratch directory before it writes the mutant, so the library's headers are copied
-    -- in after it: the mutant's check includes MPMediaItemStandin.h by name
     for _, file in ipairs(os.files(path.join(library, "*.h"))) do
         os.cp(file, path.join(scratch, path.filename(file)))
     end
@@ -244,7 +223,6 @@ function main(...)
     local _, mutant_out = run(mutant_binary, {}, runs)
     print("### the check, WITH the mutation:")
     print(strip(mutant_out))
-    -- the verdicts must differ: a mutant the check answers the same way to is one it cannot see
     if strip(baseline_out) == strip(mutant_out) then
         raise("the two verdicts are the same, so the check does not see this mutation")
     end

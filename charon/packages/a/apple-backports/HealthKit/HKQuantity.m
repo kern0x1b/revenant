@@ -1,5 +1,3 @@
-// HKQuantity: a number and the unit it is counted in, and the conversion between two units.
-
 #import <HealthKit/HealthKit.h>
 
 #import "CharonHKStore.h"
@@ -54,8 +52,6 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 #pragma mark Reading a quantity
 
-// The unit a quantity is in. The header has no property for it, so this is the port's own, and the
-// only place the unit of a quantity is kept.
 - (HKUnit *)charon_unit
 {
     return _unit;
@@ -71,8 +67,6 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return [self quantityWithUnit:unit doubleValue:value];
 }
 
-// A value in another unit of the same dimension, as the header says this throws when the unit of the
-// quantity is not one it can be converted to.
 - (double)doubleValueForUnit:(HKUnit *)unit
 {
     if (![unit isKindOfClass:[HKUnit class]])

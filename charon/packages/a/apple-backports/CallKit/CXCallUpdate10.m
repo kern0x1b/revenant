@@ -95,9 +95,6 @@
     return copy;
 }
 
-// A field of an update that is nil leaves what the call already has, which is
-// how an application changes the caller's name of a call without saying its
-// handle again.
 - (void)charon_applyOver:(CXCallUpdate *)previous
 {
     if (!previous)

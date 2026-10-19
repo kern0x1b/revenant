@@ -1,18 +1,3 @@
--- The NUL-terminated strings of a dyld shared cache's __cfstring records, in address order, read with
--- the project's own reader (modules/apple/dyld.lua's open_cache). Bounded memory: one record is read
--- at a time and nothing is kept but what is printed.
---
--- A __cfstring is 32 bytes on a 64-bit cache and the field offsets are the whole difficulty:
---
---     struct __CFConstantString { uintptr_t isa; uintptr_t flags; const char *str; unsigned long length; }
---         isa +0, flags +8, str +16, length +24
---
--- `str` is stored the way the cache stores every pointer - slid and tagged above the address bits -
--- so it is masked with 0xFFFFFFFFF before it is read, the same rule tools/cache-value.lua applies to a
--- stored pointer (its line 107) and for the same reason. Reading `str` at +8 gets `flags`, which is
--- one small constant for every record, and that is the mistake this reader's comment exists to name.
---
--- Usage: CHARON_ROOT=<worktree> xmake l cfstring-run.lua <cache file> <first address> <count> [max length]
 import("core.base.option")
 
 function main(cachefile, first, count, longest)

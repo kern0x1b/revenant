@@ -1,11 +1,3 @@
-// probe.m - a fresh NSExtensionContext, asked what it answers: its input items, the three members IntentsUI adds to it,
-// and whether its completeRequestReturningItems:completionHandler: calls its completion. The same source is built for
-// the host (Catalyst, where the class is Foundation's and an extension host is not running) and for the port.
-//
-// The class is found by name at run time, and every answer is read through its selector, so no header decides it.
-// The completion is counted after the run loop has turned for a second: a completion that is called later is counted.
-//
-//   sh run.sh
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
@@ -48,7 +40,6 @@ int main(void)
                                                   @[], ^(BOOL value) { calls++; expired = value; });
         [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
         printf("completeRequest callback %d expired %d\n", calls, expired);
-        // The widget members (NotificationCenter): absent on a host that has no widget host, as Catalyst is.
         SEL active = NSSelectorFromString(@"widgetActiveDisplayMode");
         SEL largest = NSSelectorFromString(@"widgetLargestAvailableDisplayMode");
         if ([context respondsToSelector:active]) printf("widgetActiveDisplayMode %ld\n", (long)((NSInteger (*)(id, SEL))objc_msgSend)(context, active));

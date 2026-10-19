@@ -1,9 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <ModelIO/ModelIO.h>
 #include <stdio.h>
-/* What a reader did with each file: raised, or loaded and with how many meshes. The refusal test has to see
-   WHICH, and the log line alone cannot tell them apart - a reader that logs loudly and returns nil and one
-   that loads a mesh print the same thing to stderr unless the outcome is stated as well. */
 int main(int argc, char **argv)
 {
     @autoreleasepool {

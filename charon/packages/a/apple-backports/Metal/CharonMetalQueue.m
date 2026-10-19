@@ -4,13 +4,6 @@
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-// The command queue and the command buffer of the port. The encoders of this port do their work as
-// they are encoded (the OpenGL ES 2.0 calls and the CPU kernels run inside -[encoder draw...] and
-// -[encoder dispatch...]), so a command buffer's work is already done when it is committed. What a
-// commit still decides is the buffer's life as Metal reports it: it is scheduled, then completed, the
-// handlers the application added run at those two points in that order, and the times the work
-// started and ended are read from the same clock. facts/Metal/CommandBuffer.md is the whole of it.
-
 @implementation CharonMetalQueue
 
 @synthesize label;
@@ -102,8 +95,6 @@
     return _errorOptions;
 }
 
-// A buffer answers the times of its work only once it has completed, as Metal does: before that the
-// work has not been timed, and an answer would be a number of a run that has not finished.
 - (CFTimeInterval)charonStartTime
 {
     return _status == MTLCommandBufferStatusCompleted ? _startTime : 0;
@@ -114,8 +105,6 @@
     return _status == MTLCommandBufferStatusCompleted ? _endTime : 0;
 }
 
-// The first encoder a buffer vends is where its work starts, since the port runs each command as it
-// is encoded; a buffer that encodes nothing starts when it is committed.
 - (void)charonBeginWork
 {
     if (!_startTime)
@@ -151,9 +140,6 @@
         handler(self);
 }
 
-// A handler added after the point it names has passed. Metal asserts here and the process aborts
-// (measured on the host, facts/Metal/CommandBuffer.md), and an API must not abort its caller, so the
-// port logs the mistake and calls the handler at once, which is the one call the caller can still get.
 - (void)addScheduledHandler:(MTLCommandBufferHandler)block
 {
     if (_status >= MTLCommandBufferStatusScheduled) {
@@ -189,8 +175,6 @@
     _drawable = drawable;
 }
 
-// A wait for a buffer that was never committed would block for ever in Metal, because nothing on this
-// thread can commit it while it waits. The port says so instead of hanging the caller.
 - (void)waitUntilScheduled
 {
     if (_status < MTLCommandBufferStatusCommitted)
@@ -219,9 +203,6 @@
     CharonMetalPopDebugGroup(_groups, self);
 }
 
-// The encoder of the port runs a workgroup as one thread per thread of the group, with a rendezvous
-// of a mutex and a condition variable, because iOS 6 has no pthread_barrier and a group run one
-// thread after another would let a thread past a barrier before its neighbours had written.
 - (id<MTLComputeCommandEncoder>)computeCommandEncoder
 {
     [self charonBeginWork];

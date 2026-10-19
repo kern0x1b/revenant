@@ -8,10 +8,6 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-// iOS 6 has no public way to launch another application by its bundle
-// identifier: SpringBoardServices is how SpringBoard's own clients do it
-// (debugserver launches through SBSLaunchApplicationForDebugging), so its
-// functions are looked up by name rather than linked from a private framework.
 typedef int (*launch_function)(CFStringRef, Boolean);
 typedef int (*debug_launch_function)(CFStringRef, CFURLRef, CFArrayRef, CFDictionaryRef, CFStringRef, CFStringRef, unsigned int);
 
@@ -30,9 +26,6 @@ static void usage(void)
 
 static double started;
 
-// Each state is printed once, when it changes, with the seconds since the
-// start, so whoever reads the output line by line - xmake emulate launch does,
-// to unlock the screen - sees where the launch waits and for how long.
 static void say(const char* state)
 {
     static char last[256];
@@ -43,9 +36,6 @@ static void say(const char* state)
     fflush(stdout);
 }
 
-// How a refusal names the lock state, as a token of its own that xmake emulate launch reads, so that it depends on this
-// word and not on the wording of the sentence around it: ", screen=locked" (unlock it), ", screen=passcode" (nothing
-// can unlock it), nothing when SpringBoard did not say.
 static const char* screen(bool locked, bool passcode)
 {
     return locked ? (passcode ? ", screen=passcode" : ", screen=locked") : "";
@@ -104,8 +94,6 @@ int main(int argc, char** argv)
 
     CFStringRef identifier = string(bundle);
     CFStringRef out_path = string(out), err_path = string(err);
-    // The application's output reaches its files as it is written: stdio is
-    // unbuffered and CFLog (NSLog) writes to standard error as well as to ASL.
     const void* keys[] = {CFSTR("CFLOG_FORCE_STDERR"), CFSTR("NSUnbufferedIO")};
     const void* values[] = {CFSTR("1"), CFSTR("YES")};
     CFDictionaryRef environment = CFDictionaryCreate(NULL, keys, values, 2, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
@@ -152,8 +140,6 @@ int main(int argc, char** argv)
     say("launched");
     if (wait <= 0)
         return 0;
-    // A launch SpringBoard takes is done when SpringBoard makes the
-    // application frontmost, which it does once the application is running.
     char front[256] = "nothing";
     for (;;) {
         CFStringRef current = frontmost();

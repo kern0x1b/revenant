@@ -2,34 +2,10 @@
 #import <objc/message.h>
 #import <stdio.h>
 
-// A control made of actions, on whichever side this binary is.
-//
-// The port's -insertSegmentWithAction:atIndex:animated: is a carried selector on a host class, so the harness
-// renames it and the port's side answers -charonHostInsertSegmentWithAction:atIndex:animated:. Calling the
-// public one on the port's side would reach the **host's own** method, and a host method handing a port action
-// to the host's label machinery is a mix no device ever has: on 6.x there is no host method of that name at
-// all, so the port's own is what runs there. The recorder has no prefixed method and takes the public one,
-// which is the host's own - the right answer on that side.
-// Whether the class has a method of that name, asked through the class's method list and **not** through
-// -respondsToSelector:. NSSelectorFromString on a name that exists nowhere produces a selector that is
-// registered by no class and no category, and the runtime's optimised -respondsToSelector: traps on one - which
-// is the `brk #0xc472` an lldb run of the recorder stopped in, with a one-frame backtrace because the trap is
-// inside a tail call from the host's own -setAction:forSegmentAtIndex:. So the test asks the method list.
 static BOOL charon_has_method(Class cls, const char *name)
 {
     if (!cls)
         return NO;
-    // `sel_registerName` first, and that is the whole of it: NSSelectorFromString on a name nobody registers
-    // produces an **unregistered** selector, and the runtime's optimised -respondsToSelector: traps on one -
-    // the recorder's exit 133, whose crash report put the trap under
-    // _NSDescriptionWithStringProxyFunc and the frame in this file's own block. Registering is a no-op for a
-    // name that is already registered, and it makes the question safe to ask for one that is not.
-    // `sel_registerName` first, so the selector is **known** even on the side that has no such method, and the
-    // runtime's optimised -respondsToSelector: cannot trap on it - the recorder's exit 133 was exactly that trap,
-    // with the frame in this file's own block. Then the question is asked of an **object**, because
-    // class_getInstanceMethod does not search a class's **categories**, and every method the port adds to a host
-    // class is a category's: walking the method lists answered NO for all of them, so the scenario fell back to
-    // the host's own method every time and compared the host's answers with themselves.
     SEL selector = sel_registerName(name);
     return [cls instancesRespondToSelector:selector];
 }
@@ -42,18 +18,10 @@ static void charon_insert_action(UISegmentedControl *control, UIAction *action, 
     ((void (*)(id, SEL, UIAction *, NSUInteger, BOOL))objc_msgSend)(control, chosen, action, index, NO);
 }
 
-// The port's own implementation of a control made of actions, as a value the caller passes. A symbol in the main
-// image is only in what dlsym reads when the link exports it, which this harness does not do, and a symbol defined
-// in this header would have to be defined once for two binaries that disagree about it; an argument has neither
-// problem. The port side passes the port's own function - under its **harness** name, because the renamer
-// renames every exported C symbol an object defines - and the recorder passes NULL and takes the public
-// initializer, which there is the host's own and the right answer to record.
 typedef UISegmentedControl *(*CharonControlWithActions)(UISegmentedControl *, CGRect, NSArray *);
 
 static UISegmentedControl *charon_control_with_actions(CharonControlWithActions entry, CGRect frame, NSArray *actions)
 {
-    // The one line the coordinator asked for, printed once and on both sides: the port's side passes the port's own
-    // function, the recorder's passes NULL. By construction, not by luck.
     static int reported = 0;
     if (!reported++) {
         fprintf(stderr, "[controlmenus] the port's own control-with-actions entry point %s\n",
@@ -82,40 +50,18 @@ static NSString *bar_line(UIBarButtonItem *item)
     return [NSString stringWithFormat:@"title=%@ image=%d menu=%d pa=%d width=%g style=%ld system=%@", item.title ?: @"nil", item.image != nil, item.menu != nil, item.primaryAction != nil, item.width, (long)item.style, @""];
 }
 
-// What the control is holding, slot by slot, after each step: the identifier of the action in each slot, or
-// NSNull for a slot with none. Printed to stderr so it is not one of the compared lines, and printed on both
-// sides so the two can be read against each other - the one disagreement in this group is an identifier the port
-// can no longer resolve, and this is where it goes missing.
-// A method the port carries, called under the harness's own name when the control has it. `prefixed` is the
-// renamer's rule - the first **keyword** camel-cased with the prefix glued inside it - so
-// `actionForSegmentAtIndex:` is `charonHostActionForSegmentAtIndex:` and
-// `segmentIndexForActionIdentifier:` is `charonHostSegmentIndexForActionIdentifier:`.
 static SEL charon_carried(Class cls, const char *published)
 {
-    // The renamer's rule is the prefix glued inside the first **keyword**, with that keyword's first letter
-    // capitalised: `actionForSegmentAtIndex:` is `charonHostActionForSegmentAtIndex:`. Plain concatenation
-    // gives `charonHostactionForSegmentAtIndex:`, which nothing defines, so the question answered NO and the
-    // scenario fell back to the host's method - the very mix this whole line of work is about.
     char *name = malloc(strlen(published) + 16);
     strcpy(name, "charonHost");
-    // Index **10**, not 9: "charonHost" is ten characters, so index 9 is its own `t` - writing the capitalised
-    // letter there built `charonHosActionForSegmentAtIndex:`, which is why the port's method was never reached.
     name[10] = (char)(published[0] >= 'a' && published[0] <= 'z' ? published[0] - 'a' + 'A' : published[0]);
     strcat(name, published + 1);
     SEL prefixed = sel_registerName(name);
-    // The question is asked **before** the name is freed. Asked after, it is about freed memory and answers
-    // whatever that memory happens to say - which is why every version of this helper fell back to the host's
-    // method and the compared line compared the host's answers with themselves.
     BOOL has = charon_has_method(cls, name);
     free(name);
     return has ? prefixed : sel_registerName(published);
 }
 
-// The two lookups, asked under the harness's own name when the control has them. On the port's side the
-// public name is the **host's** method - the port's are carried selectors the harness renamed - and the host's
-// reads the host's store, which the port never writes; so a line built from the public calls compares the
-// host's answers with themselves. The recorder has neither prefixed method and takes the public one, which is
-// the host's own and the right answer on that side.
 static id charon_action_at(UISegmentedControl *control, NSUInteger index)
 {
     SEL selector = charon_carried([UISegmentedControl class], "actionForSegmentAtIndex:");
@@ -231,11 +177,6 @@ static NSArray *menu_scenario(Class actionClass, Class menuClass, CharonControlW
     [lines addObject:ur_line(@"segment removed", @[@(charon_index_of(sg, @"idx")), @(charon_index_of(sg, @"id9"))])];
     [lines addObject:ur_line(@"no action", @[charon_action_at(sg, 9) ?: @"nil", charon_action_at([[UISegmentedControl alloc] initWithItems:@[@"q"]], 0) ?: @"nil"])];
     [lines addObject:ur_line(@"unique on insert", ur_raised(^id { charon_insert_action(sg, cc, 0); return @"no"; }))];
-    // The two action classes side by side in one window. `UIAction` is the host's own on both sides of a
-    // differential - the port's is renamed to CharonHostUIAction - so the first pair is the same class in both
-    // binaries and the second is the one this binary carries, and the host's comes first so that a side which
-    // cannot take the second one has printed the first one's answer before it stops. Which of the two the
-    // segment takes is the whole of the difference the -[CharonHostUIAction length] fault turns on.
     for (NSArray *pair in @[ @[ @"the host's", NSClassFromString(@"UIAction") ], @[ @"this binary's", actionClass ] ]) {
         UIAction *one = [pair[1] actionWithTitle:@"AT" image:nil
                                        identifier:[NSString stringWithFormat:@"id-%@", pair[0]]
@@ -244,9 +185,6 @@ static NSArray *menu_scenario(Class actionClass, Class menuClass, CharonControlW
         NSString *outcome = ur_raised(^id {
             charon_insert_action(own, one, 0);
             UIAction *back = charon_action_at(own, 0);
-            // **Which** path each side took is printed to stderr, not put in the compared line: it differs by
-            // construction - the port's side runs the port's own insert, the recorder's the host's - and a field
-            // that is meant to differ cannot be inside a line that is compared for equality.
             fprintf(stderr, "[controlmenus] %s took %s\n", [[pair[0] description] UTF8String],
                     [[charon_insert_action_name(own) description] UTF8String]);
             return [NSString stringWithFormat:@"segments=%ld title=%@ back=%@", (long)own.numberOfSegments,

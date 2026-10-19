@@ -1,23 +1,13 @@
-// SpriteKitSprite7.m - SKSpriteNode of iOS 7, carried for the releases that have no SpriteKit at all.
-//
-// A sprite is a node with a size, an anchor point, a colour and a texture. Its size is the one it is given, or the texture's
-// size when it is made from a texture without one; the colour blends with the texture by the colour blend factor. The
-// values are stored as the host stores them (measured against the host's own SpriteKit in facts/SpriteKit/SKSpriteNode.md),
-// and a setter does not check them. The initialisers do: a negative size raises (measured, the reasons in that fact file).
-//
-// Nothing here draws. The sprite's texture and colour are the renderer's, which is owed.
 #import "CharonSpriteKit.h"
 #if !TARGET_OS_IPHONE
 #import <AppKit/AppKit.h>
 #endif
 
-// The reason the host gives for a negative size, in the form of NSStringFromSize ({width, height} with %g).
 static NSString *CharonSKSizeString(CGSize size)
 {
     return [NSString stringWithFormat:@"{%g, %g}", size.width, size.height];
 }
 
-// The colour a sprite made from a texture has: white with no alpha (measured on the host, facts/SpriteKit/SKSpriteNode.md).
 static CharonSKColor *CharonSKTextureDefaultColor(void)
 {
 #if TARGET_OS_IPHONE
@@ -55,7 +45,6 @@ static CharonSKColor *CharonSKTextureDefaultColor(void)
     return [[self alloc] initWithTexture:texture];
 }
 
-// The host's message for a negative size here is "Invalid bounds specified", not the initialisers' "Invalid size specified".
 + (instancetype)spriteNodeWithTexture:(SKTexture *)texture size:(CGSize)size
 {
     if (size.width < 0 || size.height < 0) {
@@ -79,7 +68,6 @@ static CharonSKColor *CharonSKTextureDefaultColor(void)
     return self;
 }
 
-// A sprite made from a texture takes the texture's size, and the default colour of a texture sprite.
 - (instancetype)initWithTexture:(SKTexture *)texture
 {
     return [self initWithTexture:texture color:CharonSKTextureDefaultColor() size:texture.size];

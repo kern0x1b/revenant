@@ -119,10 +119,6 @@ typedef struct {
 @interface CharonMetalBuffer : NSObject <MTLBuffer>
 @property (nonatomic, readonly) void *bytes;
 @property (nonatomic, readonly) NSUInteger length;
-// The heap a buffer of a heap is a view into, and the offset inside it. The buffer holds the heap, so
-// the arena outlives every resource that is a view into it. -heap and -heapOffset are MTLResource's
-// own properties: the buffer answers those, of the SDK's own declaration, and does not declare a
-// second one of the same name.
 - (instancetype)initWithLength:(NSUInteger)length bytes:(const void *)bytes;
 - (instancetype)initWithHeap:(CharonMetalHeap *)heap offset:(NSUInteger)offset length:(NSUInteger)length;
 @end
@@ -143,8 +139,6 @@ typedef struct {
 @property (nonatomic) GLuint checkedStencil;
 @property (nonatomic, unsafe_unretained) CharonMetalSampler *appliedSampler;
 @property (nonatomic) int appliedCompare;
-// The internal surface a blit encoder copies through: a region of one mip level read or written with
-// the texture's own channel count, whatever the driver hands back for a read.
 - (BOOL)charonReadRegion:(MTLRegion)region level:(NSUInteger)level bytesPerRow:(NSUInteger)bytesPerRow into:(void *)pointer;
 - (BOOL)charonWriteRegion:(MTLRegion)region level:(NSUInteger)level bytes:(const void *)pointer bytesPerRow:(NSUInteger)bytesPerRow;
 - (BOOL)charonGenerateMipmaps;
@@ -152,21 +146,9 @@ typedef struct {
 - (BOOL)charonCanFilter;
 - (NSUInteger)charonChannels;
 - (NSUInteger)charonStorageSize;
-// The heap a texture of a heap was taken out of, and the offset inside it, and the setter the heap
-// uses. -heap and -heapOffset are MTLResource's own properties and are answered as the SDK declares
-// them; this is how the heap records where it put the texture.
 - (void)charonSetHeap:(CharonMetalHeap *)heap offset:(NSUInteger)offset;
 @end
 
-// A heap of the port is one allocation resources are taken out of, the way a heap is on any Metal
-// device: a buffer from a heap is a view into that allocation and a texture from a heap takes its
-// size out of it, so `usedSize`, `currentAllocatedSize`, `maxAvailableSizeWithAlignment:` and an
-// explicit offset all mean what the header says they mean. facts/Metal/Heaps.md is the whole of it.
-// Apple's documented alignment of a heap allocation: MTLHeapAlignment is 256 bytes in Apple's Metal
-// documentation (Metal Resource Allocation, "heap" alignment), which is where this number comes from
-// and not from a measurement of this device - the SGX 543 has no heaps. Nothing an application can
-// observe here depends on the exact value beyond the offsets it asks for, because 256 is also a
-// multiple of 16, the largest alignment an ARMv7 allocation needs.
 extern const NSUInteger CharonMetalHeapAlignment;
 
 @interface CharonMetalHeap : NSObject <MTLHeap>
@@ -176,7 +158,6 @@ extern const NSUInteger CharonMetalHeapAlignment;
 - (BOOL)charonPlace:(NSUInteger)length atOffset:(NSUInteger)offset error:(NSError **)error;
 - (NSUInteger)charonAligned:(NSUInteger)offset;
 - (void)charonDidAllocate:(NSUInteger)length;
-// What the heap recorded, for the members of 11.0 and 13.0 that live in their own files.
 - (NSUInteger)charonAllocated;
 - (MTLHeapType)charonType;
 - (MTLHazardTrackingMode)charonHazardTracking;
@@ -219,10 +200,6 @@ extern const NSUInteger CharonMetalHeapAlignment;
 - (const CharonPlan *)plan;
 @end
 
-// A compute pipeline of the port is a translated kernel and the threadgrid it wants, found in the
-// image that was loaded; a compute encoder runs a workgroup as one thread per thread of the group,
-// with a rendezvous of a mutex and a condition variable because iOS 6 has no pthread_barrier.
-// facts/Metal/Compute.md is the whole of it.
 @interface CharonMetalComputePipeline : NSObject <MTLComputePipelineState>
 - (instancetype)initWithFunction:(id<MTLFunction>)function error:(NSError **)error;
 - (void *)charonKernelFunction;
@@ -237,14 +214,9 @@ extern const NSUInteger CharonMetalHeapAlignment;
 @end
 
 @interface CharonMetalQueue : NSObject <MTLCommandQueue>
-// The command buffer the queue's factories vend, with the two settings the descriptor and the
-// unretained factory choose; the release files that name a factory call it.
 - (id<MTLCommandBuffer>)charonCommandBufferRetainingReferences:(BOOL)retaining errorOptions:(MTLCommandBufferErrorOption)options;
 @end
 
-// The command buffer of the port. Its times are 0 until it has completed, as Metal's are; the release
-// files that name a property read them through these accessors, since a category cannot add the
-// buffer's own state.
 @interface CharonMetalCommandBuffer : NSObject <MTLCommandBuffer>
 - (instancetype)initWithQueue:(CharonMetalQueue *)queue retainingReferences:(BOOL)retaining errorOptions:(MTLCommandBufferErrorOption)options;
 - (MTLCommandBufferErrorOption)charonErrorOptions;
@@ -256,9 +228,6 @@ extern const NSUInteger CharonMetalHeapAlignment;
 
 @interface CharonMetalEncoder : NSObject <MTLRenderCommandEncoder>
 - (instancetype)initWithDescriptor:(MTLRenderPassDescriptor *)descriptor;
-// The heaps -useHeap: and -useHeaps:count: name, and the check a bind makes against them. Metal
-// leaves undefined what happens when a resource that did not come from one of them is bound, so the
-// port says which resource it was rather than passing it by.
 - (void)charonUseHeaps:(id<MTLHeap> const *)heaps count:(NSUInteger)count;
 - (void)charonCheckHeapOf:(id)resource what:(const char *)what;
 - (NSString *)charonHeapNames;
@@ -268,23 +237,12 @@ extern const NSUInteger CharonMetalHeapAlignment;
 - (instancetype)initWithTexture:(CharonMetalTexture *)texture layer:(CAMetalLayer *)layer context:(EAGLContext *)context;
 @end
 
-// A blit is a copy, and a copy on this device is a copy on the CPU between the bytes of a buffer and
-// the pixels of a texture: the port's resources are all CPU-resident, so no transfer is ever staged.
 @interface CharonMetalBlitEncoder : NSObject <MTLBlitCommandEncoder>
 - (uint64_t)charonEncodedCount;
 - (BOOL)charonBlitTexture:(CharonMetalTexture *)source from:(MTLRegion)from level:(NSUInteger)sourceLevel
                       to:(CharonMetalTexture *)destination region:(MTLRegion)to level:(NSUInteger)destinationLevel;
 @end
 
-// A fence, and the event a shared fence is: a signal value and the wait that blocks until it is
-// reached. Both are real state, not a stand-in: -waitForFence: blocks until the value is signalled.
-// The event is the port's own class under a name of its own, because the SDK declares MTLSharedEvent
-// as a protocol and never names a class for it; the listener is the SDK's own class, implemented
-// here, because an application constructs that one by name.
-//
-// The value and the wait live in a state of their own, so that a handle names the state and not the
-// object: an event opened from a handle is a different object over the same value, which is what
-// opening an event in another process is.
 @interface CharonMetalEventState : NSObject
 - (uint64_t)signaledValue;
 - (void)setSignaledValue:(uint64_t)value;
@@ -318,8 +276,6 @@ typedef struct {
 - (const CharonDepthStencil *)state;
 @end
 
-// The log container of a command buffer and of a function log: the one class, defined in MTLReflection14.m and
-// handed out by MTLCommandBuffer14.m, so both files see its declaration here.
 @interface CharonMetalLogContainer : NSObject <MTLLogContainer>
 {
     NSMutableArray *_logs;

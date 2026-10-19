@@ -43,10 +43,6 @@ static void charon_moved(id<UIInteraction> interaction, UIView *view)
         [self addInteraction:interaction];
 }
 
-// An interaction is held once: adding one a view already holds leaves the list as it was and tells
-// the interaction's view, which is what the host's own UIKit does, and one that is held elsewhere
-// is moved rather than duplicated. A nil interaction is refused with the same exception and the same
-// message the host raises.
 - (void)addInteraction:(id<UIInteraction>)interaction
 {
     charon_needs(interaction != nil, @"interaction != nil");
@@ -64,8 +60,6 @@ static void charon_moved(id<UIInteraction> interaction, UIView *view)
     charon_moved(interaction, self);
 }
 
-// Removing one the view does not hold is quietly nothing, as on the host; removing a nil one is
-// refused the same way adding a nil one is.
 - (void)removeInteraction:(id<UIInteraction>)interaction
 {
     charon_needs(interaction != nil, @"interaction != nil");

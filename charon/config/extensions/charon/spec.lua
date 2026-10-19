@@ -1,11 +1,3 @@
--- Read a port's charon.toml and answer questions about it. The Lua port of spec.py: the same names, the same
--- refusals, the same messages. Substitution is split on purpose. Names this module can resolve are the ones Charon
--- knows without a dependency graph (paths, the target, what the build produced); names it cannot are left in place
--- for the generated recipe to resolve where the graph exists. An unknown name is an error, never an empty string:
--- a flag that silently loses its value builds something that fails elsewhere.
---
--- Call spec_bind(folder) first: the folder holds toml.lua, and its platforms/ holds the facts Charon ships.
-
 local MANIFEST = "charon.toml"
 local PATHS = {
     sources = ".", engine = "", build = "build", tasks = "tasks", package = "packaging", profiles = "",
@@ -32,7 +24,6 @@ local function toml()
     return TOML
 end
 
--- The toml reader this module uses, so a caller sees the same key order the declarations carry.
 function spec_toml()
     return toml()
 end
@@ -62,7 +53,6 @@ local function release(text)
     return parts
 end
 
--- a tuple comparison, as _release(a) < _release(b) is in Python
 local function release_before(a, b)
     local left, right = release(a), release(b)
     for index = 1, math.max(#left, #right) do
@@ -94,8 +84,6 @@ local function manifest_of(root)
     return path.join(root, MANIFEST)
 end
 
--- The placeholders in text, by name, in order: {name} or {name:detail}, where a name starts with a lower-case
--- letter and goes on with lower-case letters, digits, '_', '.' and '-'.
 function spec_placeholders(text)
     local found = {}
     for index = 1, #text do
@@ -107,7 +95,6 @@ function spec_placeholders(text)
     return found
 end
 
--- The name of the placeholder that starts at index, or nil when the text there is not one.
 function spec_match_at(text, index)
     if text:sub(index, index) ~= "{" then
         return nil
@@ -162,8 +149,6 @@ function spec_substitute(text, known, keep_graph_names)
     return table.concat(out)
 end
 
--- A manifest with one pipeline and no [variants] builds that pipeline as its one variant; a declared [variants]
--- table is never extended by the pipeline names.
 function spec_with_implicit_variants(content)
     local pipelines = content.pipeline
     if content.variants == nil and toml().is_table(pipelines) and truthy(pipelines) then
@@ -181,7 +166,6 @@ local function declaration(root, content, platforms)
     return {root = root, content = content, platforms = platforms}
 end
 
--- The declaration in root, or nil when the folder has no charon.toml.
 function spec_load(root)
     local file = manifest_of(root)
     if not os.isfile(file) then
@@ -260,8 +244,6 @@ local function is_named(entry, name)
     return entry.name == name
 end
 
--- The declaration as one variant builds it: the variant's tables merged over the port's, its targets overridden in
--- place, and the variant's name written as for-variant. The port's own declaration is not changed.
 function decl_for_variant(declared, name)
     local variant = decl_variant(declared, name)
     local content = toml().copy(declared.content)
@@ -339,7 +321,6 @@ local function platform_file(declared, name)
           name, joined(sorted_names(known), "none"))
 end
 
--- What the port builds for, from [platform] and the platform's facts. Nil when the port declares no [platform].
 function decl_platform(declared)
     local chosen = decl_section(declared, "platform")
     if not truthy(chosen) then

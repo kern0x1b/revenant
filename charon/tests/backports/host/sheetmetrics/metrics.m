@@ -1,7 +1,5 @@
 #import <UIKit/UIKit.h>
 
-/* Prints what the host's own sheet metrics (+[_UISheetPresentationMetrics _defaultMetrics], Mac Catalyst) answer, one
-   "name value" line each. A probe of the oracle, not the product: it asks the host's private class by name. */
 static double number(id object, NSString *name)
 {
     SEL selector = NSSelectorFromString(name);

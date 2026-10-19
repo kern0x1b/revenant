@@ -1,10 +1,6 @@
 #import <UIKit/UIKit.h>
 #include <stdio.h>
 
-// One body of checks, run on the host's own class (looked up by name, which run.sh's -D rename does not touch) and on the port's,
-// which run.sh compiles under the same identifier. A line is "side<TAB>check<TAB>value". Messages are sent through typed function
-// pointers, so each initialiser and factory is read as its own signature.
-
 typedef id (*Fn1)(id, SEL, id);
 typedef id (*Fn2)(id, SEL, id, id);
 typedef id (*Fn3)(id, SEL, id, id, id);

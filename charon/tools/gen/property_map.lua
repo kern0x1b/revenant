@@ -1,14 +1,3 @@
--- The ImageIO property-to-tag table of CGImageMetadata (iOS 7): the rows of CGImageMetadataCopyTagMatchingImageProperty and
--- CGImageMetadataSetValueMatchingImageProperty, written into .gen/ImageIO/ImageIOMetadata7.m from the object's hand-written text
--- (spec/ImageIO/ImageIOMetadata7.m.in) and the measured table (spec/ImageIO/property-map.tsv). The table is what the host's own
--- ImageIO answered for each (dictionary, property) pair of the SDK's CGImageProperties.h, one process per pair, by
--- tests/backports/host/imageio-metadata/property-table.m; its rows are in the pairs' order, and a pair the host does not map has no row.
---
--- It replaces tools/corpus/gen-imageio-property-map.py, which printed the same rows, and it reads no file outside the repository.
--- The pair list the probe asks about is written by pairs_header below, from the SDK's header:
---     xmake l tools/gen/property_map.lua <SDK>/System/Library/Frameworks/ImageIO.framework/Headers/CGImageProperties.h
--- which prints tests/backports/host/imageio-metadata/property-pairs-all.h.
-
 local tsv = import("tsv", {anonymous = true})
 local layout = import("layout", {anonymous = true})
 local files = import("files", {anonymous = true})
@@ -20,8 +9,6 @@ local OBJECT_NAME = "ImageIOMetadata7.m"
 local ROWS_MARK = "@PROPERTY_ROWS@\n"
 local COUNT_MARK = "@PROPERTY_COUNT@"
 
--- The ten public namespaces ImageIO declares, with the prefix the port names each by. A table row whose URI is none of them, or whose
--- prefix is not its namespace's, stops the writer: a tag in another namespace is not carried as a string literal.
 local NAMESPACE_PREFIX = {
     ["http://ns.adobe.com/exif/1.0/"] = "exif",
     ["http://ns.adobe.com/exif/1.0/aux/"] = "aux",
@@ -35,7 +22,6 @@ local NAMESPACE_PREFIX = {
     ["http://ns.adobe.com/xap/1.0/rights/"] = "xmpRights",
 }
 
--- The text with every occurrence of a plain needle replaced by a plain text (no pattern is read from either).
 local function replace_plain(text, needle, with)
     local out, pos = {}, 1
     while true do
@@ -51,7 +37,6 @@ local function replace_plain(text, needle, with)
     return table.concat(out)
 end
 
--- The rows of the table, checked: each is a mapped namespace with its own prefix, a String tag (kind 1), and an answer of the host.
 local function checked_rows(rows)
     for _, row in ipairs(rows) do
         local prefix = NAMESPACE_PREFIX[row.uri]
@@ -62,7 +47,6 @@ local function checked_rows(rows)
     return rows
 end
 
--- The C rows of the table: each row is its two strings, its URI, prefix and name, and the property constant it answers as a comment.
 local function row_text(rows)
     local lines = {}
     for _, row in ipairs(rows) do
@@ -72,7 +56,6 @@ local function row_text(rows)
     return table.concat(lines, "\n") .. "\n"
 end
 
--- The object of ImageIO's property table: name -> text. Empty for any other framework.
 function objects(tree, fw)
     local out = {}
     if fw ~= FRAMEWORK then
@@ -90,8 +73,6 @@ function objects(tree, fw)
     return out
 end
 
--- The (dictionary, property) pairs of a header: every property the header declares under a dictionary it names, in the header's order,
--- one entry per pair (two constants may share one string, and the pair is asked once).
 local function pairs_of(header_text)
     local current = nil
     local out, seen = {}, {}
@@ -116,7 +97,6 @@ local function pairs_of(header_text)
     return out
 end
 
--- The header the probe reads its pair list from: the same text the python printed, with the producer line naming this module.
 function pairs_header(header_text)
     local found = pairs_of(header_text)
     local lines = {
@@ -139,7 +119,6 @@ function pairs_header(header_text)
     return table.concat(lines, "\n") .. "\n"
 end
 
--- `xmake l tools/gen/property_map.lua HEADER`: prints the pair list of CGImageProperties.h to stdout.
 function main(header)
     assert(header ~= nil, "usage: xmake l tools/gen/property_map.lua <CGImageProperties.h>")
     local text = files.read_text(header)

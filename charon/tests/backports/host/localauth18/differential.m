@@ -4,16 +4,6 @@
 #import <LocalAuthentication/LocalAuthentication.h>
 #import "check.h"
 
-// The port's LAEnvironment family against the host's own LocalAuthentication. The host has a Touch ID
-// and a passcode set; this port's devices have neither a sensor nor a companion, and a passcode no
-// application can read. So this test does three things, and says which is which:
-//
-//   1. the shapes are the same - the same classes, the same protocols, the same selectors, the same
-//      one-object answers, the same copy-and-equal behaviour;
-//   2. the strings and values the port carries are the host's own, read across rather than retyped;
-//   3. every answer that must differ, differs, and each one is named here so the test fails if the
-//      port ever starts answering as a device with a sensor.
-
 @class CharonHostLAEnvironmentMechanism;
 @class CharonHostLAEnvironmentMechanismBiometry;
 @class CharonHostLAEnvironmentMechanismCompanion;
@@ -76,9 +66,6 @@
 - (void)environment:(CharonHostLAEnvironment *)environment stateDidChangeFromOldState:(CharonHostLAEnvironmentState *)oldState;
 @end
 
-// Everything is asked through objc_msgSend, so the same line asks the port's renamed class and the
-// system's own, with no declaration of the system's to get in the way.
-// The harness's check takes a C string for the name; a computed one is given as an NSString.
 static void check_named(BOOL passed, NSString *name, NSString *detail)
 {
     charon_check(passed, [name UTF8String], detail);
@@ -103,7 +90,6 @@ int main(void)
 {
     setvbuf(stdout, NULL, _IOLBF, 0);
 
-    // 1. The classes and the protocol are all there, on both sides, under their own names.
     NSArray *classes = @[@"LAEnvironment", @"LAEnvironmentState", @"LAEnvironmentMechanism",
                          @"LAEnvironmentMechanismBiometry", @"LAEnvironmentMechanismCompanion",
                          @"LAEnvironmentMechanismUserPassword", @"LADomainState", @"LADomainStateBiometry",
@@ -114,8 +100,6 @@ int main(void)
         check_named(port != Nil && system != Nil, [NSString stringWithFormat:@"%@ is there on both sides", name],
                      [NSString stringWithFormat:@"port %@, host %@", port, system]);
         if (port && system) {
-            // The port's superclass carries the rename the differential gives it, so the names are
-            // compared with the prefix taken off rather than the pointers.
             NSString *port_super = [NSStringFromClass([port superclass]) stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
             check_named([port_super isEqualToString:NSStringFromClass([system superclass])],
                          [NSString stringWithFormat:@"%@ stands on the same class", name],
@@ -126,7 +110,6 @@ int main(void)
     charon_check([NSClassFromString(@"CharonHostLAEnvironmentState") instancesRespondToSelector:@selector(copyWithZone:)],
                  "and it answers -copyWithZone:, as the header's NSCopying conformance says", @"no -copyWithZone:");
 
-    // 2. The shapes: one environment, one state, a copy that is another object and equal to it.
     id port_environment = ask(NSClassFromString(@"CharonHostLAEnvironment"), @"currentUser");
     id host_environment = ask(NSClassFromString(@"LAEnvironment"), @"currentUser");
     charon_check(port_environment != nil && host_environment != nil, "both hand out an environment", @"one is nil");
@@ -147,8 +130,6 @@ int main(void)
     charon_check(host_copy != host_state && [host_copy isEqual:host_state],
                  "which is what the host does with its own, asked the same way", @"the host's copy differs");
 
-    // 3. The port's mechanisms: one, and it is the passcode. The host has two, biometry and passcode,
-    //    which is the difference this port is here to report.
     NSArray *port_all = (NSArray *)ask(port_state, @"allMechanisms");
     NSArray *host_all = (NSArray *)ask(host_state, @"allMechanisms");
     printf("mechanisms: port %s host %s\n", [[port_all description] UTF8String], [[host_all description] UTF8String]);
@@ -164,7 +145,6 @@ int main(void)
     id port_password = ask(port_state, @"userPassword");
     charon_check(port_password != nil, "the passcode mechanism is there", @"nil");
     if (port_password) {
-        // 2. The strings the port carries are the host's own: read from the host's passcode mechanism.
         id host_password = ask(host_state, @"userPassword");
         charon_check(flag(port_password, @"isUsable") == NO, "the port's passcode mechanism is not usable",
                      [NSString stringWithFormat:@"%d", (int)flag(port_password, @"isUsable")]);
@@ -179,21 +159,16 @@ int main(void)
         printf("passcode mechanism: name %s icon %s (host: name %s icon %s)\n",
                [[ask(port_password, @"localizedName") description] UTF8String], [[ask(port_password, @"iconSystemName") description] UTF8String],
                [[ask(host_password, @"localizedName") description] UTF8String], [[ask(host_password, @"iconSystemName") description] UTF8String]);
-        // The host's answers are the ones this port cannot have, and naming them keeps the difference
-        // visible: if the host ever answers NO here, this test is looking at something else.
         charon_check(flag(host_password, @"isSet") == YES, "the host's passcode is set, as it says",
                      [NSString stringWithFormat:@"host %d", (int)flag(host_password, @"isSet")]);
         charon_check(flag(host_password, @"isUsable") == YES, "and usable, as it says",
                      [NSString stringWithFormat:@"host %d", (int)flag(host_password, @"isUsable")]);
     }
 
-    // 4. Observers are taken and never called; the host's state does not change either while this runs,
-    //    so both are silent, and the test checks the port takes a nil one without raising.
     [(id)port_environment addObserver:nil];
     [(id)port_environment removeObserver:nil];
     charon_check(YES, "a nil observer is taken by both calls", @"raised");
 
-    // 5. The domain state: the shapes are the host's, the contents are this release's.
     id port_domain = ask(port_state, @"biometry") == nil ? nil : nil;
     charon_check(port_domain == nil, "(the port's state has no biometry, so there is nothing to ask for one there)", @"not nil");
     LAContext *context = [[LAContext alloc] init];
@@ -238,9 +213,6 @@ int main(void)
         charon_check([ask(ask(host_domain, @"companion"), @"stateHash") length] == 0,
                      "the host's companion hash is empty, which is why the port's nil is its own answer for a state with nothing in it",
                      @"the host's companion hash is not empty");
-        // A context that has never evaluated anything has no enrolled biometry in its domain either,
-        // and the host answers nil for those hashes as well: the port's nil is what the host itself
-        // gives a domain with nothing in it, not only for a companion.
         check_named([ask(ask(host_domain, @"biometry"), @"stateHash") length] == 0
                     && [ask(host_domain, @"stateHash") length] == 0,
                     @"the host's own fresh context has no biometry hash and no domain hash either",

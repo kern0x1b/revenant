@@ -1,23 +1,9 @@
-// measure.m - what the host's own NSMorphology, NSMorphologyCustomPronoun, NSMorphologyPronoun,
-// NSInflectionRule and NSInflectionRuleExplicit answer, measured once and written to expected.txt.
-// The 26.2 members come from CharonMorphology26.h, a category on the SDK's own classes, so what is
-// measured is the host's class and not a rename of it.
-//
-//   xcrun clang -fobjc-arc -Wno-deprecated-declarations -Wno-unguarded-availability-new \
-//       -I . -o measure measure.m -framework Foundation
-//   ./measure > expected.txt
-//
-// One case per line, tab-separated, in a fixed order so a diff means something. The port is held to
-// this file by tests/backports/host/morphology/differential.m.
-
 #import <Foundation/Foundation.h>
 #import <dlfcn.h>
 #import "CharonMorphology26.h"
 
 static NSArray *Languages(void)
 {
-    // The languages the release and the host are both likely to answer for, and a few that neither is:
-    // a bare language, a language with a region, a language with a script, an empty one, and a made-up one.
     return @[@"en", @"en_US", @"en_GB", @"fr", @"fr_FR", @"de", @"ru", @"ja", @"ar", @"es", @"pt", @"zh", @"it",
              @"nl", @"pl", @"tr", @"ko", @"he", @"th", @"hi", @"und", @"", @"xx_YY", @"klingon", @"123"];
 }
@@ -36,7 +22,6 @@ int main(int argc, char **argv)
 {
     setvbuf(stdout, NULL, _IONBF, 0);
     @autoreleasepool {
-        // A fresh object's eight settings and the two answers that are not storage.
         NSMorphology *fresh = [[NSMorphology alloc] init];
         Emit(@"fresh.gender", @(fresh.grammaticalGender));
         Emit(@"fresh.partOfSpeech", @(fresh.partOfSpeech));
@@ -50,7 +35,6 @@ int main(int argc, char **argv)
         Emit(@"userMorphology.unspecified", @([NSMorphology userMorphology].unspecified));
         Emit(@"userMorphology.gender", @([NSMorphology userMorphology].grammaticalGender));
 
-        // Each setting written, and what -isUnspecified then says.
         for (NSInteger value = 0; value <= 3; value++) {
             NSMorphology *m = [[NSMorphology alloc] init];
             m.grammaticalGender = (NSGrammaticalGender)value;
@@ -65,7 +49,6 @@ int main(int argc, char **argv)
                    (long)m.partOfSpeech, (long)m.number, (long)m.grammaticalCase, (long)m.determination,
                    (long)m.grammaticalPerson, (long)m.pronounType, (long)m.definiteness, (int)m.unspecified);
         }
-        // A value outside each enumeration: read back as written, or refused.
         for (NSInteger value = 40; value <= 43; value++) {
             NSMorphology *m = [[NSMorphology alloc] init];
             m.grammaticalGender = (NSGrammaticalGender)value;
@@ -80,8 +63,6 @@ int main(int argc, char **argv)
                    (long)m.partOfSpeech, (long)m.number, (long)m.grammaticalCase, (long)m.determination,
                    (long)m.grammaticalPerson, (long)m.pronounType, (long)m.definiteness, (int)m.unspecified);
         }
-        // Which of the eight settings -isUnspecified reads, one at a time: the three the SDK declares
-        // at 15.0 and the five at 17.0 do not have the same standing (7777ac79's finding).
         {
             const char *names[] = {"grammaticalGender", "partOfSpeech", "number", "grammaticalCase", "determination",
                                    "grammaticalPerson", "pronounType", "definiteness", NULL};
@@ -93,7 +74,6 @@ int main(int argc, char **argv)
                 }
             }
         }
-        // The description's own field order, and a value outside each enumeration.
         {
             NSMorphology *m = [[NSMorphology alloc] init];
             m.grammaticalGender = 1;
@@ -117,7 +97,6 @@ int main(int argc, char **argv)
             printf("description.outOfRange\t%s\n", [out.description UTF8String]);
         }
 
-        // Which number makes it not unspecified, and which make it specified.
         for (NSInteger value = 0; value <= 3; value++) {
             NSMorphology *m = [[NSMorphology alloc] init];
             m.number = (NSGrammaticalNumber)value;
@@ -135,14 +114,12 @@ int main(int argc, char **argv)
             printf("only%ld.unspecified\t%d\n", (long)value, (int)m.unspecified);
         }
 
-        // The per-language custom pronoun support, over the set above.
         for (NSString *language in Languages()) {
             printf("supported.%s\t%d\n", language.UTF8String, (int)[NSMorphologyCustomPronoun isSupportedForLanguage:language]);
             NSString *required = List([NSMorphologyCustomPronoun requiredKeysForLanguage:language]);
             printf("required.%s\t%s\n", language.UTF8String, required.UTF8String);
         }
 
-        // Setting a custom pronoun: the full one, an empty one, nil, and one with only the required keys.
         NSMorphologyCustomPronoun *full = [[NSMorphologyCustomPronoun alloc] init];
         full.subjectForm = @"she";
         full.objectForm = @"her";
@@ -176,7 +153,6 @@ int main(int argc, char **argv)
             printf("setNil.%s\t%d\t%s\t%ld\t%s\n", language.UTF8String, (int)nilOK, nilError.domain.UTF8String ?: "(none)",
                    nilError ? (long)nilError.code : 0, nilError.localizedDescription.UTF8String ?: "(none)");
         }
-        // Reading a language that was never set, and one that was.
         {
             NSMorphology *m = [[NSMorphology alloc] init];
             printf("readback.unset\t%s\n", [m customPronounForLanguage:@"en"] ? "an object" : "(nil)");
@@ -185,7 +161,6 @@ int main(int argc, char **argv)
             printf("readback.fr\t%s\n", [m customPronounForLanguage:@"fr"] ? "an object" : "(nil)");
         }
 
-        // The five forms, each written and read back, and the two in the middle defaulted.
         {
             NSMorphologyCustomPronoun *p = [[NSMorphologyCustomPronoun alloc] init];
             printf("forms.empty\t%s\t%s\t%s\t%s\t%s\n", p.subjectForm.UTF8String ?: "(nil)",
@@ -199,7 +174,6 @@ int main(int argc, char **argv)
                    p.possessiveForm.UTF8String, p.possessiveAdjectiveForm.UTF8String, p.reflexiveForm.UTF8String);
         }
 
-        // A pronoun, and what the two unavailable initialisers do.
         {
             NSMorphologyPronoun *p = [[NSMorphologyPronoun alloc] initWithPronoun:@"she"
                                                                               morphology:[[NSMorphology alloc] init]
@@ -208,7 +182,6 @@ int main(int argc, char **argv)
                    p.dependentMorphology ? "an object" : "(nil)");
         }
 
-        // The inflection rules, over the same languages.
         for (NSString *language in Languages())
             printf("canInflect.%s\t%d\n", language.UTF8String, (int)[NSInflectionRule canInflectLanguage:language]);
         @try {
@@ -231,7 +204,6 @@ int main(int argc, char **argv)
             }
         }
 
-        // The archives, so the keys are the host's.
         {
             NSMutableData *data = [NSMutableData data];
             NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
@@ -262,13 +234,6 @@ int main(int argc, char **argv)
             printf("archive.rule\t%lu\n", (unsigned long)ed.length);
         }
 
-        // The seven attribute-name constants, read out of the host's own image: each is a
-        // FOUNDATION_EXPORT NSAttributedStringKey in the 26.2 SDK's NSAttributedString.h, so the symbol
-        // holds an NSString * and the pointer is read, not the bytes at it.
-        // Every enumeration name, one case per value from NotSet to the last and the value one past it,
-        // which is the parenthesised form. A -description that printed a bare number, or a table with a
-        // single wrong entry, answered 344/0 before these were here; these are the cases that hold the
-        // eight tables to the host's own names.
         {
             static const struct { const char *property; NSInteger count; } sets[] = {
                 {"grammaticalGender:grammaticalGender", 4}, {"partOfSpeech:partOfSpeech", 12},
@@ -305,7 +270,6 @@ int main(int argc, char **argv)
             printf("constant.%s\t%s\n", name, [value UTF8String] ?: "(null)");
         }
 
-        // The class names, so a rename is caught.
         printf("attributeName\t%s\n", NSMorphologyAttributeName.UTF8String);
         const char *classNames[] = {"NSMorphology", "NSMorphologyCustomPronoun", "NSMorphologyPronoun",
                                    "NSInflectionRule", "NSInflectionRuleExplicit", NULL};

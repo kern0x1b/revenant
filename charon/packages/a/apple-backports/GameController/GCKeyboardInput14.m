@@ -4,16 +4,6 @@
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-// The keyboard profile: one button per key code, the same spec pipeline every other profile in
-// this package is built from, so a key is a real GCControllerButtonInput that reads 0 and is not
-// pressed until something sets it, and a caller can poll it or hook a handler on it.
-//
-// The table is the SDK's own GCKeyCodes.h list, one spec per key the port carries a value for,
-// with the key's name as the alias - the form GCKeyNames.h uses and the form -buttonForKeyCode:
-// and the profile's subscript both answer with. The eight keys that list carries and this port
-// does not (GCKeyCodeF13 through GCKeyCodeF20, which are macOS-only) are named in the facts page
-// as the difference in count between this profile and the host's, which has all 134.
-
 @implementation GCKeyboardInput {
     GCKeyboardValueChangedHandler _keyChangedHandler;
     NSDictionary<NSNumber *, GCControllerButtonInput *> *_byKeyCode;
@@ -176,16 +166,11 @@
     return _anyKeyPressed;
 }
 
-// One list of specs is the whole table: the map is built from it in -init, so a key code with
-// no spec row has no button and answers nil, and nothing here can drift from the specs.
 - (GCDeviceButtonInput *)buttonForKeyCode:(GCKeyCode)code
 {
     return (id)_byKeyCode[@((int)code)];
 }
 
-// The one thing that moves a keyboard: a key changes value, its own handlers run through the
-// element, and the profile's handler runs for that key alone, which is what the header's note
-// says - once per key that changed, not once per event.
 - (void)charon_setPressed:(BOOL)pressed forKeyCode:(GCKeyCode)code value:(float)value
 {
     GCControllerButtonInput *key = (id)_byKeyCode[@((int)code)];

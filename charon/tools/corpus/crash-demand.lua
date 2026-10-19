@@ -1,80 +1,9 @@
--- Crash-level demand ranking: absent iOS-6 API that corpus apps use WITHOUT a guard. Lua port of the former
--- crash-demand.py; its docstring's caveats are kept here, unchanged in substance.
---
--- LINK-TIME symbols (classes, constants, C functions), from the corpus store:
---   strong import -> dyld aborts at LAUNCH if absent   (severity LOAD-FAIL)
---   weak import   -> guarded, degrades to nil          (severity soft)
---
--- SELECTORS (methods/properties). For each app, a selector is a SEND when the bundle carries the string
--- (__objc_methname) but does not DEFINE it (otool -oV method_t): defined selectors are override points/callbacks
--- that UIKit calls and the app does not send, so a missing one is harmless. Each send is mapped through the SDK
--- (Backports 7-10's surface-diff clang AST dump) to owner class, framework and INTRODUCED version. An app whose
--- deployment target (LC_BUILD_VERSION minos) >= that version needs no availability guard -> unrecognized-selector
--- crash on iOS 6 (CRASH-ON-USE); a lower minos means the app must guard it -> soft. Selectors with no public SDK
--- declaration drop out (app-private).
---
--- Registry status follows surface-diff's own rule: an exact row, a property's method-form rows, else the owner class
--- (absent/ignored/owed decide all members; implemented/inert covers members that arrived no later than the class
--- row), else undecided.
---
--- CAVEATS to repeat wherever this is quoted:
---  - a selector name is not class-bound in the binary; a name an app uses on its OWN class that also exists in the
---    SDK is a false positive (cross-app frequency limits it).
---  - "status comes from the ORIGINAL (earliest) owner" is sound ONLY for a name with ONE owner. For an ambiguous name
---    it SILENTLY LOSES the later owners: the row collapses onto the earliest class and every app that actually meant
---    a later one disappears with it. So the list UNDERCOUNTS demand, it does not only overcount -- and it fails
---    quietly, which is the worse failure. Caught on `prepare`: collapsed onto AVAudioEngine (AVFAudio 8.0), while
---    ppsspp/session/telegram import UIFeedbackGenerator (UIKit 10.0) and not AVAudioEngine; UIFeedbackGenerator.prepare
---    could never have appeared as a row of its own. Fix for an ambiguous row: decide the owner by which of the
---    candidate CLASSES each app actually imports, and SPLIT the row across the real owners instead of collapsing it.
---  - "unguarded" = no guard REQUIRED (minos >= introduced). A developer may still have written respondsToSelector:.
---    Upper bound on crash exposure, not proof.
---  - hardware-gated frameworks (Metal, ARKit, CoreNFC, CoreHaptics) are excluded.
---  - SENDERS OUTSIDE THE APP are invisible: only messages the app's own bundle sends are counted. A method UIKit (or
---    a backport library) calls on the app's objects -- e.g.
---    -systemLayoutSizeFittingSize:withHorizontalFittingPriority:verticalFittingPriority:, which self-sizing cells need
---    and no corpus binary names -- never appears, and neither do apps outside the corpus. "Not in the ranking" is not
---    "cannot crash": the ranking orders work, a run on a device decides.
---  - SIXTH blind spot, the same family as the fifth and larger: C-FUNCTION KEY SPELLING. The registry writes a C
---    function as `name()`; a Mach-O symbol has no parentheses and one leading underscore. Stripping the underscore but
---    not trying the `()` spelling reported EVERY carried C function as a gap. Measured when it was fixed: 76 of 140
---    link-symbol rows were false (44 implemented, 24 inert, 8 decided absent) -- the whole OpenGLES ES3 pack of 44 was
---    already carried, including _glDeleteVertexArrays, which had been the number-one head row at 4 apps, plus 11
---    Security, 5 UIKit accessibility, 3 vImage, 3 CoreVideo.
---  - FIFTH blind spot, and the only one that manufactures FALSE gaps rather than losing real ones: CLASS-LEVEL COVERAGE
---    vs ROW-LEVEL CHECKING. The registry may state a whole class in one entry, and then no per-member row exists.
---    Checking only for a per-member row reports the whole surface as a gap although it is carried. Caught when the 7-10
---    band checked six head rows against the tree and found FIVE already implemented (NSURLSessionConfiguration
---    backgroundSessionConfigurationWithIdentifier:, NSUserActivity initWithActivityType:,
---    UISearchController.obscuresBackgroundDuringPresentation, UITextInputAssistantItem.leading/trailingBarButtonGroups,
---    UIFeedbackGenerator.prepare). Two causes, both fixed above: `inert` class rows propagated to nothing at all, and
---    `implemented` class rows covered only members no newer than the class row's own `introduced`. This one costs
---    other people's TIME, not accuracy: the head of the list sent work that was already done.
---  - SEVENTH blind spot, and the one that cost a whole session before anyone could see it: A SELECTOR WITH NO VERSION
---    IN sdk-introduced.json depends on caches/sel/{7.0.1,10.3.4,12.0}.strings (~870 MB, carried from the prior wave's
---    scratchpad, not regenerated by anything in this repo) to get an upper-bound `introduced` release at all. Before
---    this tool refused to run without it, a missing or empty caches/sel/ made every such selector fall through a silent
---    `continue` -- no count, no trace, no error. Now: no caches/sel/ -> refuse to run and name what's missing; a
---    selector still unmeasurable even with the cache present -> counted into corpus/crash-demand-dropped.tsv, not lost.
---
--- PROJECT RULE, checking whether a symbol is really missing on the old system: check it against the EXPORT TABLE of
--- the library the import binds to, never against `strings` of the shared cache. The cache's string blob also holds
--- the LOCAL symbol names of every image, so a private, non-exported symbol of the very same framework reads as
--- "present" there while no import can ever bind to it. Found on _kCLErrorUserInfoAlternateRegionKey: its name sits in
--- CoreLocation's string table next to __ZTV13CLPreferences and _kCLHeadingCodingKeyAccuracy, and CoreLocation exports
--- 137 symbols, none of them this one -> a real LOAD-FAIL gap, not a false positive.
---
--- Lua has no regular expressions. Where the Python searched with a regex, the text matchers live in objc_text.lua
--- (each names the expression it replaces), and the key order of sdk-introduced.json comes from json_order.lua.
---
--- usage: xmake l tools/corpus/crash-demand.lua
 import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 local aggregate = import("aggregate", {rootdir = os.scriptdir(), anonymous = true})
 local objc = import("objc_text", {rootdir = os.scriptdir(), anonymous = true})
 local json_order = import("json_order", {rootdir = os.scriptdir(), anonymous = true})
 
--- Deployment targets, measured with otool -l (LC_BUILD_VERSION minos) on each main binary.
 local MINOS = {ish = {11, 0}, ppsspp = {11, 0}, pojav = {12, 2}, provenance = {16, 0},
                delta = {14, 0}, utm = {14, 0}, aidoku = {15, 0}, yattee = {14, 0},
                session = {15, 0}, telegram = {11, 0}}
@@ -87,17 +16,12 @@ local FRAMEWORKS_SESSION = {Photos = true, PhotosUI = true, AVFoundation = true,
                             CoreVideo = true, Accelerate = true, CoreImage = true, MobileCoreServices = true,
                             CoreServices = true, CoreText = true, QuartzCore = true, CoreMotion = true, MapKit = true,
                             OpenGLES = true}
--- owed (2026-09-30) is the port's own debt: the release has the name and nobody has written it, so it ranks with
--- absent as a real gap and below ignored, which is a decision rather than debt.
 local RANK = {implemented = 0, inert = 1, ignored = 2, owed = 3, absent = 4, undecided = 5}
 local GAP = {"absent", "undecided", "ignored", "gap?"}
 local GAPSET = {undecided = true, absent = true, ignored = true}
 local CARRIED = {implemented = true, inert = true}
 local CACHE_RUNGS = {{"7.0.1", {7, 1}}, {"10.3.4", {10, 3}}, {"12.0", {12, 0}}}
 
--- ---- small helpers ----------------------------------------------------------------------------------------------
-
--- Python's str.startswith(tuple).
 local function starts_with_any(text, prefixes)
     for _, prefix in ipairs(prefixes) do
         if text:sub(1, #prefix) == prefix then
@@ -107,12 +31,10 @@ local function starts_with_any(text, prefixes)
     return false
 end
 
--- A status's head: "implemented(class)" -> "implemented".
 local function head(status)
     return status:match("^[^(]*")
 end
 
--- Python's round(): halves go to the even neighbour.
 local function pyround(x)
     local f = math.floor(x)
     local diff = x - f
@@ -124,8 +46,6 @@ local function pyround(x)
     return f % 2 == 0 and f or f + 1
 end
 
--- A version text as a list of numbers ("7.0" -> {7, 0}); nil for an empty text. JSON null arrives as a userdata
--- sentinel, not nil, so anything that is not a non-empty string is no version.
 local function ver(text)
     if type(text) ~= "string" or text == "" then
         return nil
@@ -137,7 +57,6 @@ local function ver(text)
     return parts
 end
 
--- Python's tuple "<": element by element, a shorter tuple that is a prefix of the longer one is the smaller.
 local function tuple_less(a, b)
     for index = 1, math.max(#a, #b) do
         if a[index] == nil then
@@ -153,7 +72,6 @@ local function tuple_less(a, b)
     return false
 end
 
--- Python's min(items, key=key): the first of the smallest keys.
 local function min_by(items, key)
     local best, best_key = nil, nil
     for _, item in ipairs(items) do
@@ -200,12 +118,10 @@ local function version_text(v)
     return table.concat(v, ".")
 end
 
--- The composite sort key: fields joined by \1, numbers zero-padded and inverted where a larger count sorts first.
 local function desc(n)
     return string.format("%09d", 999999999 - n)
 end
 
--- Sorts entries by a key built from fields; `index` keeps ties in input order.
 local function sorted_by(entries, key_of)
     local keyed = {}
     for index, entry in ipairs(entries) do
@@ -235,10 +151,6 @@ local function count_of(set)
     return n
 end
 
--- ---- the protocol-member search (Python's protocol_member_in_tree) -----------------------------------------------
-
--- The bodies of the @implementation blocks of the tree: class -> {body, ...}, and the classes in first-seen order.
--- Each file is read on its own, so a block that is never closed cannot run into the next file.
 local function tree_implementations(tree)
     local impls, order = {}, {}
     local files = {}
@@ -264,9 +176,6 @@ local function tree_implementations(tree)
     return impls, order
 end
 
--- ---- the tables that drive the ranking -------------------------------------------------------------------------
-
--- The overrides file: a symbol -> its decision text, from the second line on.
 local function load_overrides(corpus)
     local overrides = {}
     local file = path.join(corpus, "decision-overrides.tsv")
@@ -289,8 +198,6 @@ local function load_overrides(corpus)
     return overrides
 end
 
--- A PROTOCOL owner has no @implementation of its own ... (see protocol_member_in_tree).
--- The override normalisation: a decision phrased in an unrecognised way must rank, not vanish.
 local CARRIED_OVERRIDE_PHRASINGS = {"present-on-6", "implemented"}
 local INERT_OVERRIDE_PHRASINGS = {"present-inert", "must-be-present-inert"}
 local function normalize_override(raw)
@@ -306,8 +213,6 @@ local function normalize_override(raw)
     return "gap? implement -- " .. raw
 end
 
--- The tree's header text, as the registry's protocol rows see it: the first class that the apps import and that
--- carries the member decides it.
 local function protocol_member_finder(impls, order, imported)
     local function carrier_of(sel)
         for _, c in ipairs(order) do
@@ -335,8 +240,6 @@ local function protocol_member_finder(impls, order, imported)
     return carrier_of
 end
 
--- ---- main ---------------------------------------------------------------------------------------------------------
-
 function main()
     local corpus = aggregate.corpus_dir()
     local sdk = aggregate.read_json(path.join(corpus, "sdk-introduced.json"))
@@ -345,7 +248,6 @@ function main()
     local reg_kinds = aggregate.load_reg_kinds()
     local store = aggregate.load_store(false)
 
-    -- The tree the protocol search reads: CHARON_TREE_DIR, else the coordinator's shared checkout.
     local tree_candidates = {path.join(os.getenv("HOME"), "Git", "projects", "ios", "charon", "packages", "a", "apple-backports")}
     if os.getenv("CHARON_TREE_DIR") then
         table.insert(tree_candidates, 1, os.getenv("CHARON_TREE_DIR"))
@@ -376,7 +278,6 @@ function main()
     end
     local carrier_of = protocol_member_finder(impls, impl_order, imported_classes)
 
-    -- selector -> the best registry status it has on ANY owner
     local reg_sel = {}
     for api, st in pairs(reg) do
         local sel = api:match("^[-+]%[[%w_]+ (.+)%]$")
@@ -385,7 +286,6 @@ function main()
         end
     end
 
-    -- An owner recorded with no version stays unversioned here; see the Python's class_version note.
     local function class_version(owner)
         local e = sdk[owner]
         if e and e[2] then
@@ -398,14 +298,11 @@ function main()
         return e and e[1] or "?"
     end
 
-    -- SDK selector index: selector -> list of {intro, api, owner, ownerkind, fw, memberkind}
     local idx = {}
     local function add(sel, entry)
         idx[sel] = idx[sel] or {}
         table.insert(idx[sel], entry)
     end
-    -- The ranking breaks ties by the file's key order (the first of equally early owners), and core.base.json's
-    -- table has none, so the order is read from the text by a tokenizer that respects strings.
     local sdk_text = io.readfile(path.join(corpus, "sdk-introduced.json"))
     for _, api in ipairs(json_order.top_level_keys(sdk_text)) do
         local e = sdk[api]
@@ -422,7 +319,6 @@ function main()
                 local owner, name = api:sub(1, dot - 1), api:sub(dot + 1)
                 local up = name:sub(1, 1):upper() .. name:sub(2)
                 for _, sel in ipairs({name, "set" .. up .. ":", "is" .. up}) do
-                    -- a custom getter isName: the bare name is not a selector on iOS 6
                     if not (sel == name and universe["is" .. up] and not universe[name]) then
                         add(sel, {intro = ver(v) or class_version(owner), api = api, owner = owner,
                                   ownerkind = kind_of(owner), fw = fw, memberkind = "property"})
@@ -432,7 +328,6 @@ function main()
         end
     end
 
-    -- Status of ONE (owner, member) candidate, by surface-diff's coverage rule.
     local overrides = load_overrides(corpus)
     local function status_one(c)
         local keys = {c.api}
@@ -452,8 +347,6 @@ function main()
         end
         if st == nil then
             local ost = reg[c.owner]
-            -- A PROTOCOL owner is not a class owner: "protocol absent" does not condemn the member, which the
-            -- adopting classes may provide.
             if reg_kinds[c.owner] == "protocol" and (ost == "absent" or ost == "ignored") then
                 ost = nil
             end
@@ -481,7 +374,6 @@ function main()
         return st or "undecided"
     end
 
-    -- per-app SENDS: carried minus stock 6.0 minus defined
     local selcache = path.join(corpus, "selcache")
     local defcache = path.join(corpus, "defcache")
     local sends = {}
@@ -505,7 +397,6 @@ function main()
         end
     end
 
-    -- A selector NAME is not class-bound in the binary; `_OBJC_CLASS_$_<Name>` is the strong-import symbol that is.
     local class_holders = {}
     for app, d in pairs(store.apps) do
         for _, r in ipairs(d.demand) do
@@ -516,7 +407,6 @@ function main()
         end
     end
 
-    -- The caches/sel strings: they give an unversioned selector an upper-bound release. Refuse without them.
     local caches_candidates = {path.join(corpus, "caches")}
     if os.getenv("CHARON_CACHES_DIR") then
         table.insert(caches_candidates, 1, os.getenv("CHARON_CACHES_DIR"))
@@ -536,7 +426,6 @@ function main()
     end
     local caches_root = path.directory(caches_sel)
 
-    -- The 6.0 baseline and the ladder: the same index aggregate.lua's ingest decides "is a gap" with.
     local b60, ladder = aggregate.build_index(caches_root)
     local gap_class_syms = {}
     for _, rung in ipairs(ladder) do
@@ -574,7 +463,6 @@ function main()
         return nil
     end
 
-    -- sel_apps: selector -> set of apps that send it and that the SDK index knows
     local sel_apps = {}
     for _, app in ipairs(APPS) do
         for s in pairs(sends[app] or {}) do
@@ -608,7 +496,6 @@ function main()
                 table.insert(dropped_no_version, {sel = s, apps = set_list(apps)})
                 skip = true
             else
-                -- introduced <= ub (the first release whose strings contain it); enough for the deployment-target rule
                 known = {}
                 for _, c in ipairs(idx[s]) do
                     table.insert(known, {intro = ub, api = c.api, owner = c.owner, ownerkind = c.ownerkind,
@@ -624,7 +511,6 @@ function main()
             else
                 local first = min_by(known, function (c) return c.intro end)
                 if HW[first.fw] or HW_NAME(first.api) then
-                    -- hardware-gated
                 else
                     local sendable = {}
                     for _, c in ipairs(known) do
@@ -639,7 +525,6 @@ function main()
                     else
                         local best = min_by(sendable, function (c) return c.intro end)
                         local key = best.api
-                        -- owners introduced together with the earliest one are equally "original"
                         local earliest, is_earliest = {}, {}
                         for _, c in ipairs(sendable) do
                             if not tuple_less(best.intro, c.intro) and not tuple_less(c.intro, best.intro) then
@@ -732,7 +617,6 @@ function main()
         if g.owners > 1 then
             disp = key .. " (+" .. (g.owners - 1) .. " owners)"
         end
-        -- Class-symbol verification, alongside the name-based count, not instead of it.
         local cls_note = ""
         local confirmed = {}
         if g.ownerkind == "class" and gap_class_syms["_OBJC_CLASS_$_" .. g.owner] then
@@ -773,7 +657,6 @@ function main()
                             cls_callers = cls_crash, cls_note = cls_note})
     end
 
-    -- ---- link-time symbols
     local seen, seen_order = {}, {}
     for _, app in ipairs(APPS) do
         local d = store.apps[app]
@@ -825,8 +708,6 @@ function main()
         end
     end
 
-    -- ---- decision hints for UNDECIDED rows (mechanical evidence only; leave-one-out hit rates)
-    -- Band 13+ is excluded: the registry decides it ~93% absent because that band is UNSTARTED.
     local classes6 = aggregate.class_universe()
     local function owner_of(api)
         api = api:gsub(" %(%+%d+ owners%)$", "")
@@ -856,7 +737,7 @@ function main()
     local function exists(o)
         return classes6[o] or CARRIED[reg[o]]
     end
-    local sib = {}                      -- owner .. band -> list of carried?-booleans over decided members
+    local sib = {}
     local decided = {}
     for _, api in ipairs(byteorder.keys(reg)) do
         local st = reg[api]
@@ -871,7 +752,7 @@ function main()
             end
         end
     end
-    local hit = {}                      -- tag -> {right, total}
+    local hit = {}
     for _, d in ipairs(decided) do
         local tag, pred
         if not exists(d.o) then
@@ -941,7 +822,6 @@ function main()
     end
     print("hint hit rates (leave-one-out, decided members, bands 7-12): " .. table.concat(hit_summary, ", "))
 
-    -- ---- write the outputs
     local gaps = {}
     for _, r in ipairs(rows) do
         if starts_with_any(r.status, GAP) and r.crash > 0 then

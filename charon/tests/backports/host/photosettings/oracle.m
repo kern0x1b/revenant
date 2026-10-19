@@ -5,14 +5,6 @@
 #include <string.h>
 #import "../../device/jpeg-exif.h"
 
-// AVCapturePhotoSettings and AVCapturePhotoOutput of the port (built under the names CharonHostAVCapturePhotoSettings and
-// CharonHostAVCapturePhotoOutput) against the host's own classes, with no camera. Every member the SDK the package
-// builds with declares (read from its header by run.sh: "<class> -|+ <selector>" per line, the file given as argument
-// 1) is answered by the port with the host's type encoding, and the port holds no ivar the compiler synthesized for a
-// header property. Then the same requests are made of both, and each answer, value or exception, must be the host's.
-// Where the port answers otherwise on purpose (the facts name each), the check is that both still answer as measured, so
-// the check fails if the host ever stops diverging.
-
 static int checks, failures;
 
 static void check(BOOL passed, NSString *what)
@@ -26,7 +18,6 @@ static void check(BOOL passed, NSString *what)
 static Class hostSettings, portSettings, hostOutput, portOutput;
 static NSMutableDictionary<NSString *, NSMutableArray *> *declared;
 
-// What an expression answers: its value's description, or the exception it raises.
 static NSString *answer(id (^block)(void))
 {
     @try {
@@ -37,7 +28,6 @@ static NSString *answer(id (^block)(void))
     }
 }
 
-// The same request of the host's class and the port's: the answers must be equal.
 static void same(NSString *what, id (^block)(Class settings, Class output))
 {
     NSString *host = answer(^{ return block(hostSettings, hostOutput); }), *port = answer(^{ return block(portSettings, portOutput); });
@@ -46,7 +36,6 @@ static void same(NSString *what, id (^block)(Class settings, Class output))
                        : [NSString stringWithFormat:@"%@\n     host: %@\n     port: %@", what, host, port]);
 }
 
-// A known divergence: the host answers `hostExpected` and the port `portExpected`.
 static void differs(NSString *what, NSString *hostExpected, NSString *portExpected, id (^block)(Class settings, Class output))
 {
     NSString *host = answer(^{ return block(hostSettings, hostOutput); }), *port = answer(^{ return block(portSettings, portOutput); });
@@ -54,8 +43,6 @@ static void differs(NSString *what, NSString *hostExpected, NSString *portExpect
           [NSString stringWithFormat:@"%@ (named divergence)\n     host: %@ (expected %@)\n     port: %@ (expected %@)", what, host, hostExpected, port, portExpected]);
 }
 
-// Every getter the header declares on the settings (an instance selector with no argument), except those whose answer is
-// the object's identity: its unique ID, and the content identifier inside livePhotoMovieMetadata.
 static NSArray<NSString *> *getters(NSString *className, NSSet *skip)
 {
     NSMutableArray *list = [NSMutableArray array];
@@ -78,11 +65,6 @@ static NSSet *settingsIdentity(void)
     return [NSSet setWithObjects:@"uniqueID", @"livePhotoMovieMetadata", nil];
 }
 
-// The three settings getters the port answers otherwise than the host in some settings (facts, "The photo settings"):
-// stabilization is YES by the header's default where the Mac answers NO, and the thumbnail codecs of an uncompressed, an
-// HEVC or a RAW photo are not offered, which is work still to do. They are left out of `settingsDump` and compared apart
-// by `settingsSame`, for every settings object every check builds: equal, or as the row of `divergences()` for that check
-// states, the host's answer and the port's.
 static NSArray<NSString *> *divergentGetters(void)
 {
     return @[@"isAutoStillImageStabilizationEnabled", @"availableEmbeddedThumbnailPhotoCodecTypes", @"availableRawEmbeddedThumbnailPhotoCodecTypes"];
@@ -95,7 +77,6 @@ static NSString *settingsDump(AVCapturePhotoSettings *settings)
     return dump(settings, getters(@"AVCapturePhotoSettings", skip));
 }
 
-// The three answers on one line, a codec list as `jpeg,hvc1` and an empty one as nothing.
 static NSString *divergentDump(AVCapturePhotoSettings *settings)
 {
     NSMutableArray *parts = [NSMutableArray array];
@@ -107,13 +88,11 @@ static NSString *divergentDump(AVCapturePhotoSettings *settings)
     return [parts componentsJoinedByString:@" "];
 }
 
-// Every getter of a dump and the three of `divergentDump`, of one side's own settings.
 static NSString *fullDump(AVCapturePhotoSettings *settings)
 {
     return [settingsDump(settings) stringByAppendingFormat:@" %@", divergentDump(settings)];
 }
 
-// The rows of divergences.tsv: a check's key, the host's answer of the three getters and the port's, tab separated.
 static NSDictionary<NSString *, NSArray<NSString *> *> *divergenceRows;
 
 static NSDictionary<NSString *, NSArray<NSString *> *> *divergences(void)
@@ -121,14 +100,11 @@ static NSDictionary<NSString *, NSArray<NSString *> *> *divergences(void)
     return divergenceRows;
 }
 
-// Two settings the same but in the three getters above, which are either equal or as `key`'s row states. The settings come
-// from `block`, built for the host and for the port.
 static void settingsSame(NSString *what, NSString *key, id (^block)(Class settings, Class output))
 {
     same(what, ^id(Class s, Class o) { return settingsDump(block(s, o)); });
     NSString *host = answer(^{ return divergentDump(block(hostSettings, hostOutput)); }), *port = answer(^{ return divergentDump(block(portSettings, portOutput)); });
     NSArray<NSString *> *row = divergences()[key];
-    // A setter that raises builds no settings: what it raised is `same`'s to compare above.
     if ([host hasPrefix:@"RAISES"] && [host isEqualToString:port])
         check(YES, [NSString stringWithFormat:@"%@: raised on both sides, no settings to compare", what]);
     else if (row)
@@ -184,7 +160,6 @@ static CMSampleBufferRef bgra_sample(size_t width, size_t height)
     return sample;
 }
 
-// A JPEG of a picture with two colours, with an Exif user comment, and ImageIO's own thumbnail when asked.
 static NSData *jpeg_file(size_t width, size_t height, BOOL thumbnail)
 {
     CGColorSpaceRef rgb = CGColorSpaceCreateDeviceRGB();
@@ -230,7 +205,6 @@ static CMSampleBufferRef jpeg_sample(void)
 
 static void settingsChecks(void)
 {
-    // Defaults and every constructor.
     settingsSame(@"+photoSettings", @"+photoSettings", ^id(Class s, Class o) { return [s photoSettings]; });
     differs(@"+photoSettings stabilization", @"0", @"1", ^id(Class s, Class o) { return @([[s photoSettings] isAutoStillImageStabilizationEnabled]); });
     same(@"+photoSettings preview formats", ^id(Class s, Class o) { return [[[s photoSettings] availablePreviewPhotoPixelFormatTypes] componentsJoinedByString:@","]; });
@@ -273,7 +247,6 @@ static void settingsChecks(void)
             for (NSNumber *raw in @[@0, @(kCVPixelFormatType_14Bayer_RGGB)])
                 for (id format in @[[NSNull null], @{AVVideoCodecKey: AVVideoCodecTypeJPEG}, @{(id)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA)}])
                 {
-                    // The RAW file type changes none of the three getters: a row is a RAW format, a processed format and its file type.
                     NSString *formatText = [[format description] stringByReplacingOccurrencesOfString:@"\n" withString:@""];
                     settingsSame([NSString stringWithFormat:@"+photoSettingsWithRawPixelFormatType:%@ rawFileType:%@ processedFormat:%@ processedFileType:%@", raw, rawType,
                                                             formatText, processedType],
@@ -285,7 +258,6 @@ static void settingsChecks(void)
                                  });
                 }
 
-    // Setters: what each takes, what it refuses, and what the settings answer after.
     typedef void (^Setter)(AVCapturePhotoSettings *);
     AVMutableMetadataItem *content = [AVMutableMetadataItem metadataItem];
     content.keySpace = AVMetadataKeySpaceQuickTimeMetadata;
@@ -354,7 +326,6 @@ static void settingsChecks(void)
             setters[name](settings);
             return settings;
         });
-    // A 420f preview, and the metadata's {MakerApple}, which the host takes: the port takes both.
     same(@"set previewPhotoFormat 420f",
          ^id(Class s, Class o) { ((AVCapturePhotoSettings *)[s photoSettings]).previewPhotoFormat = @{(id)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)}; return @"ok"; });
     same(@"set metadata {MakerApple}", ^id(Class s, Class o) {
@@ -363,7 +334,6 @@ static void settingsChecks(void)
         return settings.metadata;
     });
 
-    // The Live Photo movie metadata: the settings' own content identifier, last; the application may not give one.
     same(@"livePhotoMovieMetadata", ^id(Class s, Class o) {
         AVCapturePhotoSettings *settings = [s photoSettings];
         NSMutableArray *log = [NSMutableArray array];
@@ -389,7 +359,6 @@ static void settingsChecks(void)
         return [log componentsJoinedByString:@"; "];
     });
 
-    // A copy is the same request; +photoSettingsFromPhotoSettings: a new one with every setting.
     same(@"copy and photoSettingsFromPhotoSettings:", ^id(Class s, Class o) {
         AVCapturePhotoSettings *settings = [s photoSettingsWithRawPixelFormatType:kCVPixelFormatType_14Bayer_RGGB processedFormat:@{AVVideoCodecKey: AVVideoCodecTypeJPEG}];
         settings.flashMode = AVCaptureFlashModeAuto;
@@ -506,8 +475,6 @@ static void outputChecks(void)
     CFRelease(bgra);
     CFRelease(jpeg);
 
-    // The JPEG of a photo with a preview holds the preview as its Exif thumbnail (IFD1), no longer on its longest side
-    // than the host's writes it; with no preview, no thumbnail.
     size_t photos[][2] = {{640, 480}, {3264, 2448}}, previews[][2] = {{32, 24}, {160, 120}, {640, 480}, {1600, 1200}, {200, 200}, {120, 160}};
     for (int p = 0; p < 2; p++) {
         CMSampleBufferRef photo = jpeg_file_sample(jpeg_file(photos[p][0], photos[p][1], NO), (int32_t)photos[p][0], (int32_t)photos[p][1]);
@@ -521,8 +488,6 @@ static void outputChecks(void)
         }
         CFRelease(photo);
     }
-    // A sample whose own JPEG carries a thumbnail, with no preview: the host's repackaging drops it, the port's keeps
-    // it, as the thumbnail its capture embeds on request (facts, "The embedded thumbnail").
     CMSampleBufferRef carrying = jpeg_file_sample(jpeg_file(640, 480, YES), 640, 480);
     differs(@"JPEG representation of a JPEG carrying a thumbnail, no preview", @"640x480 comment oracle; no IFD1",
             @"640x480 comment oracle; IFD1 0103/3/1=6 011a/5/1=72/1 011b/5/1=72/1 0128/3/1=2 0201/4/1=set 0202/4/1=set next 0; thumbnail APP0 thumbnail 160x120",

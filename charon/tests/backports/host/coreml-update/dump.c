@@ -1,10 +1,3 @@
-/* dump.c - prints the updatable weights of a model file, read with the port's own reader.
- *
- * usage: dump MODEL.mlmodel
- *
- * For each layer of the network, in order: "layer NAME KIND", then one "weights" and one "bias" line when the
- * layer has them, each as its count followed by the values at %.9g. The reader is the port's (CharonMLProto.c),
- * so the dump is the port's reading of the file, which the host's own reading is compared with elsewhere. */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,7 +17,6 @@ static unsigned char *slurp(const char *path, size_t *length)
     return bytes;
 }
 
-/* A weight tensor's values, or "0" for a layer that has none (a missing bias). */
 static void print_tensor(const char *label, const charon_ml_node *params)
 {
     size_t count = params ? charon_ml_count_field(params, "floatValue") : 0;

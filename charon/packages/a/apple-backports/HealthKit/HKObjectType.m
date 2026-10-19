@@ -1,8 +1,3 @@
-// The five kinds of HKObjectType of iOS 8: a type's whole identity is its identifier, so a type is
-// its identifier and nothing else, and the one fact a quantity type carries beyond that - what it is
-// counted in and how its values are aggregated - comes from the table in HKQuantityTypes.m, which is
-// Apple's own, read out of the SDK header.
-
 #import <HealthKit/HealthKit.h>
 
 #import "CharonHKStore.h"
@@ -148,9 +143,6 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 #pragma mark - HKSampleType
 
 @implementation HKSampleType
-// iOS 13.0 added the two restricted-duration readers and their two flags, and iOS 15.0 added
-// -allowsRecalibrationForEstimates. This delivery carries the 9.3 group, so all five are @dynamic and
-// no accessor is emitted for any of them.
 @dynamic isMaximumDurationRestricted;
 @dynamic maximumAllowedDuration;
 @dynamic isMinimumDurationRestricted;

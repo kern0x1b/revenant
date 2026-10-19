@@ -1,12 +1,5 @@
 #import <UIKit/UIKit.h>
 
-// The proposal a text drop delegate is handed back, and the one CharonTextDropRequest holds and
-// UITextView+TextDragDrop11.m stores the delegate's answer in. The release has no text drop to make
-// one for and no class of that name at all; the port asks for one anyway, so it supplies the object.
-// Behaviour read out of the 11.0 arm64 cache, not out of the header's prose: the initializer calls
-// the superclass's, and on a non-nil result sets precise, the action and the fast-same-view flag,
-// leaving the progress mode and the performer at zero. The copy copies all four over the superclass's.
-
 @implementation UITextDropProposal {
 @private
     UITextDropAction _dropAction;

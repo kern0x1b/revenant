@@ -1,8 +1,3 @@
-// The events of iOS 9.0 and the trigger that fires on them: HMEvent, HMCharacteristicEvent,
-// HMLocationEvent, HMEventTrigger and HMHomeAccessControl.
-//
-// One release's API per object file, which is what the band machinery needs: every class here arrived
-// in iOS 9.0, whatever release a later member of one of them arrived in.
 #import "CharonHomeKitInternal.h"
 
 #pragma mark - HMEvent
@@ -18,9 +13,6 @@
 
 @end
 
-// The port's own way back in, and the event is rebuilt as the subclass it was created as: an event
-// trigger keeps each event's kind beside its identifier, and a presence event read back is a presence
-// event rather than whichever subclass the reader happens to reach first.
 HMEvent *CharonHomeKitEvent(NSString *identifier, NSString *kind)
 {
     HMEvent *event = nil;
@@ -112,9 +104,6 @@ HMEvent *CharonHomeKitEvent(NSString *identifier, NSString *kind)
 
 #pragma mark - HMEventTrigger
 
-// A recurrence, as the numbers a date component is made of, so that it crosses a property list: a
-// field that is not set is left out rather than written as zero, because a zero is a real value for a
-// day and a real value for an hour.
 static NSArray *charon_recurrenceList(NSArray<NSDateComponents *> *recurrences)
 {
     NSMutableArray *stored = [NSMutableArray array];
@@ -131,13 +120,8 @@ static NSArray *charon_recurrenceList(NSArray<NSDateComponents *> *recurrences)
 
 @synthesize charon_identifier = _charon_identifier, charon_homeIdentifier = _charon_homeIdentifier;
 
-// The release marks -init and +new unavailable on the trigger too, so it is made the same way every
-// other graph class is; see CharonHomeKitConstruction.h.
 - (instancetype)charon_initWithStore:(CharonHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
 {
-    // HMTrigger's own -init is unavailable in the release's header, so a subclass reaches the base
-    // through the base's port construction rather than through [super init]: the method family
-    // attribute lets this assign self, and the call names a method of our own, which is nameable.
     if (!(self = [super charon_initWithStore:store identifier:identifier]))
         return nil;
     if (self) {
@@ -209,10 +193,6 @@ static NSArray *charon_recurrenceList(NSArray<NSDateComponents *> *recurrences)
 
 - (HMEventTriggerActivationState)triggerActivationState
 {
-    // An event trigger fires when the home hub is there to run it, and a home hub is the one thing
-    // this release has none of. The header names that condition itself:
-    // HMEventTriggerActivationState.h:27 is HMEventTriggerActivationStateDisabledNoHomeHub, and
-    // "disabled, no home hub" is what this device is.
     return HMEventTriggerActivationStateDisabledNoHomeHub;
 }
 
@@ -307,9 +287,6 @@ static NSArray *charon_recurrenceList(NSArray<NSDateComponents *> *recurrences)
 
 - (void)charon_applyPredicate:(NSPredicate *)predicate
 {
-    // A predicate is an expression object and does not cross a property list, so what is stored is its
-    // format, and what is read back is a predicate built from that. The format is what the release
-    // evaluates too, so a trigger's predicate means the same thing after a relaunch.
     CharonHomeKitSetField(@"triggers", _charon_identifier, @"predicate", predicate.predicateFormat);
 }
 
@@ -341,18 +318,12 @@ HMEventTrigger *CharonHomeKitEventTrigger(NSString *identifier, NSString *homeId
 {
     (void)store;
     (void)identifier;
-    // The base's -init is unavailable too, so this one reaches it the way every other subclass here
-    // does: through the base's own port construction, which is a method of our own and nameable.
     self = [super charon_initWithStore:store identifier:identifier];
     return self;
 }
 
 - (BOOL)administrator
 {
-    // The administrator of a home is the user who may change it. This port's home graph is the
-    // application's own store, which no other application can read or write, so the user it reports is
-    // the administrator: answering NO would tell an application its own store is writable by somebody
-    // else, and an application that believed it would stop doing the one thing it is entitled to do.
     return YES;
 }
 

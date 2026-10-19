@@ -12,7 +12,6 @@ static void charon_unmarked(void *unused)
     (void)unused;
 }
 
-/* The class of service a global queue of a priority has in iOS 8 (DISPATCH_QUEUE_PRIORITY_* in queue.h). */
 static inline int charon_global_priority(dispatch_queue_t queue, long *priority)
 {
     static const long priorities[] = {DISPATCH_QUEUE_PRIORITY_HIGH, DISPATCH_QUEUE_PRIORITY_DEFAULT, DISPATCH_QUEUE_PRIORITY_LOW,
@@ -27,10 +26,6 @@ static inline int charon_global_priority(dispatch_queue_t queue, long *priority)
     return 0;
 }
 
-/* Whether the code that runs is running on the queue: the queue itself, or a queue that targets it, which dispatch_get_specific
-   answers by walking the target chain (iOS 5). The queue is marked under a key only it uses, its address with the low bit set,
-   which no object's address is. Global queues take no specifics, so for them only the queue running the block itself counts,
-   not a queue that targets them. The main thread holds the main queue, in a block or not, as libdispatch binds it there. */
 static inline int charon_runs_on_queue(dispatch_queue_t queue)
 {
     if (queue == dispatch_get_main_queue())

@@ -1,17 +1,3 @@
-/*
- * The two calls of iOS 13 that are about a path: whether it is constrained, and the gateways it
- * goes through.
- *
- * Constrained is Low Data Mode, which the release this port builds for does not have: no path of it
- * is ever constrained, which is the answer the system gives for a device with the mode off.
- *
- * The gateways are the addresses a packet leaves by on its way out, and the release's own way of
- * naming the router of an interface is the one ioctl that needs no privilege: a point-to-point
- * interface - which is what a cellular data connection on this release is - is told its destination
- * by SIOCGIFDSTADDR. A Wi-Fi interface is not point-to-point and has no such answer, so nothing is
- * enumerated for it; the fact and the measurement that shows it are in facts/Network/NWPath.md.
- */
-
 #import "CharonNW.h"
 #import "CharonNWSupport.h"
 

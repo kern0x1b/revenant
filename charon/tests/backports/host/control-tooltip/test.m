@@ -1,10 +1,6 @@
 #import <UIKit/UIKit.h>
 #include <stdio.h>
 
-// A control's tool tip, run on the same checks in two processes: the host's own UIControl, and the port's category on it. Each line is
-// "check<TAB>value"; run.sh runs this once without the port's source and once with it, and the two outputs must be the same.
-// The port's interaction class is renamed in its build, so its name is stripped of the rename before it is printed.
-
 static void report(const char *check, NSString *value)
 {
     printf("%s\t%s\n", check, value ? [value UTF8String] : "nil");

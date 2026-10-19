@@ -2,8 +2,6 @@
 #import <objc/runtime.h>
 #include <math.h>
 
-// CAFrameRateRange is a plain three-float struct with no OS dependency at all - "it arrived in
-// iOS 15" is not a wall for a value type the caller only ever constructs and compares.
 const CAFrameRateRange CAFrameRateRangeDefault = {-1, -1, -1};
 
 CAFrameRateRange CAFrameRateRangeMake(float minimum, float maximum, float preferred)
@@ -18,10 +16,6 @@ bool CAFrameRateRangeIsEqualToRange(CAFrameRateRange range, CAFrameRateRange oth
 
 static const char CharonAnimationFrameRateRangeKey;
 
-// CAAnimation carries no display link of its own on this release - CoreAnimation commits at the
-// one rhythm the render server drives, the same way a real ProMotion-less device answers this
-// property today: kept and returned faithfully, never messaged, since there is nothing here for a
-// per-animation range to throttle.
 @implementation CAAnimation (CharonFrameRateRange)
 
 - (CAFrameRateRange)preferredFrameRateRange

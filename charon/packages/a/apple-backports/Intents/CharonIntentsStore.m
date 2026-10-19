@@ -1,12 +1,3 @@
-//
-//  CharonIntentsStore.m
-//  Intents
-//
-//  The two stores CharonIntentsStore.h declares. Every write is a real file under this
-//  application's own Application Support, read back through the same path, and every failure is
-//  the error the file system reported rather than a nil that means nothing.
-//
-
 #import "CharonIntentsStore.h"
 
 #import <Intents/Intents.h>
@@ -20,8 +11,6 @@ enum {
     CharonIntentsErrorCannotDecode,
 };
 
-// One queue for both stores: a donation and a vocabulary write from two threads must not
-// interleave a read and a rewrite of the same file.
 static dispatch_queue_t charon_intents_queue(void)
 {
     static dispatch_queue_t queue;
@@ -85,9 +74,6 @@ static BOOL charon_intents_write(NSString *path, id contents, NSError **error)
         return NO;
     }
     NSError *failure = nil;
-    // The stores are property lists, written through the serialisation of their own class rather
-    // than through -writeToFile:atomically:, which this release's Foundation has no error
-    // reporting form of, so a failed write is the serialisation's own error and not a silent nil.
     NSData *data = [NSPropertyListSerialization dataWithPropertyList:contents
                                                               format:NSPropertyListBinaryFormat_v1_0
                                                              options:0
@@ -134,8 +120,6 @@ static NSString *charon_intents_interactions_file(void)
     return charon_intents_file(@"Interactions.plist");
 }
 
-// The stored interactions as their archives, so a delete can drop one without decoding it and a
-// donation can append one without decoding the rest.
 static NSMutableArray *charon_intents_stored_archives(NSError **error)
 {
     NSMutableArray *archives = [NSMutableArray array];

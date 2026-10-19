@@ -1,16 +1,3 @@
-/* The port's own answer to "is the link under us a cellular one".
-
-   Two backport files ask: the network gate, which stops a request when a cellular link may not carry
-   it, and the session's own metrics, which is where an application reads isCellular. A C function
-   shared between backport files belongs in a file that exports no API symbol of its own -- defining
-   it beside an @implementation is the trap charon/AGENTS.md names -- so it is here, in plain C with
-   no Objective-C in it at all, and the two callers include CharonNetworkAccess.h.
-
-   The answer is the port's own rather than the release's because iOS 6.1.3 has no API that reports
-   it: the flags come from SystemConfiguration, reached by name, and the reference is the zero
-   address, which is what "the default route" means and is what a device with no cellular radio
-   answers. `charon_network_cellular_override` is the test seam the gate sets to pin the answer. */
-
 #include <dlfcn.h>
 #include <netinet/in.h>
 #include <stdbool.h>

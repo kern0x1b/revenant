@@ -1,11 +1,6 @@
 #import "CharonDynamics.h"
 
-// A behavior is primitive (the concrete classes: it holds items) or composite (UIDynamicBehavior itself
-// and every subclass an application writes: it holds child behaviors), never both, as on 7.0.
 @implementation UIDynamicBehavior {
-    // Not retained and not weak, as 7.0's: a weak reference reads nil while the animator deallocates, and its
-    // -dealloc dissociates every registered behavior, which needs the animator's world. Every path that ends an
-    // animator's hold on a behavior clears it (_unregisterBehavior:, removeAllBehaviors, -[UIDynamicAnimator dealloc]).
     __unsafe_unretained UIDynamicAnimator *_context;
     NSMutableArray *_items;
     NSMutableArray *_behaviors;
@@ -142,8 +137,6 @@
 {
 }
 
-// A primitive behavior keeps the animator running; a composite one lets it stop when it has no action,
-// or when every child lets it stop (the action of a parent with children is not asked).
 - (BOOL)charon_allowsAnimatorToStop
 {
     if (_isPrimitiveBehavior)

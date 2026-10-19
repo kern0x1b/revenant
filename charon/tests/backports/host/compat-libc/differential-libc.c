@@ -1,7 +1,3 @@
-// The apple-compat shims for timingsafe_bcmp, strchrnul, rpmatch, strtonum, strsignal_r and timespec_get against the HOST's
-// own definitions, in one process, as differential.c does for OSAtomic and ffsll. The shims are compiled with their names
-// renamed to charon_port_* (run.sh). Each case prints "ok <name>" or "FAIL <name> ..." and the process exits with the number of
-// failures. The one deliberate difference is rpmatch(NULL): the host segfaults there, the shim answers -1; it is not run here.
 #include <errno.h>
 #include <limits.h>
 #include <stdint.h>
@@ -35,7 +31,6 @@ static void report(int passed, const char *name, long long got, long long want)
     }
 }
 
-// timingsafe_bcmp answers zero for equal buffers and non-zero for any difference, at every length and every byte.
 static void bcmp_case(void)
 {
     unsigned char a[40], b[40];
@@ -96,7 +91,6 @@ static void rpmatch_case(void)
         report(1, "rpmatch", 0, 0);
 }
 
-// strtonum: the value, the error string and errno, for numbers at the edges of the range, the bounds and malformed text.
 static void strtonum_case(void)
 {
     const char *numbers[] = {"0", "42", "-7", " 12", "12x", "", "abc", "9223372036854775807", "9223372036854775808",
@@ -124,7 +118,6 @@ static void strtonum_case(void)
         report(1, "strtonum", 0, 0);
 }
 
-// strsignal_r: the return value and the buffer's text for signals in and out of range, and buffers that are too short.
 static void strsignal_case(void)
 {
     const size_t sizes[] = {0, 1, 2, 5, 64};
@@ -146,7 +139,6 @@ static void strsignal_case(void)
         report(1, "strsignal_r", 0, 0);
 }
 
-// timespec_get: TIME_UTC answers the base and a time within a few seconds of the host's; any other base answers zero.
 static void timespec_case(void)
 {
     struct timespec ts;

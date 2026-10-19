@@ -37,8 +37,6 @@ static const void *charon_section(const charon_header *header, intptr_t slide, c
     return (const void *)((uintptr_t)found->addr + slide);
 }
 
-// Every alias of charon_alias.h in the images loaded so far: a library's categories on
-// a class another library aliases are attached after that library is loaded.
 static const struct charon_alias *charon_image_aliases(uint32_t image, size_t *count)
 {
     unsigned long size = 0;
@@ -66,11 +64,6 @@ static struct charon_alias *charon_aliases(size_t *count)
     return found;
 }
 
-// A category written on a name charon_alias.h aliases belongs to the release's class, where the
-// release has one. Where it has none, the proxy IS the class that name stands for -- the alias's own
-// class methods answer as the proxy's own there, and the members ld64 merged into the proxy are
-// already on it -- so the category is given the proxy and reaches the methods it adds. Answering nil
-// instead dropped the whole category on a release that has no such class.
 static Class charon_release_class(Class cls, const struct charon_alias *aliases, size_t count)
 {
     for (size_t index = 0; index < count; index++) {
@@ -144,17 +137,6 @@ static void charon_method(const struct charon_list *list, uint32_t index, const 
     *implementation = (IMP)entry[2];
 }
 
-// The question is whether cls or a superclass implements a selector, asked for every category
-// method (charon_collect) and every proxy method (charon_adopt_methods). The old answer copied
-// each class's method list and scanned the copy, once per question: most of the launch cost.
-// class_getInstanceMethod is not used for it: a selector the class lacks goes to
-// +resolveInstanceMethod: (and +resolveClassMethod: for a metaclass), a message this constructor
-// would send to application classes, possibly before their +initialize, and a resolver that
-// installs the selector would make the backport skip it.
-// So each class walked is copied once, its selectors are kept sorted, and the walk answers from
-// those copies: the lists are the ones the old loop read (none changes before the additions,
-// which come after every question), the chain is class_getSuperclass as before, and no message
-// is sent. The copies are freed at the end of the constructor.
 struct charon_snapshot {
     Class cls;
     SEL *selectors;
@@ -277,15 +259,6 @@ static void charon_add_properties(Class cls, const struct charon_list *list)
     }
 }
 
-// An alias of charon_alias.h is a subclass of the release's class, so that a subclass an
-// application writes of the name inherits the release's class and is laid out after its
-// instance variables. The compiler cannot name a class the release does not export, so the
-// superclass is written here, into the second word of the alias's class and metaclass (the
-// superclass of objc's class layout), before the runtime first uses the alias; using it then
-// lays it out from the release's class, which is what the check after it reads. An image loaded
-// with the library whose class used the alias earlier - a subclass with a +load of its own - has
-// had it laid out on NSObject, which the write cannot change: it is taken back, and the log
-// names the alias.
 static void charon_reparent(Class proxy, Class release)
 {
     Class *words = (Class *)(void *)proxy;
@@ -302,11 +275,6 @@ static void charon_reparent(Class proxy, Class release)
             class_getName(proxy), class_getName(release), class_getName(release));
 }
 
-// ld64 merges a category written on an alias into the class the alias names, CharonName,
-// since both are in one image, so the release's class takes from CharonName whatever it and
-// its superclasses lack. Where the release's class has the method itself, CharonName's copy
-// would stand before it for a subclass, so it is given the release's implementation. CharonName's
-// own class methods are selectors of the root class, which the release's class answers already.
 static unsigned charon_method_count(Class cls)
 {
     unsigned count = 0;
@@ -371,7 +339,6 @@ __attribute__((constructor)) static void charon_backports_attach(void)
         releases[index] = objc_getClass(own[index].name);
         if (!releases[index])
             continue;
-        // class_copyMethodList reads a class as realized without checking; charon_reparent realizes it.
         charon_reparent((Class)own[index].proxy, releases[index]);
         capacity += charon_method_count((Class)own[index].proxy) + charon_method_count(object_getClass((id)own[index].proxy));
     }

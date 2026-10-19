@@ -1,6 +1,3 @@
-// What a physically based material's selfIllumination draws on macOS SceneKit, with no light: one quad facing an orthographic camera,
-// turned about y by theta, pixel (4, 4) of an 8x8 snapshot. Prints "albedo roughness theta metalness selfIllumination pixel";
-// fitselfcoat.py holds every line to the port's model of it.
 import SceneKit
 import AppKit
 import Metal

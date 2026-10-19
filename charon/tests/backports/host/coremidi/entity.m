@@ -1,10 +1,3 @@
-// MIDIDeviceNewEntity (MIDIDevice14.m) answers the release's status for each step it takes, and does not hand out an entity
-// whose protocol the release refused. The host forbids a real entity (oracle/newentity2.m: it changes the owner's MIDI setup), and
-// the release cannot be made to refuse the protocol, so this test stands in for the three release calls the function makes:
-// run.sh renames MIDIDeviceAddEntity, MIDIObjectSetIntegerProperty and MIDIDeviceRemoveEntity in MIDIDevice14.m and in this
-// file to the stand-ins defined here, and nothing is linked from the release for them. The device of 0 is the answer macOS gave
-// (oracle/newentity2-macos.txt): paramErr, no entity. The unknown protocol is the port's own answer, not measured on macOS
-// (facts/CoreMIDI/Devices.md).
 #import <CoreMIDI/CoreMIDI.h>
 #import <Foundation/Foundation.h>
 #include <stdio.h>

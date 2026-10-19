@@ -1,31 +1,9 @@
-// The list, grid and map templates and the interface controller, on iOS 6, as the real view
-// controllers the header says they are, in the shapes the SDK declares.
-//
-// The buttons of CarPlay are NSObjects and not views (CarPlayTemplates12.m draws them), so each of
-// these three templates draws the buttons it holds:
-//
-//   CPListTemplate    a UITableViewController over the template's own sections and rows, with each
-//                     row's own handler called when the row is chosen, and the leading bar buttons
-//                     the CPBarButtonProviding protocol asks for drawn in the template's own bar;
-//   CPGridTemplate    a UICollectionViewController over the template's own grid buttons, each drawn
-//                     by the button itself and its own handler called when it is chosen;
-//   CPMapTemplate     the release's own MKMapView -- the only map this port has -- with the
-//                     template's own map buttons drawn over it inside the window's own safe area,
-//                     and the release's own navigation alert shown over the map when there is one.
-//
-// CPInterfaceController owns a CPWindow, keeps the root template and the tab templates and the
-// pushed stack, draws the bar buttons of whatever template is on top, and sends the delegate the
-// four template lifecycle messages the header declares. The scene it belongs to is the wall, and
-// that is the registry's, not this file's.
 #import <CarPlay/CarPlay.h>
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
 #import "CharonCarPlayTemplate.h"
 
-// The three buttons' own drawing and their own taps, which are implemented in
-// CarPlayTemplates12.m and declared here so the templates that hold them can ask. Every member is
-// prefixed, so none of it is API the package carries.
 @interface CPBarButton (CharonDrawing)
 - (void)charon_drawInRect:(CGRect)rect alpha:(CGFloat)alpha;
 - (void)charon_tap;
@@ -41,45 +19,31 @@
 - (void)charon_tap;
 @end
 
-// The template's own view controller, asked for by the interface controller when it pushes it.
-// Declared and not implemented here; each template implements it, which is where its drawing is.
 @interface CPTemplate (CharonDrawing)
 - (UIViewController *)charon_viewControllerForInterfaceController:(CPInterfaceController *)controller;
 @end
 
-// A row's handler, as the object the header's handler type is: the call the list template makes
-// when a row is chosen, so the handler is a real object with a real message and not a cast block.
 @interface CharonListItemHandler : NSObject
 - (void)charon_call:(id)item completion:(id)completion;
 @end
 
-// The grid source, declared before the grid template that uses it.
 @interface CharonGridSource : NSObject <UICollectionViewDataSource, UICollectionViewDelegate>
 + (instancetype)sourceForTemplate:(CPGridTemplate *)template;
 @end
 
-// The interface controller this port is currently pushing through, so a template that has to
-// dismiss itself can ask the one that presented it. Charon's own, so it carries no API.
 @interface CharonCarPlayInterface : NSObject
 + (instancetype)current;
 @property (nonatomic, weak) CPInterfaceController *controller;
 @end
 
-// The map template's own map buttons, drawn over its map, inside the window's own safe area.
 @interface CharonMapButtons : UIView
 @property (nonatomic, copy) NSArray<CPMapButton *> *charon_buttons;
 @end
 
-// The interface controller's own content window, which is the window its templates are drawn into.
 @interface CPInterfaceController (CharonWindow)
 @property (nonatomic, readonly, strong) CPWindow *contentWindow;
 @end
 
-// ============================ the list item ============================
-
-// The row's own state, held beside the row because a category cannot add an ivar and the row is a
-// CATEGORY on the release's own name (see CPListItem.m for why it has to be one). Charon's own, and
-// every member prefixed, so it carries no API.
 @interface CharonListRowState : NSObject
 @property (nonatomic, copy) NSString *text;
 @property (nonatomic, copy) NSString *detailText;
@@ -114,10 +78,6 @@
 @synthesize showsExplicitLabel = _showsExplicitLabel;
 @end
 
-// A CATEGORY on the name, and not a class implementation: the release carries a class of another
-// framework under this name, so the name is an alias (CPListItem.m) and ld64 merges a category
-// written on it in this image into the alias's own class, which is the row. A class implementation
-// here would define a second class of that name and the runtime would take one of the two.
 @implementation CPListItem (CharonRow)
 
 - (CharonListRowState *)charon_state
@@ -144,8 +104,6 @@
     state.detailText = detailText ?: @"";
     state.image = image;
     state.accessoryImage = accessoryImage;
-    // The header's own rule: an accessory image sets the accessory type to none, because the two are
-    // the same slot and the caller's own image is what should be in it.
     state.accessoryType = accessoryImage ? 0 : accessoryType;
     state.enabled = YES;
     state.showsDisclosureIndicator = accessoryType == 1;
@@ -158,10 +116,6 @@
                 accessoryImage:(UIImage *)accessoryImage
                  accessoryType:(NSInteger)accessoryType
 {
-    // The alias's own -initWithText:... answers as the release's class does (see charon_alias.h), so
-    // the row is set up beside it, which is what a category on an aliased name is for. Going through
-    // NSObject's -init directly, because [self alloc] inside a category is the alias's -alloc and
-    // would answer the release's class, which is not a row.
     self = ((id (*)(id, SEL))objc_msgSend)([CPListItem class], @selector(alloc));
     self = ((id (*)(id, SEL, id))objc_msgSend)(self, @selector(init), @"");
     [self charon_setState:[self charon_stateInitWithText:text detailText:detailText image:image
@@ -210,14 +164,11 @@
 - (BOOL)isShowingExplicitLabel { return [self charon_state].showsExplicitLabel; }
 - (void)setShowsExplicitLabel:(BOOL)shows { [self charon_state].showsExplicitLabel = shows; }
 
-// The header's own class property: the largest image a row's image may be. Charon's own, so no API.
 + (CGSize)maximumImageSize
 {
     return CGSizeMake(60.0, 60.0);
 }
 
-// The row's own handler, called when the row is chosen, with the item and the completion the
-// handler's own signature takes. Charon's own, so it carries no API.
 - (void)charon_selected
 {
     id handler = [self charon_state].handler;
@@ -234,8 +185,6 @@
 @implementation CharonListItemHandler
 - (void)charon_call:(id)item completion:(id)completion { }
 @end
-
-// ============================ the list section ============================
 
 @implementation CPListSection {
     NSArray<id<CPListTemplateItem>> *_items;
@@ -284,7 +233,6 @@
     return index < _items.count ? _items[index] : nil;
 }
 
-// The header's own section update, which the template's own -updateSections: goes through.
 - (void)updateItems:(NSArray<id<CPListTemplateItem>> *)items
               header:(NSString *)header
      headerSubtitle:(NSString *)headerSubtitle
@@ -300,10 +248,6 @@
     _headerButton = headerButton;
 }
 
-// The 15.0 object's storage, reached from CarPlayTemplates150.m. It is declared in
-// CharonCarPlayTemplate.h, and every name is Charon-prefixed, so none of it is API and none of it
-// appears in this object's exports. The strings copy on the way in, which is what CPListSection.h:82-97's
-// own `copy` would do anyway; the image and the button take what they are given, and a nil in clears.
 - (void)charon_setHeaderSubtitle:(NSString *)headerSubtitle { _headerSubtitle = [headerSubtitle copy]; }
 - (void)charon_setHeaderImage:(UIImage *)headerImage { _headerImage = headerImage; }
 - (void)charon_setHeaderButton:(CPButton *)headerButton { _headerButton = headerButton; }
@@ -335,11 +279,6 @@
 
 @end
 
-// ============================ the bar a template draws its buttons in ============================
-
-// The bar the templates put their leading buttons in. It is a view the templates own and add to
-// themselves, and it draws CPBarButton objects -- which are NSObjects, not views -- by asking each
-// one to draw itself. Charon's own, so it carries no API.
 @interface CharonCarPlayBar : UIView
 @property (nonatomic, copy) NSArray<CPBarButton *> *charon_buttons;
 @end
@@ -354,9 +293,6 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        // A CPBarButton is an NSObject and not a view, so the bar cannot hand it a touch. The bar
-        // takes the touch itself, works out which mark is under it -- the same arithmetic its own
-        // -drawRect: used to lay them out -- and calls that button's own handler.
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self
                                                                                 action:@selector(charon_tappedAtPoint:)];
         [self addGestureRecognizer:tap];
@@ -375,7 +311,6 @@
     CGFloat width = MIN(88.0, CGRectGetWidth(rect) / (CGFloat)MAX((NSUInteger)_buttons.count, 1U));
     CGFloat at = 0.0;
     for (CPBarButton *button in _buttons) {
-        // The header's own rule: the bar shows at most two leading buttons, and only the first two.
         if (at >= 2.0 * width) {
             break;
         }
@@ -400,7 +335,6 @@
     if (!button.isEnabled) {
         return;
     }
-    // The button's own handler, which a program gave the button, called by the button.
     [(CPBarButton *)button charon_tap];
 }
 
@@ -410,11 +344,7 @@
 + (instancetype)sourceForTemplate:(CPListTemplate *)template;
 @end
 
-// The list template's own navigation bar, kept so the leading bar buttons go into it rather than
-// into a controller that has no bar of its own on this release.
 static UINavigationBar *_listNavigationBar;
-
-// ============================ the list template ============================
 
 @interface CPListTemplate (CharonRows)
 - (NSArray<CPListItem *> *)charon_items;
@@ -429,12 +359,6 @@ static UINavigationBar *_listNavigationBar;
     CPAssistantCellConfiguration *_assistantCellConfiguration;
     UITableViewController *_list;
     CharonCarPlayBar *_charon_bar;
-    // The storage the 18.4 and 26.0 objects reach (CarPlayListTemplate184.m, CarPlayGrid260.m). A
-    // category cannot add an ivar and the class's @implementation is this file, so the values those
-    // members keep live here behind the Charon-prefixed accessors of CharonCarPlayTemplate.h - the same
-    // shape CarPlayNavigationSession12.m already uses for _turnCardColor. Every name is Charon-prefixed,
-    // so none of it is API and none of it appears in this object's exports: this file is 12.0 and stays
-    // 12.0, and the 18.4 and 26.0 selectors live in their own objects.
     BOOL _charon_showsSpinnerWhileEmpty;
     NSArray<CPGridButton *> *_charon_headerGridButtons;
 }
@@ -477,8 +401,6 @@ static UINavigationBar *_listNavigationBar;
     return [self charon_items].count;
 }
 
-// The header's own class properties, which are limits and not counts of this template: a list
-// template takes at most so many sections and so many items, and the number here is Apple's own.
 + (NSUInteger)maximumItemCount
 {
     return 100;
@@ -510,7 +432,6 @@ static UINavigationBar *_listNavigationBar;
     return [NSIndexPath indexPathForRow:(NSInteger)row inSection:(NSInteger)section];
 }
 
-// The rows, out of the template's own sections, in the section order the caller gave.
 - (NSArray<CPListItem *> *)charon_items
 {
     NSMutableArray *all = [NSMutableArray array];
@@ -524,8 +445,6 @@ static UINavigationBar *_listNavigationBar;
     return all;
 }
 
-// The list, as the table view controller the header says a list template is, with the template's own
-// bar buttons drawn in its own bar.
 - (UIViewController *)charon_viewControllerForInterfaceController:(CPInterfaceController *)controller
 {
     if (_list) {
@@ -533,15 +452,8 @@ static UINavigationBar *_listNavigationBar;
     }
     _list = [[UITableViewController alloc] initWithStyle:UITableViewStylePlain];
     _list.title = self.title;
-    // The release's own chrome, not a flat imitation of it: a UIBarStyleBlack bar, which on iOS 6 is
-    // the glossy black one with the release's own gradient and its own hairline, and the release's own
-    // grouped cells below it. The list template's own leading bar buttons go in the bar's leading side
-    // where a navigation bar puts them.
     _list.navigationItem.title = self.title;
     _list.view.backgroundColor = [UIColor blackColor];
-    // A table view controller has no navigation bar of its own on this release, so the glossy black
-    // bar the list template needs is a real UINavigationBar the template owns and puts on top of its
-    // own view -- the release's own bar, drawn by the release, not a picture of one.
     UINavigationBar *bar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 1024.0, 44.0)];
     bar.barStyle = UIBarStyleBlack;
     bar.translucent = NO;
@@ -568,12 +480,6 @@ static UINavigationBar *_listNavigationBar;
     _list.tableView.delegate = (id)[CharonListSource sourceForTemplate:self];
     if (_sections.count == 0) {
         if (_charon_showsSpinnerWhileEmpty) {
-            // The 18.4 member's answer, drawn here because the empty state is here. CPListTemplate.h:226
-            // declares it `assign` and says the template shows a spinner while it is empty, so the
-            // spinner is the whole of the property and this is where a caller asking for it sees it. The
-            // indicator is this release's own UIActivityIndicatorView, centred in the table's own view,
-            // and it spins because the template has nothing to show yet - which is the state the property
-            // is about.
             UIActivityIndicatorView *spinner =
                     [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
             spinner.center = CGPointMake(CGRectGetMidX(_list.view.bounds), CGRectGetMidY(_list.view.bounds));
@@ -581,7 +487,6 @@ static UINavigationBar *_listNavigationBar;
             [spinner startAnimating];
             _list.tableView.backgroundView = spinner;
         } else {
-            // The header's own empty view, which is the title variants the caller gave, or nothing.
             NSString *empty = _emptyViewTitleVariants.firstObject ?: _emptyViewSubtitleVariants.firstObject;
             UILabel *label = [[UILabel alloc] initWithFrame:_list.view.bounds];
             label.text = empty;
@@ -598,7 +503,6 @@ static UINavigationBar *_listNavigationBar;
     return _list;
 }
 
-// The protocol's own leading buttons, which the list template holds the way the header says it does.
 - (NSArray<CPBarButton *> *)barButtons
 {
     return _charon_bar.charon_buttons ?: @[];
@@ -613,9 +517,6 @@ static UINavigationBar *_listNavigationBar;
     _charon_bar.charon_buttons = barButtons;
 }
 
-// The 18.4 and 26.0 objects' storage, reached from CarPlayListTemplate184.m and CarPlayGrid260.m. They
-// are declared in CharonCarPlayTemplate.h and every name is Charon-prefixed, so none of this is API and
-// none of it appears in this object's exports.
 - (BOOL)charon_showsSpinnerWhileEmpty { return _charon_showsSpinnerWhileEmpty; }
 
 - (void)charon_setShowsSpinnerWhileEmpty:(BOOL)showsSpinnerWhileEmpty
@@ -627,8 +528,6 @@ static UINavigationBar *_listNavigationBar;
 
 - (void)charon_setHeaderGridButtons:(NSArray<CPGridButton *> *)headerGridButtons
 {
-    // `copy` on the way in, per CPListTemplate.h:265, so a later change to the caller's array does not
-    // change the template's. A nil in stays nil, which is what `nullable` means.
     _charon_headerGridButtons = [headerGridButtons copy];
 }
 
@@ -653,8 +552,6 @@ static UINavigationBar *_listNavigationBar;
 
 @end
 
-// The list's own data source and delegate, in the template's own object file so the template owns
-// them. Charon's own class, and every member prefixed, so it carries no API.
 @implementation CharonListSource {
     __weak CPListTemplate *_template;
 }
@@ -696,9 +593,6 @@ static UINavigationBar *_listNavigationBar;
     if (!cell) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle
                                       reuseIdentifier:cellIdentifier];
-        // The release's own cell: a grouped cell is the release's own gradient plate with a hairline
-        // under it, so nothing here is drawn to replace it -- the skin is only what the release's own
-        // cell does not give, which is the shadow the release draws per cell and this does not.
         cell.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.92];
         cell.textLabel.textColor = [UIColor colorWithWhite:0.05f alpha:1.0f];
         cell.detailTextLabel.textColor = [UIColor colorWithWhite:0.3 alpha:1.0];
@@ -737,14 +631,11 @@ static UINavigationBar *_listNavigationBar;
     }
     NSArray<id<CPListTemplateItem>> *rows = sections[(NSUInteger)indexPath.section].items;
     if ((NSUInteger)indexPath.row < rows.count && [rows[(NSUInteger)indexPath.row] isKindOfClass:[CPListItem class]]) {
-        // The row's own handler, which is what a program gave the row.
         [(CPListItem *)rows[(NSUInteger)indexPath.row] charon_selected];
     }
 }
 
 @end
-
-// ============================ the grid template ============================
 
 @implementation CPGridTemplate {
     NSArray<CPGridButton *> *_gridButtons;
@@ -802,7 +693,6 @@ static UINavigationBar *_listNavigationBar;
         return _grid;
     }
     UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-    // The header's own shape for a grid button's image, which the port draws at this size.
     layout.itemSize = CGSizeMake(180.0, 120.0);
     layout.minimumLineSpacing = 16.0;
     layout.minimumInteritemSpacing = 16.0;
@@ -856,8 +746,6 @@ static UINavigationBar *_listNavigationBar;
     static NSString *const cellIdentifier = @"CharonCarPlayGridButton";
     UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:cellIdentifier
                                                                           forIndexPath:indexPath];
-    // The release's own plate behind the button the button itself draws, so a grid button sits on an
-    // iOS 6 surface rather than on nothing.
     cell.backgroundColor = [UIColor clearColor];
     CGContextRef context = UIGraphicsGetCurrentContext();
     if (context) {
@@ -868,8 +756,6 @@ static UINavigationBar *_listNavigationBar;
     }
     NSArray<CPGridButton *> *buttons = _template.gridButtons;
     if ((NSUInteger)indexPath.item < buttons.count) {
-        // The grid button, drawn by the button itself, because a CPGridButton is an NSObject and not
-        // a view: the template asks it to draw into the cell it is in.
         CPGridButton *button = buttons[(NSUInteger)indexPath.item];
         [(CPGridButton *)button charon_drawInRect:cell.contentView.bounds];
     }
@@ -880,19 +766,12 @@ static UINavigationBar *_listNavigationBar;
 {
     NSArray<CPGridButton *> *buttons = _template.gridButtons;
     if ((NSUInteger)indexPath.item < buttons.count) {
-        // The grid button's own handler, which a program gave it.
         [(CPGridButton *)buttons[(NSUInteger)indexPath.item] charon_tap];
     }
 }
 
 @end
 
-// ============================ the map template ============================
-
-// The card the navigation alert is drawn in, a class of its own so that dismissing the alert can find it
-// and take it off the map: the release's own MKMapView is the only thing it is ever drawn over. It
-// carries no row and is not API - it is this port's own drawing, the same shape CharonCarPlayBar and
-// CharonMapButtons below already are.
 @interface CharonCarPlayAlertCard : UIView
 @end
 
@@ -912,19 +791,12 @@ static UINavigationBar *_listNavigationBar;
     MKMapView *_mapView;
     CharonCarPlayBar *_charon_bar;
     CharonMapButtons *_charon_map_buttons;
-    // The session begun by -startNavigationSessionForTrip:, which the class's own file keeps because a
-    // category cannot add storage. The method that makes one is in CarPlayNavigationSession12.m, the
-    // same 12.0 object this class belongs to.
     id _navigationSession;
-    // What CarPlayMapTemplate12.m and CarPlayMapTemplate14.m hold for this class, declared here for the
-    // same reason: a category cannot add an ivar. Reached through the Charon-prefixed accessors at the
-    // end of this @implementation and declared in CharonCarPlayTemplate.h, which is where this tree
-    // keeps a seam two objects share. All of them are Charon's own, so none carries a member row.
-    CPNavigationAlert *_charon_navigationAlert;  // the alert being shown, beside the readonly property
-    NSArray *_charon_tripPreviews;               // the previews shown; the header's limit is 12
-    CPTrip *_charon_selectedTrip;                // the selected one, for the 14.0 member
-    NSMutableDictionary *_charon_estimates;      // CPTravelEstimates, per trip
-    CPTimeRemainingColor _charon_timeRemainingColor;  // the header's own enum; 0 is its Default case
+    CPNavigationAlert *_charon_navigationAlert;
+    NSArray *_charon_tripPreviews;
+    CPTrip *_charon_selectedTrip;
+    NSMutableDictionary *_charon_estimates;
+    CPTimeRemainingColor _charon_timeRemainingColor;
 }
 
 @synthesize guidanceBackgroundColor = _guidanceBackgroundColor;
@@ -961,35 +833,22 @@ static UINavigationBar *_listNavigationBar;
     _charon_bar.charon_buttons = barButtons;
 }
 
-// The map: the release's own MKMapView, which is the only map this port has, with this port's own
-// renderers on it. The map buttons are drawn over it, and the navigation alert is shown over it when
-// the map template has one, which is what the header's own currentNavigationAlert is for.
 - (UIViewController *)charon_viewControllerForInterfaceController:(CPInterfaceController *)controller
 {
     if (_mapView) {
         return (UIViewController *)_mapView;
     }
-    // The release's own map view, which is a UIViewController on this release, so it is the map
-    // template's own view controller and not a view put inside one.
     _mapView = [[MKMapView alloc] initWithFrame:CGRectMake(0.0, 0.0, 1024.0, 600.0)];
     _mapView.mapType = MKMapTypeStandard;
     _charon_map_buttons = [[CharonMapButtons alloc] initWithFrame:CGRectMake(0.0, 460.0, 1024.0, 120.0)];
     _charon_map_buttons.charon_buttons = _mapButtons;
     _charon_map_buttons.backgroundColor = [UIColor clearColor];
-    // The map buttons sit inside the map view's own insets, which is what the window's
-    // mapButtonSafeAreaLayoutGuide is for on a release that has layout guides. UILayoutGuide is
-    // iOS 9 and the release has none (measured: -mapButtonSafeAreaLayoutGuide is absent from the
-    // armv7 cache of 6.1.3, and the gate named _OBJC_CLASS_$_UILayoutGuide as the one import the
-    // device's iOS does not export), so the property is registered absent and the inset is this
-    // port's own.
     _charon_map_buttons.frame = CGRectMake(0.0, 440.0, 1024.0, 140.0);
     [_mapView addSubview:_charon_map_buttons];
     _charon_bar = [[CharonCarPlayBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 176.0, 44.0)];
     _charon_bar.charon_buttons = self.barButtons;
     _charon_bar.backgroundColor = [UIColor clearColor];
     [_mapView addSubview:_charon_bar];
-    // A map template's own chrome is the bar at the top, which on this release is the glossy black
-    // UIBarStyleBlack one, over the release's own MKMapView underneath it.
     UINavigationBar *bar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 1024.0, 44.0)];
     bar.barStyle = UIBarStyleBlack;
     bar.translucent = YES;
@@ -999,18 +858,12 @@ static UINavigationBar *_listNavigationBar;
 
 - (void)charon_showCurrentAlert
 {
-    // The alert, drawn over the map out of its own title and subtitle variants, and the map
-    // template's own delegate told about the map button that was chosen. Charon's own, so no API.
     CPNavigationAlert *alert = _currentNavigationAlert;
     if (!alert || !_mapView) {
         return;
     }
     NSString *title = alert.titleVariants.firstObject ?: @"";
     NSString *subtitle = alert.subtitleVariants.firstObject ?: @"";
-    // The card's geometry is this port's own and not a measurement: there is no car screen to measure
-    // one on, and the same 420 x 96 is what every alert this port draws has been since the 12.0 object
-    // was written. The 1024 x 600 map it is drawn over is the release's own MKMapView at the frame
-    // above, so the card is a card over something real.
     CGSize size = CGSizeMake(420.0, 96.0);
     CharonCarPlayAlertCard *card = [[CharonCarPlayAlertCard alloc]
         initWithFrame:CGRectMake(20.0, 20.0, size.width, size.height)];
@@ -1024,21 +877,11 @@ static UINavigationBar *_listNavigationBar;
     [_mapView addSubview:card];
 }
 
-// The map the guidance and the map buttons are drawn over, for the file that draws a session's
-// estimates: it is the release's own MKMapView and nil until the template has been pushed, so
-// guidance asked for before then is not drawn onto a view that does not exist. Charon's own.
 - (UIView *)charon_mapView
 {
     return _mapView;
 }
 
-// The accessors CarPlayMapTemplate12.m and CarPlayMapTemplate14.m reach this class's storage through,
-// because a category cannot write an ivar. The members they serve are the SDK's own and are registered
-// against their own rows; every name here is Charon's own, so it carries none.
-
-// Presenting an alert, and dismissing one. A nil alert takes the card off the map rather than leaving
-// the last one on screen, which is what "Dismiss the currently-visible navigation alert" asks for, and
-// that is the whole reason the card is a class of its own: a dismissal has to be able to find it.
 - (CPNavigationAlert *)charon_navigationAlert
 {
     return _charon_navigationAlert;
@@ -1060,8 +903,6 @@ static UINavigationBar *_listNavigationBar;
     [self charon_showCurrentAlert];
 }
 
-// The view the map buttons are drawn in, which is the class's own CharonMapButtons - so the panning
-// interface the 12.0 object drives and the buttons a caller set are one set of buttons and not two.
 - (UIView *)charon_mapButtons
 {
     return _charon_map_buttons;
@@ -1082,8 +923,6 @@ static UINavigationBar *_listNavigationBar;
     return _charon_tripPreviews;
 }
 
-// Copied, because a caller that mutates the array it passed should not change what the template shows;
-// the selected trip is not copied because a trip is the caller's own object either way.
 - (void)charon_setTripPreviews:(NSArray *)previews selectedTrip:(CPTrip *)selectedTrip
 {
     _charon_tripPreviews = [previews copy];
@@ -1111,8 +950,6 @@ static UINavigationBar *_listNavigationBar;
     return trip == nil ? nil : _charon_estimates[trip];
 }
 
-// The header's own enumeration, held as the number it is: CPMapTemplate.h:36-41 gives it four cases -
-// Default = 0, Green, Orange, Red - and the drawing below names them by those cases.
 - (void)charon_setTimeRemainingColor:(CPTimeRemainingColor)color
 {
     _charon_timeRemainingColor = color;
@@ -1123,8 +960,6 @@ static UINavigationBar *_listNavigationBar;
     return _charon_timeRemainingColor;
 }
 
-// The session begun by -startNavigationSessionForTrip:, and how the file that makes one hands it
-// over. Charon's own, so neither carries API.
 - (id)charon_navigationSession
 {
     return _navigationSession;
@@ -1151,8 +986,6 @@ static UINavigationBar *_listNavigationBar;
 
 - (void)drawRect:(CGRect)rect
 {
-    // The buttons the template gave, each drawn by the button itself, laid out left to right, and
-    // skipped when the button says it is hidden, which is what CPMapButton's own hidden is for.
     CGFloat size = 88.0;
     CGFloat at = 0.0;
     for (CPMapButton *button in _buttons) {
@@ -1176,13 +1009,10 @@ static UINavigationBar *_listNavigationBar;
     if (button.isHidden || !button.isEnabled) {
         return;
     }
-    // The button's own handler, which a program gave the button, called by the button.
     [(CPMapButton *)button charon_tap];
 }
 
 @end
-
-// ============================ the interface controller ============================
 
 @implementation CPInterfaceController {
     __weak id<CPInterfaceControllerDelegate> _delegate;
@@ -1196,8 +1026,6 @@ static UINavigationBar *_listNavigationBar;
 @synthesize delegate = _delegate;
 @synthesize prefersDarkUserInterfaceStyle = _prefersDarkUserInterfaceStyle;
 
-// The content window this controller draws its templates into. Apple's own is the window a car
-// draws into; on this port it is a window the application owns, which is what a head unit is here.
 - (CPWindow *)contentWindow
 {
     if (!_contentWindow) {
@@ -1226,8 +1054,6 @@ static UINavigationBar *_listNavigationBar;
     return _stack.lastObject;
 }
 
-// The header's own car trait collection. There is no car, so the car is this device, and the answer
-// is the screen's own trait collection -- a real object, this device's own, and not a stored value.
 - (UITraitCollection *)carTraitCollection
 {
     return [UIScreen mainScreen].traitCollection;
@@ -1335,7 +1161,6 @@ static UINavigationBar *_listNavigationBar;
     [self popTemplateAnimated:animated completion:completion];
 }
 
-// The header's own deprecated spellings, which are the same operations without the completion.
 - (void)setRootTemplate:(CPTemplate *)rootTemplate animated:(BOOL)animated
 {
     [self setRootTemplate:rootTemplate animated:animated completion:nil];
@@ -1371,8 +1196,6 @@ static UINavigationBar *_listNavigationBar;
     [self dismissTemplateAnimated:animated completion:nil];
 }
 
-// The delegate's four lifecycle messages, sent for real and in the header's own order, and the
-// interface content window the templates are drawn into. Charon's own, so it carries no API.
 - (void)charon_showTop
 {
     CPWindow *window = [self contentWindow];
@@ -1424,8 +1247,6 @@ static UINavigationBar *_listNavigationBar;
 
 - (void)tabBarTemplate:(id)tabBarTemplate didSelectItemAtIndex:(NSUInteger)index
 {
-    // A tab chosen in the tab bar template, which is the root template here: the template at that
-    // index becomes the one on top, which is what a tab means.
     NSArray<CPTemplate *> *templates = self.templates;
     if (index < templates.count) {
         [self pushTemplate:templates[index] animated:YES completion:nil];

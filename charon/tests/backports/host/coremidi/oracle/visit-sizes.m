@@ -1,10 +1,3 @@
-// Host probe: the events MIDIEventListForEachEvent reports for the UMP types that have no parser of their own
-// (0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xE). Each list holds one packet. Its first word has the type under test,
-// then the words 00000000 (utility NOOP), 10F80000 (system clock) and 20903C7F (channel note on). The visitor's
-// MIDIUniversalMessage has no word count; for an unknown type it carries the raw words in unknown.words. So the
-// size the visitor assigns to T is read from where the next recognisable word starts in the events it reports
-// (a NOOP that is not reported on its own was taken into T's event). Lone-word packets (wordCount 1) run in a
-// forked child, because the visitor can walk past the end of a packet and the child may crash.
 #import <CoreMIDI/CoreMIDI.h>
 #include <stdio.h>
 #include <string.h>

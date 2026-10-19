@@ -1,18 +1,11 @@
 #import "CharonAVAudioBuffer.h"
 
-// The base class of the pair, under a Charon-owned name - see CharonAVAudioBuffer.h for why
-// `AVAudioBuffer` itself is not it: the real name is already a different, incompatible private
-// class on this release. Never instantiated directly; only AVAudioPCMBuffer, in its own object
-// file, is a real subclass.
-
 @implementation CharonAudioBuffer {
 @private
     CharonAudioBufferImpl *_charon;
-    AVAudioFormat *_charon_format;   // a real ivar, ARC-retained - see the struct's own comment in the header
+    AVAudioFormat *_charon_format;
 }
 
-// Both accessors are ordinary instance methods, callable from AVAudioPCMBuffer as any inherited
-// method would be, even though `_charon` itself stays private to this @implementation.
 - (CharonAudioBufferImpl *)charon_impl
 {
     return _charon;
@@ -60,8 +53,6 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    // Only AVAudioPCMBuffer is a real subclass in this port; the base class is never
-    // instantiated directly, matching the real framework's own abstract-in-practice AVAudioBuffer.
     return nil;
 }
 

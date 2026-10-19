@@ -1,15 +1,3 @@
-// The accessory graph of iOS 8.0: HMAccessory, HMService, HMCharacteristic,
-// HMCharacteristicMetadata and HMCharacteristicWriteAction.
-//
-// The names, the services and the characteristics an accessory advertises and the room it is in are
-// the graph's, and are answered from CharonHomeKitStore, so a graph an application built in one launch
-// is there for the next. The value of a characteristic, whether the accessory is reachable and an
-// identify are the accessory's own: the HAP code in this package (CharonHapCrypto.h,
-// CharonHAPBignum.h) is the crypto HAP pairs with and opens no session, so those answer
-// HMErrorCodeAccessoryNotReachable, which is what HomeKit answers for an accessory it cannot reach.
-//
-// One release's API per object file, which is what the band machinery needs: every class here arrived
-// in iOS 8.0, whatever release a later member of one of them arrived in.
 #import "CharonHomeKitInternal.h"
 
 #pragma mark - HMAccessory
@@ -89,8 +77,6 @@
 
 - (BOOL)supportsIdentify
 {
-    // Whether the accessory advertises an Identify characteristic, which is what the property is: the
-    // answer is the graph's, read off the accessory's own services.
     for (HMService *service in self.services) {
         for (HMCharacteristic *characteristic in service.characteristics) {
             if ([characteristic.characteristicType isEqualToString:HMCharacteristicTypeIdentify])
@@ -102,11 +88,6 @@
 
 - (BOOL)reachable
 {
-    // Reachability is the accessory's own state and the graph does not hold it: an accessory that was
-    // reachable when the last session ended is not reachable now, and a YES an application acted on
-    // would be a lie. This port holds no session with any accessory -- the transport that would tell it
-    // is not in the tree -- so the answer is the one a device with no session gives, and it is read
-    // from the store's own record so that a session, when there is one, has somewhere to answer from.
     return CharonHomeKitBoolField(CharonHomeKitRecord(@"accessories", _charon_identifier), @"reachable", NO);
 }
 
@@ -147,8 +128,6 @@
 
 - (void)identifyWithCompletionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
-    // Identify is the accessory's own light, beep or display, so with no session to it the answer is
-    // the one for an accessory that cannot be reached, rather than a claim that something blinked.
     CharonHomeKitFinishError(completionHandler, CharonHomeKitErrorForAccessory(HMErrorCodeAccessoryNotReachable, self,
                                                                                 @"identify needs a session with the accessory, and this port has none"));
 }
@@ -371,17 +350,12 @@ HMService *CharonHomeKitService(NSString *identifier, NSString *accessoryIdentif
 
 - (void)readValueWithCompletionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
-    // The value is the accessory's, and it is read over HAP. This port holds no session with an
-    // accessory it has not paired, so the read answers the way HomeKit answers for an accessory that
-    // is not reachable, and the characteristic's own graph fields stay readable.
     CharonHomeKitFinishError(completionHandler, CharonHomeKitErrorForAccessory(HMErrorCodeAccessoryNotReachable, self.service.accessory,
                                                                                 @"reading a value needs a session with the accessory, and this port has none"));
 }
 
 - (void)writeValue:(id)value completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
-    // The graph is asked first, because its answer holds whether or not there is a session: a
-    // characteristic that does not take writes is read-only whatever the accessory is doing.
     if (![(NSArray *)self.properties containsObject:HMCharacteristicPropertyWritable]) {
         CharonHomeKitFinishError(completionHandler, CharonHomeKitErrorForAccessory(HMErrorCodeReadOnlyCharacteristic, self.service.accessory,
                                                                                      @"the characteristic does not take writes"));
@@ -440,9 +414,6 @@ HMCharacteristic *CharonHomeKitCharacteristic(NSString *identifier, NSString *se
 
 #pragma mark - HMCharacteristicMetadata
 
-// The metadata belongs to the characteristic that holds it and has no identifier of its own, so it is
-// built from that characteristic's record. This is the port's own way in, which is why it is a C
-// function and not an initialiser: the release declares no initialiser for this class either.
 HMCharacteristicMetadata *CharonHomeKitCharacteristicMetadataForRecord(NSMutableDictionary *record)
 {
     HMCharacteristicMetadata *metadata = [[HMCharacteristicMetadata alloc] init];

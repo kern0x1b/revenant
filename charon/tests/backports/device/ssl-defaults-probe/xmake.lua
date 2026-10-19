@@ -1,8 +1,5 @@
 set_project("ssldefaultsprobe")
 set_version("0.1.0")
--- A measurement program, not a port: it asks the RELEASE what its own stack negotiates by default, so it
--- links the release and NOT charon@apple-backports. Asking the backport for its defaults would answer
--- the port's own constants with the port's own constants, which is the measurement this exists to avoid.
 local root = os.getenv("SSLDEFAULTS_ROOT") or path.join(os.scriptdir(), "../../../..")
 add_repositories("charon " .. root)
 add_addons("charon v0.8.11")

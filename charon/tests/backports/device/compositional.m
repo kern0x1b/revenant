@@ -14,10 +14,6 @@ static NSString *const results_folder = @"/private/var/backports";
 @property (nonatomic, strong) UIWindow *window;
 @end
 
-// The recorded answers are a 64-bit host's, printed with %g; on armv7 CGFloat is a float, so a
-// value such as cos(0.3) prints one unit apart in its sixth digit (0.955337 against 0.955336).
-// Two lines agree when every token is the same, or has the same letters before a number that is
-// within one unit of the sixth significant digit %g prints.
 static BOOL same_to_printed_digits(NSString *actual, NSString *expected)
 {
     if ([actual isEqualToString:expected])

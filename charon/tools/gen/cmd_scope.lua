@@ -1,10 +1,3 @@
--- `scope`: the scope of the surface, counted from the tables. For each framework and kind: how many surface rows there are, how many
--- the 6.1.3 and 4.3 ledgers list, and the state of each row (one state per row, by row_state); the work queue by demand; and the
--- reconciliation of the rows the scope calls generable with the stubs the trace layer wrote. Writes v-gen-scope.tsv, v-gen-scope.md,
--- v-gen-reconcile.tsv and v-gen-queue.tsv into --out, and prints the tie-out. The surface table and the ledgers are the corpus
--- (--coordination); the headers are read from --sdk. --swift-rendered names the folder swiftcode wrote the Swift skeletons' <module>.rendered
--- keys into: a Swift row a skeleton declares is a generated stub. The rules are top-level functions, so the test reads them without an SDK.
-
 local layout = import("layout", {anonymous = true})
 local snapshot = import("spec", {anonymous = true})
 local surface = import("surface", {anonymous = true})
@@ -23,39 +16,23 @@ local targets = import("targets", {anonymous = true})
 local sdk_info = import("sdk", {anonymous = true})
 local project = import("project", {anonymous = true})
 
--- The ledgers the scope counts against: the 6.1.3 release (the members it lacks are the work) and the 4.3 release.
 local LEDGER_6_1_3 = surface.ledger_6_1_3()
 local LEDGER_4_3 = surface.ledger_4_3()
--- The kinds the scope counts. A surface row of any other kind is in the tie-out's total and in no state.
 local SCOPE_KINDS = strings.set({"class", "method", "property", "constant", "function", "enum", "struct", "typealias", "protocol"})
--- The states that a generated stub answers (the trace layer's stub list is the one definition of generable).
 local GENERABLE_STATES = strings.set({"generable stub", "C function: generable stub (trace layer)"})
--- The ledger status of a row the header parse covers with no symbol to generate.
 local HEADER_OK = "header-ok"
--- The status of a C function the trace layer stubs.
 local GENERABLE = "generable"
--- The state of a row the framework has no snapshot for, and of a Swift row (the spec is the ObjC headers).
 local NO_SNAPSHOT = "no snapshot"
--- The state of a surface row the 6.1.3 ledger does not list. The ledger lists the rows it checked, so an unlisted row is not checked: it is
--- not implemented, and no state falls back to implemented for it.
 local NOT_CHECKED = surface.not_checked_state()
--- The surface kind of each shard kind a C declaration is read as (the shard's kind column): an umbrella's row is matched to a nested
--- target's shard row of the same surface kind and name.
 local SURFACE_KIND_OF_SHARD = {["function"] = "function", enumconst = "constant", var = "constant", enum = "enum", struct = "struct",
                                typedef = "typealias"}
--- The states of a Swift row, by its framework's Swift shard (swift_shard.lua): a declaration the shard names is a named gap (no Swift
--- generator yet); a row the shard does not name, or a framework with no shard, stays "no snapshot" with its reason.
--- The frameworks the markdown page lists by demand.
 local TOP_RANKS = 60
 
--- The states that name a release: the surface's release (release) and the compile release of the protocol bodies (compile, 16.4). They are
--- built once per run here, and the prefixes of decided and queue_next are these texts, so no state names a release in a literal.
 function states_of(release, compile)
     local SWIFT_RENDERED = "swift: rendered by the Swift skeleton (generated stub)"
     local SWIFT_DECLARED = "swift: declared in the " .. release .. " Swift shard (not generated: no Swift generator)"
     local SWIFT_NOT_NAMED = NO_SNAPSHOT .. ": the Swift shard names no declaration for this api"
     local SWIFT_NO_SHARD = NO_SNAPSHOT .. ": no Swift shard for the framework"
-    -- The state of each protocol object, by the transcriber's status for its protocol.
     local PROTOCOL_STATES = {
         ["sdk16 body"] = "protocol object: generated from the " .. compile .. " body",
         transcribed = "protocol object: generated from the transcribed header",
@@ -63,8 +40,6 @@ function states_of(release, compile)
         refused = "protocol object: refused by the transcriber",
         missing = "protocol object: not in the " .. release .. " AST",
     }
-    -- The decided states: the row is answered by the release, the registry, a stub, a generated constant or object, a hand implementation, or
-    -- a recorded decision. Every other state is open, and queue_item() queues it: the state is its reason in the queue.
     local DECIDED_STATES = {
         "header-only (lift)", "overridden", "generable stub", "generable constant", "numeric (not a string object)",
         "owned by a live branch", "registry decision", "not declared for iOS", "hand implementation (no registry row)",
@@ -72,8 +47,6 @@ function states_of(release, compile)
         "protocol member: in the " .. compile .. " body", "protocol member: in the transcribed protocol header", "protocol member: declared by a hand header",
         "C function: generable stub", SWIFT_RENDERED,
     }
-    -- The open states the work queue lists: the prefix of a state, the kind of work and the next step. The first prefix that matches
-    -- names the entry; a state no entry names is still queued, by queue_item()'s fallback.
     local QUEUE_NEXT = {
         {"protocol member: " .. release .. " only", "protocol member added after the " .. compile .. " body", "a registry decision: the protocol object is the " .. compile .. " body, so the member needs a transcribed or hand body for it"},
         {"protocol member: not in the " .. release .. " facts", "protocol member with no " .. release .. " fact", "read the header by hand; the member's owner is not the protocol the surface names"},
@@ -117,7 +90,6 @@ local function starts_with(text, prefix)
     return string.sub(text, 1, #prefix) == prefix
 end
 
--- The integer a demand-apps cell names: int(value or 0) of the oracle, an empty or missing cell being 0.
 local function number_of(value)
     if value == nil or value == "" then
         return 0
@@ -125,8 +97,6 @@ local function number_of(value)
     return assert(tonumber(value), "not a number in the surface table: " .. value)
 end
 
--- The state of a protocol member, by the transcriber's facts for its protocol (protocol_member_state of tools/gen.py@52253c0650). proto: the
--- protocol records of the framework (protocols.records).
 function protocol_member_state(owner, api, proto, states)
     local record = proto[owner]
     if record == nil then
@@ -136,7 +106,6 @@ function protocol_member_state(owner, api, proto, states)
     if string.find(api, ".", 1, true) and not starts_with(api, "-[") and not starts_with(api, "+[") then
         kind = "property"
     end
-    -- the selector: the canonical -[Owner selector] without its owner and its closing bracket
     local selector = (string.gsub(surface.canonical_member(api, kind), "^[%-%+]%[" .. owner .. " ", "", 1))
     selector = (string.gsub(selector, "%]$", ""))
     local member = nil
@@ -167,7 +136,6 @@ function protocol_member_state(owner, api, proto, states)
     return "protocol member: its protocol is " .. (record.status == "refused" and "refused by the transcriber" or states.not_in_ast)
 end
 
--- The state of a class object, by the trace layer's decision for it (classes.tsv through trace_files.load_class_decisions).
 local function class_state(api, ctx)
     local decision = ctx.class_decisions[api]
     if decision == nil then
@@ -182,8 +150,6 @@ local function class_state(api, ctx)
     return "class object: not generated (a member uncovered, or the superclass is not in the release)"
 end
 
--- The state of a C function (the functions snapshot, and the trace layer's generable status for it). A generable function the trace layer
--- left out reports the reason it recorded, as a method does (member_state).
 local function function_state(api, ctx)
     local record = ctx.functions[api]
     if record == nil then
@@ -202,7 +168,6 @@ local function function_state(api, ctx)
     return "C function: " .. record.reasons
 end
 
--- The state of a protocol object of an objc protocol row.
 local function protocol_state(api, ctx)
     local record = ctx.proto[api]
     if record == nil then
@@ -211,8 +176,6 @@ local function protocol_state(api, ctx)
     return assert(ctx.states.protocol[record.status], "unknown protocol status: " .. record.status)
 end
 
--- The state of a method or property the spec holds: a stub of the trace layer (or the reason it has none), by the trace layer's skip
--- reasons. A row the spec does not hold is explained by the header parse's gap reason (ctx.gap_of).
 local function member_state(kind, api, ctx)
     local r = ctx.spec_by_api[api]
     if r == nil then
@@ -242,7 +205,6 @@ local function member_state(kind, api, ctx)
     return "not stubbed: " .. reason
 end
 
--- The state of a constant: its owner and its value, from the spec row (nil when the spec holds no row for it).
 local function constant_state(r)
     if r == nil then
         return "not in the header parse (category or other)"
@@ -266,9 +228,6 @@ local function constant_state(r)
     return "not generated: " .. value
 end
 
--- The state of a Swift row the release and the registry do not answer: generated when the framework's Swift skeleton declares it (ctx.rendered,
--- the keys swiftcode wrote), else declared when the framework's Swift shard names it, else "no snapshot" with the reason (no shard for the
--- framework, or the shard names no such declaration). ctx.swift is the shard's index (nil with no shard).
 function swift_state(kind, api, ctx)
     local key = surface.key(kind, swift_shard.canonical_api(api))
     if ctx.rendered[key] then
@@ -283,8 +242,6 @@ function swift_state(kind, api, ctx)
     return ctx.states.swift_not_named
 end
 
--- The keys of the Swift rows a framework's skeleton declares: the <framework>.rendered file swiftcode wrote into dir (the sdk's swift
--- folder). No dir (no skeleton this run) or no file (the module is not rendered) is no key.
 local function rendered_of(dir, fw)
     local keys = {}
     if dir == nil then
@@ -301,11 +258,6 @@ local function rendered_of(dir, fw)
     return keys
 end
 
--- The one state a surface row is in, by the tables (scope_row_state of tools/gen.py@52253c0650). ctx: the framework's facts: led6 (the 6.1.3
--- ledger's statuses by surface.key), registry (the canonical keys a registry row covers), protocols (the objc protocol names), proto
--- (the protocol records), functions (the C function records), class_decisions (the classes.tsv decisions), spec_by_api (the spec
--- rows by api), stub_reason (the trace layer's skip reason by canonical key), stub_keys (the stub keys, or nil with no stubs file),
--- and gap_of (api -> the header parse's gap reason; nil when the framework has no snapshot).
 function row_state(kind, api, lang, ctx)
     if ctx.registry[surface.canonical_member(api, kind)] then
         return "overridden"
@@ -342,9 +294,6 @@ function row_state(kind, api, lang, ctx)
     return constant_state(ctx.spec_by_api[api])
 end
 
--- The gap reason of a method or property the spec does not hold: a bare init, new, copy, mutableCopy, dealloc or description is implicit
--- (NSObject's); a framework the extractor skips takes its reason from the extractor's list (skipped_reason, nil when it parses the
--- framework); any other member is one the parsed framework does not declare.
 function gap_reason(api, skipped_reason, states)
     local sel
     if starts_with(api, "-[") or starts_with(api, "+[") then
@@ -363,8 +312,6 @@ function gap_reason(api, skipped_reason, states)
     return "not in the extractor's parse (the framework is parsed and declares no such member)"
 end
 
--- The work of a state: the kind of work and the next step of its queue entry, or nil when the state is decided. Every open state is
--- queued: a state no entry names gets the fallback entry, so no open state is left out of the queue.
 function queue_item(state, states)
     for _, decided in ipairs(states.decided) do
         if starts_with(state, decided) then
@@ -379,8 +326,6 @@ function queue_item(state, states)
     return "open state, no queue entry names it", "decide the row by hand: the state names what is missing"
 end
 
--- Sorts the work queue by demand (sort key of tools/gen.py@52253c0650): a ranked row first, by rank; then the demand apps, most first; then the
--- framework and the api, in byte order. A row with the same key keeps the order the table gave it (seq).
 function sort_queue(queued)
     table.sort(queued, function(a, b)
         if a.unranked ~= b.unranked then
@@ -403,15 +348,12 @@ function sort_queue(queued)
     return queued
 end
 
--- The tie-out: the surface rows against the rows of the state totals. Returns the markdown line and the console line.
 function tie_out(surface_total, tied)
     local verdict = tied == surface_total and "tie" or "DO NOT TIE"
     return string.format("Tie-out: %d surface rows, %d rows in the state totals: %s.", surface_total, tied, verdict),
         string.format("tie-out: %d surface rows, %d in state totals", surface_total, tied)
 end
 
--- The state totals in the order the page lists them: by count, most first; a tie keeps the order the states were first counted (the
--- stable sort of tools/gen.py@52253c0650). totals: state -> count; first_counted: the states in the order they were first counted.
 function ranked_totals(totals, first_counted)
     local rows = {}
     for i, state in ipairs(first_counted) do
@@ -426,9 +368,6 @@ function ranked_totals(totals, first_counted)
     return rows
 end
 
--- The skip reasons the trace layer recorded (recorded: api -> reason, as its skipped.tsv gives them), by the key the scope reads them by.
--- A class property is recorded by its class accessor (+[Cls name]); the surface names it by its dotted name, which keys as the instance
--- form (-[Cls name]), so the instance key is added beside it (the alias stub_keys takes). facts: the typed facts of the framework.
 function reasons_by_key(recorded, facts)
     local out = {}
     for api, reason in pairs(recorded) do
@@ -442,20 +381,14 @@ function reasons_by_key(recorded, facts)
     return out
 end
 
--- The facts one framework's rows are stated by (the fields row_state reads), from the ledgers, the registry, the trace layer's files and
--- the spec snapshot. Exported: the work list (worklist.lua) states its rows through this same context, so the two cannot drift. skipped
--- is the extractor's skip list (coverage.skipped), which a gap reads by framework.
 function context_of(args, fw, rows, owner, states, skipped)
     local tree, corpus = args.tree, args.coordination
     local led6 = surface.ledger_status(corpus, owner, args.ledger_rows or LEDGER_6_1_3)
     local led43 = surface.ledger_status(corpus, owner, LEDGER_4_3)
     local snap = os.isfile(layout.shard_path(tree, fw))
-    -- the registry's covered keys, as the trace layer keys them (a class property by its +[...] api); the registry is the owner's
     local registry = trace.overrides_of(tree, owner, headers.shard_facts(tree, fw))
     local stub_keys = trace_files.load_stub_keys(tree, fw)
     if stub_keys ~= nil then
-        -- a class property's stub is keyed by its class accessor (+[Cls name]); the surface names it by its dotted name, which keys
-        -- as the instance form, so the instance key is added beside it
         for _, api in pairs(trace.class_property_apis(headers.shard_facts(tree, fw))) do
             if stub_keys[api] then
                 stub_keys["-" .. string.sub(api, 2)] = true
@@ -470,12 +403,10 @@ function context_of(args, fw, rows, owner, states, skipped)
     }
     if snap then
         ctx.proto = protocols.records(tree, fw)
-        -- the C functions snapshot is the owner's: an umbrella's functions.tsv holds its nested targets' functions too (Accelerate)
         ctx.functions = functions.load(tree, owner)
         ctx.class_decisions = trace_files.load_class_decisions(tree, fw)
         local spec = snapshot.load(tree, fw)
         ctx.spec_by_api = snapshot.index(spec)
-        -- the typed facts of the framework (headers.shard_facts), for the class properties among the recorded skip reasons: read only when one is read
         local parsed = nil
         local function facts_of()
             if parsed == nil then
@@ -483,7 +414,6 @@ function context_of(args, fw, rows, owner, states, skipped)
             end
             return parsed
         end
-        -- the reason the trace layer recorded for a member it left out (skipped.tsv), read by a row no stub answers
         local reasons = nil
         ctx.stub_reason_of = function(key)
             if reasons == nil then
@@ -495,7 +425,6 @@ function context_of(args, fw, rows, owner, states, skipped)
             return gap_reason(api, skipped[fw], states)
         end
     end
-    -- the protocol names the objc rows of the table name, and the protocols the snapshot holds
     for _, row in ipairs(rows) do
         if row.kind == "protocol" and row.lang == "objc" then
             ctx.protocols[row.api] = true
@@ -507,13 +436,10 @@ function context_of(args, fw, rows, owner, states, skipped)
     return ctx
 end
 
--- The tally of the run: the counts per framework and kind (in the order they were first counted), the generable keys per framework, the
--- queue, and the stub keys per framework.
 local function new_tally()
     return {counts = {}, count_order = {}, generable = {}, queued = {}, stub_sets = {}, surface_total = 0, skipped = {}}
 end
 
--- The count entry of a framework and kind, created on its first row.
 local function count_of(tally, fw, kind)
     local key = fw .. "\t" .. kind
     local c = tally.counts[key]
@@ -534,8 +460,6 @@ local function add_state(c, state)
     c.states[state] = c.states[state] + 1
 end
 
--- The keys a nested target's shard declares, "surface kind<TAB>name" -> the target (a shard row's name is the last part of its usr). A
--- name two targets declare under one kind keeps the first target named; none does (Accelerate, measured).
 function declared_by(tree, nested)
     local out = {}
     for _, target in ipairs(nested) do
@@ -553,10 +477,6 @@ function declared_by(tree, nested)
     return out
 end
 
--- The groups the scope counts, in the order the surface table first names them: {fw, owner, rows}. An umbrella (no-shard.tsv names its
--- targets) has no shard of its own; its objc rows that a nested target's shard declares are counted under that target (its shard, its
--- stubs, its class facts), with the umbrella as the owner (its ledgers and its registry, which name its entries). A row no target
--- declares, and a Swift row, stay under the umbrella.
 function counted_groups(tree, all)
     local groups, index = {}, {}
     local function group_of(fw, owner)
@@ -581,8 +501,6 @@ function counted_groups(tree, all)
     return groups
 end
 
--- Counts the rows of one framework into the tally. owner is the framework whose ledgers and registry the rows are checked against (fw
--- itself when nil).
 local function scope_rows(args, fw, rows, tally, owner, states)
     local ctx = context_of(args, fw, rows, owner or fw, states, tally.skipped)
     tally.stub_sets[fw] = ctx.stub_keys or {}
@@ -630,9 +548,6 @@ local function scope_rows(args, fw, rows, tally, owner, states)
     end
 end
 
--- The reconciliation: the rows the scope calls generable against the stubs the trace layer wrote. Returns the file's text, the number of
--- generable rows, of stubs and of rows both share, the number of differences, and the number of differences marked "should be empty"
--- (a generable row with no stub: the run fails on those).
 local function reconcile(tally)
     local union = {}
     for fw in pairs(tally.generable) do
@@ -670,8 +585,6 @@ local function reconcile(tally)
     return strings.backslash_replace(table.concat(lines, "\n") .. "\n"), generable_total, stubbed_total, both, #lines - 1, marked
 end
 
--- Returns the exit status: 0 when the tie-out ties and no reconcile difference is marked "should be empty", else 1. The four files are
--- written either way, so a failing run still leaves what it found in --out.
 function run(args)
     assert(args.sdk, "scope needs --sdk: the iOS SDK directory (the scope reads the headers)")
     assert(args.coordination, "scope needs --coordination: the corpus folder (the surface table and the ledgers)")

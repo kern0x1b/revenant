@@ -1,11 +1,3 @@
-// The HOST's PDFKit, and nothing else: no port object is in this process, so the two sides cannot
-// meet and every answer is proved to have come from where it should - dladdr names the image on each.
-//
-// One key=value line per fact, and the same keys as port.m.  The box facts go through the host's own
-// -boundsForBox: over all five box kinds CGPDFBox declares: the host HAS that method and answers it
-// (measured with class_copyMethodList: 193 instance methods, -[PDFPage boundsForBox:] among them), so
-// these are facts the run compares.  The host has no -mediaBox and no -cropBox property, which is why
-// the two properties' rows are inert while the method's is not.
 #import <Foundation/Foundation.h>
 #import <PDFKit/PDFKit.h>
 #import <objc/message.h>
@@ -24,32 +16,16 @@ static const struct { CGPDFBox box; const char *name; } kinds[] = {
     { kCGPDFBleedBox, "bleedBox" }, { kCGPDFTrimBox, "trimBox" }, { kCGPDFArtBox, "artBox" },
 };
 
-// A colour, by its components, or "(nil)".
 
-
-// The fixture file both of the once-only blocks below open, set by printInitializerFacts
-// and read by copyFactsPage - one file, one way in, rather than a second argument.
 static const char *gCopyFactsFixture = NULL;
 
 
-// ---- the /Outlines tree -------------------------------------------------------------------------
-//
-// Walked rather than printed per fixture, because every member of an outline is read off a link in the
-// tree and the link matters: the same title in two positions answers two different -index values.  The
-// walk is depth-first over -childAtIndex: in the same order on both sides, and every key is named by the
-// path it was read at, so a difference says which item and which member.
-//
-// It does NOT ask one past the end: the host RAISES NSRangeException there - measured - so the port
-// answers nil and the boundary is named in PDFOutline11.m and in the row.
 static void printOutlineWalk(const char *name, PDFOutline *outline, int depth)
 {
     if (outline == nil) {
         printf("%s.outline=nil\n", name);
         return;
     }
-    // ONE KEY PER LINE, because the comparison reads one key=value per line: a line carrying seven of
-    // them registers as the first and loses the rest.  Every other fact in this harness is printed the
-    // same way and the first version of this block was not.
     printf("%s.outline.label=%s\n", name,
            outline.label == nil ? "(nil)" : (outline.label.length == 0 ? "(empty)" : outline.label.UTF8String));
     printf("%s.outline.children=%lu\n", name, (unsigned long)outline.numberOfChildren);
@@ -61,8 +37,6 @@ static void printOutlineWalk(const char *name, PDFOutline *outline, int depth)
     if (destination == nil) {
         printf("%s.outline.dest=nil\n", name);
     } else {
-        // one key per line here as everywhere else: the point is ONE value carrying both components,
-        // the way every other point in this harness is printed, and the zoom is its own key
         printf("%s.outline.dest.page=%s\n", name, destination.page ? "an-object" : "(nil)");
         printf("%s.outline.dest.point=%.4f,%.4f\n", name, (double)destination.point.x,
                (double)destination.point.y);
@@ -93,14 +67,10 @@ static void printOutlineWalk(const char *name, PDFOutline *outline, int depth)
         snprintf(key, sizeof(key), "%s.c%lu", name, (unsigned long)i);
         printOutlineWalk(key, [outline childAtIndex:i], depth + 1);
     }
-    // ONE PAST THE END, inside @try: the host RAISES NSRangeException there - measured - so the value
-    // printed is the EXCEPTION'S NAME rather than an object, and a side that answers nil names itself.
     {
         char key[512];
         snprintf(key, sizeof(key), "%s.childPastEnd", name);
         @try {
-            // NIL IS ITS OWN ANSWER and is not an object: the first version of this block printed
-            // "an-object" whatever the call returned, so a side answering nil named itself as an object
             PDFOutline *past = [outline childAtIndex:outline.numberOfChildren];
             printf("%s=%s\n", key, past == nil ? "(nil)" : "an-object");
         } @catch (NSException *raised) {
@@ -111,25 +81,6 @@ static void printOutlineWalk(const char *name, PDFOutline *outline, int depth)
 }
 
 
-// The nine /Ff bit members, one line each and each with its OWN value, because a line carrying all nine
-// registers as one key - which is how the outline facts were lost the first time round.
-// The fixtures whose widgets a PDF STRING /T names, and -fieldName is compared only over those.  The list
-// is of FIXTURES and not of annotations so that both sides apply the same rule without either reading an
-// annotation dictionary the other cannot reach: PDFKit exposes no accessor for one, and a gate that asked
-// each side's own -fieldName and checked whether it LOOKED synthesised would be comparing the member's
-// opinion of itself.
-//
-// TWO fixtures are deliberately NOT in it.  widget-t-name.pdf, whose /T is a PDF NAME and so names
-// nothing - a prefix test swept it in and the differential caught that, which is why the list is spelled
-// out.  And widget-values.pdf, whose FIRST widget carries /T (the field) and answers "the field" while its
-// other two name nothing and answer synthesised names: a gate is of fixtures and cannot split a file, so
-// adding it would compare two keys that cannot agree.  The named case with a /DA beside it is covered by
-// widget-t-extra-DAstring instead.
-//
-// Over every other fixture the host answers a name synthesised from a counter that runs ACROSS DOCUMENTS
-// in one process - four fixtures loaded in order answer text0..text2, text3..text4, text5..text6 and
-// text7 - so no port can reproduce it and no key is printed there.  facts/PDFKit/Annotation11.md has the
-// measurement and the three fixtures that make the counter's subject visible.
 static BOOL charonFixtureNamesItsWidgets(const char *name)
 {
     static const char *const named[] = {
@@ -155,19 +106,10 @@ static void printAnnotationFlagFacts(const char *prefix, PDFAnnotation *annotati
     printf("%s.flags.activatableTextField=%d\n", prefix, (int)annotation.isActivatableTextField);
     if (charonFixtureNamesItsWidgets(prefix))
         printf("%s.flags.fieldName=%s\n", prefix, annotation.fieldName.UTF8String ?: "(nil)");
-    // -buttonWidgetStateString is compared on EVERY annotation: it is the /AP /N on-state name, or "Yes"
-    // when there is no /AP, and the harness's button-ap-states.pdf is what tells those apart.
     printf("%s.state.onName=%s\n", prefix, annotation.buttonWidgetStateString.UTF8String ?: "(nil)");
     printf("%s.state.on=%ld\n", prefix, (long)annotation.buttonWidgetState);
 }
 
-// ---- the action family and PDFDestination -------------------------------------------------------
-//
-// Printed once per annotation, after the border facts, in the same keys on both sides.  Three things
-// have to be compared rather than described: the CLASS the host builds (which is the /S name's answer and
-// not a string the port could match), the three destination members, and the sentinel - which is a
-// NUMBER on both sides (the port exports FLT_MAX, the host's own value, and it is not CGFLOAT_MAX), so
-// it is printed as the number it is rather than symbolically.
 static void printCGFloatOrUnspecified(const char *label, CGFloat value)
 {
     printf("%s=%.4f\n", label, (double)value);
@@ -182,8 +124,6 @@ static void printDestinationFacts(const char *prefix, PDFDestination *destinatio
     printf("%s.destination=an-object\n", prefix);
     PDFPage *page = destination.page;
     printf("%s.destination.page=%s\n", prefix, page ? "an-object" : "(nil)");
-    // the page's INDEX, found by asking the document for each of its pages, because the host's PDFPage
-    // has no -pageIndex - the same thing the border harness does for the same reason
     if (page != nil) {
         PDFDocument *owner = page.document;
         unsigned long index = owner ? owner.pageCount : 0;
@@ -244,14 +184,8 @@ static void printActionFacts(const char *prefix, PDFAction *action)
     }
 }
 
-// The six designated initializers the 26.2 headers declare, each built in code with no dictionary
-// behind it, because a class the program cannot construct is a class whose setters answer a crash - the
-// question the coordinator asked about PDFBorder, asked here before the code was written.
 static void printInitializerFacts(const char *fixture)
 {
-    // A real document, so -initWithPage:atPoint: is asked about a page that exists.  An
-    // empty one has no page and answers a different set of values, which is a corner
-    // nothing in this harness needs and which probe12 measured separately.
     gCopyFactsFixture = fixture;
     PDFDocument *document = [[PDFDocument alloc] initWithURL:[NSURL fileURLWithPath:@(fixture)]];
     PDFDestination *plain = [[PDFDestination alloc] init];
@@ -300,7 +234,6 @@ static void printInitializerFacts(const char *fixture)
            (int)reset.fieldsIncludedAreCleared);
 }
 
-// The key values of one border, in the header's own key order, in the shape both binaries print.
 static void printBorderKeys(const char *label, PDFBorder *border)
 {
     NSDictionary *keys = border.borderKeyValues;
@@ -321,7 +254,6 @@ static void printBorderKeys(const char *label, PDFBorder *border)
     }
 }
 
-// The pattern's numbers, which -dashPattern answers and the key values also publish.
 static void printBorderDash(const char *label, PDFBorder *border)
 {
     if (border.dashPattern == nil) {
@@ -333,12 +265,6 @@ static void printBorderDash(const char *label, PDFBorder *border)
         [parts addObject:[NSString stringWithFormat:@"%.4f", (double)[value doubleValue]]];
     printf("%s.dash.values=%s\n", label, [[parts componentsJoinedByString:@","] UTF8String]);
 }
-// ---- the border as a VALUE OBJECT: its setters, its identity and -setBorder: --------------------
-//
-// Printed once, outside the fixture loop, because none of it is about a file: these are the host's
-// answers about the OBJECT.  Every key here has the same name on the port side, and the whole block is
-// what the coordinator's own measurement (/tmp/land/pdfb/t.m) covers, extended with the setter
-// sequences that pin each setter's effect on the other two members.
 static void printBorderValueFacts(void)
 {
     PDFBorder *fresh = [[PDFBorder alloc] init];
@@ -346,7 +272,6 @@ static void printBorderValueFacts(void)
     printf("border.fresh.lineWidth=%.4f\n", (double)fresh.lineWidth);
     printf("border.fresh.dash=%s\n", fresh.dashPattern ? "an-array" : "(nil)");
     printBorderKeys("border.fresh", fresh);
-    // all three members set, which is what the coordinator measured: reads back 1 / 5 / (7 5)
     PDFBorder *all = [[PDFBorder alloc] init];
     all.style = kPDFBorderStyleDashed;
     all.lineWidth = 5;
@@ -356,7 +281,6 @@ static void printBorderValueFacts(void)
     printf("border.all.dash=%s\n", all.dashPattern ? "an-array" : "(nil)");
     printBorderDash("border.all", all);
     printBorderKeys("border.all", all);
-    // a pattern alone forces the style dashed, and an empty one forces it solid
     PDFBorder *pattern = [[PDFBorder alloc] init];
     pattern.dashPattern = @[@7, @5];
     printf("border.pattern.style=%ld\n", (long)pattern.style);
@@ -368,8 +292,6 @@ static void printBorderValueFacts(void)
     printf("border.empty.dash=%s\n", empty.dashPattern ? "an-array" : "(nil)");
     printBorderDash("border.empty", empty);
     printBorderKeys("border.empty", empty);
-    // nil is the same as an empty array, and the width is NOT reset by any of the three setters:
-    // W 5 is set first here and answers 5 after the pattern and after the nil
     PDFBorder *cleared = [[PDFBorder alloc] init];
     cleared.lineWidth = 5;
     cleared.style = kPDFBorderStyleDashed;
@@ -380,7 +302,6 @@ static void printBorderValueFacts(void)
     printf("border.cleared.dash=%s\n", cleared.dashPattern ? "an-array" : "(nil)");
     printBorderDash("border.cleared", cleared);
     printBorderKeys("border.cleared", cleared);
-    // the style setter touches nothing else, and the width setter touches nothing else
     PDFBorder *styleOnly = [[PDFBorder alloc] init];
     styleOnly.style = kPDFBorderStyleInset;
     printf("border.styleonly.style=%ld lineWidth=%.4f dash=%s\n", (long)styleOnly.style,
@@ -406,17 +327,6 @@ static void printAppearanceColour(const char *label, const char *member, id colo
            (double)a);
 }
 
-// ---- PDFAnnotation's three colours and its font, keyed by the annotation's /NM --------------------
-//
-// The keys carry `.colours.' and NOT `.page0.' on purpose: compare() treats any key containing ".page0."
-// whose value is four numbers as a RECTANGLE and compares it with a 0.001 tolerance, which is right for a
-// rectangle and wrong for a colour - the difference this family is about is in the THIRD decimal, and a
-// tolerance there would be exactly the thing that hides it.  These keys are compared as text.
-//
-// A colour is printed as its SPACE NAME and its COMPONENTS IN THAT SPACE, not as four RGBA numbers,
-// because most of these colours have no RGB: a gray answers two components and a CMYK five, and
-// -[NSColor getRed:green:blue:alpha:] is VOID on macOS and raises on a space with no RGB.  Both sides
-// read the same two facts off CoreGraphics, which is the one thing they share.
 static void printAnnotationColour(const char *label, const char *member, id colour)
 {
     if (colour == nil) {
@@ -424,8 +334,6 @@ static void printAnnotationColour(const char *label, const char *member, id colo
         return;
     }
     CGColorRef cgcolour = [(NSColor *)colour CGColor];
-    // CGColorGetColorSpace and not cgcolour->colorSpace: struct CGColor is an OPAQUE type in this SDK -
-    // CF_BRIDGED_TYPE(id) - so its member is not readable and the accessor is the only way to the space.
     CGColorSpaceRef space = cgcolour != NULL ? CGColorGetColorSpace(cgcolour) : NULL;
     printf("%s.%s.space=%s\n", label, member,
            space != NULL ? [(__bridge NSString *)CGColorSpaceGetName(space) UTF8String] : "(nil)");
@@ -438,10 +346,6 @@ static void printAnnotationColour(const char *label, const char *member, id colo
            [[parts componentsJoinedByString:@","] UTF8String]);
 }
 
-// The /NM of an annotation, as the format's own unique-name key (PDF 1.7 Table 8.16) and as a C string,
-// or NULL when the annotation does not carry one.  This is the whole of the re-keying: an annotation that
-// names itself can be found in -annotations' output whatever the host has dropped, and one that does not
-// is not printed at all rather than printed under a position that could shift.
 static const char *charonAnnotationName(PDFAnnotation *annotation)
 {
     id name = [annotation valueForAnnotationKey:@"NM"];
@@ -450,8 +354,6 @@ static const char *charonAnnotationName(PDFAnnotation *annotation)
     return [(NSString *)name UTF8String];
 }
 
-// The whole block for one fixture: the names it surfaced - which is where a dropped annotation shows up
-// as a MISSING NAME rather than as a shift - and then the four members of each named annotation.
 static void printAnnotationColourFacts(const char *fixture, PDFPage *page)
 {
     NSMutableArray *names = [NSMutableArray array];
@@ -484,8 +386,6 @@ static void printAnnotationColourFacts(const char *fixture, PDFPage *page)
     }
 }
 
-// One appearance-characters object, printed under one label, so the two sides' blocks are the same
-// shape and the comparison needs no knowledge of which is which.
 static void printAppearanceCharacteristics(const char *label,
                                            PDFAppearanceCharacteristics *characteristics)
 {
@@ -509,9 +409,6 @@ static void printAppearanceCharacteristics(const char *label,
             printf("appearance.%s.key.%s=%s\n", label, [key UTF8String],
                    [(NSString *)value UTF8String]);
         } else if ([value respondsToSelector:@selector(getRed:green:blue:alpha:)]) {
-            // a colour, compared by its four components: the host's is an NSColor and the port's is a
-            // UIColor, and their -description strings are not the same string, so the components are
-            // what both sides can answer
             CGFloat r = 0, g = 0, b = 0, a = 0;
             [(id)value getRed:&r green:&g blue:&b alpha:&a];
             printf("appearance.%s.key.%s=%.6f,%.6f,%.6f,%.6f\n", label, [key UTF8String], (double)r,
@@ -523,12 +420,6 @@ static void printAppearanceCharacteristics(const char *label,
 }
 
 
-// -copy and the four subclass -inits, printed once outside the fixture loop because neither is about a
-// file: both are questions about the OBJECT.  Every key here is measured on the host - the copy's class,
-// every member, whether a mutable member of the copy is shared with the original, and whether the page a
-// destination names is the same object - and the red controls name four of them.
-// A real page for the copy block, out of the first fixture file.  The nil-page case has a key of its
-// own below; the copy of a destination is only worth comparing when there is a page to keep.
 static PDFPage *copyFactsPage(void)
 {
     static PDFPage *page = nil;
@@ -542,9 +433,6 @@ static PDFPage *copyFactsPage(void)
 
 static void printCopyFacts(void)
 {
-    // the nil-page rule, asked first because it is what the copy block below was originally
-    // written against and got wrong: the host answers NO OBJECT for a nil page
-    // the four subclasses' -init, built with nothing: a nil -type each, and the members below
     PDFActionGoTo *goToInit = [[PDFActionGoTo alloc] init];
     printf("initgoto.class=%s type=%s destination=%s\n", class_getName([goToInit class]),
            goToInit.type.UTF8String ?: "(nil)",
@@ -566,7 +454,6 @@ static void printCopyFacts(void)
     PDFDestination *noPage = [[PDFDestination alloc] initWithPage:nil atPoint:CGPointMake(3, 4)];
     printf("initdest.nilpage=%s\n", noPage ? "an-object" : "(nil)");
 
-    // a destination copied: a new object, the SAME page, and a zoom that is its own
     PDFDestination *made = [[PDFDestination alloc] initWithPage:copyFactsPage()
                                                       atPoint:CGPointMake(3, 4)];
     made.zoom = 2.5;
@@ -581,13 +468,10 @@ static void printCopyFacts(void)
     printCGFloatOrUnspecified("copy.destination.zoomAfterSet", madeCopy.zoom);
     printCGFloatOrUnspecified("copy.destination.zoomOriginal", made.zoom);
 
-    // a destination with NO page copied - one a named destination and a plain -init both
-    // make - which is a different question from copying one that has a page
     PDFDestination *bare = [[PDFDestination alloc] init];
     PDFDestination *bareCopy = [bare copy];
     printf("copy.nopage=%s\n", bareCopy ? "an-object" : "(nil)");
 
-    // an action copied: the class and the type come along, and each subclass's own member with them
     PDFAction *base = [[PDFAction alloc] init];
     PDFAction *baseCopy = [base copy];
     printf("copy.action.class=%s type=%s same=%d\n", class_getName([baseCopy class]),
@@ -627,19 +511,11 @@ static void printCopyFacts(void)
            (int)resetCopy.fieldsIncludedAreCleared);
 }
 
-// ---- find and PDFSelection ------------------------------------------------------------------------
-//
-// Both sides ask the SAME rows in the SAME order, one key per line, because the comparison reads one
-// key=value per line.  The needles are a FIXED list, so a fixture that carries none of them answers
-// count=0 for every one - which is itself the measured answer ("May return an empty array (if not found)",
-// PDFDocument.h:259) and is compared rather than skipped.
 static const char *const kNeedles[] = {
     "alpha", "bravo", "charlie", "zero", "one", "two", "three", "six", "shared", "third", "line",
     "page", "delta", "nothing here",
 };
 
-// The control characters of a selection's own string made visible, because a range that takes a line break
-// and one that does not look identical when the break is printed raw.
 static NSString *visibleText(NSString *text)
 {
     if (text == nil)
@@ -674,17 +550,9 @@ static void printSelection(const char *prefix, PDFSelection *selection, PDFDocum
             printf("%s.range%lu=%lu,%lu\n", prefix, (unsigned long)i, (unsigned long)r.location,
                    (unsigned long)r.length);
         }
-        // The RECT over the selection's ranges on page 0, to four places, and it is asked of EVERY
-        // selection either side answers - not only of the font fixtures - because it is geometry over
-        // whatever text a page happens to carry, and the text fixtures are where a run's x, its size and
-        // a multi-line union are already pinned.
         CGRect b = [selection boundsForPage:page0];
         printf("%s.bounds0=%.4f,%.4f,%.4f,%.4f\n", prefix, b.origin.x, b.origin.y, b.size.width,
                b.size.height);
-        // AND OVER A PAGE THE SELECTION DOES NOT COVER, which is the +inf,+inf,0,0 this row has to
-        // reproduce and which a single-page document cannot show: the last page is asked whenever the
-        // document has more than one, and a one-page document answers nothing for it because there is
-        // no other page to name.
         if (document.pageCount > 1) {
             PDFPage *last = [document pageAtIndex:document.pageCount - 1];
             CGRect o = [selection boundsForPage:last];
@@ -701,9 +569,6 @@ static void printSelection(const char *prefix, PDFSelection *selection, PDFDocum
     printf("%s.copyString=%s\n", prefix, visibleText(copy.string).UTF8String ?: "(nil)");
 }
 
-// Every needle over every fixture, then the members of the FIRST selection it answers: the range, the pages,
-// the line split, the colour, the attributed string and the copy.  The per-fixture keys are named by the
-// needle and not by the selection's index, so a difference says WHICH match and not merely that one differs.
 static void printFindFacts(const char *name, PDFDocument *document)
 {
     for (unsigned i = 0; i < sizeof(kNeedles) / sizeof(*kNeedles); i++) {
@@ -714,14 +579,12 @@ static void printFindFacts(const char *name, PDFDocument *document)
             char prefix[512];
             snprintf(prefix, sizeof(prefix), "%s.find.%s.0", name, kNeedles[i]);
             printSelection(prefix, found[0], document);
-            // and the SAME needle backwards, which is the option that reverses the array and not the ranges
             NSArray<PDFSelection *> *backwards = [document findString:needle withOptions:NSBackwardsSearch];
             printf("%s.find.%s.backwards=%lu\n", name, kNeedles[i], (unsigned long)backwards.count);
             if (backwards.count > 0) {
                 snprintf(prefix, sizeof(prefix), "%s.find.%s.backwards.0", name, kNeedles[i]);
                 printSelection(prefix, backwards[0], document);
             }
-            // and the case-insensitive option, which answers the document's spelling and not the needle's
             NSArray<PDFSelection *> *folded = [document findString:needle
                                                      withOptions:NSCaseInsensitiveSearch];
             printf("%s.find.%s.folded=%lu\n", name, kNeedles[i], (unsigned long)folded.count);
@@ -755,7 +618,6 @@ int main(int argc, char **argv)
             }
             printf("%s.document=an-object\n", name);
             printf("%s.pageCount=%lu\n", name, (unsigned long)document.pageCount);
-            // the document's own answers, every one of which the host answers with NO WINDOW open
             printf("%s.isLocked=%d\n", name, (int)document.isLocked);
             printf("%s.isEncrypted=%d\n", name, (int)document.isEncrypted);
             printf("%s.allowsCopying=%d\n", name, (int)document.allowsCopying);
@@ -763,20 +625,14 @@ int main(int argc, char **argv)
                    document.documentURL ? [document.documentURL lastPathComponent].UTF8String : "(nil)");
             printf("%s.dataRepresentation.length=%lu\n", name,
                    (unsigned long)document.dataRepresentation.length);
-            // the SINGULAR -documentAttribute: the host does not have it (respondsToSelector: 0), so it is
-            // not a fact this run can compare and the row stays inert with that reason
             printf("%s.documentAttribute.supported=%d\n", name,
                    (int)[document respondsToSelector:NSSelectorFromString(@"documentAttribute:")]);
-            // the PLURAL -documentAttributes the host does have, compared by KEY SET and by the three
-            // stable strings.  Never a date and never Producer: the fixture writes a fresh timestamp on
-            // every run and Producer is the writer's own string, so neither is a fact that can agree.
             NSDictionary *attributes = document.documentAttributes;
             NSMutableArray *keys = [[attributes allKeys] mutableCopy];
             [keys sortUsingSelector:@selector(compare:)];
             printf("%s.documentAttributes.keys=%lu\n", name, (unsigned long)keys.count);
             for (NSString *key in keys)
                 printf("%s.documentAttributes.key.%s\n", name, [(NSString *)key UTF8String]);
-            // PDFView with NO WINDOW, the same cases in the same order as the port side
             {
                 PDFView *view = [[PDFView alloc] init];
                 printf("%s.view.window.supported=%d\n", name,
@@ -815,7 +671,6 @@ int main(int argc, char **argv)
                                   : nil;
             if (first != nil) {
                 printf("%s.page0.rotation=%ld\n", name, (long)first.rotation);
-                // the page's own answers, measured on the host with no window open either
                 printf("%s.page0.label=%s\n", name, first.label ? [first.label UTF8String] : "(nil)");
                 printf("%s.page0.document=%s\n", name, first.document ? "an-object" : "(nil)");
                 printf("%s.page0.pageIndex.supported=%d\n", name,
@@ -823,12 +678,7 @@ int main(int argc, char **argv)
                 printf("%s.page0.numberOfCharacters=%ld\n", name, (long)first.numberOfCharacters);
                 printf("%s.page0.string=%s\n", name, first.string ? first.string.UTF8String : "(nil)");
                 printf("%s.page0.annotations.count=%lu\n", name, (unsigned long)first.annotations.count);
-                // the SEARCH and the selection it answers, over the fixed needle list
                 printFindFacts(name, document);
-                // The BORDER, whose own members are a family of their own: PDFBorder11.m carries the
-                // rules and the fixtures that fix them.  A nil border is printed as nil and is NOT
-                // compared against the port's nil by accident - it is compared like anything else, and
-                // the subtypes that answer one where the port does not would show up here.
                 printOutlineWalk(name, document.outlineRoot, 0);
                 printAnnotationColourFacts(name, first);
                 for (unsigned a = 0; a < first.annotations.count; a++) {
@@ -906,10 +756,6 @@ int main(int argc, char **argv)
                 for (unsigned k = 0; k < sizeof(kinds) / sizeof(*kinds); k++)
                     printf("%s.page0.%s=NOT-COMPARED-no-such-method\n", name, kinds[k].name);
             } else {
-                // -border's IDENTITY and -setBorder:, on the first annotation of every fixture: the
-                // same object each time, visible mutation through it, a set object held by reference,
-                // and nil after setting nil.  These run AFTER the per-annotation facts above, because
-                // they change that annotation's border and the file's own answers must be read first.
                 if (first.annotations.count > 0) {
                     PDFAnnotation *target = first.annotations[0];
                     PDFBorder *once = target.border;
@@ -945,10 +791,6 @@ int main(int argc, char **argv)
                           : nil;
             printf("%s.pageAtIndex.one-past-the-end=%s\n", name, past ? "an-object" : "nil");
         }
-        // PDFAppearanceCharacteristics, which no annotation hands out in the 26.2 SDK, so it is its
-        // own object on this side too and the comparison is object against object.  Every member is
-        // read on a fresh one, then every member is set and read again, and the key values are read
-        // at each step: the second reading is what shows a setter that drops its value.
         printAppearanceCharacteristics("fresh", [[PDFAppearanceCharacteristics alloc] init]);
         {
             PDFAppearanceCharacteristics *only = [[PDFAppearanceCharacteristics alloc] init];

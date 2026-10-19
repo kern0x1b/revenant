@@ -1,14 +1,6 @@
--- The SDK the generator runs on, read from the SDK alone (coordination/wave-2026-10-03/design-sdk-generator.md, contract 2): the name
--- and the version from its SDKSettings.json (CanonicalName, Version), and the target triple of the parse from its deployment target.
--- Every step that needs "the release" takes it from here; no step names a release, a framework or a machine path.
--- The module lists come from the steps that read them: decls --list (the declaration frameworks) and swift_shard.modules (the Swift
--- modules).
-
 local files = import("files", {anonymous = true})
 local json = import("core.base.json")
 
--- The SDK's settings: {path, name, version, deployment, triple}, where name is the canonical name (iphoneos26.2), version the release (26.2),
--- deployment the SDK's DefaultDeploymentTarget and triple the arm64e triple of that deployment target. Raises, naming the file, when SDKSettings.json is absent or lacks a field.
 function discover(sdk)
     local file = path.join(sdk, "SDKSettings.json")
     local text = files.read_text(file)
@@ -27,9 +19,6 @@ function discover(sdk)
     }
 end
 
--- The names of the corpus files and of the outputs that carry the release, built from the release (the version discover reads). The
--- corpus of one release is the folder cache-<release> and the files named with it; a release the corpus has no files for is an error
--- where the file is read, naming the file.
 function names(release)
     local cache = "cache-" .. release
     return {

@@ -1,9 +1,5 @@
 #import "CharonDynamics.h"
 
-// Each collision behavior takes a group from the animator's counter when it joins (the first is 1)
-// and gives it back when it leaves: its items carry the category bit 1 << 2g, its boundaries 1 << 2g+1.
-// A counter, not an allocator, so a behavior that joins after another left can share bits with one
-// still there, as on 7.0. Boundaries are static edge or loop bodies at the reference system's origin.
 @implementation UICollisionBehavior {
     BOOL _usesImplicitBounds;
     UIEdgeInsets _implicitBoundsInsets;
@@ -71,8 +67,6 @@
         [self charon_setCollisions:YES forBody:body isEdge:YES];
 }
 
-// -[UICollisionBehavior _setCollisions:forBody:isEdge:] (7.0): this behavior's two bits are cleared
-// and set again; another behavior's bits on a shared body stay. The contact mask is the collision one.
 - (void)charon_setCollisions:(BOOL)on forBody:(CharonDynamicsBody *)body isEdge:(BOOL)edge
 {
     if (!body)
@@ -162,10 +156,6 @@
 
 #pragma mark Boundaries
 
-// A boundary path as 7.0 flattens it: the first subpath only, a curve as max(L / 10 pt, 1) chords of
-// equal parameter where L is the length of its 10-chord polyline, a closing subpath back to its start;
-// then, in metres, every point that exactly repeats the one before, and a last one that repeats the
-// first, dropped.
 struct CharonFlattening {
     BOOL stop;
     CFMutableDataRef points;
@@ -247,7 +237,6 @@ static void charon_flatten_element(void *info, const CGPathElement *element)
     }
 }
 
-// The loop's vertices in metres, as an NSData of b2Vec2.
 static NSData *charon_loop_vertices(CGPathRef path)
 {
     CharonFlattening state = {NO, CFDataCreateMutable(NULL, 0)};
@@ -262,8 +251,6 @@ static NSData *charon_loop_vertices(CGPathRef path)
         [vertices appendBytes:&vertex length:sizeof vertex];
         kept += 1;
     }
-    // A closed path ends on its first point: every trailing point that coincides with it goes. Fewer than two
-    // points left make no loop (facts/UIKit/UIDynamicAnimator.md M2, the host's rule of addEdgeLoop).
     const b2Vec2 *kept_vertices = (const b2Vec2 *)vertices.bytes;
     if (kept > 1) {
         while (kept >= 2 && b2DistanceSquared(kept_vertices[kept - 1], kept_vertices[0]) <= 1.42108547e-14f)
@@ -274,9 +261,6 @@ static NSData *charon_loop_vertices(CGPathRef path)
     return vertices;
 }
 
-// A path with no loop in it is refused when its body is made: at add in an animator, else at the association
-// that makes it, whose behavior is then left in animator.behaviors but not registered
-// (facts/UIKit/UIDynamicAnimator.md M2).
 static CharonDynamicsBody *charon_loop_body(UIDynamicAnimator *context, NSData *vertices)
 {
     if (vertices.length == 0)
@@ -284,8 +268,6 @@ static CharonDynamicsBody *charon_loop_body(UIDynamicAnimator *context, NSData *
     return [context charon_boundaryBodyWithLoop:(const b2Vec2 *)vertices.bytes count:(int32)(vertices.length / sizeof(b2Vec2))];
 }
 
-// A boundary is kept as its path, or its two points, and has a body only while the behavior is in an
-// animator.
 - (CharonDynamicsBody *)charon_bodyForBoundary:(id)description
 {
     UIDynamicAnimator *context = [self charon_context];
@@ -336,7 +318,6 @@ static CharonDynamicsBody *charon_loop_body(UIDynamicAnimator *context, NSData *
     [self charon_setupImplicitBoundaries];
 }
 
-// The reference bounds, inset, as a loop 1 pt outside them (7.0).
 - (void)charon_setupImplicitBoundaries
 {
     UIDynamicAnimator *context = [self charon_context];
@@ -371,8 +352,6 @@ static CharonDynamicsBody *charon_loop_body(UIDynamicAnimator *context, NSData *
     [context charon_tickle];
 }
 
-// A boundary given an identifier already in use replaces the entry, and the body it had stays in the
-// world (7.0).
 - (void)addBoundaryWithIdentifier:(id<NSCopying>)identifier forPath:(UIBezierPath *)path
 {
     if (!identifier || !path)
@@ -441,8 +420,6 @@ static CharonDynamicsBody *charon_loop_body(UIDynamicAnimator *context, NSData *
     return nil;
 }
 
-// A contact is this behavior's when one of its items is in it: with another of its items, with its
-// reference bounds (identifier nil) or with one of its boundaries.
 - (void)charon_report:(CharonDynamicsContact *)contact began:(BOOL)began
 {
     NSArray *items = [self charon_items];

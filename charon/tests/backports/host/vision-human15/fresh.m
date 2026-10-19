@@ -1,6 +1,3 @@
-/* fresh.m - what a VNHumanObservation made with -init answers, on the host and in the port, property by property. The
- * UUID is left out: it is a new one on each call. Both sides compile this file; the host's Vision is the framework and the
- * port's is its sources. */
 #import <Foundation/Foundation.h>
 #import <Vision/Vision.h>
 #import <objc/runtime.h>

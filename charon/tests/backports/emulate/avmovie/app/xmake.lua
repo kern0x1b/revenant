@@ -1,7 +1,5 @@
 set_project("charonavmovieprobe")
 set_version("0.0.1")
--- The AVMovie probe of tests/backports/host/avf-movie4, as an application launched through SpringBoard (xmake emulate launch).
--- The movies are the application's resources: run-app.sh copies the host's movies into movies/ beside this file.
 local root = os.getenv("CHARAVMOVIE_ROOT") or path.join(os.scriptdir(), "../../../../..")
 add_repositories("charon " .. root)
 add_addons("charon v0.8.17")

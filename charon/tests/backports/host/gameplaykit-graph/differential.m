@@ -1,22 +1,3 @@
-// differential.m -- the port's pathfinding graphs held against what the host's own GameplayKit answers.
-//
-// Every check below names the block of measure.m whose number it came from, and run.sh prints measure.m's own
-// output beside the checks, so each one can be re-measured rather than trusted. The port's sources are compiled
-// with no GameplayKit framework in the picture, so its classes are the only ones of these names in the process
-// and this file calls the port exactly as an application would.
-//
-// FOUR MEMBERS ARE NOT HELD AGAINST A HOST NUMBER, and each says so in its own check text:
-//   * -[GKGraphNode findPathFromNode:] -- the host traps (SIGBUS inside GameplayKit) on every input tried.
-//   * -[GKQuadtreeNode quad] -- the host answers the zero quad for every node of every tree tried.
-//   * -elementsAtPoint: for an element added with a box or a quad, and -elementsInBox: for a box element
-//     -- the host's answers contradict its own header and, at one cell size, its own tree.
-//   * the node positions of an obstacle graph -- the host answers NaN for every one of them.
-//
-// The two float tolerances are the ones the port's own header already records: CharonGK.h:37-38 says the
-// host's own float arithmetic is up to two units in the last place away from the correctly rounded division,
-// so a distance is compared with a relative slack rather than for equality. Measured on the host: 7.21110249
-// for the distance from (9,8) to (3,4), 1.41421354 and 2.23606801 for two grid cells.
-
 #import <Foundation/Foundation.h>
 #import <GameplayKit/GameplayKit.h>
 #import <objc/runtime.h>
@@ -52,9 +33,6 @@ static void contract(BOOL ok, NSString *what)
     }
 }
 
-// A point cannot go through NSValue: @encode cannot describe a vector type and -getValue:size: is iOS 11.
-// So the format helpers below read a vector into a two-float box and print it, and a node list is printed from
-// the node's own -position or -gridPosition.
 @interface CharonHostPoint : NSObject {
 @public
     float px;
@@ -138,8 +116,6 @@ static NSString *printedNames(NSArray *elements)
     return answer;
 }
 
-// Did a call raise with exactly this reason? Every refusal in this family is a refusal the host makes, and
-// the reason text is part of the answer -- two of them carry Apple's own spelling mistake, "destignated".
 static BOOL raisedWith(void (^body)(void), NSString *name, NSString *reason)
 {
     @try {
@@ -154,7 +130,6 @@ int main(void)
 {
     setbuf(stdout, NULL);
     @autoreleasepool {
-        // === m1: the nodes and their costs ==========================================================
         {
             GKGraphNode2D *a = [GKGraphNode2D nodeWithPoint:(vector_float2){0, 0}];
             GKGraphNode2D *b = [GKGraphNode2D nodeWithPoint:(vector_float2){3, 4}];
@@ -201,7 +176,6 @@ int main(void)
                  @"m1 a 2D node made with -init answers the origin point");
         }
 
-        // === m2: the edges ========================================================================
         {
             GKGraphNode2D *n0 = [GKGraphNode2D nodeWithPoint:(vector_float2){0, 0}];
             GKGraphNode2D *n1 = [GKGraphNode2D nodeWithPoint:(vector_float2){1, 0}];
@@ -231,7 +205,6 @@ int main(void)
             host([self connectedNodes].count == 2, @"m2 an edge from a node to itself is two entries both ways");
         }
 
-        // === m3: the finds ========================================================================
         {
             GKGraphNode2D *q0 = [GKGraphNode2D nodeWithPoint:(vector_float2){0, 0}];
             GKGraphNode2D *q1 = [GKGraphNode2D nodeWithPoint:(vector_float2){1, 0}];
@@ -264,8 +237,6 @@ int main(void)
             GKGraphNode2D *only = [GKGraphNode2D nodeWithPoint:(vector_float2){0, 0}];
             host([[empty findPathFromNode:only toNode:only] count] == 1,
                  @"m3 an empty graph asked for a path from a node to itself answers that node");
-            // A path that leaves the graph's own node list still walks: measured, a graph holding one node of a
-            // three-node chain answers the whole path to a node it never held.
             GKGraphNode2D *c0 = [GKGraphNode2D nodeWithPoint:(vector_float2){0, 0}];
             GKGraphNode2D *c1 = [GKGraphNode2D nodeWithPoint:(vector_float2){1, 0}];
             [c0 addConnectionsToNodes:@[c1] bidirectional:YES];
@@ -279,7 +250,6 @@ int main(void)
                      @"tried, so there is no host answer to hold it to");
         }
 
-        // === m5: the graph's own members ===========================================================
         {
             GKGraphNode2D *g0 = [GKGraphNode2D nodeWithPoint:(vector_float2){0, 0}];
             GKGraphNode2D *g1 = [GKGraphNode2D nodeWithPoint:(vector_float2){1, 0}];
@@ -306,9 +276,6 @@ int main(void)
             GKGraph *copy = [g copy];
             host([copy isMemberOfClass:[GKGraph class]] && copy.nodes.count == 4 && copy.nodes[0] != g.nodes[0],
                  @"m5 a copy is a graph of the same size whose nodes are its own objects, not the original's");
-            // The copy of a graph whose nodes hold edges: the copy's nodes must be at the same positions and
-            // their edges must name the COPY's nodes. The graph above has no edges left -- m5 removed the node
-            // in the middle of its chain -- so this builds one with edges to copy.
             GKGraphNode2D *e0 = [GKGraphNode2D nodeWithPoint:(vector_float2){0, 0}];
             GKGraphNode2D *e1 = [GKGraphNode2D nodeWithPoint:(vector_float2){3, 4}];
             [e0 addConnectionsToNodes:@[e1] bidirectional:YES];
@@ -329,7 +296,6 @@ int main(void)
             host(made.nodes.count == 0, @"m5 -init gives a graph with no nodes");
         }
 
-        // === m6: connectNodeToLowestCostNode: ======================================================
         {
             GKGraphNode2D *me = [GKGraphNode2D nodeWithPoint:(vector_float2){5, 0}];
             GKGraphNode2D *a = [GKGraphNode2D nodeWithPoint:(vector_float2){0, 0}];
@@ -355,7 +321,6 @@ int main(void)
             host([c connectedNodes].count == 0, @"m6 a graph with no nodes leaves the node alone");
         }
 
-        // === m7: the grid graph ===================================================================
         {
             GKGridGraph *g = [GKGridGraph graphFromGridStartingAt:(vector_int2){2, 3}
                                                              width:3 height:2 diagonalsAllowed:NO];
@@ -413,7 +378,6 @@ int main(void)
                  @"m7 the nodes are the class the caller named, and the generic argument answers it too");
         }
 
-        // === m8: the obstacles and their archives ==================================================
         {
             GKCircleObstacle *circle = [GKCircleObstacle obstacleWithRadius:2.5f];
             host([circle isMemberOfClass:[GKCircleObstacle class]] && circle.radius == 2.5f &&
@@ -513,7 +477,6 @@ int main(void)
                  @"m8 and a grid built without diagonals round trips without them");
         }
 
-        // === m9: the path =========================================================================
         {
             vector_float2 pathPoints[4] = {{0, 0}, {1, 0}, {1, 1}, {0, 1}};
             GKPath *path = [GKPath pathWithPoints:pathPoints count:4 radius:2.5f cyclical:YES];
@@ -566,7 +529,6 @@ int main(void)
                  @"m9 -init gives a path with no points, no radius and no winding");
         }
 
-        // === m10: the 3D node and the sphere, the 10.0 half of the path =============================
         {
             GKSphereObstacle *sphere = [GKSphereObstacle obstacleWithRadius:1.5f];
             host([sphere isMemberOfClass:[GKSphereObstacle class]] && sphere.radius == 1.5f &&
@@ -609,7 +571,6 @@ int main(void)
                  @"m10 a path of 2D points answers the 3D accessor with its own x and y and a zero z");
         }
 
-        // === m11: the octree ======================================================================
         {
             GKBox outer = {{0, 0, 0}, {8, 8, 8}};
             GKOctree *tree = [GKOctree octreeWithBoundingBox:outer minimumCellSize:2];
@@ -643,9 +604,6 @@ int main(void)
                  @"m11 a box element is filed in the NODE one level above the cell of its low corner, and that "
                  @"node is what the method hands back: a low corner at 3 in a tree of minimum cell size 2 is "
                  @"in the cell 2..4, so the node is 0..4");
-            // -elementsAtPoint: NEVER answers a box element. Measured on the host over a dense sweep of 256
-            // points from (0,0,0) to (7.5,7.5,7.5) -- every one of them inside the box -- at cell sizes 1,
-            // 2 and 4: all of them empty. A point element at (1,1,1) in the same tree IS answered.
             NSArray *insideBox = [boxed elementsAtPoint:(vector_float3){1.5f, 1.5f, 1.5f}];
             NSArray *onBox = [boxed elementsAtPoint:(vector_float3){3.5f, 1, 1}];
             NSArray *farFromBox = [boxed elementsAtPoint:(vector_float3){7, 7, 7}];
@@ -661,9 +619,6 @@ int main(void)
             host([printedNames(pointAnswered) isEqualToString:@" p"],
                  @"m11 while a POINT element in the same tree is answered from its cell -- so the two kinds "
                  @"are kept apart and this is the branch that keeps them apart");
-            // -elementsInBox: answers a box element where its OWN box meets the query. The node it is filed
-            // in is one level above the cell, and its own -box answers that NODE: measured, a box element at
-            // (1,1,1)-(2,2,2) in a tree of minimum cell size 2 hands back a node of 0..4.
             GKOctree *lifted = [GKOctree octreeWithBoundingBox:outer minimumCellSize:2];
             GKOctreeNode *liftedNode = [lifted addElement:@"box" withBox:(GKBox){{1, 1, 1}, {2, 2, 2}}];
             host(near(liftedNode.box.boxMin.x, 0) && near(liftedNode.box.boxMax.x, 4),
@@ -700,7 +655,6 @@ int main(void)
                  @"m11 removal with the node the element was filed in takes it out");
         }
 
-        // === m12: the quadtree ====================================================================
         {
             GKQuad outer = {{0, 0}, {8, 8}};
             GKQuadtree *tree = [GKQuadtree quadtreeWithBoundingQuad:outer minimumCellSize:2];
@@ -717,9 +671,6 @@ int main(void)
 
             GKQuadtree *quads = [GKQuadtree quadtreeWithBoundingQuad:outer minimumCellSize:2];
             [quads addElement:@"y" withQuad:(GKQuad){{3, 3}, {5, 5}}];
-            // The coordinator's table, measured: bounding quad (0,0)-(8,8), minimumCellSize 1, one quad
-            // element at (1,1)-(2,2). The answer follows the NODE, not the element's extent -- (0.5,0.5) and
-            // (0,0) are outside the quad and are answered, (2.5,2.5) is inside its bounding node and is not.
             GKQuadtree *one = [GKQuadtree quadtreeWithBoundingQuad:outer minimumCellSize:1];
             [one addElement:@"box" withQuad:(GKQuad){{1, 1}, {2, 2}}];
             struct { float x, y; BOOL found; } probes[] = {
@@ -771,7 +722,6 @@ int main(void)
             host(once && !twice, @"m12 removal answers YES once and NO after that");
         }
 
-        // === m13: the R-tree ======================================================================
         {
             GKRTree *tree = [GKRTree treeWithMaxNumberOfChildren:2];
             host([tree isMemberOfClass:[GKRTree class]] && tree.queryReserve == 1,
@@ -833,7 +783,6 @@ int main(void)
                  @"elements it wholly holds");
         }
 
-        // === m14: the mesh graph ==================================================================
         {
             vector_float2 square[4] = {{3, 3}, {7, 3}, {7, 7}, {3, 7}};
             GKPolygonObstacle *obstacle = [GKPolygonObstacle obstacleWithPoints:square count:4];
@@ -900,7 +849,6 @@ int main(void)
                  @"m14 and the four of them are the rectangle's corners, in the host's own order");
         }
 
-        // === m15: the obstacle graph ===============================================================
         {
             vector_float2 wall[4] = {{4, -2}, {4, 2}, {4, 2}, {4, -2}};
             GKPolygonObstacle *obstacle = [GKPolygonObstacle obstacleWithPoints:wall count:4];
@@ -974,11 +922,6 @@ int main(void)
             host([noBuffer connectedNodes].count > 0,
                  @"m15 and so does the variant that drops the buffer of the obstacles named");
 
-            // The other half of the visibility test, and the half a mutation of it would break: a CLOSED
-            // obstacle really does cut the graph. A square at (4,-4)-(8,4) with a node on either side of it,
-            // measured on the host: the two sides answer no edges at all between them and cannot see each
-            // other, while a node near the square on one side is joined to the three corners it can see. A
-            // visibility graph whose test always passed would answer "they can see each other" here.
             vector_float2 blockPoints[4] = {{4, -4}, {8, -4}, {8, 4}, {4, 4}};
             GKPolygonObstacle *block = [GKPolygonObstacle obstacleWithPoints:blockPoints count:4];
             GKObstacleGraph *cut = [GKObstacleGraph graphWithObstacles:@[block] bufferRadius:0];

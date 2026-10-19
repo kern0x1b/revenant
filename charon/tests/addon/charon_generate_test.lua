@@ -1,11 +1,3 @@
--- What Charon writes from a declaration as CMake, and what it refuses to write: the Lua port of tests/generate_test.py.
--- failures(opts) takes opts.driver (the folder holding generate.lua, spec.lua and toml.lua) and opts.scratch (a folder
--- the test may fill). With opts.oracle set to a folder holding a build tree that an earlier driver wrote, it also
--- compares the generated CMake files with the recorded ones byte for byte.
---
--- Retired with Conan, and not ported: the profile checks (the profile is replaced by the xmake configuration), the
--- [conf] checks (Conan's configuration keys), the recipe, tier-recipe and determinism checks (the recipe is replaced),
--- and the template checks, which move with the port of `charon new`.
 function failures(opts)
     local found = {}
     local G = import("generate", {rootdir = opts.driver, anonymous = true})
@@ -157,7 +149,6 @@ resources = [{ from = "images/" }]
 ]==]},
     }
 
-    -- the CMake files of the manifest, for every check that reads them
     do
         local folder = case_folder()
         write_file(folder, "compat/stubs/.keep")
@@ -213,14 +204,12 @@ resources = [{ from = "images/" }]
               "tier recipes are Conan's and are not written any more")
     end
 
-    -- a broken declaration is refused, with the reason
     for _, case in ipairs(BROKEN) do
         local folder = case_folder()
         local message = refused(function () G.generate_written(loaded(folder, case[2])) end)
         check(message ~= nil, case[1] .. " must be refused")
     end
 
-    -- sources matched by patterns, minus the excluded ones
     do
         local folder = case_folder()
         for _, relative in ipairs({"compat/a.c", "compat/deep/b.c", "compat/c.m", "compat/skip/d.c"}) do
@@ -268,7 +257,6 @@ exclude = ["compat/skip/**"]
         end
     end
 
-    -- an executable is a program, installed where it says
     do
         local folder = case_folder()
         write_file(folder, "main.c")
@@ -286,7 +274,6 @@ exclude = ["compat/skip/**"]
         end
     end
 
-    -- the cross toolchain takes the architecture from the build, not the declaration
     do
         local folder = case_folder()
         local text = G.generate_cross_toolchain(loaded(folder, '[platform]\nuse = "apple-ios"\narch = "armv8"\nos-version = "7.0"\n'))
@@ -297,7 +284,6 @@ exclude = ["compat/skip/**"]
         check(not contains(text, "armv8"), "the cross toolchain must not spell the declared architecture name clang does not know")
     end
 
-    -- a target's packages reach the project through the file the build writes, not by the declared names
     do
         local folder = case_folder()
         write_file(folder, "main.m")
@@ -307,7 +293,6 @@ exclude = ["compat/skip/**"]
               "a generated project must find its packages through the file the build writes from the graph")
     end
 
-    -- the project line names C before OBJC whatever order the targets come in
     do
         local folder = case_folder()
         write_file(folder, "first.m")
@@ -330,7 +315,6 @@ sources = ["later.c"]
               "project() must enable C before OBJC whatever order the sources and targets come in: got " .. line_at(static, 3))
     end
 
-    -- per-language values, and the folders the layered application includes
     do
         local folder = case_folder()
         for _, relative in ipairs({"src/App/main.m", "src/Screens/Chat/Cells/cell.m", "src/Calls/call.mm", "src/Resources/x.m"}) do
@@ -386,9 +370,7 @@ objcxx = ["${CXX_STDLIB}"]
         end
     end
 
-    -- the oracle: CMake files an earlier driver wrote from the same charon.toml, compared byte for byte
     if opts.oracle ~= nil then
-        -- opts.oracle is the build/VARIANT/charon folder an earlier driver wrote; opts.port holds its charon.toml
         local tree = opts.oracle
         local declared = spec.decl_for_variant(spec.spec_load(opts.port), opts.variant)
         local written = G.generate_written(declared)

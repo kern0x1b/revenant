@@ -1,13 +1,5 @@
--- The standard library's protocols in a skeleton's inheritance clause (tools/gen/swift_render.lua stdlib_qualified): an enum named Error that
--- conforms to Error refers to itself by that name, so the compiler refuses it ("'Error' has a raw type that depends on itself", 14 lines
--- of the coordinator's sdk run; "type alias 'Element' references itself" is the same spelling in a typealias). A standard protocol is
--- spelled Swift.X in the clause; a raw type stays first; a protocol of the SDK keeps its name. Checked here on three types: enum Error with
--- Error among its conformances, an Int-raw enum with Error, and a struct with a protocol that is not the standard library's. Run:
--- xmake l tests/gen/swift_stdlib_names_test.lua (pure Lua: no toolchain)
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 
--- A model row with every cell the renderer reads, "-" where the row says nothing.
 local function row(fields)
     local out = {kind = "-", usr = "-", container = "-", name = "-", side = "-", type = "-", params = "-", generic_sig = "-",
                  conformances = "-", superclass = "-", throwing = "-", async = "-", mutating = "-", attributes = "-", accessors = "-",

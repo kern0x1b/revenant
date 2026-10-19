@@ -1,5 +1,3 @@
-// HKSample: a measurement over a period, and the base of every kind of sample the store keeps.
-
 #import <HealthKit/HealthKit.h>
 
 #import "CharonHKStore.h"
@@ -9,9 +7,6 @@
     NSDate *_startDate;
     NSDate *_endDate;
 }
-// iOS 14.3 added -hasUndeterminedDuration, and this delivery carries the 9.3 group, so the member is
-// @dynamic: the compiler emits no accessor for it, the selector is not in the built library, and
-// -respondsToSelector: answers NO for it rather than a NO that looks like an answer.
 @dynamic hasUndeterminedDuration;
 
 
@@ -84,7 +79,6 @@
     return _sampleType.identifier ?: @"";
 }
 
-// The type a row of the store holds the object under: the sample's own type.
 - (HKObjectType *)charon_typeForSaving
 {
     return _sampleType;

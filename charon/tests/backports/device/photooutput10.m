@@ -7,45 +7,25 @@
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
-// AVCapturePhotoOutput as the release's still image output (facts/AVFoundation/AVCapturePhotoOutput.md):
-// the release's own output in the same session as the control, the formats offered, the refusals, real
-// captures with a preview at the display's size and at a size asked for, an uncompressed photo, a zoomed
-// one, the flash modes, and the resolved settings every capture reports. Built with AVCapturePhotoOutput.m, the
-// zoom's files, Accelerate/vImageYpCbCr8.m and Graphics/ImageIONames70.m, as the library carries them. A process of its own: the camera needs no permission on 6.1.3.
-// The camera's flash is held Off, and the run sets neither On nor Auto on it unless asked, as they fire the flash of a
-// device someone may be using: `photooutput <log> flash-on` takes the captures with the flash On and Auto,
-// `photooutput <log> flash-auto` the one capture in Auto alone, and `photooutput <log> flash-scene` (or either of the
-// others) monitors the scene for Auto, with a capture Off in between.
-
 @interface CharonPhotoCatcher : NSObject <AVCapturePhotoCaptureDelegate>
 @property (atomic) BOOL finished;
 @property (atomic) size_t photoWidth, photoHeight, previewWidth, previewHeight;
 @property (atomic) OSType previewFormat;
 @property (atomic) BOOL hadPreview, photoIsJPEG, photoIsBGRA;
-// The mean difference per channel, in levels of 255, between the preview and the photo drawn at the preview's
-// size by the probe, and the same against the photo turned upside down (the control: a preview that is not the
-// photo, or is drawn the wrong way up, is as far from one as from the other).
 @property (atomic) double previewDifference, flippedDifference, previewSpread;
 @property (atomic, strong) NSError *error;
-// The resolved settings each callback was given, and what they answered at willBeginCapture and at the photo.
 @property (atomic, strong) NSMutableArray *resolvedSeen, *callbacks;
 @property (atomic) CMVideoDimensions beganPhoto, beganPreview, resolvedPhoto, resolvedPreview, resolvedRaw, resolvedLive, resolvedThumbnail;
-// A JPEG photo as files: the sample buffer's own bytes, the port's +JPEGPhotoDataRepresentation... of it without and with
-// its preview, and the release's +jpegStillImageNSDataRepresentation: of it.
 @property (atomic, strong) NSData *photoBytes, *photoJPEG, *photoJPEGWithPreview, *releaseJPEG;
 @property (atomic) BOOL beganFlash, resolvedFlash, resolvedStabilized;
 @property (atomic) int64_t resolvedID;
-// The Exif Flash tag the release attached to the still, -1 when there is none.
 @property (atomic) long stillFlash;
-// The {MakerApple} attachment of the photo's sample buffer, nil when it carries none.
 @property (atomic, strong) NSDictionary *attachedMaker;
-// The camera's flash mode at willCapturePhoto, right before the still image output is asked for the still.
 @property (atomic) long cameraFlashAtCapture;
 @end
 
 static AVCaptureDevice *charon_camera;
 
-// The photo as an image: a JPEG through UIImage, a 32BGRA buffer through a bitmap context over its bytes.
 static CGImageRef create_photo_image(CMSampleBufferRef photo, BOOL *jpeg, BOOL *bgra)
 {
     CMFormatDescriptionRef format = CMSampleBufferGetFormatDescription(photo);
@@ -98,8 +78,6 @@ static double difference(CVPixelBufferRef preview, CGImageRef photo, BOOL flippe
                     total += abs((int)base[y * row + x * 4 + c] - (int)ours[(y * width + x) * 4 + c]);
         total /= 3;
     } else {
-        // A 4:2:0 preview: its luma plane against the luma of the probe's drawing by ITU-R BT.601 (0.299 R + 0.587 G +
-        // 0.114 B), in levels of 255 over the preview's range (16...235 for video range, 0...255 for full range).
         BOOL full = format == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange;
         const uint8_t *luma = CVPixelBufferGetBaseAddressOfPlane(preview, 0);
         size_t row = CVPixelBufferGetBytesPerRowOfPlane(preview, 0);
@@ -115,8 +93,6 @@ static double difference(CVPixelBufferRef preview, CGImageRef photo, BOOL flippe
     return total / (width * height);
 }
 
-// How much the picture varies: the mean distance of a channel from its mean, in levels of 255. A picture of one
-// colour, which any wrong drawing could match, has none.
 static double spread(CVPixelBufferRef preview)
 {
     size_t width = CVPixelBufferGetWidth(preview), height = CVPixelBufferGetHeight(preview), row = CVPixelBufferGetBytesPerRow(preview);
@@ -247,10 +223,6 @@ static BOOL same_dimensions(CMVideoDimensions a, CMVideoDimensions b)
     return a.width == b.width && a.height == b.height;
 }
 
-// What the header says of the resolved settings, against what the capture delivered: one object for every callback of
-// the request, under the request's unique ID, answering at willBeginCapture the dimensions of the photo and preview
-// buffers that come after, no RAW photo and no Live Photo movie (none asked for, none this release can make), and no
-// still image stabilization on 6.x, which has none.
 static void check_resolved(CharonPhotoCatcher *c, AVCapturePhotoSettings *settings)
 {
     AVCaptureResolvedPhotoSettings *first = c.resolvedSeen.firstObject;
@@ -294,16 +266,11 @@ static CharonPhotoCatcher *capture(AVCapturePhotoOutput *output, NSDictionary *p
     return capture_with(output, [AVCapturePhotoSettings photoSettings], preview);
 }
 
-// The preview is the photo, drawn the right way up: within a few levels of the probe's own drawing of it, and
-// further from the photo turned upside down.
 static BOOL drawn_from_photo(CharonPhotoCatcher *c)
 {
     return c.hadPreview && c.previewDifference < 6 && c.flippedDifference > c.previewDifference;
 }
 
-// The control: the release's own still image output, captured the way the facade captures, so a failure can be
-// told from the release's answer.
-// The {MakerApple} dictionary and the MakerNote of a JPEG, read through ImageIO: what the release's own JPEG writer kept of it.
 static NSDictionary *maker_apple(NSData *jpeg)
 {
     CGImageSourceRef source = jpeg ? CGImageSourceCreateWithData((__bridge CFDataRef)jpeg, NULL) : NULL;
@@ -340,7 +307,6 @@ static BOOL bare_capture(AVCaptureStillImageOutput *still, const char *label)
     return finished && !failure && width > 0;
 }
 
-// The preview keeps the photo's aspect ratio to within the rounding of one pixel.
 static BOOL same_aspect(CharonPhotoCatcher *c)
 {
     double photo = (double)c.photoWidth / c.photoHeight, preview = (double)c.previewWidth / c.previewHeight;
@@ -417,8 +383,6 @@ int main(int argc, char **argv)
         CHECK(same_aspect(asked), "and the photo's aspect ratio is kept, not the one asked");
         CHECK(drawn_from_photo(asked), "and it is the photo at that size");
 
-        // The 4:2:0 previews, converted from the port's drawing by BT.601: the format asked, at the display's size, and
-        // their luma the photo's, the right way up.
         for (NSNumber *format in @[@(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange), @(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)]) {
             CharonPhotoCatcher *ycbcr = capture(output, @{(__bridge NSString *)kCVPixelBufferPixelFormatTypeKey: format});
             printf("preview %08x: %zux%zu format %08x, luma against the photo %.2f, upside down %.2f\n", format.unsignedIntValue, ycbcr.previewWidth,
@@ -432,8 +396,6 @@ int main(int argc, char **argv)
                                                      (__bridge NSString *)kCVPixelBufferWidthKey: @100000, (__bridge NSString *)kCVPixelBufferHeightKey: @100000});
         CHECK(huge.hadPreview && MAX(huge.previewWidth, huge.previewHeight) == MAX(full.previewWidth, full.previewHeight), "a size past the display is held to it");
 
-        // An uncompressed photo: its preview is drawn through CoreImage, and the next photo settings without a format
-        // ask for a JPEG again.
         NSArray *formats = output.availablePhotoPixelFormatTypes;
         printf("photo pixel formats:");
         for (NSNumber *format in formats)
@@ -449,10 +411,6 @@ int main(int argc, char **argv)
         CharonPhotoCatcher *again = capture(output, nil);
         CHECK(again.finished && again.photoIsJPEG, "the next settings without a format take a JPEG again");
 
-        // The embedded thumbnail: asked in a JPEG's settings, a JPEG in IFD1 of the photo's own Exif at the resolved
-        // dimensions (the larger side asked, the host's 160 with none, the photo's aspect ratio), read here by the Exif
-        // layout, and kept in the port's JPEG of the photo; with the preview given, the port's JPEG holds the preview
-        // no longer than 160 on its longest side, as the host writes it. What the release's own JPEG does is printed.
         CHECK_EQUAL([probe availableEmbeddedThumbnailPhotoCodecTypes], @[AVVideoCodecJPEG], "a JPEG photo offers a JPEG thumbnail");
         CHECK_EQUAL([uncompressed availableEmbeddedThumbnailPhotoCodecTypes], @[], "an uncompressed one none");
         CHECK([raised(^{ uncompressed.embeddedThumbnailPhotoFormat = @{AVVideoCodecKey: AVVideoCodecJPEG}; }) hasPrefix:@"NSInvalidArgumentException"],
@@ -487,8 +445,6 @@ int main(int argc, char **argv)
             CHECK([portWithPreview hasSuffix:withPreview], "with the preview given, the port's JPEG holds the preview, 160 on its longest side");
         }
 
-        // {MakerApple}: the settings take the key, as the host does, and the capture merges it into the still's attachments.
-        // Whether 6.1.3's JPEG writer keeps it is measured against a capture without it, and printed.
         {
             NSString *maker = (__bridge NSString *)kCGImagePropertyMakerAppleDictionary;
             CharonPhotoCatcher *plain = capture_with(output, [AVCapturePhotoSettings photoSettings], nil);
@@ -504,7 +460,6 @@ int main(int argc, char **argv)
                    maker_apple(m.photoJPEG).description.UTF8String, has_maker_note(m.photoJPEG));
         }
 
-        // Requests the header refuses on this output raise before anything is captured.
         NSDictionary *refusals = @{
             @"a RAW photo": ^{ [output capturePhotoWithSettings:[AVCapturePhotoSettings photoSettingsWithRawPixelFormatType:kCVPixelFormatType_14Bayer_RGGB]
                                                        delegate:[CharonPhotoCatcher new]]; },
@@ -533,7 +488,6 @@ int main(int argc, char **argv)
             CHECK([answer hasPrefix:@"NSInvalidArgumentException"], "a request the output cannot take raises");
         }
 
-        // With the session running, settings are prepared at once, and the photo codec is the still image output's JPEG.
         __block int preparedCalls = 0;
         __block BOOL preparedAnswer = NO;
         [output setPreparedPhotoSettingsArray:@[[AVCapturePhotoSettings photoSettings]] completionHandler:^(BOOL prepared, NSError *error) {
@@ -546,8 +500,6 @@ int main(int argc, char **argv)
         CHECK(preparedCalls == 1 && preparedAnswer, "with the session running, prepared settings are answered YES, once");
         CHECK_EQUAL(output.availablePhotoCodecTypes, @[AVVideoCodecJPEG], "the photo codec offered is the still image output's JPEG");
 
-        // The zoom of iOS 7 over the still image connection's own scale and crop: the photo output is zoomed as any
-        // still image output is, and still captures.
         AVCaptureConnection *connection = [output connectionWithMediaType:AVMediaTypeVideo];
         printf("zoom: max %.2f, connection max %.2f\n", camera.activeFormat.videoMaxZoomFactor, connection.videoMaxScaleAndCropFactor);
         CGFloat zoom = MIN((CGFloat)2, MIN(camera.activeFormat.videoMaxZoomFactor, connection.videoMaxScaleAndCropFactor));
@@ -567,9 +519,6 @@ int main(int argc, char **argv)
             printf("zoom: this camera does not scale and crop its stills\n");
         }
 
-        // The scene: with settings monitored for Auto, their mode is on the camera and isFlashScene is the camera's own
-        // flashActive, once it has settled (0.035 s after the mode is set on the 4S, facts); with Off, NO. With none, the
-        // camera has the application's own mode back (Off, above). The one capture is Off, so the flash does not fire.
         if (camera.hasFlash && flashScene) {
             AVCapturePhotoSettings *monitored = [AVCapturePhotoSettings photoSettings];
             monitored.flashMode = AVCaptureFlashModeAuto;
@@ -577,8 +526,6 @@ int main(int argc, char **argv)
             [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
             BOOL scene = output.isFlashScene, active = camera.isFlashActive;
             AVCaptureFlashMode autoMode = camera.flashMode;
-            // A capture with the flash Off (it does not fire) takes its own mode onto the camera, and the monitored
-            // one comes back after it.
             AVCapturePhotoSettings *unlit = [AVCapturePhotoSettings photoSettings];
             unlit.flashMode = AVCaptureFlashModeOff;
             CharonPhotoCatcher *between = capture_with(output, unlit, nil);
@@ -601,12 +548,6 @@ int main(int argc, char **argv)
             printf("scene: not run, as monitoring for Auto sets Auto on the camera; `flash-scene` runs it\n");
         }
 
-        // The flash: the header offers the modes of the camera behind the output, Off, On and Auto for a camera with a
-        // flash and Off alone for one without (the iPad 2). A capture takes its settings' mode onto the camera, where the
-        // release's still image output reads it, and gives the application's own back after it; a photo still comes; the resolved settings say the flash is enabled
-        // as the still's own Exif Flash tag says it fired (bit 0). On and Auto only when asked (above), Off last so the camera
-        // is put back: with Off the port answers NO before the still and never reads its Exif, so only On and Auto reach
-        // the Exif, and Auto in the dark is the case where `flashActive` read at once would have said NO.
         NSSet *flashModes = [NSSet setWithArray:output.supportedFlashModes];
         NSSet *cameraModes = camera.hasFlash ? [NSSet setWithObjects:@(AVCaptureFlashModeOff), @(AVCaptureFlashModeOn), @(AVCaptureFlashModeAuto), nil]
                                              : [NSSet setWithObject:@(AVCaptureFlashModeOff)];
@@ -623,8 +564,6 @@ int main(int argc, char **argv)
                        (long)mode.integerValue, lit.cameraFlashAtCapture, (long)camera.flashMode, camera.flashAvailable, lit.photoWidth,
                        lit.photoHeight, lit.resolvedFlash, lit.stillFlash);
                 CHECK(lit.cameraFlashAtCapture == mode.integerValue, "a capture has its flash mode on the camera when it is taken");
-                // With the flash Off on a camera that is Off nothing is saved or given back, so this holds whether or not the
-                // give-back works: the give-back is not measured (facts, "The flash waits for the camera").
                 CHECK(camera.flashMode == AVCaptureFlashModeOff, "and after it the camera has the application's own mode back, Off");
                 CHECK(lit.finished && lit.error == nil && lit.photoIsJPEG, "and the photo comes");
                 CHECK(lit.stillFlash >= 0, "the still says in its Exif whether the flash fired");

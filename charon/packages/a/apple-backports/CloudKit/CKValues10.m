@@ -1,12 +1,3 @@
-// What iOS 10 added to CloudKit's value surface: the three subscription subclasses, the notification
-// and the three notifications it comes in, the identity of a user, the participant a share carries,
-// the metadata a share URL resolves to, and the options a share says who may be added.
-//
-// All of these are values, and all of them are held to the host's own answers the way the first
-// release's classes are. What each of them is *for* - the requests that resolve a share URL, discover
-// an identity, or save a subscription - is the transport and is a later delivery; a class that names
-// something is here because a caller can name it, build it, keep it and read it back.
-
 #import <Foundation/Foundation.h>
 #import <CloudKit/CloudKit.h>
 

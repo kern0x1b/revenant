@@ -2,7 +2,6 @@
 #import <objc/runtime.h>
 #include <uuid/uuid.h>
 
-// The port under names of its own (CharonHostNSUUID, CharonHostConcreteUUID) against the host's NSUUID, on the same inputs.
 @interface CharonHostNSUUID : NSObject <NSCopying, NSSecureCoding>
 + (instancetype)UUID;
 - (instancetype)initWithUUIDString:(NSString *)string;
@@ -88,7 +87,6 @@ static NSData *variant(NSData *original, id replacement)
     return [NSPropertyListSerialization dataWithPropertyList:plist format:NSPropertyListBinaryFormat_v1_0 options:0 error:NULL];
 }
 
-// What decoding `data` answers: the class and string of the object, or the exception.
 static NSString *decoded(NSData *data, Class named, BOOL secure)
 {
     @try {
@@ -115,7 +113,6 @@ int main(void)
         const uuid_t edge1 = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1};
         const uuid_t edge2 = {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
-        // parsing: the same strings, the same answers
         NSArray *strings = @[@"123E4567-E89B-12D3-A456-426614174000", @"123e4567-e89b-12d3-a456-426614174000", @"", @"123E4567E89B12D3A456426614174000",
                              @"{123E4567-E89B-12D3-A456-426614174000}", @"123E4567-E89B-12D3-A456-42661417400", @"123E4567-E89B-12D3-A456-4266141740000",
                              @" 123E4567-E89B-12D3-A456-426614174000", @"123E4567-E89B-12D3-A456-426614174000 ", @"123E4567-E89B-12D3-A456-426614174000\n",
@@ -137,7 +134,6 @@ int main(void)
         }
         same([[ours alloc] initWithUUIDString:(NSString *_Nonnull)nil] ? @"object" : @"nil", [[theirs alloc] initWithUUIDString:(NSString *_Nonnull)nil] ? @"object" : @"nil", @"a nil string");
 
-        // bytes, string, and the zero pointer
         const uuid_t *samples[] = {&known, &zero, &ff, &inc, &edge1, &edge2};
         NSMutableArray *ourObjects = [NSMutableArray array], *theirObjects = [NSMutableArray array];
         for (int i = 0; i < 6; i++) {
@@ -157,7 +153,6 @@ int main(void)
         }
         same([[[ours alloc] initWithUUIDBytes:NULL] UUIDString], [[[theirs alloc] initWithUUIDBytes:NULL] UUIDString], @"NULL bytes");
 
-        // equality: every pair, in both directions, across the two classes
         for (int i = 0; i < 6; i++) {
             for (int j = 0; j < 6; j++) {
                 NSString *what = [NSString stringWithFormat:@"isEqual %d %d", i, j];
@@ -168,7 +163,6 @@ int main(void)
             same(@([ourObjects[i] isEqual:[NSData dataWithBytes:*samples[i] length:16]]), @NO, @"isEqual: its data");
         }
 
-        // random UUIDs: version 4, variant 2, not equal to each other, a hash that is NSData's
         NSMutableSet *seen = [NSMutableSet set];
         int hashMismatches = 0, versions = 0, variants = 0;
         for (int i = 0; i < 2000; i++) {
@@ -189,7 +183,6 @@ int main(void)
         same(@(hashMismatches), @0, @"hash of 2000 random UUIDs is NSData's");
         same(@([[[ours UUID] UUIDString] length]), @36, @"a random UUID's string length");
 
-        // the class cluster
         same(NSStringFromClass([[ours alloc] class]), @"CharonHostConcreteUUID", @"alloc gives the concrete class");
         same(NSStringFromClass([NSUUID alloc].class), NSStringFromClass([[theirs alloc] class]), @"the host's alloc is a concrete class too");
         same(@([ours supportsSecureCoding]), @([theirs supportsSecureCoding]), @"supportsSecureCoding");
@@ -221,7 +214,6 @@ int main(void)
         same(@([overOurs copy] == overOurs), @([overTheirs copy] == overTheirs), @"an overriding subclass's copy");
         same([overOurs description] ? @YES : @NO, @YES, @"an overriding subclass has a description");
 
-        // archives: what each writes, what each reads
         id oKnown = ourObjects[0], tKnown = theirObjects[0];
         NSString *ourXML = [[NSString alloc] initWithData:archived(oKnown, YES) encoding:NSUTF8StringEncoding];
         NSString *theirXML = [[NSString alloc] initWithData:archived(tKnown, YES) encoding:NSUTF8StringEncoding];

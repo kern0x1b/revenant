@@ -1,9 +1,3 @@
-// GKRandomSource.m - GameplayKit's random source, carried for the releases that have none.
-//
-// The release's sequence is NOT MT19937, and the port says so rather than pretending: the measurements
-// are in facts/GameplayKit/GKRandomSource.md, and the ledger entry says what is owed.  What is
-// carried is a deterministic source seeded the way the header's own -init does (5489, the reference
-// MT seed) and deterministic from there.
 #import "CharonGKRandomCommon.h"
 #import <GameplayKit/GameplayKit.h>
 
@@ -35,7 +29,6 @@ static uint32_t CharonGKMTDraw(void *context)
     y ^= (y >> 11); y ^= (y << 7) & 0x9d2c5680U; y ^= (y << 15) & 0xefc60000U; y ^= (y >> 18);
     return y; }
 
-// The seed the base carries, so an archive round trip restores the same sequence.
 static const uint64_t CharonGKMTDefaultSeed = 5489u;
 
 @implementation GKRandomSource
@@ -44,15 +37,12 @@ static const uint64_t CharonGKMTDefaultSeed = 5489u;
     return self; }
 + (instancetype)sharedRandom
 { static GKRandomSource *shared; if (shared == nil) shared = [[GKRandomSource alloc] init]; return shared; }
-// The 16.4 SDK this port builds against declares this on the INSTANCE; the 26.2 header shows
-// it on the class. Carried as the build SDK declares it, and the difference is owed a row.
 - (NSArray *)arrayByShufflingObjectsInArray:(NSArray *)array
 { NSMutableArray *out = [array mutableCopy]; NSUInteger n = [out count], i;
-    // A Fisher-Yates walk with this source's own draws, which is what "using the random source" means.
     for (i = n - 1; i > 0; i--) { NSUInteger j = (NSUInteger)([[GKRandomSource sharedRandom] nextInt] % (NSInteger)(i + 1));
         if (j != i) [out exchangeObjectAtIndex:i withObjectAtIndex:j]; }
     return out; }
-- (id)copyWithZone:(NSZone *)zone { (void)zone; return self; }   // the state is the value, so a copy is itself
+- (id)copyWithZone:(NSZone *)zone { (void)zone; return self; }
 - (instancetype)initWithCoder:(NSCoder *)coder { self = [super init];
     if (self) { uint64_t seed = CharonGKMTDefaultSeed;
         NSString *key = NSStringFromClass([self class]);

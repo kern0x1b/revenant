@@ -1,16 +1,3 @@
-// The values of the port's own Foundation that AppIntents' API is written in, and that the port's
-// Foundation does not have yet. Each block is compiled only when the runtime has the type: the package
-// measures that with a probe and defines the flag, so a row whose Foundation type is not there is left
-// out of the module and the ledger reads it as `missing`, which is what it is.
-//
-// `AttributedString`, `Measurement` and `Calendar.RecurrenceRule` are Foundation types the Foundation
-// band carries (swift-foundation has all three; the ledger's Foundation rows name them
-// `missing`/`code`), and `CLPlacemark` is CoreLocation's, which the CoreLocation backports carry. The
-// conformances below are what AppIntents adds to them; they are compiled only when the runtime this
-// package is built against has the type, which the package measures with a probe before the compile -
-// see `xmake.lua`. Nothing here is a second copy of a type the port has: where the type is missing
-// the file is left out of the module and the ledger says the row is `missing`, which is the truth.
-
 import CoreLocation
 import Foundation
 
@@ -43,7 +30,6 @@ extension AttributedString: _IntentValue {
     public static var defaultResolverSpecification: Specification { return Specification() }
 }
 
-/// Reads a `String` into an `AttributedString`, for the parameter that carries styled text.
 public struct AttributedStringFromStringResolver: Resolver {
     public typealias Input = String
     public typealias Output = AttributedString

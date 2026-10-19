@@ -4,41 +4,6 @@
 #include <math.h>
 #import "check.h"
 
-// AVAudioUnitEQ over a real kAudioUnitSubType_NBandEQ unit, in the same AVAudioEngine graph
-// avaudioengine.m already proves: a graph that compiles, runs and produces silence reports
-// nothing, and a real EQ node that is attached but never actually touching the signal is exactly
-// that failure mode one level up - the check has to tell a working band from a connected, silent
-// one. Two runs of the same 2 kHz tone through player -> AVAudioUnitEQ(2 bands) -> mainMixer ->
-// (offline) output, only the EQ's own band configuration differing:
-//
-//   - band 0 Parametric, gain 0 dB, un-bypassed: a real 0 dB peaking filter's coefficients
-//     collapse to an identity transfer function, so this band should leave the tone where it
-//     started.
-//   - the same graph with band 1 added, a real LowPass at 150 Hz against the 2 kHz tone,
-//     un-bypassed: a real, predictable, large attenuation, not just "some difference".
-//
-// This is a stronger claim than "not silent" - it names the expected direction and rough
-// magnitude before the run, not after: a bypassed/0 dB band leaves the real output within a small
-// tolerance of the source, and a real active band attenuates a tone far above its cutoff to well
-// under half the source's RMS. Measured on an iPhone4,1 (6.1.3): max |output - source| with the
-// active 0 dB band was 0.000000 (bit-exact, not merely close), and RMS dropped from 0.353003
-// (source and the 0 dB run alike) to 0.007011 with the 150 Hz low-pass active - about 50x.
-//
-// This file itself is evidence for a structural property of this test stand, not just of
-// AVAudioUnitEQ: it is compiled against the real SDK's own framework headers, not this port's
-// private CharonAVAudioUnit.h, so a class member this port's implementation invents but Apple's
-// real header does not declare fails here at compile time, before it ever reaches a device. An
-// early draft of this test used a fabricated `active`/`isActive` property on
-// AVAudioUnitEQFilterParameters that does not exist in the real AVAudioUnitEQ.h (SDK 16.4) - only
-// filterType/frequency/bandwidth/gain/bypass are real - and this file's own build failed with
-// "property 'active' not found" the first time it tried to use it, catching the mistake before it
-// ever reached the registry or a device.
-//
-// CharonAudioEngineTestSupport is reached by name (NSClassFromString/objc_msgSend), not static
-// linking, for the same reason avaudioengine.m does: this project deliberately hides every symbol
-// whose bare name starts with "charon_"/"Charon" from a dylib's exported table
-// (modules/apple/backports.lua's internal_symbol()).
-
 static void setForcedOfflineOutput(BOOL offline)
 {
     Class cls = NSClassFromString(@"CharonAudioEngineTestSupport");
@@ -56,9 +21,6 @@ static OSStatus pullOutput(AudioBufferList *ioData, AVAudioFrameCount frames, AV
 static const AVAudioFrameCount kFrames = 512;
 static const float kSampleRate = 44100.0f;
 
-// Runs one player -> AVAudioUnitEQ -> mainMixer -> (offline) output graph and returns the pulled
-// samples. `configure` gets the real AVAudioUnitEQ before the engine starts, exactly the timing a
-// real caller uses: attach, connect, configure bands, then start.
 static float *runGraph(void (^configure)(AVAudioUnitEQ *eq), float *sourceOut)
 {
     setForcedOfflineOutput(YES);

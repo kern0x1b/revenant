@@ -1,20 +1,3 @@
-// probe.m - every resolution-result factory of one Intents class, called through its own signature, and what the
-// result answers on the five readers the runtime's class carries (resolutionResultCode, itemToConfirm, unsupportedReason,
-// confirmationReason, disambiguationItems). The same source is built for the host and for the port.
-//
-// Usage: probe <AppleClassName>
-//   With no argument it lists the classes it finds (the host's list is the input run.sh gives the port build).
-//
-// Every factory is found by the runtime (class_copyMethodList on the class's metaclass), and called through an
-// NSInvocation built from its type encoding, so no header decides what is called. Two argument passes per factory:
-//   pass "nil":   every object argument nil, every number 1 (a disambiguation array is nil)
-//   pass "empty": a disambiguation array (a keyword that names Disambiguate) is the empty array, the rest as "nil"
-// A factory with an argument of a struct type is listed as skipped; none of the Intents factories take one.
-//
-// Output is one line per factory and pass. The process is run once per class, so a class whose factory crashes the
-// process is named by run.sh, and the lines printed before the crash are still there (stdout is unbuffered).
-//
-//   xcrun clang -fno-objc-arc -framework Foundation -framework Intents probe.m -o probe        (host, Catalyst)
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
@@ -35,8 +18,6 @@ static const char *appleName(const char *runtime)
     return strncmp(runtime, PREFIX, prefix) == 0 ? runtime + prefix : runtime;
 }
 
-// True for the classes this probe measures: the Apple name is IN...ResolutionResult, and in the port build the class is
-// one of the renamed ones (so a system class loaded by UIKit is never mistaken for the port's).
 static BOOL measured(const char *runtime)
 {
     size_t prefix = strlen(PREFIX);
@@ -57,7 +38,6 @@ static BOOL factoryName(const char *selector)
     return NO;
 }
 
-// The text of one reader: a number, a class name, a count, or "absent"/"nil".
 static void reader(id result, NSString *name, NSMutableString *out)
 {
     if (![result respondsToSelector:NSSelectorFromString(name)]) {
@@ -108,7 +88,6 @@ static void measure(Class cls, const char *appleClass)
             for (NSUInteger a = 2; a < arguments; a++) {
                 const char *type = [signature getArgumentTypeAtIndex:a];
                 NSString *keyword = [NSString stringWithUTF8String:name];
-                // The keyword this argument belongs to: the a-th colon-separated part of the selector.
                 NSArray *parts = [keyword componentsSeparatedByString:@":"];
                 NSString *part = (a - 2 < parts.count) ? parts[a - 2] : @"";
                 if (type[0] == '@') {
@@ -153,9 +132,6 @@ static void measure(Class cls, const char *appleClass)
     free(methods);
 }
 
-// A factory that does not return ends the class's process here, after its lines so far. The host stalls on some factory
-// of INSpeakableStringResolutionResult (measured: the run waited past 25 minutes), so a class that stalls is named as a
-// crash of that class by run.sh, on both sides, and the others are still measured.
 static void charon_stalled(int signal_number)
 {
     (void)signal_number;

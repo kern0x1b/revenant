@@ -1,5 +1,3 @@
-// HKQuantityType: a type of HKQuantitySample, what it is counted in and how its values are added up.
-
 #import <HealthKit/HealthKit.h>
 
 #import "CharonHKStore.h"
@@ -74,9 +72,6 @@
 
 - (HKQuantityAggregationStyle)aggregationStyle
 {
-    // The two cases HKQuantityAggregationStyle has: a cumulative type aggregates by summing its
-    // values, and a discrete one arithmetically, which is what the SDK's own comment of each
-    // quantity type says its aggregation is.
     switch (_aggregationStyle) {
     case CharonHKAggregationCumulativeSum:
         return HKQuantityAggregationStyleCumulative;

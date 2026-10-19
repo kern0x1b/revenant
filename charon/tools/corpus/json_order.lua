@@ -1,14 +1,5 @@
--- The keys of a JSON text's top-level object, in the order the text lists them. core.base.json decodes to a table
--- with no order, and the ranking breaks ties by the writer's order (the first of equally early owners), so the
--- order is read from the text here. A tokenizer, not a pattern: a quote, brace, bracket or colon inside a string is
--- text, and a key is a string at depth one that follows the object's brace or a comma. Escapes are decoded as the
--- JSON decoder decodes them; \u escapes raise, since no key the corpus writes has one and a guess would be silent.
---   local keys = import("json_order", {rootdir = os.scriptdir(), anonymous = true}).top_level_keys(text)
--- Pure Lua: no file, no tree, so corpus_test.lua checks it on fixtures.
-
 local ESCAPES = {['"'] = '"', ["\\"] = "\\", ["/"] = "/", b = "\b", f = "\f", n = "\n", r = "\r", t = "\t"}
 
--- The string whose opening quote is at index i: its decoded text and the index of its closing quote.
 local function read_string(text, i)
     local parts, j = {}, i + 1
     while true do
@@ -32,7 +23,6 @@ local function read_string(text, i)
     end
 end
 
--- The top-level keys of a JSON text whose top level is an object, in text order.
 function top_level_keys(text)
     if text:match("^%s*{") == nil then
         raise("json_order: the text does not open an object")

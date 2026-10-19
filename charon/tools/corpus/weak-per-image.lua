@@ -1,34 +1,6 @@
--- Attribute weak imports to the IMAGE that imports them, and rank what is most likely read unguarded.
--- Lua port of the former weak-per-image.py.
---
--- Input: a directory with one `nm -m` output per Mach-O (main binary and each dylib/framework), the file
--- name being the image. A weak import prints as
---     (undefined) weak external _SYMBOL (from LIB)
--- Each image is classified from its own undefined symbols:
---     swift      imports Swift runtime/mangled symbols and little C++. The compiler REQUIRES an availability check
---                before a newer API is used, so a weak import here is guarded by construction.
---     mixed      imports many Swift AND many C++ symbols (a big framework with static C++/ObjC++ libraries linked
---                in, e.g. TelegramUIFramework). Image-level attribution cannot separate the two: treat as exposed.
---     c++        imports libc++ (`__Z...`) symbols and no Swift: ObjC++/C++ code (WebRTC, tgcalls, TDLib...).
---                The compiler only WARNS about an unguarded newer API, so direct reads are possible.
---     objc/c     plain Objective-C or C: same as c++ for this purpose.
--- This is what turns the list of weak symbols into "who reads it", the piece the bare list lacked.
---
--- usage: xmake l tools/corpus/weak-per-image.lua <dir of per-image nm -m outputs> [--any]
---   --any  attribute a symbol to every image that imports it, weak OR strong. For a build with a higher
---          deployment target (my corpus Telegram targets iOS 11, so most of these are strong there) this
---          says which KIND of code references the API, since the same source is behind both builds.
--- Needs corpus/weak-imports-ranked.tsv (weak-imports.lua) for tier, kind and registry state.
--- Output: corpus/weak-imports-by-image.tsv (corpus/weak-imports-by-image-any.tsv with --any)
---
--- The directory may be flat (one nm file per image) or nested (one directory per MODULE holding the nm output
--- of each of its .o files, as the Telegram per-module objects are laid out). Files in the same directory are
--- one unit: their weak and undefined symbols are unioned, so a module is classified on all its objects.
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
--- corpus/ is DATA, in the durable location CHARON_CORPUS_ROOT addresses (default coordination/),
--- independent of this script's own location. See tools/corpus/README.md.
 local CORPUS_ROOT = os.getenv("CHARON_CORPUS_ROOT") or path.join(os.getenv("HOME"), "Git", "projects", "ios", "coordination")
 local CORPUS = path.join(CORPUS_ROOT, "corpus")
 if not os.isdir(CORPUS) then
@@ -45,7 +17,6 @@ local function rank_of(class)
     return RANK[class] or 4
 end
 
--- The names given, in class order (ORDER, then anything else), each name once.
 local function in_rank_order(names)
     local keyed = {}
     for _, name in ipairs(names) do
@@ -62,7 +33,6 @@ local function starts(text, prefix)
     return text:sub(1, #prefix) == prefix
 end
 
--- The image's class, from the set of symbols it imports (undefined is a set: name -> true).
 local function classify(undefined)
     local swift, cpp, total = 0, 0, 0
     for sym in pairs(undefined) do
@@ -75,7 +45,7 @@ local function classify(undefined)
         end
     end
     if swift >= 10 and cpp >= 5 then
-        return "mixed"          -- Swift plus statically linked C++/ObjC++: the image alone cannot say which code reads a symbol
+        return "mixed"
     end
     if swift >= 10 then
         return "swift"
@@ -86,7 +56,6 @@ local function classify(undefined)
     return total > 0 and "objc/c" or "unknown"
 end
 
--- Every file under the directory as {unit, path}: the unit is the image (flat) or the module directory (nested).
 local function units_of(dir, base)
     local found = {}
     for _, file in ipairs(os.files(path.join(dir, "**"))) do
@@ -154,8 +123,6 @@ function main(dir, flag)
                             apps = apps, imgs = imgs, classes = classes, index = index})
     end
 
-    -- Sorted by tier, then the most exposed image class, then the most corpus apps, then the symbol; the row's
-    -- position in the ranked list breaks what is left, as Python's stable sort did.
     local keyed = {}
     for _, row in ipairs(rows) do
         local key = table.concat({row.tier, string.format("%d", rank_of(row.best)),
@@ -201,7 +168,6 @@ function main(dir, flag)
     end
     print(string.format("weak symbols in the ranked list found in these images: %d of %d -> %s", found, #rows, out))
 
-    -- per tier, the most exposed class of its symbols
     local cross, cross_tiers = {}, {}
     for _, row in ipairs(rows) do
         if not cross[row.tier] then

@@ -37,8 +37,6 @@ Class side_class(Side side, NSString *name)
 
 UIDynamicAnimator *make_animator(Side side, UIView *reference)
 {
-    // Stepped by hand only: the host's display link never ticks in this process, ours would
-    // (facts/UIKit/UIDynamicAnimator.md §1.6).
     UIDynamicAnimator *animator = [side_class(side, @"UIDynamicAnimator") alloc];
     animator = reference ? [animator initWithReferenceView:reference] : [animator init];
     [animator _setAlwaysDisableDisplayLink:YES];
@@ -55,8 +53,6 @@ BOOL animator_step(UIDynamicAnimator *animator, double dt)
     return is_oracle(animator) ? [animator _animatorStep:dt] : [animator charon_animatorStep:dt];
 }
 
-// facts/UIKit/UIDynamicAnimator.md §12 (T5): a 100x100 item at (100,100), gravity, no elasticity or resistance, over a floor
-// at y=300, 300 frames of 1/60 s; y[0..2] is the item's center at frames 26, 27 and 28, y[3] at rest (frame 300).
 void landing_scene(Side side, double y[4])
 {
     UIDynamicAnimator *animator = make_animator(side, nil);
@@ -113,8 +109,6 @@ BOOL body_resting(id body)
     return is_oracle(body) ? [body isResting] : [body resting];
 }
 
-// The body's own position, before the animator rounds it onto the screen's grid for the item. Sent by cast: `position`
-// is also the name of an AppKit method the compiler would otherwise choose.
 CGPoint body_position(id body)
 {
     return ((CGPoint(*)(id, SEL))objc_msgSend)(body, @selector(position));
@@ -134,7 +128,6 @@ NSString *normalized(NSString *text)
 
 void check_near(double actual, double expected, double tolerance, const char *name, NSString *context)
 {
-    // Equal values pass as they are: two equal infinities differ by NaN.
     charon_check(actual == expected || fabs(actual - expected) <= tolerance, name,
                  [NSString stringWithFormat:@"%@: %.9g vs %.9g (difference %.3g, tolerance %.3g)", context, actual, expected, actual - expected, tolerance]);
 }

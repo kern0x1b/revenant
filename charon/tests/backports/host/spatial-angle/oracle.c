@@ -1,6 +1,3 @@
-// The host's own Spatial, as the oracle: the SDK's inline bodies are compiled into this translation unit, and the
-// functions below are the only way the differential reaches them. Each returns the value, never the struct, so the
-// comparison is over the bits of the double the host computed.
 #include <Spatial/Spatial.h>
 
 double host_angle_make_degrees(double degrees) { return SPAngleMakeWithDegrees(degrees).radians; }

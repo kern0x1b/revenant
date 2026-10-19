@@ -1,5 +1,3 @@
-// Host probe: MIDIEventPacketSysexBytesForGroup on macOS, for the packets the contract names: a complete SysEx, a start,
-// a continue and an end, a SysEx on another group, and a non-SysEx word. Prints the status and the returned bytes.
 #import <CoreMIDI/CoreMIDI.h>
 #import <Foundation/Foundation.h>
 #include <stdio.h>
@@ -27,7 +25,6 @@ static void run(const char *tag, const UInt32 *words, int count, UInt8 group) {
     show(tag, &list->packet[0], group);
 }
 
-// Words of one SysEx7 packet of one or two words: status 0 complete, 1 start, 2 continue, 3 end, with count data bytes.
 static void sysex7(UInt32 *out, int status, int count, const UInt8 *data) {
     UInt8 pad[6] = {0, 0, 0, 0, 0, 0};
     for (int i = 0; i < count; i++) pad[i] = data[i];
@@ -50,8 +47,6 @@ int main(void) {
     run("end 0 bytes", emptyEnd, 2, 0);
     run("midi 2.0 note on", midi2, 2, 0);
     run("complete, group 15", complete, 2, 15);
-    // Long SysEx in one packet: twelve complete messages of six bytes (96 bytes out), and a start, ten continues and an
-    // end of six bytes each (66 data bytes, 74 bytes out, a SysEx of more than 64 bytes).
     {
         UInt32 words[24];
         for (int m = 0; m < 12; m++) {

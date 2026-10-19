@@ -35,8 +35,6 @@ static const void *CharonButtonGroupKey = &CharonButtonGroupKey;
     BOOL _hidden;
 }
 
-// The three values are kept as given, and independent of the items and of each other: the host answers NO, nil and NO by default (tests/backports/host/bar-group).
-// The menu is copied on set, as the header says; nil clears it.
 - (BOOL)alwaysAvailable
 {
     return _alwaysAvailable;

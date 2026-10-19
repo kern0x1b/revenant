@@ -1,8 +1,3 @@
-// Test-only, shared by the IPv6Address differential. Built against Apple's Network and against this tree's Network, and the two
-// outputs must be identical. Zones are en0 (the host path lists it on every run) or a number that names it. Loopback zones are
-// left out: the test seam reads the names the first path lists, and lo0 is missing from that list on some runs. A string with
-// more than one % is kept only where the host gives nil (four strings); the ones the host resolves to an interface are left out,
-// because the port reads one zone and Apple reads several, which is measured in the probe, not here.
 import Foundation
 import Network
 

@@ -1,17 +1,3 @@
-// buttonconfig_test.m - the button configuration of iOS 15.0, port against host.
-//
-// The host's own UIKit and the port's in one process: uikit2/run.sh renames the backport's classes, so
-// each case asks the two sides the same question and holds the answers to each other. What is compared is
-// what facts/UIKit/UIButtonConfiguration15.md records, and every default is read from the host rather than
-// assumed, so a wrong default in the port is a red run and not a row that claims otherwise.
-//
-// The red control: run this with --mutation <a case's label> and the comparison must go RED naming that key,
-// and with --mutation --no-plant it must exit 2 rather than report a clean run. See BOTH() below.
-//
-// Both sides are typed with the SDK's own class: the SDK declares UIButtonConfiguration, so the port
-// implements that class rather than declaring one, and the case names it as the harness renames it. That
-// is the point of a differential against the port's own objects: the two sides are two classes with the
-// same API and the comparison is between them.
 #import <UIKit/UIKit.h>
 #import "check.h"
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
@@ -54,15 +40,6 @@
 @property (nonatomic, readwrite, assign) UIButtonConfigurationMacIdiomStyle macIdiomStyle;
 @end
 
-// Each check names the question and takes the two answers already reduced to strings, so a red run says
-// which property differed rather than printing two objects.
-// The mutation switch, the same shape as pdfkit-str2's (c62714b7b) and modelio-34's: a comparison that has
-// only ever been green is no evidence, since it would be equally green with the cases reading nothing. The
-// key is a case's own label, given as argv[1] or in CHARON_MUTATION, and the mutation lands in a SCRATCH
-// COPY of one of the port's answers -- in memory, so nothing on disk is touched and the port's own source is
-// not edited. Three ways to ask for it and all three have to fail rather than pass quietly: a flag where a
-// key belongs, a key no case compares, and a key the two sides do NOT already agree on, because mutating a
-// key that already disagrees proves nothing about the comparison.
 static NSString *charonMutation = nil;
 static NSMutableArray *charonKeys = nil;
 static BOOL charonPlanted = NO;
@@ -101,11 +78,6 @@ static void BOTH(NSString *what, NSString *ours, NSString *theirs)
 #define SIDES(sel) \
     id ours = [sel]; id theirs = [sel]
 
-// The eight constructors, each asked by name. A configuration's own answer is not the question; the
-// question is whether the two sides answer the same, and a constructor that returned a different thing
-// would show here.
-// The eight constructors. A configuration's own answer is not the question; the question is whether the two
-// sides answer the same, so each is asked as made-or-nothing and nothing is printed through a format.
 static void check_constructors(void)
 {
     Class port = NSClassFromString(@"CharonHostUIButtonConfiguration");
@@ -137,9 +109,6 @@ static void check_constructors(void)
          [UIButtonConfiguration borderedProminentButtonConfiguration] != Nil ? @"made" : @"nothing");
 }
 
-// The eight constructors are not aliases on the host: automaticallyUpdateForSelection is 0 for filled and
-// for borderedProminent and 1 for the other six, and that one property is all that tells them apart. Each
-// answer is reduced to a string here, because BOTH compares strings.
 static void check_constructor_differences(void)
 {
     Class port = NSClassFromString(@"CharonHostUIButtonConfiguration");
@@ -157,17 +126,12 @@ static void check_constructor_differences(void)
          [@([UIButtonConfiguration grayButtonConfiguration].automaticallyUpdateForSelection) stringValue]);
 }
 
-// Every property of a fresh configuration, read from both sides. The header states no default for any of
-// them, so these are the numbers the port has to match and the case is what reads them.
 static void check_defaults(void)
 {
     CharonHostUIButtonConfiguration *ours = [NSClassFromString(@"CharonHostUIButtonConfiguration") plainButtonConfiguration];
     UIButtonConfiguration *system = [UIButtonConfiguration plainButtonConfiguration];
     charon_check(ours != nil && system != nil, "both sides make a configuration", @"one of the two answered nothing");
 
-    // Which background, not merely that there is one. The two sides' -description are two implementations
-    // with two sets of fields and a pointer in each, so comparing them could never hold; what says which
-    // background this is, on both sides, is its corner radius, and that is what is compared.
     BOTH(@"a fresh configuration's background has the same corner radius",
          ours.background == nil ? @"nil" : [@(ours.background.cornerRadius) stringValue],
          system.background == nil ? @"nil" : [@(system.background.cornerRadius) stringValue]);
@@ -208,7 +172,6 @@ static void check_defaults(void)
          [@(ours.automaticallyUpdateForSelection) stringValue], [@(system.automaticallyUpdateForSelection) stringValue]);
 }
 
-// The writes, then the reads: a configuration is a holder only if what goes in comes back out.
 static void check_writes(void)
 {
     CharonHostUIButtonConfiguration *ours = [NSClassFromString(@"CharonHostUIButtonConfiguration") plainButtonConfiguration];
@@ -255,16 +218,11 @@ static void check_writes(void)
          systemCopy == system ? @"same" : @"other");
 }
 
-// The two methods the header declares that are not properties.
 static void check_methods(void)
 {
     CharonHostUIButtonConfiguration *ours = [NSClassFromString(@"CharonHostUIButtonConfiguration") plainButtonConfiguration];
     UIButtonConfiguration *system = [UIButtonConfiguration plainButtonConfiguration];
     UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
-    // Not compared, because the two sides do not answer the same thing and the port is not right yet: the
-    // host builds a new configuration whose background differs from the fresh one's, while the port returns
-    // the receiver. The port's own answer is held here - it is a configuration - and the divergence is in
-    // facts/UIKit/UIButtonConfiguration15.md, where it is stated rather than papered over.
     id ourUpdated = [ours updatedConfigurationForButton:button];
     charon_check([ourUpdated isKindOfClass:[NSClassFromString(@"CharonHostUIButtonConfiguration") class]],
                  "the port's -updatedConfigurationForButton: answers a configuration",
@@ -277,8 +235,6 @@ static void check_methods(void)
     BOTH(@"setDefaultContentInsets answers the same insets on both sides", ourInsets, systemInsets);
 }
 
-// The round trip the review measured missing in d1's bags: the class is NSSecureCoding, so an archived
-// configuration has to come back with what it was archived with.
 static void check_archive(void)
 {
     CharonHostUIButtonConfiguration *ours = [NSClassFromString(@"CharonHostUIButtonConfiguration") plainButtonConfiguration];

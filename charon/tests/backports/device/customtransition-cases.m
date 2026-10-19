@@ -156,7 +156,6 @@ void customtransition_run(UIWindow *window, CustomTransitionRecorder record, voi
 
     NSMutableArray *steps = [NSMutableArray array];
     void (^step)(NSTimeInterval, void (^)(void)) = ^(NSTimeInterval wait, void (^block)(void)) { [steps addObject:@[@(wait), [block copy]]]; };
-    /* Where the presenting view is on the screen after a dismissal, against where it was before the presentation. */
     __block CGRect presenterFrame = CGRectZero;
     void (^recordPresenter)(NSString *) = ^(NSString *name) {
         UIView *view = navigation.view;

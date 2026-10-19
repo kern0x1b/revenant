@@ -108,16 +108,6 @@ static void charon_collect_controllers(UIViewController *controller, NSMutableOr
         charon_collect_controllers(presented, found);
 }
 
-// A trait change is delivered here, and what listens to one is not this file's business: the collection of iOS
-// 17 is carried from 6.0 and this object from 5.0, so a 5.0 object may not name a 6.0 symbol. The listeners
-// therefore register themselves, in the order they registered, and a release that carries none of them has an
-// empty list and delivers to nobody - which is what 5.x does, and what the header's own answer is there, since
-// the API these deliver is 17's. The list itself, and the call into it, are in CharonTraitObservers.m,
-// because this object is in no band the listener's file is not in: a release exports UITraitCollection
-// from 8.0 on (measured over the held armv7 caches, the two symbols this file exports and their first
-// release), so from that band the release's own class is re-exported and this object is not linked at
-// all, while UITraitOverrides17.m exports no API symbol and is in every band.
-
 static void charon_deliver_trait_changes(NSArray *environments, void (^change)(void))
 {
     NSMutableOrderedSet *found = [NSMutableOrderedSet orderedSet];
@@ -136,9 +126,6 @@ static void charon_deliver_trait_changes(NSArray *environments, void (^change)(v
     for (id<UITraitEnvironment> environment in found)
         [previous addObject:environment.traitCollection];
     change();
-    // The listeners of a trait change are called here, once the change is made, with the environments that were
-    // told and the collection each had before. The registration of iOS 17 is one of them: the port's trait
-    // change delivery is the one place a trait moves on this release, so this is where a registration fires.
     charon_call_trait_change_observers([found array], previous);
     NSUInteger index = 0;
     for (id<UITraitEnvironment> environment in found) {
@@ -351,9 +338,6 @@ static UITraitCollection *charon_make(Class cls, UIUserInterfaceIdiom idiom, CGF
     return _verticalSizeClass;
 }
 
-// The four traits this class holds in its own storage, written from UITraitCollection+Traits17.m, which is the
-// only other file that needs to change one of them and cannot reach the ivars from a category. The header
-// declares all four readonly, so these are the port's own and no application names them.
 - (void)charon_setUserInterfaceIdiom:(UIUserInterfaceIdiom)idiom
 {
     _userInterfaceIdiom = idiom;

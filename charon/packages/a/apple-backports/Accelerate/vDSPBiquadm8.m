@@ -1,15 +1,3 @@
-// The multiple-biquad filter of iOS 8.0, in double precision: vDSP_biquadm_CreateSetupD,
-// vDSP_biquadm_DestroySetupD, vDSP_biquadmD, vDSP_biquadm_ResetStateD and vDSP_biquadm_CopyStateD.
-//
-// The five are the 7.0 file's in the other scalar type, over the setup struct vDSP.h declares for them
-// (struct vDSP_biquadm_SetupStructD, a type of its own and so a definition of its own in CharonBiquad.h).
-// Measured from the release's armv7 caches, 8.0 is the first held release that exports them and 7.1.2
-// names none, so this file holds the API of exactly one release.
-//
-// The arithmetic is the 7.0 file's and the semantics are the ones measured there, with one difference the
-// SetTargets calls bring and this file does not: a double setup has a target in place before its first
-// sample whatever the rate and the threshold are (facts/Accelerate/vDSPBiquad.md).
-
 #import "CharonBiquad.h"
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"

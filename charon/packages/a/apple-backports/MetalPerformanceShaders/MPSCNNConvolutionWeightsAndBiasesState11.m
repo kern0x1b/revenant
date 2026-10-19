@@ -1,6 +1,3 @@
-// MPSCNNConvolutionWeightsAndBiasesState, from the header of MPSCNNConvolution.h in the SDK of iOS
-// 16.4: the storage a convolution reads its weights and biases from, over an MPSState's description.
-
 #import "CharonMPSCnn.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
@@ -16,8 +13,6 @@
 - (instancetype)initWithDevice:(id<MTLDevice>)device
          cnnConvolutionDescriptor:(MPSCNNConvolutionDescriptor *)descriptor
 {
-    // A convolution's weights are kernel_w * kernel_h * inputChannels * outputChannels, in the OHWI
-    // layout, and its biases are one per output channel.
     NSUInteger element = MPSSizeofMPSDataType(MPSDataTypeFloat32);
     NSUInteger weights = descriptor.kernelWidth * descriptor.kernelHeight *
                          descriptor.inputFeatureChannels * descriptor.outputFeatureChannels * element;

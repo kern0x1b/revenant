@@ -1,18 +1,5 @@
 #import "CharonAVFAudio.h"
 
-// AVAudioTime over the AudioTimeStamp the release's own engine fills in, and over the host clock
-// CoreAudio keeps: AudioGetCurrentHostTime and AudioGetHostClockFrequency are both exported by
-// CoreAudio on the real armv7 cache of iOS 6.1.3, so a moment in time is a real measurement here and
-// not a counter the port keeps for itself.
-//
-// The class is immutable, as the header says, and every answer is read out of the one AudioTimeStamp
-// the instance holds - so +timeWithHostTime:, +timeWithSampleTime:atRate: and
-// +timeWithAudioTimeStamp:sampleRate: differ only in which of the stamp's flags they set, which is
-// what makes -extrapolateTimeFromAnchor: and -isHostTimeValid / -isSampleTimeValid agree with the
-// header's description of them.
-
-// The machine's clock, read once: mach_timebase_info is what AudioGetHostClockFrequency answers
-// from, and the frequency in nanoseconds per tick is its denominator.
 static struct mach_timebase_info CharonTimeBase(void)
 {
     static struct mach_timebase_info base;
@@ -84,9 +71,6 @@ static struct mach_timebase_info CharonTimeBase(void)
     return [[self alloc] initWithHostTime:hostTime sampleTime:sampleTime atRate:sampleRate];
 }
 
-// Seconds to host time, the conversion AudioFileSecondsToHostTime performs: seconds times the
-// machine's clock frequency, and no rounding, so that the round trip through +secondsForHostTime:
-// is the release's own and not the port's.
 + (uint64_t)hostTimeForSeconds:(NSTimeInterval)seconds
 {
     struct mach_timebase_info base = CharonTimeBase();
@@ -105,10 +89,6 @@ static struct mach_timebase_info CharonTimeBase(void)
     return ((NSTimeInterval)hostTime * (NSTimeInterval)base.numer) / (NSTimeInterval)base.denom;
 }
 
-// The header's rule, taken literally: the anchor must have both a host time and a sample time, and
-// the receiver a sample rate and at least one of the two times. The result is a copy of the
-// receiver with the anchor's missing field filled in; the anchor's own host time is converted through
-// the sample rate so the two agree, which is the conversion the engine's own timestamps make.
 - (nullable AVAudioTime *)extrapolateTimeFromAnchor:(AVAudioTime *)anchorTime
 {
     if (anchorTime == nil || _charon_sampleRate <= 0 || !anchorTime.hostTimeValid || !anchorTime.sampleTimeValid) {

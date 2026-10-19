@@ -1,14 +1,6 @@
 import("fixtures")
 import("core.package.package")
 
--- A package description is Lua the package interpreter runs while it loads the
--- repository, before anything is configured or built, and that interpreter
--- offers none of the project-scope calls: an import() at the top of a recipe,
--- or any other slip that only shows when the description is evaluated, breaks
--- the config of every port that requires the package, yet builds nothing here
--- and so passes a suite that never loads a description. This asks xmake to load
--- every recipe in the repository the way a consuming port would, and fails the
--- one that does not answer.
 function failures(opt)
     local found = {}
     local packages = path.join(opt.modules, "..", "packages")

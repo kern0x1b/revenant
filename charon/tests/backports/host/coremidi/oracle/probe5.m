@@ -1,4 +1,3 @@
-// Host probe: SysEx chunking into UMP SysEx7 packets, and a SysEx split across two MIDIPackets.
 #import <CoreMIDI/CoreMIDI.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -54,7 +53,6 @@ int main(void) {
             usleep(300000);
             show(cases[c].tag);
         }
-        // Split: F0 01 02 in one packet, 03 04 F7 in the next, same send.
         {
             Byte pb[512];
             MIDIPacketList *pl = (MIDIPacketList *)pb;
@@ -68,7 +66,6 @@ int main(void) {
             usleep(300000);
             show("split across packets, same timestamp");
         }
-        // Real-time inside a SysEx: F0 01 F8 02 F7.
         {
             Byte pb[512];
             MIDIPacketList *pl = (MIDIPacketList *)pb;
@@ -79,7 +76,6 @@ int main(void) {
             usleep(300000);
             show("clock inside sysex");
         }
-        // Running status: 90 3C 7F then 3E 40 (no status byte).
         {
             Byte pb[512];
             MIDIPacketList *pl = (MIDIPacketList *)pb;

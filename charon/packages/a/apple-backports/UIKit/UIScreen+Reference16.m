@@ -1,6 +1,5 @@
 #import <UIKit/UIKit.h>
 
-// Never posted: the screens of the release have no reference display mode to change.
 NSNotificationName const UIScreenReferenceDisplayModeStatusDidChangeNotification = @"UIScreenReferenceDisplayModeStatusDidChangeNotification";
 
 @implementation UIScreen (CharonReference16)
@@ -10,7 +9,6 @@ NSNotificationName const UIScreenReferenceDisplayModeStatusDidChangeNotification
     return UIScreenReferenceDisplayModeStatusNotSupported;
 }
 
-// The screens of the release show nothing brighter than SDR white.
 - (CGFloat)currentEDRHeadroom
 {
     return 1;

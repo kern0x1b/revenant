@@ -1,7 +1,5 @@
 #import <UIKit/UIKit.h>
 
-// Measurements of the host's own symbols, written out as the header the port draws by and the expectations of the device test.
-
 static NSArray<NSString *> *record_names(NSString *path)
 {
     NSMutableArray *names = [NSMutableArray array];
@@ -18,7 +16,6 @@ static UIImage *record_host_image(NSString *name, double pointSize, NSInteger we
     return [UIImage systemImageNamed:name withConfiguration:[UIImageSymbolConfiguration configurationWithPointSize:pointSize weight:(UIImageSymbolWeight)weight scale:(UIImageSymbolScale)scale]];
 }
 
-// Renders an image into an 8 bit alpha bitmap of the given pixel size, the image scaled into the rectangle.
 static NSData *record_alpha(UIImage *image, CGSize canvas, CGRect rect, CGFloat scale)
 {
     size_t width = (size_t)ceil(canvas.width * scale), height = (size_t)ceil(canvas.height * scale);
@@ -38,7 +35,6 @@ static NSData *record_alpha_of(UIImage *image, CGFloat scale)
     return record_alpha(image, image.size, CGRectMake(0, 0, image.size.width, image.size.height), scale);
 }
 
-// The ink of an alpha bitmap: left, top, right, bottom in points.
 static CGRect record_ink(NSData *alpha, CGSize canvas, CGFloat scale)
 {
     size_t width = (size_t)ceil(canvas.width * scale), height = (size_t)ceil(canvas.height * scale);
@@ -54,7 +50,6 @@ static CGRect record_ink(NSData *alpha, CGSize canvas, CGFloat scale)
     return CGRectMake(left / scale, top / scale, (right + 1 - left) / scale, (bottom + 1 - top) / scale);
 }
 
-// A 16 by 16 grid of the cells whose mean alpha is at least half, a row to a 16 bit word.
 static void record_bits(NSData *alpha, CGSize canvas, CGFloat scale, uint16_t out[16])
 {
     size_t width = (size_t)ceil(canvas.width * scale), height = (size_t)ceil(canvas.height * scale);

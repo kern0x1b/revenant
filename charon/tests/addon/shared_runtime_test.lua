@@ -1,7 +1,5 @@
 import("fixtures")
 
--- The packages of a shared runtime: their libraries get absolute names in a tree that is left unsigned, the recipes that stage
--- them carry no ldid, and the program that depends on them writes and signs their Debian packages.
 function failures(opt)
     local shared = import("apple.shared_runtime", {rootdir = opt.modules, anonymous = true})
     local found = {}
@@ -37,7 +35,6 @@ function failures(opt)
         table.insert(found, "staging writes no Debian package: that is the program's, which signs the libraries")
     end
 
-    -- written, and signed, by the program
     local outputs = path.join(folder, "debs")
     local written = shared.deb(description, root, opt.ldid, path.join(folder, "work"), outputs)
     local extracted = path.join(folder, "extracted")
@@ -63,8 +60,6 @@ function failures(opt)
         table.insert(found, "the staged tree stays unsigned: signing is the program's")
     end
 
-    -- The recipes that stage a package name no host tool as a dependency: what a package depends on, the packages that depend
-    -- on it depend on too, and ldid brings the openssl of the host with it.
     for _, recipe in ipairs({"packages/l/libcxx/xmake.lua", "packages/s/swift-runtime/xmake.lua"}) do
         local text = io.readfile(path.join(opt.modules, "..", recipe))
         if text:find("charon@ldid", 1, true) then
@@ -72,11 +67,6 @@ function failures(opt)
         end
     end
 
-    -- A library the link line names and nothing is bound to is a library the loader opens for nothing, and the ones that
-    -- one names open in turn. libtop above binds base and nothing else; libwide is the same code linked with a second
-    -- library on its line that its code never calls, and ld64 keeps a dylib named on the command line whether or not a
-    -- symbol resolves to it (measured on libswiftSpatial.dylib, which named libswiftDarwin and libswiftsimd and bound
-    -- nothing from either). Read from the tools' own output over a linked image, so no fixture text stands for it.
     io.writefile(path.join(folder, "idle.c"), "int idle(void) { return 3; }\n")
     fixtures.link(folder, opt.ld64, "libidle.1.dylib", "armv7-apple-ios6.0", "idle.c",
                   {"-dynamiclib", "-install_name", "@rpath/libidle.1.dylib"})

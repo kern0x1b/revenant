@@ -1,6 +1,3 @@
-// Host probes for the cases the batch oracle cannot express: lists with several packets, bank select,
-// RPN/NRPN, the MIDIEventList builders' limits and MIDIEventListForEachEvent's visitor.
-// Each block prints what macOS does; nothing here is a claim about the port.
 #import <CoreMIDI/CoreMIDI.h>
 #import <Foundation/Foundation.h>
 #include <stdio.h>
@@ -27,7 +24,6 @@ static void send_and_print(MIDIPortRef out, MIDIEndpointRef dst, const char *tag
     MIDIEventList *list = (MIDIEventList *)buf;
     MIDIEventPacket *p = MIDIEventListInit(list, proto);
     for (int i = 0; i < count; i++) {
-        // one packet per message, timestamps apart
         p = MIDIEventListAdd(list, sizeof(buf), p, (MIDITimeStamp)(i + 1) * 1000, 2, &words[2 * i]);
     }
     gOutN = 0;
@@ -56,7 +52,7 @@ int main(void) {
         printf("== program change with bank valid, 2.0 -> 1.0 destination\n");
         MIDIDestinationCreateWithProtocol(client, CFSTR("p2-dst1"), kMIDIProtocol_1_0, &dst1, ^(const MIDIEventList *e, void *r) { record(e); });
         sleep(1);
-        UInt32 pcb[2] = {0x40C00001, 0x05000A03};   // bank valid, program 5, bank MSB 0x0A? (word1 bits 15-8 MSB, 7-0 LSB)
+        UInt32 pcb[2] = {0x40C00001, 0x05000A03};
         send_and_print(out, dst1, "pc bank-valid msb=0x0A lsb=0x03 prog=5", kMIDIProtocol_2_0, pcb, 1);
         UInt32 pcb2[2] = {0x40C00001, 0x05000A03};
         (void)pcb2;

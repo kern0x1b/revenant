@@ -1,12 +1,6 @@
 #import <UIKit/UIKit.h>
 #include <stdio.h>
 
-// A bundled Mac Catalyst app with the iPad idiom (UIDeviceFamily 2 in Info.plist), so a search controller is set up the way an iPad app meets
-// one, in a window, with a navigation controller. The scene delegate runs the same checks on the host's own UISearchController and, in the
-// port's build, on the port's (compiled with the classes renamed, so the host's is still reached by name); each check writes one
-// "side<TAB>check<TAB>value" line to the file named by CHARON_SCENE_OUT, then the app quits. run.sh builds both and diffs them. The
-// suggestions are the host's own items on both sides, so only the controller's answers are compared.
-
 static FILE *out;
 
 static void report(const char *side, const char *check, NSString *value)
@@ -29,13 +23,11 @@ static NSString *count_text(NSArray *items)
     return items ? [NSString stringWithFormat:@"%lu", (unsigned long)items.count] : @"nil";
 }
 
-// The suggestions the checks set: a fresh array of one item, so the same object can be told apart from a copy.
 static NSMutableArray *given_suggestions(void)
 {
     return [NSMutableArray arrayWithObject:[UISearchSuggestionItem suggestionWithLocalizedSuggestion:@"first"]];
 }
 
-// Sets the suggestions on the controller, changes the array given afterwards, and reports what the controller answers.
 static void suggestion_checks(const char *side, const char *prefix, UISearchController *controller)
 {
     NSMutableArray *given = given_suggestions();
@@ -60,7 +52,6 @@ static void checks(const char *side, UISearchController *controller, UINavigatio
     report(side, "idiom", [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad ? @"pad" : @"other");
     report(side, "responds-suggestions", yes_no([controller respondsToSelector:@selector(searchSuggestions)]));
 
-    // A controller that no navigation item holds.
     report(side, "bare-placement", number(controller.searchBarPlacement));
     report(side, "scope-activation-default", number(controller.scopeBarActivation));
     report(side, "automatic-default", yes_no(controller.automaticallyShowsScopeBar));
@@ -68,7 +59,6 @@ static void checks(const char *side, UISearchController *controller, UINavigatio
     report(side, "bare-suggestions-default", count_text(controller.searchSuggestions));
     suggestion_checks(side, "bare-suggestions", controller);
 
-    // The scope bar flag and the activation are one setting: YES is Automatic, NO is Manual, and OnTextEntry reads as YES.
     controller.automaticallyShowsScopeBar = NO;
     report(side, "automatic-set-no", yes_no(controller.automaticallyShowsScopeBar));
     report(side, "scope-activation-after-no", number(controller.scopeBarActivation));
@@ -87,7 +77,6 @@ static void checks(const char *side, UISearchController *controller, UINavigatio
     controller.ignoresSearchSuggestionsForSearchBarPlacementStacked = NO;
     report(side, "ignores-cleared", yes_no(controller.ignoresSearchSuggestionsForSearchBarPlacementStacked));
 
-    // A controller held by a navigation item: the placement follows the item's preference, and the suggestions are kept as the bar holds them.
     report(side, "item-preference-default", number(root.navigationItem.preferredSearchBarPlacement));
     root.navigationItem.searchController = controller;
     report(side, "item-placement-automatic", number(controller.searchBarPlacement));

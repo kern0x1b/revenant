@@ -1,11 +1,6 @@
 #import <UIKit/UIKit.h>
 #include <stdio.h>
 
-// A bundled Mac Catalyst app, so a window scene exists the way an app meets one. The scene delegate runs the same checks on the host's own
-// window scene and, in the port's build, on the port's UIWindowScene (compiled with the classes renamed, so the host's is still reached by
-// name); each check writes one "side<TAB>check<TAB>value" line to the file named by CHARON_SCENE_OUT, then the app quits. run.sh builds both
-// and diffs them. The activity items configuration source is weak: the checks drop a provider and read the property again.
-
 static FILE *out;
 
 static void report(const char *side, const char *check, NSString *value)
@@ -42,7 +37,6 @@ static void checks(const char *side, UIWindowScene *scene)
         report(side, "source-set-same-object", yes_no(scene.activityItemsConfigurationSource == provider));
         report(side, "source-set-is-provider", yes_no(scene.activityItemsConfigurationSource == provider));
     }
-    // The provider was held only by the pool: the property is weak, so it reads nil once the provider is gone.
     report(side, "source-after-provider-gone", scene.activityItemsConfigurationSource ? @"set" : @"nil");
 
     CharonActivityProvider *kept = [[CharonActivityProvider alloc] init];

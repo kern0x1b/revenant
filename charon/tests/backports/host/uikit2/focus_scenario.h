@@ -1,7 +1,5 @@
 #import "uirest.h"
 
-// selectionFollowsFocus of the two iOS 14 list views: the default, then the value set and read back, then set back.
-// The system's answers are written by focus_system.m and compared by focus_test.m.
 static NSArray *focus_scenario(void)
 {
     NSMutableArray *lines = [NSMutableArray array];

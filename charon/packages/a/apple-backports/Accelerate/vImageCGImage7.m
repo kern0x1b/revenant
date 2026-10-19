@@ -1,6 +1,6 @@
 #import <Accelerate/Accelerate.h>
 #import <CoreGraphics/CoreGraphics.h>
-#import <Foundation/Foundation.h>   // BOOL, which the 4.3 include chain does not reach on its own
+#import <Foundation/Foundation.h>
 #include <stdlib.h>
 #include <string.h>
 

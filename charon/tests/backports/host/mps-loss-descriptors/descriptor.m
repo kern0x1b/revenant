@@ -1,17 +1,3 @@
-/* descriptor.m - the loss and neuron descriptors of MetalPerformanceShaders, compared with Apple's own objects.
- *
- * MPSCNNLossDataDescriptor (11.3), MPSCNNLossDescriptor (11.3), MPSCNNYOLOLossDescriptor (12.0) and MPSNNNeuronDescriptor
- * (11.3). Each value is built twice in one process: by Apple's framework, and by the port under CharonHost<Name>. The
- * defaults of each factory and of -init, every setter's read back, copies, equality and coding are compared member by
- * member. A disagreement names the case, the member and both values.
- *
- * A REFUSAL IS A CHILD PROCESS. Apple asserts, and the process aborts, on a value these descriptors refuse. Each such
- * call is made in a fork on Apple's object, and the exit status says whether Apple refused: an abort is a refusal, a
- * clean exit is an acceptance. The port refuses by answering nil, or by leaving a value as it was, in this process, and
- * the two must agree.
- *
- * NO DEVICE IS CREATED. A descriptor asks a device nothing.
- */
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>
@@ -29,7 +15,6 @@ static void check(int ok, NSString *line)
     else { printf("  FAIL %s\n", [line UTF8String]); failures++; }
 }
 
-/* Runs the block in a child process: 0 for a clean exit, the signal number for a crash (an assertion is SIGABRT, 6). */
 static int inChild(void (^block)(void))
 {
     fflush(stdout);
@@ -44,7 +29,6 @@ static int inChild(void (^block)(void))
     return WIFEXITED(st) ? 0 : WTERMSIG(st);
 }
 
-/* -init is NS_UNAVAILABLE in the header, so the compiler will not send it; the runtime does (measured: a zeroed object). */
 static id initUnavailable(Class cls)
 {
     return ((id (*)(id, SEL))objc_msgSend)([cls alloc], @selector(init));
@@ -54,7 +38,6 @@ static NSString *f(float v) { return [NSString stringWithFormat:@"%.9g", v]; }
 static NSString *n(NSUInteger v) { return [NSString stringWithFormat:@"%lu", (unsigned long)v]; }
 static NSString *i(NSInteger v) { return [NSString stringWithFormat:@"%ld", (long)v]; }
 
-/* Prints the members that differ and reports whether the two read the same. */
 static int sameSnapshot(NSDictionary *apple, NSDictionary *port, NSString *what)
 {
     if ([apple isEqualToDictionary:port])
@@ -75,8 +58,6 @@ static void compareSnapshots(NSDictionary *apple, NSDictionary *port, NSString *
     check(sameSnapshot(apple, port, what), [NSString stringWithFormat:@"%@: the port reads as Apple's", what]);
 }
 
-/* A refusal is the same answer on both sides: Apple aborts (or, for a value it takes, accepts) and the port answers
- * nil or accepts in the same way. */
 static void refusal(NSString *what, BOOL appleRefused, BOOL portRefused)
 {
     check(appleRefused == portRefused,
@@ -84,14 +65,11 @@ static void refusal(NSString *what, BOOL appleRefused, BOOL portRefused)
            appleRefused ? @"refuses" : @"accepts", portRefused ? @"refuses" : @"accepts"]);
 }
 
-/* Records, under a prefix, whether two objects are equal and whether they hash alike. */
 static void equalities(NSMutableDictionary *s, NSString *prefix, id x, id y)
 {
     s[[prefix stringByAppendingString:@".isEqual"]] = [x isEqual:y] ? @"YES" : @"NO";
     s[[prefix stringByAppendingString:@".hash"]] = [x hash] == [y hash] ? @"YES" : @"NO";
 }
-
-/* ---- snapshots: every member the header declares for the class, as text ---- */
 
 static NSDictionary *lossDataSnapshot(MPSCNNLossDataDescriptor *d)
 {
@@ -126,7 +104,6 @@ static void addLoss(NSMutableDictionary *s, NSString *prefix, MPSCNNLossDescript
 static NSDictionary *yoloSnapshot(MPSCNNYOLOLossDescriptor *d)
 {
     if (!d) return @{ @"object": @"nil" };
-    /* reduceAcrossBatch is not read here: the port does not carry it (iOS 14.0 in the header, outside this class's 12.0). */
     NSMutableDictionary *s = [NSMutableDictionary dictionary];
     s[@"rescore"] = d.rescore ? @"YES" : @"NO";
     s[@"scaleXY"] = f(d.scaleXY);
@@ -155,8 +132,6 @@ static NSDictionary *neuronSnapshot(MPSNNNeuronDescriptor *d)
               @"c": f(d.c),
               @"data": d.data ? [d.data description] : @"nil" };
 }
-
-/* ---- the setters the header gives MPSCNNLossDescriptor a validity for ---- */
 
 static const char *setterNames[] = { "labelSmoothing", "numberOfClasses", "epsilon", "delta" };
 static const float setterValues[] = { 0.25f, 7.0f, 0.001f, 2.0f };
@@ -187,8 +162,6 @@ static NSData *floats(NSUInteger count, const float *values)
 {
     return [NSData dataWithBytes:values length:count * sizeof(float)];
 }
-
-/* ---- MPSCNNLossDataDescriptor ---- */
 
 static void lossDataCases(Class port)
 {
@@ -251,8 +224,6 @@ static void lossDataCases(Class port)
     equalities(peq, @"unset", mine, myUnset);
     compareSnapshots(eq, peq, @"equality: a copy, the object itself, and an unset one");
 }
-
-/* ---- MPSCNNLossDescriptor ---- */
 
 static void lossCases(Class port)
 {
@@ -361,8 +332,6 @@ static void lossCases(Class port)
     equalities(peq, @"unset", mine, initUnavailable(port));
     compareSnapshots(eq, peq, @"equality: a copy, the object itself, and an unset one");
 }
-
-/* ---- MPSCNNYOLOLossDescriptor ---- */
 
 static void yoloCases(Class port, Class lossPort)
 {
@@ -481,8 +450,6 @@ static void yoloCases(Class port, Class lossPort)
     equalities(peq, @"unset", mine, initUnavailable(port));
     compareSnapshots(eq, peq, @"equality: a copy, the object itself, and an unset one");
 }
-
-/* ---- MPSNNNeuronDescriptor ---- */
 
 static void neuronCases(Class port)
 {

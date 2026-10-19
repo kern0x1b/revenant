@@ -1,17 +1,5 @@
--- embed-models.lua: the Core ML containers the device test carries, as a C header.
---   xmake l tools/coreml/embed-models.lua <model directory> <output header>
---
--- The device test has to run a real model, and a real model is a .mlmodel file. A test binary cannot open a
--- file on the developer's machine, so the containers tools/coreml/make-models.lua writes are embedded here, byte
--- for byte, with the name of each. Nothing is rebuilt here, so what the device reads is exactly what the host
--- differential and the interpreter check read.
-
--- The containers to carry, smallest first: a test binary is a release artefact and a model of a few hundred
--- bytes keeps it one. The GLM and the GLM classifier are enough to reach the reader, the description, a
--- prediction, the class labels and the probabilities.
 local WANTED = {"glm", "glm_classifier", "tree_classifier", "nn_classifier"}
 
--- " 0x%02x," for every byte, a line break and three spaces after each sixteen.
 local function escape(data)
     local out = {}
     for index = 1, #data do

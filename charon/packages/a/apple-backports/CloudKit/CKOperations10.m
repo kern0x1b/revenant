@@ -1,19 +1,3 @@
-// The sharing operations iOS 10 added: discovering who a user is, resolving a share URL to the
-// metadata it stands for, asking who the participants of a share are, and accepting a share.
-//
-// They are all one request and one answer over the same transport, and they are together here because
-// the band machinery puts an object in the band of the release its API arrived in and iOS 10 brought
-// all five.
-//
-// What they have in common, and what the operations of the first release already established, is
-// repeated: the per-item block is called on the transport's queue in the order the service answered,
-// the completion is called last and exactly once, and an item the service refused arrives as that
-// item's own error rather than as the operation's. A batch where some items failed is
-// CKErrorPartialFailure with the per-item errors under CKPartialErrorsByItemIDKey.
-//
-// Two of the five are about an identity and three about a share, and the difference is the endpoint:
-// an identity is looked up under the container's own users root, a share under the shares root.
-
 #import "CharonCloudKit.h"
 #import "CharonCKConstants.h"
 #import "CharonCKSubscription.h"
@@ -46,8 +30,6 @@
     return [[self alloc] init];
 }
 
-// The document of a lookup: an email address, a phone number or a record identifier, and which of
-// the three it is, under the names the service reads.
 static NSDictionary *CharonCKLookupDocument(CKUserIdentityLookupInfo *lookupInfo)
 {
     if (lookupInfo.emailAddress) {
@@ -133,8 +115,6 @@ static NSDictionary *CharonCKLookupDocument(CKUserIdentityLookupInfo *lookupInfo
 - (void)main
 {
     __unsafe_unretained CKDiscoverAllUserIdentitiesOperation *weakSelf = self;
-    // Every identity the container knows is a lookup of no particular person, which is the service's
-    // own `users/lookup` with nothing in it rather than a different endpoint.
     [self runMethod:@"POST" path:@"users/lookup" body:@{} completion:^(id answer, NSError *error) {
         CKDiscoverAllUserIdentitiesOperation *strongSelf = weakSelf;
         if (!strongSelf) {

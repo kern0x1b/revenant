@@ -1,11 +1,3 @@
-// checks.m -- AVSpeechUtterance and its three rate constants: the host's own class against the port's, in one
-// binary (run.sh). Compiled plain, every bare name is Apple's. The port's two objects are compiled with each
-// name renamed to a charon_host_ spelling and linked beside this file, so the prefixed names below are the
-// port's own. Every line compares the two answers to the same question; nothing here is a typed expectation
-// except the one control at the top, which asks the host what its own default rate is.
-//
-// Output: "ok" and "FAIL" lines, a "divergence" line for the one measured difference, and checks=N failures=M.
-
 #import <Foundation/Foundation.h>
 #import <AVFAudio/AVFAudio.h>
 #include <math.h>
@@ -39,7 +31,6 @@ static void verdict(const char *what, BOOL held)
 static BOOL same_f(float a, float b) { return (isnan(a) && isnan(b)) || a == b; }
 static BOOL same_d(double a, double b) { return (isnan(a) && isnan(b)) || a == b; }
 
-// Compares one utterance's whole state, host against port, under a label.
 static void compare_state(const char *label, AVSpeechUtterance *h, charon_host_AVSpeechUtterance *p)
 {
     char what[256];
@@ -63,22 +54,17 @@ static void compare_state(const char *label, AVSpeechUtterance *h, charon_host_A
 int main(void)
 {
     @autoreleasepool {
-        // Control: the probe reads Apple's own constant. If this disagrees, the probe is not reading the host.
         verdict("control: host default rate is 0.5", AVSpeechUtteranceDefaultSpeechRate == 0.5f);
 
-        // The three constants, each a float. Host against port.
         verdict("constant minimum rate", AVSpeechUtteranceMinimumSpeechRate == charon_host_AVSpeechUtteranceMinimumSpeechRate);
         verdict("constant maximum rate", AVSpeechUtteranceMaximumSpeechRate == charon_host_AVSpeechUtteranceMaximumSpeechRate);
         verdict("constant default rate", AVSpeechUtteranceDefaultSpeechRate == charon_host_AVSpeechUtteranceDefaultSpeechRate);
 
-        // Defaults of the factory and of -initWithString:, host against port.
         AVSpeechUtterance *h = [AVSpeechUtterance speechUtteranceWithString:@"hello"];
         charon_host_AVSpeechUtterance *p = [charon_host_AVSpeechUtterance speechUtteranceWithString:@"hello"];
         compare_state("factory", h, p);
         verdict("factory default rate is the default constant", h.rate == AVSpeechUtteranceDefaultSpeechRate);
 
-        // Later-release properties the port does not carry: the port must not answer them. The host does (it is a
-        // later system), so these are port-only assertions; a silent getter here would be a fake.
         verdict("port does not answer attributedSpeechString (iOS 10)",
                 ![charon_host_AVSpeechUtterance instancesRespondToSelector:@selector(attributedSpeechString)]);
         verdict("port does not answer prefersAssistiveTechnologySettings (iOS 14)",
@@ -87,17 +73,14 @@ int main(void)
         verdict("host answers attributedSpeechString (control for the port-only check above)",
                 [AVSpeechUtterance instancesRespondToSelector:@selector(attributedSpeechString)]);
 
-        // A plain -init leaves every number at zero, on both.
         AVSpeechUtterance *hi = [[AVSpeechUtterance alloc] init];
         charon_host_AVSpeechUtterance *pi = [[charon_host_AVSpeechUtterance alloc] init];
         compare_state("plain init", hi, pi);
 
-        // A nil string, which both accept.
         AVSpeechUtterance *hn = [[AVSpeechUtterance alloc] initWithString:nil];
         charon_host_AVSpeechUtterance *pn = [[charon_host_AVSpeechUtterance alloc] initWithString:nil];
         compare_state("nil string", hn, pn);
 
-        // Setters, each over the same inputs on both. Read back what each object holds.
         float rates[] = {-1, -0.0f, 0, 0.25f, 0.5f, 1, 1.5f, 2, INFINITY, NAN};
         for (size_t i = 0; i < sizeof rates / sizeof rates[0]; i++) {
             h.rate = rates[i]; p.rate = rates[i];
@@ -128,7 +111,6 @@ int main(void)
             verdict(what, same_d(h.preUtteranceDelay, p.preUtteranceDelay) && same_d(h.postUtteranceDelay, p.postUtteranceDelay));
         }
 
-        // Voice: the same object is handed to both and read back as that object.
         NSObject *voice = [NSObject new];
         h.voice = voice; p.voice = voice;
         verdict("voice retained by host", h.voice == voice);
@@ -136,7 +118,6 @@ int main(void)
         h.voice = nil; p.voice = nil;
         verdict("voice nil on both", h.voice == nil && p.voice == nil);
 
-        // The string is retained, not copied: a later append shows through, on both.
         NSMutableString *ms = [NSMutableString stringWithString:@"abc"];
         AVSpeechUtterance *hm = [AVSpeechUtterance speechUtteranceWithString:ms];
         charon_host_AVSpeechUtterance *pm = [charon_host_AVSpeechUtterance speechUtteranceWithString:ms];
@@ -144,7 +125,6 @@ int main(void)
         verdict("host string retained, not copied", [hm.speechString isEqualToString:@"abcdef"]);
         verdict("port string retained, not copied", [pm.speechString isEqualToString:@"abcdef"]);
 
-        // Copy: a new object that carries every number, the string and the voice.
         h.rate = 0.75f; p.rate = 0.75f;
         h.pitchMultiplier = 1.5f; p.pitchMultiplier = 1.5f;
         h.volume = 0.25f; p.volume = 0.25f;
@@ -159,10 +139,8 @@ int main(void)
         verdict("host copy keeps the voice object", hc.voice == voice);
         verdict("port copy keeps the voice object", pc.voice == voice);
 
-        // Secure coding: both declare it, and both round-trip the numbers through a secure decode.
         verdict("host supports secure coding", [AVSpeechUtterance supportsSecureCoding]);
         verdict("port supports secure coding", [charon_host_AVSpeechUtterance supportsSecureCoding]);
-        // An archivable voice: a plain NSObject is not one, and the host's encoder raises on it.
         AVSpeechSynthesisVoice *sv = [AVSpeechSynthesisVoice voiceWithLanguage:@"en-US"];
         h.voice = sv; p.voice = sv;
         NSData *hd = [NSKeyedArchiver archivedDataWithRootObject:h];
@@ -183,9 +161,6 @@ int main(void)
         verdict("secure decode voice identifier", hr != nil && pr != nil &&
                 [hr.voice.identifier isEqualToString:[pr.voice valueForKey:@"identifier"]]);
 
-        // The one measured difference. The host's own archive holds speechString as $null (plutil on the
-        // archive), so its decode returns nil; the port encodes and keeps the string. Pinned as a divergence:
-        // if the host ever keeps the string, this line goes red and the facts file has to be read again.
         verdict("divergence: host decodes speechString as nil (archive holds $null)", hr != nil && hr.speechString == nil);
         verdict("divergence: port decodes speechString as the encoded string", pr != nil && [pr.speechString isEqualToString:@"hello"]);
         printf("divergence: speechString on secure decode: host=%s port=%s\n",

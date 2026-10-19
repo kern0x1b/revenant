@@ -1,6 +1,3 @@
-// A program that imports SwiftUI and takes from it what an app takes: a view, a layout, a text, a modifier, an environment
-// value, a binding. If the module is not what a port expects, this does not compile; if its library does not carry the
-// module's object, this does not link. It says what it took, so a run can be read.
 import SwiftUI
 
 struct Row: Identifiable {
@@ -33,6 +30,5 @@ struct Consumer: View {
     }
 }
 
-// The view's own type is named here, so the link keeps the module's object whatever the compiler inlines.
 let made: AnyView = AnyView(Consumer())
 print("consumer took \(type(of: made))")

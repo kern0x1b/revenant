@@ -1,6 +1,3 @@
-// What the thirty layer classes answer: the name each factory gives its layer, what each keeps, and
-// what each refuses. Written once and run twice - beside the host's MLCompute and beside the port's
-// own translation units - by run.sh, which renames the port's names so both can be in one build.
 #import "mlcompute-16.h"
 
 static void key(NSString *name, NSString *value)
@@ -210,11 +207,6 @@ void charon_mlcompute_layer_cases(void)
         text(@"loss cosine factory", [NSString stringWithFormat:@"type=%d", (int)[MLCLossLayer cosineDistanceLossWithReductionType:MLCReductionTypeMean weight:1].descriptor.lossType]);
         text(@"loss sigmoid factory", [NSString stringWithFormat:@"type=%d", (int)[MLCLossLayer sigmoidCrossEntropyLossWithReductionType:MLCReductionTypeMean labelSmoothing:0 weight:1].descriptor.lossType]);
         text(@"loss categorical factory", [NSString stringWithFormat:@"type=%d", (int)[MLCLossLayer categoricalCrossEntropyLossWithReductionType:MLCReductionTypeMean labelSmoothing:0 classCount:3 weight:1].descriptor.lossType]);
-        // The YOLO loss layer is not asked here: the current macOS header marks it gone past macOS 14
-        // (MLCOMPUTE_AVAILABLE_STARTING_BUT_DEPRECATED_MACOS14), and a Mac Catalyst build cannot even
-        // name it, so there is no host answer to compare against. The port carries it - SDK 16.4 declares
-        // it for iOS 14, where it is not deprecated, and the corpus of SDK 26.2 names it - and
-        // facts/MLCompute/Layers.md says the host can no longer be its oracle.
         printf("== what a factory keeps and what it refuses\n");
         MLCConvolutionLayer *mismatched = [MLCConvolutionLayer layerWithWeights:wrong biases:biases descriptor:convolution];
         row(@"convolution refused, descriptor", mismatched.descriptor ? @"kept" : @"no");
@@ -277,10 +269,6 @@ void charon_mlcompute_layer_cases(void)
         row(@"layer norm refused, shape", wrongNormalized.normalizedShape);
         row(@"layer norm refused, beta", wrongNormalized.beta ? @"kept" : @"no");
 
-        // The multihead attention factory, which had no case. The port answers nil for every arrangement
-        // tried, as the framework does; the host cannot be asked, because MLCompute 26's macOS header
-        // removes the class from the interface and a Catalyst build cannot name it, so this one case is
-        // asked of the port alone and says what the framework's own answer was measured to be.
         MLCMultiheadAttentionDescriptor *attentionDescriptor = [MLCMultiheadAttentionDescriptor descriptorWithModelDimension:4 headCount:2];
         MLCTensor *attentionWeights = [MLCTensor tensorWithDescriptor:shape_(@[ @4, @4 ]) fillWithData:@(1)];
         MLCTensor *attentionBiases = [MLCTensor tensorWithDescriptor:shape_(@[ @4 ]) fillWithData:@(1)];
@@ -305,8 +293,6 @@ void charon_mlcompute_layer_cases(void)
                        lstm.peepholeWeights ? @"kept" : @"no", (unsigned long)lstm.gateActivations.count,
                        (unsigned long)lstm.inputWeightsParameters.count, (unsigned long)lstm.hiddenWeightsParameters.count,
                        (unsigned long)lstm.biasesParameters.count, (int)lstm.outputResultActivation.activationType]);
-        // The two forms the host refuses are counted rather than described, so that the line does not
-        // carry a pointer that differs from run to run.
         MLCLSTMLayer *peepholed = [MLCLSTMLayer layerWithDescriptor:[MLCLSTMDescriptor descriptorWithInputSize:4 hiddenSize:5 layerCount:1 usesBiases:YES isBidirectional:NO dropout:0]
                                    inputWeights:@[ gateIn, gateIn, gateIn, gateIn ]
                                   hiddenWeights:@[ gateHidden, gateHidden, gateHidden, gateHidden ]

@@ -1,17 +1,5 @@
--- compare.lua - a check per constant: the port's value must be the host's, character for character.
---
---    xmake l compare.lua SYSTEM.tsv PORT.tsv     the verdict, exit 1 on any difference
---    xmake l compare.lua --count FILE.tsv        how many distinct names the file carries
---
--- This is the check that would catch a value written from a rule instead of from a measurement. A kSecKeyAlgorithm name says
--- which algorithm it names; only the host says what string a key signature answers with.
---
--- The rows are the TSV main.m prints: "name<TAB>value" per line. A row with other than one tab is refused, as a Python dict built
--- from the rows refused it (a value that carries a tab stopped the run there, and it stops it here too).
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
--- The rows of a file as a dict: name -> value, a later row for the same name winning, and the number of distinct names.
 local function read_rows(path)
     local dict, count = {}, 0
     for _, line in ipairs(tsv.text_lines(tsv.read_text(path))) do

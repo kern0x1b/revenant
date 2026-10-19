@@ -1,5 +1,3 @@
-/* reads a .mlmodel with the port's reader, writes it with the port's writer, reads the output back and checks the
- * two documents hold the same number of fields at the top and in the description */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

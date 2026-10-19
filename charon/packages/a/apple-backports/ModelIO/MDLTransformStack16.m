@@ -5,22 +5,11 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-// Every operation of a transform stack reads an animated value of one shape and turns it into a
-// matrix. They differ only in that shape and in what the inverse of the operation is, so what they
-// share - the name the stack was given for the operation, whether it was added as an inverse, the
-// two spellings of its matrix - is a small set of methods each of them writes itself. All of this is
-// the port's own: iOS 6 has no ModelIO at all.
-
-// The name, the inverse flag and the matrix of one operation, in one struct every operation carries,
-// so the stack can read and write them without knowing which operation it is holding.
 typedef struct {
     __unsafe_unretained NSString *name;
     BOOL inverse;
 } CharonMDLOpRecord;
 
-// What the operations share, as the methods the stack and the protocol below use. Each operation
-// writes them itself, over the one record it carries, and a new operation of the same class takes
-// the whole state of the one it is a copy of.
 @protocol CharonMDLTransformOpRecord <NSObject>
 - (CharonMDLOpRecord *)charon_record;
 - (MDLAnimatedValue *)charon_value;

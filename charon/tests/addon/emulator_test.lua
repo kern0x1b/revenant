@@ -70,10 +70,6 @@ local function verdicts(emulator, folder, found)
     end
 end
 
--- A Setup.app executable of 32-bit ARM code that stores SetupVersion the way the
--- firmware's own does, [NSNumber numberWithInt:N] under @"SetupVersion", with N
--- the given C expression; a Setup that stores its state under another key is
--- made with that key instead.
 local SETUP = [[
 @interface NSNumber
 + (id)numberWithInt:(int)value;
@@ -124,7 +120,6 @@ local function home_step(emulator, folder, opt, found)
     if kept ~= "iPhone" then
         table.insert(found, "the home step keeps what lockdownd's store already holds, read -DeviceName " .. tostring(kept))
     end
-    -- A firmware's root filesystem has no lockdownd store before its first boot.
     local fresh = path.join(folder, "home-fresh")
     os.mkdir(path.join(fresh, "private", "var", "mobile"))
     os.ln("private/var", path.join(fresh, "var"))
@@ -145,8 +140,6 @@ local function home_step(emulator, folder, opt, found)
     if none then
         table.insert(found, "a release whose Setup has no SetupVersion gets none written, read " .. tostring(none))
     end
-    -- A Setup that stores a SetupVersion this cannot read is refused, not left
-    -- to run again at every boot.
     local unread = path.join(folder, "home-unread")
     os.mkdir(path.join(unread, "private", "var", "mobile"))
     os.ln("private/var", path.join(unread, "var"))
@@ -217,9 +210,6 @@ local function deb_step(emulator, debian, folder, found)
         table.insert(found, "installing a package wrote to the host's /private/var/mobile")
     end
 
-    -- A package whose libraries depend on the release, like the backports, does
-    -- its work in the maintainer script dpkg runs with DPKG_ROOT; the image is
-    -- that root.
     local scripted = path.join(folder, "scripted")
     os.mkdir(path.join(scripted, "usr", "lib"))
     io.writefile(path.join(scripted, "usr", "lib", "carried.txt"), "carried")
@@ -348,8 +338,6 @@ local function load_step(emulator, found)
     if load ~= nil and (type(load) ~= "number" or load < 0) then
         table.insert(found, "the machine's load reads as a number or as nothing, read " .. tostring(load))
     end
-    -- A build the queue already started carries its slot, and a build inside it
-    -- must not wait for a second one.
     local marker = emulator.build_slot_name()
     if emulator.holds_build_slot({}) or not emulator.holds_build_slot({[marker] = "2"}) or
        emulator.holds_build_slot({[marker] = ""}) then
@@ -358,8 +346,6 @@ local function load_step(emulator, found)
     if emulator.build_capacity() < 2 then
         table.insert(found, "a machine runs at least two builds at once, said " .. tostring(emulator.build_capacity()))
     end
-    -- A slot is a share of the machine: what runs in it is told how much of it
-    -- to take, and only when it is an xmake that would otherwise take all of it.
     if emulator.build_jobs(12, 3) ~= 4 or emulator.build_jobs(2, 3) ~= 1 or emulator.build_jobs(12, 0) ~= 12 then
         table.insert(found, string.format("three slots on twelve cores are four jobs each, said %d, %d and %d",
                                           emulator.build_jobs(12, 3), emulator.build_jobs(2, 3), emulator.build_jobs(12, 0)))
@@ -376,8 +362,6 @@ local function load_step(emulator, found)
             table.insert(found, string.format("%s %s runs in a slot as %s, not %s", case[1][1], table.concat(case[1][2], " "), case[2], given))
         end
     end
-    -- Patience of zero is how a test takes a slot without waiting for a quiet
-    -- machine; it must still hand out the slot.
     local slot = emulator.acquire({folder = path.join(os.tmpdir(), "charon-slot-test-" .. os.getpid()), count = 1, patience = 0})
     if not slot then
         table.insert(found, "a run with no patience still takes a slot")
@@ -487,27 +471,16 @@ local function timing_and_reports(emulator, folder, found)
                                               tostring(case[1]), case[2], case[3] and "" or "not "))
         end
     end
-    -- A request the emulator never answers is a hole in the HLE, and a blocked
-    -- boot says so instead of reading as a slow guest.
     if not blocked.gap or blocked.gap.request ~= 118 or blocked.gap.seconds ~= 45 or
        blocked.gap.process ~= "backboardd" or not described:find("reply to request 118", 1, true) then
         table.insert(found, "a blocked boot names the reply the guest waited for, said " .. described)
     end
 end
 
--- The queue's plugin runs in xmake's sandbox, where a call the sandbox does not
--- hold is a crash on the way in and no command runs at all. Nothing catches
--- that but running it, so the test installs the repository as an addon in a
--- store of its own, with a Charon home of its own for the slots, and asks the
--- queue for a command that succeeds and one that fails.
 local function queue_step(emulator, folder, opt, found)
     local work = path.join(folder, "queue")
     local envs = {XMAKE_GLOBALDIR = path.join(work, "store"), CHARON_HOME = path.join(work, "home")}
     os.mkdir(work)
-    -- The install must land in the store named by XMAKE_GLOBALDIR and nowhere else: on xmake 3.1.1 an addon
-    -- installed into the machine's own store becomes the active one for every project on it
-    -- (charon/AGENTS.md, the trap the coordinator reserves). Measured 2026-09-28 around this step: the listing
-    -- of ~/.xmake/addons and addons.conf are byte for byte what they were, and no addons.conf.bak-* appears.
     local shared = path.join(os.getenv("HOME"), ".xmake", "addons")
     local before = os.exists(shared) and os.files(shared) or {}
     os.iorunv("xmake", {"addon", "--install", "-y", path.absolute(path.join(opt.modules, ".."))}, {curdir = work, envs = envs})
@@ -518,13 +491,10 @@ local function queue_step(emulator, folder, opt, found)
             end
         end
     end
-    -- where it landed: the private store is the whole point, so where the install went is the measurement
     local landed = os.files(path.join(work, "store"))
     if #landed == 0 and not os.isdir(path.join(work, "store")) then
         table.insert(found, "emulator_test's xmake addon --install left no store of its own under " .. work .. ", so where it installed is not what XMAKE_GLOBALDIR says")
     end
-    -- A queue that already holds a slot passes it down and runs the command
-    -- itself, and both ways have to answer with the status of what they ran.
     for _, held in ipairs({"", "1"}) do
         for _, case in ipairs({{"/usr/bin/true", 0}, {"/usr/bin/false", 1}}) do
             local code = os.execv("xmake", {"queue", "--", case[1]},
@@ -540,10 +510,6 @@ local function queue_step(emulator, folder, opt, found)
     end
 end
 
--- An address in a backtrace is named by the image the guest says it loaded and
--- by the nearest symbol of the images the rootfs holds as files; what only the
--- shared cache holds is named by image and offset, and what no image covers
--- stays the number it is.
 local function naming_step(emulator, found)
     local images = {{address = 0x4000, install = "/usr/libexec/port"}, {address = 0x33141000, install = "/usr/lib/libobjc.A.dylib"}}
     local symbols = {["/usr/libexec/port"] = {{address = 0x0, name = "_start"}, {address = 0x120, name = "_main"}}}
@@ -561,11 +527,6 @@ local function runner_source(opt, found)
     if source:find("CFPropertyListCreateWithStream", 1, true) then
         table.insert(found, "the runner reads SystemVersion.plist with a function iOS 3 does not have: CFPropertyListCreateWithStream arrived in 4.0, CFPropertyListCreateFromStream is there from 2.0")
     end
-    -- The runner is started from launchd.conf, which launchctl reads before it loads the LaunchDaemons: a
-    -- test begun at once finds none of them (com.apple.cvmsServ among them). tests/emulate/launchd is the
-    -- measurement on a real guest; this is the shape of the cause. The test is spawned only after launchd
-    -- has registered the Mach services the firmware's plists declare, and a service a plist hides until its
-    -- daemon checks in is not one of them.
     local wait_call = source:find("wait_for_daemons(deadline", 1, true)
     local spawn_call = source:find("posix_spawn(&child", 1, true)
     if not wait_call or not spawn_call or wait_call > spawn_call then
@@ -580,10 +541,6 @@ local function runner_source(opt, found)
     end
 end
 
--- The check every copy an install makes ends with: a program that was not copied is a program the
--- image does not hold, and an install that says it installed one is worse than one that failed. A source
--- that is not there stands in for a copy that did not happen, because the copy itself cannot be made to
--- fail here; what is under test is that the result is checked rather than assumed.
 local function copy_step(opt, found)
     local platform = import("apple.platform", {rootdir = opt.modules, anonymous = true})
     local folder = fixtures.scratch()
@@ -599,9 +556,6 @@ local function copy_step(opt, found)
     end) then
         table.insert(found, "a program that was not built must fail the install, not install nothing")
     end
-    -- A file that is not a Mach-O has no LC_UUID, and says so rather than guessing: the UUID is read
-    -- out of a Mach-O by otool, and the two-builds refusal is measured on real binaries rather than here,
-    -- because a stand-in would only test the stand-in.
     io.writefile(path.join(folder, "not-a-macho"), "built\n")
     if platform.macho_uuid(path.join(folder, "not-a-macho")) ~= nil then
         table.insert(found, "a file that is not a Mach-O has no LC_UUID")
@@ -612,10 +566,6 @@ local function copy_step(opt, found)
     os.tryrm(folder)
 end
 
--- A root filesystem holds read-only directories - the dyld cache ships as one - and a directory needs
--- execute as well as write for the entries in it to be unlinked, so remove() has to grant both. And an
--- image nothing has used for the age, an owner nothing has used for the age, and the root filesystem a
--- killed run left inside an image that is otherwise wanted all go at the start of the next xmake emulate.
 local function prune_step(emulator, folder, found)
     local base = path.join(folder, "images.noindex")
     local function image(owner, name)
@@ -623,8 +573,6 @@ local function prune_step(emulator, folder, found)
         io.writefile(path.join(here, "image.json"), "{}")
         return here
     end
-    -- stale means what used() reads: the folder and every direct child, so ageing only the folder left the
-    -- image.json written when the image was built looking like a use, and the image stayed
     local function stale(what)
         local when = os.date("%Y%m%d%H%M", os.time() - 48 * 3600)
         if os.isdir(what) or os.isfile(what) then
@@ -636,10 +584,8 @@ local function prune_step(emulator, folder, found)
             end
         end
     end
-    -- a read-only directory holding a file, as the root filesystem holds the dyld cache
     local readonly = path.join(folder, "readonly", "System", "Library", "Caches", "com.apple.dyld")
     io.writefile(path.join(readonly, "dyld_shared_cache_armv7"), "cache")
-    -- the file first: a directory at 444 cannot be entered to have its contents changed
     os.execv("chmod", {"444", path.join(readonly, "dyld_shared_cache_armv7")}, {try = true, stdout = os.nul, stderr = os.nul})
     os.execv("chmod", {"444", path.directory(readonly)}, {try = true, stdout = os.nul, stderr = os.nul})
     local refused = try {function () emulator.remove(path.join(folder, "readonly")) return true end,
@@ -651,18 +597,15 @@ local function prune_step(emulator, folder, found)
         table.insert(found, "the read-only directory is still there after remove()")
     end
 
-    -- wanted: the image itself is recent, and only the run a killed run left inside it is not
     local fresh = image("owner-fresh", "iPhone3,1_7A")
     local used = image("owner-used", "iPhone3,1_7A")
     local leftover = path.join(used, "run")
     io.writefile(path.join(leftover, "rootfs", "placeholder"), "x")
     stale(leftover)
     stale(path.join(leftover, "rootfs"))
-    -- abandoned: neither the image nor the owner that holds it has been touched
     local abandoned = image("owner-unused", "iPhone3,1_7A")
     stale(abandoned)
     stale(path.join(base, "owner-unused"))
-    -- held: an xmake emulate is using it, whatever its age
     local held = image("owner-held", "iPhone3,1_7A")
     stale(held)
     stale(path.join(base, "owner-held"))
@@ -693,7 +636,6 @@ local function prune_step(emulator, folder, found)
     if not os.isdir(held) or not os.isdir(path.join(base, "owner-held")) then
         table.insert(found, "an image another xmake emulate holds the lock of is kept whatever its age")
     end
-    -- a fresh tree is left alone entirely, which is what every normal run sees
     local only = path.join(folder, "only")
     io.writefile(path.join(only, "owner", "iPhone3,1_7A", "image.json"), "{}")
     if #emulator.prune({root = only}) ~= 0 or not os.isdir(path.join(only, "owner", "iPhone3,1_7A")) then
@@ -702,12 +644,6 @@ local function prune_step(emulator, folder, found)
 end
 
 
--- An owner has no lock a running emulate takes: the run holds its image's lock, so a prune that asked for
--- the owner's judged nothing and removed the images inside a live run's image. An image a live process holds
--- is kept, and an owner is only removed when it holds nothing.
--- A lock held by another process, which is the situation the prune's bug is about: this process opens the
--- same file and its own openlock interacts with the holder differently. The child says "held" in a file when
--- it has the lock, and the caller waits for that word.
 local function wait_for_the_lock(lock, word)
     local script = path.join(path.directory(word), "holder.py")
     io.writefile(script, string.format([[import fcntl, sys, time
@@ -727,9 +663,6 @@ time.sleep(60)
 end
 
 local function held_image_step(emulator, folder, found)
-    -- o1: an owner aged 48h, an image aged 48h, and the image's lock held by *another process* - the case the
-    -- review measured red on the old code and green on this one, cross-process because a lock this process
-    -- took is not the situation the bug is about.
     local base = path.join(folder, "images.noindex")
     local owner = path.join(base, "o1")
     local image = path.join(owner, "iPhone3,1_1")
@@ -741,8 +674,6 @@ local function held_image_step(emulator, folder, found)
         os.execv("touch", {"-t", when, what}, {try = true, stdout = os.nul, stderr = os.nul})
     end
     local held = wait_for_the_lock(image .. ".lock", folder .. "/held.txt")
-    -- the lock is aged with the owner and the image, as one pass after the holder says "held": the holder's
-    -- open(lock, "a") created it inside the owner, and a fresh lock reads as a use of the owner
     for _, what in ipairs({image, owner, image .. ".lock"}) do
         os.execv("touch", {"-t", when, what}, {try = true, stdout = os.nul, stderr = os.nul})
     end
@@ -751,13 +682,11 @@ local function held_image_step(emulator, folder, found)
     end
     local removed = emulator.prune({root = folder, hours = 24})
     if os.isdir(image) then
-        -- kept, which is the point
     else
         table.insert(found, string.format("o1: an image a live xmake emulate holds must survive the prune, and it was removed: %s (owner mtime=%s used=%s unlocks=%s)",
                                           table.concat(removed, " "), os.mtime(owner),
                                           tostring(emulator.used(owner, 24)), tostring(emulator.unlocks(owner))))
     end
-    -- a lock beside an *owner* is the prune's: the run's real lock is the image's, which the holder made
     local visited = path.join(base, "o3")
     os.mkdir(visited)
     os.mkdir(path.join(visited, "iPhone3,1_1"))
@@ -770,7 +699,6 @@ local function held_image_step(emulator, folder, found)
             table.insert(found, "the prune left a lock beside an owner it visited: " .. path.filename(entry))
         end
     end
-    -- o2, the control: the owner is fresh, so nothing is pruned whatever the lock says
     local owner2 = path.join(base, "o2")
     local image2 = path.join(owner2, "iPhone3,1_1")
     os.mkdir(owner2)
@@ -958,17 +886,6 @@ local function launch_step(emulator, folder, found)
         table.insert(found, "an application that dies ends the run with its signal")
     end
 
-    -- until-exit holds the guest instead of asking the emulator for anything, and lets go on the
-    -- application's own end or on the run's budget, whichever comes first, saying which. The verdict
-    -- is the one the real runner writes when charon-sblaunch returns, which is at launch, as soon as
-    -- the application is frontmost. Measured on an iPhone4,1 6.1.3 run of a probe application that lives
-    -- for 20 guest seconds (`launch ... until-exit -s 60`): the runner's verdict file read
-    -- {"machine":"iPhone4,1","system":"6.1.3 (10B329)","uikit":1,"UIApplication":1,"runner_seconds":17.924,
-    --  "test":{"path":"/usr/libexec/charon-sblaunch","spawned":1,"spawn_error":0,"timed_out":0,"output":1,
-    --  "seconds":17.843,"exit":0}}
-    -- while the application was at its second second of twenty, and the driver, which took the file for the
-    -- end of the budget, quit the guest 222 host seconds into the run with the application still running.
-    -- The file's existence says the application was launched, and nothing about the application's end.
     local SCALE, BUDGET = 10, 240
     local now = 0
     local function held(steps)
@@ -1012,10 +929,6 @@ local function launch_step(emulator, folder, found)
     if driver.held ~= "exited" or sent[3] ~= "settle" then
         table.insert(found, "until-exit settles once the application has ended, held " .. tostring(driver.held) .. ", sent " .. table.concat(sent, ";"))
     end
-    -- The run goes on after the application's end: the exit stays in the log, so every later tick sees it, and it
-    -- is the hold's own end, not the application's death, however far the settle and the last snapshot have got
-    -- (measured: the first fixed run held the probe for its 20 guest seconds and then failed it as "ended with
-    -- status 0" at the tick after the settle).
     state.transition = 2
     tick(state)
     state.stable[2] = true
@@ -1052,9 +965,6 @@ local function launch_step(emulator, folder, found)
     end
 end
 
--- A run's program output: the three states told apart, because silence reads as a program that
--- printed nothing when it is a program whose output was lost. A run folder, a capture flag and what
--- the two files hold, which is all the function looks at.
 local function output_step(emulator, folder, found)
     local function run(stdout, output)
         os.tryrm(folder)
@@ -1076,9 +986,6 @@ local function output_step(emulator, folder, found)
     end
 end
 
--- What an install put in: every file, its size and its whole hash, which is what the caller prints
--- and what a band holds against the build. The size is the part two installs can be compared on, a
--- signature being not reproducible.
 local function files_step(emulator, folder, found)
     os.tryrm(folder)
     os.mkdir(path.join(folder, "usr", "libexec"))

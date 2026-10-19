@@ -1,12 +1,5 @@
 #import "CharonAVAudioUnit.h"
 
-// Real AUNBandEQ parameter layout (AudioToolbox/AudioUnitParameters.h): kAUNBandEQParam_GlobalGain
-// has no band, every other parameter ID is band 0's ID plus the zero-indexed band number.
-// kAUNBandEQProperty_NumberOfBands (2200) must be set before the audio unit is initialized - this
-// port's AVAudioEngine always attaches a node (AUGraphAddNode, no AUGraphInitialize yet) before the
-// graph as a whole is initialized in -prepare, so -charon_applyPendingParameters always lands
-// before that point, exactly like a real caller configuring bands right after -initWithNumberOfBands:
-// and before -attachNode:.
 static const AudioUnitPropertyID kCharonNBandEQNumberOfBands = 2200;
 
 @implementation AVAudioUnitEQFilterParameters {
@@ -28,7 +21,7 @@ static const AudioUnitPropertyID kCharonNBandEQNumberOfBands = 2200;
         _frequency = 1000;
         _bandwidth = 0.5;
         _gain = 0;
-        _bypass = YES;   // matches Apple's own documented default: a fresh band does nothing
+        _bypass = YES;
     }
     return self;
 }
@@ -132,7 +125,7 @@ static const AudioUnitPropertyID kCharonNBandEQNumberOfBands = 2200;
 {
     AudioUnit unit = [self charon_impl]->audioUnit;
     if (!unit)
-        return;   // no real unit yet - charon_applyPendingParameters replays every kept value once attached
+        return;
     AudioUnitParameterID resolved = paramID == kAUNBandEQParam_GlobalGain ? paramID : (AudioUnitParameterID)(paramID + bandIndex);
     AudioUnitSetParameter(unit, resolved, kAudioUnitScope_Global, 0, value, 0);
 }

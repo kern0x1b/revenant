@@ -1,11 +1,3 @@
-// probe.m - what -init and +new answer on the HealthKit classes the port defines, the host's and the port's.
-//
-// host.sh builds the port's classes under CharonHost<Name> and links them into this process beside the
-// system's HealthKit, which keeps its own names. For each class this asks the same question of both, the
-// way a caller asks it - [[cls alloc] init] and [cls new] - and records what came back: an object's class,
-// or the exception raised, with its name and its reason. The port's answer must equal the host's, with the
-// CharonHost prefix taken off the class name the port's answer carries. Nothing here assumes the answer:
-// it is read from the host at run time, and the process exits 1 on any difference.
 #import <Foundation/Foundation.h>
 #import <objc/message.h>
 #import <stdio.h>
@@ -51,8 +43,6 @@ static void compare(NSString *name, SEL selector, BOOL allocate)
 int main(void)
 {
     setvbuf(stdout, NULL, _IOLBF, 0);
-    // The eight whose -init the port closes, then the classes that inherit from them, then HKDeletedObject, which
-    // inherits NSObject's and must answer an object.
     NSArray<NSString *> *names = @[
         @"HKCategorySample", @"HKObject", @"HKObjectType", @"HKQuantity",
         @"HKSource", @"HKStatistics", @"HKStatisticsCollection", @"HKWorkoutEvent",
@@ -63,8 +53,6 @@ int main(void)
         compare(name, @selector(new), NO);
     }
 
-    // The two aggregates the port builds through its own bare allocation, and their -copy. The host has no
-    // such factory, so these are the port's alone: they must answer an object and copy it.
     Class statistics = NSClassFromString(@"CharonHostHKStatistics");
     id made = ((id (*)(id, SEL, NSArray *, NSUInteger))objc_msgSend)(statistics,
                   NSSelectorFromString(@"charon_statisticsForSamples:options:"), @[], 0);

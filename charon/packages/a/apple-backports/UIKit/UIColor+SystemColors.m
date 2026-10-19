@@ -1,6 +1,5 @@
 #import <UIKit/UIKit.h>
 
-// The dynamic rows of UIColorDynamic.m, measured on the newest release of the ladder.
 UIColor *charon_system_colour(NSUInteger row);
 
 @implementation UIColor (CharonSystemColors)

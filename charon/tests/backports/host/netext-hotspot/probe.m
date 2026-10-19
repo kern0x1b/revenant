@@ -7,8 +7,6 @@
 #import "CharonNEHotspot.h"
 #endif
 
-/* One operation per process (argv[1]), so a host crash or a hang is one line and not the whole run. */
-
 static void wait_for(NSTimeInterval seconds)
 {
     NSDate *until = [NSDate dateWithTimeIntervalSinceNow:seconds];
@@ -16,7 +14,6 @@ static void wait_for(NSTimeInterval seconds)
         [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.05]];
 }
 
-/* One line per name: an array's description is printed on one line, so the harness compares all of it. */
 static void line(const char *name, id value)
 {
     NSString *text = value ? [[value description] stringByReplacingOccurrencesOfString:@"\n" withString:@" "] : @"(nil)";
@@ -170,7 +167,6 @@ static void command(void)
     line("command.network", cmd.network);
     line("command.networkList", cmd.networkList);
     line("command.createResponse", [cmd createResponse:kNEHotspotHelperResultSuccess]);
-    /* A nil endpoint, through an id, so the call does not warn: a real endpoint cannot be made from Objective-C here. */
     id endpoint = nil;
     line("command.createTCPConnection", [cmd createTCPConnection:endpoint]);
     line("command.createUDPSession", [cmd createUDPSession:endpoint]);
@@ -194,7 +190,6 @@ static void bind_request(void)
     line("bind.after", request.allHTTPHeaderFields);
 }
 
-/* yes or no for the byte string <text> inside an archive: the object is in it, or its value is. */
 static void holds(const char *name, NSData *data, NSString *text)
 {
     BOOL found = data && [data rangeOfData:[text dataUsingEncoding:NSUTF8StringEncoding] options:0
@@ -313,8 +308,6 @@ static void hs20(void)
     owner("initWithDomainName", [NEHotspotHS20Settings instanceMethodForSelector:@selector(initWithDomainName:roamingEnabled:)]);
 }
 
-/* What a configuration holds once built with an EAP object (and an HS20 one): its SSID, joinOnce, the
-   object's identity and the object's state read back through the configuration's own instance variables. */
 static void wiring(void)
 {
     NEHotspotEAPSettings *e = [[NEHotspotEAPSettings alloc] init];

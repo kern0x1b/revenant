@@ -6,7 +6,6 @@
 
 #include "CharonMLSchema.h"
 
-/* The wire types of the protocol buffer format, as CharonMLSchema.h names them. */
 #define WRITE_WIRE_VARINT CHARON_ML_WIRE_VARINT
 #define WRITE_WIRE_64 CHARON_ML_WIRE_64
 #define WRITE_WIRE_STRING CHARON_ML_WIRE_STRING
@@ -62,8 +61,6 @@ static void put_varint(out_buffer *out, uint64_t value)
     } while (value != 0);
 }
 
-/* A fixed-width value, least significant byte first, which is how the format writes 32- and 64-bit
- * numbers. */
 static void put_fixed(out_buffer *out, uint64_t value, size_t width)
 {
     unsigned char bytes[8];
@@ -84,9 +81,6 @@ static uint64_t zigzag(int64_t value)
     return ((uint64_t)value << 1) ^ (uint64_t)(value >> 63);
 }
 
-/* One value of a scalar kind, in the member the reader stores that kind in: a number for a double
- * and a float, the integer for a signed kind and the fixed-width ones, and the unsigned integer for
- * an unsigned kind and a bool. */
 static void put_scalar(out_buffer *out, const charon_ml_node *node, int kind)
 {
     uint64_t bits;
@@ -116,7 +110,6 @@ static void put_scalar(out_buffer *out, const charon_ml_node *node, int kind)
     case CHARON_ML_KIND_INT32:
     case CHARON_ML_KIND_ENUM:
     case CHARON_ML_KIND_INT64:
-        /* A negative 32-bit value is sign-extended to 64 bits, which is the form the format writes. */
         put_varint(out, (uint64_t)node->value.integer);
         break;
     case CHARON_ML_KIND_UINT32:
@@ -138,8 +131,6 @@ static void put_scalar(out_buffer *out, const charon_ml_node *node, int kind)
 
 static void put_entries(out_buffer *out, const charon_ml_node *message);
 
-/* One field of a message, under its own number: a submessage and a string as a length and their bytes,
- * and any other value as its scalar. A packed run is not a single entry and is written by put_entries. */
 static void put_entry(out_buffer *out, const charon_ml_node *entry)
 {
     const charon_ml_field *field = entry->field;
@@ -165,9 +156,6 @@ static void put_entry(out_buffer *out, const charon_ml_node *entry)
     }
 }
 
-/* The entries of a message in the order the reader kept them. The elements of a packed run are
- * consecutive entries of one field, and they go back out as one run: a length and the elements back to
- * back, which is how the format writes a packed field. */
 static void put_entries(out_buffer *out, const charon_ml_node *message)
 {
     size_t index = 0;

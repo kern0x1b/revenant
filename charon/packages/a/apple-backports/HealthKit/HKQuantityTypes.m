@@ -1,32 +1,3 @@
-// HKQuantityTypes.m: what each quantity type is counted in, and how its values are aggregated.
-//
-// The table is Apple's own, written in the SDK: every HKQuantityTypeIdentifier line of
-// HKTypeIdentifiers.h carries a trailing comment naming the unit and the aggregation, as
-// `// kg, Discrete (Arithmetic)` and `// kcal, Cumulative`. This file is that comment read for every
-// identifier of the header of iPhoneOS26.2.sdk, the SDK the corpus of this series is measured against,
-// and nothing is in it that the header does not say - with one exception, below, that the host's own
-// HealthKit overrules.
-//
-// The exception: the comment of HKQuantityTypeIdentifierUVExposure names no unit at all - it is the
-// only line of the header whose unit field is empty - and the host answers `count` and `%` for that
-// type, which is a count and a fraction. So its row carries `count`, and the file below says so where it
-// is read. Nothing else is corrected: every other unit and every aggregation here is the header's.
-//
-// The unit strings are the ones +[HKUnit unitFromString:] answers, and every one of them is held to the
-// host's own answers by tests/backports/host/healthkit, which asks the system and this library the same
-// questions in one process. The aggregations are the cases of HKQuantityAggregationStyle of the SDK the
-// port compiles against, which has two of them: a cumulative type aggregates by summing and a discrete
-// one arithmetically. The three the header's comment names beyond those two - Statistical, Most Recent,
-// Equivalent Continuous Level, Temporally Weighted - are recorded in this table as themselves and
-// collapsed to the one discrete style the contract has, which is the same answer for all of them and
-// the only one a caller compiled against that SDK can be told. The host has the later enum and answers
-// each of them with its own case; that is the one difference the host differential declares, and
-// facts/HealthKit/HealthKit.md names the ten types it is.
-//
-// A type whose documented unit is one +[HKUnit unitFromString:] cannot make would keep the string and
-// refuse a unit rather than guess one, once, in the log. After the correction above there is none: every
-// unit the header names is one the host makes and this library makes.
-
 #import <Foundation/Foundation.h>
 
 #import "CharonHKTypes.h"
@@ -50,7 +21,6 @@ Class CharonHKClassForTypeKind(NSInteger kind)
     }
 }
 
-// The lookup the kind table uses, and the one that replaces it. A nil resolver is the runtime's own.
 static CharonHKClassResolver charon_hk_class_resolver = ^Class(NSString *name) {
     return NSClassFromString(name);
 };
@@ -72,15 +42,10 @@ Class CharonHKClassForObjectKind(NSInteger kind)
         return resolve(@"HKCorrelation");
     case 3:
         return resolve(@"HKWorkout");
-    // The clinical record of 12.0, whose kind the store writes and which the table could not name, so a
-    // record could be saved and never read back.
     case 4:
         return resolve(@"HKClinicalRecord");
-    // The cumulative quantity sample of 13.0, which is a quantity sample and not one, so it has a kind
-    // of its own rather than its superclass's.
     case 5:
         return resolve(@"HKCumulativeQuantitySample");
-    // The cumulative sample of a series, of 12.0, beside its 13.0 superclass.
     case 6:
         return resolve(@"HKCumulativeQuantitySeriesSample");
     default:

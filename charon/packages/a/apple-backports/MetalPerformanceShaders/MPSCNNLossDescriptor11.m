@@ -1,7 +1,3 @@
-// MPSCNNLossDescriptor, from the header of MPSCNNLoss.h in the SDK of iOS 16.4: the type of a loss filter, its
-// reduction, and the six numbers a loss reads. A plain shape object with no storage of its own: it names a loss and
-// runs none. The defaults are the ones the release answers for the factory, measured on the host.
-
 #import "CharonMPS.h"
 
 @implementation MPSCNNLossDescriptor {
@@ -15,14 +11,8 @@
     float _delta;
 }
 
-// -init is NS_UNAVAILABLE in the header and is not overridden here: a caller that reaches NSObject's -init gets the
-// zeroed object the release answers too (measured on the host).
 + (MPSCNNLossDescriptor *)cnnLossDescriptorWithType:(MPSCNNLossType)lossType reductionType:(MPSCNNReductionType)reductionType
 {
-    // The release asserts on a loss type outside MPSCNNLossType, and on a reduction type at or past
-    // MPSCNNReductionTypeCount (measured: loss type 10 and -1 abort; reduction 4 aborts, and -1 is accepted, because
-    // the reduction is a signed enum and the test is the same one). An API in this port never crashes its caller:
-    // it refuses by name and returns nil.
     if ((unsigned int)lossType >= MPSCNNLossTypeCount) {
         CharonMPSRefuse(@"MPSCNNLossDescriptor: loss type %u is not an MPSCNNLossType, so no descriptor is made",
                         (unsigned int)lossType);
@@ -52,8 +42,6 @@
 
 - (void)setLossType:(MPSCNNLossType)lossType
 {
-    // The release does not check the loss type on the setter (measured: 10 is accepted here, and refused only by the
-    // factory), so the port does not either.
     _lossType = lossType;
 }
 
@@ -67,9 +55,6 @@
     _reductionType = reductionType;
 }
 
-// reduceAcrossBatch is declared at iOS 14.0 in the header, later than this class's 11.3, so its accessors are written
-// out rather than synthesised: the port answers them on every release it targets, and the header's availability is
-// recorded in facts/MetalPerformanceShaders/MPSCNNLossDescriptor.md.
 - (BOOL)reduceAcrossBatch
 {
     return _reduceAcrossBatch;
@@ -97,8 +82,6 @@
 
 - (void)setLabelSmoothing:(float)labelSmoothing
 {
-    // Valid only for the softmax and the sigmoid cross entropies. The release asserts on the setter for any other loss
-    // type, and it reads the loss type the descriptor holds at the moment of the set (measured).
     if (_lossType != MPSCNNLossTypeSoftMaxCrossEntropy && _lossType != MPSCNNLossTypeSigmoidCrossEntropy) {
         CharonMPSRefuse(@"MPSCNNLossDescriptor: labelSmoothing is valid only for softmax and sigmoid cross entropy, so it is not set");
         return;
@@ -113,7 +96,6 @@
 
 - (void)setNumberOfClasses:(NSUInteger)numberOfClasses
 {
-    // Valid only for the softmax cross entropy (measured: the setter asserts on any other loss type).
     if (_lossType != MPSCNNLossTypeSoftMaxCrossEntropy) {
         CharonMPSRefuse(@"MPSCNNLossDescriptor: numberOfClasses is valid only for softmax cross entropy, so it is not set");
         return;
@@ -128,7 +110,6 @@
 
 - (void)setEpsilon:(float)epsilon
 {
-    // Valid only for the log loss (measured: the setter asserts on any other loss type).
     if (_lossType != MPSCNNLossTypeLog) {
         CharonMPSRefuse(@"MPSCNNLossDescriptor: epsilon is valid only for the log loss, so it is not set");
         return;
@@ -143,7 +124,6 @@
 
 - (void)setDelta:(float)delta
 {
-    // Valid only for the Huber loss (measured: the setter asserts on any other loss type).
     if (_lossType != MPSCNNLossTypeHuber) {
         CharonMPSRefuse(@"MPSCNNLossDescriptor: delta is valid only for the Huber loss, so it is not set");
         return;

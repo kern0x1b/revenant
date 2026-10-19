@@ -1,18 +1,7 @@
-// The CarPlay templates of iOS 12, in the shapes the SDK declares: the action sheet, the alert, the
-// image set, the search template, the trip and its route choices, and the trip preview's text.
-//
-// Like the rest of CarPlay's drawing half, none of these needs a car: an action sheet is a card with
-// its own actions, an alert is a card with a title and actions, a search template is a search field
-// over a list, and a trip is a pair of map items with the routes between them. The trip preview is
-// driven by the interface controller, which is a view controller, not a car.
 #import <CarPlay/CarPlay.h>
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 
-// The interface controller this port is currently pushing through, which a template that has to
-// dismiss itself asks for. The interface controller records itself here when a template is pushed
-// and forgets when it is popped, so the answer is the one that presented the template. Charon's own,
-// so it carries no API.
 @interface CharonCarPlayInterface : NSObject
 + (instancetype)current;
 @property (nonatomic, weak) CPInterfaceController *controller;
@@ -34,9 +23,6 @@
 
 @end
 
-// The card every one of these draws itself in, and the two buttons a card's own actions become. It is
-// the same card the map template draws its guidance in, and it is Charon's own: every member prefixed,
-// so none of it is API the package carries.
 @interface CharonCarPlayCard : UIView
 - (void)charon_showTitle:(NSString *)title
                  message:(NSString *)message
@@ -47,9 +33,6 @@
     NSArray<CPAlertAction *> *_charon_actions;
 }
 
-// The card's own buttons are real UIButtons with a real target, so a tap on one calls that action's
-// own handler -- which is the whole of what an action sheet and an alert are. The grid template's
-// -collectionView:didSelectItemAtIndexPath: is the same mechanism with a different view.
 - (void)charon_buttonTapped:(UIButton *)button
 {
     NSInteger tag = button.tag;
@@ -57,7 +40,6 @@
         return;
     }
     CPAlertAction *action = _charon_actions[(NSUInteger)tag];
-    // The action's own handler, which is what a program gave the action, called with the action.
     if (action.handler) {
         action.handler(action);
     }
@@ -74,8 +56,6 @@
     label.numberOfLines = 3;
     label.textColor = [UIColor whiteColor];
     [self addSubview:label];
-    // The card's own actions, as the buttons they are: the action's own handler called when its own
-    // button is tapped, which is what an action sheet is.
     CGFloat width = CGRectGetWidth(self.bounds) / (CGFloat)MAX(_charon_actions.count, 1U);
     CGFloat at = 0.0;
     for (CPAlertAction *action in _charon_actions) {
@@ -95,17 +75,13 @@
     if (tag < 0 || (NSUInteger)tag >= _charon_actions.count) {
         return;
     }
-    // The action's own handler, which is what a program gave the action.
     CPAlertAction *action = _charon_actions[(NSUInteger)tag];
-    // The action's own handler, which is what a program gave the action, called with the action.
     if (action.handler) {
         action.handler(action);
     }
 }
 
 @end
-
-// ============================ the action sheet ============================
 
 @implementation CPActionSheetTemplate {
     NSString *_title;
@@ -132,9 +108,6 @@
 
 - (UIViewController *)charon_viewControllerForInterfaceController:(CPInterfaceController *)controller
 {
-    // The action sheet, as the card its own title, message and actions are drawn in.
-    // The card, in a view controller of its own, because the interface controller pushes view
-    // controllers and a card is a view.
     UIViewController *host = [[UIViewController alloc] init];
     host.view.backgroundColor = [UIColor blackColor];
     CharonCarPlayCard *card = [[CharonCarPlayCard alloc] initWithFrame:CGRectMake(40.0, 40.0, 600.0, 300.0)];
@@ -148,8 +121,6 @@
 
 @end
 
-// ============================ the alert ============================
-
 @implementation CPAlertTemplate {
     NSArray<NSString *> *_titleVariants;
     NSArray<CPAlertAction *> *_actions;
@@ -159,8 +130,6 @@
 @synthesize titleVariants = _titleVariants;
 @synthesize actions = _actions;
 
-// The header's own designated initialiser: the title variants and the actions themselves, which are
-// the header's own CPAlertAction objects, so a program's own actions are this alert's actions.
 - (instancetype)initWithTitleVariants:(NSArray<NSString *> *)titleVariants
                               actions:(NSArray<CPAlertAction *> *)actions
 {
@@ -173,7 +142,6 @@
     return self;
 }
 
-// The header's own class limit on the actions an alert may have, which is a limit and not a count.
 + (NSUInteger)maximumActionCount
 {
     return 3;
@@ -181,16 +149,11 @@
 
 - (void)charon_dismiss
 {
-    // An alert is dismissed by the interface controller that showed it, which is a view controller
-    // and not a car. Charon's own, so it carries no API.
     [self charon_dismissThroughInterfaceController];
 }
 
 - (void)charon_dismissThroughInterfaceController
 {
-    // The interface controller that presented this alert, which the port's own interface controller
-    // records when it pushes a template and forgets when it pops it, so an alert's own action
-    // dismisses through the same controller that presented it.
     id controller = [[CharonCarPlayInterface current] controller];
     if (controller) {
         SEL dismiss = NSSelectorFromString(@"dismissTemplateAnimated:completion:");
@@ -238,8 +201,6 @@
 
 @end
 
-// ============================ the image set ============================
-
 @implementation CPImageSet {
     UIImage *_lightContentImage;
     UIImage *_darkContentImage;
@@ -248,18 +209,11 @@
 @synthesize lightContentImage = _lightContentImage;
 @synthesize darkContentImage = _darkContentImage;
 
-// The header's own pair: a light image and a dark one, so a card can be drawn for the screen it is
-// on. The image the port picks is the light one, and the reason is written down: the release has no
-// dark mode for a car screen to be in.
 - (UIImage *)charon_imageForCurrentAppearance
 {
     return _lightContentImage ?: _darkContentImage;
 }
 
-// The class's own storage, reached from the object that carries
-// -initWithLightContentImage:darkContentImage:, which CPImageSet.h declares and a category cannot
-// write an ivar for. Both images are kept as given, nil included, and the accessor above is what picks
-// between them - so an image set with neither is one with nothing to draw, not a placeholder.
 - (void)charon_setLightContentImage:(UIImage *)lightImage darkContentImage:(UIImage *)darkImage
 {
     _lightContentImage = lightImage;
@@ -288,8 +242,6 @@
 }
 
 @end
-
-// ============================ the trip and its route choices ============================
 
 @implementation CPRouteChoice {
     NSArray<NSString *> *_summaryVariants;
@@ -356,8 +308,6 @@
     NSArray<CPRouteChoice *> *_routeChoices;
     id _userInfo;
     NSArray<CPBarButton *> *_charon_bar_buttons;
-    // The 17.4 member's storage, reached from CarPlayTrip174.m through the charon_ accessors below. See
-    // the comment on those accessors for why it is here and not there.
     NSArray<NSString *> *_charon_destinationNameVariants;
 }
 
@@ -394,11 +344,6 @@
                   routeChoices:[coder decodeObjectForKey:@"CPTripRouteChoices"] ?: @[]];
 }
 
-// The 17.4 member's storage, reached from CarPlayTrip174.m. A category cannot add an ivar and the class's
-// @implementation is this file, so the value lives here behind a Charon-prefixed accessor - the same
-// shape CarPlayNavigationSession12.m uses for _turnCardTimeColor. The name is Charon-prefixed, so none of
-// it is API and none of it appears in this object's exports: this file is 12.0 and stays 12.0, and the
-// 17.4 selectors live in their own object.
 - (NSArray<NSString *> *)charon_destinationNameVariants
 {
     return _charon_destinationNameVariants;
@@ -406,8 +351,6 @@
 
 - (void)charon_setDestinationNameVariants:(NSArray<NSString *> *)variants
 {
-    // CPTrip.h:158 declares the property `copy, nullable`, so the copy happens here and a nil in is a nil
-    // out.
     _charon_destinationNameVariants = [variants copy];
 }
 
@@ -466,8 +409,6 @@
 
 @end
 
-// ============================ the search template ============================
-
 @implementation CPSearchTemplate {
     __weak id<CPSearchTemplateDelegate> _delegate;
     UISearchBar *_charon_search_bar;
@@ -475,9 +416,6 @@
 
 @synthesize delegate = _delegate;
 
-// The search template, as a search field over an empty list: the header's own
-// -searchTemplate:updatedSearchText:completionHandler: is the answer, and this is the field the
-// user's text goes into and the delegate is told about.
 - (UIViewController *)charon_viewControllerForInterfaceController:(CPInterfaceController *)controller
 {
     UIViewController *host = [[UIViewController alloc] init];
@@ -493,7 +431,6 @@
     id<CPSearchTemplateDelegate> delegate = _delegate;
     SEL updated = NSSelectorFromString(@"searchTemplate:updatedSearchText:completionHandler:");
     if ([delegate respondsToSelector:updated]) {
-        // The header's own answer: the program searches and answers with its own results.
         void (*send)(id, SEL, CPSearchTemplate *, NSString *, id) =
             (void (*)(id, SEL, CPSearchTemplate *, NSString *, id))objc_msgSend;
         send(delegate, updated, self, searchText ?: @"", ^(NSArray<CPListItem *> *results) {

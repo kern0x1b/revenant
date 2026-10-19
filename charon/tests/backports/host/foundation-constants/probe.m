@@ -3,17 +3,10 @@
 #include <stdio.h>
 #include <string.h>
 
-/* The names this suite is about: the fourteen the package now carries, and one the package does not
-   and no framework exports, which is the control. Our values are the linked definitions, read
-   through the symbols themselves so the linker binds them to this binary's own object; the host's
-   values come from dlsym on the Foundation image, which returns that image's copy whatever the
-   process has linked. The suite's run.sh counts the definitions in the binary before running this,
-   so a port that forgot to link an object cannot pass by reading Apple's. */
-
 struct Entry {
     const char *name;
     NSString *ours;
-    int carried;   /* 1 when the package is expected to define it */
+    int carried;
 };
 
 static struct Entry ENTRIES[] = {
@@ -25,7 +18,6 @@ static struct Entry ENTRIES[] = {
     {"NSCalendarIdentifierVikram", nil, 1}, {"NSURLUbiquitousItemIsSyncPausedKey", nil, 1},
     {"NSURLUbiquitousItemSupportedSyncControlsKey", nil, 1},
     {"NSFileProtectionCompleteWhenUserInactive", nil, 1}, {"NSHTTPCookieSetByJavaScript", nil, 1},
-    /* the control: no framework exports it, and the package does not carry it */
     {"NSCalendarIdentifierCharonProbeNoSuchConstant", nil, 0},
 };
 
@@ -50,8 +42,6 @@ static void fill_ours(void)
 
 int main(int argc, char **argv)
 {
-    /* --none compares nothing on purpose: the run must refuse it, because a check that examined
-       nothing has proved nothing. */
     int compare_nothing = (argc > 1 && strcmp(argv[1], "--none") == 0);
     void *host = dlopen("/System/Library/Frameworks/Foundation.framework/Foundation", RTLD_LAZY);
     if (!host) { printf("FAIL dlopen: %s\n", dlerror()); return 2; }

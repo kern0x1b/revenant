@@ -1,15 +1,3 @@
-// matrix.m - UIImageAsset's variant rule, one line per measurement, over every registration pair and every unregister.
-//
-// One source, built twice by run.sh: against Mac Catalyst's own UIKit, and against the port's UIImageAsset and
-// UIFocusGuide compiled with their classes renamed, so both live in one process. The two outputs must be equal,
-// line for line. Labels name the keys and the answers and never a class, so the two builds print the same text.
-//
-// Keys: fourteen registrable keys (trait collections over display scale, idiom, style and layout direction, and
-// image configurations, which have no scale), two trait collections without a scale that are lookup-only, and two
-// nil lookups. A variant is tagged 1..3 by its image width, 10 points per tag. An answer prints the tag it carries
-// ("v1"; "v1*" when it is the registered object itself), "nil", or "w<width>@<scale>" for an image this run did not
-// register.
-
 #import <UIKit/UIKit.h>
 #import <UIKit/UIImageConfiguration.h>
 #import <UIKit/UIImageSymbolConfiguration.h>
@@ -21,7 +9,6 @@ static NSString *const kLabels[NLABELS] = {
     @"s1", @"s2", @"s3", @"s1-phone", @"s2-pad", @"s2-dark", @"s1-light", @"s3-rtl", @"s2-ltr", @"s2-pad-dark",
     @"bare-phone", @"bare-dark", @"c12", @"c99", @"cbold", @"cscale", @"nil-trait", @"nil-config",
 };
-// the keys an asset can register, in this order; 10 and 11 are the bare trait collections, which have no scale
 static const int kReg[NREG] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14, 15 };
 
 static NSArray *KEYS;
@@ -35,7 +22,6 @@ static UITraitCollection *both(UITraitCollection *a, UITraitCollection *b) { ret
 
 static BOOL is_config(int i) { return i >= 12 && i <= 15; }
 
-// a fresh object equal to KEYS[i]: the asset is asked with a copy as well as with the registered object
 static id make_key(int i)
 {
     switch (i) {
@@ -67,8 +53,6 @@ static UIImage *tagged(int tag)
     return image;
 }
 
-// The tag is read from the pixel width, so a variant handed back at another scale still names its variant.
-// "*" marks the registered object itself; without it the system answered a copy.
 static NSString *tag_of(UIImage *image)
 {
     if (!image)
@@ -80,7 +64,6 @@ static NSString *tag_of(UIImage *image)
     return [NSString stringWithFormat:@"w%.1f@%.1f", image.size.width, image.scale];
 }
 
-// copy: ask with a fresh equal key instead of the registered object
 static UIImage *lookup(UIImageAsset *asset, int i, BOOL copy)
 {
     if (i == 16)
@@ -134,13 +117,11 @@ int main(void)
         setvbuf(stdout, NULL, _IOLBF, 0);
         for (int t = 1; t <= 3; t++)
             tag_image[t] = tagged(t);
-        // indices 16 and 17 are the nil lookups, which never read KEYS; NSNull holds their places
         NSMutableArray *keys = [NSMutableArray array];
         for (int i = 0; i < NLABELS - 2; i++)
             [keys addObject:make_key(i)];
         KEYS = [keys arrayByAddingObjectsFromArray:@[ [NSNull null], [NSNull null] ]];
 
-        // the fresh asset, and each key alone, with a copy of the key asked as well
         UIImageAsset *fresh = [[UIImageAsset alloc] init];
         print_lookups(fresh, @"fresh");
         for (int k = 0; k < NREG; k++) {
@@ -152,7 +133,6 @@ int main(void)
             printf("%s | copy of %s = %s\n", prefix.UTF8String, kLabels[i].UTF8String, tag_of(lookup(asset, i, YES)).UTF8String);
         }
 
-        // every ordered pair of registrable keys: the first registered is variant 1, the second variant 2
         for (int a = 0; a < NREG; a++) {
             for (int b = 0; b < NREG; b++) {
                 if (a == b)
@@ -164,7 +144,6 @@ int main(void)
             }
         }
 
-        // the unregister of every key, over one key alone and over every ordered pair, each lookup printed
         for (int k = 0; k < NREG; k++) {
             for (int u = 0; u < NLABELS; u++) {
                 UIImageAsset *asset = [[UIImageAsset alloc] init];
@@ -187,7 +166,6 @@ int main(void)
             }
         }
 
-        // the refusals and the nil cases, each on its own asset
         attempt(@"reg bare-phone (no scale)", ^{ UIImageAsset *x = [[UIImageAsset alloc] init]; reg(x, 10, 1); });
         attempt(@"reg bare-dark (no scale)", ^{ UIImageAsset *x = [[UIImageAsset alloc] init]; reg(x, 11, 1); });
         attempt(@"reg scale 0", ^{ UIImageAsset *x = [[UIImageAsset alloc] init]; [x registerImage:tag_image[1] withTraitCollection:scale_of(0)]; });
@@ -212,7 +190,6 @@ int main(void)
         });
         attempt(@"unreg nil on empty", ^{ UIImageAsset *x = [[UIImageAsset alloc] init]; unreg(x, 16); unreg(x, 17); print_lookups(x, @"empty-unreg-nil"); });
 
-        // UIFocusGuide's defaults and its setters, read back
         UIFocusGuide *guide = [[UIFocusGuide alloc] init];
         printf("focus is a layout guide = %s\n", [guide isKindOfClass:[UILayoutGuide class]] ? "yes" : "no");
         printf("focus enabled = %s\n", guide.enabled ? "yes" : "no");

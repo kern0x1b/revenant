@@ -1,9 +1,3 @@
--- Requires the port's four time functions to satisfy the relations the header states, and requires the host's own to satisfy
--- them too - the host is the only oracle SensorKit has, and the port's numbers are its own anchor, so what can be compared is
--- the relation and not the value.
---
--- Usage: xmake l ./compare.lua <system.json> <port.json>
-
 import("core.base.json")
 
 local function load(file)
@@ -13,7 +7,6 @@ local function load(file)
     return records
 end
 
--- Python's repr of the value a record holds: None for a key it does not have, and 'text' for a string.
 local function repr(value)
     if value == nil then
         return "None"
@@ -47,12 +40,6 @@ function main(systemFile, portFile)
             end
         end
     end
-    -- The NSDate category's three relations, asked of BOTH builds: the host is the only oracle SensorKit has, and the
-    -- port's numbers are its own anchor, so what can be compared is the relation. IT WAS WRITTEN ONCE WITH AN EXPECTED
-    -- DIFFERENCE - that the host's own build would not have the class method - and the run said otherwise, because the
-    -- probe behind that belief used class_getInstanceMethod, which finds an INSTANCE method: the class method lives on the
-    -- metaclass, so the probe answered "no" for a method the host has. The host answers yes to all three, and both sides
-    -- are held to the same three relations.
     for _, side in ipairs(sides) do
         local who, prefix, records = side[1], side[2], side[3]
         for _, relation in ipairs({ "categoryInitPresent", "categoryGetterPresent", "categoryClassMethodPresent",

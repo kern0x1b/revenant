@@ -459,8 +459,6 @@ static void compare_actions(void)
     compare_hidden_previews(ourCategory, theirCategory, ourActions, theirActions);
 }
 
-// Every method a class declares of its own, its metaclass's instance methods apart: what is inherited
-// is the superclass's business and is compared there.
 static NSArray *own_methods(Class cls)
 {
     NSMutableArray *found = [NSMutableArray array];
@@ -473,7 +471,6 @@ static NSArray *own_methods(Class cls)
     return found;
 }
 
-// What a class adds over its superclass, which is what a caller can reach that the base does not.
 static NSArray *added_over_superclass(Class cls)
 {
     Class parent = class_getSuperclass(cls);
@@ -490,10 +487,6 @@ static NSArray *added_over_superclass(Class cls)
     return found;
 }
 
-// UNPushNotificationTrigger is a marker in both: no SDK this port is compiled against declares a
-// member on it, so what a caller reads off it comes from UNNotificationTrigger and nothing is added.
-// The system will not hand one over - only a request that arrived from a server carries one - so
-// this compares the shape of the two classes and what the port's own trigger answers.
 static void compare_push_triggers(void)
 {
     Class theirClass = [UNPushNotificationTrigger class];
@@ -513,9 +506,6 @@ static void compare_push_triggers(void)
          @"a push trigger is the backport's own notification trigger");
     same(plain(NSStringFromClass(class_getSuperclass(theirClass))), plain(NSStringFromClass([UNNotificationTrigger class])),
          @"a push trigger is a notification trigger");
-    // Nothing is added over the base, since no header declares a member. The framework's class does
-    // implement five of the base's members itself and, on the newest release, three more that no
-    // header declares; those are its own business, so they are named rather than compared.
     same(added_over_superclass(myClass), @[], @"the backport's push trigger adds no member over its base");
     printf("note: this framework's UNPushNotificationTrigger declares %s\n",
            [[own_methods(theirClass) componentsJoinedByString:@" "] UTF8String]);

@@ -1,7 +1,6 @@
 import("fixtures")
 
 local function fake_target(folder, values, installdir, alias)
-    -- A package that sets no CHARON_SHARED_PACKAGE: a runtime the program carries, not one it shares.
     local package = {installdir = function () return installdir end, envs = function () return {} end}
     return {
         name = function () return "tweak" end,
@@ -28,8 +27,6 @@ local function packages_target(declared, held)
     }
 end
 
--- A package the target adds and never receives is a binary built without it,
--- which the device only tells apart by failing, so the rules refuse the target.
 local function packages_step(platform, found)
     local refused = fixtures.refusal(function () platform.verify_packages(packages_target({"ldid"}, {})) end)
     if not (refused and refused:find("adds package ldid", 1, true)) then
@@ -43,9 +40,6 @@ local function packages_step(platform, found)
     end
 end
 
--- A package is bundled under the name the target knows it by, and a require
--- named after its repository reaches the target under its alias, so the
--- repository's spelling finds nothing and has to say what to write instead.
 local function bundled_step(bundle, found)
     local target = {
         name = function () return "tweak" end,
@@ -71,8 +65,6 @@ local function waivers_step(platform, found)
     end
 end
 
--- A program links one build of the runtime and one of libc++: a package that was compiled against another build is refused,
--- naming both.
 local function one_runtime_step(platform, folder, found)
     local function package(name, mark, linkdir)
         return {name = function () return name end,
@@ -151,8 +143,6 @@ function failures(opt)
         table.insert(found, "the carried library must be identified by its installed path: " .. identity)
     end
 
-    -- The copy of a library the runtime package installs is the runtime's image, as it is when the runtime is shared: the
-    -- imports check reports its weak imports and does not refuse the program for them.
     local runtime_root = path.join(folder, "runtime-root")
     local runtime_binary = path.join(runtime_root, "Library", "MobileSubstrate", "DynamicLibraries", "tweak.dylib")
     os.mkdir(path.directory(runtime_binary))
@@ -164,8 +154,6 @@ function failures(opt)
         table.insert(found, "the copy of a library carried from the runtime package must be exempted as the runtime's image, got " .. table.concat(exempted, " "))
     end
 
-    -- What a program carries of a package is what it loads, through its own libraries as well (an application carries what
-    -- reached() answers): the library its image names, the one that library names in turn, and not the rest the package holds.
     if not platform.reached then
         table.insert(found, "platform.reached answers which of a package's libraries a program's images load, and an application carries those")
     else
@@ -204,7 +192,6 @@ function failures(opt)
     if not errors:find("no Package field", 1, true) then
         table.insert(found, "a control file without Package cannot name the folder, and must be refused: " .. errors)
     end
-    -- A library a package the program depends on installs is pointed at by its installed name, and carried by nobody.
     local shared = path.join(folder, "shared-tweak.dylib")
     os.cp(built, shared)
     local provided = {["libabi.1.dylib"] = "/usr/lib/charon/org.example.shared/libabi.1.dylib"}

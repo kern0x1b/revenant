@@ -1,43 +1,9 @@
-// NOT CharonMetal.h: that header reaches OpenGLES/EAGL.h, which is a DEVICE framework, and this file
-// needs nothing from it - the descriptors hold values and name no object of the port's own. A host
-// differential that #includes this file (descriptors26.sh) could not compile it otherwise, and a header
-// imported for nothing is a header that will be missed when something is added that needs it.
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <objc/runtime.h>
 #import "CharonMetal26Types.h"
 #import "CharonMetalProtocols.h"
 
-// THE PIPELINE DESCRIPTORS OF METAL 4, and they are the same kind of thing as the twenty in
-// MTLDescriptors16.m: plain data holders that say what a pipeline is built FROM and ask the device
-// nothing. Every one of them arrived with the SDK of iOS 26, so every one of them is in this object
-// and no other release's API is: an object holds the API of ONE release, and this file's is 26.0.
-//
-// EVERY DEFAULT BELOW IS APPLE'S OWN, MEASURED against a fresh object of Apple's class on a machine
-// with a Metal device, not read off a header - and the measurement is in
-// tests/backports/host/metal-census/descriptors26.sh, which asks both sides and compares. The ones a
-// header does not give are exactly the ones worth measuring:
-//
-//   * a fresh MTL4PipelineDescriptor's `options` is NIL, not an object;
-//   * a fresh MTL4RenderPipelineDescriptor's `vertexDescriptor` IS an object, a fresh MTLVertexDescriptor;
-//   * the three `null_resettable` static linking descriptors are objects on a fresh descriptor, made by
-//     the getter when there is none;
-//   * `rasterSampleCount` and `maxVertexAmplificationCount` are 1, and `isRasterizationEnabled` is YES;
-//   * the colour attachment's write mask is MTLColorWriteMaskAll (15), its source factors are One and
-//     its destination factors Zero, its operations Add, and its pixel format MTLPixelFormatInvalid (0);
-//   * a stage's `maxCallStackDepth` is 1, not 0;
-//   * the colour attachment array has EIGHT slots: indices 0 to 7 answer a descriptor and index 8
-//     fails Apple's own assertion, which is measured out of process because an assertion stops it.
-//
-// WHAT THESE OBJECTS ARE NOT is stated once, at the end, and it is the same half a caller has to know
-// about the 16.0 descriptors: this port vends no object that reads a descriptor made here. The mesh
-// pipeline's three MTL4FunctionDescriptor members ARE the pipeline's object, mesh and fragment stages
-// rather than values this port can hold, and this port's rendering path is Metal over OpenGL ES 2.0
-// (facts/Metal/RenderPath.md), which has no mesh stage and no geometry or tessellation stage either.
-// facts/Metal/Descriptors26.md is the whole of it.
-
-// The colour attachment's defaults as one function, because four classes' -reset have to put them
-// back and a reset that spelled them out four times would be four places to get wrong.
 static void CharonMetal4ResetBlendState(MTL4RenderPipelineColorAttachmentDescriptor *attachment);
 
 @implementation MTL4PipelineOptions {
@@ -57,10 +23,6 @@ static void CharonMetal4ResetBlendState(MTL4RenderPipelineColorAttachmentDescrip
 }
 
 
-// VALUE EQUALITY, MEMBER BY MEMBER, because Apple's own object has an -isEqual: and an -hash of its own and that
-// changes what an application can do with two of them: two descriptors that describe the same thing are the same
-// value. Measured against Apple's own object: two fresh ones are equal, their hashes agree, and a copy equals its
-// source.
 - (BOOL)isEqual:(id)object
 {
     if (self == object) return YES;
@@ -131,7 +93,6 @@ static void CharonMetal4ResetBlendState(MTL4RenderPipelineColorAttachmentDescrip
 @synthesize binaryLinkedFunctions = _binaryLinkedFunctions;
 @synthesize preloadedLibraries = _preloadedLibraries;
 
-// 1 is Apple's own default, measured: a stage links one frame deep unless the descriptor says more.
 - (instancetype)init
 {
     if ((self = [super init]))
@@ -170,9 +131,6 @@ static void CharonMetal4ResetBlendState(MTL4RenderPipelineColorAttachmentDescrip
 
 @end
 
-// The five stages are the five readonly members the header declares, each an object on a fresh
-// descriptor: they are made here rather than on first use because that is what Apple's own object
-// answers, and a getter that made one would answer nil first.
 @implementation MTL4RenderPipelineDynamicLinkingDescriptor {
     MTL4PipelineStageDynamicLinkingDescriptor *_vertexLinkingDescriptor;
     MTL4PipelineStageDynamicLinkingDescriptor *_fragmentLinkingDescriptor;
@@ -201,9 +159,6 @@ static void CharonMetal4ResetBlendState(MTL4RenderPipelineColorAttachmentDescrip
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    // The five members are readonly, so the copy takes the IVARS rather than the properties: they are
-    // this class's own, and a copy that went through a setter that does not exist would be a setter
-    // invented for the copy's sake.
     MTL4RenderPipelineDynamicLinkingDescriptor *copy = [[MTL4RenderPipelineDynamicLinkingDescriptor alloc] init];
     copy->_vertexLinkingDescriptor = [_vertexLinkingDescriptor copy];
     copy->_fragmentLinkingDescriptor = [_fragmentLinkingDescriptor copy];
@@ -321,10 +276,6 @@ static void CharonMetal4ResetBlendState(MTL4RenderPipelineColorAttachmentDescrip
 @synthesize alphaBlendOperation = _alphaBlendOperation;
 @synthesize writeMask = _writeMask;
 
-// The header's own defaults, member by member (MTL4RenderPipeline.h:52 onwards): the format is
-// MTLPixelFormatInvalid, the blend state is MTL4BlendStateDisabled, the source factors are One, the
-// destination factors Zero, both operations Add and the write mask MTLColorWriteMaskAll. Measured
-// against Apple's own fresh object, and the numbers are 0/0/1/0/0/1/0/0/15.
 - (instancetype)init
 {
     if ((self = [super init])) {
@@ -362,9 +313,6 @@ static void CharonMetal4ResetBlendState(MTL4RenderPipelineColorAttachmentDescrip
 }
 
 
-// VALUE EQUALITY, MEMBER BY MEMBER, and the ninth member is the one a differential can watch: measured against
-// Apple's own object, two fresh attachments are equal, one whose write mask is MTLColorWriteMaskRed against one
-// whose is MTLColorWriteMaskAll is not, and Red against Red is.
 - (BOOL)isEqual:(id)object
 {
     if (self == object) return YES;
@@ -398,8 +346,6 @@ static void CharonMetal4ResetBlendState(MTL4RenderPipelineColorAttachmentDescrip
 
 @end
 
-// The defaults, in one place, because four -reset methods have to put them back: a reset that spelled
-// them out four times would be four places to get wrong and one place to measure.
 static void CharonMetal4ResetBlendState(MTL4RenderPipelineColorAttachmentDescriptor *attachment)
 {
     attachment.pixelFormat = MTLPixelFormatInvalid;
@@ -413,19 +359,8 @@ static void CharonMetal4ResetBlendState(MTL4RenderPipelineColorAttachmentDescrip
     attachment.writeMask = MTLColorWriteMaskAll;
 }
 
-// EIGHT SLOTS, measured: Apple's own array answers indices 0 to 7 with a descriptor and fails its own
-// assertion at 8. The header declares two members and no bound, so the number is Apple's and not the
-// header's - and it is measured out of process, one index per invocation, because the assertion STOPS
-// the process and a case that asked 0 to 8 in one run would die at 8 having compared nothing after it.
-// An enumeration, not a static const: an ivar array's bound has to be a compile-time constant,
-// and a static const NSUInteger is folded to one as an extension (-Wgnu-folding-constant).
 enum { CharonMetal4ColorAttachmentSlots = 8 };
 
-// The TILE pipeline's array has eight slots as well - measured against Apple's own array the same way,
-// indices 0 to 7 answer a descriptor and index 8 fails the framework's own assertion - and the array
-// itself is the 11.0 class in MTLTileRenderPipelineAttachments11.m. The number is written out here
-// because a compile-time constant has to be in the file that uses it, and it is the same measurement
-// rather than a second guess.
 enum { CharonMetal4TileColorAttachmentSlots = 8 };
 
 @implementation MTL4RenderPipelineColorAttachmentDescriptorArray {
@@ -435,9 +370,6 @@ enum { CharonMetal4TileColorAttachmentSlots = 8 };
 - (MTL4RenderPipelineColorAttachmentDescriptor *)objectAtIndexedSubscript:(NSUInteger)attachmentIndex
 {
     if (attachmentIndex >= CharonMetal4ColorAttachmentSlots) {
-        // What Apple does, in the shape this port can: refuse the index and say which one, rather than
-        // read past the array. facts/Metal/Descriptors16.md records the out-of-process measurement of
-        // Apple's own assertion for the 14.0 family; this is the same rule for the 26.0 one.
         [NSException raise:NSRangeException
                     format:@"colorAttachments[%lu]: this array has %lu slots",
                            (unsigned long)attachmentIndex, (unsigned long)CharonMetal4ColorAttachmentSlots];
@@ -457,9 +389,6 @@ enum { CharonMetal4TileColorAttachmentSlots = 8 };
                            (unsigned long)attachmentIndex, (unsigned long)CharonMetal4ColorAttachmentSlots];
         return;
     }
-    // The header says this setter has copy semantics, and that a caller can set the color attachment at a
-    // valid index set to nil, which restores that attachment's default state. So a nil resets the slot to the defaults rather than
-    // leaving the old descriptor there - measured against Apple's own array by the differential.
     if (attachment)
         _slots[attachmentIndex] = [attachment copy];
     else {
@@ -483,11 +412,6 @@ enum { CharonMetal4TileColorAttachmentSlots = 8 };
     return copy;
 }
 
-// VALUE EQUALITY, SLOT BY SLOT, over the eight slots there are. Two fresh arrays are equal because
-// both make a descriptor at an index on first read and those descriptors are equal; an array whose slot
-// 2 holds a different descriptor is not equal to one whose does. This is the member the three pipeline
-// descriptors' own equality asks, so a pipeline whose colour attachments differ is not equal to one
-// whose do not.
 - (BOOL)isEqual:(id)object
 {
     if (self == object) return YES;
@@ -510,9 +434,6 @@ enum { CharonMetal4TileColorAttachmentSlots = 8 };
 
 @end
 
-// THE BASE OF THREE, and its two members are the header's: a label and a set of options. A fresh
-// options is NIL - measured, and not the null_resettable an implementer would guess - so the port
-// keeps nil until a caller sets one.
 @implementation MTL4PipelineDescriptor {
     NSString *_label;
     MTL4PipelineOptions *_options;
@@ -540,9 +461,6 @@ enum { CharonMetal4TileColorAttachmentSlots = 8 };
 }
 
 
-// VALUE EQUALITY, MEMBER BY MEMBER, and the LABEL is one of the two. Measured against Apple's own object: two
-// fresh descriptors whose labels are both nil are equal, nil against "x" are not, "x" against "x" are, and
-// "x" against "y" are not.
 - (BOOL)isEqual:(id)object
 {
     if (self == object) return YES;
@@ -562,9 +480,6 @@ enum { CharonMetal4TileColorAttachmentSlots = 8 };
 
 @end
 
-// THE THREE STATIC LINKING DESCRIPTORS of the render pipeline are `null_resettable`, which is the
-// header saying the getter may hand back a fresh one: that is what Apple's own fresh descriptor
-// answers, so the getter makes one when there is none and the setter copies what it is given.
 static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinkingDescriptor *stored)
 {
     if (!stored)
@@ -606,9 +521,6 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
 @synthesize colorAttachmentMappingState = _colorAttachmentMappingState;
 @synthesize supportIndirectCommandBuffers = _supportIndirectCommandBuffers;
 
-// Measured against Apple's own fresh object: a vertex descriptor IS there (a fresh MTLVertexDescriptor),
-// the sample count and the amplification count are 1, rasterization is on, and everything else is its
-// own zero or NO.
 - (instancetype)init
 {
     if ((self = [super init])) {
@@ -691,20 +603,12 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
     copy.supportFragmentBinaryLinking = _supportFragmentBinaryLinking;
     copy.colorAttachmentMappingState = _colorAttachmentMappingState;
     copy.supportIndirectCommandBuffers = _supportIndirectCommandBuffers;
-    // label and options are the BASE's members and its ivars are private to it, so a subclass's
-    // copy reads them through the base's own getters and writes them through its setters. That is the
-    // public interface the header declares, and it is the only way a subclass can carry them without a
-    // seam of this package's own - which would be a method Apple's class does not have and would need
-    // a registry row of its own.
     copy.label = self.label;
     copy.options = self.options;
     return copy;
 }
 
 
-// VALUE EQUALITY, MEMBER BY MEMBER, THE COLOUR ATTACHMENTS INCLUDED: two render descriptors are equal only when
-// their attachment ARRAYS are equal too, and an array is equal only when its slots are - which is why the array's
-// own equality is below and this one asks it. The base's label and options are the last two members.
 - (BOOL)isEqual:(id)object
 {
     if (self == object) return YES;
@@ -783,9 +687,6 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
     _staticLinkingDescriptor = [descriptor copy];
 }
 
-// Every measured default here is a zero, a NO or nil - including the required threadgroup size, which
-// is 0 x 0 x 0 and not 1 x 1 x 1. The static linking descriptor is an object, as the null_resettable
-// getter says it is.
 - (instancetype)init
 {
     if ((self = [super init])) {
@@ -819,20 +720,12 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
     copy.supportBinaryLinking = _supportBinaryLinking;
     copy.staticLinkingDescriptor = _staticLinkingDescriptor;
     copy.supportIndirectCommandBuffers = _supportIndirectCommandBuffers;
-    // label and options are the BASE's members and its ivars are private to it, so a subclass's
-    // copy reads them through the base's own getters and writes them through its setters. That is the
-    // public interface the header declares, and it is the only way a subclass can carry them without a
-    // seam of this package's own - which would be a method Apple's class does not have and would need
-    // a registry row of its own.
     copy.label = self.label;
     copy.options = self.options;
     return copy;
 }
 
 
-// VALUE EQUALITY MEMBER BY MEMBER, AND THE THREADGROUP SIZE IS THREE MEMBERS: measured, two fresh descriptors are
-// equal and one whose required size is 1x2x3 against one whose is 0x0x0 is not, so MTLSize is compared by its three
-// components rather than as one number - which a memcmp of the struct would have got wrong on padding.
 - (BOOL)isEqual:(id)object
 {
     if (self == object) return YES;
@@ -870,13 +763,6 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
 
 @end
 
-// ONE MEMBER OF THIS CLASS IS NOT IN ITS EQUALITY, and the reason is a measurement: the colour
-// attachments. Apple's own MTLTileRenderPipelineColorAttachmentDescriptorArray carries NO -isEqual: of
-// its own - measured, its own method list has neither isEqual: nor hash - so two fresh arrays are two
-// objects that are not equal, and yet two fresh MTL4TileRenderPipelineDescriptors on Apple's side ARE
-// equal, also measured. An equality that compared the attachments could not answer that. The render and
-// mesh descriptors beside it DO compare theirs, because their array is MTL4RenderPipelineColorAttachment
-// DescriptorArray and that one carries an -isEqual: of its own, measured.
 @implementation MTL4TileRenderPipelineDescriptor {
     MTL4FunctionDescriptor *_tileFunctionDescriptor;
     NSUInteger _rasterSampleCount;
@@ -907,9 +793,6 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
     _staticLinkingDescriptor = [descriptor copy];
 }
 
-// The colour attachments are an object on a fresh descriptor - measured - so they are made here rather
-// than left to an auto-synthesised getter that would answer nil. The array itself is the 11.0 class in
-// MTLTileRenderPipelineAttachments11.m; this object only names it, so it carries no 11.0 symbol.
 - (instancetype)init
 {
     if ((self = [super init])) {
@@ -926,9 +809,6 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
 - (void)reset
 {
     _tileFunctionDescriptor = nil;
-    // The 16.4 header types this setter's attachment as nonnull while its own comment says a nil at a
-    // legal index is safe and resets the slot; a nil VARIABLE is what says that without contradicting
-    // the annotation, and a nil literal is what -Wnonnull is about.
     MTLTileRenderPipelineColorAttachmentDescriptor *noAttachment = nil;
     [_colorAttachments setObject:noAttachment atIndexedSubscript:0];
     _rasterSampleCount = 1;
@@ -952,11 +832,6 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
     copy.requiredThreadsPerThreadgroup = _requiredThreadsPerThreadgroup;
     copy.staticLinkingDescriptor = _staticLinkingDescriptor;
     copy.supportBinaryLinking = _supportBinaryLinking;
-    // label and options are the BASE's members and its ivars are private to it, so a subclass's
-    // copy reads them through the base's own getters and writes them through its setters. That is the
-    // public interface the header declares, and it is the only way a subclass can carry them without a
-    // seam of this package's own - which would be a method Apple's class does not have and would need
-    // a registry row of its own.
     copy.label = self.label;
     copy.options = self.options;
     return copy;
@@ -1084,9 +959,6 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
     _fragmentStaticLinkingDescriptor = [descriptor copy];
 }
 
-// Measured against Apple's own fresh object: the three stage descriptors are nil, both required
-// threadgroup sizes are 0 x 0 x 0, every count is 0 except the sample count and the amplification
-// count, which are 1, rasterization is on and every flag is NO or its own zero.
 - (instancetype)init
 {
     if ((self = [super init])) {
@@ -1163,11 +1035,6 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
     copy.supportFragmentBinaryLinking = _supportFragmentBinaryLinking;
     copy.colorAttachmentMappingState = _colorAttachmentMappingState;
     copy.supportIndirectCommandBuffers = _supportIndirectCommandBuffers;
-    // label and options are the BASE's members and its ivars are private to it, so a subclass's
-    // copy reads them through the base's own getters and writes them through its setters. That is the
-    // public interface the header declares, and it is the only way a subclass can carry them without a
-    // seam of this package's own - which would be a method Apple's class does not have and would need
-    // a registry row of its own.
     copy.label = self.label;
     copy.options = self.options;
     return copy;
@@ -1250,33 +1117,12 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
 
 @end
 
-// THE FUNCTION DESCRIPTORS: the base, which MTL4FunctionDescriptor.h declares and ends - no members
-// of its own - and the three that extend it. The base carries nothing but its existence, which is what
-// Apple's own header says it is: a name a pipeline descriptor's function members are spelled in.
-//
-// The three subclasses hold VALUES, and each one is what its own header says it is: a specialisation
-// names the function it specialises and the constant values it specialises it with; a stitched
-// function names a stitching graph and the functions it stitches; a library function names a library
-// and a name inside it. This port carries the values; what a pipeline would be built from them is the
-// half that is not there, and it is at the end of this file.
 @implementation MTL4FunctionDescriptor
-// NSCOPYING, AND IT IS THE ONE -Wprotocol WAS HIDING. The 26.2 header declares this class as
-// NSObject <NSCopying> and gives it no members of its own, and the file-level
-// `#pragma clang diagnostic ignored "-Wprotocol"` made the missing -copyWithZone: a silence instead of
-// a warning. THE PRAGMA IS GONE: every class in this file implements the protocol its own declaration
-// names, and this file builds with no diagnostic silenced.
-//
-// The copy is a fresh instance of THIS class. The three subclasses add members and override
-// -copyWithZone: to carry them, so a copy of one of those never reaches this.
 - (id)copyWithZone:(NSZone *)zone
 {
     return [[MTL4FunctionDescriptor alloc] init];
 }
 
-// AND VALUE EQUALITY, which this class has on Apple's side with no member of its own to compare:
-// measured, two fresh ones are equal, their hashes agree, and a copy equals its source. There is
-// nothing else to compare here; each subclass's equality below adds that subclass's own members to it,
-// which is what makes a specialised function different from a plain one.
 - (BOOL)isEqual:(id)object
 {
     if (self == object) return YES;
@@ -1306,10 +1152,6 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
     _functionDescriptor = [functionDescriptor copy];
 }
 
-// `atomic` is what the 26.2 header declares for this property, and a writable atomic property cannot
-// pair a synthesised getter with a hand-written setter: the getter would read without the lock the
-// setter took. So BOTH are written here, and the getter reads under the lock, which is what atomic
-// means - not a copied setter on a synthesised getter.
 - (NSString *)specializedName
 {
     @synchronized(self) { return _specializedName; }
@@ -1406,7 +1248,6 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
 @synthesize name = _name;
 @synthesize library = _library;
 
-// `atomic` again, and the same reason: both halves are written, and the getter reads under the lock.
 - (NSString *)name
 {
     @synchronized(self) { return _name; }
@@ -1450,13 +1291,3 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
 }
 
 @end
-
-// WHAT NONE OF THIS IS, and it is the half a caller has to know: nothing in this port reads a
-// descriptor made here. There is no MTL4CommandQueue, no MTL4CommandBuffer and no pipeline state this
-// port builds from any of these, so an application that fills one gets an object it can read, copy and
-// reset - and no object to hand it to. That is the same line facts/Metal/Descriptors16.md draws for
-// the 16.0 family and it is what each row's `effect` says, because `implemented` owes a reader the
-// measured behaviour INCLUDING the part that is not there. The mesh descriptor is the sharpest case:
-// its three MTL4FunctionDescriptor members ARE the pipeline's object, mesh and fragment stages rather
-// than values this port can hold, and facts/Metal/RenderPath.md is where the rendering path says it has
-// no mesh stage.

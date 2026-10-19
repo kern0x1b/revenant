@@ -1,13 +1,7 @@
--- `surface`: the surface of the SDK computed from the model (surface_model.lua): every row of every framework's declaration and Swift
--- shards that arrived after iOS 6.1, with the columns of the surface table. Writes sdk-surface-model.tsv into --out and prints the row
--- count per framework and kind. Nothing else is read and nothing is written into the tree: the readers switch to these rows, and this
--- command is how the rows are measured against the corpus table (the framework, kind and api keys of both). --sdk gives the release.
-
 local emit = import("emit", {anonymous = true})
 local surface_model = import("surface_model", {anonymous = true})
 local sdk_info = import("sdk", {anonymous = true})
 
--- Returns the exit status: 0 when the rows are written.
 function run(args)
     assert(args.out, "surface needs --out: the folder sdk-surface-model.tsv is written to")
     assert(args.sdk, "surface needs --sdk: the iPhoneOS SDK whose release the shards are checked against")

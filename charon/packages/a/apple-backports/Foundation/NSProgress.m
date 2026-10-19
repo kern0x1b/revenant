@@ -1,21 +1,5 @@
 #import <Foundation/Foundation.h>
 
-// NSProgress arrived in iOS 6.0 with most of the surface iOS 7-9 later made public (facts/Foundation/NSProgress.md): the current
-// thread's progress, +progressWithTotalUnitCount:, becomeCurrentWithPendingUnitCount:/resignCurrent, the two counts,
-// fractionCompleted, cancelling and pausing with their handlers, userInfo and kind. Below 6.0 the class itself is missing, so this
-// is the class the package's categories (NSProgress+Additions.m, +AddChild9.m, +FileOperationKind.m) already attach to on 6.0 and
-// later; they attach to this one the same way. -addChild:withPendingUnitCount: and -isFinished are not implemented here on
-// purpose: NSProgress+AddChild9.m and +Additions.m carry those (9.0), the same category for every band, so this class does not
-// duplicate a selector two files would both define.
-//
-// Where a property's accessors come from a category on every band (estimatedTimeRemaining, throughput, fileOperationKind,
-// fileURL, fileTotalCount, fileCompletedCount, and the getters of cancellationHandler/pausingHandler), this class says @dynamic
-// and implements nothing: the accessor lives in the category file, once, for every band that lacks it, which is every band this
-// class is compiled into.
-
-// A frame of the current-progress stack (swift-corelibs-foundation's Progress.swift read for this mechanism, adapted to what iOS
-// 6's own selectors are: currentProgress, becomeCurrentWithPendingUnitCount:, resignCurrent, initWithParent:userInfo:). One
-// thread's stack is a chain of these, kept in the thread's dictionary; becomeCurrent pushes, resignCurrent pops.
 @interface CharonProgressFrame : NSObject
 @property (nonatomic, strong) NSProgress *progress;
 @property (nonatomic) int64_t pendingUnitCount;
@@ -42,7 +26,7 @@ static NSString *const CharonProgressThreadKey = @"org.charon.apple-backports.NS
     NSString *_localizedDescription;
     NSString *_localizedAdditionalDescription;
     NSMutableDictionary<NSProgressUserInfoKey, id> *_userInfo;
-    NSMutableArray<CharonProgressFrame *> *_implicitChildFrames; // one per attached implicit child, {progress = the child, pendingUnitCount = its portion}
+    NSMutableArray<CharonProgressFrame *> *_implicitChildFrames;
 }
 
 @dynamic estimatedTimeRemaining, throughput, fileOperationKind, fileURL, fileTotalCount, fileCompletedCount;
@@ -94,14 +78,6 @@ static NSString *const CharonProgressThreadKey = @"org.charon.apple-backports.NS
     [NSProgress charon_setTopFrame:frame.next];
 }
 
-// The implicit child mechanism -initWithParent:userInfo: and +progressWithTotalUnitCount: use: at most one child per
-// -becomeCurrentWithPendingUnitCount: call takes the portion offered; a later one made in the same scope is not attached to
-// anything, same as swift-corelibs-foundation's _addImplicitChild.
-// A child that attaches while self is already cancelled or paused is cascaded into immediately (matching the same push
-// swift-corelibs-foundation's addChild does at attach time); one attached later, after self cancels or pauses, is reached
-// instead by the cascade -cancel/-pause below run over every already-attached child. Together the two pushes cover both
-// orders without a live link back from child to parent, which would need __weak - a runtime this class is also built
-// without, on armv7-ios4.3.
 - (void)charon_attachImplicitChild:(NSProgress *)child
 {
     CharonProgressFrame *frame = [NSProgress charon_topFrame];
@@ -133,10 +109,6 @@ static NSString *const CharonProgressThreadKey = @"org.charon.apple-backports.NS
         _userInfo = userInfoOrNil ? [userInfoOrNil mutableCopy] : [NSMutableDictionary dictionary];
         _cancellable = YES;
         _pausable = NO;
-        // iOS 6's own -initWithParent:userInfo: does not raise for a parent that is not the current progress (facts, "Where iOS
-        // 6 answers differently"; the newest release does); this attaches only when parentProgressOrNil is genuinely the top of
-        // the calling thread's stack, and is a silent no-op (no portion consumed, no crash) otherwise - not reached by any
-        // caller in this package, which only ever uses +progressWithTotalUnitCount:.
         if (parentProgressOrNil)
             [parentProgressOrNil charon_attachImplicitChild:self];
     }
@@ -165,13 +137,6 @@ static NSString *const CharonProgressThreadKey = @"org.charon.apple-backports.NS
     _completedUnitCount = completedUnitCount;
 }
 
-// iOS 6's own answer, measured (facts): NaN for a total of zero or less, not 0 (the newest release) and not 1 (swift-corelibs'
-// "no work to do" case) - both read and neither used. A progress with attached implicit children (this class's own mechanism,
-// not -addChild:withPendingUnitCount:, which the category carries with its own accounting) adds each unfinished child's
-// fraction, clamped to [0, 1], scaled by the portion it was given; a child never removed once attached, so a progress that
-// finishes keeps contributing 1.0 * its portion for the rest of the parent's life, same as completedUnitCount would if the
-// parent counted it there - which, like the newest release's -addChild:withPendingUnitCount:, this class's completedUnitCount
-// does not (measured nowhere; stated, not silently different).
 - (double)fractionCompleted
 {
     if (_totalUnitCount <= 0)
@@ -194,7 +159,6 @@ static NSString *const CharonProgressThreadKey = @"org.charon.apple-backports.NS
     return [NSSet setWithObjects:@"totalUnitCount", @"completedUnitCount", nil];
 }
 
-// iOS 6's own answer (facts): only a negative total is indeterminate; a fresh progress (0 total, 0 completed) is not.
 - (BOOL)isIndeterminate
 {
     return _totalUnitCount < 0;
@@ -278,17 +242,12 @@ static NSString *const CharonProgressThreadKey = @"org.charon.apple-backports.NS
         [frame.progress pause];
 }
 
-// The release has no way back from paused (facts): a real, honest no-op, not a crash and not a silent "resumed". A handler set
-// through -setResumingHandler: is kept, and never called, for the same reason.
 - (void)resume
 {
 }
 
 #pragma mark - Description, kind, userInfo
 
-// Empty by default on iOS 6 (facts, measured): the newest release composes a default from the counts and kind when nothing was
-// set; a rule read off a handful of cases would be a guess (facts, "What the backport adds"), so an unset value answers "" here,
-// what iOS 6 itself answers, and a value this was explicitly given comes back unchanged, as null_resettable promises.
 - (NSString *)localizedDescription
 {
     return _localizedDescription ?: @"";

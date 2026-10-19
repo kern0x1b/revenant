@@ -1,17 +1,6 @@
--- The modules of an SDK, read from the SDK's own folders and module maps by the rules of tools/found/decls.cc (discover, usr_module_map,
--- module_headers): the generator names the modules the extractor lists, and a module is what the SDK says it is. The kinds:
---   framework     System/Library/Frameworks/<F>.framework (a nested one, Outer/Inner, is in its outer one's Frameworks/ folder),
---   subframework  System/Library/SubFrameworks/<F>.framework,
---   usr           a module the usr/include module maps declare (its folder or header is named by the map, not by the module's name),
---   swift         a Swift module folder of usr/lib/swift that names no framework or usr module (no C header),
---   developer     a framework of Developer/Library/Frameworks.
--- A name that two of them give is kept once, in that order. Nothing is named here: the names are the SDK's.
-
 local order = import("order", {anonymous = true})
 local files = import("files", {anonymous = true})
 
--- The record of one module: name (a nested framework is Outer/Inner), base (its last name), kind, root (the .framework folder, the
--- usr/include folder, or the Swift module folder) and map (a usr module's module map).
 local memo = {}
 
 local function segments_of(text)
@@ -22,7 +11,6 @@ local function segments_of(text)
     return out
 end
 
--- The text of a file, one line at a time (none when the file cannot be read).
 local function lines_of(file)
     local text = files.read_text(file) or ""
     local out = {}
@@ -32,8 +20,6 @@ local function lines_of(file)
     return out
 end
 
--- The module a module map line declares at the top level: `module M` or `explicit module M`, with M not continued by a dot (a submodule
--- of that name is not the top-level module). Nil for any other line.
 local function declared_module(line)
     local name, after = string.match(line, "^explicit%s+module%s+([%w_]+)(.?)")
     if name == nil then
@@ -45,7 +31,6 @@ local function declared_module(line)
     return name
 end
 
--- The frameworks in a folder, the nested ones in each one's Frameworks/ folder: name -> record, in the order they are found.
 local function frameworks_in(dir, outer, kind, out)
     for _, folder in ipairs(os.dirs(path.join(dir, "*.framework"))) do
         local base = string.sub(path.filename(folder), 1, -11)
@@ -55,7 +40,6 @@ local function frameworks_in(dir, outer, kind, out)
     end
 end
 
--- The usr/include module maps: top-level module name -> the map that declares it. Two maps declaring one module are an error.
 local function usr_maps(include)
     local maps = {}
     local candidates = os.files(path.join(include, "*.modulemap"))
@@ -78,7 +62,6 @@ local function usr_maps(include)
     return out
 end
 
--- The modules of an SDK: name -> record, and the names in byte order. Memoized per SDK.
 function discover(sdk)
     if memo[sdk] ~= nil then
         return memo[sdk]
@@ -123,21 +106,15 @@ function discover(sdk)
     return memo[sdk]
 end
 
--- The record of a module the SDK holds, or nil.
 function module_of(sdk, name)
     return discover(sdk).modules[name]
 end
 
--- The .framework folder of a framework (a nested one's, under its outer one's Frameworks/), or the usr/include folder of a usr module,
--- or the Swift module folder. Nil for a name the SDK does not hold.
 function root_of(sdk, name)
     local record = module_of(sdk, name)
     return record and record.root or nil
 end
 
--- The .tbd files that list a module's exports, in the SDK: a framework's own (named by its last name, in its folder), or for a usr
--- module the libraries its map links (`link "x"` is usr/lib/libx.tbd). Empty when the module names no library the SDK holds: the caller
--- says so, since no export list is then read.
 function export_files(sdk, name)
     local record = module_of(sdk, name)
     if record == nil then
@@ -161,8 +138,6 @@ function export_files(sdk, name)
     return out
 end
 
--- A module map's header list, as module_headers reads it: the header and umbrella header lines, and an umbrella directory's headers, in
--- the map's order; excluded headers are dropped unless named. The block of the module named wanted is read (wanted "" reads the whole map).
 local function map_headers(map, header_base, dir_base, wanted)
     local headers, named, excluded = {}, {}, {}
     local seen = {}
@@ -223,9 +198,6 @@ local function map_headers(map, header_base, dir_base, wanted)
     return out
 end
 
--- The headers a module is parsed from (the list decls reads, as absolute paths), and nil with the reason when it has none: a usr
--- module's map names them; a framework's module map names them, else its umbrella header and then every header of Headers/; a Swift
--- module has no C header.
 function headers_of(sdk, name)
     local record = module_of(sdk, name)
     if record == nil then
@@ -268,7 +240,6 @@ function headers_of(sdk, name)
     return out
 end
 
--- The usr module that a usr/include header belongs to, by the module maps (the module whose headers include it), or nil.
 local owner_memo = {}
 function usr_owner_of(sdk, file)
     if owner_memo[sdk] == nil then
@@ -286,8 +257,6 @@ function usr_owner_of(sdk, file)
     return owner_memo[sdk][path.normalize(file)]
 end
 
--- The import of a top-level framework's umbrella header, as its folder names it (<Name/Name.h>, its Headers folder holds it). Nil for a
--- nested framework (its headers are reached through its outer framework), a usr module and a Swift module (they have no such header).
 function umbrella_import(sdk, name)
     local record = module_of(sdk, name)
     if record == nil or record.kind == "usr" or record.kind == "swift" or string.find(name, "/", 1, true) then

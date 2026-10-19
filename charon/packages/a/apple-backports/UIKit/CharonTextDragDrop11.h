@@ -3,10 +3,6 @@
 #import <UIKit/UITextDragging.h>
 #import <UIKit/UITextDropping.h>
 
-// The two adaptors that bridge a text control's own delegate to the interaction's delegate, shared
-// between the file that installs them on a control and the one that asks them. A header and not a
-// category: the release has neither protocol, so these are the port's own.
-// The two request objects: the port's own answers to the two protocols the headers declare.
 @interface CharonTextDragRequest : NSObject <UITextDragRequest>
 @property (nonatomic, strong) id<UIDragSession> session;
 @property (nonatomic, strong) UITextRange *range;

@@ -1,11 +1,3 @@
-// Differential test of the CoreMIDI translation against macOS CoreMIDI. The expected answers are the macOS
-// oracle's recorded output (oracle/batch-up.txt and oracle/batch-down.txt, from oracle/batch.m, every row of each, read at run
-// time from the directory argv[1]) and the probe results written in this file beside each check, measured on this host on
-// 2026-10-09. The translator under test is packages/a/apple-backports/CoreMIDI/CharonCoreMIDI.c, built for macOS as it is for
-// the device.
-//
-// Prints one line per check: "ok <name>" or "FAIL <name>: <detail>", then a summary. Exits with the number of
-// failures.
 #import <Foundation/Foundation.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +21,6 @@ static void check(int passed, const char *name, const char *detail)
     }
 }
 
-// Whether two word lists are equal; on a difference, the first differing index goes into detail.
 static int same_words(const uint32_t *got, size_t gotCount, const unsigned int *want, int wantCount, char *detail, size_t size)
 {
     if ((int)gotCount != wantCount) {
@@ -45,7 +36,6 @@ static int same_words(const uint32_t *got, size_t gotCount, const unsigned int *
     return 1;
 }
 
-// The MIDI 1.0 bytes of a UMP channel word, as a list of one message.
 static size_t bytes_of_word(uint32_t word, uint8_t *bytes)
 {
     bytes[0] = (uint8_t)(word >> 16);
@@ -54,7 +44,6 @@ static size_t bytes_of_word(uint32_t word, uint8_t *bytes)
     return (bytes[0] & 0xF0) == 0xC0 || (bytes[0] & 0xF0) == 0xD0 ? 2 : 3;
 }
 
-// The UMP MIDI 1.0 words of a byte list, one per channel message, as macOS delivers a 1.0 destination.
 static size_t words_of_bytes(const CharonMIDIBytes *bytes, uint32_t *words)
 {
     size_t count = 0;
@@ -72,14 +61,11 @@ static size_t words_of_bytes(const CharonMIDIBytes *bytes, uint32_t *words)
     return count;
 }
 
-// Scaling laws the rows below rely on, stated once: the centre maps to the centre and the top to the top.
 static void check_scaling_laws(void)
 {
     check(CharonMIDIUp16From7(0) == 0 && CharonMIDIUp16From7(127) == 0xFFFF, "scaling: 16-bit ends", "");
     check(CharonMIDIUp32From7(0) == 0 && CharonMIDIUp32From7(127) == 0xFFFFFFFFu, "scaling: 32-bit ends", "");
     check(CharonMIDIUp32From7(64) == 0x80000000u, "scaling: 32-bit centre", "");
-    // The rule is written in 32-bit arithmetic (a 64-bit divide is a library call on armv7); it is the rule the rows below
-    // measured, in 64 bits, at every one of the 128 inputs.
     int differing = 0;
     for (uint64_t value = 0; value < 128; value++) {
         uint64_t rule = value <= 64 ? value << 25 : 0x80000000ull + (2 * (value - 64) * 0x7FFFFFFFull + 63) / 126;
@@ -93,7 +79,6 @@ static void check_scaling_laws(void)
           "word counts: one, two and four words by type", "");
 }
 
-// One answer macOS gave the oracle: the input words of a message and the words it came out as.
 typedef struct charon_expect {
     char tag[40];
     unsigned int in[4];
@@ -102,11 +87,8 @@ typedef struct charon_expect {
     int outCount;
 } charon_expect;
 
-// The directory of the recorded oracle output (argv[1]).
 static const char *gOracleDir;
 
-// The words of a "<hex> <hex> ..." list into out, at most max; returns the count, or -1 when a token is not a hex word or
-// there are more than max.
 static int parse_words(const char *text, size_t length, unsigned int *out, int max)
 {
     int count = 0;
@@ -133,9 +115,6 @@ static int parse_words(const char *text, size_t length, unsigned int *out, int m
     return count;
 }
 
-// Every row of one recorded file ("<tag> in: <words> -> <words>", one per message; the lines that begin MISMATCH or cases= are
-// the oracle's own summary). Returns the rows, or NULL with *count 0 when the file cannot be read or a row is not of that
-// form: a recorded answer the test cannot read is a failure of the test, not a row it skips.
 static charon_expect *load_rows(const char *name, size_t *count)
 {
     char path[1024];
@@ -192,7 +171,6 @@ static charon_expect *load_rows(const char *name, size_t *count)
     return rows;
 }
 
-// Every MIDI 1.0 -> 2.0 row of the recorded oracle: a 1.0 channel word parsed in protocol 2 must give macOS's 2.0 words.
 static void check_up_rows(void)
 {
     size_t count = 0;
@@ -222,7 +200,6 @@ static void check_up_rows(void)
     free(rows);
 }
 
-// Every 2.0 -> 1.0 row of the recorded oracle: the 2.0 words of the row give the 1.0 words macOS delivered.
 static void check_down_rows(void)
 {
     size_t count = 0;
@@ -252,7 +229,6 @@ static void check_down_rows(void)
     free(rows);
 }
 
-// Probe: a 1.0 byte stream sent through a 1.0 destination (macOS "bytes" batch, recorded on this host).
 static void check_bytes_to_ump(void)
 {
     struct {
@@ -285,9 +261,6 @@ static void check_bytes_to_ump(void)
     }
 }
 
-// Probe: a 2.0 bank-selected program change, then RPN and NRPN sends on one channel, in one order. macOS
-// (probe2, one destination): the bank is sent as CC0 and CC32 before the program; an RPN sends its two
-// selecting controllers only when the parameter changes; the data entry is CC6, and CC38 only when non-zero.
 static void check_rpn_sequence(void)
 {
     CharonMIDIRPN rpn[16];
@@ -318,8 +291,6 @@ static void check_rpn_sequence(void)
     }
 }
 
-// Probe: 2.0 messages with no 1.0 form produce nothing (macOS: per-note pitch bend, per-note management, the
-// assignable controller, relative RPN, all dropped without a packet).
 static void check_dropped_messages(void)
 {
     uint32_t words[][2] = {{0x40603C00u, 0x40000000u}, {0x40F03C00u, 0x00000001u}, {0x40103C00u, 0x40000000u}, {0x40400000u, 0x00400000u}};
@@ -336,8 +307,6 @@ static void check_dropped_messages(void)
     }
 }
 
-// Probe: SysEx chunking into UMP SysEx7, as macOS sends it (probe5: 6 bytes is one complete packet, 7 bytes a
-// start and an end, 12 bytes a start and an end of six, a SysEx of nothing is a complete empty one).
 static void check_sysex_chunks(void)
 {
     struct {
@@ -373,8 +342,6 @@ static void check_sysex_chunks(void)
     }
 }
 
-// Probe: a SysEx split over two packets of one list is one complete message of four bytes (macOS: 30040102
-// 03040000); the same SysEx across two lists is held open between them.
 static void check_sysex_split(void)
 {
     CharonMIDIParser parser;
@@ -391,9 +358,6 @@ static void check_sysex_split(void)
     free(words.words);
 }
 
-// Probe: MIDIEventListAdd's packet rules (probe2 and probe3): a same time stamp merges into the packet before,
-// the buffer is counted in bytes (a list header of 8, a packet of 12 plus 4 a word), a count of zero adds nothing,
-// and a count above 64 words is kept whole.
 static void check_event_list_rules(void)
 {
     static uint8_t buffer[1024];
@@ -462,8 +426,6 @@ static void check_event_list_rules(void)
     check(packets == 3 && shortList->numPackets == 3, "event list: 64 bytes hold three packets (macOS probe2)", "");
 }
 
-// MIDIEventListAdd's return and curPacket: the scenario of oracle/eventlistadd.h run against the library (renamed by run.sh) must
-// print what macOS printed (oracle/eventlistadd-macos.txt), line by line.
 #include "eventlistadd.h"
 
 static void check_event_list_oracle(void)
@@ -503,9 +465,6 @@ static void check_event_list_oracle(void)
     free(text);
 }
 
-// A list built one MIDIEventListAdd at a time is linear in its packets, as macOS's is (measured 2026-10-10: 4.2 times the
-// time for 4 times the packets): the time at 16000 packets over the time at 4000 is near 4, and a walk of the list for each
-// add makes it near 16. The best of five runs of each size.
 static double event_list_build_ms(int packets)
 {
     size_t size = 64 + (size_t)packets * 16;
@@ -536,8 +495,6 @@ static void check_event_list_linear(void)
     check(small > 0 && large < 8 * small, "event list: building by MIDIEventListAdd is linear in its packets", detail);
 }
 
-// The constants of the 17 and 18 surface, read from this file's own copies (renamed by run.sh) and held to the
-// strings macOS gives them (oracle/constants.m, measured 2026-10-09). The three property constants are NULL on macOS.
 extern const CFStringRef charon_host_kMIDIPropertyUMPActiveGroupBitmap;
 extern const CFStringRef charon_host_kMIDIPropertyUMPCanTransmitGroupless;
 extern const CFStringRef charon_host_kMIDIPropertyAssociatedEndpoint;
@@ -556,8 +513,6 @@ extern NSString *const charon_host_MIDIUMPFunctionBlockWasUpdatedNotification;
 
 static void check_constants(void)
 {
-    // The three property keys, as macOS holds them once a client exists (oracle/constants.m reads them after
-    // MIDIClientCreate; before that they are NULL, which is the answer of a process that never called CoreMIDI).
     check([(__bridge NSString *)charon_host_kMIDIPropertyUMPActiveGroupBitmap isEqualToString:@"active group bitmap"],
           "constant kMIDIPropertyUMPActiveGroupBitmap is \"active group bitmap\", as on macOS after MIDIClientCreate", "");
     check([(__bridge NSString *)charon_host_kMIDIPropertyUMPCanTransmitGroupless isEqualToString:@"ump endpoint"],
@@ -588,9 +543,6 @@ static void check_constants(void)
     check(matched == 12, "constants: the 12 keys and notifications are their names, as on macOS", detail);
 }
 
-// The visitor, held to the bytes macOS handed its own visitor for each input (visit-expectations.h, which run.sh
-// generates into its build folder from oracle/visit-macos.txt and visit-jr.txt, the recorded output of oracle/visit.m). Only the bytes a message type defines are compared: the rest of the 28 bytes is stack garbage on
-// macOS, and the visitor's union is not zeroed there.
 #include "visit-expectations.h"
 
 extern void charon_host_MIDIEventListForEachEvent(const MIDIEventList *evtlist, MIDIEventVisitor visitor, void *visitorContext);
@@ -620,7 +572,6 @@ static void check_visitor(void)
         gVisitedCount = 0;
         charon_host_MIDIEventListForEachEvent(list, charon_visit_record, NULL);
         const unsigned char *got = gVisitedCount == 1 ? (const unsigned char *)&gVisited[0] : NULL;
-        // Which bytes of the message are defined: the type's own fields, from the expected type and status.
         size_t from = 8, to = 23;
         unsigned int type = row->bytes[0];
         if (type == 0x00 || type == 0x01) to = 13;
@@ -644,12 +595,10 @@ static void check_visitor(void)
     check(failed == 0, name, detail);
 }
 
-// MIDIEventPacketSysexBytesForGroup and MIDIDeviceNewEntity, held to macOS (oracle/sysexbytes.m and newentity2.m).
 extern OSStatus charon_host_MIDIEventPacketSysexBytesForGroup(const MIDIEventPacket *pkt, UInt8 groupIndex, CFDataRef *outData);
 extern OSStatus charon_host_MIDIDeviceNewEntity(MIDIDeviceRef device, CFStringRef name, MIDIProtocolID protocol, Boolean embedded,
                                                 ItemCount numSourceEndpoints, ItemCount numDestinationEndpoints, MIDIEntityRef *newEntity);
 
-// Whether the bytes equal the hex string want (two digits a byte, as oracle/sysexbytes.m prints them).
 static int bytes_equal_hex(CFDataRef data, const char *want)
 {
     if (!data || CFDataGetLength(data) != (CFIndex)(strlen(want) / 2))
@@ -709,7 +658,6 @@ static void check_sysex_bytes_for_group(void)
     check(failed == 0, name, detail);
 }
 
-// Packs one SysEx7 part of up to six data bytes into the two words of a UMP packet, as the UMP layout has it.
 static void sysex7_words(UInt32 *out, UInt32 status, const UInt8 *data, UInt32 count)
 {
     UInt8 pad[6] = {0, 0, 0, 0, 0, 0};
@@ -718,9 +666,6 @@ static void sysex7_words(UInt32 *out, UInt32 status, const UInt8 *data, UInt32 c
     out[1] = (UInt32)pad[2] << 24 | (UInt32)pad[3] << 16 | (UInt32)pad[4] << 8 | pad[5];
 }
 
-// A SysEx longer than a fixed buffer of the port held (oracle/sysexbytes.m, sysexbytes-macos.txt): twelve complete messages of
-// six bytes (96 bytes out), and a start, ten continues and an end of six bytes each (74 bytes out). The data bytes count up
-// from 1, so the expectation is the bytes macOS returned for the same words.
 static void check_sysex_long(void)
 {
     struct {
@@ -765,7 +710,6 @@ static void check_sysex_long(void)
     check(failed == 0, name, detail);
 }
 
-// A word count whose byte size wraps is refused, as a list too small is: nothing is copied (CharonMIDIEventListAdd).
 static void check_event_list_wrap(void)
 {
     Byte buffer[64];
@@ -784,7 +728,6 @@ static void check_new_entity_device_zero(void)
     check(status == -50 && entity == 0, "MIDIDeviceNewEntity on device 0: paramErr and no entity, as macOS", "");
 }
 
-// The bytes of a string of hex pairs, spaces ignored, into out; returns their count.
 static size_t hex_bytes(const char *text, uint8_t *out)
 {
     size_t n = 0;
@@ -801,9 +744,6 @@ static size_t hex_bytes(const char *text, uint8_t *out)
     return n;
 }
 
-// One Bluetooth LE MIDI case: the notifications in order, through one parser, and the MIDI 1.0 bytes they must give
-// together. The expectations are the framing the Bluetooth LE MIDI specification gives, not a macOS measurement: the
-// emulator has no Bluetooth and no BLE MIDI device was available (facts/CoreMIDI/Bluetooth.md).
 static void check_ble_case(const char *name, const char *const *packets, int packetCount, const char *want)
 {
     CharonBLEParser parser;
@@ -851,8 +791,6 @@ static void check_ble_parse(void)
     check_ble_case("BLE: two notes, each with its own timestamp", twoNotes, 1, "90 3C 7F 90 3E 00");
 }
 
-// The system words of type 1, each alone, as macOS sends them to a 1.0 destination (oracle/ump-invalid-system.m,
-// ump-invalid-system-macos.txt): the bytes received, and none where macOS sent none.
 static void check_system_words(void)
 {
     struct {
@@ -895,8 +833,6 @@ static void check_system_words(void)
     check(failed == 0, name, detail);
 }
 
-// The events the visitor reports for a packet of one word of each type, then a NOOP, a system clock and a note on, as macOS
-// visits it (oracle/visit-sizes.m, visit-sizes-macos.txt): the word sizes of the types the visitor had no measurement for.
 static void check_visit_word_sizes(void)
 {
     struct {

@@ -25,7 +25,6 @@ void charon_bn_from_bytes_be(BigNum *out, const uint8_t *bytes, size_t length)
 
 void charon_bn_to_bytes_be(uint8_t *bytes, size_t length, const BigNum *value)
 {
-    // The value's own bytes, minimal length, at the front; the rest of the buffer zeroed.
     memset(bytes, 0, length);
     size_t needed = charon_bn_byte_length(value);
     if (!needed || needed > length)
@@ -51,8 +50,6 @@ size_t charon_bn_byte_length(const BigNum *value)
 
 int charon_bn_equal_bytes(const BigNum *left, const uint8_t *right, size_t length)
 {
-    // A length that does not fit the width cannot be equal: the value has no such limb, and reading
-    // past it would be the bug this check exists to catch.
     if (length > (size_t)BN_LIMBS * 4)
         return 0;
     uint8_t mine[BN_LIMBS * 4];
@@ -86,9 +83,6 @@ void charon_bn_sub(BigNum *out, const BigNum *left, const BigNum *right)
     }
 }
 
-// t = a * b, then t = (t + m*n) / R for one m per limb, which leaves t * R^-1 mod n in t[limbs..].
-// The two steps are kept apart on purpose: each is a loop whose carry is visible, where the fused
-// version hides the shift in the indexing.
 #define BN_T_LIMBS (2 * BN_LIMBS + 2)
 
 static void mont_product(const BigNumMont *mont, uint32_t *t, const BigNum *left, const BigNum *right)
@@ -134,15 +128,6 @@ static void mont_reduce(const BigNumMont *mont, uint32_t *t)
 static void mont_finish(const BigNumMont *mont, BigNum *out, const uint32_t *t)
 {
     int limbs = mont->limbs;
-    // The reduced value is below 2n, and a modulus that fills its own width -- which RFC 5054's
-    // 1024-bit group does, and every group a protocol names -- has 2n above R = 2^(32*limbs). So the
-    // value needs limbs + 1 limbs, and the carry limb is part of it rather than a flag beside it.
-    //
-    // Reading only the low `limbs` limbs and then subtracting the modulus *because* the carry limb was
-    // set is the defect RFC 5054's own test vector found: for a value below the modulus whose reduced
-    // form still carried a bit past R, the subtraction underflowed and produced a number that is
-    // wrong without being obviously so. The carry limb goes in the value, and the single conditional
-    // subtraction is the one the bound justifies.
     for (int index = 0; index < BN_LIMBS; ++index)
         out->limb[index] = index <= limbs ? t[limbs + index] : 0;
     if (charon_bn_cmp(out, &mont->modulus) >= 0)
@@ -156,20 +141,10 @@ void charon_bn_mont_prepare(BigNumMont *mont, const BigNum *modulus)
     mont->limbs = (charon_bn_bits(modulus) + 31) / 32;
     if (mont->limbs < 1)
         mont->limbs = 1;
-    // n' = -n^-1 mod 2^32, by the Newton iteration on the low limb, which is all the Montgomery
-    // product ever multiplies by.
     uint32_t inverse = modulus->limb[0];
     for (int round = 0; round < 5; ++round)
         inverse *= 2u - modulus->limb[0] * inverse;
     mont->inverse = (uint32_t)(0u - inverse);
-    // R^2 mod n, where R = 2^(32*limbs) is the Montgomery radix of *this* modulus and not of the
-    // full width: mont_finish shifts by `limbs` limbs, so R^2 is 2^(64*limbs) and the doubling has
-    // to run that far.
-    //
-    // The doubling is written as one of two operations that both stay below n, because for a
-    // modulus that fills the width -- 3072 bits out of 3072, which is the SRP-6a group HAP pairs
-    // with -- 2*value does not fit, and reducing a wrapped double by subtracting n would go
-    // negative. Below n/2 the double is safe; above it the difference n - value is what is safe.
     BigNum value;
     charon_bn_set_u32(&value, 1);
     for (int bit = 0; bit < 64 * mont->limbs; ++bit) {
@@ -201,7 +176,6 @@ void charon_bn_mont_square(const BigNumMont *mont, BigNum *out, const BigNum *le
 
 void charon_bn_mont_reduce(const BigNumMont *mont, BigNum *out, const BigNum *value)
 {
-    // value * R^-1 mod n, by the Montgomery product of value with 1.
     BigNum one;
     charon_bn_set_u32(&one, 1);
     charon_bn_mont_mul(mont, out, value, &one);
@@ -227,9 +201,6 @@ void charon_bn_mont_sub(const BigNumMont *mont, BigNum *out, const BigNum *left,
 
 void charon_bn_mont_pow(const BigNumMont *mont, BigNum *out, const BigNum *value, const BigNum *exponent)
 {
-    // Square and multiply, most significant bit first, entirely in Montgomery form. The trip count
-    // is the width rather than the exponent's own, so the time this takes does not depend on the
-    // value of a secret exponent.
     BigNum base, one, accumulator, product;
     charon_bn_mont_mul(mont, &base, value, &mont->r2);
     charon_bn_set_u32(&one, 1);

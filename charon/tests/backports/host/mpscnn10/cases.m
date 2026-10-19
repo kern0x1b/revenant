@@ -1,32 +1,3 @@
-// cases.m - the convolutional elements iOS 10 added, run twice: once against the system's own MPS
-// and once against this port's classes under names of their own. Every case prints the bytes of a
-// result the case owns, so the two runs are compared for the results that are exact and against a
-// written-down float tolerance for the ones that are not.
-//
-// The point of the second run is that the port's MPSImage is what holds the values, and it is a
-// different class from the host's MPSImage - so a case that reached the host's MPSImage on the port
-// side would be comparing the host with itself. `require` says so rather than passing quietly.
-//
-// What is compared, and what each case is FOR - every rule this harness pins was solved from the
-// first run of these cases against the host, and each is one a header-only reading gets wrong:
-//   neuron-relu-a0-negative          ReLU is x>=0?x:a*x, so a zero leaves negatives at zero, not at
-//                                    their own value. A positive-only source cannot tell this from
-//                                    the identity, which is why the source here is negative.
-//   neuron-tanh-a3-b0.5              a outside, b inside: 3*tanh(0.5x), not tanh(3x) or 3*tanh(x).
-//   cnn-softmax                      ACROSS FEATURE CHANNELS, not across pixels. Two channels whose
-//                                    values differ at each pixel, so a pixel-wise softmax would answer
-//                                    sixteen different numbers where the right answer is two.
-//   cnn-softmax-3ch                  three channels, so a rule that only holds for two is visible.
-//   spatial-norm-defaults            the header gives no window at all for this class.
-//   spatial-norm-k2                   an EVEN kernel's window reaches BACK: its top left is one pixel
-//                                    before the output, which the header's forward rule does not give.
-//   local-contrast-defaults          alpha 0 - the declared default - is a local mean subtraction, and
-//                                    p0's 1.0 default is what makes the answer negative at the corner.
-//   local-contrast-alpha1            the same walk with the denominator carrying a variance.
-//   cross-channel-k3                 the divisor is the kernelSize and not the window's length, and
-//                                    Q(k) is asymmetric so channel 0 sees two channels and channel 1
-//                                    sees all three.
-//   cross-channel-k1                 a one-channel window, where the rule reduces to X/(delta+alpha*X^2).
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <Metal/Metal.h>
@@ -39,9 +10,6 @@
 static id<MTLDevice> gDevice;
 static id<MTLCommandQueue> gQueue;
 
-// Which image every compared class resolved in, printed before anything else. A class of the port's
-// with the same name as one of the host's is registered once, and a message sent to it reaches
-// whichever loaded first - so the comparison says which that was, on every run.
 static void printClassImages(void)
 {
     NSString *names[] = {
@@ -61,11 +29,6 @@ static void printClassImages(void)
     }
 }
 
-// Whether the port has its own copy of a class, under the name the rename header gives it. The rename
-// header is generated from the classes the port's objects define, so a class the port does not
-// implement is not renamed and the case reaches the host's class instead - which means the case
-// compares the host's implementation with the host's implementation and says nothing about this port
-// on that class. It is a check that examined nothing, and it has to fail rather than pass quietly.
 static BOOL portHas(const char *name)
 {
 #ifdef CHARON_PORT_BUILD
@@ -73,10 +36,6 @@ static BOOL portHas(const char *name)
     return NSClassFromString(charon) != Nil;
 #else
     (void)name;
-    // The system build links the release's own classes and has no port to ask about, so the question
-    // is not asked on that side. The guard is a claim about the port's build, and the port's
-    // transcript is the one that carries it; the comparison fails when the port's side has an
-    // uncompared case.
     return YES;
 #endif
 }
@@ -105,10 +64,6 @@ static void counted(BOOL ran)
         gCompared++;
 }
 
-// How many float values one pixel of this texture holds, read off the texture's own pixel format.
-// MPSImage13.m picks the Metal format from the channel format and the channel count, and a
-// three-channel float image is RGBA32Float - four values wide, not three - so this is asked for rather
-// than assumed. Getting it wrong is what answered all zeros on the first run of these cases.
 static NSUInteger valuesPerPixelOf(id<MTLTexture> t)
 {
     switch (t.pixelFormat) {
@@ -119,9 +74,6 @@ static NSUInteger valuesPerPixelOf(id<MTLTexture> t)
     }
 }
 
-// The row stride every read and write here uses. A macOS MTLTexture declares no row stride at all -
-// -bytesPerRow is an unrecognized selector on AGXG16XFamilyTexture, measured - so it is chosen here,
-// 256-byte aligned, which is what Metal wants and is never narrower than the row.
 static size_t strideFor(NSUInteger width, NSUInteger valuesPerPixel)
 {
     size_t row = width * valuesPerPixel * sizeof(float);
@@ -151,8 +103,6 @@ static MPSImage *make(NSUInteger w, NSUInteger h, NSUInteger channels, const flo
     return image;
 }
 
-// One case's result: the name, the element count, then the values, in the transcript's own order -
-// row-major, and within a row one line per channel, which is the order the transcript is parsed in.
 static void dump(const char *name, MPSImage *image, NSUInteger w, NSUInteger h, NSUInteger channels)
 {
     NSUInteger perPixel = valuesPerPixelOf(image.texture);
@@ -186,20 +136,12 @@ static void run(id<MTLCommandBuffer> b)
         printf("   buffer error: %s\n", [[b.error description] UTF8String]);
 }
 
-// A 4x4 of 1..16 and a ramp of -8..7. The positive ramp tells a scale or an offset apart and the
-// negative one tells a ReLU from the identity, which a positive-only source cannot.
 static const float k4x4[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 static const float kNeg[16] = {-8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7};
-// Two channels: the same ramp and a shuffled one, so a cross-channel rule is visible per pixel.
 static const float k2ch[32] = {
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
     2, 1, 4, 3, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16, 15,
 };
-// FOUR channels, four ramps, so a channel-window rule is visible in each channel. Four and not three
-// because the port's MPSImage has a Metal format for one, two and four feature channels and for no
-// other count (MPSImage13.m:49-71) - a three-channel image is refused there, which is a substrate
-// limit of that class and not of any kernel here. With kernelSize 3 and four channels every channel
-// sees a window of three, and the two edge channels' windows are the clipped ones.
 static const float k4ch[64] = {
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
     2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32,
@@ -275,8 +217,6 @@ static void neuronRestCases(void)
         dump("neuron-tanh-a1-b1", d, 4, 4, 1);
     }
     {
-        // a outside, b inside. 3*tanh(0.5) is 1.38635159 and tanh(1.5) is 0.905148253, so the two
-        // orders are told apart by the first value alone.
         MPSImage *s = make(4, 4, 1, k4x4), *d = make(4, 4, 1, NULL);
         MPSCNNNeuronTanH *k = [[MPSCNNNeuronTanH alloc] initWithDevice:gDevice a:3.0f b:0.5f];
         id<MTLCommandBuffer> b = buffer();
@@ -318,8 +258,6 @@ static void softMaxCases(void)
         dump("cnn-logsoftmax", d, 4, 4, 2);
     }
     {
-        // Four channels, so a rule that only holds for two is visible: every row of the answer must
-        // be a probability distribution over the four channels at that pixel.
         MPSImage *s = make(4, 4, 4, k4ch), *d = make(4, 4, 4, NULL);
         MPSCNNSoftMax *k = [[MPSCNNSoftMax alloc] initWithDevice:gDevice];
         id<MTLCommandBuffer> b = buffer();
@@ -347,9 +285,6 @@ static void normalizationCases(void)
             dump("spatial-norm-defaults", d, 4, 4, 1);
         }
         {
-            // An EVEN kernel. Kept because its defaults are a case of their own, but note that kw=2
-            // CANNOT tell a centred window from a backward one: -(2/2) = -1 and -2+1 = -1 are the same
-            // two pixels. The case that pins the rule is kw=3 below.
             MPSImage *s = make(4, 4, 1, k4x4), *d = make(4, 4, 1, NULL);
             MPSCNNSpatialNormalization *k = [[MPSCNNSpatialNormalization alloc] initWithDevice:gDevice
                                                                                    kernelWidth:2 kernelHeight:2];
@@ -360,10 +295,6 @@ static void normalizationCases(void)
             dump("spatial-norm-k2", d, 4, 4, 1);
         }
         {
-            // THE CASE THAT PINS THE WINDOW. kw=3 is where a centred window (first = -1) and a backward
-            // one (first = -2) are different windows, so this case tells them apart; kw=2 does not, and
-            // an earlier version of this harness leaned on kw=2 and so proved nothing. A 5-wide window
-            // is here too: -(5/2) = -2 against -5+1 = -4, which is four pixels of difference.
             MPSImage *s = make(4, 4, 1, k4x4), *d = make(4, 4, 1, NULL);
             MPSCNNSpatialNormalization *k = [[MPSCNNSpatialNormalization alloc] initWithDevice:gDevice
                                                                                    kernelWidth:3 kernelHeight:3];

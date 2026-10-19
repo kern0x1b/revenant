@@ -1,19 +1,3 @@
-// device-memory.m - what this host's own MLCompute answers for -[MLCInferenceGraph deviceMemorySize], over
-// graphs built so that the three hypotheses - the input's bytes, the output's bytes, a sum over both - are
-// three different numbers.
-//
-// The questions, and which hypothesis each one answers:
-//
-//   one input, no output        the input's bytes, and the sum, and the output's = 0
-//   one output, no input        the output's bytes, and the sum, and the input's = 0
-//   input 1 element, output 6   the input's is 4, the output's is 24, the sum is 28
-//   two outputs of 6            one output is 24, the sum over both with an input is 52
-//   neither                     zero under every hypothesis but the constant one
-//   nothing compiled            zero
-//
-// Every operand is a tensor this file makes, never one a node made: a graph's own result asked for as an
-// output raised inside the host on the previous sweep (-[__PlaceholderDictionary
-// initWithObjects:forKeys:count:]), and a probe that raises stops.
 #import <Foundation/Foundation.h>
 #import <MLCompute/MLCompute.h>
 
@@ -42,8 +26,6 @@ int main(void)
     @autoreleasepool {
         MLCDevice *device = [MLCDevice cpuDevice];
 
-        // A graph with one node over a 6-element tensor, so its result is a 6-element tensor. Every input
-        // and output below is a tensor this file makes.
         MLCGraph *six = [MLCGraph graph];
         MLCTensor *sixResult = [six nodeWithLayer:relu() source:tensorOf(6)];
         MLCGraph *one = [MLCGraph graph];
@@ -90,9 +72,6 @@ int main(void)
         [g addOutputs:@{@"y": tensorOf(1)}];
         show("one graph, input 1 and output 1", g, device);
 
-        // The pair that separates "before a compile is the largest tensor BOUND" from "before a compile is
-        // the graph's own node result": a graph whose node is one element, bound to a six-element input, and
-        // the same graph bound to nothing.
         g = [MLCInferenceGraph graphWithGraphObjects:@[one]];
         show("one graph, nothing bound", g, device);
         g = [MLCInferenceGraph graphWithGraphObjects:@[one]];
@@ -107,8 +86,6 @@ int main(void)
         [g addOutputs:@{@"y": tensorOf(1)}];
         show("six graph, input 6 and output 1", g, device);
 
-        // Two graphs linked: the memory of the pair is the question, and a link of a graph with itself is
-        // what the previous sweep measured as YES.
         MLCInferenceGraph *first = [MLCInferenceGraph graphWithGraphObjects:@[six]];
         [first addInputs:@{@"a": tensorOf(1)}];
         [first compileWithOptions:0 device:device];

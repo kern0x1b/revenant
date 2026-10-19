@@ -65,7 +65,6 @@
 
 @dynamic effectiveGeometry, keyWindow, windowingBehaviors;
 
-// The source is weak, as the header says: the scene does not keep the provider alive, and reads nil once it has gone.
 - (id<UIActivityItemsConfigurationProviding>)activityItemsConfigurationSource
 {
     return _activityItemsConfigurationSource;

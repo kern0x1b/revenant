@@ -1,8 +1,3 @@
--- The targets of the SDK entries that have no declaration shard of their own (tools/gen/targets.lua, read from tools/found/no-shard.tsv
--- and the foundation's classification in tools/found/config): every registry entry of Accelerate is declared by a nested shard that its
--- umbrella names (no-shard.tsv), and the Graphics product's members (products.tsv) are SDK frameworks with shards and own no registry rows.
--- It reads only committed data of this checkout. Run: xmake l tests/gen/targets_test.lua (exits 1 on failure).
-
 local ROOT = path.absolute(path.join(os.scriptdir(), "..", ".."))
 local TOOLS = path.join(ROOT, "tools")
 
@@ -19,7 +14,6 @@ function main()
     local headers = import("gen.headers", {rootdir = TOOLS, anonymous = true})
     local json = import("core.base.json")
 
-    -- Accelerate: the names its nested targets declare (the last part of each shard row's USR is its name)
     local umbrella = targets.umbrellas(ROOT).Accelerate
     check(umbrella ~= nil and #umbrella.targets == 2, "no-shard.tsv names two nested targets for Accelerate")
     local declared = {}
@@ -34,7 +28,6 @@ function main()
         end
     end
 
-    -- every Accelerate registry entry names something one of those shards declares (a function's "()" is not part of its name)
     local entries, resolved, unresolved = 0, 0, {}
     for _, filepath in ipairs(os.files(path.join(ROOT, "packages", "a", "apple-backports", "registry", "Accelerate", "*.json"))) do
         local doc = json.decode(io.readfile(filepath))
@@ -53,7 +46,6 @@ function main()
           .. table.concat(unresolved, ", ") .. ")")
     print(string.format("targets: Accelerate, %d of %d registry entries resolve through its nested targets", resolved, entries))
 
-    -- Graphics: a product folder whose members are SDK frameworks with shards, and no registry rows of its own
     local members = targets.products(ROOT).Graphics or {}
     check(#members > 0, "products.tsv names the Graphics members")
     for _, fw in ipairs(members) do

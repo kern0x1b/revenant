@@ -1,10 +1,5 @@
 #import "uirest.h"
 
-// The overrideUserInterfaceStyle of a controller and of a view, through the trait collection the system answers: what
-// a controller and the view under it read as their style, and how many traitCollectionDidChange: calls each override
-// makes. The same calls run on the system's classes for the expected answers (darkstyle_system.m) and on the port's
-// (darkstyle_test.m), so the two must agree line for line.
-
 @interface DarkStyleController : UIViewController
 @property (nonatomic) int changes;
 @end

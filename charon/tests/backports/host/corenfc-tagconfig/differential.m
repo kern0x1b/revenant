@@ -3,23 +3,6 @@
 #import <objc/runtime.h>
 #import "check.h"
 
-// The port's NFCTagCommandConfiguration and its two ISO15693 subclasses, each built from the port's
-// own source, against the host's CoreNFC.
-//
-// Unlike the NDEF differential beside this one there IS an oracle here: the tag-command
-// configuration classes are not API_UNAVAILABLE(macOS) the way NFCNDEFMessage.h is, so the same three
-// classes exist on the host and every value below is compared with what the host's own object
-// answers. The prefix renames in run.sh give the port's classes CharonHost* names, so the port's
-// classes and the host's coexist in one process and are asked the same questions in the same order.
-//
-// The two sets of classes are spelled differently on purpose. The -D renames reach this file and the port's sources alike, so
-// `NFCTagCommandConfiguration` here IS the host's class, and the
-// port's own class has to be reached by name: its interface is declared locally, with its real
-// CharonHost name and the properties the port implements, and NSClassFromString hands back the class
-// the port's object file registered under that name.
-
-// What the port's classes answer. The declarations are the properties of the SDK 16.4 headers, typed
-// so the checks read as the API does rather than as KVC paths.
 @interface CharonHostNFCTagCommandConfiguration : NSObject <NSCopying>
 @property (nonatomic, assign) NSUInteger maximumRetries;
 @property (nonatomic, assign) NSTimeInterval retryInterval;
@@ -50,7 +33,6 @@
                 retryInterval:(NSTimeInterval)retryInterval;
 @end
 
-// The port's class must be the one its object file registered, not a name that resolves to nothing.
 static Class port_class(Class declared, const char *name)
 {
     NSString *spelling = [NSString stringWithUTF8String:name];
@@ -97,8 +79,6 @@ static NSData *text(const char *s)
     return [NSData dataWithBytes:s length:strlen(s)];
 }
 
-// ---------------------------------------------------------------- the base class
-
 static void base_class(void)
 {
     CharonHostNFCTagCommandConfiguration *ours = [[PORT_CLASS(CharonHostNFCTagCommandConfiguration) alloc] init];
@@ -114,8 +94,6 @@ static void base_class(void)
     check_same([ours respondsToSelector:@selector(copyWithZone:)], [theirs respondsToSelector:@selector(copyWithZone:)],
                @"-copyWithZone: is what answers");
 
-    // The header calls 0 to 256 the valid range for retries and seconds the unit for the interval.
-    // The host keeps the numbers it is given, out of range and all.
     ours.maximumRetries = 1000; theirs.maximumRetries = 1000;
     check_same_u(ours.maximumRetries, theirs.maximumRetries, @"maximumRetries above the header's range");
     check_same_u(ours.maximumRetries, 1000, @"maximumRetries above the header's range is kept as given");
@@ -131,8 +109,6 @@ static void base_class(void)
     check_same_u(ourcopy.maximumRetries, theircopy.maximumRetries, @"maximumRetries of a copy");
     check_same_d(ourcopy.retryInterval, theircopy.retryInterval, @"retryInterval of a copy");
 
-    // -isEqual: is NSObject's, on both sides: two configurations built from the same fields are not
-    // equal, which is what stops a caller using one as a dictionary key for the other.
     CharonHostNFCTagCommandConfiguration *ours2 = [[PORT_CLASS(CharonHostNFCTagCommandConfiguration) alloc] init];
     NFCTagCommandConfiguration *theirs2 = [[NFCTagCommandConfiguration alloc] init];
     ours2.maximumRetries = 3; theirs2.maximumRetries = 3;
@@ -140,8 +116,6 @@ static void base_class(void)
     check_same([ours isEqual:ours2], [theirs isEqual:theirs2], @"isEqual: over two configurations of the same fields");
     check_same([ours isEqual:ours2], NO, @"isEqual: over two configurations of the same fields is NO");
 }
-
-// ------------------------------------------------- the manufacturer custom command
 
 static void custom_command(void)
 {
@@ -159,8 +133,6 @@ static void custom_command(void)
     check_same([ours superclass] == PORT_CLASS(CharonHostNFCTagCommandConfiguration),
                [theirs superclass] == [NFCTagCommandConfiguration class], @"the base class of a custom command configuration");
 
-    // The header calls 0x00-0xFF the valid manufacturer range and 0xA0-0xDF the valid command range.
-    // The host keeps both numbers it was given.
     CharonHostNFCISO15693CustomCommandConfiguration *our_out =
         [[PORT_CLASS(CharonHostNFCISO15693CustomCommandConfiguration) alloc] initWithManufacturerCode:0x1FF
                                                                                      customCommandCode:0x5
@@ -177,7 +149,6 @@ static void custom_command(void)
     ours.customCommandCode = 0x3FF; theirs.customCommandCode = 0x3FF;
     check_same_u(ours.customCommandCode, theirs.customCommandCode, @"customCommandCode set above the header's range");
 
-    // The three-field initialiser leaves the base's retry fields at zero, which the header says it does.
     NSData *params = text("hi");
     CharonHostNFCISO15693CustomCommandConfiguration *our_three =
         [[PORT_CLASS(CharonHostNFCISO15693CustomCommandConfiguration) alloc] initWithManufacturerCode:0x04
@@ -193,7 +164,6 @@ static void custom_command(void)
     check_same_u(our_three.maximumRetries, 0, @"the three-field initialiser leaves maximumRetries at zero");
     check_same_d(our_three.retryInterval, 0, @"the three-field initialiser leaves retryInterval at zero");
 
-    // The five-field initialiser sets all five.
     CharonHostNFCISO15693CustomCommandConfiguration *our_five =
         [[PORT_CLASS(CharonHostNFCISO15693CustomCommandConfiguration) alloc] initWithManufacturerCode:0x04
                                                                                      customCommandCode:0xA0
@@ -209,7 +179,6 @@ static void custom_command(void)
     check_same_u(our_five.maximumRetries, 5, @"maximumRetries of the five-field initialiser is what was asked");
     check_same_d(our_five.retryInterval, 1.5, @"retryInterval of the five-field initialiser is what was asked");
 
-    // A copy carries all five, and its request data is its own.
     CharonHostNFCISO15693CustomCommandConfiguration *ourcopy = [our_five copy];
     NFCISO15693CustomCommandConfiguration *theircopy = [their_five copy];
     check_same([ourcopy class] == [our_five class], [theircopy class] == [their_five class], @"a copy of a custom command configuration is of the same class");
@@ -238,8 +207,6 @@ static void custom_command(void)
     check_same_u(ournilcopy.maximumRetries, theirnilcopy.maximumRetries, @"maximumRetries through a copy of a nil-parameters configuration");
 }
 
-// ------------------------------------------------------- read multiple blocks
-
 static void read_multiple_blocks(void)
 {
     CharonHostNFCISO15693ReadMultipleBlocksConfiguration *ours =
@@ -256,8 +223,6 @@ static void read_multiple_blocks(void)
     check_same([ours superclass] == PORT_CLASS(CharonHostNFCTagCommandConfiguration),
                [theirs superclass] == [NFCTagCommandConfiguration class], @"the base class of a read-multiple-blocks configuration");
 
-    // The header says the start index is 0x00 to 0xFF and the length shall not be 0. The host keeps
-    // both numbers it was given.
     CharonHostNFCISO15693ReadMultipleBlocksConfiguration *our_zero =
         [[PORT_CLASS(CharonHostNFCISO15693ReadMultipleBlocksConfiguration) alloc] initWithRange:NSMakeRange(300, 0) chunkSize:0];
     NFCISO15693ReadMultipleBlocksConfiguration *their_zero =
@@ -271,7 +236,6 @@ static void read_multiple_blocks(void)
         [[NFCISO15693ReadMultipleBlocksConfiguration alloc] initWithRange:NSMakeRange(1000, 5) chunkSize:0];
     check_same_range(our_high.range, their_high.range, @"a range whose start index is above the header's");
 
-    // The two-field initialiser leaves the base's retry fields at zero.
     CharonHostNFCISO15693ReadMultipleBlocksConfiguration *our_two =
         [[PORT_CLASS(CharonHostNFCISO15693ReadMultipleBlocksConfiguration) alloc] initWithRange:NSMakeRange(3, 4) chunkSize:2];
     NFCISO15693ReadMultipleBlocksConfiguration *their_two =
@@ -283,7 +247,6 @@ static void read_multiple_blocks(void)
     check_same_u(our_two.maximumRetries, 0, @"the two-field initialiser leaves maximumRetries at zero");
     check_same_d(our_two.retryInterval, 0, @"the two-field initialiser leaves retryInterval at zero");
 
-    // The four-field initialiser sets all four.
     CharonHostNFCISO15693ReadMultipleBlocksConfiguration *our_four =
         [[PORT_CLASS(CharonHostNFCISO15693ReadMultipleBlocksConfiguration) alloc] initWithRange:NSMakeRange(3, 4)
                                                                                     chunkSize:2
@@ -307,18 +270,12 @@ static void read_multiple_blocks(void)
     check_same_u(ourcopy.maximumRetries, theircopy.maximumRetries, @"maximumRetries of a copy");
     check_same_d(ourcopy.retryInterval, theircopy.retryInterval, @"retryInterval of a copy");
 
-    // A copy is a value of its own: setting the original leaves it alone.
     our_four.range = NSMakeRange(99, 9); their_four.range = NSMakeRange(99, 9);
     check_same_range(ourcopy.range, theircopy.range, @"a copy is unaffected by the original being set");
     our_four.chunkSize = 77; their_four.chunkSize = 77;
     check_same_u(ourcopy.chunkSize, theircopy.chunkSize, @"chunkSize of a copy is unaffected by the original being set");
 }
 
-// The three configurations are values and are carried whole. The reader session they would be used
-// with is carried in the same library (CoreNFC/NFCReaderSession.m, where the session rows are
-// implemented), and carrying the configurations must not have grown a second one: the session's
-// selectors are checked against the host's own, so a session that lacks one fails here rather than
-// passing unnoticed.
 static void check_true(BOOL passed, NSString *what)
 {
     charon_check(passed, [what UTF8String], nil);
@@ -348,8 +305,6 @@ static void session_answers_as_host(void)
     check_true(NSClassFromString(@"CharonHostNFCTagReaderSession") == Nil,
                @"NFCTagReaderSession is absent from the port");
 
-    // A configuration is not a way to reach a tag: carrying it must not have added a send, and the
-    // copy that carries a configuration's own request data is still there.
     CharonHostNFCISO15693CustomCommandConfiguration *config =
         [[PORT_CLASS(CharonHostNFCISO15693CustomCommandConfiguration) alloc] initWithManufacturerCode:1
                                                                                      customCommandCode:2
@@ -359,15 +314,11 @@ static void session_answers_as_host(void)
     check_true([config respondsToSelector:@selector(copyWithZone:)],
                @"a custom command configuration still copies");
 
-    // And the port's value is its own class, not the host's class of the same API: the two coexist
-    // in this process under one name apart, which is what makes the comparison above a comparison.
     check_true([NSStringFromClass([(id)config class]) hasPrefix:@"CharonHost"],
                @"the port's class carries the CharonHost prefix");
     check_true(NSClassFromString(@"CharonHostNFCISO15693CustomCommandConfiguration") !=
                NSClassFromString(@"NFCISO15693CustomCommandConfiguration"),
                @"the port's class and the host's class of the same API are two classes");
-    // The host's own object, built the same way, answers 0 as well: the two are separate classes
-    // with the same defaults, which is the point of the comparison and not an accident of it.
     NFCISO15693CustomCommandConfiguration *host_config =
         [[NFCISO15693CustomCommandConfiguration alloc] initWithManufacturerCode:1 customCommandCode:2 requestParameters:nil];
     check_same_u(((CharonHostNFCTagCommandConfiguration *)config).maximumRetries, host_config.maximumRetries,

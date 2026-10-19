@@ -4,9 +4,6 @@
 static const NSTimeInterval CharonBackdropMinimumInterval = 0.1;
 static const NSTimeInterval CharonBackdropQuietInterval = 0.5;
 
-/* Hides the layer and every layer drawn above it on the way to the window: the later siblings,
-   and those with a greater zPosition, of the layer and of each of its superlayers. What stays
-   is what the layer is composited over. */
 static void charon_backdrop_hide_above(CALayer *layer, CALayer *top, NSMutableArray *hidden)
 {
     if (!layer.hidden) {
@@ -108,9 +105,6 @@ static void charon_backdrop_hide_above(CALayer *layer, CALayer *top, NSMutableAr
     id<CharonBackdropClient> client = _client;
     UIWindow *window = view.window;
     CGFloat scale = _scale;
-    /* The region in the window, widened to the pixels the window is drawn in, cut to the window
-       and taken back into the view: the view's transform then maps the reading onto what lies
-       under it. */
     CGRect wanted = [view convertRect:[client backdropRegion:self] toView:window];
     CGFloat minX = floor(CGRectGetMinX(wanted) * scale) / scale, minY = floor(CGRectGetMinY(wanted) * scale) / scale;
     CGFloat maxX = ceil(CGRectGetMaxX(wanted) * scale) / scale, maxY = ceil(CGRectGetMaxY(wanted) * scale) / scale;
@@ -131,8 +125,6 @@ static void charon_backdrop_hide_above(CALayer *layer, CALayer *top, NSMutableAr
         _refreshing = NO;
         return;
     }
-    /* Window coordinates into the view's (the inverse of the view's affine map into the window,
-       read off three points), then the captured rect into the bitmap, row 0 at the top. */
     CGPoint o = [view convertPoint:CGPointZero toView:window], ex = [view convertPoint:CGPointMake(1, 0) toView:window], ey = [view convertPoint:CGPointMake(0, 1) toView:window];
     CGAffineTransform toWindow = CGAffineTransformMake(ex.x - o.x, ex.y - o.y, ey.x - o.x, ey.y - o.y, o.x, o.y);
     CGContextTranslateCTM(context, 0, height);

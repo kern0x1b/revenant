@@ -1,15 +1,6 @@
-// The declarative description of a store: what a program says its rows are, which is what a
-// store is opened from, what a migration compares, and what a model file is read back into.
-//
-// Schema is a class, as Apple's is: a container, a context and a model share one description
-// rather than copies of it. It is Codable, so a schema is a file a build writes and a version
-// control keeps.
-
 import Foundation
 
 public final class Schema: Codable, Hashable {
-    /// The version a written schema carries. Apple's is 1; a schema read from a file that says
-    /// something else is refused, which is the whole point of writing the version down.
     public static let schemaEncodingVersion = Version(1, 0, 0)
 
     public let encodingVersion: Version
@@ -28,8 +19,6 @@ public final class Schema: Codable, Hashable {
         self.init(entities, version: version)
     }
 
-    /// The designated form the variadic initialiser above calls. Apple's interface declares only
-    /// the variadic one, so this is internal: a caller with a list calls it with `...`.
     init(_ entities: [Entity], version: Version = Version(1, 0, 0)) {
         self.encodingVersion = Schema.schemaEncodingVersion
         self.version = version
@@ -41,9 +30,6 @@ public final class Schema: Codable, Hashable {
         }
     }
 
-    /// The schema of a set of model types, which is what `@Model` writes into `schemaMetadata`
-    /// and what this reads back: one entity per type, named after the type, holding the
-    /// properties the macro recorded.
     public convenience init(_ types: [any PersistentModel.Type], version: Version = Version(1, 0, 0)) {
         self.init(types.map { Entity($0) }, version: version)
     }
@@ -65,8 +51,6 @@ public final class Schema: Codable, Hashable {
         return byName
     }
 
-    // MARK: The entity
-
     public final class Entity: Codable, Hashable, CustomDebugStringConvertible {
         public var name: String
         public var subentities: Set<Entity>
@@ -74,9 +58,6 @@ public final class Schema: Codable, Hashable {
         public var storedProperties: [any SchemaProperty]
         public var inheritedProperties: [any SchemaProperty]
 
-        /// The schema that holds this entity, so `superentity` can be answered without a second
-        /// copy of the entity list. Weak, because a schema holds its entities and an entity must
-        /// not keep the schema alive.
         weak var schema: Schema?
 
         public var superentity: Entity? {
@@ -84,7 +65,6 @@ public final class Schema: Codable, Hashable {
             set { superentityName = newValue?.name }
         }
 
-        /// Everything a store holds: what this entity declares and what it inherits.
         public var properties: [any SchemaProperty] { storedProperties + inheritedProperties }
 
         public var attributes: Set<Attribute> {
@@ -111,16 +91,10 @@ public final class Schema: Codable, Hashable {
             Dictionary(inheritedProperties.map { ($0.name, $0) }, uniquingKeysWith: { _, last in last })
         }
 
-        /// The indexes, as the property names each one is built over: what
-        /// `NSEntityDescription.indexes` takes, and what the store builds.
         public var indices: [[String]] {
             storedProperties.flatMap { ($0 as? any IndexNaming)?.indexPropertyNames ?? [] }
         }
 
-        /// The uniqueness constraints, as the property names each one names. The store of the
-        /// port cannot enforce them - `NSEntityDescription.uniquenessConstraints` is registered
-        /// `absent` for iOS 6, its reason being that a constraint nothing enforces would let in
-        /// the duplicates the model says cannot exist - so `ModelContext.save` checks them itself.
         public var uniquenessConstraints: [[String]] {
             storedProperties.flatMap { ($0 as? any UniqueNaming)?.uniquePropertyNames ?? [] }
         }
@@ -141,9 +115,6 @@ public final class Schema: Codable, Hashable {
             self.init(name, subentities: [Entity](), properties: properties)
         }
 
-        /// The designated form the two variadic initialisers above call. Apple's interface
-        /// declares only the variadic ones, so this is internal: a caller holds a list and wants
-        /// one entity out of it, the variadic initialiser takes it with `...`.
         init(_ name: String, subentities: [Entity], properties: [any SchemaProperty]) {
             self.name = name
             self.subentities = Set(subentities)
@@ -156,9 +127,6 @@ public final class Schema: Codable, Hashable {
             }
         }
 
-        /// The entity a model type is stored as, with the properties its macro recorded. The
-        /// order is the order the macro wrote, which is the order the source declared them in:
-        /// a store's columns are made in that order and a migration compares them in that order.
         public convenience init(_ modelType: any PersistentModel.Type) {
             self.init(Schema.entityName(for: modelType))
             storedProperties = modelType.schemaMetadata.map { entry in
@@ -218,11 +186,6 @@ public final class Schema: Codable, Hashable {
         }
     }
 
-    // MARK: What one model's property is
-
-    /// What a model's property is: the name, the key path that reaches it, the value it starts
-    /// as, and the schema property the macro built for it. This is what `@Model` writes and what
-    /// `Schema` reads, so a model type says its own shape with no `.xcdatamodeld` beside it.
     public struct PropertyMetadata {
         public let name: String
         public let keypath: AnyKeyPath
@@ -237,8 +200,6 @@ public final class Schema: Codable, Hashable {
             self.metadata = metadata
         }
     }
-
-    // MARK: The version
 
     public struct Version: Codable, Comparable, CustomStringConvertible, Hashable {
         public let major: Int
@@ -289,8 +250,6 @@ public final class Schema: Codable, Hashable {
         }
     }
 
-    // MARK: Identity and the file
-
     public static func == (lhs: Schema, rhs: Schema) -> Bool {
         lhs.entities == rhs.entities && lhs.version == rhs.version && lhs.encodingVersion == rhs.encodingVersion
     }
@@ -307,8 +266,6 @@ public final class Schema: Codable, Hashable {
         return hasher.finalize()
     }
 
-    /// The entity a model type is stored as, or nil where this schema has none: a model type the
-    /// schema does not name cannot be read from or written to this store, and nil says so.
     public final func entity<T>(for type: T.Type) -> Entity? where T: PersistentModel {
         entitiesByName[Schema.entityName(for: type)]
     }
@@ -353,10 +310,6 @@ public final class Schema: Codable, Hashable {
 }
 
 extension Schema {
-    /// What a property list is, as text. An entity holds `[any SchemaProperty]`, and an
-    /// existential of a `Hashable` protocol is not itself `Hashable`, so a list of them is
-    /// compared and hashed through this: every member of every kind, in one place, so that two
-    /// entities are equal exactly when they say the same things.
     enum Fingerprint {
         static func of(_ properties: [any SchemaProperty]) -> String {
             properties.map(one).joined(separator: "|")
@@ -396,10 +349,6 @@ extension Schema: CustomDebugStringConvertible {
 
 extension Schema: @unchecked Sendable {}
 
-/// One entry of a schema entity's property list, written with the kind of property it is: the
-/// list holds four kinds side by side, and an array of existentials has no `Encodable` of its
-/// own. This is the one place a schema's written form is ours - Apple's own is not published, and
-/// a file this package writes is read by this package.
 enum StoredProperty: Codable {
     case attribute(Schema.Attribute)
     case composite(Schema.CompositeAttribute)

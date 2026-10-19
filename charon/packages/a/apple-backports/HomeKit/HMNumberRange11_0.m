@@ -1,8 +1,3 @@
-// HMNumberRange, of iOS 11.0: the range a threshold event fires on, a value object with no identifier
-// of its own. It is a class of its own in the release's headers and of its own here, because two
-// files defining it is two class symbols with one name -- the link said so by name.
-//
-// One release's API per object file, which is what the band machinery needs.
 #import "CharonHomeKitInternal.h"
 
 #pragma mark - HMNumberRange
@@ -16,9 +11,6 @@
 
 @synthesize charon_minValue = _charon_minValue, charon_maxValue = _charon_maxValue;
 
-// -init and +new are unavailable in the release's own header, so the range is made the way the
-// release makes the objects it has no initialiser for, through its own class method; see
-// CharonHomeKitConstruction.h for why the port's construction is what it is.
 - (instancetype)charon_initWithStore:(CharonHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
 {
     (void)store;

@@ -17,9 +17,6 @@ int main(int argc, char **argv) { @autoreleasepool {
              a.contents ? a.contents.UTF8String : "(nil)",
              a.userName ? a.userName.UTF8String : "(nil)",
              a.color ? [[a.color description] UTF8String] : "(nil)");
-      // The TYPED flags and appearance properties, read as properties and NOT derived from the /F key:
-      // the line above reads /F through the key API, and it is a separate question whether PDFKit's own
-      // -shouldPrint and -shouldDisplay answer that bit.
       printf("      shouldDisplay=%d shouldPrint=%d appearanceStream=%d highlighted=%d\n",
              a.shouldDisplay, a.shouldPrint, a.hasAppearanceStream, a.isHighlighted);
       printf("      modificationDate=%s border=%s flags=%lu page=%s\n",

@@ -1,8 +1,4 @@
 #import <Foundation/Foundation.h>
-// What the host's own MLCompute answers for the layer factories whose parameters have to be of a
-// particular shape: the three normalizations, the long short-term memory and the multihead attention.
-// Together with engine.m, which asks the framework what it computes, this is the whole measurement the
-// layers family is written against (facts/MLCompute/Engine.md and facts/MLCompute/Layers.md).
 #import <MLCompute/MLCompute.h>
 static NSString *nums(NSArray *a){ if(!a) return @"(nil)"; NSMutableString *t=[NSMutableString string]; for(NSNumber *n in a){ if(t.length) [t appendString:@","]; [t appendString:n.stringValue];} return t; }
 static void row(NSString *k, id v){ printf("%s\t%s\n", k.UTF8String, v?[[v description] UTF8String]:"(nil)"); }

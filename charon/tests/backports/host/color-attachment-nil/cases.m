@@ -1,7 +1,3 @@
-// cases.m - the colour attachment array's nil store and its index check, Apple's MTLRenderPipelineDescriptor beside the
-// port's (renamed CharonHostMTLRenderPipelineDescriptor by run.sh), in one process. Measured on the macOS host: a nil
-// store resets the slot IN PLACE to the init defaults (the object stays), a stored attachment is a copy, and an index
-// of 8 or more asserts on both the store and the read (a child process, status 134).
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #include <stdio.h>
@@ -39,7 +35,6 @@ static NSArray *Fields(void)
               @"rgbBlendOperation", @"sourceAlphaBlendFactor", @"destinationAlphaBlendFactor", @"alphaBlendOperation" ];
 }
 
-// The fields of one attachment, as KVC reads them, so that the two classes are compared by value.
 static NSString *Snapshot(id attachment)
 {
     NSMutableString *text = [NSMutableString string];
@@ -53,7 +48,6 @@ static id NewDescriptor(Class cls)
     return [[cls alloc] init];
 }
 
-// The ordinary sequence, once for a class: set a slot, nil it, and compare the object, the defaults and the copy.
 static void nilSequence(Class cls, Class attachmentClass, NSString *name, NSString *defaults, NSString **outSnapshot)
 {
     checks++;
@@ -89,8 +83,6 @@ static void nilSequence(Class cls, Class attachmentClass, NSString *name, NSStri
     *outSnapshot = Snapshot(after);
 }
 
-// The linked-function properties: a fresh descriptor answers one stable empty object per stage; a store keeps a copy; a nil
-// store gives a new empty object, neither the one before nor the one that was set (measured on the host).
 static void linkedSequence(Class cls, Class linkedClass, NSString *name)
 {
     checks++;
@@ -122,7 +114,6 @@ static void linkedSequence(Class cls, Class linkedClass, NSString *name)
         fail([NSString stringWithFormat:@"% the copy's linked-functions object is nil or the same object", name]);
 }
 
-// An index of 8 asserts: forked before any Metal object is made, with the store in the child.
 static int childStatus(Class cls, BOOL store)
 {
     fflush(stdout);
@@ -154,7 +145,6 @@ int main(void)
             printf("FAIL the port's class is not in the process\n");
             return 1;
         }
-        // The index checks run first, in children: the store, then the read, for Apple and the port.
         for (int store = 0; store <= 1; store++) {
             checks++;
             int a = childStatus(apple, store);
@@ -166,7 +156,6 @@ int main(void)
                 fail([NSString stringWithFormat:@"the port's %s at index 8 returned %d and should abort (134)",
                       store ? "store" : "read", p]);
         }
-        // The defaults a fresh attachment has, read from Apple's own object, are what a reset must give.
         NSString *defaults = nil;
         id fresh = [[MTLRenderPipelineColorAttachmentDescriptor alloc] init];
         defaults = Snapshot(fresh);

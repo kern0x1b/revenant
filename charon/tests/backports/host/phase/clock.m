@@ -1,13 +1,3 @@
-// PHASEEngine's clock, the host's against the port's, in one binary.
-//
-// The host's answer is the time its own engine reports; the port's is the time the render loop of PHASEEngine15.m
-// reports. Both are run through the same script: start, one second, pause, half a second, start again, half a second,
-// stop, and an update() on an automatic engine. The checks are the measured behaviour in facts/PHASE/PHASEEngine.md:
-//   - a stopped engine's lastRenderTime is nil, and so is a paused engine's and a stopped one's;
-//   - a started engine reports its time at 48 kHz, and the time is the elapsed time since the engine last started
-//     (a pause does not carry it across, and a resume restarts it);
-//   - update() on an automatic engine raises an API Misuse exception.
-// The port's clock is a 10 ms timer, so each reading is held to the elapsed time within 100 ms.
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 #import <PHASE/PHASE.h>

@@ -1,11 +1,3 @@
--- A class or protocol the SDK's apinotes give a Swift name is declared with the swift_name attribute (CloudKit's CKRecordValue is
--- __CKRecordObjCValue in Swift, by CloudKit.apinotes). The headers command reads the apinotes' top-level Classes and Protocols
--- (cmd_headers swift_names_of); a SwiftVersions entry is not the default name and is not read. On a fixture SDK with an apinotes file
--- and a hand-built IR, the rendered header carries the attribute on each, and clang compiles the header with it.
--- Run:
---   xmake l tests/gen/swift_name_render_test.lua
--- The fixture lives under build/ in the tree and is removed when the test ends.
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 local SCRATCH = path.join(os.scriptdir(), "..", "..", "build", "swift-name-render-test")
 
@@ -16,8 +8,6 @@ local function write(filepath, text)
     handle:close()
 end
 
--- One IR row of the twenty-one columns: the framework, the kind, the usr, the name and the header; the rest are "-" or the
--- availability.
 local function row(framework, kind, usr, name, header)
     local out = {framework, kind, usr, "-", name, "-", header, "1", "ios=13.0/-/-/0", "-", "-", "-"}
     for column = 13, 21 do
@@ -40,7 +30,6 @@ local function run()
     local sdk = path.join(SCRATCH, "sdk")
     local headers = path.join(sdk, "System", "Library", "Frameworks", "FixSwift.framework", "Headers")
     write(path.join(headers, "FixSwift.h"), "#pragma clang system_header\n")
-    -- the default names are the top-level entries; the SwiftVersions entry (indented under its version) gives a different name, not read
     write(path.join(headers, "FixSwift.apinotes"),
           "Name: FixSwift\nClasses:\n- Name: FixBox\n  SwiftName: FixBoxSwift\nProtocols:\n- Name: FixValue\n  SwiftName: __FixObjCValue\n"
           .. "SwiftVersions:\n- Version: 5\n  Protocols:\n  - Name: FixValue\n    SwiftName: FixValueV5\n")
@@ -59,14 +48,12 @@ local function run()
     os.mkdir(path.join(tree, "packages", "a", "apple-backports", "registry"))
 
     local out = path.join(SCRATCH, "out")
-    -- the write mode takes the port's enumerator values: an empty run, so the port keeps the IR's values
     local port_values = path.join(SCRATCH, "port-values-empty.tsv")
     write(port_values, "# triple=armv7-apple-ios6.1.3 (no values)\n")
     cmd.run({tree = tree, ir = ir, sdk = sdk, out = out, port_values = port_values})
 
     local header = path.join(out, "Frameworks", "FixSwift.framework", "Headers", "FixSwift.h")
     local text = io.readfile(header) or ""
-    -- the attribute is a prefix of the declaration: clang refuses it after the name ("prefix attribute must be followed by an interface")
     check(string.find(text, '__attribute__((swift_name("FixBoxSwift")))\n@interface FixBox', 1, true) ~= nil,
           "the class carries the swift_name its apinotes give, in front of the @interface")
     check(string.find(text, '__attribute__((swift_name("__FixObjCValue")))\n@protocol FixValue', 1, true) ~= nil,
@@ -77,7 +64,6 @@ local function run()
     check(string.find(text, "@protocol FixPlain;", 1, true) ~= nil or string.find(text, "@protocol FixPlain\n", 1, true) ~= nil,
           "a protocol with no apinotes entry has no swift_name")
 
-    -- clang compiles the header with the attributes where they are written
     local compiled = os.execv("xcrun", {"--sdk", "macosx", "clang", "-fsyntax-only", "-x", "objective-c", header}, {try = true})
     if compiled ~= 0 then print(text) end
     check(compiled == 0, "clang compiles the header with the swift_name attributes")

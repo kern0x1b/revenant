@@ -1,20 +1,3 @@
-// bias-probe.m — what MPSMatrixNeuronGradient writes, read from the release one element at a time.
-//
-// It is built on the same helpers the differential uses, so a case here is a case there: a matrix or
-// vector made from a C array through a buffer, the kernel encoded, the command buffer waited for, and
-// the result read back out of the buffer into the array. The earlier attempt at this probe was a
-// hand-rolled second copy and answered zero for every case including its own control, which is what
-// that was worth.
-//
-//   xcrun clang -fobjc-arc -Wno-unguarded-availability-new bias-probe.m \
-//       -framework Foundation -framework Metal -framework MetalPerformanceShaders -o bias-probe
-//   ./bias-probe > bias.txt
-//
-// Three incoming gradients - a single one in the first column, a one in each of the first three, and
-// the differential's own - against all fifteen neuron types, with alpha 0.5, a = 1.5, b = 0.75,
-// c = 2.5 and a bias of {0.25, -0.25, 0.5, -0.5}. What the answers say is in
-// facts/MetalPerformanceShaders/Matrix.md.
-
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>

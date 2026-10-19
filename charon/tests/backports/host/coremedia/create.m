@@ -287,8 +287,6 @@ int main(void)
                     continue;
                 compare([NSString stringWithFormat:@"colour field %d code %d", field, code], @[writeSPS(f), pps], 4);
             }
-        // The three offsets of pic_order_cnt_type 1 over the range the standard gives them, -2^31+1 to 2^31-1:
-        // the host takes -4095 to 4095 and refuses 4096 on (-12710), and the port must answer the same.
         int offsets[] = {4095, 4096, -4095, -4096, 8190, 8191, -8191, 100000, -100000, 2147483646, 2147483647, -2147483647};
         for (int field = 0; field < 3; field++)
             for (size_t i = 0; i < sizeof offsets / sizeof *offsets; i++) {
@@ -300,11 +298,9 @@ int main(void)
                 else if (field == 1)
                     f.pocTopBottom = offsets[i];
                 else
-                    f.pocRefFrame = offsets[i] > 0 ? offsets[i] : offsets[i] + 1;   // the cycle holds the offset itself
+                    f.pocRefFrame = offsets[i] > 0 ? offsets[i] : offsets[i] + 1;
                 NSArray<NSData *> *sets = @[writeSPS(f), pps];
                 compare([NSString stringWithFormat:@"picture order count type 1 field %d offset %d", field, offsets[i]], sets, 4);
-                // The boundary itself, held to what the host measured on 2026-09-23: this fails, and the port's
-                // limit is to be read again, if CoreMedia ever takes an offset past 4095 or refuses one inside.
                 CMFormatDescriptionRef made;
                 NSString *system = outcome(NO, sets, 4, &made);
                 if (made)

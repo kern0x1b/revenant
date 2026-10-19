@@ -1,13 +1,5 @@
--- The witnesses of ObjC and Foundation conformances (tools/gen/swift_render.lua WITNESSES): a skeleton's class that adopts NSCopying,
--- NSSecureCoding, NSCoding, Decodable or NSItemProviderWriting declares the member the protocol needs when the model gives none of that
--- name (an ObjC protocol is imported without its Swift witnesses, and the compile fails "does not conform to protocol 'NSCopying'": the
--- most frequent error of the coordinator's sdk run). Checked here: a missing witness is declared, a witness the model gives is not
--- declared twice, a conformance the superclass chain provides gets none, a struct gets no `required`, and the round trip's compare reads
--- a witness as by design (not extra) when the renderer declared it. The compiler is not run here. Run: xmake l tests/gen/swift_witness_test.lua
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 
--- A model row with every cell the renderer reads, "-" where the row says nothing.
 local function row(fields)
     local out = {kind = "-", usr = "-", container = "-", name = "-", side = "-", type = "-", params = "-", generic_sig = "-",
                  conformances = "-", superclass = "-", throwing = "-", async = "-", mutating = "-", attributes = "-", accessors = "-",
@@ -19,7 +11,6 @@ local function row(fields)
     return out
 end
 
--- The lines of a text that contain a substring.
 local function lines_with(text, needle)
     local found = {}
     for line in string.gmatch(text, "[^\n]*") do
@@ -41,8 +32,6 @@ function main()
         end
     end
 
-    -- Item adopts NSCopying and NSSecureCoding with no member; Box adopts NSCopying and the model gives copy(with:); Holder is a struct
-    -- adopting Decodable; Base adopts NSCopying and Sub inherits it, so Sub declares neither the conformance nor the member.
     local rows = {
         row({kind = "swift-class", name = "Item", usr = "c:Item", conformances = "NSCopying,NSSecureCoding", superclass = "NSObject"}),
         row({kind = "swift-class", name = "Box", usr = "c:Box", conformances = "NSCopying", superclass = "NSObject"}),
@@ -66,7 +55,6 @@ function main()
     check(#lines_with(text, "required init(from") == 0, "a struct's Decodable init is not required")
     check(#lines_with(text, "import Foundation") == 1, "the skeleton imports Foundation, which the witnesses name")
 
-    -- the round trip reads the witnesses as by design: an extra row that the renderer declared is not extra
     local sdk_rows = {}
     local ours = {row({kind = "swift-method", container = "Item", name = "copy(with:)", usr = "c:Item.copy", side = "-"}),
                   row({kind = "swift-method", container = "Fix.Other", name = "extra()", usr = "c:Other.extra", side = "-"})}
@@ -82,7 +70,6 @@ function main()
     end
 end
 
--- Whether the witness set names the Item witness (container, tab, name).
 function has_witness_text(witnessed)
     return witnessed["Item\tcopy(with:)"] == true and witnessed["Item\tsupportsSecureCoding"] == true
 end

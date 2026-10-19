@@ -1,13 +1,3 @@
-//===--- CKError.swift ------------------------------------------*- swift -*-===//
-//
-// CloudKit's error: a value over the NSError that the framework's operations deliver in CKErrorDomain.
-// The domain and the user info keys are the strings the host's CloudKit uses, as measured in
-// facts/CloudKit/CKError.md (and the same as charon@apple-backports' CKConstants8.m);
-// the codes are the raw values the SDK's CKErrorCode declares. The init takes any NSError: the host
-// does not check the domain, so neither does this.
-//
-//===----------------------------------------------------------------------===//
-
 import Foundation
 
 public struct CKError: _BridgedStoredNSError {

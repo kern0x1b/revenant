@@ -1,31 +1,9 @@
-// The thirteen properties the release's own MKMapView has no answer for, each one doing what it can
-// really do and saying so where it cannot.
-//
-// What the release's map view is, measured with apple.objc.inventory against the armv7 dyld shared
-// cache of 6.1.3: 228 public instance methods, of which the map's own surface is a region
-// (-setRegion:animated:, -setCenterCoordinate:animated:, -visibleMapRect, -mapRectThatFits:,
-// -regionThatFits:, -convertCoordinate:toPointToView:), a map type (-mapType), the user location
-// (-userTrackingMode, -setUserTrackingMode:animated:, -showsUserLocation), and the overlays. It has
-// no showsTraffic, no showsBuildings, no showsPointsOfInterest, no showsCompass, no showsScale, no
-// showsUserTrackingButton, no rotateEnabled, no pitchEnabled, no camera, no zoomScale, no
-// pointOfInterestFilter, no preferredConfiguration, no cameraBoundary, no cameraZoomRange, no
-// selectableMapFeatures and no pitchButtonVisibility -- its own -_rotationState, -canRotateForHeading
-// and -setShouldRotateForHeading: are the private machinery that turns the map to follow the
-// compass, which is not a public rotation and is not used here.
-//
-// So the map stays the release's: the heading and the pitch are a transform on the release's own
-// pixels, driven by a real rotation gesture, with the annotation views counter-transformed so they
-// stay upright. That is a projection of a plane, not the release's own three-dimensional camera,
-// and the facts say so.
 #import <MapKit/MapKit.h>
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
 #import "CharonMapKit.h"
 
-// The state one map view carries for this port. A Charon class of the port's own, held per map view
-// through objc_setAssociatedObject, because a category cannot add an ivar to a release class and
-// because the release's own map view must stay the release's.
 @interface CharonMapViewState : NSObject
 @property (nonatomic) BOOL rotateEnabled;
 @property (nonatomic) BOOL pitchEnabled;
@@ -71,8 +49,6 @@
 @synthesize showsPointsOfInterest = _showsPointsOfInterest;
 @synthesize pointOfInterestFilter = _pointOfInterestFilter;
 
-// The sign the release's own map has: a heading of zero is north up, and a positive heading turns
-// the content anticlockwise on screen, so the screen's rotation is the heading negated.
 - (CGFloat)charon_contentRotation
 {
     return -_heading * (CGFloat)M_PI / 180.0;
@@ -99,8 +75,6 @@
 
 @implementation MKMapView (CharonCamera)
 
-// The display link that follows the release's own layout, held beside the map view because a
-// category cannot have an ivar. Charon's own, so it carries no API.
 - (CADisplayLink *)charon_link
 {
     return objc_getAssociatedObject(self, (const void *)"charonMapLink");
@@ -122,11 +96,6 @@
     return state;
 }
 
-// The transform, and the annotation views put back the way they were. The rotation is about the
-// middle of the map view; the perspective is the projection of a plane at the eye distance, and the
-// pitch is how far that plane is turned from flat. The release's annotation views are asked for
-// through -viewForAnnotation:, which is the release's own public way of naming them, and each is
-// given the inverse so it stays upright on a rotated map.
 - (void)charon_applyTransform
 {
     CharonMapViewState *state = [self charon_state];
@@ -145,8 +114,6 @@
         plane.m34 = -1.0 / distance;
         layer.transform = plane;
     }
-    // A pin is a flat thing standing on the map, so what puts it upright is the inverse of the
-    // map's own turn about the vertical, and nothing of the perspective.
     CATransform3D upright = CATransform3DInvert(CATransform3DMakeRotation(rotation, 0.0, 0.0, 1.0));
     for (id annotation in self.annotations) {
         MKAnnotationView *view = [self viewForAnnotation:annotation];
@@ -155,24 +122,9 @@
         }
     }
     [(MKCompassButton *)state.compass setCompassHeading:state.heading];
-    // The three controls' own frames, which the release's own layout does not know about and which
-    // would otherwise stay where the map view used to be after a bounds change.
     [self charon_updateControls];
 }
 
-// The release's own -layoutSubviews is NOT replaced here, and this is deliberate and measured.
-// Measured with apple.objc.inventory on the armv7 cache of 6.1.3: MKMapView has -layoutSubviews in
-// its OWN method list, so a category's method for that selector would never be installed -- the
-// runtime sets "ignore" when a class's implementation of a selector differs from its superclass's,
-// and attach.c's charon_collect skips the same selector for the same reason -- and if some release
-// lacked it, the lazy original-IMP lookup below would find the category's own and recurse until the
-// stack ran out.
-//
-// So the transform is re-applied from the port's own entry points instead: the camera and heading
-// setters, the rotation gesture, the three shows... setters through charon_updateControls, and a
-// CADisplayLink while the map is rotated, which is where a bounds change shows up anyway. The
-// release's own layout repositions the annotation views after any bounds change, so they are the
-// thing to re-stand, and this is where that happens.
 - (void)charon_startFollowingBounds
 {
     if ([self charon_link]) {
@@ -185,8 +137,6 @@
 
 - (void)charon_followBounds:(CADisplayLink *)link
 {
-    // Only while there is something to stand back up: a map that is not rotated has no transform
-    // to undo, and a display link that runs for nothing is a battery cost.
     CharonMapViewState *state = [self charon_state];
     if (state.rotateEnabled || state.pitchEnabled) {
         [self charon_applyTransform];
@@ -212,8 +162,6 @@
 {
     CharonMapViewState *state = [self charon_state];
     if (gesture.state == UIGestureRecognizerStateChanged) {
-        // A clockwise turn of the fingers is a clockwise turn of the map, which is a heading that
-        // counts down: north is up when the heading is zero.
         state.heading = (CGFloat)fmod((double)state.heading - (double)gesture.rotation * 180.0 / M_PI + 360.0, 360.0);
         gesture.rotation = 0.0;
         [self charon_applyTransform];
@@ -231,7 +179,6 @@
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gesture
     shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)other
 {
-    // Alongside the release's own pan and pinch, so rotating does not stop the map being panned.
     return [gesture isKindOfClass:[UIRotationGestureRecognizer class]];
 }
 
@@ -261,8 +208,6 @@
     CharonMapViewState *state = [self charon_state];
     state.pitchEnabled = pitchEnabled;
     if (pitchEnabled && state.eyeDistance <= 0.0) {
-        // The eye distance a camera keeps with its distance, so a caller that only turns pitch on
-        // gets the perspective a camera of that distance would have.
         state.eyeDistance = MAX(400.0, [self charon_metresAcross]);
     }
     if (pitchEnabled) {
@@ -281,8 +226,6 @@
     return [self charon_state].pitch;
 }
 
-// The metres the map view's own visible rect is across, through the release's own metres per map
-// point at the map's centre. Charon's own, so it carries no API.
 - (void)charon_setHeading:(CLLocationDirection)heading pitch:(CGFloat)pitch
 {
     CharonMapViewState *state = [self charon_state];
@@ -415,9 +358,6 @@
                   why:@"the release's map draws its points of interest from its own tiles and takes no filter, so there is nothing for a filter to act on"];
 }
 
-// A property that is stored and that the release's map cannot act on says so once, the first time it
-// is used, and never again: the README's answer for a visual effect the release cannot draw. Charon's
-// own, so it carries no API.
 - (void)charon_inert:(NSString *)api why:(NSString *)why
 {
     static NSMutableSet *told;
@@ -434,7 +374,6 @@
     }
 }
 
-// The three controls, put on the map view and taken off it again.
 - (void)charon_updateControls
 {
     CharonMapViewState *state = [self charon_state];
@@ -488,8 +427,6 @@
     return [self charon_state].cameraBoundary;
 }
 
-// A boundary with no region is the whole world, which is what nil means and what a boundary of the
-// whole world does, so an unbounded map is not a special case here.
 - (MKCoordinateRegion)charon_boundedRegion
 {
     MKMapCameraBoundary *boundary = [self charon_state].cameraBoundary;
@@ -524,9 +461,6 @@
     [self charon_applyCameraAnimated:animated];
 }
 
-// A region inside the boundary and inside the zoom range, which is what the two are: the boundary
-// is an area the camera may not leave, and the zoom range is how close and how far the two ends of
-// the camera's distance may be. Charon's own, so it carries no API.
 - (MKCoordinateRegion)charon_clampRegion:(MKCoordinateRegion)region
 {
     MKCoordinateRegion bounded = [self charon_boundedRegion];
@@ -549,8 +483,6 @@
     }
     MKMapCameraZoomRange *zoom = [self charon_state].cameraZoomRange;
     if (zoom) {
-        // The camera's distance is how far the map is zoomed out, and the map's own metres across
-        // is that distance, through the release's own metres per map point.
         double metresAcross = (double)[self charon_metresAcross];
         double lowest = zoom.minCenterCoordinateDistance > 0.0 ? zoom.minCenterCoordinateDistance : 0.0;
         double highest = zoom.maxCenterCoordinateDistance > 0.0 ? zoom.maxCenterCoordinateDistance : 0.0;
@@ -575,15 +507,12 @@
     return region;
 }
 
-// The map put back where this port's camera says, inside the boundary and the zoom range.
 - (void)charon_applyCameraAnimated:(BOOL)animated
 {
     MKMapCamera *camera = self.camera;
     if (!camera) {
         return;
     }
-    // A camera is a centre and a distance; the region that says the same thing is that centre and
-    // the span the distance stands for, through the release's own projection.
     MKMapPoint centre = MKMapPointForCoordinate(camera.centerCoordinate);
     double metresPerPoint = MKMetersPerMapPointAtLatitude(camera.centerCoordinate.latitude);
     double distance = camera.centerCoordinateDistance > 0.0 ? camera.centerCoordinateDistance : 1000.0;
@@ -598,8 +527,6 @@
 {
     MKMapConfiguration *configuration = [self charon_state].preferredConfiguration;
     if (!configuration) {
-        // What the release's own map type already is, said in the iOS 16 spelling: this is the same
-        // map, and a program that reads the configuration back gets the map it is looking at.
         switch (self.mapType) {
             case MKMapTypeSatellite:
                 configuration = [[MKImageryMapConfiguration alloc] init];
@@ -616,9 +543,6 @@
     return configuration;
 }
 
-// The map type a configuration stands for, which is the part of a configuration the release's map
-// can be told: the standard, the hybrid and the imagery map are the release's three map types, and
-// the rest of a configuration has no counterpart in a map type and is stored and given back.
 - (void)setPreferredConfiguration:(MKMapConfiguration *)preferredConfiguration
 {
     [self charon_state].preferredConfiguration = preferredConfiguration;

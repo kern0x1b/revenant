@@ -5,9 +5,6 @@
 #import <CoreML/CoreML.h>
 #import <CoreVideo/CoreVideo.h>
 
-/* The model behind a VNCoreMLModel. This port's VNCoreMLModel is built from a Core ML model and
- * holds it; Apple's is the same shape. The declaration is the test's own, for the reason the port
- * gives its own accessors: a wrapper's model is not in Vision's Objective-C surface. */
 @interface VNCoreMLModel (CharonModel)
 - (MLModel *)model;
 @end
@@ -119,8 +116,6 @@ static void defaults(VisionRecorder record)
     record(@"landmarks", [NSString stringWithFormat:@"%d", landmarks.inputFaceObservations == nil]);
     landmarks.inputFaceObservations = @[face];
     record(@"landmarks.set", [NSString stringWithFormat:@"%lu", (unsigned long)landmarks.inputFaceObservations.count]);
-    /* The domain every Vision error is in, measured rather than assumed: an application switches
-     * on it to tell a Vision failure from any other. */
     record(@"errorDomain", VNErrorDomain);
     VNCoreMLRequest *coreml = [[VNCoreMLRequest alloc] initWithModel:nil];
     record(@"coreml", [NSString stringWithFormat:@"crop=%lu model=%d", (unsigned long)coreml.imageCropAndScaleOption, coreml.model == nil]);
@@ -128,40 +123,19 @@ static void defaults(VisionRecorder record)
     record(@"coreml.set", [NSString stringWithFormat:@"%lu", (unsigned long)coreml.imageCropAndScaleOption]);
 }
 
-/* A Core ML request run for real, over a model read from one of the containers
- * tools/coreml/make-models.lua writes: the image in, the observations out, and what they say.
- *
- * The container is compiled with Core ML's own compiler first, because the Core ML on this host
- * refuses to read an uncompiled .mlmodel -- the same thing the CoreML family check does, and for
- * the same measured reason. The model here takes a flat vector of three numbers rather than an
- * image, because the port's own containers are the ones that exist and a request still runs: the
- * request path finds the model's first input whatever its type, and an image input is the case
- * the resampler in CharonVisionImage.h is there for. */
 static BOOL file_exists(NSURL *url)
 {
     return url != nil && [[NSFileManager defaultManager] fileExistsAtPath:url.path];
 }
 
-/* A compile that is EXPECTED to fail on a host, and why. Any other container the cases name failing
- * to compile is a case going wrong -- a corpus without it, or the port breaking a path the picture
- * cases take -- and is recorded under "coreml.compile.unexpected" so the harness fails on it rather
- * than comparing a smaller record and calling it a pass. */
 static BOOL compile_failure_expected(NSString *container)
 {
     if ([container isEqualToString:@"vision_image"]) {
-        /* This host's Core ML does not run an image model at all: tools/coreml/make-models.lua
-         * reports that container as "no host input", so its compile cannot succeed here. The
-         * picture case records the refusal and reads on, which is what the record in
-         * facts/Vision/Vision.md was measured against. */
         return YES;
     }
     return NO;
 }
 
-/* A compile outcome in fields that do not vary with the machine: the error's domain and code, and
- * whether it failed. NOT failure.localizedDescription -- that is a framework sentence that names the
- * model's file URL, so it carries an absolute path into a record that is committed, and it reads
- * differently on every host. The other compile site already recorded domain and code this way. */
 static NSString *compile_outcome(NSString *container, NSError *failure, VisionRecorder record)
 {
     record([NSString stringWithFormat:@"coreml.compile.%@", container],
@@ -182,15 +156,7 @@ static void coreml_model(CoreMLModels models, VisionRecorder record)
     NSURL *compiled;
     NSMutableString *said = [NSMutableString string];
 
-    /* A URL built with fileURLWithPath: is never nil for a file that is not there, so nil is not
-     * how absence shows up here: compileModelAtURL: is asked for a file that is not there and
-     * answers with a different code than a container that is present and cannot be run. The check
-     * has to ask the filesystem, and it is the harness that fails on the key either way. */
     if (models.glm_classifier == nil || !file_exists(models.glm_classifier)) {
-        /* A container the cases NAME and the corpus does not have. Absent is not the same as failing,
-         * and it used to be invisible: the run recorded 45 keys either way and printed a pass, with
-         * the one value that differs between the two states -- picture/error -- the only sign. The
-         * harness fails on this key, by name. */
         record(@"coreml.model.absent.glm_classifier", @"absent");
         return;
     }
@@ -199,17 +165,11 @@ static void coreml_model(CoreMLModels models, VisionRecorder record)
         compile_outcome(@"glm_classifier", failure, record);
         return;
     }
-    /* Nothing is recorded for a compile that worked, which is what the record said before this key
-     * existed: its absence is the success, and that keeps the record at 45 keys. */
     wrapper = [VNCoreMLModel modelForMLModel:[MLModel modelWithContentsOfURL:compiled error:&failure]
                                         error:&failure];
     record(@"coreml.model", [NSString stringWithFormat:@"%d input=%@", wrapper != nil,
                                                        wrapper.inputImageFeatureName ?: @"(nil)"]);
     record(@"coreml.nosuchmodel", [VNCoreMLModel modelForMLModel:nil error:&failure] == nil ? @"refused" : @"made");
-    /* Two requests that cannot be run, performed: one with no model behind it, and one whose
-     * model takes no image at all -- which is the refusal the branch this port added answers, and
-     * what a caller is told when the run failed rather than being handed an empty result and no
-     * reason. */
     {
         VNImageRequestHandler *handler = [[VNImageRequestHandler alloc] initWithCGImage:vision_picture(8, 8)
                                                                                 options:@{}];
@@ -224,8 +184,6 @@ static void coreml_model(CoreMLModels models, VisionRecorder record)
                                                                          runFailure.domain ?: @"(none)",
                                                                          (long)runFailure.code]);
     }
-    /* A model with no image in any of its inputs is the case Core ML's own documentation names as
-     * the example of one Vision cannot use. */
     record(@"coreml.vectormodel", [VNCoreMLModel modelForMLModel:[MLModel modelWithContentsOfURL:compiled
                                                                                                error:NULL]
                                                           error:&failure] == nil
@@ -297,8 +255,6 @@ static void handlers(VisionRecorder record)
     CGImageRelease(image);
 }
 
-/* A picture of the given size, in memory: solid grey, so a resampled image has known pixels
- * whatever it is drawn from. */
 CGImageRef vision_picture(size_t wide, size_t high)
 {
     CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
@@ -333,19 +289,6 @@ CoreMLModels vision_coreml_models(void)
 }
 
 
-/* The model whose input is a *picture*, which is the only kind a VNCoreMLRequest will take. The
- * wrapper is asked for it, the request is performed over a picture of a different size, and
- * everything that comes back is recorded: the wrapper's answer, the kind, the size and the colour
- * space the model declares, the error if there is one, and every observation with its class, the
- * name its value came from, the shape and the numbers of that value, and the box where the
- * observation is one that has a box.
- *
- * The container is `vision_image` from tools/coreml/make-models.lua: a 32 by 32 picture through one
- * 1x1 convolution, declared as the specification's own `imageType`. coremltools 9.0's runtime will
- * not run a network whose input is a picture, which is why the manifest records it with no
- * prediction and why the interpreter check does not read this container; Apple's Core ML and Vision,
- * which are what this case runs through, are the frameworks that do.
- */
 static void picture_case(CoreMLModels models, VisionRecorder record)
 {
     NSError *failure = nil;
@@ -353,9 +296,6 @@ static void picture_case(CoreMLModels models, VisionRecorder record)
     VNCoreMLModel *model;
 
     if (models.vision == nil || !file_exists(models.vision)) {
-        /* Same for the one container a case EXPECTS to fail. It is expected to be present and to
-         * fail: this host's Core ML does not run an image model, and the case records the refusal.
-         * Absent, it records nothing and the record loses the refusal. */
         record(@"coreml.model.absent.vision_image", @"absent");
         return;
     }

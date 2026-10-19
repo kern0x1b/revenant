@@ -3,24 +3,6 @@
 #import <AVFAudio/AVAudioBuffer.h>
 #import <AudioToolbox/AudioToolbox.h>
 
-// AVAudioConverter over the real AudioConverterServices C API (AudioConverterNew/Reset/Dispose,
-// AudioConverterConvertComplexBuffer, AudioConverterFillComplexBuffer) - every one of those symbols
-// resolves via dlsym in a running armv7 process on the 6.1.3 guest, confirmed before this was
-// written (facts/AVFoundation/AVAudioEngine.md). This class carries no class name that collides
-// with anything native to 6.0/6.1.3 (objc.inventory, same source).
-//
-// -convertToBuffer:fromBuffer:error: is documented by Apple (AVAudioConverter.h:273-286) as a simple conversion that
-// involves neither codecs nor a change of sample rate, and it maps directly onto
-// AudioConverterConvertComplexBuffer, which carries the identical restriction (fixed input/output
-// frame count). -convertToBuffer:error:withInputFromBlock: is the general path and maps onto
-// AudioConverterFillComplexBuffer, which does support sample-rate conversion and variable-length
-// codecs; this port's own C input proc bridges it to the caller's block.
-
-// AudioConverterComplexInputDataProc's OSStatus return only ever means "a real error happened,
-// stop" per Apple's own docs ("If the callback returns an error ... FillComplexBuffer will stop
-// producing output"); it has no vocabulary for "no data *right now*, call me again". This port's
-// bridge invents one: a private, deliberately-unregistered four-char code returned only by this
-// proc and only ever inspected by the wrapper that installed it, never surfaced past this file.
 static const OSStatus kCharonConverterNoDataNow = 'noda';
 
 typedef struct {
@@ -127,20 +109,9 @@ static OSStatus CharonConverterInputProc(AudioConverterRef inConverter, UInt32 *
 
 - (void)setMagicCookie:(NSData *)magicCookie
 {
-    // Real, but only decoders/encoders of a compressed format read this back - this port's
-    // AudioConverterNew calls are PCM-to-PCM/PCM-to-linear so far (demand-driven, see facts); kept
-    // as a real stored value rather than silently dropped, not yet wired to
-    // kAudioConverterDecompressionMagicCookie/kAudioConverterCompressionMagicCookie.
     _charon_magicCookie = [magicCookie copy];
 }
 
-// AudioConverterServices carries no public property for either of these on iOS: downmixing has no
-// matching constant in AudioConverter.h at all (checked, not assumed), and
-// kAudioConverterPropertyDithering/kDitherAlgorithm_* are declared under `#if !TARGET_OS_IPHONE` -
-// macOS only, never available on this platform, iOS 6 or otherwise. Real state, kept and readable
-// exactly as a caller set it, with no fabricated C property behind it - an invented constant here
-// would have been exactly the AVAudioUnitEQFilterParameters.active mistake again, at the C-symbol
-// level instead of the Objective-C one.
 - (BOOL)downmix
 {
     return _charon_downmix;
@@ -180,12 +151,6 @@ static OSStatus CharonConverterInputProc(AudioConverterRef inConverter, UInt32 *
 
 - (void)setSampleRateConverterAlgorithm:(NSString *)sampleRateConverterAlgorithm
 {
-    // kAudioConverterSampleRateConverterAlgorithm is the real, CFString-valued C property this
-    // ObjC property has always mapped onto - Apple's header marks it deprecated in favour of
-    // kAudioConverterSampleRateConverterComplexity, which takes a different kind of value (a
-    // complexity level, not an algorithm name) and is not a drop-in replacement for what this
-    // property's own real semantics call for, so the deprecated-but-still-real property is used
-    // deliberately, not by oversight.
     _charon_sampleRateConverterAlgorithm = [sampleRateConverterAlgorithm copy];
     if (sampleRateConverterAlgorithm)
         AudioConverterSetProperty(_charon_converter, kAudioConverterSampleRateConverterAlgorithm, sizeof(CFStringRef), (__bridge const void *)sampleRateConverterAlgorithm);
@@ -217,14 +182,6 @@ static OSStatus CharonConverterInputProc(AudioConverterRef inConverter, UInt32 *
 
 - (BOOL)convertToBuffer:(AVAudioPCMBuffer *)outputBuffer fromBuffer:(const AVAudioPCMBuffer *)inputBuffer error:(NSError **)outError
 {
-    // A freshly allocated AVAudioPCMBuffer's AudioBufferList carries real, already-calloc'd sample
-    // memory at its full frameCapacity (AVAudioPCMBuffer8.m), but mDataByteSize starts at 0 -
-    // mirroring the real class, it tracks frameLength, not capacity. AudioConverterConvertComplexBuffer
-    // reads mDataByteSize as how much room it has to write into, so an output buffer nobody has
-    // written to yet looks like zero capacity to it and the call fails paramErr (-50) - measured
-    // directly, the same shape of bug AVAudioEngine's own Output-scope-format trap was. Setting
-    // frameLength to the exact frame count this call will produce first gives the converter a real
-    // byte capacity to write into, matching this call's own fixed-ratio, no-resampling contract.
     [outputBuffer setFrameLength:[inputBuffer frameLength]];
     OSStatus status = AudioConverterConvertComplexBuffer(_charon_converter, [inputBuffer frameLength],
                                                           [inputBuffer audioBufferList], [outputBuffer mutableAudioBufferList]);
@@ -241,10 +198,6 @@ static OSStatus CharonConverterInputProc(AudioConverterRef inConverter, UInt32 *
     AVAudioPCMBuffer *pcmOutput = (AVAudioPCMBuffer *)outputBuffer;
     CharonConverterInputContext ctx = {.block = inputBlock, .reachedEnd = NO};
     UInt32 packetCount = [pcmOutput frameCapacity];
-    // Same capacity-vs-frameLength fact as -convertToBuffer:fromBuffer:error: above, and Apple's own
-    // docs for this call say so explicitly: "on entry, the buffers' mDataByteSize fields ... reflect
-    // buffer capacity" - claim the whole capacity as valid bytes before the call so the converter has
-    // real room to write into, then correct frameLength to what was actually produced afterward.
     [pcmOutput setFrameLength:packetCount];
     OSStatus status = AudioConverterFillComplexBuffer(_charon_converter, CharonConverterInputProc, &ctx, &packetCount,
                                                        [pcmOutput mutableAudioBufferList], NULL);
@@ -277,11 +230,6 @@ static OSStatus CharonConverterInputProc(AudioConverterRef inConverter, UInt32 *
     AudioConverterSetProperty(_charon_converter, kAudioConverterEncodeBitRate, sizeof(value), &value);
 }
 
-// bitRateStrategy is real, writable state (kept exactly as the caller set it, `nil` until then,
-// matching a fresh non-encoding converter). The four read-only arrays below are not: a
-// PCM-to-PCM/PCM-to-linear converter is not encoding, and Apple's own header documents every one of
-// them as answering nil in exactly that case - the honest answer for every converter this port
-// builds today, not a stub standing in for a codec path nobody has asked for yet.
 - (NSString *)bitRateStrategy
 {
     return _charon_bitRateStrategy;

@@ -2,28 +2,6 @@
 #import <AVFAudio/AVAudioMixing.h>
 #import <AudioToolbox/AudioUnitParameters.h>
 
-// The members Apple's own hierarchy puts on AVAudioUnit, which the port was missing on every class
-// but AVAudioUnitEffect.
-//
-// -bypass: AVAudioUnitTimeEffect.h:38 and AVAudioUnitGenerator.h:39 both declare it, and in Apple's
-// hierarchy both derive from AVAudioUnit - as they do here. It is one ivar and the release's own
-// kAudioUnitProperty_BypassEffect, which the port's AVAudioUnitEffect already used, so one
-// implementation as a category on the base covers all three and the review's crash on
-// `timeEffect.bypass = YES` is what it fixes.
-//
-// The AVAudioMixing surface, which AVAudioUnitGenerator.h:22 declares and which the port answered
-// with a pragma that turned off the compiler's report of the eleven missing members. Each value is the
-// unit's own property: the mixer's k3DMixerParam_ set, which the release has carried since iOS 2.0,
-// asked of the unit's input scope 0 - this node's own source. A unit that is not a mixer has no such
-// parameter, and AudioUnitGetParameter leaves the value at zero, which is what the gain-like members
-// then answer. The 3D members are the spherical form the mixer's azimuth, elevation and distance
-// describe, and the two members the release's parameters cannot express - the ear-model algorithms and
-// the non-point source modes - are kept and answer what this unit can do, which is the sound field.
-
-// AVAudioMixingDestination is the header's own class (AVAudioMixing.h:60-63), and its contract is that a
-// reference goes stale when the source and the mixer node disconnect, so it is fetched again each time. So it is a fresh object over the
-// pair asked for, and its values are the source node's - which is what a mixing destination is: a way
-// to set a particular connection's values rather than the source's own.
 @interface AVAudioMixingDestination (CharonImpl)
 - (instancetype)initWithCharonNode:(AVAudioNode *)node mixer:(AVAudioNode *)mixer bus:(AVAudioNodeBus)bus;
 @end
@@ -154,12 +132,10 @@
 
 @end
 
-// ---- on the base itself, as a category: no ivar is needed, because every value is the unit's own ----
 @interface AVAudioUnit (CharonMixing9)
 - (nullable AVAudioMixingDestination *)destinationForMixer:(AVAudioNode *)mixer bus:(AVAudioNodeBus)bus;
 @end
 
-// the once-in-a-log note, declared beside its use
 @interface AUAudioUnit (CharonLogging)
 + (void)charon_noteInert:(NSString *)member why:(NSString *)why;
 @end
@@ -202,8 +178,6 @@
 
 - (float)pan
 {
-    // The mixer's own azimuth is a pan: the header's pan runs -1 (hard left) to +1 (hard right) and the
-    // azimuth runs -180 to 180 degrees, so the two are the same number at different scales.
     return [self charon_inputParameter:k3DMixerParam_Azimuth] / 180.0f;
 }
 
@@ -244,9 +218,6 @@
 
 - (void)setRenderingAlgorithm:(AVAudio3DMixingRenderingAlgorithm)renderingAlgorithm
 {
-    // The mixer's own parameters have placement on or off and nothing else, so the two algorithms its
-    // parameters can express are the sound field and the pass-through, and the two that need an ear
-    // model leave it where it is rather than being answered as the sound field.
     [self charon_setInputParameter:k3DMixerParam_Enable
                              value:(renderingAlgorithm == AVAudio3DMixingRenderingAlgorithmStereoPassThrough ? 0 : 1)];
 }
@@ -258,8 +229,6 @@
 
 - (void)setSourceMode:(AVAudio3DMixingSourceMode)sourceMode
 {
-    // The release's mixer places every source as a point in a sphere; that is the point source mode
-    // and the only one its parameter set expresses. A mode it cannot render leaves it where it is.
 }
 
 - (AVAudio3DMixingPointSourceInHeadMode)pointSourceInHeadMode
@@ -341,9 +310,6 @@
     OSStatus status = AudioUnitSetParameter(unit, identifier, kAudioUnitScope_Input, 0,
                                             (AudioUnitParameterValue)value, 0);
     if (status != noErr) {
-        // The set's result used to be discarded, so a parameter the unit does not publish read back as
-        // the unit's own value and the host never learned. It is checked and said once, per member and
-        // unit, the first time the unit refuses.
         [AUAudioUnit charon_noteInert:[NSString stringWithFormat:@"%@ parameter %u", NSStringFromClass([self class]), (unsigned)identifier]
                                  why:@"this release's unit refused the value, so it keeps the value it had"];
     }

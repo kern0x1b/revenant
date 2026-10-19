@@ -1,9 +1,6 @@
--- Ask the registry's own reader whether every member Vision130.m defines has an entry, using the
--- project's own entry_of rather than a copy of it.
 import("apple.backports", {rootdir = path.join(os.getenv("CHARON_ROOT"), "modules"), anonymous = true})
 local backports = import("apple.backports", {rootdir = path.join(os.getenv("CHARON_ROOT"), "modules"), anonymous = true})
 local root = os.getenv("REGISTRY_ROOT")
--- registry() reads the generated layer as it is on disk: write it first
 backports.generate(root)
 local listed = backports.registry(root)
 print("registry read: " .. table.concat(table.orderkeys(listed), " "))

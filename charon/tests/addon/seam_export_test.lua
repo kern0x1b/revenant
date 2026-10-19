@@ -1,15 +1,3 @@
--- seam_export_test.lua: does the gate keep a declared seam exported, and only the declared ones?
---
--- A seam is a charon_ function a library defines for another library of the package to link against.
--- internal_symbol() keeps every charon_ name out of the surface and the registry check, so a seam
--- needs no registry row; link() would hide it from the dylib, which is what made the Swift Network
--- module unable to link its interface lookup. seam_symbols() is what link() reads to tell a seam from
--- the rest of the internal names, and this test is the check that it reads the declaration and no more.
---
--- The fixture is a library folder of its own, so the check is on the reading and not on any library
--- of the package: a #define of the macro, a declaration in a header and a definition in a source file,
--- a function that is not a seam, and a name in a comment that is not a declaration.
-
 import("fixtures")
 
 function main()

@@ -10,9 +10,6 @@ static void charon_resolve_os_release(void)
     charon_system_function(&charon_system_os_release, CHARON_LIBDISPATCH, "os_release");
 }
 
-/* os_release arrived with vouchers, in iOS 8 (libdispatch-442): the release before it has no voucher_copy that answers
-   anything but none, so no os_release is ever handed an object there, and a real one handed in did not come from this
-   system. The release that has it is asked for it by name, so the image binds to the system's. */
 __attribute__((visibility("hidden")))
 void os_release(void *object)
 {

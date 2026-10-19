@@ -1,16 +1,3 @@
-/* The 14.0 descriptors, compared PROPERTY BY PROPERTY against Apple's own objects.
- *
- * NO DEVICE IS EVER CREATED. A descriptor asks a device nothing - both sides are [[X alloc] init - so
- * nothing here calls one, and nothing in this family needs it:
- * a descriptor is `[[X alloc] init]` on both sides. The host object is APPLE'S, made by Apple's
- * class, and it is the oracle: the port's value is compared against what Apple's own object answers
- * for the same property after the same write. A round trip of the port's object against ITSELF would
- * prove only that the port agrees with the port, and that is the round trip that let three reviews
- * through.
- *
- * Every value set below is one the header's own enumerations name, read from the SDK, and none of
- * them is chosen to make a comparison pass.
- */
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
@@ -157,7 +144,6 @@ static void check(BOOL ok, NSString *what)
     else { printf("  FAIL %s\n", [what UTF8String]); failures++; }
 }
 
-/* THE COMPARISON ITSELF: the same write on both sides, then both values read. */
 static void same_u(NSUInteger port, NSUInteger host, NSString *what)
 {
     check(port == host, ([NSString stringWithFormat:@"%@: the port %lu and Apple's own object %lu",
@@ -172,8 +158,6 @@ static void same_i(long port, long host, NSString *what)
 int main(void)
 {
     @autoreleasepool {
-        /* A fresh descriptor on both sides, before any write: the DEFAULTS are compared too, because
-         * a port that invented a default would pass every written value and still be wrong. */
         check([[MTLAccelerationStructureDescriptor new] usage]
               == [[[charonHost_MTLAccelerationStructureDescriptor alloc] init] usage],
               @"MTLAccelerationStructureDescriptor: a fresh one answers Apple's own usage on both sides");
@@ -184,8 +168,7 @@ int main(void)
               == [[[charonHost_MTLCounterSampleBufferDescriptor alloc] init] sampleCount],
               @"MTLCounterSampleBufferDescriptor: a fresh one answers Apple's own sample count on both sides");
 
-        {   /* MTLAccelerationStructureUsageNone = 0 and MTLAccelerationStructureUsageRefit = 1,
-             * the header's own two first cases. */
+        {
             MTLAccelerationStructureDescriptor *h = [MTLAccelerationStructureDescriptor new];
             charonHost_MTLAccelerationStructureDescriptor *p = [charonHost_MTLAccelerationStructureDescriptor new];
             h.usage = MTLAccelerationStructureUsageRefit;
@@ -195,7 +178,7 @@ int main(void)
             p.usage = MTLAccelerationStructureUsageNone;
             same_i((long)p.usage, (long)h.usage, @"MTLAccelerationStructureDescriptor.usage = None");
         }
-        {   /* the geometry descriptor: a SIBLING of the base, and the values are its own */
+        {
             MTLAccelerationStructureGeometryDescriptor *h = [MTLAccelerationStructureGeometryDescriptor new];
             charonHost_MTLAccelerationStructureGeometryDescriptor *p = [charonHost_MTLAccelerationStructureGeometryDescriptor new];
             h.intersectionFunctionTableOffset = 64; p.intersectionFunctionTableOffset = 64;
@@ -216,12 +199,10 @@ int main(void)
                    @"MTLAccelerationStructureGeometryDescriptor.primitiveDataStride");
             same_u(p.primitiveDataElementSize, h.primitiveDataElementSize,
                    @"MTLAccelerationStructureGeometryDescriptor.primitiveDataElementSize");
-            /* the buffer references are CARRIED AND NOT MEASURED: both sides answer nil with no
-             * device, and that is all a no-device comparison can say about them */
             check(h.primitiveDataBuffer == nil && p.primitiveDataBuffer == nil,
                   @"the primitive data buffer is nil on both sides, and is not measured further");
         }
-        {   /* MTLAttributeFormatFloat2 is 29 and MTLIndexTypeUInt16 is 0, the header's own values */
+        {
             MTLAccelerationStructureTriangleGeometryDescriptor *h = [MTLAccelerationStructureTriangleGeometryDescriptor new];
             charonHost_MTLAccelerationStructureTriangleGeometryDescriptor *p = [charonHost_MTLAccelerationStructureTriangleGeometryDescriptor new];
             h.vertexFormat = MTLAttributeFormatFloat2; p.vertexFormat = MTLAttributeFormatFloat2;
@@ -242,7 +223,7 @@ int main(void)
             same_u(p.transformationMatrixBufferOffset, h.transformationMatrixBufferOffset,
                    @"…TriangleGeometry.transformationMatrixBufferOffset");
         }
-        {   /* MTLAttributeFormatFloat3 is 30; unused here, the float2 case above is the one compared */
+        {
             MTLAccelerationStructureBoundingBoxGeometryDescriptor *h = [MTLAccelerationStructureBoundingBoxGeometryDescriptor new];
             charonHost_MTLAccelerationStructureBoundingBoxGeometryDescriptor *p = [charonHost_MTLAccelerationStructureBoundingBoxGeometryDescriptor new];
             h.boundingBoxBufferOffset = 32; p.boundingBoxBufferOffset = 32;
@@ -252,11 +233,10 @@ int main(void)
                    @"MTLAccelerationStructureBoundingBoxGeometryDescriptor.boundingBoxBufferOffset");
             same_u(p.boundingBoxStride, h.boundingBoxStride, @"…BoundingBoxGeometry.boundingBoxStride");
             same_u(p.boundingBoxCount, h.boundingBoxCount, @"…BoundingBoxGeometry.boundingBoxCount");
-            /* and it INHERITS the geometry members, as the header has it */
             same_u(p.intersectionFunctionTableOffset, h.intersectionFunctionTableOffset,
                    @"…BoundingBoxGeometry inherits intersectionFunctionTableOffset");
         }
-        {   /* MTLMotionBorderModeClamp = 0 and MTLMotionBorderModeVanish = 1 */
+        {
             MTLPrimitiveAccelerationStructureDescriptor *h = [MTLPrimitiveAccelerationStructureDescriptor new];
             charonHost_MTLPrimitiveAccelerationStructureDescriptor *p = [charonHost_MTLPrimitiveAccelerationStructureDescriptor new];
             h.motionStartBorderMode = MTLMotionBorderModeClamp; p.motionStartBorderMode = MTLMotionBorderModeClamp;
@@ -274,11 +254,10 @@ int main(void)
                   @"MTLPrimitiveAccelerationStructureDescriptor.motionEndTime");
             same_u(p.motionKeyframeCount, h.motionKeyframeCount,
                    @"MTLPrimitiveAccelerationStructureDescriptor.motionKeyframeCount");
-            /* it INHERITS the usage, as the header has it */
             same_i((long)p.usage, (long)h.usage,
                    @"MTLPrimitiveAccelerationStructureDescriptor inherits usage");
         }
-        {   /* MTLAccelerationStructureInstanceDescriptorTypeMotion = 0 */
+        {
             MTLInstanceAccelerationStructureDescriptor *h = [MTLInstanceAccelerationStructureDescriptor new];
             charonHost_MTLInstanceAccelerationStructureDescriptor *p = [charonHost_MTLInstanceAccelerationStructureDescriptor new];
             h.instanceDescriptorBufferOffset = 16; p.instanceDescriptorBufferOffset = 16;
@@ -301,7 +280,7 @@ int main(void)
             same_u(p.motionTransformCount, h.motionTransformCount,
                    @"MTLInstanceAccelerationStructureDescriptor.motionTransformCount");
         }
-        {   /* the two function tables: one member each, and the same value on both sides */
+        {
             MTLVisibleFunctionTableDescriptor *h = [MTLVisibleFunctionTableDescriptor new];
             charonHost_MTLVisibleFunctionTableDescriptor *p = [charonHost_MTLVisibleFunctionTableDescriptor new];
             h.functionCount = 5; p.functionCount = 5;
@@ -311,7 +290,7 @@ int main(void)
             ih.functionCount = 7; ip.functionCount = 7;
             same_u(ip.functionCount, ih.functionCount, @"MTLIntersectionFunctionTableDescriptor.functionCount");
         }
-        {   /* MTLStorageModeShared = 0 and MTLStorageModeManaged = 1, MTLResource.h's own */
+        {
             MTLCounterSampleBufferDescriptor *h = [MTLCounterSampleBufferDescriptor new];
             charonHost_MTLCounterSampleBufferDescriptor *p = [charonHost_MTLCounterSampleBufferDescriptor new];
             h.label = @"host"; p.label = @"host";
@@ -323,7 +302,7 @@ int main(void)
                    @"MTLCounterSampleBufferDescriptor.storageMode = Managed");
             same_u(p.sampleCount, h.sampleCount, @"MTLCounterSampleBufferDescriptor.sampleCount");
         }
-        {   /* the three attachment descriptors, each with its own index members */
+        {
             MTLComputePassSampleBufferAttachmentDescriptor *h = [MTLComputePassSampleBufferAttachmentDescriptor new];
             charonHost_MTLComputePassSampleBufferAttachmentDescriptor *p = [charonHost_MTLComputePassSampleBufferAttachmentDescriptor new];
             h.startOfEncoderSampleIndex = 1; p.startOfEncoderSampleIndex = 1;
@@ -357,7 +336,7 @@ int main(void)
             same_u(vp.endOfFragmentSampleIndex, vh.endOfFragmentSampleIndex,
                    @"MTLRenderPassSampleBufferAttachmentDescriptor.endOfFragmentSampleIndex");
         }
-        {   /* MTLDispatchTypeSerial = 0 and MTLDispatchTypeConcurrent = 1 */
+        {
             MTLComputePassDescriptor *h = [MTLComputePassDescriptor new];
             charonHost_MTLComputePassDescriptor *p = [charonHost_MTLComputePassDescriptor new];
             h.dispatchType = MTLDispatchTypeSerial; p.dispatchType = MTLDispatchTypeSerial;
@@ -367,13 +346,12 @@ int main(void)
             same_i((long)p.dispatchType, (long)h.dispatchType,
                    @"MTLComputePassDescriptor.dispatchType = Concurrent");
         }
-        {   /* the URL, which is a real object and needs no device */
+        {
             MTLBinaryArchiveDescriptor *h = [MTLBinaryArchiveDescriptor new];
             charonHost_MTLBinaryArchiveDescriptor *p = [charonHost_MTLBinaryArchiveDescriptor new];
             NSURL *u = [NSURL fileURLWithPath:@"/charon/metal/archive.mtar"];
             h.url = u; p.url = u;
             check([[p.url path] isEqualToString:[h.url path]], @"MTLBinaryArchiveDescriptor.url");
-            /* and the DEFAULTS, with no device anywhere */
             check([MTLBinaryArchiveDescriptor new].url == nil
                   && [charonHost_MTLBinaryArchiveDescriptor new].url == nil,
                   @"MTLBinaryArchiveDescriptor: a fresh one's url is nil on both sides");
@@ -381,7 +359,7 @@ int main(void)
                   && [charonHost_MTLResourceStatePassDescriptor new] != nil,
                   @"MTLResourceStatePassDescriptor: both sides make one with no device");
         }
-        {   /* MTLLinkedFunctions and the intersection function descriptor */
+        {
             MTLLinkedFunctions *h = [MTLLinkedFunctions new];
             charonHost_MTLLinkedFunctions *p = [charonHost_MTLLinkedFunctions new];
             check([p.functions count] == [h.functions count],
@@ -392,11 +370,6 @@ int main(void)
                   @"MTLLinkedFunctions.groups: both are empty with no device");
             check([p.privateFunctions count] == [h.privateFunctions count],
                   @"MTLLinkedFunctions.privateFunctions: both are empty with no device");
-            /* THE HEADER GIVES THIS CLASS NO MEMBER OF ITS OWN, and an earlier revision of this case
-             * compared three - functionBufferOffset, functionBufferOffsetAlignment, functionStride -
-             * that no SDK header declares. What is compared is what the header does say: both sides
-             * make the class with no device, and on both sides everything it answers comes from a
-             * base, MTLFunctionDescriptor, which is a different row. */
             MTLIntersectionFunctionDescriptor *ih = [MTLIntersectionFunctionDescriptor new];
             charonHost_MTLIntersectionFunctionDescriptor *ip = [charonHost_MTLIntersectionFunctionDescriptor new];
             check(ih != nil && ip != nil,
@@ -404,7 +377,7 @@ int main(void)
             check([NSStringFromClass([ip class]) hasSuffix:@"IntersectionFunctionDescriptor"],
                   @"MTLIntersectionFunctionDescriptor: the port's class carries the row's own name");
         }
-        {   /* THE THREE ARRAYS: real storage, indexed both ways, and a read past the end is nil */
+        {
             MTLComputePassSampleBufferAttachmentDescriptor *one = [MTLComputePassSampleBufferAttachmentDescriptor new];
             one.startOfEncoderSampleIndex = 5;
             charonHost_MTLComputePassSampleBufferAttachmentDescriptor *pone = [charonHost_MTLComputePassSampleBufferAttachmentDescriptor new];
@@ -432,11 +405,6 @@ int main(void)
             same_u([sp objectAtIndexedSubscript:2].endOfEncoderSampleIndex, 7,
                    @"MTLResourceStatePassSampleBufferAttachmentDescriptorArray: index 2 reads back what was set");
         }
-        /* EVERY VALUE MEMBER'S FRESH DEFAULT, not three of them. A descriptor is created empty and
-         * a caller reads it before writing anything, so the defaults are the first values a caller
-         * ever sees; comparing three and calling it "the fresh defaults" was exactly the shape of
-         * claim the review caught. Every value member below is compared on a FRESH object, and the
-         * device-made references are compared as nil on both sides. */
         {
             struct { const char *name; unsigned long port; unsigned long host; } fresh[] = {
                 {"MTLAccelerationStructureDescriptor.usage", 0, 0},
@@ -503,12 +471,8 @@ int main(void)
                 {"MTLLinkedFunctions.privateFunctions", 0, 0},
             };
             for (unsigned i = 0; i < sizeof fresh / sizeof fresh[0]; i++) {
-                /* The values are read by NAME below, on a fresh object on each side; the table is the
-                 * list of every member the fresh comparison covers, so adding a member to the port
-                 * without adding it here is visible as a shorter list than the port has. */
                 (void)fresh[i].port; (void)fresh[i].host;
             }
-            /* and the ones actually read, through a helper that takes both fresh objects */
             check([[MTLAccelerationStructureDescriptor new] usage] == [[[charonHost_MTLAccelerationStructureDescriptor alloc] init] usage],
                   @"fresh: MTLAccelerationStructureDescriptor.usage");
             check([[MTLAccelerationStructureGeometryDescriptor new] intersectionFunctionTableOffset]
@@ -652,9 +616,6 @@ int main(void)
             check([[MTLComputePassDescriptor new] dispatchType]
                   == [[[charonHost_MTLComputePassDescriptor alloc] init] dispatchType],
                   @"fresh: MTLComputePassDescriptor.dispatchType");
-            /* The header declares both properties readonly and Apple's own object hands one back, so
-             * the port makes one too and what is compared is the array itself: both sides make one
-             * with no device, and both are empty. */
             check([[MTLComputePassDescriptor new] sampleBufferAttachments] != nil
                   && [[[charonHost_MTLComputePassDescriptor alloc] init] sampleBufferAttachments] != nil,
                   @"fresh: MTLComputePassDescriptor.sampleBufferAttachments is a real array on both sides");
@@ -683,18 +644,7 @@ int main(void)
                   && [charonHost_MTLIntersectionFunctionDescriptor new] != nil,
                   @"fresh: MTLIntersectionFunctionDescriptor is made on both sides and declares no member");
         }
-        /* THE FIVE WHOSE FRESH VALUE THE HEADER DOES NOT STATE. Apple's own object answers something
-         * and the port answers the enumeration's zero, and this asserts the PORT'S value - the one
-         * the header warrants - while PRINTING Apple's, rather than the other way round. Asserting
-         * equality here would be the port copying a private default it has no warrant for. The
-         * extended fresh comparison is what found this: with only three members covered, every one
-         * of these five had been invisible. */
         {
-            /* ONLY indexType. The header's doc for it says nothing but its name, and that is the
-             * whole of it - unlike the four beside it, whose defaults MTLAccelerationStructure.h
-             * states at :101-103, :181-182, :186-187 and :213-215, and which the port now carries
-             * and the case compares like any other member. An earlier revision of this case called
-             * all five unwritten; four of the five was wrong. */
             struct { const char *name; const char *port; const char *apple; } undocumented[] = {
                 {"indexType",
                  [[[charonHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] indexType] == 0 ? "unset" : "set",
@@ -707,10 +657,6 @@ int main(void)
             }
         }
 
-        /* THE FOUR WHOSE FRESH DEFAULT MTLAccelerationStructure.h STATES, compared like any other
-         * member because the header is the warrant: allowDuplicateIntersectionFunctionInvocation is
-         * YES (:101-103), motionEndTime is 1.0f (:181-182), motionKeyframeCount is 1 (:186-187) and
-         * vertexFormat is MTLAttributeFormatFloat3 packed (:213-215, and Float3 is 30). */
         check([[MTLAccelerationStructureGeometryDescriptor new] allowDuplicateIntersectionFunctionInvocation]
                   == [[[charonHost_MTLAccelerationStructureGeometryDescriptor alloc] init] allowDuplicateIntersectionFunctionInvocation],
               @"fresh: …GeometryDescriptor.allowDuplicateIntersectionFunctionInvocation, the header's YES");
@@ -723,10 +669,6 @@ int main(void)
         check([[MTLAccelerationStructureTriangleGeometryDescriptor new] vertexFormat]
                   == [[[charonHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] vertexFormat],
               @"fresh: …TriangleGeometryDescriptor.vertexFormat, the header's Float3 packed");
-        /* THE SEVEN WHOSE FRESH VALUE THE HEADER WARRANTS, compared like any other member because
-         * each value has a citation: the bounding box stride is 24 ("Must be at least 24"), the six
-         * sample indices are MTLCounterDontSample, which the header defines as ((NSUInteger)-1), and
-         * the instance descriptor stride is the size of the descriptor type, measured at 64. */
                         check([[MTLComputePassSampleBufferAttachmentDescriptor new] startOfEncoderSampleIndex]
                   == MTLCounterDontSample
               && [[[charonHost_MTLComputePassSampleBufferAttachmentDescriptor alloc] init] startOfEncoderSampleIndex]

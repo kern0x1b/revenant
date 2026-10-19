@@ -1,24 +1,5 @@
-// ColumnarTable.swift — the table the estimators train on, and the one `MLDataTable` and `DataFrame`
-// both are.
-//
-// The public tabular API of CreateMLComponents takes a `DataFrame` and the public API of CreateML
-// takes an `MLDataTable`, and the two are the same table with two names. Neither of those two types
-// is the place the arithmetic should live: a decision tree has no opinion about whether a column is
-// a `Column<Double>` or an `MLUntypedColumn`, and putting the split search in either of them means
-// writing it twice when the other one arrives.
-//
-// So the training core is here, over a column of one of the four kinds a tabular column really is —
-// integers, doubles, strings, or a column of sequences — and both public table types are adapters
-// onto it. One copy of the arithmetic, and the public surface is a projection of it.
-
 import Foundation
 
-/// One column of a training table.
-///
-/// The four cases are the four things a column of a training table can hold on this release. A
-/// missing value is `nil` in a column of Int, Double or String, and it is a distinct case here
-/// rather than a sentinel, because "this observation has no value" and "this observation has the
-/// value 0" have to be told apart by a split search.
 public enum TrainingColumn {
     case integers([Int64?])
     case doubles([Double?])
@@ -32,7 +13,6 @@ public enum TrainingColumn {
         }
     }
 
-    /// The column as doubles, where it has a numeric reading at all. Strings do not.
     public var numeric: [Double?]? {
         switch self {
         case .integers(let values): return values.map { $0.map(Double.init) }
@@ -41,9 +21,6 @@ public enum TrainingColumn {
         }
     }
 
-    /// The column as strings, which is how a categorical label and a categorical feature are both
-    /// compared and grouped: Apple's own representation of a category is its string, and matching
-    /// that is what makes a split threshold comparable with a host's.
     public var categorical: [String?] {
         switch self {
         case .integers(let values): return values.map { $0.map(String.init) }
@@ -52,12 +29,6 @@ public enum TrainingColumn {
         }
     }
 
-    /// A double as the string a label column spells it in.
-    ///
-    /// Apple's tabular format prints a double through its shortest round-tripping decimal form and
-    /// drops a whole number's `.0`, so that a column of doubles read from a CSV and a column of the
-    /// same values read as integers share one spelling — which is what lets a label column be
-    /// either. `1e-05` rather than `1.0e-05` for the same reason: the exponent carries no `.0`.
     public static func describe(_ value: Double) -> String {
         if value == value.rounded(), abs(value) < 1e15 {
             return String(Int64(value))
@@ -68,7 +39,6 @@ public enum TrainingColumn {
     public var isNumeric: Bool { numeric != nil }
 }
 
-/// A table the estimators train on: named columns of one height.
 public struct ColumnarTable {
     public private(set) var order: [String]
     public private(set) var columns: [String: TrainingColumn]
@@ -107,8 +77,6 @@ public struct ColumnarTable {
         order = order.map { $0 == name ? newName : $0 }
     }
 
-    /// The rows `indices` names, in that order and with repeats kept: a bootstrap sample and a
-    /// random split are both "these rows, in this order", and neither is a subsequence.
     public func rows(_ indices: [Int]) -> ColumnarTable {
         var taken = ColumnarTable()
         taken.order = order
@@ -119,7 +87,6 @@ public struct ColumnarTable {
         return taken
     }
 
-    /// A mask applied to the rows.
     public func rows(where mask: [Bool]) -> ColumnarTable {
         rows((0..<count).filter { mask[$0] })
     }
@@ -137,8 +104,6 @@ public struct ColumnarTable {
             case (.none, .some(let theirs)):
                 combined = theirs
             case (.some(let mine), .some(let theirs)):
-                // Two columns of the same name and different kinds are a table with a column that
-                // has no reading, which is what the release reports as an unreadable table.
                 combined = mine
             default:
                 combined = .strings([nil])
@@ -149,7 +114,6 @@ public struct ColumnarTable {
 }
 
 extension TrainingColumn {
-    /// A column of the same kind carrying `indices` of this one, in that order.
     public func select(_ indices: [Int]) -> TrainingColumn {
         let inRange = indices.map { $0 >= 0 && $0 < count ? $0 : 0 }
         switch self {
@@ -160,15 +124,10 @@ extension TrainingColumn {
     }
 }
 
-// MARK: - The design matrix and the targets a supervised fit is made of
-
-/// One fitted model's view of its data: the features as a matrix, the label as a vector, and the
-/// feature names the matrix's columns came from.
 public struct TabularTrainingSet {
     public var featureNames: [String]
     public var design: RowMatrix
     public var targets: [Double]
-    /// The label of each row as a string, for a classifier. A regressor's is empty.
     public var targetLabels: [String]
     public var isClassification: Bool
 
@@ -182,7 +141,6 @@ public struct TabularTrainingSet {
     }
 }
 
-/// Why a table cannot be fitted, in the words of the framework that refuses it.
 public enum TabularFittingError: Error, CustomStringConvertible, Equatable {
     case noTargetColumn(String)
     case noFeatureColumn(String)
@@ -221,13 +179,6 @@ public enum TabularFittingError: Error, CustomStringConvertible, Equatable {
     }
 }
 
-/// Builds the design matrix and the targets out of a table.
-///
-/// The rules are the ones a caller can see: the feature columns are the ones named, or every column
-/// but the target; a missing value in a feature is refused here with the column and the count named,
-/// because an estimator that silently averaged over the gaps would be answering a question about
-/// different data. A missing *label* is refused the same way, and for the same reason: there is no
-/// honest prediction to make for a row whose answer is not written down.
 public enum TabularFitting {
     public static func make(_ table: ColumnarTable,
                             targetColumn: String,
@@ -291,13 +242,6 @@ public enum TabularFitting {
 
 
 extension TabularTrainingSet {
-    /// The same table over `rows`, renumbered from zero.
-    ///
-    /// A forest's bootstrap sample sees some rows twice and misses others, and the rows it does see
-    /// are a *sub-table* — its own row indices, its own target vector, its own design matrix — not
-    /// the whole table with some rows marked. A view would have carried the full matrix into every
-    /// tree and made the tree's own row numbers mean nothing, which is the difference between a
-    /// sample and a mask and is worth a copy of the indices.
     public func sample(rows indices: [Int]) -> TabularTrainingSet {
         let total = design.rows
         let inRange = indices.map { $0 >= 0 && $0 < total ? $0 : 0 }

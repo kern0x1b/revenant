@@ -1,6 +1,3 @@
-// MPSMatrixMultiplication, from the header of the SDK of iOS 16.4. One object per release: the band machinery keeps an
-// object whole or drops it whole, so a file here carries the API of exactly one release.
-
 #import "CharonMPS.h"
 
 
@@ -111,10 +108,6 @@
         CharonMPSRefuse(@"MPSMatrixMultiplication: a matrix of data type %u, %u or %u is not one of the eight element types", (unsigned)left.dataType, (unsigned)right.dataType, (unsigned)result.dataType);
         return;
     }
-    // The left matrix holds op(A) as resultRows x interiorColumns, the right one op(B) as
-    // interiorColumns x resultColumns, and the result resultRows x resultColumns, each from its own
-    // origin, and each may be transposed on the way in. A matrix that does not hold the region is
-    // refused rather than read past its end.
     NSUInteger leftRows = _transposeLeft ? _interiorColumns : _resultRows;
     NSUInteger leftColumns = _transposeLeft ? _resultRows : _interiorColumns;
     NSUInteger rightRows = _transposeRight ? _resultColumns : _interiorColumns;
@@ -124,10 +117,6 @@
     count = count < left.matrices ? count : left.matrices;
     count = count < right.matrices ? count : right.matrices;
     BOOL whole = YES;
-    // From the batch's first index, which is what batchStart names - the header says it is "the index of
-    // the first matrix to process". Starting at zero processes a batch that was not asked for and skips
-    // the one that was, which is what multiply-batch caught: with batchStart 1 and batchSize 2 the port
-    // wrote matrices 0 and 1 and left 2 alone.
     for (NSUInteger b = start; b < start + count; b++) {
         if (!CharonMPSMatrixHolds(&left, b, _leftMatrixOrigin.x, _leftMatrixOrigin.y, leftRows, leftColumns) ||
             !CharonMPSMatrixHolds(&right, b, _rightMatrixOrigin.x, _rightMatrixOrigin.y, rightRows, rightColumns) ||

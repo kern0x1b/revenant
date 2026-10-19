@@ -1,21 +1,7 @@
--- check-registered.lua - every constant the port defines has a row, and every row of those names is defined - both ways.
---
---    xmake l check-registered.lua [--control]
---
--- GENERATED FROM THE NAMES LIST, not from the registry and not from the objects, so the comparison cannot be satisfied by a list that
--- is itself wrong: the list is the one the case file asks about, and gen-security-cases.lua --check says the case file is what the
--- list says. A check that read the objects would agree with the objects.
---
--- THE CONTROL removes one row from a copy of the registry and requires this to go red NAMING that constant, after the copy has been
--- shown green - a control that fails on a copy that was already broken proves nothing. The copy is held in memory, not written to a
--- scratch directory: the check reads the same rows either way.
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
-local NULL = {}   -- JSON null, which a table can hold where nil cannot
+local NULL = {}
 
--- A JSON reader for the registry files: an array is {array = true, items = {...}}, an object is {object = true, fields = {...}} with
--- a later repeated key winning, a string is its UTF-8 bytes, a number is a Lua number, and true, false and null are themselves.
 local function parse_json(text, path)
     local pos = 1
 
@@ -175,7 +161,6 @@ local function is_dict(v)
     return type(v) == "table" and v.object == true
 end
 
--- Python's row.get(key) on a dict: a missing key reads as None
 local function get(row, key)
     local v = row.fields[key]
     if v == nil then
@@ -184,7 +169,6 @@ local function get(row, key)
     return v
 end
 
--- Python's truth of a JSON value: None, False, 0, "", [] and {} are false
 local function truthy(v)
     if v == NULL or v == false then
         return false
@@ -205,7 +189,6 @@ local function truthy(v)
     return true
 end
 
--- Python's %r of a JSON value, for the scalars a status can be
 local function repr(v)
     if v == NULL then
         return "None"
@@ -224,12 +207,10 @@ local function has_prefix(s, prefix)
 end
 
 local here = os.scriptdir()
--- four levels up: this directory is tests/backports/host/security
 local worktree = here .. "/../../../.."
 local objects = worktree .. "/packages/a/apple-backports/Security"
 local registry = worktree .. "/packages/a/apple-backports/registry/Security"
 
--- The names the case file asks about, sorted by bytes, duplicates kept, as the list gives them.
 local function names()
     local out = {}
     for _, line in ipairs(tsv.text_lines(tsv.read_text(here .. "/algorithms.txt"))) do
@@ -242,7 +223,6 @@ local function names()
     return out
 end
 
--- The set of names the port's constant objects define, and how many there are.
 local function defined()
     local found, count = {}, 0
     local paths = os.files(objects .. "/SecurityConstants*.m")
@@ -259,8 +239,6 @@ local function defined()
     return found, count
 end
 
--- The registry's rows of kind constant, keyed by api; a later row for the same api wins. `files` is a list of entry lists, one per
--- registry file in the order they are read.
 local function recorded_rows(files)
     local out, count = {}, 0
     for _, entries in ipairs(files) do
@@ -281,7 +259,6 @@ local function recorded_rows(files)
     return out, count
 end
 
--- The entries of each registry file, in the order the files sort. A file is a list of rows, or an object whose "entries" is a list.
 local function load_registry()
     local files = {}
     local paths = os.files(registry .. "/*.json")
@@ -310,7 +287,6 @@ local function load_registry()
     return files
 end
 
--- The problems with the names against the objects and the rows, in the order the Python gave them; `files` is the registry's rows.
 local function check(files)
     local wanted_list = names()
     local wanted, wanted_count = {}, 0
@@ -368,7 +344,6 @@ local function check(files)
     return problems
 end
 
--- The control: one row removed from the first registry file that holds it, and the check must go red naming that constant.
 local function control(files)
     local before = check(files)
     if #before > 0 then

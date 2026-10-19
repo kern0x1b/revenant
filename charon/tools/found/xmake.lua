@@ -1,7 +1,3 @@
--- The declaration extractor (decls.cc): libclang's C API, read from the Command Line Tools' libclang.dylib (the toolchain pin,
--- recorded in the spec snapshot and checked by ir.lua). The clang-c headers come from the pinned package llvm-clang-c (packages/l),
--- which is include/clang-c of the llvm-project 21.1.0 release: the Command Line Tools do not ship them.
--- Build: xmake -P tools/found; the binary is in the build directory (build/), never in the source tree.
 set_project("found")
 set_defaultmode("release")
 set_languages("c++20")

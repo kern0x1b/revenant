@@ -1,17 +1,3 @@
-/* chain-oracle.m - the LIVE Metal 4 command chain on this machine, asked with the selectors the 26.2
- * headers actually declare.
- *
- * This is the oracle the port's chain will be built against. Every call below goes through the runtime,
- * because the port's build SDK has no Metal 4 declaration at all and this file has to compile against
- * whatever SDK the host has; the selectors are spelled exactly as MTLDevice.h:1240, :1271, :1278 and
- * MTL4CommandBuffer.h:71, :95, :103 name them, and each line records which header line it came from.
- *
- * A PREVIOUS PROBE OF MINE GOT FOUR OF THESE WRONG and the answers it drew from them were wrong with it:
- * it called -newCommandQueueWithDescriptor:, which is METAL 3's factory (MTL4's is
- * -newMTL4CommandQueueWithDescriptor:error:, MTLDevice.h:1271), and it sent -beginCommandBufferWithAllocator:
- * to a QUEUE, when that method belongs to the command buffer (MTL4CommandBuffer.h:71). Both are retracted
- * in facts/Metal/CommandChain26.md; this file is the corrected measurement.
- */
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <objc/message.h>
@@ -40,15 +26,9 @@ static id send1(id target, NSString *name, id first)
     return one(target, selector, first);
 }
 
-// NO `?:` ON A MESSAGE SEND ANYWHERE IN THIS FILE. It is a parse error inside an argument list - the
-// first version had four of them and the compiler named all four - so every optional answer goes
-// through these two.
 static NSString *text(id object) { return object ? [object description] : nil; }
 static const char *utf8(NSString *string) { return string ? [string UTF8String] : "(nil)"; }
 
-// THE CLASS, NEVER THE ADDRESS. Apple's -description carries the object's pointer, so a table built from
-// it differs on every run and a `git diff` on the committed table is always dirty - which is the one
-// thing a table in a repository must not be.
 static NSString *describe(id object)
 {
     if (!object) return @"(nil)";
@@ -64,7 +44,6 @@ static void member(id object, NSString *key, NSString *name)
         return;
     }
     id value = [object respondsToSelector:NSSelectorFromString(key)] ? [object valueForKey:key] : nil;
-    /* A member that is an object prints as its CLASS here too, for the same reason. */
     const char *shown = (value && [value isKindOfClass:[NSObject class]] &&
                          ![value isKindOfClass:[NSValue class]])
         ? [describe(value) UTF8String] : utf8(text(value));
@@ -171,36 +150,9 @@ int main(void)
         }
         member(buffer, @"status", @"status at the end");
 
-        /* THE QUEUE'S COMMIT, IN A CHILD PROCESS, AND THE THIRD THING THIS PROBE GOT WRONG.
-         *
-         * -[MTL4CommandQueue commit:count:] takes a C ARRAY OF BUFFERS - MTL4CommandQueue.h:231 declares
-         *
-         *     - (void)commit:(const id<MTL4CommandBuffer> _Nonnull[_Nonnull])commandBuffers
-         *              count:(NSUInteger)count;
-         *
-         * and "Enqueues an array of command buffers for execution" - so the two earlier versions of this
-         * probe, which passed ONE buffer where an array was expected, made Apple's framework read the
-         * object's own memory as the array's first element. The Segmentation fault they produced was
-         * MINE, not Apple's, and the "this row is not answerable" conclusion that came with it was
-         * retracted. An ended buffer is the NORMAL thing to commit: the header's own path is
-         * -newCommandBuffer, -beginCommandBufferWithAllocator:, work, -endCommandBuffer, -commit:count:.
-         *
-         * IT IS A CHILD PROCESS because one of the two questions below ABORTS Apple's framework rather
-         * than raising, and an abort in this process would lose every row above it. The child does the
-         * commit and the parent records what became of it.
-         */
-        /* NOT MEASURED HERE, and the reason is fork-safety rather than a missing selector. Metal is not
-         * fork-safe, so a commit cannot be measured in a child forked from a process that already holds a
-         * device, a queue and a buffer - the signal such a child dies on says nothing about the commit. The
-         * measurement is chain-commit.sh, which EXECs a fresh process per form, runs Apple's documented
-         * sequence there, keeps the allocator alive until after the commit, waits for completion, and
-         * records that process's own stderr and status as they are. Until it has run, this row says
-         * "measured next" and nothing else. */
         printf("\nand the queue's commit: measured next, in a process of its own\n");
         printf("   NOT ASKED HERE - Metal is not fork-safe, so a child forked from this process would\n"
                "       answer a question about the fork. See chain-commit.sh.\n");
-
-        /* The parent does not fork at all any more; the child helper is gone with it. */
     }
     return 0;
 }

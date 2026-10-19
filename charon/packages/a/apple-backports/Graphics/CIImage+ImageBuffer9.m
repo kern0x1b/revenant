@@ -3,9 +3,6 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-// An image buffer a capture session or a decoder hands out on iOS is a pixel buffer, which iOS 6's
-// CIImage already takes; anything else is refused with nil, as NULL is on the host.
-
 @implementation CIImage (CharonImageBuffer)
 
 static BOOL charon_is_pixel_buffer(CVImageBufferRef buffer)

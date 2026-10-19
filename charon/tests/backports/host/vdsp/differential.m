@@ -1,17 +1,3 @@
-// The port's vDSPFixed7.m and vDSPElementwise8.m held against the host's own vDSP, case by case.
-//
-// The port's two sources are compiled with every API name they define renamed, so this one can hold the
-// port's answers and the host's side by side and compare them: the two 24-bit readers, the two scaling
-// forms, the two clamps, the integer add, the two split-complex products in one precision and in the
-// other, the two sums-and-differences, the four ramps, the two sliding window maxima, the scaled
-// multiply-multiply-add, the two dot products and the distance.
-//
-// Every case gives both sides the same bytes and compares everything they wrote, so a function that
-// writes less than the other - which is what a wrong stride or a wrong count does - is caught. The
-// prototypes are the ones of the header of iOS 16.4, which is what the port's own translation units are
-// compiled against; the types they use are the host's, so the two sides are called through one set of
-// declarations.
-
 #import <Accelerate/Accelerate.h>
 #import <Foundation/Foundation.h>
 #include <math.h>
@@ -114,8 +100,6 @@ static unsigned charon_read_uint24(const vDSP_uint24 *value, int at)
     return (unsigned)(value[at].bytes[0] | (value[at].bytes[1] << 8) | (value[at].bytes[2] << 16));
 }
 
-// The two sides write into their own buffers, which start as the same bytes, and every element of both
-// is compared - so an element neither wrote, or only one of them wrote, is a difference.
 static void same_floats(const char *name, const float *mine, const float *theirs, int count)
 {
     for (int at = 0; at < count; at++) {
@@ -184,12 +168,6 @@ static void same_ints(const char *name, const int *mine, const int *theirs, int 
     report(1, name, "");
 }
 
-// The six values the 24-bit cases use, and the buffer each case writes into: eight elements, so a case
-// with a stride of two can be seen to write where it should and nowhere else. Every byte of both
-// buffers starts as a value neither side is expected to write.
-// Six elements at an output stride of two occupy twelve slots; both sides write all twelve, so both
-// buffers are that long and all twelve are compared. A buffer of eight would have both of them writing
-// past the end, which is the caller's mistake and not a difference between the two.
 #define BUFFER_SLOTS 8
 #define STRIDED_SLOTS 12
 static const float kFill = -987654.0f;
@@ -207,7 +185,6 @@ int main(void)
         unsigned24[at] = charon_uint24(unsigned_values[at]);
     }
 
-    // the two plain conversions, and a stride of two on each side
     {
         float mine[BUFFER_SLOTS], theirs[BUFFER_SLOTS];
         for (int at = 0; at < BUFFER_SLOTS; at++) {
@@ -244,7 +221,6 @@ int main(void)
         same_floats("vDSP_vfltu24 over six values", mine, theirs, BUFFER_SLOTS);
     }
 
-    // the scaling forms, at a scale of 1, 2, -1 and 0
     for (int which = 0; which < 4; which++) {
         const float scales[4] = {1.0f, 2.0f, -1.0f, 0.0f};
         float scale_array[4] = {scales[which], 0.0f, 0.0f, 0.0f};
@@ -272,7 +248,6 @@ int main(void)
         }
     }
 
-    // the two clamps, at a scale that overflows both ranges and one that does not
     {
         const float inputs[6] = {1.0f, -1.0f, 0.5f, -0.5f, 2.0f / 3.0f, 100.0f};
         const float scales[4] = {8388608.0f, -8388608.0f, 1.0f, 0.5f};
@@ -299,7 +274,6 @@ int main(void)
                 same_uint24(label, umine, utheirs, 6);
             }
         }
-        // negative inputs at a scale of one, which is where the unsigned clamp shows
         {
             const float negative[6] = {-1.0f, -0.5f, -2.0f, 0.0f, 0.25f, -1e9f};
             float one[4] = {1.0f, 0.0f, 0.0f, 0.0f};
@@ -318,7 +292,6 @@ int main(void)
         }
     }
 
-    // the integer add, with a stride on each of the three
     {
         const int a[6] = {1, -2, 3, -4, 5, -6}, b[6] = {10, 20, -30, 40, -50, 60};
         int mine[BUFFER_SLOTS], theirs[BUFFER_SLOTS];
@@ -343,7 +316,6 @@ int main(void)
         same_ints("vDSP_vaddi with a stride of two on the output", wide_mine, wide_theirs, STRIDED_SLOTS);
     }
 
-    // the split-complex products, in one precision and in the other
     {
         float ar[4] = {1, 2, 3, 4}, ai[4] = {5, 6, 7, 8};
         float br[4] = {2, 0, -1, 3}, bi[4] = {0, 1, 1, 0};
@@ -405,7 +377,6 @@ int main(void)
         }
     }
 
-    // the two sums and differences
     {
         const float a[6] = {1, 2, 3, 4, 5, 6}, b[6] = {0.5f, -0.5f, 1.0f, -1.0f, 2.0f, -2.0f};
         float m0[BUFFER_SLOTS], m1[BUFFER_SLOTS], t0[BUFFER_SLOTS], t1[BUFFER_SLOTS];
@@ -436,7 +407,6 @@ int main(void)
         same_doubles("vDSP_vaddsubD, the difference", m1, t1, BUFFER_SLOTS);
     }
 
-    // the four ramps, each of which leaves the start where the ramp ended
     {
         const double a[5] = {1, 2, 3, 4, 5}, step = 2.0;
         double m[BUFFER_SLOTS], t[BUFFER_SLOTS];
@@ -462,7 +432,6 @@ int main(void)
         vDSP_vrampmul2D(a, a, 1, &their_start, &step, t0, t1, 1, 5);
         same_doubles("vDSP_vrampmul2D, the first output", m0, t0, 5);
         same_doubles("vDSP_vrampmul2D, the second output", m1, t1, 5);
-        // the add forms accumulate into what the caller left, so both start from the same non-zero
         for (int at = 0; at < BUFFER_SLOTS; at++) {
             m[at] = t[at] = kFillD;
         }
@@ -484,7 +453,6 @@ int main(void)
         same_doubles("vDSP_vrampmuladd2D, the second output", m1, t1, 5);
     }
 
-    // the two sliding window maxima, with the N + WindowLength - 1 elements the header requires
     {
         const float a[9] = {3, 1, 4, 1, 5, 9, 2, 8, 6};
         const double ad[9] = {3, 1, 4, 1, 5, 9, 2, 8, 6};
@@ -511,7 +479,6 @@ int main(void)
                      (long)count);
             same_doubles(label, m9, t9, 9);
         }
-        // a stride on the input and on the output
         {
             const float wide[18] = {3, -1, 1, -1, 4, -1, 1, -1, 5, -1, 9, -1, 2, -1, 8, -1, 6, -1};
             float mine[9], theirs[9];
@@ -524,13 +491,6 @@ int main(void)
         }
     }
 
-    // The scaled multiply-multiply-add, the two dot products and the distance.
-    //
-    // B and D are both scalars, and a differential can only see that with an input that tells the two
-    // readings apart: with a constant D, D[0] and D[n] are the same number and any reading of D passes.
-    // So B and D are both non-uniform here, and a second case passes the one element each that the header
-    // tells a caller to pass - which is the case a vector reading also gets wrong, and gets wrong by
-    // reading past the end of the caller's own buffer.
     {
         const double a[4] = {1, 2, 3, 4}, c[4] = {10, 20, 30, 40};
         const double d[4] = {0.5, 99, 99, 99};
@@ -543,11 +503,6 @@ int main(void)
         vDSP_vsmsmaD(a, 1, b, c, 1, d, te, 1, 4);
         same_doubles("vDSP_vsmsmaD with a D that is not constant", me, te, BUFFER_SLOTS);
         {
-            // The one element B and D the header asks for, each in a buffer with a guard element on
-            // each side. Reading D[1..3] as a vector then takes whatever the guard holds, which is
-            // visible in the compared output rather than in the guard itself - a read does not change
-            // what it reads - and the guard elements are checked after the call for the other half of
-            // it, which is that neither side writes to an operand it was given.
             double lone_b[4], lone_d[4];
             for (int at = 0; at < 4; at++) {
                 lone_b[at] = lone_d[at] = kFillD;

@@ -1,11 +1,3 @@
-// The activity classes of CoreMotion, asked one question per process: the host's own CoreMotion (Catalyst) when built
-// without -DPORT, and the port's CMMotionActivity.m and CMMotionActivityManager.m when built with it. The two sides are
-// separate processes because both define the same classes; in one process the second to load would win and the port
-// would be compared with itself.
-//
-// Each case is one argv[1] value and prints a fixed set of lines, so run.sh can compare the two sides case by case and a
-// crash of one side is attributed to that case alone. Nothing here calls a sensor: the host has none, and the port has
-// none to call.
 #import <Foundation/Foundation.h>
 #import <CoreMotion/CoreMotion.h>
 #import <objc/runtime.h>
@@ -19,8 +11,6 @@ static NSString *queueKind(NSOperationQueue *passed)
     return @"other-thread";
 }
 
-// The pedometer and the altimeter hand their handlers no queue of their own, or only the one they were given: the thread
-// that runs a handler is the thing to compare for those.
 static NSString *threadKind(void)
 {
     return [NSThread isMainThread] ? @"main-thread" : @"other-thread";

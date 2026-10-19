@@ -1,10 +1,6 @@
 #import <UIKit/UIKit.h>
 #include <stdio.h>
 
-// One body of checks, run on the host's own interaction (looked up by name, which run.sh's -D rename does not touch) and on the port's,
-// which run.sh compiles under the same identifier. A line is "side<TAB>check<TAB>value". The views are attached and detached through the
-// host's own UIView, so the port's interaction is moved by the same calls the release makes. No window is needed for any of this.
-
 static void report(const char *side, const char *check, NSString *value)
 {
     printf("%s\t%s\t%s\n", side, check, value ? [value UTF8String] : "nil");

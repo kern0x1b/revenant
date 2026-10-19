@@ -103,13 +103,6 @@ static void charon_pass_on(NSProgress *parent, SEL selector)
 + (void)load
 {
     Class progress = [NSProgress class];
-    // Below iOS 6, where NSProgress.m carries the class itself, instancesRespondToSelector: measures YES for
-    // -addChild:withPendingUnitCount: already at +load time, even though this package's own class never implements it
-    // natively (Foundation/NSProgress.m has no such method) - the timing this method's own comment (charon/AGENTS.md,
-    // "+load in a backport") assumes for a category on the release's class does not carry over to a class this package
-    // carries itself, measured on the emulator. Decided on the release alone, as that trap says: below iOS 6.0 the real
-    // OS has no NSProgress at all, so this is always our own class and the swizzle always installs; from 6.0 (genuinely
-    // no addChild until 9.0) instancesRespondToSelector: is read as before.
     BOOL ours = NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_6_0;
     if (!ours && [NSProgress instancesRespondToSelector:@selector(addChild:withPendingUnitCount:)])
         return;

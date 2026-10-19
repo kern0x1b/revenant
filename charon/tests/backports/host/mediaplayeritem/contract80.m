@@ -1,5 +1,3 @@
-// The contract for MPMediaItem's 8.0 group, compiled against the port's own source and a stand-in. The
-// expected table is generated from the same list the getters and the facts rows come from.
 #import "MPMediaItemStandin.h"
 static char *const members[][3] = {
 #include "members80.h"
@@ -31,7 +29,6 @@ static const char *number(NSUInteger value, int which) {
 }
 
 int main(void) {
-    // One value per member, one per type the group carries, read back through the generated table.
     NSDictionary *given = @{@"albumPersistentID": @11, @"artistPersistentID": @12, @"albumArtistPersistentID": @13,
                             @"genrePersistentID": @14, @"composerPersistentID": @15, @"podcastPersistentID": @16,
                             @"albumTrackCount": @3, @"discCount": @1, @"beatsPerMinute": @128,
@@ -60,7 +57,6 @@ int main(void) {
         else if (strcmp(name, "assetURL") == 0) { check(name, [item.assetURL isEqual:[NSURL URLWithString:@"file:///a"]], "file:///a", text(item.assetURL)); continue; }
         check(name, got == wanted[i], number(wanted[i], 0), number(got, 1));
     }
-    // A key the dictionary does not hold: nil, so every conversion answers its zero and nothing raises.
     MPMediaItem *empty = [[MPMediaItem alloc] init];
     [empty charon_set_properties:@{}];
     check("a missing key answers zero or nil",

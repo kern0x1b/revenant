@@ -1,8 +1,6 @@
 #import "CharonSCN.h"
 #import "CharonSCNMath.h"
 
-// Each answer below is macOS SceneKit's for the same input (tests/backports/host/scenekit, mathcases).
-
 bool SCNVector3EqualToVector3(SCNVector3 a, SCNVector3 b)
 {
     return a.x == b.x && a.y == b.y && a.z == b.z;

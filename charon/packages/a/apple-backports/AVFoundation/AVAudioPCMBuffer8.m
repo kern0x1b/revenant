@@ -1,16 +1,5 @@
 #import "CharonAVAudioBuffer.h"
 
-// AVAudioPCMBuffer owns a Core Audio AudioBufferList the same way the real class does: one
-// malloc'd AudioBufferList, one calloc'd (so a freshly made buffer reads as silence rather than
-// whatever heap garbage was there) chunk of sample memory per AudioBuffer, freed together in
-// AVAudioBuffer8.m's -dealloc.
-//
-// The one thing this port never builds silently: a graph that runs and produces nothing. Nothing
-// here decides that on its own, since a buffer of zero samples is a legitimate buffer - but every
-// byte a caller writes through floatChannelData/int16ChannelData is read back through the same
-// pointer, never copied into a separate "real" location the way a stub would, so what a caller
-// wrote is what -audioBufferList reports.
-
 @implementation AVAudioPCMBuffer
 
 - (instancetype)initWithPCMFormat:(AVAudioFormat *)format frameCapacity:(AVAudioFrameCount)frameCapacity
@@ -32,7 +21,7 @@
         list->mNumberBuffers = numberOfBuffers;
         for (UInt32 i = 0; i < numberOfBuffers; i++) {
             list->mBuffers[i].mNumberChannels = channelsPerBuffer;
-            list->mBuffers[i].mDataByteSize = 0;   // frameLength starts at 0, mirroring the real class
+            list->mBuffers[i].mDataByteSize = 0;
             list->mBuffers[i].mData = frameCapacity ? calloc(1, asbd->mBytesPerFrame * frameCapacity) : NULL;
         }
 

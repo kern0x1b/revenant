@@ -3,9 +3,6 @@
 #import "CharonSymbolGlyphs.h"
 #include <math.h>
 
-// A glyph is a script over a box of 100 by 100 units, y down: m l c q z o r a A * G build a path, S F B X Y end it, d and h draw a dot and an arrowhead, H an arc with
-// one, g draws another glyph into a rectangle, K and k switch to clearing, w scales the line, !f fills what is closed.
-
 typedef struct {
     CGContextRef context;
     CGAffineTransform map;
@@ -50,7 +47,6 @@ static NSDictionary<NSString *, NSString *> *charon_glyph_table(void)
     return table;
 }
 
-// Where a glyph sits inside an enclosure, as x, y, width, height of the 100 by 100 box.
 static NSString *charon_core_box(NSString *core)
 {
     static NSDictionary *boxes;
@@ -89,7 +85,6 @@ NSString *charon_glyph_script(NSString *name)
     NSString *last = parts.lastObject;
     NSString *afterLast = count > 2 ? parts[count - 2] : nil;
 
-    // gauge.with.dots.needle.NNpercent and gauge.with.dots.needle.bottom.NNpercent
     if ([name hasPrefix:@"gauge.with.dots.needle."] && [last hasSuffix:@"percent"]) {
         double percent = [last doubleValue];
         BOOL bottom = [afterLast isEqualToString:@"bottom"];
@@ -101,7 +96,6 @@ NSString *charon_glyph_script(NSString *name)
         }
         return [NSString stringWithFormat:@"o 50 50 48 48 S %@w 1.4 m 50 %.1f l %.1f %.1f S d 50 %.1f", ticks, pivotY, 50 + 24 * cos(angle), pivotY + 24 * sin(angle), pivotY];
     }
-    // (square|rectangle).split.AxB and square.grid.AxB, filled or not
     BOOL filled = [last isEqualToString:@"fill"];
     NSArray *shape = [(filled ? [name substringToIndex:name.length - 5] : name) componentsSeparatedByString:@"."];
     if (shape.count == 3 && ([shape[0] isEqualToString:@"square"] || [shape[0] isEqualToString:@"rectangle"]) && ([shape[1] isEqualToString:@"split"] || [shape[1] isEqualToString:@"grid"])) {
@@ -127,7 +121,6 @@ NSString *charon_glyph_script(NSString *name)
             return script;
         }
     }
-    // enclosures
     static NSArray *enclosures;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
@@ -148,14 +141,12 @@ NSString *charon_glyph_script(NSString *name)
             return [NSString stringWithFormat:@"%@ B K g %@ %@ 0", outline, core, box];
         return [NSString stringWithFormat:@"%@ S g %@ %@ 0", outline, core, box];
     }
-    // slashes
     if ([last isEqualToString:@"slash"] || ([last isEqualToString:@"fill"] && [afterLast isEqualToString:@"slash"])) {
         BOOL solid = [last isEqualToString:@"fill"];
         NSString *base = [[parts subarrayWithRange:NSMakeRange(0, count - (solid ? 2 : 1))] componentsJoinedByString:@"."];
         if (charon_glyph_script(base))
             return [NSString stringWithFormat:@"%@g %@ 0 0 100 100 0 K w 2.6 m 6 6 l 94 94 S k w 1 m 6 6 l 94 94 S", solid ? @"!f " : @"", base];
     }
-    // badges: BASE.badge.KIND and BASE.trianglebadge.exclamationmark
     for (NSUInteger i = 1; i + 1 < count; i++) {
         BOOL triangle = [parts[i] hasSuffix:@"trianglebadge"] && ![parts[i] isEqualToString:@"badge"];
         if (![parts[i] isEqualToString:@"badge"] && !triangle)
@@ -184,7 +175,6 @@ NSString *charon_glyph_script(NSString *name)
         NSString *inner = core.length ? [NSString stringWithFormat:@"K g %@ %.1f %.1f 24 24 0 k", core, x - 12, y - 12] : @"";
         return [NSString stringWithFormat:@"g %@ 0 0 100 100 0 K o %.1f %.1f 27 27 Y k o %.1f %.1f 19 19 B %@", base, x, y, x, y, inner];
     }
-    // the filled form of a glyph
     if ([last isEqualToString:@"fill"]) {
         NSString *base = [name substringToIndex:name.length - 5];
         if (charon_glyph_script(base))
@@ -404,7 +394,6 @@ static void charon_run(NSString *script, CharonScene scene)
     CGPathRelease(path);
 }
 
-// The names are sorted, so a binary search finds one.
 static NSInteger charon_symbol_index(NSString *name)
 {
     if (![name isKindOfClass:[NSString class]] || !name.length)
@@ -432,7 +421,6 @@ static double charon_round_half(double value)
     return floor(value * 2 + 0.5) / 2;
 }
 
-// One value of the grid at a point size, weight and scale, interpolated between what was measured.
 static double charon_grid_value(const int16_t *values, int stride, int offset, double pointSize, int weight, int scale)
 {
     double at[2] = {0, 0};
@@ -479,7 +467,6 @@ BOOL charon_symbol_metrics(NSString *name, double pointSize, NSInteger weight, N
     return YES;
 }
 
-// The extent of a glyph's geometry, so that whatever margin a script leaves, its drawing fills the space the host's symbol fills.
 static CGRect charon_glyph_bounds(NSString *name, NSString *script)
 {
     static NSMutableDictionary *cache;

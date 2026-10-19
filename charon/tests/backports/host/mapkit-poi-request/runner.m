@@ -1,28 +1,3 @@
-// The request's own numbers, compared against the HOST's own MKLocalPointsOfInterestRequest: the four
-// members' values, for the same circles and the same regions, on both, in one process.
-//
-// The port's object is built here as a macOS dylib with its class RENAMED, because the class name is
-// Apple's and two classes of one name cannot both be live: the rename is the only way both can answer
-// the same circle in one probe. Apple's own is reached through the unrenamed name.
-//
-// WHAT IS COMPARED AND HOW, and the one number that is not compared exactly:
-//
-//   -coordinate, -region's centre and -region's span   EXACTLY, as printed to six decimals. The
-//     circle-to-region direction is the release's own projection on the port's side and Apple's own
-//     on the host's, and they agree to the last printed digit (measured over the six cases below).
-//   -radius   within 1%, and the band is not a tolerance chosen to pass: the HOST'S OWN two
-//     directions do not agree with each other either. Measured on the host's own class, a circle of
-//     500 m at the equator answers a region that reads back as 503.378 m, one at London as 499.016 m
-//     and one of 1999 m at Reykjavik as 1990.462 m -- so the host's radius is computed with an earth
-//     model of its own and not with MapKit's projection, which is what the port answers. Over the six
-//     regions below the two differ by at most 0.67%. The port's own round trip IS exact, and the probe
-//     checks that too: a circle of r metres answers a region whose half-spans are both r metres, and
-//     that region answers r metres back.
-//
-// THE MUTANT is the same dylib with no recompile: the runner allocates a subclass at run time whose
-// -radius answers the DIAGONAL of the region instead of the larger half-span, which is the reading
-// this port's first version used. Every other case is identical, so a run in which the mutant does not
-// go red means the comparison cannot see a wrong number, and the probe says so and fails.
 #import <Foundation/Foundation.h>
 #import <MapKit/MapKit.h>
 #import <CoreLocation/CoreLocation.h>
@@ -31,8 +6,6 @@
 #include <math.h>
 #include <stdio.h>
 
-// The request's own API, spelled once so both classes are driven through the same calls: the host's
-// own class and the port's renamed one declare these members with these shapes.
 @protocol CharonPointsOfInterestRequest <NSObject>
 - (instancetype)initWithCenterCoordinate:(CLLocationCoordinate2D)coordinate radius:(CLLocationDistance)radius;
 - (instancetype)initWithCoordinateRegion:(MKCoordinateRegion)region;
@@ -42,10 +15,6 @@
 - (id)copy;
 @end
 
-// The MUTANT: -radius answers the diagonal of the region -- a real number, and the wrong one.
-// Installed from main() and NOT from +load, because +load of the runner's own image runs before the
-// port's dylib is dlopen'd, so the class this subclass is made from would not exist yet and the
-// mutant would silently be the unmutated class.
 static Class CharonInstallMutant(Class port)
 {
     Class mutant = objc_allocateClassPair(port, "CharonPOIMutantRequest", 0);
@@ -71,9 +40,6 @@ static Class CharonInstallMutant(Class port)
     return mutant;
 }
 
-// The one band in the comparison, and what it is for: see the header. 1% is wider than the widest
-// disagreement measured between the two implementations (0.67%) and far narrower than the mutant's
-// (19% at the equator), so it separates a wrong reading from a different earth model.
 static const double CharonRadiusBand = 0.01;
 static const double CharonRadiusRelative = 0.01;
 
@@ -103,8 +69,6 @@ static void compare_one(const char *name, const char *direction,
     double difference = fabs(host.radius - port.radius);
     double scale = fabs(host.radius) > 1.0 ? fabs(host.radius) : 1.0;
     BOOL nearRadius = difference / scale <= CharonRadiusBand;
-    // The port's own guarantee, checked on the port's side alone: a circle of r metres answers a
-    // region that reads back as r metres.
     BOOL roundTrip = expectedRadius <= 0.0 || fabs(port.radius - expectedRadius) <= expectedRadius * CharonRadiusRelative;
     if (same && nearRadius && roundTrip) {
         printf("compare %-18s %-6s ok (radius %.3f vs %.3f, %.3f%% apart)\n", name, direction,
@@ -172,15 +136,12 @@ int main(int argc, char **argv)
             print_case("port", portRegion);
             compare_one(cases[i].name, "region", hostRegion, portRegion, 0.0);
 
-            // The round trip both sides: the circle's own region, asked back as a region.
             id<CharonPointsOfInterestRequest> hostBack = [[host alloc] initWithCoordinateRegion:hostCircle.region];
             id<CharonPointsOfInterestRequest> portBack = [[port alloc] initWithCoordinateRegion:portCircle.region];
             print_case("host-back", hostBack);
             print_case("port-back", portBack);
             compare_one(cases[i].name, "back", hostBack, portBack, cases[i].radius);
 
-            // The copy the header's own NSCopying promises, which the HOST's own class also has and
-            // which has to be the same circle rather than a shared object.
             id<CharonPointsOfInterestRequest> copied = [portCircle copy];
             printf("  copy  radius=%.3f coord=%.6f,%.6f %s\n", copied.radius, copied.coordinate.latitude,
                    copied.coordinate.longitude, copied == portCircle ? "SHARED" : "distinct");

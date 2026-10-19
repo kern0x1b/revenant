@@ -1,26 +1,3 @@
--- xmake l tests/backports/host/mediaplayeritem/generate.lua RELEASE
---
--- Emits one release group of MPMediaItem's properties, and the check's table, from ONE list.
---
--- The getters a group carries, the facts rows that cite them, and the table the host contract check
--- asserts are three places that would drift if they were written separately, so all three come from the
--- list below: this script writes the library file, replaces the group's facts rows, and writes the
--- check's table. RELEASE is 70, 80, 92, 100, 103 or 145.
---
---     xmake l tests/backports/host/mediaplayeritem/generate.lua 80
---
--- `key` is the property's own name, and `getter` is the header's `getter=` name when it has one. That the
--- dictionary key is the property name is the documented convention for MPMediaItem's property constants -
--- they are spelled as the property - and it is **not** verified against a populated item, because neither
--- this Mac nor 6.1.3 has one without a media library. What *is* measured is that the release has none of
--- these members at all, so a port-created item is the only thing that can answer them here.
---
--- Ported from generate.py. The facts rows are kept between a begin and an end marker per release, and
--- every release's block is kept in release order: a run replaces its own block, and the blocks two runs
--- of the old script appended are reduced to one each.
-
--- (property, type, getter, key) - the single list for this group. 7.0 was hand-written before the
--- generator existed and is here now, so one writer emits every group and none is typed twice.
 local GROUP_70 = {{"albumTrackNumber", "NSUInteger", "albumTrackNumber", "albumTrackNumber"},
                   {"discNumber", "NSUInteger", "discNumber", "discNumber"}}
 local GROUP_80 = {
@@ -41,8 +18,6 @@ local GROUP_80 = {
     {"assetURL", "NSURL *", "assetURL", "assetURL"},
 }
 
--- The three groups after 8.0, with the release as the header writes it and as the file names it. Two of
--- the four are declared with a getter=, so the property name is the first field and the selector the third.
 local GROUP_92 = {{"protectedAsset", "BOOL", "hasProtectedAsset", "hasProtectedAsset"}}
 local GROUP_100 = {{"dateAdded", "NSDate *", "dateAdded", "dateAdded"},
                    {"explicitItem", "BOOL", "isExplicitItem", "isExplicit"}}
@@ -50,34 +25,19 @@ local GROUP_103 = {{"playbackStoreID", "NSString *", "playbackStoreID", "playbac
                    {"preorder", "BOOL", "isPreorder", "isPreorder"}}
 local GROUP_145 = {}
 
--- The property-key constants, each the same-named string: the header declares them NSString * const and
--- the dictionary is keyed by the property's name, so a constant that named anything else would name a key
--- nothing reads. The release each arrived in is its own group's, per the header's MP_API.
--- A member's dictionary key is what the constant of that name holds, and this Mac's own MediaPlayer says
--- what that is: the property's own name, except where the 26.2 header declares a getter=, where the value
--- is the getter's name. Measured, not assumed - see constant-values.m, and the five keys it moved are the
--- ones with a getter= (isCompilation, isCloudItem, hasProtectedAsset, isExplicit, isPreorder).
---
--- The property-key constants, one per release, emitted as the globals the header declares: a
--- `NSString * const` at file scope, outside the @implementation, so a caller that spells the constant the
--- way Apple spells it links against a data symbol. A class property would be a method and would not.
 local CONSTANTS = {
     [70] = {{"MPMediaItemPropertyIsExplicit", "isExplicit"}},
     [80] = {},
     [92] = {{"MPMediaItemPropertyHasProtectedAsset", "hasProtectedAsset"}},
     [100] = {{"MPMediaItemPropertyDateAdded", "dateAdded"}},
     [103] = {{"MPMediaItemPropertyPlaybackStoreID", "playbackStoreID"}},
-    -- MPMediaItemPropertyIsPreorder is 14.5, so it has a group of its own rather than a neighbour's file:
-    -- one object, one release, per band()'s own rule.
     [145] = {{"MPMediaItemPropertyIsPreorder", "isPreorder"}},
 }
 
 local GROUPS = {[70] = GROUP_70, [80] = GROUP_80, [92] = GROUP_92, [100] = GROUP_100, [103] = GROUP_103,
                 [145] = GROUP_145}
--- The file and the table are named for the release without its dot; the header line quotes it with.
 local LABEL = {[70] = "7.0", [80] = "8.0", [92] = "9.2", [100] = "10.0", [103] = "10.3", [145] = "14.5"}
 
--- How each type is read out of the property dictionary. A type with no entry is not carried.
 local CONVERSION = {
     ["NSUInteger"] = "[[self valueForProperty:@\"%s\"] unsignedIntegerValue]",
     ["BOOL"] = "[[self valueForProperty:@\"%s\"] boolValue]",
@@ -150,8 +110,6 @@ local function emit(release, members, root)
     local library = path.join(root, "packages", "a", "apple-backports", "MediaPlayer", "MPMediaItem" .. release .. ".m")
     local declarations, bodies = {}, {}
     local constants = CONSTANTS[release] or {}
-    -- The value is the property's own name, which is the dictionary key - the same convention the
-    -- getters use and the same one coordination/crutches.md records as unverified.
     local constants_decl, constants_def = {}, {}
     for _, constant in ipairs(constants) do
         table.insert(constants_decl, "extern NSString * const " .. constant[1] .. ";\n")
@@ -184,10 +142,6 @@ local function emit(release, members, root)
     print(string.format("wrote %s, %s and the facts rows from %d members", library, table_file, #members))
 end
 
--- The facts rows for a release, written by this script and only by it.
---
--- They live between markers so a re-run replaces them rather than appending a second copy: two writers
--- of the same rows is the drift this generator exists to remove. The blocks are kept in release order.
 function write_facts(facts, release, members, label)
     local header = {}
     local renamed = {}
@@ -229,8 +183,6 @@ function write_facts(facts, release, members, label)
     local block = table.concat(body, "\n") .. "\n"
 
     local text = read(facts) or "# MPMediaItem\n"
-    -- Collect every block in the file, first occurrence of each release wins, and the run's own block
-    -- replaces the one it has.
     local first, last_end = nil, nil
     local found, order = {}, {}
     local position = 1

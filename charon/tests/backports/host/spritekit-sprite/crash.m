@@ -1,7 +1,3 @@
-// crash.m - the crash cases of SKTexture and SKSpriteNode of iOS 7, one case per process (run.sh). Each case prints its
-// outcome to stdout: the value it returned, or the exception's name and reason. A case that the host kills by a signal
-// prints nothing, and run.sh holds the port to exit 0 for it.
-// Run with one argument, the case's name.
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
 #import <SpriteKit/SpriteKit.h>

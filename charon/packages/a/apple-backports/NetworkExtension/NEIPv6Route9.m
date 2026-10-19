@@ -1,11 +1,5 @@
 #import "CharonNetworkExtensionSettings.h"
 
-/* NEIPv6Route, from iOS 9.0, apart from NEIPv6Settings.m (iOS 8.0): an object carries one release, and
-   `tools/release-split.lua` is what says so. The route the IPv6 settings hold: state, with
-   `+defaultRoute` the fixed route whose destination is the unspecified address with a prefix length of
-   zero, which is what a default route matches and what the host's own class answers -
-   tests/backports/host/netext-proxy/ compares it name by name against Apple's. */
-
 @implementation NEIPv6Route {
     NSString *_destinationAddress;
     NSNumber *_destinationNetworkPrefixLength;

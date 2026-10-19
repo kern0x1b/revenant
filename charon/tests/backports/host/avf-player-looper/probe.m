@@ -1,23 +1,3 @@
-//
-//  probe.m
-//  AVPlayerLooper (iOS 10.0), the host against the port.
-//
-//  The probe makes a one-second movie with the host's own AVAssetWriter, then loops it on an AVQueuePlayer and
-//  reads the looper's answers while the run loop turns. Three sections, each with a fresh queue:
-//
-//    A  the default range, the whole item: what the looper holds when it is ready, through a loop boundary,
-//       and after disableLooping;
-//    B  the factory with a time range (0.0 to 0.5 s): the loop length is the range, not the item;
-//    C  a template that cannot load (a movie that does not exist): the looper fails and says so.
-//
-//  Plain, it runs against Apple's AVPlayerLooper. With CHARON_PORT_BUILD=1 the class is the port's runtime name,
-//  and run.sh compiles the port's object in place of the framework's.
-//
-//  Usage: probe <output directory>. It writes loop.mov there and prints one "key = value" line per answer,
-//  then "rows: N" as its last line, which run.sh checks against the table it reads.
-//
-//  Messages go through objc_msgSend with the selector named as a string, so this file compiles against the
-//  macOS SDK with no declaration of its own for the class, and the same source runs against both sides.
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMedia/CoreMedia.h>
 #import <CoreVideo/CoreVideo.h>
@@ -51,7 +31,6 @@ static void spin(double seconds)
         [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.02]];
 }
 
-// Reads a message that answers an NSInteger, an object, or a boolean, by its selector name.
 static NSInteger intOf(id target, const char *selector)
 {
     return ((NSInteger (*)(id, SEL))objc_msgSend)(target, sel_registerName(selector));
@@ -62,7 +41,6 @@ static id objOf(id target, const char *selector)
     return ((id (*)(id, SEL))objc_msgSend)(target, sel_registerName(selector));
 }
 
-// A one-second, 10 frame, 16x16 H.264 movie, made by the host's own writer.
 static NSURL *writeMovie(NSString *dir)
 {
     NSURL *url = [NSURL fileURLWithPath:[dir stringByAppendingPathComponent:@"loop.mov"]];
@@ -93,7 +71,6 @@ static NSURL *writeMovie(NSString *dir)
     return url;
 }
 
-// Turns the run loop until the looper leaves Unknown (0), or the limit passes.
 static void waitForStatus(id looper, double limit)
 {
     NSDate *until = [NSDate dateWithTimeIntervalSinceNow:limit];
@@ -136,7 +113,6 @@ static void sectionDefault(Class looperClass, NSURL *movie)
     emit("A.error.end", objOf(looper, "error") ? @"set" : nil);
 }
 
-// The factory with a range of `hundredths` / 100 seconds from the start, for a sweep over the range lengths.
 static void sectionRange(Class looperClass, NSURL *movie, int hundredths)
 {
     char key[64];
@@ -174,7 +150,6 @@ static void sectionRange(Class looperClass, NSURL *movie, int hundredths)
     emitInt(key, intOf(looper, "status"));
 }
 
-// The default factory once the template's duration is loaded, so the answer is not the answer of a duration not yet known.
 static void sectionDefaultLoaded(Class looperClass, NSURL *movie)
 {
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:movie options:nil];
@@ -192,7 +167,6 @@ static void sectionDefaultLoaded(Class looperClass, NSURL *movie)
     ((void (*)(id, SEL))objc_msgSend)(looper, sel_registerName("disableLooping"));
 }
 
-// A range that starts after the item's beginning: 0.5 s to 1.0 s, so each loop is the second half of the movie.
 static void sectionOffsetRange(Class looperClass, NSURL *movie)
 {
     AVQueuePlayer *queue = [AVQueuePlayer queuePlayerWithItems:@[]];
@@ -203,7 +177,6 @@ static void sectionOffsetRange(Class looperClass, NSURL *movie)
     waitForStatus(looper, 5.0);
     emitInt("E.status.ready", intOf(looper, "status"));
     [queue play];
-    // Samples between the loop boundaries (0.5 s apart from the start of playback), so no sample rests on one.
     spin(0.75);
     emitInt("E.loopCount.early", intOf(looper, "loopCount"));
     spin(0.5);

@@ -1,9 +1,6 @@
 #import <Speech/Speech.h>
 #import <AVFoundation/AVFoundation.h>
 
-// The request of iOS 10 for audio that an application streams in. The port captures no audio and no recognizer runs, so the
-// audio appended is not kept and nothing reads it: the appends and the end of audio are accepted and do nothing. The native
-// format is the one the host gives a fresh instance, 16 kHz, one channel, 16-bit integers (facts/Speech/recognition-data.md).
 @implementation SFSpeechAudioBufferRecognitionRequest
 
 - (AVAudioFormat *)nativeAudioFormat

@@ -2,9 +2,6 @@
 #import <objc/runtime.h>
 #import <dlfcn.h>
 
-// __weak to objects whose classes keep their own retain count (CoreFoundation's bridged ones), then the object released:
-// set and nil on 5.0, 5.1.1 and 6.0, an abort for NSMutableString on 4.3 (arclite), as the facts say. Built and run by
-// probes.sh (MAPTABLE6_PROBES=1 adds it to emulate/xmake.lua); 4.3 aborts partway, so its run is not a pass.
 static void probe(const char *name, id (^make)(void))
 {
     __weak id weak;
@@ -19,8 +16,6 @@ static void probe(const char *name, id (^make)(void))
     fflush(stdout);
 }
 
-// What the port's own lookup (NSMapTable+Objects6.m) sees: whether libobjc's handle came back and whether dlsym answered on
-// it, so that "no objc_loadWeakRetained" is told from "dlopen failed". The lookup says no for both.
 static void lookup(void)
 {
     void *objc = dlopen("/usr/lib/libobjc.A.dylib", RTLD_LAZY | RTLD_NOLOAD);

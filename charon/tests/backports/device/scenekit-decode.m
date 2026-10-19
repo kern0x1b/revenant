@@ -1,14 +1,9 @@
-// The SceneKit archive decoder on shapes of archive a scene file can hold. Archives are written here with
-// NSKeyedArchiver, by stand-in classes archived under SceneKit's class names, so each case is exactly the shape it
-// names. Needs no OpenGL: runs on the emulator (xmake emulate) as well as on a device.
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <SceneKit/SceneKit.h>
 #import "check.h"
 #include <unistd.h>
 
-// Writes the keys it is given, as a SceneKit or AppKit class would write them: objects, integers, doubles and raw
-// bytes.
 @interface StandIn : NSObject <NSCoding>
 @property (nonatomic, strong) NSDictionary<NSString *, id> *keys;
 @property (nonatomic, strong) NSDictionary<NSString *, NSNumber *> *integers;
@@ -64,7 +59,6 @@
 @implementation StandInPhysicsWorld
 @end
 
-// Written under AppKit's NSColor, as a .scn file authored on macOS holds a material's colour.
 @interface StandInColor : StandIn
 @end
 @implementation StandInColor
@@ -85,8 +79,6 @@ static id stand_in_with(Class cls, NSDictionary *keys, NSDictionary *integers, N
     return object;
 }
 
-// A root archived from the stand-ins, decoded by the port with secure coding, as SCNScene's loader does, or without
-// it, as an application's own unarchiver may.
 static id decode_root_securely(StandIn *root, Class cls, BOOL secure, NSString **failure)
 {
     NSMutableData *data = [NSMutableData data];
@@ -119,8 +111,6 @@ static SCNNode *decode_node(StandInNode *root, NSString **failure)
     return decode_root(root, [SCNNode class], failure);
 }
 
-// What the block writes to standard error. NSLog writes there as well as to the system log when standard error is
-// a regular file.
 static NSString *captured_stderr(void (^block)(void))
 {
     NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:@"scenekit-decode-stderr.XXXXXX"];
@@ -155,9 +145,6 @@ static NSUInteger count_lines_containing(NSString *text, NSString *needle)
     return count;
 }
 
-// How many objects a list property holds (none when it answers nil, as particleSystems does with none), or -1 when it
-// holds something that is not a list: a decoder that keeps a single object as it is hands one back, and asking it for
-// a count would end the test instead of failing a check.
 static NSInteger list_count(id list)
 {
     if (list == nil) {
@@ -198,8 +185,6 @@ static void check_single_objects(void)
                  "a single material and a single element are one of each", [NSString stringWithFormat:@"geometry %@, %@", node.geometry, failure]);
 }
 
-// Without secure coding the unarchiver hands back whatever a key holds: something that is neither the class nor an
-// array is left out and said, and so is a stray object inside an array, while the rest of the node still loads.
 static void check_stray_objects(void)
 {
     __block SCNNode *node = nil;
@@ -222,8 +207,6 @@ static void check_stray_objects(void)
                  [NSString stringWithFormat:@"node %@, systems %ld, log %@, %@", node, (long)list_count(node.particleSystems), log, failure]);
 }
 
-// A colour the port cannot read leaves the material property at its default and is said once, naming the key; a
-// colour it reads says nothing.
 static void check_colours(void)
 {
     __block SCNMaterialProperty *property = nil;
@@ -253,7 +236,6 @@ static void check_colours(void)
                  [NSString stringWithFormat:@"log: %@", log]);
 }
 
-// A colour's RGBA, or NO: iOS 6 answers getRed: only for an RGB colour, and a white one answers getWhite:.
 static BOOL colour_rgba(id contents, CGFloat rgba[4])
 {
     if (![contents isKindOfClass:[UIColor class]]) {
@@ -276,10 +258,6 @@ static BOOL colour_is(id contents, CGFloat r, CGFloat g, CGFloat b, CGFloat a)
     return colour_rgba(contents, rgba) && rgba[0] == r && rgba[1] == g && rgba[2] == b && rgba[3] == a;
 }
 
-// In a material, a slot whose colour the port cannot read keeps the slot's default, which a new material holds: diffuse
-// white, specular black (macOS SceneKit's new material, scenekit-defaults-expectations.h). A slot archived with no colour
-// is contents set to nil, and macOS SceneKit decodes it to nil (measured: it writes no color, image or float key for
-// nil and reads nil back): the control that the fallback takes only an unread colour.
 static void check_material_colours(void)
 {
     __block SCNMaterial *material = nil;
@@ -312,8 +290,6 @@ static void check_material_colours(void)
                  "each of the two unreadable colours is said once, and nothing else", [NSString stringWithFormat:@"log: %@", log]);
 }
 
-// SCNPhysicsWorld is inert: what an archive holds is read, what an application sets is kept and read back, the first
-// set is said once in the log, and the queries answer empty because no body exists to hit.
 static void check_physics_world(void)
 {
     __block SCNPhysicsWorld *world = nil;
@@ -347,7 +323,6 @@ static void check_physics_world(void)
     charon_check(hits != nil && hits.count == 0, "a ray through a world with no body hits nothing", [NSString stringWithFormat:@"%@", hits]);
 }
 
-// A flag stored as neither a boolean nor an integer keeps its default and is said once, naming the key.
 static void check_flags(void)
 {
     __block SCNNode *node = nil;

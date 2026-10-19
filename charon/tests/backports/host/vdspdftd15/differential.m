@@ -1,18 +1,3 @@
-// The port's double-precision vDSP_DFT_Interleaved family held against the host's own vDSP, and both held against a
-// double-double reference under the error bound the port's facts file states:
-//
-//     |out - ref| <= K * log2(N) * DBL_EPSILON * ||x||_2      with K = 2.63
-//
-// The reference has to be more precise than double, or the bound would measure the reference and not the transform,
-// so it is computed in double-double (a pair of doubles, about 32 significant digits): products by fma, sums by
-// two-sum, and the twiddles cos and sin of 2*pi*m/M from a Taylor series in double-double after an exact reduction of
-// the angle to a quadrant and an eighth. K is the host's own worst ratio over the accepted lengths, 24 trials each,
-// across the three stages (complex forward, complex inverse, real-to-complex forward): 2.624, rounded up to 2.63. So
-// the host has to sit inside it as well as the port. Two things are checked: which lengths each side accepts over
-// every length from 1 to 1024, and the transform's values over the accepted lengths of the header's family.
-//
-// The port's objects are compiled with the charon_host_ names (run.sh), so their functions are declared here under
-// those names and the host's under the real ones, in one binary.
 #import <Foundation/Foundation.h>
 #import <Accelerate/Accelerate.h>
 #include <float.h>
@@ -52,11 +37,9 @@ static void check(NSString *what, BOOL held)
     else { failures++; printf("FAIL %s\n", what.UTF8String); }
 }
 
-// The accepted lengths, the host's set: f * 2**n with f in {2, 3, 5, 9, 15} and n >= 2, 31 of them up to 1024.
 static const vDSP_Length kAccepted[] = {8, 12, 16, 20, 24, 32, 36, 40, 48, 60, 64, 72, 80, 96, 120, 128, 144, 160,
                                         192, 240, 256, 288, 320, 384, 480, 512, 576, 640, 768, 960, 1024};
 
-// Deterministic inputs, so both sides and both runs see the same numbers: a xorshift in [-1, 1).
 static uint32_t rngState = 2463534242u;
 static double nextSample(void)
 {
@@ -65,8 +48,6 @@ static double nextSample(void)
     rngState ^= rngState << 5;
     return (double)(rngState % 20001u) / 10000.0 - 1.0;
 }
-
-// ---- double-double arithmetic: a value is hi + lo, with |lo| at most half an ulp of hi ----
 
 typedef struct {
     double hi, lo;
@@ -130,10 +111,8 @@ static DD ddDivD(DD a, double d)
     return quickTwoSum(q1, r.hi / d);
 }
 
-// pi/2 in double-double: the high part is the double nearest pi/2, the low part is the rest to about 1e-33.
 static const DD kHalfPi = {1.5707963267948966, 6.123233995736766e-17};
 
-// sin and cos of (pi/2) * num / den for 0 <= num/den <= 1/2, by Taylor series in double-double.
 static void sinCosSmall(long num, long den, DD *s, DD *c)
 {
     DD psi = ddDivD(ddMul(kHalfPi, ddOf((double)num)), (double)den);
@@ -150,9 +129,6 @@ static void sinCosSmall(long num, long den, DD *s, DD *c)
     *c = cosSum;
 }
 
-// cos and sin of 2*pi*m/M in double-double, by an exact reduction: the angle is (pi/2) * 4m/M, so its quadrant is
-// q = floor(4m/M) and the rest is (pi/2) * r/M with r = 4m - qM an integer, and r/M is folded into [0, 1/2] by
-// the symmetry of the quadrant.
 static void twiddle(long m, long M, DD *c, DD *s)
 {
     m %= M;
@@ -176,7 +152,6 @@ static void twiddle(long m, long M, DD *c, DD *s)
     }
 }
 
-// The twiddle table for one length: entry m holds cos and sin of 2*pi*m/M.
 typedef struct {
     DD *c, *s;
     long M;
@@ -195,7 +170,6 @@ static void freeTable(Table t)
     free(t.s);
 }
 
-// The double-double reference of the complex transform: X_k = sum_j x_j * exp(-+ 2*pi*i*jk/N), unscaled.
 static void referenceComplex(const DSPDoubleComplex *in, vDSP_Length n, BOOL inverse, DD *re, DD *im, const Table *t)
 {
     for (vDSP_Length k = 0; k < n; k++) {
@@ -213,8 +187,6 @@ static void referenceComplex(const DSPDoubleComplex *in, vDSP_Length n, BOOL inv
     }
 }
 
-// The real-to-complex packing of the facts (section 3): the 2N real samples are a 2N-point real DFT X, and the N
-// outputs are (2 X_0, 2 X_N) packed in element 0 and 2 X_k in the others, k = 1 .. N-1. t is the table for 2N.
 static void referenceReal(const double *x, vDSP_Length n, DD *re, DD *im, const Table *t)
 {
     vDSP_Length m = 2 * n;
@@ -234,8 +206,6 @@ static void referenceReal(const double *x, vDSP_Length n, DD *re, DD *im, const 
     }
 }
 
-// One transform through one implementation. A setup the implementation refuses is reported as NO and its output left
-// zero, so a refusal cannot read as an answer.
 static BOOL transform(const Impl *impl, vDSP_DFT_Direction direction, vDSP_DFT_RealtoComplex form, vDSP_Length n,
                       const DSPDoubleComplex *in, DSPDoubleComplex *out)
 {
@@ -249,8 +219,6 @@ static BOOL transform(const Impl *impl, vDSP_DFT_Direction direction, vDSP_DFT_R
     return YES;
 }
 
-// The worst ratio of the error to the bound over one output, and whether any element is outside it. The reference is
-// subtracted in two parts, hi and lo, so its rounding to double is not part of the error.
 typedef struct {
     double worst;
     BOOL inside;
@@ -271,7 +239,6 @@ static Ratio ratioAgainst(const DSPDoubleComplex *out, const DD *refRe, const DD
     return r;
 }
 
-// Which lengths each side accepts, over every length from 1 to 1024, both forms.
 static void compareAcceptedLengths(void)
 {
     vDSP_DFT_RealtoComplex forms[] = {vDSP_DFT_Interleaved_ComplextoComplex, vDSP_DFT_Interleaved_RealtoComplex};
@@ -292,9 +259,6 @@ static void compareAcceptedLengths(void)
     }
 }
 
-// The reference is itself checked before it is trusted: cos^2 + sin^2 = 1 for every twiddle of every accepted length,
-// in double-double, to 1e-30, and the table agrees with libm to a few ulps of 1 (libm's own argument 2*pi*m/M is a
-// double, so its error is the rounding of that argument, about 1e-15 at the largest angles).
 static void checkReference(void)
 {
     double worstIdentity = 0.0, worstLibm = 0.0;
@@ -317,8 +281,6 @@ static void checkReference(void)
           worstIdentity < 1e-30 && worstLibm < 4e-15);
 }
 
-// The values, over the accepted lengths, for one transform: every trial of every length, held to the bound on both
-// sides. Reported as the worst ratio over the whole sweep, which is the figure the bound was measured from.
 static void compareValues(const char *what, vDSP_DFT_Direction direction, vDSP_DFT_RealtoComplex form)
 {
     const int trials = 24;
@@ -326,14 +288,12 @@ static void compareValues(const char *what, vDSP_DFT_Direction direction, vDSP_D
     BOOL hostInside = YES, portInside = YES, portAccepts = YES;
     for (size_t i = 0; i < sizeof(kAccepted) / sizeof(kAccepted[0]); i++) {
         vDSP_Length n = kAccepted[i];
-        // the table for the transform's length: N for complex, 2N for the real packing of 2N samples
         Table t = tableFor(form == vDSP_DFT_Interleaved_RealtoComplex ? 2 * (long)n : (long)n);
         for (int tr = 0; tr < trials; tr++) {
             DSPDoubleComplex in[1024], hostOut[1024], portOut[1024];
             DD refRe[1024], refIm[1024];
             double norm = 0.0;
             if (form == vDSP_DFT_Interleaved_RealtoComplex) {
-                // 2N real samples packed as N complex values, the same memory the port reads and the host reads
                 double *x = &in[0].real;
                 for (vDSP_Length j = 0; j < 2 * n; j++) { x[j] = nextSample(); norm += x[j] * x[j]; }
                 referenceReal(x, n, refRe, refIm, &t);

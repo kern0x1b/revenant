@@ -10,12 +10,6 @@ package("box2d")
 
     add_configs("recipe", {description = "The digest of this recipe, so a changed flag is a different library.", default = hash.strhash128(hash.sha256(path.join(os.scriptdir(), "xmake.lua"))), type = "string", readonly = true})
 
-    -- Hidden, so the engine is never API of the image it is linked into: libUIKitBackports.dylib exports
-    -- what UIKit does, and nothing a second copy of Box2D in the process could bind to. No exceptions and
-    -- no RTTI: the engine uses neither, and without them it needs of the C++ runtime only operator delete
-    -- and __cxa_pure_virtual, which every release from 5.0 exports. NDEBUG stays undefined: PhysicsKit
-    -- keeps its b2Assert checks (the 7.0 cache holds their expressions and source paths), and a broken
-    -- invariant stops the process there as it does here.
     local FLAGS = {"-Os", "-fvisibility=hidden", "-fvisibility-inlines-hidden", "-fno-exceptions", "-fno-rtti"}
 
     on_install("iphoneos", function (package)

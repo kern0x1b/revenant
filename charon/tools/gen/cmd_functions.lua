@@ -1,12 +1,3 @@
--- `functions`: the C-function snapshot of each framework, spec/<F>/functions.tsv: one row per function the surface lists as missing at
--- 6.1.3, read from the iOS view of the framework's headers (the port of cmd_functions in tools/gen.py@52253c0650). A function no header of the
--- framework declares, or whose declaration does not read as a C function, is a row with its reason. --all: every surface framework.
--- Returns 0.
---
--- The oracle's regular expressions are written out here by hand: Lua patterns have no alternation, lookahead or lookbehind. Each
--- matcher names the pattern it is, and the offsets of the statement readers are the oracle's (0-based), so the two read the same text.
--- The proof is the committed snapshots (32 frameworks, cmp), run through the same command.
-
 local layout = import("layout", {anonymous = true})
 local files = import("files", {anonymous = true})
 local order = import("order", {anonymous = true})
@@ -24,41 +15,33 @@ local C_BASE_WORDS = {void = true, char = true, short = true, int = true, long =
                       unsigned = true, bool = true, _Bool = true, const = true, volatile = true, struct = true, enum = true,
                       union = true, id = true, SEL = true, Class = true, BOOL = true, IMP = true, CGFloat = true, NSInteger = true,
                       NSUInteger = true, size_t = true, instancetype = true}
--- The platform values of the TARGET_OS_ macros an #if can name, as the iOS build sees them (gen.py@52253c0650 PLATFORM_VALUES).
 local PLATFORM_VALUES = {TARGET_OS_IPHONE = 1, TARGET_OS_IOS = 1, TARGET_OS_EMBEDDED = 1, TARGET_OS_MAC = 0, TARGET_OS_OSX = 0,
                          TARGET_OS_VISION = 0, TARGET_OS_WATCH = 0, TARGET_OS_TV = 0, TARGET_OS_SIMULATOR = 0,
                          TARGET_OS_MACCATALYST = 0, TARGET_OS_DRIVERKIT = 0, TARGET_OS_BRIDGE = 0, TARGET_OS_UIKITFORMAC = 0,
                          TARGET_IPHONE_SIMULATOR = 0}
--- The nullability and platform words the declaration drops (strip_nullability).
 local NULLABILITY = {_Nullable = true, _Nonnull = true, __nullable = true, __nonnull = true, _Null_unspecified = true,
                      nullable = true, nonnull = true, null_resettable = true, null_unspecified = true}
 local AVAIL_WORDS = {"AVAILABLE", "DEPRECATED", "OBSOLETED"}
 local PREFIXES = {"API", "NS", "OS", "CF", "__"}
 
--- Whether byte i of text is a word character (\w).
 local function is_word_at(text, i)
     return i >= 1 and i <= #text and string.find(string.sub(text, i, i), "^[%w_]$") ~= nil
 end
 
--- Whether byte i starts a word: a word character after a non-word one (\b before it).
 local function is_word_start(text, i)
     return is_word_at(text, i) and not is_word_at(text, i - 1)
 end
 
--- The last byte (1-based) of the word run that starts at i.
 local function run_end(text, i)
     local _, last = string.find(text, "^[%w_]*", i)
     return last
 end
 
--- The first byte (1-based) after the whitespace that starts at i.
 local function skip_space(text, i)
     local _, last = string.find(text, "^%s*", i)
     return last + 1
 end
 
--- The 1-based index of the ")" that closes the "(" at open, for \((?:[^()]|\([^()]*\))*\): one level of inner parentheses, no
--- deeper. nil when the group does not close that way.
 local function group_end(text, open)
     local i = open + 1
     while true do
@@ -81,8 +64,6 @@ local function group_end(text, open)
     end
 end
 
--- re.sub with a matcher: match(text, i) returns the last byte of a match that starts at i, or nil. Each match is replaced by rep;
--- returns the text and the matched texts (the oracle's findall).
 local function substitute(text, match, rep)
     local out, found = {}, {}
     local pos, i = 1, 1
@@ -102,7 +83,6 @@ local function substitute(text, match, rep)
     return table.concat(out), found
 end
 
--- AVAILABLE, DEPRECATED or OBSOLETED inside a word, then a parenthesised argument: \b\w*(?:AVAILABLE|DEPRECATED|OBSOLETED)\w*\s*\(...\)
 local function availability_match(text, i)
     if not is_word_start(text, i) then
         return nil
@@ -125,7 +105,6 @@ local function availability_match(text, i)
     return group_end(text, open)
 end
 
--- A prefixed macro call: \b(?:API|NS|OS|CF|__)_?[A-Z][A-Z0-9_]*\s*\(...\)
 local function prefixed_call_match(text, i)
     if not is_word_start(text, i) then
         return nil
@@ -149,7 +128,6 @@ local function prefixed_call_match(text, i)
     return nil
 end
 
--- A whole macro word: \b(?:API|NS|OS|CF)_[A-Z][A-Z0-9_]*\b or \b__[A-Z][A-Z0-9_]*\b
 local function macro_word_match(text, i)
     if not is_word_start(text, i) then
         return nil
@@ -164,7 +142,6 @@ local function macro_word_match(text, i)
     return nil
 end
 
--- __attribute__((...)): \b__attribute__\s*\(\((?:[^()]|\([^()]*\))*\)\)
 local function attribute_match(text, i)
     if not is_word_start(text, i) or string.sub(text, i, i + 12) ~= "__attribute__" then
         return nil
@@ -180,7 +157,6 @@ local function attribute_match(text, i)
     return close + 1
 end
 
--- An NS_ macro word with an optional argument: \bNS_[A-Z_]+\b(?:\s*\(...\))?
 local function ns_macro_match(text, i)
     if not is_word_start(text, i) or string.sub(text, i, i + 2) ~= "NS_" then
         return nil
@@ -199,7 +175,6 @@ local function ns_macro_match(text, i)
     return last
 end
 
--- A __ macro with an optional argument right after it, no space: \b__[A-Z][A-Z0-9_]*(?:\([^()]*\))?, no \b at its end.
 local function platform_macro_match(text, i)
     if not is_word_start(text, i) or string.sub(text, i, i + 2) ~= "__" or not string.find(string.sub(text, i + 2, i + 2), "^%u$") then
         return nil
@@ -214,7 +189,6 @@ local function platform_macro_match(text, i)
     return last
 end
 
--- The declaration's availability macros: the text without them, and the availability text they carried (strip_macros).
 local function strip_macros(text)
     local avail
     text, avail = substitute(text, availability_match, " ")
@@ -225,7 +199,6 @@ local function strip_macros(text)
     return (string.gsub(string.gsub(text, "%s+", " "), "^ ", "")):gsub(" $", ""), table.concat(avail, " ")
 end
 
--- The declaration without its nullability words and platform macros (strip_nullability).
 local function strip_nullability(decl)
     local text = string.gsub(decl, "[%w_]+", function(word)
         if NULLABILITY[word] then
@@ -236,7 +209,6 @@ local function strip_nullability(decl)
     return (string.gsub(string.gsub(text, "%s+", " "), "^ ", "")):gsub(" $", "")
 end
 
--- The linkage words a framework puts before a function (CT_EXPORT, CF_EXTERN, extern, static, inline) are not part of its type.
 local LINKAGE_SUFFIXES = {"_EXPORT", "_EXTERN", "_EXPORTED", "_INLINE"}
 local function strip_linkage(text)
     local out = string.gsub(text, "[%w_]+", function(word)
@@ -252,8 +224,6 @@ local function strip_linkage(text)
     return (string.gsub(string.gsub(out, "%s+", " "), "^ ", "")):gsub(" $", "")
 end
 
--- The text with its comments taken out. Each comment is one "//" to the end of its line, or one "/*" to the next "*/": the
--- replacement of each is filler(comment).
 local function strip_comments(text, filler)
     local out, pos = {}, 1
     while true do
@@ -286,7 +256,6 @@ local function strip_comments(text, filler)
     return table.concat(out)
 end
 
--- The lines of a text as Python's split("\n") gives them: a final line feed leaves an empty last line.
 local function split_lines(text)
     local out, pos = {}, 1
     while true do
@@ -300,7 +269,6 @@ local function split_lines(text)
     end
 end
 
--- Runs f: returns true and its value, or false when it raises (the xmake sandbox has no pcall: try and catch).
 local function guarded(f)
     local ok, value = true, nil
     try {
@@ -316,7 +284,6 @@ local function guarded(f)
     return ok, value
 end
 
--- The end of a defined(NAME) at i (the oracle's \bdefined\s*\(\s*(\w+)\s*\)), or nil.
 local function defined_end(text, i)
     if not is_word_start(text, i) then
         return nil
@@ -325,8 +292,6 @@ local function defined_end(text, i)
     return stop
 end
 
--- The Python expression of an #if condition over the TARGET_OS_ values (gen.py@52253c0650 platform_value up to eval): defined(NAME) is 1 for a
--- platform name, every other name is its value. nil when the condition names anything else or has a character Python would not read here.
 local function platform_value_of(expr)
     for name in string.gmatch(expr, "defined%s*%(%s*([%w_]+)%s*%)") do
         if PLATFORM_VALUES[name] == nil then
@@ -358,8 +323,6 @@ local function platform_value_of(expr)
     return py
 end
 
--- Evaluates the Python expression platform_value_of makes (integers, comparisons, not, and, or, parentheses) the way Python does:
--- true or false, or nil where Python would raise (a syntax error).
 local function evaluate(py)
     local tokens = {}
     local i = 1
@@ -397,7 +360,6 @@ local function evaluate(py)
     local function peek()
         return tokens[pos]
     end
-    -- an operand: an integer, or a parenthesised condition (a truth value, 1 or 0, as Python compares it)
     local function atom()
         local token = peek()
         if token == nil then
@@ -418,7 +380,6 @@ local function evaluate(py)
         end
         error("syntax")
     end
-    -- a comparison chain (a < b < c is a < b and b < c); a single operand is its truth value
     local function comparison()
         local left = atom()
         if not (peek() and peek().kind == "cmp") then
@@ -479,7 +440,6 @@ local function evaluate(py)
     return value
 end
 
--- The value of an #if expression for iOS: true or false, or nil when the condition is not decided (gen.py@52253c0650 platform_value).
 local function platform_value(expr)
     local py = platform_value_of(expr)
     if py == nil then
@@ -488,8 +448,6 @@ local function platform_value(expr)
     return evaluate(py)
 end
 
--- The header text as the iOS build reads it: each #if over TARGET_OS_ values keeps the branch that holds for iOS and drops the rest; a
--- condition this cannot decide keeps every branch. Returns the text and the count of undecided conditions (gen.py@52253c0650 ios_text).
 local function ios_text(text)
     local out, stack, undecided = {}, {}, 0
     local function active()
@@ -571,8 +529,6 @@ local function ios_text(text)
     return table.concat(out, "\n"), undecided
 end
 
--- The statement text of a declaration match: preprocessor lines (with the blank lines before them) become one space each (the
--- oracle's re.sub "(?m)^\s*#.*$").
 local function without_directive_lines(text)
     return substitute(text, function(s, i)
         if i ~= 1 and string.sub(s, i - 1, i - 1) ~= "\n" then
@@ -587,8 +543,6 @@ local function without_directive_lines(text)
     end, " ")
 end
 
--- The statements that call name at their top level, as gen.py@52253c0650 c_statements: from the ; or } or @end before the name to the ; or { that
--- ends it. Offsets are the oracle's: 0-based, so the reads below follow its arithmetic. A name on a preprocessor line is no declaration.
 local function c_statements(text, name)
     local out = {}
     local n = #text
@@ -651,7 +605,6 @@ local function c_statements(text, name)
     return out
 end
 
--- The arguments of a parameter list, split on the commas outside parentheses (gen.py@52253c0650 split_top_level).
 local function split_top_level(body)
     local out, depth, current = {}, 0, ""
     for ch in string.gmatch(body, ".") do
@@ -674,7 +627,6 @@ local function split_top_level(body)
     return out
 end
 
--- A parameter with its name: the header's own, or p<index> where the header leaves it unnamed (gen.py@52253c0650 named_param; index from 0).
 local function named_param(text, index)
     if string.find(text, "(^)", 1, true) or string.find(text, "(*)", 1, true) then
         local out = text
@@ -699,8 +651,6 @@ local function named_param(text, index)
     return text .. (ends_star and ("p" .. index) or (" p" .. index))
 end
 
--- The returns, params, introduced release and declaration text of a C function declared by a statement, or nil when it does not read as
--- one (gen.py@52253c0650 c_declaration).
 local function c_declaration(statement, name)
     local clean, avail = strip_macros(statement)
     clean = strip_nullability(clean)
@@ -776,14 +726,10 @@ local function c_declaration(statement, name)
     return returns, params, introduced, string.format("%s %s(%s)", returns, name, table.concat(params, ", "))
 end
 
--- The objc C functions the 6.1.3 ledger lists as missing (not header-ok) and no registry row names: {api, introduced}, sorted
--- (gen.py@52253c0650 function_wanted).
 local function function_wanted(tree, fw, corpus, sdk_release)
     local led6 = surface.ledger_status(corpus, fw, surface.ledger_6_1_3())
     local registry = surface.registry_entries(tree, fw)
     local out = {}
-    -- a function is its symbol, so an api several declarations share (C overloads of one name) is one function, listed at its first
-    -- declaration and with the introduction of its last one (the surface's order, as the readers had it before one row per declaration)
     local named = {}
     for _, row in ipairs(surface.surface_rows(tree, corpus, sdk_release, fw)) do
         local k = surface.key(row.kind, row.api)
@@ -805,8 +751,6 @@ local function function_wanted(tree, fw, corpus, sdk_release)
     return out
 end
 
--- The header text of a module's 26.2 headers, in path order (gen.py@52253c0650 header_text_recursive). A framework's are every header under
--- its Headers folder (subfolders included); a usr module's are the headers its map names (sdk_modules.headers_of); a Swift module has none.
 local function header_text_recursive(sdk, fw)
     local parts = {}
     local record = sdk_modules.module_of(sdk, fw)
@@ -818,16 +762,12 @@ local function header_text_recursive(sdk, fw)
         return table.concat(parts, "\n")
     end
     local base = path.join(record.root, "Headers")
-    -- "**.h": every header at any depth. ("**/*.h" in xmake misses the headers of the folder itself.)
     for _, file in ipairs(files.glob(path.join(base, "**.h"))) do
         table.insert(parts, files.read_text(file) or "")
     end
     return table.concat(parts, "\n")
 end
 
--- The nested targets of an umbrella (no-shard.tsv names them: Accelerate's vImage and vecLib), each with the text of its own headers and
--- the functions its shard declares. The umbrella's master header includes them, but a function's declaration is read from the target
--- whose shard declares it: the umbrella's header set alone reads 217 vImage functions as declared nowhere.
 local function nested_targets(tree, sdk, fw)
     local out = {}
     local umbrella = targets.umbrellas(tree)[fw]
@@ -839,7 +779,6 @@ local function nested_targets(tree, sdk, fw)
     return out
 end
 
--- The text a function's declaration is read from: the first nested target whose shard declares it, else the umbrella's text.
 function declaring_text(nested, umbrella_text, name)
     for _, target in ipairs(nested) do
         if target.functions[name] ~= nil then
@@ -849,7 +788,6 @@ function declaring_text(nested, umbrella_text, name)
     return umbrella_text
 end
 
--- Writes one framework's snapshot. Returns nothing; prints the summary line.
 local function one(args, fw, sdk, sdk_release)
     local snap = layout.snap_dir(args.tree, fw)
     local target = path.join(snap, "functions.tsv")
@@ -926,7 +864,6 @@ local function one(args, fw, sdk, sdk_release)
     print(string.format("functions %s: %s", fw, table.concat(parts, ", ")))
 end
 
--- Returns the exit status: 0 (every framework is written or has nothing to write).
 function run(args)
     assert(args.coordination, "functions needs --coordination: the corpus folder (the surface table and the ledgers)")
     assert(args.sdk, "functions needs --sdk: the iPhoneOS SDK the declarations are read from")

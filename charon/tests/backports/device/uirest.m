@@ -714,7 +714,6 @@ static UIWindow *the_window;
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     UIImage *tinted = [image imageWithTintColor:[UIColor redColor]];
-    // Read the pixels through a bitmap of a known layout: the layout of a UIKit image differs between releases.
     UInt8 bytes[10 * 10 * 4];
     memset(bytes, 0, sizeof(bytes));
     CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();

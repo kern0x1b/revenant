@@ -1,24 +1,3 @@
--- gen-init-classes.lua: write tests/backports/host/intents-init/init-classes.inc, the population that harness measures.
---
--- Two derivations, and the file's own header says which is which because the claim under test is the registry's:
---
---   the class list, from the registry: every status `implemented` row that names `-[<class> init]`. A row the registry
---   carries and this file does not is a claim no run of the harness can reach, and it is the one failure the harness's
---   own guard cannot see: run.sh compares this file against expected.txt, and both are written from here, so a class
---   missing from both agrees with itself. INListCarsIntent was exactly that - a row added when its body moved into the
---   generator's EXTRA_METHODS, and neither file was regenerated, so 110 of the 111 implemented -init rows were being
---   measured. That is why the count is printed against the REGISTRY's and not only this file's.
---
---   the properties, from the port's own objects: the `@synthesize NAME = _NAME;` lines inside each class's
---   @implementation. Read from the port and not from the runtime, because those are the ones the row claims stay nil:
---   asking the runtime instead yields NSObject's hash/description/debugDescription/superclass repeated four times over
---   plus the framework's private accessors - measured, 48 properties for INActivateCarSignalIntentResponse - which is
---   neither the population the claim is about nor safe to call.
---
--- Usage:
---     xmake l tools/intents/gen-init-classes.lua            -- print the file to stdout
---     xmake l tools/intents/gen-init-classes.lua -o PATH    -- write it there
-
 import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 
@@ -26,8 +5,6 @@ local ROOT = path.absolute(path.join(os.scriptdir(), "..", ".."))
 local REGISTRY = path.join(ROOT, "packages", "a", "apple-backports", "registry", "Intents")
 local CLASSES = path.join(ROOT, "packages", "a", "apple-backports", "Intents")
 
--- The object files the properties are read out of. IN*.m is the generated per-group body, and the two Charon* files
--- are the hand-written base classes of the 10.0 and 11.0 slices.
 local function sources()
     local found = {}
     for _, file in ipairs(os.files(path.join(CLASSES, "IN*.m"))) do
@@ -70,7 +47,6 @@ local HEADER = [==[
 // them with each other would only show that they agree.
 ]==]
 
--- The class names the registry's implemented -init rows name, as a set.
 local function registry_classes()
     local names = {}
     for _, file in ipairs(os.files(path.join(REGISTRY, "ios*.json"))) do
@@ -88,7 +64,6 @@ local function registry_classes()
     return names
 end
 
--- The properties the port's own objects declare, by class.
 local function synthesised()
     local properties = {}
     local owner = nil

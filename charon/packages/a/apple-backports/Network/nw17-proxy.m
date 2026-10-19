@@ -1,18 +1,3 @@
-/*
- * The proxy configuration of iOS 17: a proxy a connection may be sent through, the relay hops of a
- * MASQUE-style relay, and the domains that do and do not go through it.
- *
- * The release this port builds for has no per-connection proxy: a connection is made to the peer its
- * endpoint names, and the system proxy settings are not consulted for it. So what is carried here is
- * the configuration itself - which kind of proxy, which endpoint, which credentials, which domains,
- * whether a failover to a direct connection is allowed - kept and answered as the SDK documents. A
- * connection that is given a privacy context holding one of these reads it and says so in the
- * establishment report rather than pretending to have gone through it; see facts/Network/NWProxy.md.
- *
- * The declarations of the two types here are the port's own: the SDK it compiles against is 16.4,
- * which predates them, and what they are is what the header of a release that has them says.
- */
-
 #import "CharonNW.h"
 #import "CharonNWSupport.h"
 

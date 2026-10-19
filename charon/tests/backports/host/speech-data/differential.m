@@ -1,10 +1,3 @@
-// The iOS 10 Speech data classes, asked one question per process: the host's own Speech (a bare macOS tool, no bundle, no
-// usage description) when built without -DPORT, and the port's sources in packages/a/apple-backports/Speech when built with
-// it. The two sides are separate processes because both define the same classes.
-//
-// Each case is one argv[1] value and prints a fixed set of lines, so run.sh can compare the two sides case by case, and a
-// crash of one side is attributed to that case alone. No recognizer is created or started: nothing here captures audio,
-// opens the microphone, or sends anything to a server.
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 #import <Speech/Speech.h>
@@ -79,7 +72,6 @@ int main(int argc, char **argv)
         break;
     }
     case 7: {
-        // The host raises when a fresh result's transcriptions are read: the case is named as a host crash by run.sh.
         SFSpeechRecognitionResult *result = [[SFSpeechRecognitionResult alloc] init];
         printf("final=%d\n", result.isFinal);
         printf("transcriptions=%s\n", show(result.transcriptions).UTF8String);
@@ -87,13 +79,10 @@ int main(int argc, char **argv)
         break;
     }
     case 8: {
-        // The status for an application with no usage description: the host answers NotDetermined, and asks for nothing.
         printf("authorizationStatus=%ld\n", (long)[SFSpeechRecognizer authorizationStatus]);
         break;
     }
     case 9: {
-        // Only the locale the host does not support is named: the host supports many locales, and the port none, which is
-        // the port's design and is recorded in facts/Speech/recognizer.md rather than compared.
         NSSet *identifiers = [[SFSpeechRecognizer supportedLocales] valueForKey:@"localeIdentifier"];
         printf("tlh-US supported=%d\n", [identifiers containsObject:@"tlh-US"]);
         break;
@@ -104,9 +93,6 @@ int main(int argc, char **argv)
         break;
     }
     case 12: {
-        // The host ends this process before the handler runs (no usage description), so run.sh names the case as a host
-        // crash. The port answers once with Restricted, the coordinator's decision (facts/Speech/recognizer.md), and run.sh
-        // checks the port's lines against that decision, not against the host.
         __block int calls = 0, onMain = 0;
         __block long seen = -1;
         [SFSpeechRecognizer requestAuthorization:^(SFSpeechRecognizerAuthorizationStatus status) {

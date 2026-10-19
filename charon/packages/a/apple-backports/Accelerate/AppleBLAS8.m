@@ -1,33 +1,9 @@
-// appleblas_sgeadd and appleblas_dgeadd, Apple's extension to the CBLAS interface of iOS 8:
-// C = alpha * op(A) + beta * op(B) for matrices m x n, with either operand optionally transposed.
-//
-// The computation is the release's own appleblas_sgeadd / appleblas_dgeadd where the release has
-// them (10.3.4 and above, measured from their own caches; no release names a cblas_*geadd at all). The
-// extended-precision geadd is the one operation CBLAS 3.x does not have and the release's vecLib
-// carries no entry point for it, so it is written here over the same element access CBLAS itself
-// uses, in the caller's own layout. Every band this port supports exports the CBLAS beside it
-// (measured from their armv7 caches: iOS 4.3, 5.1.1, 6.0, 6.1.3, 7.0, 7.1.2 and 8.0 all export
-// cblas_sgemm, cblas_dgemm, cblas_xerbla and SetBLASParamErrorProc), so nothing here is a second copy
-// of a library the device already ships.
-//
-// The parameters are checked before a caller's memory is read, and a bad one is reported through the
-// release's own cblas_xerbla rather than through a check of our own: that is the BLAS error path a
-// program of this release either replaces with SetBLASParamErrorProc or leaves to the library, and
-// the release's function answers it and ends the process exactly as the release's own BLAS does -
-// measured on the host, an invalid parameter prints the message and exits with status 255. What the
-// release's public cblas_xerbla prints differs in wording from the private handler inside Apple's own
-// accelerated BLAS on a later release ("Parameter number 8 passed to appleblas_sgeadd had an invalid
-// value" against "Parameter lda passed to appleblas_sgeadd was 1, which is invalid."); both name the
-// parameter and the routine and both end the process the same way.
-
 #import <Accelerate/Accelerate.h>
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 #pragma clang diagnostic ignored "-Wunguarded-availability"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-// Where each parameter stands in the declaration, which is the order they are checked in and the
-// number cblas_xerbla is told, as the reference BLAS's xerbla takes it.
 enum {
     CharonGeaddOrder = 1,
     CharonGeaddTransA = 2,
@@ -63,10 +39,6 @@ static int CharonGeaddTransposeIsValid(int transpose, int position)
     return 0;
 }
 
-// A leading dimension is the distance between two consecutive rows of the block in a row-major
-// layout, and between two consecutive columns in a column-major one, so the count it has to cover is
-// the number of columns of the block in the first case and the number of rows in the second. A
-// transposed operand is the other shape, which swaps the two.
 static int CharonGeaddLeadingIsValid(int order, int transposed, int m, int n, int leading, int position, const char *name)
 {
     int needed = order == CblasRowMajor ? (transposed ? m : n) : (transposed ? n : m);
@@ -77,8 +49,6 @@ static int CharonGeaddLeadingIsValid(int order, int transposed, int m, int n, in
     return 0;
 }
 
-// The element at (row, column) of an operand in the caller's own layout. A transposed operand is the
-// other shape, so the same expression reads either one.
 static int CharonGeaddIndex(int order, int transposed, int leading, int row, int col)
 {
     if (order == CblasRowMajor) {
@@ -111,11 +81,6 @@ static void CharonGeaddDouble(int order, int trans_a, int trans_b, int m, int n,
     }
 }
 
-// The checks, in the order the parameters are declared. An m or n of zero leaves C alone and asks
-// nothing else - measured: m = 0 with an otherwise valid call leaves every element of C as it was -
-// and it is the one case where neither operand is ever looked at. An alpha or a beta of zero means
-// its operand is not read at all, so a NULL there is legal (the header says so, and the host agrees:
-// C = 1 * B with A = NULL and alpha = 0 comes out as B).
 static int CharonGeaddCheck(int order, int trans_a, int trans_b, int m, int n, int alpha_is_zero, int beta_is_zero,
                             const void *a, int lda, const void *b, int ldb, const void *c, int ldc)
 {

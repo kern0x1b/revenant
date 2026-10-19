@@ -1,18 +1,6 @@
 #import <CoreGraphics/CoreGraphics.h>
 #include <math.h>
 
-// The matrix is [a b; c d] acting on row vectors, with the translation (tx, ty) last. The components are the
-// product scale * shear * rotation, with the translation applied after them: the first row of the matrix is
-// sx times the unit vector u of the rotation, and the second is sy times (sh * u + v), v being u turned a quarter.
-// Measured on the host (tests/backports/host/affine-components): the rotation is the angle of the first row, and sy is
-// the second row's component across that angle. A negative sy is the flip: it is made positive, sx is made negative,
-// and the rotation is turned a half circle back into [-pi, pi). The host takes the sine and the cosine of an angle
-// through one call, and the shear of a singular transform is a quotient of rounding, so the port does the same.
-// A matrix with a zero first row has no such angle: the rotation is zero, or a half circle when d is negative.
-
-/* The release takes the sine and the cosine of an angle through __sincos_stret (iOS 7 and later, and macOS). A build for
-   an older release links apple-compat's copy of it, which takes the two one at a time, as the SDK does for a deployment
-   target before 7.0 (facts/CoreGraphics/AffineComponents.md). */
 typedef struct {
     double sine;
     double cosine;

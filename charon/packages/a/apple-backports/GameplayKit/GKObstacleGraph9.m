@@ -1,26 +1,3 @@
-// GKObstacleGraph9.m -- the obstacle graph of GameplayKit as it arrived in iOS 9.
-//
-// WHY THIS IS AN OBJECT OF ITS OWN. An object carries the API of exactly one release (modules/apple/
-// backports.lua's check_releases, read by tools/release-split.lua). GKObstacleGraph.h:15 marks the class
-// GK_BASE_AVAILABILITY, which GameplayKitBase.h:26 defines as NS_CLASS_AVAILABLE(10_11, 9_0) -- so its last
-// release is 9.0, while GKGraphNode3D, GKMeshGraph, GKOctree, GKQuadtree, GKRTree and GKSphereObstacle are
-// GK_BASE_AVAILABILITY_2 and answer 10.0, measured by relcheck as 10.0.1. The mesh graph and the two spatial
-// indexes are GKGraph10.m; the graph itself, its nodes and its obstacles are GKGraph9.m; this is the obstacle
-// graph, which belongs with the first group and is its own file because the second is already full of 10.0.
-//
-// An obstacle graph is the visibility graph of a set of obstacles: a node at every corner an obstacle grows to,
-// and an edge between two of them when the line between them meets no obstacle. That is what makes a path round
-// them -- the corners are the only places a path can turn without crossing one.
-//
-// ONE MEASURED THING IS WORTH RECORDING RATHER THAN REPRODUCING. On the host, the nodes of an obstacle graph
-// answer NaN for -position: measured, all four of a single wall's nodes, and seven of eight for two walls, at
-// every buffer radius tried (0, 1 and 2), and the same for a node joined by -connectNodeUsingObstacles:. A node
-// that cannot say where it is describes nothing, and a path walked through the graph would be walked through
-// points that are not numbers. So this port places the corners the visibility graph is built over -- the
-// obstacle's own vertices, pushed out by the buffer radius -- and the node list answers those. The node COUNT
-// is the host's and it is well defined: one node per vertex of every obstacle, so a wall given as four points
-// answers four nodes and two walls answer eight.
-
 #import <Foundation/Foundation.h>
 #import <GameplayKit/GameplayKit.h>
 
@@ -44,10 +21,6 @@
 - (instancetype)initWithObstacles:(NSArray *)obstacles bufferRadius:(float)bufferRadius
                         nodeClass:(Class)nodeClass
 {
-    // The header bounds the node class: GKObstacleGraph.h:15 declares the class as GKGraphNode2D, and the host
-    // refuses any other with NSInternalInconsistencyException and the reason "initWithObstacles: nodeClass
-    // does not descend from GKGraphNode2D" (measured). So a class that is not one is refused here with the
-    // host's own reason rather than silently ignored.
     if (nodeClass != Nil && ![nodeClass isSubclassOfClass:[GKGraphNode2D class]]) {
         [NSException raise:NSInternalInconsistencyException
                     format:@"initWithObstacles: nodeClass does not descend from GKGraphNode2D"];
@@ -86,11 +59,6 @@
 - (float)bufferRadius { return _charonBufferRadius; }
 - (Class)classForGenericArgumentAtIndex:(NSUInteger)index { (void)index; return _charonNodeClass; }
 
-// One node per corner of each obstacle, and the buffer decides how far out each corner stands: the corners are
-// pushed out by the radius rather than left where the obstacle gave them, because the region an agent may not
-// walk into is the obstacle plus that radius. The host answers the same COUNT for every buffer and NaN for
-// every position at every buffer, so there is no host number for where they stand and the header's own rule is
-// what places them.
 - (NSArray *)charon_cornerNodes
 {
     NSMutableArray *corners = [NSMutableArray array];
@@ -105,10 +73,6 @@
     return corners;
 }
 
-// Adding an obstacle re-scans the whole graph, so the scan REPLACES the node list rather than adding to it:
-// measured, a graph of one obstacle answers four nodes, and after a second obstacle is added it answers
-// EIGHT -- four and four, not six. The old nodes and their edges go first, so that a re-scan after a removal
-// leaves no edge to a node that is gone.
 - (void)addObstacles:(NSArray *)obstacles
 {
     for (id obstacle in obstacles) {
@@ -127,8 +91,6 @@
     [self charon_rescan];
 }
 
-// The scan: the corners of the obstacles now in the graph become nodes, and the pairs that can see each other
-// become edges.
 - (void)charon_rescan
 {
     NSArray *before = [self nodes];
@@ -151,7 +113,6 @@
     [self charon_rescan];
 }
 
-// Join two nodes when the line between them meets no obstacle, and add one edge per pair.
 - (void)charon_connect:(NSArray *)nodes obstacles:(NSArray *)obstacles
 {
     for (NSUInteger first = 0; first < [nodes count]; first++) {
@@ -161,8 +122,6 @@
     }
 }
 
-// One node against every node of the graph, which is the pairing -connectNodeUsingObstacles: needs and
-// -charon_connect: cannot do: the node it is given is the caller's, not one of a pair in the graph's own list.
 - (void)charon_connectNode:(GKGraphNode *)node obstacles:(NSArray *)obstacles
 {
     if (node == nil) {
@@ -173,8 +132,6 @@
     }
 }
 
-// The test itself: is the line between two nodes free of every obstacle? This is what a visibility graph is,
-// and it is what -connectNodeUsingObstacles: is named for.
 - (void)charon_join:(GKGraphNode *)from to:(GKGraphNode *)to obstacles:(NSArray *)obstacles
 {
     if (from == nil || to == nil || from == to) {
@@ -201,16 +158,11 @@
     [from addConnectionsToNodes:@[to] bidirectional:YES];
 }
 
-// Join a node of the caller's own to every node of the graph it can see. The node is not in the graph -- a
-// caller places an agent and asks for its edges -- so the pairing is the node against the graph's own nodes,
-// which is what makes this different from -charon_connect: above.
 - (void)connectNodeUsingObstacles:(GKGraphNode *)node
 {
     [self charon_connectNode:node obstacles:_charonObstacles];
 }
 
-// With the obstacles named left out of the test, so the edges over them are kept: GKObstacleGraph.h:19 says
-// "connect the node to the nodes it has line of sight to, ignoring the listed obstacles".
 - (void)connectNodeUsingObstacles:(GKGraphNode *)node
             ignoringObstacles:(NSArray *)obstaclesToIgnore
 {
@@ -223,8 +175,6 @@
     [self charon_connectNode:node obstacles:kept];
 }
 
-// And with the buffer dropped for the obstacles named, which is what this method's name says: those corners
-// stand where the obstacle gives them rather than pushed out by the radius.
 - (void)connectNodeUsingObstacles:(GKGraphNode *)node
     ignoringBufferRadiusOfObstacles:(NSArray *)obstaclesBufferRadiusToIgnore
 {
@@ -249,8 +199,6 @@
     }
 }
 
-// The corners of one obstacle, which is what -nodesForObstacle: answers: the nodes the scan made for that
-// obstacle, in the order the obstacle's own vertices were given.
 - (NSArray *)nodesForObstacle:(GKPolygonObstacle *)obstacle
 {
     NSUInteger index = [_charonObstacles indexOfObjectIdenticalTo:obstacle];
@@ -276,9 +224,6 @@
     return answer;
 }
 
-// A locked connection is one the search may not walk, whatever the edges say. The pair is kept and the edges
-// are removed, so that unlocking puts them back: measured, locking a pair makes
-// -isConnectionLockedFromNode:toNode: answer YES and unlocking it answers NO.
 - (void)lockConnectionFromNode:(GKGraphNode *)startNode toNode:(GKGraphNode *)endNode
 {
     if (startNode == nil || endNode == nil) {

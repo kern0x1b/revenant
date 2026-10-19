@@ -1,24 +1,7 @@
-// What a store remembers of what was saved to it, iOS 18, over the Core Data history the
-// backports carry (registry/CoreData/ios11.json: NSPersistentHistoryChangeRequest,
-// NSPersistentHistoryToken, NSPersistentHistoryTransaction, NSPersistentHistoryChange,
-// NSPersistentHistoryResult, NSPersistentHistoryTrackingKey, NSPersistentHistoryTokenKey,
-// -[NSPersistentStoreCoordinator currentPersistentHistoryTokenFromStores:] and
-// NSManagedObjectContext.transactionAuthor).
-//
-// A transaction is one save; a change is one row inside it; a token is where the reader is, and a
-// tombstone is what a deleted row left behind so that a reader can still ask what it held.
-
 import Foundation
 import CoreData
 import FoundationEssentials
 import FoundationInternationalization
-
-// This port's Foundation overlay and swift-foundation's FoundationEssentials both declare
-// `Date`, and a file that imports both cannot say which it means. FoundationEssentials is the one
-// that will be the port's Foundation once charon@swift-foundation is in the store, and it is the
-// one whose values a store's rows are written as, so it is named at every use below.
-
-// MARK: - The protocols
 
 public protocol HistoryTransaction: Hashable, Identifiable, Sendable {
     associatedtype TokenType: Comparable, Hashable, Identifiable, Sendable
@@ -36,7 +19,6 @@ public enum HistoryChange: Sendable {
     case update(any HistoryUpdate)
     case delete(any HistoryDelete)
 
-    /// The row the change is about, whichever of the three it is.
     public var changedPersistentIdentifier: PersistentIdentifier {
         switch self {
         case .insert(let change): return change.changedPersistentIdentifier
@@ -88,7 +70,6 @@ public protocol HistoryProviding {
     func deleteHistory(_ descriptor: HistoryDescriptor<Self.HistoryType>) throws
 }
 
-/// What a deleted row left behind, so that a reader can still ask what it held.
 public struct HistoryTombstone<Model>: Sequence, @unchecked Sendable where Model: PersistentModel {
     public typealias Element = Any
 
@@ -116,7 +97,6 @@ public struct HistoryTombstone<Model>: Sequence, @unchecked Sendable where Model
 }
 
 public struct HistoryDescriptor<TransactionType> where TransactionType: HistoryTransaction {
-    /// How many transactions to read; zero is every one of them.
     public var fetchLimit: UInt64
     public var predicate: Predicate<TransactionType>?
     public var sortBy: [SortDescriptor<TransactionType>]
@@ -127,8 +107,6 @@ public struct HistoryDescriptor<TransactionType> where TransactionType: HistoryT
         self.sortBy = sortBy
     }
 }
-
-// MARK: - The default ones
 
 public struct DefaultHistoryTransaction: HistoryTransaction {
     public typealias TransactionIdentifier = Int64
@@ -231,9 +209,6 @@ public struct DefaultHistoryToken: HistoryToken, Comparable, Codable {
     public typealias TokenType = [String: Int64]
     public typealias ID = Int
 
-    /// Where the reader is, per store: the transaction number the store has reached. Apple's token
-    /// value has this shape, and a token is this shape because it is the whole of what a history
-    /// fetch can be resumed from.
     public var tokenValue: [String: Int64]?
 
     public var id: Int { Int(tokenValue?.values.max() ?? 0) }

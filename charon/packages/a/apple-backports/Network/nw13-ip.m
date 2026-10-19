@@ -1,11 +1,3 @@
-/*
- * The IP option of iOS 13: which of the device's own addresses a connection prefers to leave from.
- *
- * The release this port builds for has one address per interface and no policy for choosing between
- * them, so the preference is kept and read back and the connection leaves from the address of the
- * interface its path chose, which is the only address there is.
- */
-
 #import "CharonNW.h"
 #import "CharonNWSupport.h"
 

@@ -355,8 +355,6 @@ static BOOL charon_destructive(UIMenuElement *element)
     _sheetDelegate.interaction = self;
     UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:menu.title.length ? menu.title : nil delegate:_sheetDelegate cancelButtonTitle:nil
                                          destructiveButtonTitle:destructiveTitle otherButtonTitles:nil];
-    // A sheet's delegate is not retained and UIKit still calls it after the interaction has let go of
-    // the sheet, so the sheet itself keeps the delegate for as long as the sheet lives.
     objc_setAssociatedObject(sheet, &charon_sheet_delegate_key, _sheetDelegate, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     for (NSString *title in titles)
         [sheet addButtonWithTitle:title];

@@ -1,5 +1,3 @@
-// HKSource: who wrote a piece of health data, and the source of the process itself.
-
 #import <HealthKit/HealthKit.h>
 
 #import "CharonHKStore.h"
@@ -20,10 +18,6 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return [[self alloc] charon_initWithName:name bundleIdentifier:bundleIdentifier];
 }
 
-// The source of the process itself, as the release makes it: the application's own name and its own
-// bundle identifier, read out of its own Info.plist through the release's own NSBundle. Where the
-// release's plist names neither, the empty string is what it answers, so a source is never a nil
-// name.
 + (instancetype)defaultSource
 {
     static HKSource *source;
@@ -70,8 +64,6 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return [HKSource charon_sourceWithName:_name bundleIdentifier:_bundleIdentifier];
 }
 
-// NSCopying is what the header promises for this class, and a copy of a source is a source with the
-// same two names: a source is identified by them and holds nothing else.
 - (instancetype)charon_copyForStore
 {
     return [HKSource charon_sourceWithName:_name bundleIdentifier:_bundleIdentifier];

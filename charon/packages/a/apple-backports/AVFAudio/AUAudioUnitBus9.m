@@ -10,9 +10,6 @@
     BOOL _charon_enabled;
 }
 
-// The format of a bus is the unit's own kAudioUnitProperty_StreamFormat for that scope and element -
-// the header says the property is "bridged to" it, which is exactly what this is. A unit that
-// answers nothing for a bus has no format, which is nil rather than a default the port picked.
 - (AVAudioFormat *)format
 {
     UInt32 size = sizeof(AudioStreamBasicDescription);
@@ -28,12 +25,6 @@
     return [[AVAudioFormat alloc] initWithStreamDescription:&described];
 }
 
-// The private initializer the bus array builds its busses with. It is declared in the CharonImpl
-// category in CharonAVFAudio.h and it was *sent* by -charon_allComponents and never defined: the
-// object carried an undefined _objc_msgSend$initWithCharonOwner:type:index:, so every call raised.
-// The gate cannot see that - a Charon-prefixed selector has no registry row, and the linker does not
-// complain about an Objective-C message send - and the port-versus-host half of
-// tests/backports/host/avfaudio found it the first time it instantiated a bus.
 - (instancetype)initWithCharonOwner:(AUAudioUnit *)owner type:(AUAudioUnitBusType)type index:(NSUInteger)index
 {
     if ((self = [super init])) {
@@ -99,12 +90,6 @@
 
 - (NSArray<NSNumber *> *)supportedChannelLayoutTags
 {
-    // The tags the unit supports on this bus, through kAudioUnitProperty_SupportedChannelLayoutTags,
-    // which the header documents as "AudioChannelLayoutTags[ variable number of elements ]", Access:
-    // read only. The value is a CFArray whose entries are the *names* of tags, so each is read by
-    // name and the four characters of the name are the tag. A unit that publishes none answers nil,
-    // which the header allows - and nil is the answer, as opposed to the one-element array holding
-    // the bus's own current layout, which is a different question and not the one asked.
     if (_charon_owner == nil || _charon_owner.audioUnit == NULL) {
         return nil;
     }
@@ -136,8 +121,6 @@
     return found;
 }
 
-// Float64 by the header's own Value Type, for the same reason the unit's own latency is: read narrow
-// it is accepted and returns the low half of the double. See tests/backports/host/avfaudio/.
 - (NSTimeInterval)latency
 {
     if (_charon_owner == nil || _charon_owner.audioUnit == NULL) {
@@ -152,10 +135,6 @@
     return latency;
 }
 
-// Whether the bus is active, which on a v2 unit is the input render callback being installed or not -
-// the header says the property is bridged to kAudioUnitProperty_MakeConnection and
-// kAudioUnitProperty_SetRenderCallback together, and on a unit with no downstream node the render
-// callback is the whole of it.
 - (BOOL)isEnabled
 {
     return _charon_enabled;
@@ -184,9 +163,6 @@
     NSArray<AUAudioUnitBus *> *_charon_busses;
 }
 
-// A bus array is built by asking the unit how many of that kind of bus it has: a v2 unit publishes
-// the element count of a scope through kAudioUnitProperty_ElementCount, which is the release's own
-// answer, so the number of busses is the unit's and not a number the port chose.
 - (instancetype)initWithAudioUnit:(AUAudioUnit *)owner busType:(AUAudioUnitBusType)busType busses:(NSArray<AUAudioUnitBus *> *)busArray
 {
     if ((self = [super init])) {
@@ -197,9 +173,6 @@
     return self;
 }
 
-// A bus array is built by asking the unit how many of that kind of bus it has: a v2 unit publishes
-// the element count of a scope through kAudioUnitProperty_ElementCount, which is the release's own
-// answer, so the number of busses is the unit's and not a number the port chose.
 - (instancetype)initWithAudioUnit:(AUAudioUnit *)owner busType:(AUAudioUnitBusType)busType
 {
     AudioUnitScope scope = busType == AUAudioUnitBusTypeInput ? kAudioUnitScope_Input : kAudioUnitScope_Output;
@@ -235,9 +208,6 @@
     return _charon_type;
 }
 
-// The header's own default: "The base implementation returns false." A bus array of a v2 unit has
-// however many busses the unit says it has, and a v2 unit's element count is fixed once it is
-// instantiated, so it cannot be changed from the host side.
 - (BOOL)isCountChangeable
 {
     return NO;

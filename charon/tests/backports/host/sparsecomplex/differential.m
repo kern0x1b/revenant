@@ -1,19 +1,3 @@
-// The port's complex sparse family held against the host's own Accelerate, from a table of cases.
-//
-// One loop. Every case is a row of the table below - an operation, the shape, the alpha, the
-// transpose, the order, the leading dimensions, the strides, the norm, the expected status and a note -
-// and the loop builds the matrix on both sides from that row, calls the operation on each and compares
-// the status and then every element. The only place a case is read is the switch, which is the
-// operation's own signature; there is no per-case code.
-//
-// The two sides are two separate libraries. The port's is dlopen'd with RTLD_LOCAL | RTLD_FIRST and
-// reached through dlsym on that handle, so nothing of the port's can interpose the host's and the host's
-// Accelerate is the one the process already has. The port's two halves are one dylib: the complex family,
-// and the real half that owns the entry points the SDK declares with a void * matrix for, which a complex
-// matrix answers on the same terms.
-//
-// Usage: sparsecomplex <path to libComplexPort.dylib>
-
 #import <Accelerate/Accelerate.h>
 #include <complex.h>
 #include <dlfcn.h>
@@ -27,14 +11,14 @@
 #define MAX_DIM 6
 
 typedef enum {
-    OpGemv,        // y = alpha * op(A) * x + y
-    OpTrsvVector,  // x = T^-1 (x / alpha)
-    OpTrsvMatrix,  // B = T^-1 (B / alpha), nrhs right-hand sides
-    OpGemm,        // C = alpha * op(A) * B + C, B dense
-    OpOuter,       // C = alpha * x * y' as a new matrix
-    OpTrace,       // the sum along one diagonal
-    OpElementwise, // sparse_elementwise_norm_*
-    OpOperator,    // sparse_operator_norm_*
+    OpGemv,
+    OpTrsvVector,
+    OpTrsvMatrix,
+    OpGemm,
+    OpOuter,
+    OpTrace,
+    OpElementwise,
+    OpOperator,
     OpCount
 } Op;
 
@@ -42,12 +26,10 @@ static const char *op_names[OpCount] = {"a matrix-vector product", "a triangular
                                         "a triangular solve of a matrix", "a dense product", "an outer product",
                                         "a trace", "an elementwise norm", "an operator norm"};
 
-// The entries every matrix is built from, as three dense 3x3 blocks in (re, im) pairs. The products and
-// the trace use the first, the solves the second, so a case can name one by asking for its operation.
 static const double dense_entries[3 * 3 * 2] = {
-    1, 0,  0, 0,  2, 0,   // row 0
-    0, 0,  3, 1,  0, 0,   // row 1
-    4, -1, 0, 0,  0, 0,   // row 2
+    1, 0,  0, 0,  2, 0,
+    0, 0,  3, 1,  0, 0,
+    4, -1, 0, 0,  0, 0,
 };
 static const double lower_entries[3 * 3 * 2] = {
     2, 1,  0, 0,  0, 0,
@@ -57,18 +39,16 @@ static const double lower_entries[3 * 3 * 2] = {
 
 typedef struct {
     Op op;
-    int M, N;    // the matrix's shape
-    int triangular;   // 1: the lower triangular block, 0: the dense one
+    int M, N;
+    int triangular;
     double alphaRe, alphaIm;
     int trans, order, ldb, ldc, incx, incy, nrhs;
     sparse_norm norm;
-    int expectStatus;   // SPARSE_SUCCESS unless the case is a refusal
+    int expectStatus;
     const char *note;
 } Case;
 
-// Every complex case, as data.
 static const Case cases[] = {
-    // y = alpha * op(A) * x + y over the 2x3 [[1, 0, 2], [0, 3 + i, 0]]
     {OpGemv, 2, 3, 0, 1, 0, 111, 101, 3, 2, 1, 1, 0, 0, SPARSE_SUCCESS, "alpha 1"},
     {OpGemv, 2, 3, 0, 2, 0, 111, 101, 3, 2, 1, 1, 0, 0, SPARSE_SUCCESS, "alpha 2"},
     {OpGemv, 2, 3, 0, 0, 0, 111, 101, 3, 2, 1, 1, 0, 0, SPARSE_SUCCESS, "alpha 0 leaves y"},
@@ -78,7 +58,6 @@ static const Case cases[] = {
     {OpGemv, 2, 3, 0, 1, 1, 111, 101, 3, 2, 1, 1, 0, 0, SPARSE_SUCCESS, "a complex alpha"},
     {OpGemv, 2, 3, 0, 1, 0, 9, 101, 3, 2, 1, 1, 0, 0, SPARSE_ILLEGAL_PARAMETER,
      "a transpose outside the enumeration"},
-    // the triangular solves over [[2 + i, 0, 0], [1, 3, 0], [0, 0, 4]]
     {OpTrsvVector, 3, 3, 1, 1, 0, 111, 101, 1, 1, 1, 1, 0, 0, SPARSE_SUCCESS, "lower, alpha 1"},
     {OpTrsvVector, 3, 3, 1, 2, 0, 111, 101, 1, 1, 1, 1, 0, 0, SPARSE_SUCCESS, "lower, alpha 2"},
     {OpTrsvVector, 3, 3, 1, 0.5, 0, 111, 101, 1, 1, 1, 1, 0, 0, SPARSE_SUCCESS, "lower, alpha 0.5"},
@@ -92,23 +71,19 @@ static const Case cases[] = {
     {OpTrsvMatrix, 3, 3, 1, 1.5, 0, 111, 101, 5, 3, 1, 1, 2, 0, SPARSE_SUCCESS, "ldb 5"},
     {OpTrsvMatrix, 3, 3, 1, 1.5, 0, 111, 101, 1, 3, 1, 1, 2, 0, SPARSE_ILLEGAL_PARAMETER,
      "a leading dimension of one"},
-    // C = alpha * op(A) * B + C, B a dense 3x3 read with a leading dimension of 3
     {OpGemm, 2, 3, 0, 1, 0, 111, 101, 3, 3, 1, 1, 0, 0, SPARSE_SUCCESS, "row-major"},
     {OpGemm, 2, 3, 0, 2, 0, 111, 101, 3, 3, 1, 1, 0, 0, SPARSE_SUCCESS, "row-major, alpha 2"},
     {OpGemm, 2, 3, 0, 1, 0, 111, 102, 3, 2, 1, 1, 0, 0, SPARSE_SUCCESS, "column-major"},
     {OpGemm, 2, 3, 0, 2, 0, 111, 102, 3, 2, 1, 1, 0, 0, SPARSE_SUCCESS, "column-major, alpha 2"},
     {OpGemm, 2, 3, 0, 1, 0, 111, 101, 1, 2, 1, 1, 0, 0, SPARSE_ILLEGAL_PARAMETER,
      "a leading dimension of one"},
-    // the outer product
     {OpOuter, 2, 3, 0, 2, 1, 111, 101, 1, 1, 1, 1, 0, 0, SPARSE_SUCCESS, "two nonzeros of y"},
     {OpOuter, 2, 3, 0, 1, 0, 111, 101, 1, 1, 1, 1, 0, 0, SPARSE_SUCCESS, "alpha 1"},
     {OpOuter, 2, 3, 0, 0, 0, 111, 101, 1, 1, 1, 1, 0, 0, SPARSE_SUCCESS, "alpha 0"},
-    // the trace, over the offsets that name elements and those that do not
     {OpTrace, 2, 3, 0, 0, 0, 111, 101, 1, 1, 1, 1, 0, 0, SPARSE_SUCCESS, "the main diagonal"},
     {OpTrace, 2, 3, 0, 0, 0, 111, 101, 1, 1, 1, 1, 1, 0, SPARSE_SUCCESS, "one above the main diagonal"},
     {OpTrace, 2, 3, 0, 0, 0, 111, 101, 1, 1, 1, 1, -1, 0, SPARSE_SUCCESS, "one below the main diagonal"},
     {OpTrace, 2, 3, 0, 0, 0, 111, 101, 1, 1, 1, 1, 3, 0, SPARSE_SUCCESS, "past the last column"},
-    // the four norms and an unenumerated name, each of the two kinds
     {OpElementwise, 2, 3, 0, 0, 0, 111, 101, 1, 1, 1, 1, 0, SPARSE_NORM_ONE, SPARSE_SUCCESS, "SPARSE_NORM_ONE"},
     {OpElementwise, 2, 3, 0, 0, 0, 111, 101, 1, 1, 1, 1, 0, SPARSE_NORM_TWO, SPARSE_SUCCESS, "SPARSE_NORM_TWO"},
     {OpElementwise, 2, 3, 0, 0, 0, 111, 101, 1, 1, 1, 1, 0, SPARSE_NORM_INF, SPARSE_SUCCESS, "SPARSE_NORM_INF"},
@@ -127,10 +102,6 @@ static void *port;
 static int checks;
 static int failures;
 
-// Which sides this run calls: 0 both, 1 the port alone, 2 the host alone. A refused case runs the port
-// here and the host in a child, because the host does not always refuse what the port refuses (measured:
-// an unnamed transpose goes into cblas_cgemv, which ends the process), and one switch with one set of cases
-// has to serve both or it is a second copy of the loop.
 static int side;
 
 #define PORT(statement)                                                                                         \
@@ -170,10 +141,6 @@ static int same(double complex mine, double complex theirs, double tolerance)
     return a <= tolerance * scale && b <= tolerance * scale;
 }
 
-// The one place a case is compared: the two statuses, then every element, both halves. The detail is
-// built in a buffer of its own and its SIZE travels with it. The first version took a char * and wrote
-// with sizeof on it, which is the size of the pointer and not of the buffer, so every mismatch was cut
-// to seven characters and the offset snprintf returned pointed past the end.
 static void compareComplex(const Case *c, sparse_status mine, sparse_status theirs, const float complex *a,
                            const float complex *b, int count, double tolerance)
 {
@@ -191,7 +158,6 @@ static void compareComplex(const Case *c, sparse_status mine, sparse_status thei
     report(op_names[c->op], c->note, ok, text);
 }
 
-// The entry points, resolved once at load, so the loop reads a case and calls through a pointer.
 typedef sparse_status (*Gemv)(enum CBLAS_TRANSPOSE, float complex, void *, const float complex *, sparse_stride,
                               float complex *, sparse_stride);
 typedef sparse_status (*TrsvVector)(enum CBLAS_TRANSPOSE, float complex, void *, float complex *, sparse_stride);
@@ -236,7 +202,6 @@ static void *sym(const char *name)
     return found;
 }
 
-// One case. The switch is the operation's own signature and the only place a case is read.
 static void runOne(const Case *c)
 {
     const double *block = c->triangular ? lower_entries : dense_entries;
@@ -318,8 +283,6 @@ static void runOne(const Case *c)
             long portCount = portC ? portNonzero(portC) : -1;
             long hostCount = hostC ? hostNonzero(hostC) : -1;
             if (ok && side == 0 && (portCount <= 0 || hostCount <= 0)) {
-                // An empty matrix is compared by its count: an elementwise read of the host's empty
-                // product is what takes the process down, and the count is what says the matrix is empty.
                 ok = portCount == hostCount;
                 snprintf(detail, sizeof detail, "an empty matrix: %ld entries on the port, %ld on the host", portCount,
                          hostCount);
@@ -355,8 +318,6 @@ static void runOne(const Case *c)
             double mine = 0, theirs = 0;
             PORT(mine = c->op == OpElementwise ? portElementwise(portA, c->norm) : portOperator(portA, c->norm));
             HOST(theirs = c->op == OpElementwise ? hostElementwise(hostA, c->norm) : hostOperator(hostA, c->norm));
-            // The operator-two norm is the largest singular value and the host reaches it by an
-            // iteration, so it gets the stated tolerance and everything else gets none.
             double tolerance = (c->op == OpOperator && c->norm == SPARSE_NORM_TWO) ? 5e-3 : 1e-6;
             int ok = side != 0 || same(mine + 0.0 * I, theirs + 0.0 * I, tolerance);
             snprintf(detail, sizeof detail, "port %g, host %g", mine, theirs);
@@ -370,8 +331,6 @@ static void runOne(const Case *c)
     if (hostA) hostDestroy(hostA);
 }
 
-// A refused case is asked of the host in a child, because the host does not always refuse what the port
-// refuses: measured, an unnamed transpose goes into cblas_cgemv, which ends the process.
 static void hostInAChild(const Case *c)
 {
     fflush(stdout);
@@ -397,7 +356,7 @@ static void run(const Case *c)
         runOne(c);
         return;
     }
-    side = 1;   // the port alone here; the host alone in the child, which may not come back
+    side = 1;
     runOne(c);
     hostInAChild(c);
 }

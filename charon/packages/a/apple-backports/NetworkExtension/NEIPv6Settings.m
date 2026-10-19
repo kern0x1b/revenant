@@ -1,26 +1,5 @@
 #import "CharonNetworkExtensionSettings.h"
 
-/* NEIPv6Settings, the IPv6 counterpart of what NEIPv4Settings.m carries, and one object of its own
-   because an object holds the API of one release: the caches place this class at iOS 8.0 and NEIPv6Route
-   - which is in NEIPv6Route9.m, for the reason NEIPv4Route9.m gives - at 9.0.
-
-   State, like their IPv4 counterparts: the system reads a settings object when a configuration is
-   applied, so what a port object holds is what a release's own object would hold. The addresses and the
-   prefix lengths an object was built over are readonly as the header declares them, and the routes are
-   copied so a caller cannot change the object through the array it handed over.
-
-   `+defaultRoute` is the route whose destination is the unspecified address with a prefix length of
-   zero, which is what a default route is; tests/backports/host/netext-proxy/ compares both this file's
-   answers against Apple's own, name by name, and the run's verdict line is what says the port's are
-   Apple's.
-
-   The two class methods `+settingsWithAutomaticAddressing` and `+settingsWithLinkLocalAddressing` are
-   API_UNAVAILABLE on every platform in the 26.2 header, so Apple's own class does not carry them and a
-   host comparison cannot be their oracle; what they mean is fixed by their names: automatic addressing
-   is "the system fills the addresses in", and link-local addressing gives the interface its link-local
-   address and nothing else. Each answers an object with the empty arrays its read-only properties
-   answer, and the run checks the two names against the header instead. */
-
 @implementation NEIPv6Settings {
     NSArray<NSString *> *_addresses;
     NSArray<NSNumber *> *_networkPrefixLengths;
@@ -28,8 +7,6 @@
     NSArray<NEIPv6Route *> *_excludedRoutes;
 }
 
-/* Measured: a fresh NEIPv6Settings answers `addresses` and `networkPrefixLengths` as **empty arrays**
-   on the host, not nil - the same answer NEIPv4Settings gives, and the differential is what says so. */
 - (instancetype)init
 {
     return [self initWithAddresses:@[] networkPrefixLengths:@[]];

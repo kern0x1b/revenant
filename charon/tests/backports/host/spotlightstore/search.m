@@ -1,9 +1,3 @@
-// Holds CharonSearchDatastore.m's reading of the shared store to what it claims: an application can write
-// anything into that directory, so an entry that is not archive data, an archive that raises, an archive
-// that decodes to nothing or to another class, and a file whose "entries" are no dictionary are each logged
-// as rejected and skipped, and the item stored properly is still found. run.sh builds the port's own sources
-// and the bundle's, with the store root inside the build directory. The release's SPContentResult, which
-// the host does not have, is stood in for by the class below: it only records what the bundle hands over.
 #import <CoreSpotlight/CoreSpotlight.h>
 #import <objc/message.h>
 #import <objc/runtime.h>

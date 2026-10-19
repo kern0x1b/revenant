@@ -1,14 +1,6 @@
 #import <UIKit/UIKit.h>
 #import "uiviewinteractions-cases.h"
 
-// What a view does with the interactions it holds, as the system's own UIKit does it, so the
-// port's three are held to the same answers. Every case is a question that has one answer and no
-// judgement in it: is the interaction held, is a nil one refused and with what, is one already held
-// added twice or moved from elsewhere, is removing one that is not held quietly nothing, and what
-// the interaction's own willMoveToView:/didMoveToView: see on each of those.
-
-// The interaction the cases add, conforming to UIInteraction as a real one does, and recording the
-// two messages the protocol declares.
 @interface InteractionProbe : NSObject <UIInteraction>
 @property (nonatomic, weak) UIView *view;
 @property (nonatomic, strong) NSMutableArray<NSString *> *moved;
@@ -66,14 +58,12 @@ void uiviewinteractions_run(UIViewInteractionsRecorder record)
 
     record(@"add.nil", uiview_Describe(nil) ? [NSString stringWithFormat:@"%@",
             uiview_Outcome(^{ [view addInteraction:nil]; })] : @"");
-    // re-adding one already held
     NSUInteger before = view.interactions.count;
     [view addInteraction:interaction];
     record(@"reAdd.count", [NSString stringWithFormat:@"%lu->%lu", (unsigned long)before,
             (unsigned long)view.interactions.count]);
     record(@"reAdd.moved", [interaction.moved componentsJoinedByString:@","]);
 
-    // removing one the view does not hold
     record(@"remove.other", uiview_Outcome(^{ [view removeInteraction:[[InteractionProbe alloc] init]]; }));
     record(@"interactions.afterRemoveOther", uiview_Describe(view.interactions));
     record(@"remove.nil", uiview_Outcome(^{ [view removeInteraction:nil]; }));
@@ -84,7 +74,6 @@ void uiviewinteractions_run(UIViewInteractionsRecorder record)
 
     record(@"setNil", uiview_Outcome(^{ view.interactions = nil; }));
 
-    // an interaction held by another view is moved, not duplicated
     UIView *other = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
     InteractionProbe *moving = [[InteractionProbe alloc] init];
     [other addInteraction:moving];

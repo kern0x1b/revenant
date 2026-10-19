@@ -15,7 +15,6 @@ local function required(name)
     return package
 end
 
--- A target says with emulate.timing = "strict" that it measures time itself.
 local function timing()
     for _, target in pairs(project.targets()) do
         local value = target:values("emulate.timing")
@@ -102,9 +101,6 @@ local function install(ctx)
     for _, package in ipairs(written) do
         local placed = emulator.install_deb(package.deb, rootfs)
         cprint("${bright green}installed${clear} %s into %s %s", path.filename(package.deb), ctx.identifier, ctx.version)
-        -- What went in, so a caller can hold it against the build: a binary of this port is stripped and
-        -- signed on its way into the image, and ldid's signature is not reproducible, so its hash is
-        -- printed for the record and its size is what a comparison is made of.
         for _, file in ipairs(emulator.describe_files(package.stage)) do
             cprint("  %s %d B %s", file.path, file.size, file.hash:sub(1, 16))
         end
@@ -136,9 +132,6 @@ local function run(ctx, argv)
     local seconds = tonumber(option.get("seconds"))
     emulator.install_runner(rootfs, ctx.guest, argv, seconds, ctx.version)
     local results = emulator.results(rootfs)
-    -- The clone is a whole root filesystem, and it goes whatever the run did: a boot that times out, a
-    -- command that raises, a harness that gives up - each of those left one behind, and 125 of them are
-    -- what filled the cache. Only --keep holds it, and then beside the log the run leaves.
     local ok, result, booted, errors = try {
         function ()
             local boot = booter(ctx)(table.join(ctx, {rootfs = rootfs, run = folder, stop = function ()
@@ -173,12 +166,8 @@ local function run(ctx, argv)
         raise(errors)
     end
     emulator.report_output(folder, result.output)
-    -- Where the run's own files are: a program writes what it has to say into /var/charon, and the
-    -- image is under the emulator root, so the folder is named for whoever has to read them.
     print("run folder %s", folder)
     local described = emulator.describe(result)
-    -- Both clocks are named whatever the outcome, so a run is never read as
-    -- fast or slow without the scale that produced it.
     local timing = string.format("%.1f guest s / %.1f host s at time scale %s",
                                  result.guest_seconds or 0, result.host_seconds or 0, result.scale)
     if result.state == "pass" then
@@ -190,10 +179,6 @@ local function run(ctx, argv)
     end
 end
 
--- The port is installed, its application launched by SpringBoard the way a
--- tap on its icon launches it, and what the application writes and shows is
--- kept: its standard output and error, and a snapshot once its screen settles
--- and after each step.
 local function launch(ctx, identifier, steps)
     local applications = install(ctx)
     local application = applications[identifier]
@@ -208,8 +193,6 @@ local function launch(ctx, identifier, steps)
     local seconds = tonumber(option.get("seconds"))
     local results = emulator.results(rootfs)
     emulator.install_launcher(rootfs, ctx.guest)
-    -- The runner outlasts charon-sblaunch's own wait by one of its half-second
-    -- retries, so charon-sblaunch says why it gave up instead of being ended.
     emulator.install_runner(rootfs, ctx.guest, emulator.launch_command(identifier, seconds), seconds + 1, ctx.version)
     local scale = tonumber(option.get("scale")) or emulator.TIME_SCALE
     local driver = emulator.launch_driver({results = results, run = folder, application = application, steps = steps,
@@ -240,8 +223,6 @@ local function launch(ctx, identifier, steps)
     for _, shot in ipairs(driver.shots) do
         print(shot)
     end
-    -- Where the run's own files are: the application writes what it has to say into /var/charon, and
-    -- the image is under the emulator root, so the folder is named for whoever has to read them.
     print("run folder %s", folder)
     local where = string.format("on %s %s (%s) in %.1f host s at time scale %s", ctx.identifier, ctx.version, ctx.build,
                                 booted.seconds, booted.scale)
@@ -299,9 +280,6 @@ local function log(ctx, text)
     end
 end
 
--- The program is started as the guest's first process and stopped where it
--- crashes, and what the debugger reads is printed as it is read: the signal,
--- the frames named by the images the guest says it loaded, and the registers.
 local function debug_command(ctx, command)
     local image = path.join(ctx.image, "rootfs")
     if not os.isdir(image) then
@@ -346,7 +324,6 @@ local function debug_command(ctx, command)
     end
     cprint("${dim}%d images loaded; the report is %s and the emulator log is %s", #report.images,
            path.join(folder, "debug.json"), report.log)
-    -- the clone is a whole root filesystem here too, and it is not the report that keeps it alive
     if not option.get("keep") then
         emulator.remove(rootfs)
         emulator.remove(path.join(folder, "runtime"))
@@ -369,8 +346,6 @@ function main()
         end
         return
     end
-    -- Before anything else an emulate does: what earlier runs left behind. A run that was killed cannot
-    -- clean up after itself, so the next one is what bounds the cache.
     local hours = tonumber(option.get("prune-hours"))
     for _, folder in ipairs(emulator.prune({hours = hours})) do
         cprint("${bright}pruned${clear} %s, unused for more than %d hours", folder, hours or emulator.PRUNE_HOURS)

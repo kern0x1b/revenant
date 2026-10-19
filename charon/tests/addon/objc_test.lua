@@ -107,8 +107,6 @@ local function armv7_cache(file, opt)
     words(data + 0x90, 12, 1)
     pointers(data + 0x98, text + 0x1806, text + 0x180c, text + 0x1001)
     if opt.charon then
-        -- The category list of a library this repository built, which backports.lua's link renames, holding one
-        -- selector the class does not define. No image of a release carries such a section.
         words(data + 0xB0, 12, 1)
         pointers(data + 0xB8, text + 0x1813, text + 0x180c, text + 0x1001)
         pointers(data + 0xC0, text + 0x1800, class, 0, 0)
@@ -196,10 +194,6 @@ local function held_failures(folder, opt)
     return found
 end
 
--- The selector list known_selectors() keeps beside a release is named by the reader that wrote it. A shared
--- cache taken out of a firmware keeps that firmware's own mtime - 2011 for the held 4.3 one, 2013 for 6.1.3 -
--- so a comparison of times alone holds a list true for the machine's lifetime and a changed reader is never
--- read at all. A list this reader did not write is therefore not the answer, whatever its times say.
 local function kept_failures(folder, opt)
     local found = {}
     local objc = import("apple.objc", {rootdir = opt.modules, anonymous = true})
@@ -219,8 +213,6 @@ local function kept_failures(folder, opt)
         table.insert(found, "the reading is kept beside the release and read back: -heldMethod must be in the answer, and the answer names " ..
                     table.concat(table.slice(table.orderkeys(known), 1, 8), " "))
     end
-    -- A second call must answer from the file the first one wrote and not read the library again, which is
-    -- the whole reason the reading is kept: a marker left in the file survives only if it was read back.
     local list = path.join(folder, "kept", "selectors_armv7.txt")
     io.writefile(list, io.readfile(list) .. "charonMarkerInTheKeptList\n")
     if not objc.known_selectors(libraries)["-charonMarkerInTheKeptList"] then
@@ -281,9 +273,6 @@ local function selector_failures(folder, opt)
     return found
 end
 
--- An object file is not linked yet, so the class a category extends is not bound in its category
--- list but named by an external relocation of the slot; the inventory of the object has to read it,
--- or the category's members answer to no class and a band cannot tell which entries it carries.
 local function object_failures(folder, opt)
     local found = {}
     local objc = import("apple.objc", {rootdir = opt.modules, anonymous = true})

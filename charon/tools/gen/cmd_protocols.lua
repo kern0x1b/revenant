@@ -1,13 +1,3 @@
--- `protocols`: the snapshot of the objc protocols a framework names that the 6.1.3 release lacks, from the transcriber (transcribe.lua,
--- the port of tools/transcribe-protocols.py@52253c0650). For each framework it writes spec/<F>/protocols.tsv (one row per protocol and one per
--- member: what the protocol is, from the 26.2 and 16.4 ASTs). The transcriber's headers are not written into the tree: nothing reads them and
--- nothing commits them (commit 0950d41f70), so a stale Charon*Protocols.h is removed. --all: every surface framework. Returns the exit status:
--- 1 when a transcriber stopped.
---
--- The wanted protocols are the surface's protocol rows and the protocol owners of its member rows (protocol_wanted, the oracle's rule). The
--- owners are the classes the 26.2 surface names as owners of members and that the declaration shard does not carry as a class, and the 26.2
--- headers define with a body. The corpus (--coordination) is read for the surface table only; the SDKs are read from --sdk and CHARON_SDK16.
-
 local layout = import("layout", {anonymous = true})
 local files = import("files", {anonymous = true})
 local order = import("order", {anonymous = true})
@@ -23,8 +13,6 @@ local sdk_modules = import("sdk_modules", {anonymous = true})
 
 local PROTOCOL_COLUMNS = {"protocol", "introduced", "status", "reasons", "bases", "section", "kind", "instance", "selector", "decl", "in16"}
 
--- The text with its comments taken out, each replaced by one space: a "//" to the end of its line, and a "/*" to the next "*/",
--- whichever starts first. A "/*" with no "*/" after it is no comment (the oracle's re.sub over the same two alternatives).
 local function without_comments(text)
     local out, pos = {}, 1
     while true do
@@ -57,9 +45,6 @@ local function without_comments(text)
     return table.concat(out)
 end
 
--- The names the oracle's pattern finds in a text: "@protocol" then whitespace, a name, an optional <...> (no ';' or '>' in it), and
--- a line feed after the whitespace (the pattern's lookahead). The first form of the pattern (the name then a line feed) and the
--- second (with the list) are both tried, as the regular expression tries them.
 local function defined_names(text)
     local found = {}
     local pos = 1
@@ -96,8 +81,6 @@ local function defined_names(text)
     return found
 end
 
--- The text of a module's 26.2 headers, joined by line feeds: a framework's are every header of its Headers folder in name order, a usr
--- module's are the headers its map names (sdk_modules.headers_of), and a Swift module has none.
 local function header_text(sdk, fw)
     local parts = {}
     local record = sdk_modules.module_of(sdk, fw)
@@ -114,12 +97,7 @@ local function header_text(sdk, fw)
     return table.concat(parts, "\n")
 end
 
--- The objc protocols that the surface's member rows name as their owner, which the declaration shard does not carry as a class, and the
--- 26.2 headers define with a body: name -> the earliest introduced release of its member rows.
 local function protocol_owners(tree, fw, corpus, sdk, sdk_release)
-    -- The classes are the cls of the spec table the generator builds from the shard (spec.load, the rows gen writes under .gen). They
-    -- are read in memory, not from a .gen file a gen run wrote: the protocols step runs before gen in the pipeline. A framework with
-    -- no shard carries no class.
     local classes = {}
     if os.isfile(layout.shard_path(tree, fw)) then
         for _, row in ipairs(spec.load(tree, fw)) do
@@ -155,8 +133,6 @@ local function protocol_owners(tree, fw, corpus, sdk, sdk_release)
     return out
 end
 
--- The wanted protocols of a framework: the surface's objc protocol rows, then the owners it has no row for, as a list of
--- {name, introduced} sorted by name (protocol_wanted in tools/gen.py@52253c0650).
 local function protocol_wanted(tree, fw, corpus, sdk, sdk_release)
     local wanted = {}
     for _, row in ipairs(surface.surface_rows(tree, corpus, sdk_release, fw)) do
@@ -179,8 +155,6 @@ local function protocol_wanted(tree, fw, corpus, sdk, sdk_release)
     return list
 end
 
--- The snapshot's text of the facts: the protocol row, then one row per member (protocol_tsv in tools/gen.py@52253c0650). Each row has the eleven
--- columns, and a "-" where the protocol row has no member.
 local function protocols_tsv(records)
     local lines = {table.concat(PROTOCOL_COLUMNS, "\t")}
     local sorted = table.move(records, 1, #records, 1, {})
@@ -211,7 +185,6 @@ local function protocols_tsv(records)
     return table.concat(lines, "\n") .. "\n"
 end
 
--- Writes one framework: returns false when its transcriber stopped (the message is printed).
 local function one(args, fw, sdk, sdk16, sdk_release)
     local snap = layout.snap_dir(args.tree, fw)
     local wanted = protocol_wanted(args.tree, fw, args.coordination, sdk, sdk_release)
@@ -263,7 +236,6 @@ local function one(args, fw, sdk, sdk16, sdk_release)
     return true
 end
 
--- Returns the exit status: 0 when every framework was written (or has nothing to write), 1 when a transcriber stopped.
 function run(args)
     assert(args.coordination, "protocols needs --coordination: the corpus folder (the surface table)")
     assert(args.sdk, "protocols needs --sdk: the iPhoneOS SDK the declarations are read from")

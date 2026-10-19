@@ -3,11 +3,6 @@
 #import "contacts-cases.h"
 #import "contacts-expectations.h"
 
-// PRODID names the platform that wrote the vCard - "iOS 6.1.3" on the device, "macOS 27.0" in the
-// host oracle that generated contacts-expectations.h. Both are ABPersonCreateVCardRepresentationWithPeople
-// of their own AddressBook.framework, honestly reporting their own platform; holding the device to the
-// host's platform string would be holding it to a fact about the host, not about the port. Every other
-// byte of the vCard - order, fields, line endings - still has to match exactly.
 static NSString *normalizedVCard(NSString *vcard)
 {
     if (!vcard)

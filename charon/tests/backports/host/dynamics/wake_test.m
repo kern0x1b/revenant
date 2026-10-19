@@ -1,8 +1,3 @@
-// wake_test.m — facts/UIKit/UIDynamicAnimator.md M3: a paused animator of ours wakes when -[UIView setFrame:] or
-// -setBounds: changes its reference view's bounds size, and on no other change of the view. The wake is the delegate's
-// dynamicAnimatorWillResume:. The animator is stopped between the steps the way an animator at rest is: the switch
-// that keeps it from a display link, then released. (The host's own animator wakes by itself in the host UIKit; this
-// tests ours, whose observer the reference view holds.)
 #import "dynamics.h"
 #import <QuartzCore/QuartzCore.h>
 
@@ -32,7 +27,6 @@ static UIDynamicAnimator *animator_over(UIView *view, Resumes *resumes)
     return animator;
 }
 
-// Whether `change` woke an animator that was at rest.
 static BOOL wakes(UIDynamicAnimator *animator, Resumes *resumes, void (^change)(void))
 {
     bring_to_rest(animator);
@@ -61,8 +55,6 @@ static void test_wake(void)
     CHECK(!wakes(animator, resumes, ^{ view.layer.position = CGPointMake(250, 350); }), "(i) layer.position does not wake");
     CHECK(!wakes(animator, resumes, ^{ view.transform = CGAffineTransformIdentity; view.frame = CGRectOffset(view.frame, 5, 5); }),
           "a move without a change of size does not wake");
-    // The size the layer was left at is the size the setter compares with: 7.0 tests the bounds size before and after
-    // the call, not the size the last notification saw.
     view.layer.bounds = CGRectMake(0, 0, 300, 900);
     CHECK(!wakes(animator, resumes, ^{ view.bounds = CGRectMake(0, 0, 300, 900); }), "a setter that leaves the size as the layer made it does not wake");
     CHECK(wakes(animator, resumes, ^{ view.bounds = CGRectMake(0, 0, 300, 950); }), "the next real change wakes");
@@ -70,7 +62,6 @@ static void test_wake(void)
 
 static void test_lifetime(void)
 {
-    // An animator that goes leaves the view as it was; another over the same view keeps its observer.
     UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 300, 400)];
     Resumes *resumes = [Resumes new];
     UIDynamicAnimator *first = animator_over(view, resumes);
@@ -82,7 +73,6 @@ static void test_lifetime(void)
     view.frame = CGRectMake(0, 0, 300, 600);
     charon_check(YES, "a view whose animators all went can be resized", @"ours");
 
-    // A view that goes while its animator stays: the observer goes with the view, and the animator has no reference view.
     UIDynamicAnimator *orphan;
     @autoreleasepool {
         UIView *short_lived = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];

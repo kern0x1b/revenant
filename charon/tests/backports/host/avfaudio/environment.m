@@ -1,15 +1,3 @@
-// AVAudioEnvironmentNode's outputType and listenerHeadTrackingEnabled.
-//
-// The port's rules are in packages/a/apple-backports/AVFAudio/CharonEnvironmentOutput.h, the header the port's node includes,
-// so this probe checks the very mapping the node applies. Checked here:
-//   - the resolution of AVAudioEnvironmentOutputTypeAuto over the four route classes, against the header's rule: a wired
-//     route is headphones, the built-in hardware is built-in speakers, every other route is external speakers;
-//   - an explicit type is kept on every route, whatever the route is;
-//   - the host's own outputType keeps the value it is set to, for every type, which is what the port's setter does too;
-//   - the port's listenerHeadTrackingEnabled answers NO for both values. The host keeps YES (measured on macOS 27), which
-//     is a recorded divergence: it is printed, not counted, because the 6.1.3 device has no head pose for a YES to mean anything.
-// The route itself is read from AudioSession on the device, which this host does not have, so the route's class is passed in
-// here. That part is not measured by this file.
 #import <AVFoundation/AVFoundation.h>
 #include <stdio.h>
 #include "../../../../packages/a/apple-backports/AVFAudio/CharonEnvironmentOutput.h"
@@ -28,7 +16,6 @@ static void check(int passed, const char *name)
 }
 
 
-// The mixer parameter the environment node reads back through its own parameter tree, which the host renders from.
 static float mixerValue(AVAudioEnvironmentNode *node, AUParameterAddress address)
 {
     AUParameter *parameter = [node.AUAudioUnit.parameterTree parameterWithAddress:address];
@@ -68,10 +55,6 @@ int main(void)
         printf("divergence: the host's listenerHeadTrackingEnabled reads %d after YES; the port answers %d\n",
                (int)host.listenerHeadTrackingEnabled, (int)CharonEnvironmentHeadTrackingAnswer(YES));
 
-        // The reverb filter band. The host's band has the defaults the port writes (CharonEnvironmentFilter.h), and the mixer's
-        // reverb filter, read through the node's parameter tree, holds the band's values with the enable as the bypass inverted.
-        // The band keeps a value as it was given; the mixer clamps it (frequency 10 to 10000, bandwidth 0.05 to 4, gain plus or
-        // minus 18), which is why the mixer, not the band, is where the port's values are checked.
         AVAudioEngine *engine = [[AVAudioEngine alloc] init];
         AVAudioEnvironmentNode *filterNode = [[AVAudioEnvironmentNode alloc] init];
         [engine attachNode:filterNode];

@@ -1,5 +1,3 @@
-// Differential probe for CKError: built once against the host's CloudKit (no -DOURS) and once
-// against packages/s/swift-runtime/files/CloudKit/CKError.swift (-DOURS). The two outputs must match.
 import Foundation
 #if !OURS
 import CloudKit
@@ -64,17 +62,14 @@ print("assetNotAvailable", CKError.assetNotAvailable.rawValue)
 print("accountTemporarilyUnavailable", CKError.accountTemporarilyUnavailable.rawValue)
 print("participantAlreadyInvited", CKError.participantAlreadyInvited.rawValue)
 
-// The wrapped NSError, read back through the value.
 let plain = NSError(domain: CKError.errorDomain, code: 11, userInfo: nil)
 let wrapped = CKError(_nsError: plain)
 print("wrapped", wrapped._nsError.domain, wrapped._nsError.code, wrapped._nsError === plain)
 print("wrapped.code", CKError.Code(rawValue: wrapped._nsError.code).map { "\($0)" } ?? "none")
 
-// Nothing in the user info: both optionals are nil.
 print("empty.partial", wrapped.partialErrorsByItemID == nil)
 print("empty.retry", wrapped.retryAfterSeconds == nil)
 
-// Per-item errors and a retry interval, as the backports' operations put them.
 let items: [AnyHashable: Error] = ["item-a": NSError(domain: "probe", code: 5, userInfo: nil),
                                    "item-b": NSError(domain: "probe", code: 6, userInfo: nil)]
 let partial = CKError(_nsError: NSError(domain: CKError.errorDomain, code: 2,
@@ -84,6 +79,5 @@ print("partial.keys", (partial.partialErrorsByItemID?.keys.map { "\($0)" } ?? []
 print("partial.retry", partial.retryAfterSeconds ?? -1)
 print("partial.code", CKError.Code(rawValue: partial._nsError.code).map { "\($0)" } ?? "none")
 
-// The value is an Error and bridges back to the NSError it wraps.
 let asError: Error = wrapped
 print("bridged", (asError as NSError).domain, (asError as NSError).code, (asError as NSError) === plain)

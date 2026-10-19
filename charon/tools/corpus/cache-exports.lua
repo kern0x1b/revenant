@@ -1,16 +1,3 @@
--- Does a held release's armv7 dyld shared cache export a set of symbols, and which image exports each?
---
---     VNET_MODULES=<charon>/modules xmake l tools/corpus/cache-exports.lua 4.3 6.0 6.1.3
---
--- Read with apple.dyld, because the export trie compresses names: a raw search over the cache bytes is
--- not an oracle, and tools/cicontext-bounds.lua:2-4 says so in the same words. Two dots and no more, as
--- every other tool in tools/ spells it (release-split.lua:72, sdk-markers.lua:15,
--- matter-alias.lua:13): with four, the path leaves this repository and the tool reads another tree's
--- modules/apple/dyld.lua and answers from another tree's code.
---
--- The symbols come from the environment, VNET_SYMBOLS, one per space, because which set is interesting
--- changes with the question; VNET_IMAGES, one install path per space, narrows the answer to the images
--- that carry the API and prints the others as not in the cache.
 import("apple.dyld", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 
 local function split(text)

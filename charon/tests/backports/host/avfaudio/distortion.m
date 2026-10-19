@@ -1,13 +1,3 @@
-// AVAudioUnitDistortion's factory presets, preGain and wetDryMix, against the host's own unit.
-//
-// The port's preset table and its apply function are in packages/a/apple-backports/AVFAudio/CharonDistortionPresets.h,
-// the header the port's class includes, so this probe checks the very table the class sends. Held to the host's unit,
-// read back parameter by parameter:
-//   - the host's loadFactoryPreset: for presets 0-21 leaves the sixteen parameters at the table's row;
-//   - the port's apply, run on a second host unit, leaves the same sixteen values as the host's preset does;
-//   - the unit's parameters 14 and 15 (preGain and wetDryMix) are what the table says after a preset.
-// The host's preGain and wetDryMix properties are a different thing: they do not follow a preset. They keep the value
-// the object held, which the port's object mirrors (checked below). A preset outside 0-21 changes nothing, on both.
 #import <AVFoundation/AVFoundation.h>
 #import <AudioToolbox/AudioToolbox.h>
 #include <stdio.h>
@@ -45,7 +35,6 @@ int main(void)
             return 1;
         }
 
-        // A fresh unit holds row 0, and the object's own preGain and wetDryMix are the same row's values.
         float fresh[16];
         readBack(hostUnit, fresh);
         sameAs(fresh, CharonDistortionPresets[0], "fresh unit", 0);
@@ -73,7 +62,6 @@ int main(void)
             sameAs(ported, got, "port apply against the host", preset);
         }
 
-        // Out of range: the host changes nothing, and the port's apply changes nothing either.
         float before[16], after[16];
         readBack(hostUnit, before);
         [host loadFactoryPreset:(AVAudioUnitDistortionPreset)-1];
@@ -85,7 +73,6 @@ int main(void)
         readBack(portUnit, after);
         sameAs(after, CharonDistortionPresets[CharonDistortionPresetCount - 1], "port out of range", CharonDistortionPresetCount - 1);
 
-        // preGain and wetDryMix are parameters 14 and 15: a value set through the property is the parameter, and back.
         host.preGain = 12.5f;
         host.wetDryMix = 33.25f;
         AudioUnitParameterValue pg = -999, wdm = -999;

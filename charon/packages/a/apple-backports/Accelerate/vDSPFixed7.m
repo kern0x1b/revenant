@@ -1,25 +1,9 @@
-// The elementwise vDSP entry points iOS 7.0 added, over the release's own vDSP.
-//
-// Measured from the release's armv7 caches, iOS 7.0 is the first held release that exports vDSP_vaddi,
-// vDSP_vflt24, vDSP_vfltu24, vDSP_vfltsm24, vDSP_vfltsmu24, vDSP_vsmfix24, vDSP_vsmfixu24, vDSP_zvma and
-// vDSP_zvmmaa, and no earlier one does (4.3, 5.1.1, 6.0 and 6.1.3 name none of the nine), so this file
-// holds the API of exactly one release and the band machinery places it there. The rest of iOS 7.0's
-// vDSP - the multiple-biquad filter and the double-precision DFT - is in vDSPBiquadm7.m and vDSPDFT7.m.
-//
-// Every answer is the host's own vDSP, measured case by case by tests/backports/host/vdsp and recorded
-// in facts/Accelerate/vDSP.md, including the two places the operation vDSP's header documents is not
-// the one it performs.
-
 #import "CharonVDSPKernel.h"
 #include <math.h>
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 #pragma clang diagnostic ignored "-Wunguarded-availability"
 
-// A 24-bit value is three bytes, least significant first, in a struct of its own (vDSP.h). The signed
-// one is sign-extended from bit 23, the unsigned one is not: the host's vDSP_vflt24 of 8388607,
-// -8388608 and -12345 answers 8388607, -8388608 and -12345, and its vDSP_vfltu24 of the same three as
-// unsigned answers 8388607, 8388608 and 16777215, so the two readers differ only in the sign bit.
 static long charon_int24(const vDSP_int24 *value, vDSP_Stride stride, vDSP_Length at)
 {
     long raw = (long)value[at * stride].bytes[0] | ((long)value[at * stride].bytes[1] << 8) |
@@ -33,11 +17,6 @@ static unsigned long charon_uint24(const vDSP_uint24 *value, vDSP_Stride stride,
            ((unsigned long)value[at * stride].bytes[2] << 16);
 }
 
-// C = B[0] * (float)A[n], the scale a single-precision B is read at: the two functions take a B with no
-// stride, so B[0] is the whole of it. Measured with B[0] of 2 over the six values of the differential:
-// the signed reader answers 0 2 -2 16777214 -16777216 -24690, which is twice the plain conversion, and
-// the unsigned reader the same over its own range; with B[0] of -1 the unsigned reader answers
-// -0 -1 -8388607 -8388608 -16777215 -12345, so the scale is applied as it stands and nothing is clamped.
 void vDSP_vfltsm24(const vDSP_int24 *__A, vDSP_Stride __IA, const float *__B, float *__C, vDSP_Stride __IC,
                    vDSP_Length __N)
 {
@@ -56,7 +35,6 @@ void vDSP_vfltsmu24(const vDSP_uint24 *__A, vDSP_Stride __IA, const float *__B, 
     }
 }
 
-// C[n] = (float)A[n], no scale: the plain conversion of each of the two readers.
 void vDSP_vflt24(const vDSP_int24 *__A, vDSP_Stride __IA, float *__C, vDSP_Stride __IC, vDSP_Length __N)
 {
     for (vDSP_Length n = 0; n < __N; n++) {
@@ -71,12 +49,6 @@ void vDSP_vfltu24(const vDSP_uint24 *__A, vDSP_Stride __IA, float *__C, vDSP_Str
     }
 }
 
-// C[n] = trunc(A[n] * B[0]) with no scale of its own, and the result clamped into the range of the
-// destination. The host's answers say both the clamp and the rounding: with B[0] of 8388608 over
-// 1, -1, 0.5, -0.5, 2/3 and 100 the signed reader answers 8388607 -8388608 4194304 -4194304 5592405
-// 8388607, so a positive overflow stops at 8388607, a negative one reaches -8388608 exactly, and 2/3
-// truncates down to 5592405. The unsigned reader over the same six answers 8388608 0 4194304 0 5592405
-// 16777215, so a negative result becomes 0 rather than wrapping.
 void vDSP_vsmfix24(const float *__A, vDSP_Stride __IA, const float *__B, vDSP_int24 *__C, vDSP_Stride __IC,
                    vDSP_Length __N)
 {
@@ -119,7 +91,6 @@ void vDSP_vsmfixu24(const float *__A, vDSP_Stride __IA, const float *__B, vDSP_u
     }
 }
 
-// C = A + B over ints, the plain vector add of vDSP's int family.
 void vDSP_vaddi(const int *__A, vDSP_Stride __IA, const int *__B, vDSP_Stride __IB, int *__C, vDSP_Stride __IC,
                 vDSP_Length __N)
 {
@@ -128,8 +99,6 @@ void vDSP_vaddi(const int *__A, vDSP_Stride __IA, const int *__B, vDSP_Stride __
     }
 }
 
-// D = A * B + C and F = A * B + C * D + E, the split-complex operations, in the one place both
-// precisions are written.
 void vDSP_zvma(const DSPSplitComplex *__A, vDSP_Stride __IA, const DSPSplitComplex *__B, vDSP_Stride __IB,
                const DSPSplitComplex *__C, vDSP_Stride __IC, const DSPSplitComplex *__D, vDSP_Stride __ID,
                vDSP_Length __N)

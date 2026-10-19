@@ -1,45 +1,10 @@
-//
-//  CharonIntents262.h
-//  Intents
-//
-//  The thirteen declarations the port's own SDK (iPhoneOS 16.4) does not have, taken from the
-//  headers of iPhoneOS 26.2 word for word in their contract:
-//
-//      7 classes    INMessageLinkMetadata, INUnsendMessagesIntent,
-//                    INUnsendMessagesIntentResponse, INEditMessageIntent,
-//                    INEditMessageIntentResponse, INMessageReaction, INSticker
-//      4 enums      INUnsendMessagesIntentResponseCode, INEditMessageIntentResponseCode,
-//                    INMessageReactionType, INStickerType
-//      2 protocols  INUnsendMessagesIntentHandling, INEditMessageIntentHandling
-//
-//  Seven classes, four enumerations and two protocols: thirteen, counted because a count that
-//  is wrong is a claim somebody relies on.
-//
-//  This is what a backport writes for API newer than the SDK it compiles against. The port
-//  builds against iPhoneOS 16.4 (the toolchain's charon@iphoneos-sdk), and these names first
-//  appear in the SDK of 17.0 and 18.0, so nothing here can come from a framework the compiler
-//  already reads; the declaration is ours and the behaviour behind it is generated into the
-//  object file of the group the release caches measure (IN12_0.m, IN16_0.m, IN18_0.m).
-//
-//  The availability marks are not repeated, and deliberately: this header is included by the
-//  implementation files only, and every member it declares is carried from the port's own
-//  release. What an application compiles against is still the SDK's own header, and this package
-//  is what answers behind it.
-//
-
 #import <Foundation/Foundation.h>
 #import <Intents/Intents.h>
 
-// CHARON_HOST_BUILD is the host differential's build (tests/backports/host/intents-ride-driver and the
-// rest of the Intents host harnesses). Its SDK is a newer one than iPhoneOS 16.4, and it already declares every
-// name below, so a second declaration is a duplicate definition. The host build therefore takes the SDK's own
-// declarations and declares nothing here; the device build is unchanged.
 #ifndef CHARON_HOST_BUILD
 
 NS_ASSUME_NONNULL_BEGIN
 
-// The message-linking metadata of a message: what the link is (its Open Graph type and URL) and
-// what it says (the site, the summary, the title). iOS 17.0.
 API_AVAILABLE(ios(17.0), macos(14.0), watchos(10.0))
 API_UNAVAILABLE(tvos)
 @interface INMessageLinkMetadata : NSObject <NSCopying, NSSecureCoding>
@@ -58,7 +23,6 @@ API_UNAVAILABLE(tvos)
 
 @end
 
-// The code an unsend answers with. iOS 17.0.
 typedef NS_ENUM(NSInteger, INUnsendMessagesIntentResponseCode) {
     INUnsendMessagesIntentResponseCodeUnspecified = 0,
     INUnsendMessagesIntentResponseCodeReady,
@@ -74,7 +38,6 @@ typedef NS_ENUM(NSInteger, INUnsendMessagesIntentResponseCode) {
     INUnsendMessagesIntentResponseCodeFailureRequiringInAppAuthentication,
 };
 
-// The messages to unsend, by identifier. iOS 17.0.
 API_AVAILABLE(ios(17.0), macos(14.0), watchos(10.0))
 API_UNAVAILABLE(tvos)
 @interface INUnsendMessagesIntent : INIntent
@@ -101,7 +64,6 @@ API_UNAVAILABLE(tvos)
 
 @end
 
-// The answer to an unsend. iOS 17.0.
 API_AVAILABLE(ios(17.0), macos(14.0), watchos(10.0))
 API_UNAVAILABLE(tvos)
 @interface INUnsendMessagesIntentResponse : INIntentResponse
@@ -115,7 +77,6 @@ API_UNAVAILABLE(tvos)
 
 @end
 
-// The code an edit answers with. iOS 17.0.
 typedef NS_ENUM(NSInteger, INEditMessageIntentResponseCode) {
     INEditMessageIntentResponseCodeUnspecified = 0,
     INEditMessageIntentResponseCodeReady,
@@ -131,7 +92,6 @@ typedef NS_ENUM(NSInteger, INEditMessageIntentResponseCode) {
     INEditMessageIntentResponseCodeFailureRequiringInAppAuthentication,
 };
 
-// The message to edit, by identifier, and what it is to say. iOS 17.0.
 @class INStringResolutionResult;
 
 API_AVAILABLE(ios(17.0), macos(14.0), watchos(10.0))
@@ -164,7 +124,6 @@ API_UNAVAILABLE(tvos)
 
 @end
 
-// The answer to an edit. iOS 17.0.
 API_AVAILABLE(ios(17.0), macos(14.0), watchos(10.0))
 API_UNAVAILABLE(tvos)
 @interface INEditMessageIntentResponse : INIntentResponse
@@ -178,14 +137,12 @@ API_UNAVAILABLE(tvos)
 
 @end
 
-// What a reaction is: an emoji, or a generic one the service named. iOS 18.0.
 typedef NS_ENUM(NSInteger, INMessageReactionType) {
     INMessageReactionTypeUnknown = 0,
     INMessageReactionTypeEmoji,
     INMessageReactionTypeGeneric,
 };
 
-// A reaction to a message. iOS 18.0.
 API_AVAILABLE(ios(18.0), macos(15.0), watchos(11.0))
 API_UNAVAILABLE(tvos)
 @interface INMessageReaction : NSObject <NSCopying, NSSecureCoding>
@@ -200,14 +157,12 @@ API_UNAVAILABLE(tvos)
 
 @end
 
-// What a sticker is: an emoji, or a generic one. iOS 18.0.
 typedef NS_ENUM(NSInteger, INStickerType) {
     INStickerTypeUnknown = 0,
     INStickerTypeEmoji,
     INStickerTypeGeneric,
 };
 
-// A sticker on a message. iOS 18.0.
 API_AVAILABLE(ios(18.0), macos(15.0), watchos(11.0))
 API_UNAVAILABLE(tvos)
 @interface INSticker : NSObject <NSCopying, NSSecureCoding>
@@ -222,4 +177,4 @@ API_UNAVAILABLE(tvos)
 
 NS_ASSUME_NONNULL_END
 
-#endif // CHARON_HOST_BUILD
+#endif

@@ -2,10 +2,6 @@
 #include <dlfcn.h>
 #import "check.h"
 
-/* The formatter is assembled out of CoreFoundation rather than taken from it, and
-   the week rule comes from the locale, so what matters here is that the ICU of this
-   release answers the same as the one the expectations were taken from. */
-
 static NSString *image_of(Class cls)
 {
     Dl_info info;
@@ -26,9 +22,9 @@ int main(void)
         CHECK_EQUAL(image_of([NSISO8601DateFormatter class]), @"libFoundationBackports.dylib",
                     "NSISO8601DateFormatter comes from the backports library");
 
-        NSDate *epoch = [NSDate dateWithTimeIntervalSinceReferenceDate:0];        /* 2001-01-01 00:00 UTC */
-        NSDate *sunday = [NSDate dateWithTimeIntervalSince1970:1600000000];       /* 2020-09-13, a Sunday */
-        NSDate *yearEnd = [NSDate dateWithTimeIntervalSince1970:978220800];       /* 2000-12-31 00:00 UTC */
+        NSDate *epoch = [NSDate dateWithTimeIntervalSinceReferenceDate:0];
+        NSDate *sunday = [NSDate dateWithTimeIntervalSince1970:1600000000];
+        NSDate *yearEnd = [NSDate dateWithTimeIntervalSince1970:978220800];
 
         NSISO8601DateFormatter *plain = [[NSISO8601DateFormatter alloc] init];
         CHECK_EQUAL([plain.timeZone name], @"GMT", "a fresh formatter is in GMT");
@@ -46,9 +42,6 @@ int main(void)
                                | NSISO8601DateFormatWithDay, @"GMT") stringFromDate:sunday], @"20200913",
                     "a date without separators");
 
-        /* The week rule is the whole reason the locale is what it is: the week has to
-           start on Monday and the first week of a year must be the one with four days
-           in it, or the last Sunday of a year lands in a week of its own. */
         NSISO8601DateFormatOptions week = NSISO8601DateFormatWithYear | NSISO8601DateFormatWithWeekOfYear
                                         | NSISO8601DateFormatWithDay | NSISO8601DateFormatWithDashSeparatorInDate;
         CHECK_EQUAL([formatter(week, @"GMT") stringFromDate:sunday], @"2020-W37-07",

@@ -4,8 +4,6 @@
 
 void charon_windowed_run(UIWindow *window);
 
-// Whether the prefixed trait collection of a class is this executable's own implementation: the scenario means nothing
-// about the port if the calls reach the system's, which is the answer the bare name gives.
 static BOOL answers_from_app(Class cls, const char *prefixed)
 {
     Dl_info self_info, inside;

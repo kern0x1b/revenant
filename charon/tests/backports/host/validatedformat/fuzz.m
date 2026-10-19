@@ -4,8 +4,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-/* The port is compiled into this file under other selectors, so that the host's own methods stay the
-   host's and the port's static functions are at hand to type the arguments. */
 #define stringWithValidatedFormat charonHostStringWithValidatedFormat
 #define localizedStringWithValidatedFormat charonHostLocalizedStringWithValidatedFormat
 #define initWithValidatedFormat initWithCharonHostValidatedFormat
@@ -100,8 +98,6 @@ static NSString *format(BOOL wild)
     return made;
 }
 
-/* One argument per slot, of the kind the allowed string gives that slot. Every argument is a word,
-   which on arm64 is how a variadic argument of any of these kinds is passed. */
 static void arguments_for(NSString *allowed, uint64_t *words)
 {
     uint64_t floatingWord;
@@ -124,9 +120,6 @@ static void arguments_for(NSString *allowed, uint64_t *words)
     }
 }
 
-/* Whether the arguments are those the allowed string describes, in a way that also holds for the format:
-   only then is the output comparable, since the host reads eight bytes for every argument and the port
-   reads what the allowed string says. */
 static BOOL arguments_agree(NSString *wanted, NSString *allowed)
 {
     NSArray *asked = charon_format_slots(wanted, NO), *offered = charon_format_slots(allowed, NO);

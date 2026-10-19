@@ -1,13 +1,7 @@
-// Where a store keeps itself: which file, whose container it is shared through, and what it
-// mirrors.
-
 import Foundation
 import CoreData
 
 public struct ModelConfiguration: Identifiable, Hashable, @unchecked Sendable {
-    /// A group container is either "the one the bundle's entitlements name", named by hand, or
-    /// none. `automatic` and a named container are different answers and are kept apart, because
-    /// a store in the wrong container is a store another process cannot see.
     public struct GroupContainer: Hashable, Sendable {
         enum Choice: Hashable { case automatic, none, identifier(String) }
 
@@ -19,8 +13,6 @@ public struct ModelConfiguration: Identifiable, Hashable, @unchecked Sendable {
             GroupContainer(choice: .identifier(groupName))
         }
 
-        /// The container's identifier, when one was named. `automatic` reads the bundle's
-        /// entitlements, which is where the name of the automatic group is written down.
         public var identifier: String? {
             switch choice {
             case .automatic: return ModelConfiguration.bundleGroupContainerIdentifier()
@@ -30,9 +22,6 @@ public struct ModelConfiguration: Identifiable, Hashable, @unchecked Sendable {
         }
     }
 
-    /// What a store mirrors. `private(_:)` names the CloudKit container the store mirrors into;
-    /// `none` says it mirrors nothing; `automatic` says the store mirrors into the container the
-    /// bundle's own identifier names.
     public struct CloudKitDatabase: Hashable, Sendable {
         enum Choice: Hashable { case automatic, none, privateDatabase(String) }
 
@@ -44,9 +33,6 @@ public struct ModelConfiguration: Identifiable, Hashable, @unchecked Sendable {
             CloudKitDatabase(choice: .privateDatabase(privateDBName))
         }
 
-        /// The container identifier this configuration names, or nil when it names none. It is
-        /// what `cloudKitContainerIdentifier` answers, and what the store description is built
-        /// from.
         public var identifier: String? {
             switch choice {
             case .automatic: return nil
@@ -106,9 +92,6 @@ public struct ModelConfiguration: Identifiable, Hashable, @unchecked Sendable {
 
     public var id: URL { url }
 
-    /// The file a store of this name is kept in. A store in a group container is inside that
-    /// container - which is what makes it visible to the processes that share it - and a store
-    /// that names none is in the app's own Application Support, where a store of its own belongs.
     static func locate(name: String, inMemoryOnly: Bool, groupAppContainerIdentifier: String?) -> URL {
         if inMemoryOnly { return URL(fileURLWithPath: "/dev/null") }
         let manager = FileManager.default
@@ -122,8 +105,6 @@ public struct ModelConfiguration: Identifiable, Hashable, @unchecked Sendable {
         return support.appendingPathComponent(name).appendingPathExtension("store")
     }
 
-    /// The group container the bundle's own entitlements name, which is what `.automatic` means
-    /// and the only place a program can learn it without writing it down twice.
     static func bundleGroupContainerIdentifier() -> String? {
         (Bundle.main.object(forInfoDictionaryKey: "AppIdentifierPrefix") as? String).map { _ in
             Bundle.main.object(forInfoDictionaryKey: "GroupContainers") as? [[String: Any]] ?? []
@@ -165,8 +146,6 @@ extension ModelConfiguration: CustomDebugStringConvertible {
 extension ModelConfiguration: DataStoreConfiguration {
     public typealias Store = DefaultStore
 
-    /// What a configuration has to answer for before a store is opened from it: a name a file
-    /// system takes, a schema the container has, and a file a container can be written into.
     public func validate() throws {
         if name.isEmpty { throw SwiftDataError.configurationFileNameContainsInvalidCharacters }
         if name.utf8.count > 255 { throw SwiftDataError.configurationFileNameTooLong }
@@ -185,7 +164,5 @@ extension ModelConfiguration: DataStoreConfiguration {
 }
 
 extension DataStoreConfiguration {
-    /// The default: a configuration with no schema of its own is a configuration of whatever
-    /// schema the container it is given to holds.
     public func validate() throws {}
 }

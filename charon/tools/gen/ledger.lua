@@ -1,21 +1,6 @@
--- The 6.1.3 ledger's cache pass: what the release's own dyld shared cache says about each declaration of the model, and the absence
--- rule over it. The cache is read by name: the release (6.1.3) resolves through modules/apple/dyld.lua (held_source under root), and
--- the two charon readers run on the resolved file: tools/corpus/objc-inventory.lua (ObjC classes, protocols and their selectors) and
--- tools/corpus/dump-cache.lua (every exported symbol). Nothing under ~/.charon/dyld is opened here by hand.
---
--- A declaration is checkable when the cache can show it: an ObjC class or protocol, a method or property (its selector on its class),
--- a constant or a function (its linker symbol). An enum member has no symbol of its own, so it is not checkable, and neither is a type
--- (enum, struct, typealias) or a Swift declaration: the header pass and the Swift pass decide those.
---
--- The absence rule: a framework none of whose own declarations is in the cache is absent from the release, with the evidence of absence
--- being either an ObjC runtime name the cache lacks, or a C function or constant the cache lacks while a .tbd of the 26.2 SDK
--- exports it (any .tbd of the SDK, libraries included). A C declaration no SDK .tbd exports proves nothing: a static inline function has no symbol, so an iOS 6 header-only
--- framework would read as absent. A declaration the cache has is evidence of presence.
-
 local TAB = "\t"
 local NO_VALUE = "-"
 
--- The fields of a tab-separated line, empty ones included.
 function split(line, sep)
     local out, from = {}, 1
     while true do
@@ -29,8 +14,6 @@ function split(line, sep)
     end
 end
 
--- A set of the selectors a reader prints, comma-joined (an empty field is the empty set). objc-inventory writes each selector with a sign in
--- front ("-setFrame:"), which is not part of its name: the field's position says whether it is an instance or a class selector.
 local function names_set(field)
     local set = {}
     if field == nil or field == "" then
@@ -42,16 +25,8 @@ local function names_set(field)
     return set
 end
 
--- The release's runtime names: classes and protocols with their instance and class selectors (objc-inventory.lua's lines), and the
--- exported symbols (dump-cache.lua's lines, "<symbol>\t<install name>", the symbol with its leading underscore). Returns a table
--- {classes = name -> {inst, cls}, protocols = name -> {inst, cls}, exports = symbol -> true}.
--- The export names of the Swift runtime and of Swift-compiled code: the Swift runtime's entry points, the mangled names of Swift 4 and later
--- ($s, $S), the Swift 1 to 3 names (__swift, _Tt for a Swift class). A C name in the cache matches none of them.
 local SWIFT_EXPORTS = {"^_?swift_", "^_?%$[sS]", "^_?__swift", "^_Tt"}
 
--- The proof that a cache holds no Swift at all, read from its image list (cache-images.lua: install name and export count per image) and
--- its export names (dump-cache.lua). Every Swift declaration is then missing from the release: the cache has no image named libswift* and
--- no export a Swift compiler wrote, so no framework of the release has a Swift module. Returns the counts and the reason text the rows give.
 local function swift_proof(images_text, export_names)
     local images, swift_images = 0, 0
     for line in string.gmatch(images_text, "[^\n]+") do
@@ -102,15 +77,11 @@ function parse_facts(objc_text, export_text, images_text)
     return facts
 end
 
--- The release folder's cache file, resolved from the release name (dyld.held_source under dyld.root()). nil when the release holds no
--- armv7 cache.
 function cache_of(tree, release)
     local dyld = import("apple.dyld", {rootdir = path.join(tree, "modules"), anonymous = true})
     return dyld.held_source(path.join(dyld.root(), release), "armv7")
 end
 
--- Runs one charon reader over a file and returns its stdout: the cache, or with arch one built binary of that architecture. The reader is
--- an xmake script, run with the tree's own charon root.
 local function reader(tree, script, file, arch)
     local args = {"l", path.join(tree, "tools", "corpus", script), file}
     if arch then
@@ -119,7 +90,6 @@ local function reader(tree, script, file, arch)
     return os.iorunv("xmake", args, {envs = {CHARON_ROOT = tree}})
 end
 
--- The release's facts, read through the two readers. Returns the facts, the cache file and the readers' raw text (for the dump).
 function read_release(tree, release)
     local cache = cache_of(tree, release)
     assert(cache, "the release " .. release .. " holds no armv7 dyld shared cache: nothing to read it against")
@@ -128,7 +98,6 @@ function read_release(tree, release)
     return parse_facts(objc_text, export_text, images_text), cache, objc_text, export_text
 end
 
--- The symbols a binary exports, in dump-cache's line shape: nm -gU's last field, the symbol with its underscore.
 local function nm_exports(binary)
     local out = {}
     for line in string.gmatch(os.iorunv("nm", {"-gU", binary}), "[^\n]+") do
@@ -137,7 +106,6 @@ local function nm_exports(binary)
     return table.concat(out, "\n")
 end
 
--- Adds the names of one entry (a class or a protocol) to the entry of facts of the same name: a name either carries is implemented.
 local function union_entry(into, entry)
     if into == nil then
         return entry
@@ -151,7 +119,6 @@ local function union_entry(into, entry)
     return into
 end
 
--- Adds the facts of other to facts, in place, and returns facts.
 function merge(facts, other)
     for name, entry in pairs(other.classes) do
         facts.classes[name] = union_entry(facts.classes[name], entry)
@@ -165,8 +132,6 @@ function merge(facts, other)
     return facts
 end
 
--- The names the release's built libraries carry: each lib*Backports.dylib of the gate's output folder, read as its armv7 binary through
--- the ObjC reader and through nm -gU. Returns the facts (parse_facts' shape) and the number of libraries read.
 function read_built(tree, gate)
     local libs = os.files(path.join(gate, "lib*Backports.dylib"))
     assert(#libs > 0, "the gate folder " .. gate .. " holds no lib*Backports.dylib: run the gate first (its output is the built libraries)")
@@ -177,8 +142,6 @@ function read_built(tree, gate)
     return facts, #libs
 end
 
--- The owner, selector and side of a method or property record: a method "-[Owner sel:]" is owner and sel: (class side when the sign is +),
--- and a property "Owner.name" is owner and its getter (or its name), either side. nil for an api the pattern does not read.
 local function member_of(record)
     local sign, owner, sel = string.match(record.api, "^([-+])%[([%w_]+) (.+)%]$")
     if owner then
@@ -195,14 +158,10 @@ local function member_of(record)
     return nil
 end
 
--- An enum member (c:@E<enum>@<member>): a constant of the enum, with no linker symbol of its own, so the cache cannot show it.
 local function enum_member(record)
     return record.usr ~= nil and string.match(record.usr, "^c:@E[^@]*@[^@]+@") ~= nil
 end
 
--- Whether the cache shows one declaration: "present" or "absent" with its reason, or nil when the cache cannot decide it. extern is the set
--- of symbols the SDK's .tbd files export (every one, libraries included; nil or empty when there is none): it decides a C declaration the
--- cache lacks.
 function check(record, facts, extern)
     local kind, lang, api = record.kind, record.lang, record.api
     if lang ~= "objc" or enum_member(record) then
@@ -247,16 +206,6 @@ function check(record, facts, extern)
     return nil
 end
 
--- The absence rule over the declarations of each framework: decls = framework -> its records (surface_model.declarations), each claimed by
--- a framework through claimed_by. exported(unit) returns the symbol set of the SDK's .tbd files (tbd.lua all_symbols; the unit is
--- not a test), and is asked only for a C declaration. Returns framework -> {verdict, checkable, present, reason}, verdict one of:
---   "present"    a declaration the framework owns is in the 6.1.3 cache (present counts them);
---   "absent"     none of its checkable declarations is in the cache, and it has at least one (checkable counts them): the framework is not in
---                the release, so every row is work;
---   "undecided"  the cache cannot say: its declarations are types, enum members, Swift, or C declarations no SDK .tbd exports.
--- A declaration counts for the framework that owns it (claimed_by), whichever framework's shard holds it. A nested shard
--- (MetalPerformanceShaders/MPSCore) is a unit of its own, named by its folder, as the trace and the input read it: its declarations
--- claimed by its outer framework count for it too, and its .tbd is its own.
 function verdicts(decls, facts, exported)
     local extern_memo = {}
     local function extern_of(record)
@@ -309,8 +258,6 @@ function verdicts(decls, facts, exported)
     return out
 end
 
--- The state the cache and the built libraries give one declaration: implemented (one of them carries it), missing (the cache says the
--- release lacks it, by its runtime names or a C symbol the SDK exports), or nil when they cannot show it.
 local function cache_state(record, facts, extern)
     local verdict, reason = check(record, facts, extern)
     if verdict == "present" then
@@ -321,19 +268,9 @@ local function cache_state(record, facts, extern)
     return nil
 end
 
--- The state of one declaration in the ledger: implemented, missing, or undecided with what decides it. The cache and the libraries first;
--- then, for an Objective-C declaration they cannot show, the lifted-header answer header (header_pass.lua's answer_of, or nil when the
--- headers did not name it); a Swift declaration the Swift pass decides. Returns the status, what it needs, the reason, and the iOS version
--- the headers introduce it in (nil when they give none).
 function state_of(record, facts, extern, header)
-    -- A Swift record is not looked up by name in the cache: a Swift name that matches an ObjC or C name there is another declaration.
-    -- Its state is the Swift branch below: an import, the Swift proof, or undecided.
     if record.lang == "swift" then
-        -- A Swift declaration exists in the release only as Swift code, so a cache with no Swift in it lacks every one (the proof is named
-        -- in the row). The port's own build is not asked here: whether the port implements it is the gate's question, not the release's.
         if string.sub(record.usr or "", 1, 2) == "c:" then
-            -- the usr says which declaration it imports; the model holds no row for a macro or a typedef (surface_model drops both), and
-            -- no record of the import's ObjC or C twin was in the model for the rest
             local what
             if string.sub(record.usr, 1, 9) == "c:@macro@" then
                 what = "a C macro: the model holds no row for macros"
@@ -360,12 +297,6 @@ function state_of(record, facts, extern, header)
            nil
 end
 
--- The ledger rows of a unit's records (surface_model.declarations: the records whose unit is the unit, or of the nested units of an owner):
--- one row per kind, language and api, the first record of each (a usr shared by two declarations of one unit is one row). exported(unit)
--- gives the SDK's .tbd symbols as verdicts does. header_of(unit, records) gives the lifted-header answers of a unit's undecided Objective-C
--- records, key -> answer (nil: no lifted-header pass); it is asked once per unit, with all of that unit's undecided records. Sorted by kind,
--- then api. twins is the model's ObjC and C rows by usr (twins_of), which the Swift imports of records take their state from; nil when the
--- caller has none yet. Returns the rows as {kind, lang, api, introduced, header_introduced, status, needs, reason, usr}; usr is not written.
 function rows_of(records, facts, exported, header_of, twins)
     local seen, unique = {}, {}
     for _, record in ipairs(records) do
@@ -375,7 +306,6 @@ function rows_of(records, facts, exported, header_of, twins)
             table.insert(unique, record)
         end
     end
-    -- a unit's undecided records are all of its own (a shared key of two units is one row per file, but both units' records are asked)
     local pending, asked = {}, {}
     for _, record in ipairs(records) do
         local unit = record.unit or record.claimed_by
@@ -392,9 +322,6 @@ function rows_of(records, facts, exported, header_of, twins)
             answers[unit] = header_of(unit, list)
         end
     end
-    -- An import of an ObjC or C declaration (a Swift record whose usr is a clang usr) takes that declaration's row: twins is the model's
-    -- ObjC and C rows by usr (rows_twins), so the declaration is decided once, in its own framework's row. An import with no twin in the
-    -- model is undecided (state_of says so).
     local out = {}
     local imports = {}
     for _, record in ipairs(unique) do
@@ -424,8 +351,6 @@ function rows_of(records, facts, exported, header_of, twins)
     return out
 end
 
--- The ObjC and C rows of the model by usr, from the rows of every unit (rows_of's output): the twins rows_of's imports take their state
--- from. A usr two rows share is the first one's.
 function twins_of(rows)
     local twins = {}
     for _, row in ipairs(rows) do
@@ -436,13 +361,10 @@ function twins_of(rows)
     return twins
 end
 
--- The key a row is kept by in a unit: its kind, language and api (the header pass keys its answers the same way).
 function row_key(record)
     return record.kind .. "\t" .. record.lang .. "\t" .. record.api
 end
 
--- The ledger file's text for rows (rows_of's shape): the header of ledger-w45's columns, then one line per row. header-introduced is the
--- iOS version the lifted headers give the declaration, when they give one.
 function rows_text(list)
     local lines = {"kind\tlang\tapi\tintroduced\theader-introduced\tstatus\tneeds\treason"}
     for _, row in ipairs(list) do

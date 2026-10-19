@@ -1,17 +1,3 @@
-// The paths of the CloudKit Web Services interface, the mapping between a record field and its wire
-// value, and the query document a CKQuery's predicate becomes.
-//
-// These are the three pieces of the transport that need no network, and they are where most of what
-// CloudKit asks for actually lives: the path a request goes to, the shape of the JSON it carries, and
-// the one translation that has no mechanical answer, an NSPredicate into the query grammar the
-// service reads.
-//
-// The endpoints are the ones Apple's CloudKit Web Services reference names. The database root is
-// `database/1/<container>/<development|production>/<database>`, where 1 is development and 2 is
-// production, and the database is `private`, `public`, `shared` or `zones/<name>`; facts/CloudKit/
-// WebServices.md has the whole list. A zone or a record name is percent-encoded with the characters
-// the reference names and no others, so a name with a slash in it cannot become a path.
-
 #import "CharonCloudKit.h"
 #import "CharonCKConstants.h"
 #import "CharonCKSubscription.h"
@@ -90,12 +76,8 @@ NSString *CharonCKMD5Hex(NSData *data)
     return hex;
 }
 
-// MARK: - The field mapping
-
 static NSString *CharonCKDateString(NSDate *date)
 {
-    // CloudKit writes a date as ISO 8601 in UTC with fractional seconds, the form its own documents
-    // show, and reads that and the plain form of a query answer.
     static NSDateFormatter *written, *plain;
     if (!written) {
         written = [[NSDateFormatter alloc] init];
@@ -140,9 +122,6 @@ NSDate *CharonCKDateFromJSON(id json)
     return nil;
 }
 
-// A location that carries an altitude, which CLLocation of this release cannot be asked for: the
-// altitude is a property of the value CloudKit sends and the release's own CLLocation answers 0 for
-// it, so a port that read a 3D location into a 2D one would answer a different place.
 @interface CharonCKLocatedCoordinate : CLLocation
 - (instancetype)initWithLatitude:(CLLocationDegrees)latitude longitude:(CLLocationDegrees)longitude altitude:(CLLocationDistance)altitude;
 @end
@@ -177,8 +156,6 @@ static CLLocation *CharonCKLocationFromJSON(NSDictionary *json)
                                          [(NSNumber *)json[@"longitude"] doubleValue]};
     CLLocationAccuracy altitude = [json[@"altitude"] isKindOfClass:[NSNumber class]]
         ? [json[@"altitude"] doubleValue] : 0;
-    // This release makes a location with a C function and with no initializer of its own that takes
-    // a coordinate and an altitude, so the port's own is built from the two it does have.
     CLLocation *location = [[CLLocation alloc] initWithLatitude:coordinate.latitude longitude:coordinate.longitude];
     if (altitude == 0) {
         return location;
@@ -236,10 +213,6 @@ id CharonCKValueFromJSON(id json, Class *kind)
         if (kind) {
             *kind = [CKAsset class];
         }
-        // An asset arrives as its metadata. The bytes are a request of their own, so the file the
-        // port answers -fileURL with is the one that request wrote, and it does not exist until it
-        // has run: an asset of a fetched record that has not been downloaded has no file, and the
-        // header says exactly that.
         return nil;
     }
     NSMutableDictionary *out = [NSMutableDictionary dictionaryWithCapacity:object.count];
@@ -284,8 +257,6 @@ id CharonCKValueToJSON(id value)
         NSURL *file = [value fileURL];
         NSDictionary *attributes = file ? [[NSFileManager defaultManager] attributesOfItemAtPath:file.path error:NULL] : nil;
         if (!file || !attributes) {
-            // An asset with no readable file is a request the caller has not made yet, and the
-            // service's own answer for that is an asset document with nothing in it.
             return @{@"fileChecksum": @"", @"size": @0, @"wrappingKey": @""};
         }
         return @{@"fileChecksum": CharonCKMD5Hex([NSData dataWithContentsOfFile:file.path]),
@@ -344,17 +315,6 @@ CKRecordZone *CharonCKZoneWithDocument(NSDictionary *document)
                                                                                ownerName:zone[@"ownerName"] ?: CKOwnerDefaultName]];
 }
 
-// MARK: - The query document
-//
-// CloudKit's query grammar is not NSPredicate: a comparison is an `operator` of `equals`, `notEquals`,
-// `lessThan`, `lessThanOrEquals`, `greaterThan`, `greaterThanOrEquals`, `like`, `notLike`, `beginsWith`,
-// `contains` or `in` over a `field`, a `comparator` and a `value`; a compound is a `type` of `and` or
-// `or` over `subs`; and a field is named either bare or with a chain of `field`/`value`. A predicate
-// the grammar has no form for - a function, a compound comparison, a negation, a `ANY`/`ALL`/`NONE`
-// quantifier - is refused with CKErrorInvalidArguments, which is the code CKErrorCode names for a
-// malformed predicate. Answering a query the service would reject differently, or dropping part of
-// the predicate and sending the rest, would be sending a query the caller did not ask for.
-
 static NSString *CharonCKOparatorForPredicateOperator(NSPredicateOperatorType op)
 {
     switch (op) {
@@ -372,7 +332,6 @@ static NSString *CharonCKOparatorForPredicateOperator(NSPredicateOperatorType op
     }
 }
 
-// A key path, and the chain of values a compound key such as `location.latitude` is written with.
 static BOOL CharonCKKeyChain(NSString *key, NSArray **chain)
 {
     NSMutableArray *parts = [[key componentsSeparatedByString:@"."] mutableCopy];
@@ -412,9 +371,6 @@ static NSDictionary *CharonCKPredicateDocument(NSPredicate *predicate, NSError *
     if ([predicate isKindOfClass:[NSCompoundPredicate class]]) {
         NSCompoundPredicate *compound = (NSCompoundPredicate *)predicate;
         if (compound.compoundPredicateType != NSAndPredicateType && compound.compoundPredicateType != NSOrPredicateType) {
-            // A NOT has no form in the grammar. Negating is not the same as asking for the
-            // complement, and a port that answered it with something else would be answering a
-            // different query.
             if (error) {
                 *error = CharonCKError(CKErrorInvalidArguments, @"A negated predicate has no form in a CloudKit query", nil);
             }
@@ -440,9 +396,6 @@ static NSDictionary *CharonCKPredicateDocument(NSPredicate *predicate, NSError *
         return nil;
     }
     NSComparisonPredicate *comparison = (NSComparisonPredicate *)predicate;
-    // A comparison whose right-hand side is another predicate is a compound comparison - `x < 1 < y` -
-    // and the grammar has no form for one, whatever the operator says. The same goes for IN and
-    // BETWEEN, which CloudKit's own CKQuery does not accept either.
     if ([comparison.rightExpression isKindOfClass:[NSPredicate class]] ||
         comparison.predicateOperatorType == NSInPredicateOperatorType ||
         comparison.predicateOperatorType == NSBetweenPredicateOperatorType) {

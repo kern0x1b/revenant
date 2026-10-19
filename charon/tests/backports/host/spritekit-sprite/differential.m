@@ -1,8 +1,3 @@
-// differential.m - SKTexture and SKSpriteNode of iOS 7, run against the host's own SpriteKit and against the port's
-// objects, with one source. It is runtime only: no SpriteKit header, typed objc_msgSend casts, and NSClassFromString for
-// the classes, so the same program links either side. Each line is printed to stdout and compared line by line.
-//
-// The crash cases (a nil texture, a negative size) are in crash.m, one process per case, and are not run here.
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
 #include <objc/message.h>
@@ -59,7 +54,6 @@ int main(void)
     SEL dataSel = sel_registerName("textureWithData:size:");
     SEL rectSel = sel_registerName("textureWithRect:inTexture:");
 
-    // Textures: the whole of an image from pixels, the rectangles cut from it, and their copies.
     NSMutableData *pixels = [NSMutableData dataWithLength:4 * 4 * 4];
     id base = ((ObjectWithObjectSize)objc_msgSend)(textureClass, dataSel, pixels, CGSizeMake(4, 4));
     size("base size", ((SizeGetter)objc_msgSend)(base, sel_registerName("size")));
@@ -88,8 +82,6 @@ int main(void)
     printf("copy filter=%ld mipmaps=%d\n", (long)((IntGetter)objc_msgSend)(copy, sel_registerName("filteringMode")),
            ((BoolGetter)objc_msgSend)(copy, sel_registerName("usesMipmaps")));
 
-    // Sprites made from a colour: the colour, the size, and the defaults of the anchor, the centre rectangle and the
-    // blending.
     id red = ((ColorMaker)objc_msgSend)(NSClassFromString(@"NSColor"), sel_registerName("colorWithDeviceRed:green:blue:alpha:"), 1, 0, 0, 1);
     id colour = ((ObjectWithColorSize)objc_msgSend)(spriteClass, sel_registerName("spriteNodeWithColor:size:"), red, CGSizeMake(40, 20));
     printf("colour class=%s\n", [NSStringFromClass([colour class]) UTF8String]);
@@ -111,7 +103,6 @@ int main(void)
     ((VoidObject)objc_msgSend)(colour, sel_registerName("setColor:"), ((ColorMaker)objc_msgSend)(NSClassFromString(@"NSColor"), sel_registerName("colorWithDeviceRed:green:blue:alpha:"), 0, 0, 1, 1));
     printf("colour after set=%s\n", [describeColor(((ObjectGetter)objc_msgSend)(colour, sel_registerName("color"))) UTF8String]);
 
-    // A texture set on a colour sprite leaves its size and colour alone; clearing it leaves them too (measured).
     ((VoidSize)objc_msgSend)(colour, sel_registerName("setSize:"), CGSizeMake(5, 5));
     ((VoidObject)objc_msgSend)(colour, sel_registerName("setTexture:"), base);
     size("size with texture set", ((SizeGetter)objc_msgSend)(colour, sel_registerName("size")));
@@ -120,11 +111,9 @@ int main(void)
     size("size with texture cleared", ((SizeGetter)objc_msgSend)(colour, sel_registerName("size")));
     printf("texture nil after clear=%d\n", ((ObjectGetter)objc_msgSend)(colour, sel_registerName("texture")) == nil);
 
-    // A negative size is stored by the setter: the setter does not check it (measured).
     ((VoidSize)objc_msgSend)(colour, sel_registerName("setSize:"), CGSizeMake(-5, 2));
     size("negative size after set", ((SizeGetter)objc_msgSend)(colour, sel_registerName("size")));
 
-    // Sprites made from a texture: the texture's size, the white clear colour, and the given size.
     id textured = ((ObjectWithObject)objc_msgSend)(spriteClass, sel_registerName("spriteNodeWithTexture:"), sub);
     size("textured size", ((SizeGetter)objc_msgSend)(textured, sel_registerName("size")));
     printf("textured colour=%s blendFactor=%g\n", [describeColor(((ObjectGetter)objc_msgSend)(textured, sel_registerName("color"))) UTF8String],
@@ -139,7 +128,6 @@ int main(void)
     id emptySized = ((ObjectWithObjectSize)objc_msgSend)(spriteClass, sel_registerName("spriteNodeWithTexture:size:"), nil, CGSizeMake(3, 3));
     size("nil texture sized", ((SizeGetter)objc_msgSend)(emptySized, sel_registerName("size")));
 
-    // The initialisers: a colour sprite and a texture sprite from alloc and init.
     id plain = ((ObjectWithColorSize)objc_msgSend)(((ObjectGetter)objc_msgSend)(spriteClass, sel_registerName("alloc")),
                                                    sel_registerName("initWithColor:size:"), red, CGSizeMake(3, 4));
     size("initWithColor size", ((SizeGetter)objc_msgSend)(plain, sel_registerName("size")));

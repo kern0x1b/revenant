@@ -4,17 +4,11 @@
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
 
-// One sample of an animated value: a time and the components of the value at it. Every concrete
-// class keeps its samples in this one shape, so the base's keyTimes, its interpolation between two
-// samples and its lookup are written once and each class only converts to and from its own type.
-
 typedef struct {
     NSTimeInterval time;
     double component[16];
 } CharonMDLSample;
 
-// The sample machinery is MDLAnimatedValue's own, in MDLAnimatedValue11.m, and a class extension's
-// methods are not visible to a subclass, so what MDLAnimatedQuaternion needs of it is declared here.
 @interface MDLAnimatedQuaternion ()
 - (void)charon_setComponents:(const double *)value atTime:(NSTimeInterval)time;
 - (void)charon_getComponents:(double *)value atTime:(NSTimeInterval)time;
@@ -41,7 +35,6 @@ typedef struct {
 
 - (void)setFloatQuaternion:(simd_quatf)value atTime:(NSTimeInterval)time
 {
-    // A quaternion is its four components, the imaginary one first and the real one last.
     double components[4] = {value.vector.x, value.vector.y, value.vector.z, value.vector.w};
     [self charon_setComponents:components atTime:time];
 }

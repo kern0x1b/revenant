@@ -1,8 +1,3 @@
--- The measured UIKit constants (tools/gen/measured.lua): the objects the table defines, read from the table and the committed exported
--- objects of the tree. Checks the set of objects, the shape of each, and the C that the table's rows and the release's own extra text
--- come out as. Byte equality with the python writer's objects was measured once, before that writer was removed (see the commit).
---
--- Run, from any folder: xmake l tests/gen/measured_test.lua
 local REPO = path.directory(path.directory(path.absolute(os.scriptdir())))
 local TOOLS = path.join(REPO, "tools")
 local measured = import("gen.measured", {rootdir = TOOLS, anonymous = true})
@@ -23,7 +18,6 @@ table.sort(names)
 local EXPECTED = {"UIKitConstants1001.m", "UIKitConstants110.m", "UIKitConstants134.m", "UIKitConstants160.m", "UIKitConstants180.m", "UIKitConstants182.m",
                   "UIKitConstants183.m", "UIKitConstants260.m"}
 expect(#names == #EXPECTED, "the table defines " .. #EXPECTED .. " objects, got " .. #names)
--- objects() is both kinds: the release table's objects above, and the constants table's (tools/corpus/cfconst.tsv), one per object it names
 local merged = measured.objects(REPO, "UIKit")
 local merged_count = 0
 for _ in pairs(merged) do
@@ -38,25 +32,19 @@ for i, name in ipairs(EXPECTED) do
     expect(string.find(text, "// Generated:  xmake l tools/gen.lua gen --framework UIKit\n", 1, true) ~= nil, name .. " names its producer")
 end
 
--- a row with a struct value: its members are written with a leading dot, as a designated initializer
 expect(string.find(objects["UIKitConstants160.m"], "= {.top = 0.0, .leading = CGFLOAT_MAX, .bottom = 0.0, .trailing = CGFLOAT_MAX};", 1, true)
     ~= nil, "a struct value is written with its members dotted")
 
--- a typedef the SDK may not have is guarded by the release it arrived in: 18.0 is 180000
 expect(string.find(objects["UIKitConstants180.m"], "#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 180000\n", 1, true) ~= nil,
     "a floor of 18.0 is guarded at 180000")
 expect(string.find(objects["UIKitConstants180.m"], "#else\n", 1, true) ~= nil, "a guarded row has its fallback")
 
--- the 13.4 object carries the one C function the generator owns beside the constant it reads
 expect(string.find(objects["UIKitConstants134.m"], "void UIGuidedAccessConfigureAccessibilityFeatures(", 1, true) ~= nil,
     "the 13.4 object carries UIGuidedAccessConfigureAccessibilityFeatures")
 
--- the attribute macros are off the type and the nullability stays on it
 expect(string.find(objects["UIKitConstants182.m"], "const NSAttributedStringKey _Nonnull NSWritingToolsExclusionAttributeName = ", 1, true)
     ~= nil, "the type keeps its nullability and loses no API_ macro")
 
--- an object carries only its own release's rows: the release's names are not repeated in another object
--- A floored row is written twice, under the #if and the #else of its guard: only the #if branch is the declaration the SDK sees.
 local seen = {}
 for _, name in ipairs(names) do
     local in_fallback = false
@@ -75,8 +63,6 @@ for _, name in ipairs(names) do
 end
 expect(seen.UICollectionViewLayoutAutomaticDimension == "UIKitConstants1001.m", "the 10.0.1 row is in the 10.0.1 object")
 
--- a string constant is written as the string the host gives it (measured with dlsym on the Catalyst UIKit), never as the literal that
--- spells it: no object holds an escaped "@" wrapper
 for _, name in ipairs(names) do
     expect(string.find(objects[name], '@\\"', 1, true) == nil, name .. " writes no ObjC literal inside a string")
 end

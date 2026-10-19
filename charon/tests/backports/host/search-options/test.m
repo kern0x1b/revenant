@@ -1,10 +1,6 @@
 #import <UIKit/UIKit.h>
 #include <stdio.h>
 
-// One body of checks, run on the host's own class (looked up by name, which run.sh's -D rename does not touch) and on the port's,
-// which run.sh compiles under the same identifier. A line is "side<TAB>check<TAB>value". Messages are sent through typed function
-// pointers, so an enum or an options mask is read as its own type.
-
 typedef id (*PlainFn)(id, SEL);
 typedef NSInteger (*IntGetFn)(id, SEL);
 typedef void (*IntSetFn)(id, SEL, NSInteger);
@@ -42,7 +38,6 @@ static void run(const char *side, Class cls)
     report(side, "equal-to-self", yes_no([first isEqual:first]));
     report(side, "hash-equal-defaults", yes_no([first hash] == [second hash]));
 
-    // A divergence, named in run.sh: the host's class has setters the header does not declare, and its hash is per object.
     SEL wordSet = NSSelectorFromString(@"setWordMatchMethod:");
     if ([first respondsToSelector:wordSet]) {
         ((IntSetFn)[first methodForSelector:wordSet])(first, wordSet, 2);

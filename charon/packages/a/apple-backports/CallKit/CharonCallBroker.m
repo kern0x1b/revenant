@@ -140,9 +140,6 @@
         [[CharonCallAudio shared] callEndedFor:provider];
 }
 
-// A call of this application connecting is what activates the audio session,
-// and the provider is told once it is active. A cellular call of the release
-// has no provider and is none of the application's audio.
 - (void)callConnected:(CXCall *)call
 {
     if (call.charon_provider)
@@ -160,11 +157,6 @@
         [observer charon_callChanged:snapshot];
 }
 
-// What a fulfilled action does to the call it names. A failed action leaves
-// the call as it was, except where the call only exists because the action was
-// asked for - starting and answering - and there is nothing for it to be: the
-// call ends as failed, which is what an application is told when it could not
-// take the call it was asked to take.
 - (void)applyAction:(CXAction *)action
 {
     if (![action isKindOfClass:[CXCallAction class]])
@@ -186,18 +178,12 @@
         call.charon_dateStartedConnecting = call.charon_dateStartedConnecting ?: date;
         [self callChanged:call];
     } else if ([action isKindOfClass:[CXAnswerCallAction class]]) {
-        // The screen comes down as soon as the call is taken, not when it
-        // ends: from here on it is a call in progress, which is the
-        // application's own interface.
         [[CharonCallScreen shared] dismiss:call];
         call.charon_dateConnected = date;
         [call charon_setHasConnected:YES];
         [self callChanged:call];
         [self callConnected:call];
     } else if ([action isKindOfClass:[CXEndCallAction class]]) {
-        // The user of this device ended the call, so there is no reason to
-        // carry: a reason is what the provider reports when the call ended for
-        // some cause of its own.
         call.charon_dateEnded = date;
         [self removeCall:call];
     } else if ([action isKindOfClass:[CXSetHeldCallAction class]]) {

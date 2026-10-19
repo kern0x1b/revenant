@@ -1,26 +1,12 @@
-// CSVWriting.swift - writing a DataFrame as CSV bytes, and the options and error that writing names.
-//
-// Measured on the host's TabularData with the same frames (csvwriting.swift runs both). A header is written
-// raw: its names are not quoted or escaped. A cell is quoted when its text holds the delimiter, a quote, a
-// line feed or a carriage return, and a quote inside it is doubled. A missing cell, and a cell of a shorter
-// column, is the nil encoding. A date is formatted in UTC: by the default ISO 8601 formatter, or by the
-// `dateFormat` the options were made with, which is read in UTC as well.
-
 import Foundation
 
-/// How a DataFrame is written as CSV. The defaults are the framework's.
 public struct CSVWritingOptions {
     public var includesHeader: Bool
-    /// The format a date cell is written in, when the options were made with one. Setting it does not set
-    /// `dateFormatter`, which is the formatter that is used.
     public var dateFormat: String?
-    /// The text of a date cell.
     public var dateFormatter: (Date) -> String
-    /// The text of a missing cell.
     public var nilEncoding: String
     public var trueEncoding: String
     public var falseEncoding: String
-    /// The text that ends each row.
     public var newline: String
     public var delimiter: Character
 
@@ -35,8 +21,6 @@ public struct CSVWritingOptions {
                 falseEncoding: String,
                 newline: String,
                 delimiter: Character) {
-        // The newline the caller names is not kept by this initialiser: measured, the host's options made
-        // here write a line feed whatever `newline` says, and the property set afterwards is honoured.
         self.init(includesHeader: includesHeader, dateFormat: nil, nilEncoding: nilEncoding,
                   trueEncoding: trueEncoding, falseEncoding: falseEncoding, newline: "\n", delimiter: delimiter)
     }
@@ -60,12 +44,10 @@ public struct CSVWritingOptions {
         self.nilEncoding = nilEncoding
         self.trueEncoding = trueEncoding
         self.falseEncoding = falseEncoding
-        // Neither initialiser keeps `newline`: measured, both store a line feed for whatever is passed.
         self.newline = "\n"
         self.delimiter = delimiter
     }
 
-    /// A formatter in UTC, in the POSIX locale, so the same date is the same text wherever the program runs.
     private static func formatter(_ format: String) -> DateFormatter {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
@@ -75,8 +57,6 @@ public struct CSVWritingOptions {
     }
 }
 
-/// Why a DataFrame could not be written as CSV. The row counts from 0 over the data rows, and the column
-/// is the name of the column the cell is in: both measured on the host (csvwriting.swift).
 public enum CSVWritingError: Error, CustomStringConvertible {
     case badEncoding(row: Int, column: String, cellContents: Data)
 
@@ -101,8 +81,6 @@ public enum CSVWritingError: Error, CustomStringConvertible {
 }
 
 extension DataFrame {
-    /// The frame written as CSV bytes. A frame with no columns writes nothing, and a header is written
-    /// before the rows when the options say so.
     public func csvRepresentation(options: CSVWritingOptions = CSVWritingOptions()) throws -> Data {
         var lines = [String]()
         if options.includesHeader && !columns.isEmpty {
@@ -123,12 +101,10 @@ extension DataFrame {
         return Data(text.utf8)
     }
 
-    /// The frame written to a file as CSV.
     public func writeCSV(to url: URL, options: CSVWritingOptions = CSVWritingOptions()) throws {
         try csvRepresentation(options: options).write(to: url)
     }
 
-    /// One column's cells as text, each quoted where the delimiter needs it; nil for a missing cell.
     private static func cellTexts(_ column: AnyColumn, options: CSVWritingOptions) throws -> [String?] {
         func texts<T>(_ typed: Column<T>, _ text: (T) -> String) -> [String?] {
             (0..<typed.count).map { row in typed[row].map(text) }
@@ -165,11 +141,9 @@ extension DataFrame {
             }
             return cells
         }
-        // A column of a kind the writer does not know is written by its own description, as the other kinds are.
         return (0..<column.count).map { row in column[row].map { quoted("\($0)", options: options) } }
     }
 
-    /// The text quoted the way CSV quotes it, when it holds the delimiter, a quote, or a line break.
     private static func quoted(_ text: String, options: CSVWritingOptions) -> String {
         let needsQuotes = text.contains(options.delimiter) || text.contains("\"")
             || text.contains("\n") || text.contains("\r")

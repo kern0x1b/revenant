@@ -1,6 +1,3 @@
-/* stubs.m - what UIViewController+TransitionCoordinator.m calls in the rest of the port, for the host. Nothing here is
-   reached on the host except the sheet's stand-in: below 8.0 the port's engine presents, and the host's UIKit is a release
-   that presents the custom styles itself (charon_release_presents() is YES, as on a device from 8.0 on). */
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 #import "CharonCustomTransition.h"
@@ -43,8 +40,6 @@ void charon_presentation_dismiss(UIViewController *presented, UIViewController *
 {
 }
 
-/* The port keeps a controller's presentation controller in an association (CharonCustomTransition.m); the host's
-   UIKit keeps its own, so this one is a separate key the recorder reads to see what the installer left. */
 static const char charon_presentation_key;
 
 UIPresentationController *charon_presentation_controller_of(UIViewController *controller)

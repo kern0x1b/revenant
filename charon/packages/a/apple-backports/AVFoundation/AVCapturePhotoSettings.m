@@ -2,15 +2,6 @@
 #import <CoreVideo/CoreVideo.h>
 #import <ImageIO/ImageIO.h>
 
-// AVCapturePhotoSettings, iOS 10.0.1: what one request of AVCapturePhotoOutput asks for. Every member the SDK 16.4
-// header declares answers explicitly, with the defaults and the set-time checks of the release's own class, measured
-// on the host (facts/AVFoundation/AVCapturePhotoOutput.md, "The photo settings"). What a request asks for is checked
-// against the output at -capturePhotoWithSettings:delegate:, as the header's rule list says, and what the release
-// cannot capture is refused there, the way a device without the feature refuses it.
-
-// The RAW pixel formats: Bayer, the four 14-bit orders and the versatile 16-bit one; Apple ProRAW, 64-bit RGBA. The
-// host's +[AVCapturePhotoOutput isBayerRAWPixelFormat:] and +isAppleProRAWPixelFormat: answer YES for exactly these
-// among every pixel format CoreVideo describes (facts).
 BOOL CharonIsBayerRAWPixelFormat(OSType format)
 {
     switch (format) {
@@ -52,7 +43,6 @@ static NSString *CharonCodecOf(NSDictionary *format)
     return [value isKindOfClass:[NSString class]] ? value : nil;
 }
 
-// A processed format as the constructors take it: not empty, and exactly one of the two keys (the host's texts).
 static void CharonCheckProcessedFormat(NSDictionary *format, NSString *method)
 {
     if (!format)
@@ -66,8 +56,6 @@ static void CharonCheckProcessedFormat(NSDictionary *format, NSString *method)
         CharonRaise(@"*** %@ kCVPixelBufferPixelFormatTypeKey and AVVideoCodecKey may not both be specified", method);
 }
 
-// The file type a processed format is written as when none is given: a JPEG as JPEG, HEVC as HEIC, an uncompressed
-// format as TIFF, any other codec none (the host).
 static NSString *CharonDefaultProcessedFileType(NSDictionary *format)
 {
     NSString *codec = CharonCodecOf(format);
@@ -80,8 +68,6 @@ static NSString *CharonDefaultProcessedFileType(NSDictionary *format)
     return nil;
 }
 
-// The top-level metadata keys the host's -setMetadata: takes, of every key <ImageIO/CGImageProperties.h> declares:
-// the dictionaries of TIFF, Exif, PNG, IPTC, GPS, DNG, ExifAux and MakerApple, and the image's own properties.
 static NSSet *CharonMetadataKeys(void)
 {
     static NSSet *keys;
@@ -101,8 +87,6 @@ static NSSet *CharonMetadataKeys(void)
     return keys;
 }
 
-// The item every settings object carries in its Live Photo movie metadata: its own content identifier, which the
-// movie and the photo of one Live Photo share. The application may not give one of its own (the host).
 static AVMetadataItem *CharonContentIdentifierItem(NSString *identifier)
 {
     AVMutableMetadataItem *item = [AVMutableMetadataItem metadataItem];
@@ -128,7 +112,6 @@ static BOOL CharonIsContentIdentifierItem(AVMetadataItem *item)
     BOOL _charonAutoRedEyeReductionEnabled;
     AVCapturePhotoQualityPrioritization _charonPhotoQualityPrioritization;
     BOOL _charonAutoStillImageStabilizationEnabled;
-    // autoVirtualDeviceFusionEnabled and the older autoDualCameraFusionEnabled are one setting (the host).
     BOOL _charonAutoVirtualDeviceFusionEnabled;
     NSArray *_charonVirtualDeviceConstituentPhotoDeliveryEnabledDevices;
     BOOL _charonDualCameraDualPhotoDeliveryEnabled;
@@ -161,9 +144,6 @@ static BOOL CharonIsContentIdentifierItem(AVMetadataItem *item)
     }
 }
 
-// The settings of +photoSettings, under a new unique ID. The header's defaults, as the host answers them, except
-// autoStillImageStabilizationEnabled and autoRedEyeReductionEnabled, which the host answers NO: the header gives
-// stabilization YES by default, and red-eye reduction YES only where the output supports it, which it does not here.
 - (instancetype)init
 {
     return [self initCharonWithUniqueID:[AVCapturePhotoSettings charon_nextUniqueID]];
@@ -193,9 +173,6 @@ static BOOL CharonIsContentIdentifierItem(AVMetadataItem *item)
     return self;
 }
 
-// The one constructor the others come to: RAW of `raw` (0 for none) written as `rawFileType` (DNG when not given), and
-// a processed photo of `format` written as `processedFileType` (the format's own when not given). Nothing is checked
-// against an output here; -capturePhotoWithSettings:delegate: does that. With neither RAW nor a format, a JPEG.
 + (instancetype)charon_settingsWithRaw:(OSType)raw rawFileType:(NSString *)rawFileType format:(NSDictionary *)format
                      processedFileType:(NSString *)processedFileType method:(NSString *)method
 {
@@ -213,7 +190,6 @@ static BOOL CharonIsContentIdentifierItem(AVMetadataItem *item)
     if (raw) {
         settings->_charonRawPhotoPixelFormatType = raw;
         settings->_charonRawFileType = rawFileType ?: AVFileTypeDNG;
-        // "YES unless Bayer RAW": a Bayer RAW request is taken at speed, unstabilized and unfused (the header, the host).
         if (CharonIsBayerRAWPixelFormat(raw)) {
             settings->_charonPhotoQualityPrioritization = AVCapturePhotoQualityPrioritizationSpeed;
             settings->_charonAutoStillImageStabilizationEnabled = NO;
@@ -252,7 +228,6 @@ static BOOL CharonIsContentIdentifierItem(AVMetadataItem *item)
                                  method:@"+[AVCapturePhotoSettings photoSettingsWithRawPixelFormatType:rawFileType:processedFormat:processedFileType:]"];
 }
 
-// Every setting of the receiver in a new object of its class under `uniqueID`.
 - (instancetype)charon_copyWithZone:(NSZone *)zone uniqueID:(int64_t)uniqueID
 {
     AVCapturePhotoSettings *copy = [[[self class] allocWithZone:zone] initCharonWithUniqueID:uniqueID];
@@ -280,7 +255,6 @@ static BOOL CharonIsContentIdentifierItem(AVMetadataItem *item)
     copy->_charonMetadata = _charonMetadata;
     copy->_charonLivePhotoMovieFileURL = _charonLivePhotoMovieFileURL;
     copy->_charonLivePhotoVideoCodecType = _charonLivePhotoVideoCodecType;
-    // One Live Photo's content identifier: the copy carries the receiver's, as the host's copies do.
     copy->_charonContentIdentifier = _charonContentIdentifier;
     copy->_charonLivePhotoMovieMetadata = _charonLivePhotoMovieMetadata;
     copy->_charonPreviewPhotoFormat = _charonPreviewPhotoFormat;
@@ -290,13 +264,11 @@ static BOOL CharonIsContentIdentifierItem(AVMetadataItem *item)
     return copy;
 }
 
-// A copy is the same request: the receiver's unique ID and every setting (the host).
 - (id)copyWithZone:(NSZone *)zone
 {
     return [self charon_copyWithZone:zone uniqueID:_charonUniqueID];
 }
 
-// "A new AVCapturePhotoSettings object with a new uniqueID", every setting of the one given (the header, the host).
 + (instancetype)photoSettingsFromPhotoSettings:(AVCapturePhotoSettings *)photoSettings
 {
     return [photoSettings charon_copyWithZone:NULL uniqueID:[AVCapturePhotoSettings charon_nextUniqueID]];
@@ -327,7 +299,6 @@ static BOOL CharonIsContentIdentifierItem(AVMetadataItem *item)
     return _charonRawFileType;
 }
 
-// Any mode is kept; the capture refuses one the output does not offer (the header's flash rule).
 - (AVCaptureFlashMode)flashMode
 {
     return _charonFlashMode;
@@ -415,7 +386,6 @@ static BOOL CharonIsContentIdentifierItem(AVMetadataItem *item)
     return _charonHighResolutionPhotoEnabled;
 }
 
-// Setting it, YES or NO, takes back any maxPhotoDimensions given, which it replaces (the host).
 - (void)setHighResolutionPhotoEnabled:(BOOL)highResolutionPhotoEnabled
 {
     _charonHighResolutionPhotoEnabled = highResolutionPhotoEnabled;
@@ -517,7 +487,6 @@ static BOOL CharonIsContentIdentifierItem(AVMetadataItem *item)
     return _charonMetadata;
 }
 
-// Only the top-level keys are checked, and a key outside <ImageIO/CGImageProperties.h> is refused with the host's text.
 - (void)setMetadata:(NSDictionary<NSString *, id> *)metadata
 {
     NSMutableSet *invalid = [NSMutableSet setWithArray:metadata.allKeys ?: @[]];
@@ -552,8 +521,6 @@ static BOOL CharonIsContentIdentifierItem(AVMetadataItem *item)
     return _charonLivePhotoMovieMetadata;
 }
 
-// The items given, then the settings' own content identifier; nil gives the identifier alone (null_resettable). An item
-// of the application's own for the content identifier is refused with the host's text.
 - (void)setLivePhotoMovieMetadata:(NSArray<AVMetadataItem *> *)livePhotoMovieMetadata
 {
     for (AVMetadataItem *item in livePhotoMovieMetadata)
@@ -564,8 +531,6 @@ static BOOL CharonIsContentIdentifierItem(AVMetadataItem *item)
     _charonLivePhotoMovieMetadata = [items copy];
 }
 
-// The preview is drawn by the port from the captured still (facts): in the three formats the host offers, in its order,
-// 32BGRA as CoreGraphics draws it and 420v and 420f converted from that by BT.601.
 - (NSArray<NSNumber *> *)availablePreviewPhotoPixelFormatTypes
 {
     return @[@(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange), @(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange), @(kCVPixelFormatType_32BGRA)];
@@ -576,7 +541,6 @@ static BOOL CharonIsContentIdentifierItem(AVMetadataItem *item)
     return _charonPreviewPhotoFormat;
 }
 
-// The pixel format is required and must be one available; width and height are checked at capture (the host).
 - (void)setPreviewPhotoFormat:(NSDictionary<NSString *, id> *)previewPhotoFormat
 {
     if (previewPhotoFormat) {
@@ -590,10 +554,6 @@ static BOOL CharonIsContentIdentifierItem(AVMetadataItem *item)
     _charonPreviewPhotoFormat = [previewPhotoFormat copy];
 }
 
-// The thumbnail the capture can embed: a JPEG, written by the photo output into the Exif of a JPEG photo (IFD1, the
-// Exif standard's thumbnail), so it is offered for a JPEG format and for nothing else: the port delivers an uncompressed
-// photo as a pixel buffer, with no file to hold a thumbnail, and makes no HEIC. The host offers JPEG for those too
-// (facts, "The photo settings"): a thumbnail for an uncompressed, HEVC or RAW photo is not implemented (facts, "Open").
 - (NSArray<AVVideoCodecType> *)availableEmbeddedThumbnailPhotoCodecTypes
 {
     return [CharonCodecOf(_charonFormat) isEqualToString:AVVideoCodecTypeJPEG] ? @[AVVideoCodecTypeJPEG] : @[];

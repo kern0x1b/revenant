@@ -1,11 +1,5 @@
 #import <Foundation/Foundation.h>
 
-/* The name of the exception Apple's own NSPersonNameComponents raises for a read it will not answer.
-   Spelled as the string it is, because an exception's name *is* a string and 6.1.3 does not export the
-   symbol (measured with tools/corpus/cache-value.lua over the 6.1.3 armv7 cache: absent), so a
-   reference to it would not link. Raising with this string gives an exception that compares equal to
-   the release's own. */
-
 @implementation NSPersonNameComponents {
 @private
     NSString *_namePrefix;
@@ -36,13 +30,6 @@
 - (void)setNickname:(NSString *)value { _nickname = [value copy]; }
 - (NSPersonNameComponents *)phoneticRepresentation { return _phoneticRepresentation; }
 
-/* The release refuses to read a component *through* the phonetic representation when the spelling has
-   not got it, and the abbreviated template reads exactly that way, so an abbreviated style over a
-   phonetic representation raises on every current system (measured on the host, ten locales, and
-   reproducible from any caller with one public call:
-   [components valueForKey:@"phoneticRepresentation.givenName"]). The same read is refused here, in
-   the release's own words, so the port's answer is the release's answer rather than a quiet two
-   initials where every current system throws. */
 - (id)valueForUndefinedKey:(NSString *)key
 {
     if ([key hasPrefix:@"phoneticRepresentation."]) {

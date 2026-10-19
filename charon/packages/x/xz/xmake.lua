@@ -8,17 +8,11 @@ package("xz")
     add_versions("v5.8.4", "d3e650e63c110e830fd5391e7f8b45df0b91d3da")
     add_links("xzcodec")
 
-    -- The digest covers the recipe and the configuration header, so a changed flag or a changed switch is a different library.
     local recipe = os.scriptdir()
     local digest = {hash.sha256(path.join(recipe, "xmake.lua")), hash.sha256(path.join(recipe, "config.h"))}
     add_configs("recipe", {description = "The digest of this recipe and its config.h, so a changed flag is a different library.", default = hash.strhash128(table.concat(digest, ";")), type = "string", readonly = true})
 
-    -- Hidden, so the codec is never API of the image that links it in: the Compression backport exports compression_* and nothing of
-    -- liblzma. HAVE_CONFIG_H makes the sources read config.h, which is the subset's switch (packages/x/xz/config.h).
     local FLAGS = {"-Os", "-fvisibility=hidden", "-fno-strict-aliasing", "-DLZMA_API_STATIC", "-DHAVE_CONFIG_H"}
-    -- The sources of the subset: the common layer without the threaded coders, the lz and range coder, the CRC and SHA-256 checks,
-    -- and the LZMA coders. The BCJ and delta filters, lzip, the .lzma (alone) and auto decoders, the table generators (each has a main)
-    -- and the small CRC tables are not part of it.
     local SOURCES = {
         "src/liblzma/common/block_buffer_decoder.c", "src/liblzma/common/block_buffer_encoder.c", "src/liblzma/common/block_decoder.c",
         "src/liblzma/common/block_encoder.c", "src/liblzma/common/block_header_decoder.c", "src/liblzma/common/block_header_encoder.c",

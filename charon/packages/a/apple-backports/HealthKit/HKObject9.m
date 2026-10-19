@@ -1,10 +1,3 @@
-// The iOS 9.0 members of the classes of iOS 8.0, each in the category the SDK itself puts it in, and
-// so in a file of its own: one object carries the API of one release.
-//
-// What arrived in 9.0 is a device and a source revision on every object, the factories that take a
-// device, three more predicates, the two units the 8.0 table lacked, and the anchored query's
-// long-running form.
-
 #import <HealthKit/HealthKit.h>
 
 #import "CharonHKStore.h"
@@ -13,10 +6,6 @@
 
 @implementation HKObject (CharonIOS9)
 
-// The revision of the source that wrote this object. The header promises it nonnull, and it is: an
-// object the store read back carries the revision it was written under, and one made in memory and not
-// yet written carries the revision of the process that made it, which is the version of the
-// application it is in. The header's own note says the release does the same after a save.
 - (HKSourceRevision *)sourceRevision
 {
     HKSourceRevision *stored = [self charon_storedSourceRevision];
@@ -42,8 +31,6 @@
 
 #pragma mark - HKUnit
 
-// The three units iOS 8.0's table of the header's factories did not name, which the header adds in
-// 9.0: the yard, and the US and imperial cup.
 @implementation HKUnit (CharonIOS9)
 
 + (instancetype)yardUnit
@@ -136,10 +123,6 @@
                                  device:(nullable HKDevice *)device
                                metadata:(nullable NSDictionary *)metadata
 {
-    // The form with a device is the release's own form plus a device, so it keeps what the form
-    // without one keeps: a duration given here is the duration the workout has, and it ends at the
-    // start plus that duration. It goes through the constructor that stores the duration, not through
-    // the two-dates one, so that -duration answers the number the caller passed.
     HKWorkout *workout = [[HKWorkout alloc] charon_initWithType:[HKObjectType workoutType]
                                                            metadata:metadata
                                                           startDate:startDate
@@ -179,8 +162,6 @@
 
 @implementation HKQuery (CharonIOS9)
 
-// The three predicates that walk a device and a source revision, over the two key paths the 9.0 image
-// of HealthKit holds: "device" and "sourceRevision", read out of that image's own string table.
 + (NSPredicate *)predicateForObjectsFromDevices:(NSSet<HKDevice *> *)devices
 {
     if (!devices.count)

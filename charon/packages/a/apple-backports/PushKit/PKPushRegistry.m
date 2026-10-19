@@ -113,11 +113,6 @@ static void CharonPushDeliverToken(NSData *token, PKPushType type)
 @synthesize delegate = _delegate;
 @synthesize desiredPushTypes = _desiredPushTypes;
 
-// The header marks -init unavailable and names -initWithQueue: as the designated initialiser, with
-// nil documented to mean the main queue. There is no other way to make a registry, so a caller that
-// reaches it anyway gets a registry whose queue is the main queue, which is what the header's own
-// nil says - the same answer the port gives +[UICollectionViewDiffableDataSource new], whose -init
-// the header also marks unavailable.
 - (instancetype)init
 {
     return [self initWithQueue:nil];

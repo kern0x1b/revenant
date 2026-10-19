@@ -1,23 +1,8 @@
-// What the HOST's -findString:withOptions: answers for every (fixture, needle) row of the
-// word-boundary family, printed so a rule can be told from the answers rather than guessed.
-//
-//   xcrun clang -fobjc-arc -Wall tools/host-find.m -framework Foundation -framework PDFKit -o host-find
-//   ./host-find <fixtures-dir>
-//
-// One line per row:  <fixture>  <needle, controls shown>  <count>  then per selection the string it
-// covers (controls shown again - a range that takes a newline looks identical to one that does not if
-// the newline is printed raw), the page indices, the range on page 0 and the bounds.
-//
-// The ranges are what the rule is made of, so they are printed as LOCATIONS {offset,length} rather than
-// as text: a rule about characters has to be checked in the coordinates it claims to be about.
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
 #import <PDFKit/PDFKit.h>
 #include <stdio.h>
 
-// The rows of the family.  The first block is the needle's POSITION on the line, the second its
-// WHITESPACE, the third its PAGE: every row is one variable, and the fixture beside it is drawn by
-// make-text-fixture.m through the same conforming writer as every other fixture in the harness.
 typedef struct {
     const char *fixture;
     const char *needle;
@@ -39,13 +24,8 @@ static NSString *visible(NSString *text)
     return out;
 }
 
-// The fixtures directory main() is walking, so the helper below can build a path of its own.
 static NSString *fixturesDirectory;
 
-// Everything a selection can be asked, printed the one way: its string with the control characters
-// visible, the pages it covers, and EVERY range on every one of those pages.  A selection that holds
-// more than one range is a different object from one that holds a single one, and the count and the
-// ranges are the only way to see which one this is.
 static void printSelectionState(const char *label, PDFSelection *selection, PDFDocument *document)
 {
     printf("%-26s string=%-18s pages=%lu", label,
@@ -61,18 +41,12 @@ static void printSelectionState(const char *label, PDFSelection *selection, PDFD
     printf("  byLine=%lu\n", (unsigned long)selection.selectionsByLine.count);
 }
 
-// The fifth row of the mutator table needs a selection that was never in a find, so this builds one the
-// way PDFSelection.h:20 says a caller does: -initWithDocument: is the container the mutators fill.
 static PDFDocument *openFixture(const char *fixture)
 {
     NSString *path = [NSString stringWithFormat:@"%@/%@", fixturesDirectory, @(fixture)];
     return [[PDFDocument alloc] initWithURL:[NSURL fileURLWithPath:path]];
 }
 
-// A NIL selection on a document that has already been searched is not the same question as one on a
-// document that has not: a search leaves a cursor behind, and this asks for the two steps a caller makes
-// in sequence - a find, then a continue-from-nil - with the needle of each named separately, so a state
-// carried from one needle to the other is visible rather than guessed at.
 static void afterSearch(const char *fixture, const char *searched, const char *thenNeedle,
                         unsigned searches)
 {
@@ -94,9 +68,6 @@ static void afterSearch(const char *fixture, const char *searched, const char *t
            from ? visible(from.string).UTF8String : "-", from ? range.UTF8String : "-");
 }
 
-// the value a row passes to ask for a REAL nil selection, named so a reader does not have to count: an
-// out-of-range subscript and a nil argument are different questions and conflating them is what made the
-// first run of this script unreadable
 #define NO_MATCH ((NSUInteger)-1)
 
 static void fromSelection(const char *fixture, const char *needle, NSStringCompareOptions options,
@@ -105,10 +76,6 @@ static void fromSelection(const char *fixture, const char *needle, NSStringCompa
     NSString *path = [NSString stringWithFormat:@"%@/%@", fixturesDirectory, @(fixture)];
     PDFDocument *document = [[PDFDocument alloc] initWithURL:[NSURL fileURLWithPath:path]];
     if (document == nil) { printf("%-24s NO DOCUMENT\n", fixture); return; }
-    // A FRESH document has been asked nothing.  The rows that are not fresh call
-    // -findString:withOptions: first, to get the selection they start from, and that call may leave the
-    // document in a state a caller starting from nil would not be in - so the two kinds of row are told
-    // apart here rather than by the reader working out which is which.
     NSArray<PDFSelection *> *all = fresh ? @[] : [document findString:@(needle) withOptions:options];
     PDFSelection *start = (takeFromMatch == NO_MATCH || takeFromMatch >= all.count)
         ? nil : all[takeFromMatch];
@@ -139,7 +106,6 @@ int main(int argc, char **argv)
         NSString *directory = @(argv[1]);
         fixturesDirectory = directory;
         static const Row rows[] = {
-            // the same word three times, and at the end of the text the third time
             { "cgfixture-words.pdf", "zero", 0 },
             { "cgfixture-words.pdf", "alpha", 0 },
             { "cgfixture-words.pdf", "bravo", 0 },
@@ -149,12 +115,10 @@ int main(int argc, char **argv)
             { "cgfixture-words.pdf", "alpha bravo", 0 },
             { "cgfixture-words.pdf", "alpha alpha", 0 },
             { "cgfixture-words.pdf", "zero alpha bravo charlie alpha alpha", 0 },
-            // two spaces between the words
             { "cgfixture-gap.pdf", "alpha", 0 },
             { "cgfixture-gap.pdf", "bravo", 0 },
             { "cgfixture-gap.pdf", "a  b", 0 },
             { "cgfixture-gap.pdf", "alpha  bravo", 0 },
-            // three lines of different words: a line end, a line start and the end of the text
             { "cgfixture-lines2.pdf", "one", 0 },
             { "cgfixture-lines2.pdf", "two", 0 },
             { "cgfixture-lines2.pdf", "three", 0 },
@@ -163,47 +127,35 @@ int main(int argc, char **argv)
             { "cgfixture-lines2.pdf", "six", 0 },
             { "cgfixture-lines2.pdf", "two\nthree", 0 },
             { "cgfixture-lines2.pdf", "o t", 0 },
-            // a match that ends at a line end but does not start at one, and one that spans the space
             { "cgfixture-lines2.pdf", "ne two", 0 },
             { "cgfixture-lines2.pdf", "e two", 0 },
-            // a line with no text between two that have some, and a newline INSIDE one show
             { "cgfixture-blank.pdf", "alpha", 0 },
             { "cgfixture-blank.pdf", "bravo", 0 },
             { "cgfixture-inline.pdf", "alpha", 0 },
             { "cgfixture-inline.pdf", "bravo", 0 },
-            // the DRAWN trailing space and the doubled space, asked through the page's own -string: this
-            // is what says whether the whitespace of a run survives into the text the ranges are offsets
-            // into, which the port's own walk has to answer the same way
             { "cgfixture-gap.pdf", "alpha bravo", 0 },
             { "cgfixture-tail.pdf", "alpha\nbravo", 0 },
-            // a drawn trailing space at the end of the first line
             { "cgfixture-tail.pdf", "alpha", 0 },
             { "cgfixture-tail.pdf", "bravo", 0 },
             { "cgfixture-tail.pdf", "alpha \nbravo", 0 },
-            // a space at the START of a run and at the end of the last one, and two runs at the same y
-            // where the first ends in a space
             { "cgfixture-lead.pdf", "alpha", 0 },
             { "cgfixture-lead.pdf", "bravo", 0 },
             { "cgfixture-lead.pdf", "charlie", 0 },
             { "cgfixture-tailpair.pdf", "alpha", 0 },
             { "cgfixture-tailpair.pdf", "beta", 0 },
-            // matches that END INSIDE a word: the one thing R does not yet say
             { "cgfixture-words.pdf", "al", 0 },
             { "cgfixture-words.pdf", "alph", 0 },
             { "cgfixture-words.pdf", "bra", 0 },
             { "cgfixture-words.pdf", "charli", 0 },
             { "cgfixture-words.pdf", "ze", 0 },
-            // a tab inside a run
             { "cgfixture-tab.pdf", "alpha", 0 },
             { "cgfixture-tab.pdf", "bravo", 0 },
-            // two pages with different text: a needle spanning the boundary, and one inside a page
             { "cgfixture-cross.pdf", "alpha", 0 },
             { "cgfixture-cross.pdf", "bravo", 0 },
             { "cgfixture-cross.pdf", "charlie", 0 },
             { "cgfixture-cross.pdf", "delta", 0 },
             { "cgfixture-cross.pdf", "bravo charlie", 0 },
             { "cgfixture-cross.pdf", "alpha charlie", 0 },
-            // the OPTIONS the header names, on the fixture with three "alpha" in it
             { "cgfixture-words.pdf", "ALPHA", 0 },
             { "cgfixture-words.pdf", "ALPHA", NSCaseInsensitiveSearch },
             { "cgfixture-words.pdf", "alpha", NSCaseInsensitiveSearch },
@@ -211,10 +163,6 @@ int main(int argc, char **argv)
             { "cgfixture-words.pdf", "al.ha", NSLiteralSearch },
             { "cgfixture-words.pdf", "alpha", NSBackwardsSearch },
             { "cgfixture-words.pdf", "alpha bravo charlie", NSBackwardsSearch },
-            // the SECOND find entry point, over the fixture with three matches of one word: it takes a
-            // selection to start after, so its rows are written as a small script rather than as a needle
-            // each - see the fromSelection block below
-            // the six the earlier session measured, asked again in the same run so one table holds them
             { "cgfixture-lines.pdf", "shared", 0 },
             { "cgfixture-lines.pdf", "shared one", 0 },
             { "cgfixture-lines.pdf", "one", 0 },
@@ -234,13 +182,8 @@ int main(int argc, char **argv)
                 printf("%-24s %-20s NO DOCUMENT\n", rows[r].fixture, visible(needle).UTF8String);
                 continue;
             }
-            // the page's own text FIRST, printed with its controls visible: a range is an offset into it,
-            // so a table of ranges is unreadable without the string the offsets are offsets into
             for (NSUInteger p = 0; p < document.pageCount; p++) {
                 NSString *text = [[document pageAtIndex:p] string];
-                // the LENGTH beside the visible text, because a string holding a NUL prints as its own
-                // prefix and a range that reaches past it would look impossible: the offsets a range is
-                // made of are offsets into THIS string, so its length is part of every row that follows
                 printf("%-24s page-%lu -string=%s length=%lu\n", rows[r].fixture, (unsigned long)p,
                        visible(text).UTF8String, (unsigned long)text.length);
             }
@@ -250,9 +193,6 @@ int main(int argc, char **argv)
                    (unsigned long)found.count);
             for (NSUInteger i = 0; i < found.count; i++) {
                 PDFSelection *selection = found[i];
-                // The page INDEX is asked of the DOCUMENT, not of the page: the host's PDFPage carries no
-                // pageIndex of its own (PDFPage.h), and asking a page for its position in the document is
-                // what the port's own -pageIndex answers, so the two are the same number by name.
                 NSMutableString *pages = [NSMutableString string];
                 for (NSUInteger p = 0; p < selection.pages.count; p++)
                     [pages appendFormat:@"%lu,",
@@ -275,23 +215,14 @@ int main(int argc, char **argv)
         }
 
         printf("\n== the second entry point\n");
-        // A NIL selection is the row that says what nil means: the fixture with THREE matches answered
-        // the SECOND one from nil, which no reading of "start at the beginning" explains.  A needle with
-        // ONE match on the same fixture says whether nil means "the first match, exclusive" or whether
-        // something else is going on.
         fromSelection("cgfixture-words.pdf", "bravo", 0, NO_MATCH, 0, NO);
         fromSelection("cgfixture-words.pdf", "bravo", NSBackwardsSearch, NO_MATCH, 0, NO);
         fromSelection("cgfixture-words.pdf", "charlie", 0, NO_MATCH, 0, NO);
-        // and whether a BACKWARDS search crosses a page: cgfixture-3.pdf carries "page 1", "page 2" and
-        // "page 3", so "page" matches once per page, and a backwards search from page 2's match can only
-        // answer page 1's if it crosses
         fromSelection("cgfixture-3.pdf", "page", NSBackwardsSearch, 0, 0, NO);
         fromSelection("cgfixture-3.pdf", "page", NSBackwardsSearch, 1, 1, NO);
         fromSelection("cgfixture-3.pdf", "page", 0, 0, 0, NO);
         fromSelection("cgfixture-3.pdf", "page", 0, 1, 1, NO);
         fromSelection("cgfixture-3.pdf", "page", 0, 2, 2, NO);
-        // the same two questions on a document NOTHING has been asked, which is what says whether the
-        // rows above moved because of the findString: call they made first
         fromSelection("cgfixture-words.pdf", "alpha", 0, NO_MATCH, 0, YES);
         fromSelection("cgfixture-3.pdf", "page", 0, NO_MATCH, 0, YES);
         fromSelection("cgfixture-words.pdf", "alpha", NSBackwardsSearch, NO_MATCH, 0, YES);
@@ -308,14 +239,7 @@ int main(int argc, char **argv)
         afterSearch("cgfixture-words.pdf", "alpha", "bravo", 1);
 
         printf("\n== the five mutators\n");
-        //
-        // A FRESH DOCUMENT PER ROW, and the reason is measured rather than tidiness: the array a search
-        // answers is the DOCUMENT's own, so the next search on the same document replaces its contents.
-        // Asking for four needles in a row gave every row the answers of the last one, and one array came
-        // back with one element where a fresh document gives three.  Each row below therefore opens its
-        // own document and takes only what it needs.
         {
-            // addSelection: over a contiguous range, over a disjoint one, and over an overlap
             PDFDocument *words = openFixture("cgfixture-words.pdf");
             PDFSelection *one = [[words findString:@"alpha" withOptions:0][0] copy];
             [one addSelection:[[words findString:@"alpha bravo charlie" withOptions:0][0] copy]];
@@ -328,7 +252,6 @@ int main(int argc, char **argv)
             printSelectionState("addSelection disjoint", one, words);
         }
         {
-            // an overlap in each of the three shapes: the added range inside, containing, and crossing
             PDFDocument *inside = openFixture("cgfixture-words.pdf");
             PDFSelection *base = [[inside findString:@"alpha alpha" withOptions:0][0] copy];
             printSelectionState("base alpha alpha", base, inside);
@@ -366,7 +289,6 @@ int main(int argc, char **argv)
             }
         }
         {
-            // addSelections:, several at once, one of them overlapping
             PDFDocument *many = openFixture("cgfixture-words.pdf");
             PDFSelection *base = [[many findString:@"alpha alpha" withOptions:0][0] copy];
             NSArray<PDFSelection *> *additions = @[
@@ -377,7 +299,6 @@ int main(int argc, char **argv)
             printSelectionState("addSelections two", base, many);
         }
         {
-            // extendSelectionAtEnd: and extendSelectionAtStart:, in characters
             PDFDocument *words = openFixture("cgfixture-words.pdf");
             PDFSelection *end = [[words findString:@"alpha" withOptions:0][0] copy];
             [end extendSelectionAtEnd:3];
@@ -397,7 +318,6 @@ int main(int argc, char **argv)
             printSelectionState("both ends", both, words);
         }
         {
-            // extendSelectionForLineBoundaries, inside one line and across two
             PDFDocument *words = openFixture("cgfixture-words.pdf");
             PDFSelection *line = [[words findString:@"alpha" withOptions:0][0] copy];
             [line extendSelectionForLineBoundaries];
@@ -411,7 +331,6 @@ int main(int argc, char **argv)
             printSelectionState("extendForLine 2 lines", twoLine, lines2);
         }
         {
-            // across PAGES: cgfixture-3.pdf carries "page 1", "page 2", "page 3"
             PDFDocument *three = openFixture("cgfixture-3.pdf");
             NSArray<PDFSelection *> *pages = [three findString:@"page" withOptions:0];
             for (NSUInteger i = 0; i < pages.count; i++)
@@ -430,7 +349,6 @@ int main(int argc, char **argv)
             printSelectionState("extendStart 20 from page 1", beforeTheStart, three);
         }
         {
-            // the container the header describes: an empty selection, then one added, then several
             PDFDocument *words = openFixture("cgfixture-words.pdf");
             PDFSelection *container = [[PDFSelection alloc] initWithDocument:words];
             printSelectionState("initWithDocument:", container, words);
@@ -442,8 +360,6 @@ int main(int argc, char **argv)
         }
 
         {
-            // ADJACENT ranges with a space between them: whether the normalization merges ranges that TOUCH
-            // or only ranges that OVERLAP
             PDFDocument *words = openFixture("cgfixture-words.pdf");
             PDFSelection *base = [[words findString:@"alpha" withOptions:0][0] copy];
             [base addSelection:[[words findString:@"bra" withOptions:0][0] copy]];
@@ -488,8 +404,6 @@ int main(int argc, char **argv)
                            (unsigned long)r.location, (unsigned long)r.length);
                 }
                 NSAttributedString *attributed = selection.attributedString;
-                // the FONT is read by NAME and by SIZE and nothing else: the two things a UIFont on the
-                // port and an NSFont here can both answer, so the differential compares what is portable
                 NSRange fontRange = NSMakeRange(0, 0);
                 NSFont *font = [attributed length] > 0
                     ? [attributed attribute:NSFontAttributeName atIndex:0 effectiveRange:&fontRange] : nil;

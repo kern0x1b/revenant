@@ -7,8 +7,6 @@
 
 static const char charon_menu_key, charon_role_key;
 
-// As UIControl's: the three messages of UIContextMenuInteractionDelegate are carried here, so the
-// conformance is declared and the interaction has a conformer to send them to.
 @interface UIButton (CharonActions14) <UIContextMenuInteractionDelegate>
 @end
 
@@ -47,11 +45,6 @@ static const char charon_menu_key, charon_role_key;
 - (void)setMenu:(UIMenu *)menu
 {
     objc_setAssociatedObject(self, &charon_menu_key, [menu copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    // Spelled as the send it is. A property write names ONE identifier and needs two accessors, so
-    // tests/backports/host/prefix_selectors.py cannot prefix it and refuses the rewrite instead
-    // ("a carried selector the rewrite cannot rename: a write to contextMenuInteractionEnabled through dot
-    // syntax"), which took controlactions and controlmenus off the prefixed path altogether. The compiler
-    // turns this line into exactly the message send below, so nothing about the port's behaviour moves.
     [self setContextMenuInteractionEnabled:menu != nil];
 }
 

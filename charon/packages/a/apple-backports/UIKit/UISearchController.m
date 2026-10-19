@@ -119,14 +119,11 @@ static char charon_placeholder_key;
     [_searchBar charon_attachController:self];
 }
 
-// The navigation item that holds the controller, as the navigation item's searchController setter reports it. The bar is placed inline
-// while an item holds it, and stacked while none does.
 - (void)charon_setNavigationItem:(UINavigationItem *)item
 {
     _navigationItem = item;
 }
 
-// The placement: a controller no navigation item holds is stacked; one an item holds is stacked when the item prefers stacked, and inline otherwise.
 - (UINavigationItemSearchBarPlacement)searchBarPlacement
 {
     if (!_navigationItem)
@@ -135,8 +132,6 @@ static char charon_placeholder_key;
                                                                                                        : UINavigationItemSearchBarPlacementInline;
 }
 
-// The suggestions read back as an empty array whatever is set, as the host's do in every state measured (a bare controller, and one an item
-// holds in each placement). The port shows no list of them; the setter keeps nothing.
 - (NSArray *)searchSuggestions
 {
     return @[];

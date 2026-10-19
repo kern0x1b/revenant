@@ -4,8 +4,6 @@
 
 @implementation NSCollectionLayoutGroup (CharonRepeating16)
 
-// Count copies of the subitem at its own size: unlike the deprecated subitem:count:,
-// the subitem is not resized to a share of the group, and fitting is the caller's.
 + (instancetype)charon_groupWithLayoutSize:(NSCollectionLayoutSize *)layoutSize direction:(CharonGroupDirection)direction repeatingSubitem:(NSCollectionLayoutItem *)subitem count:(NSInteger)count
 {
     if (!layoutSize)

@@ -22,7 +22,6 @@ rule("apple-ios")
         end
         target:set("toolchains", string.format("@addon/charon/apple-ios[minimum=%s,sdk=%s,ld64=%s,llvm=%s]", minimum, versions["iphoneos-sdk"], versions.ld64, versions.llvm))
         target:set("policy", "build.ccache", false)
-        -- Whether the target sets a strip of its own, taken before a mode's on_config sets one for it (after_config).
         if not target:get("strip") then
             target:data_set("charon.strip.unset", true)
         end
@@ -42,11 +41,6 @@ rule("apple-ios")
         end
     end)
 
-    -- The checks after the link read the binary's symbol table, and the rules strip it afterwards with charon.strip. A
-    -- mode that strips a target setting no strip of its own (mode.release, mode.releasedbg, mode.minsizerel) sets strip
-    -- "all", which on Apple platforms links with -Wl,-x -Wl,-dead_strip (xmake's gcc.lua nf_strip), and the checks would
-    -- find no function names. The link keeps the dead-code removal and leaves the symbols to charon.strip, the way
-    -- xmake's utils.symbols.extract sets strip "none" until its own strip runs.
     after_config(function (target)
         if target:data("charon.strip.unset") and target:get("strip") == "all" then
             target:set("strip", "none")

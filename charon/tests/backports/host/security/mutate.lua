@@ -1,10 +1,3 @@
--- mutate.lua PATH API VALUE - one mutation of the port's constants object: a value the host did not print.
---
---    xmake l mutate.lua PATH API VALUE
---
--- A mutation that does not apply is an error, not a pass - the run goes red rather than skipping. It exits 1, and writes nothing,
--- when the line for API is not exactly one line of the file.
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
 function main(...)

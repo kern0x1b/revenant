@@ -1,22 +1,3 @@
--- compare.lua HOST PORT STATED - the host's answers against the port's, question by question, and what differs.
---
---    xmake l ./compare.lua <host.answers> <port.answers> <stated-differences.tsv>
---
--- Exits 0 when every question was asked on both sides, every answer is the same, and every stated difference is really a
--- difference; 1 otherwise, naming what it is. The stated file is a comment block of "name<TAB>reason" lines, a question the
--- host's own implementation does not answer at all.
---
--- Three things fail the comparison, and each of them is a failure a plain diff would report as a pass:
---
---   - a question on one side and not the other. Both sides are asked the same questions, so a missing line is a probe that
---     stopped early, and a comparison that skips it is a comparison of fewer questions than it claims.
---   - a difference nobody stated. The stated list is the whole of what may differ, so a new one is a change in behaviour and
---     not a detail.
---   - a stated difference that no longer differs. The statement is about a measurement, and a measurement that moved leaves
---     the statement wrong; passing on it would keep a claim in the tree that its own harness no longer supports.
-
--- The lines of a file, without their line ends, in order. xmake's handle:lines() keeps the "\n" on each line, so it is taken off
--- here, and the carriage return of a CRLF file with it.
 local function lines(path)
     local handle = assert(io.open(path, "rb"))
     local out = {}
@@ -28,7 +9,6 @@ local function lines(path)
     return out
 end
 
--- The name and the answer of a "name<TAB>answer" line; a line with no tab is a name with an empty answer, as partition gives.
 local function split_tab(line)
     local tab = line:find("\t", 1, true)
     if not tab then
@@ -37,8 +17,6 @@ local function split_tab(line)
     return line:sub(1, tab - 1), line:sub(tab + 1)
 end
 
--- {name: answer} and the names in the order they are asked, from a file of "name<TAB>answer" lines. nil, nil when a name is
--- asked twice on this side.
 local function read(path)
     local answers, order = {}, {}
     for _, line in ipairs(lines(path)) do
@@ -55,7 +33,6 @@ local function read(path)
     return answers, order
 end
 
--- {name: reason} and the names in the order they are stated, from the stated file, skipping the block that explains it.
 local function stated(path)
     local reasons, order = {}, {}
     for _, line in ipairs(lines(path)) do

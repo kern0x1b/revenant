@@ -1,25 +1,3 @@
--- host_answers.lua HOST.OUT - the port's answers must be the host's, over what the host actually said.
---
---    xmake l ./host_answers.lua <the output of host-answers.m>
---
--- Reads the ten COUNT lines, the two PROPERTY lines and the INIT line, and holds the port to them:
---
---   - both counts must be 0 for every one of the ten sentiment categories. 0 and not nil: the host answers an integer, and a
---     count of nothing typed in a category is zero.
---   - both speech properties must be nil for a metrics object with no session, which is what the header's own nullable means
---     with nothing behind it.
---   - -[SRSensorReader init] must raise. The port produces that raise, in SRSensorReader.m, and this line is the measurement it
---     is held to; the whole of the eighteen classes whose headers close the pair is in tests/backports/host/unavailable-init,
---     which is where that one is now held twice - to the source and to the compiled object - so a harness that quoted the
---     header's NS_UNAVAILABLE without measuring what the framework does about it would be quoting rather than checking.
---
--- Prints the three verdicts and a summary; exits 1 if the host answered something else, because a golden file that no longer
--- matches what the host says is a harness that has stopped being evidence.
---
--- The HOST COUNTS verdict is yes only when every count is 0. The Python it was ported from read the failure texts for the word
--- "count" instead, so a category that answered 3 still said yes; the verdict now reads the values it is about.
-
--- Names are sorted by their bytes, as Python sorts strings; the string comparison of Lua follows the locale's collation.
 local function byte_less(a, b)
     for i = 1, math.min(#a, #b) do
         local x, y = a:byte(i), b:byte(i)
@@ -30,7 +8,6 @@ local function byte_less(a, b)
     return #a < #b
 end
 
--- The fields of a line, split at every tab, with its line end taken off first: handle:lines() keeps the "\n" on each line.
 local function fields(line)
     line = line:gsub("\n$", ""):gsub("\r$", "")
     local out, start = {}, 1
@@ -45,7 +22,6 @@ local function fields(line)
     end
 end
 
--- Python's spelling of a value that may be missing: None, which %s would otherwise fail on.
 local function py(value)
     return value == nil and "None" or value
 end

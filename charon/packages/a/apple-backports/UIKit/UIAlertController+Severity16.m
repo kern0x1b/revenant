@@ -3,7 +3,6 @@
 
 @implementation UIAlertController (CharonSeverity16)
 
-// Only the Mac idiom draws a critical alert differently; the value is kept and changes nothing here.
 - (UIAlertControllerSeverity)severity
 {
     return [objc_getAssociatedObject(self, @selector(severity)) integerValue];

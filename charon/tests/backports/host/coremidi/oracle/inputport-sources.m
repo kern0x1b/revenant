@@ -1,8 +1,3 @@
-// Host probe: whether a MIDI 1.0 input port keeps its SysEx parser state per connected source or per port. One input
-// port (MIDIInputPortCreateWithBlock) is connected to two virtual sources, A (srcConnRefCon 1) and B (srcConnRefCon 2).
-// Messages are sent with MIDIReceived on the sources. Run 1 arrival order: A F0 01, B 90 3C 7F, A 02 F7. Run 2
-// arrival order: A F0, A 01, B 90 3C 7F, A 02 F7 (the same bytes from A, split into two messages). Each packet the
-// read block receives is printed with the srcConnRefCon it arrives with, its timestamp and its bytes.
 #import <CoreMIDI/CoreMIDI.h>
 #import <Foundation/Foundation.h>
 #include <stdio.h>

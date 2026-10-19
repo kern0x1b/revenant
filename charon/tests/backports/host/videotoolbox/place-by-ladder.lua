@@ -1,34 +1,3 @@
--- place-by-ladder.lua - places VideoToolbox's string constants by the release the cache ladder measures, one object per
--- release, and writes the registry rows to match.
---
---    xmake l place-by-ladder.lua                       the tree, from ladder.tsv (the committed table)
---    xmake l place-by-ladder.lua SPLIT.txt             the tree, from a split file (tools/release-split.lua's output)
---    xmake l place-by-ladder.lua --into OBJECTS REGISTRY   the same placement into other directories, a scratch copy
---    xmake l place-by-ladder.lua --check SPLIT.txt     says whether a split file and the committed table agree; exits 1 when not
---    xmake l place-by-ladder.lua --same-rows COMMITTED REGISTRY   says whether two registry directories hold the same rows
---                                                      in the same files, order aside; exits 1 naming what differs
---
--- The gate decides which release an object's API arrived in from the held caches' own exports first (the way
--- tools/release-split.lua does), the registry second and the SDK last. The header's availability is the release Apple
--- wrote down; the ladder is the first held release that EXPORTS the symbol, which is what a band of this port is cut by,
--- and the two differ. So the placement reads the committed table, not the header.
---
--- For each constant the target release is the earliest release the ladder gives it; a constant no held cache exports keeps
--- the release its registry row already has. The registry row moves with it - `introduced`, `source`, and the group file by
--- major release - and each VideoToolboxConstants<release>.m holds exactly the constants of its release.
--- check-constant-files.lua holds the result both ways.
---
--- ONE PASS, AND THE WHOLE LAYOUT IS BUILT AND VALIDATED BEFORE ANYTHING IS WRITTEN OR REMOVED. Every release is checked
--- against the shape of a release first, and nothing moves until every write is ready.
---
--- THE DIRECTORIES ARE PARAMETERS (--into): a check drives this placement over a scratch copy, and run.sh does, because the
--- only writer of the constant rows and of the objects must be the one the check runs.
---
--- The registry is read and written by this file's own JSON reader and writer, which keep the key order of the file and write
--- the text Python's json.dump(indent=1) wrote, so a tree this places comes back byte for byte when nothing has moved.
--- The Python this replaces was place-by-ladder.py. The generated text (the banners, the comment) is kept as that file wrote
--- it, so the committed objects are what this writes.
-
 local lib = import("vtlib", {rootdir = os.scriptdir(), anonymous = true})
 
 local HERE = os.scriptdir()
@@ -39,10 +8,6 @@ local OBJECTS = path.join(PACKAGE, "VideoToolbox")
 local REGISTRY = path.join(PACKAGE, "registry", "VideoToolbox")
 
 local IMPORTS = "#import <Foundation/Foundation.h>\n#import <CoreMedia/CoreMedia.h>\n#import <VideoToolbox/VideoToolbox.h>\n"
-
--- JSON, read and written in the order the file holds its keys. Strings are kept as their UTF-8 bytes.
--- An object is {kind = "object", keys = {...}, vals = {...}}; an array is {kind = "array", items = {...}}; an integer is
--- {kind = "int", text = "<digits>"}; true, false and the string values are Lua's own; NULL is JSON's null.
 
 local NULL = { kind = "null" }
 
@@ -64,7 +29,6 @@ local function obj_get(object, key)
     return object.vals[key]
 end
 
--- A value that must be there, as Python's d[key] raises KeyError when it is not.
 local function must_get(object, key)
     local value = object.vals[key]
     if value == nil then
@@ -249,7 +213,6 @@ local function encode_string(s)
     return table.concat(out)
 end
 
--- json.dump(value, indent=1) at a depth: each level one space further in, the closing bracket at its own level.
 local function encode(value, depth)
     if value == NULL then
         return "null"
@@ -285,8 +248,6 @@ local function encode(value, depth)
     raise("place-by-ladder.lua: a value this writer does not know")
 end
 
--- The ladder. ladder_table is every named row of the committed table, a release or "-" or "" as it is written;
--- measured_from_table is the rows a release is measured for; measured reads a split file.
 local function ladder_table(text)
     local found = {}
     for _, row in ipairs(lib.ladder_rows(text)) do
@@ -372,7 +333,6 @@ local function check_against(splitText)
     return 1
 end
 
--- A release: digits, then any number of ".digits" - the shape re.fullmatch(r"\d+(\.\d+)*") accepts.
 local function is_release(s)
     if type(s) ~= "string" or s == "" then
         return false
@@ -398,9 +358,7 @@ local function object_name(release)
     return "VideoToolboxConstants" .. string.gsub(release, "%.", "_") .. ".m"
 end
 
--- The layout, the registry and the objects are built in memory, and only then written: the same order the Python used.
 local function place(ladder, objects, registry)
-    -- the objects: each constant's line, and the comment the earliest object carries
     local lines, comment = {}, nil
     for _, file in ipairs(lib.files_matching(objects, "VideoToolboxConstants*.m")) do
         local text = lib.read_text(file)
@@ -452,7 +410,6 @@ local function place(ladder, objects, registry)
         raise("AssertionError: the objects carry no comment to put in the earliest one")
     end
 
-    -- the registry rows of the constants, in the order the files hold them
     local registryFiles = lib.files_matching(registry, "*.json")
     local rowOrder, rows = {}, {}
     for _, file in ipairs(registryFiles) do
@@ -479,7 +436,6 @@ local function place(ladder, objects, registry)
         raise("AssertionError: a defined constant has no row: " .. lib.py_list(missingRows))
     end
 
-    -- THE LAYOUT, first and whole: every constant to a release, each release validated, and the rows updated in memory
     local groups, releases, first, moved = {}, {}, nil, 0
     for _, name in ipairs(linesNames) do
         local row = rows[name]
@@ -520,7 +476,6 @@ local function place(ladder, objects, registry)
         return lib.tuple_less(lib.release_key(a), lib.release_key(b))
     end)
 
-    -- THE REGISTRY, built in memory: the constant rows out of every file, then each row into the group file of its release
     local fileOrder, files = {}, {}
     for _, file in ipairs(registryFiles) do
         local base = path.filename(file)
@@ -550,7 +505,6 @@ local function place(ladder, objects, registry)
         entries.items[#entries.items + 1] = rows[name]
     end
 
-    -- THE OBJECTS, built in memory. The comment text is the one the committed objects carry, verbatim.
     local bodies = {}
     for _, release in ipairs(releases) do
         local body = IMPORTS .. "\n"
@@ -575,7 +529,6 @@ local function place(ladder, objects, registry)
         bodies[object_name(release)] = body .. table.concat(out, "\n") .. "\n"
     end
 
-    -- AND ONLY NOW does anything move
     for _, file in ipairs(lib.files_matching(objects, "VideoToolboxConstants*.m")) do
         if bodies[path.filename(file)] == nil then
             os.rm(file)
@@ -600,10 +553,6 @@ local function place(ladder, objects, registry)
     end
 end
 
--- The registry as the same rows, file by file, order aside: each file's entries, encoded one by one and sorted by bytes, and
--- the other keys of the file, must match between the two directories, and both must hold the same files. The order of the
--- entries inside a file is not compared: place() keeps a file's other rows in their order and appends the constant rows
--- after them, so a registry the classes writer ordered differently holds the same rows.
 local function canonical_registry(directory)
     local out = {}
     for _, file in ipairs(lib.files_matching(directory, "*.json")) do

@@ -1,12 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <AppClip/APActivationPayload.h>
 
-// iOS 6.1.3 launches no App Clip: there is no App Clip binary, no registered App Clip URL, no
-// invocation by NFC tag or visual code, and no service that confirms where one happened. So no
-// payload is ever made, every payload has no URL, and a confirmation is refused with the error the
-// framework documents for exactly this case - an invocation that did not come from a tag or a code
-// (facts/AppClip/APActivationPayload.md).
-
 @implementation APActivationPayload
 
 @dynamic URL;
@@ -23,8 +17,6 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    // Nothing of a payload of this release is there to archive: the release launches no App Clip, so
-    // it never holds a URL.
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder

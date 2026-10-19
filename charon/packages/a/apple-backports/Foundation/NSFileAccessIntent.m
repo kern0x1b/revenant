@@ -9,10 +9,6 @@
 
 @implementation NSFileAccessIntent {
 @private
-    // 16.4/16.5's own header still declares an ivar block of its own for this class (@private NSURL *_url;
-    // NSInteger _options; BOOL _isRead;) that 26.2's does not (see the const-qualify commit beside this one);
-    // naming ours the same as the header's would collide there ("instance variable is already declared").
-    // Prefixed instead, so this compiles unchanged whichever the SDK's own header carries.
     NSURL *_charonURL;
     NSInteger _charonOptions;
     BOOL _charonIsRead;

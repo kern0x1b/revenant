@@ -1,8 +1,3 @@
-// MPSMatrixNeuron, from the header of the SDK of iOS 16.4. One object per release: the band machinery keeps an
-// object whole or drops it whole, so a file here carries the API of exactly one release.
-
-// The state every one of the neural network matrix kernels carries, and the accessors each of them
-// declares. A macro defines no symbol, so a file that uses one needs nothing from another.
 #define CHARON_MPS_NEURON_IVARS \
     MPSCNNNeuronType _neuronType; \
     float _neuronParameterA, _neuronParameterB, _neuronParameterC; \
@@ -116,9 +111,6 @@ CHARON_MPS_NEURON_COMMON
         CharonMPSRefuse(@"MPSMatrixNeuron: a matrix of a data type that is not one of the eight element types was given");
         return;
     }
-    // y = neuron(alpha * x + bias), the bias broadcast across the rows and indexed by the column, which
-    // is the channel. The counts are the header's: as many feature vectors and channels as the matrix
-    // holds from the source origin, and no more than the caller asked for.
     NSUInteger available = in.rows - _sourceMatrixOrigin.x;
     NSUInteger vectors = _sourceNumberOfFeatureVectors < available ? _sourceNumberOfFeatureVectors : available;
     NSUInteger columns = in.columns - _sourceMatrixOrigin.y;

@@ -1,26 +1,9 @@
--- The band objects of a framework whose spec is committed: spec/<F>/bands.json, read by gen and written, one file per band tag, into
--- .gen/<F>/ beside the spec-derived objects. It replaces tools/corpus/gen-ledger-objects.py, which wrote the same objects from the same
--- spec. A piece records its corpus rank in the spec, so the objects read no file outside the repository.
---
--- A piece is one of three kinds. A class (kind "class") is an @implementation the band declares; a category ("category") is an
--- @implementation of a class another object defines, the only way a later band extends an earlier one; a policy ("policy") emits no
--- @implementation at all and carries the names and rules of a class the package already defines. The spec states what each piece
--- forbids as well as what it carries, and the object says so in its header.
---
--- Refused, not written: a class (kind "class") that a committed .m of the package already defines. Two objects defining one class are a
--- duplicate class symbol at load, so the generator names the file that has it and stops.
---
--- Run through gen: xmake l tools/gen.lua gen --tree <tree> --framework FileProvider --sdk <iPhoneOS SDK> (the package build runs gen --all).
-
 local json = import("core.base.json")
 local files = import("files", {anonymous = true})
 local layout = import("layout", {anonymous = true})
 
--- The spec's file name under the framework's snapshot folder (spec/<F>/bands.json).
 local SPEC_NAME = "bands.json"
 
--- The header of a piece: its imports, its runtime header, and the note that says what the piece carries and forbids. The text is the one
--- the python wrote, with the producer line naming this module and the committed spec.
 local function header_lines(piece, spec_rel)
     local lines = {"#import " .. piece.header}
     for _, extra in ipairs(piece.imports or {}) do
@@ -54,7 +37,6 @@ local function header_lines(piece, spec_rel)
     return lines
 end
 
--- One piece's text: its header, then its body with the trailing whitespace off, then the final line feed.
 local function piece_text(piece, spec_rel)
     local lines = header_lines(piece, spec_rel)
     table.insert(lines, (string.gsub(piece.body, "%s+$", "")))
@@ -62,8 +44,6 @@ local function piece_text(piece, spec_rel)
     return table.concat(lines, "\n")
 end
 
--- The class names the committed .m files of the package define, as an @implementation that is not a category: "@implementation X" and
--- "@implementation X : Super" and "@implementation X {" count, "@implementation X (Cat)" does not. The files named in own are left out.
 local function defined_in_package(package_dir, own)
     local defined = {}
     for _, found in ipairs(files.glob(path.join(package_dir, "*.m"))) do
@@ -82,8 +62,6 @@ local function defined_in_package(package_dir, own)
     return defined
 end
 
--- The pieces of each band, in the spec's order, and the band names in the spec's order. A band whose pieces name two tags is refused:
--- the tag names the file, so two tags would write two files for one band.
 local function by_band(pieces)
     local bands, tags, order_of = {}, {}, {}
     for _, piece in ipairs(pieces) do
@@ -106,8 +84,6 @@ local function by_band(pieces)
     return bands, order_of
 end
 
--- The objects of a framework that its committed spec defines: name -> text, each name a file of .gen/<F>/. Empty for a framework with no
--- spec. Refused (raised) when a class piece names a class a committed .m of the package already defines.
 function objects(tree, fw)
     local out = {}
     local spec_dir = layout.snap_dir(tree, fw)

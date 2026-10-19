@@ -1,16 +1,9 @@
-// The three kinds of HKSample of iOS 8: a category, a quantity and a correlation.
-
 #import <HealthKit/HealthKit.h>
 
 #import "CharonHKStore.h"
 
 #pragma mark - HKCategorySample
 
-// This class is one the store keeps, so it adopts the protocol the store's gate tests for. Every
-// member of that protocol is inherited from HKObject - the row's own facts, the archive and the
-// class method that reads one back through this class's own -initWithCoder:. The declaration was
-// missing, so -[CharonHKStore saveObjects:error:] refused this class and every other, with
-// "is not a health object this database can keep".
 @implementation HKCategorySample {
     NSInteger _value;
 }
@@ -92,16 +85,9 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 #pragma mark - HKQuantitySample
 
-// This class is one the store keeps, so it adopts the protocol the store's gate tests for. Every
-// member of that protocol is inherited from HKObject - the row's own facts, the archive and the
-// class method that reads one back through this class's own -initWithCoder:. The declaration was
-// missing, so -[CharonHKStore saveObjects:error:] refused this class and every other, with
-// "is not a health object this database can keep".
 @implementation HKQuantitySample {
     HKQuantity *_quantity;
 }
-// iOS 12.0 added -count, and this delivery carries the 9.3 group, so the member is @dynamic and no
-// accessor is emitted for it.
 @dynamic count;
 
 
@@ -196,16 +182,10 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 #pragma mark - HKCorrelation
 
-// This class is one the store keeps, so it adopts the protocol the store's gate tests for. Every
-// member of that protocol is inherited from HKObject - the row's own facts, the archive and the
-// class method that reads one back through this class's own -initWithCoder:. The declaration was
-// missing, so -[CharonHKStore saveObjects:error:] refused this class and every other, with
-// "is not a health object this database can keep".
 @implementation HKCorrelation {
     HKCorrelationType *_correlationType;
     NSMutableDictionary<NSString *, NSMutableArray<HKObject *> *> *_byType;
 }
-// No member of a later release on this class.
 
 
 + (BOOL)supportsSecureCoding
@@ -241,9 +221,6 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
         return nil;
     correlation->_correlationType = type;
     correlation->_byType = [NSMutableDictionary dictionary];
-    // The release keeps the objects grouped by the type they are of, in the order it was given them,
-    // and a correlation holds one sample of each of the types its correlation type names; anything
-    // else it was given is refused as the header's own validation refuses it.
     for (HKSample *object in objects) {
         if (![object conformsToProtocol:@protocol(CharonHKStorable)])
             continue;
@@ -302,8 +279,6 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return [self charon_allObjectsSet];
 }
 
-// Every object of the correlation, in the order the release keeps them: the groups in the order the
-// correlation type's own table names them, and each group in the order it was given.
 - (NSArray<HKObject *> *)charon_allObjects
 {
     NSMutableArray *all = [NSMutableArray array];
@@ -330,19 +305,6 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 @end
 
-// This class is one the store keeps, so it adopts the protocol the store's gate tests for. Every
-// member of that protocol is inherited from HKObject - the row's own facts, the archive and the
-// class method that reads one back through this class's own -initWithCoder:. The adoption was
-// missing, so -[CharonHKStore saveObjects:error:] refused this class and every other, with
-// "is not a health object this database can keep".
-
-// These classes are ones the store keeps, so each adopts the protocol the store's gate tests for.
-// Every member of that protocol is inherited from HKObject - the row's own facts, the archive and
-// the class method that reads one back through the class's own -initWithCoder:. The adoption was
-// missing, so -[CharonHKStore saveObjects:error:] refused these classes and every other, with
-// "is not a health object this database can keep", and the two builders of 12.0 saved into a
-// store that took nothing. Conformance is declared on a category interface and not repeated on
-// its implementation, which is where Objective-C takes it.
 @interface HKCategorySample (CharonHKStorable) <CharonHKStorable>
 @end
 
@@ -360,4 +322,3 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 @implementation HKCorrelation (CharonHKStorable)
 @end
-

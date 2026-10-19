@@ -1,13 +1,3 @@
-// differential.m - the os_log macros' packed buffer, decoded by the port and written as the host's own
-// developer output is. The same battery as host/oslog runs in both builds:
-//
-//   -DCHARON_PORT   the port's decoder answers. The macros call _os_log_impl, which this file defines to
-//                   decode the buffer the compiler packed with charon_os_log_format_buffer, and os_log_type_enabled
-//                   is the port's answer for the log objects the port makes.
-//   (no define)     the host's own os_log answers, through its own _os_log_impl, and writes the developer
-//                   output the comparator reads.
-//
-// The log of each case is named by its index, so the two outputs are read case by case.
 #import <Foundation/Foundation.h>
 #import <os/log.h>
 #include <errno.h>
@@ -24,8 +14,6 @@ static FILE *ours_file;
 static int current_index;
 static int hex_output;
 
-/* Writes the bytes to the output: as they are, or, for a run on the emulator (argument "-"), as hex digits, because
-   the emulator's output is text and a NUL or a unit separator in it would not come back. */
 static void put_bytes(const char *bytes, size_t count)
 {
     for (size_t i = 0; i < count; i++) {
@@ -36,7 +24,6 @@ static void put_bytes(const char *bytes, size_t count)
     }
 }
 
-/* A record is the index, a unit separator, the text and a NUL. In hex mode it is one line, "R " and its digits. */
 static void emit_record(int index, const char *text)
 {
     char prefix[16];
@@ -69,7 +56,6 @@ void _os_log_impl(void *dso, os_log_t log, os_log_type_t type, const char *forma
 #define LOG_FOR(category) os_log_create("probe", category)
 #endif
 
-// The formats of the buffers the macros never make (see CRAFT in main). Each is one call, one category.
 #define OSLOG_CRAFTED(CASE) \
     CASE("a %d b %d c") \
     CASE("a %s b") \
@@ -79,8 +65,6 @@ void _os_log_impl(void *dso, os_log_t log, os_log_type_t type, const char *forma
     CASE("a %.2s b") \
     CASE("a %c b")
 
-/* A buffer built item by item at run time, for the buffers the macros never make. A pointer item points at this
-   process's own data, so both runs read the same bytes. The host decodes the buffer with its own _os_log_impl. */
 static uint8_t crafted[256];
 static uint32_t crafted_size;
 
@@ -115,7 +99,6 @@ static void craft_count(uint32_t count)
     craft_item(1, 0, &count, sizeof count);
 }
 
-/* Sets the item count the buffer claims, whatever items it holds. */
 static void craft_claim(uint8_t count)
 {
     crafted[1] = count;
@@ -125,7 +108,6 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
 #ifdef CHARON_PORT
-        /* The time decorators are measured in UTC, as run.sh sets TZ for the host run; an emulator has its own zone. */
         setenv("TZ", "UTC", 1);
         tzset();
         hex_output = strcmp(argv[1], "-") == 0;
@@ -163,8 +145,6 @@ int main(int argc, char **argv)
 #else
 #define CHARON_CURRENT(n)
 #endif
-        /* A buffer that holds no item, which no os_log macro makes: the host writes its markers for it, and the
-           port's decoder must write the same. The call is made on _os_log_impl directly, as a caller would. */
 #define CRAFT(format) \
         do { \
             char category[16]; \
@@ -177,9 +157,6 @@ int main(int argc, char **argv)
         OSLOG_BATTERY(CASE)
         OSLOG_BATTERY_HOST(CASE)
         OSLOG_CRAFTED(CRAFT)
-        /* Items of a kind the conversion does not take: the host writes its mismatch marker, consumes the item, and
-           goes on to the next conversion, which takes the next item. The privacy nibbles, the sizes and the labels
-           are the ones measured on the host. The arguments after the format are the items, in order. */
 #define CRAFT_CASE(format, ...) \
         do { \
             char category[16]; \
@@ -191,11 +168,7 @@ int main(int argc, char **argv)
             CHARON_CURRENT(index) \
             _os_log_impl(&__dso_handle, log, OS_LOG_TYPE_DEFAULT, format, crafted, crafted_size); \
         } while (0);
-        /* A string the host writes as private at nibble 0 is one in writable memory: the array below is on the stack. */
         char writable[] = "dyn";
-        /* Type 5 items point at eight bytes of UTF-16LE units: a unit run, a zero first unit with the second unit at the
-           edges of 1 to 16, a surrogate, a three-byte unit, no nul among the first two units, a nul at the second unit
-           only, a nul at the third unit (not seen), and an empty text. */
         const uint8_t w5_ab[8] = {0x41, 0, 0x42, 0, 0, 0, 0, 0};
         const uint8_t w5_a_nul[8] = {0x41, 0, 0, 0, 0, 0, 0, 0};
         const uint8_t w5_abc_nul[8] = {0x41, 0, 0x42, 0, 0x43, 0, 0, 0};
@@ -233,25 +206,20 @@ int main(int argc, char **argv)
         CRAFT_CASE("v %{public}s w", craft_value(0, 0, 1, 4))
         CRAFT_CASE("v %5d w", craft_pointer(3, 0, uu))
         CRAFT_CASE("v %d w %d x", craft_value(7, 0, 1, 8), craft_value(0, 0, 7, 4))
-        /* A zero-length scalar is an item with no value; a zero-length errno item is still errno. */
         CRAFT_CASE("v %d w", craft_value(0, 0, 0, 0))
         CRAFT_CASE("v %d w %d x", craft_value(0, 0, 0, 0), craft_value(0, 0, 7, 4))
         CRAFT_CASE("v %d w %d x", craft_value(0, 0, 7, 4), craft_value(0, 0, 0, 0))
         CRAFT_CASE("v %d w", craft_value(6, 0, 0, 0))
         CRAFT_CASE("v %m w", craft_value(6, 0, 0, 0))
-        /* NULL strings and objects: the size is 0, and a NULL string at nibble 0 has no privacy word. */
         CRAFT_CASE("v %d w", craft_pointer(2, 0, NULL))
         CRAFT_CASE("v %d w", craft_pointer(2, 2, NULL))
         CRAFT_CASE("v %s w", craft_pointer(2, 0, NULL))
         CRAFT_CASE("v %d w", craft_pointer(4, 0, NULL))
         CRAFT_CASE("v %s w", craft_pointer(4, 0, NULL))
-        /* A buffer that claims more items than it holds: the decoder stops at the bytes it has. */
         CRAFT_CASE("v %d w %d x", craft_value(0, 0, 7, 4), craft_claim(2))
         CRAFT_CASE("v %d w %d x", craft_value(0, 0, 7, 4), craft_claim(3))
         CRAFT_CASE("v %d w %d x", craft_value(0, 0, 7, 4), craft_value(0, 0, 0, 0), craft_claim(2))
         CRAFT_CASE("v %d w", craft_value(7, 0, 1, 8))
-        /* A type 5 item is a mismatch for %d, named 5 with its size from its units, and the next conversion takes the
-           next item. The privacy nibbles are 0 (a writable pointer, so private), 1 (private) and 2 (public). */
         CRAFT_CASE("v %d w", craft_pointer(5, 0, w5_ab))
         CRAFT_CASE("v %d w", craft_pointer(5, 2, w5_ab))
         CRAFT_CASE("v %d w", craft_pointer(5, 0, w5_zero_one))

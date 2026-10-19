@@ -1,8 +1,3 @@
-/* config.h of xz 5.8.4 for the Compression backport: the subset of liblzma that the LZMA codec needs, derived from the
- * upstream's non-autotools configuration (dos/config.h). Enabled: the CRC32, CRC64 and SHA-256 checks, the LZMA1 and
- * LZMA2 coders and their match finders. Not enabled: the branch-call-jump filters, delta, lzip, threads, and the
- * x86 CRC assembly, so their sources are not built. SIZEOF_SIZE_T comes from the compiler, so the one file serves both the
- * armv7 port and the 64-bit host build of the differential. */
 #define HAVE_CHECK_CRC32 1
 #define HAVE_CHECK_CRC64 1
 #define HAVE_CHECK_SHA256 1

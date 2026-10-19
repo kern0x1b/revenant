@@ -1,24 +1,3 @@
-// The three record zone changes of iOS 10.0.1.
-//
-// An object of its own because the build refuses one that holds the API of more than one release,
-// and the header puts these three at 10.0.1 and
-// CKFetchRecordZoneChangesConfiguration beside them at 12.0. The gate
-// names it: "an object carries API that arrived in one release, so split it". The releases are the
-// header's, measured by the gate against a held release's own cache, and the registry's
-// `introduced` follows them.
-//
-// CharonCKTakeZoneChanging stays with CKFetchRecordZoneChangesOperation beside it, which is the
-// only class that calls it.
-
-// The zone changes of iOS 12, and the two objects that describe them.
-//
-// CKFetchRecordZoneChangesOperation fetches the changes of several zones in one request, each with
-// its own configuration or its own options, and CKFetchDatabaseChangesOperation is the one that
-// walks the zones themselves so a caller learns which ones changed before fetching any of them. The
-// two share the same rule as every other operation here: the per-item block on the transport's
-// queue in the service's order, the completion last and exactly once, and a partial answer as
-// CKErrorPartialFailure with the failures under CKPartialErrorsByItemIDKey.
-
 #import "CharonCloudKit.h"
 #import "CharonCKConstants.h"
 #import "CharonCKSubscription.h"
@@ -54,9 +33,6 @@
 
 - (void)main
 {
-    // The database's own changes are the zones that moved since the last fetch, which the service
-    // answers under the database root rather than under a zone's: a caller learns which zones to
-    // fetch before it fetches any of them.
     NSMutableDictionary *body = [NSMutableDictionary dictionary];
     if (self.previousServerChangeToken) {
         NSData *previous = CharonCKSystemFieldsSnapshotToken(self.previousServerChangeToken);
@@ -152,9 +128,6 @@
 
 #pragma mark - The per-zone fetch document
 
-// One zone's half of the request: the token the last fetch ended at, how many to ask for and which
-// fields. The two objects the header has for it are the same three members, so both are read here
-// and neither is guessed at.
 static void CharonCKTakeZoneChanging(id entry, NSString **token, NSUInteger *limit, NSArray **keys)
 {
     if ([entry isKindOfClass:[CKFetchRecordZoneChangesConfiguration class]]) {
@@ -205,8 +178,6 @@ static void CharonCKTakeZoneChanging(id entry, NSString **token, NSUInteger *lim
     return self;
 }
 
-// The options of iOS 10 are built from the optionsByRecordZoneID the header still carries, so a
-// caller of either shape is answered the same way.
 - (instancetype)initWithRecordZoneIDs:(NSArray<CKRecordZoneID *> *)recordZoneIDs
               optionsByRecordZoneID:(NSDictionary *)optionsByRecordZoneID
 {
@@ -231,9 +202,6 @@ static void CharonCKTakeZoneChanging(id entry, NSString **token, NSUInteger *lim
         [self charon_finish];
         return;
     }
-    // The service takes one request for the changes of several zones, with a half per zone, and
-    // answers one document per zone under the same key. The per-zone halves are what the two
-    // objects of the header describe and are read here, not assumed.
     NSMutableDictionary *body = [NSMutableDictionary dictionary];
     NSMutableArray *zones = [NSMutableArray array];
     for (CKRecordZoneID *zoneID in self.recordZoneIDs) {
@@ -316,4 +284,3 @@ static void CharonCKTakeZoneChanging(id entry, NSString **token, NSUInteger *lim
 }
 
 @end
-

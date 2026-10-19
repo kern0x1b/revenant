@@ -3,12 +3,6 @@
 #import <stdlib.h>
 #import <string.h>
 
-// AudioToolbox functions of iOS 10, which the release this port runs on does not export. The release's queue calls back with a C
-// function and a user-data pointer; these take a block and a dispatch queue, and the port's callback hands each call to the block
-// on that queue. The host runs the block on the queue it was given (tests/backports/host/audiotoolbox-functions measures it).
-
-// The block and the queue one queue's callbacks go to. The release holds the pointer until the audio queue is disposed, and the
-// port has no hook for the dispose, so one small object is kept per audio queue made this way.
 @interface CharonAudioQueueDispatch : NSObject
 @property (nonatomic, strong) dispatch_queue_t queue;
 @property (nonatomic, copy) id callback;
@@ -28,8 +22,6 @@ static void CharonAudioQueueOutputCallback(void *inUserData, AudioQueueRef inAQ,
     });
 }
 
-// The input callback's timestamp and packet descriptions are only valid while the release's callback runs, so they are copied
-// before the block is queued. The copies are freed after the block returns.
 static void CharonAudioQueueInputCallback(void *inUserData, AudioQueueRef inAQ, AudioQueueBufferRef inBuffer,
                                           const AudioTimeStamp *inStartTime, UInt32 inNumberPacketDescriptions,
                                           const AudioStreamPacketDescription *inPacketDescs)
@@ -54,8 +46,6 @@ static void CharonAudioQueueInputCallback(void *inUserData, AudioQueueRef inAQ, 
     });
 }
 
-// AudioQueueNewOutputWithDispatchQueue. A NULL dispatch queue is refused with paramErr (the host's answer, measured); so is a
-// NULL block, which the host's answer is not measured for.
 OSStatus AudioQueueNewOutputWithDispatchQueue(AudioQueueRef *outAQ, const AudioStreamBasicDescription *inFormat, UInt32 inFlags,
                                               dispatch_queue_t inCallbackDispatchQueue, AudioQueueOutputCallbackBlock inCallbackBlock)
 {
@@ -73,7 +63,6 @@ OSStatus AudioQueueNewOutputWithDispatchQueue(AudioQueueRef *outAQ, const AudioS
     return status;
 }
 
-// AudioQueueNewInputWithDispatchQueue. The same rules as the output form.
 OSStatus AudioQueueNewInputWithDispatchQueue(AudioQueueRef *outAQ, const AudioStreamBasicDescription *inFormat, UInt32 inFlags,
                                              dispatch_queue_t inCallbackDispatchQueue, AudioQueueInputCallbackBlock inCallbackBlock)
 {

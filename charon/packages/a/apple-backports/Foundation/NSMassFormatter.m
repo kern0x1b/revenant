@@ -2,16 +2,6 @@
 
 #import "CharonUnitFormat.h"
 
-/* NSMassFormatter, iOS 8.0, the class whole from the 26.2 header: the number formatter and the
-   unit style that say how a mass is written, the flag that says a mass is a person's mass, the
-   four methods that write one, and the method that reads one back and is documented never to.
-
-   The measurements are the system's own, held against it by tests/backports/host/unitformat, and
-   what the release can and cannot be asked for is written down in
-   facts/Foundation/NSUnitFormat.md: the release has no NSMassFormatter and no CLDR unit-name
-   table, but it has its own NSNumberFormatter, which writes the number, and its own locale, which
-   answers under NSLocaleMeasurementSystem which system of units a mass is written in. */
-
 @implementation NSMassFormatter {
     NSNumberFormatter *_numbers;
     NSFormattingUnitStyle _unitStyle;

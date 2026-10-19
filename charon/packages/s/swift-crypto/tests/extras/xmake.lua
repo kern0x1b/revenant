@@ -1,13 +1,5 @@
 set_project("cryptoextrasprobe")
 set_version("0.0.1")
--- The armv7 probe of what _CryptoExtras carries (RSA, AES-CBC, AES-CTR, AES-GCM-SIV, ChaCha20 CTR, PBKDF2, Scrypt) and of the
--- AES key wrap of Crypto: libswiftCrypto.dylib run on the iOS 6.1.3 emulator, against the same source built for the host against
--- upstream swift-crypto 5.0.1 (main.swift's host twin is the oracle; both print the same "P| " lines when the module agrees).
--- Run from this folder:
---   xmake f -P . -p iphoneos -a armv7 -y && xmake build -P . -y cryptoextrasprobe && xmake emulate -d iPhone4,1 -r 6.1.3 install
---   xmake emulate -d iPhone4,1 -r 6.1.3 run /usr/libexec/cryptoextrasprobe rows
--- The package exports its module folder and its dylib link, and apple-compat's include root and CharonCompat (the Crypto module
--- imports CharonCompat, whose shims include <charon/...>).
 local root = path.absolute(path.join(os.scriptdir(), "../../../../.."))
 add_repositories("charon " .. root)
 add_addons("charon v0.8.17")
@@ -31,5 +23,4 @@ target("cryptoextrasprobe")
     add_packages("swift-crypto", "swift-runtime", "libcxx", "apple-backports", "apple-compat")
     set_values("charon.version", "1.0")
     set_values("charon.control", "control")
-    -- The program carries the libraries it links.
     set_values("charon.libraries", "swift-crypto", "apple-backports")

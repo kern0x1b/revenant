@@ -1,15 +1,5 @@
--- compare.lua HOSTFILE - the port's os_signpost claims, held to the host's records.
---
--- Requires the port's os_signpost answers to be the host's, and the port's own store to have kept an interval an application
--- marked. The ids are the pair that would have found the high-bit convention this series carried and the review measured
--- against the host: the host answers 0x1 with the bit clear and returns a pointer unmasked.
---
--- Usage: xmake l ./compare.lua <host.json>
-
 import("core.base.json")
 
--- What the port's code comments, facts and registry entries say the host does, and what the host does. A change of host would
--- make one of these fail, which is the point: the records are claims, and this is what holds them to it.
 local CLAIMS = {
     { "signpost.enabled", "1", "the port answers true, and says why: the header's own emit macro compiles the whole call away when it is false, so a family that recorded nothing would make every metric empty by construction" },
     { "id.isNotNull", "1", "the port's generate never returns OS_SIGNPOST_ID_NULL" },
@@ -17,7 +7,6 @@ local CLAIMS = {
     { "id.pointerIsNotReserved", "1", "the port's make_with_pointer never returns one of the two reserved values" },
 }
 
--- Python's repr of a value the records hold: None for a key it does not have, and 'text' for a string.
 local function repr(value)
     if value == nil then
         return "None"
@@ -25,8 +14,6 @@ local function repr(value)
     return "'" .. tostring(value) .. "'"
 end
 
--- The records as an id: a hexadecimal number of at most 64 bits, with the 0x prefix Python's int(text, 16) allows. A wider
--- number is refused rather than read, since no id the host can return is wider than 64 bits.
 local function hex_value(text)
     local digits = text:match("^%s*(.-)%s*$"):gsub("^0[xX]", "")
     if not digits:find("^%x+$") then
@@ -53,8 +40,6 @@ function main(hostFile)
                 name, repr(wanted), repr(system[name]), why)
         end
     end
-    -- The high bit: the port's records say the host leaves it clear, and that is what the review measured twice. This is the
-    -- check that would have found the convention the port used to carry.
     for _, name in ipairs({ "id.first", "id.second" }) do
         local value = hex_value(system[name] or "0")
         if value & (1 << 63) ~= 0 then

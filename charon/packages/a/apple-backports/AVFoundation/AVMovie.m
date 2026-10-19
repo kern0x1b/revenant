@@ -1,26 +1,6 @@
 #import <AVFoundation/AVFoundation.h>
 #import <objc/message.h>
 
-// AVMovie and AVMovieTrack, the read side, on a release that has neither (6.1.3).
-//
-// The 16.4 header makes AVMovie an AVAsset (AVMovie.h:57) and AVMovieTrack an AVAssetTrack (AVMovieTrack.h:22), so
-// both are subclasses of classes this release has. A CharonMovie holds one AVURLAsset made from the URL and options
-// the caller passed, and every public AVAsset member the header declares and this release carries is overridden to
-// answer from that asset: the release's own answer, not a value of ours. Nothing a movie answers is inherited from
-// AVAsset's own state, because AVAsset's methods read instance variables a movie does not have, so each member the
-// set names is written here (facts/AVFoundation/AVMovie.md lists the set and the members left out, and why).
-//
-// A CharonMovieTrack wraps one AVAssetTrack of that asset the same way. The movie builds its tracks once, from the
-// inner asset's tracks, and hands the same track objects out every time, so trackWithTrackID: and the filters search
-// that one array. A track's -asset is the movie that made it, held weakly, because the movie owns its tracks.
-//
-// A data movie is written to a file in the app's temporary directory and read from there; the file is removed when
-// the movie is deallocated. A movie made by -init has no URL and no inner asset: its members answer what a message to
-// nil answers, and its track lists are empty.
-//
-// The answers are measured against the host by tests/backports/host/avf-movie4. facts/AVFoundation/AVMovie.md says which
-// answers are the release's own, which are measured values, and which are a design the differential does not reach.
-
 __attribute__((objc_runtime_name("AVMovie")))
 @interface CharonMovie : AVAsset
 @end
@@ -35,26 +15,20 @@ __attribute__((objc_runtime_name("AVMovieTrack")))
 - (NSURL *)charonFileURL;
 @end
 
-// The track header reader. 6.1.3's AVAssetTrack carries none of mediaPresentationTimeRange, mediaDecodeTimeRange or
-// alternateGroupID (tests against the 6.1.3 inventory), so the four AVMovieTrack members that need them are read from
-// the movie file's own boxes, written from Apple's QuickTime File Format specification: moov, trak, tkhd, mdia, mdhd,
-// minf, stbl, stts and ctts. Nothing else is read: no edit list, no sample sizes, no data. A file that is not a movie,
-// or a box whose size does not fit its parent, makes the read fail, and the members answer as failed reads do.
 #define CHARON_FOURCC(a, b, c, d) (((uint32_t)(a) << 24) | ((uint32_t)(b) << 16) | ((uint32_t)(c) << 8) | (uint32_t)(d))
 
 typedef struct {
     int32_t trackID;
     uint16_t alternateGroup;
-    uint32_t timescale;        // the media timescale, from mdhd
-    int64_t decodeDuration;    // the sum of the stts sample deltas, in the media timescale
-    int64_t presentationStart; // the least sample time in the presentation order (decode time plus ctts offset)
-    int64_t presentationEnd;   // the greatest end of a sample in the presentation order
+    uint32_t timescale;
+    int64_t decodeDuration;
+    int64_t presentationStart;
+    int64_t presentationEnd;
 } CharonTrackHeader;
 
 static uint32_t charonBE32(const uint8_t *p) { return ((uint32_t)p[0] << 24) | ((uint32_t)p[1] << 16) | ((uint32_t)p[2] << 8) | p[3]; }
 static uint64_t charonBE64(const uint8_t *p) { return ((uint64_t)charonBE32(p) << 32) | charonBE32(p + 4); }
 
-// The box that starts at begin, inside a parent that ends at end. NO when it does not fit.
 static BOOL charonBox(const uint8_t *base, uint64_t begin, uint64_t end, uint32_t *type, uint64_t *payload, uint64_t *payloadEnd, uint64_t *next)
 {
     if (begin + 8 > end)
@@ -77,7 +51,6 @@ static BOOL charonBox(const uint8_t *base, uint64_t begin, uint64_t end, uint32_
     return YES;
 }
 
-// The first child of type inside [begin, end): its payload range.
 static BOOL charonChild(const uint8_t *base, uint64_t begin, uint64_t end, uint32_t wanted, uint64_t *payload, uint64_t *payloadEnd)
 {
     uint64_t at = begin;
@@ -93,9 +66,6 @@ static BOOL charonChild(const uint8_t *base, uint64_t begin, uint64_t end, uint3
     return NO;
 }
 
-// Reads the header of the track with trackID out of the movie's bytes. The sample times come from stts, and from ctts
-// when the track has one; the presentation range is the least and greatest sample times, which is the decode range
-// when there are no composition offsets.
 static BOOL charonReadTrackHeader(NSData *data, int32_t trackID, CharonTrackHeader *out)
 {
     const uint8_t *base = data.bytes;
@@ -114,12 +84,10 @@ static BOOL charonReadTrackHeader(NSData *data, int32_t trackID, CharonTrackHead
         uint64_t tkhd, tkhdEnd;
         if (!charonChild(base, trak, trakEnd, CHARON_FOURCC('t', 'k', 'h', 'd'), &tkhd, &tkhdEnd) || tkhd + 4 > tkhdEnd)
             continue;
-        // tkhd: version and flags, then creation and modification (4 or 8 bytes each), then track_ID.
         BOOL v1 = base[tkhd] == 1;
         uint64_t idAt = tkhd + (v1 ? 20 : 12);
         if (idAt + 4 > tkhdEnd || (int32_t)charonBE32(base + idAt) != trackID)
             continue;
-        // ... then reserved, duration, 8 reserved bytes, layer, and alternate_group.
         uint64_t altAt = tkhd + (v1 ? 46 : 34);
         if (altAt + 2 > tkhdEnd)
             return NO;
@@ -133,7 +101,6 @@ static BOOL charonReadTrackHeader(NSData *data, int32_t trackID, CharonTrackHead
             !charonChild(base, minf, minfEnd, CHARON_FOURCC('s', 't', 'b', 'l'), &stbl, &stblEnd) ||
             !charonChild(base, stbl, stblEnd, CHARON_FOURCC('s', 't', 't', 's'), &stts, &sttsEnd))
             return NO;
-        // mdhd: version and flags, creation and modification (4 or 8 bytes each), timescale.
         if (mdhd + 4 > mdhdEnd)
             return NO;
         uint64_t tsAt = mdhd + (base[mdhd] == 1 ? 20 : 12);
@@ -141,7 +108,6 @@ static BOOL charonReadTrackHeader(NSData *data, int32_t trackID, CharonTrackHead
             return NO;
         out->timescale = charonBE32(base + tsAt);
 
-        // stts: version and flags, entry count, then (count, delta) pairs.
         if (stts + 8 > sttsEnd)
             return NO;
         uint32_t entries = charonBE32(base + stts + 4);
@@ -158,8 +124,6 @@ static BOOL charonReadTrackHeader(NSData *data, int32_t trackID, CharonTrackHead
             if (ctts + 8 + 8ull * ctsEntries > cttsEnd)
                 return NO;
         }
-        // The walk: a sample's decode time is the running sum of the deltas; its presentation time adds the offset of
-        // the ctts run it falls in (offsets are signed in version 1 and unsigned in version 0, read the same here).
         int64_t decode = 0, presentationStart = INT64_MAX, presentationEnd = INT64_MIN;
         uint32_t run = 0;
         uint32_t left = ctsEntries ? charonBE32(base + ctts + 8) : 0;
@@ -202,8 +166,6 @@ static BOOL charonReadTrackHeader(NSData *data, int32_t trackID, CharonTrackHead
     NSArray<AVAssetTrack *> *_charonTracks;
 }
 
-// The host's +movieTypes, measured by the differential: six types. It is not the release's audiovisual list, which has
-// 103 types on 6.1.3 and is not what a movie answers to.
 + (NSArray<AVFileType> *)movieTypes
 {
     return @[@"com.apple.m4a-audio", @"com.apple.m4v-video", @"com.apple.quicktime-audio", @"com.apple.quicktime-movie",
@@ -222,7 +184,6 @@ static BOOL charonReadTrackHeader(NSData *data, int32_t trackID, CharonTrackHead
 
 - (instancetype)initWithURL:(NSURL *)URL options:(NSDictionary<NSString *, id> *)options
 {
-    // The reason is this library's own wording: the host's text for a nil URL is not measured.
     if (!URL)
         @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"AVMovie: a movie opened from a URL needs that URL, and it is nil" userInfo:nil];
     if ((self = [super init])) {
@@ -234,7 +195,6 @@ static BOOL charonReadTrackHeader(NSData *data, int32_t trackID, CharonTrackHead
 
 - (instancetype)initWithData:(NSData *)data options:(NSDictionary<NSString *, id> *)options
 {
-    // The host refuses empty data as well as nil (its assertion is [data length] > 0), so the port does too.
     if (!data || data.length == 0)
         @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"AVMovie: a movie opened from data needs that data, and it is nil or empty" userInfo:nil];
     if ((self = [super init])) {
@@ -258,13 +218,11 @@ static BOOL charonReadTrackHeader(NSData *data, int32_t trackID, CharonTrackHead
         [[NSFileManager defaultManager] removeItemAtURL:_charonTemporaryURL error:nil];
 }
 
-// A movie is immutable: the copy is the movie itself, retained. AVMutableMovie, which is the mutable one, comes later.
 - (id)copyWithZone:(NSZone *)zone
 {
     return self;
 }
 
-// The movie's own members, which the header declares on AVMovie.
 - (NSURL *)URL
 {
     return _charonURL;
@@ -275,19 +233,16 @@ static BOOL charonReadTrackHeader(NSData *data, int32_t trackID, CharonTrackHead
     return _charonData;
 }
 
-// The file the movie's bytes are read from: the URL it was made with, or the temporary file of a data movie.
 - (NSURL *)charonFileURL
 {
     return _charonURL ?: _charonTemporaryURL;
 }
 
-// This release keeps no media data storage for a movie, and AVMediaDataStorage is absent here.
 - (AVMediaDataStorage *)defaultMediaDataStorage
 {
     return nil;
 }
 
-// Fragmented movies are not read on this release (AVFragmentedMovie is absent), so no movie contains fragments.
 - (BOOL)canContainMovieFragments
 {
     return NO;
@@ -298,9 +253,6 @@ static BOOL charonReadTrackHeader(NSData *data, int32_t trackID, CharonTrackHead
     return NO;
 }
 
-// The file types the host answers YES for, measured by the host differential (tests/backports/host/avf-movie4). It is
-// not +movieTypes: the host lists com.apple.m4a-audio in movieTypes and answers NO for it, so the two are not one list.
-// Any other type answers NO here; the host's answer for those is not measured (it traps for public.jpeg).
 - (BOOL)isCompatibleWithFileType:(AVFileType)fileType
 {
     static NSSet<AVFileType> *types;
@@ -312,7 +264,6 @@ static BOOL charonReadTrackHeader(NSData *data, int32_t trackID, CharonTrackHead
     return [types containsObject:fileType];
 }
 
-// The tracks are AVMovieTrack objects, one for each track of the inner asset, built the first time and kept.
 - (NSArray<AVAssetTrack *> *)charonTracks
 {
     if (!_charonTracks) {
@@ -355,9 +306,6 @@ static BOOL charonReadTrackHeader(NSData *data, int32_t trackID, CharonTrackHead
     return tracks;
 }
 
-// The AVAsset members the header declares and this release carries, each answered by the inner asset.
-// A movie with no asset has no content. The host answers a zero of its default movie timescale (0/600, measured by the
-// differential), not an invalid time, so the port does the same.
 - (CMTime)duration
 {
     return _charonAsset ? _charonAsset.duration : CMTimeMake(0, 600);
@@ -388,9 +336,6 @@ static BOOL charonReadTrackHeader(NSData *data, int32_t trackID, CharonTrackHead
     return _charonAsset.providesPreciseDurationAndTiming;
 }
 
-// The host answers ForbidLocalReferenceToRemote for a movie made from a URL with no options (measured). The inner asset's
-// own default is ForbidNone, so the movie's answer is not forwarded. The options are not read for this answer: that is
-// not measured.
 - (AVAssetReferenceRestrictions)referenceRestrictions
 {
     return AVAssetReferenceRestrictionForbidLocalReferenceToRemote;
@@ -487,8 +432,6 @@ static BOOL charonReadTrackHeader(NSData *data, int32_t trackID, CharonTrackHead
     return _charonAsset.compatibleWithSavedPhotosAlbum;
 }
 
-// The asynchronous key-value loading protocol. A movie with no inner asset has nothing to load, so the handler is
-// still called, on the main queue as the inner asset's would be called, and the status is the release's unknown.
 - (AVKeyValueStatus)statusOfValueForKey:(NSString *)key error:(NSError * _Nullable __autoreleasing *)outError
 {
     return [_charonAsset statusOfValueForKey:key error:outError];
@@ -514,20 +457,12 @@ static BOOL charonReadTrackHeader(NSData *data, int32_t trackID, CharonTrackHead
     BOOL _charonHasHeader;
 }
 
-// AVAssetTrack.h:40 makes -init unavailable to a caller, and the initializers the release takes a track through are
-// private. The release's own AVAssetTrack -init is NOT sent: the differential measured it crashing on a wrapper (a
-// SIGSEGV in objc_release under this method, on the host). The wrapper takes NSObject's -init instead, which has none of
-// AVAssetTrack's state, and every AVAssetTrack member the wrapper answers is overridden, so nothing reads that state.
-// facts/AVFoundation/AVMovie.md says what is still unmeasured on 6.1.3.
 - (instancetype)initWithAssetTrack:(AVAssetTrack *)track movie:(CharonMovie *)movie
 {
     struct objc_super parent = {self, [NSObject class]};
     if ((self = ((id (*)(struct objc_super *, SEL))objc_msgSendSuper)(&parent, @selector(init)))) {
         _charonTrack = track;
         _charonMovie = movie;
-        // The header is read once, here, and kept: the host's track still answers its ranges after its movie is
-        // released (the release section of tests/backports/host/avf-movie4/probe.m measures it), so the track cannot
-        // read through the movie.
         NSURL *file = [movie charonFileURL];
         if (file.isFileURL) {
             NSData *data = [NSData dataWithContentsOfURL:file options:NSDataReadingMappedIfSafe error:nil];
@@ -537,13 +472,11 @@ static BOOL charonReadTrackHeader(NSData *data, int32_t trackID, CharonTrackHead
     return self;
 }
 
-// The movie that made the track, not the inner asset that holds it.
 - (AVAsset *)asset
 {
     return _charonMovie;
 }
 
-// The AVAssetTrack members the header declares and this release carries, each answered by the inner track.
 - (NSArray<AVMetadataItem *> *)commonMetadata
 {
     return _charonTrack.commonMetadata;
@@ -669,8 +602,6 @@ static BOOL charonReadTrackHeader(NSData *data, int32_t trackID, CharonTrackHead
     return _charonTrack.trackID;
 }
 
-// The four AVMovieTrack members. The first three are answered from the track header read when the track was made (see
-// the reader above); a movie that is not a file has no header, and the members answer as a failed read does.
 - (BOOL)charonHeader:(CharonTrackHeader *)header
 {
     if (!_charonHasHeader)
@@ -702,8 +633,6 @@ static BOOL charonReadTrackHeader(NSData *data, int32_t trackID, CharonTrackHead
     return [self charonHeader:&header] ? header.alternateGroup : 0;
 }
 
-// This release keeps no media data storage for a track, and AVMediaDataStorage is absent here. The host answers nil for
-// every track of the movies the differential makes (movie-a, movie-b, movie-c, all read from files).
 - (AVMediaDataStorage *)mediaDataStorage
 {
     return nil;

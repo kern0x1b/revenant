@@ -2,15 +2,6 @@
 #import <AVFAudio/AVAudioTypes.h>
 #import <AVFAudio/AVAudioSettings.h>
 
-// AVAudioFormat wraps a Core Audio AudioStreamBasicDescription, and iOS 6 carries Core Audio in
-// full - the struct, the format IDs and flags, and every function that reads one, all the way
-// down to the device's own AUGraph. Nothing here is emulated: the ASBD this class holds is one
-// AudioUnitSetProperty or AudioConverterNew already knows how to read, because it is exactly the
-// struct those calls have always taken. The four common formats (deinterleaved and interleaved
-// float32/float64/int16/int32) are the only ones this port builds by hand; more than two channels
-// without an explicit AVAudioChannelLayout is refused, matching the real class's own documented
-// behaviour, since this port carries no AVAudioChannelLayout to describe a wider layout with.
-
 @implementation AVAudioFormat
 
 - (instancetype)initWithStreamDescription:(const AudioStreamBasicDescription *)asbd
@@ -48,8 +39,6 @@
     return self;
 }
 
-// The only place the four common formats turn into an ASBD by hand: everywhere else in this
-// class either takes a caller's own ASBD or defers to this.
 static void charon_fillASBD(AudioStreamBasicDescription *asbd, AVAudioCommonFormat format, double sampleRate, AVAudioChannelCount channels, BOOL interleaved)
 {
     memset(asbd, 0, sizeof(*asbd));
@@ -82,9 +71,6 @@ static void charon_fillASBD(AudioStreamBasicDescription *asbd, AVAudioCommonForm
         flags |= kAudioFormatFlagIsNonInterleaved;
     asbd->mFormatFlags = flags;
     asbd->mBitsPerChannel = bitsPerChannel;
-    // Non-interleaved PCM's ASBD describes one buffer of the AudioBufferList, which holds one
-    // channel - the convention every Core Audio unit on this device already reads bytesPerFrame
-    // this way, not a choice this port invented.
     UInt32 bytesPerSample = bitsPerChannel / 8;
     asbd->mBytesPerFrame = interleaved ? bytesPerSample * channels : bytesPerSample;
     asbd->mBytesPerPacket = asbd->mBytesPerFrame;

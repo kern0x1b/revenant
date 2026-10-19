@@ -1,21 +1,8 @@
-// The donation of a run, the prediction of a run, and the relevant-intent list a widget is built
-// from: the three things an app tells the framework about a run it has already done.
-//
-// A donation is a record of a run: what the intent was, which of its parameters were filled, and what
-// it returned. The system side - Siri's and Spotlight's index of what the app has done - is a service
-// these releases do not run, so the port keeps the donations in its own store under Application
-// Support, answers queries against it, and is what a later in-process call reads back. See
-// `facts/AppIntents/Services.md`.
-
 import Foundation
 
-/// The identifier of a donation: the run's own identifier and the time it happened.
 public struct IntentDonationIdentifier: Hashable, Codable, Sendable {
-    /// The framework's own identifier of the donation.
     public let identifier: String
-    /// The intent the donation is of.
     public let intentType: String
-    /// The identifiers of the entities the donation names.
     public let entityIdentifiers: [String]
 
     public init(identifier: String = UUID().uuidString, intentType: String = "",
@@ -55,7 +42,6 @@ public struct IntentDonationIdentifier: Hashable, Codable, Sendable {
     }
 }
 
-/// What a donation is matched against when a donation is deleted.
 public struct IntentDonationMatchingPredicate {
     enum Kind {
         case donationIdentifier(IntentDonationIdentifier)
@@ -65,28 +51,23 @@ public struct IntentDonationMatchingPredicate {
 
     let kind: Kind
 
-    /// A donation of one run.
     public static func donationIdentifier(_ identifier: IntentDonationIdentifier) -> IntentDonationMatchingPredicate {
         return IntentDonationMatchingPredicate(kind: .donationIdentifier(identifier))
     }
 
-    /// A donation that names an entity.
     public static func entityIdentifier(_ identifier: EntityIdentifier) -> IntentDonationMatchingPredicate {
         return IntentDonationMatchingPredicate(kind: .entityIdentifier(identifier))
     }
 
-    /// A donation of an intent that names an entity.
     public static func intentType(_ intentType: String,
                                   entityIdentifier: EntityIdentifier? = nil) -> IntentDonationMatchingPredicate {
         return IntentDonationMatchingPredicate(kind: .intentType(intentType, entityIdentifier))
     }
 }
 
-/// One donation, as the store keeps it.
 public struct IntentDonation: Codable, Sendable {
     public let identifier: IntentDonationIdentifier
     public let timestamp: Date
-    /// The value the run returned, written the way the value writes itself.
     public let value: String?
 
     public init(identifier: IntentDonationIdentifier, timestamp: Date, value: String?) {
@@ -96,9 +77,7 @@ public struct IntentDonation: Codable, Sendable {
     }
 }
 
-/// The manager an app hands its donations to.
 public struct IntentDonationManager {
-    /// The one the framework's own extension methods use.
     public static let shared = IntentDonationManager()
 
     private let store: IntentDonationStore
@@ -108,7 +87,6 @@ public struct IntentDonationManager {
         store = IntentDonationStore()
     }
 
-    /// Donate a run with what it returned.
     @discardableResult
     public func donate<Intent: AppIntent>(intent: Intent, result: some IntentResult) -> IntentDonationIdentifier {
         let identifier = IntentDonationIdentifier(intentType: Intent.persistentIdentifier)
@@ -119,14 +97,12 @@ public struct IntentDonationManager {
         return identifier
     }
 
-    /// The donations the store holds, newest first, which is what a caller reads back in process.
     public func donations() -> [IntentDonation] {
         lock.lock()
         defer { lock.unlock() }
         return store.all()
     }
 
-    /// Delete the donations a predicate matches.
     public func deleteDonations(matching predicate: IntentDonationMatchingPredicate) {
         lock.lock()
         defer { lock.unlock() }
@@ -145,8 +121,6 @@ public struct IntentDonationManager {
     }
 }
 
-/// The port's own store of donations, under Application Support: a plist the process writes and reads
-/// back. The system donation index the framework writes to is a service these releases do not run.
 final class IntentDonationStore {
     private let path: String
 
@@ -194,8 +168,6 @@ final class IntentDonationStore {
     }
 }
 
-/// Writing what a result returned as the string a caller reads it back as, which is what a donation
-/// keeps of a run.
 enum CharonIntentResultText {
     static func write(_ result: some IntentResult) -> String? {
         if let dialog = result as? IntentResultContainer<Never, Never, Never, IntentDialog> {
@@ -205,12 +177,6 @@ enum CharonIntentResultText {
     }
 }
 
-// MARK: - Predictions
-
-/// A prediction of an intent's display. The app gives the display representation as a closure of no
-/// arguments, or, with `parameters`, as a closure of the values of the intent's parameters. The framework
-/// fills those values in when it runs the intent, so a prediction with parameters has no display
-/// representation of its own: `displayRepresentation` is nil and the closure is not called.
 public struct IntentPrediction<Intent: AppIntent, T>: IntentPredictionConfiguration, Copyable, Escapable {
     let parameters: T?
     let makeDisplayRepresentation: (() -> DisplayRepresentation)?
@@ -225,19 +191,13 @@ public struct IntentPrediction<Intent: AppIntent, T>: IntentPredictionConfigurat
     }
 }
 
-/// The predictions of a tuple of intents, which is what an app declares with `IntentPrediction`. The SDK
-/// declares the type with no initializer of its own; the framework makes it.
 public struct TupleIntentPrediction<Intent: AppIntent, T>: IntentPredictionConfiguration, Copyable, Escapable {
 }
 
-/// The display representation a prediction holds, which the port reads back for a widget's list.
 protocol _DisplayedPrediction {
     var displayRepresentation: DisplayRepresentation? { get }
 }
 
-// The keypath-parameter initializers of `IntentPrediction`, the skeleton's 15 arities as the SDK declares them.
-// The parameters are kept. The display representation is the closure's answer to the intent's values, which the
-// port does not have when it predicts, so it is nil (see `IntentPrediction`).
 extension IntentPrediction {
     public init<V0, P0>(parameters: T, displayRepresentation: @escaping (V0) -> DisplayRepresentation) where Intent: AppIntent, T == KeyPath<Intent, P0>, V0: _IntentValue, V0: Sendable, P0: IntentParameter<V0> {
         self.parameters = parameters
@@ -318,22 +278,16 @@ extension IntentPrediction {
 
 extension IntentPrediction: _DisplayedPrediction {}
 
-/// What an intent is predicted to do: the intent the prediction is for, as the protocol's associated type.
 public protocol IntentPredictionConfiguration: Escapable, Copyable {
     associatedtype Intent
 }
 
-/// An intent the framework may run on the app's behalf, which the app predicts.
 public protocol PredictableIntent: AppIntent {
-    /// The prediction the app declares for the intent.
     associatedtype Prediction
 
-    /// The prediction the framework is given for the intent.
     static var predictionConfiguration: Self.Prediction { get }
 }
 
-/// The builder of a list of predictions: the app's own `buildBlock` overloads, one per arity the
-/// framework names.
 @resultBuilder
 public enum IntentPredictionsBuilder {}
 
@@ -371,11 +325,8 @@ extension IntentPredictionsBuilder {
     public static func buildBlock(_ a1: any IntentPredictionConfiguration, _ a2: any IntentPredictionConfiguration, _ a3: any IntentPredictionConfiguration, _ a4: any IntentPredictionConfiguration, _ a5: any IntentPredictionConfiguration, _ a6: any IntentPredictionConfiguration, _ a7: any IntentPredictionConfiguration, _ a8: any IntentPredictionConfiguration, _ a9: any IntentPredictionConfiguration, _ a10: any IntentPredictionConfiguration, _ a11: any IntentPredictionConfiguration, _ a12: any IntentPredictionConfiguration, _ a13: any IntentPredictionConfiguration, _ a14: any IntentPredictionConfiguration, _ a15: any IntentPredictionConfiguration) -> [any IntentPredictionConfiguration] { return [a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15] }
 
 }
-// MARK: - Relevant intents
 
-/// One of the intents a widget shows, and how relevant it is.
 public struct RelevantIntent {
-    /// The kind of widget an intent is relevant to.
     public enum WidgetKind: Hashable {
         case accessoryCircular
         case accessoryCorner
@@ -399,7 +350,6 @@ public struct RelevantIntent {
     public var debugDescription: String { return "relevant: \(relevance)" }
 }
 
-/// The manager a widget's relevant intents are handed to.
 public final class RelevantIntentManager {
     public static let shared = RelevantIntentManager()
 
@@ -414,7 +364,6 @@ public final class RelevantIntentManager {
         store.write(intents)
     }
 
-    /// The records the store holds, which is what a widget reads back in process.
     public func relevantIntents() -> [[String: Any]] {
         lock.lock()
         defer { lock.unlock() }
@@ -422,8 +371,6 @@ public final class RelevantIntentManager {
     }
 }
 
-/// The port's own record of a widget's relevant intents, under Application Support: a widget timeline
-/// provider is a system service these releases do not run, so the list is kept in process.
 final class RelevantIntentStore {
     private let path: String
 

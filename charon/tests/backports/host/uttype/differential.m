@@ -4,8 +4,6 @@
 Boolean CharonHostUTTypeIsDynamic(CFStringRef);
 Boolean CharonHostUTTypeIsDeclared(CFStringRef);
 
-// UTTypeIsDynamic and UTTypeIsDeclared of the port against the host's, over generated identifiers
-// around the "dyn." prefix and over declared, undeclared and dynamic ones.
 int main(void)
 {
     @autoreleasepool {

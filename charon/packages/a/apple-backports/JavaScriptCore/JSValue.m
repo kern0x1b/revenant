@@ -109,8 +109,6 @@
     return [self charon_valueWithJSValueRef:JSValueMakeUndefined(context.JSGlobalContextRef) context:context];
 }
 
-/* A conversion that runs script (a valueOf or toString) and throws reports the exception to the
- * context's handler and answers NaN, 0 or nil, as the release's JSValue does. */
 static id Reported(JSContext *context, id result, JSValueRef exception)
 {
     if (exception)
@@ -216,8 +214,6 @@ static id Reported(JSContext *context, id result, JSValueRef exception)
     return JSValueIsObject(_context.JSGlobalContextRef, _value);
 }
 
-/* JSValueIsArray and JSValueIsDate only arrived in iOS 9; the object's own class answers the
- * same without them (charon_js_is_array, charon_js_is_date). */
 - (BOOL)isArray
 {
     return charon_js_is_array(_context.JSGlobalContextRef, _value);
@@ -417,8 +413,6 @@ static id Reported(JSContext *context, id result, JSValueRef exception)
     [self setValue:object atIndex:index];
 }
 
-/* The release makes these four from a dictionary literal, so their properties come in that
- * dictionary's order, and so do these. */
 + (JSValue *)valueWithPoint:(CGPoint)point inContext:(JSContext *)context
 {
     return [self valueWithObject:@{@"x": @(point.x), @"y": @(point.y)} inContext:context];
@@ -464,7 +458,6 @@ static id Reported(JSContext *context, id result, JSValueRef exception)
     return self.toString;
 }
 
-/* The value of `name` on `object`. */
 static JSValueRef NamedProperty(JSContextRef ctx, JSObjectRef object, const char *name)
 {
     JSStringRef string = JSStringCreateWithUTF8CString(name);
@@ -473,16 +466,6 @@ static JSValueRef NamedProperty(JSContextRef ctx, JSObjectRef object, const char
     return value;
 }
 
-/* A context -init made carries the constructor as its global Promise, as one with promises does:
- * writable, configurable and not enumerable (measured on the host). The release's engine makes a
- * fresh global object with no Promise of its own, so nothing is replaced there; on an engine that
- * has one, this constructor replaces it, which is how the host test holds this implementation, not
- * the host's, to the host's answers. It is defined through the context's own Object.defineProperty,
- * read before any script has run in the context: the 2012 engine's JSObjectSetProperty keeps no
- * attribute on a global object (JSGlobalObject::putDirectVirtual puts the value first, then leaves
- * the attributes of the property that now exists, JavaScriptCore-7536.26.7; measured on the iPad
- * 2, kJSPropertyAttributeDontEnum there gives an enumerable global, and ES5's defineProperty does
- * not), where [[DefineOwnProperty]] is ES5's own. */
 + (void)charon_installPromiseInContext:(JSContext *)context
 {
     JSObjectRef constructor = charon_js_promise_constructor(context);
@@ -512,12 +495,6 @@ static JSValueRef NamedProperty(JSContextRef ctx, JSObjectRef object, const char
         [context charon_noteException:exception];
 }
 
-/*
- * As the release with promises does it: the promise exists before the executor runs, the executor
- * is called as a callback whose this is the promise and whose arguments are its resolving
- * functions, and an exception it sets on the context rejects the promise instead of reaching the
- * exception handler.
- */
 + (JSValue *)valueWithNewPromiseInContext:(JSContext *)context fromExecutor:(void (^)(JSValue *resolve, JSValue *reject))callback
 {
     JSObjectRef resolve = NULL, reject = NULL;
@@ -532,7 +509,6 @@ static JSValueRef NamedProperty(JSContextRef ctx, JSObjectRef object, const char
     if (callback) {
         JSValue *resolveFunction = [JSValue charon_valueWithJSValueRef:resolve context:context];
         JSValue *rejectFunction = [JSValue charon_valueWithJSValueRef:reject context:context];
-        /* The frame holds its arguments unretained; this local keeps them for the call. */
         NSArray<JSValue *> *arguments = @[resolveFunction, rejectFunction];
         charon_js_push_callback(context, result, nil, arguments);
         callback(resolveFunction, rejectFunction);
@@ -544,11 +520,6 @@ static JSValueRef NamedProperty(JSContextRef ctx, JSObjectRef object, const char
     return result;
 }
 
-/* The release builds these two on the executor form above and so does this. It puts the result
- * or reason into an array literal, so a nil one raises NSInvalidArgumentException out of it
- * (measured on the host: "attempt to insert nil object from objects[0]"); this makes the same
- * literal before any script runs, so the exception reaches the caller without unwinding through
- * the engine's frames. */
 + (JSValue *)valueWithNewPromiseResolvedWithResult:(id)result inContext:(JSContext *)context
 {
     NSArray *arguments = @[result];
@@ -567,13 +538,6 @@ static JSValueRef NamedProperty(JSContextRef ctx, JSObjectRef object, const char
     }];
 }
 
-/*
- * Symbols. The release's engine has no symbol type: there is no value a symbol could be, and a
- * string or object standing in for one would be a different value that says it is the same. So
- * this refuses at the seam: the context is told a TypeError, as the release with symbols tells it
- * when a symbol is used where it cannot be, and the answer is undefined. -isSymbol is NO because
- * no value of this engine is one.
- */
 + (JSValue *)valueWithNewSymbolFromDescription:(NSString *)description inContext:(JSContext *)context
 {
     (void)description;

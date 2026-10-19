@@ -1,12 +1,3 @@
-/* features.m - what the host's own Metal answers for the features the port's device lacks: ray tracing (the
- * acceleration-structure encoder and the intersection-function forms) and sparse texture mapping (the resource-state
- * encoder). The host is the only device on this machine, so every answer is about a device that HAS the feature
- * if the host reports it. The port's device answers nil for these; the question is whether Metal does too on a
- * device without the feature, and this run states what it reports on the one device it has.
- *
- *     host:  clang -fobjc-arc -framework Foundation -framework Metal features.m -o features
- *            ./features LIB.metallib
- */
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 

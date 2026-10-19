@@ -1,15 +1,3 @@
-//===--- Values.swift -------------------------------------------*- swift -*-===//
-//
-// WidgetKit's value types that a program uses on its own, with no system service behind them: the
-// timeline a provider builds (Timeline, TimelineEntry, TimelineEntryRelevance, TimelineReloadPolicy),
-// the rendering modes a view reads from its environment, WidgetFamily, and the placement and mounting
-// values (LevelOfDetail, WidgetLocation, WidgetMountingStyle). The shapes are the 26.2 SDK's
-// (packages/a/apple-backports/spec/WidgetKit/swift.tsv and swiftinterface.tsv). The host answers as
-// facts/WidgetKit/Values.md measures; where it cannot (the accessory families, and the three types
-// the macOS host does not have), the facts say what the value is taken from.
-//
-//===----------------------------------------------------------------------===//
-
 import Foundation
 
 public struct TimelineEntryRelevance: Codable, Hashable {
@@ -96,9 +84,6 @@ public struct WidgetAccentedRenderingMode: Hashable {
     public static let fullColor = WidgetAccentedRenderingMode(.fullColor)
 }
 
-// WidgetFamily's raw values are the declaration order of the 26.2 SDK's cases, from 0, as the interface table
-// (packages/a/apple-backports/spec/WidgetKit/swiftinterface.tsv) lists them. The host answers 0 to 4 (facts/WidgetKit/Values.md)
-// and has no case from 5, so 5 to 8 are the IR's order and not a host measurement.
 public enum WidgetFamily: Int, Sendable {
     case systemSmall = 0
     case systemMedium = 1
@@ -111,9 +96,6 @@ public enum WidgetFamily: Int, Sendable {
     case accessoryInline = 8
 }
 
-// The conformances are the 26.2 declaration's (CustomStringConvertible, CustomDebugStringConvertible). The
-// descriptions name each case in a switch: interpolating self here would call the description again, which
-// is the recursion that crashed the first build of the probe.
 extension WidgetFamily: CustomStringConvertible, CustomDebugStringConvertible {
     public var description: String {
         switch self {

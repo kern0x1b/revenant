@@ -1,10 +1,3 @@
-/* domains.m - the three Metal error domains (MTLCommandBufferErrorDomain, MTLLibraryErrorDomain, MTLIOErrorDomain),
- * compared byte for byte with the strings Apple's own Metal holds.
- *
- * Apple's constants are read by dlsym from Apple's Metal, opened by path, never by naming the symbol: a name the
- * case declared would bind to whichever definition the link chose, and a port that defined it wrongly would be
- * compared with itself. The port's values are read from the port's own definitions, linked into this binary.
- */
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #include <dlfcn.h>
@@ -42,7 +35,6 @@ int main(void)
     check(appleMetal != NULL, @"Apple's Metal opens by path");
     if (!appleMetal)
         return 1;
-    /* A planted name proves the lookup can say a symbol is not there. */
     check(dlsym(appleMetal, "MTLCharonNoSuchErrorDomain") == NULL, @"a planted name is not in Apple's Metal");
     compare(appleMetal, "MTLCommandBufferErrorDomain", MTLCommandBufferErrorDomain);
     compare(appleMetal, "MTLLibraryErrorDomain", MTLLibraryErrorDomain);

@@ -3,9 +3,6 @@
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-// GL_HALF_FLOAT and its linear form are named by GL_OES_texture_half_float, not by ES 2.0's own
-// headers, so they are here with the values that extension's header gives. Nothing else is defined:
-// every other enum this file uses is in ES 2.0's headers.
 #ifndef GL_HALF_FLOAT
 #define GL_HALF_FLOAT 0x8D61
 #endif
@@ -13,48 +10,33 @@
 #define GL_HALF_FLOAT_LINEAR 0x8D62
 #endif
 
-// One entry per pixel format the port can hold: how the driver is told to store it, how many bytes a
-// texel is, how many channels it has and how wide one channel is. The last two are not the same thing
-// and the readback needs both: a read gives four channels of the channel's own width whatever the
-// texture has, so a format of fewer channels is a copy of the leading ones, of a width that is the
-// channel's.
 typedef struct {
     GLint internal;
     GLenum format;
     GLenum type;
-    NSUInteger bytes;      // a whole texel
-    NSUInteger channels;   // how many of the four a texel has
-    NSUInteger channel;    // how many bytes one of them is
-    const char *extension;      // the extension a device must have for this format, NULL when ES 2.0 has it
-    const char *linearExtension; // the extension a device must have to filter it, NULL when ES 2.0 can
+    NSUInteger bytes;
+    NSUInteger channels;
+    NSUInteger channel;
+    const char *extension;
+    const char *linearExtension;
 } CharonFormat;
 
 static BOOL formatFor(MTLPixelFormat pixelFormat, CharonFormat *out)
 {
     switch ((NSUInteger)pixelFormat) {
-    // The four 8-bit formats the port has always carried.
     case 70: *out = (CharonFormat){GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, 4, 4, 1, NULL, NULL}; return YES;
     case 80: *out = (CharonFormat){GL_RGBA, GL_BGRA_EXT, GL_UNSIGNED_BYTE, 4, 4, 1, NULL, NULL}; return YES;
     case 10: *out = (CharonFormat){GL_RED_EXT, GL_RED_EXT, GL_UNSIGNED_BYTE, 1, 1, 1, "GL_EXT_texture_rg", NULL}; return YES;
     case 30: *out = (CharonFormat){GL_RG_EXT, GL_RG_EXT, GL_UNSIGNED_BYTE, 2, 2, 1, "GL_EXT_texture_rg", NULL}; return YES;
-    // The half floats: the SGX 543 of an iPad 2 lists GL_OES_texture_half_float and its linear form
-    // (tests/backports/device/gl-extensions.m, 2026-09-24, and facts/SceneKit/SCNView.md), and
-    // GL_HALF_FLOAT is what ES 2.0's own header names, so RGBA16Float needs nothing more.
     case 115: *out = (CharonFormat){GL_RGBA, GL_RGBA, GL_HALF_FLOAT, 8, 4, 2, "GL_OES_texture_half_float", "GL_OES_texture_half_float_linear"}; return YES;
     case 25: *out = (CharonFormat){GL_RED_EXT, GL_RED_EXT, GL_HALF_FLOAT, 2, 1, 2, "GL_OES_texture_half_float,GL_EXT_texture_rg", "GL_OES_texture_half_float_linear,GL_EXT_texture_rg"}; return YES;
     case 65: *out = (CharonFormat){GL_RG_EXT, GL_RG_EXT, GL_HALF_FLOAT, 4, 2, 2, "GL_OES_texture_half_float,GL_EXT_texture_rg", "GL_OES_texture_half_float_linear,GL_EXT_texture_rg"}; return YES;
-    // The single floats, which need ES 2.0's OES_texture_float: a device without it answers as Metal
-    // answers for a pixel format it does not support, which is nil from -newTextureWithDescriptor:.
     case 55: *out = (CharonFormat){GL_RED_EXT, GL_RED_EXT, GL_FLOAT, 4, 1, 4, "GL_OES_texture_float,GL_EXT_texture_rg", "GL_OES_texture_float_linear,GL_EXT_texture_rg"}; return YES;
     case 125: *out = (CharonFormat){GL_RGBA, GL_RGBA, GL_FLOAT, 16, 4, 4, "GL_OES_texture_float", "GL_OES_texture_float_linear"}; return YES;
     default: return NO;
     }
 }
 
-// What this device's driver offers, read once. A format whose extensions are not all in this string is
-// one the GPU cannot hold, and the answer for it is the same as for a format ES 2.0 has no form of: no
-// texture, and one line in the log saying which extension is missing. The names are compared whole, so
-// a name that is the prefix of another one does not count as present.
 static BOOL CharonMetalDeviceHasExtension(const char *required)
 {
     static char *extensions;
@@ -118,9 +100,6 @@ NSUInteger CharonMetalBindEpoch;
     int _appliedCompare;
     __strong CharonMetalHeap *_charonHeap;
     NSUInteger _charonHeapOffset;
-    // The level the one framebuffer of this texture has attached, NSNotFound when it has none. The
-    // attachment is a property of the framebuffer, not of the call, so it is remembered: a read of a
-    // level below the first changes it, and the next caller has to be able to see that.
     NSUInteger _attachedLevel;
 }
 
@@ -223,8 +202,6 @@ static int depthKind(MTLPixelFormat pixelFormat)
         return nil;
     }
     if (!CharonMetalDeviceHasExtension(format.extension)) {
-        // What Metal answers for a pixel format this device does not support: no texture. The line says
-        // which extension is missing, because "unsupported" on its own would not tell a caller why.
         NSLog(@"Metal: pixel format %d needs %s, which this device's OpenGL ES 2.0 driver does not list", (int)descriptor.pixelFormat, format.extension);
         return nil;
     }
@@ -245,8 +222,6 @@ static int depthKind(MTLPixelFormat pixelFormat)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        // Every level of the chain is allocated here, so a level below is a texture the driver can
-        // sample, blit to and read back, not a name it refuses.
         for (NSUInteger level = 0; level < _levels; level++)
             glTexImage2D(GL_TEXTURE_2D, (GLint)level, format.internal,
                          (GLsizei)levelExtent(_width, level), (GLsizei)levelExtent(_height, level), 0,
@@ -391,8 +366,6 @@ static int depthKind(MTLPixelFormat pixelFormat)
     [self charonReadRegion:region level:level bytesPerRow:bytesPerRow into:pointer];
 }
 
-// What a texture of this shape takes out of a heap: every level of its chain at its own size, in the
-// texture's own channel count, which is the same arithmetic the driver's own allocation does.
 - (NSUInteger)charonStorageSize
 {
     CharonFormat format;
@@ -411,7 +384,6 @@ static int depthKind(MTLPixelFormat pixelFormat)
     _charonHeapOffset = offset;
 }
 
-// MTLResource's own properties, answered as the SDK declares them.
 - (id<MTLHeap>)heap
 {
     return _charonHeap;
@@ -428,10 +400,6 @@ static int depthKind(MTLPixelFormat pixelFormat)
     return !_kind && !_screen && formatFor(_pixelFormat, &format);
 }
 
-// Whether this device can filter this texture, which is a different question from whether it can
-// hold it: ES 2.0 can filter the 8-bit formats with nothing, a half float only with
-// GL_OES_texture_half_float_linear and a float only with GL_OES_texture_float_linear. Metal answers a
-// draw that filters a format which is not filterable with a validation error, and so does this.
 - (BOOL)charonCanFilter
 {
     CharonFormat format;
@@ -448,9 +416,6 @@ static int depthKind(MTLPixelFormat pixelFormat)
     return format.bytes;
 }
 
-// The one framebuffer of this texture, with the level asked for attached to it. Both the creation and
-// the re-attachment attach the level that was asked for: a framebuffer created for a read of the third
-// level has the third level attached, or that read would return the first level's pixels.
 - (GLuint)framebufferAtLevel:(NSUInteger)level
 {
     if (_screen)
@@ -467,10 +432,6 @@ static int depthKind(MTLPixelFormat pixelFormat)
     return _framebuffer;
 }
 
-// The texture's framebuffer is one object with one attachment, and a read of a level below the first
-// leaves it attached to that level. Whatever was attached before the read is attached again here, and
-// the binding the caller had is restored, so that a render into the texture afterwards finds the level
-// it would have found had nothing read in between.
 - (void)charonRestoreAttachment:(NSUInteger)level previous:(GLint)previous
 {
     if (!_screen && _attachedLevel != level) {
@@ -481,10 +442,6 @@ static int depthKind(MTLPixelFormat pixelFormat)
     glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)previous);
 }
 
-// ES 2.0 reads a colour attachment as RGBA/UNSIGNED_BYTE whatever the texture's own format is, so a
-// read of a texture with fewer or swapped channels is repacked here into the bytes Metal says the
-// texture holds. That is the same pixels in the same order the texture would report, not an
-// approximation of them.
 - (BOOL)charonReadRegion:(MTLRegion)region level:(NSUInteger)level bytesPerRow:(NSUInteger)bytesPerRow into:(void *)pointer
 {
     CharonFormat format;
@@ -514,9 +471,6 @@ static int depthKind(MTLPixelFormat pixelFormat)
         [device relinquish];
         return YES;
     }
-    // A read gives four channels of the channel's own width whatever the texture has, so a texture
-    // with fewer channels is the leading ones copied out of that row: two 16-bit channels are the
-    // first four bytes of each eight, and one 32-bit channel is the first four bytes of each sixteen.
     NSUInteger texel = format.channel * channels;
     uint8_t *scratch = calloc(1, width * 4 * format.channel);
     if (!scratch)
@@ -569,15 +523,6 @@ static int depthKind(MTLPixelFormat pixelFormat)
     return YES;
 }
 
-// A mip chain is only complete once its minification filter reads beyond level 0, which is what
-// glGenerateMipmap wants, so the filter is one that reads the chain for the call.
-//
-// The filter is read back afterwards and put back as it was, not set to a constant: the filter of
-// this texture at this moment is whatever the last draw through it left there, which is the filter
-// of that draw's sampler, not the one the texture was created with. And because the call changes the
-// texture's own filter, the sampler it last had applied is forgotten, so that the next draw through
-// this texture re-applies its own sampler instead of finding the cache still holding the previous one
-// and leaving the texture filtering the way this call left it.
 - (BOOL)charonGenerateMipmaps
 {
     CharonFormat format;
@@ -588,9 +533,6 @@ static int depthKind(MTLPixelFormat pixelFormat)
     CharonMetalBindEpoch++;
     glBindTexture(GL_TEXTURE_2D, _name);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    // ES 2.0 reports through the one error flag rather than through a return value, so the flag is
-    // read once before the call and once after: an error left by anything else cannot be mistaken for
-    // this call's, and this call's own error is not cleared for whoever reads it next.
     GLint minFilter = GL_LINEAR;
     glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, &minFilter);
     glGetError();
@@ -680,18 +622,8 @@ static BOOL wrapFor(MTLSamplerAddressMode mode, GLint *out)
 }
 
 
-// MTLSamplerState's gpuResourceID, which a review of my own work measured and I had put on the
-// WRONG CLASS: the criterion in tests/backports/host/protocol-conformance.sh reads the protocol's members
-// from the AST rather than from warnings, and it is what found this - -Wprotocol does not see property
-// accessors, and -Wobjc-protocol-property-synthesis cannot tell a hand-written getter from a missing
-// one, so both were clean while the getter sat on the texture. MTLTexture.h:424 describes it as a
-// handle to a resource fit for an argument buffer, and this device is the
-// port's own over OpenGL ES 2.0, so the answer is a typed zero rather than a selector that raises.
 - (MTLResourceID)gpuResourceID
 {
-    // MTLResourceID is a STRUCT, so "(MTLResourceID)0" is arithmetic on a type that has none and the
-    // compiler says so. A zero-initialised struct is the same value and is legal: every field is the
-    // struct's own zero, which is what "no handle" means for a struct handle.
     MTLResourceID empty = {0};
     return empty;
 }

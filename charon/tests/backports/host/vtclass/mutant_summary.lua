@@ -1,12 +1,3 @@
--- mutant_summary.lua BASE.json MUTANT.json MUTANTS COVERED EXPECTED - the per-class account run.sh prints after the
--- mutations, ported line for line from run.sh's inline python3 heredoc. It prints one line per covered class that had
--- a mutant (how many mutants applied and how many records changed), then the classes with no mutant, by name, against
--- mutants-expected.txt. It exits 1 when a covered class with no mutant is not listed in mutants-expected.txt.
---
--- Python regex, matched by hand: re.match(r"^VT\w+$", token) on each whitespace-separated token of EXPECTED, \w being
--- ASCII letters, digits and underscore: the token starts with "VT", and at least one more such character follows it,
--- and nothing else follows.
-
 local V = import("vtlib", {rootdir = os.scriptdir()})
 local R = import("records_json", {rootdir = os.scriptdir()})
 
@@ -17,7 +8,6 @@ local function none_if_null(value)
     return value
 end
 
--- The whitespace-separated tokens of a file's text, in file order (Python's read().split()).
 local function tokens_of(path)
     local list = {}
     for token in V.read_text(path):gmatch("%S+") do
@@ -33,9 +23,6 @@ local function is_expected_name(token)
     return token:sub(3):find("^[A-Za-z0-9_]+$") ~= nil
 end
 
--- json.load(open(base)), then json.load(open(mutant)), in that order, as the Python did. A missing file is an
--- uncaught exception (exit 1). A file that is not JSON is the ValueError the Python caught: it prints a line and
--- both sides become empty, and the second file is not read once the first has failed.
 local function load_pair(base_path, mutant_path)
     local function read_one(path)
         if not os.isfile(path) then
@@ -100,7 +87,6 @@ function main(base_path, mutant_path, mutants_path, covered_path, expected_path)
         end
     end
 
-    -- skipped: every covered token with no mutant, in byte order, duplicates kept as sorted() keeps them
     local skipped = {}
     for _, cls in ipairs(covered) do
         if mutated[cls] == nil then

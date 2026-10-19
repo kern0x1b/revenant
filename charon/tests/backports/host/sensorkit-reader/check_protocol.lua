@@ -1,28 +1,6 @@
--- check_protocol.lua - the metadata the port emits for SRSensorReaderDelegate, counted.
---
---    xmake l ./check_protocol.lua <the output of protocol-count>
---
--- Reads one line of the form the probe prints and holds it to what the port is supposed to ship: the protocol found, TEN optional
--- method descriptions and NONE required. Exits 1 otherwise, naming what it saw.
---
--- WHY THIS EXISTS, because the first version of this harness's header shipped a protocol with zero methods and said nothing about
--- it. Measured, on this machine, by taking @protocol(SRSensorReaderDelegate) into a Protocol * and counting:
---
---     forward declaration only   ->  found,  0 optional
---     a declared body            ->  found, 10 optional,  0 required
---
--- A forward declaration emits the protocol object and leaves it empty, so an application asking
--- `[objc_getProtocol("SRSensorReaderDelegate") conformsToSelector:@selector(sensorReaderWillStartRecording:)]` got a NO for a method
--- its own class implements. The header now declares the ten members and the count is this check's job.
---
--- There is also a measurement here that had to be got wrong twice, and the harness should not repeat it: the first probe put
--- `(void)@protocol(X)` in a `static` function that main never called, the linker dead-stripped it, and the probe printed "protocol
--- ABSENT" for both shapes. protocol-count.m calls the function and prints the object it returns, so what it counts is in the image.
-
 local WANT_OPTIONAL = 10
 local WANT_REQUIRED = 0
 
--- The text of a file as Python's text mode reads it: "\r\n" and a lone "\r" are line ends, and become "\n".
 local function read_text(path)
     local handle = assert(io.open(path, "rb"))
     local text = handle:read("a")
@@ -30,8 +8,6 @@ local function read_text(path)
     return (text:gsub("\r\n", "\n"):gsub("\r", "\n"))
 end
 
--- Python's repr of a string, for the message that quotes what the probe printed. The probe prints ASCII, so only the quote, the
--- backslash and the line ends need care.
 local function py_repr(text)
     local quote = "'"
     if text:find("'", 1, true) and not text:find('"', 1, true) then
@@ -44,8 +20,6 @@ local function py_repr(text)
     return quote .. out .. quote
 end
 
--- The first line of the form "protocol found, N optional, M required" or "protocol ABSENT, N optional, M required", with the
--- colon the probe may print after the word. Returns the state, the two counts, or nil when there is no such line.
 local function find_count(text)
     local from = 1
     while true do

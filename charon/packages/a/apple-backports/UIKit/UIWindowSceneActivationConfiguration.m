@@ -1,7 +1,5 @@
 #import <UIKit/UIKit.h>
 
-// The SDK marks -init and +new unavailable: -initWithUserActivity: is the constructor. It keeps the activity object it was
-// given, as the release does, and a nil activity is kept as nil. The options and the preview start nil.
 @implementation UIWindowSceneActivationConfiguration {
 @private
     NSUserActivity *_userActivity;

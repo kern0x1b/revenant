@@ -1,7 +1,3 @@
--- The member rows built from shard facts (tools/gen/members.lua): the api, the key, the hash, the availability text and the tbd flag
--- of each row, on a fixture of the facts; and the real AVFAudio shard's member count through headers.shard_facts (656).
--- Run: xmake l tests/gen/members_test.lua
-
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 
 function main()
@@ -36,7 +32,6 @@ function main()
     local real = headers.shard_facts(path.join(TOOLS, ".."), "AVFAudio")
     check(#members.rows(real.members, {}, "AVFAudio") == 656, "AVFAudio's shard gives 656 member rows")
 
-    -- the frameworks gen reads are the declaration shards, nested ones included, in byte order
     local snapshot = import("gen.spec", {rootdir = TOOLS, anonymous = true})
     local names = snapshot.frameworks(path.join(TOOLS, ".."))
     local found = {}

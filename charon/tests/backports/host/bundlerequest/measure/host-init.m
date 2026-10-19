@@ -12,8 +12,6 @@ int main(void) { setvbuf(stdout, NULL, _IONBF, 0); @autoreleasepool {
            P(@"-initWithTag: -> %s", made ? "an object" : "(nil)"); }
     @catch (NSException *e) { P(@"-initWithTag: -> %@: %@", e.name, e.reason); }
     P(@"--- the two NSBundle additions, and the refusal the header promises");
-    // the two additions are API_UNAVAILABLE(macOS), so they are reached by name, the way the port
-    // will reach them: nothing here links a symbol the platform does not export
     SEL setPriority = NSSelectorFromString(@"setPreservationPriority:forTags:");
     SEL priorityFor = NSSelectorFromString(@"preservationPriorityForTag:");
     NSBundle *noTags = [NSBundle mainBundle];
@@ -26,7 +24,6 @@ int main(void) { setvbuf(stdout, NULL, _IONBF, 0); @autoreleasepool {
     @try { ((void(*)(id,SEL,double,id))objc_msgSend)(noTags, setPriority, 2.0, level1);
            P(@"an out-of-range priority -> answered"); }
     @catch (NSException *e) { P(@"  an out-of-range priority -> %@: %@", e.name, e.reason); }
-    /* a bundle with a manifest, so both have tags to work on */
     NSString *root = [NSTemporaryDirectory() stringByAppendingPathComponent:@"brr2"];
     [[NSFileManager defaultManager] createDirectoryAtPath:root withIntermediateDirectories:YES attributes:nil error:NULL];
     NSDictionary *manifest = @{ @"NSBundleResourceRequestTags": @{ @"level1": @[ @{ @"NSBundleResourceRequestPath": @"packs/one.pack" } ] } };

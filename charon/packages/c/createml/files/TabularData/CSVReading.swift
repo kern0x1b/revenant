@@ -1,15 +1,5 @@
-// CSVReading.swift - reading a DataFrame from CSV bytes, and the options and errors that read names.
-//
-// The reader works on bytes, because the framework's does: a cell that is not UTF-8 is kept as its
-// bytes, and a column with one such cell is a Data column. The rules here were measured on the host's
-// TabularData with the same bytes, and the differential in tests/backports/host/createml/ checks them
-// against it: a quoted cell is never a missing value, even when its text is one of the nil encodings;
-// a number is read the way strtod reads it; a blank line is skipped; the row and column numbers of an
-// error are 1-based for rows and 0-based for columns.
-
 import Foundation
 
-/// The kind a CSV column is read as, and the kind a named column is forced to.
 public enum CSVType: Hashable, Sendable {
     case boolean
     case data
@@ -20,32 +10,19 @@ public enum CSVType: Hashable, Sendable {
     case string
 }
 
-/// How CSV bytes are read into a DataFrame. The defaults are the framework's.
 public struct CSVReadingOptions {
-    /// Whether the first record names the columns. Without one, columns are named `Column 0`, `Column 1`, and so on.
     public var hasHeaderRow: Bool
-    /// The unquoted cells that read as a missing value. An empty cell is one of them.
     public var nilEncodings: Set<String>
-    /// The cells that read as `true` when a column is a boolean column.
     public var trueEncodings: Set<String>
-    /// The cells that read as `false` when a column is a boolean column.
     public var falseEncodings: Set<String>
-    /// The kind a column of decimal numbers is read as: `.double`, or `.float`.
     public var floatingPointType: CSVType
-    /// Whether a blank line is skipped rather than read as a record of one empty cell.
     public var ignoresEmptyLines: Bool
-    /// Whether a field that begins with a quote is read as one quoted field.
     public var usesQuoting: Bool
-    /// Whether a backslash escapes the character after it inside a quoted field.
     public var usesEscaping: Bool
     public var delimiter: Character
     public var escapeCharacter: Character
-    /// The parsers a date cell is read by, in order: the first one that returns a date for the cell's text
-    /// reads it. The framework starts with its ISO 8601 reader; `addDateParseStrategy(_:)` appends one.
     public var dateParsers: [(String) -> Date?] = [parseISODateTime]
 
-    /// Adds a parse strategy to the date parsers, after the ones already there: a cell the parsers before it
-    /// do not read is read by this one.
     public mutating func addDateParseStrategy<T: ParseStrategy>(_ strategy: T)
         where T.Input == String, T.Output == Date {
         dateParsers.append { try? strategy.parse($0) }
@@ -74,8 +51,6 @@ public struct CSVReadingOptions {
     }
 }
 
-/// Why CSV bytes could not be read. Rows count from 1 over the records after the header; columns
-/// count from 0.
 public enum CSVReadingError: Error, CustomStringConvertible, LocalizedError {
     case badEncoding(row: Int, column: Int, cellContents: Data)
     case unsupportedEncoding(String)
@@ -85,7 +60,6 @@ public enum CSVReadingError: Error, CustomStringConvertible, LocalizedError {
     case missingColumn(columnName: String)
     case outOfBounds(requested: Int, actual: Int)
 
-    /// The row the error is in, or 0 when no row is. A request past the end names the row it asked for.
     public var row: Int {
         switch self {
         case .unsupportedEncoding, .missingColumn: return 0
@@ -96,7 +70,6 @@ public enum CSVReadingError: Error, CustomStringConvertible, LocalizedError {
         }
     }
 
-    /// The column the error is in, where one cell is at fault.
     public var column: Int? {
         switch self {
         case .misplacedQuote(_, let column), .failedToParse(_, let column, _, _), .badEncoding(_, let column, _):
@@ -107,7 +80,6 @@ public enum CSVReadingError: Error, CustomStringConvertible, LocalizedError {
 
     public var description: String {
         switch self {
-        // The framework's own spelling of the word, which is what a caller who compares messages sees.
         case .unsupportedEncoding(let encoding):
             return "Usupported encoding \(encoding). Only UTF8 encoding is supported."
         case .misplacedQuote(let row, let column):
@@ -125,7 +97,6 @@ public enum CSVReadingError: Error, CustomStringConvertible, LocalizedError {
         }
     }
 
-    /// A cell's contents as the framework words them: its text when it is UTF-8, its bytes when it is not.
     private static func contents(_ data: Data) -> String {
         guard let text = String(data: data, encoding: .utf8) else {
             return "Cell contents bytes are \(Array(data))."
@@ -136,24 +107,15 @@ public enum CSVReadingError: Error, CustomStringConvertible, LocalizedError {
     public var errorDescription: String? { description }
 }
 
-/// One field of a record as it was read: its bytes, and whether it was quoted, which is what keeps
-/// a quoted nil-encoding from being a missing value.
 private struct CSVField {
     var bytes: [UInt8]
     var quoted: Bool
-    /// The field as it is in the file, with its quotes and the escapes it has: what an error reports as the
-    /// cell's contents, measured on the host (a quoted date cell is reported with its quotes).
     var raw: [UInt8] = []
 
-    /// The field's text, or nil when its bytes are not UTF-8.
     var text: String? { String(bytes: bytes, encoding: .utf8) }
 }
 
 extension DataFrame {
-    /// A frame read from CSV bytes.
-    ///
-    /// `columns` keeps the named columns in the order they are named, `rows` the data rows in the range
-    /// given, and `types` forces the kind of the columns it names; a column it does not name is inferred.
     public init(csvData data: Data,
                 columns: [String]? = nil,
                 rows: Range<Int>? = nil,
@@ -188,7 +150,6 @@ extension DataFrame {
             selected.append(index)
         }
 
-        // The rows are counted with the header in the file, as the framework's message counts them.
         var chosen = numbered
         if let rows = rows {
             let fileRows = numbered.count + (options.hasHeaderRow ? 1 : 0)
@@ -205,7 +166,6 @@ extension DataFrame {
         }
     }
 
-    /// A frame read from a CSV file.
     public init(contentsOfCSVFile url: URL,
                 columns: [String]? = nil,
                 rows: Range<Int>? = nil,
@@ -214,8 +174,6 @@ extension DataFrame {
         try self.init(csvData: try Data(contentsOf: url), columns: columns, rows: rows, types: types, options: options)
     }
 
-    /// The header names, with an empty name read as its column's position and a repeated name renamed
-    /// `name.1`, `name.2`, and so on, as the framework does.
     private static func uniqueNames(_ names: [String]) -> [String] {
         var seen = Set<String>()
         var result = [String]()
@@ -233,13 +191,9 @@ extension DataFrame {
         return result
     }
 
-    /// The records of the CSV, each a list of its fields. A record with nothing in it is no record when
-    /// the options say to skip blank lines, and a record of spaces alone is one of those. An error names
-    /// the data row it is in: the header is not one, and the rows count from 1.
     private static func csvRecords(_ data: Data, options: CSVReadingOptions) throws -> [[CSVField]] {
         let headerRows = options.hasHeaderRow ? 1 : 0
         var bytes = [UInt8](data)
-        // The two UTF-16 byte orders are named by their byte-order mark, the way the framework names them.
         if bytes.starts(with: [0xFF, 0xFE]) {
             throw CSVReadingError.unsupportedEncoding("Unicode (UTF-16LE)")
         }
@@ -262,23 +216,18 @@ extension DataFrame {
         var fields = [CSVField]()
         var field = CSVField(bytes: [], quoted: false)
         var quoted = false
-        // A record is empty until a byte, a delimiter or a quote has been read in it.
         var recordIsEmpty = true
         var quoteOpenedAt: (row: Int, column: Int)?
         var index = 0
-        // Where the field being read begins in the file: after the delimiter or line break before it.
         var fieldStart = 0
 
-        // The data row of the record being read: the records read so far, less the header.
         func dataRow() -> Int { records.count - headerRows + 1 }
         func endField() {
-            // Called at the delimiter or line break that ends the field, so `index` is where it ends.
             field.raw = Array(bytes[fieldStart..<index])
             fields.append(field)
             field = CSVField(bytes: [], quoted: false)
         }
         func endRecord() {
-            // A record of spaces and tabs alone is blank too: measured, a line of one space is no row.
             let blank = recordIsEmpty
                 || (fields.isEmpty && !field.quoted && field.bytes.allSatisfy { $0 == space || $0 == tab })
             if !(blank && options.ignoresEmptyLines) {
@@ -319,7 +268,6 @@ extension DataFrame {
                 continue
             }
             if options.usesEscaping, matches(escape, at: index), index + escape.count < bytes.count {
-                // Measured: the escape reads the byte after it outside quotes as well as inside.
                 index += escape.count
                 field.bytes.append(bytes[index])
                 recordIsEmpty = false
@@ -369,10 +317,6 @@ extension DataFrame {
         return records
     }
 
-    /// One column read from its fields: forced to the kind it is named, or inferred. A column with a
-    /// cell that is not UTF-8 is a Data column; otherwise it is the first kind every present cell reads
-    /// as, in the order integer, floating point, boolean, string. A column with no present cell is a
-    /// string column.
     private static func column(name: String, at index: Int, rows: [(row: Int, fields: [CSVField])],
                                type: CSVType?, options: CSVReadingOptions) throws -> AnyColumn {
         let cells = rows.map { entry -> CSVField? in
@@ -407,8 +351,6 @@ extension DataFrame {
             return AnyColumn(try parse { $0.text.flatMap(parseFloat) })
         case .boolean:
             return AnyColumn(try parse { cell -> Bool? in
-                // A boolean cell is read without its surrounding spaces, which the number and text
-                // readings keep: measured, "1 " in a column of its own is true.
                 guard let text = cell.text?.trimmingCharacters(in: .whitespaces) else { return nil }
                 if options.trueEncodings.contains(text) { return true }
                 if options.falseEncodings.contains(text) { return false }
@@ -417,8 +359,6 @@ extension DataFrame {
         case .data:
             return AnyColumn(try parse { Data($0.bytes) })
         case .string:
-            // A string column cannot hold bytes that are not UTF-8, and the framework says so rather than
-            // substituting replacement characters.
             var values = [String?]()
             for (position, cell) in cells.enumerated() {
                 guard let cell = cell else {
@@ -433,8 +373,6 @@ extension DataFrame {
             }
             return AnyColumn(Column<String>(name: name, contents: values))
         case .date:
-            // A cell is read by the first parser that returns a date for its text; a cell whose bytes are
-            // not UTF-8 is read by none.
             return AnyColumn(try parse { field -> Date? in
                 guard let text = field.text else { return nil }
                 for parser in options.dateParsers {
@@ -445,7 +383,6 @@ extension DataFrame {
         }
     }
 
-    /// The kind every present cell reads as, in the order the framework tries them.
     private static func inferred(_ present: [CSVField], options: CSVReadingOptions) -> CSVType {
         guard !present.isEmpty else { return .string }
         if present.contains(where: { $0.text == nil }) { return .data }
@@ -463,16 +400,11 @@ extension DataFrame {
     }
 }
 
-/// An integer as the framework reads one: an optional sign and digits, and a bare sign is zero.
-// A bare sign reads as zero: measured on the host, "+" and "-" are integer cells of value 0.
 private func parseInteger(_ text: String) -> Int? {
-    // The most negative integer is not an integer cell: measured, "-9223372036854775808" reads as a double.
     if let value = Int(text) { return text.hasPrefix("-") && value == Int.min ? nil : value }
     return text == "+" || text == "-" ? 0 : nil
 }
 
-/// A double as strtod reads it: a leading space is skipped, nothing may follow the number, and an
-/// empty cell is zero. Measured on the host, `""` quoted reads as 0.0 in a numeric column.
 private func parseDouble(_ text: String) -> Double? {
     text.withCString { pointer -> Double? in
         var end: UnsafeMutablePointer<CChar>?
@@ -482,7 +414,6 @@ private func parseDouble(_ text: String) -> Double? {
     }
 }
 
-/// A float as strtof reads one, under the same rule as `parseDouble`.
 private func parseFloat(_ text: String) -> Float? {
     text.withCString { pointer -> Float? in
         var end: UnsafeMutablePointer<CChar>?

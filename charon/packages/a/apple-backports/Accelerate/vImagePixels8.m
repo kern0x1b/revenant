@@ -1,18 +1,3 @@
-// The 5/6/5 and 1/5/5/5 conversions of iOS 8.0, and the 5/5/5/1 spellings of the same two words.
-//
-// Measured from the release's armv7 caches, 8.0 is the first held release that exports the five and 7.1.2
-// names none of them, so this file holds the API of exactly one release.
-//
-// Conversion.h gives the arithmetic of the two words on its own - expand a channel up to eight bits with
-// (bits * 255 + half) / max and narrow one down with (bits * max + 127) / 255, and a one-bit alpha is that
-// bit times 255 up and (bits + 127) / 255 down - and for the two conversions *between* a 5/6/5 word and a
-// 1/5/5/5 or 5/5/5/1 word it says only "first at high bitdepth, then convert to lower bitdepth". That is
-// what the three below are, and the composition is not a bit shift: the green of a 5/6/5 word is six bits
-// and of a 1/5/5/5 or 5/5/5/1 word five, so the green goes up through a five-bit expansion and down
-// through a six-bit narrowing, or the other way round. The host's answers are what the composition is
-// measured against, case by case, in tests/backports/host/vimagepixels
-// (facts/Accelerate/vImagePixels.md).
-
 #import <Accelerate/Accelerate.h>
 #include <string.h>
 
@@ -22,11 +7,6 @@
 
 static const vImage_Flags charon_pixels8_flags = kvImageDoNotTile | kvImageGetTempBufferSize | kvImagePrintDiagnosticsToConsole;
 
-// The same checks the 7.0 file makes, and the same answers: a flag outside the set the header lists is
-// kvImageUnknownFlagsBit, GetTempBufferSize does no work and answers zero, a NULL buffer is
-// kvImageNullPointerArgument, and a destination larger than the source is
-// kvImageRoiLargerThanInputBuffer, which is what the release answers although the header's comment above
-// the 565 expansion names another code.
 static vImage_Error charon_pixels8_ready(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     if (flags & ~charon_pixels8_flags)
@@ -68,9 +48,6 @@ vImage_Error vImageConvert_RGB565toARGB1555(const vImage_Buffer *src, const vIma
                                                vImage_Flags flags)
 {
     vImage_Error ready = charon_pixels8_ready(src, dest, flags);
-    // The dither the header gives this call is recorded and not used: a dither of zero is the answer the
-    // facts file measures against the host, and the host's own dither is a noise source no header
-    // publishes (facts/Accelerate/vImagePixels.md).
     (void)dither;
     if (ready != kvImageNoError)
         return ready;
@@ -113,7 +90,7 @@ vImage_Error vImageConvert_RGB565toRGBA5551(const vImage_Buffer *src, const vIma
                                                 vImage_Flags flags)
 {
     vImage_Error ready = charon_pixels8_ready(src, dest, flags);
-    (void)dither;   // the header's dither, recorded and not used: see vImageConvert_RGB565toARGB1555 above
+    (void)dither;
     if (ready != kvImageNoError)
         return ready;
     for (vImagePixelCount row = 0; row < dest->height; row++) {

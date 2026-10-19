@@ -1,12 +1,3 @@
-// oracle.m — what macOS Metal itself does, for the port to be held to.
-//
-// Every number and every byte here is read out of a real Metal device on this host, and written into
-// metalblit-expectations.h, which tests/backports/device/metalblit.m holds the port to. Nothing in
-// this file is the port's answer to anything: it is Apple's, measured.
-//
-// Objective-C rather than Swift on purpose: the questions are about the names Metal's headers give -
-// fillBuffer:range:value:, copyFromBuffer:sourceOffset:toBuffer:destinationOffset:size: - and the
-// Swift overlay renames half of them, which would make this file a study of the overlay instead.
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
@@ -54,7 +45,6 @@ int main(int argc, const char **argv)
         blobs = [NSMutableArray array];
         lines = [NSMutableArray array];
 
-        // 1. A fill of one byte value over a range of a buffer: what does the byte value become?
         {
             id<MTLBuffer> buffer = [device newBufferWithLength:64 options:0];
             memset(buffer.contents, 0, 64);
@@ -64,7 +54,6 @@ int main(int argc, const char **argv)
             record(@"fill", bytesOf(buffer).bytes, 64);
         }
 
-        // 2. A copy of sixteen bytes from offset eight to offset forty.
         {
             id<MTLBuffer> source = [device newBufferWithLength:64 options:0];
             id<MTLBuffer> destination = [device newBufferWithLength:64 options:0];
@@ -79,8 +68,6 @@ int main(int argc, const char **argv)
             record(@"buffer_copy", bytesOf(destination).bytes, 64);
         }
 
-        // 3. The same buffer at both ends, overlapping: what Metal does against what memmove does,
-        //    because the port's copy is a memmove and the two must agree or the difference is named.
         {
             id<MTLBuffer> buffer = [device newBufferWithLength:64 options:0];
             uint8_t pattern[64];
@@ -97,8 +84,6 @@ int main(int argc, const char **argv)
             record(@"buffer_overlap_memmove", moved, 64);
         }
 
-        // 4. A region of a texture into a buffer at a stride wider than the region: the layout of
-        //    the destination is the port's own arithmetic, so this is the case worth having.
         {
             MTLTextureDescriptor *descriptor =
                 [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm width:8 height:8 mipmapped:NO];
@@ -118,9 +103,6 @@ int main(int argc, const char **argv)
             record(@"region_readback", bytesOf(buffer).bytes, 128);
         }
 
-        // 5. What a read of a BGRA texture returns, and in which order its channels come out. The
-        //    port's read repacks into the texture's own channel order, so this is the case that
-        //    decides whether the repack is right.
         {
             MTLTextureDescriptor *descriptor =
                 [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm width:2 height:2 mipmapped:NO];
@@ -135,7 +117,6 @@ int main(int argc, const char **argv)
             record(@"bgra_readback", got, 16);
         }
 
-        // 6. The geometry of a mip chain: how many levels, and what each is.
         NSUInteger mipLevels = 0;
         NSMutableString *geometry = [NSMutableString string];
         {
@@ -153,9 +134,6 @@ int main(int argc, const char **argv)
                                         (unsigned long)level, (unsigned long)((texture.width >> level) * 4)];
         }
 
-        // 7. What a read of a level below the first returns, and what generateMipmaps leaves there.
-        //    Metal averages the texels of the level above, so the port's glGenerateMipmap is held to
-        //    that rule and to the rounding of it.
         BOOL boxAverage = NO;
         BOOL roundsDown = NO;
         NSUInteger smallest = 0;
@@ -174,19 +152,12 @@ int main(int argc, const char **argv)
             [texture getBytes:level1 bytesPerRow:8 fromRegion:MTLRegionMake2D(0, 0, 2, 2) mipmapLevel:1];
             record(@"mip_level0", pattern, sizeof(pattern));
             record(@"mip_level1", level1, sizeof(level1));
-            // The four texels level 1 averages at (0,0) are 00 10 20 30, 40 50 60 70, 00 10 20 30
-            // and 40 50 60 70, so each channel of a box average of them is exactly what came out: a
-            // box average of the four is (0x00+0x40+0x00+0x40)/4 = 0x20 in red, 0x30 in green, 0x40 in
-            // blue and 0x50 in alpha, and the readback is 20 30 40 50.
             boxAverage = level1[0] == (uint8_t)((0x00 + 0x40 + 0x00 + 0x40) / 4)
                       && level1[1] == (uint8_t)((0x10 + 0x50 + 0x10 + 0x50) / 4)
                       && level1[2] == (uint8_t)((0x20 + 0x60 + 0x20 + 0x60) / 4)
                       && level1[3] == (uint8_t)((0x30 + 0x70 + 0x30 + 0x70) / 4);
         }
 
-        // 8. The rounding of that average, which the case above cannot reach: four red values whose
-        //    sum is not a multiple of four. This is the question a box filter on the SGX 543 has to
-        //    answer the same way, and it is the one number most likely to differ.
         {
             MTLTextureDescriptor *descriptor =
                 [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatR8Unorm width:2 height:2 mipmapped:YES];
@@ -199,12 +170,9 @@ int main(int argc, const char **argv)
             uint8_t level1[1] = {0};
             [texture getBytes:level1 bytesPerRow:1 fromRegion:MTLRegionMake2D(0, 0, 1, 1) mipmapLevel:1];
             record(@"mip_rounding", level1, 1);
-            // 1 + 2 + 4 + 8 is 15, and 15/4 is 3.75: truncating gives 3, rounding gives 4.
             roundsDown = level1[0] == 3;
         }
 
-        // 9. The extent of the last level of a chain whose height is not a power of two: 16x8 has
-        //    five levels, and the fifth is one texel wide and one high, not zero high as 8 >> 4 says.
         {
             MTLTextureDescriptor *descriptor =
                 [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatR8Unorm width:16 height:8 mipmapped:YES];

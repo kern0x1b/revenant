@@ -1,4 +1,3 @@
-// CharonGKRandomCommon.m - the shared half, on the class the headers make the base of the family.
 #import "CharonGKRandomCommon.h"
 
 @implementation GKRandomSource (CharonGKRandomCommon)

@@ -1,21 +1,7 @@
-// TabularEstimators.swift — the six tabular estimators CreateML's own API names, over the training
-// core in CreateMLComponents.
-//
-// The split between the two modules is the framework's: `CreateMLComponents` has the estimators and
-// their transformers, and `CreateML` has the types an application names — `MLDecisionTreeRegressor`
-// and its five siblings — which take an `MLDataTable` and give back predictions as columns. The
-// arithmetic is not here; each of these is a call into `TabularFitting` and the fitter it names.
-//
-// What these do *not* have is the `.mlmodel` export. `write(to:)` is declared and throws the
-// framework's own "not supported" error rather than writing a file no CoreML can read: the
-// specification writer belongs to the CoreML package, and a table that wrote a file with the right
-// extension and the wrong bytes would be worse than one that says it cannot.
-
 import CoreML
 import Foundation
 import CreateMLComponents
 
-/// How a training set is divided into the part that trains and the part that validates.
 public struct MLTrainingDataSplit {
     public var proportion: Double
     public var strategy: MLSplitStrategy
@@ -28,30 +14,17 @@ public struct MLTrainingDataSplit {
     }
 }
 
-/// How the rows are chosen for a split.
 public enum MLSplitStrategy: String, CaseIterable {
-    /// The rows are split at random, the way `randomSplit(by:seed:)` does.
     case random
-    /// The rows are split so that the classes keep their proportions, which is what a classifier
-    /// with a rare class needs: a random split can put every copy of it on one side.
     case stratified
-    /// The framework's own choice, which is stratified for a classifier and random for a regression
-    /// — a numeric target has no classes to keep in proportion.
     case automatic
 }
 
-/// The validation data of a fit, and the metrics it produced.
 public struct MLTrainingDataValidation {
     public var table: MLDataTable
     public var metrics: [String: Double]
 }
 
-/// The data a fit validates on, as the framework's `ModelParameters` carries it.
-///
-/// `.split` is a hold-out: the rows are divided and the part that validates is never trained on.
-/// `.none` trains on everything, which is what a caller with a separate test table wants — and which
-/// is why there are two initialisers answering the same question in two ways, one taking the data
-/// table and the other the division, exactly as the framework's own do.
 public struct MLTrainingDataValidationData {
     public enum Validation {
         case split(proportion: Double, strategy: MLSplitStrategy, seed: UInt64)
@@ -74,20 +47,9 @@ public struct MLTrainingDataValidationData {
     }
 }
 
-/// What a trained regressor's quality is measured as.
-///
-/// The two members are the ones the framework names — `maximumError` and `rootMeanSquaredError` — and
-/// not the three a statistics textbook would offer. The mean absolute error is deliberately not
-/// among them: it is not a member of this type, and a caller who wants it divides the two it has by
-/// the count, which is why the count is not needed here.
 public struct MLRegressorMetrics: CustomStringConvertible, CustomDebugStringConvertible {
-    /// The largest absolute error of the fit.
     public var maximumError: Double
-    /// The root mean squared error of the fit.
     public var rootMeanSquaredError: Double
-    /// Set when the metrics could not be computed — an empty set of observations, or a set of
-    /// predictions of a different length from the targets. A caller that reads `isValid` and not the
-    /// numbers is the caller that cannot be handed a `NaN` and believe it.
     public var error: Error?
 
     public init(maximumError: Double, rootMeanSquaredError: Double) {
@@ -98,7 +60,6 @@ public struct MLRegressorMetrics: CustomStringConvertible, CustomDebugStringConv
 
     public var isValid: Bool { error == nil }
 
-    /// The metrics of a set of predictions against the targets they were made for.
     public init(observations: [Double], predictions: [Double]) {
         guard observations.count == predictions.count, !observations.isEmpty else {
             maximumError = .nan
@@ -123,10 +84,8 @@ public struct MLRegressorMetrics: CustomStringConvertible, CustomDebugStringConv
     public var playgroundDescription: Any { debugDescription }
 }
 
-/// Why a regression's metrics could not be computed.
 public enum MLRegressorMetricsError: Error, CustomStringConvertible {
     case notComparable(Int, Int)
-    /// The estimator was fitted without a validation set, so it has no validation metrics.
     case noValidationSet
 
     public var description: String {
@@ -139,19 +98,9 @@ public enum MLRegressorMetricsError: Error, CustomStringConvertible {
     }
 }
 
-/// A classifier's quality, as the framework measures it.
-///
-/// `classificationError` is one minus the accuracy: the framework's own definition, read from its
-/// interface rather than assumed, and it is the number a caller compares against a baseline. The
-/// confusion and precision/recall tables are `MLDataTable`s because that is what the framework's
-/// members are typed as, and they are built here rather than left empty.
 public struct MLClassifierMetrics: CustomStringConvertible, CustomDebugStringConvertible {
-    /// One minus the accuracy: the share of the rows whose prediction was not the right label.
     public var classificationError: Double
-    /// A table whose rows are the true labels and whose columns are the predicted ones, with the
-    /// count of the rows in each cell.
     public var confusion: MLDataTable
-    /// A table of the precision and the recall of each class.
     public var precisionRecall: MLDataTable
     public var error: Error?
 
@@ -164,12 +113,8 @@ public struct MLClassifierMetrics: CustomStringConvertible, CustomDebugStringCon
 
     public var isValid: Bool { error == nil }
 
-    /// The accuracy: one minus the error, which is how the framework defines the pair against each
-    /// other. Named here because a differential compares it and a caller reads it, and spelled once
-    /// so the two never drift apart.
     public var accuracy: Double { 1 - classificationError }
 
-    /// The metrics of a set of predicted labels against the labels they were made for.
     public init(observations: [String], predictions: [String], labelOrder: [String]) {
         guard observations.count == predictions.count, !observations.isEmpty else {
             classificationError = .nan
@@ -187,8 +132,6 @@ public struct MLClassifierMetrics: CustomStringConvertible, CustomDebugStringCon
         }
         classificationError = 1 - Double(right) / Double(observations.count)
 
-        // The confusion table, as the framework's own is shaped: a corner cell naming the axes, a
-        // row per true label and a column per predicted one.
         var confusion = MLDataTable()
         let corner = labelOrder.isEmpty ? "True\\Predict" : "True\\(labelOrder[0])"
         var first = MLUntypedColumn([MLDataValue.string(corner)], name: "True\\Predict")
@@ -205,9 +148,6 @@ public struct MLClassifierMetrics: CustomStringConvertible, CustomDebugStringCon
         }
         self.confusion = confusion
 
-        // Precision and recall per class, each as a share of the column or the row it is a share of.
-        // A class the model never predicts has no precision, and one it never sees has no recall;
-        // both are zero rather than a division by nothing.
         var table = MLDataTable()
         table.addColumn(MLUntypedColumn(labelOrder.map { MLDataValue.string($0) }, name: "Class"),
                         named: "Class")
@@ -230,7 +170,6 @@ public struct MLClassifierMetrics: CustomStringConvertible, CustomDebugStringCon
     public var playgroundDescription: Any { debugDescription }
 }
 
-/// Why a classifier's metrics could not be computed.
 public enum MLClassifierMetricsError: Error, CustomStringConvertible {
     case notComparable(Int, Int)
 
@@ -242,7 +181,6 @@ public enum MLClassifierMetricsError: Error, CustomStringConvertible {
     }
 }
 
-/// Why an estimator could not be fitted.
 public enum MLCreateError: Error, CustomStringConvertible, Equatable {
     case invalidTrainingDataTable(String)
     case invalidFeatureColumns(String)
@@ -250,9 +188,6 @@ public enum MLCreateError: Error, CustomStringConvertible, Equatable {
     case modelCompatibility(String)
     case notSupportedOnThisDevice(String)
     case cannotWriteModel(String)
-    /// A penalised fit this build does not match the framework's answer to. The framework's penalised
-    /// fit is not the closed-form ridge or L1 solution, so it is refused rather than answered
-    /// differently (facts/CreateML/LinearModels.md, "The penalties").
     case penaltyNotMatched(String)
 
     public var description: String {
@@ -268,10 +203,8 @@ public enum MLCreateError: Error, CustomStringConvertible, Equatable {
     }
 }
 
-/// The error domain CreateML's own errors carry.
 public let MLCreateErrorDomain = "MLCreateErrorDomain"
 
-/// The six errors above, as the framework's own numbering.
 public enum MLCreateErrorCode: Int, CaseIterable {
     case invalidTrainingDataInCreate = 1
     case invalidFeatureColumnsInCreate = 2
@@ -298,17 +231,7 @@ public enum MLCreateErrorCode: Int, CaseIterable {
     }
 }
 
-// MARK: - The shared shape of the six
-
-/// The parts every one of the six has: the table, the target column, the feature columns, the
-/// training and validation metrics, and the three questions a caller asks it.
 public enum TabularEstimatorCore {
-    /// The training and validation halves of a fit, and the metrics of each.
-    /// The rows a fit trains on and the rows it validates on, given the strategy.
-    ///
-    /// `.automatic` is stratified for a classifier and random for a regression, and the reason is in
-    /// the file: a numeric target has no classes to keep in proportion, while a class that is one
-    /// row in fifty can land entirely on one side of a random split.
     public static func split(_ table: MLDataTable, classification: Bool,
                              strategy: MLSplitStrategy, seed: UInt64) -> (MLDataTable, MLDataTable?) {
         guard table.count > 1 else { return (table, nil) }
@@ -329,12 +252,7 @@ public enum TabularEstimatorCore {
     }
 }
 
-// MARK: - The regressors
-
-/// A decision-tree regressor: one tree, over the columns of an `MLDataTable`.
 public struct MLDecisionTreeRegressor {
-    /// What a single tree is allowed to be, in the framework's own names and defaults: a depth, a
-    /// loss reduction a split has to buy, a child weight a leaf has to reach, and a seed.
     public struct ModelParameters {
         public var validationData: MLDataTable?
         public var validation: MLTrainingDataValidationData.Validation
@@ -411,13 +329,11 @@ public struct MLDecisionTreeRegressor {
         return (MLDecisionTreeModel(model, trainingSet.featureNames), trainingSet)
     }
 
-    /// The predictions for a table of the same shape, as a column of doubles.
     public func predictions(from table: MLDataTable) throws -> MLUntypedColumn {
         let set = try Self.set(table, targetColumn: targetColumn, featureColumns: featureColumns)
         return MLUntypedColumn(model.predictAll(set.design).map { MLDataValue.double($0) })
     }
 
-    /// The metrics of a labelled table.
     public func evaluation(on labeledData: MLDataTable) -> MLRegressorMetrics {
         guard let set = try? Self.set(labeledData, targetColumn: targetColumn, featureColumns: featureColumns) else {
             return MLRegressorMetrics(observations: [], predictions: [])
@@ -425,13 +341,6 @@ public struct MLDecisionTreeRegressor {
         return MLRegressorMetrics(observations: set.targets, predictions: model.predictAll(set.design))
     }
 
-    /// The model's export. **Refused, and the reason is which kind of model it is.** A forest and a
-    /// booster are a `TreeEnsembleRegressor` (field 302) with a different layer set, and a
-    /// classifier is a `NeuralNetworkClassifier` (field 403) with a string label output. A file that
-    /// said `NeuralNetworkRegressor` and carried one of those would be a model Core ML loads and
-    /// answers with the **wrong arithmetic** — so the writer is not used here. The one estimator it
-    /// *is* used by is the linear model, in `CreateMLComponents.LinearModels.swift`, because a linear
-    /// model *is* a single inner-product layer. See `facts/CreateML/Export.md`.
     public func write(to fileURL: URL, metadata: MLModelMetadata? = nil) throws {
         throw MLCreateErrorCode.cannotWriteModel.error
     }
@@ -441,7 +350,6 @@ public struct MLDecisionTreeRegressor {
     }
 }
 
-/// A decision tree over doubles, as the six estimators hold it.
 public struct MLDecisionTreeModel {
     public let tree: CreateMLComponents.DecisionTreeModel
     public let featureNames: [String]
@@ -456,11 +364,7 @@ public struct MLDecisionTreeModel {
     }
 }
 
-/// A random-forest regressor.
 public struct MLRandomForestRegressor {
-    /// What a forest is allowed to be: the tree's parameters plus how many of them, and the shares
-    /// of the rows and the columns each one sees. The framework's default subsample of 0.8 is a
-    /// sample *without* replacement, which is what the core's `rowSubsample` below one does.
     public struct ModelParameters {
         public var validationData: MLDataTable?
         public var validation: MLTrainingDataValidationData.Validation
@@ -570,10 +474,7 @@ public struct MLRandomForestModel {
     }
 }
 
-/// A gradient-boosted-tree regressor.
 public struct MLBoostedTreeRegressor {
-    /// A forest's parameters plus the step size each added tree is scaled by, and the early stopping
-    /// round count, which is nil for "never stop early" — the framework's own default.
     public struct ModelParameters {
         public var validationData: MLDataTable?
         public var validation: MLTrainingDataValidationData.Validation
@@ -690,12 +591,7 @@ public struct MLBoostedTreeModel {
     }
 }
 
-// MARK: - The classifiers
-
-/// A decision-tree classifier.
 public struct MLDecisionTreeClassifier {
-    /// What a single tree is allowed to be, in the framework's own names and defaults: a depth, a
-    /// loss reduction a split has to buy, a child weight a leaf has to reach, and a seed.
     public struct ModelParameters {
         public var validationData: MLDataTable?
         public var validation: MLTrainingDataValidationData.Validation
@@ -804,11 +700,7 @@ public struct MLDecisionTreeClassifierModel {
     }
 }
 
-/// A random-forest classifier.
 public struct MLRandomForestClassifier {
-    /// What a forest is allowed to be: the tree's parameters plus how many of them, and the shares
-    /// of the rows and the columns each one sees. The framework's default subsample of 0.8 is a
-    /// sample *without* replacement, which is what the core's `rowSubsample` below one does.
     public struct ModelParameters {
         public var validationData: MLDataTable?
         public var validation: MLTrainingDataValidationData.Validation
@@ -929,10 +821,7 @@ public struct MLRandomForestClassifierModel {
     }
 }
 
-/// A gradient-boosted-tree classifier.
 public struct MLBoostedTreeClassifier {
-    /// A forest's parameters plus the step size each added tree is scaled by, and the early stopping
-    /// round count, which is nil for "never stop early" — the framework's own default.
     public struct ModelParameters {
         public var validationData: MLDataTable?
         public var validation: MLTrainingDataValidationData.Validation
@@ -1060,7 +949,6 @@ public struct MLBoostedTreeClassifierModel {
     }
 }
 
-/// The bridge from an `MLDataTable` to the training core: one function, called by all six.
 enum TabularEstimatorCoreBridge {
     static func make(_ table: MLDataTable, targetColumn: String, featureColumns: [String]?,
                      classification: Bool) throws -> TabularTrainingSet {
@@ -1071,9 +959,6 @@ enum TabularEstimatorCoreBridge {
                                        featureColumns: featureColumns, classification: classification)
     }
 
-    /// The table's columns as the training core reads them: a column of doubles, of integers or of
-    /// strings, with a missing value for a cell that has none. There is no second representation of a
-    /// table between here and there. Predictions use it too, for a table with no target column.
     static func columnar(_ table: MLDataTable) -> ColumnarTable {
         var training = ColumnarTable()
         for name in table.columnNames {

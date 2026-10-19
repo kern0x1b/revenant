@@ -1,15 +1,8 @@
-// The armv7 probe of swift-system, and its host twin. One source: on the device it imports the installed module SystemPackage
-// (libswiftSystem.dylib); on the host the same source is built against the same module compiled from the same tree for macOS,
-// or against Apple's System with `-module-alias SystemPackage=System`. Every output line starts with "P| " so a log is
-// filtered with grep, and no line carries a path of the machine that ran it: the directory is an argument, its name is not printed.
-//
-// Usage: systemprobe <directory>   (the directory exists; the probe writes systemprobe.txt into it)
 import SystemPackage
 
 let args = CommandLine.arguments
 let dir = FilePath(args.count > 1 ? args[1] : "/tmp")
 
-// FilePath: components, root, last component, extension, stem, and the lexical operations, on fixed paths.
 let sample = FilePath("/tmp/systemprobe/a/b.tar.gz")
 print("P| components \(sample.components.map { $0.string })")
 print("P| root \(sample.root?.string ?? "nil") absolute \(sample.isAbsolute)")
@@ -19,7 +12,6 @@ print("P| appending \(sample.appending("c.txt").description)")
 let relative = FilePath("x/./y/../z")
 print("P| relative \(relative.components.map { $0.string }) normalized \(relative.lexicallyNormalized().description)")
 
-// FileDescriptor: write a fixed text into a file of the directory, read it back, close both times.
 let file = dir.appending("systemprobe.txt")
 let text: [UInt8] = Array("systemprobe line one\nline two\n".utf8)
 do {
@@ -46,7 +38,6 @@ do {
   print("P| read threw other error")
 }
 
-// Errno: a file that is not there is refused with ENOENT, and the value is the constant's.
 let missing = dir.appending("systemprobe-missing.txt")
 do {
   _ = try FileDescriptor.open(missing, .readOnly)

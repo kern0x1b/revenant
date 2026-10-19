@@ -1,6 +1,3 @@
-// How macOS SceneKit draws a new material's roughness: the pixel (4, 4) of a physically based quad lit by a directional
-// light at 0, 0.3 and 0.5 rad, for the untouched default and for values set in its place, after a copy, an archive round
-// trip, contents = nil and an intensity; and which properties a material's archive carries.
 import SceneKit
 import AppKit
 import Metal

@@ -1,14 +1,3 @@
-/*
- * The calls of iOS 16 on a parameters: an application service, and whether its names must be
- * resolved with DNSSEC.
- *
- * An application service is a name that stands for a service, so the stack of such a parameters is
- * the internet protocol and a transport and nothing above them, which is what the host answers for
- * its default protocol stack, measured. DNSSEC is a demand the release's resolver does not meet - it
- * resolves with the resolver the system gives it - so the demand is kept and read back, and the
- * connection resolves the way this release resolves.
- */
-
 #import "CharonNW.h"
 
 nw_parameters_t nw_parameters_create_application_service(void)

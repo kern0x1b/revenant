@@ -18,13 +18,6 @@ static NSError *CharonIndexError(CSIndexErrorCode code, NSString *reason)
     return CharonIndexErrorBecause(code, reason, nil);
 }
 
-// A search bundle - CharonSearchDatastore.m, the principal class of
-// org.charon.corespotlight.searchBundle - runs in whatever process hosts system search, not this
-// application's own process, so an index only this app's sandbox can read is one no search bundle
-// can ever answer a query against. This mirrors org.charon.callkit's own bridge
-// (CharonCallScreen.m): a shared, world-readable cache path rather than the sandboxed
-// NSApplicationSupportDirectory this store used before a search bundle needed to read it too, kept
-// one subdirectory per indexing application so one app's items never collide with another's.
 NSString *const CharonSpotlightSharedRoot = CHARON_SPOTLIGHT_SHARED_ROOT;
 
 static NSString *CharonSpotlightStoreDirectory(void)
@@ -169,11 +162,6 @@ static NSString *CharonSpotlightCategory(void)
     return [CharonSpotlightStoreDirectory() stringByAppendingPathComponent:[self.name stringByAppendingPathExtension:@"plist"]];
 }
 
-// Answers nil once the store is on disk, where the search bundle reads it, or the error the caller's
-// completion handler receives: an index that could not be written holds nothing a search can find.
-// The code is CSIndexErrorCodeIndexUnavailableError, which the SDK's CSSearchableIndex.h documents as
-// "The indexer was unavailable": this file store is the port's indexer (facts/CoreSpotlight/
-// CoreSpotlight.md, "What differs from the release"). The cause goes under NSUnderlyingErrorKey.
 - (NSError *)save
 {
     NSString *path = [self path];
@@ -193,10 +181,6 @@ static NSString *CharonSpotlightCategory(void)
     return nil;
 }
 
-// Runs a change and saves it; when the save fails, the entries and the client state go back to what
-// they were, so memory never holds what the caller was told was not stored - a later save would write
-// it without searchd being told, and -fetchLastClientState would answer it.
-// The store's lock: a change and a search's copy of the entries are never interleaved.
 - (NSError *)apply:(void (^)(void))change
 {
     @synchronized (self) {
@@ -205,7 +189,6 @@ static NSString *CharonSpotlightCategory(void)
         @try {
             change();
         } @catch (NSException *exception) {
-            // An item that cannot be archived raises from inside the change; what it changed so far goes too.
             _entries = entries;
             _clientState = clientState;
             @throw;
@@ -287,7 +270,6 @@ NSArray<CSSearchableItem *> *CharonSpotlightDefaultItems(void)
 
 @synthesize charonName = _charonName;
 @synthesize charonStore = _charonStore;
-// Weak, as the header declares it: the index keeps no delegate alive, and a delegate that is freed reads back as nil.
 @synthesize indexDelegate = _indexDelegate;
 
 + (BOOL)isIndexingAvailable
@@ -424,10 +406,6 @@ NSArray<CSSearchableItem *> *CharonSpotlightDefaultItems(void)
         completionHandler(state, nil);
 }
 
-// The release answers this on a background queue, never before it returns. It answers -1003 for a bundle the index holds
-// nothing for, with or without an index delegate (measured: the delegate's data callback is not asked). This port has no
-// external provider to ask, so every request gets that answer: CSIndexErrorCodeRemoteConnectionError with no user info,
-// as the release gives it.
 - (void)fetchDataForBundleIdentifier:(NSString *)bundleIdentifier
                       itemIdentifier:(NSString *)itemIdentifier
                          contentType:(UTType *)contentType

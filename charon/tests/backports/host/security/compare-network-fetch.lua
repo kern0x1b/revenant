@@ -1,14 +1,5 @@
--- compare-network-fetch.lua - what the flag reads back after each thing the caller did, and the broken step NAMED.
---
---    xmake l compare-network-fetch.lua <the binary's output>
---
--- What is checked is the ROUND TRIP, because that is all an inert flag owes: what a caller sets is what a caller reads back. Whether
--- the release then acts on it is a different claim, and the fact file says the release does not - 6.1.3 resolves a trust against the
--- anchors it was given and never fetches.
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
--- label, OSStatus, value (nil where the step has none), and what the caller did. In the order the steps are named.
 local EXPECTED = {
     {"made-trust", 0, nil, "SecTrustCreateWithCertificates on the fixture"},
     {"default", 0, 0, "read before anything was set: not allowed"},
@@ -30,7 +21,6 @@ function main(...)
             wrong[#wrong + 1] = tsv.split_on(line, "\t", 1)[2]
         elseif line:find("\t", 1, true) then
             local parts = tsv.split_on(line, "\t")
-            -- Python's int() on the status and, when there is one, the value: a field that is not a number ends the run
             local status = tsv.py_int(parts[2] or "")
             local value = nil
             if #parts > 2 then
@@ -56,7 +46,6 @@ function main(...)
             bad[#bad + 1] = label .. ": status [" .. got[1] .. "] and the port claims [" .. want_status .. "] (" .. why .. ")"
         elseif want_value ~= nil and got[2] ~= want_value then
             if got[2] == nil then
-                -- Python formatted a None with %d here and ended the run with a traceback
                 io.stderr:write("compare-network-fetch.lua: " .. label .. " read no value, and the port claims one\n")
                 os.exit(1)
             end

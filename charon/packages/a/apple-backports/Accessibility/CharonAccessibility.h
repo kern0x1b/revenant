@@ -1,32 +1,8 @@
-//
-//  CharonAccessibility.h
-//  Accessibility
-//
-//  The declarations the port's own SDK (iPhoneOS 16.4) does not have, transcribed from the
-//  headers of iPhoneOS 26.2 word for word in their contract. Four of 26.2's twelve Accessibility
-//  headers are new since 16.4 — AXRequest.h, AXMathExpression.h, AXBrailleTranslator.h and
-//  AXFeatureOverrideSessionManager.h — and this is where the names in the first, the third and the
-//  fourth are declared; the second, the sixteen AXMathExpression classes, is not declared here and
-//  not carried, for the reason facts/Accessibility/Accessibility.md gives.
-//
-//  A backport writes the declaration itself for API newer than the SDK it compiles against. The
-//  availability marks are not repeated: this header is read by the implementation files only, every
-//  member it declares is carried from the port's own release, and what an application compiles
-//  against is still the SDK's own header.
-//
-
 #import <Foundation/Foundation.h>
-// A build that has no Accessibility framework - the host half of the braille differential, which
-// compiles the three braille classes against nothing but Foundation - must not pull the system's
-// header in: it declares the same three names this header transcribes, and two declarations of
-// one class is a build that cannot be trusted.
 #ifndef CHARON_BRAILLE_ONLY
 #import <Accessibility/Accessibility.h>
 #endif
 
-// AX_EXTERN is the framework's own spelling of a symbol's visibility, defined in the framework's
-// AXFoundation.h. A build without the framework - the port half of the braille differential -
-// needs the same meaning, and `extern` is what the macro expands to there.
 #ifndef AX_EXTERN
 #define AX_EXTERN extern
 #endif
@@ -66,8 +42,6 @@ API_AVAILABLE(ios(18.0), macos(15.0), tvos(18.0), watchos(11.0))
 @property (nullable, class, nonatomic, readonly) AXRequest *currentRequest;
 @property (nonatomic, readonly) AXTechnology technology;
 
-// A request is built here, with the technology that will serve it: the header marks -init
-// unavailable, and this is the argument there is none of.
 - (instancetype)charon_withTechnology:(AXTechnology)technology;
 
 - (void)charon_setTechnology:(AXTechnology)technology;
@@ -150,9 +124,6 @@ API_AVAILABLE(ios(26.0))
 @property (nonatomic, readonly) NSString *resultString;
 @property (nonatomic, readonly) NSArray<NSNumber *> *locationMap;
 
-// The header marks -init unavailable, so the two results a translator builds are built here: the
-// result string, and the map from a cell back to where the text put it. An empty map is what a
-// translation that produced no cell has.
 - (instancetype)charon_withResultString:(NSString *)resultString
                                 locations:(NSArray<NSNumber *> *)locations;
 

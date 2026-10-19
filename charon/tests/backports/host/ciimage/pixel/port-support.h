@@ -1,6 +1,3 @@
-// The port's own CoreImage classes, under the names the port's build gives them. The framework's own
-// classes of the same names are in the same process and are never asked: the two never touch the same
-// object, and each process answers for one of them.
 #import <Foundation/Foundation.h>
 #import <CoreImage/CoreImage.h>
 #import <CoreGraphics/CoreGraphics.h>
@@ -47,6 +44,4 @@
 #define PORT_CONTEXT CIContext
 #define PORT_NAME "host"
 
-// Nothing to declare for the framework's own shape: its header carries every selector, with the
-// inset spelled insetByX:Y: and taking whole numbers, which is the spelling the port is held to.
 #endif

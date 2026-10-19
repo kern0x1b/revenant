@@ -1,8 +1,3 @@
-// Probe, shared by the host program (stamp.m) and the 6.1.3 application (emulate/coremidi/app/main.m): can an object of the release
-// carry a private integer property, does it survive the owner changing the object's UniqueID, what does the read answer after the
-// object is disposed, and is a reference ever given to a second object. This decides how the library tells "the same object" from
-// "a reference the release gave to a new object" (CharonMIDIPorts.m). Every line names the status of the call and the value
-// apart: the value is meaningful only with a noErr status.
 #include <CoreMIDI/CoreMIDI.h>
 #include <Foundation/Foundation.h>
 #include <stdio.h>
@@ -15,7 +10,6 @@ static void charon_stamp_read_proc(const MIDIPacketList *packets, void *readRefC
 {
 }
 
-// The notifications the stamp causes: a property written on an object is announced to the clients as a property change.
 static int gStampChanges;
 
 static void charon_stamp_notify(const MIDINotification *message, void *refCon)
@@ -38,7 +32,6 @@ static void charon_stamp_read(const char *what, MIDIObjectRef object, CFStringRe
     fflush(stdout);
 }
 
-// Whether the object's property dictionary lists the stamp key, and how many keys it has.
 static void charon_stamp_keys(const char *what, MIDIObjectRef object)
 {
     CFPropertyListRef properties = NULL;
@@ -55,7 +48,6 @@ static void charon_stamp_keys(const char *what, MIDIObjectRef object)
         CFRelease(properties);
 }
 
-// One object kind through its life: stamp, read back, (a destination or source: the owner sets the UniqueID), dispose, read.
 static void charon_stamp_life(const char *kind, MIDIObjectRef object, int ownerSetsUniqueID, void (*dispose)(MIDIObjectRef))
 {
     char what[96];
@@ -85,8 +77,6 @@ static void charon_stamp_dispose_client(MIDIObjectRef object) { MIDIClientDispos
 static void charon_stamp_dispose_port(MIDIObjectRef object) { MIDIPortDispose((MIDIPortRef)object); }
 static void charon_stamp_dispose_endpoint(MIDIObjectRef object) { MIDIEndpointDispose((MIDIEndpointRef)object); }
 
-// Makes and disposes `count` objects while `live` of them are kept, and counts the references the release gave twice. The
-// objects of the kind are made by make(client, out); a reference seen again is a reuse.
 typedef OSStatus (*charon_stamp_make)(MIDIClientRef client, MIDIObjectRef *out);
 
 static OSStatus charon_stamp_make_destination(MIDIClientRef client, MIDIObjectRef *out)
@@ -127,7 +117,6 @@ static void charon_stamp_churn(const char *kind, charon_stamp_make make, MIDICli
         if (i > 0 && object > seen[i - 1])
             ascending++;
         seen[i] = object;
-        // A few objects stay alive across the churn: a reference that is live must not be given again.
         if (i % 50 == 0 && i / 50 < 8)
             held[i / 50] = object;
         else
@@ -169,7 +158,6 @@ static void charon_stamp_probe(void)
         charon_stamp_life("output port", output, 0, charon_stamp_dispose_port);
     if (MIDIClientCreate(CFSTR("charon-stamp-c"), NULL, NULL, &other) == noErr)
         charon_stamp_life("client", other, 0, charon_stamp_dispose_client);
-    // Notifications are delivered on this thread's run loop: let the ones queued so far arrive, then count them.
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1.0, false);
     printf("stamp: %d property change notification(s) in all\n", gStampChanges);
     fflush(stdout);

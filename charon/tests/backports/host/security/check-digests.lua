@@ -1,26 +1,5 @@
--- check-digests.lua - checks that every file the README cites matches the digest the README states for it.
---
---    xmake l check-digests.lua
---
--- The paths the README cites are written from the repository root, and the README is read from this script's own directory, so the
--- two are resolved from the script's location and not from the working directory: run from here, from the repository root or from
--- anywhere else, and the result is the same.
---
--- EXITING 0 IS THE WHOLE POINT, and a check that finds nothing to check must NOT exit 0. Four ways this FAILS on purpose:
---
---   * the README carries no digest lines            -> exit 1
---   * fewer digest lines than files cited           -> exit 1
---   * any file whose sha256 does not match          -> exit 1
---   * the README or a cited file cannot be read     -> exit 1
---
--- The cited files are read out of the README's own shasum block, so the check and the thing being checked cannot disagree about what
--- is cited.
-
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
--- Every "<64 lower-case hex><blanks><path>" line the README carries, as {digest, path} pairs in order. This is the regular
--- expression ^\s+([0-9a-f]{64})\s+(\S+)$ read in multiline mode: a match starts at the start of a line, takes its blanks (which may
--- run across lines), the 64 digits, more blanks, and a token that ends at the end of its line.
 local function digest_pairs(text)
     local found = {}
     local p = 1
@@ -59,7 +38,6 @@ local function digest_pairs(text)
     return found
 end
 
--- The text of each ``` fence pair, in order, as the non-greedy ```(.*?)``` reads them.
 local function fenced_blocks(text)
     local blocks = {}
     local pos = 1
@@ -78,8 +56,6 @@ local function fenced_blocks(text)
     return blocks
 end
 
--- The matches of \S+\.(?:m|py|c|h|lua) inside one token: each runs from the token's start (or after the previous match) to the LAST
--- dot that is followed by one of those extensions, as the greedy \S+ backtracking finds it.
 local function file_matches(token)
     local found = {}
     local pos = 1
@@ -109,9 +85,7 @@ local function file_matches(token)
     return found
 end
 
--- The text's sha256 as the README's own `shasum -a 256` computes it, or nil when the file cannot be read.
 local function sha256_of(path)
-    -- io.open raises on a missing file, so the existence check is the one that says it cannot be read
     if not os.isfile(path) then
         return nil, "cannot be opened"
     end
@@ -120,7 +94,6 @@ end
 
 function main(...)
     local here = os.scriptdir()
-    -- four levels up: this directory is tests/backports/host/security
     local root = here .. "/../../../.."
     local readme = here .. "/README.md"
     if not os.isfile(readme) then
@@ -136,10 +109,6 @@ function main(...)
         os.exit(1)
     end
 
-    -- the command block names the files the digests are for; the two must be the same set ONLY INSIDE A CODE FENCE. The prose also
-    -- contains the words "shasum -a 256" - a sentence about how the block was computed - and a match that starts there captures every
-    -- path mentioned until the next fence, including this script's own name. The command block is what the digests are for, so only
-    -- a fenced one counts.
     local cited = {}
     for _, block in ipairs(fenced_blocks(text)) do
         if block:find("shasum -a 256", 1, true) then

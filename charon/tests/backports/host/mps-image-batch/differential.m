@@ -1,12 +1,3 @@
-// differential.m - MPSImageBatchIncrementReadCount() and MPSImageBatchSynchronize(), the port's beside Metal
-// Performance Shaders' own, on the macOS host, on the same batches.
-//
-// The port's functions are the ones in packages/a/apple-backports/MetalPerformanceShaders/MPSImageBatch11.m, compiled
-// with their symbols renamed CharonHost<Name>, so the two cannot be confused. Apple's are the framework's. Every
-// expectation is Apple's answer, read in this process. The synchronise refusal is an assertion in Apple's framework,
-// so it runs in a child process (status 134), and the port's raises an exception that an uncaught process ends the
-// same way. The children are forked BEFORE this process makes any Metal object: an object made before fork() is
-// not usable in the child (the device came back nil there, measured).
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>
@@ -39,8 +30,6 @@ static NSString *stderr_path(int which, int port, char *buffer, size_t size)
     return [NSString stringWithUTF8String:buffer];
 }
 
-// One synchronise case in a child that builds its own objects. `which` 0 is a plain image only, 1 is a plain image
-// before a temporary one, and 2 is a temporary image first. Returns the child's status.
 static int synchronise_status(int which, int port)
 {
     char buffer[1024];
@@ -87,8 +76,6 @@ int main(int argc, const char *argv[])
         }
         folder = argv[1];
 
-        // 1. Synchronise, first, before this process has made any Metal object. A plain image: both return.
-        //    A temporary image: both refuse, and the refusal names the index of the first temporary image.
         checks++;
         if (synchronise_status(0, 0) != 0)
             fail(@"Metal refused a synchronise of a plain image");
@@ -117,8 +104,6 @@ int main(int argc, const char *argv[])
         MPSImageDescriptor *d = [MPSImageDescriptor imageDescriptorWithChannelFormat:MPSImageFeatureChannelFormatFloat32
                                                                                width:4 height:4 featureChannels:1];
 
-        // 2. Increment: a batch that lists one temporary image twice and a second one once. Apple counts each
-        //    distinct temporary image once and returns 2; the port must return the same and move the counts alike.
         {
             MPSTemporaryImage *a = [MPSTemporaryImage temporaryImageWithCommandBuffer:cb imageDescriptor:d];
             MPSTemporaryImage *b = [MPSTemporaryImage temporaryImageWithCommandBuffer:cb imageDescriptor:d];
@@ -145,7 +130,6 @@ int main(int argc, const char *argv[])
                      (unsigned long)c.readCount, (unsigned long)c2.readCount, (unsigned long)metalA, (unsigned long)metalB);
         }
 
-        // 3. A plain image is not counted, by Metal or by the port: a batch of plain images counts 0.
         {
             MPSImage *plain = [[MPSImage alloc] initWithDevice:device imageDescriptor:d];
             MPSImageBatch *plainOnly = @[plain, plain];
@@ -157,7 +141,6 @@ int main(int argc, const char *argv[])
                      (unsigned long)metal, (unsigned long)port);
         }
 
-        // 4. Decrement: a negative amount lowers the count the way a positive one raises it.
         {
             MPSTemporaryImage *t = [MPSTemporaryImage temporaryImageWithCommandBuffer:cb imageDescriptor:d];
             MPSImageBatchIncrementReadCount(@[t], -1);

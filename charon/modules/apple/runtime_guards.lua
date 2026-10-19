@@ -1,14 +1,5 @@
 import("compat")
 
--- The guards of the Swift runtime's weak imports. A weak import that no library of the runtime and no library of the C++
--- runtime it links exports is NULL on a release in the runtime's range that lacks it, and every one of them is called only
--- behind a guard in the runtime's own source; this table names that guard for each, by library file name and then symbol
--- as the symbol table spells it. Two readers: swift-runtime's on_test, which fails an install whose weak imports and this
--- table differ in either direction, and the checks after a program's link (platform.import_options), which report a weak
--- import a carried copy of the runtime makes only if it is recorded here and refuse any other as the program's own.
--- source is the line of the guard at the commit the recipe builds (swift b8189d76), or the patch of this repository
--- that adds it. A row is prose the machine cannot check: the pinned commit is what keeps it from going stale, so a bump
--- of the pin, or a patch that adds or drops a guard, must re-read this table.
 GUARDS = {
     ["libswiftCore.dylib"] = {
         ["__dyld_is_objc_constant"] = "stdlib/public/stubs/FoundationHelpers.mm:124 @ swiftlang/swift b8189d766d86ad7fc8106787d6ce9e402f38dd72",
@@ -98,11 +89,6 @@ GUARDS = {
     },
 }
 
--- The same form for a package's own carried libraries, keyed by the package's name (the name a program's charon.libraries
--- gives it) and then by library file name. A package that ships a library with weak imports it guards itself declares them
--- here, with the line of each guard. Both readers see these rows: the check after a program's link reads them for a copy
--- of the package's library the program carries (platform.import_options), and the package's own on_test reads them with
--- compare(..., {exact = true}), so a row the build does not import is a difference too, not only a weak import no row names.
 PACKAGES = {
     ["swift-system"] = {
         ["libswiftSystem.dylib"] = {
@@ -113,27 +99,6 @@ PACKAGES = {
     },
 }
 
--- found: what dyld.unexported_weak_imports answers for the installed libraries. opt: what this build is, so that a row
--- is compared against the configuration that produced the libraries rather than against one fixed list - opt.imports is
--- what dyld.image_imports answers for the same libraries (every import, marked weak or strong) and opt.exported what
--- every image the process carries exports, opt.minimum and opt.backports name the configuration in what is reported.
--- Returns what differs, one line each. A weak import the toolchain's own code guards (apple.compat's GUARDED) is
--- answered there, for every image, and not here.
---
--- What each way a row can disagree means, because the table states the runtime's weak imports as it is built and a
--- build answers to the release it is made for:
---
---   * the library imports the symbol weakly and nothing the runtime exports does: the row has to be there, and a row
---     the toolchain's own code already answers for is a row that should not be (unchanged);
---   * the library imports the symbol *strongly*: that is what the port's headers' lowering makes of a declaration the
---     SDK marked for a later release, so the row is a claim to satisfy rather than a difference - the process must be
---     able to resolve it, and nothing the process carries exporting it is a load failure on the release this build is for;
---   * the library imports it not at all: the code behind the row's guard is compiled out at this minimum, so there is
---     nothing to guard here and nothing to fail. A configuration that does import it is held to the first rule.
---
--- opt.exact is for a package's own table (PACKAGES), whose one build is the configuration: a library the caller names in
--- found is then held to its rows both ways, so a row whose symbol the build does not import weakly is a difference as
--- well, and the rule above does not apply to it.
 function compare(found, opt)
     opt = opt or {}
     local problems = {}
@@ -166,8 +131,6 @@ function compare(found, opt)
                 if opt.exact and not weak[symbol] then
                     table.insert(problems, string.format("apple.runtime_guards records %s for %s, which the build does not import as a weak import nothing it carries exports", symbol, library))
                 elseif strong[symbol] == false then
-                    -- the build imports it strongly: the row is satisfied by something the process carries, and a
-                    -- process that carries nothing for it cannot load the library
                     if not exported[symbol] then
                         table.insert(problems, string.format("apple.runtime_guards records %s for %s, which imports it strongly " ..
                                                             "%s, and no library the process carries exports it: the image cannot be loaded", symbol, library, where))
@@ -182,9 +145,6 @@ function compare(found, opt)
     return problems
 end
 
--- The rows of the runtime's table and of every package's own, by library file name: the one view both readers take, since
--- a carried copy is looked up by its file name whichever of the two tables declares it. Two tables that name one library
--- are a contradiction in the record, so that is refused here rather than one of them winning.
 function merged()
     local all = {}
     for _, library in ipairs(table.orderkeys(GUARDS)) do
@@ -201,22 +161,14 @@ function merged()
     return all
 end
 
--- The table, out the way that reaches. It is a plain global in xmake's module sandbox and an importer cannot read it
--- from there: measured on this xmake, `import("apple.runtime_guards", {anonymous = true})` answers with the module's
--- functions and with GUARDS nil, and `pairs(nil)` iterates nothing instead of raising - so a check written over
--- `guards.GUARDS` silently ran zero times, which is how tests/addon/dyld_test.lua's two guard-table cases came to say
--- nothing while the suite's own verdict was OK. Functions reach, data does not, so the data goes out as two.
 function guards()
     return merged()
 end
 
--- The rows of one library, or an empty table for a library the table says nothing about.
 function rows(library)
     return merged()[library] or {}
 end
 
--- Whether a package declares rows of its own: a copy of one of its libraries that a program carries is then read against
--- them (platform.lua's carries_guarded).
 function declares(package)
     return PACKAGES[package] ~= nil
 end

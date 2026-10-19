@@ -12,8 +12,6 @@ static const char charon_style_key;
     return (UIUserInterfaceStyle)[objc_getAssociatedObject(self, &charon_style_key) integerValue];
 }
 
-// The host does not apply a view's override to the view's trait collection or to the views under it (the darkstyle group),
-// so the port keeps it and reads it back and changes nothing else; a view's override is what its controller's is not.
 - (void)setOverrideUserInterfaceStyle:(UIUserInterfaceStyle)overrideUserInterfaceStyle
 {
     if (overrideUserInterfaceStyle == UIUserInterfaceStyleDark)

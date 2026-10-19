@@ -1,9 +1,3 @@
-// The camera's boundary and zoom range of iOS 13.4: the values a modern program sets on a map view to
-// bound where its camera can go, on a release whose own map view has a region and nothing else. The
-// map configurations of iOS 16.0 are in MKMapConfiguration.m.
-//
-// Both are value objects: they hold what the caller set and answer it back, and -isEqual: and
-// -copyWithZone: and the archiving the headers declare all agree with that.
 #import <MapKit/MapKit.h>
 #import <MapKit/MKMapCameraBoundary.h>
 #import <MapKit/MKMapCameraZoomRange.h>
@@ -34,8 +28,6 @@
     return self;
 }
 
-// The four numbers of the map rect, written out by name: a map rect is a struct of two points and
-// a size, which no archiver on this release knows how to carry whole.
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     MKMapRect rect = MKMapRectMake([coder decodeDoubleForKey:@"MKMapRectX"],
@@ -86,9 +78,6 @@
 @synthesize minCenterCoordinateDistance = _minCenterCoordinateDistance;
 @synthesize maxCenterCoordinateDistance = _maxCenterCoordinateDistance;
 
-// The header makes this the designated initialiser and returns nil for an empty range. A bound of
-// MKMapCameraZoomDefault (-1.0) is not a distance, it is the end of the range that the range does
-// not bound, and the getter gives it back exactly as it came in, which is what the constant means.
 - (instancetype)initWithMinCenterCoordinateDistance:(CLLocationDistance)minDistance maxCenterCoordinateDistance:(CLLocationDistance)maxDistance
 {
     if ((minDistance > 0.0 && maxDistance > 0.0 && minDistance > maxDistance) ||

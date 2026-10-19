@@ -1,8 +1,3 @@
-// probe.m - what UTTypeCopyAllTagsWithClass answers on the host, beside the type's declaration. The function is
-// deprecated in CoreServices/UTType.h (ios 8.0 to 15.0), and the release's iOS 6 has no such symbol; the port
-// reads the same tags from the declaration (UTTypeCopyDeclaration), so the host's answers are the oracle.
-//
-// Each line starts with TAGS so a run can be filtered to it.
 #import <Foundation/Foundation.h>
 #import <CoreServices/CoreServices.h>
 

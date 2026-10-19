@@ -1,14 +1,3 @@
-//===--- Wind.swift ---------------------------------------------*- swift -*-===//
-//
-// The wind of a forecast, and the sixteen points of the compass its direction is named by. Only
-// CompassDirection is here: the members of Wind (direction, speed, gust, compassDirection, its
-// Equatable and Codable conformances) are not carried yet, so the struct is declared as the
-// container the nested type needs and nothing else. The raw values are the case names, the
-// descriptions and abbreviations are the English strings the host's WeatherKit gives in the en
-// locale (facts/WeatherKit/CompassDirection.md, measured with harness/WeatherKit/compass).
-//
-//===----------------------------------------------------------------------===//
-
 public struct Wind {
     public enum CompassDirection: String, CaseIterable, Codable, CustomStringConvertible, Hashable, Sendable {
         case north

@@ -1,10 +1,6 @@
 #import <UIKit/UIKit.h>
 #include <stdio.h>
 
-// A bundled Mac Catalyst app, so a scene exists the way an app meets one. The scene delegate runs the same checks on the host's own scene
-// and, in the port's build, on the port's UIScene (compiled with the class renamed, so the host's is still reached by name); each check
-// writes one "side<TAB>check<TAB>value" line to the file named by CHARON_SCENE_OUT, then the app quits. run.sh builds both and diffs them.
-
 static FILE *out;
 
 static void report(const char *side, const char *check, NSString *value)

@@ -1,10 +1,3 @@
--- Text matchers for Objective-C sources: the regular expressions verify.lua and crash-demand.lua apply
--- to the tree, each written out as a literal search (string.find, plain) and a local scan around it.
--- Lua patterns have no alternation, no \b and no bounded lazy repeat, and a multi-megabyte tree is read
--- once per list, so each function here names the expression it replaces in its comment and checks the
--- same characters. Every position is a 1-based index into the text.
-
--- \w: a letter, a digit or an underscore. \s: the ASCII white space characters.
 local function is_word(c)
     return c ~= "" and c:match("^[%w_]$") ~= nil
 end
@@ -13,7 +6,6 @@ local function is_space(c)
     return c == " " or c == "\t" or c == "\n" or c == "\r" or c == "\f" or c == "\v"
 end
 
--- The first index at or after i that is not white space.
 local function skip_forward(text, i)
     while i <= #text and is_space(text:sub(i, i)) do
         i = i + 1
@@ -21,7 +13,6 @@ local function skip_forward(text, i)
     return i
 end
 
--- The last index at or before i that is not white space (0 when there is none).
 local function skip_back(text, i)
     while i >= 1 and is_space(text:sub(i, i)) do
         i = i - 1
@@ -29,14 +20,10 @@ local function skip_back(text, i)
     return i
 end
 
--- \b between index p-1 and index p.
 local function boundary(text, p)
     return is_word(text:sub(p - 1, p - 1)) ~= is_word(text:sub(p, p))
 end
 
--- Whether `word` occurs in text[from..to] with a word boundary on both sides: \bWORD\b. The search is
--- over the segment alone, so a directive near the top of a 16 MB tree does not scan to the next match.
--- The boundary still reads the characters on either side of the segment.
 function whole_word(text, word, from, to)
     from, to = from or 1, to or #text
     local segment = text:sub(from, to)
@@ -56,8 +43,6 @@ function whole_word(text, word, from, to)
     return false
 end
 
--- Whether `[-+]\s*\([^)]*\)\s*` ends right before index `at`: a method's return type in parentheses,
--- preceded by its - or + sign. Every "(" that can open the parentheses is tried, since [^)]* may hold one.
 local function declared_before(body, at)
     local close = skip_back(body, at - 1)
     if body:sub(close, close) ~= ")" then
@@ -79,8 +64,6 @@ local function declared_before(body, at)
     return false
 end
 
--- Whether the text after index `after` ends a declaration: \s*(?:\{|;|$), multiline. `$` also holds
--- before a line break inside the white space, because \s* gives that break back.
 local function ends_declaration(body, after)
     local j = skip_forward(body, after)
     local c = body:sub(j, j)
@@ -90,7 +73,6 @@ local function ends_declaration(body, after)
     return body:sub(after, j - 1):find("\n", 1, true) ~= nil
 end
 
--- `[-+]\s*\([^)]*\)\s*SEL\s*(?:\{|;|$)`: the method SEL is declared or defined in the text.
 function declares(body, sel)
     local from = 1
     while true do
@@ -105,7 +87,6 @@ function declares(body, sel)
     end
 end
 
--- `[-+]\s*\([^)]*\)\s*PREFIX\s*:`: a setter (or any keyword method) whose first keyword is PREFIX.
 function declares_keyword(body, prefix)
     local from = 1
     while true do
@@ -123,8 +104,6 @@ function declares_keyword(body, prefix)
     end
 end
 
--- `[-+]\s*\([^)]*\)\s*P1\s*:` then `[^;{]{0,300}?\bPi\s*:` for each further part, in order: a method
--- whose keywords are the parts of a selector with colons.
 local function chain_from(body, start, parts, index)
     if index > #parts then
         return true
@@ -165,8 +144,6 @@ function declares_selector(body, parts)
     end
 end
 
--- `KEYWORD\b[^;\n]*\bSEL\b`: a property directive such as @dynamic or @synthesize that names SEL before
--- the statement ends. Evidence of an implementation or of its absence, depending on the keyword.
 function directive_names(body, keyword, sel)
     local from = 1
     while true do
@@ -185,9 +162,6 @@ function directive_names(body, keyword, sel)
     end
 end
 
--- The bodies of every @implementation, keyed by class name, as
--- `@implementation\s+(\w+)([^\n]*)\n(.*?)(?=^@end)` reads them: the body runs from the line after the
--- @implementation line up to the start of the next line that begins with @end. Categories share the key.
 function implementations(text)
     local out = {}
     local pos = 1
@@ -201,14 +175,13 @@ function implementations(text)
         local found = false
         if newline then
             local bodystart = newline + 1
-            -- endpos is where the next search resumes (the @end line); bodyend is the body's last index
             local endpos, bodyend
             if text:sub(bodystart, bodystart + 3) == "@end" then
                 endpos, bodyend = bodystart, bodystart - 1
             else
                 local lineend = text:find("\n@end", newline, true)
                 if lineend then
-                    endpos, bodyend = lineend + 1, lineend   -- the body keeps the line break before @end
+                    endpos, bodyend = lineend + 1, lineend
                 end
             end
             if endpos then
@@ -224,8 +197,6 @@ function implementations(text)
     end
 end
 
--- `^[A-Za-z_][\w \t\*]*\bSEL\s*(=|\()`, multiline: SEL is declared or defined as a C name, one line
--- starting with a type.
 function c_declares(text, sel)
     local at = 1
     while true do

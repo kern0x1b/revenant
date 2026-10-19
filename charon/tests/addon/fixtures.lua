@@ -20,14 +20,12 @@ function run(folder, program, argv)
     return os.iorunv(program, argv, {curdir = folder})
 end
 
--- An armv7 object compiled from C source, symbols hidden unless the source says otherwise.
 function object(folder, name, source)
     io.writefile(path.join(folder, name .. ".c"), source)
     run(folder, "xcrun", {"clang", "-target", "armv7-apple-ios6.0", "-Wno-incompatible-sysroot", "-fvisibility=hidden", "-c", name .. ".c", "-o", name .. ".o"})
     return path.join(folder, name .. ".o")
 end
 
--- The version ld64 reports, which clang must be told to emit what that linker can take.
 function linker_version(ld64)
     local out, errors = os.iorunv(ld64, {"-v"})
     return ((out or "") .. (errors or "")):match("PROJECT:ld64%-(%S+)")
@@ -79,8 +77,6 @@ function refusal(action)
     return errors
 end
 
--- Installs this working tree as the addon a port reaches through @addon/charon, under a version named after the copy's
--- own commit, so a run against changed files is never answered with the addon a previous run installed.
 function repository(folder)
     local root = path.absolute(path.join(os.scriptdir(), "..", ".."))
     local copy = path.join(folder, "charon")
@@ -101,20 +97,12 @@ function repository(folder)
     local version = "v0.0.0-" .. head:sub(1, 12)
     os.vrunv("git", {"-C", copy, "tag", version})
 
-    -- The recipe of the addon is read from this directory, while the addon itself is cloned from its history, so naming
-    -- the copy and its one version here needs no commit of its own.
-    --
-    -- A plain filesystem path makes git clone with --local, hardlinking or copying loose objects straight out of this
-    -- scratch .git rather than fetching them through git's own protocol; that copy step races intermittently against
-    -- this same repository ("failed to copy file to .../objects/<hash>: No such file or directory", a different object
-    -- each time - git's own warning names the fix). A file:// URL takes git off that fast path.
     local recipe = path.join(copy, "addons", "c", "charon", "xmake.lua")
     local text = io.readfile(recipe):gsub('add_urls%("[^"]*"%)', 'add_urls("file://' .. path.join(copy, ".git") .. '")', 1)
     io.writefile(recipe, text .. string.format('    add_versions("%s", "%s")\n', version, head))
     return copy, version
 end
 
--- mode: the build mode to configure (-m), when the project declares mode rules.
 function build(at, mode)
     os.vrunv("xmake", table.join({"f", "-p", "iphoneos", "-a", "armv7", "-y"}, mode and {"-m", mode} or {}), {curdir = at})
     os.vrunv("xmake", {"build", "-y"}, {curdir = at})

@@ -10,9 +10,6 @@ static void charon_resolve_queue_create_with_target(void)
     charon_system_function(&charon_system_queue_create_with_target, CHARON_LIBDISPATCH, "dispatch_queue_create_with_target$V2");
 }
 
-/* iOS 10 makes the queue with its target in place, before the queue can run a block; here the queue is made and then given the
-   target, which is all dispatch_set_target_queue of iOS 5 asks, and nothing runs on the queue in between. */
-
 __attribute__((visibility("hidden")))
 dispatch_queue_t charon_queue_create_with_target(const char * label, dispatch_queue_attr_t attr, dispatch_queue_t target) __asm("_dispatch_queue_create_with_target$V2");
 
@@ -24,8 +21,6 @@ dispatch_queue_t charon_queue_create_with_target(const char * label, dispatch_qu
     dispatch_queue_t queue = dispatch_queue_create(label, attr);
     if (queue && target)
         dispatch_set_target_queue(queue, target);
-    /* The width the attribute names, so that a queue made through this call is as knowable as one made
-       through dispatch_queue_create: a barrier source's handler asks the width of the queue it runs on. */
     charon_queue_record_width(queue, charon_width_of_attribute(attr));
     return queue;
 }

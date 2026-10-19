@@ -1,9 +1,3 @@
--- The band objects of a committed spec (tools/gen/bands.lua): the objects FileProvider's spec defines, read from the spec and the
--- committed package, and the refusal of a class the package already defines. The spec's text is the objects' text, so each check reads
--- the object the generator writes and not a copy of it. Byte equality with the python writer's objects was measured once, before that
--- writer was removed (see the commit).
---
--- Run, from any folder: xmake l tests/gen/bands_test.lua
 local REPO = path.directory(path.directory(path.absolute(os.scriptdir())))
 local TOOLS = path.join(REPO, "tools")
 local bands = import("gen.bands", {rootdir = TOOLS, anonymous = true})
@@ -35,7 +29,6 @@ for _, name in ipairs(names) do
     expect(string.sub(text, -1) == "\n" and string.sub(text, -2, -2) ~= "\n", name .. " ends with one newline")
 end
 
--- the 11.0 object carries the class and the policy piece, each with its own rank line, in the spec's order
 local eleven = objects["FileProvider11.m"]
 expect(has(eleven, "@implementation NSFileProviderDomain {\n"), "the 11.0 object defines NSFileProviderDomain")
 expect(has(eleven, "// Corpus rank 7 of coordination/corpus/crash-demand-top.tsv. The spec is"), "the class piece carries rank 7")
@@ -44,13 +37,11 @@ expect(string.find(eleven, "@end\n\n", 1, true) ~= nil and string.find(eleven, "
     "the policy piece emits no @implementation of NSFileProviderManager")
 expect(has(eleven, "//   never called: +[NSFileProviderManager addDomain:completionHandler:]\n"), "a never_call name is written as carried")
 
--- the 16.0 object is the category alone: its two-argument init and its accessors, and no class of its own
 local sixteen = objects["FileProvider16.m"]
 expect(has(sixteen, "@implementation NSFileProviderDomain (Charon16)\n"), "the 16.0 object is a category of NSFileProviderDomain")
 expect(not has(sixteen, "@implementation NSFileProviderDomain {"), "the 16.0 object defines no class")
 expect(has(sixteen, "- (void)setSupportsSyncingTrash:(BOOL)supportsSyncingTrash {"), "the 16.0 category sets supportsSyncingTrash")
 
--- a class the package defines is refused, and the refusal names the file that has it
 local fixture = path.join(os.scriptdir(), "bands_fixture")
 local refusal = nil
 try {
@@ -60,7 +51,6 @@ try {
 expect(refusal ~= nil, "a class the package already defines is refused")
 expect(has(refusal, "FixtureThing is already defined by Other.m"), "the refusal names the file that defines the class: " .. tostring(refusal))
 
--- a category of that class in the package is not a second definition, so the same class is written
 local clean = bands.objects(fixture, "Clean")
 expect(clean["Clean9.m"] ~= nil, "a category of a class in the package is not refused")
 expect(has(clean["Clean9.m"], "@implementation FixtureThing\n@end\n"), "the class of the clean spec is written as the spec states it")

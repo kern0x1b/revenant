@@ -1,5 +1,3 @@
-// engine.mm — reads our Box2D world for the tests, which are Objective-C and cannot include Box2D's C++
-// headers. Only public Box2D 2.2.1 getters; every value in b2 units (metres, radians, kg).
 #include <Box2D/Box2D.h>
 #import "engine.h"
 
@@ -21,7 +19,6 @@ int engine_joint_count(void *world)
     return static_cast<b2World *>(world)->GetJointCount();
 }
 
-// World order is newest first (b2World::CreateJoint pushes to the front of the list).
 void *engine_joint(void *world, int index)
 {
     b2Joint *joint = static_cast<b2World *>(world)->GetJointList();

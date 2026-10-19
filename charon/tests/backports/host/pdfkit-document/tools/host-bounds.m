@@ -1,32 +1,9 @@
-// host-bounds.m - what this Mac's own PDFKit answers -[PDFSelection boundsForPage:] with.
-//
-// The instrument for facts/PDFKit/Selection11.md's one remaining row.  It links the HOST's PDFKit and
-// nothing else, so there is no port object in the process (the reason the harness builds two
-// binaries: tests/backports/host/pdfkit-document/run.sh, header comment).
-//
-// It prints, per fixture and per needle:
-//
-//   page   the page's own -string with its controls made visible, because every bounds below is a rect
-//          over a RANGE and a range is an offset into that string
-//   the selection the find answered, its own -string, and the number of ranges on the page
-//   bounds %.4f,%.4f,%.4f,%.4f  for page 0, and again for a page the selection does NOT cover, which
-//          is where the host's +inf,+inf,0,0 was measured
-//   and, per character, the CGFont reader's OWN answer for the advance of that character's glyph, so
-//          the file's numbers and the reader's numbers are in ONE table and can be compared by eye
-//          rather than by argument
-//
-// The per-character block is what tells /Widths from an embedded program: it prints what
-// CGFontGetGlyphAdvances answers for the glyphs of the lifted /FontFile2, at the fixture's own size,
-// next to what /Widths says for the same codes.  A host bounds that matches the first and not the
-// second read the program.
 #import <Foundation/Foundation.h>
 #import <PDFKit/PDFKit.h>
 #import <CoreGraphics/CoreGraphics.h>
 #include <stdio.h>
 #include <string.h>
 
-// A control byte and anything above 0x7E printed as <XX>, so a row is readable when the string holds
-// one - measured: cgfixture-inline's string has length 11 and prints as its first five characters.
 static NSString *visible(NSString *s)
 {
     if (s == nil) return @"(nil)";
@@ -39,19 +16,10 @@ static NSString *visible(NSString *s)
     return out;
 }
 
-// The glyph NAMES the codes of "page 1" carry in /MacRomanEncoding (PDF 1.7 Annex D.2, the Adobe
-// StandardEncoding names a simple font's glyphs by).  They are named here rather than derived from
-// the font because the point of this block is to ask the reader what it says about glyphs the NAME
-// picks out - which is the only code -> glyph chain the release's CGFont.h offers: there is no
-// CGFontGetGlyphsForCharacters in the SDK, and CGFontGetGlyphWithGlyphName + CGFontGetGlyphAdvances
-// are both iOS 2.0 (CGFont.h:221 and CGFont.h:204).
 static const char *const GLYPH_NAMES[] = {"p", "a", "g", "e", "space", "one"};
 static const char CODES[] = "page 1";
 #define CHARACTER_COUNT 6
 
-// What a CGFont says about the six glyphs, in FONT UNITS - which is what CGFontGetGlyphAdvances
-// returns, and the units the caller divides by CGFontGetUnitsPerEm.  Printed per glyph and summed, so
-// the sum can be compared with the host's -boundsForPage: width by eye.
 static void reportFont(const char *label, CGFontRef font)
 {
     if (font == NULL) {
@@ -92,10 +60,6 @@ int main(int argc, char **argv)
                        visible([[document pageAtIndex:p] string]).UTF8String,
                        (unsigned long)[[document pageAtIndex:p] string].length);
 
-            // THE FONT, three ways, on page 0: the embedded program if the descriptor carries one, the
-            // system font by NAME with the subset prefix stripped, and what /Widths says.  The last is
-            // read straight out of the page's dictionary, so it is the file's own number and not a
-            // reader's.
             CGPDFDocumentRef raw = CGPDFDocumentCreateWithURL((__bridge CFURLRef)
                 [NSURL fileURLWithPath:path]);
             CGPDFPageRef rawPage = raw ? CGPDFDocumentGetPage(raw, 1) : NULL;
@@ -114,7 +78,6 @@ int main(int argc, char **argv)
             long lastChar = 0;
             if (font != NULL)
                 CGPDFDictionaryGetInteger(font, "LastChar", &lastChar);
-            // /Widths, as the file states them, for the six codes the text is made of.
             if (font != NULL) {
                 long firstChar = 0;
                 CGPDFDictionaryGetInteger(font, "FirstChar", &firstChar);
@@ -128,9 +91,6 @@ int main(int argc, char **argv)
                     for (size_t k = 0; k < CHARACTER_COUNT; k++) {
                         long code = (unsigned char)CODES[k];
                         size_t at = (size_t)(code - firstChar);
-                        // /Widths entries are NUMBERS, and the reader the release offers for an
-                        // array of them is CGPDFArrayGetInteger (CGPDFArray.h:51); CGPDFArrayGetDouble
-                        // is not declared in the SDK at all.
                         long width = 0;
                         if (at < CGPDFArrayGetCount(widths))
                             CGPDFArrayGetInteger(widths, at, &width);
@@ -145,7 +105,6 @@ int main(int argc, char **argv)
                 printf("  no /F1 in the page's /Resources\n");
             }
 
-            // the EMBEDDED PROGRAM, if the descriptor has one, through the release's own reader
             if (descriptor != NULL) {
                 CGPDFStreamRef stream = NULL;
                 if (CGPDFDictionaryGetStream(descriptor, "FontFile2", &stream) && stream != NULL) {
@@ -167,17 +126,11 @@ int main(int argc, char **argv)
                 }
             }
 
-            // the font by NAME, with the subset prefix stripped - the third candidate
             if (font != NULL) {
                 const char *base = NULL;
                 if (CGPDFDictionaryGetName(font, "BaseFont", &base) && base != NULL) {
                     NSString *name = @(base);
                     NSRange plus = [name rangeOfString:@"+"];
-                    // "ABCDEF+" is SEVEN bytes and the plus is the sixth, so the name starts at
-                    // location + 1 + 6 = location + 7 counting the plus itself: stripping
-                    // location + 7 from a name whose prefix is "AAAAAB+" leaves the last three
-                    // characters, which is what an earlier draft of this probe did and it made the
-                    // name candidate unreadable.
                     if (plus.location != NSNotFound && plus.location + 7 <= name.length)
                         name = [name substringFromIndex:plus.location + 7];
                     CGFontRef named = CGFontCreateWithFontName((__bridge CFStringRef)name);
@@ -188,7 +141,6 @@ int main(int argc, char **argv)
             }
             if (raw != NULL) CGPDFDocumentRelease(raw);
 
-            // THE ANSWER.  Every needle, so a fixture with several words in it is read whole.
             static const char *const needles[] = {"p", "a", "g", "e", " ", "1", "page", "page 1"};
             PDFPage *page0 = [document pageAtIndex:0];
             PDFPage *other = document.pageCount > 1 ? [document pageAtIndex:1] : nil;

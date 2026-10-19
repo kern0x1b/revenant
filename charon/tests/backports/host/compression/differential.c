@@ -1,19 +1,9 @@
-// Differential of the Compression buffer API and stream API: the host's own libcompression (Apple's) against the port's layer,
-// in one process. The port's symbols are renamed at build time (run.sh), so both are callable. Inputs come from a seed given on
-// the command line (default 1; the seed is printed): sizes at the codecs' edges, and four classes of content. Every
-// expectation is the host's answer, or the decode of the host's own output; none is written by hand.
-//
-// What is required of the port's encoded bytes (the contract, measured in facts/Compression/CompressionBuffer.md): LZMA's bytes
-// are required, equal to the host's. For LZFSE, ZLIB, LZ4 and LZ4_RAW the bytes are a stream in the algorithm's format, not
-// Apple's encoder's bytes, so they are reported (a count per algorithm) and the required rule is cross-decoding: what the port
-// encodes, the host decodes to the input, and what the host encodes, the port decodes to the input.
 #include <compression.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-// the port's entry points, renamed by run.sh to charon_host_*
 size_t charon_host_compression_encode_buffer(uint8_t *, size_t, const uint8_t *, size_t, void *, compression_algorithm);
 size_t charon_host_compression_decode_buffer(uint8_t *, size_t, const uint8_t *, size_t, void *, compression_algorithm);
 size_t charon_host_compression_encode_scratch_buffer_size(compression_algorithm);
@@ -31,9 +21,6 @@ static int checks = 0, failures = 0, encoded_cases = 0;
 static int equal_bytes[5];
 static unsigned long long state;
 
-// The KNOWN-DIFF list: each row is one open difference, named by its entry in coordination/crutches.md. A check that
-// fails is counted under its row only when its predicate holds for it; any other failure is a failure. The predicate
-// is the explicit rule of the difference (measured in facts/Compression/CompressionBuffer.md), not a skip.
 enum { kKnownZLIBTruncation, kKnownRows };
 static const char *kKnownNames[kKnownRows] = {"charon: ZLIB truncated streams"};
 static int known[kKnownRows];
@@ -46,7 +33,6 @@ static unsigned next_random(void)
     return (unsigned)(state >> 11);
 }
 
-// content class 0: zeros; 1: repeated words; 2: uniform random bytes; 3: random runs of the two
 static void fill(uint8_t *buffer, size_t size, int content)
 {
     static const char words[] = "the quick brown fox jumps over the lazy dog 0123456789 ";
@@ -60,7 +46,6 @@ static void fill(uint8_t *buffer, size_t size, int content)
     }
 }
 
-// a stream of len bytes decodes, by the host's own decoder, to the input of n bytes
 static int decodes(size_t len, const uint8_t *stream, size_t n, const uint8_t *input, uint8_t *back, size_t cap, void *work,
                    compression_algorithm algorithm)
 {
@@ -68,7 +53,6 @@ static int decodes(size_t len, const uint8_t *stream, size_t n, const uint8_t *i
     return decoded == n && (n == 0 || memcmp(back, input, n) == 0);
 }
 
-// where the case is: the algorithm, the input size and the content class (set before each case)
 static char where[96];
 
 static void check(int ok, const char *what, int a, int b)
@@ -79,7 +63,6 @@ static void check(int ok, const char *what, int a, int b)
     printf("FAIL %s [%s]: %d vs %d\n", what, where, a, b);
 }
 
-// a check that fails is a KNOWN-DIFF only when its row's predicate holds (see the list above)
 static void check_known(int ok, int row, int predicate, const char *what, int a, int b)
 {
     checks++;
@@ -92,7 +75,6 @@ static void check_known(int ok, int row, int predicate, const char *what, int a,
     printf("FAIL %s [%s]: %d vs %d\n", what, where, a, b);
 }
 
-// The stream interface, the host's and the port's in one call shape. The host refuses LZ4_RAW at init, and so does the port.
 typedef struct {
     compression_status (*init)(compression_stream *, compression_stream_operation, compression_algorithm);
     compression_status (*process)(compression_stream *, int);
@@ -102,13 +84,8 @@ static const stream_api kHostStream = {compression_stream_init, compression_stre
 static const stream_api kPortStream = {charon_host_compression_stream_init, charon_host_compression_stream_process,
                                        charon_host_compression_stream_destroy};
 
-// The progress of a stream: the input offset after which output first appears, NO_OUTPUT when none appears before FINALIZE.
 #define NO_OUTPUT ((size_t)-1)
 
-// One stream run. The input goes in pieces of chunk bytes, each piece in process calls until it is consumed; then FINALIZE
-// comes on an empty piece, and the output goes in pieces of piece bytes (0: as much as fits). Returns the bytes written to
-// out; *before is the count written before FINALIZE, *first the input offset (the end of the chunk) at which output first
-// appeared; *status is the status of the last call (ERROR when init refuses).
 static size_t stream_run(const stream_api *api, compression_stream_operation op, compression_algorithm alg, const uint8_t *in,
                          size_t n, size_t chunk, size_t piece, uint8_t *out, size_t cap, size_t *before, size_t *first,
                          compression_status *status)
@@ -149,7 +126,6 @@ static size_t stream_run(const stream_api *api, compression_stream_operation op,
     return written;
 }
 
-// The name of an algorithm, as kNames has it.
 static const char *name_of(compression_algorithm algorithm)
 {
     for (size_t a = 0; a < sizeof kAlgorithms / sizeof *kAlgorithms; a++) {
@@ -158,33 +134,16 @@ static const char *name_of(compression_algorithm algorithm)
     return "?";
 }
 
-// The stream checks for one algorithm and one input. The host decodes every stream the port writes to the input, and the port
-// decodes every stream the host writes to it, for each chunking of the input and for an output in pieces of 7 bytes. The port's
-// stream bytes do not depend on how the input or the output was split: they are compared with the port's own one-piece output
-// (ref), not with the host's, so the bytes are judged by the cross-decode above. The host writes some output before FINALIZE
-// and the port writes none: a KNOWN-DIFF row, counted only where that is the whole difference.
-// The progress allowance of a codec, in input bytes. The output of LZ4 comes at each 64 KiB block of input, and LZMA's at its
-// first input byte (the header), in the host's offsets and the layer's alike, so their allowance is 0. ZLIB's deflate block
-// and LZFSE's block end where the host's encoder ends them, which the format leaves open, so each may come one 64 KiB block
-// earlier or later than the host's (facts/Compression/CompressionBuffer.md, Streams).
 static size_t progress_allowance(compression_algorithm algorithm)
 {
     return algorithm == COMPRESSION_ZLIB || algorithm == COMPRESSION_LZFSE ? 65536 : 0;
 }
 
-// The allowance of decoding the host's own stream: LZFSE's is 0, because the port decodes each block as the host does, and
-// an LZVN block as its bytes come (facts Streams). Other codecs keep their allowance.
 static size_t decode_allowance(compression_algorithm algorithm)
 {
     return algorithm == COMPRESSION_LZFSE ? 0 : progress_allowance(algorithm);
 }
 
-// The stream checks for one algorithm and one input. The host decodes every stream the port writes to the input, and the port
-// decodes every stream the host writes to it, for each chunking of the input and for an output in pieces of 7 bytes. The port's
-// stream bytes do not depend on how the input or the output was split: they are compared with the port's own one-piece output
-// (the reference). Output before FINALIZE is required to come where the host's does: for each chunking, the port writes output
-// before FINALIZE whenever the host does, and within the codec's allowance of the host's first output (rounded up to the chunk,
-// since output is seen only after a chunk). A host that writes nothing before FINALIZE holds the port to nothing.
 static void stream_checks(compression_algorithm algorithm, int content, const uint8_t *input, size_t n, uint8_t *host_out,
                           uint8_t *port_out, uint8_t *ref, uint8_t *back, size_t cap)
 {
@@ -199,14 +158,12 @@ static void stream_checks(compression_algorithm algorithm, int content, const ui
         snprintf(where, sizeof where, "%s n=%zu content=%d stream chunk=%zu", name_of(algorithm), n, content, chunk);
         port_n = stream_run(&kPortStream, COMPRESSION_STREAM_ENCODE, algorithm, input, n, chunk, 0, port_out, cap, &before_p, &first_p, &st_p);
         check(st_p == COMPRESSION_STATUS_END, "port stream encode ends at FINALIZE", (int)st_p, COMPRESSION_STATUS_END);
-        // the input in one piece is the reference: every other chunking must give the same bytes
         if (k == 0) {
             ref_n = port_n;
             memcpy(ref, port_out, port_n);
         }
         check(port_n == ref_n && memcmp(port_out, ref, ref_n) == 0, "port stream bytes do not depend on the input chunking",
               (int)port_n, (int)ref_n);
-        // the host's output for this chunking (into back, which the decodes below overwrite)
         stream_run(&kHostStream, COMPRESSION_STREAM_ENCODE, algorithm, input, n, chunk, 0, back, cap, &before_h, &first_h, &st_h);
         size_t slack = (progress_allowance(algorithm) + chunk - 1) / chunk * chunk;
         size_t gap = first_p > first_h ? first_p - first_h : first_h - first_p;
@@ -218,9 +175,6 @@ static void stream_checks(compression_algorithm algorithm, int content, const ui
         back_n = stream_run(&kPortStream, COMPRESSION_STREAM_DECODE, algorithm, host_out, host_n, chunk, 0, back, cap, &ignored, &ignored, &st_p);
         check(st_p == COMPRESSION_STATUS_END && back_n == n && (n == 0 || memcmp(back, input, n) == 0),
               "port stream decodes the host's stream", (int)back_n, (int)n);
-        // Decoding is incremental for every codec: decoding the host's own stream, the port writes output before FINALIZE where
-        // the host does, within the codec's allowance of the host's first output (the stream is the host's, so the blocks are
-        // the same; the host writes an LZVN block's bytes earlier than its end, see facts Streams)
         {
             size_t dbefore_h = 0, dbefore_p = 0, dfirst_h = NO_OUTPUT, dfirst_p = NO_OUTPUT;
             stream_run(&kHostStream, COMPRESSION_STREAM_DECODE, algorithm, host_out, host_n, chunk, 0, back, cap, &dbefore_h, &dfirst_h, &st_h);
@@ -229,8 +183,6 @@ static void stream_checks(compression_algorithm algorithm, int content, const ui
             size_t dgap = dfirst_p > dfirst_h ? dfirst_p - dfirst_h : dfirst_h - dfirst_p;
             check(dfirst_h == NO_OUTPUT || (dfirst_p != NO_OUTPUT && dgap <= dslack),
                   "port decodes the host's stream: output before FINALIZE within the allowance of the host's", (int)dfirst_p, (int)dfirst_h);
-            // the port writes at least as much before FINALIZE as the host, less the codec's allowance: a port that writes more
-            // has given its bytes earlier into the caller's buffer, which the API permits (facts Streams, the progress rule)
             size_t allow = decode_allowance(algorithm);
             check(dbefore_p + allow >= dbefore_h, "port decodes the host's stream: at least as much output before FINALIZE as the host, within the allowance",
                   (int)dbefore_p, (int)dbefore_h);
@@ -248,8 +200,6 @@ static void stream_checks(compression_algorithm algorithm, int content, const ui
           "port stream decodes the host's stream in 7-byte pieces", (int)back_n, (int)n);
 }
 
-// The stream interface over every algorithm the host's stream takes, the sizes and contents of the buffer checks, and corrupt
-// input: the port answers the host's status for a decode of 64 random bytes (FINALIZE on the input's end).
 static void stream_all(uint8_t *input, uint8_t *host_out, uint8_t *port_out, uint8_t *ref, uint8_t *back, size_t cap)
 {
     static const compression_algorithm kStreamAlgorithms[] = {COMPRESSION_LZFSE, COMPRESSION_ZLIB, COMPRESSION_LZ4, COMPRESSION_LZMA};
@@ -269,7 +219,6 @@ static void stream_all(uint8_t *input, uint8_t *host_out, uint8_t *port_out, uin
         snprintf(where, sizeof where, "%s corrupt stream", name_of(kStreamAlgorithms[a]));
         check(st_p == st_h, "corrupt stream: the port answers the host's status", (int)st_p, (int)st_h);
     }
-    // LZ4_RAW has no stream on the host: init refuses it, and the port refuses it too
     compression_stream r;
     check(compression_stream_init(&r, COMPRESSION_STREAM_ENCODE, COMPRESSION_LZ4_RAW) == COMPRESSION_STATUS_ERROR
           && charon_host_compression_stream_init(&r, COMPRESSION_STREAM_ENCODE, COMPRESSION_LZ4_RAW) == COMPRESSION_STATUS_ERROR,
@@ -277,13 +226,8 @@ static void stream_all(uint8_t *input, uint8_t *host_out, uint8_t *port_out, uin
 }
 
 
-// The LZ4_RAW short destinations of cut and corrupt blocks (facts, "Short destination for LZ4_RAW": the host's order inside a
-// sequence, measured by byte edits of its own blocks). The block is the host's encoding of the input; each variant is the block
-// as it is, or edited or cut at one of its last sequences, and each is decoded into the destinations at that sequence's
-// boundaries and around them. The port must answer the host's answer for each.
 struct lz4_seq { size_t tok, lit, lit_in, off_in, match, out_start, out_lit, out_end; int last; };
 
-// the sequences of a block (the last one is literals only); returns their count. q holds len / 2 + 2 sequences at most.
 static size_t lz4_parse(const uint8_t *s, size_t len, struct lz4_seq *q)
 {
     size_t in = 0, out = 0, k = 0;
@@ -322,7 +266,6 @@ static size_t lz4_parse(const uint8_t *s, size_t len, struct lz4_seq *q)
     return k;
 }
 
-// one short decode of block (len bytes) into dst, against the host's answer
 static void lz4_short(const uint8_t *block, size_t len, size_t n, size_t dst, uint8_t *back, void *host_work, void *port_work,
                       const char *what)
 {
@@ -345,7 +288,6 @@ static void lz4raw_cut_and_corrupt(const uint8_t *input, size_t n, size_t cap, v
     for (size_t p = 0; p < 4; p++) {
         struct lz4_seq *x = &q[pick[p]];
         for (int e = 0; e < 7; e++) {
-            // the offset edits and the cut after the offset need a match, and the cut inside the literals needs two of them
             if (x->last && e != 0 && e != 3 && e != 6) continue;
             if (e == 3 && x->lit < 2) continue;
             size_t vlen = len;
@@ -364,7 +306,6 @@ static void lz4raw_cut_and_corrupt(const uint8_t *input, size_t n, size_t cap, v
             case 6: vlen = x->lit_in + x->lit; break;
             default: break;
             }
-            // the destinations: the sequence's boundaries, its literals' middle, and their neighbours, and the end
             size_t cand[] = {x->out_start - (x->out_start > 0), x->out_start, x->out_start + 1, x->out_start + x->lit / 2,
                              x->out_lit - (x->out_lit > 0), x->out_lit, x->out_lit + 1, x->out_end - (x->out_end > 0),
                              x->out_end, x->out_end + 1, n - 1, n};
@@ -400,7 +341,6 @@ int main(int argc, char **argv)
             for (int content = 0; content < kClasses; content++) {
                 snprintf(where, sizeof where, "%s n=%zu content=%d", kNames[a], n, content);
                 fill(input, n, content);
-                // the host's own output and its size, which the port must read and answer for
                 size_t host_n = compression_encode_buffer(packed, cap, input, n, host_work_e, algorithm);
                 size_t port_n = charon_host_compression_encode_buffer(ours, cap, input, n, work_e, algorithm);
                 encoded_cases++;
@@ -416,12 +356,9 @@ int main(int argc, char **argv)
                     check(port_n == 0, "port answers 0 where the host does", (int)port_n, 0);
                 }
                 if (port_n && host_n && port_n == host_n && memcmp(ours, packed, port_n) == 0) equal_bytes[a]++;
-                // LZMA's bytes are required, not reported: the xz container at preset 6 is measured identical to the host's
                 if (algorithm == COMPRESSION_LZMA && host_n) {
                     check(port_n == host_n && memcmp(ours, packed, host_n) == 0, "LZMA encodes the host's bytes", (int)port_n, (int)host_n);
                 }
-                // a NULL scratch buffer is allowed on both sides (measured on the host for every algorithm): the port
-                // answers as the host does, and decodes the host's output with no scratch as well
                 size_t null_host = compression_encode_buffer(nulls, cap, input, n, NULL, algorithm);
                 size_t null_port = charon_host_compression_encode_buffer(ours, cap, input, n, NULL, algorithm);
                 check((null_port != 0) == (null_host != 0), "NULL scratch: port encodes when the host does", (int)null_port, (int)null_host);
@@ -433,8 +370,6 @@ int main(int argc, char **argv)
                     size_t null_back = charon_host_compression_decode_buffer(back, cap, packed, host_n, NULL, algorithm);
                     check(null_back == n && (n == 0 || memcmp(back, input, n) == 0), "NULL scratch: port decodes the host's output", (int)null_back, (int)n);
                 }
-                // the destination boundary of each side: its own output fits exactly. One byte less answers 0, or - where the
-                // host writes a stored form that fits (measured for LZ4) - a smaller stream that decodes to the input.
                 if (port_n) {
                     size_t fit = charon_host_compression_encode_buffer(ours, port_n, input, n, work_e, algorithm);
                     check(fit == port_n, "port encode fits its own size", (int)fit, (int)port_n);
@@ -446,7 +381,6 @@ int main(int argc, char **argv)
                     size_t short_host = compression_encode_buffer(packed, host_n - 1, input, n, host_work_e, algorithm);
                     check(short_host == 0 || short_host < host_n && decodes(short_host, packed, n, input, back, cap, host_work_d, algorithm),
                           "host encode one byte short", (int)short_host, 0);
-                    // a truncated stream: every prefix of a small stream, and a sample of a large one (the host's answer)
                     size_t step = host_n <= 8192 ? 1 : host_n / 97 + 1;
                     for (size_t k = 0; k < host_n; k += step) {
                         snprintf(where, sizeof where, "%s n=%zu content=%d truncated=%zu", kNames[a], n, content, k);
@@ -458,7 +392,6 @@ int main(int argc, char **argv)
                     }
                     snprintf(where, sizeof where, "%s n=%zu content=%d", kNames[a], n, content);
                 }
-                // a decode into a destination too small for the content: the host's answer (the first bytes, or 0)
                 if (n > 0 && host_n) {
                     size_t dsts[] = {0, 1, n / 3, n / 2, n - 1};
                     for (size_t d = 0; d < sizeof dsts / sizeof *dsts; d++) {
@@ -467,19 +400,16 @@ int main(int argc, char **argv)
                         check(small_port == small_host, "a short decode destination", (int)small_port, (int)small_host);
                     }
                 }
-                // LZ4_RAW blocks cut or edited inside their last sequences, at short destinations (content 3, sizes from 4096)
                 if (algorithm == COMPRESSION_LZ4_RAW && content == 3 && n >= 4096 && host_n) {
                     lz4raw_cut_and_corrupt(input, n, cap, host_work_e, host_work_d, work_d, back);
                 }
             }
         }
-        // corrupt input: a fixed pattern no codec frames (both must answer the same)
         uint8_t junk[64];
         for (int i = 0; i < 64; i++) junk[i] = (uint8_t)next_random();
         size_t junk_host = compression_decode_buffer(back, cap, junk, sizeof junk, host_work_d, algorithm);
         size_t junk_port = charon_host_compression_decode_buffer(back, cap, junk, sizeof junk, work_d, algorithm);
         check(junk_port == junk_host, "corrupt input", (int)junk_port, (int)junk_host);
-        // an algorithm no codec carries: both answer 0
         size_t unknown_host = compression_encode_buffer(packed, cap, input, 4, host_work_e, (compression_algorithm)0xFFF);
         size_t unknown_port = charon_host_compression_encode_buffer(ours, cap, input, 4, work_e, (compression_algorithm)0xFFF);
         check(unknown_host == 0 && unknown_port == 0, "unknown algorithm", (int)unknown_port, (int)unknown_host);

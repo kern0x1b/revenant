@@ -1,5 +1,3 @@
--- The markers a stub carries and the ones the iphoneos-sdk package puts into an SDK whose stubs carry none: read from tbd 4
--- and 3, put where the linker looks, and never twice.
 function failures(opt)
     local stubs = import("apple.sdkstubs", {rootdir = opt.modules, anonymous = true})
     local found = {}
@@ -9,7 +7,6 @@ function failures(opt)
         end
     end
 
-    -- tbd 4, several documents in one file, with a marker in the second and a symbol-level reexports section
     local v4 = table.concat({
         "--- !tapi-tbd\n", "tbd-version:     4\n", "targets:         [ armv7-ios, armv7s-ios, arm64-ios ]\n",
         "install-name:    '/usr/lib/libSystem.B.dylib'\n", "reexported-libraries:\n",
@@ -38,7 +35,6 @@ function failures(opt)
     expect("libSystem's own", (stubs.in_libsystem(first.install) and stubs.in_libsystem(second.install) and not stubs.in_libsystem("/usr/lib/libobjc.A.dylib"))
            and "yes" or "no", "yes")
 
-    -- adding: the architectures the document has, each marker once, at the top of the exports; nothing else moves
     local target = documents[1]
     local added = stubs.add_markers(target, {{archs = {"armv7", "armv7s", "arm64e"}, tokens = {"$ld$hide$os6.1$_a", "$ld$hide$os6.1$_b"}}})
     local wanted = "exports:\n  - targets: [ armv7-ios, armv7s-ios ]\n    symbols: [ '$ld$hide$os6.1$_a', '$ld$hide$os6.1$_b' ]\n  - targets:         [ armv7-ios, armv7s-ios ]\n"
@@ -49,7 +45,6 @@ function failures(opt)
     local hidden = stubs.read(added)
     expect("a document read again after adding", #stubs.markers(hidden), 2)
 
-    -- tbd 3: archs, no -ios, one document
     local v3 = table.concat({
         "--- !tapi-tbd-v3\n", "archs:                 [ armv7, armv7s, arm64, arm64e ]\n", "platform:              ios\n",
         "install-name:          /usr/lib/system/libcompiler_rt.dylib\n", "exports:\n",
@@ -66,18 +61,15 @@ function failures(opt)
     local wrapped = stubs.add_markers(v3, {{archs = {"armv7"}, tokens = many}})
     expect("a long list wraps", #wrapped:match("    symbols: [^\n]*\n") < 130 and #wrapped:match("\n[^\n]*_symbol_number_30'") > 0, true)
 
-    -- a document that re-exports whole libraries and exports nothing gets the section, before its end
     local bare = "--- !tapi-tbd\ntbd-version:     4\ntargets:         [ armv7-ios, arm64-ios ]\ninstall-name:    '/usr/lib/libx.dylib'\nreexported-libraries:\n  - targets:         [ armv7-ios ]\n    libraries:       [ '/usr/lib/liby.dylib' ]\n...\n"
     local grown = stubs.add_markers(bare, {{archs = {"armv7"}, tokens = {"$ld$hide$os6.1$_a"}}})
     expect("markers in a document with no exports", grown, bare:gsub("%.%.%.\n$", "") .. "exports:\n  - targets: [ armv7-ios ]\n    symbols: [ '$ld$hide$os6.1$_a' ]\n...\n")
 
-    -- a marker names one release, and a release is (major, minor): 6.1 for 6.1.3, so a symbol a 6.1.3 device has is not hidden at 6.1
     local versions = {"3.0", "5.0", "6.0", "6.1", "7.0"}
     expect("hides below a release", table.concat(stubs.hides("_s", "6.1.3", versions), " "), "$ld$hide$os3.0$_s $ld$hide$os5.0$_s $ld$hide$os6.0$_s")
     expect("hides of a symbol no held release exports", #stubs.hides("_s", nil, versions), 5)
     expect("nothing hidden from the release it arrived in", #stubs.hides("_s", "3.0", versions), 0)
 
-    -- what the package derives: only the symbols the table names, for armv7 and armv7s
     local table_of = stubs.releases("# comment\n_new\t6.0\n_newest\t-\n")
     expect("the table of first releases", tostring(table_of._new) .. " " .. tostring(table_of._newest), "6.0 false")
     local wanted_groups = stubs.derived(doc3, {___bswapdi2 = "5.0", ___unrelated = "5.0"}, {"3.0", "4.3", "5.0"})
@@ -85,13 +77,10 @@ function failures(opt)
     expect("derived architectures", table.concat(wanted_groups[1].archs, ","), "armv7,armv7s")
     expect("derived markers", table.concat(wanted_groups[1].tokens, " "), "$ld$hide$os3.0$___bswapdi2 $ld$hide$os4.3$___bswapdi2")
 
-    -- a document's markers carried to another: grouped by architectures, in the order met
     local groups = stubs.group(stubs.markers(second))
     expect("carried groups", #groups, 1)
     expect("carried tokens", #groups[1].tokens, 2)
 
-    -- a newer SDK's tbd (v3, no armv7-only symbols at all: no device runs 26.2 on 32-bit) beside the older one
-    -- (v4, still names them for armv7/armv7s): what it dropped, and adding it back as plain exports, not markers
     local old_unwind = table.concat({
         "--- !tapi-tbd\n", "tbd-version:     4\n", "targets:         [ armv7-ios, armv7s-ios, arm64-ios ]\n",
         "install-name:    '/usr/lib/system/libunwind.dylib'\n", "exports:\n",
@@ -122,9 +111,6 @@ function failures(opt)
     expect("the original export untouched", exported.__Unwind_Backtrace and exported.__Unwind_Backtrace.arm64 or false, true)
     expect("restoring the same drop twice adds nothing new", stubs.add_symbols(restored, dropped), restored)
 
-    -- a symbol the new stub still lists, just regrouped under an architecture the old one never paired it with alone
-    -- (arm64 only, here) - not dropped, whatever architecture carries it now: restoring it would assert something no
-    -- SDK measurement backs, the exact gap the review of this series found the first version of dropped() left open
     local new_unwind_regrouped = table.concat({
         "--- !tapi-tbd-v3\n", "archs:                 [ armv7, armv7s, arm64, arm64e ]\n", "platform:              ios\n",
         "install-name:          /usr/lib/system/libunwind.dylib\n", "exports:\n",

@@ -1,12 +1,3 @@
-/* The three value holders, held to what the SYSTEM answered: the same scenario, asked of the port,
- * compared with the answers webextension-configuration_system.m recorded on this host with no port code
- * in the process. Compiled WITH renames.sh's flags, so every class name in the scenario is the port's.
- *
- * dladdr on the answering IMP is what tells the two apart: both sides declare all three classes, so a
- * build that linked the wrong objects would compare the system against itself and agree with everything.
- * The class objects are asked through the class OBJECT and not through objc_getClass, because a class
- * NAME in a string literal is not what renames.sh's -D flags rewrite.
- */
 #import "webextension-configuration_scenario.h"
 
 static const NSUInteger EXPECTED_CASES = 36;

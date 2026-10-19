@@ -1,15 +1,6 @@
--- The intents generator's tables: which classes are hand written, what each initialiser parameter is for, the
--- causes a member is left out for, the bodies the header does not describe, and the state those bodies keep.
--- tools/intents/gen-intents.lua holds the rules that read them. Each body is the text the generator writes, a
--- Python string made a Lua one: the comments are the Python ones, and a key is "CLASS selector" with one space
--- between the two (and "CLASS selector parameter" for a parameter key).
---
--- data() returns the tables as fields of one table, because the xmake module import exposes functions only.
-
 function data()
     local D = {}
 
-    -- The ten classes whose bodies are hand written in CharonIntents100.m.
     D.hand_written = {
         INParameter = true,
         INIntent = true,
@@ -24,29 +15,19 @@ function data()
         INRideCompletionStatus = true,
     }
 
-    -- The base every resolution result shares, and the factories that fill it.
     D.resolution_base = "INIntentResolutionResult"
 
-    -- Where an initialiser parameter goes when the header's own names differ. Each entry names the class, the selector
-    -- (false for any selector of that class), the parameter, and the property or properties the value belongs in. Every
-    -- line was read off the header of iPhoneOS16.4 and is repeated in facts/Intents/Intents.md.
     D.parameter_properties = {
-        -- INBillPayee and INPaymentAccount take the number of an account and expose it as accountNumber; the class has
-        -- exactly one NSString property, which is that one.
         {"INBillPayee", "initWithNickname:number:organizationName:", "number", {"accountNumber"}},
         {"INPaymentAccount", "initWithNickname:number:accountType:organizationName:", "number", {"accountNumber"}},
         {"INPaymentAccount", "initWithNickname:number:accountType:organizationName:balance:secondaryBalance:", "number",
          {"accountNumber"}},
-        -- INPriceRange: "the lowest of the two prices used to construct this range" is the header's own comment on
-        -- minimumPrice, and the highest is maximumPrice, and initWithPrice: gives one price that is both ends of the range.
         {"INPriceRange", "initWithRangeBetweenPrice:andPrice:currencyCode:", "firstPrice", {"minimumPrice"}},
         {"INPriceRange", "initWithRangeBetweenPrice:andPrice:currencyCode:", "secondPrice", {"maximumPrice"}},
         {"INPriceRange", "initWithPrice:currencyCode:", "price", {"minimumPrice", "maximumPrice"}},
-        -- INInteraction's designated initialiser spells the response intentResponse.
         {"INInteraction", false, "response", {"intentResponse"}},
     }
 
-    -- Properties whose ownership is copy: the setter copies, the rest retain. A set of base type names.
     D.copied = {
         NSString = true, NSAttributedString = true, NSMutableString = true, NSDictionary = true,
         NSMutableDictionary = true, NSArray = true, NSMutableArray = true, NSSet = true, NSMutableSet = true,
@@ -55,15 +36,10 @@ function data()
         NSRegularExpression = true, INSpeakableString = true, INImage = true, NSError = true,
     }
 
-    -- A class that must be an object file of its own, with the measurement that says why: INPaymentMethodResolutionResult
-    -- is the one class of its group that a release below the group's own already exports (see ALONE_REASON in the
-    -- generator, and tools/intents/measure-group.lua).
     D.alone = {
         INPaymentMethodResolutionResult = "10.3",
     }
 
-    -- Why a member is not answered, one cause per way the generator leaves one out. The registry writes the reason
-    -- from these, so a reason names the cause and not the owner's group.
     D.causes = {
         later_group = "the class this member's type names is in a later group of this same delivery",
         forward_only_class = "the class this member's type names is a class the SDK's headers only forward declare, so "
@@ -86,7 +62,6 @@ function data()
         unanswered = "a member of a class of a later group of this same delivery",
     }
 
-    -- The same causes in the short form a @dynamic line in the generated source can carry.
     D.cause_labels = {
         later_group = "a class of a later group",
         forward_only_class = "a class the headers only forward declare",
@@ -94,11 +69,6 @@ function data()
         unanswered = "a class of a later group",
     }
 
-    -- The enumerations whose zero case is the one that says nothing, measured from the host: its own framework logs
-    -- "Success resolution with <Enum>Unknown will be reformed to notRequired." for a success carrying that case
-    -- (observed on the host's own Intents, 2026-09-27, for INCarSignalOptions, INTaskStatus, INRadioType,
-    -- INRelativeReference, INRelativeSetting, INTaskPriority, INVisualCodeType, INWorkoutGoalUnitType and
-    -- INWorkoutLocationType).
     D.neutral_enumerations = {
         INCallDestinationType = true, INCallRecordType = true, INCallRecordTypeOptions = true,
         INCarAudioSource = true, INCarDefroster = true, INCarSeat = true, INCarSignalOptions = true,
@@ -109,9 +79,6 @@ function data()
         INWorkoutLocationType = true,
     }
 
-    -- A member whose body is a derivation the header describes rather than a store, written here with
-    -- the header's own words for what it builds: a generated body could only put the parameter under
-    -- a name of the generator's making, which is not a member of the class.
     D.extra_methods = {
         ["INObjectCollection initWithItems:"] = {
             "- (instancetype)initWithItems:(NSArray *)items",
@@ -130,15 +97,6 @@ function data()
             "    return self;",
             "}",
         },
-        -- The four singleton accessors. Each of these headers names the accessor and says to use it -
-        -- "@c Use the @c defaultStore singleton" - so the accessor is the class's whole surface and the
-        -- one object for the process is what it answers. dispatch_once is the tree's own spelling of
-        -- one instance for the process: packages/a/apple-backports/Intents/CharonIntents100.m's
-        -- +[INVocabulary sharedVocabulary] is this body.
-        -- And it is measured, not only read: tests/backports/host/intents/intents12-rows.m asks the
-        -- system's own Intents for each of the three of this group twice in one process and prints
-        -- identical=1 for every one of them (macOS 27.0 build 26A428, arm64). The header's note and the
-        -- host's answer are the same claim from two directions.
         ["INRelevantShortcutStore defaultStore"] = {
             "+ (INRelevantShortcutStore *)defaultStore",
             "{",
@@ -178,17 +136,6 @@ function data()
             "    return shared;",
             "}",
         },
-        -- The three classes of this group whose header marks +new unavailable. NS_UNAVAILABLE is a
-        -- compile-time attribute and the runtime never sees it, so the class keeps the +new it
-        -- inherits, and the release answers it: measured on the host's own Intents, all three are
-        -- answered, all three return an object with no exception, and all three are answered by
-        -- NSObject's own +new - their metaclass chain declares the selector there and nowhere else
-        -- (tools/intents/probe-host-absent.sh against registry/Intents/ios12.json, control 100 rows
-        -- found and 55 answered in the same process). WHICH object each one returns is a second
-        -- measurement, by tests/backports/host/intents/intents12-rows.m: each returns an instance of
-        -- its own class and not of NSObject. So the answer is NSObject's +new and not a new one,
-        -- and it is reached through its IMP for the same reason the -init of each of these three
-        -- classes is: the header forbids naming the selector.
         ["INShortcut new"] = {
             "+ (instancetype)new",
             "{",
@@ -355,11 +302,6 @@ function data()
             "}",
         },
 
-        -- INFile: the header says a file holds its data and the name and uniform type identifier it
-        -- was given, and that data made from a URL memory maps on access - so the URL is kept and the
-        -- data is read through it rather than cached twice. -init is NS_UNAVAILABLE in the header and
-        -- the generator emits a body for it anyway (see own_init_unavailable), which is why these two
-        -- can allocate.
         ["INFile fileWithData:filename:typeIdentifier:"] = {
             "+ (INFile *)fileWithData:(NSData *)data",
             "    filename:(NSString *)filename",
@@ -388,8 +330,6 @@ function data()
             "    return file;",
             "}",
         },
-        -- The accessors the two factories above fill. They are readonly in the header, so nothing
-        -- synthesises them: with the fields in EXTRA_IVARS a body reads them directly.
         ["INFile data"] = {
             "- (NSData *)data",
             "{",
@@ -533,21 +473,12 @@ function data()
             "    }",
             "}",
         },
-        -- INMediaDestination's two properties are readonly and its -init is NS_UNAVAILABLE, so the two
-        -- class methods below are the only way to make one and they fill these.
         ["INMediaDestination"] = {
             "    INMediaDestinationType _mediaDestinationType;  // mediaDestinationType",
             "    NSString * _playlistName;  // playlistName",
         },
     }
 
-    -- The state a hand-written body keeps that the class's own headers declare no property for, so it
-    -- has no @synthesize and no coding or copying entry. Each field is named after the method that
-    -- writes it, and the body says what it owns.
-
-    -- The state a hand-written body keeps that the class's own headers declare no property for, so it
-    -- has no @synthesize and no coding or copying entry. Each field is named after the method that
-    -- writes it, and the body says what it owns.
     D.extra_ivars = {
         ["INRelevantShortcutStore"] = {
             "    NSArray * _relevantShortcuts;  // setRelevantShortcuts:completionHandler:",
@@ -559,30 +490,13 @@ function data()
         ["INVoiceShortcutCenter"] = {
             "    NSArray * _shortcutSuggestions;  // setShortcutSuggestions:",
         },
-        -- INFile and INSendMessageAttachment are NOT here: their properties are readonly but they are
-        -- still the class's own, so the generator synthesises the ivar and the accessor for each, and a
-        -- second declaration of the same field is "duplicate member" at compile time. Their two
-        -- factories only fill what is already there. Listing them cost a red gate: IN16_0.m:1584-1588
-        -- and :3978, six errors, all of them this.
-        -- The header's two charging-power methods are a read/write pair keyed by connector type, so
-        -- the field is a dictionary and neither is a property the header declares.
         ["INCar"] = {
             "    NSMutableDictionary * _maximumPowerByConnectorType;  // maximumPowerForChargingConnectorType:",
         },
     }
 
 
--- Charon's OWN readers for the stores the headers ask to be written. They are not in
--- EXTRA_METHODS because EXTRA_METHODS is consulted while walking the header's OWN declared
--- methods, and a reader no header declares is never visited there: the four of these were
--- written to EXTRA_METHODS and silently emitted nowhere. They are emitted from here instead,
--- after the declared members, and only for a class this file generates.
     D.charon_readers = {
-        -- A reader for each store the headers ask to be written. A setter whose value nothing can read
-        -- back is a field that only grows, and a port that offered a shortcut has no way to see that it
-        -- did - which is the state this delivery is meant to keep. The name is Charon's own, so it
-        -- collides with nothing Apple has and it is hidden at the link, and each class row's `effect`
-        -- names it the way INVocabulary's names charon_vocabularyStringsOfType:.
         ["INRelevantShortcutStore charon_relevantShortcuts"] = {
             "- (NSArray *)charon_relevantShortcuts",
             "{",

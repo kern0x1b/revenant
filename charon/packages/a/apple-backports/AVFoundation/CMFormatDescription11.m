@@ -1,15 +1,7 @@
 #import <CoreMedia/CoreMedia.h>
 #include <string.h>
 
-// The HEVC parameter-set reader of iOS 11, over the hvcC record the release already stores: 23 bytes of
-// fixed part with numOfArrays at byte 22, then per array a type byte and a 16-bit count of NAL units,
-// then per NAL unit a 16-bit length and that many bytes. Measured against the host's own reader over
-// the hvcC of a real x265 stream and over every truncation of it
-// (facts/CoreMedia/HEVCParameterSets.md).
-
 #define parameterIsInvalid kCMFormatDescriptionError_InvalidParameter
-// -12712 is what the host answers for a record it cannot walk; no SDK on this machine names it, and
-// CMVideoFormatDescription7.m carries the same value for the H.264 reader.
 #define malformedRecord ((OSStatus)-12712)
 
 OSStatus CMVideoFormatDescriptionGetHEVCParameterSetAtIndex(CMFormatDescriptionRef videoDesc, size_t parameterSetIndex,
@@ -74,21 +66,11 @@ OSStatus CMVideoFormatDescriptionGetHEVCParameterSetAtIndex(CMFormatDescriptionR
             at += size;
         }
     }
-    // Measured on the host: a record cut inside an array reports no count at all, and a record that
-    // walks reports the number of NAL units its array headers declare.
     if (parameterSetCountOut)
         *parameterSetCountOut = complete ? declared : 0;
 done:
-    // A record the walk could not finish reports no count: the host answers a truncated record with
-    // count 0 even though the header length, which only needs the fixed part, is still reported. A
-    // record it can walk reports the count whatever index was asked for.
-    // Measured, and the same rule the H.264 reader in CMVideoFormatDescription7.m carries: a call that
-    // asks for neither the pointer nor the size is answered 0 whatever index it is given - the host
-    // answers 0 for index 7 of the x265 record with only the count asked for, and 4 for index 0.
     if (!parameterSetPointerOut && !parameterSetSizeOut)
         return 0;
-    // A record the walk could not finish is refused even when the index asked for was already reached:
-    // the host answers -12712 for a record cut after the first NAL unit, with that unit's size filled in.
     if (complete && found)
         return 0;
     return malformedRecord;

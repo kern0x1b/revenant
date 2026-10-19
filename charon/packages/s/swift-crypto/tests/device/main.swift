@@ -1,20 +1,3 @@
-// The armv7 probe of swift-crypto, and its host twin. One source: on the device it is linked against the installed
-// libswiftCrypto.dylib; on the host it is compiled with `-module-alias Crypto=CryptoKit`, so every `Crypto.` name is
-// Apple's CryptoKit there. The host run is therefore the host's answers, and the device run is the module under test.
-//
-// Modes (every output line starts with "P| " so a log is filtered with grep):
-//   rows [seed] [negative] [nohmac]  deterministic rows, full bytes: digests, MACs, KDF, AEAD with fixed keys and nonces,
-//                                    key agreement from fixed keys, ML-KEM public key from a fixed seed, ECDSA DER encode and
-//                                    round trip (the decoder and encoder of P-256/384/521), DH-HKDF from the agreed secrets.
-//                                    With `negative`, the SHA256 input of length 1 is flipped on this side: exactly one row must
-//                                    differ from the host. With `nohmac`, the HMAC, HKDF and DH-HKDF rows are skipped on both sides
-//                                    (same draws skipped).
-//   make                             randomized outputs made from random keys (on the device: the keys come from BoringSSL's
-//                                    RNG), one record per line: "rec name|field|...", every field in hex. ECDSA appears twice,
-//                                    raw ("ecdsa-pNNN") and DER ("ecdsa-pNNN-der").
-//   make-hpke                        the HPKE record of `make`, separately: HPKE derives its keys with HKDF, which is HMAC.
-//   verify <hex>                     the records of a `make` run, passed as the hex of their text: each is checked on this side.
-//   entropy                          one random P-256 private key, printed: two runs must print different keys.
 import Crypto
 import Foundation
 
@@ -74,8 +57,6 @@ func emit(_ line: String) {
     fflush(stdout)
 }
 
-// MARK: rows
-
 func rowsMode(seed: UInt64, negative: Bool, macs: Bool) {
     var rng = SplitMix64(state: seed)
     emit("rows seed \(seed)\(negative ? " negative" : "")\(macs ? "" : " nohmac")")
@@ -134,7 +115,6 @@ func rowsMode(seed: UInt64, negative: Bool, macs: Bool) {
         return try Crypto.Curve25519.KeyAgreement.PrivateKey(rawRepresentation: mine).sharedSecretFromKeyAgreement(with: other).withUnsafeBytes { Data($0) }
     })
 
-    // A scalar the curve rejects is drawn again: the draws are the same on both sides, which is what makes the rows comparable.
     func scalar(_ size: Int, _ valid: (Data) -> Bool) -> Data {
         var candidate = rng.bytes(size)
         while !valid(candidate) { candidate = rng.bytes(size) }
@@ -162,8 +142,6 @@ func rowsMode(seed: UInt64, negative: Bool, macs: Bool) {
     let kemSeed = rng.bytes(64)
     row("MLKEM768 public from seed", attempt { try Crypto.MLKEM768.PrivateKey(seedRepresentation: kemSeed, publicKey: nil).publicKey.rawRepresentation })
 
-    // ECDSA's DER encoder and decoder (the refused sites of P256, P384 and P521 in ECDSA.swift): a drawn raw signature is
-    // encoded, and its DER decoded back to raw, on each side. The raw values are not signatures; both sides encode the same bytes.
     let raw256 = rng.bytes(64)
     row("P256 DER encode", attempt { try Crypto.P256.Signing.ECDSASignature(rawRepresentation: raw256).derRepresentation })
     row("P256 DER round trip", attempt {
@@ -180,8 +158,6 @@ func rowsMode(seed: UInt64, negative: Bool, macs: Bool) {
         try Crypto.P521.Signing.ECDSASignature(derRepresentation: Crypto.P521.Signing.ECDSASignature(rawRepresentation: raw521).derRepresentation).rawRepresentation
     })
 
-    // DH's hkdfDerivedSymmetricKey (the refused site in DH.swift): the X25519 and P-256 shared secrets above, through HKDF.
-    // HKDF is HMAC, so the rows run only with the HMAC rows.
     if macs {
         let dhSalt = Data(repeating: 0x5a, count: 16)
         let dhInfo = rng.bytes(13)
@@ -195,9 +171,6 @@ func rowsMode(seed: UInt64, negative: Bool, macs: Bool) {
     }
 }
 
-// MARK: make and verify
-
-// A record is a line "rec name|field|field..." with every field in hex; the verifier reads the same layout, whichever side made it.
 func makeMode() {
     var rng = SplitMix64(state: 7)
     let message = rng.bytes(64)
@@ -205,7 +178,6 @@ func makeMode() {
     emit("rec ed25519|\(hex(ed.publicKey.rawRepresentation))|\(hex(message))|\(hex(try! ed.signature(for: message)))")
 
     let ecMessage = rng.bytes(120)
-    // Each ECDSA signature is emitted twice: raw, and DER (the decoder of the other side reads the DER one).
     let p256 = Crypto.P256.Signing.PrivateKey()
     let p256Signature = try! p256.signature(for: ecMessage)
     emit("rec ecdsa-p256|\(hex(p256.publicKey.rawRepresentation))|\(hex(ecMessage))|\(hex(p256Signature.rawRepresentation))")
@@ -305,14 +277,10 @@ func verifyMode(_ text: String) {
     emit("verify summary verified=\(verified) failed=\(failed)")
 }
 
-// MARK: entropy
-
 func entropyMode() {
     let key = Crypto.P256.Signing.PrivateKey()
     emit("entropy p256 \(hex(key.rawRepresentation))")
 }
-
-// MARK: main
 
 let arguments = CommandLine.arguments
 switch arguments.count > 1 ? arguments[1] : "rows" {

@@ -1,25 +1,4 @@
-/* MLFeatureDescription: what a model says about one of its features, and the constraints that
- * say which values that feature will take.
- *
- * The model reader has already read all of this out of the specification's own fields -- the
- * name, the kind of value, whether the feature may be left out, and for a multi array or an
- * image or a sequence the shape, the size, the element type and the count. This turns that into
- * the classes an application asks, and the one method that matters is `-isAllowedValue:`, which
- * is the check a caller makes before it hands a value to a model and the check the model makes
- * of what it is handed.
- *
- * The constraints are separate classes because that is how Core ML declares them: a feature of
- * the multi array type carries a multi array constraint and none of the others, and a caller
- * reading `multiArrayConstraint` of a string feature gets nil. So a description builds the
- * constraint its own type has and no other.
- */
-
 #include "CharonMLConstraints.h"
-
-/* The constraints' own storage and the one initialiser each of them is built with. None of them
- * has a public initialiser in Core ML -- a model builds them and a caller only reads them -- so
- * the initialiser each is built with is declared here, next to the storage it fills, and the
- * declaration comes before the reading code that uses it. */
 
 @interface MLMultiArrayConstraint () {
     NSArray<NSNumber *> *_shape;
@@ -62,10 +41,6 @@
 - (instancetype)charon_initWithFeature:(const charon_ml_feature *)feature;
 @end
 
-/* The element type and the shape a multi array feature takes. A model that fixes its shape
- * gives one shape here and no shape constraint at all; a model that will take a range of shapes
- * gives the range in the shape constraint, and its shape array then holds a -1 for the dimension
- * whose length is not fixed, which is the specification's own way of writing "flexible". */
 @implementation MLMultiArrayConstraint
 
 - (instancetype)charon_initWithShape:(NSArray<NSNumber *> *)shape
@@ -129,10 +104,6 @@
 
 @end
 
-/* An image feature's own numbers: the size it wants, the pixel format it wants, and the range or
- * the set of sizes it will take. The specification writes an image feature as a width, a height
- * and a colour space, and a model that will take more than one size writes the set or the range
- * beside them. */
 @implementation MLImageConstraint
 
 - (instancetype)charon_initWithPixelsHigh:(NSInteger)pixelsHigh
@@ -206,8 +177,6 @@
 
 @end
 
-/* What a dictionary feature's keys have to be. There is one thing to say about a dictionary --
- * the kind of its keys -- so this is the smallest of the constraints. */
 @implementation MLDictionaryConstraint
 
 - (instancetype)charon_initWithKeyType:(MLFeatureType)keyType
@@ -254,10 +223,6 @@
 
 @implementation MLFeatureDescription
 
-/* The description of a feature that names no constraints of its own, which is what a sequence's
- * element is: the specification types a sequence's element in the feature's own oneof rather
- * than in a description, so an element is a number or a string and nothing else, and the
- * description a caller reads it through has to say that much and no more. */
 - (instancetype)charon_initWithName:(NSString *)name
                         type:(MLFeatureType)type
                     optional:(BOOL)optional
@@ -271,15 +236,8 @@
     return built;
 }
 
-/* Builds the description of one feature out of what the model reader read for it. The name is
- * copied because the reader's copy belongs to the model and the description outlives it, and
- * each constraint is built here because whether a feature has one follows from its own type: a
- * multi array has a multi array constraint and nothing else does. */
 - (instancetype)charon_initWithFeature:(const charon_ml_feature *)feature
 {
-    /* The description of one feature is the description of its name, type and optionality with
-     * the constraints of that type built onto it, so it is built by handing those three to the
-     * initialiser that takes them and then filling in what the type implies. */
     MLFeatureDescription *built = [self charon_initWithName:feature->name != NULL ? @(feature->name) : nil
                                                       type:charon_ml_feature_type_of(feature->type)
                                                   optional:feature->optional != 0];
@@ -353,24 +311,6 @@
     return _sequenceConstraint;
 }
 
-/* Whether a value may be given to a feature with this description. This is the check the
- * specification's own fields are read for, and it is the check a model makes of what it is
- * handed, so the rules are the model's rules rather than this class's own:
- *
- *   - an undefined value is allowed exactly when the feature is optional, because a feature
- *     that is not optional is one the model cannot do without;
- *   - a defined value has to be of the type the feature names. Int64 and Double are separate
- *     types and a value of one is not a value of the other: a model that multiplies what it is
- *     given and a model that counts what it is given are told apart by this;
- *   - a multi array has to have the element type the feature names and a shape it will take:
- *     the one shape the feature fixes, or a shape inside the range it allows, or one of the
- *     shapes it enumerates. A feature that fixes no shape at all takes any, which is what a
- *     shape constraint of the unspecified kind means;
- *   - an image has to be of the size the feature fixes, inside the range it allows, or one of
- *     the sizes it enumerates;
- *   - a dictionary's keys have to be of the key type its constraint names;
- *   - a sequence has to have as many elements as its count range allows.
- */
 - (BOOL)isAllowedValue:(MLFeatureValue *)value
 {
     if (value == nil) {
@@ -453,9 +393,6 @@
     [coder encodeObject:_sequenceConstraint forKey:@"sequenceConstraint"];
 }
 
-/* A copy is a description of the same feature, and the constraints are copied with it rather
- * than shared: they are the same numbers, and one description's constraint changing under
- * another would be a change nobody asked for. */
 - (id)copyWithZone:(NSZone *)zone
 {
     MLFeatureDescription *copy = [[MLFeatureDescription allocWithZone:zone] init];

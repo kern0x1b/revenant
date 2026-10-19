@@ -1,29 +1,3 @@
-// GKGoal.m -- the twelve things an agent can be asked to do. GameplayKit.framework carries no code at
-// all before iOS 9 (GK_BASE_AVAILABILITY is NS_CLASS_AVAILABLE(10_11, 9_0) and the 6.1.3 armv7 cache
-// exports no GameplayKit class), so this is this port's own. A goal's own surface is its factories
-// and its copy: an application builds one, hands it to a behaviour with a weight, and an agent reads
-// it, and nothing else of a goal is public. So what a goal holds here is the kind its factory names
-// and the arguments it was given, and GKAgent reads them back through -charon_kind and the accessors
-// below when it decides what to do with the goals in a behaviour.
-//
-// The arguments a goal carries, by kind:
-//   seek, flee and
-//   intercept            one agent, and nil for one of those three is what the host refuses
-//   avoid obstacles     a list of obstacles and the longest time to look ahead
-//   avoid agents        a list of agents and the longest time to look ahead
-//   separate, align,
-//   cohere              a list of agents, the distance beyond which an agent is ignored, and the
-//                       angle beyond which its direction of travel is ignored
-//   target speed        one speed
-//   wander              one speed
-//   intercept           one agent and the longest time to look ahead
-//   follow path         a path, the longest time to look ahead, and whether to follow it forwards
-//   stay on path        a path and the longest time to look ahead
-//
-// Every selector below but -copyWithZone: is one the SDK's GKGoal.h declares, and -copyWithZone: is
-// the NSCopying member it adopts. Nothing here is a property, so there is nothing for
-// -Wobjc-missing-property-synthesis to say and no pragma says otherwise.
-
 #import "CharonGK.h"
 
 @implementation GKGoal {
@@ -118,12 +92,6 @@
     return [self charon_goalWithAgent:agent kind:CharonGKGoalFlee];
 }
 
-// The three factories that take ONE agent -- seek, flee and intercept -- are the three that refuse a
-// nil one, with NSInvalidArgumentException: the host keeps the agent in a one-element list and
-// building that list with nothing in it is what raises, so there is no goal to hand back at all.
-// Measured over all twelve factories: the nine that take a list, a path or a number answer for nil
-// and for an empty list alike. The archived version of this file stored nil and answered, which is a
-// goal that names an agent that is not there.
 + (instancetype)charon_goalWithAgent:(GKAgent *)agent kind:(CharonGKGoalKind)kind
 {
     if (!agent) {

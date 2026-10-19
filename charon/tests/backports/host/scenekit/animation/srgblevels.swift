@@ -1,13 +1,7 @@
-// The mip levels of an opaque sRGB image by the rule Metal's blit generateMipmaps follows for an rgba8Unorm_srgb
-// texture on macOS (facts/SceneKit/SCNView.md, "Textures"): every level is made from the level before it as that is
-// stored, 8-bit sRGB. A texel of level n + 1 is the mean, in linear light, of its 2x2 texels of level n, stored as the
-// byte whose interval [b - 0.5, b + 0.5) / 255 of the encoding holds it (half up). The oracle's own copy of the rule,
-// taken from Metal's level bytes, not from the port; all in doubles, the mean summed row by row.
 import Metal
 
 func srgbLinear(_ e: Double) -> Double { e <= 0.04045 ? e / 12.92 : pow((e + 0.055) / 1.055, 2.4) }
 
-// srgbBounds[b] is the linear value from which the byte b holds a mean, the decoding of (b - 0.5) / 255
 let srgbBounds: [Double] = (0..<256).map { $0 == 0 ? -Double.infinity : srgbLinear((Double($0) - 0.5) / 255) }
 
 func srgbByte(_ linear: Double) -> UInt8 {
@@ -16,7 +10,6 @@ func srgbByte(_ linear: Double) -> UInt8 {
     return UInt8(low)
 }
 
-// every level of a square RGBA image of side 2^k, level 0 first; alpha is 255 throughout
 func srgbLevels(_ image: [UInt8], side: Int) -> [[UInt8]] {
     var levels = [image], n = side
     while n > 1 {
@@ -32,8 +25,6 @@ func srgbLevels(_ image: [UInt8], side: Int) -> [[UInt8]] {
     return levels
 }
 
-// an rgba8Unorm_srgb texture holding exactly these levels; SceneKit samples a given texture's levels only under
-// mipFilter linear, and reads level 0 alone under nearest (host/scenekit/animation/givenlevels.swift)
 func srgbTexture(_ device: MTLDevice, _ levels: [[UInt8]], side: Int) -> MTLTexture {
     let d = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm_srgb, width: side, height: side, mipmapped: true)
     d.storageMode = .shared

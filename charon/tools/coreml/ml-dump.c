@@ -1,25 +1,9 @@
-/* Print a CoreML container as the tree it describes, in the format tools/coreml/ref-dump.py
- * prints it, so the two are diffed against each other.
- *
- * The reader this drives is the one the port loads a model with, so a difference from the
- * reference is a field the reader did not read, or read wrongly -- not a difference in how
- * this prints. The formatting follows Python's repr for a double, because that is what the
- * reference is printed with: the shortest decimal that reads back as the same value, always
- * with a point or an exponent in it, so 1 is "1.0" here and there.
- *
- * Usage: ml-dump <model.mlmodel>            the whole tree
- *        ml-dump --model-kind <model>       only which kind of model it is
- *        ml-dump --feature <name> <model>   one field of the description, by name
- */
 #include "CharonMLProto.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-/* Python's repr of a double: the shortest decimal that reads back to the same bits, which is
- * the same rule the reference is printed with. 17 significant digits always round-trips, so
- * the loop stops at or before it. */
 static void print_double(double value)
 {
     char buffer[64];
@@ -39,7 +23,6 @@ static void print_double(double value)
         }
     }
     fputs(buffer, stdout);
-    /* repr always shows a float as a float: an integral double keeps a ".0" of its own. */
     if (strpbrk(buffer, ".eEnN") == NULL) {
         fputs(".0", stdout);
     }
@@ -60,8 +43,6 @@ static void print_string(const char *bytes, size_t length)
         } else if (byte == '\t') {
             fputs("\\t", stdout);
         } else if (byte < 32 || byte >= 127) {
-            /* Python's repr escapes what is not printable as \xNN or a \u escape; the models
-             * under test hold ASCII names, and anything else is printed so it can be seen. */
             printf("\\x%02x", byte);
         } else {
             putchar(byte);
@@ -89,9 +70,6 @@ static void print_value(const charon_ml_node *node)
             print_double(node->value.number);
             break;
         case CHARON_ML_KIND_BOOL:
-            /* The reference prints a bool as protobuf's own reflection does, which is Python's:
-             * True and False, not 1 and 0. A model says hasBias, and reading "1" for it would
-             * not say the same thing about the container. */
             fputs(node->value.unsigned_integer ? "True" : "False", stdout);
             break;
         case CHARON_ML_KIND_UINT64:
@@ -125,9 +103,6 @@ static void print_repeated(const charon_ml_node *node, const char *name, size_t 
 static void walk(const charon_ml_node *node, int indent)
 {
     size_t total = charon_ml_count(node), index = 0;
-    /* A repeated field's entries are siblings in one list, so the entries that share a field
-     * are one group and are printed as one: printing each entry on its own would print a list
-     * of two values twice over, and a group is walked once however many entries it has. */
     while (index < total) {
         const charon_ml_node *entry = charon_ml_at(node, index);
         const charon_ml_field *field = entry->field;
@@ -162,8 +137,6 @@ static void walk(const charon_ml_node *node, int indent)
     }
 }
 
-/* --- the two narrow views a caller asks for ------------------------------------------------- */
-
 static const char *MODEL_KINDS[] = {
     "pipelineClassifier", "pipelineRegressor", "pipeline", "glmRegressor", "supportVectorRegressor",
     "treeEnsembleRegressor", "neuralNetworkRegressor", "bayesianProbitRegressor", "glmClassifier",
@@ -189,9 +162,6 @@ static void print_model_kind(const charon_ml_node *model)
 
 static void print_feature(const charon_ml_node *model, const char *which, const char *wanted)
 {
-    /* description.input / description.output / description.metadata are the three lists a
-     * feature is described in; the name is asked of the field, so the description is read
-     * against the specification rather than against a guess at its layout. */
     const charon_ml_node *description = charon_ml_get(model, "description");
     const charon_ml_node *list;
     char text[512];
@@ -208,8 +178,6 @@ static void print_feature(const charon_ml_node *model, const char *which, const 
         if (name != NULL && strcmp(name, wanted) == 0) {
             char line[4096];
             size_t length = 0;
-            /* The one field a caller asks for is printed as a name and the line of it, so a
-             * shell can read the answer without a parser over the whole tree. */
             const charon_ml_node *type = charon_ml_get(feature, "type");
             const charon_ml_node *array = charon_ml_get(type, "multiArrayType");
             if (array != NULL) {
@@ -238,8 +206,6 @@ static void print_feature(const charon_ml_node *model, const char *which, const 
     }
     printf("(no feature named %s)\n", wanted);
 }
-
-/* --- the entry point ------------------------------------------------------------------------ */
 
 static char *slurp(const char *path, size_t *length)
 {

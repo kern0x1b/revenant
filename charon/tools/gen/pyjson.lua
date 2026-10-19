@@ -1,12 +1,3 @@
--- JSON text laid out as Python's json.dump(value, indent=N) lays it out, so a generator's registry and manifest files are byte-equal
--- to the Python they replace. A value is a string, an integer, nil (null), a list {array = {...}}, or an object {object = {{key, value},
--- ...}} whose keys keep the order they are given in. Strings are escaped as ensure_ascii does. json.dump writes no newline after the
--- value, and so does this: a caller that wants one adds it.
---
---     encode(value, unit)   unit is one level of indentation: "  " for indent=2, " " for indent=1
-
--- A JSON string, quoted and escaped. A non-ASCII byte would be written as \uXXXX by Python, and this writer does not do that, so it
--- refuses one rather than write a different file.
 local function string_text(text)
     assert(not string.find(text, "[\128-\255]"), "a JSON string holds a non-ASCII byte, which this writer does not escape")
     local escaped = string.gsub(text, "[%z\1-\31\"\\]", function (c)

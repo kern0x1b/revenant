@@ -1,9 +1,8 @@
--- xmake l ladder.lua <modules> <out> : first release on the cache ladder carrying each SCNView-related name, both ways
 local CLASSES = {"SCNView", "SCNScene", "SCNNode", "SCNRenderer", "SCNTransaction", "SCNAction",
-    "UIView" --[[ positive control ]], "CharonNoSuchClassXYZ" --[[ negative control ]]}
+    "UIView" , "CharonNoSuchClassXYZ" }
 local PROTOCOLS = {"SCNSceneRenderer", "SCNSceneRendererDelegate", "SCNAnimatable"}
 local SELECTORS = {
-    {"UIView", "-", "setNeedsLayout"} --[[ selector control ]], {"UIView", "-", "charonNoSuchSelector"} --[[ negative ]], {"SCNView", "-", "initWithFrame:options:"}, {"SCNView", "-", "initWithFrame:"},
+    {"UIView", "-", "setNeedsLayout"} , {"UIView", "-", "charonNoSuchSelector"} , {"SCNView", "-", "initWithFrame:options:"}, {"SCNView", "-", "initWithFrame:"},
     {"SCNView", "-", "scene"}, {"SCNView", "-", "setScene:"},
     {"SCNView", "-", "delegate"}, {"SCNView", "-", "setDelegate:"},
     {"SCNView", "-", "preferredFramesPerSecond"}, {"SCNView", "-", "setPreferredFramesPerSecond:"},
@@ -27,7 +26,7 @@ local SELECTORS = {
 local SYMBOLS = {"_SCNPreferredRenderingAPIKey", "_SCNPreferLowPowerDeviceKey",
     "_SCNParticlePropertySize", "_SCNParticlePropertyColor", "_SCNParticlePropertyOpacity",
     "_SCNLightingModelBlinn", "_SCNLightingModelPhysicallyBased",
-    "_UIApplicationDidBecomeActiveNotification" --[[ control ]]}
+    "_UIApplicationDidBecomeActiveNotification" }
 local RELEASES = {"6.1.3", "7.0", "7.1.2", "8.0", "8.1.3", "8.4.1", "9.0", "9.3", "10.0.1", "10.3", "11.0", "12.0", "16.0"}
 
 function main(modules, output)

@@ -1,18 +1,3 @@
-// dateinterval.m - NSDateIntervalFormatter on the release the program runs on, against the golden file. A command-line
-// program: build it as a daemon target that requires charon@apple-backports and run it with
-// `xmake emulate -r 6.1.3 run /usr/libexec/dateinterval <path to expected.txt>`.
-//
-// Every expected answer in the file is the host's own NSDateIntervalFormatter's, written out by dateinterval/make-expected.m
-// over fifteen locales x the twenty-five pairs of the five styles x three zones x three date pairs - 3375 cases. The class
-// here is the port's, which is the release's own DateIntervalFormat underneath (udtitvfmt_*, exported by the release's
-// libicucore from iOS 5.0 on, measured), so the answers are the release's and the golden file is what holds them.
-//
-// The class arrived in iOS 8.0 and the port carries it from 5.0, so on a release from 5.0 to 7.x the class is the port's and
-// every case runs; from 8.0 on the release's own class is the one linked and the same comparison is the check that it
-// behaves as the port says it does.
-//
-// The comparison is line by line and the order is the one make-expected.m wrote, so a line that differs names its own case.
-
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #include <stdio.h>
@@ -47,12 +32,8 @@ int main(int argc, char **argv)
         if (!contents)
             return 1;
 
-        // One class, from whichever image the band linked: the port's below 8.0 and the release's from there.
         Class formatterClass = NSClassFromString(@"NSDateIntervalFormatter");
         if (!formatterClass) {
-            // The class floor is 5.0 and below6's "ported" cell builds at 4.3, where band() leaves the
-            // object out and the release's own Foundation has no such class. A 4.3 run has nothing to
-            // compare and says so; it is not a failure of the port (the review's finding F).
             printf("dateinterval: no NSDateIntervalFormatter on this release, which is below the 5.0 floor\n");
             return 0;
         }
@@ -64,11 +45,6 @@ int main(int argc, char **argv)
             if (!line.length)
                 continue;
             NSArray *fields = SplitLine(line);
-            // The golden file has three kinds of line and each has its own shape: a `defaults` line is
-            // the key, the two styles and the template the host read off a fresh formatter; a `template`
-            // line is the key, the locale, the skeleton, the start and the answer; and every other line
-            // is the seven-field case. Reading them all as the seven-field shape rejects the 135
-            // defaults and the 105 template lines outright (the review's finding 2).
             if ([fields[0] isEqualToString:@"defaults"]) {
                 NSDateIntervalFormatter *fresh = [[formatterClass alloc] init];
                 NSString *what = [NSString stringWithFormat:@"the defaults of a fresh formatter: %@", line];
@@ -125,7 +101,6 @@ int main(int argc, char **argv)
             compared++;
             if (![answer isEqualToString:expected]) {
                 differing++;
-                // The first twenty, so a systematic difference is readable and not a wall.
                 if (differing <= 20) {
                     NSString *mine = [answer description];
                     NSString *note = [NSString stringWithFormat:@"%@ %ld %ld %@ expected [%@] got [%@]",
@@ -133,7 +108,6 @@ int main(int argc, char **argv)
                     printf("  %s\n", [note UTF8String]);
                 }
             }
-            // The two methods, not one: the interval of the class carries the same answer as the pair of dates.
             SEL withInterval = NSSelectorFromString(@"stringFromDateInterval:");
             if ([formatter respondsToSelector:withInterval]) {
                 Class intervalClass = NSClassFromString(@"NSDateInterval");

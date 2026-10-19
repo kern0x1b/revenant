@@ -1,5 +1,3 @@
-// The five property-key constants: that each is the global the header declares and not a method, and
-// that a key read through it is the same value the getter reads.
 #import "MPMediaItemStandin.h"
 
 @implementation MPMediaItem

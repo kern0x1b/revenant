@@ -1,31 +1,8 @@
-/*
- * nw_parameters_t, the calls that arrived with it in iOS 12: the factories that build a stack, and
- * everything a program can say about the path a connection of these parameters takes and about the
- * interface it will not take.
- *
- * A stack here is the three layers a connection is built from - the internet protocol, the transport
- * protocol, and the application protocols above them - held as the options of each. The factories
- * differ in what they put in the stack and in what they hand the caller's configure block: the
- * block of a protocol is run with that protocol's own options, once, before the stack is given
- * back, and the two sentinels the header names are compared by pointer, so each is defined here as
- * the empty block it is documented to behave as.
- *
- * The settings that reach the socket are read back by the connection that is given these
- * parameters: the TCP ones become setsockopt calls and the path ones are what the path monitor is
- * asked, so a program that sets them changes what its connection does rather than a field nobody
- * reads.
- */
-
 #import "CharonNW.h"
 #import "CharonNWSupport.h"
 
 #include <string.h>
 
-/* The SDK's two sentinels, which on a release with no Network bind as the null: a caller passes
-   NW_PARAMETERS_DEFAULT_CONFIGURATION to mean "the defaults" and NW_PARAMETERS_DISABLE_PROTOCOL to
-   mean "this protocol is not part of the stack", and every factory that takes them compares them by
-   pointer. Each is given here as the empty block it is documented to behave as, so the pointer the
-   caller passes is a real one and the comparison means what it says. */
 const nw_parameters_configure_protocol_block_t _nw_parameters_configure_protocol_default_configuration =
     ^(nw_protocol_options_t options) {
         (void)options;
@@ -71,14 +48,11 @@ static CharonNWProtocolStack *charon_stack(nw_protocol_definition_t transport, n
     return stack;
 }
 
-/* Whether the block a factory was given is the sentinel that leaves a protocol out. */
 static bool charon_disabled(nw_parameters_configure_protocol_block_t configure)
 {
     return configure == (nw_parameters_configure_protocol_block_t)_nw_parameters_configure_protocol_disable;
 }
 
-/* Whether the block is the one that means "the defaults", which is the same as a block of one's own
-   that changes nothing - so a program's own block that sets nothing leaves the protocol as it is. */
 static bool charon_defaulted(nw_parameters_configure_protocol_block_t configure)
 {
     return !configure ||
@@ -87,11 +61,6 @@ static bool charon_defaulted(nw_parameters_configure_protocol_block_t configure)
 
 nw_parameters_t nw_parameters_create(void)
 {
-    /* No transport protocol is in the stack yet: the default stack of a plain parameters holds the
-       internet protocol, and the transport is decided when a connection is made of it - which is a
-       TCP connection, because that is the transport a connection with no transport is. Measured on
-       the host (tests/backports/host/network-objects), which answers NULL for the transport here
-       and a transport for every other factory. */
     return charon_parameters(charon_stack(NULL, nw_protocol_copy_ip_definition()));
 }
 
@@ -113,8 +82,6 @@ nw_parameters_t nw_parameters_create_secure_tcp(nw_parameters_configure_protocol
 nw_parameters_t nw_parameters_create_secure_udp(nw_parameters_configure_protocol_block_t configure_dtls,
                                                 nw_parameters_configure_protocol_block_t configure_udp)
 {
-    /* The two protocol stacks are built in that order, the secure one above the plain one, so the
-       DTLS block runs first. */
     CharonNWProtocolStack *stack = charon_stack(nw_protocol_copy_udp_definition(), nw_protocol_copy_ip_definition());
     if (!charon_disabled(configure_dtls)) {
         CharonNWProtocolOptions *tls = (CharonNWProtocolOptions *)nw_tls_create_options();

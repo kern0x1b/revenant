@@ -1,15 +1,6 @@
--- The implementation leads of a surface row: where a reference implementation might be read, by file name (its Impl, read
--- from the file lists `impl-index` wrote under corpus/impl-source-trees). A lead is a file of the name the row's type, function or
--- constant has, in a repository that stands for the framework; it is a lead, not a fact of implementation. Nothing is cloned or read
--- but the file lists.
-
 local files = import("files", {anonymous = true})
 local json = import("core.base.json")
 
--- The repositories the leads come from: `frameworks` names the frameworks a repository stands for (nil:
--- by directory, in `directory` repositories), `under` the folder its sources sit in, `strip` a prefix the repository's names drop,
--- `prefix` a function's or a constant's name that is a prefix of the file's, and `directory` the frameworks' own folders.
--- `branch` is the branch `impl-index` (tools/gen/cmd_impl-index.lua) lists.
 local REPOS = {
     {source = "swift-foundation", repo = "swiftlang/swift-foundation", branch = "main", frameworks = {Foundation = true},
      under = "Sources/"},
@@ -27,7 +18,6 @@ local REPOS = {
     {source = "WinObjC", repo = "microsoft/WinObjC", branch = "develop", under = "Frameworks/", prefix = true, directory = true},
 }
 
--- The repositories, for the command that lists their files.
 function repositories()
     return REPOS
 end
@@ -35,8 +25,6 @@ local SOURCE_SUFFIXES = {".swift", ".c", ".m", ".mm", ".cpp", ".cc", ".h", ".hpp
 local SKIPPED_DIRS = {"Tests/", "Test/", "Example", "Benchmarks/", ".github/", "docs/", "Docs/", "tests/", "samples/", "Samples/"}
 local MEMBER_KINDS = {method = true, property = true, constant = true}
 
--- The index of one repository: its file stems, by (directory, stem), each to the shortest file name of that stem; and the directories
--- its files sit in (a `directory` repository only).
 local function index_of(corpus, entry)
     local text = files.read_text(path.join(corpus, "impl-source-trees", string.gsub(entry.repo, "/", "_") .. ".json"))
     assert(text, "no file list for " .. entry.repo .. ": run tools/gen.lua impl-index first")
@@ -85,9 +73,6 @@ local function index_of(corpus, entry)
     return {stems = stems, directories = directories}
 end
 
--- The candidate stems of a name in one repository: the name itself (its part before the parentheses), its alias without the prefix
--- the repository's `strip` names, and, for a function or a constant (`loose`) in a `prefix` repository, every prefix that ends where a
--- capital letter or an underscore begins, longest first.
 local function candidates(entry, name, loose)
     local base = string.match(name, "^([^(]*)")
     local found = {base}
@@ -106,8 +91,6 @@ local function candidates(entry, name, loose)
     return found
 end
 
--- The owners a row's name belongs to, nearest first: its class for an ObjC member, and for a Swift member its type and the types that
--- enclose it. Only members, constants and the like have owners; a type or a function has none.
 local function owners(kind, lang, api)
     local objc_owner = string.match(api, "^[-+]%[([%w_]+) ")
     if objc_owner then
@@ -135,7 +118,6 @@ local function owners(kind, lang, api)
     return out
 end
 
--- The index of every repository, read once per corpus: a list of {entry, index}.
 local memo = {}
 local function indexes(corpus)
     if memo[corpus] == nil then
@@ -148,8 +130,6 @@ local function indexes(corpus)
     return memo[corpus]
 end
 
--- The leads of one surface row: {source = ..., file = "repo:path"} in the repositories' order, one per repository. A row in a
--- framework no repository stands for has none.
 function leads(corpus, framework, kind, lang, api)
     local owner_names = owners(kind, lang, api)
     local member = #owner_names > 0 and MEMBER_KINDS[kind] ~= nil

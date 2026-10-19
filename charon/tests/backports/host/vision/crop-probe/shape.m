@@ -1,15 +1,3 @@
-/* shape.m -- on the targets that are not square, which rule is it: the centre *square* of the
- * source, or the largest centred rect of the target's aspect?
- *
- * A square target cannot tell them apart -- both give 50x50 of a 100x50 source -- so this scores
- * both on the two targets the corpus has that are not square, where they differ sharply: for
- * 16x8 to 32x8 the square is an 8x8 of a sixteen wide source, stretched 4x across and 1x down,
- * while the target's aspect takes the full width and four rows, which is the cover the port
- * already implements.
- *
- * Scored, not fitted: each rule predicts a source position for every destination pixel, and the
- * prediction is compared with the source position the ramp in Core ML's own answer reports.
- */
 #import <CoreGraphics/CoreGraphics.h>
 #import <CoreVideo/CoreVideo.h>
 #import <CoreML/CoreML.h>

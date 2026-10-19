@@ -1,4 +1,3 @@
-// gl-extensions : what the GPU's OpenGL ES 2.0 context offers — its renderer, version and extensions, one per line. The SCNView renderer picks how it holds a colour slot's image from this (facts/SceneKit/SCNView.md, "Textures").
 #import <OpenGLES/EAGL.h>
 #import <OpenGLES/ES2/gl.h>
 #include <stdio.h>

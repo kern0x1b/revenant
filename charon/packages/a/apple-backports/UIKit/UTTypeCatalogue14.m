@@ -1,379 +1,241 @@
 #import "CharonUTType.h"
 
-// UniformTypeIdentifiers' system type catalogue, iOS 14: the 119 constants of SDK 26.2's
-// UTCoreTypes.h whose availability the corpus places in this band, out of the 14.0 the file declares.
-// Every identifier below is the `UTI:` line of that constant's own doc comment in
-// System/Library/Frameworks/UniformTypeIdentifiers.framework/Headers/UTCoreTypes.h of
-// charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk -- transcribed one row per constant, nothing recalled
-// and nothing inferred from the identifier's own shape. One value is not the header's:
-// UTTypeInternetShortcut, where the header repeats the identifier of the constant directly above it
-// and the system's own UniformTypeIdentifiers answers com.microsoft.internet-shortcut (measured, and
-// re-measured on every run of tests/backports/host/uttypeconstants, which reads the value out of the
-// host rather than out of this file). facts/UIKit/UTTypeCatalogue.md carries the whole table.
-//
-// One release per object file: this object holds the 14.0 catalogue only, and the files beside it hold
-// the other bands, so every symbol first appears in exactly one release and release-split is clean.
-// The constants are plain, non-const globals filled in once by a constructor, the way UIKit/UTType.m
-// already fills the eleven it carried first and the way CFEmptyCollections.m fills
-// __NSArray0__/__NSDictionary0__: a recent SDK's header declares these `UTType *const`, but that is a
-// promise to the header's callers, not a constraint on how this backport's translation unit stores
-// them.
-
-// UTTypeCompositeContent is public.composite-content.
 UTType *UTTypeCompositeContent;
 
-// UTTypeDiskImage is public.disk-image.
 UTType *UTTypeDiskImage;
 
-// UTTypeResolvable is com.apple.resolvable.
 UTType *UTTypeResolvable;
 
-// UTTypeSymbolicLink is public.symlink.
 UTType *UTTypeSymbolicLink;
 
-// UTTypeExecutable is public.executable.
 UTType *UTTypeExecutable;
 
-// UTTypeMountPoint is com.apple.mount-point.
 UTType *UTTypeMountPoint;
 
-// UTTypeAliasFile is com.apple.alias-file.
 UTType *UTTypeAliasFile;
 
-// UTTypeURLBookmarkData is com.apple.bookmark.
 UTType *UTTypeURLBookmarkData;
 
-// UTTypeUTF16ExternalPlainText is public.utf16-external-plain-text.
 UTType *UTTypeUTF16ExternalPlainText;
 
-// UTTypeUTF16PlainText is public.utf16-plain-text.
 UTType *UTTypeUTF16PlainText;
 
-// UTTypeDelimitedText is public.delimited-values-text.
 UTType *UTTypeDelimitedText;
 
-// UTTypeCommaSeparatedText is public.comma-separated-values-text.
 UTType *UTTypeCommaSeparatedText;
 
-// UTTypeTabSeparatedText is public.tab-separated-values-text.
 UTType *UTTypeTabSeparatedText;
 
-// UTTypeUTF8TabSeparatedText is public.utf8-tab-separated-values-text.
 UTType *UTTypeUTF8TabSeparatedText;
 
-// UTTypeRTF is public.rtf.
 UTType *UTTypeRTF;
 
-// UTTypeHTML is public.html.
 UTType *UTTypeHTML;
 
-// UTTypeXML is public.xml.
 UTType *UTTypeXML;
 
-// UTTypeYAML is public.yaml.
 UTType *UTTypeYAML;
 
-// UTTypeSourceCode is public.source-code.
 UTType *UTTypeSourceCode;
 
-// UTTypeAssemblyLanguageSource is public.assembly-source.
 UTType *UTTypeAssemblyLanguageSource;
 
-// UTTypeCSource is public.c-source.
 UTType *UTTypeCSource;
 
-// UTTypeObjectiveCSource is public.objective-c-source.
 UTType *UTTypeObjectiveCSource;
 
-// UTTypeSwiftSource is public.swift-source.
 UTType *UTTypeSwiftSource;
 
-// UTTypeCPlusPlusSource is public.c-plus-plus-source.
 UTType *UTTypeCPlusPlusSource;
 
-// UTTypeObjectiveCPlusPlusSource is public.objective-c-plus-plus-source.
 UTType *UTTypeObjectiveCPlusPlusSource;
 
-// UTTypeCHeader is public.c-header.
 UTType *UTTypeCHeader;
 
-// UTTypeCPlusPlusHeader is public.c-plus-plus-header.
 UTType *UTTypeCPlusPlusHeader;
 
-// UTTypeScript is public.script.
 UTType *UTTypeScript;
 
-// UTTypeAppleScript is com.apple.applescript.text.
 UTType *UTTypeAppleScript;
 
-// UTTypeOSAScript is com.apple.applescript.script.
 UTType *UTTypeOSAScript;
 
-// UTTypeOSAScriptBundle is com.apple.applescript.script-bundle.
 UTType *UTTypeOSAScriptBundle;
 
-// UTTypeJavaScript is com.netscape.javascript-source.
 UTType *UTTypeJavaScript;
 
-// UTTypeShellScript is public.shell-script.
 UTType *UTTypeShellScript;
 
-// UTTypePerlScript is public.perl-script.
 UTType *UTTypePerlScript;
 
-// UTTypePythonScript is public.python-script.
 UTType *UTTypePythonScript;
 
-// UTTypeRubyScript is public.ruby-script.
 UTType *UTTypeRubyScript;
 
-// UTTypePHPScript is public.php-script.
 UTType *UTTypePHPScript;
 
-// UTTypeJSON is public.json.
 UTType *UTTypeJSON;
 
-// UTTypePropertyList is com.apple.property-list.
 UTType *UTTypePropertyList;
 
-// UTTypeXMLPropertyList is com.apple.xml-property-list.
 UTType *UTTypeXMLPropertyList;
 
-// UTTypeBinaryPropertyList is com.apple.binary-property-list.
 UTType *UTTypeBinaryPropertyList;
 
-// UTTypeRTFD is com.apple.rtfd.
 UTType *UTTypeRTFD;
 
-// UTTypeFlatRTFD is com.apple.flat-rtfd.
 UTType *UTTypeFlatRTFD;
 
-// UTTypeWebArchive is com.apple.webarchive.
 UTType *UTTypeWebArchive;
 
-// UTTypeJPEG is public.jpeg.
 UTType *UTTypeJPEG;
 
-// UTTypeTIFF is public.tiff.
 UTType *UTTypeTIFF;
 
-// UTTypeGIF is com.compuserve.gif.
 UTType *UTTypeGIF;
 
-// UTTypePNG is public.png.
 UTType *UTTypePNG;
 
-// UTTypeICNS is com.apple.icns.
 UTType *UTTypeICNS;
 
-// UTTypeBMP is com.microsoft.bmp.
 UTType *UTTypeBMP;
 
-// UTTypeICO is com.microsoft.ico.
 UTType *UTTypeICO;
 
-// UTTypeRAWImage is public.camera-raw-image.
 UTType *UTTypeRAWImage;
 
-// UTTypeSVG is public.svg-image.
 UTType *UTTypeSVG;
 
-// UTTypeLivePhoto is com.apple.live-photo.
 UTType *UTTypeLivePhoto;
 
-// UTTypeHEIF is public.heif.
 UTType *UTTypeHEIF;
 
-// UTTypeHEIC is public.heic.
 UTType *UTTypeHEIC;
 
-// UTTypeWebP is org.webmproject.webp.
 UTType *UTTypeWebP;
 
-// UTType3DContent is public.3d-content.
 UTType *UTType3DContent;
 
-// UTTypeUSD is com.pixar.universal-scene-description.
 UTType *UTTypeUSD;
 
-// UTTypeUSDZ is com.pixar.universal-scene-description-mobile.
 UTType *UTTypeUSDZ;
 
-// UTTypeRealityFile is com.apple.reality.
 UTType *UTTypeRealityFile;
 
-// UTTypeSceneKitScene is com.apple.scenekit.scene.
 UTType *UTTypeSceneKitScene;
 
-// UTTypeARReferenceObject is com.apple.arobject.
 UTType *UTTypeARReferenceObject;
 
-// UTTypeAudiovisualContent is public.audiovisual-content.
 UTType *UTTypeAudiovisualContent;
 
-// UTTypeMovie is public.movie.
 UTType *UTTypeMovie;
 
-// UTTypeVideo is public.video.
 UTType *UTTypeVideo;
 
-// UTTypeAudio is public.audio.
 UTType *UTTypeAudio;
 
-// UTTypeQuickTimeMovie is com.apple.quicktime-movie.
 UTType *UTTypeQuickTimeMovie;
 
-// UTTypeMPEG is public.mpeg.
 UTType *UTTypeMPEG;
 
-// UTTypeMPEG2Video is public.mpeg-2-video.
 UTType *UTTypeMPEG2Video;
 
-// UTTypeMPEG2TransportStream is public.mpeg-2-transport-stream.
 UTType *UTTypeMPEG2TransportStream;
 
-// UTTypeMP3 is public.mp3.
 UTType *UTTypeMP3;
 
-// UTTypeMPEG4Movie is public.mpeg-4.
 UTType *UTTypeMPEG4Movie;
 
-// UTTypeMPEG4Audio is public.mpeg-4-audio.
 UTType *UTTypeMPEG4Audio;
 
-// UTTypeAppleProtectedMPEG4Audio is com.apple.protected-mpeg-4-audio.
 UTType *UTTypeAppleProtectedMPEG4Audio;
 
-// UTTypeAppleProtectedMPEG4Video is com.apple.protected-mpeg-4-video.
 UTType *UTTypeAppleProtectedMPEG4Video;
 
-// UTTypeAVI is public.avi.
 UTType *UTTypeAVI;
 
-// UTTypeAIFF is public.aiff-audio.
 UTType *UTTypeAIFF;
 
-// UTTypeWAV is com.microsoft.waveform-audio.
 UTType *UTTypeWAV;
 
-// UTTypeMIDI is public.midi-audio.
 UTType *UTTypeMIDI;
 
-// UTTypePlaylist is public.playlist.
 UTType *UTTypePlaylist;
 
-// UTTypeM3UPlaylist is public.m3u-playlist.
 UTType *UTTypeM3UPlaylist;
 
-// UTTypeFolder is public.folder.
 UTType *UTTypeFolder;
 
-// UTTypeVolume is public.volume.
 UTType *UTTypeVolume;
 
-// UTTypePackage is com.apple.package.
 UTType *UTTypePackage;
 
-// UTTypeBundle is com.apple.bundle.
 UTType *UTTypeBundle;
 
-// UTTypePluginBundle is com.apple.plugin.
 UTType *UTTypePluginBundle;
 
-// UTTypeSpotlightImporter is com.apple.metadata-importer.
 UTType *UTTypeSpotlightImporter;
 
-// UTTypeQuickLookGenerator is com.apple.quicklook-generator.
 UTType *UTTypeQuickLookGenerator;
 
-// UTTypeXPCService is com.apple.xpc-service.
 UTType *UTTypeXPCService;
 
-// UTTypeFramework is com.apple.framework.
 UTType *UTTypeFramework;
 
-// UTTypeApplication is com.apple.application.
 UTType *UTTypeApplication;
 
-// UTTypeApplicationBundle is com.apple.application-bundle.
 UTType *UTTypeApplicationBundle;
 
-// UTTypeApplicationExtension is com.apple.application-and-system-extension.
 UTType *UTTypeApplicationExtension;
 
-// UTTypeUnixExecutable is public.unix-executable.
 UTType *UTTypeUnixExecutable;
 
-// UTTypeEXE is com.microsoft.windows-executable.
 UTType *UTTypeEXE;
 
-// UTTypeSystemPreferencesPane is com.apple.systempreference.prefpane.
 UTType *UTTypeSystemPreferencesPane;
 
-// UTTypeArchive is public.archive.
 UTType *UTTypeArchive;
 
-// UTTypeGZIP is org.gnu.gnu-zip-archive.
 UTType *UTTypeGZIP;
 
-// UTTypeBZ2 is public.bzip2-archive.
 UTType *UTTypeBZ2;
 
-// UTTypeZIP is public.zip-archive.
 UTType *UTTypeZIP;
 
-// UTTypeAppleArchive is com.apple.archive.
 UTType *UTTypeAppleArchive;
 
-// UTTypeSpreadsheet is public.spreadsheet.
 UTType *UTTypeSpreadsheet;
 
-// UTTypePresentation is public.presentation.
 UTType *UTTypePresentation;
 
-// UTTypeDatabase is public.database.
 UTType *UTTypeDatabase;
 
-// UTTypeMessage is public.message.
 UTType *UTTypeMessage;
 
-// UTTypeContact is public.contact.
 UTType *UTTypeContact;
 
-// UTTypeVCard is public.vcard.
 UTType *UTTypeVCard;
 
-// UTTypeToDoItem is public.to-do-item.
 UTType *UTTypeToDoItem;
 
-// UTTypeCalendarEvent is public.calendar-event.
 UTType *UTTypeCalendarEvent;
 
-// UTTypeEmailMessage is public.email-message.
 UTType *UTTypeEmailMessage;
 
-// UTTypeInternetLocation is com.apple.internet-location.
 UTType *UTTypeInternetLocation;
 
-// UTTypeInternetShortcut is com.microsoft.internet-shortcut.
 UTType *UTTypeInternetShortcut;
 
-// UTTypeFont is public.font.
 UTType *UTTypeFont;
 
-// UTTypeBookmark is public.bookmark.
 UTType *UTTypeBookmark;
 
-// UTTypePKCS12 is com.rsa.pkcs-12.
 UTType *UTTypePKCS12;
 
-// UTTypeX509Certificate is public.x509-certificate.
 UTType *UTTypeX509Certificate;
 
-// UTTypeEPUB is org.idpf.epub-container.
 UTType *UTTypeEPUB;
 
-// UTTypeLog is public.log.
 UTType *UTTypeLog;
 
 __attribute__((constructor)) static void charon_uttype_catalog_14(void)
@@ -498,16 +360,8 @@ __attribute__((constructor)) static void charon_uttype_catalog_14(void)
     UTTypeEPUB = [UTType typeWithIdentifier:@"org.idpf.epub-container"];
     UTTypeLog = [UTType typeWithIdentifier:@"public.log"];
 
-    // Handed to the index -[UTType supertypes] reads; see UIKit/UTTypeCatalogueIndex.m.
     charon_uttype_catalogue_add(@[UTTypeCompositeContent, UTTypeDiskImage, UTTypeResolvable, UTTypeSymbolicLink, UTTypeExecutable, UTTypeMountPoint, UTTypeAliasFile, UTTypeURLBookmarkData, UTTypeUTF16ExternalPlainText, UTTypeUTF16PlainText, UTTypeDelimitedText, UTTypeCommaSeparatedText, UTTypeTabSeparatedText, UTTypeUTF8TabSeparatedText, UTTypeRTF, UTTypeHTML, UTTypeXML, UTTypeYAML, UTTypeSourceCode, UTTypeAssemblyLanguageSource, UTTypeCSource, UTTypeObjectiveCSource, UTTypeSwiftSource, UTTypeCPlusPlusSource, UTTypeObjectiveCPlusPlusSource, UTTypeCHeader, UTTypeCPlusPlusHeader, UTTypeScript, UTTypeAppleScript, UTTypeOSAScript, UTTypeOSAScriptBundle, UTTypeJavaScript, UTTypeShellScript, UTTypePerlScript, UTTypePythonScript, UTTypeRubyScript, UTTypePHPScript, UTTypeJSON, UTTypePropertyList, UTTypeXMLPropertyList, UTTypeBinaryPropertyList, UTTypeRTFD, UTTypeFlatRTFD, UTTypeWebArchive, UTTypeJPEG, UTTypeTIFF, UTTypeGIF, UTTypePNG, UTTypeICNS, UTTypeBMP, UTTypeICO, UTTypeRAWImage, UTTypeSVG, UTTypeLivePhoto, UTTypeHEIF, UTTypeHEIC, UTTypeWebP, UTType3DContent, UTTypeUSD, UTTypeUSDZ, UTTypeRealityFile, UTTypeSceneKitScene, UTTypeARReferenceObject, UTTypeAudiovisualContent, UTTypeMovie, UTTypeVideo, UTTypeAudio, UTTypeQuickTimeMovie, UTTypeMPEG, UTTypeMPEG2Video, UTTypeMPEG2TransportStream, UTTypeMP3, UTTypeMPEG4Movie, UTTypeMPEG4Audio, UTTypeAppleProtectedMPEG4Audio, UTTypeAppleProtectedMPEG4Video, UTTypeAVI, UTTypeAIFF, UTTypeWAV, UTTypeMIDI, UTTypePlaylist, UTTypeM3UPlaylist, UTTypeFolder, UTTypeVolume, UTTypePackage, UTTypeBundle, UTTypePluginBundle, UTTypeSpotlightImporter, UTTypeQuickLookGenerator, UTTypeXPCService, UTTypeFramework, UTTypeApplication, UTTypeApplicationBundle, UTTypeApplicationExtension, UTTypeUnixExecutable, UTTypeEXE, UTTypeSystemPreferencesPane, UTTypeArchive, UTTypeGZIP, UTTypeBZ2, UTTypeZIP, UTTypeAppleArchive, UTTypeSpreadsheet, UTTypePresentation, UTTypeDatabase, UTTypeMessage, UTTypeContact, UTTypeVCard, UTTypeToDoItem, UTTypeCalendarEvent, UTTypeEmailMessage, UTTypeInternetLocation, UTTypeInternetShortcut, UTTypeFont, UTTypeBookmark, UTTypePKCS12, UTTypeX509Certificate, UTTypeEPUB, UTTypeLog]);
 }
 
-// UTTagClass.h carries two tag classes, and their values are the same two strings the release's own
-// MobileCoreServices declares as kUTTagClassFilenameExtension and kUTTagClassMIMEType --
-// UniformTypeIdentifiers' spelling of the same two, whose values the host's own answers with are
-// public.filename-extension and public.mime-type, read on every run of
-// tests/backports/host/uttypeconstants. They are `NSString *const` in the SDK's own header, and a
-// const object needs its initializer at its definition, so unlike the UTType constants above these
-// two are not filled in by the constructor.
 NSString *const UTTagClassFilenameExtension = @"public.filename-extension";
 NSString *const UTTagClassMIMEType = @"public.mime-type";

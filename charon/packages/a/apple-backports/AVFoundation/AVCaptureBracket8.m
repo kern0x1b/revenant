@@ -5,34 +5,6 @@
 
 #import "CharonAVFDescriptorConstruction.h"
 
-// The bracketed still-image settings, iOS 8: the abstract base and its two concrete forms.
-//
-// The first HELD RUNG that exports these three classes and their metaclasses is **8.0**, measured over
-// every held cache with _NSFileSize planted as a control; 4.3, 6.1.3 and 7.0 do not export them, and
-// they are the releases the port's floor spans, so the port defines all three under Apple's own
-// names.
-//
-// **What the host actually declares, which is what these are written against** (own methods, own
-// properties, instance size):
-//
-//   AVCaptureBracketedStillImageSettings               -initSubclass only, size 8, superclass NSObject
-//   …AutoExposureBracketedStillImageSettings          exposureTargetBias (float, R), superclass the
-//                                                      base, size 16, and
-//                                                      +autoExposureSettingsWithExposureTargetBias:
-//   …ManualExposureBracketedStillImageSettings         exposureDuration (CMTime, R) and ISO (float,
-//                                                      R), superclass the base, size 40, and
-//                                                      +manualExposureSettingsWithExposureDuration:ISO:
-//
-// So the base is an abstract marker with no members of its own - the port defines the class and its
-// Charon initializer and nothing else, because there is nothing else. An empty class of that name
-// would satisfy every `isKindOfClass:` and answer no numbers at all, which is the shape this registry
-// calls out; these two answer theirs.
-//
-// A bracketed settings object is plain configuration: it names an exposure bias, a duration and an
-// ISO, and it means all three before a device is anywhere near it. That is what makes it carryable -
-// nothing here needs a capture device, and the two class factories below are the header's own ways of
-// making one.
-
 @implementation AVCaptureBracketedStillImageSettings
 
 - (float)charon_exposureTargetBias
@@ -48,8 +20,6 @@
 
 - (CMTime)charon_exposureDuration
 {
-    // CMTime is a struct, so it is boxed by its own bytes and read back the same way; NSValue has no
-    // accessor for a CMTime and the first version of this asked it for one.
     NSValue *boxed = objc_getAssociatedObject(self, "charon.avf.bracket.exposureDuration");
     CMTime duration = kCMTimeZero;
     if (boxed) {
@@ -60,7 +30,6 @@
 
 - (void)charon_setExposureDuration:(CMTime)exposureDuration
 {
-    // CMTime has no NSValue boxing, so the two integers are boxed in one; the header's own struct.
     objc_setAssociatedObject(self, "charon.avf.bracket.exposureDuration",
                              [NSValue valueWithBytes:&exposureDuration objCType:@encode(CMTime)],
                              OBJC_ASSOCIATION_RETAIN);

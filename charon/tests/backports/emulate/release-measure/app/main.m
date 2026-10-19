@@ -1,6 +1,3 @@
-// The 6.1.3 release's own answers, read at run time. Nothing here names a class the release may lack at link time: each class
-// is looked up by name, each selector is asked of the class, and each conversion step is called through objc_msgSend, so a
-// missing class or selector is a measured answer, not a failed load.
 #import <Foundation/Foundation.h>
 #import <CoreVideo/CoreVideo.h>
 #import <CoreGraphics/CoreGraphics.h>
@@ -14,7 +11,6 @@ static void Info(NSString *name, NSString *detail)
     fflush(stdout);
 }
 
-// The name of the exception the block raises, or nil when it returns.
 static NSString *RaisedBy(void (^block)(void))
 {
     @try {
@@ -54,7 +50,6 @@ static void SelectorMeasurements(void)
     Info(@"class-AVCaptureStillImageOutput", NSClassFromString(@"AVCaptureStillImageOutput") ? @"present" : @"absent");
 }
 
-// Why the CoreImage conversion of a BGRA buffer fails on this release: each step is measured, by class lookup and message send.
 static void CoreImageMeasurements(void)
 {
     Class ciImage = NSClassFromString(@"CIImage"), ciContext = NSClassFromString(@"CIContext");
@@ -86,7 +81,6 @@ static void CoreImageMeasurements(void)
         __block CGImageRef converted = NULL;
         raised = RaisedBy(^{
             if ([context respondsToSelector:createSel]) {
-                // The buffer's own extent: the 64 by 48 buffer made above (a CIImage of a pixel buffer is the buffer's rect).
                 CGRect extent = CGRectMake(0, 0, 64, 48);
                 converted = ((CGImageRef (*)(id, SEL, id, CGRect))objc_msgSend)(context, createSel, image, extent);
             }
@@ -97,7 +91,6 @@ static void CoreImageMeasurements(void)
     } else {
         Info(@"coreimage-cgimage", @"not attempted: no image or no context");
     }
-    // Why the buffer's image is nil: the same selector on an IOSurface-backed buffer, and on a CGImage source.
     CVPixelBufferRef surfaced = NULL;
     NSDictionary *attributes = @{(__bridge NSString *)kCVPixelBufferIOSurfacePropertiesKey: @{}};
     status = CVPixelBufferCreate(kCFAllocatorDefault, 64, 48, kCVPixelFormatType_32BGRA, (__bridge CFDictionaryRef)attributes, &surfaced);

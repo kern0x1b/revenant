@@ -27,8 +27,6 @@ static void check(BOOL same, NSString *what)
         printf("different: %s\n", what.UTF8String);
 }
 
-// The image drawn into 8-bit RGBA over its extent made whole pixels and widened by a margin (64x64
-// around the origin when infinite).
 static NSData *pixels_in(CIImage *image, CGFloat margin)
 {
     if (!image)
@@ -47,8 +45,6 @@ static NSData *pixels(CIImage *image)
     return pixels_in(image, 0);
 }
 
-// Within one step of 255 per channel: the host's explicit linear sampling rounds a few edge pixels
-// one step away from the linear sampling an image has by default.
 static BOOL near_data(NSData *a, NSData *b)
 {
     if (a.length != b.length)
@@ -62,8 +58,6 @@ static BOOL near_data(NSData *a, NSData *b)
 
 static void near_image(CIImage *host, CIImage *port, NSString *what)
 {
-    // With a margin: rendered over bounds that cut through its edge, the host's explicitly linear
-    // image treats that edge otherwise than the image it came from.
     NSData *a = pixels_in(host, 3), *b = pixels_in(port, 3);
     int worst = 0;
     for (NSUInteger i = 0; i < MIN(a.length, b.length); i++)

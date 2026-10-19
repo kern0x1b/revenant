@@ -2,14 +2,8 @@
 #import <objc/runtime.h>
 #import "CharonSpotlightStore.h"
 
-// The query grammar the host was measured on (facts/CoreSpotlight/SearchQuery.md): attribute comparisons with == and !=
-// against a double-quoted string in which * matches any run of characters, combined with && (binding tighter) and ||,
-// with parentheses. Anything else - free text, an operator the grammar does not have, an unfinished comparison - is an
-// invalid query, answered with CSSearchQueryErrorCodeInvalidQuery.
 typedef BOOL (^CharonSearchPredicate)(CSSearchableItem *item);
 
-// A glob in which only * is special: the parts between stars must appear in order, the first as a prefix and the last as a
-// suffix. ? and every other character match themselves.
 static BOOL CharonSearchGlob(NSString *pattern, NSString *text)
 {
     NSArray<NSString *> *parts = [pattern componentsSeparatedByString:@"*"];
@@ -17,7 +11,6 @@ static BOOL CharonSearchGlob(NSString *pattern, NSString *text)
         return [text isEqualToString:pattern];
     NSString *first = parts.firstObject;
     NSString *last = parts.lastObject;
-    // An empty first or last part is no constraint: NSString's hasPrefix: and hasSuffix: answer NO for the empty string.
     if (first.length > 0 && ![text hasPrefix:first])
         return NO;
     NSUInteger position = first.length;
@@ -33,7 +26,6 @@ static BOOL CharonSearchGlob(NSString *pattern, NSString *text)
     return text.length >= position + last.length && (last.length == 0 || [text hasSuffix:last]);
 }
 
-// The string value of a named attribute, when the attribute set declares a property of that name holding a string.
 static NSString *CharonSearchAttribute(CSSearchableItem *item, NSString *name)
 {
     if (!class_getProperty([CSSearchableItemAttributeSet class], name.UTF8String))
@@ -42,7 +34,6 @@ static NSString *CharonSearchAttribute(CSSearchableItem *item, NSString *name)
     return [value isKindOfClass:[NSString class]] ? value : nil;
 }
 
-// Tokens are @[kind, text]: "id", "str", "==", "!=", "&&", "||", "(" and ")". Nil when a character starts no token.
 static NSArray<NSArray<NSString *> *> *CharonSearchTokens(NSString *query)
 {
     NSMutableArray<NSArray<NSString *> *> *tokens = [NSMutableArray array];
@@ -62,7 +53,6 @@ static NSArray<NSArray<NSString *> *> *CharonSearchTokens(NSString *query)
             [tokens addObject:@[c == '&' ? @"&&" : @"||", @""]];
             i += 2;
         } else if (c == '"') {
-            // A quote that is never closed runs to the end of the query: the host answers that as a value, not an error.
             NSRange close = [query rangeOfString:@"\"" options:NSLiteralSearch range:NSMakeRange(i + 1, n - i - 1)];
             NSUInteger end = close.location == NSNotFound ? n : close.location;
             [tokens addObject:@[@"str", [query substringWithRange:NSMakeRange(i + 1, end - i - 1)]]];
@@ -83,7 +73,6 @@ static NSArray<NSArray<NSString *> *> *CharonSearchTokens(NSString *query)
     return tokens;
 }
 
-// A recursive-descent parser over the tokens: or-expression, and-expression, then a parenthesised expression or a comparison.
 @interface CharonSearchParser : NSObject
 - (instancetype)initWithTokens:(NSArray<NSArray<NSString *> *> *)tokens;
 - (CharonSearchPredicate)parse;
@@ -181,7 +170,6 @@ static NSArray<NSArray<NSString *> *> *CharonSearchTokens(NSString *query)
 
 @end
 
-// The attributes a result carries are the ones fetched: the others are nil, as the host answers them.
 static CSSearchableItem *CharonSearchFetchedCopy(CSSearchableItem *item, NSArray<NSString *> *attributes)
 {
     CSSearchableItemAttributeSet *set = [[CSSearchableItemAttributeSet alloc] initWithItemContentType:@"public.item"];
@@ -240,9 +228,6 @@ static CSSearchableItem *CharonSearchFetchedCopy(CSSearchableItem *item, NSArray
     }
 }
 
-// Matching runs on the default global queue. The found handler receives the matches in one call, and only when there are
-// some; the match count is stored first, then the completion handler is invoked. A query that fails to parse, or one
-// cancelled before it finishes, yields no matches and passes its error to the completion handler.
 - (void)start
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{

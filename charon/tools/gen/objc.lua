@@ -1,19 +1,11 @@
--- The ObjC facts of the 26.2 iOS cache: the class, method and property rows of v-cache26's objc table. The table is three gzip
--- parts (110 MB compressed, about 5.7 million rows of which 4.7 million are facts) and is never staged: each consumer streams
--- the parts once, through a pipe, and keeps only the rows of the frameworks it asks for. Nothing is written. The rows are
--- reference only: they say what a method's arguments and return are, not what it does.
-
 local stream = import("stream", {anonymous = true})
 local tsv = import("tsv", {anonymous = true})
 local sdk = import("sdk", {anonymous = true})
 
 local ENTITIES = {class = true, method = true, property = true}
 local FRAMEWORK_SUFFIX = ".framework"
--- The columns a fact carries, by the name the table's header gives them.
 local FIELDS = {"entity", "owner", "section", "name", "decl", "types", "address", "superclass", "protocols", "category"}
 
--- The framework of an image, as the table's rows are grouped: the folder of the image when the folder is a framework (its name
--- without the suffix), else the image's own name. Python's os.path.basename and dirname, on the image's text.
 function framework_of(image)
     local folder = string.match(string.match(image, "^(.*)/[^/]*$") or "", "([^/]*)$")
     if string.sub(folder, -#FRAMEWORK_SUFFIX) == FRAMEWORK_SUFFIX then
@@ -22,14 +14,10 @@ function framework_of(image)
     return string.match(image, "([^/]*)$")
 end
 
--- The key of a fact: its entity, owner, section and name, joined by tabs (a tab never occurs in a field).
 function key_of(row)
     return row.entity .. "\t" .. row.owner .. "\t" .. row.section .. "\t" .. row.name
 end
 
--- Calls fn(framework, row) for every fact of the wanted frameworks, in the table's order: every row, repeats included (a consumer
--- keeps the first row of a key). wanted is a set of framework names, or nil for every framework. The parts are read in the order the
--- release's names give them: a fact's first row wins, so the order is the table's. release is the SDK's version (sdk.discover).
 function each(corpus, release, wanted, fn)
     local names = sdk.names(release)
     local columns = nil
@@ -62,7 +50,6 @@ function each(corpus, release, wanted, fn)
                 end
                 return
             end
-            -- a row with no tab is short, and a short row is refused with its file and line, never skipped
             local t1 = string.find(line, "\t", 1, true)
             assert(t1, string.format("objc table %s line %d is a short row (no tab): %s", file, number, string.sub(line, 1, 80)))
             local t2 = string.find(line, "\t", t1 + 1, true)
@@ -93,7 +80,6 @@ function each(corpus, release, wanted, fn)
     end
 end
 
--- The facts of one framework: list (the rows in the table's order, the first row of each key only) and index (key -> row).
 function facts(corpus, release, fw)
     local list, index = {}, {}
     each(corpus, release, {[fw] = true}, function(_, row)

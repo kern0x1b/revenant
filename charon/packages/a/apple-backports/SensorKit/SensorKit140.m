@@ -2,18 +2,6 @@
 #import "CharonSensorKitValue.h"
 #import "../CharonValueStore.h"
 
-// SensorKit of iOS 14, the release the framework arrived in: 16 classes, 118 properties.
-//
-// One file per release, because an object carries API that arrived in one release alone. A class is
-// implemented in the class itself, with one exception: SRKeyboardMetrics is declared over four
-// CATEGORIES of the SDK's own, and a property one of those declares can be neither @dynamic-able in a
-// category of ours - the name would be declared twice on the class - nor implemented in a class
-// implementation, so those accessors are written out and only the five the class declares itself are
-// @dynamic.
-//
-// Each class is followed by the store it keeps its values in, and the store is the one CharonValueStore
-// describes: one dictionary keyed by the property's own name, so a value is found by the same string
-// the header declares it under.
 @implementation SRAmbientLightSample
 @dynamic placement, chromaticity, lux;
 CHARON_SCALAR_PROPERTY(SRAmbientLightSensorPlacement, placement)
@@ -40,10 +28,6 @@ CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 CHARON_SCALAR_PROPERTY(SRAbsoluteTime, startTime)
 CHARON_SCALAR_PROPERTY(SRAbsoluteTime, endTime)
 CHARON_SCALAR_PROPERTY(SRDeletionReason, reason)
-// The SDK's own header declares this class conforming, so the port owes the three archiving methods,
-// and -copyWithZone: where the header says NSCopying. The archiver walks the same property list the
-// representation does, through CharonValueStore's own pair, so a value archived and read back lands in
-// the store under the property's own name and nothing has to be written out by hand for it.
 + (BOOL)supportsSecureCoding
 {
     return YES;
@@ -63,8 +47,6 @@ CHARON_SCALAR_PROPERTY(SRDeletionReason, reason)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    // A value object: the copy is a new object with the same values under the same names. A copy that
-    // shared the store would be two names for one value, which is the opposite of what a copy is.
     id copy = [[[self class] allocWithZone:zone] init];
     NSDictionary *values = CharonValueStore(self);
     for (NSString *key in [values.allKeys sortedArrayUsingSelector:@selector(compare:)]) {
@@ -87,10 +69,6 @@ CHARON_VALUE_PROPERTY(NSString *, name)
 CHARON_VALUE_PROPERTY(NSString *, model)
 CHARON_VALUE_PROPERTY(NSString *, systemName)
 CHARON_VALUE_PROPERTY(NSString *, systemVersion)
-// The SDK's own header declares this class conforming, so the port owes the three archiving methods,
-// and -copyWithZone: where the header says NSCopying. The archiver walks the same property list the
-// representation does, through CharonValueStore's own pair, so a value archived and read back lands in
-// the store under the property's own name and nothing has to be written out by hand for it.
 + (BOOL)supportsSecureCoding
 {
     return YES;
@@ -110,8 +88,6 @@ CHARON_VALUE_PROPERTY(NSString *, systemVersion)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    // A value object: the copy is a new object with the same values under the same names. A copy that
-    // shared the store would be two names for one value, which is the opposite of what a copy is.
     id copy = [[[self class] allocWithZone:zone] init];
     NSDictionary *values = CharonValueStore(self);
     for (NSString *key in [values.allKeys sortedArrayUsingSelector:@selector(compare:)]) {
@@ -147,8 +123,6 @@ CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 CHARON_SCALAR_PROPERTY(SRAbsoluteTime, from)
 CHARON_SCALAR_PROPERTY(SRAbsoluteTime, to)
 CHARON_VALUE_PROPERTY(SRDevice *, device)
-// The SDK's own header declares this class conforming, so the port owes the three archiving methods,
-// and -copyWithZone: where the header says NSCopying - see the same block on SRDeletionRecord.
 + (BOOL)supportsSecureCoding
 {
     return YES;
@@ -168,7 +142,6 @@ CHARON_VALUE_PROPERTY(SRDevice *, device)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    // A value object: the copy is a new object with the same values under the same names.
     id copy = [[[self class] allocWithZone:zone] init];
     NSDictionary *values = CharonValueStore(self);
     for (NSString *key in [values.allKeys sortedArrayUsingSelector:@selector(compare:)]) {
@@ -184,9 +157,6 @@ CHARON_VALUE_PROPERTY(SRDevice *, device)
 CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
 
-// The class's own door, declared here because no SDK header declares it and the copy below is its
-// only caller. Both this and the registry row naming it are the shape registry/MPS graph.json uses for
-// the thirteen charon_ names its own files share.
 @interface SRFetchResult ()
 - (instancetype)initWithCharonValues:(NSDictionary *)values;
 @end
@@ -194,15 +164,9 @@ CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @implementation SRFetchResult
 @dynamic timestamp, sample;
 CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"Not available")
-// The class's own framework refuses -init here, with the exception and the reason string the macro
-// carries, so the copy below cannot go through it either and takes the class's own door instead.
 CHARON_VALUE_COPY_INITIALISER
 CHARON_SCALAR_PROPERTY(SRAbsoluteTime, timestamp)
-// The header's SampleType is the class's lightweight generic parameter, an object; the value is held
-// in the store like every other member, so an archived result carries its sample through.
 CHARON_VALUE_PROPERTY(id, sample)
-// The SDK's own header declares this class conforming, so the port owes the three archiving methods,
-// and -copyWithZone: where the header says NSCopying - see the same block on SRDeletionRecord.
 + (BOOL)supportsSecureCoding
 {
     return YES;
@@ -222,9 +186,6 @@ CHARON_VALUE_PROPERTY(id, sample)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    // A value object: the copy is a new object with the same values under the same names. SRFetchResult
-    // is one of the fourteen classes whose own framework refuses -init, so the new object is made
-    // through the door the class keeps for itself.
     return [[[self class] allocWithZone:zone] initWithCharonValues:CharonValueStore(self)];
 }
 

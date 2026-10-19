@@ -1,13 +1,3 @@
-// CITextFeature, as CIFeature.h declares it, on top of the release's own CIFeature.
-//
-// The header gives the class NS_CLASS_AVAILABLE(10_11, 9_0): bounds, the four corners and subFeatures, which
-// "CIDetectorReturnSubFeatures" asks a text detector for. `type` answers the header's CIFeatureTypeText.
-// Like the rectangle and QR code features in CIFeature8.m, nothing in the port makes one: the text detector is
-// not carried, and the initializer below is what a test uses to make the object the way a detector would.
-//
-// WHICH RELEASE: 9.0, the release the header gives the class. The constant CIDetectorReturnSubFeatures and the
-// detector type CIDetectorTypeText are already carried in CIConstants90.m.
-
 #import <CoreImage/CoreImage.h>
 
 @interface CITextFeature ()

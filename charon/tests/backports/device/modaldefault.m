@@ -3,10 +3,6 @@
 #import <MediaPlayer/MediaPlayer.h>
 #import "check.h"
 
-/* The default modalPresentationStyle, held to UIKitCore 16.0 (facts/UIKit/UIModalPresentationAutomatic.md). One
-   program built twice: linked as charon links (the SDK 16.4 in LC_VERSION_MIN_IPHONEOS) with
-   MODALDEFAULT_LINKED_ON_13=1, and with -Wl,-platform_version,ios,6.0,12.4 and MODALDEFAULT_LINKED_ON_13=0. The
-   first gets Automatic, which the getter answers as the page sheet; the second keeps the release's full screen. */
 #ifndef MODALDEFAULT_LINKED_ON_13
 #error build with -DMODALDEFAULT_LINKED_ON_13=1 (SDK 13 or later) or 0 (an older SDK in the load command)
 #endif
@@ -62,11 +58,8 @@ int main(void)
         } else {
             printf("no camera here: the camera's full screen is not checked\n");
         }
-        /* AVKit's player prefers full screen, MediaPlayer's media picker the page sheet (their
-           _preferredModalPresentationStyle in 16.0). */
         CHECK_EQUAL(style_of([[AVPlayerViewController alloc] init]), @(UIModalPresentationFullScreen), "a player view controller");
         CHECK_EQUAL(style_of([[MPMediaPickerController alloc] initWithMediaTypes:MPMediaTypeAnyAudio]), @(UIModalPresentationPageSheet), "a media picker");
-        /* A split view controller prefers a custom presentation (0x188e995ac in 16.0). */
         CHECK_EQUAL(style_of([[UISplitViewController alloc] init]), @(UIModalPresentationCustom), "a split view controller");
 #endif
     }

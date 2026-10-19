@@ -1,23 +1,9 @@
-// The traits of iOS 17 on a trait collection, and the store they live in.
-//
-// A trait collection already holds a value per trait: five in its own ivars, the style and the force touch
-// capability beside them, and the rest in one dictionary of extras keyed by the trait's name. The traits of 17
-// add no store of their own: each of the twenty-two says where its value already lives, and forTrait: and
-// valueForCGFloatTrait: and the rest read and write that one place, so a collection built by
-// +traitCollectionWithUserInterfaceStyle: and one built by +traitCollectionWithNSIntegerValue:forTrait: with
-// UITraitUserInterfaceStyle are the same collection and compare equal. What the host's own UIKit answers was
-// measured first (facts/UIKit/UITrait17.md, M2 to M4).
-
 #import "CharonTraits17.h"
 #import "CharonTraitStyle.h"
 #import <objc/runtime.h>
 
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-
-// The table the three files that carry the twenty-two trait classes register into, one file per release because
-// an object carries the API of exactly one. It lives here, in the file of the release the table's own lookup
-// functions belong to, and the registration is what the other two files call.
 
 
 
@@ -36,15 +22,6 @@ static NSString *charon_kind_name(CharonTraitValue kind)
     }
 }
 
-// UIKitCore 26.2 refuses a trait class the caller reached through the wrong protocol, and a class that is not a
-// trait at all, in NSInternalInconsistencyException with these words (M4). The port refuses them the same way: an
-// application that mistypes a trait would otherwise store a value nothing can read back.
-//
-// The two traits whose default the system does not know - the typesetting language and the natural alignment
-// flag - are not among them. A host whose trait metadata has already raised once answers "does not implement the
-// required defaultValue class property" for them too, and that answer is a sign that the store is in a state it
-// does not come back from, not a rule: asked first, in a process where nothing has raised, the system takes
-// both. So the port takes them too, and the two facts record what was seen in which order (M8).
 static const CharonTraitDefinition *charon_definition_for(Class trait, CharonTraitValue kind)
 {
     if (!trait)
@@ -62,10 +39,6 @@ static const CharonTraitDefinition *charon_definition_for(Class trait, CharonTra
     return definition;
 }
 
-// A collection the traits of are immutable, so -copyWithZone: answers the same object; a copy to mutate is made
-// here instead, from the class method that carries the five ivar-backed traits and the style and then the two
-// that keep theirs beside: the extras dictionary, which the merge of one collection copies, and the force touch
-// capability, which the merge does not and which is put back by its own route.
 static UITraitCollection *charon_trait_copy(UITraitCollection *collection)
 {
     UITraitCollection *result = [UITraitCollection traitCollectionWithTraitsFromCollections:@[collection]];
@@ -79,10 +52,6 @@ UITraitCollection *charon_trait_collection_with(UITraitCollection *collection, c
 {
     switch (definition->home) {
     case CharonTraitHomeIvar: {
-        // The five traits UITraitCollection.h declares readonly have no setter an outside file can reach, so a
-        // collection carrying the new value is made through the collection's own constructors: the one for the
-        // trait, with the base collection's traits merged over it. The base's traits are kept and the new value
-        // wins, which is the order M2 measured for traitCollectionByModifyingTraits:.
         UITraitCollection *result = nil;
         if (definition->trait == (Class)[UITraitUserInterfaceIdiom class])
             result = [UITraitCollection traitCollectionWithUserInterfaceIdiom:(UIUserInterfaceIdiom)[value integerValue]];
@@ -165,10 +134,6 @@ UITraitCollection *charon_trait_collection_with(UITraitCollection *collection, c
     [self charon_set:[self charon_definition:trait kind:CharonTraitValueObject] value:object];
 }
 
-// The two traits whose default the system does not know are set here and not through the object's forTrait:,
-// which is the only route the host takes for them as well (M8). The set and the read are the same as for any
-// other trait; what differs is only that nothing is asked of the trait's default first.
-
 - (id)objectForTrait:(UIObjectTrait)trait
 {
     const CharonTraitDefinition *definition = [self charon_definition:trait kind:CharonTraitValueObject];
@@ -176,11 +141,6 @@ UITraitCollection *charon_trait_collection_with(UITraitCollection *collection, c
     return value ? value : definition->defaultValue;
 }
 
-// The twenty-one properties UIMutableTraits declares, one pair per trait, each the same trait class the generic
-// accessors above take. They are written out rather than built at run time because they are what a mutations
-// block reads and writes, and a block must not send a message the runtime has to look up by name for a
-// collection of traits it holds: the two paths are the same table, so a value set through a property and one set
-// through setNSIntegerValue:forTrait: are the same value in the same collection.
 #define CHARON_TRAIT_PROPERTY(TraitClass, Type, Getter, Setter)                                                                          \
     - (Type)Getter                                                                                                                     \
     {                                                                                                                                   \
@@ -352,13 +312,6 @@ CHARON_TRAIT_PROPERTY([UITraitSplitViewControllerLayoutEnvironment class], UISpl
     return value ? value : definition->defaultValue;
 }
 
-// The eight accessors of iOS 17, 18 and 26 that this port had no answer for. Each reads the one value its trait
-// keeps, and a collection that sets none of the trait answers the trait class's own default, which is what M2
-// measured for all of them. The last is the one that differs: a collection that sets nothing answers true for
-// resolvesNaturalAlignmentWithBaseWritingDirection, where the trait class's defaultValue is nil. The host answers
-// true and the port does too, because true is the answer a collection on this release has to give - the base
-// writing direction of a view here is the one the user's language gives, which is the other of the two the
-// header names, so natural alignment resolves the way this release always resolved it.
 - (UINSToolbarItemPresentationSize)toolbarItemPresentationSize
 {
     return (UINSToolbarItemPresentationSize)[self valueForNSIntegerTrait:[UITraitToolbarItemPresentationSize class]];
@@ -408,9 +361,6 @@ CHARON_TRAIT_PROPERTY([UITraitSplitViewControllerLayoutEnvironment class], UISpl
 
 - (NSSet<UITrait> *)changedTraitsFromTraitCollection:(UITraitCollection *)traitCollection
 {
-    // M2: the traits whose value in the receiver differs from the other collection's, and for a nil argument
-    // every trait the receiver sets. A trait neither sets is not a change, so a collection compared with itself
-    // changes nothing and one compared with an empty collection changes only what it holds.
     NSMutableSet *changed = [NSMutableSet set];
     for (Class trait in charon_trait_classes()) {
         const CharonTraitDefinition *definition = charon_trait_definition(trait);
@@ -424,14 +374,8 @@ CHARON_TRAIT_PROPERTY([UITraitSplitViewControllerLayoutEnvironment class], UISpl
     return changed;
 }
 
-// The traits that decide how a dynamic colour and a dynamic image resolve, in the order the host lists them (M1).
-// The host's lists also hold four traits no SDK header declares - UITraitVibrancy,
-// UITraitUserInterfaceRenderingMode, UITraitSelectionIsKey and UITraitArtworkSubtype - which this port does not
-// carry, so they are not named here and an application that reads the list sees the ones it can name.
 + (NSArray<UITrait> *)systemTraitsAffectingColorAppearance
 {
-    // The six the host names, in its order, and not the seven: UITraitListEnvironment is a trait class the host
-    // carries and does not list here, and the port's list is the host's (M1).
     return @[ (id)[UITraitUserInterfaceIdiom class], (id)[UITraitUserInterfaceStyle class], (id)[UITraitDisplayGamut class],
               (id)[UITraitAccessibilityContrast class], (id)[UITraitUserInterfaceLevel class], (id)[UITraitActiveAppearance class] ];
 }

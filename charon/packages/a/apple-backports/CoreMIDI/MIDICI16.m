@@ -1,7 +1,3 @@
-// MIDICIDeviceInfo, the device information a MIDI-CI device reports, of iOS 16: the release-split check dates the class to
-// iOS 16.0 (the object may hold one release's API only, so it is not in MIDICI12.m beside the iOS 12 classes). The device info
-// is made with a real destination and manufacturer 3, family 2, model 2 and revision 4 bytes, and is nil otherwise
-// (oracle/micicapability.m, micicapability-macos.txt, 2026-10-09).
 #import "CharonMIDICI.h"
 
 @implementation MIDICIDeviceInfo {

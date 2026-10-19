@@ -2,15 +2,6 @@
 #import <CoreMedia/CoreMedia.h>
 #import <VideoToolbox/VideoToolbox.h>
 
-// The string constants VideoToolbox's first held export of which is iOS 8.0. Where the values
-// come from, and why a value is not the constant's own name: the head of
-// VideoToolboxConstants7_0.m. An object carries the API of one release.
-
-// This file holds the constants of iOS 7.0; every other release's are in
-// VideoToolboxConstants<release>.m, because an object carries the API of one release: the
-// release the cache ladder measures for the symbol (place-by-ladder.py), and the registry's
-// where no held cache exports it.
-
 const CFStringRef kVTCompressionPropertyKey_GammaLevel = CFSTR("GammaLevel");
 const CFStringRef kVTCompressionPropertyKey_MultiPassStorage = CFSTR("MultiPassStorage");
 const CFStringRef kVTDecompressionPropertyKey_OutputPoolRequestedMinimumBufferCount = CFSTR("OutputPoolRequestedMinimumBufferCount");

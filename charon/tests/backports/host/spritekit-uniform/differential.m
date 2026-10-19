@@ -1,10 +1,3 @@
-// The SKUniform of iOS 8, the port against the host's own SpriteKit, over the same scenarios. The program reaches the
-// class only through the Objective-C runtime (NSClassFromString and objc_msgSend), so the same source builds against
-// the host's SpriteKit framework (the oracle) and against the port's SpriteKit8.o with no SpriteKit framework linked.
-// Nothing here writes an expected value: each scenario prints what the class answers, and run.sh compares the two runs.
-//
-// A texture is not used as a payload here: the host's SKTexture is its own class and the port has none, so the
-// texture scenarios pass nil, and the texture round trip measured against a real SKTexture is in facts/SpriteKit/SKUniform.md.
 #import <Foundation/Foundation.h>
 #import <objc/message.h>
 #import <objc/runtime.h>

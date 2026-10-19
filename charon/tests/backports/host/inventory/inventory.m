@@ -3,18 +3,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-/* The HOST's inventory of one framework, by CLASS-NAME PREFIX. One probe for every framework, so a new
-   one needs a spec and no new program.
-
-   The argument is the PREFIX and not the framework name, because the two differ: the framework is
-   FileProvider and its classes are NSFileProvider*. An earlier version matched on the framework name, found
-   nothing, and its caller reported 10358 classes - every class on the host - and called it green. So:
-
-     - a prefix that matches nothing exits 3, never 0;
-     - the totals are printed, and the caller compares the class count with what the spec expects;
-     - the framework is LINKED by the caller, or its classes are never loaded and the answer is missing
-       rather than wrong, which is the same failure in the other direction.
-*/
 int main(int argc, char **argv){
   @autoreleasepool{
     if (argc < 2) { fprintf(stderr, "usage: inventory CLASSPREFIX [FRAMEWORKNAME]\n"); return 64; }

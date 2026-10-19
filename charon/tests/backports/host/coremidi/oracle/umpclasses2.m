@@ -1,4 +1,3 @@
-// Host probe, second part: validation and the state-changing methods of the MIDI-UMP and MIDI-CI classes on macOS.
 #import <CoreMIDI/CoreMIDI.h>
 #import <Foundation/Foundation.h>
 static MIDIUMPMutableFunctionBlock *block(NSString *name, MIDIUMPFunctionBlockDirection d, MIDIUMPGroupNumber first, MIDIUInteger7 total, UInt8 streams, BOOL enabled) {

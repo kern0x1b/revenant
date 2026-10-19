@@ -1,9 +1,3 @@
--- records.lua count RECORDS.json - prints how many records the file holds (the number of keys of its object).
--- records.lua diff A.json B.json - one "caught" line for each key whose value differs between the two, in byte order,
---     with a missing value printed as None. Prints nothing when the two agree.
---
--- These are the two inline Python calls run.sh made, held here so the shell does not carry Python.
-
 local lib = import("vtlib", {rootdir = os.scriptdir(), anonymous = true})
 local json = import("core.base.json")
 

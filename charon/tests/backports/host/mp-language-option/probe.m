@@ -1,36 +1,3 @@
-// What Apple's own MediaPlayer answers, measured on THIS machine, for the two accessors
-// MPNowPlayingInfoLanguageOption90.m answers rather than stores.
-//
-// Each header line is a paraphrase of MPNowPlayingInfoLanguageOption.h, which documents both as the
-// special option standing for the best legible or audible language, chosen from system preferences (:56-63),
-// and :57-59 says a languageTag holding the auto language-tag constant is that
-// special case - a constant the SDK declares nowhere, so its value cannot be written down from the
-// headers. This program asks the question the other way round: build every option the class's own
-// designated initialiser can build and print what Apple's class answers, so the port's answer is
-// compared with the real one rather than with a reading of the comment.
-//
-// Three questions, each with its own control:
-//
-//   1. DOES THE INITIALISER STORE THE TYPE? Without this the rest measures nothing: an initialiser that
-//      dropped the type would answer NO on every row and the table would look like a refutation of the
-//      type without being one.
-//   2. WHICH TAG, IF ANY, ANSWERS YES? Thirteen values, among them the literal constant name the header
-//      prints, plus the nil tag :57-58 says disables the option.
-//   3. DO THE OTHER THREE ARGUMENTS DECIDE IT? characteristics, displayName and identifier, as nil, as
-//      empty and as filled, and the same option installed as a group's default.
-//
-// The one control is that the class really declares the five-argument initialiser: a framework that did
-// not would answer through the inherited -init and every row below would be about nothing. Nothing here
-// is CALLED on a library and nothing writes to the user's media library; options are constructed and
-// read.
-//
-//     xcrun clang -fobjc-arc -w -framework Foundation -framework MediaPlayer probe.m -o probe
-//     ./probe
-//
-// What the answer was when this file was written, on this machine: 34 options built, 0 answering YES,
-// and the type round-tripping for 0 and 1 - so the discriminator is none of the five arguments the
-// initialiser takes. The option the system inserts to mean "choose for me" is not one a caller can build,
-// on Apple's class or on the port's.
 #import <Foundation/Foundation.h>
 #import <MediaPlayer/MediaPlayer.h>
 #import <objc/message.h>
@@ -107,7 +74,7 @@ int main(void)
                     yes++;
             }
         }
-        for (NSUInteger t = 0; t < 2; t++) {   // the nil tag :57-58 says disables the option
+        for (NSUInteger t = 0; t < 2; t++) {
             id option = make(t, nil, @[], @"English", @"1");
             BOOL audible = flag(option, s_audible), legible = flag(option, s_legible);
             printf("type=%lu tag=(nil)                  audible=%d legible=%d\n", (unsigned long)t, audible, legible);

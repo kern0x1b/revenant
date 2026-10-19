@@ -3,40 +3,16 @@
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-/* A term of address: the word an application uses to address the person it is speaking to, and the
-   pronouns that go with it. The localized words themselves come out of the inflection machinery,
-   which is NSMorphology's business; what is here is the term, its language and its pronouns.
-
-   Measured on the host, and the port does the same: the three gendered terms are three distinct
-   singletons with no language and no pronouns, each equal only to itself and hashing alike each time
-   it is asked; +currentUser is a singleton too and equal only to itself; a localized term is equal to
-   another with the same language and the same pronouns, different when the language differs, and
-   different again when the pronouns are an empty array rather than nil (measured:
-   localizedForLanguageIdentifier:@"de" withPronouns:@[] is not equal to the same call with nil).
-
-   The state is one object kept beside the instance, for the reason every such object in this
-   package is: the SDK's declaration carries no ivar block and the armv7 ABI has nowhere to add one.
-   The class is declared in CharonTermOfAddress.h, without an availability mark, because the SDK this
-   package is built against does not declare the class at all; see that header for the gate's words
-   on the matter. */
-
 static char CharonTermOfAddressStateKey;
 
 @interface CharonTermOfAddressState : NSObject
 @property NSString *languageIdentifier;
 @property NSArray *pronouns;
 @property BOOL currentUser;
-/* Which factory built it, so that two terms from different factories are never equal even when
-   their state is the same -- the three gendered terms all carry no language and no pronouns. */
 @property NSString *origin;
 @end
 
 @implementation CharonTermOfAddressState
-
-/* Two terms are equal when the same factory made them and their state is equal, so +neutral,
-   +feminine, +masculine and +currentUser stay four singletons that are equal only to themselves --
-   which is what the header promises for +currentUser, and what the host answers for all four
-   (measured: the three gendered terms are mutually unequal with distinct hashes, 3, 1 and 2). */
 
 @synthesize languageIdentifier = _languageIdentifier;
 @synthesize pronouns = _pronouns;
@@ -62,8 +38,6 @@ static char CharonTermOfAddressStateKey;
 + (instancetype)charon_termWithLanguage:(NSString *)language pronouns:(NSArray *)pronouns currentUser:(BOOL)currentUser origin:(NSString *)origin
 {
     NSTermOfAddress *term = [NSTermOfAddress alloc];
-    /* -init and +new are NS_UNAVAILABLE in the SDK's own header, and the compiler refuses them here
-       as it refuses them there, so the superclass's -init is run the way a factory's would. */
     struct objc_super super = { .receiver = term, .super_class = [NSObject class] };
     ((void (*)(struct objc_super *, SEL))objc_msgSendSuper)(&super, @selector(init));
     CharonTermOfAddressState *state = [[CharonTermOfAddressState alloc] init];
@@ -143,16 +117,9 @@ static char CharonTermOfAddressStateKey;
 
 + (instancetype)localizedForLanguageIdentifier:(NSString *)language withPronouns:(NSArray *)pronouns
 {
-    /* The origin is the *factory*, not what it was asked for: if the language went into it, every
-       pair of localized terms would differ by origin and the language comparison below would never
-       be the thing that answered -- which is exactly what the differential's fixture found when the
-       origin read "localized en" and "localized de". */
     return [self charon_termWithLanguage:language pronouns:pronouns currentUser:NO origin:@"localized"];
 }
 
-/* The fixture the differential builds its language comparisons with: a term for a language and no
-   pronouns. It is the same shape as +localizedForLanguageIdentifier:withPronouns: with a nil list,
-   under the name the host's own Swift interface gives it, so a test can name one argument. */
 + (instancetype)termWithLanguageIdentifier:(NSString *)language
 {
     return [self localizedForLanguageIdentifier:language withPronouns:nil];
@@ -172,7 +139,7 @@ static char CharonTermOfAddressStateKey;
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return self; /* immutable once the factory has built it */
+    return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder

@@ -1,6 +1,3 @@
-// probe.m - the INImage bridge of IntentsUI, asked the same questions by the host's own Intents and by the
-// port. Compiled twice by run.sh: with -framework Intents -framework IntentsUI (the host), and with -DPORT
-// against the port's objects (no host Intents in that link). Both print the same lines, and run.sh diffs them.
 #import <objc/message.h>
 #import <objc/runtime.h>
 #import <Foundation/Foundation.h>
@@ -20,16 +17,12 @@
 @implementation ProbeResponse
 @end
 
-// The port's classes are compiled under renamed symbols (run.sh), because UIKit loads the system's Intents at run time
-// and two INImage classes in one process answer for each other. The host build has no renamed class.
 #ifdef PORT
 static Class image_class(void) { return NSClassFromString(@"CharonHostINImage"); }
 #else
 static Class image_class(void) { return NSClassFromString(@"INImage"); }
 #endif
 
-// Each build answers for one implementation only, and says which one it loaded: the host build must have
-// the system's Intents behind INImage, and the port build must not, so the two cannot compare the port with itself.
 static BOOL loaded_from_system(Class c) {
     const char *image = class_getImageName(c);
     return image && strstr(image, "/Intents.framework/") != NULL;
@@ -70,7 +63,6 @@ int main(void) {
         yes_no("responds imageSizeForIntentResponse:", [c respondsToSelector:NSSelectorFromString(@"imageSizeForIntentResponse:")]);
         yes_no("responds fetchUIImageWithCompletion:", [[c imageWithImageData:[NSData dataWithBytes:"x" length:1]] respondsToSelector:NSSelectorFromString(@"fetchUIImageWithCompletion:")]);
 
-        // imageSizeForIntentResponse: over the inputs both builds can make
         SEL sizeSel = NSSelectorFromString(@"imageSizeForIntentResponse:");
         NSMethodSignature *sig = [c methodSignatureForSelector:sizeSel];
         id inputs[] = { nil, [NSObject new], [ProbeResponse new] };
@@ -84,7 +76,6 @@ int main(void) {
             printf("imageSizeForIntentResponse(%s): %g x %g\n", names[i], size.width, size.height);
         }
 
-        // imageWithUIImage:
         id nilUI = [c performSelector:NSSelectorFromString(@"imageWithUIImage:") withObject:nil];
         printf("imageWithUIImage:nil -> %s, bytes %s\n", nilUI ? "object" : "nil", bytes_of(nilUI) ? "present" : "nil");
         UIGraphicsBeginImageContextWithOptions(CGSizeMake(10, 20), YES, 1);
@@ -97,7 +88,6 @@ int main(void) {
         printf("imageWithUIImage:red -> bytes %lu, equal to its PNG: ", (unsigned long)bytes_of(fromUI).length);
         printf("%s\n", [bytes_of(fromUI) isEqualToData:png] ? "yes" : "no");
 
-        // imageWithCGImage:
         id nilCG = [c performSelector:NSSelectorFromString(@"imageWithCGImage:") withObject:nil];
         printf("imageWithCGImage:nil -> %s, bytes %s\n", nilCG ? "object" : "nil", bytes_of(nilCG) ? "present" : "nil");
         CGImageRef cg = img.CGImage;
@@ -106,7 +96,6 @@ int main(void) {
         printf("imageWithCGImage:red -> bytes %lu, equal to the provider's raw bytes: ", (unsigned long)bytes_of(fromCG).length);
         printf("%s, equal to its PNG: %s\n", [bytes_of(fromCG) isEqualToData:raw] ? "yes" : "no", [bytes_of(fromCG) isEqualToData:png] ? "yes" : "no");
 
-        // -fetchUIImageWithCompletion: on a PNG-backed image, a raw-backed image and a nil-backed image
         NSArray *fetched = @[ fromUI, fromCG, nilUI ];
         const char *fetchNames[] = { "PNG-backed", "raw-backed", "nil-backed" };
         for (int i = 0; i < 3; i++) {

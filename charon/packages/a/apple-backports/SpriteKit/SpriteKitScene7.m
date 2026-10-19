@@ -1,18 +1,8 @@
-// SpriteKitScene7.m - SKScene of iOS 7, carried for the releases that have no SpriteKit at all.
-//
-// A scene is the root of a tree of nodes, presented in a view (SpriteKitView7.m). Its size is the viewport, its anchor
-// point places the origin of its coordinates in that viewport, and its frame is the viewport in those coordinates.
-// Its position and scale are not its to take: the host logs a message and keeps the values it had. Those answers, and
-// the frame formula, are measured against the host's own SpriteKit in facts/SpriteKit/SKScene.md.
-//
-// Nothing here draws. The view clears to the background colour; a node's content is the step that carries it.
 #import "CharonSpriteKit.h"
 #if !TARGET_OS_IPHONE
 #import <AppKit/AppKit.h>
 #endif
 
-// The default background colour of a scene: the host's own (measured on macOS, facts/SpriteKit/SKScene.md). The iOS
-// value is not measured on a device; the port uses the same components.
 static CharonSKColor *CharonSKDefaultBackground(void)
 {
 #if TARGET_OS_IPHONE
@@ -42,7 +32,6 @@ static CharonSKColor *CharonSKDefaultBackground(void)
     return [self initWithSize:CGSizeMake(1, 1)];
 }
 
-// The host calls didChangeSize: once from the initialiser, with the size as the old one (measured).
 - (instancetype)initWithSize:(CGSize)size
 {
     self = [super init];
@@ -61,7 +50,6 @@ static CharonSKColor *CharonSKDefaultBackground(void)
     return _size;
 }
 
-// The host calls didChangeSize: with the size the scene had, and does so even when the size does not change (measured).
 - (void)setSize:(CGSize)size
 {
     CGSize oldSize = _size;
@@ -99,15 +87,11 @@ static CharonSKColor *CharonSKDefaultBackground(void)
     _backgroundColor = backgroundColor;
 }
 
-// The frame is the viewport in the scene's own coordinates: the anchor point is the fraction of the size that sits at
-// the origin (measured: anchor (0.5,0.25) on 320x480 gives (-160,-120,320,480)).
 - (CGRect)frame
 {
     return CGRectMake(-_anchorPoint.x * _size.width, -_anchorPoint.y * _size.height, _size.width, _size.height);
 }
 
-// The host logs and ignores a scene's position, scale, rotation and depth (measured for each, facts/SpriteKit/SKScene.md).
-// The alpha, the hidden flag and the speed are stored as on any node.
 - (void)setPosition:(CGPoint)position
 {
     (void)position;
@@ -192,7 +176,6 @@ static CharonSKColor *CharonSKDefaultBackground(void)
 
 @end
 
-// The scene of a node: the nearest scene among the node and its ancestors, which for a scene is the scene itself.
 @implementation SKNode (CharonSpriteKitScene)
 
 - (SKScene *)scene

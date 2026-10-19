@@ -3,20 +3,6 @@
 #include <objc/message.h>
 #import "check.h"
 
-// AVAudioEngine and AVAudioPlayerNode: a graph that compiles, runs and produces silence reports
-// nothing - no exception, no error code, a green gate. The only real proof is reading the graph's
-// actual output and comparing samples. kAudioUnitSubType_GenericOutput needs no mediaserverd
-// (confirmed via AudioComponentFindNext - facts/AVFoundation/AVAudioEngine.md), so this pulls the
-// graph's real output by hand and checks it sample-for-sample against a known waveform scheduled
-// through a real AVAudioPlayerNode into the real mainMixerNode - the actual node/connection/format
-// plumbing this port builds, not a shortcut around it.
-//
-// CharonAudioEngineTestSupport is reached by name (NSClassFromString/objc_msgSend), not static
-// linking: this project deliberately hides every symbol whose bare name starts with
-// "charon_"/"Charon" from a dylib's exported table (modules/apple/backports.lua's
-// internal_symbol()), and a brand-new such class is still fully registered in __objc_classlist at
-// load time - only static linking against its symbol is blocked.
-
 static void setForcedOfflineOutput(BOOL offline)
 {
     Class cls = NSClassFromString(@"CharonAudioEngineTestSupport");
@@ -74,11 +60,6 @@ int main(void)
         [player play];
         CHECK([player isPlaying], "player reports playing");
 
-        // One pull for the whole buffer, matching kAudioUnitProperty_MaximumFramesPerSlice
-        // (4096, set in -init) - a chunked pull with each chunk's AudioTimeStamp reset to sample
-        // time 0 was tried first and only matched for the first chunk: the mixer unit tracks its
-        // own internal sample-time continuity across calls, and resetting it each time corrupts
-        // every chunk after the first.
         AudioBufferList *pulled = calloc(1, sizeof(AudioBufferList));
         pulled->mNumberBuffers = 1;
         pulled->mBuffers[0].mNumberChannels = 1;
@@ -93,9 +74,6 @@ int main(void)
         for (AVAudioFrameCount i = 0; i < frameCount; i++) {
             if (pulledSamples[i] != 0.0f)
                 anyNonZero = YES;
-            // The mixer's own gain/summing can introduce small floating-point differences even
-            // for a single unity-gain input, so this checks "recognizably the same waveform",
-            // not bit-exact equality - a real measurement, not a rubber stamp on non-zero output.
             if (fabsf(pulledSamples[i] - sourceChannels[0][i]) > 0.05f)
                 matchesSource = NO;
         }

@@ -7,13 +7,11 @@ CGColorTransformRef CGColorTransformCreate(CGColorSpaceRef, CFDictionaryRef);
 CGColorRef CGColorTransformConvertColor(CGColorTransformRef, CGColorRef, CGColorRenderingIntent);
 void CGColorTransformRelease(CGColorTransformRef);
 
-// The release's own answer for the grey of a colour: one pixel of a device grey bitmap.
 static CGFloat pixel_grey(CGColorRef colour)
 {
     uint8_t byte = 0;
     CGColorSpaceRef grey = CGColorSpaceCreateDeviceGray();
     CGContextRef context = CGBitmapContextCreate(&byte, 1, 1, 8, 1, grey, kCGImageAlphaNone);
-    // Opaque: a translucent colour would be composited over the bitmap's black.
     CGColorRef opaque = CGColorCreateCopyWithAlpha(colour, 1);
     CGContextSetFillColorWithColor(context, opaque);
     CGColorRelease(opaque);

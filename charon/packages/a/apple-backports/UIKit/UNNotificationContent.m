@@ -316,7 +316,6 @@ static BOOL charon_same(id a, id b)
     _interruptionLevel = interruptionLevel;
 }
 
-// The relevance is kept within [0, 1]: a value above one reads as one, and one below zero as zero.
 - (void)setRelevanceScore:(double)relevanceScore
 {
     _relevanceScore = MIN(1, MAX(0, relevanceScore));

@@ -1,6 +1,5 @@
 import("fixtures")
 
--- A repository of two directories with a tag, served the way a remote is, so a clone can be cut to a sparse list.
 local function origin(folder)
     local repository = path.join(folder, "origin")
     os.mkdir(path.join(repository, "first"))
@@ -35,13 +34,10 @@ function failures(opt)
         table.insert(found, "a sparse clone holds the paths it was cut to and no others")
     end
 
-    -- The same list is the same sources: they are kept, not cloned again.
     if checkout.pinned(sourcedir, repositories({"/first/"})) then
         table.insert(found, "a clone of the same repositories and paths is kept")
     end
 
-    -- A list that grew names sources the clone lacks, so it is made again; before the stamp named the paths, the clone
-    -- was kept and the new directory was never there.
     if not checkout.pinned(sourcedir, repositories({"/first/", "/second/"})) then
         table.insert(found, "a sparse list that grew is a clone made again")
     end

@@ -1,6 +1,3 @@
-// engine.h — what engine.mm reads of our Box2D world, in plain C for the Objective-C tests. The enum values of
-// `type` are Box2D 2.2.1's b2JointType (distance 3, revolute 1, prismatic 2, weld 8, rope 10) and b2BodyType
-// (static 0, dynamic 2).
 #include <stdbool.h>
 
 typedef struct { float x, y; } EngineVector;

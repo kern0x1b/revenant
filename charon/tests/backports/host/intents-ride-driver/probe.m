@@ -1,10 +1,3 @@
-// probe.m - what the two deprecated -[INRideDriver initWithHandle:...] initialisers store, asked of the host's own
-// Intents and of the port's objects, from one source compiled twice (run.sh). The SDK declares neither initialiser,
-// so each is called by its selector's name at run time (NSSelectorFromString and objc_msgSend), never by a name the
-// compiler checks. The reads are KVC reads of the properties the header declares on INRideDriver and INPerson.
-//
-// The port build (-DPORT) names its classes with the CharonHost prefix that run.sh renames them to, so each class
-// must be found under it; a class the port build does not find stops the run with status 2.
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
@@ -28,7 +21,6 @@ static Class class_named(const char *name)
     return c;
 }
 
-// The class's name as the Apple name, with the port's prefix taken off.
 static const char *apple_class_name(id object)
 {
     if (!object) return "nil";
@@ -67,7 +59,6 @@ static void describe(const char *label, id driver)
 
 typedef id (*HandleInit)(id, SEL, id, id, id, id, id);
 
-// -initWithHandle:displayName:image:rating:phoneNumber:, by name.
 static id init_handle_display(NSString *handle, NSString *displayName, NSString *rating, NSString *phone)
 {
     SEL selector = NSSelectorFromString(@"initWithHandle:displayName:image:rating:phoneNumber:");
@@ -75,7 +66,6 @@ static id init_handle_display(NSString *handle, NSString *displayName, NSString 
     return init([class_named("INRideDriver") alloc], selector, handle, displayName, nil, rating, phone);
 }
 
-// -initWithHandle:nameComponents:image:rating:phoneNumber:, by name.
 static id init_handle_components(NSString *handle, NSPersonNameComponents *components, NSString *rating, NSString *phone)
 {
     SEL selector = NSSelectorFromString(@"initWithHandle:nameComponents:image:rating:phoneNumber:");
@@ -109,8 +99,6 @@ int main(void)
         describe("components-empty", init_handle_components(@"alice@example.com", empty, @"4.9", @"+15550100"));
         describe("display-nil-both", init_handle_display(nil, nil, @"4.9", @"+15550100"));
         describe("components-nil-both", init_handle_components(nil, nil, @"4.9", @"+15550100"));
-        // The formatting of a name, field by field: the host's own rule, because the formatter is iOS 9 and the port
-        // has to reproduce it on 6.1.3.
         NSPersonNameComponents *full = [[NSPersonNameComponents alloc] init];
         full.namePrefix = @"Dr.";
         full.givenName = @"Alice";

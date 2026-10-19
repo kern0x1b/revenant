@@ -1,17 +1,3 @@
--- The Matter differential of behaviour: the port's answers against the host's, line by line.
---
--- tests/backports/host/matter/pure.m is one program with no device on the other end. The host's answers are what its
--- own framework gives (run.sh). This product has NO port-side answers: its library carries the cluster and data
--- classes only, so pure.m does not link against it and no port file exists to pass here. Each file prints
--- "name<TAB>answer" per line, and this reads the two files and says which names differ, for a product that carries
--- the classes pure.m asks about.
---
--- A name in one file and not the other is a difference too, and the direction of it is the finding: the host answers
--- for a name the port does not carry, or the port carries a name the host does not. A name neither answers is the
--- third case and is not a difference - it is a row of the surface no framework of either kind has, which the host
--- differential says of the surface as a whole.
---
--- Usage: xmake l tools/matter-pure-diff.lua <host.tsv> <port.tsv> [--out file]
 import("core.base.json")
 
 local function read(file)

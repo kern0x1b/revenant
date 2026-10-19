@@ -1,21 +1,3 @@
-// display-probe.m - does a bare process (no UIApplicationMain) have a display, by the public routes, and what does a display
-// link do there? Prints [UIScreen mainScreen], [UIScreen screens].count, the private +[CADisplay mainDisplay] that
-// dynamics-watch.m used to decide with (for comparison only), and then, last because it may fault, one display link:
-//     display-probe screen   -[UIScreen displayLinkWithTarget:selector:] (public since 4.0)
-//     display-probe class    +[CADisplayLink displayLinkWithTarget:selector:]
-// A second argument says what the process does first, each step adding to the one before, as dynamics-watch.m does a view before
-// its animators start a link: `view` a UIView with a subview, `window` a UIWindow made key and visible over it, `turn` a
-// CATransaction flush and a run loop turn of half a second after that, `wait` a view and then run loop turns of a quarter of a
-// second until `[UIScreen screens]` is not empty, for at most 30 s (it prints when it was, or that it was not), `app` nothing but
-// UIApplicationMain, the report coming from the launch callback. It prints the time each step took. Whether a layer tree, a window or a turn changes what the display
-// and the link do is what these ask.
-// A fault is caught to print the image, the offset in it and the fault address (the run's own verdict has only the pc), and the
-// process exits 139.
-// The build decides two things the program does not: the `apple_minimum` of the binary (LC_VERSION_MIN_IPHONEOS, which UIKit and
-// dyld may branch on) and whether charon@apple-backports is linked. display-probe/xmake.lua takes both from the environment and
-// tells the program (the first line it prints), display-probe/run.sh builds every combination for a release and runs it on the
-// emulated device: `sh tests/backports/device/display-probe/run.sh 6.1.3`. Each run is a daemon target
-// (`add_rules("@addon/charon/daemon")`, Foundation, UIKit, QuartzCore, CoreGraphics).
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 #import <dlfcn.h>
@@ -25,7 +7,6 @@
 #import <unistd.h>
 #import <sys/ucontext.h>
 
-// What the build says of itself, from display-probe/xmake.lua: the apple_minimum it was built with and whether the package is linked.
 #ifndef PROBE_MINIMUM
 #define PROBE_MINIMUM "(not said)"
 #endif
@@ -71,7 +52,6 @@ static void fault(int signal_number, siginfo_t *info, void *context)
     _exit(139);
 }
 
-// What the process's display is, by the public routes and the private one for comparison, then one display link (last: it may fault).
 static void report_and_link(BOOL screen)
 {
     UIScreen *mainScreen = [UIScreen mainScreen];
@@ -96,8 +76,6 @@ static void report_and_link(BOOL screen)
     printf("display link: %s\n", link ? "an object" : "nil");
 }
 
-// The process as an application: UIApplicationMain, and the report from the launch callback. On the emulator a program run
-// as a command does not go through SpringBoard's launch, so the callback may never come; the run's own timeout says so.
 static BOOL g_screen;
 
 @interface ProbeDelegate : NSObject <UIApplicationDelegate>
@@ -125,8 +103,6 @@ int main(int argc, char **argv)
         printf("display probe: running on %s, built with apple_minimum %s, %s, mode %s %s\n", [[[UIDevice currentDevice] systemVersion] UTF8String],
                PROBE_MINIMUM, PROBE_PACKAGE ? "charon@apple-backports linked" : "no backports library", argc > 1 ? argv[1] : "(none)",
                argc > 2 ? argv[2] : "(none)");
-        // What is made before the report, one step more each: a UIView with a subview (`view`), a UIWindow made key and
-        // visible over it (`window`), a run loop turn with a CATransaction flush after that (`turn`).
         BOOL polling = strcmp(prepare, "wait") == 0;
         BOOL view = strcmp(prepare, "view") == 0 || polling || strcmp(prepare, "window") == 0 || strcmp(prepare, "turn") == 0;
         BOOL window = strcmp(prepare, "window") == 0 || strcmp(prepare, "turn") == 0;

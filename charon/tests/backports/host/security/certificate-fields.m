@@ -4,19 +4,6 @@
 #import <dlfcn.h>
 #import <stdio.h>
 
-// THE FIXTURE IS A FIXED BYTE STRING IN THIS FILE, not an opaque binary beside it, and it was made by:
-//
-//    openssl req -x509 -newkey rsa:2048 -keyout /dev/null -out cert.pem -days 7300 -nodes \
-//        -subj "/CN=charon-der-test/O=charon backports/C=GB" \
-//        -addext "subjectAltName=email:charon-der-test@example.invalid,DNS:cert.example.invalid"
-//    openssl x509 -in cert.pem -outform DER -out certificate.der
-//
-// which is a self-signed certificate with a commonName and a subjectAltName carrying BOTH an
-// rfc822Name (an email) and a dNSName, so the two places an address can live are both present. It
-// carries no key, no device and no personal data, and the bytes are here so a reader can see the
-// structure being walked rather than trust a file. asn1parse on these bytes gives, at the offsets the
-// walk finds by tag: [0] version, serialNumber INTEGER, signature AlgorithmIdentifier, issuer Name,
-// validity, subject Name, then [3] extensions holding the subjectAltName.
 static const unsigned char CharonCertificateFixtureDER[] = {
     0x30, 0x82, 0x03, 0x4b, 0x30, 0x82, 0x02, 0x33, 0xa0, 0x03, 0x02, 0x01,
     0x02, 0x02, 0x09, 0x00, 0xf3, 0x2b, 0xb3, 0x54, 0xfe, 0x37, 0xbb, 0x87,
@@ -100,12 +87,8 @@ typedef OSStatus (*CopyEmails)(SecCertificateRef, CFArrayRef *);
 
 int main(void)
 {
-    // UNBUFFERED, so output SURVIVES A CRASH. A mutant that segfaults mid-case would otherwise lose
-    // every row printed before it, and the comparator would then say those rows "did not measure" and
-    // name a truncated buffer instead of the crash.
     setvbuf(stdout, NULL, _IONBF, 0);
     @autoreleasepool {
-        // the host's own accessors, off the SYSTEM handle, because this file defines the same names
         void *system = dlopen("/System/Library/Frameworks/Security.framework/Security", RTLD_LAZY | RTLD_LOCAL);
         CopyCommonName hostCN = (CopyCommonName)dlsym(system, "SecCertificateCopyCommonName");
         CopyEmails hostMail = (CopyEmails)dlsym(system, "SecCertificateCopyEmailAddresses");
@@ -139,7 +122,6 @@ int main(void)
         printf("email-count\t%lu\t%lu\n", (unsigned long)(portMail ? CFArrayGetCount(portMail) : 0),
                (unsigned long)(hostMailOut ? CFArrayGetCount(hostMailOut) : 0));
 
-        // a NULL out-parameter and a NULL certificate are both refused, not crashed on
         printf("null-out\t%ld\n", (long)SecCertificateCopyCommonName(cert, NULL));
         printf("null-cert\t%ld\n", (long)SecCertificateCopyCommonName(NULL, &portName));
     }

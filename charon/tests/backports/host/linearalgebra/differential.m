@@ -1,15 +1,3 @@
-// The port's LinearAlgebra8.m and AppleBLAS8.m held against the host's own Accelerate, case by case.
-//
-// The port's sources are compiled with every API name it defines renamed, so this translation unit
-// can hold the port's objects and the host's side by side and compare what each answers: the status,
-// the shape, and every element. The 42 la_* and the 2 appleblas_* prototypes are the ones of the
-// headers of iOS 16.4, which is what the port's own translation units are compiled against; the types
-// they use (la_object_t, la_count_t, la_index_t, la_status_t, la_norm_t, la_attribute_t) are the
-// host's, so the two sides are called through one set of declarations.
-//
-// Nothing here reaches into an object: each side's own accessor reads its own objects, because the
-// port's objects and the host's are different classes with different layouts.
-
 #import <Accelerate/Accelerate.h>
 #import <Foundation/Foundation.h>
 #include <math.h>
@@ -60,11 +48,6 @@ double charon_host_la_norm_as_double(la_object_t vector, la_norm_t vector_norm);
 la_object_t charon_host_la_normalized_vector(la_object_t vector, la_norm_t vector_norm);
 la_object_t charon_host_la_solve(la_object_t matrix_system, la_object_t obj_rhs);
 
-// The two entry points the release's own header reaches through macros are deliberately NOT renamed:
-// vecLib/LinearAlgebra/object.h redefines them, which defeats a -D, so the port's own definitions keep
-// their names and win the link against the host library's (measured: a definition of _la_retain in an
-// object links against -framework Accelerate without a duplicate symbol and is the one that runs).
-// Both are called here as the C functions they are.
 #undef la_retain
 #undef la_release
 la_object_t la_retain(la_object_t object);
@@ -96,9 +79,6 @@ static void report(int passed, const char *name, const char *detail)
 
 static char detail[512];
 
-// One float element of each side, through that side's own accessor. A side that cannot be read as
-// float (a double object, a splat, an object carrying an error) reads as NAN, which is the answer
-// either side gives, so a NaN on one side and not the other is a difference worth reporting.
 static float element_of_mine(la_object_t object, la_count_t at)
 {
     float buffer[64] = {0};
@@ -119,9 +99,6 @@ static float element_of_theirs(la_object_t object, la_count_t at)
     return buffer[at];
 }
 
-// The same object, made twice: once by the port and once by the host, from the same inputs. The name
-// is the case; the tolerance is how far the elements may differ, which is 0 everywhere except where
-// a sum over a vector is the arithmetic itself and the two sides may sum in a different order.
 static void same(const char *name, la_object_t mine, la_object_t theirs, double tolerance)
 {
     long my_status = (long)charon_host_la_status(mine), their_status = (long)la_status(theirs);
@@ -141,7 +118,7 @@ static void same(const char *name, la_object_t mine, la_object_t theirs, double 
         double difference = fabs((double)x - (double)y);
         double scale = fabs((double)y) > 1.0 ? fabs((double)y) : 1.0;
         if (isnan(x) && isnan(y)) {
-            continue;   // neither side could be read as a float, which is the same answer twice
+            continue;
         }
         if (!(difference <= tolerance * scale)) {
             snprintf(detail, sizeof detail, "element %lu is %g, the host says %g", (unsigned long)at, x, y);
@@ -152,13 +129,6 @@ static void same(const char *name, la_object_t mine, la_object_t theirs, double 
     report(1, name, "");
 }
 
-// A case where the host does not answer the same thing twice, and the port answers what the header
-// documents. la_solve of a matrix with an exactly zero pivot is LA_SINGULAR_ERROR in
-// vecLib/LinearAlgebra/linear_systems.h, and the host answers LA_SUCCESS in a fresh process with a store
-// that reports LA_SINGULAR_ERROR after filling the buffer with NaNs, and LA_SUCCESS with a store that
-// succeeds and writes zeros once another solve has run in the same process. So the case passes while the
-// port answers LA_SINGULAR_ERROR and the host answers either of its two, and fails on anything else -
-// which is what tells us this note has gone stale.
 static void diverges(const char *name, la_object_t mine, la_object_t theirs)
 {
     long my_status = (long)charon_host_la_status(mine), their_status = (long)la_status(theirs);
@@ -171,7 +141,6 @@ static void diverges(const char *name, la_object_t mine, la_object_t theirs)
     }
 }
 
-// A scalar answer, for the norms and for a buffer that is written rather than an object that is made.
 static void scalar(const char *name, double mine, double theirs, double tolerance)
 {
     double difference = fabs(mine - theirs);
@@ -208,13 +177,6 @@ static la_object_t theirs_double(const double *buffer, la_count_t rows, la_count
     return la_matrix_from_double_buffer(buffer, rows, cols, cols, LA_NO_HINT, LA_DEFAULT_ATTRIBUTES);
 }
 
-// Where a result is a sum over a vector, the two sides add the same terms in a different order and the
-// answers differ in the last place a float has - the host answers 0.0909090787 and 0.636363685 for
-// [[4,1],[1,3]] against [1,2] where this port answers 0.0909090936 and 0.636363626, both roundings of
-// 1/11 and 7/11 (facts/Accelerate/LinearAlgebra.md). So a sum is compared to a thousandth of a place
-// and everything else is compared exactly: a status, a shape, an element that is a sum of two values,
-// a slice, a transpose, a norm, a dot product of whole numbers. A tolerance of zero here would be
-// asserting that two independent summations produce the same bits.
 #define TOLERANT 1e-5
 #define EXACT 0.0
 
@@ -241,7 +203,6 @@ int main(void)
     la_object_t empty_theirs = la_vector_from_splat(sp_theirs, 0);
     la_object_t spd_theirs = la_splat_from_double(3.0, LA_DEFAULT_ATTRIBUTES);
 
-    // the shape a caller reads
     same("rows and cols of a 6x1", v6, t6, EXACT);
     same("rows and cols of a 2x2", m1, n1, EXACT);
     same("rows and cols of a 2x3", mine_float(eight, 2, 3), theirs_float(eight, 2, 3), EXACT);
@@ -286,7 +247,6 @@ int main(void)
     scalar("la_status of NULL", (double)charon_host_la_status(NULL), (double)la_status(NULL), EXACT);
     scalar("la_status of a good object", (double)charon_host_la_status(v6), (double)la_status(t6), EXACT);
 
-    // storage, both directions
     {
         float mine[8] = {0}, theirs[8] = {0};
         la_status_t a = charon_host_la_matrix_to_float_buffer(mine, 3, mine_float(eight, 2, 3));
@@ -310,8 +270,6 @@ int main(void)
         report(equal, "la_matrix_to_double_buffer of a double 2x2", equal ? "" : detail);
     }
     {
-        // A float object in a double buffer, a double object in a float buffer, and an object
-        // carrying an error, all three measured to be refused.
         float mine[4] = {7, 7, 7, 7}, theirs[4] = {7, 7, 7, 7};
         double dmine[4] = {7, 7, 7, 7}, dtheirs[4] = {7, 7, 7, 7};
         la_status_t a = charon_host_la_matrix_to_float_buffer(mine, 2, mine_double(four_d, 2, 2));
@@ -337,13 +295,6 @@ int main(void)
         report(a == b, "la_vector_to_float_buffer of a 2x2", "");
     }
     {
-        // The sixteen refusals: each of the four stores of a float splat, a double splat and an object
-        // carrying an error, in both scalar types. The host's order is the scalar type first and then
-        // the shape, so a splat of the buffer's own type is refused for having no shape
-        // (LA_INVALID_PARAMETER_ERROR) and a splat of the other type for its precision
-        // (LA_PRECISION_MISMATCH_ERROR), while an object carrying an error has no scalar type of its own
-        // and is refused for the precision in all four. The buffer is compared as well as the status, so
-        // a refusal that wrote something would be a difference (facts/Accelerate/LinearAlgebra.md).
         la_object_t mine_splat = charon_host_la_splat_from_float(3.0f, LA_DEFAULT_ATTRIBUTES);
         la_object_t theirs_splat = la_splat_from_float(3.0f, LA_DEFAULT_ATTRIBUTES);
         la_object_t mine_double_splat = charon_host_la_splat_from_double(3.0, LA_DEFAULT_ATTRIBUTES);
@@ -387,7 +338,6 @@ int main(void)
         }
     }
 
-    // slices
     same("la_vector_slice(v6, 1, 2, 3)", charon_host_la_vector_slice(v6, 1, 2, 3), la_vector_slice(t6, 1, 2, 3), EXACT);
     same("la_vector_slice(v6, 5, -1, 6) backwards", charon_host_la_vector_slice(v6, 5, -1, 6),
          la_vector_slice(t6, 5, -1, 6), EXACT);
@@ -405,7 +355,6 @@ int main(void)
     same("la_matrix_slice of a splat", charon_host_la_matrix_slice(sp_mine, 0, 0, 1, 1, 1, 1),
          la_matrix_slice(sp_theirs, 0, 0, 1, 1, 1, 1), EXACT);
 
-    // the constructors that read one element
     same("la_identity_matrix(3) float", charon_host_la_identity_matrix(3, LA_SCALAR_TYPE_FLOAT, LA_DEFAULT_ATTRIBUTES),
          la_identity_matrix(3, LA_SCALAR_TYPE_FLOAT, LA_DEFAULT_ATTRIBUTES), EXACT);
     same("la_identity_matrix(3) double", charon_host_la_identity_matrix(3, LA_SCALAR_TYPE_DOUBLE, LA_DEFAULT_ATTRIBUTES),
@@ -466,7 +415,6 @@ int main(void)
          EXACT);
     same("la_transpose of a splat", charon_host_la_transpose(sp_mine), la_transpose(sp_theirs), EXACT);
 
-    // scaling
     same("la_scale_with_float(m1, 0.5)", charon_host_la_scale_with_float(m1, 0.5f), la_scale_with_float(n1, 0.5f), EXACT);
     same("la_scale_with_double(m1, 0.5)", charon_host_la_scale_with_double(m1, 0.5), la_scale_with_double(n1, 0.5), EXACT);
     same("la_scale_with_float(d1) a double object", charon_host_la_scale_with_float(d1, 1.0f), la_scale_with_float(e1, 1.0f),
@@ -476,7 +424,6 @@ int main(void)
     same("la_scale_with_float of a splat", charon_host_la_scale_with_float(sp_mine, 1.0f), la_scale_with_float(sp_theirs, 1.0f),
          EXACT);
 
-    // the elementwise operations, and the refusals
     same("la_sum(v6, w6)", charon_host_la_sum(v6, w6), la_sum(t6, u6), EXACT);
     same("la_difference(v6, w6)", charon_host_la_difference(v6, w6), la_difference(t6, u6), EXACT);
     same("la_elementwise_product(v6, w6)", charon_host_la_elementwise_product(v6, w6), la_elementwise_product(t6, u6), EXACT);
@@ -493,7 +440,6 @@ int main(void)
          la_sum(t6, theirs_float(three, 3, 1)), EXACT);
     same("la_sum(v6, m1) a shape", charon_host_la_sum(v6, m1), la_sum(t6, n1), EXACT);
 
-    // products
     same("la_inner_product(v6, w6)", charon_host_la_inner_product(v6, w6), la_inner_product(t6, u6), TOLERANT);
     same("la_inner_product(v6, a splat)", charon_host_la_inner_product(v6, sp_mine), la_inner_product(t6, sp_theirs), EXACT);
     same("la_inner_product(a splat, v6)", charon_host_la_inner_product(sp_mine, v6), la_inner_product(sp_theirs, t6), EXACT);
@@ -520,7 +466,6 @@ int main(void)
     same("la_matrix_product of two double matrices", charon_host_la_matrix_product(d1, mine_double(four_d, 2, 2)),
          la_matrix_product(e1, theirs_double(four_d, 2, 2)), TOLERANT);
 
-    // the norms
     for (int which = 1; which <= 3; which++) {
         la_norm_t norm = (la_norm_t)which;
         char label[64];
@@ -560,7 +505,6 @@ int main(void)
              la_normalized_vector(sp_theirs, LA_L2_NORM), EXACT);
     }
 
-    // the solve
     {
         const float system[4] = {4, 1, 1, 3};
         const float right[2] = {1, 2};
@@ -605,7 +549,6 @@ int main(void)
              la_solve(theirs_float(four, 0, 0), theirs_float(four, 0, 0)), EXACT);
     }
 
-    // the reference count, which the two shapes of la_object_t keep in two different places
     {
         __unsafe_unretained la_object_t kept = la_retain((id)v6);
         report(kept == (id)v6, "la_retain answers the object", "");

@@ -1,6 +1,3 @@
-// MPSMatrixVectorMultiplication, from the header of the SDK of iOS 16.4. One object per release: the band machinery keeps an
-// object whole or drops it whole, so a file here carries the API of exactly one release.
-
 #import "CharonMPS.h"
 
 
@@ -51,8 +48,6 @@
         CharonMPSRefuse(@"MPSMatrixVectorMultiplication: a matrix or vector of a data type that is not one of the eight element types was given");
         return;
     }
-    // op(A) is _rows x _columns, x holds its _columns components and y the result's _rows, and the
-    // batch is the matrices and vectors the origins and the batch range name together.
     NSUInteger matrixRows = _transpose ? _columns : _rows;
     NSUInteger matrixColumns = _transpose ? _rows : _columns;
     NSUInteger start, count;

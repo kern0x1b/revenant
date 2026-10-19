@@ -3,9 +3,6 @@
 #import <Foundation/Foundation.h>
 #include <string.h>
 
-// Generated from the family's own list of the constants the port carries. run.sh renames each name in
-// the port's sources to CharonHost_<name>, so the bare name here is the host's and the CharonHost_
-// name is the port's: the same declaration, two definitions, one comparison of the bytes.
 static int failures, checks;
 
 static void compare(const char *name, CFStringRef port, CFStringRef system)

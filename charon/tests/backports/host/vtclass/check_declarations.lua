@@ -1,26 +1,13 @@
--- check_declarations.lua [SDK] [--quiet] - checks every declaration in the port's CharonVideoToolbox.h
--- against SDK 26.2's own VideoToolbox headers, ported from check-declarations.py. That file's docstring
--- says what is compared, why the port parses both sides itself, and how a difference is classified
--- (MISMATCH, MISSING, OMITTED, EXTRA); the rules here are the same.
---
--- The regular expressions of the Python are matched by hand. Each function below names the regex it
--- stands for. Every one of them is matched the way the regex engine finds it: the leftmost start, the
--- greedy quantifiers, and the non-overlapping findall scan. The text is bytes; the headers hold no
--- non-ASCII letter or whitespace, and their non-ASCII symbols are not \w or \s in Python either.
-
 local V = import("vtlib", {rootdir = os.scriptdir()})
 
--- ASCII whitespace as Python's \s and str.split() see it: space, \t, \n, \v, \f, \r, \x1c-\x1f.
 local function is_ws(b)
     return b == 32 or (b >= 9 and b <= 13) or (b >= 28 and b <= 31)
 end
 
--- Python's \w on ASCII text: a letter, a digit or an underscore.
 local function is_word(b)
     return (b >= 48 and b <= 57) or (b >= 65 and b <= 90) or (b >= 97 and b <= 122) or b == 95
 end
 
--- The byte at i, or -1 past the end, so a comparison never meets nil.
 local function byte_at(s, i)
     if i > #s then
         return -1
@@ -28,7 +15,6 @@ local function byte_at(s, i)
     return string.byte(s, i)
 end
 
--- ' '.join(s.split()): the runs of non-whitespace joined by one space.
 local function collapse(s)
     local out = {}
     for token in string.gmatch(s, "[^ \t\n\v\f\r\28\29\30\31]+") do
@@ -37,7 +23,6 @@ local function collapse(s)
     return table.concat(out, " ")
 end
 
--- Python's str.strip() on ASCII text.
 local function strip_py(s)
     local i, j = 1, #s
     while i <= j and is_ws(byte_at(s, i)) do
@@ -49,19 +34,12 @@ local function strip_py(s)
     return string.sub(s, i, j)
 end
 
--- The alternation of TRAILING, matched at q. TRAILING is
---     \s*(?:API_[A-Z_]+|NS_REFINED_FOR_SWIFT|NS_SWIFT_NAME|NS_SWIFT_UNAVAILABLE
---          |NS_SWIFT_SENDABLE|API_DEPRECATED_WITH_REPLACEMENT|NS_UNAVAILABLE|NS_DESIGNATED_INITIALIZER)
---     \s*(\((?:[^()]|\([^()]*\))*\))?
--- and the first alternative that matches at q wins, as in the regex. Returns the position after the
--- alternative, or nil.
 local LITERALS = {
     "NS_REFINED_FOR_SWIFT", "NS_SWIFT_NAME", "NS_SWIFT_UNAVAILABLE", "NS_SWIFT_SENDABLE",
     "API_DEPRECATED_WITH_REPLACEMENT", "NS_UNAVAILABLE", "NS_DESIGNATED_INITIALIZER",
 }
 
 local function alternative_end(d, q)
-    -- API_[A-Z_]+ : the prefix, then at least one [A-Z_], taken greedily
     if string.sub(d, q, q + 3) == "API_" then
         local r = q + 4
         while true do
@@ -84,8 +62,6 @@ local function alternative_end(d, q)
     return nil
 end
 
--- The optional argument list of TRAILING, from its "(" at w: \((?:[^()]|\([^()]*\))*\) . Returns the
--- position after its ")", or nil when the regex cannot match it (the group is then skipped).
 local function paren_end(d, w)
     local i = w + 1
     while true do
@@ -93,10 +69,10 @@ local function paren_end(d, w)
         if b == -1 then
             return nil
         end
-        if b == 41 then -- ")"
+        if b == 41 then
             return i + 1
         end
-        if b == 40 then -- "(": must be a simple group \([^()]*\), or the regex fails here
+        if b == 40 then
             local j = i + 1
             while true do
                 local c = byte_at(d, j)
@@ -115,9 +91,6 @@ local function paren_end(d, w)
     end
 end
 
--- One match of TRAILING that starts at p, or nil. The leading \s* is greedy, so a match that begins at a
--- space begins at the first space of its run, and a failure at a space is a failure at every space of
--- the run. Returns the position after the whole match.
 local function trailing_at(d, p)
     local q = p
     while is_ws(byte_at(d, q)) do
@@ -140,7 +113,6 @@ local function trailing_at(d, p)
     return w
 end
 
--- The leftmost match of TRAILING in d: its start, and the position after its end; nil when none.
 local function find_trailing(d)
     for p = 1, #d do
         local stop = trailing_at(d, p)
@@ -151,8 +123,6 @@ local function find_trailing(d)
     return nil
 end
 
--- Python: strip(declaration) removes every TRAILING match, leftmost first, until none is left, then
--- returns ' '.join(declaration.split()).
 local function strip(declaration)
     while true do
         local p, stop = find_trailing(declaration)
@@ -164,18 +134,12 @@ local function strip(declaration)
     return collapse(declaration)
 end
 
--- Python: normalise(type_name) is
---     re.sub(r'\s*\**\s*$', lambda m: ' *' if m.group(0).strip() else '', type_name).strip()
--- The leftmost match of that pattern is the whole run of spaces and stars at the end; it becomes ' *'
--- when it holds a star and nothing otherwise, and the result is stripped.
 local function normalise(type_name)
-    -- The spacing around a protocol list's brackets is not part of the type: id<P> and id <P> are one type,
-    -- and the SDK spells the second, the port the first. Whitespace inside the brackets is dropped the same way.
     type_name = type_name:gsub("%s*<%s*", "<"):gsub("%s*>", ">")
     local i = #type_name
     while i >= 1 do
         local b = byte_at(type_name, i)
-        if is_ws(b) or b == 42 then -- "*"
+        if is_ws(b) or b == 42 then
             i = i - 1
         else
             break
@@ -190,10 +154,6 @@ local function normalise(type_name)
     return strip_py(core .. replacement)
 end
 
--- Python: re.match(r'^(.*?)\s*(\*?)\s*(\w+)$', s). Returns group 1, group 2 ("*" or ""), group 3, or nil
--- when s does not end in a word character. The word at the end is the whole trailing run of \w. Group 1
--- is as short as it can be, so the run of spaces and at most one star before the word is taken whole,
--- and group 1 is what comes before it.
 local function split_property(s)
     local n = #s
     local w0 = n + 1
@@ -218,7 +178,6 @@ local function split_property(s)
     return string.sub(s, 1, j - 1), (stars == 1 and "*" or ""), string.sub(s, w0)
 end
 
--- Python: re.search(r'(\w+)\s*$', s): the word run at the end, or nil.
 local function trailing_word(s)
     local e = #s
     while e >= 1 and is_ws(byte_at(s, e)) do
@@ -234,9 +193,6 @@ local function trailing_word(s)
     return string.sub(s, w + 1, e)
 end
 
--- Python: findall(r'@property\s*\(([^)]*)\)([^;]*);', text, re.S). Each match is {attrs, decl}: the text
--- between the parentheses and the text between ")" and the next ";". A candidate that does not complete
--- is not a match, and the scan moves on one byte, as findall does.
 local function property_decls(text)
     local out = {}
     local p = 1
@@ -250,7 +206,7 @@ local function property_decls(text)
             q = q + 1
         end
         local matched = false
-        if byte_at(text, q) == 40 then -- "("
+        if byte_at(text, q) == 40 then
             local rp = string.find(text, ")", q + 1, true)
             if rp then
                 local sp = string.find(text, ";", rp + 1, true)
@@ -268,8 +224,6 @@ local function property_decls(text)
     return out
 end
 
--- Python: findall(r'([-+])\s*\(([^)]*)\)([^;]*);', body, re.S). Each match is {kind, decl}. The return
--- type in parentheses is captured by the regex and never used by the check, so it is not kept.
 local function method_decls(text)
     local out = {}
     local p = 1
@@ -284,7 +238,7 @@ local function method_decls(text)
             q = q + 1
         end
         local matched = false
-        if byte_at(text, q) == 40 then -- "("
+        if byte_at(text, q) == 40 then
             local rp = string.find(text, ")", q + 1, true)
             if rp then
                 local sp = string.find(text, ";", rp + 1, true)
@@ -302,7 +256,6 @@ local function method_decls(text)
     return out
 end
 
--- Python: findall(r'(\w+):\s*\(([^)]*)\)', cleaned). Each match is {word, type_text}.
 local function keyword_parts(cleaned)
     local out = {}
     local i = 1
@@ -312,12 +265,12 @@ local function keyword_parts(cleaned)
             j = j + 1
         end
         local advanced = false
-        if j > i and byte_at(cleaned, j) == 58 then -- ":"
+        if j > i and byte_at(cleaned, j) == 58 then
             local q = j + 1
             while is_ws(byte_at(cleaned, q)) do
                 q = q + 1
             end
-            if byte_at(cleaned, q) == 40 then -- "("
+            if byte_at(cleaned, q) == 40 then
                 local rp = string.find(cleaned, ")", q + 1, true)
                 if rp then
                     out[#out + 1] = {string.sub(cleaned, i, j - 1), string.sub(cleaned, q + 1, rp - 1)}
@@ -333,9 +286,6 @@ local function keyword_parts(cleaned)
     return out
 end
 
--- Python: finditer(r'@protocol\s+(VT\w+)\s*(?:<[^>]*>)?(.*?)@end', text, re.S). Each match is
--- {name, body}. The optional <...> after the name is taken when it closes; the body is the shortest
--- text up to "@end". If no "@end" follows the group, the regex gives the group up, and so does this.
 local function protocol_blocks(text)
     local out = {}
     local p = 1
@@ -362,7 +312,7 @@ local function protocol_blocks(text)
                     s = s + 1
                 end
                 local body, stop
-                if byte_at(text, s) == 60 then -- "<"
+                if byte_at(text, s) == 60 then
                     local gt = string.find(text, ">", s + 1, true)
                     if gt then
                         local e = string.find(text, "@end", gt + 1, true)
@@ -391,9 +341,6 @@ local function protocol_blocks(text)
     return out
 end
 
--- Python: finditer(r'@interface\s+(VT\w+)\s*(:\s*\w+\s*(?:<[^>]*>)?)?(.*?)@end', text, re.S). Each match
--- is {name, angle, body}, where angle is group 2 (the ":" text, or "") and body is group 3. The optional
--- group is taken when its syntax matches and an "@end" follows it; otherwise it is given up.
 local function interface_blocks(text)
     local out = {}
     local p = 1
@@ -420,7 +367,7 @@ local function interface_blocks(text)
                     s = s + 1
                 end
                 local angle, body, stop
-                if byte_at(text, s) == 58 then -- ":"
+                if byte_at(text, s) == 58 then
                     local t = s + 1
                     while is_ws(byte_at(text, t)) do
                         t = t + 1
@@ -435,7 +382,7 @@ local function interface_blocks(text)
                             v = v + 1
                         end
                         local group_end = v
-                        if byte_at(text, v) == 60 then -- "<"
+                        if byte_at(text, v) == 60 then
                             local gt = string.find(text, ">", v + 1, true)
                             if gt then
                                 group_end = gt + 1
@@ -467,7 +414,6 @@ local function interface_blocks(text)
     return out
 end
 
--- Python: x.split(',') for each x in the conformance list, each stripped. "" gives {""}.
 local function split_commas(s)
     local out = {}
     local start = 1
@@ -483,10 +429,6 @@ local function split_commas(s)
     return out
 end
 
--- Python: parse(text) -> classes. Each class is {properties = {name -> type}, instance = {selector ->
--- {types, ret}}, class = {...}, unavailable = {name -> true}, unavailable_methods = {selector -> true}
--- (only once one exists)}. The protocols are read first from the same text, because a class's conformance
--- copies their properties.
 local function parse(text)
     local protocols = {}
     for _, block in ipairs(protocol_blocks(text)) do
@@ -511,7 +453,6 @@ local function parse(text)
             entry = {properties = {}, instance = {}, class = {}, unavailable = {}}
             classes[name] = entry
         end
-        -- re.search(r'<([^>]*)>', group2): the first "<" and the ">" after it; then split on ","
         local conformances = {}
         local lt = string.find(block.angle, "<", 1, true)
         if lt then
@@ -536,8 +477,6 @@ local function parse(text)
             end
         end
 
-        -- what the class's own protocols declare, so a restatement is not an invention; the first
-        -- protocol in the list to declare a name gives its type, as setdefault does
         for _, proto in ipairs(conformances) do
             local protocol = protocols[proto]
             if protocol then
@@ -586,8 +525,6 @@ local function parse(text)
     return classes
 end
 
--- Python's str(list) of the types, or "none" for an empty list: the `list(got_types) or "none"` of the
--- messages.
 local function list_repr(items)
     if #items == 0 then
         return "none"
@@ -599,7 +536,6 @@ local function list_repr(items)
     return "[" .. table.concat(parts, ", ") .. "]"
 end
 
--- Tuples of types are equal when they have the same length and each element is equal.
 local function same_types(a, b)
     if #a ~= #b then
         return false
@@ -612,13 +548,10 @@ local function same_types(a, b)
     return true
 end
 
--- selector.split(":")[0]
 local function first_part(selector)
     return string.match(selector, "^([^:]*)")
 end
 
--- The checks for one class present in both the port and the SDK. The Python's loop body: each append
--- goes to the list of its class, in the same order.
 local function check_class(name, p, s, unavailable_methods, out)
     for _, prop in ipairs(V.sorted_keys(s.properties)) do
         if not s.unavailable[prop] then
@@ -655,8 +588,6 @@ local function check_class(name, p, s, unavailable_methods, out)
                             name, dash, selector, V.py_repr(got.ret), V.py_repr(sdk_method.ret))
                     end
                 else
-                    -- a property's getter is counted with the property; a property with a true (non-empty)
-                    -- type takes the selector's first part, as the Python's .get() truthiness does
                     local getter_type = s.properties[first_part(selector)]
                     if not getter_type or getter_type == "" then
                         out.missing[#out.missing + 1] = string.format("%s %s%s: a method SDK 26.2 declares, the port does not",
@@ -680,7 +611,6 @@ local function check_class(name, p, s, unavailable_methods, out)
     end
 end
 
--- The text of a file, or the run ends with exit 1 where the Python's open().read() raised.
 local function read_or_fail(reader, path)
     local text
     try {
@@ -714,12 +644,9 @@ function main(...)
         V.fail("check_declarations.lua: pass an iPhoneOS*.sdk or set VT_SDK")
     end
 
-    -- os.path.join(sdk, "System/Library/Frameworks/VideoToolbox.framework/Headers")
     local headers = V.join_path(sdk, "System/Library/Frameworks/VideoToolbox.framework/Headers")
     local sdk_text = read_or_fail(V.header_text, headers)
 
-    -- HERE/../../../../packages/a/apple-backports/VideoToolbox/CharonVideoToolbox.h, where HERE is this
-    -- script's directory
     local port_header = os.scriptdir() .. "/../../../../packages/a/apple-backports/VideoToolbox/CharonVideoToolbox.h"
     local port = parse(read_or_fail(V.read_text, port_header))
     local sdk_classes = parse(sdk_text)

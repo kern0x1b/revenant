@@ -3,14 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// The comparison rules CMTagCollection and CMTaggedBufferGroup both need, in one place.
-//
-// A C function shared between two backport objects is the trap in charon/AGENTS.md: the band machinery
-// keys an object on the API it exports, so an object calling another's public function links a
-// dependency between two objects that are dropped independently. Everything here is charon_-prefixed and
-// therefore not an API symbol, so the object that compiles this file exports nothing of it and both
-// CMTagCollection17.m and CMTaggedBufferGroup17.m can use it without either calling the other.
-
 BOOL charon_tag_equal(CMTag left, CMTag right)
 {
     return left.category == right.category && left.dataType == right.dataType && left.value == right.value;
@@ -24,9 +16,6 @@ BOOL charon_tag_is_less(CMTag left, CMTag right)
         return left.dataType < right.dataType;
     return left.value < right.value;
 }
-// The rule the host's own ContainsSpecifiedTags and the group's six lookups both use: every one of the
-// wanted tags is carried. The empty set is carried by everything, and neither argument is dereferenced
-// when it is NULL.
 BOOL charon_tag_carries(const CMTag *held, CMItemCount heldCount, const CMTag *wanted, CMItemCount wantedCount)
 {
     for (CMItemCount index = 0; index < wantedCount; index++) {
@@ -41,9 +30,6 @@ BOOL charon_tag_carries(const CMTag *held, CMItemCount heldCount, const CMTag *w
     }
     return YES;
 }
-
-// The collection's class and its sorted array, moved here from CMTagCollection17.m so that another
-// object can read a collection's tags without calling that object's API.
 
 @implementation CharonCMTagCollection {
     CMTag *_tags;
@@ -82,7 +68,6 @@ BOOL charon_tag_carries(const CMTag *held, CMItemCount heldCount, const CMTag *w
     return _tags;
 }
 
-// The index of the first tag not less than the one asked for, and whether that is the tag itself.
 - (NSUInteger)charon_indexOfTag:(CMTag)tag
 {
     NSUInteger low = 0, high = _count;
@@ -175,8 +160,6 @@ BOOL charon_tag_carries(const CMTag *held, CMItemCount heldCount, const CMTag *w
 }
 @end
 
-// The class method that hands a collection's tags to another object, in the helper so the group never
-// calls CMTagCollection17.o's API. The caller frees the array.
 CMTag *charon_copy_all_tags(CMTagCollectionRef collection, CMItemCount *countOut)
 {
     CharonCMTagCollection *mine = (__bridge CharonCMTagCollection *)collection;

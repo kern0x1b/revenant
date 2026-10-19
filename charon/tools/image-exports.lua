@@ -1,24 +1,3 @@
--- xmake l tools/image-exports.lua RELEASE ARCHITECTURE INSTALL_SUBSTRING [SYMBOL_SUBSTRING]
---
--- Every symbol one image of one release's shared cache exports whose name contains SYMBOL_SUBSTRING,
--- read from that image's own export trie through modules/apple/dyld.lua.
---
--- This is the check a whole-cache search cannot make. "Is AVAssetWriterCreateWithURL in the 6.1.3
--- cache?" has answer "no" whether the constructor was never compiled for that slice or is exported
--- under a spelling a search for the public name misses -- and on 6.1.3 the AVFoundation image
--- exports 75 symbols matching "AssetWriter" of which every single one is an _OBJC_CLASS_$,
--- _OBJC_METACLASS_$ or ivar symbol, which is a different fact from "the class is missing" and the
--- one that decides whether the public writer API can be used at all.
---
--- INSTALL_SUBSTRING picks the image(s) by install name (e.g. "AVFoundation.framework/AVFoundation",
--- "libIOAccessoryManager"); SYMBOL_SUBSTRING picks the symbols within it, and an empty
--- SYMBOL_SUBSTRING lists all of them. The image's total export count is printed either way, because
--- "0 of 1731" and "75 of 75" say very different things.
---
--- Usage:
---   xmake l tools/image-exports.lua 6.1.3 armv7 "AVFoundation.framework/AVFoundation" "AssetWriter"
---   xmake l tools/image-exports.lua 6.1.3 armv7 "IAPAuthentication.framework"
-
 import("apple.dyld", {rootdir = path.join(os.scriptdir(), "..", "modules")})
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "modules")})
 

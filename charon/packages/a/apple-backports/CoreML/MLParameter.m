@@ -1,19 +1,3 @@
-/* MLKey and the two sets of keys built on it: the parameters a model may be asked about, and the
- * metrics it reports while it is being asked.
- *
- * A key is a name and, for a model made of several parts, the name of the part it belongs to. It
- * has no public initialiser in Core ML -- the framework's own keys are the ones that exist, and
- * an application finds them as the class properties of MLParameterKey and MLMetricKey -- so this
- * carries each of those as what it is: the specification's own name for that parameter, and the
- * same name every time, because a key is compared by identity and an application that builds a
- * key of its own has to get the same object the model answers by.
- *
- * The names are the specification's, not guesses: the parameters of a model are written into its
- * container under exactly these names, which is what lets a model read from a file and a key
- * written by hand in an application meet. The specification's own messages for them are in
- * CharonMLModel.c, where the model's parameters are read, and a parameter whose name is not one
- * of these belongs to a sub-model and is scoped to it by name.
- */
 #import <CoreML/CoreML.h>
 
 #include "CharonMLBridge.h"
@@ -24,9 +8,6 @@
     NSString *_scope;
 }
 
-/* The one way a key is made here: its own name, and the name of the part of the model it belongs
- * to, which is nil for a key of the model as a whole. The strings are copied because a key is
- * held by a model description for as long as the model is. */
 - (instancetype)charon_initWithName:(NSString *)name scope:(NSString *)scope
 {
     MLKey *built = [super init];
@@ -47,9 +28,6 @@
     return _scope;
 }
 
-/* Two keys are the same key when they have the same name and the same scope, which is what a key
- * is: a name in a model, and nothing else. A dictionary of parameters is keyed by these, and two
- * keys that were different objects with the same name would make that dictionary miss. */
 - (BOOL)isEqual:(id)object
 {
     MLKey *other = [object isKindOfClass:[MLKey class]] ? object : nil;
@@ -94,14 +72,6 @@
     [coder encodeObject:_scope forKey:@"scope"];
 }
 
-/* The one factory both sets of keys are built from. It is on MLKey rather than on MLParameterKey
- * because a metric key is a key too: each class property below asks for its own name and gets an
- * object of its own class back.
- *
- * A new object every time, which is what a real Core ML answers -- measured: two reads of
- * MLParameterKey.learningRate are two objects that are equal, not one object. A caller compares keys
- * with isEqual: and hashes them into a dictionary, both of which work by name, and one written to
- * expect identity would be holding an assumption a release does not make. */
 + (instancetype)charon_keyNamed:(NSString *)name
 {
     if (name == nil) {
@@ -112,8 +82,6 @@
 
 @end
 
-/* The parameter keys, one for each parameter a model may be updated by, named as the
- * specification's own update parameters name them. */
 @implementation MLParameterKey
 
 + (MLParameterKey *)learningRate
@@ -186,9 +154,6 @@
     return [self charon_keyNamed:@"biases"];
 }
 
-/* A key of one named part of a model, which is what a scoped key is: the same parameter of one
- * sub-model of a pipeline rather than of the model as a whole. The scope is a name and not a
- * model, so this cannot fail and asks nothing of the model that does not exist yet. */
 - (MLParameterKey *)scopedTo:(NSString *)scope
 {
     if (scope == nil) {
@@ -199,8 +164,6 @@
 
 @end
 
-/* The metric keys: the three numbers an updatable model reports as it trains, named as the
- * specification's own training report names them. */
 @implementation MLMetricKey
 
 + (MLMetricKey *)lossValue
@@ -220,8 +183,6 @@
 
 @end
 
-/* What one parameter of a model is: its key, the value it has unless it is changed, and the bound
- * the model puts on that value if it puts one. */
 @implementation MLParameterDescription {
     MLParameterKey *_key;
     id _defaultValue;

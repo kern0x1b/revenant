@@ -20,11 +20,6 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
 }
 
 
-// A voxel array is a box of the space divided into cubic voxels, and a set of which of them are
-// filled. The index of a voxel is where it sits in that division, the data behind it is the signed
-// shell field of those that are, and every set operation on two arrays is the same operation on those
-// two sets, over the extent both of them have.
-
 @interface MDLVoxelArray (CharonSet)
 - (MDLVoxelIndex)charon_indexOfLinear:(NSUInteger)k;
 @end
@@ -57,8 +52,6 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
         _filled = [[NSMutableIndexSet alloc] init];
         _shellFieldInteriorThickness = 0;
         _shellFieldExteriorThickness = 0;
-        // The data of a voxel array is one signed byte per voxel, in the order of the index, and a
-        // positive one is a voxel of the surface and a negative one is inside it.
         const int8_t *bytes = voxelData.bytes;
         NSUInteger count = CharonMDLVoxelCount(_minimum, _maximum);
         for (NSUInteger k = 0; k < count && (k + 1) * sizeof(int8_t) <= voxelData.length; k++)
@@ -71,8 +64,6 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
 
 - (instancetype)initWithAsset:(MDLAsset *)asset divisions:(int)divisions patchRadius:(float)patchRadius
 {
-    // The extent of the array is the asset's own bounding box divided into whole voxels as wide as
-    // the box's largest side, so a shape of any size gets voxels of one size.
     MDLAxisAlignedBoundingBox box = asset.boundingBox;
     vector_float3 span = {box.maxBounds.x - box.minBounds.x, box.maxBounds.y - box.minBounds.y,
                           box.maxBounds.z - box.minBounds.z};
@@ -88,8 +79,6 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
 {
 }
 
-// A voxel array's own box is the box its voxels are in, for the same reason a mesh's is the box of
-// its geometry rather than the union of its children's.
 - (MDLAxisAlignedBoundingBox)boundingBoxAtTime:(NSTimeInterval)time
 {
     return self.boundingBox;
@@ -110,7 +99,6 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
     return (MDLAxisAlignedBoundingBox){_origin + _voxelSize * (vector_float3){_maximum.x, _maximum.y, _maximum.z}, _origin};
 }
 
-// The index of the voxel a point in space falls in, and the point at the centre of a voxel.
 - (MDLVoxelIndex)indexOfSpatialLocation:(vector_float3)location
 {
     return (MDLVoxelIndex){(int)floorf((location.x - _origin.x) / _voxelSize.x), (int)floorf((location.y - _origin.y) / _voxelSize.y),
@@ -128,9 +116,6 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
     return (MDLAxisAlignedBoundingBox){low + _voxelSize, low};
 }
 
-// The index of a voxel in the order of the data, and whether that index names a voxel of the array at
-// all. A voxel outside the extent has no index, which is what makes the answer to a question about it
-// false rather than an answer about some other voxel.
 - (BOOL)voxelExistsAtIndex:(MDLVoxelIndex)index
                  allowAnyX:(BOOL)allowAnyX allowAnyY:(BOOL)allowAnyY allowAnyZ:(BOOL)allowAnyZ
              allowAnyShell:(BOOL)allowAnyShell
@@ -138,8 +123,6 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
     NSUInteger linear;
     if (!CharonMDLVoxelIndex(index, _minimum, _maximum, &linear))
         return NO;
-    // The "any" flags ask about the shell the voxel is in rather than about the voxel itself: a
-    // shell that is allowed anywhere is allowed whatever is at the edge of the array.
     (void)allowAnyX;
     (void)allowAnyY;
     (void)allowAnyZ;
@@ -187,9 +170,6 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
     return data;
 }
 
-// The three set operations over the two sets of filled voxels, each taking the voxels of the other
-// array in the space of this one: the other array's own index is its position in its own division,
-// which is turned into this one's through the two boxes they sit in.
 - (void)charon_combine:(MDLVoxelArray *)voxels keep:(BOOL)keep
 {
     if (!voxels || voxels == self)
@@ -228,8 +208,6 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
 
 - (void)intersectWithVoxels:(MDLVoxelArray *)voxels
 {
-    // The voxels of this array the other one has are the ones kept, so the other array's set is read
-    // into a set of this array's own index and the rest is dropped.
     NSMutableIndexSet *theirs = [[NSMutableIndexSet alloc] init];
     MDLVoxelIndexExtent mine = self.voxelIndexExtent;
     for (NSUInteger k = 0; k < voxels.count; k++) {
@@ -254,9 +232,6 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
     }
 }
 
-// The voxels of a mesh: every voxel of the array's own division whose cube the mesh's triangles pass
-// through, which is the surface the mesh really has at the resolution the array is at. The patch
-// radius widens that surface by a whole voxel around it.
 - (void)setVoxelsForMesh:(MDLMesh *)mesh divisions:(int)divisions patchRadius:(float)patchRadius
 {
     MDLVertexAttributeData *positions = [mesh vertexAttributeDataForAttributeNamed:MDLVertexAttributePosition
@@ -294,8 +269,6 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
 
 - (void)convertToSignedShellField
 {
-    // Every voxel of the surface is a positive one and every voxel with no voxel next to it is a
-    // negative one, which is the signed shell field: inside the shape, on it, and outside it.
     NSMutableIndexSet *shell = [[NSMutableIndexSet alloc] init];
     MDLVoxelIndexExtent extent = self.voxelIndexExtent;
     for (NSUInteger linear = 0; linear < CharonMDLVoxelCount(extent.minimumExtent, extent.maximumExtent); linear++) {

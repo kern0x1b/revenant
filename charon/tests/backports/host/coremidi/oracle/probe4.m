@@ -1,5 +1,3 @@
-// Host probe: RPN value rules (which data entry bytes are sent), relative RPN/NRPN (opcodes 4 and 5),
-// and a note on with an attribute type, 2.0 -> 1.0. Each case is one event list of one message.
 #import <CoreMIDI/CoreMIDI.h>
 #import <Foundation/Foundation.h>
 #include <stdio.h>
@@ -47,7 +45,6 @@ int main(void) {
         MIDIPortRef out = 0;
         MIDIOutputPortCreate(client, CFSTR("p4-out"), &out);
         sleep(1);
-        // RPN 0,0 with values whose LSB/MSB pattern decides what is sent
         UInt32 v[] = {0x00000000, 0x00800000, 0x02000000, 0x02000001, 0x00000001, 0x01000000, 0x04000000, 0x3F000000 , 0x40000000};
         for (size_t i = 0; i < sizeof(v)/sizeof(v[0]); i++) {
             UInt32 w[2] = {0x40200000, v[i]};

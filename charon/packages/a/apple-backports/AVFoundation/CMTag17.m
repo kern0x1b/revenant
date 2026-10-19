@@ -4,16 +4,6 @@
 #import <CoreFoundation/CoreFoundation.h>
 #include <string.h>
 
-// The CMTag functions of iOS 17, by the host's own measured answers (facts/CoreMedia/CMTag.md). Two of
-// them are the host's quirks and are reproduced rather than tidied:
-//
-//  - the getters do not check the data type. CMTagGetOSTypeValue of an SInt64 tag is 7 and
-//    CMTagGetSInt64Value of an OSType tag is 1986618469: one 64-bit field, read the same way.
-//  - the description of an invalid tag has no closing brace. Measured byte by byte; see the facts.
-//
-// The comparison and hash live in CharonCMTagSupport.m with the collection's rules, so that this object
-// and CMTagCollection17.o do not each carry a copy of the ordering.
-
 CMTag CMTagMakeWithOSTypeValue( CMTagCategory category, FourCharCode value )
 {
     CMTag tag = {category, kCMTagDataType_OSType, (uint32_t)value};
@@ -105,9 +95,6 @@ static BOOL charon_tag_is_nan( CMTag tag )
 
 CFComparisonResult CMTagCompare( CMTag tag1, CMTag tag2 )
 {
-    // The rule the host's own answers fit, over 253 measured pairs with none wrong, and scored as a
-    // comparator over a pair because a NaN's equality is not an order and no key can carry it
-    // (facts/CoreMedia/cmtag-fixtures/).
     int32_t left = (int32_t)tag1.category, right = (int32_t)tag2.category;
     if ( left != right )
         return left < right ? kCFCompareLessThan : kCFCompareGreaterThan;
@@ -121,7 +108,7 @@ CFComparisonResult CMTagCompare( CMTag tag1, CMTag tag2 )
         memcpy(&one, &lowBits, sizeof one);
         memcpy(&two, &highBits, sizeof two);
         if ( one == 0.0 )
-            one = 0.0;   // -0.0 compares equal to 0.0, measured
+            one = 0.0;
         if ( two == 0.0 )
             two = 0.0;
         if ( one != two )
@@ -135,9 +122,6 @@ CFComparisonResult CMTagCompare( CMTag tag1, CMTag tag2 )
 
 CFHashCode CMTagHash( CMTag tag )
 {
-    // The host's hashes are CFHash of the three fields, measured: 930911443662 for the 'vide' tag,
-    // 175247351123 for SInt64 7, 242338807774 for the invalid tag. CFHash is a CFString-compatible
-    // hash, so the string of the fields is what gets hashed.
     CFMutableStringRef text = CFStringCreateMutable(NULL, 0);
     char buffer[32];
     snprintf(buffer, sizeof buffer, "%d%u%llu", (int)tag.category, (unsigned)tag.dataType, (unsigned long long)tag.value);
@@ -149,12 +133,6 @@ CFHashCode CMTagHash( CMTag tag )
 
 CFDictionaryRef CMTagCopyAsDictionary( CMTag tag, CFAllocatorRef allocator )
 {
-    // A Float64's value travels as the double's bit pattern in a 64-bit integer - 1.5 is
-    // 4609434218613702656 - which is what makes the round trip exact; measured.
-    //
-    // CFNumbers, not the addresses of integers. CFDictionaryCreate retains every key and value it is
-    // given, so handing it &value made it retain the address of a stack slot - objc_retain on the tag's
-    // own bytes - and the probe died there. The dictionary is a number's.
     unsigned category = (unsigned)tag.category;
     unsigned dataType = (unsigned)tag.dataType;
     uint64_t value = tag.value;
@@ -196,12 +174,6 @@ CMTag CMTagMakeFromDictionary( CFDictionaryRef dict )
     return tag;
 }
 
-// The description, in the host's own shape: {category:'<four>' value:<v> <type>}, with values as
-// 'xxxx' for OSType, 0x… for Flags, decimal for SInt64 and %.2f for Float64 - and with **no closing
-// brace** for an invalid tag, which is what the host prints and is measured byte by byte.
-// The four characters, through kCFStringEncodingMacRoman, which is what the host uses: a category of
-// 0xc7000000 comes back as U+00AB, and MacRoman gives U+00AB where Windows Latin-1 gives U+00C7. The
-// string ends at the first zero byte, which is why the host prints the Undefined category as ''.
 static NSString *charon_category_text(CMTagCategory category)
 {
     unsigned char bytes[4];
@@ -244,10 +216,6 @@ static NSString *charon_type_text(CMTagDataType type)
 CFStringRef CMTagCopyDescription( CFAllocatorRef allocator, CMTag tag )
 {
     (void)allocator;
-    // An invalid tag's description is {category:'<four>'{INVALID} - the literal suffix, measured as
-    // 21 bytes ending 7d, so the brace IS closed. My earlier note that it was missing was read off a
-    // truncated print. The suffix is driven by the data type, not the category: 'mdia' with no data type
-    // gives {category:'mdia'{INVALID} and the same 0 category with an OSType gives a normal description.
     NSString *text;
     if (!CMTagIsValid(tag))
         text = [NSString stringWithFormat:@"{category:'%@'{INVALID}", charon_category_text(tag.category)];

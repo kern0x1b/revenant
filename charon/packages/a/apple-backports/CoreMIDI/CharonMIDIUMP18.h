@@ -1,13 +1,6 @@
-// Charon's declarations of the MIDI-UMP and MIDI-CI classes of iOS 18, which the 16.4 SDK does not carry. Transcribed from
-// the 26.2 SDK's MIDIUMPCI.h, MIDIUMPEndpoint.h, MIDIUMPEndpointManager.h, MIDIUMPFunctionBlock.h,
-// MIDIUMPMutableEndpoint.h, MIDIUMPMutableFunctionBlock.h, MIDIUMPCIProfile.h and MIDICIDeviceManager.h, with the
-// availability macros left out: this library is built for releases before 18, and the classes it defines are its own.
-// The types a 16.4 header does not declare are declared here under the 26.2 names, with the 26.2 layouts.
 #ifndef CharonMIDIUMP18_h
 #define CharonMIDIUMP18_h
 
-// The services and setup headers only: the umbrella would bring the 26.2 declarations of the same names on a host that has
-// them, which is what the host differential (tests/backports/host/coremidi) compiles against instead.
 #import <Foundation/Foundation.h>
 #import <CoreMIDI/MIDIServices.h>
 #import <CoreMIDI/MIDISetup.h>
@@ -107,7 +100,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly, weak, nullable) MIDIUMPEndpoint *UMPEndpoint;
 @property (nonatomic, readonly, weak, nullable) MIDICIDevice *midiCIDevice;
 @property (nonatomic, readonly) BOOL isEnabled;
-// Not NS_UNAVAILABLE as in 26.2: the mutable subclass initialises through super.
 @end
 
 @interface MIDIUMPMutableFunctionBlock : MIDIUMPFunctionBlock
@@ -142,7 +134,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) BOOL hasJRTSTransmitCapability;
 @property (nonatomic, readonly) MIDIUMPCIObjectBackingType endpointType;
 @property (nonatomic, copy) NSArray<MIDIUMPFunctionBlock *> *functionBlocks;
-// Not NS_UNAVAILABLE as in 26.2: the mutable subclass initialises through super.
 @end
 
 @interface MIDIUMPMutableEndpoint : MIDIUMPEndpoint

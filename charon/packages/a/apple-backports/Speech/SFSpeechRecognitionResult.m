@@ -1,9 +1,5 @@
 #import <Speech/Speech.h>
 
-// The result of iOS 10 that a recognizer hands over. No recognizer runs here, so a result is one an application made.
-// A fresh result is not final and has no transcription. The host raises an exception when it reads the transcriptions of a
-// fresh result; the port answers an empty array instead, because an API must never crash its caller
-// (facts/Speech/recognition-data.md).
 @implementation SFSpeechRecognitionResult {
     SFTranscription *_bestTranscription;
     NSArray<SFTranscription *> *_transcriptions;

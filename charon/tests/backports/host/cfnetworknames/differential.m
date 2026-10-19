@@ -3,11 +3,6 @@
 #import <dlfcn.h>
 #import "check.h"
 
-// The port's seven CFNetwork names against the host's own, which exports every one of them. The
-// values were read out of the arm64e shared cache of iOS 18.0 (facts/CFNetwork/Names.md); this is the
-// second, independent source: the running system has the same texts, so a value that was mistyped on
-// the way out of the cache shows up here.
-
 extern const CFStringRef charonHost_kCFHTTPVersion2_0;
 extern const CFStringRef charonHost_kCFHTTPVersion3_0;
 extern const CFStringRef charonHost_kCFStreamNetworkServiceTypeCallSignaling;
@@ -27,8 +22,6 @@ static NSString *text(CFStringRef string)
 
 static void compare(const char *name, CFStringRef port)
 {
-    // The host's own, looked up by the real name: the positive control is that this returns something.
-    // dlsym gives the address of the variable, which holds the CFStringRef.
     CFStringRef host = NULL;
     void *found = dlsym(RTLD_DEFAULT, name);
     if (found) {
@@ -56,8 +49,6 @@ int main(void)
     compare("kCFStreamPropertyConnectionIsExpensive", charonHost_kCFStreamPropertyConnectionIsExpensive);
     compare("kCFStreamPropertySocketExtendedBackgroundIdleMode", charonHost_kCFStreamPropertySocketExtendedBackgroundIdleMode);
 
-    // The two version names are protocol lines; the five keys are the symbol's own text, which is what
-    // CFNetwork does. Both are checked here so a change of either shape is caught.
     charon_check([text(charonHost_kCFHTTPVersion2_0) isEqualToString:@"HTTP/2.0"], "the HTTP/2.0 name is the protocol line",
                  text(charonHost_kCFHTTPVersion2_0));
     charon_check([text(charonHost_kCFHTTPVersion3_0) isEqualToString:@"HTTP/3.0"], "the HTTP/3.0 name is the protocol line",

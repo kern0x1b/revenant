@@ -1,8 +1,3 @@
-// ARRaycast.m - the raycast vocabulary, split from ARAnchor.m because an object carries the API of
-// one release: a query, a result and a tracked raycast all arrived with 16.0, beside the body and
-// positional tracking configurations in ARConfiguration4.m and the skeleton's joint names in
-// ARKitConstants16.m.
-
 #import <ARKit/ARKit.h>
 #import <string.h>
 
@@ -101,9 +96,7 @@
     self = [super init];
     if (self) {
         _rawResults = [results copy];
-        // Apple's rule, which this follows: a raycast stops being reported once the camera has moved
-        // more than its own ray length, because past that the result no longer describes this frame.
-        _state = 0;   // ARRaycastStateInitializing, whose enumeration the SDK refines for Swift
+        _state = 0;
         _identifier = [NSUUID UUID];
     }
     return self;
@@ -111,11 +104,8 @@
 
 - (void)stopTracking
 {
-    // Apple's rule, which this follows: a tracked raycast stops reporting once the camera has moved
-    // further than its own ray length, because past that the result no longer describes this frame.
-    // The caller says so, and the results go with it.
     [_rawResults removeAllObjects];
-    _state = 2;   // ARRaycastStateStopped
+    _state = 2;
 }
 
 - (NSUUID *)identifier { return _identifier; }

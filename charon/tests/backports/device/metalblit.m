@@ -1,12 +1,3 @@
-// metalblit.m — holds the port's texture blits and its mip chain to macOS Metal's own answers.
-//
-// tests/backports/host/metalblit/oracle.m records what a real Metal device on this host does, into
-// metalblit-expectations.h beside this file; the same host test also runs the port's buffer blits
-// against those answers and is green. What is left is the part no host can run: the port's textures
-// are OpenGL ES 2.0 objects and need an EAGL context, which is what this program makes.
-//
-// Every expectation here is Apple's, measured. Nothing is checked against the port's own idea of what
-// the answer should be — the answers are byte strings and integers read off macOS Metal.
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <Metal/Metal.h>
@@ -36,8 +27,6 @@ static void same_bytes(NSData *ours, const char *theirs, NSUInteger length, cons
                   : [NSString stringWithFormat:@"%@ vs Metal's %@", ours.description, expected.description]));
 }
 
-/* The readback of a region, laid out into a buffer the way the host recorded it: the destination at
-   its offset, each row at its own stride, and nothing written past the end. */
 static void check_region_readback(id<MTLCommandQueue> queue)
 {
     MTLTextureDescriptor *descriptor =
@@ -69,8 +58,6 @@ static void check_region_readback(id<MTLCommandQueue> queue)
                "a 4x5 region from (2,3) into a buffer at 16 with a row of 64 lands where Metal puts it");
 }
 
-/* The channel order a read of a BGRA texture returns. The port repacks into the texture's own order,
-   and this is the case that decides whether the repack is right. */
 static void check_bgra_readback(void)
 {
     MTLTextureDescriptor *descriptor =
@@ -89,8 +76,6 @@ static void check_bgra_readback(void)
                "a read of a BGRA texture returns the bytes in the order they were written");
 }
 
-/* The geometry of a mip chain, and the two things a level below the first is asked for here: a read
-   of it, and the box average generateMipmaps leaves there. */
 static void check_mips(id<MTLCommandQueue> queue)
 {
     MTLTextureDescriptor *geometry =
@@ -100,9 +85,6 @@ static void check_mips(id<MTLCommandQueue> queue)
     if (chain) {
         charon_check((int)chain.mipmapLevelCount == metalblit_mip_levels, "a 16x8 chain has Metal's number of levels",
                      [NSString stringWithFormat:@"%lu against Metal's %d", (unsigned long)chain.mipmapLevelCount, metalblit_mip_levels]);
-        // The last level of a chain whose height is not a power of two is one texel, not the zero that
-        // 8 >> 4 gives: Metal can be asked for its 1x1 and it answers, which is the oracle's own
-        // measurement (metalblit_smallest_level_readable).
         uint8_t last[1] = {0};
         [chain getBytes:last bytesPerRow:1 fromRegion:MTLRegionMake2D(0, 0, 1, 1) mipmapLevel:metalblit_smallest_level];
         charon_check(metalblit_smallest_level_readable == 1, "Metal can be asked for the last level's one texel",
@@ -134,9 +116,6 @@ static void check_mips(id<MTLCommandQueue> queue)
     same_bytes([NSData dataWithBytes:level1 length:sizeof(level1)], metalblit_mip_level1, sizeof(level1),
                "a level below the first holds the box average of the four above it, as Metal leaves it");
 
-    // The one number most likely to differ: Metal rounds the average of four to the nearest, it does
-    // not truncate it, and an ES 2.0 box filter is not required to agree. Recorded on the host and
-    // checked here, so the difference is a measurement and not a suspicion.
     MTLTextureDescriptor *rounding =
         [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatR8Unorm width:2 height:2 mipmapped:YES];
     id<MTLTexture> small = [device newTextureWithDescriptor:rounding];

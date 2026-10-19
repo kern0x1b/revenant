@@ -1,19 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <Security/SecIdentity.h>
 
-/* NEHotspotNetwork, NEHotspotConfiguration, the manager and the helper, as the iOS 26.2 SDK's NEHotspotNetwork.h,
-   NEHotspotConfigurationManager.h and NEHotspotHelper.h declare them: the classes, their properties and the
-   (HotspotHelper) categories, with the enumerations they use. NEHotspotEAPSettings and NEHotspotHS20Settings are
-   declared in the same SDK header (NEHotspotConfigurationManager.h), with the two initializers of
-   NEHotspotConfiguration that take them.
-
-   The build resolves charon@iphoneos-sdk to 16.4, which has no NetworkExtension.h at all, so these
-   declarations are this package's. The member names, the getters (isSecure, didAutoJoin, didJustJoin,
-   isChosenHelper, isRoamingEnabled, isTLSClientCertificateRequired) and the availability come from those headers.
-
-   Not declared here: the iOS 18 `interface` property of NEHotspotHelperCommand and the two joinAccessoryHotspot
-   methods of the manager, which take an ASAccessory (absent in the registry). The manager never drives the join
-   route (facts/NetworkExtension/Hotspot.md). */
 NS_ASSUME_NONNULL_BEGIN
 
 typedef NS_ENUM(NSInteger, NEHotspotNetworkSecurityType) {
@@ -91,9 +78,7 @@ typedef NS_ENUM(NSInteger, NEHotspotConfigurationEAPTLSVersion) {
 @end
 
 @interface NEHotspotConfiguration : NSObject <NSCopying, NSSecureCoding>
-/* Empty, not nil, for a configuration built from an SSID prefix: the host answers the empty string. */
 @property (readonly, nullable) NSString *SSID;
-/* Empty for a configuration built from an SSID, as the host answers. */
 @property (readonly, nullable) NSString *SSIDPrefix;
 @property BOOL joinOnce;
 @property (copy, nullable) NSNumber *lifeTimeInDays;
@@ -102,9 +87,7 @@ typedef NS_ENUM(NSInteger, NEHotspotConfigurationEAPTLSVersion) {
 - (instancetype)initWithSSID:(NSString *)SSID passphrase:(NSString *)passphrase isWEP:(BOOL)isWEP;
 - (instancetype)initWithSSIDPrefix:(NSString *)SSIDPrefix;
 - (instancetype)initWithSSIDPrefix:(NSString *)SSIDPrefix passphrase:(NSString *)passphrase isWEP:(BOOL)isWEP;
-/* The SSID as given; SSIDPrefix is nil, not empty, for these two, as the host answers. */
 - (instancetype)initWithSSID:(NSString *)SSID eapSettings:(NEHotspotEAPSettings *)eapSettings;
-/* The SSID is the empty string and SSIDPrefix nil, as the host answers. */
 - (instancetype)initWithHS20Settings:(NEHotspotHS20Settings *)hs20Settings eapSettings:(NEHotspotEAPSettings *)eapSettings;
 @end
 
@@ -129,7 +112,6 @@ typedef NS_ENUM(NSInteger, NEHotspotConfigurationError) {
     NEHotspotConfigurationErrorSystemDenied = 17,
 };
 
-/* The generated constants object (.gen/NetworkExtension/NetworkExtensionConstants160.m) defines it. */
 extern NSString *const NEHotspotConfigurationErrorDomain;
 
 @interface NEHotspotConfigurationManager : NSObject

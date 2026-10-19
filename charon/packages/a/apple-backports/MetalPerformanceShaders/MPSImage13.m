@@ -1,22 +1,3 @@
-// MPSImage13.m - the image: a descriptor that says its shape, and the image that owns a texture.
-//
-// What this is: the port's own MPSImage is a real MTLTexture on the carried Metal classes, allocated
-// through MTLTextureDescriptor and read and written through the texture's own
-// getBytes:bytesPerRow:fromRegion:mipmapLevel: and replaceRegion:mipmapLevel:withBytes:bytesPerRow:.
-// That is the shape the release takes, and it is the shape tests/backports/host/mpscnn/cnn-cases.m
-// builds its cases with; the reason it is written this way is measured there, where the case's source
-// and destination used to be the host's MPSImage and the five cases compared the host with itself.
-//
-// What this is not: a texture this port answers with its own arithmetic is not here. The image holds
-// the caller's bytes and hands them back; a kernel reads and writes it. MPSImageMatrix and the rest of
-// this family are the kernels, and they are separate files.
-//
-// The 26.2 names the tree already calls - +imageDescriptorWithChannelFormat:width:height:featureChannels:
-// and -initWithDevice:imageDescriptor: - are in the 16.4 headers with 16.4's own signatures, so they
-// are implemented here and not transcribed; what 26.2 adds over them is the set of initialisers this
-// class answers as the header of this build declares them, and a caller that asks for one 16.4 does
-// not name gets the nearest this build has and no lie about it.
-
 #import "CharonMPS.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
@@ -44,9 +25,6 @@ MTLPixelFormat CharonMPSImagePixelFormat(MPSImageFeatureChannelFormat format)
     }
 }
 
-// The pixel format a texture of `channels` channels of `format` has, for the one channel and the four
-// channel layouts the header names. A channel count that has no Metal format is zero, and the caller
-// refuses rather than picking a format the caller's bytes do not match.
 MTLPixelFormat CharonMPSImagePixelFormatFor(MPSImageFeatureChannelFormat format, NSUInteger channels)
 {
     if (channels == 1)
@@ -72,9 +50,6 @@ MTLPixelFormat CharonMPSImagePixelFormatFor(MPSImageFeatureChannelFormat format,
     return MTLPixelFormatInvalid;
 }
 
-// The pixel format back to the channel format it came from, for an image made over somebody else's
-// texture. A format this build does not name is None, and the image says so in its description rather
-// than guessing a format whose element size the bytes do not have.
 MPSImageFeatureChannelFormat CharonMPSImageFormatOfPixelFormat(MTLPixelFormat pixel)
 {
     switch (pixel) {
@@ -211,8 +186,6 @@ MPSImageFeatureChannelFormat CharonMPSImageFormatOfPixelFormat(MTLPixelFormat pi
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
-    // A device alone names no shape, and the release's own default allocator is what an image of no
-    // descriptor is; this port has no allocator, so it refuses rather than answering 1x1x1 silently.
     if ((self = [super init])) {
         _device = device;
         _featureChannels = 1;
@@ -261,9 +234,6 @@ MPSImageFeatureChannelFormat CharonMPSImageFormatOfPixelFormat(MTLPixelFormat pi
                             (unsigned long)descriptor.width, (unsigned long)descriptor.height, (int)pixel);
             return self;
         }
-        // A texture's contents are whatever was in it, and a kernel reads them. The release zeroes a
-        // fresh image; the port says so explicitly rather than leaving a texture's own contents to be
-        // read as the caller's pixels, which is not a thing to leave to chance.
         NSUInteger rowBytes = descriptor.width * element * descriptor.featureChannels;
         void *zero = calloc(rowBytes * descriptor.height * descriptor.numberOfImages, 1);
         for (NSUInteger slice = 0; slice < descriptor.numberOfImages; slice++)
@@ -413,9 +383,6 @@ featureChannelInfo:(MPSImageReadWriteParams)featureChannelInfo
 
 - (instancetype)copyWithZone:(NSZone *)zone
 {
-    // A copy of an image is an image over a texture of its own with the same contents, because a
-    // texture the port does not own cannot be copied by handing the same pointer to a second image and
-    // calling it a copy: the two would write over each other.
     MPSImage *copy = nil;
     if (_texture) {
         MTLTextureDescriptor *td = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:_texture.pixelFormat

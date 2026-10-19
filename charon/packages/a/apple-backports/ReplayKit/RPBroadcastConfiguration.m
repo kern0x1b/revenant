@@ -1,8 +1,5 @@
 #import <ReplayKit/ReplayKit.h>
 
-// The configuration of the clips a broadcast makes. A fresh one has no clip duration (0.0) and no compression properties,
-// which is what the host gives. It is secure coding and nothing more: the host has no NSCopying, and a copy crashes there, so
-// the port has none either (facts/ReplayKit/RPBroadcastConfiguration.md).
 @implementation RPBroadcastConfiguration
 
 + (BOOL)supportsSecureCoding

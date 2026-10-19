@@ -21,10 +21,6 @@ typedef struct {
     BOOL isBool, isBOOL, isErrno, isTime, isMode, isSignal, isUUID, isMask;
 } CharonSpec;
 
-/* The arguments of one call. The varargs path reads the caller's va_list. The buffer path reads what the
-   compiler packed for an os_log macro: a summary byte, the item count, then per item a descriptor byte (the
-   type in its high nibble, the privacy in its low one), a length byte and that many bytes. A string, an
-   object and the bytes of %P are a pointer to their value, and the pointer is the item's data. */
 typedef struct {
     va_list *arguments;
     const unsigned char *buffer;
@@ -34,7 +30,6 @@ typedef struct {
     int error;
 } CharonArgs;
 
-/* One item of the buffer: its type, its privacy nibble, and its data (length bytes). */
 typedef struct {
     unsigned type;
     unsigned privacy;
@@ -109,7 +104,6 @@ static BOOL next_item(CharonArgs *arguments, CharonItem *item)
     return YES;
 }
 
-/* The item the next conversion would read, left in place. */
 static BOOL peek_item(const CharonArgs *arguments, CharonItem *item)
 {
     CharonArgs copy = *arguments;
@@ -130,7 +124,6 @@ static long long fetch_signed(CharonArgs *arguments, const CharonSpec *spec)
         CharonItem item;
         if (!next_item(arguments, &item))
             return 0;
-        /* Measured: a type 6 item is errno, and an integer conversion writes its value, whatever the item holds. */
         if (item.type == 6)
             return arguments->error;
         unsigned long long raw = read_little_endian(item.data, item.length);
@@ -214,7 +207,6 @@ static const void *take_pointer(CharonArgs *arguments)
     return (const void *)(uintptr_t)read_little_endian(item.data, item.length);
 }
 
-/* The item of a conversion that prints nothing from its argument, which the compiler still packs: %m. */
 static void skip_item(CharonArgs *arguments)
 {
     CharonItem item;
@@ -222,8 +214,6 @@ static void skip_item(CharonArgs *arguments)
         next_item(arguments, &item);
 }
 
-/* Measured on the host: a type 7 item (the hash of a masked value) is passed over by the conversion after it, and
-   the value is the item after it. A buffer that holds only the hash leaves the conversion with no item. */
 static void skip_hash_items(CharonArgs *arguments)
 {
     CharonItem item;
@@ -233,8 +223,6 @@ static void skip_hash_items(CharonArgs *arguments)
 
 static NSString *description_of(id object);
 
-/* Measured on the host: a string in a read-only segment of a loaded image (literal and const data) is written with no
-   privacy word at nibble 0, and a string anywhere else (writable data, the heap, the stack) as private. */
 static BOOL in_read_only_segment(const void *pointer)
 {
     uintptr_t address = (uintptr_t)pointer;
@@ -264,10 +252,6 @@ static BOOL in_read_only_segment(const void *pointer)
     return NO;
 }
 
-/* Measured on the host, for the buffer path: an integer without a length modifier takes a scalar of up to four
-   bytes or a type 6 item, %s takes a string, %@ a string or an object, and %.Np a byte run. Any other item is
-   written as a mismatch and consumed. A type 5 item is a mismatch for %d, measured; a wide-string conversion reads
-   it as before, and the other conversions are taken to mismatch as well, not measured. A type 7 item is passed over. */
 static BOOL item_fits(const CharonSpec *spec, char conversion, const CharonItem *item)
 {
     if (item->type == 7)
@@ -290,12 +274,6 @@ static BOOL item_fits(const CharonSpec *spec, char conversion, const CharonItem 
     }
 }
 
-/* The size the host reports for a type 5 item of 8 bytes, a pointer to UTF-16LE units (measured on the host: the
-   random pointed values, a sweep of each byte position of the first two units, and crafted texts). A first unit of
-   0 gives 5 when the second unit is 1 to 16, and 1 otherwise. Otherwise the text is the units before a nul among the
-   first two units, counted in UTF-8 bytes, and the size is that count plus one; a surrogate before that nul, or no
-   nul among the two units, gives 1. A nul at the third unit or later is not seen. A NULL pointer gives 0, measured,
-   and at nibble 0 it has no privacy word. Other lengths of the item are not measured. */
 static unsigned long long wide_text_size(const void *pointer)
 {
     const unsigned char *units = pointer;
@@ -317,11 +295,6 @@ static unsigned long long wide_text_size(const void *pointer)
     return 1;
 }
 
-/* The mismatch marker: the conversion as the format writes it, the kind of the item the host names, the privacy
-   words it prints, and the size it reports. Measured: a string's size is its length and a nul; a scalar's is its
-   length byte; an object's is the length of its description and a nul; a count or byte run reports 0. Privacy
-   nibble 3 reports "public private" and a size of 0, and the value is not read. A type 5 item is named by its type
-   number, and its size is the wide_text_size of its pointer. */
 static void append_mismatch(CharonText *text, const char *label, size_t labelLength, const CharonItem *item)
 {
     const char *kind = "OBJECT";
@@ -346,7 +319,6 @@ static void append_mismatch(CharonText *text, const char *label, size_t labelLen
         privacy = "public";
     else if (level == 3)
         privacy = "public private";
-    /* Measured: a NULL string at nibble 0 has no word either, as a read-only one does. */
     else if ((item->type == 2 || item->type == 5) && !(item->privacy & 4) && pointer && !in_read_only_segment(pointer))
         privacy = "private";
     unsigned long long size = 0;
@@ -576,7 +548,6 @@ static char *format_arguments(const char *format, CharonArgs *ap, int error)
         BOOL literal_precision = NO;
         if (*cursor == '{') {
             parse_decorators(&cursor, &spec);
-            /* A masked value is packed as the hash of the value, ahead of the value and of any count item. */
             if (spec.isMask)
                 skip_item(ap);
         }
@@ -619,8 +590,6 @@ static char *format_arguments(const char *format, CharonArgs *ap, int error)
             break;
         cursor++;
         size_t labelLength = (size_t)(cursor - specStart);
-        /* Measured: %P without a precision writes its own marker in place of the value, and the rest of the format
-           is not written after it, whatever the buffer holds. */
         if (!ap->arguments && conversion == 'P' && spec.precision < 0) {
             text_append(&text, "<decode: can't compose [", strlen("<decode: can't compose ["));
             text_append(&text, specStart, labelLength);
@@ -629,19 +598,13 @@ static char *format_arguments(const char *format, CharonArgs *ap, int error)
         }
         if (!ap->arguments)
             skip_hash_items(ap);
-        /* Measured on the host, with a buffer that holds no item: each value conversion writes
-           <decode: missing data> in place of its value, and the text after it goes on. */
         CharonItem pending;
         if (!ap->arguments && strchr("diouxXcsSeEfFgGaAp@mC", conversion) && !peek_item(ap, &pending)) {
             text_append(&text, "<decode: missing data>", strlen("<decode: missing data>"));
             continue;
         }
-        /* Measured: a literal precision on a string or a byte run is packed as a count item of its own, ahead
-           of the value. An integer's or a float's precision is not packed at all. */
         if (literal_precision && (conversion == 's' || conversion == 'S' || conversion == 'P'))
             skip_item(ap);
-        /* Measured on the host: a zero-length scalar is an item with no value. An integer conversion takes it, and writes
-           <decode: missing data> in place of its value; the next conversion takes the item after it. */
         if (!ap->arguments && strchr("diouxX", conversion)) {
             CharonItem item;
             if (peek_item(ap, &item) && item.type == 0 && item.length == 0) {
@@ -650,7 +613,6 @@ static char *format_arguments(const char *format, CharonArgs *ap, int error)
                 continue;
             }
         }
-        /* An item of another kind than the conversion takes is consumed and written as a mismatch. */
         if (!ap->arguments) {
             CharonItem item;
             if (peek_item(ap, &item) && !item_fits(&spec, conversion, &item)) {
@@ -711,7 +673,6 @@ static char *format_arguments(const char *format, CharonArgs *ap, int error)
             break;
         }
         case '@': {
-            /* Measured: a string item under %@ is written as the string, not read as an object. */
             CharonItem next;
             if (!ap->arguments && peek_item(ap, &next) && next.type == 2) {
                 next_item(ap, &next);

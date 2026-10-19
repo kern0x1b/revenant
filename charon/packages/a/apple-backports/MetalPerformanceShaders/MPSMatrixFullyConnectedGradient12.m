@@ -1,8 +1,3 @@
-// MPSMatrixFullyConnectedGradient, from the header of the SDK of iOS 16.4. One object per release: the band machinery keeps an
-// object whole or drops it whole, so a file here carries the API of exactly one release.
-
-// The state every one of the neural network matrix kernels carries, and the accessors each of them
-// declares. A macro defines no symbol, so a file that uses one needs nothing from another.
 #define CHARON_MPS_NEURON_IVARS \
     MPSCNNNeuronType _neuronType; \
     float _neuronParameterA, _neuronParameterB, _neuronParameterC; \
@@ -96,8 +91,6 @@ CHARON_MPS_NEURON_COMMON
         CharonMPSRefuse(@"MPSMatrixFullyConnectedGradient: a matrix of a data type that is not one of the eight element types was given");
         return;
     }
-    // The gradient with respect to the input of y = alpha * x * W + bias is dX = alpha * dY * W^T: each
-    // input channel's gradient is the incoming gradient of every output channel scaled by that weight.
     NSUInteger vectors = _sourceNumberOfFeatureVectors < gradient.rows ? _sourceNumberOfFeatureVectors : gradient.rows;
     NSUInteger outputs = _sourceOutputFeatureChannels < gradient.columns ? _sourceOutputFeatureChannels : gradient.columns;
     NSUInteger inputs = _sourceInputFeatureChannels < weights.rows ? _sourceInputFeatureChannels : weights.rows;
@@ -142,8 +135,6 @@ CHARON_MPS_NEURON_COMMON
         CharonMPSRefuse(@"MPSMatrixFullyConnectedGradient: a matrix of a data type that is not one of the eight element types was given");
         return;
     }
-    // The gradient with respect to the weights is dW = alpha * X^T * dY, one row of the input per
-    // feature vector, and the gradient with respect to the bias is the column sums of dY.
     NSUInteger vectors = _sourceNumberOfFeatureVectors < gradient.rows ? _sourceNumberOfFeatureVectors : gradient.rows;
     NSUInteger outputs = _sourceOutputFeatureChannels < gradient.columns ? _sourceOutputFeatureChannels : gradient.columns;
     NSUInteger inputs = _sourceInputFeatureChannels < in.columns ? _sourceInputFeatureChannels : in.columns;

@@ -1,9 +1,5 @@
 #import "CharonDynamics.h"
 
-// A snap is four springs from the item's corners to a static anchor body at the snap point, the item's
-// size, turned to 0 (7.0): two from the top left corner, 50 pt out to the left and upwards, two from
-// the bottom right one, out to the right and downwards. They are built at the distance the corners are
-// now, and given their rest length of 50 pt on the next turn of the main queue, as 7.0 does.
 @implementation UISnapBehavior {
     CGPoint _anchorPoint;
     CGFloat _damping;
@@ -51,7 +47,6 @@
     return _damping;
 }
 
-// The damping is read when the springs are built: a live snap keeps the one it had (7.0).
 - (void)setDamping:(CGFloat)damping
 {
     _damping = damping;

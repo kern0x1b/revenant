@@ -1,6 +1,3 @@
-// Records the size of each allocation made while charon_tracing is set, and fails the k-th one when charon_fail_at = k
-// (1-based). charon_fail_at = 0 fails every allocation; -1 only records them. Interposed on malloc, calloc, realloc,
-// valloc, aligned_alloc, posix_memalign and the malloc_zone_ calls, through DYLD_INSERT_LIBRARIES (see run.sh).
 #include <errno.h>
 #include <malloc/malloc.h>
 #include <stdlib.h>

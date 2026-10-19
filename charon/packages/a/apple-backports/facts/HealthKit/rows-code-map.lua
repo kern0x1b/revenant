@@ -1,31 +1,3 @@
--- The registry rows of a release's `absent` set, answered per OWNER CLASS from the releases' own caches.
---
--- Usage: CHARON_ROOT=<repo> xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua RELEASE...
---
--- Read through objc.code_map(), which gives every method a rung declares as
--- {owner, is_class_method, selector, imp, category} - so an answer can say WHICH class declares it,
--- whether it is a class method, and whether the class declares it of its own or a category adds it.
--- objc.inventory() cannot tell those three apart: modules/apple/objc.lua's method_list() keys BOTH of
--- a class's method lists with a leading "-" and nothing says whether an entry came from the class or
--- from a category. Measured: a first differential built on objc.inventory() answered NO for all sixteen
--- owners and all sixteen controls alike and could not tell a real zero from a blind reader.
---
--- WHAT IT IS FOR. A registry row's `reason` that says "the release does not carry this" is a claim about
--- the release, and a claim about a RELEASE is only worth what the release's own cache says. A zero with
--- no control is ambiguous - the name may be absent, or the reader may be looking at the wrong thing -
--- so this prints, per owner class, how many methods that class declares of its own. That count is the
--- control: an owner with a non-zero count and a zero for one selector is a real absence in that
--- selector, and an owner with a zero count everywhere means this reader is not seeing that class's
--- method lists and NO answer from this run may be written down. A rung that does not hold the class at
--- all prints own-methods-of-owner=0, which is NOT blindness and NOT an absence: it is the class being
--- absent, and the last line of the rung says so.
---
--- A SECOND ANSWER, and why it is here: `anywhere` names every class in the rung that declares a
--- selector at all. It is what keeps "the selector is a string in this cache" apart from "this class
--- declares it": measured, -endWorkoutSession: is a string in the armv7 caches of iOS 9.0 and later and
--- HKHealthStore declares it there, while in 18.0 CMWorkoutManager declares it as well, so a first-rung
--- answer for a selector says which release has the STRING and never which class owns it.
-
 local rows = {
     {"HKQuery", "predicateForStatesOfMindWithValence:operatorType:", true},
     {"HKQuery", "predicateForStatesOfMindWithKind:", true},
@@ -99,7 +71,6 @@ function main(...)
                                     owner, selector, own[owner] or 0,
                                     #said > 0 and table.concat(said, " / ") or "NOT DECLARED BY THIS CLASS"))
             end
-            -- The two the selector strings are in the ladder for: every class in this rung that has them.
             for _, selector in ipairs({"predicateForStatesOfMindWithValence:operatorType:",
                                        "startWorkoutSession:", "endWorkoutSession:",
                                        "pauseWorkoutSession:", "resumeWorkoutSession:"}) do

@@ -1,39 +1,3 @@
-//
-//  probe.m
-//  The 116 AVFoundation constants the port carries, the port against the host, in ONE binary.
-//
-//  run.sh compiles the port's five AVFoundationGlobals*.m with every constant name defined to its
-//  `charon_host_` spelling, and links them beside this probe. The bare name is then Apple's own symbol
-//  and the prefixed name is the port's own definition of the same constant, so one process reads both
-//  and prints them side by side. A value the port invented cannot agree with the host's.
-//
-//  Two things this reads that are easy to get wrong, both measured on this host:
-//
-//  1. THE SYMBOL IS LOOKED UP UNDER BOTH SPELLINGS. This release's AVFoundation exports these data
-//     symbols WITHOUT the Mach-O leading underscore: dlsym(RTLD_DEFAULT, "AVMediaTypeVideo") answers
-//     and dlsym(RTLD_DEFAULT, "_AVMediaTypeVideo") does not. A probe that only asks for the underscore
-//     finds nothing for all 116 and reports that the host does not have the framework, which is false:
-//     AVPlayer, AVCaptureDevice and AVAssetExportSession all resolve through objc_getClass on the same
-//     dlopen. That is what this file's own control line is here to catch, and it is why the spelling
-//     that answered is printed with every row.
-//
-//  2. THE SHAPE OF A CONSTANT IS MEASURED, NOT DECLARED. A variable whose pointee's class is the CFString
-//     class holds a string and its bytes are printed; anything else holds a number and the number is
-//     printed. No typedef is written here, so a name the compiler has never heard of is read exactly as
-//     well as one it has - which is every one of them, since 54 of the 116 are not in the SDK this host
-//     compiles against.
-//
-//  Controls, so a run that examined nothing cannot pass:
-//
-//    AVMediaTypeVideo                      a constant the host has, and it is a string   -> HAS <string>
-//    AVMediaTypeDepthData                  a second, independent string constant        -> HAS <string>
-//    AVMediaTypeCharonProbeNoSuchConstant  a planted name                                -> LACKS
-//    _OBJC_CLASS_$_AVPlayer                a class of the framework itself, so a run that
-//                                           never loaded AVFoundation cannot pass above    -> HAS <addr>
-//
-//  The name list is read from a file, one name per line, and the probe says how many names it read and
-//  how many rows it emitted, so run.sh can check the count against the run instead of a literal.
-//
 #import <Foundation/Foundation.h>
 #import <CoreFoundation/CoreFoundation.h>
 #include <dlfcn.h>
@@ -44,7 +8,6 @@
 
 static Class gStringClass;
 
-/* What one name holds, as the host's own symbol gives it. `tag` is the spelling that answered. */
 static void read_value(const char *name, const char *tag, char *out, size_t size)
 {
     void *address = dlsym(RTLD_DEFAULT, tag);
@@ -92,7 +55,6 @@ int main(int argc, char **argv)
             return 1;
         }
 
-        /* controls */
         char answer[256];
         read_value("AVMediaTypeVideo", "AVMediaTypeVideo", answer, sizeof answer);
         printf("CONTROL\tAVMediaTypeVideo\t%s\n", answer);
@@ -126,10 +88,6 @@ int main(int argc, char **argv)
             read_value(name, name, host, sizeof host);
             snprintf(prefixed, sizeof prefixed, "charon_host_%s", name);
             read_value(name, prefixed, port, sizeof port);
-            /* TAB separated, and it must be: a value is "STR <the string>", which carries spaces of its
-           * own, so a space-separated row cannot be split into three fields without cutting the value in
-           * half - which is what the first version of the join did, and it reported 60 DIFFERS rows for
-           * 116 constants that all agreed. */
             printf("%s\t%s\t%s\n", name, host, port);
             rows++;
             if (strcmp(host, port) == 0) {
