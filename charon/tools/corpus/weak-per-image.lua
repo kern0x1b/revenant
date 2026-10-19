@@ -1,12 +1,8 @@
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 
-local CORPUS_ROOT = os.getenv("CHARON_CORPUS_ROOT") or path.join(os.getenv("HOME"), "Git", "projects", "ios", "coordination")
-local CORPUS = path.join(CORPUS_ROOT, "corpus")
-if not os.isdir(CORPUS) then
-    raise("weak-per-image.lua: no corpus/ data directory found at %s. Set CHARON_CORPUS_ROOT to the directory "
-        .. "that contains corpus/.", CORPUS)
-end
+local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
+local CORPUS = workspace.corpus()
 local ORDER = {"c++", "mixed", "objc/c", "unknown", "swift"}
 local RANK = {}
 for index, class in ipairs(ORDER) do

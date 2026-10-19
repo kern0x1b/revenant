@@ -4,7 +4,7 @@ OpenGL ES 3.0 arrived with iOS 7 on the A7 and later; the drivers of iOS 6 are E
 asks for an ES 3.0 context first - and falls back when it gets none - still names the ES 3.0 functions, and does not start when
 the release does not have them.
 
-Source: `tests/backports/tools/gen-es3.py` writes `OpenGLES/ES3Functions.m` and the registry from the SDK: the ES 3.0 header
+Source: `OpenGLES/ES3Functions.m`, `OpenGLES/ES3Queries.m` and the registry were first written by a generator, since removed, from the SDK; they are maintained as source now, and the registry rows have been edited one by one since (75 of them say `owed`). That generator read the ES 3.0 header
 against the ES 2.0 header for the names and their types (99 functions), the shared caches of iOS 6.0 to 7.0.1 for the extensions the
 release has and the five names it exports already. `device/opengles.m` calls them in an ES 2.0 context on the iPhone 4S.
 

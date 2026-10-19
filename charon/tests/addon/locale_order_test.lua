@@ -27,7 +27,19 @@ local NOT_STRINGS = {
     ["tools/matter-registry.lua|table.sort(types, function (left, right) return #left > #right end)"] = "lengths",
     ["tools/symbol-first-release.lua|table.sort(found, function (a, b) return os.mtime(a) > os.mtime(b) end)"] = "modification times",
     ["tools/corpus/skeleton-table.lua|table.sort(addresses)"] = "numbers",
-    ["tools/corpus/cache-value.lua|table.sort(entries, function (a, b) return a.address < b.address end)"] = "addresses",
+    ["tools/corpus/const-values.lua|table.sort(kind_order, function (a, b)"] = "counts, then the index",
+    ["tools/corpus/ledger_headers.lua|table.sort(named, function (a, b)"] = "byteorder.less on both names",
+    ["tools/corpus/surface_walk.lua|table.sort(found, function (a, b)"] = "versions, then byteorder.less",
+    ["tools/corpus/surface-diff.lua|table.sort(releases, function (a, b) return tonumber(a) < tonumber(b) end)"] = "numbers",
+    ["tools/corpus/surface-diff.lua|table.sort(listed, function (a, b)"] = "versions, then byteorder.less",
+    ["tools/corpus/ledger_output.lua|table.sort(indexed, function (a, b)"] = "the caller's order, then the index",
+    ["tools/corpus/sdk-surface.lua|table.sort(list, function (a, b)"] = "the caller's order, then the position",
+    ["tools/corpus/sdk-surface.lua|table.sort(majors)"] = "numbers",
+    ["tools/corpus/sdk-surface.lua|table.sort(ordered, function (a, b)"] = "totals, then the index",
+    ["tools/corpus/sdk-introduced.lua|table.sort(unverified, function (a, b)"] = "byteorder.less on each field",
+    ["tools/intents/probe-host-absent.lua|table.sort(rows, function (a, b)"] = "absent first, byteorder.less, then the position",
+    ["tools/intents/gen-registry.lua|table.sort(decorated, function (a, b)"] = "byteorder.less on kind and name, then the position",
+    ["tools/corpus/cache-value.lua|table.sort(entries, function (a, b) return a.address < b.address or (a.address == b.address and a.order < b.order) end)"] = "addresses",
 }
 
 local function unsorted_strings(root)

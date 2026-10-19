@@ -2,13 +2,9 @@ import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 local objc = import("apple.objc", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
 local dyld = import("apple.dyld", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
+local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
 
-CORPUS_ROOT = os.getenv("CHARON_CORPUS_ROOT") or path.join(os.getenv("HOME"), "Git", "projects", "ios", "coordination")
-CORPUS = path.join(CORPUS_ROOT, "corpus")
-if not os.isdir(CORPUS) then
-    raise("aggregate.lua: no corpus/ data directory found at %s. Set CHARON_CORPUS_ROOT to the directory "
-        .. "that contains corpus/ (holds store.json, caches/).", CORPUS)
-end
+CORPUS = workspace.corpus()
 function corpus_dir()
     return CORPUS
 end
@@ -44,8 +40,7 @@ STATUS_RANK = {implemented = 0, inert = 1, ignored = 2, owed = 3, absent = 4}
 A5_UNREACHABLE = {Metal = true, MetalKit = true, MetalPerformanceShaders = true, MetalPerformanceShadersGraph = true}
 BUILT_EXPORTS = os.getenv("CHARON_BUILT_EXPORTS") or path.join(CORPUS, "built-exports-6.1.3.txt")
 BUILT_EXPORTS_HEADER = "# canon "
-REGISTRY_TSV = os.getenv("CHARON_REGISTRY_TSV")
-    or path.join(os.scriptdir(), "..", "..", ".agent-work", "runs", "registry-export", "carried-registry.tsv")
+REGISTRY_TSV = os.getenv("CHARON_REGISTRY_TSV") or path.join(workspace.run("registry-export"), "carried-registry.tsv")
 
 function registry_export()
     return REGISTRY_TSV

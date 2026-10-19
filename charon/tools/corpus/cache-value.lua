@@ -15,9 +15,9 @@ function main(cachefile, symbolfile)
     for _, loaded in ipairs(cache.images) do
         local entries = {}
         for _, entry in ipairs(dyld.image_symbols(cache, loaded).exports) do
-            table.insert(entries, {address = entry[1], name = entry[2]})
+            table.insert(entries, {address = entry[1], name = entry[2], order = #entries + 1})
         end
-        table.sort(entries, function (a, b) return a.address < b.address end)
+        table.sort(entries, function (a, b) return a.address < b.address or (a.address == b.address and a.order < b.order) end)
         exports_by_image[loaded.install] = entries
         for index, entry in ipairs(entries) do
             local name = entry.name:gsub("^_", "")

@@ -577,7 +577,7 @@ object by its value. The one part that follows something outside is the **owners
 that is the runtime's own documented attribute format: a property's `property_getAttributes` string
 ends in its backing ivar (`T@"NSString",C,N,V_name`), and the ownership is a flag in the field list
 after the type field. The field-list walk and the table of what each declaration compiles to are in
-this file, and the negative control for it is `tests/backports/callgen/ownership-test.sh`.
+this file, and the negative control for it is `tests/backports/callgen/ownership-test.lua`.
 
 ## What is not measured here
 

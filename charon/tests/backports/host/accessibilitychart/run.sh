@@ -112,7 +112,7 @@ echo "=== the two answers: $cases cases a side ($behaviour behaviour, $declarati
 # The comparison is in a condition and not under -e: a run whose answers do not match has to go on to
 # print the diff, and a bare `python3 compare.py` under `set -e` leaves the script at that line, which is
 # what the first version did - a failure report six lines long that no failure could ever reach.
-if python3 "$here/../common/compare.py" "$build/host.tsv" "$build/port.tsv" "$here/expected-differences.tsv"; then
+if xmake l "$here/../common/compare.lua" "$build/host.tsv" "$build/port.tsv" "$here/expected-differences.tsv"; then
     # The once-only part of the inert contract, counted on the port alone against the case's own counts.
     log=$build/port.stderr
     for member in start updateValue stop; do

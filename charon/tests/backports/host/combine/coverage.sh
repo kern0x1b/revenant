@@ -18,9 +18,8 @@ repo=$(cd "$here/../../../.." && pwd)
 build=${COMBINE_COVERAGE_BUILD:-$(runs_folder charon-combine-coverage)}
 sources=${COMBINE_SOURCES:-}
 facts=$repo/packages/s/styx/facts/Combine/CombineKit.md
-corpus=${CORPUS:-$HOME/Git/projects/ios/coordination/corpus/sdk-26.2-surface.tsv}
-tools=${CORPUS_TOOLS:-$HOME/Git/projects/ios/coordination/corpus-tools}
-sdk26=$HOME/Git/projects/ios/charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk
+corpus=${CORPUS:-$(xmake l "$repo/modules/workspace.lua" corpus sdk-26.2-surface.tsv)}
+sdk26=$(xmake l "$repo/modules/workspace.lua" sdk)
 swifc=${SWIFTC:-/usr/bin/swiftc}
 charon_swifc=${CHARON_SWIFTC:-}
 
@@ -36,7 +35,7 @@ if [ -z "$sources" ] || [ ! -d "$sources/Combine" ]; then
     echo "      charon@styx, the one holding Combine/ and CombineHelpers/, or install charon@styx once"
     exit 1
 fi
-for needed in "$corpus" "$tools/swiftinterface-surface.py" "$facts"; do
+for needed in "$corpus" "$repo/tools/corpus/swiftinterface.lua" "$facts"; do
     [ -r "$needed" ] || { echo "missing $needed"; exit 1; }
 done
 [ -d "$sdk26" ] || { echo "missing the 26.2 SDK at $sdk26"; exit 1; }

@@ -1,3 +1,5 @@
+local PORT_SDK_VERSION = "16.4"
+
 local GROUPS = {
     {"10_0_1", "10.0.1", "port"},
     {"10_3", "10.3", "port"},
@@ -43,29 +45,25 @@ function main(...)
     while index <= #arguments do
         local key = arguments[index]:match("^%-%-(.+)$")
         if key == nil or arguments[index + 1] == nil then
-            raise("usage: xmake l tools/intents/objects.lua --sdk <iPhoneOS 26.2 SDK> --out <dir> [--port-sdk <SDK>] [--work <dir>]")
+            raise("usage: xmake l tools/intents/objects.lua --out <dir> [--sdk <iPhoneOS 26.2 SDK>] [--port-sdk <SDK>] [--work <dir>]")
         end
         options[key] = arguments[index + 1]
         index = index + 2
     end
-    local root = path.absolute(path.join(os.scriptdir(), "..", ".."))
-    local sdk_newer = options.sdk
-    if sdk_newer == nil or not os.isdir(sdk_newer) then
-        raise("--sdk names the iPhoneOS 26.2 SDK the surface is read from (CHARON_GEN_SDK in the build): %s", tostring(sdk_newer))
+    local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
+    local sdk_newer = options.sdk or workspace.sdk()
+    if not os.isdir(sdk_newer) then
+        raise("--sdk names the iPhoneOS 26.2 SDK the surface is read from (CHARON_GEN_SDK in the build): %s", sdk_newer)
     end
-    local sdk_port = options["port-sdk"]
-    if sdk_port == nil then
-        local found = os.dirs(path.join(os.getenv("HOME"), ".xmake", "packages", "i", "iphoneos-sdk", "*", "*", "Developer.app", "Contents", "Developer", "Platforms", "iPhoneOS.platform", "Developer", "SDKs", "iPhoneOS*.sdk"))
-        sdk_port = found[1]
-    end
-    if sdk_port == nil or not os.isdir(sdk_port) then
-        raise("no port SDK: pass --port-sdk (the toolchain's iphoneos-sdk is not in the store)")
+    local sdk_port = options["port-sdk"] or workspace.sdk_package(PORT_SDK_VERSION)
+    if not os.isdir(sdk_port) then
+        raise("--port-sdk names the SDK the port compiles against, the toolchain's iphoneos-sdk: %s", sdk_port)
     end
     local out = options.out
     if out == nil then
         raise("--out names the folder the objects are written into")
     end
-    local work = options.work or path.join(root, ".agent-work", "intents-generation")
+    local work = options.work or workspace.run("intents-generation")
     os.mkdir(out)
     os.mkdir(work)
 

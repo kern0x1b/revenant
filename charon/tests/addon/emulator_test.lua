@@ -645,14 +645,17 @@ end
 
 
 local function wait_for_the_lock(lock, word)
-    local script = path.join(path.directory(word), "holder.py")
-    io.writefile(script, string.format([[import fcntl, sys, time
-f = open(sys.argv[1], "a")
-fcntl.flock(f, fcntl.LOCK_EX)
-open(sys.argv[2], "w").write("held")
-time.sleep(60)
-]], path.absolute(lock), path.absolute(word)))
-    os.execv("python3", {script, lock, word}, {try = true, stdout = os.nul, stderr = os.nul, detach = true})
+    local script = path.join(path.directory(word), "holder.lua")
+    io.writefile(script, [[
+function main(lock, word)
+    local held = io.openlock(lock)
+    held:lock()
+    io.writefile(word, "held")
+    os.sleep(60000)
+end
+]])
+    os.execv(os.programfile(), {"l", script, path.absolute(lock), path.absolute(word)},
+             {try = true, stdout = os.nul, stderr = os.nul, detach = true, curdir = path.directory(word)})
     for attempt = 1, 60 do
         if os.isfile(word) and io.readfile(word):find("held", 1, true) then
             return true

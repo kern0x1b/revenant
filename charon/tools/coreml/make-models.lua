@@ -547,7 +547,8 @@ local function bytes_of(file)
 end
 
 function main(...)
-    local out = path.join(os.scriptdir(), "models")
+    local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
+    local out = workspace.run("make-models", "models")
     local check, unmeasured = false, false
     local arguments = {...}
     local index = 1
@@ -570,7 +571,7 @@ function main(...)
 
     local root = path.absolute(path.join(os.scriptdir(), "..", ".."))
     local schema = proto.load(path.join(root, "packages", "a", "apple-backports", "CoreML", "CharonMLSchema.inc"))
-    local runs = path.join(root, ".agent-work", "runs", "make-models")
+    local runs = workspace.run("make-models", "work")
     local target = check and path.join(runs, "check") or out
     os.tryrm(target)
     os.mkdir(target)

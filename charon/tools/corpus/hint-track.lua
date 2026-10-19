@@ -2,14 +2,8 @@ import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")}
 local tsv = import("tsv", {rootdir = os.scriptdir()})
 local aggregate = import("aggregate", {rootdir = os.scriptdir(), anonymous = true})
 
-local CORPUS_ROOT = os.getenv("CHARON_CORPUS_ROOT") or path.join(os.getenv("HOME"), "Git", "projects", "ios", "coordination")
-local C = path.join(CORPUS_ROOT, "corpus")
+local C = aggregate.corpus_dir()
 local EXPORT = aggregate.registry_export()
-
-if not os.isdir(C) then
-    raise("hint-track.lua: no corpus/ data directory found at %s. Set CHARON_CORPUS_ROOT to the directory that "
-        .. "contains corpus/.", C)
-end
 
 local function tag_of(hint)
     local tag = (hint or ""):gsub(" %(.*%)$", ""):match("^%s*(.-)%s*$")

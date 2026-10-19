@@ -15,18 +15,18 @@ From a checkout at the pushed commit:
 
 ```
 sha=$(git rev-parse --short HEAD)
-mkdir -p .agent-work/runs/registry-export
-xmake l tools/corpus/export-registry.lua "$PWD/packages/a/apple-backports" .agent-work/runs/registry-export/carried-registry.tsv
-wc -l .agent-work/runs/registry-export/carried-registry.tsv
-cp .agent-work/runs/registry-export/carried-registry.tsv $HOME/Git/projects/ios/coordination/corpus/carried-registry-$sha.tsv
+export_tsv=$(xmake l modules/workspace.lua run registry-export)/carried-registry.tsv
+xmake l tools/corpus/export-registry.lua "$PWD/packages/a/apple-backports" "$export_tsv"
+wc -l "$export_tsv"
+cp "$export_tsv" $HOME/Git/projects/ios/coordination/corpus/carried-registry-$sha.tsv
 ```
 
 - The first argument is the **package root** `packages/a/apple-backports` (the script reads
   `<root>/registry/*.json`), not the checkout root. A wrong root writes a header-only file without an
   error: compare the row count with the previous `carried-registry-*.tsv`.
 - The corpus tools read the export at `CHARON_REGISTRY_TSV`, which defaults to
-  `.agent-work/runs/registry-export/carried-registry.tsv` in the checkout; `regen.sh` uses that default
-  path. The run folder is inside the checkout and gitignored, so the durable copy is the one in
+  `$HOME/.cache/hades/<task>/registry-export/carried-registry.tsv` (`modules/workspace.lua run registry-export`);
+  `regen.lua` uses that default path. The run folder is scratch, so the durable copy is the one in
   `coordination/corpus/`. Point `CHARON_REGISTRY_TSV` at it when the run-folder copy is missing.
 - An export older than the last registry commit on `origin/main` makes every ranking stale:
   `git log -1 --format=%cd origin/main -- packages/a/apple-backports/registry` against the file's mtime.
@@ -43,11 +43,11 @@ xmake l tools/corpus/built-exports.lua <canon-run>
 Then the batch, from the checkout whose tools you trust:
 
 ```
-tools/corpus/regen.sh <label>
+xmake l tools/corpus/regen.lua <label>
 xmake l tools/corpus/gen-report.lua
 ```
 
-`regen.sh` does, in this order (do not reorder by hand): save `crash-demand-top.tsv` as
+`regen.lua` does, in this order (do not reorder by hand): save `crash-demand-top.tsv` as
 `crash-demand-prev.tsv`; run `crash-demand.lua`; run `hint-track.lua <label>`; copy the
 export to `registry-last.tsv`. `gen-report.lua` then writes `band-*.tsv` and `corpus-report.md`.
 

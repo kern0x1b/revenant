@@ -109,7 +109,7 @@ ranges after its movie is released (the release section of the probe, measured e
 ## Measured on 6.1.3
 
 The probe (`tests/backports/host/avf-movie4/probe.m`, built with `CHARON_AVMOVIE_APP`) runs as an application on the emulated
-iPhone 4S at 6.1.3, with the three movies of the differential in its bundle (`tests/backports/emulate/avmovie/run-app.sh`).
+iPhone 4S at 6.1.3, with the three movies of the differential in its bundle (`tests/backports/emulate/avmovie/run-app.lua`).
 The run printed 364 rows, the same count the port prints on the host. Against the host's table, 277 rows are compared:
 
 - 265 rows are equal. That includes the duration, the tracks, the time ranges (zero times are compared by value, not by

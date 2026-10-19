@@ -524,7 +524,7 @@ local function sections_of(file)
 end
 
 local generated = {}
-function generate(root)
+function generate(root, sdkdir)
     local snapshot = path.join(root, "spec")
     if not os.isdir(snapshot) then
         raise("package root %s has no spec/ snapshot (%s): the generated layer in .gen/ cannot be written", root, snapshot)
@@ -540,8 +540,13 @@ function generate(root)
     end
     os.runv(os.programfile(), {"l", path.join(tree, "tools", "gen.lua"), "gen", "--tree", tree, "--all", "--sdk", sdk})
     if os.isdir(path.join(root, "Intents")) then
-        os.runv(os.programfile(), {"l", path.join(tree, "tools", "intents", "objects.lua"), "--sdk", sdk,
-            "--out", path.join(root, ".gen", "Intents"), "--work", path.join(tree, ".agent-work", "intents-generation")})
+        local workspace = import("workspace", {rootdir = path.join(tree, "modules"), anonymous = true})
+        local arguments = {"l", path.join(tree, "tools", "intents", "objects.lua"), "--sdk", sdk,
+            "--out", path.join(root, ".gen", "Intents"), "--work", workspace.run("intents-generation")}
+        if sdkdir then
+            table.join2(arguments, {"--port-sdk", sdkdir})
+        end
+        os.runv(os.programfile(), arguments)
     end
     if os.isfile(path.join(root, "spec", "ImageIO", "names.tsv")) then
         os.runv(os.programfile(), {"l", path.join(tree, "tools", "gen", "imageio_names.lua"), "", tree, "--objects"})
@@ -2058,7 +2063,7 @@ function minimums(listed, objects, architecture, deployment, opt)
 end
 
 function build(opt)
-    generate(opt.root)
+    generate(opt.root, opt.sdkdir)
     INVENTORY_STORE = opt.store
     local release = loaded(opt.cache, opt.architecture)
     opt = table.join(opt, {triple = opt.architecture .. "-apple-ios" .. opt.deployment})

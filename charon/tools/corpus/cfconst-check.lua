@@ -1,4 +1,5 @@
 local measured = import("gen.measured", {rootdir = path.join(os.scriptdir(), ".."), anonymous = true})
+local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
 
 local root = os.getenv("CHARON_ROOT") or path.join(os.scriptdir(), "..", "..")
 local cache_root = os.getenv("CACHE_ROOT") or path.join(os.getenv("HOME"), ".charon", "dyld")
@@ -59,8 +60,7 @@ end
 
 local function read_cache(cache, rows)
     local file = cache_file(cache)
-    local runs = path.join(root, ".agent-work", "runs")
-    os.mkdir(runs)
+    local runs = workspace.run("cfconst-check")
     local symbols = path.join(runs, "cfconst-symbols-" .. string.gsub(cache, " ", "-") .. ".tsv")
     local lines = {}
     for _, row in ipairs(rows) do

@@ -84,13 +84,13 @@ eight files (`xmake l` over the files, `json.loadfile`): 41 are `implemented`, 8
 
 ## Virtual endpoints on the emulated iPhone 4S at 6.1.3: which processes the release lets make them
 
-Measured with `tests/backports/emulate/coremidi` (`run.sh`, which runs `run-app.sh`: `xmake emulate -d iPhone4,1 -r 6.1.3`, time scale 10):
+Measured with `tests/backports/emulate/coremidi` (`xmake l run.lua`: `xmake emulate -d iPhone4,1 -r 6.1.3`, time scale 10):
 
 - A daemon (`/usr/libexec/charoncoremidi`, started by launchd, no bundle) is refused: the release's own `MIDISourceCreate`
   returns -10844 (kMIDINotPermitted), and so do this library's protocol endpoints. The round trip was FAIL (7 failures) as a
   daemon. The command-line tool that made that run is retired (the commit "Retire the CoreMIDI round-trip command-line tool"),
   so no command-line form of the round trip is kept. The guest's MIDIServer runs (it is spawned by launchd at boot).
-- The same probe as an application (`run-app.sh`: an installed bundle, launched through SpringBoard) passes:
+- The same probe as an application (`run.lua`: an installed bundle, launched through SpringBoard) passes:
   `roundtrip: PASS (0 failures)`, `application exit: 0`; the control `MIDISourceCreate` answers 0.
 - Isolated, for the application:
   - without an active audio session (no AudioSessionSetActive): still PASS. The audio session is not needed.

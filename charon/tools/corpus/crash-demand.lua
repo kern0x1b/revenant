@@ -3,6 +3,7 @@ import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")}
 local aggregate = import("aggregate", {rootdir = os.scriptdir(), anonymous = true})
 local objc = import("objc_text", {rootdir = os.scriptdir(), anonymous = true})
 local json_order = import("json_order", {rootdir = os.scriptdir(), anonymous = true})
+local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
 
 local MINOS = {ish = {11, 0}, ppsspp = {11, 0}, pojav = {12, 2}, provenance = {16, 0},
                delta = {14, 0}, utm = {14, 0}, aidoku = {15, 0}, yattee = {14, 0},
@@ -248,7 +249,7 @@ function main()
     local reg_kinds = aggregate.load_reg_kinds()
     local store = aggregate.load_store(false)
 
-    local tree_candidates = {path.join(os.getenv("HOME"), "Git", "projects", "ios", "charon", "packages", "a", "apple-backports")}
+    local tree_candidates = {path.join(workspace.root(), "packages", "a", "apple-backports")}
     if os.getenv("CHARON_TREE_DIR") then
         table.insert(tree_candidates, 1, os.getenv("CHARON_TREE_DIR"))
     end
