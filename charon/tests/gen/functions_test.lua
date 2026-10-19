@@ -10,9 +10,9 @@ local function check(ok, label)
     end
 end
 
-local SDK = path.normalize(path.join(os.scriptdir(), "..", "..", ".agent-work", "functions-test", "sdk"))
+local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
+local SDK = workspace.fresh("functions-test")
 local FRAMEWORKS = path.join(SDK, "System", "Library", "Frameworks")
-os.tryrm(SDK)
 os.mkdir(path.join(FRAMEWORKS, "Accelerate.framework", "Frameworks", "vImage.framework"))
 local found = sdk_modules.discover(SDK).modules
 check(found["Accelerate"] ~= nil and found["Accelerate"].root == path.join(FRAMEWORKS, "Accelerate.framework"),
@@ -29,6 +29,7 @@ check(functions.declaring_text(nested, "UMBRELLA", "vImageScale") == "VIMAGE", "
 check(functions.declaring_text(nested, "UMBRELLA", "vDSP_sve") == "VECLIB", "a function vecLib declares is read from vecLib's headers")
 check(functions.declaring_text(nested, "UMBRELLA", "NoSuchFunction") == "UMBRELLA", "a function no nested target declares is read from the umbrella's headers")
 check(functions.declaring_text({}, "UMBRELLA", "vImageScale") == "UMBRELLA", "an umbrella with no nested target reads its own headers")
+os.tryrm(SDK)
 
 print("functions test: " .. (failures == 0 and "OK" or ("FAIL " .. failures)))
 if failures > 0 then

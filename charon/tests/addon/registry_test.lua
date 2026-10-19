@@ -467,7 +467,7 @@ end
 
 local function real_object(backports, modules, found)
     local built
-    for _, run in ipairs(os.dirs(path.join(modules, "..", ".agent-work", "runs", "*"))) do
+    for _, run in ipairs(os.dirs(path.join(import("workspace", {rootdir = modules, anonymous = true}).cache(), "*", "*"))) do
         for _, folder in ipairs(os.dirs(path.join(run, "build", "objects", "*"))) do
             for _, object in ipairs(os.files(path.join(run, "build", "objects", folder, "protocols", "*.o"))) do
                 built = {run = run, folder = folder, object = object}
@@ -754,7 +754,7 @@ end
 
 function failures(opt)
     local backports = import("apple.backports", {rootdir = opt.modules, anonymous = true})
-    SCRATCH_RUNS = path.join(opt.modules, "..", ".agent-work", "runs")
+    SCRATCH_RUNS = import("workspace", {rootdir = opt.modules, anonymous = true}).run("registry-test")
     local found = {}
     local root = path.join(opt.modules, "..", "packages", "a", "apple-backports")
     if not os.isdir(path.join(root, "registry")) then
