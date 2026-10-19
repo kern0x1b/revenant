@@ -13,5 +13,8 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside hade
 - Third-party code is a package of `third_party/packages/<letter>/<name>/`: the upstream by url and commit or
   checksum, our changes as `git format-patch` files in its `patches/`, applied in order by `add_patches`. Never
   commit a copy of upstream code.
-- Before handing a change over: `xmake l tools/check.lua <member>` for each member it touches that has a check
+- xmake at the top is always `./xmakew`, the pinned and patched xmake of `third_party/packages/x/xmake` (built into
+  `$HOME/.cache/hades/xmake/` on first use): `./xmakew f -p iphoneos -a armv7`, `./xmakew build <target>`. It takes
+  the charon addon from `charon/` of the checkout; stock xmake would fetch and install charon globally instead.
+- Before handing a change over: `./xmakew l tools/check.lua <member>` for each member it touches that has a check
   there, then that member's own gate (charon's `backports-gate` skill, shade's boot skill).
