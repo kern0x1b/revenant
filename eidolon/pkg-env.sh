@@ -1,24 +1,28 @@
-# pkg-env.sh: sourced by the build scripts: the toolchain, charon@swift-runtime, libc++, apple-compat and Styx (charon@styx, built against the same runtime) that ../rtpkg requires, from the shared xmake store
+# pkg-env.sh: sourced by the build scripts: the toolchain, charon@swift-runtime, libc++ and apple-compat that the hades project requires, from the shared xmake store, and Styx, its Combine target
 STUDY=${STUDY:-$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)}
-# every package is the one ../rtpkg requires, in the shared xmake store, named by xmake itself (charon's `xmake where`)
+HADES=${HADES:-$(cd "$STUDY/.." && pwd)}
 pkg_where() {
     local d
-    d=$(cd "$STUDY/rtpkg" && xmake where "$1") && d=${d##*$'\n'} && [ -d "$d" ] && echo "$d" && return 0
-    echo "pkg-env: ../rtpkg names no installed $1; install its packages with (cd rtpkg && xmake f -p iphoneos -a armv7 -y)" >&2
+    d=$(cd "$HADES" && xmake where "$1") && d=${d##*$'\n'} && [ -d "$d" ] && echo "$d" && return 0
+    echo "pkg-env: the hades project names no installed $1; configure it at $HADES (README: One xmake project)" >&2
     return 1
 }
 # sourced, a failure returns to the script; run on its own, it exits
-ST=$(pkg_where styx) && RT=$(pkg_where swift-runtime) && LIBCXX=$(pkg_where libcxx) && COMPAT=$(pkg_where apple-compat) &&
+RT=$(pkg_where swift-runtime) && LIBCXX=$(pkg_where libcxx) && COMPAT=$(pkg_where apple-compat) &&
     SDKPKG=$(pkg_where iphoneos-sdk) && LLVM=$(pkg_where llvm) && LD=$(pkg_where ld64)/bin/ld && LDID=$(pkg_where ldid)/bin/ldid ||
     { return 1 2>/dev/null || exit 1; }
+STLIB=$HADES/build/iphoneos/armv7/release
+STMOD=$HADES/build/.gens/Combine/iphoneos/armv7/release/swift
+[ -f "$STLIB/libCombine.a" ] && [ -d "$STMOD/Combine.swiftmodule" ] ||
+    { echo "pkg-env: build the Combine target first (xmake build -P $HADES Combine)" >&2; return 1 2>/dev/null || exit 1; }
 SWIFTC=$(grep -A1 'SWIFT_EXEC' $RT/manifest.txt | tail -1 | tr -d ' "')
 # the manifest records the compiler by absolute path, which is whatever machine built the package; if that one is gone, the
 # compiler is a package of ours too, so take it from the store the runtime came from -- the same layout one level out
 [ -x "$SWIFTC" ] || SWIFTC=$(ls -td "${RT%%/s/swift-runtime/*}"/s/swift/*/*/bin/swiftc 2>/dev/null | head -1)
 [ -x "$SWIFTC" ] || { echo "pkg-env: no swiftc for the runtime at $RT" >&2; return 1 2>/dev/null || exit 1; }
 SWIFTHOME=$(dirname $(dirname $SWIFTC))
-OCFLAGS="-I $ST/lib/swift/iphoneos -I $ST/include/CombineHelpers"
-OCLINK="-L$ST/lib -lCombine -lCombineHelpers"
+OCFLAGS="-I $STMOD -I $HADES/styx/Sources/CombineHelpers/include"
+OCLINK="-L$STLIB -lCombine -lCombineHelpers"
 SDK=$(ls -d $SDKPKG/Developer.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS*.sdk)
 MARK=$(grep -A1 'CHARON_SWIFT_RUNTIME_MARK' $RT/manifest.txt | tail -1 | tr -d ' "')
 T=armv7-apple-ios6.0

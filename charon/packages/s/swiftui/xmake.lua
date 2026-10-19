@@ -4,15 +4,8 @@ package("swiftui")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
 
-    -- Inside hades the sources are the eidolon folder beside charon, as this checkout has it (modules/hades.lua
-    -- says how it is versioned and staged). Outside hades they are a pinned commit of eidolon's repository.
-    local hades_eidolon = path.join(os.scriptdir(), "..", "..", "..", "..", "eidolon")
-    if os.isfile(path.join(os.scriptdir(), "..", "..", "..", "..", "third_party", "fetch.lua")) and os.isdir(hades_eidolon) then
-        set_sourcedir(path.absolute(hades_eidolon))
-    else
-        add_urls("https://github.com/kern0x1b/eidolon.git")
-        add_versions("2026.09.28", "cc5f8b59259fa247799ae259a110d9328a9cf9cb")
-    end
+    add_urls("https://github.com/kern0x1b/eidolon.git")
+    add_versions("2026.09.28", "cc5f8b59259fa247799ae259a110d9328a9cf9cb")
 
     -- The three things the runtime a port carries is built with, named the way the runtime names them, so that a port that
     -- requires this package with them requires a runtime of the same build: the module is read against that runtime's own
@@ -26,10 +19,6 @@ package("swiftui")
     add_configs("recipe", {description = "The digest of this recipe, so a changed one is a different package.", default = hash.strhash128(hash.sha256(path.join(os.scriptdir(), "xmake.lua"))), type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
-        if package:sourcedir() then
-            local hades = import("hades", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
-            package:version_set(hades.version(package:sourcedir()))
-        end
         package:add("deps", "charon@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
                     backports = package:config("backports") or nil, backports_uikit = package:config("backports_uikit") or nil}})
         -- The module imports Combine (Text's publisher overloads, a handful of files), so it is compiled against the module
@@ -45,9 +34,6 @@ package("swiftui")
 
     on_install("iphoneos", function (package)
         local modules = path.join(package:scriptdir(), "..", "..", "..", "modules")
-        if package:sourcedir() then
-            os.cd(import("hades", {rootdir = modules, anonymous = true}).stage(package, package:sourcedir()))
-        end
         local swift = import("apple.swift", {rootdir = modules, anonymous = true})
         local toolchain = assert(package:toolchains(), "SwiftUI is built with the apple-ios toolchain")[1]
         toolchain:load()

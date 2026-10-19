@@ -68,10 +68,11 @@ exists.
 
 ## Requirements
 
-- macOS with the [Charon](https://github.com/kern0x1b/charon) toolchain, and the packages `rtpkg/` requires
-  installed into the shared xmake store (`cd rtpkg && xmake f -p iphoneos -a armv7 -y`): `swift-runtime`, `libcxx`,
-  `apple-compat`, `styx`, the iOS SDK, `llvm`, `ld64` and `ldid`. `pkg-env.sh` asks xmake where each is
-  (`xmake where`). An app that only uses Eidolon takes it as the package `charon@eidolon` instead.
+- macOS and the hades checkout this folder is in, configured for iOS at its top (hades' README: the charon addon of
+  the checkout, `xmake f -p iphoneos -a armv7`): the module is the `SwiftUI` target, Styx the `Combine` and
+  `CombineHelpers` targets, and `swift-runtime`, `libcxx`, `apple-compat`, the iOS SDK, `llvm`, `ld64` and `ldid` the
+  charon packages the project requires. `pkg-env.sh` asks the hades project where each is (`xmake where`, `xmake show`).
+  An app outside hades takes Eidolon as the package `charon@eidolon` instead.
 - To run the tests and rendered scenarios: the Charon emulator (Shade), which `xmake emulate` drives — the port in
   `eidolon/` builds the demo app, the snapshot bundle and the test binary as packages, and the emulator image,
   the device and the release are named on the command line (`-d iPhone4,1 -r 6.1.3`). The addon must be one that has
@@ -116,10 +117,11 @@ xmake l coverage.lua --check                            # the ledger, checked ag
 
 | Path | Holds |
 | --- | --- |
-| `eidolon/` | the module (`Sources/SwiftUI`), the demo app, the engine tests, the probe, the snapshot references, the coverage ledger, and the Charon port (`xmake.lua`, `control`, `Info.plist`) that builds the app, the snapshot bundle and the tests as packages for `xmake emulate` |
+| `xmake.lua` | the `SwiftUI` target, and the targets of `eidolon/` and `rtpkg/`, as part of the hades project |
+| `eidolon/` | the module (`Sources/SwiftUI`), the demo app, the engine tests, the probe, the snapshot references, the coverage ledger, and the targets (`xmake.lua`, `control`, `Info.plist`) of the app, the snapshot bundle and the tests for `xmake emulate` |
 | `bridge/` | the typed API diff against Apple's interface, the invented-name gate, and the name lists they use |
 | `combine/` | build and run scripts for the upstream OpenCombine test suite on iOS 6, with its results (Styx's ancestor; Styx carries its own now) |
-| `rtpkg/` | the small xmake project that installs the runtime packages |
+| `rtpkg/` | `eidolonrt`, a daemon of Styx and the runtime with the backports, as a target of the hades project |
 | `docs/` | the research (in Russian) |
 | `*.sh`, `device.lua` | run the emulator, take snapshots and timings, reach a device |
 

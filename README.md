@@ -32,13 +32,28 @@ Third-party code is never a copy here: `dynarmic` is MC-XiaoXiao's dynarmic at a
 patches, `boost` the 1.81.0 release archive by its checksum, `xmake` the v3.1.1 tag plus our patches to its addon
 handling.
 
-## Members build each other from this tree
+### The members for iOS
 
-charon's packages of other members (`charon@shade`, `charon@styx`, `charon@eidolon`, `charon@swiftui`) build, inside
-hades, the member folder of this checkout instead of a pinned commit of the member's old repository
-(`charon/modules/hades.lua`). The package version is git's id of that folder's tree, plus a digest of changes not
-committed, so the same sources reuse one install and any change is a new one. eidolon names charon by its folder here.
-Outside hades, the same recipes keep their urls and versions.
+styx's `Combine` and `CombineHelpers`, eidolon's `SwiftUI`, the eidolon demo, snapshots and engine tests, and
+`eidolonrt` are targets of the graph for iphoneos; charon's packages are third-party code to them (the Swift runtime,
+libc++, the backports, the SDK and the tools). They are built with `xmake f -p iphoneos -a armv7`.
+
+charon is both the package repository and the addon (toolchain and rules) of those builds, from the `charon/` folder
+of this checkout. xmake reads an addon only from the addons installed in its global directory, and installing a
+folder there makes it the machine's active charon for every project that has not locked a version. hades therefore
+has an xmake global directory of its own, `~/.cache/hades/xmake-global`, which shares the machine's package store,
+and `tools/charon-addon.lua` installs the `charon/` folder of the checkout it is run in as that directory's addon
+(run it again after a change to `charon/`, and in the checkout you build):
+
+```
+xmake l tools/charon-addon.lua
+export XMAKE_GLOBALDIR=$HOME/.cache/hades/xmake-global
+xmake f -p iphoneos -a armv7 -o $HOME/.cache/hades/<task>/build && xmake
+```
+
+`CHARON_REPO` names another charon folder for the packages (a released tree whose packages are installed already).
+charon's recipes of the members (`charon@styx`, `charon@eidolon`, `charon@swiftui`, `charon@shade`) are for
+applications outside hades and keep their pinned commits.
 
 ## Publishing a member
 
