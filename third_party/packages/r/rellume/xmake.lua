@@ -7,13 +7,18 @@ package("rellume")
     local patches = {"0001-Include-cstdint-before-the-decoder-headers.patch",
                      "0002-Lift-reads-of-TPIDRRO_EL0-on-AArch64.patch",
                      "0003-Map-a-calling-convention-only-to-the-architectures-b.patch",
-                     "0004-Lift-AArch64-without-the-x86-64-decoder.patch"}
+                     "0004-Lift-AArch64-without-the-x86-64-decoder.patch",
+                     "0005-Lift-the-AArch64-LSE-atomic-memory-operations.patch"}
     add_urls("https://github.com/aengelke/rellume.git", {submodules = false})
     add_versions("2026.09.10", commit)
+    local digests = {"xmake.lua=" .. hash.sha256(path.join(os.scriptdir(), "xmake.lua"))}
     for _, name in ipairs(patches) do
         local file = path.join(os.scriptdir(), "patches", name)
-        add_patches("2026.09.10", file, hash.sha256(file))
+        local digest = hash.sha256(file)
+        add_patches("2026.09.10", file, digest)
+        table.insert(digests, name .. "=" .. digest)
     end
+    add_configs("recipe", {description = "The digest of this recipe and the patches it applies, so a changed patch is a different build.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
 
     add_configs("llvm", {description = "The prefix of the LLVM 23 whose headers rellume is compiled against.", default = "", type = "string"})
 
