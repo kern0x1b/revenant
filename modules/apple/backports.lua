@@ -1044,11 +1044,14 @@ local function names_a_class(symbols)
 end
 
 -- A band neither keeps nor re-exports an object below its registry minimum (range.minimums, from
--- minimums() below, for the band's release range.release); those it names as left out, the third answer.
+-- minimums() below, for the band's release range.release), nor at or above the release its rows all end
+-- at (range.maximums, from windows() below, read as in_range() reads a row: the maximum is not ours);
+-- those it names as left out, the third answer.
 function band(release_exports, objects, arrived, range)
     local kept, reexported, left = {}, {}, {}
     for _, object in ipairs(objects) do
         local minimum = range and range.minimums[object]
+        local ends = range and range.maximums and range.maximums[object]
         local symbols = exported_symbols(object)
         local present = {}
         for _, symbol in ipairs(symbols) do
@@ -1057,6 +1060,8 @@ function band(release_exports, objects, arrived, range)
             end
         end
         if minimum and dyld.compare_versions(range.release, minimum) < 0 then
+            table.insert(left, object)
+        elseif ends and dyld.compare_versions(range.release, ends) >= 0 then
             table.insert(left, object)
         elseif #present == 0 or (arrived and not names_a_class(present) and arrived(object)) then
             table.insert(kept, object)
@@ -1083,8 +1088,9 @@ local function compiled(opt)
     -- which SDK's stubs say what library it belongs to, and guessing the SDK from what is installed answers for another build
     io.writefile(path.join(opt.builddir, "objects", "sdkdir"), opt.sdkdir)
     compile(opt, path.join(opt.root, "attach.c"), attach)
-    local placed = floors(opt)
-    local objects, origins, minimums = {}, {}, {}
+    local placed, windows_of = floors(opt)
+    windows_of = windows_of or {}
+    local objects, origins, minimums, maximums = {}, {}, {}, {}
     local pending = {}
     for _, library in ipairs(LIBRARIES) do
         objects[library.name] = {}
@@ -1129,7 +1135,10 @@ local function compiled(opt)
         end
     end
     compile_all(opt, pending)
-    return attach, objects, origins, minimums
+    for object, source in pairs(origins) do
+        maximums[object] = windows_of[source]
+    end
+    return attach, objects, origins, minimums, maximums
 end
 
 local function exported_through(release, install, seen)
@@ -1379,13 +1388,13 @@ end
 
 local function link(opt, library, attach, objects, releases, outputdir, checked)
     local release = checked and checked.release or opt.deployment
-    local kept, reexported, left = band(releases[1].exports, objects, checked and later_than(opt, checked.release), {release = release, minimums = opt.minimums or {}})
+    local kept, reexported, left = band(releases[1].exports, objects, checked and later_than(opt, checked.release), {release = release, minimums = opt.minimums or {}, maximums = opt.maximums or {}})
     if #left > 0 then
         local named = {}
         for _, object in ipairs(left) do
-            table.insert(named, string.format("%s (%s)", path.filename(opt.origins[object]), opt.minimums[object]))
+            table.insert(named, string.format("%s (%s)", path.filename(opt.origins[object]), (opt.minimums or {})[object] or "no minimum"))
         end
-        cprint("${color.warning}note:${clear} the band for iOS %s leaves %d objects of %s out below their registry minimum: %s",
+        cprint("${color.warning}note:${clear} the band for iOS %s leaves %d objects of %s out of their registry window (below the minimum or at the maximum): %s",
                release, #named, library.name, table.concat(named, " "))
     end
     if not reexports(opt.deployment) then
@@ -2615,6 +2624,31 @@ local function latest(a, b)
     return dyld.compare_versions(a, b) >= 0 and a or b
 end
 
+-- The release at or above which an object is in no band: the highest `maximum` of the registry rows it carries,
+-- when every one of them declares a maximum. An object with a row that declares none, or with no row of the
+-- registry's at all, has no end and is carried as before. The rows are read as in_range() reads them.
+function windows(listed, objects, architecture)
+    local ends = {}
+    for _, object in ipairs(objects) do
+        local highest, open, named = nil, false, false
+        for _, name in ipairs(carried_names(object, architecture)) do
+            local entry = entry_of(listed, name)
+            if entry then
+                named = true
+                if not entry.maximum then
+                    open = true
+                elseif not highest or dyld.compare_versions(entry.maximum, highest) > 0 then
+                    highest = entry.maximum
+                end
+            end
+        end
+        if named and not open then
+            ends[object] = highest
+        end
+    end
+    return ends
+end
+
 -- The release each object is carried from, {object = version}: the `minimum` of the registry entries
 -- its API answers to, and no key for an object without one. An object whose entries name different
 -- minimums (an entry without one names none) is refused, as misplaced() refuses mixed releases: the
@@ -2636,6 +2670,7 @@ end
 -- provide, so neither is a trap.
 function minimums(listed, objects, architecture, deployment, opt)
     local found, problems, bounds, helpers = {}, {}, {}, {}
+    local ends = windows(listed, objects, architecture)
     for _, object in ipairs(objects) do
         local names = carried_names(object, architecture)
         if #names == 0 then
@@ -2777,8 +2812,9 @@ function minimums(listed, objects, architecture, deployment, opt)
             -- linked from, and below the release this caller stops being linked from, would link the
             -- caller without it. A caller the release exports all of its API from below that release
             -- is never linked there, which is what a nil dropped[object] or an empty interval says.
-            if from and deployment then
-                local first = latest(minimum_of, from)
+            -- a caller whose window has ended by the release it would be linked from is not linked there at all
+            local first = from and latest(minimum_of, from)
+            if from and deployment and not (ends[object] and dyld.compare_versions(first, ends[object]) >= 0) then
                 if not dropped_from or dyld.compare_versions(first, dropped_from) < 0 then
                     if not openable or dyld.compare_versions(first, openable) <= 0 then
                         table.insert(problems, string.format("%s is carried %s and names %s, which %s defines only from %s on, the release it exports itself from; a band at or above that release would link this object without it, so give its entries that minimum or move the symbol to a file of its own",
@@ -2797,7 +2833,7 @@ function minimums(listed, objects, architecture, deployment, opt)
             table.insert(kept, object)
         end
     end
-    return found, problems, kept, inherited, unreachable
+    return found, problems, kept, inherited, unreachable, ends
 end
 
 function build(opt)
@@ -2814,8 +2850,8 @@ function build(opt)
     -- would be the one number a band would quote and the one that would be wrong.
     COMPILED = 0
     local compiling = os.mclock()
-    local attach, objects, origins, minimums = compiled(opt)
-    opt = table.join(opt, {origins = origins, minimums = minimums})
+    local attach, objects, origins, minimums, maximums = compiled(opt)
+    opt = table.join(opt, {origins = origins, minimums = minimums, maximums = maximums})
     local compiled_at = os.mclock()
     local compiled, placed = COMPILED, 0
     for _, library in ipairs(staged_libraries(opt)) do
@@ -2940,7 +2976,11 @@ function floors(opt)
         end
     end
     compile_all(opt, pending)
-    local found, problems, unreached, inherited, unreachable = minimums(listed(opt.root), objects, opt.architecture, opt.deployment, opt)
+    local found, problems, unreached, inherited, unreachable, ends = minimums(listed(opt.root), objects, opt.architecture, opt.deployment, opt)
+    local windows_of = {}
+    for _, object in ipairs(objects) do
+        windows_of[origins[object]] = ends[object]
+    end
     if #problems > 0 then
         raise("%d objects cannot be placed by their registry minimum above iOS %s:\n  %s", #problems, opt.deployment, table.concat(problems, "\n  "))
     end
@@ -2981,7 +3021,7 @@ function floors(opt)
         end
     end
     compile_all(opt, pending)
-    return placed
+    return placed, windows_of
 end
 
 -- The release from which band() links no object of this one, and nil when it never does: the
@@ -3268,6 +3308,11 @@ local function band_plan(opt, objects)
             if (opt.minimums or {})[object] then
                 points[opt.minimums[object]] = true
             end
+            -- a window's end is a band point, so band() can leave the object out from that release on
+            local ends = (opt.maximums or {})[object]
+            if ends and dyld.compare_versions(ends, opt.deployment) > 0 then
+                points[ends] = true
+            end
         end
     end
     points = table.orderkeys(points)
@@ -3318,8 +3363,8 @@ end
 
 function stage_bands(opt)
     opt = table.join(opt, {triple = opt.architecture .. "-apple-ios" .. opt.deployment})
-    local attach, objects, origins, minimums = compiled(opt)
-    opt = table.join(opt, {origins = origins, minimums = minimums})
+    local attach, objects, origins, minimums, maximums = compiled(opt)
+    opt = table.join(opt, {origins = origins, minimums = minimums, maximums = maximums})
     check_releases(opt, objects, origins)
     local ranges, architectures = band_plan(opt, objects)
     local home = path.join(opt.stage, INSTALL_FOLDER)
@@ -3333,7 +3378,7 @@ function stage_bands(opt)
             table.insert(caches, {cache = file, release = release})
             local reexported = {}
             for _, library in ipairs(staged_libraries(opt)) do
-                local _, symbols = band(found.exports, objects[library.name], later_than(opt, release), {release = release, minimums = opt.minimums})
+                local _, symbols = band(found.exports, objects[library.name], later_than(opt, release), {release = release, minimums = opt.minimums, maximums = opt.maximums})
                 table.join2(reexported, symbols)
             end
             signatures[release] = table.concat(reexported, " ")
