@@ -30,8 +30,8 @@ The guest keeps its arm64 memory image (rebased below 4 GiB); code runs natively
 
 ## Building
 
-Katabasis is part of the hades xmake project; run everything from the hades root. It needs an LLVM 23 with its headers and libraries
-(`/opt/homebrew/opt/llvm` by default, `--katabasis_llvm=<prefix>` for another). Rellume, farmdec and BlocksRuntime are packages of
+Katabasis is part of the hades xmake project; run everything from the hades root. LLVM 23 with its libraries comes from charon's `llvm`
+package (its `libraries` config), built from source on the first configure. Rellume, farmdec and BlocksRuntime are packages of
 `third_party/packages/`; the iOS SDK (for header-driven bridge generation), `ld64` and `ldid` are charon's packages. Build `xlate` and
 `xlgen`:
 
