@@ -2,7 +2,7 @@
 -- Usage: xmake l tests/light.lua [checkout]   (default: the charon this file is in)
 -- Exits non-zero when any suite reports a failure, so a caller can gate on the exit code.
 function main(checkout)
-    local charon = checkout and path.absolute(checkout) or path.directory(os.scriptdir())
+    local charon = path.absolute(checkout or path.directory(os.scriptdir()))
     local addon = path.join(charon, "tests", "addon")
     local modules = path.join(charon, "modules")
     local names = {"descriptions_test", "checkout_test", "registry_test", "dependency_test", "swift_rule_test"}

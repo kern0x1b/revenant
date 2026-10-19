@@ -56,6 +56,10 @@ rule("swift")
             local objectfile = path.join(target:objectdir(), "swift", target:name() .. ".o")
             target:data_set("swift.objectfile", objectfile)
             table.insert(target:objectfiles(), objectfile)
+            if target:is_static() or target:is_shared() then
+                target:data_set("swift.moduledir", path.join(target:autogendir(), "swift"))
+                target:set("policy", "build.fence", true)
+            end
         end
         -- The program names the build of the runtime it was compiled against, and the link fails against any other: by
         -- default the libraries are built without library evolution, so two builds of them do not answer for each other, and a
@@ -188,6 +192,24 @@ rule("swift")
                         table.join2(plugins, {"-plugin-path", folder})
                     end
                 end
+                local imported = {}
+                for _, dependency in ipairs(target:orderdeps()) do
+                    local moduledir = dependency:data("swift.moduledir")
+                    if moduledir then
+                        table.join2(modules, {"-I", moduledir})
+                        table.insert(imported, path.join(moduledir, (dependency:values("swift.module") or dependency:name()) .. ".swiftmodule",
+                                                         dependency:arch() .. "-apple-ios.swiftmodule"))
+                    end
+                    for _, folder in ipairs(table.wrap(dependency:get("includedirs", {interface = true}))) do
+                        table.join2(modules, {"-I", folder})
+                    end
+                end
+                local emitted = {}
+                local moduledir = target:data("swift.moduledir")
+                if moduledir then
+                    emitted = {"-emit-module", "-emit-module-path", path.join(moduledir, (target:values("swift.module") or target:name()) .. ".swiftmodule",
+                                                                              target:arch() .. "-apple-ios.swiftmodule")}
+                end
                 local argv = table.join(swift.runtime_flags({
                     architecture = target:arch(),
                     deployment = toolchain:config("deployment"),
@@ -199,12 +221,15 @@ rule("swift")
                     symbols = table.contains(table.wrap(target:get("symbols")), "debug"),
                     prefix_map = os.projectdir() .. "=/port",
                     has_main = has_main
-                }), modules, plugins, table.wrap(target:values("swift.flags")), {"-c"}, sourcebatch.sourcefiles, {"-o", objectfile})
+                }), modules, plugins, table.wrap(target:values("swift.flags")), emitted, {"-c"}, sourcebatch.sourcefiles, {"-o", objectfile})
                 depend.on_changed(function ()
                     progress.show(jobopt.progress, "${color.build.object}compiling.swift %s", target:name())
                     os.mkdir(path.directory(objectfile))
+                    if #emitted > 0 then
+                        os.mkdir(path.directory(emitted[3]))
+                    end
                     os.vrunv(swiftc, argv)
-                end, {files = sourcebatch.sourcefiles, dependfile = objectfile .. ".d", values = argv, changed = target:is_rebuilt()})
+                end, {files = table.join(sourcebatch.sourcefiles, imported), dependfile = objectfile .. ".d", values = argv, changed = target:is_rebuilt()})
                 return
             end
             local bitcode = objectfile .. ".bc"
