@@ -1,0 +1,211 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Mon, 19 Oct 2026 20:41:14 +0200
+Subject: [PATCH 7/9] Add Publishers.CollectByTime and collect(_:options:)
+
+Apple's interface declares Publishers.TimeGroupingStrategy,
+Publishers.CollectByTime and the collect(_:options:) operator;
+OpenCombine has none of them.
+---
+ .../Publishers/Publishers.CollectByTime.swift | 189 ++++++++++++++++++
+ 1 file changed, 189 insertions(+)
+ create mode 100644 Sources/OpenCombine/Publishers/Publishers.CollectByTime.swift
+
+diff --git a/Sources/OpenCombine/Publishers/Publishers.CollectByTime.swift b/Sources/OpenCombine/Publishers/Publishers.CollectByTime.swift
+new file mode 100644
+index 0000000..6a35038
+--- /dev/null
++++ b/Sources/OpenCombine/Publishers/Publishers.CollectByTime.swift
+@@ -0,0 +1,189 @@
++extension Publishers {
++
++    public enum TimeGroupingStrategy<Context: Scheduler> {
++
++        case byTime(Context, Context.SchedulerTimeType.Stride)
++
++        case byTimeOrCount(Context, Context.SchedulerTimeType.Stride, Int)
++    }
++
++    public struct CollectByTime<Upstream: Publisher, Context: Scheduler>: Publisher {
++
++        public typealias Output = [Upstream.Output]
++
++        public typealias Failure = Upstream.Failure
++
++        public let upstream: Upstream
++
++        public let strategy: Publishers.TimeGroupingStrategy<Context>
++
++        public let options: Context.SchedulerOptions?
++
++        public init(upstream: Upstream,
++                    strategy: Publishers.TimeGroupingStrategy<Context>,
++                    options: Context.SchedulerOptions?)
++        {
++            self.upstream = upstream
++            self.strategy = strategy
++            self.options = options
++        }
++
++        public func receive<Downstream: Subscriber>(subscriber: Downstream)
++            where Upstream.Failure == Downstream.Failure, Downstream.Input == [Upstream.Output]
++        {
++            upstream.subscribe(Inner(downstream: subscriber, strategy: strategy, options: options))
++        }
++    }
++}
++
++extension Publisher {
++
++    public func collect<S: Scheduler>(_ strategy: Publishers.TimeGroupingStrategy<S>,
++                                      options: S.SchedulerOptions? = nil)
++        -> Publishers.CollectByTime<Self, S>
++    {
++        return Publishers.CollectByTime(upstream: self, strategy: strategy, options: options)
++    }
++}
++
++extension Publishers.CollectByTime {
++    internal final class Inner<Downstream: Subscriber>: Subscriber, Subscription
++        where Downstream.Input == [Upstream.Output], Downstream.Failure == Upstream.Failure
++    {
++        typealias Input = Upstream.Output
++
++        typealias Failure = Upstream.Failure
++
++        private let lock = UnfairLock.allocate()
++        private let downstream: Downstream
++        private let scheduler: Context
++        private let stride: Context.SchedulerTimeType.Stride
++        private let countLimit: Int?
++        private let options: Context.SchedulerOptions?
++
++        private var state = SubscriptionStatus.awaitingSubscription
++        private var buffer: [Input] = []
++        private var scheduled: Cancellable?
++        private var downstreamDemand: Subscribers.Demand = .none
++
++        init(downstream: Downstream,
++             strategy: Publishers.TimeGroupingStrategy<Context>,
++             options: Context.SchedulerOptions?)
++        {
++            self.downstream = downstream
++            switch strategy {
++            case .byTime(let scheduler, let stride):
++                self.scheduler = scheduler
++                self.stride = stride
++                self.countLimit = nil
++            case .byTimeOrCount(let scheduler, let stride, let count):
++                self.scheduler = scheduler
++                self.stride = stride
++                self.countLimit = count
++            }
++            self.options = options
++        }
++
++        deinit {
++            lock.deallocate()
++        }
++
++        func receive(subscription: Subscription) {
++            lock.lock()
++            guard case .awaitingSubscription = state else {
++                lock.unlock()
++                subscription.cancel()
++                return
++            }
++            state = .subscribed(subscription)
++            scheduled = scheduleTick()
++            lock.unlock()
++            downstream.receive(subscription: self)
++        }
++
++        func receive(_ input: Input) -> Subscribers.Demand {
++            lock.lock()
++            guard case .subscribed = state else {
++                lock.unlock()
++                return .none
++            }
++            buffer.append(input)
++            let isFull = countLimit.map { buffer.count >= $0 } ?? false
++            lock.unlock()
++            if isFull {
++                tick()
++            }
++            return .none
++        }
++
++        func receive(completion: Subscribers.Completion<Failure>) {
++            lock.lock()
++            guard case .subscribed = state else {
++                lock.unlock()
++                return
++            }
++            state = .terminal
++            scheduled?.cancel()
++            scheduled = nil
++            buffer = []
++            lock.unlock()
++            downstream.receive(completion: completion)
++        }
++
++        func request(_ demand: Subscribers.Demand) {
++            lock.lock()
++            guard case .subscribed(let subscription) = state else {
++                lock.unlock()
++                return
++            }
++            downstreamDemand += demand
++            let isSendable = downstreamDemand > .none && !buffer.isEmpty
++            lock.unlock()
++            subscription.request(demand)
++            if isSendable {
++                tick()
++            }
++        }
++
++        func cancel() {
++            lock.lock()
++            guard case .subscribed(let subscription) = state else {
++                lock.unlock()
++                return
++            }
++            state = .terminal
++            scheduled?.cancel()
++            scheduled = nil
++            buffer = []
++            lock.unlock()
++            subscription.cancel()
++        }
++
++        private func scheduleTick() -> Cancellable {
++            return scheduler.schedule(after: scheduler.now.advanced(by: stride),
++                                      interval: stride,
++                                      tolerance: scheduler.minimumTolerance,
++                                      options: options) { [weak self] in
++                self?.tick()
++            }
++        }
++
++        private func tick() {
++            lock.lock()
++            guard case .subscribed = state, downstreamDemand > .none, !buffer.isEmpty else {
++                lock.unlock()
++                return
++            }
++            let values = buffer
++            buffer = []
++            downstreamDemand -= 1
++            lock.unlock()
++            let additionalDemand = downstream.receive(values)
++            if additionalDemand > .none {
++                lock.lock()
++                downstreamDemand += additionalDemand
++                lock.unlock()
++            }
++        }
++    }
++}
+-- 
+2.54.0 (Apple Git-157)
+

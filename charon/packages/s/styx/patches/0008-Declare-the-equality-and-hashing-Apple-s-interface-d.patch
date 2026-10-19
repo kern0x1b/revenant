@@ -1,0 +1,323 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Mon, 19 Oct 2026 20:41:14 +0200
+Subject: [PATCH 8/9] Declare the equality and hashing Apple's interface
+ declares
+
+A framework's interface prints the ==, hash(into:) and hashValue a
+compiler derives under their public names, so Apple's Combine declares
+them in the open for Subscribers.Completion, Publishers.PrefetchStrategy
+and its publishers. They are written out here with the labels, the
+constraints and the comparison Apple's declarations use: where Apple
+compares only the upstream of a publisher that holds more (Drop's count,
+CollectByCount's count, Retry's retries, Output's range, SetFailureType's
+failure, Contains's output), so does this, and code written against
+Apple gets Apple's answer.
+
+Apple also declares a second initializer of Publishers.MapError that
+takes its transform under a label; it is added beside OpenCombine's.
+---
+ .../Helpers/EquatableAndHashable.swift        | 274 ++++++++++++++++++
+ .../Publishers/Publishers.MapError.swift      |   5 +
+ 2 files changed, 279 insertions(+)
+ create mode 100644 Sources/OpenCombine/Helpers/EquatableAndHashable.swift
+
+diff --git a/Sources/OpenCombine/Helpers/EquatableAndHashable.swift b/Sources/OpenCombine/Helpers/EquatableAndHashable.swift
+new file mode 100644
+index 0000000..3e4f17b
+--- /dev/null
++++ b/Sources/OpenCombine/Helpers/EquatableAndHashable.swift
+@@ -0,0 +1,274 @@
++import COpenCombineHelpers
++
++extension Subscribers.Completion {
++
++    public static func == (a: Subscribers.Completion<Failure>, b: Subscribers.Completion<Failure>) -> Bool
++        where Failure: Equatable
++    {
++        switch (a, b) {
++        case (.finished, .finished):
++            return true
++        case let (.failure(lhs), .failure(rhs)):
++            return lhs == rhs
++        default:
++            return false
++        }
++    }
++
++    public func hash(into hasher: inout Hasher) where Failure: Hashable {
++        switch self {
++        case .finished:
++            hasher.combine(0)
++        case .failure(let error):
++            hasher.combine(1)
++            hasher.combine(error)
++        }
++    }
++}
++
++extension Subscribers.Completion where Failure: Hashable {
++
++    public var hashValue: Int {
++        var hasher = Hasher()
++        hash(into: &hasher)
++        return hasher.finalize()
++    }
++}
++
++extension Publishers.PrefetchStrategy {
++
++    public static func == (a: Publishers.PrefetchStrategy, b: Publishers.PrefetchStrategy) -> Bool {
++        switch (a, b) {
++        case (.keepFull, .keepFull), (.byRequest, .byRequest):
++            return true
++        default:
++            return false
++        }
++    }
++
++    public func hash(into hasher: inout Hasher) {
++        switch self {
++        case .keepFull:
++            hasher.combine(0)
++        case .byRequest:
++            hasher.combine(1)
++        }
++    }
++
++    public var hashValue: Int {
++        var hasher = Hasher()
++        hash(into: &hasher)
++        return hasher.finalize()
++    }
++}
++
++
++extension Empty {
++
++    public static func == (lhs: Empty<Output, Failure>, rhs: Empty<Output, Failure>) -> Bool
++    {
++        return true
++    }
++}
++
++extension Fail {
++
++    public static func == (lhs: Fail<Output, Failure>, rhs: Fail<Output, Failure>) -> Bool
++        where Failure: Equatable
++    {
++        return lhs.error == rhs.error
++    }
++}
++
++extension Just {
++
++    public static func == (lhs: Just<Output>, rhs: Just<Output>) -> Bool
++        where Output: Equatable
++    {
++        return lhs.output == rhs.output
++    }
++}
++
++extension Publishers.Collect {
++
++    public static func == (lhs: Publishers.Collect<Upstream>, rhs: Publishers.Collect<Upstream>) -> Bool
++        where Upstream: Equatable
++    {
++        return lhs.upstream == rhs.upstream
++    }
++}
++
++extension Publishers.CollectByCount {
++
++    public static func == (lhs: Publishers.CollectByCount<Upstream>, rhs: Publishers.CollectByCount<Upstream>) -> Bool
++        where Upstream: Equatable
++    {
++        return lhs.upstream == rhs.upstream && lhs.count == rhs.count
++    }
++}
++
++extension Publishers.Concatenate {
++
++    public static func == (lhs: Publishers.Concatenate<Prefix, Suffix>, rhs: Publishers.Concatenate<Prefix, Suffix>) -> Bool
++        where Prefix: Equatable, Suffix: Equatable
++    {
++        return lhs.prefix == rhs.prefix && lhs.suffix == rhs.suffix
++    }
++}
++
++extension Publishers.Contains {
++
++    public static func == (lhs: Publishers.Contains<Upstream>, rhs: Publishers.Contains<Upstream>) -> Bool
++        where Upstream: Equatable
++    {
++        return lhs.upstream == rhs.upstream
++    }
++}
++
++extension Publishers.Count {
++
++    public static func == (lhs: Publishers.Count<Upstream>, rhs: Publishers.Count<Upstream>) -> Bool
++        where Upstream: Equatable
++    {
++        return lhs.upstream == rhs.upstream
++    }
++}
++
++extension Publishers.Drop {
++
++    public static func == (lhs: Publishers.Drop<Upstream>, rhs: Publishers.Drop<Upstream>) -> Bool
++        where Upstream: Equatable
++    {
++        return lhs.upstream == rhs.upstream && lhs.count == rhs.count
++    }
++}
++
++extension Publishers.DropUntilOutput {
++
++    public static func == (lhs: Publishers.DropUntilOutput<Upstream, Other>, rhs: Publishers.DropUntilOutput<Upstream, Other>) -> Bool
++        where Upstream: Equatable, Other: Equatable
++    {
++        return lhs.upstream == rhs.upstream && lhs.other == rhs.other
++    }
++}
++
++extension Publishers.First {
++
++    public static func == (lhs: Publishers.First<Upstream>, rhs: Publishers.First<Upstream>) -> Bool
++        where Upstream: Equatable
++    {
++        return lhs.upstream == rhs.upstream
++    }
++}
++
++extension Publishers.IgnoreOutput {
++
++    public static func == (lhs: Publishers.IgnoreOutput<Upstream>, rhs: Publishers.IgnoreOutput<Upstream>) -> Bool
++        where Upstream: Equatable
++    {
++        return lhs.upstream == rhs.upstream
++    }
++}
++
++extension Publishers.Last {
++
++    public static func == (lhs: Publishers.Last<Upstream>, rhs: Publishers.Last<Upstream>) -> Bool
++        where Upstream: Equatable
++    {
++        return lhs.upstream == rhs.upstream
++    }
++}
++
++extension Publishers.Output {
++
++    public static func == (lhs: Publishers.Output<Upstream>, rhs: Publishers.Output<Upstream>) -> Bool
++        where Upstream: Equatable
++    {
++        return lhs.upstream == rhs.upstream
++            && lhs.range.lowerBound == rhs.range.lowerBound
++            && lhs.range.upperBound == rhs.range.upperBound
++    }
++}
++
++extension Publishers.ReplaceEmpty {
++
++    public static func == (lhs: Publishers.ReplaceEmpty<Upstream>, rhs: Publishers.ReplaceEmpty<Upstream>) -> Bool
++        where Upstream: Equatable, Upstream.Output: Equatable
++    {
++        return lhs.upstream == rhs.upstream && lhs.output == rhs.output
++    }
++}
++
++extension Publishers.ReplaceError {
++
++    public static func == (lhs: Publishers.ReplaceError<Upstream>, rhs: Publishers.ReplaceError<Upstream>) -> Bool
++        where Upstream: Equatable, Upstream.Output: Equatable
++    {
++        return lhs.upstream == rhs.upstream && lhs.output == rhs.output
++    }
++}
++
++extension Publishers.Retry {
++
++    public static func == (lhs: Publishers.Retry<Upstream>, rhs: Publishers.Retry<Upstream>) -> Bool
++        where Upstream: Equatable
++    {
++        return lhs.upstream == rhs.upstream && lhs.retries == rhs.retries
++    }
++}
++
++extension Publishers.Sequence {
++
++    public static func == (lhs: Publishers.Sequence<Elements, Failure>, rhs: Publishers.Sequence<Elements, Failure>) -> Bool
++        where Elements: Equatable
++    {
++        return lhs.sequence == rhs.sequence
++    }
++}
++
++extension Publishers.SetFailureType {
++
++    public static func == (lhs: Publishers.SetFailureType<Upstream, Failure>, rhs: Publishers.SetFailureType<Upstream, Failure>) -> Bool
++        where Upstream: Equatable
++    {
++        return lhs.upstream == rhs.upstream
++    }
++}
++
++extension Publishers.Zip {
++
++    public static func == (lhs: Publishers.Zip<UpstreamA, UpstreamB>, rhs: Publishers.Zip<UpstreamA, UpstreamB>) -> Bool
++        where UpstreamA: Equatable, UpstreamB: Equatable
++    {
++        return lhs.a == rhs.a && lhs.b == rhs.b
++    }
++}
++
++extension Publishers.Zip3 {
++
++    public static func == (lhs: Publishers.Zip3<UpstreamA, UpstreamB, UpstreamC>, rhs: Publishers.Zip3<UpstreamA, UpstreamB, UpstreamC>) -> Bool
++        where UpstreamA: Equatable, UpstreamB: Equatable, UpstreamC: Equatable
++    {
++        return lhs.a == rhs.a && lhs.b == rhs.b && lhs.c == rhs.c
++    }
++}
++
++extension Publishers.Zip4 {
++
++    public static func == (lhs: Publishers.Zip4<UpstreamA, UpstreamB, UpstreamC, UpstreamD>, rhs: Publishers.Zip4<UpstreamA, UpstreamB, UpstreamC, UpstreamD>) -> Bool
++        where UpstreamA: Equatable, UpstreamB: Equatable, UpstreamC: Equatable, UpstreamD: Equatable
++    {
++        return lhs.a == rhs.a && lhs.b == rhs.b && lhs.c == rhs.c && lhs.d == rhs.d
++    }
++}
++
++extension Publishers.Zip3: Equatable where UpstreamA: Equatable,
++                                      UpstreamB: Equatable,
++                                      UpstreamC: Equatable {}
++
++extension Publishers.Zip4: Equatable where UpstreamA: Equatable,
++                                      UpstreamB: Equatable,
++                                      UpstreamC: Equatable,
++                                      UpstreamD: Equatable {}
++
++extension Publishers.Zip: Equatable where UpstreamA: Equatable, UpstreamB: Equatable {}
+diff --git a/Sources/OpenCombine/Publishers/Publishers.MapError.swift b/Sources/OpenCombine/Publishers/Publishers.MapError.swift
+index 578fc64..1184214 100644
+--- a/Sources/OpenCombine/Publishers/Publishers.MapError.swift
++++ b/Sources/OpenCombine/Publishers/Publishers.MapError.swift
+@@ -25,6 +25,11 @@ extension Publishers {
+             self.transform = map
+         }
+ 
++        public init(upstream: Upstream, transform: @escaping (Upstream.Failure) -> Failure) {
++            self.upstream = upstream
++            self.transform = transform
++        }
++
+         /// This function is called to attach the specified `Subscriber`
+         /// to this `Publisher` by `subscribe(_:)`
+         ///
+-- 
+2.54.0 (Apple Git-157)
+

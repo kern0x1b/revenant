@@ -75,9 +75,9 @@ arm64, плюс гостевой libswiftCore, всё переводится е�
 
 Источник: `OpenCombine/OpenCombine` (MIT, последний коммит 1c6f02c, 2023-10). Зависимостей нет, кроме маленького C++-хелпера.
 
-Собрано `combine/build.sh ios`: Swift 6.4 (charon@swift), `-target armv7-apple-ios7.0`, рантайм и оверлеи учебных сборок проекта Swift-оверлеев, линковка при iOS 6.0, install name `@executable_path`. Проверка импортов Charon против кэшей 6.0 и 6.1.3: **0 strong missing**.
+Собрано отдельным скриптом, которого больше нет (теперь это цель `Combine` в `frameworks/styx`): Swift 6.4 (charon@swift), `-target armv7-apple-ios7.0`, рантайм и оверлеи учебных сборок проекта Swift-оверлеев, линковка при iOS 6.0, install name `@executable_path`. Проверка импортов Charon против кэшей 6.0 и 6.1.3: **0 strong missing**.
 
-Тесты: 1453 upstream-теста (исключён `URLSessionTests.swift` — наследует `NSURLSession`, iOS 7) прогнаны через собственный шим XCTest (`combine/xctest`, 230 строк; список тестов генерируется из symbol graph, `combine/gentests.py`).
+Тесты: 1453 upstream-теста (исключён `URLSessionTests.swift` — наследует `NSURLSession`, iOS 7) прогнаны через собственный шим XCTest (230 строк; теперь `frameworks/styx/harness/XCTest.swift`, а список тестов собирает `frameworks/styx/harness/discover.lua` для цели `CombineTests`).
 
 | где | тестов | прошло | упало | аварий |
 |---|---|---|---|---|
@@ -86,13 +86,13 @@ arm64, плюс гостевой libswiftCore, всё переводится е�
 
 Единственное падение на iOS 6 (`MapKeyPathTests.testMapKeyPathReflection`) воспроизводится и на хосте: тест сверяет текст рефлексии, изменившийся в новых Swift.
 
-Аварии (по 1 на прогон, каждая пропускалась и прогон продолжался, `combine/emu-loop.sh`, логи `runs.noindex/ocl*`):
+Аварии (по 1 на прогон, каждая пропускалась и прогон продолжался):
 - 7 × `DispatchQueueSchedulerTests` — trap в `SchedulerTimeType.Stride.magnitude`. Это `Int(_nanoseconds: Int64)`, а `Int` на armv7 32-битный. **У Apple ровно та же форма API**: в `Schedulers+DispatchQueue.swift` (Apache-2.0) `public var magnitude: Int` — само хранилище; в `Dispatch.swiftinterface` SDK 16.4 — `public typealias Magnitude = Swift.Int`. То есть на 32 битах и Apple Combine не представляет интервалы больше ±2,1 с. Упирается в `SignedNumeric.Magnitude`. Полезное для upstream исправление: хранить `Int64`, а публичный геттер сделать `Int(clamping:)`, тесты величин закрыть `#if` по разрядности. Это касается всех 32-битных платформ OpenCombine (wasm32, armv7 Linux/Android).
 - 1 × `DispatchQueue.async(group:qos:flags:)` и 1 × `DispatchQueue.concurrentPerform` — падение внутри libdispatch iOS 6 из Swift-оверлея (QoS — API iOS 8). Передано проекту Swift-оверлеев.
 - 1 × `Dictionary._conditionallyBridgeFromObjectiveC` (путь JSONDecoder) — trap в оверлее. Передано проекту Swift-оверлеев.
 - 5 × `Timer.tolerance` → слабый `CFRunLoopTimerSetTolerance` (iOS 7) равен NULL. Передано проекту бэкпортов, **уже реализовано** ею (`apple-backports`, `NSTimer+Tolerance.m`); после влития прогон нужно повторить.
 
-Подробности: `combine/RESULTS.md`.
+Нынешние результаты тех же тестов против Styx: `frameworks/styx/docs/TEST-RESULTS.md`.
 
 ## 4. B2. OpenSwiftUI и OpenAttributeGraph — состояние
 
@@ -276,9 +276,7 @@ Compose (нужен плагин компилятора), полный diff ви
 ## 10. Как воспроизвести
 
 ```
-combine/build.sh ios && combine/stage-ios.sh          # OpenCombine + тесты под armv7
-xmake l check.lua 6.1.3 combine/out-ios/stage/*       # проверка импортов Charon
-combine/emu-loop.sh ocl                               # прогон тестов в iLEmu
+xmake build -P . CombineTests                         # Styx + тесты OpenCombine под armv7
 eidolon/build.sh                                     # модуль SwiftUI + EidolonDemo.app + EidolonProbe
 DEV=iPod4,1 SRC=~/.charon/firmware/rootfs/iPod4,1/6.0_10A403 ./run-app.sh app10 eidolon/out/EidolonDemo.app 560 scratch/ctl7.txt
 xmake l a/closure.lua 18.0 6.1.3 /System/Library/Frameworks/SwiftUI.framework/SwiftUI

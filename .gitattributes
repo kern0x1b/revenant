@@ -22,5 +22,4 @@ revenant-webkit/docs/** linguist-documentation
 frameworks/styx/docs/** linguist-documentation
 frameworks/eidolon/docs/** linguist-documentation
 
-frameworks/styx/** comments=upstream
 charon/tests/addon/sdk-verbatim/** comments=fixture

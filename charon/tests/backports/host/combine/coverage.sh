@@ -25,16 +25,15 @@ swifc=${SWIFTC:-/usr/bin/swiftc}
 charon_swifc=${CHARON_SWIFTC:-}
 
 if [ -z "$sources" ]; then
-    sources=$(ls -d "$HOME"/.xmake/cache/packages/*/s/styx/*/source/styx/Sources 2>/dev/null | head -1 || true)
+    sources=$(ls -d "$HOME"/.xmake/packages/s/styx/*/*/src 2>/dev/null | tail -1 || true)
 fi
 if [ -z "$sources" ] || [ ! -d "$sources/Combine" ]; then
     # Said in the words the host sweep reads, because otherwise this is invisible there: a script that
     # exits 1 with no line beginning FAIL/note/skip is counted DEAD, which reads as "nobody has run this
     # lately" rather than "the input is not on this machine". The name of the missing input is the whole
     # point of the line, so it is one line and it names the input.
-    echo "FAIL: styx sources not found - set COMBINE_SOURCES to the top-level Sources/ directory of"
-    echo "      kern0x1b/styx at the commit packages/s/styx/xmake.lua pins, the one holding Combine/ and"
-    echo "      CombineHelpers/, or build the package once so the xmake package cache holds it"
+    echo "FAIL: styx sources not found - set COMBINE_SOURCES to the src/ directory of an installed"
+    echo "      charon@styx, the one holding Combine/ and CombineHelpers/, or install charon@styx once"
     exit 1
 fi
 for needed in "$corpus" "$tools/swiftinterface-surface.py" "$facts"; do
@@ -42,7 +41,7 @@ for needed in "$corpus" "$tools/swiftinterface-surface.py" "$facts"; do
 done
 [ -d "$sdk26" ] || { echo "missing the 26.2 SDK at $sdk26"; exit 1; }
 
-# The armv7 module, built the way the package builds it: the layer copied in, the whole
+# The armv7 module, built the way the package builds it: the whole
 # Combine module in one compile, the runtime's resource directory, the charon SDK.
 #
 # CHARON_SDK and CHARON_SWIFTC are named rather than guessed. There are several builds of
@@ -62,14 +61,10 @@ runtime=$(ls -d "$HOME"/.xmake/packages/s/swift-runtime/6.4.0/*/lib/swift 2>/dev
 }
 
 rm -rf "$build"
-mkdir -p "$build/stage/Combine/CombineKit" "$build/swift/Combine.swiftmodule" "$build/objects"
+mkdir -p "$build/stage/Combine" "$build/swift/Combine.swiftmodule" "$build/objects"
 cp -R "$sources/Combine/." "$build/stage/Combine/"
-cp "$repo"/packages/s/styx/files/DispatchTimeDistance.swift "$build/stage/Combine/Schedulers" 2>/dev/null || true
-mkdir -p "$build/stage/Combine/Schedulers"
-cp "$repo"/packages/s/styx/files/DispatchTimeDistance.swift "$build/stage/Combine/Schedulers/"
-cp "$repo"/packages/s/styx/files/CombineKit/*.swift "$build/stage/Combine/CombineKit/"
 clang++ -target armv7-apple-ios6.1.3 -std=c++17 -O2 -I "$sources/CombineHelpers/include" \
-    -c "$sources/CombineHelpers/CombineHelpers.cpp" -o "$build/objects/CombineHelpers.o"
+    -c "$sources/CombineHelpers"/*.cpp -o "$build/objects/CombineHelpers.o"
 if ! "$charon_swifc" -target armv7-apple-ios6.1.3 -wmo -module-name Combine -O -parse-as-library \
         -clang-target armv7-apple-ios6.1.3 \
         -sdk "$iossdk" -resource-dir "$runtime" \
