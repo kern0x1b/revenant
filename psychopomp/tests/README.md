@@ -21,15 +21,15 @@ tests/run.sh [--runtime claude] [--hours N] list timer …   # or: all
 
 For each scenario `run.sh`:
 
-1. makes a scratch directory under the system temp root, outside any repository, and in it a fresh
+1. makes a scratch directory under `$HOME/.cache/hades/psychopomp/`, outside any repository, and in it a fresh
    `HOME`;
-2. clones this repository at `HEAD` (the tree must be committed) and installs it into that `HOME`
+2. clones hades at `HEAD` (the tree must be committed) and installs the plugin into that `HOME`
    with the runtime's own commands: for Claude Code `claude plugin marketplace add <clone>` and
-   `claude plugin install psychopomp@psychopomp`;
+   `claude plugin install psychopomp@hades`;
 3. copies the scenario's `answers.md` into an empty project directory and runs the agent there,
    headless, on `request.md`;
 4. runs `check.sh` and copies the evidence (transcript, check, project without build products,
-   `.deb`s) to `.agent-work/runs/clean/<run>/<id>/`.
+   `.deb`s) to `$HOME/.cache/hades/psychopomp/<run>/<id>/`.
 
 Shared on purpose, not isolated: the xmake package store (`XMAKE_GLOBALDIR` is the real home, so
 nothing is rebuilt into a private store) and Charon's firmware, caches and emulator images
@@ -43,7 +43,7 @@ Login. On macOS the agent's login lives in the login keychain, and a fresh `HOME
 the scenario's `HOME` as `.claude/.credentials.json`, mode `600`. That `HOME` is removed as soon as
 the scenario ends and by a trap on any exit. The evidence is scanned for the exact token before the
 `HOME` goes, and `check.sh` scans it again for credential files and token shapes. The file never
-reaches `.agent-work/runs/`, a log or git. Each scenario is capped to the access token's remaining
+reaches the evidence, a log or git. Each scenario is capped to the access token's remaining
 lifetime minus 15 minutes, so the copy never has to refresh the login.
 
 ## What counts

@@ -1,9 +1,9 @@
 #!/bin/bash
 # Runs psychopomp scenarios on a clean machine: for each one, an empty project directory outside
-# any repository, a fresh HOME in which only this plugin is installed (from a clone of this
-# repository at HEAD), the scenario's answers.md, and an agent run headless on request.md.
+# any repository, a fresh HOME in which only this plugin is installed (from a clone of hades
+# at HEAD), the scenario's answers.md, and an agent run headless on request.md.
 # tests/check.sh then decides whether the run counts. Evidence is copied to
-# .agent-work/runs/clean/<run>/<scenario>/.
+# $HOME/.cache/hades/psychopomp/<run>/<scenario>/.
 #
 # Usage: tests/run.sh [--runtime claude] [--hours N] SCENARIO... | all
 #
@@ -29,6 +29,8 @@ while [ $# -gt 0 ]; do
   esac
 done
 repo=$(cd "$(dirname "$0")/.." && pwd)
+top=$(git -C "$repo" rev-parse --show-toplevel)
+cache=$HOME/.cache/hades/psychopomp
 [ ${#scenarios[@]} -gt 0 ] || { echo "name a scenario, or all" >&2; exit 2; }
 [ "${scenarios[0]}" = all ] && scenarios=($(ls "$repo/tests/scenarios"))
 
@@ -38,13 +40,14 @@ if [ "${PSYCHOPOMP_ISOLATION_APPROVED:-}" != 1 ]; then
   exit 3
 fi
 
-git -C "$repo" diff --quiet HEAD -- . ':(exclude).agent-work' || { echo "commit first: the plugin is installed from HEAD" >&2; exit 2; }
+git -C "$top" diff --quiet HEAD -- || { echo "commit first: the plugin is installed from HEAD" >&2; exit 2; }
 commit=$(git -C "$repo" rev-parse --short HEAD)
 run=$(date +%Y%m%d-%H%M%S)-$commit
-evidence_root=$repo/.agent-work/runs/clean/$run
-scratch=$(mktemp -d "${TMPDIR:-/tmp}/psychopomp-clean.XXXXXX")
+evidence_root=$cache/$run
+mkdir -p "$cache"
+scratch=$(mktemp -d "$cache/scratch.XXXXXX")
 scratch=$(cd "$scratch" && pwd -P)
-case $scratch in "$(cd "$repo/.." && pwd -P)"/*) echo "scratch $scratch is inside the workspace" >&2; exit 2 ;; esac
+case $scratch in "$(cd "$top" && pwd -P)"/*) echo "scratch $scratch is inside hades" >&2; exit 2 ;; esac
 mkdir -p "$evidence_root"
 echo "run $run, scratch $scratch"
 
@@ -54,12 +57,12 @@ xmake_bin=$(command -v xmake)
 tests_dir=$(cd "$(dirname "$0")" && pwd)
 
 # The plugin cloned at HEAD, and the guard in front of xmake. Each scenario gets its own HOME.
-plugin=$scratch/plugin guard=$scratch/guard
+clone=$scratch/hades plugin=$scratch/hades/psychopomp guard=$scratch/guard
 mkdir -p "$guard"
 homes=()
 cleanup() { local h; for h in "${homes[@]+"${homes[@]}"}"; do rm -rf "$h"; done; }
 trap cleanup EXIT INT TERM HUP
-git clone -q "$repo" "$plugin" && git -C "$plugin" checkout -q "$commit"
+git clone -q "$top" "$clone" && git -C "$clone" checkout -q "$commit"
 cat > "$guard/xmake" <<EOF
 #!/bin/bash
 for a in "\$@"; do [ "\$a" = --force ] && { echo "refused by the test guard: --force damages the shared store" >&2; exit 97; }; done
@@ -92,8 +95,8 @@ case $runtime in
 esac
 # Install the plugin into a HOME with nothing else in it, the way a user would.
 install_plugin() {
-  clean_env claude plugin marketplace add "$plugin" > "$1" 2>&1
-  clean_env claude plugin install psychopomp@psychopomp --scope user >> "$1" 2>&1
+  clean_env claude plugin marketplace add "$clone" > "$1" 2>&1
+  clean_env claude plugin install psychopomp@hades --scope user >> "$1" 2>&1
   clean_env claude plugin list >> "$1" 2>&1
   grep -q psychopomp "$1" || { echo "the plugin did not install; see $1" >&2; return 1; }
   local d
