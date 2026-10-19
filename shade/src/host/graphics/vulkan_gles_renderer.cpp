@@ -5046,13 +5046,10 @@ std::unique_ptr<GlesRenderer> create_vulkan_gles_renderer(
     } catch (const std::exception& error) {
         if (failure != nullptr)
             *failure = error.what();
-        std::clog << "[gles-renderer] Vulkan unavailable: " << error.what()
-                  << "\n";
         return { };
     } catch (...) {
         if (failure != nullptr)
             *failure = "unknown error";
-        std::clog << "[gles-renderer] Vulkan unavailable: unknown error\n";
         return { };
     }
 }
