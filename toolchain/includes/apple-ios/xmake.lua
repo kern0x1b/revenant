@@ -1,7 +1,7 @@
 local sdk = {name = "iphoneos-sdk", version = get_config("apple_sdk") or "16.4"}
 local ld64 = {name = "ld64", version = "956.6"}
 local ldid = {name = "ldid", version = "2.1.5-procursus7+23.gaf86971"}
-local llvm = {name = "llvm", version = "23.1.1"}
+local llvm = {name = "llvm", version = "23.1.3"}
 
 for _, tool in ipairs({sdk, ld64, ldid, llvm}) do
     add_requires("revenant@" .. tool.name .. " " .. tool.version, {alias = tool.name})

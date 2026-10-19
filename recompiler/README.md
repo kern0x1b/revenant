@@ -28,8 +28,8 @@ The guest keeps its arm64 memory image (rebased below 4 GiB); code runs natively
 
 ## Building
 
-The recompiler is part of the revenant xmake project; run everything from the revenant root. It needs an LLVM 23 with its headers and libraries
-(`/opt/homebrew/opt/llvm` by default, `--recompiler_llvm=<prefix>` for another). Rellume, farmdec and BlocksRuntime are packages of
+The recompiler is part of the revenant xmake project; run everything from the revenant root. LLVM 23 with its libraries comes from Revenant's `llvm`
+package (its `libraries` config), built from source on the first configure. Rellume, farmdec and BlocksRuntime are packages of
 `third_party/packages/`; the iOS SDK (for header-driven bridge generation), `ld64` and `ldid` are Revenant's packages. Build `xlate` and
 `xlgen`:
 

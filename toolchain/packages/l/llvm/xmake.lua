@@ -1,15 +1,18 @@
 package("llvm")
     set_kind("toolchain")
     set_homepage("https://llvm.org")
-    set_description("clang that compiles thread-local variables for an iOS whose dyld has none, through emulated TLS, and atomics of any size for an iOS whose libSystem has no __atomic_* calls, with compiler-rt's iOS builtins in its resource folder")
+    set_description("clang that compiles thread-local variables for an iOS whose dyld has none, through emulated TLS, and atomics of any size for an iOS whose libSystem has no __atomic_* calls, with compiler-rt's iOS builtins in its resource folder; with the libraries config, also the LLVM and clang libraries a program such as recompiler' xlate builds on")
     set_license("Apache-2.0 WITH LLVM-exception")
 
     add_urls("https://github.com/llvm/llvm-project.git")
-    add_versions("23.1.1", "6dfe1677ab8dffbc6ec13d53a1e0215d75147689")
+    add_versions("23.1.3", "0d261d1ca552c95a8f007e061c787ac7132fbcbc")
     add_deps("revenant@iphoneos-sdk", {alias = "iphoneos-sdk"})
     add_deps("cmake", "ninja", {kind = "binary"})
 
-    local patches = {"clang-emulated-tls-without-dyld.patch", "builtins-leave-emutls-to-the-runtime.patch", "clang-atomic-libcalls-from-the-runtime.patch"}
+    add_configs("libraries", {description = "Also install what a program built on LLVM and clang needs: libLLVM and libclang-cpp as shared libraries, their headers, llvm-config, and the llvm-extract, llvm-split and llvm-dis tools.", default = false, type = "boolean"})
+
+    local patches = {"clang-emulated-tls-without-dyld.patch", "builtins-leave-emutls-to-the-runtime.patch", "clang-atomic-libcalls-from-the-runtime.patch",
+                     "configure-and-build-without-python.patch"}
     local digests = {"xmake.lua=" .. hash.sha256(path.join(os.scriptdir(), "xmake.lua"))}
     for _, patch in ipairs(patches) do
         table.insert(digests, patch .. "=" .. hash.sha256(path.join(os.scriptdir(), "patches", patch)))
@@ -34,21 +37,31 @@ package("llvm")
         local jobs = tostring(os.cpuinfo("ncpu"))
 
         local compiler = path.absolute("build-clang")
-        os.vrunv("cmake", {"-G", "Ninja", "-S", "llvm", "-B", compiler, "-DCMAKE_BUILD_TYPE=Release",
+        os.tryrm(compiler)
+        local configure = {"-G", "Ninja", "-S", "llvm", "-B", compiler, "-DCMAKE_BUILD_TYPE=Release",
                            "-DCMAKE_INSTALL_PREFIX=" .. package:installdir(), "-DCMAKE_OSX_ARCHITECTURES=" .. os.arch(),
                            "-DLLVM_ENABLE_PROJECTS=clang", "-DLLVM_TARGETS_TO_BUILD=ARM;AArch64",
-                           "-DLLVM_INCLUDE_TESTS=OFF", "-DLLVM_INCLUDE_BENCHMARKS=OFF", "-DLLVM_INCLUDE_EXAMPLES=OFF",
-                           "-DLLVM_INCLUDE_DOCS=OFF", "-DCLANG_INCLUDE_TESTS=OFF", "-DCLANG_INCLUDE_DOCS=OFF",
+                           "-DLLVM_INCLUDE_TESTS=OFF", "-DLLVM_INCLUDE_UTILS=OFF", "-DLLVM_INCLUDE_BENCHMARKS=OFF",
+                           "-DLLVM_INCLUDE_EXAMPLES=OFF", "-DLLVM_INCLUDE_DOCS=OFF", "-DCLANG_INCLUDE_TESTS=OFF", "-DCLANG_INCLUDE_DOCS=OFF",
                            "-DLLVM_ENABLE_ASSERTIONS=OFF", "-DLLVM_ENABLE_ZLIB=OFF", "-DLLVM_ENABLE_ZSTD=OFF",
                            "-DLLVM_ENABLE_LIBXML2=OFF", "-DLLVM_ENABLE_TERMINFO=OFF",
-                           "-DCLANG_ENABLE_STATIC_ANALYZER=OFF", "-DCLANG_ENABLE_OBJC_REWRITER=OFF"})
-        os.vrunv("cmake", {"--build", compiler, "--parallel", jobs, "--target", "install-clang", "install-clang-resource-headers"})
+                           "-DCLANG_ENABLE_STATIC_ANALYZER=OFF", "-DCLANG_ENABLE_OBJC_REWRITER=OFF",
+                           "-DCMAKE_DISABLE_FIND_PACKAGE_Python3=ON"}
+        local targets = {"install-clang", "install-clang-resource-headers"}
+        if package:config("libraries") then
+            table.join2(configure, {"-DLLVM_BUILD_LLVM_DYLIB=ON", "-DLLVM_LINK_LLVM_DYLIB=ON",
+                                    "-DLLVM_DISTRIBUTION_COMPONENTS=LLVM;clang-cpp;llvm-headers;clang-headers;llvm-config;clang;clang-resource-headers;llvm-extract;llvm-split;llvm-dis"})
+            targets = {"install-distribution"}
+        end
+        os.vrunv("cmake", configure)
+        os.vrunv("cmake", table.join({"--build", compiler, "--parallel", jobs, "--target"}, targets))
         local clang = path.join(package:installdir("bin"), "clang")
 
         local sdk = package:dep("iphoneos-sdk")
         local sysroot = path.join(sdk:installdir(), "Developer.app", "Contents", "Developer", "Platforms", "iPhoneOS.platform",
                                   "Developer", "SDKs", "iPhoneOS" .. sdk:version_str() .. ".sdk")
         local builtins = path.absolute("build-builtins")
+        os.tryrm(builtins)
         local host_linker = os.iorunv("xcrun", {"-f", "ld"}):trim()
         os.vrunv("cmake", {"-G", "Ninja", "-S", "compiler-rt", "-B", builtins, "-DCMAKE_BUILD_TYPE=Release",
                            "-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=" .. host_linker,
@@ -58,7 +71,7 @@ package("llvm")
                            "-DCOMPILER_RT_BUILD_BUILTINS=ON", "-DCOMPILER_RT_BUILD_CRT=OFF", "-DCOMPILER_RT_BUILD_SANITIZERS=OFF",
                            "-DCOMPILER_RT_BUILD_XRAY=OFF", "-DCOMPILER_RT_BUILD_LIBFUZZER=OFF", "-DCOMPILER_RT_BUILD_PROFILE=OFF",
                            "-DCOMPILER_RT_BUILD_MEMPROF=OFF", "-DCOMPILER_RT_BUILD_ORC=OFF", "-DCOMPILER_RT_BUILD_CTX_PROFILE=OFF",
-                           "-DCOMPILER_RT_INCLUDE_TESTS=OFF",
+                           "-DCOMPILER_RT_INCLUDE_TESTS=OFF", "-DCMAKE_DISABLE_FIND_PACKAGE_Python3=ON",
                            "-DCOMPILER_RT_ENABLE_IOS=ON", "-DCOMPILER_RT_ENABLE_WATCHOS=OFF", "-DCOMPILER_RT_ENABLE_TVOS=OFF",
                            "-DCOMPILER_RT_ENABLE_XROS=OFF",
                            "-DDARWIN_iphoneos_CACHED_SYSROOT=" .. sysroot,
@@ -88,4 +101,13 @@ package("llvm")
         io.writefile(probe, "struct wide { int a, b, c; };\n_Atomic(struct wide) probe;\nstruct wide read(void) { return probe; }\n")
         os.vrunv(clang, {"-target", "armv7-apple-ios6.0", "-fsyntax-only", probe})
         os.tryrm(probe)
+        if package:config("libraries") then
+            local version = os.iorunv(path.join(package:installdir("bin"), "llvm-config"), {"--version"}):trim()
+            assert(version == package:version_str(), "llvm-config answers " .. version .. ", not " .. package:version_str())
+            for _, file in ipairs({path.join("lib", "libLLVM.dylib"), path.join("lib", "libclang-cpp.dylib"),
+                                   path.join("include", "llvm", "Config", "llvm-config.h"), path.join("include", "clang", "Basic", "LLVM.h"),
+                                   path.join("bin", "llvm-extract"), path.join("bin", "llvm-split"), path.join("bin", "llvm-dis")}) do
+                assert(os.isfile(path.join(package:installdir(), file)), "the libraries install has no " .. file)
+            end
+        end
     end)

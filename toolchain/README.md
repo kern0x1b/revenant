@@ -531,7 +531,7 @@ that linker synthesizes.
 reads `__thread_vars` on 32-bit iOS from 9.0 and on arm64 from 8.0; below that
 the toolchain adds `-femulated-tls`, and a thread-local variable lives behind a
 pthread key through `__emutls_get_address`, with C++ destructors registered by
-`__cxa_thread_atexit`. The `llvm` package is clang 23.1.1 with the change that
+`__cxa_thread_atexit`. The `llvm` package is clang 23.1.3 with the change that
 lets it accept thread-local variables for a Darwin release under emulated TLS
 and call `__cxa_thread_atexit` instead of dyld's `_tlv_atexit`, which iOS 6
 does not have and iOS 7 and 8 leave empty on armv7. Both entry points are

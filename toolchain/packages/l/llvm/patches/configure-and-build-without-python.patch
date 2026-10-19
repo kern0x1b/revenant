@@ -1,0 +1,131 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Alexander Havrysh <kesha1511@gmail.com>
+Date: Mon, 19 Oct 2026 21:39:48 +0200
+Subject: [PATCH] Configure and build without Python when tests and utils are
+ off
+
+LLVM's configure required a Python 3 interpreter even when nothing that
+uses it is built. It ran the interpreter to read its version and to
+probe for the opt-viewer modules. compiler-rt's standalone configure
+looked for one too, and fell back to requiring Python 2. clang bundled
+the dataflow HTML logger's resources with a Python script, in every
+build of clangAnalysisFlowSensitive.
+
+Python is now looked for only where something uses it: LLVM's utils,
+which the tests need, and compiler-rt's tests. The resource bundle is
+written by a CMake script that produces the same file.
+---
+ .../lib/Analysis/FlowSensitive/CMakeLists.txt |  4 +--
+ clang/utils/bundle_resources.cmake            | 25 +++++++++++++++++++
+ compiler-rt/CMakeLists.txt                    |  6 +++--
+ llvm/CMakeLists.txt                           |  6 +++--
+ llvm/cmake/config-ix.cmake                    |  8 +++---
+ 5 files changed, 40 insertions(+), 9 deletions(-)
+ create mode 100644 clang/utils/bundle_resources.cmake
+
+diff --git a/llvm-project/clang/lib/Analysis/FlowSensitive/CMakeLists.txt b/llvm-project/clang/lib/Analysis/FlowSensitive/CMakeLists.txt
+index 97e09c9b..cb8dc015 100644
+--- a/llvm-project/clang/lib/Analysis/FlowSensitive/CMakeLists.txt
++++ b/llvm-project/clang/lib/Analysis/FlowSensitive/CMakeLists.txt
+@@ -31,12 +31,12 @@ add_clang_library(clangAnalysisFlowSensitive
+ add_subdirectory(Models)
+ 
+ add_custom_command(OUTPUT HTMLLogger.inc
+-  COMMAND "${Python3_EXECUTABLE}" ${CLANG_SOURCE_DIR}/utils/bundle_resources.py
++  COMMAND ${CMAKE_COMMAND} -P ${CLANG_SOURCE_DIR}/utils/bundle_resources.cmake
+   ${CMAKE_CURRENT_BINARY_DIR}/HTMLLogger.inc
+   HTMLLogger.html HTMLLogger.css HTMLLogger.js
+   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+   COMMENT "Bundling HTMLLogger resources"
+-  DEPENDS ${CLANG_SOURCE_DIR}/utils/bundle_resources.py HTMLLogger.html HTMLLogger.css HTMLLogger.js
++  DEPENDS ${CLANG_SOURCE_DIR}/utils/bundle_resources.cmake HTMLLogger.html HTMLLogger.css HTMLLogger.js
+   VERBATIM)
+ add_custom_target(clangAnalysisFlowSensitiveResources DEPENDS HTMLLogger.inc)
+ set_target_properties(clangAnalysisFlowSensitiveResources PROPERTIES FOLDER "Clang/Misc")
+diff --git a/llvm-project/clang/utils/bundle_resources.cmake b/llvm-project/clang/utils/bundle_resources.cmake
+new file mode 100644
+index 00000000..125f766c
+--- /dev/null
++++ b/llvm-project/clang/utils/bundle_resources.cmake
+@@ -0,0 +1,25 @@
++set(output "${CMAKE_ARGV3}")
++math(EXPR last "${CMAKE_ARGC} - 1")
++set(bundle "")
++foreach(index RANGE 4 ${last})
++  set(input "${CMAKE_ARGV${index}}")
++  get_filename_component(name "${input}" NAME)
++  string(REPLACE "." "_" variable "${name}")
++  file(READ "${input}" rest)
++  string(REPLACE "\r\n" "\n" rest "${rest}")
++  string(REPLACE "\r" "\n" rest "${rest}")
++  string(APPEND bundle "const char ${variable}[] = \n")
++  while(TRUE)
++    string(FIND "${rest}" "\n" at)
++    if(at EQUAL -1)
++      string(APPEND bundle "  R\"x(${rest})x\" \"\\n\"\n")
++      break()
++    endif()
++    string(SUBSTRING "${rest}" 0 ${at} line)
++    math(EXPR next "${at} + 1")
++    string(SUBSTRING "${rest}" ${next} -1 rest)
++    string(APPEND bundle "  R\"x(${line})x\" \"\\n\"\n")
++  endwhile()
++  string(APPEND bundle "  ;\n")
++endforeach()
++file(WRITE "${output}" "${bundle}")
+diff --git a/llvm-project/compiler-rt/CMakeLists.txt b/llvm-project/compiler-rt/CMakeLists.txt
+index d720b86c..5aa8d8a0 100644
+--- a/llvm-project/compiler-rt/CMakeLists.txt
++++ b/llvm-project/compiler-rt/CMakeLists.txt
+@@ -133,8 +133,10 @@ if (COMPILER_RT_STANDALONE_BUILD)
+     set_target_properties(intrinsics_gen PROPERTIES FOLDER "LLVM/Tablegenning")
+   endif()
+ 
+-  find_package(Python3 COMPONENTS Interpreter)
+-  if(NOT Python3_Interpreter_FOUND)
++  if(COMPILER_RT_INCLUDE_TESTS)
++    find_package(Python3 COMPONENTS Interpreter)
++  endif()
++  if(COMPILER_RT_INCLUDE_TESTS AND NOT Python3_Interpreter_FOUND)
+     message(WARNING "Python3 not found, using python2 as a fallback")
+     find_package(Python2 COMPONENTS Interpreter REQUIRED)
+     if(Python2_VERSION VERSION_LESS 2.7)
+diff --git a/llvm-project/llvm/CMakeLists.txt b/llvm-project/llvm/CMakeLists.txt
+index 9340cd6c..6972f253 100644
+--- a/llvm-project/llvm/CMakeLists.txt
++++ b/llvm-project/llvm/CMakeLists.txt
+@@ -1093,8 +1093,10 @@ endif()
+ 
+ # Find python before including config-ix, since it needs to be able to search
+ # for python modules.
+-find_package(Python3 ${LLVM_MINIMUM_PYTHON_VERSION} REQUIRED
+-    COMPONENTS Interpreter)
++if(LLVM_INCLUDE_UTILS)
++  find_package(Python3 ${LLVM_MINIMUM_PYTHON_VERSION} REQUIRED
++      COMPONENTS Interpreter)
++endif()
+ 
+ # All options referred to from HandleLLVMOptions have to be specified
+ # BEFORE this include, otherwise options will not be correctly set on
+diff --git a/llvm-project/llvm/cmake/config-ix.cmake b/llvm-project/llvm/cmake/config-ix.cmake
+index aca87f15..afe434f6 100644
+--- a/llvm-project/llvm/cmake/config-ix.cmake
++++ b/llvm-project/llvm/cmake/config-ix.cmake
+@@ -763,9 +763,11 @@ set (PYTHON_MODULES
+   pygments.lexers.c_cpp
+   yaml
+   )
+-foreach(module ${PYTHON_MODULES})
+-  find_python_module(${module})
+-endforeach()
++if(Python3_EXECUTABLE)
++  foreach(module ${PYTHON_MODULES})
++    find_python_module(${module})
++  endforeach()
++endif()
+ 
+ if(PY_PYGMENTS_FOUND AND PY_PYGMENTS_LEXERS_C_CPP_FOUND AND PY_YAML_FOUND)
+   set (LLVM_HAVE_OPT_VIEWER_MODULES 1)
+-- 
+2.54.0 (Apple Git-157)
+

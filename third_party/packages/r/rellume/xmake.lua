@@ -7,26 +7,32 @@ package("rellume")
     local patches = {"0001-Include-cstdint-before-the-decoder-headers.patch",
                      "0002-Lift-reads-of-TPIDRRO_EL0-on-AArch64.patch",
                      "0003-Map-a-calling-convention-only-to-the-architectures-b.patch",
-                     "0004-Lift-AArch64-without-the-x86-64-decoder.patch"}
+                     "0004-Lift-AArch64-without-the-x86-64-decoder.patch",
+                     "0005-Lift-the-AArch64-LSE-atomic-memory-operations.patch"}
     add_urls("https://github.com/aengelke/rellume.git", {submodules = false})
     add_versions("2026.09.10", commit)
+    local digests = {"xmake.lua=" .. hash.sha256(path.join(os.scriptdir(), "xmake.lua"))}
     for _, name in ipairs(patches) do
         local file = path.join(os.scriptdir(), "patches", name)
-        add_patches("2026.09.10", file, hash.sha256(file))
+        local digest = hash.sha256(file)
+        add_patches("2026.09.10", file, digest)
+        table.insert(digests, name .. "=" .. digest)
     end
+    add_configs("recipe", {description = "The digest of this recipe and the patches it applies, so a changed patch is a different build.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
 
-    add_configs("llvm", {description = "The prefix of the LLVM 23 whose headers rellume is compiled against.", default = "", type = "string"})
+    add_configs("llvm", {description = "The version of revenant's llvm package, with its libraries, that rellume is built against.", default = "23.1.3", type = "string"})
 
     add_deps("revenant-third-party@farmdec 2022.02.08", {alias = "farmdec"})
+    on_load(function (package)
+        package:add("deps", "revenant@llvm " .. package:config("llvm"), {alias = "llvm", configs = {libraries = true}})
+    end)
     add_configs("shared", {description = "Build rellume as a shared library, which its licence asks of a program that links it.", default = true, type = "boolean", readonly = true})
     add_links("rellume")
     add_includedirs("include", "include/rellume")
 
     on_install("macosx", function (package)
         import("core.base.json")
-        local llvm = package:config("llvm")
-        assert(llvm ~= "" and os.isfile(path.join(llvm, "include", "llvm", "Config", "llvm-config.h")),
-               "rellume needs the llvm config: the prefix of an LLVM 23 with its headers")
+        local llvm = package:dep("llvm"):installdir()
 
         local function cpustruct(input, output, private)
             local entries = json.loadfile(input)
@@ -98,5 +104,5 @@ target("rellume")
     on_test(function (package)
         assert(os.isfile(path.join(package:installdir("lib"), "librellume.dylib")))
         assert(package:has_cincludes({"rellume/rellume.h", "cpustruct-aarch64.inc"},
-                                     {configs = {includedirs = path.join(package:config("llvm"), "include")}}))
+                                     {configs = {includedirs = path.join(package:dep("llvm"):installdir(), "include")}}))
     end)

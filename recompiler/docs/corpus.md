@@ -13,8 +13,8 @@ From the revenant root, after `./xmakew f -y` and `./xmakew build xlate xlgen`:
 ./xmakew build recompiler_cxxinit recompiler_refrepro recompiler_devtime
 ```
 
-`recompiler_corpus` runs the host part of every check: jumptable, tsdscan, tsdguard, int128, ordinal, weakimport and
-classpair. Their output goes to the target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The three
+`recompiler_corpus` runs the host part of every check: jumptable, tsdscan, tsdguard, int128, ordinal, weakimport,
+classpair and lse. Their output goes to the target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The three
 build targets each leave an `.app` or an executable in their own target folder.
 
 A check that also has a device part is run by hand, with the output folder as its argument:
@@ -52,6 +52,29 @@ the old code found two.
 The check builds the libc-free driver `main.c`, feeds it to xlate, and requires the exact reported count of four
 targets. Requiring "not zero" would let a partial regression (two or three targets) pass. This is host only: it
 checks xlate's build-time discovery, not the guest at run time.
+
+### lse
+
+A control for rellume's lifting of the ARMv8.1 LSE atomics: LDADD, LDCLR, LDEOR, LDSET, LDSMAX, LDSMIN, LDUMAX,
+LDUMIN, SWP and CAS.
+
+`main.c` defines 200 functions, one per operation, access width (8, 16, 32 and 64 bits) and memory order (relaxed,
+acquire, release, acq_rel and seq_cst). It is built for arm64 with `-march=armv8.1-a`, so clang emits each as one LSE
+instruction rather than an exclusive loop. The check proves three things, all on the host:
+
+1. The arm64 binary carries the expected form in every function: the right mnemonic, the right ordering and size
+   suffixes, and `w` or `x` registers.
+2. xlate lifts every function, and each lifted function holds exactly one `atomicrmw` or `cmpxchg`, with the
+   operation, the integer width, the alignment and the LLVM ordering its instruction asks for. A and L together
+   become `acq_rel`, which is also what seq_cst compiles to.
+3. The lifted code, compiled for armv7 with the flags `translate.lua` uses, carries the byte, halfword, word and
+   doubleword exclusive pairs the atomics are lowered to. The program is libc-free and has no Objective-C or blocks,
+   which the runtime a full translation links expects, so the check stops at the lifted object.
+
+The lifted IR is checked, not only xlate's failure count. Without the LSE cases, xlate reported 180 of the 200 functions
+as undecodable: those whose atomic is the first instruction. The 20 `and` functions start with an `mvn`. rellume
+lifted each of them up to the atomic and ended it with an exit to that instruction's guest address. xlate counted
+those as lifted, and the program would only fail when it got there.
 
 ### tsdscan
 

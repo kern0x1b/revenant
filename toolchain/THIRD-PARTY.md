@@ -37,7 +37,7 @@ the linker, signer and SDK stubs do not.
 | --- | --- | --- | --- |
 | Swift compiler | 6.4.0 | Apache-2.0 WITH Swift-exception | `packages/s/swift`, `packages/s/swift-bootstrap` |
 | LLVM / clang: the `clang-c` headers, the C API the declaration extractor reads the SDK through (`include/clang-c` of the clang 21.1.0 release, nothing else) | 21.1.0 | Apache-2.0 WITH LLVM-exception | `packages/l/llvm-clang-c` |
-| LLVM / clang | 23.1.1 | Apache-2.0 WITH LLVM-exception | `packages/l/llvm` |
+| LLVM / clang | 23.1.3 | Apache-2.0 WITH LLVM-exception | `packages/l/llvm` |
 | ld64, from cctools-port (with apple-libtapi to read the SDK's `.tbd` stubs) | 956.6 | APSL-2.0; libtapi is Apache-2.0 WITH LLVM-exception plus NCSA | `packages/l/ld64` |
 | ldid | 2.1.5-procursus7+23.gaf86971 | AGPL-3.0-or-later (build-time signer; linked into nothing that ships) | `packages/l/ldid` |
 | iPhone OS SDK | 16.4 | Apple SDK license terms (from [`theos/sdks`](https://github.com/theos/sdks)) | `packages/i/iphoneos-sdk` |

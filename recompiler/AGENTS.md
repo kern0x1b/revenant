@@ -28,8 +28,10 @@ our changes as patches. Rellume is built for AArch64 only, the one architecture 
 
 ## Building
 
-From the revenant root. It needs an LLVM 23 with its headers and libraries; the iOS SDK, `ld64`
-and `ldid` come from Revenant's packages.
+From the revenant root. Every tool comes from a package: LLVM 23 is Revenant's `llvm` with its
+`libraries` config (libLLVM, libclang-cpp, their headers, llvm-config, clang and the llvm tools
+the pipeline runs), and the iOS SDK, `ld64` and `ldid` are Revenant's packages too. The first
+configure builds that LLVM from source, which took 40 to 75 minutes on this machine under load.
 
 ```sh
 ./xmakew f -y
@@ -37,10 +39,6 @@ and `ldid` come from Revenant's packages.
 ./xmakew l recompiler/scripts/translate.lua path/to/app-arm64 includes.h out/
 ./xmakew l recompiler/scripts/ipa.lua App.ipa includes.h out/App.ipa
 ```
-
-The LLVM is `/opt/homebrew/opt/llvm` unless `./xmakew f --recompiler_llvm=<prefix>` names
-another. It is the one tool not taken from a package: xmake-repo's `llvm` builds from source
-with Python, and `revenant@llvm` installs the clang binary without the libraries.
 
 ## Checks
 

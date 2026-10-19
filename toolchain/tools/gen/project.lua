@@ -12,8 +12,8 @@ function port_release(args)
     return args.release or os.getenv("REVENANT_PORT_RELEASE") or DEFAULT_PORT_RELEASE
 end
 
-local DEFAULT_CLANG = path.join(os.getenv("HOME") or "", ".xmake", "packages", "l", "llvm", "23.1.1",
-                                "6a8c97aaa69241df9ed69ac86f13a045", "bin", "clang")
+local DEFAULT_CLANG = path.join(os.getenv("HOME") or "", ".xmake", "packages", "l", "llvm", "23.1.3",
+                                "b66666abaaab48ac866dbac34ddbad15", "bin", "clang")
 
 function clang(args)
     return args.clang or os.getenv("REVENANT_CLANG") or DEFAULT_CLANG

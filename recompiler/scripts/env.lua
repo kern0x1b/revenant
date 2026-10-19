@@ -35,7 +35,7 @@ function main()
         config.load()
     end
     local root = os.projectdir()
-    local llvm = config.get("recompiler_llvm")
+    local llvm = installdir("llvm")
     local sdks = os.dirs(path.join(installdir("iphoneos-sdk"), "Developer.app", "Contents", "Developer", "Platforms", "iPhoneOS.platform", "Developer", "SDKs", "iPhoneOS*.sdk"))
     if #sdks ~= 1 then
         raise("the iphoneos-sdk package holds %d SDKs, not one", #sdks)
