@@ -50,6 +50,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   before this is made again.
 
 ### Fixed
+- A boot finds its Vulkan driver without `VK_ICD_FILENAMES`: the build takes charon's `swiftshader`
+  package and puts `libvk_swiftshader.dylib` beside the program, and Shade hands it to the Vulkan
+  loader by path (`VK_LUNARG_direct_driver_loading`), next to the system's drivers. When no Vulkan
+  driver is usable the boot draws with the reference renderer and logs one
+  `[gles-renderer] Vulkan unavailable (...)` line, where it used to stop at once.
 - OpenGL ES contexts are made on iOS 6.1.3's GLEngine, whose dispatch table is
   larger than the earlier ones: EAGLContext no longer answers nil.
 - A memory object's purgeable state takes the whole state word (volatile with an

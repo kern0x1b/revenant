@@ -15,7 +15,6 @@
 namespace shade {
 
 // Returns null when Vulkan exposes no device matching the selection policy.
-// Failure details let the policy layer reject an explicitly requested backend.
 [[nodiscard]] std::unique_ptr<GlesRenderer> create_vulkan_gles_renderer(
     const std::filesystem::path& pipeline_cache,
     const VulkanPresenterConfiguration* presenter,

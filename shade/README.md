@@ -35,10 +35,15 @@ boundary, in `src/graphics`, `src/media` and `src/telephony`.
 
 - macOS on Apple silicon, xmake 3.1.2 or later and a C++20 compiler (Apple clang).
 - Every library comes as an xmake package, installed by the first configure: Dynarmic and Boost from hades'
-  `third_party` repository, OpenSSL and libplist from charon's, libpng, libjpeg-turbo, the Vulkan headers, loader
+  `third_party` repository, OpenSSL, libplist and SwiftShader from charon's, libpng, libjpeg-turbo, the Vulkan headers, loader
   and memory allocator and the glslang library (for the shader compiler in `tools/glsl`) from xmake's; optionally SDL2 (a window) and FFmpeg (compressed
   audio).
-- A Vulkan driver to draw; a CPU driver such as SwiftShader is enough.
+- Nothing to install to draw: the build takes SwiftShader (charon's `swiftshader` package, a Vulkan driver on
+  the CPU) and puts `libvk_swiftshader.dylib` beside the program, which loads it through the Vulkan loader by
+  path, next to any driver the system has. Without a usable Vulkan driver a boot draws with the built-in
+  reference renderer and logs one `[gles-renderer] Vulkan unavailable (...)` line saying why. The
+  `swiftshader` package's first install builds SwiftShader with CMake, and the SPIRV-Tools inside it runs
+  Python scripts to generate its tables; an install already in xmake's package store is reused as is.
 - A root filesystem of the firmware to run, for example one unpacked by
   Charon's `xmake firmware rootfs`.
 

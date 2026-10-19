@@ -7,6 +7,9 @@
 #include "vulkan_gles_renderer.hpp"
 #include "vulkan_memory_allocator.hpp"
 
+#include <dlfcn.h>
+#include <mach-o/dyld.h>
+
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -140,6 +143,86 @@ namespace {
         Structure value { };
         value.sType = type;
         return value;
+    }
+
+    struct BundledVulkanDriver {
+        PFN_vkGetInstanceProcAddrLUNARG get_instance_proc_addr { };
+        std::string problem;
+    };
+
+    std::filesystem::path executable_directory()
+    {
+        std::uint32_t size { };
+        static_cast<void>(_NSGetExecutablePath(nullptr, &size));
+        std::string buffer(size, '\0');
+        if (_NSGetExecutablePath(buffer.data(), &size) != 0)
+            return { };
+        buffer.resize(std::strlen(buffer.c_str()));
+        std::error_code error;
+        const auto resolved = std::filesystem::weakly_canonical(buffer, error);
+        return (error ? std::filesystem::path { buffer } : resolved)
+            .parent_path();
+    }
+
+    bool loader_has_instance_extension(std::string_view name)
+    {
+        std::uint32_t count { };
+        if (vkEnumerateInstanceExtensionProperties(nullptr, &count, nullptr) !=
+            VK_SUCCESS) {
+            return false;
+        }
+        std::vector<VkExtensionProperties> extensions(count);
+        if (vkEnumerateInstanceExtensionProperties(
+                nullptr, &count, extensions.data()) != VK_SUCCESS) {
+            return false;
+        }
+        return std::any_of(extensions.begin(),
+            extensions.begin() + static_cast<std::ptrdiff_t>(count),
+            [&](const VkExtensionProperties& extension) {
+                return name == extension.extensionName;
+            });
+    }
+
+    BundledVulkanDriver load_bundled_vulkan_driver()
+    {
+        BundledVulkanDriver driver;
+#if defined(SHADE_VULKAN_DRIVER_FILE)
+        const auto file = executable_directory() / SHADE_VULKAN_DRIVER_FILE;
+        std::error_code missing;
+        if (!std::filesystem::is_regular_file(file, missing)) {
+            driver.problem = "no Vulkan driver at " + file.string();
+            return driver;
+        }
+        if (!loader_has_instance_extension(
+                VK_LUNARG_DIRECT_DRIVER_LOADING_EXTENSION_NAME)) {
+            driver.problem = "the Vulkan loader cannot load " + file.string() +
+                             ": it lacks " +
+                             VK_LUNARG_DIRECT_DRIVER_LOADING_EXTENSION_NAME;
+            return driver;
+        }
+        auto* const handle = dlopen(file.c_str(), RTLD_NOW | RTLD_LOCAL);
+        if (handle == nullptr) {
+            const auto* const reason = dlerror();
+            driver.problem = reason != nullptr
+                                 ? std::string { reason }
+                                 : "cannot load " + file.string();
+            return driver;
+        }
+        driver.get_instance_proc_addr =
+            reinterpret_cast<PFN_vkGetInstanceProcAddrLUNARG>(
+                dlsym(handle, "vk_icdGetInstanceProcAddr"));
+        if (driver.get_instance_proc_addr == nullptr) {
+            driver.problem =
+                file.string() + " exports no vk_icdGetInstanceProcAddr";
+        }
+#endif
+        return driver;
+    }
+
+    const BundledVulkanDriver& bundled_vulkan_driver()
+    {
+        static const BundledVulkanDriver driver = load_bundled_vulkan_driver();
+        return driver;
     }
 
     std::vector<std::byte> read_pipeline_cache(
@@ -843,6 +926,24 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
             instance_extensions.reserve(presenter_.instance_extensions.size());
             for (const auto& extension : presenter_.instance_extensions)
                 instance_extensions.push_back(extension.c_str());
+            auto direct_driver =
+                make_vulkan_structure<VkDirectDriverLoadingInfoLUNARG>(
+                    VK_STRUCTURE_TYPE_DIRECT_DRIVER_LOADING_INFO_LUNARG);
+            auto direct_drivers =
+                make_vulkan_structure<VkDirectDriverLoadingListLUNARG>(
+                    VK_STRUCTURE_TYPE_DIRECT_DRIVER_LOADING_LIST_LUNARG);
+            if (const auto& driver = bundled_vulkan_driver();
+                driver.get_instance_proc_addr != nullptr) {
+                direct_driver.pfnGetInstanceProcAddr =
+                    driver.get_instance_proc_addr;
+                direct_drivers.mode =
+                    VK_DIRECT_DRIVER_LOADING_MODE_INCLUSIVE_LUNARG;
+                direct_drivers.driverCount = 1;
+                direct_drivers.pDrivers = &direct_driver;
+                instance_info.pNext = &direct_drivers;
+                instance_extensions.push_back(
+                    VK_LUNARG_DIRECT_DRIVER_LOADING_EXTENSION_NAME);
+            }
             instance_info.enabledExtensionCount =
                 static_cast<std::uint32_t>(instance_extensions.size());
             instance_info.ppEnabledExtensionNames =
@@ -5044,15 +5145,16 @@ std::unique_ptr<GlesRenderer> create_vulkan_gles_renderer(
         std::clog << "[gles-renderer] selected " << renderer->name() << "\n";
         return renderer;
     } catch (const std::exception& error) {
-        if (failure != nullptr)
-            *failure = error.what();
-        std::clog << "[gles-renderer] Vulkan unavailable: " << error.what()
-                  << "\n";
+        if (failure != nullptr) {
+            const auto& problem = bundled_vulkan_driver().problem;
+            *failure = problem.empty()
+                           ? std::string { error.what() }
+                           : std::string { error.what() } + "; " + problem;
+        }
         return { };
     } catch (...) {
         if (failure != nullptr)
             *failure = "unknown error";
-        std::clog << "[gles-renderer] Vulkan unavailable: unknown error\n";
         return { };
     }
 }

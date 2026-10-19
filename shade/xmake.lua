@@ -44,6 +44,7 @@ if has_config("shade_vulkan") then
     add_requires("vulkan-memory-allocator v3.4.0", table.join(host, {system = false}))
     add_requireconfs("vulkan-memory-allocator.vulkan-headers", {version = "1.4.335+0", override = true, system = false})
     add_requires("glslang 1.4.335+0", table.join(host, {system = false, configs = {default_resource_limits = true, hlsl = false}}))
+    add_requires("charon@swiftshader", {alias = "swiftshader"})
 end
 if has_config("shade_sdl") then
     add_requires("libsdl2", table.join(host, {system = false}))

@@ -20,8 +20,7 @@ void register_native_gles_renderer()
     configure_gles_accelerated_factory(create_vulkan_gles_renderer);
 #else
     // Without Vulkan there is no accelerated factory: the software renderer
-    // is then the one a boot gets. A factory that always fails would make
-    // every software boot throw instead.
+    // is then the one a boot gets.
     configure_gles_accelerated_factory(nullptr);
 #endif
 }

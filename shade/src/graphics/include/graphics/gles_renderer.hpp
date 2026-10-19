@@ -115,8 +115,7 @@ using GlesAcceleratedFactory = std::unique_ptr<GlesRenderer> (*)(
     GlesDeviceSelection, std::string*) noexcept;
 
 // A host adapter supplies the native backend before renderer creation. The
-// standalone core retains a reference rasterizer for tests without a host;
-// an installed host factory never falls back to that implementation.
+// standalone core retains a reference rasterizer for tests without a host.
 void configure_gles_accelerated_factory(GlesAcceleratedFactory factory);
 
 // A renderer owns host-wide Vulkan device/queue state and is shared by all

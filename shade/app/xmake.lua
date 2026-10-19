@@ -25,8 +25,12 @@ target("shade")
     add_files("main.cpp", "desktop_host.cpp", "abi_command.cpp")
     add_deps("shade_host", "shade_app_control", "shade_app_sdl", "shade_runtime")
     if has_config("shade_vulkan") then
-        add_packages("vulkan-loader")
+        add_packages("vulkan-loader", "swiftshader")
         on_config(function (target)
             target:add("rpathdirs", path.join(target:pkg("vulkan-loader"):installdir(), "lib"))
+        end)
+        after_build(function (target)
+            local driver = path.join(target:pkg("swiftshader"):installdir(), "lib", "libvk_swiftshader.dylib")
+            os.cp(driver, path.join(target:targetdir(), path.filename(driver)), {copy_if_different = true})
         end)
     end

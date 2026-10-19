@@ -10,6 +10,7 @@
 #include <atomic>
 #include <cstdint>
 #include <filesystem>
+#include <iostream>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -24,8 +25,6 @@
 namespace shade {
 namespace {
 
-    // Standalone core tests do not install a host adapter. The application
-    // always installs one, including a failing factory in non-Vulkan builds.
     class ReferenceGlesRenderer final : public GlesRenderer {
     public:
         bool draw(DisplayFrame& frame, GlesRenderTargetKey target,
@@ -127,7 +126,9 @@ namespace {
             return std::shared_ptr<GlesRenderer> { std::move(renderer) };
         performance_counters().record_fallback(
             PerfFallbackReason::VulkanUnavailable);
-        throw std::runtime_error { "Vulkan GLES backend unavailable: " + failure };
+        std::clog << "[gles-renderer] Vulkan unavailable (" << failure
+                  << "): drawing with the reference renderer\n";
+        return std::make_shared<ReferenceGlesRenderer>();
     }
 
     std::shared_ptr<GlesRenderer>& renderer_slot(GlesBackend backend,
