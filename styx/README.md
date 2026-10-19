@@ -65,8 +65,15 @@ With SwiftPM, where no system Combine shadows the module:
 swift build
 ```
 
-For the legacy-iOS (armv7) build, take it through Charon as a package
-dependency:
+Inside hades, `xmake.lua` makes Styx two targets of the hades project for iOS
+(`xmake f -p iphoneos -a armv7` at the hades top): `Combine`, the one module of
+`Sources/Combine`, and `CombineHelpers`, the C++ helper it imports. A target of
+another member links it with `add_deps("Combine")`. The layer that the
+`charon@styx` recipe puts over a pinned Styx (`charon/packages/s/styx/files`)
+is already part of these sources, so the targets take nothing from it.
+
+Outside hades, the legacy-iOS (armv7) build is taken through Charon as a
+package dependency:
 
 ```lua
 add_requires("charon@styx", {alias = "combine"})
