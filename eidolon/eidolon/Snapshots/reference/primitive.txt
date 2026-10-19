@@ -1,0 +1,10 @@
+_HostRootView (0,0,320,60)
+  UIRoundedRectButton (81,20,159,21) button ""
+    UIView (0,0,159,21)
+      UIView (0,1,33,20)
+        UIView (0,0,33,20)
+      UILabel (39,0,57,21) "Swatch"
+      UIButton (102,0,57,21) button ""
+        UIView (0,0,57,21)
+          UILabel (0,0,57,21) "Swatch"
+fired 1

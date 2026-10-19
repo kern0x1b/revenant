@@ -1,0 +1,110 @@
+_HostRootView (0,0,320,480)
+  UILayoutContainerView (0,0,320,480)
+    UINavigationTransitionView (0,0,320,480)
+      UIViewControllerWrapperView (0,44,320,436)
+        _HostRootView (0,0,320,436)
+          UITableView (0,0,320,436) table sections=[-:20]
+            UITableViewCell (0,394,320,70)
+              UITableViewCellContentView (32,0,257,69)
+                UIView (10,0,280,69)
+                  UIView (0,11,280,48)
+                    UIView (0,0,280,48)
+                      UILabel (0,0,123,21) "Conversation 6"
+                      UILabel (0,29,94,19) "Last message"
+              UIButton (290,0,30,69) button ""
+                UIImageView (10,28,10,13)
+              UIView (0,69,320,1)
+              UITableViewCellEditControl (0,0,41,70)
+                UIImageView (6,21,29,29)
+              UITableViewCellReorderControl (277,0,43,70)
+                UIImageView (12,27,19,17)
+            UITableViewCell (0,324,320,70)
+              UITableViewCellContentView (32,0,257,69)
+                UIView (10,0,280,69)
+                  UIView (0,11,280,48)
+                    UIView (0,0,280,48)
+                      UILabel (0,0,123,21) "Conversation 5"
+                      UILabel (0,29,94,19) "Last message"
+              UIButton (290,0,30,69) button ""
+                UIImageView (10,28,10,13)
+              UIView (0,69,320,1)
+              UITableViewCellEditControl (0,0,41,70)
+                UIImageView (6,21,29,29)
+              UITableViewCellReorderControl (277,0,43,70)
+                UIImageView (12,27,19,17)
+            UITableViewCell (0,254,320,70)
+              UITableViewCellContentView (32,0,257,69)
+                UIView (10,0,280,69)
+                  UIView (0,11,280,48)
+                    UIView (0,0,280,48)
+                      UILabel (0,0,123,21) "Conversation 4"
+                      UILabel (0,29,94,19) "Last message"
+              UIButton (290,0,30,69) button ""
+                UIImageView (10,28,10,13)
+              UIView (0,69,320,1)
+              UITableViewCellEditControl (0,0,41,70)
+                UIImageView (6,21,29,29)
+              UITableViewCellReorderControl (277,0,43,70)
+                UIImageView (12,27,19,17)
+            UITableViewCell (0,184,320,70)
+              UITableViewCellContentView (32,0,257,69)
+                UIView (10,0,280,69)
+                  UIView (0,11,280,48)
+                    UIView (0,0,280,48)
+                      UILabel (0,0,123,21) "Conversation 3"
+                      UILabel (0,29,94,19) "Last message"
+              UIButton (290,0,30,69) button ""
+                UIImageView (10,28,10,13)
+              UIView (0,69,320,1)
+              UITableViewCellEditControl (0,0,41,70)
+                UIImageView (6,21,29,29)
+              UITableViewCellReorderControl (277,0,43,70)
+                UIImageView (12,27,19,17)
+            UITableViewCell (0,114,320,70)
+              UITableViewCellContentView (32,0,257,69)
+                UIView (10,0,280,69)
+                  UIView (0,11,280,48)
+                    UIView (0,0,280,48)
+                      UILabel (0,0,123,21) "Conversation 2"
+                      UILabel (0,29,94,19) "Last message"
+              UIButton (290,0,30,69) button ""
+                UIImageView (10,28,10,13)
+              UIView (0,69,320,1)
+              UITableViewCellEditControl (0,0,41,70)
+                UIImageView (6,21,29,29)
+              UITableViewCellReorderControl (277,0,43,70)
+                UIImageView (12,27,19,17)
+            UITableViewCell (0,44,320,70)
+              UITableViewCellContentView (32,0,257,69)
+                UIView (10,0,280,69)
+                  UIView (0,11,280,48)
+                    UIView (0,0,280,48)
+                      UILabel (0,0,123,21) "Conversation 1"
+                      UILabel (0,29,94,19) "Last message"
+              UIButton (290,0,30,69) button ""
+                UIImageView (10,28,10,13)
+              UIView (0,69,320,1)
+              UITableViewCellEditControl (0,0,41,70)
+                UIImageView (6,21,29,29)
+              UITableViewCellReorderControl (277,0,43,70)
+                UIImageView (12,27,19,17)
+            UISearchBar (0,0,320,44)
+              UISearchBarBackground (0,0,320,44)
+              UISearchBarTextField (5,6,310,31) field "" placeholder="Search"
+                UITextFieldBorderView (0,0,310,31)
+                UIImageView (10,8,15,15)
+                UITextFieldLabel (30,7,252,18) "Search"
+            UIRefreshControl (0,-44,320,44)
+              _UIRefreshControlDefaultContentView (0,0,320,44)
+                UILabel (0,0,0,0) ""
+                UIImageView (142,4,36,36)
+                UIImageView (142,4,36,36)
+    UINavigationBar (0,0,320,44)
+      _UINavigationBarBackground (0,0,320,44)
+        UIImageView (0,44,320,3)
+      UINavigationItemView (133,9,54,27)
+      UINavigationButton (264,7,51,30) button "Done"
+        UIImageView (0,0,51,30)
+        UIButtonLabel (10,7,31,15) "Done"
+editing true
+navigation depth 1

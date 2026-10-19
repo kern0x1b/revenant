@@ -1,0 +1,23 @@
+_HostRootView (0,0,320,200)
+  UIView (0,0,320,200)
+    UIView (0,0,320,88)
+      UISearchBar (0,0,320,88)
+        UISegmentedControl (0,44,320,44)
+          _UISegmentedControlBackgroundView (0,0,320,44)
+            UIImageView (0,44,320,3)
+          UISegment (161,7,154,30)
+            UISegmentLabel (62,5,31,17) "Mine"
+            UIImageView (154,0,1,30)
+          UISegment (5,7,155,30)
+            UISegmentLabel (70,5,16,17) "All"
+            UIImageView (155,0,1,30)
+        UISearchBarBackground (0,0,320,44)
+        UISearchBarTextField (5,6,310,31) field "abc" placeholder="Search"
+          UITextFieldBorderView (0,0,310,31)
+          UIButton (285,6,19,19) button ""
+            UIImageView (0,0,19,19)
+          UIImageView (10,8,15,15)
+          UITextFieldLabel (30,7,252,18) "abc"
+    UIView (0,88,320,112)
+      UIView (132,0,57,21)
+        UILabel (0,0,57,21) "Results"

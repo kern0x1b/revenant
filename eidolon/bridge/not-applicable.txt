@@ -1,0 +1,89 @@
+# The closed list of Apple's SwiftUI types that Eidolon does not implement, and why. One line per type: the type as
+# swift-api-digester names it, a tab, the reason. Every declaration of such a type that is absent is left out of the
+# work queue and counted apart; a type is added here only with a reason that is about iOS 6 or about what a phone
+# cannot do, never because it is hard.
+WindowGroup	iOS 6 apps have one window and a UIApplicationDelegate; scenes and windows came later
+Scene	scenes came with iOS 13
+SceneBuilder	scenes came with iOS 13
+OpenWindowAction	an iPhone or iPad on iOS 6 has one window
+PresentedWindowContent	an iPhone or iPad on iOS 6 has one window
+BackgroundTask	scene background tasks belong to the scene lifecycle of iOS 13
+CommandsBuilder	there is no menu bar or command set on iOS 6
+DocumentGroup	document apps need scenes and UTType, which iOS 6 does not have
+FileDocument	document apps need scenes and UTType, which iOS 6 does not have
+ReferenceFileDocument	document apps need scenes and UTType, which iOS 6 does not have
+FileDocumentConfiguration	document apps need scenes and UTType, which iOS 6 does not have
+ReferenceFileDocumentConfiguration	document apps need scenes and UTType, which iOS 6 does not have
+FileDocumentReadConfiguration	document apps need scenes and UTType, which iOS 6 does not have
+FileDocumentWriteConfiguration	document apps need scenes and UTType, which iOS 6 does not have
+WidgetBundleBuilder	there is no WidgetKit on iOS 6
+WidgetBundle	there is no WidgetKit on iOS 6
+Widget	there is no WidgetKit on iOS 6
+WidgetConfiguration	there is no WidgetKit on iOS 6
+EmptyWidgetConfiguration	there is no WidgetKit on iOS 6
+LimitedAvailabilityConfiguration	there is no WidgetKit on iOS 6
+AccessoryLinearGaugeStyle	gauge styles for the lock screen and the watch, which iOS 6 does not have
+AccessoryLinearCapacityGaugeStyle	gauge styles for the lock screen and the watch, which iOS 6 does not have
+AccessoryCircularCapacityGaugeStyle	gauge styles for the lock screen and the watch, which iOS 6 does not have
+LinearCapacityGaugeStyle	gauge styles for the lock screen and the watch, which iOS 6 does not have
+AccessibilitySystemRotor	VoiceOver rotors came with iOS 10
+AccessibilityRotorEntry	VoiceOver rotors came with iOS 10
+AccessibilityRotorContentBuilder	VoiceOver rotors came with iOS 10
+AccessibilityRotorContent	VoiceOver rotors came with iOS 10
+AccessibilityTechnologies	assistive technologies are told apart from iOS 13
+AXChartDescriptorRepresentable	audio graphs came with iOS 15
+DropInfo	drag and drop came with iOS 11
+DropOperation	drag and drop came with iOS 11
+CodableRepresentation	Transferable came with iOS 16
+TypedPayloadError	Transferable came with iOS 16
+HoverPhase	pointer hover came with iPadOS 13.4
+PreviewDevice	previews belong to Xcode
+PreviewPlatform	previews belong to Xcode
+SwiftUIAttributes	AttributedString is not in the Foundation of iOS 6
+AttributeScopes	AttributedString is not in the Foundation of iOS 6
+AttributeDynamicLookup	AttributedString is not in the Foundation of iOS 6
+ForegroundColorAttribute	AttributedString is not in the Foundation of iOS 6
+FontAttribute	AttributedString is not in the Foundation of iOS 6
+BackgroundColorAttribute	AttributedString is not in the Foundation of iOS 6
+KerningAttribute	AttributedString is not in the Foundation of iOS 6
+TrackingAttribute	AttributedString is not in the Foundation of iOS 6
+BaselineOffsetAttribute	AttributedString is not in the Foundation of iOS 6
+UnderlineStyleAttribute	AttributedString is not in the Foundation of iOS 6
+StrikethroughStyleAttribute	AttributedString is not in the Foundation of iOS 6
+UIHostingConfiguration	UIContentConfiguration came with iOS 14
+SymbolVariants	there are no SF Symbols on iOS 6; a built-in set of glyphs is drawn instead
+SharePreview	Transferable previews came with iOS 16
+# Members of View, told apart from the types above by Type#name
+View#accessibilityCustomContent	custom accessibility content came with iOS 14
+View#accessibilityRotor	VoiceOver rotors came with iOS 10
+View#accessibilityShowsLargeContentViewer	the large content viewer came with iOS 13
+View#draggable	drag and drop came with iOS 11
+View#onDrag	drag and drop came with iOS 11
+View#dropDestination	drag and drop came with iOS 11
+View#fileExporter	file pickers need UTType and the document picker of iOS 8
+View#fileImporter	file pickers need UTType and the document picker of iOS 8
+View#fileMover	file pickers need UTType and the document picker of iOS 8
+View#navigationDocument	document apps need scenes and UTType, which iOS 6 does not have
+View#presentationDetents	sheet detents came with iOS 15
+View#presentationBackground	sheet detents and their backgrounds came with iOS 16.4
+View#presentationCompactAdaptation	popover adaptation came with iOS 16.4
+View#scenePadding	scene padding is for watchOS
+View#userActivity	NSUserActivity came with iOS 8
+View#contextMenu	context menu previews and selection menus came with iOS 13 and 16
+View#keyboardShortcut	shortcuts of a hardware keyboard came with iOS 13.4
+EnvironmentValues.immersiveSpaceDisplacement	Spatial.Pose3D is a visionOS type; Spatial is not an iOS framework, and iOS 6 has no immersive space
+EnvironmentValues.openImmersiveSpace	visionOS immersive space
+EnvironmentValues.dismissImmersiveSpace	visionOS immersive space
+EnvironmentValues.allowedDynamicRange	iOS 6 displays have no headroom above SDR
+EnvironmentValues.openWindow	iOS 6 has the one window the app is in and no way to open another
+EnvironmentValues.pushWindow	iOS 6 has no window stack
+EnvironmentValues.dismissWindow	iOS 6 has the one window the app is in
+EnvironmentValues.openSettings	iOS 6 has no settings scene
+EnvironmentValues.newDocument	iOS 6 has no document browser
+EnvironmentValues.openDocument	iOS 6 has no document browser
+EnvironmentValues.rename	iOS 6 has no file renaming through an app
+EnvironmentValues.realHorizontalSizeClass	Mac Catalyst
+EnvironmentValues.realVerticalSizeClass	Mac Catalyst
+EnvironmentValues.defaultWheelPickerItemHeight	the wheel picker is watchOS
+EnvironmentValues.isSceneCaptured	scene capture is visionOS
+EnvironmentValues.fontResolutionContext	Font.Context is an iOS 18 SwiftUI type; this port has no nested Context on Font

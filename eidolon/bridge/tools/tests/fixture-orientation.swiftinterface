@@ -1,0 +1,21 @@
+  
+}
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
+@_originallyDefinedIn(module: "SwiftUI", iOS 18.0)
+@_originallyDefinedIn(module: "SwiftUI", macOS 15.0)
+@_originallyDefinedIn(module: "SwiftUI", tvOS 18.0)
+@_originallyDefinedIn(module: "SwiftUI", watchOS 11.0)
+extension SwiftUICore.Image {
+  @frozen public enum Orientation : Swift.UInt8, Swift.CaseIterable, Swift.Hashable {
+    case up
+    case upMirrored
+    case down
+    case downMirrored
+    case left
+    case leftMirrored
+    case right
+    case rightMirrored
+    #if compiler(>=5.3) && $NonescapableTypes
+    public init?(rawValue: Swift.UInt8)
+    #endif
+    @available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *)

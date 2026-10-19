@@ -1,0 +1,25 @@
+_HostRootView (0,0,320,200)
+  UIView (0,46,320,108)
+    UIView (0,0,320,27)
+      UIView (0,9,10,10)
+        UIView (0,0,10,10)
+      UIStepper (226,0,94,27)
+        UIButton (0,0,47,27) button ""
+          UIImageView (0,0,47,27)
+          UIImageView (17,12,13,4)
+        UIButton (47,0,47,27) button ""
+          UIImageView (0,0,47,27)
+          UIImageView (18,7,13,14)
+        UIImageView (46,0,2,27)
+    UISlider (0,35,320,34)
+      UIView (161,13,157,9)
+        UIImageView (-159,0,316,9)
+      UIImageView (2,13,159,9)
+      UIImageView (149,6,23,23)
+    UITextField (0,77,320,31) field "hello!" placeholder="Name"
+      UITextFieldRoundedRectBackgroundView (0,0,320,31)
+        UIImageView (0,0,8,31)
+        UIImageView (8,0,304,31)
+        UIImageView (312,0,8,31)
+      UITextFieldLabel (7,2,306,21) "hello!"
+amount 7.0, level 0.5, text hello!, editing [true, false], committed 1

@@ -1,0 +1,5 @@
+_HostRootView (0,0,100,100)
+  UIView (35,35,30,30)
+    UIView (0,0,30,30)
+      UIView (0,0,30,30)
+timeline ticked

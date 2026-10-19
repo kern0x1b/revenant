@@ -1,0 +1,33 @@
+_HostRootView (0,0,320,300)
+  UILayoutContainerView (0,0,320,300)
+    UINavigationTransitionView (0,0,320,300)
+      UIViewControllerWrapperView (-320,44,320,256)
+        _HostRootView (0,0,320,256)
+          UITableView (0,0,320,256) table sections=[-:2]
+            UITableViewCell (0,44,320,44)
+              UITableViewCellContentView (0,0,320,43)
+                UIView (10,0,300,43)
+                  UILabel (0,11,300,21) "Pears"
+              UIView (0,43,320,1)
+            UITableViewCell (0,0,320,44)
+              UITableViewCellContentView (0,0,320,43)
+                UIView (10,0,300,43)
+                  UILabel (0,11,300,21) "Apples"
+              UIView (0,43,320,1)
+            _UITableViewSeparatorView (0,131,320,1)
+            _UITableViewSeparatorView (0,175,320,1)
+            _UITableViewSeparatorView (0,219,320,1)
+            _UITableViewSeparatorView (0,263,320,1)
+            _UITableViewSeparatorView (0,307,320,1)
+            _UITableViewSeparatorView (0,351,320,1)
+            _UITableViewSeparatorView (0,395,320,1)
+      UIViewControllerWrapperView (0,44,320,256)
+        _HostRootView (0,0,320,256)
+          UILabel (102,118,117,21) "Detail for Pears"
+    UINavigationBar (0,0,320,44)
+      _UINavigationBarBackground (0,0,320,44)
+        UIImageView (0,44,320,3)
+      UINavigationItemView (160,22,0,0)
+      UINavigationItemButtonView (5,7,50,30)
+      UINavigationItemView (0,22,0,0)
+navigation depth 2

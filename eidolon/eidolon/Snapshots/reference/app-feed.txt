@@ -1,0 +1,187 @@
+_HostRootView (0,0,320,568)
+  UILayoutContainerView (0,0,320,568)
+    UINavigationTransitionView (0,0,320,568)
+      UIViewControllerWrapperView (0,44,320,524)
+        _HostRootView (0,0,320,524)
+          UITableView (0,0,320,524) table sections=[-:7]
+            UITableViewCell (0,440,320,172)
+              UITableViewCellContentView (0,0,320,171)
+                UIView (10,0,300,171)
+                  UIView (0,11,300,150)
+                    UIView (0,6,300,138)
+                      UIView (0,0,300,40)
+                        UIView (0,0,40,40)
+                          ShapeBackedView (0,0,40,40)
+                          UIView (0,0,40,40)
+                            UILabel (14,10,12,21) "A"
+                        UIView (50,1,37,38)
+                          UILabel (0,0,32,21) "Ann"
+                          UILabel (0,23,37,15) "2h ago"
+                        UIView (97,20,160,0)
+                        UIView (267,4,33,33)
+                          UIView (0,0,33,33)
+                            UIImageView (8,8,17,17)
+                          UIButton (0,0,33,33) button ""
+                      UIView (0,48,277,63)
+                        UILabel (0,0,277,63) "Post number 3: the quick brown fox jumps over the lazy dog, again and again until it wraps."
+                      UIView (0,119,300,19)
+                        UIButton (0,0,30,19) button ""
+                          UIView (0,0,30,19)
+                            UIView (0,0,30,19)
+                              UIImageView (0,2,15,15)
+                              UILabel (21,0,9,19) "9"
+                        UIButton (54,0,30,19) button ""
+                          UIView (0,0,30,19)
+                            UIView (0,0,30,19)
+                              UIImageView (0,2,15,15)
+                              UILabel (21,0,9,19) "2"
+                        UIView (108,10,192,0)
+              UIView (0,171,320,1)
+            UITableViewCell (0,268,320,172)
+              UITableViewCellContentView (0,0,320,171)
+                UIView (10,0,300,171)
+                  UIView (0,11,300,150)
+                    UIView (0,6,300,138)
+                      UIView (0,0,300,40)
+                        UIView (0,0,40,40)
+                          ShapeBackedView (0,0,40,40)
+                          UIView (0,0,40,40)
+                            UILabel (14,10,13,21) "C"
+                        UIView (50,1,37,38)
+                          UILabel (0,0,22,21) "Cy"
+                          UILabel (0,23,37,15) "2h ago"
+                        UIView (97,20,160,0)
+                        UIView (267,4,33,33)
+                          UIView (0,0,33,33)
+                            UIImageView (8,8,17,17)
+                          UIButton (0,0,33,33) button ""
+                      UIView (0,48,277,63)
+                        UILabel (0,0,277,63) "Post number 2: the quick brown fox jumps over the lazy dog, again and again until it wraps."
+                      UIView (0,119,300,19)
+                        UIButton (0,0,30,19) button ""
+                          UIView (0,0,30,19)
+                            UIView (0,0,30,19)
+                              UIImageView (0,2,15,15)
+                              UILabel (21,0,9,19) "6"
+                        UIButton (54,0,30,19) button ""
+                          UIView (0,0,30,19)
+                            UIView (0,0,30,19)
+                              UIImageView (0,2,15,15)
+                              UILabel (21,0,9,19) "2"
+                        UIView (108,10,192,0)
+              UIView (0,171,320,1)
+            UITableViewCell (0,96,320,172)
+              UITableViewCellContentView (0,0,320,171)
+                UIView (10,0,300,171)
+                  UIView (0,11,300,150)
+                    UIView (0,6,300,138)
+                      UIView (0,0,300,40)
+                        UIView (0,0,40,40)
+                          ShapeBackedView (0,0,40,40)
+                          UIView (0,0,40,40)
+                            UILabel (14,10,12,21) "B"
+                        UIView (50,1,37,38)
+                          UILabel (0,0,33,21) "Bob"
+                          UILabel (0,23,37,15) "2h ago"
+                        UIView (97,20,160,0)
+                        UIView (267,4,33,33)
+                          UIView (0,0,33,33)
+                            UIImageView (8,8,17,17)
+                          UIButton (0,0,33,33) button ""
+                      UIView (0,48,277,63)
+                        UILabel (0,0,277,63) "Post number 1: the quick brown fox jumps over the lazy dog, again and again until it wraps."
+                      UIView (0,119,300,19)
+                        UIButton (0,0,30,19) button ""
+                          UIView (0,0,30,19)
+                            UIView (0,0,30,19)
+                              UIImageView (0,2,15,15)
+                              UILabel (21,0,9,19) "3"
+                        UIButton (54,0,30,19) button ""
+                          UIView (0,0,30,19)
+                            UIView (0,0,30,19)
+                              UIImageView (0,2,15,15)
+                              UILabel (21,0,9,19) "2"
+                        UIView (108,10,192,0)
+              UIView (0,171,320,1)
+            UITableViewCell (0,0,320,96)
+              UITableViewCellContentView (0,0,320,95)
+                UIView (10,0,300,95)
+                  UIView (0,11,300,74)
+                    UIView (0,0,300,74)
+                      UIScrollView (0,0,300,74)
+                        UIView (0,0,396,63)
+                          UIView (16,0,364,63)
+                            UIView (0,0,40,63)
+                              UIView (0,0,40,40)
+                                UIView (0,0,40,40)
+                                  ShapeBackedView (0,0,40,40)
+                                  UIView (0,0,40,40)
+                                    UILabel (14,10,12,21) "A"
+                                UIView (0,0,40,40)
+                                  ShapeBackedView (-3,-3,46,46)
+                              UILabel (9,48,22,15) "Ann"
+                            UIView (54,0,40,63)
+                              UIView (0,0,40,40)
+                                UIView (0,0,40,40)
+                                  ShapeBackedView (0,0,40,40)
+                                  UIView (0,0,40,40)
+                                    UILabel (14,10,12,21) "B"
+                                UIView (0,0,40,40)
+                                  ShapeBackedView (-3,-3,46,46)
+                              UILabel (9,48,23,15) "Bob"
+                            UIView (108,0,40,63)
+                              UIView (0,0,40,40)
+                                UIView (0,0,40,40)
+                                  ShapeBackedView (0,0,40,40)
+                                  UIView (0,0,40,40)
+                                    UILabel (14,10,13,21) "C"
+                                UIView (0,0,40,40)
+                                  ShapeBackedView (-3,-3,46,46)
+                              UILabel (13,48,15,15) "Cy"
+                            UIView (162,0,40,63)
+                              UIView (0,0,40,40)
+                                UIView (0,0,40,40)
+                                  ShapeBackedView (0,0,40,40)
+                                  UIView (0,0,40,40)
+                                    UILabel (14,10,13,21) "D"
+                                UIView (0,0,40,40)
+                                  ShapeBackedView (-3,-3,46,46)
+                              UILabel (9,48,22,15) "Dee"
+                            UIView (216,0,40,63)
+                              UIView (0,0,40,40)
+                                UIView (0,0,40,40)
+                                  ShapeBackedView (0,0,40,40)
+                                  UIView (0,0,40,40)
+                                    UILabel (14,10,12,21) "E"
+                                UIView (0,0,40,40)
+                                  ShapeBackedView (-3,-3,46,46)
+                              UILabel (10,48,20,15) "Eve"
+                            UIView (270,0,40,63)
+                              UIView (0,0,40,40)
+                                UIView (0,0,40,40)
+                                  ShapeBackedView (0,0,40,40)
+                                  UIView (0,0,40,40)
+                                    UILabel (15,10,11,21) "F"
+                                UIView (0,0,40,40)
+                                  ShapeBackedView (-3,-3,46,46)
+                              UILabel (10,48,20,15) "Fay"
+                            UIView (324,0,40,63)
+                              UIView (0,0,40,40)
+                                UIView (0,0,40,40)
+                                  ShapeBackedView (0,0,40,40)
+                                  UIView (0,0,40,40)
+                                    UILabel (14,10,13,21) "G"
+                                UIView (0,0,40,40)
+                                  ShapeBackedView (-3,-3,46,46)
+                              UILabel (9,48,22,15) "Gus"
+              UIView (0,95,320,1)
+    UINavigationBar (0,0,320,44)
+      _UINavigationBarBackground (0,0,320,44)
+        UIImageView (0,44,320,3)
+      UINavigationItemView (135,9,49,27)
+      _HostRootView (298,13,17,17)
+        UIView (0,0,17,17)
+          UIButton (0,0,17,17) button ""
+            UIView (0,0,17,17)
+              UIImageView (0,0,17,17)
+navigation depth 1

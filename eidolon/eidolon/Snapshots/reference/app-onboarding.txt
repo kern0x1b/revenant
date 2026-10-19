@@ -1,0 +1,34 @@
+_HostRootView (0,0,320,568)
+  UIView (0,0,320,568)
+    UIView (0,0,320,493)
+      UIScrollView (0,0,320,493)
+        UIView (0,0,320,493)
+          UIView (16,16,288,461)
+            UIImageView (104,0,80,80)
+            UILabel (77,100,134,36) "Welcome"
+            UILabel (6,156,277,42) "A short description of this page that wraps onto more than one line."
+        UIView (320,0,320,493)
+          UIView (16,16,288,461)
+            UIImageView (104,0,80,80)
+            UILabel (81,100,127,36) "Discover"
+            UILabel (6,156,277,42) "A short description of this page that wraps onto more than one line."
+        UIView (640,0,320,493)
+          UIView (16,16,288,461)
+            UIImageView (104,0,80,80)
+            UILabel (104,100,80,36) "Enjoy"
+            UILabel (6,156,277,42) "A short description of this page that wraps onto more than one line."
+      UIPageControl (0,457,320,36)
+        UIImageView (141,15,6,6)
+        UIImageView (157,15,6,6)
+        UIImageView (173,15,6,6)
+    UIView (114,501,92,67)
+      UIRoundedRectButton (16,16,60,35) button ""
+        UIView (0,0,60,35)
+          UIView (0,0,60,35)
+            ShapeBackedView (0,0,60,35)
+            ShapeBackedView (0,0,60,35)
+            ShapeBackedView (0,0,60,35)
+          UIView (0,0,60,35)
+            UIView (12,7,36,21)
+              UILabel (0,0,36,21) "Next"
+navigation depth 0

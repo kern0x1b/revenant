@@ -1,0 +1,40 @@
+_HostRootView (0,0,320,568)
+  UIView (0,21,320,527)
+    UIView (16,16,288,495)
+      UIView (34,0,220,220)
+        UIView (0,0,220,220)
+          UIView (0,0,220,220)
+            ShapeBackedView (0,0,220,220)
+          UIImageView (75,75,70,70)
+      UIView (94,244,100,52)
+        UILabel (0,0,100,27) "Song title"
+        UILabel (7,31,87,21) "Artist name"
+      UIView (0,320,288,53)
+        UISlider (0,0,288,34)
+          UIView (92,13,194,9)
+            UIImageView (-90,0,284,9)
+          UIImageView (2,13,90,9)
+          UIImageView (80,6,23,23)
+        UIView (0,38,288,15)
+          UILabel (0,0,24,15) "1:12"
+          UIView (32,8,219,0)
+          UILabel (259,0,29,15) "-2:40"
+      UIView (60,397,168,40)
+        UIButton (0,8,24,24) button ""
+          UIView (0,0,24,24)
+            UIImageView (0,0,24,24)
+        UIButton (64,0,40,40) button ""
+          UIView (0,0,40,40)
+            UIImageView (0,0,40,40)
+        UIButton (144,8,24,24) button ""
+          UIView (0,0,24,24)
+            UIImageView (0,0,24,24)
+      UIView (0,461,288,34)
+        UIImageView (0,9,17,17)
+        UISlider (25,0,238,34)
+          UIView (163,13,73,9)
+            UIImageView (-161,0,234,9)
+          UIImageView (2,13,161,9)
+          UIImageView (151,6,23,23)
+        UIImageView (271,9,17,17)
+navigation depth 0

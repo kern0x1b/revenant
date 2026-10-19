@@ -1,0 +1,26 @@
+_HostRootView (0,0,320,300)
+  UILayoutContainerView (0,0,320,300)
+    UINavigationTransitionView (0,0,320,300)
+      UIViewControllerWrapperView (0,44,320,256)
+        _HostRootView (0,0,320,256)
+          UITableView (0,0,320,256) table sections=[-:1]
+            UITableViewBackgroundView (0,0,320,256)
+              UIImageView (0,0,320,256)
+              UIView (0,0,320,256)
+            UITableViewCell (0,10,320,46)
+              UIGroupTableViewCellBackground (9,0,302,46)
+              UITableViewCellContentView (10,1,300,43)
+                UIView (10,0,280,43)
+                  UILabel (0,11,280,21) "No items"
+              UIImageView (10,1,300,7)
+            UITableViewHeaderFooterView (0,56,320,60)
+              _UITableViewHeaderFooterContentView (0,0,320,60)
+                _UITableViewHeaderFooterViewLabel (25,6,270,38) "Nothing here yet. Tap Add to create the first item."
+    UINavigationBar (0,0,320,44)
+      _UINavigationBarBackground (0,0,320,44)
+        UIImageView (0,44,320,3)
+      UINavigationItemView (132,9,55,27)
+      UINavigationButton (267,7,48,30) button "Add"
+        UIImageView (0,0,48,30)
+        UIButtonLabel (12,7,23,15) "Add"
+navigation depth 1

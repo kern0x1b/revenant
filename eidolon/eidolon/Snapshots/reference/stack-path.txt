@@ -1,0 +1,25 @@
+_HostRootView (0,0,320,300)
+  UILayoutContainerView (0,0,320,300)
+    UINavigationTransitionView (0,0,320,300)
+      UIViewControllerWrapperView (-320,44,320,256)
+        _HostRootView (0,0,320,256)
+          UIView (144,103,33,50)
+            UIView (1,0,32,21)
+              UILabel (0,0,32,21) "One"
+            UIView (0,29,33,21)
+              UILabel (0,0,33,21) "Two"
+      UIViewControllerWrapperView (0,44,320,256)
+        _HostRootView (0,0,320,256)
+          UIView (131,103,58,50)
+            UILabel (0,0,58,21) "Detail 1"
+            UIView (1,29,56,21)
+              UILabel (0,0,56,21) "Deeper"
+    UINavigationBar (0,0,320,44)
+      _UINavigationBarBackground (0,0,320,44)
+        UIImageView (0,44,320,3)
+      UINavigationItemView (320,22,0,0)
+      UINavigationItemView (123,9,73,27)
+      UINavigationItemButtonView (111,7,64,30)
+      UINavigationItemButtonView (5,7,48,30)
+path [1]
+navigation depth 2

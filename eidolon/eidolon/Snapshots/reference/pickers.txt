@@ -1,0 +1,52 @@
+_HostRootView (0,0,320,300)
+  UILayoutContainerView (0,0,320,300)
+    UINavigationTransitionView (0,0,320,300)
+      UIViewControllerWrapperView (0,44,320,256)
+        _HostRootView (0,0,320,256)
+          UITableView (0,0,320,256) table sections=[-:1 Size:2]
+            UITableViewBackgroundView (0,0,320,256)
+              UIImageView (0,0,320,256)
+              UIView (0,0,320,256)
+            UITableViewCell (0,147,320,45)
+              UIGroupTableViewCellBackground (9,0,302,45)
+                UIView (1,0,300,1)
+              UITableViewCellContentView (10,0,300,43)
+                UIView (10,0,280,43)
+                  UIButton (0,11,280,21) button ""
+                    UIView (0,0,280,21)
+                      UIView (0,0,280,21)
+                        UILabel (0,0,44,21) "Large"
+                        UIView (52,11,203,0)
+                        UILabel (263,0,17,21) "✓"
+              UIView (10,0,300,1)
+            UITableViewCell (0,102,320,45)
+              UIGroupTableViewCellBackground (9,0,302,45)
+                UIView (1,44,300,1)
+              UITableViewCellContentView (10,1,300,43)
+                UIView (10,0,280,43)
+                  UIButton (0,11,280,21) button ""
+                    UIView (0,0,280,21)
+                      UIView (0,0,280,21)
+                        UILabel (0,0,43,21) "Small"
+                        UIView (51,11,229,0)
+              UIImageView (10,1,300,7)
+            UITableViewCell (0,10,320,46)
+              UIGroupTableViewCellBackground (9,0,302,46)
+              UITableViewCellContentView (10,1,280,43)
+                UIView (10,0,260,43)
+                  UIView (0,11,260,21)
+                    UIView (0,0,260,21)
+                      UILabel (0,0,35,21) "Fruit"
+                      UIView (43,11,174,0)
+                      UILabel (225,0,35,21) "Pear"
+              UIButton (280,1,30,43) button ""
+                UIImageView (10,15,10,13)
+              UIImageView (10,1,300,7)
+            UITableViewHeaderFooterView (0,66,320,36)
+              _UITableViewHeaderFooterContentView (0,0,320,36)
+                _UITableViewHeaderFooterViewLabel (19,7,34,21) "Size"
+    UINavigationBar (0,0,320,44)
+      _UINavigationBarBackground (0,0,320,44)
+        UIImageView (0,44,320,3)
+      UINavigationItemView (160,22,0,0)
+navigation depth 1

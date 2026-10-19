@@ -1,0 +1,25 @@
+_HostRootView (0,0,320,240)
+  UIView (0,26,320,188)
+    UIView (12,12,296,164)
+      UIView (0,0,296,30)
+        UIView (0,0,60,30)
+          UIView (0,0,60,30)
+        UIView (68,15,190,0)
+        UIView (266,0,30,30)
+          UIView (0,0,30,30)
+      UIView (0,38,296,21)
+        UILabel (0,0,61,21) "Leading"
+        UIView (65,11,171,0)
+        UILabel (240,0,56,21) "Trailing"
+      UIView (0,67,296,21)
+        UILabel (113,0,71,21) "Centered"
+      UIView (0,96,296,2)
+        UIView (0,0,296,2)
+      UIView (0,106,296,58)
+        UIView (0,0,296,58)
+          UIView (8,8,280,42)
+            UIView (0,0,52,42)
+              UILabel (0,0,35,21) "Title"
+              UILabel (0,23,52,19) "Subtitle"
+            UIView (60,21,207,0)
+            UILabel (275,11,5,21) "›"

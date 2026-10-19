@@ -1,0 +1,34 @@
+_HostRootView (0,0,320,300)
+  UITableView (0,0,320,300) table sections=[-:3]
+    UITableViewCell (0,132,320,44)
+      UITableViewCellContentView (0,0,320,43)
+        UIView (10,0,300,43)
+          UILabel (0,11,300,21) "idle"
+      UIView (0,43,320,1)
+    UITableViewCell (0,88,320,44)
+      UITableViewCellContentView (0,0,320,43)
+        UIView (10,0,300,43)
+          UILabel (0,11,300,21) "Pears"
+      UIView (0,43,320,1)
+    UITableViewCell (0,44,320,44)
+      UITableViewCellContentView (0,0,320,43)
+        UIView (10,0,300,43)
+          UILabel (0,11,300,21) "Apples"
+      UIView (0,43,320,1)
+    UISearchBar (0,0,320,44)
+      UISearchBarBackground (0,0,320,44)
+      UISearchBarTextField (5,6,310,31) field "Apricots" placeholder="Fruit"
+        UITextFieldBorderView (0,0,310,31)
+        UIButton (285,6,19,19) button ""
+          UIImageView (0,0,19,19)
+        UIImageView (10,8,15,15)
+        UITextFieldLabel (30,7,252,18) "Apricots"
+    _UITableViewSeparatorView (0,219,320,1)
+    _UITableViewSeparatorView (0,263,320,1)
+    _UITableViewSeparatorView (0,307,320,1)
+    _UITableViewSeparatorView (0,351,320,1)
+    _UITableViewSeparatorView (0,395,320,1)
+    _UITableViewSeparatorView (0,439,320,1)
+    _UITableViewSeparatorView (0,483,320,1)
+text Apricots, isSearching false
+navigation depth 0

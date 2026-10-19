@@ -1,0 +1,126 @@
+_HostRootView (0,0,320,568)
+  UILayoutContainerView (0,0,320,568)
+    UITransitionView (0,0,320,519)
+      UIViewControllerWrapperView (0,0,320,519)
+        _HostRootView (0,0,320,519)
+          UIView (0,0,320,519)
+            UIView (16,16,288,487)
+              UIView (144,0,0,86)
+              UIView (0,96,288,61)
+                UIView (16,0,256,61)
+                  UILabel (227,0,29,61) "0"
+              UIView (0,167,288,56)
+                UIButton (0,0,65,56) button ""
+                  UIView (0,0,65,56)
+                    UIView (0,0,65,56)
+                      UIView (0,0,65,56)
+                        UIView (0,0,65,56)
+                          UILabel (26,14,14,29) "7"
+                UIButton (75,0,65,56) button ""
+                  UIView (0,0,65,56)
+                    UIView (0,0,65,56)
+                      UIView (0,0,65,56)
+                        UIView (0,0,65,56)
+                          UILabel (26,14,14,29) "8"
+                UIButton (149,0,65,56) button ""
+                  UIView (0,0,65,56)
+                    UIView (0,0,65,56)
+                      UIView (0,0,65,56)
+                        UIView (0,0,65,56)
+                          UILabel (26,14,14,29) "9"
+                UIButton (224,0,65,56) button ""
+                  UIView (0,0,65,56)
+                    UIView (0,0,65,56)
+                      UIView (0,0,65,56)
+                        UIView (0,0,65,56)
+                          UILabel (25,14,15,29) "÷"
+              UIView (0,233,288,56)
+                UIButton (0,0,65,56) button ""
+                  UIView (0,0,65,56)
+                    UIView (0,0,65,56)
+                      UIView (0,0,65,56)
+                        UIView (0,0,65,56)
+                          UILabel (26,14,14,29) "4"
+                UIButton (75,0,65,56) button ""
+                  UIView (0,0,65,56)
+                    UIView (0,0,65,56)
+                      UIView (0,0,65,56)
+                        UIView (0,0,65,56)
+                          UILabel (26,14,14,29) "5"
+                UIButton (149,0,65,56) button ""
+                  UIView (0,0,65,56)
+                    UIView (0,0,65,56)
+                      UIView (0,0,65,56)
+                        UIView (0,0,65,56)
+                          UILabel (26,14,14,29) "6"
+                UIButton (224,0,65,56) button ""
+                  UIView (0,0,65,56)
+                    UIView (0,0,65,56)
+                      UIView (0,0,65,56)
+                        UIView (0,0,65,56)
+                          UILabel (25,14,15,29) "×"
+              UIView (0,299,288,56)
+                UIButton (0,0,65,56) button ""
+                  UIView (0,0,65,56)
+                    UIView (0,0,65,56)
+                      UIView (0,0,65,56)
+                        UIView (0,0,65,56)
+                          UILabel (26,14,14,29) "1"
+                UIButton (75,0,65,56) button ""
+                  UIView (0,0,65,56)
+                    UIView (0,0,65,56)
+                      UIView (0,0,65,56)
+                        UIView (0,0,65,56)
+                          UILabel (26,14,14,29) "2"
+                UIButton (149,0,65,56) button ""
+                  UIView (0,0,65,56)
+                    UIView (0,0,65,56)
+                      UIView (0,0,65,56)
+                        UIView (0,0,65,56)
+                          UILabel (26,14,14,29) "3"
+                UIButton (224,0,65,56) button ""
+                  UIView (0,0,65,56)
+                    UIView (0,0,65,56)
+                      UIView (0,0,65,56)
+                        UIView (0,0,65,56)
+                          UILabel (25,14,15,29) "−"
+              UIView (0,365,288,56)
+                UIButton (0,0,65,56) button ""
+                  UIView (0,0,65,56)
+                    UIView (0,0,65,56)
+                      UIView (0,0,65,56)
+                        UIView (0,0,65,56)
+                          UILabel (26,14,14,29) "0"
+                UIButton (75,0,65,56) button ""
+                  UIView (0,0,65,56)
+                    UIView (0,0,65,56)
+                      UIView (0,0,65,56)
+                        UIView (0,0,65,56)
+                          UILabel (29,14,7,29) "."
+                UIButton (149,0,65,56) button ""
+                  UIView (0,0,65,56)
+                    UIView (0,0,65,56)
+                      UIView (0,0,65,56)
+                        UIView (0,0,65,56)
+                          UILabel (25,14,15,29) "="
+                UIButton (224,0,65,56) button ""
+                  UIView (0,0,65,56)
+                    UIView (0,0,65,56)
+                      UIView (0,0,65,56)
+                        UIView (0,0,65,56)
+                          UILabel (25,14,15,29) "+"
+              UIButton (0,431,288,56) button ""
+                UIView (0,0,288,56)
+                  UIView (0,0,288,56)
+                    UIView (0,0,288,56)
+                      UIView (0,0,288,56)
+                        UILabel (135,14,18,29) "C"
+    UITabBar (0,519,320,49)
+      _UITabBarBackgroundView (0,0,320,49)
+      UIImageView (0,-3,320,3)
+      UITabBarButton (2,1,156,48)
+        UITabBarSelectionIndicatorView (0,2,156,44)
+        UITabBarButtonLabel (67,34,22,13) "Calc"
+      UITabBarButton (162,1,156,48)
+        UITabBarButtonLabel (64,34,28,13) "Timer"
+navigation depth 0

@@ -1,0 +1,35 @@
+_HostRootView (0,0,320,300)
+  UILayoutContainerView (0,0,320,300)
+    UINavigationTransitionView (0,0,320,300)
+      UIViewControllerWrapperView (0,44,320,212)
+        _HostRootView (0,0,320,212)
+          UIView (0,86,320,40)
+            UIView (0,0,320,40)
+    UINavigationBar (0,0,320,44)
+      _UINavigationBarBackground (0,0,320,44)
+        UIImageView (0,44,320,3)
+      UINavigationButton (5,7,60,30) button "Cancel"
+        UIImageView (0,0,60,30)
+        UIButtonLabel (10,7,40,15) "Cancel"
+      _HostRootView (295,12,20,20)
+        UIView (0,0,20,20)
+          UIButton (0,0,20,20) button ""
+            UIView (0,0,20,20)
+              UIView (0,0,20,20)
+                UIView (0,0,20,20)
+      UINavigationButton (239,7,48,30) button "Add"
+        UIImageView (0,0,48,30)
+        UIButtonLabel (12,7,23,15) "Add"
+      _HostRootView (130,12,60,20)
+        UIView (0,0,60,20)
+          UIView (0,0,60,20)
+            UIView (0,0,60,20)
+    UIToolbar (0,256,320,44)
+      _UIToolbarBackground (0,0,320,44)
+      UIImageView (0,-3,320,3)
+      UIToolbarTextButton (12,0,38,44)
+        UILabel (0,8,38,25) "Left"
+      UIToolbarTextButton (257,0,51,44)
+        UILabel (0,8,51,25) "Right"
+taps ["add", "cancel", "icon"]
+navigation depth 1

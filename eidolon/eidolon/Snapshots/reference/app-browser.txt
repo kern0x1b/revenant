@@ -1,0 +1,33 @@
+_HostRootView (0,0,320,568)
+  UIView (0,0,320,568)
+    UIView (0,0,320,47)
+      UIView (0,0,320,47)
+        UIView (8,8,304,31)
+          UIView (0,7,17,17)
+            UIButton (0,0,17,17) button ""
+              UIView (0,0,17,17)
+                UIImageView (0,0,17,17)
+          UIView (25,0,254,31)
+            UITextField (0,0,254,31) field "Welcome" placeholder="Search or enter address"
+              UITextFieldRoundedRectBackgroundView (0,0,254,31)
+                UIImageView (0,0,8,31)
+                UIImageView (8,0,238,31)
+                UIImageView (246,0,8,31)
+              UITextFieldLabel (7,2,240,21) "Welcome"
+          UIButton (287,7,17,17) button ""
+            UIView (0,0,17,17)
+              UIImageView (0,0,17,17)
+    UIWebView (0,47,320,521)
+      _UIWebViewScrollView (0,0,320,521)
+        UIImageView (0,0,54,54)
+        UIImageView (0,0,54,54)
+        UIImageView (0,0,54,54)
+        UIImageView (0,0,54,54)
+        UIImageView (-14,14,30,1)
+        UIImageView (-14,14,30,1)
+        UIImageView (0,0,1,30)
+        UIImageView (0,0,1,30)
+        UIImageView (0,491,320,30)
+        UIImageView (0,0,320,30)
+        UIWebBrowserView (0,0,320,521)
+navigation depth 0

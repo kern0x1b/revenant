@@ -1,0 +1,6 @@
+Package: space.kern0x1b.eidolonrt
+Name: eidolonrt
+Version: 0.0.1
+Architecture: iphoneos-arm
+Description: probe
+Maintainer: none

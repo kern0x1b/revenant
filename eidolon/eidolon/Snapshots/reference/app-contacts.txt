@@ -1,0 +1,136 @@
+_HostRootView (0,0,320,568)
+  UILayoutContainerView (0,0,320,568)
+    UINavigationTransitionView (0,0,320,568)
+      UIViewControllerWrapperView (0,44,320,524)
+        _HostRootView (0,0,320,524)
+          UITableView (0,0,320,524) table sections=[Favorites:2 All contacts:12]
+            UITableViewCell (0,484,320,44)
+              UITableViewCellContentView (0,0,300,43)
+                UIView (10,0,280,43)
+                  UIView (0,11,280,21)
+                    UIView (0,0,280,21)
+                      UILabel (0,0,46,21) "Bob 9"
+                      UIView (54,11,226,0)
+              UIButton (290,0,30,43) button ""
+                UIImageView (10,15,10,13)
+              UIView (0,43,320,1)
+            UITableViewCell (0,440,320,44)
+              UITableViewCellContentView (0,0,300,43)
+                UIView (10,0,280,43)
+                  UIView (0,11,280,21)
+                    UIView (0,0,280,21)
+                      UILabel (0,0,52,21) "Alice 8"
+                      UIView (60,11,220,0)
+              UIButton (290,0,30,43) button ""
+                UIImageView (10,15,10,13)
+              UIView (0,43,320,1)
+            UITableViewCell (0,396,320,44)
+              UITableViewCellContentView (0,0,300,43)
+                UIView (10,0,280,43)
+                  UIView (0,11,280,21)
+                    UIView (0,0,280,21)
+                      UILabel (0,0,53,21) "Dave 7"
+                      UIView (61,11,219,0)
+              UIButton (290,0,30,43) button ""
+                UIImageView (10,15,10,13)
+              UIView (0,43,320,1)
+            UITableViewCell (0,352,320,44)
+              UITableViewCellContentView (0,0,300,43)
+                UIView (10,0,280,43)
+                  UIView (0,11,280,21)
+                    UIView (0,0,280,21)
+                      UILabel (0,0,55,21) "Carol 6"
+                      UIView (63,11,217,0)
+              UIButton (290,0,30,43) button ""
+                UIImageView (10,15,10,13)
+              UIView (0,43,320,1)
+            UITableViewCell (0,308,320,44)
+              UITableViewCellContentView (0,0,300,43)
+                UIView (10,0,280,43)
+                  UIView (0,11,280,21)
+                    UIView (0,0,280,21)
+                      UILabel (0,0,46,21) "Bob 5"
+                      UIView (54,11,201,0)
+                      UIImageView (263,2,17,17)
+              UIButton (290,0,30,43) button ""
+                UIImageView (10,15,10,13)
+              UIView (0,43,320,1)
+            UITableViewCell (0,264,320,44)
+              UITableViewCellContentView (0,0,300,43)
+                UIView (10,0,280,43)
+                  UIView (0,11,280,21)
+                    UIView (0,0,280,21)
+                      UILabel (0,0,52,21) "Alice 4"
+                      UIView (60,11,220,0)
+              UIButton (290,0,30,43) button ""
+                UIImageView (10,15,10,13)
+              UIView (0,43,320,1)
+            UITableViewCell (0,220,320,44)
+              UITableViewCellContentView (0,0,300,43)
+                UIView (10,0,280,43)
+                  UIView (0,11,280,21)
+                    UIView (0,0,280,21)
+                      UILabel (0,0,53,21) "Dave 3"
+                      UIView (61,11,219,0)
+              UIButton (290,0,30,43) button ""
+                UIImageView (10,15,10,13)
+              UIView (0,43,320,1)
+            UITableViewCell (0,176,320,44)
+              UITableViewCellContentView (0,0,300,43)
+                UIView (10,0,280,43)
+                  UIView (0,11,280,21)
+                    UIView (0,0,280,21)
+                      UILabel (0,0,55,21) "Carol 2"
+                      UIView (63,11,217,0)
+              UIButton (290,0,30,43) button ""
+                UIImageView (10,15,10,13)
+              UIView (0,43,320,1)
+            UITableViewCell (0,132,320,44)
+              UITableViewCellContentView (0,0,300,43)
+                UIView (10,0,280,43)
+                  UIView (0,11,280,21)
+                    UIView (0,0,280,21)
+                      UILabel (0,0,46,21) "Bob 1"
+                      UIView (54,11,226,0)
+              UIButton (290,0,30,43) button ""
+                UIImageView (10,15,10,13)
+              UIView (0,43,320,1)
+            UITableViewCell (0,66,320,44)
+              UITableViewCellContentView (0,0,300,43)
+                UIView (10,0,280,43)
+                  UIView (0,11,280,21)
+                    UILabel (0,0,280,21) "Carol 10"
+              UIButton (290,0,30,43) button ""
+                UIImageView (10,15,10,13)
+              UIView (0,43,320,1)
+            UITableViewCell (0,22,320,44)
+              UITableViewCellContentView (0,0,300,43)
+                UIView (10,0,280,43)
+                  UIView (0,11,280,21)
+                    UILabel (0,0,280,21) "Bob 5"
+              UIButton (290,0,30,43) button ""
+                UIImageView (10,15,10,13)
+              UIView (0,43,320,1)
+            UITableViewHeaderFooterView (0,0,320,22)
+              _UITableViewHeaderFooterViewBackground (0,0,320,23)
+                UIView (0,0,320,23)
+              _UITableViewHeaderFooterContentView (0,0,320,23)
+                _UITableViewHeaderFooterViewLabel (12,1,80,22) "Favorites"
+            UITableViewHeaderFooterView (0,110,320,22)
+              _UITableViewHeaderFooterViewBackground (0,0,320,23)
+                UIView (0,0,320,23)
+              _UITableViewHeaderFooterContentView (0,0,320,23)
+                _UITableViewHeaderFooterViewLabel (12,1,102,22) "All contacts"
+    UINavigationBar (0,0,320,44)
+      _UINavigationBarBackground (0,0,320,44)
+        UIImageView (0,44,320,3)
+      UINavigationItemView (116,9,88,27)
+      UINavigationButton (5,7,51,30) button "Edit"
+        UIImageView (0,0,51,30)
+        UIButtonLabel (14,7,23,15) "Edit"
+      _HostRootView (298,13,17,17)
+        UIView (0,0,17,17)
+          UIButton (0,0,17,17) button ""
+            UIView (0,0,17,17)
+              UIImageView (0,0,17,17)
+navigation depth 1

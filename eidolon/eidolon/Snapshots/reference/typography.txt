@@ -1,0 +1,8 @@
+_HostRootView (0,0,320,240)
+  UIView (10,24,301,192)
+    UIView (12,12,277,168)
+      UILabel (0,0,145,36) "Large title"
+      UILabel (0,42,50,29) "Title"
+      UILabel (0,77,72,21) "Headline"
+      UILabel (0,104,277,42) "Body text that wraps onto a second line when the width runs out"
+      UILabel (0,152,53,16) "Footnote"

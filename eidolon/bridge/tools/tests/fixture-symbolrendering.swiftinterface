@@ -1,0 +1,11 @@
+@_originallyDefinedIn(module: "SwiftUI", macOS 15.0)
+@_originallyDefinedIn(module: "SwiftUI", tvOS 18.0)
+@_originallyDefinedIn(module: "SwiftUI", watchOS 11.0)
+extension SwiftUICore.View {
+  #if compiler(>=5.3) && $NonescapableTypes
+  @inlinable nonisolated public func symbolRenderingMode(_ mode: SwiftUICore.SymbolRenderingMode?) -> some SwiftUICore.View {
+        return environment(\.symbolRenderingMode, mode)
+    }
+  
+  #endif
+}

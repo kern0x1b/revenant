@@ -1,0 +1,6 @@
+Package: space.kern0x1b.eidolon
+Name: Eidolon
+Architecture: iphoneos-arm
+Description: Eidolon, the SwiftUI API reimplemented on the UIKit of iOS 6, as the demo application
+ that xmake emulate installs and that SpringBoard launches; the bundle whose Info.plist carries
+ EidolonSnapshots renders the snapshot scenarios instead.

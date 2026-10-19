@@ -1,0 +1,129 @@
+_HostRootView (0,0,320,300)
+  UIView (0,46,320,209)
+    UILabel (141,0,39,21) "Days"
+    UIView (0,27,320,44)
+      UIRoundedRectButton (0,0,72,44) button "‹"
+        UIGroupTableViewCellBackground (0,0,72,44)
+        UIImageView (1,1,70,43)
+        UIButtonLabel (34,12,4,19) "‹"
+      UIView (80,22,17,0)
+      UIView (105,12,110,21)
+        UILabel (0,0,110,21) "February 2026"
+      UIView (223,22,17,0)
+      UIRoundedRectButton (248,0,72,44) button "›"
+        UIGroupTableViewCellBackground (0,0,72,44)
+        UIImageView (1,1,70,43)
+        UIButtonLabel (34,12,4,19) "›"
+    UIView (22,77,276,132)
+      UIView (0,0,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (13,5,10,21) "1"
+      UIView (40,0,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (13,5,10,21) "2"
+      UIView (80,0,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (13,5,10,21) "3"
+      UIView (120,0,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (13,5,10,21) "4"
+      UIView (160,0,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (13,5,10,21) "5"
+      UIView (200,0,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (13,5,10,21) "6"
+      UIView (240,0,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (13,5,10,21) "7"
+      UIView (0,34,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (13,5,10,21) "8"
+      UIView (40,34,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (13,5,10,21) "9"
+      UIView (80,34,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (9,5,19,21) "10"
+      UIView (120,34,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (9,5,19,21) "11"
+      UIView (160,34,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (9,5,19,21) "12"
+      UIView (200,34,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (9,5,19,21) "13"
+      UIView (240,34,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (9,5,19,21) "14"
+      UIView (0,68,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (9,5,19,21) "15"
+      UIView (40,68,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (9,5,19,21) "16"
+      UIView (80,68,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (9,5,19,21) "17"
+      UIView (120,68,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (9,5,19,21) "18"
+      UIView (160,68,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (9,5,19,21) "19"
+      UIView (200,68,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (9,5,19,21) "20"
+      UIView (240,68,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (9,5,19,21) "21"
+      UIView (0,102,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (9,5,19,21) "22"
+      UIView (40,102,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (9,5,19,21) "23"
+      UIView (80,102,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (9,5,19,21) "24"
+      UIView (120,102,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (9,5,19,21) "25"
+      UIView (160,102,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (9,5,19,21) "26"
+      UIView (200,102,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (9,5,19,21) "27"
+      UIView (240,102,36,30)
+        UIView (0,0,36,30)
+          UIView (0,0,36,30)
+            UILabel (9,5,19,21) "28"

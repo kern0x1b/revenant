@@ -1,0 +1,18 @@
+_HostRootView (0,0,320,300)
+  UILayoutContainerView (0,0,320,300)
+    UINavigationTransitionView (0,0,320,300)
+      UIViewControllerWrapperView (-320,44,320,256)
+        _HostRootView (0,0,320,256)
+          UIView (149,118,23,21)
+            UIView (0,0,23,21)
+              UILabel (0,0,23,21) "Go"
+      UIViewControllerWrapperView (0,44,320,256)
+        _HostRootView (0,0,320,256)
+          UILabel (110,118,101,21) "Pushed page"
+    UINavigationBar (0,0,320,44)
+      _UINavigationBarBackground (0,0,320,44)
+        UIImageView (0,44,320,3)
+      UINavigationItemView (160,22,0,0)
+      UINavigationItemButtonView (5,7,48,30)
+      UINavigationItemView (-47,9,47,27)
+navigation depth 2

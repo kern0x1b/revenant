@@ -1,0 +1,3 @@
+_HostRootView (0,0,200,120)
+  UIView (69,29,63,63)
+    UILabel (0,0,63,63) "One line"

@@ -1,0 +1,56 @@
+== initial
+_HostRootView (0,0,320,460)
+  UIView (0,0,320,460)
+    UIView (8,8,304,444)
+      UIView (0,0,304,10)
+        UIView (0,0,304,10)
+      UIView (0,16,304,12)
+        UIView (0,0,40,12)
+          UIView (0,0,40,12)
+        UIView (44,6,248,0)
+        UIView (296,0,8,12)
+          UIView (0,0,8,12)
+      UIView (0,34,304,12)
+        UIView (0,0,40,12)
+          UIView (0,0,40,12)
+        UIView (44,6,240,0)
+        UIView (288,0,16,12)
+          UIView (0,0,16,12)
+      UIView (152,52,0,392)
+== after state change
+_HostRootView (0,0,320,460)
+  UIView (0,0,320,460)
+    UIView (8,8,304,444)
+      UIView (0,0,304,17)
+        UIView (0,0,304,17)
+      UIView (0,23,304,12)
+        UIView (0,0,120,12)
+          UIView (0,0,120,12)
+        UIView (124,6,168,0)
+        UIView (296,0,8,12)
+          UIView (0,0,8,12)
+      UIView (0,41,304,12)
+        UIView (0,0,120,12)
+          UIView (0,0,120,12)
+        UIView (124,6,160,0)
+        UIView (288,0,16,12)
+          UIView (0,0,16,12)
+      UIView (0,59,304,12)
+        UIView (0,0,120,12)
+          UIView (0,0,120,12)
+        UIView (124,6,152,0)
+        UIView (280,0,24,12)
+          UIView (0,0,24,12)
+      UIView (0,77,304,20)
+        UIView (0,0,304,20)
+      UIView (152,103,0,341)
+body evaluations: 2
+update loop: 200 updates in 0.519 s, 2.59 ms average, 2.92 ms worst
+build+layout of the screen: 6.5 ms average
+deep color depth 1: build+layout 26.9 ms, update 13.90 ms average, 14.74 ms worst, 439 sizes computed and 432 cached per update
+deep color depth 2: build+layout 44.1 ms, update 32.28 ms average, 33.07 ms worst, 1183 sizes computed and 1656 cached per update
+deep color depth 3: build+layout 73.3 ms, update 56.22 ms average, 61.27 ms worst, 2135 sizes computed and 3417 cached per update
+deep color depth 4: build+layout 100.9 ms, update 78.09 ms average, 79.36 ms worst, 2999 sizes computed and 5025 cached per update
+deep color depth 5: build+layout 127.9 ms, update 102.32 ms average, 107.25 ms worst, 3863 sizes computed and 6633 cached per update
+deep color depth 6: build+layout 166.0 ms, update 139.01 ms average, 146.11 ms worst, 5363 sizes computed and 9470 cached per update
+ok

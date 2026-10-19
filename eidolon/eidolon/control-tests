@@ -1,0 +1,5 @@
+Package: space.kern0x1b.eidolon.tests
+Name: Eidolon engine tests
+Architecture: iphoneos-arm
+Description: Eidolon's engine tests as one binary, which xmake emulate run starts in the guest and
+ whose exit status is the verdict.

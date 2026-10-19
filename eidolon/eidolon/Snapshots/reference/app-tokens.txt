@@ -1,0 +1,78 @@
+_HostRootView (0,0,320,400)
+  UILayoutContainerView (0,0,320,400)
+    UINavigationTransitionView (0,0,320,400)
+      UIViewControllerWrapperView (0,44,320,356)
+        _HostRootView (0,0,320,356)
+          UIView (0,0,320,356)
+            UIView (0,0,320,44)
+              UISearchBar (0,0,320,44)
+                UISearchBarBackground (0,0,320,44)
+                UISearchBarTextField (5,6,310,31) field "" placeholder="Search"
+                  UITextFieldBorderView (0,0,310,31)
+                  UIImageView (10,8,15,15)
+                  UITextFieldLabel (30,7,252,18) "Search"
+            UIView (0,44,320,312)
+              UIView (0,0,320,312)
+                UIView (0,0,320,30)
+                  UIView (0,0,320,30)
+                    UIScrollView (0,0,320,30)
+                      UIView (0,0,176,25)
+                        UIView (8,0,160,25)
+                          UIView (0,0,77,25)
+                            UIView (0,0,77,25)
+                              UIView (0,0,77,25)
+                                UIView (0,4,77,17)
+                                  UIView (8,0,61,17)
+                                    UILabel (0,1,40,15) "Unread"
+                                    UIButton (44,0,17,17) button ""
+                                      UIView (0,0,17,17)
+                                        UIImageView (0,0,17,17)
+                          UIView (83,0,77,25)
+                            UIView (0,0,77,25)
+                              UIView (0,0,77,25)
+                                UIView (0,4,77,17)
+                                  UIView (8,0,61,17)
+                                    UILabel (0,1,40,15) "Starred"
+                                    UIButton (44,0,17,17) button ""
+                                      UIView (0,0,17,17)
+                                        UIImageView (0,0,17,17)
+                UITableView (0,30,320,282) table sections=[-:6]
+                  UITableViewCell (0,220,320,44)
+                    UITableViewCellContentView (0,0,320,43)
+                      UIView (10,0,300,43)
+                        UILabel (0,11,300,21) "Message 6"
+                    UIView (0,43,320,1)
+                  UITableViewCell (0,176,320,44)
+                    UITableViewCellContentView (0,0,320,43)
+                      UIView (10,0,300,43)
+                        UILabel (0,11,300,21) "Message 5"
+                    UIView (0,43,320,1)
+                  UITableViewCell (0,132,320,44)
+                    UITableViewCellContentView (0,0,320,43)
+                      UIView (10,0,300,43)
+                        UILabel (0,11,300,21) "Message 4"
+                    UIView (0,43,320,1)
+                  UITableViewCell (0,88,320,44)
+                    UITableViewCellContentView (0,0,320,43)
+                      UIView (10,0,300,43)
+                        UILabel (0,11,300,21) "Message 3"
+                    UIView (0,43,320,1)
+                  UITableViewCell (0,44,320,44)
+                    UITableViewCellContentView (0,0,320,43)
+                      UIView (10,0,300,43)
+                        UILabel (0,11,300,21) "Message 2"
+                    UIView (0,43,320,1)
+                  UITableViewCell (0,0,320,44)
+                    UITableViewCellContentView (0,0,320,43)
+                      UIView (10,0,300,43)
+                        UILabel (0,11,300,21) "Message 1"
+                    UIView (0,43,320,1)
+                  _UITableViewSeparatorView (0,307,320,1)
+                  _UITableViewSeparatorView (0,351,320,1)
+                  _UITableViewSeparatorView (0,395,320,1)
+                  _UITableViewSeparatorView (0,439,320,1)
+    UINavigationBar (0,0,320,44)
+      _UINavigationBarBackground (0,0,320,44)
+        UIImageView (0,44,320,3)
+      UINavigationItemView (139,9,41,27)
+navigation depth 1

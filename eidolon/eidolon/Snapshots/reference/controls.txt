@@ -1,0 +1,37 @@
+_HostRootView (0,0,320,220)
+  UIView (0,17,320,187)
+    UIView (12,12,296,163)
+      UIView (0,0,296,44)
+        UIRoundedRectButton (0,0,76,44) button "Left"
+          UIGroupTableViewCellBackground (0,0,76,44)
+          UIImageView (1,1,74,43)
+          UIButtonLabel (24,12,28,19) "Left"
+        UIView (84,22,117,0)
+        UIRoundedRectButton (209,0,87,44) button "Right"
+          UIGroupTableViewCellBackground (0,0,87,44)
+          UIImageView (1,1,85,43)
+          UIButtonLabel (24,12,39,19) "Right"
+      UIView (0,54,296,27)
+        UILabel (0,3,52,21) "Switch"
+        UISwitch (217,0,79,27) switch on=false
+          _UISwitchInternalView (-1,0,79,27)
+            UIImageView (1,0,77,27)
+            UIView (1,0,77,27)
+              UIImageView (-52,0,79,27)
+              UIImageView (-52,0,131,27)
+              UIImageView (-1,0,29,27)
+      UITextField (0,91,296,31) field "typed text" placeholder="Placeholder"
+        UITextFieldRoundedRectBackgroundView (0,0,296,31)
+          UIImageView (0,0,8,31)
+          UIImageView (8,0,280,31)
+          UIImageView (288,0,8,31)
+        UITextFieldLabel (7,2,282,21) "typed text"
+      UIView (0,132,296,1)
+      UIView (0,143,296,20)
+        UIView (0,0,40,20)
+          UIView (0,0,40,20)
+        UIView (48,0,40,20)
+          UIView (0,0,40,20)
+        UIView (96,0,40,20)
+          UIView (0,0,40,20)
+        UIView (144,10,152,0)

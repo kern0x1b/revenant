@@ -1,0 +1,31 @@
+_HostRootView (0,0,320,300)
+  UIView (0,7,320,287)
+    UIView (10,10,300,267)
+      UILabel (0,0,133,21) "pi 3.142 count 42"
+      UILabel (0,27,81,21) "spaced"
+      UILabel (0,54,104,21) "hidden secret"
+      UIView (0,81,94,47)
+        UILabel (0,0,46,21) "Name"
+        UILabel (52,0,42,21) "Value"
+        UILabel (17,23,12,21) "A"
+        UILabel (54,23,38,21) "1000"
+        UIView (0,46,94,1)
+      UIView (0,134,120,30)
+        UIView (0,0,120,30)
+          UILabel (71,9,49,21) "corner"
+      UIView (0,170,300,60)
+        UITableView (0,0,300,60) table sections=[-:1]
+          UITableViewCell (0,0,300,44)
+            UITableViewCellContentView (0,0,266,43)
+              UIView (10,0,246,43)
+                UILabel (0,11,246,21) "Inbox"
+            UILabel (266,12,24,20) "7"
+            UIView (0,43,300,1)
+          _UITableViewSeparatorView (0,87,300,1)
+          _UITableViewSeparatorView (0,131,300,1)
+      UITextField (0,236,300,31) field "" placeholder="Search"
+        UITextFieldRoundedRectBackgroundView (0,0,300,31)
+          UIImageView (0,0,8,31)
+          UIImageView (8,0,284,31)
+          UIImageView (292,0,8,31)
+        UITextFieldLabel (7,2,286,21) "Search"
