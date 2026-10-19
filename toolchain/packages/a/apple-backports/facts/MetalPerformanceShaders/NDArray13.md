@@ -67,12 +67,12 @@ separate walks and neither is derived from the other.
 
 ## The plant, and why this object's is not the family-wide one
 
-The matrix family's control is `CHARON_PLANT` in `CharonMPS.h`, which perturbs what `CharonMPSStore`
+The matrix family's control is `REVENANT_PLANT` in `RevenantMPS.h`, which perturbs what `RevenantMPSStore`
 writes. **It cannot reach this object, and that is measured.** This file copies BYTES and never calls
 the store - the release's own accessors copy bytes too, "Copy bytes from MPSNDArray into buffer" and
 "Copy bytes from a buffer into the MPSNDArray" (`MPSCore/MPSNDArray.h:383` and `:397`) - so a plant on
 the store path produces a byte-identical binary and a green run the harness did not earn. The control
-here is `CHARON_NDARRAY_PLANT`, which perturbs the copy itself.
+here is `REVENANT_NDARRAY_PLANT`, which perturbs the copy itself.
 
 Two things about it were found by the harness refusing to go green, and both are worth recording:
 

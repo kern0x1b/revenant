@@ -15,7 +15,7 @@ shows. Up to four are supported by the system; the port does not draw them.
 - Equality of styles does not compare the accessories: this was not measured, and the port keeps equality as it was.
 
 Measured by `tests/backports/host/pointer-accessory` (42 checks; the port's classes and the host's print the same values, and the nine
-controls fail). The port's class is what the test builds in the port's build, with the CharonPort prefix stripped from the names.
+controls fail). The port's class is what the test builds in the port's build, with the RevenantPort prefix stripped from the names.
 
 The pointer itself is not drawn with the accessories, and nothing on the port's pointer is placed relative to an accessory. The
 `+[UIPointerStyle systemPointerStyle]` class method is a separate row and is not built here.
@@ -28,7 +28,7 @@ Source: the host's own UIKit under Mac Catalyst, and the header of SDK 16.4 (`UI
 
 - Its class is `UIPointerAccessory`, and its shape is a `UIPointerShape` holding a path: 11 elements (a move, six curves and lines, and a
   close), with bounds from the origin of about 8.54 by 8.77 points. The path is the same at every position, so two arrows' shapes compare equal and
-  are not the same object. The port builds the same path from the host's elements, at full precision, in `charon_arrowPath()`.
+  are not the same object. The port builds the same path from the host's elements, at full precision, in `revenant_arrowPath()`.
 - The position is the one given. The orientation is **YES**: the header says a system vended accessory's orientation varies, and the arrow's is
   YES where a custom accessory's is NO. A copy of the arrow has NO, as a copy of a custom one does, and setting the orientation NO keeps NO.
 - It is not a rounded rectangle: the arrow's shape does not equal one.

@@ -9,7 +9,7 @@ attachments, and the linked-function sets). It asks no device anything. Nothing 
 
 `tests/backports/host/mesh-render-pipeline-descriptor/run.sh` builds the port's class for Catalyst beside Apple's Metal
 in one process, with the class, its colour attachment array and descriptor (`Metal/MTLRenderPipelineDescriptor8.m`) and
-its buffer array (`Metal/MTLReflection11.m`) all renamed `CharonHost<Name>`. It compares the members at a fresh
+its buffer array (`Metal/MTLReflection11.m`) all renamed `RevenantHost<Name>`. It compares the members at a fresh
 descriptor, one with every member set away from its default, a copy of that one, and the set one after `-reset`. A
 mutant that makes the fresh rasterization off turns the fresh comparison red, and it does.
 
@@ -43,7 +43,7 @@ its own arrays.
 ## Copy and linked functions
 
 The three linked-function properties are `null_resettable` and `copy`, measured: a set value reads back as a copy, not
-the object set, and a nil set reads back a fresh object. The port does the same (`CharonCopyLinkedFunctions`
+the object set, and a nil set reads back a fresh object. The port does the same (`RevenantCopyLinkedFunctions`
 copies the four members, since `MTLLinkedFunctions` has no `NSCopying` in the port).
 
 `binaryArchives` is a `copy` array; nil is its own answer, and an empty array set reads back as an empty array.

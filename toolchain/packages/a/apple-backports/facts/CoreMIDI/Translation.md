@@ -3,7 +3,7 @@
 The release has MIDI 1.0 bytes only, so a port that is made for Universal MIDI Packets converts both ways. Each rule
 below is one macOS CoreMIDI was measured to apply, through virtual endpoints on this host (macOS, arm64) on 2026-10-09;
 the measurements are the lines of the oracle's output, `tests/backports/host/coremidi/oracle/batch.m`, and the probes
-recorded beside them. `CharonCoreMIDI.c` implements the rules and `tests/backports/host/coremidi/run.sh` holds it to
+recorded beside them. `RevenantCoreMIDI.c` implements the rules and `tests/backports/host/coremidi/run.sh` holds it to
 them: every one of the 896 recorded 1.0 to 2.0 answers and of the 106 880 recorded 2.0 to 1.0 answers (the 65 536 velocities,
 the 32-bit values and the rest of that batch), read from the recorded files at run time, and the probes. Nothing here is taken from the 26.2 headers, which say what a value means and not how a
 conversion rounds.
@@ -11,7 +11,7 @@ conversion rounds.
 ## 1.0 to 2.0 (a 2.0 port receiving a 1.0 packet)
 
 - Each source connected to a port has its own parser: the SysEx and the running status of one source's bytes do not carry into
-  another source's (CharonMIDIPorts.m, keyed by the source's connection reference). The measured fact behind it is the
+  another source's (RevenantMIDIPorts.m, keyed by the source's connection reference). The measured fact behind it is the
   legacy input port's: each source's bytes come out as their own packets, unchanged (oracle/inputport-sources.m,
   inputport-sources-macos.txt). The UMP input port's state is not measured. The per-source parser is the reading that two byte
   streams are two streams; differential-ports.m checks that a SysEx open on one source is ended by that source's own F7, with
@@ -39,7 +39,7 @@ conversion rounds.
 ## 2.0 to 1.0 (a list sent or received through a 1.0 endpoint)
 
 - A list sent to a 2.0 destination this process made is not converted: each packet's time stamp and words reach its block as
-  they were sent (CharonMIDISend, CharonMIDIPorts.m), so a 2.0 velocity of 0x1234 arrives as 0x1234, which is what macOS's
+  they were sent (RevenantMIDISend, RevenantMIDIPorts.m), so a 2.0 velocity of 0x1234 arrives as 0x1234, which is what macOS's
   own 2.0 destination gives for the same list (differential-ports.m). A 1.0 destination of the library, and a source, still
   take the 1.0 route below.
 - A disposed destination of the library takes nothing: its block is not called, from a send or from in-process delivery,
@@ -73,8 +73,8 @@ conversion rounds.
 
 ## 2.0 sources and the 2.0 input ports connected to them (a measured gap)
 
-A 2.0 list sent to a 2.0 DESTINATION this process made reaches the destination's block as it was sent (CharonMIDIPorts.m,
-charon_deliver_2_0; checked against the release's own 2.0 destination in differential-ports.m). The same is not true of a 2.0
+A 2.0 list sent to a 2.0 DESTINATION this process made reaches the destination's block as it was sent (RevenantMIDIPorts.m,
+revenant_deliver_2_0; checked against the release's own 2.0 destination in differential-ports.m). The same is not true of a 2.0
 SOURCE and the 2.0 input port connected to it: `MIDIReceivedEventList` on a source converts the list to MIDI 1.0 bytes and hands
 them to the release's `MIDIReceived`, and the port's read procedure converts them back, so a 16-bit velocity is cut to 7 bits and
 spread again.

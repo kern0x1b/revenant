@@ -56,7 +56,7 @@ the identity — and that the host agrees about the two of those that are declar
 one instruction:
 
 ```
--[charon_host_PHASEEngine rootObject]:
+-[revenant_host_PHASEEngine rootObject]:
   mov x0, #0x0        <- a constant nil, no load at all
 ```
 
@@ -69,8 +69,8 @@ body**, so the accessor was still
 
 Three measurements had been consistent with that and none had said it outright, because each was
 answering a question about the *class* — the answering method was the port's own (`dladdr`:
-`-[charon_host_PHASEEngine rootObject]`), the ivar was strong and assigned in the only initializer, and
-the slot at offset 72 held a live object. `@synthesize rootObject = _charon_rootObject;` changed
+`-[revenant_host_PHASEEngine rootObject]`), the ivar was strong and assigned in the only initializer, and
+the slot at offset 72 held a live object. `@synthesize rootObject = _revenant_rootObject;` changed
 nothing because **a hand-written accessor wins over a synthesised one**, and the one it won with
 returned nil. The tenth ivar was never a clue: the SDK's own 26.0 `lastRenderTime` property is
 auto-synthesised into `_lastRenderTime`, which is ordinary and one class.
@@ -78,7 +78,7 @@ auto-synthesised into `_lastRenderTime`, which is ordinary and one class.
 The getter returns the ivar, there is exactly one definition of the method again, and:
 
 ```
-stage a fresh engine's root object: port charon_host_PHASEObject, host PHASERootObject
+stage a fresh engine's root object: port revenant_host_PHASEObject, host PHASERootObject
 checks=37 failures=0
 ```
 

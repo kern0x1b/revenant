@@ -114,7 +114,7 @@ answers solid on all of them (`border-plain`, `border-radii`, `border-zero`, `bo
   the array is read at all.
 * `bs-d` carries `/S /D` and no `/D` and answers `[3 2]`; `bs-dash-string` carries `/S /D` with a `/D`
   that is a PDF string and answers the same `[3 2]`. So `[3 2]` is the measured **default** for a
-  dashed border whose `/D` is not an array of numbers, and `charonDefaultDashPattern()` is where it is
+  dashed border whose `/D` is not an array of numbers, and `revenantDefaultDashPattern()` is where it is
   written down.
 
 ## `-borderKeyValues`

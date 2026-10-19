@@ -30,7 +30,7 @@ in one process: twenty-one records, equal), and read again on an iPhone 4S and a
 ## How the port does it
 
 The release runs a queue on threads of its own, so the port takes the scheduling of such a queue into its own hands. A queue that is
-given an underlying queue gets a scheduler (`CharonOperationScheduler`) that keeps the waiting and the running operations, watches
+given an underlying queue gets a scheduler (`RevenantOperationScheduler`) that keeps the waiting and the running operations, watches
 `isReady` and `isFinished` of each by key value observing, and starts an operation with `dispatch_async` onto the underlying
 queue when it is ready, the limit lets it and the queue is not suspended. `-addOperation:`, `-addOperations:waitUntilFinished:`,
 `-addOperationWithBlock:`, `-operations`, `-operationCount`, `-cancelAllOperations`, `-waitUntilAllOperationsAreFinished`, `-setSuspended:`,

@@ -48,7 +48,7 @@ Eleven assertions, and each mutation names the row it breaks:
 | `local-identity-holds` | the options object holds and reads back the identity | — |
 | the retain balance | — | dropping the `+1` → `access-empty-true: got 0` |
 
-The two objects the case links: `SecObjectWrappersIdentity12_0.m` holds `CharonSecIdentity`, and
+The two objects the case links: `SecObjectWrappersIdentity12_0.m` holds `RevenantSecIdentity`, and
 `SecObjectWrappersIdentity16_0.m` holds the accessor and **declares** that class without implementing it —
 a second `@implementation` would be a duplicate definition, and there is none.
 

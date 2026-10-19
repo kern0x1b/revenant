@@ -3,7 +3,7 @@
 `NEProxyServer`, `NEProxySettings`, `NEIPv4Route` and `NEIPv4Settings` are state, as their headers say of
 them: the system reads a settings object when a configuration is applied, so what a port object holds is
 what a release's own object would hold. The build SDK is 16.4 and has no NetworkExtension.h, so
-`NetworkExtension/CharonNetworkExtensionSettings.h` is this package's, written from the iOS 26.2 headers'
+`NetworkExtension/RevenantNetworkExtensionSettings.h` is this package's, written from the iOS 26.2 headers'
 own declarations - including the three names capitalised in Apple's header **and** in the ledger:
 `HTTPEnabled`, `HTTPSEnabled`, `HTTPSServer`.
 

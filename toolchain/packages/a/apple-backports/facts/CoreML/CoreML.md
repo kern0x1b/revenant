@@ -183,11 +183,11 @@ Two more, and both are about what the build measures rather than what it carries
 
   Fixing the container uncovered three answers this port did not have, all of them about a FIXED
   size and all of them measured against the release rather than argued. The reader left its range
-  fields at `CHARON_ML_FLEXIBLE` when no range node was present, so a fixed size took the range
+  fields at `REVENANT_ML_FLEXIBLE` when no range node was present, so a fixed size took the range
   branch and answered `NSRange(NSUIntegerMax, 0)` for both dimensions; it now reads a fixed size as
-  no range at all (`CharonMLModel.c`). `charon_ml_image_size_constraint_of` then answers the
+  no range at all (`RevenantMLModel.c`). `revenant_ml_image_size_constraint_of` then answers the
   enumerated kind with the one size and a length-one range per dimension
-  (`CharonMLConstraints.h`). And a required feature the caller left out now says what the release
+  (`RevenantMLConstraints.h`). And a required feature the caller left out now says what the release
   says, `Feature image is required but not specified.` (`MLModel.m`), instead of a sentence of the
   port's own that named the feature's type.
 
@@ -201,7 +201,7 @@ Two more, and both are about what the build measures rather than what it carries
 - **`__OBJC_PROTOCOL_$_MLFeatureProvider` is defined by two objects.** `MLFeatureProvider.m` and
   the generated `CoreMLBackportsProtocols11.0.m` both emit it, because any translation unit that
   sees a protocol's definition and references it emits the object, and `MLFeatureProvider.m`
-  must import `<CoreML/CoreML.h>` for the enums `CharonMLBridge.h` needs (`MLFeatureType`,
+  must import `<CoreML/CoreML.h>` for the enums `RevenantMLBridge.h` needs (`MLFeatureType`,
   `MLFeatureTypeInt64`; without it the first error is `unknown type name 'MLFeatureType'`). The
   two used to DISAGREE -- the port's own declaration gave the protocol the base `<NSObject>` and
   the SDK's header gives it none -- and ld64 kept whichever weak definition came first on the
@@ -235,7 +235,7 @@ the three kinds of row answer differently:
   application compiled against Core ML's own header cannot send them and one that sends by name gets
   `doesNotRecognizeSelector`. The port's objects inherit NSObject's and there is no body of the port's to carry.
 - **Two protocols are carried**: `MLCustomLayer` and `MLCustomModel`, both declared with a body by SDK 16.4
-  (`MLCustomLayer.h:19`, `MLCustomModel.h:19`), so `CharonCoreMLProtocols.h` forward-declares them and
+  (`MLCustomLayer.h:19`, `MLCustomModel.h:19`), so `RevenantCoreMLProtocols.h` forward-declares them and
   `protocol_sources()` emits their metadata objects into the generated protocol source. Measured: that object
   compiles clean with the package's flags and `nm` reports `__OBJC_PROTOCOL_$_MLCustomLayer` and
   `$_MLCustomModel` in it; none of the 21 port objects defines either, so each has exactly one definition.
@@ -395,13 +395,13 @@ archive carries, so the value comes back of the image type and undefined, and th
 
 | File | Holds |
 | --- | --- |
-| `CharonMLSchema.h`, `CharonMLSchema.c`, `CharonMLSchema.inc` | the specification as a table, and the lookup over it |
-| `CharonMLProto.h`, `CharonMLProto.c` | the wire format, and the document it builds |
-| `CharonMLValue.h`, `CharonMLValue.c` | a feature's value: a number, a string, an array, a dictionary |
-| `CharonMLTensor.h`, `CharonMLTensor.c` | a float tensor and the shape arithmetic the layers need |
-| `CharonMLModel.h`, `CharonMLModel.c` | the model: its kind, its description, its class labels, its loading |
-| `CharonMLLayers.h`, `CharonMLLayers.c`, `CharonMLLayerKinds.h`, `CharonMLLayerKinds.c` | the layers, dispatched by the field number of the specification's layer oneof |
-| `CharonMLPredict.h`, `CharonMLPredict.c` | the run: pipelines, networks, trees, GLMs, preprocessing, and the answers |
+| `RevenantMLSchema.h`, `RevenantMLSchema.c`, `RevenantMLSchema.inc` | the specification as a table, and the lookup over it |
+| `RevenantMLProto.h`, `RevenantMLProto.c` | the wire format, and the document it builds |
+| `RevenantMLValue.h`, `RevenantMLValue.c` | a feature's value: a number, a string, an array, a dictionary |
+| `RevenantMLTensor.h`, `RevenantMLTensor.c` | a float tensor and the shape arithmetic the layers need |
+| `RevenantMLModel.h`, `RevenantMLModel.c` | the model: its kind, its description, its class labels, its loading |
+| `RevenantMLLayers.h`, `RevenantMLLayers.c`, `RevenantMLLayerKinds.h`, `RevenantMLLayerKinds.c` | the layers, dispatched by the field number of the specification's layer oneof |
+| `RevenantMLPredict.h`, `RevenantMLPredict.c` | the run: pipelines, networks, trees, GLMs, preprocessing, and the answers |
 | `tools/coreml/gen-schema.lua` | the generator for the table |
 | `tools/coreml/make-models.lua` | the containers, and the host's own answers for them |
 | `tools/coreml/ml-dump.c`, `tools/coreml/predict-main.c` | the two harnesses the checks drive |
@@ -574,7 +574,7 @@ and are left out so the block stays short -- the run they come from is the one a
 of them.
 
 And the release side, from the two armv7 caches this package deploys on
-(`CHARON_ROOT="$PWD" xmake l tools/corpus/cache-census.lua ML 6.1.3 4.3`, the same reader
+(`REVENANT_ROOT="$PWD" xmake l tools/corpus/cache-census.lua ML 6.1.3 4.3`, the same reader
 `registry/CoreNFC/ios11.json` cites):
 
 | release | images naming ML | classes | of which `ML*` | protocols | of which `ML*` |

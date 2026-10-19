@@ -7,8 +7,8 @@ now implemented, and what they do, is written down here rather than left to the 
 
 Loading a texture from image bytes needs no GPU driver beyond what this port's own
 Metal-over-OpenGL-ES-2.0 device already does for real: `-newTextureWithDescriptor:` and
-`-replaceRegion:mipmapLevel:withBytes:bytesPerRow:` both already exist in `CharonMetalDevice.m`/
-`CharonMetalTexture.m`.
+`-replaceRegion:mipmapLevel:withBytes:bytesPerRow:` both already exist in `RevenantMetalDevice.m`/
+`RevenantMetalTexture.m`.
 
 `-initWithDevice:` keeps the device. Every loading method (`newTextureWithCGImage:`,
 `newTextureWithData:`, `newTextureWithContentsOfURL:`, `newTextureWithName:scaleFactor:bundle:`,
@@ -29,7 +29,7 @@ out of the header needs (`MTKTextureLoader.h:44` and its siblings).
   top-left. A `CGImage` carries no origin - there is no flag on it for where row 0 is - so for the
   two conditional origins the caller's choice *is* that metadata, and the loader takes it at its word:
   `TopLeft` flips, `BottomLeft` does not, which is the whole difference between them. A flip is the
-  rows swapped end for end (`CharonMTKFlipRows`), not a mirror, because the destination is a GLES
+  rows swapped end for end (`RevenantMTKFlipRows`), not a mirror, because the destination is a GLES
   texture whose row 0 is the bottom one.
 - **TextureUsage** (`:62`), **TextureCPUCacheMode** (`:69`) and **TextureStorageMode** (`:76`) are
   set on the port's real `MTLTextureDescriptor`, each as the header defines it: the texture "will be
@@ -85,7 +85,7 @@ Their two controls are the same check run on a class that does override `-init` 
 a name no framework has (which is not a class).
 
 The port's side, by `tests/backports/host/metalkit-init/run.sh`: the port's objects for these five classes
-are built for Catalyst beside Apple's MetalKit in one process, every class renamed `CharonHost<Name>`, and
+are built for Catalyst beside Apple's MetalKit in one process, every class renamed `RevenantHost<Name>`, and
 asked the same question. Each inherits NSObject's `-init`, defines none, and `alloc` followed by `-init`
 gives an instance of its class. The run has 22 checks, the same controls, and a mutation in which the
 override control loses its `-init`; the mutant turns red on that control.

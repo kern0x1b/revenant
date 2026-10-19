@@ -2,7 +2,7 @@
 
 The iOS 7 surface of SpriteKit's `SKTexture`: a rectangle of an image, its size, its filter and its mipmap flag, and the
 two constructors that need no image loader. The port's object is `SpriteKit/SpriteKitTexture7.m`, declared by
-`SpriteKit/CharonSpriteKit.h`. The rows are in `registry/SpriteKit/ios7.json` (with the owed constructors), `ios8.json`
+`SpriteKit/RevenantSpriteKit.h`. The rows are in `registry/SpriteKit/ios7.json` (with the owed constructors), `ios8.json`
 (the noise and normal-map members) and `ios9.json` (`CGImage`).
 
 ## Oracle and what was measured

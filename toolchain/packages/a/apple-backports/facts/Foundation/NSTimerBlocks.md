@@ -11,7 +11,7 @@ The three are one construction. `-initWithFireDate:interval:repeats:block:` make
 block with the timer it is given. It then asks the timer's own long initializer, the one iOS has had since 2.0, for a
 timer whose target is that object and whose selector is `fire:`, with no user info, and lets go of its own hold on the
 object. The timer keeps the object, and so the block, until it is invalidated. The port's object is
-`CharonTimerBlockTarget`.
+`RevenantTimerBlockTarget`.
 
 - `+timerWithTimeInterval:repeats:block:` allocates a timer with `-allocWithZone:` on the receiver and initializes it
   with a fire date of now plus the interval and the same interval, and answers it autoreleased. The timer is not on

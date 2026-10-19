@@ -6,7 +6,7 @@ Test: `tests/backports/host/mps-rnn-descriptors/` (descriptor.m, run.sh)
 ## Measured
 
 - **Host:** macOS 27.0.1 (26A434), MPSNeuralNetwork of that host, built as Catalyst
-  (`arm64-apple-ios16.0-macabi`), Apple's class and the port's class (`CharonHostMPSLSTMDescriptor`) in one process.
+  (`arm64-apple-ios16.0-macabi`), Apple's class and the port's class (`RevenantHostMPSLSTMDescriptor`) in one process.
 - **Run:** `tests/backports/host/mps-rnn-descriptors/run.sh`, 40 checks, 0 failures.
 - **Declared members compared:** the base class's five and the sixteen the 16.4 header declares here
   (MPSRNNLayer.h lines 389-508): `memoryWeightsAreDiagonal` (BOOL); twelve weight sources, three per gate

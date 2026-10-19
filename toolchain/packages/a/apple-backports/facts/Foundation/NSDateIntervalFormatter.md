@@ -35,7 +35,7 @@ property of `FoundationBackports` and not of a band, and `modules/apple/deps.lua
 into `-l<name>` with no weak form, so a 4.3 band that does **not** use this class still carries an
 LC_LOAD_DYLIB for `libicucore`, whose four symbols the 4.3 release exports none of. What is weak is
 the three **imports**: they are declared `__attribute__((weak_import))` and bind NULL on 4.3, which is
-what `-[NSDateIntervalFormatter charon_intervalFrom:to:]` checks for before its first call. So the
+what `-[NSDateIntervalFormatter revenant_intervalFrom:to:]` checks for before its first call. So the
 cost is one load command a band does not need and one library on a release whose libicucore holds
 none of the four symbols, and not a fault: the import check passes because 4.3 *has* a libicucore, and
 the release is never asked for a symbol it does not have. A weak form in `deps.lua` would fix it and

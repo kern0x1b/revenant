@@ -10,7 +10,7 @@ Measured 2026-09-28 in the `api-reality` worktree, for the ARKit series on `cfde
 | 6.1.3 | yes — the port implements the SDK's own class | **writable**, except the two gaps below |
 | 8.0+ | native | the same rows |
 
-The port implements the SDK's declared classes rather than declaring its own: `CharonSCN.h:1` is
+The port implements the SDK's declared classes rather than declaring its own: `RevenantSCN.h:1` is
 `#import <SceneKit/SceneKit.h>`, and `SCNView.m` is `@implementation SCNView` carrying
 `_OBJC_CLASS_$_SCNView`. So `ARSCNView` compiled against the SDK's SceneKit header subclasses exactly
 the port's class, and `ARKitBackports` now names `SceneKitBackports` in its `libraries`.
@@ -107,7 +107,7 @@ return make no difference at all, which is what "SceneKit reads its own storage 
 like from the outside.
 
 **Consequences, per band.** On 6.x, where the SceneKit is this tree's, the port's `SCNGeometry` gets a
-package-internal `charon_replaceSources:elements:` declared in `CharonSCN.h` and in no public header,
+package-internal `revenant_replaceSources:elements:` declared in `RevenantSCN.h` and in no public header,
 which `-updateFromPlaneGeometry:` calls; the port implements the storage, so this is not a private ivar
 and not new public API, and it needs no registry row. On 8.0–11.2, where SceneKit is the system's, there
 is no such storage to reach and no override is read, so `ARSCNPlaneGeometry` on that band is a
@@ -193,7 +193,7 @@ the error is mine. The gate compiles an object with (`backports.lua:394-396`):
 file which the build does not see — the protocol members of `SCNAnimatable`
 (`animationKeys`, `insertMaterial:atIndex:`, `removeMaterialAtIndex:`,
 `replaceMaterialAtIndex:withMaterial:`), which the gate does not ask about. Under the real flags
-`SCNGeometry.m`, `SCNView.m` and `charon_replaceSources:elements:` are all clean, and every ARKit object
+`SCNGeometry.m`, `SCNView.m` and `revenant_replaceSources:elements:` are all clean, and every ARKit object
 compiles clean under the same flags.
 
 A hand compile is not a measurement of the tree's own files, and the rule is to build through the

@@ -23,13 +23,13 @@ does not reach.
 
 ## The record shape is the specification's, written out
 
-`CharonNDEF.h` and `CharonNDEF.m` in this directory are the NFC Forum NDEF Technical Specification's
+`RevenantNDEF.h` and `RevenantNDEF.m` in this directory are the NFC Forum NDEF Technical Specification's
 record, not a description of it: the header byte with MB, ME, SR, IL, TNF and CF; a one-byte type
 length; a payload length of one byte when SR is set and of four when it is not; **the ID length byte
 exactly when the header's IL says the field is there**, whatever length that byte names; then the type,
-the ID and the payload. `CharonNDEFRecordLength` answers **0** when a field is wider than the
+the ID and the payload. `RevenantNDEFRecordLength` answers **0** when a field is wider than the
 one-byte length fields can say, so a record that cannot be written is refused rather than truncated,
-and `CharonNDEFRecordDecode` answers 0 for bytes that are not a whole record of the length they claim.
+and `RevenantNDEFRecordDecode` answers 0 for bytes that are not a whole record of the length they claim.
 The URI RTD's 36-entry prefix table and the text RTD's status byte (its top bit the encoding, its low
 six the length of the language code) are the same source's.
 

@@ -86,7 +86,7 @@ collect, cancelling, the refused connection and the datagram one each need the p
 through the port's own accessors - a report of the port read by the host's accessor reads Apple's layout
 of a port object - so they are port-only checks, and they are what the emulator run at 6.1.3
 (`tests/backports/device`) is for. The report's numbers are the connection's own counters and the
-kernel's own `TCP_CONNECTION_INFO` (`charon_nw_tcp_round_trips`), which is what the accessors in
+kernel's own `TCP_CONNECTION_INFO` (`revenant_nw_tcp_round_trips`), which is what the accessors in
 `NWObjects.md` read.
 
 ## What the release's own TLS is, and how the connection uses it

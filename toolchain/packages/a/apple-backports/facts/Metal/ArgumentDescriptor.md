@@ -9,7 +9,7 @@ device anything. The argument encoder that would lay such a member out is not in
 ## What is measured, and against what
 
 `tests/backports/host/argument-descriptor/run.sh` builds the port's class for Catalyst beside Apple's Metal in one
-process, renamed `CharonHostMTLArgumentDescriptor`, and compares its members with Apple's: a fresh descriptor (from
+process, renamed `RevenantHostMTLArgumentDescriptor`, and compares its members with Apple's: a fresh descriptor (from
 the class method and from `new`), one with every member set away from its default, a copy of that one, and the
 original after the copy was taken. Equality and the hash are compared too. A mutant that makes the fresh texture
 type 1D turns the fresh comparison red, and it does.

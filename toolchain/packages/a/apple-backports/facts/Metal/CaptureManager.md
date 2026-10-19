@@ -6,7 +6,7 @@ actually starting a capture needs a backend this port does not have.
 
 ## What the port does
 
-`+sharedCaptureManager` gives a real per-process singleton (a private `initCharon` avoids the
+`+sharedCaptureManager` gives a real per-process singleton (a private `initRevenant` avoids the
 header's own `-init` being marked `API_UNAVAILABLE`, matching the pattern the real class uses).
 `-newCaptureScopeWithDevice:`/`-newCaptureScopeWithCommandQueue:` give a real object conforming to
 `MTLCaptureScope`: `-beginScope`/`-endScope` are no-ops (there is nothing to bracket), `label`,
@@ -22,7 +22,7 @@ deep-copies them.
 
 ## What is the actual wall
 
-There is no GPU trace capture backend in this port at all: `CharonMetalDevice` runs over OpenGL ES
+There is no GPU trace capture backend in this port at all: `RevenantMetalDevice` runs over OpenGL ES
 2.0, and nothing records or exports the Xcode GPU trace format this class's whole purpose is to
 produce. `-startCaptureWithDescriptor:error:`'s refusal names this precisely rather than leaving
 `isCapturing` stuck at `YES` or silently doing nothing while claiming success.

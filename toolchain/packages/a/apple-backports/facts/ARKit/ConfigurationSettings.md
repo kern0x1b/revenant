@@ -26,7 +26,7 @@ read and then set (a scratch probe, not in the tree):
 The support answers the host gives are NO for every configuration (`isSupported`, and `supportsSceneReconstruction:`,
 `supportsUserFaceTracking`, `supportsAppClipCodeTracking`): the host is a Mac, with no camera-and-gyroscope tracking of
 the kind an iPhone runs, so these answers say nothing about the iPhone 4S and are not the port's oracle. The port's own
-answers come from its tracker (`CharonARTracker.m`) and from the sensors it has.
+answers come from its tracker (`RevenantARTracker.m`) and from the sensors it has.
 
 The defaults are the host's, and a release's defaults are not assumed to differ from them. The port's tests check the
 defaults and the round trip on the 4S under 6.1.3, in `tests/backports/device/arkit-config`.
@@ -57,7 +57,7 @@ Until then the body rows stay as they are, and this file is the place that says 
 
 `initialWorldMap` is stored on the world and positional configurations, and a session that starts with one restores the
 tracker's world from it before the camera starts (`ARSession.m`, `runWithConfiguration:options:`). The map is an
-archive of the tracker's own state, `CharonARTracker`'s `worldState`: the points it has placed, with their positions in
+archive of the tracker's own state, `RevenantARTracker`'s `worldState`: the points it has placed, with their positions in
 the world, their identifiers, their ages and hits, and the planes the detector found in them, as bytes written
 field by field and little-endian, so an archive made on one build reads on another. The anchors the map was saved
 with are carried in after the run options have had their say, so they are the world the session starts with.

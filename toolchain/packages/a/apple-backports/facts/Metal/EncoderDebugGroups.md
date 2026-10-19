@@ -7,7 +7,7 @@ all three encoder classes.
 
 ## What the port does
 
-The three encoders and the command buffer share one helper, `Metal/CharonMetalDebugGroups.h`:
+The three encoders and the command buffer share one helper, `Metal/RevenantMetalDebugGroups.h`:
 
 * **A push** adds the name to a stack the encoder keeps. A nil name is pushed as the empty string, so the
   stack never holds nil.

@@ -156,7 +156,7 @@ object set's 177 symbols.
 **A cascade of no sections is a setup, not a refusal, on both creates.** Asked of the host:
 `vDSP_biquad_CreateSetup(coeffs, 0)`, `vDSP_biquad_CreateSetupD(coeffs, 0)` and
 `vDSP_biquadm_CreateSetup(coeffs, 0, 1)` each answer a setup, and so does the m-form at one section and no
-channels. `CharonBiquadCreate` already agrees - it refuses only on no coefficients or an overflow - so the
+channels. `RevenantBiquadCreate` already agrees - it refuses only on no coefficients or an overflow - so the
 shared create needed no change and the gated `vDSP_biquadm*` rows are untouched.
 
 **The port's saved `Delay` matches the host's own dump** on the layout, which the grid above now pins term by
@@ -272,7 +272,7 @@ SAN=1 sh tests/backports/host/vdspbiquad6/run.sh        # the same, under Addres
 FPC=off sh tests/backports/host/vdspbiquad6/run.sh      # the same, with contraction off on both sides
 ```
 
-`SAN=1` and `FPC=off` are in `run.sh`'s own flags on purpose: the renamed `_charon_host_*` objects have to be
+`SAN=1` and `FPC=off` are in `run.sh`'s own flags on purpose: the renamed `_revenant_host_*` objects have to be
 built the way the plain run builds them, or the comparison is between two different builds. An ad-hoc command
 that renames differently builds different objects and says nothing - which cost this shape a day.
 

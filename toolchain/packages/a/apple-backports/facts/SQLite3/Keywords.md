@@ -38,7 +38,7 @@ registry row and this file must say so; they do not yet, because nothing measure
 
 ## The test
 
-`tests/backports/host/sqlite3/run.sh` builds `Keywords.c` with each name renamed to `charon_port_*` and
+`tests/backports/host/sqlite3/run.sh` builds `Keywords.c` with each name renamed to `revenant_port_*` and
 `differential-keywords.c` calls both. It checks the count, every index from -2 to 148 (the return code, the name and
 its length, and that a failure leaves `n` alone and sets `z` NULL), and `sqlite3_keyword_check` on every keyword in
 upper, lower and mixed case, with the exact length, a short and a long length, a zero length, a changed last letter,

@@ -8,7 +8,7 @@ controller or from `[GCKeyboard coalescedKeyboard]` - which is nil, because noth
 ## What iOS 6 and iOS 4.3 carry: nothing
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua GC 6.1.3 4.3
+REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua GC 6.1.3 4.3
 ```
 
 ```
@@ -59,8 +59,8 @@ A touchpad the host builds itself, with no controller behind it, answers **nil**
 `touchSurface`. Measured, and it is on both sides of the comparison above: the host's two children are nil, so
 every axis read through them is zero and every handler the host runs is handed zeros and nans.
 
-This port builds **real** elements for both instead - the surface through the same `-charon_linkXAxis:yAxis:up:down:left:right:`
-a dpad spec is linked with, the button and the four surface buttons through the same `-initWithCharonSpec:` seam
+This port builds **real** elements for both instead - the surface through the same `-revenant_linkXAxis:yAxis:up:down:left:right:`
+a dpad spec is linked with, the button and the four surface buttons through the same `-initWithRevenantSpec:` seam
 every profile in this package uses - and the `touchpad elements` group of the differential reads them back
 through the accessors a caller uses: the axes carry the normalized values the call put in, the button carries its
 own value and its pressed state, and a value outside `[-1,1]` is clamped rather than taken whole.
@@ -172,7 +172,7 @@ would be a mode no controller ever entered, and the header's own sentence says t
 controller's answer. What the port does answer is the part it can: the trigger is a real
 `GCControllerButtonInput` underneath, so its value, pressed and touched states and its handlers are
 this package's own button behaviour, and the four `setMode` calls record what was asked for through a
-seam (`-charon_requestedMode:`) for a profile with a controller attached to send.
+seam (`-revenant_requestedMode:`) for a profile with a controller attached to send.
 
 #### The 15.4 half of the same family
 
@@ -190,7 +190,7 @@ Measured on the host's own trigger, same trigger and same drive as the four abov
 are **present**, and each call leaves `mode` 0, `status` 0 and `armPosition` 0. That is the same answer the
 four 14.5 calls give, and for the header's reason: `mode` is the controller's answer and no controller is
 behind it. So the port's three do what the four do - record the mode through
-`-charon_setRequestedMode:`, reach it back through `-charon_requestedMode:` - and the `adaptive trigger`
+`-revenant_setRequestedMode:`, reach it back through `-revenant_requestedMode:` - and the `adaptive trigger`
 group of the differential holds both families at 11 lines a side, all identical.
 
 What is deliberately **not** done with a curve's numbers: they are not clamped, ordered or stored. The

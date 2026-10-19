@@ -4,7 +4,7 @@
 
 Measured on the host: Apple M4 Pro, macOS 27.0.1, SDK 27.0. The oracle is Apple's own `MPSNNNeuronDescriptor` in the
 system's MetalPerformanceShaders framework. The port (`MPSNNNeuronDescriptor11.m`) is compiled for Catalyst beside
-Apple's framework with its classes renamed `CharonHost<Name>`, and both run in one process. The comparison is
+Apple's framework with its classes renamed `RevenantHost<Name>`, and both run in one process. The comparison is
 `tests/backports/host/mps-loss-descriptors/` (`run.sh`, `descriptor.m`): 70 checks, 0 failures on this host, and the
 mutant turns the loss-defaults check red (which is the loss descriptor's check, not this class's; this class has no
 mutant of its own).
@@ -21,7 +21,7 @@ mutant of its own).
 - **Refusals.** The release aborts on a PReLU type through any parameter factory, on a type of 16 or past it (16 and
   99 measured), and on a PReLU data length that is not a positive whole number of floats: 0, 1, 2, 3, 5, 6 and 7 bytes
   abort, while 4, 8, 12 and 4096 are taken. The port returns nil for the same calls and logs once through
-  `CharonMPSRefuse`.
+  `RevenantMPSRefuse`.
 - **Setters are not checked:** `neuronType` (PReLU and 16 are stored as set, and setting PReLU does not require data),
   `a`, `b`, `c`. `data` is retained as set (the same object).
 - **Copy** carries neuronType, a, b and c. The data is copied as an `NSData` (`-[NSData copy]`): a mutable array's
@@ -44,7 +44,7 @@ mutant of its own).
 ## Not measured
 
 - The archive bytes compared with each other: the class name inside each archive differs (`MPSNNNeuronDescriptor`
-  and `CharonHostMPSNNNeuronDescriptor`), so the two are decoded by their own classes and not across.
+  and `RevenantHostMPSNNNeuronDescriptor`), so the two are decoded by their own classes and not across.
 - A cross-decode of the release's archive by the port, or the reverse: it needs the class name rewritten in the
   archive, which this test does not do.
 - The iOS 11.3 to 16.x release, and the iOS 6.1.3 armv7 device. The host is macOS 27.0.1 under Catalyst.

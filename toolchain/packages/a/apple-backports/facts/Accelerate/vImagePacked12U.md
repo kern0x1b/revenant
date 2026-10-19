@@ -66,7 +66,7 @@ values cost nothing.
 and the reason was **two bugs in this band and one in the port** - not a difference in the host's answers that
 survived. With the case written properly, the port's packed row came into exact agreement with the host's at
 every width, and what it had been doing was writing the first pixel of every triple as zero. The defect was in
-`charon_packed12_put`:
+`revenant_packed12_put`:
 
 ```c
 pair = column % 2 ? ((pair & 0xf000u) | (value & 0xfffu))        // four bits, not twelve

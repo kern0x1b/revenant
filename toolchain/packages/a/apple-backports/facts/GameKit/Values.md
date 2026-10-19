@@ -37,7 +37,7 @@ recorded here rather than papered over with a category that cannot exist.
 against the SDK's declarations:
 
     checks=15 failures=0
-    and with the port built with -DCHARON_MUTATE_SETLOAD:
+    and with the port built with -DREVENANT_MUTATE_SETLOAD:
     FAIL the port's set load answers no sets: 1
     FAIL and an error rather than a value: no error at all
     checks=13 failures=2
@@ -47,7 +47,7 @@ answer on this surface is that the release has no such call — no sets, no imag
 identifier, no container record — so a probe that perturbs its own arguments has nothing to change:
 three shapes of that were tried and each was a tautology (inverting the expectation on a flag, setting a
 read-only property through KVC, and skipping the call so the checks disappear rather than fail). The
-switch is `CHARON_MUTATE_SETLOAD` in `GKLeaderboardSet7.m`: a load that answers one set and no error,
+switch is `REVENANT_MUTATE_SETLOAD` in `GKLeaderboardSet7.m`: a load that answers one set and no error,
 where the release has no call that makes a set at all.
 
 **One trap the probe found, and it is worth the record.** `GKErrorDomain` is a `GK_EXTERN_WEAK` global.

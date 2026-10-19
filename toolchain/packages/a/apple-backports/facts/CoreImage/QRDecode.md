@@ -1,6 +1,6 @@
-# QR decoder (CharonQRDecode.c): what the host measures, and what stays open
+# QR decoder (RevenantQRDecode.c): what the host measures, and what stays open
 
-The decoder is `Graphics/CharonQRDecode.c` (ISO/IEC 18004, plain C, no CoreImage). It reads a grid of modules and returns
+The decoder is `Graphics/RevenantQRDecode.c` (ISO/IEC 18004, plain C, no CoreImage). It reads a grid of modules and returns
 the message bytes and the mode. Its differential test is `tests/backports/host/ciqr/run.sh`: the host makes the codes with
 CIQRCodeGenerator, the grid is read from the pixels, and the decoder's message is held to CIDetector's messageString.
 
@@ -19,7 +19,7 @@ CIQRCodeGenerator, the grid is read from the pixels, and the decoder's message i
 
 ## What the decoder reads
 
-Numeric, alphanumeric and byte segments, any count of them in one symbol (the mode is then CharonQRModeMixed). Versions
+Numeric, alphanumeric and byte segments, any count of them in one symbol (the mode is then RevenantQRModeMixed). Versions
 1 to 40, all four levels: 280 host cases (5 kinds x versions 1, 2, 7, 10, 25, 40 x four levels, with damage; and byte,
 clean, versions 1 to 40 x four levels) decode to the host's text.
 
@@ -28,7 +28,7 @@ decodes; flipping a quarter of the modules fails with an error and no text.
 
 ## Open
 
-- Kanji, ECI, FNC1 and structured append: the decoder returns CharonQRDecodeUnsupported. Not read.
+- Kanji, ECI, FNC1 and structured append: the decoder returns RevenantQRDecodeUnsupported. Not read.
 - symbolDescriptor (CIQRCodeDescriptor): not carried out. Known difference 1 in Features.md stays.
 - Six clean codes at level L (byte, versions 23, 27, 35, 36, 37, 38) decode to the host's text only through Reed-Solomon
   correction: every block has one or two codewords among the first stream codewords that disagree with the syndromes,

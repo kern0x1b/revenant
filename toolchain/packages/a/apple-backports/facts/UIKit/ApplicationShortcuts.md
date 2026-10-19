@@ -32,4 +32,4 @@ readonly on the item and writable on `UIMutableApplicationShortcutItem`, nil unt
 string given is copied, so a change to it afterwards does not reach the item), as the header says and the host does. Nil
 clears it. A copy of a mutable item is an item and keeps the identifier; a mutable copy keeps it too; copying an item returns
 the item itself. Measured by `tests/backports/host/shortcut-item` (11 checks, the port and the host print the same values; the
-three controls fail): the port's classes answer as the host's do, with the CharonPort prefix stripped from their names.
+three controls fail): the port's classes answer as the host's do, with the RevenantPort prefix stripped from their names.

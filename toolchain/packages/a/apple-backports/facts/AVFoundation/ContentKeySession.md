@@ -21,7 +21,7 @@ decryption rests on are in `ContentKeyValues.md`.
 - `AVContentKey`, iOS 14.5: `contentKeySpecifier`, `externalContentProtectionStatus` (17.4) and `revoke` (17.4), and the
   port's own sample decryption (below). The session hands each recipient one key per request.
 - The protocols `AVContentKeySessionDelegate` and `AVContentKeyRecipient`, forward-declared in
-  `CharonAVFoundationProtocols.h` (the SDK defines them).
+  `RevenantAVFoundationProtocols.h` (the SDK defines them).
 
 ## Measured: the session
 

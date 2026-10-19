@@ -22,7 +22,7 @@ preview's, and the settings the capture resolved.
 | `sourceDeviceType` | nil | a single camera names no source (virtual device constituents are not carried) |
 | `bracketSettings` (11.0) | the bracket member the photo was taken for; nil for a single capture | facts/AVFoundation/AVCapturePhotoBracketSettings.md |
 | `fileDataRepresentation` | the JPEG's own bytes; nil for an uncompressed still (no file container on this release) | the still's JPEG |
-| `CGImageRepresentation` | the still as a new CGImage at full size, decoded from the JPEG or converted from the buffer | `CharonCreatePhotoImage` (AVCapturePhotoOutput.m) |
+| `CGImageRepresentation` | the still as a new CGImage at full size, decoded from the JPEG or converted from the buffer | `RevenantCreatePhotoImage` (AVCapturePhotoOutput.m) |
 | `previewCGImageRepresentation` | the preview as a new CGImage | the same helper |
 
 The header's rule that the photo is non-nil even with an error holds: an error photo is made with no sample, so it answers
@@ -38,7 +38,7 @@ neither (the header's 10.0 rule, with the 11.0 callback counted).
 
 ## CoreImage on 6.1.3
 
-The uncompressed photo's CGImage is made by CoreImage (`CharonCreatePhotoImage`). Measured on the release's runtime
+The uncompressed photo's CGImage is made by CoreImage (`RevenantCreatePhotoImage`). Measured on the release's runtime
 (`tests/backports/emulate/release-measure`, runs `releasemeasure-20261017-152721` and `-152926`), for a 64 by 48 BGRA buffer:
 
 | Step | Plain buffer (`CVPixelBufferCreate`, no attributes) | IOSurface-backed buffer (`kCVPixelBufferIOSurfacePropertiesKey`) |

@@ -88,13 +88,13 @@ from the player.
 
 `AVPlayerViewController.m`'s play path ends in `[_player play]`, and the play press is where the rate
 belongs. That object is 8.0 API and must not define 16.0 API, so the call goes through
-`-[AVPlayerViewController charon_applySelectedSpeed]`, implemented in
+`-[AVPlayerViewController revenant_applySelectedSpeed]`, implemented in
 `AVPlayerViewControllerSpeeds16.m` (the object that owns the 16.0 API) and declared in
-`CharonAVKitSpeeds.h`. The call site asks for it with `respondsToSelector:` first, because the 8.0
+`RevenantAVKitSpeeds.h`. The call site asks for it with `respondsToSelector:` first, because the 8.0
 object also links in the bands that do not carry the 16.0 object.
 
 A seam the port owns is still API the port exports, so it is registered: the row
-`-[AVPlayerViewController charon_applySelectedSpeed]` in `registry/AVKit/ios16speeds.json`, with no SDK
+`-[AVPlayerViewController revenant_applySelectedSpeed]` in `registry/AVKit/ios16speeds.json`, with no SDK
 header declaring the name and the `source` saying so.
 
 ## Two defects this family caused and then fixed, both measured
@@ -110,7 +110,7 @@ that compile clean and answer nothing.
    `AVPlayerViewController.o` lists `-speeds` and `-selectedSpeed`, and the 16.0 object's category lists
    neither. With `@dynamic` restored, each name is listed by exactly one object, and it is the right one.
 2. **The public getter has to be spelled as the header spells it.** The first version of the 16.0
-   category named its getter `charon_speeds` and compiled without a warning. `otool -ov` of that object
+   category named its getter `revenant_speeds` and compiled without a warning. `otool -ov` of that object
    then showed a category holding `setSpeeds:` and **no** `-speeds`: the property would have answered
    nothing at all, and `respondsToSelector:@selector(speeds)` would have said NO while the setter said
    YES. It is `-speeds` now, and the otool output of the 16. object lists `speeds`, `setSpeeds:`,
@@ -123,9 +123,9 @@ lives in its own file and no file carries two releases' API:
 
 | object | release | what it defines |
 | --- | --- | --- |
-| `AVPlayerViewControllerSpeeds16.m` | 16.0 | `AVPlaybackSpeed` and its six methods, and the `AVPlayerViewController(CharonSpeeds16)` category: `speeds`, `setSpeeds:`, `selectedSpeed`, `selectSpeed:`, `charon_applySelectedSpeed` |
+| `AVPlayerViewControllerSpeeds16.m` | 16.0 | `AVPlaybackSpeed` and its six methods, and the `AVPlayerViewController(RevenantSpeeds16)` category: `speeds`, `setSpeeds:`, `selectedSpeed`, `selectSpeed:`, `revenant_applySelectedSpeed` |
 | `AVPlayerViewController.m` | 8.0 | its own API; no 16.0 name (checked with `otool -ov`, which lists none of the five) |
-| `AVPictureInPictureControllerContentSource15.m` | 15.0 | `AVPictureInPictureControllerContentSource`, `initWithPlayerLayer:`, `playerLayer`, and the `CharonContentSource15` category: `initWithContentSource:`, `contentSource`, `setContentSource:` |
+| `AVPictureInPictureControllerContentSource15.m` | 15.0 | `AVPictureInPictureControllerContentSource`, `initWithPlayerLayer:`, `playerLayer`, and the `RevenantContentSource15` category: `initWithContentSource:`, `contentSource`, `setContentSource:` |
 | `AVPictureInPictureController.m` | 9.0 | its own API; no 15.0 name |
 
 ## Not measured on device

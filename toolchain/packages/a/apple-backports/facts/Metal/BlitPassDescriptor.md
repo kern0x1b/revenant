@@ -15,7 +15,7 @@ every attachment slot.
 
 ## What differs from the release
 
-This port's `CharonMetalEncoder`/`CharonMetalQueue` carry no blit command encoder or counter
+This port's `RevenantMetalEncoder`/`RevenantMetalQueue` carry no blit command encoder or counter
 sampling of their own, so a descriptor built here is not yet consumed by anything real - the same
 situation `MTLStageInputOutputDescriptor` is in (`facts/Metal/StageInputOutputDescriptor.md`): the
 object exists and is correct, the pipeline stage it configures is a separate, larger gap.

@@ -1,7 +1,7 @@
 # SKCropNode (iOS 7)
 
 The iOS 7 surface of SpriteKit's `SKCropNode`: a node whose children show where its mask node has content. The port's
-object is `SpriteKit/SpriteKitCrop7.m`, declared by `SpriteKit/CharonSpriteKit.h`. The row is in `registry/SpriteKit/ios7.json`.
+object is `SpriteKit/SpriteKitCrop7.m`, declared by `SpriteKit/RevenantSpriteKit.h`. The row is in `registry/SpriteKit/ios7.json`.
 
 ## Oracle and what was measured
 

@@ -82,9 +82,9 @@ and the 9.0 object's class extension, which is where the setter really is, is no
 AVPictureInPictureControllerContentSource15.o
   -[AVPictureInPictureControllerContentSource initWithPlayerLayer:]
   -[AVPictureInPictureControllerContentSource playerLayer]
-  -[AVPictureInPictureController(CharonContentSource15) initWithContentSource:]
-  -[AVPictureInPictureController(CharonContentSource15) contentSource]
-  -[AVPictureInPictureController(CharonContentSource15) setContentSource:]
+  -[AVPictureInPictureController(RevenantContentSource15) initWithContentSource:]
+  -[AVPictureInPictureController(RevenantContentSource15) contentSource]
+  -[AVPictureInPictureController(RevenantContentSource15) setContentSource:]
 AVPictureInPictureController.o
   -[AVPictureInPictureController initWithPlayerLayer:]      <- and no 15.0 name
 ```

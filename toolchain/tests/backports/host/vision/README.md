@@ -2,7 +2,7 @@
 
 `sh tests/backports/host/vision/run-crop.sh`
 
-What it measures: for each case, a picture and a target, the port's `charon_vision_pixels` and
+What it measures: for each case, a picture and a target, the port's `revenant_vision_pixels` and
 Core ML's own `+[MLFeatureValue featureValueWithCGImage:pixelsWide:pixelsHigh:pixelFormatType:options:error:]`
 under **the same option**, and the two pixel buffers compared byte for byte. Every case prints
 `differing=N of M`.
@@ -10,7 +10,7 @@ under **the same option**, and the two pixel buffers compared byte for byte. Eve
 Three things it does that a plain comparison would not, each because the check once failed without
 them:
 
-- **The port build compiles `Vision/CharonVisionBilinear.c`.** The kernel is not in the header, and a
+- **The port build compiles `Vision/RevenantVisionBilinear.c`.** The kernel is not in the header, and a
   port build that leaves it out links against nothing and answers nothing.
 - **Each side's origin is printed with `dladdr`, and the run fails if they are the same image.** The
   system build answers *both* sides with the framework's own constructor — it is a control, and it

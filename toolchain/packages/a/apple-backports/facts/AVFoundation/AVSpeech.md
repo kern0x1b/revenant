@@ -102,7 +102,7 @@ measured on the host:
   Sinji, as `...zh-HK.Sinji` does.
 - The identifier of a voice (measured with `host-match2.m`): where the host's voiceWithLanguage: with the release's code
   gives a voice with the release's name (accents and hyphens folded), the identifier is the host's. That is 22 of the
-  36: the table in `AVSpeechSynthesisVoice7.m` (`CharonHostIdentifiers`). Most are `com.apple.voice.super-compact.<code>.<name>`;
+  36: the table in `AVSpeechSynthesisVoice7.m` (`RevenantHostIdentifiers`). Most are `com.apple.voice.super-compact.<code>.<name>`;
   en-US Samantha is `com.apple.voice.compact.` (the one `compact` on the host); the host's identifier drops the hyphen
   (`Ting-Ting` is `Tingting`, `Sin-Ji` is `Sinji`). The other 14 voices have no host voice under their name and language
   (ar-SA Maged, da-DK Ida, el-GR Alexandros, fr-CA Julie, fi-FI Mikko, hu-HU Eszter, it-IT Silvia, no-NO Stine,

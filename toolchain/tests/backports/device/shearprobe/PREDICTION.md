@@ -34,14 +34,14 @@ this very device: the release's own Q14 integers summed over the row it uses, di
 half up into the stored type. It scored 768 of 768 at a scale of one, 1344 of 1344 at two and 480 of 480 at a
 half there, so it is a measured model of this release, not an assumed one.
 
-The port's own pair is also computed a third way, by the port's own `CharonResamplePhase` fed the mapping
-`CharonShearRun` implements, and printed beside the pair recovered from the port's bytes. If those two ever
+The port's own pair is also computed a third way, by the port's own `RevenantResamplePhase` fed the mapping
+`RevenantShearRun` implements, and printed beside the pair recovered from the port's bytes. If those two ever
 disagree the instrument is wrong and the run says so on its own face.
 
 ## The predictions
 
-**P1 - nothing is refused.** `CharonResampleFilterOf` returns 1 for the release's filter at all five scales
-(v-tail-a13 measured the 6.1.3 armv7 header shape on this device, nine of nine), `CharonShearReady` returns
+**P1 - nothing is refused.** `RevenantResampleFilterOf` returns 1 for the release's filter at all five scales
+(v-tail-a13 measured the 6.1.3 armv7 header shape on this device, nine of nine), `RevenantShearReady` returns
 `kvImageNoError` at every case, and both engines return `kvImageNoError` at every case. Confidence: high.
 
 **P2 - the control, a scale of one.** At a scale of one, translate 0, slope 0, on both axes, the release's

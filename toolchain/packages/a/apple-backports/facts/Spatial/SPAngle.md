@@ -3,7 +3,7 @@
 Four functions of the iOS 16 Spatial API, in `Spatial/Spatial16.m` of `libSpatialBackports.dylib` (config `spatial`).
 Their declarations are the generator's (`spec/Spatial/declarations.tsv`, the rows `SPAngleMakeWithDegrees`,
 `SPAngleMakeWithRadians`, `SPAngleGetDegrees`, `SPAngleEqualToAngle`, all `introduced` 16.0 by the SDK's availability).
-The struct is `SPAngle { double radians; }`. Declared in `Spatial/CharonSpatial.h`.
+The struct is `SPAngle { double radians; }`. Declared in `Spatial/RevenantSpatial.h`.
 
 ## Why these bodies are the port's own
 

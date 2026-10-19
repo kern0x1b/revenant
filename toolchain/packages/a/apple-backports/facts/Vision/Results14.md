@@ -2,8 +2,8 @@
 
 These two classes are the points a point-finding request writes. Their initialisers are marked `NS_UNAVAILABLE` in the SDK's
 `VNDetectedPoint.h`, so an application never makes one; the port makes them with its own factories
-(`charon_pointWithX:y:confidence:` and `charon_pointWithX:y:confidence:identifier:`). The factories are the only way in, and
-their names carry the `charon_` prefix, so they are not part of the surface.
+(`revenant_pointWithX:y:confidence:` and `revenant_pointWithX:y:confidence:identifier:`). The factories are the only way in, and
+their names carry the `revenant_` prefix, so they are not part of the surface.
 
 ## What the class is
 

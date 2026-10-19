@@ -40,7 +40,7 @@ list, an optional output node and an attribute list. None of them asks the devic
 them is absent, and that is the same distinction the owner drew for the hardware rows.
 
 **What the port cannot do is STITCH, and that is a different thing.** `air2cpu` translates each kernel
-to its own object and `CharonMetalLibrary` holds a dictionary of them, so a graph handed to this port
+to its own object and `RevenantMetalLibrary` holds a dictionary of them, so a graph handed to this port
 describes a function it will never produce. That is a limit on the port's **output**, not on these
 **objects**, and the rows say so in those words.
 

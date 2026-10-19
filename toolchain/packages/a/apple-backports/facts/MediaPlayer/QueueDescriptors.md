@@ -76,7 +76,7 @@ the rule `AGENTS.md` records after a reviewer's verdict on a helper that carried
 
 Each is also declared exactly **once**, on the class that implements it. Restating the 10.1 declaration in
 the 11.0 object was tried, to avoid depending on include order, and produced
-`duplicate definition of category 'CharonSubclassInit' on interface 'MPMusicPlayerQueueDescriptor'`.
+`duplicate definition of category 'RevenantSubclassInit' on interface 'MPMusicPlayerQueueDescriptor'`.
 
 The runtime refusal is separate and by class comparison — `if ([self class] == [Base class])` — because
 both concrete subclasses go *through* the base initializer on their way to being objects. A base that always
@@ -127,7 +127,7 @@ what it can honestly be is what it inherits — the release's own playback acces
 
 The membership test in `-removeItem:` is a **shortcut, not the correctness of the removal**:
 `-removeObject:` on an object the array does not hold is already a documented no-op, so the queue would be
-unchanged either way. What the test buys is that `-charonSetItems:` is not called for a removal that changed
+unchanged either way. What the test buys is that `-revenantSetItems:` is not called for a removal that changed
 nothing. The file's comment now says exactly that, instead of claiming a guarantee the mutation shows is not
 there. A check that removes only an item that *is* present was added anyway, because it is the case a
 caller hits.

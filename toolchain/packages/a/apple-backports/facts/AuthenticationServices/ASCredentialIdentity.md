@@ -165,7 +165,7 @@ What it carries: `-initWithUser:password:`, `+credentialWithUser:password:`, `-u
 copied in and out, and `-copyWithZone:` carrying **both**. A copy that dropped the password would be an
 object that looks like a credential and could not be used for one.
 
-Its construction is the port's own — `-charon_initWithUser:password:` — because `ASAuthorizationCredential`,
+Its construction is the port's own — `-revenant_initWithUser:password:` — because `ASAuthorizationCredential`,
 the protocol it adopts, declares the initialisers `NS_UNAVAILABLE`.
 
 **The check that covers it is the shape one, and it is the check that caught the row.** With the class in

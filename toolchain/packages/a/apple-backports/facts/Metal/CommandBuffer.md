@@ -1,7 +1,7 @@
 # The command queue and the command buffer, iOS 8 to 16
 
-The port's `CharonMetalQueue` and `CharonMetalCommandBuffer` carry the command queue protocol and the
-command buffer protocol of the SDK. Their members are in the files named by release: `CharonMetalQueue.m`
+The port's `RevenantMetalQueue` and `RevenantMetalCommandBuffer` carry the command queue protocol and the
+command buffer protocol of the SDK. Their members are in the files named by release: `RevenantMetalQueue.m`
 (8.0: the base), `MTLCommandQueue8.m`, `MTLCommandQueue14.m`, `MTLCommandBuffer10.m`,
 `MTLCommandBuffer11.m`, `MTLCommandBuffer12.m`, `MTLCommandBuffer13.m`, `MTLCommandBuffer14.m` and
 `MTLCommandBuffer16.m`.

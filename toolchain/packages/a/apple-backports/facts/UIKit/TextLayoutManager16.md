@@ -35,7 +35,7 @@ The probe reads the host's answers only. It does not measure what the host's lay
 
 - The port's text stack is TextKit 1: the `NSLayoutManager` categories (`UIKit/NSLayoutManager+Text7.m`, `+Text12.m`, `+Text13.m`) and the
   text container categories. It has no layout manager of the TextKit 2 kind, no fragments, no line fragments and no viewport controller.
-- `UIKit/NSTextContentStorage15.m` carries the content side. Its paragraph call (`charon_paragraph_from:to:`, line 301) asks the storage's
+- `UIKit/NSTextContentStorage15.m` carries the content side. Its paragraph call (`revenant_paragraph_from:to:`, line 301) asks the storage's
   delegate for a paragraph when the delegate answers the selector, and its element call (line 325) asks the content manager's delegate
   `textContentManager:shouldEnumerateTextElement:options:` the same way. Neither protocol is declared in the port, and no differential measures
   the answers yet.

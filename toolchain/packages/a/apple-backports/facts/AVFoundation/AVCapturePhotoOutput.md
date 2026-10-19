@@ -59,7 +59,7 @@ defines under that name has the release's still image output as its superclass, 
 `-[AVCaptureSession addOutput:]` takes it, builds it into the graph and runs it as the output it is,
 and `-outputs`, `-canAddOutput:` and `-removeOutput:` are the release's own, unchanged. The SDK
 declares the class above `AVCaptureOutput`, so `AVCapturePhotoOutput.m` declares the implementation
-under a name of its own (`CharonPhotoOutput`) with clang's `objc_runtime_name("AVCapturePhotoOutput")`:
+under a name of its own (`RevenantPhotoOutput`) with clang's `objc_runtime_name("AVCapturePhotoOutput")`:
 the class, its metaclass and their `_OBJC_CLASS_$_`/`_OBJC_METACLASS_$_` symbols carry the API's
 name, which is all an application or the registry check ever sees (`nm -m` of the probe:
 `_OBJC_CLASS_$_AVCapturePhotoOutput` in `__objc_data`, `AVCaptureStillImageOutput` undefined as its
@@ -217,7 +217,7 @@ the header's 11.0.
 ## Measured on device
 
 `tests/backports/device/photooutput10.m`, built with `AVCapturePhotoOutput.m` and the zoom's files
-(`AVCaptureDevice+VideoZoom7.m`, `CharonAVCapture.m`, `AVCaptureDevice+ActiveFrameDuration.m`), as
+(`AVCaptureDevice+VideoZoom7.m`, `RevenantAVCapture.m`, `AVCaptureDevice+ActiveFrameDuration.m`), as
 the library carries them. iPad 2, 6.1.3: 27 checks, 0 failed. The class keeps its name and
 `session.outputs` holds it, and loses it on removal. A photo alone comes as a 960x720 JPEG. The
 previews come in 32BGRA at 960x720 (the photo's size, under the display's 1024), at 160x120 when
@@ -323,7 +323,7 @@ their registry rows carry.
 ## The photo settings
 
 Since the bfw3 band's change every member of `AVCapturePhotoSettings` in the 16.4 header (38 properties, the six
-constructors, `NSCopying`) has an accessor or a method of the port's own, with an explicit `_charon…` ivar: the host
+constructors, `NSCopying`) has an accessor or a method of the port's own, with an explicit `_revenant…` ivar: the host
 oracle `tests/backports/host/photosettings/run.sh` reads the member list from clang's AST of the header, checks each
 against the host class's type encoding, and refuses any ivar synthesized for a declared property. The same oracle
 refuses the class as `7bb1720d` carried it (390 failures), its negative control.
@@ -362,7 +362,7 @@ Named divergences, each a check that fails if the host ever stops answering so:
 
 ## The photo output
 
-`CharonPhotoOutput` answers every member of the header's `AVCapturePhotoOutput` and its category
+`RevenantPhotoOutput` answers every member of the header's `AVCapturePhotoOutput` and its category
 `AVCapturePhotoOutputDepthDataDeliverySupport`, checked against the host by the same oracle.
 
 - Without a camera behind it, as the host with no session answers: every `*Supported` NO, the `available*` lists empty,
@@ -406,7 +406,7 @@ Named divergences, each a check that fails if the host ever stops answering so:
 The Exif standard keeps a thumbnail in IFD1 of the TIFF block of the JPEG's APP1 "Exif" segment, as a JPEG (Compression
 6) found by JPEGInterchangeFormat and JPEGInterchangeFormatLength. ImageIO writes one only from 8.0
 (`kCGImageDestinationEmbedThumbnail`); the format is open, so the port writes the segment itself
-(`CharonJPEGWithThumbnail` in `AVCapturePhotoOutput.m`): it keeps the TIFF block as it is, appends IFD1 and the
+(`RevenantJPEGWithThumbnail` in `AVCapturePhotoOutput.m`): it keeps the TIFF block as it is, appends IFD1 and the
 thumbnail, and links IFD1 from IFD0; a JPEG with no Exif segment gets one. A segment longer than 65535 bytes cannot be
 written: the thumbnail is then written again at ImageIO's lowest quality, and when that does not fit either, the
 photo comes without one, the log says so, and `embeddedThumbnailDimensions` is 0x0. So that it can say so, settings

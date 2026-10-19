@@ -72,7 +72,7 @@ same enum value would be a lie here.
 ## What the release itself carries, measured
 
 Neither deployment band end carries the class, which is why this is a port object and not a
-re-export. `CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua UI 6.1.3 4.3 11.0 12.0`, and
+re-export. `REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua UI 6.1.3 4.3 11.0 12.0`, and
 `tools/cache-index/first-rung.lua`:
 
 ```

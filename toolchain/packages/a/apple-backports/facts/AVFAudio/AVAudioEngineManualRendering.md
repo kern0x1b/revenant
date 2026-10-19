@@ -15,7 +15,7 @@ it. In manual rendering it is a `kAudioUnitSubType_GenericOutput`, which needs n
 graph: it removes the current output node, adds a generic output, and re-connects the main mixer,
 which is the one connection the engine makes to its output in `-init`. So an application gets manual
 rendering by calling the header's method, not by setting a flag before `-init`; the class-level
-`CharonOfflineOutput` flag that the port's test support uses is still there for that older path, and
+`RevenantOfflineOutput` flag that the port's test support uses is still there for that older path, and
 this one does not need it.
 
 Both scopes of `kAudioUnitProperty_StreamFormat` are set on the new output, and it is worth saying
@@ -40,9 +40,9 @@ while one is set.
 ## The three types, and why they are transcribed
 
 `AVAudioEngineManualRenderingStatus`, `AVAudioEngineManualRenderingMode` and
-`AVAudioEngineManualRenderingBlock` are declared in `AVFoundation/CharonAVAudioEngineManual.h` rather
+`AVAudioEngineManualRenderingBlock` are declared in `AVFoundation/RevenantAVAudioEngineManual.h` rather
 than imported, because `<AVFAudio/AVAudioEngine.h>` is reachable only through the umbrella and the
-SDK's AVFAudio headers cannot be entered twice — `CharonAVAudioBuffer.h` has already imported
+SDK's AVFAudio headers cannot be entered twice — `RevenantAVAudioBuffer.h` has already imported
 `<AVFAudio/AVAudioFormat.h>`, and the umbrella imports it again, giving `duplicate interface
 definition for class 'AVAudioNode'`. They are spelled and valued exactly as `AVAudioEngine.h`
 declares them (`:76-81`, `:83-86`, `:138`).

@@ -31,7 +31,7 @@ cache holds none of the names (`tools/corpus/objc-inventory.lua`).
 - `UIKit/UICalendarSelectionSingleDate.m`: the selected date is a copy. A tap on a day chooses it when the delegate's
   `dateSelection:canSelectDate:` allows it (it allows a day when the delegate does not implement the method) and the day is not already chosen;
   then the delegate's `dateSelection:didSelectDate:` is called with that day. Setting the date changes the selection at once and calls nothing.
-- The base's `init` is NSObject's. The SDK marks the base class's `init` unavailable, so the subclass starts from `charon_init`, which the base
+- The base's `init` is NSObject's. The SDK marks the base class's `init` unavailable, so the subclass starts from `revenant_init`, which the base
   implements as `[super init]`.
 - The delegate protocol is kept in the image by a function the object keeps (`__attribute__((used))`) that returns `@protocol(...)`. Read from the
   armv7 object of `UICalendarSelectionSingleDate.m` compiled for 6.1.3 against the 16.4 SDK: `__OBJC_LABEL_PROTOCOL_$_UICalendarSelectionSingleDateDelegate`

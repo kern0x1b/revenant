@@ -23,7 +23,7 @@
 //
 //   The build SDK is 16.4, and none of the twenty-two classes appears in any header under its
 //   UIKit.framework/Headers - so the port is the only thing here that can make those names exist.  Every
-//   class is therefore declared in CharonUIKit26.h, guarded on __has_include so a future SDK's own
+//   class is therefore declared in RevenantUIKit26.h, guarded on __has_include so a future SDK's own
 //   declaration wins.
 //
 //   The build SDK 16.4 is also missing the two 26.0 enums UIImageSymbolConfigurationColorRenderingMode and
@@ -54,7 +54,7 @@
 // THE FOUR OBJECTS, one release each, because release-split reads band points only and a reader is the
 // only thing that would notice a 26.1 method in the 26.0 file:
 //
-//   CharonUIKit26.h  the twenty-two class declarations, shared - a header is not an object and holds no API
+//   RevenantUIKit26.h  the twenty-two class declarations, shared - a header is not an object and holds no API
 //   UIKit26_0.m      121 rows, 26.0
 //   UIKit26_1.m        2 rows, 26.1
 //   UIKit26_4.m        1 row,  26.4

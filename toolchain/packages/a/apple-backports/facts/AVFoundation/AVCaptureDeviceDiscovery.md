@@ -35,7 +35,7 @@ What that `-init` answers is **nil, with no exception** - measured on the host's
 CLASS AVCaptureDeviceDiscoverySession own-init=1 own-new=0 init=ok nil new=ok nil
 ```
 
-The port therefore defines `-init` and answers nil (`CHARON_AVFOUNDATION_UNAVAILABLE_INIT` in `CharonAVCapture.h`,
+The port therefore defines `-init` and answers nil (`REVENANT_AVFOUNDATION_UNAVAILABLE_INIT` in `RevenantAVCapture.h`,
 carried by `AVCaptureDeviceDiscoverySession.m`) and deliberately does **not** define `+new`: a definition would put
 a selector in the port's metadata where Apple's class has none and answer the caller exactly what `NSObject`'s
 already answers. `+[NSObject new]` calls `[[self alloc] init]`, so the inherited `+new` reaches that same `-init` and

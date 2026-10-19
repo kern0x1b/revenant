@@ -1,7 +1,7 @@
 # AVCapturePhotoBracketSettings and the bracketed capture, iOS 10.0 and 11.0
 
 What the port builds: the settings class (`AVCapturePhotoBracketSettings.m`, its two factories and its properties), the
-output's bracketed capture (`AVCapturePhotoOutput.m`, `charon_captureOne:` and `capturePhotoWithSettings:delegate:`), and
+output's bracketed capture (`AVCapturePhotoOutput.m`, `revenant_captureOne:` and `capturePhotoWithSettings:delegate:`), and
 the 11.0 photo the bracket's callbacks deliver (`AVCapturePhoto11.m`, facts/AVFoundation/AVCapturePhoto11.md).
 
 ## What the header says (iPhoneOS 26.2 SDK, AVCapturePhotoOutput.h)
@@ -45,7 +45,7 @@ A bracket of N members is N stills, in order. Each member is applied with the co
 | `AVCaptureAutoExposureBracketedStillImageSettings.exposureTargetBias` | the private bias pair, under `lockForConfiguration` (the same setter `-setExposureTargetBias:completionHandler:` drives) | Yes: set before the member's still. The camera's own bias, read before the bracket, is given back after the last photo. |
 | `AVCaptureManualExposureBracketedStillImageSettings.exposureDuration` | the release's private `-setExposureDuration:` (CMTime) and `-exposureDuration`, measured on the 6.1.3 runtime (below) | Yes, device-unverified: set under the camera's lock before the member's still; the camera's own duration, read before the bracket, is given back after the last photo. |
 | `AVCaptureManualExposureBracketedStillImageSettings.ISO` | the release's private `-setExposureGain:` (float) and `-exposureGain`, measured on the runtime; the gain's unit is not measured | Yes, device-unverified: the ISO is passed as the gain, given back after the last photo with the duration. **Open crutch: the ISO-to-gain mapping is unmeasured, and stays unmeasured until a 4S is attached.** See "Manual exposure". |
-| `AVCapturePhotoSettings.flashMode` (the request's, applied to every photo) | public `-setFlashMode:` on the camera (4.0) | Yes, for each photo, through the output's flash handling (`charon_setFlashMode:ofCamera:`). |
+| `AVCapturePhotoSettings.flashMode` (the request's, applied to every photo) | public `-setFlashMode:` on the camera (4.0) | Yes, for each photo, through the output's flash handling (`revenant_setFlashMode:ofCamera:`). |
 | Exposure point and lock, focus, white-balance lock | public members of 6.1.3's AVCaptureDevice | Not per member. No bracket member carries them; they are the application's own settings on the device, which the bracket does not change. |
 
 The last row is a reading of the coordinator's instruction to apply each setting with exposure point and lock, focus, flash and
@@ -81,11 +81,11 @@ Until then the manual member's duration and gain are applied as the release's ow
 
 ## maxBracketedCapturePhotoCount
 
-The port answers **three**: `CharonBracketedCapturePhotoLimit` in AVCapturePhotoOutput.m, the count its bracket path delivers and
-its capture enforces (a bracket above it is refused at capture with the header's rule as its text, `charon_checkBracket:`).
+The port answers **three**: `RevenantBracketedCapturePhotoLimit` in AVCapturePhotoOutput.m, the count its bracket path delivers and
+its capture enforces (a bracket above it is refused at capture with the header's rule as its text, `revenant_checkBracket:`).
 
 Derivation from the code. The bracket is a chain of stills: the next still is taken when the previous photo's callbacks have
-returned (`charon_captureOne:` completes, then the next step), and the port holds no sample buffer past its callback. So nothing in
+returned (`revenant_captureOne:` completes, then the next step), and the port holds no sample buffer past its callback. So nothing in
 the chain bounds the count; the bound is the one the port states and enforces. Three is the bracket the probe exercises
 (`tests/backports/emulate/photobracket`, the three auto members), so the answer is the count the port has been built to deliver
 and checks, not a count it has not checked.

@@ -19,7 +19,7 @@ comes from, the uniforms with the buffer and offset each is loaded from (and the
 index is an instance identifier), the textures, the sizes of textures the function asks for, the varyings (with a
 `flat` mark) and the vertex inputs of a vertex descriptor.
 
-`half` becomes `mediump`. The vertex shader turns the depth of Metal's clip space, 0 to w, into ES's, minus w to w (`gl_Position.z = gl_Position.z * 2.0 - gl_Position.w`), so the depth buffer holds what Metal's would, and ends with `gl_Position.y *= charon_flip`, which the runtime sets to -1 for
+`half` becomes `mediump`. The vertex shader turns the depth of Metal's clip space, 0 to w, into ES's, minus w to w (`gl_Position.z = gl_Position.z * 2.0 - gl_Position.w`), so the depth buffer holds what Metal's would, and ends with `gl_Position.y *= revenant_flip`, which the runtime sets to -1 for
 a render target that is a texture, since Metal's window has its origin at the top and ES's framebuffer object at the
 bottom.
 
@@ -37,20 +37,20 @@ A depth texture is read as a `sampler2D`, taking the depth from its first channe
 
 ## Several render targets
 
-ES 2.0 has one colour output, so a function that writes several targets (up to four) gets a uniform, `charon_output`, that says which of its colours to write, and the runtime draws
+ES 2.0 has one colour output, so a function that writes several targets (up to four) gets a uniform, `revenant_output`, that says which of its colours to write, and the runtime draws
 once for each target, into the target's own framebuffer, with the target's own blending. `PREFIX.json` says how many outputs there are.
 
 ## The colour attachment
 
 A fragment function that takes the colour it draws over as an argument (`[[color(n)]]`) reads it in one of two ways. When the function writes that target and no other, it reads
 `gl_LastFragData[0]`, with `GL_EXT_shader_framebuffer_fetch`, which the SGX 543 has: the framebuffer is read where the tile is, and there is no copy of it to a texture. When it does not write that
-target, it reads the attachment as a texture (`charon_attachmentN`) at the position of the fragment, and `PREFIX.json` lists the attachment; the runtime binds it, since it is not the one drawn to. A function may write
+target, it reads the attachment as a texture (`revenant_attachmentN`) at the position of the fragment, and `PREFIX.json` lists the attachment; the runtime binds it, since it is not the one drawn to. A function may write
 any of the four targets, alone or with others.
 
 ## Function constants
 
 A function constant is a global the library fills in when a function is made, and a predicate a static initialiser computes from the constants. The
-shader carries them as the names `charon_fcN` (the value) and `charon_fcN_defined` (whether it was given), for the port to define at the head of the source
+shader carries them as the names `revenant_fcN` (the value) and `revenant_fcN_defined` (whether it was given), for the port to define at the head of the source
 when it makes the function, and the initialiser is translated ahead of the function. `PREFIX.json` lists the constants with their index, name and type
 (`bool`, `int` or `float`), and marks a vertex input that a constant switches as optional.
 

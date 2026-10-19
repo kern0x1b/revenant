@@ -26,7 +26,7 @@ Source: the host's own UIKit under Mac Catalyst (macOS 27.0.1), measured by `tes
 
 ## What the port does
 
-- `UIKit/UIEditMenuConfiguration.m`: the factory allocates the object and runs `-charon_initWithIdentifier:sourcePoint:`, which sends `[super init]`
+- `UIKit/UIEditMenuConfiguration.m`: the factory allocates the object and runs `-revenant_initWithIdentifier:sourcePoint:`, which sends `[super init]`
   and then sets the identifier (a copy, or a new `NSUUID` for nil) and the point. The method is not named `init...` because ARC does not allow
   `self` to be assigned in an init-family method here, and `init` is unavailable at compile time.
 - The arrow direction is an ordinary stored property.

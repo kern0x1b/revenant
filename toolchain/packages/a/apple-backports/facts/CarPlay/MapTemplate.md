@@ -50,12 +50,12 @@ answered by its own declaration, and the two that needed it most are quoted rath
 
 ## What the port draws, and what it does not measure
 
-The drawing is the class's own, in `CarPlayTemplatesView12.m`: `-charon_showCurrentAlert` draws the
-navigation alert over the release's `MKMapView`, `CharonMapButtons` draws the map buttons, and
-`-charon_drawTripPreviews` (in `CarPlayMapTemplate12.m`) draws the preview card. The members drive that
+The drawing is the class's own, in `CarPlayTemplatesView12.m`: `-revenant_showCurrentAlert` draws the
+navigation alert over the release's `MKMapView`, `RevenantMapButtons` draws the map buttons, and
+`-revenant_drawTripPreviews` (in `CarPlayMapTemplate12.m`) draws the preview card. The members drive that
 drawing; none of them reimplements it.
 
-Two cards are classes of their own — `CharonCarPlayAlertCard` and `CharonMapPreviewCard` — for one
+Two cards are classes of their own — `RevenantCarPlayAlertCard` and `RevenantMapPreviewCard` — for one
 reason: a dismissal and a `-hideTripPreviews` have to be able to *find* the card they take off the map.
 A plain `UIView` could not be told apart from the map's own subviews.
 
@@ -85,7 +85,7 @@ argument does not reach the answer, and it is written down in the row rather tha
 
 A category cannot add an ivar, so the storage for the alert, the previews, the per-trip estimates and
 the time-remaining colour is declared with the class's own ivars in `CarPlayTemplatesView12.m` and
-reached through the accessors declared in `CharonCarPlayTemplate.h` — the header this tree keeps for
+reached through the accessors declared in `RevenantCarPlayTemplate.h` — the header this tree keeps for
 exactly this, and the same seam shape `CarPlayGrid260.m` and `CarPlayNavigationSession154.m` already
 use. `CPGridButton`'s 26.0 `-updateImage:` went into the object this library already had for that
 release rather than into a second 26.0 object of its own, and `CPImageSet`'s initialiser is a category

@@ -3,7 +3,7 @@
 The request finds the boundaries of the dark or light shapes in a picture. Its answer is an observation of the top-level
 contours, each with its children, and each contour is a closed chain of points. The three classes are implemented in
 `Vision/Vision14_0.m` (the contrast pivot, a 15.0 property, in `Vision/Vision15_0.m`), and the detection is the tracer in
-`Vision/CharonVisionContours.h`. The handler runs the request in `Vision/VNHandlers.m`.
+`Vision/RevenantVisionContours.h`. The handler runs the request in `Vision/VNHandlers.m`.
 
 ## What the host does, measured
 

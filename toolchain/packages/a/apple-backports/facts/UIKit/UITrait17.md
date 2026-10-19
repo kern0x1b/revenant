@@ -23,7 +23,7 @@ collection and compare equal.
 | home | traits |
 | --- | --- |
 | `UITraitCollection.m`'s own ivars | idiom, display scale, both size classes |
-| `charon_trait_style` | user interface style |
+| `revenant_trait_style` | user interface style |
 | the force touch capability's own storage | force touch capability |
 | the extras dictionary | the other fourteen |
 
@@ -106,7 +106,7 @@ The port raises the same three, word for word, with the trait named by its `+nam
 ## M5 — traitOverrides
 
 A view, a view controller, a presentation controller and a scene each have their own, and two views
-never share one. The host's class is named `_UITraitOverrides`; the port's is named `CharonOverrides`,
+never share one. The host's class is named `_UITraitOverrides`; the port's is named `RevenantOverrides`,
 and the two names are different on purpose. A class a library defines under a name nobody owns is
 that library's own type, is not Apple's API, and carries no release - which is how every other private
 helper in this library is named. Defined under Apple's private name it is the other thing: it looks
@@ -141,7 +141,7 @@ taken away, and the force touch capability goes to Unknown.
 ## M6 — the registration
 
 A view, a view controller, a window and a scene answer the four methods of `UITraitChangeObservable`.
-The host's registration is a class named `_UITraitRegistration`; the port's is `CharonRegistration`,
+The host's registration is a class named `_UITraitRegistration`; the port's is `RevenantRegistration`,
 for the reason M5 gives. It conforms to `UITraitChangeRegistration`, which is `NSCopying`, and a copy is the same registration:
 two calls asking for the same traits are two registrations and a copy is not a second of them.
 Unregistering is quiet twice over, and unregistering a registration that is not the observable's is
@@ -202,7 +202,7 @@ Two findings, and both are the reason a header is not enough:
   declares any of the six, so nothing here answers them.
 - The host's two private classes, `_UITraitOverrides` and `_UITraitRegistration`. No header declares
   either, and the port does not define them: the port's own classes for the two jobs are
-  `CharonOverrides` and `CharonRegistration`, and M5 gives why the names are not shared.
+  `RevenantOverrides` and `RevenantRegistration`, and M5 gives why the names are not shared.
 - The Swift-only `UIKit.Trait` and its twenty-two case names, which are a typealias and enum cases in
   the corpus and carry no code at run time.
 - The traits of a scene the release does not have: a scene capture state, an HDR headroom usage limit
@@ -217,16 +217,16 @@ against declares the trait protocols in its own `UITrait.h` **and the trait clas
 them** — `@interface UITraitUserInterfaceIdiom : NSObject <UINSIntegerTraitDefinition>`,
 `@interface UITraitDisplayScale : NSObject <UICGFloatTraitDefinition>` — so a class list read off
 a trait class in that process is the SDK's declaration, not this library's, whatever
-`CharonTraits17.h` says.
+`RevenantTraits17.h` says.
 
 Measured, on this file's own group: taking `<UINSIntegerTraitDefinition>` off
-`UITraitUserInterfaceIdiom` in `CharonTraits17.h` and giving `UITraitDisplayScale` the integer
+`UITraitUserInterfaceIdiom` in `RevenantTraits17.h` and giving `UITraitDisplayScale` the integer
 kind as well both leave `traits17` at `checks=352 failures=0`, exit 0. The class is renamed to
-`CharonHost…` and still carries the SDK's protocol list, because the declaration that binds is
+`RevenantHost…` and still carries the SDK's protocol list, because the declaration that binds is
 the one in the SDK's header for the same name.
 
 The one protocol in this delivery a host case *can* read is the range layer's `NSTextLocation`,
-and only because `CharonTextLocation` is a name no SDK header uses — see
+and only because `RevenantTextLocation` is a name no SDK header uses — see
 `facts/UIKit/NSTextRange15.md` and the case in `content15_test.m`, whose mutation drops that
 declaration off the class and turns the group red.
 
@@ -241,8 +241,8 @@ asks the reader and not the pair.
 
 The pair is `-valueForCGFloatTraitClass:` and `-setCGFloatValueForTraitClass:value:`, and they are
 not on the collection: `nm` over the built object has them on
-`-[CharonHostCharonTraitMutations …]`, the port's own category on `NSObject`, and the collection's
-own `-valueForCGFloatTrait:` on `-[CharonHostUITraitCollection(CharonTraits) …]`. So the two ways
+`-[RevenantHostRevenantTraitMutations …]`, the port's own category on `NSObject`, and the collection's
+own `-valueForCGFloatTrait:` on `-[RevenantHostUITraitCollection(RevenantTraits) …]`. So the two ways
 in are two classes, and nothing in the group asks the `NSObject` one. Measured, by putting one
 into the forwarding reader over a copy of the package and running the group: `checks=355
 failures=0`, exit 0. Nothing is wrong with what the port answers - both paths reach the one

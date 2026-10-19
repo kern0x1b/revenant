@@ -82,7 +82,7 @@ all if it had not been asked `ifi_type` first.
 
 ## How an interface's type is decided, and what the name was wrong about
 
-`charon_type_of()` used to read the interface's **name**: `lo` for the loopback, `pdp_ip` for the
+`revenant_type_of()` used to read the interface's **name**: `lo` for the loopback, `pdp_ip` for the
 cellular radio, `en` for Wi-Fi, everything else `other`. A device run showed four of twenty checks
 failing on the untyped cases, and the two halves of it were wrong in the same way:
 
@@ -139,7 +139,7 @@ the differential's comment all said in three places - wrong in all three, and th
 `other` filter *out* of the predicate was a mutant in the wrong direction: putting the type filter back
 turns the tunnel row red, and so does taking the address away.
 
-The predicate is `charon_path_wants()`, asked with synthetic types in the objects differential - nine
+The predicate is `revenant_path_wants()`, asked with synthetic types in the objects differential - nine
 rows, so a filter on the path is a check that can fail rather than a line in a comment - with a mutant
 each. A device run over a real tunnel is what would confirm the same thing in the port's own path
 assembly, and this file says so rather than claiming it.

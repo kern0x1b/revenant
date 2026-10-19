@@ -7,7 +7,7 @@ Test: `tests/backports/host/mps-rnn-descriptors/` (descriptor.m, run.sh)
 
 - **Host:** macOS 27.0.1 (26A434), MPSNeuralNetwork of that host, built as Catalyst
   (`arm64-apple-ios16.0-macabi` against the macOS SDK 27.0), run in one process with Apple's
-  class and the port's class renamed `CharonHostMPSRNNDescriptor`.
+  class and the port's class renamed `RevenantHostMPSRNNDescriptor`.
 - **Run:** `tests/backports/host/mps-rnn-descriptors/run.sh`, 40 checks, 0 failures; the GRU-default
   mutant turns the run red with `FAIL MPSGRUDescriptor defaults`.
 - **Declared members compared:** the five the iOS 16.4 header `MPSRNNLayer.h` declares for this class

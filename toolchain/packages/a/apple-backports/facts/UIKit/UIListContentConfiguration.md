@@ -26,7 +26,7 @@ text in this port. Measured by `tests/backports/host/storage-config`.
 
 ## On iOS 6
 
-The sidebar header's default text is the host's route: the body text style at the medium weight, built from the body font's descriptor with the weight trait (`charon_medium_body_font` in `UIKit/CharonLists.m`). On the host that gives the style's line spacing, half a point more than a plain medium system font's, which measured half a point short in every content view of that style.
+The sidebar header's default text is the host's route: the body text style at the medium weight, built from the body font's descriptor with the weight trait (`revenant_medium_body_font` in `UIKit/RevenantLists.m`). On the host that gives the style's line spacing, half a point more than a plain medium system font's, which measured half a point short in every content view of that style.
 
 On the release there is no medium face and no style leading, and the port has neither to add. Measured on an iPad 2 (6.1.3) through the port's own `+[UIListContentConfiguration sidebarHeaderConfiguration]`: its text font is `Helvetica` at 17 points with a line height of 21, exactly what `[UIFont systemFontOfSize:17]`, the body style's font (`UIFontTextStyles.md`) and `systemFontOfSize:weight:` at `UIFontWeightMedium` give; CoreText, handed the regular face's descriptor with the weight trait 0.23, returns `Helvetica` again (only bold resolves, to `Helvetica-Bold`), so the descriptor route neither fails nor falls back to `systemFontOfSize:`. On iOS 6 the header's font is therefore the release's regular 17-point system font, as it was before this route, and the content size category it follows on the host is the one category iOS 6 has. `tests/backports/device/lists.m` holds the equality.
 

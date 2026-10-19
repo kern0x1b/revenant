@@ -42,7 +42,7 @@ nowhere else.
 
 - **The face classes**: `ARFaceTrackingConfiguration`'s `+isSupported` answers NO in
   `ARKit/ARConfiguration2.m`, so a session never runs face tracking and never reports an `ARFaceAnchor`.
-  The port has no face path in `ARKit/CharonARTracker.h`: the tracker reports features, planes and the
+  The port has no face path in `ARKit/RevenantARTracker.h`: the tracker reports features, planes and the
   camera pose.
 - **The depth classes**: `-[ARFrame hasCapturedDepthData]` returns NO (`ARKit/ARFrame.m:402`), and
   `ARFrame.sceneDepth` is not carried, so no frame holds an `ARDepthData`.

@@ -52,7 +52,7 @@ password that looked stored would mislead.
 - `presentationContextProvider` is kept and read back, weakly, as the release holds it. `-start` sends it
   `presentationAnchorForWebAuthenticationSession:` when it responds to the selector, and, if the answer is
   non-nil, presents the page over that window instead of the key window - `SFAuthenticationSession`'s own
-  `charon_presentationWindow` hook, already built for exactly this and unused until now. This was carried
+  `revenant_presentationWindow` hook, already built for exactly this and unused until now. This was carried
   `inert` for a time on the theory that a single-window device makes the question pointless, which mistakes
   "the answer is almost always the key window" for "the question need not be asked": an application that
   keeps a second, non-key window around (a picture-in-picture overlay, a window it is mid-transition to)

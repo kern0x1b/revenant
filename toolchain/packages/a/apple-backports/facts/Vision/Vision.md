@@ -58,7 +58,7 @@ recorded by `tests/backports/host/vision/run.sh` (45 records) and held against t
   4x7 to 33x9, and "the kernel reads 50015 / 50015 / 50092" for the three CoreGraphics qualities --
   every one of those was the probe feeding vImage a source it had reconstructed rather than Core
   ML's, and none of them is a statement about the port. The `kCGInterpolationHigh` in
-  CharonVisionImage.h is therefore not a measured choice either: it was put there for a
+  RevenantVisionImage.h is therefore not a measured choice either: it was put there for a
   premultiplied-alpha hypothesis that the numbers rejected, and what it does to the fit rows is
   nothing, because those rows are already 0.
 
@@ -256,13 +256,13 @@ recorded by `tests/backports/host/vision/run.sh` (45 records) and held against t
   is one measurement from the 0 bucket.
 
   **Integrated, and every scale-fit row now reads 0.** The kernel is in the library as
-  `Vision/CharonVisionBilinear.c` with a two-line declaration in `CharonVisionImage.h`, and the
+  `Vision/RevenantVisionBilinear.c` with a two-line declaration in `RevenantVisionImage.h`, and the
   header changes by one call: the CoreGraphics draw becomes the kernel call, with the rect the two
   branches already computed handed to it as the placement. Everything around it is untouched, and
   the library compiles for armv7 at 6.1.3 with the file that includes the header.
 
   **The check measures the port, and the table through it is now the port's own.** Three defects in
-  the check are fixed: the port build compiles `CharonVisionBilinear.c`; each side's origin is printed
+  the check are fixed: the port build compiles `RevenantVisionBilinear.c`; each side's origin is printed
   with `dladdr` and the run **fails** if the two resolve to the same image, so a comparison that has
   collapsed into the framework against itself cannot read zero; and the verdict and the mutants are
   counted separately, with the mutants running whatever the verdict was. The mutant is the

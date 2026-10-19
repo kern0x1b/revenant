@@ -39,7 +39,7 @@ drawn grid. The 6.1.3 cache holds none of the three names (`tools/corpus/objc-in
   steps a month.
 - `UIKit/UICalendarViewDecoration.m`: the decoration keeps an image, a colour, both (the image tinted with the colour), or a provider of a
   view; it has no getters, as the release's. The view draws it at the foot of the day's cell.
-- `UIKit/CharonCalendar.h`: the methods the calendar's parts share, which the release does not have.
+- `UIKit/RevenantCalendar.h`: the methods the calendar's parts share, which the release does not have.
 - The delegate protocol is kept in the image by a function the object keeps (`__attribute__((used))`) that returns `@protocol(...)`. Read from
   the armv7 object of `UICalendarView.m` compiled for 6.1.3 against the 16.4 SDK: `__OBJC_LABEL_PROTOCOL_$_UICalendarViewDelegate` is in
   `__DATA,__objc_protolist`. The 16.2 method is called through its implementation, so the port's build needs no newer availability.

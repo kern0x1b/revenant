@@ -35,7 +35,7 @@ not as agreement, and the state, error, finish and cancel rows are not in any ca
 - `-init` and `-initWithLocale:`: nil. A recognizer for a locale the port does not support is not made, which is the
   host's answer for a locale it does not support (case 10).
 - `SFSpeechRecognitionTask`: a fresh task is not finishing and not cancelled (case 13). No task is ever started.
-- `SFSpeechRecognizerDelegate` and `SFSpeechRecognitionTaskDelegate`: declared in `CharonSpeechProtocols.h` with their
+- `SFSpeechRecognizerDelegate` and `SFSpeechRecognitionTaskDelegate`: declared in `RevenantSpeechProtocols.h` with their
   optional methods, as the SDK declares them.
 - `SFSpeechErrorDomain`: the constant the build exports from the constants record `spec/Speech/constants.tsv`, with the
   value the host has.

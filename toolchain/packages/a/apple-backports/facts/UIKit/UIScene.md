@@ -78,7 +78,7 @@ object file from `UISceneConstants.m`'s iOS 13.0 constants, since `check_registr
 ## `UISceneErrorDomain`, iOS 15
 
 `UIKit/UISceneConstants15.m` exports `UISceneErrorDomain` with the value `@"UISceneErrorDomain"`, the literal the port's
-scene requests already built their errors with (`charon_scene_error` in `UIKit/UIApplication+Scenes.m`, which now uses the
+scene requests already built their errors with (`revenant_scene_error` in `UIKit/UIApplication+Scenes.m`, which now uses the
 constant, so the two cannot drift). Before, the domain was right and the constant absent: an application comparing
 `error.domain` against `UISceneErrorDomain` read a NULL weak reference and never matched. `introduced` is the header's 15.0,
 **not measured**: the cache ladder has 12.0 and then 16.0, no 13-15 rung to place the first export between them. The value

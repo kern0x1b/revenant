@@ -34,7 +34,7 @@ compared, described and **applied to the drawing**:
 | read and applied to three views' `alpha` | `UIListContentView.m:187-190` |
 
 `UIListContentView.m:187` is the load-bearing line: the drawing path sets `_textLabel.alpha`,
-`_secondaryLabel.alpha` and `_imageView.alpha` from `[config charon_alpha]`. So a caller who sets the
+`_secondaryLabel.alpha` and `_imageView.alpha` from `[config revenant_alpha]`. So a caller who sets the
 new public property changes what the port draws, because the setter writes the same ivar the drawing path
 reads — there is no second store and no translation step.
 
@@ -71,7 +71,7 @@ otool -v -s __TEXT __objc_methname UIListContentConfiguration.o
 The selector table lists, among the class's own:
 
 ```
-00001fa2  charon_alpha
+00001fa2  revenant_alpha
 00001faf  alpha
 00001fb5  setAlpha:
 ```
@@ -82,7 +82,7 @@ unrelated: `-Wincomplete-implementation` for `+prominentInsetGroupedHeaderConfig
 `+extraProminentInsetGroupedHeaderConfiguration`, which the 16.4 header declares and this file has
 never defined.
 
-## Why the accessor is written as it is, and why `-charon_alpha` stays
+## Why the accessor is written as it is, and why `-revenant_alpha` stays
 
 The two accessors are written in the same shape as the public accessors this file already defines
 (`-image`/`-setImage:`, `-textProperties`, and the rest): a getter returning the ivar and a setter
@@ -90,7 +90,7 @@ assigning it, on the `@implementation` itself, with no `@interface` — the file
 the class, so the accessors are reachable by selector and by the compile, which is what the registry
 check counts.
 
-`-charon_alpha` is deliberately **kept**, not folded into `-alpha`. `UIListContentView.m:187` reads it,
+`-revenant_alpha` is deliberately **kept**, not folded into `-alpha`. `UIListContentView.m:187` reads it,
 and folding the two would mean touching the drawing path for no gain. Two names for one value is a
 small, stated duplication rather than a second mechanism: both return the same ivar, and there is
 nothing to keep in step.

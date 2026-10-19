@@ -1,7 +1,7 @@
 # SKLabelNode (iOS 7)
 
 The iOS 7 surface of SpriteKit's `SKLabelNode`: a text in a font, with its colour, alignment and line layout. The port's
-object is `SpriteKit/SpriteKitLabel7.m`, declared by `SpriteKit/CharonSpriteKit.h`. The rows are in `registry/SpriteKit/`
+object is `SpriteKit/SpriteKitLabel7.m`, declared by `SpriteKit/RevenantSpriteKit.h`. The rows are in `registry/SpriteKit/`
 `ios7.json`, and the attributed text is in `ios11.json`.
 
 ## Oracle and what was measured

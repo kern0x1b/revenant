@@ -34,35 +34,35 @@ grep -nE '^\+ \(instancetype\)' \
 
 ## What each method returns, and why that is not a new behaviour
 
-**`+[UIBackgroundConfiguration listCellConfiguration]` → `CharonBackgroundStyleListCell`.** This style
+**`+[UIBackgroundConfiguration listCellConfiguration]` → `RevenantBackgroundStyleListCell`.** This style
 already exists and is already in use; only the door was missing:
 
-- in the port's own style enum, `CharonLists.h:30`
-- given the same systemBackground colour as `ListPlainCell` in `-initCharonWithStyle:`,
+- in the port's own style enum, `RevenantLists.h:30`
+- given the same systemBackground colour as `ListPlainCell` in `-initRevenantWithStyle:`,
   `UIBackgroundConfiguration.m:144-145`
-- returned by `-charon_styleColor:`, `:366-367`
+- returned by `-revenant_styleColor:`, `:366-367`
 - counted as plain by `-updatedConfigurationForState:`, `:382`
 - **already built** by `UICollectionViewListCell.m:40` and `:52`
 
 So the method returns the identical configuration the port's own list cell uses today. Nothing about the
 drawing changes.
 
-**`+[UIListContentConfiguration headerConfiguration]` → `CharonListStyleHeader`, and
-`+footerConfiguration` → `CharonListStyleFooter`.** Both styles are carried, and the footer is *not* the
+**`+[UIListContentConfiguration headerConfiguration]` → `RevenantListStyleHeader`, and
+`+footerConfiguration` → `RevenantListStyleFooter`.** Both styles are carried, and the footer is *not* the
 header relabelled — the initialiser gives them different margins, which is the whole of the difference
 between a header and a footer here:
 
 | style | margins (top, leading, bottom, trailing) | where |
 |---|---|---|
-| `CharonListStyleHeader` | `10, 8, 10, 8` | `UIListContentConfiguration.m:176-179` |
-| `CharonListStyleFooter` | `8, 8, 6, 8` | `UIListContentConfiguration.m:180-184` |
+| `RevenantListStyleHeader` | `10, 8, 10, 8` | `UIListContentConfiguration.m:176-179` |
+| `RevenantListStyleFooter` | `8, 8, 6, 8` | `UIListContentConfiguration.m:180-184` |
 
-Both are answered as header-footer styles by `-charon_isHeaderFooterStyle:` (`:294-297`), which is what
+Both are answered as header-footer styles by `-revenant_isHeaderFooterStyle:` (`:294-297`), which is what
 the drawing path asks.
 
 ## `+[UIBackgroundConfiguration listFooterConfiguration]` stays `absent`, and why
 
-The port's background styles name headers and **no footer at all**. The full enum, `CharonLists.h:21-31`:
+The port's background styles name headers and **no footer at all**. The full enum, `RevenantLists.h:21-31`:
 
 ```
 Custom, ListPlainCell, ListPlainHeaderFooter, ListGroupedCell, ListGroupedHeaderFooter,

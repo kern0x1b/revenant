@@ -31,12 +31,12 @@ the port's zeros were wrong in six places. Measured on the host:
 | `setDefaultContentInsets` | the same insets, **7 12 7 12** |
 
 The port's background is a fresh instance of its own `UIBackgroundConfiguration`: its style is 0, and
-0 is `CharonBackgroundStyleCustom` (`CharonLists.h:22`), which is the base style the host prints, with
+0 is `RevenantBackgroundStyleCustom` (`RevenantLists.h:22`), which is the base style the host prints, with
 the measured corner radius on it. The case holds the **radius** and nothing else about the background:
 the two sides' `-description` are two implementations with two sets of fields and a pointer in each and
 could never be character-equal, and the base style is not a property the host's class has at all - it
 appears only inside that description - so there is no property here for a two-sided comparison to hold
-on. The port exposes its own as `-charon_style`, which the host has no counterpart for.
+on. The port exposes its own as `-revenant_style`, which the host has no counterpart for.
 
 ## M3. The eight constructors are not aliases
 

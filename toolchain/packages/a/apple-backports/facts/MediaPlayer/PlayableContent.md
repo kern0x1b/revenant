@@ -32,7 +32,7 @@ absence is visible at all — a per-image `__objc_classlist` read cannot see a p
 - **`MPPlayableContentDataSource`, `MPPlayableContentDelegate`** — `implemented`, and a protocol is the
   easier case, not the harder one: an application's own class conforms to it and this port declares the
   method signatures the header declares. The tree already takes this shape in
-  `registry/MetalPerformanceShadersGraph/graph.json`, whose 13 `charon_` rows are all `implemented`.
+  `registry/MetalPerformanceShadersGraph/graph.json`, whose 13 `revenant_` rows are all `implemented`.
 
 ## The limit, stated rather than hidden
 
@@ -103,12 +103,12 @@ type; the port's object never constructs one — it hands the data source's answ
 **One of those five did not fail at first, and the fix is in the check.** The update-depth clamp was
 originally asserted by calling a balanced sequence and printing "balanced" — which passes on a mutant
 that lets the depth go negative, because a balanced sequence balances under both spellings. The depth is
-now read through `-charonUpdateDepth` and compared at each step, which is what makes the clamp observable.
+now read through `-revenantUpdateDepth` and compared at each step, which is what makes the clamp observable.
 That is the second time in this band a check that could not fail had to be rewritten rather than kept
 (the first is the `languageTag` copy in `LanguageOptions.md`); both are recorded rather than quietly
 fixed, because a green check that certifies nothing is the same defect as a swallowed error.
 
-`-charonUpdateDepth` and `-charonReloadCount` are the port's own accessors, not a published API: no SDK
+`-revenantUpdateDepth` and `-revenantReloadCount` are the port's own accessors, not a published API: no SDK
 header declares a reload count, and adding a public property for a counter Apple does not publish would
 be a wider surface than the header's.
 

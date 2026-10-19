@@ -29,7 +29,7 @@ xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations "$here/sampler.m" \
 # sampler -> MIDI instrument -> generator -> effect -> unit -> node, and the unit's parameter tree and bus
 # classes, because the sampler's initialiser goes through all of them.
 renames="-DAVAudioUnitSampler=revenant_host_AVAudioUnitSampler
--DCHaronAudioComponentCount=revenant_host_CHaronAudioComponentCount"
+-DCRevenantAudioComponentCount=revenant_host_CRevenantAudioComponentCount"
 # the iOS spelling of the mixer's bus-enable parameter; the macOS SDK this harness builds
 # against has only the newer name, and the headers renamed the other way
 renames="$renames -Dk3DMixerParam_Enable=k3DMixerParam_BusEnable"

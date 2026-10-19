@@ -4,7 +4,7 @@
 
 Measured on the host: Apple M4 Pro, macOS 27.0.1, SDK 27.0. The oracle is Apple's own `MPSCNNLossDescriptor` in the
 system's MetalPerformanceShaders framework. The port (`MPSCNNLossDescriptor11.m`) is compiled for Catalyst beside
-Apple's framework with its classes renamed `CharonHost<Name>`, and both run in one process. The comparison is
+Apple's framework with its classes renamed `RevenantHost<Name>`, and both run in one process. The comparison is
 `tests/backports/host/mps-loss-descriptors/` (`run.sh`, `descriptor.m`): 70 checks, 0 failures on this host, and the
 mutant (the factory's default weight changed to 2.0 in a scratch copy) turns the loss-defaults check red on
 `weight: apple 1, port 2`.
@@ -16,7 +16,7 @@ mutant (the factory's default weight changed to 2.0 in a scratch copy) turns the
   0, `numberOfClasses` 1, `epsilon` 1e-7, `delta` 1.
 - **Refusals in the factory.** A loss type of 10 or -1 aborts the release, and so does a reduction type of 4. A
   reduction type of -1 is accepted (the reduction is a signed enum). The port returns nil for the three refused values
-  through `CharonMPSRefuse`, and accepts -1.
+  through `RevenantMPSRefuse`, and accepts -1.
 - **Setters that the release validates**, each against the loss type the descriptor holds at the moment of the set,
   measured for all ten loss types:
   - `labelSmoothing` only for softmax cross entropy (type 2) and sigmoid cross entropy (type 3);

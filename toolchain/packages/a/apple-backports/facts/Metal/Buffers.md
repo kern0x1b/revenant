@@ -1,6 +1,6 @@
 # Buffers: debug markers and the GPU address, iOS 10.0 and later
 
-A buffer on this port is CPU memory. `CharonMetalBuffer` allocates its bytes once with `calloc`, or takes
+A buffer on this port is CPU memory. `RevenantMetalBuffer` allocates its bytes once with `calloc`, or takes
 them as a window onto a heap's allocation, and `-contents` returns that pointer. The members here are the
 ones of `MTLBuffer` the port did not define before this file.
 

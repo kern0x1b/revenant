@@ -8,14 +8,14 @@ on a real device is never exact.
 
 `spatial-tracker-diff.m` builds and runs it:
 
-    clang -O -fobjc-arc -DCHARON_TRACKER_OFFLINE=1 -I . -o tracker-diff \
-          CharonARTracker.m spatial-tracker-diff.m \
+    clang -O -fobjc-arc -DREVENANT_TRACKER_OFFLINE=1 -I . -o tracker-diff \
+          RevenantARTracker.m spatial-tracker-diff.m \
           -framework Foundation -framework CoreVideo -framework CoreGraphics
     ./tracker-diff
 
 ## The seam, and what it leaves out
 
-`CHARON_TRACKER_OFFLINE` compiles out three things and nothing else: the `CMMotionManager` the
+`REVENANT_TRACKER_OFFLINE` compiles out three things and nothing else: the `CMMotionManager` the
 session owns, the `AVCaptureDevice`/`AVCaptureSession` the session owns, and the two
 `ARRaycastTarget` cases a raycast filters its targets with. The first two do not exist on the host
 and the third is not declared there. Every line of the tracking, the matching, the integration, the
@@ -122,7 +122,7 @@ running but is not yet producing a pose the picture agrees with.
 
 ## The turn was being multiplied the wrong way round
 
-The pose accumulated, but ran away instead of tracking. `CharonRotationBetween(from, to)` multiplied
+The pose accumulated, but ran away instead of tracking. `RevenantRotationBetween(from, to)` multiplied
 the two quaternions in the order they were handed in, and the rotation that carries `from` onto `to`
 is `to` composed with `from`'s inverse. For two attitudes a step apart about one axis, the wrong order
 gives the *sum* of their angles rather than the difference, so a 5.73-degree step produced turns of
@@ -222,7 +222,7 @@ permissive implementation rather than transcribed.
 This is the reason the Gauss-Newton step is out of the frame's path, and it is not located.
 
 What is known, in the order it was measured. The pose accumulates the gyroscope's turn correctly once
-`CharonRotationBetween` multiplies `conj(from) * to` rather than `from * to` — two attitudes a step
+`RevenantRotationBetween` multiplies `conj(from) * to` rather than `from * to` — two attitudes a step
 apart about one axis give the sum of their angles in the wrong order, and the pose reached 143 degrees
 after five frames where the truth was at 28.65. A landmark's depth comes from the turn-compensated
 drift of a point known to be the same point, divided by the camera's focal length, which is the camera's
@@ -241,7 +241,7 @@ So one of three things is wrong, and the numbers do not yet say which:
   is placed with it and put back into the camera's space with its inverse. The first version applied it
   the wrong way and every point projected behind the camera, which the solver reported as no residual
   at all rather than as a wrong one; it is now inverted, but "now inverted" is not "now right".
-- **the projection and the landmark are in different hands.** `CharonProject` builds a ray from
+- **the projection and the landmark are in different hands.** `RevenantProject` builds a ray from
   `intrinsics` and the pose; the landmark was placed from a ray built from a *normalised* image
   coordinate and the frame's size. Those agree only if the principal point is the frame's centre and
   the intrinsics are the same ones, and the principal point is assumed rather than measured.
@@ -299,7 +299,7 @@ range, and a baseline across frames is what it needs, and there is none.
 The depth is no longer the first-order drift formula. A point matched across two frames is on the ray
 out of the camera that saw it first, through the pixel it was seen at, and on the ray out of the camera
 now, through the pixel it is at; the distance along the first ray at which those two rays meet is its
-depth. That is the triangulation a two-frame stereo pair does, in `CharonTriangulatedDepth`, and it
+depth. That is the triangulation a two-frame stereo pair does, in `RevenantTriangulatedDepth`, and it
 takes the pose delta's own translation as the baseline - so the translation is in the model rather than
 missing from it, which is what the drift formula was: it attributed the whole drift to the rotation and
 had no baseline at all.
@@ -351,12 +351,12 @@ passes a half turn. A clean integer multiple with a wrap is an arithmetic one, n
 the pose is being advanced by twice the turn the gyroscope reported, and the mean of 71.459 degrees is
 what a 2x rate looks like averaged over a full turn and a half.
 
-Not yet located. What is ruled out: the turn's order (`CharonRotationBetween` is `conj(from) * to` and
+Not yet located. What is ruled out: the turn's order (`RevenantRotationBetween` is `conj(from) * to` and
 is verified by the wrap), the quaternion-to-matrix construction (checked by hand for the y-axis case the
 sequence uses: it gives `columns[0] = (cos, 0, -sin)`, `columns[2] = (sin, 0, cos)`, the right-handed
 rotation), the intrinsics (fixed, and now reading `cx 80 cy 60`), and the depth (triangulation, and it
 reports zero correctly because there is no baseline). What is not ruled out: the pose being advanced
-somewhere as well as at `CharonARTracker.m:681`, or the differential's own truth being indexed twice -
+somewhere as well as at `RevenantARTracker.m:681`, or the differential's own truth being indexed twice -
 there are three loops over the frames in `spatial-tracker-diff.m` and only one of them is the measurement.
 
 The next measurement is one line: print the quaternion the differential hands the tracker and the
@@ -379,7 +379,7 @@ Measured, over the 30-frame sequence, after the fix:
 ```
 
 **Retracting what this file said before.** Every number above the previous line, and every conclusion
-drawn from it, was a measurement of a broken oracle. `CharonAttitudeOf` in the differential had every
+drawn from it, was a measurement of a broken oracle. `RevenantAttitudeOf` in the differential had every
 component of the matrix-to-quaternion extraction the wrong way round - column-major, so
 `R[2][1] - R[1][2]` for the quaternion's x is `columns[1][2] - columns[2][1]` and the file had it
 reversed - which reads every rotation back as its conjugate. The angle between a rotation and its

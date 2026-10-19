@@ -2,7 +2,7 @@
 
 `UICollectionLayoutListConfiguration.leadingSwipeActionsConfigurationProvider` and `trailingSwipeActionsConfigurationProvider`, with `UIContextualAction` and `UISwipeActionsConfiguration`, on the rows of a list.
 
-Source: the header of SDK 16.4 and the swipe of the table view the package already carries (`UITableView+SwipeActions.m`), whose buttons and gestures the list reuses (`CharonSwipeViews.m`). The host's UIKit under Mac Catalyst draws no swipe on a row, so there is no oracle for the pixels; the touch behaviour is checked on an iPhone 4S by `tests/backports/device/lists.m` with real touches.
+Source: the header of SDK 16.4 and the swipe of the table view the package already carries (`UITableView+SwipeActions.m`), whose buttons and gestures the list reuses (`RevenantSwipeViews.m`). The host's UIKit under Mac Catalyst draws no swipe on a row, so there is no oracle for the pixels; the touch behaviour is checked on an iPhone 4S by `tests/backports/device/lists.m` with real touches.
 
 ## What the port does
 

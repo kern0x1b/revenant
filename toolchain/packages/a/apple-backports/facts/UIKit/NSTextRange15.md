@@ -3,7 +3,7 @@
 `NSTextRange`, `NSTextSelection`, `NSTextElement`, `NSTextParagraph`,
 `NSTextSelectionNavigation`, and the two protocols the range layer is written
 against, `NSTextLocation` and `NSTextSelectionDataSource`. This package declares the protocol on
-its own concrete location type: `CharonTextLocation.h` has `CharonTextLocation : NSObject
+its own concrete location type: `RevenantTextLocation.h` has `RevenantTextLocation : NSObject
 <NSTextLocation>`, the class is a name no SDK header uses, and the objects define
 `__OBJC_PROTOCOL_$_NSTextLocation`. The SDK this library is compiled against declares the protocol
 by name, so the name alone proves nothing; the class and the class name are what make the

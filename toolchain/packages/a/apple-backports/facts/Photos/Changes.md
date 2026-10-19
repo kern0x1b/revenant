@@ -184,7 +184,7 @@ device that is not the iPad 2 is the owner's. What was missing there was a devic
 
 The iPad 2 was attached, and the five programs ran through the same runner, in one command:
 
-    $ CHARON_DEVICE_HOLDER=photos-1 sh tests/backports/device/photos/run.sh \
+    $ REVENANT_DEVICE_HOLDER=photos-1 sh tests/backports/device/photos/run.sh \
           --device ipad2 --control photosalbums8 photosavailability13 photoschanges8 photosdata9
     photosalbums8: 3 checks, 0 failed
     photosavailability13: 11 checks, 0 failed

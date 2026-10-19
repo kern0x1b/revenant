@@ -32,8 +32,8 @@ class extension carries `_URL`, `_actions`, `_bookingTime`, `_itemReference`,
 itself, and the `@implementation` has a getter for each, written as a method and **not** as an
 `@synthesize` — a superclass's read-only property is not one this class can synthesise, and
 synthesising it would be a claim it does not own. The initialiser stores the value it was given in
-that ivar and reaches the superclass through `charon_intents_super_init`, which is the pattern the
-tree already uses twice (`gen-intents.py:647` and `CharonIntents100.m:334`).
+that ivar and reaches the superclass through `revenant_intents_super_init`, which is the pattern the
+tree already uses twice (`gen-intents.py:647` and `RevenantIntents100.m:334`).
 
 A caller holding an `INReservation *` and sending `itemReference` gets this class's answer, because
 the getter is this class's own: one object, one value. **That sentence is the design, and the
@@ -67,8 +67,8 @@ following are **owed to `intents-1c`** and are not claims:
 
 The host half needs the class names renamed before it links, and the rename list is built and
 measured but the harness is not in this series: the port's sources `#import <Intents/Intents.h>` and
-`CharonIntents262.h` re-declares the classes the 16.4 SDK lacks, so on the host every one of them is a
-**duplicate interface definition** until it is renamed. `CharonIntents100.m` cannot build for the
+`RevenantIntents262.h` re-declares the classes the 16.4 SDK lacks, so on the host every one of them is a
+**duplicate interface definition** until it is renamed. `RevenantIntents100.m` cannot build for the
 host at all (`UIKit/UIKit.h` is iOS-only), so `INIntentResolutionResult` and the resolution helpers
 are port-only whatever happens.
 

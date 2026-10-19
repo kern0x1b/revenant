@@ -4,7 +4,7 @@ Five classes, each in a file of its own because `band()` reads a file as one obj
 boundary: `NSMorphology.m` holds `NSMorphology`, the iOS 17.0 category and the side table they
 share, and exports no API symbol of its own; `NSMorphologyCustomPronoun.m`,
 `NSMorphologyPronoun.m`, `NSInflectionRule.m` and `NSInflectionRuleExplicit.m` are the other four.
-`CharonMorphology.h` holds what the SDK does not.
+`RevenantMorphology.h` holds what the SDK does not.
 
 Source: the 26.2 Foundation's `NSMorphology.h` and `NSInflectionRule.h`, read whole, and the host's
 own five classes held against the port by `tests/backports/host/morphology` — **344 comparisons, none
@@ -30,8 +30,8 @@ NSMorphologyPronoun 0
 
 So the SDK has three of the eight enums and not the class, while the macOS SDK the differential
 builds against has all six — and a header that declared them unconditionally would be a
-redeclaration on one of the two. `CharonMorphology.h` therefore declares the five 17.0 enums and
-`NSMorphologyPronoun` under `CHARON_MORPHOLOGY_IOS17_ENUMS` and `CHARON_MORPHOLOGY_IOS17_PRONOUN`,
+redeclaration on one of the two. `RevenantMorphology.h` therefore declares the five 17.0 enums and
+`NSMorphologyPronoun` under `REVENANT_MORPHOLOGY_IOS17_ENUMS` and `REVENANT_MORPHOLOGY_IOS17_PRONOUN`,
 which the **package** defines, and the differential does not.
 
 ## The rules, all measured
@@ -101,10 +101,10 @@ The port-target compile is clean of errors and of the one diagnostic the gate tu
 `-Werror=objc-missing-property-synthesis`. The warnings it still reports are owed here rather than
 fixed, each with the one that would be the fix:
 
-- **four `-Wnullability-completeness` sites in `CharonMPSImage.h`** — a pointer parameter with no
+- **four `-Wnullability-completeness` sites in `RevenantMPSImage.h`** — a pointer parameter with no
   `_Nonnull`/`_Nullable`. The fix is the annotation; the port's own headers spell it everywhere else.
 - **the four `+supportsSecureCoding` the NSSecureCoding adopters do not answer**
-  (`CharonMorphology.m`, `NSInflectionRule.m`, `NSMorphologyCustomPronoun.m`,
+  (`RevenantMorphology.m`, `NSInflectionRule.m`, `NSMorphologyCustomPronoun.m`,
   `NSMorphologyPronoun.m`) — `-Wobjc-property-implementation` and `-Wprotocol` on the class property
   the protocol declares. The fix is one `+ (BOOL)supportsSecureCoding` per class, after the ivar
   block rather than before it, which is where a first attempt put it and lost the compile.

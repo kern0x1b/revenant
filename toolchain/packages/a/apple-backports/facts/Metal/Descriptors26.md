@@ -15,7 +15,7 @@ sh tests/backports/host/metal-census/descriptors26.sh
 ```
 the differential, against Apple's own objects, with no device created:
   the DEVICE objects define all of them under Apple's own names (MTL4PipelineOptions and 22 more)
-  ok   the control: ZZZNoSuchNameCharonR16 is not a class of this framework
+  ok   the control: ZZZNoSuchNameRevenantR16 is not a class of this framework
   ok   fresh: shaderValidation: the port 0 and Apple's own object 0
   ok   copy of a changed one: shaderReflection: the port 2 and Apple's own object 2
   ok   fresh: maxCallStackDepth, and it is Apple's own 1 and not a zero: the port 1 and Apple's own object 1

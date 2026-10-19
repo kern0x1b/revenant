@@ -10,7 +10,7 @@ comment:
 
 * `factory-probe.sh` asks how a **sized** map behaves. The header marks `-init` and `+new` unavailable
   and gives no other way to make one, so the system cannot be asked and the port's
-  `+charon_mapWithDimensions:` is the only map with a size a caller chose. Seven checks.
+  `+revenant_mapWithDimensions:` is the only map with a size a caller chose. Seven checks.
 * `protocol-check.sh` asks whether a caller can **find every protocol the registry claims**, by the name
   the registry gives it. The names come out of `registry/Accessibility`'s `kind: protocol` /
   `status: implemented` rows and the sources out of `modules/apple/backports.lua`'s own
@@ -20,8 +20,8 @@ comment:
 
 **The three protocol-name cases are not in the two-sided comparison, and the alias is why.** The
 differential keeps its two halves from colliding by compiling the port half with
-`-DAXBrailleMapRenderer=CharonPortAXBrailleMapRenderer`, and that alias renames the **protocol** as well
-as the class. So in the port half the protocol is `CharonPortAXBrailleMapRenderer` and in the host half
+`-DAXBrailleMapRenderer=RevenantPortAXBrailleMapRenderer`, and that alias renames the **protocol** as well
+as the class. So in the port half the protocol is `RevenantPortAXBrailleMapRenderer` and in the host half
 `AXBrailleMapRenderer` belongs to the framework: two different names answer one question, and a lookup by
 name cannot be compared across them. Measured both ways: `objc_getProtocol("AXBrailleMapRenderer")` in a
 binary linking the port's own objects answers found, and the same call in the port half of the

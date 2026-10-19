@@ -98,7 +98,7 @@ class answers them, and a `CIContext` the release made does not have them either
 and the gate said the release does not carry them, which at iOS 6.1.3 is true. So neither status is
 honest and the rows are gone, with the reason here: **a release that has a working colour space and
 format answers them itself, and on one that has not the port's own context class answers them for the
-contexts the port makes** — which is a property of `CharonGOCtxContext`, not of `CIContext`, and a
+contexts the port makes** — which is a property of `RevenantGOCtxContext`, not of `CIContext`, and a
 caller holding a context the port did not make finds nothing either way.
 
 ## What the pixel probe measures

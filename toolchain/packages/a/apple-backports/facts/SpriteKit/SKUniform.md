@@ -3,7 +3,7 @@
 The iOS 8 surface of SpriteKit's `SKUniform`: the class, its three factories, its three initialisers, and its
 `name`, `uniformType`, `floatValue` and `textureValue` properties, plus `NSCopying` and `NSSecureCoding`.
 The port's object is `SpriteKit/SpriteKit8.m` (config `spritekit`, library `libSpriteKitBackports.dylib`), declared
-by `SpriteKit/CharonSpriteKit.h`. The declarations are the generator's (`spec/SpriteKit/declarations.tsv`, the rows
+by `SpriteKit/RevenantSpriteKit.h`. The declarations are the generator's (`spec/SpriteKit/declarations.tsv`, the rows
 `introduced` 8.0 by the SDK's availability). The rows are in `registry/SpriteKit/ios8.json`.
 
 ## Oracle and what was measured
@@ -51,7 +51,7 @@ Measured on the host:
   port, and the round trip is the claim.
 - Nothing draws. A shader needs SpriteKit's renderer, which the port does not carry, so the uniform is held for the
   application and read back. `SKShader` is not in this object.
-- The header `CharonSpriteKit.h` declares only the iOS 8 surface and does not import `<SpriteKit/SpriteKit.h>`. The
+- The header `RevenantSpriteKit.h` declares only the iOS 8 surface and does not import `<SpriteKit/SpriteKit.h>`. The
   SDK declares later members of `SKUniform` (the iOS 10 vector and matrix uniforms), and an implementation that
   includes it is incomplete for every release below 10: clang warns on each of them, which is the cause to avoid.
 - The enumeration values are the SDK's (`spec/SpriteKit/declarations.tsv`, 0 to 8), and the host's measured types

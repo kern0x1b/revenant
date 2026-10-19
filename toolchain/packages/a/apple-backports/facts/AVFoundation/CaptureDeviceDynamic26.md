@@ -4,7 +4,7 @@
 `AVCaptureDeviceFormat` and one of `AVCaptureDeviceInput`, with the two setter methods among them - in one
 object. Registry: `registry/AVFoundation/dynamic26.json`, thirteen rows, one per row the
 `coordination/corpus/ledger-2026-10-03/AVFoundation.tsv` snapshot reads `missing` for them at 26.0. Header:
-`CharonAVCaptureDeviceDynamic26.h`, transcribed from the SDK 26.2 (`AVCaptureDevice.h:2698-2736` and
+`RevenantAVCaptureDeviceDynamic26.h`, transcribed from the SDK 26.2 (`AVCaptureDevice.h:2698-2736` and
 `:3862-3895`, `AVCaptureInput.h:443-452`) with two types of its own: the string enum `AVCaptureAspectRatio` and
 the `AVCaptureCameraLensSmudgeDetectionStatus` enum with the header's own four values.
 

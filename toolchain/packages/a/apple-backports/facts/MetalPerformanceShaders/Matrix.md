@@ -108,7 +108,7 @@ edit broke the kernel rather than refuting the header - was the right one.
 
 `MPSMatrixMultiplication` has two passes over the batch: one that checks every matrix holds the region
 its origin names, and one that computes. Both start at the batch's **first** index, which is what
-`batchStart` is - "the index of the first matrix to process" - and `CharonMPSBatch` implements the
+`batchStart` is - "the index of the first matrix to process" - and `RevenantMPSBatch` implements the
 header's rule that a `batchSize` of 0 means all of them.
 
 **The release does not.** Measured over three matrices, right-hand side scaled so matrix *i* writes its

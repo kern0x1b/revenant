@@ -74,7 +74,7 @@ is one (read from 6.1.3's AVFoundation in the armv7 cache):
   lock is held; the port asks the method instead, a documented exception.
 - `-[AVCaptureSession startRunning]` is not replaced: `AVCaptureSessionDidStartRunningNotification` (4.0) says it.
 - `-[AVCaptureSession addInput:]`, `-addOutput:` and `-commitConfiguration` are wrapped, calling the release's
-  first (`CharonAVCapture.m`): 6.x posts nothing for them, and `inputs` and `outputs` are not observable (6.1.3's
+  first (`RevenantAVCapture.m`): 6.x posts nothing for them, and `inputs` and `outputs` are not observable (6.1.3's
   `addInput:` and `addOutput:` send no `willChangeValueForKey:`). A device's sessions are learnt from
   `addInput:`, and each of them reapplies the zoom and the frame durations to the connections it made.
 - `-[AVCaptureVideoPreviewLayer setSession:]` is wrapped (`-initWithSession:` calls it): a session does not list its

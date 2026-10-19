@@ -60,7 +60,7 @@ port on the same allocator agree, and that is what the differential checks.
 
 ## The test
 
-`tests/backports/host/sqlite3/run.sh` links `StringBuilder.c` with each name renamed to `charon_port_*`, and
+`tests/backports/host/sqlite3/run.sh` links `StringBuilder.c` with each name renamed to `revenant_port_*`, and
 `differential-str.c` calls the host's builder and the port's with the same steps, comparing length, error, text and
 the finished string after every step. Scenarios: the empty builder, appends, formats, reset, the limit (TOOBIG and
 the calls after it), just under the limit, the boundary sequences above, and NULL. The control adds one to the port's

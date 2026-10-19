@@ -20,5 +20,5 @@ Source: the host's own UIKit under Mac Catalyst (macOS 27.0), held against the b
 ## Where it differs
 
 - The system's `-description` raises an exception when a string is nil (it builds a dictionary from them); the port's writes `(null)`.
-- The port's `-initCharonWithCharacters:unmodified:keyCode:modifierFlags:` makes a key for the tests; the release never does.
+- The port's `-initRevenantWithCharacters:unmodified:keyCode:modifierFlags:` makes a key for the tests; the release never does.
 - `UIKeyboardHIDUsage` is an enumeration and has no entry.

@@ -48,13 +48,13 @@ on the reduce class or the inherited 1:1 one wins.
 ## Next step
 
 1. Cases in `image-cases.m`, one per concrete class over a 4x3 float32 image - a row reduction expects 3
-   values, a column reduction 4 - with `CharonReferenceImageReduce` in `mps-reference.h` computing
+   values, a column reduction 4 - with `RevenantReferenceImageReduce` in `mps-reference.h` computing
    min/max/mean/sum in plain C over `clipRectSource` intersected with the image. Exact for min, max and
    the row/column sums; a tolerance for the means, which divide. A row that can make no comparison is
    written `inert-with-reason` with the AGX line above.
 2. **Red control before the implementation**: add the cases, watch both plants report `NOT AS EXPECTED`
    while the kernels do not exist yet. That is the control biting before there is anything to pass it. The
-   plants are in `CharonMPSStore` and `CharonMPSImageWriteRegion`; a reduction stores through the former,
+   plants are in `RevenantMPSStore` and `RevenantMPSImageWriteRegion`; a reduction stores through the former,
    so they reach it.
 3. `MPSImageReduce13.m`, then the nine rows, then export `mps-reduce` on `160b3baf8` with one Self-review
    on the tip and review-mechanical with the nm sweep.

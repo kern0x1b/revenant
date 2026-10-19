@@ -3,7 +3,7 @@
 `AVFoundation/AVCaptureDeviceRectsOfInterest26.m` carries all eight - six properties on `AVCaptureDevice` and
 the two `-defaultRectFor...PointOfInterest:` methods. Registry: `registry/AVFoundation/rectsofinterest26.json`,
 eight rows, one per row the `coordination/corpus/ledger-2026-10-03/AVFoundation.tsv` snapshot reads `missing`
-for them at 26.0. Header: `CharonAVCaptureDeviceRectsOfInterest26.h`, transcribed from the SDK 26.2
+for them at 26.0. Header: `RevenantAVCaptureDeviceRectsOfInterest26.h`, transcribed from the SDK 26.2
 (`AVCaptureDevice.h:1159-1187` and `:1403-1429`) because SDK 16.4 declares none of it - and, unlike the two
 slices below it in the same folder, **no type at all**, because CGPoint, CGSize, CGRect and BOOL are
 CoreGraphics' own and Foundation's.

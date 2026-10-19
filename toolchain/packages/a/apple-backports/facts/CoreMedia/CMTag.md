@@ -2,7 +2,7 @@
 
 `CMTag` arrived at iOS 17. The SDK the toolchain resolves is 16.4, where
 `ls iPhoneOS16.4.sdk/.../CoreMedia.framework/Headers/ | grep -c Tag` is **0**, so the type and all
-twenty-five functions that take or return it are transcribed in `CharonCMTag26.h` alongside the tag
+twenty-five functions that take or return it are transcribed in `RevenantCMTag26.h` alongside the tag
 collection's. The corpus lists twenty-five functions and forty-eight constants in this header as missing.
 
 This file records the host's answers, measured by `.agent-work/runs/cmtag/measure.m` and
@@ -99,7 +99,7 @@ so the object exports nothing for them, the differential cannot and must not com
 no registry row.
 
 And a defect this table found in what is committed: `CMTagGetValueDataType` is an **export**, and
-`CharonCMTag26.h` was inlining it — so the object was defining **eighteen**, not nineteen. The inline is
+`RevenantCMTag26.h` was inlining it — so the object was defining **eighteen**, not nineteen. The inline is
 removed and the function is defined in the object.
 
 

@@ -53,7 +53,7 @@ character the nominal font cannot show - is therefore not carried into anything 
 text storage's own font attribute for the affected range mid-layout was considered and rejected: it would make the substitution visible
 to every attribute reader in this codebase for free, but it also risks the layout manager treating its own glyph-generation callback as
 an edit to react to, and that interaction was not verified. So a divergence between the given font and the character's own
-`NSFontAttributeName` is flagged once, loudly, through the same `charon_menus_say_once` this codebase already uses for a known,
+`NSFontAttributeName` is flagged once, loudly, through the same `revenant_menus_say_once` this codebase already uses for a known,
 inert gap (`NSLayoutManager.usesDefaultHyphenation`, `NSLayoutManager+Text13.m`) - never assumed away, never silently dropped.
 
 Glyph properties a caller sets this way are not backed by any native setter found on the release - none was assumed, none was called

@@ -19,7 +19,7 @@ Measured:
 - A real-time system message (F8 to FF) arrives as type 0xFF with its group from the word and its word at offset 8.
 - A word of a type the header does not name (6 and 7, 8 to 0xC, 0xD and 0xF) arrives as type 0xFF, group 0xFF, its words at
   offset 8. Measured for 0x60 (type 6), 0xD0 (flex data) and 0xF0 (UMP stream) as the bytes of one event.
-- The word sizes the visitor and the translation use (CharonMIDIUMPWordCount): 1 for types 6 and 7, 2 for 8, 9 and A, 3 for B
+- The word sizes the visitor and the translation use (RevenantMIDIUMPWordCount): 1 for types 6 and 7, 2 for 8, 9 and A, 3 for B
   and C, 4 for D, E and F. Measured on macOS 27.0.1 (oracle/visit-sizes.m, visit-sizes-macos.txt) by where the next
   recognisable word begins: a packet of a type's word then a NOOP, a system clock and a note on gives 4, 4, 3, 3, 3, 2, 2 and
   1 events for types 6, 7, 8, 9, A, B, C and E. The lone-word probe of types 8 to 0xE overran the packet and was killed (the

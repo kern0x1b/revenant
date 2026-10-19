@@ -21,7 +21,7 @@ without the configuration lock raises `NSGenericException` with 7.0's text ("act
 cannot be set without first successfully gaining exclusive ownership of the device using
 -lockForConfiguration:"), read as 7.0 reads it: `-[AVCaptureDevice isLockedForConfiguration]`, a method
 6.1.3 has and its own setters ask (`CaptureZoomAudioSession.md`). A device tracks the sessions its input
-has been added to (`AVFoundation/CharonAVCapture.m`, shared with the zoom: `AVCaptureSession`'s
+has been added to (`AVFoundation/RevenantAVCapture.m`, shared with the zoom: `AVCaptureSession`'s
 `addInput:`, `addOutput:` and `commitConfiguration` wrapped with `method_setImplementation`, and
 `AVCaptureSessionDidStartRunningNotification`; `CaptureZoomAudioSession.md` says why each); on each of them, every video
 connection of every tracked session gets the device's stored duration written onto its own

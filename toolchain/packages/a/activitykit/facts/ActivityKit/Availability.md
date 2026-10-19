@@ -7,7 +7,7 @@ iOS 16.1, in the Dynamic Island. Measured on this port's target: the 6.1.3 relea
 entitlement for one. `ActivityAuthorizationInfo.areActivitiesEnabled` is therefore the framework's own
 answer for a device that does not support Live Activities, which is `false`.
 
-The module asks rather than asserts. `CharonActivitySupport` holds the reader the system's own answer
+The module asks rather than asserts. `RevenantActivitySupport` holds the reader the system's own answer
 comes through; with no reader installed - every release this port builds for - it answers what the
 release answers. Everything else follows the framework's own way from that one answer:
 

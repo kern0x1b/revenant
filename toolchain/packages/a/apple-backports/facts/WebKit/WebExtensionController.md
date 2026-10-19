@@ -14,7 +14,7 @@ webextension-controller_scenario.h the questions, in one file, so the two sides 
                                   different ones -- compiled twice, once plain and once with the renames
 ```
 
-The port is compiled for the host with `-DCHARON_HOST_DIFFERENTIAL`, which makes its own headers step
+The port is compiled for the host with `-DREVENANT_HOST_DIFFERENTIAL`, which makes its own headers step
 aside so the SDK's declarations are used, and with `renames.sh`'s `-D` flags, which prefix the classes
 the port implements so its classes and Apple's live side by side in one process. `dladdr` is what tells
 the two apart: without it a build that linked the wrong objects would compare the system against itself
@@ -88,7 +88,7 @@ record an answer the port is not meant to match. Each is a named case, checked o
 | `port.controller.loadExtensionContext` | raises `NSInternalInconsistencyException` | NO, in `WKWebExtensionContextErrorDomain` | it could not load a context if it tried; the raise is the host's nil-argument check, and the port checks rather than throws |
 | `port.controller.unloadExtensionContext` | the same raise | the same answer | nothing was ever loaded |
 | `port.controller.extensionContextForNilExtension` | raises | nil | the same rule, same reason |
-| `port.class.dataRecord` and the five members, `port.dataRecord.sizeInBytesOfTypes` | cannot be asked: `+new` and `-init` are `NS_UNAVAILABLE` on `WKWebExtensionDataRecord` | built by the port's own `charon_initWithIdentifier:displayName:containedDataTypes:errors:` | there is no host object to compare with, so each member is held to the value the record was built from, and the sizes to the zero an empty record holds |
+| `port.class.dataRecord` and the five members, `port.dataRecord.sizeInBytesOfTypes` | cannot be asked: `+new` and `-init` are `NS_UNAVAILABLE` on `WKWebExtensionDataRecord` | built by the port's own `revenant_initWithIdentifier:displayName:containedDataTypes:errors:` | there is no host object to compare with, so each member is held to the value the record was built from, and the sizes to the zero an empty record holds |
 
 ## The extension families' own 78 records
 

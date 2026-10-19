@@ -66,7 +66,7 @@ reading it would claim a check the port never made. The three graph edges — `p
 own is a request nobody asked for.
 
 **The result is a report, not a handle.** Two `readonly` properties, no public initialiser, and a graph
-entry point `-charon_initWithHomeIdentifier:accessoryIdentifiers:` that is the only way one is made — a
+entry point `-revenant_initWithHomeIdentifier:accessoryIdentifiers:` that is the only way one is made — a
 result that could be conjured empty would name a home it added nothing to.
 
 ## What a device does that this port does not

@@ -32,11 +32,11 @@ on the port's side the case built its images through the release's own class and
 the release with itself. The harness printed that and nothing acted on it:
 
     image MPSImage                               /System/Library/.../MPSCore
-    image CharonMPSImage                         (absent)
+    image RevenantMPSImage                         (absent)
 
 `cnn-cases.m` now asks, before each case builds anything, whether the port has every class that case
 builds from, and a case that does not is named and counted as *not compared*; the comparison then fails
-on the uncompared case. `run.sh` is marked with `-DCHARON_PORT_BUILD` so the question is asked on the
+on the uncompared case. `run.sh` is marked with `-DREVENANT_PORT_BUILD` so the question is asked on the
 port's build only — the system build links the release's classes and has no port to ask about. The red
 line, on the tree as it stood before this class:
 
@@ -203,7 +203,7 @@ quoting the rule they are not answering, rather than answering per channel.
   coefficients; the port refuses the image instead of implementing it. A caller with an RGB or RGBA
   image gets a refusal naming the feature channel count, not an answer.
 - **The arithmetic clamp**, `minimumValue` and `maximumValue` on `MPSImageArithmetic`. The header
-  declares both; no case sets either, and the port's `CharonMPSCombine` applies them, but nothing here has
+  declares both; no case sets either, and the port's `RevenantMPSCombine` applies them, but nothing here has
   measured that it does so where the release would.
 - **The strides**, `primaryStrideInPixels` and `secondaryStrideInPixels`. Declared by the header, carried
   by the port, and **no case exercises them**: a kernel given a stride and a kernel given none are the

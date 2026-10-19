@@ -9,7 +9,7 @@ command buffer to hand back, so nothing here creates one.
 ## What is measured, and against what
 
 `tests/backports/host/indirect-command-buffer-descriptor/run.sh` builds the port's class for Catalyst beside Apple's
-Metal in one process, renamed `CharonHostMTLIndirectCommandBufferDescriptor`, and compares its members with Apple's: a
+Metal in one process, renamed `RevenantHostMTLIndirectCommandBufferDescriptor`, and compares its members with Apple's: a
 fresh descriptor (from `init` and from `new`), one with every member set away from its default, a copy of that one,
 and the original after the copy was taken. Equality and the hash are compared too. A mutant that makes the fresh
 kernel threadgroup memory bind count 0 turns the fresh comparison red, and it does.

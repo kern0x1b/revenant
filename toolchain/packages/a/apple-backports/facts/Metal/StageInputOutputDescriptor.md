@@ -19,5 +19,5 @@ gives a fresh default instance, and `-copyWithZone:` deep-copies every attribute
 Nothing in this port ever reads an `MTLStageInputOutputDescriptor`: it exists because an
 application that builds one (to hand to a compute pipeline, say) must not LOAD-FAIL doing so, not
 because this port's own compute path consults it. This port carries no compute pipeline at all
-(`CharonMetalDevice` implements only the render path over OpenGL ES 2.0), so a descriptor built
+(`RevenantMetalDevice` implements only the render path over OpenGL ES 2.0), so a descriptor built
 here has nowhere real to go yet - a fact about the wider compute gap, not about this descriptor.

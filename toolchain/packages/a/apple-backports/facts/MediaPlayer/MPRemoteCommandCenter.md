@@ -26,7 +26,7 @@ iOS 6.1.3 has no `MediaPlayer.framework` command surface, but it has the mechani
 documented to sit above: `UIEventTypeRemoteControl`, delivered to the responder chain with a
 `UIEventSubtypeRemoteControl*` subtype since iOS 4.0 - present and real on this release, not
 invented. `-[UIApplication sendEvent:]` is swizzled (`+load`, the same interception point
-`CharonPushBridge` already uses for PushKit rather than depending on an override the host
+`RevenantPushBridge` already uses for PushKit rather than depending on an override the host
 application may not implement) to recognize `UIEventTypeRemoteControl`, map its subtype to the
 matching `MPRemoteCommand`, build a real `MPRemoteCommandEvent` (or `MPSeekCommandEvent`, with the
 correct begin/end `type`, for the two seek commands), and dispatch every registered target/handler

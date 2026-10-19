@@ -16,7 +16,7 @@ so a 17.0 name measures as 18.0. Measured, not annotated, is the rule.
 ## The types the port has to declare
 
 `AVCaptionUnitsType`, `AVCaptionDimension`, `AVCaptionPoint` and `AVCaptionSize` are iOS 18 and SDK 16.4
-declares none of them, so `CharonAVFoundationCaption18.h` transcribes 26.2's own declarations. Two
+declares none of them, so `RevenantAVFoundationCaption18.h` transcribes 26.2's own declarations. Two
 departures from 26.2's text, both forced by the SDK the toolchain resolves and both stated in the header:
 
 - **`API_UNAVAILABLE(visionos)` is dropped from every declaration.** SDK 16.4's `availability.h` does not
@@ -31,7 +31,7 @@ departures from 26.2's text, both forced by the SDK the toolchain resolves and b
 ## The differential
 
 `tests/backports/host/avf-globals/functions.m`, in the same binary as the constants phase: the port's
-object is compiled with its four definitions renamed to `charon_host_` names and with the eight reaction
+object is compiled with its four definitions renamed to `revenant_host_` names and with the eight reaction
 constants it compares against renamed too, and linked beside a probe that calls Apple's own symbols
 under the bare names. Both sides are read with the SDK's own `AVCaptionDimension` / `AVCaptionPoint` /
 `AVCaptionSize`, which are 26.2's layout - the layout the port's own header transcribes - so the port's
@@ -104,7 +104,7 @@ Left here because each of them reads as a green run rather than as a failure.
    `AVCaptionDimension AVCaptionDimensionMake(...)` and the lookup `NSString
    *AVCaptureReactionSystemImageNameForType(...)`, so neither has its name at column 0. The anchored
    pattern renamed nothing, the four symbols then resolved against the linked AVFoundation, every
-   `charon_host_` pointer stayed NULL, and the probe segfaulted on the first call.
+   `revenant_host_` pointer stayed NULL, and the probe segfaulted on the first call.
 2. **A second, private spelling of the structs.** The first version declared its own `CharDimension`,
    `CharPoint` and `CharSize` with the same field types and the same widths, and called through function
    pointers cast to them. Same segfault, same place. A second spelling of a struct this file then calls

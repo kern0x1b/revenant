@@ -37,7 +37,7 @@ The **distance attenuation model**. The header defines three laws — linear sto
 `referenceDistance` — and the mixer's own parameters for a source are a distance and a gain, so the
 model is applied to the gain and the distance the unit is given. The unit still renders; the port only
 decides the gain, which is exactly the parameter it has. The three laws are written out in
-`-charon_gainForDistance:` from the header's own documentation, with the documented defaults (inverse
+`-revenant_gainForDistance:` from the header's own documentation, with the documented defaults (inverse
 model, 1 m reference, 100000 m maximum, rolloff 1).
 
 ## What this unit cannot be
@@ -68,7 +68,7 @@ answer, not a substitute.
     initialized, which is not followed.
   - The route class `Receiver` resolves to built-in speakers: the header has no earpiece type, and the built-in
     hardware is the nearest answer. That is the port's choice, not a measurement.
-  - Mapping and table: `AVFAudio/CharonEnvironmentOutput.h`, checked by `tests/backports/host/avfaudio/environment.sh`
+  - Mapping and table: `AVFAudio/RevenantEnvironmentOutput.h`, checked by `tests/backports/host/avfaudio/environment.sh`
     (`checks=environment-output failures=0`).
 - **`listenerHeadTrackingEnabled`** (iOS 18) answers **NO** whatever is set; the value is not kept. This release's mixer has
   no head pose to take, and no motion sensor feeds one.
@@ -77,8 +77,8 @@ answer, not a substitute.
 
 ## The reverb filter band
 
-`reverbParameters.filterParameters` is implemented (`CharonEnvironmentFilterParameters` in `AVFAudio/AVAudioEnvironmentNode8.m`,
-with the defaults and the enable mapping in `AVFAudio/CharonEnvironmentFilter.h`). It is an `AVAudioUnitEQFilterParameters`, a band
+`reverbParameters.filterParameters` is implemented (`RevenantEnvironmentFilterParameters` in `AVFAudio/AVAudioEnvironmentNode8.m`,
+with the defaults and the enable mapping in `AVFAudio/RevenantEnvironmentFilter.h`). It is an `AVAudioUnitEQFilterParameters`, a band
 of a filter. The host's band is not an `AVAudioUnitEQ` band's defaults: the port's band subclass takes the environment as its owner, and
 the environment writes the band to the mixer's reverb filter, the SpatialMixer's parameters 14 to 18. Measured on the host, on the
 environment node's own parameter tree (`tests/backports/host/avfaudio/environment.m` checks each of these, and a mutation of one
@@ -112,7 +112,7 @@ These rows are `owed` in the registry. Each has its measured reason in `registry
 
 ## Not yet measured here
 
-The environment node's own offline pull — `-charon_renderOfflineToBuffer:frames:`, the release's
+The environment node's own offline pull — `-revenant_renderOfflineToBuffer:frames:`, the release's
 `AudioUnitRender` on its real generic output — is the hook the manual-rendering differential in
 `AVAudioEngine.m` uses. The sample-by-sample comparison against macOS is the next piece of work and is
 not in this delivery.

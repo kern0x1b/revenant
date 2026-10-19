@@ -2,7 +2,7 @@
 
 `NSTextContentManager`, `NSTextContentStorage`, `NSTextListElement`, the four
 protocols between them — `NSTextElementProvider`, `NSTextStorageObserving`,
-`NSTextContentManagerDelegate`, `NSTextContentStorageDelegate` — and `CharonTextLocation`,
+`NSTextContentManagerDelegate`, `NSTextContentStorageDelegate` — and `RevenantTextLocation`,
 the port's own `NSTextLocation`. Whole, from the headers of SDK 26.2:
 `NSTextContentManager.h`, `NSTextListElement.h`, `NSTextStorage.h`.
 
@@ -85,7 +85,7 @@ a storage leaves the document where it is. The port's `-attributedString` answer
 because a document that hands out its own mutable string is a document an application edits
 behind the manager's back.
 
-**The locations are the port's own**, `CharonTextLocation`: an offset and the document it is
+**The locations are the port's own**, `RevenantTextLocation`: an offset and the document it is
 in. Both are needed, because an offset is only an offset in one document, and
 `-offsetFromLocation:toLocation:` is what answers `NSNotFound` for two locations of two
 documents — the header's own words for that case. `NSTextLocation` is a protocol with one
@@ -156,19 +156,19 @@ contents/textList configured with the text list element's position inside the tr
 records the difference. The differential holds both sides' own shape, so a host that starts
 agreeing with the port is noticed.
 
-## CharonTextLocation
+## RevenantTextLocation
 
 The port's own `NSTextLocation`, which the range layer's group had carried and then removed as
 unused, and this group needs again: a document's locations are the content storage's, and
 without a concrete location there is nothing to make a range of.
 
 **It takes no registry entry, and the reason is measured.** `nm -m` of the 6.1.3 gate's
-`libUIKitBackports.dylib` shows `_OBJC_CLASS_$_CharonTextLocation` as
+`libUIKitBackports.dylib` shows `_OBJC_CLASS_$_RevenantTextLocation` as
 `non-external (was a private external)`: the class is in the library and the linker made it
 hidden, and the gate's `found.classes` sees exported classes only, so an entry claiming it is
 implemented cannot be satisfied — which is what the gate said, by name. The two precedents in
 this tree agree: `__NSConcreteUUID` **has** an entry, because `+[NSUUID alloc]` hands that class
-out and the system names it; the port's own `CharonListMenuDelegate` and `CharonListMenuHooks` are
+out and the system names it; the port's own `RevenantListMenuDelegate` and `RevenantListMenuHooks` are
 hidden in the same library and have **no** entry, because nothing hands them out. Rule R4 is
 satisfied by the SDK row that does exist and that the range layer's group already carries:
 `NSTextLocation`, the protocol, in `ios15textrange.json`. It holds the document and the
@@ -187,9 +187,9 @@ define. A lookup by name would not have measured that: the SDK `content15_test.m
 against carries the protocol object itself, and `NSProtocolFromString("NSTextElementProvider")`
 answers non-nil in a process with none of this library in it.
 
-The case in `content15_test.m` therefore reads the protocol list off `CharonTextLocation`, which
+The case in `content15_test.m` therefore reads the protocol list off `RevenantTextLocation`, which
 is the one of the four this package puts on a class of its own: no SDK header declares the name
-`CharonTextLocation`, so its declaration in `CharonTextLocation.h` is the only one, and the
+`RevenantTextLocation`, so its declaration in `RevenantTextLocation.h` is the only one, and the
 protocol on it is this library's. `NSTextElementProvider` has no such class here — the port's
 `NSTextElement` adopts nothing in its own source, and the SDK's declaration of that class is what
 a runtime would read — so for that one the nm table above is the evidence and no case claims

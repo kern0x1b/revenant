@@ -70,7 +70,7 @@ This package's `NSItemProvider` *is* a class that adopts both protocols, so the 
 | `+objectWithItemProviderData:typeIdentifier:error:` | a provider over the data; nil and an `NSError` when the type identifier is empty or the data is nil | `NSItemProvider.m:547` |
 
 The instance visibility needed one real fix rather than a reading: both registrations take a
-`visibility:` argument and **dropped it** — `CharonRepresentation` had nowhere to keep it — so any
+`visibility:` argument and **dropped it** — `RevenantRepresentation` had nowhere to keep it — so any
 answer here would have been invented. The representation carries it now, and the narrowest of them is
 what the instance method reports, because a provider registered with mixed visibilities must not claim
 a representation the receiver is not allowed to see.

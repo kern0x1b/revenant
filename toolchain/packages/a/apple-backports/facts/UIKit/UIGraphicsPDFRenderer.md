@@ -9,7 +9,7 @@ every call below is the call the release makes and not a reading of its neighbou
 
 ## Where the classes are, and where they are not
 
-`CHARON_ROOT=<worktree> xmake l tools/corpus/cache-census.lua UIGraphicsPDF 6.1.3 4.3 10.3.4`:
+`REVENANT_ROOT=<worktree> xmake l tools/corpus/cache-census.lua UIGraphicsPDF 6.1.3 4.3 10.3.4`:
 
 ```
 6.1.3  ... classes 11378, of which UIGraphicsPDF* 0
@@ -35,7 +35,7 @@ carry, so no band that takes the object lacks one:
 Read with `xmake l tools/cache-index/first-rung.lua <symbol>`, one name per run. The last one is the
 family's only private call: it sets the matrix a context returns to when its CTM is reset, which is
 what keeps the y flip across the pages of one document, and the three private functions beside it in
-`CharonGraphicsRenderer.h` are declared the same way for the same reason.
+`RevenantGraphicsRenderer.h` are declared the same way for the same reason.
 
 ## The members, and where each body is
 

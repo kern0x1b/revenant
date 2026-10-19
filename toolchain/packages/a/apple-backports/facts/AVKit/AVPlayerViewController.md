@@ -78,7 +78,7 @@ Everything is built of what iOS 6 has: `AVPlayerLayer`, `UISlider`, `UIButton` w
   is written.
 - The 12.0 full screen messages are sent with the transition coordinator of UIKitBackports, which
   AVKitBackports links: its `presentViewController:` and `dismissViewControllerAnimated:` attach a
-  `CharonTransitionCoordinator` to the full screen controller before the transition starts and keep it
+  `RevenantTransitionCoordinator` to the full screen controller before the transition starts and keep it
   until it ends, so `willBegin...` goes out right after the presentation starts and `willEnd...` right
   after the dismissal starts, each once. The 15.0 full screen restore message is not sent.
 - `pixelBufferAttributes` (9.0): 6.1.3's `AVPlayerLayer` takes no pixel format, and its

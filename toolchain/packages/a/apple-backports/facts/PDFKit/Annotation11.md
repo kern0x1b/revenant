@@ -413,14 +413,14 @@ That it is the **category** and not a broken port is measured, not argued: a `-7
 binary, so the **class's own** members there do run - which is also why that block's keys are the port's.
 
 **The answer is a seam.** The derivation of all four members now lives in
-**`CharonPDFKitColours.h`** as `static inline` functions over the annotation's `CGPDFDictionary`, which is
-`CharonLists.h`'s shape and for `CharonLists.h`'s reason: a C symbol in a `.m` is a symbol a host
+**`RevenantPDFKitColours.h`** as `static inline` functions over the annotation's `CGPDFDictionary`, which is
+`RevenantLists.h`'s shape and for `RevenantLists.h`'s reason: a C symbol in a `.m` is a symbol a host
 differential that compiles the port's objects with its own sources cannot link. `PDFAnnotationColours11.m`
 is four one-line members over that seam, and the harness's Catalyst side calls the seam **directly**, on
 the same `CGPDFDictionary` the port read:
 
-    CGPDFDictionaryRef dictionary = [annotation charon_CGPDFDictionary];
-    printAnnotationColour(label, "backgroundColor", charon_annotation_background_colour(dictionary));
+    CGPDFDictionaryRef dictionary = [annotation revenant_CGPDFDictionary];
+    printAnnotationColour(label, "backgroundColor", revenant_annotation_background_colour(dictionary));
     ...
 
 **No selector is dispatched anywhere in that path**, so nothing a later image loads can take it over, and
@@ -438,7 +438,7 @@ than fighting for the class.
 
 ### Two traps in CoreGraphics that each cost this family a whole run
 
-Both are in `CharonPDFKitColours.h` and both are about reading a PDF colour array:
+Both are in `RevenantPDFKitColours.h` and both are about reading a PDF colour array:
 
 1. **`CGPDFArrayGetObject` is ZERO-BASED.** Its index runs `0 .. count-1`, the way `PDFKit11.m`,
    `PDFPage11.m` and `PDFAction11.m` already read arrays in this library - so reading component `i` as
@@ -464,7 +464,7 @@ answer. CoreGraphics types a bare `1` as `kCGPDFObjectTypeInteger` and a bare `0
 All four are **`implemented`**, and none of them is a constant or a stand-in:
 
 * **`backgroundColor`, `interiorColor`, `fontColor`, `font`** - four members in
-  `PDFAnnotationColours11.m`, one line each, over five `static inline` seams in `CharonPDFKitColours.h`
+  `PDFAnnotationColours11.m`, one line each, over five `static inline` seams in `RevenantPDFKitColours.h`
   that decide the key, the colour space, the components, the alpha and the font name and size. Compared
   against Apple's own members over 48 named fixtures through the seam, with 179 named red controls, of which
   fourteen name a colour or font key: `nmbg-rgb.backgroundColor.space` and `.components` (the DeviceRGB

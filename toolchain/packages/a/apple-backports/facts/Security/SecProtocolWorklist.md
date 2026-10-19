@@ -89,7 +89,7 @@ legible - it says what shape each group has and why - and it is not about debt a
 
 ### `sec_protocol_options_*` - a settings holder
 
-The port supplies its own class, `CharonSecProtocolOptions : NSObject <OS_sec_protocol_options>`, and
+The port supplies its own class, `RevenantSecProtocolOptions : NSObject <OS_sec_protocol_options>`, and
 **the setter holds the value** - a version, a ciphersuite, an ALPN string, a block, copied and held -
 while nothing in 6.1.3 ever reads it, because the release has no TLS stack that takes a
 `sec_protocol_options_t`. Every row is therefore **`inert`**: callable, the value held, and the effect

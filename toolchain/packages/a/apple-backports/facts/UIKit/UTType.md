@@ -8,7 +8,7 @@ demand this class. Behaviour is not reasoned: it is the `UTType*` C functions Mo
 already carries on iOS 6 (`UTTypeConformsTo`, `UTTypeCopyPreferredTagWithClass`,
 `UTTypeCopyDescription`, `UTTypeCreatePreferredIdentifierForTag`, `UTTypeIsDynamic`,
 `UTTypeIsDeclared`) - the same functions `UIDocumentPickerViewController.m`'s own
-`charon_acceptsPath:` was already calling before this class existed.
+`revenant_acceptsPath:` was already calling before this class existed.
 
 ## What `UTType` is
 
@@ -64,7 +64,7 @@ extension `zzqq`). This library now carries both functions (`UIKit/UTTypeDynamic
 ## What differs from the system
 
 `tags` only ever reports `UTTagClassFilenameExtension` and `UTTagClassMIMEType`, the two tag
-classes `charon_acceptsPath:` and the constants above already need; the release's real registry
+classes `revenant_acceptsPath:` and the constants above already need; the release's real registry
 of additional tag classes (`com.apple.nspboard-type`, `com.apple.ostype`, and so on) is not read.
 `version`, `referenceURL` and `supertypes` are now carried, in `facts/UIKit/UTTypeDeclarations.md`: a
 type's version and reference URL are properties of the type's declaration, so they are read out of the

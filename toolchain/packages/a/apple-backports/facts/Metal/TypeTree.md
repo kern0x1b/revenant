@@ -586,7 +586,7 @@ pointer types) refused it, and reading its warnings found four defects that no h
   struct member and an argument use; a pointer's two (`elementStructType`, `elementArrayType`) answer
   nil, for the reason a pointer's pointee is empty.
 - The stride was written under a name no header declares (`arrayStride`); the header's is `stride`.
-- The two helpers `charonTyped:` and `charonDataTypeFromScalar:` were declared on classes that did not
+- The two helpers `revenantTyped:` and `revenantDataTypeFromScalar:` were declared on classes that did not
   define them, and are now two static functions the members and the arguments share.
 
 The library's flags catch what the host build does not: a property the class extension declares and
@@ -740,7 +740,7 @@ carried, not omitted.
 and the criterion reported every member missing -- including against 26.2, where the real declarations
 are visible. It was not the SDK: a protocol takes no storage, so there was nothing for an
 `@implementation` to inherit from. Declaring them as protocols and putting the storage in
-`CharonMetalFunctionLog` / `CharonMetalFunctionLogDebugLocation` fixed it, and the criterion then reads
+`RevenantMetalFunctionLog` / `RevenantMetalFunctionLogDebugLocation` fixed it, and the criterion then reads
 `every protocol member is defined` for both.
 
 **What the logs ANSWER, which is the whole of them.** A function log is the GPU's own record of what a

@@ -12,7 +12,7 @@ link said so:
 ```
 Undefined symbols for architecture armv7:
   "_MDLVertexAttributeNormal", referenced from:
-      _CharonMDLBuildMesh in MDLAsset9.o
+      _RevenantMDLBuildMesh in MDLAsset9.o
 ```
 
 Every value is the one the host's own symbol holds: `position`, `normal`, `textureCoordinate`,

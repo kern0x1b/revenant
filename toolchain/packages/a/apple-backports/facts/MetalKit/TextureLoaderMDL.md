@@ -20,11 +20,11 @@ sh tests/backports/host/metal-census/loaderoptions.sh
   ok   MTKTextureLoaderOptionSRGB -> MTKTextureLoaderOptionSRGB
   ... (seven more, one per key MetalKit exports)
 loaderoptions: 10 check(s), 0 failure(s)
-  red    MTKTextureLoaderOptionLoadAsArray: the port says MTKTextureLoaderOptionLoadAsArrayScharonMutant and Apple's own framework says MTKTextureLoaderOptionLoadAsArray
+  red    MTKTextureLoaderOptionLoadAsArray: the port says MTKTextureLoaderOptionLoadAsArraySrevenantMutant and Apple's own framework says MTKTextureLoaderOptionLoadAsArray
 ```
 
 The harness compiles the port's object under `-DMTKTextureLoaderOptionLoadAsArray=
-charonHost_MTKTextureLoaderOptionLoadAsArray`, so both spellings are in one binary and the two can be
+revenantHost_MTKTextureLoaderOptionLoadAsArray`, so both spellings are in one binary and the two can be
 compared; it also refuses a binary that does not define the renamed symbol, because a case that read
 Apple's framework for the port's answer would agree with itself. The mutation is the value changed to
 something else, and it is red.

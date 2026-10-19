@@ -14,7 +14,7 @@ accident. All 28 answered; none was absent from the host.
 
 Then the same table was read out of two builds and the two were diffed, which is what
 `tests/backports/host/avf-metadata/run.sh` does: once linked against Apple's framework alone, and
-once with the port's three files in the same binary, every name renamed to `charon_host_<name>` so
+once with the port's three files in the same binary, every name renamed to `revenant_host_<name>` so
 the port's definition and Apple's sit side by side. The port's table is byte-identical to the host's.
 
 Two things that measurement settled, and which a header reading would have got wrong:

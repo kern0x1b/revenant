@@ -4,7 +4,7 @@
 
 Measured on the host: Apple M4 Pro, macOS 27.0.1, SDK 27.0. The oracle is Apple's own `MPSCNNYOLOLossDescriptor` in
 the system's MetalPerformanceShaders framework. The port (`MPSCNNYOLOLossDescriptor12.m`) is compiled for Catalyst
-beside Apple's framework with its classes renamed `CharonHost<Name>`, and both run in one process. The comparison is
+beside Apple's framework with its classes renamed `RevenantHost<Name>`, and both run in one process. The comparison is
 `tests/backports/host/mps-loss-descriptors/` (`run.sh`, `descriptor.m`): 70 checks, 0 failures on this host in the
 same run as the other three classes, and the mutant turns the loss-defaults check red.
 

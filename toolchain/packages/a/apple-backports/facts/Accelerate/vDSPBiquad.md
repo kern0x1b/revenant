@@ -14,7 +14,7 @@ exactly one release:
 | `Accelerate/vDSPDFT7.m` | 4 | iOS 7.0 (`vDSP_DFT_zop_CreateSetupD`, `_zrop_CreateSetupD`, `_ExecuteD`, `_DestroySetupD`) |
 
 vDSP.h publishes no layout for `struct vDSP_biquadm_SetupStruct` or its double twin, saying only that the contents may change from
-release to release and that a caller should go through the setup and setter routines, so `Accelerate/CharonBiquad.h` defines both
+release to release and that a caller should go through the setup and setter routines, so `Accelerate/RevenantBiquad.h` defines both
 and every caller only ever passes the pointer around.
 
 ## What the filter is

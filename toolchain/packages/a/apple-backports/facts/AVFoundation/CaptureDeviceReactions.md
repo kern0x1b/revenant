@@ -2,7 +2,7 @@
 
 `AVFoundation/AVCaptureDeviceReactions17.m` (the 17.0 half, ten rows) and
 `AVFoundation/AVCaptureDeviceFormatDepthZoom17.m` (the 17.2 half, two rows). Registry:
-`registry/AVFoundation/reactions17.json`. Header: `CharonAVCaptureDeviceReactions17.h`, which transcribes
+`registry/AVFoundation/reactions17.json`. Header: `RevenantAVCaptureDeviceReactions17.h`, which transcribes
 26.2's own declarations because SDK 16.4 has no `AVCaptureReactions.h` at all and its `AVCaptureDevice.h`
 declares none of this.
 
@@ -71,7 +71,7 @@ What the same run measured on the host, and these are measurements this port's a
 
 ### Where the port keeps the choice, and what key
 
-`CharonCaptureUserPreferredCameraHistory`, in the application's own `NSUserDefaults`, holding the
+`RevenantCaptureUserPreferredCameraHistory`, in the application's own `NSUserDefaults`, holding the
 `-uniqueID` of the devices that were set, most recent first, at most three of them.
 
 - **that store**, because the header's promise is "across app launches and reboots" (`:661`) and

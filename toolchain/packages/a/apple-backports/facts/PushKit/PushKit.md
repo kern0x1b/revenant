@@ -32,7 +32,7 @@ it re-asks `apsd` for a token by replaying `-registerForRemoteNotificationTypes:
 `-registerUserNotificationSettings:` - never bits this port invents on the application's behalf,
 since that would show the user a permission prompt they never asked PushKit to show. When
 `apsd` calls the application delegate back with a token, this port hears it too: the first time
-`-[UIApplication setDelegate:]` names a delegate class, `CharonPushBridge` chains its own
+`-[UIApplication setDelegate:]` names a delegate class, `RevenantPushBridge` chains its own
 implementation onto that class's `-application:didRegisterForRemoteNotificationsWithDeviceToken:`
 (calling the application's own implementation first, if it has one, then broadcasting the token to
 every live `PKPushRegistry` whose `desiredPushTypes` wants it) - the same

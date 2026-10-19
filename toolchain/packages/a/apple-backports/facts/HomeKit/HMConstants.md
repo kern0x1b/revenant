@@ -121,5 +121,5 @@ construction, and the 63 enum types likewise; the ledger's own `header-ok` says 
 nothing to it.
 
 The model — `HMHome`, `HMRoom`, `HMAccessory` and the rest — is a separate family and is not in this
-delivery. `CharonHomeKitStore.m` and `CharonHAPBignum.m` are here because they are what the model and
+delivery. `RevenantHomeKitStore.m` and `RevenantHAPBignum.m` are here because they are what the model and
 the HAP transport are written on, and both are the port's own symbols, so no band drops them.

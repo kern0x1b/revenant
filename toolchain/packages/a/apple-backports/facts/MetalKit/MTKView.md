@@ -11,7 +11,7 @@ Metal-over-OpenGL-ES-2.0 device.
 port's Metal already draws through. `device`, `colorPixelFormat`, `framebufferOnly`,
 `presentsWithTransaction` and `colorspace` all forward to that layer's own real properties.
 `drawableSize` reads and writes the layer's own `drawableSize`. `currentDrawable` is the layer's
-real `-nextDrawable` (`CharonMetalNextDrawable`). `clearColor`/`clearDepth`/`clearStencil` are held
+real `-nextDrawable` (`RevenantMetalNextDrawable`). `clearColor`/`clearDepth`/`clearStencil` are held
 and used to build a real `MTLRenderPassDescriptor` in `currentRenderPassDescriptor`, attaching the
 current drawable's texture and, when `depthStencilPixelFormat` is not `MTLPixelFormatInvalid`, a
 real depth/stencil texture created through the device's own `-newTextureWithDescriptor:`, cached

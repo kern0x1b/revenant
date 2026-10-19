@@ -1,7 +1,7 @@
 # The pixel formats the port holds, and the ones it refuses
 
 Queued from MPS: the image filters and the convolutional kernels work in half and single floats, and
-`formatFor` in `CharonMetalTexture.m` admitted only the four 8-bit formats. This is what the port holds
+`formatFor` in `RevenantMetalTexture.m` admitted only the four 8-bit formats. This is what the port holds
 now, why, and what it answers for the rest.
 
 ## The nine formats
@@ -21,7 +21,7 @@ now, why, and what it answers for the rest.
 The internal format is unsized — `GL_RGBA`, `GL_RG`, `GL_RED` — with the type the extension names
 (`GL_HALF_FLOAT`, `GL_FLOAT`), which is what OpenGL ES 2.0 with those extensions specifies; the sized
 internal formats are ES 3.0. `GL_HALF_FLOAT` is not in ES 2.0's own headers, so it is defined in
-`CharonMetalTexture.m` with the value `GL_OES_texture_half_float`'s header gives, and nothing else is
+`RevenantMetalTexture.m` with the value `GL_OES_texture_half_float`'s header gives, and nothing else is
 defined there.
 
 **Where the extension list comes from.** The SGX 543 of an iPad 2 at 6.1.3
@@ -43,7 +43,7 @@ answer rather than a texture that holds something else.
 ## The readback, and why channels are not bytes
 
 OpenGL ES 2.0 reads a colour attachment as four channels of the channel's own width, whatever the texture
-holds, so a texture of fewer channels is the **leading** ones copied out of that row. `CharonFormat`
+holds, so a texture of fewer channels is the **leading** ones copied out of that row. `RevenantFormat`
 therefore carries the width of a whole texel, how many channels there are and how wide one channel is,
 because before this they were one number and the two are not the same thing:
 
@@ -60,7 +60,7 @@ unchanged: one texel, four channels, one byte each.
 
 ES 2.0 filters the 8-bit formats with nothing extra. A **half float** is filtered only with
 `GL_OES_texture_half_float_linear` and a **float** only with `GL_OES_texture_float_linear`, so each format
-carries that extension beside the one that lets it exist, and `-charonCanFilter` asks the same extension
+carries that extension beside the one that lets it exist, and `-revenantCanFilter` asks the same extension
 string the texture was made against.
 
 **A format this device cannot filter, asked to be filtered, is what Metal answers with a validation
@@ -70,7 +70,7 @@ and the log says so once per texture, naming the pixel format. Saying it once pe
 once per draw is deliberate — a kernel in a loop would otherwise put a line out per invocation — and the
 line names the texture and the format, so the caller can find which one.
 
-The eight-bit formats are unaffected: `charonCanFilter` is YES for all four on every device, so the path
+The eight-bit formats are unaffected: `revenantCanFilter` is YES for all four on every device, so the path
 is only taken by a float format on a driver without its linear extension.
 
 ## What is not here

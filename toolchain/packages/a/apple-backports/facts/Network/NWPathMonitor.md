@@ -51,6 +51,6 @@ CPU, the counts per case were (host, then port):
 
 The port's counts did not vary in any run. The host's did, on three cases, and only under load: the extra update is a
 second delivery of a path the host had already reported. The port reports a reachability change only when the path
-differs from the last one it reported (charon_deliver), and its count is what it always is. The differential therefore compares the port's count exactly with the host's count where
+differs from the last one it reported (revenant_deliver), and its count is what it always is. The differential therefore compares the port's count exactly with the host's count where
 the host is steady, and for the three cases above it requires the port to deliver the host's floor (2, 1, 1) and
 the host to deliver at least that floor.

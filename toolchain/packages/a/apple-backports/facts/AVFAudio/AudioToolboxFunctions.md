@@ -6,7 +6,7 @@ Carried in `libAVFAudioBackports.dylib`. The registry is `registry/AVFAudio/iosa
 
 The oracle is the host's own function of the same name, called through `dlsym` with the same inputs. The host test is
 `tests/backports/host/audiotoolbox-functions/functions.m`, and `functions.sh` runs it. Its last line is
-`checks=audiotoolbox-functions failures=0`. Each port definition is compiled under a `CharonTest` name, so the host's symbol and the
+`checks=audiotoolbox-functions failures=0`. Each port definition is compiled under a `RevenantTest` name, so the host's symbol and the
 port's sit in one process. Two mutations were run on purpose: the last-active time as 1 and the unknown-extension status as 0. The
 test failed on both (5 FAIL lines), and the sources were reverted. The drum bank's MSB changed to 119 fails two checks (2 FAIL lines), and the source was restored.
 
@@ -40,7 +40,7 @@ no host measurement.
 `AudioComponentInstantiate(component, options, handler)` calls the handler with an instance and status 0 for a component. The host
 calls it on the calling thread, before the call returns; the test measures that the handler runs on the main thread when the call is
 made there, and before the call returns. For no component, the host answers no instance and status -3000
-(`CharonAudioComponentNoComponentStatus`; the iOS SDK names no constant for it). The options choose out-of-process loading on the
+(`RevenantAudioComponentNoComponentStatus`; the iOS SDK names no constant for it). The options choose out-of-process loading on the
 host. The port loads every unit in its own process, so it does not use them. A `NULL` handler is not called: the host's answer to a
 `NULL` handler is not measured.
 
@@ -56,7 +56,7 @@ answers for every identifier.
 
 `MusicDeviceMIDIEventList(unit, offset, list)` sends each Universal MIDI Packet message of the list to the unit, in order: a complete
 system-exclusive message to `MusicDeviceSysEx`, and every other message to `MusicDeviceMIDIEvent` at the offset. The port walks the list
-with `CharonForEachMIDIMessage` (`AVFAudio/CharonMIDIEventList.h`), the walk the instrument's `sendMIDIEventList:` already uses.
+with `RevenantForEachMIDIMessage` (`AVFAudio/RevenantMIDIEventList.h`), the walk the instrument's `sendMIDIEventList:` already uses.
 
 The host test renders the sampler after each list, from a fresh engine with the General MIDI bank, and compares the port's render with
 the host's bit for bit, and their statuses. Five lists: a MIDI 1.0 note on, a MIDI 2.0 note on at velocity16 0x8000 and at 0xFFFF,
@@ -129,7 +129,7 @@ the release has no dependency to fill for such a format either, so the port leav
 and the packet count, with the dependency array NULL and given (measured on a WAV file). A format that employs dependent packets is not
 measured.
 
-The three functions of this section are declared in `AVFAudio/CharonAudioToolboxDeclarations.h`, with the types the 16.4 SDK does not
+The three functions of this section are declared in `AVFAudio/RevenantAudioToolboxDeclarations.h`, with the types the 16.4 SDK does not
 have (`AudioStreamPacketDependencyDescription`, `AudioConverterOptions`, `AudioConverterComplexInputDataProcRealtimeSafe`). The header
 is guarded on `CA_REALTIME_API`, which the iOS 26 SDK defines, so a 26 SDK build does not see the types twice.
 

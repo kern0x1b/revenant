@@ -112,7 +112,7 @@ K = 1.538.** So the inverse is specified as well as the forward, and both are he
 
 **The obstacle, and it is the house's rename mechanism rather than anything in the rows.** The differential
 renames the port's definitions so the port's and the host's can sit in one binary, by compiling the port with
-`-DvDSP_DFT_Interleaved_CreateSetup=charon_host_vDSP_DFT_Interleaved_CreateSetup` and so on. **Those three
+`-DvDSP_DFT_Interleaved_CreateSetup=revenant_host_vDSP_DFT_Interleaved_CreateSetup` and so on. **Those three
 function names share a prefix with the opaque setup type `vDSP_DFT_Interleaved_Setup`**, and the preprocessor
 substitution reaches the header's own declarations of the type, so vDSP.h stops compiling at the family's own
 declarations. Every other family in this band renames cleanly because no function name is a prefix of a type
@@ -131,9 +131,9 @@ carry this family and that the "bit exact" result was the port compared with its
 the impulse tables and K = 1.538 all came from the real release.
 
 What actually happened: **the `-D` renames were applied to the differential's translation unit as well**, so
-its host calls were renamed to `charon_host_*` too and both call sites reached the port. The port's object
+its host calls were renamed to `revenant_host_*` too and both call sites reached the port. The port's object
 must be compiled with the `-D` list and **the differential's must not**. With that, `nm` shows the two sides
-distinct - `_vDSP_DFT_Interleaved_Execute` undefined and binding to Accelerate, `_charon_host_...` defined -
+distinct - `_vDSP_DFT_Interleaved_Execute` undefined and binding to Accelerate, `_revenant_host_...` defined -
 and the comparison is real.
 
 **What the result actually is, corrected: the port is WITHIN the bound, not bit exact.** 17 checks, 0 failures,

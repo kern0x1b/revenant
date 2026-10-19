@@ -43,7 +43,7 @@ Response (measured, 12 cases, R1 to R12):
 ## How the response is used
 
 The response is what `-[AVContentKeyRequest processContentKeyResponse:]` takes. The port's session reads it through
-internal members (`CharonAVContentKey.h`): its kind (clear key, token or FairPlay), and for a clear key its key and
+internal members (`RevenantAVContentKey.h`): its kind (clear key, token or FairPlay), and for a clear key its key and
 vector. The public header declares no reader on the response, so the object still has none for an application. The
 session's behaviour on each kind is in `ContentKeySession.md`.
 

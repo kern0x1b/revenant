@@ -39,7 +39,7 @@ ellipses above stand for are written out here in full:
 **Every one of the twenty is defined under APPLE'S OWN NAME**, and that is not a naming preference:
 iOS 6 carries no class of any of those twenty names, so a caller writing
 `[[MTLComputePassDescriptor alloc] init]` must find one, and an earlier revision of this series
-defined them as `CharonMetal<Name>`. The 6.1.3 gate refused that series for exactly this reason -
+defined them as `RevenantMetal<Name>`. The 6.1.3 gate refused that series for exactly this reason -
 the registry listed `MTLComputePassDescriptor` as implemented while nothing defined that name - and
 the differential had not noticed, because the harness renamed the port's copy with `-D` and the case
 compared the host's class with the port's under a name only the test knew. The harness now compiles
@@ -146,7 +146,7 @@ says it is going no further.
 `MTLAccelerationStructure`, `MTLAccelerationStructureCommandEncoder`, `MTLBinaryArchive`,
 `MTLCommandBufferEncoderInfo`, `MTLCounter`, `MTLCounterSampleBuffer`, `MTLCounterSet`,
 `MTLDynamicLibrary`, `MTLFunctionHandle`, `MTLIntersectionFunctionTable` and
-`MTLVisibleFunctionTable` are declared in `CharonMetalProtocols.h`, so a caller resolving one by its
+`MTLVisibleFunctionTable` are declared in `RevenantMetalProtocols.h`, so a caller resolving one by its
 own name finds it — the rule from the stack-20 gate failure.
 
 `tools/transcribe-protocols.py@52253c0650` wrote all eleven, and each arrives as a **forward declaration**: the

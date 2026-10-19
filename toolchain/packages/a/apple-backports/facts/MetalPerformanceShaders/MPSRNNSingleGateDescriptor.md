@@ -7,7 +7,7 @@ Test: `tests/backports/host/mps-rnn-descriptors/` (descriptor.m, run.sh)
 
 - **Host:** macOS 27.0.1 (26A434), MPSNeuralNetwork of that host, built as Catalyst
   (`arm64-apple-ios16.0-macabi`), Apple's class and the port's class in one process
-  (`CharonHostMPSRNNSingleGateDescriptor`).
+  (`RevenantHostMPSRNNSingleGateDescriptor`).
 - **Run:** `tests/backports/host/mps-rnn-descriptors/run.sh`, 40 checks, 0 failures (this class: defaults,
   factory at (3, 5) and at (0, 0), set values, copy, equality).
 - **Declared members compared:** the base class's five (see MPSRNNDescriptor.md) and the two the 16.4 header

@@ -20,8 +20,8 @@ Source: the host's own UIKit under Mac Catalyst (macOS 27.0), measured with rand
 
 Held by `UIKit/UIConfigurationUpdateHandler15.m` for `UICollectionViewCell`, `UITableViewCell` and `UITableViewHeaderFooterView` alike
 (`UITableViewCellConfiguration.md` points here). The block is kept copied; setting one, nil included, sends the view
-`setNeedsUpdateConfiguration`, as the header says. When the update runs at layout (`charon_layoutWillRun` in
-`UIKit/CharonConfigurationHost.m`), the view is sent `updateConfigurationUsingState:` first and the handler is called after it with the
+`setNeedsUpdateConfiguration`, as the header says. When the update runs at layout (`revenant_layoutWillRun` in
+`UIKit/RevenantConfigurationHost.m`), the view is sent `updateConfigurationUsingState:` first and the handler is called after it with the
 view and the same state object - the order the header gives ("called after `-updateConfigurationUsingState:`"). That the system hands
 both the same state object is the port's reading of the header, not measured. No host oracle runs on this machine (Catalyst is not
 installed), and the device run is the last section. Ladder by `objc.inventory` (`.agent-work/plan-and-analysis/b1314-flips/ladder-updatehandler.log`,

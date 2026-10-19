@@ -8,18 +8,18 @@ caller asks what a kernel binds. They are in `Metal/MTLArgumentBinding16.m`, one
 `release-split` on it reports `clean, every object file's symbols first-appear in one release
 (1 files, 0 symbols, 50 releases checked)`. **The 16.0 the rows carry is the ladder's band, not a
 measurement of this object**: the tool placed **0 symbols**, because every symbol the object defines
-is port-internal (`CharonMetal`-prefixed, which the tool excludes by design), so there is nothing in
+is port-internal (`RevenantMetal`-prefixed, which the tool excludes by design), so there is nothing in
 it for the tool to place in any release.
 
 ## The rows
 
 | protocol | header | the port's class | kind it answers |
 | --- | --- | --- | --- |
-| `MTLBinding` | `MTLArgument.h:335-343` | `CharonMetalBinding` | the base; buffer |
-| `MTLBufferBinding` | `MTLArgument.h:346-352` | `CharonMetalBufferBinding` | `MTLBindingTypeBuffer` (0) |
-| `MTLTextureBinding` | `MTLArgument.h:361-366` | `CharonMetalTextureBinding` | `MTLBindingTypeTexture` (2) |
-| `MTLThreadgroupBinding` | `MTLArgument.h:355-358` | `CharonMetalThreadgroupBinding` | `MTLBindingTypeThreadgroupMemory` (1) |
-| `MTLObjectPayloadBinding` | `MTLArgument.h:369-372` | `CharonMetalObjectPayloadBinding` | `MTLBindingTypeObjectPayload` (34) |
+| `MTLBinding` | `MTLArgument.h:335-343` | `RevenantMetalBinding` | the base; buffer |
+| `MTLBufferBinding` | `MTLArgument.h:346-352` | `RevenantMetalBufferBinding` | `MTLBindingTypeBuffer` (0) |
+| `MTLTextureBinding` | `MTLArgument.h:361-366` | `RevenantMetalTextureBinding` | `MTLBindingTypeTexture` (2) |
+| `MTLThreadgroupBinding` | `MTLArgument.h:355-358` | `RevenantMetalThreadgroupBinding` | `MTLBindingTypeThreadgroupMemory` (1) |
+| `MTLObjectPayloadBinding` | `MTLArgument.h:369-372` | `RevenantMetalObjectPayloadBinding` | `MTLBindingTypeObjectPayload` (34) |
 
 `MTLBinding` declares `name`, `type`, `access`, `index`, `used` (`isUsed`) and `argument`
 (`isArgument`); the four derive from it and add only their own memory numbers. The base carries ONE
@@ -67,10 +67,10 @@ sh tests/backports/host/metal-census/argbinding.sh
 | mutant | breaks | red line |
 | --- | --- | --- |
 | `M0` | the base's `-type` | `MTLBinding: the base answers the kind it was built as` |
-| `M1` | `CharonMetalBufferBinding`'s `-type` | `MTLBufferBinding: its type is MTLBindingTypeBuffer` |
-| `M2` | `CharonMetalTextureBinding`'s `-type` | `MTLTextureBinding: its type is MTLBindingTypeTexture` |
-| `M3` | `CharonMetalThreadgroupBinding`'s `-type` | `MTLThreadgroupBinding: its type is MTLBindingTypeThreadgroupMemory` |
-| `M4` | `CharonMetalObjectPayloadBinding`'s `-type` | `MTLObjectPayloadBinding: its type is MTLBindingTypeObjectPayload (34)` |
+| `M1` | `RevenantMetalBufferBinding`'s `-type` | `MTLBufferBinding: its type is MTLBindingTypeBuffer` |
+| `M2` | `RevenantMetalTextureBinding`'s `-type` | `MTLTextureBinding: its type is MTLBindingTypeTexture` |
+| `M3` | `RevenantMetalThreadgroupBinding`'s `-type` | `MTLThreadgroupBinding: its type is MTLBindingTypeThreadgroupMemory` |
+| `M4` | `RevenantMetalObjectPayloadBinding`'s `-type` | `MTLObjectPayloadBinding: its type is MTLBindingTypeObjectPayload (34)` |
 | `M5` | the shared `used` write | `MTLBinding: it reads back its name, index, access and both flags` |
 
 Three things in the harness exist because they failed here once:
@@ -130,13 +130,13 @@ vends the protocol; the class query and the port's own class set are what answer
 
 The two factories are `-[MTLFunction newArgumentEncoderWithBufferIndex:error:]` and its
 reflection-taking twin (`MTLLibrary.h:156-169`), and the port **implements both** at
-`Metal/CharonMetalLibrary.m:113` and `:118`, each a `return nil`. That is deliberate and is
+`Metal/RevenantMetalLibrary.m:113` and `:118`, each a `return nil`. That is deliberate and is
 recorded in the source: a missing method *raises* on call, while a method that answers nil is a
 call that *returns*, so a caller that probes gets a value instead of a crash.
 
 This is a **source fact, not a measurement**, and the case says so rather than implying
-otherwise: `CharonMetalFunction` is implemented in the same object as the library, which
-references `CharonMetalDevice`, and that object needs EAGL context headers this host case does not
+otherwise: `RevenantMetalFunction` is implemented in the same object as the library, which
+references `RevenantMetalDevice`, and that object needs EAGL context headers this host case does not
 carry — so the call could not be made here without adding a fake to link against, and a fake was
 not added.
 

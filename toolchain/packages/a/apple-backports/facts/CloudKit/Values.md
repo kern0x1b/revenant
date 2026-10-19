@@ -17,7 +17,7 @@ they are all in the 26.2 surface the corpus measures.
   the class behind the public one is private and its `-init` is not implemented. A trap takes the
   process down. This port's engine is an `NSObject` that does not trap - it builds, with no state - so
   the refusal a caller meets is the one this package's own header makes: both spellings are
-  `NS_UNAVAILABLE` in `CharonCKSyncEngine26.h`, as they are in Apple's own header, and the engine is
+  `NS_UNAVAILABLE` in `RevenantCKSyncEngine26.h`, as they are in Apple's own header, and the engine is
   built through `-initWithConfiguration:`. The measured difference, and what a caller sees only if it
   sends the selector dynamically, is in *The operation initializers* below.
 - **A refusal from the service is handed over with the thing it was about.** A failed record save
@@ -29,7 +29,7 @@ they are all in the 26.2 surface the corpus measures.
   deleted, purged, or the user reset their encrypted data. Those are different problems for a caller
   and the port does not fold them together.
 - **A batch asks the delegate's provider for a record through the port's own selector**
-  (`-charon_recordForRecordID:`), because the 26.2 headers type the provider as `id` and declare no
+  (`-revenant_recordForRecordID:`), because the 26.2 headers type the provider as `id` and declare no
   selector for it. A record the delegate has not read is not sent: a port that sent a record it had
   invented would be overwriting one it never saw.
 
@@ -37,7 +37,7 @@ they are all in the 26.2 surface the corpus measures.
 
 `CKRecordZoneID`, `CKRecordID`, `CKServerChangeToken`, `CKReference`, `CKAsset`, `CKRecordZone` and
 `CKRecord` are in `CloudKit/CKRecords8.m`, with the parent and share of iOS 10.0 in
-`CloudKit/CKRecords10.m` and the two record decoders in `CloudKit/CharonCKRecords.m`. They were
+`CloudKit/CKRecords10.m` and the two record decoders in `CloudKit/RevenantCKRecords.m`. They were
 missing from the tree while the registry carried all seven as `implemented` - 82 rows, 75 classes - and
 the release-split refused before the link ever ran, so nothing had found it.
 
@@ -102,8 +102,8 @@ second half is what made them look impossible:
 
 `CKFetchWebAuthTokenOperation` is declared by the headers this package builds against, 9.2 with three
 members, so nothing about it had to be transcribed. `CKShareRequestAccessOperation` is not in the 16.4
-headers and is transcribed from the 26.2 ones into `CharonCKIOS26.h` - the same shape as
-`CharonCKSyncEngine26.h`, which is how the other half of the 26 surface is declared - and implemented
+headers and is transcribed from the 26.2 ones into `RevenantCKIOS26.h` - the same shape as
+`RevenantCKSyncEngine26.h`, which is how the other half of the 26 surface is declared - and implemented
 in `CKOperations26.m` beside it with an explicit `@synthesize` for each of its three properties.
 
 **What each one asks the service for.** The web auth token operation is the one request in this package
@@ -119,7 +119,7 @@ against the service and neither claims an answer it was given.
 
 The two siblings of the 26 sharing surface that are still not carried - `CKShareAccessRequester`,
 `CKShareBlockedIdentity`, and the members of `CKShare` that say a share may ask at all - are named at
-the bottom of `CharonCKIOS26.h`. They are values the service fills in, and the `CKShare` members cannot
+the bottom of `RevenantCKIOS26.h`. They are values the service fills in, and the `CKShare` members cannot
 be answered without `CKShare` itself.
 
 ## The five names the two halves of the pile defined without a row
@@ -139,9 +139,9 @@ worked around:
   whatever it had found. A check that cannot fail is not evidence: the five names above were reported as
   "both directions 0" on the strength of a mirror that could not have said otherwise. It now exits
   non-zero on either direction.
-- The duplicate `(CharonCKBuilding)` categories in `CloudKit/CharonCKSubscription.h` were the same fact in
+- The duplicate `(RevenantCKBuilding)` categories in `CloudKit/RevenantCKSubscription.h` were the same fact in
   the source: two categories of one name on one class, where the runtime keeps one and the other's members
-  are never registered. `CKUserIdentity` was declared twice - the four properties in one, `-charon_identity`
+  are never registered. `CKUserIdentity` was declared twice - the four properties in one, `-revenant_identity`
   in the other - and `CKShareParticipant` twice, the two properties in one and `-initWithType:` in the
   other. Each pair is one category now, carrying every member it had between them. The pile's own final
   commit carries the same duplication, so this is not a replay artefact.
@@ -335,13 +335,13 @@ concrete subclass of CKOperation"* is a statement about which class was instanti
 initializer was reached - a `CKModifyRecordsOperation` **is** a concrete subclass, and measured on the
 host it answers. So `-[CKOperation init]` does both halves in one method: for the abstract base itself it
 raises with the host's exception and words, and for anything below it it is the ordinary designated
-initializer, `NSOperation`'s own `-init` followed by `-charon_setUp` (the four members every operation
+initializer, `NSOperation`'s own `-init` followed by `-revenant_setUp` (the four members every operation
 needs). Every subclass therefore writes the `[super init]` the header tells it to write, and there is no
 seam to go around. The question "which class is this really" is asked with `object_getClass`, not
 `[self class]`, because `-class` is a method a subclass may answer with something else.
 
 The first version of this had it the other way round: the base refused unconditionally and every
-subclass built through a `-charon_init` seam instead of `[super init]`. It compiled, it was green, and it
+subclass built through a `-revenant_init` seam instead of `[super init]`. It compiled, it was green, and it
 was wrong twice over - it would have raised on every operation anybody built, and it cost 35
 `-Wobjc-designated-initializers` warnings over these files, because a category cannot carry
 `objc_designated_initializer` and marking the seam designated in a class extension instead makes clang
@@ -362,7 +362,7 @@ answers either spelling. `+[CKSyncEngine new]` and `-[CKSyncEngine init]` **trap
 the class behind the public one is private and its `-init` is not implemented - and this port's
 `CKSyncEngine` is an `NSObject` that does not trap: it builds, with no state. The difference is only
 visible to a caller that sends the selector dynamically; a caller compiling against
-`CharonCKSyncEngine26.h` cannot write `[CKSyncEngine new]` at all, because that header marks both
+`RevenantCKSyncEngine26.h` cannot write `[CKSyncEngine new]` at all, because that header marks both
 spellings `NS_UNAVAILABLE` as Apple's own does.
 
 **What is measured here and what is not.** The 36 cases above are the host's own answers, and they are
@@ -721,9 +721,9 @@ The red control that would not fire was a **stale object**, not a swallowed acce
 directory is cleared and rebuilt on every run now, and every plant carries a sentinel the link must show
 before the plant counts:
 
-    int CharonPlantMarker = 1;
+    int RevenantPlantMarker = 1;
 
-    $ nm /tmp/zone-port | grep CharonPlantMarker
+    $ nm /tmp/zone-port | grep RevenantPlantMarker
     the sentinel IS in the linked binary - the link is not stale
 
 With that in place the control fires: a planted `-[CKRecordZone capabilities] { return 7; }` in a rebuilt
@@ -784,8 +784,8 @@ untouched - `git status` on it reads empty after the run.
 
 **And the control still fails, with the sentinel present.** So this is not a stale link this time:
 
-    sentinel CharonPlantMarker IS in the linked binary - the link is not stale
-    nm /tmp/zone-planted | grep -c CharonPlantMarker        1
+    sentinel RevenantPlantMarker IS in the linked binary - the link is not stale
+    nm /tmp/zone-planted | grep -c RevenantPlantMarker        1
     capabilities symbols in the planted object               3
     PLANTED: same 6  differ 0  -> the control FAILED
 
@@ -864,7 +864,7 @@ land in the wrong class silently:
 and the control, which had not fired through a stale object, a stale link and a missing class all at
 once:
 
-    sentinel CharonPlantMarker IS in the linked binary - the link is not stale
+    sentinel RevenantPlantMarker IS in the linked binary - the link is not stale
     PLANTED: same 2  differ 4  -> THE CONTROL FIRED
 
 The lesson worth keeping, and it is not about this file: a control that does not fire is the most

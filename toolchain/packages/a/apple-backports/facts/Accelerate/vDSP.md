@@ -27,8 +27,8 @@ These twenty-two are the ones later releases added, and they are arithmetic over
 only the twenty-two functions the release does not have.
 
 The two split-complex products exist in one precision in 7.0 and in the other in 8.0, and they are one body written once
-and generated per scalar type in `Accelerate/CharonVDSPKernel.c`, so the two precisions and the two releases cannot drift
-apart. That file exports nothing: the names a caller reaches are the twenty-two above, and a name beginning with `charon_`
+and generated per scalar type in `Accelerate/RevenantVDSPKernel.c`, so the two precisions and the two releases cannot drift
+apart. That file exports nothing: the names a caller reaches are the twenty-two above, and a name beginning with `revenant_`
 is the port's own and is not weighed against a release (modules/apple/backports.lua, `internal_symbol`).
 
 ## The twenty-two, each against the header's own formula

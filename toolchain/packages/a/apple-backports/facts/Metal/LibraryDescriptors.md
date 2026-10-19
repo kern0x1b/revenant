@@ -1,8 +1,8 @@
 # The library's type, install name and function descriptors, iOS 14.0 and later
 
-A library on this port is the translated form of a metallib file: `CharonMetalDevice` loads
+A library on this port is the translated form of a metallib file: `RevenantMetalDevice` loads
 `<name>.metallib.es2`, a folder of C and ES that the build made from the AIR, and it refuses a library built
-from source or from bytes in memory. A `CharonMetalLibrary` holds one `CharonMetalFunction` per kernel or
+from source or from bytes in memory. A `RevenantMetalLibrary` holds one `RevenantMetalFunction` per kernel or
 shader, each a name, a stage, its translated source and its reflection.
 
 ## Measured on the host
@@ -66,7 +66,7 @@ What the translator writes, against what the host answers for the same file (`fi
 The third row is the one that tells the record from the file name: the host reads the record, and so does the
 translator. Its run output is `tests/backports/device/library-probe/fileload-expectations.txt`.
 
-The port answers the value it reads back: `CharonMetalLibrary` keeps `installName` from `library.json`, and
+The port answers the value it reads back: `RevenantMetalLibrary` keeps `installName` from `library.json`, and
 `-[MTLLibrary installName]` (`Metal/MTLLibrary14.m`) returns it, or nil when the translator wrote none. The member is
 iOS 14.0 (`API_AVAILABLE(macos(11.0), ios(14.0))` in the 16.4 SDK, which a compile against the 6.1.3 target warns
 about), so it sits in the 14.0 category with `type`.

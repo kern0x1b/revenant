@@ -50,7 +50,7 @@ used on this page as such. What introduced a SensorKit name comes from the SDK's
 ## What is real, and what is not
 
 **The 38 classes are real value objects.** Each is made, and each of its properties is kept in a
-store keyed by the property's own name - the store `CharonValueStore.h` describes and MetricKit already
+store keyed by the property's own name - the store `RevenantValueStore.h` describes and MetricKit already
 uses. A property reads back exactly what an application put there, and the archiver walks the same
 property list, so a value archived and read back lands under the name it went in under. Nothing in this
 framework is measured by the port: there is no sensor to measure.
@@ -89,13 +89,13 @@ way. No device list is fabricated.
 ## The four measurements the build forced, and what follows from them
 
 The lowered **16.4** SDK this package compiles against is four minor versions behind the one this
-package develops against, and the gap is the whole reason `CharonSensorKit.h` exists:
+package develops against, and the gap is the whole reason `RevenantSensorKit.h` exists:
 
 | what the build cannot see | measured how | what the port does |
 | --- | --- | --- |
-| **19 of the 38 classes** | compiling a probe of all 38 names against the 16.4 headers | declared in `CharonSensorKit.h` - same superclass, selectors, property types, no ivars, and the availability annotations left out, as the other three redeclarations in this package do |
+| **19 of the 38 classes** | compiling a probe of all 38 names against the 16.4 headers | declared in `RevenantSensorKit.h` - same superclass, selectors, property types, no ivars, and the availability annotations left out, as the other three redeclarations in this package do |
 | **15 of 25 property types** | the same probe, then the header compiled and read for collisions | declared; the other ten, including nine integer enumerations the 26.2 headers spell differently from the 16.4 ones, are left to the SDK |
-| **13 properties on 6 classes** | a per-class diff of the two headers' property lists | declared in `(CharonSensorKitNNN)` categories, one per release, because a class the SDK declares cannot be declared again |
+| **13 properties on 6 classes** | a per-class diff of the two headers' property lists | declared in `(RevenantSensorKitNNN)` categories, one per release, because a class the SDK declares cannot be declared again |
 | **4 property types from frameworks this package does not carry** | a probe naming `ARFaceAnchor`, `SNClassificationResult`, `SFSpeechRecognitionResult`, `SampleType` against the build's headers | **declared as `id` and carried, all four**: `SRFaceMetrics.faceAnchor`, `SRSpeechMetrics.soundClassification`, `SRSpeechMetrics.speechRecognition`, `SRFetchResult.sample`. The TYPE is still not here - there is no `ARFaceAnchor`, `SNClassificationResult` or `SFSpeechRecognitionResult` in this package - but the property is, and that is the part that matters: the archiver walks the DECLARED property list, so a property this package does not declare cannot be read back and an archived reading silently loses that field. `SampleType` is a generic parameter rather than a class, which is why `SRFetchResult.sample` was already carried this way and the other three were not; see the section on the five value members |
 
 ## The 57 string constants, and why the eighteen newest could not be carried before
@@ -120,7 +120,7 @@ A run of it prints:
 sensorkit-names: 57 names compared, 0 differing
 sensorkit-names: 57 names compared, 57 differing      <- the all-wrong plant
 the one-wrong plant of SensorKitNames14.m is red and names exactly 1 row: SRDeviceUsageCategoryBooks
-the one-wrong plant of CharonSensorKitNames.h is red and names exactly 1 row: SRSensorSiriSpeechMetrics
+the one-wrong plant of RevenantSensorKitNames.h is red and names exactly 1 row: SRSensorSiriSpeechMetrics
 sensorkit-names: 0 names compared, 57 differing  <- COMPARED NOTHING   <- the empty-host control
 ```
 
@@ -187,7 +187,7 @@ and every row says so in its own `effect`. This is the limit of this measurement
 **Where the values live, and why they are not written six times.** An object carries the API of exactly
 one release, so the eighteen belong to six objects; their values, though, are one list, and the
 harness has to walk that whole list from a single host-compilable source. They are therefore defined
-once, in `CharonSensorKitNames.h`, behind one guard per release: each release object defines its own
+once, in `RevenantSensorKitNames.h`, behind one guard per release: each release object defines its own
 guard and imports the header, and the harness's `names-extra.m` defines all seven and imports it. One
 definition of each string in the tree, read eight ways.
 
@@ -338,9 +338,9 @@ its rows are answered by the class's own list, and both raise what iOS raises.
 **The two copies that could not go through `-init`.** `SRFetchResult` and `SRSupplementalCategory` are
 the two of the fourteen the port gives a `-copyWithZone:`, and a copy is a new object, so it cannot be
 made by a `-init` that raises. Both take a door the class keeps for itself,
-`-initWithCharonValues:` - a name no SDK header declares, registered as the `charon_` row the shape
-`registry/MetalPerformanceShadersGraph/graph.json` uses, and written once in `CharonValueStore.h`'s
-`CHARON_VALUE_COPY_INITIALISER` so that there is one spelling of the copy rule in the package.
+`-initWithRevenantValues:` - a name no SDK header declares, registered as the `revenant_` row the shape
+`registry/MetalPerformanceShadersGraph/graph.json` uses, and written once in `RevenantValueStore.h`'s
+`REVENANT_VALUE_COPY_INITIALISER` so that there is one spelling of the copy rule in the package.
 
 **`-[SRSensorReader init]` was `absent` until this measurement, and the reason it gives for staying that
 way is now answered.** It said: *"`+[SRSensorReader new]` is already an `implemented` entry in this same
@@ -383,7 +383,7 @@ agreeing with the source check by construction. All five are noticed.
 **Why this is not a differential, and that is measured rather than assumed.** There is no behavioural
 oracle for `SRSensorReader` on this machine. The host's own `SensorKit.framework` declares the class and
 implements nothing - `respondsToSelector:` is 0 for `+authorizationStatus` and `+sharedReader` - and the
-port's `CharonSensorKit.h` cannot be compiled against the host's newer SDK at all: clang answers
+port's `RevenantSensorKit.h` cannot be compiled against the host's newer SDK at all: clang answers
 `typedef redefinition with different types ('NSInteger' vs 'enum SRAcousticSettingsSampleLifetime')`
 for the fifteen enumerations it redeclares, because the host's SensorKit spells them `NS_ENUM`. Building
 the port's reader for Catalyst against the 16.4 SDK instead was tried and does not work either, on this
@@ -440,7 +440,7 @@ keep the six red forever and hide that they are answered.
 **The protocol itself is now carried, and it is the header that had to be real.** The delegate is the
 application's own object, so nothing in the port adopts `SRSensorReaderDelegate` - which is why the port
 emitted no `__OBJC_PROTOCOL_$_` for it at all, and an application compiled against the SDK found no such
-protocol on the device. `CharonSensorKitProtocols.h` declares it and the object
+protocol on the device. `RevenantSensorKitProtocols.h` declares it and the object
 `modules/apple/backports.lua` generates from the registry row, `SensorKitBackportsProtocols14.0.m`, makes
 clang emit the metadata.
 
@@ -469,7 +469,7 @@ clang emit the metadata.
   `duplicate protocol definition of 'SRSensorReaderDelegate' is ignored [-Wduplicate-protocol]` and uses
   **Apple's** declaration, so the metadata emitted would carry references into a framework this release
   does not have. The header therefore declares four `@class` lines and one untyped
-  `typedef NSInteger SRAuthorizationStatus` - the same shape `CharonSensorKit.h` uses for its fifteen
+  `typedef NSInteger SRAuthorizationStatus` - the same shape `RevenantSensorKit.h` uses for its fifteen
   enumerations - and compiles with no diagnostic and **no undefined reference into SensorKit**, read back
   with `nm -u`.
 
@@ -507,9 +507,9 @@ one the property is spelled with:
 | `SRAcousticSettingsMusicEQ.lateNightModeEnabled` | `isLateNightModeEnabled` |
 | `SRAcousticSettingsMusicEQ.soundCheckEnabled` | `isSoundCheckEnabled` |
 
-`CharonSensorKit.h` said none of that, so the port carried `-soundCheckEnabled` and seven more of the
+`RevenantSensorKit.h` said none of that, so the port carried `-soundCheckEnabled` and seven more of the
 same shape: a selector the release's class does not have, and none of the eight it does. The header now
-declares each getter, and the accessor is `CHARON_SCALAR_GETTER(Type, name, getter)` - both spellings,
+declares each getter, and the accessor is `REVENANT_SCALAR_GETTER(Type, name, getter)` - both spellings,
 because the name is what the store is keyed by and what a caller writes, and the getter is the selector
 that goes into the class's own method list. The property rows in `registry/SensorKit/ios14.json` are
 unchanged by this: a property row names the property, and the property kept its name.
@@ -528,8 +528,8 @@ class for it, and that is also where a contract belongs.
 
 ## The one thing this framework shares with another
 
-`CharonValueStore.h` - the property walk, the conversion table, the archiver walk and the store. Its
-recognition test is **"a class that answers `charon_valueForKey:` is one of ours"**, because
+`RevenantValueStore.h` - the property walk, the conversion table, the archiver walk and the store. Its
+recognition test is **"a class that answers `revenant_valueForKey:` is one of ours"**, because
 SensorKit has thirty-eight value classes and MetricKit has two, every one of both an `NSObject`
 subclass: there is no common superclass left to name, and the accessor the store adds is the test both
 frameworks already have.

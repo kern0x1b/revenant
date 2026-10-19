@@ -7,7 +7,7 @@ and the other frameworks of the same release that draw with them.
 (green, teal and purple changed; the others keep the light value below). What follows is what 12.0 carried, kept as the record.
 
 That answer is ours only where the release has no getter of its own. `attach.c` adds a backported method only when the class
-and its superclasses lack the selector (`charon_implements`), and the release's own UIColor has these class methods: none of
+and its superclasses lack the selector (`revenant_implements`), and the release's own UIColor has these class methods: none of
 them in 6.1.3, all but `systemPurpleColor` from 7.0 through 8.4.1, all nine from 9.0 through 10.3.4 (`objc.inventory` of the
 held armv7 and armv7s caches, with `+redColor` found on every one of them and `+systemIndigoColor` on none). So a band of 7.0
 or later answers the release's own colour, which is the value an application gets there without the port, and the 18.0 values

@@ -8,7 +8,7 @@ not part of this row, and the descriptor is carried so that a caller reads back 
 ## What is measured, and against what
 
 `tests/backports/host/compute-pipeline-descriptor/run.sh` builds the port's class for Catalyst beside Apple's
-Metal in one process, renamed `CharonHostMTLComputePipelineDescriptor`, and compares every readable member
+Metal in one process, renamed `RevenantHostMTLComputePipelineDescriptor`, and compares every readable member
 of the two descriptors at four moments: a fresh descriptor, one with every settable member set away from its
 default, the same one after `-reset`, and a copy of the set one. The comparison is a snapshot of each member's
 value, so a disagreement names the member and both values. A mutant that makes `-reset` also clear the required
@@ -43,12 +43,12 @@ reads back in the copy with the mutability it was set with, and the copy's slot 
   for it is not exercised.
 - `linkedFunctions` is Apple's own `MTLLinkedFunctions` in the case, not the port's. The port's file
   `Metal/MTLDescriptors14.m` does not compile against the SDK of macOS 26 the host builds with, because
-  `CharonMetalProtocols.h` forward-declares the `MTL4*Sparse*` classes, which that SDK declares as typedefs.
+  `RevenantMetalProtocols.h` forward-declares the `MTL4*Sparse*` classes, which that SDK declares as typedefs.
   The case measures the descriptor's own members; the linked functions it holds are the host's on both sides.
 - Device-side use (`-[MTLDevice newComputePipelineStateWithDescriptor:...]`) is not carried by this row.
 
 ## The members the SDK this package compiles against does not declare
 
 `shaderValidation` (18.0) and `requiredThreadsPerThreadgroup` (26.0) are declared for the port by
-`Metal/CharonMetal26Types.h` and implemented as explicit accessors in the class file. Their types, and the
+`Metal/RevenantMetal26Types.h` and implemented as explicit accessors in the class file. Their types, and the
 values they take, are the header's.

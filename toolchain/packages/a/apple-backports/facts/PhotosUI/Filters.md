@@ -60,7 +60,7 @@ read `4.0`). So of the eight kind filters:
   live photo, and the reason that path exists.
 
 A filter of nothing is not the port declining to answer. It is the filter the release's own
-library can be asked for, and `-[PHPickerFilter charon_mediaTypes]`, the seam the 14.0 picker
+library can be asked for, and `-[PHPickerFilter revenant_mediaTypes]`, the seam the 14.0 picker
 reads, is empty for it, which is what the picker acts on.
 
 ## The three compositions

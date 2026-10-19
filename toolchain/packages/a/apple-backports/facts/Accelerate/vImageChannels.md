@@ -39,7 +39,7 @@ Four spellings of the same test were built at `-Os` and read in the disassembly:
 | **the same on a `volatile` copy of the parameter** | **there** |
 
 because the attribute is an assumption about a *value* and a volatile read is a memory access the optimizer
-has to honour. That is what `CharonChannelsIsNull` is, and every NULL test of the three files goes through
+has to honour. That is what `RevenantChannelsIsNull` is, and every NULL test of the three files goes through
 it. **No pragma is involved and none could be**: `-Wnonnull` and `-Wpointer-bool-conversion` are warnings, so
 suppressing them would silence the diagnostic that names the folded test without bringing the test back.
 The three files now carry no `#pragma` at all - `-Wunguarded-availability-new` was already off on the
@@ -63,7 +63,7 @@ script asserts its own target before planting it (a `str.replace` on a missing n
 fails if the planted run is clean:
 
 ```
-$ PLANT='if (CharonChannelsIsNull(src) || CharonChannelsIsNull(dest))
+$ PLANT='if (RevenantChannelsIsNull(src) || RevenantChannelsIsNull(dest))
         return kvImageNullPointerArgument;' sh tests/backports/host/vimagechannels/run.sh
 planted: removed 3 occurrence(s) of the NULL test
 PLANT: the control holds - without the NULL test the run ends on a signal (exit 139),
@@ -82,7 +82,7 @@ for (int i = 0; i < 4; i++) { result[i] = srcPixel[permuteMap[i]]; if (mask & co
 
 so the mask is tested from the top bit down and **a set bit copies the given pixel in**. Measured over all
 sixteen masks on three widths, the host answers that and not the other way round; the first version of
-`CharonChannels.h` had the sense the other way up and the run said so at every mask.
+`RevenantChannels.h` had the sense the other way up and the run said so at every mask.
 
 The overwrite with a pixel is written differently, and its prose points the other way:
 
@@ -198,7 +198,7 @@ which is why the family is three object files and not one. Nothing here needs a 
 ## Half-precision needs no arithmetic here, and that is the argument
 
 `vImagePermuteChannels_ARGB16F` and `vImageOverwriteChannelsWithScalar_Planar16F` would want
-`CharonVImageFixed.h`, the header this library uses where a half is computed and has to be rounded. Neither
+`RevenantVImageFixed.h`, the header this library uses where a half is computed and has to be rounded. Neither
 of these computes one: a permute moves sixteen bits and a fill copies sixteen bits, and a half that is
 copied is the same half it was. So the sixteen bits move as sixteen bits, the differential compares them as
 bits, and the fill case uses the value `0x1234` - a half NaN - which a port that converted it to a float and

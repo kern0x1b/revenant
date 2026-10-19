@@ -133,7 +133,7 @@
 // TWO THINGS THIS AUDIT FOUND THAT ARE NOT DEFECTS, so a later reader does not re-open them.  First,
 // `-[UIResponder providerForDeferredMenuElement:]` returns `id` where UIResponder.h:135 declares
 // `UIDeferredMenuElementProvider *`; the two are the same pointer on armv7 and the object answers nil, so
-// no caller can tell, and the port declares that class itself in CharonUIKit26.h.  Second,
+// no caller can tell, and the port declares that class itself in RevenantUIKit26.h.  Second,
 // `-[UIBarButtonItem identifier]` returns `NSString *` and that is the SDK's own type - UIBarButtonItem.h:180
 // declares `@property (nonatomic, copy, nullable) NSString *identifier`, no typedef involved.  A first pass
 // at this audit matched the name against NSLayoutConstraint.h's `identifier` and reported a disagreement

@@ -81,9 +81,9 @@ limit rather than with a silent success.
 The rows this file counted as "a build error: MTLAllocation, 15" were **stale**, and the correction
 is the point of this entry. Each of the fifteen carried the reason:
 
-> `CharonMetalProtocols.h:51:35: error: cannot find protocol declaration for 'MTLAllocation'`
+> `RevenantMetalProtocols.h:51:35: error: cannot find protocol declaration for 'MTLAllocation'`
 
-Two things about that are no longer true. **`CharonMetalProtocols.h` does not name `MTLAllocation`
+Two things about that are no longer true. **`RevenantMetalProtocols.h` does not name `MTLAllocation`
 at all** — `grep -c MTLAllocation` on the file is 0 — and **line 51 is a bare forward declaration**,
 not that diagnostic. The header compiles with the library's own flags and no `-I`, run from
 `packages/a/apple-backports`, and the quoted `file:line:column` no longer resolves to anything.
@@ -95,28 +95,28 @@ ignored` at the top of the file, and a *suppressed* warning cannot be promoted t
 with `-Werror=protocol -Werror=incomplete-implementation` names the missing required members, exactly:
 
 ```
-Metal/CharonMetalBuffer.m:4:17: error: method 'newTextureWithDescriptor:offset:bytesPerRow:' in protocol 'MTLBuffer' not implemented
-Metal/CharonMetalBuffer.m:4:17: error: method 'addDebugMarker:range:' in protocol 'MTLBuffer' not implemented
-Metal/CharonMetalBuffer.m:4:17: error: method 'removeAllDebugMarkers' in protocol 'MTLBuffer' not implemented
+Metal/RevenantMetalBuffer.m:4:17: error: method 'newTextureWithDescriptor:offset:bytesPerRow:' in protocol 'MTLBuffer' not implemented
+Metal/RevenantMetalBuffer.m:4:17: error: method 'addDebugMarker:range:' in protocol 'MTLBuffer' not implemented
+Metal/RevenantMetalBuffer.m:4:17: error: method 'removeAllDebugMarkers' in protocol 'MTLBuffer' not implemented
 ```
 
 | protocol | the port's class | missing required members, measured |
 | --- | --- | --- |
-| MTLDevice | `CharonMetalDevice` | debug markers, the offset texture constructor |
-| MTLResource | `CharonMetalBuffer`, `CharonMetalTexture` **by inheritance** | the debug markers `MTLResource` declares |
-| MTLBuffer | `CharonMetalBuffer` | the offset texture constructor (the debug markers and `gpuAddress` are defined; `facts/Metal/Buffers.md`) |
-| MTLTexture | `CharonMetalTexture` | debug markers |
-| MTLSamplerState | `CharonMetalSampler` (CharonMetal.h:186) | none |
-| MTLFunction | `CharonMetalFunction` | none |
-| MTLLibrary | `CharonMetalLibrary` | function constants, `-newFunctionWithConstantValues:` |
-| MTLRenderPipelineState | `CharonMetalPipeline` | the binary, the stage-input accessors |
-| MTLCommandQueue | `CharonMetalQueue` | `-insertDebugBoundary:`, the handler members |
-| MTLCommandBuffer | `CharonMetalCommandBuffer` | none |
-| MTLCommandEncoder | `CharonMetalEncoder`, `CharonMetalComputeEncoder` **by inheritance** | none |
-| MTLRenderCommandEncoder | `CharonMetalEncoder` | `-setViewport`, debug marking |
-| MTLDrawable | `CharonMetalDrawable` **by inheritance** through `CAMetalDrawable` | none — the stripped compile is CLEAN |
-| MTLDepthStencilState | `CharonMetalDepthStencil` | none — the stripped compile is CLEAN |
-| MTLCaptureScope | `CharonMTLCaptureScope` | none |
+| MTLDevice | `RevenantMetalDevice` | debug markers, the offset texture constructor |
+| MTLResource | `RevenantMetalBuffer`, `RevenantMetalTexture` **by inheritance** | the debug markers `MTLResource` declares |
+| MTLBuffer | `RevenantMetalBuffer` | the offset texture constructor (the debug markers and `gpuAddress` are defined; `facts/Metal/Buffers.md`) |
+| MTLTexture | `RevenantMetalTexture` | debug markers |
+| MTLSamplerState | `RevenantMetalSampler` (RevenantMetal.h:186) | none |
+| MTLFunction | `RevenantMetalFunction` | none |
+| MTLLibrary | `RevenantMetalLibrary` | function constants, `-newFunctionWithConstantValues:` |
+| MTLRenderPipelineState | `RevenantMetalPipeline` | the binary, the stage-input accessors |
+| MTLCommandQueue | `RevenantMetalQueue` | `-insertDebugBoundary:`, the handler members |
+| MTLCommandBuffer | `RevenantMetalCommandBuffer` | none |
+| MTLCommandEncoder | `RevenantMetalEncoder`, `RevenantMetalComputeEncoder` **by inheritance** | none |
+| MTLRenderCommandEncoder | `RevenantMetalEncoder` | `-setViewport`, debug marking |
+| MTLDrawable | `RevenantMetalDrawable` **by inheritance** through `CAMetalDrawable` | none — the stripped compile is CLEAN |
+| MTLDepthStencilState | `RevenantMetalDepthStencil` | none — the stripped compile is CLEAN |
+| MTLCaptureScope | `RevenantMTLCaptureScope` | none |
 
 **Three of them needed no class at all**, because 16.4's own headers make the conformance by
 inheritance: `MTLBuffer.h:32` declares `@protocol MTLBuffer <MTLResource>` and `MTLTexture.h:264` the
@@ -148,20 +148,20 @@ each row names them:
 
 | row | the port's class | the exact selectors owed |
 | --- | --- | --- |
-| MTLDevice | `CharonMetalDevice` | `heapBufferSizeAndAlignWithLength:options:`, `heapTextureSizeAndAlignWithDescriptor:`, `minimumLinearTextureAlignmentForPixelFormat:`, `minimumTextureBufferAlignmentForPixelFormat:`, `newBufferWithBytesNoCopy:length:options:deallocator:`, `newComputePipelineStateWithDescriptor:options:completionHandler:` and 13 more |
-| MTLResource | `CharonMetalBuffer`, `CharonMetalTexture` | `isAliasable`, `makeAliasable`, and the debug markers `MTLResource` declares |
-| MTLBuffer | `CharonMetalBuffer` | `newTextureWithDescriptor:offset:bytesPerRow:` (the debug markers and `gpuAddress` are defined; `facts/Metal/Buffers.md`) |
-| MTLTexture | `CharonMetalTexture` | `getBytes:bytesPerRow:bytesPerImage:fromRegion:mipmapLevel:slice:`, `newTextureViewWithPixelFormat:`, `newTextureViewWithPixelFormat:textureType:levels:slices:`, `newSharedTextureHandle`, the `MTLResource` pair |
-| MTLFunction | `CharonMetalLibrary` | `newArgumentEncoderWithBufferIndex:`, `newArgumentEncoderWithBufferIndex:reflection:` |
-| MTLLibrary | `CharonMetalLibrary` | `newFunctionWithDescriptor:error:` and the intersection-function and completion-handler forms |
-| MTLRenderPipelineState | `CharonMetalPipeline` | `imageblockMemoryLengthForDimensions:`, `functionHandleWithFunction:stage:`, `newIntersectionFunctionTableWithDescriptor:stage:`, `newVisibleFunctionTableWithDescriptor:stage:` |
-| MTLCommandQueue | `CharonMetalQueue` | `commandBufferWithDescriptor:` |
-| MTLCommandBuffer | `CharonMetalCommandBuffer` | `blitCommandEncoderWithDescriptor:`, `computeCommandEncoderWithDescriptor:`, `computeCommandEncoderWithDispatchType:`, `accelerationStructureCommandEncoder`, `encodeSignalEvent:value:`, `encodeWaitForEvent:value:` and more |
-| MTLCommandEncoder, MTLRenderCommandEncoder | `CharonMetalEncoder`, `CharonMetalComputeEncoder` | `setVertexBufferOffset:atIndex:`, `setFragmentBufferOffset:atIndex:`, `setScissorRects:count:`, `setDepthClipMode:`, and on the compute side `setBufferOffset:atIndex:` and more |
+| MTLDevice | `RevenantMetalDevice` | `heapBufferSizeAndAlignWithLength:options:`, `heapTextureSizeAndAlignWithDescriptor:`, `minimumLinearTextureAlignmentForPixelFormat:`, `minimumTextureBufferAlignmentForPixelFormat:`, `newBufferWithBytesNoCopy:length:options:deallocator:`, `newComputePipelineStateWithDescriptor:options:completionHandler:` and 13 more |
+| MTLResource | `RevenantMetalBuffer`, `RevenantMetalTexture` | `isAliasable`, `makeAliasable`, and the debug markers `MTLResource` declares |
+| MTLBuffer | `RevenantMetalBuffer` | `newTextureWithDescriptor:offset:bytesPerRow:` (the debug markers and `gpuAddress` are defined; `facts/Metal/Buffers.md`) |
+| MTLTexture | `RevenantMetalTexture` | `getBytes:bytesPerRow:bytesPerImage:fromRegion:mipmapLevel:slice:`, `newTextureViewWithPixelFormat:`, `newTextureViewWithPixelFormat:textureType:levels:slices:`, `newSharedTextureHandle`, the `MTLResource` pair |
+| MTLFunction | `RevenantMetalLibrary` | `newArgumentEncoderWithBufferIndex:`, `newArgumentEncoderWithBufferIndex:reflection:` |
+| MTLLibrary | `RevenantMetalLibrary` | `newFunctionWithDescriptor:error:` and the intersection-function and completion-handler forms |
+| MTLRenderPipelineState | `RevenantMetalPipeline` | `imageblockMemoryLengthForDimensions:`, `functionHandleWithFunction:stage:`, `newIntersectionFunctionTableWithDescriptor:stage:`, `newVisibleFunctionTableWithDescriptor:stage:` |
+| MTLCommandQueue | `RevenantMetalQueue` | `commandBufferWithDescriptor:` |
+| MTLCommandBuffer | `RevenantMetalCommandBuffer` | `blitCommandEncoderWithDescriptor:`, `computeCommandEncoderWithDescriptor:`, `computeCommandEncoderWithDispatchType:`, `accelerationStructureCommandEncoder`, `encodeSignalEvent:value:`, `encodeWaitForEvent:value:` and more |
+| MTLCommandEncoder, MTLRenderCommandEncoder | `RevenantMetalEncoder`, `RevenantMetalComputeEncoder` | `setVertexBufferOffset:atIndex:`, `setFragmentBufferOffset:atIndex:`, `setScissorRects:count:`, `setDepthClipMode:`, and on the compute side `setBufferOffset:atIndex:` and more |
 
 **Four stay `implemented`, because the stripped compile is clean for their classes:**
-`MTLSamplerState` (`CharonMetalSampler`), `MTLDepthStencilState` (`CharonMetalDepthStencil`),
-`MTLDrawable` (`CharonMetalDrawable`) and `MTLCaptureScope` (`CharonMTLCaptureScope`).
+`MTLSamplerState` (`RevenantMetalSampler`), `MTLDepthStencilState` (`RevenantMetalDepthStencil`),
+`MTLDrawable` (`RevenantMetalDrawable`) and `MTLCaptureScope` (`RevenantMTLCaptureScope`).
 
 **The floors, computed from the registry as it now stands.** `protocol_sources` (backports.lua:656)
 reads every `implemented` protocol row and raises `floors_of[introduced]` to the row's `minimum`:
@@ -178,14 +178,14 @@ they were higher.
 **Three citations corrected, each verified by `grep -n` against the 16.4 SDK rather than recalled.**
 `MTLResource` is forward-declared at **`MTLBuffer.h:17`**, and it is the base of `MTLBuffer` at
 **`MTLBuffer.h:32`**. `MTLDrawable` is declared at **`MTLDrawable.h:26`** and forward-declared at
-**`MTLCommandBuffer.h:20`**; `CharonMetalDrawable` conforms to `CAMetalDrawable`, whose inheritance
+**`MTLCommandBuffer.h:20`**; `RevenantMetalDrawable` conforms to `CAMetalDrawable`, whose inheritance
 from `MTLDrawable` is in **`QuartzCore/…/CAMetalLayer.h:28`** — QuartzCore, not a Metal header, which
 is what the earlier entry implied by citing the Metal headers for it. `MTLCommandEncoder` is the base
 of **`MTLRenderCommandEncoder.h:131`** and **`MTLComputeCommandEncoder.h:41`**.
 
 **And the count was wrong: TWELVE classes keep the pragma, not thirteen.** Ten had it removed, and
-twelve keep theirs — `CharonMetalBuffer`, `CharonMetalDevice`, `CharonMetalEncoder`,
-`CharonMetalLibrary`, `CharonMetalPipeline`, `CharonMetalQueue`, `CharonMetalTexture`,
+twelve keep theirs — `RevenantMetalBuffer`, `RevenantMetalDevice`, `RevenantMetalEncoder`,
+`RevenantMetalLibrary`, `RevenantMetalPipeline`, `RevenantMetalQueue`, `RevenantMetalTexture`,
 `MTLBlitCommandEncoder8`, `MTLComputeCommandEncoder8`, `MTLComputePipeline8`, `MTLHeap10` and
 `MTLSharedEvent12`. A reviewer's independent run measured the same twelve refusing with
 `-Wprotocol` naming a member in each, and the control — the same tree with the pragmas in place —
@@ -235,8 +235,8 @@ test was built on two warnings, and **each is wrong in a different way**:
 
 Both were clean while **two rows were not conformant at all**, and `backports.lua:664` turns an
 `implemented` protocol row into a band floor. The six `MTLFunction` property getters were on
-`CharonMetalLibrary`, which declares `<MTLLibrary>`, instead of `CharonMetalFunction`; and
-`MTLSamplerState`'s `gpuResourceID` was on `CharonMetalTexture` instead of `CharonMetalSampler`.
+`RevenantMetalLibrary`, which declares `<MTLLibrary>`, instead of `RevenantMetalFunction`; and
+`MTLSamplerState`'s `gpuResourceID` was on `RevenantMetalTexture` instead of `RevenantMetalSampler`.
 
 **The criterion is now: an `implemented` row <=> for every protocol member — required and optional
 instance and class methods, and every property's getter and, when readwrite, its setter — the class's
@@ -251,32 +251,32 @@ otherwise accept if inherited.
 
 | row | class | missing | state |
 | --- | --- | ---: | --- |
-| MTLCaptureScope | `CharonMTLCaptureScope` | 0 | **implemented** |
-| MTLSamplerState | `CharonMetalSampler` | 0 | **implemented** |
-| MTLFunction | `CharonMetalFunction` | 0 | **implemented** |
-| MTLDrawable | `CharonMetalDrawable` | 0 | **implemented** |
-| MTLDepthStencilState | `CharonMetalDepthStencil` | 0 | **implemented** |
-| MTLCommandQueue | `CharonMetalQueue` | 2 | inert |
-| MTLResource | `CharonMetalBuffer` | 4 | inert |
-| MTLBuffer | `CharonMetalBuffer` | 4 | inert |
-| MTLLibrary | `CharonMetalLibrary` | 6 | inert |
-| MTLCommandEncoder | `CharonMetalComputeEncoder` | 3 | inert |
-| MTLRenderPipelineState | `CharonMetalPipeline` | 15 | inert |
-| MTLCommandBuffer | `CharonMetalCommandBuffer` | 19 | inert |
-| MTLTexture | `CharonMetalTexture` | 25 | inert |
-| MTLDevice | `CharonMetalDevice` | 84 | inert |
-| MTLRenderCommandEncoder | `CharonMetalEncoder` | 104 | inert |
+| MTLCaptureScope | `RevenantMTLCaptureScope` | 0 | **implemented** |
+| MTLSamplerState | `RevenantMetalSampler` | 0 | **implemented** |
+| MTLFunction | `RevenantMetalFunction` | 0 | **implemented** |
+| MTLDrawable | `RevenantMetalDrawable` | 0 | **implemented** |
+| MTLDepthStencilState | `RevenantMetalDepthStencil` | 0 | **implemented** |
+| MTLCommandQueue | `RevenantMetalQueue` | 2 | inert |
+| MTLResource | `RevenantMetalBuffer` | 4 | inert |
+| MTLBuffer | `RevenantMetalBuffer` | 4 | inert |
+| MTLLibrary | `RevenantMetalLibrary` | 6 | inert |
+| MTLCommandEncoder | `RevenantMetalComputeEncoder` | 3 | inert |
+| MTLRenderPipelineState | `RevenantMetalPipeline` | 15 | inert |
+| MTLCommandBuffer | `RevenantMetalCommandBuffer` | 19 | inert |
+| MTLTexture | `RevenantMetalTexture` | 25 | inert |
+| MTLDevice | `RevenantMetalDevice` | 84 | inert |
+| MTLRenderCommandEncoder | `RevenantMetalEncoder` | 104 | inert |
 
 **Three of the ten need no class of their own and are still measured.** `MTLResource` is answered
-through `CharonMetalBuffer` (`MTLBuffer.h:32` makes `MTLBuffer` a `MTLResource`),
-`MTLCommandEncoder` through `CharonMetalComputeEncoder` (`MTLComputeCommandEncoder.h:41`), and
-`MTLDrawable` through `CharonMetalDrawable`, which adopts `CAMetalDrawable` and that is `<MTLDrawable>`
+through `RevenantMetalBuffer` (`MTLBuffer.h:32` makes `MTLBuffer` a `MTLResource`),
+`MTLCommandEncoder` through `RevenantMetalComputeEncoder` (`MTLComputeCommandEncoder.h:41`), and
+`MTLDrawable` through `RevenantMetalDrawable`, which adopts `CAMetalDrawable` and that is `<MTLDrawable>`
 in QuartzCore's `CAMetalLayer.h:28`. The tool resolves each by asking which `@interface` adopts a
 protocol inheriting the row's, so these are measured on a real class rather than asserted.
 
 ### update 2026-09-29: MTLResource is implemented — all four members were cheap
 
-The criterion reported `CharonMetalBuffer` missing four `MTLResource` members — `allocatedSize`,
+The criterion reported `RevenantMetalBuffer` missing four `MTLResource` members — `allocatedSize`,
 `hazardTrackingMode`, `isAliasable`, `makeAliasable` — and **all four were cheap**, needing no
 measurement, because each is a property of a CPU-resident buffer whose size the port already answers.
 
@@ -293,7 +293,7 @@ whether the call succeeded is what `isAliasable` answers. Reading the header bef
 method would have saved a round trip.
 
 `MTLResource` is therefore `implemented`, and the criterion reports every member of the protocol
-defined for `CharonMetalBuffer`.
+defined for `RevenantMetalBuffer`.
 
 ### update: v-impl-metal-device -- the queue, the command buffer, the encoders, the buffer and the library
 

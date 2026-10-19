@@ -2,7 +2,7 @@
 
 The iOS 7 surface of SpriteKit's `SKSpriteNode`: a sprite made from a colour or a texture, with its size, anchor point,
 centre rectangle, colour blend and blend mode. The port's object is `SpriteKit/SpriteKitSprite7.m`, declared by
-`SpriteKit/CharonSpriteKit.h`. The rows are in `registry/SpriteKit/ios7.json` (with the owed image and archive
+`SpriteKit/RevenantSpriteKit.h`. The rows are in `registry/SpriteKit/ios7.json` (with the owed image and archive
 constructors), `ios8.json` (the normal-map, lighting and shader members) and `ios10.json` (scale to size, attributes).
 
 ## Oracle and what was measured

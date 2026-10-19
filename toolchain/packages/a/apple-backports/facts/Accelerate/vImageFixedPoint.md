@@ -3,7 +3,7 @@
 
 This group answers **4.3** as well, for the same reason and with the same measurement: `vImageCGImage7.m` and `vImageYpCbCr8.m` use `BOOL`, which is Foundation's, and at 4.3 the include chain does not bring that header in - so both now import Foundation themselves, which is what the gate found when the floor came down.
 Nine entry points in `Accelerate/vImageFixedPoint7.m` (iOS 7.0) and `Accelerate/vImageFixedPoint10.m` (iOS 10.0), with
-the shared half-float and saturation code in `Accelerate/CharonVImageFixed.h`. Measured from the release's own armv7 caches,
+the shared half-float and saturation code in `Accelerate/RevenantVImageFixed.h`. Measured from the release's own armv7 caches,
 7.0 is the first held release that exports the seven of its group and 10.3.4 the first that exports the two of 10.0, so the two
 files hold the API of one release each.
 

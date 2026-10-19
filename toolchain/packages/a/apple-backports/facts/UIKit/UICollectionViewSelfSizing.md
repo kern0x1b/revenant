@@ -45,6 +45,6 @@ An item that is not displayed keeps its estimate, or the size the delegate answe
 - Supplementary views do not self-size.
 
 A compositional layout (`UICollectionViewCompositionalLayout.md`) measures its estimated items on the same steps and shares the
-default `preferredLayoutAttributesFittingAttributes:`: a layout that answers `-charon_estimatedAxesForAttributes:` tells the default
+default `preferredLayoutAttributesFittingAttributes:`: a layout that answers `-revenant_estimatedAxesForAttributes:` tells the default
 which axes are free, and the default holds the others at the size the layout gave, as the release's does with the width of the
 attributes. A cell that overrides the method works for both layouts.

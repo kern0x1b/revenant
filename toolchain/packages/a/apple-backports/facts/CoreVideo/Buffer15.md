@@ -40,7 +40,7 @@ row is the release of the API that needed it.
 ## What the host answers, measured
 
 `tests/backports/host/corevideo/run.sh` links the port's objects into the same binary as the host's
-own CoreVideo, renamed to `charonHost_*`, so both answers are callable in one process. The verdict
+own CoreVideo, renamed to `revenantHost_*`, so both answers are callable in one process. The verdict
 line of the run that delivered this:
 
 ```

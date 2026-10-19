@@ -11,7 +11,7 @@ objects. Four objects, one release each:
 | `AVFoundation/AVSampleBufferRenderSynchronizer12.m` | 12.0 | `-currentTime` |
 | `AVFoundation/AVSampleBufferRenderSynchronizer14.m` | 14.5 | `-setRate:time:atHostTime:` |
 
-`AVFoundation/CharonAVSampleBufferRender.h` is the private header the three of them share: the one method
+`AVFoundation/RevenantAVSampleBufferRender.h` is the private header the three of them share: the one method
 the synchronizer says to a renderer when its rate changes, and the synchronizer's own seams.
 
 ## The correction, and it is in the renderer's queue

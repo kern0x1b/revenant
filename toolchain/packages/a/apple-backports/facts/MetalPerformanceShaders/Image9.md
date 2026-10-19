@@ -101,7 +101,7 @@ Neither is a defect in the kernels; both are in the shared layer and both are ow
 1. **The header's recommended conversion is not walkable.** MPSImageIntegral.h:22-26 says "if the
    channels in the source image are normalized, half-float or floating values, the destination image is
    recommended to be a 32-bit floating-point image". The layer's walkability check compares the two
-   images' **data types** (`CharonMPSImageDataTypeOf`), so an Unorm8 source (`MPSDataTypeUInt8`) into a
+   images' **data types** (`RevenantMPSImageDataTypeOf`), so an Unorm8 source (`MPSDataTypeUInt8`) into a
    Float32 destination is **refused by name** and nothing is written. Measured: 95 mismatches of 96,
    every value 0. The cases therefore measure the data type the layer does walk, and the rows say so.
 2. **A non-zero `offset` is answered against the origin.** The integral reads the rectangle from
@@ -116,7 +116,7 @@ a four-channel stride, on an image whose `featureChannels` is 1. The region read
 `1, 1.4e-45, -4.7e30, 4` instead of `1, 2, 3, 4, 5, 6`, which reads exactly like a stride defect in
 `MPSImageWalk13.m`, and I reported it as one. It is not: the port maps a one-channel descriptor to
 `MTLPixelFormatR32Float` (`MPSImage13.m:42`, value 55), whose row is `cols * sizeof(float)` = 12, and the
-layer's own `bytesPerRow` is that same 12. With the right stride `CharonMPSImageReadRegion` returns
+layer's own `bytesPerRow` is that same 12. With the right stride `RevenantMPSImageReadRegion` returns
 `1..6` for the 3x2 image. **The walking layer is correct; the case was wrong.** Recorded because a
 mis-measurement that looks like a defect in main is worth a note, and because the next person to fill a
 texture in a harness will hit the same four-channel instinct.

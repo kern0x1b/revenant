@@ -54,4 +54,4 @@ which of the two is right here is a question the emulator run has to answer, not
 The same two libraries are what a TLS 1.2 or 1.3 connection needs where the release's own
 SecureTransport stops: `nw_tls_copy_sec_protocol_options` of a connection that negotiated above 1.1
 would be a picotls options object rather than the release's, and the two sentinels of the port's
-`CharonNWSecProtocol` are where a program would find out which of the two a connection got.
+`RevenantNWSecProtocol` are where a program would find out which of the two a connection got.

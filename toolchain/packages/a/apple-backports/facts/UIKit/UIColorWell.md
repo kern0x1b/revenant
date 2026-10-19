@@ -30,7 +30,7 @@ group), and the header of SDK 16.4. A Mac Catalyst tool never completes a presen
   `-colorPickerViewController:didSelectColor:continuously:` (iOS 15) is sent for every choice, continuously while a finger moves; a delegate that only has
   `-colorPickerViewControllerDidSelectColor:` (iOS 14) hears it once, when the finger lifts.
   Registry correction, 2026-09-23: `ios15-16.json` listed the iOS 15 message `absent`, "never sent", while
-  `charon_pickColor:continuously:` in `UIKit/UIColorPickerViewController.m` sends it; the row is now `implemented`.
+  `revenant_pickColor:continuously:` in `UIKit/UIColorPickerViewController.m` sends it; the row is now `implemented`.
 - The `supportsEyedropper` and `maximumLinearExposure` of iOS 26 are not answered.
 
 ## What the picker is

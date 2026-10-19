@@ -7,7 +7,7 @@ host's own Accelerate over the same inputs and compares a status, a count and ev
 checks, 0 failures** (`sh tests/backports/host/sparseblas/run.sh`).
 
 Read with `facts/Accelerate/SparseBLAS.md`, which is the real family's file: the storage is the same
-(CharonSparseBLAS.h), the refusals are the same, and where this file says "as the real family does" that
+(RevenantSparseBLAS.h), the refusals are the same, and where this file says "as the real family does" that
 is the reference. What follows is only what the complex half does differently, and the five places
 where the host cannot be the oracle.
 
@@ -18,7 +18,7 @@ ladder this port holds (1.1.4 through 18.0, read through `tools/cache-index/firs
 held rung carrying any of them is `NONE`, and the 26.2 header that declares them puts every one of them
 at 18.5. They are one object file because they are one release. The iPhoneOS 16.4 SDK this package
 compiles against declares none of them, so they are transcribed into
-`packages/a/apple-backports/Accelerate/CharonSparseComplex26.h`.
+`packages/a/apple-backports/Accelerate/RevenantSparseComplex26.h`.
 
 The imports the object does carry are the release's own and resolve on every band: `cblas_ccopy`,
 `cblas_zcopy`, `cheev_` and `zheev_` are all first exported by 3.2, and the oldest band this port
@@ -31,7 +31,7 @@ helper the compiler calls out to. Measured by compiling a translation unit that 
 `float _Complex` and `double _Complex` for `armv7-apple-ios6.0`: the only names left undefined are
 `__mulsc3`, `__muldc3`, `__divsc3` and `__divdc3`. Addition, subtraction and a real scaling need none of
 them (the same object leaves them all defined), so they are written with the operators in
-`CharonSparseComplex.h`, and the two that would need a helper are spelled out there - the product as
+`RevenantSparseComplex.h`, and the two that would need a helper are spelled out there - the product as
 `(ar br - ai bi) + (ar bi + ai br)i`, and the quotient by Smith's algorithm, which divides by a real
 number once. A complex value is a pair of doubles throughout, and a value is rounded to the width its row
 stores when it is written, which is the rule the real family follows when it stores a float through a
@@ -172,15 +172,15 @@ of thing a reader will otherwise repeat:
 
 ## What changed in the shared helpers
 
-Five statics moved out of `SparseBLAS9.m` into `CharonSparseBLAS.h` without a change of behaviour -
-`CharonSparseMake`, `CharonSparseRepeated`, `CharonSparseWritable`, `CharonSparsePutEntry` and the two
+Five statics moved out of `SparseBLAS9.m` into `RevenantSparseBLAS.h` without a change of behaviour -
+`RevenantSparseMake`, `RevenantSparseRepeated`, `RevenantSparseWritable`, `RevenantSparsePutEntry` and the two
 permutations - because this file needs all of them and a function defined in a file that exports an API
 symbol is left out of a band the release already has, which is how a shared C function becomes an
 undefined symbol in a later band only. The real family's differential still answers **368 checks, 0
 failures** after the move, which is the check that it is the same arithmetic.
 
 One of them changed behaviour, and it is a fix rather than a port of the complex rule:
-`CharonSparsePutEntry` refused an index past the end of a matrix but not a **negative** one, so
+`RevenantSparsePutEntry` refused an index past the end of a matrix but not a **negative** one, so
 `sparse_insert_entry_float(A, v, -1, 0)` read `row[-1]` and wrote outside the allocation. Measured on the
 host, for the real type and for the complex one alike, all four of `(3,0)`, `(0,3)`, `(-1,0)` and `(0,-1)`
 against a 2x2 answer `SPARSE_ILLEGAL_PARAMETER` and change nothing. The guard is now there for both

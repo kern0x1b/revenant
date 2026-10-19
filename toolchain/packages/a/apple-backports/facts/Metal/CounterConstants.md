@@ -49,7 +49,7 @@ Four of the twenty-one are not what their name suggests, and all twenty-one are 
 Apple's copy is read by **`dlsym` on Apple's Metal, by name, from a handle opened by path** — not by
 naming the extern, because the link would bind each name to whichever definition won and a port that
 defined all twenty-one wrongly would be compared with itself. The port's copies are **renamed** while
-they are compiled for the host (`-D<name>=charonHost_<name>`), so the two sets coexist and the case
+they are compiled for the host (`-D<name>=revenantHost_<name>`), so the two sets coexist and the case
 reads one of each. `counters.sh` proves both sides: the host binary holds all twenty-one **renamed**,
 and the device object holds all twenty-one **under Apple's own names**, which is what a caller on iOS 6
 binds to.

@@ -164,7 +164,7 @@ has is absent): `MPMediaItemArtwork` declares 13 own instance methods - `initWit
 The release declares `imageWithSize:` on `MPMediaItemArtwork` itself, so a category implementing it
 would be shadowed by the release's own method on the release's class and would never run. The
 initialiser is therefore a category method - nothing to shadow, the release has no such method -
-whose implementation **discards `self` and returns an instance of `CharonHandlerMediaItemArtwork`**, a
+whose implementation **discards `self` and returns an instance of `RevenantHandlerMediaItemArtwork`**, a
 port subclass that stores the bounds and the handler and overrides `imageWithSize:` and `bounds`. A
 subclass override is not shadowing: real artwork is an `MPConcreteMediaItemArtwork` and is untouched,
 and only artwork a caller made through this initialiser consults the handler, which is what the
@@ -350,7 +350,7 @@ rather than new code. The class and its `type` are in
 `UIEventSubtypeRemoteControl*` into a seek event.
 
 **The check is not written, and the reason is in the row.** `MPRemoteCommandCenter71.m` imports the
-real `<MediaPlayer/MediaPlayer.h>` and has no `CHARON_MEDIAPLAYER_STANDIN` seam, so a host check for it
+real `<MediaPlayer/MediaPlayer.h>` and has no `REVENANT_MEDIAPLAYER_STANDIN` seam, so a host check for it
 pulls this Mac's own MediaPlayer and collides with the stand-in's declarations - `MPMediaItem` twice and
 `MPMediaEntityPersistentID` as a different type. Giving that file the same seam the generated files take
 is the next thing, and it is a file stack 15 already merged, so it wants its own review rather than

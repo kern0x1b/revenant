@@ -21,16 +21,16 @@ crash was live.
 ## What this pass does
 
 `GCMouse` now has a real designated initializer: it builds a real `GCMouseInput`
-(`-[GCMouseInput init]`, the same spec-driven `-initWithCharonSpecs:` pipeline
+(`-[GCMouseInput init]`, the same spec-driven `-initWithRevenantSpecs:` pipeline
 `GCPhysicalInputProfile14.m` already gives `GCController`'s own profiles) and attaches it via
-`charon_setDevice:`. `handlerQueue` defaults to the main queue and is a real stored property;
+`revenant_setDevice:`. `handlerQueue` defaults to the main queue and is a real stored property;
 `vendorName` answers `"Mouse"`, `productCategory` the real `GCProductCategoryMouse` constant
 (`GCConstants15.m`).
 
 `GCMouseInput`'s `leftButton`/`rightButton`/`middleButton` are real `GCControllerButtonInput`
 elements, and `scroll` a real `GCDeviceCursor` - both built through a new `mouseSpecs` table
-(`CharonGCTables.m`) and a new `"cursor"` element kind added to
-`-[GCPhysicalInputProfile initWithCharonSpecs:]`'s dispatch (`GCDeviceCursor` is itself a
+(`RevenantGCTables.m`) and a new `"cursor"` element kind added to
+`-[GCPhysicalInputProfile initWithRevenantSpecs:]`'s dispatch (`GCDeviceCursor` is itself a
 `GCControllerDirectionPad` subclass, so the existing dpad axis/button linking logic picks it up
 without further change). `mouseMovedHandler` is a real, copied, settable block property.
 `auxiliaryButtons` answers `nil` - the header already allows this for a mouse with none, and this

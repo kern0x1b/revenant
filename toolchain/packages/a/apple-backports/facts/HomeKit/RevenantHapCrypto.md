@@ -8,7 +8,7 @@ the group's value.
 
 ## What is here, and what it is checked against
 
-`CharonHapCrypto.m` is a thin layer: every primitive it exposes is either iOS 6's own CommonCrypto or
+`RevenantHapCrypto.m` is a thin layer: every primitive it exposes is either iOS 6's own CommonCrypto or
 Monocypher's, and the layer exists so that the transport's code reads as HAP's derivation and not as a
 call into a hash library. The checks are the published vectors of each primitive, run as a host test
 (`tests/backports/host/hapcrypto`), and all nine agree:
@@ -29,11 +29,11 @@ The AEAD is `crypto_aead_init_ietf`, not Monocypher's own `crypto_aead_init_x`. 
 the whole reason this library is the one: HAP's session keys are **ChaCha20-Poly1305 with a 12-byte
 nonce**, the IETF construction, and the XChaCha20-Poly1305 that Monocypher's own initialiser builds
 would produce a ciphertext no accessory could read. Monocypher 4.0 seals through a context rather than
-through a one-shot call, so `charon_hap_seal` initialises a context, writes once, and lets it go.
+through a one-shot call, so `revenant_hap_seal` initialises a context, writes once, and lets it go.
 
 `crypto_aead_write` and `crypto_aead_read` also mean the context carries the counter, so a session
 that needs several frames increments the nonce itself — which is what HAP's framing does, and what
-`CharonHAPSession.m` does when it lands.
+`RevenantHAPSession.m` does when it lands.
 
 ## The library, and why this one
 
@@ -47,7 +47,7 @@ TweetNaCl's 2014-04-27 tarball is no longer served from any address this machine
 tried, all 404), and the two that did answer were a 403 and a different project's 404. **`csrp` is not
 used at all**, and that is the better answer rather than the fallback: SRP-6a is a hundred lines of
 exponentiation and hashing over a modular exponentiation this package already has in
-`CharonHAPBignum.m`, and that exponentiation is checked against an independent implementation on 72
+`RevenantHAPBignum.m`, and that exponentiation is checked against an independent implementation on 72
 primes from 32 to 3072 bits. A vendored SRP would be a second, unverified answer to a question the
 package can already answer correctly.
 
@@ -68,11 +68,11 @@ single entry. The prime is also what the RFC's own formula
 3072-bit group and 2 for the other two is the reason the agreement on the other two matters: it is a
 check, not the answer.
 
-The group is in `CharonHapSrp.inc` in the work area, generated from the RFC's text and compiled for
+The group is in `RevenantHapSrp.inc` in the work area, generated from the RFC's text and compiled for
 armv7/iOS 6.1.3.
 
 **The implementation is written and is not finished, and the reason is a defect in the bignum, not in
-the protocol.** `CharonHapSrp.m` in the work area is a complete SRP-6a over that group, and RFC 5054
+the protocol.** `RevenantHapSrp.m` in the work area is a complete SRP-6a over that group, and RFC 5054
 Appendix B's own 1024-bit test vector pins x, v, k, A, B, u and the premaster secret individually. Four
 of the seven agree:
 
@@ -89,7 +89,7 @@ implementation.** Measured, with the operands held and the arithmetic otherwise 
 | `k * v` (narrow by full width) | `758DD475 2C44DCC8…` | `EB79375A F210A486…` |
 | `k` read at the field's width instead of its own | `BC1B60E2 FEE48393…` | `BCCBE9C1 16BD0BAD…` |
 
-So the defect is in `CharonHAPBignum.m`'s Montgomery product for operands of different widths, and the
+So the defect is in `RevenantHAPBignum.m`'s Montgomery product for operands of different widths, and the
 72-case differential that file was checked against did not reach it: every case in it used two
 full-width operands, which is the shape a modexp is made of and not the shape SRP makes.
 
@@ -102,10 +102,10 @@ over `mont->limbs`. The second is the better fix and the first is the one that u
 today, since a narrow `k`, `x` or `u` is the whole reason this came up.
 
 **What is in the tree and what is not.** In: the group, SHA-1 (which RFC 5054's vector needs and HAP
-does not), and the bignum's big-endian conversion -- `charon_bn_from_bytes_be` / `charon_bn_to_bytes_be`
+does not), and the bignum's big-endian conversion -- `revenant_bn_from_bytes_be` / `revenant_bn_to_bytes_be`
 -- which was a real bug of its own, since the limb order is little-endian and every protocol value is
 big-endian, and reading one the wrong way round gives a different number that still computes. Out:
-`CharonHapSrp.m`, which is parked in `.agent-work/plan-and-analysis/hap-srp/` with its vector, the
+`RevenantHapSrp.m`, which is parked in `.agent-work/plan-and-analysis/hap-srp/` with its vector, the
 OpenSSL probe and the narrowing probe, because code that fails its own test is not a delivery.
 
 **One thing the vector settled, which is worth keeping.** RFC 5054's own Appendix B vector uses
@@ -124,7 +124,7 @@ counter — which is ordinary code and is not blocked by anything in this file.
 ## A note on the seed
 
 Monocypher's `crypto_ed25519_key_pair` **destroys the seed** it is given: it wipes the 32 bytes once
-it has hashed them. `charon_hap_ed25519_keypair_from_seed` therefore copies the caller's seed and
+it has hashed them. `revenant_hap_ed25519_keypair_from_seed` therefore copies the caller's seed and
 hands the library the copy. A caller who passed a string literal straight through would have had the
 library write zeroes into read-only memory; the host test found that, and it is why the wrapper is
 shaped the way it is rather than as a one-line pass-through.

@@ -41,7 +41,7 @@ application with a window, run on the host's guides and on the port's, compared 
   the away set alone it is active everywhere; with both set, both read active. The port stores the sets and does not apply them, so
   `UITrackingLayoutGuide` stays owed (registry), and `UIKeyboardLayoutGuide` carries that gap with it.
 - **The aspect-fit class.** The host's guide is a private class, `_UIWindowSafeAreaAspectFitLayoutGuide`. The port's is
-  `CharonAspectFitLayoutGuide`, named here rather than matched.
+  `RevenantAspectFitLayoutGuide`, named here rather than matched.
 - **The protocol.** `UILayoutGuideAspectFitting` is declared in the SDK's `UIWindow.h`, and it has no registry row in this band. The guide
   answers `aspectRatio` without declaring the protocol. Whether the host's guide conforms to it at run time is not measured in this differential.
 - **Keyboard tracking on the release.** The keyboard guide's `usesBottomSafeArea` and `keyboardDismissPadding` are iOS 17 members, outside

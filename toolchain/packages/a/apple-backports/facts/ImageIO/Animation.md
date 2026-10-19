@@ -98,7 +98,7 @@ format is covered.
 
 ## The port's own class, registered
 
-`CharonImageAnimation` holds the source, the block, the frame index and the timer of one animation. No SDK
+`RevenantImageAnimation` holds the source, the block, the frame index and the timer of one animation. No SDK
 header declares it, so it carries one registry row of its own - `registry/ImageIO/animate134.json`, status
 `owed`, the shape `registry/Metal/ios80classes.json` uses for a class of the port's own, because the ledger is an SDK
 ledger and nothing is claimed about SDK behaviour with a name no SDK header declares. The class's methods are built in

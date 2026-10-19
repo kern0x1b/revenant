@@ -84,7 +84,7 @@ both methods, and `MDLAsset9.m:24` declares `@property (nonatomic, retain) id<MD
 The generator's header map is why they were ever mistaken for classes: `packages/a/apple-backports/spec/ModelIO/hdr-map.json`
 records only `@interface` declarations, and it holds the three concrete resolvers
 (`MDLRelativeAssetResolver`, `MDLPathAssetResolver`, `MDLBundleAssetResolver`) and neither protocol.
-`CharonModelIO.h` then declared each missing name as `@interface X : NSObject` so a category had
+`RevenantModelIO.h` then declared each missing name as `@interface X : NSObject` so a category had
 something to attach to, and that is the whole of the failure: **seven** categories on seven such
 names emitted seven `_OBJC_CLASS_$_` references and no object in the library defined any of them. The
 band link printed two of the seven.
@@ -109,7 +109,7 @@ and `MDLRelativeAssetResolver`, `MDLPathAssetResolver`, `MDLBundleAssetResolver`
 The protocols themselves are carried the way `modules/apple/backports.lua`'s `protocol_sources()`
 carries every other one: a `kind: protocol`, `status: implemented` row, from which the build writes
 `ModelIOBackportsProtocols<release>.m` and clang emits `__OBJC_PROTOCOL_$_<name>` into it.
-`CharonModelIOProtocols.h` is the header those generated sources import, and holds forward
+`RevenantModelIOProtocols.h` is the header those generated sources import, and holds forward
 declarations only, because every one of the seven is declared with a body by the SDK the package
 compiles against and the umbrella import beside them brings the bodies in.
 

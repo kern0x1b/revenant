@@ -17,7 +17,7 @@ two different things.
 
 What has to agree between the two sides is what the families **on top of** a source do with it: which
 protocol methods they call, in which order, and how they combine the answers. None of that needs a
-generator. So `CharonGKScriptedSource.h` is a `GKRandom` that answers a written list of lines -- `int=7`,
+generator. So `RevenantGKScriptedSource.h` is a `GKRandom` that answers a written list of lines -- `int=7`,
 `bounded:6=2`, `uniform=0.5`, `bool=1` -- and writes down what it was asked; a call whose kind does not
 match the next line records a `MISMATCH` and a list that runs out records `starved`. The same script
 prints the same trace on the host and on the port, so any difference in which method a distribution
@@ -83,8 +83,8 @@ reached for shows up as a difference in the text.
   carries and whose row is in `registry/GameplayKit/random.json`. There is no second copy of a shuffle
   here, and none in the distribution family either.
 - The archived version of this family ran a Fisher-Yates of its own over `nextIntWithUpperBound:` and
-  shared it with the distribution family through a `charon_` category in a file of its own
-  (`CharonGKShuffle.m`). That file is gone with this commit: it was a second copy of a shuffle the
+  shared it with the distribution family through a `revenant_` category in a file of its own
+  (`RevenantGKShuffle.m`). That file is gone with this commit: it was a second copy of a shuffle the
   framework already has, and the host measures it as one -- the source is asked for the array, not for a
   sequence of bounds.
 

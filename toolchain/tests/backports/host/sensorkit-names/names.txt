@@ -17,7 +17,7 @@
 // RevenantSensorKitNames.h - which the harness's own port-side source imports with all seven guards
 // defined, so the eighteen values the comparison walks are the eighteen the objects carry and not a
 // second copy of them.
-static const char *const CHaronNames[] = {
+static const char *const CRevenantNames[] = {
     "SRDeviceUsageCategoryBooks",
     "SRDeviceUsageCategoryBusiness",
     "SRDeviceUsageCategoryCatalogs",

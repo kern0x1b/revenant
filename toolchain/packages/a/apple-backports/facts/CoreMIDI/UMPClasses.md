@@ -1,6 +1,6 @@
 # MIDI-UMP and MIDI-CI device classes of iOS 18: what each answers
 
-Nine classes of the iOS 18 surface are implemented in `CoreMIDI/MIDIUMP18.m` over the declarations in `CoreMIDI/CharonMIDIUMP18.h`
+Nine classes of the iOS 18 surface are implemented in `CoreMIDI/MIDIUMP18.m` over the declarations in `CoreMIDI/RevenantMIDIUMP18.h`
 (transcribed from the 26.2 headers; the 16.4 SDK has none of them). Measured on macOS on 2026-10-09 by
 `tests/backports/host/coremidi/oracle/umpclasses.m` and `umpclasses2.m` (recorded in `umpclasses-macos.txt` and
 `umpclasses2-macos.txt`); differential-ump.m holds the port to the answers below.

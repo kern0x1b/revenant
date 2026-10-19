@@ -3,11 +3,11 @@
 `AVFoundation/AVCaptureDeferredStart26.m` carries the eleven code rows - eight properties and three methods -
 over the three classes the feature belongs to, and the registry
 `registry/AVFoundation/deferredstart26.json` carries thirteen with the protocol row and its two methods.
-Header: `CharonAVCaptureDeferredStart26.h`, transcribed from the SDK 26.2 (`AVCaptureSession.h:670-725`,
+Header: `RevenantAVCaptureDeferredStart26.h`, transcribed from the SDK 26.2 (`AVCaptureSession.h:670-725`,
 `AVCaptureOutputBase.h:117-131`, `AVCaptureVideoPreviewLayer.h:262-278`).
 
 **The protocol is not declared in that header.** `AVCaptureSessionDeferredStartDelegate` is in
-`CharonAVFoundationProtocols.h`, transcribed from the SDK 26.2 by `tools/transcribe-protocols.py@52253c0650`, and the
+`RevenantAVFoundationProtocols.h`, transcribed from the SDK 26.2 by `tools/transcribe-protocols.py@52253c0650`, and the
 protocol row in the registry is what makes the generated protocol source emit it into every band - without the
 row a conformance looks present in the source while the runtime has no protocol object to add it to (the trap
 `facts/UIKit/UIKit16Absence.md` records). The regeneration, its command and its line counts are in the delivery
@@ -56,10 +56,10 @@ band of this repository links against SDK 16.4.
 
 So it is read, once, from the only place it is written down: the `sdk` field of the main executable's own load
 command (`LC_VERSION_MIN_IPHONEOS`, or `LC_BUILD_VERSION` for the platform the image was linked for), through
-`packages/a/apple-backports/CharonProgramSDK.h`. That read was a file-static in
+`packages/a/apple-backports/RevenantProgramSDK.h`. That read was a file-static in
 `UIKit/UIViewController+AutomaticPresentation.m`, which is not reusable - a static in one object cannot be called
 from another - so it became a header of `static inline` functions and the UIKit caller includes it, which is the
-arrangement `CharonValueStore.h` and `CharonSayOnce.h` already use and for the same reason: two libraries that
+arrangement `RevenantValueStore.h` and `RevenantSayOnce.h` already use and for the same reason: two libraries that
 include it each get their own copy and neither needs an exported symbol, which this package's registry does not
 allow.
 

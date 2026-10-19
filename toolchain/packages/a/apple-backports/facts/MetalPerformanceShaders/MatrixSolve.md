@@ -16,8 +16,8 @@ introduced 11.0, **implemented**), and every one of these five encodes takes `MP
 `MTLComputeCommandEncoder`, no dispatch, nothing this host would have to encode to reach. The arithmetic
 they name is arithmetic a CPU already does: a triangular substitution, an LU solve against a
 factorization, a Cholesky factorization, a Cholesky solve. `MPSMatrixVectorMultiplication11.m` already
-walks a matrix through `CharonMPSMatrixViewOf` / `CharonMPSMatrixElement` / `CharonMPSLoad` /
-`CharonMPSStore`, and this file reuses that substrate rather than writing a second answer for the same
+walks a matrix through `RevenantMPSMatrixViewOf` / `RevenantMPSMatrixElement` / `RevenantMPSLoad` /
+`RevenantMPSStore`, and this file reuses that substrate rather than writing a second answer for the same
 walk.
 
 ## The oracle is a ROUND TRIP, and that is the reason this family is checkable at all
@@ -31,7 +31,7 @@ encoding, so the release is not the oracle and **no number on these rows measure
 - a **solve** is right when its answer multiplied by `A` gives `B` — `MPSMatrixSolve.h:24-26`.
 
 Both are statements about the ANSWER, so neither needs to agree with the release's pivot order or its
-rounding. `CharonMPSMatrixSolveReference.h` writes them in plain C and never names the port's class.
+rounding. `RevenantMPSMatrixSolveReference.h` writes them in plain C and never names the port's class.
 
 **What is deliberately not checked: the pivot INDICES.** `MPSMatrixDecomposition.h:92-94` says the array
 holds "an array of size 1xmin(rows, columns) values. Element type must be `MPSDataTypeUInt32`" and says
@@ -71,7 +71,7 @@ rather than by reading:
    `[4 2 2; 2 5 1; 2 1 6]` — **42 of the run's 62 elements wrong**. Fixed by walking the triangle in
    dependency order.
 2. **The triangle mirror appeared at four different index sites** and one of them disagreed with the
-   write, so the upper Cholesky's inner products were empty. Fixed by making `CharonMPSCholeskyFactor`
+   write, so the upper Cholesky's inner products were empty. Fixed by making `RevenantMPSCholeskyFactor`
    the *only* place `lower` appears on a read.
 3. **`solves-transpose`** — the Cholesky solve substituted through the stored triangle **twice** and
    never its transpose, so it solved a different system: `(1, 0.75, 1.4)` where the solution is
@@ -111,7 +111,7 @@ downward, which genuinely visits `(2,2)` before `(2,0)`.
 ## The bound
 
 A factorization of exactly-representable entries is exact, and a solve divides — so a solve's answers are
-held to **one whole float32 ulp**, the bound `mps-reference.h` and `CharonNNReduceReference.h` already
+held to **one whole float32 ulp**, the bound `mps-reference.h` and `RevenantNNReduceReference.h` already
 state for the other families, not widened here. The Cholesky solve's factor is heap-allocated at the order
 it was given, with no fixed ceiling: a limit written into the code would refuse an order the release
 factors, and would have to be a second answer for a caller to choose between.

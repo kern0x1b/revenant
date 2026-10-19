@@ -65,7 +65,7 @@ Measured 2026-09-23 on the iPhone 4S (6.1.3), `tests/backports/device/cellularda
 assumption this port carried - that `CTServerConnectionCreate` tolerates a `NULL` callback the way
 the earlier host-only read of its disassembly suggested - was wrong. On real hardware the call
 answers `NULL` for every combination that passes a `NULL` callback, whatever the context is, and
-only succeeds once a real (even inert) callback function pointer is given. `CharonCTConnection` in
+only succeeds once a real (even inert) callback function pointer is given. `RevenantCTConnection` in
 `CTCellularData9.m` now passes one; without this fix `restrictedState` answered
 `kCTCellularDataRestrictedStateUnknown` on every read, not because the state was unknown but
 because the connection was never created - the honest-`Unknown` guarantee was doing its job, but on

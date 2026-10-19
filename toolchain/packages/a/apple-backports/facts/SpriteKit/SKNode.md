@@ -3,7 +3,7 @@
 The iOS 7 surface of SpriteKit's `SKNode`: the node tree, the local transform, the frame, the hit tests and the
 conversions. The port's objects are `SpriteKit/SpriteKit7.m` (the class), `SpriteKit/SpriteKit8.m` (the subscript,
 in a category) and `SpriteKit/SpriteKit9.m` (`moveToParent:`, in a category), all declared by
-`SpriteKit/CharonSpriteKit.h`. The config is `spritekit`, the library is `libSpriteKitBackports.dylib`. The rows are in
+`SpriteKit/RevenantSpriteKit.h`. The config is `spritekit`, the library is `libSpriteKitBackports.dylib`. The rows are in
 `registry/SpriteKit/ios7.json`, `ios8.json` and `ios9.json`.
 
 ## Oracle and what was measured
@@ -94,7 +94,7 @@ status. Measured on the host:
 - `convertPoint:(1,2) fromNode:h` to `g` (a sibling) gives `(6,7)`.
 - With scale 2 on the parent the root point is `(22,41)`; with a rotation on the parent `(1,0)` gives `(-5,32)`.
 - The local transform is the scale, then the rotation, then the translation, and the conversion goes through the scene
-  root both nodes share. The port composes the same order (`CharonSKLocalTransform`).
+  root both nodes share. The port composes the same order (`RevenantSKLocalTransform`).
 
 ### Frames, hit tests and equality
 

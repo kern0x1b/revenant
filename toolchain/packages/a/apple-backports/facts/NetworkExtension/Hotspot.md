@@ -8,7 +8,7 @@ host's answers and drive no join, and the join route they leave undriven.
 
 ## What is carried
 
-- `NetworkExtension/CharonNEHotspot.h`: the declarations, from the iOS 26.2 SDK's `NEHotspotNetwork.h`,
+- `NetworkExtension/RevenantNEHotspot.h`: the declarations, from the iOS 26.2 SDK's `NEHotspotNetwork.h`,
   `NEHotspotConfigurationManager.h`, `NEHotspotHelper.h` and the `(HotspotHelper)` category of `NEHotspotHelper.h`.
 - `NetworkExtension/NEHotspotNetwork.m`: the state object, and `+fetchCurrentWithCompletionHandler:`.
 - `NetworkExtension/NEHotspotConfiguration.m`: the four initializers and the two that take settings, the properties,

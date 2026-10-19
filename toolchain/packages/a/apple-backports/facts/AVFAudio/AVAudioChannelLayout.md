@@ -6,7 +6,7 @@ Carried in `libAVFAudioBackports.dylib` (the `avfaudio` config), over the `Audio
 **The channel count and the canonical tag are the release's own answers**, not a table the port keeps:
 `AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutForTag, ...)` answers a layout for a tag
 and `kAudioFormatProperty_TagsForNumberOfChannels` answers the tags of a count, and both are answered
-by `AudioFormatGetProperty`, which iOS 6.1.3 exports. The table in `CharonAVFAudioCommon.m` is only
+by `AudioFormatGetProperty`, which iOS 6.1.3 exports. The table in `RevenantAVFAudioCommon.m` is only
 the fallback for the tags the release's `AudioFormat` declines, so that a layout AVFAudio names
 itself still answers.
 

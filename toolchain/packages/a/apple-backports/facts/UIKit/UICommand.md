@@ -62,7 +62,7 @@ Measured on the host, the port's objects and the system's in one process (the `c
 would have answered a different object than the one the caller passed.
 
 The comparison responds to a wrong answer on these rows, which is what makes the table evidence rather than a green run. Two
-plants in a scratch copy of the port's sources - `-setState:` that keeps nothing, and `-charon_setImage:` that drops the image
+plants in a scratch copy of the port's sources - `-setState:` that keeps nothing, and `-revenant_setImage:` that drops the image
 - and the run says so by name, on exactly the rows above:
 
     FAIL key command values:

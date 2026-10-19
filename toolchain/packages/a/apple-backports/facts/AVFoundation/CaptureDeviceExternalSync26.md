@@ -4,7 +4,7 @@
 on `AVCaptureDeviceInput` and the two external-sync methods - in one object, over two classes every release
 already carries. Registry: `registry/AVFoundation/externalsync26.json`, eleven rows, one per row the
 `coordination/corpus/ledger-2026-10-03/AVFoundation.tsv` snapshot reads `missing` for them at 26.0. Header:
-`CharonAVCaptureDeviceExternalSync26.h`, transcribed from the SDK 26.2 (`AVCaptureDevice.h:376-393`,
+`RevenantAVCaptureDeviceExternalSync26.h`, transcribed from the SDK 26.2 (`AVCaptureDevice.h:376-393`,
 `AVCaptureInput.h:286-350`), with two names of its own that are forward declarations only: `AVExternalSyncDevice`
 and its delegate protocol, whose class, six properties, `-init`, `+new`, discovery session and delegate methods
 are a family of their own rows.

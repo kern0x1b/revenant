@@ -11,7 +11,7 @@ file, a mesh or an asset - they convert one descriptor's attribute/layout data i
 Both directions share a format-mapping table between `MTLVertexFormat` and `MDLVertexFormat`: the
 plain float/int/uint 1-4 component formats, the four normalized 8/16-bit packed formats
 (`UChar4Normalized`/`Char4Normalized`/`UShort2Normalized`/`Short2Normalized`) and `half2`/`half3`/`half4` -
-the formats this port's own `MTLVertexDescriptor`/`CharonMetal` rendering pipeline already
+the formats this port's own `MTLVertexDescriptor`/`RevenantMetal` rendering pipeline already
 understands and could plausibly receive from a converted descriptor. `MTKMetalVertexDescriptorFromModelIOWithError`
 walks the Model I/O descriptor's `attributes`/`layouts` and builds a real `MTLVertexDescriptor`;
 `MTKModelIOVertexDescriptorFromMetalWithError` does the inverse, building real `MDLVertexAttribute`/

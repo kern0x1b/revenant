@@ -48,7 +48,7 @@ one describes no cone.
 
 ## The one gain law
 
-`-charon_gainAtDistance:` on the geometric spreading model is `1 / distance^rolloffFactor`, and that
+`-revenant_gainAtDistance:` on the geometric spreading model is `1 / distance^rolloffFactor`, and that
 is the whole of what a geometric spreading model computes. A rolloff of zero — the state a never-set
 parameter is in — gives a gain of one, which is what that exponent means and not a special case
 written to paper over the missing default.

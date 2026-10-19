@@ -15,7 +15,7 @@ methods:
 
 `-provider` and the three `NSCopying`/`NSSecureCoding` members are the public contract; `initWithProvider:`
 is the release's own way in and is not in the public header, so the port does not reach for it — the port's
-construction is named and declared in `CharonASConstruction.h`, which is the same mechanism HomeKit's
+construction is named and declared in `RevenantASConstruction.h`, which is the same mechanism HomeKit's
 graph uses and for the same reason.
 
 ## The parts that are decided, and how
@@ -56,7 +56,7 @@ The first correction allowed a space between the sign and the paren and then req
 the very next character, which `- (instancetype)init` does not have either, so the second run was still
 green in the wrong direction. What works is where a declaration puts the selector: a `-` or `+`, optional
 space, `(`, the return type, `)`, optional space, and then the member name with a non-identifier after
-it — so that `charon_initWithProvider:` is not read as `provider`, which is the next false positive the
+it — so that `revenant_initWithProvider:` is not read as `provider`, which is the next false positive the
 prefix form would have given.
 
     ASWebAuthenticationSession   init                                            yes yes same

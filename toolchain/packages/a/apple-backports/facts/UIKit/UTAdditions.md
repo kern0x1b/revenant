@@ -17,7 +17,7 @@ Two questions, both answered by the release:
   the release resolves for that extension, which is `-typeWithFilenameExtension:` and so
   `UTTypeCreatePreferredIdentifierForTag` underneath.
 
-`UIKit/UTTypeDeclarations14.m`'s sibling seam `-charon_conformsToFilenameExtension:` on `UTType` states
+`UIKit/UTTypeDeclarations14.m`'s sibling seam `-revenant_conformsToFilenameExtension:` on `UTType` states
 that second question once; both categories and `NSItemProviderUTType16.m` go through the same two
 release functions rather than each answering it its own way.
 

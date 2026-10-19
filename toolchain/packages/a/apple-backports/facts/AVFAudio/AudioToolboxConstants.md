@@ -7,7 +7,7 @@ Carried in `libAVFAudioBackports.dylib`, with the registry in `registry/AVFAudio
 `kAudioComponentRegistrationsChangedNotification` (iOS 7) and `kAudioComponentInstanceInvalidationNotification` (iOS 9) are
 exported `const CFStringRef` variables. The release does not export either (6.1.3 armv7 cache, `tools/image-exports.lua`).
 The port defines both, in `AVFAudio/AudioComponentNotifications7.m` and `AVFAudio/AudioComponentNotifications9.m`, from the
-strings in `AVFAudio/CharonAudioToolboxNames.h`:
+strings in `AVFAudio/RevenantAudioToolboxNames.h`:
 
 - `com.apple.coreaudio.AudioComponentRegistrationsChanged`
 - `com.apple.coreaudio.AudioComponentInstanceInvalidated`
@@ -23,7 +23,7 @@ symbol to define: an application compiled against the SDK gets the value inline.
 answer is the header the build reads, which declares it.
 
 The eight cases of iOS 17 to 26 (the table's rows for 17.0, 18.0 and 26.0 except `kAudioUnitProperty_SpatialMixerEnableHeadTracking`
-and `_PersonalizedHRTFMode`, which the 16.4 SDK declares) are not in the 16.4 SDK, so `AVFAudio/CharonAudioToolboxDeclarations.h`
+and `_PersonalizedHRTFMode`, which the 16.4 SDK declares) are not in the 16.4 SDK, so `AVFAudio/RevenantAudioToolboxDeclarations.h`
 declares them, under the same `CA_REALTIME_API` guard as the iOS 26 types, with the iOS 26.2 SDK's values. The constants host test
 checks each value against the 26.2 SDK.
 

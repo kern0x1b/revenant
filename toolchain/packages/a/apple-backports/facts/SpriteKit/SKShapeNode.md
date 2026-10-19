@@ -1,7 +1,7 @@
 # SKShapeNode (iOS 7, and the points form of iOS 8)
 
 The iOS 7 surface of SpriteKit's `SKShapeNode`: a node that draws a path, with its stroke, fill and line style. The port's
-object is `SpriteKit/SpriteKitShape7.m`, declared by `SpriteKit/CharonSpriteKit.h`; the points constructor is in
+object is `SpriteKit/SpriteKitShape7.m`, declared by `SpriteKit/RevenantSpriteKit.h`; the points constructor is in
 `SpriteKit/SpriteKit8.m`, since the spec gives it iOS 8. The rows are in `registry/SpriteKit/ios7.json`, `ios8.json` and
 `ios10.json`.
 

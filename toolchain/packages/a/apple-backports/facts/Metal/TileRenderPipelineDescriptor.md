@@ -8,7 +8,7 @@ from and asks no device anything. Its colour attachments and tile buffers are th
 ## What is measured, and against what
 
 `tests/backports/host/tile-render-pipeline-descriptor/run.sh` builds the port's class for Catalyst beside Apple's Metal
-in one process, renamed `CharonHostMTLTileRenderPipelineDescriptor`, and compares the members both sides can be asked
+in one process, renamed `RevenantHostMTLTileRenderPipelineDescriptor`, and compares the members both sides can be asked
 without harm at four moments: a fresh descriptor, one with its settable members set away from their defaults, the
 same one after `-reset`, and a copy of the set one. A mutant that stops `-reset` clearing the threadgroup limit turns
 the reset comparison red, and it does.
@@ -67,4 +67,4 @@ default mutability back. These are the port's expectations and are not compared 
 ## The members the SDK this package compiles against does not declare
 
 `shaderValidation` (18.0) and `requiredThreadsPerThreadgroup` (26.0) are declared for the port by
-`Metal/CharonMetal26Types.h` and implemented as explicit accessors in the class file.
+`Metal/RevenantMetal26Types.h` and implemented as explicit accessors in the class file.

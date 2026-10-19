@@ -60,6 +60,6 @@ context, which the port does not carry; their rows stay `absent` and are not ans
 ## Test
 
 `tests/backports/host/cgpdf-names`: 1017 checks, 0 failures. The port's two source files are built with their
-symbols renamed `charon_host_*`; each constant's text is compared with the host's, and `CGPDFTagTypeGetName` is
+symbols renamed `revenant_host_*`; each constant's text is compared with the host's, and `CGPDFTagTypeGetName` is
 compared for every value from 0 to 1000 (the host's NULLs included), with the 900 difference checked on both
 sides.

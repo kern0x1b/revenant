@@ -5,7 +5,7 @@ counter, no per-change log, nothing `ABAddressBookRegisterExternalChangeCallback
 delivers beyond "something changed, go look". `-[CNContactStore
 enumeratorForChangeHistoryFetchRequest:error:]` and `currentHistoryToken` are
 not a read of a journal the release keeps; they are a journal this port keeps
-itself, over `CharonContactsHistory`, built from what iOS 6 does give: the
+itself, over `RevenantContactsHistory`, built from what iOS 6 does give: the
 book's own enumeration, its record identifiers, `kABPersonModificationDateProperty`
 on every person, and a group's name and membership.
 
@@ -20,10 +20,10 @@ answer.
 
 ## The journal
 
-`CharonContactsHistory` snapshots the book on demand: every contact's
+`RevenantContactsHistory` snapshots the book on demand: every contact's
 identifier and `kABPersonModificationDateProperty`, and every group's
 identifier, name and sorted member identifiers. A snapshot is written as a
-generation - a UUID-named plist under `Application Support/CharonContacts/History`
+generation - a UUID-named plist under `Application Support/RevenantContacts/History`
 - and `currentHistoryToken` is an opaque `NSData` (`NSKeyedArchiver` over the
 generation's name) naming exactly that snapshot. Only the most recent 24
 generations are kept; writing a new one prunes the oldest.
@@ -83,7 +83,7 @@ to diff from later.
   actually took produces no event at all, since neither snapshot ever named
   it.
 - **A removed member whose own contact was deleted is reported once, not
-  twice.** `CharonContactsHistory` needs the member's `ABRecordRef` to build
+  twice.** `RevenantContactsHistory` needs the member's `ABRecordRef` to build
   the `CNContact` a `CNChangeHistoryRemoveMemberFromGroupEvent` carries; if
   the contact itself is gone, only its own `CNChangeHistoryDeleteContactEvent`
   is reported, not a separate membership event for the same disappearance.
@@ -116,7 +116,7 @@ documented readonly properties and `-acceptEventVisitor:`, which dispatches
 to the matching `CNChangeHistoryEventVisitor` method (the optional
 group/subgroup visit methods are dispatched only when the visitor implements
 them, matching the `@optional` methods of the real protocol).
-`CharonContactsHistory` constructs nine of them - every one but
+`RevenantContactsHistory` constructs nine of them - every one but
 `CNChangeHistoryAddSubgroupToGroupEvent` and `..RemoveSubgroupFromGroupEvent`.
 
 `CNChangeHistoryAddSubgroupToGroupEvent` and `..RemoveSubgroupFromGroupEvent`

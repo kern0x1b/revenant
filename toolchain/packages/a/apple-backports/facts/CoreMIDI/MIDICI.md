@@ -3,7 +3,7 @@
 The MIDI Capability Inquiry classes come in two generations. The 1.x classes of iOS 12, 14 and 16 (MIDICIProfile,
 MIDICIProfileState, MIDICISession (12); MIDICIDiscoveredNode, MIDICIDiscoveryManager, MIDICIResponder, and the protocol
 MIDICIProfileResponderDelegate (14); MIDICIDeviceInfo (16, by the release-split tool)) are in `CoreMIDI/MIDICI12.m`,
-`MIDICI14.m`, `MIDICI16.m` and `CoreMIDI/CharonMIDICI.h`. The
+`MIDICI14.m`, `MIDICI16.m` and `CoreMIDI/RevenantMIDICI.h`. The
 device classes of iOS 18 are in `UMPClasses.md`.
 
 ## What was measured on macOS (2026-10-09, oracle/micicapability.m and umpclasses.m)
@@ -42,7 +42,7 @@ machine where a MIDI-CI device answers: no such device was measured.
 - The MI-CI actions that would do something on a transport are `inert` in the registry: discoverWithHandler (MIDICIDiscoveryManager),
   start, notifyProfile and sendProfile (MIDICIResponder and its delegate protocol), and enableProfile and disableProfile
   (MICISession). Each does nothing and answers NO or returns, and says once in the log that it has no MI-CI transport
-  (charon_ci_inert, MIDICI14.m). macOS refuses its own MIDI-CI client on the measured host and never calls the discovery handler
+  (revenant_ci_inert, MIDICI14.m). macOS refuses its own MIDI-CI client on the measured host and never calls the discovery handler
   (oracle/micicapability-macos.txt), so that no-op is the measured answer there.
 - The getters of the MI-CI device, profile and manager classes (no profiles, zero MUID and counts, nil names, empty device lists)
   answer for a port that has no MI-CI device at all. Those rows stay `implemented`: the device lists measured empty on macOS

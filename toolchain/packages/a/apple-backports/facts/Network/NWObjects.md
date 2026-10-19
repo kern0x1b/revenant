@@ -8,7 +8,7 @@ them, and every getter answers the release's own answer for what a program has (
 **Source: the host's own Network.framework, asked the same question of the port's implementation
 compiled beside it with its names changed, and the two answers compared** -
 `tests/backports/host/network-objects`, 176 checks, the port's files compiled with every symbol they
-define renamed (`-Dnw_x=charonhost_nw_x`, `-DCharonX=CharonHostCharonX`) and one program reaching
+define renamed (`-Dnw_x=revenanthost_nw_x`, `-DRevenantX=RevenantHostRevenantX`) and one program reaching
 either side through one table of function pointers. The host is macOS 27.0 (build 26A428), whose
 Network.framework carries the whole of the 26.2 API. Where a value had to come from a real release and
 not from a header, it is said so below.
@@ -17,8 +17,8 @@ not from a header, it is said so below.
 
 - Every `nw_*` type is a protocol of the SDK's own making (`OS_OBJECT_DECL` makes `nw_path_t` an
   `NSObject<OS_nw_path> *`), so each object here is an `NSObject` that adopts the protocol of the type
-  it is. The classes and their state are in `CharonNW.h`, their implementations in
-  `CharonNWObjects.m`, and the few pieces of C every file needs in `CharonNWSupport.c` - which is C so
+  it is. The classes and their state are in `RevenantNW.h`, their implementations in
+  `RevenantNWObjects.m`, and the few pieces of C every file needs in `RevenantNWSupport.c` - which is C so
   that nothing in it is exported, because a helper an Objective-C file defined would be a symbol the
   registry has to describe and a file that carries API of two releases would be split from under it.
 - One file per family **and per release**, named for the release (`nw12-core.m`, `nw13-txtrecord.m`,
@@ -197,7 +197,7 @@ declare them: the seventeen of iOS 17 (`nw_proxy_config_*`, `nw_privacy_context_
 twenty-one anywhere in the tree, so **a program built against the port's SDK cannot name one of them
 without declaring the prototype itself**; the two types they need (`nw_proxy_config_t`,
 `nw_relay_hop_t`) are the port's own declarations, under `__has_include(<Network/proxy_config.h>)` so
-that a newer SDK's declarations are never made twice (`CharonNW.h`).
+that a newer SDK's declarations are never made twice (`RevenantNW.h`).
 
 `NW_ALL_PATHS` is **not** one of the twenty-one - the 16.4 SDK declares
 `_nw_data_transfer_report_all_paths` at `connection_report.h:538-539` - and neither are the two

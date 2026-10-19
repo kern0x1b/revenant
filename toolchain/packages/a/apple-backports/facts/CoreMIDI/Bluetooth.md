@@ -6,7 +6,7 @@ and so does a disconnect of an identifier that is not connected, and of an empty
 
 The port does not export either function under its name: the central has never run (no BLE MIDI device was used, and the
 emulated 4S has no Bluetooth), and the registry says `owed` (see "Status in the registry" below). The bodies are kept as
-`charon_bluetooth_activate_all_connections` and `charon_bluetooth_disconnect` (MIDIBluetooth16.m), which answer noErr as macOS
+`revenant_bluetooth_activate_all_connections` and `revenant_bluetooth_disconnect` (MIDIBluetooth16.m), which answer noErr as macOS
 does. What those bodies would do, once a device run lets the names be exported:
 
 - The central is a CoreBluetooth `CBCentralManager` (CoreBluetooth is in the 6.1.3 cache: `CBCentralManager`,
@@ -15,8 +15,8 @@ does. What those bodies would do, once a device run lets the names be exported:
   and connect to each device found. It would read the MIDI I/O characteristic `7772E5DB-3868-4112-A1A9-F2669D106BF3` and
   subscribe to it.
 - Each BLE MIDI packet's header and timestamp bytes are dropped and its MIDI bytes are received by a virtual source the
-  central makes for the device, through the release's MIDISourceCreate and MIDIReceived. The framing is CharonBLEMIDIParse
-  (CharonCoreMIDI.c): a byte with bit 7 set where a timestamp is due is that timestamp; inside a SysEx the timestamp before
+  central makes for the device, through the release's MIDISourceCreate and MIDIReceived. The framing is RevenantBLEMIDIParse
+  (RevenantCoreMIDI.c): a byte with bit 7 set where a timestamp is due is that timestamp; inside a SysEx the timestamp before
   F7 or a real-time byte is read the same way; running status is sent again with its data; a SysEx continues across
   notifications, and the parser's state belongs to the device. The cases in tests/backports/host/coremidi/differential.m
   (check_ble_parse) are the specification's framing, not a macOS measurement.
@@ -45,7 +45,7 @@ What is not established:
 ## Status in the registry (round 3)
 
 - The two driver functions are not exported under their names: the registry says `owed` (registry/CoreMIDI/ios16.json). The
-  central's bodies are charon_bluetooth_activate_all_connections and charon_bluetooth_disconnect (MIDIBluetooth16.m), so a
+  central's bodies are revenant_bluetooth_activate_all_connections and revenant_bluetooth_disconnect (MIDIBluetooth16.m), so a
   device run is one rename away from `implemented`. The reason is that the central has never run: no BLE MIDI device has been
   used, and the emulated 4S has no Bluetooth.
 - The 6.1.3 selectors (identifier not answered, UUID answered) are measured (tests/backports/emulate/coremidi/app/main.m).
@@ -55,7 +55,7 @@ What is not established:
 ## CoreBluetooth is opened on first use (2026-10-10)
 
 The library does not link CoreBluetooth: the central's bodies find `CBCentralManager` and `CBUUID` by name after a dlopen of the
-framework on their first use (MIDIBluetooth16.m, charon_cb_class), and the framework is not on the library's line in
+framework on their first use (MIDIBluetooth16.m, revenant_cb_class), and the framework is not on the library's line in
 modules/apple/backports.lua. Measured: the object's undefined symbols had the two class symbols before and have none after
 (nm -u, armv7 at iOS 6.0 against the 16.4 SDK). On the emulated 6.1.3 the framework's path opens and `CBPeripheral` is present
 (the probe of tests/backports/emulate/coremidi/app/main.m); the library's own dlopen has not run there, because the central

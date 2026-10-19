@@ -4,7 +4,7 @@
 the same three classes the two slices above it in this folder carry. Registry:
 `registry/AVFoundation/cinematicvideo26.json`, ten rows, one per row the
 `coordination/corpus/ledger-2026-10-03/AVFoundation.tsv` snapshot reads `missing` for them at 26.0. Header:
-`CharonAVCaptureDeviceCinematicVideo26.h`, transcribed from the SDK 26.2 (`AVCaptureDevice.h:1299-1328`,
+`RevenantAVCaptureDeviceCinematicVideo26.h`, transcribed from the SDK 26.2 (`AVCaptureDevice.h:1299-1328`,
 `:2682-2696`, `:3782-3818` and `AVCaptureInput.h:425-439`), with two types of its own: the string enum
 `AVCaptureSceneMonitoringStatus` and the focus-mode enum `AVCaptureCinematicVideoFocusMode` (the header's own
 three values).

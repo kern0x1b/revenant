@@ -7,7 +7,7 @@ any of them, so every number below is measured.
 Source: the host's own UIKit under Mac Catalyst (macOS 27.0, build 26A428), asked for every default, every
 write read back, the copy, the archive round trip and the two `NS_UNAVAILABLE` constructors, by the case in
 `tests/backports/host/uikit2/listseparator_test.m` - the port's object built beside the system's in one
-process, under the name `CharonHostUIListSeparatorConfiguration`, and every value printed by the case for both
+process, under the name `RevenantHostUIListSeparatorConfiguration`, and every value printed by the case for both
 sides. That case is the oracle: its expectations are what the host answers, not what the port returns.
 
 ## M1. The defaults, as the host answers them
@@ -95,7 +95,7 @@ Both are gone and the warning with them: the header already marks `-initWithList
 initializer left to warn about. The two definitions were answering what `NSObject`'s already answers, on a
 class Apple's own metadata does not give them to.
 
-A first version of this file, and of the row beside it, said the port had a `-initCharonWithDefaults:` method
+A first version of this file, and of the row beside it, said the port had a `-initRevenantWithDefaults:` method
 "stated as a separate method so the difference between the two paths is in the code rather than in a comment".
 **There is no such method** and there never was. The registry check's coherence pass is what found it - it
 named the selector as one the row cites and the file the row names does not define. A comment that describes a
@@ -156,7 +156,7 @@ The 14.5 object holds the copy and the archive, and both have to reach a 15.0 me
 measured, not assumed, in `UIImageConfiguration+Locale17.m`'s comment - so a 15.0 category could not *extend*
 the 14.5 copy; it could only replace it, and a replacement would lose the six fields. The direction that
 works is the one the locale object uses: the older object calls, the newer one implements, through
-declarations both can see in `CharonLists.h`. Nothing outside this library reads those three, which is why
+declarations both can see in `RevenantLists.h`. Nothing outside this library reads those three, which is why
 they are not registry rows; the case reads the public pair.
 
 ## M5. `-isEqual:` and `-hash`, field by field

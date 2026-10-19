@@ -49,7 +49,7 @@ scratch; the probe's own output is in the run folder). Stretch is options nil an
 
 - **Enlargement by stretch differs by one unit at most.** Noise enlarged to 8x6 is within 1 of the host in every
   channel, which is rounding in the port's kernel, not a different filter. The port's kernel is the Vision kernel
-  (`CharonVisionBilinear.c`); the host's enlargement impulse response is the same separable tent with a half-pixel
+  (`RevenantVisionBilinear.c`); the host's enlargement impulse response is the same separable tent with a half-pixel
   centre, measured on a single white pixel.
 - **Reduction by stretch differs.** Noise reduced to 2x2 differs by up to 65. The host's impulse sweep (one white pixel
   moved across a 5x5 picture into a 2x2 output) gives weights that the port's kernel does not reproduce. The host's

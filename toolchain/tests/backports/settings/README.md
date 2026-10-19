@@ -22,7 +22,7 @@ iphonesimulator` answers `SDK "iphonesimulator" cannot be located`. What holds t
 
   * `hearing-check.m`, compiled for `armv7-apple-ios6.0` against the 16.4 SDK, which holds the compiler to
     the SDK's own declarations of the three functions;
-  * `nm` over the built `CharonHearing15.o`, which `run.lua` **asserts** rather than prints - it is what
+  * `nm` over the built `RevenantHearing15.o`, which `run.lua` **asserts** rather than prints - it is what
     mutant M9 turns red on;
   * `axs-census.lua`, which is the measurement the answers are readings of, and which is narrower than
     what the code first claimed: the release's Accessibility surface holds 28 hearing-named exports, all

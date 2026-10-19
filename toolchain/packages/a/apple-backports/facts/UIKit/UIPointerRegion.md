@@ -24,4 +24,4 @@ Source: the host's own UIKit under Mac Catalyst (macOS 27.0), held against the b
 
 - `location` and `modifiers` are read-only values; a fresh request has both at zero. Its description is
   `<UIPointerRegionRequest: 0x...; location = {x, y}>` and does not mention the modifiers. It is not copyable.
-- No release of iOS 6 makes one, so the port's `-initCharonWithLocation:modifiers:` exists for the tests.
+- No release of iOS 6 makes one, so the port's `-initRevenantWithLocation:modifiers:` exists for the tests.

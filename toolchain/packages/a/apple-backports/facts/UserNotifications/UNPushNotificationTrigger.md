@@ -48,15 +48,15 @@ The class is one factory and nothing else:
 
 ```objc
 @implementation UNPushNotificationTrigger
-+ (instancetype)charon_pushTrigger
++ (instancetype)revenant_pushTrigger
 {
-    return [[self alloc] initCharonWithRepeats:NO];
+    return [[self alloc] initRevenantWithRepeats:NO];
 }
 @end
 ```
 
 `-init` is `NS_UNAVAILABLE` on `UNNotificationTrigger`, which is why the factory exists
-and why it is declared in `CharonUserNotifications.h`. `repeats` is NO: a pushed
+and why it is declared in `RevenantUserNotifications.h`. `repeats` is NO: a pushed
 notification is not a schedule the application asked for. Everything else - `repeats`,
 `initWithCoder:`, `encodeWithCoder:`, `isEqual:`, `hash`, `copyWithZone:` - is
 `UNNotificationTrigger`'s and is carried there.
@@ -91,7 +91,7 @@ Three things in that note are worth stating rather than glossing:
 
 ## The request a push becomes
 
-`charon_push_request` in `UNUserNotificationCenter.m` reads the payload the release hands
+`revenant_push_request` in `UNUserNotificationCenter.m` reads the payload the release hands
 the delegate: the alert fields are under `aps`, and whatever the server sent beside them
 is the notification's own data, so `content.userInfo` is the whole payload.
 

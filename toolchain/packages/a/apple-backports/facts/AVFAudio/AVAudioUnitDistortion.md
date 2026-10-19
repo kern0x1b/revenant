@@ -1,6 +1,6 @@
 # AVAudioUnitDistortion: preGain, wetDryMix and the factory presets
 
-Carried in `AVFAudio/AVAudioUnitSubclasses8.m`, with the preset table in `AVFAudio/CharonDistortionPresets.h`.
+Carried in `AVFAudio/AVAudioUnitSubclasses8.m`, with the preset table in `AVFAudio/RevenantDistortionPresets.h`.
 Checked by `tests/backports/host/avfaudio/distortion.sh` (`distortion.m`): the host's unit is read back parameter
 by parameter, and the port's table and apply are run on a second host unit and held to it.
 
@@ -21,7 +21,7 @@ no reason.
 
 The host's `loadFactoryPreset:` for presets 0-21 (`AVAudioUnitDistortionPreset`, in the SDK's order) leaves all
 sixteen parameters at one row of a table, and the table was read back from the host unit after each preset.
-`CharonDistortionPresets.h` is that table: row = preset, column = parameter id. A fresh unit holds row 0. A preset
+`RevenantDistortionPresets.h` is that table: row = preset, column = parameter id. A fresh unit holds row 0. A preset
 outside 0-21 changes nothing, on the host and in the port (checked).
 
 ## The host's properties do not follow a preset

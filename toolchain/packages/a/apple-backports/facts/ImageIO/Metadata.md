@@ -238,7 +238,7 @@ all three counts, so a host that stopped agreeing would be visible there and not
   second way: `xmp:Rating` is what `kCGImagePropertyIPTCStarRating` maps to and `Iptc4xmpExt:Rating` is what
   `kCGImagePropertyIPTCExtRating` maps to.
 - **The prefix is NOT part of the match.** A tag whose namespace and name are the row's and whose prefix is
-  one the caller registered (`charonprobe:ISOSpeed` in the `cipa.jp` namespace) is answered.
+  one the caller registered (`revenantprobe:ISOSpeed` in the `cipa.jp` namespace) is answered.
 - **Only the top level of the tree is searched.** A tree holding `exif:Sub{exif:DateTimeOriginal}` answers
   NULL for (`Exif`, `DateTimeOriginal), and one holding `exif:Sub{photoshop:DateCreated}` - the name that
   property really maps to - answers NULL too. Nothing below a structure or inside an array is found.
@@ -299,7 +299,7 @@ and which is right only for an array of strings: **a string becomes a tag - name
 and by its key in a structure - and every other element is held as it is**, and the wrapping is **one level
 deep**, so the string inside the nested array stays a string. The host's own packet for that array writes three
 `<rdf:li>` elements and leaves out both the boolean and the two containers, which is the same answer. The
-port's `charon_wrap` wrapped every element before, which made a number a tag holding the string `"2.500000"`
+port's `revenant_wrap` wrapped every element before, which made a number a tag holding the string `"2.500000"`
 where the host holds the number itself; that is fixed here too, and the harness's
 `tag number in array`, `tag number in structure` and `tag number in path array` records are what say so.
 

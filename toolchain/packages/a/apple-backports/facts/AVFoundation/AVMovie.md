@@ -1,7 +1,7 @@
 # AVMovie and AVMovieTrack, the read side, by forwarding
 
-`packages/a/apple-backports/AVFoundation/AVMovie.m`: `CharonMovie` (runtime name `AVMovie`, superclass `AVAsset`) and
-`CharonMovieTrack` (runtime name `AVMovieTrack`, superclass `AVAssetTrack`). Registry rows: `registry/AVFoundation/movie13.json`.
+`packages/a/apple-backports/AVFoundation/AVMovie.m`: `RevenantMovie` (runtime name `AVMovie`, superclass `AVAsset`) and
+`RevenantMovieTrack` (runtime name `AVMovieTrack`, superclass `AVAssetTrack`). Registry rows: `registry/AVFoundation/movie13.json`.
 Host differential: `tests/backports/host/avf-movie4` (writer.m makes the movies, probe.m is built against the host and the
 port, run.sh joins the tables and holds the planted control).
 
@@ -76,7 +76,7 @@ movie does not have, so no inherited AVAsset behaviour is relied on for a movie'
   on movie-c, where the host reads the patched value.
 - `mediaDataStorage`: `nil`. Measured nil for every track of the three movies. AVMediaDataStorage is absent on 6.1.3.
 
-The reader is `charonReadTrackHeader` in `AVMovie.m`: it reads the movie file's own boxes (`moov`, `trak`, `tkhd`, `mdia`,
+The reader is `revenantReadTrackHeader` in `AVMovie.m`: it reads the movie file's own boxes (`moov`, `trak`, `tkhd`, `mdia`,
 `mdhd`, `minf`, `stbl`, `stts`, `ctts`) with the layout in Apple's QuickTime File Format specification. A movie with no file
 (made by `-init`), a remote URL, or a box that does not fit its parent answers an invalid range, or 0 for the alternate
 group. The file is read once, when the track is made, and the track keeps the header: the host's track still answers its
@@ -108,7 +108,7 @@ ranges after its movie is released (the release section of the probe, measured e
 
 ## Measured on 6.1.3
 
-The probe (`tests/backports/host/avf-movie4/probe.m`, built with `CHARON_AVMOVIE_APP`) runs as an application on the emulated
+The probe (`tests/backports/host/avf-movie4/probe.m`, built with `REVENANT_AVMOVIE_APP`) runs as an application on the emulated
 iPhone 4S at 6.1.3, with the three movies of the differential in its bundle (`tests/backports/emulate/avmovie/run-app.lua`).
 The run printed 364 rows, the same count the port prints on the host. Against the host's table, 277 rows are compared:
 

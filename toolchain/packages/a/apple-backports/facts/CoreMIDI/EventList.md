@@ -38,5 +38,5 @@ Measured on macOS on 2026-10-10 (`eventlistadd.m` in the same folder, recorded i
 - A refused add (a merge or a new packet that does not fit) returns NULL and leaves the count and the last packet's words as
   they were. The sizes are in bytes: a merge needs 28 for one word added to a one-word packet (8 + 12 + 4 + 4), and 27 refuses.
 
-`CharonCoreMIDI.c`'s `CharonMIDIEventListAdd` implements these rules, and the two API functions of
+`RevenantCoreMIDI.c`'s `RevenantMIDIEventListAdd` implements these rules, and the two API functions of
 `MIDIEventList14.m` call it. The packets it writes are the ones `MIDISendEventList` and the protocol-aware ports read.

@@ -44,14 +44,14 @@ newAccelerationStructureWithSize:	16.0
 newAccelerationStructureWithDescriptor:	16.0
 MTLIOCommandQueue	16.0
 MTLIOScratchBuffer	16.0
-ZZZNoSuchNameCharonR16	NONE
+ZZZNoSuchNameRevenantR16	NONE
 ```
 
 The first run reads 50 per-release indexes in 29.60 s and every later one is a binary search over them,
 which is why this is a measurement and not a scan: the same question asked with `strings` over the
 caches is 148 s a name on an idle machine, measured in the tool's own header.
 
-**The control is `ZZZNoSuchNameCharonR16 -> NONE`**, and it is what makes the other answers mean
+**The control is `ZZZNoSuchNameRevenantR16 -> NONE`**, and it is what makes the other answers mean
 something: a tool that answered NONE for everything would be indistinguishable from a real absence.
 `MTLCounterDontSample` answers NONE too, and that one is correct - it is an enumeration case and has no
 symbol by nature.
@@ -88,7 +88,7 @@ $ xcrun otool -oV $W/heapobjs/MTLHeap10.o | grep -c 'name .*newAccelerationStruc
 ```
 
 **The selector string IS in the object and the object does NOT implement the method.** `MTLHeap` is a
-protocol and `CharonMetalHeap` adopts it, so clang puts the protocol's member names into the class's
+protocol and `RevenantMetalHeap` adopts it, so clang puts the protocol's member names into the class's
 `__objc_methname` section; four `grep -cxF` counts of 1 would have been read as "the port implements
 these". The measurement that answers the question is the class's own method list, and it says 23
 instance methods - `initWithDescriptor:error:`, `newBufferWithLength:options:`,
@@ -112,18 +112,18 @@ MTLIOScratchBufferAllocator            none
 MTLMeshRenderPipelineDescriptor        none
 MTLArgument                            packages/a/apple-backports/Metal/MTLTypeReflection8.m
 MTLHeapDescriptor                      packages/a/apple-backports/Metal/MTLHeap10.m
-$ grep -c '^@protocol' packages/a/apple-backports/Metal/CharonMetalProtocols.h
+$ grep -c '^@protocol' packages/a/apple-backports/Metal/RevenantMetalProtocols.h
 32
 $ grep -n '@protocol MTLIO\|@protocol MTLAccelerationStructurePass' \
-      packages/a/apple-backports/Metal/CharonMetalProtocols.h || echo "none of them is declared there"
+      packages/a/apple-backports/Metal/RevenantMetalProtocols.h || echo "none of them is declared there"
 none of them is declared there
 ```
 
 The last two lines of that run are the control: the same grep answers for `MTLArgument` and
 `MTLHeapDescriptor`, so the six `none` lines are the tree's answer and not a grep that finds nothing.
 `MTLHeap` itself answers *none* from that list and is not missing: the port's heap class is
-`CharonMetalHeap`, which adopts the protocol the row names, and that protocol is declared in
-`CharonMetalProtocols.h`.
+`RevenantMetalHeap`, which adopts the protocol the row names, and that protocol is declared in
+`RevenantMetalProtocols.h`.
 
 So the five `MTLIO*` protocols are in no header a caller compiles against, and a binary that links this
 port's Metal objects has no protocol of any of those names to answer `NSProtocolFromString`.
@@ -133,7 +133,7 @@ port's Metal objects has no protocol of any of those names to answer `NSProtocol
 **The whole-cache census of the two band ends has not run for this band.** The command is
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua MTL 6.1.3 4.3 12.0
+REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua MTL 6.1.3 4.3 12.0
 ```
 
 and it is the one measurement the rulebook would have here for its "control in the same run over the

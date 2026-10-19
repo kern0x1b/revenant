@@ -27,7 +27,7 @@ so the pick is a consequence of the table and not a preference. **No code in thi
 ## The pick, and why
 
 **The largest family is `AttributedStringFromStringResolver` at 7, and it is the one family I must
-not pick**: all seven rows are behind `CHARON_APPINTENTS_ATTRIBUTED_STRING`, and that flag is defined
+not pick**: all seven rows are behind `REVENANT_APPINTENTS_ATTRIBUTED_STRING`, and that flag is defined
 only when a probe finds `AttributedString` in the runtime — which no installed runtime has
 (`LocalizedStringResource` and `AttributedString` alike: zero hits in every
 `…/lib/swift/iphoneos` in the store). It is the Foundation Swift family's, and the queue line says so.

@@ -71,14 +71,14 @@ type or manufacturer.
 
 **Port choice, not Apple behaviour:** when `componentType` is 0 the port uses `kAudioUnitType_MusicDevice`,
 and when `componentManufacturer` is 0 it uses `kAudioUnitManufacturer_Apple`. The override calls the
-AVAudioUnit hook (see `CharonAVAudioUnit.h`), and never returns nil: `NSObject`'s `init` does not fail,
+AVAudioUnit hook (see `RevenantAVAudioUnit.h`), and never returns nil: `NSObject`'s `init` does not fail,
 so the nonnull declaration holds for every description.
 
 ## The list form
 
 `-[AVAudioUnitMIDIInstrument sendMIDIEventList:]` (iOS 16) is **implemented**, and it is not
 `MusicDeviceMIDIEventList`, which this release does not export. The list is walked in order by
-`CharonForEachMIDIMessage` (`AVFAudio/CharonMIDIEventList.h`), and each message goes to the release's own call:
+`RevenantForEachMIDIMessage` (`AVFAudio/RevenantMIDIEventList.h`), and each message goes to the release's own call:
 a MIDI 1.0 message to `MusicDeviceMIDIEvent`, a complete system-exclusive message to `MusicDeviceSysEx`.
 
 - **Type 1** (system common and realtime): the status and the data bytes its status takes. Not observed on the host's

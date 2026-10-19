@@ -78,7 +78,7 @@ a pass.
 
 **Not measured here, and why:** the `nil` an authorised process gets, and the 3310 a restricted one
 gets. Both need a bundle identifier the user allowed, which is an application, and the fleet keeps
-that on the iPad 2 (the device that holds the fleet's own `CharonPhotosProbe` fixtures); the iPad 2
+that on the iPad 2 (the device that holds the fleet's own `RevenantPhotosProbe` fixtures); the iPad 2
 was not attached on 2026-09-30. The rule that produces them is two lines over a status the port already
 answers and measures -- `+[PHPhotoLibrary authorizationStatus]` is measured in
 `tests/backports/device/photos8.m` -- and the header's own `nullable` on the property, so the mapping

@@ -8,7 +8,7 @@ which needs no driver to exist and hold the values it is given.
 ## The seam this plugs into, already honest
 
 `MTLCompileOptions` exists purely as the parameter to
-`-[id<MTLDevice> newLibraryWithSource:options:error:]`. This port's own `CharonMetalDevice.m`
+`-[id<MTLDevice> newLibraryWithSource:options:error:]`. This port's own `RevenantMetalDevice.m`
 already implements that method - it accepted an `MTLCompileOptions *` argument before this pass
 touched anything - and already refuses honestly:
 
@@ -16,7 +16,7 @@ touched anything - and already refuses honestly:
 - (id<MTLLibrary>)newLibraryWithSource:(NSString *)source options:(MTLCompileOptions *)options error:(NSError **)error
 {
     if (error)
-        *error = CharonMetalError(3, @"Metal Shading Language source is not compiled on this system");
+        *error = RevenantMetalError(3, @"Metal Shading Language source is not compiled on this system");
     return nil;
 }
 ```

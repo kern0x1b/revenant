@@ -19,7 +19,7 @@ CornerStyle` is the nested Swift name the SDK's overlay gives it. So:
 
 - where the port's headers declare the enclosing Objective-C class, the overlay carries a namespace
   type of its own and a `typealias` on the class, which is what makes the nested name resolve
-  (`extension UIButton { public typealias Configuration = CharonUIButton.Configuration }`);
+  (`extension UIButton { public typealias Configuration = RevenantUIButton.Configuration }`);
 - where the headers declare no such class at all - the type is native Swift in UIKitCore and has no
   Objective-C spelling - the namespace is declared outright.
 
@@ -105,7 +105,7 @@ That number was measured on an earlier run, before this series; the output has n
 path, so read it as that run's measurement, not a fresh one:
 
 ```
-$ export CHARON_PORT_VFS=$PWD/.agent-work/runs/uikit-c/port/6.1.3/vfs.yaml
+$ export REVENANT_PORT_VFS=$PWD/.agent-work/runs/uikit-c/port/6.1.3/vfs.yaml
 $ n=0; for f in /tmp/n86/*.swift; do c=$(packages/s/swift-runtime/facts/UIKit/tc.sh "$f" 2>&1 | grep -c "error:"); n=$((n+c)); done
 $ echo "files: $(ls /tmp/n86/*.swift | wc -l)   total error lines: $n"
 files: 86   total error lines: 0

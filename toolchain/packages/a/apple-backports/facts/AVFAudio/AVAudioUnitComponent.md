@@ -83,7 +83,7 @@ The SDK declares `componentURL` (`NS_DEPRECATED(10_10, 10_11, NA, NA)`, AVAudioU
 `availableArchitectures` (:88), `userTagNames` and `setUserTagNames:` (:116), `iconURL` (:134),
 `hasCustomView` (:158) and `supportsNumberInputChannels:outputChannels:` (:169) unavailable on iOS.
 The iOS 26.2 cache (23C55, iPhone17,1, arm64e) registers every one of them on AVAudioUnitComponent in
-the AVFAudio image. Measured with `CHARON_ROOT=<tree> xmake l tools/corpus/objc-inventory.lua <cache>`,
+the AVFAudio image. Measured with `REVENANT_ROOT=<tree> xmake l tools/corpus/objc-inventory.lua <cache>`,
 the class's instance selectors, which list all 29 of its selectors, controls included (`allTagNames`,
 `icon`, `name`). So the rows stay `implemented`: a process on that release gets an answer from the
 binary, not `respondsToSelector:` NO. The introduced release is the one recorded in the registry; it is

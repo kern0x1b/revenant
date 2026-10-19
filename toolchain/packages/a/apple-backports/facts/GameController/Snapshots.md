@@ -61,7 +61,7 @@ objects, split by what the ladder first exports. The rung below is measured, not
 - `GCSnapshots16.m` — the four current functions and both version constants, first exported at 16.0,
   the rule `GCConstants16.m` already follows;
 
-The shared encoding and decoding are `static inline` in `CharonGCSnapshot.h`, so each object holds
+The shared encoding and decoding are `static inline` in `RevenantGCSnapshot.h`, so each object holds
 its own copy and no object names a symbol another one defines — which is the failure
 `A C function shared between backport files` describes.
 
@@ -199,15 +199,15 @@ read-back contributes 55 lines and the objects 10.
 
 Two defects in what was already here came out of those groups, both in the direction pad:
 
-1. `charon_applyV100:` sent `charon_setValue:` to the pad. That selector is declared on
+1. `revenant_applyV100:` sent `revenant_setValue:` to the pad. That selector is declared on
    `GCControllerAxisInput`, and a pad does not answer it (`GCElements7.m` gives a pad its `xAxis` and
    `yAxis` as two elements of their own), so building a `GCGamepadSnapshot` from data raised
    `NSInvalidArgumentException` -- and it wrote both `dpadX` and `dpadY` to the same object besides.
    Each now goes to the axis it names.
-2. `-saveSnapshot` read the pad's value with `charon_gc_read_float(pad, @selector(xAxis))`, which
+2. `-saveSnapshot` read the pad's value with `revenant_gc_read_float(pad, @selector(xAxis))`, which
    asks the pad for a *float* through a selector that answers an *element*, so it read nothing and
    the byte was zero. Zero is what a released stick reads, so the plain game's direction pad held no
-   value and every existing answer agreed with it. `charon_gc_pad_axis()` in `CharonGCSnapshot.h` is
+   value and every existing answer agreed with it. `revenant_gc_pad_axis()` in `RevenantGCSnapshot.h` is
    the read that answers the question, and the micro case is where the harness sees it: a `dpadX` of
    `-0.5` in the port's own bytes against the host encoder's is the whole difference.
 

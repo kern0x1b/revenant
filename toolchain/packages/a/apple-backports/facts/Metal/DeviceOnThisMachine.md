@@ -31,7 +31,7 @@ So on this machine the call answers, in well under a second, and the device work
 written and read back, and the texels come back unchanged. **The hang is not a property of this
 machine and the pages that said so were wrong about it.**
 
-The control is there because it is the one the old claim never had: `ZZZNoSuchNameCharonR16` is asked
+The control is there because it is the one the old claim never had: `ZZZNoSuchNameRevenantR16` is asked
 the way a class is asked and answers nil, so a machine on which the check answered "there is a device"
 for anything would have passed.
 
@@ -50,7 +50,7 @@ real wall, which is what makes the distinction worth a page.
 
 ## What this page does NOT retract
 
-* **The port's own device is still not a host object.** `CharonMetalDevice` is an EAGL context over
+* **The port's own device is still not a host object.** `RevenantMetalDevice` is an EAGL context over
   OpenGL ES 2.0 and the iPhone 4S and the iPad 2 are the machines it runs on; nothing here changes
   that, and no host case can stand in for it.
 * **The port's own Metal objects still cannot be linked into a host case.** The seam every case in

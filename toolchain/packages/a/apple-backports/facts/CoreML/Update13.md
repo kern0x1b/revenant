@@ -34,7 +34,7 @@ test runs on. -resumeWithParameters: refuses a non-empty dictionary by name, bec
 
 ## THE LIFECYCLE
 
-`charon_ml_taskForModelAtURL:` (CoreMLUpdate13.m) reads the model file, makes the trainer, takes the samples from
+`revenant_ml_taskForModelAtURL:` (CoreMLUpdate13.m) reads the model file, makes the trainer, takes the samples from
 the batch provider, and returns a task in state 1 (Suspended). `-resume` (the override in MLUpdateTask) moves the
 task to Running and starts the loop on the task's serial queue. The loop:
 
@@ -47,7 +47,7 @@ task to Running and starts the loop on the task's serial queue. The loop:
 5. sets state 4 (Completed) and calls the completion handler once, with event 0 and empty metrics.
 
 A trainer error sets state 5 (Failed) with the trainer's message and stops the loop. A progress handler is called
-only for the events its mask asks for. Every context's model is a `CharonMLWritableWrappedModel`, which adopts
+only for the events its mask asks for. Every context's model is a `RevenantMLWritableWrappedModel`, which adopts
 `MLWritable` (the snapshot is written through it).
 
 **The host's behaviour, measured with the same model** (`tests/backports/host/coreml-update/host-train.m`):
@@ -126,7 +126,7 @@ claim this page makes about it.
 - **The host's snapshot format.** The host writes a compiled package; the port writes a `.mlmodel`. They are
   compared by the reader's dump, not by bytes.
 - **Feature names.** The port hard-codes `x` and `t`. A model with other names is not handled.
-- **Field width.** `charon_ml_int` truncates a model field above 2^31 before its range check; such a model is
+- **Field width.** `revenant_ml_int` truncates a model field above 2^31 before its range check; such a model is
   refused later, by the count mismatch.
 - **Device.** No device run was made; the training runs on the CPU in the port.
 
@@ -135,4 +135,4 @@ claim this page makes about it.
 - The other layer kinds the trainer does not run (the trainer runs convolution, flatten and inner product only),
   and the state API for them.
 - Identifying the loss. The probes above are the record; the loss is not yet a function the port has identified.
-- MLWritable's declaration: a line for it in `CharonCoreMLProtocols.h`, so the row can move to implemented.
+- MLWritable's declaration: a line for it in `RevenantCoreMLProtocols.h`, so the row can move to implemented.

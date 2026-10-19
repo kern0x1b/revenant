@@ -42,7 +42,7 @@ holds them.
   valueOptions:NSPointerFunctionsStrongMemory`: the release's own table, keys retained and not copied, values retained,
   as 6.0's.
 - `+weakToStrongObjectsMapTable`, `+strongToWeakObjectsMapTable` and `+weakToWeakObjectsMapTable` are
-  `CharonWeakMapTable`, an NSMapTable subclass made with the sides that are weak. Each entry holds a strong side
+  `RevenantWeakMapTable`, an NSMapTable subclass made with the sides that are weak. Each entry holds a strong side
   strongly and a weak side unretained; a weak side's object holds a small watch as an associated object, and the watch,
   released with the object, marks that side of the entry gone and queues the entry on its table. Not a `__weak`
   reference: on 4.3 that is the SDK's arclite (`packages/i/iphoneos-sdk/arclite/weak.m`), which learns of a death
@@ -123,7 +123,7 @@ holds them.
     `coordination/crutches.md`. Keep the last release of a weak key or of a weak value from happening on another thread while
     the table is enumerated or copied, or while it is asked for, or given, a key equal to one that may be going. A table is
     not thread-safe otherwise, as NSMapTable is not.
-- `charon_watch` answers the watch's address, not the watch. Measured on 4.3, 5.1.1 and 6.0 under `xmake emulate`: with
+- `revenant_watch` answers the watch's address, not the watch. Measured on 4.3, 5.1.1 and 6.0 under `xmake emulate`: with
   the watch returned as an object, every watch taken off its object stayed alive (the count of live watches only grew,
   1000 after 1000 set-and-remove of one key) while the same source on the host freed it at once. The reading: ARC's
   claim of an object returned to a caller that only stores its address is an iOS 8 runtime function, so below it the

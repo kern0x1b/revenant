@@ -21,11 +21,11 @@ to a new value, not at all when they are set to the value they already have, and
 ## The same moment seen from the controller (iOS 11)
 
 `-[UIViewController viewLayoutMarginsDidChange]` is delivered from the same place the view's own message
-is, in `UIView+LayoutMargins.m`'s `charon_margins_changed`, right after the view is told and before its
+is, in `UIView+LayoutMargins.m`'s `revenant_margins_changed`, right after the view is told and before its
 subviews are walked. The order is the release's own: `facts/UIKit/UIViewSafeArea.md` records that iOS 11
 tells the view first and the controller second, from `-_safeAreaInsetsDidChangeFromOldInsets:` at
 `0x18a27d178`. The controller is found by walking `nextResponder`, which is the walk
-`UIView+SafeArea.m`'s `charon_view_controller` already makes for the safe area, so there is one way to ask
+`UIView+SafeArea.m`'s `revenant_view_controller` already makes for the safe area, so there is one way to ask
 the question rather than two.
 
 The member is declared by its own file, `UIKit/UIViewController+LayoutMarginsDidChange11.m`, and not by

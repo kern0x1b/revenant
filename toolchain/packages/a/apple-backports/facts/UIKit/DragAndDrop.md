@@ -38,7 +38,7 @@ relocation reading — an object file has no bind opcodes, so a pointer to a sym
 defines is an external relocation of the pointer's size:
 
     UIDropSession.o            NSObject NSProgressReporting UIDragDropSession UIDragSession UIDropSession
-    CharonDropCoordinatorObjects.o  NSObject UICollectionViewDropCoordinator
+    RevenantDropCoordinatorObjects.o  NSObject UICollectionViewDropCoordinator
                                 UICollectionViewDropPlaceholderContext UIDragAnimating
                                 UITableViewDropCoordinator UITableViewDropPlaceholderContext
     UITextView+TextDragDrop11.o NSObject UIDragInteractionDelegate UIDropInteractionDelegate
@@ -122,7 +122,7 @@ makes them worth having.
 
 ## What this family does not yet do
 
-The delegate **questions** are carried and the view asks the ones it can (`charon_dropItemsAtPoint:
+The delegate **questions** are carried and the view asks the ones it can (`revenant_dropItemsAtPoint:
 session:` finds the items under a point for a drop delegate). The rest — the drag delegate's
 `itemsForBeginningDragSession:` being routed from a view's own long press, and the drop coordinator
 objects that answer `dropItem:toItemAtIndexPath:` and its three siblings — are not built. The

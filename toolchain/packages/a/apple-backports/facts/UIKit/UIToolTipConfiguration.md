@@ -21,7 +21,7 @@ source beside the host's class in one process and prints the same checks for bot
 
 ## What the port does
 
-- `UIKit/UIToolTipConfiguration.m`: both factories build the configuration through `charon_initWithToolTip:inRect:`, which copies the string and
+- `UIKit/UIToolTipConfiguration.m`: both factories build the configuration through `revenant_initWithToolTip:inRect:`, which copies the string and
   keeps the rectangle. The whole-view factory passes `CGRectNull`, as the header names it. The runtime `-init` answers the zero state through the
   ivars' zero values.
 - `toolTip` and `sourceRect` are the header's readonly properties, and the port's getters answer the stored values.

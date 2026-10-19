@@ -1,7 +1,7 @@
 # SKEffectNode (iOS 7)
 
 The iOS 7 surface of SpriteKit's `SKEffectNode`: a node that draws its children through a filter, and the superclass of
-`SKScene`. The port's object is `SpriteKit/SpriteKitEffect7.m`, declared by `SpriteKit/CharonSpriteKit.h`. The rows are in
+`SKScene`. The port's object is `SpriteKit/SpriteKitEffect7.m`, declared by `SpriteKit/RevenantSpriteKit.h`. The rows are in
 `registry/SpriteKit/ios7.json` (with the shader owed) and `ios10.json` (the attributes, owed).
 
 ## Oracle and what was measured

@@ -46,7 +46,7 @@ AVFAudio - see `AVFAudioStrings.md` for the reader and its control.
 
 The SDK declares `-setInputMuteStateChangeHandler:error:` macOS only (AVAudioApplication.h:104,
 `API_UNAVAILABLE(ios, ...)`). The iOS 26.2 cache (23C55, iPhone17,1, arm64e) registers the selector on
-AVAudioApplication: `CHARON_ROOT=<tree> xmake l tools/corpus/objc-inventory.lua <cache>` lists it among
+AVAudioApplication: `REVENANT_ROOT=<tree> xmake l tools/corpus/objc-inventory.lua <cache>` lists it among
 the class's 31 instance selectors, with `setInputMuted:error:` and `isInputMuted` as controls. The row
 stays `implemented`. Its introduced release is the one the registry records; the iOS 18.0 and 6.1.3
 caches were not read here (review F3).

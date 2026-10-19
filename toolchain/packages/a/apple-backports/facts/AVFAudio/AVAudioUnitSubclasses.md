@@ -19,7 +19,7 @@ parameters**. Every subtype and every parameter id is out of `AudioUnitParameter
 A value set is an `AudioUnitSetParameter` on the real unit, so it changes what the release's unit
 renders. A value read is an `AudioUnitGetParameter`. A value set before the node is attached is kept
 and applied when the real `AudioUnit` arrives, which is the base class's own
-`-charon_applyPendingParameters` — the same arrangement `AVAudioUnitEQ` already uses.
+`-revenant_applyPendingParameters` — the same arrangement `AVAudioUnitEQ` already uses.
 
 **`AVAudioUnitReverb` uses `kReverb2Param_*`, not `kReverbParam_*`.** iOS's reverb unit is a different
 unit from the desktop one and carries a different parameter set: `AudioUnitParameters.h` has the

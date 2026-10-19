@@ -25,7 +25,7 @@ a program built for 10.12 or later calls. The buffer functions decode the packed
 `os_log_create(subsystem, category)` answers a log object, the same one every time for the same pair: the release keeps
 them in a tree keyed by both strings, and answers one that is retained, with the count of a global object, so a log is
 never let go. `_os_log_default` is a statically made object of the same class, the value of `OS_LOG_DEFAULT`. The port's
-class is `CharonOSLog`; its default object takes its class when the library loads. The release's class, `OS_os_log`, is private and is not carried. `charon_os_log_named` keeps every log in one static table and
+class is `RevenantOSLog`; its default object takes its class when the library loads. The release's class, `OS_os_log`, is private and is not carried. `revenant_os_log_named` keeps every log in one static table and
 never removes one, so each log lives as long as the process. The port does not replace the class's `-retain`,
 `-release` or `-retainCount`: replacing them recursed through `objc_storeStrong` (measured with lldb), and the table
 already keeps the logs alive.

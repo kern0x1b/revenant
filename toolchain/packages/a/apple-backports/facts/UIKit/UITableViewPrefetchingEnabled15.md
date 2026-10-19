@@ -61,7 +61,7 @@ this file adds nothing and defers to it.
 
 ## The one cross-object call, and why it is a message send
 
-The hook calls `-charon_prefetchRows`, which `UITableView+Prefetching10.m` defines. The two files
+The hook calls `-revenant_prefetchRows`, which `UITableView+Prefetching10.m` defines. The two files
 are separate objects and separate `band()` decisions, so a band could keep this one and leave the
 10.0 one out. The call is therefore **sent, guarded by `respondsToSelector:`**, not made as a C
 call: a message send is a no-op when nothing implements it, where a C symbol would be
@@ -79,8 +79,8 @@ This file is the one the review caught hardest: its `#import` lines and both cat
 declarations had ended up **below** the `+load` installer that sends their messages, so it
 compiled against a `UITableView` that did not exist yet — *"cannot find interface declaration for
 'NSObject'"*, then *"use of undeclared identifier 'UITableView'"*, `'Method'`, `'IMP'`,
-`'class_replaceMethod'`, and finally *"property 'charon_prefetchingAllowed' not found"* and *"no
-visible `@interface` for 'UITableView' declares the selector 'charon_prefetchRows'"*. All of it
+`'class_replaceMethod'`, and finally *"property 'revenant_prefetchingAllowed' not found"* and *"no
+visible `@interface` for 'UITableView' declares the selector 'revenant_prefetchRows'"*. All of it
 was ordering, and the order is now: storage key, the two declarations, the installer, the category.
 Moving them also removed a duplicate definition of the storage key the reshuffle had introduced.
 
@@ -89,7 +89,7 @@ Checked before the compiler, and worth keeping:
 - every selector the file calls exists in the port or the SDK — `-respondsToSelector:`,
   `-instancesRespondToSelector:`, `-class_getInstanceMethod`, `-method_getImplementation`,
   `-class_replaceMethod`, `-imp_implementationWithBlock` and the four runtime functions are
-  public API, and `-charon_prefetchRows` is declared and defined in `UITableView+Prefetching10.m`
+  public API, and `-revenant_prefetchRows` is declared and defined in `UITableView+Prefetching10.m`
   (`:18` and `:106`);
 - the two-hook composition above was **run** on the host, in a file of the same shape with two
   installers and one instrumented original, and the output is what the comment claims;

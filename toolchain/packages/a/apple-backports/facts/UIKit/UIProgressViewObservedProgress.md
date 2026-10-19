@@ -23,7 +23,7 @@ image refers to.
 
 ## What the port does
 
-The port observes `fractionCompleted` of the progress with a helper of its own, `CharonProgressObserver`, which
+The port observes `fractionCompleted` of the progress with a helper of its own, `RevenantProgressObserver`, which
 holds the view weakly and the progress strongly and removes its observation when it is deallocated - so a progress
 view that goes away while observing takes the observation with it and does not leave key-value observing pointing
 at freed memory. A change seen off the main thread is applied on the main queue, since `NSProgress` publishes from

@@ -27,7 +27,7 @@ Green, all seven, and the run prints `checks=7 failures=0`:
 - it becomes `ready` on the port it was asked for, and reports that port;
 - the host's own `NWConnection` reaches `ready` **through** the port's listener, which is the accept
   loop working against Apple's own implementation;
-- the handover to a new-connection handler, and the port was right about it: `CHARON_TRACE_LISTENER` shows
+- the handover to a new-connection handler, and the port was right about it: `REVENANT_TRACE_LISTENER` shows
   it calling the handler at `ready`, with the listener the test holds, the queue the test set, and the
   connection the test's own block then receives. What was wrong was the check - the test's handler
   filled a list and the check read a variable nothing ever wrote, so the check could not pass however the
@@ -49,7 +49,7 @@ wrong:
   so the inbound check was asserting on the host's own read, which the host's own Network satisfies on
   its own, and the port's delivery was never being looked at.
 
-The instrument that found both is `CHARON_TRACE_FD` and `CHARON_TRACE_LISTENER`, off unless the
+The instrument that found both is `REVENANT_TRACE_FD` and `REVENANT_TRACE_LISTENER`, off unless the
 environment names them: they print the descriptor at the source, what the read returns with the receive and
 the state at that moment, and the drain's entry and its decision. They are diagnostics and not the fix,
 and they are worth keeping for the next surface.

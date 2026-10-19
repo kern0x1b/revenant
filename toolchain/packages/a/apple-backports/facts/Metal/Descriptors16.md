@@ -22,7 +22,7 @@ by a reviewer, and it is the one that ends the row:
 sh tests/backports/host/metal-census/descriptors16.sh
 ```
 
-It builds the port for this host with the four classes renamed (`charonHost_…`), proves with `nm` that
+It builds the port for this host with the four classes renamed (`revenantHost_…`), proves with `nm` that
 the port's own classes - not the host framework's - are the ones in the binary, compares every
 property with Apple's own object of the same class, and then runs six mutations, one per class and
 one per member nothing else in the file shares. Its run ends:
