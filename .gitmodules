@@ -1,4 +1,4 @@
 [submodule "revenant-webkit/webkit-254"]
-	path = revenant-webkit/webkit-254
+	path = frameworks/WebKit/webkit-254
 	url = https://github.com/kern0x1b/WebKit.git
 	branch = main
