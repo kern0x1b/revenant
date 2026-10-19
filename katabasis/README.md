@@ -21,33 +21,39 @@ This is a research prototype, not a product. It is complete enough to take a rea
 | `xlate/` | Lifts arm64 → LLVM IR (Rellume), recovers jump tables, rewrites Objective-C class/protocol/ivar metadata and data binds to the 32-bit layout, emits `lifted.bc`. |
 | `xlgen/` (in `xlate/`) | Generates the guest↔host ABI bridges (calling-convention, `va_list`, blocks, Objective-C message dispatch, data-symbol shims) from the SDK headers. |
 | `runtime/` | The armv7 support runtime: message routing, block bridging, weak references, ivar-layout reconciliation, and Objective-C compatibility shims. |
-| `scripts/translate.sh` | The end-to-end pipeline: `arm64 executable` → armv7 iOS 6 executable. |
-| `corpus/` | Small self-contained test apps (UI, blocks, drawing). |
-| `perf/` | On-device and in-emulator translated-vs-native benchmark. |
+| `scripts/translate.lua` | The end-to-end pipeline: `arm64 executable` → armv7 iOS 6 executable. |
+| `scripts/ipa.lua` | The same for a whole `.ipa`, its embedded frameworks lifted as guest images. |
+| `corpus/` | Small self-contained test programs and apps, the translator's regression suite (`docs/corpus.md`). |
+| `perf/` | On-device translated-vs-native benchmark. |
 
 The guest keeps its arm64 memory image (rebased below 4 GiB); code runs natively as armv7; only crossings into the system frameworks go through bridges.
 
 ## Building
 
-Requires an LLVM 23 toolchain, a recent iOS SDK (for header-driven bridge generation), `ld64`, and `ldid`. Build the `xlate`/`xlgen` tools with CMake:
+Katabasis is part of the hades xmake project; run everything from the hades root. It needs an LLVM 23 with its headers and libraries
+(`/opt/homebrew/opt/llvm` by default, `--katabasis_llvm=<prefix>` for another). Rellume, farmdec and BlocksRuntime are packages of
+`third_party/packages/`; the iOS SDK (for header-driven bridge generation), `ld64` and `ldid` are charon's packages. Build `xlate` and
+`xlgen`:
 
 ```sh
-cmake -S xlate -B xlate/build -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/llvm \
-  -DCMAKE_C_COMPILER=/opt/homebrew/opt/llvm/bin/clang -DCMAKE_CXX_COMPILER=/opt/homebrew/opt/llvm/bin/clang++
-cmake --build xlate/build -j
+./xmakew f -y
+./xmakew build xlate xlgen
 ```
 
 Then translate an arm64 executable:
 
 ```sh
-scripts/translate.sh path/to/app-arm64 includes.h out/
+./xmakew l katabasis/scripts/translate.lua path/to/app-arm64 includes.h out/
 ```
 
 where `includes.h` imports the frameworks the app uses. The output `out/<name>` is an armv7 iOS 6 executable; drop it into the app bundle in place of the original.
+A whole `.ipa` is translated with `./xmakew l katabasis/scripts/ipa.lua App.ipa includes.h out/App.ipa`.
+
+The corpus runs with `./xmakew test 'katabasis_corpus/*'`; `docs/corpus.md` says what each check proves and how to run the parts that need a device.
 
 ### Guest libraries, and what a bind names
 
-Further arguments are guest images lifted with the executable (`scripts/translate.sh app-arm64 includes.h out/ libA.dylib libB.dylib`;
+Further arguments are guest images lifted with the executable (`./xmakew l katabasis/scripts/translate.lua app-arm64 includes.h out/ libA.dylib libB.dylib`;
 `XL_FRAMEWORKS_DIR` finds a bundle's embedded frameworks). A bind takes an image by the install name it spells, exactly: an app that binds the
 host's `NSString` next to an embedded image that defines its own keeps the host's. Two images with one install name are an error.
 
@@ -61,7 +67,7 @@ libc++abi from `charon@swift-runtime` built with `library_evolution=true`) is `@
 
 ```sh
 XL_REPLACES=/usr/lib/libc++.1.dylib=<libs>/libc++.1.dylib \
-  scripts/translate.sh swift/demo-arm64 targets/swiftdemo-includes.h out/ <libs>/libswiftCore.dylib <libs>/libc++.1.dylib <libs>/libc++abi.1.dylib
+  ./xmakew l katabasis/scripts/translate.lua katabasis/swift/demo-arm64 katabasis/targets/swiftdemo-includes.h out/ <libs>/libswiftCore.dylib <libs>/libc++.1.dylib <libs>/libc++abi.1.dylib
 ```
 
 or the operators, guards and exception classes it takes from libc++ (307 names re-exported from libc++abi among them) come from the host's C++ runtime
@@ -99,7 +105,7 @@ object, so what Swift reads from it stays true. `runtime/swift_classes.m`.
 ## Scope and limits
 
 - Objective-C and C are supported. Swift is being brought up on the demo (`swift/`, `libswiftCore` lifted as a guest image, the run described above);
-  it does not run to the end yet, and what a Swift program meets is measured one failure at a time (`.agent-work` status of the band).
+  it does not run to the end yet, and what a Swift program meets is measured one failure at a time.
 - iOS 7+ system APIs the app calls must exist on the target; ones that don't are reported, not stubbed (they belong to a separate backports effort).
 - Un-liftable functions (hand-written assembly in crash reporters, etc.) become traps that fault only if actually called.
 
