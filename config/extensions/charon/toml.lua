@@ -534,4 +534,3 @@ function parse(text, name)
     end
     return root
 end
-

@@ -334,4 +334,3 @@ strip = ""
 
     return found
 end
-
