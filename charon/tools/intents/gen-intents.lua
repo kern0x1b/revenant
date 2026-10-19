@@ -1512,3 +1512,7 @@ function report_json_top(answered)
     end
     return json_object(entries, 0) .. "\n"
 end
+
+function answer(lines, name)
+    return answer_of(lines, name)
+end

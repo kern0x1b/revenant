@@ -88,15 +88,15 @@ function heavy()
     return script
 end
 
-local function sdk_in(installdir)
+local function sdk_in(installdir, version)
     return path.join(installdir, "Developer.app", "Contents", "Developer", "Platforms", "iPhoneOS.platform", "Developer", "SDKs",
-                     "iPhoneOS" .. SDK_VERSION .. ".sdk")
+                     "iPhoneOS" .. version .. ".sdk")
 end
 
-local function package_sdk(install)
+local function package_sdk(version, install)
     local scratch = fresh("sdk-resolve")
     io.writefile(path.join(scratch, "xmake.lua"), string.format("add_repositories(%q)\nadd_requires(%q)\n",
-                                                                 "charon " .. root(), "iphoneos-sdk " .. SDK_VERSION))
+                                                                 "charon " .. root(), "iphoneos-sdk " .. version))
     local failure
     local result = try {
         function ()
@@ -107,7 +107,7 @@ local function package_sdk(install)
             local start = output:sub(1, 2) == "[\n" and 1 or output:find("\n[\n", 1, true)
             local entries = start and json.decode(output:sub(start)) or {}
             for _, entry in ipairs(entries) do
-                if entry.require == "iphoneos-sdk " .. SDK_VERSION and entry.installdir then
+                if entry.require == "iphoneos-sdk " .. version and entry.installdir then
                     return entry.installdir
                 end
             end
@@ -120,12 +120,29 @@ local function package_sdk(install)
     }
     os.tryrm(scratch)
     if failure then
-        raise("workspace: xmake could not resolve charon's iphoneos-sdk %s package: %s", SDK_VERSION, failure)
+        raise("workspace: xmake could not resolve charon's iphoneos-sdk %s package: %s", version, failure)
     end
     if not result then
-        raise("workspace: xmake named no install folder for charon's iphoneos-sdk %s package", SDK_VERSION)
+        raise("workspace: xmake named no install folder for charon's iphoneos-sdk %s package", version)
     end
-    return sdk_in(result), result
+    return sdk_in(result, version), result
+end
+
+function sdk_package(version, opt)
+    opt = opt or {}
+    local key = "package " .. version
+    if resolved[key] and not opt.install then
+        return resolved[key]
+    end
+    local folder, installdir = package_sdk(version, opt.install)
+    if not os.isfile(path.join(folder, "SDKSettings.json")) then
+        raise("workspace: the iPhoneOS %s SDK is not there: charon's iphoneos-sdk %s package is not installed at %s. "
+              .. "Install it with `xmake l %s %s --install`%s",
+              version, version, installdir, path.join(root(), "modules", "workspace.lua"), opt.command or ("sdk-package " .. version),
+              opt.alternative or "")
+    end
+    resolved[key] = folder
+    return folder
 end
 
 function sdk(opt)
@@ -137,23 +154,16 @@ function sdk(opt)
         end
         return path.absolute(named)
     end
-    if resolved.sdk and not opt.install then
-        return resolved.sdk
-    end
-    local folder, installdir = package_sdk(opt.install)
-    if not os.isfile(path.join(folder, "SDKSettings.json")) then
-        raise("workspace: the iPhoneOS %s SDK is not there: charon's iphoneos-sdk %s package is not installed at %s. "
-              .. "Install it with `xmake l %s sdk --install`, or set %s to an iPhoneOS%s.sdk folder",
-              SDK_VERSION, SDK_VERSION, installdir, path.join(root(), "modules", "workspace.lua"), SDK_VARIABLE, SDK_VERSION)
-    end
-    resolved.sdk = folder
-    return folder
+    return sdk_package(SDK_VERSION, {install = opt.install, command = "sdk",
+                                     alternative = string.format(", or set %s to an iPhoneOS%s.sdk folder", SDK_VARIABLE, SDK_VERSION)})
 end
 
 function main(command, ...)
     local arguments = {...}
     if command == "sdk" then
         print(sdk({install = arguments[1] == "--install"}))
+    elseif command == "sdk-package" and arguments[1] then
+        print(sdk_package(arguments[1], {install = arguments[2] == "--install"}))
     elseif command == "corpus" then
         print(corpus(table.unpack(arguments)))
     elseif command == "coordination" then
@@ -167,6 +177,6 @@ function main(command, ...)
     elseif command == "fresh" and arguments[1] then
         print(fresh(arguments[1]))
     else
-        raise("usage: xmake l modules/workspace.lua sdk [--install] | corpus [path ...] | coordination | heavy | task | run [path ...] | fresh <name>")
+        raise("usage: xmake l modules/workspace.lua sdk [--install] | sdk-package <version> [--install] | corpus [path ...] | coordination | heavy | task | run [path ...] | fresh <name>")
     end
 end

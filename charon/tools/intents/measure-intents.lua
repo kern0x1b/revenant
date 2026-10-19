@@ -1,5 +1,5 @@
 function main(list, sdkdir, output, modules)
-    local dyld = import("apple.dyld", {rootdir = modules, anonymous = true})
+    local dyld = import("apple.dyld", {rootdir = modules or path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
     local symbols = {}
     for line in io.readfile(list):gmatch("[^\n]+") do
         local name = line:match("^%s*(.-)%s*$")
@@ -12,7 +12,7 @@ function main(list, sdkdir, output, modules)
     local first = dyld.first_releases(ladder, sdkdir, symbols)
     local lines, measured, none = {}, {}, {}
     for _, symbol in ipairs(symbols) do
-        local name, release = symbol:sub(14), first[symbol]
+        local name, release = symbol:sub(#"_OBJC_CLASS_$_" + 1), first[symbol]
         if release then
             measured[release] = (measured[release] or 0) + 1
             table.insert(lines, string.format("%s\t%s", name, release))
