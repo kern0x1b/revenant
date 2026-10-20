@@ -7,6 +7,10 @@ local function source()
     end
 end
 
+local function only()
+    return os.getenv("REVENANT_PREBUILT_ONLY") == "1"
+end
+
 function key(package)
     local parts = {package:name(), package:version_str() or "latest", package:plat(), package:arch(), package:buildhash()}
     local deps = {}
@@ -32,6 +36,9 @@ end
 function fetch(package)
     local repository = source()
     if not repository then
+        if only() then
+            raise("%s: REVENANT_PREBUILT_ONLY=1 needs REVENANT_PREBUILT, the repository whose release holds the prebuilt %s", package:name(), key(package))
+        end
         return false
     end
     local archive = archive_of(package)
@@ -48,9 +55,12 @@ function fetch(package)
         return true
     end }
     if not fetched then
-        print("%s: no prebuilt %s at %s, building from source", package:name(), key(package), repository)
         os.tryrm(partial)
         os.tryrm(listed)
+        if only() then
+            raise("%s: no release holds the prebuilt %s at %s, and REVENANT_PREBUILT_ONLY=1 forbids building it from source", package:name(), key(package), repository)
+        end
+        print("%s: no prebuilt %s at %s, building from source", package:name(), key(package), repository)
         return false
     end
     local expected = io.readfile(listed):match("^(%x+)")
