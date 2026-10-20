@@ -25,12 +25,14 @@ jobs:
     timeout-minutes: 360
     env:
       REVENANT_PREBUILT: ${{ github.repository }}
-      REVENANT_PREBUILT_OUT: ${{ runner.temp }}/prebuilt
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
+
+      - name: Name the archive folder
+        run: echo "REVENANT_PREBUILT_OUT=$RUNNER_TEMP/prebuilt" >> "$GITHUB_ENV"
 
       - name: Build xmake from its pin
         run: ./xmakew --version
