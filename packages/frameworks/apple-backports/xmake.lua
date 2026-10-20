@@ -20,12 +20,12 @@ package("apple-backports")
     add_deps("revenant@apple-compat", {alias = "apple-compat"})
 
     local add_configs = add_configs
-    local modules = path.join(os.scriptdir(), "..", "..", "..", "modules")
+    local modules = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "modules")
     local inputs = table.join(os.files(path.join(os.scriptdir(), "*.c")), os.files(path.join(os.scriptdir(), "*.h")),
                               os.files(path.join(os.scriptdir(), "*", "*.m")), os.files(path.join(os.scriptdir(), "*", "*.mm")), os.files(path.join(os.scriptdir(), "*", "*.h")),
                               os.files(path.join(os.scriptdir(), "registry", "*.json")), os.files(path.join(os.scriptdir(), "registry", "*", "*.json")))
     table.insert(inputs, path.join(modules, "apple", "backports.lua"))
-    local repo = path.join(os.scriptdir(), "..", "..", "..")
+    local repo = path.join(os.scriptdir(), "..", "..", "..", "toolchain")
     inputs = table.join(inputs, os.files(path.join(repo, "tools", "gen", "**")), os.files(path.join(repo, "tools", "found", "**.lua")),
                         os.files(path.join(os.scriptdir(), "spec", "**")))
     table.insert(inputs, path.join(repo, "tools", "gen.lua"))
@@ -182,7 +182,7 @@ package("apple-backports")
     end)
 
     on_install("iphoneos", function (package)
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "modules")
+        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
         local backports = import("apple.backports", {rootdir = modules, anonymous = true})
         local firmware = import("apple.firmware", {rootdir = modules, anonymous = true})
         local dyld = import("apple.dyld", {rootdir = modules, anonymous = true})
@@ -293,7 +293,7 @@ package("apple-backports")
                                                 version = assert(released, "the addon recipe names no Revenant release") .. "+" .. package:config("sources"):sub(1, 8),
                                                 outputdir = package:installdir("share")}))
         os.vcp(path.join(package:scriptdir(), "registry"), package:installdir("share"))
-        os.vcp(path.join(package:scriptdir(), "..", "..", "..", "LICENSE"), package:installdir("licenses"))
+        os.vcp(path.join(package:scriptdir(), "..", "..", "..", "toolchain", "LICENSE"), package:installdir("licenses"))
     end)
 
     on_test(function (package)
