@@ -17,10 +17,10 @@
 # beside it. The identifier both sides are asked about for the arithmetic is the host's own, and the
 # port's table is what is held to it.
 set -eu
-echo "FAIL host/healthkit/run.sh: its Python steps are gone and not yet ported to Lua: mutate.py" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
+. "$here/../../common/generated.sh"
+ensure_generated "$here" HealthKit
 healthkit=${HEALTHKIT:-$here/../../../../packages/frameworks/apple-backports/HealthKit}
 BUILD=${BUILD:-$(runs_fresh revenant-healthkit)}
 sdk=$(xcrun --show-sdk-path)
@@ -157,7 +157,7 @@ mutant() {
     rm -f "$BUILD/mutant/differential"
     cp "$healthkit"/*.m "$healthkit"/*.h "$BUILD/mutant/HealthKit/"
     cp "$here/../../../../packages/frameworks/apple-backports/RevenantSayOnce.h" "$BUILD/mutant/"
-    python3 "$here/mutate.py" "$BUILD/mutant/HealthKit/$file" "$from" "$to"
+    runs_xmake l "$here/../../common/substitute.lua" all "$BUILD/mutant/HealthKit/$file" "$from" "$to"
     for source in $sources; do
         xcrun clang -fobjc-arc $quiet $renames $constants -I"$BUILD/mutant/HealthKit" -c "$BUILD/mutant/HealthKit/$source" \
             -o "$BUILD/mutant/$source.o" 2>/dev/null || true
