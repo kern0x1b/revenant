@@ -154,7 +154,7 @@
     _loading = YES;
     dispatch_queue_t work = queue;
     if (!work) {
-        work = dispatch_queue_create("org.revenant.apple-backports.MapKitSnapshotter", DISPATCH_QUEUE_SERIAL);
+        work = dispatch_queue_create("org.revenant.backports.MapKitSnapshotter", DISPATCH_QUEUE_SERIAL);
     }
 
     dispatch_async(work, ^{

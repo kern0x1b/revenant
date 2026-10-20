@@ -4,7 +4,7 @@ option("backports_min_ios", {default = "6.0", showmenu = true,
 local ROOT = path.absolute(path.join(os.scriptdir(), "..", ".."))
 local TOOLS = path.absolute(path.join(os.scriptdir(), "tools"))
 local SKELETON = path.join(ROOT, "build", "generated", "backports", "skeleton")
-local INSTALL_FOLDER = "/usr/lib/revenant/org.revenant.apple-backports"
+local INSTALL_FOLDER = "/usr/lib/revenant/org.revenant.backports"
 local SRC = path.absolute(path.join(os.scriptdir(), "src"))
 
 local LIBRARIES = {

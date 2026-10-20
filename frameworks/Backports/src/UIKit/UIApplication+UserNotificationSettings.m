@@ -3,7 +3,7 @@
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-static NSString *const RevenantRegisteredTypesKey = @"org.revenant.apple-backports.UIUserNotificationTypes";
+static NSString *const RevenantRegisteredTypesKey = @"org.revenant.backports.UIUserNotificationTypes";
 static char revenant_remote_registered_key;
 
 static UIUserNotificationType revenant_registered_types(void)

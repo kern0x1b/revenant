@@ -6,8 +6,8 @@
 - (instancetype)initWithRevenantType:(PKPushType)type token:(NSData *)token;
 @end
 
-static NSString *const RevenantPushTokenDefaultsKeyPrefix = @"org.revenant.apple-backports.PKPushToken.";
-static NSString *const RevenantRegisteredTypesKey = @"org.revenant.apple-backports.UIUserNotificationTypes";
+static NSString *const RevenantPushTokenDefaultsKeyPrefix = @"org.revenant.backports.PKPushToken.";
+static NSString *const RevenantRegisteredTypesKey = @"org.revenant.backports.UIUserNotificationTypes";
 
 @interface PKPushRegistry (RevenantPushKit)
 - (void)revenant_deliverToken:(NSData *)token forType:(PKPushType)type;

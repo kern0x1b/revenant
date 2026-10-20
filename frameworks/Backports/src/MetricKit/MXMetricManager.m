@@ -8,14 +8,14 @@
 
 static NSString *const RevenantMXErrorDomain = @"MXErrorDomain";
 
-static NSString *const RevenantPayloadsKey = @"org.revenant.apple-backports.MetricKit.payloads";
-static NSString *const RevenantLaunchMeasurementsKey = @"org.revenant.apple-backports.MetricKit.extendedLaunch";
+static NSString *const RevenantPayloadsKey = @"org.revenant.backports.MetricKit.payloads";
+static NSString *const RevenantLaunchMeasurementsKey = @"org.revenant.backports.MetricKit.extendedLaunch";
 
 static NSString *RevenantPayloadFolder(void)
 {
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
     NSString *root = paths.firstObject ?: NSTemporaryDirectory();
-    NSString *folder = [root stringByAppendingPathComponent:@"org.revenant.apple-backports.MetricKit"];
+    NSString *folder = [root stringByAppendingPathComponent:@"org.revenant.backports.MetricKit"];
     [[NSFileManager defaultManager] createDirectoryAtPath:folder withIntermediateDirectories:YES attributes:nil error:NULL];
     return folder;
 }

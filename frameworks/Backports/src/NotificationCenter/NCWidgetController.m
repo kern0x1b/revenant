@@ -2,7 +2,7 @@
 #import <NotificationCenter/NotificationCenter.h>
 #import "../RevenantSayOnce.h"
 
-static NSString *const RevenantWidgetContentKeyPrefix = @"org.revenant.apple-backports.NCWidgetHasContent.";
+static NSString *const RevenantWidgetContentKeyPrefix = @"org.revenant.backports.NCWidgetHasContent.";
 
 @implementation NCWidgetController
 

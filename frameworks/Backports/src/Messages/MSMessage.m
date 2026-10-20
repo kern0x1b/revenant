@@ -3,7 +3,7 @@
 #import <Messages/MSMessageLayout.h>
 #import <Messages/MSSession.h>
 
-static NSString *const RevenantSenderParticipantKey = @"org.revenant.apple-backports.MSMessage.senderParticipant";
+static NSString *const RevenantSenderParticipantKey = @"org.revenant.backports.MSMessage.senderParticipant";
 
 @implementation MSMessage
 

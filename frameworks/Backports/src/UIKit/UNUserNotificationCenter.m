@@ -4,8 +4,8 @@
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-static NSString *const RevenantRequestKey = @"org.revenant.apple-backports.UNNotificationRequest";
-static NSString *const RevenantAuthorizedKey = @"org.revenant.apple-backports.UIUserNotificationTypes";
+static NSString *const RevenantRequestKey = @"org.revenant.backports.UNNotificationRequest";
+static NSString *const RevenantAuthorizedKey = @"org.revenant.backports.UIUserNotificationTypes";
 static const BOOL RevenantReleaseShowsTitles = NO;
 
 @implementation UNNotificationSettings {
@@ -200,7 +200,7 @@ static dispatch_queue_t revenant_center_queue(void)
     static dispatch_queue_t queue;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        queue = dispatch_queue_create("org.revenant.apple-backports.UNUserNotificationCenter", DISPATCH_QUEUE_SERIAL);
+        queue = dispatch_queue_create("org.revenant.backports.UNUserNotificationCenter", DISPATCH_QUEUE_SERIAL);
     });
     return queue;
 }

@@ -10,7 +10,7 @@
 @synthesize progress = _progress, pendingUnitCount = _pendingUnitCount, childAttached = _childAttached, next = _next;
 @end
 
-static NSString *const RevenantProgressThreadKey = @"org.revenant.apple-backports.NSProgress.current";
+static NSString *const RevenantProgressThreadKey = @"org.revenant.backports.NSProgress.current";
 
 @implementation NSProgress {
     int64_t _totalUnitCount;

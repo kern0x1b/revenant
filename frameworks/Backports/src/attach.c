@@ -271,7 +271,7 @@ static void revenant_reparent(Class proxy, Class release)
         return;
     words[1] = superclass;
     meta[1] = metasuperclass;
-    asl_log(NULL, NULL, ASL_LEVEL_ERR, "apple-backports: %s was laid out before the library's loader ran, so it stays a subclass of NSObject and a subclass of %s does not inherit %s",
+    asl_log(NULL, NULL, ASL_LEVEL_ERR, "backports: %s was laid out before the library's loader ran, so it stays a subclass of NSObject and a subclass of %s does not inherit %s",
             class_getName(proxy), class_getName(release), class_getName(release));
 }
 
