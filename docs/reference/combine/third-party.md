@@ -29,7 +29,7 @@ beside the sources and the libraries it builds from them, and it is the notice a
 copy of this software must carry.
 
 Combine is OpenCombine with a series of patches, the files in
-`toolchain/packages/frameworks/combine/patches/`, under the same MIT terms and with no other
+`frameworks/Combine/patches/`, under the same MIT terms and with no other
 claim over Sergej Jaskiewicz's work. The patches are ours, and they are:
 
 - the core, the Dispatch scheduler and the Foundation integration made one
