@@ -12,8 +12,6 @@
 # Every line printed here starts with ok/FAIL/note so run-all.sh reads this test as alive: a test whose
 # run.sh says nothing before it stops is DEAD as far as the sweep is concerned, whatever it printed.
 set -eu
-echo "FAIL host/air2cpu/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 35" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -32,22 +30,7 @@ probe=$work/link-probe
 mkdir -p "$work/kernels"
 rm -rf "$work/kernels"
 mkdir -p "$work/kernels"
-python3 - "$here/kernels.metal" "$work/kernels" <<'PY'
-import os, re, sys
-source, out = sys.argv[1], sys.argv[2]
-lines = open(source).read().split('\n')
-starts = [index for index, line in enumerate(lines) if line.startswith('kernel void ')]
-prologue = '\n'.join(lines[:starts[0]])
-for number, index in enumerate(starts):
-    end = starts[number + 1] if number + 1 < len(starts) else len(lines)
-    top = index
-    while top > 0 and (lines[top - 1].startswith('//') or lines[top - 1].strip() == ''):
-        top -= 1
-    name = re.match(r'kernel void (\w+)', lines[index]).group(1)
-    open(os.path.join(out, '%02d-%s.metal' % (number, name)), 'w').write(
-        prologue + '\n' + '\n'.join(lines[top:end]) + '\n')
-print('note %d kernels split out of the fixture' % len(starts))
-PY
+runs_xmake l "$here/tools.lua" split "$here/kernels.metal" "$work/kernels"
 xcrun clang -fobjc-arc -Wno-deprecated-declarations "$here/link-probe.m" -framework Metal -framework Foundation -o "$probe"
 linked=0
 refused=0
