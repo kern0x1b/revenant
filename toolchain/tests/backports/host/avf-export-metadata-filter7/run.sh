@@ -33,8 +33,6 @@
 # mutation), and a red verdict overall. A control runs each mutant's UNMUTATED source through the
 # identical build-and-run path and must stay green.
 set -eu
-echo "FAIL host/avf-export-metadata-filter7/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 50; the inline block PYEOF at line 136; the inline block PYEOF at line 201" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -47,32 +45,22 @@ mkdir -p "$build/src"
 FLAGS="-fobjc-arc -w"
 
 mutate() {
-    python3 - "$1" "$2" <<'PY'
-import sys
-path, which = sys.argv[1], sys.argv[2]
-text = open(path).read()
-MUTATIONS = {
     # the step itself, gone: with a filter set and no metadata of the caller's, nothing is left behind and
     # the row the check exists for goes back to nil.
-    "nostep": ("""    if (!filter || session.metadata)
-        return;""", "    return;"),
     # the header's second condition, dropped: "The filter will not be applied to metadata set with via the
     # metadata property" stops being true, and the caller's own array is replaced by the source's.
-    "alwaysover": ("""    if (!filter || session.metadata)
-        return;""", """    if (!filter)
-        return;"""),
     # the header's first condition, dropped: with NO filter set the step runs anyway, and the session ends
     # up carrying the source's metadata where the caller set none.
-    "nofiltercheck": ("""    if (!filter || session.metadata)
-        return;""", """    if (session.metadata)
-        return;"""),
-}
-before, after = MUTATIONS[which]
-if before not in text:
-    raise SystemExit("the %s mutation did not apply, so this run proves nothing" % which)
-open(path, "w").write(text.replace(before, after, 1))
-print("# applied the %s mutation" % which)
-PY
+    guard='    if (!filter || session.metadata)
+        return;'
+    case "$2" in
+        nostep) runs_xmake l "$here/../../common/substitute.lua" first "$1" "$guard" "    return;" ;;
+        alwaysover) runs_xmake l "$here/../../common/substitute.lua" first "$1" "$guard" "    if (!filter)
+        return;" ;;
+        nofiltercheck) runs_xmake l "$here/../../common/substitute.lua" first "$1" "$guard" "    if (session.metadata)
+        return;" ;;
+    esac
+    echo "# applied the $2 mutation"
 }
 
 want=${AVFEFMUTANT:-}
@@ -133,103 +121,14 @@ fi
 
 # ---- 4. the join, the port's own assertion, and the verdict
 set +e
-python3 - "$build" "$oracle_dir" <<'PYEOF'
-import sys, os
-build, oracle_dir = sys.argv[1], sys.argv[2]
-
-def load(name):
-    rows = {}
-    for line in open(name):
-        if not line.strip():
-            continue
-        key, sep, value = line.rstrip("\n").partition(" | ")
-        if not sep:
-            print("MALFORMED       a line with no ' | ' in it: %s" % line.strip())
-            continue
-        rows[key.strip()] = value.strip()
-    return rows
-
-host = load(os.path.join(build, "host.table"))
-port = load(os.path.join(build, "port.table"))
-
-ALLOWANCES = {
- "sharing filter: metadata after the export":
-   "Apple's own session writes the kept items into the OUTPUT FILE and leaves `metadata` nil - measured "
-   "here, on a real export of a real file. This release has no member that hands the file a list, so the "
-   "port leaves the filtered items on the session and lets the release's own export write them. The value "
-   "is not free: the row below asserts it is exactly the release's own filtered answer",
-}
-
-# The rows that describe the two BUILDS: the host half exports a real file this machine wrote and the port
-# half a stand-in's two-item array, so these are about what each half was given, not about what either
-# answered. A difference in a must-match row below is a difference in the port.
-BUILD_PREFIXES = ("CONTROL ", "release filter:", "rows")
-port_only = host_only = unequal = 0
-unexplained = []
-for key in sorted(set(host) | set(port)):
-    if key.startswith(BUILD_PREFIXES):
-        continue
-    if key not in port:
-        print("HOST ONLY        %s" % key); host_only += 1
-    elif key not in host:
-        print("PORT ONLY        %s" % key); port_only += 1
-    elif host[key] != port[key]:
-        unequal += 1
-        if key in ALLOWANCES:
-            print("ALLOWED          %-46s host=[%s] port=[%s]" % (key, host[key], port[key]))
-        else:
-            print("UNEXPLAINED      %-46s host=[%s] port=[%s]" % (key, host[key], port[key]))
-            unexplained.append(key)
-
-# The assertion inside the port's own table: the row the object exists for.
-kept = port.get("sharing filter: metadata after the export")
-release = port.get("release filter: sharing filter over the source")
-if kept != release:
-    print("UNEXPLAINED      the port left [%s] on the session and the release's own filter answers [%s] "
-          "for the source's array" % (kept, release))
-    unexplained.append("sharing filter: metadata after the export")
-print("SUMMARY rows: host=%d port=%d  must-match-unequal=%d port-only=%d host-only=%d unexplained=%d"
-      % (len(host), len(port), unequal, port_only, host_only, len(unexplained)))
-sys.exit(1 if (port_only or host_only or unexplained) else 0)
-PYEOF
+runs_xmake l "$here/tables.lua" join "$build" "$oracle_dir"
 join_status=$?
 set -e
 
 # ---- 5. the directionality assertion, and the control
 if [ -n "$want" ] && [ "$control" = 0 ]; then
     set +e
-    changed=$(python3 - "$build" "$oracle_dir" <<'PYEOF'
-import sys, os
-build, oracle_dir = sys.argv[1], sys.argv[2]
-def load(name):
-    rows = {}
-    for line in open(name):
-        if not line.strip():
-            continue
-        key, _, value = line.rstrip("\n").partition(" | ")
-        rows[key.strip()] = value.strip()
-    return rows
-base = load(os.path.join(oracle_dir, "port.baseline"))
-port = load(os.path.join(build, "port.table"))
-host = load(os.path.join(build, "host.table"))
-changed, right_then_wrong = [], []
-for key in set(base) | set(port):
-    if base.get(key) == port.get(key):
-        continue
-    changed.append(key)
-    if key in host and base.get(key) == host[key]:
-        right_then_wrong.append(key)
-    elif key == "sharing filter: metadata after the export" and base.get(key) == base.get("release filter: sharing filter over the source"):
-        # the port's own oracle: the value was RIGHT against the release's filtering entry point
-        right_then_wrong.append(key)
-for key in sorted(right_then_wrong):
-    print("BROKE A RIGHT ONE  %-46s was=[%s] now=[%s]" % (key, base.get(key), port.get(key)))
-for key in sorted(changed):
-    print("CHANGED           %-46s before=[%s] after=[%s]" % (key, base.get(key), port.get(key)))
-print("DIRECTIONALITY changed=%d right-then-wrong=%d" % (len(changed), len(right_then_wrong)))
-sys.exit(0 if (changed and right_then_wrong) else 1)
-PYEOF
-)
+    changed=$(runs_xmake l "$here/tables.lua" direction "$build" "$oracle_dir")
     dir_status=$?
     set -e
     if [ "$dir_status" != 0 ]; then
