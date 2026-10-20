@@ -1,5 +1,5 @@
 set_project("swiftui-surface")
-add_repositories("revenant " .. path.join(os.scriptdir(), "..", "..", "..", "..", "toolchain"))
+add_repositories("revenant " .. path.join(os.scriptdir(), "..", "..", "..", ".."))
 add_requires("revenant@swift-syntax", {alias = "swift-syntax"})
 set_allowedplats("macosx")
 set_allowedarchs("macosx|arm64")

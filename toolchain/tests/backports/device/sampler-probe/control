@@ -1,7 +1,0 @@
-Package: org.revenant.samplerprobe
-Name: Revenant sampler probe
-Architecture: iphoneos-arm
-Description: Whether the release carries the Apple sampler as an audio component, which is a registration and not an export
-Maintainer: revenant
-Author: revenant
-Section: Development

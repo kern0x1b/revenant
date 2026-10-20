@@ -1,0 +1,7 @@
+#import <Foundation/Foundation.h>
+
+NSString *const NSMetadataUbiquitousSharedItemCurrentUserRoleKey = @"NSMetadataUbiquitousSharedItemCurrentUserRoleKey";
+NSString *const NSMetadataUbiquitousSharedItemCurrentUserPermissionsKey = @"NSMetadataUbiquitousSharedItemCurrentUserPermissionsKey";
+NSString *const NSMetadataUbiquitousSharedItemMostRecentEditorNameComponentsKey = @"NSMetadataUbiquitousSharedItemMostRecentEditorNameComponentsKey";
+NSString *const NSMetadataUbiquitousSharedItemPermissionsReadOnly = @"NSMetadataUbiquitousSharedItemPermissionsReadOnly";
+NSString *const NSMetadataUbiquitousSharedItemPermissionsReadWrite = @"NSMetadataUbiquitousSharedItemPermissionsReadWrite";

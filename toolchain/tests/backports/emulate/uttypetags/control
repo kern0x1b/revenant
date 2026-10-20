@@ -1,7 +1,0 @@
-Package: org.revenant.uttypetags
-Name: Revenant UTTypeCopyAllTagsWithClass probe
-Architecture: iphoneos-arm
-Description: Prints UTTypeCopyAllTagsWithClass answers for the declared identifiers and a generated set of dynamic identifiers, one TAGS line each, for comparison with the host
-Maintainer: revenant
-Author: revenant
-Section: Development

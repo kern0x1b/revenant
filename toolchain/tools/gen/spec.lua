@@ -10,7 +10,7 @@ local digest = import("digest", {anonymous = true})
 local json = import("core.base.json")
 
 function frameworks(tree)
-    local root = path.join(tree, layout.constants().SNAP_ROOT)
+    local root = path.join(tree, "..", layout.constants().SNAP_ROOT)
     local names = {}
     for _, pattern in ipairs({"*", "*/*"}) do
         for _, filepath in ipairs(files.glob(path.join(root, pattern, layout.constants().SHARD_FILE))) do
@@ -125,7 +125,7 @@ local OVERRIDE_KINDS = {method = true, property = true, class = true}
 
 function overrides(tree, fw)
     local found, order_of = {}, {}
-    for _, filepath in ipairs(files.glob(path.join(tree, layout.registry_dir(fw), "*.json"))) do
+    for _, filepath in ipairs(files.glob(path.join(tree, "..", layout.registry_dir(fw), "*.json"))) do
         local data = json.decode(files.read_text(filepath))
         local entries = data.entries or data
         for _, entry in ipairs(entries) do

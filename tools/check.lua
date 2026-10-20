@@ -20,14 +20,15 @@ end
 
 local layout = {
     top = {"AGENTS.md", "README.md", "CONTRIBUTING.md", "SECURITY.md", "CHANGELOG.md", "LICENSES", "REUSE.toml",
-           "xmake.lua", "xmakew", "tools", "docs", "third_party", "toolchain", "emulator", "recompiler", "agent-skills",
-           "frameworks", ".agents", ".claude", ".claude-plugin", ".github", ".editorconfig", ".gitattributes", ".gitignore"},
+           "xmake.lua", "xmakew", "tools", "docs", "third_party", "toolchain", "packages", "addons", "emulator", "recompiler",
+           "agent-skills", "frameworks", ".agents", ".claude", ".claude-plugin", ".github", ".editorconfig", ".gitattributes",
+           ".gitignore"},
     component = {"xmake.lua", "README.md", "src", "include", "patches", "tests", "examples", "tools"},
     plugin = {"README.md", "tests", ".claude-plugin", "skills", "LICENSE", "THIRD-PARTY.md"},
     docs = {"README.md", "tutorials", "guides", "reference", "explanation"},
     third_party = {"xmake.lua", "patches"},
     agentfiles = {"AGENTS.md", "CLAUDE.md", ".claude", ".agents"},
-    addon = {"addon.lua", "addons", "includes", "modules", "packages", "plugins", "rules", "toolchains"}
+    addon = {"addon.lua", "includes", "modules", "plugins", "rules", "toolchains"}
 }
 
 local addon = {
@@ -35,8 +36,8 @@ local addon = {
     rules = {depth = 4, files = {"xmake.lua"}},
     toolchains = {depth = 4, files = {"xmake.lua"}},
     includes = {depth = 4, files = {"xmake.lua"}},
-    packages = {depth = 5, files = {"xmake.lua"}},
-    addons = {depth = 5, files = {"xmake.lua"}}
+    packages = {depth = 4, files = {"xmake.lua"}},
+    addons = {depth = 4, files = {"xmake.lua"}}
 }
 
 local function has(list, name)
@@ -48,10 +49,10 @@ local function has(list, name)
     return false
 end
 
-local function addon_fault(parts)
-    local kind, last = parts[2], parts[#parts]
+local function addon_fault(parts, first)
+    local kind, last = parts[first], parts[#parts]
     if kind == "addon.lua" then
-        return #parts > 2 and "addon.lua is a file" or nil
+        return #parts > first and "addon.lua is a file" or nil
     elseif kind == "modules" then
         if not last:endswith(".lua") then
             return "modules/ holds Lua files only"
@@ -101,12 +102,13 @@ function checks.layout()
             wrong(file, "not part of the top layout")
         elseif parts[1] == "frameworks" and #parts == 2 then
             wrong(file, "frameworks/ holds framework folders only")
-        elseif parts[1] == "toolchain" and allowed.addon[parts[2]] then
-            local shape = addon[parts[2]]
+        elseif (parts[1] == "toolchain" and allowed.addon[parts[2]]) or addon[parts[1]] then
+            local first = parts[1] == "toolchain" and 2 or 1
+            local shape = addon[parts[first]]
             if shape and #parts >= shape.depth then
                 folders[table.concat(parts, "/", 1, shape.depth - 1)] = shape.files
             end
-            local why = addon_fault(parts)
+            local why = addon_fault(parts, first)
             if why then
                 wrong(file, why)
             end

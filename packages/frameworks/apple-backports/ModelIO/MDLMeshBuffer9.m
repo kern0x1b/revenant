@@ -1,0 +1,160 @@
+#import <ModelIO/ModelIO.h>
+
+#pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
+
+@interface MDLMeshBufferZoneDefault ()
+- (void)revenant_setCapacity:(NSUInteger)capacity allocator:(id<MDLMeshBufferAllocator>)allocator;
+@end
+
+@implementation MDLMeshBufferMap {
+    void *_bytes;
+    void (^_deallocator)(void);
+}
+
+- (instancetype)initWithBytes:(void *)bytes deallocator:(void (^)(void))deallocator
+{
+    if ((self = [super init])) {
+        _bytes = bytes;
+        _deallocator = [deallocator copy];
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    if (_deallocator)
+        _deallocator();
+}
+
+- (void *)bytes
+{
+    return _bytes;
+}
+
+@end
+@implementation MDLMeshBufferData {
+    NSMutableData *_data;
+    id<MDLMeshBufferAllocator> _allocator;
+    id<MDLMeshBufferZone> _zone;
+    MDLMeshBufferType _type;
+}
+
+- (instancetype)initWithType:(MDLMeshBufferType)type length:(NSUInteger)length
+{
+    return [self initWithType:type data:[NSMutableData dataWithLength:length]];
+}
+
+- (instancetype)initWithType:(MDLMeshBufferType)type data:(NSData *)data
+{
+    if ((self = [super init])) {
+        _type = type;
+        _data = [data mutableCopy];
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+}
+
+- (NSData *)data
+{
+    return _data;
+}
+
+- (NSUInteger)length
+{
+    return _data.length;
+}
+
+- (id<MDLMeshBufferAllocator>)allocator
+{
+    return _allocator;
+}
+
+- (id<MDLMeshBufferZone>)zone
+{
+    return _zone;
+}
+
+- (MDLMeshBufferType)type
+{
+    return _type;
+}
+
+- (void)fillData:(NSData *)data offset:(NSUInteger)offset
+{
+    if (!data || offset + data.length > _data.length)
+        return;
+    [_data replaceBytesInRange:NSMakeRange(offset, data.length) withBytes:data.bytes length:data.length];
+}
+
+- (MDLMeshBufferMap *)map
+{
+    return [[MDLMeshBufferMap alloc] initWithBytes:_data.mutableBytes deallocator:nil];
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    MDLMeshBufferData *copy = [[[self class] allocWithZone:zone] initWithType:_type data:_data];
+    [copy revenant_setAllocator:_allocator zone:_zone];
+    return copy;
+}
+
+- (void)revenant_setAllocator:(id<MDLMeshBufferAllocator>)allocator zone:(id<MDLMeshBufferZone>)zone
+{
+    if (_allocator != allocator) {
+        _allocator = allocator;
+    }
+    if (_zone != zone) {
+        _zone = zone;
+    }
+}
+
+@end
+@implementation MDLMeshBufferDataAllocator
+
+- (id<MDLMeshBufferZone>)newZone:(NSUInteger)capacity
+{
+    MDLMeshBufferZoneDefault *zone = [[MDLMeshBufferZoneDefault alloc] init];
+    [zone revenant_setCapacity:capacity allocator:self];
+    return zone;
+}
+
+- (id<MDLMeshBufferZone>)newZoneForBuffersWithSize:(NSArray<NSNumber *> *)sizes andType:(NSArray<NSNumber *> *)types
+{
+    NSUInteger total = 0;
+    for (NSNumber *size in sizes)
+        total += size.unsignedIntegerValue;
+    return [self newZone:total];
+}
+
+- (id<MDLMeshBuffer>)newBuffer:(NSUInteger)length type:(MDLMeshBufferType)type
+{
+    return [self newBufferFromZone:nil data:[NSMutableData dataWithLength:length] type:type];
+}
+
+- (id<MDLMeshBuffer>)newBufferWithData:(NSData *)data type:(MDLMeshBufferType)type
+{
+    return [self newBufferFromZone:nil data:data type:type];
+}
+
+- (id<MDLMeshBuffer>)newBufferFromZone:(id<MDLMeshBufferZone>)zone length:(NSUInteger)length type:(MDLMeshBufferType)type
+{
+    if (zone && length > zone.capacity)
+        return nil;
+    return [self newBufferFromZone:zone data:[NSMutableData dataWithLength:length] type:type];
+}
+
+- (id<MDLMeshBuffer>)newBufferFromZone:(id<MDLMeshBufferZone>)zone data:(NSData *)data type:(MDLMeshBufferType)type
+{
+    if (zone && ![zone isKindOfClass:[MDLMeshBufferZoneDefault class]])
+        return nil;
+    if (zone && data.length > zone.capacity)
+        return nil;
+    MDLMeshBufferData *buffer = [[MDLMeshBufferData alloc] initWithType:type data:data];
+    [buffer revenant_setAllocator:self zone:zone];
+    return buffer;
+}
+
+@end

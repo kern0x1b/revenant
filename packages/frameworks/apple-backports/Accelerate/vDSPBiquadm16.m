@@ -1,0 +1,48 @@
+#import "RevenantBiquad.h"
+
+#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+#pragma clang diagnostic ignored "-Wunguarded-availability"
+#pragma clang diagnostic ignored "-Wnonnull"
+
+void vDSP_biquadm_SetActiveFiltersD(vDSP_biquadm_SetupD __setup, const bool *__filter_states)
+{
+    if (__setup && __filter_states) {
+        RevenantBiquadSetActive(__setup, __filter_states);
+    }
+}
+
+void vDSP_biquadm_SetCoefficientsSingleD(vDSP_biquadm_SetupD __setup, const float *__coeffs, vDSP_Length __start_sec,
+                                         vDSP_Length __start_chn, vDSP_Length __nsec, vDSP_Length __nchn)
+{
+    if (__setup && __coeffs) {
+        RevenantBiquadSetCoefficientsFloat(__setup, __coeffs, __start_sec, __start_chn, __nsec, __nchn);
+    }
+}
+
+void vDSP_biquadm_SetCoefficientsDoubleD(vDSP_biquadm_SetupD __setup, const double *__coeffs, vDSP_Length __start_sec,
+                                         vDSP_Length __start_chn, vDSP_Length __nsec, vDSP_Length __nchn)
+{
+    if (__setup && __coeffs) {
+        RevenantBiquadSetCoefficients(__setup, __coeffs, __start_sec, __start_chn, __nsec, __nchn);
+    }
+}
+
+void vDSP_biquadm_SetTargetsSingleD(vDSP_biquadm_SetupD __setup, const float *__targets, double __interp_rate,
+                                    double __interp_threshold, vDSP_Length __start_sec, vDSP_Length __start_chn,
+                                    vDSP_Length __nsec, vDSP_Length __nchn)
+{
+    if (__setup && __targets) {
+        RevenantBiquadSetTargetsFloat(__setup, __targets, __interp_rate, __interp_threshold, __start_sec, __start_chn,
+                                    __nsec, __nchn);
+    }
+}
+
+void vDSP_biquadm_SetTargetsDoubleD(vDSP_biquadm_SetupD __setup, const double *__targets, double __interp_rate,
+                                    double __interp_threshold, vDSP_Length __start_sec, vDSP_Length __start_chn,
+                                    vDSP_Length __nsec, vDSP_Length __nchn)
+{
+    if (__setup && __targets) {
+        RevenantBiquadSetTargets(__setup, __targets, __interp_rate, __interp_threshold, __start_sec, __start_chn, __nsec,
+                               __nchn);
+    }
+}

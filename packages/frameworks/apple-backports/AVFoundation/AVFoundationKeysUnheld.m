@@ -1,0 +1,6 @@
+#import <AVFoundation/AVFoundation.h>
+
+NSString *const AVPlayerInterstitialEventMonitorAssetListResponseStatusDidChangeErrorKey = @"AssetListResponseStatusDidChangeErrorKey";
+NSString *const AVPlayerInterstitialEventMonitorAssetListResponseStatusDidChangeEventKey = @"AssetListResponseStatusDidChangeEventKey";
+NSString *const AVPlayerInterstitialEventMonitorAssetListResponseStatusDidChangeNotification = @"AssetListResponseStatusDidChangeNotification";
+NSString *const AVPlayerInterstitialEventMonitorAssetListResponseStatusDidChangeStatusKey = @"AssetListResponseStatusDidChangeStatusKey";

@@ -1,0 +1,36 @@
+#import <GameController/GameController.h>
+
+GCInputButtonName const GCInputButtonShare = (GCInputButtonName)@"Button Share";
+NSString *const GCInputDirectionalCenterButton = @"Button Center";
+NSString *const GCInputDirectionalTouchSurfaceButton = @"Button A";
+NSString *const GCInputMicroGamepadButtonA = @"Button A";
+NSString *const GCInputMicroGamepadButtonMenu = @"Button Menu";
+NSString *const GCInputMicroGamepadButtonX = @"Button X";
+NSString *const GCInputMicroGamepadDpad = @"Direction Pad";
+GCKeyCode const GCKeyCodeF13 = 104;
+GCKeyCode const GCKeyCodeF14 = 105;
+GCKeyCode const GCKeyCodeF15 = 106;
+GCKeyCode const GCKeyCodeF16 = 107;
+GCKeyCode const GCKeyCodeF17 = 108;
+GCKeyCode const GCKeyCodeF18 = 109;
+GCKeyCode const GCKeyCodeF19 = 110;
+GCKeyCode const GCKeyCodeF20 = 111;
+NSString *const GCKeyF13 = @"F13";
+NSString *const GCKeyF14 = @"F14";
+NSString *const GCKeyF15 = @"F15";
+NSString *const GCKeyF16 = @"F16";
+NSString *const GCKeyF17 = @"F17";
+NSString *const GCKeyF18 = @"F18";
+NSString *const GCKeyF19 = @"F19";
+NSString *const GCKeyF20 = @"F20";
+NSString *const GCProductCategoryCoalescedRemote = @"Coalesced Remote";
+NSString *const GCProductCategoryControlCenterRemote = @"Control Center Remote";
+NSString *const GCProductCategoryDualSense = @"DualSense";
+NSString *const GCProductCategoryDualShock4 = @"DualShock 4";
+NSString *const GCProductCategoryKeyboard = @"Keyboard";
+NSString *const GCProductCategoryMFi = @"MFi";
+NSString *const GCProductCategoryMouse = @"Mouse";
+NSString *const GCProductCategorySiriRemote1stGen = @"Siri Remote (1st Generation)";
+NSString *const GCProductCategorySiriRemote2ndGen = @"Siri Remote (2nd Generation)";
+NSString *const GCProductCategoryUniversalElectronicsRemote = @"Universal Electronics Remote";
+NSString *const GCProductCategoryXboxOne = @"Xbox One";

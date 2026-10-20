@@ -1,0 +1,67 @@
+#import "RevenantSensorKit.h"
+#import "RevenantSensorKitValue.h"
+#import "../RevenantValueStore.h"
+
+@implementation SRAcousticSettings
+@dynamic environmentalSoundMeasurementsEnabled, audioExposureSampleLifetime, headphoneSafetyAudioLevel, musicEQSettings, accessibilitySettings;
+REVENANT_SCALAR_GETTER(BOOL, environmentalSoundMeasurementsEnabled, isEnvironmentalSoundMeasurementsEnabled)
+REVENANT_SCALAR_PROPERTY(SRAcousticSettingsSampleLifetime, audioExposureSampleLifetime)
+REVENANT_VALUE_PROPERTY(NSNumber *, headphoneSafetyAudioLevel)
+REVENANT_VALUE_PROPERTY(SRAcousticSettingsMusicEQ *, musicEQSettings)
+REVENANT_VALUE_PROPERTY(SRAcousticSettingsAccessibility *, accessibilitySettings)
+@end
+@implementation SRAcousticSettings (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@end
+@implementation SRAcousticSettingsAccessibility
+@dynamic leftRightBalance, monoAudioEnabled, backgroundSounds, headphoneAccommodations;
+REVENANT_SCALAR_PROPERTY(double, leftRightBalance)
+REVENANT_SCALAR_GETTER(BOOL, monoAudioEnabled, isMonoAudioEnabled)
+REVENANT_VALUE_PROPERTY(SRAcousticSettingsAccessibilityBackgroundSounds *, backgroundSounds)
+REVENANT_VALUE_PROPERTY(SRAcousticSettingsAccessibilityHeadphoneAccommodations *, headphoneAccommodations)
+@end
+@implementation SRAcousticSettingsAccessibility (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@end
+@implementation SRAcousticSettingsAccessibilityBackgroundSounds
+@dynamic enabled, soundName, relativeVolume, playWithMediaEnabled, relativeVolumeWithMedia, stopOnLockEnabled;
+REVENANT_SCALAR_GETTER(BOOL, enabled, isEnabled)
+REVENANT_SCALAR_PROPERTY(SRAcousticSettingsAccessibilityBackgroundSoundsName, soundName)
+REVENANT_SCALAR_PROPERTY(double, relativeVolume)
+REVENANT_SCALAR_GETTER(BOOL, playWithMediaEnabled, isPlayWithMediaEnabled)
+REVENANT_SCALAR_PROPERTY(double, relativeVolumeWithMedia)
+REVENANT_SCALAR_GETTER(BOOL, stopOnLockEnabled, isStopOnLockEnabled)
+@end
+@implementation SRAcousticSettingsAccessibilityBackgroundSounds (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@end
+@implementation SRAcousticSettingsAccessibilityHeadphoneAccommodations
+@dynamic enabled, mediaEnhanceTuning, mediaEnhanceBoosting, mediaEnhanceApplication;
+REVENANT_SCALAR_GETTER(BOOL, enabled, isEnabled)
+REVENANT_SCALAR_PROPERTY(SRAcousticSettingsAccessibilityHeadphoneAccommodationsMediaEnhanceTuning, mediaEnhanceTuning)
+REVENANT_SCALAR_PROPERTY(SRAcousticSettingsAccessibilityHeadphoneAccommodationsMediaEnhanceBoosting, mediaEnhanceBoosting)
+REVENANT_SCALAR_PROPERTY(SRAcousticSettingsAccessibilityHeadphoneAccommodationsMediaEnhanceApplication, mediaEnhanceApplication)
+@end
+@implementation SRAcousticSettingsAccessibilityHeadphoneAccommodations (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@end
+@implementation SRAcousticSettingsMusicEQ
+@dynamic soundCheckEnabled, lateNightModeEnabled;
+REVENANT_SCALAR_GETTER(BOOL, soundCheckEnabled, isSoundCheckEnabled)
+REVENANT_SCALAR_GETTER(BOOL, lateNightModeEnabled, isLateNightModeEnabled)
+@end
+@implementation SRAcousticSettingsMusicEQ (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@end
+@implementation SRSleepSession
+@dynamic startDate, duration, identifier;
+REVENANT_VALUE_PROPERTY(NSDate *, startDate)
+REVENANT_SCALAR_PROPERTY(NSTimeInterval, duration)
+REVENANT_VALUE_PROPERTY(NSString *, identifier)
+@end
+@implementation SRSleepSession (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@end
+
+#define REVENANT_SENSORKIT_NAMES_26_0
+#import "RevenantSensorKitNames.h"

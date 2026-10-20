@@ -8,7 +8,7 @@ end
 
 local function implemented_protocols(root, folder)
     local found = {}
-    local registry = path.join(root, "packages", "frameworks", "apple-backports", "registry")
+    local registry = path.join(root, "..", "packages", "frameworks", "apple-backports", "registry")
     local files = os.files(path.join(registry, folder, "*.json"))
     local single = path.join(registry, folder .. ".json")
     if os.isfile(single) then table.insert(files, single) end

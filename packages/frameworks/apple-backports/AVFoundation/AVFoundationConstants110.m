@@ -1,0 +1,32 @@
+#import <AVFoundation/AVFoundation.h>
+
+NSString *const AVAssetDownloadedAssetEvictionPriorityDefault = @"default";
+NSString *const AVAssetDownloadedAssetEvictionPriorityImportant = @"important";
+NSString *const AVAssetExportPresetHEVC1920x1080 = @"AVAssetExportPresetHEVC1920x1080";
+NSString *const AVAssetExportPresetHEVC3840x2160 = @"AVAssetExportPresetHEVC3840x2160";
+NSString *const AVAssetExportPresetHEVCHighestQuality = @"AVAssetExportPresetHEVCHighestQuality";
+NSString *const AVAssetWriterInputMediaDataLocationBeforeMainMediaDataNotInterleaved = @"AVAssetWriterInputMediaDataLocationBeforeMainMediaDataNotInterleaved";
+NSString *const AVAssetWriterInputMediaDataLocationInterleavedWithMainMediaData = @"AVAssetWriterInputMediaDataLocationInterleavedWithMainMediaData";
+NSString *const AVContentKeySystemClearKey = @"ClearKeySystem";
+NSString *const AVFileTypeAVCI = @"public.avci";
+NSString *const AVFileTypeDNG = @"com.adobe.raw-image";
+NSString *const AVFileTypeHEIC = @"public.heic";
+NSString *const AVFileTypeHEIF = @"public.heif";
+NSString *const AVFileTypeJPEG = @"public.jpeg";
+NSString *const AVFileTypeTIFF = @"public.tiff";
+NSString *const AVMediaTypeDepthData = @"dpth";
+NSString *const AVMetadataFormatUnknown = @"public.unknown";
+NSString *const AVMetadataKeySpaceAudioFile = @"caaf";
+NSString *const AVOutputSettingsPresetHEVC1920x1080 = @"AVOutputSettingsPresetHEVC1920x1080";
+NSString *const AVOutputSettingsPresetHEVC3840x2160 = @"AVOutputSettingsPresetHEVC3840x2160";
+NSString *const AVRouteDetectorMultipleRoutesDetectedDidChangeNotification = @"AVRouteDetectorMultipleRoutesDetectedDidChangeNotification";
+NSString *const AVSampleBufferAudioRendererFlushTimeKey = @"AVSampleBufferAudioRendererFlushTimeKey";
+NSString *const AVSampleBufferAudioRendererWasFlushedAutomaticallyNotification = @"AVSampleBufferAudioRendererWasFlushedAutomaticallyNotification";
+NSString *const AVVideoCodecHEVC = @"hvc1";
+NSString *const AVVideoCodecTypeAppleProRes422 = @"apcn";
+NSString *const AVVideoCodecTypeAppleProRes4444 = @"ap4h";
+NSString *const AVVideoCodecTypeH264 = @"avc1";
+NSString *const AVVideoCodecTypeHEVC = @"hvc1";
+NSString *const AVVideoCodecTypeJPEG = @"jpeg";
+NSString *const AVVideoTransferFunction_ITU_R_2100_HLG = @"ITU_R_2100_HLG";
+NSString *const AVVideoTransferFunction_SMPTE_ST_2084_PQ = @"SMPTE_ST_2084_PQ";

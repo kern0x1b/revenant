@@ -1,2 +1,0 @@
-client 0
-MIDIDeviceCreate -50

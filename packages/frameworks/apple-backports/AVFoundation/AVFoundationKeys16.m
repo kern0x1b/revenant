@@ -1,0 +1,15 @@
+#import <AVFoundation/AVFoundation.h>
+
+NSString *const AVAssetDownloadTaskPrefersHDRKey = @"AVAssetDownloadTaskPrefersHDRKey";
+NSString *const AVAssetDownloadTaskPrefersLosslessAudioKey = @"AVAssetDownloadTaskPrefersLosslessAudioKey";
+NSString *const AVMediaCharacteristicContainsHDRVideo = @"public.contains-hdr-video";
+NSString *const AVPlayerInterstitialEventMonitorCurrentEventDidChangeNotification = @"CurrentEventDidChangeNotification";
+NSString *const AVPlayerInterstitialEventMonitorEventsDidChangeNotification = @"EventsDidChangeNotification";
+NSString *const AVPlayerItemTimeJumpedOriginatingParticipantKey = @"AVPlayerItemTimeJumpedOriginatingParticipantKey";
+NSString *const AVSampleBufferAudioRendererOutputConfigurationDidChangeNotification = @"AVSampleBufferAudioRendererOutputConfigurationDidChangeNotification";
+NSString *const AVSampleBufferDisplayLayerOutputObscuredDueToInsufficientExternalProtectionDidChangeNotification = @"AVSampleBufferDisplayLayerOutputObscuredDueToInsufficientExternalProtectionDidChangeNotification";
+NSString *const AVSampleBufferDisplayLayerRequiresFlushToResumeDecodingDidChangeNotification = @"AVSampleBufferDisplayLayerRequiresFlushToResumeDecodingDidChangeNotification";
+NSString *const AVURLAssetHTTPUserAgentKey = @"AVURLAssetHTTPUserAgentKey";
+NSString *const AVURLAssetPrimarySessionIdentifierKey = @"AVURLAssetPrimarySessionIdentifierKey";
+NSString *const AVURLAssetURLRequestAttributionKey = @"AVURLAssetURLRequestAttributionKey";
+NSString *const AVVideoAppleProRAWBitDepthKey = @"AppleProRAWBitDepthKey";

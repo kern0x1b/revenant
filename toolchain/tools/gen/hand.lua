@@ -137,7 +137,7 @@ function implementations(tree)
     local cache = state(tree)
     if cache.implementations == nil then
         local found = {}
-        for _, filepath in ipairs(sources(path.join(tree, SOURCES_ROOT), IMPLEMENTATION_SKIP)) do
+        for _, filepath in ipairs(sources(path.join(tree, "..", SOURCES_ROOT), IMPLEMENTATION_SKIP)) do
             implementations_in(strings.universal(files.read_text(filepath)), found)
         end
         cache.implementations = found
@@ -149,7 +149,7 @@ function class_names(tree)
     local cache = state(tree)
     if cache.classes == nil then
         local names = {}
-        for _, filepath in ipairs(sources(path.join(tree, SOURCES_ROOT), CLASS_SKIP)) do
+        for _, filepath in ipairs(sources(path.join(tree, "..", SOURCES_ROOT), CLASS_SKIP)) do
             class_names_in(strings.universal(files.read_text(filepath)), names)
         end
         cache.classes = names
@@ -161,7 +161,7 @@ function functions(tree)
     local cache = state(tree)
     if cache.functions == nil then
         local found = {}
-        for _, filepath in ipairs(sources(path.join(tree, SOURCES_ROOT), IMPLEMENTATION_SKIP, true)) do
+        for _, filepath in ipairs(sources(path.join(tree, "..", SOURCES_ROOT), IMPLEMENTATION_SKIP, true)) do
             functions_in(strings.universal(files.read_text(filepath)), found)
         end
         cache.functions = found

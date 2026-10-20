@@ -195,9 +195,8 @@ end
 function default_checkout(surface)
     local directory = path.directory(realpath(surface))
     for _ = 1, 6 do
-        local candidate = path.join(directory, "toolchain")
-        if os.isdir(path.join(candidate, "packages")) then
-            return candidate
+        if os.isdir(path.join(directory, "packages")) then
+            return directory
         end
         local parent = path.directory(directory)
         if parent == nil or parent == directory then

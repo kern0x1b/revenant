@@ -1,0 +1,11 @@
+#import <ImageIO/ImageIO.h>
+
+extern CFStringRef const kCGImageAuxiliaryDataTypeHDRGainMap;
+extern CFStringRef const kCGImageAuxiliaryDataTypeSemanticSegmentationGlassesMatte;
+extern CFStringRef const kCGImageAuxiliaryDataTypeSemanticSegmentationSkyMatte;
+extern CFStringRef const kCGImageDestinationPreserveGainMap;
+
+CFStringRef const kCGImageAuxiliaryDataTypeHDRGainMap = CFSTR("kCGImageAuxiliaryDataTypeHDRGainMap");
+CFStringRef const kCGImageAuxiliaryDataTypeSemanticSegmentationGlassesMatte = CFSTR("kCGImageAuxiliaryDataTypeSemanticSegmentationGlassesMatte");
+CFStringRef const kCGImageAuxiliaryDataTypeSemanticSegmentationSkyMatte = CFSTR("kCGImageAuxiliaryDataTypeSemanticSegmentationSkyMatte");
+CFStringRef const kCGImageDestinationPreserveGainMap = CFSTR("kCGImageDestinationPreserveGainMap");

@@ -1,0 +1,27 @@
+#import <Foundation/Foundation.h>
+#if defined(REVENANT_MEDIAPLAYER_STANDIN)
+#import "MPMediaItemStandin.h"
+#else
+#import <MediaPlayer/MediaPlayer.h>
+#endif
+
+@interface MPMediaItem (Revenant103)
+@property (nonatomic, readonly) NSString * playbackStoreID;
+@property (nonatomic, readonly) BOOL preorder;
+@end
+
+extern NSString * const MPMediaItemPropertyPlaybackStoreID;
+
+@implementation MPMediaItem (Revenant103)
+
+- (NSString *)playbackStoreID {
+    return (NSString *)[self valueForProperty:@"playbackStoreID"];
+}
+
+- (BOOL)isPreorder {
+    return [[self valueForProperty:@"isPreorder"] boolValue];
+}
+
+@end
+
+NSString * const MPMediaItemPropertyPlaybackStoreID = @"playbackStoreID";

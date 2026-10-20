@@ -1,0 +1,687 @@
+#import <Foundation/Foundation.h>
+#import <OpenGLES/gltypes.h>
+#include <dlfcn.h>
+#include <string.h>
+
+static void revenant_es3_error(void)
+{
+    void (*bind)(GLenum, GLuint) = (void (*)(GLenum, GLuint))dlsym(RTLD_DEFAULT, "glBindTexture");
+    if (bind)
+        bind(0, 0);
+}
+
+static void revenant_es3_value_error(void)
+{
+    void (*generate)(GLsizei, GLuint *) = (void (*)(GLsizei, GLuint *))dlsym(RTLD_DEFAULT, "glGenTextures");
+    if (generate)
+        generate(-1, NULL);
+}
+
+extern void glReadBuffer(GLenum mode) __attribute__((availability(ios, introduced=7.0)));
+extern void glTexImage3D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid* pixels) __attribute__((availability(ios, introduced=7.0)));
+extern void glTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const GLvoid* pixels) __attribute__((availability(ios, introduced=7.0)));
+extern void glCopyTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height) __attribute__((availability(ios, introduced=7.0)));
+extern void glDrawBuffers(GLsizei n, const GLenum* bufs) __attribute__((availability(ios, introduced=7.0)));
+extern void glUniformMatrix2x3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value) __attribute__((availability(ios, introduced=7.0)));
+extern void glUniformMatrix3x2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value) __attribute__((availability(ios, introduced=7.0)));
+extern void glUniformMatrix2x4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value) __attribute__((availability(ios, introduced=7.0)));
+extern void glUniformMatrix4x2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value) __attribute__((availability(ios, introduced=7.0)));
+extern void glUniformMatrix3x4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value) __attribute__((availability(ios, introduced=7.0)));
+extern void glUniformMatrix4x3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value) __attribute__((availability(ios, introduced=7.0)));
+extern void glBlitFramebuffer(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter) __attribute__((availability(ios, introduced=7.0)));
+extern void glRenderbufferStorageMultisample(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) __attribute__((availability(ios, introduced=7.0)));
+extern void glFramebufferTextureLayer(GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer) __attribute__((availability(ios, introduced=7.0)));
+extern GLvoid* glMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access) __attribute__((availability(ios, introduced=7.0)));
+extern void glFlushMappedBufferRange(GLenum target, GLintptr offset, GLsizeiptr length) __attribute__((availability(ios, introduced=7.0)));
+extern void glBindVertexArray(GLuint array) __attribute__((availability(ios, introduced=7.0)));
+extern void glDeleteVertexArrays(GLsizei n, const GLuint* arrays) __attribute__((availability(ios, introduced=7.0)));
+extern void glGenVertexArrays(GLsizei n, GLuint* arrays) __attribute__((availability(ios, introduced=7.0)));
+extern GLboolean glIsVertexArray(GLuint array) __attribute__((availability(ios, introduced=7.0)));
+extern void glGetIntegeri_v(GLenum target, GLuint index, GLint* data) __attribute__((availability(ios, introduced=7.0)));
+extern void glBeginTransformFeedback(GLenum primitiveMode) __attribute__((availability(ios, introduced=7.0)));
+extern void glEndTransformFeedback(void) __attribute__((availability(ios, introduced=7.0)));
+extern void glBindBufferRange(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size) __attribute__((availability(ios, introduced=7.0)));
+extern void glBindBufferBase(GLenum target, GLuint index, GLuint buffer) __attribute__((availability(ios, introduced=7.0)));
+extern void glTransformFeedbackVaryings(GLuint program, GLsizei count, const GLchar* const *varyings, GLenum bufferMode) __attribute__((availability(ios, introduced=7.0)));
+extern void glGetTransformFeedbackVarying(GLuint program, GLuint index, GLsizei bufSize, GLsizei* length, GLsizei* size, GLenum* type, GLchar* name) __attribute__((availability(ios, introduced=7.0)));
+extern void glVertexAttribIPointer(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid* pointer) __attribute__((availability(ios, introduced=7.0)));
+extern void glGetVertexAttribIiv(GLuint index, GLenum pname, GLint* params) __attribute__((availability(ios, introduced=7.0)));
+extern void glGetVertexAttribIuiv(GLuint index, GLenum pname, GLuint* params) __attribute__((availability(ios, introduced=7.0)));
+extern void glVertexAttribI4i(GLuint index, GLint x, GLint y, GLint z, GLint w) __attribute__((availability(ios, introduced=7.0)));
+extern void glVertexAttribI4ui(GLuint index, GLuint x, GLuint y, GLuint z, GLuint w) __attribute__((availability(ios, introduced=7.0)));
+extern void glVertexAttribI4iv(GLuint index, const GLint* v) __attribute__((availability(ios, introduced=7.0)));
+extern void glVertexAttribI4uiv(GLuint index, const GLuint* v) __attribute__((availability(ios, introduced=7.0)));
+extern void glGetUniformuiv(GLuint program, GLint location, GLuint* params) __attribute__((availability(ios, introduced=7.0)));
+extern GLint glGetFragDataLocation(GLuint program, const GLchar *name) __attribute__((availability(ios, introduced=7.0)));
+extern void glUniform1ui(GLint location, GLuint v0) __attribute__((availability(ios, introduced=7.0)));
+extern void glUniform2ui(GLint location, GLuint v0, GLuint v1) __attribute__((availability(ios, introduced=7.0)));
+extern void glUniform3ui(GLint location, GLuint v0, GLuint v1, GLuint v2) __attribute__((availability(ios, introduced=7.0)));
+extern void glUniform4ui(GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3) __attribute__((availability(ios, introduced=7.0)));
+extern void glUniform1uiv(GLint location, GLsizei count, const GLuint* value) __attribute__((availability(ios, introduced=7.0)));
+extern void glUniform2uiv(GLint location, GLsizei count, const GLuint* value) __attribute__((availability(ios, introduced=7.0)));
+extern void glUniform3uiv(GLint location, GLsizei count, const GLuint* value) __attribute__((availability(ios, introduced=7.0)));
+extern void glUniform4uiv(GLint location, GLsizei count, const GLuint* value) __attribute__((availability(ios, introduced=7.0)));
+extern void glClearBufferiv(GLenum buffer, GLint drawbuffer, const GLint* value) __attribute__((availability(ios, introduced=7.0)));
+extern void glClearBufferuiv(GLenum buffer, GLint drawbuffer, const GLuint* value) __attribute__((availability(ios, introduced=7.0)));
+extern void glClearBufferfv(GLenum buffer, GLint drawbuffer, const GLfloat* value) __attribute__((availability(ios, introduced=7.0)));
+extern void glClearBufferfi(GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil) __attribute__((availability(ios, introduced=7.0)));
+extern const GLubyte* glGetStringi(GLenum name, GLuint index) __attribute__((availability(ios, introduced=7.0)));
+extern void glCopyBufferSubData(GLenum readTarget, GLenum writeTarget, GLintptr readOffset, GLintptr writeOffset, GLsizeiptr size) __attribute__((availability(ios, introduced=7.0)));
+extern void glGetUniformIndices(GLuint program, GLsizei uniformCount, const GLchar* const *uniformNames, GLuint* uniformIndices) __attribute__((availability(ios, introduced=7.0)));
+extern void glGetActiveUniformsiv(GLuint program, GLsizei uniformCount, const GLuint* uniformIndices, GLenum pname, GLint* params) __attribute__((availability(ios, introduced=7.0)));
+extern GLuint glGetUniformBlockIndex(GLuint program, const GLchar* uniformBlockName) __attribute__((availability(ios, introduced=7.0)));
+extern void glGetActiveUniformBlockiv(GLuint program, GLuint uniformBlockIndex, GLenum pname, GLint* params) __attribute__((availability(ios, introduced=7.0)));
+extern void glGetActiveUniformBlockName(GLuint program, GLuint uniformBlockIndex, GLsizei bufSize, GLsizei* length, GLchar* uniformBlockName) __attribute__((availability(ios, introduced=7.0)));
+extern void glUniformBlockBinding(GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding) __attribute__((availability(ios, introduced=7.0)));
+extern void glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei instancecount) __attribute__((availability(ios, introduced=7.0)));
+extern void glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices, GLsizei instancecount) __attribute__((availability(ios, introduced=7.0)));
+extern GLsync glFenceSync(GLenum condition, GLbitfield flags) __attribute__((availability(ios, introduced=7.0)));
+extern GLboolean glIsSync(GLsync sync) __attribute__((availability(ios, introduced=7.0)));
+extern void glDeleteSync(GLsync sync) __attribute__((availability(ios, introduced=7.0)));
+extern GLenum glClientWaitSync(GLsync sync, GLbitfield flags, GLuint64 timeout) __attribute__((availability(ios, introduced=7.0)));
+extern void glWaitSync(GLsync sync, GLbitfield flags, GLuint64 timeout) __attribute__((availability(ios, introduced=7.0)));
+extern void glGetInteger64v(GLenum pname, GLint64* params) __attribute__((availability(ios, introduced=7.0)));
+extern void glGetSynciv(GLsync sync, GLenum pname, GLsizei bufSize, GLsizei* length, GLint* values) __attribute__((availability(ios, introduced=7.0)));
+extern void glGetInteger64i_v(GLenum target, GLuint index, GLint64* data) __attribute__((availability(ios, introduced=7.0)));
+extern void glGetBufferParameteri64v(GLenum target, GLenum pname, GLint64* params) __attribute__((availability(ios, introduced=7.0)));
+extern void glGenSamplers(GLsizei count, GLuint* samplers) __attribute__((availability(ios, introduced=7.0)));
+extern void glDeleteSamplers(GLsizei count, const GLuint* samplers) __attribute__((availability(ios, introduced=7.0)));
+extern GLboolean glIsSampler(GLuint sampler) __attribute__((availability(ios, introduced=7.0)));
+extern void glBindSampler(GLuint unit, GLuint sampler) __attribute__((availability(ios, introduced=7.0)));
+extern void glSamplerParameteri(GLuint sampler, GLenum pname, GLint param) __attribute__((availability(ios, introduced=7.0)));
+extern void glSamplerParameteriv(GLuint sampler, GLenum pname, const GLint* param) __attribute__((availability(ios, introduced=7.0)));
+extern void glSamplerParameterf(GLuint sampler, GLenum pname, GLfloat param) __attribute__((availability(ios, introduced=7.0)));
+extern void glSamplerParameterfv(GLuint sampler, GLenum pname, const GLfloat* param) __attribute__((availability(ios, introduced=7.0)));
+extern void glGetSamplerParameteriv(GLuint sampler, GLenum pname, GLint* params) __attribute__((availability(ios, introduced=7.0)));
+extern void glGetSamplerParameterfv(GLuint sampler, GLenum pname, GLfloat* params) __attribute__((availability(ios, introduced=7.0)));
+extern void glVertexAttribDivisor(GLuint index, GLuint divisor) __attribute__((availability(ios, introduced=7.0)));
+extern void glBindTransformFeedback(GLenum target, GLuint id) __attribute__((availability(ios, introduced=7.0)));
+extern void glDeleteTransformFeedbacks(GLsizei n, const GLuint* ids) __attribute__((availability(ios, introduced=7.0)));
+extern void glGenTransformFeedbacks(GLsizei n, GLuint* ids) __attribute__((availability(ios, introduced=7.0)));
+extern GLboolean glIsTransformFeedback(GLuint id) __attribute__((availability(ios, introduced=7.0)));
+extern void glPauseTransformFeedback(void) __attribute__((availability(ios, introduced=7.0)));
+extern void glResumeTransformFeedback(void) __attribute__((availability(ios, introduced=7.0)));
+extern void glGetProgramBinary(GLuint program, GLsizei bufSize, GLsizei* length, GLenum* binaryFormat, GLvoid* binary) __attribute__((availability(ios, introduced=7.0)));
+extern void glProgramBinary(GLuint program, GLenum binaryFormat, const GLvoid* binary, GLsizei length) __attribute__((availability(ios, introduced=7.0)));
+extern void glProgramParameteri(GLuint program, GLenum pname, GLint value) __attribute__((availability(ios, introduced=7.0)));
+extern void glInvalidateFramebuffer(GLenum target, GLsizei numAttachments, const GLenum* attachments) __attribute__((availability(ios, introduced=7.0)));
+extern void glInvalidateSubFramebuffer(GLenum target, GLsizei numAttachments, const GLenum* attachments, GLint x, GLint y, GLsizei width, GLsizei height) __attribute__((availability(ios, introduced=7.0)));
+extern void glTexStorage2D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height) __attribute__((availability(ios, introduced=7.0)));
+extern void glTexStorage3D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth) __attribute__((availability(ios, introduced=7.0)));
+extern void glGetInternalformativ(GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint* params) __attribute__((availability(ios, introduced=7.0)));
+
+void glReadBuffer(GLenum mode)
+{
+    revenant_es3_error();
+}
+
+void glTexImage3D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid* pixels)
+{
+    revenant_es3_error();
+}
+
+void glTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const GLvoid* pixels)
+{
+    revenant_es3_error();
+}
+
+void glCopyTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height)
+{
+    revenant_es3_error();
+}
+
+void glDrawBuffers(GLsizei n, const GLenum* bufs)
+{
+    revenant_es3_error();
+}
+
+void glUniformMatrix2x3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
+{
+    revenant_es3_error();
+}
+
+void glUniformMatrix3x2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
+{
+    revenant_es3_error();
+}
+
+void glUniformMatrix2x4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
+{
+    revenant_es3_error();
+}
+
+void glUniformMatrix4x2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
+{
+    revenant_es3_error();
+}
+
+void glUniformMatrix3x4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
+{
+    revenant_es3_error();
+}
+
+void glUniformMatrix4x3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
+{
+    revenant_es3_error();
+}
+
+void glBlitFramebuffer(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter)
+{
+    revenant_es3_error();
+}
+
+void glRenderbufferStorageMultisample(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height)
+{
+    static void (*fn)(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
+    if (!fn)
+        fn = (void (*)(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height))dlsym(RTLD_DEFAULT, "glRenderbufferStorageMultisampleAPPLE");
+    if (fn)
+        { fn(target, samples, internalformat, width, height); return; }
+    revenant_es3_error();
+}
+
+void glFramebufferTextureLayer(GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer)
+{
+    revenant_es3_error();
+}
+
+GLvoid* glMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access)
+{
+    static GLvoid* (*fn)(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access);
+    if (!fn)
+        fn = (GLvoid* (*)(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access))dlsym(RTLD_DEFAULT, "glMapBufferRangeEXT");
+    if (fn)
+        return fn(target, offset, length, access);
+    revenant_es3_error();
+    return NULL;
+}
+
+void glFlushMappedBufferRange(GLenum target, GLintptr offset, GLsizeiptr length)
+{
+    static void (*fn)(GLenum target, GLintptr offset, GLsizeiptr length);
+    if (!fn)
+        fn = (void (*)(GLenum target, GLintptr offset, GLsizeiptr length))dlsym(RTLD_DEFAULT, "glFlushMappedBufferRangeEXT");
+    if (fn)
+        { fn(target, offset, length); return; }
+    revenant_es3_error();
+}
+
+void glBindVertexArray(GLuint array)
+{
+    static void (*fn)(GLuint array);
+    if (!fn)
+        fn = (void (*)(GLuint array))dlsym(RTLD_DEFAULT, "glBindVertexArrayOES");
+    if (fn)
+        { fn(array); return; }
+    revenant_es3_error();
+}
+
+void glDeleteVertexArrays(GLsizei n, const GLuint* arrays)
+{
+    static void (*fn)(GLsizei n, const GLuint* arrays);
+    if (!fn)
+        fn = (void (*)(GLsizei n, const GLuint* arrays))dlsym(RTLD_DEFAULT, "glDeleteVertexArraysOES");
+    if (fn)
+        { fn(n, arrays); return; }
+    revenant_es3_error();
+}
+
+void glGenVertexArrays(GLsizei n, GLuint* arrays)
+{
+    static void (*fn)(GLsizei n, GLuint* arrays);
+    if (!fn)
+        fn = (void (*)(GLsizei n, GLuint* arrays))dlsym(RTLD_DEFAULT, "glGenVertexArraysOES");
+    if (fn)
+        { fn(n, arrays); return; }
+    revenant_es3_error();
+}
+
+GLboolean glIsVertexArray(GLuint array)
+{
+    static GLboolean (*fn)(GLuint array);
+    if (!fn)
+        fn = (GLboolean (*)(GLuint array))dlsym(RTLD_DEFAULT, "glIsVertexArrayOES");
+    if (fn)
+        return fn(array);
+    revenant_es3_error();
+    return (GLboolean)0;
+}
+
+void glGetIntegeri_v(GLenum target, GLuint index, GLint* data)
+{
+    revenant_es3_error();
+}
+
+void glBeginTransformFeedback(GLenum primitiveMode)
+{
+    revenant_es3_error();
+}
+
+void glEndTransformFeedback(void)
+{
+    revenant_es3_error();
+}
+
+void glBindBufferRange(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size)
+{
+    revenant_es3_error();
+}
+
+void glBindBufferBase(GLenum target, GLuint index, GLuint buffer)
+{
+    revenant_es3_error();
+}
+
+void glTransformFeedbackVaryings(GLuint program, GLsizei count, const GLchar* const *varyings, GLenum bufferMode)
+{
+    revenant_es3_error();
+}
+
+void glGetTransformFeedbackVarying(GLuint program, GLuint index, GLsizei bufSize, GLsizei* length, GLsizei* size, GLenum* type, GLchar* name)
+{
+    revenant_es3_error();
+}
+
+void glVertexAttribIPointer(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid* pointer)
+{
+    revenant_es3_error();
+}
+
+void glGetVertexAttribIiv(GLuint index, GLenum pname, GLint* params)
+{
+    revenant_es3_error();
+}
+
+void glGetVertexAttribIuiv(GLuint index, GLenum pname, GLuint* params)
+{
+    revenant_es3_error();
+}
+
+void glVertexAttribI4i(GLuint index, GLint x, GLint y, GLint z, GLint w)
+{
+    revenant_es3_error();
+}
+
+void glVertexAttribI4ui(GLuint index, GLuint x, GLuint y, GLuint z, GLuint w)
+{
+    revenant_es3_error();
+}
+
+void glVertexAttribI4iv(GLuint index, const GLint* v)
+{
+    revenant_es3_error();
+}
+
+void glVertexAttribI4uiv(GLuint index, const GLuint* v)
+{
+    revenant_es3_error();
+}
+
+void glGetUniformuiv(GLuint program, GLint location, GLuint* params)
+{
+    revenant_es3_error();
+}
+
+GLint glGetFragDataLocation(GLuint program, const GLchar *name)
+{
+    revenant_es3_error();
+    return (GLint)0;
+}
+
+void glUniform1ui(GLint location, GLuint v0)
+{
+    revenant_es3_error();
+}
+
+void glUniform2ui(GLint location, GLuint v0, GLuint v1)
+{
+    revenant_es3_error();
+}
+
+void glUniform3ui(GLint location, GLuint v0, GLuint v1, GLuint v2)
+{
+    revenant_es3_error();
+}
+
+void glUniform4ui(GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3)
+{
+    revenant_es3_error();
+}
+
+void glUniform1uiv(GLint location, GLsizei count, const GLuint* value)
+{
+    revenant_es3_error();
+}
+
+void glUniform2uiv(GLint location, GLsizei count, const GLuint* value)
+{
+    revenant_es3_error();
+}
+
+void glUniform3uiv(GLint location, GLsizei count, const GLuint* value)
+{
+    revenant_es3_error();
+}
+
+void glUniform4uiv(GLint location, GLsizei count, const GLuint* value)
+{
+    revenant_es3_error();
+}
+
+void glClearBufferiv(GLenum buffer, GLint drawbuffer, const GLint* value)
+{
+    revenant_es3_error();
+}
+
+void glClearBufferuiv(GLenum buffer, GLint drawbuffer, const GLuint* value)
+{
+    revenant_es3_error();
+}
+
+void glClearBufferfv(GLenum buffer, GLint drawbuffer, const GLfloat* value)
+{
+    revenant_es3_error();
+}
+
+void glClearBufferfi(GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil)
+{
+    revenant_es3_error();
+}
+
+const GLubyte *glGetStringi(GLenum name, GLuint index)
+{
+    const GLubyte *(*get)(GLenum) = (const GLubyte *(*)(GLenum))dlsym(RTLD_DEFAULT, "glGetString");
+    if (name != 0x1F03 || !get) {
+        revenant_es3_error();
+        return NULL;
+    }
+    const char *text = (const char *)get(0x1F03);
+    static char token[256];
+    while (text && *text) {
+        while (*text == ' ')
+            text++;
+        size_t length = strcspn(text, " ");
+        if (!length)
+            break;
+        if (index-- == 0) {
+            length = length < sizeof token - 1 ? length : sizeof token - 1;
+            memcpy(token, text, length);
+            token[length] = 0;
+            return (const GLubyte *)token;
+        }
+        text += length;
+    }
+    revenant_es3_value_error();
+    return NULL;
+}
+
+void glCopyBufferSubData(GLenum readTarget, GLenum writeTarget, GLintptr readOffset, GLintptr writeOffset, GLsizeiptr size)
+{
+    revenant_es3_error();
+}
+
+void glGetUniformIndices(GLuint program, GLsizei uniformCount, const GLchar* const *uniformNames, GLuint* uniformIndices)
+{
+    revenant_es3_error();
+}
+
+void glGetActiveUniformsiv(GLuint program, GLsizei uniformCount, const GLuint* uniformIndices, GLenum pname, GLint* params)
+{
+    revenant_es3_error();
+}
+
+GLuint glGetUniformBlockIndex(GLuint program, const GLchar* uniformBlockName)
+{
+    revenant_es3_error();
+    return (GLuint)0;
+}
+
+void glGetActiveUniformBlockiv(GLuint program, GLuint uniformBlockIndex, GLenum pname, GLint* params)
+{
+    revenant_es3_error();
+}
+
+void glGetActiveUniformBlockName(GLuint program, GLuint uniformBlockIndex, GLsizei bufSize, GLsizei* length, GLchar* uniformBlockName)
+{
+    revenant_es3_error();
+}
+
+void glUniformBlockBinding(GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding)
+{
+    revenant_es3_error();
+}
+
+void glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei instancecount)
+{
+    revenant_es3_error();
+}
+
+void glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices, GLsizei instancecount)
+{
+    revenant_es3_error();
+}
+
+GLsync glFenceSync(GLenum condition, GLbitfield flags)
+{
+    static GLsync (*fn)(GLenum condition, GLbitfield flags);
+    if (!fn)
+        fn = (GLsync (*)(GLenum condition, GLbitfield flags))dlsym(RTLD_DEFAULT, "glFenceSyncAPPLE");
+    if (fn)
+        return fn(condition, flags);
+    revenant_es3_error();
+    return (GLsync)0;
+}
+
+GLboolean glIsSync(GLsync sync)
+{
+    static GLboolean (*fn)(GLsync sync);
+    if (!fn)
+        fn = (GLboolean (*)(GLsync sync))dlsym(RTLD_DEFAULT, "glIsSyncAPPLE");
+    if (fn)
+        return fn(sync);
+    revenant_es3_error();
+    return (GLboolean)0;
+}
+
+void glDeleteSync(GLsync sync)
+{
+    static void (*fn)(GLsync sync);
+    if (!fn)
+        fn = (void (*)(GLsync sync))dlsym(RTLD_DEFAULT, "glDeleteSyncAPPLE");
+    if (fn)
+        { fn(sync); return; }
+    revenant_es3_error();
+}
+
+GLenum glClientWaitSync(GLsync sync, GLbitfield flags, GLuint64 timeout)
+{
+    static GLenum (*fn)(GLsync sync, GLbitfield flags, GLuint64 timeout);
+    if (!fn)
+        fn = (GLenum (*)(GLsync sync, GLbitfield flags, GLuint64 timeout))dlsym(RTLD_DEFAULT, "glClientWaitSyncAPPLE");
+    if (fn)
+        return fn(sync, flags, timeout);
+    revenant_es3_error();
+    return (GLenum)0;
+}
+
+void glWaitSync(GLsync sync, GLbitfield flags, GLuint64 timeout)
+{
+    static void (*fn)(GLsync sync, GLbitfield flags, GLuint64 timeout);
+    if (!fn)
+        fn = (void (*)(GLsync sync, GLbitfield flags, GLuint64 timeout))dlsym(RTLD_DEFAULT, "glWaitSyncAPPLE");
+    if (fn)
+        { fn(sync, flags, timeout); return; }
+    revenant_es3_error();
+}
+
+void glGetInteger64v(GLenum pname, GLint64* params)
+{
+    static void (*fn)(GLenum pname, GLint64* params);
+    if (!fn)
+        fn = (void (*)(GLenum pname, GLint64* params))dlsym(RTLD_DEFAULT, "glGetInteger64vAPPLE");
+    if (fn)
+        { fn(pname, params); return; }
+    revenant_es3_error();
+}
+
+void glGetSynciv(GLsync sync, GLenum pname, GLsizei bufSize, GLsizei* length, GLint* values)
+{
+    static void (*fn)(GLsync sync, GLenum pname, GLsizei bufSize, GLsizei* length, GLint* values);
+    if (!fn)
+        fn = (void (*)(GLsync sync, GLenum pname, GLsizei bufSize, GLsizei* length, GLint* values))dlsym(RTLD_DEFAULT, "glGetSyncivAPPLE");
+    if (fn)
+        { fn(sync, pname, bufSize, length, values); return; }
+    revenant_es3_error();
+}
+
+void glGetInteger64i_v(GLenum target, GLuint index, GLint64* data)
+{
+    revenant_es3_error();
+}
+
+void glGetBufferParameteri64v(GLenum target, GLenum pname, GLint64* params)
+{
+    revenant_es3_error();
+}
+
+void glGenSamplers(GLsizei count, GLuint* samplers)
+{
+    revenant_es3_error();
+}
+
+void glDeleteSamplers(GLsizei count, const GLuint* samplers)
+{
+    revenant_es3_error();
+}
+
+GLboolean glIsSampler(GLuint sampler)
+{
+    revenant_es3_error();
+    return (GLboolean)0;
+}
+
+void glBindSampler(GLuint unit, GLuint sampler)
+{
+    revenant_es3_error();
+}
+
+void glSamplerParameteri(GLuint sampler, GLenum pname, GLint param)
+{
+    revenant_es3_error();
+}
+
+void glSamplerParameteriv(GLuint sampler, GLenum pname, const GLint* param)
+{
+    revenant_es3_error();
+}
+
+void glSamplerParameterf(GLuint sampler, GLenum pname, GLfloat param)
+{
+    revenant_es3_error();
+}
+
+void glSamplerParameterfv(GLuint sampler, GLenum pname, const GLfloat* param)
+{
+    revenant_es3_error();
+}
+
+void glGetSamplerParameteriv(GLuint sampler, GLenum pname, GLint* params)
+{
+    revenant_es3_error();
+}
+
+void glGetSamplerParameterfv(GLuint sampler, GLenum pname, GLfloat* params)
+{
+    revenant_es3_error();
+}
+
+void glVertexAttribDivisor(GLuint index, GLuint divisor)
+{
+    revenant_es3_error();
+}
+
+void glBindTransformFeedback(GLenum target, GLuint id)
+{
+    revenant_es3_error();
+}
+
+void glDeleteTransformFeedbacks(GLsizei n, const GLuint* ids)
+{
+    revenant_es3_error();
+}
+
+void glGenTransformFeedbacks(GLsizei n, GLuint* ids)
+{
+    revenant_es3_error();
+}
+
+GLboolean glIsTransformFeedback(GLuint id)
+{
+    revenant_es3_error();
+    return (GLboolean)0;
+}
+
+void glPauseTransformFeedback(void)
+{
+    revenant_es3_error();
+}
+
+void glResumeTransformFeedback(void)
+{
+    revenant_es3_error();
+}
+
+void glGetProgramBinary(GLuint program, GLsizei bufSize, GLsizei* length, GLenum* binaryFormat, GLvoid* binary)
+{
+    revenant_es3_error();
+}
+
+void glProgramBinary(GLuint program, GLenum binaryFormat, const GLvoid* binary, GLsizei length)
+{
+    revenant_es3_error();
+}
+
+void glProgramParameteri(GLuint program, GLenum pname, GLint value)
+{
+    static void (*fn)(GLuint program, GLenum pname, GLint value);
+    if (!fn)
+        fn = (void (*)(GLuint program, GLenum pname, GLint value))dlsym(RTLD_DEFAULT, "glProgramParameteriEXT");
+    if (fn)
+        { fn(program, pname, value); return; }
+    revenant_es3_error();
+}
+
+void glInvalidateFramebuffer(GLenum target, GLsizei numAttachments, const GLenum* attachments)
+{
+    static void (*fn)(GLenum target, GLsizei numAttachments, const GLenum* attachments);
+    if (!fn)
+        fn = (void (*)(GLenum target, GLsizei numAttachments, const GLenum* attachments))dlsym(RTLD_DEFAULT, "glDiscardFramebufferEXT");
+    if (fn)
+        { fn(target, numAttachments, attachments); return; }
+    revenant_es3_error();
+}
+
+void glInvalidateSubFramebuffer(GLenum target, GLsizei numAttachments, const GLenum* attachments, GLint x, GLint y, GLsizei width, GLsizei height)
+{
+    revenant_es3_error();
+}
+
+void glTexStorage2D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height)
+{
+    static void (*fn)(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height);
+    if (!fn)
+        fn = (void (*)(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height))dlsym(RTLD_DEFAULT, "glTexStorage2DEXT");
+    if (fn)
+        { fn(target, levels, internalformat, width, height); return; }
+    revenant_es3_error();
+}
+
+void glTexStorage3D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth)
+{
+    revenant_es3_error();
+}
+
+void glGetInternalformativ(GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint* params)
+{
+    revenant_es3_error();
+}

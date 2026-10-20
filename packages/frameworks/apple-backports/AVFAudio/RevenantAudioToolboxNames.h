@@ -1,0 +1,2 @@
+#define RevenantAudioComponentRegistrationsChangedName @"com.apple.coreaudio.AudioComponentRegistrationsChanged"
+#define RevenantAudioComponentInstanceInvalidatedName @"com.apple.coreaudio.AudioComponentInstanceInvalidated"

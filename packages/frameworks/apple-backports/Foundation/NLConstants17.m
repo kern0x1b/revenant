@@ -1,0 +1,33 @@
+#import <Foundation/Foundation.h>
+
+NSString *const NLScriptArabic = @"Arab";
+NSString *const NLScriptArmenian = @"Armn";
+NSString *const NLScriptBengali = @"Beng";
+NSString *const NLScriptCanadianAboriginalSyllabics = @"Cans";
+NSString *const NLScriptCherokee = @"Cher";
+NSString *const NLScriptCyrillic = @"Cyrl";
+NSString *const NLScriptDevanagari = @"Deva";
+NSString *const NLScriptEthiopic = @"Ethi";
+NSString *const NLScriptGeorgian = @"Geor";
+NSString *const NLScriptGreek = @"Grek";
+NSString *const NLScriptGujarati = @"Gujr";
+NSString *const NLScriptGurmukhi = @"Guru";
+NSString *const NLScriptHebrew = @"Hebr";
+NSString *const NLScriptJapanese = @"Jpan";
+NSString *const NLScriptKannada = @"Knda";
+NSString *const NLScriptKhmer = @"Khmr";
+NSString *const NLScriptKorean = @"Kore";
+NSString *const NLScriptLao = @"Laoo";
+NSString *const NLScriptLatin = @"Latn";
+NSString *const NLScriptMalayalam = @"Mlym";
+NSString *const NLScriptMongolian = @"Mong";
+NSString *const NLScriptMyanmar = @"Mymr";
+NSString *const NLScriptOriya = @"Orya";
+NSString *const NLScriptSimplifiedChinese = @"Hans";
+NSString *const NLScriptSinhala = @"Sinh";
+NSString *const NLScriptTamil = @"Taml";
+NSString *const NLScriptTelugu = @"Telu";
+NSString *const NLScriptThai = @"Thai";
+NSString *const NLScriptTibetan = @"Tibt";
+NSString *const NLScriptTraditionalChinese = @"Hant";
+NSString *const NLScriptUndetermined = @"Zyyy";

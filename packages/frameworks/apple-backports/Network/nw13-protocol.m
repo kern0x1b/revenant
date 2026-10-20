@@ -1,0 +1,19 @@
+#import "RevenantNW.h"
+
+nw_protocol_definition_t nw_protocol_copy_ws_definition(void)
+{
+    static RevenantNWProtocolDefinition *definition;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        definition = [[RevenantNWProtocolDefinition alloc] init];
+        definition->_family = @"nw_ws";
+        definition->_identifier = @"nw_ws";
+    });
+    return definition;
+}
+
+bool nw_protocol_metadata_is_ws(nw_protocol_metadata_t metadata)
+{
+    RevenantNWProtocolMetadata *value = (RevenantNWProtocolMetadata *)metadata;
+    return value && [value->_definition->_family isEqualToString:@"nw_ws"];
+}

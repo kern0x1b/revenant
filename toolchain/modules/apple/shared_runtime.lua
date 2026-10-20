@@ -4,7 +4,7 @@ import("dyld")
 import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..")})
 
-local ADDON = path.join(os.scriptdir(), "..", "..", "addons", "r", "revenant", "xmake.lua")
+local ADDON = path.join(os.scriptdir(), "..", "..", "..", "addons", "r", "revenant", "xmake.lua")
 
 function package_name(kind, buildhash)
     return "org.revenant." .. kind .. "-" .. buildhash:sub(1, 8)

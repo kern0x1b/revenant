@@ -1,0 +1,47 @@
+#import <ImageIO/ImageIO.h>
+
+extern CFStringRef const kCGImageAnimationDelayTime;
+extern CFStringRef const kCGImageAnimationLoopCount;
+extern CFStringRef const kCGImageAnimationStartIndex;
+extern CFStringRef const kCGImageAuxiliaryDataTypeSemanticSegmentationHairMatte;
+extern CFStringRef const kCGImageAuxiliaryDataTypeSemanticSegmentationSkinMatte;
+extern CFStringRef const kCGImageAuxiliaryDataTypeSemanticSegmentationTeethMatte;
+extern CFStringRef const kCGImagePropertyAPNGCanvasPixelHeight;
+extern CFStringRef const kCGImagePropertyAPNGCanvasPixelWidth;
+extern CFStringRef const kCGImagePropertyAPNGFrameInfoArray;
+extern CFStringRef const kCGImagePropertyExifOffsetTime;
+extern CFStringRef const kCGImagePropertyExifOffsetTimeDigitized;
+extern CFStringRef const kCGImagePropertyExifOffsetTimeOriginal;
+extern CFStringRef const kCGImagePropertyGIFCanvasPixelHeight;
+extern CFStringRef const kCGImagePropertyGIFCanvasPixelWidth;
+extern CFStringRef const kCGImagePropertyGIFFrameInfoArray;
+extern CFStringRef const kCGImagePropertyHEICSCanvasPixelHeight;
+extern CFStringRef const kCGImagePropertyHEICSCanvasPixelWidth;
+extern CFStringRef const kCGImagePropertyHEICSDelayTime;
+extern CFStringRef const kCGImagePropertyHEICSDictionary;
+extern CFStringRef const kCGImagePropertyHEICSFrameInfoArray;
+extern CFStringRef const kCGImagePropertyHEICSLoopCount;
+extern CFStringRef const kCGImagePropertyHEICSUnclampedDelayTime;
+
+CFStringRef const kCGImageAnimationDelayTime = CFSTR("DelayTime");
+CFStringRef const kCGImageAnimationLoopCount = CFSTR("LoopCount");
+CFStringRef const kCGImageAnimationStartIndex = CFSTR("StartIndex");
+CFStringRef const kCGImageAuxiliaryDataTypeSemanticSegmentationHairMatte = CFSTR("kCGImageAuxiliaryDataTypeSemanticSegmentationHairMatte");
+CFStringRef const kCGImageAuxiliaryDataTypeSemanticSegmentationSkinMatte = CFSTR("kCGImageAuxiliaryDataTypeSemanticSegmentationSkinMatte");
+CFStringRef const kCGImageAuxiliaryDataTypeSemanticSegmentationTeethMatte = CFSTR("kCGImageAuxiliaryDataTypeSemanticSegmentationTeethMatte");
+CFStringRef const kCGImagePropertyAPNGCanvasPixelHeight = CFSTR("CanvasPixelHeight");
+CFStringRef const kCGImagePropertyAPNGCanvasPixelWidth = CFSTR("CanvasPixelWidth");
+CFStringRef const kCGImagePropertyAPNGFrameInfoArray = CFSTR("FrameInfo");
+CFStringRef const kCGImagePropertyExifOffsetTime = CFSTR("OffsetTime");
+CFStringRef const kCGImagePropertyExifOffsetTimeDigitized = CFSTR("OffsetTimeDigitized");
+CFStringRef const kCGImagePropertyExifOffsetTimeOriginal = CFSTR("OffsetTimeOriginal");
+CFStringRef const kCGImagePropertyGIFCanvasPixelHeight = CFSTR("CanvasPixelHeight");
+CFStringRef const kCGImagePropertyGIFCanvasPixelWidth = CFSTR("CanvasPixelWidth");
+CFStringRef const kCGImagePropertyGIFFrameInfoArray = CFSTR("FrameInfo");
+CFStringRef const kCGImagePropertyHEICSCanvasPixelHeight = CFSTR("CanvasPixelHeight");
+CFStringRef const kCGImagePropertyHEICSCanvasPixelWidth = CFSTR("CanvasPixelWidth");
+CFStringRef const kCGImagePropertyHEICSDelayTime = CFSTR("DelayTime");
+CFStringRef const kCGImagePropertyHEICSDictionary = CFSTR("{HEICS}");
+CFStringRef const kCGImagePropertyHEICSFrameInfoArray = CFSTR("FrameInfo");
+CFStringRef const kCGImagePropertyHEICSLoopCount = CFSTR("LoopCount");
+CFStringRef const kCGImagePropertyHEICSUnclampedDelayTime = CFSTR("UnclampedDelayTime");

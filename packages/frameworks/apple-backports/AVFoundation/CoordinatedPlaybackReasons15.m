@@ -1,0 +1,17 @@
+#import <AVFoundation/AVFoundation.h>
+
+NSString *const AVCoordinatedPlaybackSuspensionReasonAudioSessionInterrupted = @"AVCoordinatedPlaybackSuspensionReasonAudioSessionInterrupted";
+NSString *const AVCoordinatedPlaybackSuspensionReasonCoordinatedPlaybackNotPossible = @"AVCoordinatedPlaybackSuspensionReasonCoordinatedPlaybackNotPossible";
+NSString *const AVCoordinatedPlaybackSuspensionReasonPlayingInterstitial = @"AVCoordinatedPlaybackSuspensionReasonPlayingInterstitial";
+NSString *const AVCoordinatedPlaybackSuspensionReasonStallRecovery = @"AVCoordinatedPlaybackSuspensionReasonStallRecovery";
+NSString *const AVCoordinatedPlaybackSuspensionReasonUserActionRequired = @"AVCoordinatedPlaybackSuspensionReasonUserActionRequired";
+NSString *const AVCoordinatedPlaybackSuspensionReasonUserIsChangingCurrentTime = @"AVCoordinatedPlaybackSuspensionReasonUserIsChangingCurrentTime";
+NSString *const AVPlaybackCoordinatorOtherParticipantsDidChangeNotification = @"AVPlaybackCoordinatorOtherParticipantsDidChangeNotification";
+NSString *const AVPlaybackCoordinatorSuspensionReasonsDidChangeNotification = @"AVPlaybackCoordinatorSuspensionReasonsDidChangeNotification";
+NSString *const AVPlayerRateDidChangeOriginatingParticipantKey = @"AVPlayerRateDidChangeOriginatingParticipantKey";
+NSString *const AVPlayerRateDidChangeReasonAppBackgrounded = @"AVPlayerRateDidChangeReasonAppBackgrounded";
+NSString *const AVPlayerRateDidChangeReasonAudioSessionInterrupted = @"AVPlayerRateDidChangeReasonAudioSessionInterrupted";
+NSString *const AVPlayerRateDidChangeReasonSetRateCalled = @"AVPlayerRateDidChangeReasonSetRateCalled";
+NSString *const AVPlayerRateDidChangeReasonSetRateFailed = @"AVPlayerRateDidChangeReasonSetRateFailed";
+NSString *const AVPlayerWaitingDuringInterstitialEventReason = @"AVPlayerWaitingDuringInterstitialEventReason";
+NSString *const AVPlayerWaitingForCoordinatedPlaybackReason = @"AVPlayerWaitingForCoordinatedPlaybackReason";

@@ -1,0 +1,35 @@
+#import <HealthKit/HealthKit.h>
+
+HKCategoryTypeIdentifier const HKCategoryTypeIdentifierBleedingAfterPregnancy = @"HKCategoryTypeIdentifierBleedingAfterPregnancy";
+HKCategoryTypeIdentifier const HKCategoryTypeIdentifierBleedingDuringPregnancy = @"HKCategoryTypeIdentifierBleedingDuringPregnancy";
+HKCategoryTypeIdentifier const HKCategoryTypeIdentifierSleepApneaEvent = @"HKCategoryTypeIdentifierSleepApneaEvent";
+HKClinicalTypeIdentifier const HKClinicalTypeIdentifierClinicalNoteRecord = @"HKClinicalTypeIdentifierClinicalNoteRecord";
+NSString * const HKDataTypeIdentifierStateOfMind = @"HKDataTypeStateOfMind";
+HKFHIRResourceType const HKFHIRResourceTypeDiagnosticReport = @"DiagnosticReport";
+HKFHIRResourceType const HKFHIRResourceTypeDocumentReference = @"DocumentReference";
+NSString * const HKMetadataKeyActivityType = @"HKActivityType";
+NSString * const HKMetadataKeyAppleFitnessPlusSession = @"HKMetadataKeyAppleFitnessPlusSession";
+NSString * const HKMetadataKeyCyclingFunctionalThresholdPowerTestType = @"HKCyclingCyclingFunctionalThresholdPowerTestType";
+NSString * const HKMetadataKeyHeadphoneGain = @"HKMetadataKeyHeadphoneGain";
+NSString * const HKMetadataKeyMaximumLightIntensity = @"HKMetadataKeyMaximumLightIntensity";
+NSString * const HKMetadataKeyPhysicalEffortEstimationType = @"HKPhysicalEffortEstimationType";
+NSString * const HKMetadataKeyWaterSalinity = @"HKMetadataKeyWaterSalinity";
+NSString * const HKPredicateKeyPathWorkoutEffortRelationship = @"ratingOfExertionAssociation";
+HKQuantityTypeIdentifier const HKQuantityTypeIdentifierAppleSleepingBreathingDisturbances = @"HKQuantityTypeIdentifierAppleSleepingBreathingDisturbances";
+HKQuantityTypeIdentifier const HKQuantityTypeIdentifierCrossCountrySkiingSpeed = @"HKQuantityTypeIdentifierCrossCountrySkiingSpeed";
+HKQuantityTypeIdentifier const HKQuantityTypeIdentifierCyclingCadence = @"HKQuantityTypeIdentifierCyclingCadence";
+HKQuantityTypeIdentifier const HKQuantityTypeIdentifierCyclingFunctionalThresholdPower = @"HKQuantityTypeIdentifierCyclingFunctionalThresholdPower";
+HKQuantityTypeIdentifier const HKQuantityTypeIdentifierCyclingPower = @"HKQuantityTypeIdentifierCyclingPower";
+HKQuantityTypeIdentifier const HKQuantityTypeIdentifierCyclingSpeed = @"HKQuantityTypeIdentifierCyclingSpeed";
+HKQuantityTypeIdentifier const HKQuantityTypeIdentifierDistanceCrossCountrySkiing = @"HKQuantityTypeIdentifierDistanceCrossCountrySkiing";
+HKQuantityTypeIdentifier const HKQuantityTypeIdentifierDistancePaddleSports = @"HKQuantityTypeIdentifierDistancePaddleSports";
+HKQuantityTypeIdentifier const HKQuantityTypeIdentifierDistanceRowing = @"HKQuantityTypeIdentifierDistanceRowing";
+HKQuantityTypeIdentifier const HKQuantityTypeIdentifierDistanceSkatingSports = @"HKQuantityTypeIdentifierDistanceSkatingSports";
+HKQuantityTypeIdentifier const HKQuantityTypeIdentifierEstimatedWorkoutEffortScore = @"HKQuantityTypeIdentifierEstimatedWorkoutEffortScore";
+HKQuantityTypeIdentifier const HKQuantityTypeIdentifierPaddleSportsSpeed = @"HKQuantityTypeIdentifierPaddleSportsSpeed";
+HKQuantityTypeIdentifier const HKQuantityTypeIdentifierPhysicalEffort = @"HKQuantityTypeIdentifierPhysicalEffort";
+HKQuantityTypeIdentifier const HKQuantityTypeIdentifierRowingSpeed = @"HKQuantityTypeIdentifierRowingSpeed";
+HKQuantityTypeIdentifier const HKQuantityTypeIdentifierTimeInDaylight = @"HKQuantityTypeIdentifierTimeInDaylight";
+HKQuantityTypeIdentifier const HKQuantityTypeIdentifierWorkoutEffortScore = @"HKQuantityTypeIdentifierWorkoutEffortScore";
+NSString * const HKScoredAssessmentTypeIdentifierGAD7 = @"HKScoredAssessmentTypeIdentifierGAD7";
+NSString * const HKScoredAssessmentTypeIdentifierPHQ9 = @"HKScoredAssessmentTypeIdentifierPHQ9";

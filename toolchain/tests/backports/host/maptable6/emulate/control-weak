@@ -1,7 +1,0 @@
-Package: org.revenant.weakprobe
-Name: weakprobe
-Architecture: iphoneos-arm
-Description: __weak probe
-Maintainer: revenant
-Author: revenant
-Section: Development

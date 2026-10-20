@@ -29,7 +29,7 @@ local function version_less(a, b)
     end
     return false
 end
-local registry = path.join(root, "packages", "frameworks", "apple-backports", "registry")
+local registry = path.join(root, "..", "packages", "frameworks", "apple-backports", "registry")
 local libraries = {}
 for line in io.lines(path.join(root, "modules", "apple", "backports.lua")) do
     local name, folder = line:match('name = "([A-Za-z]+Backports)", folder = "([A-Za-z]+)"')
@@ -128,7 +128,7 @@ while IFS='	' read -r file folder minimum name; do
 done < "$OUT/plan.txt"
 if [ "$examined" -eq 0 ] && [ "$fail" -eq 0 ]; then
     echo "protocol-sources: FAIL - 0 protocol sources examined, so nothing was compiled; the registry is"
-    echo "  $ROOT/packages/frameworks/apple-backports/registry and the libraries are read from"
+    echo "  $ROOT/../packages/frameworks/apple-backports/registry and the libraries are read from"
     echo "  $ROOT/modules/apple/backports.lua"
     exit 2
 fi

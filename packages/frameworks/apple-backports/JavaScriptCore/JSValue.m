@@ -1,0 +1,554 @@
+#import "JSInternal.h"
+#import <CoreGraphics/CoreGraphics.h>
+
+@interface JSValue ()
+{
+    JSValueRef _value;
+    JSContext *_context;
+}
+@end
+
+@implementation JSValue
+
++ (instancetype)revenant_valueWithJSValueRef:(JSValueRef)value context:(JSContext *)context
+{
+    JSValue *result = [self alloc];
+    result->_value = value;
+    result->_context = context;
+    JSValueProtect(context.JSGlobalContextRef, value);
+    return result;
+}
+
++ (JSValue *)valueWithJSValueRef:(JSValueRef)value inContext:(JSContext *)context
+{
+    return [self revenant_valueWithJSValueRef:value context:context];
+}
+
+- (void)dealloc
+{
+    JSValueUnprotect(_context.JSGlobalContextRef, _value);
+}
+
+- (JSValueRef)JSValueRef
+{
+    return _value;
+}
+
+- (JSContext *)context
+{
+    return _context;
+}
+
++ (JSValue *)valueWithObject:(id)value inContext:(JSContext *)context
+{
+    if ([value isKindOfClass:[JSValue class]])
+        return value;
+    return [self revenant_valueWithJSValueRef:revenant_js_box(context.JSGlobalContextRef, value) context:context];
+}
+
++ (JSValue *)valueWithBool:(BOOL)value inContext:(JSContext *)context
+{
+    return [self revenant_valueWithJSValueRef:JSValueMakeBoolean(context.JSGlobalContextRef, value) context:context];
+}
+
++ (JSValue *)valueWithDouble:(double)value inContext:(JSContext *)context
+{
+    return [self revenant_valueWithJSValueRef:JSValueMakeNumber(context.JSGlobalContextRef, value) context:context];
+}
+
++ (JSValue *)valueWithInt32:(int32_t)value inContext:(JSContext *)context
+{
+    return [self valueWithDouble:value inContext:context];
+}
+
++ (JSValue *)valueWithUInt32:(uint32_t)value inContext:(JSContext *)context
+{
+    return [self valueWithDouble:value inContext:context];
+}
+
++ (JSValue *)valueWithNewObjectInContext:(JSContext *)context
+{
+    return [self revenant_valueWithJSValueRef:JSObjectMake(context.JSGlobalContextRef, NULL, NULL) context:context];
+}
+
++ (JSValue *)valueWithNewArrayInContext:(JSContext *)context
+{
+    return [self revenant_valueWithJSValueRef:JSObjectMakeArray(context.JSGlobalContextRef, 0, NULL, NULL) context:context];
+}
+
++ (JSValue *)valueWithNewRegularExpressionFromPattern:(NSString *)pattern flags:(NSString *)flags inContext:(JSContext *)context
+{
+    JSStringRef patternString = revenant_js_string(pattern);
+    JSStringRef flagsString = revenant_js_string(flags);
+    JSValueRef arguments[2] = {JSValueMakeString(context.JSGlobalContextRef, patternString), JSValueMakeString(context.JSGlobalContextRef, flagsString)};
+    JSValueRef exception = NULL;
+    JSObjectRef result = JSObjectMakeRegExp(context.JSGlobalContextRef, 2, arguments, &exception);
+    JSStringRelease(patternString);
+    JSStringRelease(flagsString);
+    if (exception)
+        [context revenant_noteException:exception];
+    return [self revenant_valueWithJSValueRef:result context:context];
+}
+
++ (JSValue *)valueWithNewErrorFromMessage:(NSString *)message inContext:(JSContext *)context
+{
+    JSStringRef text = revenant_js_string(message);
+    JSValueRef argument = JSValueMakeString(context.JSGlobalContextRef, text);
+    JSStringRelease(text);
+    JSObjectRef result = JSObjectMakeError(context.JSGlobalContextRef, 1, &argument, NULL);
+    return [self revenant_valueWithJSValueRef:result context:context];
+}
+
++ (JSValue *)valueWithNullInContext:(JSContext *)context
+{
+    return [self revenant_valueWithJSValueRef:JSValueMakeNull(context.JSGlobalContextRef) context:context];
+}
+
++ (JSValue *)valueWithUndefinedInContext:(JSContext *)context
+{
+    return [self revenant_valueWithJSValueRef:JSValueMakeUndefined(context.JSGlobalContextRef) context:context];
+}
+
+static id Reported(JSContext *context, id result, JSValueRef exception)
+{
+    if (exception)
+        [context revenant_noteException:exception];
+    return result;
+}
+
+- (id)toObject
+{
+    return revenant_js_unbox(_context.JSGlobalContextRef, _value);
+}
+
+- (id)toObjectOfClass:(Class)expectedClass
+{
+    id object = self.toObject;
+    return [object isKindOfClass:expectedClass] ? object : nil;
+}
+
+- (BOOL)toBool
+{
+    return JSValueToBoolean(_context.JSGlobalContextRef, _value);
+}
+
+
+- (double)toDouble
+{
+    JSValueRef exception = NULL;
+    double value = JSValueToNumber(_context.JSGlobalContextRef, _value, &exception);
+    if (exception) {
+        [_context revenant_noteException:exception];
+        return NAN;
+    }
+    return value;
+}
+
+- (int32_t)toInt32
+{
+    return (int32_t)revenant_js_uint32(self.toDouble);
+}
+
+- (uint32_t)toUInt32
+{
+    return (uint32_t)self.toInt32;
+}
+
+- (NSNumber *)toNumber
+{
+    JSValueRef exception = NULL;
+    return Reported(_context, revenant_js_to_number(_context.JSGlobalContextRef, _value, &exception), exception);
+}
+
+- (NSString *)toString
+{
+    JSValueRef exception = NULL;
+    return Reported(_context, revenant_js_to_string(_context.JSGlobalContextRef, _value, &exception), exception);
+}
+
+- (NSDate *)toDate
+{
+    JSValueRef exception = NULL;
+    return Reported(_context, revenant_js_to_date(_context.JSGlobalContextRef, _value, &exception), exception);
+}
+
+- (NSArray *)toArray
+{
+    JSValueRef exception = NULL;
+    return Reported(_context, revenant_js_to_array(_context.JSGlobalContextRef, _value, &exception), exception);
+}
+
+- (NSDictionary *)toDictionary
+{
+    JSValueRef exception = NULL;
+    return Reported(_context, revenant_js_to_dictionary(_context.JSGlobalContextRef, _value, &exception), exception);
+}
+
+- (BOOL)isUndefined
+{
+    return JSValueIsUndefined(_context.JSGlobalContextRef, _value);
+}
+
+- (BOOL)isNull
+{
+    return JSValueIsNull(_context.JSGlobalContextRef, _value);
+}
+
+- (BOOL)isBoolean
+{
+    return JSValueIsBoolean(_context.JSGlobalContextRef, _value);
+}
+
+- (BOOL)isNumber
+{
+    return JSValueIsNumber(_context.JSGlobalContextRef, _value);
+}
+
+- (BOOL)isString
+{
+    return JSValueIsString(_context.JSGlobalContextRef, _value);
+}
+
+- (BOOL)isObject
+{
+    return JSValueIsObject(_context.JSGlobalContextRef, _value);
+}
+
+- (BOOL)isArray
+{
+    return revenant_js_is_array(_context.JSGlobalContextRef, _value);
+}
+
+- (BOOL)isDate
+{
+    return revenant_js_is_date(_context.JSGlobalContextRef, _value);
+}
+
+- (BOOL)isEqualToObject:(id)value
+{
+    JSValue *other = [JSValue valueWithObject:value inContext:_context];
+    return JSValueIsStrictEqual(_context.JSGlobalContextRef, _value, other.JSValueRef);
+}
+
+- (BOOL)isEqualWithTypeCoercionToObject:(id)value
+{
+    JSValue *other = [JSValue valueWithObject:value inContext:_context];
+    JSValueRef exception = NULL;
+    BOOL equal = JSValueIsEqual(_context.JSGlobalContextRef, _value, other.JSValueRef, &exception);
+    if (exception)
+        [_context revenant_noteException:exception];
+    return equal;
+}
+
+- (BOOL)isInstanceOf:(id)value
+{
+    JSValue *constructor = [JSValue valueWithObject:value inContext:_context];
+    if (!JSValueIsObject(_context.JSGlobalContextRef, constructor.JSValueRef))
+        return NO;
+    JSValueRef exception = NULL;
+    BOOL result = JSValueIsInstanceOfConstructor(_context.JSGlobalContextRef, _value, JSValueToObject(_context.JSGlobalContextRef, constructor.JSValueRef, &exception), &exception);
+    if (exception)
+        [_context revenant_noteException:exception];
+    return result;
+}
+
+- (JSValue *)callWithArguments:(NSArray *)arguments
+{
+    return [self revenant_callWithArguments:arguments thisValue:NULL asConstructor:NO];
+}
+
+- (JSValue *)constructWithArguments:(NSArray *)arguments
+{
+    return [self revenant_callWithArguments:arguments thisValue:NULL asConstructor:YES];
+}
+
+- (JSValue *)revenant_callWithArguments:(NSArray *)arguments thisValue:(JSObjectRef)thisObject asConstructor:(BOOL)asConstructor
+{
+    JSContextRef ctx = _context.JSGlobalContextRef;
+    JSValueRef exception = NULL;
+    JSObjectRef function = JSValueToObject(ctx, _value, &exception);
+    if (!function) {
+        if (exception)
+            [_context revenant_noteException:exception];
+        return [JSValue valueWithUndefinedInContext:_context];
+    }
+    NSUInteger count = arguments.count;
+    JSValueRef *values = count ? malloc(sizeof(JSValueRef) * count) : NULL;
+    for (NSUInteger index = 0; index < count; index++)
+        values[index] = revenant_js_box(ctx, arguments[index]);
+    JSValueRef result;
+    revenant_js_enter();
+    if (asConstructor)
+        result = JSObjectCallAsConstructor(ctx, function, count, values, &exception);
+    else
+        result = JSObjectCallAsFunction(ctx, function, thisObject, count, values, &exception);
+    free(values);
+    JSValue *value = [JSValue revenant_valueWithJSValueRef:(exception || !result) ? JSValueMakeUndefined(ctx) : result context:_context];
+    JSValue *thrown = exception ? [JSValue revenant_valueWithJSValueRef:exception context:_context] : nil;
+    revenant_js_leave();
+    if (thrown)
+        [_context revenant_noteException:thrown.JSValueRef];
+    return value;
+}
+
+- (JSValue *)invokeMethod:(NSString *)method withArguments:(NSArray *)arguments
+{
+    JSValue *function = [self valueForProperty:method];
+    JSContextRef ctx = _context.JSGlobalContextRef;
+    JSValueRef exception = NULL;
+    JSObjectRef thisObject = JSValueToObject(ctx, _value, &exception);
+    if (exception)
+        [_context revenant_noteException:exception];
+    return [function revenant_callWithArguments:arguments thisValue:thisObject asConstructor:NO];
+}
+
+- (JSValue *)valueForProperty:(NSString *)property
+{
+    JSContextRef ctx = _context.JSGlobalContextRef;
+    JSValueRef exception = NULL;
+    JSObjectRef object = JSValueToObject(ctx, _value, &exception);
+    if (!object) {
+        if (exception)
+            [_context revenant_noteException:exception];
+        return [JSValue valueWithUndefinedInContext:_context];
+    }
+    JSStringRef name = revenant_js_string(property);
+    JSValueRef result = JSObjectGetProperty(ctx, object, name, &exception);
+    JSStringRelease(name);
+    if (exception)
+        [_context revenant_noteException:exception];
+    return [JSValue revenant_valueWithJSValueRef:result ?: JSValueMakeUndefined(ctx) context:_context];
+}
+
+- (void)setValue:(id)value forProperty:(NSString *)property
+{
+    JSContextRef ctx = _context.JSGlobalContextRef;
+    JSValueRef exception = NULL;
+    JSObjectRef object = JSValueToObject(ctx, _value, &exception);
+    if (!object)
+        return;
+    JSStringRef name = revenant_js_string(property);
+    JSObjectSetProperty(ctx, object, name, revenant_js_box(ctx, value), kJSPropertyAttributeNone, &exception);
+    JSStringRelease(name);
+    if (exception)
+        [_context revenant_noteException:exception];
+}
+
+- (BOOL)deleteProperty:(NSString *)property
+{
+    JSContextRef ctx = _context.JSGlobalContextRef;
+    JSValueRef exception = NULL;
+    JSObjectRef object = JSValueToObject(ctx, _value, &exception);
+    if (!object)
+        return NO;
+    JSStringRef name = revenant_js_string(property);
+    BOOL result = JSObjectDeleteProperty(ctx, object, name, &exception);
+    JSStringRelease(name);
+    if (exception)
+        [_context revenant_noteException:exception];
+    return result;
+}
+
+- (BOOL)hasProperty:(NSString *)property
+{
+    JSContextRef ctx = _context.JSGlobalContextRef;
+    JSValueRef exception = NULL;
+    JSObjectRef object = JSValueToObject(ctx, _value, &exception);
+    if (!object)
+        return NO;
+    JSStringRef name = revenant_js_string(property);
+    BOOL result = JSObjectHasProperty(ctx, object, name);
+    JSStringRelease(name);
+    return result;
+}
+
+- (void)defineProperty:(NSString *)property descriptor:(id)descriptor
+{
+    JSValue *definePropertyFunction = [[self.context.globalObject valueForProperty:@"Object"] valueForProperty:@"defineProperty"];
+    [definePropertyFunction callWithArguments:@[self, property, descriptor]];
+}
+
+- (JSValue *)valueAtIndex:(NSUInteger)index
+{
+    JSContextRef ctx = _context.JSGlobalContextRef;
+    JSValueRef exception = NULL;
+    JSObjectRef object = JSValueToObject(ctx, _value, &exception);
+    if (!object)
+        return [JSValue valueWithUndefinedInContext:_context];
+    JSValueRef result = JSObjectGetPropertyAtIndex(ctx, object, (unsigned)index, &exception);
+    if (exception)
+        [_context revenant_noteException:exception];
+    return [JSValue revenant_valueWithJSValueRef:result ?: JSValueMakeUndefined(ctx) context:_context];
+}
+
+- (void)setValue:(id)value atIndex:(NSUInteger)index
+{
+    JSContextRef ctx = _context.JSGlobalContextRef;
+    JSValueRef exception = NULL;
+    JSObjectRef object = JSValueToObject(ctx, _value, &exception);
+    if (!object)
+        return;
+    JSObjectSetPropertyAtIndex(ctx, object, (unsigned)index, revenant_js_box(ctx, value), &exception);
+    if (exception)
+        [_context revenant_noteException:exception];
+}
+
+- (JSValue *)objectForKeyedSubscript:(id)key
+{
+    return [self valueForProperty:[key description]];
+}
+
+- (JSValue *)objectAtIndexedSubscript:(NSUInteger)index
+{
+    return [self valueAtIndex:index];
+}
+
+- (void)setObject:(id)object forKeyedSubscript:(id)key
+{
+    [self setValue:object forProperty:[key description]];
+}
+
+- (void)setObject:(id)object atIndexedSubscript:(NSUInteger)index
+{
+    [self setValue:object atIndex:index];
+}
+
++ (JSValue *)valueWithPoint:(CGPoint)point inContext:(JSContext *)context
+{
+    return [self valueWithObject:@{@"x": @(point.x), @"y": @(point.y)} inContext:context];
+}
+
++ (JSValue *)valueWithRange:(NSRange)range inContext:(JSContext *)context
+{
+    return [self valueWithObject:@{@"location": @(range.location), @"length": @(range.length)} inContext:context];
+}
+
++ (JSValue *)valueWithRect:(CGRect)rect inContext:(JSContext *)context
+{
+    return [self valueWithObject:@{@"x": @(rect.origin.x), @"y": @(rect.origin.y), @"width": @(rect.size.width), @"height": @(rect.size.height)} inContext:context];
+}
+
++ (JSValue *)valueWithSize:(CGSize)size inContext:(JSContext *)context
+{
+    return [self valueWithObject:@{@"width": @(size.width), @"height": @(size.height)} inContext:context];
+}
+
+- (CGPoint)toPoint
+{
+    return CGPointMake([[self valueForProperty:@"x"] toDouble], [[self valueForProperty:@"y"] toDouble]);
+}
+
+- (NSRange)toRange
+{
+    return NSMakeRange((NSUInteger)[[self valueForProperty:@"location"] toDouble], (NSUInteger)[[self valueForProperty:@"length"] toDouble]);
+}
+
+- (CGRect)toRect
+{
+    return CGRectMake([[self valueForProperty:@"x"] toDouble], [[self valueForProperty:@"y"] toDouble], [[self valueForProperty:@"width"] toDouble], [[self valueForProperty:@"height"] toDouble]);
+}
+
+- (CGSize)toSize
+{
+    return CGSizeMake([[self valueForProperty:@"width"] toDouble], [[self valueForProperty:@"height"] toDouble]);
+}
+
+- (NSString *)description
+{
+    return self.toString;
+}
+
+static JSValueRef NamedProperty(JSContextRef ctx, JSObjectRef object, const char *name)
+{
+    JSStringRef string = JSStringCreateWithUTF8CString(name);
+    JSValueRef value = JSObjectGetProperty(ctx, object, string, NULL);
+    JSStringRelease(string);
+    return value;
+}
+
++ (void)revenant_installPromiseInContext:(JSContext *)context
+{
+    JSObjectRef constructor = revenant_js_promise_constructor(context);
+    if (!constructor)
+        return;
+    JSGlobalContextRef ctx = context.JSGlobalContextRef;
+    JSObjectRef global = JSContextGetGlobalObject(ctx);
+    JSObjectRef define = (JSObjectRef)NamedProperty(ctx, (JSObjectRef)NamedProperty(ctx, global, "Object"), "defineProperty");
+    JSObjectRef descriptor = JSObjectMake(ctx, NULL, NULL);
+    const struct { const char *name; JSValueRef value; } fields[] = {
+        {"value", constructor},
+        {"writable", JSValueMakeBoolean(ctx, true)},
+        {"enumerable", JSValueMakeBoolean(ctx, false)},
+        {"configurable", JSValueMakeBoolean(ctx, true)},
+    };
+    for (size_t index = 0; index < sizeof fields / sizeof fields[0]; index++) {
+        JSStringRef name = JSStringCreateWithUTF8CString(fields[index].name);
+        JSObjectSetProperty(ctx, descriptor, name, fields[index].value, kJSPropertyAttributeNone, NULL);
+        JSStringRelease(name);
+    }
+    JSStringRef name = JSStringCreateWithUTF8CString("Promise");
+    JSValueRef arguments[] = {global, JSValueMakeString(ctx, name), descriptor};
+    JSStringRelease(name);
+    JSValueRef exception = NULL;
+    JSObjectCallAsFunction(ctx, define, NULL, 3, arguments, &exception);
+    if (exception)
+        [context revenant_noteException:exception];
+}
+
++ (JSValue *)valueWithNewPromiseInContext:(JSContext *)context fromExecutor:(void (^)(JSValue *resolve, JSValue *reject))callback
+{
+    JSObjectRef resolve = NULL, reject = NULL;
+    JSValueRef exception = NULL;
+    JSObjectRef promise = revenant_js_deferred_promise(context, &resolve, &reject, &exception);
+    if (!promise) {
+        JSValue *thrown = exception ? [JSValue revenant_valueWithJSValueRef:exception context:context] : nil;
+        [context revenant_noteException:thrown.JSValueRef];
+        return [JSValue valueWithUndefinedInContext:context];
+    }
+    JSValue *result = [JSValue revenant_valueWithJSValueRef:promise context:context];
+    if (callback) {
+        JSValue *resolveFunction = [JSValue revenant_valueWithJSValueRef:resolve context:context];
+        JSValue *rejectFunction = [JSValue revenant_valueWithJSValueRef:reject context:context];
+        NSArray<JSValue *> *arguments = @[resolveFunction, rejectFunction];
+        revenant_js_push_callback(context, result, nil, arguments);
+        callback(resolveFunction, rejectFunction);
+        JSValue *thrown = revenant_js_pop_callback();
+        if (thrown)
+            [rejectFunction callWithArguments:@[thrown]];
+    }
+    revenant_js_leave();
+    return result;
+}
+
++ (JSValue *)valueWithNewPromiseResolvedWithResult:(id)result inContext:(JSContext *)context
+{
+    NSArray *arguments = @[result];
+    return [self valueWithNewPromiseInContext:context fromExecutor:^(JSValue *resolve, JSValue *reject) {
+        (void)reject;
+        [resolve callWithArguments:arguments];
+    }];
+}
+
++ (JSValue *)valueWithNewPromiseRejectedWithReason:(id)reason inContext:(JSContext *)context
+{
+    NSArray *arguments = @[reason];
+    return [self valueWithNewPromiseInContext:context fromExecutor:^(JSValue *resolve, JSValue *reject) {
+        (void)resolve;
+        [reject callWithArguments:arguments];
+    }];
+}
+
++ (JSValue *)valueWithNewSymbolFromDescription:(NSString *)description inContext:(JSContext *)context
+{
+    (void)description;
+    JSValue *error = [context[@"TypeError"] constructWithArguments:@[@"this release's JavaScript engine has no symbols"]];
+    [context revenant_noteException:error.JSValueRef];
+    return [JSValue valueWithUndefinedInContext:context];
+}
+
+- (BOOL)isSymbol
+{
+    return NO;
+}
+
+@end

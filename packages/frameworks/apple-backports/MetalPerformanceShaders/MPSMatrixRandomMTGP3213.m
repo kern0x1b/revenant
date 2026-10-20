@@ -1,0 +1,34 @@
+#import "RevenantMPS.h"
+
+#pragma clang diagnostic ignored "-Wprotocol"
+#pragma clang diagnostic ignored "-Wincomplete-implementation"
+
+@implementation MPSMatrixRandomMTGP32
+
+- (instancetype)initWithDevice:(id<MTLDevice>)device
+{
+    if (!(self = [super initWithDevice:device revenantRandom:NO]))
+        return nil;
+    return [self revenant_mps_configureWithDataType:MPSDataTypeUInt32 seed:0 distribution:nil];
+}
+
+- (instancetype)initWithDevice:(id<MTLDevice>)device destinationDataType:(MPSDataType)destinationDataType seed:(NSUInteger)seed
+{
+    if (!(self = [super initWithDevice:device revenantRandom:NO]))
+        return nil;
+    return [self revenant_mps_configureWithDataType:destinationDataType seed:(uint32_t)seed distribution:nil];
+}
+
+- (instancetype)initWithDevice:(id<MTLDevice>)device destinationDataType:(MPSDataType)destinationDataType seed:(NSUInteger)seed distributionDescriptor:(MPSMatrixRandomDistributionDescriptor *)distributionDescriptor
+{
+    if (!(self = [super initWithDevice:device revenantRandom:NO]))
+        return nil;
+    return [self revenant_mps_configureWithDataType:destinationDataType seed:(uint32_t)seed distribution:distributionDescriptor];
+}
+
+- (void)synchronizeStateOnCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
+{
+    (void)commandBuffer;
+}
+
+@end

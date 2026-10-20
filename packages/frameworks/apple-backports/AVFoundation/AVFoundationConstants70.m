@@ -1,0 +1,34 @@
+#import <AVFoundation/AVFoundation.h>
+
+NSString *const AVAudioTimePitchAlgorithmLowQualityZeroLatency = @"LowQualityZeroLatency";
+NSString *const AVAudioTimePitchAlgorithmSpectral = @"Spectral";
+NSString *const AVAudioTimePitchAlgorithmTimeDomain = @"TimeDomain";
+NSString *const AVAudioTimePitchAlgorithmVarispeed = @"Varispeed";
+NSString *const AVFileTypeAC3 = @"public.ac3-audio";
+NSString *const AVFileTypeMPEGLayer3 = @"public.mp3";
+NSString *const AVFileTypeSunAU = @"public.au-audio";
+NSString *const AVMetadata3GPUserDataKeyAlbumAndTrack = @"albm";
+NSString *const AVMetadata3GPUserDataKeyCollection = @"coll";
+NSString *const AVMetadata3GPUserDataKeyKeywordList = @"kywd";
+NSString *const AVMetadata3GPUserDataKeyMediaClassification = @"clsf";
+NSString *const AVMetadata3GPUserDataKeyMediaRating = @"rtng";
+NSString *const AVMetadata3GPUserDataKeyThumbnail = @"thmb";
+NSString *const AVMetadata3GPUserDataKeyUserRating = @"urat";
+NSString *const AVMetadataFormatISOUserData = @"org.mp4ra";
+NSString *const AVMetadataKeySpaceISOUserData = @"uiso";
+NSString *const AVOutputSettingsPreset1280x720 = @"AVOutputSettingsPreset1280x720";
+NSString *const AVOutputSettingsPreset1920x1080 = @"AVOutputSettingsPreset1920x1080";
+NSString *const AVOutputSettingsPreset640x480 = @"AVOutputSettingsPreset640x480";
+NSString *const AVOutputSettingsPreset960x540 = @"AVOutputSettingsPreset960x540";
+NSString *const AVPlayerItemLegibleOutputTextStylingResolutionDefault = @"AVPlayerItemLegibleOutputTextStylingResolutionDefault";
+NSString *const AVPlayerItemLegibleOutputTextStylingResolutionSourceAndRulesOnly = @"AVPlayerItemLegibleOutputTextStylingResolutionSourceAndRulesOnly";
+NSString *const AVVideoAllowFrameReorderingKey = @"AllowFrameReordering";
+NSString *const AVVideoAverageNonDroppableFrameRateKey = @"AverageNonDroppableFrameRate";
+NSString *const AVVideoExpectedSourceFrameRateKey = @"ExpectedFrameRate";
+NSString *const AVVideoH264EntropyModeCABAC = @"CABAC";
+NSString *const AVVideoH264EntropyModeCAVLC = @"CAVLC";
+NSString *const AVVideoH264EntropyModeKey = @"H264EntropyMode";
+NSString *const AVVideoMaxKeyFrameIntervalDurationKey = @"MaxKeyFrameIntervalDuration";
+NSString *const AVVideoProfileLevelH264BaselineAutoLevel = @"H264_Baseline_AutoLevel";
+NSString *const AVVideoProfileLevelH264HighAutoLevel = @"H264_High_AutoLevel";
+NSString *const AVVideoProfileLevelH264MainAutoLevel = @"H264_Main_AutoLevel";

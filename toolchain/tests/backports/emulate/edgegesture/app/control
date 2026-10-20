@@ -1,7 +1,0 @@
-Package: org.revenant.edge-probe
-Name: Revenant edge gesture probe
-Architecture: iphoneos-arm
-Description: One white window, to measure which gestures from the screen edges the release answers, launched through SpringBoard
-Maintainer: revenant
-Author: revenant
-Section: Development
