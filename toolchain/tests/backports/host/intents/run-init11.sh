@@ -34,8 +34,6 @@
 #
 # sh tests/backports/host/intents/run-init11.sh
 set -eu
-echo "FAIL host/intents/run-init11.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 118; the inline block PY at line 133" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 repo=$(cd "$here/../../../.." && pwd)
@@ -115,25 +113,11 @@ grep -m1 "control: " "$build/absent.log" | sed 's/^/  /'
 echo "  intents-11 init: 16 of 16 absent, and the control still found the framework's names"
 
 echo "== 4. the registry cross-check: every -[X init] row in ios11.json has a line here"
-missing=$(python3 - "$registry" "$here/init11.m" <<'PY'
-import json, re, sys
-registry, harness = sys.argv[1], sys.argv[2]
-rows = [e["api"] for e in json.load(open(registry))["entries"]
-        if e["kind"] == "method" and e["api"].endswith(" init]")]
-lines = set(re.findall(r'"(IN\w+)"', open(harness).read()))
-want = {a[2:-6] for a in rows}          # -[INFoo init] -> INFoo, dropping " init]"
-print("\n".join(sorted(want - lines)))
-PY
-)
+missing=$(runs_xmake l "$here/crosscheck-init11.lua" missing "$registry" "$here/init11.m")
 if [ -n "$missing" ]; then
     echo "  intents-11 init: FAIL these -init rows have no line in init11.m:"
     echo "$missing" | sed 's/^/    /'
     exit 1
 fi
-python3 - "$registry" <<'PY' | sed 's/^/  /'
-import json, sys
-rows = [e["api"] for e in json.load(open(sys.argv[1]))["entries"]
-        if e["kind"] == "method" and e["api"].endswith(" init]")]
-print("intents-11 init: %d -init rows, every one has a line in init11.m" % len(rows))
-PY
+runs_xmake l "$here/crosscheck-init11.lua" count "$registry" | sed 's/^/  /'
 echo "  intents-11 init: PASS"

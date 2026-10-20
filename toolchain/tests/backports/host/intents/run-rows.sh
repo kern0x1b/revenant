@@ -25,8 +25,6 @@
 #
 # Usage: sh tests/backports/host/intents/run-rows.sh
 set -eu
-echo "FAIL host/intents/run-rows.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 169" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 build=${INTENTS_ROWS_BUILD:-$(runs_folder build/intents-rows)}
@@ -164,47 +162,9 @@ echo "intents rows: 12.0 group measured; what it settles and what it does not is
 # hands the handler to a dispatch instead of calling it inline.  A direct call would sit between the
 # method's opening brace and the dispatch, so its absence there is the assertion.
 root=$(cd "$here/../../../.." && pwd)
-port=$root/packages/frameworks/apple-backports/Intents/IN12_0.m
+. "$here/../../common/generated.sh"
+ensure_generated "$here" Intents
+port=$root/packages/frameworks/apple-backports/.gen/Intents/IN12_0.m
 echo "intents rows: the port's own three bodies hand the handler to a dispatch"
-python3 - "$port" <<'PY'
-import sys
-source = open(sys.argv[1], encoding="utf-8").read()
-# Each member by the FIRST LINE of its definition, which is where the generator writes it: a
-# selector is wrapped across lines, so the whole selector is not one string to look for. The body is
-# everything from there to the end of its @implementation.
-members = {
-    "- (void)setRelevantShortcuts:(NSArray<INRelevantShortcut *> *)shortcuts":
-        "INRelevantShortcutStore -setRelevantShortcuts:completionHandler:",
-    "- (void)getAllVoiceShortcutsWithCompletion:":
-        "INVoiceShortcutCenter -getAllVoiceShortcutsWithCompletion:",
-    "- (void)getVoiceShortcutWithIdentifier:(NSUUID *)identifier":
-        "INVoiceShortcutCenter -getVoiceShortcutWithIdentifier:completion:",
-}
-failures = []
-for definition, row in members.items():
-    start = source.find("\n" + definition)
-    if start < 0:
-        failures.append("%s: the method is not in the object at all" % row)
-        continue
-    end = source.find("\n@end", start)
-    body = source[start:end if end > 0 else len(source)]
-    brace = body.index("{")
-    dispatch = body.find("dispatch_async(", brace)
-    if dispatch < 0:
-        failures.append("%s: no dispatch at all, so the handler is called inline" % row)
-        continue
-    # A call before the dispatch is the synchronous answer this check exists to catch. The pattern
-    # carries the open paren, and it appears nowhere but in the three real calls - the prose above
-    # each body writes the selector with a colon, never with one - so a comment cannot satisfy or
-    # trip it.
-    if "completionHandler(" in body[brace:dispatch]:
-        failures.append("%s: the handler is called BEFORE the dispatch" % row)
-        continue
-    print("intents12 port %-56s dispatches its handler" % row)
-for failure in failures:
-    print("FAIL " + failure)
-print("port bodies: %d of %d dispatch, %d failed"
-      % (len(members) - len(failures), len(members), len(failures)))
-sys.exit(1 if failures else 0)
-PY
+runs_xmake l "$here/dispatch-check.lua" "$port"
 echo "intents rows: the port's three bodies are asynchronous, which is what the host measurement demands"
