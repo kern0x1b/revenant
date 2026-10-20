@@ -1,6 +1,6 @@
 local REPO = path.absolute(path.join(os.scriptdir(), "..", ".."))
 local IR = path.join(REPO, "tools", "found", "ir.lua")
-local RUN = path.join(REPO, ".agent-work", "runs", "ir-identity-test")
+local RUN = import("workspace", {rootdir = path.join(REPO, "modules"), anonymous = true}).run("ir-identity-test")
 local fake = import("fake_decls", {rootdir = os.scriptdir(), anonymous = true})
 
 local VERSION = "Apple clang version 21.0.0 (clang-2100.3.34.2)"

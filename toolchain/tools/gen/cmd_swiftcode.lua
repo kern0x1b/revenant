@@ -31,7 +31,7 @@ function run(args)
     local known = swift_model.module_set(args.sdk)
     os.mkdir(args.out)
     local started = os.mclock()
-    local folder = swift_model.prefetch(args.tree, heavy, args.sdk, triple, all)
+    local folder = swift_model.prefetch(heavy,args.sdk, triple, all)
     local classes, no_model = swift_model.class_index(folder, all)
     local bounds = swift_model.associated_bounds(args.sdk)
     for _, l in ipairs(no_model) do
