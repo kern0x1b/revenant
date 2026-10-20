@@ -40,7 +40,8 @@ What the toolchain is, and why it is built this way, is in [design](../../explan
 ## Conventions
 
 - Tracked files hold no personal data: no device address, hostname, credential or absolute `/Users/<name>/` path.
-  Use `$HOME`, placeholders and the gitignored `device.env`, whose keys `device.env.example` lists.
+  Use `$HOME`, placeholders and the gitignored `device.env`, which names the phone in `DEVICE_HOST`, `DEVICE_PORT`,
+  `DEVICE_UDID` and `DEVICE_PASSWORD`.
 - Build output (`build/`, `.xmake/`) is gitignored, and comes back from the package definitions.
 - A package takes a dependency by its own name, `package:dep("name")`. A host tool brings its own dependencies,
   and they meet a target's dependencies under the same key, where the later one wins: tdlib once linked a macOS
