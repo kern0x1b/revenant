@@ -52,8 +52,6 @@ Confirm the port's engine is active:
 - `/tmp/rev-safari-stderr.log` has `[tweak] ctor pass`, and `/tmp/rev-safari-tweak.log` has a `re-exec` line for each app in `InjectedApps` (Safari by default).
 - To start a log afresh, truncate it with `: > FILE`. Never delete it while Safari runs: the loader holds it open, and later lines are lost.
 
-Screenshot: `./xmakew device run 'sleep 8; /usr/bin/shot >/dev/null 2>&1'`, then `scp` `/tmp/screenshot.png` into `$HOME/.revenant/cache/<task>/`.
-
 Driving the UI and measuring: the `webkit-device-tools` package builds `revtouch`, `revmem`, `revpid` and `raise-memory-limit` (`docs/tools.md`). `./xmakew where -P . webkit-device-tools` prints its folder; `scp` `bin/revtouch` to `/usr/bin` on the phone, then `./xmakew device run "revtouch tap 160 240"` or `revtouch swipe X Y X2 Y2`. Coordinates are points on a 320x480 screen unless `REVTOUCH_W` and `REVTOUCH_H` say otherwise. Take a screenshot first, because launching an app does not make it frontmost. `revmem <pid>` sums dirty pages by VM tag; the phone has no vmmap.
 
 Performance measurements:
@@ -85,4 +83,4 @@ A SIGSEGV in `IMGSGX543GLDriver` after `malloc: mmap(size=...) failed (error cod
 
 A device that looks dead, or an ssh connection reset: see the `device` skill.
 
-Recovery: reinstall the last good .deb (see Deploy). If the phone is stuck, boot into safe mode by holding Volume Up during boot; MobileSubstrate is off there, so you can ssh in and revert.
+Recovery: reinstall the last good .deb (see Deploy). If the phone is stuck, boot into safe mode by holding Volume Up during boot; MobileSubstrate is off there, so you can ssh in and revert. Screenshots and liveness checks: the `device` skill.

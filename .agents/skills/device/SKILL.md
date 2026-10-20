@@ -31,13 +31,13 @@ A claim held by another name fails until it is released or expires.
 ## Copy files
 
 - `scp -P <DEVICE_PORT> LOCAL root@<DEVICE_HOST>:REMOTE`, or the other way round.
-- From Lua, through the same claim and tunnel: `./xmakew l frameworks/SwiftUI/tools/device.lua copy LOCAL REMOTE` and `fetch REMOTE LOCAL`.
+- Through the module, with the same claim and tunnel: `./xmakew l frameworks/SwiftUI/tools/device.lua copy LOCAL REMOTE` and `fetch REMOTE LOCAL`.
 
 Local files go under `$HOME/.revenant/cache/<task>/`, not into the checkout.
 
 ## Snapshots
 
-- The screen: `./xmakew device run 'sleep 8; /usr/bin/shot >/dev/null 2>&1'`, then `scp` `/tmp/screenshot.png`. `shot` always writes `/tmp/screenshot.png`, whatever path it is given. Heavy pages need 15 to 30 s to finish loading.
+- The screen: `./xmakew device run 'sleep 8; /usr/bin/shot >/dev/null 2>&1'`, then `scp` `/tmp/screenshot.png`. `shot` always writes `/tmp/screenshot.png`, whatever path it is given. A page that loads slowly needs 15 to 30 s before the shot.
 - SwiftUI demo: `./xmakew build SwiftUIDemo` first, then `./xmakew l frameworks/SwiftUI/tools/device.lua shots [--live | --gesture] SCENARIO...`. It installs the demo into `/Applications`, launches it through `/private/var/tmp/sblaunch`, and fetches each scenario's picture: `--live` the real screen, `--gesture` the screen after the scenario's touches. Pictures go to `$HOME/.revenant/cache/<task>/swiftui/device-shots/`.
 - Crash report: `./xmakew l frameworks/SwiftUI/tools/device.lua crash [REPORT.plist]` fetches `LatestCrash-SwiftUIDemo.plist` (or reads REPORT) and symbolicates it against the built demo.
 
