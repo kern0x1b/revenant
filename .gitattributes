@@ -19,7 +19,7 @@ toolchain/docs/** linguist-documentation
 emulator/docs/** linguist-documentation
 recompiler/docs/** linguist-documentation
 frameworks/WebKit/docs/** linguist-documentation
-frameworks/Combine/docs/** linguist-documentation
+docs/**/combine/** linguist-documentation
 docs/**/swiftui/** linguist-documentation
 
 toolchain/tests/addon/sdk-verbatim/** comments=fixture

@@ -28,6 +28,12 @@ SPDX-FileCopyrightText = ["2019 Sergej Jaskiewicz", "2026 kern0x1b"]
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
+path = "docs/reference/combine/third-party.md"
+precedence = "closest"
+SPDX-FileCopyrightText = ["2019 Sergej Jaskiewicz", "2026 kern0x1b"]
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
 path = "agent-skills/skills/xmake-*/**"
 precedence = "closest"
 SPDX-FileCopyrightText = ["xmake-io and the xmake-skills contributors", "2026 kern0x1b"]

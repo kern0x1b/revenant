@@ -22,6 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `collect(_:options:)`, and the equality and hashing Apple's interface declares.
 
 ### Changed
+- The folder follows revenant's one layout: `Tests/` is `tests/` (the skip list under `tests/data/`), the patch series
+  is `frameworks/Combine/patches/`, the contributor guide, the test results and the licence notice are under the top
+  `docs/` (`docs/guides/combine/`, `docs/reference/combine/`), and the README is one screen. The entries above name
+  the old paths as they were.
 - Folded the separate Dispatch and Foundation modules into the core and renamed
   the whole to `Combine`; dropped the `.ocombine` disambiguation machinery.
 - Combine is no longer a copy of OpenCombine's sources. The `revenant@combine` recipe
