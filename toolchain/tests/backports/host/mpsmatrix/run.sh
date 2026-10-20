@@ -83,7 +83,7 @@ for source in "$mps"/*.m; do
         echo "the port source $source did not compile; stopping, because a count from a stale build is not a count"
         exit 1
     fi
-    runs_xmake l "$here/../prefix_selectors.lua" "$source" "$build/$name.m" ccharonHost_ \
+    runs_xmake l "$here/../prefix_selectors.lua" "$source" "$build/$name.m" crevenantHost_ \
         --declarations="$build/declarations.h" -fobjc-arc $target $quiet -include "$build/rename.h" -- "$build/$name.plain.o"
     # The define belongs here and not only on the plain compile: prefix_selectors.py turns the plain
     # object back into source, and this is the compile whose object is linked, so a define left off

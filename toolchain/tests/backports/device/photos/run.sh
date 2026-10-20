@@ -124,7 +124,7 @@ link_one() { # $1 output, rest: objects
     shift
     # shellcheck disable=SC2086
     $PHOTOS_CC -target "$triple" -isysroot "$PHOTOS_SDK" -fuse-ld="$PHOTOS_LD" -fobjc-arc \
-        -Wl,-rename_section,__DATA,__objc_catlist,__DATA,__revenant_catlist \
+        -Wl,-rename_section,__DATA,__objc_catlist,__DATA,__port_catlist \
         -o "$output" "$@" $frameworks $extra
     # Fatal, like the [ -e "$tool" ] and `command -v ldid` guards above: a binary that could not be
     # signed is a binary that is pushed and launched and then fails somewhere else -- an opaque launch

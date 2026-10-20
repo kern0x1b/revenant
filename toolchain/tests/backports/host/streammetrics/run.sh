@@ -41,7 +41,7 @@ renames "$objects" "*" > "$build/flags"
 #     Measured 2026-10-04 on this tree: the task this test calls "the host's own" was a
 #     RevenantHostNSURLSessionStreamTask made by the port's factory, so the run died on the LEFT side of
 #     the differential and every answer compared was the port's against the port's.
-#   * its category section renamed to __revenant_catlist, so the loader does not apply it at load and
+#   * its category section renamed to __port_catlist, so the loader does not apply it at load and
 #     host-attach.c applies it at run time under those prefixed names.
 # A category on a class the port defines keeps __objc_catlist: host-attach.c's class_addMethod refuses a
 # selector the class already answers, and the port's own NSURLSessionTaskTransactionMetrics has
@@ -77,14 +77,14 @@ for file in $files; do
     if [ "$file" = "NSURLSessionStreamTask9.m" ]; then
         # shellcheck disable=SC2046
         xcrun clang $target $flags -I"$sources" $(cat "$build/flags") -c "$sources/$file" -o "$build/ported/$file.o"
-        perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$build/ported/$file.o"
+        perl -0777 -pi -e 's/__objc_catlist\0\0/__port_catlist\0\0/g' "$build/ported/$file.o"
     elif [ -n "$release_owns" ]; then
         # shellcheck disable=SC2046
-        runs_xmake l "$here/../prefix_selectors.lua" "$sources/$file" "$build/ported/$file" charonHost_ \
+        runs_xmake l "$here/../prefix_selectors.lua" "$sources/$file" "$build/ported/$file" revenantHost_ \
             $target -DREVENANT_HOST_BUILD -I"$sources" -- $build/plain/*.o
         # shellcheck disable=SC2046
         xcrun clang $target $flags -I"$sources" $(cat "$build/flags") -c "$build/ported/$file" -o "$build/ported/$file.o"
-        perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$build/ported/$file.o"
+        perl -0777 -pi -e 's/__objc_catlist\0\0/__port_catlist\0\0/g' "$build/ported/$file.o"
     else
         # shellcheck disable=SC2046
         xcrun clang $target $flags $(cat "$build/flags") -c "$sources/$file" -o "$build/ported/$file.o"

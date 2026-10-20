@@ -176,7 +176,7 @@ static const struct revenant_added_method revenant_added_methods[] = {
     {"NSMutableDictionary", "setObject:forKeyedSubscript:", (IMP)revenant_set_object_for_keyed_subscript, "v@:@@"},
 };
 
-__attribute__((used, section("__DATA,__revenant_addsel"))) static const char *const revenant_added_selectors[] = {
+__attribute__((used, section("__DATA,__port_addsel"))) static const char *const revenant_added_selectors[] = {
     "objectAtIndexedSubscript:",
     "setObject:atIndexedSubscript:",
     "objectForKeyedSubscript:",

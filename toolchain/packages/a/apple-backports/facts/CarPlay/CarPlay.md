@@ -13,7 +13,7 @@ So Apple's CarPlay `CPListItem` is iOS 12 and absent, and its *name* is taken, w
 `CPTemplate` or any other CarPlay class, but it does have this one *name*, and a name the release
 exports cannot be replaced by a second class of the same name.) `CarPlay/CPListItem.m` carries the name as an **alias**: it defines
 `RevenantCPListItem`, exports the release's name to it, and records the pair in
-`__DATA,__revenant_alias` for the library's loader. A subclass an application writes of `CPListItem`
+`__DATA,__port_alias` for the library's loader. A subclass an application writes of `CPListItem`
 inherits the release's class and is laid out after it; sent to `RevenantCPListItem` itself, the class
 introspection answers as the release's class does, so `[CPListItem class]`, what `[CPListItem alloc]`
 makes and what the release hands out are one class. This is exactly how the port already handles a

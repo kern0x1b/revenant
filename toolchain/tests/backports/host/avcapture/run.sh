@@ -26,11 +26,11 @@ for file in $carried; do
     xcrun clang -fobjc-arc $target -fvisibility=hidden $quiet $renames -I"$AV" -c "$AV/$file" -o "$BUILD/plain/$file.o"
 done
 for file in $carried; do
-    runs_xmake l "$here/../prefix_selectors.lua" "$AV/$file" "$BUILD/prefixed/$file" charonHost_ --declarations="$BUILD/prefixed/declarations.h" -fobjc-arc $target $quiet $renames -I"$AV" -- "$BUILD"/plain/*.o
+    runs_xmake l "$here/../prefix_selectors.lua" "$AV/$file" "$BUILD/prefixed/$file" revenantHost_ --declarations="$BUILD/prefixed/declarations.h" -fobjc-arc $target $quiet $renames -I"$AV" -- "$BUILD"/plain/*.o
 done
 for file in $carried; do
     xcrun clang -fobjc-arc $target -fvisibility=hidden $quiet $renames -I"$AV" -include "$BUILD/prefixed/declarations.h" -c "$BUILD/prefixed/$file" -o "$BUILD/renamed/$file.o"
-    perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$BUILD/renamed/$file.o"
+    perl -0777 -pi -e 's/__objc_catlist\0\0/__port_catlist\0\0/g' "$BUILD/renamed/$file.o"
 done
 xcrun clang -fobjc-arc $target $quiet $renames "$here/differential.m" "$here/../foundation2/host-attach.c" "$BUILD"/renamed/*.o -framework AVFoundation -framework Foundation -o "$BUILD/differential"
 "$BUILD/differential"

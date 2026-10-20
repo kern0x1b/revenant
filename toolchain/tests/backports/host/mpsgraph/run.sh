@@ -99,7 +99,7 @@ build_objects() {
         _s=$(basename "$source" .m)
         xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -DREVENANT_PLANT=$_plant \
             -c "$source" -o "$_objdir/$_s.plain.o"
-        runs_xmake l "$here/../prefix_selectors.lua" "$source" "$_objdir/$_s.m" ccharonHost_ \
+        runs_xmake l "$here/../prefix_selectors.lua" "$source" "$_objdir/$_s.m" crevenantHost_ \
             --declarations="$build/declarations.h" -fobjc-arc $target $quiet -DREVENANT_PLANT=$_plant \
             -I"$graph" -include "$build/rename.h" -- "$_objdir/$_s.plain.o"
         xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -DREVENANT_PLANT=$_plant \

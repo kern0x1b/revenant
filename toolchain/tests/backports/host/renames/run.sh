@@ -83,7 +83,7 @@ fi
 
 # the whole-selector renamer does what renames() must not: a category's selector prefixed whole, with the
 # identifiers inside the selector left as they are
-runs_xmake l "$here/../prefix_selectors.lua" "$here/probe.m" "$build/probe.renamed.m" charonHost \
+runs_xmake l "$here/../prefix_selectors.lua" "$here/probe.m" "$build/probe.renamed.m" revenantHost \
     --declarations="$build/declarations.h" $flags -target arm64-apple-ios15.0-macabi -isysroot "$sdk" \
     -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" -- "$build/probe.o"
 check yes "$(present 'revenantHostProbeOf:(id)object forKey:(id)key' "$build/probe.renamed.m")" "the category's two-piece selector is prefixed whole"

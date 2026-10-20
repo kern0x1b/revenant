@@ -10,9 +10,9 @@ target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/Syste
 mkdir -p "$BUILD"
 xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -c "$SOURCES/NSUserDefaults+SuiteName.m" -o "$BUILD/plain.o"
 printf '#import <Foundation/Foundation.h>\n' > "$BUILD/declarations.h"
-runs_xmake l "$here/../prefix_selectors.lua" "$SOURCES/NSUserDefaults+SuiteName.m" "$BUILD/NSUserDefaults+SuiteName.m" charonHost_ --declarations="$BUILD/declarations.h" -fobjc-arc $target $quiet -- "$BUILD/plain.o"
+runs_xmake l "$here/../prefix_selectors.lua" "$SOURCES/NSUserDefaults+SuiteName.m" "$BUILD/NSUserDefaults+SuiteName.m" revenantHost_ --declarations="$BUILD/declarations.h" -fobjc-arc $target $quiet -- "$BUILD/plain.o"
 xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -I"$SOURCES" -include "$BUILD/declarations.h" -c "$BUILD/NSUserDefaults+SuiteName.m" -o "$BUILD/suite.o"
-perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$BUILD/suite.o"
+perl -0777 -pi -e 's/__objc_catlist\0\0/__port_catlist\0\0/g' "$BUILD/suite.o"
 xcrun clang -fobjc-arc $target $quiet "$here/differential.m" "$here/../foundation2/host-attach.c" "$BUILD/suite.o" \
     -framework Foundation -framework CoreGraphics -o "$BUILD/differential"
 SUITE_EXPECTATIONS="${SUITE_EXPECTATIONS:-$here/../../device/suitedefaults-expectations.h}" "$BUILD/differential"

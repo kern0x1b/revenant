@@ -10,9 +10,9 @@ target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/Syste
 mkdir -p "$BUILD"
 xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -c "$UIKIT/UIView+DirectionalLayoutMargins.m" -o "$BUILD/plain.o"
 printf '#import <UIKit/UIKit.h>\n' > "$BUILD/declarations.h"
-runs_xmake l "$here/../prefix_selectors.lua" "$UIKIT/UIView+DirectionalLayoutMargins.m" "$BUILD/UIView+DirectionalLayoutMargins.m" charonHost_ --declarations="$BUILD/declarations.h" -fobjc-arc $target $quiet -- "$BUILD/plain.o"
+runs_xmake l "$here/../prefix_selectors.lua" "$UIKIT/UIView+DirectionalLayoutMargins.m" "$BUILD/UIView+DirectionalLayoutMargins.m" revenantHost_ --declarations="$BUILD/declarations.h" -fobjc-arc $target $quiet -- "$BUILD/plain.o"
 xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -I"$UIKIT" -include "$BUILD/declarations.h" -c "$BUILD/UIView+DirectionalLayoutMargins.m" -o "$BUILD/margins.o"
-perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$BUILD/margins.o"
+perl -0777 -pi -e 's/__objc_catlist\0\0/__port_catlist\0\0/g' "$BUILD/margins.o"
 xcrun clang -fobjc-arc $target $quiet "$here/differential.m" "$here/../foundation2/host-attach.c" "$BUILD/margins.o" \
     -framework UIKit -framework Foundation -o "$BUILD/differential"
 "$BUILD/differential"

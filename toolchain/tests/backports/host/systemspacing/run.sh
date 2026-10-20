@@ -10,9 +10,9 @@ target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/Syste
 mkdir -p "$BUILD"
 xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -c "$UIKIT/NSLayoutAnchor+SystemSpacing.m" -o "$BUILD/plain.o"
 printf '#import <UIKit/UIKit.h>\n' > "$BUILD/declarations.h"
-runs_xmake l "$here/../prefix_selectors.lua" "$UIKIT/NSLayoutAnchor+SystemSpacing.m" "$BUILD/NSLayoutAnchor+SystemSpacing.m" charonHost_ --declarations="$BUILD/declarations.h" -fobjc-arc $target $quiet -- "$BUILD/plain.o"
+runs_xmake l "$here/../prefix_selectors.lua" "$UIKIT/NSLayoutAnchor+SystemSpacing.m" "$BUILD/NSLayoutAnchor+SystemSpacing.m" revenantHost_ --declarations="$BUILD/declarations.h" -fobjc-arc $target $quiet -- "$BUILD/plain.o"
 xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -I"$UIKIT" -include "$BUILD/declarations.h" -c "$BUILD/NSLayoutAnchor+SystemSpacing.m" -o "$BUILD/spacing.o"
-perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$BUILD/spacing.o"
+perl -0777 -pi -e 's/__objc_catlist\0\0/__port_catlist\0\0/g' "$BUILD/spacing.o"
 xcrun clang -fobjc-arc $target $quiet "$here/differential.m" "$here/../foundation2/host-attach.c" "$BUILD/spacing.o" \
     -framework UIKit -framework Foundation -framework CoreGraphics -o "$BUILD/differential"
 "$BUILD/differential"

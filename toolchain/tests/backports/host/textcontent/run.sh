@@ -26,9 +26,9 @@ for source in $sources; do
 done
 printf '#import <UIKit/UIKit.h>\n' > "$BUILD/prefixed/declarations.h"
 for source in $sources; do
-    runs_xmake l "$here/../prefix_selectors.lua" "$UIKIT/$source" "$BUILD/prefixed/$source" charonHost_ --declarations="$BUILD/prefixed/declarations.h" -fobjc-arc $target $quiet -I"$UIKIT" -- "$BUILD"/plain/*.o
+    runs_xmake l "$here/../prefix_selectors.lua" "$UIKIT/$source" "$BUILD/prefixed/$source" revenantHost_ --declarations="$BUILD/prefixed/declarations.h" -fobjc-arc $target $quiet -I"$UIKIT" -- "$BUILD"/plain/*.o
     xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -I"$UIKIT" -include "$BUILD/prefixed/declarations.h" -c "$BUILD/prefixed/$source" -o "$BUILD/renamed/$source.o"
-    perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$BUILD/renamed/$source.o"
+    perl -0777 -pi -e 's/__objc_catlist\0\0/__port_catlist\0\0/g' "$BUILD/renamed/$source.o"
 done
 xcrun clang -fobjc-arc $target $quiet "$here/differential.m" "$here/../foundation2/host-attach.c" "$BUILD"/UITextContentType*-renamed.o "$BUILD/storage.o" "$BUILD"/renamed/*.o \
     -framework UIKit -framework Foundation -o "$BUILD/differential"

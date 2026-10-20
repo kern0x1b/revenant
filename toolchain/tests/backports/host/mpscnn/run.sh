@@ -51,7 +51,7 @@ objects=""
 for source in "$mps"/*.m; do
     name=$(basename "$source" .m)
     xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -c "$source" -o "$build/$name.plain.o"
-    runs_xmake l "$here/../prefix_selectors.lua" "$source" "$build/$name.m" ccharonHost_ \
+    runs_xmake l "$here/../prefix_selectors.lua" "$source" "$build/$name.m" crevenantHost_ \
         --declarations="$build/declarations.h" -fobjc-arc $target $quiet -I"$mps" -include "$build/rename.h" -- "$build/$name.plain.o"
     xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -I"$mps" -include "$build/rename.h" \
         -include "$build/declarations.h" -c "$build/$name.m" -o "$build/$name.o"

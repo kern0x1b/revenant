@@ -29,12 +29,12 @@ printf '#import <Foundation/Foundation.h>\n#import <UIKit/UIKit.h>\n' > "$BUILD/
 for file in NSAttributedStringLocalizedFormat15.m NSBundle+LocalizedAttributed15.m NSAttributedStringInflection15.m NSURLSessionTask+Delegate15.m; do
     xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -c "$SOURCES/$file" -o "$BUILD/plain/$file.o"
     # shellcheck disable=SC2086
-    runs_xmake l "$here/../prefix_selectors.lua" "$SOURCES/$file" "$BUILD/ported/$file" charonHost_ \
+    runs_xmake l "$here/../prefix_selectors.lua" "$SOURCES/$file" "$BUILD/ported/$file" revenantHost_ \
         --declarations="$BUILD/declarations.h" -fobjc-arc -fvisibility=hidden $target $quiet -- "$BUILD/plain/$file.o"
     # shellcheck disable=SC2086
     xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -I"$SOURCES" \
         -c "$BUILD/ported/$file" -o "$BUILD/ported/$file.o"
-    perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$BUILD/ported/$file.o"
+    perl -0777 -pi -e 's/__objc_catlist\0\0/__port_catlist\0\0/g' "$BUILD/ported/$file.o"
 done
 
 # The Markdown object: its class is the port's own and is renamed, its three initialisers are members of
@@ -44,12 +44,12 @@ xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -c "$SOURCES/$markdown
 . "$here/../uikit2/renames.sh"
 renames "$BUILD/plain/$markdown.o" > "$BUILD/renames"
 # shellcheck disable=SC2046
-runs_xmake l "$here/../prefix_selectors.lua" "$SOURCES/$markdown" "$BUILD/ported/$markdown" charonHost_ \
+runs_xmake l "$here/../prefix_selectors.lua" "$SOURCES/$markdown" "$BUILD/ported/$markdown" revenantHost_ \
     --declarations="$BUILD/declarations.h" -fobjc-arc -fvisibility=hidden $target $quiet $(cat "$BUILD/renames") -- "$BUILD/plain/$markdown.o"
 # shellcheck disable=SC2046
 xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -I"$SOURCES" $(cat "$BUILD/renames") \
     -c "$BUILD/ported/$markdown" -o "$BUILD/ported/$markdown.o"
-perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$BUILD/ported/$markdown.o"
+perl -0777 -pi -e 's/__objc_catlist\0\0/__port_catlist\0\0/g' "$BUILD/ported/$markdown.o"
 
 # The keys are constants, not selectors: the port's definitions are what the test reads, and the
 # system's own are read beside them through a second handle on the image, so both values are in one
