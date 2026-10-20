@@ -38,12 +38,6 @@ local function sorted_keys(map)
     return byteorder.keys(map)
 end
 
-local function sorted_list(items)
-    local out = table.join(items)
-    byteorder.sort(out)
-    return out
-end
-
 local function minutes(started)
     return (os.mclock() - started) / 60000.0
 end
@@ -140,7 +134,7 @@ end
 function main(...)
     local args = common.parse_args("const-values.lua", OPTIONS, {...})
     local started = os.mclock()
-    local revenant_root = os.getenv("REVENANT_ROOT") or workspace.root()
+    local revenant_root = workspace.root()
     local scratch = workspace.fresh("const-values")
     local surface = args.surface or workspace.corpus("sdk-26.2-surface.tsv")
 

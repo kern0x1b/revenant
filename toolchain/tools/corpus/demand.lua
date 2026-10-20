@@ -1,7 +1,5 @@
 import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
-local objc = import("apple.objc", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
-local dyld = import("apple.dyld", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
 local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
 
 CORPUS = workspace.corpus()
@@ -15,14 +13,6 @@ end
 
 function built_exports_header()
     return BUILT_EXPORTS_HEADER
-end
-
-function is_gap(status)
-    return GAP_STATUS[status] == true
-end
-
-function band_route(band)
-    return BAND_ROUTE[band]
 end
 
 CACHES = os.getenv("REVENANT_CACHES_DIR") or path.join(CORPUS, "caches")
@@ -64,12 +54,12 @@ end
 function read_json(file)
     local held, err = json.decode(io.readfile(file))
     if held == nil then
-        raise("aggregate.lua: %s is not readable JSON: %s", file, tostring(err))
+        raise("demand.lua: %s is not readable JSON: %s", file, tostring(err))
     end
     return held
 end
 
-function load_cache_tsv(stem, caches)
+local function load_cache_tsv(stem, caches)
     local attr = {}
     for line in io.lines(path.join(caches or CACHES, stem .. ".tsv")) do
         local sym, fw = line:match("^([^\t]*)\t?(.*)$")
@@ -80,7 +70,7 @@ function load_cache_tsv(stem, caches)
     return attr
 end
 
-function build_index(caches)
+local function build_index(caches)
     local b60 = load_cache_tsv("6.0", caches)
     local ladder = {}
     for _, rung in ipairs(LADDER) do
@@ -89,7 +79,7 @@ function build_index(caches)
     return b60, ladder
 end
 
-function macho_binaries(appdir)
+local function macho_binaries(appdir)
     local out = {}
     for _, p in ipairs(os.files(path.join(appdir, "**"))) do
         local ext = p:match("%.([^./]+)$")
@@ -101,7 +91,7 @@ function macho_binaries(appdir)
     return out
 end
 
-function scan_symbols(binary)
+local function scan_symbols(binary)
     local undefined, defined = {}, {}
     for line in os.iorunv("nm", {"-m", binary}):gmatch("[^\n]+") do
         local toks = {}
@@ -129,7 +119,7 @@ function scan_symbols(binary)
     return undefined, defined
 end
 
-function sym_kind(sym)
+local function sym_kind(sym)
     local name = sym:match("^_OBJC_CLASS_%$_(.+)$") or sym:match("^_OBJC_METACLASS_%$_(.+)$")
     if name then
         return "class", name
@@ -141,7 +131,7 @@ function sym_kind(sym)
     return "symbol", sym
 end
 
-function categorize(fw)
+local function categorize(fw)
     if fw:sub(-6) ~= ".dylib" then
         return "FRAMEWORK"
     end
@@ -157,19 +147,19 @@ function categorize(fw)
     return "SYSLIB"
 end
 
-function load_store(missing_ok)
+local function load_store(missing_ok)
     if os.isfile(STORE) then
         return read_json(STORE)
     end
     if not missing_ok then
-        raise("aggregate.lua: no store at %s; run ingest first.", STORE)
+        raise("demand.lua: no store at %s; run ingest first.", STORE)
     end
     return {apps = {}}
 end
 
 function ingest(app, appdir)
     if not os.isdir(appdir) then
-        raise("aggregate.lua: %s is not a bundle directory; ingest reads the .app, not a scan of it.", appdir)
+        raise("demand.lua: %s is not a bundle directory; ingest reads the .app, not a scan of it.", appdir)
     end
     local b60, ladder = build_index()
     local bins = macho_binaries(appdir)
@@ -229,7 +219,7 @@ function ingest(app, appdir)
     store.apps[app] = {binaries = #bins, demand = records, residual = residual}
     local text, err = json.encode(store, {pretty = true, indent = 1})
     if not text then
-        raise("aggregate.lua: cannot encode the store: %s", tostring(err))
+        raise("demand.lua: cannot encode the store: %s", tostring(err))
     end
     io.writefile(STORE, text)
     local shown = {}
@@ -244,7 +234,7 @@ end
 
 function load_registry()
     if not os.isfile(REGISTRY_TSV) then
-        raise("aggregate.lua: registry export not found at %s (REVENANT_REGISTRY_TSV). Every row would "
+        raise("demand.lua: registry export not found at %s (REVENANT_REGISTRY_TSV). Every row would "
             .. "silently read as undecided instead of raising.", REGISTRY_TSV)
     end
     local reg = {}
@@ -269,9 +259,9 @@ function load_registry()
     return reg
 end
 
-function load_reg_kinds()
+local function load_reg_kinds()
     if not os.isfile(REGISTRY_TSV) then
-        raise("aggregate.lua: registry export not found at %s (REVENANT_REGISTRY_TSV). load_reg_kinds() has "
+        raise("demand.lua: registry export not found at %s (REVENANT_REGISTRY_TSV). load_reg_kinds() has "
             .. "nothing to read.", REGISTRY_TSV)
     end
     local kinds = {}
@@ -297,7 +287,7 @@ function load_reg_kinds()
     return kinds
 end
 
-function carried_status(reg, kind, name, framework)
+local function carried_status(reg, kind, name, framework)
     if A5_UNREACHABLE[framework] then
         return "n/a-A5"
     end
@@ -310,48 +300,7 @@ function carried_status(reg, kind, name, framework)
     return "gap?"
 end
 
-function load_built_exports()
-    if not os.isfile(BUILT_EXPORTS) then
-        raise("aggregate.lua: export list of the 6.1.3 band not found at %s (REVENANT_BUILT_EXPORTS); make it "
-            .. "with built-exports.lua <canon-run> (README, 'Built exports').", BUILT_EXPORTS)
-    end
-    local lines = io.lines(BUILT_EXPORTS)
-    local header = lines() or ""
-    local built, classes = {}, 0
-    for line in lines do
-        local name = line:match("^%s*(.-)%s*$")
-        if name ~= "" then
-            built[name] = true
-            if name:sub(1, 14) == "_OBJC_CLASS_$_" then
-                classes = classes + 1
-            end
-        end
-    end
-    if header:sub(1, #BUILT_EXPORTS_HEADER) ~= BUILT_EXPORTS_HEADER then
-        raise("aggregate.lua: %s does not name the canon it was read from; make it again with "
-            .. "built-exports.lua <canon-run>.", BUILT_EXPORTS)
-    end
-    if classes == 0 then
-        raise("aggregate.lua: %s names no class; it is not the export list of a backports band.", BUILT_EXPORTS)
-    end
-    return built, header:sub(#BUILT_EXPORTS_HEADER + 1)
-end
-
-function launch_blocks(strong, status, kind, name, built)
-    if strong < 1 or status == "n/a-A5" then
-        return false
-    end
-    if GAP_STATUS[status] then
-        return true
-    end
-    local symbol = name
-    if kind == "class" then
-        symbol = "_OBJC_CLASS_$_" .. name
-    end
-    return built[symbol] == nil
-end
-
-function is_swift_mangled(name)
+local function is_swift_mangled(name)
     return name:sub(1, 3) == "_$s" or name:sub(1, 3) == "_$S" or name:sub(1, 2) == "$s" or name:sub(1, 2) == "$S"
 end
 
@@ -418,47 +367,11 @@ function report(only)
     end
 end
 
-local function stock_source()
-    local source = dyld.held_source(path.join(dyld.root(), "6.0"), "armv7")
-    if not source then
-        raise("aggregate.lua: no armv7 6.0 cache is held under %s", dyld.root())
-    end
-    return source
-end
-
-function selector_universe()
-    local names = {}
-    for key in pairs(objc.known_selectors(stock_source())) do
-        names[key:sub(2)] = true
-    end
-    return names
-end
-
-function class_universe()
-    local names = {}
-    for name in pairs(objc.inventory(stock_source()).classes) do
-        names[name] = true
-    end
-    return names
-end
-
-function ranked(entries, count_of, name_of)
-    local keyed = {}
-    for index, entry in ipairs(entries) do
-        keyed[string.format("%07d", 1000000 - count_of(entry)) .. "\1" .. name_of(entry) .. "\1" .. string.format("%07d", index)] = entry
-    end
-    local out = {}
-    for _, key in ipairs(byteorder.keys(keyed)) do
-        table.insert(out, keyed[key])
-    end
-    return out
-end
-
 function main(cmd, ...)
     cmd = cmd or "report"
     if cmd == "ingest" then
         local app, appdir = ...
-        assert(app and appdir, "usage: aggregate.lua ingest <app> <path-to-.app>")
+        assert(app and appdir, "usage: demand.lua ingest <app> <path-to-.app>")
         ingest(app, appdir)
     elseif cmd == "report" then
         local only = nil
@@ -471,6 +384,6 @@ function main(cmd, ...)
         end
         report(only)
     else
-        print("usage: aggregate.lua ingest <app> <path-to-.app> | report [cat,cat...]")
+        print("usage: demand.lua ingest <app> <path-to-.app> | report [cat,cat...]")
     end
 end

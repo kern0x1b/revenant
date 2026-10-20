@@ -1,13 +1,6 @@
 import("core.base.json")
 local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
 
-local function either(a, b)
-    if text.truthy(a) then
-        return a
-    end
-    return b
-end
-
 local function is_object(v)
     return type(v) == "table" and v[1] == nil
 end
@@ -26,7 +19,7 @@ local function walk(node, path, out)
     local nested = path
     if node.kind == "TypeDecl" then
         nested = {table.unpack(path)}
-        nested[#nested + 1] = either(either(node.name, node.printedName), "")
+        nested[#nested + 1] = text.either(text.either(node.name, node.printedName), "")
     end
     for _, child in ipairs(children(node)) do
         walk(child, nested, out)
@@ -198,7 +191,7 @@ function main(...)
         if not skip and not text.startswith(printed, "_") and not under_underscore then
             local owner = nesting[#nesting] or ""
             if not only or owner == only then
-                local kind = either(node.declKind, node.kind)
+                local kind = text.either(node.declKind, node.kind)
                 local covered = (kind == "Func" or kind == "Constructor")
                     and covered_by_defaults(ours_shapes, owner, printed)
                 if kind ~= "Accessor" and not covered then

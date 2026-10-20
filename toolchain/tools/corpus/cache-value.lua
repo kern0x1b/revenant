@@ -1,6 +1,8 @@
+local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
+
 function main(cachefile, symbolfile)
     assert(cachefile and symbolfile, "usage: cache-value.lua <cache file> <symbols file>")
-    local dyld = import("apple.dyld", {rootdir = path.join(os.getenv("REVENANT_ROOT"), "modules"), anonymous = true})
+    local dyld = import("apple.dyld", {rootdir = path.join(workspace.root(), "toolchain", "modules"), anonymous = true})
     local wanted, order = {}, {}
     for line in io.lines(symbolfile) do
         local name, width, pointer, text = line:match("^([^\t]+)\t(%S+)\t([^\t]*)\t([^\t]*)$")

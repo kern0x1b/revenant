@@ -1,4 +1,5 @@
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "modules")})
+local matter_text = import("matter-text", {rootdir = os.scriptdir(), anonymous = true})
 
 local UNAVAILABLE_MARKS = {"MTR_PROVISIONALLY_AVAILABLE", "MTR_UNSTABLE_API", "NS_UNAVAILABLE", "API_UNAVAILABLE"}
 local UNAVAILABLE = {}
@@ -220,28 +221,10 @@ local function parse(file, text)
     return blocks, typedefs
 end
 
-local function digest(text)
-    local h = 0
-    for k = 1, #text, 4096 do
-        for _, b in ipairs({text:byte(k, math.min(k + 4095, #text))}) do
-            h = (h * 31 + b) % 4294967296
-        end
-    end
-    return string.format("%08x", h)
-end
-
 local function read_lines(file)
     local out = {}
     for line in io.lines(file) do
         out[#out + 1] = line
-    end
-    return out
-end
-
-local function cells_of(line)
-    local out = {}
-    for cell in (line .. "\t"):gmatch("([^\t]*)\t") do
-        out[#out + 1] = cell
     end
     return out
 end
@@ -311,7 +294,7 @@ function main(headers, overlap_path, corpus_path, outfile)
         if first then
             first = false
         else
-            local cells = cells_of(line)
+            local cells = matter_text.cells_of(line)
             input[#input + 1] = cells[1]
             real[cells[1]] = cells[2]
         end
@@ -320,7 +303,7 @@ function main(headers, overlap_path, corpus_path, outfile)
 
     local roots, corpus_rows, not_in_headers, provisional = {}, 0, 0, 0
     for index, line in ipairs(read_lines(corpus_path)) do
-        local cells = cells_of(line)
+        local cells = matter_text.cells_of(line)
         if index > 1 and cells[1] == "Matter" and cells[2] == "class" then
             corpus_rows = corpus_rows + 1
             local name = cells[4]
@@ -387,8 +370,8 @@ function main(headers, overlap_path, corpus_path, outfile)
     end
     table.sort(texts, byteorder.less)
     local corpus_text = io.readfile(corpus_path)
-    local stamp = "# inputs: class-overlap.tsv " .. digest(overlap_text) .. "; corpus " .. digest(corpus_text)
-        .. "; headers " .. digest(table.concat(texts))
+    local stamp = "# inputs: class-overlap.tsv " .. matter_text.digest(overlap_text) .. "; corpus " .. matter_text.digest(corpus_text)
+        .. "; headers " .. matter_text.digest(table.concat(texts))
 
     local rows = {stamp, "class\treal-stack\tin-closure\treason\temit"}
     local counts = {emit = 0, closure = 0, real_no = 0}
