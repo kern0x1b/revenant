@@ -29,13 +29,13 @@ One `.deb` for the whole repository, installed once through Cydia. It holds the 
 repository writes (SwiftUI, Combine, WebKit, and so on) and the Swift runtime. After it is installed, any
 application works as on a newer iOS. That includes applications this toolchain did not build.
 
-- A framework iOS 6 does not have is installed at its real path, for example
-  `/System/Library/Frameworks/Metal.framework`. An application that imports Metal loads ours, and only that
-  application pays for it.
-- Members that are missing from a framework iOS 6 already has are found by the loader in the backports
-  library. Which mechanism does that is chosen by measurement.
 - An application built by today's Xcode is arm64 only, and these devices are 32-bit ARM. Such a binary runs
-  there through the recompiler.
+  there through the recompiler, which binds its imports to the backports libraries when it translates it.
+  An application this toolchain builds links them directly.
+- The libraries live in `/usr/lib/revenant/`, never over a system file, so the same package stays correct on a
+  later iOS that has the real framework. Only an application that links a library loads it.
+- Where the system has its own implementation it wins at run time: Objective-C through the class alias, C and
+  Swift through a forwarder. How, and what is still to measure: `backports-loading.md`.
 
 ## What is worked on
 
