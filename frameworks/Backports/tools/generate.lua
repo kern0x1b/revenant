@@ -165,6 +165,11 @@ end
 
 function skeleton_for(name, includes)
     local state = prepare({name}, includes)
+    local keys = table.keys(state.implemented[name] or {})
+    table.sort(keys)
+    local folder = path.join(sdkfiles.build_root(), "keys")
+    os.mkdir(folder)
+    io.writefile(path.join(folder, name .. ".txt"), table.concat(keys, "\n") .. (#keys > 0 and "\n" or ""))
     local pending = {}
     for _, framework in ipairs(state.frameworks) do
         local rows = {}
