@@ -42,7 +42,7 @@ emulate.lua snapshots [--accept] [--only=NAME]   # rendered scenarios against fr
 emulate.lua perf                         # in-app timings of deeply nested layouts
 coverage.lua --check                     # the ledger, checked against the code
 api-surface.lua                          # the typed API diff against Apple's interface
-apple-surface.lua                        # Apple's 26.2 surface, which the invented-name gate reads
+api-surface.lua apple                    # Apple's 26.2 surface, which the invented-name gate reads
 device.lua shots SCENARIO...             # scenarios rendered on a claimed phone
 ```
 

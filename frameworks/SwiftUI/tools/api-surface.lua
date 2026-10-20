@@ -3,16 +3,57 @@ import("core.project.project")
 
 local tree = import("lib.tree", {rootdir = os.scriptdir(), anonymous = true})
 
-local USAGE = [[usage: ./xmakew l frameworks/SwiftUI/tools/api-surface.lua [prepare]
+local USAGE = [==[usage: ./xmakew l frameworks/SwiftUI/tools/api-surface.lua [prepare | apple [MODULE...]]
   prepare   copy the SwiftUI framework of the iOS 16.4 SDK with its interface patched, for swift-api-digester
+  apple     write Apple's 26.2 surface, one row per declaration, to apple-26-surface.tsv in the run folder, which
+            api-invented.lua reads; it builds the surftool of tests/surface first
   (none)    prepare if needed, then dump Apple's and this module's API, list the gaps (api-diff.lua) and the
             public names Apple's 26.2 does not declare (api-invented.lua); STRICT=1 makes an invented name a failure.
-Run it from the top of revenant, configured for iphoneos, after ./xmakew build -P . SwiftUI.]]
+Run it from the top of revenant, configured for iphoneos, after ./xmakew build -P . SwiftUI.]==]
 
 local SDK_VERSION = "16.4"
+local APPLE_ENTRY = {"Swift", "SwiftUI", "SwiftUICore", "Foundation", "CoreFoundation", "Combine", "Observation", "CoreGraphics", "UIKit"}
+local PATCH_OPENER = 'os_log(.fault, log: Log.runtimeIssuesLog, """\n'
+local PATCH_REPLACEMENT = "_ = Log.runtimeIssuesLog"
 
 local function framework()
     return path.join(tree.run("fw"), "SwiftUI.framework")
+end
+
+local function closing_end(s, body)
+    local line_start = body
+    while line_start <= #s do
+        local newline = string.find(s, "\n", line_start, true)
+        local line_end = newline and newline - 1 or #s
+        local line = string.sub(s, line_start, line_end)
+        local _, close = string.find(line, '^%s*"""%)')
+        if close then
+            return line_start + close - 1
+        end
+        if not newline then
+            break
+        end
+        line_start = newline + 1
+    end
+    return nil
+end
+
+local function patch(file)
+    local s = io.readfile(file)
+    local from = 1
+    while true do
+        local at = string.find(s, PATCH_OPENER, from, true)
+        if not at then
+            break
+        end
+        local finish = closing_end(s, at + #PATCH_OPENER)
+        if finish then
+            io.writefile(file, string.sub(s, 1, at - 1) .. PATCH_REPLACEMENT .. string.sub(s, finish + 1))
+            return
+        end
+        from = at + 1
+    end
+    raise("the os_log call this patches was not found in %s", file)
 end
 
 local function prepare()
@@ -20,8 +61,7 @@ local function prepare()
     local copy = framework()
     os.tryrm(copy)
     os.cp(path.join(sdk, "System", "Library", "Frameworks", "SwiftUI.framework"), copy)
-    local interface = path.join(copy, "Modules", "SwiftUI.swiftmodule", "arm64-apple-ios.swiftinterface")
-    os.execv(os.programfile(), {"l", path.join(os.scriptdir(), "patch-interface.lua"), interface})
+    patch(path.join(copy, "Modules", "SwiftUI.swiftmodule", "arm64-apple-ios.swiftinterface"))
     print("%s ready", copy)
 end
 
@@ -104,9 +144,50 @@ local function surface()
     end
 end
 
-function main(action)
+local function surftool()
+    local project = tree.root("tests", "surface")
+    local build = tree.run("surface", "build")
+    local envs = {XMAKE_CONFIGDIR = tree.run("surface", "config")}
+    for _, argv in ipairs({{"f", "-P", project, "-o", build, "-y"}, {"build", "-P", project}}) do
+        os.execv(os.programfile(), argv, {envs = envs})
+    end
+    local tool = path.join(build, "macosx", "arm64", "release", "surftool")
+    if not os.isfile(tool) then
+        raise("the build of %s left no surftool at %s", project, tool)
+    end
+    return tool
+end
+
+local function interfaces(sdk, modules)
+    local found = {}
+    for _, name in ipairs(modules) do
+        local folders = os.dirs(path.join(sdk, "**", name .. ".swiftmodule"))
+        table.sort(folders)
+        if #folders == 0 then
+            raise("the SDK at %s has no %s.swiftmodule", sdk, name)
+        end
+        local files = os.files(path.join(folders[1], "*.swiftinterface"))
+        table.sort(files)
+        table.join2(found, files)
+    end
+    return found
+end
+
+local function apple(modules)
+    local sdk = tree.sdk()
+    local tool = surftool()
+    local out = path.join(tree.run("api"), "apple-26-surface.tsv")
+    local file = io.open(out, "w")
+    os.execv(tool, table.join({sdk}, interfaces(sdk, modules)), {stdout = file})
+    file:close()
+    print("%s written", out)
+end
+
+function main(action, ...)
     if action == "prepare" then
         prepare()
+    elseif action == "apple" then
+        apple(#{...} > 0 and {...} or APPLE_ENTRY)
     elseif action == nil then
         surface()
     else
