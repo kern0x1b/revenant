@@ -67,7 +67,7 @@ if is_plat("iphoneos") then
         add_packages("combine")
         add_tests("templates")
         on_test(function (target)
-            local gyb = path.join(os.scriptdir(), "..", "..", "toolchain", "modules", "gyb", "main.lua")
+            local gyb = import("@addon.revenant.gyb.main", {anonymous = true})
             local header = io.readfile(sources(target, "utils", "template_header.txt")):gsub("\n$", "")
             local templates = os.files(sources(target, "Combine", "**.gyb"))
             assert(#templates > 0, "revenant@combine installed no gyb templates")
@@ -75,7 +75,7 @@ if is_plat("iphoneos") then
                 local generated = path.join(path.directory(template), "GENERATED-" .. path.basename(template))
                 local expanded = path.join(target:autogendir(), path.filename(generated))
                 os.mkdir(path.directory(expanded))
-                os.vrunv(os.programfile(), {"l", gyb, "-Dtemplate_header=" .. header, "--line-directive", "", "-o", expanded, template})
+                gyb.main("-Dtemplate_header=" .. header, "--line-directive", "", "-o", expanded, template)
                 if io.readfile(expanded, {encoding = "binary"}) ~= io.readfile(generated, {encoding = "binary"}) then
                     raise("%s is not what %s expands to", generated, template)
                 end

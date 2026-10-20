@@ -1,7 +1,6 @@
 import("lib.detect.find_tool")
 
 local member = path.join(os.scriptdir(), "..")
-local toolchain_modules = path.join(member, "..", "..", "..", "toolchain", "modules")
 
 local common = {
     {"PORT", "Cocoa"},
@@ -92,7 +91,7 @@ local compat_sources = {
 local packages = {"icu", "libcxx", "libxml2", "libxslt", "openssl", "wasm3", "brotli", "libpsl", "libwebp", "woff2"}
 
 local function toolchain_module(name)
-    return import(name, {rootdir = toolchain_modules, anonymous = true})
+    return import("@addon.revenant." .. name, {anonymous = true})
 end
 
 function variant(name)

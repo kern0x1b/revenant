@@ -8,7 +8,7 @@
   examples/webview-host/WebKitUIKitDelegate.m) and a <canvas> that keeps drawing while fullscreen,
   to show the compositing layer is still live and not just a frozen snapshot.
 
-  Both buttons are tapped by hand, or through tools/revtouch at the fixed screen
+  Both buttons are tapped by hand, or through revtouch (src/device-tools/revtouch.c) at the fixed screen
   points they sit at: a script-evaluated requestFullscreen() has no user gesture
   and DocumentFullscreen requires one, so the page cannot drive itself.
 -->

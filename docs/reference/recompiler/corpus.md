@@ -1,6 +1,6 @@
 # The corpus and the benchmark
 
-`tests/` holds the translator's own regression programs and `tools/perf/` its benchmark. Their sources are C, Objective-C,
+`tests/` holds the translator's own regression programs and `tests/perf/` its benchmark. Their sources are C, Objective-C,
 assembly and Swift. The steps that build, translate and check them are Lua run by xmake: a `check.lua` or `build.lua`
 beside the sources, and the shared parts in `tools/` (`env.lua`, `corpus.lua`, `translate.lua`, `macho.lua`).
 
@@ -25,7 +25,7 @@ A check that also has a device part is run by hand, with the output folder as it
 ./xmakew l recompiler/tests/swiftconformance/check.lua <out>
 ```
 
-These need a claimed device (the skill `device`): `REVENANT_DEVICE_HOLDER` and `REVENANT_DEVICE`
+These need a claimed device (the skill `device-session`): `REVENANT_DEVICE_HOLDER` and `REVENANT_DEVICE`
 exported and the claim held. They reach the device through Revenant's `device` module. Without an argument, output goes
 to `build/recompiler/corpus/<name>`.
 

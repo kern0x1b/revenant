@@ -28,7 +28,7 @@ under their licenses as well; the full texts are in `LICENSES/`.
 
 - Source: <https://github.com/mattpocock/skills>, commit `c55ee46`: the skills `grilling` and
   `grill-me` (and the earlier `grill-me` at `a6bdfd9`).
-- License: MIT, Copyright (c) 2026 Matt Pocock (`LICENSES/MIT-mattpocock-skills.txt`).
+- License: MIT, Copyright (c) 2026 Matt Pocock (`LICENSES/MIT.txt`).
 - Used in: `skills/init`. Its interview follows their approach: a design tree, rounds that ask
   the whole frontier with a recommended answer each, facts looked up rather than asked, and done
   only when every branch is settled and the user confirms. The text is our own, written for this plugin.

@@ -9,7 +9,7 @@ XNU kernel (system calls, Mach, IOKit) and the devices the firmware asks about, 
 daemons and frameworks run on top, on a JIT-translated ARM CPU (Dynarmic: revenant's `dynarmic` package, an upstream
 commit with our patches, in `third_party/dynarmic`).
 
-[How it works](../../explanation/emulator/how-it-works.md) describes the pieces. [Build and run](build-and-run.md)
+[How it works](../../explanation/emulator/how-it-works.md) describes the pieces. [Build and test](build-and-test.md)
 covers the build, the options and a boot.
 
 ## Layout
@@ -20,7 +20,7 @@ covers the build, the options and a boot.
   address space and the CPU wrapper, and `src/graphics/`, `src/media/`, `src/network/`, `src/telephony/`,
   `src/bluetooth/`, `src/storage/`, `src/crypto/` the devices and frameworks the guest talks to, with `src/host/`
   for what they use on the Mac.
-- `tools/`: the guest probe (`tools/guest`) and the GLSL shader compiler (`tools/glsl`).
+- `tests/guest/dns-probe/`: the guest DNS probe; `src/glsl/`: the GLSL shader compiler, a host tool.
 - Nothing third-party is vendored ([the third-party notices](../../reference/emulator/third-party.md)). A change to
   Dynarmic is a new patch in `third_party/dynarmic/patches/`, listed in that package.
 

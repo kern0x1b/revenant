@@ -5,8 +5,8 @@ What the toolchain is, and why it is built this way, is in [design](../../explan
 
 ## Where to look
 
-- The tasks: [write a port](port.md), [write a package](packages.md), [run on the emulator](emulate.md),
-  [run the tests](tests.md).
+- The tasks: [write a port](../../tutorials/toolchain/port.md), [write a package](packages.md), [run on the emulator](emulate.md),
+  [run the tests](../../reference/toolchain/tests.md).
 - The facts: [rules and values](../../reference/toolchain/rules.md), [commands](../../reference/toolchain/commands.md),
   [packages](../../reference/toolchain/packages.md), [tools](../../reference/toolchain/tools.md).
 - Skills in the top `.agents/skills/`: `emulator` drives `xmake emulate`, `device` reaches a phone. The xmake reference skills come from the `xmake-skills` plugin pinned in
@@ -33,7 +33,7 @@ What the toolchain is, and why it is built this way, is in [design](../../explan
 
 - `./xmakew l tools/check.lua toolchain` runs `tests/light.lua`, which runs the addon's tests.
 - `./xmakew l tools/check.lua layout` from the repository root.
-- The skill `emulator` for a run on the emulator.
+- The skill `emulator-session` for a run on the emulator.
 - A change that spans components is one series in the repository, one commit per component it touches.
 
 ## Conventions

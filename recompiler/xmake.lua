@@ -56,7 +56,7 @@ rule("recompiler.translated")
 rule_end()
 
 for _, app in ipairs({{"recompiler_cxxinit", "tests/cxxinit/build.lua"}, {"recompiler_refrepro", "tests/refrepro/build.lua"},
-                      {"recompiler_devtime", "tools/perf/build.lua"}}) do
+                      {"recompiler_devtime", "tests/perf/build.lua"}}) do
     local name, script = app[1], app[2]
     target(name)
         set_kind("phony")

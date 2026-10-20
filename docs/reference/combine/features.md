@@ -20,3 +20,8 @@
 
 What the upstream suite does and does not run, and what the run on iOS 6.1.3 showed, is in
 [test results](test-results.md).
+
+## Trademarks
+
+Combine, Swift, iOS and iPhone are trademarks of Apple Inc. They are used here nominatively, to say what this software is
+and where it runs; there is no affiliation with or endorsement by Apple, and none of Apple's code or assets is included.

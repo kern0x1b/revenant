@@ -1,6 +1,6 @@
 # Rules, values and checks
 
-The target rules and the values each one reads, the settings a port sets for the toolchain, the checks every binary is held to where it is linked, and where the installed files go. How to use them is in [write a port](../../guides/toolchain/port.md).
+The target rules and the values each one reads, the settings a port sets for the toolchain, the checks every binary is held to where it is linked, and where the installed files go. How to use them is in [write a port](../../tutorials/toolchain/port.md).
 
 ## Target rules
 

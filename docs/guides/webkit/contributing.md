@@ -121,7 +121,7 @@ the `RevPrefs` target in `xmake.lua`, like the dylibs beside it — that writes 
 - Documentation: the guides beside this file, the explanations in [`docs/explanation/webkit/`](../../explanation/webkit/)
   and the reference in [`docs/reference/webkit/`](../../reference/webkit/). The [README](../../../frameworks/WebKit/README.md)
   has the index.
-- Playbooks: revenant's `.agents/skills/webkit/SKILL.md` and `.agents/skills/device/SKILL.md`.
+- Playbooks: revenant's `.agents/skills/webkit/SKILL.md` and `.agents/skills/device-session/SKILL.md`.
 
 ## Repository layout
 
@@ -129,8 +129,9 @@ the `RevPrefs` target in `xmake.lua`, like the dylibs beside it — that writes 
 examples/webview-host/  The standalone application: the embeddable host for the web view
 src/                    The port's code: its packages, modules, compat library, platform targets and licence
   compat/       Symbols iOS 6 does not have, built into libios6compat.a
+  device-tools/ The webkit-device-tools package: the phone's probes, their C sources and entitlements
+  engine/       The webkit-engine package's recipe
   modules/      What the engine package does: options, checks, staging, the carry manifest
-  packages/     The webkit-engine and webkit-device-tools packages
   packaging/    The package's control file and DEBIAN scripts
   platform/     The tweak, compat and TLS dylibs and the Settings bundle, xmake targets
     safari/     The Safari substitution: the loader, the compat/hooks, WebAssembly and TLS sources

@@ -1,5 +1,5 @@
 local function dyld()
-    return import("apple.dyld", {rootdir = path.join(os.scriptdir(), "..", "..", "toolchain", "modules"), anonymous = true})
+    return import("@addon.revenant.apple.dyld", {anonymous = true})
 end
 
 function absent(cache, symbols, provided)

@@ -8,7 +8,7 @@
   outside revenant takes SwiftUI as the package `revenant@swiftui-uikit` instead.
 - To run the tests and rendered scenarios: revenant's emulator, which `./xmakew emulate` drives once the project is
   configured with `--emulate=y`. `frameworks/SwiftUI/tools/emulate.lua` does that configure itself; use the emulator the way the
-  repository's skill `emulator` says.
+  repository's skill `emulator-session` says.
 - To measure on hardware: an iPhone 4S or an iPad 2 on iOS 6.1.3, claimed with `./xmakew device` (skill
   `device`).
 
@@ -42,7 +42,7 @@ emulate.lua snapshots [--accept] [--only=NAME]   # rendered scenarios against fr
 emulate.lua perf                         # in-app timings of deeply nested layouts
 coverage.lua --check                     # the ledger, checked against the code
 api-surface.lua                          # the typed API diff against Apple's interface
-apple-surface.lua                        # Apple's 26.2 surface, which the invented-name gate reads
+api-surface.lua apple                    # Apple's 26.2 surface, which the invented-name gate reads
 device.lua shots SCENARIO...             # scenarios rendered on a claimed phone
 ```
 

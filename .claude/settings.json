@@ -10,7 +10,14 @@
       "Bash(git push -f *)",
       "Bash(git push --force-with-lease *)",
       "Bash(git checkout -- *)",
-      "Bash(git clean -f *)"
+      "Bash(git clean -f *)",
+      "Bash(git rebase *)",
+      "Bash(git commit --amend *)",
+      "Bash(git restore *)",
+      "Bash(git stash *)",
+      "Bash(pkill -f *)",
+      "Bash(sed -i *)",
+      "Bash(perl -i *)"
     ]
   },
   "autoMemoryEnabled": false,
