@@ -13,8 +13,6 @@
 # port's walk agrees with RevenantMPSMatrixSolveReference.h, which is the header's own sentences written as
 # arithmetic in plain C and never names the port's class.
 set -eu
-echo "FAIL host/mpsmatrixsolve/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 38; the inline block PY at line 80" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 mps=${MPS:-$here/../../../../packages/frameworks/apple-backports/MetalPerformanceShaders}
@@ -35,14 +33,7 @@ for source in "$mps"/*.m; do
 done
 for object in "$build/plain"/*.o; do xcrun nm -g --defined-only "$object"; done \
     | grep -oE '_OBJC_CLASS_\$_[A-Za-z0-9_]+' | sed 's/_OBJC_CLASS_\$_//' | sort -u > "$build/port-defines.txt"
-python3 - "$build/port-defines.txt" "$build/rename.h" <<'PY'
-import sys
-names = [line.strip() for line in open(sys.argv[1]) if line.strip()]
-with open(sys.argv[2], 'w') as out:
-    for name in names:
-        out.write("#define %s Revenant%s\n" % (name, name))
-print("classes the port defines: %d" % len(names))
-PY
+runs_xmake l "$runs_checkout/tests/backports/common/classes.lua" rename "$build/port-defines.txt" "$build/rename.h"
 echo "renamed: $(grep -c define "$build/rename.h") classes"
 
 printf '#import <MetalPerformanceShaders/MetalPerformanceShaders.h>\n#import "RevenantMPSCnn.h"\n#import <objc/runtime.h>\n#include <stdio.h>\n' > "$build/declarations.h"
@@ -77,24 +68,5 @@ cat "$build/port.txt"
 # The verdict, read from the transcript rather than from the exit code of the case: the case prints what
 # it compared and the check below is what decides pass or fail, so a case that silently compared nothing
 # cannot pass by exiting zero.
-python3 - "$build/port.txt" <<'PY'
-import re, sys
-text = open(sys.argv[1]).read()
-last = re.findall(r"^compared (\d+) mismatches (\d+)$", text, re.M)
-if not last:
-    print("FAIL: the case printed no verdict line")
-    sys.exit(1)
-compared, mismatches = int(last[-1][0]), int(last[-1][1])
-if mismatches:
-    print("FAIL: %d mismatches over %d compared" % (mismatches, compared))
-    sys.exit(1)
-if compared < 53:
-    # Two Cholesky factorizations round-tripped at 9 elements each (18), one non-positive-definite status
-    # (1), two LU factorizations at 9 each (18), one singular status (1), the triangular solve over two
-    # right-hand sides (6), the upper one (3), the alpha != 0 one (3), the Cholesky solve over two sides
-    # (6) and the LU solve over two sides (6): 62 with the statuses; the run that passes reports the
-    # count it actually reached, and this floor refuses a run that reached fewer than every kernel.
-    print("FAIL: only %d elements compared, which cannot be the five kernels over these systems" % compared)
-    sys.exit(1)
-print("PASS: %d elements compared, %d mismatches" % (compared, mismatches))
-PY
+runs_xmake l "$runs_checkout/tests/backports/common/compared.lua" "$build/port.txt" 53 \
+    "the five kernels over these systems"

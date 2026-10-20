@@ -11,8 +11,6 @@
 # move it. The line carries all three numbers - identical, within the bound, beyond it - and a mutant
 # that is a wrong answer moves the third.
 set -eu
-echo "FAIL host/mpsmatrix/mutation.sh: its Python steps are gone and not yet ported to Lua: the inline block PYEOF at line 89" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -79,51 +77,18 @@ gradient=$mps/MPSMatrixBatchNormalizationGradient12.m
 multiply=$mps/MPSMatrixMultiplication10.m
 header=$mps/RevenantMPS.h
 
-# Every anchor resolved before a single harness run, in one python process, which prints one line per
+# Every anchor resolved before a single harness run, in one process, which prints one line per
 # site and exits non-zero naming the ones that do not resolve exactly once. A campaign costs three
 # full harness runs, so a stale anchor found this way is a second and found the expensive way is forty
 # minutes - and the tenth mutant of this campaign used to be found the expensive way. The check reads
 # the anchors and the files itself and prints what it compared, so a run that examined nothing cannot
 # come back green: it has one line per site and a count at the end, and they are the only way out.
 anchor_check() {
-    python3 - "$mps" "$MUTANTS_DIR" <<'PYEOF'
-import os
-import sys
-mps, mutants = sys.argv[1], sys.argv[2]
-sites = [("MPSMatrixMultiplication10.m", "multiply-accumulation"),
-         ("MPSMatrixBatchNormalization12.m", "forward-mean"),
-         ("MPSMatrixSum11.m", "sum-transposed-clip"),
-         ("MPSMatrixSum11.m", "sum-scale-index"),
-         ("MPSMatrixBatchNormalizationGradient12.m", "gradient-per-parameter"),
-         ("MPSMatrixSum11.m", "scale-guard-edge-one"),
-         ("MPSMatrixSum11.m", "scale-guard-clamp-two"),
-         ("MPSMatrixSum11.m", "neuron-application")]
-bad = []
-for name, site in sites:
-    path = os.path.join(mps, name)
-    try:
-        anchor = open(os.path.join(mutants, site + ".anchor")).read()
-    except OSError as e:
-        bad.append("%s: no anchor file (%s)" % (site, e))
-        print("anchor check: %-26s NO ANCHOR FILE" % site)
-        continue
-    if anchor.endswith("\n"):
-        anchor = anchor[:-1]
-    try:
-        text = open(path).read()
-    except OSError as e:
-        bad.append("%s: no source (%s)" % (site, e))
-        print("anchor check: %-26s NO SOURCE" % site)
-        continue
-    n = text.count(anchor)
-    print("anchor check: %-26s %d occurrence(s) in %s" % (site, n, name))
-    if n != 1:
-        bad.append("%s occurs %d times in %s, and a mutation needs exactly one" % (site, n, name))
-print("anchor check: %d sites compared, %d not resolving exactly once" % (len(sites), len(bad)))
-for line in bad:
-    sys.stderr.write(line + "\n")
-sys.exit(1 if bad else 0)
-PYEOF
+    runs_xmake l "$runs_checkout/tests/backports/common/mutants.lua" anchors "$mps" "$MUTANTS_DIR" \
+        MPSMatrixMultiplication10.m:multiply-accumulation MPSMatrixBatchNormalization12.m:forward-mean \
+        MPSMatrixSum11.m:sum-transposed-clip MPSMatrixSum11.m:sum-scale-index \
+        MPSMatrixBatchNormalizationGradient12.m:gradient-per-parameter MPSMatrixSum11.m:scale-guard-edge-one \
+        MPSMatrixSum11.m:scale-guard-clamp-two MPSMatrixSum11.m:neuron-application
 }
 anchor_check || { echo "the campaign is not startable: an anchor does not resolve exactly once" >&2; exit 1; }
 

@@ -33,8 +33,6 @@
 # comparison that reads only one end of each case cannot see one of them. The run has to pass once and
 # fail twice, or the comparison is not looking at the thing it claims to.
 set -eu
-echo "FAIL host/mpsndarray/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 57; the inline block PY at line 105; the inline block PY at line 127" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -54,14 +52,7 @@ for name in $sources; do
         -c "$mps/$name.m" -o "$build/$name.plain.o" || exit 1
 done
 xcrun nm -gU $build/*.plain.o | awk '$3 ~ /^_OBJC_CLASS_\$_/ { print $3 }' | sort -u > "$build/port-defines.txt"
-python3 - "$build/port-defines.txt" "$build/rename.h" <<'PY'
-import sys
-names = sorted(line.strip()[len("_OBJC_CLASS_$_"):] for line in open(sys.argv[1]) if line.strip())
-with open(sys.argv[2], "w") as out:
-    for name in names:
-        out.write("#define %s Revenant%s\n" % (name, name))
-print("classes the port defines: %d" % len(names))
-PY
+runs_xmake l "$runs_checkout/tests/backports/common/classes.lua" rename "$build/port-defines.txt" "$build/rename.h"
 
 # build_one <plant> <name> <case file> - every object AND the case file renamed together, so the two
 # sides of the comparison are the port's own classes and the release's own and never a mixture.
@@ -102,35 +93,13 @@ echo "  release: $(wc -l < "$build/release.txt" | tr -d ' ') lines"
 build_one 0 port "$here/ndarray-cases.m" || { echo "mpsndarray: the port build FAILED"; exit 1; }
 
 # ---- the comparison, line by line, so a difference names the case that made it.
-python3 - "$build/release.txt" "$build/port.txt" <<'PY'
-import sys
-def read(path):
-    return [l.rstrip("\n") for l in open(path) if l.strip() and not l.startswith("commit:")]
-a, b = read(sys.argv[1]), read(sys.argv[2])
-bad = [(x, y) for x, y in zip(a, b) if x != y]
-if len(a) != len(b):
-    print("compared: the release printed %d lines, the port %d" % (len(a), len(b)))
-    bad += [("<missing>", ">") for _ in range(abs(len(a) - len(b)))]
-print("compared: %d lines" % min(len(a), len(b)))
-if bad:
-    print("MISMATCHES: %d" % len(bad))
-    for x, y in bad:
-        print("  release: %s\n  port:    %s" % (x, y))
-    sys.exit(1)
-print("MISMATCHES: 0")
-PY
+runs_xmake l "$here/compare.lua" compare "$build/release.txt" "$build/port.txt"
 
 # ---- the plants: the port's own store path, so the comparison is shown a port that writes the wrong
 # value. Both of these MUST fail the comparison, or the comparison is not looking at the port.
 for plant in 1 2; do
     build_one $plant port-plant$plant "$here/ndarray-cases.m"
-    if python3 - "$build/port.txt" "$build/port-plant$plant.txt" <<'PY'
-import sys
-def read(path):
-    return [l.rstrip("\n") for l in open(path) if l.strip() and not l.startswith("commit:")]
-sys.exit(0 if read(sys.argv[1]) == read(sys.argv[2]) else 1)
-PY
-    then
+    if runs_xmake l "$here/compare.lua" same "$build/port.txt" "$build/port-plant$plant.txt"; then
         echo "PLANT $plant SURVIVED: the comparison cannot see a port that writes the wrong value"
         exit 1
     fi

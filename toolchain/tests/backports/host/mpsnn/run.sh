@@ -34,8 +34,6 @@
 # loaded first. The rename is the mechanism and the `class` lines in both transcripts are the receipt - the
 # system build prints `MPSNNAdditionNode`, the port build prints `RevenantMPSNNAdditionNode`.
 set -eu
-echo "FAIL host/mpsnn/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 68" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -65,24 +63,14 @@ for source in "$mps"/*.m; do
     plain="$plain $build/$name.plain.o"
 done
 xcrun nm -gU $plain | awk '$3 ~ /^_OBJC_CLASS_\$_/ { print $3 }' | sort -u > "$build/port-defines.txt"
-python3 - "$build/port-defines.txt" "$build/rename.h" <<'PY'
-import sys
-defined = set()
-for line in open(sys.argv[1]):
-    line = line.strip()
-    if line.startswith("_OBJC_CLASS_$_"):
-        defined.add(line[len("_OBJC_CLASS_$_"):])
-with open(sys.argv[2], "w") as out:
-    for name in sorted(defined):
-        out.write("#define %s Revenant%s\n" % (name, name))
-PY
+runs_xmake l "$runs_checkout/tests/backports/common/classes.lua" rename "$build/port-defines.txt" "$build/rename.h"
 echo "renamed: $(grep -c define "$build/rename.h") classes of $(wc -l < "$build/port-defines.txt" | tr -d ' ')"
 
 printf '#import <MetalPerformanceShaders/MetalPerformanceShaders.h>\n#include <stdio.h>\n' > "$build/declarations.h"
 objects=""
 for source in "$mps"/*.m; do
     name=$(basename "$source" .m)
-    runs_xmake l "$here/../prefix_selectors.lua" "$source" "$build/$name.m" crevenantHost_ \
+    runs_xmake l "$here/../prefix_selectors.lua" "$source" "$build/$name.m" revenantHost_ \
         --declarations="$build/declarations.h" -fobjc-arc $target $quiet -I"$mps" \
         -include "$build/rename.h" -- "$build/$name.plain.o" || exit 1
     xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -I"$mps" -include "$build/rename.h" \

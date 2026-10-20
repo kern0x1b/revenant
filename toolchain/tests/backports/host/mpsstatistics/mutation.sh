@@ -19,14 +19,12 @@
 #                 number on exactly the two-channel source and on nothing else, which is why that
 #                 source is in the cases at all.
 #
-# Every anchor is resolved before the first harness run, in one python process that prints a line per
+# Every anchor is resolved before the first harness run, in one process that prints a line per
 # site and a count, and exits non-zero naming any that does not resolve exactly once - so a stale anchor
 # is found in a second rather than in the middle of a campaign.
 #
 #     CAMPAIGN=one|all    one runs one site, all runs every site (the default)
 set -eu
-echo "FAIL host/mpsstatistics/mutation.sh: its Python steps are gone and not yet ported to Lua: the inline block PYEOF at line 55; the inline block PYEOF at line 91" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -52,32 +50,8 @@ case "$campaign" in
 esac
 
 anchor_check() {
-    python3 - "$mps" "$MUTANTS_DIR" <<'PYEOF'
-import os, sys
-mps, mutants = sys.argv[1], sys.argv[2]
-sites = [("MPSImageStatistics11.m", "extrema-seed"),
-         ("MPSImageStatistics11.m", "variance-form"),
-         ("MPSImageStatistics11.m", "mean-divisor")]
-bad = []
-for name, site in sites:
-    try:
-        anchor = open(os.path.join(mutants, site + ".anchor")).read()
-        text = open(os.path.join(mps, name)).read()
-    except OSError as e:
-        bad.append("%s: %s" % (site, e))
-        print("anchor check: %-16s NO FILE (%s)" % (site, e))
-        continue
-    if anchor.endswith("\n"):
-        anchor = anchor[:-1]
-    n = text.count(anchor)
-    print("anchor check: %-16s %d occurrence(s) in %s" % (site, n, name))
-    if n != 1:
-        bad.append("%s occurs %d times in %s, and a mutation needs exactly one" % (site, n, name))
-print("anchor check: %d sites compared, %d not resolving exactly once" % (len(sites), len(bad)))
-for line in bad:
-    sys.stderr.write(line + "\n")
-sys.exit(1 if bad else 0)
-PYEOF
+    runs_xmake l "$runs_checkout/tests/backports/common/mutants.lua" anchors "$mps" "$MUTANTS_DIR" \
+        MPSImageStatistics11.m:extrema-seed MPSImageStatistics11.m:variance-form MPSImageStatistics11.m:mean-divisor
 }
 anchor_check || { echo "the campaign is not startable: an anchor does not resolve exactly once" >&2; exit 1; }
 
@@ -88,23 +62,7 @@ count() {
 }
 
 mutate() {
-    python3 - "$mps/$1" "$MUTANTS_DIR/$2.anchor" "$MUTANTS_DIR/$2.repl" <<'PYEOF'
-import sys
-path, anchor_path, repl_path = sys.argv[1], sys.argv[2], sys.argv[3]
-anchor = open(anchor_path).read()
-repl = open(repl_path).read()
-if anchor.endswith("\n"):
-    anchor = anchor[:-1]
-if repl.endswith("\n"):
-    repl = repl[:-1]
-text = open(path).read()
-n = text.count(anchor)
-if n != 1:
-    print("the anchor occurs %d times in %s, so the mutation is not startable" % (n, path))
-    sys.exit(1)
-open(path, 'w').write(text.replace(anchor, repl))
-print("mutated %s at %s" % (path.rsplit('/', 1)[-1], sys.argv[3].rsplit('/', 1)[-1]))
-PYEOF
+    runs_xmake l "$runs_checkout/tests/backports/common/mutants.lua" anchor "$mps/$1" "$MUTANTS_DIR/$2.anchor" "$MUTANTS_DIR/$2.repl"
 }
 
 FILE=MPSImageStatistics11.m

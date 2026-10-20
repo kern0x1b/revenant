@@ -14,8 +14,6 @@
 #
 # Not a differential and not a claim about Apple's arithmetic: nothing here measures Apple's code.
 set -eu
-echo "FAIL host/mpstemporary/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 48; the inline block PY at line 60" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 mps=${MPS:-$here/../../../../packages/frameworks/apple-backports/MetalPerformanceShaders}
@@ -45,28 +43,13 @@ for name in $sources; do
 done
 for object in $plain; do xcrun nm -g --defined-only "$object"; done \
     | grep -oE '_OBJC_CLASS_\$_[A-Za-z0-9_]+' | sed 's/_OBJC_CLASS_\$_//' | sort -u > "$build/port-defines.txt"
-python3 - "$build/port-defines.txt" "$build/rename.h" <<'PY'
-import sys
-names = [line.strip() for line in open(sys.argv[1]) if line.strip()]
-with open(sys.argv[2], 'w') as out:
-    for name in names:
-        out.write("#define %s Revenant%s\n" % (name, name))
-print("classes the port's subset defines, renamed: %d" % len(names))
-PY
+runs_xmake l "$runs_checkout/tests/backports/common/classes.lua" rename "$build/port-defines.txt" "$build/rename.h"
 
 # The classes this harness is about, named here so the run FAILS if one is missing from the objects.
 # Without this the harness would compile, run and compare, and every check would be about an object
 # that was never linked in - a green run that measured nothing.
-python3 - "$build/port-defines.txt" <<'PY'
-import sys
-defined = {line.strip() for line in open(sys.argv[1]) if line.strip()}
-wanted = ["MPSImage", "MPSTemporaryImage", "MPSImageConvolution", "RevenantMPSTemporaryImageAllocator"]
-missing = [name for name in wanted if name not in defined]
-if missing:
-    print("the port's objects do not define: %s" % ", ".join(missing))
-    raise SystemExit(1)
-print("the port's subset defines all %d classes this case asks for" % len(wanted))
-PY
+runs_xmake l "$runs_checkout/tests/backports/common/classes.lua" require "$build/port-defines.txt" \
+    MPSImage MPSTemporaryImage MPSImageConvolution RevenantMPSTemporaryImageAllocator
 
 # The port's objects are REBUILT with the rename header, which is what makes the port's classes the
 # ones the case links against: compiled without it they would define MPSImage while the case asks for

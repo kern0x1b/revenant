@@ -13,8 +13,6 @@
 # port's walk agrees with RevenantMPSStatisticsReference.h, which is the header's own sentences written as
 # arithmetic in plain C and never names the port's class.
 set -eu
-echo "FAIL host/mpsstatistics/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 38; the inline block PY at line 80" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 mps=${MPS:-$here/../../../../packages/frameworks/apple-backports/MetalPerformanceShaders}
@@ -35,14 +33,7 @@ for source in "$mps"/*.m; do
 done
 for object in "$build/plain"/*.o; do xcrun nm -g --defined-only "$object"; done \
     | grep -oE '_OBJC_CLASS_\$_[A-Za-z0-9_]+' | sed 's/_OBJC_CLASS_\$_//' | sort -u > "$build/port-defines.txt"
-python3 - "$build/port-defines.txt" "$build/rename.h" <<'PY'
-import sys
-names = [line.strip() for line in open(sys.argv[1]) if line.strip()]
-with open(sys.argv[2], 'w') as out:
-    for name in names:
-        out.write("#define %s Revenant%s\n" % (name, name))
-print("classes the port defines: %d" % len(names))
-PY
+runs_xmake l "$runs_checkout/tests/backports/common/classes.lua" rename "$build/port-defines.txt" "$build/rename.h"
 echo "renamed: $(grep -c define "$build/rename.h") classes"
 
 printf '#import <MetalPerformanceShaders/MetalPerformanceShaders.h>\n#import "RevenantMPSCnn.h"\n#import <objc/runtime.h>\n#include <stdio.h>\n' > "$build/declarations.h"
@@ -77,22 +68,5 @@ cat "$build/port.txt"
 # The verdict, read from the transcript rather than from the exit code of the case: the case prints what
 # it compared and the check below is what decides pass or fail, so a case that silently compared nothing
 # cannot pass by exiting zero.
-python3 - "$build/port.txt" <<'PY'
-import re, sys
-text = open(sys.argv[1]).read()
-last = re.findall(r"^compared (\d+) mismatches (\d+)$", text, re.M)
-if not last:
-    print("FAIL: the case printed no verdict line")
-    sys.exit(1)
-compared, mismatches = int(last[-1][0]), int(last[-1][1])
-if mismatches:
-    print("FAIL: %d mismatches over %d compared" % (mismatches, compared))
-    sys.exit(1)
-if compared < 23:
-    # Three kernels over three 3x3x1 sources is (2 + 2 + 1) answers each = 15; over one 3x2x2 source,
-    # where the walk must read BOTH channels and not plane 0 alone, another 5; over two 1x1 sources
-    # another 3. That is 23, and a run that compared fewer did not reach every kernel over every source.
-    print("FAIL: only %d elements compared, which cannot be the three kernels over these sources" % compared)
-    sys.exit(1)
-print("PASS: %d elements compared, %d mismatches" % (compared, mismatches))
-PY
+runs_xmake l "$runs_checkout/tests/backports/common/compared.lua" "$build/port.txt" 23 \
+    "the three kernels over these sources"

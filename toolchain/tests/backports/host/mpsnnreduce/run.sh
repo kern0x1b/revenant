@@ -14,8 +14,6 @@
 # which is the header's twelve per-class sentences written as arithmetic in plain C and never names the
 # port's class. A case that agrees is two implementations of one sentence, not one compared with itself.
 set -eu
-echo "FAIL host/mpsnnreduce/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 39; the inline block PY at line 82" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 mps=${MPS:-$here/../../../../packages/frameworks/apple-backports/MetalPerformanceShaders}
@@ -36,14 +34,7 @@ for source in "$mps"/*.m; do
 done
 for object in "$build/plain"/*.o; do xcrun nm -g --defined-only "$object"; done \
     | grep -oE '_OBJC_CLASS_\$_[A-Za-z0-9_]+' | sed 's/_OBJC_CLASS_\$_//' | sort -u > "$build/port-defines.txt"
-python3 - "$build/port-defines.txt" "$build/rename.h" <<'PY'
-import sys
-names = [line.strip() for line in open(sys.argv[1]) if line.strip()]
-with open(sys.argv[2], 'w') as out:
-    for name in names:
-        out.write("#define %s Revenant%s\n" % (name, name))
-print("classes the port defines: %d" % len(names))
-PY
+runs_xmake l "$runs_checkout/tests/backports/common/classes.lua" rename "$build/port-defines.txt" "$build/rename.h"
 echo "renamed: $(grep -c define "$build/rename.h") classes"
 
 printf '#import <MetalPerformanceShaders/MetalPerformanceShaders.h>\n#import "RevenantMPSCnn.h"\n#import <objc/runtime.h>\n#include <stdio.h>\n' > "$build/declarations.h"
@@ -79,22 +70,6 @@ cat "$build/port.txt"
 # The verdict, read from the transcript rather than from the exit code of the case: the case prints what
 # it compared and the check below is what decides pass or fail, so a case that silently compared nothing
 # cannot pass by exiting zero.
-python3 - "$build/port.txt" <<'PY'
-import re, sys
-text = open(sys.argv[1]).read()
-last = re.findall(r"^compared (\d+) mismatches (\d+)$", text, re.M)
-if not last:
-    print("FAIL: the case printed no verdict line")
-    sys.exit(1)
-compared, mismatches = int(last[-1][0]), int(last[-1][1])
-if mismatches:
-    print("FAIL: %d mismatches over %d compared" % (mismatches, compared))
-    sys.exit(1)
-if compared < 100:
-    # twelve classes over a 3x4x3 source is 3 rows x 3 channels = 9 runs each for row and column, and
-    # 12 pixels each for feature channel: 9+9+12 per operation, four operations, plus the refusal.
-    print("FAIL: only %d elements compared, which cannot be the twelve classes over this source" % compared)
-    sys.exit(1)
-print("PASS: %d elements compared, 0 mismatches" % compared)
-PY
+runs_xmake l "$runs_checkout/tests/backports/common/compared.lua" "$build/port.txt" 100 \
+    "the twelve classes over this source"
 echo "port: MPSNNReduce agrees with the header's sentence, case for case"

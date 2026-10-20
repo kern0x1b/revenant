@@ -4,14 +4,12 @@
 #
 # mps-cases.m is compiled twice and run twice. The first build links the system's MetalPerformanceShaders
 # and calls it by its own names. The second build compiles this port's own sources with the MPS class
-# names mapped to Revenant names and its selectors prefixed (prefix_selectors.py), so the port's
+# names mapped to Revenant names and its selectors prefixed (prefix_selectors.lua), so the port's
 # implementations are reached under names of their own and cannot replace the system's, and it calls the
 # same cases.m with the same mapping. Every case prints its result buffer as bytes, so the two runs are
 # compared exactly: a difference of one bit in one element is a failure, not a tolerance this script
 # chooses after seeing the numbers.
 set -eu
-echo "FAIL host/mpsmatrix/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 67; rank.py; page-check.py" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 for script in "$here"/*.sh; do
@@ -19,7 +17,7 @@ for script in "$here"/*.sh; do
 done
 mps=${MPS:-$here/../../../../packages/frameworks/apple-backports/MetalPerformanceShaders}
 # The grader's self-test first, because it needs no transcripts and a run of it is a second: it is the
-# check that the four-argument form of rank.py - the form its own help documents - works, and that the
+# check that the four-argument form of rank.lua - the form its own help documents - works, and that the
 # 2026-09-29 form of it, which died with UnboundLocalError on that form, does not. Wired here because a
 # check nothing invokes is not a check.
 sh "$here/rank-selftest.sh" || { echo "rank-selftest failed; the grader is not measuring" >&2; exit 1; }
@@ -64,14 +62,7 @@ for source in "$mps"/*.m; do
 done
 for object in "$build/plain"/*.o; do xcrun nm -g --defined-only "$object"; done \
     | grep -oE '_OBJC_CLASS_\$_[A-Za-z0-9_]+' | sed 's/_OBJC_CLASS_\$_//' | sort -u > "$build/port-defines.txt"
-python3 - "$build/port-defines.txt" "$build/rename.h" <<'PY'
-import sys
-names = [line.strip() for line in open(sys.argv[1]) if line.strip()]
-with open(sys.argv[2], 'w') as out:
-    for name in names:
-        out.write("#define %s Revenant%s\n" % (name, name))
-print("classes the port defines: %d" % len(names))
-PY
+runs_xmake l "$runs_checkout/tests/backports/common/classes.lua" rename "$build/port-defines.txt" "$build/rename.h"
 echo "renamed: $(grep -c define "$build/rename.h") classes"
 
 # The port's own sources, with their selectors prefixed so they do not replace the system's.
@@ -83,9 +74,9 @@ for source in "$mps"/*.m; do
         echo "the port source $source did not compile; stopping, because a count from a stale build is not a count"
         exit 1
     fi
-    runs_xmake l "$here/../prefix_selectors.lua" "$source" "$build/$name.m" crevenantHost_ \
+    runs_xmake l "$here/../prefix_selectors.lua" "$source" "$build/$name.m" revenantHost_ \
         --declarations="$build/declarations.h" -fobjc-arc $target $quiet -include "$build/rename.h" -- "$build/$name.plain.o"
-    # The define belongs here and not only on the plain compile: prefix_selectors.py turns the plain
+    # The define belongs here and not only on the plain compile: prefix_selectors.lua turns the plain
     # object back into source, and this is the compile whose object is linked, so a define left off
     # here is a trace that is compiled in and then thrown away.
     if ! xcrun clang -fobjc-arc -Wformat -Werror=format -fvisibility=hidden -DREVENANT_BN_TRACE $target $candidate $quiet -I"$mps" -include "$build/rename.h" \
@@ -156,26 +147,26 @@ done
 # below now reads the whole set: a case that is not bit-identical and not within ULP_BOUND units in the
 # last place has to be in owed.tsv, and one that is not fails the run.
 #
-#   rank.py <system-prefix> <port-prefix> <ulp-bound> [owed.tsv]
+#   rank.lua <system-prefix> <port-prefix> <ulp-bound> [owed.tsv]
 #
 # The bound is 64 units in the last place, which is 7.6e-06 relative near 1.0. The two distances it sits
-# between are the run's own and are checked by page-check.py below against the facts file: the largest
+# between are the run's own and are checked by page-check.lua below against the facts file: the largest
 # among the cases that are rounding, and the smallest among those that are not. The bound is named here,
 # in the grader's output and in Matrix.md, so a reader can see it rather than infer it.
 ULP_BOUND=64
 
-python3 "$here/rank.py" "$build/system.prefix" "$build/port.prefix" "$ULP_BOUND" "$here/owed.tsv"
-rank_status=$?
+rank_status=0
+runs_xmake l "$here/rank.lua" "$build/system.prefix" "$build/port.prefix" "$ULP_BOUND" "$here/owed.tsv" || rank_status=$?
 
 # Every figure the facts page and the registry state about this run, checked against this run. Wired
-# here so the page cannot outlive the numbers it quotes: page-check.py recomputes them from the two
+# here so the page cannot outlive the numbers it quotes: page-check.lua recomputes them from the two
 # transcripts rather than reading a log, and a page that states a figure this run does not produce makes
 # the run red. Two files, both named rather than globbed, so a page that moves is a line to change here
 # and not a glob that silently checks nothing.
 FACTS=$here/../../../../packages/frameworks/apple-backports/facts/MetalPerformanceShaders/Matrix.md
 REGISTRY=$here/../../../../packages/frameworks/apple-backports/registry/MetalPerformanceShaders/matrix.json
 page_status=0
-python3 "$here/page-check.py" "$build" "$FACTS" "$REGISTRY" || page_status=$?
+runs_xmake l "$here/page-check.lua" "$build" "$FACTS" "$REGISTRY" || page_status=$?
 
 if [ "$rank_status" -ne 0 ]; then
     echo "the grader found a case that differs beyond $ULP_BOUND units in the last place and is not named in $here/owed.tsv"
