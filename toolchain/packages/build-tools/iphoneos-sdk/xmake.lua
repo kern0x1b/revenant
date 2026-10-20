@@ -192,7 +192,7 @@ package("iphoneos-sdk")
         os.vcp(path.join(package:scriptdir(), "usr", "lib", "*"), libraries .. "/")
 
         local csu = package:resourcedir("csu")
-        local linker = path.join(package:dep("ld64"):installdir("bin"), "ld")
+        local linkerdir = package:dep("ld64"):installdir("bin")
         local objects = {
             {"crt1.o", "2.0", {"start.s", "crt.c", "dyld_glue.s"}, {"-DCRT"}},
             {"crt1.3.1.o", "3.1", {"start.s", "crt.c"}, {"-DADD_PROGRAM_VARS"}},
@@ -208,7 +208,7 @@ package("iphoneos-sdk")
                     table.insert(sources, path.join(csu, source))
                 end
                 os.vrunv("xcrun", table.join({"clang", "-r", "-target", architecture .. "-apple-ios", "-miphoneos-version-min=" .. object[2],
-                                              "-isysroot", folder, "-Os", "-nostdlib", "-Wl,-keep_private_externs", "-fuse-ld=" .. linker},
+                                              "-isysroot", folder, "-Os", "-nostdlib", "-Wl,-keep_private_externs", "-B" .. linkerdir, "-fuse-ld=ld"},
                                              object[4], sources, {"-o", slice}))
                 table.insert(slices, slice)
             end
