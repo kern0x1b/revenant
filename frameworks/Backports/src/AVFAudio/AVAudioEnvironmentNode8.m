@@ -1,5 +1,4 @@
 #import "RevenantAVFAudio.h"
-#import "RevenantAVFAudioNew.h"
 #import <AVFAudio/AVAudioEnvironmentNode.h>
 #import <AudioToolbox/AUComponent.h>
 #import <AudioToolbox/AudioUnitParameters.h>
@@ -521,8 +520,6 @@ static RevenantEnvironmentRouteClass RevenantCurrentRouteClass(void)
     return AudioUnitRender(_revenant_outputUnit, &flags, &timestamp, 0, frames, buffer);
 }
 
-
-
 - (float)volume
 {
     return [self revenant_mixerParameter:k3DMixerParam_Gain];
@@ -565,8 +562,6 @@ static RevenantEnvironmentRouteClass RevenantCurrentRouteClass(void)
     [self revenant_setMixerParameter:k3DMixerParam_Elevation value:asinf(position.y / distance) * 180.0f / (float)M_PI];
     [self revenant_setMixerParameter:k3DMixerParam_Distance value:distance];
 }
-
-
 
 - (AVAudio3DMixingSourceMode)sourceMode
 {

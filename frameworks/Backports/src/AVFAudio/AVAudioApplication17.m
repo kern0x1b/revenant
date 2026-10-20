@@ -1,5 +1,4 @@
 #import "RevenantAVFAudio.h"
-#import "RevenantAVFAudioNew.h"
 #import <objc/message.h>
 
 NSString * const AVAudioApplicationMuteStateKey = @"AVAudioApplicationMuteStateKey";

@@ -4,6 +4,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreMIDI/MIDIServices.h>
 #import <CoreMIDI/MIDISetup.h>
+#import <CoreMIDI/MIDIUMPCI.h>
 
 typedef UInt8 MIDIUInteger4;
 typedef UInt8 MIDIUInteger7;
@@ -14,62 +15,9 @@ typedef MIDIUInteger7 MIDIUMPFunctionBlockID;
 typedef MIDIUInteger28 MIDICIMUID;
 typedef uint8_t MIDIChannelNumber;
 
-typedef struct {
-    Byte sysExIDByte[3];
-} MIDI2DeviceManufacturer;
-
-typedef struct {
-    Byte revisionLevel[4];
-} MIDI2DeviceRevisionLevel;
-
-typedef struct {
-    Byte bytes[5];
-} MIDICIProfileID;
-
-typedef NS_ENUM(UInt8, MIDICIDeviceType) {
-    kMIDICIDeviceTypeUnknown = 0,
-    kMIDICIDeviceTypeLegacyMIDI1,
-    kMIDICIDeviceTypeVirtual,
-    kMIDICIDeviceTypeUSBMIDI
-};
-
-typedef NS_ENUM(UInt8, MIDICIProfileType) {
-    kMIDICIProfileTypeSingleChannel = 1,
-    kMIDICIProfileTypeGroup = 2,
-    kMIDICIProfileTypeFunctionBlock = 3,
-    kMIDICIProfileTypeMultichannel = 4
-};
-
-typedef NS_ENUM(UInt8, MIDIUMPCIObjectBackingType) {
-    kMIDIUMPCIObjectBackingTypeUnknown = 0,
-    kMIDIUMPCIObjectBackingTypeVirtual,
-    kMIDIUMPCIObjectBackingTypeDriverDevice,
-    kMIDIUMPCIObjectBackingTypeUSBMIDI
-};
-
 typedef NS_OPTIONS(MIDIUInteger4, MIDIUMPProtocolOptions) {
     kMIDIUMPProtocolOptionsMIDI1 = 1,
     kMIDIUMPProtocolOptionsMIDI2 = 1 << 1
-};
-
-typedef NS_ENUM(SInt32, MIDIUMPFunctionBlockMIDI1Info) {
-    kMIDIUMPFunctionBlockMIDI1InfoNotMIDI1 = 0,
-    kMIDIUMPFunctionBlockMIDI1InfoUnrestrictedBandwidth = 1,
-    kMIDIUMPFunctionBlockMIDI1InfoRestrictedBandwidth = 2
-};
-
-typedef NS_ENUM(SInt32, MIDIUMPFunctionBlockUIHint) {
-    kMIDIUMPFunctionBlockUIHintUnknown = 0,
-    kMIDIUMPFunctionBlockUIHintReceiver = 1,
-    kMIDIUMPFunctionBlockUIHintSender = 2,
-    kMIDIUMPFunctionBlockUIHintSenderReceiver = 3
-};
-
-typedef NS_ENUM(SInt32, MIDIUMPFunctionBlockDirection) {
-    kMIDIUMPFunctionBlockDirectionUnknown = 0,
-    kMIDIUMPFunctionBlockDirectionInput = 1,
-    kMIDIUMPFunctionBlockDirectionOutput = 2,
-    kMIDIUMPFunctionBlockDirectionBidirectional = 3
 };
 
 @class MIDI2DeviceInfo, MIDIUMPEndpoint, MIDIUMPFunctionBlock, MIDICIDevice, MIDIUMPCIProfile;

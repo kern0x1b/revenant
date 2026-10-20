@@ -6,11 +6,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef NS_ENUM(NSInteger, AVCaptureCinematicVideoFocusMode) {
-    AVCaptureCinematicVideoFocusModeNone   = 0,
-    AVCaptureCinematicVideoFocusModeStrong = 1,
-    AVCaptureCinematicVideoFocusModeWeak   = 2,
-} API_AVAILABLE(ios(26.0));
 
 typedef NSString *AVCaptureSceneMonitoringStatus NS_TYPED_ENUM API_AVAILABLE(ios(26.0));
 

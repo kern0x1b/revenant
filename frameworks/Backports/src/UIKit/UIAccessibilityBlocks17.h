@@ -21,11 +21,6 @@ typedef CGPoint (^AXPointReturnBlock)(void);
 typedef CGRect (^AXRectReturnBlock)(void);
 typedef UIBezierPath *_Nullable (^AXPathReturnBlock)(void);
 
-typedef NS_OPTIONS(NSUInteger, UIAccessibilityDirectTouchOptions) {
-    UIAccessibilityDirectTouchOptionNone = 0,
-    UIAccessibilityDirectTouchOptionSilentOnTouch = 1 << 0,
-    UIAccessibilityDirectTouchOptionRequiresActivation = 1 << 1,
-} API_AVAILABLE(ios(17.0));
 
 API_AVAILABLE(ios(17.0), tvos(17.0)) API_UNAVAILABLE(watchos)
 @interface NSObject (RevenantAccessibilityBlocks17)

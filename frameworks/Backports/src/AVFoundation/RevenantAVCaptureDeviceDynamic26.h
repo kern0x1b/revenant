@@ -8,12 +8,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef NSString *AVCaptureAspectRatio NS_TYPED_ENUM;
 
-typedef NS_ENUM(NSInteger, AVCaptureCameraLensSmudgeDetectionStatus) {
-    AVCaptureCameraLensSmudgeDetectionStatusDisabled          = 0,
-    AVCaptureCameraLensSmudgeDetectionStatusSmudgeNotDetected = 1,
-    AVCaptureCameraLensSmudgeDetectionStatusSmudged           = 2,
-    AVCaptureCameraLensSmudgeDetectionStatusUnknown           = 3,
-} API_AVAILABLE(ios(26.0));
 
 @interface AVCaptureDevice (RevenantCaptureDeviceDynamic26)
 

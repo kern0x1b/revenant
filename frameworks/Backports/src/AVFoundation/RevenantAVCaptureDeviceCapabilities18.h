@@ -6,11 +6,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef NS_ENUM(NSInteger, AVCaptureMultichannelAudioMode) {
-    AVCaptureMultichannelAudioModeNone                 = 0,
-    AVCaptureMultichannelAudioModeStereo               = 1,
-    AVCaptureMultichannelAudioModeFirstOrderAmbisonics = 2,
-} API_AVAILABLE(ios(18.0)) API_UNAVAILABLE(watchos);
 
 typedef NSString *AVSpatialCaptureDiscomfortReason NS_TYPED_ENUM API_AVAILABLE(ios(18.0));
 

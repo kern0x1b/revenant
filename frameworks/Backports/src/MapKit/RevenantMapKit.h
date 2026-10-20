@@ -14,9 +14,6 @@ NS_ASSUME_NONNULL_BEGIN
 @class MKLocalSearchCompleter;
 @class MKLocalSearchCompletion;
 
-#if !REVENANT_HOST_PROBE
-typedef NSInteger MKLocalSearchRegionPriority;
-#endif
 
 @interface MKLocalSearchCompleter (RevenantDelegate)
 - (void)revenant_delegateDidUpdate;
@@ -48,23 +45,7 @@ void revenant_sayOnce(NSString *api, NSString *why);
 @end
 
 #if !REVENANT_HOST_PROBE
-typedef NS_OPTIONS(NSUInteger, MKAddressFilterOption) {
-    MKAddressFilterOptionCountry          = 1 << 0,
-    MKAddressFilterOptionPostalCode       = 1 << 1,
-    MKAddressFilterOptionLocality         = 1 << 2,
-    MKAddressFilterOptionSubLocality      = 1 << 3,
-    MKAddressFilterOptionAdministrativeArea = 1 << 4,
-    MKAddressFilterOptionSubAdministrativeArea = 1 << 5,
-};
 
-@interface MKAddressFilter : NSObject
-+ (instancetype)filterIncludingAll;
-+ (instancetype)filterExcludingAll;
-- (instancetype)initIncludingOptions:(MKAddressFilterOption)options;
-- (instancetype)initExcludingOptions:(MKAddressFilterOption)options;
-- (BOOL)includesOptions:(MKAddressFilterOption)options;
-- (BOOL)excludesOptions:(MKAddressFilterOption)options;
-@end
 
 @interface MKLocalSearchCompleter (RevenantPriority)
 @property (nonatomic, assign) NSInteger regionPriority;
@@ -72,25 +53,7 @@ typedef NS_OPTIONS(NSUInteger, MKAddressFilterOption) {
 @end
 #endif
 
-#if !REVENANT_HOST_PROBE
-@interface MKAddressRepresentations : NSObject
-- (instancetype)initWithFullAddress:(NSString *)fullAddress;
-@end
 
-@interface MKAddress : NSObject
-- (instancetype)initWithFullAddress:(NSString *)fullAddress;
-@property (nonatomic, readonly, copy) NSString *fullAddress;
-@property (nonatomic, readonly, copy) NSString *shortAddress;
-- (nullable MKAddressRepresentations *)addressRepresentations;
-@end
-#endif
-
-#if !REVENANT_HOST_PROBE
-@interface MKMapItemIdentifier : NSObject
-- (nullable NSString *)identifierString;
-- (instancetype)initWithMapItem:(MKMapItem *)mapItem;
-@end
-#endif
 
 @interface MKCompassButton (RevenantCompass)
 - (void)setCompassHeading:(CLLocationDirection)heading;

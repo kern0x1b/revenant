@@ -1,5 +1,4 @@
 #import "RevenantAVFAudio.h"
-#import "RevenantAVFAudioNew.h"
 
 @implementation AVAudioSessionCapability {
     BOOL _revenant_supported;
