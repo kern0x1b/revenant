@@ -1,3 +1,4 @@
+import("async.runjobs")
 import("core.project.project")
 
 local ast = import("ast", {rootdir = os.scriptdir(), anonymous = true})
@@ -17,59 +18,84 @@ function minimum()
     return value
 end
 
+local function extract(sdk, version, cache, logs, name)
+    local rows = facts.objc_facts(sdk, name, version)
+    if sdkfiles.has_swift_module(sdk, name) then
+        for _, row in ipairs(facts.swift_facts(sdk, name, version, logs)) do
+            table.insert(rows, row)
+        end
+    end
+    sdkfiles.write_rows(path.join(cache, name .. ".tsv"), name, rows)
+end
+
+local function failure_file(logs, name)
+    return path.join(logs, name .. ".failed")
+end
+
 local function worker(args)
     local sdk, version, cache, logs = args[2], args[3], args[4], args[5]
     for index = 6, #args do
         local name = args[index]
-        local rows = facts.objc_facts(sdk, name, version)
-        if sdkfiles.has_swift_module(sdk, name) then
-            for _, row in ipairs(facts.swift_facts(sdk, name, version, logs)) do
-                table.insert(rows, row)
-            end
-        end
-        sdkfiles.write_rows(path.join(cache, name .. ".tsv"), name, rows)
+        try
+        {
+            function ()
+                extract(sdk, version, cache, logs, name)
+            end,
+            catch
+            {
+                function (errors)
+                    io.writefile(failure_file(logs, name), tostring(errors))
+                    raise("%s: %s", name, tostring(errors))
+                end
+            }
+        }
     end
 end
 
-local function quote(text)
-    return "'" .. (string.gsub(text, "'", "'\\''")) .. "'"
+local function shard_failure(logs, list, errors)
+    local reports = {}
+    for _, name in ipairs(list) do
+        if os.isfile(failure_file(logs, name)) then
+            table.insert(reports, name .. ": " .. string.sub(io.readfile(failure_file(logs, name)), -1500))
+        end
+    end
+    if #reports == 0 then
+        reports = {tostring(errors)}
+    end
+    return table.concat(reports, "\n")
 end
 
-local function run_shards(sdk, version, cache, logs, names)
+function extract_all(sdk, version, cache, logs, names)
     local shards = {}
-    for index = 1, SHARDS do
+    for index = 1, math.min(SHARDS, #names) do
         shards[index] = {}
     end
     for index, name in ipairs(names) do
-        table.insert(shards[(index - 1) % SHARDS + 1], name)
+        table.insert(shards[(index - 1) % #shards + 1], name)
     end
-    local commands = {}
-    local marks = {}
-    for index, list in ipairs(shards) do
-        if #list > 0 then
-            local base = path.join(logs, "shard-" .. index)
-            os.tryrm(base .. ".failed")
-            local words = {quote(os.programfile()), "l", "-P", quote(sdkfiles.root()),
-                quote(path.join(os.scriptdir(), "generate.lua")), "facts", quote(sdk), quote(version), quote(cache), quote(logs)}
-            for _, name in ipairs(list) do
-                table.insert(words, quote(name))
-            end
-            table.insert(commands, "(" .. table.concat(words, " ") .. " > " .. quote(base .. ".log") .. " 2>&1 || touch "
-                .. quote(base .. ".failed") .. ") &")
-            table.insert(marks, {index = index, base = base})
+    if #shards == 0 then
+        return
+    end
+    runjobs("backports/facts", function (index)
+        local list = shards[index]
+        local argv = {"l", "-P", sdkfiles.root(), path.join(os.scriptdir(), "generate.lua"), "facts", sdk, version, cache, logs}
+        for _, name in ipairs(list) do
+            os.tryrm(failure_file(logs, name))
+            table.insert(argv, name)
         end
-    end
-    os.execv("/bin/sh", {"-c", table.concat(commands, " ") .. " wait"})
-    local failed = {}
-    for _, mark in ipairs(marks) do
-        if os.isfile(mark.base .. ".failed") then
-            table.insert(failed, string.format("shard %d failed (%s):\n%s", mark.index, mark.base .. ".log",
-                string.sub(io.readfile(mark.base .. ".log") or "", -800)))
-        end
-    end
-    if #failed > 0 then
-        raise(table.concat(failed, "\n"))
-    end
+        try
+        {
+            function ()
+                os.execv(os.programfile(), argv)
+            end,
+            catch
+            {
+                function (errors)
+                    raise("facts failed:\n%s", shard_failure(logs, list, errors))
+                end
+            }
+        }
+    end, {total = #shards, comax = #shards})
 end
 
 local function ready(sdk, version, logs)
@@ -89,7 +115,7 @@ local function ready(sdk, version, logs)
     end
     if #missing > 0 then
         os.mkdir(logs)
-        run_shards(sdk, version, cache, logs, missing)
+        extract_all(sdk, version, cache, logs, missing)
     end
     return cache, names
 end

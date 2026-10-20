@@ -109,7 +109,7 @@ local function package_sdk(version, install)
     if not result then
         raise("workspace: xmake named no install folder for revenant's iphoneos-sdk %s package", version)
     end
-    return sdk_in(result, version), result
+    return result
 end
 
 function sdk_package(version, opt)
@@ -118,12 +118,10 @@ function sdk_package(version, opt)
     if resolved[key] and not opt.install then
         return resolved[key]
     end
-    local folder, installdir = package_sdk(version, opt.install)
+    local folder = sdk_in(package_sdk(version, opt.install), version)
     if not os.isfile(path.join(folder, "SDKSettings.json")) then
-        raise("workspace: the iPhoneOS %s SDK is not there: revenant's iphoneos-sdk %s package is not installed at %s. "
-              .. "Install it with `xmake l %s %s --install`%s",
-              version, version, installdir, path.join(root(), "modules", "workspace.lua"), opt.command or ("sdk-package " .. version),
-              opt.alternative or "")
+        raise("workspace: the iphoneos-sdk install is incomplete: %s has no SDKSettings.json; run ./xmakew l -P . "
+              .. "toolchain/modules/workspace.lua sdk-package %s --install", folder, version)
     end
     resolved[key] = folder
     return folder
@@ -138,8 +136,7 @@ function sdk(opt)
         end
         return path.absolute(named)
     end
-    return sdk_package(SDK_VERSION, {install = opt.install, command = "sdk",
-                                     alternative = string.format(", or set %s to an iPhoneOS%s.sdk folder", SDK_VARIABLE, SDK_VERSION)})
+    return sdk_package(SDK_VERSION, {install = opt.install})
 end
 
 function main(command, ...)
