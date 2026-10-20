@@ -58,8 +58,11 @@ int main(void)
         revenant_bn_mont_prepare(&mont, &n);
         if (strcmp(fields[0], "pow") == 0)
             revenant_bn_mont_pow(&mont, &out, &a, &b);
-        else
-            revenant_bn_mont_mul(&mont, &out, &a, &b);
+        else {
+            BigNum left;
+            revenant_bn_mont_mul(&mont, &left, &a, &mont.r2);
+            revenant_bn_mont_mul(&mont, &out, &left, &b);
+        }
         size_t needed = revenant_bn_byte_length(&out);
         uint8_t bytes[BN_LIMBS * 4];
         revenant_bn_to_bytes_be(bytes, needed ? needed : 1, &out);
