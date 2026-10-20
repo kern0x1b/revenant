@@ -56,7 +56,6 @@ if [ ! -x "$prefix/bin/xmake" ]; then
         for file in core/src/lua/lua/*.c core/src/lua/lua/*.h; do
             case ${file##*/} in
                 onelua.c) ;;
-                lparser.c) sed 's/RDKCONST);/VDKREG);/' "$file" > "$work/lua/lparser.c" ;;
                 *) cp "$file" "$work/lua/" ;;
             esac
         done

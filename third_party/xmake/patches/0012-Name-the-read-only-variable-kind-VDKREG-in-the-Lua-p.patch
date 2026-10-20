@@ -1,0 +1,35 @@
+From 48636a97a76bd95cf0049b98d078b2652e378da4 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Wed, 21 Oct 2026 00:52:08 +0200
+Subject: [PATCH] Name the read-only variable kind VDKREG in the Lua parser
+ xmakew builds
+
+---
+ core/src/lua/lua/lparser.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/core/src/lua/lua/lparser.c b/core/src/lua/lua/lparser.c
+index b3855d4..6c1d94a 100644
+--- a/core/src/lua/lua/lparser.c
++++ b/core/src/lua/lua/lparser.c
+@@ -1688,7 +1688,7 @@ static void fornum (LexState *ls, TString *varname, int line) {
+   int base = fs->freereg;
+   new_localvarliteral(ls, "(for state)");
+   new_localvarliteral(ls, "(for state)");
+-  new_varkind(ls, varname, RDKCONST);  /* control variable */
++  new_varkind(ls, varname, VDKREG);  /* control variable */
+   checknext(ls, '=');
+   exp1(ls);  /* initial value */
+   checknext(ls, ',');
+@@ -1715,7 +1715,7 @@ static void forlist (LexState *ls, TString *indexname) {
+   new_localvarliteral(ls, "(for state)");  /* iterator function */
+   new_localvarliteral(ls, "(for state)");  /* state */
+   new_localvarliteral(ls, "(for state)");  /* closing var. (after swap) */
+-  new_varkind(ls, indexname, RDKCONST);  /* control variable */
++  new_varkind(ls, indexname, VDKREG);  /* control variable */
+   /* other declared variables */
+   while (testnext(ls, ',')) {
+     new_localvar(ls, str_checkname(ls));
+-- 
+2.54.0 (Apple Git-157)
+
