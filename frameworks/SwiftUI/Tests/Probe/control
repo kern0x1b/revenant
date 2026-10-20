@@ -1,6 +1,5 @@
-Package: space.kern0x1b.swiftuirt
-Name: swiftuirt
-Version: 0.0.1
+Package: space.kern0x1b.swiftui.probe
+Name: SwiftUI probe
 Architecture: iphoneos-arm
-Description: probe
-Maintainer: none
+Description: SwiftUI's headless probe: it hosts a view without a window, changes its state, prints the
+ UIView tree with its frames and times each update, for measurements on a device.

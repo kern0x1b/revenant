@@ -1,5 +1,5 @@
 import("core.base.json")
-local text = import("lib.text", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
+local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
 
 local MODIFIERS = {"public ", "internal ", "static ", "mutating ", "nonisolated ", "final "}
 local KEEP_KEYWORDS = {"func", "var", "let", "init", "subscript", "typealias", "associatedtype", "case"}
@@ -115,11 +115,7 @@ local function available_version(head)
 end
 
 local function sdk_path()
-    local env = os.getenv("APPLE_26_SDK")
-    if env and env ~= "" then
-        return env
-    end
-    return path.join(os.getenv("HOME"), "Git", "projects", "ios", "charon", ".agent-work", "sdk-26.2", "iPhoneOS26.2.sdk")
+    return import("lib.tree", {rootdir = os.scriptdir(), anonymous = true}).sdk()
 end
 
 local function apple(types)

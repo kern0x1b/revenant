@@ -1,15 +1,7 @@
 local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
 
-local DEFAULT_REPORT = path.join(".agent-work", "runs", "device-crash", "crash.plist")
-local BINARY = path.join("SwiftUI", "out", "SwiftUIDemo.app", "SwiftUIDemo")
-
 local function output_of(program, args)
-    local quoted = {"-c", '"$0" "$@" 2>/dev/null || true'}
-    quoted[#quoted + 1] = program
-    for _, arg in ipairs(args) do
-        quoted[#quoted + 1] = arg
-    end
-    return os.iorunv("/bin/sh", quoted)
+    return os.iorunv(program, args)
 end
 
 local function bisect_right(list, key)
@@ -51,30 +43,28 @@ local function app_base(report)
     end
 end
 
-function main(...)
-    local args = {...}
-    local file = args[1] or DEFAULT_REPORT
+function symbolicate(file, binary)
     if not os.isfile(file) then
-        io.stderr:write(file .. ": no such report; fetch it first (see the top of this file)\n")
-        os.exit(1)
+        raise("%s: no such report; ./xmakew l frameworks/SwiftUI/tools/device.lua crash fetches the latest from the claimed device", file)
+    end
+    if not os.isfile(binary) then
+        raise("%s: no such binary; build SwiftUIDemo first", binary)
     end
     local report = output_of("plutil", {"-extract", "description", "raw", "-o", "-", file})
     report = string.gsub(report, "\n$", "")
 
     local exception = string.match(report, "Exception Type:[^\n]*")
     if exception == nil then
-        io.stderr:write("the report has no Exception Type line\n")
-        os.exit(1)
+        raise("the report has no Exception Type line")
     end
     print(exception)
     local base = app_base(report)
     if base == nil then
-        io.stderr:write("the report has no SwiftUIDemo frame to take the base address from\n")
-        os.exit(1)
+        raise("the report has no SwiftUIDemo frame to take the base address from")
     end
 
     local symbols = {}
-    for _, line in ipairs(text.split(output_of("nm", {"-n", BINARY}), "\n")) do
+    for _, line in ipairs(text.split(output_of("nm", {"-n", binary}), "\n")) do
         local parts = {}
         for word in string.gmatch(line, "%S+") do
             parts[#parts + 1] = word
@@ -101,8 +91,7 @@ function main(...)
         local frame = frames[i]
         if base and frame >= base and frame < base + 0x300000 then
             if #symbols == 0 then
-                io.stderr:write("no symbols in " .. BINARY .. "; nm printed none\n")
-                os.exit(1)
+                raise("no symbols in %s; nm printed none", binary)
             end
             local count = bisect_right(symbols, frame - base + 0x4000)
             local index = count > 0 and count or #symbols
@@ -114,8 +103,7 @@ function main(...)
     print("crashed thread top:")
     local between = text.split(report, "Thread 0 Crashed:")
     if between[2] == nil then
-        io.stderr:write("the report has no Thread 0 Crashed section\n")
-        os.exit(1)
+        raise("the report has no Thread 0 Crashed section")
     end
     local section = text.split(between[2], "Thread 1")[1]
     for _, line in ipairs(text.split(section, "\n")) do
@@ -124,4 +112,12 @@ function main(...)
             print("   " .. number .. " " .. name)
         end
     end
+end
+
+function main(report, binary)
+    if not report then
+        raise("usage: ./xmakew l frameworks/SwiftUI/tools/crash.lua REPORT.plist [BINARY]")
+    end
+    local tree = import("lib.tree", {rootdir = os.scriptdir(), anonymous = true})
+    symbolicate(report, binary or path.join(tree.demo(), "SwiftUIDemo"))
 end

@@ -1,6 +1,6 @@
-local root = path.join(os.scriptdir(), "..", "..")
-local scratch = path.join(root, ".agent-work", "runs", "surf-diff-test")
+local tree = import("lib.tree", {rootdir = os.scriptdir(), anonymous = true})
 local script = path.join(os.scriptdir(), "surf-diff.lua")
+local scratch = nil
 
 local THREE = "Image\tvar\talpha\nText\tfunc\tbold\n"
 local TWO = "Image\talpha\nText\tbold\n"
@@ -8,19 +8,17 @@ local ONE = "Image#alpha\n"
 local FOUR = "Image\tvar\talpha\tABI.swift\n"
 
 local function run(old, new, flags)
-    os.mkdir(scratch)
+    scratch = scratch or tree.fresh("surf-diff-test")
     local a, b = path.join(scratch, "old.tsv"), path.join(scratch, "new.tsv")
     local err = path.join(scratch, "stderr.txt")
     io.writefile(a, old)
     io.writefile(b, new)
-    local args = {"-c", 'xmake l "$@" 2>"$ERRFILE"; echo "exit=$?"', "sh", script}
-    for _, flag in ipairs(flags) do
-        args[#args + 1] = flag
-    end
-    args[#args + 1] = a
-    args[#args + 1] = b
-    local out = os.iorunv("/bin/sh", args, {envs = {ERRFILE = err}})
-    local code = tonumber(string.match(out, "exit=(%d+)"))
+    local args = table.join({"l", script}, flags, {a, b})
+    local stderr = io.open(err, "w")
+    local stdout = io.open(path.join(scratch, "stdout.txt"), "w")
+    local code = os.execv(os.programfile(), args, {stdout = stdout, stderr = stderr, try = true})
+    stderr:close()
+    stdout:close()
     return code, io.readfile(err)
 end
 
@@ -63,5 +61,6 @@ function main(...)
         end
     end
     print(string.format("\n%d/%d cases", passed, #results))
+    os.tryrm(scratch)
     os.exit(passed == #results and 0 or 1)
 end

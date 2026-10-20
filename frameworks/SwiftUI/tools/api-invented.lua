@@ -1,5 +1,5 @@
 import("core.base.json")
-local text = import("lib.text", {rootdir = path.join(os.scriptdir(), ".."), anonymous = true})
+local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
 
 local function either(a, b)
     if text.truthy(a) then
@@ -86,10 +86,11 @@ end
 
 function main(...)
     local argv = {...}
-    local surface_path = either(os.getenv("APPLE_26_SURFACE"), path.join(os.scriptdir(), "apple-26-surface.tsv"))
+    local tree = import("lib.tree", {rootdir = os.scriptdir(), anonymous = true})
+    local surface_path = path.join(tree.run("api"), "apple-26-surface.tsv")
     if not os.isfile(surface_path) then
         io.stderr:write("# ERROR no Apple surface: " .. surface_path .. " is missing\n")
-        io.stderr:write("# run bridge/surface-swiftui.sh first; the gate does not fall back to its own parse\n")
+        io.stderr:write("# run tools/apple-surface.lua first; the gate does not fall back to its own parse\n")
         os.exit(2)
     end
 
@@ -119,7 +120,7 @@ function main(...)
     walk(root, {}, false)
 
     local allowed = {}
-    local allow_path = path.join(os.scriptdir(), "api-allow-list.txt")
+    local allow_path = tree.api("allow-list.txt")
     if os.isfile(allow_path) then
         for _, line in ipairs(text.split(io.readfile(allow_path), "\n")) do
             if text.strip(line) ~= "" and not text.startswith(text.lstrip(line), "# ")

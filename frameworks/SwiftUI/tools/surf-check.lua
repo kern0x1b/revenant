@@ -1,4 +1,4 @@
-local text = import("lib.text", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
+local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
 
 local NESTED = {
     {"ResizingMode", 2},

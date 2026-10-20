@@ -1,4 +1,4 @@
-local text = import("lib.text", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
+local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
 
 local function lines_of(content)
     local lines = text.split(content, "\n")
@@ -40,10 +40,10 @@ local function ours(file)
 end
 
 function main(...)
-    local root = path.join(os.scriptdir(), "..", "..")
+    local tree = import("lib.tree", {rootdir = os.scriptdir(), anonymous = true})
     local args = {...}
-    local ours_path = args[1] or path.join(root, ".agent-work", "runs", "ours-source.tsv")
-    local surface_path = args[2] or path.join(root, ".agent-work", "runs", "surface-26.2.tsv")
+    local ours_path = args[1] or path.join(tree.run("surface"), "ours-source.tsv")
+    local surface_path = args[2] or path.join(tree.run("surface"), "surface-26.2.tsv")
     local negative_name = args[3] or "TextEditorStyle"
 
     local apple = surface(surface_path)

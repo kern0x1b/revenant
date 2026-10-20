@@ -1,12 +1,10 @@
-local text = import("lib.text", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
-local owners = import("lib.owners", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
+local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
+local owners = import("lib.owners", {rootdir = os.scriptdir(), anonymous = true})
 
 local COLUMNS = 3
 
 local function interfaces()
-    local env = os.getenv("APPLE_26_SDK")
-    local sdk = (env and env ~= "") and env or path.join(os.getenv("HOME"), "Git", "projects", "ios", "charon",
-        ".agent-work", "sdk-26.2", "iPhoneOS26.2.sdk")
+    local sdk = import("lib.tree", {rootdir = os.scriptdir(), anonymous = true}).sdk()
     local out = {}
     for _, pattern in ipairs({
         path.join(sdk, "System", "Library", "Frameworks", "*", "Modules", "*.swiftmodule", "arm64e-apple-ios.swiftinterface"),
@@ -161,7 +159,7 @@ local function read(file, allow_empty)
         return nil, string.format(
             "%s: line %d has %d tab-separated column(s), the %d this diff reads are owner/kind/name; %d line(s) in all "
             .. "(first at line %d). Refusing to read the file as the empty set: the partition below would hold vacuously. "
-            .. "Use the artifact that has three columns (see bridge/tools/surftool/README.md for what each one is).",
+            .. "Use the artifact that has three columns (frameworks/SwiftUI/docs/surface.md says what each one is).",
             file, number, found, COLUMNS, #bad, number)
     end
     if #rows == 0 and not allow_empty then

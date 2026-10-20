@@ -1,5 +1,5 @@
-local text = import("lib.text", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
-local braces = import("lib.braces", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
+local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
+local braces = import("lib.braces", {rootdir = os.scriptdir(), anonymous = true})
 
 local MODULES = {Swift = true, SwiftUI = true, SwiftUICore = true, Foundation = true, UIKit = true, Combine = true}
 
@@ -253,8 +253,9 @@ local function scan(file, out)
     end
 end
 
-function collect(root)
-    local files = os.files(path.join(root, "SwiftUI", "Sources", "SwiftUI", "*.swift"))
+function collect()
+    local tree = import("lib.tree", {rootdir = os.scriptdir(), anonymous = true})
+    local files = os.files(path.join(tree.sources(), "*.swift"))
     table.sort(files)
     local out = {}
     for _, file in ipairs(files) do
@@ -264,8 +265,7 @@ function collect(root)
 end
 
 function main(...)
-    local root = path.join(os.scriptdir(), "..", "..")
-    for _, row in ipairs(collect(root)) do
+    for _, row in ipairs(collect()) do
         print(row.owner .. "\t" .. row.kind .. "\t" .. row.name .. "\t" .. row.file)
     end
 end

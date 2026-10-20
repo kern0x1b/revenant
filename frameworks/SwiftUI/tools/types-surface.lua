@@ -1,6 +1,7 @@
-local text = import("lib.text", {rootdir = path.join(os.scriptdir(), ".."), anonymous = true})
+local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
 
-local here = os.scriptdir()
+local tree = import("lib.tree", {rootdir = os.scriptdir(), anonymous = true})
+local here = tree.api()
 local sdk, frameworks, stdlib
 local scope = os.getenv("APPLE_26_SCOPE")
 if scope == nil then
@@ -155,10 +156,7 @@ function main(...)
     for _, a in ipairs({...}) do
         sdk = sdk or a
     end
-    sdk = sdk or os.getenv("APPLE_26_SDK")
-    if sdk == nil then
-        sdk = path.join(os.getenv("HOME"), "Git", "projects", "ios", "charon", ".agent-work", "sdk-26.2", "iPhoneOS26.2.sdk")
-    end
+    sdk = sdk or tree.sdk()
     frameworks = path.join(sdk, "System", "Library", "Frameworks")
     stdlib = path.join(sdk, "usr", "lib", "swift")
     if not os.isdir(sdk) then

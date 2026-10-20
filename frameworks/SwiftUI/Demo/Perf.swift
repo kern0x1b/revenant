@@ -62,4 +62,7 @@ func runPerf() {
         }
     }
     logProbe("perf done")
+    if perfFromBundle {
+        exit(0)
+    }
 }

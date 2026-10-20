@@ -1,5 +1,5 @@
 import("core.base.json")
-local text = import("lib.text", {rootdir = path.join(os.scriptdir(), ".."), anonymous = true})
+local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
 
 local function either(a, b)
     if text.truthy(a) then
@@ -172,7 +172,7 @@ function main(...)
     end
 
     local not_applicable = {}
-    local listed = path.join(os.scriptdir(), "not-applicable.txt")
+    local listed = import("lib.tree", {rootdir = os.scriptdir(), anonymous = true}).api("not-applicable.txt")
     if os.isfile(listed) then
         for _, line in ipairs(text.split(io.readfile(listed), "\n")) do
             if text.strip(line) ~= "" and not text.startswith(line, "#") then
@@ -247,7 +247,7 @@ function main(...)
             end
         end
     end
-    io.stderr:write(string.format("# absent %d, variant %d, not applicable %d (bridge/not-applicable.txt, with reasons)\n",
+    io.stderr:write(string.format("# absent %d, variant %d, not applicable %d (Tests/API/not-applicable.txt, with reasons)\n",
         total["absent"], total["variant"], total["not-applicable"]))
 
     local used = {}

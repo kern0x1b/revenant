@@ -129,7 +129,7 @@ struct ContentView: View {
         .environmentObject(library)
         .onAppear {
             probe("content appeared books=\(library.books.count)")
-            if FileManager.default.fileExists(atPath: "/var/revenant/perf.on") {
+            if perfFromBundle || FileManager.default.fileExists(atPath: "/var/revenant/perf.on") {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) { runPerf() }
             }
             if snapshotRun != nil {
@@ -143,6 +143,8 @@ struct ContentView: View {
 func loadBackports() {
     probe("backports: UISwipeActionsConfiguration \(NSClassFromString("UISwipeActionsConfiguration") != nil ? "present" : "absent")")
 }
+
+let perfFromBundle = Bundle.main.object(forInfoDictionaryKey: "SwiftUIPerf") != nil
 
 let snapshotRun: (only: String?, images: Bool, fromBundle: Bool)? = {
     let fromBundle = Bundle.main.object(forInfoDictionaryKey: "SwiftUISnapshots") != nil

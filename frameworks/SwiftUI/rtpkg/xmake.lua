@@ -1,8 +1,0 @@
-target("swiftuirt")
-    add_rules("@addon/revenant/daemon", "@addon/revenant/swift")
-    add_deps("Combine")
-    add_packages("apple-backports")
-    set_values("revenant.libraries", "apple-backports")
-    add_files("main.swift")
-    add_frameworks("Foundation", "CoreData")
-    set_values("revenant.control", "control")

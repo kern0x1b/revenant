@@ -1,5 +1,5 @@
 local ours = import("ours", {rootdir = os.scriptdir(), anonymous = true})
-local braces = import("lib.braces", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
+local braces = import("lib.braces", {rootdir = os.scriptdir(), anonymous = true})
 
 local checks = 0
 local failed = 0
@@ -18,7 +18,7 @@ check("a brace in a line comment", (braces.braces('    // a { b', false, false, 
 check("a brace in a block comment", (braces.braces('    /* a { b */', false, false, 0)), 0)
 check("a real brace", (braces.braces('    struct X {', false, false, 0)), 1)
 
-local out = ours.collect(path.join(os.scriptdir(), "..", ".."))
+local out = ours.collect()
 
 local function owned_by(owner, kind, name)
     for _, row in ipairs(out) do

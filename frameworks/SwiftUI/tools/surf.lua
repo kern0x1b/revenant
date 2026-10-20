@@ -1,5 +1,5 @@
-local text = import("lib.text", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
-local owners = import("lib.owners", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
+local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
+local owners = import("lib.owners", {rootdir = os.scriptdir(), anonymous = true})
 
 local KEYWORDS = {"struct", "class", "enum", "protocol", "actor", "typealias"}
 
@@ -84,9 +84,7 @@ end
 
 function main(...)
     local args = {...}
-    local env = os.getenv("APPLE_26_SDK")
-    local sdk = (env and env ~= "") and env or path.join(os.getenv("HOME"), "Git", "projects", "ios", "charon",
-        ".agent-work", "sdk-26.2", "iPhoneOS26.2.sdk")
+    local sdk = import("lib.tree", {rootdir = os.scriptdir(), anonymous = true}).sdk()
     local swiftui = path.join(sdk, "System", "Library", "Frameworks", "SwiftUI.framework", "Modules",
         "SwiftUI.swiftmodule", "arm64e-apple-ios.swiftinterface")
     local swiftuicore = path.join(sdk, "System", "Library", "Frameworks", "SwiftUICore.framework", "Modules",
