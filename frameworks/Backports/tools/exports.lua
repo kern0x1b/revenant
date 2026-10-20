@@ -1,4 +1,5 @@
 local sdkfiles = import("sdk", {rootdir = os.scriptdir(), anonymous = true})
+local sources = import("implemented", {rootdir = os.scriptdir(), anonymous = true})
 
 function exported_of(library)
     local symbols = {}
@@ -14,8 +15,8 @@ end
 function methods_of(library)
     local methods, named, unnamed = {}, 0, 0
     for line in os.iorunv("otool", {"-ov", library}):gmatch("[^\n]+") do
-        local sign, container, selector = line:match("^%s+imp%s+%S+%s+%(%S+%)%s+([%+%-])%[(%S+) (%S+)%]$")
-        if sign then
+        local sign, container, selector = line:match("([%+%-])%[(%S+) ([^%]]+)%]$")
+        if sign and line:match("^%s+imp%s") then
             named = named + 1
             local class = container:match("^[^(]+")
             local kind = sign == "+" and "class method" or "instance method"
@@ -27,11 +28,10 @@ function methods_of(library)
     return methods, named, unnamed
 end
 
-function keys_of(folder)
+function keys_of()
     local keys = {}
-    for _, file in ipairs(os.files(path.join(folder, "*.txt"))) do
-        local framework = path.filename(file):gsub("%.txt$", "")
-        for key in io.readfile(file):gmatch("[^\n]+") do
+    for framework, set in pairs(sources.from_objects()) do
+        for key in pairs(set) do
             table.insert(keys, {framework = framework, key = key})
         end
     end
@@ -63,7 +63,6 @@ function owners_of(item, libraries)
 end
 
 function main(libdir, report)
-    local folder = path.join(sdkfiles.build_root(), "keys")
     libdir = libdir or path.join(sdkfiles.root(), "build", "iphoneos", "armv7", "release")
     report = report or path.join(sdkfiles.build_root(), "exports.txt")
     local libraries = {}
@@ -78,7 +77,7 @@ function main(libdir, report)
         unnamed = unnamed + library.unnamed
     end
     local lines, counts, missing, duplicated, once = {}, {}, 0, 0, 0
-    for _, item in ipairs(keys_of(folder)) do
+    for _, item in ipairs(keys_of()) do
         local kind = item.key:match("^(.-)|")
         counts[kind] = counts[kind] or {missing = 0, duplicated = 0, once = 0}
         local owners = owners_of(item, libraries)
