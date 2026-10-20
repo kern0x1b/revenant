@@ -1,0 +1,539 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Tue, 20 Oct 2026 03:13:00 +0200
+Subject: [PATCH 8/9] Take the job count from a jobserver or from
+ XMAKE_MAX_JOBS
+
+xmake schedules its own jobs with os.default_njob(), the number of
+cores plus two, and passes that number as -j to every package build it
+runs, so a machine shared by several builds runs each of them at full
+width: a package build that is told to keep to six jobs runs fourteen,
+and an LLVM build in a package install reached a load of 66 on twelve
+cores.
+
+os.default_njob() now returns XMAKE_MAX_JOBS when it is set, and xmake
+becomes a client of a GNU make jobserver when MAKEFLAGS names one with
+--jobserver-auth=fifo:PATH, the form GNU make 4.4 and ninja 1.13 read:
+
+- core.base.jobserver opens the FIFO once per process and takes and
+  gives back single tokens without blocking (io.jobserver_open, _take,
+  _give and _close, in C, because a buffered file read would take
+  every token there is at once). hold(n, func) takes up to n - 1 tokens
+  that are free, calls func with the width it got, and gives them back.
+- runjobs runs the first job of each call on the implicit token of the
+  process and takes a token from the jobserver for every other job it
+  runs at the same time, and gives it back when the job ends. A call
+  that waits for a token sleeps in its coroutine, so the jobs it already
+  runs finish and give theirs back.
+- ninja and meson leave -j out when the jobserver is there and ninja is
+  1.13 or later, so ninja takes its tokens from the jobserver as it
+  goes; an explicit jobs option of a recipe still wins.
+- make, autoconf and CMake's Makefile builds run make with -j set to
+  the tokens they hold, because the make of macOS is 3.81 and reads no
+  FIFO.
+---
+ core/src/xmake/engine.c                       |  8 ++
+ core/src/xmake/io/jobserver.c                 | 67 ++++++++++++++
+ xmake/core/base/jobserver.lua                 | 92 +++++++++++++++++++
+ xmake/core/base/os.lua                        |  4 +
+ .../modules/import/core/base/jobserver.lua    | 11 +++
+ xmake/modules/async/runjobs.lua               | 33 +++++++
+ xmake/modules/package/tools/autoconf.lua      |  6 +-
+ xmake/modules/package/tools/cmake.lua         | 12 ++-
+ xmake/modules/package/tools/make.lua          |  6 +-
+ xmake/modules/package/tools/meson.lua         | 12 ++-
+ xmake/modules/package/tools/ninja.lua         | 27 ++++--
+ 11 files changed, 263 insertions(+), 15 deletions(-)
+ create mode 100644 core/src/xmake/io/jobserver.c
+ create mode 100644 xmake/core/base/jobserver.lua
+ create mode 100644 xmake/core/sandbox/modules/import/core/base/jobserver.lua
+
+diff --git a/core/src/xmake/engine.c b/core/src/xmake/engine.c
+index b37817c..3c12294 100644
+--- a/core/src/xmake/engine.c
++++ b/core/src/xmake/engine.c
+@@ -211,6 +211,10 @@ tb_int_t xm_io_pipe_read(lua_State *lua);
+ tb_int_t xm_io_pipe_write(lua_State *lua);
+ tb_int_t xm_io_pipe_wait(lua_State *lua);
+ tb_int_t xm_io_pipe_connect(lua_State *lua);
++tb_int_t xm_io_jobserver_open(lua_State *lua);
++tb_int_t xm_io_jobserver_take(lua_State *lua);
++tb_int_t xm_io_jobserver_give(lua_State *lua);
++tb_int_t xm_io_jobserver_close(lua_State *lua);
+ 
+ // the io/poller functions
+ tb_int_t xm_io_poller_insert(lua_State *lua);
+@@ -535,6 +539,10 @@ static luaL_Reg const g_io_functions[] = {
+     { "pipe_write", xm_io_pipe_write },
+     { "pipe_wait", xm_io_pipe_wait },
+     { "pipe_connect", xm_io_pipe_connect },
++    { "jobserver_open", xm_io_jobserver_open },
++    { "jobserver_take", xm_io_jobserver_take },
++    { "jobserver_give", xm_io_jobserver_give },
++    { "jobserver_close", xm_io_jobserver_close },
+     { "poller_insert", xm_io_poller_insert },
+     { "poller_modify", xm_io_poller_modify },
+     { "poller_remove", xm_io_poller_remove },
+diff --git a/core/src/xmake/io/jobserver.c b/core/src/xmake/io/jobserver.c
+new file mode 100644
+index 0000000..ed43b19
+--- /dev/null
++++ b/core/src/xmake/io/jobserver.c
+@@ -0,0 +1,67 @@
++#include "prefix.h"
++#if !defined(TB_CONFIG_OS_WINDOWS) || defined(TB_COMPILER_LIKE_UNIX)
++#    include <errno.h>
++#    include <fcntl.h>
++#    include <unistd.h>
++#    define XM_IO_JOBSERVER_FIFO 1
++#endif
++
++tb_int_t xm_io_jobserver_open(lua_State *lua) {
++    tb_assert_and_check_return_val(lua, 0);
++    tb_char_t const *path = luaL_checkstring(lua, 1);
++#ifdef XM_IO_JOBSERVER_FIFO
++    tb_int_t fd = open(path, O_RDWR | O_NONBLOCK | O_CLOEXEC);
++    if (fd >= 0) {
++        lua_pushinteger(lua, fd);
++        return 1;
++    }
++#endif
++    lua_pushnil(lua);
++    return 1;
++}
++
++tb_int_t xm_io_jobserver_take(lua_State *lua) {
++    tb_assert_and_check_return_val(lua, 0);
++    tb_int_t fd = (tb_int_t)luaL_checkinteger(lua, 1);
++#ifdef XM_IO_JOBSERVER_FIFO
++    tb_char_t token = 0;
++    ssize_t   real  = -1;
++    do {
++        real = read(fd, &token, 1);
++    } while (real < 0 && errno == EINTR);
++    if (real == 1) {
++        lua_pushlstring(lua, &token, 1);
++        return 1;
++    }
++#endif
++    lua_pushnil(lua);
++    return 1;
++}
++
++tb_int_t xm_io_jobserver_give(lua_State *lua) {
++    tb_assert_and_check_return_val(lua, 0);
++    tb_int_t         fd    = (tb_int_t)luaL_checkinteger(lua, 1);
++    size_t           size  = 0;
++    tb_char_t const *token = luaL_checklstring(lua, 2, &size);
++    tb_bool_t        ok    = tb_false;
++#ifdef XM_IO_JOBSERVER_FIFO
++    ssize_t real = -1;
++    if (size == 1) {
++        do {
++            real = write(fd, token, 1);
++        } while (real < 0 && errno == EINTR);
++    }
++    ok = real == 1;
++#endif
++    lua_pushboolean(lua, ok);
++    return 1;
++}
++
++tb_int_t xm_io_jobserver_close(lua_State *lua) {
++    tb_assert_and_check_return_val(lua, 0);
++    tb_int_t fd = (tb_int_t)luaL_checkinteger(lua, 1);
++#ifdef XM_IO_JOBSERVER_FIFO
++    close(fd);
++#endif
++    return 0;
++}
+diff --git a/xmake/core/base/jobserver.lua b/xmake/core/base/jobserver.lua
+new file mode 100644
+index 0000000..7b04d40
+--- /dev/null
++++ b/xmake/core/base/jobserver.lua
+@@ -0,0 +1,92 @@
++local jobserver = jobserver or {}
++local _instance = _instance or {}
++
++local io = require("base/io")
++local os = require("base/os")
++local table = require("base/table")
++
++function _instance:take()
++    if self.fd then
++        return io.jobserver_take(self.fd)
++    end
++end
++
++function _instance:give(token)
++    if self.fd and token then
++        return io.jobserver_give(self.fd, token)
++    end
++end
++
++function _instance:close()
++    if self.fd then
++        io.jobserver_close(self.fd)
++        self.fd = nil
++    end
++end
++
++function jobserver.open(fifo)
++    if fifo and io.jobserver_open then
++        local fd = io.jobserver_open(fifo)
++        if fd then
++            local instance = table.inherit(_instance)
++            instance.fd = fd
++            instance.fifo = fifo
++            return instance
++        end
++    end
++end
++
++function jobserver.auth(makeflags)
++    makeflags = makeflags or os.getenv("MAKEFLAGS")
++    if makeflags then
++        return makeflags:match("%-%-jobserver%-auth=fifo:(%S+)")
++    end
++end
++
++function jobserver.client()
++    local client = jobserver._CLIENT
++    if client == nil then
++        client = jobserver.open(jobserver.auth()) or false
++        jobserver._CLIENT = client
++    end
++    return client or nil
++end
++
++function jobserver.take()
++    local client = jobserver.client()
++    if client then
++        return client:take()
++    end
++end
++
++function jobserver.give(token)
++    local client = jobserver.client()
++    if client then
++        return client:give(token)
++    end
++end
++
++function jobserver.hold(njob, func)
++    njob = math.max(math.floor(tonumber(njob) or 1), 1)
++    if not jobserver.client() then
++        return func(njob)
++    end
++    local tokens = {}
++    while #tokens + 1 < njob do
++        local token = jobserver.take()
++        if not token then
++            break
++        end
++        table.insert(tokens, token)
++    end
++    local ok, result = pcall(func, #tokens + 1)
++    for _, token in ipairs(tokens) do
++        jobserver.give(token)
++    end
++    if not ok then
++        error(result, 0)
++    end
++    return result
++end
++
++return jobserver
+diff --git a/xmake/core/base/os.lua b/xmake/core/base/os.lua
+index 89be6d6..0b424b5 100644
+--- a/xmake/core/base/os.lua
++++ b/xmake/core/base/os.lua
+@@ -1678,6 +1678,10 @@ end
+ 
+ -- get the default parallel jobs number
+ function os.default_njob()
++    local limit = tonumber(os.getenv("XMAKE_MAX_JOBS"))
++    if limit and limit >= 1 then
++        return math.floor(limit)
++    end
+     local njob
+     local ncpu = os.cpuinfo().ncpu
+     if ncpu > 2 then
+diff --git a/xmake/core/sandbox/modules/import/core/base/jobserver.lua b/xmake/core/sandbox/modules/import/core/base/jobserver.lua
+new file mode 100644
+index 0000000..9f8068d
+--- /dev/null
++++ b/xmake/core/sandbox/modules/import/core/base/jobserver.lua
+@@ -0,0 +1,11 @@
++local jobserver = require("base/jobserver")
++
++local sandbox_core_base_jobserver = sandbox_core_base_jobserver or {}
++
++for key, value in pairs(jobserver) do
++    if not key:startswith("_") then
++        sandbox_core_base_jobserver[key] = value
++    end
++end
++
++return sandbox_core_base_jobserver
+diff --git a/xmake/modules/async/runjobs.lua b/xmake/modules/async/runjobs.lua
+index 224841c..bd8fe2e 100644
+--- a/xmake/modules/async/runjobs.lua
++++ b/xmake/modules/async/runjobs.lua
+@@ -20,6 +20,7 @@
+ 
+ -- imports
+ import("core.base.scheduler")
++import("core.base.jobserver")
+ import("utils.progress")
+ import("utils.waiting_indicator")
+ 
+@@ -375,6 +376,31 @@ function _waiting_indicator_loop(state)
+     state.waiting_indicator_semaphore = nil
+ end
+ 
++function _take_token(state, run_in_remote)
++    if run_in_remote or not jobserver.client() then
++        return
++    end
++    while not state.stop do
++        if not state.implicit_token_held then
++            state.implicit_token_held = true
++            return true
++        end
++        local token = jobserver.take()
++        if token then
++            return token
++        end
++        os.sleep(20)
++    end
++end
++
++function _give_token(state, token)
++    if token == true then
++        state.implicit_token_held = false
++    elseif token then
++        jobserver.give(token)
++    end
++end
++
+ -- consume jobs
+ function _consume_jobs_loop(state, run_in_remote)
+     local jobs = state.jobs
+@@ -427,10 +453,16 @@ function _consume_jobs_loop(state, run_in_remote)
+             end
+         end
+ 
++        local token
+         try
+         {
+             function ()
+ 
++                token = _take_token(state, run_in_remote)
++                if state.stop or (not job and state.finished_count >= total) then
++                    return
++                end
++
+                 -- mark the current coroutine to run remote job
+                 if run_in_remote and co_running then
+                     co_running:data_set("distcc.distccjob", job_distcc)
+@@ -498,6 +530,7 @@ function _consume_jobs_loop(state, run_in_remote)
+             finally
+             {
+                 function ()
++                    _give_token(state, token)
+                     if job then
+                         jobs:remove(job)
+                     end
+diff --git a/xmake/modules/package/tools/autoconf.lua b/xmake/modules/package/tools/autoconf.lua
+index 181fc82..fa18c85 100644
+--- a/xmake/modules/package/tools/autoconf.lua
++++ b/xmake/modules/package/tools/autoconf.lua
+@@ -21,6 +21,7 @@
+ -- imports
+ import("core.base.option")
+ import("core.base.semver")
++import("core.base.jobserver")
+ import("core.project.config")
+ import("core.tool.toolchain")
+ import("core.cache.memcache")
+@@ -731,7 +732,10 @@ function build(package, configs, opt)
+             end
+         end
+     end
+-    make(package, argv, opt)
++    jobserver.hold(njob, function (width)
++        argv[1] = "-j" .. width
++        make(package, argv, opt)
++    end)
+ end
+ 
+ -- install package
+diff --git a/xmake/modules/package/tools/cmake.lua b/xmake/modules/package/tools/cmake.lua
+index 311b1c0..12ffd5a 100644
+--- a/xmake/modules/package/tools/cmake.lua
++++ b/xmake/modules/package/tools/cmake.lua
+@@ -22,6 +22,7 @@
+ import("core.base.option")
+ import("core.base.semver")
+ import("core.base.hashset")
++import("core.base.jobserver")
+ import("core.tool.toolchain")
+ import("core.project.config")
+ import("core.project.project")
+@@ -1070,6 +1071,7 @@ function _build_for_make(package, configs, opt)
+     end
+     local jobs = _get_parallel_njobs(opt)
+     table.insert(argv, "-j" .. jobs)
++    local jobsindex = #argv
+     if option.get("diagnosis") then
+         table.insert(argv, "VERBOSE=1")
+     end
+@@ -1089,7 +1091,10 @@ function _build_for_make(package, configs, opt)
+         end
+         os.vrunv(make, argv)
+     else
+-        os.vrunv("make", argv)
++        jobserver.hold(jobs, function (width)
++            argv[jobsindex] = "-j" .. width
++            os.vrunv("make", argv)
++        end)
+     end
+ end
+ 
+@@ -1177,7 +1182,10 @@ function _install_for_make(package, configs, opt)
+         os.vrunv(make, argv)
+         os.vrunv(make, {"install"})
+     else
+-        os.vrunv("make", argv)
++        jobserver.hold(jobs, function (width)
++            argv[1] = "-j" .. width
++            os.vrunv("make", argv)
++        end)
+         os.vrunv("make", {"install"})
+     end
+ end
+diff --git a/xmake/modules/package/tools/make.lua b/xmake/modules/package/tools/make.lua
+index 17a9936..8aef099 100644
+--- a/xmake/modules/package/tools/make.lua
++++ b/xmake/modules/package/tools/make.lua
+@@ -20,6 +20,7 @@
+ 
+ -- imports
+ import("core.base.option")
++import("core.base.jobserver")
+ import("core.project.config")
+ import("lib.detect.find_tool")
+ import("private.utils.toolchain", {alias = "toolchain_utils"})
+@@ -149,7 +150,10 @@ function build(package, configs, opt)
+     end
+ 
+     -- do build
+-    make(package, argv, opt)
++    jobserver.hold(njob, function (width)
++        argv[1] = "-j" .. width
++        make(package, argv, opt)
++    end)
+ end
+ 
+ -- install package
+diff --git a/xmake/modules/package/tools/meson.lua b/xmake/modules/package/tools/meson.lua
+index cbfa832..a5d341f 100644
+--- a/xmake/modules/package/tools/meson.lua
++++ b/xmake/modules/package/tools/meson.lua
+@@ -23,6 +23,7 @@ import("core.base.option")
+ import("core.project.config")
+ import("core.tool.toolchain")
+ import("lib.detect.find_tool")
++import("package.tools.ninja")
+ import("private.utils.executable_path")
+ import("private.utils.toolchain", {alias = "toolchain_utils"})
+ 
+@@ -602,13 +603,18 @@ function build(package, configs, opt)
+ 
+     -- configurate build
+     local builddir = _get_builddir(package, opt)
+-    local njob = opt.jobs or option.get("jobs") or tostring(os.default_njob())
++    local njob = opt.jobs
++    if not njob and not ninja.reads_jobserver(find_tool("ninja", {version = true})) then
++        njob = option.get("jobs") or tostring(os.default_njob())
++    end
+     local argv = {"compile", "-C", builddir}
+     if option.get("diagnosis") then
+         table.insert(argv, "-v")
+     end
+-    table.insert(argv, "-j")
+-    table.insert(argv, njob)
++    if njob then
++        table.insert(argv, "-j")
++        table.insert(argv, njob)
++    end
+ 
+     -- do build
+     local meson = assert(find_tool("meson"), "meson not found!")
+diff --git a/xmake/modules/package/tools/ninja.lua b/xmake/modules/package/tools/ninja.lua
+index 168266c..daf91f8 100644
+--- a/xmake/modules/package/tools/ninja.lua
++++ b/xmake/modules/package/tools/ninja.lua
+@@ -20,12 +20,21 @@
+ 
+ -- imports
+ import("core.base.option")
++import("core.base.semver")
++import("core.base.jobserver")
+ import("lib.detect.find_tool")
+ 
+-function _default_argv(package, configs, opt)
++function reads_jobserver(ninja)
++    return jobserver.client() and ninja and ninja.version and semver.compare(ninja.version, "1.13") >= 0
++end
++
++function _default_argv(package, configs, opt, ninja)
+     opt = opt or {}
+     local builddir = opt.builddir or opt.buildir or os.curdir()
+-    local njob = opt.jobs or option.get("jobs") or tostring(os.default_njob())
++    local njob = opt.jobs
++    if not njob and not reads_jobserver(ninja) then
++        njob = option.get("jobs") or tostring(os.default_njob())
++    end
+     if opt.buildir then
+         wprint("{buildir = } has been deprecated, please use {builddir = } in ninja.install")
+     end
+@@ -40,8 +49,10 @@ function _default_argv(package, configs, opt)
+     if option.get("diagnosis") then
+         table.insert(argv, "-v")
+     end
+-    table.insert(argv, "-j")
+-    table.insert(argv, njob)
++    if njob then
++        table.insert(argv, "-j")
++        table.insert(argv, njob)
++    end
+     if configs then
+         table.join2(argv, configs)
+     end
+@@ -53,8 +64,8 @@ end
+ function build(package, configs, opt)
+     opt = opt or {}
+     local argv = {}
+-    local ninja = assert(find_tool("ninja"), "ninja not found!")
+-    table.join2(argv, _default_argv(package, configs, opt))
++    local ninja = assert(find_tool("ninja", {version = true}), "ninja not found!")
++    table.join2(argv, _default_argv(package, configs, opt, ninja))
+     os.vrunv(ninja.program, argv, {envs = opt.envs})
+ end
+ 
+@@ -62,7 +73,7 @@ end
+ function install(package, configs, opt)
+     opt = opt or {}
+     local argv = {"install"}
+-    local ninja = assert(find_tool("ninja"), "ninja not found!")
+-    table.join2(argv, _default_argv(package, configs, opt))
++    local ninja = assert(find_tool("ninja", {version = true}), "ninja not found!")
++    table.join2(argv, _default_argv(package, configs, opt, ninja))
+     os.vrunv(ninja.program, argv, {envs = opt.envs})
+ end
+-- 
+2.54.0 (Apple Git-157)
+
