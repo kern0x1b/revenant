@@ -68,7 +68,7 @@ function failures(opts)
     expect({["libraries/xz/xmake.lua"] = 'package("xz")\n', ["libraries/xz/patches/a.patch"] = "x\n"}, {},
            "files beside the xmake.lua must not matter")
 
-    local tree_found = index.layout_findings(path.join(opts.modules, "..", "packages"))
+    local tree_found = index.layout_findings(path.join(opts.modules, "..", "..", "packages"))
     check(#tree_found == 0, "the toolchain's own packages must be filed by the table: " .. table.concat(tree_found, "; "))
 
     if not opts.scratch then

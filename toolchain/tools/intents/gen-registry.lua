@@ -791,7 +791,7 @@ end
 
 local function read_hand_written(answered, group, hand_written)
     local generator = import("gen-intents", {rootdir = os.scriptdir(), anonymous = true})
-    local file = path.join(revenant_root(), "packages", "frameworks", "apple-backports", "Intents", hand_written)
+    local file = path.join(revenant_root(), "..", "packages", "frameworks", "apple-backports", "Intents", hand_written)
     local lines = lines_of(file)
     local names = {}
     for name in pairs(group) do

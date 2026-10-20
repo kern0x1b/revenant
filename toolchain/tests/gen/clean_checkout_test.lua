@@ -1,8 +1,8 @@
-local ROOT = path.absolute(path.join(os.scriptdir(), "..", ".."))
+local ROOT = path.absolute(path.join(os.scriptdir(), "..", "..", ".."))
 local GEN_PREFIX = "packages/frameworks/apple-backports/.gen/"
 local SDK_FIXTURE = path.absolute(path.join(os.scriptdir(), "sdk_fixture", "release-26.2"))
 local DERIVED = {".git", "build", ".xmake", "packages/frameworks/apple-backports/.gen"}
-local workspace = import("workspace", {rootdir = path.join(ROOT, "modules"), anonymous = true})
+local workspace = import("workspace", {rootdir = path.join(ROOT, "toolchain", "modules"), anonymous = true})
 
 local function listing(dir)
     local out = {}
@@ -51,7 +51,7 @@ local function extract(dir)
 end
 
 local function run_gen(dir, args, search_path)
-    local argv = {"l", "tools/gen.lua"}
+    local argv = {"l", "toolchain/tools/gen.lua"}
     for _, arg in ipairs(args) do
         table.insert(argv, arg)
     end

@@ -48,7 +48,7 @@ local function write_fixture(dir, with_registry, record_status)
     shards.write(tree, FRAMEWORK, surface_objc, nil)
     emit.file(path.join(corpus, "ledger-w45", FRAMEWORK .. ".tsv"), tsv.table_text(LEDGER_COLUMNS, ledger_rows))
     if with_registry then
-        emit.file(path.join(tree, layout.registry_dir(FRAMEWORK), "fixture.json"),
+        emit.file(path.join(tree, "..", layout.registry_dir(FRAMEWORK), "fixture.json"),
                   '{"entries": [{"api": "FKRegistered", "kind": "protocol"}]}\n')
     end
     local snap = layout.snap_dir(tree, FRAMEWORK)

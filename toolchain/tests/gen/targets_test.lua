@@ -29,7 +29,7 @@ function main()
     end
 
     local entries, resolved, unresolved = 0, 0, {}
-    for _, filepath in ipairs(os.files(path.join(ROOT, "packages", "frameworks", "apple-backports", "registry", "Accelerate", "*.json"))) do
+    for _, filepath in ipairs(os.files(path.join(ROOT, "..", "packages", "frameworks", "apple-backports", "registry", "Accelerate", "*.json"))) do
         local doc = json.decode(io.readfile(filepath))
         for _, e in ipairs(doc.entries or doc) do
             entries = entries + 1
@@ -51,7 +51,7 @@ function main()
     for _, fw in ipairs(members) do
         check(#headers.shard_records(ROOT, fw) > 0, "the Graphics member " .. fw .. " has a shard")
     end
-    check(not os.isdir(path.join(ROOT, "packages", "frameworks", "apple-backports", "registry", "Graphics")),
+    check(not os.isdir(path.join(ROOT, "..", "packages", "frameworks", "apple-backports", "registry", "Graphics")),
           "Graphics has no registry folder of its own: its rows are its members'")
 
     print("targets test: " .. (failures == 0 and "OK" or ("FAIL " .. failures)) .. " (" .. count .. " checks)")

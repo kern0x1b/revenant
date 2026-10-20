@@ -47,7 +47,7 @@ local function read_rows(file, kinds)
 end
 
 local function shard_path(tree, fw)
-    return path.join(tree, layout.constants().SNAP_ROOT, fw, "declarations.tsv")
+    return path.join(tree, "..", layout.constants().SNAP_ROOT, fw, "declarations.tsv")
 end
 
 function shard_records(tree, fw)
@@ -67,7 +67,7 @@ end
 local function shard_files(tree)
     local found = {}
     for _, pattern in ipairs({"*", "*/*"}) do
-        for _, filepath in ipairs(files.glob(path.join(tree, layout.constants().SNAP_ROOT, pattern, "declarations.tsv"))) do
+        for _, filepath in ipairs(files.glob(path.join(tree, "..", layout.constants().SNAP_ROOT, pattern, "declarations.tsv"))) do
             table.insert(found, filepath)
         end
     end

@@ -533,7 +533,7 @@ function generate(root, sdkdir)
         return
     end
     generated[root] = true
-    local tree = path.absolute(path.join(root, "..", "..", ".."))
+    local tree = path.absolute(path.join(root, "..", "..", "..", "toolchain"))
     local sdk = os.getenv("REVENANT_GEN_SDK")
     if not sdk or sdk == "" then
         raise("the generated layer needs REVENANT_GEN_SDK: the iPhoneOS SDK whose release the spec snapshot is measured on (gen --sdk)")

@@ -45,7 +45,7 @@ function failures(opt)
     local macho = import("apple.macho", {rootdir = opt.modules, anonymous = true})
     local found = {}
     local folder = fixtures.scratch()
-    local list = path.join(opt.modules, "..", "packages", "runtimes", "libcxx", "operators-not-weak.exp")
+    local list = path.join(opt.modules, "..", "..", "packages", "runtimes", "libcxx", "operators-not-weak.exp")
     io.writefile(path.join(folder, "runtime.cpp"), RUNTIME)
     io.writefile(path.join(folder, "client.cpp"), CLIENT)
     io.writefile(path.join(folder, "replacement.cpp"), REPLACEMENT)

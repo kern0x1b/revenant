@@ -81,12 +81,15 @@ function repository(folder)
     local root = path.absolute(path.join(os.scriptdir(), "..", ".."))
     local copy = path.join(folder, "revenant")
     os.mkdir(copy)
-    local listed = os.iorunv("git", {"-C", root, "ls-files", "-c", "-o", "--exclude-standard"})
-    for _, file in ipairs(listed:split("\n", {plain = true})) do
-        file = file:trim()
-        if file ~= "" and os.isfile(path.join(root, file)) then
-            os.mkdir(path.directory(path.join(copy, file)))
-            os.cp(path.join(root, file), path.join(copy, file))
+    local sources = {{root, {}}, {path.directory(root), {"packages", "addons"}}}
+    for _, source in ipairs(sources) do
+        local listed = os.iorunv("git", table.join({"-C", source[1], "ls-files", "-c", "-o", "--exclude-standard", "--"}, source[2]))
+        for _, file in ipairs(listed:split("\n", {plain = true})) do
+            file = file:trim()
+            if file ~= "" and os.isfile(path.join(source[1], file)) then
+                os.mkdir(path.directory(path.join(copy, file)))
+                os.cp(path.join(source[1], file), path.join(copy, file))
+            end
         end
     end
     for _, argv in ipairs({{"init", "-q", "-b", "main"}, {"add", "-A"},

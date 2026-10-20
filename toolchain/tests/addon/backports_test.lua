@@ -18,7 +18,7 @@ local function recipe_digest(folder, name, recipe, tree_files)
 end
 
 local function digest_step(opt, folder, found)
-    local recipe = path.join(opt.modules, "..", "packages", "frameworks", "apple-backports", "xmake.lua")
+    local recipe = path.join(opt.modules, "..", "..", "packages", "frameworks", "apple-backports", "xmake.lua")
     local tree_files = {
         [path.join("packages", "frameworks", "apple-backports", "Foundation", "NSThing.m")] = "// a backport\n",
         [path.join("packages", "frameworks", "apple-backports", "Foundation", "RevenantThing.h")] = "// its header\n",
@@ -26,7 +26,7 @@ local function digest_step(opt, folder, found)
         [path.join("packages", "frameworks", "apple-backports", "registry", "UIKit", "thing.json")] = '{"framework": "UIKit", "entries": []}\n',
         [path.join("packages", "frameworks", "apple-backports", "registry", "flat.json")] = "[]\n",
         [path.join("packages", "frameworks", "apple-backports", "notes.md")] = "notes\n",
-        [path.join("modules", "apple", "backports.lua")] = "-- the build module\n",
+        [path.join("toolchain", "modules", "apple", "backports.lua")] = "-- the build module\n",
         [path.join("addons", "r", "revenant", "xmake.lua")] = 'add_versions("v0.8.4", "0")\n'
     }
     local before, errors = recipe_digest(folder, "digest-before", recipe, tree_files)

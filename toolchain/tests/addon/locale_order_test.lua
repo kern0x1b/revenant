@@ -44,7 +44,7 @@ local NOT_STRINGS = {
 
 local function unsorted_strings(root)
     local found, sites, on_byteorder, used = {}, 0, 0, {}
-    for _, folder in ipairs({"addons", "modules", "tools"}) do
+    for _, folder in ipairs({"../addons", "modules", "tools"}) do
         for _, file in ipairs(os.files(path.join(root, folder, "**.lua"))) do
             local relative = path.relative(file, root)
             if not relative:find("/gen/", 1, true) and relative ~= "modules/byteorder.lua" then

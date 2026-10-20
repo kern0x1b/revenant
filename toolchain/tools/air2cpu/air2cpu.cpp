@@ -24,7 +24,7 @@
 using namespace llvm;
 
 extern "C" typedef void (*air2cpu_barrier_fn)(void *context, uint32_t tid, uint32_t threads);
-#include "../../packages/frameworks/apple-backports/air2cpu-abi.h"
+#include "../../../packages/frameworks/apple-backports/air2cpu-abi.h"
 
 namespace {
 

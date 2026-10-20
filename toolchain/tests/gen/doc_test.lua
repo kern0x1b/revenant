@@ -36,7 +36,7 @@ local function write_fixture(tree, corpus)
     os.mkdir(tree)
     os.cp(TOOLS, path.join(tree, "tools"))
     os.cp(path.join(TOOLS, "..", "modules"), path.join(tree, "modules"))
-    local package = path.join(tree, "packages", "frameworks", "apple-backports")
+    local package = path.join(tree, "..", "packages", "frameworks", "apple-backports")
     shards.write(tree, FIXTURE, {
         shards.objc_row("method", "c:objc(cs)FKThing(im)setName:age:", nil, nil, nil, "ios=12.0/-/-/0"),
         shards.objc_row("method", "c:objc(cs)FKThing(im)reset", nil, nil, nil, "ios=12.0/-/-/0"),

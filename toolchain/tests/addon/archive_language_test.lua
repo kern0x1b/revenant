@@ -7,7 +7,7 @@ function main()
         local entries = library.archives or {}
         if #entries > 0 then
             local cxx = false
-            local folder = path.join(root, "packages", "frameworks", "apple-backports", library.folder)
+            local folder = path.join(root, "..", "packages", "frameworks", "apple-backports", library.folder)
             for _, source in ipairs(os.files(path.join(folder, "*.mm"))) do
                 cxx = true
             end

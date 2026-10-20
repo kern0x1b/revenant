@@ -87,7 +87,7 @@ function main(...)
     local workspace = import("workspace", {rootdir = path.join(root, "modules"), anonymous = true})
     local files = options.files
     if #files == 0 then
-        files = os.files(path.join(root, "packages", "frameworks", "apple-backports", "registry", "Intents", "*.json"))
+        files = os.files(path.join(root, "..", "packages", "frameworks", "apple-backports", "registry", "Intents", "*.json"))
         byteorder.sort(files)
     end
     local work = options.work or workspace.fresh("probe-host-absent")

@@ -40,7 +40,7 @@ end
     if not digest.stripped(base):find('"a -- b"', 1, true) or not digest.stripped(base):find("line -- not a comment", 1, true) then
         table.insert(found, "a string keeps its comment marker")
     end
-    local root = path.join(opt.modules, "..")
+    local root = path.join(opt.modules, "..", "..")
     for _, recipe in ipairs(digest.recipes()) do
         local written = io.readfile(path.join(root, recipe.folder, "digest.lua"))
         local expected = digest.digest_file(recipe, digest.sources(root, recipe.inputs))

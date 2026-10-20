@@ -14,7 +14,7 @@ end
 
 function write(tree, fw, objc_rows, swift_rows)
     local emit = import("gen.emit", {rootdir = TOOLS, anonymous = true})
-    local folder = path.join(tree, SNAP, fw)
+    local folder = path.join(tree, "..", SNAP, fw)
     os.mkdir(folder)
     if objc_rows then
         assert(emit.file(path.join(folder, "declarations.tsv"), OBJC_HEADER .. table.concat(objc_rows, "\n") .. "\n"),
@@ -29,7 +29,7 @@ end
 function write_interface(tree, fw, text)
     local emit = import("gen.emit", {rootdir = TOOLS, anonymous = true})
     local swift_interface = import("gen.swift_interface", {rootdir = TOOLS, anonymous = true})
-    local folder = path.join(tree, SNAP, fw)
+    local folder = path.join(tree, "..", SNAP, fw)
     os.mkdir(folder)
     assert(emit.file(path.join(folder, "swiftinterface.tsv"), (swift_interface.shard_text(text, fw))),
            "could not write the interface shard of " .. fw)

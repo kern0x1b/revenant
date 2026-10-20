@@ -2,8 +2,8 @@ import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 
 local ROOT = path.absolute(path.join(os.scriptdir(), "..", ".."))
-local REGISTRY = path.join(ROOT, "packages", "frameworks", "apple-backports", "registry", "Intents")
-local CLASSES = path.join(ROOT, "packages", "frameworks", "apple-backports", "Intents")
+local REGISTRY = path.join(ROOT, "..", "packages", "frameworks", "apple-backports", "registry", "Intents")
+local CLASSES = path.join(ROOT, "..", "packages", "frameworks", "apple-backports", "Intents")
 
 local function sources()
     local found = {}

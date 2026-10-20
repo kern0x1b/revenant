@@ -9,7 +9,7 @@ local SNAPSHOTS = {"protocols.tsv", "functions.tsv"}
 local COLUMNS = {"framework", "file", "sha256"}
 
 function pin_path(tree)
-    return path.join(tree, layout.constants().SNAP_ROOT, "snapshots.tsv")
+    return path.join(tree, "..", layout.constants().SNAP_ROOT, "snapshots.tsv")
 end
 
 function pin_read(tree)
@@ -42,7 +42,7 @@ function pin_record(tree, fw, file)
 end
 
 function pin_keys(tree)
-    local root = path.join(tree, layout.constants().SNAP_ROOT)
+    local root = path.join(tree, "..", layout.constants().SNAP_ROOT)
     local base = path.absolute(root)
     local keys = {}
     for _, filepath in ipairs(files.glob(path.join(root, "**.tsv"))) do
@@ -57,7 +57,7 @@ end
 
 function pin_problems(tree)
     local pins = pin_read(tree)
-    local root = path.join(tree, layout.constants().SNAP_ROOT)
+    local root = path.join(tree, "..", layout.constants().SNAP_ROOT)
     local out, seen = {}, {}
     for _, key in ipairs(pin_keys(tree)) do
         local framework, file = key[1], key[2]

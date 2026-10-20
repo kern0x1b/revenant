@@ -61,7 +61,7 @@ function failures(opt)
     end
 
     for _, recipe in ipairs({"packages/runtimes/libcxx/xmake.lua", "packages/runtimes/swift-runtime/xmake.lua"}) do
-        local text = io.readfile(path.join(opt.modules, "..", recipe))
+        local text = io.readfile(path.join(opt.modules, "..", "..", recipe))
         if text:find("revenant@ldid", 1, true) then
             table.insert(found, recipe .. " must not depend on ldid: a host tool's dependencies (openssl) reach every package that depends on this one")
         end
