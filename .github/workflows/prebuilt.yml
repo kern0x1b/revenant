@@ -59,9 +59,9 @@ jobs:
           [ -x /opt/homebrew/opt/llvm/bin/llvm-config ] || brew install llvm
           ./xmakew require -P . -y -v revenant@ld64
           ld64=$(./xmakew where -P . ld64)
-          if [ ! -x "$ld64/bin/ld" ]; then
-            echo "xmake installed no ld64 at $ld64" >&2
-            ./xmakew require -P . --list
+          if [ -z "$ld64" ] || [ ! -x "$ld64/bin/ld" ]; then
+            echo "xmake installed no ld64 at '$ld64'" >&2
+            ./xmakew require -P . --info revenant@ld64
             exit 1
           fi
 
