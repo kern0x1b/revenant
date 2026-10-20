@@ -25,7 +25,7 @@ toolchain/build/
 toolchain/tests/backports/emulate/calls/xmake-addons.lock
 toolchain/tools/.media-player-include.m
 toolchain/tools/.media-player-include.m.ast
-toolchain/packages/a/apple-backports/.gen/
+toolchain/packages/frameworks/apple-backports/.gen/
 toolchain/tests/backports/device/metalchain-probe/run/
 toolchain/tests/backports/device/metalchain-probe/background.log
 toolchain/tests/backports/device/metalchain-probe/xmake-addons.lock
