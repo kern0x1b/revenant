@@ -692,8 +692,8 @@ libcxx; the package names Combine's module folders too, since SwiftUI re-exports
 Combine. A SwiftUI port takes the `backports` variant of all three: Combine's own
 weak import, `_CFRunLoopTimerSetTolerance`, is answered by
 `revenant@apple-backports`, which the port then carries (`coredata = true`, and
-`add_packages` plus `set_values("revenant.libraries", ...)` for it), as
-`SwiftUI/rtpkg/xmake.lua` does. The runtime's own weak imports are checked against
+`add_packages` plus `set_values("revenant.libraries", ...)` for it), as the
+targets of `frameworks/SwiftUI/xmake.lua` in revenant do. The runtime's own weak imports are checked against
 `modules/apple/runtime_guards.lua`. That a SwiftUI port passes `xmake deb`
 with no `revenant.waive.weak-imports` has not been run end to end yet: it needs the
 rebuilt runtime.

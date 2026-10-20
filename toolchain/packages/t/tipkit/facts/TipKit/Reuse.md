@@ -25,10 +25,10 @@ things a port of it would most likely be built from, and found nothing reusable:
   crutch is filed in `coordination/crutches.md`, open until Foundation Swift r2 carries it). Nothing
   here reimplements it.
 * **SwiftUI's `SwiftUI`** — the source the ten `View.tip*` rows are routed to, and the reason they
-  are not declared here: SwiftUI (`$HOME/Git/projects/ios/SwiftUI`, `SwiftUI/Sources/SwiftUI/`) has
+  are not declared here: SwiftUI (`frameworks/SwiftUI/Sources/` in revenant) has
   `View` with its `body` requirement, `ShapeStyle`, `Edge`, `Binding`,
   `PresentationBackgroundInteraction`, `EnvironmentValues` and `EnvironmentKey`, but it is compiled
-  only into `rtpkg`'s `swiftuirt` daemon target and there is no `revenant@swiftui` package to depend on
+  only into the SwiftUI targets of the revenant project and there is no `revenant@swiftui` package to depend on
   yet. The ask is with the SwiftUI band; `README.md:40-43` and `facts/TipKit/Rendering.md` say so too.
 * **`packages/a/apple-backports/registry/CoreSpotlight/ios9.json`** — read through
   the generator's port headers (`tools/gen/cmd_headers.lua`); not this package's file.
