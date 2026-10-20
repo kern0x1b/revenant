@@ -111,7 +111,7 @@ jobs:
             build/.objs
             build/.deps
             build/iphoneos
-          key: backports-objects-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'third_party/**', 'xmake.lua', 'xmakew') }}
+          key: backports-objects-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'packages/**', 'addons/**', 'third_party/**', 'xmake.lua', 'xmakew') }}
 
       - name: Configure the Backports component
         if: steps.component.outputs.present == 'true'
@@ -161,7 +161,7 @@ jobs:
             build/.objs
             build/.deps
             build/iphoneos
-          key: backports-objects-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'third_party/**', 'xmake.lua', 'xmakew') }}
+          key: backports-objects-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'packages/**', 'addons/**', 'third_party/**', 'xmake.lua', 'xmakew') }}
 
       - name: Upload the Backports libraries
         if: steps.component.outputs.present == 'true'

@@ -26,7 +26,8 @@ Four caches make a warm run quick:
   is restored by exact key and saved once, after the configure has succeeded, so a store is never saved half-made;
 - the generated skeleton `build/generated/backports`, keyed by `frameworks/Backports/**` and saved on the same condition;
 - the objects `build/.objs`, their depfiles `build/.deps` and the libraries `build/iphoneos`, keyed by the store key and
-  by the hashes of `frameworks/Backports/**`, `toolchain/**`, `third_party/**`, `xmake.lua` and `xmakew`, saved once the
+  by the hashes of `frameworks/Backports/**`, `toolchain/**`, `packages/**`, `addons/**`, `third_party/**`, `xmake.lua`
+  and `xmakew`, saved once the
   build has succeeded.
 
 xmake recompiles a source whose mtime is newer than its depfile, and a restored cache has older depfiles than a fresh
