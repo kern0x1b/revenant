@@ -41,7 +41,7 @@ package("webkit-device-tools")
             os.vrunv(toolchain:tool("cc"), table.join(compiled, linker, {path.join(tools, tool .. ".c"), "-o", path.join(package:installdir("bin"), tool)}, frameworks))
         end
         os.mkdir(package:installdir("licenses"))
-        os.vcp(path.join(member, "src", "LICENSE"), package:installdir("licenses"))
+        os.vcp(path.join(member, "LICENSE"), package:installdir("licenses"))
         local modules = path.join(package:scriptdir(), "..", "..", "..", "..", "..", "toolchain", "modules")
         local signing = import("apple.signing", {rootdir = modules, anonymous = true})
         local ldid = path.join(package:dep("ldid"):installdir(), "bin", "ldid")

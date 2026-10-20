@@ -25,7 +25,7 @@ A check that also has a device part is run by hand, with the output folder as it
 ./xmakew l recompiler/tests/swiftconformance/check.lua <out>
 ```
 
-These need a claimed device (the skill `device`): `REVENANT_DEVICE_HOLDER` and `REVENANT_DEVICE`
+These need a claimed device (the skill `device-session`): `REVENANT_DEVICE_HOLDER` and `REVENANT_DEVICE`
 exported and the claim held. They reach the device through Revenant's `device` module. Without an argument, output goes
 to `build/recompiler/corpus/<name>`.
 

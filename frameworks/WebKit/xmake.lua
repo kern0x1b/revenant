@@ -20,7 +20,7 @@ if is_plat("iphoneos") then
         target:set("values", "revenant.version", version)
         target:set("values", "revenant.control", "src/packaging/control")
         target:set("values", "revenant.maintainer-scripts", "src/packaging/DEBIAN")
-        target:set("values", "revenant.licenses", "src/LICENSE", "../../docs/reference/webkit/third-party.md")
+        target:set("values", "revenant.licenses", "LICENSE", "../../docs/reference/webkit/third-party.md")
     end
 
     target("RevSafari")

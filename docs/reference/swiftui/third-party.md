@@ -21,3 +21,7 @@ SwiftUI re-implements the shape of Apple's public SwiftUI API and contains no co
 public type and modifier names in `frameworks/SwiftUI/tests/data/api/` are identifiers only. `tools/api-surface.lua prepare` makes a local copy
 of a framework from the reader's own iOS SDK to compare against, in a run folder outside the tree; that copy is not part of this repository and must not
 be committed or passed on.
+
+## Trademarks
+
+SwiftUI, UIKit, Combine, iOS and iPhone are trademarks of Apple Inc. They are used here nominatively, to say what this project is compatible with. There is no affiliation. This repository contains no code or assets of Apple's.

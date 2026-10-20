@@ -52,7 +52,7 @@ into the port binary that ships to a device.
 
 | Component | Version | License | Package |
 | --- | --- | --- | --- |
-| The emulator — Revenant's ARM/iOS userland emulator | 2026.10.15+1 | MPL-2.0 (notices in its `NOTICE`) | `packages/emulator/emulator`, from [`kern0x1b/revenant`](https://github.com/kern0x1b/revenant/tree/main/emulator) |
+| The emulator — Revenant's ARM/iOS userland emulator | 2026.10.15+1 | MPL-2.0 (notices in [its notice](../emulator/notice.md)) | `packages/emulator/emulator`, from [`kern0x1b/revenant`](https://github.com/kern0x1b/revenant/tree/main/emulator) |
 | SwiftShader | 2026.09.16 | Apache-2.0 | `packages/emulator/swiftshader` |
 | libplist | 2.7.0 | LGPL-2.1-or-later | `packages/build-tools/libplist` — read/write plist for the ldid signer and the emulator |
 | OpenSSL | 4.0.2 | Apache-2.0 | `packages/libraries/openssl` — used by the ldid signer and the emulator |

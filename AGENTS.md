@@ -7,7 +7,7 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
 - One layout for the whole repository, so that nothing has to be remembered per component:
 
   ```
-  AGENTS.md README.md CONTRIBUTING.md SECURITY.md CHANGELOG.md   the only such files
+  AGENTS.md README.md CONTRIBUTING.md SECURITY.md   the only such files
   LICENSES/ REUSE.toml       every licence text once (SPDX names), and which paths each covers
   xmake.lua xmakew tools/    the one build graph, its xmake, the repository's Lua tools
   docs/                      all documentation, by kind (Diataxis), then by component:
@@ -21,11 +21,14 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   <component>/               toolchain, emulator, recompiler, agent-skills, frameworks/<Framework>
   ```
 
+  A document about the whole repository is not in a component's folder: it sits directly under its quadrant (`explanation/platform.md`, `explanation/backports-loading.md`, `guides/ci.md`, `guides/machine.md`, `guides/prebuilt.md`). A component's documents sit under `<quadrant>/<component>/`, and `docs/README.md` indexes every document.
+
   Every component has the same shape, lowercase, and nothing else at its top:
 
   ```
   xmake.lua    its targets and tests, included by the top xmake.lua (xmake test runs its tests)
   README.md    one screen: what it is, how to build, run and test it, links into docs/
+  LICENSE      when the component ships its licence inside its own package
   src/         all of its code
   include/     its public headers, when it has any
   patches/     when the component is an upstream at a commit plus our changes (its xmake.lua applies them)
@@ -60,7 +63,7 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   it back as a patch on that version; an old pin is never the answer. Moving a pin means rebasing our patches onto
   the new version and dropping the ones upstream made unnecessary.
 - Skills live in `.agents/skills/` at the top of revenant (`.claude/skills` links there); a member keeps none of its
-  own. xmake's own skills come from the `xmake-skills` plugin pinned in `.claude/settings.json`, never a copy.
+  own. xmake's own skills come from the `xmake-skills` plugin pinned in `.claude/settings.json`, and are not copied into `.agents/`. The `xmake-*` skills of `agent-skills/` are derived from those upstream skills and rewritten for the toolchain: `agent-skills/THIRD-PARTY.md` maps each one to its upstream skills and to the commit they were taken from.
   `agent-skills/` is the plugin `agent-skills` of the revenant marketplace (`.claude-plugin/marketplace.json`).
 - xmake at the top is always `./xmakew`, the pinned and patched xmake of `third_party/xmake` (built into
   `$HOME/.revenant/cache/xmake/` on first use): `./xmakew f -p iphoneos -a armv7`, `./xmakew build <target>`. It takes
@@ -69,4 +72,4 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   `$HOME/.revenant/cache`, and `./xmakew l tools/clean.lua [--packages | --all]` gives it back; it is in `docs/guides/machine.md`.
 - Before handing a change over: `./xmakew l tools/check.lua layout`, `./xmakew l tools/check.lua <component>` for
   each component it touches, then that component's gate (the backports gate is gone until `xmake test` replaces it;
-  for the emulator, the skill `emulator`).
+  for the emulator, the skill `emulator-session`).

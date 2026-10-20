@@ -1,8 +1,9 @@
 # Contributing
 
-revenant is an openly AI-built project (developed with Claude). Contributions are welcome; the working guide of each
-member (architecture, gotchas, how to build and test) is its `AGENTS.md`, and [AGENTS.md](AGENTS.md) at the top says
-how the members fit together.
+revenant is an openly AI-built project (developed with Claude). Contributions are welcome. [AGENTS.md](AGENTS.md) at the top is the working guide of the whole
+repository: how the members fit together, the layout and the rules. Each member's guide (architecture, gotchas,
+how to build and test) is `docs/guides/<component>/contributing.md`, and [the documentation index](docs/README.md)
+lists every document.
 
 - **Commits:** plain imperative subject, one commit per member a change touches. Keep the
   `Co-Authored-By: Claude <noreply@anthropic.com>` trailer: we mark AI-built work, we do not hide it.

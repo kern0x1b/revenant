@@ -10,9 +10,9 @@ Builds applications and tweaks for legacy Apple platforms with [xmake](https://x
 
 ## Documentation
 
-- Writing a port: [guides/toolchain/port.md](../docs/guides/toolchain/port.md), and [writing a package](../docs/guides/toolchain/packages.md)
+- Writing a port: [tutorials/toolchain/port.md](../docs/tutorials/toolchain/port.md), and [writing a package](../docs/guides/toolchain/packages.md)
 - Running on an emulated device: [guides/toolchain/emulate.md](../docs/guides/toolchain/emulate.md)
-- Tests and contributing: [tests](../docs/guides/toolchain/tests.md), [contributing](../docs/guides/toolchain/contributing.md)
+- Tests and contributing: [tests](../docs/reference/toolchain/tests.md), [contributing](../docs/guides/toolchain/contributing.md)
 - Rules, values and checks: [reference/toolchain/rules.md](../docs/reference/toolchain/rules.md)
 - Commands and environment: [reference/toolchain/commands.md](../docs/reference/toolchain/commands.md)
 - Packages and versions: [reference/toolchain/packages.md](../docs/reference/toolchain/packages.md)
