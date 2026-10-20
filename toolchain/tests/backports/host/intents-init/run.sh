@@ -28,8 +28,6 @@
 #
 #   sh tests/backports/host/intents-init/run.sh --write
 set -eu
-echo "FAIL host/intents-init/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 53" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -50,19 +48,7 @@ echo "host   macOS $host build $build, $arch"
 # into gen-intents.py's EXTRA_METHODS, the row was added, and neither file was regenerated, so 110
 # of the 111 rows were being measured and the guard below was 110 against 110.
 registry=$root/packages/frameworks/apple-backports/registry/Intents
-claimed=$(python3 - "$registry" <<'PY'
-import glob, json, os, re, sys
-names = set()
-for path in sorted(glob.glob(os.path.join(sys.argv[1], "ios*.json"))):
-    document = json.load(open(path, encoding="utf-8"))
-    for entry in document["entries"] if isinstance(document, dict) else document:
-        if entry.get("status") == "implemented":
-            match = re.match(r"^-\[(\w+) init\]$", entry["api"])
-            if match:
-                names.add(match.group(1))
-print(len(names))
-PY
-)
+claimed=$(runs_xmake l "$here/claimed.lua" "$registry")
 listed=$(grep -c '^    { "IN' "$here/init-classes.inc")
 golden=$(grep -c '^[A-Za-z]' "$here/expected.txt")
 echo "guard  $claimed implemented -init rows in registry/Intents, $listed in init-classes.inc, $golden in expected.txt"
