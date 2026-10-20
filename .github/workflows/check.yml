@@ -14,12 +14,13 @@ defaults:
 
 jobs:
   checks:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+    runs-on: macos-26
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/cache@v4
+      - uses: actions/cache/restore@v4
+        id: xmake
         with:
           path: ~/.revenant/cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'third_party/xmake/**') }}
@@ -38,6 +39,12 @@ jobs:
       - name: Check the toolchain
         run: ./xmakew l -P . tools/check.lua toolchain
 
+      - uses: actions/cache/save@v4
+        if: always() && steps.xmake.outputs.cache-hit != 'true'
+        with:
+          path: ~/.revenant/cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'third_party/xmake/**') }}
+
   backports:
     runs-on: macos-26
     timeout-minutes: 60
@@ -53,7 +60,8 @@ jobs:
           xcode-select -p
           xcrun clang --version
 
-      - uses: actions/cache@v4
+      - uses: actions/cache/restore@v4
+        id: xmake
         with:
           path: ~/.revenant/cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'third_party/xmake/**') }}
@@ -62,7 +70,8 @@ jobs:
         id: keys
         run: echo "hash=$(./xmakew l -P . tools/keys.lua | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/cache@v4
+      - uses: actions/cache/restore@v4
+        id: store
         with:
           path: ~/.revenant/cache/xmake-global
           key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
@@ -91,3 +100,15 @@ jobs:
           name: backports-libraries
           path: build/iphoneos/armv7/release/lib*.dylib
           if-no-files-found: error
+
+      - uses: actions/cache/save@v4
+        if: always() && steps.store.outputs.cache-hit != 'true'
+        with:
+          path: ~/.revenant/cache/xmake-global
+          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+
+      - uses: actions/cache/save@v4
+        if: always() && steps.xmake.outputs.cache-hit != 'true'
+        with:
+          path: ~/.revenant/cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'third_party/xmake/**') }}
