@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 360
     env:
       REVENANT_PREBUILT: ${{ github.repository }}
@@ -34,10 +34,11 @@ jobs:
       - name: Name the archive folder
         run: echo "REVENANT_PREBUILT_OUT=$RUNNER_TEMP/prebuilt" >> "$GITHUB_ENV"
 
-      - name: Select Xcode 26.3
+      - name: Select Xcode 26.6 and show its clang
         run: |
-          sudo xcode-select -s /Applications/Xcode_26.3.app/Contents/Developer
+          sudo xcode-select -s /Applications/Xcode_26.6.app/Contents/Developer
           xcode-select -p
+          xcrun --find clang
           xcrun clang --version
 
       - name: Free the disk of the other Xcode versions
@@ -45,7 +46,7 @@ jobs:
           df -h /
           for app in /Applications/Xcode_*.app; do
             case "$app" in
-              /Applications/Xcode_26.3.app) ;;
+              /Applications/Xcode_26.6.app) ;;
               *) sudo rm -rf "$app" ;;
             esac
           done
