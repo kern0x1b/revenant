@@ -22,8 +22,7 @@ What the toolchain is, and why it is built this way, is in [design](../../explan
 | `includes/apple-ios/`, `includes/emulate/` | what a port includes: `@addon/revenant/apple-ios` and `@addon/revenant/emulate` |
 | `plugins/` | the verbs: `check`, `compile-commands`, `deb`, `device`, `emulate`, `firmware`, `where` |
 | `modules/apple/` | the Lua the rules and verbs run; `modules/gyb/` expands Swift's `.gyb` templates in Lua |
-| `packages/<group>/<name>/` | package definitions, grouped as `build-tools`, `runtimes`, `frameworks`, `libraries`, `emulator`, `tweaks` |
-| `tools/package-index.lua` | the group of each package; `tests/addon/revenant_index_test.lua` holds the tree to it |
+| `packages/<letter>/<name>/` | package definitions, grouped as `build-tools`, `runtimes`, `frameworks`, `libraries`, `emulator`, `tweaks` |
 | `tools/` | developer tools, see [tools](../../reference/toolchain/tools.md) |
 | `tests/` | `light.lua`, which runs the addon's tests; `addon/`, `common/`, `corpus/`, `emulate/`, `gen/`, `swiftui/` |
 
@@ -56,7 +55,7 @@ Each entry: the wrong pattern, the right one, and the mechanical reason.
   store, or a private `XMAKE_GLOBALDIR` to pick up a changed recipe or patch. Right: build normally.
   `./xmakew` points `XMAKE_GLOBALDIR` at `$HOME/.revenant/cache/xmake-global`. Reason: the packages that matter
   (`llvm`, `swift-runtime`, `libcxx`, `swift`) hash their sources, patches and definition into a
-  digest (`the deleted registry package xmake.lua`, `packages/runtimes/swift-runtime/digest.lua`), so a changed
+  digest (`the deleted registry package xmake.lua`, `packages/s/swift-runtime/digest.lua`), so a changed
   backport or patch is already a different package with its own install path. A private store re-resolves the whole
   chain from the network, up to building LLVM. A build's own output that must survive (a crash log) goes to a file
   of its own: `./xmakew build ... > "$HOME/.revenant/cache/<task>/build.log" 2>&1`.

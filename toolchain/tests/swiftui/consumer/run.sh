@@ -33,7 +33,7 @@ binary=$(find "$build/project/build" -name consumer -type f -perm -u+x 2>/dev/nu
 [ -n "$binary" ] || { echo "consumer: the build produced no binary"; tail -40 "$build/build.log"; exit 1; }
 
 store=${XMAKE_GLOBALDIR:-$HOME/.xmake}
-library=$(find "$store/packages/frameworks/swiftui" -name libRevenantSwiftUI.a 2>/dev/null | head -1)
+library=$(find "$store/packages/s/swiftui" -name libRevenantSwiftUI.a 2>/dev/null | head -1)
 [ -n "$library" ] || { echo "consumer: revenant@swiftui installed no libRevenantSwiftUI.a under $store"; exit 1; }
 installdir=$(dirname "$(dirname "$library")")
 module=$installdir/lib/swift/iphoneos/SwiftUI.swiftmodule

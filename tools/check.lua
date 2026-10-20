@@ -35,9 +35,7 @@ local addon = {
     plugins = {depth = 4, files = {"xmake.lua", "main.lua"}},
     rules = {depth = 4, files = {"xmake.lua"}},
     toolchains = {depth = 4, files = {"xmake.lua"}},
-    includes = {depth = 4, files = {"xmake.lua"}},
-    packages = {depth = 4, files = {"xmake.lua"}},
-    addons = {depth = 4, files = {"xmake.lua"}}
+    includes = {depth = 4, files = {"xmake.lua"}}
 }
 
 local function has(list, name)
@@ -65,6 +63,25 @@ local function addon_fault(parts, first)
     end
 end
 
+local function recipe_fault(parts)
+    local kind = parts[1]
+    if #parts < 3 then
+        return kind .. " holds one folder per recipe, under the first letter of its name"
+    elseif #parts[2] ~= 1 or parts[2] ~= parts[3]:sub(1, 1) then
+        return kind .. " folders are named <first letter>/<name>"
+    elseif kind == "addons" then
+        if #parts ~= 4 or parts[4] ~= "xmake.lua" then
+            return "addons/<letter>/<name> holds xmake.lua only"
+        end
+        return nil
+    elseif #parts == 4 and parts[4] == "xmake.lua" then
+        return nil
+    elseif #parts > 4 and (parts[4] == "port" or parts[4] == "patches") then
+        return nil
+    end
+    return "packages/<letter>/<name> holds xmake.lua, port/ and patches/ only"
+end
+
 function checks.layout()
     local allowed = {}
     for name, list in pairs(layout) do
@@ -80,6 +97,7 @@ function checks.layout()
     local files = os.iorunv("git", {"-C", root, "-c", "core.quotepath=false", "ls-files"})
     local present = {}
     local folders = {}
+    local recipes = {}
     for file in files:gmatch("[^\n]+") do
         present[file] = true
         local parts = path.split(file)
@@ -102,6 +120,14 @@ function checks.layout()
             wrong(file, "not part of the top layout")
         elseif parts[1] == "frameworks" and #parts == 2 then
             wrong(file, "frameworks/ holds framework folders only")
+        elseif parts[1] == "packages" or parts[1] == "addons" then
+            local why = recipe_fault(parts)
+            if why then
+                wrong(file, why)
+            end
+            if #parts >= 3 then
+                recipes[parts[1] .. "/" .. parts[2] .. "/" .. parts[3]] = true
+            end
         elseif (parts[1] == "toolchain" and allowed.addon[parts[2]]) or addon[parts[1]] then
             local first = parts[1] == "toolchain" and 2 or 1
             local shape = addon[parts[first]]
@@ -125,6 +151,11 @@ function checks.layout()
             if not present[folder .. "/" .. name] then
                 wrong(folder, "has no " .. name)
             end
+        end
+    end
+    for _, recipe in ipairs(table.orderkeys(recipes)) do
+        if not present[recipe .. "/xmake.lua"] then
+            wrong(recipe, "has no xmake.lua")
         end
     end
     for _, line in ipairs(errors) do

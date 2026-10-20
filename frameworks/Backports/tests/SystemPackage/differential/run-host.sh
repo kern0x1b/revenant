@@ -3,7 +3,7 @@ set -u
 SRC="$1"; OUT="$2"; SEED="${3:-20261014}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 mkdir -p "$OUT/run-apple" "$OUT/run-ours"
-: "${APPLE_COMPAT:?set APPLE_COMPAT to packages/runtimes/apple-compat}"
+: "${APPLE_COMPAT:?set APPLE_COMPAT to packages/a/apple-compat}"
 HOSTOBJ=()
 for f in shims csystem_port; do xcrun clang -c "$SRC/Sources/CSystem/$f.c" -I "$SRC/Sources/CSystem/include" -I "$APPLE_COMPAT/include" -o "$OUT/$f-host.o" || exit 1; HOSTOBJ+=("$OUT/$f-host.o"); done
 for f in openat unlinkat fdopendir fstatat; do xcrun clang -c "$APPLE_COMPAT/src/$f.c" -I "$APPLE_COMPAT/include" -o "$OUT/compat-$f-host.o" || exit 1; HOSTOBJ+=("$OUT/compat-$f-host.o"); done

@@ -1,6 +1,6 @@
 # Packages
 
-The packages the toolchain defines, filed under `packages/<group>/<name>/`, with the versions they pin, the configs that choose what a package builds, and the layout of the backports package. Licences and the upstream of each third-party piece are in [third-party](third-party.md). How to write one is in [write a package](../../guides/toolchain/packages.md).
+The packages the toolchain defines, filed under `packages/<letter>/<name>/`, with the versions they pin, the configs that choose what a package builds, and the layout of the backports package. Licences and the upstream of each third-party piece are in [third-party](third-party.md). How to write one is in [write a package](../../guides/toolchain/packages.md).
 
 A port requires a package by its name, and a package is built for the port's architecture and oldest release. The default `apple-ios` toolchain is pinned by `includes("@addon/revenant/apple-ios")`, which requires the SDK, `ld64` and `ldid` at the versions below and hands every other package the same toolchain.
 

@@ -49,9 +49,9 @@ package("swift-runtime")
             table.insert(digests, path.relative(file, path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", held)) .. "=" .. hash.sha256(file))
         end
     end
-    local folder = path.join(os.scriptdir(), "..", "..", "runtimes", "apple-compat")
-    for _, shim in ipairs(table.join(os.files(path.join(folder, "src", "*.c")), os.files(path.join(folder, "src", "*.h")),
-                                     os.files(path.join(folder, "include", "revenant", "*.h")))) do
+    local folder = path.join(os.scriptdir(), "..", "..", "a", "apple-compat")
+    for _, shim in ipairs(table.join(os.files(path.join(folder, "port", "src", "*.c")), os.files(path.join(folder, "port", "src", "*.h")),
+                                     os.files(path.join(folder, "port", "include", "revenant", "*.h")))) do
         table.insert(digests, "apple-compat/" .. path.filename(shim) .. "=" .. hash.sha256(shim))
     end
     table.sort(digests)

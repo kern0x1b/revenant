@@ -2,8 +2,7 @@ function main(checkout)
     local revenant = path.absolute(checkout or path.directory(os.scriptdir()))
     local addon = path.join(revenant, "tests", "addon")
     local modules = path.join(revenant, "modules")
-    local names = {"descriptions_test", "checkout_test", "dependency_test", "swift_rule_test", "workspace_test",
-                   "revenant_index_test"}
+    local names = {"descriptions_test", "checkout_test", "dependency_test", "swift_rule_test", "workspace_test"}
     if os.isfile(path.join(addon, "lock_test.lua")) then
         table.insert(names, "lock_test")
     end

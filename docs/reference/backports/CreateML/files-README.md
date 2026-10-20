@@ -1,6 +1,6 @@
 # CreateML and CreateMLComponents, for the port's armv7 releases
 
-Three Swift modules, built for armv7 by `packages/frameworks/createml/xmake.lua` against the
+Three Swift modules, built for armv7 by `packages/c/createml/xmake.lua` against the
 `revenant@swift-runtime` a port carries:
 
 | Module | Holds |
@@ -21,7 +21,7 @@ would be a second copy of something that exists, and slower than the vector unit
 
 `CoreML/Codec.swift` reads and writes Apple's `.mlmodel`, which is a protobuf (proto2, little-endian
 fixed fields). The schema is Apple's, under BSD-3-Clause, in `coremltools/mlmodel/format/*.proto`; the
-copies this package vendors are in `packages/frameworks/createml/proto/` with their licence, pinned to a
+copies this package vendors are in `packages/c/createml/proto/` with their licence, pinned to a
 commit in that directory's README.
 
 The codec is not a generator and not a second declaration of the schema. It implements the wire format

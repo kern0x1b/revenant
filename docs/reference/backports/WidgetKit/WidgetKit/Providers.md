@@ -80,7 +80,7 @@ trapping. It still does not count as placed, because the digester prints it as `
 ## The five declarations review 2 removed, and why each is not there
 
 `2026-09-28-api-appintents-kits-2.md` found five `fatalError`s in this module and one fabricated
-value. All six are gone (`grep -rn fatalError packages/frameworks/{widgetkit,tipkit,activitykit}/Sources` is
+value. All six are gone (`grep -rn fatalError frameworks/Backports/src/{WidgetKit,TipKit,ActivityKit}` is
 empty), and the rows below are the cost, stated rather than hidden:
 
 | removed | why it is not here | what it costs |

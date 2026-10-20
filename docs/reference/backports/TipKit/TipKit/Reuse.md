@@ -4,7 +4,7 @@ The reviewer brief's rule (owner, 2026-09-28): a delivery names the open upstrea
 "searched: none" with the queries. This is that line for `revenant@tipkit`.
 
 **searched: none.** The queries and what each turned up are in
-`packages/frameworks/appintents/facts/AppIntents/Reuse.md` — `gh search code "public protocol AppIntent
+`packages/a/appintents/facts/AppIntents/Reuse.md` — `gh search code "public protocol AppIntent
 language:swift"`, `gh search code "public protocol ActivityAttributes language:swift"`, `gh search
 repos "swift backport framework shim iOS 6"` (empty) — and none of them is a TipKit: the framework has
 no open reimplementation that a `search` finds, and `coordination/corpus/ledger/TipKit.tsv` carries

@@ -32,7 +32,7 @@
     });
     if (!table) {
         if (error)
-            *error = RevenantMetalError(20, @"this library carries no kernel the port could translate: tools/air2cpu has not been run over it, or every kernel in it was refused by name, and the log of the build that ran it says which");
+            *error = RevenantMetalError(20, @"this library carries no kernel the port could translate: the air2cpu tool in frameworks/Backports/src/air2cpu has not been run over it, or every kernel in it was refused by name, and the log of the build that ran it says which");
         return nil;
     }
     for (unsigned index = 0; index < count; index++) {
@@ -46,7 +46,7 @@
         return self;
     }
     if (error)
-        *error = RevenantMetalError(21, [NSString stringWithFormat:@"%@ is not a kernel this port could translate: tools/air2cpu refused it, and the refusal is in the log of the build that ran it",
+        *error = RevenantMetalError(21, [NSString stringWithFormat:@"%@ is not a kernel this port could translate: the air2cpu tool in frameworks/Backports/src/air2cpu refused it, and the refusal is in the log of the build that ran it",
                                    name ? name : @"that function"]);
     return nil;
 }

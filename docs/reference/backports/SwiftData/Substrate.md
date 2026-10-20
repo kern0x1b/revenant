@@ -25,9 +25,9 @@ libSwiftMacros.dylib
 `SwiftLibraryPluginProvider`, `SwiftIfConfig`, `SwiftWarningControl`, `SwiftRefactor` - a host
 module each, with its dylib.
 
-`packages/build-tools/swift/xmake.lua:124-129` is what builds them (`SWIFT_BUILD_SWIFT_SYNTAX=ON`, the
+`packages/s/swift/xmake.lua:124-129` is what builds them (`SWIFT_BUILD_SWIFT_SYNTAX=ON`, the
 `swift-syntax-lib` install component, and the `SwiftMacros`/`ObservationMacros` ninja targets),
-and `packages/runtimes/swift-runtime/xmake.lua:149` hands the directory to a port as
+and `packages/s/swift-runtime/xmake.lua:149` hands the directory to a port as
 `SWIFT_PLUGIN_PATH`, which `rules/swift/xmake.lua:182` passes to every port compile as
 `-plugin-path`.
 

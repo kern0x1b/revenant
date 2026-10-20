@@ -47,7 +47,7 @@ conformance that wants another specification names its own beside it.
 | `AppEntity(schema:)` | open by the coordinator's ruling of 2026-09-28, with the reason in `Macros.md`: the interface names the `memberAttribute` role and not the attribute it adds, and Apple's expansion is not on this machine |
 
 **Measured, and it places.** The module compiles for `armv7-apple-ios6.1.3` with the extension member
-in it -- 0 errors, `object 2056252 bytes`, through `heavy.sh` (`the device compile, **now `packages/frameworks/appintents/xmake.lua`'s own flags**; the script is not kept`),
+in it -- 0 errors, `object 2056252 bytes`, through `heavy.sh` (`the device compile, **now `packages/a/appintents/xmake.lua`'s own flags**; the script is not kept`),
 and the digester's dump of that build has the member. Against the **80-row** corpus ledger the
 module goes from 13 placed to **14**, and `AppEntity.defaultResolverSpecification` is no longer in
 `AppIntents-missing.tsv`; the four rows that carry that name and are still there belong to other
@@ -63,7 +63,7 @@ repeat the old total.
 | rows | what settles it |
 | --- | --- |
 | `IntentParameter.<Unit>.==(a:b:)` for 26 unit types and `ValueState.==(lhs:rhs:)` — **27** | the digester prints each type's cases and `hashValue` and no equality member. Three hypotheses were tried on the built module and all three are refuted: not enums only (`IntentPerson.Handle` is a struct), not synthesised only (`IntentParameter.Acceleration` declares its `==` in `Units.swift:21`), not nesting in a generic type (`InputConnectionBehavior` is top-level). The discriminator is not identified |
-| `IntentPerson.Handle`/`.Handle.Value`/`.Handle.Label`/`.Name`/`.Identifier` — 14, of which the 5 `==` are **placed by a typecheck call site** and the 8 `init(from:)`/`encode(to:)` are here | same behaviour, same refutations. The `==` rows were placed by `the equality probe, **now `packages/frameworks/appintents/tests/probe-appintents-equality.swift`**` typechecking against Apple's AppIntents and against this module, both exit 0; the coding members need a call site, and a call site for them needs an *instance* of each type |
+| `IntentPerson.Handle`/`.Handle.Value`/`.Handle.Label`/`.Name`/`.Identifier` — 14, of which the 5 `==` are **placed by a typecheck call site** and the 8 `init(from:)`/`encode(to:)` are here | same behaviour, same refutations. The `==` rows were placed by `the equality probe, **now `packages/a/appintents/tests/probe-appintents-equality.swift`**` typechecking against Apple's AppIntents and against this module, both exit 0; the coding members need a call site, and a call site for them needs an *instance* of each type |
 | `AttributedStringFromStringResolver` — 7, and it is not this one | **all three are declared**: `==` and `hash(into:)` come from `Resolver: Hashable, Sendable` (the port's own `Resolver` carries it, `Values.swift:210`) and `resolve(from:context:)` is at `Gated.swift:53`. The 7 rows are the *gated* ones: the whole type is behind `REVENANT_APPINTENTS_ATTRIBUTED_STRING`, and the recipe's own probe measures that this runtime has no `AttributedString` |
 
 ## 4. Rows that are another band's — 16 rows
@@ -90,7 +90,7 @@ spelling is the ledger's to normalise.
 `AppEntity(schema:)`, `AppIntent(schema:)`, `AppEnum(schema:)`, `AssistantEntity/Enum/Intent(schema:)`,
 `ComputedProperty()` ×5, `DeferredProperty()` ×2, `UnionValue()`. The contracts are in
 `Macros.md`, the four `memberAttribute` rows are open by the coordinator's ruling with the reason, and
-the plugin itself is the series in `packages/frameworks/appintents-macros/`.
+the plugin itself is the series in `frameworks/Backports/src/AppIntentsMacros/`.
 
 ## 7. Rows that are a result-builder type's members — 9 rows
 

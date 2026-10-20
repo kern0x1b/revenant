@@ -28,13 +28,8 @@ jobs:
       - name: Check the comments
         run: ./xmakew l -P . tools/comments.lua check
 
-      - name: Count the layout breaks
-        run: |
-          out="$RUNNER_TEMP/layout.txt"
-          ./xmakew l -P . tools/check.lua layout > "$out" 2>&1 || true
-          count=$(grep -oE '[0-9]+ paths break' "$out" | grep -oE '[0-9]+' || true)
-          echo "::warning title=layout::${count:-no count printed} paths break the layout; not failing yet"
-          echo "Layout breaks: ${count:-no count printed} (reported, not failing yet)" >> "$GITHUB_STEP_SUMMARY"
+      - name: Check the layout
+        run: ./xmakew l -P . tools/check.lua layout
 
       - name: Check the toolchain
         run: ./xmakew l -P . tools/check.lua toolchain

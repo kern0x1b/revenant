@@ -160,3 +160,16 @@ if is_plat("iphoneos") then
             end)
     end
 end
+
+option("air2cpu", {default = false, showmenu = true,
+    description = "Build air2cpu, the host tool that turns the AIR of a Metal compute kernel into the C kernel table the Metal port reads. It reads LLVM IR, so it needs revenant@llvm with its libraries; the configure is not for iphoneos."})
+
+if not is_plat("iphoneos") and has_config("air2cpu") then
+    add_requires("revenant@llvm 23.1.3", {alias = "llvm", configs = {libraries = true}})
+
+    target("air2cpu")
+        set_kind("binary")
+        set_default(false)
+        add_files(path.join(SRC, "air2cpu", "air2cpu.cpp"))
+        add_packages("llvm")
+end

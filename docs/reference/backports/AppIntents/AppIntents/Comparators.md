@@ -24,7 +24,7 @@ key however many values it holds.
 | `ShortcutTileColor` | 16 | `Shortcuts.swift` |
 | `SetFocusFilterIntentError` | 2 | `SystemIntents.swift` |
 
-**Measured two ways.** The call sites are in `the comparator probe, **now `packages/frameworks/appintents/tests/probe-comparators.swift`**`: twelve
+**Measured two ways.** The call sites are in `the comparator probe, **now `packages/a/appintents/tests/probe-comparators.swift`**`: twelve
 questions — does an operator equal itself, does it equal its neighbour, does a tile colour equal
 itself and its next — which **typecheck against Apple's AppIntents** on the host (0 errors, and
 `apple-comparators.txt` has Apple's twelve answers) **and against this module** for
@@ -62,5 +62,5 @@ $ grep -rc "static func == (.*) -> Bool { return true }\|func hash(into hasher: 
 
 The measurement does not move — the digester does not print an enum's `==` — and the row count stays
 **2043 of 2323**: what changed is what the module answers, and the probe that asks is in
-`the comparator probe, **now `packages/frameworks/appintents/tests/probe-comparators.swift`**`. The port's *answers* still want an emulator run, which
+`the comparator probe, **now `packages/a/appintents/tests/probe-comparators.swift`**`. The port's *answers* still want an emulator run, which
 this machine has not had yet.

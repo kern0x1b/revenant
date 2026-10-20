@@ -1,6 +1,6 @@
 # CreateML and CreateMLComponents, for the port's armv7 releases
 
-Three Swift modules, built for armv7 by `packages/frameworks/createml/xmake.lua` against the
+Three Swift modules, built for armv7 by `packages/c/createml/xmake.lua` against the
 `revenant@swift-runtime` a port carries:
 
 | Module | Holds |
