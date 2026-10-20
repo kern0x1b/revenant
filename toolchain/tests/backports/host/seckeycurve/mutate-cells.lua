@@ -116,7 +116,7 @@ function main(port, here, scratch)
             os.mkdir(copy)
             os.cp(port .. "/" .. CURVE, copy .. "/" .. CURVE)
             os.cp(port .. "/" .. FUNCTIONS, copy .. "/" .. FUNCTIONS)
-            local planted = run_capture("xmake", {"l", helper, port .. "/" .. filename, copy .. "/" .. filename,
+            local planted = run_capture(os.programfile(), {"l", helper, port .. "/" .. filename, copy .. "/" .. filename,
                 needle, replacement})
             if not planted then
                 print(string.format("SETUP-FAILED %-20s the text to mutate is not in %s", name, filename))

@@ -70,7 +70,7 @@ local function run_driver(p, mode)
     local output, failure
     try {
         function ()
-            output = os.iorunv("xmake", {"l", "./tools/found/ir.lua"}, {curdir = REPO, envs = {IR_DECLS = p.decls, IR_SDK = p.sdk,
+            output = os.iorunv(os.programfile(), {"l", "./tools/found/ir.lua"}, {curdir = REPO, envs = {IR_DECLS = p.decls, IR_SDK = p.sdk,
                 IR_SPEC = p.spec, IR_UNPARSED = p.unparsed, IR_CONFLICTS = p.conflicts, IR_FULL = p.full, IR_MODE = mode,
                 IR_NO_SHARD = p.no_shard, IR_TIMEOUT = "5"}})
         end,
