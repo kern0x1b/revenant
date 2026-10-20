@@ -1,5 +1,5 @@
 ---
-name: device
+name: device-session
 description: Use when a task has to run on a real jailbroken legacy iPhone or iPad (iOS 6) instead of the emulator: claim the phone, run a command on it, copy files to or from it, read its log, take a screenshot, or fetch SwiftUI demo snapshots and crash reports from it.
 ---
 

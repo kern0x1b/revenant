@@ -1,5 +1,5 @@
 ---
-name: emulator
+name: emulator-session
 description: Use when a task needs an emulated iOS device instead of a phone: build the emulator in emulator/ and boot a firmware root filesystem with it to check a change to it, or run a port on the emulator with `xmake emulate` (install, run a command, launch an app and tap it, debug it, read its log, take its last frame). Says what the emulator can and cannot prove. For real hardware, use the device skill.
 ---
 
@@ -71,7 +71,7 @@ Launching an app:
 
 ## What it proves and what it does not
 
-- The emulator draws through SwiftShader, not a device GPU. UIKit text, collection layout, gestures, timing and GPU behaviour are checked on a real device (the `device` skill).
+- The emulator draws through SwiftShader, not a device GPU. UIKit text, collection layout, gestures, timing and GPU behaviour are checked on a real device (the `device-session` skill).
 - A UIKit app started by `run` never reaches `application:didFinishLaunchingWithOptions:`, and the frames are SpringBoard's. Use `launch` for an app.
 - There is no audio daemon. `kAudioSessionNotInitialized` there is the emulator's, not the code's.
 - A device without an emulator profile, or a release whose Darwin the emulator does not emulate, is refused with the reason. Nothing is substituted.

@@ -19,7 +19,7 @@ The project is `frameworks/WebKit/`. `docs/guides/webkit/contributing.md` maps t
 ## Deploy
 
 1. `cp frameworks/WebKit/tests/data/device.env.example device.env` at the top, then set `DEVICE_HOST`, `DEVICE_PORT` and, over USB, `DEVICE_UDID`. The file is gitignored.
-2. Claim the phone first: `./xmakew device claim` (see the `device` skill).
+2. Claim the phone first: `./xmakew device claim` (see the `device-session` skill).
 3. `./xmakew device install -P .` builds and stages the substitution, writes the .deb, copies it to the phone and runs `dpkg -i`. It refuses a .deb whose app would replace an installed app with another bundle id.
 
 | In the package | On the phone |
@@ -81,6 +81,6 @@ A symptom after a change of the port's own:
 
 A SIGSEGV in `IMGSGX543GLDriver` after `malloc: mmap(size=...) failed (error code=12)` is address-space exhaustion near the memory ceiling, not the change under test. The lever is peak resident memory.
 
-A device that looks dead, or an ssh connection reset: see the `device` skill.
+A device that looks dead, or an ssh connection reset: see the `device-session` skill.
 
 Recovery: reinstall the last good .deb (see Deploy). If the phone is stuck, boot into safe mode by holding Volume Up during boot; MobileSubstrate is off there, so you can ssh in and revert. Screenshots and liveness checks: the `device` skill.

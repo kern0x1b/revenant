@@ -121,7 +121,7 @@ the `RevPrefs` target in `xmake.lua`, like the dylibs beside it — that writes 
 - Documentation: the guides beside this file, the explanations in [`docs/explanation/webkit/`](../../explanation/webkit/)
   and the reference in [`docs/reference/webkit/`](../../reference/webkit/). The [README](../../../frameworks/WebKit/README.md)
   has the index.
-- Playbooks: revenant's `.agents/skills/webkit/SKILL.md` and `.agents/skills/device/SKILL.md`.
+- Playbooks: revenant's `.agents/skills/webkit/SKILL.md` and `.agents/skills/device-session/SKILL.md`.
 
 ## Repository layout
 

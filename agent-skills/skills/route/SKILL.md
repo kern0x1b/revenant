@@ -1,5 +1,5 @@
 ---
-name: agent-skills
+name: route
 description: The route for building a modern app for old iOS (iOS 5, 6, 7 and later; iPhone 3GS, 4, 4S, iPad, iPod touch; armv7) from an empty directory to a .deb for a jailbroken device or a Cydia repository, in Objective-C or Swift, SwiftUI and Combine included, with the toolchain and the emulator. Use at the start of any such request, to find which skill handles the current step, or when resuming a project that has a PROJECT.md.
 ---
 
