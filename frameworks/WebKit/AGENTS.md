@@ -12,7 +12,7 @@ and the machinery that runs it. There are two ways the engine is used:
 
 1. **Standalone app** — the engine hosted in this repo's own application
    (`app/`), which exists to exercise the engine directly. Built by
-   `revenant build --variant prefixed`.
+   `./xmakew build -P . RevWebViewHost`, against the prefixed variant of `webkit-engine`.
 2. **Safari substitution** — the engine dropped underneath the phone's own Mobile
    Safari by a MobileSubstrate tweak. This is the current focus; the screenshots
    in the README are of it.
@@ -23,11 +23,11 @@ The engine lives in the dyld shared cache and cannot be swapped for one process.
 A loader is injected into the launching app, sets `DYLD_FRAMEWORK_PATH` /
 `DYLD_INSERT_LIBRARIES`, and re-execs; the second launch loads the port's engine.
 
-| Source | Built to | On device | Job |
+| Source | Built by | On device | Job |
 | --- | --- | --- | --- |
-| `platform/safari/rev-safari-tweak.c` | `build/system/stage/Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib` | `/Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib` | The **loader**: reads `InjectedApps`, re-execs enabled apps, skips SpringBoard. |
-| `platform/safari/safari-compat.mm` | `build/system/stage/usr/lib/rev-safari-compat.dylib` | `/usr/lib/rev-safari-compat.dylib` | **Compat + hooks**: iOS 6 ABI stubs, bookmarks start page, WebAssembly, preference reads. Inserted by the loader. |
-| the engine build | `build/system/stage/usr/lib/rev-fw` | `/usr/lib/rev-fw/*.framework` | The WebKit engine itself. |
+| `platform/safari/rev-safari-tweak.c` | target `RevSafari` | `/Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib` | The **loader**: reads `InjectedApps`, re-execs enabled apps, skips SpringBoard. |
+| `platform/safari/safari-compat.mm` | target `rev-safari-compat` | `/usr/lib/rev-safari-compat.dylib` | **Compat + hooks**: iOS 6 ABI stubs, bookmarks start page, WebAssembly, preference reads. Inserted by the loader. |
+| `third_party/webkit` and its patches | package `webkit-engine`, its `stage/usr/lib/rev-fw` | `/usr/lib/rev-fw/*.framework` | The WebKit engine itself. |
 
 **The loader and the compat dylib are different files.** Deploying the compat
 dylib over `RevSafari.dylib` (or vice versa) drops Safari to the system engine —
@@ -36,7 +36,7 @@ this has happened. The package puts each in its own place.
 ## The Settings pane
 
 `platform/prefs/` builds `RevPrefs.bundle` — a native PreferenceBundle, built by
-CMake that toolchain writes from `revenant.toml`, like the dylibs beside it — that writes the `space.kern0x1b.rev` preferences domain the engine reads
+the `RevPrefs` target in `xmake.lua`, like the dylibs beside it — that writes the `space.kern0x1b.rev` preferences domain the engine reads
 (`NewTabStartPage`, `CustomURLEnabled`, `CustomURL`, `InjectedApps`). System
 `PSListController` cells are loaded from `platform/prefs/Resources/Root.plist`.
 
@@ -48,8 +48,8 @@ CMake that toolchain writes from `revenant.toml`, like the dylibs beside it — 
   those two frameworks read that type with the old layout. The symptom is not a
   crash log: the engine initialises cleanly, Safari's chrome draws with no text at
   all, and the process disappears with no REVCRASH line and no crash report. After
-  any header change run the full `revenant build`, which builds everything, then
-  deploy.
+  any header change rebuild the whole `webkit-engine` package, which is what a
+  change to the patch series does, then deploy.
 - **Load-time undefined symbols.** A dylib that links clean (`ninja`/`clang`
   exit 0) can still fail to load on iOS 6, silently — dyld gives up and, for the
   Safari case, Safari falls back to the system engine. After building an injected
@@ -58,7 +58,7 @@ CMake that toolchain writes from `revenant.toml`, like the dylibs beside it — 
   sqlite; the loader links only libSystem + CoreFoundation.
 - **An excluded engine source needs its feature gate off.** Wrong: dropping a
   file from the build (a `// ios6:` line in
-  `webkit-254/Source/WebCore/SourcesCocoa.txt`) and aliasing its symbols to
+  `Source/WebCore/SourcesCocoa.txt`) and aliasing its symbols to
   `webkitIOS6MediaEngineUnavailable` in `compat/ios6_media_stubs.cpp` while the
   `HAVE_*`/`ENABLE_*` gate that calls it stays on. Right: turn that gate off
   under `WEBKIT_IOS6` too, as `HAVE_AVASSETREADER` is in
@@ -68,7 +68,7 @@ CMake that toolchain writes from `revenant.toml`, like the dylibs beside it — 
 - **A new UIKit-delegate selector needs a default.** Wrong: sending a selector
   through `_UIKitDelegateForwarder` that only UIKit's own delegate implements.
   Right: also add it, empty, to `WebDefaultUIKitDelegate`
-  (`webkit-254/Source/WebKitLegacy/ios/DefaultDelegates/`). Reason:
+  (`Source/WebKitLegacy/ios/DefaultDelegates/`). Reason:
   `_WebSafeForwarder` answers `respondsToSelector:` and
   `methodSignatureForSelector:` from its default target only, so without the
   default the send raises an unrecognized selector.
@@ -84,9 +84,11 @@ CMake that toolchain writes from `revenant.toml`, like the dylibs beside it — 
   `killall Preferences` and reopen. A respring re-locks the device.
 - **`/usr/bin/shot`** always writes `/tmp/screenshot.png` and ignores any path
   argument.
-- **The engine is a git submodule** (`webkit-254/`) on the fork's `main` branch.
-  Commit and push are forward-only safe; `git checkout`/`reset` inside it can
-  destroy the port. Never do destructive git there.
+- **The engine is upstream plus a patch series** (`third_party/webkit`). A change
+  to the engine is a change to one of its patches, made in a scratch clone of
+  WebKit at the base commit with the series applied, exported again with
+  `git format-patch`, and its sha256 updated in the recipe. Never edit the
+  fetched source in the package cache: the next fetch discards it.
 
 ## Conventions
 
@@ -98,22 +100,23 @@ CMake that toolchain writes from `revenant.toml`, like the dylibs beside it — 
   openly AI-built public product — keep AI/tool attribution (the
   agent's own `Co-Authored-By:` trailer); we mark our work, we do not hide it.
 - **Build artifacts** (`build/`, `*.dylib`, `*.a`, `*.log`) are
-  gitignored and reproducible from the recipe — do not commit them.
+  gitignored and reproducible from the packages — do not commit them.
 - **No pull requests to other people's repositories.** Fixes worth sending to WebKit collect in
   `docs/upstream.md`; they go upstream once, as one batch, only after the engine is fully tested
   and only when the owner says so.
 
 ## Where to look
 
-- Build: `revenant build` (`revenant build --variant prefixed` for the standalone application's engine); see `docs/building.md`. It ends with the device filesystem tree in `build/system/stage`.
-- Package: `revenant package` copies
-  `space.kern0x1b.rev_<version>_iphoneos-arm.deb`, engine frameworks included,
-  into `build/<variant>/` and prints `package <path>`; `packaging/` holds only
-  the `control` file and the `DEBIAN/postinst` script. The version is `version`
-  in `revenant.toml`.
-- Deploy: `revenant install` packages, copies each .deb to `/tmp`, runs
-  `dpkg -i … && rm`, refuses a .deb whose app would replace another bundle id,
-  and runs `su mobile -c uicache` when the package holds an app; `revenant deploy`
-  for the engine alone. Claim the device first (`revenant-device`).
+- Build: `./xmakew f -P . -p iphoneos -a armv7 && ./xmakew -P .` at the top of revenant;
+  see `docs/building.md`. The engine's device filesystem tree is the `stage/` folder of
+  the `webkit-engine` package.
+- Package: `./xmakew deb -P .` writes `space.kern0x1b.rev_<version>_iphoneos-arm.deb`,
+  engine frameworks included; `packaging/` holds only the `control` file and the
+  `DEBIAN/postinst` script. The version is `version` in `xmake.lua`.
+- Deploy: `./xmakew device install -P .` builds the package, runs `dpkg -i` on the phone
+  `device.env` names, and refuses a .deb whose app would replace another bundle id.
+  Claim the device first (`./xmakew device claim`).
+- Tests: `tests/run-batteries.lua` and `tests/device/*.lua`, run with `./xmakew l`; the
+  host tests are `./xmakew test -P .` after `./xmakew f -P . --webkit_host_tests=y`.
 - Documentation: `docs/` (`architecture.md`, `network.md`, `compatibility.md`, `building.md`, `memory-and-caches.md`).
 - Playbooks: revenant's `.agents/skills/revenant-{build,deploy,test,debug,device}/SKILL.md`.

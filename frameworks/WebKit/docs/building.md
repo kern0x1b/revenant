@@ -1,160 +1,88 @@
 # Building the port
 
 Everything targets **armv7 with a 6.0 deployment target**, built with the **iOS 16.4
-SDK** the `apple-ios` platform names. Current clang compiles C++23 for a 2011 phone,
-and what iOS 6 lacks of it is linked in from the toolchain's `apple-compat`.
+SDK** the toolchain's `iphoneos-sdk` package lays out. Current clang compiles C++23 for a
+2011 phone, and what iOS 6 lacks of it is linked in from the toolchain's backports.
 
-Host requirements: `conan` and the Command Line Tools. Conan installs the rest,
-the SDK included - `iphoneos-sdk` fetches it from [theos/sdks](https://github.com/theos/sdks):
-`cmake` and `ninja` from ConanCenter, `ldid` (ad-hoc signing) and the `ld64`
-linker from the toolchain. Xcode is not needed and is not installed here, and
-neither is Theos - the Command Line Tools carry the compiler and its runtime,
-and `strip`, `otool`, `nm` and `install_name_tool` are found through them. The
-Python that runs WebKit's generators and the check scripts is the one Conan runs
-in; nothing is taken from `PATH`.
+The port is a member of revenant and is built the way every member is, with `./xmakew` at the
+top of the checkout:
 
-The first build of `ld64` on a machine also needs an LLVM, because cctools'
-configure runs `llvm-config` to find `libLTO`; the toolchain reads the path
-from `LLVM_PREFIX` once, so `export LLVM_PREFIX="$(brew --prefix llvm)"` before
-it. Afterwards the package is in the Conan cache and nothing asks again.
-
-The SDK reaches the build as `tools.apple:sdk_path`, which the toolchain's
-`iphoneos-sdk` package answers: the `apple-ios` platform requires it for every
-build, and it downloads the SDK archive once, checks its sha256 and lays it out
-as Xcode does. A `tools.apple:sdk_path` set in a profile still wins.
-
-ccache is not picked up on its own. To use it, set the compiler launchers in
-your own `global.conf` or profile; `compat/`, `platform/` and the engine all
-build with the same generated `conan_toolchain.cmake`, so this covers all three:
-
+```sh
+./xmakew f -P . -p iphoneos -a armv7
+./xmakew -P .                      # the engine packages, the tweaks and the Settings bundle
+./xmakew deb -P .                  # space.kern0x1b.rev_<version>_iphoneos-arm.deb
+./xmakew device install -P .       # the same, then dpkg -i on the phone device.env names
 ```
-tools.cmake.cmaketoolchain:extra_variables={"CMAKE_C_COMPILER_LAUNCHER": "ccache", "CMAKE_CXX_COMPILER_LAUNCHER": "ccache", "CMAKE_OBJC_COMPILER_LAUNCHER": "ccache", "CMAKE_OBJCXX_COMPILER_LAUNCHER": "ccache"}
-```
+
+Host requirements: the Command Line Tools. xmake fetches the rest: the SDK, `cmake` and
+`ninja`, `ldid` for ad-hoc signing and the linker come from the toolchain's packages.
+Xcode is not needed and neither is Theos; `strip`, `otool`, `nm`, `plutil` and
+`install_name_tool` are found through the Command Line Tools.
 
 ## 1. The engine source
 
-```sh
-./fetch-source.py
-```
+The engine is upstream WebKit at one commit of `main` with this port as an ordered series of
+patches, `third_party/webkit/patches/`. The `webkit` package in `third_party/webkit/xmake.lua`
+fetches that commit by hash, as a sparse checkout of the folders the build reads, and applies
+the series with `git apply`; each patch is pinned by its sha256 in the recipe. Nothing of the
+engine is vendored and there is no fork to keep in step.
 
-`webkit-254` is a git submodule tracking the `main` branch of a WebKit fork,
-where this port's engine changes live as real commits. There is no patch series to
-apply.
+The series is the port: changing the engine means changing a patch, and the recipe's checksum
+with it. How to move the base to a newer upstream commit is in
+[core-update.md](core-update.md).
 
 ## 2. The libraries iOS 6 cannot supply
 
-They are declared, not scripted. `revenant.toml` names them and `conan.lock` pins
-the exact recipe and binary of each; `recipes/` holds the recipe for every one,
-and each names a git URL and a commit rather than vendoring a copy:
+Each is an xmake package at its release, built for armv7 and iOS 6 by a recipe in
+`third_party/`, or by the toolchain where every member shares it:
 
-| Package | Why the system copy will not do |
-| --- | --- |
-| `libcxx/23.1.1@revenant/stable` | iOS 6 ships a 2012 libc++; C++23 needs a current one |
-| `icu/78.3@revenant/stable` | the system ICU predates WebKit's minimum, and text segmentation with it has no zero-width joiner |
-| `openssl/4.0.2@revenant/stable` | TLS 1.2/1.3 and Web Crypto |
-| `libpsl/0.23.3+5.ga629c83@revenant/stable` | public-suffix lookups this CFNetwork does not do |
-| `libwebp/1.6.0+258.g6ff2f43@revenant/stable` | this ImageIO cannot decode WebP |
-| `libxml2/2.15.4@revenant/stable` | the system copy is 2.7.8 from 2010, older than the API libxslt and the SDK headers expect |
-| `libxslt/1.1.45@revenant/stable` | XSLT; the SDK has no libxslt headers or armv7 library |
-| `woff2/1.0.2+13.gfb9c337@revenant/stable` | web fonts in the format the web serves them |
-| `brotli/1.2.0+161.g85c2aaf@revenant/stable` | what woff2 decompresses with |
+| Package | Version | Why the system copy will not do |
+| --- | --- | --- |
+| `libcxx` (toolchain) | 23.1.1 | iOS 6 ships a 2012 libc++; C++23 needs a current one |
+| `icu` | 78.3 | the system ICU predates WebKit's minimum, and text segmentation with it has no zero-width joiner |
+| `openssl` (toolchain) | 4.0.2 | TLS 1.2/1.3 and Web Crypto |
+| `libpsl` | 0.23.3 | public-suffix lookups this CFNetwork does not do |
+| `libwebp` | 1.6.0 | this ImageIO cannot decode WebP |
+| `libxml2` | 2.15.4 | the system copy is 2.7.8 from 2010, older than the API libxslt and the SDK headers expect |
+| `libxslt` | 1.1.45 | XSLT; the SDK has no libxslt headers or armv7 library |
+| `woff2` | 2026.06.29 | web fonts in the format the web serves them; upstream has tagged nothing since 2017, so this is its latest commit |
+| `brotli` | 1.2.0 | what woff2 decompresses with |
+| `wasm3` | 0.9.1-beta.1 | the interpreter behind WebAssembly in Safari's compat dylib |
 
-The user and channel are not decoration. ConanCenter publishes packages under
-these same names, Conan asks remotes in the order they were registered, and a
-wrong order does not fail - it quietly builds against a recipe that cannot
-cross-compile for armv7. The namespace makes a bare `icu/78.3` unresolvable
-from these indexes, so a reference that forgets it is an error instead.
-
-`@revenant/stable` belongs to what the toolchain serves and every port shares.
-The libraries this port builds for itself are `@revenant/stable`: another port
-on the same machine builds its own OpenSSL with its own choices, and two recipes
-behind one reference overwrite each other's packages in the shared cache.
-
-The target is `[platform] use = "apple-ios"` with armv7 and iOS 6.0 in
-`revenant.toml`; the toolchain's platform file says what is true of that target.
-What is this port's own - C++23, and tuning for the Cortex-A9 in the iPhone 4S
-and iPad 2 - is `[target]`, and the toolchain writes the whole profile from both. A 3GS is a
-Cortex-A8, and another port on the same toolchain has no reason to inherit
-either choice.
-
-Register the two indexes once, the toolchain's and this repository's:
-
-```sh
-revenant setup <revenant>
-```
-
-That installs the toolchain's configuration - profiles, settings, hooks and
-The toolchain itself - and registers both recipe indexes ahead of the general remotes.
-`revenant build`, `revenant deploy`, `revenant test` and the rest are the toolchain itself; it
-lives in the toolchain, not here, so every port gets the same verbs. This
-repository declares itself to it in `revenant.toml` and carries nothing else of the
-build. The phone's address comes from `device.env` at the root of the
-checkout, and from nowhere else.
-
-`conan config install` copies rather than references, so run `revenant setup` again
-after the toolchain changes. `revenant provenance` says which copy is answering.
-
-`revenant build` writes `build/system/conan/revenant-deps.env` through the
-`revenant-base` generator, straight from the dependency graph - one
-`REVENANT_HOST_<NAME>=path` line per library and `REVENANT_BUILD_<NAME>=path` per build
-tool, so `REVENANT_BUILD_LD64` is the linker. Nothing names a version, an
-architecture or a folder layout. Change a version in
-`revenant.toml` and everything follows. Building builds whatever is missing and
-reuses whatever is not.
-
-`libios6compat.a` holds only this port's own stubs. It used to carry copies of
-OpenSSL's and libpsl's objects, and because it comes first on the link line
-those copies - not the packages - were what the engine actually linked. The
-engine now links both packages directly.
+ICU is built with its data trimmed to the languages in `third_party/icu/keep-languages.txt`.
 
 `libios6compat.a` - the symbols this OS predates, see
-[compatibility.md](compatibility.md) - is this port's own code, built by the
-engine's recipe from the `[[static-library]]` block of `revenant.toml` before the
-engine itself.
+[compatibility.md](compatibility.md) - is this port's own code in `compat/`, built by the
+engine package before the engine itself. It holds only this port's own stubs; the engine
+links OpenSSL and libpsl from their packages.
 
-`scripts/check-cacert.py` builds nothing: it verifies the trust store the
-standalone application carries against the hash this project reviewed, and with
-`--upstream` says whether curl serves the same extract today.
+`tools/check-cacert.lua` builds nothing: it verifies the trust store the standalone
+application carries against the hash this project reviewed, and with `--upstream` says
+whether curl serves the same extract today. It is the `webkit-cacert` check:
+`./xmakew check -P . webkit-cacert`.
 
 ## 3. The engine
 
-```sh
-revenant build
-```
+`packages/engine/xmake.lua` is the `webkit-engine` package, and `modules/engine.lua` holds
+what it does: the CMake options and tuning flags of each variant, and the steps, in the
+order that fails cheapest first:
 
-`revenant.toml` declares the whole build, the way a Gradle build file does, and
-The toolchain writes the recipe from it: that recipe
-installs the libraries, writes the CMake toolchain and cache - every path taken
-from the dependency graph, the linker from the `ld64` package - and then runs
-the steps in the order that fails cheapest first:
-
-1. `scripts/carry-check.py` - the engine tree still holds what this port needs
-2. `libios6compat.a`, then the engine through CMake and Ninja
+1. `modules/carry.lua` - the patched tree still holds what this port needs (`carry-manifest.txt`)
+2. `libios6compat.a`, then the engine through CMake and Ninja; configure is checked to have
+   taken every path it was given and the project include
 3. WebKitLegacy exports exactly the symbols its export list names
-4. `tools/compat-audit.py` - no stub shadows a definition WebKit has
-5. `tools/symbol-check.py` - the symbol surface matches `carry-symbols.txt`
-6. `platform/` through CMake - the loader, the compat and TLS dylibs and the
-   Settings bundle - stripped and signed
-7. the frameworks laid out as the iOS 6 system frameworks they replace, beside
-   the C++ runtime and everything from step 6, as the whole device filesystem
-   tree in `build/system/stage`
-8. `dyld-imports-check` from the toolchain, when the phone's shared cache is
-   configured
+4. no compat stub shadows a definition WebKit has
+5. `modules/symbols.lua` - the symbol surface matches `carry-symbols.txt`
+6. `modules/stage.lua` - the frameworks laid out as the iOS 6 system frameworks they
+   replace, beside the C++ runtime, as the device filesystem tree in the package's `stage/`,
+   its plists binary and checked; and a `batteries/` folder with `jsc` for the tests
 
-Everything lands in `build/system`. The `.deb` is a separate step,
-described in [the package](#4-the-package). Why each CMake setting has the
-value it has is in [engine-configuration.md](engine-configuration.md).
+The tweaks and the Settings bundle are xmake targets in `xmake.lua` beside the package, built
+with the toolchain's `tweak` rule, which checks every binary as it links. Why each CMake
+setting has the value it has is in [engine-configuration.md](engine-configuration.md).
 
-A change to any recipe here or in the toolchain changes its revision, and
-`conan.lock` has to follow in the same commit:
-
-```sh
-revenant build --lockfile= --update
-```
-
-A stale lock does not fail on the machine that made the change - the old
-revision is still in its cache and the build quietly uses it - only on a fresh
-clone.
+The package's identity includes a digest of its recipe, the modules, `compat/` and
+`carry-symbols.txt`, so a change to any of them rebuilds the engine and nothing else does.
 
 Three things about this build are worth knowing, because they explain choices
 that look arbitrary otherwise.
@@ -163,12 +91,12 @@ that look arbitrary otherwise.
 can sit in a process beside the system one. When a process takes our frameworks
 through `DYLD_FRAMEWORK_PATH` the system engine is never loaded, there is
 nothing to collide with, and UIKit needs the classes under their real names - it
-links `_OBJC_CLASS_$_WebView`, not a prefixed spelling. The recipe therefore
-builds the unprefixed engine by default; `revenant build --variant prefixed` builds the prefixed
-one for the standalone application.
+links `_OBJC_CLASS_$_WebView`, not a prefixed spelling. The `webkit-engine` package
+therefore builds the unprefixed engine by default; its `variant=prefixed` config builds
+the prefixed one for the standalone application.
 
-**The recipe arranges that build as the system frameworks a process expects**,
-into `build/system/stage/usr/lib/rev-fw` rather than an application bundle,
+**The package arranges that build as the system frameworks a process expects**,
+into `stage/usr/lib/rev-fw` rather than an application bundle,
 which is what makes `DYLD_FRAMEWORK_PATH` substitution possible for Mobile
 Safari: `WebKitLegacy` becomes `WebKit.framework`, every framework takes the
 install name of the iOS 6 framework it stands in for (`JavaScriptCore` is a
@@ -180,86 +108,54 @@ depending on `@rpath`.
 defines.** A stub that shadows a real definition links cleanly and then fails at
 runtime: `WebCoreWebThreadLock` is a function pointer in WTF and was a function
 here, which turned a call into a store into `__TEXT` and a bus error.
-`tools/compat-audit.py` checks for exactly that:
+The build checks for exactly that, and `tools/compat-audit.lua` runs the same check by hand:
 
 ```sh
-python3 tools/compat-audit.py --compat build/system/compat/libios6compat.a \
-    --engine-build build/system --icu "$REVENANT_HOST_ICU"
+./xmakew l frameworks/WebKit/tools/compat-audit.lua --compat <build>/compat/libios6compat.a \
+    --engine-build <build> --icu "$(./xmakew where -P . icu)"
 ```
 
 **Every import has to exist on the phone.** The SDK the engine compiles against
 is years newer than the system it runs on, so a call can link cleanly against a
 function iOS 6 never had. Nothing fails at load: the import is bound lazily, and
 the process dies the first time the call is made. A plain `ws://` WebSocket did
-exactly that. `dyld-imports-check`, a tool_requires from the toolchain because
-the other port needs it too, compares every non-weak import in the staged tree -
-the frameworks, the C++ runtime, the tweak and TLS dylibs and the Settings
-bundle - with what the phone's own shared cache exports, and the build runs it
-once it knows where a copy of that cache is:
+exactly that. The toolchain's rules compare every non-weak import of what they link
+with what the phone's own shared cache exports, once `xmake firmware` has fetched it.
 
-```sh
-revenant device fetch /System/Library/Caches/com.apple.dyld/dyld_shared_cache_armv7 build/
-revenant build \
-    -c user.apple-ios:dyld_shared_cache="$PWD/build/dyld_shared_cache_armv7"
-```
-
-`build/` is reproducible and gitignored.
-
-**A change to a WebCore header means a full build - `revenant build`, which builds
-everything.** A partial build leaves
+**A change to a WebCore header means a full build.** A partial build leaves
 WebKit and WebKitLegacy compiled against the old class size, and the result loads
 and then behaves wrongly — empty text in the interface, and a silent death with no
-crash log. This has cost more than one debugging session.
+crash log. This has cost more than one debugging session. The package builds the engine
+whole every time its identity changes.
 
-`revenant build --variant prefixed`
-builds the same source with the class prefix applied, into
-`build/prefixed`, for a build that has to coexist with the system
-engine in one process. The shipped build is the unprefixed one; see
-[architecture.md](architecture.md#two-webkits-in-one-process).
+The prefixed variant builds the same source with the class prefix applied, for a build
+that has to coexist with the system engine in one process. The shipped build is the
+unprefixed one; see [architecture.md](architecture.md#two-webkits-in-one-process).
 
 ## 4. The package
 
 ```sh
-revenant package
+./xmakew deb -P .
 ```
 
-`revenant build` has already built everything around the engine - the
-`[[device-library]]` blocks of `revenant.toml` build `RevSafari.dylib`,
-`rev-safari-compat.dylib`, `rev-TLS.dylib` and
-`RevPrefs.bundle` - and laid it out with the engine in
-`build/system/stage`. `revenant package` runs the recipe's
-`package()`, which copies that tree into `<package folder>/root` and writes
-`<package folder>/deb/space.kern0x1b.rev_<version>_iphoneos-arm.deb` with
-revenant-apple's `DebianPackage`: `debian-binary`, `control.tar.gz` and
-`data.tar.lzma`, the same members `dpkg-deb` writes. To release a new version,
-change `version` in `revenant.toml` and build. `packaging/` holds only
-`packaging/control`, which carries no version of its own, and
-`packaging/DEBIAN/postinst`.
+`RevSafari` carries the package: its target names `packaging/control` and
+`packaging/DEBIAN`, and installs the engine package's `stage/` tree at the root of the
+`.deb`, beside `RevSafari.dylib` and its MobileSubstrate filter, `rev-safari-compat.dylib`,
+`rev-TLS.dylib` and `RevPrefs.bundle` with its PreferenceLoader entry. The version is
+`version` in `xmake.lua`; `packaging/control` carries none of its own.
 
-One `.deb` carries the loader and its MobileSubstrate filter, the compatibility
-and hook dylib, the TLS library, the Settings bundle with its PreferenceLoader
-entry, the C++ runtime and the engine frameworks.
-
-Two settings on the `rev-safari-compat` device library in `revenant.toml` are not
-optional: the compat dylib is
+Two settings on the `rev-safari-compat` target are not optional: the compat dylib is
 built without `_FORTIFY_SOURCE` and without libc++ (`-nostdlib++`), because the `__*_chk` symbols
 are linkage this release never had and the engine carries its own C++ runtime — a
 second one in the same process is a crash waiting to happen.
 
 ## 5. Onto the device
 
-Copy `device.env.example` to `device.env` and fill in the address and password;
-neither is in the repository.
+Copy `device.env.example` to `device.env` at the top of the revenant checkout and fill in the
+address; neither is in the repository.
 
 ```sh
-revenant deploy    # engine only: back up, push the staged frameworks, restart Safari
-```
-
-For everything else, install the package the way any tweak is installed:
-
-```sh
-revenant device copy "<package folder>/deb/space.kern0x1b.rev_<version>_iphoneos-arm.deb" /tmp/rev.deb
-revenant device run 120 "dpkg -i /tmp/rev.deb"
+./xmakew device install -P .
 ```
 
 ## The engine without Safari
@@ -277,17 +173,16 @@ this engine, because it drives its view through the *system* WebCore's
 `UIWebView`'s own implementation would.
 
 ```sh
-revenant build --variant prefixed
-revenant run --wait 20
+./xmakew build -P . RevWebViewHost
+./xmakew device -P . run "uiopen revwebviewhost:"
+./xmakew device -P . log
 ```
 
-The prefixed build ends in `build/prefixed/RevWebViewHost.app`,
-the engine and the C++ runtime bundled inside it and its version taken from
-`revenant.toml`; `revenant package --variant prefixed` puts it in
-`<package folder>/RevWebViewHost.app`. The runner installs it, opens it through its
-`revwebviewhost:` scheme and brings back the log. It needs the device
-address in `device.env` at the root of the checkout, as everything that reaches
-the phone does.
+`RevWebViewHost` is an app target built on demand with the toolchain's `app` rule, against
+the `webkit-engine` package's prefixed variant: the engine and the C++ runtime are bundled
+inside it, and its version is `version` in `xmake.lua`. It opens through its
+`revwebviewhost:` scheme. It needs the device address in `device.env` at the top of the
+checkout, as everything that reaches the phone does.
 
 **As an embedding surface.** Compiled with `-DREV_WEBVIEW_HOST_NO_MAIN` the file
 carries no `main()`, and `RevWebViewHostControlling` in
@@ -329,8 +224,8 @@ imports check covers what it links against; two things it cannot see are worth
 looking at in the staged tree the package is made from:
 
 ```sh
-otool -L build/system/stage/usr/lib/rev-safari-compat.dylib
-otool -l build/system/stage/Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib | grep LC_ENCRYPTION_INFO
+otool -L <stage>/usr/lib/rev-safari-compat.dylib
+otool -l <stage>/Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib | grep LC_ENCRYPTION_INFO
 ```
 
 The second must print nothing. Apple's linker from Xcode 27 writes that load
@@ -370,7 +265,7 @@ The user agent is the test: a page that echoes it — or the engine's own log at
 `/tmp/rev-safari-stderr.log` — should report `AppleWebKit/605`, not `536`.
 
 Then run the numeric suite, which reads pixels and glyph widths rather than
-screenshots: [`tests/device/run.py`](../tests/device/README.md).
+screenshots: [`tests/device/run.lua`](../tests/device/README.md).
 
 ## The toolchain this port needs, and how little of it is Apple's
 
@@ -386,7 +281,7 @@ really about.
 clang emits those slots as local labels, so only hand-written assembly can
 produce one. OpenSSL's ARM generator does, for the capability word every
 NEON-dispatching module reads, and a single such object in an archive kills the
-link whether or not anything references it. The `openssl` recipe patches
+link whether or not anything references it. The toolchain's `openssl` package patches
 the generator - the ios32 branch of `$comm` in `crypto/perlasm/arm-xlate.pl` -
 to emit a plain data word instead. Same address, same label name, no GOT atom.
 Eight objects were affected; all of them link now, with the assembly kept.

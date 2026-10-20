@@ -26,7 +26,7 @@ if is_plat("iphoneos") then
 end
 
 if is_plat("iphoneos") then
-    includes("frameworks/Combine", "frameworks/SwiftUI")
+    includes("frameworks/Combine", "frameworks/SwiftUI", "frameworks/WebKit")
 else
-    includes("emulator", "recompiler", "frameworks/Combine", "frameworks/SwiftUI")
+    includes("emulator", "recompiler", "frameworks/Combine", "frameworks/SwiftUI", "frameworks/WebKit")
 end

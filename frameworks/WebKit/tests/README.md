@@ -1,30 +1,24 @@
 # Tests
 
-Run before every deploy: `revenant test`
+Run before every deploy, from the top of revenant:
 
-    revenant test --tier host       ICU data checks on this Mac, seconds once ICU is built
-    revenant test --tier batteries  JavaScript batteries under jsc on the iPhone
-    revenant test                   every tier the declaration names
-
-The toolchain installs what a tier declares it needs and hands it over, so the tiers
-are run through it. The one direct call is the batteries against a tree the toolchain
-does not manage: `ENGINE_BUILD=/path/to/build tests/run-tests.py`.
+    ./xmakew f -P . --webkit_host_tests=y && ./xmakew test -P .   ICU data checks on this Mac
+    ./xmakew l frameworks/WebKit/tests/run-batteries.lua           JavaScript batteries under jsc on the iPhone
 
 ## host
 
 `icu-sanity` opens the resource bundles, the time zone enumeration and every
 character encoding the engine hands to ICU, against the same trimmed data the
-phone ships. The `host` tier declares the `icu` package it needs in
-`revenant.toml`; the toolchain writes the recipe that asks for the version `conan.lock`
-pins, builds it for this Mac with the recipe's own data filter, and tells the
-tier where it landed, so the first run builds ICU once and every later run
-reuses it.
+phone ships. With `webkit_host_tests` on, configuring for this Mac requires the
+`icu` package, built for this Mac by the same recipe and data filter as the phone's,
+and `icu-sanity` and `icu-locales` are targets whose `add_tests` run them; the first
+run builds ICU once and every later run reuses it.
 
-The encoding list is not maintained by hand. `gen-required-encodings.py` reads
+The encoding list is not maintained by hand. `tools/required-encodings.lua` reads
 it out of `TextCodecICU.cpp`, so it tracks the engine: everything else is
 decoded by WebKit itself (`TextCodecCJK`, `TextCodecSingleByte`,
-`TextCodecLatin1`, `TextCodecUTF8`) and needs nothing from ICU. Re-run the
-generator after updating WebKit.
+`TextCodecLatin1`, `TextCodecUTF8`) and needs nothing from ICU. Re-run it
+after updating WebKit.
 
 `known-missing-encodings.txt` lists encodings ICU 74 genuinely does not ship, so
 a real gap stays visible without failing the build.
@@ -40,16 +34,13 @@ The same fault takes two seconds to find here.
 
 ## device
 
-`tests/js/*.js` run under `jsc` on the phone with the freshly built engine.
-The engine comes from `ENGINE_BUILD`, or from the engine build the toolchain names:
-the one tree directly under `build/` that is configured and has its frameworks
-laid out under `stage/`. The port keeps no rule of its own for this. The runner
-compares `jsc`, the C++ runtime and each framework with the phone's copy by
-content and syncs the ones that differ, so the batteries never run against a
-stale engine, and it pins the connection to the iPhone's UDID through iproxy so
-a connected iPad cannot answer instead.
-
-Requires `iproxy 2225:22 -u <iphone-udid> &`.
+`tests/js/*.js` run under `jsc` on the phone with the freshly built engine:
+`run-batteries.lua` takes the `batteries/` folder the `webkit-engine` package installs
+(`jsc`, its `JavaScriptCore` and the C++ runtime it was built against), or the one
+`--batteries` names. It compares each file with the phone's copy by content and pushes
+the ones that differ, so the batteries never run against a stale engine. The phone is the
+one `device.env` at the top of revenant names; with `DEVICE_UDID` set the device module
+pins the USB tunnel to that phone, so a connected iPad cannot answer instead.
 
 Each battery prints its own verdict line. A battery that produces no verdict is
 a failure — it died partway through.

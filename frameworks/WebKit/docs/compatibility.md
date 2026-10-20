@@ -191,7 +191,7 @@ normal — the constant is missing because the feature it names was invented
 later — so every one of them is a crash waiting for the first page that reaches
 it, and chasing them one backtrace at a time never ends.
 
-`tools/probe-soft-links.py` generates a probe that asks the device about all of
+`tools/probe-soft-links.lua` generates a probe that asks the device about all of
 them at once. Run on the iPhone 4S (iOS 6.1.3):
 
     present 140   missing 135

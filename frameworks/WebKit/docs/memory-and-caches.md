@@ -221,7 +221,7 @@ of whether a change made the process die.
 
 ## Values that look wrong and are not
 
-Each of these is set on purpose. Paths are relative to `webkit-254/Source`.
+Each of these is set on purpose. Paths are relative to `Source/` of the patched engine tree.
 
 - **`minimumBytesPerCollectionCycle` = 8 MB on armv7** (`JavaScriptCore/runtime/OptionsList.h`,
   applied in `JavaScriptCore/heap/Heap.cpp`). It is most of the gap between the heap's capacity

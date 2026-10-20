@@ -19,10 +19,10 @@ all, whether named directly or reached through another header.
 
 | Consumer | Files it reads | Beyond the ones above it |
 | --- | --- | --- |
-| the engine (`revenant.toml`, all three frameworks and `jsc`) | 1637 - 1586 headers, 51 stubs | |
+| the engine (all three frameworks and `jsc`) | 1637 - 1586 headers, 51 stubs | |
 | `libios6compat.a` | 1021 headers | none |
 | the tweak dylibs (`platform/`) | 4 headers, 11 stubs | `usr/include/AvailabilityVersions.h` |
-| the libraries in `recipes/` and `libcxx` | 339 headers, 7 stubs | 25 headers, mostly `usr/include` and `libxml2` |
+| the libraries the engine links and `libcxx` | 339 headers, 7 stubs | 25 headers, mostly `usr/include` and `libxml2` |
 
 ## macOS
 
@@ -51,19 +51,16 @@ built for it.
 ## Measuring again
 
 The recording costs one rebuild with two variables set for the compiler and
-three for the linker. `tools/sdk-usage.py` in the toolchain turns the logs into
-the list:
+three for the linker:
 
-    export CC_PRINT_HEADERS=1 CC_PRINT_HEADERS_FILE=/tmp/headers.txt
-    export LD_TRACE_DYLIBS=1 LD_TRACE_ARCHIVES=1 LD_TRACE_FILE=/tmp/links.txt
+    export CC_PRINT_HEADERS=1 CC_PRINT_HEADERS_FILE=<scratch>/headers.txt
+    export LD_TRACE_DYLIBS=1 LD_TRACE_ARCHIVES=1 LD_TRACE_FILE=<scratch>/links.txt
     # rebuild what is being measured, with ccache out of the way
 
-    python3 <revenant toolchain>/tools/sdk-usage.py --sdk "$(revenant where tool:iphoneos-sdk)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.7.sdk" \
-        --ninja build/system --headers /tmp/headers.txt --links /tmp/links.txt \
-        --out sdk-usage/iPhoneOS13.7.sdk.txt
-
-ccache replays a compile without running the compiler, so a cached compile logs
-nothing; `--ninja` reads the engine's includes from ninja's dependency log
-instead, which ccache does keep. The linker is always really run, so link traces
+The lists here were written from those logs by the toolchain's `sdk-usage` script, which
+left the toolchain with the rest of its Python and has no successor yet: measuring again
+means turning the two logs into SDK-relative paths, and for the engine reading its
+includes from ninja's dependency log, because ccache replays a compile without running
+the compiler and a cached compile logs nothing. The linker is always really run, so link traces
 need no special care: everything armv7, the tweak dylibs included, links through
 the `ld64` package with `-B` from the profile.

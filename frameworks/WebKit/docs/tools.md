@@ -8,9 +8,9 @@ verdict rather than a log.
 They are documented here rather than in their own source, because the source of
 a probe should be the experiment and nothing else.
 
-The phone itself is reached through Revenant's device module, which reads this
-port's `device.env`: `revenant device run SECONDS COMMAND`, `copy LOCAL REMOTE`,
-`fetch REMOTE LOCAL`, and `tests/device/harness.py` for the test pages. It
+The phone itself is reached through Revenant's device module, which reads the
+`device.env` at the top of the checkout: `./xmakew device -P . run COMMAND` from a shell,
+`run`, `copy` and `fetch` from Lua, and `tests/device/harness.lua` for the test pages. It
 revives the `iproxy` tunnel before every command, because a dead tunnel answers
 "connection refused", which reads in a log exactly like a browser that crashed.
 
@@ -23,12 +23,27 @@ revives the `iproxy` tunnel before every command, because a dead tunnel answers
 
 ## Building them
 
-The `revenant-device-tools` recipe builds the four C tools for armv7 and signs
-each with the entitlements it needs:
+The `webkit-device-tools` package, `packages/device-tools/xmake.lua`, builds the four C tools
+for armv7 from `tools/CMakeLists.txt` and signs each with the entitlements in
+`tools/entitlements/` it needs. Configuring for iphoneos requires it, so it is built with the
+port, and `./xmakew where -P . webkit-device-tools` names its folder:
 
 ```sh
-conan install --requires=revenant-device-tools/1.0.0@revenant/stable --lockfile="" \
-  -pr:h build/system/revenant/profile -pr:b default --build=missing \
-  --deployer=direct_deploy --deployer-folder=dist --output-folder=dist/conan
-revenant device copy dist/direct_deploy/revenant-device-tools/bin/revmem /usr/bin/revmem
+scp -P <port> "$(./xmakew where -P . webkit-device-tools)/bin/revmem" root@<phone>:/usr/bin/revmem
 ```
+
+## The scripts on this side
+
+What used to be Python is Lua run by `./xmakew l`; each prints its usage with `--help`.
+
+| Script | What it does |
+| --- | --- |
+| `carry-check.lua` | checks that the patched engine tree still holds what the port needs, against `carry-manifest.txt`; every engine build runs it first |
+| `port-delta.lua` | how much the patch series changes upstream, by area and kind, and how much of it carries the `WEBKIT_IOS6` guard |
+| `carry-audit.lua` | files whose port markers thinned out against a reference tree, after moving the series to a newer base |
+| `symbol-check.lua` | the engine's imported symbols and exported classes against `carry-symbols.txt`, and `--pin` |
+| `compat-audit.lua` | no `libios6compat.a` stub defines a symbol the engine or ICU defines |
+| `prefix-exports.lua` | the prefixed variant's export list, written from the class prefix header |
+| `required-encodings.lua` | `tests/host/required-encodings.txt`, read from `TextCodecICU.cpp` |
+| `probe-soft-links.lua` | a C probe that asks the phone for every constant PAL soft-links |
+| `check-cacert.lua` | the application's trust store against the reviewed hash, and `--upstream` |

@@ -1,14 +1,16 @@
 # Keeping the engine current
 
-The engine is a real fork. `main` in this fork is upstream's history with this
-port's commits on top of `1b78c03f880e`, so upstream is an ancestor and a merge
-is a merge. It was a graft until 2026-09-11 - a snapshot with no shared
-ancestry, updated by applying other people's diffs - and
-[maintaining.md](maintaining.md) is what that fork is carried by now.
+The engine is upstream WebKit at one commit of `main`, `c70a794b0341` of 2026-09-14,
+with this port as a series of 26 patches in `third_party/webkit/patches`. It was a
+graft until 2026-09-11 - a snapshot with no shared ancestry, updated by applying
+other people's diffs - then a fork whose `main` carried the port as commits until
+2026-10-20, when those commits became the series; [maintaining.md](maintaining.md)
+is how the series is carried now. The record below is from the fork's time, and
+names its branches.
 
 How far the port has drifted is still a question about content rather than about
-the log, and `scripts/port-delta.py` answers it. Today, against
-`origin/webkitglib/2.54`:
+the log, and `tools/port-delta.lua` answers it from the series itself. When the
+fork was measured against `origin/webkitglib/2.54` it read:
 
 ```
 1396 files changed, 52650 insertions(+), 9987 deletions(-)
@@ -22,10 +24,11 @@ the log, and `scripts/port-delta.py` answers it. Today, against
 
 ## How far behind the snapshot is
 
-`scripts/port-delta.py --freshness` answers that from content rather than dates,
+`tools/port-delta.lua --freshness` now answers it from GitHub's comparison of the base
+with upstream `main`. Its Python predecessor answered from content rather than dates,
 because content is what the question is really about: for each commit on the upstream branch
 it takes a line that commit added and looks for it in our tree, and the first
-one we already carry is where the snapshot sits. Today:
+one we already carry is where the snapshot sits. In the fork's time it read:
 
 ```
 branch tip: 2026-09-03  Cherry-pick 305413.1005@safari-7624.5.1.10-branch
@@ -86,17 +89,19 @@ are the real work of an update.
 
 They cost very different things.
 
-**Inside the series** — `webkitglib/2.54` taking security and stability picks
-from Safari's branch. With ancestry this is an ordinary merge:
+**Inside the series** — taking security and stability fixes from upstream onto the
+same base. In a scratch clone with the series applied this is a cherry-pick, and the
+fix goes into the patch whose concern it touches, or becomes a patch of its own:
 
 ```sh
-git -C webkit-254 fetch upstream 'refs/heads/webkitglib/2.54:refs/remotes/upstream/webkitglib/2.54'
-git -C webkit-254 merge upstream/webkitglib/2.54
+git cherry-pick <upstream fix>
+git format-patch -N -o <revenant>/third_party/webkit/patches <base>..series
 ```
 
-Conflicts land only where a pick touches a file this port also changed, which
-`scripts/port-delta.py` lists, and `rerere.enabled` means a resolution is only
-made once. Then the carry check, the build, and `tests/device/run.py`.
+Conflicts land only where a fix touches a file this port also changed, which
+`tools/port-delta.lua` lists, and `rerere.enabled` means a resolution is only
+made once. Then the checksums in the recipe, the carry check, the build, and
+`tests/device/run.lua`.
 
 The last update done the old way, on 2026-09-10, took the branch's five newest
 picks as a diff: none touched a port-changed file, the engine rebuilt whole
@@ -424,7 +429,7 @@ left needs work per family rather than per file:
 The audit that found the lost adaptations is now a script:
 
 ```sh
-scripts/carry-audit.py main Source/WebCore/page
+./xmakew l frameworks/WebKit/tools/carry-audit.lua <reference tree> Source/WebCore/page
 ```
 
 It compares, per file, how many port markers a file carries here against the
@@ -594,7 +599,7 @@ what is left.
 
 ## The procedure this argues for
 
-1. Run `scripts/port-delta.py` against the current base and keep the output. It
+1. Run `tools/port-delta.lua` on the current series and keep the output. It
    is the before picture, and the after picture has to be explainable.
 2. Fetch the new upstream branch and diff it against the current base to see
    which of the 440 unguarded WebCore/JSC files upstream also touched. Only those
@@ -612,7 +617,7 @@ what is left.
    that name them — plus this port's own fixes on top of them, which are in the
    delta above. Expect the JSValue representation to be the hard part: see
    [armv7-jit.md](armv7-jit.md).
-5. Build, then run `tests/device/run.py`. The suite is the acceptance test: it
+5. Build, then run `tests/device/run.lua`. The suite is the acceptance test: it
    is numeric, it runs on the device, and it stands at 55 of 55 today.
 6. Anything the suite does not cover that the update touches gets a check added
    to it first, not after.
@@ -634,7 +639,7 @@ mechanically, which would change meaning in some of them for no benefit.
 For triage during a merge:
 
 ```sh
-scripts/port-delta.py --unguarded Source/WebCore/platform
+./xmakew l frameworks/WebKit/tools/port-delta.lua --unguarded Source/WebCore/platform
 ```
 
 lists the changed files in an area that carry no guard, largest diff first -

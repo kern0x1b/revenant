@@ -9,11 +9,11 @@ description: Diagnose and recover the Safari substitution on device — Safari f
 
 The loader did not re-exec Safari, or the engine did not load. Check in order:
 
-1. `revenant device run 12 "cat /tmp/rev-safari-tweak.log"` — is there a
+1. `./xmakew device -P . run "cat /tmp/rev-safari-tweak.log"` — is there a
    `re-exec …MobileSafari` line? No line → the loader bailed (Safari disabled in
    `InjectedApps`, or the loader failed to load).
 2. Confirm the two dylibs are the right files and sizes:
-   `revenant device run 12 "ls -la /Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib /usr/lib/rev-safari-compat.dylib"`.
+   `./xmakew device -P . run "ls -la /Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib /usr/lib/rev-safari-compat.dylib"`.
    A common mistake is deploying the compat dylib over `RevSafari.dylib` — the
    loader is small; the compat dylib is much larger (bundles WASM).
 3. Compare the on-device dylib's linkage to the local build: pull it back and run
@@ -40,19 +40,20 @@ Settings → RevWebKit → Diagnostics → **Log page console** (`ConsoleLog` in
 `space.kern0x1b.rev` domain) makes the compat dylib turn on WebKit's
 `LogsPageMessagesToSystemConsoleEnabled` when Safari starts — no engine rebuild.
 Relaunch Safari, load the page, then read
-`revenant device run 12 "cat /tmp/rev-safari-stderr.log"`: console messages and
+`./xmakew device -P . run "cat /tmp/rev-safari-stderr.log"`: console messages and
 uncaught errors appear with their file and line.
 
 The row sits below what a remote session can scroll to. To flip it remotely:
-`revenant device fetch /var/mobile/Library/Preferences/space.kern0x1b.rev.plist <local>`,
-set `ConsoleLog` with Python's `plistlib`, `revenant device copy` it back, then
-`revenant device run 12 "killall cfprefsd MobileSafari"`. Turn it off afterwards:
+fetch `/var/mobile/Library/Preferences/space.kern0x1b.rev.plist` with `scp`,
+set `ConsoleLog` with `plutil -replace ConsoleLog -bool YES <local>`, copy it back, then
+`./xmakew device -P . run "killall cfprefsd MobileSafari"`. Turn it off afterwards:
 a chatty page writes a lot.
 
 ## A symptom after a change of the port's own
 
 - Suspect the port's own code first: list the port changes that could produce
-  the symptom (`grep -rn WEBKIT_IOS6 webkit-254/Source/<area>`, plus `app/`,
+  the symptom (the patches in `third_party/webkit/patches` that touch `Source/<area>`,
+  `grep -rn WEBKIT_IOS6` in the patched tree, plus `app/`,
   `compat/`, `platform/`) and rule each out by measurement before blaming the
   site, upstream WebKit or the device.
 - Diagnostics never run unconditionally on a per-frame or per-event path: no
@@ -82,15 +83,14 @@ read a connection-reset — the tunnel/USB mechanics there apply here unchanged.
 Nothing on the device keeps a copy of the loader or the compat dylib. The ways
 back:
 
-- **Anything the .deb installed:** reinstall an earlier .deb (`revenant package`
-  leaves each version it builds in `build/<variant>/`):
-  `revenant device copy build/system/space.kern0x1b.rev_<version>_iphoneos-arm.deb /tmp/rev.deb`,
-  then `revenant device run 300 "dpkg -i /tmp/rev.deb && rm -f /tmp/rev.deb"`.
-- **The engine after `revenant deploy`:** it left the replaced binaries in
-  `/usr/lib/rev-fw.bak/<Framework>`; copy each back and restart Safari:
+- **Anything the .deb installed:** reinstall an earlier .deb (`./xmakew deb -P .`
+  writes it under `build/`; keep the last good one): copy it to the phone with `scp`,
+  then `./xmakew device -P . -s 300 run "dpkg -i /tmp/rev.deb && rm -f /tmp/rev.deb"`.
+- **The engine after an engine-only push of the old tooling:** it left the replaced
+  binaries in `/usr/lib/rev-fw.bak/<Framework>`; copy each back and restart Safari:
 
 ```sh
-revenant device run 30 'cd /usr/lib/rev-fw.bak && for fw in *; do cp -f "$fw" "/usr/lib/rev-fw/$fw.framework/$fw"; done; killall MobileSafari'
+./xmakew device -P . -s 30 run 'cd /usr/lib/rev-fw.bak && for fw in *; do cp -f "$fw" "/usr/lib/rev-fw/$fw.framework/$fw"; done; killall MobileSafari'
 ```
 
 If a bad **broad** injection makes the UI misbehave, reinstalling a good

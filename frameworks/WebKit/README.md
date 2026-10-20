@@ -92,8 +92,8 @@ needs. Each of those is fixed here.
 
 Correctness is checked by a numeric suite that runs on the device and reads
 pixels, glyph widths and the platform surface rather than screenshots:
-`tests/device/run.py`, currently **57 of 57**. Alongside it,
-`tests/device/sweep.py` loads real sites and reports whether each one survived,
+`tests/device/run.lua`, currently **57 of 57**. Alongside it,
+`tests/device/sweep.lua` loads real sites and reports whether each one survived,
 painted, and what it cost in memory - the failures that only the actual web
 produces do not show up in a suite that checks its own numbers. Both are described
 in [tests/device/README.md](tests/device/README.md).
@@ -108,9 +108,9 @@ first. Three artifacts do this:
 
 | Artifact | On device | Built by | Role |
 | --- | --- | --- | --- |
-| **Loader** | `/Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib` | the `RevSafari` device library in `revenant.toml` | Reads the enabled-apps preference and re-execs an enabled app with the engine's `DYLD_*` set. Skips SpringBoard. |
-| **Engine** | `/usr/lib/rev-fw/{JavaScriptCore,WebCore,WebKit}.framework` | `revenant build` from `revenant.toml`, which also lays it out under the system's names | The WebKit build itself. |
-| **Compat / hooks** | `/usr/lib/rev-safari-compat.dylib` | the `rev-safari-compat` device library in `revenant.toml` | The ABI symbols iOS 6 predates, plus the bookmarks start page, WebAssembly, and preference reads. Inserted by the loader. |
+| **Loader** | `/Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib` | the `RevSafari` target in `xmake.lua` | Reads the enabled-apps preference and re-execs an enabled app with the engine's `DYLD_*` set. Skips SpringBoard. |
+| **Engine** | `/usr/lib/rev-fw/{JavaScriptCore,WebCore,WebKit}.framework` | the `webkit-engine` package, `packages/engine`, which also lays it out under the system's names | The WebKit build itself. |
+| **Compat / hooks** | `/usr/lib/rev-safari-compat.dylib` | the `rev-safari-compat` target in `xmake.lua` | The ABI symbols iOS 6 predates, plus the bookmarks start page, WebAssembly, and preference reads. Inserted by the loader. |
 
 The loader and the compat dylib are two different files with two different jobs —
 overwriting one with the other drops Safari back to the system engine.
@@ -124,38 +124,35 @@ overwriting one with the other drops Safari back to the system engine.
 
 **Build host** (macOS)
 
-- The Command Line Tools. The **iOS 16.4 SDK** the `apple-ios` platform names
-  arrives as the toolchain's `iphoneos-sdk` package, fetched from [theos/sdks](https://github.com/theos/sdks)
-  and checked against its sha256. Xcode is not needed, and neither is Theos.
-- `conan`, and [toolchain](https://github.com/kern0x1b/revenant/tree/main/toolchain)
-  installed with `conan config install`. Conan itself installs `cmake`, `ninja`,
-  `ldid` and the `ld64` linker.
+- The Command Line Tools. The **iOS 16.4 SDK** arrives as the toolchain's `iphoneos-sdk`
+  package, fetched from [theos/sdks](https://github.com/theos/sdks) and checked against its
+  sha256. Xcode is not needed, and neither is Theos.
+- revenant's `./xmakew`, which fetches `cmake`, `ninja`, `ldid` and the linker as packages.
 
 ## Build
 
+The port is a member of revenant, built from the top of the checkout. The engine is upstream
+WebKit at a commit of `main` plus this port's patch series, `third_party/webkit/patches`,
+which the `webkit` package fetches and applies; nothing of it is checked in here.
+
 ```sh
-./fetch-source.py          # the engine, a git submodule on the fork's main branch
+./xmakew f -P . -p iphoneos -a armv7
+./xmakew -P .
+./xmakew deb -P .
 ```
 
-Then the libraries this OS cannot supply, the engine, and the package. The whole
-sequence, and why each piece exists, is in **[docs/building.md](docs/building.md)**:
+The whole sequence, and why each piece exists, is in **[docs/building.md](docs/building.md)**.
 
-| Step | Builds |
-| --- | --- |
-| `revenant build` | the libraries iOS 6 predates, `libios6compat.a`, the engine and everything around it, laid out as the device filesystem in `build/system/stage` |
-| `revenant package` | the `.deb` |
-
-A change to a WebCore header means a full build, which `revenant build` is: a
+A change to a WebCore header means a full build, which the engine package always is: a
 partial build leaves the other frameworks compiled against the old class size,
 and the result loads and then misbehaves with no crash to read.
 
 ### The Safari substitution, as a package
 
-`revenant build` lays out the engine as the system frameworks it replaces, and
-builds everything that goes on the device around it from the device libraries
-`revenant.toml` declares. `revenant package` packs that tree into
-`<package folder>/deb/space.kern0x1b.rev_<version>_iphoneos-arm.deb`.
-The version is `version` in `revenant.toml` - change it there and build.
+The `webkit-engine` package lays out the engine as the system frameworks it replaces, and
+the targets in `xmake.lua` build everything that goes on the device around it.
+`./xmakew deb -P .` packs both into `space.kern0x1b.rev_<version>_iphoneos-arm.deb`.
+The version is `version` in `xmake.lua` - change it there and build.
 
 One `.deb` carries all of it: the loader and its MobileSubstrate filter, the
 compatibility and hook dylib, the TLS library, the Settings bundle with its
@@ -166,7 +163,7 @@ is installed:
 dpkg -i space.kern0x1b.rev_*_iphoneos-arm.deb
 ```
 
-Two settings on the `rev-safari-compat` device library in `revenant.toml` are not
+Two settings on the `rev-safari-compat` target are not
 optional: the compat dylib
 is built without `_FORTIFY_SOURCE` and without libc++, because the `__*_chk`
 symbols are linkage this release never had, and the engine carries its own C++
@@ -178,17 +175,14 @@ The device address and password are **not** in the repository. Copy the example
 and fill it in:
 
 ```sh
-cp device.env.example device.env    # set DEVICE_HOST / DEVICE_PORT / DEVICE_PASSWORD
+cp frameworks/WebKit/device.env.example device.env    # at the top of revenant: DEVICE_HOST / DEVICE_PORT
 ```
 
 Then build and install the package, which carries the loader, the compatibility
 dylib, the TLS dylib and the Settings pane, and can be removed again:
 
 ```sh
-revenant build
-revenant package
-revenant device copy "<package folder>/deb/space.kern0x1b.rev_<version>_iphoneos-arm.deb" /tmp/rev.deb
-revenant device run 120 "dpkg -i /tmp/rev.deb"
+./xmakew device install -P .
 ```
 
 **Verify it took.** Open any page in Safari and check the user agent — a request
@@ -227,17 +221,20 @@ reads:
 app/            The standalone application: the embeddable host for the web view
 compat/         Symbols iOS 6 does not have, built into libios6compat.a
 docs/           Documentation and the screenshots in this README
+modules/        What the engine package does: options, checks, staging, the carry manifest
+packages/       The webkit-engine and webkit-device-tools packages
 packaging/      The package's control file and DEBIAN scripts
-platform/       The tweak, compat and TLS dylibs and the Settings bundle, built with CMake
+platform/       The tweak, compat and TLS dylibs and the Settings bundle, xmake targets
   safari/       The Safari substitution: the loader, the compat/hooks, WebAssembly and TLS sources
   prefs/        The RevWebKit Settings PreferenceBundle
   device/       What is installed on the phone beside the engine
-recipes/        Conan recipes for the libraries iOS 6 cannot supply
-scripts/        The check scripts the declaration names, and maintenance and device helpers
 tests/          The numeric device suite, host tests, and JS conformance checks
-tools/          Diagnostic instruments, on the host and on the device
-webkit-254/     The engine, a git submodule on the fork's main branch
+tools/          Diagnostic instruments on the device, and the maintenance scripts on the host
+xmake.lua       The member: its packages, targets, checks and host tests
 ```
+
+The engine itself is `third_party/webkit` at the top of revenant: an upstream commit and the
+patch series, and the libraries iOS 6 cannot supply are packages beside it.
 
 
 ## Documentation
@@ -293,12 +290,12 @@ MIT, see `LICENSE`, for the code in this repository: the compatibility library,
 the tooling, the tests, the packaging and the documentation.
 
 The engine is WebKit and keeps its own terms - LGPL-2.1-or-later and
-BSD-2-Clause - and this port's changes to it are commits on the `main`
-branch of the `webkit-254` submodule, under those same terms.
+BSD-2-Clause - and this port's changes to it are the patches in
+`third_party/webkit/patches`, under those same terms.
 
 Nothing third-party is vendored here. Every library this operating system
-cannot supply is fetched from its own upstream by a Conan recipe under
-`recipes/`, at a pinned version. [THIRD-PARTY.md](THIRD-PARTY.md) lists each one,
+cannot supply is fetched from its own upstream by an xmake package under
+`third_party/`, at a pinned version. [THIRD-PARTY.md](THIRD-PARTY.md) lists each one,
 its version, its license, and the recipe that fetches it - and what this project
 deliberately does not carry, including anybody else's fonts, pages or test
 suites.

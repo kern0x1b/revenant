@@ -4,8 +4,8 @@ Numbers, on the phone, repeatable - because a screenshot is not a measurement
 and one run is not evidence.
 
 ```sh
-revenant test --tier gate                      # every page, verdict per check
-revenant test --tier gate --test-port 8898     # if 8899 is busy
+./xmakew l frameworks/WebKit/tests/device/run.lua                # every page, verdict per check
+./xmakew l frameworks/WebKit/tests/device/run.lua --port 8898    # if 8899 is busy
 ```
 
 The device cannot be asked for its DOM, so each page reports itself: the runner
@@ -125,7 +125,7 @@ effect path only.
 
 ## web-platform.html — what a page written this decade can ask for
 
-Twenty-nine checks over the APIs a modern site reaches for, run by `run.py` like
+Twenty-nine checks over the APIs a modern site reaches for, run by `run.lua` like
 the rest. It exists because of the failure that wrote it: `window.WebAssembly`
 was installed by a swizzle that won its race only sometimes, and when it lost,
 every site behind an AWS WAF challenge rendered one sentence about attempts
@@ -142,7 +142,7 @@ filter it cannot honour.
 runner serves: the specification exposes it to secure contexts only, and the
 check says so rather than reporting a hole that is not there.
 
-## gl-present.py — the canvas the GPU drew, on the screen
+## gl-present.lua — the canvas the GPU drew, on the screen
 
 Every WebGL check in `web-platform.html` passes by reading pixels back out of
 the context, and all of them passed while the canvas on screen was a white
@@ -150,13 +150,13 @@ rectangle: reading back and presenting are different paths, and only one of them
 was working. This loads a canvas cleared to red and looks at the screen.
 
 ```sh
-tests/device/gl-present.py
+./xmakew l frameworks/WebKit/tests/device/gl-present.lua
 ```
 
 It prints how much of the page area is red and exits non-zero when the answer is
 `absent`. The screenshot stays in `tests/device/sweep-shots/gl-present.png`.
 
-## conformance.py — Khronos' suite, on the phone
+## conformance.lua — Khronos' suite, on the phone
 
 The suite is not vendored here; it is a project of its own and is cloned
 separately:
@@ -167,11 +167,12 @@ git clone --depth 1 --filter=blob:none --sparse \
 cd webgl-conformance && git sparse-checkout set sdk/tests
 ```
 
-Then name the tests to run; `WEBGL_TESTS` points at the checkout if it is not
-in `~/Git/tools/webgl-conformance/sdk/tests`:
+Then name the tests to run, and the checkout's `sdk/tests` with `--suite` or
+`WEBGL_TESTS`:
 
 ```sh
-tests/device/conformance.py conformance/rendering/culling.html
+./xmakew l frameworks/WebKit/tests/device/conformance.lua --suite <checkout>/sdk/tests \
+    conformance/rendering/culling.html
 ```
 
 Each test writes its own PASS and FAIL lines into its page, so
@@ -181,7 +182,7 @@ the *expectation*, and the values actually read are on the line after it, which
 the runner now includes. What has been run so far, and the two failures left,
 are in [../../docs/webgl.md](../../docs/webgl.md).
 
-## gl-frame-rate.py — a canvas that keeps drawing, and how fast
+## gl-frame-rate.lua — a canvas that keeps drawing, and how fast
 
 Everything else about WebGL here is measured on one frame, and one frame hid a
 freeze: with no `CVOpenGLESTextureCacheFlush` the cache kept every IOSurface
@@ -189,7 +190,7 @@ alive, WebKit rebuilt the drawing buffer every frame, and the web thread stopped
 answering after the first one - no crash and no log line.
 
 ```sh
-tests/device/gl-frame-rate.py
+./xmakew l frameworks/WebKit/tests/device/gl-frame-rate.lua
 ```
 
 It animates for four seconds at each of three canvas sizes and prints the rate,
@@ -197,15 +198,15 @@ exiting non-zero if the last size never reports - which is what a freeze looks
 like. Today: **29, 30 and 28 frames a second** at 64x64, 320x240 and 320x480,
 which says the cost is per frame rather than per pixel.
 
-## share-sheet.py — navigator.share, which needs a finger and a secure page
+## share-sheet.lua — navigator.share, which needs a finger and a secure page
 
-Two things keep this out of `run.py`: the API is exposed to secure contexts only,
+Two things keep this out of `run.lua`: the API is exposed to secure contexts only,
 and calling it needs a user gesture. Both are solvable on this device. The page
 is served through a reverse SSH tunnel so it arrives at `http://localhost`, which
 is a secure context, and `revtouch` taps the button and then the sheet's Cancel.
 
 ```sh
-tests/device/share-sheet.py
+./xmakew l frameworks/WebKit/tests/device/share-sheet.lua
 ```
 
 It prints what the page saw on load and after cancelling, and exits non-zero
@@ -213,21 +214,21 @@ unless the promise rejects with `AbortError`, which is what the specification
 asks for when the sheet is dismissed. The screenshot of the open sheet stays in
 `tests/device/sweep-shots/share-sheet.png`.
 
-## sweep.py — the same engine against the web as it is served
+## sweep.lua — the same engine against the web as it is served
 
-`run.py` measures the engine against numbers it can check itself. Some failures
+`run.lua` measures the engine against numbers it can check itself. Some failures
 never appear that way: an anti-bot challenge that needs an API the port does not
-have looks like a blank page and nothing else. `sweep.py` loads real sites, one
+have looks like a blank page and nothing else. `sweep.lua` loads real sites, one
 browser per site, and reports four things per page:
 
 ```
-tests/device/sweep.py https://example.org/   # the sites you name
-tests/device/sweep.py                        # or a list in sweep-sites.txt, which is yours and gitignored
+./xmakew l frameworks/WebKit/tests/device/sweep.lua https://example.org/   # the sites you name
+./xmakew l frameworks/WebKit/tests/device/sweep.lua                        # or a list in sweep-sites.txt, which is yours and gitignored
 ```
 
 It ships with no list of its own. Which sites a browser here is driven at from
 an automated run is the operator's call and the operator's business with those
-sites' terms, not something this repository decides. Everything `run.py` loads
+sites' terms, not something this repository decides. Everything `run.lua` loads
 is served out of this directory.
 
 | Column | What it means |
