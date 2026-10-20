@@ -3,12 +3,9 @@
 # pixels for one lit quad over angles, shininess, roughness, metalness and albedo; the fits name the formulas and
 # how far every pixel is from them. Takes a few minutes; run it through coordination/heavy.sh.
 set -eu
-echo "FAIL host/scenekit/lighting/run.sh: its Python steps are gone and not yet ported to Lua: fitspec.py; fitpbr.py; fitgraze.py; fitselfillumination.py" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../../common/runs.sh" "$here"
 BUILD=${BUILD:-$(runs_fresh revenant-lighting)}
-cp "$here"/fitspec.py "$here"/fitpbr.py "$here"/fitgraze.py "$here"/fitselfillumination.py "$BUILD"/
 xcrun swiftc -O "$here/dense.swift" -o "$BUILD/dense"
 xcrun swiftc -O "$here/grazing.swift" -o "$BUILD/grazing"
 xcrun swiftc -O "$here/selfillumination.swift" -o "$BUILD/selfillumination"
@@ -17,8 +14,8 @@ cd "$BUILD"
 ./dense | grep -v '^#' > dense.txt
 ./grazing | grep -v '^#' > grazing.txt
 ./selfillumination > selfillumination.txt
-python3 fitspec.py
-python3 fitpbr.py
-python3 fitgraze.py
-python3 fitselfillumination.py
+runs_xmake l "$here/fits.lua" spec "$BUILD"
+runs_xmake l "$here/fits.lua" pbr "$BUILD"
+runs_xmake l "$here/fits.lua" graze "$BUILD"
+runs_xmake l "$here/fits.lua" selfillumination "$BUILD"
 ./defaultslot

@@ -11,8 +11,6 @@
 # the switches taking away nothing the port draws. No bound on the frames is set yet (facts/SceneKit/SCNView.md,
 # "The frame tolerance"). Run it through coordination/heavy.sh (it renders with Metal).
 set -eu
-echo "FAIL host/scenekit/frames.sh: its Python steps are gone and not yet ported to Lua: compare.py" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 SCENES=$1
@@ -24,16 +22,16 @@ status=0
 for scene in star2 coin; do
     "$BUILD/render" "$SCENES/$scene.scn" 256 0 "$BUILD/$scene-full.png" noparticles
     "$BUILD/render" "$SCENES/$scene.scn" 256 0 "$BUILD/$scene-drawn.png" noparticles $undrawn
-    echo "$scene: cost of what the port does not draw, on macOS: $(python3 "$here/compare.py" "$BUILD/$scene-full.png" "$BUILD/$scene-drawn.png")"
-    same=$(python3 "$here/compare.py" "$FRAMES/$scene-full.png" "$FRAMES/$scene-drawn.png")
+    echo "$scene: cost of what the port does not draw, on macOS: $(runs_xmake l "$here/compare.lua" "$BUILD/$scene-full.png" "$BUILD/$scene-drawn.png")"
+    same=$(runs_xmake l "$here/compare.lua" "$FRAMES/$scene-full.png" "$FRAMES/$scene-drawn.png")
     case "$same" in
         "iou=1.0000 mean=0.00 p95=0 "*) echo "$scene same: $same" ;;
         *) echo "$scene same: $same (not identical)"; status=1 ;;
     esac
-    echo "$scene drawn: $(python3 "$here/compare.py" "$BUILD/$scene-drawn.png" "$FRAMES/$scene-drawn.png")"
-    echo "$scene full: $(python3 "$here/compare.py" "$BUILD/$scene-full.png" "$FRAMES/$scene-full.png")"
+    echo "$scene drawn: $(runs_xmake l "$here/compare.lua" "$BUILD/$scene-drawn.png" "$FRAMES/$scene-drawn.png")"
+    echo "$scene full: $(runs_xmake l "$here/compare.lua" "$BUILD/$scene-full.png" "$FRAMES/$scene-full.png")"
     for d in 0.02 0.05 0.1; do
-        echo "$scene wrong $d, drawn: $(python3 "$here/compare.py" "$BUILD/$scene-drawn.png" "$FRAMES/$scene-wrong$d.png")"
+        echo "$scene wrong $d, drawn: $(runs_xmake l "$here/compare.lua" "$BUILD/$scene-drawn.png" "$FRAMES/$scene-wrong$d.png")"
     done
 done
 exit $status
