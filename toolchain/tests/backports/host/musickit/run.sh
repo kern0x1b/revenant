@@ -14,8 +14,6 @@
 #   sh run.sh
 
 set -e
-echo "FAIL host/musickit/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 93" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 # Four levels up is the repository root, as in every other suite under tests/backports/host: five is
@@ -90,39 +88,4 @@ xcrun -sdk macosx clang -O1 -w -I "$work/uECC" -c "$work/uECC/uECC.c" -o "$work/
 # three parts are written into - this run's scratch directory, which is what the checker below reads.
 "$work/mint" "$work/key8.pem" ABCDE12345 TEAMID9999 "$work"
 
-python3 - "$work" <<'PY'
-import base64, subprocess, sys, os
-work = sys.argv[1]
-parts = [open(os.path.join(work, 'part%d.txt' % i)).read().strip() for i in range(3)]
-if len(parts) != 3 or parts[0] == 'nil':
-    print("FAIL: mint returned no token")
-    raise SystemExit(1)
-def b64u(text):
-    return base64.urlsafe_b64decode(text + '=' * (-len(text) % 4))
-header, payload, signature = b64u(parts[0]), b64u(parts[1]), b64u(parts[2])
-print("header  :", header.decode())
-print("payload :", payload.decode())
-print("signature bytes:", len(signature), "(JOSE ES256 is the raw r || s, 64)")
-if len(signature) != 64:
-    print("FAIL: the signature part is not the raw pair")
-    raise SystemExit(1)
-n = 0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC63FF51
-if int.from_bytes(signature[32:], 'big') > n // 2:
-    print("FAIL: the signature is not low-s")
-    raise SystemExit(1)
-def der_int(value):
-    body = value.lstrip(b'\x00') or b'\x00'
-    if body[0] & 0x80:
-        body = b'\x00' + body
-    return bytes([0x02, len(body)]) + body
-inner = der_int(signature[:32]) + der_int(signature[32:])
-open(os.path.join(work, 'sig.der'), 'wb').write(bytes([0x30, len(inner)]) + inner)
-open(os.path.join(work, 'signing.txt'), 'w').write(parts[0] + '.' + parts[1])
-subprocess.run(['openssl', 'ec', '-in', os.path.join(work, 'key.pem'), '-pubout',
-                '-out', os.path.join(work, 'pub.pem')], capture_output=True)
-verified = subprocess.run(['openssl', 'dgst', '-sha256', '-verify', os.path.join(work, 'pub.pem'),
-                           '-signature', os.path.join(work, 'sig.der'),
-                           os.path.join(work, 'signing.txt')], capture_output=True, text=True)
-print("OpenSSL  :", verified.stdout.strip() or verified.stderr.strip().splitlines()[-1])
-raise SystemExit(0 if 'Verified OK' in verified.stdout else 1)
-PY
+runs_xmake l "$here/verify.lua" "$work"
