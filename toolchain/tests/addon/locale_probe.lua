@@ -1,5 +1,5 @@
 function main(modules, root)
-    local store = import("borrow", {rootdir = modules, anonymous = true})
+    local store = import("store", {rootdir = path.join(modules, "..", "tests", "common"), anonymous = true})
     local macho = import("apple.macho", {rootdir = modules, anonymous = true})
     local debian = import("debian", {rootdir = modules, anonymous = true})
     local emulator = import("emulator", {rootdir = modules, anonymous = true})

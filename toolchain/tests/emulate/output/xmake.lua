@@ -1,7 +1,7 @@
 set_project("emulateoutput")
 set_version("0.0.1")
 add_repositories("revenant " .. (os.getenv("REVENANT_REPO") or "https://github.com/kern0x1b/revenant.git"))
-add_addons("revenant " .. (os.getenv("REVENANT_ADDON") or "v0.8.13"))
+add_addons("revenant " .. (os.getenv("REVENANT_ADDON") or io.readfile(path.join(os.scriptdir(), "../../common/addon.version")):trim()))
 set_config("apple_minimum", "6.1.3")
 includes("@addon/revenant/apple-ios")
 includes("@addon/revenant/emulate")

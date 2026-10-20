@@ -1,5 +1,4 @@
-import("core.base.option")
-import("byteorder")
+import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 
 function root(given)
     return path.join(given or os.getenv("XMAKE_GLOBALDIR") or os.getenv("HOME"), ".xmake")

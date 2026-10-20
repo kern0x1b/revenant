@@ -1,29 +1,45 @@
+import("async.runjobs")
+
+local function child(name, argv, curdir)
+    local scratch = path.join(os.getenv("HOME"), ".revenant", "cache", name)
+    os.tryrm(scratch)
+    os.mkdir(scratch)
+    local log = path.join(scratch, "output.log")
+    local status = os.execv(os.programfile(), argv, {stdout = log, stderr = log, curdir = curdir, try = true})
+    return {status = status, log = log, scratch = scratch}
+end
+
+local function report(label, result)
+    if result.status == 0 then
+        print(label .. ": OK")
+        os.tryrm(result.scratch)
+        return 0
+    end
+    print(label .. " FAIL: exit " .. result.status .. ", its output follows (kept in " .. result.scratch .. ")")
+    print(io.readfile(result.log))
+    return 1
+end
+
+local addon_suites = {"descriptions_test", "checkout_test", "registry_test", "dependency_test", "swift_rule_test",
+                      "workspace_test", "revenant_index_test", "lock_test", "cache_sweep_test", "protocol_headers_test",
+                      "matter_closure_test", "sdk_verbatim_test", "locale_order_test"}
+
+local gen_suites = {"gen_test", "headers_test", "members_test", "trace_test", "doc_test", "scope_test", "protocols_test",
+                    "atomic_test", "ir_failure_test", "ir_identity_test", "record_test", "clean_checkout_test",
+                    "targets_test", "host_json_test", "stream_test", "protocol_set_test", "removed_ceiling_test",
+                    "snapshot_pins_test", "input_test", "render_test", "render_headers_test", "swift_model_test",
+                    "swift_render_test", "swift_roundtrip_test", "sdk_test", "sdk_cmd_test", "literal_test",
+                    "surface_test", "swift_interface_test", "swift_match_test", "ledger_test", "worklist_test",
+                    "verify_test", "target_availability_test", "port_headers_test", "measured_test", "functions_test",
+                    "usr_include_test", "probe_test", "swift_name_render_test", "reexport_import_test",
+                    "usr_headers_test", "vfs_overlay_test"}
+
 function main(checkout)
     local revenant = path.absolute(checkout or path.directory(os.scriptdir()))
     local addon = path.join(revenant, "tests", "addon")
     local modules = path.join(revenant, "modules")
-    local names = {"descriptions_test", "checkout_test", "registry_test", "dependency_test", "swift_rule_test", "workspace_test",
-                   "revenant_index_test"}
-    if os.isfile(path.join(addon, "lock_test.lua")) then
-        table.insert(names, "lock_test")
-    end
-    if os.isfile(path.join(addon, "cache_sweep_test.lua")) then
-        table.insert(names, "cache_sweep_test")
-    end
-    if os.isfile(path.join(addon, "protocol_headers_test.lua")) then
-        table.insert(names, "protocol_headers_test")
-    end
-    if os.isfile(path.join(addon, "matter_closure_test.lua")) then
-        table.insert(names, "matter_closure_test")
-    end
-    if os.isfile(path.join(addon, "sdk_verbatim_test.lua")) then
-        table.insert(names, "sdk_verbatim_test")
-    end
-    if os.isfile(path.join(addon, "locale_order_test.lua")) then
-        table.insert(names, "locale_order_test")
-    end
     local failed = 0
-    for _, name in ipairs(names) do
+    for _, name in ipairs(addon_suites) do
         local t = import(name, {rootdir = addon, anonymous = true})
         local failures = t.failures({modules = modules})
         if #failures == 0 then
@@ -33,90 +49,51 @@ function main(checkout)
             failed = failed + #failures
         end
     end
-    if os.isfile(path.join(addon, "archive_language_test.lua")) then
-        local ok = try {
-            function ()
-                import("archive_language_test", {rootdir = addon, anonymous = true}).main()
-                print("archive_language_test: OK (0 failures)")
-                return true
-            end,
-            catch {
-                function (errors)
-                    print("archive_language_test FAIL: " .. tostring(errors))
-                end
-            }
+    local ok = try {
+        function ()
+            import("archive_language_test", {rootdir = addon, anonymous = true}).main()
+            print("archive_language_test: OK (0 failures)")
+            return true
+        end,
+        catch {
+            function (errors)
+                print("archive_language_test FAIL: " .. tostring(errors))
+            end
         }
-        if not ok then failed = failed + 1 end
+    }
+    if not ok then failed = failed + 1 end
+    local found = path.join(revenant, "tools", "found")
+    local configured = child("found-configure", {"f", "-P", found, "-y"}, revenant)
+    local built = configured
+    if configured.status == 0 then
+        built = child("found-build", {"-P", found}, revenant)
+        os.tryrm(configured.scratch)
     end
-    local corpus_lua_test = path.join(revenant, "tests", "corpus", "corpus_test.lua")
-    if os.isfile(corpus_lua_test) then
-        local ok = try {
-            function ()
-                os.execv(os.programfile(), {"l", corpus_lua_test}, {stdout = os.nuldev(), stderr = os.nuldev(), curdir = revenant})
-                print("corpus_test.lua: OK")
-                return true
-            end,
-            catch {
-                function (errors)
-                    print("corpus_test.lua FAIL: " .. tostring(errors))
-                end
-            }
-        }
-        if not ok then failed = failed + 1 end
-    end
-    if os.isfile(path.join(revenant, "tools", "found", "xmake.lua")) and os.isfile(path.join(revenant, "tests", "gen", "render_headers_test.lua")) then
-        local found = path.join(revenant, "tools", "found")
-        local built = try {
-            function ()
-                os.execv(os.programfile(), {"f", "-P", found, "-y"}, {stdout = os.nuldev(), stderr = os.nuldev(), curdir = revenant})
-                os.execv(os.programfile(), {"-P", found}, {stdout = os.nuldev(), stderr = os.nuldev(), curdir = revenant})
-                return true
-            end,
-            catch {
-                function (errors)
-                    print("tools/found build FAIL: " .. tostring(errors))
-                end
-            }
-        }
-        if not built then failed = failed + 1 end
-    end
+    failed = failed + report("tools/found build", built)
     local skip = {}
     for name in (os.getenv("LIGHT_SKIP") or ""):gmatch("[^,%s]+") do
         skip[name] = true
     end
-    for _, name in ipairs({"gen_test", "headers_test", "members_test", "trace_test", "doc_test", "scope_test", "protocols_test",
-                           "atomic_test", "ir_failure_test", "ir_identity_test", "record_test", "clean_checkout_test",
-                           "targets_test", "host_json_test", "stream_test", "protocol_set_test", "removed_ceiling_test",
-                           "snapshot_pins_test", "input_test", "render_test",
-                           "render_headers_test",
-                           "swift_model_test", "swift_render_test", "swift_roundtrip_test",
-                           "sdk_test", "sdk_cmd_test", "literal_test",
-                           "surface_test", "swift_interface_test", "swift_match_test",
-                           "ledger_test",
-                           "worklist_test",
-                           "verify_test",
-                           "target_availability_test", "port_headers_test",
-                           "measured_test",
-                           "functions_test", "usr_include_test", "probe_test",
-                           "swift_name_render_test", "reexport_import_test", "usr_headers_test", "vfs_overlay_test"}) do
-        local suite = path.join(revenant, "tests", "gen", name .. ".lua")
-        if skip[name] then
-            print(name .. ": SKIPPED by LIGHT_SKIP")
-        elseif os.isfile(suite) then
-            local ok = try {
-                function ()
-                    os.execv(os.programfile(), {"l", suite}, {stdout = os.nuldev(), stderr = os.nuldev(), curdir = revenant})
-                    print(name .. ": OK")
-                    return true
-                end,
-                catch {
-                    function (errors)
-                        print(name .. " FAIL: " .. tostring(errors))
-                    end
-                }
-            }
-            if not ok then failed = failed + 1 end
+    local suites = {}
+    for _, name in ipairs(gen_suites) do
+        table.insert(suites, {name = name, file = path.join(revenant, "tests", "gen", name .. ".lua")})
+    end
+    table.insert(suites, {name = "corpus_test", file = path.join(revenant, "tests", "corpus", "corpus_test.lua")})
+    local jobs = {}
+    for _, suite in ipairs(suites) do
+        if skip[suite.name] then
+            print(suite.name .. ": SKIPPED by LIGHT_SKIP")
+        else
+            table.insert(jobs, suite)
         end
+    end
+    local results = {}
+    runjobs("light", function (index)
+        local suite = jobs[index]
+        results[index] = child(suite.name, {"l", suite.file}, revenant)
+    end, {total = #jobs, comax = os.cpuinfo().ncpu})
+    for index, suite in ipairs(jobs) do
+        failed = failed + report(suite.name, results[index])
     end
     if failed > 0 then
         print("light guard: " .. failed .. " failure(s)")
