@@ -11,9 +11,9 @@ framework builds and runs where there is no system Combine: legacy iOS (down to
 iOS 6.1.3, armv7). It is the reactive layer under [SwiftUI]'s SwiftUI on the
 [toolchain] toolchain.
 
-There is no copy of the code here. `toolchain/packages/c/combine/xmake.lua` pins
+There is no copy of the code here. `toolchain/packages/frameworks/combine/xmake.lua` pins
 OpenCombine at one commit and applies the series in
-`toolchain/packages/c/combine/patches/`; this folder holds the targets that build the
+`toolchain/packages/frameworks/combine/patches/`; this folder holds the targets that build the
 patched tree inside revenant and run upstream's tests against it.
 
 ### The one design decision
@@ -56,7 +56,7 @@ Consequences to respect:
 | `Tests/skip.txt` | the tests left out of the iOS 6 run, one `Class` or `Class.test` per line (see `docs/TEST-RESULTS.md`) |
 | `Tests/control` | the Debian control of the test daemon |
 | `tools/discover.lua` | finds upstream's tests and writes the `main.swift` that runs them |
-| `../../toolchain/packages/c/combine/` | the recipe and the patches |
+| `../../toolchain/packages/frameworks/combine/` | the recipe and the patches |
 
 ## 3. How to build, and how to check
 
@@ -74,7 +74,7 @@ Consequences to respect:
 ### Changing the code
 
 Work in a clone of OpenCombine at the pinned commit with the series applied
-(`git am toolchain/packages/c/combine/patches/*.patch`), commit, and regenerate the
+(`git am toolchain/packages/frameworks/combine/patches/*.patch`), commit, and regenerate the
 series with `git format-patch --zero-commit --no-renames` from the pinned
 commit. Put the new `sha256` of each file in the recipe's `patches` list. A
 change to a gyb template is followed by its expansion with Revenant's gyb, never
