@@ -30,7 +30,7 @@ A change to a WebCore header means a full engine build — a partial build leave
 other frameworks on the old class size, and the result loads and misbehaves with
 no crash log. The package always builds the engine whole; a change to the series,
 the recipe, `frameworks/WebKit/modules/`, `compat/` or `carry-symbols.txt` changes its
-identity and rebuilds it. `frameworks/WebKit/docs/building.md` has the whole sequence.
+identity and rebuilds it. `docs/guides/webkit/build-and-test.md` has the whole sequence.
 
 A change to the engine is a change to a patch: in a scratch clone of WebKit at the
 base commit, `git am` the series, change the commit it belongs to, `git format-patch`

@@ -45,8 +45,8 @@ addon lock entry). What this skill does is diagnose, read-only, and hand the fin
    message. Both can look current while the payload is still stale.
 4. Send the differing paths and the measurements to the coordinator. The coordinator decides how
    the shared payload is refreshed.
-5. To check that a given toolchain version behaves as expected, follow the contract's rule in
-   `AGENTS.md`, "The revenant addon". For a build's verdict, read its *final* line
+5. To check that a given toolchain version behaves as expected, follow the rule in
+   `docs/guides/recompiler/contributing.md`, "The revenant addon". For a build's verdict, read its *final* line
    (`[100%]: build ok` or `error:`), not an intermediate `imports: ... resolves against N exports`,
    which also prints in a build that later fails at link.
 

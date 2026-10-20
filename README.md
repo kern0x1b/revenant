@@ -92,5 +92,5 @@ member>`. Building and testing follow each member's own README.
 ## Licences and policies
 
 Each member is under the licence in its own folder: the emulator under MPL-2.0 (with its `NOTICE`), every other member under
-MIT. A member that builds on third-party code lists it in its `THIRD-PARTY.md`; the code itself comes in as a package
+MIT. A member that builds on third-party code lists it in its third-party notice, `docs/reference/<member>/third-party.md`; the code itself comes in as a package
 of `third_party/` or of the toolchain. [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md) hold for all members.
