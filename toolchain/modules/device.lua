@@ -1,4 +1,5 @@
 import("core.base.option")
+import("core.base.process")
 import("lib.detect.find_tool")
 import("byteorder")
 
@@ -284,6 +285,18 @@ function fetch(settings, remote, localfile)
         os.runv(program, argv, {envs = envs})
         return true
     end }
+end
+
+function reverse_tunnel(settings, port)
+    tunnel(settings)
+    local forwarded = {"-o", "ControlMaster=no", "-o", "ControlPath=none"}
+    local program, argv, extra = authenticated(settings, "ssh", table.join(forwarded, ssh_options,
+                                               {"-N", "-R", port .. ":127.0.0.1:" .. port, "-p", settings.port, "root@" .. settings.host}))
+    local envs = {}
+    for key, value in pairs(table.join(os.getenvs(), extra or {})) do
+        table.insert(envs, key .. "=" .. value)
+    end
+    return process.openv(program, argv, {envs = envs})
 end
 
 function uninstall_command(packages, opt)
