@@ -1,25 +1,4 @@
 #!/bin/bash
-# output.sh [DEVICE] [RELEASE]: a run's program output, measured, on a real guest. Two runs, and the
-# second is the one that matters:
-#
-#   end   a program that returns. Its stdio is flushed by the exit, so this passes with any runner; it
-#         says the file was captured and that xmake emulate log brings the line back.
-#   hang  a program the deadline kills, which never flushes. A program's stdio is block buffered once it
-#         is a file, so the lines it wrote are still in the buffer when SIGKILL arrives and the only thing
-#         that can have put them in the file is the runner spawning it unbuffered - NSUnbufferedIO=YES,
-#         which this series' revenant-runner sets and the installed addon does not. The runner the run used
-#         is read out of the run's own verdict, and the three hang checks stand or fall together on it:
-#         with the tree's runner all three must hold, with the installed one the miss is expected and is
-#         reported as unmeasured rather than as a pass.
-#
-# stderr is the control: it is unbuffered by default, so its line lands with either runner and its
-# presence says the file was captured at all. The stdout lines are the claim.
-#
-# The run's files are found through *this* run's verdict, not through the newest one on the machine: a
-# marker is written just before the run and the verdict is the one newer than it, and more than one
-# newer than it is an ambiguity this script refuses rather than picking. The verdict carries the absolute
-# paths of what the program wrote, and the installed addon writes it, so the check does not depend on
-# which addon is in use.
 set -eu
 cd "$(dirname "$0")"
 . ../../backports/common/runs.sh "$PWD"
@@ -29,10 +8,6 @@ out=${OUT_DIR:-$(runs_folder emulate-output)}
 known=revenant-emulate-output
 mkdir -p "$out"
 
-# This run's verdict: the one written after the marker. The key that says which runner wrote it is the
-# host's own result's top-level `output`, which emulator.verdict() copies out of the runner's verdict
-# (`test.output`) and run_task then writes over the file - the runner's `test` object is not in the file
-# that is on disk, so reading it there finds nothing and excuses every miss.
 verdict() { xmake l "$PWD/verdict.lua" "$@"; }
 runner() {
   if text=$(verdict "$1" runner 2>/dev/null); then echo "$text"; else echo unknown; fi
@@ -45,12 +20,9 @@ named() { verdict "$1" "$2"; }
 xmake f -p iphoneos -a armv7 -y > "$out/configure.log" 2>&1
 xmake emulate install -d "$device" -r "$release" > "$out/install.log" 2>&1
 
-# The run's own exit is the emulator's, not this script's: a hang run ends in a timeout by design, so
-# folding its status into the exit made a run whose checks all passed exit 255. It is reported, and the
-# checks alone decide the exit. Each mode ends by its own checks and says so.
 status=0
 mode_failed=0
-report_mode() {  # one place says what a mode decided, and it decides the script's exit
+report_mode() {
   if [ "$mode_failed" = 0 ]; then
     echo "$mode: every check of this mode passed, so this mode exits 0"
   else
@@ -125,10 +97,6 @@ for mode in end hang; do
     mode_failed=1
   fi
   if [ "$mode" = hang ]; then
-    # One expectation, taken from the run's own verdict, and all three hang checks behind it. The tree's
-    # runner spawns the program unbuffered, so a program that never flushed must still be whole in the
-    # file; the installed runner has no `output` field and buffers, so there the three are expected to
-    # miss, and a miss there says the run is unmeasured rather than that the port passed.
     case $which_runner in
       tree)
         if [ "$control" = yes ] && [ "$first" = yes ] && [ "$second" = yes ] && [ "$logged" = yes ]; then

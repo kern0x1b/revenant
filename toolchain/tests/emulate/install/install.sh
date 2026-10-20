@@ -1,18 +1,4 @@
 #!/bin/bash
-# install.sh [DEVICE] [RELEASE]: that an install puts in the program it built, in an image that did not
-# exist before the install. The second form of the defect this covers: on a fresh image the install
-# reported "install ok!" and the image had no /usr/libexec at all, because the package carried nothing and
-# nothing said so.
-#
-# The two things checked are the file and its identity. The file: is it there at all, and where. The
-# identity: does its LC_UUID equal the build output's, which is the one thing neither strip nor ldid's
-# signature touches, so a copy of an earlier build cannot pass for this one. Both are refused by the
-# install itself now, so a green run here is the install agreeing, and a red one names which of the two
-# links let it through.
-#
-# The image has to be fresh, so the case refuses to run against an image that is already there and says
-# how to make it fresh. It does not remove it: that is a deletion of a directory under the emulator root
-# and it is the caller's to make.
 set -eu
 cd "$(dirname "$0")"
 . ../../backports/common/runs.sh "$PWD"
@@ -23,8 +9,6 @@ program=emulateinstall
 installed=/usr/libexec/$program
 mkdir -p "$out"
 
-# The image is keyed by the project and its directory's hash, both of which are xmake's; the newest image
-# whose rootfs is this project's is found by the marker the control's package name leaves in image.json.
 image=$(grep -rl "org.revenant.emulateinstall" "${HOME}/.revenant/emulator/images.noindex"/*/*/image.json 2>/dev/null |
         sed 's#/image.json$##' | head -1)
 if [ -n "$image" ]; then

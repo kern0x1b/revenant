@@ -78,6 +78,7 @@ function checks.layout()
 end
 
 function checks.comments()
+    os.execv(os.programfile(), {"l", path.join(root, "tools", "comments.lua"), "test"}, {curdir = root})
     os.execv(os.programfile(), {"l", path.join(root, "tools", "comments.lua"), "check"}, {curdir = root})
 end
 
