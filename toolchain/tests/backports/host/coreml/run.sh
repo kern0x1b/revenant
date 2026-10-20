@@ -10,8 +10,6 @@
 # does. facts/CoreML/CoreML.md carries the measurement. COREML_DIVERGENT still names a container
 # whose prediction numbers are a recorded divergence, for whoever finds the next one.
 set -eu
-echo "FAIL host/coreml/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 65; the inline block PY at line 99; the inline block PY at line 268" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -43,7 +41,7 @@ echo "corpus: $(ls "$models" | grep -c '\.mlmodel$') containers in $models"
 # this repository's own and takes a second.
 if [ ! -d "$models" ]; then
     echo "no containers in $models: writing them with tools/coreml/make-models.lua"
-    xmake l "$root/tools/coreml/make-models.lua" --out "$models" > "$build/models.log" 2>&1 || {
+    runs_xmake l "$root/tools/coreml/make-models.lua" --out "$models" > "$build/models.log" 2>&1 || {
         echo "FAIL: the containers could not be written, so there is nothing to record:"
         tail -3 "$build/models.log" | sed 's/^/    /'; exit 1; }
 fi
@@ -62,17 +60,7 @@ COREML_RECORDS="$build/system.json" "$build/system" "$models"
 #    that the two sets of classes can sit in one binary. The registry says which names those are:
 #    the classes and protocols this port carries, and the constants it exports -- a constant the
 #    port also defines would be a duplicate of the framework's own.
-python3 - "$registry" "$build/rename.h" <<'PY'
-import glob, json, os, sys
-names = set()
-for path in glob.glob(os.path.join(sys.argv[1], "*.json")):
-    for entry in json.load(open(path))["entries"]:
-        if entry["kind"] in ("class", "protocol", "constant", "function"):
-            names.add(entry["api"].replace("()", ""))
-with open(sys.argv[2], "w") as out:
-    for name in sorted(names):
-        out.write("#define %s Revenant%s\n" % (name, name))
-PY
+runs_xmake l "$runs_checkout/tests/backports/common/registry.lua" names "$registry" "$build/rename.h" class,protocol,constant,function
 
 # Compiles the port from the sources in $1 -- the whole package, its C files and the generated
 # table as well as its Objective-C -- and writes the binary into $2. A mutant is a copy of the whole
@@ -96,122 +84,7 @@ COREML_RECORDS="$build/port.json" "$build/port/run" "$models"
 #    container the release itself refused to load.
 # COREML_DIVERGENT names a container whose prediction numbers are a recorded divergence and is empty
 # by default: there is none, since nn_image's cause was found and fixed (see facts/CoreML/CoreML.md).
-COREML_DIVERGENT=${COREML_DIVERGENT:-} python3 - "$build/system.json" "$build/port.json" "$build/verdict" <<'PY'
-import json, os, sys
-system, port = json.load(open(sys.argv[1])), json.load(open(sys.argv[2]))
-divergent = os.environ.get("COREML_DIVERGENT", "")
-differences, missing, one_sided = [], [], []
-# The keys whose answer is about hardware THIS RELEASE has none of, each named. iOS 6 has no Metal
-# driver and no neural engine at all, so the port's list of compute devices holds the one unit it has,
-# the CPU, where this host's holds a neural engine, a GPU and a CPU; and the two properties that read a
-# device's own hardware answer what a device of this port's knows, which is nothing. Every other key of
-# the family is compared like any other, and an allowance that stops being needed is a failure: a list
-# nobody checks is a list that hides whatever it names.
-HARDWARE = {
-    "devices/all count": "the count of the compute devices this host has against the one this release has",
-    "devices/all 0": "the first of them, which is a neural engine here and the CPU there",
-    "devices/all 1": "the second of them, which only a host with a GPU or a neural engine has",
-    "devices/all 2": "the third of them, which only a host with a GPU or a neural engine has",
-    "devices/model count": "the same count, asked of MLModel",
-    "devices/model 0": "the same first device, asked of MLModel",
-    "devices/model 1": "the same second device, asked of MLModel",
-    "devices/model 2": "the same third device, asked of MLModel",
-    "devices/gpu listed metal device": "a GPU device's own Metal device, and this release has no Metal",
-    "devices/ane listed core count": "a neural engine's own core count, and this release has no engine",
-}
-stale = [key for key in HARDWARE if key in system and key in port and system[key] == port[key]]
-# The containers the release refused to load, read out of its own record rather than named here: one
-# it refused has a model/<name>/error key and one it loaded has none. For such a container the release
-# has no answer at all, so what the port answers for it is not compared against nothing, and it is not
-# a port defect either: the measurement is that the release refuses this container, and what it says
-# when asked is in facts/CoreML/CoreML.md. If it ever loads the container, these keys come back and are
-# compared like any other - which is why the set is read out of the record and not spelled out.
-refused = {key[len("model/"):-len("/error")]: system[key] for key in system
-           if key.startswith("model/") and key.endswith("/error")}
-for key in sorted(set(system) | set(port)):
-    if key in system and key in port:
-        if system[key] != port[key]:
-            differences.append((key, system[key], port[key]))
-        continue
-    # A key of the shape every per-container key has: what was asked, of which container, of what.
-    parts = key.split("/")
-    container = parts[1] if len(parts) > 2 else ""
-    one_sided.append((key, container, "the port" if key in system else "the release",
-                      system.get(key, port.get(key))))
-missing = [row for row in one_sided if row[1] not in refused and row[0] not in HARDWARE]
-# A number may differ by the width of the type it is stored in: the host runs the same arithmetic
-# on its own hardware, in float32, and the port's interpreter is measured against coremltools' own
-# runtime to 1e-5 by tools/coreml/check-predict.sh. Here the tolerance is a float32's, and a number
-# beyond it is still reported -- unless the container is one facts/CoreML/CoreML.md records as a
-# divergence, whose whole point is that the two do not agree.
-TOLERANCE = float(os.environ.get("COREML_TOLERANCE", "1e-3"))
-
-def numeric(key, want, got):
-    """A recorded value is one number or a comma-joined list of them, and it is compared number by
-    number: a string that is not a number at all is not within a tolerance of anything."""
-    left, right = str(want).split(","), str(got).split(",")
-    if len(left) != len(right):
-        return False
-    for one, other in zip(left, right):
-        try:
-            if abs(float(one) - float(other)) > TOLERANCE:
-                return False
-        except ValueError:
-            return False
-    return True
-
-informational, hard = [], []
-for key, want, got in differences:
-    # Recorded, in each case, by what the framework answered and not by how a key is spelled: the
-    # numbers of the prediction of a container this port and this host are a measured divergence
-    # apart, and a key the framework has no answer for -- it raised -- has nothing to compare
-    # against. A prefix rule could not notice either of those ceasing to be true, and a rule that
-    # exempts a prefix is a rule that hides a regression in whatever the prefix names.
-    recorded = ((key.startswith("value/") and divergent and ("/" + divergent + "/") in key)
-                or str(want).startswith("raised "))
-    if key in HARDWARE:
-        informational.append((key, want, got))
-    elif recorded:
-        informational.append((key, want, got))
-    elif key.startswith("value/") and numeric(key, want, got):
-        pass  # within the tolerance of the type, which is not a difference
-    else:
-        hard.append((key, want, got))
-for key, want, got in hard:
-    print("DIFF", key)
-    print("  system", want[:300])
-    print("  port  ", got[:300])
-for key, container, side, value in missing:
-    print("MISSING", key, "- no answer on the side of", side)
-    print("  the side that has it", value[:200])
-for key, container, side, value in one_sided:
-    if container in refused:
-        print("one side only:", key, "- no answer on", side, "; the release refused", container,
-              "with", repr(refused[container])[:120], "and answered nothing else for it")
-for key, want, got in informational:
-    if key in HARDWARE:
-        print("hardware (this release has none of it):", key, "-", HARDWARE[key])
-    else:
-        print("divergent (recorded):", key)
-    print("  system", want[:200])
-    print("  port  ", got[:200])
-for key, container, side, value in one_sided:
-    if key in HARDWARE and side == "the release":
-        print("hardware (this release has none of it):", key, "-", HARDWARE[key],
-              "- and no answer on the port's side either")
-for key in stale:
-    print("STALE ALLOWANCE", key, "- both sides now answer", repr(system[key])[:120],
-          "so the difference this release's hardware causes is gone and the allowance must go with it")
-unanswered = len(one_sided) - len(missing)
-print("compared %d keys, %d differ, %d missing, %d recorded divergences, %d for a container the release refused"
-      % (len(set(system) | set(port)), len(hard), len(missing), len(informational), unanswered))
-# The verdict is written where the rest of the run can read it instead of ending the script here.
-# A red comparison used to raise SystemExit at this line, which is above the mutants: a test that was
-# red for any reason never reached its controls, so a dead mutant could not be seen for as long as the
-# comparison stayed red. The two verdicts are reported together and either one fails the run.
-with open(sys.argv[3], "w") as out:
-    out.write("differs\n" if hard or missing or stale else "same\n")
-PY
+runs_xmake l "$here/compare.lua" "$build/system.json" "$build/port.json" "$build/verdict"
 verdict=$(cat "$build/verdict")
 echo "comparison: $verdict"
 
@@ -265,13 +138,7 @@ mutant() {
     # The mutation is counted before it is applied: `text.replace` on a needle the file does not
     # hold writes the file back unchanged and prints nothing, and a "planted" run over an
     # unplanted file then reports the mutant as applied (2026-10-03).
-    python3 - "$build/mutant/$file" "$from" "$to" <<'PY'
-import sys
-path, old, new = sys.argv[1:4]
-text = open(path).read()
-assert text.count(old) == 1, "%d occurrences of %r in %s" % (text.count(old), old, path)
-open(path, "w").write(text.replace(old, new, 1))
-PY
+    runs_xmake l "$runs_checkout/tests/backports/common/mutants.lua" once "$build/mutant/$file" "$from" "$to"
     outcome=planted
     # Every mutant is named before it runs, so a line the run prints after one of them -- the
     # shell's own report of a job killed by a signal -- belongs to a mutant the reader can see,
