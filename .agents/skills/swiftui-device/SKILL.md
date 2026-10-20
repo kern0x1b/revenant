@@ -1,6 +1,6 @@
 ---
 name: swiftui-device
-description: Reach a real iOS 6 device from this repository — claim it, copy the demo or a probe over with device.lua, take device snapshots with device-shots.sh, and read "Permission denied" or connection-reset failures correctly. Use whenever SwiftUI work needs hardware (not the emulator). The fleet discipline itself (claim, launch, tap, respring, privacy, cleanup) is the workspace skill `device-session`.
+description: Reach a real iOS 6 device for SwiftUI work — claim it, copy files over and back, install the demo and take device snapshots, and read its crash reports with frameworks/SwiftUI/tools/device.lua, and read "Permission denied" or connection-reset failures correctly. Use whenever SwiftUI work needs hardware (not the emulator). The fleet discipline itself (claim, launch, tap, respring, privacy, cleanup) is the workspace skill `device-session`.
 ---
 
 # Device access from SwiftUI
@@ -12,47 +12,38 @@ is specific to SwiftUI.
 
 ## Claim
 
-`xmake device` runs in any directory holding a `device.env` (or `device.NAME.env`). SwiftUI has
-no root xmake project and keeps no `device.env` (`rtpkg/` has none either), so claim from a
-directory that has one — the shared toolchain checkout, or the `DEVICE_ROOT` of `local.env`:
+`xmake device` and `device.lua` both read the phone from a `device.env` (or `device.NAME.env`) in
+the folder they run in; it is git-ignored and never committed. Run both from the top of the
+revenant checkout, with a `device.env` there:
 
 ```
 export REVENANT_DEVICE_HOLDER=<task>
-cd $HOME/Git/projects/ios/revenant            # or "$DEVICE_ROOT"
-xmake device list
-xmake device --minutes=30 claim             # -d NAME (or REVENANT_DEVICE=NAME) picks device.NAME.env
+./xmakew device list
+./xmakew device --minutes=30 claim          # -d NAME (or REVENANT_DEVICE=NAME) picks device.NAME.env
 ```
 
-A claim without a holder errors; `run` and the rest check the claim through
-`REVENANT_DEVICE_HOLDER` only, so keep it exported for the whole session. `xmake device` has no
-copy or fetch action: its actions are install, uninstall, log, run, where, list, claim, release.
+A claim without a holder errors, and every action of `device.lua` refuses a phone that
+`REVENANT_DEVICE_HOLDER` has not claimed, so keep it exported for the whole session. Running a
+command on the phone and reading its log are `./xmakew device run` and `./xmakew device log`.
 
-## Copy, fetch, run: device.lua
-
-```
-export REVENANT_MODULES=$HOME/Git/projects/ios/revenant/modules
-set -a; . $HOME/Git/projects/ios/revenant/device.env; set +a     # DEVICE_HOST/PORT/UDID/PASSWORD
-xmake l device.lua copy <local> <remote>
-xmake l device.lua fetch <remote> <local>
-xmake l device.lua run "<command>" [SECONDS]
-xmake l device.lua log [SECONDS]
-```
-
-`device.lua` imports Revenant's `device` module from `REVENANT_MODULES` and reads the phone only from
-the `DEVICE_*` environment variables, never from a `device.env`; the module still checks the claim
-against `REVENANT_DEVICE_HOLDER`.
-
-## Device snapshots: device-shots.sh
+## device.lua
 
 ```
-./device-shots.sh [--live | --gesture] SCENARIO...
+./xmakew l frameworks/SwiftUI/tools/device.lua copy LOCAL REMOTE
+./xmakew l frameworks/SwiftUI/tools/device.lua fetch REMOTE LOCAL
+./xmakew l frameworks/SwiftUI/tools/device.lua shots [--live | --gesture] SCENARIO...
+./xmakew l frameworks/SwiftUI/tools/device.lua crash [REPORT.plist]
 ```
 
-It installs `SwiftUI/out/SwiftUIDemo.app`, renders each scenario in the app and fetches the
-results into `device-shots/` (git-ignored). It reads `DEVICE_ROOT` (a toolchain port directory whose
-`device.env` names the phone) and `REVENANT_DEVICE_HOLDER` from `local.env`, and talks to the phone
-through the Conan CLI `revenant --root "$DEVICE_ROOT" device run|copy|fetch`, which checks no claim:
-claim with `xmake device` first.
+`shots` installs the built `SwiftUIDemo.app` (`./xmakew build -P . SwiftUIDemo` first) into
+`/Applications`, launches it through SpringBoard with `/private/var/tmp/sblaunch`, and for each
+scenario fetches what the app rendered in its own process (`--live`: a picture of the real screen;
+`--gesture`: the screen when the scenario's touches have opened the row, and after them). The
+pictures go to `$HOME/.revenant/cache/<task>/swiftui/device-shots/`.
+
+`crash` fetches the demo's `LatestCrash-SwiftUIDemo.plist` from the phone (or reads REPORT) and
+symbolicates its app frames against the built demo; `frameworks/SwiftUI/tools/crash.lua` does the
+reading.
 
 ## Traps
 
