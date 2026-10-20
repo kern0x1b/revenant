@@ -17,8 +17,6 @@
 # comparison can tell the port from the system - and one run printing both was reading as if the plant
 # had been the thing that passed.
 set -eu
-echo "FAIL host/netext-requests/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PYEOF at line 106" >&2
-exit 1
 
 mode=clean
 plant=apply
@@ -68,8 +66,8 @@ for name in attribution requiresDNSSECValidation allowsPersistentDNS allowsUltra
         b=$(grep "^image.$name.$half	" "$W/B.txt" | cut -f2)
         a=$(grep "^image.$name.$half	" "$W/A.txt" | cut -f2)
         case "$b" in
-            "$root"/*) ;;
-            *) echo "  FAIL $name.$half: B answered from '$b', which is not this worktree's object"; bad=$((bad + 1)) ;;
+            "$W/B") ;;
+            *) echo "  FAIL $name.$half: B answered from '$b', which is not B's own build of the port's object"; bad=$((bad + 1)) ;;
         esac
         case "$a" in
             "$root"/*) echo "  FAIL $name.$half: A answered from the port's own build ('$a')"; bad=$((bad + 1)) ;;
@@ -103,16 +101,12 @@ if [ "$mode" = mutation ]; then
     scratch="$W/scratch"
     mkdir -p "$scratch"
     if [ "$plant" = apply ]; then
-        if ! python3 - "$src" "$scratch/mutant.m" <<'PYEOF'
-import sys
-source, target = sys.argv[1], sys.argv[2]
-text = open(source).read()
-mark = "    NSNumber *value = [NSURLProtocol propertyForKey:key inRequest:request];\n    return value ? value.boolValue : NO;"
-if text.count(mark) != 1:
-    print("the default to break is not in the source once")
-    raise SystemExit(1)
-open(target, "w").write(text.replace(mark, "    NSNumber *value = [NSURLProtocol propertyForKey:key inRequest:request];\n    return value ? value.boolValue : YES;", 1))
-PYEOF
+        mark='    NSNumber *value = [NSURLProtocol propertyForKey:key inRequest:request];
+    return value ? value.boolValue : NO;'
+        plant='    NSNumber *value = [NSURLProtocol propertyForKey:key inRequest:request];
+    return value ? value.boolValue : YES;'
+        cp "$src" "$scratch/mutant.m"
+        if ! runs_xmake l "$here/../../common/substitute.lua" once "$scratch/mutant.m" "$mark" "$plant"
         then
             echo "RUN FAILED: the plant did not apply" >&2
             exit 1
