@@ -17,7 +17,7 @@ repository's root `AGENTS.md` applies.
 | `src/runtime/` | The armv7 support runtime: message routing, block bridging, weak references, ivar-layout reconciliation, Objective-C compatibility shims. Compiled per translation, because it includes the state header xlate writes for each app. |
 | `tools/` | `translate.lua` and `ipa.lua`, the pipeline; `env.lua` (tools and paths from the xmake configuration), `macho.lua` (the Mach-O edits), `corpus.lua` (shared by the corpus checks), `imports.lua` and `absent_on_target.lua`. |
 | `tests/` | Small self-contained test programs and apps: the translator's regression suite. [The corpus](../../reference/recompiler/corpus.md) says what each check proves. |
-| `tools/perf/` | The on-device translated-versus-native benchmark. |
+| `tests/perf/` | The on-device translated-versus-native benchmark. |
 | `targets/` | Not a folder of the repository: its two `*-includes.h` lists are in `include/`. A real-world app's folder, `targets/<app>/`, is untracked and lives only on the disk that builds it. Everything under it, `*-out*`, `*-arm64`, `*.app`, `*.ipa`, `*.log`, is generated or investigative material. Never read it as source, never grep it wholesale, never move it. |
 
 Rellume, farmdec and BlocksRuntime are packages of `third_party/`, pinned by commit with our changes as patches.

@@ -15,7 +15,7 @@ Mach-O that a real iOS 6 device (or an emulator) loads and runs as a normal app.
 | `tools/translate.lua` | The end-to-end pipeline: arm64 executable to armv7 iOS 6 executable. |
 | `tools/ipa.lua` | The same for a whole `.ipa`, its embedded frameworks lifted as guest images. |
 | `tests/` | Small self-contained test programs and apps, the translator's regression suite. |
-| `tools/perf/` | The on-device translated-versus-native benchmark. |
+| `tests/perf/` | The on-device translated-versus-native benchmark. |
 
 Rellume, farmdec and BlocksRuntime are packages of `third_party/`, pinned by commit with our changes as patches.
 Rellume is built for AArch64 only, the one architecture xlate lifts.

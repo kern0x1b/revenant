@@ -1,5 +1,7 @@
 local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
+local owners = import("lib.owners", {rootdir = os.scriptdir(), anonymous = true})
 local braces = import("lib.braces", {rootdir = os.scriptdir(), anonymous = true})
+
 
 local MODULES = {Swift = true, SwiftUI = true, SwiftUICore = true, Foundation = true, UIKit = true, Combine = true}
 
@@ -264,8 +266,180 @@ function collect()
     return out
 end
 
-function main(...)
+local function tree_rows()
     for _, row in ipairs(collect()) do
         print(row.owner .. "\t" .. row.kind .. "\t" .. row.name .. "\t" .. row.file)
+    end
+end
+
+
+local KEYWORDS = {"struct", "class", "enum", "protocol", "actor", "typealias"}
+
+local function type_name(body)
+    for at = 1, #body do
+        if text.boundary(body, at) then
+            for _, keyword in ipairs(KEYWORDS) do
+                if text.startswith(body, keyword, at) then
+                    local _, space = string.find(body, "^%s+", at + #keyword)
+                    local name = space and string.match(body, "^[%w_]+", space + 1)
+                    if name then
+                        return name
+                    end
+                end
+            end
+        end
+    end
+    return nil
+end
+
+local function declaration(body)
+    if text.has_word(body, "subscript") then
+        return "subscript", "subscript"
+    end
+    if text.has_word(body, "init") then
+        return "init", "init"
+    end
+    local func_name = text.name_after(body, "func ")
+    if func_name then
+        return "func", func_name
+    end
+    local var_name = text.name_after(body, "var ")
+    if var_name then
+        return "var", var_name
+    end
+    local case_name = text.name_after(body, "case ")
+    if case_name then
+        return "const", case_name
+    end
+    local type = type_name(body)
+    if type then
+        return "type", type
+    end
+    return nil
+end
+
+local function scan_sdk(file, want, out, seen)
+    local lines = text.split(io.readfile(file), "\n")
+    local pending = ""
+    for _, row in ipairs(owners.walk(lines)) do
+        local s = text.strip(row.line)
+        if s == "" or text.startswith(s, "#") then
+            pending = ""
+        elseif row.owner == nil then
+            if text.startswith(s, "@") then
+                pending = s
+            end
+        else
+            local first = text.partition(row.owner, ".")
+            if want[first] then
+                if string.find(pending, "@available%(iOS,%s*unavailable") then
+                    pending = ""
+                else
+                    local brace = string.find(s, "{", 1, true)
+                    local body = brace and string.sub(s, 1, brace - 1) or s
+                    if body ~= "" then
+                        local kind, name = declaration(body)
+                        if kind then
+                            local key = row.owner .. "\t" .. kind .. "\t" .. name
+                            if not seen[key] then
+                                seen[key] = true
+                                out[#out + 1] = {row.owner, kind, name}
+                            end
+                        end
+                        pending = ""
+                    end
+                end
+            end
+        end
+    end
+end
+
+local function sdk_rows(want_file)
+    local sdk = import("lib.tree", {rootdir = os.scriptdir(), anonymous = true}).sdk()
+    local swiftui = path.join(sdk, "System", "Library", "Frameworks", "SwiftUI.framework", "Modules",
+        "SwiftUI.swiftmodule", "arm64e-apple-ios.swiftinterface")
+    local swiftuicore = path.join(sdk, "System", "Library", "Frameworks", "SwiftUICore.framework", "Modules",
+        "SwiftUICore.swiftmodule", "arm64e-apple-ios.swiftinterface")
+
+    local want = {}
+    for _, line in ipairs(text.split(io.readfile(want_file), "\n")) do
+        local s = text.strip(line)
+        if s ~= "" and not text.startswith(s, "#") then
+            want[s] = true
+        end
+    end
+
+    local out, seen = {}, {}
+    scan_sdk(swiftui, want, out, seen)
+    scan_sdk(swiftuicore, want, out, seen)
+    for _, row in ipairs(out) do
+        print(text.join("\t", row))
+    end
+end
+
+local COLUMNS = 3
+local OURS = 4
+
+local function lines_of(content)
+    local lines = text.split(content, "\n")
+    if lines[#lines] == "" then
+        lines[#lines] = nil
+    end
+    return lines
+end
+
+local function convert(file)
+    local rows, keys = {}, {}
+    for number, line in ipairs(lines_of(io.readfile(file))) do
+        if text.strip(line) ~= "" then
+            local parts = text.split(line, "\t")
+            local row = nil
+            if #parts == OURS then
+                row = {parts[1], parts[2], parts[3]}
+            elseif #parts == COLUMNS then
+                row = parts
+            else
+                io.stderr:write(string.format(
+                    "%s: line %d has %d columns, the %d ours.lua writes or the %d surf-diff reads. Refusing.\n",
+                    file, number, #parts, OURS, COLUMNS))
+                os.exit(1)
+            end
+            local key = text.join("\t", row)
+            if not keys[key] then
+                keys[key] = row
+                rows[#rows + 1] = row
+            end
+        end
+    end
+    table.sort(rows, function(a, b)
+        for i = 1, COLUMNS do
+            if a[i] ~= b[i] then
+                return a[i] < b[i]
+            end
+        end
+        return false
+    end)
+    return rows
+end
+
+local function collapse(file)
+    local rows = convert(file)
+    for _, row in ipairs(rows) do
+        print(text.join("\t", row))
+    end
+    io.stderr:write(string.format("# %d rows of three columns from %s\n", #rows, file))
+end
+
+local USAGE = "usage: ./xmakew l frameworks/SwiftUI/tools/surface-rows.lua sdk WANT | tree | collapse OURS.tsv"
+
+function main(action, argument)
+    if action == "sdk" and argument then
+        sdk_rows(argument)
+    elseif action == "tree" and argument == nil then
+        tree_rows()
+    elseif action == "collapse" and argument then
+        collapse(argument)
+    else
+        raise(USAGE)
     end
 end

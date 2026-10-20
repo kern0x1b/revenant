@@ -4,10 +4,9 @@ package("webkit-device-tools")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
 
-    local tools = path.join(os.scriptdir(), "..", "..", "..", "tools")
     local digests = {}
     local inputs = table.join({path.join(os.scriptdir(), "xmake.lua")},
-                              os.files(path.join(tools, "*.c")), os.files(path.join(tools, "entitlements", "*.xml")))
+                              os.files(path.join(os.scriptdir(), "*.c")), os.files(path.join(os.scriptdir(), "entitlements", "*.xml")))
     table.sort(inputs)
     for _, file in ipairs(inputs) do
         table.insert(digests, path.filename(file) .. "=" .. hash.sha256(file))
@@ -21,8 +20,7 @@ package("webkit-device-tools")
     on_install("iphoneos", function (package)
         local toolchain = assert(package:toolchains(), "webkit-device-tools is built with the apple-ios toolchain")[1]
         toolchain:load()
-        local member = path.join(package:scriptdir(), "..", "..", "..")
-        local common = {"-target", package:arch() .. "-apple-ios", "-miphoneos-version-min=" .. toolchain:config("deployment"),
+        local common ={"-target", package:arch() .. "-apple-ios", "-miphoneos-version-min=" .. toolchain:config("deployment"),
                         "-isysroot", toolchain:config("sdkdir")}
         if toolchain:config("linker_version") then
             table.join2(common, {"-mlinker-version=" .. toolchain:config("linker_version")})
@@ -38,15 +36,14 @@ package("webkit-device-tools")
         os.mkdir(package:installdir("bin"))
         for _, tool in ipairs(TOOLS) do
             local frameworks = tool == "revtouch" and {"-framework", "IOKit", "-framework", "CoreFoundation"} or {}
-            os.vrunv(toolchain:tool("cc"), table.join(compiled, linker, {path.join(tools, tool .. ".c"), "-o", path.join(package:installdir("bin"), tool)}, frameworks))
+            os.vrunv(toolchain:tool("cc"), table.join(compiled, linker, {path.join(package:scriptdir(), tool .. ".c"), "-o", path.join(package:installdir("bin"), tool)}, frameworks))
         end
         os.mkdir(package:installdir("licenses"))
-        os.vcp(path.join(member, "LICENSE"), package:installdir("licenses"))
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "..", "..", "toolchain", "modules")
-        local signing = import("apple.signing", {rootdir = modules, anonymous = true})
+        os.vcp(path.join(package:scriptdir(), "..", "..", "LICENSE"), package:installdir("licenses"))
+        local signing = import("@addon.revenant.apple.signing", {anonymous = true})
         local ldid = path.join(package:dep("ldid"):installdir(), "bin", "ldid")
         for _, tool in ipairs(TOOLS) do
-            local entitlements = path.join(member, "tools", "entitlements", tool .. ".xml")
+            local entitlements = path.join(package:scriptdir(), "entitlements", tool .. ".xml")
             signing.sign(ldid, path.join(package:installdir("bin"), tool), {entitlements = os.isfile(entitlements) and entitlements or nil})
         end
     end)

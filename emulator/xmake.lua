@@ -90,7 +90,7 @@ add_rules("emulator.module")
 
 includes("src/mach", "src/foundation", "src/device_state", "src/filesystem", "src/network", "src/storage",
          "src/telephony", "src/media", "src/bluetooth", "src/crypto", "src/graphics", "src/kernel", "src/debug",
-         "src/host", "src/runtime", "src/app", "tools/guest", "tools/glsl")
+         "src/host", "src/runtime", "src/app", "src/glsl", "tests/guest/dns-probe")
 
 target("emulator_block_profile_test")
     set_kind("binary")

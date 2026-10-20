@@ -23,7 +23,7 @@ local function targetfile(name)
 end
 
 function sorted(list)
-    import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "toolchain", "modules"), anonymous = true}).sort(list)
+    import("@addon.revenant.byteorder", {anonymous = true}).sort(list)
     return list
 end
 
@@ -43,7 +43,6 @@ function main()
     local env = {
         root = root,
         recompiler = path.join(root, "recompiler"),
-        modules = path.join(root, "toolchain", "modules"),
         builddir = path.absolute(config.builddir(), root),
         xlate = targetfile("xlate"),
         xlgen = targetfile("xlgen"),

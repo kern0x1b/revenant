@@ -1,6 +1,6 @@
 # The corpus and the benchmark
 
-`tests/` holds the translator's own regression programs and `tools/perf/` its benchmark. Their sources are C, Objective-C,
+`tests/` holds the translator's own regression programs and `tests/perf/` its benchmark. Their sources are C, Objective-C,
 assembly and Swift. The steps that build, translate and check them are Lua run by xmake: a `check.lua` or `build.lua`
 beside the sources, and the shared parts in `tools/` (`env.lua`, `corpus.lua`, `translate.lua`, `macho.lua`).
 

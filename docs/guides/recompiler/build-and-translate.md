@@ -30,7 +30,7 @@ A whole `.ipa` is translated with
 
 The translator takes a compiled arm64 Mach-O, never source. For an app under `targets/` that means the decrypted
 executable and frameworks of its released `.ipa`, never objects built from an edited copy of its source. `tests/` and
-`tools/perf/` build their own arm64 input from their own source.
+`tests/perf/` build their own arm64 input from their own source.
 
 ## Guest libraries, and what a bind names
 

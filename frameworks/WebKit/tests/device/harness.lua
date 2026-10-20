@@ -5,7 +5,6 @@ import("core.base.socket")
 local tests = path.normalize(path.absolute(os.scriptdir()))
 local member = path.normalize(path.join(tests, "..", ".."))
 local revenant = path.normalize(path.join(member, "..", ".."))
-local toolchain_modules = path.join(revenant, "toolchain", "modules")
 
 local types = {html = "text/html; charset=utf-8", js = "application/javascript", css = "text/css", jpg = "image/jpeg",
                jpeg = "image/jpeg", png = "image/png", svg = "image/svg+xml", json = "application/json", txt = "text/plain"}
@@ -190,7 +189,7 @@ end
 local phone_methods = {}
 
 function phone()
-    local device = import("device", {rootdir = toolchain_modules, anonymous = true})
+    local device = import("@addon.revenant.device", {anonymous = true})
     local settings = device.bind(revenant)
     return object(phone_methods, {device = device, settings = settings})
 end

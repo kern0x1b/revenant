@@ -215,7 +215,7 @@ Dates are the day the change was measured on the device, not the day it compiled
   ever promoted, so none of it ran. Frames needed three further gates opened, each
   false for its own reason, and their layer is keyed by the element that owns the
   frame.
-- `tools/revpid.c`, which lists pids by name. The device has no `ps`, and `revmem`
+- `src/device-tools/revpid.c`, which lists pids by name. The device has no `ps`, and `revmem`
   takes a pid, so a process's memory could not be measured without it.
 
 - **Web Crypto that performs its operations.** AES-GCM, HMAC, HKDF and AES key

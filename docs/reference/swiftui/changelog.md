@@ -91,7 +91,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   typechecks are the tests of `SwiftUITypeChecks`, and building `SwiftUI` begins with the ledger check.
 - Everything runs through revenant's `./xmakew`: the emulator runs, the snapshots and the timings are
   `tools/emulate.lua`, the device runs `tools/device.lua`, the API diff `tools/api-surface.lua`, Apple's 26.2
-  surface `tools/apple-surface.lua` (with the walker as the host project `Tests/Surface/`). The tools take the
+  surface `tools/api-surface.lua apple` (with the walker as the host project `Tests/Surface/`). The tools take the
   26.2 SDK and their run folder from `toolchain/modules/workspace.lua` and write nothing into the tree.
 
 ### Removed
