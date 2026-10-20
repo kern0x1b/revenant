@@ -171,7 +171,7 @@ local function surface_rows(rows, name, surface)
     end
 end
 
-function inherit_class_floor(rows)
+local function inherit_class_floor(rows)
     local floor = {}
     for _, row in ipairs(rows) do
         if row.lang == "objc" and (row.kind == "class" or row.kind == "protocol") and row.introduced ~= "" then
@@ -228,7 +228,7 @@ local function swift_module()
     return import("swiftinterface", {rootdir = os.scriptdir(), anonymous = true})
 end
 
-function walk_sdk(sdk_path, only, with_swift, with_include)
+local function walk_sdk(sdk_path, only, with_swift, with_include)
     local version = sw.sdk_version(sdk_path)
     local target = "arm64-apple-ios" .. version
     local only_set = only and set_of(only) or nil

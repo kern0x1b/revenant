@@ -59,7 +59,7 @@ function read_json(file)
     return held
 end
 
-function load_cache_tsv(stem, caches)
+local function load_cache_tsv(stem, caches)
     local attr = {}
     for line in io.lines(path.join(caches or CACHES, stem .. ".tsv")) do
         local sym, fw = line:match("^([^\t]*)\t?(.*)$")
@@ -70,7 +70,7 @@ function load_cache_tsv(stem, caches)
     return attr
 end
 
-function build_index(caches)
+local function build_index(caches)
     local b60 = load_cache_tsv("6.0", caches)
     local ladder = {}
     for _, rung in ipairs(LADDER) do
@@ -79,7 +79,7 @@ function build_index(caches)
     return b60, ladder
 end
 
-function macho_binaries(appdir)
+local function macho_binaries(appdir)
     local out = {}
     for _, p in ipairs(os.files(path.join(appdir, "**"))) do
         local ext = p:match("%.([^./]+)$")
@@ -91,7 +91,7 @@ function macho_binaries(appdir)
     return out
 end
 
-function scan_symbols(binary)
+local function scan_symbols(binary)
     local undefined, defined = {}, {}
     for line in os.iorunv("nm", {"-m", binary}):gmatch("[^\n]+") do
         local toks = {}
@@ -119,7 +119,7 @@ function scan_symbols(binary)
     return undefined, defined
 end
 
-function sym_kind(sym)
+local function sym_kind(sym)
     local name = sym:match("^_OBJC_CLASS_%$_(.+)$") or sym:match("^_OBJC_METACLASS_%$_(.+)$")
     if name then
         return "class", name
@@ -131,7 +131,7 @@ function sym_kind(sym)
     return "symbol", sym
 end
 
-function categorize(fw)
+local function categorize(fw)
     if fw:sub(-6) ~= ".dylib" then
         return "FRAMEWORK"
     end
@@ -147,7 +147,7 @@ function categorize(fw)
     return "SYSLIB"
 end
 
-function load_store(missing_ok)
+local function load_store(missing_ok)
     if os.isfile(STORE) then
         return read_json(STORE)
     end
@@ -259,7 +259,7 @@ function load_registry()
     return reg
 end
 
-function load_reg_kinds()
+local function load_reg_kinds()
     if not os.isfile(REGISTRY_TSV) then
         raise("demand.lua: registry export not found at %s (REVENANT_REGISTRY_TSV). load_reg_kinds() has "
             .. "nothing to read.", REGISTRY_TSV)
@@ -287,7 +287,7 @@ function load_reg_kinds()
     return kinds
 end
 
-function carried_status(reg, kind, name, framework)
+local function carried_status(reg, kind, name, framework)
     if A5_UNREACHABLE[framework] then
         return "n/a-A5"
     end
@@ -300,7 +300,7 @@ function carried_status(reg, kind, name, framework)
     return "gap?"
 end
 
-function is_swift_mangled(name)
+local function is_swift_mangled(name)
     return name:sub(1, 3) == "_$s" or name:sub(1, 3) == "_$S" or name:sub(1, 2) == "$s" or name:sub(1, 2) == "$S"
 end
 

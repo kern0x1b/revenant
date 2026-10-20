@@ -113,7 +113,7 @@ local function availability_at(text, at, word)
             unavailable = text:sub(after_obsoleted, after_obsoleted + 11) == " Unavailable"}
 end
 
-function availability_search(text, words)
+local function availability_search(text, words)
     local from = 1
     while true do
         local best, best_word = nil, nil
@@ -137,7 +137,7 @@ end
 local ATTRIBUTE_WORDS = {"ios", "maccatalyst"}
 local AVAILABILITY_WORDS = {"ios"}
 
-function anonymous_name(name)
+local function anonymous_name(name)
     return name:find("^col:%d") ~= nil or name:find("^line:%d") ~= nil or name:find("/", 1, true) ~= nil
         or name:find("%.h:%d") ~= nil
 end
@@ -517,12 +517,12 @@ function newest_macos_sdk()
     return found[#found].folder
 end
 
-function cryptex_frameworks(sdk)
+local function cryptex_frameworks(sdk)
     local folder = path.join(sdk, "System", "Cryptexes", "OS", "System", "Library", "Frameworks")
     return os.isdir(folder) and folder or nil
 end
 
-function subframeworks(sdk)
+local function subframeworks(sdk)
     local folder = path.join(sdk, "System", "Library", "SubFrameworks")
     return os.isdir(folder) and folder or nil
 end
@@ -596,7 +596,7 @@ function cleanup()
     open_dumps = {}
 end
 
-function dump_headers(command, text)
+local function dump_headers(command, text)
     local folder = workspace.fresh("surface-walk")
     open_dumps[folder] = true
     local stem = path.join(folder, "dump")
@@ -616,7 +616,7 @@ function dump_headers(command, text)
             size = os.isfile(stdout_file) and os.filesize(stdout_file) or 0}
 end
 
-function dump_lines(dump)
+local function dump_lines(dump)
     return io.lines(dump.stdout_file)
 end
 
@@ -852,7 +852,7 @@ end
 
 local Release = {}
 
-function release_from(file, name)
+local function release_from(file, name)
     if not os.isfile(file) then
         raise("no class inventory of iOS %s at %s", name or file, file)
     end
@@ -945,7 +945,7 @@ function Release:answers(owner, side, selector)
     return false
 end
 
-function setter_of(name)
+local function setter_of(name)
     return "set" .. name:sub(1, 1):upper() .. name:sub(2) .. ":"
 end
 
