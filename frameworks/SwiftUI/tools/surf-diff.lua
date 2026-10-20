@@ -159,7 +159,7 @@ local function read(file, allow_empty)
         return nil, string.format(
             "%s: line %d has %d tab-separated column(s), the %d this diff reads are owner/kind/name; %d line(s) in all "
             .. "(first at line %d). Refusing to read the file as the empty set: the partition below would hold vacuously. "
-            .. "Use the artifact that has three columns (frameworks/SwiftUI/docs/surface.md says what each one is).",
+            .. "Use the artifact that has three columns (docs/reference/swiftui/surface.md says what each one is).",
             file, number, found, COLUMNS, #bad, number)
     end
     if #rows == 0 and not allow_empty then

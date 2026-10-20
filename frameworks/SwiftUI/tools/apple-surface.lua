@@ -3,7 +3,7 @@ local tree = import("lib.tree", {rootdir = os.scriptdir(), anonymous = true})
 local ENTRY = {"Swift", "SwiftUI", "SwiftUICore", "Foundation", "CoreFoundation", "Combine", "Observation", "CoreGraphics", "UIKit"}
 
 local function surftool()
-    local project = tree.root("Tests", "Surface")
+    local project = tree.root("tests", "surface")
     local build = tree.run("surface", "build")
     local envs = {XMAKE_CONFIGDIR = tree.run("surface", "config")}
     for _, argv in ipairs({{"f", "-P", project, "-o", build, "-y"}, {"build", "-P", project}}) do

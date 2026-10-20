@@ -22,8 +22,8 @@ cancellation. The time-based cases use `TestScheduler` in `Harness.swift`, a typ
 to the public `Scheduler` protocol whose time the case drives, so a time-based operator is
 the same on both sides whatever the host's clock is doing.
 
-Every rule patches `0005` to `0008` of `packages/frameworks/combine/patches` implement was taken from this
-table, and `packages/frameworks/combine/facts/Combine/CombineKit.md` has each rule with what the host does.
+Every rule patches `0005` to `0008` of `../frameworks/Combine/patches` implement was taken from this
+table, and `../docs/reference/combine/CombineKit.md` has each rule with what the host does.
 
 ## What it builds, and what it cannot
 
@@ -44,7 +44,7 @@ The Foundation integration is not in the host copy — `src/Combine/Foundation` 
 `src/Combine/Schedulers` are removed — for the same reason: it is where
 `NotificationCenter.Publisher`, `Timer.publish`, the run loop and operation queue schedulers
 and KVO live. Those are measured on the device instead, by the probe in
-`packages/frameworks/combine/facts/Combine/CombineKit.md`.
+`../docs/reference/combine/CombineKit.md`.
 
 ## A module that does not build
 
@@ -62,7 +62,7 @@ DIFFERENTIAL: identical
 `coverage.sh` builds the armv7 module the way the package builds it, synthesises the
 interface out of it, and counts the corpus rows it carries with the corpus's own tool on both
 sides. It then compares the count — and each family of the rows it does not carry — with the
-table in `packages/frameworks/combine/facts/Combine/CombineKit.md`, and fails when they disagree. The
+table in `../docs/reference/combine/CombineKit.md`, and fails when they disagree. The
 numbers in the facts are a check, not a claim. With one family miscounted by one:
 
 ```

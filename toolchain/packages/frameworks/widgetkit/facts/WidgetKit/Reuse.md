@@ -25,7 +25,7 @@ things a port of it would most likely be built from, and found nothing reusable:
   crutch is filed in `coordination/crutches.md`, open until Foundation Swift r2 carries it). Nothing
   here reimplements it.
 * **SwiftUI's `SwiftUI`** — the source the ten `View.tip*` rows are routed to, and the reason they
-  are not declared here: SwiftUI (`frameworks/SwiftUI/Sources/` in revenant) has
+  are not declared here: SwiftUI (`frameworks/SwiftUI/src/` in revenant) has
   `View` with its `body` requirement, `ShapeStyle`, `Edge`, `Binding`,
   `PresentationBackgroundInteraction`, `EnvironmentValues` and `EnvironmentKey`, but it is compiled
   only into the SwiftUI targets of the revenant project and there is no `revenant@swiftui` package to depend on

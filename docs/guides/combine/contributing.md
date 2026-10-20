@@ -12,9 +12,9 @@ iOS 6.1.3, armv7). It is the reactive layer under [SwiftUI]'s SwiftUI on the
 [toolchain] toolchain.
 
 There is no copy of the code here. `toolchain/packages/frameworks/combine/xmake.lua` pins
-OpenCombine at one commit and applies the series in
-`toolchain/packages/frameworks/combine/patches/`; this folder holds the targets that build the
-patched tree inside revenant and run upstream's tests against it.
+OpenCombine at one commit and applies the series in `frameworks/Combine/patches/`; this
+module holds the targets that build the patched tree inside revenant and run upstream's
+tests against it.
 
 ### The one design decision
 
@@ -52,11 +52,13 @@ Consequences to respect:
 | Path | Holds |
 | --- | --- |
 | `xmake.lua` | `CombineHelpers` and `Combine` on the tree `revenant@combine` installs with `sources = true`; `CombineXCTest` and `CombineTests`, upstream's tests as a daemon; `CombineGenerated`, the gyb check |
-| `Tests/XCTest.swift` | the XCTest API shim the tests compile against (`XCT_SKIP`, `XCT_FILTER`, `xct-skip.txt`, `xct-resume.txt` at run time) |
-| `Tests/skip.txt` | the tests left out of the iOS 6 run, one `Class` or `Class.test` per line (see `docs/TEST-RESULTS.md`) |
-| `Tests/control` | the Debian control of the test daemon |
+| `patches/` | the series the recipe applies, one patch per file; their `sha256` digests are in the recipe |
+| `tests/XCTest.swift` | the XCTest API shim the tests compile against (`XCT_SKIP`, `XCT_FILTER`, `xct-skip.txt`, `xct-resume.txt` at run time) |
+| `tests/data/skip.txt` | the tests left out of the iOS 6 run, one `Class` or `Class.test` per line (see `docs/reference/combine/test-results.md`) |
+| `tests/control` | the Debian control of the test daemon |
 | `tools/discover.lua` | finds upstream's tests and writes the `main.swift` that runs them |
-| `../../toolchain/packages/frameworks/combine/` | the recipe and the patches |
+| `../../docs/` at the top of revenant | `guides/combine/` (this guide, build and test, usage), `reference/combine/` (features, changelog, test results, the third-party notice), `explanation/combine/` (how it works) |
+| `../../toolchain/packages/frameworks/combine/` | the recipe: the pin of OpenCombine and the list of patches |
 
 ## 3. How to build, and how to check
 
@@ -74,7 +76,7 @@ Consequences to respect:
 ### Changing the code
 
 Work in a clone of OpenCombine at the pinned commit with the series applied
-(`git am toolchain/packages/frameworks/combine/patches/*.patch`), commit, and regenerate the
+(`git am frameworks/Combine/patches/*.patch`), commit, and regenerate the
 series with `git format-patch --zero-commit --no-renames` from the pinned
 commit. Put the new `sha256` of each file in the recipe's `patches` list. A
 change to a gyb template is followed by its expansion with Revenant's gyb, never
@@ -101,16 +103,7 @@ patch's message.
 OpenCombine is at <https://github.com/OpenCombine/OpenCombine>. To take a newer
 commit, move the pin in the recipe, rebuild the series on it and check the
 targets and the tests. Do not re-add public product branding beyond what the
-MIT license requires (the copyright notice in `LICENSE`).
-
----
-
-## Workspace context
-
-This repository is part of `$HOME/Git/projects/ios/`. The workspace contract
-that applies to all projects here lives in `$HOME/Git/projects/ios/AGENTS.md`
-(§2–§6); read it for rules on the agent work area (`.agent-work/`), git
-worktrees (`.agent-work/worktrees/`), delegation, safety, and shared skills.
+MIT license requires (the copyright notice in `docs/reference/combine/third-party.md`).
 
 [toolchain]: https://github.com/kern0x1b/revenant/tree/main/toolchain
 [SwiftUI]: https://github.com/kern0x1b/revenant/tree/main/frameworks/SwiftUI

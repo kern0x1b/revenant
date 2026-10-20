@@ -10,7 +10,7 @@
 `@StateObject`, `ObservableObject` с `@Published`, `navigationTitle`.
 
 Сборка: `swiftc -target arm64-apple-ios14.0 -sdk <SDK 16.4> -F fw -O -wmo -parse-as-library`, где `app.swift` — это
-`../Tests/API/app.swift`.
+`frameworks/SwiftUI/tests/data/api/app.swift`.
 `fw/SwiftUI.framework` — локальная копия фреймворка из SDK, которую делает `tools/api-surface.lua prepare` в папке прогона, с правкой одной строки `swiftinterface`
 (`os_log` со строковой интерполяцией не пересобирается компилятором 6.4). Копия нужна только чтобы
 скомпилировать подопытное приложение на этой машине; ничего из Apple не распространяется.
@@ -47,7 +47,7 @@
 
 ## Воспроизведение нашей реализацией
 
-`Sources/` собран под `arm64-apple-ios14.0` против настоящего SDK
+`frameworks/SwiftUI/src/` собран под `arm64-apple-ios14.0` против настоящего SDK
 (`-D REV_SYSTEM_COMBINE` — вместо Combine берётся системный Combine, `-D REV_NO_FIELD_REFLECTION` —
 на месте `_forEachField`, которого нет в prebuilt stdlib, заглушка; в порте этот SPI есть, потому что
 рантайм собирается из исходников).

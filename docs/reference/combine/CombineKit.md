@@ -5,7 +5,7 @@ OpenCombine and a layer of its own, `packages/frameworks/combine/files/CombineKi
 gap between that module and the Combine Apple's SDK 26.2 declares. The layer was compiled
 into the same module, so it saw the fork's internal helpers, and no vendored file was edited.
 From `2026.10.19` the package builds OpenCombine itself with the patches in
-`packages/frameworks/combine/patches/`: the layer's files are patches `0005` to `0008`, and patch `0001`
+`frameworks/Combine/patches/`: the layer's files are patches `0005` to `0008`, and patch `0001`
 declares what the fork nested under `OCombine` at Apple's level, so the divergence the
 73 rows below describe is gone there. The counts below were not taken again.
 

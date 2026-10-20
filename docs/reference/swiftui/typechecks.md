@@ -1,6 +1,6 @@
 # Builder typechecks
 
-`Tests/TypeChecks/` holds snippets the result builders must accept or refuse, each one a test of the
+`frameworks/SwiftUI/tests/typechecks/` holds snippets the result builders must accept or refuse, each one a test of the
 `SwiftUITypeChecks` target: `./xmakew test -P . SwiftUITypeChecks/*` from the top of revenant, after the `SwiftUI`
 target is built. A positive snippet passes when it compiles with nothing said; a negative one passes when the
 compiler refuses it and its first error names the reason the snippet exists. Each test's compiler output is in
@@ -21,5 +21,5 @@ concrete widget type and with `any Widget`) and the mutant one (exit 1: the same
 overload is added that takes what a bare `if` is).
 
 The mutant is `static func buildOptional(_ widget: (any Widget)?) -> some Widget` in
-`Sources/Widgets.swift`, which 26.2 does not have. Add it, build the module, run the two widget-bundle tests,
+`frameworks/SwiftUI/src/Widgets.swift`, which 26.2 does not have. Add it, build the module, run the two widget-bundle tests,
 and they turn red; that is what the case is for.
