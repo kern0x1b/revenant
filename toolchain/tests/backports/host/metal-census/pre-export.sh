@@ -53,7 +53,7 @@ mkdir -p "$work/obj"
 run_split() {   # fails, naming why, unless the tool succeeded over at least one real object
     split=${SPLIT_OUT:-$work/split.txt}
     status=0
-    ( cd "$root" && xmake l tools/release-split.lua "$split_dir" "$split" "$SDK" ) \
+    ( cd "$root" && runs_xmake l tools/release-split.lua "$split_dir" "$split" "$SDK" ) \
         > "$work/split.log" 2>&1 || status=$?
     plain=$(sed 's/\x1b\[[0-9;]*m//g' "$work/split.log")
     mixed=$(printf '%s\n' "$plain" | grep -E "^error: release-split" || true)

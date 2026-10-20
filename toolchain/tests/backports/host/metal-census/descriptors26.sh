@@ -23,8 +23,6 @@
 # tile descriptor's colour attachments are an 11.0 class and an object holds the API of ONE release.
 # Each is compiled under the same rename set, so the case sees one coherent port.
 set -eu
-echo "FAIL host/metal-census/descriptors26.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 280" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -277,23 +275,8 @@ echo "  ok   RUN FAILED: the broken mutation did not build, and no binary was le
 # occurrence is there because -init and -reset spell the same default twice in four of these classes,
 # and "appears 2" is a harness that stops rather than a decision about which one to change.
 mutate() {   # $1 label, $2 file, $3 class, $4 old text, $5 new text, [6 occurrence]
-    python3 - "$S/Metal/$2" "$work/port/$1.m" "$3" "$4" "$5" "${6:-1}" <<'PY'
-import sys
-src, out, cls, old, new, nth = sys.argv[1:7]
-nth = int(nth)
-text = open(src).read()
-i = text.index("@implementation %s" % cls)
-j = text.find("\n@end", i)
-assert 0 < j, "the mutation must find its class's own body: %r" % cls
-body = text[i:j]
-# AT LEAST the nth: -init and -reset spell the same default in four of these classes, so the count is
-# not required to be one. What it must be is AT LEAST the occurrence asked for - a pattern that matches
-# nothing has no occurrence to change, and that is the mistake worth stopping on.
-assert body.count(old) >= nth, "the mutation must match at least %d place(s) in %s: %r appears %d" % (nth, cls, old, body.count(old))
-parts = body.split(old)
-body = old.join(parts[:nth]) + new + old.join(parts[nth:])
-open(out, "w").write(text[:i] + body + text[j:])
-PY
+    cp "$S/Metal/$2" "$work/port/$1.m"
+    runs_xmake l "$here/../../common/mutants.lua" within "$work/port/$1.m" "$3" "$4" "$5" "${6:-1}"
     [ -s "$work/port/$1.m" ] || { echo "FAIL: the mutation $1 wrote nothing" >&2; exit 1; }
     # ONLY ITS OWN INCLUDE IS REPLACED, and the include is spelled with QUOTES and no slash, so the
     # substitution has to match that. Pointing both includes at one copy compiled the 26.0 classes twice

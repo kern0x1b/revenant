@@ -16,8 +16,6 @@
 # harness here: a mutation compiled with a wrong -I depth once left the previous binary in place and a
 # green run was read off an object that no longer existed.
 set -eu
-echo "FAIL host/metal-census/rasterrate.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 100" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -97,15 +95,7 @@ build() {   # $1 output name, $2 port source
 # A mutation is SCOPED TO ITS CLASS, not matched by text.
 mutate() {   # $1 mutant name, $2 class, $3 old text, $4 new text
     cp "$SRC" "$work/$1.m"
-    python3 - "$work/$1.m" "$2" "$3" "$4" <<'PY'
-import sys
-path, cls, old, new = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
-text = open(path).read()
-i = text.index("@implementation %s\n" % cls)
-head, body = text[:i], text[i:]
-assert old in body, "the mutation must match the code it is mutating: %r" % old
-open(path, "w").write(head + body.replace(old, new, 1))
-PY
+    runs_xmake l "$here/../../common/mutants.lua" within "$work/$1.m" "$2" "$3" "$4"
 }
 
 expect_red() {   # $1 label, $2 output name

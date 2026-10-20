@@ -19,8 +19,6 @@
 # THE MDLTEXTURE IS APPLE'S, and one of them, given to both sides: it is the input, not the thing under
 # test, and two of them would be two inputs.
 set -eu
-echo "FAIL host/metal-census/mdltexture.sh: its Python steps are gone and not yet ported to Lua: the inline block PYMUT at line 120" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -117,13 +115,8 @@ timeout 300 "$work/real" || { echo "FAIL: the MDL loader differential failed" >&
 # caught a mutation that had not been applied. `cmp` is what says the copy differs, and a literal
 # text replacement has no metacharacters to get wrong.
 mutate() {   # $1 label, $2 old text, $3 new text
-    python3 - "$S/MetalKit/MTKTextureLoaderMDL10.m" "$work/port/$1.m" "$2" "$3" <<'PYMUT'
-import sys
-src, out, old, new = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
-text = open(src).read()
-assert text.count(old) == 1, "the mutation must match exactly one place: %r appears %d times" % (old, text.count(old))
-open(out, "w").write(text.replace(old, new, 1))
-PYMUT
+    cp "$S/MetalKit/MTKTextureLoaderMDL10.m" "$work/port/$1.m"
+    runs_xmake l "$here/../../common/mutants.lua" once "$work/port/$1.m" "$2" "$3"
     if cmp -s "$work/port/$1.m" "$S/MetalKit/MTKTextureLoaderMDL10.m"; then
         echo "FAIL: the mutation $1 did not change the file, so it would run the real code" >&2
         exit 1

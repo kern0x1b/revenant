@@ -15,8 +15,6 @@
 # pass. Every build below removes its outputs first, and a build that fails is named and exits
 # non-zero instead of being counted as a red test.
 set -eu
-echo "FAIL host/metal-census/argbinding.sh: its Python steps are gone and not yet ported to Lua: the inline block PY2 at line 129; the inline block PY3 at line 202" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -126,18 +124,7 @@ expect_red() {   # $1 label, $2 output name
 # is how an early revision of this script "mutated" the base while reporting a green run.
 mutate_type() {   # $1 mutant name, $2 class, $3 replacement
     cp "$SRC" "$work/$1.m"
-    python3 - "$work/$1.m" "$2" "$3" <<'PY2'
-import re, sys
-path, cls, new = sys.argv[1], sys.argv[2], sys.argv[3]
-text = open(path).read()
-i = text.index("@implementation %s\n" % cls)
-head, body = text[:i], text[i:]
-j = body.index("- (MTLBindingType)type")
-k = body.index("\n}", j)
-seg, n = re.subn(r"    return MTLBindingType\w+;", "    %s   // MUTATION" % new, body[j:k], count=1)
-assert n == 1, "no -type return in %s" % cls
-open(path, "w").write(head + body[:j] + seg + body[k:])
-PY2
+    runs_xmake l "$here/../../common/mutants.lua" returns "$work/$1.m" "$2" "- (MTLBindingType)type" "$3"
 }
 
 echo "the round trip:"
@@ -199,17 +186,10 @@ build mutant-m4 "$here/argbinding.m" "$work/m4.m"; expect_red "M4 MTLObjectPaylo
 # and the base's own flag assertion is what names it.
 echo "the mutation: the shared -used answer"
 cp "$SRC" "$work/m5.m"
-python3 - "$work/m5.m" <<'PY3'
-import sys
-path = sys.argv[1]
-text = open(path).read()
-old = '[binding setValue:@(used) forKey:@"used"];'
-assert old in text, "the constructor's used assignment was not found"
 # the two flags are ONE shared implementation, so they cannot be broken per row and a per-row mutant
 # for them would be a mutant of nothing. This breaks the shared write instead, and the base's own
 # flag assertion is what names it - the base was built with used=NO.
-open(path, "w").write(text.replace(old, "[binding setValue:@YES forKey:@\"used\"];   // MUTATION", 1))
-PY3
+runs_xmake l "$here/../../common/mutants.lua" first "$work/m5.m" '[binding setValue:@(used) forKey:@"used"];' '[binding setValue:@YES forKey:@"used"];   // MUTATION'
 build mutant-m5 "$here/argbinding.m" "$work/m5.m"; expect_red "M5 the shared -used" mutant-m5
 
 echo "argbinding: the round trip is green, the control is RUN FAILED, and all five row mutants are red"

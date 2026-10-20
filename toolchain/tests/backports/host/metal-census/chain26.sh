@@ -24,8 +24,6 @@
 # produced an object carrying Apple's name in one invocation and the port's in another (see
 # descriptors26.sh). The binary is asked for the renamed symbols and the run stops if they are absent.
 set -eu
-echo "FAIL host/metal-census/chain26.sh: its Python steps are gone and not yet ported to Lua: the inline block PYEOF at line 128" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -125,13 +123,8 @@ echo "  ok   and no binary was left to run"
 # first version of this mutated the wrapper and stopped with "the mutation must match exactly one
 # place: appears 0", which is the harness saying it was about to mutate nothing.
 mutate() {   # $1 label, $2 old text, $3 new text
-    python3 - "$S/Metal/MTL4CommandChain26.m" "$work/port/$1-source.m" "$2" "$3" <<'PYEOF'
-import sys
-src, out, old, new = sys.argv[1:5]
-text = open(src).read()
-assert text.count(old) == 1, "the mutation must match exactly one place: %r appears %d" % (old, text.count(old))
-open(out, "w").write(text.replace(old, new, 1))
-PYEOF
+    cp "$S/Metal/MTL4CommandChain26.m" "$work/port/$1-source.m"
+    runs_xmake l "$here/../../common/mutants.lua" once "$work/port/$1-source.m" "$2" "$3"
     [ -s "$work/port/$1-source.m" ] || { echo "FAIL: the mutation $1 wrote nothing" >&2; exit 1; }
     sed "s|MTL4CommandChain26.m|$1-source.m|" "$work/port/port-pristine.m" > "$work/port/port.m"
     if cmp -s "$work/port/port.m" "$work/port/port-pristine.m"; then

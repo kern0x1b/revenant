@@ -15,8 +15,6 @@
 #
 # It reads the REGISTRY, not a list written here, so a row cannot be flipped without this noticing.
 set -eu
-echo "FAIL host/metal-census/check-protocol-rows.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 34; the inline block PY2 at line 52; the one-line step at line 67; the one-line step at line 95" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -31,40 +29,16 @@ mkdir -p "$work"
 
 # $1 registry path, $2 header path -> the implemented protocol rows the header does NOT declare.
 missing() {
-    python3 - "$1" "$2" <<'PY'
-import json, re, sys
-reg, hdr = sys.argv[1], sys.argv[2]
-declared = set(re.findall(r"@protocol\s+(\w+)\s*;", open(hdr, encoding="utf-8").read()))
-doc = json.load(open(reg, encoding="utf-8"))
-for row in doc["entries"]:
-    if row.get("status") == "implemented" and row.get("kind") == "protocol":
-        if row["api"] not in declared:
-            print(row["api"])
-PY
+    runs_xmake l "$here/checks.lua" protocol-missing "$1" "$2"
 }
 
 # THE RED CONTROL: a row marked implemented whose protocol the header does not declare MUST be named.
-# The registry is copied and one declaration REMOVED, so the tree is not touched and the check has to
+# The header is copied and one declaration REMOVED, so the tree is not touched and the check has to
 # notice a row it would otherwise pass.
 if [ -n "${SELF_TEST:-}" ]; then
     selfreg="$work/registry.json"
     cp "$reg" "$selfreg"
-    python3 - "$selfreg" "$hdr" <<'PY2'
-import json, re, sys
-reg, hdr = sys.argv[1], sys.argv[2]
-declared = set(re.findall(r"@protocol\s+(\w+)\s*;", open(hdr, encoding="utf-8").read()))
-doc = json.load(open(reg, encoding="utf-8"))
-victim = None
-for row in doc["entries"]:
-    if row.get("status") == "implemented" and row.get("kind") == "protocol" and row["api"] in declared:
-        victim = row["api"]
-        break
-assert victim, "the control needs one implemented protocol row to remove"
-print(victim, file=sys.stderr)
-doc["_control_removed"] = victim          # the harness below reads it and drops the declaration
-json.dump(doc, open(reg, "w", encoding="utf-8"), indent=2)
-PY2
-    victim=$(python3 -c "import json;print(json.load(open('$selfreg'))['_control_removed'])")
+    victim=$(runs_xmake l "$here/checks.lua" protocol-victim "$selfreg" "$hdr")
     grep -v "^@protocol $victim;$" "$hdr" > "$work/hdr-missing.h"
     if out=$(missing "$selfreg" "$work/hdr-missing.h") && [ -z "$out" ]; then
         echo "FAIL: the self-test removed $victim from the header and the check did not notice" >&2
@@ -92,10 +66,7 @@ if out=$(missing "$reg" "$hdr"); then
         exit 1
     fi
 fi
-count=$(python3 -c "
-import json
-d = json.load(open('$reg', encoding='utf-8'))
-print(sum(1 for r in d['entries'] if r.get('status') == 'implemented' and r.get('kind') == 'protocol'))")
+count=$(runs_xmake l "$here/checks.lua" protocol-count "$reg")
 declared=$(grep -c '^@protocol' "$hdr")
 echo "  every implemented protocol row is declared: $count row(s), $declared declaration(s) in RevenantMetalProtocols.h"
 echo "check-protocol-rows: OK"
