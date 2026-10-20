@@ -5,7 +5,7 @@ package("tipkit")
     set_policy("package.strict_compatibility", true)
 
     local digests = {}
-    local inputs = table.join({path.join(os.scriptdir(), "xmake.lua")}, os.files(path.join(os.scriptdir(), "Sources", "TipKit", "**.swift")))
+    local inputs = table.join({path.join(os.scriptdir(), "xmake.lua")}, os.files(path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "TipKit", "**.swift")))
     table.sort(inputs)
     for _, file in ipairs(inputs) do
         table.insert(digests, path.relative(file, os.scriptdir()) .. "=" .. hash.sha256(file))
@@ -69,9 +69,9 @@ package("tipkit")
 
         local module = path.join(swiftdir, "TipKit.swiftmodule")
         os.mkdir(module)
-        local sources_tipkit = os.files(path.join(package:scriptdir(), "Sources", "TipKit", "**.swift"))
+        local sources_tipkit = os.files(path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "TipKit", "**.swift"))
         if #sources_tipkit == 0 then
-            raise("%s compiles Sources/TipKit/**.swift, which matches no file", package:name())
+            raise("%s compiles frameworks/Backports/src/TipKit/**.swift, which matches no file", package:name())
         end
 
         local argv = table.join(swift.runtime_flags({
@@ -89,5 +89,5 @@ package("tipkit")
         os.tryrm(probe_dir)
         package:setenv("REVENANT_SWIFT_MODULES", swiftdir)
         os.cp(path.join(os.scriptdir(), "..", "..", "..", "toolchain", "LICENSE"), path.join(package:installdir("licenses")))
-        os.cp("README.md", path.join(package:installdir("share")))
+        os.cp(path.join(package:scriptdir(), "..", "..", "..", "docs", "reference", "backports", "TipKit", "README.md"), path.join(package:installdir("share")))
     end)

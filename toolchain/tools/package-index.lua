@@ -3,7 +3,7 @@ import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "modules")})
 GROUPS = {
     ["build-tools"] = {"llvm", "llvm-clang-c", "swift", "swift-bootstrap", "swift-syntax", "ld64", "ldid", "gn", "libplist", "iphoneos-sdk"},
     runtimes = {"libcxx", "swift-runtime", "swift-embedded", "apple-compat", "revenant-coding"},
-    frameworks = {"activitykit", "appintents", "appintents-macros", "createml", "musickit", "swift-data", "tipkit",
+    frameworks = {"activitykit", "appintents", "createml", "musickit", "swift-data", "tipkit",
                   "widgetkit", "combine", "swiftui", "swiftui-uikit", "matter", "swift-crypto", "swift-system"},
     libraries = {"box2d", "ggml", "lz4", "lzfse", "micro-ecc", "monocypher", "opencv", "openssl", "picotls", "quicly",
                  "suitesparse-ordering", "xz", "zlib"},

@@ -5,7 +5,7 @@ package("appintents")
     set_policy("package.strict_compatibility", true)
 
     local digests = {}
-    local inputs = table.join({path.join(os.scriptdir(), "xmake.lua")}, os.files(path.join(os.scriptdir(), "Sources", "AppIntents", "**.swift")))
+    local inputs = table.join({path.join(os.scriptdir(), "xmake.lua")}, os.files(path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "AppIntents", "**.swift")))
     table.sort(inputs)
     for _, file in ipairs(inputs) do
         table.insert(digests, path.relative(file, os.scriptdir()) .. "=" .. hash.sha256(file))
@@ -54,7 +54,7 @@ package("appintents")
         end
 
         local sources, carries = {}, false
-        for _, file in ipairs(os.files(path.join(package:scriptdir(), "Sources", "AppIntents", "**.swift"))) do
+        for _, file in ipairs(os.files(path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "AppIntents", "**.swift"))) do
             if path.filename(file) ~= "LocalizedStringResource.swift" then
                 table.insert(sources, file)
             end
@@ -77,7 +77,7 @@ package("appintents")
             print("%s: this runtime's Foundation has LocalizedStringResource, the module uses the platform's and carries none",
                   package:name())
         else
-            table.insert(sources, path.join(package:scriptdir(), "Sources", "AppIntents", "LocalizedStringResource.swift"))
+            table.insert(sources, path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "AppIntents", "LocalizedStringResource.swift"))
             print("%s: this runtime's Foundation has no LocalizedStringResource, the module carries it (AppIntents' whole API is written in it)",
                   package:name())
         end
@@ -148,5 +148,5 @@ package("appintents")
         os.tryrm(probe_dir)
         package:setenv("REVENANT_SWIFT_MODULES", swiftdir)
         os.cp(path.join(os.scriptdir(), "..", "..", "..", "toolchain", "LICENSE"), path.join(package:installdir("licenses")))
-        os.cp("README.md", package:installdir("share"))
+        os.cp(path.join(package:scriptdir(), "..", "..", "..", "docs", "reference", "backports", "AppIntents", "README.md"), package:installdir("share"))
     end)

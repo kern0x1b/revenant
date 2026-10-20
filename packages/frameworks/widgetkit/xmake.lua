@@ -5,7 +5,7 @@ package("widgetkit")
     set_policy("package.strict_compatibility", true)
 
     local digests = {}
-    local inputs = table.join({path.join(os.scriptdir(), "xmake.lua")}, os.files(path.join(os.scriptdir(), "Sources", "WidgetKit", "**.swift")))
+    local inputs = table.join({path.join(os.scriptdir(), "xmake.lua")}, os.files(path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "WidgetKit", "**.swift")))
     table.sort(inputs)
     for _, file in ipairs(inputs) do
         table.insert(digests, path.relative(file, os.scriptdir()) .. "=" .. hash.sha256(file))
@@ -52,9 +52,9 @@ package("widgetkit")
 
         local module = path.join(swiftdir, "WidgetKit.swiftmodule")
         os.mkdir(module)
-        local sources_widgetkit = os.files(path.join(package:scriptdir(), "Sources", "WidgetKit", "**.swift"))
+        local sources_widgetkit = os.files(path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "WidgetKit", "**.swift"))
         if #sources_widgetkit == 0 then
-            raise("%s compiles Sources/WidgetKit/**.swift, which matches no file", package:name())
+            raise("%s compiles frameworks/Backports/src/WidgetKit/**.swift, which matches no file", package:name())
         end
 
         local argv = table.join(swift.runtime_flags({
@@ -72,5 +72,5 @@ package("widgetkit")
         os.tryrm(probe_dir)
         package:setenv("REVENANT_SWIFT_MODULES", swiftdir)
         os.cp(path.join(os.scriptdir(), "..", "..", "..", "toolchain", "LICENSE"), path.join(package:installdir("licenses")))
-        os.cp("README.md", path.join(package:installdir("share")))
+        os.cp(path.join(package:scriptdir(), "..", "..", "..", "docs", "reference", "backports", "WidgetKit", "README.md"), path.join(package:installdir("share")))
     end)

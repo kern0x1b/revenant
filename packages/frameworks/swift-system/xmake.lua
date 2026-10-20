@@ -14,9 +14,9 @@ package("swift-system")
     end
     local compat = path.join(os.scriptdir(), "..", "..", "runtimes", "apple-compat")
     for _, name in ipairs({"openat", "unlinkat", "fdopendir", "fstatat"}) do
-        table.insert(inputs, path.join(compat, "src", name .. ".c"))
+        table.insert(inputs, path.join(compat, "port", "src", name .. ".c"))
     end
-    for _, file in ipairs(os.files(path.join(compat, "include", "revenant", "*.h"))) do
+    for _, file in ipairs(os.files(path.join(compat, "port", "include", "revenant", "*.h"))) do
         table.insert(inputs, file)
     end
     table.sort(inputs)
@@ -56,10 +56,10 @@ package("swift-system")
         end
         local csystem = path.join(tree, "Sources", "CSystem")
         local cflags = {"-target", triple, "-isysroot", sdk, "-miphoneos-version-min=" .. minimum,
-                        "-I", path.join(csystem, "include"), "-I", path.join(compat, "include")}
+                        "-I", path.join(csystem, "include"), "-I", path.join(compat, "port", "include")}
         for _, file in ipairs(table.join(
-                os.files(path.join(compat, "src", "openat.c")), os.files(path.join(compat, "src", "unlinkat.c")),
-                os.files(path.join(compat, "src", "fdopendir.c")), os.files(path.join(compat, "src", "fstatat.c")),
+                os.files(path.join(compat, "port", "src", "openat.c")), os.files(path.join(compat, "port", "src", "unlinkat.c")),
+                os.files(path.join(compat, "port", "src", "fdopendir.c")), os.files(path.join(compat, "port", "src", "fstatat.c")),
                 os.files(path.join(csystem, "shims.c")), os.files(path.join(csystem, "csystem_port.c")))) do
             os.vrunv(toolchain:tool("cc"), table.join(cflags, {"-c", file, "-o", path.join(objects, path.basename(file) .. ".o")}))
         end
@@ -80,7 +80,7 @@ package("swift-system")
         local argv = swift.runtime_flags({architecture = package:arch(), deployment = minimum, sdk = sdk, resources = resources,
                                           module = "SystemPackage"})
         table.join2(argv, {"-swift-version", "6", "-enable-experimental-feature", "Lifetimes", "-D", "SYSTEM_PACKAGE_DARWIN",
-                           "-D", "SYSTEM_PACKAGE", "-I", path.join(csystem, "include"), "-I", path.join(compat, "include"),
+                           "-D", "SYSTEM_PACKAGE", "-I", path.join(csystem, "include"), "-I", path.join(compat, "port", "include"),
                            "-Xfrontend", "-disable-autolinking-runtime-compatibility-concurrency",
                            "-Xfrontend", "-disable-autolinking-runtime-compatibility-dynamic-replacements"}, availability,
                            {"-emit-module", "-emit-module-path", path.join(module, package:arch() .. "-apple-ios.swiftmodule"), "-c"},

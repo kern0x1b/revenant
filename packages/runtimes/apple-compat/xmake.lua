@@ -6,8 +6,8 @@ package("apple-compat")
 
     local digests = {}
     local sources = table.join({path.join(os.scriptdir(), "xmake.lua")},
-                               os.files(path.join(os.scriptdir(), "src", "*.c")), os.files(path.join(os.scriptdir(), "src", "*.h")),
-                               os.files(path.join(os.scriptdir(), "include", "revenant", "*.h")))
+                               os.files(path.join(os.scriptdir(), "port", "src", "*.c")), os.files(path.join(os.scriptdir(), "port", "src", "*.h")),
+                               os.files(path.join(os.scriptdir(), "port", "include", "revenant", "*.h")))
     table.sort(sources)
     for _, file in ipairs(sources) do
         table.insert(digests, path.filename(file) .. "=" .. hash.sha256(file))
@@ -43,9 +43,9 @@ package("apple-compat")
         for _, symbol in ipairs(package:data("provided")) do
             local object = path.absolute(symbol .. ".o")
             os.vrunv(toolchain:tool("cc"), {"-target", triple, "-miphoneos-version-min=" .. toolchain:config("deployment"), "-isysroot", toolchain:config("sdkdir"), "-Os",
-                               "-fno-builtin", "-fvisibility=hidden", "-c", path.join(package:scriptdir(), "src", symbol .. ".c"), "-o", object})
+                               "-fno-builtin", "-fvisibility=hidden", "-c", path.join(package:scriptdir(), "port", "src", symbol .. ".c"), "-o", object})
             table.insert(objects, object)
-            local header = path.join(package:scriptdir(), "include", "revenant", symbol .. ".h")
+            local header = path.join(package:scriptdir(), "port", "include", "revenant", symbol .. ".h")
             if os.isfile(header) then
                 os.vcp(header, path.join(package:installdir("include"), "revenant") .. "/")
             end
@@ -66,9 +66,9 @@ package("apple-compat")
         local process_wide = package:data("process_wide")
         if #process_wide > 0 then
             local folder = path.join(package:installdir("share"), "apple-compat", "process-wide")
-            os.vcp(path.join(package:scriptdir(), "src", "*.h"), folder .. "/")
+            os.vcp(path.join(package:scriptdir(), "port", "src", "*.h"), folder .. "/")
             for _, symbol in ipairs(process_wide) do
-                os.vcp(path.join(package:scriptdir(), "src", symbol .. ".c"), folder .. "/")
+                os.vcp(path.join(package:scriptdir(), "port", "src", symbol .. ".c"), folder .. "/")
             end
         end
         os.vcp(path.join(package:scriptdir(), "..", "..", "..", "toolchain", "LICENSE"), package:installdir("licenses"))
