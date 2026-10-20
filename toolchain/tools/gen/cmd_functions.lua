@@ -791,7 +791,7 @@ end
 local function one(args, fw, sdk, sdk_release)
     local snap = layout.snap_dir(args.tree, fw)
     local target = path.join(snap, "functions.tsv")
-    local wanted = function_wanted(args.tree, fw, args.coordination, sdk_release)
+    local wanted = function_wanted(args.tree, fw, args.corpus, sdk_release)
     if #wanted == 0 then
         if os.isfile(target) then
             os.rm(target)
@@ -865,11 +865,11 @@ local function one(args, fw, sdk, sdk_release)
 end
 
 function run(args)
-    assert(args.coordination, "functions needs --coordination: the corpus folder (the surface table and the ledgers)")
+    assert(args.corpus, "functions needs --corpus: the corpus folder (the surface table and the ledgers)")
     assert(args.sdk, "functions needs --sdk: the iPhoneOS SDK the declarations are read from")
     local sdk = args.sdk
     local sdk_release = sdk_info.discover(sdk).version
-    local targets = args.all and surface.surface_frameworks(args.tree, args.coordination, sdk_release) or {args.framework}
+    local targets = args.all and surface.surface_frameworks(args.tree, args.corpus, sdk_release) or {args.framework}
     for _, fw in ipairs(targets) do
         one(args, fw, sdk, sdk_release)
     end

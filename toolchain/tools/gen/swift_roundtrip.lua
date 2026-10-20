@@ -1,4 +1,4 @@
-local heavy_batch = import("heavy_batch", {anonymous = true})
+local batch = import("batch", {anonymous = true})
 local swift_render = import("swift_render", {anonymous = true})
 local json = import("core.base.json")
 
@@ -108,10 +108,10 @@ function compile_item(triple, sdk, source, module_dir, name, underlying)
     end
     local quoted = {}
     for i, word in ipairs(words) do
-        quoted[i] = heavy_batch.quote(word)
+        quoted[i] = batch.quote(word)
     end
     local log = path.join(module_dir, "compile.log")
-    return {base = path.join(module_dir, "compile"), command = table.concat(quoted, " ") .. " > " .. heavy_batch.quote(log) .. " 2>&1"}
+    return {base = path.join(module_dir, "compile"), command = table.concat(quoted, " ") .. " > " .. batch.quote(log) .. " 2>&1"}
 end
 
 function compile_result(module_dir)
@@ -129,14 +129,14 @@ function dump_item(triple, sdk, module_dir, name)
                    "-avoid-location", "-avoid-tool-args", "-o", path.join(module_dir, "dump.json")}
     local quoted = {}
     for i, word in ipairs(words) do
-        quoted[i] = heavy_batch.quote(word)
+        quoted[i] = batch.quote(word)
     end
     local json_path = path.join(module_dir, "dump.json")
     if os.isfile(json_path) then
         os.rm(json_path)
     end
     local err = path.join(module_dir, "dump.err")
-    return {base = path.join(module_dir, "dump"), command = table.concat(quoted, " ") .. " 2> " .. heavy_batch.quote(err)}
+    return {base = path.join(module_dir, "dump"), command = table.concat(quoted, " ") .. " 2> " .. batch.quote(err)}
 end
 
 function dump_result(module_dir)

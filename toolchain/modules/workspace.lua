@@ -59,18 +59,10 @@ function fresh(name)
     raise("workspace: no free folder %s.* under %s after 100 tries", name, parent)
 end
 
-function coordination()
-    local named = os.getenv(CORPUS_VARIABLE)
-    if named and named ~= "" then
-        return path.absolute(named)
-    end
-    return path.join(home(), "Git", "projects", "ios", "coordination")
-end
-
 function corpus(...)
-    local folder = path.join(coordination(), "corpus")
+    local folder = os.getenv(CORPUS_VARIABLE) or path.join(home(), ".revenant", "corpus")
     if not os.isdir(folder) then
-        raise("workspace: no corpus at %s; set %s to the folder that holds corpus/", folder, CORPUS_VARIABLE)
+        raise("workspace: no corpus at %s; set %s to it", folder, CORPUS_VARIABLE)
     end
     local parts = {...}
     local wanted = path.join(folder, table.unpack(parts))
@@ -78,14 +70,6 @@ function corpus(...)
         raise("workspace: the corpus at %s has no %s", folder, path.relative(wanted, folder))
     end
     return wanted
-end
-
-function heavy()
-    local script = path.join(coordination(), "heavy.sh")
-    if not os.isfile(script) then
-        raise("workspace: no heavy.sh at %s; set %s to the folder that holds it", script, CORPUS_VARIABLE)
-    end
-    return script
 end
 
 local function sdk_in(installdir, version)
@@ -166,10 +150,6 @@ function main(command, ...)
         print(sdk_package(arguments[1], {install = arguments[2] == "--install"}))
     elseif command == "corpus" then
         print(corpus(table.unpack(arguments)))
-    elseif command == "coordination" then
-        print(coordination())
-    elseif command == "heavy" then
-        print(heavy())
     elseif command == "task" then
         print(task())
     elseif command == "run" then
@@ -177,6 +157,6 @@ function main(command, ...)
     elseif command == "fresh" and arguments[1] then
         print(fresh(arguments[1]))
     else
-        raise("usage: xmake l modules/workspace.lua sdk [--install] | sdk-package <version> [--install] | corpus [path ...] | coordination | heavy | task | run [path ...] | fresh <name>")
+        raise("usage: xmake l modules/workspace.lua sdk [--install] | sdk-package <version> [--install] | corpus [path ...] | task | run [path ...] | fresh <name>")
     end
 end

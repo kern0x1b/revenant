@@ -101,7 +101,7 @@ function lines(sdk, name)
     table.insert(argv, out)
     table.insert(argv, "-minimum-access-level")
     table.insert(argv, "public")
-    local status, _, errors = stream.heavy_text(workspace.heavy(), argv)
+    local status, _, errors = stream.bounded_text(argv)
     assert(status == 0, string.format("swift docs %s: swift-symbolgraph-extract exits with status %s: %s", name, tostring(status),
         string.sub(errors or "", -300)))
     local file = path.join(out, record.base .. ".symbols.json")

@@ -159,14 +159,14 @@ end
 
 function run(args)
     assert(args.sdk, "worklist needs --sdk: the iPhoneOS SDK (the release names the surface table)")
-    assert(args.coordination, "worklist needs --coordination: the corpus folder (the surface table and the ledgers)")
+    assert(args.corpus, "worklist needs --corpus: the corpus folder (the surface table and the ledgers)")
     assert(args.tree, "worklist needs --tree: the repository")
     assert(args.out, "worklist needs --out: the folder the work list is written to")
     assert(args.scope, "worklist needs --scope: the scope's v-gen-scope.tsv the counts tie to")
     local release = sdk_info.discover(args.sdk).version
     local compile = sdk_info.discover(project.sdk16(args)).version
     local states = scope.states_of(release, compile)
-    local all = surface.all_rows(args.tree, args.coordination, release)
+    local all = surface.all_rows(args.tree, args.corpus, release)
     local skipped = coverage.skipped(args.tree)
     os.mkdir(args.out)
     local lines_of_totals = {TOTALS_HEADER}

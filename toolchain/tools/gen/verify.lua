@@ -58,7 +58,6 @@ function run(args)
     assert(args.tree, "verify needs --tree: the repository (decls is its tools/found product)")
     assert(args.ir, "verify needs --ir: the full IR the headers are compared with")
     assert(args.headers, "verify needs --headers: the generated headers tree")
-    assert(args.coordination, "verify needs --coordination: the folder heavy.sh sits in (the swift round trip's heavy jobs)")
     assert(args.out, "verify needs --out: the folder the round trips are written to")
     local rows = known_rows_of(args)
     local decls = decls_of(args.tree)
@@ -78,7 +77,7 @@ function run(args)
             end
         end
     end
-    local swift_status, swift_detail, swift_measured = roundtrip.run({sdk = args.sdk, coordination = args.coordination,
+    local swift_status, swift_detail, swift_measured = roundtrip.run({sdk = args.sdk, 
                                                                       out = path.join(args.out, "swift"), framework = args.framework,
                                                                       tree = args.tree, headers = args.headers})
     for key, count in pairs(swift_measured) do

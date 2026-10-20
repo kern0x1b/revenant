@@ -187,7 +187,7 @@ end
 
 local function one(args, fw, sdk, sdk16, sdk_release)
     local snap = layout.snap_dir(args.tree, fw)
-    local wanted = protocol_wanted(args.tree, fw, args.coordination, sdk, sdk_release)
+    local wanted = protocol_wanted(args.tree, fw, args.corpus, sdk, sdk_release)
     for _, stale in ipairs(files.glob(path.join(snap, "Revenant*Protocols.h"))) do
         os.rm(stale)
     end
@@ -237,12 +237,12 @@ local function one(args, fw, sdk, sdk16, sdk_release)
 end
 
 function run(args)
-    assert(args.coordination, "protocols needs --coordination: the corpus folder (the surface table)")
+    assert(args.corpus, "protocols needs --corpus: the corpus folder (the surface table)")
     assert(args.sdk, "protocols needs --sdk: the iPhoneOS SDK the declarations are read from")
     local sdk = args.sdk
     local sdk16 = project.sdk16(args)
     local sdk_release = sdk_info.discover(sdk).version
-    local targets = args.all and surface.surface_frameworks(args.tree, args.coordination, sdk_release) or {args.framework}
+    local targets = args.all and surface.surface_frameworks(args.tree, args.corpus, sdk_release) or {args.framework}
     local failed = 0
     for _, fw in ipairs(targets) do
         if not one(args, fw, sdk, sdk16, sdk_release) then

@@ -166,7 +166,7 @@ function dump_command(sdk, triple, framework, mode, base, variant)
     return table.concat(words, " ")
 end
 
-local function run_dumps(heavy, folder, sdk, triple, names, variant)
+local function run_dumps(folder, sdk, triple, names, variant)
     local commands = {}
     for _, framework in ipairs(names) do
         for _, mode in ipairs({API_MODE, ABI_MODE}) do
@@ -184,7 +184,7 @@ local function run_dumps(heavy, folder, sdk, triple, names, variant)
     io.writefile(jobs, table.concat(commands, "\0") .. "\0")
     try {
         function()
-            os.execv("gtimeout", {"-k", tostring(KILL_AFTER), tostring(BATCH_TIMEOUT), heavy, "sh", "-c",
+            os.execv("gtimeout", {"-k", tostring(KILL_AFTER), tostring(BATCH_TIMEOUT), "sh", "-c",
                                   string.format("xargs -0 -P %d -n 1 sh -c < %s; true", DUMP_WIDTH, jobs)})
         end,
         catch {
@@ -206,10 +206,10 @@ local function run_dumps(heavy, folder, sdk, triple, names, variant)
     end
 end
 
-function dump_batch(heavy, sdk, triple, names, variant)
+function dump_batch(sdk, triple, names, variant)
     assert(VARIANTS[variant], "dump_batch: no variant " .. tostring(variant))
     local folder = cache_folder(sdk)
-    run_dumps(heavy, folder, sdk, triple, names, variant)
+    run_dumps(folder, sdk, triple, names, variant)
     return folder
 end
 
@@ -290,8 +290,8 @@ function shard_path(tree, framework)
     return path.join(tree, layout.constants().SNAP_ROOT, framework, SHARD_FILE)
 end
 
-function write_shards(tree, heavy, sdk, triple, names)
-    local folder = dump_batch(heavy, sdk, triple, names, "shard")
+function write_shards(tree, sdk, triple, names)
+    local folder = dump_batch(sdk, triple, names, "shard")
     local out = {}
     for _, framework in ipairs(names) do
         local rows, reason = dump_rows(folder, framework)
@@ -335,8 +335,6 @@ function index(tree, framework)
 end
 
 function plan(corpus, sdk, framework)
-    local heavy = path.join(path.directory(corpus), "heavy.sh")
-    assert(os.isfile(heavy), "no heavy.sh beside the corpus folder: " .. heavy)
     local names = framework and {framework} or modules(sdk)
     local out = {}
     for _, name in ipairs(names) do
@@ -344,5 +342,5 @@ function plan(corpus, sdk, framework)
             table.insert(out, name)
         end
     end
-    return heavy, out, sdk_info.discover(sdk).triple
+    return out, sdk_info.discover(sdk).triple
 end

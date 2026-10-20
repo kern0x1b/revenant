@@ -382,7 +382,7 @@ function reasons_by_key(recorded, facts)
 end
 
 function context_of(args, fw, rows, owner, states, skipped)
-    local tree, corpus = args.tree, args.coordination
+    local tree, corpus = args.tree, args.corpus
     local led6 = surface.ledger_status(corpus, owner, args.ledger_rows or LEDGER_6_1_3)
     local led43 = surface.ledger_status(corpus, owner, LEDGER_4_3)
     local snap = os.isfile(layout.shard_path(tree, fw))
@@ -587,12 +587,12 @@ end
 
 function run(args)
     assert(args.sdk, "scope needs --sdk: the iOS SDK directory (the scope reads the headers)")
-    assert(args.coordination, "scope needs --coordination: the corpus folder (the surface table and the ledgers)")
+    assert(args.corpus, "scope needs --corpus: the corpus folder (the surface table and the ledgers)")
     assert(args.out, "scope needs --out: the folder the four files are written to")
     local sdk_release = sdk_info.discover(args.sdk).version
     local compile = sdk_info.discover(project.sdk16(args)).version
     local states = states_of(sdk_release, compile)
-    local all = surface.all_rows(args.tree, args.coordination, sdk_release)
+    local all = surface.all_rows(args.tree, args.corpus, sdk_release)
     local tally = new_tally()
     tally.skipped = coverage.skipped(args.tree)
     for _, fw in ipairs(all.order) do

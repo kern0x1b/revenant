@@ -31,8 +31,8 @@ end
 
 local eleven = objects["FileProvider11.m"]
 expect(has(eleven, "@implementation NSFileProviderDomain {\n"), "the 11.0 object defines NSFileProviderDomain")
-expect(has(eleven, "// Corpus rank 7 of coordination/corpus/crash-demand-top.tsv. The spec is"), "the class piece carries rank 7")
-expect(has(eleven, "// Corpus rank 8 of coordination/corpus/crash-demand-top.tsv. The spec is"), "the policy piece carries rank 8")
+expect(has(eleven, "// Corpus rank 7 of the corpus's crash-demand-top.tsv. The spec is"), "the class piece carries rank 7")
+expect(has(eleven, "// Corpus rank 8 of the corpus's crash-demand-top.tsv. The spec is"), "the policy piece carries rank 8")
 expect(string.find(eleven, "@end\n\n", 1, true) ~= nil and string.find(eleven, "@implementation NSFileProviderManager", 1, true) == nil,
     "the policy piece emits no @implementation of NSFileProviderManager")
 expect(has(eleven, "//   never called: +[NSFileProviderManager addDomain:completionHandler:]\n"), "a never_call name is written as carried")

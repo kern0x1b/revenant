@@ -82,8 +82,7 @@ Each entry: wrong pattern -> right pattern -> the mechanical reason.
 
 - **The shared store, not a private one.** `./xmakew` points `XMAKE_GLOBALDIR` at
   `~/.revenant/cache/xmake-global`, so the store every build shares is
-  `~/.revenant/cache/xmake-global/.xmake`; the packages from before the move are still in `~/.xmake`
-  and `./xmakew borrow --from ~/.xmake` clones them over (`docs/guides/machine.md`). Wrong: `xmake require --force`,
+  `~/.revenant/cache/xmake-global/.xmake`. Wrong: `xmake require --force`,
   `xrepo install --force`, `rm -rf` under either store, or another `XMAKE_GLOBALDIR` of your own to pick
   up a changed recipe or patch. Right: just rebuild normally against the shared store. Reason:
   every package that matters here (`apple-backports`, `llvm`, `swift-runtime`, `libcxx`, `swift`)
@@ -194,10 +193,7 @@ Each entry: wrong pattern -> right pattern -> the mechanical reason.
   `backports-gate` links one band and passes; only the all-band build of `canon-install` shows it.
 
 - **The compiler cache behind a backports build.** Wrong: reading a hit rate as proof the build is
-  the same, or setting the cache's key by hand for one run. Right: gate through
-  `coordination/heavy.sh` (`tools/heavy.lua` of the root, `docs/guides/machine.md`), which exports `CCACHE_DIR`,
-  `FLEET_HEAVY_CPUS`, `XMAKE_MAX_JOBS` and the `MAKEFLAGS` of its token pool, and writes
-  `hash_dir = false` and `max_size` into `$CCACHE_DIR/ccache.conf`; the check for a cache is the
+  the same, or setting the cache's key by hand for one run. Right: `./xmakew` exports `CCACHE_DIR`, `CCACHE_NOHASHDIR` and `CCACHE_MAXSIZE`; the check for a cache is the
   objects it hands back against a `CCACHE_DISABLE=1` build, not the hit rate. Reason: the key is
   the preprocessed source and the compiler, plus the path of the source - and `hash_dir = false` is
   what makes that path relative, so every worktree reaches a source by the same name and shares one

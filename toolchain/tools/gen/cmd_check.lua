@@ -109,7 +109,7 @@ function run(args)
     end
     local failed, removed_total, removed_in = 0, 0, 0
     for _, fw in ipairs(targets) do
-        local problems, warnings, removed, new = diagnose(args.tree, fw, args.coordination, sdk_release)
+        local problems, warnings, removed, new = diagnose(args.tree, fw, args.corpus, sdk_release)
         for _, line in ipairs(problems) do
             print("CHECK " .. fw .. ": " .. line)
         end

@@ -26,11 +26,11 @@ local COMMENTS_NOT_DERIVED = "- not derived: the extractor does not run for this
 local DECL_NOT_DERIVED = "not derived: decl (ruling D8)"
 local NOT_IN_ROWS = "not derived: not in the doc rows"
 local function behaviour_note(release)
-    return "Not part of this page. `xmake l tools/gen.lua behaviour --framework <framework> --coordination <corpus> "
+    return "Not part of this page. `xmake l tools/gen.lua behaviour --framework <framework> --corpus <corpus> "
                        .. "--ipsw-cache <cache>` writes the summary of the methods it is run on (the calls in the order the code makes "
                        .. "them, the register branches, the strings, constants and error domains its comments name; REFERENCE ONLY) "
-                       .. "to `behaviour/<Class>.md` beside this page. It reads the on-disk iOS " .. release .. " cache one method at a time through "
-                       .. "coordination/heavy.sh (--limit and --selector choose the methods). No command produces implementation "
+                       .. "to `behaviour/<Class>.md` beside this page. It reads the on-disk iOS " .. release .. " cache one method at a time "
+                       .. "(--limit and --selector choose the methods). No command produces implementation "
                        .. "pseudocode yet."
 end
 local NO_COMMENT = "no comment in the doc rows"
@@ -568,7 +568,7 @@ local function write_framework(ctx, fw, objc_state)
 end
 
 function run(args)
-    assert(args.coordination, "doc needs --coordination: the corpus folder")
+    assert(args.corpus, "doc needs --corpus: the corpus folder")
     assert(args.sdk, "doc needs --sdk: the iOS SDK directory")
     local tree = args.tree
     assert(files.read_text(swift.bucket_path(tree)) ~= nil,
@@ -581,8 +581,8 @@ function run(args)
     end
     local sdk_release = sdk_info.discover(args.sdk).version
     local compile = sdk_info.discover(project.sdk16(args)).version
-    local objc_states = read_objc(args.coordination, sdk_release, needs)
-    local ctx = {tree = tree, corpus = args.coordination, sdk = args.sdk, sdk_release = sdk_release, compile = compile, out_root = out_root}
+    local objc_states = read_objc(args.corpus, sdk_release, needs)
+    local ctx = {tree = tree, corpus = args.corpus, sdk = args.sdk, sdk_release = sdk_release, compile = compile, out_root = out_root}
     for _, fw in ipairs(targets) do
         write_framework(ctx, fw, objc_states[fw])
     end

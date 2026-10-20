@@ -258,14 +258,14 @@ function text(program, args)
     return status, table.concat(parts), errors
 end
 
-local HEAVY_SECONDS = 1800
-function heavy_text(heavy, args)
-    local argv = {"timeout", tostring(HEAVY_SECONDS)}
+local BOUND_SECONDS = 1800
+function bounded_text(args)
+    local argv = {tostring(BOUND_SECONDS)}
     for _, arg in ipairs(args) do
         table.insert(argv, arg)
     end
     local parts = {}
-    local status, errors = drive(heavy, argv, function(piece)
+    local status, errors = drive("timeout", argv, function(piece)
         table.insert(parts, piece)
     end, true, true, false)
     return status, table.concat(parts), errors

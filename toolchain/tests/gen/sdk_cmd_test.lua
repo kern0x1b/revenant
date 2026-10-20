@@ -11,7 +11,7 @@ function main()
         end
     end
     local cmd = import("gen.cmd_sdk", {rootdir = TOOLS, anonymous = true})
-    local args = {sdk = path.join(ROOT, "tests", "gen", "sdk_fixture", "release-26.2"), tree = ROOT, coordination = ROOT, out = ROOT}
+    local args = {sdk = path.join(ROOT, "tests", "gen", "sdk_fixture", "release-26.2"), tree = ROOT, corpus = ROOT, out = ROOT}
 
     cmd.use(nil)
     local names = {}
@@ -68,7 +68,7 @@ function main()
     local message = nil
     try {
         function()
-            cmd.run({sdk = args.sdk, tree = ROOT, coordination = ROOT})
+            cmd.run({sdk = args.sdk, tree = ROOT, corpus = ROOT})
         end,
         catch {
             function(errors)

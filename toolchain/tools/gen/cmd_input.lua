@@ -317,7 +317,7 @@ end
 local function write_framework(args, fw, sdk_release)
     local tree, sdk = args.tree, args.sdk
     local names = sdk_info.names(sdk_release)
-    local ledger = ledger_constants(tree, args.coordination, fw, sdk_release)
+    local ledger = ledger_constants(tree, args.corpus, fw, sdk_release)
     local docs = {usr = {}}
     if #ledger > 0 then
         local record = sdk_modules.module_of(sdk, fw)
@@ -338,7 +338,7 @@ local function write_framework(args, fw, sdk_release)
             enum_values[name] = r.value
         end
     end
-    local ios_path = path.join(args.coordination, names.ios_table)
+    local ios_path = path.join(args.corpus, names.ios_table)
     assert(os.isfile(ios_path), "input: the corpus has no iOS constants table for SDK release " .. sdk_release .. ": " .. ios_path)
     local ios, ios_conflicts = ios_constants(ios_path)
     local conflicting = 0
@@ -436,17 +436,17 @@ end
 
 function run(args)
     assert(args.sdk, "input needs --sdk: the iPhoneOS SDK the declarations are read from")
-    assert(args.coordination, "input needs --coordination: the corpus folder (the ledgers and the iOS constants table)")
+    assert(args.corpus, "input needs --corpus: the corpus folder (the ledgers and the iOS constants table)")
     assert(os.isdir(args.sdk), "input: the --sdk folder is not found: " .. args.sdk)
-    assert(os.isdir(args.coordination), "input: the --coordination folder is not found: " .. args.coordination)
+    assert(os.isdir(args.corpus), "input: the --corpus folder is not found: " .. args.corpus)
     if args.measured and not args.all then
         assert(os.isfile(args.measured), "input: the --measured file is not found: " .. args.measured)
     end
     local sdk_release = sdk_info.discover(args.sdk).version
-    local targets = args.all and surface.surface_frameworks(args.tree, args.coordination, sdk_release) or {args.framework}
+    local targets = args.all and surface.surface_frameworks(args.tree, args.corpus, sdk_release) or {args.framework}
     local written, without_ledger = 0, 0
     for _, fw in ipairs(targets) do
-        if surface.has_ledger(args.coordination, surface.ledger_6_1_3(), fw) or surface.absent_frameworks(args.tree)[fw] ~= nil then
+        if surface.has_ledger(args.corpus, surface.ledger_6_1_3(), fw) or surface.absent_frameworks(args.tree)[fw] ~= nil then
             local rows, differences, conflicting = write_framework(args, fw, sdk_release)
             written = written + 1
             print(string.format("input %s: %d constants, %d differ from the host (the iOS value wins), %d cache symbols with conflicting values",

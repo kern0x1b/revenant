@@ -174,7 +174,7 @@ local function test_python_json_spelling()
           "indent=1, sort_keys, booleans, empty maps and ensure_ascii escapes are Python's: " .. text)
     check(swift.encode({names = {Z = "a", A = "b"}, version = 2}) == '{"names": {"A": "b", "Z": "a"}, "version": 2}',
           "the compact form uses Python's default separators")
-    local oracle = path.join(workspace.coordination(), "corpus", "ledger", "swift-modules.json")
+    local oracle = path.join(os.getenv("HOME") or "", ".revenant", "corpus", "ledger", "swift-modules.json")
     if not os.isfile(oracle) then
         skip("the committed swift-modules.json is not on this machine")
         return

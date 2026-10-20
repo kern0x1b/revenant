@@ -53,15 +53,11 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
 - Skills live in `.agents/skills/` at the top of revenant (`.claude/skills` links there); a member keeps none of its
   own. xmake's own skills come from the `xmake-skills` plugin pinned in `.claude/settings.json`, never a copy.
   `agent-skills/` is the plugin `agent-skills` of the revenant marketplace (`.claude-plugin/marketplace.json`).
-- Workspace-wide procedures are skills in `$HOME/Git/projects/ios/.agents/skills/`: `device-session`,
-  `canon-install`, `patch-merge`, `worktree-sweep`, `session-handoff`, `band-launch`, `band-supervise`. A session
-  started inside revenant does not list them: read `<name>/SKILL.md` there.
 - xmake at the top is always `./xmakew`, the pinned and patched xmake of `third_party/xmake` (built into
   `$HOME/.revenant/cache/xmake/` on first use): `./xmakew f -p iphoneos -a armv7`, `./xmakew build <target>`. It takes
   the revenant addon from `toolchain/` of the checkout; stock xmake would fetch and install the toolchain globally instead.
   Its package store is `$HOME/.revenant/cache/xmake-global` (`XMAKE_GLOBALDIR`). Everything a build can make again is under
-  `$HOME/.revenant/cache`, and `./xmakew l tools/clean.lua [--packages | --all]` gives it back; heavy jobs share one token
-  pool, `./xmakew l tools/heavy.lua <command>`. Both are in `docs/guides/machine.md`.
+  `$HOME/.revenant/cache`, and `./xmakew l tools/clean.lua [--packages | --all]` gives it back; it is in `docs/guides/machine.md`.
 - Before handing a change over: `./xmakew l tools/check.lua layout`, `./xmakew l tools/check.lua <component>` for
   each component it touches, then that component's gate skill (`backports-gate` for the toolchain, `emulator-boot`
   for the emulator).
