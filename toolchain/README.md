@@ -188,8 +188,8 @@ export them either. An SDK whose stubs carry no `$ld$` marker at all, such as
 stubs (one archive, downloaded beside it), library by library by install name,
 and for the symbols of libSystem that 16.5 does not have it writes one hide marker
 for each release the 16.5 markers name below the first release the held dyld
-caches export the symbol from (`markers/iPhoneOS26.2.tsv`, written by
-`tools/sdk-markers.lua`). So the linker of 26.2 knows what the one of 16.5 knew, and
+caches export the symbol from (`markers/iPhoneOS26.2.tsv`, a checked-in table).
+So the linker of 26.2 knows what the one of 16.5 knew, and
 `__Unwind_GetIPInfo` still binds to libgcc_s below iOS 5. A libSystem without any hide
 marker is refused whatever its version. Only libSystem gets markers derived, as in 16.5, where the frameworks' newer API is told apart by availability and weak links, not by markers (the rule agrees with 16.5's own libSystem hides for 181 of 184 symbols, measured; for the other three, libdispatch's `dispatch_assert_queue`, `dispatch_assert_queue_not` and `dispatch_queue_create_with_target`, the answer of 16.5 stands: hidden only at 10.0, where the caches say 7.0). The SDK's stubs also say only for armv7 and armv7s where
 symbols lived on iOS 7 to 10 (`$ld$hide$os7.0$` in CFNetwork, `$ld$add$os7.0$`
