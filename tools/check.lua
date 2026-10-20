@@ -26,8 +26,43 @@ local layout = {
     plugin = {"README.md", "tests", ".claude-plugin", "skills", "LICENSE", "THIRD-PARTY.md"},
     docs = {"README.md", "tutorials", "guides", "reference", "explanation"},
     third_party = {"xmake.lua", "patches"},
-    agentfiles = {"AGENTS.md", "CLAUDE.md", ".claude", ".agents"}
+    agentfiles = {"AGENTS.md", "CLAUDE.md", ".claude", ".agents"},
+    addon = {"addon.lua", "addons", "includes", "modules", "packages", "plugins", "rules", "toolchains"}
 }
+
+local addon = {
+    plugins = {depth = 4, files = {"xmake.lua", "main.lua"}},
+    rules = {depth = 4, files = {"xmake.lua"}},
+    toolchains = {depth = 4, files = {"xmake.lua"}},
+    includes = {depth = 4, files = {"xmake.lua"}},
+    packages = {depth = 5, files = {"xmake.lua"}},
+    addons = {depth = 5, files = {"xmake.lua"}}
+}
+
+local function has(list, name)
+    for _, entry in ipairs(list) do
+        if entry == name then
+            return true
+        end
+    end
+    return false
+end
+
+local function addon_fault(parts)
+    local kind, last = parts[2], parts[#parts]
+    if kind == "addon.lua" then
+        return #parts > 2 and "addon.lua is a file" or nil
+    elseif kind == "modules" then
+        if not last:endswith(".lua") then
+            return "modules/ holds Lua files only"
+        end
+    else
+        local shape = addon[kind]
+        if #parts ~= shape.depth or not has(shape.files, last) then
+            return kind .. " folders hold " .. table.concat(shape.files, " and ") .. " only"
+        end
+    end
+end
 
 function checks.layout()
     local allowed = {}
@@ -42,7 +77,10 @@ function checks.layout()
         table.insert(errors, file .. ": " .. why)
     end
     local files = os.iorunv("git", {"-C", root, "-c", "core.quotepath=false", "ls-files"})
+    local present = {}
+    local folders = {}
     for file in files:gmatch("[^\n]+") do
+        present[file] = true
         local parts = path.split(file)
         local component
         if parts[1] == "frameworks" then
@@ -63,12 +101,28 @@ function checks.layout()
             wrong(file, "not part of the top layout")
         elseif parts[1] == "frameworks" and #parts == 2 then
             wrong(file, "frameworks/ holds framework folders only")
+        elseif parts[1] == "toolchain" and allowed.addon[parts[2]] then
+            local shape = addon[parts[2]]
+            if shape and #parts >= shape.depth then
+                folders[table.concat(parts, "/", 1, shape.depth - 1)] = shape.files
+            end
+            local why = addon_fault(parts)
+            if why then
+                wrong(file, why)
+            end
         elseif component and #parts > component and not members[parts[component + 1]] then
             wrong(file, "a component holds only " .. table.concat(listed, ", "))
         elseif parts[1] == "docs" and not allowed.docs[parts[2]] then
             wrong(file, "docs/ holds only " .. table.concat(layout.docs, ", "))
         elseif parts[1] == "third_party" and #parts > 2 and not allowed.third_party[parts[3]] then
             wrong(file, "a third_party package holds only " .. table.concat(layout.third_party, ", "))
+        end
+    end
+    for _, folder in ipairs(table.orderkeys(folders)) do
+        for _, name in ipairs(folders[folder]) do
+            if not present[folder .. "/" .. name] then
+                wrong(folder, "has no " .. name)
+            end
         end
     end
     for _, line in ipairs(errors) do
