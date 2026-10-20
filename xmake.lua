@@ -25,6 +25,8 @@ if is_plat("iphoneos") then
     add_requires("revenant@apple-compat", {alias = "apple-compat"})
 end
 
+includes("frameworks/Backports")
+
 if is_plat("iphoneos") then
     includes("frameworks/Combine", "frameworks/SwiftUI", "frameworks/WebKit")
 else
