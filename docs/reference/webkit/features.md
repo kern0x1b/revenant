@@ -1,5 +1,7 @@
 # What works, and the Settings pane
 
+The engine the phone ships with is WebKit 536 from 2012. It cannot render a page written this decade, and it cannot negotiate TLS with a current server. Each of those is fixed here, and the features are listed below, with the Settings pane.
+
 ## What works
 
 - **Current WebKit**, built from source for armv7 with a 6.0 deployment target: current C++ compiled for a 2011 phone.
