@@ -80,7 +80,7 @@ end
 local function package_sdk(version, install)
     local scratch = fresh("sdk-resolve")
     io.writefile(path.join(scratch, "xmake.lua"), string.format("add_repositories(%q)\nadd_requires(%q)\n",
-                                                                 "revenant " .. root(), "iphoneos-sdk " .. version))
+                                                                 "revenant " .. path.directory(root()), "iphoneos-sdk " .. version))
     local failure
     local result = try {
         function ()
