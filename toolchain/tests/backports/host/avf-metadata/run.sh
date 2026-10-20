@@ -23,8 +23,6 @@
 # Usage: sh tests/backports/host/avf-metadata/run.sh          the differential
 #        AVFMUTANT=1 sh tests/backports/host/avf-metadata/run.sh   the mutant, which must go red
 set -eu
-echo "FAIL host/avf-metadata/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PERTURB at line 88; the inline block PERTURB at line 105" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -82,42 +80,23 @@ if [ "${AVFMUTANT:-0}" != 0 ]; then
     if [ "${AVFBREAK:-0}" != 0 ]; then
         # The control for the mutant: one value changed AND one line made not-C, so the file does
         # not compile. A harness that counted this as "noticed" would be counting a build failure as
-        # an observation, which is the failure mode this exists to rule out. The perturbing is done in
-        # python, not in nested sed, so a quoting slip cannot leave the file untouched and let the run
+        # an observation, which is the failure mode this exists to rule out. The perturbing is done by the
+        # substitute helper, not nested sed, so a quoting slip cannot leave the file untouched and let the run
         # pass for the wrong reason.
-        python3 - "$build/port-src/MetadataKeyspaces154.m" <<'PERTURB'
-import sys
-path = sys.argv[1]
-text = open(path).read()
-text = text.replace('@"Codabar"', '@"codabar"')
-text = text.replace('NSString *const AVMetadataObjectTypeGS1DataBarCode = @"org.gs1.GS1DataBar";',
-                    'this is not C at all = @"org.gs1.GS1DataBar";')
-open(path, 'w').write(text)
-if 'this is not C at all' not in text:
-    raise SystemExit('the control did not apply, so this run proves nothing')
-PERTURB
+        runs_xmake l "$here/../../common/substitute.lua" all "$build/port-src/MetadataKeyspaces154.m" \
+            '@"Codabar"' '@"codabar"' \
+            'NSString *const AVMetadataObjectTypeGS1DataBarCode = @"org.gs1.GS1DataBar";' \
+            'this is not C at all = @"org.gs1.GS1DataBar";'
     else
         # The mutant: two changes, and both are single-byte. The object type Codabar is "Codabar" and
         # the mutant spells it "codabar" - one letter. And the row the commit singles out,
         # AVMetadataIdentifierQuickTimeUserDataAccessibilityDescription, whose value is the eleven
         # ASCII characters "udta/%A9ade", loses the one byte of its percent sign: 0x25 becomes 0x3f.
         # The report says which row catches which, rather than assuming.
-        python3 - "$build/port-src/MetadataKeyspaces154.m" "$build/port-src/MetadataKeyspaces14.m" <<'PERTURB'
-import sys
-codabar, keyspaces = sys.argv[1], sys.argv[2]
-text = open(codabar).read()
-text = text.replace('@"Codabar"', '@"codabar"')
-open(codabar, 'w').write(text)
-if '@"codabar"' not in text:
-    raise SystemExit('the letter mutant did not apply, so this run proves nothing')
-text = open(keyspaces).read()
-before = '@"udta/%A9ade"'
-after = '@"udta/?A9ade"'
-if before not in text:
-    raise SystemExit('the one-byte mutant did not apply, so this run proves nothing')
-text = text.replace(before, after)
-open(keyspaces, 'w').write(text)
-PERTURB
+        runs_xmake l "$here/../../common/substitute.lua" all "$build/port-src/MetadataKeyspaces154.m" \
+            '@"Codabar"' '@"codabar"'
+        runs_xmake l "$here/../../common/substitute.lua" all "$build/port-src/MetadataKeyspaces14.m" \
+            '@"udta/%A9ade"' '@"udta/?A9ade"'
     fi
 fi
 for source in $sources; do
