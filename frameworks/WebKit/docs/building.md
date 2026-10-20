@@ -49,7 +49,7 @@ Each is an xmake package at its release, built for armv7 and iOS 6 by a recipe i
 | `brotli` | 1.2.0 | what woff2 decompresses with |
 | `wasm3` | 0.9.1-beta.1 | the interpreter behind WebAssembly in Safari's compat dylib |
 
-ICU is built with its data trimmed to the languages in `third_party/icu/keep-languages.txt`.
+ICU is built with its data trimmed to the languages listed in the install script of `third_party/icu/xmake.lua`.
 
 `libios6compat.a` - the symbols this OS predates, see
 [compatibility.md](compatibility.md) - is this port's own code in `compat/`, built by the

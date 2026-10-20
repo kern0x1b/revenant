@@ -1,0 +1,40 @@
+version = 1
+SPDX-PackageName = "revenant"
+SPDX-PackageSupplier = "kern0x1b"
+SPDX-PackageDownloadLocation = "https://github.com/kern0x1b/revenant"
+
+[[annotations]]
+path = "**"
+precedence = "closest"
+SPDX-FileCopyrightText = "2026 kern0x1b"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "emulator/**"
+precedence = "closest"
+SPDX-FileCopyrightText = "2026 kern0x1b"
+SPDX-License-Identifier = "MPL-2.0"
+
+[[annotations]]
+path = "docs/**/emulator/**"
+precedence = "closest"
+SPDX-FileCopyrightText = "2026 kern0x1b"
+SPDX-License-Identifier = "MPL-2.0"
+
+[[annotations]]
+path = "frameworks/Combine/**"
+precedence = "closest"
+SPDX-FileCopyrightText = ["2019 Sergej Jaskiewicz", "2026 kern0x1b"]
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "agent-skills/skills/xmake-*/**"
+precedence = "closest"
+SPDX-FileCopyrightText = ["xmake-io and the xmake-skills contributors", "2026 kern0x1b"]
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "agent-skills/skills/init/**"
+precedence = "closest"
+SPDX-FileCopyrightText = ["2026 Matt Pocock", "2026 kern0x1b"]
+SPDX-License-Identifier = "MIT"

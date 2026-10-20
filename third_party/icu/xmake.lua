@@ -1,6 +1,6 @@
 package("icu")
     set_homepage("https://icu.unicode.org")
-    set_description("ICU as static libraries for armv7 and iOS 6, and for the Mac that tests its data: the prebuilt data archive of the release, cut down with ICU's own icupkg, genrb and derb to the languages in keep-languages.txt and without the RBNF and transliteration trees")
+    set_description("ICU as static libraries for armv7 and iOS 6, and for the Mac that tests its data: the prebuilt data archive of the release, cut down with ICU's own icupkg, genrb and derb to the languages its install script lists and without the RBNF and transliteration trees")
     set_license("Unicode-3.0")
     set_policy("package.strict_compatibility", true)
 
@@ -20,6 +20,7 @@ package("icu")
         local parallel = import("parallel", {rootdir = modules, anonymous = true})
         local trees = {"", "curr/", "lang/", "region/", "zone/", "unit/", "coll/", "brkitr/", "rbnf/"}
         local dropped = {"rbnf/", "translit/"}
+        local languages = {"af", "am", "ar", "az", "be", "bg", "bn", "bs", "ca", "cs", "cy", "da", "de", "el", "en", "es", "et", "eu", "fa", "fi", "fil", "fr", "ga", "gl", "gu", "he", "hi", "hr", "hu", "hy", "id", "is", "it", "ja", "ka", "kk", "km", "kn", "ko", "lo", "lt", "lv", "mk", "ml", "mr", "ms", "my", "nb", "ne", "nl", "nn", "no", "pa", "pl", "pt", "ro", "ru", "si", "sk", "sl", "sq", "sr", "sv", "sw", "ta", "te", "th", "tl", "tr", "uk", "ur", "uz", "vi", "zh"}
         local unindexed = {ja_JP_TRADITIONAL = true, th_TH_TRADITIONAL = true, de_ = true, de__PHONEBOOK = true, es_ = true, es__TRADITIONAL = true}
 
         local function language(name)
@@ -34,7 +35,7 @@ package("icu")
 
         local function trim(bin, archive)
             local keep, kept = {root = true}, 0
-            for _, name in ipairs(io.readfile(path.join(package:scriptdir(), "keep-languages.txt")):split("%s+")) do
+            for _, name in ipairs(languages) do
                 keep[name] = true
                 kept = kept + 1
             end

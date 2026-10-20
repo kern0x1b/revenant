@@ -34,7 +34,10 @@ target("xlate")
     add_packages("llvm", "rellume")
     add_links("LLVM")
     on_config(function (target)
-        target:add("rpathdirs", path.join(target:pkg("rellume"):installdir(), "lib"))
+        local rellume = target:pkg("rellume")
+        if rellume then
+            target:add("rpathdirs", path.join(rellume:installdir(), "lib"))
+        end
     end)
 
 target("xlgen")
