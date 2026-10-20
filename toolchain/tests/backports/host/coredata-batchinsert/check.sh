@@ -8,7 +8,7 @@
 # The mutants are steps of THIS check, not a separate entry point. mutant-init.sh is the driver for
 # the -init one - it copies the port's source, mutates the copy, checks the copy BUILDS, runs the
 # listing and diffs it against reference-host.tsv - and it is called from here so that one command
-# is the whole check. mutant-init.py is the mutation, kept apart from the shell so that a
+# is the whole check. mutants.lua holds the mutations, kept apart from the shell so that a
 # multi-line edit cannot splice into a driver again, which is what broke an earlier version of this.
 #
 # Nothing persisted - the store in the other probe is NSInMemoryStoreType - and no CloudKit here.
@@ -21,8 +21,6 @@
 # why -init's reason text is the LITERAL and not NSStringFromClass: a class-name substitution would
 # spell the renamed class where Apple spells NSBatchInsertRequest.
 set -eu
-echo "FAIL host/coredata-batchinsert/check.sh: its Python steps are gone and not yet ported to Lua: mutant-ivar.py" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 FP=${COREDATA:-$here/../../../../packages/frameworks/apple-backports}
@@ -66,7 +64,7 @@ if [ "${1:-}" = "mutant" ]; then
     # a724920f found, mutated so the check the reviewer reads is the one that goes red on it.
     echo
     echo "=== MUTANT 2: the handler cross-assignment is back"
-    python3 "$here/mutant-ivar.py" "$FP/CoreData/NSBatchInsertRequest.m" "$build/port.m"
+    runs_xmake l "$here/mutants.lua" ivar "$FP/CoreData/NSBatchInsertRequest.m" "$build/port.m"
     grep -v '#import "RevenantCoreData.h"' "$build/port.m" > "$build/port.buildable.m"
     mv "$build/port.buildable.m" "$build/port.m"
     xcrun clang -fobjc-arc -w -DNSBatchInsertRequest=RevenantBatchInsertRequest \
