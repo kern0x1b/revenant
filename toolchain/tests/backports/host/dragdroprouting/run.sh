@@ -9,8 +9,6 @@
 # DDR_ROOT names the port's checkout; the sources are taken from it by path, so the port is never
 # installed as the addon (toolchain/AGENTS.md, Traps).
 set -eu
-echo "FAIL host/dragdroprouting/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PYMUT at line 56; the inline block at line 109" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=${DDR_ROOT:-$here/../../../..}
@@ -53,24 +51,16 @@ rm -f "$scratch/RevenantDropSequence11.m"
 cp "$port/RevenantDropSequence11.m" "$scratch/RevenantDropSequence11.m"
 original=$scratch/RevenantDropSequence11.m
 mutated=$build/RevenantDropSequence11.m.mutated
-python3 - "$original" "$mutated" <<'PYMUT'
-import sys
-src, dst = sys.argv[1], sys.argv[2]
-s = open(src).read()
-before = s
-# The sequence now asks the interaction through objc_msgSend, so the mutation is the order of the
-# two sends themselves: the update is asked before the enter, where the header has it after.
-s = s.replace("""    ((void (*)(id, SEL, id, id))objc_msgSend)(delegate, @selector(dropInteraction:sessionDidEnter:), interaction, session);
+enter_from='    ((void (*)(id, SEL, id, id))objc_msgSend)(delegate, @selector(dropInteraction:sessionDidEnter:), interaction, session);
     NSIndexPath *destination = [self indexPathForItemAtPoint:[self convertPoint:point fromView:nil]];
     if (destination) {
-        ((UIDropProposal * (*)(id, SEL, id, id))objc_msgSend)(delegate, @selector(dropInteraction:sessionDidUpdate:), interaction, session);""",
-"""    NSIndexPath *destination = [self indexPathForItemAtPoint:[self convertPoint:point fromView:nil]];
+        ((UIDropProposal * (*)(id, SEL, id, id))objc_msgSend)(delegate, @selector(dropInteraction:sessionDidUpdate:), interaction, session);'
+enter_to='    NSIndexPath *destination = [self indexPathForItemAtPoint:[self convertPoint:point fromView:nil]];
     if (destination) {
         ((UIDropProposal * (*)(id, SEL, id, id))objc_msgSend)(delegate, @selector(dropInteraction:sessionDidUpdate:), interaction, session);
-        ((void (*)(id, SEL, id, id))objc_msgSend)(delegate, @selector(dropInteraction:sessionDidEnter:), interaction, session);""")
-assert s != before, "the mutation did not apply"
-open(dst, "w").write(s)
-PYMUT
+        ((void (*)(id, SEL, id, id))objc_msgSend)(delegate, @selector(dropInteraction:sessionDidEnter:), interaction, session);'
+cp "$original" "$mutated"
+runs_xmake l "$here/../../common/substitute.lua" all "$mutated" "$enter_from" "$enter_to"
 
 # The mutant has to differ from the source, or the mutated half is the clean half and asserts
 # nothing. cmp says so, and the diff is printed so the two can be read rather than trusted. diff
@@ -106,11 +96,7 @@ run_one() {
     image=$3
     verdict=$(ls -d "$HOME/.revenant/emulator/images.noindex/$image/iPhone3,1_"*"/run/verdict.json" 2>/dev/null | head -1)
     if [ -n "$verdict" ]; then
-        echo "$2 $release: $(python3 -c "
-import json,sys
-d=json.load(open('$verdict'))
-print(d.get('state','?'), d.get('reason',''), d.get('signal','') and 'signal '+str(d['signal']) or '')
-" 2>/dev/null)"
+        echo "$2 $release: $(runs_xmake l "$here/../../common/verdict.lua" "$verdict" signal 2>/dev/null)"
     fi
     if [ "$status" -eq 0 ] && grep -Eq 'pass.{0,12} on iPhone' "$release.log"; then
         echo "$2 $release: pass"
