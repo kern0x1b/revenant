@@ -1,0 +1,612 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Wed, 16 Sep 2026 12:00:00 +0200
+Subject: [PATCH] JavaScriptCore: put ARMv7 back into the Yarr JIT
+
+Trunk's Yarr with the ARMv7 register set and code paths restored, so regular
+expressions are compiled on this CPU instead of interpreted.
+---
+ .../JavaScriptCore/yarr/YarrInterpreter.cpp   |   4 +-
+ Source/JavaScriptCore/yarr/YarrJIT.cpp        | 165 +++++++++++++++++-
+ Source/JavaScriptCore/yarr/YarrJIT.h          |   7 +
+ Source/JavaScriptCore/yarr/YarrJITRegisters.h |  25 ++-
+ Source/JavaScriptCore/yarr/hasher.py          | 119 ++++---------
+ 5 files changed, 227 insertions(+), 93 deletions(-)
+
+diff --git a/Source/JavaScriptCore/yarr/YarrInterpreter.cpp b/Source/JavaScriptCore/yarr/YarrInterpreter.cpp
+index 9df5e423215a334cb8bec2e13e991996f75c9a5e..3d67fc4e7e080c7441a508995d37360ec78a593e 100644
+--- a/Source/JavaScriptCore/yarr/YarrInterpreter.cpp
++++ b/Source/JavaScriptCore/yarr/YarrInterpreter.cpp
+@@ -479,7 +479,9 @@ public:
+ 
+         auto linearSearchRanges = [ch](const Vector<CharacterRange>& ranges) {
+             for (unsigned i = 0; i < ranges.size(); ++i) {
+-                if ((ch >= ranges[i].begin) && (ch <= ranges[i].end))
++                if (ch < ranges[i].begin)
++                    return false;
++                if (ch <= ranges[i].end)
+                     return true;
+             }
+ 
+diff --git a/Source/JavaScriptCore/yarr/YarrJIT.cpp b/Source/JavaScriptCore/yarr/YarrJIT.cpp
+index 458c960710fcbd3279e6e3daece37fe842e0cc41..722d8b45913c7ce719b25da115acc330081f7f5c 100644
+--- a/Source/JavaScriptCore/yarr/YarrJIT.cpp
++++ b/Source/JavaScriptCore/yarr/YarrJIT.cpp
+@@ -39,12 +39,18 @@
+ #include "YarrDisassembler.h"
+ #include "YarrJITRegisters.h"
+ #include "YarrMatchingContextHolder.h"
++#if defined(WEBKIT_IOS6)
++#include <atomic>
++#include <cstdio>
++#include <cstdlib>
++#endif
+ #include <wtf/ASCIICType.h>
+ #include <wtf/BitVector.h>
+ #include <wtf/HexNumber.h>
+ #include <wtf/ListDump.h>
+ #include <wtf/MathExtras.h>
+ #include <wtf/TZoneMallocInlines.h>
++#include <wtf/text/CString.h>
+ #include <wtf/text/MakeString.h>
+ 
+ WTF_ALLOW_UNSAFE_BUFFER_USAGE_BEGIN
+@@ -446,6 +452,8 @@ static constexpr MacroAssembler::TrustedImm32 surrogateTagMask = MacroAssembler:
+ static constexpr MacroAssembler::TrustedImm32 surrogatePairTags = MacroAssembler::TrustedImm32(0xdc00d800);
+ static constexpr MacroAssembler::TrustedImm32 surrogateTagShiftedRight11 = MacroAssembler::TrustedImm32(0xd800 >> 11);
+ 
++#if ENABLE(YARR_JIT_UNICODE_EXPRESSIONS)
++
+ static void tryReadUnicodeCharImpl(VM& vm, CCallHelpers& jit, MacroAssembler::RegisterID resultReg)
+ {
+     MacroAssembler::JumpList slowCases;
+@@ -578,6 +586,7 @@ static void tryReadUnicodeCharSlowImpl(CCallHelpers& jit)
+ 
+     haveResult.link(&jit);
+ }
++#endif
+ 
+ template<class YarrJITRegs = YarrJITDefaultRegisters>
+ class YarrGenerator final : public YarrJITInfo {
+@@ -1006,8 +1015,13 @@ class YarrGenerator final : public YarrJITInfo {
+             // Otherwise, actually perform the bit test.
+             m_jit.sub32(character, MacroAssembler::Imm32(static_cast<unsigned>(min)), scratch);
+             MacroAssembler::Jump notInVector = m_jit.branch32(MacroAssembler::Above, scratch, MacroAssembler::TrustedImm32(max - min));
++#if CPU(REGISTER64)
+             m_jit.lshift64(MacroAssembler::TrustedImm32(1), scratch, scratch);
+             matchDest.append(m_jit.branchTest64(MacroAssembler::NonZero, scratch, MacroAssembler::TrustedImm64(mask.storage()[0])));
++#else
++            m_jit.lshift32(MacroAssembler::TrustedImm32(1), scratch, scratch);
++            matchDest.append(m_jit.branchTest32(MacroAssembler::NonZero, scratch, MacroAssembler::TrustedImm32(mask.storage()[0])));
++#endif
+             notInVector.link(&m_jit);
+         }
+         }
+@@ -1441,6 +1455,7 @@ class YarrGenerator final : public YarrJITInfo {
+         return MacroAssembler::BaseIndex(base, indexReg, MacroAssembler::TimesTwo, Checked<int32_t>(characterOffset) * static_cast<int32_t>(sizeof(char16_t)));
+     }
+ 
++#if ENABLE(YARR_JIT_UNICODE_EXPRESSIONS)
+     void tryReadUnicodeChar(MacroAssembler::BaseIndex address, MacroAssembler::RegisterID resultReg)
+     {
+         ASSERT(m_charSize == CharSize::Char16);
+@@ -1494,6 +1509,7 @@ class YarrGenerator final : public YarrJITInfo {
+     // in |character| and matches it against |trailsOnlyClass| (a transient class containing
+     // only the trail surrogate values from the source class). Skips the full surrogate-pair
+     // decode that tryReadUnicodeCharImpl would emit (~16 instructions).
++#endif
+     void readSurrogatePairAndMatchTrailForSharedLead(Checked<unsigned> negativeCharacterOffset,
+         MacroAssembler::RegisterID character,
+         MacroAssembler::RegisterID scratch,
+@@ -1649,10 +1665,15 @@ class YarrGenerator final : public YarrJITInfo {
+             m_jit.load8(address, resultReg);
+         else if (!m_decodeSurrogatePairs)
+             m_jit.load16Unaligned(address, resultReg);
++#if ENABLE(YARR_JIT_UNICODE_EXPRESSIONS)
+         else if (m_direction == Backward)
+             tryReadUnicodeCharBackward(address, resultReg);
+         else
+             tryReadUnicodeChar(address, resultReg);
++#else
++        else
++            RELEASE_ASSERT_NOT_REACHED();
++#endif
+     }
+ 
+     void readCharacterForCharacterClassTerm(Checked<unsigned> negativeCharacterOffset, MacroAssembler::RegisterID resultReg, const PatternTerm* term)
+@@ -1722,7 +1743,7 @@ class YarrGenerator final : public YarrJITInfo {
+         m_jit.storePtr(imm, frameAddress().withOffset(frameLocation * sizeof(void*)));
+     }
+ 
+-#if CPU(ARM64) || CPU(X86_64) || CPU(RISCV64)
++#if CPU(ARM64) || CPU(X86_64) || CPU(RISCV64) || CPU(ARM_THUMB2)
+     void storeToFrame(MacroAssembler::TrustedImmPtr imm, unsigned frameLocation)
+     {
+         m_jit.storePtr(imm, frameAddress().withOffset(frameLocation * sizeof(void*)));
+@@ -1841,7 +1862,12 @@ class YarrGenerator final : public YarrJITInfo {
+     }
+     void clearSubpattern(unsigned subpattern)
+     {
++#if USE(JSVALUE64)
+         m_jit.store64(MacroAssembler::TrustedImm64(static_cast<uint64_t>(-1)), subpatternStartAddress(subpattern));
++#else
++        m_jit.store32(MacroAssembler::TrustedImm32(static_cast<uint32_t>(-1)), subpatternStartAddress(subpattern));
++        m_jit.store32(MacroAssembler::TrustedImm32(static_cast<uint32_t>(-1)), subpatternEndAddress(subpattern));
++#endif
+     }
+ 
+     void emitClearCapturesForTerm(PatternTerm* term)
+@@ -2511,6 +2537,7 @@ class YarrGenerator final : public YarrJITInfo {
+         backtrackTermDefault(opIndex);
+     }
+ 
++#if ENABLE(YARR_JIT_BACKREFERENCES)
+     void matchBackreference(size_t opIndex, MacroAssembler::JumpList& characterMatchFails, MacroAssembler::RegisterID character, MacroAssembler::RegisterID patternIndex, MacroAssembler::RegisterID patternCharacter, MacroAssembler::RegisterID subpatternIdReg)
+     {
+         YarrOp& op = m_ops[opIndex];
+@@ -2804,6 +2831,7 @@ class YarrGenerator final : public YarrJITInfo {
+         }
+         }
+     }
++#endif
+     void backtrackBackReference(size_t opIndex)
+     {
+         YarrOp& op = m_ops[opIndex];
+@@ -3885,7 +3913,11 @@ class YarrGenerator final : public YarrJITInfo {
+ 
+         case PatternTerm::Type::NumberedBackReference:
+         case PatternTerm::Type::NamedBackReference:
++#if ENABLE(YARR_JIT_BACKREFERENCES)
+             generateBackReference(term->type == PatternTerm::Type::NamedBackReference, opIndex);
++#else
++            m_failureReason = JITFailureReason::BackReference;
++#endif
+             break;
+         case PatternTerm::Type::DotStarEnclosure:
+             generateDotStarEnclosure(opIndex);
+@@ -5671,6 +5703,10 @@ class YarrGenerator final : public YarrJITInfo {
+                     // Multi-alt FixedCount (needs to remember which alternative each
+                     // iteration took) or backtrackable inner content (needs to roll
+                     // state back across iterations) — use the ParenContext path.
++#if !ENABLE(YARR_JIT_ALL_PARENS_EXPRESSIONS)
++                    m_failureReason = JITFailureReason::ParenthesizedSubpattern;
++                    return;
++#endif
+                     m_containsNestedSubpatterns = true;
+                     m_usesT2 = true;
+                     parenthesesBeginOpCode = YarrOpCode::ParenthesesSubpatternBegin;
+@@ -5685,6 +5721,10 @@ class YarrGenerator final : public YarrJITInfo {
+                 }
+             } else {
+                 // Greedy/NonGreedy quantifiers: use generic ParenContext-based nodes.
++#if !ENABLE(YARR_JIT_ALL_PARENS_EXPRESSIONS)
++                m_failureReason = JITFailureReason::ParenthesizedSubpattern;
++                return;
++#endif
+                 m_containsNestedSubpatterns = true;
+                 parenthesesBeginOpCode = YarrOpCode::ParenthesesSubpatternBegin;
+                 parenthesesEndOpCode = YarrOpCode::ParenthesesSubpatternEnd;
+@@ -6320,8 +6360,7 @@ class YarrGenerator final : public YarrJITInfo {
+         static_assert(sizeof(BoyerMooreBitmap::Map::WordType) == sizeof(uint32_t));
+         static_assert(1 << 5 == 32);
+         static_assert(1 << (5 + 2) == BoyerMooreBitmap::Map::size());
+-        m_jit.move(m_regs.regT0, m_regs.regT2);
+-        m_jit.urshift32(MacroAssembler::TrustedImm32(5), m_regs.regT2);
++        m_jit.urshift32(m_regs.regT0, MacroAssembler::TrustedImm32(5), m_regs.regT2);
+         m_jit.and32(MacroAssembler::TrustedImm32(0b11), m_regs.regT2);
+         m_jit.load32(MacroAssembler::BaseIndex(m_regs.regT1, m_regs.regT2, MacroAssembler::TimesFour), m_regs.regT2);
+         m_jit.urshift32(m_regs.regT0, m_regs.regT2);
+@@ -6885,6 +6924,12 @@ class YarrGenerator final : public YarrJITInfo {
+         } else if (m_pattern.hasDuplicateNamedCaptureGroups())
+             registers.add(X86Registers::r14, IgnoreVectors);
+ #elif CPU(ARM64)
++#elif CPU(ARM_THUMB2)
++        registers.add(ARMRegisters::r4, IgnoreVectors);
++        registers.add(ARMRegisters::r5, IgnoreVectors);
++        registers.add(ARMRegisters::r6, IgnoreVectors);
++        registers.add(ARMRegisters::r8, IgnoreVectors);
++        registers.add(ARMRegisters::r10, IgnoreVectors);
+ #elif CPU(RISCV64)
+ #endif
+         return registers;
+@@ -6906,7 +6951,7 @@ class YarrGenerator final : public YarrJITInfo {
+ 
+     void generateEnter()
+     {
+-#if CPU(X86_64) || CPU(RISCV64)
++#if CPU(X86_64) || CPU(ARM_THUMB2) || CPU(RISCV64)
+         m_jit.emitFunctionPrologue();
+ #elif CPU(ARM64)
+         // JITCage code is doing prologue and epilogue in thunk.
+@@ -6922,11 +6967,15 @@ class YarrGenerator final : public YarrJITInfo {
+             size_t stackSizeForCalleeSaves = WTF::roundUpToMultipleOf<stackAlignmentBytes()>(m_calleeSaves.registerCount() * sizeof(UCPURegister));
+ #if CPU(X86_64) || CPU(ARM64)
+             m_jit.subPtr(GPRInfo::callFrameRegister, CCallHelpers::TrustedImm32(stackSizeForCalleeSaves), MacroAssembler::stackPointerRegister);
++            m_jit.emitSaveCalleeSavesFor(&m_calleeSaves);
+ #else
++            //
++            //
++            //
++            m_jit.emitSaveCalleeSavesFor(&m_calleeSaves);
+             m_jit.subPtr(GPRInfo::callFrameRegister, CCallHelpers::TrustedImm32(stackSizeForCalleeSaves), m_regs.regT0);
+             m_jit.move(m_regs.regT0, MacroAssembler::stackPointerRegister);
+ #endif
+-            m_jit.emitSaveCalleeSavesFor(&m_calleeSaves);
+         }
+     }
+ 
+@@ -6938,7 +6987,7 @@ class YarrGenerator final : public YarrJITInfo {
+         }
+ 
+         m_jit.emitRestoreCalleeSavesFor(&m_calleeSaves);
+-#if CPU(X86_64) || CPU(RISCV64)
++#if CPU(X86_64) || CPU(ARM_THUMB2) || CPU(RISCV64)
+         m_jit.emitFunctionEpilogue();
+ #elif CPU(ARM64)
+         // JITCage code is doing prologue and epilogue in thunk.
+@@ -7098,6 +7147,20 @@ public:
+     {
+         MacroAssembler::Label startOfMainCode;
+ 
++#if !ENABLE(YARR_JIT_UNICODE_EXPRESSIONS)
++        if (m_decodeSurrogatePairs) {
++            codeBlock.setFallBackWithFailureReason(JITFailureReason::DecodeSurrogatePair);
++            return;
++        }
++#endif
++
++#if !ENABLE(YARR_JIT_BACKREFERENCES)
++        if (m_pattern.m_containsBackreferences) {
++            codeBlock.setFallBackWithFailureReason(JITFailureReason::BackReference);
++            return;
++        }
++#endif
++
+ #if ENABLE(YARR_JIT_UNICODE_CAN_INCREMENT_INDEX_FOR_NON_BMP)
+         // A zero minimum-size alternative (e.g. /aa|\B/u) can match in the middle of a surrogate pair, so it must not be skipped.
+         if (m_decodeSurrogatePairs && m_executionMode != ExecutionMode::InlineTest && !m_pattern.multiline() && !m_pattern.m_containsBOL && !m_pattern.m_containsLookbehinds && !m_pattern.m_containsModifiers && m_pattern.m_body->m_minimumSize) {
+@@ -7142,8 +7205,14 @@ public:
+             functionChecks<YarrCodeBlock::YarrJITCode16>();
+             functionChecks<YarrCodeBlock::YarrJITCodeMatchOnly8>();
+             functionChecks<YarrCodeBlock::YarrJITCodeMatchOnly16>();
++#if CPU(ARM_THUMB2)
++            MacroAssembler::RegisterID matchingContext = m_regs.regT1;
++            unsigned offset = POKE_ARGUMENT_OFFSET;
++            m_jit.loadPtr(MacroAssembler::Address(GPRInfo::callFrameRegister, offset * sizeof(void*)), matchingContext);
++#else
+             // The MatchingContextHolder* arrives in the 5th argument register.
+             MacroAssembler::RegisterID matchingContext = GPRInfo::argumentGPR4;
++#endif
+             MacroAssembler::Jump stackOk = m_jit.branchPtr(MacroAssembler::BelowOrEqual, MacroAssembler::Address(matchingContext, MatchingContextHolder::offsetOfStackLimit()), m_regs.regT0);
+ 
+             // Exceeded stack limit, punt to the interpreter.
+@@ -7678,6 +7747,7 @@ private:
+     SubjectSampler m_sampler;
+ };
+ 
++#if ENABLE(YARR_JIT_UNICODE_EXPRESSIONS)
+ static MacroAssemblerCodeRef<JITThunkPtrTag> tryReadUnicodeCharSlowThunkGenerator(VM&)
+ {
+     CCallHelpers jit(nullptr);
+@@ -7690,7 +7760,9 @@ static MacroAssemblerCodeRef<JITThunkPtrTag> tryReadUnicodeCharSlowThunkGenerato
+ 
+     return FINALIZE_THUNK(patchBuffer, JITThunkPtrTag, "Yarr tryReadUnicodeChar"_s, "YARR tryReadUnicodeChar thunk");
+ }
++#endif
+ 
++#if ENABLE(YARR_JIT_BACKREFERENCES)
+ static MacroAssemblerCodeRef<JITThunkPtrTag> areCanonicallyEquivalentThunkGenerator(VM&)
+ {
+     CCallHelpers jit(nullptr);
+@@ -7772,12 +7844,89 @@ static MacroAssemblerCodeRef<JITThunkPtrTag> areCanonicallyEquivalentThunkGenera
+ 
+     return FINALIZE_THUNK(patchBuffer, JITThunkPtrTag, "Yarr areCanonicallyEquivalent", "YARR areCanonicallyEquivalent call");
+ }
++#endif
+ 
+ JSC_DEFINE_NOEXCEPT_JIT_OPERATION(operationAreCanonicallyEquivalent, bool, (unsigned a, unsigned b, CanonicalMode canonicalMode))
+ {
+     return areCanonicallyEquivalent(static_cast<char32_t>(a), static_cast<char32_t>(b), canonicalMode);
+ }
+ 
++#if defined(WEBKIT_IOS6)
++namespace YarrJITInstrumentation {
++
++static const char* failureReasonName(JITFailureReason failure)
++{
++    switch (failure) {
++    case JITFailureReason::DecodeSurrogatePair:
++        return "DecodeSurrogatePair";
++    case JITFailureReason::BackReference:
++        return "BackReference";
++    case JITFailureReason::Lookbehind:
++        return "Lookbehind";
++    case JITFailureReason::ParenthesizedSubpattern:
++        return "ParenthesizedSubpattern";
++    case JITFailureReason::ParenthesisNestedTooDeep:
++        return "ParenthesisNestedTooDeep";
++    case JITFailureReason::ExecutableMemoryAllocationFailure:
++        return "ExecutableMemoryAllocationFailure";
++    case JITFailureReason::OffsetTooLarge:
++        return "OffsetTooLarge";
++    case JITFailureReason::GeneratedCodeSizeTooLarge:
++        return "GeneratedCodeSizeTooLarge";
++    }
++    return "Unknown";
++}
++
++static FILE* NODELETE eventLog()
++{
++    static FILE* file = [] () -> FILE* {
++        const char* path = getenv("WEBKIT_IOS6_YARR_JIT_LOG");
++        if (!path || !path[0])
++            return nullptr;
++        FILE* opened = fopen(path, "w");
++        if (opened)
++            setvbuf(opened, nullptr, _IOLBF, 0);
++        return opened;
++    }();
++    return file;
++}
++
++static void recordAttempt(YarrPattern& pattern, StringView patternString, std::optional<JITFailureReason> failureReason)
++{
++    static std::atomic<uint64_t> attempts { 0 };
++    static std::atomic<uint64_t> successes { 0 };
++
++    uint64_t attemptCount = attempts.fetch_add(1, std::memory_order_relaxed) + 1;
++    uint64_t successCount = successes.load(std::memory_order_relaxed);
++    if (!failureReason)
++        successCount = successes.fetch_add(1, std::memory_order_relaxed) + 1;
++
++    FILE* log = eventLog();
++    if (!log)
++        return;
++
++    CString preview = patternString.utf8();
++    int previewLength = static_cast<int>(std::min<size_t>(preview.length(), 120));
++
++    fprintf(log, "%.3f attempt=%llu success=%llu ok=%d reason=%s flags=%s%s%s%s%s%s%s pattern=\"%.*s\"\n",
++        MonotonicTime::now().secondsSinceEpoch().value(),
++        static_cast<unsigned long long>(attemptCount),
++        static_cast<unsigned long long>(successCount),
++        failureReason ? 0 : 1,
++        failureReason ? failureReasonName(*failureReason) : "-",
++        pattern.global() ? "g" : "",
++        pattern.ignoreCase() ? "i" : "",
++        pattern.multiline() ? "m" : "",
++        pattern.dotAll() ? "s" : "",
++        pattern.sticky() ? "y" : "",
++        pattern.unicode() ? "u" : "",
++        pattern.unicodeSets() ? "v" : "",
++        previewLength, preview.data());
++}
++
++}
++#endif
++
+ static void dumpCompileFailure(JITFailureReason failure)
+ {
+     switch (failure) {
+@@ -7808,6 +7957,10 @@ void jitCompile(YarrPattern& pattern, StringView patternString, CharSize charSiz
+     YarrJITDefaultRegisters jitRegisters;
+     YarrGenerator<YarrJITDefaultRegisters>(masm, vm, &codeBlock, jitRegisters, pattern, patternString, charSize, mode, sampleString).compile(codeBlock);
+ 
++#if defined(WEBKIT_IOS6)
++    YarrJITInstrumentation::recordAttempt(pattern, patternString, codeBlock.failureReason());
++#endif
++
+     if (auto failureReason = codeBlock.failureReason()) {
+         if (Options::dumpCompiledRegExpPatterns()) [[unlikely]] {
+             pattern.dumpPatternString(WTF::dataFile(), patternString);
+diff --git a/Source/JavaScriptCore/yarr/YarrJIT.h b/Source/JavaScriptCore/yarr/YarrJIT.h
+index 628471501eca5bd8fbd29e91c4be4ba4a868b78f..96853f3d3616fb18fa77daef7cce34e26d1ecbc6 100644
+--- a/Source/JavaScriptCore/yarr/YarrJIT.h
++++ b/Source/JavaScriptCore/yarr/YarrJIT.h
+@@ -56,6 +56,9 @@ class MatchingContextHolder;
+ class YarrCodeBlock;
+ 
+ enum class JITFailureReason : uint8_t {
++    DecodeSurrogatePair,
++    BackReference,
++    ParenthesizedSubpattern,
+     Lookbehind,
+     ParenthesisNestedTooDeep,
+     ExecutableMemoryAllocationFailure,
+@@ -233,6 +236,10 @@ public:
+ 
+     const uint8_t* addLatin1Table(const CharacterClass::ByteTable& table)
+     {
++        for (auto& stored : m_latin1Tables) {
++            if (stored->data == table.data)
++                return stored->data.data();
++        }
+         m_latin1Tables.append(makeUniqueRef<CharacterClass::ByteTable>(table));
+         return m_latin1Tables.last()->data.data();
+     }
+diff --git a/Source/JavaScriptCore/yarr/YarrJITRegisters.h b/Source/JavaScriptCore/yarr/YarrJITRegisters.h
+index 028c3e7c40ad2b9538d7297650a4098df040316c..efe98144b6223e1d0bdda84c067c8e6e1fe1beb8 100644
+--- a/Source/JavaScriptCore/yarr/YarrJITRegisters.h
++++ b/Source/JavaScriptCore/yarr/YarrJITRegisters.h
+@@ -42,7 +42,30 @@ struct YarrJITDefaultRegisters {
+ public:
+     static constexpr YarrRegisters registersAssignments = YarrRegisters::DefaultRegisters;
+ 
+-#if CPU(ARM64)
++#if CPU(ARM_THUMB2)
++    static constexpr GPRReg input = ARMRegisters::r0;
++    static constexpr GPRReg index = ARMRegisters::r1;
++    static constexpr GPRReg length = ARMRegisters::r2;
++    static constexpr GPRReg output = ARMRegisters::r3;
++
++    static constexpr GPRReg matchingContext = InvalidGPRReg;
++    static constexpr GPRReg freelistRegister = InvalidGPRReg;
++
++    static constexpr GPRReg regT0 = ARMRegisters::r4;
++    static constexpr GPRReg regT1 = ARMRegisters::r5;
++    static constexpr GPRReg regT2 = ARMRegisters::r8;
++    static constexpr GPRReg regT3 = ARMRegisters::r10;
++
++    static constexpr GPRReg remainingMatchCount = InvalidGPRReg;
++    static constexpr GPRReg regUnicodeInputAndTrail = InvalidGPRReg;
++    static constexpr GPRReg unicodeAndSubpatternIdTemp = InvalidGPRReg;
++    static constexpr GPRReg firstCharacterAdditionalReadSize = InvalidGPRReg;
++    static constexpr GPRReg endOfStringAddress = InvalidGPRReg;
++
++    static constexpr GPRReg returnRegister = ARMRegisters::r0;
++    static constexpr GPRReg returnRegister2 = ARMRegisters::r1;
++
++#elif CPU(ARM64)
+     // Argument registers
+     static constexpr GPRReg input = ARM64Registers::x0;
+     static constexpr GPRReg index = ARM64Registers::x1;
+diff --git a/Source/JavaScriptCore/yarr/hasher.py b/Source/JavaScriptCore/yarr/hasher.py
+index 7183091cef83849ca9aea4c6b859c92a7f860f0b..002d4345b55e42c56c7896ba4cac9eeaae7883c9 100644
+--- a/Source/JavaScriptCore/yarr/hasher.py
++++ b/Source/JavaScriptCore/yarr/hasher.py
+@@ -28,11 +28,12 @@
+ 
+ mask64 = 2**64 - 1
+ mask32 = 2**32 - 1
+-secret = [3257665815644502181, 10067880064238660809, 5418857496715711651]
++narrowSecretA = 0x53c5ca59
++narrowSecretB = 0x74743c1b
+ 
+ 
+ def stringHash(str):
+-    return rapidhash(str)
++    return narrowHash(str)
+ 
+ 
+ def maskTop8BitsAndAvoidZero(value):
+@@ -50,50 +51,11 @@ def maskTop8BitsAndAvoidZero(value):
+     return value
+ 
+ 
+-def rapidhash(string):
++def narrowHash(string):
+     # https://github.com/Nicoshev/rapidhash
+-    # Hashes raw ASCII bytes (1 byte per character).
+-    def add64(a, b):
+-        return (a + b) & mask64
+-
+-    def multi64(a, b):
+-        return a * b & mask64
+-
+-    def rapid_mul128(A, B):
+-        ha = A >> 32
+-        hb = B >> 32
+-        la = A & mask32
+-        lb = B & mask32
+-        rh = multi64(ha, hb)
+-        rm0 = multi64(ha, lb)
+-        rm1 = multi64(hb, la)
+-        rl = multi64(la, lb)
+-        t = add64(rl, (rm0 << 32))
+-        c = int(t < rl)
+-
+-        lo = add64(t, (rm1 << 32))
+-        c += int(lo < t)
+-        hi = add64(rh, add64((rm0 >> 32), add64((rm1 >> 32), c)))
+-        return lo, hi
+-
+-    def rapid_mix(A, B):
+-        A, B = rapid_mul128(A, B)
+-        return A ^ B
+-
+-    length = len(string)
+-    seed = rapid_mix(0 ^ secret[0], secret[1]) ^ length
+-    a = 0
+-    b = 0
+-
+-    def read64(i):
+-        return (ord(string[i])
+-                | (ord(string[i + 1]) << 8)
+-                | (ord(string[i + 2]) << 16)
+-                | (ord(string[i + 3]) << 24)
+-                | (ord(string[i + 4]) << 32)
+-                | (ord(string[i + 5]) << 40)
+-                | (ord(string[i + 6]) << 48)
+-                | (ord(string[i + 7]) << 56))
++    def narrowMix(a, b):
++        product = ((a ^ narrowSecretA) * (b ^ narrowSecretB)) & mask64
++        return (product & mask32, (product >> 32) & mask32)
+ 
+     def read32(i):
+         return (ord(string[i])
+@@ -102,48 +64,35 @@ def rapidhash(string):
+                 | (ord(string[i + 3]) << 24))
+ 
+     def readSmall(i, k):
+-        return ((ord(string[i]) << 56)
+-                | (ord(string[i + (k >> 1)]) << 32)
++        return ((ord(string[i]) << 16)
++                | (ord(string[i + (k >> 1)]) << 8)
+                 | ord(string[i + k - 1]))
+ 
+-    if length <= 16:
+-        if length >= 4:
+-            delta = 4 if length >= 8 else 0
+-            a = (read32(0) << 32) | read32(length - 4)
+-            b = (read32(delta) << 32) | read32(length - 4 - delta)
+-        elif length > 0:
+-            a = readSmall(0, length)
+-            b = 0
+-        else:
+-            a = b = 0
+-    else:
+-        i = length
+-        off = 0
+-        if i > 48:
+-            see1 = seed
+-            see2 = seed
+-            while True:
+-                seed = rapid_mix(read64(off) ^ secret[0], read64(off + 8) ^ seed)
+-                see1 = rapid_mix(read64(off + 16) ^ secret[1], read64(off + 24) ^ see1)
+-                see2 = rapid_mix(read64(off + 32) ^ secret[2], read64(off + 40) ^ see2)
+-                off += 48
+-                i -= 48
+-                if i < 48:
+-                    break
+-            seed ^= see1 ^ see2
+-        if i > 16:
+-            seed = rapid_mix(read64(off) ^ secret[2], read64(off + 8) ^ seed ^ secret[1])
+-            if i > 32:
+-                seed = rapid_mix(read64(off + 16) ^ secret[2], read64(off + 24) ^ seed)
+-        a = read64(off + i - 16)
+-        b = read64(off + i - 8)
+-    a ^= secret[1]
+-    b ^= seed
+-
+-    (a, b) = rapid_mul128(a, b)
+-    hashValue = rapid_mix(a ^ secret[0] ^ length, b ^ secret[1]) & mask32
+-
+-    return maskTop8BitsAndAvoidZero(hashValue)
++    length = len(string)
++    seed = 0
++    see1 = length & mask32
++    (seed, see1) = narrowMix(seed, see1)
++
++    remaining = length
++    offset = 0
++    while remaining > 8:
++        seed ^= read32(offset)
++        see1 ^= read32(offset + 4)
++        (seed, see1) = narrowMix(seed, see1)
++        offset += 8
++        remaining -= 8
++
++    if remaining >= 4:
++        seed ^= read32(offset)
++        see1 ^= read32(offset + remaining - 4)
++    elif remaining:
++        seed ^= readSmall(offset, remaining)
++
++    (seed, see1) = narrowMix(seed, see1)
++    seed ^= see1
++    (seed, see1) = narrowMix(seed, see1)
++
++    return maskTop8BitsAndAvoidZero((seed ^ see1) & mask32)
+ 
+ 
+ def ceilingToPowerOf2(v):

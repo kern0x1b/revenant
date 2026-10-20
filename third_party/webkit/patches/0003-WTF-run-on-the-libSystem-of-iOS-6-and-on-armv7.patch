@@ -1,0 +1,3508 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Wed, 16 Sep 2026 12:00:00 +0200
+Subject: [PATCH] WTF: run on the libSystem of iOS 6 and on armv7
+
+Threading, clocks, logging and dispatch where a 2012 libSystem and a current
+WTF disagree: work queues dispatch a leaked function through the plain
+dispatch_*_f calls this release has, the NEON paths are usable again on this
+CPU, and the soft-linking assert names the missing symbol and its framework
+instead of printing an empty dlerror(), which is what made missing-constant
+crashes diagnosable.
+---
+ Source/WTF/wtf/ASCIICType.h                   |  10 +-
+ Source/WTF/wtf/Assertions.cpp                 |   7 +
+ Source/WTF/wtf/Atomics.h                      |   4 +
+ Source/WTF/wtf/AvailableMemory.cpp            |   9 +-
+ Source/WTF/wtf/FastMalloc.h                   | 102 ++++++-
+ Source/WTF/wtf/FunctionTraits.h               |  29 ++
+ Source/WTF/wtf/HashFunctions.h                |  39 ++-
+ Source/WTF/wtf/HashMap.h                      |  16 ++
+ Source/WTF/wtf/HashSet.h                      |  14 +-
+ Source/WTF/wtf/HashTable.h                    |  72 +++--
+ Source/WTF/wtf/LockAlgorithmInlines.h         |  35 ++-
+ Source/WTF/wtf/MallocCommon.cpp               |   5 +
+ Source/WTF/wtf/MathExtras.h                   |  16 +-
+ Source/WTF/wtf/MemoryPressureHandler.h        |   4 +-
+ Source/WTF/wtf/ParkingLot.cpp                 |  20 +-
+ Source/WTF/wtf/PlatformEnable.h               |  83 +++---
+ Source/WTF/wtf/PlatformEnableCocoa.h          |  88 +++++-
+ Source/WTF/wtf/PlatformHave.h                 |  94 +++++--
+ Source/WTF/wtf/RobinHoodHashTable.h           |   8 +-
+ Source/WTF/wtf/RunLoop.cpp                    |   2 +-
+ Source/WTF/wtf/RunLoop.h                      |   6 +
+ Source/WTF/wtf/ThreadSafeRefCounted.h         |  10 +
+ Source/WTF/wtf/Vector.h                       |  77 ++++--
+ Source/WTF/wtf/VectorTraits.h                 |  15 +-
+ Source/WTF/wtf/WordLock.cpp                   |  45 +++-
+ Source/WTF/wtf/cf/RunLoopCF.cpp               |  14 +
+ Source/WTF/wtf/cocoa/MainThreadCocoa.mm       |   1 +
+ Source/WTF/wtf/cocoa/MemoryFootprintCocoa.cpp |  32 +++
+ .../wtf/cocoa/MemoryPressureHandlerCocoa.mm   |  91 ++++++-
+ Source/WTF/wtf/cocoa/TollFreeBridging.h       |   2 +
+ Source/WTF/wtf/cocoa/WorkQueueCocoa.mm        |  20 ++
+ Source/WTF/wtf/darwin/DispatchExtras.h        |   8 +
+ Source/WTF/wtf/darwin/DispatchOSObject.h      |  11 +
+ Source/WTF/wtf/darwin/NetworkOSObject.h       |   6 +
+ Source/WTF/wtf/darwin/OSLogPrintStream.mm     |   7 +-
+ Source/WTF/wtf/posix/OSAllocatorPOSIX.cpp     |   5 +-
+ Source/WTF/wtf/text/ASCIIFastPath.h           |  59 +++-
+ .../WTF/wtf/text/IntegerToStringConversion.h  | 112 ++++++--
+ Source/WTF/wtf/text/MakeString.h              |  30 +++
+ Source/WTF/wtf/text/RapidHash.h               | 130 +++++++++
+ Source/WTF/wtf/text/StringBuilder.cpp         |   7 +
+ Source/WTF/wtf/text/StringBuilder.h           |  17 +-
+ Source/WTF/wtf/text/StringCommon.h            | 251 ++++++++++++++++++
+ Source/WTF/wtf/text/StringConcatenate.h       |   8 +
+ Source/WTF/wtf/text/StringImpl.cpp            |  65 +++--
+ Source/WTF/wtf/text/StringImpl.h              |  70 ++++-
+ .../WTF/wtf/text/StringToIntegerConversion.h  |  20 +-
+ Source/WTF/wtf/text/StringView.h              |  20 +-
+ Source/WTF/wtf/text/WTFString.cpp             |  25 ++
+ Source/WTF/wtf/text/WTFString.h               |   2 +-
+ 50 files changed, 1606 insertions(+), 217 deletions(-)
+
+diff --git a/Source/WTF/wtf/ASCIICType.h b/Source/WTF/wtf/ASCIICType.h
+index 828e17ab0beb9a583eb23f7f42b2460e33890a5a..21da82cc11bf7ef0cb003b4cbbea4c3be9dc746f 100644
+--- a/Source/WTF/wtf/ASCIICType.h
++++ b/Source/WTF/wtf/ASCIICType.h
+@@ -92,7 +92,7 @@ template<Character CharacterType> constexpr bool isASCII(CharacterType character
+ 
+ template<Character CharacterType> constexpr bool isASCIILower(CharacterType character)
+ {
+-    return character >= 'a' && character <= 'z';
++    return static_cast<unsigned>(character - 'a') <= ('z' - 'a');
+ }
+ 
+ template<Character CharacterType> constexpr CharacterType toASCIILowerUnchecked(CharacterType character)
+@@ -112,7 +112,7 @@ template<Character CharacterType> constexpr bool isASCIIAlpha(CharacterType char
+ 
+ template<Character CharacterType> constexpr bool isASCIIDigit(CharacterType character)
+ {
+-    return character >= '0' && character <= '9';
++    return static_cast<unsigned>(character - '0') <= ('9' - '0');
+ }
+ 
+ template<Character CharacterType> constexpr bool isASCIIAlphanumeric(CharacterType character)
+@@ -122,7 +122,7 @@ template<Character CharacterType> constexpr bool isASCIIAlphanumeric(CharacterTy
+ 
+ template<Character CharacterType> constexpr bool isASCIIHexDigit(CharacterType character)
+ {
+-    return isASCIIDigit(character) || (toASCIILowerUnchecked(character) >= 'a' && toASCIILowerUnchecked(character) <= 'f');
++    return isASCIIDigit(character) || static_cast<unsigned>(toASCIILowerUnchecked(character) - 'a') <= ('f' - 'a');
+ }
+ 
+ template<Character CharacterType> constexpr bool isASCIIBinaryDigit(CharacterType character)
+@@ -132,7 +132,7 @@ template<Character CharacterType> constexpr bool isASCIIBinaryDigit(CharacterTyp
+ 
+ template<Character CharacterType> constexpr bool isASCIIOctalDigit(CharacterType character)
+ {
+-    return character >= '0' && character <= '7';
++    return static_cast<unsigned>(character - '0') <= ('7' - '0');
+ }
+ 
+ template<Character CharacterType> constexpr bool isASCIIPrintable(CharacterType character)
+@@ -178,7 +178,7 @@ template<Character CharacterType> constexpr bool isUnicodeCompatibleASCIIWhitesp
+ 
+ template<Character CharacterType> constexpr bool isASCIIUpper(CharacterType character)
+ {
+-    return character >= 'A' && character <= 'Z';
++    return static_cast<unsigned>(character - 'A') <= ('Z' - 'A');
+ }
+ 
+ template<Character CharacterType> constexpr bool isNotASCIIWhitespace(CharacterType character)
+diff --git a/Source/WTF/wtf/Assertions.cpp b/Source/WTF/wtf/Assertions.cpp
+index be79a7a653d5a10c5266d242473e6053b75a4df6..ee4d680158b946d79ce5d438bd991954dc65d8c1 100644
+--- a/Source/WTF/wtf/Assertions.cpp
++++ b/Source/WTF/wtf/Assertions.cpp
+@@ -778,4 +778,11 @@ String getAndResetAccumulatedLogs()
+ 
+ } // namespace WTF
+ 
++#if defined(WEBKIT_IOS6)
++extern "C" WTF_EXPORT_PRIVATE void WTFInvokeCrashHook(void);
++extern "C" void WTFInvokeCrashHook(void)
++{
++}
++#endif
++
+ WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
+diff --git a/Source/WTF/wtf/Atomics.h b/Source/WTF/wtf/Atomics.h
+index 14a4467d8a56d29fd2c4f3b42c662b5a768dffdb..7ef71c19f364adcab906e83fcc39f2768bbbeaa6 100644
+--- a/Source/WTF/wtf/Atomics.h
++++ b/Source/WTF/wtf/Atomics.h
+@@ -78,6 +78,10 @@ struct Atomic {
+     ALWAYS_INLINE bool compareExchangeWeak(T expected, T desired, std::memory_order order = std::memory_order_seq_cst)
+     {
+         T expectedOrActual = expected;
++#if defined(WEBKIT_IOS6)
++        if (order == std::memory_order_acquire || order == std::memory_order_acq_rel)
++            return value.compare_exchange_weak(expectedOrActual, desired, order, std::memory_order_relaxed);
++#endif
+         return value.compare_exchange_weak(expectedOrActual, desired, order);
+     }
+ 
+diff --git a/Source/WTF/wtf/AvailableMemory.cpp b/Source/WTF/wtf/AvailableMemory.cpp
+index dda9eac9d4fb6191ea651abaf93b66ae790872aa..81b9b9df2df0ba920edcfbc41bc37048944bf0f5 100644
+--- a/Source/WTF/wtf/AvailableMemory.cpp
++++ b/Source/WTF/wtf/AvailableMemory.cpp
+@@ -185,7 +185,14 @@ size_t availableMemory()
+ #if PLATFORM(IOS_FAMILY) || OS(LINUX) || OS(FREEBSD)
+ MemoryStatus memoryStatus()
+ {
+-#if PLATFORM(IOS_FAMILY)
++#if defined(WEBKIT_IOS6)
++    mach_task_basic_info_data_t taskInfo;
++    mach_msg_type_number_t taskInfoCount = MACH_TASK_BASIC_INFO_COUNT;
++
++    size_t memoryFootprint = 0;
++    if (KERN_SUCCESS == task_info(mach_task_self(), MACH_TASK_BASIC_INFO, (task_info_t)(&taskInfo), &taskInfoCount))
++        memoryFootprint = static_cast<size_t>(taskInfo.resident_size);
++#elif PLATFORM(IOS_FAMILY)
+     task_vm_info_data_t vmInfo;
+     mach_msg_type_number_t vmSize = TASK_VM_INFO_COUNT;
+ 
+diff --git a/Source/WTF/wtf/FastMalloc.h b/Source/WTF/wtf/FastMalloc.h
+index 1ea29ac3ad86640494747f3486558e54fd6b550c..4d4a53b52fdb891c0e0f2514123df9ab261ccd51 100644
+--- a/Source/WTF/wtf/FastMalloc.h
++++ b/Source/WTF/wtf/FastMalloc.h
+@@ -236,9 +236,55 @@ template<typename T, typename U> inline bool operator==(const FastAllocator<T>&,
+ 
+ struct FastCompactMalloc;
+ 
++#if defined(WEBKIT_IOS6) && USE(SYSTEM_MALLOC) && !ENABLE(MALLOC_HEAP_BREAKDOWN)
++
++ALWAYS_INLINE void* systemMallocOrCrash(size_t size)
++{
++    void* result = ::malloc(size);
++    if (!result) [[unlikely]]
++        CRASH();
++    return result;
++}
++
++ALWAYS_INLINE void* systemZeroedMallocOrCrash(size_t size)
++{
++    void* result = ::calloc(1, size);
++    if (!result) [[unlikely]]
++        CRASH();
++    return result;
++}
++
++ALWAYS_INLINE void* systemReallocOrCrash(void* p, size_t size)
++{
++    void* result = ::realloc(p, size);
++    if (!result) [[unlikely]]
++        CRASH();
++    return result;
++}
++
++struct FastMalloc {
++    static void* malloc(size_t size) { return systemMallocOrCrash(size); }
++    static void* tryMalloc(size_t size) { return ::malloc(size); }
++    static void* zeroedMalloc(size_t size) { return systemZeroedMallocOrCrash(size); }
++    static void* tryZeroedMalloc(size_t size) { return ::calloc(1, size); }
++    static void* realloc(void* p, size_t size) { return systemReallocOrCrash(p, size); }
++    static void* tryRealloc(void* p, size_t size) { return ::realloc(p, size); }
++    static void free(void* p) { ::free(p); }
++    static void fastFree(void* p) { ::free(p); }
++
++    static constexpr ALWAYS_INLINE size_t nextCapacity(size_t capacity)
++    {
++        return std::max(capacity + capacity / 2, capacity + 1);
++    }
++
++    using CompactMalloc = FastCompactMalloc;
++};
++
++#else
++
+ struct FastMalloc {
+     static void* malloc(size_t size) { return fastMalloc(size); }
+-    
++
+     static void* tryMalloc(size_t size)
+     {
+         auto result = tryFastMalloc(size);
+@@ -269,7 +315,7 @@ struct FastMalloc {
+             return realResult;
+         return nullptr;
+     }
+-    
++
+     static void free(void* p) { fastFree(p); }
+ 
+     static void fastFree(void* p) { ::WTF::fastFree(p); }
+@@ -282,12 +328,34 @@ struct FastMalloc {
+     using CompactMalloc = FastCompactMalloc;
+ };
+ 
++#endif
++
+ struct FastAlignedMalloc {
+     static void* alignedMalloc(size_t alignment, size_t size) { return fastAlignedMalloc(alignment, size); }
+     static void* tryAlignedMalloc(size_t alignment, size_t size) { return tryFastAlignedMalloc(alignment, size); }
+     static void free(void* p) { fastFree(p); }
+ };
+ 
++#if defined(WEBKIT_IOS6) && USE(SYSTEM_MALLOC) && !ENABLE(MALLOC_HEAP_BREAKDOWN)
++
++struct FastCompactMalloc {
++    static void* malloc(size_t size) { return systemMallocOrCrash(size); }
++    static void* tryMalloc(size_t size) { return ::malloc(size); }
++    static void* zeroedMalloc(size_t size) { return systemZeroedMallocOrCrash(size); }
++    static void* tryZeroedMalloc(size_t size) { return ::calloc(1, size); }
++    static void* realloc(void* p, size_t size) { return systemReallocOrCrash(p, size); }
++    static void* tryRealloc(void* p, size_t size) { return ::realloc(p, size); }
++    static void free(void* p) { ::free(p); }
++    static void fastFree(void* p) { ::free(p); }
++
++    static constexpr ALWAYS_INLINE size_t nextCapacity(size_t capacity)
++    {
++        return std::max(capacity + capacity / 2, capacity + 1);
++    }
++};
++
++#else
++
+ struct FastCompactMalloc {
+     static void* malloc(size_t size) { return fastCompactMalloc(size); }
+ 
+@@ -332,6 +400,8 @@ struct FastCompactMalloc {
+     }
+ };
+ 
++#endif
++
+ template<typename T>
+ struct FastFree {
+     static_assert(std::is_trivially_destructible<T>::value);
+@@ -463,6 +533,14 @@ using WTF::tryFastCompactMalloc;
+ using WTF::tryFastCompactZeroedMalloc;
+ using WTF::fastCompactAlignedMalloc;
+ 
++#if defined(WEBKIT_IOS6) && USE(SYSTEM_MALLOC) && !ENABLE(MALLOC_HEAP_BREAKDOWN)
++#define WTF_FAST_ALLOCATED_NEW(size) ::WTF::systemMallocOrCrash(size)
++#define WTF_FAST_ALLOCATED_DELETE(p) ::free(p)
++#else
++#define WTF_FAST_ALLOCATED_NEW(size) ::WTF::fastMalloc(size)
++#define WTF_FAST_ALLOCATED_DELETE(p) ::WTF::fastFree(p)
++#endif
++
+ #define WTF_DEPRECATED_MAKE_FAST_ALLOCATED_IMPL(_type) \
+     static_assert(!WTF::usesTZoneHeap<_type>(), "Decendents of TZONE_ALLOCATED classes must also be TZONE_ALLOCATED"); \
+     \
+@@ -471,22 +549,22 @@ using WTF::fastCompactAlignedMalloc;
+     \
+     void* operator new(size_t size) \
+     { \
+-        return ::WTF::fastMalloc(size); \
++        return WTF_FAST_ALLOCATED_NEW(size); \
+     } \
+     \
+     void operator delete(void* p) \
+     { \
+-        ::WTF::fastFree(p); \
++        WTF_FAST_ALLOCATED_DELETE(p); \
+     } \
+     \
+     void* operator new[](size_t size) \
+     { \
+-        return ::WTF::fastMalloc(size); \
++        return WTF_FAST_ALLOCATED_NEW(size); \
+     } \
+     \
+     void operator delete[](void* p) \
+     { \
+-        ::WTF::fastFree(p); \
++        WTF_FAST_ALLOCATED_DELETE(p); \
+     } \
+     void* operator new(size_t, NotNullTag, void* location) \
+     { \
+@@ -495,7 +573,7 @@ using WTF::fastCompactAlignedMalloc;
+     } \
+     static void freeAfterDestruction(void* p) \
+     { \
+-        ::WTF::fastFree(p); \
++        WTF_FAST_ALLOCATED_DELETE(p); \
+     } \
+     using WTFIsFastMallocAllocated = int; \
+ 
+@@ -508,22 +586,22 @@ using WTF::fastCompactAlignedMalloc;
+     \
+     void* operator new(size_t size) \
+     { \
+-        return ::WTF::fastCompactMalloc(size); \
++        return WTF_FAST_ALLOCATED_NEW(size); \
+     } \
+     \
+     void operator delete(void* p) \
+     { \
+-        ::WTF::fastFree(p); \
++        WTF_FAST_ALLOCATED_DELETE(p); \
+     } \
+     \
+     void* operator new[](size_t size) \
+     { \
+-        return ::WTF::fastCompactMalloc(size); \
++        return WTF_FAST_ALLOCATED_NEW(size); \
+     } \
+     \
+     void operator delete[](void* p) \
+     { \
+-        ::WTF::fastFree(p); \
++        WTF_FAST_ALLOCATED_DELETE(p); \
+     } \
+     void* operator new(size_t, NotNullTag, void* location) \
+     { \
+@@ -532,7 +610,7 @@ using WTF::fastCompactAlignedMalloc;
+     } \
+     static void freeAfterDestruction(void* p) \
+     { \
+-        ::WTF::fastFree(p); \
++        WTF_FAST_ALLOCATED_DELETE(p); \
+     } \
+     using WTFIsFastMallocAllocated = int; \
+ 
+diff --git a/Source/WTF/wtf/FunctionTraits.h b/Source/WTF/wtf/FunctionTraits.h
+index 1231da9eda41a28d121ec11d10e4868f1f142fb7..c13e78c652f4cfea30bb22c1f9d1b2fff55772ae 100644
+--- a/Source/WTF/wtf/FunctionTraits.h
++++ b/Source/WTF/wtf/FunctionTraits.h
+@@ -34,6 +34,28 @@ namespace WTF {
+ template<typename T>
+ struct FunctionTraits;
+ 
++#if USE(JSVALUE32_64)
++
++template<typename T>
++static constexpr unsigned slotsForCCallArgument()
++{
++    static_assert(!std::is_class<T>::value || sizeof(T) <= sizeof(void*), "This doesn't support complex structs.");
++    static_assert(sizeof(T) == 8 || sizeof(T) <= 4);
++    if (sizeof(T) == 8)
++        return 2;
++
++    return 1;
++}
++
++template<typename T>
++static constexpr unsigned computeCCallSlots() { return slotsForCCallArgument<T>(); }
++
++template<typename T, typename... Ts>
++    requires (sizeof...(Ts) > 0)
++static constexpr unsigned computeCCallSlots() { return computeCCallSlots<Ts...>() + slotsForCCallArgument<T>(); }
++
++#endif
++
+ template<typename Result, typename... Args>
+ struct FunctionTraits<Result(Args...)> {
+     using ResultType = Result;
+@@ -47,7 +69,14 @@ struct FunctionTraits<Result(Args...)> {
+     using ArgumentType = typename std::tuple_element<n, std::tuple<Args...>>::type;
+     using ArgumentTypes = std::tuple<Args...>;
+ 
++
++#if USE(JSVALUE64)
+     static constexpr unsigned cCallArity() { return arity; }
++#else
++
++    static constexpr unsigned cCallArity() { return computeCCallSlots<Args...>(); }
++#endif
++
+ };
+ 
+ #if OS(WINDOWS) && CPU(X86_64)
+diff --git a/Source/WTF/wtf/HashFunctions.h b/Source/WTF/wtf/HashFunctions.h
+index 8c633ff78236f0026effeffeaefb8255802cc82b..a3670abfd0c7b8460f2d4e8d01e2acaa979ed9a1 100644
+--- a/Source/WTF/wtf/HashFunctions.h
++++ b/Source/WTF/wtf/HashFunctions.h
+@@ -30,8 +30,40 @@
+ namespace WTF {
+     // integer hash function
+ 
+-    // rapidhash "mum" mixer.
+-    // Keep in sync with AssemblyHelpers::rapidHashMix64 and FTL rapidHashMix64 code as we need to use the same hash function.
++#if defined(WEBKIT_IOS6)
++
++    ALWAYS_INLINE unsigned intHash(uint32_t key)
++    {
++        key ^= key >> 16;
++        key *= 0x7feb352dU;
++        key ^= key >> 15;
++        key *= 0x846ca68bU;
++        key ^= key >> 16;
++        return key;
++    }
++
++    ALWAYS_INLINE unsigned intHash(uint64_t key)
++    {
++        return intHash(static_cast<uint32_t>(key) ^ static_cast<uint32_t>(key >> 32));
++    }
++
++    ALWAYS_INLINE unsigned intHash(uint8_t key8)
++    {
++        return intHash(static_cast<uint32_t>(key8));
++    }
++
++    ALWAYS_INLINE unsigned intHash(uint16_t key16)
++    {
++        return intHash(static_cast<uint32_t>(key16));
++    }
++
++    ALWAYS_INLINE unsigned pairIntHash(unsigned key1, unsigned key2)
++    {
++        return intHash(key1 * 277951225U + key2 * 95187966U);
++    }
++
++#else
++
+     inline unsigned intHash(uint64_t key)
+     {
+         constexpr uint64_t secret1 = 0x2d358dccaa6c78a5ULL;
+@@ -56,7 +88,6 @@ namespace WTF {
+         return intHash(static_cast<uint32_t>(key16));
+     }
+ 
+-    // Compound integer hash method: http://opendatastructures.org/versions/edition-0.1d/ods-java/node33.html#SECTION00832000000000000000
+     inline unsigned pairIntHash(unsigned key1, unsigned key2)
+     {
+         unsigned shortRandom1 = 277951225; // A random 32-bit value.
+@@ -68,6 +99,8 @@ namespace WTF {
+         return highBits;
+     }
+ 
++#endif
++
+     template<typename T> struct IntHash {
+         static unsigned hash(T key) { return intHash(static_cast<typename SizedUnsignedTrait<sizeof(T)>::Type>(key)); }
+         static bool equal(T a, T b) { return a == b; }
+diff --git a/Source/WTF/wtf/HashMap.h b/Source/WTF/wtf/HashMap.h
+index 52ca37a29ef6d3c43609f05d7f1e71ad82191f46..7d58583420159da371a51d29c2b76b26fda4c62a 100644
+--- a/Source/WTF/wtf/HashMap.h
++++ b/Source/WTF/wtf/HashMap.h
+@@ -227,6 +227,22 @@ public:
+     template<SmartPtr K = KeyType> bool remove(std::add_const_t<typename GetPtrHelper<K>::UnderlyingType>*);
+     template<SmartPtr K = KeyType> MappedTakeType take(std::add_const_t<typename GetPtrHelper<K>::UnderlyingType>*);
+ 
++#if defined(WEBKIT_IOS6)
++    template<typename P, typename V, SmartPtr K = KeyType>
++        requires std::same_as<std::remove_cv_t<P>, typename GetPtrHelper<K>::UnderlyingType*>
++    AddResult add(P key, V&& value) LIFETIME_BOUND
++    {
++        return inlineAdd(key, std::forward<V>(value));
++    }
++
++    template<typename P, SmartPtr K = KeyType>
++        requires std::same_as<std::remove_cv_t<P>, typename GetPtrHelper<K>::UnderlyingType*>
++    AddResult ensure(P key, NOESCAPE const Invocable<MappedType()> auto& functor) LIFETIME_BOUND
++    {
++        return inlineEnsure(key, functor);
++    }
++#endif
++
+     // Overloads for smart pointer keys that take the raw reference type as the parameter.
+     template<SmartPtr K = KeyType> iterator find(std::add_const_t<typename GetPtrHelper<K>::UnderlyingType>& ref) LIFETIME_BOUND { return find(&ref); }
+     template<SmartPtr K = KeyType> const_iterator find(std::add_const_t<typename GetPtrHelper<K>::UnderlyingType>& ref) const LIFETIME_BOUND { return find(&ref); }
+diff --git a/Source/WTF/wtf/HashSet.h b/Source/WTF/wtf/HashSet.h
+index 021cb4688f062e0b7eea621ab20663ff34c1fb9e..be016e3cea89f0485d32c9b1c8f89c7fbfb3a93c 100644
+--- a/Source/WTF/wtf/HashSet.h
++++ b/Source/WTF/wtf/HashSet.h
+@@ -205,7 +205,10 @@ public:
+     template<typename OtherCollection>
+     bool isSubset(const OtherCollection&);
+ 
+-    // Overloads for smart pointer values that take the raw pointer type as the parameter.
++#if defined(WEBKIT_IOS6)
++    template<SmartPtr V = ValueType> AddResult add(typename GetPtrHelper<V>::UnderlyingType*) LIFETIME_BOUND;
++#endif
++
+     template<SmartPtr V = ValueType> iterator find(std::add_const_t<typename GetPtrHelper<V>::UnderlyingType>*) const LIFETIME_BOUND;
+     template<SmartPtr V = ValueType> bool contains(std::add_const_t<typename GetPtrHelper<V>::UnderlyingType>*) const;
+     template<SmartPtr V = ValueType> bool remove(std::add_const_t<typename GetPtrHelper<V>::UnderlyingType>*);
+@@ -367,6 +370,15 @@ inline auto HashSet<T, U, V, W, shouldValidateKey>::add(ValueType&& value) LIFET
+     return m_impl.template add<shouldValidateKey>(WTF::move(value));
+ }
+ 
++#if defined(WEBKIT_IOS6)
++template<typename T, typename U, typename V, typename W, ShouldValidateKey shouldValidateKey>
++template<SmartPtr Ptr>
++inline auto HashSet<T, U, V, W, shouldValidateKey>::add(typename GetPtrHelper<Ptr>::UnderlyingType* value) LIFETIME_BOUND -> AddResult
++{
++    return m_impl.template add<HashSetTranslator<ValueTraits, HashFunctions>, shouldValidateKey>(value, [&]() ALWAYS_INLINE_LAMBDA -> ValueType { return value; });
++}
++#endif
++
+ template<typename T, typename U, typename V, typename W, ShouldValidateKey shouldValidateKey>
+ inline void HashSet<T, U, V, W, shouldValidateKey>::addVoid(const ValueType& value)
+ {
+diff --git a/Source/WTF/wtf/HashTable.h b/Source/WTF/wtf/HashTable.h
+index 4502983763651998e1c6279d12a904810a64e03f..f2d28b6c561e48f75a87c46946af7d711e015916 100644
+--- a/Source/WTF/wtf/HashTable.h
++++ b/Source/WTF/wtf/HashTable.h
+@@ -521,7 +521,13 @@ DECLARE_ALLOCATOR_WITH_HEAP_IDENTIFIER(HashTable);
+         static bool isWeakNullBucket(const ValueType& value) { return isHashTraitsWeakNullValue<KeyTraits>(Extractor::extract(value)); }
+         static bool isDeletedBucket(const ValueType& value) { return KeyTraits::isDeletedValue(Extractor::extract(value)); }
+         static bool isEmptyOrDeletedBucket(const ValueType& value) { return isEmptyBucket(value) || isDeletedBucket(value); }
+-        static bool isEmptyOrDeletedOrWeakNullBucket(const ValueType& value) { return isEmptyBucket(value) || isDeletedBucket(value) || isWeakNullBucket(value); }
++        static bool isEmptyOrDeletedOrWeakNullBucket(const ValueType& value)
++        {
++            if constexpr (KeyTraits::hasIsWeakNullValueFunction)
++                return isEmptyBucket(value) || isDeletedBucket(value) || isWeakNullBucket(value);
++            else
++                return isEmptyBucket(value) || isDeletedBucket(value);
++        }
+ 
+         bool isValidKey(const ValueType& value) { return !isEmptyOrDeletedOrWeakNullBucket(value); }
+ 
+@@ -573,14 +579,42 @@ DECLARE_ALLOCATOR_WITH_HEAP_IDENTIFIER(HashTable);
+         void deleteWeakNullEntries();
+ 
+         static constexpr unsigned computeBestTableSize(unsigned keyCount);
+-        bool shouldExpand() const { return HashTableSizePolicy::shouldExpand(keyCount() + deletedCount(), tableSize()); }
++
++        bool shouldExpand() const
++        {
++            ASSERT(m_table);
++            const unsigned* metadata = reinterpret_cast_ptr<const unsigned*>(m_table);
++            unsigned countAndDeleted = metadata[keyCountOffset] + metadata[deletedCountOffset];
++            unsigned size = metadata[tableSizeOffset];
++#if defined(WEBKIT_IOS6)
++            if (size <= maxSmallTableCapacity)
++                return countAndDeleted >= size - (size >> 2);
++            return countAndDeleted >= (size >> 1);
++#else
++            return HashTableSizePolicy::shouldExpand(countAndDeleted, size);
++#endif
++        }
++
+         bool mustRehashInPlace() const { return keyCount() * minLoad < tableSize() * 2; }
+-        bool shouldShrink() const { return keyCount() * minLoad < tableSize() && tableSize() > KeyTraits::minimumTableSize; }
+-        ValueType* expand(ValueType* entry = nullptr);
++
++        bool shouldShrink() const
++        {
++            if (!m_table)
++                return false;
++            const unsigned* metadata = reinterpret_cast_ptr<const unsigned*>(m_table);
++            unsigned size = metadata[tableSizeOffset];
++#if defined(WEBKIT_IOS6)
++            static constexpr unsigned smallestTableWorthShrinking = 32;
++            if (size <= smallestTableWorthShrinking)
++                return false;
++#endif
++            return metadata[keyCountOffset] * minLoad < size && size > KeyTraits::minimumTableSize;
++        }
++        NEVER_INLINE ValueType* expand(ValueType* entry = nullptr);
+         void shrink() { rehash(tableSize() / 2, nullptr); }
+-        void shrinkToBestSize();
++        NEVER_INLINE void shrinkToBestSize();
+ 
+-        ValueType* rehash(Checked<unsigned> newTableSize, ValueType* entry);
++        NEVER_INLINE ValueType* rehash(Checked<unsigned> newTableSize, ValueType* entry);
+         ValueType* reinsert(ValueType&&);
+ 
+         static void initializeBucket(ValueType& bucket);
+@@ -617,10 +651,12 @@ DECLARE_ALLOCATOR_WITH_HEAP_IDENTIFIER(HashTable);
+ 
+         unsigned tableSize() const { return m_table ? reinterpret_cast_ptr<unsigned*>(m_table)[tableSizeOffset] : 0; }
+         void setTableSize(unsigned size) const { ASSERT(m_table); reinterpret_cast_ptr<unsigned*>(m_table)[tableSizeOffset] = size; }
+-        unsigned tableSizeMask() const { ASSERT(m_table); return m_table ? reinterpret_cast_ptr<unsigned*>(m_table)[tableSizeMaskOffset] : 0; }
++        unsigned tableSizeMask() const { ASSERT(m_table); return reinterpret_cast_ptr<unsigned*>(m_table)[tableSizeMaskOffset]; }
+         void setTableSizeMask(unsigned mask) { ASSERT(m_table); reinterpret_cast_ptr<unsigned*>(m_table)[tableSizeMaskOffset] = mask; }
+         unsigned keyCount() const { return m_table ? reinterpret_cast_ptr<unsigned*>(m_table)[keyCountOffset] : 0; }
+         void setKeyCount(unsigned count) const { ASSERT(m_table); reinterpret_cast_ptr<unsigned*>(m_table)[keyCountOffset] = count; }
++        void adjustKeyCount(int delta) const { ASSERT(m_table); reinterpret_cast_ptr<unsigned*>(m_table)[keyCountOffset] += delta; }
++        void adjustDeletedCount(int delta) const { ASSERT(m_table); reinterpret_cast_ptr<unsigned*>(m_table)[deletedCountOffset] += delta; }
+         unsigned deletedCount() const { ASSERT(m_table); return reinterpret_cast_ptr<unsigned*>(m_table)[deletedCountOffset]; }
+         void setDeletedCount(unsigned count) const { ASSERT(m_table); reinterpret_cast_ptr<unsigned*>(m_table)[deletedCountOffset] = count; }
+ 
+@@ -928,12 +964,12 @@ DECLARE_ALLOCATOR_WITH_HEAP_IDENTIFIER(HashTable);
+         if (deletedEntry) {
+             initializeBucket(*deletedEntry);
+             entry = deletedEntry;
+-            setDeletedCount(deletedCount() - 1);
++            adjustDeletedCount(-1);
+         }
+ 
+         HashTranslator::translate(*entry, std::forward<T>(key), functor);
+         validateKey<shouldValidateKey>(*entry);
+-        setKeyCount(keyCount() + 1);
++        adjustKeyCount(1);
+         
+         if (shouldExpand())
+             entry = expand(entry);
+@@ -965,12 +1001,12 @@ DECLARE_ALLOCATOR_WITH_HEAP_IDENTIFIER(HashTable);
+         
+         if (isDeletedBucket(*entry)) {
+             initializeBucket(*entry);
+-            setDeletedCount(deletedCount() - 1);
++            adjustDeletedCount(-1);
+         }
+ 
+         HashTranslator::translate(*entry, std::forward<T>(key), functor, h);
+         validateKey<shouldValidateKey>(*entry);
+-        setKeyCount(keyCount() + 1);
++        adjustKeyCount(1);
+ 
+         if (shouldExpand())
+             entry = expand(entry);
+@@ -1064,8 +1100,8 @@ DECLARE_ALLOCATOR_WITH_HEAP_IDENTIFIER(HashTable);
+ #endif
+ 
+         deleteBucket(*pos);
+-        setDeletedCount(deletedCount() + 1);
+-        setKeyCount(keyCount() - 1);
++        adjustDeletedCount(1);
++        adjustKeyCount(-1);
+ 
+         if (shouldShrink())
+             shrink();
+@@ -1152,8 +1188,8 @@ DECLARE_ALLOCATOR_WITH_HEAP_IDENTIFIER(HashTable);
+             ++removedBucketCount;
+         }
+         if (removedBucketCount) {
+-            setDeletedCount(deletedCount() + removedBucketCount);
+-            setKeyCount(keyCount() - removedBucketCount);
++            adjustDeletedCount(static_cast<int>(removedBucketCount));
++            adjustKeyCount(-static_cast<int>(removedBucketCount));
+         }
+ 
+         internalCheckTableConsistency();
+@@ -1185,8 +1221,8 @@ DECLARE_ALLOCATOR_WITH_HEAP_IDENTIFIER(HashTable);
+             ++removedBucketCount;
+         }
+         if (removedBucketCount) {
+-            setDeletedCount(deletedCount() + removedBucketCount);
+-            setKeyCount(keyCount() - removedBucketCount);
++            adjustDeletedCount(static_cast<int>(removedBucketCount));
++            adjustKeyCount(-static_cast<int>(removedBucketCount));
+         }
+ 
+         if (shouldShrink())
+@@ -1342,7 +1378,7 @@ DECLARE_ALLOCATOR_WITH_HEAP_IDENTIFIER(HashTable);
+             if (isWeakNullBucket(oldEntry)) {
+                 ASSERT(std::addressof(oldEntry) != entry);
+                 oldEntry.~ValueType();
+-                setKeyCount(keyCount() - 1);
++                adjustKeyCount(-1);
+                 continue;
+             }
+ 
+diff --git a/Source/WTF/wtf/LockAlgorithmInlines.h b/Source/WTF/wtf/LockAlgorithmInlines.h
+index ed06c104324421368f89446150c2db256e4a790c..d455a60d1ee33a114ed2ef43c13fa07d8378f0b7 100644
+--- a/Source/WTF/wtf/LockAlgorithmInlines.h
++++ b/Source/WTF/wtf/LockAlgorithmInlines.h
+@@ -42,21 +42,48 @@ namespace WTF {
+ template<typename LockType, LockType isHeldBit, LockType hasParkedBit, typename Hooks>
+ void LockAlgorithm<LockType, isHeldBit, hasParkedBit, Hooks>::lockSlow(Atomic<LockType>& lock)
+ {
++#if defined(WEBKIT_IOS6)
++    static constexpr unsigned spinLimit = 16;
++    static constexpr unsigned nopCount = 8;
++    static constexpr unsigned yieldInterval = 8;
++    unsigned spinCount = 0;
++#else
+     SpinBackoff backoff;
++#endif
+     
+     for (;;) {
++#if defined(WEBKIT_IOS6)
++        LockType currentValue = lock.load(std::memory_order_relaxed);
++#else
+         LockType currentValue = lock.load();
+-        
++#endif
++
+         // We allow ourselves to barge in.
+         if (!(currentValue & isHeldBit)) {
++#if defined(WEBKIT_IOS6)
++            if (lock.compareExchangeWeak(currentValue, Hooks::lockHook(currentValue | isHeldBit), std::memory_order_acquire))
++                return;
++#else
+             if (lock.compareExchangeWeak(currentValue, Hooks::lockHook(currentValue | isHeldBit)))
+                 return;
++#endif
+             continue;
+         }
+ 
+         // If there is nobody parked and we haven't spun too much, we can just try to spin around.
++#if defined(WEBKIT_IOS6)
++        if (!(currentValue & hasParkedBit) && spinCount < spinLimit) {
++            spinCount++;
++            if (!(spinCount % yieldInterval))
++                Thread::yield();
++            for (unsigned i = 0; i < nopCount; i++)
++                __asm__ volatile("yield");
++            continue;
++        }
++#else
+         if (!(currentValue & hasParkedBit) && !backoff.shouldParkAfterSpinOnce())
+             continue;
++#endif
+ 
+         // Need to park. We do this by setting the parked bit first, and then parking. We spin around
+         // if the parked bit wasn't set and we failed at setting it.
+@@ -114,8 +141,13 @@ void LockAlgorithm<LockType, isHeldBit, hasParkedBit, Hooks>::unlockSlow(Atomic<
+         }
+         
+         if ((oldByteValue & mask) == isHeldBit) {
++#if defined(WEBKIT_IOS6)
++            if (lock.compareExchangeWeak(oldByteValue, Hooks::unlockHook(oldByteValue & ~isHeldBit), std::memory_order_release))
++                return;
++#else
+             if (lock.compareExchangeWeak(oldByteValue, Hooks::unlockHook(oldByteValue & ~isHeldBit)))
+                 return;
++#endif
+             continue;
+         }
+ 
+@@ -160,4 +192,3 @@ void LockAlgorithm<LockType, isHeldBit, hasParkedBit, Hooks>::unlockSlow(Atomic<
+ }
+ 
+ } // namespace WTF
+-
+diff --git a/Source/WTF/wtf/MallocCommon.cpp b/Source/WTF/wtf/MallocCommon.cpp
+index d211ae00bee0df0f0674b17ed2be2fc0b4f0b2b0..ded2995225fa9c403c7de1ef65ba9e81c05841e4 100644
+--- a/Source/WTF/wtf/MallocCommon.cpp
++++ b/Source/WTF/wtf/MallocCommon.cpp
+@@ -29,8 +29,13 @@
+ namespace WTF {
+ 
+ #if ASSERT_ENABLED
++#if defined(WEBKIT_IOS6)
++static IOS6ThreadLocal<unsigned> forbidMallocUseScopeCount;
++static IOS6ThreadLocal<unsigned> disableMallocRestrictionScopeCount;
++#else
+ thread_local static unsigned forbidMallocUseScopeCount;
+ thread_local static unsigned disableMallocRestrictionScopeCount;
++#endif
+ 
+ ForbidMallocUseForCurrentThreadScope::ForbidMallocUseForCurrentThreadScope()
+ {
+diff --git a/Source/WTF/wtf/MathExtras.h b/Source/WTF/wtf/MathExtras.h
+index a3039d664575b9f2f032ab9dd0d35dddcc9a7e23..c7165e1888613553179599bce78a435e21c3a518 100644
+--- a/Source/WTF/wtf/MathExtras.h
++++ b/Source/WTF/wtf/MathExtras.h
+@@ -676,6 +676,12 @@ inline uint32_t reverseBits32(uint32_t value)
+         : "=r"(result)
+         : "r"(value));
+     return result;
++#elif CPU(ARM_THUMB2) || CPU(ARM_TRADITIONAL)
++    uint32_t result;
++    __asm__("rbit %0, %1"
++        : "=r"(result)
++        : "r"(value));
++    return result;
+ #else
+     value = ((value & 0xaaaaaaaa) >> 1) | ((value & 0x55555555) << 1);
+     value = ((value & 0xcccccccc) >> 2) | ((value & 0x33333333) << 2);
+@@ -1073,13 +1079,15 @@ SUPPRESS_NODELETE ALWAYS_INLINE std::optional<int32_t> NODELETE tryConvertToStri
+         return result;
+     return std::nullopt;
+ #else
+-    if (std::isinf(value) || std::isnan(value))
++    if (value < static_cast<double>(INT32_MIN) || value > static_cast<double>(INT32_MAX)) [[unlikely]]
+         return std::nullopt;
+ 
+-    // Note that -0.0 is not StrictInt32.
+-    const int32_t asInt32 = truncateDoubleToInt32(value);
+-    if (!(asInt32 != value || (!asInt32 && std::signbit(value))))
++    const int32_t asInt32 = static_cast<int32_t>(value);
++    if (asInt32 == value) [[likely]] {
++        if (!asInt32 && std::signbit(value)) [[unlikely]]
++            return std::nullopt;
+         return asInt32;
++    }
+ 
+     return std::nullopt;
+ #endif
+diff --git a/Source/WTF/wtf/MemoryPressureHandler.h b/Source/WTF/wtf/MemoryPressureHandler.h
+index f4a31bd813f8ec562f8621ab15796dc8e90b7215..e6df4baa9a3ecbd8dc410594e4aaf67ec68c063b 100644
+--- a/Source/WTF/wtf/MemoryPressureHandler.h
++++ b/Source/WTF/wtf/MemoryPressureHandler.h
+@@ -109,7 +109,7 @@ public:
+     bool isUnderMemoryWarning() const
+     {
+         return m_memoryPressureStatus == SystemMemoryPressureStatus::Warning
+-#if PLATFORM(MAC)
++#if PLATFORM(MAC) || defined(WEBKIT_IOS6)
+             || m_memoryUsagePolicy == MemoryUsagePolicy::Conservative
+ #endif
+             || m_isSimulatingMemoryWarning;
+@@ -118,7 +118,7 @@ public:
+     bool isUnderMemoryPressure() const
+     {
+         return m_memoryPressureStatus == SystemMemoryPressureStatus::Critical
+-#if PLATFORM(MAC)
++#if PLATFORM(MAC) || defined(WEBKIT_IOS6)
+             || m_memoryUsagePolicy >= MemoryUsagePolicy::Strict
+ #endif
+             || m_isSimulatingMemoryPressure;
+diff --git a/Source/WTF/wtf/ParkingLot.cpp b/Source/WTF/wtf/ParkingLot.cpp
+index dbc911d9a574d53f74607e72282465c34844cb26..fb25bd0b039b815a3767797a5e35171388825dec 100644
+--- a/Source/WTF/wtf/ParkingLot.cpp
++++ b/Source/WTF/wtf/ParkingLot.cpp
+@@ -26,6 +26,7 @@
+ #include "config.h"
+ #include <wtf/ParkingLot.h>
+ 
++#include <bit>
+ #include <wtf/DataLog.h>
+ #include <wtf/FixedVector.h>
+ #include <wtf/HashFunctions.h>
+@@ -217,7 +218,11 @@ struct Hashtable {
+     WTF_DEPRECATED_MAKE_STRUCT_FAST_ALLOCATED(Hashtable);
+ 
+     Hashtable(unsigned size)
++#if defined(WEBKIT_IOS6)
++        : data(std::bit_ceil(size))
++#else
+         : data(size)
++#endif
+     {
+         ASSERT(size >= 1);
+ 
+@@ -241,6 +246,15 @@ struct Hashtable {
+         }
+     }
+ 
++    unsigned indexFor(unsigned hash) const
++    {
++#if defined(WEBKIT_IOS6)
++        return hash & (static_cast<unsigned>(data.size()) - 1);
++#else
++        return hash % data.size();
++#endif
++    }
++
+     FixedVector<Atomic<Bucket*>> data;
+ };
+ 
+@@ -385,7 +399,7 @@ void ensureHashtableSize(unsigned numThreads)
+         if (verbose)
+             dataLogForCurrentThread(": rehashing thread data ", RawPointer(threadData), " with address = ", RawPointer(threadData->address), "\n");
+         unsigned hash = hashAddress(threadData->address);
+-        unsigned index = hash % newHashtable->data.size();
++        unsigned index = newHashtable->indexFor(hash);
+         if (verbose)
+             dataLogForCurrentThread(": index = ", index, "\n");
+         Bucket* bucket = newHashtable->data[index].load();
+@@ -464,7 +478,7 @@ bool enqueue(const void* address, NOESCAPE const Functor& functor)
+ 
+     for (;;) {
+         Hashtable* myHashtable = ensureHashtable();
+-        unsigned index = hash % myHashtable->data.size();
++        unsigned index = myHashtable->indexFor(hash);
+         Atomic<Bucket*>& bucketPointer = myHashtable->data[index];
+         Bucket* bucket;
+         for (;;) {
+@@ -516,7 +530,7 @@ bool dequeue(
+ 
+     for (;;) {
+         Hashtable* myHashtable = ensureHashtable();
+-        unsigned index = hash % myHashtable->data.size();
++        unsigned index = myHashtable->indexFor(hash);
+         Atomic<Bucket*>& bucketPointer = myHashtable->data[index];
+         Bucket* bucket = bucketPointer.load();
+         if (!bucket) {
+diff --git a/Source/WTF/wtf/PlatformEnable.h b/Source/WTF/wtf/PlatformEnable.h
+index 452247cc6d61f0f94b1718c2d00cf759b2be4d59..21f57bd781b4c1e9a6d94627643b3681b7ccc696 100644
+--- a/Source/WTF/wtf/PlatformEnable.h
++++ b/Source/WTF/wtf/PlatformEnable.h
+@@ -292,9 +292,13 @@
+ #define ENABLE_IOS_TOUCH_EVENTS 0
+ #endif
+ 
++#if !defined(ENABLE_ISO18013_DOCUMENT_REQUEST_INFO)
++#define ENABLE_ISO18013_DOCUMENT_REQUEST_INFO 0
++#endif
++
+ #if !defined(ENABLE_IPC_TESTING_API)
+ /* Enable IPC testing on all ASAN builds and debug builds. Enable it in GLib ports when assertions are enabled. */
+-#if ((ASAN_ENABLED || !defined(NDEBUG)) && PLATFORM(COCOA)) || (ASSERT_ENABLED && (PLATFORM(GTK) || PLATFORM(WPE)))
++#if ((ASAN_ENABLED || !defined(NDEBUG)) && PLATFORM(COCOA)) || (ASSERT_ENABLED && (PLATFORM(GTK) || PLATFORM(WPE)) && COMPILER(GCC))
+ #define ENABLE_IPC_TESTING_API 1
+ #endif
+ #endif
+@@ -545,6 +549,10 @@
+ #define ENABLE_SPELLCHECK 0
+ #endif
+ 
++#if !defined(ENABLE_TEXT_AUTOSIZING)
++#define ENABLE_TEXT_AUTOSIZING 0
++#endif
++
+ #if !defined(ENABLE_TEXT_CARET)
+ #define ENABLE_TEXT_CARET 1
+ #endif
+@@ -629,7 +637,7 @@
+ #define ENABLE_WEBGPU PLATFORM(COCOA)
+ #endif
+ 
+-#if !defined(ENABLE_WEBGPU_BY_DEFAULT) && ((PLATFORM(MAC) && __MAC_OS_X_VERSION_MIN_REQUIRED >= 260000) || PLATFORM(IOS) || PLATFORM(VISION) || PLATFORM(WATCHOS))
++#if !defined(ENABLE_WEBGPU_BY_DEFAULT) && ((PLATFORM(MAC) && __MAC_OS_X_VERSION_MIN_REQUIRED >= 260000) || PLATFORM(IOS) || PLATFORM(VISION))
+ #define ENABLE_WEBGPU_BY_DEFAULT 1
+ #endif
+ 
+@@ -715,10 +723,16 @@
+ #define ENABLE_JIT 1
+ #endif
+ 
+-#if !CPU(ADDRESS64)
++#if USE(JSVALUE32_64)
++#if CPU(ARM_THUMB2) && (OS(LINUX) || OS(DARWIN))
++#if !defined(ENABLE_JIT)
++#define ENABLE_JIT 1
++#endif
++#else
+ #undef ENABLE_JIT
+ #define ENABLE_JIT 0
+ #endif
++#endif
+ 
+ #if CPU(RISCV64)
+ #undef ENABLE_WEBASSEMBLY
+@@ -737,17 +751,17 @@
+ #endif
+ #endif
+ 
+-#if !defined(ENABLE_JUMP_ISLANDS) && ENABLE(JIT) && CPU(ARM64) && CPU(ADDRESS64)
++#if !defined(ENABLE_JUMP_ISLANDS) && ENABLE(JIT)
++#if (CPU(ARM64) && CPU(ADDRESS64)) || CPU(ARM_THUMB2)
+ #define ENABLE_JUMP_ISLANDS 1
+ #endif
++#endif
+ 
+ /* FIXME: This should be turned into an #error invariant */
+ /* The FTL *does not* work on 32-bit platforms. Disable it even if someone asked us to enable it. */
+-#if !CPU(ADDRESS64)
++#if USE(JSVALUE32_64)
+ #undef ENABLE_FTL_JIT
+ #define ENABLE_FTL_JIT 0
+-#undef ENABLE_DFG_JIT
+-#define ENABLE_DFG_JIT 0
+ #endif
+ 
+ /* If possible, try to enable a disassembler. This is optional. We proceed in two
+@@ -765,7 +779,11 @@
+ #define ENABLE_RISCV64_DISASSEMBLER 1
+ #endif
+ 
+-#if !defined(ENABLE_DISASSEMBLER) && (ENABLE(ZYDIS) || ENABLE(ARM64_DISASSEMBLER) || ENABLE(RISCV64_DISASSEMBLER) || (ENABLE(JIT) && USE(CAPSTONE)))
++#if !defined(ENABLE_ARMV7_DISASSEMBLER) && ENABLE(JIT) && CPU(ARM_THUMB2) && !USE(CAPSTONE)
++#define ENABLE_ARMV7_DISASSEMBLER 1
++#endif
++
++#if !defined(ENABLE_DISASSEMBLER) && (ENABLE(ZYDIS) || ENABLE(ARM64_DISASSEMBLER) || ENABLE(ARMV7_DISASSEMBLER) || ENABLE(RISCV64_DISASSEMBLER) || (ENABLE(JIT) && USE(CAPSTONE)))
+ #define ENABLE_DISASSEMBLER 1
+ #endif
+ 
+@@ -780,6 +798,10 @@
+ #define ENABLE_DFG_JIT 1
+ #endif
+ 
++#if CPU(ARM_THUMB2) && (OS(DARWIN) || OS(LINUX) || OS(FREEBSD))
++#define ENABLE_DFG_JIT 1
++#endif
++
+ #endif /* !defined(ENABLE_DFG_JIT) && ENABLE(JIT) */
+ 
+ #if ENABLE(DFG_JIT) && ASSERT_ENABLED
+@@ -792,7 +814,7 @@
+ #define ENABLE_CONCURRENT_JS 1
+ #endif
+ 
+-#if ENABLE(JIT) && (CPU(X86_64) || CPU(ARM64)) && HAVE(FAST_TLS)
++#if (CPU(X86_64) || CPU(ARM64)) && HAVE(FAST_TLS)
+ #define ENABLE_FAST_TLS_JIT 1
+ #endif
+ 
+@@ -892,6 +914,24 @@
+ #define ENABLE_YARR_JIT_DEBUG 0
+ #endif
+ 
++#if ENABLE(YARR_JIT) && (CPU(ARM64) || CPU(X86_64) || CPU(RISCV64))
++#define ENABLE_YARR_JIT_ALL_PARENS_EXPRESSIONS 1
++#define ENABLE_YARR_JIT_REGEXP_TEST_INLINE 1
++#endif
++
++#if ENABLE(YARR_JIT) && (CPU(ARM64) || CPU(X86_64) || CPU(RISCV64))
++#define ENABLE_YARR_JIT_BACKREFERENCES 1
++#if CPU(ARM64) || CPU(X86_64)
++#define ENABLE_YARR_JIT_BACKREFERENCES_FOR_16BIT_EXPRS 1
++#else
++#define ENABLE_YARR_JIT_BACKREFERENCES_FOR_16BIT_EXPRS 0
++#endif
++#endif
++
++#if ENABLE(YARR_JIT) && (CPU(ARM64) || CPU(X86_64) || CPU(RISCV64))
++#define ENABLE_YARR_JIT_UNICODE_EXPRESSIONS 1
++#endif
++
+ /* Enables an optimiztion to advance two codepoints when we fail to match a non-BMP character */
+ #if ENABLE(YARR_JIT) && CPU(ARM64)
+ #define ENABLE_YARR_JIT_UNICODE_CAN_INCREMENT_INDEX_FOR_NON_BMP 1
+@@ -936,7 +976,7 @@
+ #endif
+ 
+ #if ENABLE(JIT)
+-#if CPU(ARM64)
++#if CPU(ARM_THUMB2) || CPU(ARM64)
+ #define ENABLE_BRANCH_COMPACTION 1
+ #endif
+ #endif
+@@ -953,28 +993,11 @@
+ #define ENABLE_GC_VALIDATION 1
+ #endif
+ 
+-#if OS(DARWIN) && ENABLE(JIT) && USE(APPLE_INTERNAL_SDK) && CPU(ARM64E) && HAVE(JIT_CAGE)
+-#if    HAVE(JIT_CAGE_RELAXATION) && !(PLATFORM(MAC) || PLATFORM(MACCATALYST))
+-#define ENABLE_JIT_CAGE 1
+-// FIXME: rdar://183646426
+-#define ENABLE_JIT_CAGE_RELAXATION 0
+-#elif  HAVE(JIT_CAGE_RELAXATION) &&  (PLATFORM(MAC) || PLATFORM(MACCATALYST))
+-#define ENABLE_JIT_CAGE 0
+-// FIXME: rdar://183649352
+-#define ENABLE_JIT_CAGE_RELAXATION 0
+-#elif !HAVE(JIT_CAGE_RELAXATION) && !(PLATFORM(MAC) || PLATFORM(MACCATALYST))
++#if OS(DARWIN) && ENABLE(JIT) && USE(APPLE_INTERNAL_SDK) && CPU(ARM64E) && HAVE(JIT_CAGE) && !PLATFORM(MAC) && !PLATFORM(MACCATALYST)
+ #define ENABLE_JIT_CAGE 1
+-#define ENABLE_JIT_CAGE_RELAXATION 0
+-#elif !HAVE(JIT_CAGE_RELAXATION) &&  (PLATFORM(MAC) || PLATFORM(MACCATALYST))
+-#define ENABLE_JIT_CAGE 0
+-#define ENABLE_JIT_CAGE_RELAXATION 0
+-#else
+-#error "Should not be reached"
+ #endif
+-#endif // OS(DARWIN) && ENABLE(JIT) && USE(APPLE_INTERNAL_SDK) && CPU(ARM64E) && HAVE(JIT_CAGE)
+ 
+-#if !ENABLE(JIT_CAGE_RELAXATION) && (ENABLE(JIT_CAGE) \
+-    || (ENABLE(JIT) && OS(DARWIN) && CPU(ADDRESS64) && ASSERT_ENABLED))
++#if OS(DARWIN) && CPU(ADDRESS64) && ENABLE(JIT) && (ENABLE(JIT_CAGE) || ASSERT_ENABLED)
+ #define ENABLE_JIT_OPERATION_VALIDATION 1
+ #endif
+ 
+@@ -1002,7 +1025,7 @@
+    that executes each opcode. It cannot be supported by the CLoop since there's no way to embed the
+    OpcodeID word in the CLoop's switch statement cases. It is also currently not implemented for MSVC.
+ */
+-#if !defined(ENABLE_LLINT_EMBEDDED_OPCODE_ID) && !ENABLE(C_LOOP) && (CPU(X86) || CPU(X86_64) || CPU(ARM64) || CPU(RISCV64))
++#if !defined(ENABLE_LLINT_EMBEDDED_OPCODE_ID) && !ENABLE(C_LOOP) && (CPU(X86) || CPU(X86_64) || CPU(ARM64) || (CPU(ARM_THUMB2) && OS(DARWIN)) || CPU(RISCV64))
+ #define ENABLE_LLINT_EMBEDDED_OPCODE_ID 1
+ #endif
+ 
+diff --git a/Source/WTF/wtf/PlatformEnableCocoa.h b/Source/WTF/wtf/PlatformEnableCocoa.h
+index 465781991a576df5201a7c6739578b8f4e071a32..d130454883f3eb041519d1f302e34afec35aa53e 100644
+--- a/Source/WTF/wtf/PlatformEnableCocoa.h
++++ b/Source/WTF/wtf/PlatformEnableCocoa.h
+@@ -76,7 +76,7 @@
+ #define ENABLE_AIRPLAY_PICKER 1
+ #endif
+ 
+-#if !defined(ENABLE_COCOA_WEBM_PLAYER) && !PLATFORM(MACCATALYST) && !PLATFORM(WATCHOS) && !PLATFORM(APPLETV)
++#if !defined(ENABLE_COCOA_WEBM_PLAYER) && !defined(WEBKIT_IOS6) && !PLATFORM(MACCATALYST) && !PLATFORM(WATCHOS) && !PLATFORM(APPLETV)
+ #define ENABLE_COCOA_WEBM_PLAYER 1
+ #endif
+ 
+@@ -84,9 +84,12 @@
+ #define ENABLE_APP_BOUND_DOMAINS 1
+ #endif
+ 
+-#if !defined(ENABLE_WEB_THREAD_DISABLEMENT) && PLATFORM(IOS_FAMILY)
++#if !defined(ENABLE_WEB_THREAD_DISABLEMENT) && PLATFORM(IOS_FAMILY) && !defined(WEBKIT_IOS6)
+ #define ENABLE_WEB_THREAD_DISABLEMENT 1
+ #endif
++#if defined(WEBKIT_IOS6)
++#define ENABLE_WEB_THREAD_DISABLEMENT 0
++#endif
+ 
+ #if !defined(ENABLE_APP_HIGHLIGHTS) && (PLATFORM(MAC) || PLATFORM(IOS))
+ #define ENABLE_APP_HIGHLIGHTS 1
+@@ -303,13 +306,12 @@
+ #define ENABLE_DATACUE_VALUE 1
+ #endif
+ 
+-#if !defined(ENABLE_DATA_DETECTION) && (PLATFORM(MAC) || PLATFORM(IOS) || PLATFORM(MACCATALYST) || PLATFORM(VISION))
++#if !defined(ENABLE_DATA_DETECTION) && defined(WEBKIT_IOS6)
++#define ENABLE_DATA_DETECTION 0
++#elif !defined(ENABLE_DATA_DETECTION) && (PLATFORM(MAC) || PLATFORM(IOS) || PLATFORM(MACCATALYST) || PLATFORM(VISION))
+ #define ENABLE_DATA_DETECTION 1
+ #endif
+ 
+-#if !defined(ENABLE_DECLARATIVE_WEB_PUSH) && (PLATFORM(MAC) || PLATFORM(IOS))
+-#define ENABLE_DECLARATIVE_WEB_PUSH 1
+-#endif
+ 
+ #if !defined(ENABLE_DESTINATION_COLOR_SPACE_DISPLAY_P3)
+ #define ENABLE_DESTINATION_COLOR_SPACE_DISPLAY_P3 1
+@@ -658,12 +660,16 @@
+ #define ENABLE_NON_VISIBLE_WEBPROCESS_MEMORY_CLEANUP_TIMER 1
+ #endif
+ 
+-#if !defined(ENABLE_NOTIFICATION_EVENT) && (PLATFORM(MAC) || PLATFORM(IOS))
++#if !defined(ENABLE_NOTIFICATIONS)
++#define ENABLE_NOTIFICATIONS 1
++#endif
++
++#if !defined(ENABLE_NOTIFICATION_EVENT) && (PLATFORM(MAC) || PLATFORM(IOS)) && ENABLE(NOTIFICATIONS)
+ #define ENABLE_NOTIFICATION_EVENT 1
+ #endif
+ 
+-#if !defined(ENABLE_NOTIFICATIONS)
+-#define ENABLE_NOTIFICATIONS 1
++#if !defined(ENABLE_DECLARATIVE_WEB_PUSH) && (PLATFORM(MAC) || PLATFORM(IOS)) && ENABLE(NOTIFICATION_EVENT)
++#define ENABLE_DECLARATIVE_WEB_PUSH 1
+ #endif
+ 
+ #if !defined(ENABLE_NOTIFY_FILTERING) && PLATFORM(MAC)
+@@ -912,9 +918,12 @@
+ #define ENABLE_TOUCH_EVENTS 1
+ #endif
+ 
+-#if !defined(ENABLE_TOUCH_EVENT_REGIONS) && PLATFORM(IOS_FAMILY)
++#if !defined(ENABLE_TOUCH_EVENT_REGIONS) && PLATFORM(IOS_FAMILY) && !defined(WEBKIT_IOS6)
+ #define ENABLE_TOUCH_EVENT_REGIONS 1
+ #endif
++#if defined(WEBKIT_IOS6)
++#define ENABLE_TOUCH_EVENT_REGIONS 0
++#endif
+ 
+ #if !defined(ENABLE_TOUCH_ACTION_REGIONS) && PLATFORM(IOS_FAMILY)
+ #define ENABLE_TOUCH_ACTION_REGIONS 1
+@@ -1234,3 +1243,62 @@
+ #endif
+ 
+ #endif // PLATFORM(COCOA)
++
++#if defined(WEBKIT_IOS6)
++#undef ENABLE_PIXEL_FORMAT_RGBA16F
++#define ENABLE_PIXEL_FORMAT_RGBA16F 0
++#undef ENABLE_APPLE_PAY
++#define ENABLE_APPLE_PAY 0
++#undef ENABLE_APPLE_PAY_AMS_UI
++#define ENABLE_APPLE_PAY_AMS_UI 0
++#undef ENABLE_APPLE_PAY_AUTOMATIC_RELOAD_LINE_ITEM
++#define ENABLE_APPLE_PAY_AUTOMATIC_RELOAD_LINE_ITEM 0
++#undef ENABLE_APPLE_PAY_AUTOMATIC_RELOAD_PAYMENTS
++#define ENABLE_APPLE_PAY_AUTOMATIC_RELOAD_PAYMENTS 0
++#undef ENABLE_APPLE_PAY_COUPON_CODE
++#define ENABLE_APPLE_PAY_COUPON_CODE 0
++#undef ENABLE_APPLE_PAY_DEFERRED_LINE_ITEM
++#define ENABLE_APPLE_PAY_DEFERRED_LINE_ITEM 0
++#undef ENABLE_APPLE_PAY_DEFERRED_PAYMENTS
++#define ENABLE_APPLE_PAY_DEFERRED_PAYMENTS 0
++#undef ENABLE_APPLE_PAY_DELEGATED_REQUEST
++#define ENABLE_APPLE_PAY_DELEGATED_REQUEST 0
++#undef ENABLE_APPLE_PAY_DISBURSEMENTS
++#define ENABLE_APPLE_PAY_DISBURSEMENTS 0
++#undef ENABLE_APPLE_PAY_FEATURES
++#define ENABLE_APPLE_PAY_FEATURES 0
++#undef ENABLE_APPLE_PAY_INSTALLMENTS
++#define ENABLE_APPLE_PAY_INSTALLMENTS 0
++#undef ENABLE_APPLE_PAY_LATER
++#define ENABLE_APPLE_PAY_LATER 0
++#undef ENABLE_APPLE_PAY_LATER_AVAILABILITY
++#define ENABLE_APPLE_PAY_LATER_AVAILABILITY 0
++#undef ENABLE_APPLE_PAY_MERCHANT_CATEGORY_CODE
++#define ENABLE_APPLE_PAY_MERCHANT_CATEGORY_CODE 0
++#undef ENABLE_APPLE_PAY_MULTI_MERCHANT_PAYMENTS
++#define ENABLE_APPLE_PAY_MULTI_MERCHANT_PAYMENTS 0
++#undef ENABLE_APPLE_PAY_NEW_BUTTON_TYPES
++#define ENABLE_APPLE_PAY_NEW_BUTTON_TYPES 0
++#undef ENABLE_APPLE_PAY_PAYMENT_ORDER_DETAILS
++#define ENABLE_APPLE_PAY_PAYMENT_ORDER_DETAILS 0
++#undef ENABLE_APPLE_PAY_RECURRING_LINE_ITEM
++#define ENABLE_APPLE_PAY_RECURRING_LINE_ITEM 0
++#undef ENABLE_APPLE_PAY_RECURRING_PAYMENTS
++#define ENABLE_APPLE_PAY_RECURRING_PAYMENTS 0
++#undef ENABLE_APPLE_PAY_REMOTE_UI
++#define ENABLE_APPLE_PAY_REMOTE_UI 0
++#undef ENABLE_APPLE_PAY_REMOTE_UI_USES_SCENE
++#define ENABLE_APPLE_PAY_REMOTE_UI_USES_SCENE 0
++#undef ENABLE_APPLE_PAY_SELECTED_SHIPPING_METHOD
++#define ENABLE_APPLE_PAY_SELECTED_SHIPPING_METHOD 0
++#undef ENABLE_APPLE_PAY_SESSION_V11
++#define ENABLE_APPLE_PAY_SESSION_V11 0
++#undef ENABLE_APPLE_PAY_SETUP
++#define ENABLE_APPLE_PAY_SETUP 0
++#undef ENABLE_APPLE_PAY_SHIPPING_CONTACT_EDITING_MODE
++#define ENABLE_APPLE_PAY_SHIPPING_CONTACT_EDITING_MODE 0
++#undef ENABLE_APPLE_PAY_SHIPPING_METHOD_DATE_COMPONENTS_RANGE
++#define ENABLE_APPLE_PAY_SHIPPING_METHOD_DATE_COMPONENTS_RANGE 0
++#undef ENABLE_APPLE_PAY_UPDATE_SHIPPING_METHODS_WHEN_CHANGING_LINE_ITEMS
++#define ENABLE_APPLE_PAY_UPDATE_SHIPPING_METHODS_WHEN_CHANGING_LINE_ITEMS 0
++#endif
+diff --git a/Source/WTF/wtf/PlatformHave.h b/Source/WTF/wtf/PlatformHave.h
+index 9e37a3326e70bf8add6d7e216f3f9ecc0d1c4d77..7d81d40e4df52b6f2c4708e442c9b9098f000945 100644
+--- a/Source/WTF/wtf/PlatformHave.h
++++ b/Source/WTF/wtf/PlatformHave.h
+@@ -96,11 +96,11 @@
+ #define HAVE_HISERVICES 1
+ #endif
+ 
+-#if PLATFORM(IOS_FAMILY)
++#if PLATFORM(IOS_FAMILY) && !defined(WEBKIT_IOS6_NO_READLINE)
+ #define HAVE_READLINE 1
+ #endif
+ 
+-#if PLATFORM(IOS_FAMILY) && CPU(ARM_NEON)
++#if PLATFORM(IOS_FAMILY) && CPU(ARM_NEON) && !defined(WEBKIT_IOS6)
+ #undef HAVE_ARM_NEON_INTRINSICS
+ #define HAVE_ARM_NEON_INTRINSICS 0
+ #endif
+@@ -216,7 +216,7 @@
+ #define HAVE_PTHREAD_SETNAME_NP 1
+ #endif
+ 
+-#if OS(DARWIN)
++#if OS(DARWIN) && !defined(WEBKIT_IOS6_NO_READLINE)
+ #define HAVE_READLINE 1
+ #endif
+ 
+@@ -371,7 +371,7 @@
+ #define HAVE_THREAD_TIME_CONSTRAINTS 1
+ #endif
+ 
+-#if PLATFORM(COCOA)
++#if PLATFORM(COCOA) && !defined(WEBKIT_IOS6)
+ #define HAVE_AVASSETREADER 1
+ #endif
+ 
+@@ -387,7 +387,7 @@
+ #define HAVE_RUBBER_BANDING 1
+ #endif
+ 
+-#if PLATFORM(COCOA) && !PLATFORM(WATCHOS)
++#if PLATFORM(COCOA) && !PLATFORM(WATCHOS) && !defined(WEBKIT_IOS6)
+ #define HAVE_IOSURFACE_ALPHA_CHANNEL_MODE 1
+ #endif
+ 
+@@ -575,7 +575,7 @@
+ #define HAVE_APP_SSO 1
+ #endif
+ 
+-#if PLATFORM(COCOA) || PLATFORM(GTK) || PLATFORM(WPE)
++#if (PLATFORM(COCOA) && !defined(WEBKIT_IOS6)) || PLATFORM(GTK) || PLATFORM(WPE)
+ #define HAVE_COOKIE_CHANGE_LISTENER_API 1
+ #endif
+ 
+@@ -583,7 +583,7 @@
+ #define HAVE_NEAR_FIELD 1
+ #endif
+ 
+-#if PLATFORM(COCOA)
++#if PLATFORM(COCOA) && !defined(WEBKIT_IOS6)
+ #define HAVE_OS_SIGNPOST 1
+ #endif
+ 
+@@ -591,7 +591,7 @@
+ #define HAVE_AVPLAYER_VIDEORANGEOVERRIDE 1
+ #endif
+ 
+-#if PLATFORM(COCOA) && !PLATFORM(WATCHOS) && !PLATFORM(APPLETV)
++#if PLATFORM(COCOA) && !PLATFORM(WATCHOS) && !PLATFORM(APPLETV) && !defined(WEBKIT_IOS6)
+ #define HAVE_CG_PATH_UNEVEN_CORNERS_ROUNDEDRECT 1
+ #endif
+ 
+@@ -627,7 +627,7 @@
+ #define HAVE_UISCENE_BASED_VIEW_SERVICE_STATE_NOTIFICATIONS 1
+ #endif
+ 
+-#if PLATFORM(IOS_FAMILY) && !PLATFORM(IOS_FAMILY_SIMULATOR) && !PLATFORM(MACCATALYST)
++#if PLATFORM(IOS_FAMILY) && !PLATFORM(IOS_FAMILY_SIMULATOR) && !PLATFORM(MACCATALYST) && !defined(WEBKIT_IOS6)
+ #define HAVE_IOS_JIT_RESTRICTIONS 1
+ #endif
+ 
+@@ -768,7 +768,7 @@
+ #define HAVE_DDSCANNER_QOS_CONFIGURATION 1
+ #endif
+ 
+-#if PLATFORM(COCOA) && !PLATFORM(WATCHOS) && !PLATFORM(APPLETV)
++#if PLATFORM(COCOA) && !PLATFORM(WATCHOS) && !PLATFORM(APPLETV) && !defined(WEBKIT_IOS6)
+ #define HAVE_SPEECHRECOGNIZER 1
+ #endif
+ 
+@@ -876,7 +876,7 @@
+ #define HAVE_ASV_INLINE_PREVIEW 1
+ #endif
+ 
+-#if PLATFORM(IOS) || PLATFORM(MACCATALYST) || PLATFORM(MAC) || PLATFORM(VISION)
++#if (PLATFORM(IOS) || PLATFORM(MACCATALYST) || PLATFORM(MAC) || PLATFORM(VISION)) && !defined(WEBKIT_IOS6)
+ #define HAVE_NSURLPROTOCOL_WITH_SKIPAPPSSO 1
+ #endif
+ 
+@@ -886,8 +886,10 @@
+ 
+ #if PLATFORM(COCOA)
+ #define HAVE_CORE_TEXT_SBIX_IMAGE_SIZE_FUNCTIONS 1
++#if !defined(WEBKIT_IOS6)
+ #define HAVE_WOFF_SUPPORT 1
+ #endif
++#endif
+ 
+ #if PLATFORM(MAC) || PLATFORM(IOS) || PLATFORM(MACCATALYST) || PLATFORM(VISION)
+ #if !defined(HAVE_VK_IMAGE_ANALYSIS)
+@@ -1079,7 +1081,7 @@
+ #define HAVE_APPLE_PUSH_SERVICE_URL_TOKEN_SUPPORT 1
+ #endif
+ 
+-#if PLATFORM(COCOA)
++#if PLATFORM(COCOA) && !defined(WEBKIT_IOS6)
+ #define HAVE_AVIF 1
+ #endif
+ 
+@@ -1108,7 +1110,11 @@
+ #define HAVE_SHARED_REGION_SPI 1
+ #endif
+ 
+-#if PLATFORM(IOS_FAMILY) && !PLATFORM(MACCATALYST)
++#if !defined(WEBKIT_IOS6)
++#define HAVE_AVAUDIOSESSION_CARAUDIO_PORT 1
++#endif
++
++#if PLATFORM(IOS_FAMILY) && !PLATFORM(MACCATALYST) && !defined(WEBKIT_IOS6)
+ #define HAVE_MEDIAEXPERIENCE_AVSYSTEMCONTROLLER 1
+ #endif
+ 
+@@ -1362,10 +1368,12 @@
+     || PLATFORM(IOS) \
+     || PLATFORM(APPLETV) \
+     || PLATFORM(WATCHOS)
++#if !defined(WEBKIT_IOS6)
+ #define HAVE_JPEGXL 1
+ #endif
++#endif
+ 
+-#if PLATFORM(COCOA)
++#if PLATFORM(COCOA) && !defined(WEBKIT_IOS6)
+ #define HAVE_HEIC 1
+ #endif
+ 
+@@ -1398,7 +1406,7 @@
+ #define HAVE_IDLE_SLEEP_STATE 1
+ #endif
+ 
+-#if PLATFORM(COCOA)
++#if PLATFORM(COCOA) && !defined(WEBKIT_IOS6)
+ #define HAVE_CGSTYLE_COLORMATRIX_BLUR 1
+ #endif
+ 
+@@ -1692,7 +1700,7 @@
+ #define HAVE_X25519_ZERO_CHECKS 1
+ #endif
+ 
+-#if !defined(HAVE_CG_PATH_CONTINUOUS_ROUNDED_RECT) && PLATFORM(COCOA)
++#if !defined(HAVE_CG_PATH_CONTINUOUS_ROUNDED_RECT) && PLATFORM(COCOA) && !defined(WEBKIT_IOS6)
+ #define HAVE_CG_PATH_CONTINUOUS_ROUNDED_RECT 1
+ #endif
+ 
+@@ -1925,6 +1933,7 @@
+ #endif
+ 
+ #if !defined(HAVE_ALLOW_ONLY_PARTITIONED_COOKIES) \
++    && !defined(WEBKIT_IOS6) \
+     && ((PLATFORM(MAC) && __MAC_OS_X_VERSION_MIN_REQUIRED >= 260200) \
+     || ((PLATFORM(IOS) || PLATFORM(MACCATALYST)) && __IPHONE_OS_VERSION_MIN_REQUIRED >= 260200) \
+     || (PLATFORM(VISION) && __VISION_OS_VERSION_MIN_REQUIRED >= 260200) \
+@@ -2036,3 +2045,56 @@
+     || (PLATFORM(VISION) && __VISION_OS_VERSION_MIN_REQUIRED >= 270000))
+ #define HAVE_AVPLAYER_DISCONNECTEDFROMSYSTEMAUDIO 1
+ #endif
++
++#if defined(WEBKIT_IOS6)
++#undef HAVE_SUPPORT_HDR_DISPLAY_APIS
++#define HAVE_SUPPORT_HDR_DISPLAY_APIS 0
++#undef HAVE_TASK_IDENTITY_TOKEN
++#define HAVE_TASK_IDENTITY_TOKEN 0
++#undef HAVE_CG_CONTEXT_SET_OWNER_IDENTITY
++#define HAVE_CG_CONTEXT_SET_OWNER_IDENTITY 0
++#undef HAVE_IOSURFACE_ACCELERATOR
++#define HAVE_IOSURFACE_ACCELERATOR 0
++#undef HAVE_IOSURFACE_COREIMAGE_SUPPORT
++#define HAVE_IOSURFACE_COREIMAGE_SUPPORT 0
++#undef HAVE_AVSAMPLEBUFFERVIDEORENDERER
++#define HAVE_AVSAMPLEBUFFERVIDEORENDERER 0
++#undef HAVE_VTDECOMPRESSIONSESSION_MULTIIMAGE
++#define HAVE_VTDECOMPRESSIONSESSION_MULTIIMAGE 0
++#undef HAVE_MULTI_IMAGE_DECODE
++#define HAVE_MULTI_IMAGE_DECODE 0
++#undef HAVE_IOSURFACE_SET_OWNERSHIP
++#define HAVE_IOSURFACE_SET_OWNERSHIP 0
++#undef HAVE_PASSKIT_AUTOMATIC_RELOAD_PAYMENTS
++#define HAVE_PASSKIT_AUTOMATIC_RELOAD_PAYMENTS 0
++#undef HAVE_PASSKIT_AUTOMATIC_RELOAD_SUMMARY_ITEM
++#define HAVE_PASSKIT_AUTOMATIC_RELOAD_SUMMARY_ITEM 0
++#undef HAVE_PASSKIT_DEFAULT_SHIPPING_METHOD
++#define HAVE_PASSKIT_DEFAULT_SHIPPING_METHOD 0
++#undef HAVE_PASSKIT_DEFERRED_PAYMENTS
++#define HAVE_PASSKIT_DEFERRED_PAYMENTS 0
++#undef HAVE_PASSKIT_DEFERRED_SUMMARY_ITEM
++#define HAVE_PASSKIT_DEFERRED_SUMMARY_ITEM 0
++#undef HAVE_PASSKIT_DISBURSEMENTS
++#define HAVE_PASSKIT_DISBURSEMENTS 0
++#undef HAVE_PASSKIT_INSTALLMENTS
++#define HAVE_PASSKIT_INSTALLMENTS 0
++#undef HAVE_PASSKIT_MAC_HELPER_TEMP
++#define HAVE_PASSKIT_MAC_HELPER_TEMP 0
++#undef HAVE_PASSKIT_MODULARIZATION
++#define HAVE_PASSKIT_MODULARIZATION 0
++#undef HAVE_PASSKIT_MULTI_MERCHANT_PAYMENTS
++#define HAVE_PASSKIT_MULTI_MERCHANT_PAYMENTS 0
++#undef HAVE_PASSKIT_PAYMENT_ORDER_DETAILS
++#define HAVE_PASSKIT_PAYMENT_ORDER_DETAILS 0
++#undef HAVE_PASSKIT_PAYMENT_SERVICES_MERCHANT_URL_IS_DELEGATED
++#define HAVE_PASSKIT_PAYMENT_SERVICES_MERCHANT_URL_IS_DELEGATED 0
++#undef HAVE_PASSKIT_RECURRING_PAYMENTS
++#define HAVE_PASSKIT_RECURRING_PAYMENTS 0
++#undef HAVE_PASSKIT_RECURRING_SUMMARY_ITEM
++#define HAVE_PASSKIT_RECURRING_SUMMARY_ITEM 0
++#undef HAVE_PASSKIT_SHIPPING_METHOD_DATE_COMPONENTS_RANGE
++#define HAVE_PASSKIT_SHIPPING_METHOD_DATE_COMPONENTS_RANGE 0
++#undef HAVE_AVCONTENTKEYREQUEST_PENDING_PROTECTION_STATUS
++#define HAVE_AVCONTENTKEYREQUEST_PENDING_PROTECTION_STATUS 0
++#endif
+diff --git a/Source/WTF/wtf/RobinHoodHashTable.h b/Source/WTF/wtf/RobinHoodHashTable.h
+index a8d6df55c198f8e529a1845ac617b182c0c8e8ab..1776febec810329778dd3758397a10176411ded0 100644
+--- a/Source/WTF/wtf/RobinHoodHashTable.h
++++ b/Source/WTF/wtf/RobinHoodHashTable.h
+@@ -258,11 +258,11 @@ private:
+         return m_willExpand && keyCount * 2 >= tableSize;
+     }
+     bool shouldShrink() const { return keyCount() * minLoad < tableSize() && tableSize() > KeyTraits::minimumTableSize; }
+-    void expand();
++    NEVER_INLINE void expand();
+     void shrink() { rehash(tableSize() / 2); }
+-    void shrinkToBestSize();
++    NEVER_INLINE void shrinkToBestSize();
+ 
+-    void rehash(unsigned newTableSize);
++    NEVER_INLINE void rehash(unsigned newTableSize);
+     void reinsert(ValueType&&);
+ 
+     static void initializeBucket(ValueType& bucket);
+@@ -354,7 +354,7 @@ ALWAYS_INLINE auto RobinHoodHashTable<Key, Value, Extractor, HashFunctions, Trai
+     unsigned distance = 0;
+ 
+     while (true) {
+-        ValueType* entry = m_table + index;
++        ValueType* entry = table + index;
+         if (isEmptyBucket(*entry))
+             return nullptr;
+ 
+diff --git a/Source/WTF/wtf/RunLoop.cpp b/Source/WTF/wtf/RunLoop.cpp
+index bfb38c92982b2c48517d9b097dbc6d652be917eb..20e777ed76fb14bbf9b2a04dee2d6a631513ee61 100644
+--- a/Source/WTF/wtf/RunLoop.cpp
++++ b/Source/WTF/wtf/RunLoop.cpp
+@@ -133,7 +133,7 @@ void RunLoop::performWork()
+         while (!m_currentIteration.isEmpty())
+             m_nextIteration.prepend(m_currentIteration.takeLast());
+ 
+-        m_currentIteration = std::exchange(m_nextIteration, { });
++        m_currentIteration.swap(m_nextIteration);
+     }
+ 
+     while (!m_currentIteration.isEmpty()) {
+diff --git a/Source/WTF/wtf/RunLoop.h b/Source/WTF/wtf/RunLoop.h
+index 2a916946b7a034407bbad8f1fe9e92a611f20bc6..9a7529e4f27b17611349a01c01cf2defa61f2125 100644
+--- a/Source/WTF/wtf/RunLoop.h
++++ b/Source/WTF/wtf/RunLoop.h
+@@ -416,6 +416,11 @@ inline void assertIsCurrent(const RunLoop& runLoop) WTF_ASSERTS_ACQUIRED_CAPABIL
+     RELEASE_ASSERT(runLoop.isCurrent());
+ }
+ 
++inline void releaseAssertIsCurrent(const RunLoop& runLoop) WTF_ASSERTS_ACQUIRED_CAPABILITY(runLoop)
++{
++    RELEASE_ASSERT(runLoop.isCurrent());
++}
++
+ WTF_EXPORT_PRIVATE void callOnRunLoop(RunLoop&, Function<void()>&&);
+ 
+ } // namespace WTF
+@@ -423,4 +428,5 @@ WTF_EXPORT_PRIVATE void callOnRunLoop(RunLoop&, Function<void()>&&);
+ using WTF::RunLoop;
+ using WTF::RunLoopMode;
+ using WTF::assertIsCurrent;
++using WTF::releaseAssertIsCurrent;
+ using WTF::callOnRunLoop;
+diff --git a/Source/WTF/wtf/ThreadSafeRefCounted.h b/Source/WTF/wtf/ThreadSafeRefCounted.h
+index 9426a1b4ea1a76ed0f7379e552737a7e05988cbf..830358652acf93cc12b902c196062c1687510e8c 100644
+--- a/Source/WTF/wtf/ThreadSafeRefCounted.h
++++ b/Source/WTF/wtf/ThreadSafeRefCounted.h
+@@ -66,12 +66,22 @@ protected:
+     {
+         m_refCountDebugger.willDeref(m_refCount.load(std::memory_order_relaxed));
+ 
++#if defined(WEBKIT_IOS6)
++        if (m_refCount.fetch_sub(1, std::memory_order_release) == 1) [[unlikely]] {
++            std::atomic_thread_fence(std::memory_order_acquire);
++            m_refCountDebugger.willDelete();
++
++            m_refCount.store(1, std::memory_order_relaxed);
++            return true;
++        }
++#else
+         if (m_refCount.fetch_sub(1, std::memory_order_acq_rel) == 1) [[unlikely]] {
+             m_refCountDebugger.willDelete();
+ 
+             m_refCount.store(1, std::memory_order_relaxed);
+             return true;
+         }
++#endif
+ 
+         return false;
+     }
+diff --git a/Source/WTF/wtf/Vector.h b/Source/WTF/wtf/Vector.h
+index a54ca832bed251464767ac7f00048980365523b3..3ed430393ab6dac459ed9c037415489d188486f0 100644
+--- a/Source/WTF/wtf/Vector.h
++++ b/Source/WTF/wtf/Vector.h
+@@ -60,14 +60,47 @@ enum class NulloptBehavior : bool { Ignore, Abort };
+ 
+ WTF_ALLOW_UNSAFE_BUFFER_USAGE_BEGIN
+ 
++#if defined(WEBKIT_IOS6)
++
++ALWAYS_INLINE void vectorCopyBytes(void* destination, const void* source, size_t bytes)
++{
++    if (bytes >= 32) {
++        memcpy(destination, source, bytes);
++        return;
++    }
++    auto* to = static_cast<uint8_t*>(destination);
++    auto* from = static_cast<const uint8_t*>(source);
++    while (bytes >= 4) {
++        uint32_t word;
++        __builtin_memcpy(&word, from, sizeof(word));
++        __builtin_memcpy(to, &word, sizeof(word));
++        to += 4;
++        from += 4;
++        bytes -= 4;
++    }
++    while (bytes) {
++        *to++ = *from++;
++        --bytes;
++    }
++}
++
++#define WTF_VECTOR_COPY_BYTES(destination, source, bytes) ::WTF::vectorCopyBytes(destination, source, bytes)
++
++#else
++
++#define WTF_VECTOR_COPY_BYTES(destination, source, bytes) memcpy(destination, source, bytes)
++
++#endif
++
+ template<typename T>
+ struct VectorCopier {
+     template<typename U, std::size_t Extent>
+     static void uninitializedCopy(std::span<const U, Extent> src, std::span<T> dst)
+     {
+-        if constexpr (std::is_trivially_copyable_v<T> && std::is_trivially_default_constructible_v<T> && std::same_as<T, U>)
+-            memcpySpan(dst, src);
+-        else {
++        if constexpr (std::is_trivially_copyable_v<T> && std::is_trivially_default_constructible_v<T> && std::same_as<T, U>) {
++            RELEASE_ASSERT(dst.size() >= src.size());
++            WTF_VECTOR_COPY_BYTES(static_cast<void*>(dst.data()), static_cast<const void*>(src.data()), src.size_bytes());
++        } else {
+             for (size_t i = 0; i < src.size(); ++i)
+                 new (NotNull, &dst[i]) T(src[i]);
+         }
+@@ -119,7 +152,7 @@ struct VectorTypeOperations
+     static void move(T* src, T* srcEnd, T* dst)
+     {
+         if constexpr (VectorTraits<T>::canMoveWithMemcpy)
+-            memcpy(static_cast<void*>(dst), static_cast<void*>(const_cast<T*>(src)), reinterpret_cast<const char*>(srcEnd) - reinterpret_cast<const char*>(src));
++            WTF_VECTOR_COPY_BYTES(static_cast<void*>(dst), static_cast<const void*>(src), static_cast<size_t>(reinterpret_cast<const char*>(srcEnd) - reinterpret_cast<const char*>(src)));
+         else {
+             while (src != srcEnd) {
+                 new (NotNull, dst) T(WTF::move(*src));
+@@ -162,9 +195,10 @@ struct VectorTypeOperations
+     template<std::size_t Extent>
+     static void uninitializedCopy(std::span<const T, Extent> src, std::span<T> dst)
+     {
+-        if constexpr (VectorTraits<T>::canCopyWithMemcpy)
+-            memcpySpan(asMutableByteSpan(dst), asByteSpan(src));
+-        else {
++        if constexpr (VectorTraits<T>::canCopyWithMemcpy) {
++            RELEASE_ASSERT(dst.size() >= src.size());
++            WTF_VECTOR_COPY_BYTES(static_cast<void*>(dst.data()), static_cast<const void*>(src.data()), src.size_bytes());
++        } else {
+             for (size_t i = 0; i < src.size(); ++i)
+                 new (NotNull, &dst[i]) T(src[i]);
+         }
+@@ -173,9 +207,10 @@ struct VectorTypeOperations
+     template<typename U, std::size_t Extent>
+     static void uninitializedMove(std::span<U, Extent> source, std::span<T> destination)
+     {
+-        if constexpr (std::same_as<T, U> && std::is_trivially_copyable_v<T>)
+-            memcpySpan(destination, source);
+-        else {
++        if constexpr (std::same_as<T, U> && std::is_trivially_copyable_v<T>) {
++            RELEASE_ASSERT(destination.size() >= source.size());
++            WTF_VECTOR_COPY_BYTES(static_cast<void*>(destination.data()), static_cast<const void*>(source.data()), source.size_bytes());
++        } else {
+             for (size_t i = 0; i < source.size(); ++i)
+                 new (NotNull, std::addressof(destination[i])) T(WTF::move(source[i]));
+         }
+@@ -239,7 +274,7 @@ public:
+             if (!newBuffer) [[unlikely]]
+                 return false;
+         }
+-        m_capacity = sizeToAllocate / sizeof(T);
++        m_capacity = newCapacity;
+         m_buffer = newBuffer;
+         return true;
+     }
+@@ -258,7 +293,7 @@ public:
+         if (newCapacity > std::numeric_limits<size_t>::max() / sizeof(T))
+             CRASH();
+         size_t sizeToAllocate = newCapacity * sizeof(T);
+-        m_capacity = sizeToAllocate / sizeof(T);
++        m_capacity = newCapacity;
+         m_buffer = static_cast<T*>(Malloc::realloc(m_buffer, sizeToAllocate));
+     }
+ 
+@@ -966,12 +1001,12 @@ private:
+     template<FailureAction> bool reserveInitialCapacity(size_t initialCapacity);
+     template<FailureAction> bool growCapacityBy(size_t increment);
+ 
+-    template<FailureAction> bool expandCapacity(size_t newMinCapacity);
++    template<FailureAction> NEVER_INLINE bool expandCapacity(size_t newMinCapacity);
+     template<FailureAction> T* expandCapacity(size_t newMinCapacity, T*);
+     template<FailureAction, typename U> U* expandCapacity(size_t newMinCapacity, U*);
+-    template<FailureAction, typename U> bool appendSlowCase(U&&);
++    template<FailureAction, typename U> NEVER_INLINE bool appendSlowCase(U&&);
+     template<FailureAction, typename... Args> bool constructAndAppend(Args&&...);
+-    template<FailureAction, typename... Args> bool constructAndAppendSlowCase(Args&&...);
++    template<FailureAction, typename... Args> NEVER_INLINE bool constructAndAppendSlowCase(Args&&...);
+ 
+     template<FailureAction, typename U> bool append(U&&);
+     template<FailureAction, typename U, size_t Extent> bool append(std::span<const U, Extent>);
+@@ -1413,6 +1448,18 @@ bool Vector<T, inlineCapacity, OverflowHandler, minCapacity, Malloc>::reserveCap
+     static_assert(action == FailureAction::Crash || action == FailureAction::Report);
+     if (newCapacity <= capacity())
+         return true;
++
++#if defined(WEBKIT_IOS6)
++    if constexpr (action == FailureAction::Crash) {
++        if (Base::shouldReallocateBuffer(newCapacity) && isValidCapacityForVector<T>(newCapacity)) {
++            asanSetBufferSizeToFullCapacity();
++            Base::reallocateBuffer(newCapacity);
++            asanSetInitialBufferSizeTo(size());
++            return true;
++        }
++    }
++#endif
++
+     T* oldBuffer = begin();
+     T* oldEnd = end();
+ 
+diff --git a/Source/WTF/wtf/VectorTraits.h b/Source/WTF/wtf/VectorTraits.h
+index ab163e5fcc3f1c9ab107c6842c951538775e5a89..4559097c80e8436ed989a6e022e59052aadbc9de 100644
+--- a/Source/WTF/wtf/VectorTraits.h
++++ b/Source/WTF/wtf/VectorTraits.h
+@@ -55,10 +55,19 @@ namespace WTF {
+         static constexpr bool canCompareWithMemcmp = true;
+     };
+ 
+-    // Requiring std::has_unique_object_representations_v<T> to make sure the type doesn't have padding and can
+-    // be used with memcmp().
+     template<typename T>
+-    struct VectorTraits : VectorTraitsBase<std::is_standard_layout_v<T> && std::is_trivially_copyable_v<T> && std::is_trivially_default_constructible_v<T> && std::has_unique_object_representations_v<T>, T> { };
++    struct VectorTraits
++    {
++        static constexpr bool isTriviallyCopyable = std::is_trivially_copyable_v<T>;
++        static constexpr bool isTriviallyDefaultConstructible = std::is_trivially_default_constructible_v<T>;
++
++        static constexpr bool needsInitialization = !isTriviallyDefaultConstructible;
++        static constexpr bool canInitializeWithMemset = isTriviallyDefaultConstructible;
++        static constexpr bool canMoveWithMemcpy = isTriviallyCopyable;
++        static constexpr bool canCopyWithMemcpy = isTriviallyCopyable;
++        static constexpr bool canFillWithMemset = sizeof(T) == sizeof(char) && std::is_integral<T>::value;
++        static constexpr bool canCompareWithMemcmp = isTriviallyCopyable && std::has_unique_object_representations_v<T>;
++    };
+ 
+     struct SimpleClassVectorTraits : VectorTraitsBase<false, void>
+     {
+diff --git a/Source/WTF/wtf/WordLock.cpp b/Source/WTF/wtf/WordLock.cpp
+index 5aad4aa134cc2efb15999f06ab0baccbbd97ce92..2be0d386cf0f258447e56c4bd5071d007929b0e9 100644
+--- a/Source/WTF/wtf/WordLock.cpp
++++ b/Source/WTF/wtf/WordLock.cpp
+@@ -27,7 +27,9 @@
+ #include "config.h"
+ #include <wtf/WordLock.h>
+ 
++#include <algorithm>
+ #include <condition_variable>
++#include <cstdlib>
+ #include <mutex>
+ #include <wtf/SpinBackoff.h>
+ #include <wtf/Threading.h>
+@@ -61,13 +63,41 @@ struct ThreadData {
+ 
+ } // anonymous namespace
+ 
++#if defined(WEBKIT_IOS6)
++static unsigned wordLockPolicy(const char* name, unsigned defaultValue, unsigned minimum)
++{
++    const char* text = std::getenv(name);
++    if (!text || !text[0])
++        return defaultValue;
++    char* end = nullptr;
++    unsigned long parsed = std::strtoul(text, &end, 10);
++    if (end == text || parsed > 4096)
++        return defaultValue;
++    return std::max<unsigned>(minimum, static_cast<unsigned>(parsed));
++}
++
++static const unsigned wordLockSpinLimit = wordLockPolicy("WEBKIT_WORDLOCK_SPIN_LIMIT", 16, 0);
++static const unsigned wordLockNopCount = wordLockPolicy("WEBKIT_WORDLOCK_NOP_COUNT", 8, 0);
++static const unsigned wordLockYieldInterval = wordLockPolicy("WEBKIT_WORDLOCK_YIELD_INTERVAL", 8, 1);
++#endif
++
+ NEVER_INLINE void WordLock::lockSlow()
+ {
+     SpinBackoff backoff;
+ 
++#if defined(WEBKIT_IOS6)
++    unsigned spinCount = 0;
++    const unsigned spinLimit = wordLockSpinLimit;
++    unsigned spinsSinceYield = 0;
++#endif
++
+     for (;;) {
++#if defined(WEBKIT_IOS6)
++        uintptr_t currentWordValue = m_word.load(std::memory_order_relaxed);
++#else
+         uintptr_t currentWordValue = m_word.load();
+-        
++#endif
++
+         if (!(currentWordValue & isLockedBit)) {
+             // It's not possible for someone to hold the queue lock while the lock itself is no longer
+             // held, since we will only attempt to acquire the queue lock when the lock is held and
+@@ -80,8 +110,21 @@ NEVER_INLINE void WordLock::lockSlow()
+         }
+ 
+         // If there is no queue and we haven't spun too much, we can just try to spin around again.
++#if defined(WEBKIT_IOS6)
++        if (!(currentWordValue & ~queueHeadMask) && spinCount < spinLimit) {
++            spinCount++;
++            if (++spinsSinceYield >= wordLockYieldInterval) {
++                spinsSinceYield = 0;
++                Thread::yield();
++            }
++            for (unsigned i = 0; i < wordLockNopCount; ++i)
++                __asm__ volatile("yield");
++            continue;
++        }
++#else
+         if (!(currentWordValue & ~queueHeadMask) && !backoff.shouldParkAfterSpinOnce())
+             continue;
++#endif
+ 
+         // Need to put ourselves on the queue. Create the queue if one does not exist. This requries
+         // owning the queue for a little bit. The lock that controls the queue is itself a spinlock.
+diff --git a/Source/WTF/wtf/cf/RunLoopCF.cpp b/Source/WTF/wtf/cf/RunLoopCF.cpp
+index 9bcc2dda1aa5f24f4b363ccd29d5ce35ec473919..3251170c574ba51bbab85ae9b06c05587082c2d6 100644
+--- a/Source/WTF/wtf/cf/RunLoopCF.cpp
++++ b/Source/WTF/wtf/cf/RunLoopCF.cpp
+@@ -24,6 +24,7 @@
+  */
+ 
+ #include "config.h"
++#include <mutex>
+ #include <wtf/RunLoop.h>
+ 
+ #include <wtf/AutodrainedPool.h>
+@@ -148,6 +149,19 @@ void RunLoop::TimerBase::stop()
+     if (!m_timer)
+         return;
+ 
++#if defined(WEBKIT_IOS6)
++    if (!m_runLoop->isCurrent()) {
++        static std::once_flag reported;
++        std::call_once(reported, [] {
++            WTFLogAlways("[runloop] a timer was stopped from another thread; invalidating it there");
++        });
++        CFRunLoopTimerInvalidate(m_timer.get());
++        m_timer = nullptr;
++        return;
++    }
++#endif
++
++    releaseAssertIsCurrent(m_runLoop);
+     // An active timer must be stopped (and destroyed) on its run loop's thread: the CFRunLoopTimer
+     // holds a raw pointer to this TimerBase as its callback context, and CFRunLoopTimerInvalidate()
+     // does not synchronize with a callback already dispatching on the run loop's thread, so invalidating
+diff --git a/Source/WTF/wtf/cocoa/MainThreadCocoa.mm b/Source/WTF/wtf/cocoa/MainThreadCocoa.mm
+index 63e62716f9417b0d82cc8314829341834731d86f..1f1e70688b99617518672b9d0137d6e9f5d70e01 100644
+--- a/Source/WTF/wtf/cocoa/MainThreadCocoa.mm
++++ b/Source/WTF/wtf/cocoa/MainThreadCocoa.mm
+@@ -38,6 +38,7 @@
+ #import <wtf/BlockPtr.h>
+ #import <wtf/Logging.h>
+ #import <wtf/RunLoop.h>
++#import <wtf/Threading.h>
+ 
+ #if USE(WEB_THREAD)
+ #import <wtf/ios/WebCoreThread.h>
+diff --git a/Source/WTF/wtf/cocoa/MemoryFootprintCocoa.cpp b/Source/WTF/wtf/cocoa/MemoryFootprintCocoa.cpp
+index 86e280b542843960a1845809a99a5d262bf6b278..c72233093eb2910374649ae24b2ea88250e6d89a 100644
+--- a/Source/WTF/wtf/cocoa/MemoryFootprintCocoa.cpp
++++ b/Source/WTF/wtf/cocoa/MemoryFootprintCocoa.cpp
+@@ -27,18 +27,50 @@
+ #include <wtf/MemoryFootprint.h>
+ 
+ #include <mach/mach.h>
++#include <cstring>
++#include <wtf/Assertions.h>
++#include <cstdlib>
+ #include <mach/task_info.h>
+ 
+ namespace WTF {
+ 
+ size_t memoryFootprint()
+ {
++#if defined(WEBKIT_IOS6)
++    static const int useInternal = [] -> int {
++        const char* mode = getenv("WEBKIT_IOS6_FOOTPRINT");
++        return mode && !strcmp(mode, "own");
++    }();
++
++    if (useInternal) {
++        task_vm_info_data_t vmInfo;
++        mach_msg_type_number_t vmCount = TASK_VM_INFO_REV0_COUNT;
++        kern_return_t vmResult = task_info(mach_task_self(), TASK_VM_INFO, (task_info_t)&vmInfo, &vmCount);
++        static bool reported = false;
++        if (!reported) {
++            reported = true;
++            WTFLogAlways("[footprint] TASK_VM_INFO kr=%d internal=%llu external=%llu compressed=%llu",
++                (int)vmResult, (unsigned long long)vmInfo.internal,
++                (unsigned long long)vmInfo.external, (unsigned long long)vmInfo.compressed);
++        }
++        if (vmResult == KERN_SUCCESS)
++            return static_cast<size_t>(vmInfo.internal + vmInfo.compressed);
++    }
++
++    mach_task_basic_info_data_t taskInfo;
++    mach_msg_type_number_t count = MACH_TASK_BASIC_INFO_COUNT;
++    kern_return_t result = task_info(mach_task_self(), MACH_TASK_BASIC_INFO, (task_info_t) &taskInfo, &count);
++    if (result != KERN_SUCCESS)
++        return 0;
++    return static_cast<size_t>(taskInfo.resident_size);
++#else
+     task_vm_info_data_t vmInfo;
+     mach_msg_type_number_t count = TASK_VM_INFO_COUNT;
+     kern_return_t result = task_info(mach_task_self(), TASK_VM_INFO, (task_info_t) &vmInfo, &count);
+     if (result != KERN_SUCCESS)
+         return 0;
+     return static_cast<size_t>(vmInfo.phys_footprint);
++#endif
+ }
+ 
+ }
+diff --git a/Source/WTF/wtf/cocoa/MemoryPressureHandlerCocoa.mm b/Source/WTF/wtf/cocoa/MemoryPressureHandlerCocoa.mm
+index 07cb2efe6dc0b722e9f236d17345df4de85e2dae..ed76fcd27afa077c7edc10bd1de8fa07ea6c0122 100644
+--- a/Source/WTF/wtf/cocoa/MemoryPressureHandlerCocoa.mm
++++ b/Source/WTF/wtf/cocoa/MemoryPressureHandlerCocoa.mm
+@@ -34,7 +34,9 @@
+ #import <mach/task_info.h>
+ #import <malloc/malloc.h>
+ #import <notify.h>
++#import <sys/sysctl.h>
+ #import <wtf/Logging.h>
++#import <wtf/MemoryFootprint.h>
+ #import <wtf/darwin/DispatchExtras.h>
+ #import <wtf/spi/darwin/DispatchSPI.h>
+ 
+@@ -51,11 +53,14 @@
+ 
+ void MemoryPressureHandler::platformReleaseMemory(Critical critical)
+ {
++#if defined(WEBKIT_IOS6)
++    if (critical == Critical::Yes)
++        cache_simulate_memory_warning_event(DISPATCH_MEMORYPRESSURE_CRITICAL);
++#else
+     if (critical == Critical::Yes && (!isUnderMemoryPressure() || m_isSimulatingMemoryPressure)) {
+-        // libcache listens to OS memory notifications, but for process suspension
+-        // or memory pressure simulation, we need to prod it manually:
+         cache_simulate_memory_warning_event(DISPATCH_MEMORYPRESSURE_CRITICAL);
+     }
++#endif
+ }
+ 
+ static OSObjectPtr<dispatch_source_t>& NODELETE memoryPressureEventSource()
+@@ -86,19 +91,91 @@
+ static constexpr unsigned s_holdOffMultiplier = 20;
+ #endif
+ 
++#if defined(WEBKIT_IOS6)
++static const Seconds s_criticalPressureRepeatInterval { 60_s };
++
++static int systemMemoryFreeLevel()
++{
++    int level = 0;
++    size_t size = sizeof(level);
++    if (sysctlbyname("kern.memorystatus_level", &level, &size, nullptr, 0))
++        return 100;
++    return level;
++}
++
++static size_t processMemoryBudget()
++{
++    static size_t budget = 0;
++    if (!budget) {
++        budget = 320 * MB;
++        if (const char* override = getenv("WEBKIT_IOS6_MEMORY_BUDGET_MB")) {
++            long value = strtol(override, nullptr, 10);
++            if (value > 16 && value < 4096)
++                budget = static_cast<size_t>(value) * MB;
++        }
++    }
++    return budget;
++}
++
++static SystemMemoryPressureStatus gradeMemoryPressure(SystemMemoryPressureStatus previous)
++{
++    size_t footprint = memoryFootprint();
++    size_t budget = processMemoryBudget();
++    int level = systemMemoryFreeLevel();
++
++    if (footprint >= budget * 9 / 10 || level < 8)
++        return SystemMemoryPressureStatus::Critical;
++
++    if (footprint >= budget * 3 / 4 || level < 12)
++        return SystemMemoryPressureStatus::Warning;
++
++    if (previous != SystemMemoryPressureStatus::Normal && footprint >= budget * 5 / 8)
++        return SystemMemoryPressureStatus::Warning;
++
++    return SystemMemoryPressureStatus::Normal;
++}
++#endif
++
+ void MemoryPressureHandler::install()
+ {
+     if (m_installed || timerEventSource())
+         return;
+ 
+     dispatch_async(m_dispatchQueue.get(), ^{
++#if defined(WEBKIT_IOS6)
++        SUPPRESS_RETAINPTR_CTOR_ADOPT memoryPressureEventSource() = adoptOSObject(dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, m_dispatchQueue.get()));
++        if (!memoryPressureEventSource())
++            return;
++
++        dispatch_source_set_timer(memoryPressureEventSource().get(), dispatch_time(DISPATCH_TIME_NOW, 0),
++            s_minimumHoldOffTime.seconds() * NSEC_PER_SEC, NSEC_PER_SEC);
++        dispatch_source_set_event_handler(memoryPressureEventSource().get(), ^{
++            SystemMemoryPressureStatus previous = m_memoryPressureStatus.load();
++            SystemMemoryPressureStatus status = gradeMemoryPressure(previous);
++            setMemoryPressureStatus(status);
++
++            if (status == SystemMemoryPressureStatus::Critical) {
++                static std::optional<MonotonicTime> lastCriticalResponse;
++                auto now = MonotonicTime::now();
++                if (!lastCriticalResponse || now - *lastCriticalResponse >= s_criticalPressureRepeatInterval) {
++                    lastCriticalResponse = now;
++                    respondToMemoryPressure(Critical::Yes);
++                }
++            } else if (status == SystemMemoryPressureStatus::Warning && previous != SystemMemoryPressureStatus::Warning)
++                respondToMemoryPressure(Critical::No);
++
++            if (m_shouldLogMemoryMemoryPressureEvents)
++                RELEASE_LOG(MemoryPressure, "Memory pressure: footprint %zu MB, budget %zu MB, system free %d%%, status %d", memoryFootprint() / MB, processMemoryBudget() / MB, systemMemoryFreeLevel(), static_cast<int>(status));
++        });
++        dispatch_resume(memoryPressureEventSource().get());
++#else
+         auto memoryStatusFlags = DISPATCH_MEMORYPRESSURE_NORMAL | DISPATCH_MEMORYPRESSURE_WARN | DISPATCH_MEMORYPRESSURE_CRITICAL | DISPATCH_MEMORYPRESSURE_PROC_LIMIT_WARN | DISPATCH_MEMORYPRESSURE_PROC_LIMIT_CRITICAL;
+-        memoryPressureEventSource() = dispatch_source_create(DISPATCH_SOURCE_TYPE_MEMORYPRESSURE, 0, memoryStatusFlags, m_dispatchQueue.get());
++        auto *memoryPressureSourceType = DISPATCH_SOURCE_TYPE_MEMORYPRESSURE;
++        memoryPressureEventSource() = dispatch_source_create(memoryPressureSourceType, 0, memoryStatusFlags, m_dispatchQueue.get());
+ 
+         dispatch_source_set_event_handler(memoryPressureEventSource().get(), ^{
+             auto status = dispatch_source_get_data(memoryPressureEventSource().get());
+             switch (status) {
+-            // VM pressure events.
+             case DISPATCH_MEMORYPRESSURE_NORMAL:
+                 setMemoryPressureStatus(SystemMemoryPressureStatus::Normal);
+                 break;
+@@ -110,7 +187,6 @@
+                 setMemoryPressureStatus(SystemMemoryPressureStatus::Critical);
+                 respondToMemoryPressure(Critical::Yes);
+                 break;
+-            // Process memory limit events.
+             case DISPATCH_MEMORYPRESSURE_PROC_LIMIT_WARN:
+                 didExceedProcessMemoryLimit(ProcessMemoryLimit::Warning);
+                 respondToMemoryPressure(Critical::No);
+@@ -124,6 +200,7 @@
+                 RELEASE_LOG(MemoryPressure, "Received memory pressure event: %lu, system vm pressure critical: %d", status, isUnderMemoryPressure());
+         });
+         dispatch_resume(memoryPressureEventSource().get());
++#endif
+     });
+ 
+     // Allow simulation of memory warning (80% of high watermark) with "notifyutil -p org.WebKit.memoryWarning
+@@ -247,7 +324,11 @@
+     if (err != KERN_SUCCESS)
+         return std::nullopt;
+ 
++#if defined(WEBKIT_IOS6)
++    return MemoryUsage {static_cast<size_t>(vmInfo.internal), memoryFootprint()};
++#else
+     return MemoryUsage {static_cast<size_t>(vmInfo.internal), static_cast<size_t>(vmInfo.phys_footprint)};
++#endif
+ }
+ 
+ } // namespace WTF
+diff --git a/Source/WTF/wtf/cocoa/TollFreeBridging.h b/Source/WTF/wtf/cocoa/TollFreeBridging.h
+index ed50593f8549b1d80cc2e114d380814ee0cb7121..559b5a805392b429310d69bd1605b7ba45e55ed2 100644
+--- a/Source/WTF/wtf/cocoa/TollFreeBridging.h
++++ b/Source/WTF/wtf/cocoa/TollFreeBridging.h
+@@ -64,7 +64,9 @@ WTF_DECLARE_TOLL_FREE_BRIDGING_TRAITS(CTFont, NSFont)
+ #else
+ WTF_DECLARE_TOLL_FREE_BRIDGING_TRAITS(CTFont, UIFont)
+ #endif
++#if HAVE(IOSURFACE)
+ WTF_DECLARE_TOLL_FREE_BRIDGING_TRAITS(IOSurface, ::IOSurface)
++#endif
+ 
+ template<> struct CFTollFreeBridgingTraits<CFBooleanRef> { using BridgedType = NSNumber *; };
+ 
+diff --git a/Source/WTF/wtf/cocoa/WorkQueueCocoa.mm b/Source/WTF/wtf/cocoa/WorkQueueCocoa.mm
+index 4e6d8a282e6707053e71b5a5edc699bf50a92a8e..5becc1c2705c9ccf348f13a4436116615b5a3c18 100644
+--- a/Source/WTF/wtf/cocoa/WorkQueueCocoa.mm
++++ b/Source/WTF/wtf/cocoa/WorkQueueCocoa.mm
+@@ -53,9 +53,21 @@
+     delete item;
+ }
+ 
++#if defined(WEBKIT_IOS6)
++static void dispatchLeakedFunction(void* dispatchContext)
++{
++    auto function = adopt(static_cast<Function<void()>::Impl*>(dispatchContext));
++    function();
++}
++#endif
++
+ void WorkQueueBase::dispatch(Function<void()>&& function)
+ {
++#if defined(WEBKIT_IOS6)
++    dispatch_async_f(m_dispatchQueue.get(), function.leak(), dispatchLeakedFunction);
++#else
+     dispatch_async_f(m_dispatchQueue.get(), new DispatchWorkItem { WTF::move(function) }, dispatchWorkItem<DispatchWorkItem>);
++#endif
+ }
+ 
+ void WorkQueueBase::dispatchWithQOS(Function<void()>&& function, QOS qos)
+@@ -69,12 +81,20 @@
+ 
+ void WorkQueueBase::dispatchAfter(Seconds duration, Function<void()>&& function)
+ {
++#if defined(WEBKIT_IOS6)
++    dispatch_after_f(dispatch_time(DISPATCH_TIME_NOW, duration.nanosecondsAs<int64_t>()), m_dispatchQueue.get(), function.leak(), dispatchLeakedFunction);
++#else
+     dispatch_after_f(dispatch_time(DISPATCH_TIME_NOW, duration.nanosecondsAs<int64_t>()), m_dispatchQueue.get(), new DispatchWorkItem { WTF::move(function) }, dispatchWorkItem<DispatchWorkItem>);
++#endif
+ }
+ 
+ void WorkQueueBase::dispatchSync(Function<void()>&& function)
+ {
++#if defined(WEBKIT_IOS6)
++    dispatch_sync_f(m_dispatchQueue.get(), function.leak(), dispatchLeakedFunction);
++#else
+     dispatch_sync_f(m_dispatchQueue.get(), new Function<void()> { WTF::move(function) }, dispatchWorkItem<Function<void()>>);
++#endif
+ }
+ 
+ WorkQueueBase::WorkQueueBase(OSObjectPtr<dispatch_queue_t>&& dispatchQueue)
+diff --git a/Source/WTF/wtf/darwin/DispatchExtras.h b/Source/WTF/wtf/darwin/DispatchExtras.h
+index 07f4e7e2aa299792e658b834dc8a8217d105dc5e..589e2c44a4676c195f08c727860df45fe116b7ba 100644
+--- a/Source/WTF/wtf/darwin/DispatchExtras.h
++++ b/Source/WTF/wtf/darwin/DispatchExtras.h
+@@ -41,12 +41,20 @@ inline dispatch_queue_main_t mainDispatchQueueSingleton()
+ 
+ inline dispatch_queue_attr_t serialQueueWithAutoreleasePoolAttrSingleton()
+ {
++#if defined(WEBKIT_IOS6)
++    return DISPATCH_QUEUE_SERIAL;
++#else
+     return DISPATCH_QUEUE_SERIAL_WITH_AUTORELEASE_POOL; // NOLINT
++#endif
+ }
+ 
+ inline dispatch_queue_attr_t concurrentQueueWithAutoreleasePoolAttrSingleton()
+ {
++#if defined(WEBKIT_IOS6)
++    return DISPATCH_QUEUE_CONCURRENT;
++#else
+     return DISPATCH_QUEUE_CONCURRENT_WITH_AUTORELEASE_POOL; // NOLINT
++#endif
+ }
+ 
+ } // namespace WTF
+diff --git a/Source/WTF/wtf/darwin/DispatchOSObject.h b/Source/WTF/wtf/darwin/DispatchOSObject.h
+index c41971dafe435b3d7a71234bd28af5078659a708..6f3d84d7ad7319f692d035a607ac73bb7ec4d3d1 100644
+--- a/Source/WTF/wtf/darwin/DispatchOSObject.h
++++ b/Source/WTF/wtf/darwin/DispatchOSObject.h
+@@ -29,6 +29,16 @@
+ #include <wtf/OSObjectPtr.h>
+ #include <wtf/darwin/TypeCastsOSObject.h>
+ 
++#if defined(WEBKIT_IOS6)
++#define WTF_OS_OBJECT_DISPATCH_TYPES(M) \
++    M(dispatch_data) \
++    M(dispatch_group) \
++    M(dispatch_io) \
++    M(dispatch_object) \
++    M(dispatch_queue) \
++    M(dispatch_semaphore) \
++    M(dispatch_source)
++#else
+ #define WTF_OS_OBJECT_DISPATCH_TYPES(M) \
+     M(dispatch_data) \
+     M(dispatch_group) \
+@@ -38,6 +48,7 @@
+     M(dispatch_queue_global) \
+     M(dispatch_semaphore) \
+     M(dispatch_source)
++#endif
+ 
+ // Forward declarations for dispatch base struct types.
+ WTF_EXTERN_C_BEGIN
+diff --git a/Source/WTF/wtf/darwin/NetworkOSObject.h b/Source/WTF/wtf/darwin/NetworkOSObject.h
+index 7fce6fa97585f0385a4573940d2c7c472bd07b0a..478d1d9e75e6b49a32344398bdb6767882dee75c 100644
+--- a/Source/WTF/wtf/darwin/NetworkOSObject.h
++++ b/Source/WTF/wtf/darwin/NetworkOSObject.h
+@@ -29,11 +29,17 @@
+ #include <wtf/OSObjectPtr.h>
+ #include <wtf/darwin/TypeCastsOSObject.h>
+ 
++#if defined(WEBKIT_IOS6)
++#define WTF_OS_OBJECT_NETWORK_TYPES(M) \
++    M(nw_endpoint) \
++    M(nw_path)
++#else
+ #define WTF_OS_OBJECT_NETWORK_TYPES(M) \
+     M(nw_endpoint) \
+     M(nw_path) \
+     M(nw_resolution_report) \
+     M(nw_resolver_config)
++#endif
+ 
+ // Forward declarations for network base struct types.
+ WTF_EXTERN_C_BEGIN
+diff --git a/Source/WTF/wtf/darwin/OSLogPrintStream.mm b/Source/WTF/wtf/darwin/OSLogPrintStream.mm
+index 7cbf02b7aee83f572991695aea5437a78e774fb4..46a84b465718b75d2e5dd319e46acbb5782994e2 100644
+--- a/Source/WTF/wtf/darwin/OSLogPrintStream.mm
++++ b/Source/WTF/wtf/darwin/OSLogPrintStream.mm
+@@ -50,8 +50,9 @@
+ 
+ std::unique_ptr<OSLogPrintStream> OSLogPrintStream::open(const char* subsystem, const char* category, os_log_type_t logType)
+ {
+-    os_log_t log = os_log_create(subsystem, category);
+-    return makeUnique<OSLogPrintStream>(log, logType);
++    UNUSED_PARAM(subsystem);
++    UNUSED_PARAM(category);
++    return makeUnique<OSLogPrintStream>(nullptr, logType);
+ }
+ 
+ void OSLogPrintStream::vprintf(const char* format, va_list argList)
+@@ -79,7 +80,7 @@
+         if (buffer[offset] == '\n') {
+             // Set the new line to a null character so os_log stops copying there.
+             buffer[offset] = '\0';
+-            os_log_with_type(m_log, m_logType, "%{public}s", buffer.data());
++            fprintf(stderr, "%s\n", buffer.data());
+             skip(buffer, offset + 1);
+             newOffset -= offset + 1;
+             offset = 0;
+diff --git a/Source/WTF/wtf/posix/OSAllocatorPOSIX.cpp b/Source/WTF/wtf/posix/OSAllocatorPOSIX.cpp
+index ca44751e7d8ca4c7b6263808f088a2041b5fbd91..b190e0fa479523f37f0529cc0b781df635950764 100644
+--- a/Source/WTF/wtf/posix/OSAllocatorPOSIX.cpp
++++ b/Source/WTF/wtf/posix/OSAllocatorPOSIX.cpp
+@@ -40,9 +40,12 @@
+ #if ENABLE(JIT_CAGE)
+ #include <WebKitAdditions/JITCageAdditions.h>
+ #else // ENABLE(JIT_CAGE)
+-#if OS(DARWIN)
++#if OS(DARWIN) && !defined(WEBKIT_IOS6)
+ #define MAP_EXECUTABLE_FOR_JIT MAP_JIT
+ #define MAP_EXECUTABLE_FOR_JIT_WITH_JIT_CAGE MAP_JIT
++#elif OS(DARWIN)
++#define MAP_EXECUTABLE_FOR_JIT 0
++#define MAP_EXECUTABLE_FOR_JIT_WITH_JIT_CAGE 0
+ #else // OS(DARWIN)
+ #define MAP_EXECUTABLE_FOR_JIT 0
+ #define MAP_EXECUTABLE_FOR_JIT_WITH_JIT_CAGE 0
+diff --git a/Source/WTF/wtf/text/ASCIIFastPath.h b/Source/WTF/wtf/text/ASCIIFastPath.h
+index 1f1d7b222049615adadd0edfa2f576c74868fc11..d1e22e2a4535fbee77a839344d8f6a31b5f09c1a 100644
+--- a/Source/WTF/wtf/text/ASCIIFastPath.h
++++ b/Source/WTF/wtf/text/ASCIIFastPath.h
+@@ -27,6 +27,7 @@
+ #include <wtf/BitSet.h>
+ #include <wtf/SIMDHelpers.h>
+ #include <wtf/StdLibExtras.h>
++#include <wtf/UnalignedAccess.h>
+ #include <wtf/text/ASCIILiteral.h>
+ #include <wtf/text/Latin1Character.h>
+ 
+@@ -123,6 +124,37 @@ template<typename CharacterType>
+ SUPPRESS_NODELETE inline bool NODELETE charactersAreAllASCII(std::span<const CharacterType> span)
+ {
+ WTF_ALLOW_UNSAFE_BUFFER_USAGE_BEGIN
++#if defined(WEBKIT_IOS6)
++    constexpr size_t stride = sizeof(uint32_t) / sizeof(CharacterType);
++    static_assert(sizeof(CharacterType) == 1 || sizeof(CharacterType) == 2);
++    constexpr uint32_t nonASCIIMask = sizeof(CharacterType) == 1 ? 0x80808080U : 0xFF80FF80U;
++
++    const auto* characters = span.data();
++    size_t length = span.size();
++    const auto* end = characters + length;
++    const auto* wordEnd = characters + (length & ~(stride - 1));
++
++    while (static_cast<size_t>(wordEnd - characters) >= 4 * stride) {
++        uint32_t accumulated = unalignedLoad<uint32_t>(characters);
++        accumulated |= unalignedLoad<uint32_t>(characters + stride);
++        accumulated |= unalignedLoad<uint32_t>(characters + 2 * stride);
++        accumulated |= unalignedLoad<uint32_t>(characters + 3 * stride);
++        if (accumulated & nonASCIIMask)
++            return false;
++        characters += 4 * stride;
++    }
++    while (characters < wordEnd) {
++        if (unalignedLoad<uint32_t>(characters) & nonASCIIMask)
++            return false;
++        characters += stride;
++    }
++    while (characters < end) {
++        if (!isASCII(*characters++))
++            return false;
++    }
++WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
++    return true;
++#else
+     using UnsignedType = SameSizeUnsignedInteger<CharacterType>;
+     constexpr size_t simdStride = SIMD::stride<UnsignedType>;
+     constexpr size_t chunkSize = 8 * simdStride;
+@@ -135,7 +167,6 @@ WTF_ALLOW_UNSAFE_BUFFER_USAGE_BEGIN
+         constexpr auto nonASCIIMask = static_cast<UnsignedType>(~UnsignedType { 0x7F });
+         auto mask = SIMD::splat<UnsignedType>(nonASCIIMask);
+ 
+-        // Process chunkSize elements per chunk (8 x SIMD vectors), check once per chunk.
+         const auto* chunkEnd = characters + (length & ~(chunkSize - 1));
+         while (characters < chunkEnd) {
+             auto acc = SIMD::load(std::bit_cast<const UnsignedType*>(characters));
+@@ -150,7 +181,6 @@ WTF_ALLOW_UNSAFE_BUFFER_USAGE_BEGIN
+                 return false;
+             characters += chunkSize;
+         }
+-        // Handle remaining SIMD vectors.
+         const auto* simdEnd = characters + (static_cast<size_t>(end - characters) & ~(simdStride - 1));
+         auto acc = SIMD::splat<UnsignedType>(0);
+         while (characters < simdEnd) {
+@@ -161,13 +191,13 @@ WTF_ALLOW_UNSAFE_BUFFER_USAGE_BEGIN
+             return false;
+     }
+ 
+-    // Scalar tail with early exit.
+     while (characters < end) {
+         if (!isASCII(*characters++))
+             return false;
+     }
+ WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
+     return true;
++#endif
+ }
+ 
+ ALWAYS_INLINE constexpr bool charactersAreAllLatin1(std::span<const Latin1Character>)
+@@ -184,6 +214,28 @@ inline constexpr bool charactersAreAllLatin1(std::span<const char16_t> span)
+         }
+     } else {
+         WTF_ALLOW_UNSAFE_BUFFER_USAGE_BEGIN
++#if defined(WEBKIT_IOS6)
++        const auto* characters = span.data();
++        const auto* end = characters + span.size();
++        const auto* wordEnd = characters + (span.size() & ~static_cast<size_t>(1));
++
++        while (static_cast<size_t>(wordEnd - characters) >= 8) {
++            uint32_t accumulated = unalignedLoad<uint32_t>(characters);
++            accumulated |= unalignedLoad<uint32_t>(characters + 2);
++            accumulated |= unalignedLoad<uint32_t>(characters + 4);
++            accumulated |= unalignedLoad<uint32_t>(characters + 6);
++            if (accumulated & 0xFF00FF00U)
++                return false;
++            characters += 8;
++        }
++        while (characters < wordEnd) {
++            if (unalignedLoad<uint32_t>(characters) & 0xFF00FF00U)
++                return false;
++            characters += 2;
++        }
++        if (characters < end && !isLatin1(*characters))
++            return false;
++#else
+         constexpr size_t simdStride = SIMD::stride<uint16_t>;
+ 
+         const auto* characters = span.data();
+@@ -202,6 +254,7 @@ inline constexpr bool charactersAreAllLatin1(std::span<const char16_t> span)
+             if (!isLatin1(*characters++))
+                 return false;
+         }
++#endif
+         WTF_ALLOW_UNSAFE_BUFFER_USAGE_END
+     }
+     return true;
+diff --git a/Source/WTF/wtf/text/IntegerToStringConversion.h b/Source/WTF/wtf/text/IntegerToStringConversion.h
+index 21ac1f9c0a2736e90a596e521b336a0813de8b26..d4b3136d2613028e0821d70517b13c6dab14ac3e 100644
+--- a/Source/WTF/wtf/text/IntegerToStringConversion.h
++++ b/Source/WTF/wtf/text/IntegerToStringConversion.h
+@@ -36,15 +36,94 @@ enum PositiveOrNegativeNumber { PositiveNumber, NegativeNumber };
+ 
+ template<typename> struct IntegerToStringConversionTrait;
+ 
++inline constexpr uint32_t decimalDigitThresholds32[11] = {
++    0, 9, 99, 999, 9999, 99999, 999999, 9999999, 99999999, 999999999, UINT32_MAX
++};
++
++inline constexpr uint64_t decimalDigitThresholds64[20] = {
++    0, 9, 99, 999, 9999, 99999, 999999, 9999999, 99999999, 999999999,
++    9999999999ULL, 99999999999ULL, 999999999999ULL, 9999999999999ULL, 99999999999999ULL,
++    999999999999999ULL, 9999999999999999ULL, 99999999999999999ULL, 999999999999999999ULL,
++    9999999999999999999ULL
++};
++
++template<typename UnsignedIntegerType>
++constexpr unsigned decimalDigitCount(UnsignedIntegerType number)
++{
++    if constexpr (sizeof(UnsignedIntegerType) <= sizeof(uint32_t)) {
++        uint32_t value = static_cast<uint32_t>(number);
++        unsigned significantBits = 32 - clz(static_cast<uint32_t>(value | 1));
++        unsigned estimate = ((significantBits - 1) * 1233) >> 12;
++        return estimate + 1 + (value > decimalDigitThresholds32[estimate + 1]);
++    } else {
++        uint64_t value = static_cast<uint64_t>(number);
++        unsigned significantBits = 64 - clz(static_cast<uint64_t>(value | 1));
++        unsigned estimate = ((significantBits - 1) * 1233) >> 12;
++        return estimate + 1 + (value > decimalDigitThresholds64[estimate + 1]);
++    }
++}
++
++inline constexpr Latin1Character decimalDigitPairs[200] = {
++    '0','0','0','1','0','2','0','3','0','4','0','5','0','6','0','7','0','8','0','9',
++    '1','0','1','1','1','2','1','3','1','4','1','5','1','6','1','7','1','8','1','9',
++    '2','0','2','1','2','2','2','3','2','4','2','5','2','6','2','7','2','8','2','9',
++    '3','0','3','1','3','2','3','3','3','4','3','5','3','6','3','7','3','8','3','9',
++    '4','0','4','1','4','2','4','3','4','4','4','5','4','6','4','7','4','8','4','9',
++    '5','0','5','1','5','2','5','3','5','4','5','5','5','6','5','7','5','8','5','9',
++    '6','0','6','1','6','2','6','3','6','4','6','5','6','6','6','7','6','8','6','9',
++    '7','0','7','1','7','2','7','3','7','4','7','5','7','6','7','7','7','8','7','9',
++    '8','0','8','1','8','2','8','3','8','4','8','5','8','6','8','7','8','8','8','9',
++    '9','0','9','1','9','2','9','3','9','4','9','5','9','6','9','7','9','8','9','9'
++};
++
++template<typename CharacterType>
++constexpr size_t writeDecimalDigitsBackward32(uint32_t number, std::span<CharacterType> destination, size_t index)
++{
++    while (number >= 100) {
++        unsigned pair = (number % 100) * 2;
++        number /= 100;
++        destination[--index] = static_cast<CharacterType>(decimalDigitPairs[pair + 1]);
++        destination[--index] = static_cast<CharacterType>(decimalDigitPairs[pair]);
++    }
++    if (number >= 10) {
++        unsigned pair = number * 2;
++        destination[--index] = static_cast<CharacterType>(decimalDigitPairs[pair + 1]);
++        destination[--index] = static_cast<CharacterType>(decimalDigitPairs[pair]);
++        return index;
++    }
++    destination[--index] = static_cast<CharacterType>('0' + number);
++    return index;
++}
++
++template<typename CharacterType>
++constexpr size_t writeEightDecimalDigitsBackward(uint32_t number, std::span<CharacterType> destination, size_t index)
++{
++    for (unsigned i = 0; i < 4; ++i) {
++        unsigned pair = (number % 100) * 2;
++        number /= 100;
++        destination[--index] = static_cast<CharacterType>(decimalDigitPairs[pair + 1]);
++        destination[--index] = static_cast<CharacterType>(decimalDigitPairs[pair]);
++    }
++    return index;
++}
++
++template<typename CharacterType, typename UnsignedIntegerType>
++constexpr size_t writeDecimalDigitsBackward(UnsignedIntegerType number, std::span<CharacterType> destination, size_t index)
++{
++    if constexpr (sizeof(UnsignedIntegerType) > sizeof(uint32_t)) {
++        while (number > static_cast<UnsignedIntegerType>(UINT32_MAX)) {
++            index = writeEightDecimalDigitsBackward(static_cast<uint32_t>(number % 100000000ULL), destination, index);
++            number /= 100000000ULL;
++        }
++    }
++    return writeDecimalDigitsBackward32(static_cast<uint32_t>(number), destination, index);
++}
++
+ template<typename T, typename UnsignedIntegerType, PositiveOrNegativeNumber NumberType, typename AdditionalArgumentType>
+ static inline typename IntegerToStringConversionTrait<T>::ReturnType numberToStringImpl(UnsignedIntegerType number, AdditionalArgumentType additionalArgument)
+ {
+     std::array<Latin1Character, sizeof(UnsignedIntegerType) * 3 + 1> buffer;
+-    auto index = buffer.size();
+-    do {
+-        buffer[--index] = static_cast<Latin1Character>((number % 10) + '0');
+-        number /= 10;
+-    } while (number);
++    auto index = writeDecimalDigitsBackward(number, std::span<Latin1Character> { buffer }, buffer.size());
+ 
+     if (NumberType == NegativeNumber)
+         buffer[--index] = '-';
+@@ -70,18 +149,14 @@ template<typename CharacterType, typename UnsignedIntegerType, PositiveOrNegativ
+ static inline void writeIntegerToBufferImpl(UnsignedIntegerType number, std::span<CharacterType> destination)
+ {
+     static_assert(!std::is_same_v<bool, std::remove_cv_t<UnsignedIntegerType>>, "'bool' not supported");
+-    std::array<Latin1Character, sizeof(UnsignedIntegerType) * 3 + 1> buffer;
+-    auto index = buffer.size();
+-    do {
+-        buffer[--index] = static_cast<Latin1Character>((number % 10) + '0');
+-        number /= 10;
+-    } while (number);
++    size_t index = decimalDigitCount(number);
++    if (NumberType == NegativeNumber)
++        ++index;
++
++    index = writeDecimalDigitsBackward(number, destination, index);
+ 
+     if (NumberType == NegativeNumber)
+-        buffer[--index] = '-';
+-    
+-    for (size_t i = 0; i < buffer.size() - index; ++i)
+-        destination[i] = static_cast<CharacterType>(buffer[index + i]);
++        destination[--index] = '-';
+ }
+ 
+ template<typename CharacterType, typename IntegerType>
+@@ -101,12 +176,7 @@ inline void writeIntegerToBuffer(IntegerType integer, std::span<CharacterType> d
+ template<typename UnsignedIntegerType, PositiveOrNegativeNumber NumberType>
+ constexpr unsigned lengthOfIntegerAsStringImpl(UnsignedIntegerType number)
+ {
+-    unsigned length = 0;
+-
+-    do {
+-        ++length;
+-        number /= 10;
+-    } while (number);
++    unsigned length = decimalDigitCount(number);
+ 
+     if (NumberType == NegativeNumber)
+         ++length;
+diff --git a/Source/WTF/wtf/text/MakeString.h b/Source/WTF/wtf/text/MakeString.h
+index 7042de2b4294dde3d08288786d2b69dea1113e9a..238b9b8bba9d3bb224b8ffe615780f9b93a966bb 100644
+--- a/Source/WTF/wtf/text/MakeString.h
++++ b/Source/WTF/wtf/text/MakeString.h
+@@ -67,6 +67,29 @@ RefPtr<StringImpl> tryMakeStringImplFromAdaptersInternal(unsigned length, bool a
+     return result;
+ }
+ 
++#if defined(WEBKIT_IOS6)
++template<typename Adapter> constexpr bool adapterCanShareStringImpl = requires(const Adapter& adapter) {
++    { adapter.existingStringImpl() } -> std::same_as<StringImpl*>;
++};
++
++template<typename... StringTypeAdapters>
++String tryShareSingleNonEmptyAdapter(unsigned length, bool areAllAdapters8Bit, const StringTypeAdapters&... adapters)
++{
++    StringImpl* shared = nullptr;
++    ([&] {
++        if constexpr (adapterCanShareStringImpl<StringTypeAdapters>) {
++            if (!shared && adapters.length() == length) {
++                if (auto* impl = adapters.existingStringImpl()) {
++                    if (impl->is8Bit() == areAllAdapters8Bit)
++                        shared = impl;
++                }
++            }
++        }
++    }(), ...);
++    return shared ? String { shared } : String { };
++}
++#endif
++
+ template<typename... StringTypeAdapters>
+ String tryMakeStringFromAdapters(StringTypeAdapters&&... adapters)
+ {
+@@ -87,6 +110,13 @@ String tryMakeStringFromAdapters(StringTypeAdapters&&... adapters)
+             return String();
+ 
+         bool areAllAdapters8Bit = are8Bit(adapters...);
++#if defined(WEBKIT_IOS6)
++        unsigned totalLength = sum;
++        if (!totalLength)
++            return emptyString();
++        if (auto shared = tryShareSingleNonEmptyAdapter(totalLength, areAllAdapters8Bit, adapters...); !shared.isNull())
++            return shared;
++#endif
+         return tryMakeStringImplFromAdaptersInternal(sum, areAllAdapters8Bit, adapters...);
+     }
+ }
+diff --git a/Source/WTF/wtf/text/RapidHash.h b/Source/WTF/wtf/text/RapidHash.h
+index 4ad93ae5618b9c2f6dba579c9fb6eb23343a2424..95ce225983faf33e8fb895209df1989c87918689 100644
+--- a/Source/WTF/wtf/text/RapidHash.h
++++ b/Source/WTF/wtf/text/RapidHash.h
+@@ -68,12 +68,142 @@ public:
+     template<typename T, typename Converter = DefaultConverter>
+     ALWAYS_INLINE static constexpr unsigned computeHashAndMaskTop8Bits(std::span<const T> data)
+     {
++#if defined(WEBKIT_IOS6)
++        return StringHasher::avoidZero(narrowHash<T, Converter>(data) & StringHasher::maskHash);
++#else
+         return StringHasher::avoidZero(static_cast<unsigned>(rapidhash<T, Converter>(data)) & StringHasher::maskHash);
++#endif
+     }
+ 
+ private:
+     friend class StringHasher;
+ 
++#if defined(WEBKIT_IOS6)
++    static constexpr uint32_t narrowSecretA = 0x53c5ca59U;
++    static constexpr uint32_t narrowSecretB = 0x74743c1bU;
++
++    ALWAYS_INLINE static constexpr void narrowMix(uint32_t& a, uint32_t& b)
++    {
++        uint64_t product = static_cast<uint64_t>(a ^ narrowSecretA) * static_cast<uint64_t>(b ^ narrowSecretB);
++        a = static_cast<uint32_t>(product);
++        b = static_cast<uint32_t>(product >> 32);
++    }
++
++    ALWAYS_INLINE static constexpr uint32_t narrowHashImpl(uint32_t length, NOESCAPE const Invocable<uint32_t(uint32_t)> auto& read32, NOESCAPE const Invocable<uint32_t(uint32_t, uint32_t)> auto& readSmall)
++    {
++        uint32_t seed = 0;
++        uint32_t see1 = length;
++        narrowMix(seed, see1);
++
++        uint32_t remaining = length;
++        uint32_t offset = 0;
++        while (remaining > 8) {
++            seed ^= read32(offset);
++            see1 ^= read32(offset + 4);
++            narrowMix(seed, see1);
++            offset += 8;
++            remaining -= 8;
++        }
++
++        if (remaining >= 4) [[likely]] {
++            seed ^= read32(offset);
++            see1 ^= read32(offset + remaining - 4);
++        } else if (remaining)
++            seed ^= readSmall(offset, remaining);
++
++        narrowMix(seed, see1);
++        seed ^= see1;
++        narrowMix(seed, see1);
++        return seed ^ see1;
++    }
++
++    template<typename T, typename Converter>
++    ALWAYS_INLINE static constexpr uint32_t narrowHashOneBytePerChar(std::span<const T> data, [[maybe_unused]] uint32_t& seenBits)
++    {
++        const T* p = data.data();
++
++        auto foldByte = [&](uint32_t index) ALWAYS_INLINE_LAMBDA -> uint32_t {
++            if constexpr (std::is_same_v<Converter, DefaultConverter>) {
++                if constexpr (sizeof(T) == 2) {
++                    uint32_t character = static_cast<uint32_t>(static_cast<uint16_t>(data[index]));
++                    seenBits |= character;
++                    return character & 0xFF;
++                } else
++                    return static_cast<uint32_t>(static_cast<uint8_t>(data[index]));
++            } else {
++                uint32_t converted = static_cast<uint32_t>(static_cast<uint16_t>(Converter::convert(data[index])));
++                return (converted & 0xFF) | (converted >> 8);
++            }
++        };
++
++        auto read32 = [&](uint32_t offset) ALWAYS_INLINE_LAMBDA -> uint32_t {
++#if CPU(LITTLE_ENDIAN)
++            if (!std::is_constant_evaluated()) {
++                if constexpr (std::is_same_v<Converter, DefaultConverter>) {
++                    if constexpr (sizeof(T) == 1)
++                        return unalignedLoad<uint32_t>(p + offset);
++                    else if constexpr (sizeof(T) == 2) {
++                        uint32_t low = unalignedLoad<uint32_t>(p + offset);
++                        uint32_t high = unalignedLoad<uint32_t>(p + offset + 2);
++                        seenBits |= low | high;
++                        return ((low | (low >> 8)) & 0xFFFF) | (((high | (high >> 8)) & 0xFFFF) << 16);
++                    }
++                }
++            }
++#endif
++            uint32_t result = 0;
++            for (uint32_t i = 0; i < 4; ++i)
++                result |= foldByte(offset + i) << (i * 8);
++            return result;
++        };
++
++        auto readSmall = [&](uint32_t offset, uint32_t count) ALWAYS_INLINE_LAMBDA -> uint32_t {
++            return (foldByte(offset) << 16) | (foldByte(offset + (count >> 1)) << 8) | foldByte(offset + count - 1);
++        };
++
++        return narrowHashImpl(static_cast<uint32_t>(data.size()), read32, readSmall);
++    }
++
++    ALWAYS_INLINE static constexpr uint32_t narrowHashRawBytes(std::span<const char16_t> data)
++    {
++        const char16_t* p = data.data();
++
++        auto readByte = [&](uint32_t byteIndex) ALWAYS_INLINE_LAMBDA -> uint32_t {
++            uint32_t character = static_cast<uint32_t>(static_cast<uint16_t>(data[byteIndex >> 1]));
++            return (byteIndex & 1) ? (character >> 8) : (character & 0xFF);
++        };
++
++        auto read32 = [&](uint32_t byteOffset) ALWAYS_INLINE_LAMBDA -> uint32_t {
++#if CPU(LITTLE_ENDIAN)
++            if (!std::is_constant_evaluated())
++                return unalignedLoad<uint32_t>(reinterpret_cast<const uint8_t*>(p) + byteOffset);
++#endif
++            uint32_t result = 0;
++            for (uint32_t i = 0; i < 4; ++i)
++                result |= readByte(byteOffset + i) << (i * 8);
++            return result;
++        };
++
++        auto readSmall = [&](uint32_t byteOffset, uint32_t count) ALWAYS_INLINE_LAMBDA -> uint32_t {
++            return (readByte(byteOffset) << 16) | (readByte(byteOffset + (count >> 1)) << 8) | readByte(byteOffset + count - 1);
++        };
++
++        return narrowHashImpl(static_cast<uint32_t>(2 * data.size()), read32, readSmall);
++    }
++
++    template<typename T, typename Converter>
++    ALWAYS_INLINE static constexpr uint32_t narrowHash(std::span<const T> data)
++    {
++        uint32_t seenBits = 0;
++        uint32_t result = narrowHashOneBytePerChar<T, Converter>(data, seenBits);
++        if constexpr (sizeof(T) == 2 && std::is_same_v<Converter, DefaultConverter>) {
++            if (seenBits & 0xFF00FF00U) [[unlikely]]
++                return narrowHashRawBytes(data);
++        }
++        return result;
++    }
++#endif
++
+     ALWAYS_INLINE static constexpr std::pair<uint64_t, uint64_t> rapidMul128(uint64_t A, uint64_t B)
+     {
+         UInt128 r = static_cast<UInt128>(A) * B;
+diff --git a/Source/WTF/wtf/text/StringBuilder.cpp b/Source/WTF/wtf/text/StringBuilder.cpp
+index e43c6a7b75f514b99dffc9099bc4d004c1fbfc75..36ca10dcf9071525e05a9fdbb8bb94f285b76721 100644
+--- a/Source/WTF/wtf/text/StringBuilder.cpp
++++ b/Source/WTF/wtf/text/StringBuilder.cpp
+@@ -158,6 +158,13 @@ void StringBuilder::append(std::span<const char16_t> characters)
+         return;
+     }
+     RELEASE_ASSERT(characters.size() < std::numeric_limits<uint32_t>::max());
++#if defined(WEBKIT_IOS6)
++    if (is8Bit() && charactersAreAllLatin1(characters)) {
++        if (auto destination = extendBufferForAppending<Latin1Character>(saturatingSum<uint32_t>(m_length, static_cast<uint32_t>(characters.size()))); destination.data())
++            StringImpl::copyCharacters(destination, characters);
++        return;
++    }
++#endif
+     if (auto destination = extendBufferForAppendingWithUpconvert(saturatingSum<uint32_t>(m_length, static_cast<uint32_t>(characters.size()))); destination.data())
+         StringImpl::copyCharacters(destination, characters);
+ }
+diff --git a/Source/WTF/wtf/text/StringBuilder.h b/Source/WTF/wtf/text/StringBuilder.h
+index 358208b8e060212fd2ac9b826cb8a400efdc42bc..d993d7e4a12d3086ca09669d446144178b590708 100644
+--- a/Source/WTF/wtf/text/StringBuilder.h
++++ b/Source/WTF/wtf/text/StringBuilder.h
+@@ -162,23 +162,24 @@ inline StringBuilder::operator StringView() const LIFETIME_BOUND
+ 
+ inline void StringBuilder::append(char16_t character)
+ {
+-    if (m_buffer && m_length < m_buffer->length() && m_string.isNull()) {
+-        if (!m_buffer->is8Bit()) {
++    if (m_buffer && m_length < m_buffer->length() && m_string.isNull()) [[likely]] {
++        if (m_buffer->is8Bit()) [[likely]] {
++            if (isLatin1(character)) [[likely]] {
++                spanConstCast<Latin1Character>(m_buffer->span8())[m_length++] = static_cast<Latin1Character>(character);
++                return;
++            }
++        } else {
+             spanConstCast<char16_t>(m_buffer->span16())[m_length++] = character;
+             return;
+         }
+-        if (isLatin1(character)) {
+-            spanConstCast<Latin1Character>(m_buffer->span8())[m_length++] = static_cast<Latin1Character>(character);
+-            return;
+-        }
+     }
+     append(WTF::span(character));
+ }
+ 
+ inline void StringBuilder::append(Latin1Character character)
+ {
+-    if (m_buffer && m_length < m_buffer->length() && m_string.isNull()) {
+-        if (m_buffer->is8Bit())
++    if (m_buffer && m_length < m_buffer->length() && m_string.isNull()) [[likely]] {
++        if (m_buffer->is8Bit()) [[likely]]
+             spanConstCast<Latin1Character>(m_buffer->span8())[m_length++] = character;
+         else
+             spanConstCast<char16_t>(m_buffer->span16())[m_length++] = character;
+diff --git a/Source/WTF/wtf/text/StringCommon.h b/Source/WTF/wtf/text/StringCommon.h
+index 8f5a04d19c3a15b02201ba4036af0aa01337dfe8..9eb58aa8b9cfcd738cc394033ef78b030ea76a83 100644
+--- a/Source/WTF/wtf/text/StringCommon.h
++++ b/Source/WTF/wtf/text/StringCommon.h
+@@ -257,6 +257,68 @@ SUPPRESS_NODELETE ALWAYS_INLINE bool NODELETE equal(const char16_t* a, std::span
+ #endif
+     }
+ }
++#elif defined(WEBKIT_IOS6) && !ASAN_ENABLED
++template<OneByteCharacterType CharacterType>
++SUPPRESS_NODELETE ALWAYS_INLINE bool NODELETE equal(const CharacterType* a, std::span<const CharacterType> b)
++{
++    ASSERT(b.size() <= std::numeric_limits<unsigned>::max());
++    unsigned length = b.size();
++
++    if (!length)
++        return true;
++    if (length == 1)
++        return *a == b.front();
++
++    switch (sizeof(unsigned) * CHAR_BIT - clz(length - 1)) {
++    case 0:
++        RELEASE_ASSERT_NOT_REACHED();
++    case 1:
++        return unalignedLoad<uint16_t>(a) == unalignedLoad<uint16_t>(b.data());
++    case 2:
++        return unalignedLoad<uint16_t>(a) == unalignedLoad<uint16_t>(b.data())
++            && unalignedLoad<uint16_t>(a + length - 2) == unalignedLoad<uint16_t>(b.data() + length - 2);
++    case 3:
++        return unalignedLoad<uint32_t>(a) == unalignedLoad<uint32_t>(b.data())
++            && unalignedLoad<uint32_t>(a + length - 4) == unalignedLoad<uint32_t>(b.data() + length - 4);
++    default:
++        if (unalignedLoad<uint32_t>(a) != unalignedLoad<uint32_t>(b.data()))
++            return false;
++        for (unsigned i = length % 4; i < length; i += 4) {
++            if (unalignedLoad<uint32_t>(a + i) != unalignedLoad<uint32_t>(b.data() + i))
++                return false;
++        }
++        return true;
++    }
++}
++
++SUPPRESS_NODELETE ALWAYS_INLINE bool NODELETE equal(const char16_t* a, std::span<const char16_t> b)
++{
++    ASSERT(b.size() <= std::numeric_limits<unsigned>::max());
++    unsigned length = b.size();
++
++    if (!length)
++        return true;
++    if (length == 1)
++        return *a == b.front();
++
++    switch (sizeof(unsigned) * CHAR_BIT - clz(length - 1)) {
++    case 0:
++        RELEASE_ASSERT_NOT_REACHED();
++    case 1:
++        return unalignedLoad<uint32_t>(a) == unalignedLoad<uint32_t>(b.data());
++    case 2:
++        return unalignedLoad<uint32_t>(a) == unalignedLoad<uint32_t>(b.data())
++            && unalignedLoad<uint32_t>(a + length - 2) == unalignedLoad<uint32_t>(b.data() + length - 2);
++    default:
++        if (unalignedLoad<uint32_t>(a) != unalignedLoad<uint32_t>(b.data()))
++            return false;
++        for (unsigned i = length % 2; i < length; i += 2) {
++            if (unalignedLoad<uint32_t>(a + i) != unalignedLoad<uint32_t>(b.data() + i))
++                return false;
++        }
++        return true;
++    }
++}
+ #elif CPU(X86) && !ASAN_ENABLED
+ template<OneByteCharacterType CharacterType>
+ ALWAYS_INLINE bool NODELETE equal(const CharacterType* a, std::span<const CharacterType> b)
+@@ -362,6 +424,27 @@ SUPPRESS_NODELETE ALWAYS_INLINE bool NODELETE equal(const Latin1Character* a, st
+     if (length == 1)
+         return *a == b.front();
+     return true;
++#elif defined(WEBKIT_IOS6) && !ASAN_ENABLED
++    ASSERT(b.size() <= std::numeric_limits<unsigned>::max());
++    unsigned length = b.size();
++
++    auto expand2 = [](const Latin1Character* p) ALWAYS_INLINE_LAMBDA -> uint32_t {
++        uint32_t v32 = unalignedLoad<uint16_t>(p);
++        return (v32 | (v32 << 8)) & 0x00FF00FFU;
++    };
++
++    if (length >= 2) {
++        if (expand2(a) != unalignedLoad<uint32_t>(b.data()))
++            return false;
++        for (unsigned i = length % 2; i < length; i += 2) {
++            if (expand2(a + i) != unalignedLoad<uint32_t>(b.data() + i))
++                return false;
++        }
++        return true;
++    }
++    if (length == 1)
++        return *a == b.front();
++    return true;
+ #else
+     for (size_t i = 0; i < b.size(); ++i) {
+         if (a[i] != b[i])
+@@ -463,6 +546,28 @@ bool NODELETE equal(const StringClass& string, std::span<const char8_t> span)
+     return Unicode::equal(string.span16(), span);
+ }
+ 
++#if defined(WEBKIT_IOS6) && CPU(LITTLE_ENDIAN)
++namespace SWAR {
++
++ALWAYS_INLINE constexpr uint32_t asciiLowerBytes(uint32_t word)
++{
++    uint32_t low = word & 0x7F7F7F7FU;
++    uint32_t atLeastA = low + 0x3F3F3F3FU;
++    uint32_t aboveZ = low + 0x25252525U;
++    return word | ((atLeastA & ~aboveZ & ~word & 0x80808080U) >> 2);
++}
++
++ALWAYS_INLINE constexpr uint32_t asciiLowerHalves(uint32_t word)
++{
++    uint32_t low = word & 0x7FFF7FFFU;
++    uint32_t atLeastA = low + 0x7FBF7FBFU;
++    uint32_t aboveZ = low + 0x7FA57FA5U;
++    return word | ((atLeastA & ~aboveZ & ~word & 0x80008000U) >> 10);
++}
++
++}
++#endif
++
+ template<typename CharacterTypeA, typename CharacterTypeB> SUPPRESS_NODELETE inline bool NODELETE equalIgnoringASCIICaseWithLength(std::span<const CharacterTypeA> a, std::span<const CharacterTypeB> b, size_t lengthToCheck)
+ {
+     ASSERT(a.size() >= lengthToCheck);
+@@ -502,6 +607,29 @@ template<typename CharacterTypeA, typename CharacterTypeB> SUPPRESS_NODELETE inl
+             return true;
+         }
+     }
++#elif defined(WEBKIT_IOS6) && CPU(LITTLE_ENDIAN)
++    if constexpr (std::is_same_v<CharacterTypeA, CharacterTypeB> && (sizeof(CharacterTypeA) == 1 || sizeof(CharacterTypeA) == 2)) {
++        constexpr size_t stride = sizeof(uint32_t) / sizeof(CharacterTypeA);
++        size_t i = 0;
++        for (; i + stride <= lengthToCheck; i += stride) {
++            uint32_t aWord = unalignedLoad<uint32_t>(a.data() + i);
++            uint32_t bWord = unalignedLoad<uint32_t>(b.data() + i);
++            if (aWord == bWord)
++                continue;
++            if constexpr (sizeof(CharacterTypeA) == 1) {
++                if (SWAR::asciiLowerBytes(aWord) != SWAR::asciiLowerBytes(bWord))
++                    return false;
++            } else {
++                if (SWAR::asciiLowerHalves(aWord) != SWAR::asciiLowerHalves(bWord))
++                    return false;
++            }
++        }
++        for (; i < lengthToCheck; ++i) {
++            if (toASCIILower(a[i]) != toASCIILower(b[i]))
++                return false;
++        }
++        return true;
++    }
+ #endif
+ 
+     for (size_t i = 0; i < lengthToCheck; ++i) {
+@@ -644,6 +772,23 @@ SUPPRESS_NODELETE ALWAYS_INLINE const uint8_t* NODELETE find8(const uint8_t* poi
+ template<typename UnsignedType>
+ SUPPRESS_NODELETE ALWAYS_INLINE const UnsignedType* NODELETE findImpl(const UnsignedType* pointer, UnsignedType character, size_t length)
+ {
++#if defined(WEBKIT_IOS6) && CPU(LITTLE_ENDIAN)
++    size_t index = 0;
++    if constexpr (sizeof(UnsignedType) == 2) {
++        uint32_t splat = static_cast<uint32_t>(character) * 0x00010001U;
++        for (; index + 2 <= length; index += 2) {
++            uint32_t value = unalignedLoad<uint32_t>(pointer + index) ^ splat;
++            uint32_t mask = (value - 0x00010001U) & ~value & 0x80008000U;
++            if (mask)
++                return pointer + index + ((mask & 0x00008000U) ? 0 : 1);
++        }
++    }
++    for (; index < length; ++index) {
++        if (pointer[index] == character)
++            return pointer + index;
++    }
++    return nullptr;
++#else
+     auto charactersVector = SIMD::splat<UnsignedType>(character);
+     auto vectorMatch = [&](auto value) ALWAYS_INLINE_LAMBDA {
+         auto mask = SIMD::equal(value, charactersVector);
+@@ -659,6 +804,7 @@ SUPPRESS_NODELETE ALWAYS_INLINE const UnsignedType* NODELETE findImpl(const Unsi
+     if (cursor == end)
+         return nullptr;
+     return cursor;
++#endif
+ }
+ 
+ ALWAYS_INLINE const uint16_t* NODELETE find16(const uint16_t* pointer, uint16_t character, size_t length)
+@@ -674,6 +820,13 @@ ALWAYS_INLINE const uint32_t* NODELETE find32(const uint32_t* pointer, uint32_t
+ template<typename LaneType>
+ SUPPRESS_NODELETE ALWAYS_INLINE const LaneType* NODELETE find64BitLaneImpl(const LaneType* pointer, LaneType target, size_t length)
+ {
++#if defined(WEBKIT_IOS6)
++    for (size_t index = 0; index < length; ++index) {
++        if (pointer[index] == target)
++            return pointer + index;
++    }
++    return nullptr;
++#else
+     static_assert(sizeof(LaneType) == sizeof(uint64_t));
+     constexpr size_t scalarThreshold = 4;
+     size_t index = 0;
+@@ -714,6 +867,7 @@ SUPPRESS_NODELETE ALWAYS_INLINE const LaneType* NODELETE find64BitLaneImpl(const
+     if (cursor < end && *cursor == target)
+         return cursor;
+     return nullptr;
++#endif
+ }
+ 
+ SUPPRESS_NODELETE ALWAYS_INLINE const uint64_t* NODELETE find64(const uint64_t* pointer, uint64_t character, size_t length)
+@@ -723,6 +877,13 @@ SUPPRESS_NODELETE ALWAYS_INLINE const uint64_t* NODELETE find64(const uint64_t*
+ 
+ SUPPRESS_NODELETE ALWAYS_INLINE const uint8_t* NODELETE reverseFind8(const uint8_t* pointer, uint8_t character, size_t length)
+ {
++#if defined(WEBKIT_IOS6)
++    for (size_t index = length; index--;) {
++        if (pointer[index] == character)
++            return pointer + index;
++    }
++    return nullptr;
++#else
+     constexpr size_t thresholdLength = 16;
+ 
+     size_t index = length;
+@@ -752,11 +913,19 @@ SUPPRESS_NODELETE ALWAYS_INLINE const uint8_t* NODELETE reverseFind8(const uint8
+         return nullptr;
+     return cursor;
+ #endif
++#endif
+ }
+ 
+ template<typename UnsignedType>
+ SUPPRESS_NODELETE ALWAYS_INLINE const UnsignedType* NODELETE reverseFindImpl(const UnsignedType* pointer, UnsignedType character, size_t length)
+ {
++#if defined(WEBKIT_IOS6)
++    for (size_t index = length; index--;) {
++        if (pointer[index] == character)
++            return pointer + index;
++    }
++    return nullptr;
++#else
+     auto charactersVector = SIMD::splat<UnsignedType>(character);
+     auto vectorMatch = [&](auto value) ALWAYS_INLINE_LAMBDA {
+         auto mask = SIMD::equal(value, charactersVector);
+@@ -773,6 +942,7 @@ SUPPRESS_NODELETE ALWAYS_INLINE const UnsignedType* NODELETE reverseFindImpl(con
+     if (cursor == end)
+         return nullptr;
+     return cursor;
++#endif
+ }
+ 
+ ALWAYS_INLINE const uint16_t* NODELETE reverseFind16(const uint16_t* pointer, uint16_t character, size_t length)
+@@ -787,6 +957,13 @@ ALWAYS_INLINE const uint32_t* NODELETE reverseFind32(const uint32_t* pointer, ui
+ 
+ SUPPRESS_NODELETE ALWAYS_INLINE const uint64_t* NODELETE reverseFind64(const uint64_t* pointer, uint64_t character, size_t length)
+ {
++#if defined(WEBKIT_IOS6)
++    for (size_t i = length; i--;) {
++        if (pointer[i] == character)
++            return pointer + i;
++    }
++    return nullptr;
++#else
+     constexpr size_t scalarThreshold = 4;
+     size_t index = length;
+     size_t runway = length > scalarThreshold ? length - scalarThreshold : 0;
+@@ -840,6 +1017,7 @@ SUPPRESS_NODELETE ALWAYS_INLINE const uint64_t* NODELETE reverseFind64(const uin
+     }
+ 
+     return nullptr;
++#endif
+ }
+ 
+ ALWAYS_INLINE const Float16* NODELETE reverseFindFloat16(const Float16* pointer, Float16 target, size_t length)
+@@ -1126,6 +1304,50 @@ SUPPRESS_NODELETE ALWAYS_INLINE const char16_t* NODELETE find16NonASCII(std::spa
+     ASSERT(index < length);
+     return find16NonASCIIAlignedImpl({ pointer + index, length - index });
+ }
++#elif defined(WEBKIT_IOS6) && CPU(LITTLE_ENDIAN)
++SUPPRESS_NODELETE ALWAYS_INLINE const Latin1Character* NODELETE find8NonASCII(std::span<const Latin1Character> data)
++{
++    auto* pointer = data.data();
++    size_t length = data.size();
++
++    size_t index = 0;
++    for (; index + 4 <= length; index += 4) {
++        uint32_t mask = unalignedLoad<uint32_t>(pointer + index) & 0x80808080U;
++        if (!mask)
++            continue;
++        if (mask & 0x00000080U)
++            return pointer + index;
++        if (mask & 0x00008000U)
++            return pointer + index + 1;
++        if (mask & 0x00800000U)
++            return pointer + index + 2;
++        return pointer + index + 3;
++    }
++    for (; index < length; ++index) {
++        if (!isASCII(pointer[index]))
++            return pointer + index;
++    }
++    return nullptr;
++}
++
++SUPPRESS_NODELETE ALWAYS_INLINE const char16_t* NODELETE find16NonASCII(std::span<const char16_t> data)
++{
++    auto* pointer = data.data();
++    size_t length = data.size();
++
++    size_t index = 0;
++    for (; index + 2 <= length; index += 2) {
++        uint32_t mask = unalignedLoad<uint32_t>(pointer + index) & 0xFF80FF80U;
++        if (!mask)
++            continue;
++        if (mask & 0x0000FF80U)
++            return pointer + index;
++        return pointer + index + 1;
++    }
++    if (index < length && !isASCII(pointer[index]))
++        return pointer + index;
++    return nullptr;
++}
+ #endif
+ 
+ template<std::integral CharacterType1, std::integral CharacterType2>
+@@ -1274,6 +1496,21 @@ SUPPRESS_NODELETE inline bool NODELETE equalLettersIgnoringASCIICaseWithLength(s
+             return true;
+         }
+     }
++#elif defined(WEBKIT_IOS6)
++    if constexpr (sizeof(CharacterType) == 1) {
++        size_t i = 0;
++        for (; i + 4 <= length; i += 4) {
++            uint32_t charactersWord = unalignedLoad<uint32_t>(characters.data() + i);
++            uint32_t lowercaseWord = unalignedLoad<uint32_t>(lowercaseLetters.data() + i);
++            if ((charactersWord | 0x20202020U) != lowercaseWord)
++                return false;
++        }
++        for (; i < length; ++i) {
++            if (!isASCIIAlphaCaselessEqual(characters[i], lowercaseLetters[i]))
++                return false;
++        }
++        return true;
++    }
+ #endif
+ 
+     for (size_t i = 0; i < length; ++i) {
+@@ -1518,6 +1755,20 @@ inline void copyElements(std::span<uint16_t> destinationSpan, std::span<const ui
+     // Handle remaining elements.
+     while (destination != end)
+         *destination++ = *source++;
++#elif defined(WEBKIT_IOS6)
++    size_t i = 0;
++    if (length >= 4) {
++        size_t wordEnd = length & ~static_cast<size_t>(3);
++        for (; i < wordEnd; i += 4) {
++            uint32_t packed = unalignedLoad<uint32_t>(source + i);
++            uint32_t low = packed & 0xFFFFU;
++            uint32_t high = packed >> 16;
++            unalignedStore<uint32_t>(destination + i, (low | (low << 8)) & 0x00FF00FFU);
++            unalignedStore<uint32_t>(destination + i + 2, (high | (high << 8)) & 0x00FF00FFU);
++        }
++    }
++    for (; i < length; ++i)
++        destination[i] = source[i];
+ #else
+     for (unsigned i = 0; i < length; ++i)
+         destination[i] = source[i];
+diff --git a/Source/WTF/wtf/text/StringConcatenate.h b/Source/WTF/wtf/text/StringConcatenate.h
+index f7715fae2968223cfa010a009c45a2c6e1f9520c..220601893a37cf83f621a676b70098c4cf637c30 100644
+--- a/Source/WTF/wtf/text/StringConcatenate.h
++++ b/Source/WTF/wtf/text/StringConcatenate.h
+@@ -199,6 +199,10 @@ public:
+         WTF_STRINGTYPEADAPTER_COPIED_WTF_STRING();
+     }
+ 
++#if defined(WEBKIT_IOS6)
++    StringImpl* existingStringImpl() const { return (m_string && !m_string->isSymbol()) ? m_string : nullptr; }
++#endif
++
+ private:
+     SUPPRESS_UNCOUNTED_MEMBER StringImpl* const m_string;
+ };
+@@ -242,6 +246,10 @@ public:
+         WTF_STRINGTYPEADAPTER_COPIED_WTF_STRING();
+     }
+ 
++#if defined(WEBKIT_IOS6)
++    StringImpl* existingStringImpl() const { return m_string.isSymbol() ? nullptr : &m_string; }
++#endif
++
+ private:
+     SUPPRESS_UNCOUNTED_MEMBER StringImpl& m_string;
+ };
+diff --git a/Source/WTF/wtf/text/StringImpl.cpp b/Source/WTF/wtf/text/StringImpl.cpp
+index 5d86a75e938f2e34ae41e7cb74d80218a6ac77a6..25813c08ac12f445ec3b96dec5da1bd79d316f19 100644
+--- a/Source/WTF/wtf/text/StringImpl.cpp
++++ b/Source/WTF/wtf/text/StringImpl.cpp
+@@ -708,33 +708,32 @@ Ref<StringImpl> StringImpl::convertToUppercaseWithLocale(const AtomString& local
+ Ref<StringImpl> StringImpl::foldCase()
+ {
+     if (is8Bit()) {
+-        unsigned failingIndex;
++        bool needsFolding = false;
++        bool need16BitCharacters = false;
++        unsigned ored = 0;
+         auto span = span8();
+-        for (unsigned i = 0; i < span.size(); ++i) {
+-            auto character = span[i];
+-            if (!isASCII(character) || isASCIIUpper(character)) [[unlikely]] {
+-                failingIndex = i;
+-                goto SlowPath;
+-            }
++        for (auto character : span) {
++            ored |= character;
++            if (isASCIIUpper(character))
++                needsFolding = true;
++            if (character == 0xB5 || character == 0xDF)
++                need16BitCharacters = true;
+         }
+-        // String was all ASCII and no uppercase, so just return as-is.
+-        return *this;
+ 
+-SlowPath:
+-        bool need16BitCharacters = false;
+-        for (unsigned i = failingIndex; i < span.size(); ++i) {
+-            auto character = span[i];
+-            if (character == 0xB5 || character == 0xDF) {
+-                need16BitCharacters = true;
+-                break;
+-            }
++        if (!(ored & ~0x7F)) {
++            if (!needsFolding)
++                return *this;
++            std::span<Latin1Character> data8;
++            auto folded = createUninitializedInternalNonEmpty(m_length, data8);
++            for (unsigned i = 0; i < span.size(); ++i)
++                data8[i] = toASCIILower(span[i]);
++            return folded;
+         }
+ 
+         if (!need16BitCharacters) {
+             std::span<Latin1Character> data8;
+             auto folded = createUninitializedInternalNonEmpty(m_length, data8);
+-            copyCharacters(data8, span.first(failingIndex));
+-            for (unsigned i = failingIndex; i < span.size(); ++i) {
++            for (unsigned i = 0; i < span.size(); ++i) {
+                 auto character = span[i];
+                 if (isASCII(character))
+                     data8[i] = toASCIILower(character);
+@@ -746,7 +745,6 @@ SlowPath:
+             return folded;
+         }
+     } else {
+-        // FIXME: Unclear why we use goto in the 8-bit case, and a different approach in the 16-bit case.
+         bool noUpper = true;
+         unsigned ored = 0;
+         auto span = span16();
+@@ -794,7 +792,26 @@ template<StringImpl::CaseConvertType type, typename CharacterType>
+ ALWAYS_INLINE Ref<StringImpl> StringImpl::convertASCIICase(StringImpl& impl, std::span<const CharacterType> data)
+ {
+     size_t failingIndex;
+-    for (size_t i = 0; i < data.size(); ++i) {
++    size_t scanStart = 0;
++
++#if defined(WEBKIT_IOS6)
++    if constexpr (sizeof(CharacterType) == 1) {
++        constexpr uint32_t lowBias = type == CaseConvertType::Lower ? 0x3f3f3f3fU : 0x1f1f1f1fU;
++        constexpr uint32_t highBias = type == CaseConvertType::Lower ? 0xdadadadaU : 0xfafafafaU;
++        size_t count = data.size();
++        size_t index = 0;
++        for (; index + 4 <= count; index += 4) {
++            uint32_t word = unalignedLoad<uint32_t>(&data[index]);
++            if (word & 0x80808080U)
++                break;
++            if ((word + lowBias) & (highBias - word) & 0x80808080U)
++                break;
++        }
++        scanStart = index;
++    }
++#endif
++
++    for (size_t i = scanStart; i < data.size(); ++i) {
+         CharacterType character = data[i];
+         if constexpr (type == CaseConvertType::Lower) {
+             if (isASCIIUpper(character)) [[unlikely]] {
+@@ -1646,11 +1663,17 @@ UTF8CString StringImpl::utf8(ConversionMode mode) const
+ 
+ NEVER_INLINE unsigned StringImpl::hashSlowCase() const
+ {
++#if defined(WEBKIT_IOS6)
++    unsigned hash = is8Bit() ? StringHasher::computeHashAndMaskTop8Bits(span8()) : StringHasher::computeHashAndMaskTop8Bits(span16());
++    setHash(hash);
++    return hash;
++#else
+     if (is8Bit())
+         setHash(StringHasher::computeHashAndMaskTop8Bits(span8()));
+     else
+         setHash(StringHasher::computeHashAndMaskTop8Bits(span16()));
+     return existingHash();
++#endif
+ }
+ 
+ unsigned StringImpl::concurrentHash() const
+diff --git a/Source/WTF/wtf/text/StringImpl.h b/Source/WTF/wtf/text/StringImpl.h
+index 39753740e5c148b6a1c155440340dc0ab105db62..c9a7d96c75d75a415d1eccfb8deec97cf41b3527 100644
+--- a/Source/WTF/wtf/text/StringImpl.h
++++ b/Source/WTF/wtf/text/StringImpl.h
+@@ -428,7 +428,25 @@ public:
+     {
+         static_assert(sizeof(char16_t) == sizeof(uint16_t));
+         static_assert(sizeof(Latin1Character) == sizeof(uint8_t));
++#if defined(WEBKIT_IOS6)
++        RELEASE_ASSERT(destination.size() >= source.size());
++        size_t count = source.size();
++        if (count >= 32)
++            return copyElements(spanReinterpretCast<uint16_t>(destination), source);
++        size_t index = 0;
++        for (; index + 4 <= count; index += 4) {
++            uint32_t bytes = unalignedLoad<uint32_t>(&source[index]);
++            uint32_t low = (bytes & 0x000000ffU) | ((bytes & 0x0000ff00U) << 8);
++            uint32_t high = ((bytes >> 16) & 0x000000ffU) | ((bytes & 0xff000000U) >> 8);
++            unalignedStore<uint32_t>(&destination[index], low);
++            unalignedStore<uint32_t>(&destination[index + 2], high);
++        }
++        for (; index < count; ++index)
++            destination[index] = source[index];
++        return;
++#else
+         return copyElements(spanReinterpretCast<uint16_t>(destination), source);
++#endif
+     }
+ 
+     ALWAYS_INLINE static void copyCharacters(std::span<Latin1Character> destination, std::span<const char16_t> source)
+@@ -439,7 +457,25 @@ public:
+         for (auto character : source)
+             ASSERT(isLatin1(character));
+ #endif
++#if defined(WEBKIT_IOS6)
++        RELEASE_ASSERT(destination.size() >= source.size());
++        size_t count = source.size();
++        if (count >= 32)
++            return copyElements(destination, spanReinterpretCast<const uint16_t>(source));
++        size_t index = 0;
++        for (; index + 4 <= count; index += 4) {
++            uint32_t first = unalignedLoad<uint32_t>(&source[index]);
++            uint32_t second = unalignedLoad<uint32_t>(&source[index + 2]);
++            uint32_t packed = (first & 0x000000ffU) | ((first >> 8) & 0x0000ff00U)
++                | ((second & 0x000000ffU) << 16) | ((second >> 16) << 24);
++            unalignedStore<uint32_t>(&destination[index], packed);
++        }
++        for (; index < count; ++index)
++            destination[index] = static_cast<Latin1Character>(source[index]);
++        return;
++#else
+         return copyElements(destination, spanReinterpretCast<const uint16_t>(source));
++#endif
+     }
+ 
+     // Some string features, like reference counting and the atomicity flag, are not
+@@ -803,15 +839,33 @@ inline std::strong_ordering codePointCompare(std::span<const CharacterType1> cha
+     auto* characters2Ptr = characters2.data();
+     size_t position = 0;
+ 
+-#if CPU(REGISTER64)
++#if defined(WEBKIT_IOS6) && CPU(LITTLE_ENDIAN)
++    if constexpr (sizeof(CharacterType1) == sizeof(CharacterType2) && (sizeof(CharacterType1) == 1 || sizeof(CharacterType1) == 2)) {
++        constexpr size_t stride = sizeof(uint32_t) / sizeof(CharacterType1);
++        for (; position + (stride - 1) < commonLength;) {
++            auto lhs = unalignedLoad<uint32_t>(characters1Ptr);
++            auto rhs = unalignedLoad<uint32_t>(characters2Ptr);
++            if (lhs != rhs) {
++                if constexpr (sizeof(CharacterType1) == 1)
++                    return (flipBytes(lhs) > flipBytes(rhs)) ? std::strong_ordering::greater : std::strong_ordering::less;
++                else {
++                    auto rotate16 = [](uint32_t value) ALWAYS_INLINE_LAMBDA {
++                        return (value << 16) | (value >> 16);
++                    };
++                    return (rotate16(lhs) > rotate16(rhs)) ? std::strong_ordering::greater : std::strong_ordering::less;
++                }
++            }
++
++            characters1Ptr += stride;
++            characters2Ptr += stride;
++            position += stride;
++        }
++    }
++#elif CPU(REGISTER64)
+     if constexpr (sizeof(CharacterType1) == sizeof(CharacterType2) && (sizeof(CharacterType1) == 1 || sizeof(CharacterType1) == 2)) {
+         using ChunkType = std::conditional_t<sizeof(CharacterType1) == 1, uint32_t, uint64_t>;
+         constexpr size_t stride = sizeof(ChunkType) / sizeof(CharacterType1);
+         for (; position + (stride - 1) < commonLength;) {
+-            // Even though CPU does not need aligned access, we cannot
+-            // simply dereference ChunkType* or the compiler may perform
+-            // optimizations based on the assumption that all ChunkType
+-            // objects are naturally aligned.
+             auto lhs = unalignedLoad<ChunkType>(characters1Ptr);
+             auto rhs = unalignedLoad<ChunkType>(characters2Ptr);
+             if (lhs != rhs) {
+@@ -1229,7 +1283,11 @@ inline StringImpl::StringImpl(CreateSymbolTag)
+ 
+ template<typename T> inline size_t StringImpl::allocationSize(Checked<size_t> tailElementCount)
+ {
++#if defined(WEBKIT_IOS6)
++    return tailOffset<T>() + tailElementCount.value() * sizeof(T);
++#else
+     return tailOffset<T>() + tailElementCount * sizeof(T);
++#endif
+ }
+ 
+ template<typename CharacterType>
+@@ -1466,7 +1524,7 @@ inline std::expected<std::invoke_result_t<Func, std::span<const char8_t>>, UTF8C
+     if (productOverflows<size_t>(characters.size(), 2) || !isValidCapacityForVector<char8_t>(characters.size() * 2)) [[unlikely]]
+         return makeUnexpected(UTF8ConversionError::OutOfMemory);
+ 
+-#if CPU(ARM64)
++#if CPU(ARM64) || (defined(WEBKIT_IOS6) && CPU(LITTLE_ENDIAN))
+     if (auto* firstNonASCII = find8NonASCII(characters)) {
+         size_t prefixLength = firstNonASCII - characters.data();
+         size_t remainingLength = characters.size() - prefixLength;
+diff --git a/Source/WTF/wtf/text/StringToIntegerConversion.h b/Source/WTF/wtf/text/StringToIntegerConversion.h
+index 3ca6e78fe8448f242d61b4b8fb080380fe5926ac..901c81fa803d45706674b6a03d0c0932e500c2e8 100644
+--- a/Source/WTF/wtf/text/StringToIntegerConversion.h
++++ b/Source/WTF/wtf/text/StringToIntegerConversion.h
+@@ -60,25 +60,33 @@ template<typename IntegralType, typename CharacterType> std::optional<IntegralTy
+     else
+         skipExactly(data, '+');
+ 
+-    auto isCharacterAllowedInBase = [] (auto character, auto base) {
++    const bool isBase10 = base == 10;
++    const unsigned letterLimitInBase = base > 10 ? static_cast<unsigned>('a') + std::min<unsigned>(base - 10u, 26u) : 0;
++    auto isCharacterAllowedInBase = [&] (auto character) {
++        if (isBase10)
++            return isASCIIDigit(character);
+         if (isASCIIDigit(character))
+             return character - '0' < base;
+-        return toASCIILowerUnchecked(character) >= 'a' && toASCIILowerUnchecked(character) < 'a' + std::min(base - 10, 26);
++        auto lowered = toASCIILowerUnchecked(character);
++        return lowered >= 'a' && static_cast<unsigned>(lowered) < letterLimitInBase;
+     };
+ 
+-    if (!(!data.empty() && isCharacterAllowedInBase(data.front(), base)))
++    if (!(!data.empty() && isCharacterAllowedInBase(data.front())))
+         return std::nullopt;
+ 
+     Checked<IntegralType, RecordOverflow> value;
+     do {
+         auto c = consume(data);
+-        IntegralType digitValue = isASCIIDigit(c) ? c - '0' : toASCIILowerUnchecked(c) - 'a' + 10;
+-        value *= static_cast<IntegralType>(base);
++        IntegralType digitValue = (isBase10 || isASCIIDigit(c)) ? c - '0' : toASCIILowerUnchecked(c) - 'a' + 10;
++        if (isBase10)
++            value *= static_cast<IntegralType>(10);
++        else
++            value *= static_cast<IntegralType>(base);
+         if (isNegative)
+             value -= digitValue;
+         else
+             value += digitValue;
+-    } while (!data.empty() && isCharacterAllowedInBase(data.front(), base));
++    } while (!data.empty() && isCharacterAllowedInBase(data.front()));
+ 
+     if (value.hasOverflowed()) [[unlikely]]
+         return std::nullopt;
+diff --git a/Source/WTF/wtf/text/StringView.h b/Source/WTF/wtf/text/StringView.h
+index fcda80aeb0ee7a42d768b7636c6c60e8d365d389..428a5d0348b8ebfc57b607efa238f80fb59df6df 100644
+--- a/Source/WTF/wtf/text/StringView.h
++++ b/Source/WTF/wtf/text/StringView.h
+@@ -466,16 +466,17 @@ inline StringView::StringView(const StringImpl* string LIFETIME_BOUND)
+ 
+ inline StringView::StringView(const String& string LIFETIME_BOUND)
+ {
+-    setUnderlyingString(string.impl());
+-    if (!string.impl()) {
++    SUPPRESS_UNCOUNTED_LOCAL auto* impl = string.impl();
++    setUnderlyingString(impl);
++    if (!impl) {
+         clear();
+         return;
+     }
+-    if (string.is8Bit()) {
+-        initialize(string.span8());
++    if (impl->is8Bit()) {
++        initialize(impl->span8());
+         return;
+     }
+-    initialize(string.span16());
++    initialize(impl->span16());
+ }
+ 
+ inline StringView::StringView(const AtomString& atomString LIFETIME_BOUND)
+@@ -813,13 +814,10 @@ ALWAYS_INLINE bool equal(StringView a, StringView b)
+ 
+ inline bool equal(StringView a, std::span<const Latin1Character> b)
+ {
+-    if (!b.data())
+-        return !a.isEmpty();
+-    if (a.isEmpty())
+-        return !b.data();
+-
+-    if (a.length() != b.size())
++    if (a.length() != b.size()) [[likely]]
+         return false;
++    if (!b.size())
++        return true;
+ 
+     if (a.is8Bit())
+         return equal(a.span8().data(), b);
+diff --git a/Source/WTF/wtf/text/WTFString.cpp b/Source/WTF/wtf/text/WTFString.cpp
+index 22d7d5dd54596289c16b1022371c4449494fc867..6be31c3ceb5d54b5755487c45ed9fe5cb1b959c7 100644
+--- a/Source/WTF/wtf/text/WTFString.cpp
++++ b/Source/WTF/wtf/text/WTFString.cpp
+@@ -78,7 +78,32 @@ char32_t String::codePointAt(unsigned i) const
+ 
+ String makeStringByJoining(std::span<const String> strings, const String& separator)
+ {
++#if defined(WEBKIT_IOS6)
++    if (strings.empty())
++        return emptyString();
++    if (strings.size() == 1)
++        return strings.front();
++
++    Checked<unsigned> totalLength = 0;
++    for (const auto& string : strings)
++        totalLength += string.length();
++    totalLength += Checked<unsigned>(strings.size() - 1) * separator.length();
++
++    if (totalLength.hasOverflowed())
++        return String();
++
++    StringBuilder builder;
++    builder.reserveCapacity(totalLength.value());
++    for (const auto& string : strings) {
++        if (builder.isEmpty())
++            builder.append(string);
++        else
++            builder.append(separator, string);
++    }
++    return builder.toString();
++#else
+     return makeString(interleave(strings, separator));
++#endif
+ }
+ 
+ String makeStringByRemoving(const String& string, unsigned position, unsigned lengthToRemove)
+diff --git a/Source/WTF/wtf/text/WTFString.h b/Source/WTF/wtf/text/WTFString.h
+index ec87143310f33fc59c92186fb81b6393ad1da5ca..f0f390772ff5885522de9513101a75fed9595017 100644
+--- a/Source/WTF/wtf/text/WTFString.h
++++ b/Source/WTF/wtf/text/WTFString.h
+@@ -123,7 +123,7 @@ public:
+ 
+     bool is8Bit() const { return !m_impl || m_impl->is8Bit(); }
+ 
+-    unsigned sizeInBytes() const { return m_impl ? m_impl->length() * (is8Bit() ? sizeof(Latin1Character) : sizeof(char16_t)) : 0; }
++    unsigned sizeInBytes() const { return m_impl ? m_impl->length() * (m_impl->is8Bit() ? sizeof(Latin1Character) : sizeof(char16_t)) : 0; }
+ 
+     WTF_EXPORT_PRIVATE ASCIICString ascii() const;
+     WTF_EXPORT_PRIVATE Latin1CString latin1() const;

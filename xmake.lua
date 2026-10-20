@@ -6,7 +6,7 @@ set_defaultmode("release")
 
 includes("third_party/blocksruntime", "third_party/boost", "third_party/dynarmic", "third_party/farmdec", "third_party/rellume")
 includes("third_party/brotli", "third_party/icu", "third_party/libpsl", "third_party/libwebp", "third_party/libxml2",
-         "third_party/libxslt", "third_party/wasm3", "third_party/woff2")
+         "third_party/libxslt", "third_party/wasm3", "third_party/webkit", "third_party/woff2")
 add_repositories("revenant " .. (os.getenv("REVENANT_REPO") or "toolchain"))
 add_addons("revenant", {sourcedir = "toolchain"})
 

@@ -1,0 +1,232 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Wed, 16 Sep 2026 12:00:00 +0200
+Subject: [PATCH] Perform Web Crypto through WebKit's OpenSSL backend
+
+The Cocoa backend works in CryptoKit, which has no armv7 Swift, so this port
+uses WebKit's own OpenSSL backend: digests, HMAC, AES-GCM, CBC, CFB, CTR and key
+wrapping, HKDF, PBKDF2, ECDSA, ECDH, RSA-OAEP and RSASSA-PKCS1. EC key import
+reads ASN1 strings through their accessors, which OpenSSL 4 requires.
+---
+ Source/WebCore/PAL/pal/SourcesCocoa.txt                | 10 ----------
+ Source/WebCore/crypto/CryptoKey.cpp                    |  2 +-
+ .../crypto/algorithms/CryptoAlgorithmEd25519.cpp       |  2 +-
+ .../crypto/algorithms/CryptoAlgorithmX25519.cpp        |  2 +-
+ Source/WebCore/crypto/keys/CryptoKeyEC.cpp             |  2 +-
+ Source/WebCore/crypto/keys/CryptoKeyEC.h               |  2 +-
+ Source/WebCore/crypto/keys/CryptoKeyOKP.cpp            |  2 +-
+ Source/WebCore/crypto/keys/CryptoKeyRSA.h              |  2 +-
+ .../crypto/openssl/CryptoAlgorithmAESGCMOpenSSL.cpp    |  6 ++++++
+ .../crypto/openssl/CryptoAlgorithmRSA_OAEPOpenSSL.cpp  | 10 ++++++++++
+ Source/WebCore/crypto/openssl/CryptoKeyECOpenSSL.cpp   |  6 +++---
+ 11 files changed, 26 insertions(+), 20 deletions(-)
+
+diff --git a/Source/WebCore/PAL/pal/SourcesCocoa.txt b/Source/WebCore/PAL/pal/SourcesCocoa.txt
+index c5e0823f6b2bc026c7641d085063d9831233cb6c..cd83b9488c5b5ac71891d7e34a3b87afeb7abd0d 100644
+--- a/Source/WebCore/PAL/pal/SourcesCocoa.txt
++++ b/Source/WebCore/PAL/pal/SourcesCocoa.txt
+@@ -53,11 +53,9 @@ cocoa/LockdownModeCocoa.mm @nonARC
+ cocoa/MediaToolboxSoftLink.cpp
+ cocoa/NaturalLanguageSoftLink.mm @nonARC
+ cocoa/OpenGLSoftLinkCocoa.mm @nonARC
+-cocoa/PassKitSoftLink.mm @nonARC
+ cocoa/QuartzCoreSoftLink.mm @nonARC
+ cocoa/RevealSoftLink.mm @nonARC
+ cocoa/ScreenTimeSoftLink.mm @nonARC
+-cocoa/SpeechSoftLink.mm @nonARC
+ cocoa/TranslationUIServicesSoftLink.mm @nonARC
+ cocoa/UsageTrackingSoftLink.mm @nonARC
+ cocoa/VisionKitCoreSoftLink.mm @nonARC
+@@ -67,14 +65,6 @@ cocoa/WebContentRestrictionsSoftLink.mm @nonARC
+ cocoa/WebPrivacySoftLink.mm @nonARC
+ cocoa/WritingToolsUISoftLink.mm @nonARC
+ 
+-crypto/CryptoAlgorithmAESGCMCocoa.cpp
+-crypto/CryptoAlgorithmAESKWCocoaBridging.cpp
+-crypto/CryptoAlgorithmEd25519CocoaBridging.cpp
+-crypto/CryptoAlgorithmHKDFCocoaBridging.cpp
+-crypto/CryptoAlgorithmHMACCocoaBridging.cpp
+-crypto/CryptoAlgorithmX25519CocoaBridging.cpp
+-crypto/CryptoEDKeyBridging.cpp
+-crypto/PlatformECKey.cpp
+ 
+ crypto/commoncrypto/CryptoDigestCommonCrypto.cpp
+ 
+diff --git a/Source/WebCore/crypto/CryptoKey.cpp b/Source/WebCore/crypto/CryptoKey.cpp
+index 927efc02a7d485fdcdb3f61c40948a15dd0cd6ec..926ab48a74db9a97f87c47cfa37f98b05783271c 100644
+--- a/Source/WebCore/crypto/CryptoKey.cpp
++++ b/Source/WebCore/crypto/CryptoKey.cpp
+@@ -76,7 +76,7 @@ WebCoreOpaqueRoot root(CryptoKey* key)
+     return WebCoreOpaqueRoot { key };
+ }
+ 
+-#if !OS(DARWIN) || PLATFORM(GTK)
++#if !OS(DARWIN) || PLATFORM(GTK) || USE(OPENSSL)
+ Vector<uint8_t> CryptoKey::randomData(size_t size)
+ {
+     Vector<uint8_t> result(size);
+diff --git a/Source/WebCore/crypto/algorithms/CryptoAlgorithmEd25519.cpp b/Source/WebCore/crypto/algorithms/CryptoAlgorithmEd25519.cpp
+index a053b3297c582bef8aad2e9641acaf3165e03872..b67893ab8b160b34ee58282c81975c4cf848471c 100644
+--- a/Source/WebCore/crypto/algorithms/CryptoAlgorithmEd25519.cpp
++++ b/Source/WebCore/crypto/algorithms/CryptoAlgorithmEd25519.cpp
+@@ -35,7 +35,7 @@
+ 
+ namespace WebCore {
+ 
+-#if !PLATFORM(COCOA) && !USE(GCRYPT)
++#if (!PLATFORM(COCOA) || USE(OPENSSL)) && !USE(GCRYPT)
+ ExceptionOr<Vector<uint8_t>> CryptoAlgorithmEd25519::platformSign(const CryptoKeyOKP&, const Vector<uint8_t>&)
+ {
+     ASSERT_NOT_REACHED();
+diff --git a/Source/WebCore/crypto/algorithms/CryptoAlgorithmX25519.cpp b/Source/WebCore/crypto/algorithms/CryptoAlgorithmX25519.cpp
+index 84091c1b3996d539ac389bb750a24e88a88b8045..345d88721a46d3ebd1a8fd26e29fad81b2914b6b 100644
+--- a/Source/WebCore/crypto/algorithms/CryptoAlgorithmX25519.cpp
++++ b/Source/WebCore/crypto/algorithms/CryptoAlgorithmX25519.cpp
+@@ -58,7 +58,7 @@ void CryptoAlgorithmX25519::generateKey(const CryptoAlgorithmParameters&, bool e
+     callback(WTF::move(pair));
+ }
+ 
+-#if !PLATFORM(COCOA) && !USE(GCRYPT)
++#if (!PLATFORM(COCOA) || USE(OPENSSL)) && !USE(GCRYPT)
+ std::optional<Vector<uint8_t>> CryptoAlgorithmX25519::platformDeriveBits(const CryptoKeyOKP&, const CryptoKeyOKP&)
+ {
+     return std::nullopt;
+diff --git a/Source/WebCore/crypto/keys/CryptoKeyEC.cpp b/Source/WebCore/crypto/keys/CryptoKeyEC.cpp
+index a062e96fb416156c43263ce7a8f94ab0f8f10e3c..f4e2fece145632b516e61ea55713b262a9427633 100644
+--- a/Source/WebCore/crypto/keys/CryptoKeyEC.cpp
++++ b/Source/WebCore/crypto/keys/CryptoKeyEC.cpp
+@@ -31,7 +31,7 @@
+ #include "JsonWebKey.h"
+ #include <wtf/text/Base64.h>
+ 
+-#if OS(DARWIN) && !PLATFORM(GTK)
++#if OS(DARWIN) && !PLATFORM(GTK) && !USE(OPENSSL)
+ #include <pal/crypto/CryptoTypes.h>
+ #include <pal/crypto/PlatformECKey.h>
+ #endif
+diff --git a/Source/WebCore/crypto/keys/CryptoKeyEC.h b/Source/WebCore/crypto/keys/CryptoKeyEC.h
+index 5c7e5dfdb9e6dc26f50da506c74350e3119d5f16..407aaa9b46e5252e3d76d9bbb7bb0d31e5f20e9e 100644
+--- a/Source/WebCore/crypto/keys/CryptoKeyEC.h
++++ b/Source/WebCore/crypto/keys/CryptoKeyEC.h
+@@ -29,7 +29,7 @@
+ #include <WebCore/CryptoKeyPair.h>
+ 
+ #include <wtf/Platform.h>
+-#if OS(DARWIN) && !PLATFORM(GTK)
++#if OS(DARWIN) && !PLATFORM(GTK) && !USE(OPENSSL)
+ #include <WebCore/CommonCryptoUtilities.h>
+ 
+ #include <pal/crypto/CryptoTypes.h>
+diff --git a/Source/WebCore/crypto/keys/CryptoKeyOKP.cpp b/Source/WebCore/crypto/keys/CryptoKeyOKP.cpp
+index 3bc098d85c2ced569a5ad2333f58eef95afb5aff..9cb3fd6c0112c187c7fdaa096ffb482b111e05f7 100644
+--- a/Source/WebCore/crypto/keys/CryptoKeyOKP.cpp
++++ b/Source/WebCore/crypto/keys/CryptoKeyOKP.cpp
+@@ -232,7 +232,7 @@ CryptoKey::Data CryptoKeyOKP::data() const
+     };
+ }
+ 
+-#if !PLATFORM(COCOA) && !USE(GCRYPT)
++#if (!PLATFORM(COCOA) || USE(OPENSSL)) && !USE(GCRYPT)
+ 
+ bool CryptoKeyOKP::supportsNamedCurve()
+ {
+diff --git a/Source/WebCore/crypto/keys/CryptoKeyRSA.h b/Source/WebCore/crypto/keys/CryptoKeyRSA.h
+index e219a0ef8175dbdf96241e6a9fe61c07a48cce2f..3b2299d76ebe07d3fd226ce6dc54803008d146a6 100644
+--- a/Source/WebCore/crypto/keys/CryptoKeyRSA.h
++++ b/Source/WebCore/crypto/keys/CryptoKeyRSA.h
+@@ -28,7 +28,7 @@
+ #include "CryptoKey.h"
+ #include <wtf/Function.h>
+ 
+-#if OS(DARWIN) && !PLATFORM(GTK)
++#if OS(DARWIN) && !PLATFORM(GTK) && !USE(OPENSSL)
+ #include "CommonCryptoUtilities.h"
+ 
+ typedef CCRSACryptorRef PlatformRSAKey;
+diff --git a/Source/WebCore/crypto/openssl/CryptoAlgorithmAESGCMOpenSSL.cpp b/Source/WebCore/crypto/openssl/CryptoAlgorithmAESGCMOpenSSL.cpp
+index 8794e4102cec8a172f9d023df2b6ef9cc19bc9e6..50c5276d211b5519c54925265ed2b2bdb7664bd7 100644
+--- a/Source/WebCore/crypto/openssl/CryptoAlgorithmAESGCMOpenSSL.cpp
++++ b/Source/WebCore/crypto/openssl/CryptoAlgorithmAESGCMOpenSSL.cpp
+@@ -68,6 +68,9 @@ static std::optional<Vector<uint8_t>> cryptEncrypt(const Vector<uint8_t>& key, c
+     if (1 != EVP_EncryptInit_ex(ctx.get(), algorithm, nullptr, nullptr, nullptr))
+         return std::nullopt;
+ 
++    if (1 != EVP_CIPHER_CTX_set_padding(ctx.get(), 0))
++        return std::nullopt;
++
+     // Disable padding
+     if (1 != EVP_CIPHER_CTX_set_padding(ctx.get(), 0))
+         return std::nullopt;
+@@ -124,6 +127,9 @@ static std::optional<Vector<uint8_t>> cryptDecrypt(const Vector<uint8_t>& key, c
+     if (1 != EVP_DecryptInit_ex(ctx.get(), algorithm, nullptr, nullptr, nullptr))
+         return std::nullopt;
+ 
++    if (1 != EVP_CIPHER_CTX_set_padding(ctx.get(), 0))
++        return std::nullopt;
++
+     // Disable padding
+     if (1 != EVP_CIPHER_CTX_set_padding(ctx.get(), 0))
+         return std::nullopt;
+diff --git a/Source/WebCore/crypto/openssl/CryptoAlgorithmRSA_OAEPOpenSSL.cpp b/Source/WebCore/crypto/openssl/CryptoAlgorithmRSA_OAEPOpenSSL.cpp
+index 509c277dad35878dfc1001598877939ff1bfad10..bd3f1ec430a5e651291171f2f7f89a2565b607aa 100644
+--- a/Source/WebCore/crypto/openssl/CryptoAlgorithmRSA_OAEPOpenSSL.cpp
++++ b/Source/WebCore/crypto/openssl/CryptoAlgorithmRSA_OAEPOpenSSL.cpp
+@@ -36,6 +36,8 @@ namespace WebCore {
+ 
+ ExceptionOr<Vector<uint8_t>> CryptoAlgorithmRSA_OAEP::platformEncrypt(const CryptoAlgorithmRsaOaepParams& parameters, const CryptoKeyRSA& key, const Vector<uint8_t>& plainText)
+ {
++#if OPENSSL_VERSION_NUMBER >= 0x30000000L \
++    || (defined(EVP_PKEY_CTX_set_rsa_oaep_md) && defined(EVP_PKEY_CTX_set_rsa_mgf1_md) && defined(EVP_PKEY_CTX_set0_rsa_oaep_label))
+     const EVP_MD* md = digestAlgorithm(key.hashAlgorithmIdentifier());
+     if (!md)
+         return Exception { ExceptionCode::NotSupportedError };
+@@ -77,10 +79,15 @@ ExceptionOr<Vector<uint8_t>> CryptoAlgorithmRSA_OAEP::platformEncrypt(const Cryp
+     cipherText.shrink(cipherTextLen);
+ 
+     return cipherText;
++#else
++    return Exception { ExceptionCode::NotSupportedError };
++#endif
+ }
+ 
+ ExceptionOr<Vector<uint8_t>> CryptoAlgorithmRSA_OAEP::platformDecrypt(const CryptoAlgorithmRsaOaepParams& parameters, const CryptoKeyRSA& key, const Vector<uint8_t>& cipherText)
+ {
++#if OPENSSL_VERSION_NUMBER >= 0x30000000L \
++    || (defined(EVP_PKEY_CTX_set_rsa_oaep_md) && defined(EVP_PKEY_CTX_set_rsa_mgf1_md) && defined(EVP_PKEY_CTX_set0_rsa_oaep_label))
+     const EVP_MD* md = digestAlgorithm(key.hashAlgorithmIdentifier());
+     if (!md)
+         return Exception { ExceptionCode::NotSupportedError };
+@@ -122,6 +129,9 @@ ExceptionOr<Vector<uint8_t>> CryptoAlgorithmRSA_OAEP::platformDecrypt(const Cryp
+     plainText.shrink(plainTextLen);
+ 
+     return plainText;
++#else
++    return Exception { ExceptionCode::NotSupportedError };
++#endif
+ }
+ 
+ } // namespace WebCore
+diff --git a/Source/WebCore/crypto/openssl/CryptoKeyECOpenSSL.cpp b/Source/WebCore/crypto/openssl/CryptoKeyECOpenSSL.cpp
+index 0f7ae9f33e16bbde4974cc90960ba2d4764b40b3..ed4786600f0c482c8c7cae5caea4602a76bfd891 100644
+--- a/Source/WebCore/crypto/openssl/CryptoKeyECOpenSSL.cpp
++++ b/Source/WebCore/crypto/openssl/CryptoKeyECOpenSSL.cpp
+@@ -274,8 +274,8 @@ RefPtr<CryptoKeyEC> CryptoKeyEC::platformImportSpki(CryptoAlgorithmIdentifier id
+     //     parameters  ANY DEFINED BY algorithm OPTIONAL
+     // }
+ 
+-    ptr = value->value.sequence->data;
+-    auto algorithm = ASN1SequencePtr(d2i_ASN1_SEQUENCE_ANY(nullptr, &ptr, value->value.sequence->length));
++    ptr = ASN1_STRING_get0_data(value->value.sequence);
++    auto algorithm = ASN1SequencePtr(d2i_ASN1_SEQUENCE_ANY(nullptr, &ptr, ASN1_STRING_length(value->value.sequence)));
+     if (!algorithm)
+         return nullptr;
+ 
+@@ -324,7 +324,7 @@ RefPtr<CryptoKeyEC> CryptoKeyEC::platformImportSpki(CryptoAlgorithmIdentifier id
+     if (!point)
+         return nullptr;
+ 
+-    if (EC_POINT_oct2point(group, point.get(), bitString->data, bitString->length, 0) <= 0)
++    if (EC_POINT_oct2point(group, point.get(), ASN1_STRING_get0_data(bitString), ASN1_STRING_length(bitString), 0) <= 0)
+         return nullptr;
+ 
+     if (EC_KEY_set_public_key(key.get(), point.get()) <= 0)

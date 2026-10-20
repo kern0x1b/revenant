@@ -1,0 +1,1073 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Wed, 16 Sep 2026 12:00:00 +0200
+Subject: [PATCH] Load web fonts and shape text on the CoreText of iOS 6
+
+No @font-face had ever loaded a font on this port, and every form control was
+painted in a fully transparent colour. This loads web fonts, looking for the
+WOFF2 library when the build asks for it, and draws form controls. Joined emoji
+compose into one glyph because the character break iterator uses ICU; the
+system font takes a weight; font feature tags are translated to the pairs this
+CoreText understands; an empty glyph coverage is not read; blend filters take
+the non-separable modes; and a missing localized string shows the English text.
+---
+ .../TextBreakIteratorInternalICUCocoa.cpp     |  12 +
+ Source/WebCore/platform/LocalizedStrings.cpp  |  11 +-
+ Source/WebCore/platform/graphics/Font.cpp     |  30 ++-
+ Source/WebCore/platform/graphics/Font.h       |   9 +
+ .../graphics/cocoa/FontCacheCoreText.cpp      |  23 +-
+ .../cocoa/SystemFontDatabaseCoreText.cpp      |  32 ++-
+ .../graphics/cocoa/UnrealizedCoreTextFont.cpp | 132 ++++++++++
+ .../graphics/coretext/FontCoreText.cpp        |  59 ++++-
+ .../FontCustomPlatformDataCoreText.cpp        |  23 +-
+ .../platform/graphics/filters/FEBlend.cpp     |  12 +
+ .../software/FEBlendSoftwareApplier.cpp       |   2 +-
+ .../filters/software/FEBlendSoftwareApplier.h |   2 +-
+ .../WebCore/rendering/ios/RenderThemeIOS.mm   |  63 ++++-
+ Source/cmake/OptionsIOS.cmake                 | 237 ++++++++++++++++++
+ 14 files changed, 627 insertions(+), 20 deletions(-)
+ create mode 100644 Source/cmake/OptionsIOS.cmake
+
+diff --git a/Source/WTF/wtf/text/cocoa/TextBreakIteratorInternalICUCocoa.cpp b/Source/WTF/wtf/text/cocoa/TextBreakIteratorInternalICUCocoa.cpp
+index 4f5988340729aa2a24dad16dfe997b65c65a326f..1f01d9c035db8c9d4f2d63fc9ed8f941ff3368b8 100644
+--- a/Source/WTF/wtf/text/cocoa/TextBreakIteratorInternalICUCocoa.cpp
++++ b/Source/WTF/wtf/text/cocoa/TextBreakIteratorInternalICUCocoa.cpp
+@@ -38,11 +38,23 @@ TextBreakIterator::Backing TextBreakIterator::mapModeToBackingIterator(StringVie
+             return TextBreakIteratorCF(string, priorContext, TextBreakIteratorCF::Mode::LineBreak, locale);
+         return TextBreakIteratorICU(string, priorContext, TextBreakIteratorICU::LineMode { lineMode.behavior }, locale);
+     }, [string, priorContext, &locale](TextBreakIterator::CaretMode) -> TextBreakIterator::Backing {
++#if defined(WEBKIT_IOS6)
++        return TextBreakIteratorICU(string, priorContext, TextBreakIteratorICU::CharacterMode { }, locale);
++#else
+         return TextBreakIteratorCF(string, priorContext, TextBreakIteratorCF::Mode::ComposedCharacter, locale);
++#endif
+     }, [string, priorContext, &locale](TextBreakIterator::DeleteMode) -> TextBreakIterator::Backing {
++#if defined(WEBKIT_IOS6)
++        return TextBreakIteratorICU(string, priorContext, TextBreakIteratorICU::CharacterMode { }, locale);
++#else
+         return TextBreakIteratorCF(string, priorContext, TextBreakIteratorCF::Mode::BackwardDeletion, locale);
++#endif
+     }, [string, priorContext, &locale](TextBreakIterator::CharacterMode) -> TextBreakIterator::Backing {
++#if defined(WEBKIT_IOS6)
++        return TextBreakIteratorICU(string, priorContext, TextBreakIteratorICU::CharacterMode { }, locale);
++#else
+         return TextBreakIteratorCF(string, priorContext, TextBreakIteratorCF::Mode::ComposedCharacter, locale);
++#endif
+     });
+ }
+ 
+diff --git a/Source/WebCore/platform/LocalizedStrings.cpp b/Source/WebCore/platform/LocalizedStrings.cpp
+index c4c472fdd2eaf510f2523571b98f76a9c09a38e2..6a90891ec04adcc9059b7316911d1b1c6ed1bb17 100644
+--- a/Source/WebCore/platform/LocalizedStrings.cpp
++++ b/Source/WebCore/platform/LocalizedStrings.cpp
+@@ -101,7 +101,11 @@ RetainPtr<CFStringRef> copyLocalizedString(CFStringRef key)
+ {
+     static CFStringRef notFound = CFSTR("localized string not found");
+ 
+-    auto result = adoptCF(CFBundleCopyLocalizedString(webCoreBundleSingleton(), key, notFound, nullptr));
++    CFBundleRef bundle = webCoreBundleSingleton();
++    if (!bundle)
++        return key;
++
++    auto result = adoptCF(CFBundleCopyLocalizedString(bundle, key, notFound, nullptr));
+ 
+ #if ASSERT_ENABLED
+     if (result.get() == notFound) {
+@@ -111,6 +115,11 @@ RetainPtr<CFStringRef> copyLocalizedString(CFStringRef key)
+     }
+ #endif
+ 
++#if defined(WEBKIT_IOS6)
++    if (!result || result.get() == notFound)
++        return key;
++#endif
++
+     return result;
+ }
+ #endif
+diff --git a/Source/WebCore/platform/graphics/Font.cpp b/Source/WebCore/platform/graphics/Font.cpp
+index d3af53015b79409956a48e8505c85a1f432d3a68..841e9af4aab0ad4a5b19150762bef1348205575a 100644
+--- a/Source/WebCore/platform/graphics/Font.cpp
++++ b/Source/WebCore/platform/graphics/Font.cpp
+@@ -388,7 +388,7 @@ static RefPtr<GlyphPage> createAndFillGlyphPage(unsigned pageNumber, const Font&
+     unsigned glyphPageSize = GlyphPage::sizeForPageNumber(pageNumber);
+ 
+     unsigned start = GlyphPage::startingCodePointInPageNumber(pageNumber);
+-    Vector<char16_t> buffer(glyphPageSize * 2 + 2);
++    Vector<char16_t, GlyphPage::size * 2 + 2> buffer(glyphPageSize * 2 + 2);
+     unsigned bufferLength;
+     if (U_IS_BMP(start)) {
+         bufferLength = glyphPageSize;
+@@ -424,14 +424,32 @@ static RefPtr<GlyphPage> createAndFillGlyphPage(unsigned pageNumber, const Font&
+ 
+ const GlyphPage* Font::glyphPage(unsigned pageNumber) const
+ {
+-    return m_glyphPages.ensure(pageNumber, [&] {
++    static_assert(directMappedGlyphPageCount * GlyphPage::size == 256);
++
++    bool isDirectMapped = pageNumber < directMappedGlyphPageCount;
++    if (isDirectMapped && (m_directMappedGlyphPagesFilled & (1u << pageNumber)))
++        return m_directMappedGlyphPages[pageNumber];
++
++    auto addResult = m_glyphPages.ensure(pageNumber, [&] {
+         return createAndFillGlyphPage(pageNumber, *this);
+-    }).iterator->value.get();
++    });
++    auto* page = addResult.iterator->value.get();
++
++#if USE(CORE_TEXT) && defined(WEBKIT_IOS6) && !ENABLE(OPENTYPE_VERTICAL)
++    if (addResult.isNewEntry && page)
++        prewarmGlyphAdvances(*page);
++#endif
++
++    if (isDirectMapped) {
++        m_directMappedGlyphPages[pageNumber] = page;
++        m_directMappedGlyphPagesFilled |= 1u << pageNumber;
++    }
++    return page;
+ }
+ 
+ Glyph Font::glyphForCharacter(char32_t character) const
+ {
+-    RefPtr page = glyphPage(GlyphPage::pageNumberForCodePoint(character));
++    auto* page = glyphPage(GlyphPage::pageNumberForCodePoint(character));
+     if (!page)
+         return 0;
+     return page->glyphForCharacter(character);
+@@ -439,7 +457,7 @@ Glyph Font::glyphForCharacter(char32_t character) const
+ 
+ GlyphData Font::glyphDataForCharacter(char32_t character) const
+ {
+-    RefPtr page = glyphPage(GlyphPage::pageNumberForCodePoint(character));
++    auto* page = glyphPage(GlyphPage::pageNumberForCodePoint(character));
+     if (!page)
+         return GlyphData();
+     return page->glyphDataForCharacter(character);
+@@ -664,7 +682,7 @@ ColorGlyphType Font::colorGlyphType(Glyph glyph) const
+ 
+     return WTF::switchOn(m_emojiType, [](NoEmojiGlyphs) {
+         return ColorGlyphType::Outline;
+-#if USE(SKIA)
++#if USE(SKIA) || defined(WEBKIT_IOS6)
+     }, [](AllEmojiGlyphs) {
+         return ColorGlyphType::Color;
+ #endif
+diff --git a/Source/WebCore/platform/graphics/Font.h b/Source/WebCore/platform/graphics/Font.h
+index b03ca586e30b8139f86574e871df1c1df8a9b340..fd4edcd48612958d61f34bcd2e2a422d4eb9088f 100644
+--- a/Source/WebCore/platform/graphics/Font.h
++++ b/Source/WebCore/platform/graphics/Font.h
+@@ -120,6 +120,10 @@ public:
+ 
+     const GlyphPage* glyphPage(unsigned pageNumber) const;
+ 
++#if USE(CORE_TEXT) && defined(WEBKIT_IOS6) && !ENABLE(OPENTYPE_VERTICAL)
++    void prewarmGlyphAdvances(const GlyphPage&) const;
++#endif
++
+     void determinePitch();
+     PitchType pitch() const { return m_treatAsFixedPitch ? PitchType::Fixed : PitchType::Variable; }
+     bool canTakeFixedPitchFastContentMeasuring() const { return m_canTakeFixedPitchFastContentMeasuring; }
+@@ -135,6 +139,8 @@ public:
+     WEBCORE_EXPORT static std::optional<Ref<Font>> fromIPCData(IPCFontData&&);
+     WEBCORE_EXPORT IPCFontData toSerializableFont() const;
+     WEBCORE_EXPORT std::optional<InstalledFont> toSerializableInstalledFont() const;
++
++    RetainPtr<CFDictionaryRef> cfStringAttributes(bool enableKerning, const AtomString& locale) const;
+ #endif
+ #if PLATFORM(WIN)
+     SCRIPT_CACHE* scriptCache() const LIFETIME_BOUND { return &m_scriptCache; }
+@@ -174,6 +180,9 @@ private:
+     float platformWidthForGlyph(Glyph) const;
+     Path platformPathForGlyph(Glyph) const;
+ 
++    static constexpr unsigned directMappedGlyphPageCount = 16;
++    mutable std::array<const GlyphPage*, directMappedGlyphPageCount> m_directMappedGlyphPages { };
++    mutable uint16_t m_directMappedGlyphPagesFilled { 0 };
+     mutable HashMap<unsigned, RefPtr<GlyphPage>, IntHash<unsigned>, WTF::UnsignedWithZeroKeyHashTraits<unsigned>> m_glyphPages;
+     mutable GlyphMetricsMap<float> m_glyphToWidthMap;
+     mutable std::unique_ptr<GlyphMetricsMap<FloatRect>> m_glyphToBoundsMap;
+diff --git a/Source/WebCore/platform/graphics/cocoa/FontCacheCoreText.cpp b/Source/WebCore/platform/graphics/cocoa/FontCacheCoreText.cpp
+index 62f2587a040ba25a87067d2e4538403ca94480e1..1dabac14c2a84d099b2713c32919ed75dd9a7c0b 100644
+--- a/Source/WebCore/platform/graphics/cocoa/FontCacheCoreText.cpp
++++ b/Source/WebCore/platform/graphics/cocoa/FontCacheCoreText.cpp
+@@ -42,6 +42,7 @@
+ #include "UnrealizedCoreTextFont.h"
+ #include <CoreText/SFNTLayoutTypes.h>
+ #include <array>
++#include <atomic>
+ #include <pal/spi/cf/CoreTextSPI.h>
+ #include <pal/spi/cocoa/AccessibilitySupportSPI.h>
+ #include <wtf/HashSet.h>
+@@ -71,10 +72,16 @@ static RetainPtr<CFArrayRef> variationAxesWithNonLocalizedAxesNames(CTFontDescri
+ 
+ static RetainPtr<CFArrayRef> variationAxes(CTFontRef font, ShouldLocalizeAxisNames shouldLocalizeAxisNames)
+ {
++#if defined(WEBKIT_IOS6)
++    UNUSED_PARAM(font);
++    UNUSED_PARAM(shouldLocalizeAxisNames);
++    return nullptr;
++#else
+     if (shouldLocalizeAxisNames == ShouldLocalizeAxisNames::Yes)
+         return adoptCF(CTFontCopyVariationAxes(font));
+     RetainPtr fontDescriptor = adoptCF(CTFontCopyFontDescriptor(font));
+     return variationAxesWithNonLocalizedAxesNames(fontDescriptor.get());
++#endif
+ }
+ 
+ VariationDefaultsMap defaultVariationValues(CTFontRef font, ShouldLocalizeAxisNames shouldLocalizeAxisNames)
+@@ -284,8 +291,11 @@ public:
+         m_families.clear();
+         for (auto& item : inputAllowlist)
+             m_families.add(item);
++        s_isEmpty.store(m_families.isEmpty(), std::memory_order_relaxed);
+     }
+ 
++    static bool isEmpty() { return s_isEmpty.load(std::memory_order_relaxed); }
++
+     bool allows(const AtomString& family) const WTF_REQUIRES_LOCK(lock)
+     {
+         return m_families.isEmpty() || m_families.contains(family);
+@@ -294,10 +304,12 @@ public:
+     static Lock lock;
+ 
+ private:
++    static std::atomic<bool> s_isEmpty;
+     HashSet<String, ASCIICaseInsensitiveHash> m_families;
+ };
+ 
+ Lock FontCacheAllowlist::lock;
++std::atomic<bool> FontCacheAllowlist::s_isEmpty { true };
+ 
+ void FontCache::setFontAllowlist(const Vector<String>& inputAllowlist)
+ {
+@@ -444,6 +456,9 @@ FontSelectionCapabilities capabilitiesForFontDescriptor(CTFontDescriptorRef font
+ 
+ static const FontDatabase::InstalledFont* findClosestFont(const FontDatabase::InstalledFontFamily& familyFonts, FontSelectionRequest fontSelectionRequest)
+ {
++    if (familyFonts.installedFonts.size() == 1)
++        return &familyFonts.installedFonts[0];
++
+     auto capabilities = familyFonts.installedFonts.map([](auto& font) {
+         return font.capabilities;
+     });
+@@ -476,8 +491,11 @@ struct FontLookup {
+ 
+ static bool isDotPrefixedForbiddenFont(const AtomString& family)
+ {
++    if (!family.startsWith('.'))
++        return false;
++
+     if (linkedOnOrAfterSDKWithBehavior(SDKAlignedBehavior::ForbidsDotPrefixedFonts))
+-        return family.startsWith('.');
++        return true;
+     return equalLettersIgnoringASCIICase(family, ".applesystemuifontserif"_s)
+         || equalLettersIgnoringASCIICase(family, ".sf ns mono"_s)
+         || equalLettersIgnoringASCIICase(family, ".sf ui mono"_s)
+@@ -487,6 +505,9 @@ static bool isDotPrefixedForbiddenFont(const AtomString& family)
+ 
+ static bool isAllowlistedFamily(const AtomString& family)
+ {
++    if (FontCacheAllowlist::isEmpty())
++        return true;
++
+     if (isSystemFont(family.string()))
+         return true;
+ 
+diff --git a/Source/WebCore/platform/graphics/cocoa/SystemFontDatabaseCoreText.cpp b/Source/WebCore/platform/graphics/cocoa/SystemFontDatabaseCoreText.cpp
+index a8848ac61bf78f62d64cacc405d7a0f5e4cfe797..927002bbe138cae9c84afc276d4a661924e334b4 100644
+--- a/Source/WebCore/platform/graphics/cocoa/SystemFontDatabaseCoreText.cpp
++++ b/Source/WebCore/platform/graphics/cocoa/SystemFontDatabaseCoreText.cpp
+@@ -147,12 +147,40 @@ RetainPtr<CTFontRef> SystemFontDatabaseCoreText::createFontByApplyingWeightWidth
+     CFTypeRef traitsKeys[] = { kCTFontWeightTrait, kCTFontWidthTrait, kCTFontSlantTrait, kCTFontUIFontDesignTrait };
+     CFTypeRef traitsValues[] = { weightNumber.get(), widthNumber.get(), italicsNumber.get(), design ? static_cast<CFTypeRef>(design) : static_cast<CFTypeRef>(kCTFontUIFontDesignDefault) };
+     auto traitsDictionary = adoptCF(CFDictionaryCreate(kCFAllocatorDefault, traitsKeys, traitsValues, std::size(traitsKeys), &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
++#if defined(WEBKIT_IOS6)
++    {
++        auto mutableTraits = adoptCF(CFDictionaryCreateMutableCopy(kCFAllocatorDefault, 0, traitsDictionary.get()));
++        CTFontSymbolicTraits symbolicTraits = 0;
++        if (weight >= kCTFontWeightSemibold)
++            symbolicTraits |= kCTFontTraitBold;
++        if (italic)
++            symbolicTraits |= kCTFontTraitItalic;
++        if (symbolicTraits) {
++            auto symbolicNumber = adoptCF(CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &symbolicTraits));
++            CFDictionarySetValue(mutableTraits.get(), kCTFontSymbolicTrait, symbolicNumber.get());
++        }
++        traitsDictionary = adoptCF(static_cast<CFDictionaryRef>(CFRetain(mutableTraits.get())));
++    }
++#endif
+     auto attributes = adoptCF(CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
+     CFDictionaryAddValue(attributes.get(), kCTFontTraitsAttribute, traitsDictionary.get());
+     addAttributesForInstalledFonts(attributes.get(), allowUserInstalledFonts);
+     auto modification = adoptCF(CTFontDescriptorCreateWithAttributes(attributes.get()));
+-    if (font)
+-        return adoptCF(CTFontCreateCopyWithAttributes(font, size, nullptr, modification.get()));
++    if (font) {
++        auto result = adoptCF(CTFontCreateCopyWithAttributes(font, size, nullptr, modification.get()));
++#if defined(WEBKIT_IOS6)
++        CTFontSymbolicTraits desired = 0;
++        if (weight >= kCTFontWeightSemibold)
++            desired |= kCTFontTraitBold;
++        if (italic)
++            desired |= kCTFontTraitItalic;
++        if (desired) {
++            if (RetainPtr withTraits = adoptCF(CTFontCreateCopyWithSymbolicTraits(result ? result.get() : font, size, nullptr, desired, desired)))
++                return withTraits;
++        }
++#endif
++        return result;
++    }
+     return adoptCF(CTFontCreateWithFontDescriptor(modification.get(), size, nullptr));
+ }
+ 
+diff --git a/Source/WebCore/platform/graphics/cocoa/UnrealizedCoreTextFont.cpp b/Source/WebCore/platform/graphics/cocoa/UnrealizedCoreTextFont.cpp
+index 80a19d046e2b0957902b9bac057714aa026afb2f..91eeca944e2e86db102685fc490f55af4a05a5b6 100644
+--- a/Source/WebCore/platform/graphics/cocoa/UnrealizedCoreTextFont.cpp
++++ b/Source/WebCore/platform/graphics/cocoa/UnrealizedCoreTextFont.cpp
+@@ -32,6 +32,7 @@
+ #include "FontInterrogation.h"
+ #include "FontMetricsNormalization.h"
+ #include <CoreFoundation/CoreFoundation.h>
++#include <CoreText/SFNTLayoutTypes.h>
+ #include <optional>
+ #include <pal/spi/cf/CoreTextSPI.h>
+ 
+@@ -177,11 +178,115 @@ static void addAttributesForFontPalettes(CFMutableDictionaryRef attributes, cons
+     );
+ }
+ 
++#if defined(WEBKIT_IOS6)
++static void appendRawTrueTypeFeature(CFMutableArrayRef features, int type, int selector)
++{
++    auto typeNumber = adoptCF(CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &type));
++    auto selectorNumber = adoptCF(CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &selector));
++    CFTypeRef featureKeys[] = { kCTFontFeatureTypeIdentifierKey, kCTFontFeatureSelectorIdentifierKey };
++    CFTypeRef featureValues[] = { typeNumber.get(), selectorNumber.get() };
++    auto feature = adoptCF(CFDictionaryCreate(kCFAllocatorDefault, featureKeys, featureValues, std::size(featureKeys), &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
++    CFArrayAppendValue(features, feature.get());
++}
++
++static bool tagEquals(FontTag tag, const char (&comparison)[5])
++{
++    for (size_t i = 0; i < tag.size(); ++i) {
++        char c = tag[i];
++        if (c >= 'A' && c <= 'Z')
++            c += 'a' - 'A';
++        if (c != comparison[i])
++            return false;
++    }
++    return true;
++}
++
++static void appendTrueTypeFeature(CFMutableArrayRef features, const FontFeature& feature)
++{
++    if (tagEquals(feature.tag(), "liga") || tagEquals(feature.tag(), "clig")) {
++        if (feature.enabled()) {
++            appendRawTrueTypeFeature(features, kLigaturesType, kCommonLigaturesOnSelector);
++            appendRawTrueTypeFeature(features, kLigaturesType, kContextualLigaturesOnSelector);
++        } else {
++            appendRawTrueTypeFeature(features, kLigaturesType, kCommonLigaturesOffSelector);
++            appendRawTrueTypeFeature(features, kLigaturesType, kContextualLigaturesOffSelector);
++        }
++    } else if (tagEquals(feature.tag(), "dlig")) {
++        if (feature.enabled())
++            appendRawTrueTypeFeature(features, kLigaturesType, kRareLigaturesOnSelector);
++        else
++            appendRawTrueTypeFeature(features, kLigaturesType, kRareLigaturesOffSelector);
++    } else if (tagEquals(feature.tag(), "hlig")) {
++        if (feature.enabled())
++            appendRawTrueTypeFeature(features, kLigaturesType, kHistoricalLigaturesOnSelector);
++        else
++            appendRawTrueTypeFeature(features, kLigaturesType, kHistoricalLigaturesOffSelector);
++    } else if (tagEquals(feature.tag(), "calt")) {
++        if (feature.enabled())
++            appendRawTrueTypeFeature(features, kContextualAlternatesType, kContextualAlternatesOnSelector);
++        else
++            appendRawTrueTypeFeature(features, kContextualAlternatesType, kContextualAlternatesOffSelector);
++    } else if (tagEquals(feature.tag(), "subs") && feature.enabled())
++        appendRawTrueTypeFeature(features, kVerticalPositionType, kInferiorsSelector);
++    else if (tagEquals(feature.tag(), "sups") && feature.enabled())
++        appendRawTrueTypeFeature(features, kVerticalPositionType, kSuperiorsSelector);
++    else if (tagEquals(feature.tag(), "smcp") && feature.enabled())
++        appendRawTrueTypeFeature(features, kLowerCaseType, kLowerCaseSmallCapsSelector);
++    else if (tagEquals(feature.tag(), "c2sc") && feature.enabled())
++        appendRawTrueTypeFeature(features, kUpperCaseType, kUpperCaseSmallCapsSelector);
++    else if (tagEquals(feature.tag(), "pcap") && feature.enabled())
++        appendRawTrueTypeFeature(features, kLowerCaseType, kLowerCasePetiteCapsSelector);
++    else if (tagEquals(feature.tag(), "c2pc") && feature.enabled())
++        appendRawTrueTypeFeature(features, kUpperCaseType, kUpperCasePetiteCapsSelector);
++    else if (tagEquals(feature.tag(), "titl") && feature.enabled())
++        appendRawTrueTypeFeature(features, kStyleOptionsType, kTitlingCapsSelector);
++    else if (tagEquals(feature.tag(), "lnum") && feature.enabled())
++        appendRawTrueTypeFeature(features, kNumberCaseType, kUpperCaseNumbersSelector);
++    else if (tagEquals(feature.tag(), "onum") && feature.enabled())
++        appendRawTrueTypeFeature(features, kNumberCaseType, kLowerCaseNumbersSelector);
++    else if (tagEquals(feature.tag(), "pnum") && feature.enabled())
++        appendRawTrueTypeFeature(features, kNumberSpacingType, kProportionalNumbersSelector);
++    else if (tagEquals(feature.tag(), "tnum") && feature.enabled())
++        appendRawTrueTypeFeature(features, kNumberSpacingType, kMonospacedNumbersSelector);
++    else if (tagEquals(feature.tag(), "frac") && feature.enabled())
++        appendRawTrueTypeFeature(features, kFractionsType, kDiagonalFractionsSelector);
++    else if (tagEquals(feature.tag(), "afrc") && feature.enabled())
++        appendRawTrueTypeFeature(features, kFractionsType, kVerticalFractionsSelector);
++    else if (tagEquals(feature.tag(), "ordn") && feature.enabled())
++        appendRawTrueTypeFeature(features, kVerticalPositionType, kOrdinalsSelector);
++    else if (tagEquals(feature.tag(), "zero") && feature.enabled())
++        appendRawTrueTypeFeature(features, kTypographicExtrasType, kSlashedZeroOnSelector);
++    else if (tagEquals(feature.tag(), "hist") && feature.enabled())
++        appendRawTrueTypeFeature(features, kLigaturesType, kHistoricalLigaturesOnSelector);
++    else if (tagEquals(feature.tag(), "fwid") && feature.enabled())
++        appendRawTrueTypeFeature(features, kTextSpacingType, kMonospacedTextSelector);
++    else if (tagEquals(feature.tag(), "pwid") && feature.enabled())
++        appendRawTrueTypeFeature(features, kTextSpacingType, kProportionalTextSelector);
++    else if (tagEquals(feature.tag(), "ruby") && feature.enabled())
++        appendRawTrueTypeFeature(features, kRubyKanaType, kRubyKanaOnSelector);
++}
++#endif
++
+ static void applyFeatures(CFMutableDictionaryRef attributes, const FeaturesMap& featuresToBeApplied)
+ {
+     if (featuresToBeApplied.isEmpty())
+         return;
+ 
++#if defined(WEBKIT_IOS6)
++    RetainPtr<CFMutableArrayRef> aatFeatures;
++    if (RetainPtr existing = static_cast<CFArrayRef>(CFDictionaryGetValue(attributes, kCTFontFeatureSettingsAttribute)))
++        aatFeatures = adoptCF(CFArrayCreateMutableCopy(kCFAllocatorDefault, 0, existing.get()));
++    else
++        aatFeatures = adoptCF(CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks));
++
++    for (auto& p : featuresToBeApplied)
++        appendTrueTypeFeature(aatFeatures.get(), FontFeature(p.key, p.value));
++
++    if (CFArrayGetCount(aatFeatures.get()))
++        CFDictionarySetValue(attributes, kCTFontFeatureSettingsAttribute, aatFeatures.get());
++    return;
++#else
++
+     RetainPtr<CFMutableArrayRef> featureArray;
+     if (RetainPtr fontFeatureSettings = static_cast<CFArrayRef>(CFDictionaryGetValue(attributes, kCTFontFeatureSettingsAttribute)))
+         featureArray = adoptCF(CFArrayCreateMutableCopy(kCFAllocatorDefault, 0, fontFeatureSettings.get()));
+@@ -194,6 +299,7 @@ static void applyFeatures(CFMutableDictionaryRef attributes, const FeaturesMap&
+     }
+ 
+     CFDictionarySetValue(attributes, kCTFontFeatureSettingsAttribute, featureArray.get());
++#endif
+ }
+ 
+ void UnrealizedCoreTextFont::applyVariations(CFMutableDictionaryRef attributes, const VariationsMap& variationsToBeApplied)
+@@ -201,6 +307,11 @@ void UnrealizedCoreTextFont::applyVariations(CFMutableDictionaryRef attributes,
+     if (variationsToBeApplied.isEmpty())
+         return;
+ 
++#if defined(WEBKIT_IOS6)
++    UNUSED_PARAM(attributes);
++    return;
++#else
++
+     RetainPtr<CFMutableDictionaryRef> variationDictionary;
+     if (RetainPtr fontVariations = static_cast<CFDictionaryRef>(CFDictionaryGetValue(attributes, kCTFontVariationAttribute)))
+         variationDictionary = adoptCF(CFDictionaryCreateMutableCopy(kCFAllocatorDefault, 0, fontVariations.get()));
+@@ -215,6 +326,7 @@ void UnrealizedCoreTextFont::applyVariations(CFMutableDictionaryRef attributes,
+     }
+ 
+     CFDictionarySetValue(attributes, kCTFontVariationAttribute, variationDictionary.get());
++#endif
+ }
+ 
+ void UnrealizedCoreTextFont::modifyFromContext(CFMutableDictionaryRef attributes, const FontDescription& fontDescription, const FontCreationContext& fontCreationContext, ApplyTraitsVariations applyTraitsVariations, float weight, float width, float slope, CGFloat size, const OpticalSizingType& opticalSizingType)
+@@ -327,6 +439,26 @@ RetainPtr<CTFontRef> UnrealizedCoreTextFont::realize() const
+     if (!static_cast<bool>(*this))
+         return nullptr;
+ 
++#if defined(WEBKIT_IOS6)
++    if (([]() { static const bool logFontsOnce = getenv("WEBKIT_IOS6_LOG_FONTS") != nullptr; return logFontsOnce; }())) {
++        auto base = WTF::switchOn(m_baseFont, [](const RetainPtr<CTFontRef>& font) -> RetainPtr<CFStringRef> {
++            return font ? adoptCF(CTFontCopyFamilyName(font.get())) : nullptr;
++        }, [](const RetainPtr<CTFontDescriptorRef>& descriptor) -> RetainPtr<CFStringRef> {
++            return descriptor ? adoptCF(static_cast<CFStringRef>(CTFontDescriptorCopyAttribute(descriptor.get(), kCTFontFamilyNameAttribute))) : nullptr;
++        });
++        auto keys = adoptCF(CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, nullptr));
++        CFDictionaryApplyFunction(m_attributes.get(), [](const void* key, const void*, void* context) {
++            CFDictionarySetValue(static_cast<CFMutableDictionaryRef>(context), key, kCFBooleanTrue);
++        }, keys.get());
++        auto description = adoptCF(CFCopyDescription(keys.get()));
++        auto baseDescription = base ? String(base.get()).utf8() : CString("(no base)"_s);
++        fprintf(stderr, "[ios6 font] realize %s size %g keys %s\n",
++            baseDescription.legacyCStringPointer(), m_size,
++            String(description.get()).utf8().legacyCStringPointer());
++        fflush(stderr);
++    }
++#endif
++
+     auto font = WTF::switchOn(m_baseFont, [this](const RetainPtr<CTFontRef>& font) -> RetainPtr<CTFontRef> {
+         if (!font)
+             return nullptr;
+diff --git a/Source/WebCore/platform/graphics/coretext/FontCoreText.cpp b/Source/WebCore/platform/graphics/coretext/FontCoreText.cpp
+index 532443ee5dd02640d172c0717dc075a7962d3a91..3f5de4e120fb4edc79082586d2303537c9566613 100644
+--- a/Source/WebCore/platform/graphics/coretext/FontCoreText.cpp
++++ b/Source/WebCore/platform/graphics/coretext/FontCoreText.cpp
+@@ -34,6 +34,7 @@
+ #include "FontCascade.h"
+ #include "FontCustomPlatformData.h"
+ #include "FontDescription.h"
++#include "GlyphPage.h"
+ #include "LocaleCocoa.h"
+ #include "Logging.h"
+ #include "OpenTypeCG.h"
+@@ -167,10 +168,14 @@ void FontBase::platformInit()
+ #endif
+ 
+     if (CTFontGetSymbolicTraits(ctFont.get()) & kCTFontTraitColorGlyphs) {
++#if defined(WEBKIT_IOS6)
++        m_emojiType = AllEmojiGlyphs { };
++#else
+         if (RetainPtr cfBitVector = adoptCF(CTFontCopyColorGlyphCoverage(ctFont.get())))
+             m_emojiType = SomeEmojiGlyphs { BitVector(cfBitVector.get()) };
+         else
+             m_emojiType = NoEmojiGlyphs { };
++#endif
+     } else
+         m_emojiType = NoEmojiGlyphs { };
+ 
+@@ -269,6 +274,9 @@ static RetainPtr<CFDictionaryRef> smallCapsTrueTypeDictionary(int rawKey, int ra
+ 
+ static void unionBitVectors(BitVector& result, CFBitVectorRef source)
+ {
++    if (!source)
++        return;
++
+     CFIndex length = CFBitVectorGetCount(source);
+     result.ensureSize(length);
+     CFIndex min = 0;
+@@ -416,7 +424,7 @@ static inline std::optional<CFStringRef> openTypeFeature(CFDictionaryRef feature
+ {
+     ASSERT(isOpenTypeFeature(feature));
+     RetainPtr tag = static_cast<CFStringRef>(CFDictionaryGetValue(feature, kCTFontOpenTypeFeatureTag));
+-    int rawValue;
++    int rawValue = 0;
+     RetainPtr value = static_cast<CFNumberRef>(CFDictionaryGetValue(feature, kCTFontOpenTypeFeatureValue));
+     auto success = CFNumberGetValue(value.get(), kCFNumberIntType, &rawValue);
+     ASSERT_UNUSED(success, success);
+@@ -426,11 +434,11 @@ static inline std::optional<CFStringRef> openTypeFeature(CFDictionaryRef feature
+ static inline std::pair<int, int> trueTypeFeature(CFDictionaryRef feature)
+ {
+     ASSERT(isTrueTypeFeature(feature));
+-    int rawType;
++    int rawType = 0;
+     RetainPtr type = static_cast<CFNumberRef>(CFDictionaryGetValue(feature, kCTFontFeatureTypeIdentifierKey));
+     auto success = CFNumberGetValue(type.get(), kCFNumberIntType, &rawType);
+     ASSERT_UNUSED(success, success);
+-    int rawSelector;
++    int rawSelector = 0;
+     RetainPtr selector = static_cast<CFNumberRef>(CFDictionaryGetValue(feature, kCTFontFeatureSelectorIdentifierKey));
+     success = CFNumberGetValue(selector.get(), kCFNumberIntType, &rawSelector);
+     ASSERT_UNUSED(success, success);
+@@ -585,11 +593,40 @@ float Font::platformWidthForGlyph(Glyph glyph) const
+     if (platformData().size()) {
+         bool horizontal = platformData().orientation() == FontOrientation::Horizontal;
+         CTFontOrientation orientation = horizontal || m_isBrokenIdeographFallback ? kCTFontOrientationHorizontal : kCTFontOrientationVertical;
+-        CTFontGetAdvancesForGlyphs(protect(ctFont()).get(), orientation, &glyph, &advance, 1);
++        CTFontGetAdvancesForGlyphs(ctFont(), orientation, &glyph, &advance, 1);
+     }
+     return advance.width;
+ }
+ 
++#if defined(WEBKIT_IOS6) && !ENABLE(OPENTYPE_VERTICAL)
++void Font::prewarmGlyphAdvances(const GlyphPage& page) const
++{
++    if (!platformData().size())
++        return;
++
++    std::array<CGGlyph, GlyphPage::size> glyphs;
++    unsigned count = 0;
++    for (unsigned i = 0; i < GlyphPage::size; ++i) {
++        auto glyph = page.glyphForIndex(i);
++        if (!glyph || isZeroWidthSpaceGlyph(glyph))
++            continue;
++        glyphs[count++] = glyph;
++    }
++
++    if (count < 2)
++        return;
++
++    bool horizontal = platformData().orientation() == FontOrientation::Horizontal;
++    CTFontOrientation orientation = horizontal || m_isBrokenIdeographFallback ? kCTFontOrientationHorizontal : kCTFontOrientationVertical;
++
++    std::array<CGSize, GlyphPage::size> advances;
++    CTFontGetAdvancesForGlyphs(ctFont(), orientation, glyphs.data(), advances.data(), count);
++
++    for (unsigned i = 0; i < count; ++i)
++        m_glyphToWidthMap.metricsSlotForGlyph(glyphs[i]) = advances[i].width;
++}
++#endif
++
+ GlyphBufferAdvance Font::applyTransforms(GlyphBuffer& glyphBuffer, unsigned beginningGlyphIndex, unsigned beginningStringIndex, bool enableKerning, bool requiresShaping, const AtomString& locale, StringView text, TextDirection textDirection) const
+ {
+     UNUSED_PARAM(requiresShaping);
+@@ -597,6 +634,16 @@ GlyphBufferAdvance Font::applyTransforms(GlyphBuffer& glyphBuffer, unsigned begi
+     if (!platformData().size())
+         return makeGlyphBufferAdvance();
+ 
++#if defined(WEBKIT_IOS6)
++    UNUSED_PARAM(beginningStringIndex);
++    UNUSED_PARAM(enableKerning);
++    UNUSED_PARAM(locale);
++    UNUSED_PARAM(text);
++    if (textDirection == TextDirection::RTL)
++        glyphBuffer.reverse(beginningGlyphIndex, glyphBuffer.size() - beginningGlyphIndex);
++    return makeGlyphBufferAdvance();
++#endif
++
+     auto handler = ^(CFRange range, CGGlyph** newGlyphsPointer, CGSize** newAdvancesPointer, CGPoint** newOffsetsPointer, CFIndex** newIndicesPointer)
+     {
+         range.location = std::min(std::max(range.location, static_cast<CFIndex>(0)), static_cast<CFIndex>(glyphBuffer.size()));
+@@ -764,7 +811,7 @@ FloatRect Font::platformBoundsForGlyph(Glyph glyph) const
+ {
+     FloatRect boundingBox;
+     CGRect ignoredRect = { };
+-    boundingBox = CTFontGetBoundingRectsForGlyphs(protect(ctFont()).get(), platformData().orientation() == FontOrientation::Vertical ? kCTFontOrientationVertical : kCTFontOrientationHorizontal, &glyph, &ignoredRect, 1);
++    boundingBox = CTFontGetBoundingRectsForGlyphs(ctFont(), platformData().orientation() == FontOrientation::Vertical ? kCTFontOrientationVertical : kCTFontOrientationHorizontal, &glyph, &ignoredRect, 1);
+     boundingBox.setY(-boundingBox.maxY());
+     boundingBox.setWidth(boundingBox.width() + m_syntheticBoldOffset);
+ 
+@@ -774,7 +821,7 @@ FloatRect Font::platformBoundsForGlyph(Glyph glyph) const
+ Vector<FloatRect, Font::inlineGlyphRunCapacity> Font::platformBoundsForGlyphs(const Vector<Glyph, inlineGlyphRunCapacity>& glyphs) const
+ {
+     Vector<CGRect, inlineGlyphRunCapacity> rectsForGlyphs(glyphs.size());
+-    CTFontGetBoundingRectsForGlyphs(protect(ctFont()).get(), platformData().orientation() == FontOrientation::Vertical ? kCTFontOrientationVertical : kCTFontOrientationHorizontal, glyphs.span().data(), rectsForGlyphs.mutableSpan().data(), rectsForGlyphs.size());
++    CTFontGetBoundingRectsForGlyphs(ctFont(), platformData().orientation() == FontOrientation::Vertical ? kCTFontOrientationVertical : kCTFontOrientationHorizontal, glyphs.span().data(), rectsForGlyphs.mutableSpan().data(), rectsForGlyphs.size());
+ 
+     return rectsForGlyphs.map<Vector<FloatRect, inlineGlyphRunCapacity>>([&](const auto& rect) -> auto {
+         FloatRect boundingBox(rect);
+diff --git a/Source/WebCore/platform/graphics/coretext/FontCustomPlatformDataCoreText.cpp b/Source/WebCore/platform/graphics/coretext/FontCustomPlatformDataCoreText.cpp
+index f359c9b16612926b8b9187f0be6b94400bd92c4f..d8c002bd07d432e0d9f7dcf1492f7b2d35a02288 100644
+--- a/Source/WebCore/platform/graphics/coretext/FontCustomPlatformDataCoreText.cpp
++++ b/Source/WebCore/platform/graphics/coretext/FontCustomPlatformDataCoreText.cpp
+@@ -116,9 +116,29 @@ static RetainPtr<CFDataRef> extractFontCustomPlatformDataMemorySafe(const Shared
+ 
+ RefPtr<FontCustomPlatformData> FontCustomPlatformData::create(SharedBuffer& buffer, const String& itemInCollection)
+ {
++#if defined(WEBKIT_IOS6)
++    RetainPtr sfntData = buffer.createCFData();
++    if (!sfntData)
++        return nullptr;
++    RetainPtr provider = adoptCF(CGDataProviderCreateWithCFData(sfntData.get()));
++    if (!provider)
++        return nullptr;
++    RetainPtr cgFont = adoptCF(CGFontCreateWithDataProvider(provider.get()));
++    if (!cgFont)
++        return nullptr;
++    RetainPtr ctFont = adoptCF(CTFontCreateWithGraphicsFont(cgFont.get(), 0, nullptr, nullptr));
++    if (!ctFont)
++        return nullptr;
++    RetainPtr fontDescriptor = adoptCF(CTFontCopyFontDescriptor(ctFont.get()));
++    if (!fontDescriptor)
++        return nullptr;
++
++    Ref bufferRef = SharedBuffer::create(sfntData.get());
++    FontPlatformData::CreationData creationData = { WTF::move(bufferRef), itemInCollection };
++    return adoptRef(new FontCustomPlatformData(fontDescriptor.get(), WTF::move(creationData)));
++#else
+     RetainPtr extractedData = extractFontCustomPlatformDataSystemParser(buffer, itemInCollection);
+     if (!extractedData) {
+-        // Something is wrong with the font.
+         return nullptr;
+     }
+ 
+@@ -127,6 +147,7 @@ RefPtr<FontCustomPlatformData> FontCustomPlatformData::create(SharedBuffer& buff
+ 
+     FontPlatformData::CreationData creationData = { WTF::move(bufferRef), itemInCollection };
+     return adoptRef(new FontCustomPlatformData(fontDescriptor.get(), WTF::move(creationData)));
++#endif
+ }
+ 
+ RefPtr<FontCustomPlatformData> FontCustomPlatformData::createMemorySafe(SharedBuffer& buffer, const String& itemInCollection)
+diff --git a/Source/WebCore/platform/graphics/filters/FEBlend.cpp b/Source/WebCore/platform/graphics/filters/FEBlend.cpp
+index 59a01faf2ca40e7a54a6e09db1d38b95cc4adca3..a6715f82dc89550e94914d0cda2dfe96dab2c532 100644
+--- a/Source/WebCore/platform/graphics/filters/FEBlend.cpp
++++ b/Source/WebCore/platform/graphics/filters/FEBlend.cpp
+@@ -82,6 +82,18 @@ std::unique_ptr<FilterEffectApplier> FEBlend::createAcceleratedApplier() const
+ std::unique_ptr<FilterEffectApplier> FEBlend::createSoftwareApplier() const
+ {
+ #if HAVE(ARM_NEON_INTRINSICS)
++#if defined(WEBKIT_IOS6)
++    switch (blendMode()) {
++    case BlendMode::Normal:
++    case BlendMode::Multiply:
++    case BlendMode::Screen:
++    case BlendMode::Darken:
++    case BlendMode::Lighten:
++        break;
++    default:
++        return FilterEffectApplier::create<FEBlendSoftwareApplier>(*this);
++    }
++#endif
+     return FilterEffectApplier::create<FEBlendNeonApplier>(*this);
+ #else
+     return FilterEffectApplier::create<FEBlendSoftwareApplier>(*this);
+diff --git a/Source/WebCore/platform/graphics/filters/software/FEBlendSoftwareApplier.cpp b/Source/WebCore/platform/graphics/filters/software/FEBlendSoftwareApplier.cpp
+index f8450547c223ba6f762c0e888821754901b1ff5d..6c70c95a443b23d9999a2451d7e89a05c5f3d225 100644
+--- a/Source/WebCore/platform/graphics/filters/software/FEBlendSoftwareApplier.cpp
++++ b/Source/WebCore/platform/graphics/filters/software/FEBlendSoftwareApplier.cpp
+@@ -26,7 +26,7 @@
+ #include "config.h"
+ #include "FEBlendSoftwareApplier.h"
+ 
+-#if !HAVE(ARM_NEON_INTRINSICS)
++#if !HAVE(ARM_NEON_INTRINSICS) || defined(WEBKIT_IOS6)
+ 
+ #include "FEBlend.h"
+ #include "FloatPoint.h"
+diff --git a/Source/WebCore/platform/graphics/filters/software/FEBlendSoftwareApplier.h b/Source/WebCore/platform/graphics/filters/software/FEBlendSoftwareApplier.h
+index 98186d7efcea560b433ed851737daf47f2a77f53..63a33d36e461615d8b5bd497ec77bca9db341345 100644
+--- a/Source/WebCore/platform/graphics/filters/software/FEBlendSoftwareApplier.h
++++ b/Source/WebCore/platform/graphics/filters/software/FEBlendSoftwareApplier.h
+@@ -23,7 +23,7 @@
+ 
+ #pragma once
+ 
+-#if !HAVE(ARM_NEON_INTRINSICS)
++#if !HAVE(ARM_NEON_INTRINSICS) || defined(WEBKIT_IOS6)
+ 
+ #include "FilterEffectApplier.h"
+ #include <wtf/TZoneMalloc.h>
+diff --git a/Source/WebCore/rendering/ios/RenderThemeIOS.mm b/Source/WebCore/rendering/ios/RenderThemeIOS.mm
+index b7a40a42b4018cd71ee0c55a2531a2f44ae51c2d..761834d08ea371725d5b2f273442a598475d8bc0 100644
+--- a/Source/WebCore/rendering/ios/RenderThemeIOS.mm
++++ b/Source/WebCore/rendering/ios/RenderThemeIOS.mm
+@@ -1027,8 +1027,11 @@ CornerRadii barCornerRadii(
+ Color RenderThemeIOS::systemFocusRingColor()
+ {
+     if (!cachedFocusRingColor().has_value()) {
+-        // FIXME: Should be using +keyboardFocusIndicatorColor. For now, work around <rdar://problem/50838886>.
++#if defined(WEBKIT_IOS6)
++        cachedFocusRingColor() = SRGBA<uint8_t> { 0, 122, 255 };
++#else
+         cachedFocusRingColor() = colorFromCocoaColor([PAL::getUIColorClassSingleton() systemBlueColor]);
++#endif
+     }
+     return *cachedFocusRingColor();
+ }
+@@ -1176,6 +1179,10 @@ CornerRadii barCornerRadii(
+ 
+ static inline std::optional<Color> systemColorFromCSSValueSystemColorInformation(CSSValueSystemColorInformation systemColorInformation, bool useDarkAppearance)
+ {
++#if defined(WEBKIT_IOS6)
++    if (![PAL::getUIColorClassSingleton() respondsToSelector:systemColorInformation.selector])
++        return std::nullopt;
++#endif
+     UIColor *color = wtfObjCMsgSend<UIColor *>(PAL::getUIColorClassSingleton(), systemColorInformation.selector);
+     if (!color)
+         return std::nullopt;
+@@ -1203,6 +1210,56 @@ CornerRadii barCornerRadii(
+     return std::nullopt;
+ }
+ 
++#if defined(WEBKIT_IOS6)
++static CSSValueID standardEquivalentOfAppleSystemColor(CSSValueID cssValueID)
++{
++    switch (cssValueID) {
++    case CSSValueAppleSystemBlue:
++        return CSSValueAccentcolor;
++
++    case CSSValueWebkitControlBackground:
++    case CSSValueAppleSystemOpaqueFill:
++    case CSSValueAppleSystemOpaqueSecondaryFill:
++    case CSSValueAppleSystemOpaqueSecondaryFillDisabled:
++    case CSSValueAppleSystemOpaqueTertiaryFill:
++        return CSSValueButtonface;
++
++    case CSSValueAppleSystemLabel:
++    case CSSValueAppleSystemHeaderText:
++        return CSSValueCanvastext;
++
++    case CSSValueAppleSystemSecondaryLabel:
++    case CSSValueAppleSystemTertiaryLabel:
++    case CSSValueAppleSystemQuaternaryLabel:
++    case CSSValueAppleSystemPlaceholderText:
++        return CSSValueGraytext;
++
++    case CSSValueAppleSystemBackground:
++    case CSSValueAppleSystemSecondaryBackground:
++    case CSSValueAppleSystemTertiaryBackground:
++    case CSSValueAppleSystemGroupedBackground:
++    case CSSValueAppleSystemSecondaryGroupedBackground:
++    case CSSValueAppleSystemTertiaryGroupedBackground:
++    case CSSValueAppleSystemTextBackground:
++    case CSSValueAppleSystemControlBackground:
++        return CSSValueCanvas;
++
++    case CSSValueAppleSystemSeparator:
++    case CSSValueAppleSystemOpaqueSeparator:
++    case CSSValueAppleSystemContainerBorder:
++    case CSSValueAppleSystemGrid:
++        return CSSValueButtonborder;
++
++    case CSSValueAppleSystemSelectedContentBackground:
++    case CSSValueAppleSystemUnemphasizedSelectedContentBackground:
++        return CSSValueHighlight;
++
++    default:
++        return CSSValueInvalid;
++    }
++}
++#endif
++
+ static RenderThemeIOS::CSSValueToSystemColorMap& globalCSSValueToSystemColorMap()
+ {
+     static NeverDestroyed<RenderThemeIOS::CSSValueToSystemColorMap> colorMap;
+@@ -1272,6 +1329,10 @@ CornerRadii barCornerRadii(
+         auto color = systemColorFromCSSValueID(cssValueID, useDarkAppearance, useElevatedUserInterfaceLevel);
+         if (color)
+             return *color;
++#if defined(WEBKIT_IOS6)
++        if (auto standardValueID = standardEquivalentOfAppleSystemColor(cssValueID); standardValueID != CSSValueInvalid)
++            return RenderTheme::systemColor(standardValueID, options);
++#endif
+         return RenderTheme::systemColor(cssValueID, options);
+     }();
+ 
+diff --git a/Source/cmake/OptionsIOS.cmake b/Source/cmake/OptionsIOS.cmake
+new file mode 100644
+index 0000000000000000000000000000000000000000..396576d453ba8ecd8ba12e4f3dc81a810af5b026
+--- /dev/null
++++ b/Source/cmake/OptionsIOS.cmake
+@@ -0,0 +1,237 @@
++include(WebKitVersion)
++
++WEBKIT_OPTION_BEGIN()
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_API_TESTS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_LAYOUT_TESTS PRIVATE ON)
++
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_APPLE_PAY PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_APPLE_PAY_DELEGATED_REQUEST PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_APPLICATION_MANIFEST PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_ASYNC_SCROLLING PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_ATTACHMENT_ELEMENT PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_AUTOCAPITALIZE PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_AVF_CAPTIONS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_CACHE_PARTITIONING PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_CONTENT_EXTENSIONS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_CONTENT_FILTERING PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_DARK_MODE_CSS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_DATACUE_VALUE PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_DRAG_SUPPORT PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_ENCRYPTED_MEDIA PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_EXPERIMENTAL_FEATURES PRIVATE OFF)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_GAMEPAD PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_GPU_PROCESS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_INSPECTOR_ALTERNATE_DISPATCHERS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_INSPECTOR_EXTENSIONS PRIVATE OFF)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_INSPECTOR_TELEMETRY PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_LEGACY_CUSTOM_PROTOCOL_MANAGER PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_LEGACY_ENCRYPTED_MEDIA PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_MEDIA_SOURCE PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_MEDIA_RECORDER PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_MEDIA_STREAM PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_MEMORY_SAMPLER PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_PAYMENT_REQUEST PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_PERIODIC_MEMORY_MONITOR PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_PICTURE_IN_PICTURE_API PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_RESOURCE_USAGE PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_SANDBOX_EXTENSIONS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_SHAREABLE_RESOURCE PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_STREAMING_IPC_IN_LOG_FORWARDING PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_POINTER_LOCK PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_SPEECH_SYNTHESIS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_TELEPHONE_NUMBER_DETECTION PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_TEXT_AUTOSIZING PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_TOUCH_EVENTS PRIVATE ${USE_APPLE_INTERNAL_SDK})
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_IOS_TOUCH_EVENTS PRIVATE ${USE_APPLE_INTERNAL_SDK})
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_IOS_GESTURE_EVENTS PRIVATE ${USE_APPLE_INTERNAL_SDK})
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_WEBKIT_TOUCH_CALLOUT_CSS_PROPERTY PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_VARIATION_FONTS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_VIDEO_PRESENTATION_MODE PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_WEBDRIVER_KEYBOARD_INTERACTIONS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_WEBXR PRIVATE OFF)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_WEB_API_STATISTICS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_WEB_AUTHN PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_WEB_CODECS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_WEB_RTC PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_WIRELESS_PLAYBACK_TARGET PRIVATE ON)
++
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_ACCESSIBILITY_ISOLATED_TREE PRIVATE OFF)
++
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_CONTEXT_MENUS PRIVATE OFF)
++
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_WEBGPU PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(USE_AVIF PRIVATE OFF)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(USE_JPEGXL PRIVATE OFF)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(USE_LCMS PRIVATE OFF)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(USE_WOFF2 PRIVATE OFF)
++
++if (USE_WEBP)
++    find_package(WebP COMPONENTS demux)
++    if (NOT WebP_FOUND)
++        message(FATAL_ERROR "libwebp is required for USE_WEBP")
++    endif ()
++    SET_AND_EXPOSE_TO_BUILD(USE_WEBP ON)
++endif ()
++
++if (USE_WOFF2)
++    find_package(WOFF2 1.0.2 COMPONENTS dec)
++    if (NOT WOFF2_FOUND)
++        message(FATAL_ERROR "libwoff2dec is required for USE_WOFF2")
++    endif ()
++endif ()
++
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_MEDIA_SOURCE_IN_WORKERS PRIVATE ON)
++
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_OFFSCREEN_CANVAS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_OFFSCREEN_CANVAS_IN_WORKERS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_WK_WEB_EXTENSIONS PRIVATE ON)
++
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_PREDEFINED_COLOR_SPACE_DISPLAY_P3 PRIVATE ON)
++
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_APPLE_PAY_AUTOMATIC_RELOAD_LINE_ITEM PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_APPLE_PAY_AUTOMATIC_RELOAD_PAYMENTS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_APPLE_PAY_COUPON_CODE PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_APPLE_PAY_DEFERRED_LINE_ITEM PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_APPLE_PAY_DEFERRED_PAYMENTS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_APPLE_PAY_DELEGATED_REQUEST PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_APPLE_PAY_DISBURSEMENTS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_APPLE_PAY_INSTALLMENTS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_APPLE_PAY_LATER_AVAILABILITY PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_APPLE_PAY_MERCHANT_CATEGORY_CODE PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_APPLE_PAY_MULTI_MERCHANT_PAYMENTS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_APPLE_PAY_PAYMENT_ORDER_DETAILS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_APPLE_PAY_RECURRING_LINE_ITEM PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_APPLE_PAY_RECURRING_PAYMENTS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_APPLE_PAY_SELECTED_SHIPPING_METHOD PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_APPLE_PAY_SHIPPING_CONTACT_EDITING_MODE PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_APPLE_PAY_SHIPPING_METHOD_DATE_COMPONENTS_RANGE PRIVATE ON)
++
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_MINIBROWSER PUBLIC OFF)
++
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_WEBDRIVER_KEYBOARD_GRAPHEME_CLUSTERS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_MEDIA_CONTROLS_CONTEXT_MENUS PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_MODEL_ELEMENT PRIVATE ON)
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_WRITING_TOOLS PRIVATE ON)
++
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_BACK_FORWARD_LIST_SWIFT PRIVATE OFF)
++
++WEBKIT_OPTION_END()
++
++if (CMAKE_IOS_SIMULATOR OR CMAKE_OSX_SYSROOT MATCHES "[Ss]imulator")
++    set(WEBKIT_PLATFORM_NAME "iPhoneSimulator")
++    set(WEBKIT_SDK_NAME "iphonesimulator")
++else ()
++    set(WEBKIT_PLATFORM_NAME "iPhoneOS")
++    set(WEBKIT_SDK_NAME "iphoneos")
++endif ()
++string(REGEX MATCH "^[0-9]+\\.[0-9]+" _sdk_major_minor "${_sdk_version}")
++if (_sdk_major_minor AND (NOT CMAKE_OSX_DEPLOYMENT_TARGET OR CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS _sdk_major_minor))
++    set(CMAKE_OSX_DEPLOYMENT_TARGET "${_sdk_major_minor}" CACHE STRING "Minimum iOS version" FORCE)
++    message(WARNING "Deployment target auto-set to SDK version: ${CMAKE_OSX_DEPLOYMENT_TARGET} (SPI header guards require this)")
++endif ()
++
++WEBKIT_XCRUN(_clang -f clang)
++if (EXISTS "${_clang}")
++    set(CMAKE_C_COMPILER "${_clang}")
++    set(CMAKE_CXX_COMPILER "${_clang}++")
++    set(CMAKE_OBJC_COMPILER "${_clang}")
++    set(CMAKE_OBJCXX_COMPILER "${_clang}++")
++endif ()
++
++include(OptionsCocoa)
++
++enable_language(OBJC OBJCXX)
++
++find_package(ZLIB REQUIRED)
++
++if (TARGET ZLIB::ZLIB)
++    set_target_properties(ZLIB::ZLIB PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "")
++endif ()
++
++set(WebKit_LIBRARY_TYPE SHARED)
++
++set(bmalloc_LIBRARY_TYPE OBJECT)
++set(WTF_LIBRARY_TYPE OBJECT)
++set(JavaScriptCore_LIBRARY_TYPE SHARED)
++set(WebCore_LIBRARY_TYPE SHARED)
++
++if (CMAKE_OSX_SYSROOT)
++    add_link_options("-F${CMAKE_OSX_SYSROOT}/System/Library/Frameworks")
++    add_link_options("-F${CMAKE_OSX_SYSROOT}/System/Library/PrivateFrameworks")
++    add_compile_options("$<$<COMPILE_LANGUAGE:Swift>:SHELL:-Fsystem ${CMAKE_OSX_SYSROOT}/System/Library/PrivateFrameworks>")
++    set(WEBKIT_PRIVATE_FRAMEWORKS_COMPILE_FLAG "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-iframework${CMAKE_OSX_SYSROOT}/System/Library/PrivateFrameworks>")
++endif ()
++
++if (CMAKE_OSX_SYSROOT MATCHES "\\.Internal\\.sdk$")
++    add_compile_options("$<$<COMPILE_LANGUAGE:Swift>:-DUSE_APPLE_INTERNAL_SDK>")
++    add_compile_options("$<$<COMPILE_LANGUAGE:Swift>:SHELL:-Xcc -DUSE_APPLE_INTERNAL_SDK>")
++endif ()
++
++set(_textinput_private "${CMAKE_OSX_SYSROOT}/System/Library/PrivateFrameworks/TextInput.framework/Modules/module.private.modulemap")
++if (EXISTS "${_textinput_private}")
++    set(_empty_modulemap "${CMAKE_BINARY_DIR}/empty-module.private.modulemap")
++    file(WRITE "${_empty_modulemap}" "")
++    set(_vfs_overlay "${CMAKE_BINARY_DIR}/ios-swift-vfs-overlay.yaml")
++    file(WRITE "${_vfs_overlay}"
++"{
++  \"version\": 0,
++  \"case-sensitive\": false,
++  \"roots\": [
++    {
++      \"name\": \"${_textinput_private}\",
++      \"type\": \"file\",
++      \"external-contents\": \"${_empty_modulemap}\"
++    }
++  ]
++}
++")
++    add_compile_options("$<$<COMPILE_LANGUAGE:Swift>:SHELL:-Xcc -ivfsoverlay -Xcc ${_vfs_overlay}>")
++endif ()
++
++add_compile_options(
++    "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-shorten-64-to-32>"
++    "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-sign-conversion>"
++    "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-conversion>"
++    "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-float-conversion>"
++    "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-shadow>"
++    "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-overloaded-virtual>"
++    "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-reserved-identifier>"
++    "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-exit-time-destructors>"
++    "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-implicit-fallthrough>"
++)
++
++add_compile_options("$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-error=#warnings>")
++add_compile_options("$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-objc-method-access>")
++
++add_compile_options(
++    "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-fno-common>"
++)
++
++if (ENABLE_SANITIZERS)
++    add_compile_definitions(ENABLE_CONJECTURE_ASSERT=1)
++endif ()
++
++set(IOS_DEPLOYMENT_TARGET "${CMAKE_OSX_DEPLOYMENT_TARGET}" CACHE STRING "" FORCE)
++if (CMAKE_IOS_SIMULATOR OR CMAKE_OSX_SYSROOT MATCHES "[Ss]imulator")
++    set(PLATFORM_NAME "iPhoneSimulator" CACHE STRING "" FORCE)
++else ()
++    set(PLATFORM_NAME "iPhoneOS" CACHE STRING "" FORCE)
++endif ()
++
++set(CMAKE_BUILD_WITH_INSTALL_NAME_DIR ON)
++set(JavaScriptCore_INSTALL_NAME_DIR "/System/Library/Frameworks" CACHE STRING "" FORCE)
++set(WebKit_INSTALL_NAME_DIR "/System/Library/Frameworks" CACHE STRING "" FORCE)
++set(WebCore_INSTALL_NAME_DIR "/System/Library/PrivateFrameworks" CACHE STRING "" FORCE)
++set(WebGPU_INSTALL_NAME_DIR "/System/Library/PrivateFrameworks" CACHE STRING "" FORCE)
++set(WebKitLegacy_INSTALL_NAME_DIR "/System/Library/PrivateFrameworks" CACHE STRING "" FORCE)
++
++if (WEBKIT_ADDITIONS_INCLUDE_PATH AND EXISTS "${WEBKIT_ADDITIONS_INCLUDE_PATH}/WebKitAdditions/CMake/OptionsIOS.cmake")
++    message(STATUS "WebKitAdditions CMake: ${WEBKIT_ADDITIONS_INCLUDE_PATH}/WebKitAdditions/CMake/OptionsIOS.cmake")
++    include("${WEBKIT_ADDITIONS_INCLUDE_PATH}/WebKitAdditions/CMake/OptionsIOS.cmake")
++endif ()
++
++if (CMAKE_OSX_SYSROOT AND EXISTS "${CMAKE_OSX_SYSROOT}/usr/local/include")
++    add_compile_options("$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-isystem${CMAKE_OSX_SYSROOT}/usr/local/include>")
++    add_compile_options("$<$<COMPILE_LANGUAGE:Swift>:SHELL:-Xcc -isystem${CMAKE_OSX_SYSROOT}/usr/local/include>")
++endif ()
++

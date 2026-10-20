@@ -1,0 +1,2524 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Wed, 16 Sep 2026 12:00:00 +0200
+Subject: [PATCH] WebGL through an ANGLE backend on EAGL
+
+Upstream's only GL backend on Apple platforms is ANGLE's Metal renderer, which
+needs an A7. This adds an ANGLE GLES backend on EAGL, the OpenGL ES 2.0 API this
+hardware has: EAGL displays, pbuffer and IOSurface surfaces, IOSurface client
+buffers through CVOpenGLESTextureCache, and the texture handover that puts a
+canvas the GPU drew on the screen without a copy per frame. WebCore's GL context
+points at it, WebGL runs on drivers without a framebuffer blit, a context that
+asked for no alpha channel is served, and the textures taken from the cache are
+let go. WebGL is turned on.
+---
+ Source/ThirdParty/ANGLE/GL.cmake              |  13 +
+ Source/ThirdParty/ANGLE/PlatformCocoa.cmake   |  50 +++
+ Source/ThirdParty/ANGLE/PlatformIOS.cmake     |  33 ++
+ Source/ThirdParty/ANGLE/src/common/platform.h |   2 +-
+ .../ThirdParty/ANGLE/src/libANGLE/Display.cpp |  13 +-
+ .../src/libANGLE/renderer/gl/SurfaceGL.cpp    |   6 +
+ .../src/libANGLE/renderer/gl/SurfaceGL.h      |   3 +
+ .../src/libANGLE/renderer/gl/TextureGL.cpp    |  39 +-
+ .../src/libANGLE/renderer/gl/TextureGL.h      |   1 +
+ .../libANGLE/renderer/gl/eagl/DeviceEAGL.cpp  |  34 ++
+ .../libANGLE/renderer/gl/eagl/DeviceEAGL.h    |  31 ++
+ .../libANGLE/renderer/gl/eagl/DisplayEAGL.h   | 101 +++++
+ .../libANGLE/renderer/gl/eagl/DisplayEAGL.mm  | 356 ++++++++++++++++++
+ .../renderer/gl/eagl/IOSurfaceSurfaceEAGL.h   | 101 +++++
+ .../renderer/gl/eagl/IOSurfaceSurfaceEAGL.mm  | 356 ++++++++++++++++++
+ .../renderer/gl/eagl/PbufferSurfaceEAGL.cpp   | 156 ++++++++
+ .../renderer/gl/eagl/PbufferSurfaceEAGL.h     |  71 ++++
+ Source/WTF/wtf/spi/cocoa/IOTypesSPI.h         |   2 +-
+ Source/WebCore/PlatformIOS.cmake              | 180 +++++++++
+ Source/WebCore/page/Page.cpp                  | 234 ++++++++++--
+ Source/WebCore/page/Page.h                    |   1 +
+ .../WebCore/platform/graphics/ImageBuffer.cpp |   2 +-
+ .../graphics/angle/GraphicsContextGLANGLE.cpp |  10 +
+ .../graphics/ca/cocoa/PlatformCALayerCocoa.mm |  17 +-
+ .../graphics/cg/GraphicsContextGLCG.cpp       |   6 +-
+ .../graphics/cocoa/GraphicsContextGLCocoa.h   |   1 +
+ .../graphics/cocoa/GraphicsContextGLCocoa.mm  |  37 +-
+ 27 files changed, 1814 insertions(+), 42 deletions(-)
+ create mode 100644 Source/ThirdParty/ANGLE/PlatformIOS.cmake
+ create mode 100644 Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/DeviceEAGL.cpp
+ create mode 100644 Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/DeviceEAGL.h
+ create mode 100644 Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/DisplayEAGL.h
+ create mode 100644 Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/DisplayEAGL.mm
+ create mode 100644 Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/IOSurfaceSurfaceEAGL.h
+ create mode 100644 Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/IOSurfaceSurfaceEAGL.mm
+ create mode 100644 Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/PbufferSurfaceEAGL.cpp
+ create mode 100644 Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/PbufferSurfaceEAGL.h
+ create mode 100644 Source/WebCore/PlatformIOS.cmake
+
+diff --git a/Source/ThirdParty/ANGLE/GL.cmake b/Source/ThirdParty/ANGLE/GL.cmake
+index 4034fab6d78a123b95635adcaacd357ab5973919..93529441d2186d5f98d1c1b4ff52e0d1389cbd50 100644
+--- a/Source/ThirdParty/ANGLE/GL.cmake
++++ b/Source/ThirdParty/ANGLE/GL.cmake
+@@ -99,6 +99,19 @@ if(is_win)
+     )
+ endif()
+ 
++if(is_ios OR WEBKIT_IOS6)
++    list(APPEND gl_backend_sources
++        "src/libANGLE/renderer/gl/eagl/DeviceEAGL.cpp"
++        "src/libANGLE/renderer/gl/eagl/DeviceEAGL.h"
++        "src/libANGLE/renderer/gl/eagl/DisplayEAGL.h"
++        "src/libANGLE/renderer/gl/eagl/DisplayEAGL.mm"
++        "src/libANGLE/renderer/gl/eagl/IOSurfaceSurfaceEAGL.h"
++        "src/libANGLE/renderer/gl/eagl/IOSurfaceSurfaceEAGL.mm"
++        "src/libANGLE/renderer/gl/eagl/PbufferSurfaceEAGL.cpp"
++        "src/libANGLE/renderer/gl/eagl/PbufferSurfaceEAGL.h"
++    )
++endif()
++
+ if(angle_use_x11)
+     list(APPEND gl_backend_sources
+         "src/libANGLE/renderer/gl/glx/ContextGLX.cpp"
+diff --git a/Source/ThirdParty/ANGLE/PlatformCocoa.cmake b/Source/ThirdParty/ANGLE/PlatformCocoa.cmake
+index fbc06d29661d4e4ae0141b5d548076d3f74c6767..da4fd0050f25ae12e8b6c90f1b33c13f3f19dfe0 100644
+--- a/Source/ThirdParty/ANGLE/PlatformCocoa.cmake
++++ b/Source/ThirdParty/ANGLE/PlatformCocoa.cmake
+@@ -1,7 +1,22 @@
+ find_library(COREGRAPHICS_LIBRARY CoreGraphics)
++if (NOT COREGRAPHICS_LIBRARY)
++    set(COREGRAPHICS_LIBRARY "")
++endif ()
+ find_library(FOUNDATION_LIBRARY Foundation)
++if (NOT FOUNDATION_LIBRARY)
++    set(FOUNDATION_LIBRARY "")
++endif ()
+ find_library(IOSURFACE_LIBRARY IOSurface)
++if (NOT IOSURFACE_LIBRARY)
++    set(IOSURFACE_LIBRARY "")
++endif ()
++if (NOT IOSURFACE_LIBRARY)
++    set(IOSURFACE_LIBRARY "")
++endif ()
+ find_library(METAL_LIBRARY Metal)
++if (NOT METAL_LIBRARY)
++    set(METAL_LIBRARY "")
++endif ()
+ if (NOT TARGET ZLIB::ZLIB)
+     find_package(ZLIB REQUIRED)
+ endif ()
+@@ -57,3 +72,38 @@ else ()
+         ${QUARTZCORE_LIBRARY}
+     )
+ endif ()
++
++if (WEBKIT_SDK_IS_IOS_FAMILY)
++
++    find_library(QUARTZCORE_LIBRARY QuartzCore)
++
++    list(REMOVE_ITEM ANGLE_SOURCES
++        src/common/gl/cgl/FunctionsCGL.cpp
++        src/common/gl/cgl/FunctionsCGL.h
++        src/common/system_utils_mac.cpp
++    )
++
++    list(APPEND ANGLE_SOURCES
++        src/common/system_utils_ios.cpp
++    )
++
++    list(APPEND ANGLE_SOURCES
++        ${libangle_gpu_info_util_ios_sources}
++        src/libANGLE/renderer/driver_utils_ios.mm
++    )
++
++    list(APPEND ANGLEGLESv2_LIBRARIES
++        ${QUARTZCORE_LIBRARY}
++    )
++
++    if (WEBKIT_IOS6)
++        list(REMOVE_ITEM ANGLE_SOURCES ${metal_backend_sources} ${angle_translator_lib_msl_sources})
++        list(REMOVE_ITEM ANGLE_DEFINITIONS ANGLE_ENABLE_METAL)
++
++        list(APPEND ANGLE_SOURCES ${gl_backend_sources})
++        list(APPEND ANGLE_DEFINITIONS ANGLE_ENABLE_OPENGL ANGLE_ENABLE_EAGL)
++
++        find_library(OPENGLES_FRAMEWORK OpenGLES)
++        list(APPEND ANGLEGLESv2_LIBRARIES ${OPENGLES_FRAMEWORK})
++    endif ()
++endif ()
+diff --git a/Source/ThirdParty/ANGLE/PlatformIOS.cmake b/Source/ThirdParty/ANGLE/PlatformIOS.cmake
+new file mode 100644
+index 0000000000000000000000000000000000000000..9f8cf21061101c6dd645cbf9cb2ed9f9cc8f0d1b
+--- /dev/null
++++ b/Source/ThirdParty/ANGLE/PlatformIOS.cmake
+@@ -0,0 +1,33 @@
++include(PlatformCocoa.cmake)
++
++find_library(QUARTZCORE_LIBRARY QuartzCore)
++
++list(REMOVE_ITEM ANGLE_SOURCES
++    src/common/gl/cgl/FunctionsCGL.cpp
++    src/common/gl/cgl/FunctionsCGL.h
++    src/common/system_utils_mac.cpp
++)
++
++list(APPEND ANGLE_SOURCES
++    src/common/system_utils_ios.cpp
++)
++
++list(APPEND ANGLE_SOURCES
++    ${libangle_gpu_info_util_ios_sources}
++    src/libANGLE/renderer/driver_utils_ios.mm
++)
++
++list(APPEND ANGLEGLESv2_LIBRARIES
++    ${QUARTZCORE_LIBRARY}
++)
++
++if (WEBKIT_IOS6)
++    list(REMOVE_ITEM ANGLE_SOURCES ${metal_backend_sources} ${angle_translator_lib_msl_sources})
++    list(REMOVE_ITEM ANGLE_DEFINITIONS ANGLE_ENABLE_METAL)
++
++    list(APPEND ANGLE_SOURCES ${gl_backend_sources})
++    list(APPEND ANGLE_DEFINITIONS ANGLE_ENABLE_OPENGL ANGLE_ENABLE_EAGL)
++
++    find_library(OPENGLES_FRAMEWORK OpenGLES)
++    list(APPEND ANGLEGLESv2_LIBRARIES ${OPENGLES_FRAMEWORK})
++endif ()
+diff --git a/Source/ThirdParty/ANGLE/src/common/platform.h b/Source/ThirdParty/ANGLE/src/common/platform.h
+index 140101d98fb406132b5dff92d605a75f3781b1a4..02034a379b1552cf502a3b7fd6aee4b977a36e8a 100644
+--- a/Source/ThirdParty/ANGLE/src/common/platform.h
++++ b/Source/ThirdParty/ANGLE/src/common/platform.h
+@@ -130,7 +130,7 @@
+ #        if TARGET_OS_VISION  // Must be checked before iOS
+ #            define ANGLE_PLATFORM_VISIONOS 1
+ #        elif TARGET_OS_IOS
+-#            if __IPHONE_OS_VERSION_MAX_ALLOWED < 170000
++#            if __IPHONE_OS_VERSION_MAX_ALLOWED < 170000 && !defined(WEBKIT_IOS6)
+ #                error iOS 17 SDK or newer is required.
+ #            endif
+ #            define ANGLE_PLATFORM_IOS 1
+diff --git a/Source/ThirdParty/ANGLE/src/libANGLE/Display.cpp b/Source/ThirdParty/ANGLE/src/libANGLE/Display.cpp
+index ae46ee10d0941e1f361244e595a7495c325902dc..7e4825de2ddf52a912774de443dfaffd501463ec 100644
+--- a/Source/ThirdParty/ANGLE/src/libANGLE/Display.cpp
++++ b/Source/ThirdParty/ANGLE/src/libANGLE/Display.cpp
+@@ -69,6 +69,8 @@
+ #        include "libANGLE/renderer/gl/wgl/DisplayWGL.h"
+ #    elif ANGLE_ENABLE_CGL
+ #        include "libANGLE/renderer/gl/cgl/DisplayCGL.h"
++#    elif defined(ANGLE_ENABLE_EAGL)
++#        include "libANGLE/renderer/gl/eagl/DisplayEAGL.h"
+ #    elif defined(ANGLE_PLATFORM_LINUX)
+ #        include "libANGLE/renderer/gl/egl/DisplayEGL.h"
+ #        if defined(ANGLE_USE_X11)
+@@ -438,7 +440,7 @@ EGLAttrib GetDisplayTypeFromEnvironment()
+ #elif defined(ANGLE_ENABLE_VULKAN) && defined(ANGLE_PLATFORM_ANDROID)
+     return EGL_PLATFORM_ANGLE_TYPE_VULKAN_ANGLE;
+ #elif defined(ANGLE_ENABLE_OPENGL)
+-#    if defined(ANGLE_PLATFORM_ANDROID) || defined(ANGLE_USE_GBM)
++#    if defined(ANGLE_PLATFORM_ANDROID) || defined(ANGLE_USE_GBM) || defined(ANGLE_ENABLE_EAGL)
+     return EGL_PLATFORM_ANGLE_TYPE_OPENGLES_ANGLE;
+ #    else
+     return EGL_PLATFORM_ANGLE_TYPE_OPENGL_ANGLE;
+@@ -551,6 +553,10 @@ rx::DisplayImpl *CreateDisplayFromAttribs(EGLAttrib displayType,
+             impl = new rx::DisplayCGL(state);
+             break;
+ 
++#    elif defined(ANGLE_ENABLE_EAGL)
++            impl = new rx::DisplayEAGL(state);
++            break;
++
+ #    elif defined(ANGLE_PLATFORM_LINUX)
+ #        if defined(ANGLE_USE_GBM) || defined(ANGLE_USE_WAYLAND)
+             if (platformType == 0)
+@@ -607,7 +613,10 @@ rx::DisplayImpl *CreateDisplayFromAttribs(EGLAttrib displayType,
+ 
+         case EGL_PLATFORM_ANGLE_TYPE_OPENGLES_ANGLE:
+ #if defined(ANGLE_ENABLE_OPENGL)
+-#    if defined(ANGLE_PLATFORM_WINDOWS)
++#    if defined(ANGLE_ENABLE_EAGL)
++            impl = new rx::DisplayEAGL(state);
++            break;
++#    elif defined(ANGLE_PLATFORM_WINDOWS)
+             impl = new rx::DisplayWGL(state);
+ #    elif defined(ANGLE_PLATFORM_LINUX)
+ #        if defined(ANGLE_USE_GBM) || defined(ANGLE_USE_WAYLAND)
+diff --git a/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/SurfaceGL.cpp b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/SurfaceGL.cpp
+index 94c150f87c7a279cf09e80ac4a20ac9d6b92c031..92e9bd9f87da391dcf0b18c5e28ee4c67d361116 100644
+--- a/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/SurfaceGL.cpp
++++ b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/SurfaceGL.cpp
+@@ -72,6 +72,12 @@ bool SurfaceGL::hasEmulatedAlphaChannel() const
+     return false;
+ }
+ 
++angle::Result SurfaceGL::getBindTexImageTextureID(const gl::Context *context, GLuint *textureIDOut)
++{
++    *textureIDOut = 0;
++    return angle::Result::Continue;
++}
++
+ egl::Error SurfaceGL::attachToFramebuffer(const gl::Context *context, gl::Framebuffer *framebuffer)
+ {
+     return egl::NoError();
+diff --git a/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/SurfaceGL.h b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/SurfaceGL.h
+index 972983d5a1bc4e41a1fa29b758493b1a53d0f00f..2f00544afbe834d6949cc868b8d6498856536351 100644
+--- a/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/SurfaceGL.h
++++ b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/SurfaceGL.h
+@@ -29,6 +29,9 @@ class SurfaceGL : public SurfaceImpl
+ 
+     virtual bool hasEmulatedAlphaChannel() const;
+ 
++    virtual angle::Result getBindTexImageTextureID(const gl::Context *context,
++                                                   GLuint *textureIDOut);
++
+     egl::Error attachToFramebuffer(const gl::Context *context,
+                                    gl::Framebuffer *framebuffer) override;
+     egl::Error detachFromFramebuffer(const gl::Context *context,
+diff --git a/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/TextureGL.cpp b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/TextureGL.cpp
+index 62c194014a04cc0b7b2870ba4d1a45e641ecf613..4467742514ff2602c573fa446376cd7c66ccd4fe 100644
+--- a/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/TextureGL.cpp
++++ b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/TextureGL.cpp
+@@ -214,8 +214,12 @@ void TextureGL::onDestroy(const gl::Context *context)
+ {
+     GetImplAs<ContextGL>(context)->flushIfNecessaryBeforeDeleteTextures();
+     StateManagerGL *stateManager = GetStateManagerGL(context);
+-    stateManager->deleteTexture(mTextureID);
+-    mTextureID = 0;
++    if (mOwnsTextureID)
++    {
++        stateManager->deleteTexture(mTextureID);
++    }
++    mOwnsTextureID = true;
++    mTextureID     = 0;
+ }
+ 
+ angle::Result TextureGL::setImage(const gl::Context *context,
+@@ -2025,11 +2029,32 @@ angle::Result TextureGL::bindTexImage(const gl::Context *context, egl::Surface *
+ 
+     StateManagerGL *stateManager = GetStateManagerGL(context);
+ 
++    SurfaceGL *surfaceGL = GetImplAs<SurfaceGL>(surface);
++
++    GLuint surfaceTextureID = 0;
++    ANGLE_TRY(surfaceGL->getBindTexImageTextureID(context, &surfaceTextureID));
++    if (surfaceTextureID != 0 && surfaceTextureID != mTextureID)
++    {
++        if (mOwnsTextureID)
++        {
++            stateManager->deleteTexture(mTextureID);
++        }
++        mTextureID     = surfaceTextureID;
++        mOwnsTextureID = false;
++
++        mLevelInfo.clear();
++        mLevelInfo.resize(GetMaxLevelInfoCountForTextureType(getType()));
++
++        mAppliedSwizzle   = gl::SwizzleState();
++        mAppliedSampler   = gl::SamplerState::CreateDefaultForTarget(getType());
++        mAppliedBaseLevel = 0;
++        mAppliedMaxLevel  = gl::kInitialMaxLevel;
++        mLocalDirtyBits   = mAllModifiedDirtyBits;
++    }
++
+     // Make sure this texture is bound
+     stateManager->bindTexture(getType(), mTextureID);
+ 
+-    SurfaceGL *surfaceGL = GetImplAs<SurfaceGL>(surface);
+-
+     const gl::Format &surfaceFormat = surface->getBindTexImageFormat();
+     setLevelInfo(context, getType(), 0, 1,
+                  LevelInfoGL(surfaceFormat.info->format, surfaceFormat.info->internalFormat, false,
+@@ -2541,7 +2566,11 @@ angle::Result TextureGL::recreateTexture(const gl::Context *context)
+     StateManagerGL *stateManager = GetStateManagerGL(context);
+ 
+     stateManager->bindTexture(getType(), mTextureID);
+-    stateManager->deleteTexture(mTextureID);
++    if (mOwnsTextureID)
++    {
++        stateManager->deleteTexture(mTextureID);
++    }
++    mOwnsTextureID = true;
+ 
+     functions->genTextures(1, &mTextureID);
+     stateManager->bindTexture(getType(), mTextureID);
+diff --git a/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/TextureGL.h b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/TextureGL.h
+index 788d26c5cb6c2a2cd025468261196b8bf7d520bd..ec9c5315d4dea9b29cf0971ef3e68abed61d28f5 100644
+--- a/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/TextureGL.h
++++ b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/TextureGL.h
+@@ -332,6 +332,7 @@ class TextureGL : public TextureImpl
+     GLenum mAppliedDepthStencilTextureMode;
+ 
+     GLuint mTextureID;
++    bool mOwnsTextureID = true;
+ };
+ }  // namespace rx
+ 
+diff --git a/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/DeviceEAGL.cpp b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/DeviceEAGL.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..6ccc8160b06153e78fdbcc0c1038af23634bcf2b
+--- /dev/null
++++ b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/DeviceEAGL.cpp
+@@ -0,0 +1,34 @@
++//
++// Copyright 2026 The ANGLE Project Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++//
++// DeviceEAGL.cpp: EAGL implementation of egl::Device
++//
++// EAGL has no device object to hand out and no EGL_EAGL_* attribute to name it
++// by, so this exists to satisfy the interface and answers nothing.
++
++#include "libANGLE/renderer/gl/eagl/DeviceEAGL.h"
++
++#include <EGL/eglext.h>
++
++namespace rx
++{
++
++DeviceEAGL::DeviceEAGL() {}
++
++DeviceEAGL::~DeviceEAGL() {}
++
++egl::Error DeviceEAGL::initialize()
++{
++    return egl::NoError();
++}
++
++egl::Error DeviceEAGL::getAttribute(const egl::Display *display, EGLint attribute, void **outValue)
++{
++    return egl::Error(EGL_BAD_ATTRIBUTE);
++}
++
++void DeviceEAGL::generateExtensions(egl::DeviceExtensions *outExtensions) const {}
++
++}
+diff --git a/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/DeviceEAGL.h b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/DeviceEAGL.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..42093b49cbf6e56deef78f639faf5e5dabd29289
+--- /dev/null
++++ b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/DeviceEAGL.h
+@@ -0,0 +1,31 @@
++//
++// Copyright 2026 The ANGLE Project Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++//
++// DeviceEAGL.h: EAGL implementation of egl::Device
++
++#ifndef LIBANGLE_RENDERER_GL_EAGL_DEVICEEAGL_H_
++#define LIBANGLE_RENDERER_GL_EAGL_DEVICEEAGL_H_
++
++#include "libANGLE/Device.h"
++#include "libANGLE/renderer/DeviceImpl.h"
++
++namespace rx
++{
++class DeviceEAGL : public DeviceImpl
++{
++  public:
++    DeviceEAGL();
++    ~DeviceEAGL() override;
++
++    egl::Error initialize() override;
++    egl::Error getAttribute(const egl::Display *display,
++                            EGLint attribute,
++                            void **outValue) override;
++    void generateExtensions(egl::DeviceExtensions *outExtensions) const override;
++};
++
++}
++
++#endif
+diff --git a/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/DisplayEAGL.h b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/DisplayEAGL.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..ee19edc436e3675afac627181399225ff8fb011b
+--- /dev/null
++++ b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/DisplayEAGL.h
+@@ -0,0 +1,101 @@
++//
++// Copyright 2026 The ANGLE Project Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++//
++
++// DisplayEAGL.h: EAGL implementation of egl::Display
++
++#ifndef LIBANGLE_RENDERER_GL_EAGL_DISPLAYEAGL_H_
++#define LIBANGLE_RENDERER_GL_EAGL_DISPLAYEAGL_H_
++
++#include <unordered_set>
++
++#include "libANGLE/renderer/gl/DisplayGL.h"
++
++#ifdef __OBJC__
++@class EAGLContext;
++#else
++typedef struct objc_object EAGLContext;
++#endif
++
++namespace rx
++{
++
++class DisplayEAGL : public DisplayGL
++{
++  public:
++    DisplayEAGL(const egl::DisplayState &state);
++    ~DisplayEAGL() override;
++
++    egl::Error initialize(egl::Display *display) override;
++    void terminate() override;
++    egl::Error prepareForCall() override;
++    egl::Error releaseThread() override;
++
++    egl::Error makeCurrent(egl::Display *display,
++                           egl::Surface *drawSurface,
++                           egl::Surface *readSurface,
++                           gl::Context *context) override;
++
++    SurfaceImpl *createWindowSurface(const egl::SurfaceState &state,
++                                     EGLNativeWindowType window,
++                                     const egl::AttributeMap &attribs) override;
++    SurfaceImpl *createPbufferSurface(const egl::SurfaceState &state,
++                                      const egl::AttributeMap &attribs) override;
++    SurfaceImpl *createPbufferFromClientBuffer(const egl::SurfaceState &state,
++                                               EGLenum buftype,
++                                               EGLClientBuffer clientBuffer,
++                                               const egl::AttributeMap &attribs) override;
++    SurfaceImpl *createPixmapSurface(const egl::SurfaceState &state,
++                                     NativePixmapType nativePixmap,
++                                     const egl::AttributeMap &attribs) override;
++
++    ContextImpl *createContext(const gl::State &state,
++                               gl::ErrorSet *errorSet,
++                               const egl::Config *configuration,
++                               const gl::Context *shareContext,
++                               const egl::AttributeMap &attribs) override;
++
++    egl::ConfigSet generateConfigs() override;
++
++    bool testDeviceLost() override;
++    egl::Error restoreLostDevice(const egl::Display *display) override;
++
++    bool isValidNativeWindow(EGLNativeWindowType window) const override;
++    egl::Error validateClientBuffer(const egl::Config *configuration,
++                                    EGLenum buftype,
++                                    EGLClientBuffer clientBuffer,
++                                    const egl::AttributeMap &attribs) const override;
++
++    DeviceImpl *createDevice() override;
++
++    egl::Error waitClient(const gl::Context *context) override;
++    egl::Error waitUntilWorkScheduled() override;
++    egl::Error waitNative(const gl::Context *context, EGLint engine) override;
++
++    gl::Version getMaxSupportedESVersion() const override;
++
++    EAGLContext *getEAGLContext() const;
++
++    void initializeFrontendFeatures(angle::FrontendFeatures *features) const override;
++    void populateFeatureList(angle::FeatureList *features) override;
++
++    RendererGL *getRenderer() const override;
++
++  private:
++    egl::Error makeCurrentSurfaceless(gl::Context *context) override;
++
++    void generateExtensions(egl::DisplayExtensions *outExtensions) const override;
++    void generateCaps(egl::Caps *outCaps) const override;
++
++    std::shared_ptr<RendererGL> mRenderer;
++
++    egl::Display *mEGLDisplay;
++    EAGLContext *mContext;
++    std::unordered_set<uint64_t> mThreadsWithCurrentContext;
++};
++
++}
++
++#endif
+diff --git a/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/DisplayEAGL.mm b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/DisplayEAGL.mm
+new file mode 100644
+index 0000000000000000000000000000000000000000..34f840145fad5bdb264167e6cdcaaf8bfc2944cd
+--- /dev/null
++++ b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/DisplayEAGL.mm
+@@ -0,0 +1,356 @@
++//
++// Copyright 2026 The ANGLE Project Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++//
++
++// DisplayEAGL.mm: EAGL implementation of egl::Display
++//
++// The GLES counterpart of DisplayCGL, for hardware that predates Metal. EAGL
++// has no pixel formats and no explicit device: a context is created for an API
++// version and made current on a thread, and that is the whole surface of it.
++
++#import "libANGLE/renderer/gl/eagl/DisplayEAGL.h"
++
++#import <OpenGLES/EAGL.h>
++#import <dlfcn.h>
++
++#import "common/debug.h"
++#import "common/system_utils.h"
++#import "libANGLE/Display.h"
++#import "libANGLE/Error.h"
++#import "libANGLE/renderer/gl/ContextGL.h"
++#import "libANGLE/renderer/gl/RendererGL.h"
++#import "libANGLE/renderer/gl/eagl/DeviceEAGL.h"
++#import "libANGLE/renderer/gl/eagl/IOSurfaceSurfaceEAGL.h"
++#import "libANGLE/renderer/gl/eagl/PbufferSurfaceEAGL.h"
++
++namespace
++{
++
++const char *kOpenGLESFrameworkName = "/System/Library/Frameworks/OpenGLES.framework/OpenGLES";
++
++}
++
++namespace rx
++{
++
++class FunctionsGLEAGL : public FunctionsGL
++{
++  public:
++    FunctionsGLEAGL(void *dylibHandle) : mDylibHandle(dylibHandle) {}
++
++    ~FunctionsGLEAGL() override { dlclose(mDylibHandle); }
++
++  private:
++    void *loadProcAddress(const std::string &function) const override
++    {
++        return dlsym(mDylibHandle, function.c_str());
++    }
++
++    void *mDylibHandle;
++};
++
++DisplayEAGL::DisplayEAGL(const egl::DisplayState &state)
++    : DisplayGL(state), mEGLDisplay(nullptr), mContext(nullptr), mThreadsWithCurrentContext()
++{}
++
++DisplayEAGL::~DisplayEAGL() {}
++
++egl::Error DisplayEAGL::initialize(egl::Display *display)
++{
++    mEGLDisplay = display;
++
++    mContext = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
++    if (mContext == nullptr)
++    {
++        return egl::Error(EGL_NOT_INITIALIZED, "Could not create the EAGL context.");
++    }
++
++    if (![EAGLContext setCurrentContext:mContext])
++    {
++        return egl::Error(EGL_NOT_INITIALIZED, "Could not make the EAGL context current.");
++    }
++    mThreadsWithCurrentContext.insert(angle::GetCurrentThreadUniqueId());
++
++    void *handle = dlopen(kOpenGLESFrameworkName, RTLD_NOW);
++    if (!handle)
++    {
++        return egl::Error(EGL_NOT_INITIALIZED, "Could not open the OpenGLES framework.");
++    }
++
++    std::unique_ptr<FunctionsGL> functionsGL(new FunctionsGLEAGL(handle));
++    functionsGL->initialize(display->getAttributeMap());
++
++    mRenderer.reset(new RendererGL(std::move(functionsGL), display->getAttributeMap(), this));
++
++    const gl::Version &maxVersion = mRenderer->getMaxSupportedESVersion();
++    if (maxVersion < gl::Version(2, 0))
++    {
++        return egl::Error(EGL_NOT_INITIALIZED, "OpenGL ES 2.0 is not supportable.");
++    }
++
++    return DisplayGL::initialize(display);
++}
++
++void DisplayEAGL::terminate()
++{
++    DisplayGL::terminate();
++
++    mRenderer.reset();
++    if (mContext != nullptr)
++    {
++        [EAGLContext setCurrentContext:nullptr];
++        [mContext release];
++        mContext = nullptr;
++        mThreadsWithCurrentContext.clear();
++    }
++}
++
++egl::Error DisplayEAGL::prepareForCall()
++{
++    if (!mContext)
++    {
++        return egl::Error(EGL_NOT_INITIALIZED, "Context not allocated.");
++    }
++    auto threadId = angle::GetCurrentThreadUniqueId();
++    if (mThreadsWithCurrentContext.find(threadId) == mThreadsWithCurrentContext.end())
++    {
++        if (![EAGLContext setCurrentContext:mContext])
++        {
++            return egl::Error(EGL_BAD_ALLOC, "Could not make device EAGL context current.");
++        }
++        mThreadsWithCurrentContext.insert(threadId);
++    }
++    return egl::NoError();
++}
++
++egl::Error DisplayEAGL::releaseThread()
++{
++    ASSERT(mContext);
++    auto threadId = angle::GetCurrentThreadUniqueId();
++    if (mThreadsWithCurrentContext.find(threadId) != mThreadsWithCurrentContext.end())
++    {
++        if (![EAGLContext setCurrentContext:nullptr])
++        {
++            return egl::Error(EGL_BAD_ALLOC, "Could not release device EAGL context.");
++        }
++        mThreadsWithCurrentContext.erase(threadId);
++    }
++    return egl::NoError();
++}
++
++egl::Error DisplayEAGL::makeCurrent(egl::Display *display,
++                                    egl::Surface *drawSurface,
++                                    egl::Surface *readSurface,
++                                    gl::Context *context)
++{
++    return DisplayGL::makeCurrent(display, drawSurface, readSurface, context);
++}
++
++SurfaceImpl *DisplayEAGL::createWindowSurface(const egl::SurfaceState &state,
++                                              EGLNativeWindowType window,
++                                              const egl::AttributeMap &attribs)
++{
++    UNIMPLEMENTED();
++    return nullptr;
++}
++
++SurfaceImpl *DisplayEAGL::createPbufferSurface(const egl::SurfaceState &state,
++                                               const egl::AttributeMap &attribs)
++{
++    EGLint width  = static_cast<EGLint>(attribs.get(EGL_WIDTH, 0));
++    EGLint height = static_cast<EGLint>(attribs.get(EGL_HEIGHT, 0));
++    return new PbufferSurfaceEAGL(state, mRenderer.get(), width, height);
++}
++
++SurfaceImpl *DisplayEAGL::createPbufferFromClientBuffer(const egl::SurfaceState &state,
++                                                        EGLenum buftype,
++                                                        EGLClientBuffer clientBuffer,
++                                                        const egl::AttributeMap &attribs)
++{
++    ASSERT(buftype == EGL_IOSURFACE_ANGLE);
++
++    return new IOSurfaceSurfaceEAGL(state, mRenderer.get(), mContext, clientBuffer, attribs);
++}
++
++egl::Error DisplayEAGL::validateClientBuffer(const egl::Config *configuration,
++                                             EGLenum buftype,
++                                             EGLClientBuffer clientBuffer,
++                                             const egl::AttributeMap &attribs) const
++{
++    ASSERT(buftype == EGL_IOSURFACE_ANGLE);
++
++    if (!IOSurfaceSurfaceEAGL::validateAttributes(clientBuffer, attribs))
++    {
++        return egl::Error(EGL_BAD_ATTRIBUTE);
++    }
++
++    return egl::NoError();
++}
++
++SurfaceImpl *DisplayEAGL::createPixmapSurface(const egl::SurfaceState &state,
++                                              NativePixmapType nativePixmap,
++                                              const egl::AttributeMap &attribs)
++{
++    UNIMPLEMENTED();
++    return nullptr;
++}
++
++ContextImpl *DisplayEAGL::createContext(const gl::State &state,
++                                        gl::ErrorSet *errorSet,
++                                        const egl::Config *configuration,
++                                        const gl::Context *shareContext,
++                                        const egl::AttributeMap &attribs)
++{
++    return new ContextGL(state, errorSet, mRenderer,
++                         RobustnessVideoMemoryPurgeStatus::NOT_REQUESTED);
++}
++
++DeviceImpl *DisplayEAGL::createDevice()
++{
++    return new DeviceEAGL();
++}
++
++egl::ConfigSet DisplayEAGL::generateConfigs()
++{
++    egl::ConfigSet configs;
++
++    const gl::Version &maxVersion = getMaxSupportedESVersion();
++    ASSERT(maxVersion >= gl::Version(2, 0));
++    bool supportsES3 = maxVersion >= gl::Version(3, 0);
++
++    egl::Config config;
++
++    config.nativeVisualID   = 0;
++    config.nativeVisualType = 0;
++    config.nativeRenderable = EGL_TRUE;
++
++    config.redSize     = 8;
++    config.greenSize   = 8;
++    config.blueSize    = 8;
++    config.alphaSize   = 8;
++    config.depthSize   = 24;
++    config.stencilSize = 8;
++
++    config.colorBufferType = EGL_RGB_BUFFER;
++    config.luminanceSize   = 0;
++    config.alphaMaskSize   = 0;
++
++    config.bufferSize = config.redSize + config.greenSize + config.blueSize + config.alphaSize;
++
++    config.transparentType = EGL_NONE;
++
++    const gl::Caps &caps    = mRenderer->getNativeCaps();
++    config.maxPBufferWidth  = caps.maxRenderbufferSize;
++    config.maxPBufferHeight = caps.maxRenderbufferSize;
++    config.maxPBufferPixels = caps.maxRenderbufferSize * caps.maxRenderbufferSize;
++
++    config.configCaveat = EGL_NONE;
++
++    config.sampleBuffers     = 0;
++    config.samples           = 0;
++    config.level             = 0;
++    config.bindToTextureRGB  = EGL_FALSE;
++    config.bindToTextureRGBA = EGL_FALSE;
++
++    config.bindToTextureTarget = EGL_TEXTURE_2D;
++
++    config.surfaceType = EGL_WINDOW_BIT | EGL_PBUFFER_BIT;
++
++    config.minSwapInterval = 1;
++    config.maxSwapInterval = 1;
++
++    config.renderTargetFormat = GL_RGBA8;
++    config.depthStencilFormat = GL_DEPTH24_STENCIL8;
++
++    config.conformant     = EGL_OPENGL_ES2_BIT | (supportsES3 ? EGL_OPENGL_ES3_BIT_KHR : 0);
++    config.renderableType = config.conformant;
++
++    config.matchNativePixmap = EGL_NONE;
++
++    config.colorComponentType = EGL_COLOR_COMPONENT_TYPE_FIXED_EXT;
++
++    configs.add(config);
++    return configs;
++}
++
++bool DisplayEAGL::testDeviceLost()
++{
++    return false;
++}
++
++egl::Error DisplayEAGL::restoreLostDevice(const egl::Display *display)
++{
++    UNIMPLEMENTED();
++    return egl::Error(EGL_BAD_DISPLAY);
++}
++
++bool DisplayEAGL::isValidNativeWindow(EGLNativeWindowType window) const
++{
++    return false;
++}
++
++EAGLContext *DisplayEAGL::getEAGLContext() const
++{
++    return mContext;
++}
++
++void DisplayEAGL::generateExtensions(egl::DisplayExtensions *outExtensions) const
++{
++    outExtensions->iosurfaceClientBuffer = true;
++    outExtensions->surfacelessContext    = true;
++
++    outExtensions->displayTextureShareGroup   = true;
++    outExtensions->displaySemaphoreShareGroup = true;
++
++    DisplayGL::generateExtensions(outExtensions);
++}
++
++void DisplayEAGL::generateCaps(egl::Caps *outCaps) const
++{
++    outCaps->textureNPOT = true;
++}
++
++egl::Error DisplayEAGL::waitClient(const gl::Context *context)
++{
++    return egl::NoError();
++}
++
++egl::Error DisplayEAGL::waitNative(const gl::Context *context, EGLint engine)
++{
++    return egl::NoError();
++}
++
++egl::Error DisplayEAGL::waitUntilWorkScheduled()
++{
++    mState.contextMap.forEach([](gl::Context *context) { context->flush(); });
++    return egl::NoError();
++}
++
++gl::Version DisplayEAGL::getMaxSupportedESVersion() const
++{
++    return mRenderer->getMaxSupportedESVersion();
++}
++
++egl::Error DisplayEAGL::makeCurrentSurfaceless(gl::Context *context)
++{
++    return egl::NoError();
++}
++
++void DisplayEAGL::initializeFrontendFeatures(angle::FrontendFeatures *features) const
++{
++    mRenderer->initializeFrontendFeatures(features);
++}
++
++void DisplayEAGL::populateFeatureList(angle::FeatureList *features)
++{
++    mRenderer->getFeatures().populateFeatureList(features);
++}
++
++RendererGL *DisplayEAGL::getRenderer() const
++{
++    return mRenderer.get();
++}
++
++}
+diff --git a/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/IOSurfaceSurfaceEAGL.h b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/IOSurfaceSurfaceEAGL.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..dd2a0d802f29c4cc1ef928d1e31d261c358f30d4
+--- /dev/null
++++ b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/IOSurfaceSurfaceEAGL.h
+@@ -0,0 +1,101 @@
++//
++// Copyright 2026 The ANGLE Project Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++//
++
++// IOSurfaceSurfaceEAGL.h: an IOSurface-backed pbuffer for the EAGL backend
++
++#ifndef LIBANGLE_RENDERER_GL_EAGL_IOSURFACESURFACEEAGL_H_
++#define LIBANGLE_RENDERER_GL_EAGL_IOSURFACESURFACEEAGL_H_
++
++#include <CoreVideo/CoreVideo.h>
++
++#include "libANGLE/renderer/gl/SurfaceGL.h"
++#include "libANGLE/renderer/gl/eagl/DisplayEAGL.h"
++
++struct __IOSurface;
++typedef __IOSurface *IOSurfaceRef;
++
++namespace egl
++{
++class AttributeMap;
++}
++
++namespace rx
++{
++
++class DisplayEAGL;
++class FunctionsGL;
++class StateManagerGL;
++
++class IOSurfaceSurfaceEAGL : public SurfaceGL
++{
++  public:
++    IOSurfaceSurfaceEAGL(const egl::SurfaceState &state,
++                         RendererGL *renderer,
++                         EAGLContext *context,
++                         EGLClientBuffer buffer,
++                         const egl::AttributeMap &attribs);
++    ~IOSurfaceSurfaceEAGL() override;
++
++    egl::Error initialize(const egl::Display *display) override;
++    egl::Error makeCurrent(const gl::Context *context) override;
++    egl::Error unMakeCurrent(const gl::Context *context) override;
++
++    egl::Error swap(const gl::Context *context, SurfaceSwapFeedback *feedback) override;
++    egl::Error postSubBuffer(const gl::Context *context,
++                             EGLint x,
++                             EGLint y,
++                             EGLint width,
++                             EGLint height) override;
++    egl::Error querySurfacePointerANGLE(EGLint attribute, void **value) override;
++    egl::Error bindTexImage(const gl::Context *context,
++                            gl::Texture *texture,
++                            EGLint buffer) override;
++    egl::Error releaseTexImage(const gl::Context *context, EGLint buffer) override;
++    void setSwapInterval(const egl::Display *display, EGLint interval) override;
++
++    gl::Extents getSize() const override;
++
++    EGLint isPostSubBufferSupported() const override;
++    EGLint getSwapBehavior() const override;
++
++    static bool validateAttributes(EGLClientBuffer buffer, const egl::AttributeMap &attribs);
++
++    egl::Error attachToFramebuffer(const gl::Context *context,
++                                   gl::Framebuffer *framebuffer) override;
++    egl::Error detachFromFramebuffer(const gl::Context *context,
++                                     gl::Framebuffer *framebuffer) override;
++
++    angle::Result getBindTexImageTextureID(const gl::Context *context,
++                                           GLuint *textureIDOut) override;
++
++    bool hasEmulatedAlphaChannel() const override;
++
++  private:
++    angle::Result ensureSurfaceTexture(const gl::Context *context);
++    angle::Result initializeAlphaChannel(const gl::Context *context, GLuint texture);
++
++    const FunctionsGL *mFunctions;
++    StateManagerGL *mStateManager;
++
++    EAGLContext *mEAGLContext;
++    IOSurfaceRef mIOSurface;
++    int mWidth;
++    int mHeight;
++    int mPlane;
++    GLenum mInternalFormat;
++    bool mAlphaInitialized;
++
++    CVPixelBufferRef mPixelBuffer;
++    CVOpenGLESTextureCacheRef mTextureCache;
++    CVOpenGLESTextureRef mSurfaceTexture;
++    GLuint mSurfaceTextureID;
++
++    GLuint mFramebufferID;
++};
++
++}
++
++#endif
+diff --git a/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/IOSurfaceSurfaceEAGL.mm b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/IOSurfaceSurfaceEAGL.mm
+new file mode 100644
+index 0000000000000000000000000000000000000000..79436939032dc89202327fcc13bc220046cb0fca
+--- /dev/null
++++ b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/IOSurfaceSurfaceEAGL.mm
+@@ -0,0 +1,356 @@
++//
++// Copyright 2026 The ANGLE Project Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++//
++
++// IOSurfaceSurfaceEAGL.mm: an IOSurface-backed pbuffer for the EAGL backend
++//
++// The CGL backend points an existing texture object at an IOSurface with
++// CGLTexImageIOSurface2D. GLES has no such call; what it has is
++// CVOpenGLESTextureCache, which makes a texture of its own out of the surface.
++// So the surface creates that texture and hands its name over - to a framebuffer
++// directly, or to the texture object that EGL_BindTexImage names, which takes
++// the name for as long as the image is bound.
++
++#import "libANGLE/renderer/gl/eagl/IOSurfaceSurfaceEAGL.h"
++
++#import <OpenGLES/EAGL.h>
++#import <OpenGLES/ES2/glext.h>
++
++#include <dlfcn.h>
++
++#import "common/debug.h"
++#import "libANGLE/AttributeMap.h"
++#import "libANGLE/renderer/gl/BlitGL.h"
++#import "libANGLE/renderer/gl/ContextGL.h"
++#import "libANGLE/renderer/gl/FramebufferGL.h"
++#import "libANGLE/renderer/gl/FunctionsGL.h"
++#import "libANGLE/renderer/gl/RendererGL.h"
++#import "libANGLE/renderer/gl/StateManagerGL.h"
++#import "libANGLE/renderer/gl/renderergl_utils.h"
++
++namespace
++{
++
++void *iosurfaceLibrary()
++{
++    static void *library =
++        dlopen("/System/Library/PrivateFrameworks/IOSurface.framework/IOSurface", RTLD_LAZY);
++    return library;
++}
++
++size_t surfacePlaneCount(IOSurfaceRef surface)
++{
++    typedef size_t (*PlaneCountFunction)(IOSurfaceRef);
++    PlaneCountFunction planeCount =
++        reinterpret_cast<PlaneCountFunction>(dlsym(iosurfaceLibrary(), "IOSurfaceGetPlaneCount"));
++    return planeCount ? planeCount(surface) : 0;
++}
++
++size_t surfaceWidthOfPlane(IOSurfaceRef surface, size_t plane)
++{
++    typedef size_t (*WidthFunction)(IOSurfaceRef, size_t);
++    WidthFunction width =
++        reinterpret_cast<WidthFunction>(dlsym(iosurfaceLibrary(), "IOSurfaceGetWidthOfPlane"));
++    return width ? width(surface, plane) : 0;
++}
++
++size_t surfaceHeightOfPlane(IOSurfaceRef surface, size_t plane)
++{
++    typedef size_t (*HeightFunction)(IOSurfaceRef, size_t);
++    HeightFunction height =
++        reinterpret_cast<HeightFunction>(dlsym(iosurfaceLibrary(), "IOSurfaceGetHeightOfPlane"));
++    return height ? height(surface, plane) : 0;
++}
++
++}
++
++namespace rx
++{
++
++IOSurfaceSurfaceEAGL::IOSurfaceSurfaceEAGL(const egl::SurfaceState &state,
++                                           RendererGL *renderer,
++                                           EAGLContext *context,
++                                           EGLClientBuffer buffer,
++                                           const egl::AttributeMap &attribs)
++    : SurfaceGL(state),
++      mFunctions(renderer->getFunctions()),
++      mStateManager(renderer->getStateManager()),
++      mEAGLContext(context),
++      mIOSurface(nullptr),
++      mWidth(0),
++      mHeight(0),
++      mPlane(0),
++      mInternalFormat(GL_NONE),
++      mAlphaInitialized(false),
++      mPixelBuffer(nullptr),
++      mTextureCache(nullptr),
++      mSurfaceTexture(nullptr),
++      mSurfaceTextureID(0),
++      mFramebufferID(0)
++{
++    mIOSurface = reinterpret_cast<IOSurfaceRef>(buffer);
++    CFRetain(mIOSurface);
++
++    mWidth  = static_cast<int>(attribs.get(EGL_WIDTH));
++    mHeight = static_cast<int>(attribs.get(EGL_HEIGHT));
++    mPlane  = static_cast<int>(attribs.get(EGL_IOSURFACE_PLANE_ANGLE));
++
++    mInternalFormat   = static_cast<GLenum>(attribs.get(EGL_TEXTURE_INTERNAL_FORMAT_ANGLE));
++    mAlphaInitialized = !hasEmulatedAlphaChannel();
++}
++
++IOSurfaceSurfaceEAGL::~IOSurfaceSurfaceEAGL()
++{
++    if (mFramebufferID != 0)
++    {
++        mStateManager->deleteFramebuffer(mFramebufferID);
++        mFramebufferID = 0;
++    }
++    if (mSurfaceTexture != nullptr)
++    {
++        CFRelease(mSurfaceTexture);
++        mSurfaceTexture   = nullptr;
++        mSurfaceTextureID = 0;
++    }
++    if (mTextureCache != nullptr)
++    {
++        CVOpenGLESTextureCacheFlush(mTextureCache, 0);
++        CFRelease(mTextureCache);
++        mTextureCache = nullptr;
++    }
++    if (mPixelBuffer != nullptr)
++    {
++        CFRelease(mPixelBuffer);
++        mPixelBuffer = nullptr;
++    }
++    if (mIOSurface != nullptr)
++    {
++        CFRelease(mIOSurface);
++        mIOSurface = nullptr;
++    }
++}
++
++egl::Error IOSurfaceSurfaceEAGL::initialize(const egl::Display *display)
++{
++    if (CVPixelBufferCreateWithIOSurface(kCFAllocatorDefault, mIOSurface, nullptr, &mPixelBuffer) !=
++        kCVReturnSuccess)
++    {
++        return egl::Error(EGL_BAD_ALLOC, "Could not wrap the IOSurface in a CVPixelBuffer.");
++    }
++
++    if (CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, nullptr, mEAGLContext, nullptr,
++                                     &mTextureCache) != kCVReturnSuccess)
++    {
++        return egl::Error(EGL_BAD_ALLOC, "Could not create the texture cache for the IOSurface.");
++    }
++
++    return egl::NoError();
++}
++
++angle::Result IOSurfaceSurfaceEAGL::ensureSurfaceTexture(const gl::Context *context)
++{
++    if (mSurfaceTextureID != 0)
++    {
++        return angle::Result::Continue;
++    }
++
++    CVReturn result = CVOpenGLESTextureCacheCreateTextureFromImage(
++        kCFAllocatorDefault, mTextureCache, mPixelBuffer, nullptr, GL_TEXTURE_2D, GL_RGBA, mWidth,
++        mHeight, GL_BGRA_EXT, GL_UNSIGNED_BYTE, mPlane, &mSurfaceTexture);
++    ANGLE_CHECK(GetImplAs<ContextGL>(context), result == kCVReturnSuccess,
++                "Could not make a texture from the IOSurface.", GL_OUT_OF_MEMORY);
++
++    mSurfaceTextureID = CVOpenGLESTextureGetName(mSurfaceTexture);
++    mStateManager->bindTexture(gl::TextureType::_2D, mSurfaceTextureID);
++    mFunctions->texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
++    mFunctions->texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
++    mFunctions->texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
++    mFunctions->texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
++
++    return angle::Result::Continue;
++}
++
++angle::Result IOSurfaceSurfaceEAGL::getBindTexImageTextureID(const gl::Context *context,
++                                                             GLuint *textureIDOut)
++{
++    ANGLE_TRY(ensureSurfaceTexture(context));
++    ANGLE_TRY(initializeAlphaChannel(context, mSurfaceTextureID));
++    *textureIDOut = mSurfaceTextureID;
++    return angle::Result::Continue;
++}
++
++angle::Result IOSurfaceSurfaceEAGL::initializeAlphaChannel(const gl::Context *context,
++                                                           GLuint texture)
++{
++    if (mAlphaInitialized)
++    {
++        return angle::Result::Continue;
++    }
++
++    BlitGL *blitter = GetBlitGL(context);
++    ANGLE_TRY(blitter->clearRenderableTextureAlphaToOne(context, texture,
++                                                        gl::TextureTarget::_2D, 0));
++    mAlphaInitialized = true;
++    return angle::Result::Continue;
++}
++
++bool IOSurfaceSurfaceEAGL::hasEmulatedAlphaChannel() const
++{
++    return mInternalFormat == GL_RGB;
++}
++
++egl::Error IOSurfaceSurfaceEAGL::makeCurrent(const gl::Context *context)
++{
++    return egl::NoError();
++}
++
++egl::Error IOSurfaceSurfaceEAGL::unMakeCurrent(const gl::Context *context)
++{
++    GetFunctionsGL(context)->flush();
++    return egl::NoError();
++}
++
++egl::Error IOSurfaceSurfaceEAGL::swap(const gl::Context *context, SurfaceSwapFeedback *feedback)
++{
++    return egl::NoError();
++}
++
++egl::Error IOSurfaceSurfaceEAGL::postSubBuffer(const gl::Context *context,
++                                               EGLint x,
++                                               EGLint y,
++                                               EGLint width,
++                                               EGLint height)
++{
++    UNREACHABLE();
++    return egl::NoError();
++}
++
++egl::Error IOSurfaceSurfaceEAGL::querySurfacePointerANGLE(EGLint attribute, void **value)
++{
++    UNREACHABLE();
++    return egl::NoError();
++}
++
++egl::Error IOSurfaceSurfaceEAGL::bindTexImage(const gl::Context *context,
++                                              gl::Texture *texture,
++                                              EGLint buffer)
++{
++    if (IsError(ensureSurfaceTexture(context)))
++    {
++        return egl::Error(EGL_CONTEXT_LOST, "Could not make a texture from the IOSurface.");
++    }
++
++    return egl::NoError();
++}
++
++egl::Error IOSurfaceSurfaceEAGL::releaseTexImage(const gl::Context *context, EGLint buffer)
++{
++    GetFunctionsGL(context)->flush();
++
++    if (mSurfaceTexture != nullptr && mFramebufferID == 0)
++    {
++        CFRelease(mSurfaceTexture);
++        mSurfaceTexture   = nullptr;
++        mSurfaceTextureID = 0;
++        CVOpenGLESTextureCacheFlush(mTextureCache, 0);
++    }
++
++    return egl::NoError();
++}
++
++void IOSurfaceSurfaceEAGL::setSwapInterval(const egl::Display *display, EGLint interval)
++{
++    UNREACHABLE();
++}
++
++gl::Extents IOSurfaceSurfaceEAGL::getSize() const
++{
++    return gl::Extents(mWidth, mHeight, 1);
++}
++
++EGLint IOSurfaceSurfaceEAGL::isPostSubBufferSupported() const
++{
++    UNREACHABLE();
++    return EGL_FALSE;
++}
++
++EGLint IOSurfaceSurfaceEAGL::getSwapBehavior() const
++{
++    return EGL_BUFFER_PRESERVED;
++}
++
++bool IOSurfaceSurfaceEAGL::validateAttributes(EGLClientBuffer buffer,
++                                              const egl::AttributeMap &attribs)
++{
++    IOSurfaceRef ioSurface = reinterpret_cast<IOSurfaceRef>(buffer);
++
++    size_t planeCount = std::max(size_t(1), surfacePlaneCount(ioSurface));
++    EGLAttrib plane   = attribs.get(EGL_IOSURFACE_PLANE_ANGLE);
++    if (plane < 0 || static_cast<size_t>(plane) >= planeCount)
++    {
++        return false;
++    }
++
++    EGLAttrib width  = attribs.get(EGL_WIDTH);
++    EGLAttrib height = attribs.get(EGL_HEIGHT);
++    if (width <= 0 || height <= 0 ||
++        width > static_cast<EGLAttrib>(surfaceWidthOfPlane(ioSurface, plane)) ||
++        height > static_cast<EGLAttrib>(surfaceHeightOfPlane(ioSurface, plane)))
++    {
++        return false;
++    }
++
++    EGLAttrib internalFormat = attribs.get(EGL_TEXTURE_INTERNAL_FORMAT_ANGLE);
++    EGLAttrib type           = attribs.get(EGL_TEXTURE_TYPE_ANGLE);
++    if ((internalFormat != GL_BGRA_EXT && internalFormat != GL_RGBA && internalFormat != GL_RGB) ||
++        type != GL_UNSIGNED_BYTE)
++    {
++        return false;
++    }
++
++    return true;
++}
++
++egl::Error IOSurfaceSurfaceEAGL::attachToFramebuffer(const gl::Context *context,
++                                                     gl::Framebuffer *framebuffer)
++{
++    FramebufferGL *framebufferGL = GetImplAs<FramebufferGL>(framebuffer);
++    ASSERT(framebufferGL->getFramebufferID() == 0);
++
++    if (IsError(ensureSurfaceTexture(context)))
++    {
++        return egl::Error(EGL_CONTEXT_LOST, "Could not make a texture from the IOSurface.");
++    }
++
++    if (IsError(initializeAlphaChannel(context, mSurfaceTextureID)))
++    {
++        return egl::Error(EGL_CONTEXT_LOST, "Could not clear the IOSurface's alpha channel.");
++    }
++
++    if (mFramebufferID == 0)
++    {
++        GLuint framebufferID = 0;
++        mFunctions->genFramebuffers(1, &framebufferID);
++        mStateManager->bindFramebuffer(GL_FRAMEBUFFER, framebufferID);
++        mFunctions->framebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
++                                         mSurfaceTextureID, 0);
++        mFramebufferID = framebufferID;
++    }
++
++    framebufferGL->setFramebufferID(mFramebufferID);
++    return egl::NoError();
++}
++
++egl::Error IOSurfaceSurfaceEAGL::detachFromFramebuffer(const gl::Context *context,
++                                                       gl::Framebuffer *framebuffer)
++{
++    FramebufferGL *framebufferGL = GetImplAs<FramebufferGL>(framebuffer);
++    ASSERT(framebufferGL->getFramebufferID() == mFramebufferID);
++
++    framebufferGL->setFramebufferID(0);
++    return egl::NoError();
++}
++
++}
+diff --git a/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/PbufferSurfaceEAGL.cpp b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/PbufferSurfaceEAGL.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..826565ac5a8ab8717fed64cd0ed33aa0438fdadd
+--- /dev/null
++++ b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/PbufferSurfaceEAGL.cpp
+@@ -0,0 +1,156 @@
++//
++// Copyright 2026 The ANGLE Project Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++//
++
++// PBufferSurfaceEAGL.cpp: an implementation of egl::Surface for PBuffers for the CLG backend,
++//                      currently implemented using renderbuffers
++
++#include "libANGLE/renderer/gl/eagl/PbufferSurfaceEAGL.h"
++
++#include "common/debug.h"
++#include "libANGLE/renderer/gl/FramebufferGL.h"
++#include "libANGLE/renderer/gl/FunctionsGL.h"
++#include "libANGLE/renderer/gl/RendererGL.h"
++#include "libANGLE/renderer/gl/StateManagerGL.h"
++
++namespace rx
++{
++
++PbufferSurfaceEAGL::PbufferSurfaceEAGL(const egl::SurfaceState &state,
++                                     RendererGL *renderer,
++                                     EGLint width,
++                                     EGLint height)
++    : SurfaceGL(state),
++      mWidth(width),
++      mHeight(height),
++      mFunctions(renderer->getFunctions()),
++      mStateManager(renderer->getStateManager()),
++      mFramebuffer(0),
++      mColorRenderbuffer(0),
++      mDSRenderbuffer(0)
++{}
++
++PbufferSurfaceEAGL::~PbufferSurfaceEAGL()
++{
++    if (mFramebuffer != 0)
++    {
++        mStateManager->deleteFramebuffer(mFramebuffer);
++        mFramebuffer = 0;
++    }
++
++    if (mColorRenderbuffer != 0)
++    {
++        mStateManager->deleteRenderbuffer(mColorRenderbuffer);
++        mColorRenderbuffer = 0;
++    }
++    if (mDSRenderbuffer != 0)
++    {
++        mStateManager->deleteRenderbuffer(mDSRenderbuffer);
++        mDSRenderbuffer = 0;
++    }
++}
++
++egl::Error PbufferSurfaceEAGL::initialize(const egl::Display *display)
++{
++    mFunctions->genRenderbuffers(1, &mColorRenderbuffer);
++    mStateManager->bindRenderbuffer(GL_RENDERBUFFER, mColorRenderbuffer);
++    mFunctions->renderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, mWidth, mHeight);
++
++    mFunctions->genRenderbuffers(1, &mDSRenderbuffer);
++    mStateManager->bindRenderbuffer(GL_RENDERBUFFER, mDSRenderbuffer);
++    mFunctions->renderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, mWidth, mHeight);
++
++    return egl::NoError();
++}
++
++egl::Error PbufferSurfaceEAGL::makeCurrent(const gl::Context *context)
++{
++    return egl::NoError();
++}
++
++egl::Error PbufferSurfaceEAGL::swap(const gl::Context *context, SurfaceSwapFeedback *feedback)
++{
++    return egl::NoError();
++}
++
++egl::Error PbufferSurfaceEAGL::postSubBuffer(const gl::Context *context,
++                                            EGLint x,
++                                            EGLint y,
++                                            EGLint width,
++                                            EGLint height)
++{
++    return egl::NoError();
++}
++
++egl::Error PbufferSurfaceEAGL::querySurfacePointerANGLE(EGLint attribute, void **value)
++{
++    UNIMPLEMENTED();
++    return egl::NoError();
++}
++
++egl::Error PbufferSurfaceEAGL::bindTexImage(const gl::Context *context,
++                                           gl::Texture *texture,
++                                           EGLint buffer)
++{
++    UNIMPLEMENTED();
++    return egl::NoError();
++}
++
++egl::Error PbufferSurfaceEAGL::releaseTexImage(const gl::Context *context, EGLint buffer)
++{
++    UNIMPLEMENTED();
++    return egl::NoError();
++}
++
++void PbufferSurfaceEAGL::setSwapInterval(const egl::Display *display, EGLint interval) {}
++
++gl::Extents PbufferSurfaceEAGL::getSize() const
++{
++    return gl::Extents(mWidth, mHeight, 1);
++}
++
++
++EGLint PbufferSurfaceEAGL::isPostSubBufferSupported() const
++{
++    UNIMPLEMENTED();
++    return EGL_FALSE;
++}
++
++EGLint PbufferSurfaceEAGL::getSwapBehavior() const
++{
++    return EGL_BUFFER_PRESERVED;
++}
++
++egl::Error PbufferSurfaceEAGL::attachToFramebuffer(const gl::Context *context,
++                                                  gl::Framebuffer *framebuffer)
++{
++    FramebufferGL *framebufferGL = GetImplAs<FramebufferGL>(framebuffer);
++    ASSERT(framebufferGL->getFramebufferID() == 0);
++
++    if (mFramebuffer == 0)
++    {
++        GLuint framebufferID = 0;
++        mFunctions->genFramebuffers(1, &framebufferID);
++        mStateManager->bindFramebuffer(GL_FRAMEBUFFER, framebufferID);
++        mFunctions->framebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER,
++                                            mColorRenderbuffer);
++        mFunctions->framebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
++                                            GL_RENDERBUFFER, mDSRenderbuffer);
++        mFramebuffer = framebufferID;
++    }
++    framebufferGL->setFramebufferID(mFramebuffer);
++    return egl::NoError();
++}
++
++egl::Error PbufferSurfaceEAGL::detachFromFramebuffer(const gl::Context *context,
++                                                    gl::Framebuffer *framebuffer)
++{
++    FramebufferGL *framebufferGL = GetImplAs<FramebufferGL>(framebuffer);
++    ASSERT(framebufferGL->getFramebufferID() == mFramebuffer);
++    framebufferGL->setFramebufferID(0);
++    return egl::NoError();
++}
++
++}
+diff --git a/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/PbufferSurfaceEAGL.h b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/PbufferSurfaceEAGL.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..32e95ca33260c2c235f23384c3f1adeb60e7963c
+--- /dev/null
++++ b/Source/ThirdParty/ANGLE/src/libANGLE/renderer/gl/eagl/PbufferSurfaceEAGL.h
+@@ -0,0 +1,71 @@
++//
++// Copyright 2026 The ANGLE Project Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++//
++
++// PBufferSurfaceEAGL.h: an implementation of egl::Surface for PBuffers for the CLG backend,
++//                      currently implemented using renderbuffers
++
++#ifndef LIBANGLE_RENDERER_GL_EAGL_PBUFFERSURFACEEAGL_H_
++#define LIBANGLE_RENDERER_GL_EAGL_PBUFFERSURFACEEAGL_H_
++
++#include "libANGLE/renderer/gl/SurfaceGL.h"
++
++namespace rx
++{
++
++class FunctionsGL;
++class RendererGL;
++class StateManagerGL;
++
++class PbufferSurfaceEAGL : public SurfaceGL
++{
++  public:
++    PbufferSurfaceEAGL(const egl::SurfaceState &state,
++                      RendererGL *renderer,
++                      EGLint width,
++                      EGLint height);
++    ~PbufferSurfaceEAGL() override;
++
++    egl::Error initialize(const egl::Display *display) override;
++    egl::Error makeCurrent(const gl::Context *context) override;
++
++    egl::Error swap(const gl::Context *context, SurfaceSwapFeedback *feedback) override;
++    egl::Error postSubBuffer(const gl::Context *context,
++                             EGLint x,
++                             EGLint y,
++                             EGLint width,
++                             EGLint height) override;
++    egl::Error querySurfacePointerANGLE(EGLint attribute, void **value) override;
++    egl::Error bindTexImage(const gl::Context *context,
++                            gl::Texture *texture,
++                            EGLint buffer) override;
++    egl::Error releaseTexImage(const gl::Context *context, EGLint buffer) override;
++    void setSwapInterval(const egl::Display *display, EGLint interval) override;
++
++    gl::Extents getSize() const override;
++
++    EGLint isPostSubBufferSupported() const override;
++    EGLint getSwapBehavior() const override;
++
++    egl::Error attachToFramebuffer(const gl::Context *context,
++                                   gl::Framebuffer *framebuffer) override;
++    egl::Error detachFromFramebuffer(const gl::Context *context,
++                                     gl::Framebuffer *framebuffer) override;
++
++  private:
++    unsigned mWidth;
++    unsigned mHeight;
++
++    const FunctionsGL *mFunctions;
++    StateManagerGL *mStateManager;
++
++    GLuint mFramebuffer;
++    GLuint mColorRenderbuffer;
++    GLuint mDSRenderbuffer;
++};
++
++}
++
++#endif
+diff --git a/Source/WTF/wtf/spi/cocoa/IOTypesSPI.h b/Source/WTF/wtf/spi/cocoa/IOTypesSPI.h
+index 32ec17f7da14c995ef2e9e6c4ef58b5951f55bc8..1dd53eb4280cd904280486bb62cea68fe2f5f1f3 100644
+--- a/Source/WTF/wtf/spi/cocoa/IOTypesSPI.h
++++ b/Source/WTF/wtf/spi/cocoa/IOTypesSPI.h
+@@ -34,7 +34,7 @@ DECLARE_SYSTEM_HEADER
+ 
+ #include <wtf/Platform.h>
+ 
+-#if PLATFORM(MAC) || PLATFORM(IOS) || USE(APPLE_INTERNAL_SDK)
++#if (PLATFORM(MAC) || PLATFORM(IOS) || USE(APPLE_INTERNAL_SDK)) && !defined(WEBKIT_IOS6)
+ 
+ #include <IOKit/IOTypes.h>
+ 
+diff --git a/Source/WebCore/PlatformIOS.cmake b/Source/WebCore/PlatformIOS.cmake
+new file mode 100644
+index 0000000000000000000000000000000000000000..074c8728c5a0efe97a56f89ae0cf93cd42ca5352
+--- /dev/null
++++ b/Source/WebCore/PlatformIOS.cmake
+@@ -0,0 +1,180 @@
++include(PlatformCocoa.cmake)
++
++target_compile_options(WebCore PRIVATE -Wno-\#warnings -Wno-abstract-final-class)
++
++set(BUNDLE_VERSION "${MACOSX_FRAMEWORK_BUNDLE_VERSION}")
++set(SHORT_VERSION_STRING "${WEBKIT_MAC_VERSION}")
++set(PRODUCT_NAME "WebCore")
++set(PRODUCT_BUNDLE_IDENTIFIER "com.apple.WebCore")
++configure_file(${WEBCORE_DIR}/Info.plist ${CMAKE_CURRENT_BINARY_DIR}/WebCore-Info.plist)
++
++set(_wc_fw "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/WebCore.framework")
++
++add_custom_command(TARGET WebCore POST_BUILD
++    COMMAND ${CMAKE_COMMAND} -E copy_directory "${WEBCORE_DIR}/en.lproj" "${_wc_fw}/en.lproj"
++    COMMAND ${CMAKE_COMMAND} -E copy_if_different
++        "${WEBCORE_DIR}/Resources/ContentFilterBlockedPage.html"
++        "${WEBCORE_DIR}/Resources/linearSRGB.icc"
++        "${WEBCORE_DIR}/Resources/ListButtonArrow.png"
++        "${WEBCORE_DIR}/Resources/ListButtonArrow@2x.png"
++        "${WEBCORE_DIR}/Resources/missingImage.png"
++        "${WEBCORE_DIR}/Resources/missingImage@2x.png"
++        "${WEBCORE_DIR}/Resources/missingImage@3x.png"
++        "${WEBCORE_DIR}/Resources/modelDefaultDiffuseData"
++        "${WEBCORE_DIR}/Resources/modelDefaultSpecularData"
++        "${WEBCORE_DIR}/Resources/textAreaResizeCorner.png"
++        "${WEBCORE_DIR}/Resources/textAreaResizeCorner@2x.png"
++        "${_wc_fw}/"
++    COMMAND ${CMAKE_COMMAND} -E make_directory "${_wc_fw}/audio"
++    COMMAND ${CMAKE_COMMAND} -E copy_if_different
++        "${WEBCORE_DIR}/platform/audio/resources/Composite.wav"
++        "${_wc_fw}/audio/"
++    COMMAND ${CMAKE_COMMAND} -E copy_directory
++        "${WEBCORE_DIR}/Modules/modern-media-controls"
++        "${_wc_fw}/modern-media-controls"
++    COMMAND ${CMAKE_COMMAND} -E rm -rf "${_wc_fw}/Resources"
++    COMMAND ${CMAKE_COMMAND} -E copy
++        "${CMAKE_CURRENT_BINARY_DIR}/WebCore-Info.plist"
++        "${_wc_fw}/Info.plist"
++    COMMENT "Installing WebCore.framework resources (flat iOS layout)")
++
++configure_file("${WEBCORE_DIR}/WebCore_Private.modulemap"
++               "${_wc_fw}/Modules/module.private.modulemap" COPYONLY)
++
++find_library(APPSUPPORT_LIBRARY AppSupport HINTS ${CMAKE_OSX_SYSROOT}/System/Library/PrivateFrameworks)
++find_library(IOSURFACEACCELERATOR_LIBRARY IOSurfaceAccelerator HINTS ${CMAKE_OSX_SYSROOT}/System/Library/PrivateFrameworks)
++find_library(IMAGEIO_LIBRARY ImageIO)
++find_library(CORETEXT_LIBRARY CoreText)
++find_library(COREIMAGE_LIBRARY CoreImage)
++find_library(COREVIDEO_LIBRARY CoreVideo)
++find_library(GRAPHICSSERVICES_LIBRARY GraphicsServices HINTS ${CMAKE_OSX_SYSROOT}/System/Library/PrivateFrameworks)
++find_library(MOBILEGESTALT_LIBRARY MobileGestalt HINTS ${CMAKE_OSX_SYSROOT}/usr/lib)
++find_library(MOBILECORESERVICES_LIBRARY MobileCoreServices)
++find_library(UIKIT_LIBRARY UIKit)
++
++list(APPEND WebCore_LIBRARIES
++    ${COREIMAGE_LIBRARY}
++    ${CORETEXT_LIBRARY}
++    ${COREVIDEO_LIBRARY}
++    ${IMAGEIO_LIBRARY}
++    ${MOBILECORESERVICES_LIBRARY}
++    ${UIKIT_LIBRARY}
++)
++
++if (APPSUPPORT_LIBRARY)
++    list(APPEND WebCore_LIBRARIES ${APPSUPPORT_LIBRARY})
++endif ()
++if (FONTPARSER_LIBRARY)
++    list(APPEND WebCore_LIBRARIES ${FONTPARSER_LIBRARY})
++endif ()
++if (GRAPHICSSERVICES_LIBRARY)
++    list(APPEND WebCore_LIBRARIES ${GRAPHICSSERVICES_LIBRARY})
++endif ()
++if (MOBILEGESTALT_LIBRARY)
++    list(APPEND WebCore_LIBRARIES ${MOBILEGESTALT_LIBRARY})
++endif ()
++
++if (IOSURFACEACCELERATOR_LIBRARY AND NOT WEBKIT_IOS6)
++    list(APPEND WebCore_LIBRARIES ${IOSURFACEACCELERATOR_LIBRARY})
++endif ()
++
++list(APPEND WebCore_PRIVATE_INCLUDE_DIRECTORIES
++    "${CMAKE_SOURCE_DIR}/Source/WebCore/accessibility/ios"
++    "${WEBCORE_DIR}/platform/mac"
++    "${WEBCORE_DIR}/platform/graphics/mac"
++    "${WEBCORE_DIR}/editing/mac"
++    "${WEBCORE_DIR}/loader/ios"
++    "${WEBCORE_DIR}/page/mac"
++    "${WEBCORE_DIR}/Modules/system-preview"
++    "${WEBCORE_DIR}/editing/ios"
++    "${WEBCORE_DIR}/page/ios"
++    "${WEBCORE_DIR}/platform/audio/ios"
++    "${WEBCORE_DIR}/platform/graphics/ios"
++    "${WEBCORE_DIR}/platform/graphics/ios/controls"
++    "${WEBCORE_DIR}/platform/ios"
++    "${WEBCORE_DIR}/platform/ios/wak"
++    "${WEBCORE_DIR}/platform/mediastream/ios"
++    "${WEBCORE_DIR}/platform/network/ios"
++    "${WEBCORE_DIR}/rendering/ios"
++)
++
++list(APPEND WebCore_SOURCES
++    accessibility/AccessibilityMediaHelpers.cpp
++
++    accessibility/ios/AXObjectCacheIOS.mm
++    accessibility/ios/AccessibilityObjectIOS.mm
++    accessibility/ios/WebAccessibilityObjectWrapperIOS.mm
++
++    editing/ios/EditorIOS.mm
++
++    page/ios/EventHandlerIOS.mm
++    page/ios/FrameIOS.mm
++
++    platform/cocoa/WebAVPlayerLayerView.mm
++
++    platform/graphics/ios/IconIOS.mm
++
++    platform/ios/ColorIOS.mm
++    platform/ios/DragImageIOS.mm
++    platform/ios/KeyEventIOS.mm
++    platform/ios/LocalCurrentGraphicsContextIOS.mm
++    platform/ios/LocalCurrentTraitCollection.mm
++    platform/ios/LocalizedDeviceModel.mm
++    platform/ios/PasteboardIOS.mm
++    platform/ios/PlatformEventFactoryIOS.mm
++    platform/ios/PlatformPasteboardIOS.mm
++    platform/ios/PlatformScreenIOS.mm
++    platform/ios/ScrollAnimatorIOS.mm
++    platform/ios/ScrollViewIOS.mm
++    platform/ios/ScrollbarThemeIOS.mm
++    platform/ios/ThemeIOS.mm
++    platform/ios/UIFoundationSoftLink.mm
++    platform/ios/UserAgentIOS.mm
++    platform/ios/ValidationBubbleIOS.mm
++    platform/ios/WidgetIOS.mm
++
++    platform/ios/wak/WAKAppKitStubs.mm
++    platform/ios/wak/WAKClipView.mm
++    platform/ios/wak/WAKResponder.mm
++    platform/ios/wak/WKUtilities.cpp
++
++    platform/mediastream/ios/MediaCaptureStatusBarManager.mm
++
++    rendering/ios/RenderThemeIOS.mm
++)
++
++set_source_files_properties(
++    ${WEBCORE_DIR}/platform/ios/wak/WAKAppKitStubs.mm
++    ${WEBCORE_DIR}/platform/ios/wak/WAKClipView.mm
++    ${WEBCORE_DIR}/platform/ios/wak/WAKResponder.mm
++    PROPERTIES COMPILE_FLAGS -fno-objc-arc
++)
++
++list(APPEND WebCore_USER_AGENT_STYLE_SHEETS
++)
++
++list(APPEND WebCore_PRIVATE_FRAMEWORK_HEADERS
++    dom/TouchEvent.h
++
++    page/mac/WebCoreFrameView.h
++
++    platform/audio/ios/MediaDeviceRouteController.h
++    platform/audio/ios/MediaDeviceRouteLoadURLResult.h
++
++    platform/graphics/mac/ColorMac.h
++
++    platform/ios/AbstractPasteboard.h
++
++    platform/ios/wak/WAKView.h
++)
++
++set(CSS_VALUE_PLATFORM_DEFINES "WTF_PLATFORM_IOS WTF_PLATFORM_IOS_FAMILY WTF_PLATFORM_COCOA ENABLE_APPLE_PAY_NEW_BUTTON_TYPES HAVE_CORE_MATERIAL HAVE_MATERIAL_HOSTING")
++
++list(APPEND WebCoreTestSupport_PRIVATE_INCLUDE_DIRECTORIES "${WEBCORE_DIR}/testing/cocoa")
++list(APPEND WebCoreTestSupport_SOURCES
++    testing/MockMediaDeviceRoute.mm
++    testing/MockMediaDeviceRouteController.mm
++
++    testing/cocoa/WebMockMediaDeviceRoute.mm
++)
++
+diff --git a/Source/WebCore/page/Page.cpp b/Source/WebCore/page/Page.cpp
+index a26485a6771a1d63e0d0f5ff3800f30221a77304..92b5175d6eaabc135a35230660de814027ccca6b 100644
+--- a/Source/WebCore/page/Page.cpp
++++ b/Source/WebCore/page/Page.cpp
+@@ -224,6 +224,7 @@
+ #include "WorkerOrWorkletScriptController.h"
+ #include <JavaScriptCore/VM.h>
+ #include <ranges>
++#include <stdlib.h>
+ #include <wtf/Borrow.h>
+ #include <wtf/FileSystem.h>
+ #include <wtf/StdLibExtras.h>
+@@ -2353,6 +2354,28 @@ void Page::syncLocalFrameInfoToRemote()
+     });
+ }
+ 
++#if defined(WEBKIT_IOS6)
++static void collectDocuments(const Frame& mainFrame, Vector<Ref<Document>, 8>& documents)
++{
++    for (RefPtr frame = &mainFrame; frame; frame = frame->tree().traverseNext()) {
++        RefPtr localFrame = dynamicDowncast<LocalFrame>(*frame);
++        if (!localFrame)
++            continue;
++        RefPtr document = localFrame->document();
++        if (!document)
++            continue;
++        documents.append(document.releaseNonNull());
++    }
++}
++
++static inline bool documentIsStillRenderable(Document& document, const Page& page)
++{
++    return document.page() == &page
++        && !document.renderingIsSuppressedForViewTransition()
++        && document.visualUpdatesAllowed();
++}
++#endif
++
+ // https://html.spec.whatwg.org/multipage/webappapis.html#update-the-rendering
+ void Page::updateRendering()
+ {
+@@ -2380,9 +2403,21 @@ void Page::updateRendering()
+ 
+     layoutIfNeeded();
+ 
+-    auto runProcessingStep = [&](RenderingUpdateStep step, NOESCAPE const Function<void(Document&)>& perDocumentFunction) {
++#if defined(WEBKIT_IOS6)
++    Vector<Ref<Document>, 8> documents;
++    collectDocuments(mainFrame(), documents);
++#endif
++
++    auto runProcessingStep = [&](RenderingUpdateStep step, auto&& perDocumentFunction) {
+         m_renderingUpdateRemainingSteps.last().remove(step);
+-        forEachRenderableDocument(perDocumentFunction);
++#if defined(WEBKIT_IOS6)
++        for (auto& document : documents) {
++            if (documentIsStillRenderable(document, *this))
++                perDocumentFunction(document.get());
++        }
++#else
++        forEachRenderableDocument(std::forward<decltype(perDocumentFunction)>(perDocumentFunction));
++#endif
+     };
+ 
+     runProcessingStep(RenderingUpdateStep::RestoreScrollPositionAndViewState, [] (Document& document) {
+@@ -2395,12 +2430,16 @@ void Page::updateRendering()
+         scrollingCoordinator->willStartRenderingUpdate();
+ #endif
+ 
+-    // Timestamps should not change while serving the rendering update steps.
+-    Vector<WeakPtr<Document, WeakPtrImplWithEventTargetData>> initialDocuments;
++#if defined(WEBKIT_IOS6)
++    for (auto& document : documents)
++        protect(document->window())->freezeNowTimestamp();
++#else
++    Vector<WeakPtr<Document, WeakPtrImplWithEventTargetData>, 8> initialDocuments;
+     forEachDocument([&initialDocuments] (Document& document) {
+         protect(document.window())->freezeNowTimestamp();
+         initialDocuments.append(document);
+     });
++#endif
+ 
+     runProcessingStep(RenderingUpdateStep::Reveal, [] (Document& document) {
+         // FIXME: Bug 278193 - Hidden docs should already be excluded.
+@@ -2465,10 +2504,16 @@ void Page::updateRendering()
+         document.updateResizeObservations(*this);
+     });
+ 
+-    // https://drafts.csswg.org/scroll-animations-1/#event-loop
++#if defined(WEBKIT_IOS6)
++    for (auto& document : documents) {
++        if (document->page() == this)
++            document->updateStaleScrollTimelines();
++    }
++#else
+     forEachDocument([] (Document& document) {
+         document.updateStaleScrollTimelines();
+     });
++#endif
+ 
+     runProcessingStep(RenderingUpdateStep::FocusFixup, [&] (Document& document) {
+         if (RefPtr focusedElement = document.focusedElement()) {
+@@ -2492,7 +2537,10 @@ void Page::updateRendering()
+     });
+ 
+     runProcessingStep(RenderingUpdateStep::Images, [] (Document& document) {
+-        for (auto& image : protect(document.cachedResourceLoader())->allCachedSVGImages()) {
++        Ref cachedResourceLoader = protect(document.cachedResourceLoader());
++        if (!cachedResourceLoader->hasCachedSVGImages())
++            return;
++        for (auto& image : cachedResourceLoader->allCachedSVGImages()) {
+             if (RefPtr page = image->internalPage())
+                 page->isolatedUpdateRendering();
+         }
+@@ -2507,10 +2555,17 @@ void Page::updateRendering()
+             Style::AnchorPositionEvaluator::updateScrollAdjustments(*renderView);
+     });
+ 
++#if defined(WEBKIT_IOS6)
++    for (auto& document : documents) {
++        if (RefPtr window = document->window())
++            window->unfreezeNowTimestamp();
++    }
++#else
+     for (auto& document : initialDocuments) {
+         if (document && document->window())
+             document->window()->unfreezeNowTimestamp();
+     }
++#endif
+ 
+     m_renderingUpdateRemainingSteps.last().remove(RenderingUpdateStep::WheelEventMonitorCallbacks);
+ 
+@@ -2539,9 +2594,25 @@ void Page::doAfterUpdateRendering()
+     // Code here should do once-per-frame work that needs to be done before painting, and requires
+     // layout to be up-to-date. It should not run script, trigger layout, or dirty layout.
+ 
+-    auto runProcessingStep = [&](RenderingUpdateStep step, NOESCAPE const Function<void(Document&)>& perDocumentFunction) {
++#if defined(WEBKIT_IOS6)
++    Vector<Ref<Document>, 8> documents;
++    collectDocuments(mainFrame(), documents);
++#endif
++
++    auto forEachRenderable = [&](auto&& perDocumentFunction) {
++#if defined(WEBKIT_IOS6)
++        for (auto& document : documents) {
++            if (documentIsStillRenderable(document, *this))
++                perDocumentFunction(document.get());
++        }
++#else
++        forEachRenderableDocument(std::forward<decltype(perDocumentFunction)>(perDocumentFunction));
++#endif
++    };
++
++    auto runProcessingStep = [&](RenderingUpdateStep step, auto&& perDocumentFunction) {
+         m_renderingUpdateRemainingSteps.last().remove(step);
+-        forEachRenderableDocument(perDocumentFunction);
++        forEachRenderable(std::forward<decltype(perDocumentFunction)>(perDocumentFunction));
+     };
+ 
+     runProcessingStep(RenderingUpdateStep::CursorUpdate, [] (Document& document) {
+@@ -2557,11 +2628,11 @@ void Page::doAfterUpdateRendering()
+         document.enqueueEventTimingEntriesIfNeeded();
+     });
+ 
+-    forEachRenderableDocument([] (Document& document) {
++    forEachRenderable([] (Document& document) {
+         document.selection().updateAppearanceAfterUpdatingRendering();
+     });
+ 
+-    forEachRenderableDocument([] (Document& document) {
++    forEachRenderable([] (Document& document) {
+         document.updateHighlightPositions();
+     });
+ 
+@@ -2572,13 +2643,13 @@ void Page::doAfterUpdateRendering()
+ #endif
+ 
+ #if ENABLE(APP_HIGHLIGHTS)
+-    forEachRenderableDocument([timestamp = m_lastRenderingUpdateTimestamp] (Document& document) {
++    forEachRenderable([timestamp = m_lastRenderingUpdateTimestamp] (Document& document) {
+         document.restoreUnrestoredAppHighlights(timestamp);
+     });
+ #endif
+ 
+ #if ENABLE(VIDEO)
+-    forEachRenderableDocument([] (Document& document) {
++    forEachRenderable([] (Document& document) {
+         document.updateTextTrackRepresentationImageIfNeeded();
+     });
+ #endif
+@@ -2599,9 +2670,16 @@ void Page::doAfterUpdateRendering()
+     if (RefPtr document = localMainFrame ? localMainFrame->document() : nullptr)
+         document->updateTouchEventRegions();
+ #endif
++#if defined(WEBKIT_IOS6)
++    for (auto& document : documents) {
++        if (document->page() == this)
++            document->updateEventRegions();
++    }
++#else
+     forEachDocument([] (Document& document) {
+         document.updateEventRegions();
+     });
++#endif
+ 
+ #if ENABLE(ACCESSIBILITY_ISOLATED_TREE)
+     m_renderingUpdateRemainingSteps.last().remove(RenderingUpdateStep::AccessibilityRegionUpdate);
+@@ -2611,7 +2689,7 @@ void Page::doAfterUpdateRendering()
+         if (CheckedPtr axObjectCache = existingAXObjectCache())
+             axObjectCache->onAccessibilityPaintStarted();
+ 
+-        forEachRenderableDocument([] (Document& document) {
++        forEachRenderable([] (Document& document) {
+             document.updateAccessibilityObjectRegions();
+         });
+ 
+@@ -2630,9 +2708,7 @@ void Page::doAfterUpdateRendering()
+ 
+     m_renderingUpdateRemainingSteps.last().remove(RenderingUpdateStep::PrepareCanvasesForDisplayOrFlush);
+ 
+-    forEachRenderableDocument([] (Document& document) {
+-        document.prepareCanvasesForDisplayOrFlushIfNeeded();
+-    });
++    prepareCanvasesForDisplayOrFlushIfNeeded();
+ 
+     if (localMainFrame) {
+         ASSERT(!localMainFrame->view() || !localMainFrame->view()->needsLayout());
+@@ -2650,8 +2726,19 @@ void Page::doAfterUpdateRendering()
+ 
+     computeSampledPageTopColorIfNecessary();
+ 
+-    if (mainFrame().tree().containsRemoteFrame())
++#if defined(WEBKIT_IOS6)
++    ASSERT(!settings().siteIsolationEnabled());
++#else
++    if (settings().siteIsolationEnabled())
+         syncLocalFrameInfoToRemote();
++#endif
++}
++
++void Page::prepareCanvasesForDisplayOrFlushIfNeeded()
++{
++    forEachRenderableDocument([] (Document& document) {
++        document.prepareCanvasesForDisplayOrFlushIfNeeded();
++    });
+ }
+ 
+ void Page::finalizeRenderingUpdate(OptionSet<FinalizeRenderingUpdateFlags> flags)
+@@ -2747,9 +2834,16 @@ void Page::didCompleteRenderingFrame()
+ void Page::didUpdateRendering()
+ {
+     LOG_WITH_STREAM(EventLoop, stream << "Page " << this << " didUpdateRendering()");
++#if defined(WEBKIT_IOS6)
++    Vector<Ref<Document>, 8> documents;
++    collectDocuments(mainFrame(), documents);
++    for (auto& document : documents)
++        document->flushDeferredRenderingIsSuppressedForViewTransitionChanges();
++#else
+     forEachDocument([&] (Document& document) {
+         document.flushDeferredRenderingIsSuppressedForViewTransitionChanges();
+     });
++#endif
+ }
+ 
+ void Page::prioritizeVisibleResources()
+@@ -2762,10 +2856,19 @@ void Page::prioritizeVisibleResources()
+ 
+     Vector<CachedResourceHandle<CachedResource>> toPrioritize;
+ 
++#if defined(WEBKIT_IOS6)
++    Vector<Ref<Document>, 8> documents;
++    collectDocuments(mainFrame(), documents);
++    for (auto& document : documents) {
++        if (documentIsStillRenderable(document, *this))
++            toPrioritize.appendVector(protect(document->cachedResourceLoader())->visibleResourcesToPrioritize());
++    }
++#else
+     forEachRenderableDocument([&] (Document& document) {
+         toPrioritize.appendVector(protect(document.cachedResourceLoader())->visibleResourcesToPrioritize());
+     });
+-    
++#endif
++
+     auto computeSchedulingMode = [&] {
+         // Parsing generates resource loads.
+         if (localTopDocument->parsing())
+@@ -2881,6 +2984,23 @@ void Page::timelineControllerMaximumAnimationFrameRateDidChange(AnimationTimelin
+     chrome().client().renderingUpdateFramesPerSecondChanged();
+ }
+ 
++#if defined(WEBKIT_IOS6)
++static FramesPerSecond pageIOS6RenderingUpdateFrameRateCap()
++{
++    static const FramesPerSecond cap = [] -> FramesPerSecond {
++        if (const char* override = getenv("WEBKIT_IOS6_RENDERING_UPDATE_FPS")) {
++            int parsed = atoi(override);
++            if (parsed > 0 && parsed <= FullSpeedFramesPerSecond)
++                return static_cast<FramesPerSecond>(parsed);
++            if (parsed <= 0)
++                return FullSpeedFramesPerSecond;
++        }
++        return 30;
++    }();
++    return cap;
++}
++#endif
++
+ std::optional<FramesPerSecond> Page::preferredRenderingUpdateFramesPerSecond(OptionSet<PreferredRenderingUpdateOption> flags) const
+ {
+     // Unless the call site specifies an explicit set of options, this method will account for both
+@@ -2893,6 +3013,14 @@ std::optional<FramesPerSecond> Page::preferredRenderingUpdateFramesPerSecond(Opt
+         throttlingReasons = { };
+ 
+     auto frameRate = preferredFramesPerSecond(throttlingReasons, m_displayNominalFramesPerSecond, settings().preferPageRenderingUpdatesNear60FPSEnabled());
++#if defined(WEBKIT_IOS6)
++    auto capped = [] (std::optional<FramesPerSecond> rate) {
++        if (rate && *rate > pageIOS6RenderingUpdateFrameRateCap())
++            rate = pageIOS6RenderingUpdateFrameRateCap();
++        return rate;
++    };
++    frameRate = capped(frameRate);
++#endif
+     if (!flags.contains(PreferredRenderingUpdateOption::IncludeAnimationsFrameRate))
+         return frameRate;
+ 
+@@ -2902,6 +3030,20 @@ std::optional<FramesPerSecond> Page::preferredRenderingUpdateFramesPerSecond(Opt
+     if (isThrottled)
+         return frameRate;
+ 
++#if defined(WEBKIT_IOS6)
++    Vector<Ref<Document>, 8> documents;
++    collectDocuments(mainFrame(), documents);
++    for (auto& document : documents) {
++        if (CheckedPtr timelinesController = document->timelinesController()) {
++            if (auto timelinePreferredFrameRate = timelinesController->maximumAnimationFrameRate()) {
++                if (!frameRate || *frameRate < *timelinePreferredFrameRate)
++                    frameRate = *timelinePreferredFrameRate;
++            }
++        }
++    }
++
++    return capped(frameRate);
++#else
+     forEachDocument([&] (Document& document) {
+         if (CheckedPtr timelinesController = document.timelinesController()) {
+             if (auto timelinePreferredFrameRate = timelinesController->maximumAnimationFrameRate()) {
+@@ -2919,11 +3061,18 @@ std::optional<FramesPerSecond> Page::preferredRenderingUpdateFramesPerSecond(Opt
+     }
+ 
+     return frameRate;
++#endif
+ }
+ 
+ Seconds Page::preferredRenderingUpdateInterval() const
+ {
+-    return preferredFrameInterval(m_throttlingReasons, m_displayNominalFramesPerSecond, settings().preferPageRenderingUpdatesNear60FPSEnabled());
++    auto interval = preferredFrameInterval(m_throttlingReasons, m_displayNominalFramesPerSecond, settings().preferPageRenderingUpdatesNear60FPSEnabled());
++#if defined(WEBKIT_IOS6)
++    static const Seconds cappedInterval { 1.0 / pageIOS6RenderingUpdateFrameRateCap() };
++    if (interval < cappedInterval)
++        return cappedInterval;
++#endif
++    return interval;
+ }
+ 
+ void Page::addGPUCanvasRequestingRenderingUpdatePacing(CanvasRenderingContext& context)
+@@ -4695,6 +4844,14 @@ RenderingUpdateScheduler* Page::existingRenderingUpdateScheduler()
+ 
+ void Page::forEachDocumentFromMainFrame(const Frame& mainFrame, NOESCAPE const Function<void(Document&)>& functor)
+ {
++    if (!mainFrame.tree().firstChild()) {
++        if (RefPtr localMainFrame = dynamicDowncast<LocalFrame>(mainFrame)) {
++            if (RefPtr document = localMainFrame->document())
++                functor(*document);
++        }
++        return;
++    }
++
+     Vector<Ref<Document>, 8> documents;
+     for (RefPtr frame = mainFrame; frame; frame = frame->tree().traverseNext()) {
+         RefPtr localFrame = dynamicDowncast<LocalFrame>(*frame);
+@@ -4750,8 +4907,20 @@ bool Page::findMatchingLocalDocument(NOESCAPE const Function<bool(Document&)>& f
+ 
+ void Page::forEachRenderableDocument(NOESCAPE const Function<void(Document&)>& functor) const
+ {
++    Ref mainFrame = this->mainFrame();
++    if (!mainFrame->tree().firstChild()) {
++        RefPtr localMainFrame = dynamicDowncast<LocalFrame>(mainFrame.get());
++        if (!localMainFrame)
++            return;
++        RefPtr document = localMainFrame->document();
++        if (!document || document->renderingIsSuppressedForViewTransition() || !document->visualUpdatesAllowed())
++            return;
++        functor(*document);
++        return;
++    }
++
+     Vector<Ref<Document>, 8> documents;
+-    for (RefPtr frame = mainFrame(); frame; frame = frame->tree().traverseNext()) {
++    for (RefPtr frame = mainFrame.ptr(); frame; frame = frame->tree().traverseNext()) {
+         RefPtr localFrame = dynamicDowncast<LocalFrame>(*frame);
+         if (!localFrame)
+             continue;
+@@ -4781,8 +4950,15 @@ void Page::forEachMediaElement(NOESCAPE const Function<void(HTMLMediaElement&)>&
+ 
+ void Page::forEachLocalFrame(NOESCAPE const Function<void(LocalFrame&)>& functor)
+ {
+-    Vector<Ref<LocalFrame>> frames;
+-    for (RefPtr frame = mainFrame(); frame; frame = frame->tree().traverseNext()) {
++    Ref mainFrame = this->mainFrame();
++    if (!mainFrame->tree().firstChild()) {
++        if (RefPtr localMainFrame = dynamicDowncast<LocalFrame>(mainFrame.get()))
++            functor(*localMainFrame);
++        return;
++    }
++
++    Vector<Ref<LocalFrame>, 8> frames;
++    for (RefPtr frame = mainFrame.ptr(); frame; frame = frame->tree().traverseNext()) {
+         if (RefPtr localFrame = dynamicDowncast<LocalFrame>(*frame))
+             frames.append(localFrame.releaseNonNull());
+     }
+@@ -4804,9 +4980,21 @@ void Page::forEachRootFrameView(NOESCAPE const Function<void(LocalFrameView&)>&
+ 
+ void Page::forEachWindowEventLoop(NOESCAPE const Function<void(WindowEventLoop&)>& functor)
+ {
++    Ref mainFrame = this->mainFrame();
++    if (!mainFrame->tree().firstChild()) {
++        RefPtr localMainFrame = dynamicDowncast<LocalFrame>(mainFrame.get());
++        if (!localMainFrame)
++            return;
++        if (RefPtr document = localMainFrame->document()) {
++            Ref eventLoop = document->windowEventLoop();
++            functor(eventLoop);
++        }
++        return;
++    }
++
+     HashSet<Ref<WindowEventLoop>> windowEventLoops;
+     RefPtr<WindowEventLoop> lastEventLoop;
+-    for (RefPtr frame = mainFrame(); frame; frame = frame->tree().traverseNext()) {
++    for (RefPtr frame = mainFrame.ptr(); frame; frame = frame->tree().traverseNext()) {
+         RefPtr localFrame = dynamicDowncast<LocalFrame>(*frame);
+         if (!localFrame)
+             continue;
+diff --git a/Source/WebCore/page/Page.h b/Source/WebCore/page/Page.h
+index a24c825f40389aabe3798d5793de28b947198ceb..073527e39f9dda0cd83bcb1f03497764f4488232 100644
+--- a/Source/WebCore/page/Page.h
++++ b/Source/WebCore/page/Page.h
+@@ -846,6 +846,7 @@ public:
+     WEBCORE_EXPORT void updateRendering();
+     // A call to updateRendering() that is not followed by a call to finalizeRenderingUpdate().
+     WEBCORE_EXPORT void isolatedUpdateRendering();
++    WEBCORE_EXPORT void prepareCanvasesForDisplayOrFlushIfNeeded();
+     // Called when the rendering update steps are complete, but before painting.
+     WEBCORE_EXPORT void finalizeRenderingUpdate(OptionSet<FinalizeRenderingUpdateFlags>);
+     WEBCORE_EXPORT void finalizeRenderingUpdateForRootFrame(LocalFrame&, OptionSet<FinalizeRenderingUpdateFlags>);
+diff --git a/Source/WebCore/platform/graphics/ImageBuffer.cpp b/Source/WebCore/platform/graphics/ImageBuffer.cpp
+index ea2bca619dd073dbaa7c73c7db5f4ec334fb7b46..fa3e4d74c00f6f7f0ea9ecc1c8ba8de9e7ce717d 100644
+--- a/Source/WebCore/platform/graphics/ImageBuffer.cpp
++++ b/Source/WebCore/platform/graphics/ImageBuffer.cpp
+@@ -88,7 +88,7 @@ RefPtr<ImageBuffer> ImageBuffer::create(const FloatSize& size, RenderingMode ren
+ 
+     switch (renderingMode) {
+     case RenderingMode::Accelerated:
+-#if HAVE(IOSURFACE)
++#if HAVE(IOSURFACE) && !defined(WEBKIT_IOS6)
+         if (ProcessCapabilities::canUseAcceleratedBuffers()) {
+             ImageBufferCreationContext creationContext;
+             if (graphicsClient)
+diff --git a/Source/WebCore/platform/graphics/angle/GraphicsContextGLANGLE.cpp b/Source/WebCore/platform/graphics/angle/GraphicsContextGLANGLE.cpp
+index 4e9cc00815c70e3b74fc9ea6a6079b88444862b1..6be2e56ad6b0eeb78430cc202cd45b81c6d96351 100644
+--- a/Source/WebCore/platform/graphics/angle/GraphicsContextGLANGLE.cpp
++++ b/Source/WebCore/platform/graphics/angle/GraphicsContextGLANGLE.cpp
+@@ -851,6 +851,16 @@ void GraphicsContextGLANGLE::prepareTexture()
+         // Blit m_preserveDrawingBufferTexture into m_texture.
+         ScopedGLCapability scopedScissor(GL_SCISSOR_TEST, GL_FALSE);
+         ScopedGLCapability scopedDither(GL_DITHER, GL_FALSE);
++        if (!m_isForWebGL2 && !isExtensionEnabledImpl("GL_NV_framebuffer_blit"_s) && !isExtensionEnabledImpl("GL_ANGLE_framebuffer_blit"_s)) {
++            ScopedFramebuffer readFBO;
++            GL_BindFramebuffer(GL_FRAMEBUFFER, readFBO);
++            GL_FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_preserveDrawingBufferTexture, 0);
++            ScopedRestoreTextureBinding restoreBinding(TEXTURE_BINDING_2D, TEXTURE_2D);
++            GL_BindTexture(GL_TEXTURE_2D, m_texture);
++            GL_CopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_currentWidth, m_currentHeight);
++            GL_BindFramebuffer(GL_FRAMEBUFFER, m_state.boundDrawFBO);
++            return;
++        }
+         GL_BindFramebuffer(GL_DRAW_FRAMEBUFFER_ANGLE, m_preserveDrawingBufferFBO);
+         // Read m_preserveDrawingBufferTexture through an own framebuffer instead of m_fbo, because
+         // the read buffer of m_fbo, the emulated default framebuffer, is set by the WebGL 2 context
+diff --git a/Source/WebCore/platform/graphics/ca/cocoa/PlatformCALayerCocoa.mm b/Source/WebCore/platform/graphics/ca/cocoa/PlatformCALayerCocoa.mm
+index 530798105b7400793e0c5da137ab9b6aa4ce88ef..58a288aa284f3a106d02c96daadc52be7ff8bc3e 100644
+--- a/Source/WebCore/platform/graphics/ca/cocoa/PlatformCALayerCocoa.mm
++++ b/Source/WebCore/platform/graphics/ca/cocoa/PlatformCALayerCocoa.mm
+@@ -34,6 +34,7 @@
+ #import "LocalCurrentGraphicsContext.h"
+ #import "MediaPlayerEnumsCocoa.h"
+ #import "Model.h"
++#import "NativeImage.h"
+ #import "PathCG.h"
+ #import "PlatformCAAnimationCocoa.h"
+ #import "PlatformCAFilters.h"
+@@ -845,8 +846,18 @@ - (void)setOwner:(WebCore::PlatformCALayer*)owner
+ 
+ void PlatformCALayerCocoa::setDelegatedContents(const PlatformCALayerInProcessDelegatedContents& contents)
+ {
+-    if (!contents.finishedFence || protect(contents.finishedFence)->waitFor(delegatedContentsFinishedTimeout))
++#if HAVE(IOSURFACE)
++    if (!contents.finishedFence || protect(contents.finishedFence)->waitFor(delegatedContentsFinishedTimeout)) {
++#if defined(WEBKIT_IOS6)
++        RefPtr image = const_cast<IOSurface&>(contents.surface).createNativeImage();
++        setContents(image ? image->platformImage().get() : nullptr);
++#else
+         setContents(contents.surface.asLayerContents());
++#endif
++    }
++#else
++    UNUSED_PARAM(contents);
++#endif
+ }
+ 
+ void PlatformCALayerCocoa::setContentsRect(const FloatRect& value)
+@@ -999,7 +1010,7 @@ - (void)setOwner:(WebCore::PlatformCALayer*)owner
+ {
+     BEGIN_BLOCK_OBJC_EXCEPTIONS
+     [m_layer setCornerRadius:value];
+-    if (value)
++    if (value && [m_layer respondsToSelector:@selector(setCornerCurve:)])
+         [m_layer setCornerCurve:kCACornerCurveCircular];
+     END_BLOCK_OBJC_EXCEPTIONS
+ }
+@@ -1201,7 +1212,9 @@ - (void)setOwner:(WebCore::PlatformCALayer*)owner
+             ALLOW_DEPRECATED_DECLARATIONS_BEGIN
+             [m_layer setWantsExtendedDynamicRangeContent:true];
+             ALLOW_DEPRECATED_DECLARATIONS_END
++#if !defined(WEBKIT_IOS6)
+             [m_layer setToneMapMode:CAToneMapModeIfSupported];
++#endif
+         }
+ #endif
+         END_BLOCK_OBJC_EXCEPTIONS
+diff --git a/Source/WebCore/platform/graphics/cg/GraphicsContextGLCG.cpp b/Source/WebCore/platform/graphics/cg/GraphicsContextGLCG.cpp
+index 8ea17fd5e11fa09d3f810125c1d4dac5e6f13b96..f5ad6184c1b3efe42fc3c751adcc0a477c7197f5 100644
+--- a/Source/WebCore/platform/graphics/cg/GraphicsContextGLCG.cpp
++++ b/Source/WebCore/platform/graphics/cg/GraphicsContextGLCG.cpp
+@@ -114,7 +114,7 @@ ALWAYS_INLINE void convert16BitFormatToRGBA8(std::span<const SourceType>, std::s
+ template<> ALWAYS_INLINE void NODELETE convert16BitFormatToRGBA8<GraphicsContextGL::DataFormat::RGBA16Little, uint16_t, uint8_t>(std::span<const uint16_t> source, std::span<uint8_t> destination, unsigned pixelsPerRow)
+ {
+ #if HAVE(ARM_NEON_INTRINSICS)
+-    SIMD::unpackOneRowOfRGBA16LittleToRGBA8(source.data(), destination.data(), pixelsPerRow);
++    SIMD::unpackOneRowOfRGBA16LittleToRGBA8(source, destination, pixelsPerRow);
+ #endif
+     for (unsigned i = 0; i < pixelsPerRow; ++i) {
+         destination[0] = convertColor16LittleTo8(source[0]);
+@@ -141,7 +141,7 @@ template<> ALWAYS_INLINE void NODELETE convert16BitFormatToRGBA8<GraphicsContext
+ template<> ALWAYS_INLINE void NODELETE convert16BitFormatToRGBA8<GraphicsContextGL::DataFormat::RGB16Little, uint16_t, uint8_t>(std::span<const uint16_t> source, std::span<uint8_t> destination, unsigned pixelsPerRow)
+ {
+ #if HAVE(ARM_NEON_INTRINSICS)
+-    SIMD::unpackOneRowOfRGB16LittleToRGBA8(source.data(), destination.data(), pixelsPerRow);
++    SIMD::unpackOneRowOfRGB16LittleToRGBA8(source, destination, pixelsPerRow);
+ #endif
+     for (unsigned i = 0; i < pixelsPerRow; ++i) {
+         destination[0] = convertColor16LittleTo8(source[0]);
+@@ -168,7 +168,7 @@ template<> ALWAYS_INLINE void NODELETE convert16BitFormatToRGBA8<GraphicsContext
+ template<> ALWAYS_INLINE void NODELETE convert16BitFormatToRGBA8<GraphicsContextGL::DataFormat::ARGB16Little, uint16_t, uint8_t>(std::span<const uint16_t> source, std::span<uint8_t> destination, unsigned pixelsPerRow)
+ {
+ #if HAVE(ARM_NEON_INTRINSICS)
+-    SIMD::unpackOneRowOfARGB16LittleToRGBA8(source.data(), destination.data(), pixelsPerRow);
++    SIMD::unpackOneRowOfARGB16LittleToRGBA8(source, destination, pixelsPerRow);
+ #endif
+     for (unsigned i = 0; i < pixelsPerRow; ++i) {
+         destination[0] = convertColor16LittleTo8(source[1]);
+diff --git a/Source/WebCore/platform/graphics/cocoa/GraphicsContextGLCocoa.h b/Source/WebCore/platform/graphics/cocoa/GraphicsContextGLCocoa.h
+index f1c5b89e64925faccff54fba9671131bf3be808d..42873a191897708bf9bb871147380be3b9c8c73f 100644
+--- a/Source/WebCore/platform/graphics/cocoa/GraphicsContextGLCocoa.h
++++ b/Source/WebCore/platform/graphics/cocoa/GraphicsContextGLCocoa.h
+@@ -146,6 +146,7 @@ protected:
+ #endif
+     void* createMetalSharedEventEGLSync(id, uint64_t);
+     RetainPtr<IOSurfaceRef> copySurfaceBuffer(SurfaceBuffer);
++    bool supportsFlipBlit() const;
+ 
+     ProcessIdentity m_resourceOwner;
+     ColorSpace m_drawingBufferColorSpace;
+diff --git a/Source/WebCore/platform/graphics/cocoa/GraphicsContextGLCocoa.mm b/Source/WebCore/platform/graphics/cocoa/GraphicsContextGLCocoa.mm
+index a5bed43b942d3b75617362feaf633dbef82e0d8c..0d3dee52545eb7d8cbee6f6e56d153ec5211ff77 100644
+--- a/Source/WebCore/platform/graphics/cocoa/GraphicsContextGLCocoa.mm
++++ b/Source/WebCore/platform/graphics/cocoa/GraphicsContextGLCocoa.mm
+@@ -120,10 +120,17 @@ static EGLDisplay initializeEGLDisplay(const GraphicsContextGLAttributes& attrs)
+ 
+     Vector<EGLAttrib> displayAttributes;
+     displayAttributes.append(EGL_PLATFORM_ANGLE_TYPE_ANGLE);
++#if defined(WEBKIT_IOS6)
++    displayAttributes.append(EGL_PLATFORM_ANGLE_TYPE_OPENGLES_ANGLE);
++#else
+     displayAttributes.append(EGL_PLATFORM_ANGLE_TYPE_METAL_ANGLE);
++#endif
+     // These properties are defined for EGL_ANGLE_power_preference as EGLContext attributes,
+     // but Metal backend uses EGLDisplay attributes.
+     auto powerPreference = attrs.powerPreference;
++#if defined(WEBKIT_IOS6)
++    powerPreference = GraphicsContextGLPowerPreference::Default;
++#endif
+     if (powerPreference == GraphicsContextGLPowerPreference::HighPerformance) {
+         displayAttributes.append(EGL_POWER_PREFERENCE_ANGLE);
+         displayAttributes.append(EGL_HIGH_POWER_ANGLE);
+@@ -145,11 +152,13 @@ static EGLDisplay initializeEGLDisplay(const GraphicsContextGLAttributes& attrs)
+         displayAttributes.append(static_cast<EGLAttrib>(attrs.windowGPUID));
+     }
+ #endif
++#if !defined(WEBKIT_IOS6)
+     ASSERT(WTF::contains(clientExtensions, "EGL_ANGLE_feature_control"_span));
+     displayAttributes.append(EGL_FEATURE_OVERRIDES_DISABLED_ANGLE);
+     displayAttributes.append(reinterpret_cast<EGLAttrib>(disabledANGLEMetalFeatures));
+     displayAttributes.append(EGL_FEATURE_OVERRIDES_ENABLED_ANGLE);
+     displayAttributes.append(reinterpret_cast<EGLAttrib>(enabledANGLEMetalFeatures));
++#endif
+     displayAttributes.append(EGL_NONE);
+ 
+     EGLDisplay display = EGL_GetPlatformDisplay(EGL_PLATFORM_ANGLE_ANGLE, reinterpret_cast<void*>(EGL_DEFAULT_DISPLAY), displayAttributes.span().data());
+@@ -161,7 +170,7 @@ static EGLDisplay initializeEGLDisplay(const GraphicsContextGLAttributes& attrs)
+     }
+     LOG(WebGL, "ANGLE initialised Major: %d Minor: %d", majorVersion, minorVersion);
+ 
+-#if ASSERT_ENABLED
++#if ASSERT_ENABLED && !defined(WEBKIT_IOS6)
+     auto displayExtensions = unsafeSpan(EGL_QueryString(display, EGL_EXTENSIONS));
+     ASSERT(WTF::contains(displayExtensions, "EGL_ANGLE_metal_shared_event_sync"_span));
+ #endif
+@@ -199,12 +208,15 @@ static EGLDisplay initializeEGLDisplay(const GraphicsContextGLAttributes& attrs)
+ {
+     GraphicsContextGLAttributes attributes = contextAttributes();
+     m_isForWebGL2 = attributes.isWebGL2;
++#if !defined(WEBKIT_IOS6)
+     if (!platformSupportsMetal())
+         return false;
++#endif
+ 
+     m_displayObj = initializeEGLDisplay(attributes);
+-    if (!m_displayObj)
++    if (!m_displayObj) {
+         return false;
++    }
+ 
+     EGLint configAttributes[] = {
+         EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+@@ -271,6 +283,7 @@ static EGLDisplay initializeEGLDisplay(const GraphicsContextGLAttributes& attrs)
+         LOG(WebGL, "EGLContext Initialization failed.");
+         return false;
+     }
++#if !defined(WEBKIT_IOS6)
+     m_finishedMetalSharedEventListener = adoptNS([[MTLSharedEventListener alloc] init]);
+     if (!m_finishedMetalSharedEventListener) {
+         ASSERT_NOT_REACHED();
+@@ -281,6 +294,7 @@ static EGLDisplay initializeEGLDisplay(const GraphicsContextGLAttributes& attrs)
+         ASSERT_NOT_REACHED();
+         return false;
+     }
++#endif
+     return true;
+ }
+ 
+@@ -293,7 +307,7 @@ static EGLDisplay initializeEGLDisplay(const GraphicsContextGLAttributes& attrs)
+ #endif
+     // For flip blit.
+     if (!m_isForWebGL2 && !enableExtensionsImpl({ "GL_NV_framebuffer_blit"_s }))
+-        return false;
++        enableExtensionsImpl({ "GL_ANGLE_framebuffer_blit"_s });
+ #if ENABLE(WEBXR)
+     auto attributes = contextAttributes();
+     if (attributes.xrCompatible && !enableRequiredWebXRExtensionsImpl())
+@@ -375,8 +389,15 @@ static EGLDisplay initializeEGLDisplay(const GraphicsContextGLAttributes& attrs)
+     return bindNextDrawingBuffer();
+ }
+ 
++bool GraphicsContextGLCocoa::supportsFlipBlit() const
++{
++    return m_isForWebGL2 || isExtensionEnabledImpl("GL_NV_framebuffer_blit"_s) || isExtensionEnabledImpl("GL_ANGLE_framebuffer_blit"_s);
++}
++
+ RetainPtr<IOSurfaceRef> GraphicsContextGLCocoa::copySurfaceBuffer(SurfaceBuffer bufferType)
+ {
++    if (!supportsFlipBlit())
++        return nullptr;
+     auto size = getInternalFramebufferSize();
+     auto& source = surfaceBuffer(bufferType);
+     if (!source || source.size() != size)
+@@ -909,6 +930,8 @@ static CGImageAlphaInfo alphaInfoForSurfaceBufferContents(const GraphicsContextG
+ 
+ RefPtr<NativeImage> GraphicsContextGLCocoa::copyNativeImage(SurfaceBuffer buffer)
+ {
++    if (!supportsFlipBlit())
++        return GraphicsContextGLANGLE::copyNativeImage(buffer);
+     if (!makeContextCurrent())
+         return nullptr;
+     if (buffer == SurfaceBuffer::DrawingBuffer)
+@@ -930,10 +953,15 @@ static CGImageAlphaInfo alphaInfoForSurfaceBufferContents(const GraphicsContextG
+ 
+ void GraphicsContextGLCocoa::insertFinishedSignalOrInvoke(Function<void()> signal)
+ {
++#if defined(WEBKIT_IOS6)
++    if (makeContextCurrent())
++        GL_Finish();
++    signal();
++    return;
++#else
+     static std::atomic<uint64_t> nextSignalValue;
+     uint64_t signalValue = ++nextSignalValue;
+     RetainPtr<id<MTLSharedEvent>> event = m_finishedMetalSharedEvent.get();
+-    // The block below has to be a real compiler generated block instead of BlockPtr due to a Metal bug. rdar://108035473
+     __block Function<void()> blockSignal = WTF::move(signal);
+     [event notifyListener:m_finishedMetalSharedEventListener.get() atValue:signalValue block:^(id<MTLSharedEvent>, uint64_t) {
+         blockSignal();
+@@ -946,6 +974,7 @@ static CGImageAlphaInfo alphaInfoForSurfaceBufferContents(const GraphicsContextG
+     }
+     bool result = EGL_DestroySync(platformDisplay(), eglSync);
+     ASSERT_UNUSED(result, result);
++#endif
+ }
+ 
+ #if ENABLE(VIDEO)
