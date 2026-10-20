@@ -50,7 +50,7 @@ function commands.rename(defines, header)
     local names = defined(defines)
     local renamable = {}
     for _, name in ipairs(names) do
-        if name:sub(1, 7) ~= "Revenant" then
+        if not name:find("^Revenant") then
             table.insert(renamable, name)
         end
     end
