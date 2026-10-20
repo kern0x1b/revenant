@@ -1,25 +1,8 @@
-local function digest(text)
-    local h = 0
-    for k = 1, #text, 4096 do
-        for _, b in ipairs({text:byte(k, math.min(k + 4095, #text))}) do
-            h = (h * 31 + b) % 4294967296
-        end
-    end
-    return string.format("%08x", h)
-end
-
-local function cells_of(line)
-    local out = {}
-    for cell in (line .. "\t"):gmatch("([^\t]*)\t") do
-        out[#out + 1] = cell
-    end
-    return out
-end
-
 function failures(opt)
     local byteorder = import("byteorder", {rootdir = opt.modules})
-    local root = path.join(opt.modules, "..")
-    local apple = path.join(root, "..", "packages", "frameworks", "apple-backports")
+    local matter_text = import("matter-text", {rootdir = path.join(opt.modules, "..", "tools"), anonymous = true})
+    local workspace = import("workspace", {rootdir = opt.modules, anonymous = true})
+    local apple = path.join(workspace.root(), "packages", "frameworks", "apple-backports")
     local facts = path.join(apple, "facts", "Matter")
     local closure = path.join(facts, "emit-closure.tsv")
     local overlap = path.join(facts, "class-overlap.tsv")
@@ -36,7 +19,7 @@ function failures(opt)
         if first then
             first = false
         else
-            local cells = cells_of(line)
+            local cells = matter_text.cells_of(line)
             if cells[1] then
                 real[cells[1]] = cells[2]
                 input = input + 1
@@ -50,7 +33,7 @@ function failures(opt)
     end
     local stamp = lines[1] or ""
     local have = stamp:match("^# inputs: class%-overlap%.tsv (%x+);")
-    local want = digest(overlap_text)
+    local want = matter_text.digest(overlap_text)
     if have ~= want then
         out[#out + 1] = "emit-closure.tsv is stale: its class-overlap.tsv digest is " .. tostring(have)
             .. ", the file's is " .. want .. " (re-run tools/matter-closure.lua)"
@@ -61,7 +44,7 @@ function failures(opt)
 
     local emit, rows, prev = {}, 0, nil
     for index = 3, #lines do
-        local cells = cells_of(lines[index])
+        local cells = matter_text.cells_of(lines[index])
         local name, real_col, closure_col, reason, emit_col = cells[1], cells[2], cells[3], cells[4], cells[5]
         rows = rows + 1
         if prev and not byteorder.less(prev, name) then

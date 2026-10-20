@@ -1,4 +1,5 @@
 local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
+local sets = import("lib.sets", {rootdir = os.scriptdir(), anonymous = true})
 local tree = import("lib.tree", {rootdir = os.scriptdir(), anonymous = true})
 
 local function words_of(file)
@@ -10,15 +11,6 @@ local function words_of(file)
         end
     end
     return set, count
-end
-
-local function sorted_keys(set)
-    local keys = {}
-    for k in pairs(set) do
-        keys[#keys + 1] = k
-    end
-    table.sort(keys)
-    return keys
 end
 
 local function unavailable_on_ios(attributes)
@@ -103,6 +95,6 @@ function main()
             in_view = false
         end
     end
-    io.writefile(tree.api("apple-view-modifiers-ios.txt"), text.join("\n", sorted_keys(usable_mods)) .. "\n")
-    print(string.format("modifiers: %d -> %d usable on iOS", mod_count, #sorted_keys(usable_mods)))
+    io.writefile(tree.api("apple-view-modifiers-ios.txt"), text.join("\n", sets.sorted_keys(usable_mods)) .. "\n")
+    print(string.format("modifiers: %d -> %d usable on iOS", mod_count, #sets.sorted_keys(usable_mods)))
 end

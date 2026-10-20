@@ -1,16 +1,8 @@
 local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
 
-local function lines_of(content)
-    local lines = text.split(content, "\n")
-    if lines[#lines] == "" then
-        lines[#lines] = nil
-    end
-    return lines
-end
-
 local function surface(file)
     local rows = {}
-    for _, line in ipairs(lines_of(io.readfile(file))) do
+    for _, line in ipairs(text.lines(io.readfile(file))) do
         local parts = text.split(line, "\t")
         if #parts == 3 then
             rows[#rows + 1] = {owner = parts[1], kind = parts[2], api = parts[3]}
@@ -21,7 +13,7 @@ end
 
 local function ours(file)
     local declared = {}
-    for number, line in ipairs(lines_of(io.readfile(file))) do
+    for number, line in ipairs(text.lines(io.readfile(file))) do
         local parts = text.split(line, "\t")
         if #parts ~= 4 then
             io.stderr:write(string.format("%s: line %d has %d columns, want 4 (owner, kind, name, file)\n",

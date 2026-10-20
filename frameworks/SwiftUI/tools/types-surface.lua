@@ -1,4 +1,5 @@
 local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
+local sets = import("lib.sets", {rootdir = os.scriptdir(), anonymous = true})
 
 local tree = import("lib.tree", {rootdir = os.scriptdir(), anonymous = true})
 local here = tree.api()
@@ -142,15 +143,6 @@ local function unavailable_on_ios(attributes)
     return string.match(attributes, "@available%(%s*iOS%s*,%s*unavailable") ~= nil
 end
 
-local function sorted_keys(set)
-    local keys = {}
-    for k in pairs(set) do
-        keys[#keys + 1] = k
-    end
-    table.sort(keys)
-    return keys
-end
-
 function main(...)
     sdk = nil
     for _, a in ipairs({...}) do
@@ -203,30 +195,23 @@ function main(...)
         end
     end
     local added, removed = {}, {}
-    for _, name in ipairs(sorted_keys(everything)) do
+    for _, name in ipairs(sets.sorted_keys(everything)) do
         if previous[name] == nil then
             added[#added + 1] = name
         end
     end
-    for _, name in ipairs(sorted_keys(previous)) do
+    for _, name in ipairs(sets.sorted_keys(previous)) do
         if everything[name] == nil then
             removed[#removed + 1] = name
         end
     end
     local rows = {}
-    for _, name in ipairs(sorted_keys(everything)) do
+    for _, name in ipairs(sets.sorted_keys(everything)) do
         rows[#rows + 1] = name .. "\t" .. everything[name]
     end
     io.writefile(path_out, rows_text(rows))
-    io.writefile(path.join(here, "apple-types-ios.txt"), rows_text(sorted_keys(on_ios)))
+    io.writefile(path.join(here, "apple-types-ios.txt"), rows_text(sets.sorted_keys(on_ios)))
 
-    local function count_of(set)
-        local n = 0
-        for _ in pairs(set) do
-            n = n + 1
-        end
-        return n
-    end
     local function head_of(list)
         local shown = {}
         for i = 1, math.min(#list, 20) do
@@ -237,9 +222,9 @@ function main(...)
     print("types-surface: " .. sdk)
     table.sort(module_order)
     for _, module in ipairs(module_order) do
-        print("  " .. module .. ": " .. count_of(per_module[module]) .. " types")
+        print("  " .. module .. ": " .. sets.count_of(per_module[module]) .. " types")
     end
-    print("  apple-types.txt: " .. count_of(everything) .. " types, " .. count_of(on_ios) .. " of them usable on iOS")
+    print("  apple-types.txt: " .. sets.count_of(everything) .. " types, " .. sets.count_of(on_ios) .. " of them usable on iOS")
     print("  added " .. #added .. ": " .. head_of(added))
     print("  removed " .. #removed .. ": " .. head_of(removed))
 end

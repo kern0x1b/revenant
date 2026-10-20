@@ -1,4 +1,5 @@
 local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
+local sets = import("lib.sets", {rootdir = os.scriptdir(), anonymous = true})
 local owners = import("lib.owners", {rootdir = os.scriptdir(), anonymous = true})
 
 local COLUMNS = 3
@@ -230,14 +231,6 @@ local function sorted_rows(set)
     return rows
 end
 
-local function count_of(set)
-    local n = 0
-    for _ in pairs(set) do
-        n = n + 1
-    end
-    return n
-end
-
 local function show(owner)
     return owner == nil and "None" or owner
 end
@@ -337,9 +330,9 @@ function main(...)
         end
     end
 
-    local n_old, n_new = count_of(old), count_of(new)
-    local n_only_old, n_only_new = count_of(only_old), count_of(only_new)
-    local n_moved, n_attribute, n_other = count_of(moved), count_of(attribute), count_of(other)
+    local n_old, n_new = sets.count_of(old), sets.count_of(new)
+    local n_only_old, n_only_new = sets.count_of(only_old), sets.count_of(only_new)
+    local n_moved, n_attribute, n_other = sets.count_of(moved), sets.count_of(attribute), sets.count_of(other)
     print(string.format("|O| = %d   surface rows in OLD", n_old))
     print(string.format("|N| = %d   surface rows in NEW", n_new))
     print(string.format("|O\\N| = %d   |O\\N| rows: moved %d  attribute %d  other %d",
@@ -369,7 +362,7 @@ function main(...)
         end
     end
 
-    local union = count_of(moved) + count_of(attribute) + count_of(other)
+    local union = sets.count_of(moved) + sets.count_of(attribute) + sets.count_of(other)
     local ok = (n_old - n_new == n_only_old - n_only_new) and union == n_only_old
     print(string.format("identity over surface rows (not gap rows): |O|-|N| = %d, |O\\N| - |N\\O| = %d, classes: %d + %d + %d = %d",
         n_old - n_new, n_only_old - n_only_new, n_moved, n_attribute, n_other, union))

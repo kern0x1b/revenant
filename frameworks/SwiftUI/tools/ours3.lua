@@ -3,17 +3,9 @@ local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
 local COLUMNS = 3
 local OURS = 4
 
-local function lines_of(content)
-    local lines = text.split(content, "\n")
-    if lines[#lines] == "" then
-        lines[#lines] = nil
-    end
-    return lines
-end
-
 local function convert(file)
     local rows, keys = {}, {}
-    for number, line in ipairs(lines_of(io.readfile(file))) do
+    for number, line in ipairs(text.lines(io.readfile(file))) do
         if text.strip(line) ~= "" then
             local parts = text.split(line, "\t")
             local row = nil
