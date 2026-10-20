@@ -58,11 +58,17 @@ jobs:
         run: |
           [ -x /opt/homebrew/opt/llvm/bin/llvm-config ] || brew install llvm
           ./xmakew require -P . -y -v revenant@ld64
+          ld64=$(./xmakew where -P . ld64)
+          if [ ! -x "$ld64/bin/ld" ]; then
+            echo "xmake installed no ld64 at $ld64" >&2
+            ./xmakew require -P . --list
+            exit 1
+          fi
 
       - name: Prove the iOS SDK links with ld64
         run: |
-          ld=$(find "$HOME/.revenant/cache/xmake-global/.xmake/packages/l/ld64" -name ld -path '*/bin/ld' | head -n 1)
-          [ -x "$ld" ] || { echo "no ld64 under the store" >&2; exit 1; }
+          ld="$(./xmakew where -P . ld64)/bin/ld"
+          [ -x "$ld" ] || { echo "no ld64 at $ld" >&2; exit 1; }
           probe="$RUNNER_TEMP/linker-probe"
           mkdir -p "$probe"
           printf 'int f(void) { return 1; }\n' > "$probe/a.c"
