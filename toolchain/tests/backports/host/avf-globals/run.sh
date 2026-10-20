@@ -654,7 +654,7 @@ done
 #
 # The port's own objects are compiled for the host here in the same way, so the walker is treated the same.
 coding=""
-for candidate in "$root/packages/r/revenant-coding/files" "$HOME/Git/projects/ios/hades/toolchain/packages/r/revenant-coding/files"; do
+for candidate in "$root/packages/r/revenant-coding/files" "$HOME/Git/projects/ios/revenant/toolchain/packages/r/revenant-coding/files"; do
     [ -f "$candidate/RevenantCoding.m" ] && { coding_source="$candidate/RevenantCoding.m"; break; }
 done
 [ -n "${coding_source:-}" ] || {
