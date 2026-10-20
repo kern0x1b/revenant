@@ -9,7 +9,7 @@ The target rules and the values each one reads, the settings a port sets for the
 | `@addon/revenant/tweak` | a MobileSubstrate dylib | `tweak.filter`, `revenant.install`, `revenant.libraries` |
 | `@addon/revenant/daemon` | an executable in `/usr/libexec` | `revenant.install`, `revenant.libraries`; its LaunchDaemons plist through `add_installfiles` |
 | `@addon/revenant/app` | `Name.app` | `app.plist-file`, `app.plist`, `app.resources`, `app.frameworks`, `app.url-scheme` |
-| `@addon/revenant/library` | a shared library an application bundles | the common values only; checked, stripped, signed and import-checked with the bundle |
+| `@addon/revenant/library` | a shared library an application bundles | the values on any target below; checked, stripped, signed and import-checked with the bundle |
 | `@addon/revenant/swift` | added beside one of the rules above | `swift.module` (default the target's name), `swift.flags` |
 | `@addon/revenant/check` | a project check | `check.*`, see below |
 
