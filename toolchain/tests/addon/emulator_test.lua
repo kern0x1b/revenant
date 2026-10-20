@@ -483,7 +483,7 @@ local function queue_step(emulator, folder, opt, found)
     os.mkdir(work)
     local shared = path.join(os.getenv("HOME"), ".xmake", "addons")
     local before = os.exists(shared) and os.files(shared) or {}
-    os.iorunv("xmake", {"addon", "--install", "-y", path.absolute(path.join(opt.modules, ".."))}, {curdir = work, envs = envs})
+    os.iorunv(os.programfile(), {"addon", "--install", "-y", path.absolute(path.join(opt.modules, ".."))}, {curdir = work, envs = envs})
     if os.isdir(shared) then
         for _, name in ipairs(os.files(shared)) do
             if not table.contains(before, name) then
@@ -497,7 +497,7 @@ local function queue_step(emulator, folder, opt, found)
     end
     for _, held in ipairs({"", "1"}) do
         for _, case in ipairs({{"/usr/bin/true", 0}, {"/usr/bin/false", 1}}) do
-            local code = os.execv("xmake", {"queue", "--", case[1]},
+            local code = os.execv(os.programfile(), {"queue", "--", case[1]},
                                   {curdir = work, try = true,
                                    envs = table.join(envs, {[emulator.build_slot_name()] = held}),
                                    stdout = path.join(work, "queue.log"), stderr = path.join(work, "queue.log")})

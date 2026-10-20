@@ -104,6 +104,6 @@ function repository(folder)
 end
 
 function build(at, mode)
-    os.vrunv("xmake", table.join({"f", "-p", "iphoneos", "-a", "armv7", "-y"}, mode and {"-m", mode} or {}), {curdir = at})
-    os.vrunv("xmake", {"build", "-y"}, {curdir = at})
+    os.vrunv(os.programfile(), table.join({"f", "-p", "iphoneos", "-a", "armv7", "-y"}, mode and {"-m", mode} or {}), {curdir = at})
+    os.vrunv(os.programfile(), {"build", "-y"}, {curdir = at})
 end

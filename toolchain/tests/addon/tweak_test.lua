@@ -52,7 +52,7 @@ function failures(opt)
         end
 
         local installdir = path.join(folder, "installed")
-        local install_refused = fixtures.refusal(function () os.vrunv("xmake", {"install", "-o", installdir, "-y"}, {curdir = at}) end)
+        local install_refused = fixtures.refusal(function () os.vrunv(os.programfile(), {"install", "-o", installdir, "-y"}, {curdir = at}) end)
         local library = path.join(installdir, "Library", "MobileSubstrate", "DynamicLibraries", "safearea.dylib")
         local filter = path.join(installdir, "Library", "MobileSubstrate", "DynamicLibraries", "safearea.plist")
         if install_refused then
