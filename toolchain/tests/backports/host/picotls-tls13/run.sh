@@ -10,8 +10,6 @@
 # The certificate and the key are made here, by the host's own openssl, into the build directory: the
 # port's tree holds neither, and both are thrown away with the directory.
 set -eu
-echo "FAIL host/picotls-tls13/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 74" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 BACKPORTS=${BACKPORTS:-$here/../../../../packages}
@@ -71,10 +69,7 @@ openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:P-256 -nodes -days 1 \
     -keyout "$build/key.pem" -out "$build/cert.pem" -subj "/CN=revenant probe" >/dev/null 2>&1
 openssl pkcs8 -topk8 -nocrypt -in "$build/key.pem" -outform DER -out "$build/key.der" 2>/dev/null
 # picotls's own signer takes the raw secp256r1 scalar, which is the last 32 bytes of the PKCS#8 form
-python3 - "$build/key.der" "$build/key.raw" <<'PY'
-import sys
-open(sys.argv[2], "wb").write(open(sys.argv[1], "rb").read()[-32:])
-PY
+tail -c 32 "$build/key.der" > "$build/key.raw"
 
 "$build/probe" "$build/cert.pem" "$build/key.raw" > "$build/log" 2>&1 && result=0 || result=$?
 grep -v '^ok ' "$build/log" | head -20 || true
