@@ -48,7 +48,7 @@ function main(checkout)
         }
         if not ok then failed = failed + 1 end
     end
-    local corpus_lua_test = path.join(revenant, "tools", "corpus", "tests", "corpus_test.lua")
+    local corpus_lua_test = path.join(revenant, "tests", "corpus", "corpus_test.lua")
     if os.isfile(corpus_lua_test) then
         local ok = try {
             function ()

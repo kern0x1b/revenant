@@ -1,7 +1,7 @@
 import("core.base.json")
 
 local HERE = os.scriptdir()
-local TOOLS = path.join(HERE, "..")
+local TOOLS = path.join(HERE, "..", "..", "tools", "corpus")
 local MODULES = path.join(TOOLS, "..", "..", "modules")
 local workspace = import("workspace", {rootdir = MODULES, anonymous = true})
 local sw = import("surface_walk", {rootdir = TOOLS, anonymous = true})

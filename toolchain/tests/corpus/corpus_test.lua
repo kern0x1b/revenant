@@ -1,8 +1,8 @@
-local objc = import("objc_text", {rootdir = path.join(os.scriptdir(), "..")})
+local objc = import("objc_text", {rootdir = path.join(os.scriptdir(), "..", "..", "tools", "corpus")})
 local declares, declares_keyword, declares_selector = objc.declares, objc.declares_keyword, objc.declares_selector
 local directive_names, implementations, c_declares, whole_word = objc.directive_names, objc.implementations, objc.c_declares, objc.whole_word
-local json_order = import("json_order", {rootdir = path.join(os.scriptdir(), "..")})
-local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "..", "modules"), anonymous = true})
+local json_order = import("json_order", {rootdir = path.join(os.scriptdir(), "..", "..", "tools", "corpus")})
+local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
 
 local function keys_joined(text)
     return table.concat(json_order.top_level_keys(text), "\1")

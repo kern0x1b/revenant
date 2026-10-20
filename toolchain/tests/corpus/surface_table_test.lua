@@ -1,5 +1,5 @@
-local swift = import("swiftinterface", {rootdir = path.join(os.scriptdir(), ".."), anonymous = true})
-local surface = import("sdk-surface", {rootdir = path.join(os.scriptdir(), ".."), anonymous = true})
+local swift = import("swiftinterface", {rootdir = path.join(os.scriptdir(), "..", "..", "tools", "corpus"), anonymous = true})
+local surface = import("sdk-surface", {rootdir = path.join(os.scriptdir(), "..", "..", "tools", "corpus"), anonymous = true})
 
 local INTERFACE = table.concat({
     "// swift-interface-format-version: 1.0",

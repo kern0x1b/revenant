@@ -1,6 +1,6 @@
 import("core.base.json")
 
-local TOOLS = path.join(os.scriptdir(), "..")
+local TOOLS = path.join(os.scriptdir(), "..", "..", "tools", "corpus")
 local REVENANT = path.join(TOOLS, "..", "..")
 local swift = import("values_swift", {rootdir = TOOLS, anonymous = true})
 local values_const = import("values_const", {rootdir = TOOLS, anonymous = true})

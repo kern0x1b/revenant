@@ -1,6 +1,6 @@
 import("core.base.json")
 
-local REVENANT = path.join(os.scriptdir(), "..", "..", "..")
+local REVENANT = path.join(os.scriptdir(), "..", "..")
 local workspace = import("workspace", {rootdir = path.join(REVENANT, "modules"), anonymous = true})
 local probe = import("probe-exports", {rootdir = path.join(REVENANT, "tests", "backports", "tools"), anonymous = true})
 
