@@ -16,8 +16,6 @@
 # another family recorded is not in these two runs, and reading it here would report a divergence that has
 # gone away.
 set -eu
-echo "FAIL host/mpsgraph/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 70; the inline block PY at line 208" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 graph=${GRAPH:-$here/../../../../packages/frameworks/apple-backports/MetalPerformanceShadersGraph}
@@ -67,20 +65,7 @@ xcrun clang -fobjc-arc $target $quiet "$here/refusals.m" \
     -framework Foundation -framework Metal -framework MetalPerformanceShadersGraph -o "$build/refusals"
 
 # The names this library carries, each under a name of its own.
-python3 - "$graph" "$build/rename.h" <<'PY'
-import os, re, sys
-names = set()
-for entry in sorted(os.listdir(sys.argv[1])):
-    if not entry.endswith('.m'):
-        continue
-    for line in open(os.path.join(sys.argv[1], entry), errors='ignore'):
-        m = re.match(r'@implementation\s+(\w+)', line)
-        if m and m.group(1).startswith('MPSGraph'):
-            names.add(m.group(1))
-with open(sys.argv[2], 'w') as out:
-    for name in sorted(names):
-        out.write("#define %s Revenant%s\n" % (name, name))
-PY
+runs_xmake l "$runs_checkout/tests/backports/common/classes.lua" implemented "$graph" MPSGraph "$build/rename.h"
 echo "renamed: $(grep -c define "$build/rename.h") classes"
 
 printf '#import <MetalPerformanceShadersGraph/MetalPerformanceShadersGraph.h>\n#import "RevenantMPSGraph.h"\n' > "$build/declarations.h"
@@ -99,7 +84,7 @@ build_objects() {
         _s=$(basename "$source" .m)
         xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -DREVENANT_PLANT=$_plant \
             -c "$source" -o "$_objdir/$_s.plain.o"
-        runs_xmake l "$here/../prefix_selectors.lua" "$source" "$_objdir/$_s.m" crevenantHost_ \
+        runs_xmake l "$here/../prefix_selectors.lua" "$source" "$_objdir/$_s.m" revenantHost_ \
             --declarations="$build/declarations.h" -fobjc-arc $target $quiet -DREVENANT_PLANT=$_plant \
             -I"$graph" -include "$build/rename.h" -- "$_objdir/$_s.plain.o"
         xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -DREVENANT_PLANT=$_plant \
@@ -205,139 +190,9 @@ for entry in $families; do
     # compared here at all, because it is not in either of the two runs, and it is checked in the family
     # that does run it.
     set +e
-    python3 - "$build/system.$family.prefix" "$build/port.$family.prefix" "$here/recorded-cells.txt" \
-        "$here/tolerances.txt" "$family" <<'PY'
-import sys
-recorded = {}
-for number, line in enumerate(open(sys.argv[3]), 1):
-    if line.startswith("#") or not line.strip():
-        continue
-    fields = line.split()
-    if len(fields) != 5:
-        print("recorded-cells.txt line %d is not five fields:" % number, line.strip())
-        raise SystemExit(1)
-    recorded[(fields[0], fields[1], int(fields[2]))] = (fields[3], fields[4])
-# How many units in the last place two answers of one data type may differ and still be the same answer,
-# per case. Zero everywhere but the transcendental family, and there it is Metal's own documented figure
-# for that function, which is the whole of what "the same arithmetic" can mean for a kernel that is not
-# the C library's: tolerances.txt carries the number and where it is written down.
-tolerances = {}
-for number, line in enumerate(open(sys.argv[4]), 1):
-    if line.startswith("#") or not line.strip():
-        continue
-    fields = line.split()
-    if len(fields) != 3:
-        print("tolerances.txt line %d is not three fields:" % number, line.strip())
-        raise SystemExit(1)
-    tolerances[(fields[0], fields[1])] = int(fields[2])
-
-# The distance between two answers of a floating point type, in units in the last place: the bit patterns
-# read as signed integers in sign-magnitude order, so the distance is how many representable values lie
-# between them. A zero of either sign is the same value and the distance is zero; two NaNs are the same
-# answer whatever their payloads; a NaN against a number is no distance at all and fails.
-def value_of(pattern):
-    # The bytes are written in the order the buffer holds them and an x86 buffer is little-endian, so the
-    # number is those bytes the other way round.
-    return int(bytes.fromhex(pattern)[::-1].hex(), 16)
-
-def monotone(pattern):
-    # How many representable values lie between two answers: the bit patterns read as signed integers in
-    # sign-magnitude order, so +0 is 0, every positive value is its own pattern and every negative one is
-    # the negation of its magnitude, and the distance is the difference of those.
-    value = value_of(pattern)
-    sign, magnitude = value >> (len(pattern) * 4 - 1), value & ((1 << (len(pattern) * 4 - 1)) - 1)
-    return -magnitude if sign else magnitude
-
-def is_nan(pattern):
-    # The exponent all ones and the mantissa not zero, read off the number and not off the printed bytes.
-    value = value_of(pattern)
-    if len(pattern) == 4:
-        return value & 0x7C00 == 0x7C00 and value & 0x03FF != 0
-    return value & 0x7F800000 == 0x7F800000 and value & 0x007FFFFF != 0
-
-def is_zero(pattern):
-    return value_of(pattern) & ((1 << (len(pattern) * 4 - 1)) - 1) == 0
-
-def distance(one, other, width):
-    if is_nan(one) and is_nan(other):
-        return 0
-    if is_nan(one) or is_nan(other):
-        return None
-    # A zero of either sign is the same value, as IEEE has it: a kernel that answers +0 where the port
-    # answers -0 is not off by an ulp and not off by half of one.
-    if is_zero(one) and is_zero(other):
-        return 0
-    return abs(monotone(one) - monotone(other))
-
-# Which operation and data type this run actually holds, so that a recorded cell of another family is
-# neither counted as seen nor reported as a divergence that has gone away.
-ran = set()
-for line in open(sys.argv[1]):
-    fields = line.split()
-    if len(fields) >= 5:
-        ran.add((fields[1], fields[2]))
-
-hard, seen, differing, checked, cells = [], set(), set(), 0, 0
-for one, other in zip(open(sys.argv[1]), open(sys.argv[2])):
-    a, b = one.split(), other.split()
-    # Five fields is a case with a result buffer in it: the marker, the operation, the data type, the
-    # length and the bytes. Anything shorter is a line of its own - the graph device type, a shaped type
-    # data type - and it is compared as the whole line it is.
-    if len(a) < 5 or len(b) < 5 or a[1] != b[1]:
-        if one != other:
-            hard.append(" ".join(a))
-        continue
-    checked += 1
-    # How many hex characters one element of this data type is: two per byte, and the bytes of the
-    # types this file asks for. A predicate's result is a boolean - MPSSizeofMPSDataType(MPSDataTypeBool)
-    # is 1, measured - and the case names carry that as "bool-from-<the operand's type>", so a boolean
-    # cell is one byte and is compared like any other.
-    # The width is in hex characters, because the bytes are written in the order the buffer holds them and
-    # that is the order this reads. A float32 is 8 of them, a float16 four, an int32 eight, a boolean two.
-    width = {"float32": 8, "float16": 4, "int32": 8}.get(a[2], 2 if a[2].startswith("bool") else 8)
-    count = int(a[3]) * 2 // width
-    cells += count
-    allowed = tolerances.get((a[1], a[2]), 0)
-    for i in range(count):
-        key = (a[1], a[2], i)
-        release = a[4][i * width:(i + 1) * width]
-        mine = b[4][i * width:(i + 1) * width]
-        want = (release, mine)
-        listed = recorded.get(key)
-        if want[0] == want[1]:
-            if listed is not None:
-                hard.append("%s %s element %d is on recorded-cells.txt and the two now agree" % key)
-            continue
-        # A boolean or an integer answer has no tolerance: it is one bit of truth or a whole number, and
-        # "within N units in the last place" is not a thing for either. So the tolerance is read only for
-        # the two floating point types, and a case of another type that differs is a failure.
-        if allowed and a[2] in ("float32", "float16"):
-            how_far = distance(release, mine, width)
-            if how_far is not None and how_far <= allowed:
-                continue
-        differing.add(key)
-        if listed is None:
-            hard.append("%s %s element %d: release %s, port %s, and it is neither within %d ulp nor recorded"
-                        % (key[0], key[1], key[2], want[0], want[1], allowed))
-        elif listed != want:
-            hard.append("%s %s element %d is recorded as release %s and port %s and answered %s and %s"
-                        % (key[0], key[1], key[2], listed[0], listed[1], want[0], want[1]))
-        else:
-            seen.add(key)
-for key, value in sorted(recorded.items()):
-    if (key[0], key[1]) not in ran:
-        continue
-    if key not in differing:
-        hard.append("%s %s element %d is recorded as release %s and port %s and the two now agree"
-                    % (key[0], key[1], key[2], value[0], value[1]))
-print("%s: same as the system on %d of the %d cells with a result buffer; %d within the release's own "
-      "precision, %d recorded" % (sys.argv[5], cells - len(seen), cells, cells - len(seen) - len(differing), len(seen)))
-for name in hard:
-    print("  DIFFERS:", name)
-print("checks=%d failures=%d recorded=%d" % (checked, len(hard), len(seen)))
-raise SystemExit(1 if hard else 0)
-PY
-    verdict=$?
+    verdict=0
+    runs_xmake l "$here/compare.lua" compare "$build/system.$family.prefix" "$build/port.$family.prefix" \
+        "$here/recorded-cells.txt" "$here/tolerances.txt" "$family" || verdict=$?
     set -e
     if [ "$verdict" -ne 0 ]; then
         failed=1
