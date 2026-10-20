@@ -1,13 +1,6 @@
 import("core.base.json")
 local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
 
-local function either(a, b)
-    if text.truthy(a) then
-        return a
-    end
-    return b
-end
-
 local function is_object(v)
     return type(v) == "table" and v[1] == nil
 end
@@ -30,7 +23,7 @@ end
 local function access_level(node)
     local attributes = node.declAttributes
     if is_object(attributes) then
-        return either(attributes.accessLevel, "public")
+        return text.either(attributes.accessLevel, "public")
     end
     if type(attributes) == "table" then
         for _, item in ipairs(attributes) do
@@ -70,14 +63,14 @@ local function walk(node, nesting, public)
         local base = string.match(string.gsub(printed, "<[^<>]*>", ""), "^([^%(]*)")
         if (public or is_public) and text.truthy(base) and not text.startswith(base, "_")
             and (utf8.len(base) or #base) > 1 then
-            ours[#ours + 1] = {nesting[#nesting] or "", base, either(node.declKind, "")}
+            ours[#ours + 1] = {nesting[#nesting] or "", base, text.either(node.declKind, "")}
         end
     end
     local is_type = kind == "TypeDecl" and text.truthy(node.name)
     local nested = nesting
     if is_type then
         nested = {table.unpack(nesting)}
-        nested[#nested + 1] = either(either(node.name, node.printedName), "")
+        nested[#nested + 1] = text.either(text.either(node.name, node.printedName), "")
     end
     for _, child in ipairs(node.children or {}) do
         walk(child, nested, public or (is_public and is_type))

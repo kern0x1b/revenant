@@ -4,19 +4,24 @@ local SDK_VERSION = "26.2"
 local SDK_VARIABLE = "REVENANT_GEN_SDK"
 local CORPUS_VARIABLE = "REVENANT_CORPUS_ROOT"
 local TASK_VARIABLE = "REVENANT_TASK"
+local HOME_VARIABLE = "REVENANT_HOME"
 
 local resolved = {}
 
 function root()
-    return path.directory(path.absolute(os.scriptdir()))
+    return path.directory(path.directory(path.absolute(os.scriptdir())))
 end
 
-local function home()
+function home()
+    local named = os.getenv(HOME_VARIABLE)
+    if named and named ~= "" then
+        return named
+    end
     local value = os.getenv("HOME")
     if not value or value == "" then
-        raise("workspace: HOME is not set, so there is no $HOME/.revenant/cache to put run output in")
+        raise("workspace: HOME is not set, so there is no $HOME/.revenant to keep revenant's data in")
     end
-    return value
+    return path.join(value, ".revenant")
 end
 
 function task()
@@ -38,7 +43,7 @@ function task()
 end
 
 function cache()
-    return path.join(home(), ".revenant", "cache")
+    return path.join(home(), "cache")
 end
 
 function run(...)
@@ -60,7 +65,7 @@ function fresh(name)
 end
 
 function corpus(...)
-    local folder = os.getenv(CORPUS_VARIABLE) or path.join(home(), ".revenant", "corpus")
+    local folder = os.getenv(CORPUS_VARIABLE) or path.join(home(), "corpus")
     if not os.isdir(folder) then
         raise("workspace: no corpus at %s; set %s to it", folder, CORPUS_VARIABLE)
     end

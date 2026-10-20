@@ -2,6 +2,7 @@ import("core.base.option")
 import("core.base.process")
 import("lib.detect.find_tool")
 import("byteorder")
+import("workspace")
 
 CHOSEN = "REVENANT_DEVICE"
 
@@ -17,7 +18,7 @@ local ssh_options = {
     "-o", "ControlPath=/tmp/revenant-ssh-%h-%p"
 }
 
-function read_env_file(file)
+local function read_env_file(file)
     local values = {}
     if not os.isfile(file) then
         return values
@@ -45,7 +46,7 @@ function read_env_file(file)
     return values
 end
 
-function env_file(root, name)
+local function env_file(root, name)
     local chosen = name or os.getenv(CHOSEN)
     return path.join(root, chosen and ("device." .. chosen .. ".env") or "device.env")
 end
@@ -83,7 +84,7 @@ function where(settings)
 end
 
 local function leases()
-    return path.join(os.getenv("REVENANT_HOME") or path.join(os.getenv("HOME"), ".revenant"), "devices")
+    return path.join(workspace.home(), "devices")
 end
 
 function holder_name(given)

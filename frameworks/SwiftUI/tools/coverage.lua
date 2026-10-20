@@ -1,35 +1,7 @@
 import("core.base.json")
 local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
+local sets = import("lib.sets", {rootdir = os.scriptdir(), anonymous = true})
 local tree = import("lib.tree", {rootdir = os.scriptdir(), anonymous = true})
-
-local function lines_of(content)
-    local lines = text.split(content, "\n")
-    if lines[#lines] == "" then
-        lines[#lines] = nil
-    end
-    return lines
-end
-
-local function read(file)
-    return io.readfile(file)
-end
-
-local function count_of(set)
-    local n = 0
-    for _ in pairs(set) do
-        n = n + 1
-    end
-    return n
-end
-
-local function sorted_keys(set)
-    local keys = {}
-    for k in pairs(set) do
-        keys[#keys + 1] = k
-    end
-    table.sort(keys)
-    return keys
-end
 
 local function format_named(template, values)
     return (string.gsub(template, "{([%w_]+)}", function(key)
@@ -65,14 +37,14 @@ local function sources()
     table.sort(names)
     local out = {}
     for _, name in ipairs(names) do
-        out[#out + 1] = {name = name, text = read(path.join(dir, name))}
+        out[#out + 1] = {name = name, text = io.readfile(path.join(dir, name))}
     end
     return out
 end
 
 local function apple_surface()
     local types, type_names = {}, {}
-    for _, line in ipairs(lines_of(read(tree.api("apple-types.txt")))) do
+    for _, line in ipairs(text.lines(io.readfile(tree.api("apple-types.txt")))) do
         local parts = text.split(line, "\t")
         if #parts ~= 2 then
             raise("coverage: apple-types.txt line has " .. #parts .. " columns: " .. line)
@@ -83,7 +55,7 @@ local function apple_surface()
         types[parts[1]] = parts[2]
     end
     local mods = {}
-    for _, line in ipairs(lines_of(read(tree.api("apple-view-modifiers.txt")))) do
+    for _, line in ipairs(text.lines(io.readfile(tree.api("apple-view-modifiers.txt")))) do
         if text.strip(line) ~= "" then
             mods[#mods + 1] = text.strip(line)
         end
@@ -93,7 +65,7 @@ end
 
 local function ios_names(file)
     local set = {}
-    for _, line in ipairs(lines_of(read(tree.api(file)))) do
+    for _, line in ipairs(text.lines(io.readfile(tree.api(file)))) do
         if text.strip(line) ~= "" then
             set[text.strip(line)] = true
         end
@@ -126,7 +98,7 @@ end
 local function stub_calls()
     local counted, partial, unreadable = {}, {}, {}
     for _, source in ipairs(sources()) do
-        for number, line in ipairs(lines_of(source.text)) do
+        for number, line in ipairs(text.lines(source.text)) do
             local at, word = first_call(line)
             if at then
                 local rest = string.sub(line, at + #word + 1)
@@ -287,7 +259,7 @@ local function invented_count()
         return nil
     end
     local n = 0
-    for _, line in ipairs(lines_of(read(invented_file()))) do
+    for _, line in ipairs(text.lines(io.readfile(invented_file()))) do
         if text.strip(line) ~= "" then
             n = n + 1
         end
@@ -362,9 +334,9 @@ local function counts()
             ios_type_hits = ios_type_hits + 1
         end
     end
-    n.ios_apple_types = count_of(ios_types)
+    n.ios_apple_types = sets.count_of(ios_types)
     n.ios_types = ios_type_hits
-    n.ios_apple_mods = count_of(ios_mods)
+    n.ios_apple_mods = sets.count_of(ios_mods)
     n.ios_mods = #ios_mod_list
     n.ios_working = #ios_work
     n.ios_pending = #ios_pend
@@ -410,7 +382,7 @@ function main(...)
 
     if has_arg("--update") then
         io.writefile(baseline_path, baseline_json(n))
-        local readme = read(readme_path)
+        local readme = io.readfile(readme_path)
         readme = string.gsub(readme, SCORE, function(...)
             return format_named(SCORE_TEXT, n)
         end)
@@ -433,7 +405,7 @@ function main(...)
     if has_arg("--check") then
         local problems = {}
         if os.isfile(baseline_path) then
-            local baseline = json.decode(read(baseline_path))
+            local baseline = json.decode(io.readfile(baseline_path))
             for _, key in ipairs({"types", "mods", "working"}) do
                 if n[key] < baseline[key] then
                     problems[#problems + 1] = key .. ": было " .. string.format("%d", baseline[key]) .. ", стало " .. n[key]
@@ -441,7 +413,7 @@ function main(...)
                 end
             end
         end
-        local readme = read(readme_path)
+        local readme = io.readfile(readme_path)
         local ios = {string.match(readme, IOS_SCORE)}
         if #ios == 0 then
             problems[#problems + 1] = "docs/reference/swiftui/ledger.md не содержит строки со счётом для iOS"
@@ -477,7 +449,7 @@ function main(...)
                     .. text.join(", ", actual) .. ") — обновите docs/reference/swiftui/ledger.md (./xmakew l frameworks/SwiftUI/tools/coverage.lua --update)"
             end
         end
-        for _, name in ipairs(sorted_keys(parts.ignored)) do
+        for _, name in ipairs(sets.sorted_keys(parts.ignored)) do
             if not string.find(readme, "`" .. name .. "`", 1, true) then
                 problems[#problems + 1] = "игнорируемый API " .. name .. " не описан в docs/reference/swiftui/ledger.md"
             end
@@ -525,7 +497,7 @@ function main(...)
         print("  " .. text.join(", ", parts.stubs))
     end
     if has_arg("--ignored") then
-        for _, name in ipairs(sorted_keys(parts.ignored)) do
+        for _, name in ipairs(sets.sorted_keys(parts.ignored)) do
             print("  " .. name .. ": " .. parts.ignored[name])
         end
     end

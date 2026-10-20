@@ -11,6 +11,21 @@ function split(s, sep)
     end
 end
 
+function lines(content)
+    local out = split(content, "\n")
+    if out[#out] == "" then
+        out[#out] = nil
+    end
+    return out
+end
+
+function either(a, b)
+    if truthy(a) then
+        return a
+    end
+    return b
+end
+
 function lstrip(s)
     return (string.gsub(s, "^%s+", ""))
 end

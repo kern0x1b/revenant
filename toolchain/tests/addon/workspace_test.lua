@@ -26,11 +26,15 @@ end
 function failures(opt)
     local workspace = import("workspace", {rootdir = opt.modules, anonymous = true})
     local found = {}
-    local revenant = path.directory(path.absolute(opt.modules))
-    local cache = path.join(os.getenv("HOME"), ".revenant", "cache")
+    local revenant = path.directory(path.directory(path.absolute(opt.modules)))
+    local cache = workspace.cache()
 
     if workspace.root() ~= revenant then
         table.insert(found, "root() is the checkout the module sits in: " .. workspace.root() .. " against " .. revenant)
+    end
+    local home = os.getenv("REVENANT_HOME") or path.join(os.getenv("HOME"), ".revenant")
+    if workspace.home() ~= home or cache ~= path.join(home, "cache") then
+        table.insert(found, "home() is REVENANT_HOME or $HOME/.revenant, and cache() is under it: " .. workspace.home())
     end
 
     local task = "revenant-workspace-test-" .. tostring(os.time()) .. "-" .. tostring(math.random(1000000))
