@@ -129,7 +129,7 @@ Restoring it was the last step before the first successful load.
 
 ## Related
 
-- [compatibility.md](compatibility.md) — the API this OS does not have, how each gap is answered, and the rule every shim answers to
+- [compatibility.md](../../reference/webkit/compatibility.md) — the API this OS does not have, how each gap is answered, and the rule every shim answers to
 - [memory-and-caches.md](memory-and-caches.md) — what 512 MB forces
 - [core-update.md](core-update.md) — moving the port to a newer engine branch
 - [network.md](network.md) — the TLS and HTTP layers this port brings with it

@@ -58,7 +58,7 @@ three for the linker:
     # rebuild what is being measured, with ccache out of the way
 
 The lists here were written from those logs by the toolchain's `sdk-usage` script, which
-left the toolchain with the rest of its Python and has no successor yet: measuring again
+has been removed from the toolchain and has no successor yet: measuring again
 means turning the two logs into SDK-relative paths, and for the engine reading its
 includes from ninja's dependency log, because ccache replays a compile without running
 the compiler and a cached compile logs nothing. The linker is always really run, so link traces

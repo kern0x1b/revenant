@@ -2,7 +2,7 @@
 
 Orientation for anyone — human or AI assistant — working on this repository.
 Read it before making changes. Task-specific playbooks live as skills under
-revenant's `.agents/skills/` (revenant-build, revenant-deploy, revenant-test, revenant-debug, revenant-device); this file is
+revenant's `.agents/skills/` (revenant-build, revenant-deploy, revenant-test, revenant-debug, revenant-device); this guide is
 the map.
 
 ## What this is
@@ -102,13 +102,13 @@ the `RevPrefs` target in `xmake.lua`, like the dylibs beside it — that writes 
 - **Build artifacts** (`build/`, `*.dylib`, `*.a`, `*.log`) are
   gitignored and reproducible from the packages — do not commit them.
 - **No pull requests to other people's repositories.** Fixes worth sending to WebKit collect in
-  `docs/upstream.md`; they go upstream once, as one batch, only after the engine is fully tested
+  [upstream](../../reference/webkit/upstream.md); they go upstream once, as one batch, only after the engine is fully tested
   and only when the owner says so.
 
 ## Where to look
 
 - Build: `./xmakew f -P . -p iphoneos -a armv7 && ./xmakew -P .` at the top of revenant;
-  see `docs/building.md`. The engine's device filesystem tree is the `stage/` folder of
+  see [build and test](build-and-test.md). The engine's device filesystem tree is the `stage/` folder of
   the `webkit-engine` package.
 - Package: `./xmakew deb -P .` writes `space.kern0x1b.rev_<version>_iphoneos-arm.deb`,
   engine frameworks included; `packaging/` holds only the `control` file and the
@@ -118,5 +118,28 @@ the `RevPrefs` target in `xmake.lua`, like the dylibs beside it — that writes 
   Claim the device first (`./xmakew device claim`).
 - Tests: `tests/run-batteries.lua` and `tests/device/*.lua`, run with `./xmakew l`; the
   host tests are `./xmakew test -P .` after `./xmakew f -P . --webkit_host_tests=y`.
-- Documentation: `docs/` (`architecture.md`, `network.md`, `compatibility.md`, `building.md`, `memory-and-caches.md`).
+- Documentation: the guides beside this file, the explanations in [`docs/explanation/webkit/`](../../explanation/webkit/)
+  and the reference in [`docs/reference/webkit/`](../../reference/webkit/). The [README](../../../frameworks/WebKit/README.md)
+  has the index.
 - Playbooks: revenant's `.agents/skills/revenant-{build,deploy,test,debug,device}/SKILL.md`.
+
+## Repository layout
+
+```
+app/            The standalone application: the embeddable host for the web view
+compat/         Symbols iOS 6 does not have, built into libios6compat.a
+modules/        What the engine package does: options, checks, staging, the carry manifest
+packages/       The webkit-engine and webkit-device-tools packages
+packaging/      The package's control file and DEBIAN scripts
+platform/       The tweak, compat and TLS dylibs and the Settings bundle, xmake targets
+  safari/       The Safari substitution: the loader, the compat/hooks, WebAssembly and TLS sources
+  prefs/        The RevWebKit Settings PreferenceBundle
+  device/       What is installed on the phone beside the engine
+sdk-usage/      The lists of what the port reads from Apple's SDKs (see the reference)
+tests/          The numeric device suite, host tests, and JS conformance checks
+tools/          Diagnostic instruments on the device, and the maintenance scripts on the host
+xmake.lua       The member: its packages, targets, checks and host tests
+```
+
+The documentation is at the top of revenant, in `docs/`. The engine itself is `third_party/webkit`: an upstream commit
+and the patch series, and the libraries iOS 6 cannot supply are packages beside it.

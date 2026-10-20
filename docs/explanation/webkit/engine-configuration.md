@@ -14,7 +14,7 @@ preprocessed source plus the command line, not on the build directory, so it
 survives and turns "rebuild everything" back into "recompile what changed" once
 it is warm. It is not taken from `PATH`: it is used when
 `tools.cmake.cmaketoolchain:extra_variables` sets the compiler launchers, as
-[building.md](building.md) shows.
+[building.md](../../guides/webkit/build-and-test.md) shows.
 
 **The SDK is named explicitly.** Otherwise the build asks `xcrun` for an
 "iphoneos" SDK by name, which only a full Xcode install has, and the toolchain

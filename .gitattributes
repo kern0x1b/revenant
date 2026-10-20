@@ -17,7 +17,7 @@
 *.swift.gyb linguist-language=Swift
 toolchain/docs/** linguist-documentation
 docs/**/recompiler/** linguist-documentation
-frameworks/WebKit/docs/** linguist-documentation
+docs/**/webkit/** linguist-documentation
 docs/**/combine/** linguist-documentation
 docs/**/emulator/** linguist-documentation
 docs/**/swiftui/** linguist-documentation

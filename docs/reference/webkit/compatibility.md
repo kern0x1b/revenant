@@ -92,7 +92,7 @@ on the device.
   are the accept/reject decision for every WebSocket connection and for
   `ResourceResponseCocoa.mm`'s certificate metadata, so the trust evaluation
   never ran. Both are implemented in terms of `SecTrustEvaluate`, present since
-  iOS 2. See [network.md](network.md).
+  iOS 2. See [network.md](../../explanation/webkit/network.md).
 - **A conic gradient cast every parameter to void and made no paint call**, so a
   site's `conic-gradient()` background came out fully transparent instead of the
   documented fallback. It now fills with the gradient's first stop, read back
@@ -181,7 +181,7 @@ Two more sat in the injected dylib and reported invented numbers:
   exact through a canvas (`tests/device/gradients-and-blends.html`). The
   element is not composited; the tile Safari paints into is not a bitmap
   context, and this CoreGraphics drops the non-separable modes there. The
-  measurements and the one attempt not to repeat are in `tests/device/README.md`.
+  measurements and the one attempt not to repeat are in [the device suite](device-suite.md).
 
 ## Soft-linked constants
 
@@ -294,6 +294,6 @@ Present: `-category`, `-mode`, `-categoryOptions`, `-setCategory:withOptions:err
 
 ## Related
 
-- [architecture.md](architecture.md) — how the engine is loaded in place of the system one
-- [network.md](network.md) — the TLS and HTTP layers, and why trust may never be a stub
+- [architecture.md](../../explanation/webkit/architecture.md) — how the engine is loaded in place of the system one
+- [network.md](../../explanation/webkit/network.md) — the TLS and HTTP layers, and why trust may never be a stub
 - [tools.md](tools.md) — the probes that produced the numbers above

@@ -16,7 +16,6 @@ breaks it, because nothing upstream will ever tell us.
 | `third_party/webkit/xmake.lua` | the base: one commit of upstream `WebKit/WebKit` `main`, fetched by hash |
 | `third_party/webkit/patches/` | the product: this port as an ordered series of patches, one per concern, each explaining in its message what it changes and why |
 | the recipe's checksums | one sha256 per patch, so the series that builds is the series that was reviewed |
-| the old fork, `kern0x1b/WebKit` | the history the series was cut from, left as it was so nothing is lost |
 
 There is no fork to keep in step and no merge commit to read: base plus series is the
 whole engine, and applying the series to its base reproduces, file for file, the tree
@@ -195,7 +194,7 @@ required a 64-bit NaN-boxed JSValue on ARMv7 first. That proved wrong in
 practice: the 32-bit world is a set of files and build entries, and carrying them
 onto trunk is mechanical enough that the branch now runs on the phone. What the
 merge really costs is written up in
-[core-update.md](core-update.md#the-trunk-branch-runs-2026-09-12), together with
+[core-update.md](../../explanation/webkit/core-update.md#the-trunk-branch-runs-2026-09-12), together with
 the five bugs that only the device found.
 
 That is not a dependency on someone's goodwill: the base is one commit named in the

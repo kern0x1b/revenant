@@ -180,7 +180,7 @@ Each test writes its own PASS and FAIL lines into its page, so
 lines back out. Two things about reading the result: a test's FAIL line states
 the *expectation*, and the values actually read are on the line after it, which
 the runner now includes. What has been run so far, and the two failures left,
-are in [../../docs/webgl.md](../../docs/webgl.md).
+are in [WebGL](../../explanation/webkit/webgl.md).
 
 ## gl-frame-rate.lua — a canvas that keeps drawing, and how fast
 

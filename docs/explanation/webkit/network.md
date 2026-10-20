@@ -267,7 +267,7 @@ exist here and are implemented in `compat/ios6_compat.c` in terms of
 they are the accept/reject decision for every WebSocket connection and for
 `ResourceResponseCocoa.mm`'s certificate metadata. As stubs answering success —
 which is what they were — that step never ran at all. See
-[compatibility.md](compatibility.md) for the rule that produced that fix.
+[compatibility.md](../../reference/webkit/compatibility.md) for the rule that produced that fix.
 
 ## Reading what happened
 
@@ -282,6 +282,6 @@ stall this port spent a long time chasing.
 ## Related
 
 - [architecture.md](architecture.md) — how the engine gets underneath Safari
-- [compatibility.md](compatibility.md) — what this OS does not have, and the
+- [compatibility.md](../../reference/webkit/compatibility.md) — what this OS does not have, and the
   rule every shim answers to
-- [building.md](building.md) — building and deploying the compat package
+- [building.md](../../guides/webkit/build-and-test.md) — building and deploying the compat package

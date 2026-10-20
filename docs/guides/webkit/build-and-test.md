@@ -1,4 +1,13 @@
-# Building the port
+# Build and test the port
+
+## Requirements
+
+**Device:** an iPhone 4S (armv7), iOS 6.1.3, jailbroken, with **MobileSubstrate/CydiaSubstrate**, a working TLS
+shim on the device (the modern-TLS layer), and OpenSSH for deploys.
+
+**Build host (macOS):** the Command Line Tools. The **iOS 16.4 SDK** arrives as the toolchain's `iphoneos-sdk` package,
+fetched from [theos/sdks](https://github.com/theos/sdks) and checked against its sha256. Xcode is not needed, and neither
+is Theos. revenant's `./xmakew` fetches `cmake`, `ninja`, `ldid` and the linker as packages.
 
 Everything targets **armv7 with a 6.0 deployment target**, built with the **iOS 16.4
 SDK** the toolchain's `iphoneos-sdk` package lays out. Current clang compiles C++23 for a
@@ -29,7 +38,7 @@ engine is vendored and there is no fork to keep in step.
 
 The series is the port: changing the engine means changing a patch, and the recipe's checksum
 with it. How to move the base to a newer upstream commit is in
-[core-update.md](core-update.md).
+[core-update.md](../../explanation/webkit/core-update.md).
 
 ## 2. The libraries iOS 6 cannot supply
 
@@ -52,7 +61,7 @@ Each is an xmake package at its release, built for armv7 and iOS 6 by a recipe i
 ICU is built with its data trimmed to the languages listed in the install script of `third_party/icu/xmake.lua`.
 
 `libios6compat.a` - the symbols this OS predates, see
-[compatibility.md](compatibility.md) - is this port's own code in `compat/`, built by the
+[compatibility.md](../../reference/webkit/compatibility.md) - is this port's own code in `compat/`, built by the
 engine package before the engine itself. It holds only this port's own stubs; the engine
 links OpenSSL and libpsl from their packages.
 
@@ -79,7 +88,7 @@ order that fails cheapest first:
 
 The tweaks and the Settings bundle are xmake targets in `xmake.lua` beside the package, built
 with the toolchain's `tweak` rule, which checks every binary as it links. Why each CMake
-setting has the value it has is in [engine-configuration.md](engine-configuration.md).
+setting has the value it has is in [engine-configuration.md](../../explanation/webkit/engine-configuration.md).
 
 The package's identity includes a digest of its recipe, the modules, `compat/` and
 `carry-symbols.txt`, so a change to any of them rebuilds the engine and nothing else does.
@@ -130,7 +139,7 @@ whole every time its identity changes.
 
 The prefixed variant builds the same source with the class prefix applied, for a build
 that has to coexist with the system engine in one process. The shipped build is the
-unprefixed one; see [architecture.md](architecture.md#two-webkits-in-one-process).
+unprefixed one; see [architecture.md](../../explanation/webkit/architecture.md#two-webkits-in-one-process).
 
 ## 4. The package
 
@@ -189,7 +198,7 @@ carries no `main()`, and `RevWebViewHostControlling` in
 `app/RevWebViewHostEmbedding.h` is the whole interface another application
 drives it through — load, back, forward, reload, stop, a content frame, and a
 delegate that reports title, progress, URL, scroll offset and failures. That is
-the consumer the app-shell cache policy in [network.md](network.md) was written
+the consumer the app-shell cache policy in [network.md](../../explanation/webkit/network.md) was written
 for: a wrapped site that has to launch like a native application. Nothing in
 this repository embeds it today; it is a capability, kept because the
 substitution path cannot serve an application that is not Safari.
@@ -265,7 +274,7 @@ The user agent is the test: a page that echoes it — or the engine's own log at
 `/tmp/rev-safari-stderr.log` — should report `AppleWebKit/605`, not `536`.
 
 Then run the numeric suite, which reads pixels and glyph widths rather than
-screenshots: [`tests/device/run.lua`](../tests/device/README.md).
+screenshots: [`tests/device/run.lua`](../../reference/webkit/device-suite.md).
 
 ## The toolchain this port needs, and how little of it is Apple's
 
@@ -316,4 +325,32 @@ The `ld64` recipe carries the two snags in building it: `apple-libtapi` calls
 the call is guarded and `HOST_LINK_VERSION` set by hand; and cctools' bundled
 `llvm-c/lto.h` wants headers from a newer LLVM, so it is configured against
 Homebrew's.
+
+## Deploy and test
+
+The device address and password are not in the repository. Copy the example and fill it in:
+
+```sh
+cp frameworks/WebKit/device.env.example device.env    # at the top of revenant: DEVICE_HOST / DEVICE_PORT
+```
+
+Then build and install the package, which carries the loader, the compatibility dylib, the TLS dylib and the Settings
+pane, and can be removed again:
+
+```sh
+./xmakew device install -P .
+```
+
+**Verify it took.** Open any page in Safari and check the user agent: a request to a service that echoes it, or the
+on-device engine log at `/tmp/rev-safari-stderr.log`, should show `AppleWebKit/605`, not `536`. The stock engine renders
+modern Google and YouTube broken; the port renders them.
+
+**Screenshots from the device:** `/usr/bin/shot` writes `/tmp/screenshot.png`; `scp` it back.
+
+**Iterating on the Settings pane** does not need a respring: redeploy `RevPrefs.bundle`, then `killall Preferences` and
+reopen it.
+
+The numeric device suite is `frameworks/WebKit/tests/device/run.lua`, run with `./xmakew l`;
+[the device suite](../../reference/webkit/device-suite.md) describes what it measures. The host and browser batteries
+are in [tests](tests.md).
 

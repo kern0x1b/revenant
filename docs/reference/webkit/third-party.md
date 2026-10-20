@@ -94,5 +94,15 @@ rather than replacing anything.
 
 ## This project's own code
 
-MIT, `LICENSE`. That covers what is in this repository: the compatibility
+MIT, `frameworks/WebKit/LICENSE`. That covers what is in this repository: the compatibility
 library, the port's tooling, the tests, the packaging and the documentation.
+
+## Trademarks and screenshots
+
+The screenshots show third-party websites rendered by this engine, as examples of what it displays on the device. All
+names, logos, page designs and content in them remain the property of their respective owners and are shown
+nominatively, to demonstrate a browser engine working, under fair use. This project is not affiliated with, endorsed by,
+or sponsored by any of them, and ships none of their code, assets or branding.
+
+Nor does anything here drive a browser at somebody else's site on its own: the automated suite loads pages served from
+this repository, and the one script that can load a real site takes the list from the operator.

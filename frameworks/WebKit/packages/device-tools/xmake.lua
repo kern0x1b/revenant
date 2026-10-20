@@ -1,6 +1,6 @@
 package("webkit-device-tools")
     set_homepage("https://github.com/kern0x1b/revenant/tree/main/frameworks/WebKit")
-    set_description("The probes the WebKit port measures the phone with, docs/tools.md: revmem, revpid, revtouch and raise-memory-limit, built for the phone and signed with the entitlements each needs")
+    set_description("The probes the WebKit port measures the phone with, docs/reference/webkit/tools.md: revmem, revpid, revtouch and raise-memory-limit, built for the phone and signed with the entitlements each needs")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
 

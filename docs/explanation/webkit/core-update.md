@@ -4,7 +4,7 @@ The engine is upstream WebKit at one commit of `main`, `c70a794b0341` of 2026-09
 with this port as a series of 26 patches in `third_party/webkit/patches`. It was a
 graft until 2026-09-11 - a snapshot with no shared ancestry, updated by applying
 other people's diffs - then a fork whose `main` carried the port as commits until
-2026-10-20, when those commits became the series; [maintaining.md](maintaining.md)
+2026-10-20, when those commits became the series; [maintaining.md](../../guides/webkit/maintaining.md)
 is how the series is carried now. The record below is from the fork's time, and
 names its branches.
 
@@ -25,7 +25,7 @@ fork was measured against `origin/webkitglib/2.54` it read:
 ## How far behind the snapshot is
 
 `tools/port-delta.lua --freshness` now answers it from GitHub's comparison of the base
-with upstream `main`. Its Python predecessor answered from content rather than dates,
+with upstream `main`. Its predecessor, since rewritten in Lua, answered from content rather than dates,
 because content is what the question is really about: for each commit on the upstream branch
 it takes a line that commit added and looks for it in our tree, and the first
 one we already carry is where the snapshot sits. In the fork's time it read:

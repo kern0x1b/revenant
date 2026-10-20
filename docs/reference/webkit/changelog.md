@@ -8,6 +8,9 @@ Dates are the day the change was measured on the device, not the day it compiled
 ## [Unreleased]
 
 ### Changed
+- The documents moved into the repository's one layout: the guide is
+  `docs/guides/webkit/contributing.md`, the explanations are in `docs/explanation/webkit/`, and
+  the reference is in `docs/reference/webkit/`. The old entries keep the paths they had.
 - **The engine is upstream plus a patch series, built by xmake.** The fork's 176
   commits and its merge of `webkitglib/2.54` are 24 topic patches on upstream
   `main` of 2026-09-14, checked to rebuild the fork's tree exactly, plus two that
