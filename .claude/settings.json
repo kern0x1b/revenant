@@ -26,7 +26,7 @@
       "source": {
         "source": "github",
         "repo": "xmake-io/xmake-skills",
-        "ref": "master"
+        "ref": "ef67caa46353af102a9914a82bfed93f952ca8aa"
       }
     }
   },
