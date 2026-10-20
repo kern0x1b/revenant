@@ -107,7 +107,7 @@ jobs:
             build/.objs
             build/.deps
             build/iphoneos
-          key: backports-objects-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'third_party/**', 'xmake.lua', 'xmakew') }}
+          key: backports-objects-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'packages/**', 'addons/**', 'third_party/**', 'xmake.lua', 'xmakew') }}
 
       - name: Configure the Backports component
         if: steps.component.outputs.present == 'true'
@@ -141,6 +141,14 @@ jobs:
           path: build/generated/backports
           key: backports-generated-${{ runner.os }}-${{ hashFiles('frameworks/Backports/**') }}
 
+      - name: Diagnose the CommonCrypto link
+        if: steps.component.outputs.present == 'true'
+        continue-on-error: true
+        run: |
+          ./xmakew build -P . -v CommonCryptoBackports > "$RUNNER_TEMP/cc.txt" 2>&1 || true
+          grep -n -E "dynamiclib|weak_framework|fuse-ld|ld-path|libtool|linking" "$RUNNER_TEMP/cc.txt" | cut -c1-3000 | head -20
+          tail -5 "$RUNNER_TEMP/cc.txt" | cut -c1-500
+
       - name: Build the Backports component
         if: steps.component.outputs.present == 'true'
         timeout-minutes: 10
@@ -157,7 +165,7 @@ jobs:
             build/.objs
             build/.deps
             build/iphoneos
-          key: backports-objects-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'third_party/**', 'xmake.lua', 'xmakew') }}
+          key: backports-objects-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'packages/**', 'addons/**', 'third_party/**', 'xmake.lua', 'xmakew') }}
 
       - name: Upload the Backports libraries
         if: steps.component.outputs.present == 'true'
