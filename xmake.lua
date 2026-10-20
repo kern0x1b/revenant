@@ -4,7 +4,7 @@ set_xmakever("3.1.2")
 add_rules("mode.release", "mode.debug")
 set_defaultmode("release")
 
-add_repositories("revenant-third-party third_party")
+includes("third_party/blocksruntime", "third_party/boost", "third_party/dynarmic", "third_party/farmdec", "third_party/rellume")
 add_repositories("revenant " .. (os.getenv("REVENANT_REPO") or "toolchain"))
 add_addons("revenant", {sourcedir = "toolchain"})
 

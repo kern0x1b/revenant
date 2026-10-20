@@ -23,7 +23,7 @@ apply too.
 | `perf/` | On-device translated-vs-native benchmark. |
 | `targets/` | Untracked (`.gitignore`: `targets/*`, only `targets/*-includes.h` is kept): one directory per real-world app, living only on this disk. Everything under it — `*-out*`, `*-arm64`, `*.app`, `*.ipa`, `*.log`, `uistack3-official` — is **generated or investigative material**: never read it as source, never grep it wholesale, never move it. |
 
-Rellume, farmdec and BlocksRuntime are packages of `third_party/packages/`, pinned by commit with
+Rellume, farmdec and BlocksRuntime are packages of `third_party/`, pinned by commit with
 our changes as patches. Rellume is built for AArch64 only, the one architecture xlate lifts.
 
 ## Building

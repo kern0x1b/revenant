@@ -13,9 +13,10 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   `./xmakew l tools/comments.lua check [path ...]` finds comments, `strip` removes them, and `verify [rev]` proves that
   the files changed since `rev` differ from it in comments only (clang's raw tokens, Swift's parse tree, Lua's
   bytecode). Files that carry upstream text (`comments=upstream`) or whose comments are the test data (`comments=fixture`) are marked in `.gitattributes`.
-- Third-party code is a package of `third_party/packages/<letter>/<name>/`: the upstream by url and commit or
+- Third-party code is a package of `third_party/<name>/`: the upstream by url and commit or
   checksum, our changes as `git format-patch` files in its `patches/`, applied in order by `add_patches`. Never
-  commit a copy of upstream code.
+  commit a copy of upstream code. The top `xmake.lua` includes each one, so a member requires it by its bare name
+  (`add_requires("dynarmic 6.7.0")`).
 - Every dependency is at its latest release, or at the head of its main branch where it has no releases or we need
   what is not released yet. A newer version that dropped something we need (armv7, iOS 6, an API, a build mode) gets
   it back as a patch on that version; an old pin is never the answer. Moving a pin means rebasing our patches onto
@@ -26,7 +27,7 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
 - Workspace-wide procedures are skills in `$HOME/Git/projects/ios/.agents/skills/`: `device-session`,
   `canon-install`, `patch-merge`, `worktree-sweep`, `session-handoff`, `band-launch`, `band-supervise`. A session
   started inside revenant does not list them: read `<name>/SKILL.md` there.
-- xmake at the top is always `./xmakew`, the pinned and patched xmake of `third_party/packages/x/xmake` (built into
+- xmake at the top is always `./xmakew`, the pinned and patched xmake of `third_party/xmake` (built into
   `$HOME/.revenant/cache/xmake/` on first use): `./xmakew f -p iphoneos -a armv7`, `./xmakew build <target>`. It takes
   the revenant addon from `toolchain/` of the checkout; stock xmake would fetch and install the toolchain globally instead.
 - Before handing a change over: `./xmakew l tools/check.lua <member>` for each member it touches that has a check
