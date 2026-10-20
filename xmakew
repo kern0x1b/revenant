@@ -50,7 +50,7 @@ if [ ! -x "$prefix/bin/xmake" ]; then
     (
         cd "$work/src"
         ./configure --prefix="$work/install"
-        make -j"$(getconf _NPROCESSORS_ONLN)"
+        make -j"${XMAKE_MAX_JOBS:-$(getconf _NPROCESSORS_ONLN)}"
         make install
         mkdir -p "$work/lua"
         for file in core/src/lua/lua/*.c core/src/lua/lua/*.h; do
@@ -72,4 +72,6 @@ if [ ! -x "$prefix/bin/xmake" ]; then
     trap - EXIT INT TERM
 fi
 
+XMAKE_GLOBALDIR=${XMAKE_GLOBALDIR:-$HOME/.revenant/cache/xmake-global}
+export XMAKE_GLOBALDIR
 exec "$prefix/bin/xmake" "$@"
