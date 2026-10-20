@@ -1,0 +1,93 @@
+name: check
+
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash --noprofile --norc -eo pipefail {0}
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.revenant/cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'third_party/xmake/**') }}
+
+      - name: Check the comments
+        run: ./xmakew l -P . tools/comments.lua check
+
+      - name: Count the layout breaks
+        run: |
+          out="$RUNNER_TEMP/layout.txt"
+          ./xmakew l -P . tools/check.lua layout > "$out" 2>&1 || true
+          count=$(grep -oE '[0-9]+ paths break' "$out" | grep -oE '[0-9]+' || true)
+          echo "::warning title=layout::${count:-no count printed} paths break the layout; not failing yet"
+          echo "Layout breaks: ${count:-no count printed} (reported, not failing yet)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Check the toolchain
+        run: ./xmakew l -P . tools/check.lua toolchain
+
+  backports:
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      REVENANT_PREBUILT: kern0x1b/revenant
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select the newest Xcode and show its clang
+        run: |
+          xcode=$(ls -d /Applications/Xcode_*.app | sort -V | tail -n 1)
+          sudo xcode-select -s "$xcode/Contents/Developer"
+          xcode-select -p
+          xcrun clang --version
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.revenant/cache/xmake
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'third_party/xmake/**') }}
+
+      - name: Key the package store
+        id: keys
+        run: echo "hash=$(./xmakew l -P . tools/keys.lua | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.revenant/cache/xmake-global
+          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+
+      - name: Check that the branch has the Backports component
+        id: component
+        run: |
+          if git grep -q 'option("component"' -- '*xmake.lua'; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=backports::this branch has no component option; the Backports build is skipped"
+            echo "Backports build skipped: this branch has no component option." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Configure and build the Backports component
+        if: steps.component.outputs.present == 'true'
+        run: |
+          ./xmakew f -P . -p iphoneos -a armv7 --component=Backports
+          ./xmakew build -P .
+
+      - name: Upload the Backports libraries
+        if: steps.component.outputs.present == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: backports-libraries
+          path: build/iphoneos/armv7/release/lib*.dylib
+          if-no-files-found: error
