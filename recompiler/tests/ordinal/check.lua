@@ -202,7 +202,7 @@ function main(out)
         corpus.fail("a re-export whose target is no input was listed as answered")
     end
 
-    os.cp(path.join(e.recompiler, "p3", "includes.h"), o("includes.h"))
+    os.cp(path.join(e.recompiler, "include", "uikit-includes.h"), o("includes.h"))
     for _, shape in ipairs({"host", "guest"}) do
         os.tryrm(o(shape .. "-xl"))
         translate.translate(o(shape .. "-app"), o("includes.h"), o(shape .. "-xl"), {o("libfake.dylib")})

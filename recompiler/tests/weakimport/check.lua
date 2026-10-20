@@ -59,7 +59,7 @@ function main(out, opt)
     end
 
     cc({path.join(here, "main.c"), "-o", o("WeakImport-arm64")})
-    os.cp(path.join(e.recompiler, "p3", "includes.h"), o("includes.h"))
+    os.cp(path.join(e.recompiler, "include", "uikit-includes.h"), o("includes.h"))
     translate.translate(o("WeakImport-arm64"), o("includes.h"), o("xl"))
     os.execv("xcrun", {"clang", "-target", "armv7-apple-ios6.0", "-isysroot", e.sdk, "-fuse-ld=" .. e.ld, "-Wl,-no_pie", "-O2", "-w",
                        path.join(here, "main.c"), "-o", o("WeakImportNative")})
