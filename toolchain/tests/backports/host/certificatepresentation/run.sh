@@ -17,8 +17,6 @@
 # very call the presentation makes - so this runs as a plain Catalyst binary with no window and no app
 # context, and nothing about the host's own state is involved.
 set -eu
-echo "FAIL host/certificatepresentation/run.sh: its Python steps are gone and not yet ported to Lua: rename.py; compare.py; mutate.py" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
@@ -35,7 +33,7 @@ xcrun clang $common -I"$device" "$here/record.m" "$device/certificate-cases.m" $
 CERTIFICATE_RECORDS="$build/system.json" "$build/system"
 echo "records: $(runs_harness records "$build/system.json")"
 
-python3 "$here/rename.py" "$registry" "$build/rename.h"
+runs_xmake l "$here/../../common/registry-rename.lua" "$registry" "$build/rename.h"
 
 port() {
     dir=$1
@@ -46,7 +44,7 @@ rm -rf "$build/port"; mkdir -p "$build/port"
 cp "$securityui"/*.m "$securityui"/*.h "$build/port/"
 port "$build/port"
 CERTIFICATE_RECORDS="$build/port.json" "$build/port/run"
-python3 "$here/compare.py" "$build/system.json" "$build/port.json"
+runs_xmake l "$here/compare.lua" "$build/system.json" "$build/port.json"
 echo "port: agrees with the host's trust on every line the sheet builds"
 
 # A differential that cannot tell a mutation from itself guards nothing, so each mutation of the sheet's
@@ -57,7 +55,7 @@ mutant() {
     from=$1; to=$2
     rm -rf "$build/mutant"; mkdir -p "$build/mutant"
     cp "$securityui"/*.m "$securityui"/*.h "$build/mutant/"
-    python3 "$here/mutate.py" "$build/mutant/SFCertificatePresentation.m" "$from" "$to"
+    runs_xmake l "$here/../../common/substitute.lua" once "$build/mutant/SFCertificatePresentation.m" "$from" "$to"
     port "$build/mutant"
     rm -f "$build/mutant.json"
     CERTIFICATE_RECORDS="$build/mutant.json" timeout 60 "$build/mutant/run" > /dev/null 2>&1 || true
