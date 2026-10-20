@@ -1,0 +1,30 @@
+package("libpsl")
+    set_homepage("https://rockdaboot.github.io/libpsl")
+    set_description("libpsl with its built-in public suffix list as a static library and no IDNA library: WebKit's soup-free cookie and domain checks use it, and the release tarball carries the list already compiled to a DAFSA")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://github.com/rockdaboot/libpsl/releases/download/$(version)/libpsl-$(version).tar.gz")
+    add_versions("0.23.3", "93941f85a1e7bd593fa94f299233cb5dfc91cd144fd9a78a6ceb75001c5b03be")
+    add_deps("cmake", "ninja", {kind = "binary"})
+    add_links("psl")
+
+    on_install("iphoneos", function (package)
+        io.writefile("build-revenant/CMakeLists.txt", [[
+cmake_minimum_required(VERSION 3.21)
+project(libpsl C)
+add_library(psl STATIC ${PSL_SOURCE}/src/psl.c ${PSL_SOURCE}/src/lookup_string_in_fixed_set.c)
+target_include_directories(psl PRIVATE ${PSL_SOURCE}/include ${PSL_SOURCE}/src)
+target_compile_definitions(psl PRIVATE ENABLE_BUILTIN HAVE_NL_LANGINFO BUILDING_PSL "PACKAGE_VERSION=\"${PSL_VERSION}\"")
+install(TARGETS psl ARCHIVE DESTINATION lib)
+install(FILES ${PSL_SOURCE}/include/libpsl.h DESTINATION include)
+]])
+        local cmake = import("apple.cmake", {rootdir = path.join(package:scriptdir(), "..", "..", "toolchain", "modules"), anonymous = true})
+        cmake.install(package, {"-DPSL_SOURCE=" .. os.curdir(), "-DPSL_VERSION=" .. package:version_str()},
+                      {sourcedir = "build-revenant", licenses = "COPYING"})
+    end)
+
+    on_test(function (package)
+        assert(os.isfile(path.join(package:installdir("lib"), "libpsl.a")))
+        assert(os.isfile(path.join(package:installdir("include"), "libpsl.h")))
+    end)

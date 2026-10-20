@@ -1,0 +1,863 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Wed, 16 Sep 2026 12:00:00 +0200
+Subject: [PATCH] Keep the webkitglib/2.54 state these files had in the port
+
+The port grew on the webkitglib/2.54 branch before it followed main, and in
+these files the merges kept the release branch's text: its NEWS entries and
+WPE options, three LayoutTests and an API test, and a few WebCore, WebKit and
+B3 hunks that main changed differently. Nothing here is needed by the port;
+it is kept so the series reproduces the port's tree exactly, and is the first
+patch to drop on a rebase.
+---
+ ...ded-frames-invalid-media-time-expected.txt |   1 +
+ ...emove-coded-frames-invalid-media-time.html |  59 ++++++++++
+ ...age-buffer-cross-backend-race-expected.txt |   1 +
+ ...ttern-image-buffer-cross-backend-race.html | 109 ++++++++++++++++++
+ ...ebm-reversed-timestamps-crash-expected.txt |  11 ++
+ ...source-webm-reversed-timestamps-crash.html |  95 +++++++++++++++
+ Source/JavaScriptCore/b3/B3ReduceStrength.cpp |  56 +--------
+ Source/JavaScriptCore/b3/testb3_1.cpp         |  21 ++--
+ .../WebCore/WebCore.xcodeproj/project.pbxproj |   4 +
+ .../bindings/js/JSHTMLMediaElementCustom.cpp  |  42 +++++++
+ Source/WebCore/html/HTMLMediaElement.idl      |   1 +
+ Source/WebCore/html/track/TrackOpaqueRoot.h   |  51 ++++++++
+ .../WebKit/UIProcess/WebBackForwardList.cpp   |   1 +
+ Source/WebKit/gtk/NEWS                        |  25 ++++
+ Source/WebKit/wpe/NEWS                        |  40 +++++++
+ Source/cmake/OptionsWPE.cmake                 |   2 +-
+ Source/cmake/WebKitFeatures.cmake             |   2 +-
+ .../Tests/WebKit/WKWebView/WebsitePolicies.mm |  27 +----
+ 18 files changed, 459 insertions(+), 89 deletions(-)
+ create mode 100644 LayoutTests/ipc/remote-source-buffer-remove-coded-frames-invalid-media-time-expected.txt
+ create mode 100644 LayoutTests/ipc/remote-source-buffer-remove-coded-frames-invalid-media-time.html
+ create mode 100644 LayoutTests/ipc/set-fill-pattern-image-buffer-cross-backend-race-expected.txt
+ create mode 100644 LayoutTests/ipc/set-fill-pattern-image-buffer-cross-backend-race.html
+ create mode 100644 LayoutTests/media/media-source/media-source-webm-reversed-timestamps-crash-expected.txt
+ create mode 100644 LayoutTests/media/media-source/media-source-webm-reversed-timestamps-crash.html
+ create mode 100644 Source/WebCore/bindings/js/JSHTMLMediaElementCustom.cpp
+ create mode 100644 Source/WebCore/html/track/TrackOpaqueRoot.h
+
+diff --git a/LayoutTests/ipc/remote-source-buffer-remove-coded-frames-invalid-media-time-expected.txt b/LayoutTests/ipc/remote-source-buffer-remove-coded-frames-invalid-media-time-expected.txt
+new file mode 100644
+index 0000000000000000000000000000000000000000..cb6a4d50d440802e2c8b52bcc101999e809d5f1b
+--- /dev/null
++++ b/LayoutTests/ipc/remote-source-buffer-remove-coded-frames-invalid-media-time-expected.txt
+@@ -0,0 +1 @@
++This test passes if it does not crash the GPU process.
+diff --git a/LayoutTests/ipc/remote-source-buffer-remove-coded-frames-invalid-media-time.html b/LayoutTests/ipc/remote-source-buffer-remove-coded-frames-invalid-media-time.html
+new file mode 100644
+index 0000000000000000000000000000000000000000..d0faa6f5063c718d1fdb0babe9a5c9ddfd5a49e5
+--- /dev/null
++++ b/LayoutTests/ipc/remote-source-buffer-remove-coded-frames-invalid-media-time.html
+@@ -0,0 +1,59 @@
++<!DOCTYPE html><!-- webkit-test-runner [ IPCTestingAPIEnabled=true MediaContainmentEnabled=false ] -->
++<html><body>
++<p>This test passes if it does not crash the GPU process.</p>
++<script>
++if (window.testRunner) {
++    testRunner.waitUntilDone();
++    testRunner.dumpAsText();
++}
++window.onerror = () => testRunner?.notifyDone();
++const sleep = ms => new Promise(r => setTimeout(r, ms));
++
++// RemoteSourceBufferProxy::RemoveCodedFrames with an invalid MediaTime end argument
++// produced an inverted iterator range in TrackBuffer::removeCodedFrames, which
++// std::minmax_element walked past end(). MediaContainmentEnabled=false ensures the
++// SourceBufferPrivate / TrackBuffer live in the GPU process.
++async function main() {
++    if (!window.IPC)
++        return;
++
++    // Populate a GPU-side TrackBuffer via vanilla MSE.
++    const buf = await (await fetch('../media/media-source/content/test-fragmented-video.mp4')).arrayBuffer();
++    const init = buf.slice(0, 721);
++    const seg0 = buf.slice(721, 721 + 53533);
++    const seg1 = buf.slice(54254, 54254 + 56293);
++
++    const v = document.createElement('video');
++    v.disableRemotePlayback = true;
++    document.body.appendChild(v);
++    const ms = new MediaSource();
++    v.src = URL.createObjectURL(ms);
++    await new Promise(r => ms.addEventListener('sourceopen', r, { once: true }));
++
++    const sb = ms.addSourceBuffer('video/mp4; codecs="avc1.4d281e"');
++    const upd = () => new Promise(r => sb.addEventListener('updateend', r, { once: true }));
++    sb.appendBuffer(init); await upd();
++    sb.appendBuffer(seg0); await upd();
++    sb.appendBuffer(seg1); await upd();
++
++    // start = mid-range valid, end = invalid (timeFlags == 0), currentTime = valid zero.
++    // MediaTime is encoded as { int64_t timeValue, uint32_t timeScale, uint8_t timeFlags }.
++    const args = [
++        { type: 'int64_t', value: 1000000 }, { type: 'uint32_t', value: 1000000 }, { type: 'uint8_t', value: 1 },
++        { type: 'int64_t', value: 0 }, { type: 'uint32_t', value: 1 }, { type: 'uint8_t', value: 0 },
++        { type: 'int64_t', value: 0 }, { type: 'uint32_t', value: 1 }, { type: 'uint8_t', value: 1 },
++    ];
++
++    // The RemoteSourceBufferIdentifier is a small GPU-allocated counter; sweep a generous range.
++    // ignoreInvalidMessageForTesting drops messages to non-existent receivers.
++    const conn = IPC.connectionForProcessTarget('GPU');
++    for (let i = 1; i <= 200; i++)
++        conn.sendWithAsyncReply(i, IPC.messages.RemoteSourceBufferProxy_RemoveCodedFrames.name, args, () => { });
++
++    await sleep(2000);
++}
++
++setTimeout(() => main().finally(() => testRunner?.notifyDone()), 0);
++setTimeout(() => testRunner?.notifyDone(), 30000);
++</script>
++</body></html>
+diff --git a/LayoutTests/ipc/set-fill-pattern-image-buffer-cross-backend-race-expected.txt b/LayoutTests/ipc/set-fill-pattern-image-buffer-cross-backend-race-expected.txt
+new file mode 100644
+index 0000000000000000000000000000000000000000..29a530c7158a990b49cea2cf1fec0bbc24bd56fe
+--- /dev/null
++++ b/LayoutTests/ipc/set-fill-pattern-image-buffer-cross-backend-race-expected.txt
+@@ -0,0 +1 @@
++This test passes if the GPU process does not crash.
+diff --git a/LayoutTests/ipc/set-fill-pattern-image-buffer-cross-backend-race.html b/LayoutTests/ipc/set-fill-pattern-image-buffer-cross-backend-race.html
+new file mode 100644
+index 0000000000000000000000000000000000000000..06205dcab3d5efa2505b11da6b491ee8100abd4f
+--- /dev/null
++++ b/LayoutTests/ipc/set-fill-pattern-image-buffer-cross-backend-race.html
+@@ -0,0 +1,109 @@
++<!DOCTYPE html><!-- webkit-test-runner [ IPCTestingAPIEnabled=true ] -->
++<p>This test passes if the GPU process does not crash.</p>
++<script src="../resources/ipc.js"></script>
++<script>
++if (window.testRunner) {
++    testRunner.dumpAsText();
++    testRunner.waitUntilDone();
++}
++
++let CoreIPC;
++let currentIdentifier = 0x1000 + Math.floor(Math.random() * 0x1000000);
++function generateIdentifier() { return currentIdentifier++; }
++function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
++
++function createRemoteRenderingBackend() {
++    const streamConnection = CoreIPC.newStreamConnection();
++    const renderingBackendIdentifier = generateIdentifier();
++    CoreIPC.GPU.GPUConnectionToWebProcess.CreateRenderingBackend(0, {
++        renderingBackendIdentifier: renderingBackendIdentifier,
++        connectionHandle: streamConnection
++    });
++    const remoteRenderingBackend = streamConnection.newInterface("RemoteRenderingBackend", renderingBackendIdentifier);
++    const didInitializeReply = streamConnection.connection.waitForMessage(
++        renderingBackendIdentifier, IPC.messages.RemoteRenderingBackendProxy_DidInitialize.name, 1);
++    streamConnection.connection.setSemaphores(didInitializeReply[0].value, didInitializeReply[1].value);
++    return { streamConnection, remoteRenderingBackend };
++}
++
++const COLORSPACE_SRGB = { serializableColorSpace: { alias: { optionalValue: { m_cgColorSpace: { alias: { variantType: 'WebCore::ColorSpace', variant: 19 } } } } } };
++
++function createRemoteImageBuffer(backend, w, h) {
++    const imageBufferIdentifier = generateIdentifier();
++    const graphicsContextIdentifier = generateIdentifier();
++    backend.remoteRenderingBackend.CreateImageBuffer({
++        logicalSize: { width: w, height: h },
++        renderingMode: 1,
++        renderingPurpose: 0,
++        resolutionScale: 1.0,
++        colorSpace: COLORSPACE_SRGB,
++        bufferFormat: { pixelFormat: 2, useLosslessCompression: 1 },
++        identifier: imageBufferIdentifier,
++        contextIdentifier: graphicsContextIdentifier
++    });
++    return {
++        remoteGraphicsContext: backend.streamConnection.newInterface("RemoteGraphicsContext", graphicsContextIdentifier),
++        imageBufferIdentifier, graphicsContextIdentifier
++    };
++}
++
++const RECT256 = { location: { x: 0, y: 0 }, size: { width: 256, height: 256 } };
++const RECT64 = { location: { x: 0, y: 0 }, size: { width: 64, height: 64 } };
++const IDENTITY = { span: [1.0, 0.0, 0.0, 1.0, 0.0, 0.0] };
++
++window.setTimeout(async () => {
++    if (!window.IPC)
++        return window.testRunner?.notifyDone();
++    try {
++        CoreIPC = (await import('./coreipc.js')).CoreIPC;
++        CoreIPC.typeInfo['WebCore::PlatformColorSpace'] = [{ type: 'std::optional<WebKit::CoreIPCCGColorSpace>', name: 'alias' }];
++
++        // Two RemoteRenderingBackend instances => two GPU process work-queue threads.
++        const A = createRemoteRenderingBackend();
++        const B = createRemoteRenderingBackend();
++
++        // Tile T owned by backend A.
++        const T = createRemoteImageBuffer(A, 256, 256);
++        T.remoteGraphicsContext.SetFillPackedColor({ color: { value: 0xff00ff00 } });
++        T.remoteGraphicsContext.FillRect({ rect: RECT256, requiresClipToRect: 0 });
++
++        // Create destination buffers on A whose base-state fill brush references T,
++        // serialize each into the per-connection shared resource cache, and adopt on B.
++        const N = 128;
++        const Dp = [];
++        for (let i = 0; i < N; i++) {
++            const D = createRemoteImageBuffer(A, 64, 64);
++            D.remoteGraphicsContext.SetFillPatternImageBuffer({
++                imageBufferIdentifier: T.imageBufferIdentifier,
++                pattern: { repeatX: true, repeatY: true, patternSpaceTransform: IDENTITY }
++            });
++            const sId = generateIdentifier();
++            A.remoteRenderingBackend.MoveToSerializedBuffer({
++                identifier: D.imageBufferIdentifier, serializedIdentifier: sId
++            });
++            const ibId = generateIdentifier();
++            const ctxId = generateIdentifier();
++            B.remoteRenderingBackend.MoveToImageBuffer({
++                identifier: sId, imageBufferIdentifier: ibId, contextIdentifier: ctxId
++            });
++            Dp.push(B.streamConnection.newInterface("RemoteGraphicsContext", ctxId));
++        }
++
++        // Race B's pattern fills (which would dereference T) against A's draws into T.
++        for (let iter = 0; iter < 8; iter++) {
++            for (let i = 0; i < N; i++) {
++                Dp[i].FillRect({ rect: RECT64, requiresClipToRect: 0 });
++                for (let k = 0; k < 8; k++) {
++                    T.remoteGraphicsContext.FillRect({ rect: RECT256, requiresClipToRect: 0 });
++                    T.remoteGraphicsContext.ClearRect({ rect: RECT256 });
++                }
++            }
++            await sleep(0);
++        }
++
++        A.streamConnection.connection.invalidate();
++        B.streamConnection.connection.invalidate();
++    } catch (e) { }
++    window.testRunner?.notifyDone();
++}, 10);
++</script>
+diff --git a/LayoutTests/media/media-source/media-source-webm-reversed-timestamps-crash-expected.txt b/LayoutTests/media/media-source/media-source-webm-reversed-timestamps-crash-expected.txt
+new file mode 100644
+index 0000000000000000000000000000000000000000..b0b6a009ab5ba4f4c97900d73d1273a52cb6decc
+--- /dev/null
++++ b/LayoutTests/media/media-source/media-source-webm-reversed-timestamps-crash-expected.txt
+@@ -0,0 +1,11 @@
++Tests that appending a WebM cluster whose block timestamps decrease, after abort(), does not crash.
++
++EVENT(sourceopen)
++EVENT(updateend)
++EVENT(updateend)
++RUN(sourceBuffer.abort())
++EVENT(updateend)
++EVENT(updateend)
++EXPECTED (source.readyState == 'open') OK
++END OF TEST
++
+diff --git a/LayoutTests/media/media-source/media-source-webm-reversed-timestamps-crash.html b/LayoutTests/media/media-source/media-source-webm-reversed-timestamps-crash.html
+new file mode 100644
+index 0000000000000000000000000000000000000000..17ccb7a01bbffec2deff167a341335d7762e1566
+--- /dev/null
++++ b/LayoutTests/media/media-source/media-source-webm-reversed-timestamps-crash.html
+@@ -0,0 +1,95 @@
++<!DOCTYPE html>
++<html>
++<head>
++    <title>media-source-webm-reversed-timestamps-crash</title>
++    <script src="webm-generator.js"></script>
++    <script src="../video-test.js"></script>
++    <script>
++    // A WebM SimpleBlock cluster whose block timestamps go backward causes the
++    // WebM parser to compute a negative sample duration. When appended after
++    // abort() (which resets the track buffer's highest presentation timestamp
++    // while preserving its samples), Coded Frame Processing step 1.14 calls
++    // findSamplesBetweenPresentationTimes() with endTime < beginTime; the
++    // resulting reversed iterator range walks past the end of the sample map.
++    // This test passes if it does not crash.
++
++    var source;
++    var sourceBuffer;
++    var initData;
++
++    function simpleBlockCluster(trackNumber, clusterTimecode, blocks)
++    {
++        // Hand-roll a Cluster of SimpleBlocks (no BlockDuration), so the
++        // parser must derive each sample's duration from the gap to the
++        // next block's timestamp.
++        function vintSize(n)
++        {
++            if (n < 0x7F)
++                return new Uint8Array([0x80 | n]);
++            return new Uint8Array([0x40 | (n >> 8), n & 0xFF]);
++        }
++        var body = [new Uint8Array([0xE7, 0x81, clusterTimecode & 0xFF])];
++        for (var block of blocks) {
++            var ts = new Uint8Array(2);
++            new DataView(ts.buffer).setInt16(0, block.timestamp, false);
++            var payload = WebM.concat(new Uint8Array([0x80 | trackNumber]), ts,
++                new Uint8Array([block.isSync ? 0x80 : 0x00]), block.data);
++            body.push(new Uint8Array([0xA3]), vintSize(payload.byteLength), payload);
++        }
++        var clusterBody = WebM.concat(...body);
++        return WebM.concat(new Uint8Array([0x1F, 0x43, 0xB6, 0x75]),
++            vintSize(clusterBody.byteLength), clusterBody);
++    }
++
++    async function runTest()
++    {
++        findMediaElement();
++
++        if (!MediaSource.isTypeSupported(WebM.VIDEO_TYPE)) {
++            consoleWrite('SKIPPED: ' + WebM.VIDEO_TYPE + ' is not supported');
++            return;
++        }
++
++        source = new MediaSource();
++        video.src = URL.createObjectURL(source);
++        await waitFor(source, 'sourceopen');
++
++        sourceBuffer = source.addSourceBuffer(WebM.VIDEO_TYPE);
++
++        initData = WebM.initSegment({ tracks: [{ id: 1, type: 'video', defaultDuration: 0 }] });
++        sourceBuffer.appendBuffer(initData);
++        await waitFor(sourceBuffer, 'updateend');
++
++        var samples = [{ duration: 50, isSync: true }];
++        for (var i = 0; i < 7; ++i)
++            samples.push({ duration: 50, isSync: false });
++        sourceBuffer.appendBuffer(WebM.mediaSegment({
++            tracks: [{ id: 1, type: 'video', baseDecodeTime: 0, samples: samples }]
++        }));
++        await waitFor(sourceBuffer, 'updateend');
++
++        run('sourceBuffer.abort()');
++
++        sourceBuffer.appendBuffer(initData);
++        await waitFor(sourceBuffer, 'updateend');
++
++        sourceBuffer.appendBuffer(simpleBlockCluster(1, 0, [
++            { timestamp: 200, isSync: true, data: new Uint8Array([0x30, 0x12, 0x00, 0x9D, 0x01, 0x2A, 0x40, 0x01, 0xF0, 0x00, 0x00]) },
++            { timestamp: 10, isSync: false, data: new Uint8Array([0xD1, 0x02, 0x00]) },
++            { timestamp: 250, isSync: false, data: new Uint8Array([0xD1, 0x02, 0x00]) },
++        ]));
++        await waitFor(sourceBuffer, 'updateend');
++
++        testExpected('source.readyState', 'open');
++    }
++
++    window.addEventListener('load', () => {
++        runTest().then(endTest).catch(failTest);
++    });
++    </script>
++</head>
++<body>
++    <div>Tests that appending a WebM cluster whose block timestamps decrease, after abort(), does not crash.</div>
++    <video></video>
++</body>
++</html>
+diff --git a/Source/JavaScriptCore/b3/B3ReduceStrength.cpp b/Source/JavaScriptCore/b3/B3ReduceStrength.cpp
+index 452b0bc23d6089ca94022f6845d0f5cea67312a0..66c9422a4a734ede29c634c4b109c0766eb2ae58 100644
+--- a/Source/JavaScriptCore/b3/B3ReduceStrength.cpp
++++ b/Source/JavaScriptCore/b3/B3ReduceStrength.cpp
+@@ -119,16 +119,6 @@ namespace B3ReduceStrengthInternal {
+ static constexpr bool verbose = false;
+ }
+ 
+-static inline std::optional<SIMDLane> wideningLaneFor(SIMDLane lane)
+-{
+-    switch (lane) {
+-    case SIMDLane::i8x16: return SIMDLane::i16x8;
+-    case SIMDLane::i16x8: return SIMDLane::i32x4;
+-    case SIMDLane::i32x4: return SIMDLane::i64x2;
+-    default: return std::nullopt;
+-    }
+-}
+-
+ struct CanonicalShuffleInfo {
+     B3::Opcode opcode;
+     SIMDLane lane;
+@@ -2701,6 +2691,7 @@ private:
+             break;
+         }
+ 
++#if !CPU(NEEDS_ALIGNED_ACCESS) && CPU(ADDRESS64)
+         case MemoryCopy: {
+             if (m_value->child(2)->hasInt()) {
+                 auto* memoryCopy = m_value->as<BulkMemoryValue>();
+@@ -2839,6 +2830,7 @@ private:
+             }
+             break;
+         }
++#endif
+ 
+         case CCall: {
+             // Turn this: Call(fmod, constant1, constant2)
+@@ -3292,23 +3284,7 @@ private:
+                         && (value->child(1)->isConstant() || value->child(2)->isConstant());
+                 });
+             
+-            if (!select)
+-                break;
+-
+-            // All values between Select and Check must be cloneable.
+-            bool canClone = true;
+-            for (unsigned i = m_index; ; --i) {
+-                Value* value = m_block->at(i);
+-                if (value->kind().isCloningForbidden()) {
+-                    canClone = false;
+-                    break;
+-                }
+-                if (value == select)
+-                    break;
+-                RELEASE_ASSERT(i); // Select should be found
+-            }
+-
+-            if (canClone) {
++            if (select) {
+                 specializeSelect(select);
+                 m_didSpecializeSelect = true;
+                 break;
+@@ -3947,20 +3923,6 @@ private:
+         }
+ 
+         case VectorZipLower: {
+-            // Turn this: VectorZipLower(x, zeroConstant) with a widenable integer lane
+-            // Into this: VectorExtendLow(x, widerLane, Unsigned)
+-            //
+-            // zip1(x, 0) interleaves each narrow element of x's low half with a zero
+-            // element, which is exactly an unsigned widening of the low half (uxtl / pmovzx).
+-            //   zip i8x16  -> i8 ->i16 zero extension
+-            //   zip i16x8  -> i16->i32 zero extension
+-            //   zip i32x4  -> i32->i64 zero extension
+-            if (SIMDValue* zip = m_value->as<SIMDValue>(); zip->child(1)->isV128(vectorAllZeros())) {
+-                if (auto widerLane = wideningLaneFor(zip->simdLane())) {
+-                    replaceWithNew<SIMDValue>(m_value->origin(), VectorExtendLow, B3::V128, *widerLane, SIMDSignMode::Unsigned, zip->child(0));
+-                    break;
+-                }
+-            }
+             // Turn this: VectorZipLower(i64x2, i64x2)
+             // Into this: VectorDupElement(i64x2, 0)
+             if (tryReduceSameInputShuffleToDup(0))
+@@ -3969,14 +3931,6 @@ private:
+         }
+ 
+         case VectorZipHigher: {
+-            // Turn this: VectorZipHigher(x, zeroConstant) with a widenable integer lane
+-            // Into this: VectorExtendHigh(x, widerLane, Unsigned)
+-            if (SIMDValue* zip = m_value->as<SIMDValue>(); zip->child(1)->isV128(vectorAllZeros())) {
+-                if (auto widerLane = wideningLaneFor(zip->simdLane())) {
+-                    replaceWithNew<SIMDValue>(m_value->origin(), VectorExtendHigh, B3::V128, *widerLane, SIMDSignMode::Unsigned, zip->child(0));
+-                    break;
+-                }
+-            }
+             // Turn this: VectorZipHigher(i64x2, i64x2)
+             // Into this: VectorDupElement(i64x2, 1)
+             if (tryReduceSameInputShuffleToDup(1))
+@@ -4185,7 +4139,7 @@ private:
+                 auto rtt = structNew->rtt();
+                 int32_t toHeapType = cast->targetHeapType();
+                 RefPtr targetRTT = cast->targetRTT();
+-                if (Wasm::isTypeIndexHeapType(toHeapType)) {
++                if (!Wasm::typeIndexIsType(static_cast<Wasm::TypeIndex>(toHeapType))) {
+                     if (rtt->isSubRTT(*targetRTT)) {
+                         // shouldNegate can only be set on WasmRefTest.
+                         ASSERT(!cast->shouldNegate());
+@@ -4257,7 +4211,7 @@ private:
+                 auto rtt = structNew->rtt();
+                 int32_t toHeapType = cast->targetHeapType();
+                 RefPtr targetRTT = cast->targetRTT();
+-                if (Wasm::isTypeIndexHeapType(toHeapType)) {
++                if (!Wasm::typeIndexIsType(static_cast<Wasm::TypeIndex>(toHeapType))) {
+                     const bool isSubtype = rtt->isSubRTT(*targetRTT);
+                     replaceWithNewValue(m_proc.addIntConstant(m_value, cast->shouldNegate() ? !isSubtype : isSubtype));
+                     break;
+diff --git a/Source/JavaScriptCore/b3/testb3_1.cpp b/Source/JavaScriptCore/b3/testb3_1.cpp
+index 811be2f5e6c38829f1cbba1785c416228b335488..58dca34818ba7e589ffb713451dcb61fe3d2dc1e 100644
+--- a/Source/JavaScriptCore/b3/testb3_1.cpp
++++ b/Source/JavaScriptCore/b3/testb3_1.cpp
+@@ -637,10 +637,12 @@ void run(const TestConfig* config)
+     RUN(testInt52RoundTripBinary());
+     RUN(testTruncSShrAddUnalignedConstant());
+ 
++#if !CPU(ARM)
+     RUN_UNARY(testCheckAddRemoveCheckWithSExt8, int8Operands());
+     RUN_UNARY(testCheckAddRemoveCheckWithSExt16, int16Operands());
+     RUN_UNARY(testCheckAddRemoveCheckWithSExt32, int32Operands());
+     RUN_UNARY(testCheckAddRemoveCheckWithZExt32, int32Operands());
++#endif
+ 
+     RUN(testStoreZeroReg());
+     RUN(testStore32(44));
+@@ -776,8 +778,10 @@ void run(const TestConfig* config)
+     RUN(testPatchpointAnyImm(ValueRep::WarmAny));
+     RUN(testPatchpointAnyImm(ValueRep::ColdAny));
+     RUN(testPatchpointAnyImm(ValueRep::LateColdAny));
+-    RUN(testPatchpointManyWarmAnyImms());
+-    RUN(testPatchpointManyColdAnyImms());
++    if constexpr (!is32Bit()) {
++        RUN(testPatchpointManyWarmAnyImms());
++        RUN(testPatchpointManyColdAnyImms());
++    }
+     RUN(testPatchpointWithRegisterResult());
+     RUN(testPatchpointWithStackArgumentResult());
+     RUN(testPatchpointWithAnyResult());
+@@ -789,6 +793,7 @@ void run(const TestConfig* config)
+     RUN(testCheckTrickyMegaCombo());
+     RUN(testCheckTwoMegaCombos());
+     RUN(testCheckTwoNonRedundantMegaCombos());
++#if !CPU(ARM)
+     RUN(testCheckAddImm());
+     RUN(testCheckAddImmCommute());
+     RUN(testCheckAddImmSomeRegister());
+@@ -818,6 +823,7 @@ void run(const TestConfig* config)
+     RUN(testCheckMulFoldFail(2147483647, 100));
+     RUN(testCheckMulArgumentAliasing64());
+     RUN(testCheckMulArgumentAliasing32());
++#endif
+ 
+     RUN_BINARY([](int32_t a, int32_t b) { testCompare(Equal, a, b); }, int64Operands(), int64Operands());
+     RUN_BINARY([](int32_t a, int32_t b) { testCompare(NotEqual, a, b); }, int64Operands(), int64Operands());
+@@ -917,7 +923,6 @@ void run(const TestConfig* config)
+ 
+     RUN(testSwitchTargettingSameBlock());
+     RUN(testSwitchTargettingSameBlockFoldPathConstant());
+-    RUN(testSwitchSparseI64RangeOverflow());
+ 
+     RUN(testTrunc(0));
+     RUN(testTrunc(1));
+@@ -1154,8 +1159,6 @@ void run(const TestConfig* config)
+     RUN(testLICMControlDependent());
+     RUN(testLICMControlDependentNotBackwardsDominant());
+     RUN(testLICMControlDependentSideExits());
+-    RUN(testLICMControlDependentSideExitInPredecessor());
+-    RUN(testLICMControlDependentSideExitInEarlierIteration());
+     RUN(testLICMReadsPinnedWritesPinned());
+     RUN(testLICMReadsWritesDifferentHeaps());
+     RUN(testLICMReadsWritesOverlappingHeaps());
+@@ -1163,7 +1166,9 @@ void run(const TestConfig* config)
+ 
+     addAtomicTests(config, tasks);
+     RUN(testDepend32());
+-    RUN(testDepend64());
++    if constexpr (!is32Bit()) {
++        RUN(testDepend64());
++    }
+ 
+     RUN(testWasmBoundsCheck(0));
+     RUN(testWasmBoundsCheck(100));
+@@ -1171,9 +1176,6 @@ void run(const TestConfig* config)
+     RUN(testWasmBoundsCheck(std::numeric_limits<unsigned>::max() - 5));
+ 
+     RUN(testWasmAddress());
+-    RUN(testWasmAddressZeroExtendScaledIndex());
+-    RUN(testWasmAddressZeroExtend32BitShiftWraps());
+-    RUN(testWasmAddressScaledIndexWithLockedShlChild());
+     RUN(testWasmAddressWithOffset());
+     
+     RUN(testFastTLSLoad());
+@@ -1491,7 +1493,6 @@ void run(const TestConfig* config)
+         RUN(testVectorXor3());
+         RUN(testVectorShlImmediate());
+         RUN(testVectorShrImmediate());
+-        RUN(testVectorZipWithZeroIsZeroExtend());
+         RUN(testVectorUnzipEven());
+         RUN(testVectorUnzipOdd());
+         RUN(testVectorZipLower());
+diff --git a/Source/WebCore/WebCore.xcodeproj/project.pbxproj b/Source/WebCore/WebCore.xcodeproj/project.pbxproj
+index 2e96ea66208afe8d92c766322071b94ca7f19be5..638aa2c67359673b29c4124deffd883a9765467d 100644
+--- a/Source/WebCore/WebCore.xcodeproj/project.pbxproj
++++ b/Source/WebCore/WebCore.xcodeproj/project.pbxproj
+@@ -17153,6 +17153,8 @@
+ 		9B56C9A81C89312800C456DF /* CustomElementReactionQueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomElementReactionQueue.h; sourceTree = "<group>"; };
+ 		9B56C9A91C89329A00C456DF /* CustomElementReactionQueue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CustomElementReactionQueue.cpp; sourceTree = "<group>"; };
+ 		9B6116491F6A593300E923B8 /* WebContentReader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = WebContentReader.cpp; sourceTree = "<group>"; };
++		9B672EC52FDC971500D9F683 /* JSHTMLMediaElementCustom.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = JSHTMLMediaElementCustom.cpp; sourceTree = "<group>"; };
++		9B672EC62FDC98BF00D9F683 /* TrackOpaqueRoot.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TrackOpaqueRoot.h; sourceTree = "<group>"; };
+ 		9B69D3B11B98FF0A00E3512B /* HTMLSlotElement.idl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = HTMLSlotElement.idl; sourceTree = "<group>"; };
+ 		9B69D3B21B98FFE900E3512B /* HTMLSlotElement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HTMLSlotElement.cpp; sourceTree = "<group>"; };
+ 		9B69D3B31B98FFE900E3512B /* HTMLSlotElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HTMLSlotElement.h; sourceTree = "<group>"; };
+@@ -32713,6 +32715,7 @@
+ 				4131F3B11F9552810059995A /* JSFetchEventCustom.cpp */,
+ 				84BBE5482597E7F100AA8F28 /* JSHTMLAllCollectionCustom.cpp */,
+ 				6E576BC324EB509C0094D4AA /* JSHTMLCanvasElementCustom.cpp */,
++				9B672EC52FDC971500D9F683 /* JSHTMLMediaElementCustom.cpp */,
+ 				D6F7960C166FFECE0076DD18 /* JSHTMLTemplateElementCustom.cpp */,
+ 				511EF2CE17F0FDF100E4FA16 /* JSIDBObjectStoreCustom.cpp */,
+ 				51E269321DD3BC43006B6A58 /* JSIDBTransactionCustom.cpp */,
+@@ -36329,6 +36332,7 @@
+ 				070334D21459FFAC008D8D45 /* TrackEvent.idl */,
+ 				BE88E0BF1715CE2600658D98 /* TrackListBase.cpp */,
+ 				BE88E0C01715CE2600658D98 /* TrackListBase.h */,
++				9B672EC62FDC98BF00D9F683 /* TrackOpaqueRoot.h */,
+ 				BE88E0D21715D2A200658D98 /* VideoTrack.cpp */,
+ 				BE88E0D31715D2A200658D98 /* VideoTrack.h */,
+ 				BE88E0D41715D2A200658D98 /* VideoTrack.idl */,
+diff --git a/Source/WebCore/bindings/js/JSHTMLMediaElementCustom.cpp b/Source/WebCore/bindings/js/JSHTMLMediaElementCustom.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..9b9fc34f2511b4497b58260d01d36d60f6f7da94
+--- /dev/null
++++ b/Source/WebCore/bindings/js/JSHTMLMediaElementCustom.cpp
+@@ -0,0 +1,42 @@
++/*
++ * Copyright (C) 2026 Apple Inc. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
++ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
++ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
++ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
++ * THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include "config.h"
++#include "JSHTMLMediaElement.h"
++
++#include "TrackOpaqueRoot.h"
++#include "WebCoreOpaqueRootInlines.h"
++
++namespace WebCore {
++
++template<typename Visitor>
++void JSHTMLMediaElement::visitAdditionalChildrenInGCThread(Visitor& visitor)
++{
++    addWebCoreOpaqueRoot(visitor, wrapped().trackOpaqueRoot().opaqueRoot());
++}
++
++DEFINE_VISIT_ADDITIONAL_CHILDREN_IN_GC_THREAD(JSHTMLMediaElement);
++
++}
+diff --git a/Source/WebCore/html/HTMLMediaElement.idl b/Source/WebCore/html/HTMLMediaElement.idl
+index 35fefdacfa8e5ce92579c4ab5f46241c7afe3236..dbd0045814debbd49d751b4903407037d07c8f6a 100644
+--- a/Source/WebCore/html/HTMLMediaElement.idl
++++ b/Source/WebCore/html/HTMLMediaElement.idl
+@@ -43,6 +43,7 @@ typedef (
+     ActiveDOMObject,
+     Conditional=VIDEO,
+     ExportMacro=WEBCORE_EXPORT,
++    JSCustomMarkFunction,
+     JSGenerateToNativeObject,
+     Exposed=Window
+ ] interface HTMLMediaElement : HTMLElement {
+diff --git a/Source/WebCore/html/track/TrackOpaqueRoot.h b/Source/WebCore/html/track/TrackOpaqueRoot.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..458d53c585aa40ee3438fed0f25c2dfee7a16739
+--- /dev/null
++++ b/Source/WebCore/html/track/TrackOpaqueRoot.h
+@@ -0,0 +1,51 @@
++/*
++ * Copyright (C) 2026 Apple Inc. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
++ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
++ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
++ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
++ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
++ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
++ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
++ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#pragma once
++
++#include "WebCoreOpaqueRoot.h"
++#include <wtf/ThreadSafeRefCounted.h>
++
++namespace WebCore {
++
++class TrackOpaqueRoot : public ThreadSafeRefCounted<TrackOpaqueRoot> {
++public:
++    static Ref<TrackOpaqueRoot> create(const WebCoreOpaqueRoot& root)
++    {
++        return adoptRef(*new TrackOpaqueRoot(root));
++    }
++
++    WebCoreOpaqueRoot opaqueRoot() const { return m_opaqueRoot; }
++    void clear() { m_opaqueRoot = nullptr; }
++
++private:
++    TrackOpaqueRoot(const WebCoreOpaqueRoot& root)
++        : m_opaqueRoot(root)
++    { }
++
++    WebCoreOpaqueRoot m_opaqueRoot;
++};
++
++}
+diff --git a/Source/WebKit/UIProcess/WebBackForwardList.cpp b/Source/WebKit/UIProcess/WebBackForwardList.cpp
+index dbc01b14e56d455d6dba570784d97d9f3002464c..77d3f441a698f81d58093791d2444a0356e5b792 100644
+--- a/Source/WebKit/UIProcess/WebBackForwardList.cpp
++++ b/Source/WebKit/UIProcess/WebBackForwardList.cpp
+@@ -42,6 +42,7 @@
+ #include <WebCore/DiagnosticLoggingKeys.h>
+ #include <WebCore/Page.h>
+ #include <wtf/Borrow.h>
++#include <WebCore/Page.h>
+ #include <wtf/DebugUtilities.h>
+ #include <wtf/HexNumber.h>
+ #include <wtf/SetForScope.h>
+diff --git a/Source/WebKit/gtk/NEWS b/Source/WebKit/gtk/NEWS
+index 5b6e6d6f990c7b49989568bf4e299e01ec24f66f..beb69ef96710eb3d560e46d3fd4e349514258c03 100644
+--- a/Source/WebKit/gtk/NEWS
++++ b/Source/WebKit/gtk/NEWS
+@@ -1,3 +1,28 @@
++=================
++WebKitGTK 2.53.91
++=================
++
++What's new in WebKitGTK 2.53.91?
++
++  - Handle video orientation in skia compositor.
++  - Do not use cached credentials when Authorization header is present.
++  - Fix scrollbar rendering issues due to incorrect damage.
++  - Add log fallback when journald is not reachable
++  - Fix several crashes and rendering issues.
++
++=================
++WebKitGTK 2.53.90
++=================
++
++What's new in WebKitGTK 2.53.90?
++
++  - Do not support rendering tiles in the main thread in accelerated compositing mode.
++  - Add magnification property to WebKitWebView to handle visual scaling.
++  - Add new API to allow setting a per-navigation custom User-Agent to WebKitWebsitePolicies.
++  - Improved platform media queries to handle prefers reduced motion, high contrast and dark theme.
++  - Fix several crashes and rendering issues.
++  - Translation updates: Brazilian Portuguese, Slovenian.
++
+ ================
+ WebKitGTK 2.53.4
+ ================
+diff --git a/Source/WebKit/wpe/NEWS b/Source/WebKit/wpe/NEWS
+index a7b1bcf15fd2a8cfe9923878f4646c4ddacbd5bf..45840fd118a4bd2ddd8a10aca97e8a6c464ffc9f 100644
+--- a/Source/WebKit/wpe/NEWS
++++ b/Source/WebKit/wpe/NEWS
+@@ -1,3 +1,43 @@
++==================
++WPE WebKit 2.53.91
++==================
++
++What's new in WPE WebKit 2.53.91?
++
++  - Enable paint damage propagation by default.
++  - Handle video orientation in the Skia compositor.
++  - Do not use cached credentials when the Authorization header is present.
++  - Fix scrollbar rendering issues due to incorrect damage tracking.
++  - Add logging fallback to the standard error output when journald is not reachable.
++  - Require Ninja for building. Using the CMake Makefile generator is no longer supported.
++  - Fix the build with CMake 4.4 or newer.
++  - Fix several crashes and rendering issues.
++
++==================
++WPE WebKit 2.53.90
++==================
++
++What's new in WPE WebKit 2.53.90?
++
++  - Do not support rendering tiles in the main thread in accelerated compositing mode.
++  - Add magnification property to WebKitWebView to handle visual scaling.
++  - Add new API to allow setting a per-navigation custom User-Agent to WebKitWebsitePolicies.
++  - Add WEBKIT_INPUT_PURPOSE_SEARCH to the API (and conversely WPE_INPUT_PURPOSE_SEARCH in
++    WPEPlatform) which allows detecting when values of an input fields are expected to be
++    search terms.
++  - Improved platform media queries to handle prefers reduced motion, high contrast and dark theme.
++  - Improved drag-and-drop support.
++  - Allow disabling font subpixel rendering, which is now the default setting and matches font
++    the default rendering in most desktop environments.
++  - Add a feature flag to support skipping caching of pages with multimedia content in the
++    back-forward cache.
++  - Add a built-in popup menu support, used as the default implementation when the
++    WebKitWebView::show-option-menu signal is left unhandled.
++  - Add initial support for the Pointer Lock API, which may be enabled at build time with
++    the ENABLE_POINTER_LOCK CMake option.
++  - MiniBrowser now handles the SIGTERM and SIGINT signals, and exits cleanly.
++  - Fix several crashes and rendering issues.
++
+ =================
+ WPE WebKit 2.53.3
+ =================
+diff --git a/Source/cmake/OptionsWPE.cmake b/Source/cmake/OptionsWPE.cmake
+index ae48e98aaa26631d9539971302be46c1a40ab60d..2353bdce2aee32d8eb5a4dfecf4ef0eff700e344 100644
+--- a/Source/cmake/OptionsWPE.cmake
++++ b/Source/cmake/OptionsWPE.cmake
+@@ -92,7 +92,7 @@ WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_THUNDER PRIVATE ${ENABLE_DEVELOPER_MODE}
+ WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_TOUCH_EVENTS PRIVATE ON)
+ WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_VARIATION_FONTS PRIVATE ON)
+ WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_WEB_CODECS PRIVATE ON)
+-WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_WEB_RTC PRIVATE ${ENABLE_EXPERIMENTAL_FEATURES})
++WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_WEB_RTC PRIVATE OFF)
+ WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_WEBDRIVER_BIDI PRIVATE ${ENABLE_EXPERIMENTAL_FEATURES})
+ WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_WK_WEB_EXTENSIONS PRIVATE ${ENABLE_EXPERIMENTAL_FEATURES})
+ WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_WEBXR PRIVATE ${ENABLE_EXPERIMENTAL_FEATURES})
+diff --git a/Source/cmake/WebKitFeatures.cmake b/Source/cmake/WebKitFeatures.cmake
+index 8a44255f4d5639aad319f1493a2d2093c90e6e06..fadc4e0277b66290a0fc22d4b89798a0487d91ff 100644
+--- a/Source/cmake/WebKitFeatures.cmake
++++ b/Source/cmake/WebKitFeatures.cmake
+@@ -165,7 +165,7 @@ macro(WEBKIT_OPTION_BEGIN)
+         elseif (COMPILER_IS_CLANG)
+             _WEBKIT_DETECT_SWIFT_CXX_INTEROP_SUPPORT(_swift_interop_ok)
+             if (_swift_interop_ok)
+-                set(_swift_features_default ON)
++                set(_swift_features_default OFF)
+             else ()
+                 set(_swift_features_default OFF)
+             endif ()
+diff --git a/Tools/TestWebKitAPI/Tests/WebKit/WKWebView/WebsitePolicies.mm b/Tools/TestWebKitAPI/Tests/WebKit/WKWebView/WebsitePolicies.mm
+index 6b9d3cebfed7434761cb3e30f32056caf2b92a99..d16c0890a68e9c4bbffb88eb9bb87f262694196c 100644
+--- a/Tools/TestWebKitAPI/Tests/WebKit/WKWebView/WebsitePolicies.mm
++++ b/Tools/TestWebKitAPI/Tests/WebKit/WKWebView/WebsitePolicies.mm
+@@ -1977,32 +1977,7 @@ - (void)webView:(WKWebView *)webView runJavaScriptAlertPanelWithMessage:(NSStrin
+         { "/subframe.html"_s, { "<script>window.parent.postMessage(window.location.href, '*');</script>"_s } },
+     }, TestWebKitAPI::HTTPServer::Protocol::Http);
+ 
+-    RetainPtr handler = adoptNS([TestURLSchemeHandler new]);
+-    [handler setStartURLSchemeTaskHandler:^(WKWebView *, id<WKURLSchemeTask> task) {
+-        NSString *path = task.request.URL.path;
+-        NSString *type = nil;
+-        NSString *result = nil;
+-        if ([path hasSuffix:@"script.js"]) {
+-            result = @"window.results.push(window.location.href);";
+-            type = @"text/javascript";
+-        } else if ([path hasSuffix:@"script_subframe.js"]) {
+-            result = @"window.parent.postMessage(window.location.href, '*');";
+-            type = @"text/javascript";
+-        }
+-
+-        if (!result) {
+-            [task didFailWithError:[NSError errorWithDomain:@"TestWebKitAPI" code:1 userInfo:nil]];
+-            return;
+-        }
+-
+-        RetainPtr response = adoptNS([[NSURLResponse alloc] initWithURL:task.request.URL MIMEType:type expectedContentLength:[result length] textEncodingName:nil]);
+-        [task didReceiveResponse:response.get()];
+-        [task didReceiveData:[result dataUsingEncoding:NSUTF8StringEncoding]];
+-        [task didFinish];
+-    }];
+-
+-    RetainPtr configuration = adoptNS([[WKWebViewConfiguration alloc] init]);
+-    [configuration setURLSchemeHandler:handler.get() forURLScheme:@"test"];
++    auto configuration = adoptNS([[WKWebViewConfiguration alloc] init]);
+ 
+     doneCompiling = false;
+     NSString* contentBlocker = @"[{\"action\":{\"type\":\"block\"},\"trigger\":{\"url-filter\":\".*\",\"resource-type\":[\"script\"]}}]";

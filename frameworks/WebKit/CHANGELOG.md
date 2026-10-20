@@ -7,6 +7,17 @@ Dates are the day the change was measured on the device, not the day it compiled
 
 ## [Unreleased]
 
+### Changed
+- **The engine is upstream plus a patch series, built by xmake.** The fork's 176
+  commits and its merge of `webkitglib/2.54` are 24 topic patches on upstream
+  `main` of 2026-09-14, checked to rebuild the fork's tree exactly, plus two that
+  let CMake configure without Python and keep the configured compiler. The
+  `webkit` package fetches the base by commit and applies the series; the
+  submodule, `revenant.toml`, `conan.lock` and the Conan recipes are gone, and
+  the libraries the engine links are xmake packages at their releases. The
+  Python checks are Lua: the carry and symbol checks, the compat audit, the
+  export list, the staging checks and the device tests.
+
 ### Fixed
 - **A crash at load that had not happened yet.** Taking the engine branch's 97
   newest commits rolled ANGLE forward, and the new ANGLE calls `crc32_z` - a

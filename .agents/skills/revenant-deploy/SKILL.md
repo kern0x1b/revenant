@@ -8,42 +8,28 @@ description: Push the Safari substitution and the RevWebKit Settings pane to a j
 ## Configure the device address (never committed)
 
 ```sh
-cp device.env.example device.env
-# set DEVICE_HOST, DEVICE_PORT, DEVICE_PASSWORD in device.env (gitignored)
+cp frameworks/WebKit/device.env.example device.env
+# set DEVICE_HOST, DEVICE_PORT (and DEVICE_UDID over USB) in device.env at the top of the checkout (gitignored)
 ```
 
-The toolchain reads it: `revenant device run <timeout> "<cmd>"`,
-`revenant device copy <local> <remote>` and `revenant device fetch <remote> <local>`.
-Scripts import it instead of building SSH option strings of their own.
-Claim the device before any of this; `revenant device` does not check claims — see
-`.agents/skills/device-ssh-access`.
+The toolchain's device module reads it: `./xmakew device -P . run "<cmd>"` from a shell,
+and `run`, `copy` and `fetch` from Lua, as the tests in `frameworks/WebKit/tests/` do.
+Scripts use the module instead of building SSH option strings of their own.
+Claim the device before any of this with `./xmakew device claim` — see `revenant-device`.
 
 ## Push everything
 
-`revenant build` stages the whole substitution; one command packs and installs it:
-
 ```sh
-revenant install
+./xmakew device install -P .
 ```
 
-It runs `revenant package` (which copies the .deb into `build/<variant>/` and
-prints `package <path>`), copies each .deb to `/tmp` on the phone, runs
-`dpkg -i <deb> && rm -f <deb>`, refuses a .deb whose `/Applications/<App>.app`
-would replace an installed app with another bundle id, and runs
-`su mobile -c uicache` when the package holds an app. The package's
-`packaging/DEBIAN/postinst` kills Mobile Safari and Preferences; no respring is
-needed.
+It builds and stages the whole substitution, writes the `.deb`, runs `dpkg -i` on the phone
+and refuses a .deb whose `/Applications/<App>.app` would replace an installed app with
+another bundle id. The package's `packaging/DEBIAN/postinst` kills Mobile Safari and
+Preferences; no respring is needed.
 
-For the engine alone, without rebuilding the package:
-
-```sh
-revenant deploy
-```
-
-It backs up each framework binary to `/usr/lib/rev-fw.bak/<Framework>`, copies
-the binaries and streams their resources, fails if AppleDouble `._*` files
-landed on the phone, and then runs only `killall MobileSafari` — no postinst, so
-kill Preferences yourself if the pane depends on the change.
+There is no engine-only push any more: the engine is part of the one package, and
+installing it is how the phone gets a new engine.
 
 The package puts each file where it belongs:
 
@@ -60,26 +46,24 @@ The package puts each file where it belongs:
 
 - **Never overwrite the loader with the compat dylib or vice versa** — they are
   different files; swapping them drops Safari to the system engine.
-- **Keep `/usr/lib/rev-fw.bak/`**: only `revenant deploy` makes it, and it holds the
-  engine binaries it replaced. `revenant install` keeps no backup; the way back
-  there is reinstalling an earlier .deb — see `.claude/skills/debug`.
-- **Iterating on the Settings pane needs no respring:** redeploy the bundle, then
-  `revenant device run 15 "killall Preferences"` and reopen it. A respring re-locks the
+- **Keep the previous .deb**: installing keeps no backup, and the way back is
+  reinstalling an earlier package — see `revenant-debug`. A `/usr/lib/rev-fw.bak/`
+  an older engine-only push left on the phone still holds the binaries it replaced.
+- **Iterating on the Settings pane needs no respring:** reinstall, then
+  `./xmakew device -P . run "killall Preferences"` and reopen it. A respring re-locks the
   device.
 
 ## After deploying
 
-Respring with `revenant device run 15 "killall SpringBoard"`, wait for it to come back
-(`launchctl list | grep com.apple.SpringBoard`), then verify — see
-`.claude/skills/test`.
+Respring with `./xmakew device -P . run "killall SpringBoard"`, wait for it to come back
+(`launchctl list | grep com.apple.SpringBoard`), then verify — see `revenant-test`.
 
 ## Proving the phone holds this build
 
 The stage differs from the build tree by design: it strips local symbols
 (`strip -S -x`; WebCore is about half the size staged), retargets install names
-and re-signs each binary, renames per `as` (`WebKitLegacy.framework` is staged as
-`WebKit.framework`), turns plists binary (`stage:plists-to-binary`) and copies
-resources only where `resources = true` (WebCore). Size and md5 compare only
+and re-signs each binary, renames `WebKitLegacy.framework` to `WebKit.framework`,
+turns plists binary and copies resources only for WebCore. Size and md5 compare only
 within one side — stage against phone. Across tree and stage compare what
 survives strip and re-signing:
 
@@ -88,4 +72,4 @@ otool -l FILE | awk '$1=="uuid"{print $2; exit}'   # LC_UUID; the line after LC_
 nm -gU FILE | wc -l                                  # exported symbol count
 ```
 
-Compare plists by parsed content (`plistlib`), never by bytes.
+Compare plists by parsed content (`plutil -convert json -o - FILE`), never by bytes.

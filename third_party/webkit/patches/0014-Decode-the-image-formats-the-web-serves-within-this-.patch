@@ -1,0 +1,1048 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Wed, 16 Sep 2026 12:00:00 +0200
+Subject: [PATCH] Decode the image formats the web serves, within this device's
+ memory
+
+This ImageIO cannot decode WebP, so WebKit's own decoder does, and the formats
+that cannot be decoded are no longer advertised to servers. The image size
+query no longer recurses until the stack runs out, a size that is not known
+yet is not divided by, an image is held before its observer is told about it,
+the bytes an image arrived as are kept in a file rather than in dirty memory,
+and purgeable decoded images stay off after measuring what they cost.
+---
+ Source/WebCore/loader/cache/CachedImage.cpp   |  48 ++++++
+ Source/WebCore/loader/cache/CachedImage.h     |   6 +
+ .../loader/cache/CachedResourceRequest.cpp    |   2 +
+ .../loader/cocoa/DiskCacheMonitorCocoa.h      |   4 +
+ .../loader/cocoa/DiskCacheMonitorCocoa.mm     |  50 ++++++
+ .../loader/cocoa/SubresourceLoaderCocoa.mm    |   5 +
+ Source/WebCore/page/MemoryRelease.cpp         |  58 +++++++
+ .../WebCore/platform/graphics/BitmapImage.cpp |  25 +++
+ .../graphics/BitmapImageDescriptor.cpp        |  26 ++-
+ .../platform/graphics/BitmapImageSource.cpp   |  75 ++++++++-
+ .../graphics/cg/ImageBackingStoreCG.cpp       |   4 +-
+ .../platform/graphics/cg/ImageDecoderCG.cpp   | 156 +++++++++++++-----
+ .../platform/graphics/filters/FilterImage.h   |   1 +
+ .../image-decoders/ScalableImageDecoder.cpp   |  11 ++
+ 14 files changed, 413 insertions(+), 58 deletions(-)
+
+diff --git a/Source/WebCore/loader/cache/CachedImage.cpp b/Source/WebCore/loader/cache/CachedImage.cpp
+index 0185dce3e73e82fb869effe0dce21f43cca9ef7a..41f2673a125195001e1484c3bfdd7da512c8c104 100644
+--- a/Source/WebCore/loader/cache/CachedImage.cpp
++++ b/Source/WebCore/loader/cache/CachedImage.cpp
+@@ -49,6 +49,7 @@
+ #include "SharedBuffer.h"
+ #include "StyleComputedStyle+GettersInlines.h"
+ #include "SubresourceLoader.h"
++#include <stdlib.h>
+ #include <wtf/NeverDestroyed.h>
+ #include <wtf/StdLibExtras.h>
+ 
+@@ -64,6 +65,10 @@
+ #include "MultiRepresentationHEICMetrics.h"
+ #endif
+ 
++#if defined(WEBKIT_IOS6) && PLATFORM(COCOA)
++#include "DiskCacheMonitorCocoa.h"
++#endif
++
+ namespace WebCore {
+ 
+ CachedImage::CachedImage(CachedResourceRequest&& request, PAL::SessionID sessionID, const CookieJar* cookieJar)
+@@ -510,6 +515,9 @@ inline void CachedImage::clearImage()
+     m_lastUpdateImageDataTime = { };
+     m_updateImageDataCount = 0;
+     m_allowsOrientationOverride = true;
++#if defined(WEBKIT_IOS6)
++    m_intrinsicSizeIsAvailable = false;
++#endif
+ }
+ 
+ void CachedImage::updateBufferInternal(const FragmentedSharedBuffer& data)
+@@ -531,6 +539,11 @@ void CachedImage::updateBufferInternal(const FragmentedSharedBuffer& data)
+     // usually happens when the observers are repainted.
+     encodedDataStatus = updateImageData(false);
+ 
++#if defined(WEBKIT_IOS6)
++    if (encodedDataStatus >= EncodedDataStatus::SizeAvailable)
++        m_intrinsicSizeIsAvailable = true;
++#endif
++
+     if (encodedDataStatus > EncodedDataStatus::Error && encodedDataStatus < EncodedDataStatus::SizeAvailable)
+         return;
+ 
+@@ -553,6 +566,20 @@ bool CachedImage::shouldDeferUpdateImageData() const
+     static constexpr std::array<double, 5> updateImageDataBackoffIntervals { 0, 1, 3, 6, 15 };
+     unsigned interval = m_updateImageDataCount;
+ 
++#if defined(WEBKIT_IOS6)
++    if (m_intrinsicSizeIsAvailable) {
++        static const double progressiveInterval = [] -> double {
++            if (const char* override = getenv("WEBKIT_IOS6_PROGRESSIVE_IMAGE_INTERVAL"))
++                return atof(override);
++            return 0;
++        }();
++
++        if (progressiveInterval <= 0)
++            return true;
++        return (MonotonicTime::now() - m_lastUpdateImageDataTime).seconds() < progressiveInterval;
++    }
++#endif
++
+     // The first time through, the chunk time will be 0 and the image will get an update.
+     return (MonotonicTime::now() - m_lastUpdateImageDataTime).seconds() < updateImageDataBackoffIntervals[interval];
+ }
+@@ -615,10 +642,31 @@ void CachedImage::finishLoading(const FragmentedSharedBuffer* data, const Networ
+     setLoading(false);
+     setAllowsOrientationOverride(isCORSSameOrigin() || protect(m_image)->sourceURL().protocolIsData());
+ 
++#if defined(WEBKIT_IOS6)
++    fileBackEncodedDataIfWorthwhile();
++#endif
++
+     notifyObservers();
+     CachedResource::finishLoading(data, metrics);
+ }
+ 
++#if defined(WEBKIT_IOS6)
++void CachedImage::fileBackEncodedDataIfWorthwhile()
++{
++    static constexpr size_t leastWorthMapping = 16 * 1024;
++
++    if (!m_data || m_data->size() < leastWorthMapping)
++        return;
++
++    for (auto& entry : *m_data) {
++        if (entry.segment->containsMappedFileData())
++            return;
++    }
++
++    fileBackEncodedImageData(resourceRequest(), sessionID(), m_data->makeContiguous());
++}
++#endif
++
+ void CachedImage::didReplaceSharedBufferContents()
+ {
+     if (RefPtr image = m_image) {
+diff --git a/Source/WebCore/loader/cache/CachedImage.h b/Source/WebCore/loader/cache/CachedImage.h
+index 71cf1a94b1573fed39a4ba2a8ecf11b44e719689..4bb0b315a50357e469409ddeeaba94159e4106fe 100644
+--- a/Source/WebCore/loader/cache/CachedImage.h
++++ b/Source/WebCore/loader/cache/CachedImage.h
+@@ -185,6 +185,9 @@ private:
+     void updateBufferInternal(const FragmentedSharedBuffer&);
+ 
+     void didReplaceSharedBufferContents() override;
++#if defined(WEBKIT_IOS6)
++    void fileBackEncodedDataIfWorthwhile();
++#endif
+ 
+     struct ContainerContext {
+         LayoutSize containerSize;
+@@ -219,6 +222,9 @@ private:
+     bool m_shouldPaintBrokenImage : 1;
+     bool m_forceUpdateImageDataEnabledForTesting : 1;
+     bool m_allowsOrientationOverride : 1;
++#if defined(WEBKIT_IOS6)
++    bool m_intrinsicSizeIsAvailable { false };
++#endif
+ };
+ 
+ } // namespace WebCore
+diff --git a/Source/WebCore/loader/cache/CachedResourceRequest.cpp b/Source/WebCore/loader/cache/CachedResourceRequest.cpp
+index b92d5675626b8aec8bfa324e62ff8440b376b85a..68327a0392c46513609630b7730a28c28280ff64 100644
+--- a/Source/WebCore/loader/cache/CachedResourceRequest.cpp
++++ b/Source/WebCore/loader/cache/CachedResourceRequest.cpp
+@@ -143,7 +143,9 @@ static String acceptHeaderValueForImageResource(bool usingSecureProtocol)
+ {
+     static MainThreadNeverDestroyed<String> staticPrefix = [] {
+         StringBuilder builder;
++#if !defined(WEBKIT_IOS6) || USE(WEBP)
+         builder.append("image/webp,"_s);
++#endif
+ #if HAVE(AVIF) || USE(AVIF)
+         builder.append("image/avif,"_s);
+ #endif
+diff --git a/Source/WebCore/loader/cocoa/DiskCacheMonitorCocoa.h b/Source/WebCore/loader/cocoa/DiskCacheMonitorCocoa.h
+index 689009c3ee30cee1d9675e0dcae5386ad0b82a53..b8157ba5935e2d9445c3b5fa0a612f600df43165 100644
+--- a/Source/WebCore/loader/cocoa/DiskCacheMonitorCocoa.h
++++ b/Source/WebCore/loader/cocoa/DiskCacheMonitorCocoa.h
+@@ -34,6 +34,10 @@ namespace WebCore {
+ 
+ class SharedBuffer;
+ 
++#if defined(WEBKIT_IOS6)
++void fileBackEncodedImageData(const ResourceRequest&, PAL::SessionID, Ref<SharedBuffer>&&);
++#endif
++
+ class DiskCacheMonitor {
+ public:
+     static void monitorFileBackingStoreCreation(const ResourceRequest&, PAL::SessionID, CFCachedURLResponseRef);
+diff --git a/Source/WebCore/loader/cocoa/DiskCacheMonitorCocoa.mm b/Source/WebCore/loader/cocoa/DiskCacheMonitorCocoa.mm
+index 1a27570edf034e060c4dc1dee644e99630bf6ede..a6c5c91ae30c460567bdb8dd2dbdf132f13447cc 100644
+--- a/Source/WebCore/loader/cocoa/DiskCacheMonitorCocoa.mm
++++ b/Source/WebCore/loader/cocoa/DiskCacheMonitorCocoa.mm
+@@ -26,12 +26,18 @@
+ #import "config.h"
+ #import "DiskCacheMonitorCocoa.h"
+ 
++#import "CachedResource.h"
+ #import "CachedResource.h"
+ #import "MemoryCache.h"
+ #import "SharedBuffer.h"
+ #import <pal/spi/cf/CFNetworkSPI.h>
++#import <wtf/BlockPtr.h>
++#import <wtf/FileHandle.h>
++#import <wtf/FileSystem.h>
+ #import <wtf/MainThread.h>
++#import <wtf/NeverDestroyed.h>
+ #import <wtf/RefPtr.h>
++#import <wtf/WorkQueue.h>
+ #import <wtf/darwin/DispatchExtras.h>
+ 
+ #if USE(WEB_THREAD)
+@@ -52,6 +58,50 @@
+     return SharedBuffer::create(data.get());
+ }
+ 
++#if defined(WEBKIT_IOS6)
++static WorkQueue& fileBackingQueue()
++{
++    static NeverDestroyed<Ref<WorkQueue>> queue = WorkQueue::create("org.webkit.ios6.image-file-backing"_s);
++    return queue.get();
++}
++
++void fileBackEncodedImageData(const ResourceRequest& request, PAL::SessionID sessionID, Ref<SharedBuffer>&& data)
++{
++    ASSERT(isMainThread());
++
++    fileBackingQueue().dispatch([request = request.isolatedCopy(), sessionID, data = WTF::move(data)]() mutable {
++        auto [path, handle] = FileSystem::openTemporaryFile("revimage"_s);
++        if (!handle)
++            return;
++
++        auto written = handle.write(data->span());
++        handle = { };
++        if (written != data->size()) {
++            FileSystem::deleteFile(path);
++            return;
++        }
++
++        RefPtr fileBacked = SharedBuffer::createWithContentsOfFile(path, FileSystem::MappedFileMode::Shared);
++        FileSystem::deleteFile(path);
++        if (!fileBacked)
++            return;
++
++        auto install = [request = WTF::move(request), sessionID, fileBacked = fileBacked.releaseNonNull()] {
++            if (RefPtr resource = MemoryCache::singleton().resourceForRequest(request, sessionID))
++                resource->tryReplaceEncodedData(fileBacked);
++        };
++
++#if USE(WEB_THREAD)
++        callOnMainThread([install = WTF::move(install)]() mutable {
++            WebThreadRun(makeBlockPtr(WTF::move(install)).get());
++        });
++#else
++        callOnMainThread(WTF::move(install));
++#endif
++    });
++}
++#endif
++
+ void DiskCacheMonitor::monitorFileBackingStoreCreation(const ResourceRequest& request, PAL::SessionID sessionID, CFCachedURLResponseRef cachedResponse)
+ {
+     if (!cachedResponse)
+diff --git a/Source/WebCore/loader/cocoa/SubresourceLoaderCocoa.mm b/Source/WebCore/loader/cocoa/SubresourceLoaderCocoa.mm
+index 86b4619bdcc506a8ee1f400960aa4ab62d259dee..31528cefa76788c010a7e12cc02158d522d9e83e 100644
+--- a/Source/WebCore/loader/cocoa/SubresourceLoaderCocoa.mm
++++ b/Source/WebCore/loader/cocoa/SubresourceLoaderCocoa.mm
+@@ -38,7 +38,12 @@
+ void SubresourceLoader::willCacheResponseAsync(ResourceHandle* handle, NSCachedURLResponse* response, CompletionHandler<void(NSCachedURLResponse *)>&& completionHandler)
+ {
+     RefPtr resource = m_resource;
++    if (!resource) {
++        return completionHandler(nullptr);
++    }
++#if !defined(WEBKIT_IOS6)
+     DiskCacheMonitor::monitorFileBackingStoreCreation(request(), resource->sessionID(), [response _CFCachedURLResponse]);
++#endif
+     if (!resource->shouldCacheResponse(response.response))
+         return completionHandler(nullptr);
+     ResourceLoader::willCacheResponseAsync(handle, response, WTF::move(completionHandler));
+diff --git a/Source/WebCore/page/MemoryRelease.cpp b/Source/WebCore/page/MemoryRelease.cpp
+index c071561dc46c18f2cdb386ae3e2c6834e61e6d87..70ce533ee9da350fe18b8049d1b358ab22f60cbc 100644
+--- a/Source/WebCore/page/MemoryRelease.cpp
++++ b/Source/WebCore/page/MemoryRelease.cpp
+@@ -24,8 +24,15 @@
+  */
+ 
+ #include "config.h"
++#include <wtf/MemoryFootprint.h>
+ #include "MemoryRelease.h"
+ 
++#if defined(WEBKIT_IOS6)
++#include <mach/mach.h>
++#include <mach/task.h>
++#include <stdlib.h>
++#endif
++
+ #include "AsyncNodeDeletionQueueInlines.h"
+ #include "BackForwardCache.h"
+ #include "CSSFontSelector.h"
+@@ -82,6 +89,35 @@
+ 
+ namespace WebCore {
+ 
++#if defined(WEBKIT_IOS6)
++static double residentMegabytes()
++{
++    struct task_basic_info info;
++    mach_msg_type_number_t count = TASK_BASIC_INFO_COUNT;
++    if (task_info(mach_task_self(), TASK_BASIC_INFO, reinterpret_cast<task_info_t>(&info), &count) != KERN_SUCCESS)
++        return 0;
++    return info.resident_size / 1048576.0;
++}
++
++static double codeDeletionThresholdMegabytes()
++{
++    static const double threshold = [] -> double {
++        if (const char* override = getenv("WEBKIT_IOS6_CODE_DELETION_THRESHOLD_MB")) {
++            double value = atof(override);
++            if (value > 0)
++                return value;
++        }
++        return 275;
++    }();
++    return threshold;
++}
++
++bool shouldDeleteAllCodeForMemoryPressure()
++{
++    return WTF::memoryFootprint() / 1048576.0 >= codeDeletionThresholdMegabytes();
++}
++#endif
++
+ static void releaseNoncriticalMemory(MaintainMemoryCache maintainMemoryCache)
+ {
+     RenderTheme::singleton().purgeCaches();
+@@ -113,7 +149,9 @@ static void releaseNoncriticalMemory(MaintainMemoryCache maintainMemoryCache)
+     HTMLNameCache::clear();
+     ImmutableStyleProperties::clearDeduplicationMap();
+     SelectorChecker::clearCompiledHasArgumentSelectors();
++#if !defined(WEBKIT_IOS6)
+     SVGPathElement::clearCache();
++#endif
+ #if ENABLE(INTERACTION_REGIONS_IN_EVENT_REGION)
+     InteractionRegion::clearCache();
+ #endif
+@@ -142,6 +180,15 @@ static void releaseCriticalMemory(Synchronous synchronous, MaintainBackForwardCa
+         page.cookieJar().clearCache();
+     });
+ 
++#if defined(WEBKIT_IOS6)
++    Page::forEachPage([](auto& page) {
++        if (RefPtr localMainFrame = page.localMainFrame()) {
++            if (RefPtr document = localMainFrame->document())
++                document->styleScope().invalidateMatchedDeclarationsCache();
++        }
++    });
++#endif
++
+     auto allDocuments = Document::allDocuments();
+     auto protectedDocuments = WTF::map(allDocuments, [](auto& document) -> Ref<Document> {
+         return document.get();
+@@ -160,10 +207,21 @@ static void releaseCriticalMemory(Synchronous synchronous, MaintainBackForwardCa
+             protect(localFrame->editor())->releaseMemory();
+     }
+ 
++#if defined(WEBKIT_IOS6)
++    if (shouldDeleteAllCodeForMemoryPressure()) {
++        WTFLogAlways("[codewipe] footprint %.0f MB, resident %.0f MB, threshold %.0f MB",
++            WTF::memoryFootprint() / 1048576.0, residentMegabytes(), codeDeletionThresholdMegabytes());
++        if (synchronous == Synchronous::Yes)
++            GarbageCollectionController::singleton().deleteAllCode(JSC::PreventCollectionAndDeleteAllCode);
++        else
++            GarbageCollectionController::singleton().deleteAllCode(JSC::DeleteAllCodeIfNotCollecting);
++    }
++#else
+     if (synchronous == Synchronous::Yes)
+         GarbageCollectionController::singleton().deleteAllCode(JSC::PreventCollectionAndDeleteAllCode);
+     else
+         GarbageCollectionController::singleton().deleteAllCode(JSC::DeleteAllCodeIfNotCollecting);
++#endif
+ 
+ #if ENABLE(VIDEO)
+     for (auto& mediaElement : HTMLMediaElement::allMediaElements())
+diff --git a/Source/WebCore/platform/graphics/BitmapImage.cpp b/Source/WebCore/platform/graphics/BitmapImage.cpp
+index 4831ebfb17d75f3837488a200e657d129094726d..705ca6ac73b43065ee0e0e821c769d0ab56830ef 100644
+--- a/Source/WebCore/platform/graphics/BitmapImage.cpp
++++ b/Source/WebCore/platform/graphics/BitmapImage.cpp
+@@ -93,6 +93,9 @@ ImageDrawResult BitmapImage::draw(GraphicsContext& context, const FloatRect& des
+     auto size = m_source->size(ImageOrientation::Orientation::None);
+     auto sourceSize = m_source->sourceSize(ImageOrientation::Orientation::None);
+ 
++    if (size.isEmpty() || sourceSize.isEmpty())
++        return ImageDrawResult::DidNothing;
++
+     // adjustedSourceRect is in the coordinates of densityCorrectedSize, so map it to the sourceSize.
+     auto adjustedSourceRect = sourceRect;
+     if (sourceSize != size)
+@@ -100,6 +103,19 @@ ImageDrawResult BitmapImage::draw(GraphicsContext& context, const FloatRect& des
+ 
+     auto scaleFactorForDrawing = context.scaleFactorForDrawing(destinationRect, adjustedSourceRect);
+     auto sizeForDrawing = expandedIntSize(sourceSize * scaleFactorForDrawing);
++
++#if defined(WEBKIT_IOS6)
++    if (!sourceSize.isEmpty()) {
++        int quantum = std::max(1, sourceSize.maxDimension() / 8);
++        auto quantize = [quantum](int value, int limit) {
++            if (value >= limit)
++                return limit;
++            return std::min(limit, ((value + quantum - 1) / quantum) * quantum);
++        };
++        sizeForDrawing = { quantize(sizeForDrawing.width(), sourceSize.width()), quantize(sizeForDrawing.height(), sourceSize.height()) };
++    }
++#endif
++
+     auto subsamplingLevel =  m_source->subsamplingLevelForScaleFactor(context, scaleFactorForDrawing, options.allowImageSubsampling());
+     auto preferredDecodingDestination = m_source->preferredDecodingDestination(context, options);
+ 
+@@ -123,8 +139,17 @@ ImageDrawResult BitmapImage::draw(GraphicsContext& context, const FloatRect& des
+     else {
+         // adjustedSourceRect is in the coordinates of the unsubsampled image, so map it to the subsampled image.
+         auto imageSize = nativeImage->size();
++#if defined(WEBKIT_IOS6)
++        if (imageSize != sourceSize && !sourceSize.isEmpty()) {
++            if (adjustedSourceRect == FloatRect { { }, FloatSize { sourceSize } })
++                adjustedSourceRect = FloatRect { { }, FloatSize { imageSize } };
++            else
++                adjustedSourceRect.scale(imageSize / sourceSize);
++        }
++#else
+         if (imageSize != sourceSize)
+             adjustedSourceRect.scale(imageSize / sourceSize);
++#endif
+ 
+         auto orientation = options.orientation();
+         if (orientation == ImageOrientation::Orientation::FromImage)
+diff --git a/Source/WebCore/platform/graphics/BitmapImageDescriptor.cpp b/Source/WebCore/platform/graphics/BitmapImageDescriptor.cpp
+index 22477fc3962d915afb11cded23955b8939311141..992cbe8fdd74990f496a23c7a7a34a005644e11e 100644
+--- a/Source/WebCore/platform/graphics/BitmapImageDescriptor.cpp
++++ b/Source/WebCore/platform/graphics/BitmapImageDescriptor.cpp
+@@ -108,6 +108,11 @@ EncodedDataStatus BitmapImageDescriptor::encodedDataStatus() const
+ 
+ IntSize BitmapImageDescriptor::size(ImageOrientation orientation) const
+ {
++#if defined(WEBKIT_IOS6)
++    if (RefPtr decoder = m_source->decoderIfExists(); decoder && m_source->frames().isEmpty())
++        return sourceSize(orientation);
++#endif
++
+     auto densityCorrectedSize = this->densityCorrectedSize();
+     if (!densityCorrectedSize)
+         return sourceSize(orientation);
+@@ -122,9 +127,7 @@ IntSize BitmapImageDescriptor::sourceSize(ImageOrientation orientation) const
+ {
+     IntSize size;
+ 
+-#if !USE(CG)
+-    // It's possible that we have decoded the metadata, but not frame contents yet. In that case ImageDecoder claims to
+-    // have the size available, but the frame cache is empty. Return the decoder size without caching in such case.
++#if !USE(CG) || defined(WEBKIT_IOS6)
+     RefPtr decoder = m_source->decoderIfExists();
+     if (decoder && m_source->frames().isEmpty())
+         size = decoder->size();
+@@ -188,6 +191,9 @@ bool BitmapImageDescriptor::hasHDRGainMap() const
+ 
+ bool BitmapImageDescriptor::hasHDRColorSpace() const
+ {
++#if defined(WEBKIT_IOS6)
++    return false;
++#else
+     if (m_cachedFlags.contains(CachedFlag::ColorSpace))
+         return m_colorSpace.usesITUR_2100TF();
+ 
+@@ -196,10 +202,9 @@ bool BitmapImageDescriptor::hasHDRColorSpace() const
+ 
+     bool hasHDRColorSpace = colorSpace().usesITUR_2100TF();
+ 
+-    // FIXME: This frame may not be destroyed. It can be reused for sync image decoding.
+-    // Async image decoding should destroy this frame and treat it as if it did not exist.
+     m_source->destroyNativeImageAtIndex(m_source->primaryFrameIndex());
+     return hasHDRColorSpace;
++#endif
+ }
+ 
+ String BitmapImageDescriptor::uti() const
+@@ -238,9 +243,9 @@ SubsamplingLevel BitmapImageDescriptor::maximumSubsamplingLevel() const
+     if (!isSizeAvailable())
+         return SubsamplingLevel::Default;
+ 
+-    // FIXME: this value was chosen to be appropriate for Apple ports since the image
+-    // subsampling is only enabled by default on Apple ports. Choose a different value
+-    // if image subsampling is enabled on other platform.
++#if defined(WEBKIT_IOS6)
++    auto level = SubsamplingLevel::Last;
++#else
+     static constexpr int maximumImageAreaBeforeSubsampling = 5 * 1024 * 1024;
+     auto level = SubsamplingLevel::First;
+ 
+@@ -249,6 +254,7 @@ SubsamplingLevel BitmapImageDescriptor::maximumSubsamplingLevel() const
+         if (area < maximumImageAreaBeforeSubsampling)
+             break;
+     }
++#endif
+ 
+     m_maximumSubsamplingLevel = level;
+     m_cachedFlags.add(CachedFlag::MaximumSubsamplingLevel);
+@@ -269,7 +275,11 @@ SubsamplingLevel BitmapImageDescriptor::subsamplingLevelForScaleFactor(GraphicsC
+     if (!(scale > 0 && scale <= 1))
+         return SubsamplingLevel::Default;
+ 
++#if defined(WEBKIT_IOS6)
++    int result = std::floor(std::log2(1 / scale));
++#else
+     int result = std::ceil(std::log2(1 / scale));
++#endif
+     return static_cast<SubsamplingLevel>(std::min(result, static_cast<int>(maximumSubsamplingLevel())));
+ #else
+     UNUSED_PARAM(context);
+diff --git a/Source/WebCore/platform/graphics/BitmapImageSource.cpp b/Source/WebCore/platform/graphics/BitmapImageSource.cpp
+index 32ed62b68c7288920d5001666c5c7db5f2422f4b..b3511555a5ff0f254a262424e040764d4708c9d1 100644
+--- a/Source/WebCore/platform/graphics/BitmapImageSource.cpp
++++ b/Source/WebCore/platform/graphics/BitmapImageSource.cpp
+@@ -34,6 +34,7 @@
+ #include "ImageFrameAnimator.h"
+ #include "ImageObserver.h"
+ #include "Logging.h"
++#include <stdlib.h>
+ 
+ namespace WebCore {
+ 
+@@ -98,8 +99,12 @@ void BitmapImageSource::encodedDataStatusChanged(EncodedDataStatus status)
+     if (status >= EncodedDataStatus::SizeAvailable)
+         m_frames.resizeToFit(protect(m_decoder)->frameCount());
+ 
++    RefPtr bitmapImage = m_bitmapImage.get();
++    if (!bitmapImage)
++        return;
++
+     if (auto imageObserver = this->imageObserver())
+-        imageObserver->encodedDataStatusChanged(protect(*m_bitmapImage), status);
++        imageObserver->encodedDataStatusChanged(*bitmapImage, status);
+ }
+ 
+ EncodedDataStatus BitmapImageSource::dataChanged(FragmentedSharedBuffer* data, bool allDataReceived)
+@@ -154,8 +159,12 @@ void BitmapImageSource::decodedSizeChanged(long long decodedSize)
+     if (!decodedSize)
+         return;
+ 
++    RefPtr bitmapImage = m_bitmapImage.get();
++    if (!bitmapImage)
++        return;
++
+     if (auto imageObserver = this->imageObserver())
+-        imageObserver->decodedSizeChanged(protect(*m_bitmapImage), decodedSize);
++        imageObserver->decodedSizeChanged(*bitmapImage, decodedSize);
+ }
+ 
+ void BitmapImageSource::decodedSizeIncreased(unsigned decodedSize)
+@@ -212,8 +221,12 @@ bool BitmapImageSource::canDestroyDecodedData() const
+     if (!isLargeForDecoding())
+         return true;
+ 
++    RefPtr bitmapImage = m_bitmapImage.get();
++    if (!bitmapImage)
++        return true;
++
+     if (auto imageObserver = this->imageObserver())
+-        return imageObserver->canDestroyDecodedData(protect(*m_bitmapImage));
++        return imageObserver->canDestroyDecodedData(*bitmapImage);
+ 
+     return true;
+ }
+@@ -317,8 +330,12 @@ bool BitmapImageSource::isAnimationAllowed() const
+         return false;
+ 
+     // ImageObserver may disallow animation.
++    RefPtr bitmapImage = m_bitmapImage.get();
++    if (!bitmapImage)
++        return true;
++
+     if (auto imageObserver = this->imageObserver())
+-        return imageObserver->allowsAnimation(protect(*m_bitmapImage));
++        return imageObserver->allowsAnimation(*bitmapImage);
+ 
+     return true;
+ }
+@@ -342,7 +359,19 @@ DecodingDestination BitmapImageSource::preferredDecodingDestination(GraphicsCont
+ bool BitmapImageSource::isLargeForDecoding() const
+ {
+     auto sizeInBytes = size(ImageOrientation::Orientation::None).unclampedArea() * sizeof(uint32_t);
++#if defined(WEBKIT_IOS6)
++    static const size_t asynchronousDecodingThreshold = [] -> size_t {
++        if (const char* override = getenv("WEBKIT_IOS6_ASYNC_DECODE_MIN_KB")) {
++            int value = atoi(override);
++            if (value > 0 && value <= 64 * 1024)
++                return static_cast<size_t>(value) * KB;
++        }
++        return 64 * KB;
++    }();
++    return sizeInBytes > (isAnimated() ? 100 * KB : asynchronousDecodingThreshold);
++#else
+     return sizeInBytes > (isAnimated() ? 100 * KB : 500 * KB);
++#endif
+ }
+ 
+ bool BitmapImageSource::isDecoderWorkQueueIdle() const
+@@ -427,8 +456,12 @@ void BitmapImageSource::imageFrameAtIndexAvailable(unsigned index, ImageAnimatin
+     if (decodingStatus == DecodingStatus::Invalid)
+         return;
+ 
++    RefPtr bitmapImage = m_bitmapImage.get();
++    if (!bitmapImage)
++        return;
++
+     if (auto imageObserver = this->imageObserver())
+-        imageObserver->imageFrameAvailable(protect(*m_bitmapImage), animatingState, nullptr, decodingStatus);
++        imageObserver->imageFrameAvailable(*bitmapImage, animatingState, nullptr, decodingStatus);
+ }
+ 
+ void BitmapImageSource::imageFrameDecodeAtIndexHasFinished(unsigned index, ImageAnimatingState animatingState, DecodingStatus decodingStatus)
+@@ -549,8 +582,13 @@ const ImageFrame& BitmapImageSource::frameAtIndexCacheIfNeeded(unsigned index, c
+     auto& frame = m_frames[index];
+     auto subsamplingLevelValue = subsamplingLevel.value_or(frame.subsamplingLevel());
+ 
++#if defined(WEBKIT_IOS6)
++    if (frame.isComplete())
++        return frame;
++#else
+     if (frame.isComplete() && subsamplingLevelValue == frame.subsamplingLevel())
+         return frame;
++#endif
+ 
+     destroyNativeImageAtIndex(index);
+ 
+@@ -617,6 +655,26 @@ std::expected<Ref<NativeImage>, DecodingStatus> BitmapImageSource::nativeImageAt
+     if (auto compatibleDecodingDestination = compatibleDecodingDestinationWithOptionsAtIndex(index, subsamplingLevel, options))
+         decodingDestination = *compatibleDecodingDestination;
+     else {
++#if defined(WEBKIT_IOS6)
++        std::optional<IntSize> sizeForDrawing;
++        if (!isAnimated())
++            sizeForDrawing = options.sizeForDrawing();
++
++        auto decodingOptions = DecodingOptions { DecodingMode::Synchronous, decodingDestination, sizeForDrawing };
++
++        auto result = protect(m_decoder)->createNativeImageAtIndex(index, subsamplingLevel, decodingOptions);
++        if (!result)
++            return makeUnexpected(DecodingStatus::Invalid);
++
++        Ref nativeImage = WTF::move(std::get<Ref<NativeImage>>(*result));
++        decodingDestination = std::get<DecodingDestination>(*result);
++
++        if (sizeForDrawing && nativeImage->size() == protect(m_decoder)->size())
++            sizeForDrawing = std::nullopt;
++
++        decodingOptions = { DecodingMode::Synchronous, decodingDestination, sizeForDrawing };
++        cacheNativeImageAtIndex(index, subsamplingLevel, decodingOptions, WTF::move(nativeImage));
++#else
+         auto decodingOptions = DecodingOptions { DecodingMode::Synchronous, decodingDestination };
+ 
+         auto result = protect(m_decoder)->createNativeImageAtIndex(index, subsamplingLevel, decodingOptions);
+@@ -628,6 +686,7 @@ std::expected<Ref<NativeImage>, DecodingStatus> BitmapImageSource::nativeImageAt
+ 
+         decodingOptions = { DecodingMode::Synchronous, decodingDestination };
+         cacheNativeImageAtIndex(index, subsamplingLevel, decodingOptions, WTF::move(nativeImage));
++#endif
+     }
+ 
+     if (RefPtr nativeImage = frameAtIndex(index).nativeImage(decodingDestination))
+@@ -733,8 +792,12 @@ void BitmapImageSource::setHasHDRContentForTesting()
+ 
+     m_hasHDRContentForTesting = true;
+ 
++    RefPtr bitmapImage = m_bitmapImage.get();
++    if (!bitmapImage)
++        return;
++
+     if (auto imageObserver = this->imageObserver())
+-        imageObserver->imageContentChanged(protect(*m_bitmapImage));
++        imageObserver->imageContentChanged(*bitmapImage);
+ }
+ 
+ DecodingStatus BitmapImageSource::frameDecodingStatusAtIndex(unsigned index) const
+diff --git a/Source/WebCore/platform/graphics/cg/ImageBackingStoreCG.cpp b/Source/WebCore/platform/graphics/cg/ImageBackingStoreCG.cpp
+index ebd4797c60b851678f31866c70084b084a25e57b..bd385ca81af74a9d7481e08ff12283abe904b671 100644
+--- a/Source/WebCore/platform/graphics/cg/ImageBackingStoreCG.cpp
++++ b/Source/WebCore/platform/graphics/cg/ImageBackingStoreCG.cpp
+@@ -26,6 +26,8 @@
+ #include "config.h"
+ #include "ImageBackingStore.h"
+ 
++#include "ColorSpaceCG.h"
++
+ namespace WebCore {
+ 
+ static void dataProviderReleaseCallback(void* info, const void*, size_t)
+@@ -42,7 +44,7 @@ PlatformImagePtr ImageBackingStore::image() const
+     size_t height = size().height();
+     size_t bytesPerRow = bytesPerPixel * width;
+ 
+-    auto colorSpace = adoptCF(CGColorSpaceCreateWithName(kCGColorSpaceSRGB));
++    RetainPtr colorSpace = sRGBColorSpaceSingleton();
+     auto dataProvider = adoptCF(CGDataProviderCreateWithData(m_pixels.get(), m_pixelsSpan.data(), height * bytesPerRow, dataProviderReleaseCallback));
+ 
+     if (!dataProvider)
+diff --git a/Source/WebCore/platform/graphics/cg/ImageDecoderCG.cpp b/Source/WebCore/platform/graphics/cg/ImageDecoderCG.cpp
+index 15c8b43bb3f5bbbbaf868aef29a5d43a163a0c92..3f242a055af98fecd7750c453abc202bb5e65b2d 100644
+--- a/Source/WebCore/platform/graphics/cg/ImageDecoderCG.cpp
++++ b/Source/WebCore/platform/graphics/cg/ImageDecoderCG.cpp
+@@ -42,6 +42,7 @@
+ #include <wtf/FlipBytes.h>
+ #include <wtf/TZoneMallocInlines.h>
+ #include <wtf/cf/TypeCastsCF.h>
++#include <wtf/cf/VectorCF.h>
+ 
+ #include "CoreVideoSoftLink.h"
+ #include "MediaAccessibilitySoftLink.h"
+@@ -153,6 +154,19 @@ static RetainPtr<CFDictionaryRef> imageSourceOptions(SubsamplingLevel subsamplin
+     if (subsamplingLevel == SubsamplingLevel::Default && decodingDestination == DecodingDestination::Base)
+         return options;
+ 
++    if (decodingDestination == DecodingDestination::Base && subsamplingLevel > SubsamplingLevel::First && subsamplingLevel <= SubsamplingLevel::Last) {
++        static CFDictionaryRef subsampledOptions[static_cast<int>(SubsamplingLevel::Max)];
++        static std::once_flag initializeSubsampledOptionsOnce;
++        std::call_once(initializeSubsampledOptionsOnce, [] {
++            for (auto level = SubsamplingLevel::First; level <= SubsamplingLevel::Last; ++level) {
++                auto levelOptions = adoptCF(CFDictionaryCreateMutableCopy(nullptr, 0, options));
++                appendImageSourceOption(levelOptions.get(), level);
++                subsampledOptions[static_cast<int>(level)] = levelOptions.leakRef();
++            }
++        });
++        return subsampledOptions[static_cast<int>(subsamplingLevel)];
++    }
++
+     auto extendedOptions = adoptCF(CFDictionaryCreateMutableCopy(nullptr, 0, options));
+     appendImageSourceOption(extendedOptions.get(), subsamplingLevel);
+     appendImageSourceOption(extendedOptions.get(), decodingDestination);
+@@ -307,8 +321,18 @@ static std::optional<IntSize> densityCorrectedSizeFromProperties(CFDictionaryRef
+ ImageDecoderCG::ImageDecoderCG(FragmentedSharedBuffer& data, AlphaOption, GammaAndColorProfileOption)
+ {
+     RetainPtr<CFStringRef> utiHint;
++#if defined(WEBKIT_IOS6)
++    if (data.size() >= 32) {
++        std::array<uint8_t, 512> header;
++        auto headerSpan = std::span<uint8_t> { header }.first(std::min<size_t>(header.size(), data.size()));
++        data.copyTo(headerSpan, 0);
++        auto headerData = toCFData(headerSpan);
++        utiHint = CGImageSourceGetTypeWithData(headerData.get(), nullptr, nullptr);
++    }
++#else
+     if (data.size() >= 32)
+         utiHint = CGImageSourceGetTypeWithData(data.makeContiguous()->createCFData().get(), nullptr, nullptr);
++#endif
+ 
+     if (utiHint) {
+         const void* key = kCGImageSourceTypeIdentifierHint;
+@@ -319,6 +343,34 @@ ImageDecoderCG::ImageDecoderCG(FragmentedSharedBuffer& data, AlphaOption, GammaA
+         m_nativeDecoder = adoptCF(CGImageSourceCreateIncremental(nullptr));
+ }
+ 
++RetainPtr<CFDictionaryRef> ImageDecoderCG::propertiesAtIndex(size_t index, SubsamplingLevel subsamplingLevel) const
++{
++    {
++        Locker locker { m_propertiesLock };
++        if (m_properties && m_propertiesIndex == index && m_propertiesSubsamplingLevel == subsamplingLevel)
++            return m_properties;
++    }
++
++    auto properties = adoptCF(CGImageSourceCopyPropertiesAtIndex(m_nativeDecoder.get(), index, imageSourceOptions(subsamplingLevel).get()));
++    if (!properties)
++        return nullptr;
++
++    {
++        Locker locker { m_propertiesLock };
++        m_properties = properties;
++        m_propertiesIndex = index;
++        m_propertiesSubsamplingLevel = subsamplingLevel;
++    }
++
++    return properties;
++}
++
++void ImageDecoderCG::clearCachedProperties() const
++{
++    Locker locker { m_propertiesLock };
++    m_properties = nullptr;
++}
++
+ size_t ImageDecoderCG::bytesDecodedToDetermineProperties() const
+ {
+     // Measured by tracing malloc/calloc calls on Mac OS 10.6.6, x86_64.
+@@ -380,7 +432,7 @@ EncodedDataStatus ImageDecoderCG::encodedDataStatus() const
+         if (m_encodedDataStatus == EncodedDataStatus::SizeAvailable)
+             break;
+ 
+-        auto image0Properties = adoptCF(CGImageSourceCopyPropertiesAtIndex(m_nativeDecoder.get(), 0, imageSourceOptions().get()));
++        auto image0Properties = propertiesAtIndex(0);
+         if (!image0Properties || !CFDictionaryContainsKey(image0Properties.get(), kCGImagePropertyPixelWidth) || !CFDictionaryContainsKey(image0Properties.get(), kCGImagePropertyPixelHeight)) {
+             m_encodedDataStatus = EncodedDataStatus::TypeAvailable;
+             break;
+@@ -400,23 +452,11 @@ EncodedDataStatus ImageDecoderCG::encodedDataStatus() const
+ 
+ bool ImageDecoderCG::hasHDRGainMap() const
+ {
+-#if HAVE(SUPPORT_HDR_DISPLAY)
++#if HAVE(SUPPORT_HDR_DISPLAY) && !defined(WEBKIT_IOS6)
+     auto properties = adoptCF(CGImageSourceCopyProperties(m_nativeDecoder.get(), imageSourceMetadataOptions().get()));
+     if (!properties)
+         return false;
+ 
+-    // Look for FileContentsDictionary like this one:
+-    //
+-    // "{FileContents}" = {
+-    //      ImageCount = 1;
+-    //      Images = ( {
+-    //              AuxiliaryData = ( {
+-    //                      AuxiliaryDataType = kCGImageAuxiliaryDataTypeISOGainMap;
+-    //                      Height = 667;
+-    //                      Orientation = 1;
+-    //                      PixelFormat = 875836518;
+-    //                      Width = 1000;
+-    //              } );
+     auto fileContentsProperties = dynamic_cf_cast<CFDictionaryRef>(CFDictionaryGetValue(properties.get(), kCGImagePropertyFileContentsDictionary));
+     if (!fileContentsProperties)
+         return false;
+@@ -487,7 +527,7 @@ RepetitionCount ImageDecoderCG::repetitionCount() const
+ 
+ std::optional<IntPoint> ImageDecoderCG::hotSpot() const
+ {
+-    auto properties = adoptCF(CGImageSourceCopyPropertiesAtIndex(m_nativeDecoder.get(), 0, imageSourceOptions().get()));
++    auto properties = propertiesAtIndex(0);
+     if (!properties)
+         return std::nullopt;
+     
+@@ -506,48 +546,34 @@ std::optional<IntPoint> ImageDecoderCG::hotSpot() const
+     return IntPoint(x, y);
+ }
+ 
+-bool ImageDecoderCG::hasAlpha() const
+-{
+-    String uti = this->uti();
+-    
+-    // Return false if there is no image type or the image type is JPEG, because
+-    // JPEG does not support alpha transparency.
+-    if (uti.isEmpty() || uti == "public.jpeg"_s)
+-        return false;
+-    
+-    // FIXME: Could return false for other non-transparent image formats.
+-    // FIXME: Could maybe return false for a GIF Frame if we have enough info in the GIF properties dictionary
+-    // to determine whether or not a transparent color was defined.
+-    return true;
+-}
+-
+ IntSize ImageDecoderCG::frameSizeAtIndex(size_t index, SubsamplingLevel subsamplingLevel) const
+ {
+-    auto properties = adoptCF(CGImageSourceCopyPropertiesAtIndex(m_nativeDecoder.get(), index, imageSourceOptions(subsamplingLevel).get()));
++    auto properties = propertiesAtIndex(index, subsamplingLevel);
+     return frameSizeFromProperties(properties.get());
+ }
+ 
+ FloatSize ImageDecoderCG::frameDensityAtIndex(size_t index) const
+ {
+-    RetainPtr properties = adoptCF(CGImageSourceCopyPropertiesAtIndex(m_nativeDecoder.get(), index, imageSourceOptions().get()));
++    RetainPtr properties = propertiesAtIndex(index);
+     return frameDensityFromProperties(properties.get());
+ }
+ 
+ bool ImageDecoderCG::frameIsCompleteAtIndex(size_t index) const
+ {
+-    ASSERT(frameCount());
++    auto frameCount = this->frameCount();
++    ASSERT(frameCount);
+     // CGImageSourceGetStatusAtIndex() changes the return status value from kCGImageStatusIncomplete
+     // to kCGImageStatusComplete only if (index > 1 && index < frameCount() - 1). To get an accurate
+     // result for the last frame (or the single frame of the static image) use CGImageSourceGetStatus()
+     // instead for this frame.
+-    if (index == frameCount() - 1)
++    if (index == frameCount - 1)
+         return CGImageSourceGetStatus(m_nativeDecoder.get()) == kCGImageStatusComplete;
+     return CGImageSourceGetStatusAtIndex(m_nativeDecoder.get(), index) == kCGImageStatusComplete;
+ }
+ 
+ ImageOrientation ImageDecoderCG::frameOrientationAtIndex(size_t index) const
+ {
+-    auto properties = adoptCF(CGImageSourceCopyPropertiesAtIndex(m_nativeDecoder.get(), index, imageSourceOptions().get()));
++    auto properties = propertiesAtIndex(index);
+     if (!properties)
+         return ImageOrientation::Orientation::None;
+ 
+@@ -556,7 +582,7 @@ ImageOrientation ImageDecoderCG::frameOrientationAtIndex(size_t index) const
+ 
+ std::optional<IntSize> ImageDecoderCG::frameDensityCorrectedSizeAtIndex(size_t index) const
+ {
+-    auto properties = adoptCF(CGImageSourceCopyPropertiesAtIndex(m_nativeDecoder.get(), index, imageSourceOptions().get()));
++    auto properties = propertiesAtIndex(index);
+     if (!properties)
+         return std::nullopt;
+ 
+@@ -573,10 +599,16 @@ std::optional<IntSize> ImageDecoderCG::frameDensityCorrectedSizeAtIndex(size_t i
+ Seconds ImageDecoderCG::frameDurationAtIndex(size_t index) const
+ {
+     RetainPtr<CFDictionaryRef> properties = nullptr;
+-    RetainPtr<CFDictionaryRef> frameProperties = adoptCF(CGImageSourceCopyPropertiesAtIndex(m_nativeDecoder.get(), index, imageSourceOptions().get()));
++    RetainPtr<CFDictionaryRef> frameProperties = propertiesAtIndex(index);
+     CFDictionaryRef animationProperties = animationPropertiesFromProperties(frameProperties.get());
+ 
+-    if (frameProperties && !animationProperties) {
++#if defined(WEBKIT_IOS6)
++    bool mayHaveContainerFrameInfo = frameCount() > 1;
++#else
++    constexpr bool mayHaveContainerFrameInfo = true;
++#endif
++
++    if (mayHaveContainerFrameInfo && frameProperties && !animationProperties) {
+         properties = adoptCF(CGImageSourceCopyProperties(m_nativeDecoder.get(), imageSourceOptions().get()));
+         animationProperties = animationPropertiesFromProperties(properties.get(), WebCoreCGImagePropertyAVISDictionary, index);
+         if (!animationProperties)
+@@ -610,7 +642,15 @@ bool ImageDecoderCG::frameHasAlphaAtIndex(size_t index) const
+ 
+ bool ImageDecoderCG::fetchFrameMetaDataAtIndex(size_t index, SubsamplingLevel subsamplingLevel, const DecodingOptions& options, ImageFrame& frame) const
+ {
+-    auto properties = adoptCF(CGImageSourceCopyPropertiesAtIndex(m_nativeDecoder.get(), index, imageSourceOptions(subsamplingLevel).get()));
++#if defined(WEBKIT_IOS6)
++    UNUSED_PARAM(options);
++    auto properties = propertiesAtIndex(index, SubsamplingLevel::Default);
++    if (!properties)
++        return false;
++
++    frame.m_size = frameSizeFromProperties(properties.get());
++#else
++    auto properties = propertiesAtIndex(index, subsamplingLevel);
+     if (!properties)
+         return false;
+ 
+@@ -619,6 +659,7 @@ bool ImageDecoderCG::fetchFrameMetaDataAtIndex(size_t index, SubsamplingLevel su
+         frame.m_size = frame.nativeImage(options.decodingDestination())->size();
+     } else
+         frame.m_size = frameSizeFromProperties(properties.get());
++#endif
+ 
+     frame.m_density = frameDensityFromProperties(properties.get());
+ 
+@@ -681,15 +722,29 @@ PlatformImagePtr ImageDecoderCG::createFrameImageAtIndex(size_t index, Subsampli
+ 
+     ASSERT(decodingOptions.decodingMode() != DecodingMode::Auto);
+ 
+-    if (decodingOptions.decodingMode() == DecodingMode::Synchronous) {
++    bool decodeForNativeSize = decodingOptions.decodingMode() == DecodingMode::Synchronous;
++    auto sizeForDrawing = decodingOptions.sizeForDrawing();
++    std::optional<IntSize> nativeSize;
++
++#if defined(WEBKIT_IOS6)
++    if (sizeForDrawing) {
++        nativeSize = frameSizeAtIndex(index, SubsamplingLevel::Default);
++        if (sizeForDrawing->unclampedArea() < nativeSize->unclampedArea())
++            decodeForNativeSize = false;
++    }
++#endif
++
++    if (decodeForNativeSize) {
+         // Decode an image synchronously for its native size.
+         options = imageSourceOptions(subsamplingLevel, decodingOptions.decodingDestination());
+         image = adoptCF(CGImageSourceCreateImageAtIndex(m_nativeDecoder.get(), index, options.get()));
+     } else {
+-        auto size = frameSizeAtIndex(index, SubsamplingLevel::Default);
++        if (!nativeSize)
++            nativeSize = frameSizeAtIndex(index, SubsamplingLevel::Default);
++        auto size = *nativeSize;
+ 
+         // Don't consider the subsamplingLevel when comparing the image native size with sizeForDrawing.
+-        if (auto sizeForDrawing = decodingOptions.sizeForDrawing()) {
++        if (sizeForDrawing) {
+             // See which size is smaller: the image native size or the decodingSize.
+             if (sizeForDrawing->unclampedArea() < size.unclampedArea())
+                 size = *sizeForDrawing;
+@@ -705,7 +760,16 @@ PlatformImagePtr ImageDecoderCG::createFrameImageAtIndex(size_t index, Subsampli
+     // CGContextDrawImage. We now tell CG to cache the drawn images. See also <rdar://problem/14366755> -
+     // CoreGraphics needs to un-deprecate kCGImageCachingTemporary since it's still not the default.
+ ALLOW_DEPRECATED_DECLARATIONS_BEGIN
++#if defined(WEBKIT_IOS6)
++    static const bool transient = [] {
++        if (const char* override = getenv("WEBKIT_IOS6_TRANSIENT_IMAGE_CACHE"))
++            return override[0] == '1';
++        return false;
++    }();
++    CGImageSetCachingFlags(image.get(), transient ? kCGImageCachingTransient : kCGImageCachingTemporary);
++#else
+     CGImageSetCachingFlags(image.get(), kCGImageCachingTemporary);
++#endif
+ ALLOW_DEPRECATED_DECLARATIONS_END
+ #endif // PLATFORM(IOS_FAMILY)
+ 
+@@ -810,9 +874,15 @@ void ImageDecoderCG::setData(const FragmentedSharedBuffer& data, bool allDataRec
+     // We use FragmentedSharedBuffer's ability to wrap itself inside CFData to get around this, ensuring that ImageIO is
+     // really looking at the FragmentedSharedBuffer.
+     CGImageSourceUpdateData(m_nativeDecoder.get(), contiguousData->createCFData().get(), allDataReceived);
+-    
++
+     m_uti = decodeUTI(contiguousData.get());
+     m_isXBitmapImage = m_uti == "public.xbitmap-image"_s;
++
++    // JPEG does not support alpha transparency.
++    // FIXME: Could return false for other non-transparent image formats.
++    m_hasAlpha = !m_uti.isEmpty() && m_uti != "public.jpeg"_s;
++
++    clearCachedProperties();
+ }
+ 
+ bool ImageDecoderCG::canDecodeType(const String& mimeType)
+diff --git a/Source/WebCore/platform/graphics/filters/FilterImage.h b/Source/WebCore/platform/graphics/filters/FilterImage.h
+index d8819dd9a5561595b60aed8481676601ed951a54..7cfb765986ba96432c3f09be48f663146cad462d 100644
+--- a/Source/WebCore/platform/graphics/filters/FilterImage.h
++++ b/Source/WebCore/platform/graphics/filters/FilterImage.h
+@@ -108,6 +108,7 @@ private:
+     ColorSpace m_colorSpace;
+ 
+     RefPtr<ImageBuffer> m_imageBuffer;
++
+     RefPtr<PixelBuffer> m_unpremultipliedPixelBuffer;
+     RefPtr<PixelBuffer> m_premultipliedPixelBuffer;
+ 
+diff --git a/Source/WebCore/platform/image-decoders/ScalableImageDecoder.cpp b/Source/WebCore/platform/image-decoders/ScalableImageDecoder.cpp
+index 3f46090c1c8905a7ab80a942c252395153170f6a..eec1ed67f25894c82ff001b5f6710d045eabd920 100644
+--- a/Source/WebCore/platform/image-decoders/ScalableImageDecoder.cpp
++++ b/Source/WebCore/platform/image-decoders/ScalableImageDecoder.cpp
+@@ -35,6 +35,9 @@
+ #include "PNGImageDecoder.h"
+ #include "WEBPImageDecoder.h"
+ #endif
++#if PLATFORM(COCOA) && USE(WEBP)
++#include "WEBPImageDecoder.h"
++#endif
+ #if USE(AVIF)
+ #include "AVIFImageDecoder.h"
+ #endif
+@@ -93,6 +96,9 @@ static bool matchesCURSignature(std::span<const uint8_t> contents)
+     return spanHasPrefix(contents, unsafeMakeSpan("\x00\x00\x02\x00", 4));
+ }
+ 
++#endif
++
++#if !PLATFORM(COCOA) || USE(WEBP)
+ static bool matchesWebPSignature(std::span<const uint8_t> contents)
+ {
+     return spanHasPrefix(contents, "RIFF"_span) && spanHasPrefix(contents.subspan(8), "WEBPVP"_span);
+@@ -161,6 +167,11 @@ RefPtr<ScalableImageDecoder> ScalableImageDecoder::create(FragmentedSharedBuffer
+         return WEBPImageDecoder::create(alphaOption, gammaAndColorProfileOption);
+ #endif
+ 
++#if PLATFORM(COCOA) && USE(WEBP)
++    if (matchesWebPSignature(contentsSpan))
++        return WEBPImageDecoder::create(alphaOption, gammaAndColorProfileOption);
++#endif
++
+ #if USE(AVIF)
+     if (matchesAVIFSignature(contentsSpan, data))
+         return AVIFImageDecoder::create(alphaOption, gammaAndColorProfileOption);

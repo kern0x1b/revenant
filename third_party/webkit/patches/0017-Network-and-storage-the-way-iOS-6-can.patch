@@ -1,0 +1,567 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Wed, 16 Sep 2026 12:00:00 +0200
+Subject: [PATCH] Network and storage the way iOS 6 can
+
+A ws:// WebSocket opens without asking CFNetwork about HSTS, which this release
+cannot answer; a private session's cookies stay out of the shared jar; Brotli
+streams say they are unavailable instead of pretending to work; SQLite is not
+initialized from the main thread; a resource that closing a tab already took
+away is not dereferenced; and the icon a page declares is loaded by the engine.
+---
+ .../Modules/compression/CompressionStream.cpp |   3 +-
+ .../WebCore/loader/mac/ResourceLoaderMac.mm   |   6 +-
+ .../WebCore/platform/sql/SQLiteDatabase.cpp   |  75 +++++++--
+ .../Cookies/cocoa/CookieStorageObserver.mm    |   3 +
+ .../SocketStreamHandleImplCFNet.cpp           |   6 +
+ .../mac/WebCoreSupport/WebFrameLoaderClient.h |   2 +-
+ .../WebCoreSupport/WebFrameLoaderClient.mm    | 159 ++++++++++++------
+ 7 files changed, 186 insertions(+), 68 deletions(-)
+
+diff --git a/Source/WebCore/Modules/compression/CompressionStream.cpp b/Source/WebCore/Modules/compression/CompressionStream.cpp
+index a1cfae2a1567dff63239d162ec2d1c5792b5422b..deddf02495f4ac0dd008bd748780661f7d79e2f9 100644
+--- a/Source/WebCore/Modules/compression/CompressionStream.cpp
++++ b/Source/WebCore/Modules/compression/CompressionStream.cpp
+@@ -48,7 +48,7 @@ bool CompressionStream::initializeIfNecessary(Algorithm algorithm, Operation ope
+ {
+     if (m_isInitialized)
+         return true;
+-#if PLATFORM(COCOA)
++#if PLATFORM(COCOA) && !defined(WEBKIT_IOS6)
+     switch (algorithm) {
+     case Algorithm::Brotli:
+         auto result = compression_stream_init(&m_stream, operation == Operation::Compression ? COMPRESSION_STREAM_ENCODE : COMPRESSION_STREAM_DECODE, COMPRESSION_BROTLI);
+@@ -59,6 +59,7 @@ bool CompressionStream::initializeIfNecessary(Algorithm algorithm, Operation ope
+ #else
+     UNUSED_PARAM(algorithm);
+     UNUSED_PARAM(operation);
++    return false;
+ #endif
+     m_isInitialized = true;
+     return true;
+diff --git a/Source/WebCore/loader/mac/ResourceLoaderMac.mm b/Source/WebCore/loader/mac/ResourceLoaderMac.mm
+index 96c0d2cc744d10d176b14a05cfa79bb74b80438f..72b0b22a75007e96ad0b866977ee7fc80a4dd85b 100644
+--- a/Source/WebCore/loader/mac/ResourceLoaderMac.mm
++++ b/Source/WebCore/loader/mac/ResourceLoaderMac.mm
+@@ -40,7 +40,11 @@
+ {
+     if (m_options.sendLoadCallbacks == SendCallbackPolicy::DoNotSendCallbacks)
+         return completionHandler(nullptr);
+-    protect(frameLoader()->client())->willCacheResponse(protect(documentLoader()).get(), *identifier(), response, WTF::move(completionHandler));
++
++    RefPtr frameLoader = this->frameLoader();
++    if (!frameLoader || !identifier())
++        return completionHandler(nullptr);
++    protect(frameLoader->client())->willCacheResponse(protect(documentLoader()).get(), *identifier(), response, WTF::move(completionHandler));
+ }
+ 
+ }
+diff --git a/Source/WebCore/platform/sql/SQLiteDatabase.cpp b/Source/WebCore/platform/sql/SQLiteDatabase.cpp
+index 42e92ea168c64e389694ca397224949505215d08..eae6ef748207e71449df3a3742247ca2b69158d1 100644
+--- a/Source/WebCore/platform/sql/SQLiteDatabase.cpp
++++ b/Source/WebCore/platform/sql/SQLiteDatabase.cpp
+@@ -34,6 +34,8 @@
+ #include "SQLiteFileSystem.h"
+ #include "SQLiteStatement.h"
+ #include <bmalloc/BPlatform.h>
++#include <stdlib.h>
++#include <limits>
+ #include <mutex>
+ #include <sqlite3.h>
+ #include <thread>
+@@ -52,6 +54,45 @@ WTF_MAKE_TZONE_ALLOCATED_IMPL(SQLiteDatabase);
+ 
+ static constexpr auto notOpenErrorMessage = "database is not open"_s;
+ 
++#if defined(WEBKIT_IOS6)
++static int sqliteDatabaseTuningValue(const char* name, int defaultValue, int minimumValue, int maximumValue)
++{
++    const char* text = getenv(name);
++    if (!text || !*text)
++        return defaultValue;
++
++    char* end = nullptr;
++    long parsed = strtol(text, &end, 10);
++    if (end == text || *end)
++        return defaultValue;
++    if (parsed < minimumValue || parsed > maximumValue)
++        return defaultValue;
++
++    return static_cast<int>(parsed);
++}
++
++static int sqliteDatabaseTuningPageSize()
++{
++    int pageSize = sqliteDatabaseTuningValue("WEBKIT_SQLITE_PAGE_SIZE", 4096, 512, 65536);
++    if (pageSize & (pageSize - 1))
++        return 4096;
++    return pageSize;
++}
++
++static void sqliteDatabaseApplyPragma(SQLiteDatabase& database, ASCIILiteral pragma, int64_t value)
++{
++    auto statement = database.prepareStatementSlow(makeString("PRAGMA "_s, pragma, " = "_s, value));
++    if (!statement) {
++        LOG_ERROR("SQLite database could not prepare PRAGMA %s", pragma.characters());
++        return;
++    }
++
++    int result = statement->step();
++    if (result != SQLITE_DONE && result != SQLITE_ROW)
++        LOG_ERROR("SQLite database could not apply PRAGMA %s - %d", pragma.characters(), result);
++}
++#endif
++
+ static void unauthorizedSQLFunction(sqlite3_context *context, int, sqlite3_value **)
+ {
+     auto* functionName = static_cast<const char*>(sqlite3_user_data(context));
+@@ -67,26 +108,21 @@ static void initializeSQLiteIfNecessary()
+         // aren't confident that it really is, and we still support ancient versions of SQLite. So
+         // std::call_once is used to stay on the safe side. See bug #143245.
+ 
+-#if OS(DARWIN)
++#if OS(DARWIN) && !defined(WEBKIT_IOS6)
+         int ret;
+         callOnMainThreadAndWait([&] {
+-            // In the Network process, this function can be called on a background thread when
+-            // creating WebKit::ResourceLoadStatisticsStore, which then races with
+-            // WebKit::NetworkProcess::initializeNetworkProcess(). Since both of those calls query
+-            // the Darwin user temp directory via confstr(), this should only be called from the
+-            // main thread.
+             ret = sqlite3_initialize();
+         });
++#elif OS(DARWIN)
++        int ret = sqlite3_initialize();
+ #else
+-        // On non-Darwin systems confstr() is MT-safe and it does not try to fiddle with environment
+-        // variables, and it is better initialize directly. This is true at least on Linux with the
+-        // supported C libraries (glibc, Musl, uClibc), the "big" BSDs (FreeBSD, NetBSD, OpenBSD),
+-        // and the Android C library (Bionic) does not even provide confstr().
+         int ret = sqlite3_initialize();
+ #endif
+ 
+         if (ret != SQLITE_OK) {
+-#if SQLITE_VERSION_NUMBER >= 3007015
++#if defined(WEBKIT_IOS6)
++            WTFLogAlways("Failed to initialize SQLite: %d", ret);
++#elif SQLITE_VERSION_NUMBER >= 3007015
+             WTFLogAlways("Failed to initialize SQLite: %s", sqlite3_errstr(ret));
+ #else
+             WTFLogAlways("Failed to initialize SQLite");
+@@ -181,6 +217,15 @@ bool SQLiteDatabase::open(const String& filename, OpenMode openMode, OptionSet<O
+     if (sqlite3_extended_result_codes(m_db, 1) != SQLITE_OK)
+         return false;
+ 
++#if defined(WEBKIT_IOS6)
++    {
++        SQLiteTransactionInProgressAutoCounter transactionCounter;
++        if (filename != inMemoryPath())
++            sqliteDatabaseApplyPragma(*this, "page_size"_s, sqliteDatabaseTuningPageSize());
++        sqliteDatabaseApplyPragma(*this, "cache_size"_s, -sqliteDatabaseTuningValue("WEBKIT_SQLITE_CACHE_SIZE_KB", 2048, 32, 65536));
++    }
++#endif
++
+     {
+         SQLiteTransactionInProgressAutoCounter transactionCounter;
+         if (!executeCommand("PRAGMA temp_store = MEMORY;"_s))
+@@ -191,6 +236,14 @@ bool SQLiteDatabase::open(const String& filename, OpenMode openMode, OptionSet<O
+         if (openMode != OpenMode::ReadOnly && !useWALJournalMode())
+             return false;
+ 
++#if defined(WEBKIT_IOS6)
++        if (openMode != OpenMode::ReadOnly) {
++            SQLiteTransactionInProgressAutoCounter transactionCounter;
++            sqliteDatabaseApplyPragma(*this, "synchronous"_s, sqliteDatabaseTuningValue("WEBKIT_SQLITE_SYNCHRONOUS", 1, 0, 2));
++            sqliteDatabaseApplyPragma(*this, "journal_size_limit"_s, static_cast<int64_t>(sqliteDatabaseTuningValue("WEBKIT_SQLITE_JOURNAL_SIZE_LIMIT_KB", 512, 0, 65536)) * 1024);
++        }
++#endif
++
+         auto shmFileName = makeString(filename, "-shm"_s);
+         if (FileSystem::fileExists(shmFileName) && !FileSystem::isSafeToUseMemoryMapForPath(shmFileName)) {
+             RELEASE_LOG_FAULT(SQLDatabase, "Opened an SQLite database with a Class A -shm file. This may trigger a crash when the user locks the device. (%s)", shmFileName.utf8().legacyCStringPointer());
+diff --git a/Source/WebKit/NetworkProcess/Cookies/cocoa/CookieStorageObserver.mm b/Source/WebKit/NetworkProcess/Cookies/cocoa/CookieStorageObserver.mm
+index b5a9703feec8f0c513e29096235f834a2c9e63d7..34d87e3709f4b8b0d004c77472b6821683076b32 100644
+--- a/Source/WebKit/NetworkProcess/Cookies/cocoa/CookieStorageObserver.mm
++++ b/Source/WebKit/NetworkProcess/Cookies/cocoa/CookieStorageObserver.mm
+@@ -126,10 +126,13 @@ - (void)cookiesChangedNotificationHandler:(NSNotification *)notification
+     if (isReregistering && !m_hasRegisteredInternalsForNotifications)
+         return;
+ 
++#if defined(WEBKIT_IOS6)
++#else
+     if (m_cookieStorage.get() != [NSHTTPCookieStorage sharedHTTPCookieStorage]) {
+         RetainPtr internalObject = (static_cast<WKNSHTTPCookieStorageDummyForInternalAccess *>(m_cookieStorage.get()))->_internal;
+         [internalObject registerForPostingNotificationsWithContext:m_cookieStorage.get()];
+     }
++#endif
+ }
+ 
+ void CookieStorageObserver::stopObserving()
+diff --git a/Source/WebKitLegacy/WebCoreSupport/SocketStreamHandleImplCFNet.cpp b/Source/WebKitLegacy/WebCoreSupport/SocketStreamHandleImplCFNet.cpp
+index 94237a3d61a97e72a920f530d2b9bf7cade1aba1..fa4936f9824f82a2b626f84ecdcbe5ff2426e03a 100644
+--- a/Source/WebKitLegacy/WebCoreSupport/SocketStreamHandleImplCFNet.cpp
++++ b/Source/WebKitLegacy/WebCoreSupport/SocketStreamHandleImplCFNet.cpp
+@@ -93,6 +93,7 @@ SocketStreamHandleImpl::SocketStreamHandleImpl(const URL& url, SocketStreamHandl
+     URL httpsURL { makeString("https://"_s, m_url.host()) };
+     m_httpsURL = httpsURL.createCFURL();
+ 
++#if !defined(WEBKIT_IOS6)
+     // Don't check for HSTS violation for ephemeral sessions since
+     // HSTS state should not transfer between regular and private browsing.
+     if (url.protocolIs("ws"_s)
+@@ -104,6 +105,9 @@ SocketStreamHandleImpl::SocketStreamHandleImpl(const URL& url, SocketStreamHandl
+         });
+         return;
+     }
++#else
++    UNUSED_PARAM(sessionID);
++#endif
+ 
+     createStreams();
+     ASSERT(!m_readStream == !m_writeStream);
+@@ -304,10 +308,12 @@ void SocketStreamHandleImpl::createStreams()
+     CFWriteStreamRef writeStream = 0;
+     CFStreamCreatePairWithSocketToHost(0, host.get(), port(), &readStream, &writeStream);
+     CFWriteStreamSetProperty(writeStream, _kCFStreamSocketSetNoDelay, kCFBooleanTrue);
++#if !defined(WEBKIT_IOS6)
+     if (m_auditData.sourceApplicationAuditData && m_auditData.sourceApplicationAuditData.get()) {
+         CFReadStreamSetProperty(readStream, kCFStreamPropertySourceApplication, m_auditData.sourceApplicationAuditData.get());
+         CFWriteStreamSetProperty(writeStream, kCFStreamPropertySourceApplication, m_auditData.sourceApplicationAuditData.get());
+     }
++#endif
+ 
+     m_readStream = adoptCF(readStream);
+     m_writeStream = adoptCF(writeStream);
+diff --git a/Source/WebKitLegacy/mac/WebCoreSupport/WebFrameLoaderClient.h b/Source/WebKitLegacy/mac/WebCoreSupport/WebFrameLoaderClient.h
+index 14649a88b0282898a0817b06921f834ad64642b7..c87416186a40eb196af4f082efb31009cb99ffb7 100644
+--- a/Source/WebKitLegacy/mac/WebCoreSupport/WebFrameLoaderClient.h
++++ b/Source/WebKitLegacy/mac/WebCoreSupport/WebFrameLoaderClient.h
+@@ -248,7 +248,7 @@ private:
+ 
+     RefPtr<WebCore::HistoryItem> createHistoryItemTree(bool clipAtTarget, WebCore::BackForwardItemIdentifier) const final;
+ 
+-#if !PLATFORM(IOS_FAMILY)
++#if !PLATFORM(IOS_FAMILY) || defined(WEBKIT_IOS6)
+     bool m_loadingIcon { false };
+ #endif
+ 
+diff --git a/Source/WebKitLegacy/mac/WebCoreSupport/WebFrameLoaderClient.mm b/Source/WebKitLegacy/mac/WebCoreSupport/WebFrameLoaderClient.mm
+index d5197950009388d3511ab385fede344b412eaaab..7d929a927b0a0cec9238daf975364a916556ef9e 100644
+--- a/Source/WebKitLegacy/mac/WebCoreSupport/WebFrameLoaderClient.mm
++++ b/Source/WebKitLegacy/mac/WebCoreSupport/WebFrameLoaderClient.mm
+@@ -309,45 +309,45 @@ - (void)invalidate;
+ 
+ bool WebFrameLoaderClient::dispatchDidLoadResourceFromMemoryCache(WebCore::DocumentLoader* loader, const WebCore::ResourceRequest& request, const WebCore::ResourceResponse& response, int length)
+ {
+-    RetainPtr webView = getWebView(m_webFrame.get());
+-    WebResourceDelegateImplementationCache* implementations = WebViewGetResourceLoadDelegateImplementations(webView.get());
++    WebView *webView = getWebView(m_webFrame.get());
++    WebResourceDelegateImplementationCache* implementations = WebViewGetResourceLoadDelegateImplementations(webView);
+ #if PLATFORM(IOS_FAMILY)
+     if (implementations->webThreadDidLoadResourceFromMemoryCacheFunc) {
+-        CallResourceLoadDelegateInWebThread(implementations->webThreadDidLoadResourceFromMemoryCacheFunc, webView.get(), @selector(webThreadWebView:didLoadResourceFromMemoryCache:response:length:fromDataSource:), protect(request.nsURLRequest(WebCore::HTTPBodyUpdatePolicy::UpdateHTTPBody)).get(), protect(response.nsURLResponse()).get(), length, dataSource(loader));
++        CallResourceLoadDelegateInWebThread(implementations->webThreadDidLoadResourceFromMemoryCacheFunc, webView, @selector(webThreadWebView:didLoadResourceFromMemoryCache:response:length:fromDataSource:), protect(request.nsURLRequest(WebCore::HTTPBodyUpdatePolicy::UpdateHTTPBody)).get(), protect(response.nsURLResponse()).get(), length, dataSource(loader));
+         return true;
+     }
+ #endif
+     if (!implementations->didLoadResourceFromMemoryCacheFunc)
+         return false;
+ 
+-    CallResourceLoadDelegate(implementations->didLoadResourceFromMemoryCacheFunc, webView.get(), @selector(webView:didLoadResourceFromMemoryCache:response:length:fromDataSource:), protect(request.nsURLRequest(WebCore::HTTPBodyUpdatePolicy::UpdateHTTPBody)).get(), protect(response.nsURLResponse()).get(), length, dataSource(loader));
++    CallResourceLoadDelegate(implementations->didLoadResourceFromMemoryCacheFunc, webView, @selector(webView:didLoadResourceFromMemoryCache:response:length:fromDataSource:), protect(request.nsURLRequest(WebCore::HTTPBodyUpdatePolicy::UpdateHTTPBody)).get(), protect(response.nsURLResponse()).get(), length, dataSource(loader));
+     return true;
+ }
+ 
+ void WebFrameLoaderClient::assignIdentifierToInitialRequest(WebCore::ResourceLoaderIdentifier identifier, WebCore::DocumentLoader* loader, const WebCore::ResourceRequest& request)
+ {
+-    RetainPtr webView = getWebView(m_webFrame.get());
+-    WebResourceDelegateImplementationCache* implementations = WebViewGetResourceLoadDelegateImplementations(webView.get());
++    WebView *webView = getWebView(m_webFrame.get());
++    WebResourceDelegateImplementationCache* implementations = WebViewGetResourceLoadDelegateImplementations(webView);
+ 
+     RetainPtr<id> object;
+ 
+ #if PLATFORM(IOS_FAMILY)
+     if (implementations->webThreadIdentifierForRequestFunc) {
+-        object = CallResourceLoadDelegateInWebThread(implementations->webThreadIdentifierForRequestFunc, webView.get(), @selector(webThreadWebView:identifierForInitialRequest:fromDataSource:), protect(request.nsURLRequest(WebCore::HTTPBodyUpdatePolicy::UpdateHTTPBody)).get(), dataSource(loader));
++        object = CallResourceLoadDelegateInWebThread(implementations->webThreadIdentifierForRequestFunc, webView, @selector(webThreadWebView:identifierForInitialRequest:fromDataSource:), protect(request.nsURLRequest(WebCore::HTTPBodyUpdatePolicy::UpdateHTTPBody)).get(), dataSource(loader));
+     } else
+ #endif
+     if (implementations->identifierForRequestFunc)
+-        object = CallResourceLoadDelegate(implementations->identifierForRequestFunc, webView.get(), @selector(webView:identifierForInitialRequest:fromDataSource:), protect(request.nsURLRequest(WebCore::HTTPBodyUpdatePolicy::UpdateHTTPBody)).get(), dataSource(loader));
++        object = CallResourceLoadDelegate(implementations->identifierForRequestFunc, webView, @selector(webView:identifierForInitialRequest:fromDataSource:), protect(request.nsURLRequest(WebCore::HTTPBodyUpdatePolicy::UpdateHTTPBody)).get(), dataSource(loader));
+     else
+         object = adoptNS([[NSObject alloc] init]);
+ 
+-    [webView.get() _addObject:object.get() forIdentifier:identifier];
++    [webView _addObject:object.get() forIdentifier:identifier];
+ }
+ 
+ void WebFrameLoaderClient::dispatchWillSendRequest(WebCore::DocumentLoader* loader, WebCore::ResourceLoaderIdentifier identifier, WebCore::ResourceRequest& request, const WebCore::ResourceResponse& redirectResponse)
+ {
+-    RetainPtr webView = getWebView(m_webFrame.get());
+-    WebResourceDelegateImplementationCache* implementations = WebViewGetResourceLoadDelegateImplementations(webView.get());
++    WebView *webView = getWebView(m_webFrame.get());
++    WebResourceDelegateImplementationCache* implementations = WebViewGetResourceLoadDelegateImplementations(webView);
+ 
+     if (redirectResponse.isNull())
+         static_cast<WebDocumentLoaderMac*>(loader)->increaseLoadCount(identifier);
+@@ -364,11 +364,11 @@ - (void)invalidate;
+     RetainPtr newURLRequest = currentURLRequest;
+ #if PLATFORM(IOS_FAMILY)
+     if (implementations->webThreadWillSendRequestFunc) {
+-        newURLRequest = (NSURLRequest *)CallResourceLoadDelegateInWebThread(implementations->webThreadWillSendRequestFunc, webView.get(), @selector(webThreadWebView:resource:willSendRequest:redirectResponse:fromDataSource:), [webView.get() _objectForIdentifier:identifier], currentURLRequest.get(), protect(redirectResponse.nsURLResponse()).get(), dataSource(loader));
++        newURLRequest = (NSURLRequest *)CallResourceLoadDelegateInWebThread(implementations->webThreadWillSendRequestFunc, webView, @selector(webThreadWebView:resource:willSendRequest:redirectResponse:fromDataSource:), [webView _objectForIdentifier:identifier], currentURLRequest.get(), protect(redirectResponse.nsURLResponse()).get(), dataSource(loader));
+     } else
+ #endif
+     if (implementations->willSendRequestFunc)
+-        newURLRequest = (NSURLRequest *)CallResourceLoadDelegate(implementations->willSendRequestFunc, webView.get(), @selector(webView:resource:willSendRequest:redirectResponse:fromDataSource:), [webView.get() _objectForIdentifier:identifier], currentURLRequest.get(), protect(redirectResponse.nsURLResponse()).get(), dataSource(loader));
++        newURLRequest = (NSURLRequest *)CallResourceLoadDelegate(implementations->willSendRequestFunc, webView, @selector(webView:resource:willSendRequest:redirectResponse:fromDataSource:), [webView _objectForIdentifier:identifier], currentURLRequest.get(), protect(redirectResponse.nsURLResponse()).get(), dataSource(loader));
+ 
+     if (newURLRequest != currentURLRequest)
+         request.updateFromDelegatePreservingOldProperties(WebCore::ResourceRequest(newURLRequest.get()));
+@@ -376,12 +376,12 @@ - (void)invalidate;
+ 
+ bool WebFrameLoaderClient::shouldUseCredentialStorage(WebCore::DocumentLoader* loader, WebCore::ResourceLoaderIdentifier identifier)
+ {
+-    RetainPtr webView = getWebView(m_webFrame.get());
+-    WebResourceDelegateImplementationCache* implementations = WebViewGetResourceLoadDelegateImplementations(webView.get());
++    WebView *webView = getWebView(m_webFrame.get());
++    WebResourceDelegateImplementationCache* implementations = WebViewGetResourceLoadDelegateImplementations(webView);
+ 
+     if (implementations->shouldUseCredentialStorageFunc) {
+-        if (id resource = [webView.get() _objectForIdentifier:identifier])
+-            return CallResourceLoadDelegateReturningBoolean(NO, implementations->shouldUseCredentialStorageFunc, webView.get(), @selector(webView:resource:shouldUseCredentialStorageForDataSource:), resource, dataSource(loader));
++        if (id resource = [webView _objectForIdentifier:identifier])
++            return CallResourceLoadDelegateReturningBoolean(NO, implementations->shouldUseCredentialStorageFunc, webView, @selector(webView:resource:shouldUseCredentialStorageForDataSource:), resource, dataSource(loader));
+     }
+ 
+     return true;
+@@ -458,36 +458,36 @@ - (void)invalidate;
+ 
+ void WebFrameLoaderClient::dispatchDidReceiveResponse(WebCore::DocumentLoader* loader, WebCore::ResourceLoaderIdentifier identifier, const WebCore::ResourceResponse& response)
+ {
+-    RetainPtr webView = getWebView(m_webFrame.get());
+-    WebResourceDelegateImplementationCache* implementations = WebViewGetResourceLoadDelegateImplementations(webView.get());
++    WebView *webView = getWebView(m_webFrame.get());
++    WebResourceDelegateImplementationCache* implementations = WebViewGetResourceLoadDelegateImplementations(webView);
+ 
+ #if PLATFORM(IOS_FAMILY)
+     if (implementations->webThreadDidReceiveResponseFunc) {
+-        if (id resource = [webView.get() _objectForIdentifier:identifier])
+-            CallResourceLoadDelegateInWebThread(implementations->webThreadDidReceiveResponseFunc, webView.get(), @selector(webThreadWebView:resource:didReceiveResponse:fromDataSource:), resource, protect(response.nsURLResponse()).get(), dataSource(loader));
++        if (id resource = [webView _objectForIdentifier:identifier])
++            CallResourceLoadDelegateInWebThread(implementations->webThreadDidReceiveResponseFunc, webView, @selector(webThreadWebView:resource:didReceiveResponse:fromDataSource:), resource, protect(response.nsURLResponse()).get(), dataSource(loader));
+ 
+     } else
+ #endif
+     if (implementations->didReceiveResponseFunc) {
+-        if (id resource = [webView.get() _objectForIdentifier:identifier])
+-            CallResourceLoadDelegate(implementations->didReceiveResponseFunc, webView.get(), @selector(webView:resource:didReceiveResponse:fromDataSource:), resource, protect(response.nsURLResponse()).get(), dataSource(loader));
++        if (id resource = [webView _objectForIdentifier:identifier])
++            CallResourceLoadDelegate(implementations->didReceiveResponseFunc, webView, @selector(webView:resource:didReceiveResponse:fromDataSource:), resource, protect(response.nsURLResponse()).get(), dataSource(loader));
+     }
+ }
+ 
+ void WebFrameLoaderClient::willCacheResponse(WebCore::DocumentLoader* loader, WebCore::ResourceLoaderIdentifier identifier, NSCachedURLResponse* response, CompletionHandler<void(NSCachedURLResponse *)>&& completionHandler) const
+ {
+-    RetainPtr webView = getWebView(m_webFrame.get());
+-    WebResourceDelegateImplementationCache* implementations = WebViewGetResourceLoadDelegateImplementations(webView.get());
++    WebView *webView = getWebView(m_webFrame.get());
++    WebResourceDelegateImplementationCache* implementations = WebViewGetResourceLoadDelegateImplementations(webView);
+ 
+ #if PLATFORM(IOS_FAMILY)
+     if (implementations->webThreadWillCacheResponseFunc) {
+-        if (id resource = [webView.get() _objectForIdentifier:identifier])
+-            return completionHandler(CallResourceLoadDelegateInWebThread(implementations->webThreadWillCacheResponseFunc, webView.get(), @selector(webThreadWebView:resource:willCacheResponse:fromDataSource:), resource, response, dataSource(loader)));
++        if (id resource = [webView _objectForIdentifier:identifier])
++            return completionHandler(CallResourceLoadDelegateInWebThread(implementations->webThreadWillCacheResponseFunc, webView, @selector(webThreadWebView:resource:willCacheResponse:fromDataSource:), resource, response, dataSource(loader)));
+     } else
+ #endif
+     if (implementations->willCacheResponseFunc) {
+-        if (id resource = [webView.get() _objectForIdentifier:identifier])
+-            return completionHandler(CallResourceLoadDelegate(implementations->willCacheResponseFunc, webView.get(), @selector(webView:resource:willCacheResponse:fromDataSource:), resource, response, dataSource(loader)));
++        if (id resource = [webView _objectForIdentifier:identifier])
++            return completionHandler(CallResourceLoadDelegate(implementations->willCacheResponseFunc, webView, @selector(webView:resource:willCacheResponse:fromDataSource:), resource, response, dataSource(loader)));
+     }
+ 
+     completionHandler(response);
+@@ -495,17 +495,17 @@ - (void)invalidate;
+ 
+ void WebFrameLoaderClient::dispatchDidReceiveContentLength(WebCore::DocumentLoader* loader, WebCore::ResourceLoaderIdentifier identifier, int dataLength)
+ {
+-    RetainPtr webView = getWebView(m_webFrame.get());
+-    WebResourceDelegateImplementationCache* implementations = WebViewGetResourceLoadDelegateImplementations(webView.get());
++    WebView *webView = getWebView(m_webFrame.get());
++    WebResourceDelegateImplementationCache* implementations = WebViewGetResourceLoadDelegateImplementations(webView);
+ #if PLATFORM(IOS_FAMILY)
+     if (implementations->webThreadDidReceiveContentLengthFunc) {
+-        if (id resource = [webView.get() _objectForIdentifier:identifier])
+-            CallResourceLoadDelegateInWebThread(implementations->webThreadDidReceiveContentLengthFunc, webView.get(), @selector(webThreadWebView:resource:didReceiveContentLength:fromDataSource:), resource, (NSInteger)dataLength, dataSource(loader));
++        if (id resource = [webView _objectForIdentifier:identifier])
++            CallResourceLoadDelegateInWebThread(implementations->webThreadDidReceiveContentLengthFunc, webView, @selector(webThreadWebView:resource:didReceiveContentLength:fromDataSource:), resource, (NSInteger)dataLength, dataSource(loader));
+     } else
+ #endif
+     if (implementations->didReceiveContentLengthFunc) {
+-        if (id resource = [webView.get() _objectForIdentifier:identifier])
+-            CallResourceLoadDelegate(implementations->didReceiveContentLengthFunc, webView.get(), @selector(webView:resource:didReceiveContentLength:fromDataSource:), resource, (NSInteger)dataLength, dataSource(loader));
++        if (id resource = [webView _objectForIdentifier:identifier])
++            CallResourceLoadDelegate(implementations->didReceiveContentLengthFunc, webView, @selector(webView:resource:didReceiveContentLength:fromDataSource:), resource, (NSInteger)dataLength, dataSource(loader));
+     }
+ }
+ 
+@@ -517,43 +517,53 @@ - (void)invalidate;
+ 
+ void WebFrameLoaderClient::dispatchDidFinishLoading(WebCore::DocumentLoader* loader, WebCore::ResourceLoaderIdentifier identifier)
+ {
+-    RetainPtr webView = getWebView(m_webFrame.get());
+-    WebResourceDelegateImplementationCache* implementations = WebViewGetResourceLoadDelegateImplementations(webView.get());
++    WebView *webView = getWebView(m_webFrame.get());
++    WebResourceDelegateImplementationCache* implementations = WebViewGetResourceLoadDelegateImplementations(webView);
+ 
+ #if PLATFORM(IOS_FAMILY)
+     if (implementations->webThreadDidFinishLoadingFromDataSourceFunc) {
+-        if (id resource = [webView.get() _objectForIdentifier:identifier])
+-            CallResourceLoadDelegateInWebThread(implementations->webThreadDidFinishLoadingFromDataSourceFunc, webView.get(), @selector(webThreadWebView:resource:didFinishLoadingFromDataSource:), resource, dataSource(loader));
++        if (id resource = [webView _objectForIdentifier:identifier])
++            CallResourceLoadDelegateInWebThread(implementations->webThreadDidFinishLoadingFromDataSourceFunc, webView, @selector(webThreadWebView:resource:didFinishLoadingFromDataSource:), resource, dataSource(loader));
+     } else
+ #endif
+ 
+     if (implementations->didFinishLoadingFromDataSourceFunc) {
+-        if (id resource = [webView.get() _objectForIdentifier:identifier])
+-            CallResourceLoadDelegate(implementations->didFinishLoadingFromDataSourceFunc, webView.get(), @selector(webView:resource:didFinishLoadingFromDataSource:), resource, dataSource(loader));
++        if (id resource = [webView _objectForIdentifier:identifier]) {
++#if defined(WEBKIT_IOS6)
++            CallResourceLoadDelegateDeferred(webView, @selector(webView:resource:didFinishLoadingFromDataSource:), resource, dataSource(loader));
++#else
++            CallResourceLoadDelegate(implementations->didFinishLoadingFromDataSourceFunc, webView, @selector(webView:resource:didFinishLoadingFromDataSource:), resource, dataSource(loader));
++#endif
++        }
+     }
+ 
+-    [webView.get() _removeObjectForIdentifier:identifier];
++    [webView _removeObjectForIdentifier:identifier];
+ 
+     static_cast<WebDocumentLoaderMac*>(loader)->decreaseLoadCount(identifier);
+ }
+ 
+ void WebFrameLoaderClient::dispatchDidFailLoading(WebCore::DocumentLoader* loader, WebCore::ResourceLoaderIdentifier identifier, const WebCore::ResourceError& error)
+ {
+-    RetainPtr webView = getWebView(m_webFrame.get());
+-    WebResourceDelegateImplementationCache* implementations = WebViewGetResourceLoadDelegateImplementations(webView.get());
++    WebView *webView = getWebView(m_webFrame.get());
++    WebResourceDelegateImplementationCache* implementations = WebViewGetResourceLoadDelegateImplementations(webView);
+ 
+ #if PLATFORM(IOS_FAMILY)
+     if (implementations->webThreadDidFailLoadingWithErrorFromDataSourceFunc) {
+-        if (id resource = [webView.get() _objectForIdentifier:identifier])
+-            CallResourceLoadDelegateInWebThread(implementations->webThreadDidFailLoadingWithErrorFromDataSourceFunc, webView.get(), @selector(webThreadWebView:resource:didFailLoadingWithError:fromDataSource:), resource, (NSError *)error, dataSource(loader));
++        if (id resource = [webView _objectForIdentifier:identifier])
++            CallResourceLoadDelegateInWebThread(implementations->webThreadDidFailLoadingWithErrorFromDataSourceFunc, webView, @selector(webThreadWebView:resource:didFailLoadingWithError:fromDataSource:), resource, (NSError *)error, dataSource(loader));
+     } else
+ #endif
+     if (implementations->didFailLoadingWithErrorFromDataSourceFunc) {
+-        if (id resource = [webView.get() _objectForIdentifier:identifier])
+-            CallResourceLoadDelegate(implementations->didFailLoadingWithErrorFromDataSourceFunc, webView.get(), @selector(webView:resource:didFailLoadingWithError:fromDataSource:), resource, (NSError *)error, dataSource(loader));
++        if (id resource = [webView _objectForIdentifier:identifier]) {
++#if defined(WEBKIT_IOS6)
++            CallResourceLoadDelegateDeferred(webView, @selector(webView:resource:didFailLoadingWithError:fromDataSource:), resource, (NSError *)error, dataSource(loader));
++#else
++            CallResourceLoadDelegate(implementations->didFailLoadingWithErrorFromDataSourceFunc, webView, @selector(webView:resource:didFailLoadingWithError:fromDataSource:), resource, (NSError *)error, dataSource(loader));
++#endif
++        }
+     }
+ 
+-    [webView.get() _removeObjectForIdentifier:identifier];
++    [webView _removeObjectForIdentifier:identifier];
+ 
+     static_cast<WebDocumentLoaderMac*>(loader)->decreaseLoadCount(identifier);
+ }
+@@ -1842,11 +1852,25 @@ static bool shouldBlockPlugin(WebBasePluginPackage *)
+     return nullAtom();
+ }
+ 
++#if defined(WEBKIT_IOS6)
++static WebWindowObjectClearedCallback s_windowObjectClearedCallback;
++
++extern "C" __attribute__((visibility("default"))) void WebSetWindowObjectClearedCallback(WebWindowObjectClearedCallback callback)
++{
++    s_windowObjectClearedCallback = callback;
++}
++#endif
++
+ void WebFrameLoaderClient::dispatchDidClearWindowObjectInWorld(WebCore::DOMWrapperWorld& world)
+ {
+     RetainPtr webView = getWebView(m_webFrame.get());
+     WebFrameLoadDelegateImplementationCache* implementations = WebViewGetFrameLoadDelegateImplementations(webView.get());
+ 
++#if defined(WEBKIT_IOS6)
++    if (s_windowObjectClearedCallback && &world == &WebCore::mainThreadNormalWorldSingleton())
++        s_windowObjectClearedCallback(webView.get(), m_webFrame.get());
++#endif
++
+     if (implementations->didClearWindowObjectForFrameInScriptWorldFunc) {
+         CallFrameLoadDelegate(implementations->didClearWindowObjectForFrameInScriptWorldFunc,
+             webView.get(), @selector(webView:didClearWindowObjectForFrame:inScriptWorld:), m_webFrame.get(), [WebScriptWorld findOrCreateWorld:world]);
+@@ -1995,10 +2019,8 @@ void didFail() override
+         return;
+     }
+ 
+-#if !PLATFORM(IOS_FAMILY)
++#if !PLATFORM(IOS_FAMILY) || defined(WEBKIT_IOS6)
+     ASSERT(!m_loadingIcon);
+-    // WebKit 1, which only supports one icon per page URL, traditionally has preferred the last icon in case of multiple icons listed.
+-    // To preserve that behavior we walk the list backwards.
+     for (auto icon = icons.rbegin(); icon != icons.rend(); ++icon) {
+         if (icon->first.type != WebCore::LinkIconType::Favicon || m_loadingIcon) {
+             documentLoader->didGetLoadDecisionForIcon(false, icon->second, [](auto) { });
+@@ -2012,7 +2034,6 @@ void didFail() override
+         });
+     }
+ #else
+-    // No WebCore icon loading on iOS
+     for (auto& icon : icons)
+         documentLoader->didGetLoadDecisionForIcon(false, icon.second, [](auto) { });
+ #endif
+@@ -2038,9 +2059,39 @@ void didFail() override
+ }
+ #endif // !PLATFORM(IOS_FAMILY)
+ 
++#if defined(WEBKIT_IOS6)
++NSString * const WebViewDidLoadMainFrameIconNotification = @"WebViewDidLoadMainFrameIconNotification";
++NSString * const WebViewMainFrameIconDataKey = @"WebViewMainFrameIconData";
++NSString * const WebViewMainFrameIconPageURLKey = @"WebViewMainFrameIconPageURL";
++#endif
++
+ void WebFrameLoaderClient::finishedLoadingIcon(WebCore::FragmentedSharedBuffer* iconData)
+ {
+-#if !PLATFORM(IOS_FAMILY)
++#if defined(WEBKIT_IOS6)
++    ASSERT(m_loadingIcon);
++    m_loadingIcon = false;
++
++    RetainPtr webView = getWebView(m_webFrame.get());
++    if (!webView || !iconData)
++        return;
++
++    RefPtr contiguous = iconData->makeContiguous();
++    RetainPtr data = contiguous->createNSData();
++    if (![data.get() length])
++        return;
++
++    RetainPtr<NSString> pageURL;
++    if (auto* frame = core(m_webFrame.get())) {
++        if (RefPtr loader = frame->loader().documentLoader())
++            pageURL = loader->url().string().createNSString();
++    }
++    if (![pageURL.get() length])
++        return;
++
++    [[NSNotificationCenter defaultCenter] postNotificationName:WebViewDidLoadMainFrameIconNotification
++        object:webView.get()
++        userInfo:@{ WebViewMainFrameIconDataKey: data.get(), WebViewMainFrameIconPageURLKey: pageURL.get() }];
++#elif !PLATFORM(IOS_FAMILY)
+     ASSERT(m_loadingIcon);
+     m_loadingIcon = false;
+ 

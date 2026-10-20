@@ -1,0 +1,880 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Wed, 16 Sep 2026 12:00:00 +0200
+Subject: [PATCH] Serve Mobile Safari as its embedder on iOS 6
+
+The pasteboard is written the way this release does it, with the async
+clipboard left off; a page's share goes to the system share sheet; an embedder
+can add globals without being the frame load delegate; the browser version that
+goes with the engine is reported; the user agent rule no longer names a 2012
+build; and the Notifications API is on.
+---
+ .../editing/cocoa/NodeHTMLConverter.mm        |  11 ++
+ Source/WebCore/page/Quirks.cpp                |  20 ++-
+ .../platform/ios/PlatformPasteboardIOS.mm     |  82 +++++++--
+ Source/WebKitLegacy/WebKitLegacy-iOS.exp      |  88 +++++-----
+ .../ios/WebCoreSupport/WebChromeClientIOS.mm  | 156 ++++++++++++++++--
+ .../WebKitLegacy/mac/WebView/WebViewPrivate.h |  29 ++++
+ 6 files changed, 322 insertions(+), 64 deletions(-)
+
+diff --git a/Source/WebCore/editing/cocoa/NodeHTMLConverter.mm b/Source/WebCore/editing/cocoa/NodeHTMLConverter.mm
+index e9678b1b544345404beb3fb52c63a98fdc011eb4..09dde95aaea4c9be8a43784d05bcd68fa8aeceb0 100644
+--- a/Source/WebCore/editing/cocoa/NodeHTMLConverter.mm
++++ b/Source/WebCore/editing/cocoa/NodeHTMLConverter.mm
+@@ -869,7 +869,18 @@ static Color normalizedColor(Color color, bool ignoreDefaultColor, Element& elem
+     Ref primaryFont = renderer->style().fontCascade().primaryFont();
+     if (primaryFont->attributes().origin == FontOrigin::Remote)
+         return [PlatformFontClass systemFontOfSize:defaultFontSize];
++#if defined(WEBKIT_IOS6)
++    RetainPtr coreTextFont = primaryFont->ctFont();
++    if (!coreTextFont)
++        return [PlatformFontClass systemFontOfSize:defaultFontSize];
++    CGFloat size = CTFontGetSize(coreTextFont.get());
++    RetainPtr postScriptName = adoptCF(CTFontCopyPostScriptName(coreTextFont.get()));
++    if (RetainPtr platformFont = [PlatformFontClass fontWithName:(__bridge NSString *)postScriptName.get() size:size])
++        return platformFont.autorelease();
++    return [PlatformFontClass systemFontOfSize:size];
++#else
+     return (__bridge PlatformFont *)primaryFont->ctFont();
++#endif
+ }
+ 
+ NSDictionary *HTMLConverter::computedAttributesForElement(Element& element)
+diff --git a/Source/WebCore/page/Quirks.cpp b/Source/WebCore/page/Quirks.cpp
+index ac7538a4ad5c0c27d4c5fa0db44db4b6971f581b..32870b9801c268a1eb7177ab3bf0b1aa68ab0df8 100644
+--- a/Source/WebCore/page/Quirks.cpp
++++ b/Source/WebCore/page/Quirks.cpp
+@@ -1851,8 +1851,26 @@ static constexpr auto frozenVersion = "18_6"_s;
+ static constexpr auto frozenVersion = "18_7"_s;
+ #endif
+ 
+-String Quirks::standardUserAgentWithApplicationNameIncludingCompatOverrides(const String& applicationName, const String& userAgentOSVersion, UserAgentType type)
++#if defined(WEBKIT_IOS6)
++static constexpr auto frozenMobileBuild = "15E148"_s;
++static constexpr auto frozenSafariVersion = "604.1"_s;
++
++static String applicationNameMatchingFrozenVersion(const String& applicationName)
+ {
++    if (!applicationName.contains("Safari/"_s))
++        return applicationName;
++    return makeString("Version/"_s, makeStringByReplacingAll(StringView(frozenVersion), '_', '.'),
++        " Mobile/"_s, frozenMobileBuild, " Safari/"_s, frozenSafariVersion);
++}
++#endif
++
++String Quirks::standardUserAgentWithApplicationNameIncludingCompatOverrides(const String& originalApplicationName, const String& userAgentOSVersion, UserAgentType type)
++{
++#if defined(WEBKIT_IOS6)
++    auto applicationName = applicationNameMatchingFrozenVersion(originalApplicationName);
++#else
++    auto& applicationName = originalApplicationName;
++#endif
+     auto overriddenUAString = standardUserAgentWithApplicationNameIncludingCompatOverridesInternal(applicationName, userAgentOSVersion, type);
+     if (overriddenUAString.length())
+         return overriddenUAString;
+diff --git a/Source/WebCore/platform/ios/PlatformPasteboardIOS.mm b/Source/WebCore/platform/ios/PlatformPasteboardIOS.mm
+index 4a22b7f75b894f57434ac0f4cb258f337677c03c..9154b82daed8844925f895b0f177d0a6da8f8c87 100644
+--- a/Source/WebCore/platform/ios/PlatformPasteboardIOS.mm
++++ b/Source/WebCore/platform/ios/PlatformPasteboardIOS.mm
+@@ -53,7 +53,11 @@
+ 
+ #import <pal/ios/UIKitSoftLink.h>
+ 
++#if defined(WEBKIT_IOS6)
++#define PASTEBOARD_SUPPORTS_ITEM_PROVIDERS 0
++#else
+ #define PASTEBOARD_SUPPORTS_ITEM_PROVIDERS (PLATFORM(IOS_FAMILY) && !(PLATFORM(WATCHOS) || PLATFORM(APPLETV)))
++#endif
+ #define PASTEBOARD_SUPPORTS_PRESENTATION_STYLE_AND_TEAM_DATA (PASTEBOARD_SUPPORTS_ITEM_PROVIDERS && !PLATFORM(MACCATALYST))
+ 
+ @interface UIPasteboard () <AbstractPasteboard>
+@@ -140,8 +144,6 @@ static bool shouldTreatAtLeastOneTypeAsFile(NSArray<NSString *> *platformTypes)
+     return false;
+ }
+ 
+-#if PASTEBOARD_SUPPORTS_ITEM_PROVIDERS
+-
+ static bool platformTypeConformsToWebArchivePBoardType(NSString *platformType, UTType *platformUTType)
+ {
+     if ([platformType isEqualToString:WebArchivePboardType])
+@@ -205,6 +207,8 @@ static bool platformTypeConformsToWebArchivePBoardType(NSString *platformType, U
+     return copyToVector(domPasteboardTypes);
+ }
+ 
++#if PASTEBOARD_SUPPORTS_ITEM_PROVIDERS
++
+ #if PASTEBOARD_SUPPORTS_PRESENTATION_STYLE_AND_TEAM_DATA
+ 
+ static PasteboardItemPresentationStyle pasteboardItemPresentationStyle(UIPreferredPresentationStyle style)
+@@ -333,7 +337,11 @@ static bool pasteboardMayContainFilePaths(id<AbstractPasteboard> pasteboard)
+ Color PlatformPasteboard::color()
+ {
+     NSData *data = [m_pasteboard dataForPasteboardType:UIColorPboardType];
++#if defined(WEBKIT_IOS6)
++    UIColor *uiColor = dynamic_objc_cast<UIColor>([NSKeyedUnarchiver unarchiveObjectWithData:data]);
++#else
+     UIColor *uiColor = [NSKeyedUnarchiver unarchivedObjectOfClass:PAL::getUIColorClassSingleton() fromData:data error:nil];
++#endif
+     return roundAndClampToSRGBALossy(uiColor.CGColor);
+ }
+ 
+@@ -704,30 +712,84 @@ static void addRepresentationsForPlainText(WebItemProviderRegistrationInfoList *
+     return false;
+ }
+ 
+-void PlatformPasteboard::write(const PasteboardWebContent&)
++static RetainPtr<NSString> platformTypeForWebType(const String& type)
+ {
++    if (isDeclaredUTI(type))
++        return type.createNSString();
++    auto uti = UTIFromMIMEType(type);
++    return uti.isEmpty() ? type.createNSString() : uti.createNSString();
+ }
+ 
+-void PlatformPasteboard::write(const PasteboardImage&)
++static RetainPtr<NSDictionary> representationsForCustomData(const PasteboardCustomData& data)
+ {
++    auto representations = adoptNS([[NSMutableDictionary alloc] init]);
++    data.forEachPlatformStringOrBuffer([&](auto& type, auto& stringOrBuffer) {
++        RetainPtr platformType = platformTypeForWebType(type);
++        if (![platformType length])
++            return;
++        WTF::switchOn(stringOrBuffer, [&](const String& string) {
++            [representations setObject:string.createNSString().get() forKey:platformType.get()];
++        }, [&](const Ref<SharedBuffer>& buffer) {
++            [representations setObject:buffer->makeContiguous()->createNSData().get() forKey:platformType.get()];
++        });
++    });
++
++    [representations setObject:data.createSharedBuffer()->createNSData().get() forKey:@(PasteboardCustomData::cocoaType().characters())];
++    return representations;
+ }
+ 
+-void PlatformPasteboard::write(const String&, const String&)
++int64_t PlatformPasteboard::write(const Vector<PasteboardCustomData>& itemData, PasteboardDataLifetime)
+ {
++    [m_pasteboard setItems:createNSArray(itemData, [](auto& data) {
++        return representationsForCustomData(data);
++    }).get()];
++    return [m_pasteboard changeCount];
+ }
+ 
+-void PlatformPasteboard::write(const PasteboardURL&)
++void PlatformPasteboard::write(const PasteboardWebContent& content)
+ {
++    PasteboardCustomData data;
++    if (!content.dataInStringFormat.isEmpty())
++        data.writeString(textPlainContentTypeAtom(), content.dataInStringFormat);
++    if (!content.dataInHTMLFormat.isEmpty())
++        data.writeString(textHTMLContentTypeAtom(), content.dataInHTMLFormat);
++    for (auto& typeAndData : content.clientTypesAndData) {
++        if (typeAndData.second)
++            data.writeData(typeAndData.first, protect(typeAndData.second)->makeContiguous());
++    }
++    write(Vector<PasteboardCustomData> { WTF::move(data) }, PasteboardDataLifetime::Persistent);
+ }
+ 
+-Vector<String> PlatformPasteboard::typesSafeForDOMToReadAndWrite(const String&) const
++void PlatformPasteboard::write(const PasteboardImage& pasteboardImage)
+ {
+-    return { };
++    PasteboardCustomData data;
++    if (pasteboardImage.resourceData && !pasteboardImage.resourceMIMEType.isEmpty())
++        data.writeData(pasteboardImage.resourceMIMEType, protect(pasteboardImage.resourceData)->makeContiguous());
++    if (!pasteboardImage.url.url.isEmpty())
++        data.writeString("text/uri-list"_s, pasteboardImage.url.url.string());
++    write(Vector<PasteboardCustomData> { WTF::move(data) }, PasteboardDataLifetime::Persistent);
+ }
+ 
+-int64_t PlatformPasteboard::write(const Vector<PasteboardCustomData>&, PasteboardDataLifetime)
++void PlatformPasteboard::write(const String& pasteboardType, const String& text)
+ {
+-    return 0;
++    PasteboardCustomData data;
++    data.writeString(pasteboardType, text);
++    write(Vector<PasteboardCustomData> { WTF::move(data) }, PasteboardDataLifetime::Persistent);
++}
++
++void PlatformPasteboard::write(const PasteboardURL& url)
++{
++    PasteboardCustomData data;
++    data.writeString("text/uri-list"_s, url.url.string());
++    data.writeString(textPlainContentTypeAtom(), url.url.string());
++    write(Vector<PasteboardCustomData> { WTF::move(data) }, PasteboardDataLifetime::Persistent);
++}
++
++Vector<String> PlatformPasteboard::typesSafeForDOMToReadAndWrite(const String&) const
++{
++    return webSafeTypes([m_pasteboard pasteboardTypes], IncludeImageTypes::No, [] {
++        return false;
++    });
+ }
+ 
+ #endif
+diff --git a/Source/WebKitLegacy/WebKitLegacy-iOS.exp b/Source/WebKitLegacy/WebKitLegacy-iOS.exp
+index 566b8e58b9d1ddf98fad5970f07a1bef7b8dde54..543788a0c15b8b495611e8f8ed6beeac150af48c 100644
+--- a/Source/WebKitLegacy/WebKitLegacy-iOS.exp
++++ b/Source/WebKitLegacy/WebKitLegacy-iOS.exp
+@@ -1,7 +1,3 @@
+-__WebCreateFragment
+-__WebHTMLViewPrintingMaximumShrinkFactor
+-__WebHTMLViewPrintingMinimumShrinkFactor
+-__WebViewDidStartAcceleratedCompositingNotification
+ _DOMEventException
+ _DOMException
+ _DOMRangeException
+@@ -10,9 +6,6 @@ _OBJC_CLASS_$_DOMAbstractView
+ _OBJC_CLASS_$_DOMAttr
+ _OBJC_CLASS_$_DOMBlob
+ _OBJC_CLASS_$_DOMCDATASection
+-_OBJC_CLASS_$_DOMCharacterData
+-_OBJC_CLASS_$_DOMComment
+-_OBJC_CLASS_$_DOMCounter
+ _OBJC_CLASS_$_DOMCSSCharsetRule
+ _OBJC_CLASS_$_DOMCSSFontFaceRule
+ _OBJC_CLASS_$_DOMCSSImportRule
+@@ -27,6 +20,9 @@ _OBJC_CLASS_$_DOMCSSStyleSheet
+ _OBJC_CLASS_$_DOMCSSUnknownRule
+ _OBJC_CLASS_$_DOMCSSValue
+ _OBJC_CLASS_$_DOMCSSValueList
++_OBJC_CLASS_$_DOMCharacterData
++_OBJC_CLASS_$_DOMComment
++_OBJC_CLASS_$_DOMCounter
+ _OBJC_CLASS_$_DOMDocument
+ _OBJC_CLASS_$_DOMDocumentFragment
+ _OBJC_CLASS_$_DOMDocumentType
+@@ -39,16 +35,16 @@ _OBJC_CLASS_$_DOMFileList
+ _OBJC_CLASS_$_DOMHTMLAnchorElement
+ _OBJC_CLASS_$_DOMHTMLAppletElement
+ _OBJC_CLASS_$_DOMHTMLAreaElement
++_OBJC_CLASS_$_DOMHTMLBRElement
+ _OBJC_CLASS_$_DOMHTMLBaseElement
+ _OBJC_CLASS_$_DOMHTMLBaseFontElement
+ _OBJC_CLASS_$_DOMHTMLBodyElement
+-_OBJC_CLASS_$_DOMHTMLBRElement
+ _OBJC_CLASS_$_DOMHTMLButtonElement
+ _OBJC_CLASS_$_DOMHTMLCanvasElement
+ _OBJC_CLASS_$_DOMHTMLCollection
++_OBJC_CLASS_$_DOMHTMLDListElement
+ _OBJC_CLASS_$_DOMHTMLDirectoryElement
+ _OBJC_CLASS_$_DOMHTMLDivElement
+-_OBJC_CLASS_$_DOMHTMLDListElement
+ _OBJC_CLASS_$_DOMHTMLDocument
+ _OBJC_CLASS_$_DOMHTMLElement
+ _OBJC_CLASS_$_DOMHTMLEmbedElement
+@@ -57,16 +53,16 @@ _OBJC_CLASS_$_DOMHTMLFontElement
+ _OBJC_CLASS_$_DOMHTMLFormElement
+ _OBJC_CLASS_$_DOMHTMLFrameElement
+ _OBJC_CLASS_$_DOMHTMLFrameSetElement
++_OBJC_CLASS_$_DOMHTMLHRElement
+ _OBJC_CLASS_$_DOMHTMLHeadElement
+ _OBJC_CLASS_$_DOMHTMLHeadingElement
+-_OBJC_CLASS_$_DOMHTMLHRElement
+ _OBJC_CLASS_$_DOMHTMLHtmlElement
+ _OBJC_CLASS_$_DOMHTMLIFrameElement
+ _OBJC_CLASS_$_DOMHTMLImageElement
+ _OBJC_CLASS_$_DOMHTMLInputElement
++_OBJC_CLASS_$_DOMHTMLLIElement
+ _OBJC_CLASS_$_DOMHTMLLabelElement
+ _OBJC_CLASS_$_DOMHTMLLegendElement
+-_OBJC_CLASS_$_DOMHTMLLIElement
+ _OBJC_CLASS_$_DOMHTMLLinkElement
+ _OBJC_CLASS_$_DOMHTMLMapElement
+ _OBJC_CLASS_$_DOMHTMLMarqueeElement
+@@ -74,8 +70,8 @@ _OBJC_CLASS_$_DOMHTMLMediaElement
+ _OBJC_CLASS_$_DOMHTMLMenuElement
+ _OBJC_CLASS_$_DOMHTMLMetaElement
+ _OBJC_CLASS_$_DOMHTMLModElement
+-_OBJC_CLASS_$_DOMHTMLObjectElement
+ _OBJC_CLASS_$_DOMHTMLOListElement
++_OBJC_CLASS_$_DOMHTMLObjectElement
+ _OBJC_CLASS_$_DOMHTMLOptGroupElement
+ _OBJC_CLASS_$_DOMHTMLOptionElement
+ _OBJC_CLASS_$_DOMHTMLOptionsCollection
+@@ -110,9 +106,9 @@ _OBJC_CLASS_$_DOMObject
+ _OBJC_CLASS_$_DOMOverflowEvent
+ _OBJC_CLASS_$_DOMProcessingInstruction
+ _OBJC_CLASS_$_DOMProgressEvent
++_OBJC_CLASS_$_DOMRGBColor
+ _OBJC_CLASS_$_DOMRange
+ _OBJC_CLASS_$_DOMRect
+-_OBJC_CLASS_$_DOMRGBColor
+ _OBJC_CLASS_$_DOMStyleSheet
+ _OBJC_CLASS_$_DOMStyleSheetList
+ _OBJC_CLASS_$_DOMText
+@@ -126,13 +122,15 @@ _OBJC_CLASS_$_DOMXPathResult
+ _OBJC_CLASS_$_WAKResponder
+ _OBJC_CLASS_$_WAKView
+ _OBJC_CLASS_$_WAKWindow
++_OBJC_CLASS_$_WKQuadObject
++_OBJC_CLASS_$_WebApplicationCache
+ _OBJC_CLASS_$_WebArchive
+ _OBJC_CLASS_$_WebBackForwardList
+ _OBJC_CLASS_$_WebCache
+ _OBJC_CLASS_$_WebCoreStatistics
++_OBJC_CLASS_$_WebDataSource
+ _OBJC_CLASS_$_WebDatabaseManager
+ _OBJC_CLASS_$_WebDatabaseQuotaManager
+-_OBJC_CLASS_$_WebDataSource
+ _OBJC_CLASS_$_WebDefaultPolicyDelegate
+ _OBJC_CLASS_$_WebDeviceOrientation
+ _OBJC_CLASS_$_WebDeviceOrientationProviderMock
+@@ -148,10 +146,10 @@ _OBJC_CLASS_$_WebGeolocation
+ _OBJC_CLASS_$_WebGeolocationCoreLocationProvider
+ _OBJC_CLASS_$_WebGeolocationPosition
+ _OBJC_CLASS_$_WebGeolocationProviderIOS
+-_OBJC_CLASS_$_WebHistory
+-_OBJC_CLASS_$_WebHistoryItem
+ _OBJC_CLASS_$_WebHTMLRepresentation
+ _OBJC_CLASS_$_WebHTMLView
++_OBJC_CLASS_$_WebHistory
++_OBJC_CLASS_$_WebHistoryItem
+ _OBJC_CLASS_$_WebInspector
+ _OBJC_CLASS_$_WebItemProviderPasteboard
+ _OBJC_CLASS_$_WebItemProviderRegistrationInfoList
+@@ -161,6 +159,7 @@ _OBJC_CLASS_$_WebNavigationData
+ _OBJC_CLASS_$_WebNotification
+ _OBJC_CLASS_$_WebPDFView
+ _OBJC_CLASS_$_WebPDFViewPlaceholder
++_OBJC_CLASS_$_WebPluginController
+ _OBJC_CLASS_$_WebPluginDatabase
+ _OBJC_CLASS_$_WebPolicyDecisionListener
+ _OBJC_CLASS_$_WebPreferences
+@@ -177,7 +176,6 @@ _OBJC_CLASS_$_WebUndefined
+ _OBJC_CLASS_$_WebUserContentURLPattern
+ _OBJC_CLASS_$_WebView
+ _OBJC_CLASS_$_WebVisiblePosition
+-_OBJC_CLASS_$_WKQuadObject
+ _OBJC_IVAR_$_WAKWindow._availableScreenSize
+ _OBJC_IVAR_$_WAKWindow._contentView
+ _OBJC_IVAR_$_WAKWindow._entireWindowVisibleForTesting
+@@ -202,9 +200,6 @@ _OBJC_METACLASS_$_DOMAbstractView
+ _OBJC_METACLASS_$_DOMAttr
+ _OBJC_METACLASS_$_DOMBlob
+ _OBJC_METACLASS_$_DOMCDATASection
+-_OBJC_METACLASS_$_DOMCharacterData
+-_OBJC_METACLASS_$_DOMComment
+-_OBJC_METACLASS_$_DOMCounter
+ _OBJC_METACLASS_$_DOMCSSCharsetRule
+ _OBJC_METACLASS_$_DOMCSSFontFaceRule
+ _OBJC_METACLASS_$_DOMCSSImportRule
+@@ -219,6 +214,9 @@ _OBJC_METACLASS_$_DOMCSSStyleSheet
+ _OBJC_METACLASS_$_DOMCSSUnknownRule
+ _OBJC_METACLASS_$_DOMCSSValue
+ _OBJC_METACLASS_$_DOMCSSValueList
++_OBJC_METACLASS_$_DOMCharacterData
++_OBJC_METACLASS_$_DOMComment
++_OBJC_METACLASS_$_DOMCounter
+ _OBJC_METACLASS_$_DOMDocument
+ _OBJC_METACLASS_$_DOMDocumentFragment
+ _OBJC_METACLASS_$_DOMDocumentType
+@@ -231,16 +229,16 @@ _OBJC_METACLASS_$_DOMFileList
+ _OBJC_METACLASS_$_DOMHTMLAnchorElement
+ _OBJC_METACLASS_$_DOMHTMLAppletElement
+ _OBJC_METACLASS_$_DOMHTMLAreaElement
++_OBJC_METACLASS_$_DOMHTMLBRElement
+ _OBJC_METACLASS_$_DOMHTMLBaseElement
+ _OBJC_METACLASS_$_DOMHTMLBaseFontElement
+ _OBJC_METACLASS_$_DOMHTMLBodyElement
+-_OBJC_METACLASS_$_DOMHTMLBRElement
+ _OBJC_METACLASS_$_DOMHTMLButtonElement
+ _OBJC_METACLASS_$_DOMHTMLCanvasElement
+ _OBJC_METACLASS_$_DOMHTMLCollection
++_OBJC_METACLASS_$_DOMHTMLDListElement
+ _OBJC_METACLASS_$_DOMHTMLDirectoryElement
+ _OBJC_METACLASS_$_DOMHTMLDivElement
+-_OBJC_METACLASS_$_DOMHTMLDListElement
+ _OBJC_METACLASS_$_DOMHTMLDocument
+ _OBJC_METACLASS_$_DOMHTMLElement
+ _OBJC_METACLASS_$_DOMHTMLEmbedElement
+@@ -249,16 +247,16 @@ _OBJC_METACLASS_$_DOMHTMLFontElement
+ _OBJC_METACLASS_$_DOMHTMLFormElement
+ _OBJC_METACLASS_$_DOMHTMLFrameElement
+ _OBJC_METACLASS_$_DOMHTMLFrameSetElement
++_OBJC_METACLASS_$_DOMHTMLHRElement
+ _OBJC_METACLASS_$_DOMHTMLHeadElement
+ _OBJC_METACLASS_$_DOMHTMLHeadingElement
+-_OBJC_METACLASS_$_DOMHTMLHRElement
+ _OBJC_METACLASS_$_DOMHTMLHtmlElement
+ _OBJC_METACLASS_$_DOMHTMLIFrameElement
+ _OBJC_METACLASS_$_DOMHTMLImageElement
+ _OBJC_METACLASS_$_DOMHTMLInputElement
++_OBJC_METACLASS_$_DOMHTMLLIElement
+ _OBJC_METACLASS_$_DOMHTMLLabelElement
+ _OBJC_METACLASS_$_DOMHTMLLegendElement
+-_OBJC_METACLASS_$_DOMHTMLLIElement
+ _OBJC_METACLASS_$_DOMHTMLLinkElement
+ _OBJC_METACLASS_$_DOMHTMLMapElement
+ _OBJC_METACLASS_$_DOMHTMLMarqueeElement
+@@ -266,8 +264,8 @@ _OBJC_METACLASS_$_DOMHTMLMediaElement
+ _OBJC_METACLASS_$_DOMHTMLMenuElement
+ _OBJC_METACLASS_$_DOMHTMLMetaElement
+ _OBJC_METACLASS_$_DOMHTMLModElement
+-_OBJC_METACLASS_$_DOMHTMLObjectElement
+ _OBJC_METACLASS_$_DOMHTMLOListElement
++_OBJC_METACLASS_$_DOMHTMLObjectElement
+ _OBJC_METACLASS_$_DOMHTMLOptGroupElement
+ _OBJC_METACLASS_$_DOMHTMLOptionElement
+ _OBJC_METACLASS_$_DOMHTMLOptionsCollection
+@@ -302,9 +300,9 @@ _OBJC_METACLASS_$_DOMObject
+ _OBJC_METACLASS_$_DOMOverflowEvent
+ _OBJC_METACLASS_$_DOMProcessingInstruction
+ _OBJC_METACLASS_$_DOMProgressEvent
++_OBJC_METACLASS_$_DOMRGBColor
+ _OBJC_METACLASS_$_DOMRange
+ _OBJC_METACLASS_$_DOMRect
+-_OBJC_METACLASS_$_DOMRGBColor
+ _OBJC_METACLASS_$_DOMStyleSheet
+ _OBJC_METACLASS_$_DOMStyleSheetList
+ _OBJC_METACLASS_$_DOMText
+@@ -318,13 +316,14 @@ _OBJC_METACLASS_$_DOMXPathResult
+ _OBJC_METACLASS_$_WAKResponder
+ _OBJC_METACLASS_$_WAKView
+ _OBJC_METACLASS_$_WAKWindow
++_OBJC_METACLASS_$_WKQuadObject
+ _OBJC_METACLASS_$_WebArchive
+ _OBJC_METACLASS_$_WebBackForwardList
+ _OBJC_METACLASS_$_WebCache
+ _OBJC_METACLASS_$_WebCoreStatistics
++_OBJC_METACLASS_$_WebDataSource
+ _OBJC_METACLASS_$_WebDatabaseManager
+ _OBJC_METACLASS_$_WebDatabaseQuotaManager
+-_OBJC_METACLASS_$_WebDataSource
+ _OBJC_METACLASS_$_WebDefaultPolicyDelegate
+ _OBJC_METACLASS_$_WebDeviceOrientation
+ _OBJC_METACLASS_$_WebDeviceOrientationProviderMock
+@@ -340,10 +339,10 @@ _OBJC_METACLASS_$_WebGeolocation
+ _OBJC_METACLASS_$_WebGeolocationCoreLocationProvider
+ _OBJC_METACLASS_$_WebGeolocationPosition
+ _OBJC_METACLASS_$_WebGeolocationProviderIOS
+-_OBJC_METACLASS_$_WebHistory
+-_OBJC_METACLASS_$_WebHistoryItem
+ _OBJC_METACLASS_$_WebHTMLRepresentation
+ _OBJC_METACLASS_$_WebHTMLView
++_OBJC_METACLASS_$_WebHistory
++_OBJC_METACLASS_$_WebHistoryItem
+ _OBJC_METACLASS_$_WebInspector
+ _OBJC_METACLASS_$_WebItemProviderPasteboard
+ _OBJC_METACLASS_$_WebItemProviderRegistrationInfoList
+@@ -369,11 +368,13 @@ _OBJC_METACLASS_$_WebUndefined
+ _OBJC_METACLASS_$_WebUserContentURLPattern
+ _OBJC_METACLASS_$_WebView
+ _OBJC_METACLASS_$_WebVisiblePosition
+-_OBJC_METACLASS_$_WKQuadObject
+ _WAKViewDidScrollNotification
+ _WAKViewFrameSizeDidChangeNotification
+ _WAKWindowScreenScaleDidChangeNotification
+ _WAKWindowVisibilityDidChangeNotification
++_WKGetCurrentGraphicsContext
++_WKRectFill
++_WKSetCurrentGraphicsContext
+ _WebActionButtonKey
+ _WebActionElementKey
+ _WebActionFormKey
+@@ -381,9 +382,9 @@ _WebActionModifierFlagsKey
+ _WebActionNavigationTypeKey
+ _WebActionOriginalURLKey
+ _WebArchivePboardType
++_WebConsoleMessageCSSMessageSource
+ _WebConsoleMessageConsoleAPIMessageSource
+ _WebConsoleMessageContentBlockerMessageSource
+-_WebConsoleMessageCSSMessageSource
+ _WebConsoleMessageDebugMessageLevel
+ _WebConsoleMessageErrorMessageLevel
+ _WebConsoleMessageInfoMessageLevel
+@@ -453,6 +454,7 @@ _WebKitResourceLoadStatisticsDirectoryDefaultsKey
+ _WebKitSetBackgroundAndForegroundNotificationNames
+ _WebKitSetEndBackgroundTaskBlock
+ _WebKitSetInvalidWebBackgroundTaskIdentifier
++_WebKitSetIsClassic
+ _WebKitSetStartBackgroundTaskBlock
+ _WebLocalizedString
+ _WebOpenPanelConfigurationAllowMultipleFilesKey
+@@ -476,12 +478,12 @@ _WebQuickLookUTIKey
+ _WebScriptErrorDescriptionKey
+ _WebScriptErrorDomain
+ _WebScriptErrorLineNumberKey
++_WebSetWindowObjectClearedCallback
+ _WebStorageDidModifyOriginNotification
+ _WebStorageDirectoryDefaultsKey
+ _WebThreadAdoptAndRelease
+ _WebThreadCallDelegate
+ _WebThreadCallDelegateAsync
+-_webThreadDelegateMessageScopeCount
+ _WebThreadEnable
+ _WebThreadIsCurrent
+ _WebThreadIsEnabled
+@@ -494,12 +496,11 @@ _WebThreadLockFromAnyThreadNoLog
+ _WebThreadLockPopModal
+ _WebThreadLockPushModal
+ _WebThreadMakeNSInvocation
+-_WebThreadNotCurrent
+ _WebThreadNSRunLoop
++_WebThreadNotCurrent
+ _WebThreadPostNotification
+ _WebThreadRun
+ _WebThreadRunOnMainThread
+-_webThreadShouldYield
+ _WebThreadUnlock
+ _WebThreadUnlockFromAnyThread
+ _WebThreadUnlockGuardForMail
+@@ -508,6 +509,11 @@ _WebViewDidChangeNotification
+ _WebViewDidChangeSelectionNotification
+ _WebViewDidChangeTypingStyleNotification
+ _WebViewDidEndEditingNotification
++_WebViewProgressBackgroundColorKey
++_WebViewProgressEstimateChangedNotification
++_WebViewProgressEstimatedProgressKey
++_WebViewProgressStartedNotification
++_WebViewWillCloseNotification
+ _WebViewportFitAutoValue
+ _WebViewportFitContainValue
+ _WebViewportFitCoverValue
+@@ -519,11 +525,9 @@ _WebViewportMinimumScaleKey
+ _WebViewportShrinkToFitKey
+ _WebViewportUserScalableKey
+ _WebViewportWidthKey
+-_WebViewProgressBackgroundColorKey
+-_WebViewProgressEstimateChangedNotification
+-_WebViewProgressEstimatedProgressKey
+-_WebViewProgressStartedNotification
+-_WebViewWillCloseNotification
+-_WKGetCurrentGraphicsContext
+-_WKRectFill
+-_WKSetCurrentGraphicsContext
++__WebCreateFragment
++__WebHTMLViewPrintingMaximumShrinkFactor
++__WebHTMLViewPrintingMinimumShrinkFactor
++__WebViewDidStartAcceleratedCompositingNotification
++_webThreadDelegateMessageScopeCount
++_webThreadShouldYield
+diff --git a/Source/WebKitLegacy/ios/WebCoreSupport/WebChromeClientIOS.mm b/Source/WebKitLegacy/ios/WebCoreSupport/WebChromeClientIOS.mm
+index 607e26e30eada2b2753cca4ecbb4307e5896a6a9..9cd251d73a47a5841ee8a37566ca1942a44339ba 100644
+--- a/Source/WebKitLegacy/ios/WebCoreSupport/WebChromeClientIOS.mm
++++ b/Source/WebKitLegacy/ios/WebCoreSupport/WebChromeClientIOS.mm
+@@ -24,6 +24,13 @@
+  */
+ 
+ #import "WebChromeClientIOS.h"
++#import <WebCore/ShareData.h>
++#import <WebCore/WebCoreThreadRun.h>
++#import <wtf/BlockPtr.h>
++#import <UIKit/UIKit.h>
++#import <WebCore/UserGestureIndicator.h>
++#import <WebCore/HTMLSelectElement.h>
++#import <WebCore/HTMLTextFormControlElement.h>
+ 
+ #if PLATFORM(IOS_FAMILY)
+ 
+@@ -58,6 +65,7 @@
+ #import <WebCore/Icon.h>
+ #import <WebCore/IntRect.h>
+ #import <WebCore/LocalFrameInlines.h>
++#import <WebCore/LocalFrameView.h>
+ #import <WebCore/NodeDocument.h>
+ #import <WebCore/PlatformScreen.h>
+ #import <WebCore/RenderBox.h>
+@@ -98,6 +106,36 @@ static WebMediaCaptureType webMediaCaptureType(MediaCaptureType type)
+ 
+ WTF_MAKE_TZONE_ALLOCATED_IMPL(WebChromeClientIOS);
+ 
++#if defined(WEBKIT_IOS6)
++@interface NSObject (RevViewportForFrameCompat)
++- (void)webView:(WebView *)webView didReceiveViewportArguments:(NSDictionary *)arguments forFrame:(WebFrame *)frame;
++@end
++
++static inline bool uiKitDelegateImplements(WebView *webView, SEL selector)
++{
++    return [[webView _UIKitDelegate] respondsToSelector:selector];
++}
++
++static void callUIKitDelegateAsync(WebView *webView, SEL selector)
++{
++    if (![webView _UIKitDelegateForwarder])
++        return;
++
++    RetainPtr<id> delegate = [webView _UIKitDelegate];
++    if (![delegate respondsToSelector:selector])
++        return;
++
++    if (!WebThreadIsCurrent()) {
++        [delegate.get() performSelector:selector withObject:webView];
++        return;
++    }
++
++    RunLoop::mainSingleton().dispatch([delegate = WTF::move(delegate), webView = retainPtr(webView), selector] {
++        [delegate.get() performSelector:selector withObject:webView.get()];
++    });
++}
++#endif
++
+ void WebChromeClientIOS::setWindowRect(const WebCore::FloatRect& r)
+ {
+     [[webView() _UIDelegateForwarder] webView:webView() setFrame:r];
+@@ -161,14 +199,67 @@ static WebMediaCaptureType webMediaCaptureType(MediaCaptureType type)
+         [[webView() _UIKitDelegateForwarder] webView:webView() runOpenPanelForFileButtonWithResultListener:listener.get() configuration:configuration];
+ }
+ 
+-void WebChromeClientIOS::showShareSheet(ShareDataWithParsedURL&&, CompletionHandler<void(bool)>&&)
++#if defined(WEBKIT_IOS6)
++static UIViewController *viewControllerToPresentFrom()
++{
++    UIViewController *presenter = [[[UIApplication sharedApplication] keyWindow] rootViewController];
++    while (presenter.presentedViewController)
++        presenter = presenter.presentedViewController;
++    return presenter;
++}
++#endif
++
++void WebChromeClientIOS::showShareSheet(ShareDataWithParsedURL&& data, CompletionHandler<void(bool)>&& completionHandler)
+ {
++#if defined(WEBKIT_IOS6)
++    auto items = adoptNS([[NSMutableArray alloc] init]);
++    if (!data.shareData.text.isEmpty())
++        [items addObject:data.shareData.text.createNSString().get()];
++    if (data.url)
++        [items addObject:data.url->createNSURL().get()];
++    if (![items count] && !data.shareData.title.isEmpty())
++        [items addObject:data.shareData.title.createNSString().get()];
++
++    if (![items count]) {
++        completionHandler(false);
++        return;
++    }
++
++    dispatch_async(dispatch_get_main_queue(), makeBlockPtr([items = WTF::move(items), completionHandler = WTF::move(completionHandler)] () mutable {
++        auto finish = [completionHandler = WTF::move(completionHandler)] (bool completed) mutable {
++            WebThreadRun(makeBlockPtr([completionHandler = WTF::move(completionHandler), completed] () mutable {
++                completionHandler(completed);
++            }).get());
++        };
++
++        UIViewController *presenter = viewControllerToPresentFrom();
++        if (!presenter) {
++            finish(false);
++            return;
++        }
++
++        auto controller = adoptNS([[UIActivityViewController alloc] initWithActivityItems:items.get() applicationActivities:nil]);
++ALLOW_DEPRECATED_DECLARATIONS_BEGIN
++        [controller setCompletionHandler:makeBlockPtr([finish = WTF::move(finish)] (NSString *, BOOL completed) mutable {
++            finish(completed);
++        }).get()];
++ALLOW_DEPRECATED_DECLARATIONS_END
++        [presenter presentViewController:controller.get() animated:YES completion:nil];
++    }).get());
++#else
++    UNUSED_PARAM(data);
++    completionHandler(false);
++#endif
+ }
+ 
+-#if ENABLE(IOS_TOUCH_EVENTS)
++#if ENABLE(IOS_TOUCH_EVENTS) || ENABLE(TOUCH_EVENTS)
+ 
+ void WebChromeClientIOS::didPreventDefaultForEvent()
+ {
++#if defined(WEBKIT_IOS6)
++    if (!uiKitDelegateImplements(webView(), @selector(webViewDidPreventDefaultForEvent:)))
++        return;
++#endif
+     [[webView() _UIKitDelegateForwarder] webViewDidPreventDefaultForEvent:webView()];
+ }
+ 
+@@ -198,6 +289,13 @@ static WebMediaCaptureType webMediaCaptureType(MediaCaptureType type)
+     return WebViewportFitAutoValue;
+ }
+ 
++static inline float resolvedViewportLength(float length, float deviceLength)
++{
++    if (length == WebCore::ViewportArguments::ValueDeviceWidth || length == WebCore::ViewportArguments::ValueDeviceHeight)
++        return deviceLength;
++    return length;
++}
++
+ static inline NSDictionary *dictionaryForViewportArguments(const WebCore::ViewportArguments& arguments)
+ {
+     return @{ WebViewportInitialScaleKey: @(arguments.zoom),
+@@ -206,8 +304,8 @@ static WebMediaCaptureType webMediaCaptureType(MediaCaptureType type)
+               WebViewportUserScalableKey: @(arguments.userZoom),
+               WebViewportShrinkToFitKey: @(0),
+               WebViewportFitKey: nameForViewportFitValue(arguments.viewportFit),
+-              WebViewportWidthKey: @(arguments.width),
+-              WebViewportHeightKey: @(arguments.height) };
++              WebViewportWidthKey: @(resolvedViewportLength(arguments.width, WebCore::screenSize().width())),
++              WebViewportHeightKey: @(resolvedViewportLength(arguments.height, WebCore::screenSize().height())) };
+ }
+ 
+ FloatSize WebChromeClientIOS::screenSize() const
+@@ -217,9 +315,7 @@ static WebMediaCaptureType webMediaCaptureType(MediaCaptureType type)
+ 
+ FloatSize WebChromeClientIOS::availableScreenSize() const
+ {
+-    // WebKit1 code should query the WAKWindow for the available screen size.
+-    ASSERT_NOT_REACHED();
+-    return FloatSize();
++    return FloatSize(WebCore::availableScreenSize());
+ }
+ 
+ FloatSize WebChromeClientIOS::overrideScreenSize() const
+@@ -234,7 +330,14 @@ static WebMediaCaptureType webMediaCaptureType(MediaCaptureType type)
+ 
+ void WebChromeClientIOS::dispatchViewportPropertiesDidChange(const WebCore::ViewportArguments& arguments) const
+ {
+-    [[webView() _UIKitDelegateForwarder] webView:webView() didReceiveViewportArguments:dictionaryForViewportArguments(arguments)];
++    NSDictionary *dictionary = dictionaryForViewportArguments(arguments);
++#if defined(WEBKIT_IOS6)
++    if (uiKitDelegateImplements(webView(), @selector(webView:didReceiveViewportArguments:forFrame:))) {
++        [[webView() _UIKitDelegateForwarder] webView:webView() didReceiveViewportArguments:dictionary forFrame:[webView() mainFrame]];
++        return;
++    }
++#endif
++    [[webView() _UIKitDelegateForwarder] webView:webView() didReceiveViewportArguments:dictionary];
+ }
+ 
+ void WebChromeClientIOS::dispatchDisabledAdaptationsDidChange(const OptionSet<WebCore::DisabledAdaptations>&) const
+@@ -258,11 +361,19 @@ static WebMediaCaptureType webMediaCaptureType(MediaCaptureType type)
+ 
+ void WebChromeClientIOS::didStartOverflowScroll()
+ {
++#if defined(WEBKIT_IOS6)
++    if (!uiKitDelegateImplements(webView(), @selector(webViewDidStartOverflowScroll:)))
++        return;
++#endif
+     [[[webView() _UIKitDelegateForwarder] asyncForwarder] webViewDidStartOverflowScroll:webView()];
+ }
+ 
+ void WebChromeClientIOS::didEndOverflowScroll()
+ {
++#if defined(WEBKIT_IOS6)
++    if (!uiKitDelegateImplements(webView(), @selector(webViewDidEndOverflowScroll:)))
++        return;
++#endif
+     [[[webView() _UIKitDelegateForwarder] asyncForwarder] webViewDidEndOverflowScroll:webView()];
+ }
+ 
+@@ -279,10 +390,19 @@ static WebMediaCaptureType webMediaCaptureType(MediaCaptureType type)
+         m_formNotificationSuppressions = 0;
+ }
+ 
+-void WebChromeClientIOS::elementDidFocus(WebCore::Element& element, const WebCore::FocusOptions&)
++void WebChromeClientIOS::elementDidFocus(WebCore::Element& element, const WebCore::FocusOptions& options)
+ {
+-    if (m_formNotificationSuppressions <= 0)
+-        [[webView() _UIKitDelegateForwarder] webView:webView() elementDidFocusNode:kit(&element)];
++    if (m_formNotificationSuppressions > 0)
++        return;
++
++    //
++    bool canBeTypedInto = is<WebCore::HTMLTextFormControlElement>(element)
++        || is<WebCore::HTMLSelectElement>(element)
++        || element.hasEditableStyle();
++    if (!canBeTypedInto)
++        return;
++
++    [[webView() _UIKitDelegateForwarder] webView:webView() elementDidFocusNode:kit(&element)];
+ }
+ 
+ void WebChromeClientIOS::elementDidBlur(WebCore::Element& element)
+@@ -311,7 +431,11 @@ static WebMediaCaptureType webMediaCaptureType(MediaCaptureType type)
+ 
+ void WebChromeClientIOS::didFlushCompositingLayers()
+ {
++#if defined(WEBKIT_IOS6)
++    callUIKitDelegateAsync(webView(), @selector(webViewDidCommitCompositingLayerChanges:));
++#else
+     [[[webView() _UIKitDelegateForwarder] asyncForwarder] webViewDidCommitCompositingLayerChanges:webView()];
++#endif
+ }
+ 
+ bool WebChromeClientIOS::fetchCustomFixedPositionLayoutRect(IntRect& rect)
+@@ -332,6 +456,11 @@ static WebMediaCaptureType webMediaCaptureType(MediaCaptureType type)
+ 
+ void WebChromeClientIOS::addOrUpdateScrollingLayer(Node* node, PlatformLayer* scrollingLayer, PlatformLayer* contentsLayer, const IntSize& scrollSize, bool allowHorizontalScrollbar, bool allowVerticalScrollbar)
+ {
++#if defined(WEBKIT_IOS6)
++    if (!uiKitDelegateImplements(webView(), @selector(webView:didCreateOrUpdateScrollingLayer:withContentsLayer:scrollSize:forNode:allowHorizontalScrollbar:allowVerticalScrollbar:)))
++        return;
++#endif
++
+     DOMNode *domNode = kit(node);
+ 
+     [[[webView() _UIKitDelegateForwarder] asyncForwarder] webView:webView() didCreateOrUpdateScrollingLayer:scrollingLayer withContentsLayer:contentsLayer scrollSize:[NSValue valueWithSize:scrollSize] forNode:domNode
+@@ -340,6 +469,11 @@ static WebMediaCaptureType webMediaCaptureType(MediaCaptureType type)
+ 
+ void WebChromeClientIOS::removeScrollingLayer(Node* node, PlatformLayer* scrollingLayer, PlatformLayer* contentsLayer)
+ {
++#if defined(WEBKIT_IOS6)
++    if (!uiKitDelegateImplements(webView(), @selector(webView:willRemoveScrollingLayer:withContentsLayer:forNode:)))
++        return;
++#endif
++
+     DOMNode *domNode = kit(node);
+     [[[webView() _UIKitDelegateForwarder] asyncForwarder] webView:webView() willRemoveScrollingLayer:scrollingLayer withContentsLayer:contentsLayer forNode:domNode];
+ }
+diff --git a/Source/WebKitLegacy/mac/WebView/WebViewPrivate.h b/Source/WebKitLegacy/mac/WebView/WebViewPrivate.h
+index 339cbcda1a95ca6ee4607012d3aef6a5a27fd9ed..48088f8f8eed6ea80f759cb622b4f4f8fbbc9e12 100644
+--- a/Source/WebKitLegacy/mac/WebView/WebViewPrivate.h
++++ b/Source/WebKitLegacy/mac/WebView/WebViewPrivate.h
+@@ -167,6 +167,17 @@ typedef enum {
+ 
+ @end
+ 
++#if defined(WEBKIT_IOS6)
++typedef void (*WebWindowObjectClearedCallback)(WebView *webView, WebFrame *frame);
++#ifdef __cplusplus
++extern "C" {
++#endif
++extern __attribute__((visibility("default"))) void WebSetWindowObjectClearedCallback(WebWindowObjectClearedCallback);
++#ifdef __cplusplus
++}
++#endif
++#endif
++
+ @interface WebView (WebPendingPublic)
+ 
+ - (void)scheduleInRunLoop:(NSRunLoop *)runLoop forMode:(NSString *)mode;
+@@ -427,11 +438,18 @@ Could be worth adding to the API.
+ - (DOMCSSStyleDeclaration *)styleAtSelectionStart;
+ 
+ - (NSUInteger)_renderTreeSize;
++- (CGSize)_contentsSize;
+ 
+ - (void)_setResourceLoadSchedulerSuspended:(BOOL)suspend;
+ + (void)_setTileCacheLayerPoolCapacity:(unsigned)capacity;
+++ (void)_setMemoryCacheCapacitiesForLowMemoryDevice;
+ 
++- (void)_markScrolledByUser;
+ + (void)_releaseMemoryNow;
++- (void)_setLayoutViewportRect:(CGRect)rect;
+++ (void)_relieveMemoryPressure;
+++ (void)_capDecodedImageMemory:(unsigned)bytes;
+++ (void)_reportMemoryBreakdown;
+ 
+ - (void)_replaceCurrentHistoryItem:(WebHistoryItem *)item;
+ 
+@@ -761,6 +779,14 @@ Could be worth adding to the API.
+ + (void)_removeUserStyleSheetsFromGroup:(NSString *)groupName world:(WebScriptWorld *)world;
+ + (void)_removeAllUserContentFromGroup:(NSString *)groupName;
+ 
++- (BOOL)_addContentRuleList:(NSString *)ruleJSON name:(NSString *)name;
++- (void)_removeContentRuleListNamed:(NSString *)name;
++- (void)_removeAllContentRuleLists;
++
+++ (void)_setJavaScriptBytecodeCacheDirectory:(NSString *)path maximumSize:(unsigned long long)maximumSize;
+++ (void)_flushJavaScriptBytecodeCache;
+++ (void)_clearJavaScriptBytecodeCache;
++
+ // SPI for DumpRenderTree
+ + (void)_setLoadResourcesSerially:(BOOL)serialize;
+ - (void)_forceRepaintForTesting;
+@@ -788,6 +814,9 @@ Could be worth adding to the API.
+ - (WebPageVisibilityState)_visibilityState;
+ - (void)_setVisibilityState:(WebPageVisibilityState)visibilityState isInitialState:(BOOL)isInitialState;
+ 
++- (void)_sendInputString:(NSString *)string withFlags:(unsigned)flags fromVariantKey:(BOOL)fromVariantKey;
++- (void)_sendDeleteFromInputWithFlags:(unsigned)flags;
++
+ #if !TARGET_OS_IPHONE
+ - (BOOL)windowOcclusionDetectionEnabled;
+ - (void)setWindowOcclusionDetectionEnabled:(BOOL)flag;

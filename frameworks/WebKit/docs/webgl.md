@@ -14,7 +14,7 @@ webgl-without-errors    0x0
 ```
 
 Those are five of the checks in `tests/device/web-platform.html`, run on the
-device by `tests/device/run.py`, so a regression is a failing test rather than a
+device by `tests/device/run.lua`, so a regression is a failing test rather than a
 discovery.
 
 WebGL **2.0** is not here and will not be: it needs OpenGL ES 3.0 and this
@@ -118,7 +118,7 @@ complaining and never draws. It is given a `CGImage` over the same surface
 instead - `IOSurface::createNativeImage`, which is the path `toDataURL` was
 already proving correct on this device.
 
-`tests/device/gl-present.py` is the check that would have caught this: a canvas
+`tests/device/gl-present.lua` is the check that would have caught this: a canvas
 cleared to red, a screenshot, and the share of the page area that is actually
 red. It reads 97%.
 
@@ -136,7 +136,7 @@ frame-rate numbers above are measured on.
 ## What Khronos' conformance suite says
 
 The suite is not vendored - it is cloned separately and served from the Mac, and
-`tests/device/conformance.py` runs named tests on the phone. What has been run
+`tests/device/conformance.lua` runs named tests on the phone. What has been run
 so far, and what it found:
 
 | Area | Result |
@@ -217,4 +217,4 @@ Two that are still open, and both of them are this driver rather than this port:
   prepare, the `CGImage` over the surface, and the drawing buffer's own
   bookkeeping - rather than per pixel. Nothing heavier has been measured, and
   the per-frame cost is where a real page will feel this port.
-  `tests/device/gl-frame-rate.py` prints the numbers.
+  `tests/device/gl-frame-rate.lua` prints the numbers.

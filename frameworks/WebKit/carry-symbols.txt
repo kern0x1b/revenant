@@ -1,6 +1,6 @@
 # Symbols this port's frameworks depend on and provide, as of the last
-# build known to load on the device. tools/symbol-check.py compares a
-# fresh build against this.
+# build known to load on the device. tools/symbol-check.lua compares a
+# fresh build against this, and so does every build of the engine.
 #
 # undefined <framework> <symbol>  something iOS 6 must already have.
 #   A new one means an upstream change reached for API this system may

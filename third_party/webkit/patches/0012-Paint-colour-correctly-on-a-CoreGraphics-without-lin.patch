@@ -1,0 +1,1247 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Wed, 16 Sep 2026 12:00:00 +0200
+Subject: [PATCH] Paint colour correctly on a CoreGraphics without linear
+ colour spaces
+
+The CoreGraphics of iOS 6 matches colour spaces by primaries and ignores
+transfer functions, so it cannot hold a linear one. linearRGB becomes a
+genuinely linear space the engine converts itself: pixels are converted
+between sRGB and linearRGB when crossing pixel buffers, SVG filters interpolate
+in linear light, a filter gets its source in the space this port paints in, and
+linear sRGB stays distinguishable from sRGB. Gradients interpolate
+premultiplied, paths are drawn through the native CoreGraphics sequence, and
+the modern spelling of backdrop-filter reaches the style adjuster.
+---
+ .../WebCore/platform/graphics/ColorSpace.cpp  |  13 +-
+ Source/WebCore/platform/graphics/ColorSpace.h |  13 +
+ .../graphics/DestinationColorSpace.cpp        | 267 ++++++++++++++++++
+ .../platform/graphics/DestinationColorSpace.h | 100 +++++++
+ .../graphics/ImageBufferContextSwitcher.cpp   |   5 +-
+ .../graphics/PixelBufferConversion.cpp        |  92 ++++++
+ .../platform/graphics/cg/ColorSpaceCG.cpp     |  12 +
+ .../graphics/cg/GradientRendererCG.cpp        |   5 +
+ .../graphics/cg/GraphicsContextCG.cpp         | 122 +++++++-
+ .../cg/ImageBufferCGBitmapBackend.cpp         |  57 ++++
+ .../graphics/cg/ImageBufferCGBitmapBackend.h  |   5 +
+ .../platform/graphics/cg/ImageUtilitiesCG.cpp |   3 +-
+ .../platform/graphics/filters/FilterImage.cpp |  24 +-
+ .../WebCore/rendering/RenderLayerFilters.cpp  |   2 +-
+ .../legacy/LegacyRenderSVGResourceFilter.cpp  |   2 +-
+ Source/WebCore/style/StyleAdjuster.cpp        |  72 ++++-
+ 16 files changed, 761 insertions(+), 33 deletions(-)
+ create mode 100644 Source/WebCore/platform/graphics/DestinationColorSpace.cpp
+ create mode 100644 Source/WebCore/platform/graphics/DestinationColorSpace.h
+
+diff --git a/Source/WebCore/platform/graphics/ColorSpace.cpp b/Source/WebCore/platform/graphics/ColorSpace.cpp
+index c71bee1d2e60e85607ab2669823bdbd3d670d7af..42b84b8d37a857572e7f5da452b48fb049bdd4b7 100644
+--- a/Source/WebCore/platform/graphics/ColorSpace.cpp
++++ b/Source/WebCore/platform/graphics/ColorSpace.cpp
+@@ -70,7 +70,10 @@ const ColorSpace& ColorSpace::SRGB()
+ 
+ const ColorSpace& ColorSpace::LinearSRGB()
+ {
+-#if USE(CG) || USE(SKIA)
++#if defined(WEBKIT_IOS6)
++    static NeverDestroyed<ColorSpace> colorSpace { linearSRGBColorSpaceSingleton(), true };
++    return colorSpace.get();
++#elif USE(CG) || USE(SKIA)
+     return knownColorSpace<linearSRGBColorSpaceSingleton>();
+ #else
+     return knownColorSpace<PlatformColorSpace::Name::LinearSRGB>();
+@@ -148,6 +151,10 @@ const ColorSpace& ColorSpace::ExtendedRec2020()
+ 
+ bool operator==(const ColorSpace& a, const ColorSpace& b)
+ {
++#if defined(WEBKIT_IOS6)
++    if (a.isLinearSRGB() != b.isLinearSRGB())
++        return false;
++#endif
+ #if USE(CG)
+     // Do not protect the platformColorSpace here as it is not strictly required for safety and
+     // this code is performance sensitive.
+@@ -190,7 +197,7 @@ std::optional<ColorSpace> ColorSpace::asExtended() const
+ {
+     if (usesExtendedRange())
+         return *this;
+-#if USE(CG)
++#if USE(CG) && !defined(WEBKIT_IOS6)
+     // Avoid refing color space here as this is performance-sensitive.
+     SUPPRESS_UNRETAINED_ARG if (RetainPtr colorSpace = adoptCF(CGColorSpaceCreateExtended(platformColorSpace())))
+         return ColorSpace(WTF::move(colorSpace));
+@@ -232,7 +239,7 @@ bool ColorSpace::usesExtendedRange() const
+ 
+ bool ColorSpace::usesITUR_2100TF() const
+ {
+-#if USE(CG)
++#if USE(CG) && !defined(WEBKIT_IOS6)
+     // Avoid refing color space here as this is performance-sensitive.
+     SUPPRESS_UNRETAINED_ARG return CGColorSpaceUsesITUR_2100TF(platformColorSpace());
+ #else
+diff --git a/Source/WebCore/platform/graphics/ColorSpace.h b/Source/WebCore/platform/graphics/ColorSpace.h
+index 6633e65f785af147d8e867a4ab8eae7ca8414797..0b575ee7fddd8fa49d1e50a835f830a582a130a2 100644
+--- a/Source/WebCore/platform/graphics/ColorSpace.h
++++ b/Source/WebCore/platform/graphics/ColorSpace.h
+@@ -61,6 +61,16 @@ public:
+ #endif
+     }
+ 
++#if defined(WEBKIT_IOS6)
++    ColorSpace(PlatformColorSpace platformColorSpace, bool isLinearSRGB)
++        : m_platformColorSpace { WTF::move(platformColorSpace) }
++        , m_isLinearSRGB { isLinearSRGB }
++    {
++    }
++
++    bool isLinearSRGB() const { return m_isLinearSRGB; }
++#endif
++
+ #if USE(SKIA)
+     PlatformColorSpaceValue platformColorSpace() const { return m_platformColorSpace; }
+ #else
+@@ -79,6 +89,9 @@ public:
+ 
+ private:
+     PlatformColorSpace m_platformColorSpace;
++#if defined(WEBKIT_IOS6)
++    bool m_isLinearSRGB { false };
++#endif
+ };
+ 
+ WEBCORE_EXPORT bool operator==(const ColorSpace&, const ColorSpace&);
+diff --git a/Source/WebCore/platform/graphics/DestinationColorSpace.cpp b/Source/WebCore/platform/graphics/DestinationColorSpace.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..8af6ae015f664a1979b796a534ec0f2f2a6fdfb0
+--- /dev/null
++++ b/Source/WebCore/platform/graphics/DestinationColorSpace.cpp
+@@ -0,0 +1,267 @@
++/*
++ * Copyright (C) 2021 Apple Inc. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
++ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
++ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
++ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
++ * THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include "config.h"
++#include "DestinationColorSpace.h"
++#include "NotImplemented.h"
++
++#include <wtf/NeverDestroyed.h>
++#include <wtf/text/TextStream.h>
++
++#if USE(CG)
++#include "ColorSpaceCG.h"
++#include <pal/spi/cg/CoreGraphicsSPI.h>
++#elif USE(SKIA)
++#include "ColorSpaceSkia.h"
++#endif
++
++namespace WebCore {
++
++#if USE(CG) || USE(SKIA)
++#if USE(CG)
++using KnownColorSpaceAccessor = CGColorSpaceRef();
++#elif USE(SKIA)
++using KnownColorSpaceAccessor = sk_sp<SkColorSpace>();
++#endif
++template<KnownColorSpaceAccessor accessor> static const DestinationColorSpace& knownColorSpace()
++{
++    static NeverDestroyed<DestinationColorSpace> colorSpace { accessor() };
++    return colorSpace.get();
++}
++#else
++template<PlatformColorSpace::Name name> static const DestinationColorSpace& knownColorSpace()
++{
++    static NeverDestroyed<DestinationColorSpace> colorSpace { name };
++    return colorSpace.get();
++}
++#endif
++
++const DestinationColorSpace& DestinationColorSpace::SRGB()
++{
++#if USE(CG) || USE(SKIA)
++    return knownColorSpace<sRGBColorSpaceSingleton>();
++#else
++    return knownColorSpace<PlatformColorSpace::Name::SRGB>();
++#endif
++}
++
++const DestinationColorSpace& DestinationColorSpace::LinearSRGB()
++{
++#if defined(WEBKIT_IOS6)
++    static NeverDestroyed<DestinationColorSpace> colorSpace { linearSRGBColorSpaceSingleton(), true };
++    return colorSpace.get();
++#elif USE(CG) || USE(SKIA)
++    return knownColorSpace<linearSRGBColorSpaceSingleton>();
++#else
++    return knownColorSpace<PlatformColorSpace::Name::LinearSRGB>();
++#endif
++}
++
++#if ENABLE(DESTINATION_COLOR_SPACE_DISPLAY_P3)
++const DestinationColorSpace& DestinationColorSpace::DisplayP3()
++{
++#if USE(CG) || USE(SKIA)
++    return knownColorSpace<displayP3ColorSpaceSingleton>();
++#else
++    return knownColorSpace<PlatformColorSpace::Name::DisplayP3>();
++#endif
++}
++
++const DestinationColorSpace& DestinationColorSpace::ExtendedDisplayP3()
++{
++#if USE(CG) || USE(SKIA)
++    return knownColorSpace<extendedDisplayP3ColorSpaceSingleton>();
++#else
++    return knownColorSpace<PlatformColorSpace::Name::ExtendedDisplayP3>();
++#endif
++}
++
++const DestinationColorSpace& DestinationColorSpace::LinearDisplayP3()
++{
++#if USE(CG) || USE(SKIA)
++    return knownColorSpace<linearDisplayP3ColorSpaceSingleton>();
++#else
++    return knownColorSpace<PlatformColorSpace::Name::LinearDisplayP3>();
++#endif
++}
++
++const DestinationColorSpace& DestinationColorSpace::ExtendedLinearDisplayP3()
++{
++#if USE(CG) || USE(SKIA)
++    return knownColorSpace<extendedLinearDisplayP3ColorSpaceSingleton>();
++#else
++    return knownColorSpace<PlatformColorSpace::Name::ExtendedLinearDisplayP3>();
++#endif
++}
++#endif
++
++#if ENABLE(DESTINATION_COLOR_SPACE_EXTENDED_SRGB)
++const DestinationColorSpace& DestinationColorSpace::ExtendedSRGB()
++{
++#if USE(CG) || USE(SKIA)
++    return knownColorSpace<extendedSRGBColorSpaceSingleton>();
++#else
++    return knownColorSpace<PlatformColorSpace::Name::ExtendedSRGB>();
++#endif
++}
++
++const DestinationColorSpace& DestinationColorSpace::ExtendedLinearSRGB()
++{
++#if USE(CG) || USE(SKIA)
++    return knownColorSpace<extendedLinearSRGBColorSpaceSingleton>();
++#else
++    return knownColorSpace<PlatformColorSpace::Name::ExtendedLinearSRGB>();
++#endif
++}
++#endif
++
++#if ENABLE(DESTINATION_COLOR_SPACE_EXTENDED_REC_2020)
++const DestinationColorSpace& DestinationColorSpace::ExtendedRec2020()
++{
++#if USE(CG)
++    return knownColorSpace<ITUR_2020ColorSpaceSingleton>();
++#else
++    return knownColorSpace<PlatformColorSpace::Name::ExtendedRec2020>();
++#endif
++}
++#endif
++
++bool operator==(const DestinationColorSpace& a, const DestinationColorSpace& b)
++{
++#if defined(WEBKIT_IOS6)
++    if (a.isLinearSRGB() != b.isLinearSRGB())
++        return false;
++#endif
++#if USE(CG)
++    SUPPRESS_UNRETAINED_ARG return CGColorSpaceEqualToColorSpace(a.platformColorSpace(), b.platformColorSpace());
++#elif USE(SKIA)
++    return SkColorSpace::Equals(a.platformColorSpace().get(), b.platformColorSpace().get());
++#else
++    return a.platformColorSpace() == b.platformColorSpace();
++#endif
++}
++
++std::optional<DestinationColorSpace> DestinationColorSpace::asRGB() const
++{
++#if USE(CG)
++    SUPPRESS_UNRETAINED_LOCAL CGColorSpaceRef colorSpace = platformColorSpace();
++    if (CGColorSpaceGetModel(colorSpace) == kCGColorSpaceModelIndexed)
++        colorSpace = CGColorSpaceGetBaseColorSpace(colorSpace);
++
++    if (CGColorSpaceGetModel(colorSpace) != kCGColorSpaceModelRGB)
++        return std::nullopt;
++
++    if (usesExtendedRange())
++        return std::nullopt;
++
++    return DestinationColorSpace(colorSpace);
++
++#elif USE(SKIA)
++    if (platformColorSpace()->isSRGB())
++        return SRGB();
++    return std::nullopt;
++
++#else
++    return *this;
++#endif
++}
++
++std::optional<DestinationColorSpace> DestinationColorSpace::asExtended() const
++{
++    if (usesExtendedRange())
++        return *this;
++#if USE(CG) && !defined(WEBKIT_IOS6)
++    SUPPRESS_UNRETAINED_ARG if (RetainPtr colorSpace = adoptCF(CGColorSpaceCreateExtended(platformColorSpace())))
++        return DestinationColorSpace(WTF::move(colorSpace));
++#endif
++    return std::nullopt;
++}
++
++bool DestinationColorSpace::supportsOutput() const
++{
++#if USE(CG)
++    SUPPRESS_UNRETAINED_ARG return CGColorSpaceSupportsOutput(platformColorSpace());
++#else
++    notImplemented();
++    return true;
++#endif
++}
++
++bool DestinationColorSpace::usesRGBColorModel() const
++{
++#if USE(CG)
++    SUPPRESS_UNRETAINED_ARG return CGColorSpaceGetModel(platformColorSpace()) == kCGColorSpaceModelRGB;
++#else
++    return true;
++#endif
++}
++
++bool DestinationColorSpace::usesExtendedRange() const
++{
++#if USE(CG)
++    SUPPRESS_UNRETAINED_ARG return CGColorSpaceUsesExtendedRange(platformColorSpace());
++#else
++    notImplemented();
++    return false;
++#endif
++}
++
++bool DestinationColorSpace::usesITUR_2100TF() const
++{
++#if USE(CG) && !defined(WEBKIT_IOS6)
++    SUPPRESS_UNRETAINED_ARG return CGColorSpaceUsesITUR_2100TF(platformColorSpace());
++#else
++    notImplemented();
++    return false;
++#endif
++}
++
++TextStream& operator<<(TextStream& ts, const DestinationColorSpace& colorSpace)
++{
++    if (colorSpace == DestinationColorSpace::SRGB())
++        ts << "sRGB"_s;
++    else if (colorSpace == DestinationColorSpace::LinearSRGB())
++        ts << "LinearSRGB"_s;
++#if ENABLE(DESTINATION_COLOR_SPACE_DISPLAY_P3)
++    else if (colorSpace == DestinationColorSpace::DisplayP3())
++        ts << "DisplayP3"_s;
++#endif
++#if ENABLE(DESTINATION_COLOR_SPACE_EXTENDED_SRGB)
++    else if (colorSpace == DestinationColorSpace::ExtendedSRGB())
++        ts << "ExtendedSRGB"_s;
++#endif
++#if ENABLE(DESTINATION_COLOR_SPACE_EXTENDED_REC_2020)
++    else if (colorSpace == DestinationColorSpace::ExtendedRec2020())
++        ts << "ExtendedRec2020"_s;
++#endif
++#if USE(CG)
++    else if (RetainPtr description = adoptCF(CGColorSpaceCopyICCProfileDescription(protect(colorSpace.platformColorSpace()).get())))
++        ts << String(description.get());
++#endif
++
++    return ts;
++}
++
++}
+diff --git a/Source/WebCore/platform/graphics/DestinationColorSpace.h b/Source/WebCore/platform/graphics/DestinationColorSpace.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..e678993cf0721f650a655beb312ec981e2cc4afa
+--- /dev/null
++++ b/Source/WebCore/platform/graphics/DestinationColorSpace.h
+@@ -0,0 +1,100 @@
++/*
++ * Copyright (C) 2021 Apple Inc. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
++ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
++ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
++ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
++ * THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#pragma once
++
++#include <WebCore/PlatformColorSpace.h>
++#include <WebCore/PlatformExportMacros.h>
++#include <optional>
++#include <wtf/Assertions.h>
++#include <wtf/Forward.h>
++#include <wtf/Platform.h>
++#include <wtf/StdLibExtras.h>
++
++namespace WebCore {
++
++class DestinationColorSpace {
++public:
++    WEBCORE_EXPORT static const DestinationColorSpace& SRGB();
++    WEBCORE_EXPORT static const DestinationColorSpace& LinearSRGB();
++#if ENABLE(DESTINATION_COLOR_SPACE_DISPLAY_P3)
++    WEBCORE_EXPORT static const DestinationColorSpace& DisplayP3();
++    WEBCORE_EXPORT static const DestinationColorSpace& ExtendedDisplayP3();
++    WEBCORE_EXPORT static const DestinationColorSpace& LinearDisplayP3();
++    WEBCORE_EXPORT static const DestinationColorSpace& ExtendedLinearDisplayP3();
++#endif
++#if ENABLE(DESTINATION_COLOR_SPACE_EXTENDED_SRGB)
++    WEBCORE_EXPORT static const DestinationColorSpace& ExtendedSRGB();
++    WEBCORE_EXPORT static const DestinationColorSpace& ExtendedLinearSRGB();
++#endif
++#if ENABLE(DESTINATION_COLOR_SPACE_EXTENDED_REC_2020)
++    WEBCORE_EXPORT static const DestinationColorSpace& ExtendedRec2020();
++#endif
++
++    explicit DestinationColorSpace(PlatformColorSpace platformColorSpace)
++        : m_platformColorSpace { WTF::move(platformColorSpace) }
++    {
++#if USE(CG) || USE(SKIA)
++        ASSERT(m_platformColorSpace);
++#endif
++    }
++
++#if defined(WEBKIT_IOS6)
++    DestinationColorSpace(PlatformColorSpace platformColorSpace, bool isLinearSRGB)
++        : m_platformColorSpace { WTF::move(platformColorSpace) }
++        , m_isLinearSRGB { isLinearSRGB }
++    {
++    }
++
++    bool isLinearSRGB() const { return m_isLinearSRGB; }
++#endif
++
++#if USE(SKIA)
++    PlatformColorSpaceValue platformColorSpace() const { return m_platformColorSpace; }
++#else
++    PlatformColorSpaceValue platformColorSpace() const { return m_platformColorSpace.get(); }
++#endif
++    PlatformColorSpace serializableColorSpace() const { return m_platformColorSpace; }
++
++    WEBCORE_EXPORT std::optional<DestinationColorSpace> asRGB() const;
++    WEBCORE_EXPORT std::optional<DestinationColorSpace> asExtended() const;
++
++    WEBCORE_EXPORT bool supportsOutput() const;
++
++    WEBCORE_EXPORT bool usesRGBColorModel() const;
++    WEBCORE_EXPORT bool usesExtendedRange() const;
++    bool usesITUR_2100TF() const;
++
++private:
++    PlatformColorSpace m_platformColorSpace;
++#if defined(WEBKIT_IOS6)
++    bool m_isLinearSRGB { false };
++#endif
++};
++
++WEBCORE_EXPORT bool operator==(const DestinationColorSpace&, const DestinationColorSpace&);
++
++WEBCORE_EXPORT TextStream& operator<<(TextStream&, const DestinationColorSpace&);
++}
+diff --git a/Source/WebCore/platform/graphics/ImageBufferContextSwitcher.cpp b/Source/WebCore/platform/graphics/ImageBufferContextSwitcher.cpp
+index c61c213f3d4cdf89d373df07c0b446a5fe004898..1f53667a1b0a20d2ee9b91e11001f862f663e6c4 100644
+--- a/Source/WebCore/platform/graphics/ImageBufferContextSwitcher.cpp
++++ b/Source/WebCore/platform/graphics/ImageBufferContextSwitcher.cpp
+@@ -89,10 +89,7 @@ void ImageBufferContextSwitcher::endDrawSourceImage(GraphicsContext& destination
+     }
+ 
+     FilterResults results;
+-#if USE(CAIRO)
+-    // Cairo operates in SRGB which is why the SourceImage initially is in SRGB color space,
+-    // but before applying all filters it has to be transformed to LinearRGB to comply with
+-    // specification (https://www.w3.org/TR/filter-effects-1/#attr-valuedef-in-sourcegraphic).
++#if USE(CAIRO) || defined(WEBKIT_IOS6)
+     if (m_sourceImage)
+         m_sourceImage->transformToColorSpace(colorSpace);
+ #else
+diff --git a/Source/WebCore/platform/graphics/PixelBufferConversion.cpp b/Source/WebCore/platform/graphics/PixelBufferConversion.cpp
+index 9e401612087752ccd93aa14de36707b375f1ff7d..6a83fbbd7251c4522584870b292b92083183169d 100644
+--- a/Source/WebCore/platform/graphics/PixelBufferConversion.cpp
++++ b/Source/WebCore/platform/graphics/PixelBufferConversion.cpp
+@@ -25,6 +25,7 @@
+ 
+ #include "config.h"
+ #include "PixelBufferConversion.h"
++#include "ColorTransferFunctions.h"
+ 
+ #include "AlphaPremultiplication.h"
+ #include "ColorSpace.h"
+@@ -255,8 +256,13 @@ static bool convertImagePixelsAcceleratedMatchingSize(const ConstPixelBufferConv
+         constexpr std::array<uint8_t, 4> identityMap { 0, 1, 2, 3 };
+         constexpr std::array<uint8_t, 4> swappedMap { 2, 1, 0, 3 };
+         constexpr uint8_t lastChannelMask = 0x1; // 0x8 is the first of the four channels, 0x1 the last.
++#if defined(WEBKIT_IOS6)
++        vImagePermuteChannels_ARGB8888(&sourceVImageBuffer, &destinationVImageBuffer, swapComponentOrder ? swappedMap.data() : identityMap.data(), kvImageNoFlags);
++        vImageOverwriteChannelsWithScalar_ARGB8888(255, &destinationVImageBuffer, &destinationVImageBuffer, lastChannelMask, kvImageNoFlags);
++#else
+         constexpr std::array<uint8_t, 4> opaqueAlpha { 0, 0, 0, 255 };
+         vImagePermuteChannelsWithMaskedInsert_ARGB8888(&sourceVImageBuffer, &destinationVImageBuffer, swapComponentOrder ? swappedMap.data() : identityMap.data(), lastChannelMask, opaqueAlpha.data(), kvImageNoFlags);
++#endif
+         return true;
+     }
+ 
+@@ -579,8 +585,94 @@ static bool canCopyPixels(const PixelBufferFormat& sourceFormat, const PixelBuff
+         && (sourceAlphaFormat == destinationAlphaFormat || (sourceAlphaFormat == AlphaFormat::Premultiplied && destinationAlphaFormat == AlphaFormat::Opaque));
+ }
+ 
++#if defined(WEBKIT_IOS6)
++static const std::array<uint8_t, 256>& transferTable(bool toLinear)
++{
++    using Transfer = SRGBTransferFunction<float, TransferFunctionMode::Clamped>;
++
++    static NeverDestroyed<std::array<uint8_t, 256>> toLinearTable = [] {
++        std::array<uint8_t, 256> table;
++        for (unsigned i = 0; i < 256; ++i) {
++            float linear = Transfer::toLinear(i / 255.0f);
++            table[i] = static_cast<uint8_t>(linear * 255.0f + 0.5f);
++        }
++        return table;
++    }();
++
++    static NeverDestroyed<std::array<uint8_t, 256>> toGammaTable = [] {
++        std::array<uint8_t, 256> table;
++        for (unsigned i = 0; i < 256; ++i) {
++            float encoded = Transfer::toGammaEncoded(i / 255.0f);
++            table[i] = static_cast<uint8_t>(encoded * 255.0f + 0.5f);
++        }
++        return table;
++    }();
++
++    return toLinear ? toLinearTable.get() : toGammaTable.get();
++}
++
++static bool isEightBitFormat(PixelFormat format)
++{
++    return format == PixelFormat::RGBA8 || format == PixelFormat::BGRA8 || format == PixelFormat::BGRX8;
++}
++
++static bool convertImagePixelsAcrossSRGBAndLinearSRGB(const ConstPixelBufferConversionView& source, const PixelBufferConversionView& destination, const IntSize& destinationSize)
++{
++    bool toLinear = source.format.colorSpace == ColorSpace::SRGB() && destination.format.colorSpace == ColorSpace::LinearSRGB();
++    bool toGammaEncoded = source.format.colorSpace == ColorSpace::LinearSRGB() && destination.format.colorSpace == ColorSpace::SRGB();
++    if (!toLinear && !toGammaEncoded)
++        return false;
++    if (!isEightBitFormat(source.format.pixelFormat) || !isEightBitFormat(destination.format.pixelFormat))
++        return false;
++
++    auto sameColorSpaceSource = source;
++    sameColorSpaceSource.format.colorSpace = destination.format.colorSpace;
++    convertImagePixels(sameColorSpaceSource, destination, destinationSize);
++
++    auto& table = transferTable(toLinear);
++    bool premultiplied = destination.format.alphaFormat == AlphaPremultiplication::Premultiplied;
++    bool hasAlpha = destination.format.pixelFormat != PixelFormat::BGRX8;
++
++    size_t rowOffset = 0;
++    for (int y = 0; y < destinationSize.height(); ++y) {
++        for (int x = 0; x < destinationSize.width(); ++x) {
++            size_t pixel = rowOffset + static_cast<size_t>(x) * 4;
++            uint8_t alpha = hasAlpha ? destination.rows[pixel + 3] : 255;
++
++            for (size_t channel = 0; channel < 3; ++channel) {
++                unsigned value = destination.rows[pixel + channel];
++                if (premultiplied && hasAlpha) {
++                    if (!alpha) {
++                        destination.rows[pixel + channel] = 0;
++                        continue;
++                    }
++                    value = std::min<unsigned>(255, (value * 255 + alpha / 2) / alpha);
++                }
++
++                value = table[value];
++
++                if (premultiplied && hasAlpha)
++                    value = (value * alpha + 127) / 255;
++
++                destination.rows[pixel + channel] = static_cast<uint8_t>(value);
++            }
++        }
++        rowOffset += destination.bytesPerRow;
++    }
++
++    return true;
++}
++#endif
++
+ void convertImagePixels(const ConstPixelBufferConversionView& source, const PixelBufferConversionView& destination, const IntSize& destinationSize)
+ {
++#if defined(WEBKIT_IOS6)
++    if (source.format.colorSpace != destination.format.colorSpace) {
++        if (convertImagePixelsAcrossSRGBAndLinearSRGB(source, destination, destinationSize))
++            return;
++    }
++#endif
++
+     // We currently only support converting between RGBA8, BGRA8, RGBX8, BGRX8, and (where enabled) RGBA16F.
+     ASSERT(isSupportedConversionFormat(source.format.pixelFormat));
+     ASSERT(isSupportedConversionFormat(destination.format.pixelFormat));
+diff --git a/Source/WebCore/platform/graphics/cg/ColorSpaceCG.cpp b/Source/WebCore/platform/graphics/cg/ColorSpaceCG.cpp
+index 127d1349574189a1bdd8016bdd253a647d8ecefe..704a97cc7ed6f2f40142ad78884b1c666b8ae08f 100644
+--- a/Source/WebCore/platform/graphics/cg/ColorSpaceCG.cpp
++++ b/Source/WebCore/platform/graphics/cg/ColorSpaceCG.cpp
+@@ -40,7 +40,11 @@ template<const CFStringRef& colorSpaceNameGlobalConstant> static CGColorSpaceRef
+     static LazyNeverDestroyed<RetainPtr<CGColorSpaceRef>> colorSpace;
+     static std::once_flag onceFlag;
+     std::call_once(onceFlag, [] {
++#if defined(WEBKIT_IOS6)
++        colorSpace.construct(adoptCF(CGColorSpaceCreateDeviceRGB()));
++#else
+         colorSpace.construct(adoptCF(CGColorSpaceCreateWithName(RetainPtr { colorSpaceNameGlobalConstant }.get())));
++#endif
+         ASSERT(colorSpace.get());
+     });
+     return colorSpace.get().get();
+@@ -51,7 +55,11 @@ template<const CFStringRef& colorSpaceNameGlobalConstant> static CGColorSpaceRef
+     static LazyNeverDestroyed<RetainPtr<CGColorSpaceRef>> colorSpace;
+     static std::once_flag onceFlag;
+     std::call_once(onceFlag, [] {
++#if defined(WEBKIT_IOS6)
++        colorSpace.construct(RetainPtr { namedColorSpace<colorSpaceNameGlobalConstant>() });
++#else
+         colorSpace.construct(adoptCF(CGColorSpaceCreateExtended(RetainPtr { namedColorSpace<colorSpaceNameGlobalConstant>() }.get())));
++#endif
+         ASSERT(colorSpace.get());
+     });
+     return colorSpace.get().get();
+@@ -119,7 +127,11 @@ CGColorSpaceRef linearDisplayP3ColorSpaceSingleton()
+ 
+ CGColorSpaceRef linearSRGBColorSpaceSingleton()
+ {
++#if defined(WEBKIT_IOS6)
++    return sRGBColorSpaceSingleton();
++#else
+     return namedColorSpace<kCGColorSpaceLinearSRGB>();
++#endif
+ }
+ 
+ CGColorSpaceRef ROMMRGBColorSpaceSingleton()
+diff --git a/Source/WebCore/platform/graphics/cg/GradientRendererCG.cpp b/Source/WebCore/platform/graphics/cg/GradientRendererCG.cpp
+index d7a978838ec16ac2375c784a7e265c2926636b97..a0dcf1b197c0019f0e955f3a0c7095c88c8800fc 100644
+--- a/Source/WebCore/platform/graphics/cg/GradientRendererCG.cpp
++++ b/Source/WebCore/platform/graphics/cg/GradientRendererCG.cpp
+@@ -109,6 +109,11 @@ static bool anyComponentIsNone(const GradientColorStops& stops)
+ 
+ GradientRendererCG::Gradient GradientRendererCG::makeGradient(ColorInterpolationMethod colorInterpolationMethod, const GradientColorStops& stops) const
+ {
++#if defined(WEBKIT_IOS6)
++    if (colorInterpolationMethod.alphaPremultiplication == AlphaPremultiplication::Premultiplied)
++        return makeGradientBySampling(colorInterpolationMethod, stops);
++#endif
++
+     // For non-sRGB color spaces, or sRGB with 'none' components, fall back to sampling.
+     bool needsSampling = WTF::switchOn(colorInterpolationMethod.colorSpace,
+         [&] (const ColorInterpolationMethod::SRGB&) {
+diff --git a/Source/WebCore/platform/graphics/cg/GraphicsContextCG.cpp b/Source/WebCore/platform/graphics/cg/GraphicsContextCG.cpp
+index 3890d3b79b1603fa50e6f4a2803e75cda8b612ed..e1d32b173eef0ee7ea6c17b1b6d141312171b5c8 100644
+--- a/Source/WebCore/platform/graphics/cg/GraphicsContextCG.cpp
++++ b/Source/WebCore/platform/graphics/cg/GraphicsContextCG.cpp
+@@ -45,6 +45,8 @@
+ #include "Timer.h"
+ #include <pal/spi/cg/CoreGraphicsSPI.h>
+ #include <pal/spi/cg/ImageIOSPI.h>
++#include <array>
++#include <optional>
+ #include <wtf/MathExtras.h>
+ #include <wtf/RetainPtr.h>
+ #include <wtf/TZoneMallocInlines.h>
+@@ -58,11 +60,43 @@ namespace WebCore {
+ 
+ WTF_MAKE_TZONE_ALLOCATED_IMPL(GraphicsContextCG);
+ 
++#if defined(WEBKIT_IOS6)
++static std::optional<std::array<CGFloat, 4>> NODELETE ios6DeviceRGBComponents(const Color& color)
++{
++    auto bytes = color.tryGetAsSRGBABytes();
++    if (!bytes)
++        return std::nullopt;
++    auto components = asColorComponents(bytes->resolved());
++    return std::array<CGFloat, 4> {
++        static_cast<CGFloat>(components[0] / 255.0),
++        static_cast<CGFloat>(components[1] / 255.0),
++        static_cast<CGFloat>(components[2] / 255.0),
++        static_cast<CGFloat>(components[3] / 255.0) };
++}
++#endif
++
+ static void setCGFillColor(CGContextRef context, const Color& color, const ColorSpace& colorSpace)
+ {
++#if defined(WEBKIT_IOS6)
++    if (auto components = ios6DeviceRGBComponents(color)) {
++        CGContextSetRGBFillColor(context, (*components)[0], (*components)[1], (*components)[2], (*components)[3]);
++        return;
++    }
++#endif
+     CGContextSetFillColorWithColor(context, cachedCGColorInDestinationStandardRange(color, colorSpace).get());
+ }
+ 
++static void NODELETE setCGStrokeColor(CGContextRef context, const Color& color, const ColorSpace& colorSpace)
++{
++#if defined(WEBKIT_IOS6)
++    if (auto components = ios6DeviceRGBComponents(color)) {
++        CGContextSetRGBStrokeColor(context, (*components)[0], (*components)[1], (*components)[2], (*components)[3]);
++        return;
++    }
++#endif
++    CGContextSetStrokeColorWithColor(context, cachedCGColorInDestinationStandardRange(color, colorSpace).get());
++}
++
+ CGAffineTransform getUserToBaseCTM(CGContextRef context)
+ {
+     return CGAffineTransformConcat(CGContextGetCTM(context), CGAffineTransformInvert(CGContextGetBaseCTM(context)));
+@@ -194,7 +228,9 @@ static void setCGContextPath(CGContextRef context, const Path& path)
+ 
+ static void drawPathWithCGContext(CGContextRef context, CGPathDrawingMode drawingMode, const Path& path)
+ {
+-    CGContextDrawPathDirect(context, drawingMode, path.platformPath(), nullptr);
++    CGContextBeginPath(context);
++    CGContextAddPath(context, path.platformPath());
++    CGContextDrawPath(context, drawingMode);
+ }
+ 
+ static RenderingMode renderingModeForCGContext(CGContextRef cgContext, GraphicsContextCG::CGContextSource source)
+@@ -252,9 +288,12 @@ const ColorSpace& GraphicsContextCG::colorSpace() const
+ 
+     // FIXME: Need to handle kCGContextTypePDF.
+     auto contextType = CGContextGetType(context);
++#if HAVE(IOSURFACE)
+     if (contextType == kCGContextTypeIOSurface)
+         colorSpace = CGIOSurfaceContextGetColorSpace(context);
+-    else if (contextType == kCGContextTypeBitmap)
++    else
++#endif
++    if (contextType == kCGContextTypeBitmap)
+         colorSpace = CGBitmapContextGetColorSpace(context);
+     else
+         colorSpace = CGContextGetColorSpace(context);
+@@ -352,7 +391,8 @@ void GraphicsContextCG::drawNativeImage(const NativeImage& nativeImage, const Fl
+     auto oldInterpolationQuality = imageInterpolationQuality();
+     auto interpolationQuality = imageInterpolationQualityForOptions(options);
+ 
+-    auto subImage = image;
++    RetainPtr<CGImageRef> retainedSubImage;
++    auto subImage = image.get();
+ 
+     auto adjustedDestRect = normalizedDestRect;
+ 
+@@ -366,7 +406,8 @@ void GraphicsContextCG::drawNativeImage(const NativeImage& nativeImage, const Fl
+             // containing only the portion we want to display. We need to do this because high-quality
+             // interpolation smoothes sharp edges, causing pixels from outside the source rect to bleed
+             // into the destination rect. See <rdar://problem/6112909>.
+-            subImage = getSubimage(subImage.get(), imageSize, subimageRect, options);
++            retainedSubImage = getSubimage(subImage, imageSize, subimageRect, options);
++            subImage = retainedSubImage.get();
+ 
+             auto subPixelPadding = normalizedSrcRect.location() - subimageRect.location();
+             adjustedDestRect = { adjustedDestRect.location() - subPixelPadding * scale, subimageRect.size() * scale };
+@@ -385,7 +426,8 @@ void GraphicsContextCG::drawNativeImage(const NativeImage& nativeImage, const Fl
+ #if PLATFORM(IOS_FAMILY)
+     bool wasAntialiased = CGContextGetShouldAntialias(context);
+     // Anti-aliasing is on by default on the iPhone. Need to turn it off when drawing images.
+-    CGContextSetShouldAntialias(context, false);
++    if (wasAntialiased)
++        CGContextSetShouldAntialias(context, false);
+ 
+     // Align to pixel boundaries
+     adjustedDestRect = roundToDevicePixels(adjustedDestRect);
+@@ -393,7 +435,9 @@ void GraphicsContextCG::drawNativeImage(const NativeImage& nativeImage, const Fl
+ 
+     auto oldCompositeOperator = compositeOperation();
+     auto oldBlendMode = blendMode();
+-    setCGBlendMode(context, options.compositeOperator(), options.blendMode());
++    bool blendModeChanged = oldCompositeOperator != options.compositeOperator() || oldBlendMode != options.blendMode();
++    if (blendModeChanged)
++        setCGBlendMode(context, options.compositeOperator(), options.blendMode());
+ 
+     if (interpolationQuality != oldInterpolationQuality)
+         CGContextSetInterpolationQuality(context, toCGInterpolationQuality(interpolationQuality));
+@@ -414,7 +458,7 @@ void GraphicsContextCG::drawNativeImage(const NativeImage& nativeImage, const Fl
+     }
+ 
+     if (options.dynamicRangeLimit() == PlatformDynamicRangeLimit::standard() && options.drawsHDRContent() == DrawsHDRContent::Yes)
+-        setCGDynamicRangeLimitForImage(context, subImage.get(), options.dynamicRangeLimit().value());
++        setCGDynamicRangeLimitForImage(context, subImage, options.dynamicRangeLimit().value());
+ #endif
+ 
+     // Make the origin be at adjustedDestRect.location()
+@@ -435,14 +479,16 @@ void GraphicsContextCG::drawNativeImage(const NativeImage& nativeImage, const Fl
+     CGContextScaleCTM(context, 1, -1);
+ 
+     // Draw the image.
+-    CGContextDrawImage(context, adjustedDestRect, subImage.get());
++    CGContextDrawImage(context, adjustedDestRect, subImage);
+ 
+     if (!stateSaver.didSave()) {
+         CGContextSetCTM(context, transform);
+ #if PLATFORM(IOS_FAMILY)
+-        CGContextSetShouldAntialias(context, wasAntialiased);
++        if (wasAntialiased)
++            CGContextSetShouldAntialias(context, true);
+ #endif
+-        setCGBlendMode(context, oldCompositeOperator, oldBlendMode);
++        if (blendModeChanged)
++            setCGBlendMode(context, oldCompositeOperator, oldBlendMode);
+         if (interpolationQuality != oldInterpolationQuality)
+             CGContextSetInterpolationQuality(context, toCGInterpolationQuality(oldInterpolationQuality));
+ #if HAVE(SUPPORT_HDR_DISPLAY_APIS)
+@@ -910,6 +956,17 @@ void GraphicsContextCG::fillRect(const FloatRect& rect, Gradient& gradient, cons
+ void GraphicsContextCG::fillRect(const FloatRect& rect, const Color& color)
+ {
+     CGContextRef context = platformContext();
++#if defined(WEBKIT_IOS6)
++    if (([]() { static const bool logPaintOnce = getenv("WEBKIT_IOS6_LOG_PAINT") != nullptr; return logPaintOnce; }())) {
++        static unsigned logged;
++        if (logged++ < 25) {
++            auto [r, g, b, a] = color.toColorTypeLossy<SRGBA<uint8_t>>().resolved();
++            fprintf(stderr, "[ios6 fill] %g,%g %gx%g rgba %d,%d,%d,%d\n",
++                rect.x(), rect.y(), rect.width(), rect.height(), r, g, b, a);
++            fflush(stderr);
++        }
++    }
++#endif
+     Color oldFillColor = fillColor();
+ 
+     if (oldFillColor != color)
+@@ -1056,6 +1113,14 @@ void GraphicsContextCG::clipPath(const Path& path, WindRule clipRule)
+     if (path.isEmpty())
+         CGContextClipToRect(context, CGRectZero);
+     else {
++#if defined(WEBKIT_IOS6)
++        if (auto* segment = path.singleSegmentIfExists()) {
++            if (auto* rectSegment = std::get_if<PathRect>(&segment->data())) {
++                CGContextClipToRect(context, rectSegment->rect);
++                return;
++            }
++        }
++#endif
+         setCGContextPath(context, path);
+         if (clipRule == WindRule::EvenOdd)
+             CGContextEOClip(context);
+@@ -1141,13 +1206,22 @@ void GraphicsContextCG::setCGDropShadow(const std::optional<GraphicsDropShadow>&
+ 
+     CGContextSetAlpha(context, shadow->opacity);
+ 
++#if defined(WEBKIT_IOS6)
++    CGContextSetShadowWithColor(context, offset, blurRadius,
++        cachedCGColorInDestinationStandardRange(shadow->color, colorSpace()).get());
++#else
+     auto style = adoptCF(CGStyleCreateShadow2(offset, blurRadius, cachedCGColorInDestinationStandardRange(shadow->color, colorSpace()).get()));
+     CGContextSetStyle(context, style.get());
++#endif
+ }
+ 
+ void GraphicsContextCG::clearCGDropShadow()
+ {
++#if defined(WEBKIT_IOS6)
++    CGContextSetShadowWithColor(platformContext(), CGSizeZero, 0, nullptr);
++#else
+     CGContextSetStyle(platformContext(), nullptr);
++#endif
+ }
+ 
+ #if HAVE(CGSTYLE_COLORMATRIX_BLUR)
+@@ -1182,7 +1256,11 @@ void GraphicsContextCG::setCGStyle(const std::optional<GraphicsStyle>& style, bo
+     auto context = platformContext();
+ 
+     if (!style) {
++#if defined(WEBKIT_IOS6)
++        CGContextSetShadowWithColor(context, CGSizeZero, 0, nullptr);
++#else
+         CGContextSetStyle(context, nullptr);
++#endif
+         return;
+     }
+ 
+@@ -1237,7 +1315,7 @@ void GraphicsContextCG::didUpdateState(GraphicsContextState& state)
+ 
+         case GraphicsContextState::Change::StrokeBrush:
+             if (!state.strokeBrush().hasPatternOrGradient())
+-                CGContextSetStrokeColorWithColor(context, cachedCGColorInDestinationStandardRange(state.strokeBrush().color(), colorSpace()).get());
++                setCGStrokeColor(context, state.strokeBrush().color(), colorSpace());
+             break;
+ 
+         case GraphicsContextState::Change::CompositeMode:
+@@ -1479,6 +1557,26 @@ FloatRect GraphicsContextCG::roundToDevicePixels(const FloatRect& rect) const
+     }
+     if (m_userToDeviceTransformKnownToBeIdentity)
+         return roundedIntRect(rect);
++
++    if (!deviceMatrix.b && !deviceMatrix.c) {
++        CGFloat deviceScaleX = std::abs(deviceMatrix.a);
++        CGFloat deviceScaleY = std::abs(deviceMatrix.d);
++
++        CGFloat left = std::round(rect.x() * deviceScaleX);
++        CGFloat top = std::round(rect.y() * deviceScaleY);
++        CGFloat right = std::round((rect.x() + rect.width()) * deviceScaleX);
++        CGFloat bottom = std::round((rect.y() + rect.height()) * deviceScaleY);
++
++        if (top == bottom && rect.height())
++            bottom += 1;
++        if (left == right && rect.width())
++            right += 1;
++
++        FloatPoint roundedOrigin { static_cast<float>(left / deviceScaleX), static_cast<float>(top / deviceScaleY) };
++        FloatPoint roundedLowerRight { static_cast<float>(right / deviceScaleX), static_cast<float>(bottom / deviceScaleY) };
++        return FloatRect(roundedOrigin, roundedLowerRight - roundedOrigin);
++    }
++
+     return cgRoundToDevicePixelsNonIdentity(deviceMatrix, rect);
+ }
+ 
+@@ -1519,8 +1617,10 @@ bool GraphicsContextCG::knownToHaveFloatBasedBacking() const
+ {
+     auto context = platformContext();
+ 
++#if HAVE(IOSURFACE)
+     if (CGContextGetType(context) == kCGContextTypeIOSurface)
+         return CGIOSurfaceContextGetBitmapInfo(context) & kCGBitmapFloatComponents;
++#endif
+     if (CGContextGetType(context) == kCGContextTypeBitmap)
+         return CGBitmapContextGetBitmapInfo(context) & kCGBitmapFloatComponents;
+     return false;
+diff --git a/Source/WebCore/platform/graphics/cg/ImageBufferCGBitmapBackend.cpp b/Source/WebCore/platform/graphics/cg/ImageBufferCGBitmapBackend.cpp
+index 6dba2b92547f046fb2019d25d30dedb9a34f36a5..a5cea3631ecb9ac3bd64443efc1c836005f0d443 100644
+--- a/Source/WebCore/platform/graphics/cg/ImageBufferCGBitmapBackend.cpp
++++ b/Source/WebCore/platform/graphics/cg/ImageBufferCGBitmapBackend.cpp
+@@ -26,6 +26,8 @@
+ #include "config.h"
+ #include "ImageBufferCGBitmapBackend.h"
+ 
++#include "ColorTransferFunctions.h"
++
+ #if USE(CG)
+ 
+ #include "GraphicsContext.h"
+@@ -138,6 +140,61 @@ RefPtr<NativeImage> ImageBufferCGBitmapBackend::createNativeImageReference()
+         0, true, kCGRenderingIntentDefault)));
+ }
+ 
++#if defined(WEBKIT_IOS6)
++static const std::array<uint8_t, 256>& transferTable(bool toLinear)
++{
++    using Transfer = SRGBTransferFunction<float, TransferFunctionMode::Clamped>;
++
++    static NeverDestroyed<std::array<uint8_t, 256>> toLinearTable = [] {
++        std::array<uint8_t, 256> table;
++        for (unsigned i = 0; i < 256; ++i)
++            table[i] = static_cast<uint8_t>(Transfer::toLinear(i / 255.0f) * 255.0f + 0.5f);
++        return table;
++    }();
++
++    static NeverDestroyed<std::array<uint8_t, 256>> toGammaEncodedTable = [] {
++        std::array<uint8_t, 256> table;
++        for (unsigned i = 0; i < 256; ++i)
++            table[i] = static_cast<uint8_t>(Transfer::toGammaEncoded(i / 255.0f) * 255.0f + 0.5f);
++        return table;
++    }();
++
++    return toLinear ? toLinearTable.get() : toGammaEncodedTable.get();
++}
++
++void ImageBufferCGBitmapBackend::transformToColorSpace(const ColorSpace& newColorSpace)
++{
++    if (newColorSpace == colorSpace())
++        return;
++
++    bool toLinear = !(colorSpace() == ColorSpace::LinearSRGB()) && newColorSpace == ColorSpace::LinearSRGB();
++    bool toGammaEncoded = colorSpace() == ColorSpace::LinearSRGB() && !(newColorSpace == ColorSpace::LinearSRGB());
++    if (!toLinear && !toGammaEncoded)
++        return;
++
++    auto& table = transferTable(toLinear);
++    auto backendSize = size();
++
++    for (int y = 0; y < backendSize.height(); ++y) {
++        auto row = m_data.subspan(static_cast<size_t>(y) * bytesPerRow());
++        for (int x = 0; x < backendSize.width(); ++x) {
++            auto pixel = row.subspan(static_cast<size_t>(x) * 4);
++            uint8_t alpha = pixel[3];
++            if (!alpha)
++                continue;
++
++            for (size_t channel = 0; channel < 3; ++channel) {
++                unsigned value = alpha == 255 ? pixel[channel] : std::min<unsigned>(255, (pixel[channel] * 255 + alpha / 2) / alpha);
++                value = table[value];
++                pixel[channel] = static_cast<uint8_t>(alpha == 255 ? value : (value * alpha + 127) / 255);
++            }
++        }
++    }
++
++    m_colorSpace = newColorSpace;
++}
++#endif
++
+ void ImageBufferCGBitmapBackend::getPixelBuffer(const IntRect& srcRect, PixelBuffer& destination)
+ {
+     ImageBufferBackend::getPixelBuffer(srcRect, m_data, destination);
+diff --git a/Source/WebCore/platform/graphics/cg/ImageBufferCGBitmapBackend.h b/Source/WebCore/platform/graphics/cg/ImageBufferCGBitmapBackend.h
+index 458f2ed1c57c48fc32d0335a3e37c43665e63ddd..aa5bd85cd8f08bb54b651a00fd25961de08b45f3 100644
+--- a/Source/WebCore/platform/graphics/cg/ImageBufferCGBitmapBackend.h
++++ b/Source/WebCore/platform/graphics/cg/ImageBufferCGBitmapBackend.h
+@@ -25,6 +25,8 @@
+ 
+ #pragma once
+ 
++#include "DestinationColorSpace.h"
++
+ #if USE(CG)
+ 
+ #include <WebCore/ImageBuffer.h>
+@@ -53,6 +55,9 @@ private:
+     RefPtr<NativeImage> copyNativeImage() final;
+     RefPtr<NativeImage> createNativeImageReference() final;
+ 
++#if defined(WEBKIT_IOS6)
++    void transformToColorSpace(const ColorSpace&) final;
++#endif
+     void getPixelBuffer(const IntRect&, PixelBuffer&) final;
+     void putPixelBuffer(const PixelBufferSourceView&, const IntRect& srcRect, const IntPoint& destPoint, AlphaPremultiplication destFormat) final;
+ 
+diff --git a/Source/WebCore/platform/graphics/cg/ImageUtilitiesCG.cpp b/Source/WebCore/platform/graphics/cg/ImageUtilitiesCG.cpp
+index a7da1d86d1fca42969e0969a0a210b59ce13b45c..fa24481395e80ccdc5792228fef43c8023ed0b08 100644
+--- a/Source/WebCore/platform/graphics/cg/ImageUtilitiesCG.cpp
++++ b/Source/WebCore/platform/graphics/cg/ImageUtilitiesCG.cpp
+@@ -24,6 +24,7 @@
+  */
+ 
+ #include "config.h"
++#include "DestinationColorSpace.h"
+ #include "ImageUtilities.h"
+ 
+ #include "BitmapImage.h"
+@@ -343,7 +344,7 @@ RefPtr<SharedBuffer> createIconDataFromBitmaps(Vector<Ref<ShareableBitmap>>&& bi
+ 
+     constexpr auto icoUTI = "com.microsoft.ico"_s;
+     RetainPtr cfUTI = icoUTI.createCFString();
+-    RetainPtr colorSpace = adoptCF(CGColorSpaceCreateWithName(kCGColorSpaceSRGB));
++    RetainPtr colorSpace = DestinationColorSpace::SRGB().platformColorSpace();
+     RetainPtr destinationData = adoptCF(CFDataCreateMutable(0, 0));
+     RetainPtr destination = adoptCF(CGImageDestinationCreateWithData(destinationData.get(), cfUTI.get(), bitmaps.size(), nullptr));
+ 
+diff --git a/Source/WebCore/platform/graphics/filters/FilterImage.cpp b/Source/WebCore/platform/graphics/filters/FilterImage.cpp
+index 2520bc5f142aa33cd8cdda905e92e862104a99b7..7ecd1edba42388252f52fae7f593caec85d9bbad 100644
+--- a/Source/WebCore/platform/graphics/filters/FilterImage.cpp
++++ b/Source/WebCore/platform/graphics/filters/FilterImage.cpp
+@@ -243,13 +243,12 @@ static RefPtr<PixelBuffer> getConvertedPixelBuffer(PixelBuffer& sourcePixelBuffe
+ 
+ bool FilterImage::requiresPixelBufferColorSpaceConversion(std::optional<ColorSpace> colorSpace) const
+ {
+-#if USE(CG) || USE(SKIA)
+-    // This function determines whether we need the step of an extra color space conversion
+-    // We only need extra color conversion when 1) color space is different in the input
+-    // AND 2) the filter is manipulating raw pixels
++#if defined(WEBKIT_IOS6)
++    UNUSED_PARAM(colorSpace);
++    return false;
++#elif USE(CG) || USE(SKIA)
+     return colorSpace && m_colorSpace != *colorSpace;
+ #else
+-    // Additional color space conversion is not needed on non-CG
+     UNUSED_PARAM(colorSpace);
+     return false;
+ #endif
+@@ -398,15 +397,22 @@ void FilterImage::correctPremultipliedPixelBuffer()
+ 
+ void FilterImage::transformToColorSpace(const ColorSpace& colorSpace)
+ {
+-#if USE(CG) || USE(SKIA)
+-    // CG and SKIA handle color space adjustments internally.
++#if USE(CG) && defined(WEBKIT_IOS6)
++    if (colorSpace == m_colorSpace)
++        return;
++
++    if (RefPtr imageBuffer = this->imageBuffer())
++        imageBuffer->transformToColorSpace(colorSpace);
++
++    m_colorSpace = colorSpace;
++    m_unpremultipliedPixelBuffer = nullptr;
++    m_premultipliedPixelBuffer = nullptr;
++#elif USE(CG) || USE(SKIA)
+     UNUSED_PARAM(colorSpace);
+ #else
+     if (colorSpace == m_colorSpace)
+         return;
+ 
+-    // FIXME: We can avoid this potentially unnecessary ImageBuffer conversion by adding
+-    // color space transform support for the {pre,un}multiplied arrays.
+     if (RefPtr imageBuffer = this->imageBuffer())
+         imageBuffer->transformToColorSpace(colorSpace);
+ 
+diff --git a/Source/WebCore/rendering/RenderLayerFilters.cpp b/Source/WebCore/rendering/RenderLayerFilters.cpp
+index dd1ad379173b26aa96e4bcee539adbf0719a6a19..a05fa3eb2715f020be0e538a87099928a2098174 100644
+--- a/Source/WebCore/rendering/RenderLayerFilters.cpp
++++ b/Source/WebCore/rendering/RenderLayerFilters.cpp
+@@ -264,7 +264,7 @@ GraphicsContext* RenderLayerFilters::beginFilterEffect(RenderElement& renderer,
+         // SVG spec: color-interpolation-filters defaults to linearRGB, so SVG filter
+         // operations should happen in linear color space. Match legacy SVG filter behavior.
+         auto colorSpace = ColorSpace::SRGB();
+-#if !USE(CAIRO)
++#if !USE(CAIRO) && !defined(WEBKIT_IOS6)
+         if (usesSVGUserSpace)
+             colorSpace = ColorSpace::LinearSRGB();
+ #endif
+diff --git a/Source/WebCore/rendering/svg/legacy/LegacyRenderSVGResourceFilter.cpp b/Source/WebCore/rendering/svg/legacy/LegacyRenderSVGResourceFilter.cpp
+index 5d115e1865defb80d01742e7880b3ba5e71e494e..959e765b719494ada369646192914186456b4e8c 100644
+--- a/Source/WebCore/rendering/svg/legacy/LegacyRenderSVGResourceFilter.cpp
++++ b/Source/WebCore/rendering/svg/legacy/LegacyRenderSVGResourceFilter.cpp
+@@ -143,7 +143,7 @@ auto LegacyRenderSVGResourceFilter::applyResource(RenderElement& renderer, const
+ 
+     filterData->filter->clampFilterRegionIfNeeded();
+ 
+-#if USE(CAIRO)
++#if USE(CAIRO) || defined(WEBKIT_IOS6)
+     auto colorSpace = ColorSpace::SRGB();
+ #else
+     auto colorSpace = ColorSpace::LinearSRGB();
+diff --git a/Source/WebCore/style/StyleAdjuster.cpp b/Source/WebCore/style/StyleAdjuster.cpp
+index a85d77c82a3d5b1501a2e8b243eeeb5f7e31dd0e..9afb08841e662c21ffaceb26cb3ba419a941f80e 100644
+--- a/Source/WebCore/style/StyleAdjuster.cpp
++++ b/Source/WebCore/style/StyleAdjuster.cpp
+@@ -443,8 +443,63 @@ void Adjuster::adjustFirstLineStyle(Style::ComputedStyle& style)
+     style.setDisplayMaintainingOriginalDisplay(DisplayType::InlineFlow);
+ }
+ 
++#if defined(WEBKIT_IOS6)
++static bool viewportBoundedLayoutEnabled()
++{
++    static int enabled = -1;
++    if (enabled < 0)
++        enabled = access("/tmp/native-viewport-layout", F_OK) == 0 ? 1 : 0;
++    return enabled > 0;
++}
++
++static bool shouldBoundLayoutToViewport(const Style::ComputedStyle& style, const Element& element)
++{
++    if (style.position() != PositionType::Static && style.position() != PositionType::Relative)
++        return false;
++    if (style.floating() != Float::None)
++        return false;
++
++    auto display = style.display();
++    if (!(display == DisplayType::BlockFlow || display == DisplayType::BlockFlowRoot
++        || display == DisplayType::BlockFlex || display == DisplayType::BlockGrid))
++        return false;
++
++    if (style.contain().toRaw())
++        return false;
++
++    RefPtr parent = element.parentElement();
++    if (!parent)
++        return false;
++    if (parent->childElementCount() < 8)
++        return false;
++    if (parent->hasTagName(HTMLNames::bodyTag) || parent->hasTagName(HTMLNames::htmlTag))
++        return false;
++
++    unsigned following = 0;
++    for (RefPtr sibling = element.nextElementSibling(); sibling && following < 3; sibling = sibling->nextElementSibling())
++        ++following;
++    if (following < 3)
++        return false;
++
++    return true;
++}
++#endif
++
+ void Adjuster::adjust(Style::ComputedStyle& style) const
+ {
++#if defined(WEBKIT_IOS6)
++    if (style.display() != DisplayType::None && !style.backdropFilter().isNone()) {
++        auto& declared = style.backgroundColor();
++        if (declared.isResolvedColor()) {
++            auto& background = declared.resolvedColor();
++            if (background.isVisible() && !background.isOpaque())
++                style.setBackgroundColor({ background.opaqueColor() });
++        }
++
++        style.setBackdropFilter(Style::Filter { CSS::Keyword::None { } });
++    }
++#endif
++
+     if (style.display() == DisplayType::Contents)
+         adjustDisplayContentsStyle(style);
+     else if (style.display() != DisplayType::None) {
+@@ -648,13 +703,13 @@ void Adjuster::adjust(Style::ComputedStyle& style) const
+             style.setAutoRevealsWhenFound();
+     }
+ 
+-    bool overflowIsClipOrVisible = isOverflowClipOrVisible(style.overflowY()) && isOverflowClipOrVisible(style.overflowX());
++    auto usedDisplay = style.display();
+ 
+     // The overflow property does not apply to table row elements (CSS2 section 11.1.1).
+-    if (style.display() == DisplayType::TableRow) {
++    if (usedDisplay == DisplayType::TableRow) {
+         style.setOverflowX(ComputedStyle::initialOverflowX());
+         style.setOverflowY(ComputedStyle::initialOverflowY());
+-    } else if (!overflowIsClipOrVisible && style.display().isTableBox()) {
++    } else if (usedDisplay.isTableBox() && !(isOverflowClipOrVisible(style.overflowY()) && isOverflowClipOrVisible(style.overflowX()))) {
+         // Tables only support overflow:hidden and overflow:visible and ignore anything else,
+         // see https://drafts.csswg.org/css2/#overflow. As a table is not a block
+         // container box the rules for resolving conflicting x and y values in CSS Overflow Module
+@@ -812,6 +867,17 @@ void Adjuster::adjust(Style::ComputedStyle& style) const
+             adjustForTextAutosizing(style, protect(*m_element));
+     }
+ 
++#if defined(WEBKIT_IOS6)
++    if (viewportBoundedLayoutEnabled() && m_element && style.contentVisibility() == ContentVisibility::Visible && shouldBoundLayoutToViewport(style, *m_element)) {
++        style.setContentVisibility(ContentVisibility::Auto);
++
++        if (style.containIntrinsicHeight().isNone())
++            style.setContainIntrinsicHeight({ CSS::Keyword::Auto { }, Style::ContainIntrinsicSize::Length { 320 } });
++        if (style.containIntrinsicWidth().isNone())
++            style.setContainIntrinsicWidth({ CSS::Keyword::Auto { }, Style::ContainIntrinsicSize::Length { 320 } });
++    }
++#endif
++
+     if (m_parentStyle.contentVisibility() != ContentVisibility::Hidden && m_element && ContainmentChecker { style, *m_element }.isSkippedContentRoot())
+         style.setUsedContentVisibility(style.contentVisibility());
+ 

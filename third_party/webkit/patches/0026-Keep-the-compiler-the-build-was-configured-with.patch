@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Tue, 20 Oct 2026 13:00:00 +0200
+Subject: [PATCH] Keep the compiler the build was configured with
+
+OptionsIOS6.cmake replaced the C, C++, Objective-C and Objective-C++
+compilers with the clang that xcrun finds. That pins the real binary when
+CMake was handed the shims in /usr/bin, and it is what a build with Apple's
+clang wants. A build configured with another clang, the cross toolchain's
+own, had its compilers switched under it instead: CMake saw the Objective-C
+compiler change, threw the cache away and configured again for the host.
+
+The compilers are replaced only when the one CMake was given is a /usr/bin
+shim.
+---
+ Source/cmake/OptionsIOS6.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Source/cmake/OptionsIOS6.cmake b/Source/cmake/OptionsIOS6.cmake
+index 3b4345d8b2c14fcae52e419f9bf4efbae67ac6c6..a46e46a9ef4b5a24080ff2eb8a6e32d2198f5d0f 100644
+--- a/Source/cmake/OptionsIOS6.cmake
++++ b/Source/cmake/OptionsIOS6.cmake
+@@ -29,7 +29,7 @@ if (_sdk_major_minor AND (NOT CMAKE_OSX_DEPLOYMENT_TARGET OR CMAKE_OSX_DEPLOYMEN
+ endif ()
+ 
+ WEBKIT_XCRUN(_clang -f clang)
+-if (EXISTS "${_clang}")
++if (EXISTS "${_clang}" AND CMAKE_C_COMPILER MATCHES "^/usr/bin/")
+     set(CMAKE_C_COMPILER "${_clang}")
+     set(CMAKE_CXX_COMPILER "${_clang}++")
+     set(CMAKE_OBJC_COMPILER "${_clang}")

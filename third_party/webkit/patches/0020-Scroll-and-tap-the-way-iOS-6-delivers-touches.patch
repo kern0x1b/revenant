@@ -1,0 +1,1200 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Wed, 16 Sep 2026 12:00:00 +0200
+Subject: [PATCH] Scroll and tap the way iOS 6 delivers touches
+
+Scrollable overflow areas and frames are scrolled by touch through the system's
+UIWebOverflowScrollView. Touch-derived pointer events are dispatched for media
+control taps, and the mouse events derived from touches are tagged as synthetic
+taps so they do not double the pointer stream. The port's event and layout
+adaptations are carried, inspector-only layout work is skipped, and the layout
+log is restored.
+---
+ .../controls/auto-hide-controller.js          |   2 +-
+ Source/WebCore/dom/Document.cpp               |  41 ++-
+ Source/WebCore/page/EventHandler.cpp          |  37 ++-
+ .../page/LocalFrameViewLayoutContext.cpp      | 118 +++++++++
+ Source/WebCore/page/ios/FrameIOS.mm           |  12 +
+ .../platform/ios/PlatformEventFactoryIOS.mm   |  61 +++--
+ .../rendering/RenderLayerCompositor.cpp       | 233 +++++++++++++-----
+ .../WebCore/rendering/RenderLayerCompositor.h |   4 +
+ .../rendering/RenderLayerScrollableArea.cpp   |   4 +-
+ .../mac/WebCoreSupport/WebChromeClient.h      |   3 +
+ 10 files changed, 416 insertions(+), 99 deletions(-)
+
+diff --git a/Source/WebCore/Modules/modern-media-controls/controls/auto-hide-controller.js b/Source/WebCore/Modules/modern-media-controls/controls/auto-hide-controller.js
+index 61f153e12bde21b1741507b09d46cf2fbcc5c5dd..e0ed6530b638f109f2f14fc5d456a3f81ad0648f 100644
+--- a/Source/WebCore/Modules/modern-media-controls/controls/auto-hide-controller.js
++++ b/Source/WebCore/Modules/modern-media-controls/controls/auto-hide-controller.js
+@@ -110,7 +110,7 @@ class AutoHideController
+ 
+             // If the pointer is a mouse (supports hover), see if we can
+             // immediately hide without waiting for the auto-hide timer.
+-            if (event.pointerType == "mouse")
++            if (event.pointerType == "mouse" && window.matchMedia && window.matchMedia("(hover: hover)").matches)
+                 this._autoHideTimerFired();
+ 
+             this._resetAutoHideTimer();
+diff --git a/Source/WebCore/dom/Document.cpp b/Source/WebCore/dom/Document.cpp
+index e1afd2578e1f0f508e560875eb5fa6fdfc9d05d3..6e9e9bbf4d5f90e8cc398f4ac8127724e49ac348 100644
+--- a/Source/WebCore/dom/Document.cpp
++++ b/Source/WebCore/dom/Document.cpp
+@@ -1336,9 +1336,11 @@ void Document::invalidateQuerySelectorAllResults(Node& startingNode)
+ {
+     if (m_querySelectorAllResults.isEmptyIgnoringNullReferences())
+         return;
+-    for (RefPtr currentNode = startingNode; currentNode; currentNode = currentNode->parentNode()) {
+-        if (!currentNode->hasValidQuerySelectorAllResults())
++    RefPtr<Node> protectedNode;
++    for (SUPPRESS_UNCOUNTED_LOCAL Node* currentNode = &startingNode; currentNode; currentNode = currentNode->parentNode()) {
++        if (!currentNode->hasValidQuerySelectorAllResults()) [[likely]]
+             continue;
++        protectedNode = currentNode;
+         m_querySelectorAllResults.remove(*currentNode);
+         currentNode->setHasValidQuerySelectorAllResults(false);
+     }
+@@ -1348,9 +1350,11 @@ void Document::invalidateQuerySelectorAllResultsForClassAttributeChange(Node& st
+ {
+     if (m_querySelectorAllResults.isEmptyIgnoringNullReferences())
+         return;
+-    for (RefPtr currentNode = startingNode; currentNode; currentNode = currentNode->parentNode()) {
+-        if (!currentNode->hasValidQuerySelectorAllResults())
++    RefPtr<Node> protectedNode;
++    for (SUPPRESS_UNCOUNTED_LOCAL Node* currentNode = &startingNode; currentNode; currentNode = currentNode->parentNode()) {
++        if (!currentNode->hasValidQuerySelectorAllResults()) [[likely]]
+             continue;
++        protectedNode = currentNode;
+         auto it = m_querySelectorAllResults.find(*currentNode);
+         ASSERT(it != m_querySelectorAllResults.end());
+         if (it == m_querySelectorAllResults.end())
+@@ -2811,6 +2815,12 @@ void Document::updateRenderTree(std::unique_ptr<Style::Update> styleUpdate)
+ 
+ void Document::resolveStyle(ResolveStyleType type)
+ {
++#if defined(WEBKIT_IOS6)
++    if (g_webkitIOS6LayoutCounters) [[unlikely]] {
++        extern unsigned g_webkitIOS6StyleResolves;
++        ++g_webkitIOS6StyleResolves;
++    }
++#endif
+     ScriptDisallowedScope::InMainThread scriptDisallowedScope;
+ 
+     ASSERT(!view() || !view()->isPainting());
+@@ -4474,7 +4484,7 @@ bool Document::shouldScheduleLayout() const
+         return true;
+     if (!bodyOrFrameset())
+         return false;
+-    if (styleScope().hasPendingSheetsBeforeBody())
++    if (styleScope().blocksRenderingBeforeBody())
+         return false;
+     if (view() && !view()->isVisuallyNonEmpty())
+         return false;
+@@ -6933,7 +6943,7 @@ void Document::moveNodeIteratorsToNewDocument(Node& node, Document& newDocument)
+ void Document::updateRangesAfterChildrenChanged(ContainerNode& container)
+ {
+     for (auto& range : m_ranges)
+-        Ref { range.get() }->nodeChildrenChanged(container);
++        range.get().nodeChildrenChanged(container);
+ }
+ 
+ void Document::nodeChildrenWillBeRemoved(ContainerNode& container)
+@@ -6976,7 +6986,7 @@ void Document::nodeWillBeRemoved(Node& node)
+         nodeIterator->nodeWillBeRemoved(node);
+ 
+     for (auto& range : m_ranges)
+-        Ref { range.get() }->nodeWillBeRemoved(node);
++        range.get().nodeWillBeRemoved(node);
+ 
+     if (RefPtr frame = this->frame()) {
+         frame->eventHandler().nodeWillBeRemoved(node);
+@@ -9551,6 +9561,23 @@ void Document::didRemoveEventTargetNode(Node& handler)
+     }
+ }
+ 
++#if ENABLE(TOUCH_EVENTS) && PLATFORM(IOS_FAMILY)
++void Document::addTouchEventListener(Node& node)
++{
++    m_touchEventHandlerCounts.add(node);
++}
++
++void Document::removeTouchEventListener(Node& node, EventHandlerRemoval removalMode)
++{
++    removeHandlerFromSet(m_touchEventHandlerCounts, node, removalMode);
++}
++
++void Document::removeTouchEventHandler(Node& node, EventHandlerRemoval removalMode)
++{
++    removeHandlerFromSet(m_touchEventHandlerCounts, node, removalMode);
++}
++#endif
++
+ unsigned Document::touchEventHandlerCount() const
+ {
+ #if ENABLE(TOUCH_EVENTS)
+diff --git a/Source/WebCore/page/EventHandler.cpp b/Source/WebCore/page/EventHandler.cpp
+index be1914f20d9bd590ebebbe51498706c3096361f5..a52e38517377d66285c3657bcc8c4537918f97a2 100644
+--- a/Source/WebCore/page/EventHandler.cpp
++++ b/Source/WebCore/page/EventHandler.cpp
+@@ -363,7 +363,7 @@ static inline ScrollGranularity NODELETE wheelGranularityToScrollGranularity(uns
+     }
+ }
+ 
+-#if (ENABLE(TOUCH_EVENTS) && !PLATFORM(IOS_FAMILY))
++#if ENABLE(TOUCH_EVENTS)
+ static bool shouldGesturesTriggerActive()
+ {
+     // If the platform we're on supports GestureTapDown and GestureTapCancel then we'll
+@@ -3098,8 +3098,10 @@ void EventHandler::updateMouseEventTargetNode(const AtomString& eventType, Node*
+         m_textRecognitionHoverTimer.restart();
+ #endif // ENABLE(IMAGE_ANALYSIS)
+ 
++#if !defined(WEBKIT_IOS6)
+     if (RefPtr page = frame->page())
+         protect(page->imageOverlayController())->elementUnderMouseDidChange(frame, m_elementUnderMouse);
++#endif
+ 
+     ASSERT_IMPLIES(m_elementUnderMouse, &m_elementUnderMouse->document() == frame->document());
+     ASSERT_IMPLIES(m_lastElementUnderMouse, &m_lastElementUnderMouse->document() == frame->document());
+@@ -5464,9 +5466,28 @@ static HitTestResult hitTestResultInFrame(LocalFrame* frame, const LayoutPoint&
+     return result;
+ }
+ 
++#if defined(WEBKIT_IOS6)
++static FILE* touchLatencyLog()
++{
++    static FILE* file = [] () -> FILE* {
++        const char* path = getenv("WEBKIT_IOS6_TOUCH_LATENCY_LOG");
++        if (!path || !path[0])
++            return nullptr;
++        FILE* opened = fopen(path, "a");
++        if (opened)
++            setvbuf(opened, nullptr, _IOLBF, 0);
++        return opened;
++    }();
++    return file;
++}
++#endif
++
+ std::expected<bool, RemoteFrameGeometryTransformer> EventHandler::handleTouchEvent(const PlatformTouchEvent& event)
+ {
+     Ref frame = m_frame.get();
++#if defined(WEBKIT_IOS6)
++    MonotonicTime touchHandleEntry = MonotonicTime::now();
++#endif
+ 
+     // First build up the lists to use for the 'touches', 'targetTouches' and 'changedTouches' attributes
+     // in the JS event. See https://www.sitepen.com/blog/touching-and-gesturing-on-the-iphone/
+@@ -5595,7 +5616,7 @@ std::expected<bool, RemoteFrameGeometryTransformer> EventHandler::handleTouchEve
+         if (!targetFrame)
+             continue;
+ 
+-#if PLATFORM(WPE) || PLATFORM(GTK)
++#if PLATFORM(WPE) || PLATFORM(GTK) || defined(WEBKIT_IOS6)
+         RefPtr<EventTarget> pointerTarget = touchTarget;
+ 
+         if (pointState != PlatformTouchPoint::TouchPressed) {
+@@ -5685,6 +5706,18 @@ std::expected<bool, RemoteFrameGeometryTransformer> EventHandler::handleTouchEve
+             Ref<TouchEvent> touchEvent = TouchEvent::create(effectiveTouches.get(), targetTouches.get(), changedTouches[state].m_touches.get(),
+                 stateName, downcast<Node>(*target).document().windowProxy(), { }, event.modifiers());
+             target->dispatchEvent(touchEvent);
++#if defined(WEBKIT_IOS6)
++            if (state == PlatformTouchPoint::TouchPressed) {
++                if (FILE* log = touchLatencyLog()) {
++                    MonotonicTime dispatchDone = MonotonicTime::now();
++                    fprintf(log, "%.3f touchstart capture->entry=%.1fms entry->dispatched=%.1fms capture->dispatched=%.1fms\n",
++                        dispatchDone.secondsSinceEpoch().value(),
++                        (touchHandleEntry - event.timestamp()).milliseconds(),
++                        (dispatchDone - touchHandleEntry).milliseconds(),
++                        (dispatchDone - event.timestamp()).milliseconds());
++                }
++            }
++#endif
+             swallowedEvent = swallowedEvent || touchEvent->defaultPrevented() || touchEvent->defaultHandled();
+         }
+     }
+diff --git a/Source/WebCore/page/LocalFrameViewLayoutContext.cpp b/Source/WebCore/page/LocalFrameViewLayoutContext.cpp
+index 61749fa2eecc674d3bc7d185a5b3944181454f73..57b49acb613d3de95abf225dc0992b4435456639 100644
+--- a/Source/WebCore/page/LocalFrameViewLayoutContext.cpp
++++ b/Source/WebCore/page/LocalFrameViewLayoutContext.cpp
+@@ -68,6 +68,48 @@
+ 
+ namespace WebCore {
+ 
++#if defined(WEBKIT_IOS6)
++unsigned g_webkitIOS6BlocksLaidOut;
++unsigned g_webkitIOS6BlocksForced;
++unsigned g_webkitIOS6BlocksDirty;
++unsigned g_webkitIOS6StylesSet;
++unsigned g_webkitIOS6StyleResolves;
++unsigned g_webkitIOS6DirtyOnEntry;
++unsigned g_webkitIOS6BlocksViaChild;
++extern "C" { double g_webkitIOS6LayoutMsTotal; unsigned g_webkitIOS6LayoutCount; }
++extern "C" int g_webkitIOS6PendingDrawWork;
++unsigned g_webkitIOS6GridStretchHeight;
++unsigned g_webkitIOS6GridStretchRequirement;
++unsigned g_webkitIOS6GridStretchPercent;
++extern "C" {
++unsigned long long g_webkitIOS6InlineLayoutNs;
++unsigned g_webkitIOS6InlineLayoutCount;
++unsigned long long g_webkitIOS6BoxGeometryNs;
++unsigned g_webkitIOS6BoxGeometryCount;
++}
++
++static constexpr unsigned needsLayoutSlots = 24;
++static void* needsLayoutCallers[needsLayoutSlots];
++static unsigned needsLayoutCounts[needsLayoutSlots];
++bool g_webkitIOS6NeedsLayoutRecording;
++bool g_webkitIOS6LayoutCounters;
++
++void recordNeedsLayoutCaller(void* caller)
++{
++    for (unsigned i = 0; i < needsLayoutSlots; i++) {
++        if (needsLayoutCallers[i] == caller) {
++            needsLayoutCounts[i]++;
++            return;
++        }
++        if (!needsLayoutCallers[i]) {
++            needsLayoutCallers[i] = caller;
++            needsLayoutCounts[i] = 1;
++            return;
++        }
++    }
++}
++#endif
++
+ WTF_MAKE_TZONE_ALLOCATED_IMPL(LocalFrameViewLayoutContext);
+ 
+ UpdateScrollInfoAfterLayoutTransaction::UpdateScrollInfoAfterLayoutTransaction() = default;
+@@ -235,6 +277,13 @@ void LocalFrameViewLayoutContext::performLayout(bool canDeferUpdateLayerPosition
+ #if PLATFORM(IOS_FAMILY)
+     if (protect(view())->updateFixedPositionLayoutRect() && subtreeLayoutRoot())
+         convertSubtreeLayoutToFullLayout();
++#if defined(WEBKIT_IOS6)
++    if (protect(view())->useCustomFixedPositionLayoutRect())
++        protect(view())->setLayoutViewportOverrideRect(LayoutRect(protect(view())->customFixedPositionLayoutRect()),
++            LocalFrameView::TriggerLayoutOrNot::No);
++
++    protect(view())->setFixedPositionRectAtLastLayout(protect(view())->rectForFixedPositionLayout());
++#endif
+ #endif
+     {
+         SetForScope layoutPhase(m_layoutPhase, LayoutPhase::InPreLayout);
+@@ -263,7 +312,9 @@ void LocalFrameViewLayoutContext::performLayout(bool canDeferUpdateLayerPosition
+         m_firstLayout = false;
+     }
+ 
++#if !defined(WEBKIT_IOS6)
+     Vector<FloatQuad> layoutAreas;
++#endif
+     {
+         TraceScope tracingScope(RenderTreeLayoutStart, RenderTreeLayoutEnd);
+         SetForScope layoutPhase(m_layoutPhase, LayoutPhase::InRenderTreeLayout);
+@@ -272,8 +323,65 @@ void LocalFrameViewLayoutContext::performLayout(bool canDeferUpdateLayerPosition
+         RenderView::RepaintRegionAccumulator repaintRegionAccumulator(renderView());
+ #ifndef NDEBUG
+         RenderTreeNeedsLayoutChecker checker(*renderView());
++#endif
++#if defined(WEBKIT_IOS6)
++        static int logLayouts = -1;
++        if (logLayouts < 0)
++            logLayouts = !access("/tmp/native-layout-log", F_OK);
++        MonotonicTime layoutStart = logLayouts ? MonotonicTime::now() : MonotonicTime();
++        if (logLayouts) {
++            g_webkitIOS6LayoutCounters = true;
++            g_webkitIOS6BlocksLaidOut = 0;
++            g_webkitIOS6BlocksForced = 0;
++            g_webkitIOS6BlocksDirty = 0;
++            g_webkitIOS6BlocksViaChild = 0;
++            for (unsigned i = 0; i < needsLayoutSlots; i++) {
++                needsLayoutCallers[i] = nullptr;
++                needsLayoutCounts[i] = 0;
++            }
++            g_webkitIOS6NeedsLayoutRecording = true;
++            g_webkitIOS6GridStretchHeight = 0;
++            g_webkitIOS6GridStretchRequirement = 0;
++            g_webkitIOS6GridStretchPercent = 0;
++            g_webkitIOS6InlineLayoutNs = 0;
++            g_webkitIOS6InlineLayoutCount = 0;
++            g_webkitIOS6BoxGeometryNs = 0;
++            g_webkitIOS6BoxGeometryCount = 0;
++            g_webkitIOS6StylesSet = 0;
++            g_webkitIOS6StyleResolves = 0;
++            g_webkitIOS6DirtyOnEntry = 0;
++            if (CheckedPtr root = renderView()) {
++                for (CheckedPtr walk = static_cast<RenderObject*>(root.get()); walk; walk = walk->nextInPreOrder()) {
++                    if (walk->selfNeedsLayout())
++                        ++g_webkitIOS6DirtyOnEntry;
++                }
++            }
++        }
+ #endif
+         layoutRoot->layout();
++#if defined(WEBKIT_IOS6)
++        if (logLayouts) {
++            auto elapsed = (MonotonicTime::now() - layoutStart).milliseconds();
++            g_webkitIOS6LayoutMsTotal += elapsed;
++            ++g_webkitIOS6LayoutCount;
++            bool wholeDocument = is<RenderView>(*layoutRoot);
++            WTFLogAlways("[layout] %s %.1f ms, %u blocks (%u forced, %u self, %u via child), %u on entry, document %d px",
++                wholeDocument ? "whole document" : "subtree", elapsed, g_webkitIOS6BlocksLaidOut,
++                g_webkitIOS6BlocksForced, g_webkitIOS6BlocksDirty, g_webkitIOS6BlocksViaChild, g_webkitIOS6DirtyOnEntry,
++                renderView() ? renderView()->documentRect().height() : -1);
++            g_webkitIOS6NeedsLayoutRecording = false;
++            WTFLogAlways("[phase] inline %llu ms in %u calls, box geometry %llu ms in %u calls",
++                g_webkitIOS6InlineLayoutNs / 1000000, g_webkitIOS6InlineLayoutCount,
++                g_webkitIOS6BoxGeometryNs / 1000000, g_webkitIOS6BoxGeometryCount);
++            if (g_webkitIOS6GridStretchHeight || g_webkitIOS6GridStretchRequirement || g_webkitIOS6GridStretchPercent)
++                WTFLogAlways("[grid] stretch relayouts: %u height differs, %u requirement, %u percent descendants",
++                    g_webkitIOS6GridStretchHeight, g_webkitIOS6GridStretchRequirement, g_webkitIOS6GridStretchPercent);
++            for (unsigned i = 0; i < needsLayoutSlots && needsLayoutCallers[i]; i++) {
++                if (needsLayoutCounts[i] > 50)
++                    WTFLogAlways("[dirtied] %u from %p", needsLayoutCounts[i], needsLayoutCallers[i]);
++            }
++        }
++#endif
+         {
+             CheckedPtr renderView = this->renderView();
+             auto state = renderView ? renderView->textAutosizingState() : RenderView::TextAutosizingState::Normal;
+@@ -298,7 +406,9 @@ void LocalFrameViewLayoutContext::performLayout(bool canDeferUpdateLayerPosition
+                 break;
+             }
+         }
++#if !defined(WEBKIT_IOS6)
+         layoutRoot->absoluteQuads(layoutAreas);
++#endif
+ 
+         clearSubtreeLayoutRoot();
+         ASSERT(m_percentHeightIgnoreList.isEmptyIgnoringNullReferences());
+@@ -332,7 +442,9 @@ void LocalFrameViewLayoutContext::performLayout(bool canDeferUpdateLayerPosition
+         protect(view())->didLayout(layoutRoot, canDeferUpdateLayerPositions);
+         runOrScheduleAsynchronousTasks(canDeferUpdateLayerPositions);
+     }
++#if !defined(WEBKIT_IOS6)
+     InspectorInstrumentation::didLayout(frame, *layoutRoot, layoutAreas);
++#endif
+     DebugPageOverlays::didLayout(frame);
+ }
+ 
+@@ -719,6 +831,9 @@ void LocalFrameViewLayoutContext::disableSetNeedsLayout()
+ 
+ void LocalFrameViewLayoutContext::scheduleLayout()
+ {
++#if defined(WEBKIT_IOS6)
++    g_webkitIOS6PendingDrawWork = 1;
++#endif
+     // FIXME: We should assert the page is not in the back/forward cache, but that is causing
+     // too many false assertions. See <rdar://problem/7218118>.
+     ASSERT(frame().view() == &view());
+@@ -766,6 +881,9 @@ void LocalFrameViewLayoutContext::unscheduleLayout()
+ 
+ void LocalFrameViewLayoutContext::scheduleSubtreeLayout(RenderElement& layoutRoot)
+ {
++#if defined(WEBKIT_IOS6)
++    g_webkitIOS6PendingDrawWork = 1;
++#endif
+     ASSERT(renderView());
+     CheckedRef renderView = *this->renderView();
+ 
+diff --git a/Source/WebCore/page/ios/FrameIOS.mm b/Source/WebCore/page/ios/FrameIOS.mm
+index 101d1da08a6cf0c9b1ef9cba667644fe9357d95a..35c23b83a02ef0c3236613d6137e6df18995997b 100644
+--- a/Source/WebCore/page/ios/FrameIOS.mm
++++ b/Source/WebCore/page/ios/FrameIOS.mm
+@@ -579,6 +579,18 @@
+ {
+     LOG_WITH_STREAM(Scrolling, stream << "Frame::overflowScrollPositionChangedForNode " << node << " position " << position);
+ 
++#if defined(WEBKIT_IOS6)
++    if (RefPtr owner = dynamicDowncast<HTMLFrameOwnerElement>(node)) {
++        RefPtr contentFrame = dynamicDowncast<LocalFrame>(owner->contentFrame());
++        RefPtr frameView = contentFrame ? contentFrame->view() : nullptr;
++        if (frameView) {
++            auto scope = ScrollTypeScope(*frameView, isUserScroll ? ScrollType::User : ScrollType::Programmatic);
++            frameView->setScrollPosition(position);
++        }
++        return;
++    }
++#endif
++
+     RenderObject* renderer = node->renderer();
+     if (!renderer || !renderer->hasLayer())
+         return;
+diff --git a/Source/WebCore/platform/ios/PlatformEventFactoryIOS.mm b/Source/WebCore/platform/ios/PlatformEventFactoryIOS.mm
+index fd5e28d27864adb4751d9d17791f816b3ec846ab..c78bd664bafdf49a14ba1b16146fad1722963921 100644
+--- a/Source/WebCore/platform/ios/PlatformEventFactoryIOS.mm
++++ b/Source/WebCore/platform/ios/PlatformEventFactoryIOS.mm
+@@ -96,6 +96,9 @@ static inline DoublePoint globalPointForEvent(WebEvent *event)
+         m_button = MouseButton::Left; // This has always been the LeftButton on iOS.
+         m_clickCount = 1; // This has always been 1 on iOS.
+         m_modifiers = modifiersForEvent(event);
++#if defined(WEBKIT_IOS6)
++        m_syntheticClickType = SyntheticClickType::OneFingerTap;
++#endif
+     }
+ };
+ 
+@@ -537,24 +540,25 @@ int windowsKeyCodeForKeyEvent(WebEvent* event)
+ }
+ 
+ #if ENABLE(TOUCH_EVENTS)
+-static PlatformTouchPoint::TouchPhaseType convertTouchPhase(NSNumber *touchPhaseNumber)
++//
++static PlatformTouchPoint::State convertTouchPhase(NSNumber *touchPhaseNumber)
+ {
+     WebEventTouchPhaseType touchPhase = static_cast<WebEventTouchPhaseType>([touchPhaseNumber unsignedIntValue]);
+     switch (touchPhase) {
+     case WebEventTouchPhaseBegan:
+-        return PlatformTouchPoint::TouchPhaseBegan;
++        return PlatformTouchPoint::TouchPressed;
+     case WebEventTouchPhaseMoved:
+-        return PlatformTouchPoint::TouchPhaseMoved;
++        return PlatformTouchPoint::TouchMoved;
+     case WebEventTouchPhaseStationary:
+-        return PlatformTouchPoint::TouchPhaseStationary;
++        return PlatformTouchPoint::TouchStationary;
+     case WebEventTouchPhaseEnded:
+-        return PlatformTouchPoint::TouchPhaseEnded;
++        return PlatformTouchPoint::TouchReleased;
+     case WebEventTouchPhaseCancelled:
+-        return PlatformTouchPoint::TouchPhaseCancelled;
++        return PlatformTouchPoint::TouchCancelled;
+     default:
+         ASSERT_NOT_REACHED();
+     }
+-    return PlatformTouchPoint::TouchPhaseBegan;
++    return PlatformTouchPoint::TouchPressed;
+ }
+ 
+ static PlatformEvent::Type touchEventType(WebEvent *event)
+@@ -574,26 +578,29 @@ int windowsKeyCodeForKeyEvent(WebEvent* event)
+     }
+ }
+     
+-static PlatformTouchPoint::TouchPhaseType touchPhaseFromPlatformEventType(PlatformEvent::Type type)
++static PlatformTouchPoint::State touchPhaseFromPlatformEventType(PlatformEvent::Type type)
+ {
+     switch (type) {
+     case PlatformEvent::Type::TouchStart:
+-        return PlatformTouchPoint::TouchPhaseBegan;
++        return PlatformTouchPoint::TouchPressed;
+     case PlatformEvent::Type::TouchMove:
+-        return PlatformTouchPoint::TouchPhaseMoved;
++        return PlatformTouchPoint::TouchMoved;
+     case PlatformEvent::Type::TouchEnd:
+-        return PlatformTouchPoint::TouchPhaseEnded;
++        return PlatformTouchPoint::TouchReleased;
+     default:
+         ASSERT_NOT_REACHED();
+-        return PlatformTouchPoint::TouchPhaseCancelled;
++        return PlatformTouchPoint::TouchCancelled;
+     }
+ }
+ 
+ class PlatformTouchPointBuilder : public PlatformTouchPoint {
+ public:
+-    PlatformTouchPointBuilder(unsigned identifier, const IntPoint& locationInRootView, std::optional<IntPoint>&& locationInViewport, TouchPhaseType phase)
+-        : PlatformTouchPoint(identifier, locationInRootView, WTF::move(locationInViewport), phase)
++    PlatformTouchPointBuilder(unsigned identifier, const IntPoint& location, State state)
+     {
++        m_id = identifier;
++        m_state = state;
++        m_pos = location;
++        m_screenPos = location;
+     }
+ };
+ 
+@@ -605,34 +612,22 @@ int windowsKeyCodeForKeyEvent(WebEvent* event)
+         m_modifiers = modifiersForEvent(event);
+         m_timestamp = MonotonicTime::fromRawSeconds(event.timestamp);
+ 
+-        m_gestureScale = event.gestureScale;
+-        m_gestureRotation = event.gestureRotation;
+-        m_isGesture = event.isGesture;
+-        m_position = pointForEvent(event);
+-        m_globalPosition = globalPointForEvent(event);
+-
+         unsigned touchCount = event.touchCount;
+-        m_touchPoints = Vector<PlatformTouchPoint>(touchCount, [&](size_t i) -> PlatformTouchPoint {
++        m_touchPoints.reserveInitialCapacity(touchCount);
++        for (unsigned i = 0; i < touchCount; ++i) {
+             unsigned identifier = [(NSNumber *)[event.touchIdentifiers objectAtIndex:i] unsignedIntValue];
+             IntPoint location = IntPoint([(NSValue *)[event.touchLocations objectAtIndex:i] pointValue]);
+-            PlatformTouchPoint::TouchPhaseType touchPhase = convertTouchPhase([event.touchPhases objectAtIndex:i]);
+-            return PlatformTouchPointBuilder(identifier, location, std::nullopt, touchPhase);
+-        });
++            PlatformTouchPoint::State state = convertTouchPhase([event.touchPhases objectAtIndex:i]);
++            m_touchPoints.append(PlatformTouchPointBuilder(identifier, location, state));
++        }
+     }
+     
+     PlatformTouchEventBuilder(PlatformEvent::Type type, IntPoint location)
+     {
+         m_type = type;
+         m_timestamp = MonotonicTime::now();
+-        
+-        m_gestureScale = 1;
+-        m_gestureRotation = 0;
+-        m_isGesture = 0;
+-        m_position = location;
+-        m_globalPosition = location;
+-        m_isPotentialTap = true;
+-        
+-        m_touchPoints = Vector<PlatformTouchPoint>({ PlatformTouchPointBuilder(1, location, std::nullopt, touchPhaseFromPlatformEventType(type)) });
++
++        m_touchPoints.append(PlatformTouchPointBuilder(1, location, touchPhaseFromPlatformEventType(type)));
+     }
+ };
+ 
+diff --git a/Source/WebCore/rendering/RenderLayerCompositor.cpp b/Source/WebCore/rendering/RenderLayerCompositor.cpp
+index 350a33ca62925f96b9922a5c1a57d6398f434d4a..73ebedd9e18540973e14ecbfd953db6c3d79dcfe 100644
+--- a/Source/WebCore/rendering/RenderLayerCompositor.cpp
++++ b/Source/WebCore/rendering/RenderLayerCompositor.cpp
+@@ -24,6 +24,7 @@
+  */
+ 
+ #include "config.h"
++#include <unistd.h>
+ #include "RenderLayerCompositor.h"
+ 
+ #include "AsyncScrollingCoordinator.h"
+@@ -57,6 +58,7 @@
+ #include "RemoteFrame.h"
+ #include "RenderBoxInlines.h"
+ #include "RenderElementInlines.h"
++#include "RenderElementStyleInlines.h"
+ #include "RenderEmbeddedObject.h"
+ #include "RenderFragmentedFlow.h"
+ #include "RenderGeometryMap.h"
+@@ -182,16 +184,18 @@ struct RenderLayerCompositor::CompositingState {
+ 
+     void updateWithDescendantStateAndLayer(const CompositingState& childState, const RenderLayer& layer, const RenderLayer* ancestorLayer, const OverlapExtent& layerExtent, bool isUnchangedSubtree = false)
+     {
++        const bool layerIsComposited = layer.isComposited();
++
+         // Subsequent layers in the parent stacking context also need to composite.
+-        subtreeIsCompositing |= childState.subtreeIsCompositing | layer.isComposited();
++        subtreeIsCompositing |= childState.subtreeIsCompositing | layerIsComposited;
+         if (!isUnchangedSubtree)
+             fullPaintOrderTraversalRequired |= childState.fullPaintOrderTraversalRequired;
+ 
+         // Turn overlap testing off for later layers if it's already off, or if we have an animating transform.
+         // Note that if the layer clips its descendants, there's no reason to propagate the child animation to the parent layers. That's because
+         // we know for sure the animation is contained inside the clipping rectangle, which is already added to the overlap map.
+-        auto canReenableOverlapTesting = [&layer] {
+-            return layer.isComposited() && RenderLayerCompositor::clipsCompositingDescendants(layer);
++        auto canReenableOverlapTesting = [&layer, layerIsComposited] {
++            return layerIsComposited && RenderLayerCompositor::clipsCompositingDescendants(layer);
+         };
+         if ((!childState.testingOverlap && !canReenableOverlapTesting()) || layerExtent.knownToBeHaveExtentUncertainty())
+             testingOverlap = false;
+@@ -201,7 +205,7 @@ struct RenderLayerCompositor::CompositingState {
+                 return true;
+             if (!ancestorLayer)
+                 return false;
+-            if (!layer.isComposited())
++            if (!layerIsComposited)
+                 return false;
+             if (!layer.renderer().isOutOfFlowPositioned())
+                 return false;
+@@ -212,14 +216,14 @@ struct RenderLayerCompositor::CompositingState {
+ 
+         hasCompositedNonContainedDescendants = computeHasCompositedNonContainedDescendants();
+ 
+-        if ((layer.isComposited() && layer.hasBlendMode()) || (layer.hasNotIsolatedCompositedBlendingDescendants() && !layer.isolatesCompositedBlending()))
++        if ((layerIsComposited && layer.hasBlendMode()) || (layer.hasNotIsolatedCompositedBlendingDescendants() && !layer.isolatesCompositedBlending()))
+             hasNotIsolatedCompositedBlendingDescendants = true;
+ 
+-        if ((layer.isComposited() && layer.hasBackdropFilter()) || (layer.hasBackdropFilterDescendantsWithoutRoot() && !layer.isBackdropRoot()))
++        if ((layerIsComposited && layer.hasBackdropFilter()) || (layer.hasBackdropFilterDescendantsWithoutRoot() && !layer.isBackdropRoot()))
+             hasBackdropFilterDescendantsWithoutRoot = true;
+ 
+ #if HAVE(CORE_MATERIAL)
+-        if (layer.isComposited() && layer.hasAppleVisualEffectRequiringBackdropFilter())
++        if (layerIsComposited && layer.hasAppleVisualEffectRequiringBackdropFilter())
+             hasBackdropFilterDescendantsWithoutRoot = true;
+ #endif
+     }
+@@ -683,7 +687,11 @@ void RenderLayerCompositor::cacheAcceleratedCompositingFlagsAfterLayout()
+         return false;
+     };
+ 
++#if defined(WEBKIT_IOS6)
++    bool forceCompositingMode = m_hasAcceleratedCompositing && frameContentRequiresCompositing();
++#else
+     bool forceCompositingMode = m_hasAcceleratedCompositing && m_renderView.settings().forceCompositingMode() && frameContentRequiresCompositing();
++#endif
+     if (forceCompositingMode != m_forceCompositingMode) {
+         m_forceCompositingMode = forceCompositingMode;
+         rootRenderLayer().setDescendantsNeedCompositingRequirementsTraversal();
+@@ -710,7 +718,7 @@ bool RenderLayerCompositor::updateCompositingPolicy()
+ 
+     static auto cachedMemoryPolicy = WTF::MemoryUsagePolicy::Unrestricted;
+     bool nowUnderMemoryPressure = isCurrentlyUnderMemoryPressureOrWarning();
+-    static bool cachedIsUnderMemoryPressureOrWarning = nowUnderMemoryPressure;
++    static bool cachedIsUnderMemoryPressureOrWarning = false;
+ 
+     if (cachedIsUnderMemoryPressureOrWarning != nowUnderMemoryPressure) {
+         cachedMemoryPolicy = MemoryPressureHandler::singleton().currentMemoryUsagePolicy();
+@@ -891,8 +899,39 @@ void RenderLayerCompositor::updateScrollCoordinatedLayersAfterFlush()
+         m_legacyScrollingLayerCoordinator->registerAllViewportConstrainedLayers(*this);
+         m_legacyScrollingLayerCoordinator->registerAllScrollingLayers();
+     }
++#if defined(WEBKIT_IOS6)
++    updateFrameScrollingLayerForEmbedder();
++#endif
++}
++
++#if defined(WEBKIT_IOS6)
++void RenderLayerCompositor::updateFrameScrollingLayerForEmbedder()
++{
++    auto& frameView = m_renderView.frameView();
++    RefPtr ownerElement = frameView.frame().ownerElement();
++    if (!ownerElement || !m_scrollContainerLayer || !m_scrolledContentsLayer)
++        return;
++
++    auto contentsSize = frameView.totalContentsSize();
++    auto visibleSize = frameView.visibleContentRect().size();
++    bool scrolls = contentsSize.height() > visibleSize.height() || contentsSize.width() > visibleSize.width();
++
++    if (!scrolls) {
++        if (m_registeredFrameScrollingLayerWithEmbedder) {
++            m_registeredFrameScrollingLayerWithEmbedder = false;
++            page().chrome().client().removeScrollingLayer(ownerElement.get(),
++                m_scrollContainerLayer->platformLayer(), m_scrolledContentsLayer->platformLayer());
++        }
++        return;
++    }
++
++    m_registeredFrameScrollingLayerWithEmbedder = true;
++    page().chrome().client().addOrUpdateScrollingLayer(ownerElement.get(),
++        m_scrollContainerLayer->platformLayer(), m_scrolledContentsLayer->platformLayer(),
++        contentsSize, true, true);
+ }
+ #endif
++#endif
+ 
+ void RenderLayerCompositor::didChangePlatformLayerForLayer(RenderLayer& layer, const GraphicsLayer*)
+ {
+@@ -980,7 +1019,7 @@ void RenderLayerCompositor::applyToCompositedLayerIncludingDescendants(RenderLay
+ {
+     if (layer.isComposited())
+         function(layer);
+-    for (CheckedPtr childLayer = layer.firstChild(); childLayer; childLayer = childLayer->nextSibling())
++    for (SUPPRESS_UNCHECKED_LOCAL auto* childLayer = layer.firstChild(); childLayer; childLayer = childLayer->nextSibling())
+         applyToCompositedLayerIncludingDescendants(*childLayer, function);
+ }
+ 
+@@ -993,7 +1032,7 @@ void RenderLayerCompositor::updateEventRegionsRecursive(RenderLayer& layer)
+     if (!layer.hasDescendantNeedingEventRegionUpdate())
+         return;
+ 
+-    for (CheckedPtr childLayer = layer.firstChild(); childLayer; childLayer = childLayer->nextSibling())
++    for (SUPPRESS_UNCHECKED_LOCAL auto* childLayer = layer.firstChild(); childLayer; childLayer = childLayer->nextSibling())
+         updateEventRegionsRecursive(*childLayer);
+ 
+     layer.clearHasDescendantNeedingEventRegionUpdate();
+@@ -1040,10 +1079,69 @@ static std::optional<ScrollingNodeID> frameHostingNodeForFrame(LocalFrame& frame
+ // Returns true on a successful update.
+ bool RenderLayerCompositor::updateCompositingLayers(CompositingUpdateType updateType, RenderLayer* updateRootArg)
+ {
++#if defined(WEBKIT_IOS6)
++    {
++        static int recordLayers = -1;
++        if (recordLayers < 0)
++            recordLayers = access("/tmp/native-weblock-on", F_OK) == 0 ? 1 : 0;
++        static CFAbsoluteTime lastLayerReport;
++        CFAbsoluteTime layerNow = recordLayers ? CFAbsoluteTimeGetCurrent() : 0;
++        if (recordLayers && layerNow - lastLayerReport > 3.0) {
++            lastLayerReport = layerNow;
++            unsigned backed = 0;
++            unsigned total = 0;
++            if (auto* root = m_renderView.layer()) {
++                Vector<const RenderLayer*> stack;
++                stack.append(root);
++                while (!stack.isEmpty()) {
++                    const RenderLayer* current = stack.takeLast();
++                    total++;
++                    if (current->isComposited())
++                        backed++;
++                    for (const RenderLayer* child = current->firstChild(); child; child = child->nextSibling())
++                        stack.append(child);
++                }
++            }
++            WTFLogAlways("[layers] %u composited of %u render layers", backed, total);
++        }
++    }
++#endif
+     LOG_WITH_STREAM(Compositing, stream << "RenderLayerCompositor " << this << " [" << m_renderView.frameView() << "] updateCompositingLayers " << updateType << " contentLayersCount " << m_contentLayersCount);
+ 
+     TraceScope tracingScope(CompositingUpdateStart, CompositingUpdateEnd);
+ 
++#if defined(WEBKIT_IOS6)
++    struct CompositingUpdateTimer {
++        bool report;
++        CompositingUpdateType type;
++        MonotonicTime startedAt;
++        CompositingUpdateTimer(bool r, CompositingUpdateType t)
++            : report(r), type(t), startedAt(r ? MonotonicTime::now() : MonotonicTime()) { }
++        ~CompositingUpdateTimer()
++        {
++            if (!report)
++                return;
++            static unsigned counts[8];
++            static double totals[8];
++            static MonotonicTime lastReport;
++            unsigned index = static_cast<unsigned>(type) & 7;
++            counts[index]++;
++            totals[index] += (MonotonicTime::now() - startedAt).milliseconds();
++            MonotonicTime now = MonotonicTime::now();
++            if (now - lastReport > 3_s) {
++                lastReport = now;
++                for (unsigned i = 0; i < 8; i++) {
++                    if (counts[i])
++                        WTFLogAlways("[compositing] kind %u: %u updates, %.0f ms", i, counts[i], totals[i]);
++                }
++            }
++        }
++    } compositingUpdateTimer([] {
++        static bool report = getenv("WEBKIT_IOS6_COMPOSITING_LOG") != nullptr;
++        return report;
++    }(), updateType);
++#endif
++
+ #if ENABLE(TREE_DEBUGGING)
+     if (compositingLogEnabled())
+         showPaintOrderTree(m_renderView.layer());
+@@ -1243,6 +1341,10 @@ bool RenderLayerCompositor::allowBackingStoreDetachingForFixedPosition(RenderLay
+         fixedLayoutRect = frameView->rectForFixedPositionLayout();
+ 
+     bool allowDetaching = !fixedLayoutRect.intersects(absoluteBounds);
++
++#if defined(WEBKIT_IOS6)
++    allowDetaching = false;
++#endif
+     LOG_WITH_STREAM(Compositing, stream << "RenderLayerCompositor (layer " << &layer << ") allowsBackingStoreDetaching - absoluteBounds " << absoluteBounds << " layoutViewportRect " << fixedLayoutRect << ", allowDetaching " << allowDetaching);
+     return allowDetaching;
+ }
+@@ -1279,7 +1381,6 @@ void RenderLayerCompositor::computeCompositingRequirements(RenderLayer* ancestor
+     unsigned treeDepth = 0;
+ #endif
+ 
+-    layer.updateDescendantDependentFlags();
+     layer.updateLayerListsIfNeeded();
+ 
+     if (!layer.hasDescendantNeedingCompositingRequirementsTraversal()
+@@ -1312,6 +1413,13 @@ void RenderLayerCompositor::computeCompositingRequirements(RenderLayer* ancestor
+ 
+     OverlapExtent layerExtent;
+ 
++    std::optional<bool> canBeCompositedResult;
++    auto layerCanBeComposited = [&] {
++        if (!canBeCompositedResult)
++            canBeCompositedResult = canBeComposited(layer);
++        return *canBeCompositedResult;
++    };
++
+     // Use the fact that we're composited as a hint to check for an animating transform.
+     // FIXME: Maybe needsToBeComposited() should return a bitmask of reasons, to avoid the need to recompute things.
+     if (willBeComposited && !layer.isRenderViewLayer())
+@@ -1321,7 +1429,7 @@ void RenderLayerCompositor::computeCompositingRequirements(RenderLayer* ancestor
+     overlapMap.geometryMap().pushMappingsToAncestor(&layer, ancestorLayer, respectTransforms);
+ 
+     InlineWeakPtr<RenderLayer> providedBackingLayer;
+-    if (!willBeComposited && compositingState.subtreeIsCompositing && canBeComposited(layer)) {
++    if (!willBeComposited && compositingState.subtreeIsCompositing && layerCanBeComposited()) {
+         if (auto* provider = backingSharingState.backingProviderCandidateForLayer(layer, *this, overlapMap, layerExtent)) {
+             provider->sharingLayers.add(layer);
+             LOG_WITH_STREAM(Compositing, stream << TextStream::Repeat(treeDepth * 2, ' ') << " " << &layer << " can share with " << backingSharingState.backingProviderCandidates());
+@@ -1352,7 +1460,7 @@ void RenderLayerCompositor::computeCompositingRequirements(RenderLayer* ancestor
+         layer.setIndirectCompositingReason(compositingReason);
+ 
+     // Check if the computed indirect reason will force the layer to become composited.
+-    if (!willBeComposited && layer.mustCompositeForIndirectReasons() && canBeComposited(layer)) {
++    if (!willBeComposited && layer.mustCompositeForIndirectReasons() && layerCanBeComposited()) {
+         LOG_WITH_STREAM(Compositing, stream << TextStream::Repeat(treeDepth * 2, ' ') << "layer " << &layer << " compositing for indirect reason " << layer.indirectCompositingReason() << " (was sharing: " << !!providedBackingLayer << ")");
+         willBeComposited = true;
+         providedBackingLayer = nullptr;
+@@ -1441,7 +1549,7 @@ void RenderLayerCompositor::computeCompositingRequirements(RenderLayer* ancestor
+                 didSpeculativelyPushOverlapContainer = true;
+             }
+ 
+-            for (CheckedPtr childLayer : layer.negativeZOrderLayers()) {
++            for (SUPPRESS_UNCHECKED_LOCAL auto* childLayer : layer.negativeZOrderLayers()) {
+                 computeCompositingRequirements(&layer, *childLayer, overlapMap, currentState, backingSharingState);
+ 
+                 // If we have to make a layer for this child, make one now so we can have a contents layer
+@@ -1463,10 +1571,10 @@ void RenderLayerCompositor::computeCompositingRequirements(RenderLayer* ancestor
+             }
+         }
+ 
+-        for (CheckedPtr childLayer : layer.normalFlowLayers())
++        for (SUPPRESS_UNCHECKED_LOCAL auto* childLayer : layer.normalFlowLayers())
+             computeCompositingRequirements(&layer, *childLayer, overlapMap, currentState, backingSharingState);
+ 
+-        for (CheckedPtr childLayer : layer.positiveZOrderLayers())
++        for (SUPPRESS_UNCHECKED_LOCAL auto* childLayer : layer.positiveZOrderLayers())
+             computeCompositingRequirements(&layer, *childLayer, overlapMap, currentState, backingSharingState);
+ 
+         // Set the flag to say that this layer has compositing children.
+@@ -1495,7 +1603,7 @@ void RenderLayerCompositor::computeCompositingRequirements(RenderLayer* ancestor
+         layer.setNeedsCompositingConfigurationUpdate();
+ 
+     // Now check for reasons to become composited that depend on the state of descendant layers.
+-    if (!willBeComposited && canBeComposited(layer)) {
++    if (!willBeComposited && layerCanBeComposited()) {
+         layer.update3DTransformedDescendantStatus();
+         auto indirectReason = computeIndirectCompositingReason(layer, currentState.subtreeIsCompositing, layer.has3DTransformedDescendant(), !!providedBackingLayer);
+         if (indirectReason != IndirectCompositingReason::None) {
+@@ -1578,7 +1686,6 @@ void RenderLayerCompositor::traverseUnchangedSubtree(RenderLayer* ancestorLayer,
+     unsigned treeDepth = 0;
+ #endif
+ 
+-    layer.updateDescendantDependentFlags();
+     layer.updateLayerListsIfNeeded();
+ 
+     ASSERT(!compositingState.fullPaintOrderTraversalRequired);
+@@ -1641,16 +1748,16 @@ void RenderLayerCompositor::traverseUnchangedSubtree(RenderLayer* ancestorLayer,
+ #endif
+ 
+     if (!canSkipComputeCompositingRequirementsForSubtree(layer, layerIsComposited)) {
+-        for (CheckedPtr childLayer : layer.negativeZOrderLayers()) {
++        for (SUPPRESS_UNCHECKED_LOCAL auto* childLayer : layer.negativeZOrderLayers()) {
+             traverseUnchangedSubtree(&layer, *childLayer, overlapMap, currentState, backingSharingState);
+             if (currentState.subtreeIsCompositing)
+                 ASSERT(layerIsComposited);
+         }
+ 
+-        for (CheckedPtr childLayer : layer.normalFlowLayers())
++        for (SUPPRESS_UNCHECKED_LOCAL auto* childLayer : layer.normalFlowLayers())
+             traverseUnchangedSubtree(&layer, *childLayer, overlapMap, currentState, backingSharingState);
+ 
+-        for (CheckedPtr childLayer : layer.positiveZOrderLayers())
++        for (SUPPRESS_UNCHECKED_LOCAL auto* childLayer : layer.positiveZOrderLayers())
+             traverseUnchangedSubtree(&layer, *childLayer, overlapMap, currentState, backingSharingState);
+ 
+         // Set the flag to say that this layer has compositing children.
+@@ -1707,7 +1814,6 @@ void RenderLayerCompositor::collectViewTransitionNewContentLayers(RenderLayer& l
+ 
+ void RenderLayerCompositor::updateBackingAndHierarchy(RenderLayer& layer, Vector<Ref<GraphicsLayer>>& childLayersOfEnclosingLayer, UpdateBackingTraversalState& traversalState, ScrollingTreeState& scrollingTreeState, OptionSet<UpdateLevel> updateLevel)
+ {
+-    layer.updateDescendantDependentFlags();
+     layer.updateLayerListsIfNeeded();
+ 
+     bool layerNeedsUpdate = !updateLevel.isEmpty();
+@@ -1817,19 +1923,19 @@ void RenderLayerCompositor::updateBackingAndHierarchy(RenderLayer& layer, Vector
+     };
+ 
+     if (requireDescendantTraversal) {
+-        for (CheckedPtr renderLayer : layer.negativeZOrderLayers()) {
++        for (SUPPRESS_UNCHECKED_LOCAL auto* renderLayer : layer.negativeZOrderLayers()) {
+             updateBackingAndHierarchy(*renderLayer, childList, traversalStateForDescendants, scrollingStateForDescendants, updateLevel);
+             appendSVGSegmentLayerIfNecessary(*renderLayer);
+         }
+ 
+         appendForegroundLayerIfNecessary();
+ 
+-        for (CheckedPtr renderLayer : layer.normalFlowLayers()) {
++        for (SUPPRESS_UNCHECKED_LOCAL auto* renderLayer : layer.normalFlowLayers()) {
+             updateBackingAndHierarchy(*renderLayer, childList, traversalStateForDescendants, scrollingStateForDescendants, updateLevel);
+             appendSVGSegmentLayerIfNecessary(*renderLayer);
+         }
+ 
+-        for (CheckedPtr renderLayer : layer.positiveZOrderLayers()) {
++        for (SUPPRESS_UNCHECKED_LOCAL auto* renderLayer : layer.positiveZOrderLayers()) {
+             updateBackingAndHierarchy(*renderLayer, childList, traversalStateForDescendants, scrollingStateForDescendants, updateLevel);
+             appendSVGSegmentLayerIfNecessary(*renderLayer);
+         }
+@@ -1977,26 +2083,26 @@ void RenderLayerCompositor::adjustOverflowScrollbarContainerLayers(RenderLayer&
+     if (layersClippedByScrollers.isEmpty())
+         return;
+ 
+-    HashMap<CheckedPtr<RenderLayer>, CheckedPtr<RenderLayer>> overflowScrollToLastContainedLayerMap;
++    HashMap<RenderLayer*, RenderLayer*> overflowScrollToLastContainedLayerMap;
+ 
+-    for (CheckedPtr clippedLayer : layersClippedByScrollers) {
++    for (SUPPRESS_UNCHECKED_LOCAL auto* clippedLayer : layersClippedByScrollers) {
+         auto* clippingStack = clippedLayer->backing()->ancestorClippingStack();
+ 
+         for (const auto& stackEntry : clippingStack->stack()) {
+             if (!stackEntry.clipData.isOverflowScroll)
+                 continue;
+ 
+-            if (CheckedPtr layer = stackEntry.clipData.clippingLayer.get())
++            if (SUPPRESS_UNCHECKED_LOCAL auto* layer = stackEntry.clipData.clippingLayer.get())
+                 overflowScrollToLastContainedLayerMap.set(layer, clippedLayer);
+         }
+     }
+ 
+-    for (CheckedPtr overflowScrollingLayer : overflowScrollLayers) {
++    for (SUPPRESS_UNCHECKED_LOCAL auto* overflowScrollingLayer : overflowScrollLayers) {
+         auto it = overflowScrollToLastContainedLayerMap.find(overflowScrollingLayer);
+         if (it == overflowScrollToLastContainedLayerMap.end())
+             continue;
+     
+-        CheckedPtr lastContainedDescendant = it->value;
++        SUPPRESS_UNCHECKED_LOCAL auto* lastContainedDescendant = it->value;
+         if (!lastContainedDescendant || !lastContainedDescendant->isComposited())
+             continue;
+ 
+@@ -2342,7 +2448,7 @@ static void clearBackingSharingWithinStackingContext(RenderLayer& stackingContex
+     if (&curLayer != &stackingContextRoot && curLayer.isStackingContext())
+         return;
+ 
+-    for (CheckedPtr child = curLayer.firstChild(); child; child = child->nextSibling()) {
++    for (SUPPRESS_UNCHECKED_LOCAL auto* child = curLayer.firstChild(); child; child = child->nextSibling()) {
+         if (child->isComposited())
+             child->backing()->clearBackingSharingLayers({ });
+ 
+@@ -2603,10 +2709,6 @@ void RenderLayerCompositor::computeExtent(const LayerOverlapMap& overlapMap, con
+     if (extent.extentComputed)
+         return;
+ 
+-    auto markExtentAsComputed = WTF::makeScopeExit([&]() {
+-        extent.extentComputed = true;
+-    });
+-
+     LayoutRect layerBounds;
+     if (extent.hasTransformAnimation)
+         extent.animationCausesExtentUncertainty = !layer.getOverlapBoundsIncludingChildrenAccountingForTransformAnimations(layerBounds);
+@@ -2639,6 +2741,8 @@ void RenderLayerCompositor::computeExtent(const LayerOverlapMap& overlapMap, con
+         // rect that covers all the locations that the fixed element could move to.
+         extent.bounds = m_renderView.frameView().fixedScrollableAreaBoundsInflatedForScrolling(extent.bounds);
+     }
++
++    extent.extentComputed = true;
+ }
+ 
+ enum class AncestorTraversal { Continue, Stop };
+@@ -2648,9 +2752,9 @@ template <typename Function>
+ static AncestorTraversal traverseAncestorLayers(const RenderLayer& layer, Function&& function)
+ {
+     auto positioningBehavior = layer.renderer().style().position();
+-    CheckedPtr nextPaintOrderParent = layer.paintOrderParent();
++    SUPPRESS_UNCHECKED_LOCAL const RenderLayer* nextPaintOrderParent = layer.paintOrderParent();
+ 
+-    for (CheckedPtr<const RenderLayer> ancestorLayer = layer.parent(); ancestorLayer; ancestorLayer = ancestorLayer->parent()) {
++    for (SUPPRESS_UNCHECKED_LOCAL const RenderLayer* ancestorLayer = layer.parent(); ancestorLayer; ancestorLayer = ancestorLayer->parent()) {
+         bool inContainingBlockChain = true;
+ 
+         switch (positioningBehavior) {
+@@ -2750,8 +2854,7 @@ void RenderLayerCompositor::addToOverlapMap(LayerOverlapMap& overlapMap, const R
+         return;
+ 
+     auto clippedBounds = computeClippedOverlapBounds(overlapMap, layer, extent);
+-
+-    computeClippingScopes(layer, extent);
++    ASSERT(extent.clippingScopesComputed);
+     overlapMap.add(layer, clippedBounds, extent.clippingScopes);
+ }
+ 
+@@ -2772,13 +2875,13 @@ void RenderLayerCompositor::addDescendantsToOverlapMapRecursive(LayerOverlapMap&
+     LayerListMutationDetector mutationChecker(const_cast<RenderLayer&>(layer));
+ #endif
+ 
+-    for (CheckedPtr renderLayer : layer.negativeZOrderLayers())
++    for (SUPPRESS_UNCHECKED_LOCAL auto* renderLayer : layer.negativeZOrderLayers())
+         addDescendantsToOverlapMapRecursive(overlapMap, *renderLayer, &layer);
+ 
+-    for (CheckedPtr renderLayer : layer.normalFlowLayers())
++    for (SUPPRESS_UNCHECKED_LOCAL auto* renderLayer : layer.normalFlowLayers())
+         addDescendantsToOverlapMapRecursive(overlapMap, *renderLayer, &layer);
+ 
+-    for (CheckedPtr renderLayer : layer.positiveZOrderLayers())
++    for (SUPPRESS_UNCHECKED_LOCAL auto* renderLayer : layer.positiveZOrderLayers())
+         addDescendantsToOverlapMapRecursive(overlapMap, *renderLayer, &layer);
+     
+     if (ancestorLayer)
+@@ -3136,14 +3239,14 @@ void RenderLayerCompositor::recursiveRepaintLayer(RenderLayer& layer)
+ #endif
+ 
+     if (layer.hasCompositingDescendant()) {
+-        for (CheckedPtr renderLayer : layer.negativeZOrderLayers())
++        for (SUPPRESS_UNCHECKED_LOCAL auto* renderLayer : layer.negativeZOrderLayers())
+             recursiveRepaintLayer(*renderLayer);
+ 
+-        for (CheckedPtr renderLayer : layer.positiveZOrderLayers())
++        for (SUPPRESS_UNCHECKED_LOCAL auto* renderLayer : layer.positiveZOrderLayers())
+             recursiveRepaintLayer(*renderLayer);
+     }
+ 
+-    for (CheckedPtr renderLayer : layer.normalFlowLayers())
++    for (SUPPRESS_UNCHECKED_LOCAL auto* renderLayer : layer.normalFlowLayers())
+         recursiveRepaintLayer(*renderLayer);
+ }
+ 
+@@ -3152,7 +3255,7 @@ bool RenderLayerCompositor::layerRepaintTargetsBackingSharingLayer(RenderLayer&
+     if (sharingState.backingProviderCandidates().isEmpty())
+         return false;
+ 
+-    for (CheckedPtr<const RenderLayer> currLayer = &layer; currLayer; currLayer = currLayer->paintOrderParent()) {
++    for (SUPPRESS_UNCHECKED_LOCAL const RenderLayer* currLayer = &layer; currLayer; currLayer = currLayer->paintOrderParent()) {
+         if (compositedWithOwnBackingStore(*currLayer))
+             return false;
+         
+@@ -4107,7 +4210,8 @@ bool RenderLayerCompositor::requiresCompositingForScrollableFrame(RequiresCompos
+     if (isRootFrameCompositor())
+         return false;
+ 
+-#if PLATFORM(COCOA) || USE(COORDINATED_GRAPHICS)
++#if defined(WEBKIT_IOS6)
++#elif PLATFORM(COCOA) || USE(COORDINATED_GRAPHICS)
+     if (!m_renderView.settings().asyncFrameScrollingEnabled())
+         return false;
+ #endif
+@@ -4138,16 +4242,20 @@ bool RenderLayerCompositor::requiresCompositingForPosition(RenderLayerModelObjec
+ 
+     auto position = renderer.style().position();
+     bool isFixed = renderer.isFixedPositioned();
++#if !defined(WEBKIT_IOS6)
+     if (isFixed && !layer.isStackingContext())
+         return false;
++#else
++#endif
+     
+     bool isSticky = renderer.isInFlowPositioned() && position == PositionType::Sticky;
+     if (!isFixed && !isSticky)
+         return false;
+ 
+     // FIXME: acceleratedCompositingForFixedPositionEnabled should probably be renamed acceleratedCompositingForViewportConstrainedPositionEnabled().
+-    if (!m_renderView.settings().acceleratedCompositingForFixedPositionEnabled())
++    if (!m_renderView.settings().acceleratedCompositingForFixedPositionEnabled()) {
+         return false;
++    }
+ 
+     if (isSticky) {
+         // rendererForCompositingTests() substitutes the reflected renderer for a RenderReplica, so `layer` can
+@@ -4165,12 +4273,14 @@ bool RenderLayerCompositor::requiresCompositingForPosition(RenderLayerModelObjec
+     auto container = renderer.container();
+     ASSERT(container);
+ 
+-    // Don't promote fixed position elements that are descendants of a non-view container, e.g. transformed elements.
+-    // They will stay fixed wrt the container rather than the enclosing frame.
++#if !defined(WEBKIT_IOS6)
+     if (container != &m_renderView) {
+         queryData.nonCompositedForPositionReason = RenderLayer::NotCompositedForNonViewContainer;
+         return false;
+     }
++#else
++    UNUSED_VARIABLE(container);
++#endif
+ 
+     bool paintsContent = layer.isVisuallyNonEmpty() || layer.hasVisibleDescendant();
+     if (!paintsContent) {
+@@ -4178,6 +4288,7 @@ bool RenderLayerCompositor::requiresCompositingForPosition(RenderLayerModelObjec
+         return false;
+     }
+ 
++
+     // Scroll-adjusted boxes can be scrolled into view, so don't check viewport intersection on them.
+     if (!layer.anchorScrollAdjustment() && !fixedLayerIntersectsViewport(layer)) {
+         queryData.nonCompositedForPositionReason = RenderLayer::NotCompositedForBoundsOutOfView;
+@@ -4324,7 +4435,7 @@ ViewportConstrainedSublayers RenderLayerCompositor::viewportConstrainedSublayers
+     if (layer.renderer().effectiveCapturedInViewTransition())
+         return None;
+ 
+-    for (CheckedPtr ancestor = layer.parent(); ancestor; ancestor = ancestor->parent()) {
++    for (SUPPRESS_UNCHECKED_LOCAL auto* ancestor = layer.parent(); ancestor; ancestor = ancestor->parent()) {
+         if (ancestor->hasCompositedScrollableOverflow())
+             return sublayersForViewportConstrainedLayer();
+ 
+@@ -5220,7 +5331,11 @@ void RenderLayerCompositor::ensureRootLayer()
+             m_scrolledContentsLayer->setAnchorPoint({ });
+ 
+ #if PLATFORM(IOS_FAMILY)
+-            if (m_renderView.settings().asyncFrameScrollingEnabled()) {
++            bool needsScrollContainer = m_renderView.settings().asyncFrameScrollingEnabled();
++#if defined(WEBKIT_IOS6)
++            needsScrollContainer = needsScrollContainer || !m_renderView.frameView().frame().isRootFrame();
++#endif
++            if (needsScrollContainer) {
+                 m_scrollContainerLayer = GraphicsLayer::create(graphicsLayerFactory(), *this, GraphicsLayer::Type::ScrollContainer);
+ 
+                 m_scrollContainerLayer->setName(MAKE_STATIC_STRING_IMPL("scroll container"));
+@@ -5443,17 +5558,17 @@ bool RenderLayerCompositor::layerHas3DContent(const RenderLayer& layer) const
+     LayerListMutationDetector mutationChecker(const_cast<RenderLayer&>(layer));
+ #endif
+ 
+-    for (CheckedPtr renderLayer : layer.negativeZOrderLayers()) {
++    for (SUPPRESS_UNCHECKED_LOCAL auto* renderLayer : layer.negativeZOrderLayers()) {
+         if (layerHas3DContent(*renderLayer))
+             return true;
+     }
+ 
+-    for (CheckedPtr renderLayer : layer.positiveZOrderLayers()) {
++    for (SUPPRESS_UNCHECKED_LOCAL auto* renderLayer : layer.positiveZOrderLayers()) {
+         if (layerHas3DContent(*renderLayer))
+             return true;
+     }
+ 
+-    for (CheckedPtr renderLayer : layer.normalFlowLayers()) {
++    for (SUPPRESS_UNCHECKED_LOCAL auto* renderLayer : layer.normalFlowLayers()) {
+         if (layerHas3DContent(*renderLayer))
+             return true;
+     }
+@@ -5491,7 +5606,11 @@ FixedPositionViewportConstraints RenderLayerCompositor::computeFixedViewportCons
+ 
+     FixedPositionViewportConstraints constraints;
+     constraints.setLayerPositionAtLastLayout(scrollingNodeLayer->position());
++#if defined(WEBKIT_IOS6)
++    constraints.setViewportRectAtLastLayout(layer.backing()->viewportRectWhenPositioned());
++#else
+     constraints.setViewportRectAtLastLayout(m_renderView.frameView().rectForFixedPositionLayout());
++#endif
+     constraints.setAlignmentOffset(scrollingNodeLayer->pixelAlignmentOffset());
+ 
+     const Style::ComputedStyle& style = layer.renderer().style();
+@@ -5539,7 +5658,11 @@ StickyPositionViewportConstraints RenderLayerCompositor::computeStickyViewportCo
+     StickyPositionViewportConstraints constraints;
+     renderer.computeStickyPositionConstraints(constraints, renderer.constrainingRectForStickyPosition());
+ 
++#if defined(WEBKIT_IOS6)
++    constraints.setViewportRectAtLastLayout(layer.backing()->viewportRectWhenPositioned());
++#else
+     constraints.setViewportRectAtLastLayout(m_renderView.frameView().rectForFixedPositionLayout());
++#endif
+     constraints.setLayerPositionAtLastLayout(scrollingNodeLayer->position());
+     if (scrollingNodeLayer != anchorLayer)
+         constraints.setAnchorLayerOffsetAtLastLayout(toFloatSize(anchorLayer->position()));
+diff --git a/Source/WebCore/rendering/RenderLayerCompositor.h b/Source/WebCore/rendering/RenderLayerCompositor.h
+index 81f0d0b0e9efd78d447691666df87c4602708110..12a257065190592f9d50901125c2311dde6aea5c 100644
+--- a/Source/WebCore/rendering/RenderLayerCompositor.h
++++ b/Source/WebCore/rendering/RenderLayerCompositor.h
+@@ -532,6 +532,10 @@ private:
+ #if PLATFORM(IOS_FAMILY)
+     void updateScrollCoordinatedLayersAfterFlushIncludingSubframes();
+     void updateScrollCoordinatedLayersAfterFlush();
++#if defined(WEBKIT_IOS6)
++    void updateFrameScrollingLayerForEmbedder();
++    bool m_registeredFrameScrollingLayerWithEmbedder { false };
++#endif
+ #endif
+ 
+     FloatRect visibleRectForLayerFlushing() const;
+diff --git a/Source/WebCore/rendering/RenderLayerScrollableArea.cpp b/Source/WebCore/rendering/RenderLayerScrollableArea.cpp
+index ca7dca039229352278e85b60abb7b11cefac9e13..e3a69dbaebab07cbad2925b5058210d79dc188c4 100644
+--- a/Source/WebCore/rendering/RenderLayerScrollableArea.cpp
++++ b/Source/WebCore/rendering/RenderLayerScrollableArea.cpp
+@@ -533,7 +533,9 @@ bool RenderLayerScrollableArea::canUseCompositedScrolling() const
+     if (renderer.settings().asyncOverflowScrollingEnabled())
+         return isVisible && scrollsOverflow() && !m_layer.isInsideSVGForeignObject();
+ 
+-#if PLATFORM(IOS_FAMILY) && ENABLE(WEBKIT_OVERFLOW_SCROLLING_CSS_PROPERTY)
++#if defined(WEBKIT_IOS6)
++    return isVisible && scrollsOverflow() && !m_layer.isInsideSVGForeignObject();
++#elif PLATFORM(IOS_FAMILY) && ENABLE(WEBKIT_OVERFLOW_SCROLLING_CSS_PROPERTY)
+     return isVisible && scrollsOverflow() && renderer.style().overflowScrolling() == Style::WebkitOverflowScrolling::Touch;
+ #else
+     return false;
+diff --git a/Source/WebKitLegacy/mac/WebCoreSupport/WebChromeClient.h b/Source/WebKitLegacy/mac/WebCoreSupport/WebChromeClient.h
+index d3fb6fd6e72902b4998cad123773033b36a0a85e..2e428df5388035c95f2ae7ede15ebff8fdab9af8 100644
+--- a/Source/WebKitLegacy/mac/WebCoreSupport/WebChromeClient.h
++++ b/Source/WebKitLegacy/mac/WebCoreSupport/WebChromeClient.h
+@@ -184,6 +184,9 @@ private:
+             CanvasTrigger |
+ #if PLATFORM(IOS_FAMILY)
+             AnimatedOpacityTrigger | // Allow opacity animations to trigger compositing mode for iOS: <rdar://problem/7830677>
++#endif
++#if defined(WEBKIT_IOS6)
++            ScrollableNonMainFrameTrigger |
+ #endif
+             AnimationTrigger);
+     }

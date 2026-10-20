@@ -27,9 +27,9 @@ re-execs. The second launch loads the new engine first.
 
 | Artifact | On device | Built by | Role |
 | --- | --- | --- | --- |
-| Loader | `/Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib` | `platform/safari/rev-safari-tweak.c`, the `RevSafari` device library in `revenant.toml` | Reads the enabled-apps preference, re-execs an enabled app with the engine's `DYLD_*` set, skips SpringBoard |
-| Engine | `/usr/lib/rev-fw/{JavaScriptCore,WebCore,WebKit}.framework` | `revenant build`, which lays it out under the system's names | The WebKit build itself |
-| Compat | `/usr/lib/rev-safari-compat.dylib` | `platform/safari/safari-compat.mm`, the `rev-safari-compat` device library in `revenant.toml` | The ABI iOS 6 predates, the bookmarks start page, WebAssembly, preference reads |
+| Loader | `/Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib` | `platform/safari/rev-safari-tweak.c`, the `RevSafari` target in `xmake.lua` | Reads the enabled-apps preference, re-execs an enabled app with the engine's `DYLD_*` set, skips SpringBoard |
+| Engine | `/usr/lib/rev-fw/{JavaScriptCore,WebCore,WebKit}.framework` | the `webkit-engine` package, which lays it out under the system's names | The WebKit build itself |
+| Compat | `/usr/lib/rev-safari-compat.dylib` | `platform/safari/safari-compat.mm`, the `rev-safari-compat` target in `xmake.lua` | The ABI iOS 6 predates, the bookmarks start page, WebAssembly, preference reads |
 
 ### Framework names have to be the system's
 
@@ -120,8 +120,8 @@ method on a system class in the prefixed build needs the same treatment.
 
 Measured from the shared cache rather than guessed: across the 18 system libraries
 that import from WebKit, WebCore and JavaScriptCore, 147 symbols are imported in
-total, and UIKit itself uses 80. `tools/dsc-imports.py` and `tools/objc-surface.py`
-do the counting.
+total, and UIKit itself uses 80. `xmake firmware extract` and `xmake firmware classes`
+of the toolchain read the cache and the classes it holds, which is where these counts come from.
 
 One thing is not a symbol: UIKit gets its `WKWindowRef` by sending
 `-[WAKWindow _windowRef]`, an accessor 2.54 dropped along with the C window layer.

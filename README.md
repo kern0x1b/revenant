@@ -11,7 +11,7 @@ armv7), in one repository. Each member keeps its own folder, history, `README.md
 | `frameworks/Combine/` | Combine down to iOS 6, armv7 (module `Combine`) |
 | `recompiler/` | static recompiler of arm64 iOS applications into armv7 binaries for iOS 6 |
 | `agent-skills/` | skills for coding agents that build modern apps for old iOS |
-| `frameworks/WebKit/` | a current WebKit built for armv7 (the WebKit tree itself is the `webkit-254` submodule) |
+| `frameworks/WebKit/` | a current WebKit built for armv7 (the engine is `third_party/webkit`: upstream at a commit plus the port's patches) |
 
 Names: the repository and the platform are revenant; a folder is named for what it holds (`toolchain/`, `emulator/`,
 `recompiler/`, `agent-skills/`); a group of products is named by its role (`frameworks/`); a member that implements

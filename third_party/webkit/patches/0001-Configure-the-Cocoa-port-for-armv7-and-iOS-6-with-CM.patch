@@ -1,0 +1,4252 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Wed, 16 Sep 2026 12:00:00 +0200
+Subject: [PATCH] Configure the Cocoa port for armv7 and iOS 6 with CMake
+
+The port is built by CMake as PORT=Cocoa with WEBKIT_IOS6 on, for an armv7
+iPhone 4S on iOS 6.1.3, by a package recipe outside this tree rather than by
+Xcode. This gives that build what it needs:
+
+- OptionsIOS6.cmake: the feature set this device can run, and OptionsCocoa
+  and WebKitMacros reading it;
+- FindICU and FindWOFF2 that take the libraries from a package instead of the
+  SDK, copy WebKit's ICU headers only into the folder its own finder makes, and
+  find the WOFF2 common library and the compiler builtins;
+- libxml2 and libxslt provided by a package to a Cocoa build;
+- WebKitLegacy linked with the port's export list, frameworks given the
+  Info.plist the port processed, and framework roots searched at link time in
+  the order CMake finds them;
+- the source lists and platform files of JavaScriptCore, WTF, WebCore,
+  WebKitLegacy, bmalloc and ANGLE that name the port's sources;
+- the includes a file needs when the unified sources group differently, so a
+  build does not depend on which bundle a file happens to land in.
+---
+ Source/JavaScriptCore/CMakeLists.txt          |   13 +
+ Source/JavaScriptCore/PlatformCocoa.cmake     |   20 +-
+ Source/ThirdParty/ANGLE/CMakeLists.txt        |    4 +-
+ Source/WTF/CMakeLists.txt                     |    4 -
+ Source/WTF/wtf/PlatformCocoa.cmake            |   11 +-
+ Source/WTF/wtf/PlatformJSCOnly.cmake          |    2 +-
+ Source/WebCore/Headers.cmake                  |    2 +
+ .../commoncrypto/CryptoDigestCommonCrypto.cpp |  123 +-
+ Source/WebCore/PlatformCocoa.cmake            |  142 ++-
+ Source/WebCore/Sources.txt                    |   41 +-
+ .../WebCore/animation/KeyframeEffectStack.cpp |   42 +-
+ .../WebCore/animation/KeyframeEffectStack.h   |    2 +
+ Source/WebCore/bridge/objc/WebScriptObject.h  |    2 +
+ .../contentextensions/URLFilterParser.cpp     |    2 +-
+ Source/WebCore/css/parser/CSSParserToken.cpp  |   49 -
+ .../WebCore/dom/ContextDestructionObserver.h  |    2 +
+ Source/WebCore/dom/ElementIterator.h          |    9 +-
+ .../grid/GridFormattingContext.cpp            |    3 +-
+ Source/WebCore/page/LocalFrameView.cpp        |   55 +-
+ Source/WebCore/page/LocalFrameView.h          |    9 +-
+ Source/WebCore/page/ios/WebEventRegion.mm     |    4 +-
+ Source/WebCore/platform/BoxExtents.h          |    2 +
+ Source/WebCore/platform/graphics/FloatRect.h  |    2 +
+ .../WebCore/platform/graphics/NativeImage.cpp |    6 +
+ .../WebCore/platform/graphics/NativeImage.h   |    3 +
+ .../platform/graphics/PlatformTimeRanges.h    |    2 +
+ .../FormatDescriptionUtilities.cpp            |    2 +-
+ .../platform/graphics/cg/NativeImageCG.cpp    |  127 +-
+ .../WebCore/platform/ios/wak/WAKResponder.h   |    2 +
+ Source/WebCore/platform/ios/wak/WAKView.h     |    2 +
+ Source/WebCore/platform/ios/wak/WAKWindow.h   |    2 +
+ .../rev/RevMediaPlayerMediaStream.mm          |  226 ++++
+ .../WebCore/platform/network/CredentialBase.h |    2 +
+ Source/WebCore/platform/sql/SQLiteDatabase.h  |    2 +
+ Source/WebCore/plugins/PluginData.h           |    2 +
+ .../rendering/GridTrackSizingAlgorithm.cpp    |   68 +-
+ .../rendering/GridTrackSizingAlgorithm.h      |   38 +
+ Source/WebCore/style/RuleFeature.cpp          |  123 +-
+ Source/WebCore/style/RuleFeature.h            |   42 +-
+ Source/WebCore/style/StyleScopeRuleSets.cpp   |   34 +
+ Source/WebCore/style/StyleScopeRuleSets.h     |   28 +
+ Source/WebCore/style/StyleTreeResolver.cpp    |   14 +-
+ .../style/computed/StyleComputedStyleBase.cpp |   14 +
+ Source/WebKitLegacy/PlatformCocoa.cmake       |   15 +-
+ Source/WebKitLegacy/PlatformIOS.cmake         | 1107 +++++++++++++++++
+ Source/WebKitLegacy/SourcesCocoa.txt          |  132 +-
+ .../WebCoreSupport/LegacySocketProvider.cpp   |   16 +-
+ Source/bmalloc/PlatformCocoa.cmake            |    6 +
+ Source/cmake/FindICU.cmake                    |    1 +
+ Source/cmake/FindWOFF2.cmake                  |    4 +
+ Source/cmake/OptionsCocoa.cmake               |   78 +-
+ Source/cmake/OptionsIOS6.cmake                |  134 ++
+ Source/cmake/WebKitMacros.cmake               |   16 +
+ 53 files changed, 2371 insertions(+), 422 deletions(-)
+ create mode 100644 Source/WebCore/platform/mediastream/rev/RevMediaPlayerMediaStream.mm
+ create mode 100644 Source/WebKitLegacy/PlatformIOS.cmake
+ create mode 100644 Source/cmake/OptionsIOS6.cmake
+
+diff --git a/Source/JavaScriptCore/CMakeLists.txt b/Source/JavaScriptCore/CMakeLists.txt
+index e29bff754fd399dfa3dfd98b759d66f33a222cb8..5dd4d37a7cf503d7f23bb42c0e99687dd57c02a8 100644
+--- a/Source/JavaScriptCore/CMakeLists.txt
++++ b/Source/JavaScriptCore/CMakeLists.txt
+@@ -26,6 +26,7 @@ set(JavaScriptCore_PRIVATE_INCLUDE_DIRECTORIES
+     "${JAVASCRIPTCORE_DIR}/dfg"
+     "${JAVASCRIPTCORE_DIR}/disassembler"
+     "${JAVASCRIPTCORE_DIR}/disassembler/ARM64"
++    "${JAVASCRIPTCORE_DIR}/disassembler/ARMv7"
+     "${JAVASCRIPTCORE_DIR}/disassembler/zydis"
+     "${JAVASCRIPTCORE_DIR}/domjit"
+     "${JAVASCRIPTCORE_DIR}/ftl"
+@@ -314,6 +315,8 @@ list(APPEND JavaScriptCore_HEADERS
+ 
+ if (WTF_CPU_X86_64)
+     set(OFFLINE_ASM_BACKEND "X86_64")
++elseif (WTF_CPU_ARM)
++    set(OFFLINE_ASM_BACKEND "ARMv7")
+ elseif (WTF_CPU_ARM64)
+     if (CMAKE_OSX_ARCHITECTURES STREQUAL "arm64e")
+         set(OFFLINE_ASM_BACKEND "ARM64E")
+@@ -621,6 +624,9 @@ set(JavaScriptCore_PRIVATE_FRAMEWORK_HEADERS
+     API/glib/JSCVirtualMachinePrivate.h
+     API/glib/JSCWrapperMap.h
+ 
++    assembler/ARMv7Assembler.h
++    assembler/ARMv7Registers.h
++    assembler/MacroAssemblerARMv7.h
+     assembler/ARM64Assembler.h
+     assembler/ARM64EAssembler.h
+     assembler/ARM64Registers.h
+@@ -995,6 +1001,7 @@ set(JavaScriptCore_PRIVATE_FRAMEWORK_HEADERS
+     jit/ScratchRegisterAllocator.h
+     jit/Snippet.h
+     jit/SnippetParams.h
++    jit/SnippetReg.h
+     jit/SnippetSlowPathCalls.h
+     jit/SpillRegistersMode.h
+     jit/TagRegistersMode.h
+@@ -1820,6 +1827,12 @@ add_dependencies(JavaScriptCore_CopyPrivateHeaders Bytecodes JSCBuiltins JSCWebP
+ target_include_directories(LowLevelInterpreterLib
+     PRIVATE "$<TARGET_PROPERTY:JavaScriptCore,INCLUDE_DIRECTORIES>" "${JavaScriptCore_PRIVATE_FRAMEWORK_HEADERS_DIR}/JavaScriptCore")
+ add_dependencies(LowLevelInterpreterLib Bytecodes JSCBuiltins JSCWebPreferenceOptions)
++
++target_compile_options(LowLevelInterpreterLib PRIVATE -fno-lto)
++
++if (WEBKIT_IOS6_SIZE_OPTIMIZED)
++    target_compile_options(JavaScriptCore PRIVATE -Oz)
++endif ()
+ if (TARGET WTF_CopyHeaders)
+     add_dependencies(LowLevelInterpreterLib WTF_CopyHeaders)
+ endif ()
+diff --git a/Source/JavaScriptCore/PlatformCocoa.cmake b/Source/JavaScriptCore/PlatformCocoa.cmake
+index c007319c75d6705aaa933c4ff9f6300824723c55..7d63c3f81826229276a369932626ab3628ceddd9 100644
+--- a/Source/JavaScriptCore/PlatformCocoa.cmake
++++ b/Source/JavaScriptCore/PlatformCocoa.cmake
+@@ -5,8 +5,20 @@ target_compile_options(JavaScriptCore PRIVATE
+ )
+ 
+ find_library(SECURITY_LIBRARY Security)
++
++if (NOT SECURITY_LIBRARY)
++
++    set(SECURITY_LIBRARY "")
++
++endif ()
+ find_library(COREGRAPHICS_LIBRARY CoreGraphics)
++if (NOT COREGRAPHICS_LIBRARY)
++    set(COREGRAPHICS_LIBRARY "")
++endif ()
+ find_library(CORETEXT_LIBRARY CoreText)
++if (NOT CORETEXT_LIBRARY)
++    set(CORETEXT_LIBRARY "")
++endif ()
+ list(APPEND JavaScriptCore_LIBRARIES
+     ${SECURITY_LIBRARY}
+     ${COREGRAPHICS_LIBRARY}
+@@ -195,7 +207,13 @@ if (WEBKIT_SDK_IS_IOS_FAMILY)
+ 
+     # BrowserEngineCore provides the inline-JIT-permissions API (be_memory_*)
+     # that threadSelfRestrict uses; weak-linked (iOS 17.4+).
+-    target_link_options(JavaScriptCore PRIVATE "LINKER:-weak_framework,BrowserEngineCore")
++    find_library(BROWSERENGINECORE_LIBRARY BrowserEngineCore
++        PATHS "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks"
++        NO_DEFAULT_PATH
++    )
++    if (BROWSERENGINECORE_LIBRARY)
++        target_link_options(JavaScriptCore PRIVATE "LINKER:-weak_framework,BrowserEngineCore")
++    endif ()
+ 
+     target_compile_definitions(JavaScriptCore PRIVATE PAS_BMALLOC_HIDDEN=1)
+     target_compile_options(JavaScriptCore PRIVATE
+diff --git a/Source/ThirdParty/ANGLE/CMakeLists.txt b/Source/ThirdParty/ANGLE/CMakeLists.txt
+index 145984b2c6a7a5020b434d0324544e0c0bc77741..6cc53e7a3a95b000c418c11bb93be6c4503cd0ff 100644
+--- a/Source/ThirdParty/ANGLE/CMakeLists.txt
++++ b/Source/ThirdParty/ANGLE/CMakeLists.txt
+@@ -49,7 +49,7 @@ set(EGL_LIBRARY_TYPE STATIC)
+ # attribute the Khronos headers put on the entry points, leaving them unexported.
+ set(_angle_prototypes ${no_gl_prototypes})
+ set(_angle_egl_api_definition EGLAPI=)
+-if (APPLE)
++if (APPLE AND NOT WEBKIT_IOS6)
+     set(ANGLE_LIBRARY_TYPE OBJECT)
+     set(GLESv2_LIBRARY_TYPE OBJECT)
+     set(EGL_LIBRARY_TYPE OBJECT)
+@@ -212,7 +212,7 @@ if (USE_ANGLE_EGL OR ENABLE_WEBGL)
+         add_library(ANGLE::EGL ALIAS EGLFramework)
+     endif ()
+ 
+-    if (APPLE)
++    if (APPLE AND NOT WEBKIT_IOS6)
+         # OptionsCocoa.cmake applies -fvisibility=hidden only to C and CXX, so the
+         # ObjC++ Metal backend would export all of rx::*Mtl from the dylib.
+         foreach (_angle_object_target IN ITEMS ANGLE GLESv2 EGL)
+diff --git a/Source/WTF/CMakeLists.txt b/Source/WTF/CMakeLists.txt
+index bd1a345ef393304eeda0e8411a5126e48eba8682..1b2684bf2eec95a10909b7f554dc92da6946ab8b 100644
+--- a/Source/WTF/CMakeLists.txt
++++ b/Source/WTF/CMakeLists.txt
+@@ -1,7 +1,3 @@
+ set_property(DIRECTORY . PROPERTY FOLDER "WTF")
+ 
+ add_subdirectory(wtf)
+-
+-if (APPLE AND NOT USE_APPLE_INTERNAL_SDK)
+-    file(COPY ${WTF_DIR}/icu/unicode DESTINATION ${ICU_INCLUDE_DIRS})
+-endif ()
+diff --git a/Source/WTF/wtf/PlatformCocoa.cmake b/Source/WTF/wtf/PlatformCocoa.cmake
+index 60810ebba8f43057b25824d1e1b3eaac3190929a..3a4c488b9efbf629a6358f55b7d9de25870e09b0 100644
+--- a/Source/WTF/wtf/PlatformCocoa.cmake
++++ b/Source/WTF/wtf/PlatformCocoa.cmake
+@@ -1,6 +1,15 @@
+ find_library(COREFOUNDATION_LIBRARY CoreFoundation)
++if (NOT COREFOUNDATION_LIBRARY)
++    set(COREFOUNDATION_LIBRARY "")
++endif ()
+ find_library(READLINE_LIBRARY Readline)
++if (NOT READLINE_LIBRARY)
++    set(READLINE_LIBRARY "")
++endif ()
+ find_library(SECURITY_LIBRARY Security)
++if (NOT SECURITY_LIBRARY)
++    set(SECURITY_LIBRARY "")
++endif ()
+ list(APPEND WTF_LIBRARIES
+     ${COREFOUNDATION_LIBRARY}
+     ${READLINE_LIBRARY}
+@@ -136,7 +145,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR USE_APPLE_INTERNAL_SDK)
+         WORKING_DIRECTORY ${WTF_DERIVED_SOURCES_DIR}
+         COMMAND ${Mig_EXECUTABLE} -header mach_exc.h -user mach_excUser.c
+             -sheader MachExceptionsServer.h -server mach_excServer.c
+-            -DMACH_EXC_SERVER_TASKIDTOKEN_STATE -isysroot ${CMAKE_OSX_SYSROOT}
++            -DMACH_EXC_SERVER_TASKIDTOKEN_STATE -isysroot ${MIG_SYSROOT}
+             MachExceptions.defs
+         VERBATIM)
+     list(APPEND WTF_SOURCES
+diff --git a/Source/WTF/wtf/PlatformJSCOnly.cmake b/Source/WTF/wtf/PlatformJSCOnly.cmake
+index b78f744819363d815d8268c8e853aa8051950aba..3418565ec097480e58edca4a0cd4b4c7da0f8755 100644
+--- a/Source/WTF/wtf/PlatformJSCOnly.cmake
++++ b/Source/WTF/wtf/PlatformJSCOnly.cmake
+@@ -88,7 +88,7 @@ elseif (APPLE)
+         WORKING_DIRECTORY ${WTF_DERIVED_SOURCES_DIR}
+         COMMAND ${Mig_EXECUTABLE} -header mach_exc.h -user mach_excUser.c
+             -sheader MachExceptionsServer.h -server mach_excServer.c
+-            -DMACH_EXC_SERVER_TASKIDTOKEN_STATE -isysroot ${CMAKE_OSX_SYSROOT}
++            -DMACH_EXC_SERVER_TASKIDTOKEN_STATE -isysroot ${MIG_SYSROOT}
+             MachExceptions.defs
+         VERBATIM)
+     if (NOT USE_GLIB)
+diff --git a/Source/WebCore/Headers.cmake b/Source/WebCore/Headers.cmake
+index d5651f18f9d909b8413fab4759f73cead88c3424..922101883c6d7709a843bb2a277fd6568d8e805c 100644
+--- a/Source/WebCore/Headers.cmake
++++ b/Source/WebCore/Headers.cmake
+@@ -989,6 +989,7 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
+     bindings/js/ReadableStreamDefaultController.h
+     bindings/js/RunJavaScriptParameters.h
+     bindings/js/ScriptCachedFrameData.h
++    bindings/js/ScriptBytecodeCache.h
+     bindings/js/ScriptController.h
+     bindings/js/ScriptWrappable.h
+     bindings/js/ScriptWrappableInlines.h
+@@ -2118,6 +2119,7 @@ set(WebCore_PRIVATE_FRAMEWORK_HEADERS
+     page/SettingsBase.h
+     page/ShadowRealmGlobalScope.h
+     page/ShareData.h
++    page/Scheduling.h
+     page/SocketProvider.h
+     page/SpeechRecognitionProvider.h
+     page/SpeechSynthesisClient.h
+diff --git a/Source/WebCore/PAL/pal/crypto/commoncrypto/CryptoDigestCommonCrypto.cpp b/Source/WebCore/PAL/pal/crypto/commoncrypto/CryptoDigestCommonCrypto.cpp
+index de7e8754fe7e0e41fc0cd9b0e8afd97644b7c460..c4f8e306bf3bdecd03dbcbfade3fd5dbaecaf18f 100644
+--- a/Source/WebCore/PAL/pal/crypto/commoncrypto/CryptoDigestCommonCrypto.cpp
++++ b/Source/WebCore/PAL/pal/crypto/commoncrypto/CryptoDigestCommonCrypto.cpp
+@@ -1,37 +1,8 @@
+-/*
+- * Copyright (C) 2013-2024 Apple Inc. All rights reserved.
+- *
+- * Redistribution and use in source and binary forms, with or without
+- * modification, are permitted provided that the following conditions
+- * are met:
+- * 1. Redistributions of source code must retain the above copyright
+- *    notice, this list of conditions and the following disclaimer.
+- * 2. Redistributions in binary form must reproduce the above copyright
+- *    notice, this list of conditions and the following disclaimer in the
+- *    documentation and/or other materials provided with the distribution.
+- *
+- * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+- * THE POSSIBILITY OF SUCH DAMAGE.
+- */
+-
+ #include "config.h"
+ #include "CryptoDigest.h"
+ 
+-#include "PALSwift-Generated.h"
+-#include <CommonCrypto/CommonCrypto.h>
+-#include <optional>
+-#include <pal/crypto/CryptoTypes.h>
+-#include <span>
+-#include <wtf/EscapableByteSpan.h>
++#include <CommonCrypto/CommonDigest.h>
++#include <wtf/StdLibExtras.h>
+ #include <wtf/TZoneMallocInlines.h>
+ 
+ namespace PAL::Crypto {
+@@ -39,8 +10,12 @@ namespace PAL::Crypto {
+ struct CryptoDigestContext {
+     WTF_MAKE_STRUCT_TZONE_ALLOCATED(CryptoDigestContext);
+ 
+-    CryptoDigest::Algorithm algorithm;
+-    std::unique_ptr<pal::Digest> ccContext;
++    CryptoDigest::Algorithm algorithm { CryptoDigest::Algorithm::SHA_1 };
++    union {
++        CC_SHA1_CTX sha1;
++        CC_SHA256_CTX sha256;
++        CC_SHA512_CTX sha512;
++    } state;
+ };
+ 
+ WTF_MAKE_STRUCT_TZONE_ALLOCATED_IMPL(CryptoDigestContext);
+@@ -52,65 +27,79 @@ CryptoDigest::CryptoDigest()
+ 
+ CryptoDigest::~CryptoDigest() = default;
+ 
+-static std::unique_ptr<pal::Digest> createCryptoDigest(CryptoDigest::Algorithm algorithm)
+-{
+-    switch (algorithm) {
+-    case CryptoDigest::Algorithm::SHA_1: {
+-        return WTF::makeUniqueWithoutFastMallocCheck<pal::Digest>(pal::Digest::sha1Init());
+-    }
+-    case CryptoDigest::Algorithm::SHA_256: {
+-        return WTF::makeUniqueWithoutFastMallocCheck<pal::Digest>(pal::Digest::sha256Init());
+-    }
+-    case CryptoDigest::Algorithm::SHA_384: {
+-        return WTF::makeUniqueWithoutFastMallocCheck<pal::Digest>(pal::Digest::sha384Init());
+-    }
+-    case CryptoDigest::Algorithm::SHA_512: {
+-        return WTF::makeUniqueWithoutFastMallocCheck<pal::Digest>(pal::Digest::sha512Init());
+-    }
+-    case CryptoDigest::Algorithm::DEPRECATED_SHA_224: {
+-        RELEASE_ASSERT_NOT_REACHED_WITH_MESSAGE("SHA224 is not supported.");
+-        return nullptr;
+-    }
+-    }
+-}
+-
+ std::unique_ptr<CryptoDigest> CryptoDigest::create(CryptoDigest::Algorithm algorithm)
+ {
+     std::unique_ptr<CryptoDigest> digest = WTF::makeUnique<CryptoDigest>();
+-    ASSERT(digest->m_context);
+     digest->m_context->algorithm = algorithm;
+-    digest->m_context->ccContext = createCryptoDigest(algorithm);
++
++    switch (algorithm) {
++    case CryptoDigest::Algorithm::SHA_1:
++        CC_SHA1_Init(&digest->m_context->state.sha1);
++        break;
++    case CryptoDigest::Algorithm::SHA_256:
++        CC_SHA256_Init(&digest->m_context->state.sha256);
++        break;
++    case CryptoDigest::Algorithm::SHA_384:
++        CC_SHA384_Init(&digest->m_context->state.sha512);
++        break;
++    case CryptoDigest::Algorithm::SHA_512:
++        CC_SHA512_Init(&digest->m_context->state.sha512);
++        break;
++    case CryptoDigest::Algorithm::DEPRECATED_SHA_224:
++        CC_SHA224_Init(&digest->m_context->state.sha256);
++        break;
++    }
+     return digest;
+ }
+ 
+ void CryptoDigest::addBytes(std::span<const uint8_t> input)
+ {
++    CC_LONG length = static_cast<CC_LONG>(input.size());
+     switch (m_context->algorithm) {
+     case CryptoDigest::Algorithm::SHA_1:
++        CC_SHA1_Update(&m_context->state.sha1, input.data(), length);
++        break;
+     case CryptoDigest::Algorithm::SHA_256:
++        CC_SHA256_Update(&m_context->state.sha256, input.data(), length);
++        break;
+     case CryptoDigest::Algorithm::SHA_384:
+-    case CryptoDigest::Algorithm::SHA_512: {
+-        m_context->ccContext->update(escapableSpan(input));
+-        return;
+-    }
++        CC_SHA384_Update(&m_context->state.sha512, input.data(), length);
++        break;
++    case CryptoDigest::Algorithm::SHA_512:
++        CC_SHA512_Update(&m_context->state.sha512, input.data(), length);
++        break;
+     case CryptoDigest::Algorithm::DEPRECATED_SHA_224:
+-        RELEASE_ASSERT_NOT_REACHED_WITH_MESSAGE("SHA224 is not supported.");
+-        return;
++        CC_SHA224_Update(&m_context->state.sha256, input.data(), length);
++        break;
+     }
+ }
+ 
+ Vector<uint8_t> CryptoDigest::computeHash()
+ {
++    Vector<uint8_t> result;
+     switch (m_context->algorithm) {
+     case CryptoDigest::Algorithm::SHA_1:
++        result.grow(CC_SHA1_DIGEST_LENGTH);
++        CC_SHA1_Final(result.mutableSpan().data(), &m_context->state.sha1);
++        break;
+     case CryptoDigest::Algorithm::SHA_256:
++        result.grow(CC_SHA256_DIGEST_LENGTH);
++        CC_SHA256_Final(result.mutableSpan().data(), &m_context->state.sha256);
++        break;
+     case CryptoDigest::Algorithm::SHA_384:
++        result.grow(CC_SHA384_DIGEST_LENGTH);
++        CC_SHA384_Final(result.mutableSpan().data(), &m_context->state.sha512);
++        break;
+     case CryptoDigest::Algorithm::SHA_512:
+-        return m_context->ccContext->finalize();
++        result.grow(CC_SHA512_DIGEST_LENGTH);
++        CC_SHA512_Final(result.mutableSpan().data(), &m_context->state.sha512);
++        break;
+     case CryptoDigest::Algorithm::DEPRECATED_SHA_224:
+-        RELEASE_ASSERT_NOT_REACHED_WITH_MESSAGE("SHA224 is not supported.");
+-        return { };
++        result.grow(CC_SHA224_DIGEST_LENGTH);
++        CC_SHA224_Final(result.mutableSpan().data(), &m_context->state.sha256);
++        break;
+     }
++    return result;
+ }
+ 
+-} // namespace PAL
++}
+diff --git a/Source/WebCore/PlatformCocoa.cmake b/Source/WebCore/PlatformCocoa.cmake
+index 01dbad84abf9f030f91ba5892e757a4523fc7396..49988ac86fa3adc1ac704886bfb74ab7d128b886 100644
+--- a/Source/WebCore/PlatformCocoa.cmake
++++ b/Source/WebCore/PlatformCocoa.cmake
+@@ -5,6 +5,21 @@ if (WebCore_INSTALL_NAME_DIR)
+     )
+ endif ()
+ 
++if (USE_WEBP)
++    list(APPEND WebCore_LIBRARIES WebP::libwebp WebP::demux)
++endif ()
++
++if (USE_OPENSSL)
++    include(platform/OpenSSL.cmake)
++    get_filename_component(IOS6_OPENSSL_LIB_DIR "${WEBKIT_IOS6_CRYPTO_LIB}" DIRECTORY)
++    get_filename_component(IOS6_OPENSSL_ROOT "${IOS6_OPENSSL_LIB_DIR}" DIRECTORY)
++    list(APPEND WebCore_PRIVATE_INCLUDE_DIRECTORIES
++        "${WEBCORE_DIR}/crypto/openssl"
++        "${IOS6_OPENSSL_ROOT}/include"
++    )
++endif ()
++
++make_directory("${CMAKE_BINARY_DIR}/WebCore/Modules")
+ file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/WebCore/Modules")
+ configure_file(${WEBCORE_DIR}/WebCore.modulemap ${CMAKE_BINARY_DIR}/WebCore/Modules/module.modulemap COPYONLY)
+ configure_file(${WEBCORE_DIR}/WebCore_Private.modulemap ${CMAKE_BINARY_DIR}/WebCore/Modules/module.private.modulemap COPYONLY)
+@@ -14,32 +29,94 @@ target_compile_options(WebCore PRIVATE
+ 
+ target_compile_options(WebCore PRIVATE ${WEBKIT_PRIVATE_FRAMEWORKS_COMPILE_FLAG})
+ 
+-target_link_options(WebCore PRIVATE "LINKER:-weak_framework,BrowserEngineKit")
++find_library(BROWSERENGINEKIT_LIBRARY BrowserEngineKit
++    PATHS "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks"
++    NO_DEFAULT_PATH
++)
++if (BROWSERENGINEKIT_LIBRARY)
++    target_link_options(WebCore PRIVATE -weak_framework BrowserEngineKit)
++endif ()
+ 
+ target_link_options(WebCore PRIVATE
+     "LINKER:-unexported_symbols_list,${WEBCORE_DIR}/Configurations/WebCore.unexp"
+ )
+ 
+ find_library(ACCELERATE_LIBRARY Accelerate)
++if (NOT ACCELERATE_LIBRARY)
++    set(ACCELERATE_LIBRARY "")
++endif ()
+ find_library(AUDIOTOOLBOX_LIBRARY AudioToolbox)
++if (NOT AUDIOTOOLBOX_LIBRARY)
++    set(AUDIOTOOLBOX_LIBRARY "")
++endif ()
+ find_library(AVFOUNDATION_LIBRARY AVFoundation)
++if (NOT AVFOUNDATION_LIBRARY)
++    set(AVFOUNDATION_LIBRARY "")
++endif ()
+ find_library(CFNETWORK_LIBRARY CFNetwork)
++if (NOT CFNETWORK_LIBRARY)
++    set(CFNETWORK_LIBRARY "")
++endif ()
+ find_library(COMPRESSION_LIBRARY Compression)
++if (NOT COMPRESSION_LIBRARY)
++    set(COMPRESSION_LIBRARY "")
++endif ()
+ find_library(COREAUDIO_LIBRARY CoreAudio)
++if (NOT COREAUDIO_LIBRARY)
++    set(COREAUDIO_LIBRARY "")
++endif ()
+ find_library(COREMEDIA_LIBRARY CoreMedia)
++if (NOT COREMEDIA_LIBRARY)
++    set(COREMEDIA_LIBRARY "")
++endif ()
+ find_library(FONTPARSER_LIBRARY FontParser HINTS ${CMAKE_OSX_SYSROOT}/System/Library/PrivateFrameworks/FontServices.framework)
++if (NOT FONTPARSER_LIBRARY)
++    set(FONTPARSER_LIBRARY "")
++endif ()
+ find_library(IOKIT_LIBRARY IOKit)
++if (NOT IOKIT_LIBRARY)
++    set(IOKIT_LIBRARY "")
++endif ()
+ find_library(IOSURFACE_LIBRARY IOSurface)
++if (NOT IOSURFACE_LIBRARY)
++    set(IOSURFACE_LIBRARY "")
++endif ()
+ find_library(LIBACCESSIBILITY_LIBRARY Accessibility PATHS ${CMAKE_OSX_SYSROOT}/usr/lib NO_CMAKE_FIND_ROOT_PATH NO_DEFAULT_PATH)
++if (NOT LIBACCESSIBILITY_LIBRARY)
++    set(LIBACCESSIBILITY_LIBRARY "")
++endif ()
+ find_library(ACCESSIBILITYSUPPORT_LIBRARY AccessibilitySupport HINTS ${CMAKE_OSX_SYSROOT}/System/Library/PrivateFrameworks)
++if (NOT ACCESSIBILITYSUPPORT_LIBRARY)
++    set(ACCESSIBILITYSUPPORT_LIBRARY "")
++endif ()
+ find_library(METAL_LIBRARY Metal)
++if (NOT METAL_LIBRARY)
++    set(METAL_LIBRARY "")
++endif ()
+ find_library(NETWORKEXTENSION_LIBRARY NetworkExtension)
++if (NOT NETWORKEXTENSION_LIBRARY)
++    set(NETWORKEXTENSION_LIBRARY "")
++endif ()
+ find_library(QUARTZCORE_LIBRARY QuartzCore)
++if (NOT QUARTZCORE_LIBRARY)
++    set(QUARTZCORE_LIBRARY "")
++endif ()
+ find_library(SECURITY_LIBRARY Security)
++if (NOT SECURITY_LIBRARY)
++    set(SECURITY_LIBRARY "")
++endif ()
+ find_library(SYSTEMCONFIGURATION_LIBRARY SystemConfiguration)
++if (NOT SYSTEMCONFIGURATION_LIBRARY)
++    set(SYSTEMCONFIGURATION_LIBRARY "")
++endif ()
+ find_library(UNIFORMTYPEIDENTIFIERS_LIBRARY UniformTypeIdentifiers)
++if (NOT UNIFORMTYPEIDENTIFIERS_LIBRARY)
++    set(UNIFORMTYPEIDENTIFIERS_LIBRARY "")
++endif ()
+ find_library(VIDEOTOOLBOX_LIBRARY VideoToolbox)
+-find_library(XML2_LIBRARY XML2)
++if (NOT VIDEOTOOLBOX_LIBRARY)
++    set(VIDEOTOOLBOX_LIBRARY "")
++endif ()
+ find_library(APPLICATIONSERVICES_LIBRARY ApplicationServices)
+ find_library(AUDIOUNIT_LIBRARY AudioUnit)
+ find_library(CARBON_LIBRARY Carbon)
+@@ -105,7 +182,6 @@ list(APPEND WebCore_LIBRARIES
+     ${SYSTEMCONFIGURATION_LIBRARY}
+     ${UNIFORMTYPEIDENTIFIERS_LIBRARY}
+     ${VIDEOTOOLBOX_LIBRARY}
+-    ${XML2_LIBRARY}
+ )
+ 
+ if (WEBKIT_SDK_IS_MACOS)
+@@ -175,14 +251,33 @@ else ()
+     list(APPEND WebCore_PRIVATE_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/WebGPU/Headers")
+ endif ()
+ 
++list(APPEND WebCore_PRIVATE_INCLUDE_DIRECTORIES
++    "${CMAKE_SOURCE_DIR}/Source/WebKitLegacy/mac/DOM"
++    "${CMAKE_SOURCE_DIR}/Source/WebKitLegacy/mac/WebCoreSupport"
++    "${CMAKE_SOURCE_DIR}/Source/WebKitLegacy/mac"
++)
++
++set(WebCore_EXTRA_LINK_OPTIONS "SHELL:-Wl,-force_load $<TARGET_FILE:PAL>")
+ set(WebCore_EXTRA_LINK_OPTIONS "LINKER:-force_load,$<TARGET_FILE:PAL>")
+ 
+ find_library(COREUI_FRAMEWORK CoreUI HINTS ${CMAKE_OSX_SYSROOT}/System/Library/PrivateFrameworks)
++
++if (NOT COREUI_FRAMEWORK)
++
++    set(COREUI_FRAMEWORK "")
++
++endif ()
+ if (COREUI_FRAMEWORK)
+     list(APPEND WebCore_LIBRARIES ${COREUI_FRAMEWORK})
+ endif ()
+ 
+ find_library(DATADETECTORSCORE_FRAMEWORK DataDetectorsCore HINTS ${CMAKE_OSX_SYSROOT}/System/Library/PrivateFrameworks)
++
++if (NOT DATADETECTORSCORE_FRAMEWORK)
++
++    set(DATADETECTORSCORE_FRAMEWORK "")
++
++endif ()
+ if (DATADETECTORSCORE_FRAMEWORK)
+     list(APPEND WebCore_LIBRARIES ${DATADETECTORSCORE_FRAMEWORK})
+ endif ()
+@@ -260,6 +355,7 @@ list(APPEND WebCore_PRIVATE_INCLUDE_DIRECTORIES
+     "${WEBCORE_DIR}/platform/graphics/opengl"
+     "${WEBCORE_DIR}/platform/graphics/re"
+     "${WEBCORE_DIR}/platform/image-decoders"
++    "${WEBCORE_DIR}/platform/image-decoders/webp"
+     "${WEBCORE_DIR}/platform/mediacapabilities"
+     "${WEBCORE_DIR}/platform/mediarecorder/cocoa"
+     "${WEBCORE_DIR}/platform/mediastream/cocoa"
+@@ -306,11 +402,6 @@ list(APPEND WebCore_PRIVATE_INCLUDE_DIRECTORIES
+     "${WebCore_PRIVATE_FRAMEWORK_HEADERS_DIR}"
+ )
+ 
+-list(APPEND WebCore_SYSTEM_INCLUDE_DIRECTORIES
+-    "${CMAKE_OSX_SYSROOT}/usr/include/libxslt"
+-    "${CMAKE_OSX_SYSROOT}/usr/include/libxml2"
+-)
+-
+ list(APPEND WebCore_SOURCES
+     Modules/geolocation/cocoa/GeolocationPositionDataCocoa.mm
+ 
+@@ -367,7 +458,6 @@ list(APPEND WebCore_SOURCES
+     platform/cocoa/LoggingCocoa.mm
+     platform/cocoa/MIMETypeRegistryCocoa.mm
+     platform/cocoa/MediaRemoteSoftLink.mm
+-    platform/cocoa/NetworkExtensionContentFilter.mm
+     platform/cocoa/ParentalControlsContentFilter.mm
+     platform/cocoa/PasteboardCocoa.mm
+     platform/cocoa/SearchPopupMenuCocoa.mm
+@@ -407,23 +497,6 @@ list(APPEND WebCore_SOURCES
+     platform/graphics/avfoundation/MediaSelectionGroupAVFObjC.mm
+     platform/graphics/avfoundation/WebAVSampleBufferListener.mm
+ 
+-    platform/graphics/avfoundation/objc/AVAssetTrackUtilities.mm
+-    platform/graphics/avfoundation/objc/AudioTrackPrivateAVFObjC.mm
+-    platform/graphics/avfoundation/objc/AudioTrackPrivateMediaSourceAVFObjC.cpp
+-    platform/graphics/avfoundation/objc/CDMInstanceFairPlayStreamingAVFObjC.mm
+-    platform/graphics/avfoundation/objc/CDMSessionAVContentKeySession.mm
+-    platform/graphics/avfoundation/objc/CDMSessionAVFoundationObjC.mm
+-    platform/graphics/avfoundation/objc/ImageDecoderAVFObjC.mm
+-    platform/graphics/avfoundation/objc/InbandTextTrackPrivateAVFObjC.mm
+-    platform/graphics/avfoundation/objc/MediaPlayerPrivateAVFoundationObjC.mm
+-    platform/graphics/avfoundation/objc/MediaPlayerPrivateMediaSourceAVFObjC.mm
+-    platform/graphics/avfoundation/objc/MediaSampleAVFObjC.mm
+-    platform/graphics/avfoundation/objc/MediaSourcePrivateAVFObjC.mm
+-    platform/graphics/avfoundation/objc/QueuedVideoOutput.mm
+-    platform/graphics/avfoundation/objc/SourceBufferPrivateAVFObjC.mm
+-    platform/graphics/avfoundation/objc/VideoTrackPrivateAVFObjC.cpp
+-    platform/graphics/avfoundation/objc/VideoTrackPrivateMediaSourceAVFObjC.mm
+-    platform/graphics/avfoundation/objc/WebCoreAVFResourceLoader.mm
+ 
+     platform/graphics/ca/FrameProcessIndicators.cpp
+     platform/graphics/ca/GraphicsLayerCA.cpp
+@@ -490,7 +563,6 @@ list(APPEND WebCore_SOURCES
+     platform/graphics/cocoa/UnrealizedCoreTextFont.cpp
+     platform/graphics/cocoa/WebActionDisablingCALayerDelegate.mm
+     platform/graphics/cocoa/WebCoreCALayerExtras.mm
+-    platform/graphics/cocoa/WebCoreDecompressionSession.mm
+     platform/graphics/cocoa/WebLayer.mm
+     platform/graphics/cocoa/WebMAudioUtilitiesCocoa.mm
+     platform/graphics/cocoa/WebProcessGraphicsContextGLCocoa.mm
+@@ -516,12 +588,7 @@ list(APPEND WebCore_SOURCES
+ 
+     platform/mediarecorder/MediaRecorderPrivateWriter.cpp
+ 
+-    platform/mediastream/cocoa/CoreAudioCaptureUnit.mm
+-    platform/mediastream/cocoa/MockRealtimeVideoSourceCocoa.mm
+-    platform/mediastream/cocoa/RealtimeOutgoingVideoSourceCocoa.cpp
+ 
+-    platform/mediastream/libwebrtc/LibWebRTCAudioModule.cpp
+-    platform/mediastream/libwebrtc/LibWebRTCDav1dDecoder.cpp
+ 
+     platform/network/cf/CertificateInfoCFNet.cpp
+     platform/network/cf/CookieStorageSessionCFNet.cpp
+@@ -1028,8 +1095,6 @@ list(REMOVE_ITEM WebCore_PRIVATE_FRAMEWORK_HEADERS
+     page/WebKitNamespace.h
+ 
+     platform/AbortableTaskQueue.h
+-    platform/PlatformTouchEvent.h
+-    platform/PlatformTouchPoint.h
+     platform/StringEntropyHelpers.h
+ 
+     platform/encryptedmedia/CDMUtilities.h
+@@ -1265,7 +1330,6 @@ list(APPEND WebCore_PRIVATE_FRAMEWORK_HEADERS
+     platform/cocoa/CoreVideoSoftLink.h
+     platform/cocoa/LocalCurrentGraphicsContext.h
+     platform/cocoa/NSURLUtilities.h
+-    platform/cocoa/NetworkExtensionContentFilter.h
+     platform/cocoa/ParentalControlsContentFilter.h
+     platform/cocoa/ParentalControlsURLFilter.h
+     platform/cocoa/ParentalControlsURLFilterParameters.h
+@@ -1436,6 +1500,7 @@ list(APPEND WebCore_PRIVATE_FRAMEWORK_HEADERS
+     platform/ios/wak/WKUtilities.h
+     platform/ios/wak/WKView.h
+     platform/ios/wak/WKViewPrivate.h
++    platform/ios/wak/WKWindow.h
+     platform/ios/wak/WebCoreThread.h
+     platform/ios/wak/WebCoreThreadInternal.h
+     platform/ios/wak/WebCoreThreadMessage.h
+@@ -1504,6 +1569,7 @@ list(APPEND WebCore_PRIVATE_FRAMEWORK_HEADERS
+     accessibility/cocoa/CocoaAccessibilityConstants.h
+ )
+ 
++if (NOT WEBKIT_IOS6_COMPAT_LIB)
+ list(APPEND WebCore_IDL_FILES
+     Modules/applepay/ApplePayAutomaticReloadPaymentRequest.idl
+     Modules/applepay/ApplePayCancelEvent.idl
+@@ -1564,6 +1630,7 @@ list(APPEND WebCore_IDL_FILES
+     Modules/applepay/paymentrequest/ApplePayPaymentCompleteDetails.idl
+     Modules/applepay/paymentrequest/ApplePayRequest.idl
+ )
++endif ()
+ 
+ set(FEATURE_DEFINES_OBJECTIVE_C "LANGUAGE_OBJECTIVE_C=1 ${FEATURE_DEFINES_WITH_SPACE_SEPARATOR}")
+ set(ADDITIONAL_BINDINGS_DEPENDENCIES
+@@ -1635,6 +1702,11 @@ list(APPEND WebCore_PRIVATE_FRAMEWORK_HEADERS
+     platform/mac/WebCoreView.h
+ )
+ 
++list(APPEND WebCore_SOURCES
++    platform/graphics/cg/IOSurfacePool.cpp
++    platform/graphics/cocoa/IOSurface.mm
++    platform/graphics/cocoa/IOSurfacePoolCocoa.mm
++)
+ 
+ if (WEBKIT_SDK_IS_MACOS)
+ 
+diff --git a/Source/WebCore/Sources.txt b/Source/WebCore/Sources.txt
+index 7e9e375084c16e91ae8a9a2692542bd3d3a299e3..279c1760a5cd2e11b732e88772266378cca18c5d 100644
+--- a/Source/WebCore/Sources.txt
++++ b/Source/WebCore/Sources.txt
+@@ -107,37 +107,6 @@ Modules/WebGPU/GPUValidationError.cpp
+ Modules/WebGPU/GPUVertexAttribute.cpp
+ Modules/WebGPU/GPUVertexBufferLayout.cpp
+ Modules/WebGPU/GPUVertexState.cpp
+-Modules/WebGPU/Implementation/WebGPUAdapterImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUBindGroupImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUBindGroupLayoutImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUBufferImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUCommandBufferImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUCommandEncoderImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUCompositorIntegrationImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUComputePassEncoderImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUComputePipelineImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUConvertToBackingContext.cpp
+-Modules/WebGPU/Implementation/WebGPUCreateImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUDeviceImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUDowncastConvertToBackingContext.cpp
+-Modules/WebGPU/Implementation/WebGPUExternalTextureImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUPipelineLayoutImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUPresentationContextImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUQuerySetImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUQueueImpl.cpp
+-Modules/WebGPU/Implementation/WebGPURenderBundleEncoderImpl.cpp
+-Modules/WebGPU/Implementation/WebGPURenderBundleImpl.cpp
+-Modules/WebGPU/Implementation/WebGPURenderPassEncoderImpl.cpp
+-Modules/WebGPU/Implementation/WebGPURenderPipelineImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUSamplerImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUShaderModuleImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUTextureImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUTextureViewImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUXRBindingImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUXRProjectionLayerImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUXRSubImageImpl.cpp
+-Modules/WebGPU/Implementation/WebGPUXRViewImpl.cpp
+ Modules/WebGPU/WGSLLanguageFeatures.cpp
+ Modules/airplay/WebKitPlaybackTargetAvailabilityEvent.cpp
+ Modules/applicationmanifest/ApplicationManifestParser.cpp
+@@ -800,6 +769,7 @@ bindings/js/JSGPUErrorCustom.cpp
+ bindings/js/JSHTMLAllCollectionCustom.cpp
+ bindings/js/JSHTMLCanvasElementCustom.cpp
+ bindings/js/JSHTMLElementCustom.cpp @cost:3
++bindings/js/JSHTMLMediaElementCustom.cpp
+ bindings/js/JSHTMLTemplateElementCustom.cpp
+ bindings/js/JSHistoryCustom.cpp
+ bindings/js/JSIDBCursorCustom.cpp
+@@ -880,6 +850,7 @@ bindings/js/JSXPathResultCustom.cpp
+ bindings/js/ModuleScriptLoader.cpp
+ bindings/js/ReadableStreamDefaultController.cpp
+ bindings/js/ScheduledAction.cpp
++bindings/js/ScriptBytecodeCache.cpp
+ bindings/js/ScriptCachedFrameData.cpp
+ bindings/js/ScriptController.cpp
+ bindings/js/ScriptModuleLoader.cpp
+@@ -2335,6 +2306,8 @@ page/NavigationHistoryEntry.cpp
+ page/NavigationPrecommitController.cpp
+ page/NavigationTransition.cpp
+ page/Navigator.cpp
++page/Scheduling.cpp
++page/NavigatorScheduling.cpp
+ page/NavigatorBase.cpp
+ page/NavigatorGlobalPrivacyControl.cpp
+ page/NavigatorLoginStatus.cpp
+@@ -2932,12 +2905,10 @@ platform/mediastream/RealtimeMediaSourceSupportedConstraints.cpp
+ platform/mediastream/RealtimeOutgoingAudioSource.cpp
+ platform/mediastream/RealtimeOutgoingVideoSource.cpp
+ platform/mediastream/RealtimeVideoCaptureSource.cpp
++platform/mediastream/rev/RealtimeMediaSourceCenterRev.cpp
+ platform/mediastream/WebRTCProvider.cpp
+ platform/mock/DeviceOrientationClientMock.cpp
+ platform/mock/GeolocationClientMock.cpp
+-platform/mock/MockRealtimeAudioSource.cpp
+-platform/mock/MockRealtimeMediaSourceCenter.cpp
+-platform/mock/MockRealtimeVideoSource.cpp
+ platform/mock/PlatformMediaEngineConfigurationFactoryMock.cpp
+ platform/mock/PlatformSpeechSynthesizerMock.cpp
+ platform/mock/RTCDataChannelHandlerMock.cpp
+@@ -5505,3 +5476,5 @@ JSXRWebGLBinding.cpp
+ JSXRWebGLLayerInit.cpp
+ JSXRWebGLSubImage.cpp
+ JSXSLTProcessor.cpp
++platform/graphics/DestinationColorSpace.cpp
++platform/graphics/avfoundation/FormatDescriptionUtilities.cpp
+diff --git a/Source/WebCore/animation/KeyframeEffectStack.cpp b/Source/WebCore/animation/KeyframeEffectStack.cpp
+index 1545cdc87808ef76c6860632d22aa7eea23e704c..30706bbd0c623ded3a4689ff40f1687e2bf15e0d 100644
+--- a/Source/WebCore/animation/KeyframeEffectStack.cpp
++++ b/Source/WebCore/animation/KeyframeEffectStack.cpp
+@@ -88,7 +88,7 @@ void KeyframeEffectStack::removeEffect(KeyframeEffect& effect)
+         startAcceleratedAnimationsIfPossible();
+ }
+ 
+-bool KeyframeEffectStack::hasMatchingEffect(NOESCAPE const Function<bool(const KeyframeEffect&)>& function) const
++bool KeyframeEffectStack::hasMatchingEffect(const ScopedLambda<bool(const KeyframeEffect&)>& function) const
+ {
+     for (auto& effect : m_effects) {
+         if (function(*effect))
+@@ -97,25 +97,33 @@ bool KeyframeEffectStack::hasMatchingEffect(NOESCAPE const Function<bool(const K
+     return false;
+ }
+ 
++bool KeyframeEffectStack::hasMatchingEffect(NOESCAPE const Function<bool(const KeyframeEffect&)>& function) const
++{
++    return hasMatchingEffect(scopedLambdaRef<bool(const KeyframeEffect&)>(function));
++}
++
+ bool KeyframeEffectStack::containsProperty(CSSPropertyID property) const
+ {
+-    return hasMatchingEffect([property] (const KeyframeEffect& effect) {
++    auto matches = [property] (const KeyframeEffect& effect) {
+         return effect.animatesProperty(property);
+-    });
++    };
++    return hasMatchingEffect(scopedLambdaRef<bool(const KeyframeEffect&)>(matches));
+ }
+ 
+ bool KeyframeEffectStack::requiresPseudoElement() const
+ {
+-    return hasMatchingEffect([] (const KeyframeEffect& effect) {
++    auto matches = [] (const KeyframeEffect& effect) {
+         return effect.requiresPseudoElement();
+-    });
++    };
++    return hasMatchingEffect(scopedLambdaRef<bool(const KeyframeEffect&)>(matches));
+ }
+ 
+ bool KeyframeEffectStack::isCurrentlyAffectingProperty(CSSPropertyID property) const
+ {
+-    return hasMatchingEffect([property] (const KeyframeEffect& effect) {
++    auto matches = [property] (const KeyframeEffect& effect) {
+         return effect.isCurrentlyAffectingProperty(property) || effect.isRunningAcceleratedAnimationForProperty(property);
+-    });
++    };
++    return hasMatchingEffect(scopedLambdaRef<bool(const KeyframeEffect&)>(matches));
+ }
+ 
+ const Vector<WeakPtr<KeyframeEffect>>& KeyframeEffectStack::sortedEffects()
+@@ -151,10 +159,19 @@ OptionSet<AnimationImpact> KeyframeEffectStack::applyKeyframeEffects(Style::Comp
+             || targetStyle.transform() != previousStyle.transform();
+     }();
+ 
+-    auto unanimatedStyle = Style::ComputedStyle::clone(targetStyle);
+-
+     // We iterate over a snapshot of the effect list as it may mutate during application.
+-    for (const auto& effect : copyToVector(sortedEffects())) {
++    auto& effects = sortedEffects();
++    Vector<WeakPtr<KeyframeEffect>, 4> effectsSnapshot;
++    effectsSnapshot.reserveInitialCapacity(effects.size());
++    for (auto& effect : effects)
++        effectsSnapshot.append(effect);
++
++    std::unique_ptr<Style::ComputedStyle> unanimatedStyleSnapshot;
++    if (effectsSnapshot.size() > 1)
++        unanimatedStyleSnapshot = Style::ComputedStyle::clonePtr(targetStyle);
++    const Style::ComputedStyle& unanimatedStyle = unanimatedStyleSnapshot ? *unanimatedStyleSnapshot : targetStyle;
++
++    for (const auto& effect : effectsSnapshot) {
+         auto keyframeRecomputationReason = effect->recomputeKeyframesIfNecessary(previousLastStyleChangeEventStyle, unanimatedStyle, resolutionContext);
+ 
+         auto wasOrWasAboutToRunAccelerated = effect->isRunningAccelerated() || effect->isAboutToRunAccelerated();
+@@ -344,9 +361,10 @@ void KeyframeEffectStack::applyPendingAcceleratedActions() const
+ 
+ bool KeyframeEffectStack::hasAcceleratedEffects() const
+ {
+-    return hasMatchingEffect([](const auto& effect) {
++    auto matches = [](const KeyframeEffect& effect) {
+         return effect.isRunningAccelerated();
+-    });
++    };
++    return hasMatchingEffect(scopedLambdaRef<bool(const KeyframeEffect&)>(matches));
+ }
+ 
+ } // namespace WebCore
+diff --git a/Source/WebCore/animation/KeyframeEffectStack.h b/Source/WebCore/animation/KeyframeEffectStack.h
+index 1c2d158540bcbc931b01c06a45833b0948d8b898..26672a74a3a0498c942ee63a673ca935e96a97f4 100644
+--- a/Source/WebCore/animation/KeyframeEffectStack.h
++++ b/Source/WebCore/animation/KeyframeEffectStack.h
+@@ -29,6 +29,7 @@
+ #include <WebCore/CSSPropertyNames.h>
+ #include <WebCore/StyleAnimations.h>
+ #include <WebCore/WebAnimationTypes.h>
++#include <wtf/ScopedLambda.h>
+ #include <wtf/Vector.h>
+ #include <wtf/WeakPtr.h>
+ 
+@@ -60,6 +61,7 @@ public:
+     bool requiresPseudoElement() const;
+     OptionSet<AnimationImpact> applyKeyframeEffects(Style::ComputedStyle& targetStyle, HashSet<AnimatableCSSProperty>& affectedProperties, const Style::ComputedStyle* previousLastStyleChangeEventStyle, const Style::ResolutionContext&);
+     bool hasMatchingEffect(NOESCAPE const Function<bool(const KeyframeEffect&)>&) const;
++    bool hasMatchingEffect(const ScopedLambda<bool(const KeyframeEffect&)>&) const;
+ 
+     void effectAbilityToBeAcceleratedDidChange(const KeyframeEffect&);
+     bool allowsAcceleration() const;
+diff --git a/Source/WebCore/bridge/objc/WebScriptObject.h b/Source/WebCore/bridge/objc/WebScriptObject.h
+index 09ab5589bc00410a6f9b872bb3ba720b4d63d685..cff657b813e6068c266ed302dd20b4f4c2092c0a 100644
+--- a/Source/WebCore/bridge/objc/WebScriptObject.h
++++ b/Source/WebCore/bridge/objc/WebScriptObject.h
+@@ -27,6 +27,8 @@
+ #define WebScriptObject_h
+ 
+ #import <Foundation/Foundation.h>
++
++#include "PlatformExportMacros.h"
+ #import <JavaScriptCore/JSBase.h>
+ #import <WebCore/WebKitAvailability.h>
+ 
+diff --git a/Source/WebCore/contentextensions/URLFilterParser.cpp b/Source/WebCore/contentextensions/URLFilterParser.cpp
+index 19bcf443fcb0f6c51227361c38ba4255bc255806..6e12f5b4ac853a6cc2026af0fae5cd62dab9c7dd 100644
+--- a/Source/WebCore/contentextensions/URLFilterParser.cpp
++++ b/Source/WebCore/contentextensions/URLFilterParser.cpp
+@@ -408,7 +408,7 @@ URLFilterParser::ParseStatus URLFilterParser::addPattern(StringView pattern, boo
+ 
+     ParseStatus status = Ok;
+     PatternParser patternParser(patternIsCaseSensitive);
+-    if (!JSC::Yarr::hasError(JSC::Yarr::parse(patternParser, pattern, JSC::Yarr::CompileMode::Legacy, 0, false, false)))
++    if (!JSC::Yarr::hasError(JSC::Yarr::parse(patternParser, pattern, JSC::Yarr::CompileMode::Legacy, 0, false)))
+         patternParser.finalize(patternId, m_combinedURLFilters);
+     else
+         status = YarrError;
+diff --git a/Source/WebCore/css/parser/CSSParserToken.cpp b/Source/WebCore/css/parser/CSSParserToken.cpp
+index 1233bc844569aa8fecba6cc703d398166c1ce151..1696465d11b135cd382f98e18e431bfdabfcb709 100644
+--- a/Source/WebCore/css/parser/CSSParserToken.cpp
++++ b/Source/WebCore/css/parser/CSSParserToken.cpp
+@@ -351,55 +351,6 @@ CSSUnitType CSSParserToken::stringToUnitType(StringView stringView)
+     return cssPrimitiveValueUnitFromTrie(stringView.span16());
+ }
+ 
+-CSSParserToken::CSSParserToken(CSSParserTokenType type, BlockType blockType)
+-    : m_type(type)
+-    , m_blockType(blockType)
+-{
+-}
+-
+-CSSParserToken::CSSParserToken(unsigned nonNewlineWhitespaceCount)
+-    : m_type(NonNewlineWhitespaceToken)
+-    , m_blockType(NotBlock)
+-    , m_whitespaceCount(nonNewlineWhitespaceCount)
+-{
+-}
+-
+-// Just a helper used for Delimiter tokens.
+-CSSParserToken::CSSParserToken(CSSParserTokenType type, char16_t c)
+-    : m_type(type)
+-    , m_blockType(NotBlock)
+-    , m_delimiter(c)
+-{
+-    ASSERT(m_type == DelimiterToken);
+-}
+-
+-CSSParserToken::CSSParserToken(CSSParserTokenType type, StringView value, BlockType blockType)
+-    : m_type(type)
+-    , m_blockType(blockType)
+-    , m_id(-1)
+-{
+-    initValueFromStringView(value);
+-}
+-
+-CSSParserToken::CSSParserToken(double numericValue, NumericValueType numericValueType, NumericSign sign, StringView originalText)
+-    : m_type(NumberToken)
+-    , m_blockType(NotBlock)
+-    , m_numericValueType(numericValueType)
+-    , m_numericSign(sign)
+-    , m_unit(static_cast<unsigned>(CSSUnitType::Number))
+-    , m_numericValue(numericValue)
+-{
+-    initValueFromStringView(originalText);
+-}
+-
+-CSSParserToken::CSSParserToken(HashTokenType type, StringView value)
+-    : m_type(HashToken)
+-    , m_blockType(NotBlock)
+-    , m_hashTokenType(type)
+-{
+-    initValueFromStringView(value);
+-}
+-
+ static StringView NODELETE mergeIfAdjacent(StringView a, StringView b)
+ {
+     if (a.is8Bit() && b.is8Bit()) {
+diff --git a/Source/WebCore/dom/ContextDestructionObserver.h b/Source/WebCore/dom/ContextDestructionObserver.h
+index 3bad0aa919ea5ef94c6368fd5aa8785c52fbba53..7ec4b27fa05ac858cf7578ba3b20604aeca48c33 100644
+--- a/Source/WebCore/dom/ContextDestructionObserver.h
++++ b/Source/WebCore/dom/ContextDestructionObserver.h
+@@ -26,6 +26,8 @@
+ 
+ #pragma once
+ 
++#include "PlatformExportMacros.h"
++
+ #include <wtf/AbstractRefCountedAndCanMakeWeakPtr.h>
+ #include <wtf/Forward.h>
+ #include <wtf/WeakPtr.h>
+diff --git a/Source/WebCore/dom/ElementIterator.h b/Source/WebCore/dom/ElementIterator.h
+index f90d36fbfeab784c8f29e8f1819da9fdf210a4ea..e137332e4488c1e32baf238ac0420dbddd311381 100644
+--- a/Source/WebCore/dom/ElementIterator.h
++++ b/Source/WebCore/dom/ElementIterator.h
+@@ -50,7 +50,7 @@ public:
+     inline ElementType& operator*() const;
+     inline ElementType* operator->() const;
+ 
+-    constexpr operator bool() const { return m_current.get(); }
++    constexpr operator bool() const { return m_current; }
+     constexpr bool operator!() const { return !m_current; }
+     constexpr bool operator==(std::nullptr_t) const { return !m_current; }
+     constexpr bool operator==(const ElementIterator&) const;
+@@ -68,8 +68,13 @@ protected:
+     ElementIterator(const ContainerNode* root, ElementType* current);
+ 
+ private:
++#if defined(WEBKIT_IOS6)
++    const ContainerNode* m_root { nullptr };
++    ElementType* m_current { nullptr };
++#else
+     CheckedPtr<const ContainerNode> m_root;
+     CheckedPtr<ElementType> m_current;
++#endif
+ 
+ #if ASSERT_ENABLED
+     ElementIteratorAssertions m_assertions;
+@@ -110,7 +115,7 @@ inline ElementType* ElementIterator<ElementType>::operator->() const
+ {
+     ASSERT(m_current);
+     ASSERT(!m_assertions.domTreeHasMutated());
+-    return m_current.get();
++    return m_current;
+ }
+ 
+ template <typename ElementType>
+diff --git a/Source/WebCore/layout/formattingContexts/grid/GridFormattingContext.cpp b/Source/WebCore/layout/formattingContexts/grid/GridFormattingContext.cpp
+index 775116301ea7823abf38e4931847db3f482d4582..f69f5ead68029d2d7e1afd3704735d797b9bbe8b 100644
+--- a/Source/WebCore/layout/formattingContexts/grid/GridFormattingContext.cpp
++++ b/Source/WebCore/layout/formattingContexts/grid/GridFormattingContext.cpp
+@@ -257,10 +257,9 @@ PlacedGridItems GridFormattingContext::constructPlacedGridItems(const GridAreas&
+ {
+     PlacedGridItems placedGridItems;
+     placedGridItems.reserveInitialCapacity(gridAreas.size());
+-    CheckedRef formattingContextStyle = root().style();
++    CheckedRef gridContainerStyle = this->gridContainerStyle();
+     for (auto [ unplacedGridItem, gridAreaLines ] : gridAreas) {
+         CheckedRef gridItem = unplacedGridItem.m_layoutBox;
+-        CheckedRef gridContainerStyle = this->gridContainerStyle();
+         placedGridItems.constructAndAppend(gridItem, gridAreaLines, gridContainerStyle);
+     }
+     return placedGridItems;
+diff --git a/Source/WebCore/page/LocalFrameView.cpp b/Source/WebCore/page/LocalFrameView.cpp
+index 52f8cd72fa2e3073163713fd16fc2f1677b96695..978c7b8e57befbd6244d1e29dadf416ee54f0970 100644
+--- a/Source/WebCore/page/LocalFrameView.cpp
++++ b/Source/WebCore/page/LocalFrameView.cpp
+@@ -162,6 +162,11 @@
+ #define FRAME_ID m_frame->frameID().toUInt64()
+ #define FRAMEVIEW_RELEASE_LOG(channel, fmt, ...) RELEASE_LOG_FORWARDABLE(channel, fmt, PAGE_ID, FRAME_ID, m_frame->isMainFrame(), ##__VA_ARGS__)
+ 
++#if defined(WEBKIT_IOS6)
++extern "C" int g_webkitIOS6PendingDrawWork;
++extern "C" unsigned g_webkitIOS6PaintsRefusedForLayout;
++#endif
++
+ namespace WebCore {
+ 
+ using namespace HTMLNames;
+@@ -3831,7 +3836,8 @@ void LocalFrameView::scrollPositionChanged(const ScrollPosition& oldPosition, co
+     }
+ }
+ 
+-void LocalFrameView::applyRecursivelyWithVisibleRect(NOESCAPE const Function<void(LocalFrameView& frameView, const IntRect& visibleRect)>& apply)
++template<typename ApplyFunction>
++void LocalFrameView::applyRecursivelyWithVisibleRect(NOESCAPE const ApplyFunction& apply)
+ {
+     IntRect windowClipRect = this->windowClipRect();
+     auto visibleRect = windowToContents(windowClipRect);
+@@ -5499,6 +5505,8 @@ bool LocalFrameView::shouldSuspendScrollAnimations() const
+ 
+ void LocalFrameView::notifyAllFramesThatContentAreaWillPaint() const
+ {
++#if defined(WEBKIT_IOS6)
++#else
+     notifyScrollableAreasThatContentAreaWillPaint();
+ 
+     for (RefPtr child = m_frame->tree().firstRenderedChild(); child; child = child->tree().traverseNextRendered(m_frame.ptr())) {
+@@ -5508,10 +5516,13 @@ void LocalFrameView::notifyAllFramesThatContentAreaWillPaint() const
+         if (RefPtr frameView = localChild->view())
+             frameView->notifyScrollableAreasThatContentAreaWillPaint();
+     }
++#endif
+ }
+ 
+ void LocalFrameView::notifyScrollableAreasThatContentAreaWillPaint() const
+ {
++#if defined(WEBKIT_IOS6)
++#else
+     RefPtr page = m_frame->page();
+     if (!page)
+         return;
+@@ -5527,6 +5538,7 @@ void LocalFrameView::notifyScrollableAreasThatContentAreaWillPaint() const
+         if (!is<ScrollView>(scrollableArea))
+             scrollableArea->contentAreaWillPaint();
+     }
++#endif
+ }
+ 
+ void LocalFrameView::updateScrollCorner()
+@@ -5875,6 +5887,15 @@ void LocalFrameView::paintContents(GraphicsContext& context, const IntRect& dirt
+ 
+ void LocalFrameView::paintContents(GraphicsContext& context, const IntRect& dirtyRect, Node* subtreePaintRoot, SecurityOriginPaintPolicy securityOriginPaintPolicy, RegionContext* regionContext)
+ {
++#if defined(WEBKIT_IOS6)
++    if (([]() { static const bool logPaintOnce = getenv("WEBKIT_IOS6_LOG_PAINT") != nullptr; return logPaintOnce; }())) {
++        fprintf(stderr, "[ios6 paint] paintContents %d,%d %dx%d transparent %d disabled %d base %s\n",
++            dirtyRect.x(), dirtyRect.y(), dirtyRect.width(), dirtyRect.height(),
++            isTransparent(), context.paintingDisabled(),
++            baseBackgroundColor().isOpaque() ? "opaque" : "not opaque");
++        fflush(stderr);
++    }
++#endif
+ #ifndef NDEBUG
+     bool fillWithWarningColor = [&] {
+         if (m_frame->document()->printing())
+@@ -5908,6 +5929,13 @@ void LocalFrameView::paintContents(GraphicsContext& context, const IntRect& dirt
+         return;
+     }
+ 
++#if defined(WEBKIT_IOS6)
++    if (!layoutContext().inPaintableState() || needsLayout()) {
++        ++g_webkitIOS6PaintsRefusedForLayout;
++        g_webkitIOS6PendingDrawWork = 1;
++        return;
++    }
++#else
+     if (!layoutContext().inPaintableState())
+         return;
+ 
+@@ -5916,6 +5944,7 @@ void LocalFrameView::paintContents(GraphicsContext& context, const IntRect& dirt
+         FRAMEVIEW_RELEASE_LOG(Layout, LocalFrameViewNotPaintingLayoutNeeded);
+         return;
+     }
++#endif
+ 
+     PaintingState paintingState;
+     willPaintContents(context, dirtyRect, paintingState, regionContext);
+@@ -6149,7 +6178,7 @@ void LocalFrameView::checkAndDispatchDidReachVisuallyNonEmptyState()
+             return true;
+ 
+         // FIXME: We should also ignore renderers with non-final style.
+-        if (document->styleScope().hasPendingSheetsBeforeBody())
++        if (document->styleScope().blocksRenderingBeforeBody())
+             return false;
+ 
+         auto finishedParsingMainDocument = m_frame->loader().stateMachine().committedFirstRealDocumentLoad()
+@@ -6725,12 +6754,20 @@ bool LocalFrameView::updateFixedPositionLayoutRect()
+     if (!page || !page->chrome().client().fetchCustomFixedPositionLayoutRect(newRect))
+         return false;
+ 
+-    if (newRect != m_customFixedPositionLayoutRect) {
+-        m_customFixedPositionLayoutRect = newRect;
+-        setViewportConstrainedObjectsNeedLayout();
+-        return true;
+-    }
+-    return false;
++    if (newRect == m_customFixedPositionLayoutRect)
++        return false;
++
++#if defined(WEBKIT_IOS6)
++    bool onlyScrolled = newRect.size() == m_customFixedPositionLayoutRect.size();
++    m_customFixedPositionLayoutRect = newRect;
++    if (onlyScrolled)
++        return false;
++#else
++    m_customFixedPositionLayoutRect = newRect;
++#endif
++
++    setViewportConstrainedObjectsNeedLayout();
++    return true;
+ }
+ 
+ void LocalFrameView::setCustomSizeForResizeEvent(IntSize customSize)
+@@ -6929,6 +6966,8 @@ static Vector<Ref<Widget>> collectAndProtectWidgets(const HashSet<SingleThreadWe
+ void LocalFrameView::updateWidgetPositions()
+ {
+     m_updateWidgetPositionsTimer.stop();
++    if (m_widgetsInRenderTree.isEmpty())
++        return;
+     // updateWidgetPosition() can possibly cause layout to be re-entered (via plug-ins running
+     // scripts in response to NPP_SetWindow, for example), so we need to keep the Widgets
+     // alive during enumeration.
+diff --git a/Source/WebCore/page/LocalFrameView.h b/Source/WebCore/page/LocalFrameView.h
+index c462ad569fccd0426364de7b0a6b497860397bc3..6c458823c06c0326da7f97d4065158cb69c7e1db 100644
+--- a/Source/WebCore/page/LocalFrameView.h
++++ b/Source/WebCore/page/LocalFrameView.h
+@@ -150,6 +150,10 @@ public:
+ #if PLATFORM(IOS_FAMILY)
+     bool useCustomFixedPositionLayoutRect() const;
+     IntRect customFixedPositionLayoutRect() const { return m_customFixedPositionLayoutRect; }
++#if defined(WEBKIT_IOS6)
++    LayoutRect fixedPositionRectAtLastLayout() const { return m_fixedPositionRectAtLastLayout; }
++    void setFixedPositionRectAtLastLayout(const LayoutRect& rect) { m_fixedPositionRectAtLastLayout = rect; }
++#endif
+     WEBCORE_EXPORT void setCustomFixedPositionLayoutRect(const IntRect&);
+     bool updateFixedPositionLayoutRect();
+ 
+@@ -870,7 +874,7 @@ private:
+ 
+     void updateScrollGeometryContentSize();
+ 
+-    void applyRecursivelyWithVisibleRect(NOESCAPE const Function<void(LocalFrameView& frameView, const IntRect& visibleRect)>&);
++    template<typename ApplyFunction> void applyRecursivelyWithVisibleRect(NOESCAPE const ApplyFunction&);
+     void resumeVisibleImageAnimations(const IntRect& visibleRect);
+ #if ENABLE(ACCESSIBILITY_ANIMATION_CONTROL)
+     void updatePlayStateForAllAnimations(const IntRect& visibleRect);
+@@ -1074,6 +1078,9 @@ private:
+     bool m_useCustomFixedPositionLayoutRect { false };
+ 
+     IntRect m_customFixedPositionLayoutRect;
++#if defined(WEBKIT_IOS6)
++    LayoutRect m_fixedPositionRectAtLastLayout;
++#endif
+     std::optional<IntSize> m_customSizeForResizeEvent;
+ #endif
+ 
+diff --git a/Source/WebCore/page/ios/WebEventRegion.mm b/Source/WebCore/page/ios/WebEventRegion.mm
+index 7f5118061d3301023d315130baea19fd83a59baa..a1c3bee52fe0c37f1b95598b09faac40907893f2 100644
+--- a/Source/WebCore/page/ios/WebEventRegion.mm
++++ b/Source/WebCore/page/ios/WebEventRegion.mm
+@@ -26,7 +26,7 @@
+ #import "config.h"
+ #import "WebEventRegion.h"
+  
+-#if ENABLE(IOS_TOUCH_EVENTS)
++#if ENABLE(IOS_TOUCH_EVENTS) || defined(WEBKIT_IOS6)
+ 
+ #import "FloatQuad.h"
+ 
+@@ -105,4 +105,4 @@ - (CGPoint)p4
+ 
+ @end
+ 
+-#endif // ENABLE(IOS_TOUCH_EVENTS)
++#endif
+diff --git a/Source/WebCore/platform/BoxExtents.h b/Source/WebCore/platform/BoxExtents.h
+index fa41b44037df4b3e79fbb391f5af588c39177e2d..3e3e1aa1f99a94d795c0b450174c335342dc5db7 100644
+--- a/Source/WebCore/platform/BoxExtents.h
++++ b/Source/WebCore/platform/BoxExtents.h
+@@ -25,6 +25,8 @@
+ 
+ #pragma once
+ 
++#include "PlatformExportMacros.h"
++
+ #include <WebCore/LayoutUnit.h>
+ #include <WebCore/RectEdges.h>
+ #include <optional>
+diff --git a/Source/WebCore/platform/graphics/FloatRect.h b/Source/WebCore/platform/graphics/FloatRect.h
+index 2a607867e47accaac68d1bafa8d012848212e066..f2afc235c0d31aa8bb845abba3b937acf8bd5196 100644
+--- a/Source/WebCore/platform/graphics/FloatRect.h
++++ b/Source/WebCore/platform/graphics/FloatRect.h
+@@ -26,6 +26,8 @@
+ 
+ #pragma once
+ 
++#include "PlatformExportMacros.h"
++
+ #include <WebCore/BoxExtents.h>
+ #include <WebCore/FloatPoint.h>
+ #include <utility>
+diff --git a/Source/WebCore/platform/graphics/NativeImage.cpp b/Source/WebCore/platform/graphics/NativeImage.cpp
+index 856cb3d9127b80b2d9389a0eb61bfcc5b0e10596..2959b1f2ddc7906dbc5773d175c498d143460474 100644
+--- a/Source/WebCore/platform/graphics/NativeImage.cpp
++++ b/Source/WebCore/platform/graphics/NativeImage.cpp
+@@ -63,6 +63,7 @@ NativeImage::NativeImage(PlatformImagePtr&& platformImage, std::optional<GainMap
+     : m_platformImage(WTF::move(platformImage))
+     , m_gainMap(WTF::move(gainMap))
+ {
++    cacheSize();
+     computeHeadroom();
+ }
+ #endif
+@@ -94,6 +95,7 @@ void NativeImage::replacePlatformImage(PlatformImagePtr&& platformImage) const
+     ASSERT(platformImage);
+     Locker locker { m_lock };
+     m_platformImage = WTF::move(platformImage);
++    cacheSize();
+     // Intention is that the contents do not change, so properties are not recomputed.
+ }
+ 
+@@ -107,6 +109,10 @@ void NativeImage::computeHeadroom() const
+ {
+ }
+ 
++void NativeImage::cacheSize() const
++{
++}
++
+ RefPtr<NativeImage> NativeImage::rotatedImage(ImageOrientation orientation)
+ {
+     IntSize sizeForRotation = orientation.usesWidthAsHeight() ? size().transposedSize() : size();
+diff --git a/Source/WebCore/platform/graphics/NativeImage.h b/Source/WebCore/platform/graphics/NativeImage.h
+index 755de7604ebf078afdc5cc731f44575e56188e86..4db2cec6cf5dff6a29782599231a7866d943b24b 100644
+--- a/Source/WebCore/platform/graphics/NativeImage.h
++++ b/Source/WebCore/platform/graphics/NativeImage.h
+@@ -124,7 +124,10 @@ protected:
+ #endif
+ 
+     void computeHeadroom() const WTF_REQUIRES_LOCK(m_lock);
++    void cacheSize() const WTF_REQUIRES_LOCK(m_lock);
+ 
++    mutable int m_cachedWidth { 0 };
++    mutable int m_cachedHeight { 0 };
+     mutable Lock m_lock;
+     mutable PlatformImagePtr m_platformImage WTF_GUARDED_BY_LOCK(m_lock);
+     mutable std::optional<GainMap> m_gainMap;
+diff --git a/Source/WebCore/platform/graphics/PlatformTimeRanges.h b/Source/WebCore/platform/graphics/PlatformTimeRanges.h
+index 2bb8c4528f9bee1ca3ac056d08f855647bdfc482..8efdde064b35fb078eaffe53dbb2328a2093eb63 100644
+--- a/Source/WebCore/platform/graphics/PlatformTimeRanges.h
++++ b/Source/WebCore/platform/graphics/PlatformTimeRanges.h
+@@ -25,6 +25,8 @@
+ 
+ #pragma once
+ 
++#include "PlatformExportMacros.h"
++
+ #include <algorithm>
+ #include <wtf/ArgumentCoder.h>
+ #include <wtf/MediaTime.h>
+diff --git a/Source/WebCore/platform/graphics/avfoundation/FormatDescriptionUtilities.cpp b/Source/WebCore/platform/graphics/avfoundation/FormatDescriptionUtilities.cpp
+index 7fc40a588982c9dfc8c4d24bbcad2c96be9105ca..3cb879ab61aaf1ee97d887f2035a7738220b0898 100644
+--- a/Source/WebCore/platform/graphics/avfoundation/FormatDescriptionUtilities.cpp
++++ b/Source/WebCore/platform/graphics/avfoundation/FormatDescriptionUtilities.cpp
+@@ -275,7 +275,7 @@ String codecFromFormatDescription(CMFormatDescriptionRef formatDescription)
+             return "hvc1"_s;
+         return createHEVCCodecParametersString(*parameters);
+     }
+-    case kCMVideoCodecType_DolbyVisionHEVC:
++    case 'dvh1':
+     case 'cdh1': {
+         RetainPtr sampleExtensionsDict = dynamic_cf_cast<CFDictionaryRef>(PAL::CMFormatDescriptionGetExtension(formatDescription, PAL::kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms));
+         if (!sampleExtensionsDict)
+diff --git a/Source/WebCore/platform/graphics/cg/NativeImageCG.cpp b/Source/WebCore/platform/graphics/cg/NativeImageCG.cpp
+index 3aca4cd089cae2cabf72a2bebd3082da9f67009f..742d06edefcfd815c92d905ae34949a45afa14ff 100644
+--- a/Source/WebCore/platform/graphics/cg/NativeImageCG.cpp
++++ b/Source/WebCore/platform/graphics/cg/NativeImageCG.cpp
+@@ -34,6 +34,7 @@
+ #include "ImageBuffer.h"
+ #include "ImageRotationSessionVT.h"
+ #include "ImageUtilities.h"
++#include "Logging.h"
+ #include "PixelBuffer.h"
+ #include <limits>
+ #include <pal/spi/cg/CoreGraphicsSPI.h>
+@@ -41,6 +42,12 @@
+ 
+ #include "CoreVideoSoftLink.h"
+ 
++#if defined(WEBKIT_IOS6)
++#define WEBKIT_IOS6_HEADROOM(image) ((float)1.0)
++#else
++#define WEBKIT_IOS6_HEADROOM CGImageGetContentHeadroom
++#endif
++
+ namespace WebCore {
+ 
+ RefPtr<NativeImage> NativeImage::create(PlatformImagePtr&& image, std::optional<GainMap>&& gainMap)
+@@ -72,6 +79,8 @@ RefPtr<NativeImage> NativeImage::createTransient(PlatformImagePtr&& image)
+     return create(WTF::move(transientImage));
+ }
+ 
++#if !defined(WEBKIT_IOS6)
++
+ static void releaseImageBlock(void* info, CGImageBlockRef)
+ {
+     SUPPRESS_RETAINPTR_CTOR_ADOPT RetainPtr pixelBuffer = adoptCF(static_cast<CVPixelBufferRef>(info));
+@@ -182,6 +191,113 @@ RefPtr<NativeImage> NativeImage::create(RetainPtr<CVPixelBufferRef> pixelBuffer,
+     return NativeImage::create(WTF::move(image));
+ }
+ 
++#else
++
++namespace {
++
++class CVPixelBufferDataProviderInfo {
++    WTF_MAKE_NONCOPYABLE(CVPixelBufferDataProviderInfo);
++public:
++    static RetainPtr<CGDataProviderRef> createDataProvider(RetainPtr<CVPixelBufferRef>&&);
++
++private:
++    CVPixelBufferDataProviderInfo(RetainPtr<CVPixelBufferRef>&& pixelBuffer)
++        : m_pixelBuffer(WTF::move(pixelBuffer))
++    {
++    }
++    ~CVPixelBufferDataProviderInfo();
++    const void* getBytePointer();
++    void releaseBytePointer();
++
++    static const void* getBytePointerCallback(void* info) { RELEASE_ASSERT(info); return static_cast<CVPixelBufferDataProviderInfo*>(info)->getBytePointer(); }
++    static void releaseBytePointerCallback(void* info, const void*) { RELEASE_ASSERT(info); static_cast<CVPixelBufferDataProviderInfo*>(info)->releaseBytePointer(); }
++    static void releaseInfoCallback(void* info) { RELEASE_ASSERT(info); delete static_cast<CVPixelBufferDataProviderInfo*>(info); }
++
++    const RetainPtr<CVPixelBufferRef> m_pixelBuffer;
++    unsigned m_lockCount { 0 };
++};
++
++RetainPtr<CGDataProviderRef> CVPixelBufferDataProviderInfo::createDataProvider(RetainPtr<CVPixelBufferRef>&& pixelBuffer)
++{
++    if (CVPixelBufferGetPixelFormatType(pixelBuffer.get()) != kCVPixelFormatType_32BGRA)
++        return nullptr;
++    auto dataSize = CVPixelBufferGetDataSize(pixelBuffer.get());
++    if (!dataSize)
++        return nullptr;
++    CVPixelBufferDataProviderInfo* info = new CVPixelBufferDataProviderInfo(WTF::move(pixelBuffer));
++    CGDataProviderDirectCallbacks providerCallbacks = { 0, getBytePointerCallback, releaseBytePointerCallback, 0, releaseInfoCallback };
++    return adoptCF(CGDataProviderCreateDirect(info, dataSize, &providerCallbacks));
++}
++
++CVPixelBufferDataProviderInfo::~CVPixelBufferDataProviderInfo()
++{
++    if (!m_lockCount)
++        return;
++    RELEASE_LOG_ERROR(Media, "lockCount != 0: %d", m_lockCount);
++    ASSERT_NOT_REACHED();
++}
++
++const void* CVPixelBufferDataProviderInfo::getBytePointer()
++{
++    auto result = CVPixelBufferLockBaseAddress(m_pixelBuffer.get(), kCVPixelBufferLock_ReadOnly);
++    if (result != kCVReturnSuccess) {
++        RELEASE_LOG_ERROR(Media, "CVPixelBufferLockBaseAddress() error: %d", result);
++        ASSERT_NOT_REACHED();
++        return nullptr;
++    }
++    ++m_lockCount;
++    auto bytes = CVPixelBufferGetSpan(m_pixelBuffer.get());
++    if (!bytes.data()) {
++        RELEASE_LOG_ERROR(Media, "CVPixelBufferGetSpan() null");
++        return nullptr;
++    }
++    verifyImageBufferIsBigEnough(bytes);
++    return bytes.data();
++}
++
++void CVPixelBufferDataProviderInfo::releaseBytePointer()
++{
++    auto result = CVPixelBufferUnlockBaseAddress(m_pixelBuffer.get(), kCVPixelBufferLock_ReadOnly);
++    if (result != kCVReturnSuccess) {
++        RELEASE_LOG_ERROR(Media, "CVPixelBufferUnlockBaseAddress() error: %d", result);
++        ASSERT_NOT_REACHED();
++        return;
++    }
++    if (!m_lockCount) {
++        RELEASE_LOG_ERROR(Media, "invalid releaseBytePointer()");
++        ASSERT_NOT_REACHED();
++        return;
++    }
++    --m_lockCount;
++}
++
++}
++
++RefPtr<NativeImage> NativeImage::create(RetainPtr<CVPixelBufferRef> pixelBuffer, CGImageAlphaInfo alphaInfo, RetainPtr<CGColorSpaceRef> colorSpace)
++{
++    if (!pixelBuffer || !colorSpace)
++        return nullptr;
++
++    IntSize size { static_cast<int>(CVPixelBufferGetWidth(pixelBuffer.get())), static_cast<int>(CVPixelBufferGetHeight(pixelBuffer.get())) };
++    if (size.isEmpty())
++        return nullptr;
++
++    auto bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer.get());
++    RetainPtr provider = CVPixelBufferDataProviderInfo::createDataProvider(WTF::move(pixelBuffer));
++    if (!provider)
++        return nullptr;
++
++    auto bitmapInfo = static_cast<CGBitmapInfo>(alphaInfo) | static_cast<CGBitmapInfo>(kCGBitmapByteOrder32Little);
++    RetainPtr<CGImageRef> image = adoptCF(CGImageCreate(size.width(), size.height(), 8, 32, bytesPerRow, colorSpace.get(), bitmapInfo, provider.get(), nullptr, false, kCGRenderingIntentDefault));
++    if (!image)
++        return nullptr;
++
++    CGImageSetProperty(image.get(), CFSTR("CA_IOSURFACE_IMAGE"), kCFBooleanTrue);
++    return NativeImage::create(WTF::move(image));
++}
++
++#endif
++
+ static CGImageAlphaInfo alphaInfoForAlphaLast(bool isPremultiplied)
+ {
+     return isPremultiplied ? kCGImageAlphaPremultipliedLast : kCGImageAlphaLast;
+@@ -250,10 +366,15 @@ RefPtr<NativeImage> NativeImage::create(Ref<PixelBuffer>&& pixelBuffer)
+     return NativeImage::create(adoptCF(CGImageCreate(imageSize.width(), imageSize.height(), bitsPerComponent, bytesPerPixel * 8, bytesPerPixel * imageSize.width(), colorSpace.get(), bitmapInfo, dataProvider.get(), 0, false, kCGRenderingIntentDefault)));
+ }
+ 
++void NativeImage::cacheSize() const
++{
++    m_cachedWidth = static_cast<int>(CGImageGetWidth(m_platformImage.get()));
++    m_cachedHeight = static_cast<int>(CGImageGetHeight(m_platformImage.get()));
++}
++
+ IntSize NativeImage::size() const
+ {
+-    Locker locker { m_lock };
+-    return IntSize(CGImageGetWidth(m_platformImage.get()), CGImageGetHeight(m_platformImage.get()));
++    return IntSize(m_cachedWidth, m_cachedHeight);
+ }
+ 
+ bool NativeImage::hasAlpha() const
+@@ -286,7 +407,7 @@ void NativeImage::computeHeadroom() const
+     constexpr auto gainMapImageHeadroom = Headroom(peakLevel / whiteLevel);
+ 
+ #if HAVE(SUPPORT_HDR_DISPLAY)
+-    float headroom = CGImageGetContentHeadroom(m_platformImage.get());
++    float headroom = WEBKIT_IOS6_HEADROOM(m_platformImage.get());
+     m_baseImageHeadroom = Headroom(std::max<float>(headroom, Headroom::None));
+ #else
+     m_baseImageHeadroom = Headroom::None;
+diff --git a/Source/WebCore/platform/ios/wak/WAKResponder.h b/Source/WebCore/platform/ios/wak/WAKResponder.h
+index e852470fa05301591694fbbc08dfa033a6d78cd3..1e999459c403ea2def53a11c7c085699a2464616 100644
+--- a/Source/WebCore/platform/ios/wak/WAKResponder.h
++++ b/Source/WebCore/platform/ios/wak/WAKResponder.h
+@@ -28,6 +28,8 @@
+ 
+ #import <Foundation/Foundation.h>
+ 
++#include "PlatformExportMacros.h"
++
+ #if TARGET_OS_IPHONE
+ 
+ #import <WebCore/WKTypes.h>
+diff --git a/Source/WebCore/platform/ios/wak/WAKView.h b/Source/WebCore/platform/ios/wak/WAKView.h
+index 73dd4de2a7fb743646bea61f45d2d79083472fe0..49b527b51619a9b71c3272ee107a316319884335 100644
+--- a/Source/WebCore/platform/ios/wak/WAKView.h
++++ b/Source/WebCore/platform/ios/wak/WAKView.h
+@@ -28,6 +28,8 @@
+ 
+ #import <Foundation/Foundation.h>
+ 
++#include "PlatformExportMacros.h"
++
+ #if TARGET_OS_IPHONE
+ 
+ #import <CoreGraphics/CoreGraphics.h>
+diff --git a/Source/WebCore/platform/ios/wak/WAKWindow.h b/Source/WebCore/platform/ios/wak/WAKWindow.h
+index eb69e45818166434e51bfca02d04e0f304c1ca47..acfe9d9ace4b20a02ce9e808236fc73c0915d951 100644
+--- a/Source/WebCore/platform/ios/wak/WAKWindow.h
++++ b/Source/WebCore/platform/ios/wak/WAKWindow.h
+@@ -81,6 +81,7 @@ WEBCORE_EXPORT @interface WAKWindow : WAKResponder
+     WAKView *_contentView;
+     WAKView *_responderView;
+     WAKView *_nextResponder;
++    WKWindowRef _windowRef;
+ 
+     BOOL _visible;
+     BOOL _isInSnapshottingPaint;
+@@ -116,6 +117,7 @@ WEBCORE_EXPORT @interface WAKWindow : WAKResponder
+ - (NSSelectionDirection)keyViewSelectionDirection;
+ - (BOOL)makeFirstResponder:(WAKResponder *)responder;
+ - (WAKView *)_newFirstResponderAfterResigning NS_RETURNS_NOT_RETAINED;
++- (WKWindowRef)_windowRef;
+ - (void)setFrame:(CGRect)frameRect display:(BOOL)flag;
+ - (CGRect)frame;
+ - (void)setContentRect:(CGRect)rect;
+diff --git a/Source/WebCore/platform/mediastream/rev/RevMediaPlayerMediaStream.mm b/Source/WebCore/platform/mediastream/rev/RevMediaPlayerMediaStream.mm
+new file mode 100644
+index 0000000000000000000000000000000000000000..b9722d82769739daf2900f3e64ef7ed7cd447ede
+--- /dev/null
++++ b/Source/WebCore/platform/mediastream/rev/RevMediaPlayerMediaStream.mm
+@@ -0,0 +1,226 @@
++#import "config.h"
++#import "RevMediaPlayerMediaStream.h"
++
++#if ENABLE(MEDIA_STREAM)
++
++#import "DestinationColorSpace.h"
++#import "GraphicsContext.h"
++#import "MediaPlayerPrivate.h"
++#import "MediaStreamPrivate.h"
++#import "MediaStreamTrackPrivate.h"
++#import "NativeImage.h"
++#import "PlatformTimeRanges.h"
++#import "RealtimeMediaSource.h"
++#import "VideoFrame.h"
++#import <QuartzCore/QuartzCore.h>
++#import <wtf/MainThread.h>
++#import <wtf/RetainPtr.h>
++#import <wtf/ThreadSafeRefCounted.h>
++
++namespace WebCore {
++
++class RevMediaPlayerMediaStream final
++    : public MediaPlayerPrivateInterface
++    , public RealtimeMediaSource::VideoFrameObserver
++    , public ThreadSafeRefCounted<RevMediaPlayerMediaStream, WTF::DestructionThread::Main> {
++public:
++    explicit RevMediaPlayerMediaStream(MediaPlayer& player)
++        : m_player(player)
++    {
++    }
++
++    ~RevMediaPlayerMediaStream()
++    {
++        stopObserving();
++    }
++
++    void ref() const final { ThreadSafeRefCounted::ref(); }
++    void deref() const final { ThreadSafeRefCounted::deref(); }
++
++    static void registerMediaEngine(MediaEngineRegistrar);
++
++private:
++    constexpr MediaPlayerType mediaPlayerType() const final { return MediaPlayerType::AVFObjCMediaStream; }
++
++    using MediaPlayerPrivateInterface::load;
++
++    void load(MediaStreamPrivate& stream) final
++    {
++        m_stream = &stream;
++        auto tracks = stream.tracks();
++        for (auto& track : tracks) {
++            if (track->isVideo()) {
++                m_videoSource = const_cast<RealtimeMediaSource*>(&track->source());
++                break;
++            }
++        }
++        ensureLayer();
++        if (m_videoSource)
++            m_videoSource->addVideoFrameObserver(*this);
++
++        m_networkState = MediaPlayer::NetworkState::Loaded;
++        m_readyState = MediaPlayer::ReadyState::HaveMetadata;
++        if (RefPtr player = m_player.get()) {
++            player->networkStateChanged();
++            player->readyStateChanged();
++        }
++    }
++
++    void cancelLoad() final { stopObserving(); }
++
++    void stopObserving()
++    {
++        if (m_videoSource) {
++            m_videoSource->removeVideoFrameObserver(*this);
++            m_videoSource = nullptr;
++        }
++    }
++
++    void videoFrameAvailable(VideoFrame& videoFrame, VideoFrameTimeMetadata) final
++    {
++        Ref<VideoFrame> frame = videoFrame;
++        Ref protectedThis { *this };
++        callOnMainThread([this, protectedThis = WTF::move(protectedThis), frame = WTF::move(frame)]() mutable {
++            m_currentFrame = frame.copyRef();
++            m_currentImage = nullptr;
++
++            auto size = frame->presentationSize();
++            bool sizeChanged = m_naturalSize != size;
++            m_naturalSize = size;
++
++            updateCurrentImage();
++
++            bool firstFrame = !m_hasFrame;
++            m_hasFrame = true;
++            if (firstFrame) {
++                m_readyState = MediaPlayer::ReadyState::HaveEnoughData;
++                if (RefPtr player = m_player.get()) {
++                    player->firstVideoFrameAvailable();
++                    player->readyStateChanged();
++                }
++            }
++            if (sizeChanged) {
++                if (RefPtr player = m_player.get())
++                    player->sizeChanged();
++            }
++            m_didProgress = true;
++        });
++    }
++
++    void updateCurrentImage()
++    {
++        if (!m_currentFrame)
++            return;
++        auto pixelBuffer = m_currentFrame->pixelBuffer();
++        if (!pixelBuffer)
++            return;
++        CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
++        void* base = CVPixelBufferGetBaseAddress(pixelBuffer);
++        size_t width = CVPixelBufferGetWidth(pixelBuffer);
++        size_t height = CVPixelBufferGetHeight(pixelBuffer);
++        size_t bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer);
++        RetainPtr<CGColorSpaceRef> colorSpace = adoptCF(CGColorSpaceCreateDeviceRGB());
++        RetainPtr<CGContextRef> context = base ? adoptCF(CGBitmapContextCreate(base, width, height, 8, bytesPerRow, colorSpace.get(), kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrder32Little)) : nullptr;
++        RetainPtr<CGImageRef> cgImage = context ? adoptCF(CGBitmapContextCreateImage(context.get())) : nullptr;
++        CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
++        if (!cgImage)
++            return;
++        m_currentImage = NativeImage::create(cgImage.get());
++        if (m_layer)
++            [m_layer setContents:(__bridge id)cgImage.get()];
++    }
++
++    PlatformLayer* platformLayer() const final { return m_layer.get(); }
++    bool supportsAcceleratedRendering() const final { return true; }
++    void acceleratedRenderingStateChanged() final { }
++    bool supportsFullscreen() const final { return false; }
++    bool supportsPictureInPicture() const final { return false; }
++
++    void ensureLayer()
++    {
++        if (m_layer)
++            return;
++        m_layer = adoptNS([[CALayer alloc] init]);
++        [m_layer setContentsGravity:kCAGravityResizeAspectFill];
++        [m_layer setOpaque:YES];
++        [m_layer setMasksToBounds:YES];
++    }
++
++    void play() final { m_playing = true; }
++    void pause() final { m_playing = false; }
++    bool paused() const final { return !m_playing; }
++
++    FloatSize naturalSize() const final { return m_naturalSize; }
++    bool hasVideo() const final { return !!m_videoSource; }
++    bool hasAudio() const final { return false; }
++    void setPageIsVisible(bool visible) final { m_visible = visible; }
++
++    MediaTime currentTime() const final { return MediaTime::zeroTime(); }
++    MediaTime duration() const final { return MediaTime::positiveInfiniteTime(); }
++
++    Ref<MediaTimePromise> seekToTarget(const SeekTarget&) final { return MediaTimePromise::createAndReject(PlatformMediaError::Cancelled); }
++
++    MediaPlayer::NetworkState networkState() const final { return m_networkState; }
++    MediaPlayer::ReadyState readyState() const final { return m_readyState; }
++
++    const PlatformTimeRanges& buffered() const final { return PlatformTimeRanges::emptyRanges(); }
++    bool didLoadingProgress() const final { return m_didProgress; }
++
++    void paint(GraphicsContext& context, const FloatRect& destRect) final
++    {
++        if (!m_currentImage)
++            return;
++        FloatRect imageRect { FloatPoint::zero(), m_currentImage->size() };
++        context.drawNativeImage(*m_currentImage, destRect, imageRect);
++    }
++
++    ColorSpace colorSpace() final { return ColorSpace::SRGB(); }
++
++    MediaPlayer::MovieLoadType movieLoadType() const final { return MediaPlayer::MovieLoadType::LiveStream; }
++
++    ThreadSafeWeakPtr<MediaPlayer> m_player;
++    RefPtr<MediaStreamPrivate> m_stream;
++    RefPtr<RealtimeMediaSource> m_videoSource;
++    RetainPtr<CALayer> m_layer;
++    RefPtr<VideoFrame> m_currentFrame;
++    RefPtr<NativeImage> m_currentImage;
++    FloatSize m_naturalSize;
++    MediaPlayer::NetworkState m_networkState { MediaPlayer::NetworkState::Empty };
++    MediaPlayer::ReadyState m_readyState { MediaPlayer::ReadyState::HaveNothing };
++    bool m_playing { false };
++    bool m_visible { false };
++    bool m_hasFrame { false };
++    bool m_didProgress { false };
++};
++
++class RevMediaStreamPlayerFactory final : public MediaPlayerFactory {
++private:
++    MediaPlayerEnums::MediaEngineIdentifier identifier() const final { return MediaPlayerEnums::MediaEngineIdentifier::AVFoundationMediaStream; }
++
++    Ref<MediaPlayerPrivateInterface> createMediaEnginePlayer(MediaPlayer& player) const final
++    {
++        return adoptRef(*new RevMediaPlayerMediaStream(player));
++    }
++
++    void getSupportedTypes(HashSet<String>& types) const final { types.clear(); }
++
++    MediaPlayer::SupportsType supportsTypeAndCodecs(const MediaEngineSupportParameters& parameters) const final
++    {
++        return (parameters.platformType == PlatformMediaDecodingType::MediaStream && !parameters.requiresRemotePlayback)
++            ? MediaPlayer::SupportsType::IsSupported : MediaPlayer::SupportsType::IsNotSupported;
++    }
++};
++
++void RevMediaPlayerMediaStream::registerMediaEngine(MediaEngineRegistrar registrar)
++{
++    registrar(makeUnique<RevMediaStreamPlayerFactory>());
++}
++
++void registerRevMediaStreamPlayer(MediaEngineRegistrar registrar)
++{
++    RevMediaPlayerMediaStream::registerMediaEngine(registrar);
++}
++
++}
++
++#endif
+diff --git a/Source/WebCore/platform/network/CredentialBase.h b/Source/WebCore/platform/network/CredentialBase.h
+index bbed16b6935ca8957ca692b77c86852783c65526..3c7fcd279af5b3571ddc81364209eed0785fcec6 100644
+--- a/Source/WebCore/platform/network/CredentialBase.h
++++ b/Source/WebCore/platform/network/CredentialBase.h
+@@ -25,6 +25,8 @@
+ 
+ #pragma once
+ 
++#include "PlatformExportMacros.h"
++
+ #include <wtf/text/WTFString.h>
+ 
+ namespace WebCore {
+diff --git a/Source/WebCore/platform/sql/SQLiteDatabase.h b/Source/WebCore/platform/sql/SQLiteDatabase.h
+index 880df467c6e5d96e143a6fa9b3193279522b1ffd..467821da11c5e27c165bddbc484453f589392424 100644
+--- a/Source/WebCore/platform/sql/SQLiteDatabase.h
++++ b/Source/WebCore/platform/sql/SQLiteDatabase.h
+@@ -26,6 +26,8 @@
+ 
+ #pragma once
+ 
++#include "PlatformExportMacros.h"
++
+ #include <functional>
+ #include <sqlite3.h>
+ #include <wtf/CheckedRef.h>
+diff --git a/Source/WebCore/plugins/PluginData.h b/Source/WebCore/plugins/PluginData.h
+index 8899baca0261fb60838de0effcf13cfb774c7880..be4a6099a4b29c762db89683541204c36395dcaf 100644
+--- a/Source/WebCore/plugins/PluginData.h
++++ b/Source/WebCore/plugins/PluginData.h
+@@ -20,6 +20,8 @@
+ 
+ #pragma once
+ 
++#include "PlatformExportMacros.h"
++
+ #include <wtf/Platform.h>
+ #include <wtf/RefCounted.h>
+ #include <wtf/URL.h>
+diff --git a/Source/WebCore/rendering/GridTrackSizingAlgorithm.cpp b/Source/WebCore/rendering/GridTrackSizingAlgorithm.cpp
+index c08712a55b877c6835a885a79e6516ebb0042ba0..89d47f49c6bb0284c383b8d98edd5096793f17c3 100644
+--- a/Source/WebCore/rendering/GridTrackSizingAlgorithm.cpp
++++ b/Source/WebCore/rendering/GridTrackSizingAlgorithm.cpp
+@@ -40,6 +40,7 @@
+ #include "StylePrimitiveNumericTypes+Evaluation.h"
+ #include "StylePrimitiveNumericTypes+EvaluationMinimum.h"
+ #include "StyleSelfAlignmentData.h"
++#include <algorithm>
+ #include <ranges>
+ #include <wtf/Range.h>
+ #include <wtf/StdMap.h>
+@@ -50,6 +51,19 @@
+ 
+ namespace WebCore {
+ 
++static inline bool gridTrackSizingSortedIndicesIntersect(const Vector<unsigned>& sortedTrackIndices, unsigned startLine, unsigned endLine)
++{
++    auto* begin = sortedTrackIndices.begin();
++    auto* end = sortedTrackIndices.end();
++    auto* first = std::lower_bound(begin, end, startLine);
++    return first != end && *first < endLine;
++}
++
++static inline bool gridTrackSizingSortedIndicesContain(const Vector<unsigned>& sortedTrackIndices, unsigned trackIndex)
++{
++    return gridTrackSizingSortedIndicesIntersect(sortedTrackIndices, trackIndex, trackIndex + 1);
++}
++
+ class ScopedGridAreaContentLogicalHeight {
+ public:
+     ScopedGridAreaContentLogicalHeight(RenderBox& gridItem, RenderBox::GridAreaSize size)
+@@ -1088,8 +1102,13 @@ LayoutUnit GridTrackSizingAlgorithmStrategy::logicalHeightForGridItem(RenderBox&
+     gridItem.layoutIfNeeded();
+ 
+     auto gridItemLogicalHeight = gridItem.logicalHeight() + GridLayoutFunctions::marginLogicalSizeForGridItem(*renderGrid(), gridItemBlockDirection, gridItem) + m_algorithm.baselineOffsetForGridItem(gridItem, direction());
++#if defined(WEBKIT_IOS6)
++    if (intrinsicLogicalHeightsForRowSizingFirstPass && sizingState() == GridTrackSizingAlgorithm::SizingState::RowSizingFirstIteration && renderGrid()->canCacheIntrinsicLogicalHeightForRowSizingFirstPass(gridItem))
++        intrinsicLogicalHeightsForRowSizingFirstPass->setSizeForGridItem(gridItem, gridItemLogicalHeight);
++#else
+     if (intrinsicLogicalHeightsForRowSizingFirstPass && sizingState() == GridTrackSizingAlgorithm::SizingState::RowSizingFirstIteration)
+         intrinsicLogicalHeightsForRowSizingFirstPass->setSizeForGridItem(gridItem, gridItemLogicalHeight);
++#endif
+ 
+     return gridItemLogicalHeight;
+ }
+@@ -1834,9 +1853,7 @@ void GridTrackSizingAlgorithm::aggregateGridItemsForIntrinsicSizing(Vector<GridI
+     auto& allTracks = tracks(m_direction);
+ 
+     traverseSubgridTreeForIntrinsicSizing([&](RenderBox& gridItem, GridSpan gridItemSpan) {
+-        bool spansContentSizedTracks = std::ranges::any_of(m_contentSizedTracksIndex, [startLine = gridItemSpan.startLine(), endLine = gridItemSpan.endLine()](auto trackIndex) {
+-            return trackIndex >= startLine && trackIndex < endLine;
+-        });
++        bool spansContentSizedTracks = gridTrackSizingSortedIndicesIntersect(m_contentSizedTracksIndex, gridItemSpan.startLine(), gridItemSpan.endLine());
+         if (!spansContentSizedTracks)
+             return;
+ 
+@@ -1888,9 +1905,7 @@ void GridTrackSizingAlgorithm::computeDefiniteAndIndefiniteItemsForGridLanes(Std
+     };
+ 
+     auto isTrackContentSized = [&](unsigned trackIndex) {
+-        return std::ranges::any_of(m_contentSizedTracksIndex, [trackIndex](auto index) {
+-            return index == trackIndex;
+-        });
++        return gridTrackSizingSortedIndicesContain(m_contentSizedTracksIndex, trackIndex);
+     };
+ 
+     traverseSubgridTreeForIntrinsicSizing([&](RenderBox& gridItem, GridSpan gridItemSpan) {
+@@ -1925,9 +1940,7 @@ void GridTrackSizingAlgorithm::computeDefiniteAndIndefiniteItemsForGridLanes(Std
+         // Indefinite items contribute to all content-sized tracks (aggregated by span
+         // length), so they skip this check.
+         if (!isIndefinite) {
+-            bool spansContentSizedTracks = std::ranges::any_of(m_contentSizedTracksIndex, [startLine = gridItemSpan.startLine(), endLine = gridItemSpan.endLine()](auto trackIndex) {
+-                return trackIndex >= startLine && trackIndex < endLine;
+-            });
++            bool spansContentSizedTracks = gridTrackSizingSortedIndicesIntersect(m_contentSizedTracksIndex, gridItemSpan.startLine(), gridItemSpan.endLine());
+             if (!spansContentSizedTracks)
+                 return;
+         }
+@@ -2106,6 +2119,20 @@ void GridTrackSizingAlgorithm::setup(Style::GridTrackSizingDirection direction,
+     setAvailableSpace(direction, availableSpace ? std::max(0_lu, *availableSpace) : availableSpace);
+ 
+     m_sizingOperation = sizingOperation;
++#if defined(WEBKIT_IOS6)
++    switch (m_sizingOperation) {
++    case SizingOperation::IntrinsicSizeComputation:
++        if (!m_ios6IndefiniteSizeStrategy)
++            m_ios6IndefiniteSizeStrategy = makeUnique<IndefiniteSizeStrategy>(*this);
++        m_strategy = m_ios6IndefiniteSizeStrategy.get();
++        break;
++    case SizingOperation::TrackSizing:
++        if (!m_ios6DefiniteSizeStrategy)
++            m_ios6DefiniteSizeStrategy = makeUnique<DefiniteSizeStrategy>(*this);
++        m_strategy = m_ios6DefiniteSizeStrategy.get();
++        break;
++    }
++#else
+     switch (m_sizingOperation) {
+     case SizingOperation::IntrinsicSizeComputation:
+         m_strategy = makeUnique<IndefiniteSizeStrategy>(*this);
+@@ -2114,6 +2141,7 @@ void GridTrackSizingAlgorithm::setup(Style::GridTrackSizingDirection direction,
+         m_strategy = makeUnique<DefiniteSizeStrategy>(*this);
+         break;
+     }
++#endif
+ 
+     m_contentSizedTracksIndex.shrink(0);
+     m_flexibleSizedTracksIndex.shrink(0);
+@@ -2125,9 +2153,26 @@ void GridTrackSizingAlgorithm::setup(Style::GridTrackSizingDirection direction,
+     } else
+         setFreeSpace(direction, std::nullopt);
+ 
++#if defined(WEBKIT_IOS6)
++    auto& directionTracks = tracks(direction);
++    while (directionTracks.size() > numTracks)
++        retireTrack(directionTracks.takeLast());
++    for (auto& track : directionTracks)
++        track->resetForSizingRun();
++    if (directionTracks.size() < numTracks) {
++        directionTracks.reserveCapacity(numTracks);
++        while (directionTracks.size() < numTracks) {
++            if (m_ios6RetiredTracks.isEmpty())
++                directionTracks.append(makeUniqueRef<GridTrack>());
++            else
++                directionTracks.append(m_ios6RetiredTracks.takeLast());
++        }
++    }
++#else
+     tracks(direction) = Vector<UniqueRef<GridTrack>>(numTracks, [](size_t) {
+         return makeUniqueRef<GridTrack>();
+     });
++#endif
+ 
+     m_needsSetup = false;
+     m_hasPercentSizedRowsIndefiniteHeight = false;
+@@ -2267,8 +2312,13 @@ void GridTrackSizingAlgorithm::reset()
+ {
+     ASSERT(wasSetup());
+     m_sizingState = SizingState::ColumnSizingFirstIteration;
++#if defined(WEBKIT_IOS6)
++    retireTracks(m_columns);
++    retireTracks(m_rows);
++#else
+     m_columns.shrink(0);
+     m_rows.shrink(0);
++#endif
+     m_contentSizedTracksIndex.shrink(0);
+     m_flexibleSizedTracksIndex.shrink(0);
+     m_autoSizedTracksForStretchIndex.shrink(0);
+diff --git a/Source/WebCore/rendering/GridTrackSizingAlgorithm.h b/Source/WebCore/rendering/GridTrackSizingAlgorithm.h
+index ddc20763333a7148c780de47ccde19b0c2b187d7..9626e2cff5d5b682fbd5c8633b4c19cdc05ade72 100644
+--- a/Source/WebCore/rendering/GridTrackSizingAlgorithm.h
++++ b/Source/WebCore/rendering/GridTrackSizingAlgorithm.h
+@@ -98,6 +98,19 @@ public:
+     const Style::ZoomResolvable<Style::GridTrackSize>& NODELETE cachedTrackSize() const LIFETIME_BOUND;
+     void setCachedTrackSize(const Style::ZoomResolvable<Style::GridTrackSize>&);
+ 
++#if defined(WEBKIT_IOS6)
++    void resetForSizingRun()
++    {
++        m_baseSize = 0_lu;
++        m_growthLimit = 0_lu;
++        m_plannedSize = 0_lu;
++        m_tempSize = 0_lu;
++        m_growthLimitCap = std::nullopt;
++        m_infinitelyGrowable = false;
++        m_cachedTrackSize = std::nullopt;
++    }
++#endif
++
+ private:
+     bool isGrowthLimitBiggerThanBaseSize() const { return growthLimitIsInfinite() || m_growthLimit >= std::max(m_baseSize, 0_lu); }
+ 
+@@ -289,6 +302,22 @@ private:
+ 
+     bool isDirectionInStackingAxis() const;
+ 
++#if defined(WEBKIT_IOS6)
++    static constexpr size_t maximumRetiredTrackCount = 16;
++    void retireTrack(UniqueRef<GridTrack>&& track)
++    {
++        if (m_ios6RetiredTracks.size() >= maximumRetiredTrackCount)
++            return;
++        track->resetForSizingRun();
++        m_ios6RetiredTracks.append(WTF::move(track));
++    }
++    void retireTracks(Vector<UniqueRef<GridTrack>>& trackList)
++    {
++        while (!trackList.isEmpty())
++            retireTrack(trackList.takeLast());
++    }
++#endif
++
+     // Data.
+     bool wasSetup() const { return !!m_strategy; }
+     bool m_needsSetup { true };
+@@ -304,6 +333,9 @@ private:
+     // writing modes.
+     Vector<UniqueRef<GridTrack>> m_columns;
+     Vector<UniqueRef<GridTrack>> m_rows;
++#if defined(WEBKIT_IOS6)
++    Vector<UniqueRef<GridTrack>> m_ios6RetiredTracks;
++#endif
+     Vector<unsigned> m_contentSizedTracksIndex;
+     Vector<unsigned> m_flexibleSizedTracksIndex;
+     Vector<unsigned> m_autoSizedTracksForStretchIndex;
+@@ -314,7 +346,13 @@ private:
+     Grid& m_grid;
+ 
+     const RenderGrid* m_renderGrid;
++#if defined(WEBKIT_IOS6)
++    std::unique_ptr<GridTrackSizingAlgorithmStrategy> m_ios6IndefiniteSizeStrategy;
++    std::unique_ptr<GridTrackSizingAlgorithmStrategy> m_ios6DefiniteSizeStrategy;
++    GridTrackSizingAlgorithmStrategy* m_strategy { nullptr };
++#else
+     std::unique_ptr<GridTrackSizingAlgorithmStrategy> m_strategy;
++#endif
+ 
+     // The track sizing algorithm is used for both layout and intrinsic size
+     // computation. We're normally just interested in intrinsic inline sizes
+diff --git a/Source/WebCore/style/RuleFeature.cpp b/Source/WebCore/style/RuleFeature.cpp
+index a80076c4f166aa01a1d713e8708d7298b0f44dba..94916a36236c153497980c0b4506889d69cc55da 100644
+--- a/Source/WebCore/style/RuleFeature.cpp
++++ b/Source/WebCore/style/RuleFeature.cpp
+@@ -350,8 +350,9 @@ void RuleFeatureSet::recursivelyCollectFeaturesFromSelector(SelectorFeatures& se
+         } else if (selector->match() == CSSSelector::Match::Class || selector->isEquivalentToClassSelector())
+             selectorFeatures.classes.append({ selector, matchElement, context.isNegation, scopeSourcesForFeature() });
+         else if (selector->isAttributeSelector()) {
+-            attributeLowercaseLocalNamesInRules.add(selector->attribute().localNameLowercase());
+-            attributeLocalNamesInRules.add(selector->attribute().localName());
++            auto& attribute = selector->attribute();
++            attributeLowercaseLocalNamesInRules.add(attribute.localNameLowercase());
++            attributeLocalNamesInRules.add(attribute.localName());
+             selectorFeatures.attributes.append({ selector, matchElement, context.isNegation, scopeSourcesForFeature() });
+         } else if (selector->match() == CSSSelector::Match::PseudoElement) {
+             // Don't put anything here as selectors that differ by pseudo-element only are collected only once.
+@@ -464,7 +465,11 @@ static PseudoClassInvalidationKey makePseudoClassInvalidationKey(CSSSelector::Ps
+ 
+ void RuleFeatureSet::collectFeatures(CollectionContext& collectionContext, const RuleData& ruleData, const Vector<Ref<const StyleRuleScope>>& scopeRules)
+ {
++#if defined(WEBKIT_IOS6)
++    ASSERT(isMainThread());
++#else
+     RELEASE_ASSERT(isMainThread());
++#endif
+ 
+     // Empty rules don't affect style so we never need to invalidate for them.
+     if (ruleData.styleRule().properties().isEmpty())
+@@ -535,7 +540,8 @@ void RuleFeatureSet::collectFeatures(CollectionContext& collectionContext, const
+ 
+     for (auto& entry : selectorFeatures.attributes) {
+         auto& [selector, matchElement, isNegation, scopeSources] = entry;
+-        auto& featureVector = *attributeRules.ensure(selector->attribute().localNameLowercase(), [] {
++        auto& lowercaseName = selector->attribute().localNameLowercase();
++        auto& featureVector = *attributeRules.ensure(lowercaseName, [] {
+             return makeUnique<RuleFeatureVector>();
+         }).iterator->value;
+ 
+@@ -548,14 +554,14 @@ void RuleFeatureSet::collectFeatures(CollectionContext& collectionContext, const
+         });
+ 
+         if (matchElement.relation == MatchElement::Relation::Host)
+-            attributesAffectingHost.add(selector->attribute().localNameLowercase());
++            attributesAffectingHost.add(lowercaseName);
+         setUsesRelation(matchElement.relation);
+     }
+ 
+     for (auto& entry : selectorFeatures.pseudoClasses) {
+         auto& [selector, matchElement, isNegation, scopeSources] = entry;
+         auto& featureVector = *pseudoClassRules.ensure(makePseudoClassInvalidationKey(selector->pseudoClass(), *selector), [] {
+-            return makeUnique<Vector<RuleFeature>>();
++            return makeUnique<RuleFeatureVector>();
+         }).iterator->value;
+ 
+         addToVector(featureVector, RuleFeature {
+@@ -624,10 +630,17 @@ void RuleFeatureSet::add(const RuleFeatureSet& other)
+     attributeLocalNamesInRules.addAll(other.attributeLocalNamesInRules);
+ 
+     auto addMap = [&](auto& map, auto& otherMap) {
++        if (otherMap.isEmpty())
++            return;
++        if (map.isEmpty())
++            map.reserveInitialCapacity(otherMap.size());
+         for (auto& keyValuePair : otherMap) {
+-            map.ensure(keyValuePair.key, [] {
++            auto& vector = *map.ensure(keyValuePair.key, [] {
+                 return makeUnique<std::decay_t<decltype(*keyValuePair.value)>>();
+-            }).iterator->value->appendVector(*keyValuePair.value);
++            }).iterator->value;
++            if (vector.isEmpty())
++                vector.reserveInitialCapacity(keyValuePair.value->size());
++            vector.appendVector(*keyValuePair.value);
+         }
+     };
+ 
+@@ -676,18 +689,94 @@ void RuleFeatureSet::clear()
+     hasStartingStyleRules = false;
+ }
+ 
++#if defined(WEBKIT_IOS6)
++void RuleFeatureSet::recordBaseline(RuleFeatureBaseline& baseline) const
++{
++    baseline.idsInRules = idsInRules;
++    baseline.idsMatchingAncestorsInRules = idsMatchingAncestorsInRules;
++    baseline.attributeLowercaseLocalNamesInRules = attributeLowercaseLocalNamesInRules;
++    baseline.attributeLocalNamesInRules = attributeLocalNamesInRules;
++
++    auto recordSizes = [](const auto& map, auto& sizes) {
++        sizes.clear();
++        if (map.isEmpty())
++            return;
++        sizes.reserveInitialCapacity(map.size());
++        for (auto& keyValuePair : map)
++            sizes.add(keyValuePair.key, keyValuePair.value->size());
++    };
++    recordSizes(idRules, baseline.idRuleSizes);
++    recordSizes(classRules, baseline.classRuleSizes);
++    recordSizes(attributeRules, baseline.attributeRuleSizes);
++    recordSizes(pseudoClassRules, baseline.pseudoClassRuleSizes);
++    recordSizes(hasPseudoClassRules, baseline.hasPseudoClassRuleSizes);
++
++    baseline.classesAffectingHost = classesAffectingHost;
++    baseline.attributesAffectingHost = attributesAffectingHost;
++    baseline.pseudoClassesAffectingHost = pseudoClassesAffectingHost;
++    baseline.pseudoClasses = pseudoClasses;
++
++    baseline.usesFirstLineRules = usesFirstLineRules;
++    baseline.usesFirstLetterRules = usesFirstLetterRules;
++    baseline.hasStartingStyleRules = hasStartingStyleRules;
++
++    baseline.isValid = true;
++}
++
++void RuleFeatureSet::restoreBaseline(const RuleFeatureBaseline& baseline)
++{
++    RELEASE_ASSERT(isMainThread());
++    ASSERT(baseline.isValid);
++
++    idsInRules = baseline.idsInRules;
++    idsMatchingAncestorsInRules = baseline.idsMatchingAncestorsInRules;
++    attributeLowercaseLocalNamesInRules = baseline.attributeLowercaseLocalNamesInRules;
++    attributeLocalNamesInRules = baseline.attributeLocalNamesInRules;
++
++    auto restoreSizes = [](auto& map, const auto& sizes) {
++        map.removeIf([&](auto& keyValuePair) {
++            auto it = sizes.find(keyValuePair.key);
++            if (it == sizes.end())
++                return true;
++            if (keyValuePair.value->size() > it->value)
++                keyValuePair.value->shrink(it->value);
++            return false;
++        });
++    };
++    restoreSizes(idRules, baseline.idRuleSizes);
++    restoreSizes(classRules, baseline.classRuleSizes);
++    restoreSizes(attributeRules, baseline.attributeRuleSizes);
++    restoreSizes(pseudoClassRules, baseline.pseudoClassRuleSizes);
++    restoreSizes(hasPseudoClassRules, baseline.hasPseudoClassRuleSizes);
++
++    classesAffectingHost = baseline.classesAffectingHost;
++    attributesAffectingHost = baseline.attributesAffectingHost;
++    pseudoClassesAffectingHost = baseline.pseudoClassesAffectingHost;
++    pseudoClasses = baseline.pseudoClasses;
++
++    usesFirstLineRules = baseline.usesFirstLineRules;
++    usesFirstLetterRules = baseline.usesFirstLetterRules;
++    hasStartingStyleRules = baseline.hasStartingStyleRules;
++}
++#endif
++
+ void RuleFeatureSet::shrinkToFit()
+ {
+-    for (auto& rules : idRules.values())
+-        rules->shrinkToFit();
+-    for (auto& rules : classRules.values())
+-        rules->shrinkToFit();
+-    for (auto& rules : attributeRules.values())
+-        rules->shrinkToFit();
+-    for (auto& rules : pseudoClassRules.values())
+-        rules->shrinkToFit();
+-    for (auto& rules : hasPseudoClassRules.values())
+-        rules->shrinkToFit();
++    auto shrinkAll = [](auto& map) {
++        for (auto& rules : map.values()) {
++#if defined(WEBKIT_IOS6)
++            if (rules->capacity() - rules->size() < 4)
++                continue;
++#endif
++            rules->shrinkToFit();
++        }
++    };
++
++    shrinkAll(idRules);
++    shrinkAll(classRules);
++    shrinkAll(attributeRules);
++    shrinkAll(pseudoClassRules);
++    shrinkAll(hasPseudoClassRules);
+ }
+ 
+ } // namespace Style
+diff --git a/Source/WebCore/style/RuleFeature.h b/Source/WebCore/style/RuleFeature.h
+index cc3b8c3ced802c2f06ed4eb7b793d893131657d9..59845f32ebaedd7e63f40b5946c550bca7499f8a 100644
+--- a/Source/WebCore/style/RuleFeature.h
++++ b/Source/WebCore/style/RuleFeature.h
+@@ -111,7 +111,7 @@ static_assert(sizeof(RuleFeature) <= 32, "RuleFeature is a frequently allocated
+ 
+ using PseudoClassInvalidationKey = std::tuple<unsigned, uint8_t, AtomString>;
+ 
+-using RuleFeatureVector = Vector<RuleFeature>;
++using RuleFeatureVector = Vector<RuleFeature, 0, WTF::CrashOnOverflow, 4>;
+ 
+ struct SelectorDeduplicationKey {
+     SelectorDeduplicationKey(const CSSSelector&);
+@@ -123,10 +123,16 @@ struct SelectorDeduplicationKey {
+     bool operator==(const SelectorDeduplicationKey&) const;
+ };
+ 
++struct RuleFeatureBaseline;
++
+ struct RuleFeatureSet {
+     void add(const RuleFeatureSet&);
+     void clear();
+     void shrinkToFit();
++#if defined(WEBKIT_IOS6)
++    void recordBaseline(RuleFeatureBaseline&) const;
++    void restoreBaseline(const RuleFeatureBaseline&);
++#endif
+ 
+     struct CollectionContext {
+         HashSet<GenericHashKey<SelectorDeduplicationKey>> selectorDeduplicationSet;
+@@ -163,10 +169,10 @@ private:
+     struct SelectorFeatures {
+         using InvalidationFeature = std::tuple<const CSSSelector*, MatchElement, IsNegation, Vector<const CSSSelector*>>;
+ 
+-        Vector<InvalidationFeature> ids;
+-        Vector<InvalidationFeature> classes;
+-        Vector<InvalidationFeature> attributes;
+-        Vector<InvalidationFeature> pseudoClasses;
++        Vector<InvalidationFeature, 2> ids;
++        Vector<InvalidationFeature, 4> classes;
++        Vector<InvalidationFeature, 2> attributes;
++        Vector<InvalidationFeature, 4> pseudoClasses;
+         Vector<InvalidationFeature> hasPseudoClasses;
+     };
+     struct RecursiveCollectionContext;
+@@ -175,6 +181,32 @@ private:
+     void NODELETE collectPseudoElementFeatures(const RuleData&);
+ };
+ 
++#if defined(WEBKIT_IOS6)
++struct RuleFeatureBaseline {
++    bool isValid { false };
++
++    HashSet<AtomString> idsInRules;
++    HashSet<AtomString> idsMatchingAncestorsInRules;
++    HashSet<AtomString> attributeLowercaseLocalNamesInRules;
++    HashSet<AtomString> attributeLocalNamesInRules;
++
++    HashMap<AtomString, unsigned> idRuleSizes;
++    HashMap<AtomString, unsigned> classRuleSizes;
++    HashMap<AtomString, unsigned> attributeRuleSizes;
++    HashMap<PseudoClassInvalidationKey, unsigned> pseudoClassRuleSizes;
++    HashMap<PseudoClassInvalidationKey, unsigned> hasPseudoClassRuleSizes;
++
++    HashSet<AtomString> classesAffectingHost;
++    HashSet<AtomString> attributesAffectingHost;
++    HashSet<CSSSelector::PseudoClass, IntHash<CSSSelector::PseudoClass>, WTF::StrongEnumHashTraits<CSSSelector::PseudoClass>> pseudoClassesAffectingHost;
++    HashSet<CSSSelector::PseudoClass, IntHash<CSSSelector::PseudoClass>, WTF::StrongEnumHashTraits<CSSSelector::PseudoClass>> pseudoClasses;
++
++    bool usesFirstLineRules { false };
++    bool usesFirstLetterRules { false };
++    bool hasStartingStyleRules { false };
++};
++#endif
++
+ MatchElement::HasRelation computeHasArgumentRelation(const CSSSelector&);
+ 
+ enum class InvalidationKeyType : uint8_t { Universal = 1, Class, Id, Attribute, Tag };
+diff --git a/Source/WebCore/style/StyleScopeRuleSets.cpp b/Source/WebCore/style/StyleScopeRuleSets.cpp
+index b020e0be5753a6aae8b3061e29621ce430ac8ed6..62777c2d3d19a4fb766cd96096afa59145f20a1d 100644
+--- a/Source/WebCore/style/StyleScopeRuleSets.cpp
++++ b/Source/WebCore/style/StyleScopeRuleSets.cpp
+@@ -66,17 +66,23 @@ ScopeRuleSets::~ScopeRuleSets()
+     RELEASE_ASSERT(!m_isInvalidatingStyleWithRuleSets);
+ }
+ 
++#if !defined(WEBKIT_IOS6)
+ RuleSet* ScopeRuleSets::userAgentMediaQueryStyle() const
+ {
+     updateUserAgentMediaQueryStyleIfNeeded();
+     return m_userAgentMediaQueryStyle.get();
+ }
++#endif
+ 
+ void ScopeRuleSets::updateUserAgentMediaQueryStyleIfNeeded() const
+ {
+     if (!UserAgentStyle::mediaQueryStyleSheet)
+         return;
+ 
++#if defined(WEBKIT_IOS6)
++    m_userAgentMediaQueryStyleVersionOnUpdate = UserAgentStyle::defaultStyleVersion;
++#endif
++
+     auto ruleCount = UserAgentStyle::mediaQueryStyleSheet->ruleCount();
+     if (m_userAgentMediaQueryStyle && ruleCount == m_userAgentMediaQueryRuleCountOnUpdate)
+         return;
+@@ -96,12 +102,19 @@ RuleSet* ScopeRuleSets::dynamicViewTransitionsStyle() const
+     return m_dynamicViewTransitionsStyle.get();
+ }
+ 
++#if defined(WEBKIT_IOS6)
++RuleSet* ScopeRuleSets::sharedUserStyle() const
++{
++    return m_styleResolver.document().styleScope().resolver().ruleSets().userStyle();
++}
++#else
+ RuleSet* ScopeRuleSets::userStyle() const
+ {
+     if (m_usesSharedUserStyle)
+         return m_styleResolver.document().styleScope().resolver().ruleSets().userStyle();
+     return m_userStyle.get();
+ }
++#endif
+ 
+ RuleSet* ScopeRuleSets::styleForDeclarationOrigin(DeclarationOrigin origin)
+ {
+@@ -269,9 +282,21 @@ void ScopeRuleSets::collectFeatures() const
+     RELEASE_ASSERT(isMainThread());
+     RELEASE_ASSERT(!m_isInvalidatingStyleWithRuleSets);
+ 
++#if defined(WEBKIT_IOS6)
++    if (m_userAgentFeatureBaseline.isValid && m_userAgentFeatureBaselineVersion == UserAgentStyle::defaultStyleVersion)
++        m_features.restoreBaseline(m_userAgentFeatureBaseline);
++    else {
++        m_features.clear();
++        if (UserAgentStyle::defaultStyle)
++            m_features.add(UserAgentStyle::defaultStyle->features());
++        m_features.recordBaseline(m_userAgentFeatureBaseline);
++        m_userAgentFeatureBaselineVersion = UserAgentStyle::defaultStyleVersion;
++    }
++#else
+     m_features.clear();
+     if (UserAgentStyle::defaultStyle)
+         m_features.add(UserAgentStyle::defaultStyle->features());
++#endif
+     m_defaultStyleVersionOnFeatureCollection = UserAgentStyle::defaultStyleVersion;
+ 
+     if (RefPtr userAgentMediaQueryStyle = this->userAgentMediaQueryStyle())
+@@ -342,6 +367,15 @@ static OptionSet<HasArgumentProperty> hasArgumentProperties(const CSSSelectorLis
+ template<typename KeyType, typename Hash, typename HashTraits>
+ static Vector<InvalidationRuleSet>* ensureInvalidationRuleSets(const KeyType& key, HashMap<KeyType, std::unique_ptr<Vector<InvalidationRuleSet>>, Hash, HashTraits>& ruleSetMap, const HashMap<KeyType, std::unique_ptr<RuleFeatureVector>, Hash, HashTraits>& ruleFeatures)
+ {
++#if defined(WEBKIT_IOS6)
++    {
++        auto it = ruleSetMap.find(key);
++        if (it != ruleSetMap.end())
++            return it->value.get();
++        if (!ruleFeatures.get(key))
++            return nullptr;
++    }
++#endif
+     return ruleSetMap.ensure(key, [&] () -> std::unique_ptr<Vector<InvalidationRuleSet>> {
+         auto* features = ruleFeatures.get(key);
+         if (!features)
+diff --git a/Source/WebCore/style/StyleScopeRuleSets.h b/Source/WebCore/style/StyleScopeRuleSets.h
+index 8c5e827bd714f453f1f0404786f8b5ed848b3f04..3449de97468e594b1d51d253b4ab0525b2c81391 100644
+--- a/Source/WebCore/style/StyleScopeRuleSets.h
++++ b/Source/WebCore/style/StyleScopeRuleSets.h
+@@ -87,10 +87,29 @@ public:
+     ~ScopeRuleSets();
+ 
+     bool isAuthorStyleDefined() const { return m_isAuthorStyleDefined; }
++#if defined(WEBKIT_IOS6)
++    RuleSet* userAgentMediaQueryStyle() const
++    {
++        if (m_userAgentMediaQueryStyle && m_userAgentMediaQueryStyleVersionOnUpdate == UserAgentStyle::defaultStyleVersion)
++            return m_userAgentMediaQueryStyle.get();
++        updateUserAgentMediaQueryStyleIfNeeded();
++        return m_userAgentMediaQueryStyle.get();
++    }
++#else
+     RuleSet* userAgentMediaQueryStyle() const;
++#endif
+     RuleSet* NODELETE dynamicViewTransitionsStyle() const;
+     RuleSet& authorStyle() const { return *m_authorStyle; }
++#if defined(WEBKIT_IOS6)
++    RuleSet* userStyle() const
++    {
++        if (m_usesSharedUserStyle) [[unlikely]]
++            return sharedUserStyle();
++        return m_userStyle.get();
++    }
++#else
+     RuleSet* userStyle() const;
++#endif
+     RuleSet* styleForDeclarationOrigin(DeclarationOrigin);
+ 
+     const RuleFeatureSet& features() const LIFETIME_BOUND;
+@@ -134,6 +153,9 @@ private:
+     void collectFeatures() const;
+     void collectRulesFromUserStyleSheets(const Vector<Ref<CSSStyleSheet>>&, RuleSet& userStyle, const MQ::MediaQueryEvaluator&);
+     void updateUserAgentMediaQueryStyleIfNeeded() const;
++#if defined(WEBKIT_IOS6)
++    RuleSet* sharedUserStyle() const;
++#endif
+ 
+     RefPtr<RuleSet> m_authorStyle;
+     mutable RefPtr<RuleSet> m_userAgentMediaQueryStyle;
+@@ -152,6 +174,12 @@ private:
+ 
+     mutable std::optional<SelectorsForStyleAttribute> m_cachedSelectorsForStyleAttribute;
+ 
++#if defined(WEBKIT_IOS6)
++    mutable RuleFeatureBaseline m_userAgentFeatureBaseline;
++    mutable unsigned m_userAgentFeatureBaselineVersion { 0 };
++    mutable unsigned m_userAgentMediaQueryStyleVersionOnUpdate { 0 };
++#endif
++
+     mutable unsigned m_defaultStyleVersionOnFeatureCollection { 0 };
+     mutable unsigned m_userAgentMediaQueryRuleCountOnUpdate { 0 };
+ 
+diff --git a/Source/WebCore/style/StyleTreeResolver.cpp b/Source/WebCore/style/StyleTreeResolver.cpp
+index 0f4a062ea287c67412a3582831a43a9c04774cbf..ef1faf3be557921eb21f56b44949408a7af73f75 100644
+--- a/Source/WebCore/style/StyleTreeResolver.cpp
++++ b/Source/WebCore/style/StyleTreeResolver.cpp
+@@ -377,6 +377,18 @@ auto TreeResolver::resolveElement(Element& element, const Style::ComputedStyle*
+     }
+ 
+     auto resolveAndAddPseudoElementStyle = [&](const PseudoElementIdentifier& pseudoElementIdentifier) {
++#if defined(WEBKIT_IOS6)
++        switch (pseudoElementIdentifier.type) {
++        case PseudoElementType::FirstLine:
++        case PseudoElementType::FirstLetter:
++            break;
++        default:
++            if (!update.style->hasPseudoStyle(pseudoElementIdentifier.type)
++                && (!existingStyle || !existingStyle->hasPseudoElementStyles()))
++                return OptionSet<Change> { };
++            break;
++        }
++#endif
+         const Style::ComputedStyle* existingPseudoStyle = existingStyle ? existingStyle->pseudoElementStyle(pseudoElementIdentifier) : nullptr;
+         auto pseudoElementUpdate = resolvePseudoElement(element, pseudoElementIdentifier, update, parent().isInDisplayNoneTree, existingPseudoStyle);
+ 
+@@ -1522,7 +1534,7 @@ std::unique_ptr<Update> TreeResolver::resolve()
+     if (!documentElement->childNeedsStyleRecalc() && !documentElement->needsStyleRecalc())
+         return WTF::move(m_update);
+ 
+-    m_didSeePendingStylesheet = m_document->styleScope().hasPendingSheetsBeforeBody();
++    m_didSeePendingStylesheet = m_document->styleScope().blocksRenderingBeforeBody();
+ 
+     if (!m_update)
+         m_update = makeUnique<Update>(m_document);
+diff --git a/Source/WebCore/style/computed/StyleComputedStyleBase.cpp b/Source/WebCore/style/computed/StyleComputedStyleBase.cpp
+index 666c204f809273d5bb7864f2e129293e99b59da3..c7fef205de3e6f27beae21cfcb8d80a4b185e18a 100644
+--- a/Source/WebCore/style/computed/StyleComputedStyleBase.cpp
++++ b/Source/WebCore/style/computed/StyleComputedStyleBase.cpp
+@@ -325,6 +325,20 @@ void ComputedStyleBase::setZoomFromAnimation(Zoom value)
+         m_nonInheritedData.access().rareData.access().zoom = value;
+ }
+ 
++#if defined(WEBKIT_IOS6)
++
++ZoomFactor ComputedStyleBase::usedZoomForLengthWhenZoomed() const
++{
++    ASSERT(inheritedFlags().isZoomed);
++
++    if (useSVGZoomRulesForLength())
++        return ZoomFactor(1.0f);
++
++    return ZoomFactor(usedZoom());
++}
++
++#endif
++
+ void ComputedStyleBase::synchronizeLetterSpacingWithFontCascade()
+ {
+     auto& fontCascade = mutableFontCascadeWithoutUpdate();
+diff --git a/Source/WebKitLegacy/PlatformCocoa.cmake b/Source/WebKitLegacy/PlatformCocoa.cmake
+index 009896d27693dc8145b086c68475aeea39d3d185..5132d0cd87497a2dfd53618cd80691f3b88c64f3 100644
+--- a/Source/WebKitLegacy/PlatformCocoa.cmake
++++ b/Source/WebKitLegacy/PlatformCocoa.cmake
+@@ -44,13 +44,8 @@ list(APPEND WebKitLegacy_PRIVATE_INCLUDE_DIRECTORIES
+ 
+ list(APPEND WebKitLegacy_UNIFIED_SOURCE_LIST_FILES
+     SourcesCocoa.txt
++    SourcesCMakeCocoa.txt
+ )
+-# FIXME: Test building on iOS and then enable on iOS.
+-if (NOT WEBKIT_SDK_IS_IOS_FAMILY)
+-    list(APPEND WebKitLegacy_UNIFIED_SOURCE_LIST_FILES
+-        SourcesCMakeCocoa.txt
+-    )
+-endif ()
+ WEBKIT_COMPUTE_SOURCES(WebKitLegacy)
+ 
+ list(APPEND WebKitLegacy_SOURCES
+@@ -134,6 +129,9 @@ list(APPEND WebKitLegacy_SOURCES
+     ios/Misc/WebNSStringExtrasIOS.m
+     ios/Misc/WebUIKitSupport.mm
+ 
++    mac/Misc/WebNSStringExtrasIOS6.mm
++    mac/WebView/WebLegacyCompatibilityAPI.mm
++
+     ios/WebCoreSupport/PopupMenuIOS.mm
+     ios/WebCoreSupport/SearchPopupMenuIOS.cpp
+     ios/WebCoreSupport/WebChromeClientIOS.mm
+@@ -256,8 +254,11 @@ set_target_properties(WebKitLegacy PROPERTIES
+     INSTALL_NAME_DIR "${WebKitLegacy_INSTALL_NAME_DIR}"
+ )
+ 
++if (NOT WEBKIT_IOS6_EXPORTS)
++    set(WEBKIT_IOS6_EXPORTS "${WEBKITLEGACY_DIR}/WebKitLegacy-iOS.exp")
++endif ()
+ target_link_options(WebKitLegacy PRIVATE
+-    -exported_symbols_list ${WEBKITLEGACY_DIR}/WebKitLegacy-iOS.exp
++    -exported_symbols_list ${WEBKIT_IOS6_EXPORTS}
+ )
+ 
+ # FIXME: Generate this list dynamically (from `tapi reexport` against the
+diff --git a/Source/WebKitLegacy/PlatformIOS.cmake b/Source/WebKitLegacy/PlatformIOS.cmake
+new file mode 100644
+index 0000000000000000000000000000000000000000..8e5c1e008fc1af812ccc783fbea0be98699bd541
+--- /dev/null
++++ b/Source/WebKitLegacy/PlatformIOS.cmake
+@@ -0,0 +1,1107 @@
++include(PlatformCocoa.cmake)
++
++find_library(UIKIT_LIBRARY UIKit)
++
++list(APPEND WebKitLegacy_PRIVATE_LIBRARIES
++    ${UIKIT_LIBRARY}
++)
++
++target_compile_options(WebKitLegacy PRIVATE
++    "$<$<COMPILE_LANGUAGE:OBJC>:-std=gnu99>")
++
++set(BUNDLE_VERSION "${MACOSX_FRAMEWORK_BUNDLE_VERSION}")
++set(SHORT_VERSION_STRING "${WEBKIT_MAC_VERSION}")
++set(PRODUCT_NAME "WebKitLegacy")
++set(PRODUCT_BUNDLE_IDENTIFIER "com.apple.WebKitLegacy")
++configure_file(${WEBKITLEGACY_DIR}/mac/Info.plist ${CMAKE_CURRENT_BINARY_DIR}/WebKitLegacy-Info.plist)
++execute_process(COMMAND plutil -insert MinimumOSVersion -string "${CMAKE_OSX_DEPLOYMENT_TARGET}" ${CMAKE_CURRENT_BINARY_DIR}/WebKitLegacy-Info.plist)
++execute_process(COMMAND plutil -insert UIDeviceFamily -json "[1,2]" ${CMAKE_CURRENT_BINARY_DIR}/WebKitLegacy-Info.plist)
++
++set(WebKitLegacy_POST_BUILD_COMMAND
++    ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/WebKitLegacy-Info.plist
++        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/WebKitLegacy.framework/Info.plist
++)
++set_target_properties(WebKitLegacy PROPERTIES
++    INSTALL_NAME_DIR "${WebKitLegacy_INSTALL_NAME_DIR}"
++)
++target_link_options(WebKitLegacy PRIVATE
++    -compatibility_version 1.0.0
++    -current_version ${WEBKIT_MAC_VERSION}
++)
++
++target_link_options(WebKitLegacy PRIVATE
++    -exported_symbols_list ${WEBKIT_IOS6_EXPORTS}
++)
++
++
++list(APPEND WebKitLegacy_PRIVATE_INCLUDE_DIRECTORIES
++    "${WEBKITLEGACY_DIR}/Modules"
++
++    "${WEBKITLEGACY_DIR}/ios"
++
++    "${WEBKITLEGACY_DIR}/ios/DefaultDelegates"
++    "${WEBKITLEGACY_DIR}/ios/Misc"
++    "${WEBKITLEGACY_DIR}/ios/WebCoreSupport"
++    "${WEBKITLEGACY_DIR}/ios/WebView"
++
++    "${WEBKITLEGACY_DIR}/mac/DOM"
++    "${WEBKITLEGACY_DIR}/mac/DefaultDelegates"
++    "${WEBKITLEGACY_DIR}/mac/History"
++    "${WEBKITLEGACY_DIR}/mac/Panels"
++    "${WEBKITLEGACY_DIR}/mac/Plugins"
++    "${WEBKITLEGACY_DIR}/mac/Storage"
++    "${WEBKITLEGACY_DIR}/mac/WebInspector"
++    "${WEBKITLEGACY_DIR}/mac/WebView"
++)
++
++list(APPEND WebKitLegacy_SOURCES
++    ios/DefaultDelegates/WebDefaultFormDelegate.m
++    ios/DefaultDelegates/WebDefaultFrameLoadDelegate.m
++    ios/DefaultDelegates/WebDefaultResourceLoadDelegate.m
++    ios/DefaultDelegates/WebDefaultUIKitDelegate.m
++
++    ios/Misc/WebGeolocationCoreLocationProvider.mm
++    ios/Misc/WebGeolocationProviderIOS.mm
++    ios/Misc/WebNSStringExtrasIOS.m
++    ios/Misc/WebUIKitSupport.mm
++
++    ios/WebCoreSupport/PopupMenuIOS.mm
++    ios/WebCoreSupport/SearchPopupMenuIOS.cpp
++    ios/WebCoreSupport/WebChromeClientIOS.mm
++    ios/WebCoreSupport/WebFixedPositionContent.mm
++    ios/WebCoreSupport/WebFrameIOS.mm
++    ios/WebCoreSupport/WebGeolocation.mm
++    ios/WebCoreSupport/WebInspectorClientIOS.mm
++    ios/WebCoreSupport/WebMIMETypeRegistry.mm
++    ios/WebCoreSupport/WebSelectionRect.m
++    ios/WebCoreSupport/WebVisiblePosition.mm
++
++    ios/WebView/WebFrameViewWAKCompatibility.m
++    ios/WebView/WebPDFViewIOS.mm
++    ios/WebView/WebPDFViewPlaceholder.mm
++    ios/WebView/WebPlainWhiteView.mm
++
++    mac/DefaultDelegates/WebDefaultEditingDelegate.m
++    mac/DefaultDelegates/WebDefaultPolicyDelegate.mm
++    mac/DefaultDelegates/WebDefaultUIDelegate.mm
++
++    mac/WebView/WebPDFDocumentExtras.mm
++)
++
++list(APPEND WebKitLegacy_PRIVATE_LIBRARIES
++    "-F${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
++    "-framework WebCore"
++)
++add_dependencies(WebKitLegacy WebCore)
++
++list(APPEND WebKitLegacy_SOURCES
++    mac/History/BackForwardList.mm
++    mac/History/BinaryPropertyList.cpp
++    mac/History/HistoryPropertyList.mm
++    mac/History/WebHistory.mm
++    mac/History/WebHistoryItem.mm
++
++    mac/Misc/WebCache.mm
++    mac/Misc/WebCoreStatistics.mm
++    mac/Misc/WebDownload.mm
++    mac/Misc/WebElementDictionary.mm
++    mac/Misc/WebKitErrors.m
++    mac/Misc/WebKitLogInitialization.mm
++    mac/Misc/WebKitLogging.m
++    mac/Misc/WebKitNSStringExtras.mm
++    mac/Misc/WebKitStatistics.m
++    mac/Misc/WebKitVersionChecks.mm
++    mac/Misc/WebLocalizableStrings.mm
++    mac/Misc/WebLocalizableStringsInternal.mm
++    mac/Misc/WebNSDataExtras.mm
++    mac/Misc/WebNSDictionaryExtras.m
++    mac/Misc/WebNSFileManagerExtras.mm
++    mac/Misc/WebNSObjectExtras.mm
++    mac/Misc/WebNSURLExtras.mm
++    mac/Misc/WebNSURLRequestExtras.m
++    mac/Misc/WebNSUserDefaultsExtras.mm
++    mac/Misc/WebUserContentURLPattern.mm
++
++    mac/Plugins/WebPluginPackage.mm
++
++    mac/Storage/WebDatabaseManager.mm
++    mac/Storage/WebDatabaseManagerClient.mm
++    mac/Storage/WebDatabaseProvider.mm
++    mac/Storage/WebDatabaseQuotaManager.mm
++    mac/Storage/WebStorageManager.mm
++    mac/Storage/WebStorageTrackerClient.mm
++
++    mac/WebCoreSupport/LegacyHistoryItemClient.mm
++    mac/WebCoreSupport/WebAlternativeTextClient.mm
++    mac/WebCoreSupport/WebChromeClient.mm
++    mac/WebCoreSupport/WebContextMenuClient.mm
++    mac/WebCoreSupport/WebDragClient.mm
++    mac/WebCoreSupport/WebEditorClient.mm
++    mac/WebCoreSupport/WebFrameNetworkingContext.mm
++    mac/WebCoreSupport/WebGeolocationClient.mm
++    mac/WebCoreSupport/WebKitFullScreenListener.mm
++    mac/WebCoreSupport/WebMediaKeySystemClient.mm
++    mac/WebCoreSupport/WebNotificationClient.mm
++    mac/WebCoreSupport/WebOpenPanelResultListener.mm
++    mac/WebCoreSupport/WebPaymentCoordinatorClient.mm
++    mac/WebCoreSupport/WebPlatformStrategies.mm
++    mac/WebCoreSupport/WebPluginInfoProvider.mm
++    mac/WebCoreSupport/WebProgressTrackerClient.mm
++    mac/WebCoreSupport/WebSecurityOrigin.mm
++    mac/WebCoreSupport/WebSelectionServiceController.mm
++    mac/WebCoreSupport/WebValidationMessageClient.mm
++    mac/WebCoreSupport/WebVisitedLinkStore.mm
++
++    mac/WebInspector/WebInspectorFrontend.mm
++    mac/WebInspector/WebNodeHighlight.mm
++    mac/WebInspector/WebNodeHighlightView.mm
++    mac/WebInspector/WebNodeHighlighter.mm
++
++    mac/WebView/WebArchive.mm
++    mac/WebView/WebDelegateImplementationCaching.mm
++    mac/WebView/WebDeviceOrientation.mm
++    mac/WebView/WebDeviceOrientationProviderMock.mm
++    mac/WebView/WebDocumentLoaderMac.mm
++    mac/WebView/WebFeature.m
++    mac/WebView/WebFormDelegate.m
++    mac/WebView/WebGeolocationPosition.mm
++    mac/WebView/WebHTMLRepresentation.mm
++    mac/WebView/WebIndicateLayer.mm
++    mac/WebView/WebJSPDFDoc.mm
++    mac/WebView/WebMediaPlaybackTargetPicker.mm
++    mac/WebView/WebNavigationData.mm
++    mac/WebView/WebNotification.mm
++    mac/WebView/WebPolicyDelegate.mm
++    mac/WebView/WebPreferences.mm
++    mac/Misc/WebNSStringExtrasIOS6.mm
++    mac/WebView/WebLegacyCompatibilityAPI.mm
++    mac/WebView/WebPreferencesDefaultValues.mm
++    mac/WebView/WebResource.mm
++    mac/WebView/WebTextIterator.mm
++    mac/WebView/WebViewData.mm
++)
++
++set(WebKitLegacy_LEGACY_FORWARDING_HEADERS_FILES
++    ${WEBCORE_DIR}/bridge/objc/WebScriptObject.h
++    ${WEBCORE_DIR}/platform/cocoa/WebKitAvailability.h
++    ${WEBCORE_DIR}/platform/ios/wak/WAKAppKitStubs.h
++    ${WEBCORE_DIR}/platform/ios/wak/WAKResponder.h
++    ${WEBCORE_DIR}/platform/ios/wak/WAKView.h
++    ${WEBCORE_DIR}/platform/ios/wak/WAKWindow.h
++    ${WEBCORE_DIR}/platform/ios/wak/WKContentObservation.h
++    ${WEBCORE_DIR}/platform/ios/wak/WKGraphics.h
++    ${WEBCORE_DIR}/platform/ios/wak/WKTypes.h
++
++    ${WEBCORE_DIR}/platform/ios/AbstractPasteboard.h
++    ${WEBCORE_DIR}/platform/ios/KeyEventCodesIOS.h
++    ${WEBCORE_DIR}/platform/ios/WebEvent.h
++    ${WEBCORE_DIR}/page/ios/WebEventRegion.h
++    ${WEBCORE_DIR}/platform/ios/WebItemProviderPasteboard.h
++    ${WEBCORE_DIR}/platform/ios/wak/WebCoreThread.h
++    ${WEBCORE_DIR}/platform/ios/wak/WebCoreThreadMessage.h
++    ${WEBCORE_DIR}/platform/ios/wak/WebCoreThreadRun.h
++
++    mac/DOM/DOM.h
++    mac/DOM/DOMAbstractView.h
++    mac/DOM/DOMAbstractViewFrame.h
++    mac/DOM/DOMAbstractViewInternal.h
++    mac/DOM/DOMAttr.h
++    mac/DOM/DOMAttrInternal.h
++    mac/DOM/DOMBlob.h
++    mac/DOM/DOMBlobInternal.h
++    mac/DOM/DOMCDATASection.h
++    mac/DOM/DOMCDATASectionInternal.h
++    mac/DOM/DOMCSS.h
++    mac/DOM/DOMCSSCharsetRule.h
++    mac/DOM/DOMCSSFontFaceRule.h
++    mac/DOM/DOMCSSImportRule.h
++    mac/DOM/DOMCSSMediaRule.h
++    mac/DOM/DOMCSSPageRule.h
++    mac/DOM/DOMCSSPrimitiveValue.h
++    mac/DOM/DOMCSSPrimitiveValueInternal.h
++    mac/DOM/DOMCSSRule.h
++    mac/DOM/DOMCSSRuleInternal.h
++    mac/DOM/DOMCSSRuleList.h
++    mac/DOM/DOMCSSRuleListInternal.h
++    mac/DOM/DOMCSSStyleDeclaration.h
++    mac/DOM/DOMCSSStyleDeclarationInternal.h
++    mac/DOM/DOMCSSStyleRule.h
++    mac/DOM/DOMCSSStyleSheet.h
++    mac/DOM/DOMCSSStyleSheetInternal.h
++    mac/DOM/DOMCSSUnknownRule.h
++    mac/DOM/DOMCSSValue.h
++    mac/DOM/DOMCSSValueInternal.h
++    mac/DOM/DOMCSSValueList.h
++    mac/DOM/DOMCharacterData.h
++    mac/DOM/DOMComment.h
++    mac/DOM/DOMCommentInternal.h
++    mac/DOM/DOMCore.h
++    mac/DOM/DOMCounter.h
++    mac/DOM/DOMCounterInternal.h
++    mac/DOM/DOMCustomXPathNSResolver.h
++    mac/DOM/DOMDocument.h
++    mac/DOM/DOMDocumentFragment.h
++    mac/DOM/DOMDocumentFragmentInternal.h
++    mac/DOM/DOMDocumentFragmentPrivate.h
++    mac/DOM/DOMDocumentInternal.h
++    mac/DOM/DOMDocumentPrivate.h
++    mac/DOM/DOMDocumentType.h
++    mac/DOM/DOMDocumentTypeInternal.h
++    mac/DOM/DOMElement.h
++    mac/DOM/DOMElementInternal.h
++    mac/DOM/DOMEntity.h
++    mac/DOM/DOMEntityReference.h
++    mac/DOM/DOMEvent.h
++    mac/DOM/DOMEventException.h
++    mac/DOM/DOMEventInternal.h
++    mac/DOM/DOMEventListener.h
++    mac/DOM/DOMEventTarget.h
++    mac/DOM/DOMEvents.h
++    mac/DOM/DOMException.h
++    mac/DOM/DOMExtensions.h
++    mac/DOM/DOMFile.h
++    mac/DOM/DOMFileInternal.h
++    mac/DOM/DOMFileList.h
++    mac/DOM/DOMFileListInternal.h
++    mac/DOM/DOMHTML.h
++    mac/DOM/DOMHTMLAnchorElement.h
++    mac/DOM/DOMHTMLAppletElement.h
++    mac/DOM/DOMHTMLAreaElement.h
++    mac/DOM/DOMHTMLAreaElementInternal.h
++    mac/DOM/DOMHTMLBRElement.h
++    mac/DOM/DOMHTMLBaseElement.h
++    mac/DOM/DOMHTMLBaseFontElement.h
++    mac/DOM/DOMHTMLBodyElement.h
++    mac/DOM/DOMHTMLButtonElement.h
++    mac/DOM/DOMHTMLCanvasElement.h
++    mac/DOM/DOMHTMLCollection.h
++    mac/DOM/DOMHTMLCollectionInternal.h
++    mac/DOM/DOMHTMLDListElement.h
++    mac/DOM/DOMHTMLDirectoryElement.h
++    mac/DOM/DOMHTMLDivElement.h
++    mac/DOM/DOMHTMLDocument.h
++    mac/DOM/DOMHTMLDocumentInternal.h
++    mac/DOM/DOMHTMLElement.h
++    mac/DOM/DOMHTMLElementInternal.h
++    mac/DOM/DOMHTMLElementPrivate.h
++    mac/DOM/DOMHTMLEmbedElement.h
++    mac/DOM/DOMHTMLFieldSetElement.h
++    mac/DOM/DOMHTMLFontElement.h
++    mac/DOM/DOMHTMLFormElement.h
++    mac/DOM/DOMHTMLFormElementInternal.h
++    mac/DOM/DOMHTMLFrameElement.h
++    mac/DOM/DOMHTMLFrameSetElement.h
++    mac/DOM/DOMHTMLHRElement.h
++    mac/DOM/DOMHTMLHeadElement.h
++    mac/DOM/DOMHTMLHeadElementInternal.h
++    mac/DOM/DOMHTMLHeadingElement.h
++    mac/DOM/DOMHTMLHtmlElement.h
++    mac/DOM/DOMHTMLIFrameElement.h
++    mac/DOM/DOMHTMLImageElement.h
++    mac/DOM/DOMHTMLImageElementInternal.h
++    mac/DOM/DOMHTMLInputElement.h
++    mac/DOM/DOMHTMLInputElementInternal.h
++    mac/DOM/DOMHTMLInputElementPrivate.h
++    mac/DOM/DOMHTMLLIElement.h
++    mac/DOM/DOMHTMLLabelElement.h
++    mac/DOM/DOMHTMLLegendElement.h
++    mac/DOM/DOMHTMLLinkElement.h
++    mac/DOM/DOMHTMLLinkElementInternal.h
++    mac/DOM/DOMHTMLMapElement.h
++    mac/DOM/DOMHTMLMarqueeElement.h
++    mac/DOM/DOMHTMLMediaElement.h
++    mac/DOM/DOMHTMLMenuElement.h
++    mac/DOM/DOMHTMLMetaElement.h
++    mac/DOM/DOMHTMLModElement.h
++    mac/DOM/DOMHTMLOListElement.h
++    mac/DOM/DOMHTMLObjectElement.h
++    mac/DOM/DOMHTMLOptGroupElement.h
++    mac/DOM/DOMHTMLOptionElement.h
++    mac/DOM/DOMHTMLOptionElementInternal.h
++    mac/DOM/DOMHTMLOptionsCollection.h
++    mac/DOM/DOMHTMLOptionsCollectionInternal.h
++    mac/DOM/DOMHTMLParagraphElement.h
++    mac/DOM/DOMHTMLParamElement.h
++    mac/DOM/DOMHTMLPreElement.h
++    mac/DOM/DOMHTMLQuoteElement.h
++    mac/DOM/DOMHTMLScriptElement.h
++    mac/DOM/DOMHTMLScriptElementInternal.h
++    mac/DOM/DOMHTMLSelectElement.h
++    mac/DOM/DOMHTMLSelectElementInternal.h
++    mac/DOM/DOMHTMLStyleElement.h
++    mac/DOM/DOMHTMLStyleElementInternal.h
++    mac/DOM/DOMHTMLTableCaptionElement.h
++    mac/DOM/DOMHTMLTableCaptionElementInternal.h
++    mac/DOM/DOMHTMLTableCellElement.h
++    mac/DOM/DOMHTMLTableCellElementInternal.h
++    mac/DOM/DOMHTMLTableColElement.h
++    mac/DOM/DOMHTMLTableColElementInternal.h
++    mac/DOM/DOMHTMLTableElement.h
++    mac/DOM/DOMHTMLTableRowElement.h
++    mac/DOM/DOMHTMLTableSectionElement.h
++    mac/DOM/DOMHTMLTableSectionElementInternal.h
++    mac/DOM/DOMHTMLTextAreaElement.h
++    mac/DOM/DOMHTMLTextAreaElementInternal.h
++    mac/DOM/DOMHTMLTextAreaElementPrivate.h
++    mac/DOM/DOMHTMLTitleElement.h
++    mac/DOM/DOMHTMLUListElement.h
++    mac/DOM/DOMHTMLVideoElement.h
++    mac/DOM/DOMImplementation.h
++    mac/DOM/DOMImplementationInternal.h
++    mac/DOM/DOMInternal.h
++    mac/DOM/DOMKeyboardEvent.h
++    mac/DOM/DOMMediaError.h
++    mac/DOM/DOMMediaErrorInternal.h
++    mac/DOM/DOMMediaList.h
++    mac/DOM/DOMMediaListInternal.h
++    mac/DOM/DOMMouseEvent.h
++    mac/DOM/DOMMutationEvent.h
++    mac/DOM/DOMNamedNodeMap.h
++    mac/DOM/DOMNamedNodeMapInternal.h
++    mac/DOM/DOMNode.h
++    mac/DOM/DOMNodeFilter.h
++    mac/DOM/DOMNodeInternal.h
++    mac/DOM/DOMNodeIterator.h
++    mac/DOM/DOMNodeIteratorInternal.h
++    mac/DOM/DOMNodeList.h
++    mac/DOM/DOMNodeListInternal.h
++    mac/DOM/DOMNodePrivate.h
++    mac/DOM/DOMObject.h
++    mac/DOM/DOMOverflowEvent.h
++    mac/DOM/DOMPrivate.h
++    mac/DOM/DOMProcessingInstruction.h
++    mac/DOM/DOMProcessingInstructionInternal.h
++    mac/DOM/DOMProgressEvent.h
++    mac/DOM/DOMRGBColor.h
++    mac/DOM/DOMRGBColorInternal.h
++    mac/DOM/DOMRange.h
++    mac/DOM/DOMRangeException.h
++    mac/DOM/DOMRangeInternal.h
++    mac/DOM/DOMRanges.h
++    mac/DOM/DOMRect.h
++    mac/DOM/DOMRectInternal.h
++    mac/DOM/DOMStyleSheet.h
++    mac/DOM/DOMStyleSheetInternal.h
++    mac/DOM/DOMStyleSheetList.h
++    mac/DOM/DOMStyleSheetListInternal.h
++    mac/DOM/DOMStylesheets.h
++    mac/DOM/DOMText.h
++    mac/DOM/DOMTextEvent.h
++    mac/DOM/DOMTextInternal.h
++    mac/DOM/DOMTimeRanges.h
++    mac/DOM/DOMTimeRangesInternal.h
++    mac/DOM/DOMTokenList.h
++    mac/DOM/DOMTokenListInternal.h
++    mac/DOM/DOMTraversal.h
++    mac/DOM/DOMTreeWalker.h
++    mac/DOM/DOMTreeWalkerInternal.h
++    mac/DOM/DOMUIEvent.h
++    mac/DOM/DOMUIKitExtensions.h
++    mac/DOM/DOMViews.h
++    mac/DOM/DOMWheelEvent.h
++    mac/DOM/DOMWheelEventInternal.h
++    mac/DOM/DOMXPath.h
++    mac/DOM/DOMXPathException.h
++    mac/DOM/DOMXPathExpression.h
++    mac/DOM/DOMXPathExpressionInternal.h
++    mac/DOM/DOMXPathNSResolver.h
++    mac/DOM/DOMXPathResult.h
++    mac/DOM/DOMXPathResultInternal.h
++    mac/DOM/ExceptionHandlers.h
++    mac/DOM/ObjCEventListener.h
++    mac/DOM/ObjCNodeFilterCondition.h
++    mac/DOM/WebAutocapitalizeTypes.h
++    mac/DOM/WebDOMOperations.h
++    mac/DOM/WebDOMOperationsInternal.h
++    mac/DOM/WebDOMOperationsPrivate.h
++
++    mac/DefaultDelegates/WebDefaultContextMenuDelegate.h
++    mac/DefaultDelegates/WebDefaultEditingDelegate.h
++    mac/DefaultDelegates/WebDefaultPolicyDelegate.h
++    mac/DefaultDelegates/WebDefaultUIDelegate.h
++
++    mac/History/BackForwardList.h
++    mac/History/BinaryPropertyList.h
++    mac/History/HistoryPropertyList.h
++    mac/History/WebBackForwardList.h
++    mac/History/WebBackForwardListInternal.h
++    mac/History/WebBackForwardListPrivate.h
++    mac/History/WebHistory.h
++    mac/History/WebHistoryInternal.h
++    mac/History/WebHistoryItem.h
++    mac/History/WebHistoryItemInternal.h
++    mac/History/WebHistoryItemPrivate.h
++    mac/History/WebHistoryPrivate.h
++    mac/History/WebURLsWithTitles.h
++
++    mac/Misc/WebCache.h
++    mac/Misc/WebCoreStatistics.h
++    mac/Misc/WebDownload.h
++    mac/Misc/WebElementDictionary.h
++    mac/Misc/WebIconDatabase.h
++    mac/Misc/WebKit.h
++    mac/Misc/WebKitErrors.h
++    mac/Misc/WebKitErrorsPrivate.h
++    mac/Misc/WebKitLogging.h
++    mac/Misc/WebKitNSStringExtras.h
++    mac/Misc/WebKitStatistics.h
++    mac/Misc/WebKitStatisticsPrivate.h
++    mac/Misc/WebKitVersionChecks.h
++    mac/Misc/WebLocalizableStrings.h
++    mac/Misc/WebLocalizableStringsInternal.h
++    mac/Misc/WebNSControlExtras.h
++    mac/Misc/WebNSDataExtras.h
++    mac/Misc/WebNSDictionaryExtras.h
++    mac/Misc/WebNSEventExtras.h
++    mac/Misc/WebNSFileManagerExtras.h
++    mac/Misc/WebNSImageExtras.h
++    mac/Misc/WebNSObjectExtras.h
++    mac/Misc/WebNSPasteboardExtras.h
++    mac/Misc/WebNSPrintOperationExtras.h
++    mac/Misc/WebNSURLExtras.h
++    mac/Misc/WebNSURLRequestExtras.h
++    mac/Misc/WebNSUserDefaultsExtras.h
++    mac/Misc/WebNSViewExtras.h
++    mac/Misc/WebNSWindowExtras.h
++    mac/Misc/WebQuotaManager.h
++    mac/Misc/WebSharingServicePickerController.h
++    mac/Misc/WebStringTruncator.h
++    mac/Misc/WebUserContentURLPattern.h
++
++    mac/Panels/WebAuthenticationPanel.h
++    mac/Panels/WebPanelAuthenticationHandler.h
++
++    mac/Plugins/WebBasePluginPackage.h
++    mac/Plugins/WebPlugin.h
++    mac/Plugins/WebPluginContainer.h
++    mac/Plugins/WebPluginContainerCheck.h
++    mac/Plugins/WebPluginContainerPrivate.h
++    mac/Plugins/WebPluginController.h
++    mac/Plugins/WebPluginDatabase.h
++    mac/Plugins/WebPluginPackage.h
++    mac/Plugins/WebPluginPackagePrivate.h
++    mac/Plugins/WebPluginViewFactory.h
++    mac/Plugins/WebPluginViewFactoryPrivate.h
++
++    mac/Storage/WebDatabaseManagerClient.h
++    mac/Storage/WebDatabaseManagerInternal.h
++    mac/Storage/WebDatabaseManagerPrivate.h
++    mac/Storage/WebDatabaseQuotaManager.h
++    mac/Storage/WebStorageManagerInternal.h
++    mac/Storage/WebStorageManagerPrivate.h
++    mac/Storage/WebStorageTrackerClient.h
++
++    mac/WebCoreSupport/CorrectionPanel.h
++    mac/WebCoreSupport/PopupMenuMac.h
++    mac/WebCoreSupport/SearchPopupMenuMac.h
++    mac/WebCoreSupport/WebAlternativeTextClient.h
++    mac/WebCoreSupport/WebApplicationCache.h
++    mac/WebCoreSupport/WebApplicationCacheInternal.h
++    mac/WebCoreSupport/WebApplicationCacheQuotaManager.h
++    mac/WebCoreSupport/WebChromeClient.h
++    mac/WebCoreSupport/WebContextMenuClient.h
++    mac/WebCoreSupport/WebCreateFragmentInternal.h
++    mac/WebCoreSupport/WebDragClient.h
++    mac/WebCoreSupport/WebEditorClient.h
++    mac/WebCoreSupport/WebFrameLoaderClient.h
++    mac/WebCoreSupport/WebFrameNetworkingContext.h
++    mac/WebCoreSupport/WebGeolocationClient.h
++    mac/WebCoreSupport/WebInspectorClient.h
++    mac/WebCoreSupport/WebJavaScriptTextInputPanel.h
++    mac/WebCoreSupport/WebKitFullScreenListener.h
++    mac/WebCoreSupport/WebNotificationClient.h
++    mac/WebCoreSupport/WebOpenPanelResultListener.h
++    mac/WebCoreSupport/WebPaymentCoordinatorClient.h
++    mac/WebCoreSupport/WebPlatformStrategies.h
++    mac/WebCoreSupport/WebPluginInfoProvider.h
++    mac/WebCoreSupport/WebProgressTrackerClient.h
++    mac/WebCoreSupport/WebSecurityOriginInternal.h
++    mac/WebCoreSupport/WebSecurityOriginPrivate.h
++    mac/WebCoreSupport/WebSelectionServiceController.h
++    mac/WebCoreSupport/WebValidationMessageClient.h
++    mac/WebCoreSupport/WebVisitedLinkStore.h
++
++    mac/WebInspector/WebInspector.h
++    mac/WebInspector/WebInspectorFrontend.h
++    mac/WebInspector/WebInspectorPrivate.h
++    mac/WebInspector/WebNodeHighlight.h
++    mac/WebInspector/WebNodeHighlightView.h
++    mac/WebInspector/WebNodeHighlighter.h
++
++    mac/WebView/WebAllowDenyPolicyListener.h
++    mac/WebView/WebArchive.h
++    mac/WebView/WebArchiveInternal.h
++    mac/WebView/WebClipView.h
++    mac/WebView/WebDataSource.h
++    mac/WebView/WebDataSourceInternal.h
++    mac/WebView/WebDataSourcePrivate.h
++    mac/WebView/WebDelegateImplementationCaching.h
++    mac/WebView/WebDeviceOrientation.h
++    mac/WebView/WebDeviceOrientationInternal.h
++    mac/WebView/WebDeviceOrientationProvider.h
++    mac/WebView/WebDeviceOrientationProviderMock.h
++    mac/WebView/WebDeviceOrientationProviderMockInternal.h
++    mac/WebView/WebDocument.h
++    mac/WebView/WebDocumentInternal.h
++    mac/WebView/WebDocumentLoaderMac.h
++    mac/WebView/WebDocumentPrivate.h
++    mac/WebView/WebDynamicScrollBarsView.h
++    mac/WebView/WebDynamicScrollBarsViewInternal.h
++    mac/WebView/WebEditingDelegate.h
++    mac/WebView/WebEditingDelegatePrivate.h
++    mac/WebView/WebFeature.h
++    mac/WebView/WebFormDelegate.h
++    mac/WebView/WebFormDelegatePrivate.h
++    mac/WebView/WebFrame.h
++    mac/WebView/WebFrameInternal.h
++    mac/WebView/WebFrameLoadDelegate.h
++    mac/WebView/WebFrameLoadDelegatePrivate.h
++    mac/WebView/WebFramePrivate.h
++    mac/WebView/WebFrameView.h
++    mac/WebView/WebFrameViewInternal.h
++    mac/WebView/WebFrameViewPrivate.h
++    mac/WebView/WebFullScreenController.h
++    mac/WebView/WebGeolocationPosition.h
++    mac/WebView/WebGeolocationPositionInternal.h
++    mac/WebView/WebHTMLRepresentation.h
++    mac/WebView/WebHTMLRepresentationPrivate.h
++    mac/WebView/WebHTMLView.h
++    mac/WebView/WebHTMLViewInternal.h
++    mac/WebView/WebHTMLViewPrivate.h
++    mac/WebView/WebHistoryDelegate.h
++    mac/WebView/WebImmediateActionController.h
++    mac/WebView/WebIndicateLayer.h
++    mac/WebView/WebJSPDFDoc.h
++    mac/WebView/WebMediaPlaybackTargetPicker.h
++    mac/WebView/WebNavigationData.h
++    mac/WebView/WebNotification.h
++    mac/WebView/WebNotificationInternal.h
++    mac/WebView/WebPDFDocumentExtras.h
++    mac/WebView/WebPDFRepresentation.h
++    mac/WebView/WebPDFView.h
++    mac/WebView/WebPolicyDelegate.h
++    mac/WebView/WebPolicyDelegatePrivate.h
++    mac/WebView/WebPreferenceKeysPrivate.h
++    mac/WebView/WebPreferences.h
++    mac/WebView/WebPreferencesPrivate.h
++    mac/WebView/WebResource.h
++    mac/WebView/WebResourceInternal.h
++    mac/WebView/WebResourceLoadDelegate.h
++    mac/WebView/WebResourceLoadDelegatePrivate.h
++    mac/WebView/WebResourcePrivate.h
++    mac/WebView/WebScriptDebugDelegate.h
++    mac/WebView/WebScriptDebugger.h
++    mac/WebView/WebScriptWorld.h
++    mac/WebView/WebScriptWorldInternal.h
++    mac/WebView/WebTextCompletionController.h
++    mac/WebView/WebTextIterator.h
++    mac/WebView/WebUIDelegate.h
++    mac/WebView/WebUIDelegatePrivate.h
++    mac/WebView/WebVideoFullscreenController.h
++    mac/WebView/WebView.h
++    mac/WebView/WebViewData.h
++    mac/WebView/WebViewInternal.h
++    mac/WebView/WebViewPrivate.h
++    mac/WebView/WebWindowAnimation.h
++)
++
++set(WebKitLegacy_PROJECT_HEADERS ${WebKitLegacy_LEGACY_FORWARDING_HEADERS_FILES})
++
++list(APPEND WebKitLegacy_PUBLIC_FRAMEWORK_HEADERS
++    ${WEBCORE_DIR}/bridge/objc/WebScriptObject.h
++    ${WEBCORE_DIR}/platform/cocoa/WebKitAvailability.h
++    ${WEBCORE_DIR}/platform/ios/AbstractPasteboard.h
++    ${WEBCORE_DIR}/platform/ios/KeyEventCodesIOS.h
++    ${WEBCORE_DIR}/platform/ios/WebEvent.h
++    ${WEBCORE_DIR}/page/ios/WebEventRegion.h
++    ${WEBCORE_DIR}/platform/ios/WebItemProviderPasteboard.h
++    ${WEBCORE_DIR}/platform/ios/wak/WAKAppKitStubs.h
++    ${WEBCORE_DIR}/platform/ios/wak/WAKResponder.h
++    ${WEBCORE_DIR}/platform/ios/wak/WAKView.h
++    ${WEBCORE_DIR}/platform/ios/wak/WAKWindow.h
++    ${WEBCORE_DIR}/platform/ios/wak/WKContentObservation.h
++    ${WEBCORE_DIR}/platform/ios/wak/WKGraphics.h
++    ${WEBCORE_DIR}/platform/ios/wak/WKTypes.h
++    ${WEBCORE_DIR}/platform/ios/wak/WebCoreThread.h
++    ${WEBCORE_DIR}/platform/ios/wak/WebCoreThreadMessage.h
++    ${WEBCORE_DIR}/platform/ios/wak/WebCoreThreadRun.h
++
++    ios/Misc/WebGeolocationCoreLocationProvider.h
++    ios/Misc/WebGeolocationProviderIOS.h
++    ios/Misc/WebNSStringExtrasIOS.h
++    ios/Misc/WebNSStringExtrasIPhone.h
++    ios/Misc/WebUIKitSupport.h
++
++    ios/WebCoreSupport/WebCaretChangeListener.h
++    ios/WebCoreSupport/WebFixedPositionContent.h
++    ios/WebCoreSupport/WebFrameIOS.h
++    ios/WebCoreSupport/WebFrameIPhone.h
++    ios/WebCoreSupport/WebGeolocationPrivate.h
++    ios/WebCoreSupport/WebMIMETypeRegistry.h
++    ios/WebCoreSupport/WebSelectionRect.h
++    ios/WebCoreSupport/WebVisiblePosition.h
++
++    ios/WebView/WebPDFViewIOS.h
++    ios/WebView/WebPDFViewIPhone.h
++    ios/WebView/WebPDFViewPlaceholder.h
++    ios/WebView/WebUIKitDelegate.h
++
++    mac/DOM/DOMInternal.h
++    mac/DOM/DOMPrivate.h
++    mac/DOM/ExceptionHandlers.h
++    mac/DOM/ObjCEventListener.h
++    mac/DOM/ObjCNodeFilterCondition.h
++    mac/DOM/WebDOMOperationsInternal.h
++
++    mac/DefaultDelegates/WebDefaultEditingDelegate.h
++    mac/DefaultDelegates/WebDefaultPolicyDelegate.h
++    mac/DefaultDelegates/WebDefaultUIDelegate.h
++
++    mac/History/BackForwardList.h
++    mac/History/WebBackForwardList.h
++    mac/History/WebBackForwardListInternal.h
++    mac/History/WebBackForwardListPrivate.h
++    mac/History/WebHistory.h
++    mac/History/WebHistoryInternal.h
++    mac/History/WebHistoryItem.h
++    mac/History/WebHistoryItemInternal.h
++    mac/History/WebHistoryItemPrivate.h
++    mac/History/WebHistoryPrivate.h
++
++    mac/Misc/WebCache.h
++    mac/Misc/WebCoreStatistics.h
++    mac/Misc/WebDownload.h
++    mac/Misc/WebElementDictionary.h
++    mac/Misc/WebKit.h
++    mac/Misc/WebKitErrors.h
++    mac/Misc/WebKitErrorsPrivate.h
++    mac/Misc/WebKitLogging.h
++    mac/Misc/WebKitNSStringExtras.h
++    mac/Misc/WebKitStatistics.h
++    mac/Misc/WebKitStatisticsPrivate.h
++    mac/Misc/WebKitVersionChecks.h
++    mac/Misc/WebLocalizableStrings.h
++    mac/Misc/WebLocalizableStringsInternal.h
++    mac/Misc/WebNSDataExtras.h
++    mac/Misc/WebNSDictionaryExtras.h
++    mac/Misc/WebNSFileManagerExtras.h
++    mac/Misc/WebNSObjectExtras.h
++    mac/Misc/WebNSURLExtras.h
++    mac/Misc/WebNSURLRequestExtras.h
++    mac/Misc/WebNSUserDefaultsExtras.h
++    mac/Misc/WebQuotaManager.h
++    mac/Misc/WebUserContentURLPattern.h
++
++    mac/Plugins/WebBasePluginPackage.h
++    mac/Plugins/WebPlugin.h
++    mac/Plugins/WebPluginContainer.h
++    mac/Plugins/WebPluginContainerPrivate.h
++    mac/Plugins/WebPluginController.h
++    mac/Plugins/WebPluginDatabase.h
++    mac/Plugins/WebPluginPackage.h
++    mac/Plugins/WebPluginViewFactory.h
++    mac/Plugins/WebPluginViewFactoryPrivate.h
++
++    mac/Storage/WebDatabaseManagerClient.h
++    mac/Storage/WebDatabaseManagerInternal.h
++    mac/Storage/WebDatabaseManagerPrivate.h
++    mac/Storage/WebDatabaseQuotaManager.h
++    mac/Storage/WebStorageManagerInternal.h
++    mac/Storage/WebStorageManagerPrivate.h
++    mac/Storage/WebStorageTrackerClient.h
++
++    mac/WebCoreSupport/WebApplicationCache.h
++    mac/WebCoreSupport/WebApplicationCacheInternal.h
++    mac/WebCoreSupport/WebApplicationCacheQuotaManager.h
++    mac/WebCoreSupport/WebCreateFragmentInternal.h
++    mac/WebCoreSupport/WebFrameLoaderClient.h
++    mac/WebCoreSupport/WebKitFullScreenListener.h
++    mac/WebCoreSupport/WebOpenPanelResultListener.h
++    mac/WebCoreSupport/WebSecurityOriginInternal.h
++    mac/WebCoreSupport/WebSecurityOriginPrivate.h
++
++    mac/WebInspector/WebInspector.h
++    mac/WebInspector/WebInspectorFrontend.h
++    mac/WebInspector/WebInspectorPrivate.h
++    mac/WebInspector/WebNodeHighlight.h
++    mac/WebInspector/WebNodeHighlightView.h
++    mac/WebInspector/WebNodeHighlighter.h
++
++    mac/WebView/WebAllowDenyPolicyListener.h
++    mac/WebView/WebArchive.h
++    mac/WebView/WebArchiveInternal.h
++    mac/WebView/WebDataSource.h
++    mac/WebView/WebDataSourceInternal.h
++    mac/WebView/WebDataSourcePrivate.h
++    mac/WebView/WebDelegateImplementationCaching.h
++    mac/WebView/WebDeviceOrientation.h
++    mac/WebView/WebDeviceOrientationInternal.h
++    mac/WebView/WebDeviceOrientationProvider.h
++    mac/WebView/WebDeviceOrientationProviderMock.h
++    mac/WebView/WebDeviceOrientationProviderMockInternal.h
++    mac/WebView/WebDocument.h
++    mac/WebView/WebDocumentInternal.h
++    mac/WebView/WebDocumentLoaderMac.h
++    mac/WebView/WebDocumentPrivate.h
++    mac/WebView/WebEditingDelegate.h
++    mac/WebView/WebEditingDelegatePrivate.h
++    mac/WebView/WebFeature.h
++    mac/WebView/WebFormDelegate.h
++    mac/WebView/WebFormDelegatePrivate.h
++    mac/WebView/WebFrame.h
++    mac/WebView/WebFrameInternal.h
++    mac/WebView/WebFrameLoadDelegate.h
++    mac/WebView/WebFrameLoadDelegatePrivate.h
++    mac/WebView/WebFramePrivate.h
++    mac/WebView/WebFrameView.h
++    mac/WebView/WebFrameViewInternal.h
++    mac/WebView/WebFrameViewPrivate.h
++    mac/WebView/WebGeolocationPosition.h
++    mac/WebView/WebGeolocationPositionInternal.h
++    mac/WebView/WebHTMLRepresentation.h
++    mac/WebView/WebHTMLRepresentationPrivate.h
++    mac/WebView/WebHistoryDelegate.h
++    mac/WebView/WebIndicateLayer.h
++    mac/WebView/WebMediaPlaybackTargetPicker.h
++    mac/WebView/WebNavigationData.h
++    mac/WebView/WebNotification.h
++    mac/WebView/WebNotificationInternal.h
++    mac/WebView/WebPolicyDelegate.h
++    mac/WebView/WebPolicyDelegatePrivate.h
++    mac/WebView/WebPreferenceKeysPrivate.h
++    mac/WebView/WebPreferences.h
++    mac/WebView/WebPreferencesPrivate.h
++    mac/WebView/WebResource.h
++    mac/WebView/WebResourceInternal.h
++    mac/WebView/WebResourceLoadDelegate.h
++    mac/WebView/WebResourceLoadDelegatePrivate.h
++    mac/WebView/WebResourcePrivate.h
++    mac/WebView/WebScriptDebugDelegate.h
++    mac/WebView/WebScriptWorld.h
++    mac/WebView/WebScriptWorldInternal.h
++    mac/WebView/WebTextIterator.h
++    mac/WebView/WebUIDelegate.h
++    mac/WebView/WebUIDelegatePrivate.h
++    mac/WebView/WebView.h
++    mac/WebView/WebViewData.h
++    mac/WebView/WebViewInternal.h
++    mac/WebView/WebViewPrivate.h
++)
++
++set(_wkl_excluded_for_ios
++    BackForwardList.h
++    BinaryPropertyList.h
++    CorrectionPanel.h
++    DOMAbstractViewFrame.h
++    DOMAbstractViewInternal.h
++    DOMAttrInternal.h
++    DOMBlobInternal.h
++    DOMCDATASectionInternal.h
++    DOMCSSPrimitiveValueInternal.h
++    DOMCSSRuleInternal.h
++    DOMCSSRuleListInternal.h
++    DOMCSSStyleDeclarationInternal.h
++    DOMCSSStyleSheetInternal.h
++    DOMCSSValueInternal.h
++    DOMCommentInternal.h
++    DOMCounterInternal.h
++    DOMCustomXPathNSResolver.h
++    DOMDocumentFragmentInternal.h
++    DOMDocumentInternal.h
++    DOMDocumentTypeInternal.h
++    DOMElementInternal.h
++    DOMEventInternal.h
++    DOMFileInternal.h
++    DOMFileListInternal.h
++    DOMHTMLAreaElementInternal.h
++    DOMHTMLCollectionInternal.h
++    DOMHTMLDocumentInternal.h
++    DOMHTMLElementInternal.h
++    DOMHTMLFormElementInternal.h
++    DOMHTMLHeadElementInternal.h
++    DOMHTMLImageElementInternal.h
++    DOMHTMLInputElementInternal.h
++    DOMHTMLLinkElementInternal.h
++    DOMHTMLOptionElementInternal.h
++    DOMHTMLOptionsCollectionInternal.h
++    DOMHTMLScriptElementInternal.h
++    DOMHTMLSelectElementInternal.h
++    DOMHTMLStyleElementInternal.h
++    DOMHTMLTableCaptionElementInternal.h
++    DOMHTMLTableCellElementInternal.h
++    DOMHTMLTableColElementInternal.h
++    DOMHTMLTableSectionElementInternal.h
++    DOMHTMLTextAreaElementInternal.h
++    DOMImplementationInternal.h
++    DOMInternal.h
++    DOMMediaErrorInternal.h
++    DOMMediaListInternal.h
++    DOMNamedNodeMapInternal.h
++    DOMNodeInternal.h
++    DOMNodeIteratorInternal.h
++    DOMNodeListInternal.h
++    DOMProcessingInstructionInternal.h
++    DOMRGBColorInternal.h
++    DOMRangeInternal.h
++    DOMRectInternal.h
++    DOMStyleSheetInternal.h
++    DOMStyleSheetListInternal.h
++    DOMTextInternal.h
++    DOMTimeRangesInternal.h
++    DOMTokenList.h
++    DOMTokenListInternal.h
++    DOMTreeWalkerInternal.h
++    DOMWheelEventInternal.h
++    DOMXPathExpressionInternal.h
++    DOMXPathResultInternal.h
++    ExceptionHandlers.h
++    HistoryPropertyList.h
++    ObjCEventListener.h
++    ObjCNodeFilterCondition.h
++    PopupMenuMac.h
++    SearchPopupMenuMac.h
++    WebAlternativeTextClient.h
++    WebApplicationCache.h
++    WebApplicationCacheInternal.h
++    WebApplicationCacheQuotaManager.h
++    WebArchiveInternal.h
++    WebAuthenticationPanel.h
++    WebBackForwardListInternal.h
++    WebBasePluginPackage.h
++    WebChromeClient.h
++    WebClipView.h
++    WebContextMenuClient.h
++    WebDOMOperationsInternal.h
++    WebDataSourceInternal.h
++    WebDatabaseManagerClient.h
++    WebDatabaseManagerInternal.h
++    WebDefaultContextMenuDelegate.h
++    WebDefaultEditingDelegate.h
++    WebDefaultUIDelegate.h
++    WebDelegateImplementationCaching.h
++    WebDeviceOrientationInternal.h
++    WebDeviceOrientationProviderMockInternal.h
++    WebDocumentInternal.h
++    WebDocumentLoaderMac.h
++    WebDragClient.h
++    WebDynamicScrollBarsView.h
++    WebDynamicScrollBarsViewInternal.h
++    WebEditorClient.h
++    WebElementDictionary.h
++    WebFrameInternal.h
++    WebFrameLoaderClient.h
++    WebFrameNetworkingContext.h
++    WebFrameViewInternal.h
++    WebFullScreenController.h
++    WebGeolocationClient.h
++    WebGeolocationPositionInternal.h
++    WebHTMLViewInternal.h
++    WebHistoryDelegate.h
++    WebHistoryInternal.h
++    WebHistoryItemInternal.h
++    WebIconDatabase.h
++    WebImmediateActionController.h
++    WebIndicateLayer.h
++    WebInspectorClient.h
++    WebInspectorFrontend.h
++    WebJSPDFDoc.h
++    WebJavaScriptTextInputPanel.h
++    WebKitFullScreenListener.h
++    WebKitLogging.h
++    WebKitStatisticsPrivate.h
++    WebKitVersionChecks.h
++    WebLocalizableStringsInternal.h
++    WebMediaPlaybackTargetPicker.h
++    WebNSControlExtras.h
++    WebNSDataExtras.h
++    WebNSDictionaryExtras.h
++    WebNSEventExtras.h
++    WebNSImageExtras.h
++    WebNSObjectExtras.h
++    WebNSPasteboardExtras.h
++    WebNSPrintOperationExtras.h
++    WebNSURLRequestExtras.h
++    WebNSWindowExtras.h
++    WebNodeHighlight.h
++    WebNodeHighlightView.h
++    WebNodeHighlighter.h
++    WebNotificationClient.h
++    WebNotificationInternal.h
++    WebOpenPanelResultListener.h
++    WebPDFDocumentExtras.h
++    WebPDFRepresentation.h
++    WebPDFView.h
++    WebPanelAuthenticationHandler.h
++    WebPaymentCoordinatorClient.h
++    WebPlatformStrategies.h
++    WebPluginContainerCheck.h
++    WebPluginController.h
++    WebPluginInfoProvider.h
++    WebPluginPackage.h
++    WebProgressTrackerClient.h
++    WebResourceInternal.h
++    WebScriptDebugger.h
++    WebScriptWorldInternal.h
++    WebSecurityOriginInternal.h
++    WebSelectionServiceController.h
++    WebSharingServicePickerController.h
++    WebStorageManagerInternal.h
++    WebStorageTrackerClient.h
++    WebStringTruncator.h
++    WebTextCompletionController.h
++    WebValidationMessageClient.h
++    WebVideoFullscreenController.h
++    WebViewData.h
++    WebViewInternal.h
++    WebVisitedLinkStore.h
++    WebWindowAnimation.h
++)
++
++set(_wkl_filtered "")
++foreach (_path IN LISTS WebKitLegacy_PUBLIC_FRAMEWORK_HEADERS)
++    get_filename_component(_pathname "${_path}" NAME)
++    cmake_path(IS_PREFIX WEBCORE_DIR "${_path}" NORMALIZE _is_from_webcore)
++    if (NOT _pathname IN_LIST _wkl_excluded_for_ios AND NOT _is_from_webcore)
++        list(APPEND _wkl_filtered "${_path}")
++    endif ()
++endforeach ()
++set(WebKitLegacy_PUBLIC_FRAMEWORK_HEADERS ${_wkl_filtered})
++unset(_wkl_filtered)
++unset(_pathname)
++
++if (UNIFDEF_EXECUTABLE AND NOT EXISTS "${UNIFDEF_EXECUTABLE}")
++    unset(UNIFDEF_EXECUTABLE CACHE)
++endif ()
++find_program(UNIFDEF_EXECUTABLE unifdef
++    HINTS /usr/bin
++    DOC "unifdef tool used by postprocess-header-rule"
++    REQUIRED)
++set(_wkl_migrate_tmp_dir "${CMAKE_BINARY_DIR}/WebKitLegacy/_migrate_tmp")
++file(MAKE_DIRECTORY "${_wkl_migrate_tmp_dir}")
++
++if (CMAKE_OSX_SYSROOT MATCHES "[Ss]imulator")
++    set(_wkl_unifdef_args -B -DTARGET_OS_IPHONE=1 -DTARGET_OS_SIMULATOR=1 -DUSE_APPLE_INTERNAL_SDK=1)
++else ()
++    set(_wkl_unifdef_args -B -DTARGET_OS_IPHONE=1 -DTARGET_OS_SIMULATOR=0 -DUSE_APPLE_INTERNAL_SDK=1)
++endif ()
++foreach (_feat ENABLE_TOUCH_EVENTS ENABLE_IOS_GESTURE_EVENTS)
++    if (${_feat})
++        list(APPEND _wkl_unifdef_args "-D${_feat}=1")
++    else ()
++        list(APPEND _wkl_unifdef_args "-D${_feat}=0")
++    endif ()
++endforeach ()
++
++foreach (_file ${WebKitLegacy_LEGACY_FORWARDING_HEADERS_FILES})
++    get_filename_component(_name "${_file}" NAME)
++    if (_name IN_LIST _wkl_excluded_for_ios)
++        continue ()
++    endif ()
++    set(_target_filename "${WebKitLegacy_FRAMEWORK_HEADERS_DIR}/WebKitLegacy/${_name}")
++    if (IS_ABSOLUTE "${_file}")
++        set(_src_path "${_file}")
++    else ()
++        set(_src_path "${CMAKE_CURRENT_SOURCE_DIR}/${_file}")
++    endif ()
++    file(READ "${_src_path}" _migrated)
++    string(REPLACE "<WebCore/" "<WebKitLegacy/" _migrated "${_migrated}")
++    string(REGEX REPLACE "(\n[ \t]*)WEBCORE_EXPORT " "\\1" _migrated "${_migrated}")
++    string(REGEX REPLACE "^([ \t]*)WEBCORE_EXPORT " "\\1" _migrated "${_migrated}")
++    if (NOT _name STREQUAL "WebKitAvailability.h")
++        string(REGEX REPLACE " *WEBKIT_(CLASS_|ENUM_)?(AVAILABLE|DEPRECATED)_MAC\\([^)]+\\)" "" _migrated "${_migrated}")
++    endif ()
++    set(_unifdef_input "${_wkl_migrate_tmp_dir}/in_${_name}")
++    set(_unifdef_output "${_wkl_migrate_tmp_dir}/out_${_name}")
++    file(WRITE "${_unifdef_input}" "${_migrated}")
++    execute_process(
++        COMMAND "${UNIFDEF_EXECUTABLE}" ${_wkl_unifdef_args} -o "${_unifdef_output}" "${_unifdef_input}"
++        RESULT_VARIABLE _unifdef_rc
++        OUTPUT_VARIABLE _unifdef_stdout
++        ERROR_VARIABLE _unifdef_stderr
++    )
++    if (_unifdef_rc GREATER 1)
++        message(FATAL_ERROR "unifdef rc=${_unifdef_rc} for ${_src_path}\nstdout: ${_unifdef_stdout}\nstderr: ${_unifdef_stderr}")
++    endif ()
++    file(READ "${_unifdef_output}" _migrated)
++    file(REMOVE "${_unifdef_input}" "${_unifdef_output}")
++
++    set(_existing "")
++    if (EXISTS "${_target_filename}")
++        file(READ "${_target_filename}" _existing)
++    endif ()
++    if (NOT _existing STREQUAL _migrated)
++        file(REMOVE "${_target_filename}")
++        file(WRITE "${_target_filename}" "${_migrated}")
++    endif ()
++endforeach ()
++
++set(_wkl_fw "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/WebKitLegacy.framework")
++make_directory("${_wkl_fw}")
++make_directory("${_wkl_fw}/Modules")
++
++if (NOT EXISTS "${_wkl_fw}/PrivateHeaders")
++    file(CREATE_LINK "${WebKitLegacy_FRAMEWORK_HEADERS_DIR}/WebKitLegacy"
++                     "${_wkl_fw}/PrivateHeaders" SYMBOLIC)
++endif ()
++
++configure_file(${WEBKITLEGACY_DIR}/Modules/WebKitLegacy.modulemap
++               ${_wkl_fw}/Modules/module.modulemap COPYONLY)
++set(_wkl_modulemap_body "")
++foreach (_file ${WebKitLegacy_LEGACY_FORWARDING_HEADERS_FILES})
++    get_filename_component(_name "${_file}" NAME)
++    if (_name IN_LIST _wkl_excluded_for_ios)
++        continue ()
++    endif ()
++    string(APPEND _wkl_modulemap_body "    header \"${_name}\"\n")
++endforeach ()
++string(APPEND _wkl_modulemap_body "    header \"WorkAround173516139.h\"\n")
++file(WRITE ${_wkl_fw}/Modules/module.private.modulemap
++"framework module WebKitLegacy [system] {
++${_wkl_modulemap_body}    export *
++}
++")
++unset(_wkl_modulemap_body)
++configure_file(${WEBKITLEGACY_DIR}/Modules/WorkAround173516139.h
++               ${WebKitLegacy_FRAMEWORK_HEADERS_DIR}/WebKitLegacy/WorkAround173516139.h
++               COPYONLY)
++
++set(_wkl_vfs "${CMAKE_BINARY_DIR}/WebKitLegacy-vfs-overlay.yaml")
++set(_wkl_vfs_modules_entries "")
++list(APPEND _wkl_vfs_modules_entries
++    "{\"type\":\"file\",\"name\":\"module.modulemap\",\"external-contents\":\"${_wkl_fw}/Modules/module.modulemap\"}"
++    "{\"type\":\"file\",\"name\":\"module.private.modulemap\",\"external-contents\":\"${_wkl_fw}/Modules/module.private.modulemap\"}"
++)
++set(_wkl_vfs_headers_entries "")
++foreach (_file ${WebKitLegacy_LEGACY_FORWARDING_HEADERS_FILES})
++    get_filename_component(_name "${_file}" NAME)
++    if (_name IN_LIST _wkl_excluded_for_ios)
++        continue ()
++    endif ()
++    if (IS_ABSOLUTE "${_file}")
++        set(_src "${_file}")
++    else ()
++        set(_src "${CMAKE_CURRENT_SOURCE_DIR}/${_file}")
++    endif ()
++    list(APPEND _wkl_vfs_headers_entries
++        "{\"type\":\"file\",\"name\":\"${_name}\",\"external-contents\":\"${_src}\"}"
++    )
++endforeach ()
++list(JOIN _wkl_vfs_modules_entries "," _wkl_vfs_modules_str)
++list(JOIN _wkl_vfs_headers_entries "," _wkl_vfs_headers_str)
++file(WRITE "${_wkl_vfs}"
++"{\"case-sensitive\":\"false\",\"version\":0,\"roots\":[\
++{\"type\":\"directory\",\"name\":\"${_wkl_fw}/Modules\",\"contents\":[${_wkl_vfs_modules_str}]},\
++{\"type\":\"directory\",\"name\":\"${_wkl_fw}/PrivateHeaders\",\"contents\":[${_wkl_vfs_headers_str}]},\
++{\"type\":\"directory\",\"name\":\"${WebKitLegacy_FRAMEWORK_HEADERS_DIR}/WebKitLegacy\",\"contents\":[${_wkl_vfs_headers_str}]}\
++]}\n")
++target_compile_options(WebKitLegacy PRIVATE
++    "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:SHELL:-ivfsoverlay ${_wkl_vfs}>")
++unset(_wkl_vfs)
++unset(_wkl_vfs_modules_entries)
++unset(_wkl_vfs_modules_str)
++unset(_wkl_vfs_headers_entries)
++unset(_wkl_vfs_headers_str)
++
++if (TARGET WebCore AND TARGET WebKitLegacy_CopyHeaders)
++    add_dependencies(WebCore WebKitLegacy_CopyHeaders)
++endif ()
+diff --git a/Source/WebKitLegacy/SourcesCocoa.txt b/Source/WebKitLegacy/SourcesCocoa.txt
+index 341b8ec1f745929c9998741c2ca84ebce041022f..a479c53aa3bf0ae1a0a7e89a848463e5a9a19a9f 100644
+--- a/Source/WebKitLegacy/SourcesCocoa.txt
++++ b/Source/WebKitLegacy/SourcesCocoa.txt
+@@ -23,139 +23,8 @@
+ 
+ WebCoreSupport/WebResourceLoadScheduler.mm @nonARC
+ 
+-mac/DOM/DOM.mm @nonARC
+-mac/DOM/DOMAbstractView.mm @nonARC
+-mac/DOM/DOMAttr.mm @nonARC
+-mac/DOM/DOMBlob.mm @nonARC
+-mac/DOM/DOMCDATASection.mm @nonARC
+-mac/DOM/DOMCSS.mm @nonARC
+-mac/DOM/DOMCSSCharsetRule.mm @nonARC
+-mac/DOM/DOMCSSFontFaceRule.mm @nonARC
+-mac/DOM/DOMCSSImportRule.mm @nonARC
+-mac/DOM/DOMCSSMediaRule.mm @nonARC
+-mac/DOM/DOMCSSPageRule.mm @nonARC
+-mac/DOM/DOMCSSPrimitiveValue.mm @nonARC
+-mac/DOM/DOMCSSRule.mm @nonARC
+-mac/DOM/DOMCSSRuleList.mm @nonARC
+-mac/DOM/DOMCSSStyleDeclaration.mm @nonARC
+-mac/DOM/DOMCSSStyleRule.mm @nonARC
+-mac/DOM/DOMCSSStyleSheet.mm @nonARC
+-mac/DOM/DOMCSSUnknownRule.mm @nonARC
+-mac/DOM/DOMCSSValue.mm @nonARC
+-mac/DOM/DOMCSSValueList.mm @nonARC
+-mac/DOM/DOMCharacterData.mm @nonARC
+ mac/DOM/DOMComment.h
+-mac/DOM/DOMComment.mm @nonARC
+ mac/DOM/DOMCommentInternal.h
+-mac/DOM/DOMCounter.mm @nonARC
+-mac/DOM/DOMCustomXPathNSResolver.mm @nonARC
+-mac/DOM/DOMDocument.mm @nonARC
+-mac/DOM/DOMDocumentFragment.mm @nonARC
+-mac/DOM/DOMDocumentType.mm @nonARC
+-mac/DOM/DOMElement.mm @nonARC
+-mac/DOM/DOMEntity.mm @nonARC
+-mac/DOM/DOMEntityReference.mm @nonARC
+-mac/DOM/DOMEvent.mm @nonARC
+-mac/DOM/DOMEvents.mm @nonARC
+-mac/DOM/DOMFile.mm @nonARC
+-mac/DOM/DOMFileList.mm @nonARC
+-mac/DOM/DOMHTML.mm @nonARC
+-mac/DOM/DOMHTMLAnchorElement.mm @nonARC
+-mac/DOM/DOMHTMLAppletElement.mm @nonARC
+-mac/DOM/DOMHTMLAreaElement.mm @nonARC
+-mac/DOM/DOMHTMLBRElement.mm @nonARC
+-mac/DOM/DOMHTMLBaseElement.mm @nonARC
+-mac/DOM/DOMHTMLBaseFontElement.mm @nonARC
+-mac/DOM/DOMHTMLBodyElement.mm @nonARC
+-mac/DOM/DOMHTMLButtonElement.mm @nonARC
+-mac/DOM/DOMHTMLCanvasElement.mm @nonARC
+-mac/DOM/DOMHTMLCollection.mm @nonARC
+-mac/DOM/DOMHTMLDListElement.mm @nonARC
+-mac/DOM/DOMHTMLDirectoryElement.mm @nonARC
+-mac/DOM/DOMHTMLDivElement.mm @nonARC
+-mac/DOM/DOMHTMLDocument.mm @nonARC
+-mac/DOM/DOMHTMLElement.mm @nonARC
+-mac/DOM/DOMHTMLEmbedElement.mm @nonARC
+-mac/DOM/DOMHTMLFieldSetElement.mm @nonARC
+-mac/DOM/DOMHTMLFontElement.mm @nonARC
+-mac/DOM/DOMHTMLFormElement.mm @nonARC
+-mac/DOM/DOMHTMLFrameElement.mm @nonARC
+-mac/DOM/DOMHTMLFrameSetElement.mm @nonARC
+-mac/DOM/DOMHTMLHRElement.mm @nonARC
+-mac/DOM/DOMHTMLHeadElement.mm @nonARC
+-mac/DOM/DOMHTMLHeadingElement.mm @nonARC
+-mac/DOM/DOMHTMLHtmlElement.mm @nonARC
+-mac/DOM/DOMHTMLIFrameElement.mm @nonARC
+-mac/DOM/DOMHTMLImageElement.mm @nonARC
+-mac/DOM/DOMHTMLInputElement.mm @nonARC
+-mac/DOM/DOMHTMLLIElement.mm @nonARC
+-mac/DOM/DOMHTMLLabelElement.mm @nonARC
+-mac/DOM/DOMHTMLLegendElement.mm @nonARC
+-mac/DOM/DOMHTMLLinkElement.mm @nonARC
+-mac/DOM/DOMHTMLMapElement.mm @nonARC
+-mac/DOM/DOMHTMLMarqueeElement.mm @nonARC
+-mac/DOM/DOMHTMLMediaElement.mm @nonARC
+-mac/DOM/DOMHTMLMenuElement.mm @nonARC
+-mac/DOM/DOMHTMLMetaElement.mm @nonARC
+-mac/DOM/DOMHTMLModElement.mm @nonARC
+-mac/DOM/DOMHTMLOListElement.mm @nonARC
+-mac/DOM/DOMHTMLObjectElement.mm @nonARC
+-mac/DOM/DOMHTMLOptGroupElement.mm @nonARC
+-mac/DOM/DOMHTMLOptionElement.mm @nonARC
+-mac/DOM/DOMHTMLOptionsCollection.mm @nonARC
+-mac/DOM/DOMHTMLParagraphElement.mm @nonARC
+-mac/DOM/DOMHTMLParamElement.mm @nonARC
+-mac/DOM/DOMHTMLPreElement.mm @nonARC
+-mac/DOM/DOMHTMLQuoteElement.mm @nonARC
+-mac/DOM/DOMHTMLScriptElement.mm @nonARC
+-mac/DOM/DOMHTMLSelectElement.mm @nonARC
+-mac/DOM/DOMHTMLStyleElement.mm @nonARC
+-mac/DOM/DOMHTMLTableCaptionElement.mm @nonARC
+-mac/DOM/DOMHTMLTableCellElement.mm @nonARC
+-mac/DOM/DOMHTMLTableColElement.mm @nonARC
+-mac/DOM/DOMHTMLTableElement.mm @nonARC
+-mac/DOM/DOMHTMLTableRowElement.mm @nonARC
+-mac/DOM/DOMHTMLTableSectionElement.mm @nonARC
+-mac/DOM/DOMHTMLTextAreaElement.mm @nonARC
+-mac/DOM/DOMHTMLTitleElement.mm @nonARC
+-mac/DOM/DOMHTMLUListElement.mm @nonARC
+-mac/DOM/DOMHTMLVideoElement.mm @nonARC
+-mac/DOM/DOMImplementation.mm @nonARC
+-mac/DOM/DOMInternal.mm @nonARC @cost:4
+-mac/DOM/DOMKeyboardEvent.mm @nonARC @cost:3
+-mac/DOM/DOMMediaError.mm @nonARC @cost:3
+-mac/DOM/DOMMediaList.mm @nonARC @cost:3
+-mac/DOM/DOMMouseEvent.mm @nonARC @cost:3
+-mac/DOM/DOMMutationEvent.mm @nonARC @cost:3
+-mac/DOM/DOMNamedNodeMap.mm @nonARC @cost:3
+-mac/DOM/DOMNode.mm @nonARC @cost:4
+-mac/DOM/DOMNodeIterator.mm @nonARC @cost:3
+-mac/DOM/DOMNodeList.mm @nonARC @cost:3
+-mac/DOM/DOMObject.mm @nonARC
+-mac/DOM/DOMOverflowEvent.mm @nonARC @cost:3
+-mac/DOM/DOMProcessingInstruction.mm @nonARC @cost:3
+-mac/DOM/DOMProgressEvent.mm @nonARC @cost:3
+-mac/DOM/DOMRGBColor.mm @nonARC @cost:3
+-mac/DOM/DOMRange.mm @nonARC @cost:5
+-mac/DOM/DOMRect.mm @nonARC @cost:3
+-mac/DOM/DOMStyleSheet.mm @nonARC @cost:3
+-mac/DOM/DOMStyleSheetList.mm @nonARC @cost:3
+-mac/DOM/DOMText.mm @nonARC @cost:3
+-mac/DOM/DOMTextEvent.mm @nonARC @cost:3
+-mac/DOM/DOMTimeRanges.mm @nonARC @cost:3
+-mac/DOM/DOMTokenList.mm @nonARC @cost:3
+-mac/DOM/DOMTreeWalker.mm @nonARC @cost:3
+-mac/DOM/DOMUIEvent.mm @nonARC @cost:3
+-mac/DOM/DOMUIKitExtensions.mm @nonARC
+-mac/DOM/DOMUtility.mm @nonARC @cost:5
+-mac/DOM/DOMWheelEvent.mm @nonARC @cost:3
+-mac/DOM/DOMXPath.mm @nonARC
+-mac/DOM/DOMXPathExpression.mm @nonARC @cost:3
+-mac/DOM/DOMXPathResult.mm @nonARC @cost:3
+-mac/DOM/ExceptionHandlers.mm @nonARC
+-mac/DOM/ObjCEventListener.mm @nonARC @cost:3
+-mac/DOM/ObjCNodeFilterCondition.mm @nonARC
+-mac/DOM/WebDOMOperations.mm @nonARC @cost:11
+ 
+ mac/DefaultDelegates/WebDefaultContextMenuDelegate.mm @nonARC @cost:4
+ 
+@@ -186,3 +55,4 @@ mac/WebView/WebScriptDebugDelegate.mm @nonARC @cost:4
+ mac/WebView/WebScriptWorld.mm @nonARC @cost:3
+ mac/WebView/WebView.mm @nonARC @cost:16
+ mac/WebView/WebViewRenderingUpdateScheduler.mm @nonARC
++mac/DOM/WebDOMOperations.mm @nonARC @cost:11
+diff --git a/Source/WebKitLegacy/WebCoreSupport/LegacySocketProvider.cpp b/Source/WebKitLegacy/WebCoreSupport/LegacySocketProvider.cpp
+index 9467bf0131369aba726693ebce92e1c83cc1363f..7878f22e6b751611fb87d81991f1512c8449bd26 100644
+--- a/Source/WebKitLegacy/WebCoreSupport/LegacySocketProvider.cpp
++++ b/Source/WebKitLegacy/WebCoreSupport/LegacySocketProvider.cpp
+@@ -25,20 +25,9 @@
+ 
+ #import "LegacySocketProvider.h"
+ 
+-#import <WebCore/EmptyClients.h>
+-
+-#ifdef BUILDING_WITH_CMAKE
+-// WebSocketChannel.cpp (in Sources.txt, not loaded by CMake) depends on SocketStreamHandle.
+-// Stub out -- WK2 NetworkProcess handles WebSockets.
+-#import <WebCore/WebTransportSession.h>
+-#import <wtf/CompletionHandler.h>
+-
+-RefPtr<WebCore::ThreadableWebSocketChannel> LegacySocketProvider::createWebSocketChannel(WebCore::Document&, WebCore::WebSocketChannelClient&, WebCore::IsInitiatedByDedicatedWorker)
+-{
+-    return nullptr;
+-}
+-#else
++//
+ #import "WebSocketChannel.h"
++#import <WebCore/EmptyClients.h>
+ #import <WebCore/WebTransportSession.h>
+ #import <wtf/CompletionHandler.h>
+ 
+@@ -46,7 +35,6 @@ RefPtr<WebCore::ThreadableWebSocketChannel> LegacySocketProvider::createWebSocke
+ {
+     return WebCore::WebSocketChannel::create(document, client, *this);
+ }
+-#endif
+ 
+ Ref<WebCore::WebTransportSession> LegacySocketProvider::createWebTransportSession(WebCore::ScriptExecutionContext& context, WebCore::WebTransportSessionClient& client)
+ {
+diff --git a/Source/bmalloc/PlatformCocoa.cmake b/Source/bmalloc/PlatformCocoa.cmake
+index 6b5d04308f7e76d469c10a2df7e96856af3f5a47..dd4fb2217cb2473956d4a9ef1bdabed05cef26a5 100644
+--- a/Source/bmalloc/PlatformCocoa.cmake
++++ b/Source/bmalloc/PlatformCocoa.cmake
+@@ -9,6 +9,12 @@ list(APPEND bmalloc_SOURCES
+ )
+ 
+ find_library(FOUNDATION_LIBRARY Foundation)
++
++if (NOT FOUNDATION_LIBRARY)
++
++    set(FOUNDATION_LIBRARY "")
++
++endif ()
+ list(APPEND bmalloc_LIBRARIES ${FOUNDATION_LIBRARY})
+ 
+ target_compile_options(bmalloc PRIVATE -fno-threadsafe-statics)
+diff --git a/Source/cmake/FindICU.cmake b/Source/cmake/FindICU.cmake
+index 98b671b4bc3f5717006f5e93517720dc509a143e..df1a23cc3f6335193d1cf228c054dd9e28bbe306 100644
+--- a/Source/cmake/FindICU.cmake
++++ b/Source/cmake/FindICU.cmake
+@@ -4,6 +4,7 @@ if (APPLE)
+         set(ICU_INCLUDE_DIRS ${CMAKE_OSX_SYSROOT}/usr/local/include)
+     else ()
+         set(ICU_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ICU/Headers)
++        file(COPY ${CMAKE_SOURCE_DIR}/Source/WTF/icu/unicode DESTINATION ${ICU_INCLUDE_DIRS})
+     endif ()
+     # Apple just has a single tbd/dylib for ICU.
+     find_library(ICU_I18N_LIBRARY icucore)
+diff --git a/Source/cmake/FindWOFF2.cmake b/Source/cmake/FindWOFF2.cmake
+index e96df035bd10c3f83de137c812f9e05569bb852f..caa8ccbbcaa0d3972b588f0a0947bbb32e4c8652 100644
+--- a/Source/cmake/FindWOFF2.cmake
++++ b/Source/cmake/FindWOFF2.cmake
+@@ -154,6 +154,10 @@ if (WOFF2_DEC_LIBRARY AND NOT TARGET WOFF2::dec)
+         INTERFACE_COMPILE_OPTIONS "${WOFF2_COMPILE_OPTIONS}"
+         INTERFACE_INCLUDE_DIRECTORIES "${WOFF2_DEC_INCLUDE_DIR}"
+     )
++    if (TARGET WOFF2::common)
++        set_target_properties(WOFF2::dec PROPERTIES
++            INTERFACE_LINK_LIBRARIES WOFF2::common)
++    endif ()
+ endif ()
+ 
+ mark_as_advanced(
+diff --git a/Source/cmake/OptionsCocoa.cmake b/Source/cmake/OptionsCocoa.cmake
+index aaf48affe12cbebf60334dedfe30e7596ff94e3e..bfedfcb96d7b3e7fb51c8c0ef71869f43e98cd47 100644
+--- a/Source/cmake/OptionsCocoa.cmake
++++ b/Source/cmake/OptionsCocoa.cmake
+@@ -166,7 +166,9 @@ WEBKIT_OPTION_END()
+ # ---------------------------------------------------------------------------
+ # Shared Cocoa configuration.
+ # ---------------------------------------------------------------------------
+-set(SWIFT_REQUIRED ON)
++if (NOT DEFINED SWIFT_REQUIRED)
++    set(SWIFT_REQUIRED ON)
++endif ()
+ 
+ if (WEBKIT_SDK_IS_MACOS AND USE_APPLE_INTERNAL_SDK)
+     set(WEBKIT_CODE_SIGN_IDENTITY "Safari Engineering")
+@@ -189,7 +191,11 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+ set(WebKitTestRunner_DERIVED_SOURCES_DIR "${CMAKE_BINARY_DIR}/DerivedSources/WebKitTestRunner")
+ set(TestRunnerShared_DERIVED_SOURCES_DIR "${CMAKE_BINARY_DIR}/DerivedSources/TestRunnerShared")
+ 
+-SET_AND_EXPOSE_TO_BUILD(USE_LIBWEBRTC TRUE)
++if (WTF_CPU_ARM)
++    SET_AND_EXPOSE_TO_BUILD(USE_LIBWEBRTC FALSE)
++else ()
++    SET_AND_EXPOSE_TO_BUILD(USE_LIBWEBRTC TRUE)
++endif ()
+ 
+ if (NOT ENABLE_WEBGPU)
+     set(_webgpu_fwd "${CMAKE_BINARY_DIR}/WebGPU-stub/WebGPU")
+@@ -207,14 +213,18 @@ else ()
+ endif ()
+ 
+ set(ENABLE_WEBKIT_LEGACY ON)
+-set(ENABLE_WEBKIT ON)
++if (NOT DEFINED CACHE{ENABLE_WEBKIT})
++    set(ENABLE_WEBKIT ON)
++endif ()
+ 
+ # OBJECT libraries don't produce .swiftmodule files.
+ set(PAL_LIBRARY_TYPE STATIC)
+ 
+ set(CMAKE_LINK_DEPENDS_NO_SHARED ON)
+ 
+-set(USE_ANGLE_EGL ON)
++if (NOT DEFINED CACHE{USE_ANGLE_EGL})
++    set(USE_ANGLE_EGL ON)
++endif ()
+ 
+ # FIXME: CMake is not used for Production at this moment. https://bugs.webkit.org/show_bug.cgi?id=322112
+ SET_AND_EXPOSE_TO_BUILD(ENGINEERING_BUILD ON)
+@@ -223,12 +233,15 @@ function(WEBKIT_ADD_SDK_IMPORTED_LIBRARY _target _library)
+     if (NOT TARGET ${_target})
+         add_library(${_target} UNKNOWN IMPORTED)
+         set_target_properties(${_target} PROPERTIES IMPORTED_LOCATION "${CMAKE_OSX_SYSROOT}/usr/lib/${_library}")
++        if (ARGC GREATER 2)
++            set_target_properties(${_target} PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_OSX_SYSROOT}/${ARGV2}")
++        endif ()
+     endif ()
+ endfunction()
+ 
+ WEBKIT_ADD_SDK_IMPORTED_LIBRARY(SQLite::SQLite3 libsqlite3.tbd)
+-WEBKIT_ADD_SDK_IMPORTED_LIBRARY(LibXml2::LibXml2 libxml2.tbd)
+-WEBKIT_ADD_SDK_IMPORTED_LIBRARY(LibXslt::LibXslt libxslt.tbd)
++WEBKIT_ADD_SDK_IMPORTED_LIBRARY(LibXml2::LibXml2 libxml2.tbd usr/include/libxml2)
++WEBKIT_ADD_SDK_IMPORTED_LIBRARY(LibXslt::LibXslt libxslt.tbd usr/include/libxslt)
+ WEBKIT_ADD_SDK_IMPORTED_LIBRARY(LibXslt::LibExslt libexslt.tbd)
+ WEBKIT_ADD_SDK_IMPORTED_LIBRARY(ZLIB::ZLIB libz.tbd)
+ if (NOT TARGET SQLite3::SQLite3)
+@@ -242,7 +255,7 @@ find_package(Threads REQUIRED)
+ 
+ # Replace the SDK's availability headers with stubs that defuse availability
+ # checks.
+-if (NOT USE_APPLE_INTERNAL_SDK)
++if (NOT USE_APPLE_INTERNAL_SDK AND NOT WEBKIT_NO_AVAILABILITY_OVERLAY)
+     set(_availability_overlay_dir "${CMAKE_SOURCE_DIR}/WebKitLibraries/AvailabilityOverlay")
+     set(_availability_overlay_yaml "${CMAKE_BINARY_DIR}/availability-overlay.yaml")
+     file(WRITE "${_availability_overlay_yaml}.tmp"
+@@ -360,11 +373,36 @@ add_link_options(
+ 
+ # Linked globally because PAL has Swift sources that get force-loaded into WebCore,
+ # and WebCore does not link JavaScriptCore directly on all platforms.
+-find_library(SWIFTCORE_LIBRARY swiftCore HINTS ${CMAKE_OSX_SYSROOT}/usr/lib/swift REQUIRED)
+-link_libraries(${SWIFTCORE_LIBRARY})
++find_library(SWIFTCORE_LIBRARY swiftCore HINTS ${CMAKE_OSX_SYSROOT}/usr/lib/swift)
++if (NOT SWIFTCORE_LIBRARY)
++    set(SWIFTCORE_LIBRARY "")
++endif ()
++if (SWIFTCORE_LIBRARY)
++    link_libraries(${SWIFTCORE_LIBRARY})
++endif ()
++
++if (WEBKIT_IOS6_COMPAT_LIB)
++    link_libraries(${WEBKIT_IOS6_COMPAT_LIB})
++    execute_process(COMMAND ${CMAKE_C_COMPILER} -print-runtime-dir
++        OUTPUT_VARIABLE WEBKIT_IOS6_RUNTIME_DIR OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
++    set(WEBKIT_IOS6_BUILTINS "${WEBKIT_IOS6_RUNTIME_DIR}/libclang_rt.ios.a")
++    if (NOT EXISTS "${WEBKIT_IOS6_BUILTINS}")
++        message(FATAL_ERROR "libclang_rt.ios.a not found in ${WEBKIT_IOS6_RUNTIME_DIR}")
++    endif ()
++    add_link_options("${WEBKIT_IOS6_BUILTINS}" "SHELL:-Wl,-U,_objc_msgSend_stret" "SHELL:-Wl,-not_for_dyld_shared_cache")
++endif ()
++
++if (WEBKIT_IOS6_CRYPTO_LIB)
++    SET_AND_EXPOSE_TO_BUILD(USE_OPENSSL ON)
++    link_libraries(${WEBKIT_IOS6_CRYPTO_LIB})
++endif ()
++
++if (WEBKIT_IOS6_LIBCXX_DIR)
++    add_link_options(-nostdlib++ -L${WEBKIT_IOS6_LIBCXX_DIR}/lib -lc++ -lc++abi)
++endif ()
+ 
+ WEBKIT_XCRUN(_libtool -f libtool)
+-if (CMAKE_GENERATOR STREQUAL "Ninja")
++if (TRUE)
+     set(CMAKE_CXX_ARCHIVE_CREATE "${_libtool} -static -no_warning_for_no_symbols -o <TARGET> <OBJECTS>")
+     set(CMAKE_C_ARCHIVE_CREATE "${_libtool} -static -no_warning_for_no_symbols -o <TARGET> <OBJECTS>")
+     set(CMAKE_CXX_ARCHIVE_APPEND "${_libtool} -static -no_warning_for_no_symbols -o <TARGET> <TARGET> <OBJECTS>")
+@@ -492,8 +530,13 @@ if (WEBKIT_SDK_IS_IOS_FAMILY)
+     # too, and its stubs export none of the SPI this build links against.
+     if (CMAKE_OSX_SYSROOT)
+         add_link_options("-F${CMAKE_BINARY_DIR}")
+-        add_link_options("-F${CMAKE_OSX_SYSROOT}/System/Library/Frameworks")
+-        add_link_options("-F${CMAKE_OSX_SYSROOT}/System/Library/PrivateFrameworks")
++        foreach (_framework_root IN LISTS CMAKE_FIND_ROOT_PATH CMAKE_OSX_SYSROOT)
++            foreach (_framework_dir Frameworks PrivateFrameworks)
++                if (IS_DIRECTORY "${_framework_root}/System/Library/${_framework_dir}")
++                    add_link_options("-F${_framework_root}/System/Library/${_framework_dir}")
++                endif ()
++            endforeach ()
++        endforeach ()
+     endif ()
+ endif ()
+ 
+@@ -520,3 +563,14 @@ endif ()
+ 
+ set(MiniBrowser_DERIVED_SOURCES_DIR "${CMAKE_BINARY_DIR}/DerivedSources/MiniBrowser")
+ 
++if (NOT TARGET OpenGL::GLES)
++    find_library(OPENGLES_FRAMEWORK OpenGLES)
++    if (OPENGLES_FRAMEWORK)
++        add_library(OpenGL::GLES INTERFACE IMPORTED)
++        set_target_properties(OpenGL::GLES PROPERTIES INTERFACE_LINK_LIBRARIES "${OPENGLES_FRAMEWORK}")
++    endif ()
++endif ()
++
++if (WEBKIT_SDK_IS_IOS_FAMILY)
++    include(OptionsIOS6)
++endif ()
+diff --git a/Source/cmake/OptionsIOS6.cmake b/Source/cmake/OptionsIOS6.cmake
+new file mode 100644
+index 0000000000000000000000000000000000000000..3b4345d8b2c14fcae52e419f9bf4efbae67ac6c6
+--- /dev/null
++++ b/Source/cmake/OptionsIOS6.cmake
+@@ -0,0 +1,134 @@
++if (USE_WEBP)
++    find_package(WebP COMPONENTS demux)
++    if (NOT WebP_FOUND)
++        message(FATAL_ERROR "libwebp is required for USE_WEBP")
++    endif ()
++    SET_AND_EXPOSE_TO_BUILD(USE_WEBP ON)
++endif ()
++
++if (USE_WOFF2)
++    find_package(WOFF2 1.0.2 COMPONENTS dec)
++    if (NOT WOFF2_FOUND)
++        message(FATAL_ERROR "libwoff2dec is required for USE_WOFF2")
++    endif ()
++endif ()
++
++
++
++if (CMAKE_IOS_SIMULATOR OR CMAKE_OSX_SYSROOT MATCHES "[Ss]imulator")
++    set(WEBKIT_PLATFORM_NAME "iPhoneSimulator")
++    set(WEBKIT_SDK_NAME "iphonesimulator")
++else ()
++    set(WEBKIT_PLATFORM_NAME "iPhoneOS")
++    set(WEBKIT_SDK_NAME "iphoneos")
++endif ()
++string(REGEX MATCH "^[0-9]+\\.[0-9]+" _sdk_major_minor "${_sdk_version}")
++if (_sdk_major_minor AND (NOT CMAKE_OSX_DEPLOYMENT_TARGET OR CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS _sdk_major_minor))
++    set(CMAKE_OSX_DEPLOYMENT_TARGET "${_sdk_major_minor}" CACHE STRING "Minimum iOS version" FORCE)
++    message(WARNING "Deployment target auto-set to SDK version: ${CMAKE_OSX_DEPLOYMENT_TARGET} (SPI header guards require this)")
++endif ()
++
++WEBKIT_XCRUN(_clang -f clang)
++if (EXISTS "${_clang}")
++    set(CMAKE_C_COMPILER "${_clang}")
++    set(CMAKE_CXX_COMPILER "${_clang}++")
++    set(CMAKE_OBJC_COMPILER "${_clang}")
++    set(CMAKE_OBJCXX_COMPILER "${_clang}++")
++endif ()
++
++
++enable_language(OBJC OBJCXX)
++
++find_package(ZLIB REQUIRED)
++
++if (TARGET ZLIB::ZLIB)
++    set_target_properties(ZLIB::ZLIB PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "")
++endif ()
++
++set(WebKit_LIBRARY_TYPE SHARED)
++
++set(bmalloc_LIBRARY_TYPE OBJECT)
++set(WTF_LIBRARY_TYPE OBJECT)
++set(JavaScriptCore_LIBRARY_TYPE SHARED)
++set(WebCore_LIBRARY_TYPE SHARED)
++
++if (CMAKE_OSX_SYSROOT)
++    add_link_options("-F${CMAKE_OSX_SYSROOT}/System/Library/Frameworks")
++    add_link_options("-F${CMAKE_OSX_SYSROOT}/System/Library/PrivateFrameworks")
++    add_compile_options("$<$<COMPILE_LANGUAGE:Swift>:SHELL:-Fsystem ${CMAKE_OSX_SYSROOT}/System/Library/PrivateFrameworks>")
++    set(WEBKIT_PRIVATE_FRAMEWORKS_COMPILE_FLAG "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-iframework${CMAKE_OSX_SYSROOT}/System/Library/PrivateFrameworks>")
++endif ()
++
++if (CMAKE_OSX_SYSROOT MATCHES "\\.Internal\\.sdk$")
++    add_compile_options("$<$<COMPILE_LANGUAGE:Swift>:-DUSE_APPLE_INTERNAL_SDK>")
++    add_compile_options("$<$<COMPILE_LANGUAGE:Swift>:SHELL:-Xcc -DUSE_APPLE_INTERNAL_SDK>")
++endif ()
++
++set(_textinput_private "${CMAKE_OSX_SYSROOT}/System/Library/PrivateFrameworks/TextInput.framework/Modules/module.private.modulemap")
++if (EXISTS "${_textinput_private}")
++    set(_empty_modulemap "${CMAKE_BINARY_DIR}/empty-module.private.modulemap")
++    file(WRITE "${_empty_modulemap}" "")
++    set(_vfs_overlay "${CMAKE_BINARY_DIR}/ios-swift-vfs-overlay.yaml")
++    file(WRITE "${_vfs_overlay}"
++"{
++  \"version\": 0,
++  \"case-sensitive\": false,
++  \"roots\": [
++    {
++      \"name\": \"${_textinput_private}\",
++      \"type\": \"file\",
++      \"external-contents\": \"${_empty_modulemap}\"
++    }
++  ]
++}
++")
++    add_compile_options("$<$<COMPILE_LANGUAGE:Swift>:SHELL:-Xcc -ivfsoverlay -Xcc ${_vfs_overlay}>")
++endif ()
++
++add_compile_options(
++    "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-shorten-64-to-32>"
++    "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-sign-conversion>"
++    "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-conversion>"
++    "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-float-conversion>"
++    "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-shadow>"
++    "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-overloaded-virtual>"
++    "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-reserved-identifier>"
++    "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-exit-time-destructors>"
++    "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-implicit-fallthrough>"
++)
++
++add_compile_options("$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-error=#warnings>")
++add_compile_options("$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-Wno-objc-method-access>")
++
++add_compile_options(
++    "$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-fno-common>"
++)
++
++if (ENABLE_SANITIZERS)
++    add_compile_definitions(ENABLE_CONJECTURE_ASSERT=1)
++endif ()
++
++set(IOS_DEPLOYMENT_TARGET "${CMAKE_OSX_DEPLOYMENT_TARGET}" CACHE STRING "" FORCE)
++if (CMAKE_IOS_SIMULATOR OR CMAKE_OSX_SYSROOT MATCHES "[Ss]imulator")
++    set(PLATFORM_NAME "iPhoneSimulator" CACHE STRING "" FORCE)
++else ()
++    set(PLATFORM_NAME "iPhoneOS" CACHE STRING "" FORCE)
++endif ()
++
++set(CMAKE_BUILD_WITH_INSTALL_NAME_DIR ON)
++set(JavaScriptCore_INSTALL_NAME_DIR "/System/Library/Frameworks" CACHE STRING "" FORCE)
++set(WebKit_INSTALL_NAME_DIR "/System/Library/Frameworks" CACHE STRING "" FORCE)
++set(WebCore_INSTALL_NAME_DIR "/System/Library/PrivateFrameworks" CACHE STRING "" FORCE)
++set(WebGPU_INSTALL_NAME_DIR "/System/Library/PrivateFrameworks" CACHE STRING "" FORCE)
++set(WebKitLegacy_INSTALL_NAME_DIR "/System/Library/PrivateFrameworks" CACHE STRING "" FORCE)
++
++if (WEBKIT_ADDITIONS_INCLUDE_PATH AND EXISTS "${WEBKIT_ADDITIONS_INCLUDE_PATH}/WebKitAdditions/CMake/OptionsIOS.cmake")
++    message(STATUS "WebKitAdditions CMake: ${WEBKIT_ADDITIONS_INCLUDE_PATH}/WebKitAdditions/CMake/OptionsIOS.cmake")
++    include("${WEBKIT_ADDITIONS_INCLUDE_PATH}/WebKitAdditions/CMake/OptionsIOS.cmake")
++endif ()
++
++if (CMAKE_OSX_SYSROOT AND EXISTS "${CMAKE_OSX_SYSROOT}/usr/local/include")
++    add_compile_options("$<$<NOT:$<COMPILE_LANGUAGE:Swift>>:-isystem${CMAKE_OSX_SYSROOT}/usr/local/include>")
++    add_compile_options("$<$<COMPILE_LANGUAGE:Swift>:SHELL:-Xcc -isystem${CMAKE_OSX_SYSROOT}/usr/local/include>")
++endif ()
++
+diff --git a/Source/cmake/WebKitMacros.cmake b/Source/cmake/WebKitMacros.cmake
+index 12613d7b7984e2c6ca62aa7fa68a86f2415a7b09..312af70151396a828cdfa3eaf07d7fda3d1a4f9d 100644
+--- a/Source/cmake/WebKitMacros.cmake
++++ b/Source/cmake/WebKitMacros.cmake
+@@ -409,6 +409,17 @@ macro(WEBKIT_DEFINE_SUBTARGET_WITH_PREFIX _target _subtarget)
+             string(JOIN "|" _groups ${_arg_HEADER_GROUPS})
+             list(FILTER ${_subtarget}_SOURCES INCLUDE REGEX "-header-(${_groups})\\.")
+         endif ()
++        set(_compilable_sources)
++        foreach (_src IN LISTS ${_subtarget}_SOURCES)
++            get_source_file_property(_header_only "${_src}" HEADER_FILE_ONLY)
++            if (NOT _header_only)
++                list(APPEND _compilable_sources "${_src}")
++            endif ()
++        endforeach ()
++        if (NOT _compilable_sources)
++            set(${_subtarget}_SOURCES)
++        endif ()
++
+         if (${_subtarget}_SOURCES)
+             list(REMOVE_ITEM ${_target}_SOURCES ${${_subtarget}_SOURCES})
+             WEBKIT_DEFINE_SUBTARGET(${_subtarget} ${_target} ${${_subtarget}_SOURCES})
+@@ -827,6 +838,10 @@ macro(WEBKIT_FRAMEWORK _target)
+ 
+     if (APPLE AND NOT PORT STREQUAL "GTK" AND ${${_target}_LIBRARY_TYPE} MATCHES SHARED)
+         set_target_properties(${_target} PROPERTIES FRAMEWORK TRUE)
++        if (EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${_target}-Info.plist")
++            set_target_properties(${_target} PROPERTIES
++                MACOSX_FRAMEWORK_INFO_PLIST "${CMAKE_CURRENT_BINARY_DIR}/${_target}-Info.plist")
++        endif ()
+         target_compile_options(${_target} BEFORE PUBLIC -F${CMAKE_BINARY_DIR})
+         install(TARGETS ${_target} FRAMEWORK DESTINATION ${LIB_INSTALL_DIR})
+         _WEBKIT_CREATE_FRAMEWORK_BUNDLE_STRUCTURE(${_target})
+@@ -898,6 +913,7 @@ function(WEBKIT_COPY_FILES target_name)
+     cmake_parse_arguments(opt "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+     set(files ${opt_FILES})
+     set(dst_files)
++    file(MAKE_DIRECTORY ${opt_DESTINATION})
+ 
+     foreach (file IN LISTS files)
+         if (IS_ABSOLUTE ${file})

@@ -9,14 +9,18 @@ Two consequences decide everything below. The port has to **own** that code
 rather than inherit it, and it has to **find out early** when an upstream change
 breaks it, because nothing upstream will ever tell us.
 
-## The shape of the fork
+## The shape of the carry
 
 | | |
 | --- | --- |
-| `main` in this fork | the product: upstream's tree plus this port, as commits |
-| `upstream` remote | `WebKit/WebKit`. Never a branch of ours, only a remote |
-| Topic branches | one per concern, each explaining in its commits why it exists |
-| Tag `ios6-graft-2026-09-11` | the original graft, the tip of the retired `ios6-armv7` branch, kept so nothing is lost |
+| `third_party/webkit/xmake.lua` | the base: one commit of upstream `WebKit/WebKit` `main`, fetched by hash |
+| `third_party/webkit/patches/` | the product: this port as an ordered series of patches, one per concern, each explaining in its message what it changes and why |
+| the recipe's checksums | one sha256 per patch, so the series that builds is the series that was reviewed |
+| the old fork, `kern0x1b/WebKit` | the history the series was cut from, left as it was so nothing is lost |
+
+There is no fork to keep in step and no merge commit to read: base plus series is the
+whole engine, and applying the series to its base reproduces, file for file, the tree
+the fork's `main` carried when the series was cut.
 
 Two rules, both borrowed from projects that do this at scale:
 
@@ -42,9 +46,11 @@ loud:
 For (2) the answer is a declarative manifest, checked before anything is built:
 
 ```sh
-scripts/carry-check.py        # reads carry-manifest.txt, exits non-zero with a list
-scripts/carry-check.py --paths   # the engine paths it reads, for a sparse checkout
+./xmakew l frameworks/WebKit/tools/carry-check.lua [--tree DIR]   # reads carry-manifest.txt, fails with a list
+./xmakew l frameworks/WebKit/tools/carry-check.lua --paths        # the engine paths it reads, for a sparse checkout
 ```
+
+Every engine build runs the same check on the patched tree before it compiles anything.
 
 It found its first real problem on the day it was written - an assertion that
 named the wrong header for `-[WAKWindow _windowRef]`, the accessor UIKit uses to
@@ -63,7 +69,7 @@ What it asserts about a merged tree:
   armv7, `USE(JSVALUE32_64)` reached by the armv7 configuration, the CMake
   entries that name the files above.
 - **The symbol surface**, in `carry-symbols.txt` and checked by
-  `tools/symbol-check.py` as a step of `revenant build`: every symbol the three
+  `modules/symbols.lua` as a step of every engine build: every symbol the three
   frameworks leave undefined - 6486 of them - and every Objective-C class they
   export by name. A *new* undefined symbol is the important one: it means an
   upstream change reached for API this system may not have, and dyld kills the
@@ -83,7 +89,7 @@ merge quietly take away from us".
 It is a question, not a verdict. Each new undefined symbol is looked up against
 what iOS 6 has, and there are only two outcomes: either the system has it - the
 engine loads, the suite passes, and the pin is regenerated with
-`tools/symbol-check.py --pin` so the new baseline is one the device has
+`tools/symbol-check.lua --pin` so the new baseline is one the device has
 verified - or it does not, and something has to provide it.
 
 The first time this ran in anger, on 2026-09-11, it was the second case: an
@@ -116,52 +122,52 @@ rather than screenshots.
 
 ## How an update actually runs
 
+Moving the base is work in a scratch clone of WebKit, never in the package cache:
+
 ```sh
-revenant integrate --ref upstream/webkitglib/2.54   # the series' own picks
-revenant integrate --ref upstream/main              # the base change, when it is time
-revenant integrate                                        # just run the gates on what is here
+git clone --filter=blob:none https://github.com/WebKit/WebKit.git webkit && cd webkit
+git switch -c series <base commit from third_party/webkit/xmake.lua>
+git am <revenant>/third_party/webkit/patches/*.patch
+git rebase --onto <new base> <base commit> series    # with rerere.enabled, so a resolution replays
+git format-patch -N -o <revenant>/third_party/webkit/patches <new base>..series
 ```
 
 In order, stopping at the first failure that matters:
 
-1. `git merge` the chosen upstream ref into an integration branch, with
-   `rerere.enabled` so a conflict resolved once is replayed next time.
-2. `scripts/carry-check.py` — before a single file is compiled.
-3. `scripts/port-delta.py` — the delta and the guard census, against the new
-   base, kept as the before-and-after of the merge.
-4. The armv7 build, `revenant build`.
-5. `tools/symbol-check.py` against the pin, which the build runs itself.
+1. Rebase the series onto the new base, one patch at a time, so each conflict lands in
+   the concern its patch is about.
+2. Re-export the series, and put the new base commit and every patch's sha256 in the
+   recipe.
+3. `tools/carry-check.lua` on the rebased tree — before a single file is compiled.
+4. `tools/port-delta.lua` and `tools/carry-audit.lua` against the old tree — the delta,
+   the guard census, and the files whose port markers thinned out in the move.
+5. The armv7 build, `./xmakew -P .`, which runs the carry check, the export check, the
+   compat audit and the symbol check against the pin itself.
 6. Host tests.
-7. Deploy, then the device suite — if the phone answers. If it does not, the run
-   exits 3 and says the integration is unverified and must not be shipped.
+7. Deploy, then the device suite — if the phone answers. If it does not, the move is
+   unverified and must not be shipped.
 
-Only a run that reached the end green becomes `main`. The integration branch is
-allowed to be red for as long as it takes — that is what it is for.
+Only a series that reached the end green replaces the one in the recipe. The scratch
+branch is allowed to be red for as long as it takes — that is what it is for.
 
 ### Cadence
 
-- **Per upstream release or release candidate**: merge, tiers 1 to 4. Frequent
-  small merges are cheaper than rare large ones, and the kernel's own guidance
-  for downstream trees says the same: merge at release points, not continuously,
-  and keep topic branches narrow so each one moves independently.
-- **Weekly**: the base series' own security picks, then the full pyramid, with
-  the device.
-- **Per series hop, or before anything is published**: tier 6 as well.
+- **Per upstream release or release candidate**: move the base, tiers 1 to 4. Frequent
+  small moves are cheaper than rare large ones, and the kernel's own guidance
+  for downstream trees says the same: move at release points, not continuously,
+  and keep each patch narrow so it moves independently.
+- **Weekly**: upstream's security fixes picked onto the series, then the full pyramid,
+  with the device.
+- **Before anything is published**: tier 5 as well.
 
-### Running it on a schedule
+How far the series is from upstream today can be measured without moving it: applying
+each patch in turn to a tree of the current `main`, with `git apply --3way`, counts the
+files each patch would conflict in. Against `main` of 2026-10-19 the series of 26 patches
+conflicts in 261 files, in 19 of the patches; WebCore above the platform layer (patch 11,
+86 files) and the WebKit1 API iOS links (patch 22, 48 files) are half of it.
 
-Nothing here needs a service. One crontab line takes the series' own picks every
-Monday morning and leaves a log to read:
-
-```
-0 9 * * 1  cd ~/path/to/port && revenant integrate --ref upstream/webkitglib/2.54 >> ~/port-integration.log 2>&1
-```
-
-It stops at the first gate that fails, and a run that cannot reach the phone
-exits 3 rather than reporting success - so an unattended run either produces a
-green log or a reason. What it must never do is push: a merge that nobody has
-read is not a release, and the only thing that makes a run shippable is a person
-looking at the device.
+Nothing that moves the base may push on its own: a series nobody has read is not a
+release, and the only thing that makes it shippable is a person looking at the device.
 
 ## What tracking `main` costs today, measured
 
@@ -192,10 +198,9 @@ merge really costs is written up in
 [core-update.md](core-update.md#the-trunk-branch-runs-2026-09-12), together with
 the five bugs that only the device found.
 
-That is not a dependency on someone's goodwill: with a real merge base, the
-choice of upstream ref is a one-line change, and every piece of the port,
-including the 32-bit engine world, is a commit in this fork. If upstream deleted
-its own history tomorrow, the port would still build.
+That is not a dependency on someone's goodwill: the base is one commit named in the
+recipe, and every piece of the port, including the 32-bit engine world, is a patch in
+this repository. The base commit is the one thing fetched from upstream.
 
 ## Order of work
 
@@ -205,7 +210,11 @@ its own history tomorrow, the port would still build.
    merges.
 2. **The manifest and its check.** Cheapest tier, largest return.
 3. **Topic branches.** Split the carry by concern so a merge conflict lands in
-   one subject at a time.
+   one subject at a time. Done as the patch series: the fork's 176 commits and its
+   merge of the 2.54 branch, grouped into 24 patches that applied to upstream
+   `c70a794b03` give the fork's tree exactly; then this port's own comments were
+   taken out of them and two build patches added, configure without Python and
+   keeping the configured compiler.
 4. **32-bit JSC coverage on the host.** The container, the build, the suites.
 5. **The integration branch against `main`**, to measure the real cost and to
    host the 64-bit JSValue work.
