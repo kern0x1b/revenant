@@ -1,1 +1,0 @@
-            double y = RevenantMPSApplyNeuron(neuron.type, sum, neuron.a, neuron.b, neuron.c, RevenantMPSNeuronA(&neuron, column));

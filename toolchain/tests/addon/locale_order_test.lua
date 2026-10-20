@@ -25,7 +25,6 @@ local NOT_STRINGS = {
     ["modules/apple/firmware.lua|table.sort(listed, function (a, b) return dyld.compare_versions(a, b) < 0 end)"] = "versions",
     ["modules/gyb/runtime.lua|table.sort(keyed, function(a, b)"] = "Python's order, byteorder.less on strings, then the index",
     ["tools/matter-registry.lua|table.sort(types, function (left, right) return #left > #right end)"] = "lengths",
-    ["tools/symbol-first-release.lua|table.sort(found, function (a, b) return os.mtime(a) > os.mtime(b) end)"] = "modification times",
     ["tools/corpus/skeleton-table.lua|table.sort(addresses)"] = "numbers",
     ["tools/corpus/const-values.lua|table.sort(kind_order, function (a, b)"] = "counts, then the index",
     ["tools/corpus/ledger_headers.lua|table.sort(named, function (a, b)"] = "byteorder.less on both names",

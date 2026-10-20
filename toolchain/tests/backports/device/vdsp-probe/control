@@ -1,7 +1,0 @@
-Package: org.revenant.vdspprobe
-Name: Revenant vDSP biquad probe
-Architecture: iphoneos-arm
-Description: The release's own vDSP_biquad against this band's kernel, on the guest's own arithmetic
-Maintainer: revenant
-Author: revenant
-Section: Development

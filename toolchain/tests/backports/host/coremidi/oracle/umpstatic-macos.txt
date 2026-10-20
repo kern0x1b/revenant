@@ -1,5 +1,0 @@
-endpoint before any block: static 0, JRTS receive 0, JRTS transmit 0
-after registerFunctionBlocks markAsStatic:NO: static 0, JRTS receive 0, JRTS transmit 0
-registerFunctionBlocks markAsStatic:NO answered 1
-second endpoint after registerFunctionBlocks markAsStatic:YES: static 1, JRTS receive 0, JRTS transmit 0
-registerFunctionBlocks markAsStatic:YES answered 1

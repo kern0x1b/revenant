@@ -1,3 +1,0 @@
-        if (_byFeatureChannel) {
-            pixel = r;
-            step = 0;

@@ -1,7 +1,0 @@
-Package: org.revenant.metalchainprobe
-Name: Revenant Metal 4 command chain probe
-Architecture: iphoneos-arm
-Description: The port's Metal 4 command chain against the answers Apple's own Metal gave on this host
-Maintainer: revenant
-Author: revenant
-Section: Development

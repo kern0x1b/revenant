@@ -1,7 +1,0 @@
-Package: org.revenant.enumprobe
-Name: enumprobe
-Architecture: iphoneos-arm
-Description: The NSMapTable factories of iOS 6.0 against the release
-Maintainer: revenant
-Author: revenant
-Section: Development

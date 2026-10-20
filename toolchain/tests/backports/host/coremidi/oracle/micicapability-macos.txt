@@ -1,7 +1,0 @@
-device info, real destination, 3/2/2/4 bytes: yes
-  family length 2 model length 2
-device info, real destination, manufacturer 2 bytes: nil
-device info, revision 1 byte: nil
-profile without a name: yes name=Standard Profile Bank 0x00 Number 0x01, Version: 0x02 Level: 0x03
-discovery handler called 0 time(s), nodes 99
-responder created: nil

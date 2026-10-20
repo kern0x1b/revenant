@@ -1,6 +1,0 @@
-maml-video-light: written bytes identical to the original
-host reads the written model: yes
-descriptions equal: yes
-resnet-16: written bytes identical to the original
-host reads the written model: yes
-descriptions equal: yes

@@ -1,5 +1,0 @@
-#define RevenantHostUIContentSizeCategoryCompareToCategory UIContentSizeCategoryCompareToCategory
-#define RevenantHostUIContentSizeCategoryIsAccessibilityCategory UIContentSizeCategoryIsAccessibilityCategory
-#define RevenantHostUIFontTextStyleLargeTitle UIFontTextStyleLargeTitle
-#define main revenant_main_contentsize
-#import "contentsize/differential.m"

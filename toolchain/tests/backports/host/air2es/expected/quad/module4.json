@@ -1,1 +1,0 @@
-{"stage":"fragment","entry":"constFragment","usesVertexId":false,"attributes":[],"uniforms":[],"textures":[],"varyings":[],"constants":[{"index":0,"name":"use_tint","type":"bool"},{"index":1,"name":"gain","type":"float"}],"inputs":[],"sizes":[],"outputs":[0],"fetches":[],"usesInstanceId":false}

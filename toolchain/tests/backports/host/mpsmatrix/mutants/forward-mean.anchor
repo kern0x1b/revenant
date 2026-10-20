@@ -1,1 +1,0 @@
-                float root = 1.0f / sqrtf((float)given + _epsilon);

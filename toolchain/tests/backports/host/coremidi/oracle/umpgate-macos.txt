@@ -1,5 +1,0 @@
-endpoint enabled before setEnabled: 0
-send while disabled (never enabled): callback calls 1
-send while enabled: callback calls 1
-send after setEnabled:NO: callback calls 1
-function block IDs of three blocks (registration order): 1 2 3 

@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 export SWIFTUI_ROOT=${SWIFTUI_ROOT:-$(cd "$here/../../.." && pwd)}
-. "$here/../../backports/common/runs.sh" "$here"
+. "$here/../../common/runs.sh" "$here"
 build=${SWIFTUI_BUILD:-$(runs_folder swiftui-consumer)}
 mkdir -p "$build"
 if ! mkdir "$build/run.lock" 2>/dev/null; then

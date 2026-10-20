@@ -1,7 +1,0 @@
-Package: org.revenant.calls
-Name: Revenant call test
-Architecture: iphoneos-arm
-Description: Every class and member the backports registry carries, looked up, asked for with respondsToSelector: and called with neutral arguments
-Maintainer: revenant
-Author: revenant
-Section: Development
