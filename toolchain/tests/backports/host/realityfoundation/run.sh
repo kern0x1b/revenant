@@ -18,8 +18,6 @@
 # What this is not: a system comparison - no release before iOS 13 carries either module and the
 # 26.2 one is an interface with no implementation to run. main.swift says so at its top.
 set -eu
-echo "FAIL host/realityfoundation/run.sh: its Python steps are gone and not yet ported to Lua: coverage.py; mutate.py" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 files=${RF_OVERLAY_FILES:-$here/../../../../packages/runtimes/swift-runtime/files}
@@ -59,13 +57,13 @@ common="-target $target -sdk $sdk -swift-version 5 -parse-as-library -O -wmo"
     -o "$build/rf-check" "$build/RealityFoundation.o" "$build/RealityKit.o" "$here/main.swift"
 
 # The registry's sources are bound to what the differential actually measures, and the binding is
-# checked here rather than trusted: --check exits non-zero if a row's source is not what coverage.py
+# checked here rather than trusted: --check exits non-zero if a row's source is not what coverage.lua
 # decides, and the control beside it is the same edit the reviewer made, run every time.
-python3 "$here/coverage.py" --check \
+runs_xmake l "$here/coverage.lua" check \
     "$here/../../../../packages/runtimes/swift-runtime/registry/RealityFoundation.json" \
     "$here/../../../../packages/runtimes/swift-runtime/registry/RealityKit.json" > "$build/coverage.txt" \
     && coverage=0 || coverage=1
-[ "$coverage" -eq 0 ] || { echo "registry sources are not what coverage.py decides:"; \
+[ "$coverage" -eq 0 ] || { echo "registry sources are not what coverage.lua decides:"; \
     grep -E "MISMATCH|CLAIMS A MEASUREMENT" "$build/coverage.txt" | head -6; }
 sh "$here/coverage-control.sh" > "$build/coverage-control.txt" 2>&1 && control=0 || control=1
 [ "$control" -eq 0 ] || { echo "the coverage control failed:"; head -8 "$build/coverage-control.txt"; }
@@ -90,7 +88,7 @@ if [ "${RF_MUTANTS:-1}" = "1" ]; then
         label=$1; from=$2; to=$3
         rm -rf "$build/mutant"; mkdir -p "$build/mutant"
         cp -R "$files" "$build/mutant/files"
-        python3 "$here/mutate.py" "$build/mutant/files/RealityFoundation/IK.swift" "$from" "$to" || { echo "MUTANT REFUSED: $label"; survived=$((survived + 1)); return; }
+        runs_xmake l "$here/../../common/mutants.lua" once "$build/mutant/files/RealityFoundation/IK.swift" "$from" "$to" || { echo "MUTANT REFUSED: $label"; survived=$((survived + 1)); return; }
         if RF_OVERLAY_FILES="$build/mutant/files" RF_BUILD="$build/mutant-build" RF_MUTANTS=0 \
            sh "$here/run.sh" > "$build/mutant-build.log" 2>&1; then
             echo "MUTANT SURVIVED: $label"
