@@ -11,10 +11,13 @@ add_requireconfs("rellume.llvm.iphoneos-sdk", {override = true, version = "16.4"
 
 rule("recompiler.llvm")
     on_config(function (target)
-        local prefix = target:pkg("llvm"):installdir()
-        target:add("sysincludedirs", path.join(prefix, "include"))
-        target:add("linkdirs", path.join(prefix, "lib"))
-        target:add("rpathdirs", path.join(prefix, "lib"))
+        local llvm = target:pkg("llvm")
+        if llvm then
+            local prefix = llvm:installdir()
+            target:add("sysincludedirs", path.join(prefix, "include"))
+            target:add("linkdirs", path.join(prefix, "lib"))
+            target:add("rpathdirs", path.join(prefix, "lib"))
+        end
         target:add("defines", "_GNU_SOURCE", "__STDC_CONSTANT_MACROS", "__STDC_FORMAT_MACROS", "__STDC_LIMIT_MACROS")
         target:add("cxxflags", "-fno-rtti")
     end)
