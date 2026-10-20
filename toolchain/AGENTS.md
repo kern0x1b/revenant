@@ -80,8 +80,11 @@ Android) as it is here; iOS 6 is the first platform it targets, not its limit.
 
 Each entry: wrong pattern -> right pattern -> the mechanical reason.
 
-- **The shared `~/.xmake` store, not a private one.** Wrong: `xmake require --force`,
-  `xrepo install --force`, `rm -rf ~/.xmake/packages/...`, or a private `XMAKE_GLOBALDIR` to pick
+- **The shared store, not a private one.** `./xmakew` points `XMAKE_GLOBALDIR` at
+  `~/.revenant/cache/xmake-global`, so the store every build shares is
+  `~/.revenant/cache/xmake-global/.xmake`; the packages from before the move are still in `~/.xmake`
+  and `./xmakew borrow --from ~/.xmake` clones them over (`docs/machine.md`). Wrong: `xmake require --force`,
+  `xrepo install --force`, `rm -rf` under either store, or another `XMAKE_GLOBALDIR` of your own to pick
   up a changed recipe or patch. Right: just rebuild normally against the shared store. Reason:
   every package that matters here (`apple-backports`, `llvm`, `swift-runtime`, `libcxx`, `swift`)
   hashes its own sources, patches and recipe into a readonly digest config (`sources`/`recipe` -
@@ -192,7 +195,8 @@ Each entry: wrong pattern -> right pattern -> the mechanical reason.
 
 - **The compiler cache behind a backports build.** Wrong: reading a hit rate as proof the build is
   the same, or setting the cache's key by hand for one run. Right: gate through
-  `coordination/heavy.sh`, which exports `CCACHE_DIR` and `FLEET_HEAVY_CPUS` and writes
+  `coordination/heavy.sh` (`tools/heavy.lua` of the root, `docs/machine.md`), which exports `CCACHE_DIR`,
+  `FLEET_HEAVY_CPUS`, `XMAKE_MAX_JOBS` and the `MAKEFLAGS` of its token pool, and writes
   `hash_dir = false` and `max_size` into `$CCACHE_DIR/ccache.conf`; the check for a cache is the
   objects it hands back against a `CCACHE_DISABLE=1` build, not the hit rate. Reason: the key is
   the preprocessed source and the compiler, plus the path of the source - and `hash_dir = false` is

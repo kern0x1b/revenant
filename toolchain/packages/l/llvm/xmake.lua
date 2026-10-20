@@ -20,6 +20,9 @@ package("llvm")
     add_configs("recipe", {description = "The digest of this recipe and the patches it applies, so a changed flag or patch is a different compiler.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
 
     on_download(function (package, opt)
+        if import("prebuilt", {rootdir = path.join(os.scriptdir(), "..", "..", "..", "modules"), anonymous = true}).fetch(package) then
+            return
+        end
         local checkout = import("checkout", {rootdir = path.join(os.scriptdir(), "..", "..", "..", "modules"), anonymous = true})
         checkout.pinned(opt.sourcedir, {{url = opt.url, tag = "llvmorg-" .. package:version_str(),
                                          commit = package:revision(opt.url_alias) or package:commit(),
@@ -30,11 +33,15 @@ package("llvm")
     end)
 
     on_install("@macosx", function (package)
+        local prebuilt = import("prebuilt", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
+        if prebuilt.install(package) then
+            return
+        end
         for _, patch in ipairs(patches) do
             os.vrunv("git", {"apply", path.join(package:scriptdir(), "patches", patch), "-p2"})
         end
         local major = package:version():major()
-        local jobs = tostring(os.cpuinfo("ncpu"))
+        local parallel = import("parallel", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
 
         local compiler = path.absolute("build-clang")
         os.tryrm(compiler)
@@ -46,7 +53,7 @@ package("llvm")
                            "-DLLVM_ENABLE_ASSERTIONS=OFF", "-DLLVM_ENABLE_ZLIB=OFF", "-DLLVM_ENABLE_ZSTD=OFF",
                            "-DLLVM_ENABLE_LIBXML2=OFF", "-DLLVM_ENABLE_TERMINFO=OFF",
                            "-DCLANG_ENABLE_STATIC_ANALYZER=OFF", "-DCLANG_ENABLE_OBJC_REWRITER=OFF",
-                           "-DCMAKE_DISABLE_FIND_PACKAGE_Python3=ON"}
+                           "-DCMAKE_DISABLE_FIND_PACKAGE_Python3=ON", "-DLLVM_PARALLEL_LINK_JOBS=" .. parallel.link_jobs()}
         local targets = {"install-clang", "install-clang-resource-headers"}
         if package:config("libraries") then
             table.join2(configure, {"-DLLVM_BUILD_LLVM_DYLIB=ON", "-DLLVM_LINK_LLVM_DYLIB=ON",
@@ -54,7 +61,7 @@ package("llvm")
             targets = {"install-distribution"}
         end
         os.vrunv("cmake", configure)
-        os.vrunv("cmake", table.join({"--build", compiler, "--parallel", jobs, "--target"}, targets))
+        os.vrunv("cmake", table.join({"--build", compiler}, parallel.cmake_ninja(), {"--target"}, targets))
         local clang = path.join(package:installdir("bin"), "clang")
 
         local sdk = package:dep("iphoneos-sdk")
@@ -77,12 +84,13 @@ package("llvm")
                            "-DDARWIN_iphoneos_CACHED_SYSROOT=" .. sysroot,
                            "-DDARWIN_iphonesimulator_OVERRIDE_SDK_VERSION=" .. sdk:version_str(),
                            "-DDARWIN_ios_BUILTIN_ARCHS=armv7;armv7s;arm64", "-DDARWIN_osx_BUILTIN_ARCHS=" .. os.arch()})
-        os.vrunv("cmake", {"--build", builtins, "--parallel", jobs})
+        os.vrunv("cmake", table.join({"--build", builtins}, parallel.cmake_ninja()))
         os.vrunv("cmake", {"--install", builtins})
 
         for _, project in ipairs({"llvm", "clang", "compiler-rt"}) do
             os.vcp(path.join(project, "LICENSE.TXT"), path.join(package:installdir("licenses"), project, "LICENSE.TXT"))
         end
+        prebuilt.pack(package)
     end)
 
     on_test(function (package)

@@ -25,7 +25,7 @@ local function live_checkouts(given)
 end
 
 local function sdkdirs()
-    local found = os.dirs(path.join(os.getenv("HOME"), ".xmake", "packages", "i", "iphoneos-sdk", "*", "*", "Developer.app",
+    local found = os.dirs(path.join(os.getenv("XMAKE_GLOBALDIR") or os.getenv("HOME"), ".xmake", "packages", "i", "iphoneos-sdk", "*", "*", "Developer.app",
                                     "Contents", "Developer", "Platforms", "iPhoneOS.platform", "Developer", "SDKs", "iPhoneOS*.sdk"))
     byteorder.sort(found)
     return found

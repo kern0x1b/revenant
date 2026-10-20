@@ -30,5 +30,8 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
 - xmake at the top is always `./xmakew`, the pinned and patched xmake of `third_party/xmake` (built into
   `$HOME/.revenant/cache/xmake/` on first use): `./xmakew f -p iphoneos -a armv7`, `./xmakew build <target>`. It takes
   the revenant addon from `toolchain/` of the checkout; stock xmake would fetch and install the toolchain globally instead.
+  Its package store is `$HOME/.revenant/cache/xmake-global` (`XMAKE_GLOBALDIR`). Everything a build can make again is under
+  `$HOME/.revenant/cache`, and `./xmakew l tools/clean.lua [--packages | --all]` gives it back; heavy jobs share one token
+  pool, `./xmakew l tools/heavy.lua <command>`. Both are in `docs/machine.md`.
 - Before handing a change over: `./xmakew l tools/check.lua <member>` for each member it touches that has a check
   there, then that member's own gate (the toolchain's `backports-gate` skill, the emulator's `emulator-boot` skill).

@@ -1,0 +1,63 @@
+name: prebuilt
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: The package to build once for its key
+        type: choice
+        options:
+          - llvm
+          - llvm-libraries
+          - swift
+        default: llvm
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prebuilt-${{ inputs.package }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 360
+    env:
+      REVENANT_PREBUILT: ${{ github.repository }}
+      REVENANT_PREBUILT_OUT: ${{ runner.temp }}/prebuilt
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Build xmake from its pin
+        run: ./xmakew --version
+
+      - name: Build or fetch the package
+        env:
+          PACKAGE: ${{ inputs.package }}
+        run: |
+          case "$PACKAGE" in
+            llvm) ./xmakew require -P . -y -v revenant@llvm ;;
+            llvm-libraries) ./xmakew require -P . -y -v --extra="{configs={libraries=true}}" revenant@llvm ;;
+            swift) ./xmakew require -P . -y -v revenant@swift ;;
+            *) echo "no such package: $PACKAGE" >&2; exit 1 ;;
+          esac
+
+      - name: Attach the archive to the release of its key
+        env:
+          COMMIT: ${{ github.sha }}
+        run: |
+          shopt -s nullglob
+          for tagfile in "$REVENANT_PREBUILT_OUT"/*.tag; do
+            tag=$(cat "$tagfile")
+            name=$(basename "$tagfile" .tag)
+            if gh release view "$tag" >/dev/null 2>&1; then
+              echo "$tag is released already"
+              continue
+            fi
+            gh release create "$tag" "$REVENANT_PREBUILT_OUT/$name"-*.tar.xz "$REVENANT_PREBUILT_OUT/$name"-*.tar.xz.sha256 \
+              --title "$tag" --notes "Built by the prebuilt workflow from $COMMIT on $RUNNER_OS $RUNNER_ARCH." --prerelease
+          done

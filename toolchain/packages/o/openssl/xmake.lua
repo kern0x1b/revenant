@@ -32,7 +32,9 @@ package("openssl")
             end
         end
         os.vrunv("./Configure", options, {envs = envs})
-        os.vrunv("make", {"-j" .. os.cpuinfo("ncpu"), "build_libs"}, {envs = envs})
+        import("parallel", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true}).hold(nil, function (width)
+            os.vrunv("make", {"-j" .. width, "build_libs"}, {envs = envs})
+        end)
         os.cp("libcrypto.a", package:installdir("lib"))
         os.cp("libssl.a", package:installdir("lib"))
         os.cp("include/openssl", package:installdir("include"))

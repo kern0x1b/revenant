@@ -57,8 +57,11 @@ package("ld64")
         os.vrunv("./configure", {"--prefix=" .. install, "--target=arm-apple-darwin11", "--with-libtapi=" .. tapi_install,
                                  "--with-llvm-config=" .. llvm_config.program},
                  {curdir = cctools, envs = {CPPFLAGS = "-I" .. path.join(llvm, "include")}})
+        local parallel = import("parallel", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
         for _, part in ipairs({"ld64/src/3rd", "ld64/src/mach_o", "ld64/src/ld"}) do
-            os.vrunv("make", {"-C", part, "-j" .. os.cpuinfo("ncpu")}, {curdir = cctools})
+            parallel.hold(nil, function (width)
+                os.vrunv("make", {"-C", part, "-j" .. width}, {curdir = cctools})
+            end)
         end
         os.vrunv("make", {"-C", "ld64/src/ld", "install-binPROGRAMS"}, {curdir = cctools})
 

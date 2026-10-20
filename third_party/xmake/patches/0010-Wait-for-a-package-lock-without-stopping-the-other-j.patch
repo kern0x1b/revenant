@@ -1,0 +1,58 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Tue, 20 Oct 2026 03:29:25 +0200
+Subject: [PATCH] Wait for a package lock without stopping the other jobs
+
+The fetch and the install of packages run as coroutines of one process,
+and a package lock taken by another process was waited for with a
+blocking flock. The wait stopped every coroutine of the process,
+including the ones that held other package locks, so two processes that
+each held one lock and wanted the other's stopped forever at no CPU.
+
+Two configures of different projects show it: one holds lka while it
+installs it and wants lkb; the other holds lkb while it fetches it and
+wants lka. Both stay asleep until they are killed.
+
+Inside a coroutine the lock is now tried again every 100 ms, and the
+wait yields to the scheduler, so the holder finishes and lets go. Outside
+a coroutine the blocking lock stays.
+---
+ xmake/core/package/package.lua | 14 +++++++++++---
+ 1 file changed, 11 insertions(+), 3 deletions(-)
+
+diff --git a/xmake/core/package/package.lua b/xmake/core/package/package.lua
+index ec7b874..eee2972 100644
+--- a/xmake/core/package/package.lua
++++ b/xmake/core/package/package.lua
+@@ -52,6 +52,7 @@ local language       = require("language/language")
+ local language_menu  = require("language/menu")
+ local sandbox        = require("sandbox/sandbox")
+ local sandbox_os     = require("sandbox/modules/os")
++local scheduler      = require("base/scheduler")
+ local sandbox_module = require("sandbox/modules/import/core/sandbox/module")
+ 
+ -- new an instance
+@@ -840,10 +841,17 @@ function _instance:lock(opt)
+     else
+         utils.cprint("${color.warning}package(%s) is being accessed by other processes, please wait!", self:name())
+     end
+-    local ok, errors = self:filelock():lock(opt)
+-    if not ok then
+-        os.raise(errors)
++    if not scheduler:co_running() then
++        local ok, errors = self:filelock():lock(opt)
++        if not ok then
++            os.raise(errors)
++        end
++        return true
+     end
++    while not self:filelock():trylock(opt) do
++        sandbox_os.sleep(100)
++    end
++    return true
+ end
+ 
+ -- unlock the whole package
+-- 
+2.54.0 (Apple Git-157)
+

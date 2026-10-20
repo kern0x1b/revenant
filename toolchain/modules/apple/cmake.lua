@@ -112,7 +112,8 @@ function install(package, configs, opt)
     table.join2(argv, configs or {})
     local envs = {SOURCE_DATE_EPOCH = opt.source_date_epoch or "0", IPHONEOS_DEPLOYMENT_TARGET = toolchain(package):config("deployment")}
     os.vrunv(cmake.program, argv, {envs = envs})
-    os.vrunv(cmake.program, table.join({"--build", builddir, "--parallel", tostring(os.cpuinfo("ncpu"))}, opt.targets and table.join({"--target"}, opt.targets) or {}), {envs = envs})
+    local parallel = import("parallel", {rootdir = path.directory(os.scriptdir()), anonymous = true})
+    os.vrunv(cmake.program, table.join({"--build", builddir}, parallel.cmake_ninja(), opt.targets and table.join({"--target"}, opt.targets) or {}), {envs = envs})
     if opt.install ~= false then
         os.vrunv(cmake.program, {"--install", builddir}, {envs = envs})
     end
