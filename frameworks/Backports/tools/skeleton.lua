@@ -20,9 +20,9 @@ struct revenant_backports_method {
     IMP implementation;
 };
 
-void revenant_backports_fail(const char *name) __attribute__((noreturn));
+void revenant_backports_fail(const char *name) __attribute__((noreturn, visibility("hidden")));
 void revenant_backports_register(const struct revenant_backports_class *classes, unsigned count,
-                                 const struct revenant_backports_method *methods, unsigned method_count);
+                                 const struct revenant_backports_method *methods, unsigned method_count) __attribute__((visibility("hidden")));
 
 #endif
 ]==]
@@ -138,12 +138,12 @@ end
 local function write_c(file, functions, swift)
     local lines = {'#include "revenant_backports.h"', ""}
     for index, entry in ipairs(functions) do
-        table.insert(lines, string.format("__attribute__((weak)) void revenant_c_%d(void) __asm__(%s);", index, quoted("_" .. entry.symbol)))
-        table.insert(lines, string.format("__attribute__((weak)) void revenant_c_%d(void) { revenant_backports_fail(%s); }", index, quoted(entry.label)))
+        table.insert(lines, string.format("__attribute__((weak, visibility(\"default\"))) void revenant_c_%d(void) __asm__(%s);", index, quoted("_" .. entry.symbol)))
+        table.insert(lines, string.format("__attribute__((weak, visibility(\"default\"))) void revenant_c_%d(void) { revenant_backports_fail(%s); }", index, quoted(entry.label)))
     end
     for index, entry in ipairs(swift) do
-        table.insert(lines, string.format("__attribute__((weak)) void revenant_swift_%d(void) __asm__(%s);", index, quoted("_" .. entry.symbol)))
-        table.insert(lines, string.format("__attribute__((weak)) void revenant_swift_%d(void) { revenant_backports_fail(%s); }", index, quoted(entry.label)))
+        table.insert(lines, string.format("__attribute__((weak, visibility(\"default\"))) void revenant_swift_%d(void) __asm__(%s);", index, quoted("_" .. entry.symbol)))
+        table.insert(lines, string.format("__attribute__((weak, visibility(\"default\"))) void revenant_swift_%d(void) { revenant_backports_fail(%s); }", index, quoted(entry.label)))
     end
     io.writefile(file, table.concat(lines, "\n") .. "\n")
 end
