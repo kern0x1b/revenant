@@ -22,8 +22,8 @@ package("iphoneos-sdk")
 
     local digests = {}
     local inputs = table.join({path.join(os.scriptdir(), "xmake.lua"), path.join(os.scriptdir(), "..", "..", "..", "toolchain", "modules", "apple", "sdkstubs.lua")},
-                              os.files(path.join(os.scriptdir(), "usr", "**")), os.files(path.join(os.scriptdir(), "arclite", "*")),
-                              os.files(path.join(os.scriptdir(), "blocks", "*")), os.files(path.join(os.scriptdir(), "markers", "*")))
+                              os.files(path.join(os.scriptdir(), "port", "usr", "**")), os.files(path.join(os.scriptdir(), "port", "arclite", "*")),
+                              os.files(path.join(os.scriptdir(), "port", "blocks", "*")), os.files(path.join(os.scriptdir(), "port", "markers", "*")))
     table.sort(inputs)
     for _, file in ipairs(inputs) do
         table.insert(digests, path.relative(file, os.scriptdir()) .. "=" .. hash.sha256(file))
@@ -54,7 +54,7 @@ package("iphoneos-sdk")
         local markers = package:resourcedir("markers")
         if markers then
             local older = os.isfile(path.join(markers, "SDKSettings.json")) and markers or assert(os.dirs(path.join(markers, "iPhoneOS*.sdk"))[1], "the older SDK's archive holds no SDK")
-            local first = stubs.releases(io.readfile(path.join(package:scriptdir(), "markers", "iPhoneOS" .. package:version_str() .. ".tsv")))
+            local first = stubs.releases(io.readfile(path.join(package:scriptdir(), "port", "markers", "iPhoneOS" .. package:version_str() .. ".tsv")))
             local carried, versions, seen = {}, {}, {}
             for _, file in ipairs(os.files(path.join(older, "**.tbd"))) do
                 local text = not file:find("/DriverKit/", 1, true) and io.readfile(file)
@@ -189,7 +189,7 @@ package("iphoneos-sdk")
                 io.writefile(stub, table.concat(lines, "\n") .. "\n")
             end
         end
-        os.vcp(path.join(package:scriptdir(), "usr", "lib", "*"), libraries .. "/")
+        os.vcp(path.join(package:scriptdir(), "port", "usr", "lib", "*"), libraries .. "/")
 
         local csu = package:resourcedir("csu")
         local linker = path.join(package:dep("ld64"):installdir("bin"), "ld")
@@ -218,7 +218,7 @@ package("iphoneos-sdk")
         local archives = {}
         for _, architecture in ipairs({"armv6", "armv7", "armv7s", "arm64"}) do
             local objects = {}
-            for _, source in ipairs(os.files(path.join(package:scriptdir(), "arclite", "*.m"))) do
+            for _, source in ipairs(os.files(path.join(package:scriptdir(), "port", "arclite", "*.m"))) do
                 local object = path.absolute(architecture .. "-" .. path.basename(source) .. ".o")
                 os.vrunv("xcrun", {"clang", "-target", architecture .. "-apple-ios2.0", "-isysroot", folder, "-Os", "-fno-objc-arc",
                                    "-c", source, "-o", object})
@@ -232,7 +232,7 @@ package("iphoneos-sdk")
         for _, architecture in ipairs({"armv6", "armv7"}) do
             local object = path.absolute(architecture .. "-BlocksRuntime.o")
             os.vrunv("xcrun", {"clang", "-target", architecture .. "-apple-ios2.0", "-isysroot", folder, "-Os", "-fno-objc-arc",
-                               "-c", path.join(package:scriptdir(), "blocks", "BlocksRuntime.m"), "-o", object})
+                               "-c", path.join(package:scriptdir(), "port", "blocks", "BlocksRuntime.m"), "-o", object})
             local archive = path.absolute(architecture .. "-libBlocksRuntime.a")
             os.vrunv("xcrun", {"libtool", "-static", "-o", archive, object})
             table.insert(blocks, archive)
