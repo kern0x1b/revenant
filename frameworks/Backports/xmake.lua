@@ -5,6 +5,7 @@ local ROOT = path.absolute(path.join(os.scriptdir(), "..", ".."))
 local TOOLS = path.absolute(path.join(os.scriptdir(), "tools"))
 local SKELETON = path.join(ROOT, "build", "generated", "backports", "skeleton")
 local INSTALL_FOLDER = "/usr/lib/revenant/org.revenant.apple-backports"
+local SRC = path.absolute(path.join(os.scriptdir(), "src"))
 
 local LIBRARIES = {
     {name = "FoundationBackports", folder = "Foundation", frameworks = {"Foundation", "CoreFoundation", "SystemConfiguration"}, libraries = {"icucore"}, archives = {}, system = {}},
@@ -106,13 +107,7 @@ if is_plat("iphoneos") then
     add_requires("revenant@ggml 0.25.3", {alias = "ggml"})
     add_requires("revenant@revenant-coding", {alias = "revenant-coding"})
 
-    local generated = false
-    local function generate()
-        if not generated then
-            generated = true
-            import("generate", {rootdir = TOOLS, anonymous = true}).main()
-        end
-    end
+    local generator
 
     local FLAGS = {"-Os", "-g0", "-Wall", "-Wno-unguarded-availability-new", "-Wno-unguarded-availability"}
     local OBJC_FLAGS = table.join(FLAGS, {"-fobjc-arc", "-Werror=objc-missing-property-synthesis", "-fmacro-prefix-map=" .. ROOT .. "/="})
@@ -128,7 +123,8 @@ if is_plat("iphoneos") then
             add_mxxflags(table.join(OBJC_FLAGS, {"-fno-rtti", "-fvisibility-inlines-hidden"}))
             add_shflags("-install_name", INSTALL_FOLDER .. "/lib" .. library.name .. ".dylib", "-Wno-incompatible-sysroot",
                         "-Wl,-no_encryption", "-Wl,-rename_section,__DATA,__objc_catlist,__DATA,__port_catlist")
-            add_files("src/" .. library.folder .. "/*.m", "src/" .. library.folder .. "/*.mm", "src/" .. library.folder .. "/*.c", "src/attach.c")
+            add_files(table.join(os.files(path.join(SRC, library.folder, "*.m")), os.files(path.join(SRC, library.folder, "*.mm")),
+                                 os.files(path.join(SRC, library.folder, "*.c")), {path.join(SRC, "attach.c")}))
             for _, name in ipairs(library.libraries) do
                 if name:endswith("Backports") then
                     add_deps(name)
@@ -136,8 +132,8 @@ if is_plat("iphoneos") then
                     add_syslinks(name)
                 end
             end
-            if #library.frameworks > 0 then
-                add_weakframeworks(table.unpack(library.frameworks))
+            for _, framework in ipairs(library.frameworks) do
+                add_shflags("-weak_framework", framework)
             end
             for _, name in ipairs(library.archives) do
                 add_packages(name)
@@ -145,8 +141,15 @@ if is_plat("iphoneos") then
             for _, name in ipairs(library.system) do
                 add_syslinks(name)
             end
+            on_load(function (target)
+                generator = import("generate", {rootdir = TOOLS, anonymous = true})
+            end)
             on_config(function (target)
-                generate()
+                local includes = {}
+                for _, name in ipairs(library.archives) do
+                    table.insert(includes, target:pkg(name):installdir("include"))
+                end
+                generator.skeleton_for(library.folder, includes)
                 local files = {}
                 for _, file in ipairs({path.join(SKELETON, library.folder .. ".m"), path.join(SKELETON, library.folder .. ".c")}) do
                     if os.isfile(file) then
