@@ -15,7 +15,7 @@ function api(...)
 end
 
 function workspace()
-    return import("workspace", {rootdir = revenant("toolchain", "modules"), anonymous = true})
+    return import("@addon.revenant.workspace", {anonymous = true})
 end
 
 function sdk()

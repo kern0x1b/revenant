@@ -13,7 +13,7 @@ local LOG = "/var/tmp/swiftui-demo.log"
 local SBLAUNCH = "/private/var/tmp/sblaunch"
 
 local function phone()
-    local device = import("device", {rootdir = tree.revenant("toolchain", "modules"), anonymous = true})
+    local device = import("@addon.revenant.device", {anonymous = true})
     local settings = device.bind(os.curdir())
     local key = settings.udid ~= "" and settings.udid
     if not key and settings.host ~= "127.0.0.1" then
