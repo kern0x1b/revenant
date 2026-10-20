@@ -1,2 +1,0 @@
-                sum -= RevenantMatrixSolveGet(&factor, 0, lower ? other : row, lower ? row : other) *
-                       RevenantMatrixSolveGet(&x, 0, other, side);

@@ -1,9 +1,0 @@
-MIDICIDeviceManager discoveredCIDevices count 0
-MIDIUMPEndpointManager UMPEndpoints count 0
-MIDI2DeviceInfo manufacturerID=123456 family=1234 model=102 revision=03040506
-MIDIUMPMutableFunctionBlock created: yes
-  name=fb firstGroup=0 groups=1 enabled=1
-MIDIUMPMutableEndpoint created: yes
-  name=ep protocol=2 enabled=0 destination=33206304 source=33206303
-MIDICIDeviceInfo created: nil family-length=0
-MIDICIProfile created: yes name=profile id-length=5

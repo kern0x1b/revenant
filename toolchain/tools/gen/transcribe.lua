@@ -59,7 +59,7 @@ end
 
 local function have_of(tree)
     local have = {}
-    for _, filepath in ipairs(files.glob(path.join(tree, "packages", "**.h"))) do
+    for _, filepath in ipairs(files.glob(path.join(tree, "..", "packages", "**.h"))) do
         if not string.match(path.filename(filepath), "^Revenant[%w]+Protocols%.h$") then
             for line in string.gmatch(strings.universal(io.readfile(filepath)), "[^\n]*") do
                 for name in string.gmatch(line, "@protocol%s+([%w_]+)") do
@@ -473,7 +473,7 @@ local function header_text(tree, sdk, framework, entries, defined16, have, proto
         end
     end
     table.sort(hand, order.less)
-    local folder_path = path.absolute(path.join(tree, "packages", "frameworks", "apple-backports", framework))
+    local folder_path = path.absolute(path.join(tree, "..", "packages", "frameworks", "apple-backports", framework))
     local seen = {}
     for _, header in ipairs(hand) do
         if not seen[header] then

@@ -1,7 +1,7 @@
 # Third-party code, and where each piece stands
 
 This repository contains almost no third-party source. Every dependency below is
-declared by a package under `toolchain/packages/` that names the upstream it fetches
+declared by a package under `packages/` that names the upstream it fetches
 and the version it pins; nothing external is vendored into the tree except the sources
 listed under *Vendored in the tree*. Each package copies its upstream license file
 under `licenses/` when it installs.

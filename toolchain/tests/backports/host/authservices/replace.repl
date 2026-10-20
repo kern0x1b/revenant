@@ -1,2 +1,0 @@
-    NSMutableArray *records = [self revenant_records];
-    for (ASPasswordCredentialIdentity *identity in newCredentialIdentities) {

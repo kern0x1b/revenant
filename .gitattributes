@@ -18,4 +18,3 @@
 docs/** linguist-documentation
 
 toolchain/tests/addon/sdk-verbatim/** comments=fixture
-toolchain/tests/backports/** comments=pending

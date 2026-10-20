@@ -1,2 +1,0 @@
-flow: ok=1 results=1 class=VNPixelBufferObservation format=843264102 size=64x64
-trajectories: requested length 3, reported length 5, first result at frame 6, class VNTrajectoryObservation

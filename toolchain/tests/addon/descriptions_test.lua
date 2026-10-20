@@ -3,7 +3,7 @@ import("core.package.package")
 
 function failures(opt)
     local found = {}
-    local packages = path.join(opt.modules, "..", "packages")
+    local packages = path.join(opt.modules, "..", "..", "packages")
     for _, recipe in ipairs(os.files(path.join(packages, "*", "*", "xmake.lua"))) do
         local root = path.directory(recipe)
         local name = path.filename(root)

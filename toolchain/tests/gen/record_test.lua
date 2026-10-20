@@ -52,7 +52,7 @@ local function write_inputs(tree)
     local layout = import("gen.layout", {rootdir = TOOLS, anonymous = true})
     local snapshot = import("gen.spec", {rootdir = TOOLS, anonymous = true})
     emit.file(layout.shard_path(tree, FRAMEWORK), shard_text(CONSTANT_HASH))
-    emit.file(path.join(tree, layout.registry_dir(FRAMEWORK), "ios.json"),
+    emit.file(path.join(tree, "..", layout.registry_dir(FRAMEWORK), "ios.json"),
         '{"entries":[{"api":"-[FKThing reset]","kind":"method","status":"implemented","owner":"hand"},'
         .. '{"api":"-[FKThing setLevel:]","kind":"method","status":"implemented","owner":"hand"}]}\n')
     local registry = path.join(layout.registry_dir(FRAMEWORK), "ios.json")

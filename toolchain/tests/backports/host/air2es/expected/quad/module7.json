@@ -1,1 +1,0 @@
-{"stage":"fragment","entry":"colorFragment","usesVertexId":false,"attributes":[],"uniforms":[],"textures":[],"varyings":[{"name":"vary_generated_5shadeDv4_f_","argument":1,"flat":false}],"constants":[],"inputs":[],"sizes":[],"outputs":[0],"fetches":[],"usesInstanceId":false}

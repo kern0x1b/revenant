@@ -187,7 +187,7 @@ function main()
 
     local surface = import("gen.surface", {rootdir = TOOLS, anonymous = true})
     local emit = import("gen.emit", {rootdir = TOOLS, anonymous = true})
-    emit.file(path.join(tree, "packages", "frameworks", "apple-backports", "spec", "framework-verdicts-6.1.3.tsv"),
+    emit.file(path.join(tree, "..", "packages", "frameworks", "apple-backports", "spec", "framework-verdicts-6.1.3.tsv"),
               "framework\tverdict\tcheckable\tpresent\treason\n"
               .. "FixGamma\tabsent\t1\t0\tfixture: no runtime symbol in the 6.1.3 cache\n"
               .. "FixBeta\tundecided\t0\t0\tfixture: no runtime declaration\n")

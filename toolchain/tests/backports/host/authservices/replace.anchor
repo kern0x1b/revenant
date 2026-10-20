@@ -1,2 +1,0 @@
-    NSMutableArray *records = [NSMutableArray array];
-    for (ASPasswordCredentialIdentity *identity in newCredentialIdentities) {

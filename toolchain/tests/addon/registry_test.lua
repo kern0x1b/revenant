@@ -1,7 +1,7 @@
 import("fixtures")
 
 local function one_minimum_step(backports, root, found)
-    local tool = import("registry-one-minimum", {rootdir = path.join(root, "..", "..", "..", "tools")})
+    local tool = import("registry-one-minimum", {rootdir = path.join(root, "..", "..", "..", "toolchain", "tools")})
     local work = path.join(fixtures.scratch(), "one-minimum")
     os.rm(work)
     os.mkdir(path.join(work, "registry", "RevenantThing"))
@@ -349,7 +349,7 @@ local function protocol_headers(backports, root, found)
     local out = fixtures.scratch()
     for _, library in ipairs(backports.libraries()) do
         local written = backports.protocol_sources({root = root, sdkdir = os.getenv("BP_SDK")}, library, out, library.folder)
-        local tree = path.join(root, "..", "..", "..")
+        local tree = path.join(root, "..", "..", "..", "toolchain")
         local rendered = import("gen.protocol_headers", {rootdir = path.join(tree, "tools"), anonymous = true})
         if #written > 0 and rendered.header_text(tree, library.folder) == nil then
             table.insert(found, string.format("%s has %d generated protocol sources and no Revenant%sProtocols.h for them to import: "
@@ -644,7 +644,7 @@ end
 
 local function inline_rows_step(backports, opt, found)
     local counter = 0
-    local header_path = path.join(opt.modules, "..", "packages", "frameworks", "apple-backports", "AVFoundation",
+    local header_path = path.join(opt.modules, "..", "..", "packages", "frameworks", "apple-backports", "AVFoundation",
                                  "RevenantCMTag26.h")
     local header = io.readfile(header_path)
     if not header then
@@ -756,7 +756,7 @@ function failures(opt)
     local backports = import("apple.backports", {rootdir = opt.modules, anonymous = true})
     SCRATCH_RUNS = import("workspace", {rootdir = opt.modules, anonymous = true}).run("registry-test")
     local found = {}
-    local root = path.join(opt.modules, "..", "packages", "frameworks", "apple-backports")
+    local root = path.join(opt.modules, "..", "..", "packages", "frameworks", "apple-backports")
     if not os.isdir(path.join(root, "registry")) then
         table.insert(found, root .. " holds no registry to read")
         return found

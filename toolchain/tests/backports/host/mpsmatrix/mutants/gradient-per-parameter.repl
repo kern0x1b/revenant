@@ -1,2 +1,0 @@
-            // MUTATION: zeros written, not untouched
-            if (resultGradientForGammaVector) { { RevenantMPSVectorView v = RevenantMPSVectorViewOf(resultGradientForGammaVector); for (NSUInteger i = 0; i < v.length; i++) RevenantMPSStore(RevenantMPSVectorElement(&v, 0, i), v.dataType, 0, 0.0); } }

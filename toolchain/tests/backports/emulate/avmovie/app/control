@@ -1,7 +1,0 @@
-Package: org.revenant.avmovie-probe
-Name: Revenant AVMovie probe application
-Architecture: iphoneos-arm
-Description: The AVMovie host differential's probe as an application on the 6.1.3 emulator, reading the movies in its bundle
-Maintainer: revenant
-Author: revenant
-Section: Development

@@ -1,7 +1,0 @@
-known: symbolDescriptor (nil)
-known: qr round trip class CIQRCodeFeature equal 1
-known: bounds {8.00 8.00 168.00 168.00}
-known: corners topLeft (8.00 176.00) topRight (176.00 176.00) bottomLeft (8.00 8.00) bottomRight (176.00 8.00)
-known: symbolDescriptor (nil)
-known: messageString (nil)
-known: symbolDescriptor (nil)

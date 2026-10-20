@@ -21,8 +21,8 @@ function main()
         end
     end
 
-    local root = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true}).fresh("headers-test")
-    local folder = path.join(root, "packages", "frameworks", "apple-backports", "spec", "Fixture")
+    local root = path.join(import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true}).fresh("headers-test"), "toolchain")
+    local folder = path.join(root, "..", "packages", "frameworks", "apple-backports", "spec", "Fixture")
     os.mkdir(folder)
     local shard = io.open(path.join(folder, "declarations.tsv"), "wb")
     shard:write("#libclang=test\tsdk=iPhoneOS26.2\tcolumns=declhash,usr,kind,side,name,container,availability,message\n")

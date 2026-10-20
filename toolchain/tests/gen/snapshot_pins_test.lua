@@ -1,7 +1,8 @@
 local ROOT = path.absolute(path.join(os.scriptdir(), "..", ".."))
 local TOOLS = path.join(ROOT, "tools")
-local TREE = import("workspace", {rootdir = path.join(ROOT, "modules"), anonymous = true}).run("snapshot-pins-test")
-local SPEC = path.join(TREE, "packages", "frameworks", "apple-backports", "spec")
+local CONTAINER = import("workspace", {rootdir = path.join(ROOT, "modules"), anonymous = true}).run("snapshot-pins-test")
+local TREE = path.join(CONTAINER, "toolchain")
+local SPEC = path.join(TREE, "..", "packages", "frameworks", "apple-backports", "spec")
 local pins = import("gen.snapshot_pins", {rootdir = TOOLS, anonymous = true})
 local check = import("gen.cmd_check", {rootdir = TOOLS, anonymous = true})
 
@@ -30,7 +31,7 @@ local function write(framework, file, text)
     io.writefile(path.join(dir, file), text)
 end
 
-os.tryrm(TREE)
+os.tryrm(CONTAINER)
 write("Fa", "protocols.tsv", "protocol\tintroduced\nP\t12.0\n")
 write("Fa", "functions.tsv", "api\tintroduced\nf\t13.0\n")
 write("Outer/Inner", "protocols.tsv", "protocol\tintroduced\nQ\t14.0\n")
@@ -67,7 +68,7 @@ expect("a constant record with a row is no problem", check.constant_record_probl
 os.rm(path.join(SPEC, "Fa", "constants.tsv"))
 expect("no constant record is no problem", check.constant_record_problem(TREE, "Fa") == nil)
 
-os.tryrm(TREE)
+os.tryrm(CONTAINER)
 print("snapshot pins test: " .. (failures == 0 and "OK" or ("FAIL " .. failures)))
 if failures > 0 then
     os.exit(1)

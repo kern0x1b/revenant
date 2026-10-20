@@ -1,4 +1,0 @@
-#ifndef REVENANT_HOST_GLES2_GLEXT_H
-#define REVENANT_HOST_GLES2_GLEXT_H
-#import <OpenGLES/ES2/gl.h>
-#endif

@@ -43,7 +43,7 @@ end
 local absent_memo = {}
 function absent_frameworks(tree)
     if absent_memo[tree] == nil then
-        local file = path.join(tree, layout.constants().SNAP_ROOT, "framework-verdicts-6.1.3.tsv")
+        local file = path.join(tree, "..", layout.constants().SNAP_ROOT, "framework-verdicts-6.1.3.tsv")
         assert(os.isfile(file), "the 6.1.3 framework verdicts are not found: " .. file)
         local known = {}
         for _, row in ipairs(tsv.records(files.read_text(file))) do
@@ -141,8 +141,8 @@ end
 
 function registry_rows(tree, fw)
     local out = {}
-    local single = path.join(tree, layout.constants().REGISTRY, fw .. ".json")
-    local candidates = files.glob(path.join(tree, layout.registry_dir(fw), "*.json"))
+    local single = path.join(tree, "..", layout.constants().REGISTRY, fw .. ".json")
+    local candidates = files.glob(path.join(tree, "..", layout.registry_dir(fw), "*.json"))
     if os.isfile(single) then
         table.insert(candidates, single)
     end

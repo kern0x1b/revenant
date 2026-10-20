@@ -1,6 +1,0 @@
-INUIAddVoiceShortcutButton	init	INUIAddVoiceShortcutButton	isKind 1	exact 1
-INUIAddVoiceShortcutButton	initWithFrame:	INUIAddVoiceShortcutButton	isKind 1	exact 1
-INUIAddVoiceShortcutViewController	init	INUIAddVoiceShortcutViewController	isKind 1	exact 1
-INUIAddVoiceShortcutViewController	initWithNibName:bundle:	INUIAddVoiceShortcutViewController	isKind 1	exact 1
-INUIEditVoiceShortcutViewController	init	INUIEditVoiceShortcutViewController	isKind 1	exact 1
-INUIEditVoiceShortcutViewController	initWithNibName:bundle:	INUIEditVoiceShortcutViewController	isKind 1	exact 1

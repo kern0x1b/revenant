@@ -114,7 +114,7 @@ function failures(opt)
     return found
 end
 
-local SUITES = {"registry_files_test", "walk_test", "surface_table_test", "ledger_test", "values_test"}
+local SUITES = {"walk_test", "surface_table_test", "ledger_test", "values_test"}
 
 local function suite_failures()
     local found = {}

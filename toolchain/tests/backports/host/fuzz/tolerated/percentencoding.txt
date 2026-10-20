@@ -1,3 +1,0 @@
-# Categories of the percentencoding fuzzer where the host is not the truth: the category, a tab, and why.
-decode.string.options1.paddingInside	open: with unknown characters ignored and a '=' followed by more data, the host's Objective-C decoder answers bytes where the newest open implementation (swift-foundation _decodeIgnoringErrors) refuses the padding; which of the two the NSData of iOS 7 to 18 is has not yet been read from a binary
-decode.data.options1.paddingInside	open: with unknown characters ignored and a '=' followed by more data, the host's Objective-C decoder answers bytes where the newest open implementation (swift-foundation _decodeIgnoringErrors) refuses the padding; which of the two the NSData of iOS 7 to 18 is has not yet been read from a binary

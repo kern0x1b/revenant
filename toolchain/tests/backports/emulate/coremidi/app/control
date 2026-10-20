@@ -1,7 +1,0 @@
-Package: org.revenant.coremidi-app
-Name: Revenant CoreMIDI round trip application
-Architecture: iphoneos-arm
-Description: The CoreMIDI round trip as an application with the audio background mode, launched through SpringBoard
-Maintainer: revenant
-Author: revenant
-Section: Development
