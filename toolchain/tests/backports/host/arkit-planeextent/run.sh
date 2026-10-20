@@ -13,8 +13,6 @@
 # port's own code.
 
 set -eu
-echo "FAIL host/arkit-planeextent/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 49" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 repo=$(cd "$here/../../../.." && pwd)
@@ -46,15 +44,8 @@ mutant() {
     copy="$runs/mutant"
     rm -rf "$copy"; mkdir -p "$copy"
     cp "$ARKit/ARPlaneExtent16.m" "$ARKit/RevenantARKitPlaneExtent.h" "$copy/"
-    python3 - "$copy/ARPlaneExtent16.m" "$from" "$to" <<'PY' || { echo "MUTANT NOT APPLIED: $label"; survived=$((survived + 1)); return; }
-import sys
-path, old, new = sys.argv[1], sys.argv[2], sys.argv[3]
-text = open(path).read()
-if text.count(old) != 1:
-    sys.stderr.write("needle occurs %d times, expected 1\n" % text.count(old))
-    sys.exit(1)
-open(path, "w").write(text.replace(old, new))
-PY
+    runs_xmake l "$runs_checkout/tests/backports/common/mutants.lua" once "$copy/ARPlaneExtent16.m" "$from" "$to" \
+        || { echo "MUTANT NOT APPLIED: $label"; survived=$((survived + 1)); return; }
     if build "$copy" >/dev/null 2>&1 && "$runs/extent" > "$runs/mutant.txt" 2>&1 && grep -q '^VERDICT ok' "$runs/mutant.txt"; then
         echo "MUTANT SURVIVED: $label"
         survived=$((survived + 1))
