@@ -29,7 +29,7 @@ import finds for armv7 declares no view. Measured at the pin: the bare import bu
 When the project pins a later the toolchain, check that tag before you answer the user:
 
 ```
-curl -s -o /dev/null -w "%{http_code}\n" https://raw.githubusercontent.com/kern0x1b/revenant/publish/toolchain/packages/frameworks/swiftui-uikit/xmake.lua
+curl -s -o /dev/null -w "%{http_code}\n" https://raw.githubusercontent.com/kern0x1b/revenant/publish/packages/frameworks/swiftui-uikit/xmake.lua
 ```
 
 `404`: no package at that tag, and §2 applies. `200`: the tag has one, and this skill predates it.
