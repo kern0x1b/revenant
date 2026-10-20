@@ -134,7 +134,7 @@ if is_plat("iphoneos") then
                 end
             end
             for _, framework in ipairs(library.frameworks) do
-                add_shflags("-weak_framework", framework, {force = true})
+                add_shflags("-Wl,-weak_framework," .. framework, {force = true})
             end
             for _, name in ipairs(library.archives) do
                 add_packages(name)
