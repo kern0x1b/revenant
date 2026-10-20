@@ -51,7 +51,7 @@ jobs:
 
   backports:
     runs-on: macos-26
-    timeout-minutes: 360
+    timeout-minutes: 30
     env:
       REVENANT_PREBUILT: kern0x1b/revenant
       REVENANT_PREBUILT_ONLY: "1"
@@ -100,11 +100,21 @@ jobs:
             echo "Backports build skipped: this branch has no component option." >> "$GITHUB_STEP_SUMMARY"
           fi
 
-      - name: Configure and build the Backports component
+      - name: Configure the Backports component
         if: steps.component.outputs.present == 'true'
         run: |
-          ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y
-          ./xmakew build -P .
+          stamp() { while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done; }
+          echo "stage configure starts $(date -u +%H:%M:%S)"
+          ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y 2>&1 | stamp
+          echo "stage configure ends $(date -u +%H:%M:%S)"
+
+      - name: Build the Backports component
+        if: steps.component.outputs.present == 'true'
+        run: |
+          stamp() { while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done; }
+          echo "stage build starts $(date -u +%H:%M:%S)"
+          ./xmakew build -P . 2>&1 | stamp
+          echo "stage build ends $(date -u +%H:%M:%S)"
 
       - name: Upload the Backports libraries
         if: steps.component.outputs.present == 'true'
@@ -112,6 +122,34 @@ jobs:
         with:
           name: backports-libraries
           path: build/iphoneos/armv7/release/lib*.dylib
+          if-no-files-found: error
+
+      - name: Check every source key against the built libraries
+        if: steps.component.outputs.present == 'true'
+        run: |
+          mkdir -p "$RUNNER_TEMP/report"
+          echo "stage exports starts $(date -u +%H:%M:%S)"
+          ./xmakew l -P . frameworks/Backports/tools/exports.lua > "$RUNNER_TEMP/report/exports.txt" 2>&1
+          echo "stage exports ends $(date -u +%H:%M:%S)"
+          cat "$RUNNER_TEMP/report/exports.txt" | head -40
+          cat "$RUNNER_TEMP/report/exports.txt" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Count the implemented members per framework
+        if: steps.component.outputs.present == 'true'
+        run: |
+          mkdir -p "$RUNNER_TEMP/report"
+          echo "stage status starts $(date -u +%H:%M:%S)"
+          ./xmakew l -P . frameworks/Backports/tools/status.lua > "$RUNNER_TEMP/report/status.txt" 2>&1
+          echo "stage status ends $(date -u +%H:%M:%S)"
+          echo "Top 10 frameworks by implemented members:" >> "$GITHUB_STEP_SUMMARY"
+          grep -v '^total' "$RUNNER_TEMP/report/status.txt" | sort -k3,3nr | head -10 >> "$GITHUB_STEP_SUMMARY"
+          grep '^total' "$RUNNER_TEMP/report/status.txt" >> "$GITHUB_STEP_SUMMARY" || true
+
+      - uses: actions/upload-artifact@v4
+        if: steps.component.outputs.present == 'true'
+        with:
+          name: backports-report
+          path: ${{ runner.temp }}/report
           if-no-files-found: error
 
       - uses: actions/cache/save@v4
