@@ -28,7 +28,7 @@ package("ld64")
     end)
 
     on_install("@macosx", function (package)
-        local prebuilt = import("prebuilt", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
+        local prebuilt = import("prebuilt", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
         if prebuilt.install(package) then
             return
         end
