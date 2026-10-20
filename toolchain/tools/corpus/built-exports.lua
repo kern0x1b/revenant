@@ -1,5 +1,5 @@
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
-import("aggregate", {rootdir = os.scriptdir()})
+import("demand", {rootdir = os.scriptdir()})
 
 local BAND = path.join("build", "stage", "usr", "lib", "revenant", "org.revenant.apple-backports", "bands", "6.1.3")
 
@@ -28,9 +28,9 @@ function main(run)
         end
     end
     byteorder.sort(names)
-    local out = aggregate.built_exports_file()
+    local out = demand.built_exports_file()
     local file = assert(io.open(out, "w"))
-    file:write(aggregate.built_exports_header() .. version .. "\n")
+    file:write(demand.built_exports_header() .. version .. "\n")
     for _, name in ipairs(names) do
         file:write(name .. "\n")
     end

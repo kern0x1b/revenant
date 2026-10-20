@@ -54,7 +54,7 @@ end
 function read_json(file)
     local held, err = json.decode(io.readfile(file))
     if held == nil then
-        raise("aggregate.lua: %s is not readable JSON: %s", file, tostring(err))
+        raise("demand.lua: %s is not readable JSON: %s", file, tostring(err))
     end
     return held
 end
@@ -152,14 +152,14 @@ function load_store(missing_ok)
         return read_json(STORE)
     end
     if not missing_ok then
-        raise("aggregate.lua: no store at %s; run ingest first.", STORE)
+        raise("demand.lua: no store at %s; run ingest first.", STORE)
     end
     return {apps = {}}
 end
 
 function ingest(app, appdir)
     if not os.isdir(appdir) then
-        raise("aggregate.lua: %s is not a bundle directory; ingest reads the .app, not a scan of it.", appdir)
+        raise("demand.lua: %s is not a bundle directory; ingest reads the .app, not a scan of it.", appdir)
     end
     local b60, ladder = build_index()
     local bins = macho_binaries(appdir)
@@ -219,7 +219,7 @@ function ingest(app, appdir)
     store.apps[app] = {binaries = #bins, demand = records, residual = residual}
     local text, err = json.encode(store, {pretty = true, indent = 1})
     if not text then
-        raise("aggregate.lua: cannot encode the store: %s", tostring(err))
+        raise("demand.lua: cannot encode the store: %s", tostring(err))
     end
     io.writefile(STORE, text)
     local shown = {}
@@ -234,7 +234,7 @@ end
 
 function load_registry()
     if not os.isfile(REGISTRY_TSV) then
-        raise("aggregate.lua: registry export not found at %s (REVENANT_REGISTRY_TSV). Every row would "
+        raise("demand.lua: registry export not found at %s (REVENANT_REGISTRY_TSV). Every row would "
             .. "silently read as undecided instead of raising.", REGISTRY_TSV)
     end
     local reg = {}
@@ -261,7 +261,7 @@ end
 
 function load_reg_kinds()
     if not os.isfile(REGISTRY_TSV) then
-        raise("aggregate.lua: registry export not found at %s (REVENANT_REGISTRY_TSV). load_reg_kinds() has "
+        raise("demand.lua: registry export not found at %s (REVENANT_REGISTRY_TSV). load_reg_kinds() has "
             .. "nothing to read.", REGISTRY_TSV)
     end
     local kinds = {}
@@ -371,7 +371,7 @@ function main(cmd, ...)
     cmd = cmd or "report"
     if cmd == "ingest" then
         local app, appdir = ...
-        assert(app and appdir, "usage: aggregate.lua ingest <app> <path-to-.app>")
+        assert(app and appdir, "usage: demand.lua ingest <app> <path-to-.app>")
         ingest(app, appdir)
     elseif cmd == "report" then
         local only = nil
@@ -384,6 +384,6 @@ function main(cmd, ...)
         end
         report(only)
     else
-        print("usage: aggregate.lua ingest <app> <path-to-.app> | report [cat,cat...]")
+        print("usage: demand.lua ingest <app> <path-to-.app> | report [cat,cat...]")
     end
 end
