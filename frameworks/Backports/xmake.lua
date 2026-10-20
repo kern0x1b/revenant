@@ -145,11 +145,7 @@ if is_plat("iphoneos") then
                 generator = import("generate", {rootdir = TOOLS, anonymous = true})
             end)
             on_config(function (target)
-                local includes = {}
-                for _, name in ipairs(library.archives) do
-                    table.insert(includes, path.join(target:pkg(name):installdir(), "include"))
-                end
-                generator.skeleton_for(library.folder, includes)
+                generator.skeleton_for(library.folder)
                 local files = {}
                 for _, file in ipairs({path.join(SKELETON, library.folder .. ".m"), path.join(SKELETON, library.folder .. ".c")}) do
                     if os.isfile(file) then
