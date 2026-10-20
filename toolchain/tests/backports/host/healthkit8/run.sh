@@ -15,8 +15,6 @@
 # constants are not compiled in, because the system's HealthKit exports the same symbols and the two
 # would collide - the same arrangement tests/backports/host/healthkit/run.sh uses.
 set -eu
-echo "FAIL host/healthkit8/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 78" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 checkout=$(cd "$here/../../../.." && pwd)
@@ -75,27 +73,6 @@ mv "$objects/probe.new" "$objects/probe"
 # The registry rows of these sixteen are what the heredoc below reads. What is asserted here is only that the sixteen rows are the sixteen
 # this file asked about, so a future row added to the same sixteen is caught by a reviewer rather than
 # by a silent gap.
-rows=$(python3 - "$checkout" <<'PY'
-import json, sys
-registry = json.load(open(sys.argv[1] + "/packages/frameworks/apple-backports/registry/HealthKit/ios8.json"))
-asked = ["+[HKQuery predicateForStatesOfMindWithAssociation:]",
-         "+[HKQuery predicateForStatesOfMindWithKind:]",
-         "+[HKQuery predicateForStatesOfMindWithLabel:]",
-         "+[HKQuery predicateForStatesOfMindWithValence:operatorType:]",
-         "-[HKCategorySample init]", "-[HKHealthStore endWorkoutSession:]",
-         "-[HKHealthStore pauseWorkoutSession:]", "-[HKHealthStore resumeWorkoutSession:]",
-         "-[HKHealthStore startWorkoutSession:]", "-[HKObject init]", "-[HKObjectType init]",
-         "-[HKQuantity init]", "-[HKSource init]", "-[HKStatistics init]",
-         "-[HKStatisticsCollection init]", "-[HKWorkoutEvent init]"]
-rows = {entry["api"]: entry for entry in registry["entries"]}
-missing = [name for name in asked if name not in rows]
-for name in missing:
-    print("row not in the registry: " + name)
-for name in asked:
-    if name in rows and rows[name]["status"] != "absent":
-        print("row is not absent any more: %s (%s)" % (name, rows[name]["status"]))
-print("rows asked about: %d, all absent in registry/HealthKit/ios8.json" % (len(asked) - len(missing)))
-PY
-)
+rows=$(runs_xmake l "$here/ios8-rows.lua" "$checkout")
 printf '%s\n' "$rows"
 printf '%s\n' "$rows" | grep -q '^rows asked about: 16, all absent'
