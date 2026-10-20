@@ -30,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   module, and the revenant targets compile that tree. Upstream's tests run as the
   `CombineTests` target, found by a Lua discovery; the SwiftPM manifest, the
   Makefile, the gyb script and the LLDB script are gone.
+- `harness/` is split by role: the XCTest shim, the skip list and the test
+  daemon's control are `Tests/`, the discovery is `tools/discover.lua`.
 
 ### Removed
 - The `OCombine` namespaces of `Optional.Publisher` and `Result.Publisher`.

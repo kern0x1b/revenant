@@ -40,7 +40,7 @@
 ### 2.3 Чего требует от SwiftUI само приложение (замер, 2026-09-17)
 
 Вывод раздела 2.2 относится к переносу фреймворка Apple. Отдельный вопрос — что нужно приложению, и
-ответ другой. Подробности и команды: `bridge/README.md`.
+ответ другой. Подробности и команды: `bridge.md`.
 
 Подопытное приложение (`@main App`, `NavigationView`, `List`, `ForEach` по `Identifiable`, `NavigationLink`,
 `Toggle`, `Button`, `Text` с интерполяцией, `@State`, `@StateObject`, `@Published`, `navigationTitle`),
@@ -77,7 +77,7 @@ arm64, плюс гостевой libswiftCore, всё переводится е�
 
 Собрано отдельным скриптом, которого больше нет (теперь это цель `Combine` в `frameworks/Combine`): Swift 6.4 (revenant@swift), `-target armv7-apple-ios7.0`, рантайм и оверлеи учебных сборок проекта Swift-оверлеев, линковка при iOS 6.0, install name `@executable_path`. Проверка импортов тулчейна против кэшей 6.0 и 6.1.3: **0 strong missing**.
 
-Тесты: 1453 upstream-теста (исключён `URLSessionTests.swift` — наследует `NSURLSession`, iOS 7) прогнаны через собственный шим XCTest (230 строк; теперь `frameworks/Combine/harness/XCTest.swift`, а список тестов собирает `frameworks/Combine/harness/discover.lua` для цели `CombineTests`).
+Тесты: 1453 upstream-теста (исключён `URLSessionTests.swift` — наследует `NSURLSession`, iOS 7) прогнаны через собственный шим XCTest (230 строк; теперь `frameworks/Combine/Tests/XCTest.swift`, а список тестов собирает `frameworks/Combine/tools/discover.lua` для цели `CombineTests`).
 
 | где | тестов | прошло | упало | аварий |
 |---|---|---|---|---|
@@ -122,10 +122,10 @@ arm64, плюс гостевой libswiftCore, всё переводится е�
 
 ### 5.2 Что уже сделано
 
-Модуль `SwiftUI/Sources/SwiftUI` (проект SwiftUI; Swift-модуль по-прежнему называется `SwiftUI`) — около 14 000 строк.
-Полный перечень поддержанного, игнорируемого и отсутствующего ведётся в `SwiftUI/README.md` и сверяется со сборкой
+Модуль `Sources/` (проект SwiftUI; Swift-модуль по-прежнему называется `SwiftUI`) — около 14 000 строк.
+Полный перечень поддержанного, игнорируемого и отсутствующего ведётся в `ledger.md` и сверяется со сборкой
 (`coverage.lua --check`). Счёт на 19.09 по интерфейсу SwiftUI из SDK 16.4 — по той его части, которую Apple объявляет
-доступной на iOS (срез строит `bridge/ios-surface.lua`): **490 из 520 типов, 289 из 289 модификаторов `View`**, из них
+доступной на iOS (срез строит `tools/ios-surface.lua`): **490 из 520 типов, 289 из 289 модификаторов `View`**, из них
 188 действуют, 101 объявлен и игнорируется (каждый пишет строку в журнал и в `/var/revenant/swiftui-ignored.txt`),
 заглушек `unimplemented` не осталось. По полному интерфейсу, вместе с macOS/tvOS/watchOS-частью: 503 из 592 типов.
 Список игнорируемых закрытый: туда попадает только то, чему в iOS 6 нечему соответствовать; всё, что упиралось в наш
@@ -146,11 +146,11 @@ arm64, плюс гостевой libswiftCore, всё переводится е�
 
 ### 5.3 Проба: приложение
 
-`SwiftUI/Demo/DemoApp.swift` (177 строк) — приложение на обычном синтаксисе SwiftUI: `@main struct DemoApp: App`, `NavigationView` со `List`, карточка со `@State` (счётчик, переключатель, поле ввода), `@StateObject` модель с `@Published`, `@EnvironmentObject` в строках и на экране деталей, `ForEach` по `Identifiable`, условное представление, `NavigationLink` на экран деталей.
+`Demo/DemoApp.swift` (177 строк) — приложение на обычном синтаксисе SwiftUI: `@main struct DemoApp: App`, `NavigationView` со `List`, карточка со `@State` (счётчик, переключатель, поле ввода), `@StateObject` модель с `@Published`, `@EnvironmentObject` в строках и на экране деталей, `ForEach` по `Identifiable`, условное представление, `NavigationLink` на экран деталей.
 
-Собирается `SwiftUI/build.sh` в `SwiftUIDemo.app` (armv7, `MinimumOSVersion 6.0`), проверка импортов тулчейна против 6.0 и 6.1.3 — 0 strong missing.
+Собирается целью `SwiftUIDemo` в `SwiftUIDemo.app` (armv7, `MinimumOSVersion 6.0`), проверка импортов тулчейна против 6.0 и 6.1.3 — 0 strong missing.
 
-Прогон в iLEmu (iPod4,1, iOS 6.0, запуск через SpringBoard, касания по сценарию, `run-app.sh`, прогоны `runs.noindex/app10`):
+Прогон в iLEmu (iPod4,1, iOS 6.0, запуск через SpringBoard, касания по сценарию, прогон `app10` тогдашнего `run-app.sh`):
 
 | ![список](shots/01-list.png) | ![переключатель](shots/02-toggle.png) | ![детали](shots/03-detail.png) | ![избранное](shots/04-favorite.png) |
 |---|---|---|---|
@@ -162,7 +162,7 @@ arm64, плюс гостевой libswiftCore, всё переводится е�
 
 ### 5.4 Проба: движок на железе
 
-`SwiftUI/Probe/main.swift` — безоконный пробник: строит дерево, меняет состояние через `@Published`, сбрасывает транзакции, печатает дерево `UIView` с рамками и замеряет время. Запущен на **iPhone 4S, iOS 6.1.3** (через модуль device тулчейна, файлы только в `/var/tmp`, после прогона удалены; вывод `device-run/probe-iphone4s.out`):
+`Tests/Probe/main.swift` — безоконный пробник: строит дерево, меняет состояние через `@Published`, сбрасывает транзакции, печатает дерево `UIView` с рамками и замеряет время. Запущен на **iPhone 4S, iOS 6.1.3** (через модуль device тулчейна, файлы только в `/var/tmp`, после прогона удалены; вывод прогона в дереве не хранится):
 
 - дерево собралось, изменение `@Published` добавило новую строку `ForEach`, показало условный блок и изменило ширины — согласование и лейаут на железе работают;
 - **2,83 мс** на полное обновление экрана (200 обновлений за 0,566 с), худшее 3,71 мс;
@@ -182,13 +182,13 @@ arm64, плюс гостевой libswiftCore, всё переводится е�
 
 Счёт «490 из 520 типов, 289 из 289 модификаторов» верен как счёт **имён** и таким и остаётся, но им нельзя мерить
 полноту. Типизированный разбор `swift-api-digester` (интерфейс Apple SwiftUI для iOS 16.4 против нашего модуля,
-`bridge/api-surface.sh`) даёт то, чего счёт по именам не видит: **1402 декларации Apple отсутствуют и 321 есть с
+`tools/api-surface.lua`) даёт то, чего счёт по именам не видит: **1402 декларации Apple отсутствуют и 321 есть с
 другой подписью** (вызовы, покрытые нашими значениями по умолчанию, не считаются). Причина слепоты счёта —
 сравнение по имени не различает перегрузки и принимает `Shading.linearGradient` за `ShapeStyle.linearGradient`.
 Тот же разбор и сценарии из реального кода нашли и три тихие неправды, которых имена не показывали: `.updating` у
 жеста не вызывал тело (жесты сверялись по типу замыкания через `Mirror`), `animatableData` у своих фигур, эффектов
 и раскладок нигде не читалась, а `GeometryEffect` был записан как «игнорируется» с неверной причиной
-(`CALayer.transform` есть с iOS 2). Все три исправлены; список остального — рабочая очередь (`bridge/api/gaps.txt`).
+(`CALayer.transform` есть с iOS 2). Все три исправлены; список остального — рабочая очередь (`gaps.txt`, который пишет `tools/api-surface.lua`).
 
 ### Приёмы из смежных систем (разбор 19.09)
 
@@ -276,8 +276,8 @@ Compose (нужен плагин компилятора), полный diff ви
 ## 10. Как воспроизвести
 
 ```
-xmake build -P . CombineTests                         # Combine + тесты OpenCombine под armv7
-SwiftUI/build.sh                                     # модуль SwiftUI + SwiftUIDemo.app + SwiftUIProbe
-DEV=iPod4,1 SRC=~/.revenant/firmware/rootfs/iPod4,1/6.0_10A403 ./run-app.sh app10 SwiftUI/out/SwiftUIDemo.app 560 scratch/ctl7.txt
+./xmakew build -P . CombineTests                               # Combine + тесты OpenCombine под armv7
+./xmakew build -P . SwiftUI SwiftUIDemo SwiftUIProbe               # модуль SwiftUI + SwiftUIDemo.app + SwiftUIProbe
+./xmakew l frameworks/SwiftUI/tools/emulate.lua snapshots          # сценарии демо в эмуляторе, через SpringBoard
 xmake l a/closure.lua 18.0 6.1.3 /System/Library/Frameworks/SwiftUI.framework/SwiftUI
 ```

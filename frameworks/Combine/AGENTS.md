@@ -52,18 +52,21 @@ Consequences to respect:
 | Path | Holds |
 | --- | --- |
 | `xmake.lua` | `CombineHelpers` and `Combine` on the tree `revenant@combine` installs with `sources = true`; `CombineXCTest` and `CombineTests`, upstream's tests as a daemon; `CombineGenerated`, the gyb check |
-| `harness/XCTest.swift` | the XCTest API shim the tests compile against (`XCT_SKIP`, `XCT_FILTER`, `xct-skip.txt`, `xct-resume.txt` at run time) |
-| `harness/discover.lua` | finds upstream's tests and writes the `main.swift` that runs them |
-| `harness/skip.txt` | the tests left out of the iOS 6 run, one `Class` or `Class.test` per line (see `docs/TEST-RESULTS.md`) |
-| `harness/control` | the Debian control of the test daemon |
+| `Tests/XCTest.swift` | the XCTest API shim the tests compile against (`XCT_SKIP`, `XCT_FILTER`, `xct-skip.txt`, `xct-resume.txt` at run time) |
+| `Tests/skip.txt` | the tests left out of the iOS 6 run, one `Class` or `Class.test` per line (see `docs/TEST-RESULTS.md`) |
+| `Tests/control` | the Debian control of the test daemon |
+| `tools/discover.lua` | finds upstream's tests and writes the `main.swift` that runs them |
 | `../../toolchain/packages/c/combine/` | the recipe and the patches |
 
 ## 3. How to build, and how to check
 
-- `xmake build Combine` at the revenant top (configured `-p iphoneos -a armv7`)
-  builds the module; `xmake build CombineTests` the tests, which
-  `xmake emulate run` starts in the guest.
-- `xmake test CombineGenerated` expands each `*.swift.gyb` with Revenant's gyb
+- `./xmakew build -P . Combine` at the revenant top (configured with
+  `./xmakew f -P . -p iphoneos -a armv7`) builds the module;
+  `./xmakew build -P . CombineTests` the tests. Configured with `--emulate=y` as
+  well, `./xmakew emulate -P . -d iPhone4,1 -r 6.1.3 install` and
+  `./xmakew emulate -P . -d iPhone4,1 -r 6.1.3 run /usr/libexec/CombineTests` start
+  them in the guest; the repository's skill `emulate-port` says how to use the emulator.
+- `./xmakew test -P . CombineGenerated` expands each `*.swift.gyb` with Revenant's gyb
   (`toolchain/modules/gyb`) and checks the `GENERATED-*` file beside it.
 - Outside revenant: `add_requires("revenant@combine")`, which compiles the module against
   `revenant@swift-runtime` with the runtime's compiler and flags.
@@ -92,8 +95,6 @@ patch's message.
 - A Swift `private` declaration's mangled name depends on the name of its file.
   A patch that moves declarations between files changes symbols; keep a file's
   name when its declarations stay.
-- macOS file systems are case-insensitive: a folder here may not share its name
-  with upstream's `Tests` up to case, hence `harness/`.
 
 ## 6. Upstream
 
