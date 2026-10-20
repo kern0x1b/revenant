@@ -23,8 +23,8 @@ revives the `iproxy` tunnel before every command, because a dead tunnel answers
 
 ## Building them
 
-The `webkit-device-tools` package, `packages/device-tools/xmake.lua`, builds the four C tools
-for armv7 from `tools/CMakeLists.txt` and signs each with the entitlements in
+The `webkit-device-tools` package, `packages/device-tools/xmake.lua`, compiles the four C tools
+in `tools/` for armv7 and signs each with the entitlements in
 `tools/entitlements/` it needs. Configuring for iphoneos requires it, so it is built with the
 port, and `./xmakew where -P . webkit-device-tools` names its folder:
 
