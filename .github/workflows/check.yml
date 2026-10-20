@@ -58,6 +58,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Give the checkout a fixed mtime
+        run: git ls-files -z | xargs -0 touch -t 200001010000
+
       - name: Select the newest Xcode and show its clang
         run: |
           xcode=$(ls -d /Applications/Xcode_*.app | sort -V | tail -n 1)
@@ -100,6 +103,16 @@ jobs:
             echo "Backports build skipped: this branch has no component option." >> "$GITHUB_STEP_SUMMARY"
           fi
 
+      - uses: actions/cache/restore@v4
+        id: objects
+        if: steps.component.outputs.present == 'true'
+        with:
+          path: |
+            build/.objs
+            build/.deps
+            build/iphoneos
+          key: backports-objects-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'third_party/**', 'xmake.lua', 'xmakew') }}
+
       - name: Configure the Backports component
         if: steps.component.outputs.present == 'true'
         timeout-minutes: 20
@@ -140,6 +153,15 @@ jobs:
           echo "stage build starts $(date -u +%H:%M:%S)"
           ./xmakew build -P . 2>&1 | stamp
           echo "stage build ends $(date -u +%H:%M:%S)"
+
+      - uses: actions/cache/save@v4
+        if: steps.component.outputs.present == 'true' && steps.objects.outputs.cache-hit != 'true'
+        with:
+          path: |
+            build/.objs
+            build/.deps
+            build/iphoneos
+          key: backports-objects-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'third_party/**', 'xmake.lua', 'xmakew') }}
 
       - name: Upload the Backports libraries
         if: steps.component.outputs.present == 'true'
