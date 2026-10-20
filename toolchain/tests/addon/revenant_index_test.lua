@@ -1,8 +1,8 @@
 import("fixtures")
 
 function failures(opts)
-    local driver = opts.driver or path.join(opts.modules, "..", "config", "extensions", "revenant")
-    local index = import("index", {rootdir = driver, anonymous = true})
+    local driver = opts.driver or path.join(opts.modules, "..", "tools")
+    local index = import("package-index", {rootdir = driver, anonymous = true})
     local scratch = opts.scratch or fixtures.scratch()
     local found = {}
     local counter = 0

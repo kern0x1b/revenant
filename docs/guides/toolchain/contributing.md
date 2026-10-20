@@ -23,7 +23,7 @@ What the toolchain is, and why it is built this way, is in [design](../../explan
 | `plugins/` | the verbs: `check`, `compile-commands`, `deb`, `device`, `emulate`, `firmware`, `where` |
 | `modules/apple/` | the Lua the rules and verbs run; `modules/gyb/` expands Swift's `.gyb` templates in Lua |
 | `packages/<group>/<name>/` | package definitions, grouped as `build-tools`, `runtimes`, `frameworks`, `libraries`, `emulator`, `tweaks` |
-| `config/extensions/revenant/index.lua` | the group of each package; `tests/addon/revenant_index_test.lua` holds the tree to it |
+| `tools/package-index.lua` | the group of each package; `tests/addon/revenant_index_test.lua` holds the tree to it |
 | `tools/` | developer tools, see [tools](../../reference/toolchain/tools.md) |
 | `tests/` | `light.lua`, which runs the addon's tests; `addon/`, `backports/`, `emulate/`, `gen/`, `swiftui/` |
 

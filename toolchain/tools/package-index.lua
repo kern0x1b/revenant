@@ -1,3 +1,5 @@
+import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "modules")})
+
 GROUPS = {
     ["build-tools"] = {"llvm", "llvm-clang-c", "swift", "swift-bootstrap", "swift-syntax", "ld64", "ldid", "gn", "libplist", "iphoneos-sdk"},
     runtimes = {"libcxx", "swift-runtime", "swift-embedded", "apple-compat", "revenant-coding"},
@@ -63,7 +65,7 @@ function layout_findings(root, groups)
             table.insert(found, string.format("the table puts %s under %s, and there is no folder of it", name, group))
         end
     end
-    table.sort(found)
+    byteorder.sort(found)
     return found
 end
 
@@ -72,6 +74,6 @@ function index_findings(root, groups)
     for _, package in ipairs(os.dirs(path.join(root, "*", "*"))) do
         declaration_findings(found, package, path.filename(package))
     end
-    table.sort(found)
+    byteorder.sort(found)
     return found
 end
