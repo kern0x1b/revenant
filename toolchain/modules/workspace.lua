@@ -77,6 +77,22 @@ local function sdk_in(installdir, version)
                      "iPhoneOS" .. version .. ".sdk")
 end
 
+function installed_sdk(installdir, version)
+    local preferred = sdk_in(installdir, version)
+    if os.isfile(path.join(preferred, "SDKSettings.json")) then
+        return preferred
+    end
+    local siblings = os.dirs(path.join(path.directory(installdir), "*"))
+    table.sort(siblings)
+    for _, sibling in ipairs(siblings) do
+        local folder = sdk_in(sibling, version)
+        if os.isfile(path.join(folder, "SDKSettings.json")) then
+            return folder
+        end
+    end
+    return nil, preferred
+end
+
 local function package_sdk(version, install)
     local scratch = fresh("sdk-resolve")
     io.writefile(path.join(scratch, "xmake.lua"), string.format("add_repositories(%q)\nadd_requires(%q)\n",
@@ -109,7 +125,7 @@ local function package_sdk(version, install)
     if not result then
         raise("workspace: xmake named no install folder for revenant's iphoneos-sdk %s package", version)
     end
-    return sdk_in(result, version), result
+    return result
 end
 
 function sdk_package(version, opt)
@@ -118,12 +134,13 @@ function sdk_package(version, opt)
     if resolved[key] and not opt.install then
         return resolved[key]
     end
-    local folder, installdir = package_sdk(version, opt.install)
-    if not os.isfile(path.join(folder, "SDKSettings.json")) then
-        raise("workspace: the iPhoneOS %s SDK is not there: revenant's iphoneos-sdk %s package is not installed at %s. "
-              .. "Install it with `xmake l %s %s --install`%s",
-              version, version, installdir, path.join(root(), "modules", "workspace.lua"), opt.command or ("sdk-package " .. version),
-              opt.alternative or "")
+    local installdir = package_sdk(version, opt.install)
+    local folder, preferred = installed_sdk(installdir, version)
+    if not folder then
+        raise("workspace: the iPhoneOS %s SDK is not there: no revenant's iphoneos-sdk %s install under %s holds an SDKSettings.json "
+              .. "(xmake named %s). Install it with `xmake l %s %s --install`%s",
+              version, version, path.directory(installdir), preferred, path.join(root(), "modules", "workspace.lua"),
+              opt.command or ("sdk-package " .. version), opt.alternative or "")
     end
     resolved[key] = folder
     return folder

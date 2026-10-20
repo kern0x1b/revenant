@@ -2,8 +2,24 @@ local tools = path.absolute(path.join(os.scriptdir(), "..", "tools"))
 local facts = import("facts", {rootdir = tools, anonymous = true})
 local ast = import("ast", {rootdir = tools, anonymous = true})
 local sdkfiles = import("sdk", {rootdir = tools, anonymous = true})
+local generate = import("generate", {rootdir = tools, anonymous = true})
 
 local VERSION = "26.2"
+
+local function failure_of(action)
+    local message
+    try
+    {
+        action,
+        catch
+        {
+            function (errors)
+                message = tostring(errors)
+            end
+        }
+    }
+    return message
+end
 
 function main()
     local data = path.absolute(path.join(os.scriptdir(), "data"))
@@ -45,5 +61,22 @@ function main()
     assert(implemented == 2, "expected 2 implemented members, got " .. implemented)
     assert(#missing == 1 and missing[1] == "fx_later", "expected fx_later to be the only missing member")
 
+    local cache = path.join(os.getenv("HOME"), ".revenant", "cache", "backports-test")
+    os.tryrm(cache)
+    os.mkdir(cache)
+    local logs = path.join(cache, "logs")
+    os.mkdir(logs)
+    generate.extract_all(sdk, VERSION, cache, logs, {"Fixture"})
+    assert(os.isfile(path.join(cache, "Fixture.tsv")), "extract_all wrote no TSV for Fixture")
+
+    local clang = failure_of(function () generate.extract_all(sdk, VERSION, cache, logs, {"Broken"}) end)
+    assert(clang and string.find(clang, "Broken: ", 1, true), "a failing clang call did not raise naming Broken: " .. tostring(clang))
+
+    local digester = failure_of(function () generate.extract_all(sdk, VERSION, cache, logs, {"BadSwift"}) end)
+    assert(digester and string.find(digester, "BadSwift: ", 1, true), "a failing digester call did not raise naming BadSwift: " .. tostring(digester))
+
+    os.tryrm(cache)
     print("backports tests passed: extracted " .. #rows .. " facts, Y=" .. #scoped .. ", X=" .. implemented)
+    print("clang failure: " .. clang)
+    print("digester failure: " .. digester)
 end
