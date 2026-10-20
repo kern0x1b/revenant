@@ -16,10 +16,10 @@
 **/GENERATED-* linguist-generated=true
 *.swift.gyb linguist-language=Swift
 toolchain/docs/** linguist-documentation
-emulator/docs/** linguist-documentation
-recompiler/docs/** linguist-documentation
-frameworks/WebKit/docs/** linguist-documentation
+docs/**/recompiler/** linguist-documentation
+docs/**/webkit/** linguist-documentation
 docs/**/combine/** linguist-documentation
+docs/**/emulator/** linguist-documentation
 docs/**/swiftui/** linguist-documentation
 
 toolchain/tests/addon/sdk-verbatim/** comments=fixture

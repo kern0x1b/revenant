@@ -25,7 +25,7 @@ index 0000000000000000000000000000000000000000..4e9148f8c6e7eb12d5721ed28482dc2d
 +
 +The engine is built by CMake from the repository that carries the toolchain, the
 +dependencies and the device-side pieces:
-+**[revenant-webkit](https://github.com/kern0x1b/revenant-webkit)**. This fork is
++**[revenant](https://github.com/kern0x1b/revenant/tree/main/frameworks/WebKit)**. This fork is
 +the engine half; that repository is the other half, and its README is where the
 +build and deploy instructions are.
 +
