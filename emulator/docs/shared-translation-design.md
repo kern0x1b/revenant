@@ -147,7 +147,7 @@ The descent session saw the same crash on 5.0 and 5.1.1, which fits a fault of t
 
 The emulator at upstream 411248c calls arm64 dynarmic interfaces (`NativeCodeSlab`,
 `Jit::Precompile`, `Jit::GeneratePortableIR`, `Jit::GetDispatchCounters`, ...) whose arm64
-implementations exist only in Revenant's `packages/i/emulator/patches/2026.09.16/dynarmic.patch`; the
+implementations exist only in Revenant's `packages/emulator/emulator/patches/2026.09.16/dynarmic.patch`; the
 pinned dynarmic implements them for x64 only. So an arm64 Mac cannot link HEAD from the submodule
 as committed. The reproducible control is upstream 411248c + Revenant's `emulator.patch` +
 `dynarmic.patch` - what the `emulator` package builds - and the lab tree's own work is its difference
