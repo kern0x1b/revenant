@@ -45,17 +45,25 @@ package("swift")
     add_configs("recipe", {description = "The digest of this recipe and the changes it makes to the compiler's sources, so a changed flag or patch is a different compiler.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
 
     on_download(function (package, opt)
+        if import("prebuilt", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true}).fetch(package) then
+            return
+        end
         local checkout = import("checkout", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
         checkout.pinned(opt.sourcedir, assert(sources[package:version_str()],
                         "this package knows no sources for Swift " .. package:version_str()))
     end)
 
     on_install("@macosx", function (package)
+        local prebuilt = import("prebuilt", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
+        if prebuilt.install(package) then
+            return
+        end
         local swift = import("apple.swift", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
         local bootstrap = assert(package:dep("swift-bootstrap"), "revenant@swift is built with the swift.org toolchain of the same release")
         local build = path.absolute("build")
         local prefix = package:installdir()
-        local jobs = math.min(import("core.base.option").get("jobs") or 8, 8)
+        local parallel = import("parallel", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
+        local compile_jobs = 8
 
         for _, source in ipairs(assert(sources[package:version_str()], "this package knows no sources for Swift " .. package:version_str())) do
             if not os.isdir(source.name) then
@@ -75,7 +83,7 @@ package("swift")
 
         os.vrunv("cmake", table.join({"-S", "cmark", "-B", path.join(build, "cmark")}, common,
                                      {"-DCMARK_THREADING=ON", "-DBUILD_TESTING=OFF"}))
-        os.vrunv("ninja", {"-C", path.join(build, "cmark"), "-j" .. jobs})
+        os.vrunv("ninja", table.join({"-C", path.join(build, "cmark")}, parallel.ninja(compile_jobs)))
 
         os.vrunv("cmake", table.join({"-S", path.join("llvm-project", "llvm"), "-B", path.join(build, "llvm")}, common, {
             "-DLLVM_ENABLE_ASSERTIONS=OFF", "-DLLVM_TARGETS_TO_BUILD=AArch64;ARM", "-DLLVM_ENABLE_PROJECTS=clang",
@@ -84,9 +92,9 @@ package("swift")
             "-DLLVM_INCLUDE_BENCHMARKS=OFF", "-DLLVM_INCLUDE_EXAMPLES=OFF", "-DLLVM_INCLUDE_DOCS=OFF", "-DCLANG_INCLUDE_DOCS=OFF",
             "-DLLVM_ENABLE_ZLIB=ON", "-DLLVM_ENABLE_ZSTD=OFF", "-DLLVM_ENABLE_LIBXML2=OFF", "-DLLVM_ENABLE_LIBEDIT=OFF",
             "-DLLVM_ENABLE_LIBPFM=OFF", "-DLLVM_ENABLE_Z3_SOLVER=OFF", "-DLLVM_ENABLE_CURL=OFF", "-DLLVM_ENABLE_HTTPLIB=OFF",
-            "-DLLVM_PARALLEL_LINK_JOBS=" .. math.max(math.floor(jobs / 2), 1), "-DCLANG_VENDOR=Apple",
+            "-DLLVM_PARALLEL_COMPILE_JOBS=" .. compile_jobs, "-DLLVM_PARALLEL_LINK_JOBS=" .. parallel.link_jobs(), "-DCLANG_VENDOR=Apple",
             "-DCLANG_VENDOR_UTI=com.apple.compilers.llvm.clang", "-DPACKAGE_VERSION=21.0.0"}))
-        os.vrunv("ninja", {"-C", path.join(build, "llvm"), "-j" .. jobs})
+        os.vrunv("ninja", table.join({"-C", path.join(build, "llvm")}, parallel.ninja(compile_jobs)))
 
         os.vrunv("cmake", table.join({"-S", "swift", "-B", path.join(build, "swift")}, common, {
             "-DCMAKE_Swift_COMPILER=" .. path.join(bootstrap:installdir("bin"), "swiftc"),
@@ -112,11 +120,11 @@ package("swift")
             "-DSWIFT_ENABLE_EXPERIMENTAL_STRING_PROCESSING=ON", "-DSWIFT_STDLIB_INSTALL_PARENT_MODULE_FOR_SHIMS=ON",
             "-DSWIFT_ENABLE_EXPERIMENTAL_DISTRIBUTED=ON", "-DSWIFT_ENABLE_EXPERIMENTAL_PARSER_VALIDATION=ON",
             "-DSWIFT_VENDOR=Apple", "-DSWIFT_VERSION=" .. package:version():major() .. "." .. package:version():minor(),
-            "-DSWIFT_PARALLEL_LINK_JOBS=" .. math.max(math.floor(jobs / 2), 1),
+            "-DSWIFT_PARALLEL_LINK_JOBS=" .. parallel.link_jobs(),
             "-DSWIFT_INSTALL_COMPONENTS=compiler;compiler-swift-syntax-lib;swift-syntax-lib;clang-resource-dir-symlink;clang-builtin-headers-in-clang-resource-dir;stdlib"}))
-        os.vrunv("ninja", {"-C", path.join(build, "swift"), "-j" .. jobs, "compiler", "compiler-swift-syntax-lib",
+        os.vrunv("ninja", table.join({"-C", path.join(build, "swift")}, parallel.ninja(compile_jobs), {"compiler", "compiler-swift-syntax-lib",
                            "swift-syntax-lib", "stdlib", "copy_shim_headers", "SwiftMacros", "ObservationMacros",
-                           "clang-resource-dir-symlink", "clang-builtin-headers-in-clang-resource-dir"})
+                           "clang-resource-dir-symlink", "clang-builtin-headers-in-clang-resource-dir"}))
         for _, component in ipairs({"compiler", "compiler-swift-syntax-lib", "swift-syntax-lib", "clang-resource-dir-symlink",
                                     "clang-builtin-headers-in-clang-resource-dir", "stdlib"}) do
             os.vrunv("cmake", {"--install", path.join(build, "swift"), "--component", component})
@@ -159,6 +167,7 @@ package("swift")
         os.vcp(path.join("swift", "LICENSE.txt"), package:installdir("licenses") .. "/")
 
         os.tryrm(build)
+        prebuilt.pack(package)
     end)
 
     on_test(function (package)

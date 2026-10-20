@@ -43,7 +43,9 @@ package("opencv")
         table.insert(configure, "-DCMAKE_INSTALL_PREFIX=" .. package:installdir())
         os.iorunv(table.join(configure, {"-S", os.curdir(), "-B", build}))
 
-        os.iorunv({"cmake", "--build", build, "--target", "install", "--parallel", "5"})
+        import("parallel", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true}).hold(5, function (width)
+            os.iorunv({"cmake", "--build", build, "--target", "install", "--parallel", tostring(width)})
+        end)
 
         for _, name in ipairs({"core", "imgproc", "features2d", "flann", "calib3d"}) do
             local header = path.join("modules", name, "include", "opencv2")

@@ -78,5 +78,5 @@ function sources(root, inputs)
 end
 
 function digest_file(recipe, value)
-    return string.format("-- Written by tools/recipe-digests.lua; a test compares it with the sources. It is what the recipe's build hash takes of\n-- its own Lua, and it does not change when only a comment or the layout does.\n%s = \"%s\"\n", recipe.variable, value)
+    return string.format("%s = \"%s\"\n", recipe.variable, value)
 end
