@@ -1,7 +1,9 @@
 # revenant
 
 The platform for running current iOS software on old iOS releases (iOS 26.2 surface on iOS 6.1.3, iPhone 4S,
-armv7), in one repository. Each member keeps its own folder, history, `README.md` and `AGENTS.md`:
+armv7), in one repository. Every component has the same layout (`src/`, `tests/`, `examples/`, `tools/`, `patches/`,
+a one-screen `README.md`), all documentation is in `docs/`, and `AGENTS.md` at the top is the only agent file; the
+layout is spelled out there:
 
 | Folder | What it is |
 | --- | --- |
