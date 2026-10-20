@@ -59,6 +59,8 @@ typedef struct Session {
     size_t readBytes;
     bool awaitingFirstByte;
     bool handshakeDone;
+    bool breakOnServerAuth;
+    bool serverAuthReported;
     bool failed;
     struct Session *next;
 } Session;
@@ -312,6 +314,72 @@ OSStatus ourSSLGetPeerDomainName(SSLContextRef context, char *name, size_t *leng
     return noErr;
 }
 
+static OSStatus copyPeerTrust(Session *session, SecTrustRef *trust)
+{
+    STACK_OF(X509) *chain = SSL_get_peer_cert_chain(session->ssl);
+    if (!chain)
+        return errSSLInternal;
+
+    CFMutableArrayRef certificates = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
+    for (int i = 0; i < sk_X509_num(chain); i++) {
+        X509 *certificate = sk_X509_value(chain, i);
+        unsigned char *der = NULL;
+        int length = i2d_X509(certificate, &der);
+        if (length <= 0 || !der)
+            continue;
+        CFDataRef data = CFDataCreate(NULL, der, length);
+        OPENSSL_free(der);
+        if (!data)
+            continue;
+        SecCertificateRef secCertificate = SecCertificateCreateWithData(NULL, data);
+        CFRelease(data);
+        if (secCertificate) {
+            CFArrayAppendValue(certificates, secCertificate);
+            CFRelease(secCertificate);
+        }
+    }
+
+    SecPolicyRef policy = NULL;
+    if (session->host[0]) {
+        CFStringRef host = CFStringCreateWithCString(NULL, session->host, kCFStringEncodingUTF8);
+        if (host) {
+            policy = SecPolicyCreateSSL(true, host);
+            CFRelease(host);
+        }
+    }
+    if (!policy)
+        policy = SecPolicyCreateBasicX509();
+    SecTrustRef created = NULL;
+    OSStatus status = SecTrustCreateWithCertificates(certificates, policy, &created);
+    if (policy)
+        CFRelease(policy);
+    CFRelease(certificates);
+    if (status != errSecSuccess)
+        return status;
+    *trust = created;
+    return noErr;
+}
+
+static OSStatus verifyPeerTrust(Session *session)
+{
+    SecTrustRef trust = NULL;
+    SecTrustResultType result = kSecTrustResultInvalid;
+    bool evaluated = session->host[0] && copyPeerTrust(session, &trust) == noErr
+        && SecTrustEvaluate(trust, &result) == errSecSuccess;
+    if (trust)
+        CFRelease(trust);
+    if (evaluated && (result == kSecTrustResultProceed || result == kSecTrustResultUnspecified))
+        return noErr;
+    note("%s: certificate rejected by the system trust store, result %d", session->host, result);
+    return errSSLXCertChainInvalid;
+}
+
+static void completeHandshake(Session *session)
+{
+    session->handshakeDone = true;
+    rememberSession(session->host, session->ssl);
+}
+
 OSStatus ourSSLHandshake(SSLContextRef context)
 {
     Session *session = sessionFor(context, true);
@@ -319,6 +387,11 @@ OSStatus ourSSLHandshake(SSLContextRef context)
         return errSSLInternal;
     if (session->handshakeDone)
         return noErr;
+    if (session->serverAuthReported) {
+        session->serverAuthReported = false;
+        completeHandshake(session);
+        return noErr;
+    }
     if (!session->startedAt.tv_sec)
         gettimeofday(&session->startedAt, NULL);
     if (!startSession(session)) {
@@ -328,7 +401,6 @@ OSStatus ourSSLHandshake(SSLContextRef context)
 
     int result = SSL_do_handshake(session->ssl);
     if (result == 1) {
-        session->handshakeDone = true;
         struct timeval now;
         gettimeofday(&now, NULL);
         double took = (now.tv_sec - session->startedAt.tv_sec) * 1000.0
@@ -336,7 +408,16 @@ OSStatus ourSSLHandshake(SSLContextRef context)
         note("handshake with %s: %s, %s, %.0f ms, resumed %d", session->host,
             SSL_get_version(session->ssl), SSL_get_cipher(session->ssl),
             took, SSL_session_reused(session->ssl));
-        rememberSession(session->host, session->ssl);
+        if (session->breakOnServerAuth) {
+            session->serverAuthReported = true;
+            return errSSLPeerAuthCompleted;
+        }
+        OSStatus status = verifyPeerTrust(session);
+        if (status != noErr) {
+            session->failed = true;
+            return status;
+        }
+        completeHandshake(session);
         return noErr;
     }
 
@@ -471,49 +552,7 @@ OSStatus ourSSLCopyPeerTrust(SSLContextRef context, SecTrustRef *trust)
     Session *session = sessionFor(context, false);
     if (!session || !session->ssl || !trust)
         return errSSLInternal;
-
-    STACK_OF(X509) *chain = SSL_get_peer_cert_chain(session->ssl);
-    if (!chain)
-        return errSSLInternal;
-
-    CFMutableArrayRef certificates = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
-    for (int i = 0; i < sk_X509_num(chain); i++) {
-        X509 *certificate = sk_X509_value(chain, i);
-        unsigned char *der = NULL;
-        int length = i2d_X509(certificate, &der);
-        if (length <= 0 || !der)
-            continue;
-        CFDataRef data = CFDataCreate(NULL, der, length);
-        OPENSSL_free(der);
-        if (!data)
-            continue;
-        SecCertificateRef secCertificate = SecCertificateCreateWithData(NULL, data);
-        CFRelease(data);
-        if (secCertificate) {
-            CFArrayAppendValue(certificates, secCertificate);
-            CFRelease(secCertificate);
-        }
-    }
-
-    SecPolicyRef policy = NULL;
-    if (session->host[0]) {
-        CFStringRef host = CFStringCreateWithCString(NULL, session->host, kCFStringEncodingUTF8);
-        if (host) {
-            policy = SecPolicyCreateSSL(true, host);
-            CFRelease(host);
-        }
-    }
-    if (!policy)
-        policy = SecPolicyCreateBasicX509();
-    SecTrustRef created = NULL;
-    OSStatus status = SecTrustCreateWithCertificates(certificates, policy, &created);
-    if (policy)
-        CFRelease(policy);
-    CFRelease(certificates);
-    if (status != errSecSuccess)
-        return status;
-    *trust = created;
-    return noErr;
+    return copyPeerTrust(session, trust);
 }
 
 OSStatus ourSSLGetNegotiatedProtocolVersion(SSLContextRef context, SSLProtocol *protocol)
@@ -550,7 +589,15 @@ OSStatus ourSSLGetSessionState(SSLContextRef context, SSLSessionState *state)
 
 OSStatus ourSSLSetProtocolVersionMin(SSLContextRef context, SSLProtocol version) { (void)context; (void)version; return noErr; }
 OSStatus ourSSLSetProtocolVersionMax(SSLContextRef context, SSLProtocol version) { (void)context; (void)version; return noErr; }
-OSStatus ourSSLSetSessionOption(SSLContextRef context, SSLSessionOption option, Boolean value) { (void)context; (void)option; (void)value; return noErr; }
+OSStatus ourSSLSetSessionOption(SSLContextRef context, SSLSessionOption option, Boolean value)
+{
+    Session *session = sessionFor(context, true);
+    if (!session)
+        return errSecAllocate;
+    if (option == kSSLSessionOptionBreakOnServerAuth)
+        session->breakOnServerAuth = value;
+    return noErr;
+}
 OSStatus ourSSLSetAllowAnonymousCiphers(SSLContextRef context, Boolean value) { (void)context; (void)value; return noErr; }
 OSStatus ourSSLSetClientSideAuthenticate(SSLContextRef context, SSLAuthenticate authenticate) { (void)context; (void)authenticate; return noErr; }
 OSStatus ourSSLGetClientSideAuthenticate(SSLContextRef context, SSLAuthenticate *authenticate) { (void)context; if (authenticate) *authenticate = kNeverAuthenticate; return noErr; }

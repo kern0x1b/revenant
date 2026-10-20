@@ -17,7 +17,7 @@ compiled into the standalone application.
 | | `src/platform/safari/tls-openssl.c` | `examples/webview-host/ModernTLSURLProtocol.m` |
 | --- | --- | --- |
 | Takes over | the 25 SecureTransport entry points CFNetwork imports | every request that goes through `NSURLConnection` |
-| Leaves alone | the socket, its timeouts and proxy handling, the `SecTrust` evaluation — all still CFNetwork's | nothing above the socket: the exchange is made here and handed back as an ordinary `NSURLResponse` |
+| Leaves alone | the socket, its timeouts and proxy handling; the `SecTrust` evaluation, which is CFNetwork's after a break on server auth and the shim's otherwise | nothing above the socket: the exchange is made here and handed back as an ordinary `NSURLResponse` |
 | Why both | anything that reaches the network below `NSURLConnection` — a WebSocket, CFNetwork's own fetches — is served here | a page is a hundred requests, and the pool, the cache and the app-shell policy all need the whole exchange |
 
 ## Interposing SecureTransport
@@ -35,6 +35,15 @@ evaluates it against its own trust store. The evaluation is bound to the host
 that was asked for: a basic X.509 policy asks only whether a chain is valid, not
 whether it was issued for this site, so without the host binding any
 certificate a trusted CA ever signed would be accepted for any domain.
+
+OpenSSL's own verification stays off (`SSL_VERIFY_NONE`): iOS 6 has no root store
+for it to use, so `SecTrust` is the verifier in both places it runs. When the
+caller asks to break on server auth (`kSSLSessionOptionBreakOnServerAuth`), the
+handshake returns `errSSLPeerAuthCompleted` once, and the caller evaluates the
+trust from `SSLCopyPeerTrust` before handshaking again. Otherwise the shim
+evaluates it before the handshake succeeds, and a chain the system does not
+accept fails with `errSSLXCertChainInvalid`. Without a host name the shim refuses
+to evaluate at all, because there is nothing to bind the chain to.
 
 Two rules this layer learned:
 
