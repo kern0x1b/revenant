@@ -14,9 +14,9 @@
   option skips both steps, and the job summary says so.
 
 The checks run on macOS, not Linux: on Linux the light guard stops early at `registry_test`, which finds gaps there
-that it does not find on macOS. Today the `checks` job is red on purpose. The light guard fails `doc_test`, and on the
-runner also `registry_test` and `ir_failure_test`, which call `xmake` from `PATH`, where the runner has none (the
-laptop has Homebrew's). Those tests should call `os.programfile()` instead.
+that it does not find on macOS. The light guard skips `doc_test` (`LIGHT_SKIP`), which tests the old generator and is
+deleted with the registry; the workflow prints a notice saying so. Every other suite must pass, so the `checks` job
+is red when one of them fails.
 
 Two caches make a warm run quick: the pinned xmake binary, keyed by `xmakew` and `third_party/xmake`, and the
 package store `~/.revenant/cache/xmake-global`, keyed by the output of `./xmakew l tools/keys.lua`. Each cache is
