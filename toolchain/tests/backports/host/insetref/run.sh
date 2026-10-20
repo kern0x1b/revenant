@@ -3,8 +3,6 @@
 # writes the answers where the device test reads them, then compiles the port's flow layout beside them (its categories replace the
 # system's methods of the same name) and holds it to the same records, with mutants of the port that each have to be told apart.
 set -eu
-echo "FAIL host/insetref/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 31; the inline block PY at line 47" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
@@ -13,30 +11,21 @@ build=${BUILD:-$(runs_fresh revenant-insetref)}
 sdk=$(xcrun --show-sdk-path)
 compile() {
     output=$1; shift
-    xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" -fobjc-arc -w -I"$device" \
+    xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" -fobjc-arc -w -I"$device" -I"$uikit" \
         "$here/record.m" "$device/insetref-cases.m" "$@" -framework UIKit -framework Foundation -framework CoreGraphics -o "$output"
 }
 compile "$build/system"
 INSETREF_RECORDS="$build/system.json" "$build/system"
-xmake l "$here/../../common/embed.lua" "$build/system.json" "$device/insetref-expectations.h" foundation2_expectations
-sed -i.bak 's/foundation2_expectations/insetref_expectations/' "$device/insetref-expectations.h" && rm -f "$device/insetref-expectations.h.bak"
+runs_xmake l "$here/../../common/embed.lua" "$build/system.json" "$device/insetref-expectations.h" insetref_expectations
 echo "records: $(runs_harness records "$build/system.json")"
 
 port="UICollectionViewFlowLayout+SelfSizing.m"
 mkdir -p "$build/port"
 cp "$uikit/$port" "$build/port/$port"
-compile "$build/port/run" "$build/port/$port"
+compile "$build/port/run" "$build/port/$port" "$uikit/RevenantSelfSizing.m"
 INSETREF_RECORDS="$build/port.json" "$build/port/run"
 if cmp -s "$build/system.json" "$build/port.json"; then echo "port: same as the system"; else
-    python3 - "$build/system.json" "$build/port.json" <<'PY'
-import json, sys
-a, b = json.load(open(sys.argv[1])), json.load(open(sys.argv[2]))
-for key in sorted(a):
-    if a[key] != b.get(key):
-        print("DIFF", key)
-        print("  system", a[key][:300])
-        print("  port  ", str(b.get(key))[:300])
-PY
+    runs_xmake l "$runs_checkout/tests/backports/common/records.lua" diff "$build/system.json" "$build/port.json" 300 || true
     echo "port: DIFFERS"; exit 1
 fi
 
@@ -44,14 +33,9 @@ survived=0
 mutant() {
     from=$1; to=$2
     rm -rf "$build/mutant"; mkdir -p "$build/mutant"
-    python3 - "$uikit/$port" "$build/mutant/$port" "$from" "$to" <<'PY'
-import sys
-source, target, old, new = sys.argv[1:5]
-text = open(source).read()
-assert old in text, old
-open(target, "w").write(text.replace(old, new, 1))
-PY
-    compile "$build/mutant/run" "$build/mutant/$port"
+    cp "$uikit/$port" "$build/mutant/$port"
+    runs_xmake l "$runs_checkout/tests/backports/common/mutants.lua" first "$build/mutant/$port" "$from" "$to"
+    compile "$build/mutant/run" "$build/mutant/$port" "$uikit/RevenantSelfSizing.m"
     rm -f "$build/mutant.json"
     INSETREF_RECORDS="$build/mutant.json" timeout 60 "$build/mutant/run" > /dev/null 2>&1 || true
     if cmp -s "$build/system.json" "$build/mutant.json"; then echo "MUTANT SURVIVED: $from -> $to"; survived=$((survived + 1)); fi

@@ -12,8 +12,6 @@
 # read by this too, and any real property list the caller names. Nothing of Apple's libraries is
 # asserted about here - no kernel, no name, no value.
 set -eu
-echo "FAIL host/metal-census/reflection.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 98; the inline block PY2 at line 128" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -95,27 +93,19 @@ fi
 
 # The real reader, and the mutant: one line apart.
 cp "$root/packages/frameworks/apple-backports/Metal/MTLTypeReflection8.m" "$work/mutant.m"
-python3 - "$work/mutant.m" <<'PY'
-import sys
-path = sys.argv[1]
-source = open(path).read()
 # THE MUTATION is in the 8.0 object now - the reader is two objects since the release split - and it
 # is MTLArgument's -access, which is where the guess lived. Anything the build does not recognise
 # becomes read-write, and an argument declared write-only is neither readable nor read-write.
-old = """- (MTLArgumentAccess)access
+runs_xmake l "$here/../../common/mutants.lua" once "$work/mutant.m" "- (MTLArgumentAccess)access
 {
-    return RevenantAccessFromWord(_argument[@"access"]);
-}"""
-new = """- (MTLArgumentAccess)access
+    return RevenantAccessFromWord(_argument[@\"access\"]);
+}" "- (MTLArgumentAccess)access
 {
     // THE MUTATION: anything this build does not recognise becomes read-write, which is the guess the
     // port must not make.
-    return [_argument[@"access"] isEqualToString:@"read-only"] ? MTLArgumentAccessReadOnly
+    return [_argument[@\"access\"] isEqualToString:@\"read-only\"] ? MTLArgumentAccessReadOnly
                                                                : MTLArgumentAccessReadWrite;
-}"""
-assert old in source, "the mutation must match the real code it is mutating"
-open(path, "w").write(source.replace(old, new))
-PY
+}"
 
 build() {
     xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" \
@@ -125,15 +115,10 @@ build() {
         -o "$2" "$1" -framework Foundation -framework Metal -framework CoreGraphics 2>"$3"
 }
 cp "$here/reflection.m" "$work/mutant-test.m"
-python3 - "$work/mutant-test.m" <<'PY2'
-import sys
-p = sys.argv[1]
-s = open(p).read()
 # the mutant test includes the MUTANT reader, and its own assertions are the same ones - so the only
 # difference between the two binaries is the reader, which is the point
-s = s.replace('#import "MTLTypeReflection.m"', '#import "mutant.m"\n#import "mutant11.m"')
-open(p, "w").write(s)
-PY2
+runs_xmake l "$here/../../common/mutants.lua" all "$work/mutant-test.m" '#import "MTLTypeReflection.m"' '#import "mutant.m"
+#import "mutant11.m"'
 
 build "$here/reflection.m" "$work/real" "$work/real.build" || { echo "the real reader does not build:"; cat "$work/real.build"; exit 1; }
 # The mutant binary: the same test, with the MUTANT reader in place of the real one, so the only

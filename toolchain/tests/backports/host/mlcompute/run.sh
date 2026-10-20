@@ -7,8 +7,6 @@
 # The names come from the port's own sources, not from a list kept here, so a class the port adds is
 # renamed too.
 set -eu
-echo "FAIL host/mlcompute/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 42" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 port=${MLCOMPUTE_PORT:-$here/../../../../packages/frameworks/apple-backports/MLCompute}
@@ -39,26 +37,7 @@ $port/RevenantMLCGraph.mm"
 # and missed here. The classes come from the @interface and @implementation lines and the functions from the
 # definitions; the enumerations are header values with no symbol, and are renamed by the same list so a
 # case may name one of them.
-python3 - "$port" "$build/rename.h" <<'PY'
-import os, re, sys
-port, out = sys.argv[1], sys.argv[2]
-names = set()
-classes = re.compile(r"^@(?:interface|implementation)\s+(MLC\w+)", re.M)
-functions = re.compile(r"^(?:NSString \*|NSUInteger|void|BOOL)\s+(MLC\w+)\(", re.M)
-for entry in sorted(os.listdir(port)):
-    if not entry.endswith((".m", ".h")):
-        continue
-    text = open(os.path.join(port, entry)).read()
-    names.update(classes.findall(text))
-    names.update(functions.findall(text))
-    names.update(re.findall(r"^\s*(MLC\w+),?$", text, re.M))     # the enumerations of a case list
-    names.update(re.findall(r"\b(MLCDataType\w+|MLCPoolingType\w+)\b", text))
-# The port's own private names never collide with the framework's and are not renamed.
-with open(out, "w") as handle:
-    for name in sorted(names):
-        handle.write("#define %s Revenant%s\n" % (name, name))
-print("renamed %d names" % len(names))
-PY
+runs_xmake l "$here/rename.lua" "$port" "$build/rename.h"
 
 # The system side: the host's framework answers every case.
 xcrun clang $common "$here/record.m" "$here/cases.m" "$here/layer-cases.m" "$here/optimizer-cases.m" "$here/graph-cases.m" "$here/inference-cases.m" $libs -framework MLCompute -o "$build/system"

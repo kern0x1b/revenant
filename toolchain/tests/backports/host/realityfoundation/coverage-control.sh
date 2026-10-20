@@ -16,37 +16,26 @@
 # that is the state the bug lived in and a repaired tree would make the fixture look wrong for the
 # wrong reason.
 set -eu
-echo "FAIL host/realityfoundation/coverage-control.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 33; the one-line step at line 44; coverage-fixture-check.py; the one-line step at line 58; the inline block PY at line 80; the one-line step at line 92; the one-line step at line 97; the one-line step at line 98" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 repo=$(cd "$here/../../../.." && pwd)
 runs="$(runs_folder realityfoundation)"
 mkdir -p "$runs"
-coverage="$here/coverage.py"
-fixture="$here/coverage-guard-pre-repair.py"
+coverage="$here/coverage.lua"
+fixture="$here/coverage-guard-pre-repair.lua"
 registry="$repo/packages/runtimes/swift-runtime/registry/RealityFoundation.json"
 pre="$runs/control-pre-repair.json"
 
 declaration_sentence="the declaration in packages/runtimes/swift-runtime/files/, which tests/backports/host/swiftregistry holds to a name, and the interface line it was read from. No check in this series measures it"
 cp "$registry" "$pre"
-python3 - "$pre" "$declaration_sentence" <<'PY'
-import json, sys
-path, sentence = sys.argv[1], sys.argv[2]
-document = json.load(open(path))
-for entry in document["entries"]:
-    if entry.get("status") == "implemented":
-        entry["source"] = sentence
-json.dump(document, open(path, "w"), indent=4)
-open(path, "a").write("\n")
-PY
+runs_xmake l "$coverage" restate "$pre" "$declaration_sentence"
 
-covered=$(python3 "$coverage" "$registry" 2>/dev/null | grep -c '^covered  ' || true)
+covered=$(runs_xmake l "$coverage" report "$registry" 2>/dev/null | grep -c '^covered  ' || true)
 [ -n "$covered" ] || covered=0
 echo "control: a copy where all $covered covered rows say no measurement"
 
 # 1. the fixture must accept that tree: the bug, as shipped
-python3 "$here/coverage-fixture-check.py" "$fixture" "$coverage" "$pre" > "$runs/control-fixture.txt" 2>&1 || {
+runs_xmake l "$here/coverage-fixture-check.lua" "$fixture" "$coverage" "$pre" > "$runs/control-fixture.txt" 2>&1 || {
     echo "PREMISE FAILED: the pre-repair fixture does not accept the pre-repair tree, so this control"
     echo "  is not comparing what it names. Fixture output:"
     sed 's/^/    /' "$runs/control-fixture.txt" | head -6
@@ -55,7 +44,7 @@ python3 "$here/coverage-fixture-check.py" "$fixture" "$coverage" "$pre" > "$runs
 echo "  the pre-repair fixture accepts it: $(tail -1 "$runs/control-fixture.txt") - the bug, as shipped"
 
 # 2. the real guard must reject that same tree
-if python3 "$coverage" --check "$pre" > "$runs/control-real.txt" 2>&1; then
+if runs_xmake l "$coverage" check "$pre" > "$runs/control-real.txt" 2>&1; then
     echo "PREMISE FAILED: the real guard accepts a covered row that claims no measurement, which is"
     echo "  the r3 defect the fixture is here to demonstrate. Nothing to see."
     exit 1
@@ -77,25 +66,15 @@ rm -f "$pre"
 # 4. and the original ask: a hand-edited row, red first, repaired by --write
 copy="$runs/control-hand-edit.json"
 cp "$registry" "$copy"
-python3 - "$copy" <<'PY'
-import json, sys
-path = sys.argv[1]
-document = json.load(open(path))
-for entry in document["entries"]:
-    if entry.get("status") == "implemented":
-        entry["source"] = "HAND EDITED BY THE CONTROL: the host differential measures every one of these"
-        break
-json.dump(document, open(path, "w"), indent=4)
-open(path, "a").write("\n")
-PY
+runs_xmake l "$coverage" edit-first "$copy"
 echo "control: a hand-edited row, red first"
-if python3 "$coverage" --check "$copy" > "$runs/control-red.txt" 2>&1; then
+if runs_xmake l "$coverage" check "$copy" > "$runs/control-red.txt" 2>&1; then
     echo "PREMISE FAILED: --check exited 0 on a hand-edited row, so the guard is not guarding"
     exit 1
 fi
 echo "  --check exits non-zero, and says so: $(grep -m 1 'CLAIMS A MEASUREMENT' "$runs/control-red.txt" | sed 's/^ *//')"
-python3 "$coverage" --write "$copy" > /dev/null 2>&1
-if ! python3 "$coverage" --check "$copy" > "$runs/control-green.txt" 2>&1; then
+runs_xmake l "$coverage" write "$copy" > /dev/null 2>&1
+if ! runs_xmake l "$coverage" check "$copy" > "$runs/control-green.txt" 2>&1; then
     echo "PREMISE FAILED: --check is still failing after --write regenerated the row"
     exit 1
 fi

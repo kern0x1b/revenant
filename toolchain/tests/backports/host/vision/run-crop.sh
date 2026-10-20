@@ -11,8 +11,6 @@
 # (the header's REVENANT_VISION_INTERPOLATION is the seam), which is how the one the framework uses was
 # found: the numbers below are the measurement, and the default in the header is the answer.
 set -eu
-echo "FAIL host/vision/run-crop.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 29; the inline block PY2 at line 79" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -26,17 +24,7 @@ sdk=$(xcrun --show-sdk-path)
 common="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks -fobjc-arc -w -Wno-unguarded-availability"
 libs="-framework Foundation -framework CoreGraphics -framework CoreVideo -framework CoreML -framework Vision"
 
-python3 - "$vision" "$build/rename.h" <<'PY'
-import glob, json, os, sys
-names = set()
-for path in glob.glob(os.path.join(sys.argv[1], "..", "registry", "Vision", "*.json")):
-    for entry in json.load(open(path))["entries"]:
-        if entry["kind"] in ("class", "protocol", "constant", "function"):
-            names.add(entry["api"].replace("()", ""))
-with open(sys.argv[2], "w") as out:
-    for name in sorted(names):
-        out.write("#define %s Revenant%s\n" % (name, name))
-PY
+runs_xmake l "$runs_checkout/tests/backports/common/registry.lua" names "$vision/../registry/Vision" "$build/rename.h" class,protocol,constant,function
 
 xcrun clang $common -I"$here" "$here/crop.m" $libs -o "$build/system" 2>/dev/null ||
     xcrun clang $common -I"$here" "$here/crop.m" $libs -o "$build/system"
@@ -76,23 +64,10 @@ fi
 rm -rf "$build/mutant"
 mkdir -p "$build/mutant"
 cp "$vision"/*.m "$vision"/*.h "$vision"/*.c "$build/mutant/"
-python3 - "$build/mutant/CharonVisionBilinear.c" <<'PY2'
-import hashlib
-import sys
-
-path = sys.argv[1]
-text = open(path).read()
-before = hashlib.sha256(text.encode()).hexdigest()
-text = text.replace("revenant_vision_clamp(((double)y + 0.5) * down",
-                    "revenant_vision_clamp(((double)(insetY + y) + 0.5) * down", 1)
-text = text.replace("revenant_vision_clamp(((double)x + 0.5) * across",
-                    "revenant_vision_clamp(((double)(insetX + x) + 0.5) * across", 1)
-after = hashlib.sha256(text.encode()).hexdigest()
-if before == after:
-    raise SystemExit("the mutant changed nothing: its anchors do not match the library's own text")
-print("the mutant changed the file: %s -> %s" % (before[:12], after[:12]))
-open(path, "w").write(text)
-PY2
+runs_xmake l "$runs_checkout/tests/backports/common/mutants.lua" first "$build/mutant/RevenantVisionBilinear.c" \
+    "revenant_vision_clamp(((double)y + 0.5) * down" "revenant_vision_clamp(((double)(insetY + y) + 0.5) * down"
+runs_xmake l "$runs_checkout/tests/backports/common/mutants.lua" first "$build/mutant/RevenantVisionBilinear.c" \
+    "revenant_vision_clamp(((double)x + 0.5) * across" "revenant_vision_clamp(((double)(insetX + x) + 0.5) * across"
 xcrun clang $common -DREVENANT_PORT_BUILD=1 -include "$build/rename.h" -I"$here" -I"$build/mutant" \
     "$here/crop.m" "$build/mutant/RevenantVisionBilinear.c" $libs -o "$build/mutant/run"
 if "$build/mutant/run" > "$build/mutant/record.txt" 2>&1; then

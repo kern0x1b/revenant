@@ -7,8 +7,6 @@
 # compared here, and a kernel the tool refused is reported as refused rather than as a difference,
 # because a refused kernel answers the port's documented error and is not a wrong number.
 set -eu
-echo "FAIL host/air2cpu/compare.sh: its Python steps are gone and not yet ported to Lua: extract.py; check-generated-addressing.py; compare.py" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -64,7 +62,7 @@ cat "$work/oracle.out"
     $("$llvm/bin/llvm-config" --cxxflags | sed 's/-fno-exceptions//') \
     "$root/tools/air2cpu/air2cpu.cpp" -o "$work/air2cpu" \
     $("$llvm/bin/llvm-config" --ldflags --libs core irreader bitreader support) -Wl,-rpath,"$llvm/lib"
-python3 "$here/extract.py" "$work/kernels.metallib" "$work" > "$work/extract.out"
+runs_xmake l "$here/tools.lua" extract "$work/kernels.metallib" "$work" > "$work/extract.out"
 cat "$work/extract.out"
 for bc in "$work"/air/*.bc; do
     "$work/air2cpu" "$bc" "$work/port.c" >> "$work/air2cpu.out" 2>&1 || { echo "air2cpu failed on $bc"; tail -5 "$work/air2cpu.out"; exit 1; }
@@ -73,7 +71,7 @@ cat "$work/air2cpu.out"
 # The generated C's own addressing, as a check and not as a read: every array address must be computed
 # with the element's real width, and a base must never be multiplied by itself. This is the class of
 # bug that made every array element of every kernel alias onto element zero, silently.
-python3 "$here/check-generated-addressing.py" "$work/port.c"
+runs_xmake l "$here/tools.lua" addressing "$work/port.c"
 xcrun clang -O2 -Wno-unused-variable -I"$work" -I"$root/packages/frameworks/apple-backports" "$work/port.c" "$here/driver.c" -o "$work/port"
 (cd "$work" && ./port) > "$work/port.out"
 cat "$work/port.out"
@@ -117,4 +115,4 @@ cat "$work/port.out"
 grep -a "^refused" "$work/port.err" || true
 
 # 3. The comparison, by kernel name.
-python3 "$here/compare.py" "$work/oracle.out" "$work/port.out" "$work/air2cpu.out" "$work/port.c" "$here/kernels.metal"
+runs_xmake l "$here/tools.lua" compare "$work/oracle.out" "$work/port.out" "$work/air2cpu.out" "$work/port.c" "$here/kernels.metal"

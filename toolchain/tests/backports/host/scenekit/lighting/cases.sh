@@ -10,6 +10,5 @@ BUILD=${BUILD:-$(runs_fresh revenant-lighting)}
 EXPECTATIONS=${EXPECTATIONS:-$DEVICE/scenekit-lighting-expectations.h}
 xcrun swiftc -O "$here/cases.swift" -o "$BUILD/cases"
 "$BUILD/cases" "$BUILD/cases.json"
-xmake l "$here/../../../common/embed.lua" "$BUILD/cases.json" "$EXPECTATIONS" foundation2_expectations
-sed -i '' 's/foundation2_expectations/scenekit_lighting_expectations/' "$EXPECTATIONS"
+runs_xmake l "$here/../../../common/embed.lua" "$BUILD/cases.json" "$EXPECTATIONS" scenekit_lighting_expectations
 echo "wrote $EXPECTATIONS"

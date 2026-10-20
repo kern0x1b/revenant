@@ -8,8 +8,6 @@
 # the framework in the port process - the same values the port's own constants carry, over 136 of them
 # measured equal to the host's.
 set -eu
-echo "FAIL host/ciimage/pixel/run.sh: its Python steps are gone and not yet ported to Lua: compare.py" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../../common/runs.sh" "$here"
 GRAPHICS=${GRAPHICS:-$here/../../../../../packages/frameworks/apple-backports/Graphics}
@@ -73,7 +71,7 @@ if [ "$(head -1 "$BUILD/port/answers.txt")" != "probe port" ]; then
     echo "the port probe is not the port: it says '$(head -1 "$BUILD/port/answers.txt")'"
     exit 2
 fi
-python3 "$here/../../modelio/compare.py" "$BUILD/host/answers.txt" "$BUILD/port/answers.txt" "$TOLERANCE" ciimage
+runs_xmake l "$here/../../modelio/compare.lua" compare "$BUILD/host/answers.txt" "$BUILD/port/answers.txt" "$TOLERANCE" ciimage
 status=$?
 echo "answers: $BUILD/host/answers.txt $BUILD/port/answers.txt"
 exit $status

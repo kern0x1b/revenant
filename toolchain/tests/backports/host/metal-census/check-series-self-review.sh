@@ -9,8 +9,6 @@
 # commit at a time. So a mid-series commit carrying the line, or the tip carrying it twice, or two
 # commits carrying it, all pass the hook and fail the rule. This reads the series and says so.
 set -eu
-echo "FAIL host/metal-census/check-series-self-review.sh: its Python steps are gone and not yet ported to Lua: the inline block at line 27; the inline block at line 72" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -24,37 +22,12 @@ REPO=${REPO:-$root}
 
 # $1 base, $2 tip -> every failure it finds, one per line.
 findings() {
-    ( cd "$REPO" && git log --reverse --format='%H%x1f%s%x1f%b%x1e' "$base..$tip" ) 2>/dev/null | python3 -c '
-import sys
-commits = []
-for raw in sys.stdin.read().split("\x1e"):
-    raw = raw.strip("\n")
-    if not raw:
-        continue
-    sha, subject, body = raw.split("\x1f", 2)
-    commits.append((sha, subject, body))
-if not commits:
-    print("no commits in %s..%s" % ("'"$base"'", "'"$tip"'"))
-    raise SystemExit(0)
-tip_sha = commits[-1][0]
-for sha, subject, body in commits:
-    short = sha[:9]
-    if subject.startswith("Self-review:") or subject.startswith("Self-review "):
-        print("%s: the SUBJECT is a Self-review line, which is never a subject" % short)
-    n = 0
-    for line in body.split("\n"):
-        if line.startswith("Self-review:"):
-            n += 1
-    if n > 1:
-        print("%s: %d Self-review lines in one body, and it is one line" % (short, n))
-    if n == 1 and sha != tip_sha:
-        first = next(l for l in body.split("\n") if l.startswith("Self-review:"))
-        at_start = body.split("\n")[0].startswith("Self-review:")
-        print("%s: carries a Self-review line and is not the tip, so it should not"
-              % short)
-        if not at_start:
-            print("%s: and its Self-review line is not the FIRST line of the body" % short)
-'
+    logdir=$(runs_folder metal-census/self-review-log)
+    rm -rf "$logdir"
+    mkdir -p "$logdir"
+    ( cd "$REPO" && git log --reverse --format='%H%x1f%s%x1f%b%x1e' "$1..$2" ) > "$logdir/log.txt" 2>/dev/null || true
+    runs_xmake l "$here/checks.lua" review "$logdir/log.txt" "$1" "$2"
+    rm -rf "$logdir"
 }
 
 # SELF-TEST: the three ways to break the rule, each caught, fed to the PARSER as git's own output
@@ -69,34 +42,8 @@ if [ -n "${SELF_TEST:-}" ]; then
     work_ok "$work" || { echo "FAIL: the self-test scratch is not under the run folder" >&2; exit 1; }
     rm -rf "$work"; mkdir -p "$work" || exit 1
     feed() {   # git log output on stdin, in git's own --format with %x1f and %x1e
-        python3 -c '
-import sys
-raw = sys.stdin.read()
-commits = []
-for chunk in raw.split("\x1e"):
-    chunk = chunk.strip("\n")
-    if not chunk:
-        continue
-    sha, subject, body = chunk.split("\x1f", 2)
-    commits.append((sha, subject, body))
-if not commits:
-    print("no commits in the range")
-    raise SystemExit(0)
-tip_sha = commits[-1][0]
-for sha, subject, body in commits:
-    short = sha[:9]
-    if subject.startswith("Self-review:") or subject.startswith("Self-review "):
-        print("%s: the SUBJECT is a Self-review line, which is never a subject" % short)
-    n = sum(1 for l in body.split("\n") if l.startswith("Self-review:"))
-    if n > 1:
-        print("%s: %d Self-review lines in one body, and it is one line" % (short, n))
-    if n == 1 and sha != tip_sha:
-        print("%s: carries a Self-review line and is not the tip, so it should not" % short)
-        if not body.split("\n")[0].startswith("Self-review:"):
-            print("%s: and its Self-review line is not the FIRST line of the body" % short)
-' <<EOF
-$(cat)
-EOF
+        cat > "$work/feed.txt"
+        runs_xmake l "$here/checks.lua" review "$work/feed.txt" base tip
     }
     rc=0
     # TWO records, so the one carrying the line is NOT the last: with it alone it reads as the tip and is correctly allowed there.
@@ -130,7 +77,7 @@ EOF
     exit 0
 fi
 
-out=$(findings)
+out=$(findings "$base" "$tip")
 if [ -n "$out" ]; then
     echo "FAIL: the Self-review rule is broken in this series:" >&2
     printf '%s\n' "$out" | sed 's/^/    /' >&2

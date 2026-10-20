@@ -16,8 +16,6 @@
 # actually define, so the MPSImage and the answer are the port's own and not the release's class
 # reached by accident.
 set -eu
-echo "FAIL host/mpsimage9/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 41" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -38,17 +36,7 @@ for source in "$mps"/*.m; do
     plain="$plain $build/$name.plain.o"
 done
 nm -gU $plain | awk '$3 ~ /^_OBJC_CLASS_\$_/ { print $3 }' | sort -u > "$build/port-defines.txt"
-python3 - "$build/port-defines.txt" "$build/rename.h" <<'PY'
-import sys
-defined = set()
-for line in open(sys.argv[1]):
-    line = line.strip()
-    if line.startswith("_OBJC_CLASS_$_"):
-        defined.add(line[len("_OBJC_CLASS_$_"):])
-with open(sys.argv[2], "w") as out:
-    for name in sorted(defined):
-        out.write("#define %s Revenant%s\n" % (name, name))
-PY
+runs_xmake l "$runs_checkout/tests/backports/common/classes.lua" rename "$build/port-defines.txt" "$build/rename.h"
 echo "renamed: $(grep -c define "$build/rename.h") classes of $(wc -l < "$build/port-defines.txt" | tr -d ' ')"
 
 # ---- the plant has to be compiled into the OBJECTS, not only into the case file. The sibling harness

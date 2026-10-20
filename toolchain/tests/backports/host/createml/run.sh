@@ -36,7 +36,7 @@ mkdir -p "$out/modules"
 [ "${KEEP:-0}" = "1" ] || trap 'rm -rf "$out"' EXIT
 
 cp -R "$files" "$out/files"
-xmake l "$here/rename-modules.lua" "$out/files"
+runs_xmake l "$here/rename-modules.lua" "$out/files"
 
 # `-enable-testing` so the suite's `@testable import PortTabularData` can reach the members that are
 # internal on purpose: `AnyColumn`'s typed initialisers, `presentValues` and `erasedValues` are not

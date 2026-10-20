@@ -3,8 +3,6 @@
 # device test reads them, then compiles the port's own categories over the system's classes (a category replaces the method it names) and its
 # UITextInputPasswordRules and the accessors of the scroll indicator insets under names of their own (the host's UIScreen asks -isCaptured while it is made, so that file is held to the iPad 2 alone), holds them to the same records, and tells each of a list of mutants of the port apart.
 set -eu
-echo "FAIL host/traits11/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 47; the inline block PY at line 63" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
@@ -17,8 +15,7 @@ files="UITextInputPasswordRules.m UITextInputTraits11.m UIView+InvertColors.m UI
 
 xcrun clang $common -I"$device" "$here/record.m" "$device/traits11-cases.m" $libs -o "$build/system"
 TRAITS11_RECORDS="$build/system.json" "$build/system"
-xmake l "$here/../../common/embed.lua" "$build/system.json" "$device/traits11-expectations.h" foundation2_expectations
-sed -i.bak 's/foundation2_expectations/traits11_expectations/' "$device/traits11-expectations.h" && rm -f "$device/traits11-expectations.h.bak"
+runs_xmake l "$here/../../common/embed.lua" "$build/system.json" "$device/traits11-expectations.h" traits11_expectations
 echo "records: $(runs_harness records "$build/system.json")"
 
 cat > "$build/rename.h" <<'HEADER'
@@ -44,15 +41,7 @@ for file in $files RevenantMenus.h; do cp "$uikit/$file" "$build/port/$file"; do
 port "$build/port"
 TRAITS11_RECORDS="$build/port.json" "$build/port/run"
 if cmp -s "$build/system.json" "$build/port.json"; then echo "port: same as the system"; else
-    python3 - "$build/system.json" "$build/port.json" <<'PY'
-import json, sys
-a, b = json.load(open(sys.argv[1])), json.load(open(sys.argv[2]))
-for key in sorted(a):
-    if a[key] != b.get(key):
-        print("DIFF", key)
-        print("  system", a[key][:300])
-        print("  port  ", str(b.get(key))[:300])
-PY
+    runs_xmake l "$runs_checkout/tests/backports/common/records.lua" diff "$build/system.json" "$build/port.json" 300 || true
     echo "port: DIFFERS"; exit 1
 fi
 
@@ -60,13 +49,7 @@ survived=0
 mutant() {
     rm -rf "$build/mutant"; mkdir -p "$build/mutant"
     for each in $files RevenantMenus.h; do cp "$uikit/$each" "$build/mutant/$each"; done
-    python3 - "$build/mutant/$1" "$2" "$3" <<'PY'
-import sys
-path, old, new = sys.argv[1:4]
-text = open(path).read()
-assert old in text, old
-open(path, "w").write(text.replace(old, new, 1))
-PY
+    runs_xmake l "$runs_checkout/tests/backports/common/mutants.lua" first "$build/mutant/$1" "$2" "$3"
     port "$build/mutant"
     rm -f "$build/mutant.json"
     TRAITS11_RECORDS="$build/mutant.json" timeout 60 "$build/mutant/run" > /dev/null 2>&1 || true

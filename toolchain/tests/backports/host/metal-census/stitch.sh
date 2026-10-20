@@ -8,8 +8,6 @@
 # built for the device and the other for the host, and the failure looks like a missing main rather
 # than a mismatched architecture. The test and the source go in together, as sources, for the host.
 set -eu
-echo "FAIL host/metal-census/stitch.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 115; the inline block PY at line 131; the inline block PY3 at line 150" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -112,14 +110,7 @@ prove_defined "$(nm -g "$work/real" 2>/dev/null)" || exit 1
 
 echo "the mutation: a graph that forgets its nodes"
 cp "$SRC" "$work/m1.m"
-python3 - "$work/m1.m" <<'PY'
-import sys
-path = sys.argv[1]
-text = open(path).read()
-old = "        _nodes = [nodes copy] ?: @[];"
-assert old in text, "the mutation must match the code it is mutating"
-open(path, "w").write(text.replace(old, "        _nodes = @[];   // MUTATION", 1))
-PY
+runs_xmake l "$here/../../common/mutants.lua" first "$work/m1.m" "        _nodes = [nodes copy] ?: @[];" "        _nodes = @[];   // MUTATION"
 build mutant-nodes "$work/m1.m" m1-device.o
 if "$work/mutant-nodes" > "$work/m1.out" 2>&1; then
     echo "FAIL: the mutant that forgets the nodes is NOT red" >&2; exit 1
@@ -128,18 +119,12 @@ echo "  ok   red, at: $(grep -m1 'FAIL' "$work/m1.out")"
 
 echo "the mutation: a copy that returns the object instead of a copy"
 cp "$SRC" "$work/m2.m"
-python3 - "$work/m2.m" <<'PY'
-import sys
-path = sys.argv[1]
-text = open(path).read()
-old = "    return [[MTLFunctionStitchingGraph alloc] initWithFunctionName:_functionName\n                                                              nodes:_nodes\n                                                         outputNode:_outputNode\n                                                         attributes:_attributes"
-assert old in text, "the mutation must match the code it is mutating"
 # the whole multi-line return becomes the alias, so the file still parses: a mutation that does not
 # compile would be a FAILURE OF THE BUILD, not of the test, and would prove nothing
-new = "    return self;   // MUTATION: a copy that is an alias"
-assert old in text, "the mutation must match the code it is mutating"
-open(path, "w").write(text.replace(old, new, 1))
-PY
+runs_xmake l "$here/../../common/mutants.lua" first "$work/m2.m" "    return [[MTLFunctionStitchingGraph alloc] initWithFunctionName:_functionName
+                                                              nodes:_nodes
+                                                         outputNode:_outputNode
+                                                         attributes:_attributes" "    return self;   // MUTATION: a copy that is an alias"
 build mutant-alias "$work/m2.m" m2-device.o
 if "$work/mutant-alias" > "$work/m2.out" 2>&1; then
     echo "FAIL: the aliasing mutant is NOT red" >&2; exit 1
@@ -147,15 +132,7 @@ fi
 echo "  ok   red, at: $(grep -m1 'FAIL' "$work/m2.out")"
 echo "the mutation: a binary-functions descriptor that forgets the vertex list"
 cp "$SRC" "$work/m3.m"
-python3 - "$work/m3.m" <<'PY3'
-import sys
-path = sys.argv[1]
-text = open(path).read()
-old = "    _vertexAdditionalBinaryFunctions = [vertexAdditionalBinaryFunctions copy];"
-new = "    _vertexAdditionalBinaryFunctions = @[];   // MUTATION: the vertex list is forgotten"
-assert old in text, "the mutation must match the code it is mutating"
-open(path, "w").write(text.replace(old, new, 1))
-PY3
+runs_xmake l "$here/../../common/mutants.lua" first "$work/m3.m" "    _vertexAdditionalBinaryFunctions = [vertexAdditionalBinaryFunctions copy];" "    _vertexAdditionalBinaryFunctions = @[];   // MUTATION: the vertex list is forgotten"
 build mutant-binaries "$work/m3.m" m3-device.o
 if "$work/mutant-binaries" > "$work/m3.out" 2>&1; then
     echo "FAIL: the mutant that forgets the vertex list is NOT red" >&2; exit 1

@@ -12,8 +12,6 @@
 #
 # It reads the REGISTRY, so a row cannot be flipped without a pointer that resolves.
 set -eu
-echo "FAIL host/metal-census/check-facts-pointers.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 32; the inline block PY2 at line 65; the one-line step at line 105; the one-line step at line 106; the one-line step at line 114; the one-line step at line 135" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -29,92 +27,18 @@ mkdir -p "$work"
 
 # $1 registry, $2 package dir -> one line per implemented row that cannot be followed.
 broken() {
-    python3 - "$1" "$2" <<'PY'
-import glob, json, os, re, sys
-reg, pkg = sys.argv[1], sys.argv[2]
-doc = json.load(open(reg, encoding="utf-8"))
-for row in doc["entries"]:
-    if row.get("status") != "implemented":
-        continue
-    api, facts = row["api"], row.get("facts")
-    if not facts:
-        print("%-46s no facts pointer at all" % api)
-        continue
-    path = os.path.join(pkg, facts)
-    if not os.path.isfile(path):
-        print("%-46s points at %s, which does not exist" % (api, facts))
-        continue
-    # and the file must actually LEAD to the symbol, ON AN IDENTIFIER BOUNDARY. A bare substring
-    # test is not enough and this is how it failed: MTLAccelerationStructure is a substring of
-    # MTLAccelerationStructureCommandEncoder, so a row re-pointed at a facts file that names only
-    # the command encoder passed. A file is evidence only if it names THIS symbol and not as a
-    # prefix of a longer one, so the match needs a boundary on both sides.
-    text = open(path, encoding="utf-8").read()
-    if not re.search(r"(?<![A-Za-z0-9_])%s(?![A-Za-z0-9_])" % re.escape(api), text):
-        print("%-46s points at %s, which names it only inside a longer identifier" % (api, facts)) \
-            if re.search(re.escape(api), text) else \
-            print("%-46s points at %s, which never mentions it" % (api, facts))
-PY
+    runs_xmake l "$here/checks.lua" facts-broken "$1" "$2"
 }
 
 # THE RED CONTROL: a copy of the registry with one row's pointer made to lead nowhere, and one with
-# it removed, and BOTH must be named. A check that cannot go red proves nothing.
+# it removed, and BOTH must be named. A check that cannot go red proves nothing. The control runs in
+# process on a copy of the registry: a row with a pointer to a file that does not exist, a row with no
+# pointer, and a row re-pointed at a REAL file that names the row's API only INSIDE a longer
+# identifier - Heaps.md names MTLAccelerationStructureCommandEncoder, which contains
+# MTLAccelerationStructure. A bare substring test passes that; only an identifier-boundary match
+# refuses it.
 if [ -n "${SELF_TEST:-}" ]; then
-    selfreg="$work/registry.json"
-    cp "$reg" "$selfreg"
-    python3 - "$selfreg" "$factsroot" <<'PY2'
-import json, sys
-p = sys.argv[1]
-doc = json.load(open(p, encoding="utf-8"))
-rows = [r for r in doc["entries"] if r.get("status") == "implemented" and r.get("facts")]
-assert len(rows) >= 3, "the control needs three implemented rows with a pointer"
-doc["_control_missing_file"] = rows[0]["api"]
-doc["_control_no_pointer"] = rows[1]["api"]
-rows[0]["facts"] = "facts/Metal/NoSuchFile.md"
-rows[1].pop("facts", None)
-# THE THIRD NEGATIVE, and it is the reviewer's own case: a row re-pointed at a REAL file that
-# names the row's API only INSIDE a longer identifier - Heaps.md names
-# MTLAccelerationStructureCommandEncoder, which contains MTLAccelerationStructure. A bare substring
-# test passes that; only an identifier-boundary match refuses it. The file is found rather than
-# hard-coded, by the property the control needs: it names a longer identifier built from the row's
-# API, and does not name the row's own API on a boundary.
-import glob, os, re as _re
-# Find the PAIR by the property the control needs, not by guessing a row: a row whose API, with
-# "CommandEncoder" appended, is named by some facts file that does NOT name the row's own API on a
-# boundary. MTLAccelerationStructure and Heaps.md are such a pair - Heaps.md names
-# MTLAccelerationStructureCommandEncoder and never MTLAccelerationStructure on its own - and that is
-# the reviewer's case, but nothing here is written down for it.
-row = None
-for candidate in rows:
-    api = candidate["api"]
-    longer = api + "CommandEncoder"
-    for cand in sorted(glob.glob(os.path.join(sys.argv[2], "**", "*.md"), recursive=True)):
-        text = open(cand, encoding="utf-8", errors="replace").read()
-        if _re.search(_re.escape(longer), text) and not _re.search(
-                r"(?<![A-Za-z0-9_])%s(?![A-Za-z0-9_])" % _re.escape(api), text):
-            row, found = candidate, cand
-            break
-    if row:
-        break
-assert row, "the control needs a row named only inside a longer identifier somewhere"
-row["facts"] = os.path.relpath(found, os.path.dirname(os.path.dirname(sys.argv[2])))
-doc["_control_substring"] = row["api"]
-doc["_control_substring_file"] = row["facts"]
-json.dump(doc, open(p, "w", encoding="utf-8"), indent=2)
-PY2
-    miss=$(python3 -c "import json;d=json.load(open('$selfreg'));print(d['_control_missing_file'])")
-    none=$(python3 -c "import json;d=json.load(open('$selfreg'));print(d['_control_no_pointer'])")
-    out=$(broken "$selfreg" "$pkg" || true)
-    printf '%s\n' "$out" | grep -q "$miss" || {
-        echo "FAIL: the control's missing-file row was not named" >&2; exit 1; }
-    echo "  ok   the self-test's NEGATIVE 1: a pointer to a file that does not exist is named"
-    printf '%s\n' "$out" | grep -q "$none" || {
-        echo "FAIL: the control's pointer-less row was not named" >&2; exit 1; }
-    echo "  ok   the self-test's NEGATIVE 2: an implemented row with no pointer is named"
-    sub=$(python3 -c "import json;d=json.load(open('$selfreg'));print(d['_control_substring'])")
-    printf '%s\n' "$out" | grep -q "$sub" || {
-        echo "FAIL: the control's substring row was not named" >&2; exit 1; }
-    echo "  ok   the self-test's NEGATIVE 3: a row named only inside a longer identifier is named"
+    runs_xmake l "$here/checks.lua" facts-control "$reg" "$factsroot" "$pkg" || { rm -rf "$work"; exit 1; }
     if out=$(broken "$reg" "$pkg") && [ -n "$out" ]; then
         echo "FAIL: the real tree has rows whose pointer does not lead:" >&2
         printf '%s\n' "$out" | sed 's/^/    /' >&2
@@ -132,10 +56,7 @@ if out=$(broken "$reg" "$pkg"); then
         exit 1
     fi
 fi
-count=$(python3 -c "
-import json
-d = json.load(open('$reg', encoding='utf-8'))
-print(sum(1 for r in d['entries'] if r.get('status') == 'implemented'))")
+count=$(runs_xmake l "$here/checks.lua" facts-count "$reg")
 echo "  every implemented row's facts pointer leads to a file that mentions it: $count row(s)"
 echo "check-facts-pointers: OK"
 # THE SCRATCH IS REMOVED HERE.

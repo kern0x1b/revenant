@@ -14,8 +14,6 @@
 # :296 documents all three as "read, write, read-write" - and the real writer's mapping is read in
 # fixtures/accesses.ll by run-compare below, not here.
 set -eu
-echo "FAIL host/air2cpu/check-access-mutation.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 30" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -27,27 +25,7 @@ mkdir -p "$work"
 # The real writer, and the mutant: identical except that the mutant reads the access from the node's
 # FIRST operand, which is the defect this check exists to keep from coming back.
 cp "$root/tools/air2cpu/air2cpu.cpp" "$work/mutant.cpp"
-python3 - "$work/mutant.cpp" <<'PY'
-import sys
-path = sys.argv[1]
-source = open(path).read()
-start = source.index("    // A key may be BARE")
-end = source.index("        if (name == \"air.arg_name\")")
-# the mutant: no key-stream scan at all, and the access read only from operand 0
-source = source[:start] + '''    for (unsigned i = start; i + 1 < node->getNumOperands(); i += 2) {
-        auto *key = dyn_cast<MDString>(node->getOperand(i));
-        if (!key)
-            continue;
-        std::string name = key->getString().str();
-''' + source[end:]
-# and the access comes from operand 0 only
-source = source.replace('''        const char *access = nullptr;''',
-'''        const char *access = nullptr;
-        if (metadata.access == "air.read") access = "read-only";
-        else if (metadata.access == "air.write") access = "write-only";
-        else if (metadata.access == "air.read_write") access = "read-write";''')
-open(path, "w").write(source)
-PY
+runs_xmake l "$here/tools.lua" mutant "$work/mutant.cpp"
 
 # The generated source includes the call convention by a path relative to ITSELF, so a mutant that
 # lives outside the tree needs the header at the same relative place. Copied, not symlinked: the run

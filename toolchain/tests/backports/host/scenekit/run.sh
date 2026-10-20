@@ -10,6 +10,5 @@ EXPECTATIONS=${EXPECTATIONS:-$DEVICE/scenekit-expectations.h}
 mkdir -p "$BUILD"
 xcrun swiftc -O "$here/oracle.swift" -o "$BUILD/oracle"
 "$BUILD/oracle" "$BUILD/expectations.json"
-xmake l "$here/../../common/embed.lua" "$BUILD/expectations.json" "$EXPECTATIONS" foundation2_expectations
-sed -i '' 's/foundation2_expectations/scenekit_expectations/' "$EXPECTATIONS"
+runs_xmake l "$here/../../common/embed.lua" "$BUILD/expectations.json" "$EXPECTATIONS" scenekit_expectations
 echo "wrote $EXPECTATIONS"

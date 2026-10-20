@@ -7,8 +7,6 @@
 # one runtime; port-support.m supplies the handful of symbols ModelIO itself exports that a release
 # without it has to carry. Nothing in the comparison is tuned: a line that differs is reported.
 set -eu
-echo "FAIL host/modelio/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 63; compare.py" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 MODELIO=${MODELIO:-$here/../../../../packages/frameworks/apple-backports/ModelIO}
@@ -60,39 +58,14 @@ fi
 # carries the Mach-O that defined the class it came from, and these two assertions turn it into a runtime
 # fact: a host answer that did not come from ModelIO, or a port answer that did, fails the run instead of
 # passing on the link being right for a reason nobody looked at.
-python3 - "$BUILD/host/err.txt" "$BUILD/port/err.txt" <<'PY'
-import sys
-def images(path):
-    out = {}
-    for line in open(path, errors="replace"):
-        if line.startswith("image "):
-            parts = line.split()
-            if len(parts) >= 4:
-                out.setdefault(parts[1], set()).add(parts[3])
-    return out
-host, port = images(sys.argv[1]), images(sys.argv[2])
-if not host or not port:
-    print("FAIL  no image lines: the probe did not report which image answered")
-    sys.exit(1)
-for cls, kinds in sorted(host.items()):
-    for kind in kinds:
-        if kind != "system-modelio":
-            print("FAIL  the host answered %s from %s, not from the system ModelIO" % (cls, kind)); sys.exit(1)
-for cls, kinds in sorted(port.items()):
-    for kind in kinds:
-        if kind != "port":
-            print("FAIL  the port answered %s from %s - it does not link ModelIO" % (cls, kind)); sys.exit(1)
-common = set(host) & set(port)
-print("  images: %d classes on both sides (%d host, %d port); host from the system ModelIO,"
-      " port from its binary and band objects" % (len(common), len(host), len(port)))
-PY
+runs_xmake l "$here/compare.lua" images "$BUILD/host/err.txt" "$BUILD/port/err.txt"
 
 # THE KNOWN-OPEN COUNT IS CHECKED, not remembered. compare.py prints every difference and a summary line, so
 # the number of "different:" lines above IS the tally; this checks it against known-open.txt and fails if they
 # differ, in either direction. A run carrying differences nobody recorded is a FAIL, and so is a recorded
 # difference the run no longer produces: the two cannot drift apart, and the number of open differences is
 # on the output rather than only in a message somebody has to remember to write.
-output=$(python3 "$here/compare.py" "$BUILD/host/answers.txt" "$BUILD/port/answers.txt" "${1:-0.0005}" 2>&1) || true
+output=$(runs_xmake l "$here/compare.lua" compare "$BUILD/host/answers.txt" "$BUILD/port/answers.txt" "${1:-0.0005}" 2>&1) || true
 printf '%s\n' "$output"
 actual=$(printf '%s\n' "$output" | grep -c '^different:')
 recorded=$(grep -c '^[^#]' "$here/known-open.txt" || true)
