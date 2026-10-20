@@ -220,6 +220,101 @@ function add_symbols(text, wanted)
     return put_entries(text, entries)
 end
 
+function add_archs(text, wanted)
+    local doc = read(text)
+    local missing = {}
+    for _, arch in ipairs(wanted) do
+        if not table.contains(doc.archs, arch) then
+            table.insert(missing, arch)
+        end
+    end
+    if #missing == 0 then
+        return text
+    end
+    local key, suffix = doc.format == "v3" and "archs" or "targets", doc.format == "v3" and "" or "-ios"
+    local names = {}
+    for _, arch in ipairs(missing) do
+        table.insert(names, arch .. suffix)
+    end
+    local at, close = text:find("\n" .. key .. ":[ \t]*%[[^%]]*%]")
+    local listed = text:sub(at, close):gsub("%s*%]$", "")
+    return text:sub(1, at - 1) .. listed .. ", " .. table.concat(names, ", ") .. " ]" .. text:sub(close + 1)
+end
+
+function slice(doc, wanted)
+    local groups, order = {}, {}
+    for _, entry in ipairs(doc.exports) do
+        local archs = {}
+        for _, arch in ipairs(wanted) do
+            if table.contains(entry.archs, arch) then
+                table.insert(archs, arch)
+            end
+        end
+        if #archs > 0 then
+            for _, list in ipairs(LISTS) do
+                local key = list .. "\t" .. table.concat(archs, ",")
+                if not groups[key] then
+                    groups[key] = {archs = archs, list = list, tokens = {}, seen = {}}
+                    table.insert(order, key)
+                end
+                for _, symbol in ipairs(entry.lists[list]) do
+                    if not symbol:startswith("$ld$") and not groups[key].seen[symbol] then
+                        groups[key].seen[symbol] = true
+                        table.insert(groups[key].tokens, symbol)
+                    end
+                end
+            end
+        end
+    end
+    local out = {}
+    for _, key in ipairs(order) do
+        table.insert(out, {archs = groups[key].archs, list = groups[key].list, tokens = groups[key].tokens})
+    end
+    return out
+end
+
+function add_clients(text)
+    local at = text:find("\nallowable%-clients:[ \t]*\n")
+    if not at then
+        return text
+    end
+    local after = text:find("\n%S", at + 1) or #text
+    local section = text:sub(at, after)
+    if section:find("armv7", 1, true) then
+        return text
+    end
+    local body = section:match("^\n[^\n]*\n(.*)$") or ""
+    local extra = (body:gsub("targets:(%s*)%[[^%]]*%]", "targets:%1[ armv7-ios, armv7s-ios ]"))
+    if extra == "" then
+        return text
+    end
+    return text:sub(1, after) .. extra .. text:sub(after + 1)
+end
+
+function add_reexports(text, capable)
+    local at = text:find("\nreexported%-libraries:[ \t]*\n")
+    if not at then
+        return text
+    end
+    local after = text:find("\n%S", at + 1) or #text
+    local section = text:sub(at, after)
+    if section:find("armv7", 1, true) then
+        return text
+    end
+    local names, seen = {}, {}
+    for name in section:gmatch("'(/[^']+)'") do
+        if capable[name] and not seen[name] then
+            seen[name] = true
+            table.insert(names, "'" .. name .. "'")
+        end
+    end
+    if #names == 0 then
+        return text
+    end
+    local entry = string.format("  - targets:         [ armv7-ios, armv7s-ios ]\n    libraries:       [ %s ]\n", table.concat(names, ", "))
+    return text:sub(1, after) .. entry .. text:sub(after + 1)
+end
+
 function group(found)
     local groups, order = {}, {}
     for _, marker in ipairs(found) do
