@@ -51,9 +51,9 @@ revenant does, in `frameworks/Combine`.
 | --- | --- |
 | Corpus rows for `Combine` | 1224 |
 | Covered by the built armv7 module | 1131 |
-| The 93 that are not, and why | `docs/reference/combine/CombineKit.md` |
+| The 93 that are not, and why | `docs/reference/combine/combine-kit.md` |
 | `swift-api-digester -dump-sdk`, Apple's 26.2 `Combine.swiftinterface` against ours | 963 declarations in both, 72 in Apple's that are not in ours, 272 in ours that Apple does not declare |
-| Host differential, 40 cases, the same source against the host's own Combine and against ours | `DIFFERENTIAL: identical`; the mutation turns it to 4 differing lines; `docs/reference/combine/CombineKit.md` |
+| Host differential, 40 cases, the same source against the host's own Combine and against ours | `DIFFERENTIAL: identical`; the mutation turns it to 4 differing lines; `docs/reference/combine/combine-kit.md` |
 | The armv7 probe on the emulated iPhone 4S at 6.1.3 | 50 of 50, `combinekit: every check held`, exit 0 |
 
 The counts were taken on `2026.09.20`, the fork with a layer of its own; `2026.10.19` carries
