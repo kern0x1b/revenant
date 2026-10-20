@@ -1,8 +1,0 @@
-Package: $identifier
-Name: $Name
-Architecture: iphoneos-arm
-Description: $Name, a MobileSubstrate tweak
-Maintainer: $maintainer
-Author: $maintainer
-Section: Tweaks
-Depends: mobilesubstrate

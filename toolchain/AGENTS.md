@@ -47,8 +47,6 @@ Android) as it is here; iOS 6 is the first platform it targets, not its limit.
 
 | Path | Holds |
 | --- | --- |
-| `config/` | Conan configuration: settings, hooks, and the `revenant` driver + platform facts under `config/extensions/`. |
-| `recipes/` | Conan recipes - the SDK, ld64, ldid, libplist, libcxx, the imports check, and the `revenant-base` / `revenant-apple` bases every port extends. |
 | `modules/` | build modules / ports. `modules/gyb/` is the only gyb: Swift's `gyb.py` and the Python its templates run, in Lua (README, "No Python runs in that build"); nothing here calls Python to expand a template. |
 | `packages/` | package definitions, filed by group as `packages/<group>/<name>`: `build-tools`, `runtimes`, `frameworks`, `libraries`, `emulator`, `tweaks`. The table of which package is in which group is `config/extensions/revenant/index.lua`, and `tests/addon/revenant_index_test.lua` holds the tree to it. |
 | `plugins/` | build plugins. |

@@ -188,8 +188,8 @@ export them either. An SDK whose stubs carry no `$ld$` marker at all, such as
 stubs (one archive, downloaded beside it), library by library by install name,
 and for the symbols of libSystem that 16.5 does not have it writes one hide marker
 for each release the 16.5 markers name below the first release the held dyld
-caches export the symbol from (`markers/iPhoneOS26.2.tsv`, written by
-`tools/sdk-markers.lua`). So the linker of 26.2 knows what the one of 16.5 knew, and
+caches export the symbol from (`markers/iPhoneOS26.2.tsv`, a checked-in table).
+So the linker of 26.2 knows what the one of 16.5 knew, and
 `__Unwind_GetIPInfo` still binds to libgcc_s below iOS 5. A libSystem without any hide
 marker is refused whatever its version. Only libSystem gets markers derived, as in 16.5, where the frameworks' newer API is told apart by availability and weak links, not by markers (the rule agrees with 16.5's own libSystem hides for 181 of 184 symbols, measured; for the other three, libdispatch's `dispatch_assert_queue`, `dispatch_assert_queue_not` and `dispatch_queue_create_with_target`, the answer of 16.5 stands: hidden only at 10.0, where the caches say 7.0). The SDK's stubs also say only for armv7 and armv7s where
 symbols lived on iOS 7 to 10 (`$ld$hide$os7.0$` in CFNetwork, `$ld$add$os7.0$`
@@ -923,18 +923,6 @@ below; it goes away once they have.
 
 ## What is here
 
-    config/settings_user.yml   iOS 6.0 and 6.1, which Conan does not ship
-    config/extensions/hooks/   refuses a build missing what its platform requires, and maps machine paths away
-    config/extensions/revenant/  the toolchain: the entry point, what it generates, and the phone transport
-    config/extensions/revenant/platforms/  apple-ios: what a port that builds for iOS is built with
-    recipes/ld64/              the linker, built from cctools-port
-    recipes/ldid/              the signing tool the device accepts
-    recipes/libplist/          the property-list library ldid reads entitlements with
-    recipes/iphoneos-sdk/      the SDK, fetched and verified on the machine that uses it
-    recipes/libcxx/            the C++ runtime an old iOS does not ship
-    recipes/dyld-imports-check/  the check that every import exists in a device's dyld cache
-    recipes/revenant-base/       what every port's recipe extends, whatever its platform
-    recipes/revenant-apple/      the Apple half: Mach-O invariants, bundles, signing, the .deb writer
 
 ## A new machine
 
@@ -942,44 +930,17 @@ below; it goes away once they have.
     xcode-select --install
 
     git clone https://github.com/kern0x1b/revenant.git
-    conan config install toolchain/config
 
     export LLVM_PREFIX="$(brew --prefix llvm)"
 
-The toolchain is the entry point, the way Gradle is. Inside a port, run it once by its
-full path:
-
-    "$(conan config home)/extensions/revenant/revenant" setup <path to this repo>
-
-That installs this configuration, registers this repository's recipes and the
-port's own ahead of the general remotes, and links `revenant` into the first
-writable folder on PATH, so every later call is just `revenant`. A new port starts from a template, which builds, packages and passes
-`check:imports` as written:
-
-    revenant new tweak|daemon|app NAME [--identifier com.example.name]
-
-`REVENANT_MAINTAINER` fills the control file's maintainer. The verbs are the same
-in every port:
-
-    revenant build [--variant NAME]   everything the declaration names
-    revenant lock                     pin every variant's graph to what the indexes serve now
-    revenant task NAME [NAME...]      declared tasks, run the way the pipeline runs them
-    revenant test [--tier NAME]       the declared test tiers
-    revenant package                  the .deb, copied to build/<variant>/
-    revenant install                  package and dpkg -i the .deb on the phone, refusing to
-                                    install an app over one with another bundle identifier
-    revenant deploy, revenant run       install on the phone, launch the application
-    revenant device log [SECONDS] [TEXT]  the phone's log over USB, filtered
-    revenant generate                 write the recipe, profile and CMake without building
-    revenant integrate, clean, provenance, device run|copy|fetch
+Build and run a port through xmake from the repository root with `./xmakew`. The
+plugins under `toolchain/plugins/` provide the verbs (`check`, `compile-commands`,
+`deb`, `device`, `emulate`, `firmware`, `where`).
 
 The phone is named in the port's `device.env` (`DEVICE_HOST`, `DEVICE_PORT`,
 `DEVICE_UDID`, `DEVICE_PASSWORD`). A port with more than one keeps
 `device.NAME.env` beside it and picks one with `--device NAME`, or with
 `REVENANT_DEVICE=NAME` for a whole shell.
-
-`conan config install` copies rather than links, so after changing the toolchain here
-run `revenant setup` again; `revenant provenance` says which copy is answering.
 
 A port with one pipeline needs no `[variants]`: each name under `[pipeline]` is
 a variant with no options of its own. A port carries no conanfile.py, no profile,
@@ -1040,7 +1001,7 @@ A task is a table with exactly one of `script`, `shell` or `python`, and its
 `revenant.toml`; the generated recipe finds it from the `build/<variant>/revenant`
 folder it lives in, so it carries no checkout path, and `user.revenant:port`
 names another. A task runs in `[pipeline]` as `task:NAME`, before the build under `revenant integrate`
-when `[integrate] before-build` names it, or on its own with `revenant task NAME`.
+when `[integrate] before-build` names it, or on its own.
 
 A target's `sources` may be patterns - `src/**/*.m` - with `exclude`, expanded
 when the toolchain writes the project; a pattern that matches nothing is refused. An
@@ -1119,7 +1080,7 @@ the trim rewrites: `conan create` in that folder gives a different revision from
 the one consumers resolve, so a package built that way is not the one they use.
 
 `[platform]` names what the port builds for, and nothing else says it. A
-platform is a file of facts - `config/extensions/revenant/platforms/apple-ios.toml`
+platform is a file of facts - the apple-ios one was removed with the Conan configuration
 is the first - giving the operating system, its SDK name, the architectures it
 builds with the oldest and newest release each supports, the tools every build
 for an architecture requires (the SDK package; ld64 for armv7), the compiler's
@@ -1164,8 +1125,7 @@ configured and that has frameworks laid out, the frameworks to install are
 whatever the build staged, and a test tier gets the phone, the build tree or its
 packages only when it declares `needs` or `packages`.
 
-`LLVM_PREFIX` is read once, by `config/global.conf`, into
-`user.ld64:llvm_prefix`. Only the `ld64` recipe asks for it: cctools' configure
+`LLVM_PREFIX` is read by the ld64 package (`packages/build-tools/ld64`), which asks for it: cctools' configure
 runs `llvm-config` to find `libLTO`, and a linker built without it silently
 drops LTO support, which this target builds with. Recipes never read the
 environment themselves, so a missing path stops `conan create` with that
