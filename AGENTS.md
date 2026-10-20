@@ -32,6 +32,12 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   tools/       its developer tools, Lua only
   ```
 
+  `agent-skills` is the one plugin with a different shape: `README.md`, `tests/`, `.claude-plugin/`, `skills/`, `LICENSE`
+  and `THIRD-PARTY.md`. The plugin format fixes its manifest at `.claude-plugin/plugin.json` beside the skills, and an
+  installed plugin is that folder alone, so the skills and the licence and notice they carry stay there. Its
+  `plugin.json` could point the skills at `src/`, but Claude Code's loading of a custom skills path is not verified
+  here, so the skills are not moved until it is.
+
   A component uses another through the build graph (`add_deps`, or its package by name), never by a path into the
   other's folder. The layout is checked by `./xmakew l tools/check.lua layout`.
 - A change that spans components is one series in revenant, one commit per component it touches.
