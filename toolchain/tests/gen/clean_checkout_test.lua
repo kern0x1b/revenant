@@ -80,15 +80,15 @@ function main()
     local extracted = extract(dir)
     if extracted ~= 0 then
         fail("the tree could not be extracted (status " .. tostring(extracted) .. ")")
-    elseif not os.isfile(path.join(dir, "tools", "gen.lua")) then
-        fail("the extracted tree holds no tools/gen.lua: the extraction is not the tree under test")
+    elseif not os.isfile(path.join(dir, "toolchain", "tools", "gen.lua")) then
+        fail("the extracted tree holds no toolchain/tools/gen.lua: the extraction is not the tree under test")
     else
         local before = listing(dir)
         local started = os.mclock()
-        local gen_status = run_gen(dir, {"gen", "--tree", dir, "--all", "--sdk", SDK_FIXTURE}, search_path)
+        local gen_status = run_gen(dir, {"gen", "--tree", path.join(dir, "toolchain"), "--all", "--sdk", SDK_FIXTURE}, search_path)
         local gen_ms = os.mclock() - started
         started = os.mclock()
-        local check_status = run_gen(dir, {"check", "--tree", dir, "--all", "--sdk", SDK_FIXTURE}, search_path)
+        local check_status = run_gen(dir, {"check", "--tree", path.join(dir, "toolchain"), "--all", "--sdk", SDK_FIXTURE}, search_path)
         local check_ms = os.mclock() - started
         local after = listing(dir)
         if gen_status ~= 0 then
