@@ -4,8 +4,6 @@
 # categories replace the system's methods of the same name) and held to the same records, with mutants that each have to be told apart.
 # An application, not a process of its own: UIWindow needs UIApplicationMain behind it, as host/safeguide/run.sh does.
 set -eu
-echo "FAIL host/toolbar/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 40; the inline block PY at line 59; the inline block PY at line 77" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
@@ -37,15 +35,7 @@ for file in $files; do cp "$uikit/$file" "$build/port/$file"; done
 compile "$build/port/port.app" "$build/port/UIView+SafeArea.m" "$build/port/UIViewController+SafeArea.m"
 record "$build/port/port.app" "$build/port.json"
 if cmp -s "$build/system.json" "$build/port.json"; then echo "port: same as the system"; else
-    python3 - "$build/system.json" "$build/port.json" <<'PY'
-import json, sys
-a, b = json.load(open(sys.argv[1])), json.load(open(sys.argv[2]))
-for key in sorted(a):
-    if a[key] != b.get(key):
-        print("DIFF", key)
-        print("  system", a[key])
-        print("  port  ", b.get(key))
-PY
+    runs_xmake l "$runs_checkout/tests/backports/common/records.lua" diff "$build/system.json" "$build/port.json" || true
     echo "port: DIFFERS"; exit 1
 fi
 
@@ -56,13 +46,8 @@ mutant() {
     from=$1; to=$2
     rm -rf "$build/mutant"; mkdir -p "$build/mutant"
     cp "$build/port/UIView+SafeArea.m" "$build/mutant/UIView+SafeArea.m"
-    python3 - "$uikit/UIViewController+SafeArea.m" "$build/mutant/UIViewController+SafeArea.m" "$from" "$to" <<'PY'
-import sys
-source, target, old, new = sys.argv[1:5]
-text = open(source).read()
-assert text.count(old) == 1, old
-open(target, "w").write(text.replace(old, new, 1))
-PY
+    cp "$uikit/UIViewController+SafeArea.m" "$build/mutant/UIViewController+SafeArea.m"
+    runs_xmake l "$runs_checkout/tests/backports/common/mutants.lua" once "$build/mutant/UIViewController+SafeArea.m" "$from" "$to"
     compile "$build/mutant/mutant.app" "$build/mutant/UIView+SafeArea.m" "$build/mutant/UIViewController+SafeArea.m"
     rm -f "$build/mutant.json"
     TOOLBAR_RECORDS="$build/mutant.json" timeout 60 "$build/mutant/mutant.app/Contents/MacOS/app" > /dev/null 2>&1 || true
@@ -74,10 +59,5 @@ echo "mutants surviving: $survived"
 [ "$survived" -eq 0 ]
 
 # What the device holds itself to: every record of the host's but the measured ones, which are numbers of one window.
-python3 - "$build/system.json" "$build/expected.json" <<'PY'
-import json, sys
-records = json.load(open(sys.argv[1]))
-json.dump({key: value for key, value in records.items() if not key.startswith("measured")}, open(sys.argv[2], "w"))
-PY
-xmake l "$here/../../common/embed.lua" "$build/expected.json" "$device/toolbar-expectations.h" foundation2_expectations
-sed -i.bak 's/foundation2_expectations/toolbar_expectations/' "$device/toolbar-expectations.h" && rm -f "$device/toolbar-expectations.h.bak"
+runs_xmake l "$runs_checkout/tests/backports/common/records.lua" without "$build/system.json" "$build/expected.json" measured
+runs_xmake l "$here/../../common/embed.lua" "$build/expected.json" "$device/toolbar-expectations.h" toolbar_expectations

@@ -3,8 +3,6 @@
 # same translates, same slopes, same edging modes, every byte of every destination row compared - and both
 # answers compared against an expectation this harness computes in its own loops.
 set -eu
-echo "FAIL host/shear/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 52" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 ACCELERATE=$here/../../../../packages/frameworks/apple-backports/Accelerate
@@ -49,20 +47,7 @@ if [ -n "${PLANT:-}" ]; then
     # nothing). A second control replaces an EXPRESSION - the vertical's far-edge anchor - and needs the
     # replacement spelled out.
     replace=${PLANT_REPLACE:-if (0) /* planted: the test can no longer hold */}
-    python3 - "$build/planted" "$PLANT" "$replace" <<'PY'
-import glob, sys
-folder, needle, replacement = sys.argv[1], sys.argv[2], sys.argv[3]
-hits = 0
-for path in glob.glob(folder + "/*.h"):
-    text = open(path).read()
-    found = text.count(needle)
-    if found:
-        open(path, "w").write(text.replace(needle, replacement))
-        hits += found
-if hits == 0:
-    sys.exit("PLANT: the needle is not in any of the copied headers, so nothing was planted")
-print("planted: replaced %d occurrence(s) of the needle" % hits)
-PY
+    runs_xmake l "$runs_checkout/tests/backports/common/mutants.lua" plant "$build/planted" "$PLANT" "$replace"
     ACCELERATE="$build/planted"
 fi
 
