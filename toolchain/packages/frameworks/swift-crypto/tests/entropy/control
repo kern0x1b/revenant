@@ -1,5 +1,0 @@
-Package: org.revenant.entropyprobe
-Name: entropyprobe
-Architecture: iphoneos-arm
-Maintainer: revenant band v-int-swift10
-Description: random sources of the armv7 iOS 6.1.3 emulator (v-int-swift10)

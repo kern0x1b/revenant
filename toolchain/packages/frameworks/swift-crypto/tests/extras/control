@@ -1,5 +1,0 @@
-Package: org.revenant.cryptoextrasprobe
-Name: cryptoextrasprobe
-Architecture: iphoneos-arm
-Maintainer: revenant band v-crypto-diff
-Description: swift-crypto CryptoExtras probe for the armv7 iOS 6.1.3 emulator (v-crypto-diff)
