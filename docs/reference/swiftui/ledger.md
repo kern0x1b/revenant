@@ -277,7 +277,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   и 26.2 такого члена нет вовсе (`SwiftUICore.swiftinterface:8758-8762` — только `automatic`,
   `explicit(_:)` и `==`).
 - `blur` и шесть цветовых фильтров получают измеренную формулировку: размытие в каноне этого порта есть
-  (`apple-backports/UIKit/UIVisualEffect.m`, `RevenantBlur.m`; `facts/UIKit/UIVisualEffect.md`), но это
+  (`frameworks/Backports/src/UIKit/UIVisualEffect.m`, `RevenantBlur.m`; `facts/UIKit/UIVisualEffect.md`), но это
   `UIView`, а у модификатора SwiftUI нет вида, в который его положить; шесть фильтров ложатся на
   `compositingFilter` слоя, который порт уже ставит, и пока им не рисуется.
 - `SymbolVariants` взят из OpenSwiftUI (MIT, `OpenSwiftUIProject/OpenSwiftUI`,
@@ -305,7 +305,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   имена этих двух модификаторов в журнале. И четыре речи
   VoiceOver — `speechAlwaysIncludesPunctuation`, `speechSpellsOutCharacters`, `speechAdjustedPitch`,
   `speechAnnouncementsQueued`. Сами четыре атрибута в каноне этого порта есть
-  (`apple-backports/UIKit/UIAccessibilitySpeechAttributes.m` и два соседа, `registry/UIKit/ios13rest.json`),
+  (`frameworks/Backports/src/UIKit/UIAccessibilitySpeechAttributes.m` и два соседа, `registry/UIKit/ios13rest.json`),
   а VoiceOver iOS 6 не читает ни одного с атрибутированной строки —
   `apple-backports/facts/UIKit/UIAccessibilitySpeechAttributes.md`; каждый пишет в журнал именно с этим.
   Эти четыре `Text`-перегрузки — то, что добавил 26.2; `View`-перегрузки были уже в 16.4.

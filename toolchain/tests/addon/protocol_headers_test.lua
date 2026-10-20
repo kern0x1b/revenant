@@ -55,7 +55,7 @@ function failures(opt)
     local found = {}
     local root = path.join(opt.modules, "..")
     for _, library in ipairs(libraries_of(opt.modules)) do
-        local folder = path.join(root, "packages", "frameworks", "apple-backports", library.folder)
+        local folder = path.join(root, "..", "frameworks", "Backports", "src", library.folder)
         local rows = implemented_protocols(root, library.folder)
         if #rows > 0 then
             local header = path.join(folder, "Revenant" .. library.folder .. "Protocols.h")

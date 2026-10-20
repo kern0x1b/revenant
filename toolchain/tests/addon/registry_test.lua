@@ -71,7 +71,7 @@ local function range_step(backports, folder, found)
         table.insert(entries, string.format('{"api": "%s", "kind": "function", "introduced": "9.0", "minimum": "%s", "status": "implemented"}', row[1], row[2]))
     end
     io.writefile(path.join(work, "registry", "range.json"), '{"framework": "Range", "entries": [' .. table.concat(entries, ", ") .. ']}\n')
-    local listed = backports.registry(work)
+    local listed = backports.registry(work, work)
     local api = "__attribute__((visibility(\"default\"))) "
     local early = fixtures.object(work, "early", api .. "int range_early(void) { return 4; }\n")
     local late = fixtures.object(work, "late", "int range_shared(void);\n" .. api .. "int range_late(void) { return range_shared() + 6; }\n")
@@ -147,7 +147,7 @@ local function type_rows(backports, found)
         io.writefile(path.join(root, "registry", "Fix.json"), string.format('{"framework": "Fix", "entries": [%s]}', table.concat(rows, ", ")))
         local message
         local passed = try {
-            function () backports.check_registry(root, {classes = {}, members = {}, symbols = {}}, true, "6.1.3", {}, nil) return true end,
+            function () backports.check_registry(root, root, {classes = {}, members = {}, symbols = {}}, true, "6.1.3", {}, nil) return true end,
             catch {function (errors) message = tostring(errors) end}
         }
         return (passed and "the check passed, nothing was held unbuilt") or message or "raised with no message"
@@ -166,7 +166,7 @@ local function type_rows(backports, found)
     io.writefile(path.join(root, "registry", "Fix.json"), string.format('{"framework": "Fix", "entries": [%s]}', row("FixturedSdkType", "type")))
     local message
     local passed = try {
-        function () backports.check_registry(root, {classes = {}, members = {}, symbols = {}}, true, "6.1.3", {}, nil, sdk) return true end,
+        function () backports.check_registry(root, root, {classes = {}, members = {}, symbols = {}}, true, "6.1.3", {}, nil, sdk) return true end,
         catch {function (errors) message = tostring(errors) end}
     }
     if (passed and "the check passed, nothing was held unbuilt") ~= "the check passed, nothing was held unbuilt" then
@@ -179,14 +179,14 @@ local function type_rows(backports, found)
             table.insert(found, "a type no header declares is still red, and the run must name " .. name .. ": " .. absent)
         end
     end
-    local rows = backports.registry(root)
+    local rows = backports.registry(root, root)
     told({string.format('{"api": "FixturedFree()", "kind": "function", "introduced": "11.0", "minimum": "6.0", "status": "implemented", "facts": "f"}')})
-    rows = backports.registry(root)
+    rows = backports.registry(root, root)
     if (rows["FixturedFree()"] or {}).kind ~= "function" then
         table.insert(found, "a function is not read out of the registry at all, so nothing can look it up")
     end
     told({row("FixturedType", "type"), row("FixturedKind", "type"), row("FixturedCaseOne", "case")})
-    local listed = backports.registry(root)
+    local listed = backports.registry(root, root)
     for _, name in ipairs({"FixturedType", "FixturedKind", "FixturedCaseOne"}) do
         if (listed[name] or {}).kind == nil then
             table.insert(found, "the registry does not list " .. name .. " at all")
@@ -214,7 +214,7 @@ local function member_and_protocol_rows(backports, found)
         end
         local message
         local ok = try {
-            function () backports.check_registry(root, {classes = classes, members = members, symbols = symbols or {}},
+            function () backports.check_registry(root, root, {classes = classes, members = members, symbols = symbols or {}},
                                                   true, "6.1.3", {}, inventory) return true end,
             catch {function (errors) message = tostring(errors) end}
         }
@@ -237,7 +237,7 @@ local function member_and_protocol_rows(backports, found)
         local message
         local ok = try {
             function ()
-                local _, _, class_only = backports.check_registry(root, {classes = {FixClass = true}, members = members or {}, symbols = {}},
+                local _, _, class_only = backports.check_registry(root, root, {classes = {FixClass = true}, members = members or {}, symbols = {}},
                                                                   true, "6.1.3", {}, inventory)
                 for _, name in ipairs(class_only or {}) do table.insert(named_rows, name) end
                 return true
@@ -262,13 +262,13 @@ local function member_and_protocol_rows(backports, found)
     inventory.classes.FixCategory = nil
     rows(protocol)
     io.writefile(path.join(root, "RevenantFixture.h"), "#import <Foundation/Foundation.h>\n@protocol FixProtocol <NSObject>\n- (void)fixIt;\n@end\n")
-    local declared = backports.declared_protocols(root)
+    local declared = backports.declared_protocols(root, root)
     if not declared.FixProtocol then
         table.insert(found, "a protocol a header the package installs declares with a body must be implemented, and it is not")
     end
     os.tryrm(path.join(root, "RevenantFixture.h"))
     io.writefile(path.join(root, "RevenantFixture.h"), "#import <Foundation/Foundation.h>\n@protocol FixProtocol;\n")
-    declared = backports.declared_protocols(root)
+    declared = backports.declared_protocols(root, root)
     if declared.FixProtocol then
         table.insert(found, "a forward declaration is not a declaration: @protocol FixProtocol; must not answer the row")
     end
@@ -318,7 +318,7 @@ local function own_rows(backports, found)
     for _, pair in ipairs({{"Alpha", "AlphaOne"}, {"Beta", "BetaOne"}}) do
         local folder, name = pair[1], pair[2]
         local library = {name = folder .. "Backports", folder = folder}
-        local written = backports.protocol_sources({root = root}, library, out, folder)
+        local written = backports.protocol_sources({root = root, sources = root}, library, out, folder)
         local text = written[1] and io.readfile(written[1]) or ""
         if not text:find("@protocol(" .. name .. ")", 1, true) then
             table.insert(found, folder .. " does not generate its own protocol row: " .. text:gsub("\n", " "):sub(1, 90))
@@ -333,7 +333,7 @@ end
 
 
 local function generated_includes(backports, found)
-    local folder = "/somewhere/packages/frameworks/apple-backports/Foundation"
+    local folder = "/somewhere/frameworks/Backports/src/Foundation"
     local flags = table.concat(backports.compile_arguments({includes = {folder}}, "Protocols.m"), " ")
     if not flags:find("-I" .. folder, 1, true) then
         table.insert(found, "a generated source's job must add the library's own folder to its include path, and it does not: " .. flags)
@@ -348,7 +348,7 @@ end
 local function protocol_headers(backports, root, found)
     local out = fixtures.scratch()
     for _, library in ipairs(backports.libraries()) do
-        local written = backports.protocol_sources({root = root, sdkdir = os.getenv("BP_SDK")}, library, out, library.folder)
+        local written = backports.protocol_sources({root = root, sources = root, sdkdir = os.getenv("BP_SDK")}, library, out, library.folder)
         local tree = path.join(root, "..", "..", "..")
         local rendered = import("gen.protocol_headers", {rootdir = path.join(tree, "tools"), anonymous = true})
         if #written > 0 and rendered.header_text(tree, library.folder) == nil then
@@ -367,7 +367,7 @@ local function protocol_declarations(backports, root, found)
         local folder = path.join(root, library.folder)
         if os.isdir(folder) then
             local carried, count = {}, 0
-            for _, written in ipairs(backports.protocol_sources({root = root, sdkdir = os.getenv("BP_SDK")}, library, out, library.folder)) do
+            for _, written in ipairs(backports.protocol_sources({root = root, sources = root, sdkdir = os.getenv("BP_SDK")}, library, out, library.folder)) do
                 for line in io.lines(written) do
                     local name = line:match("@protocol%(([%w_]+)%)")
                     if name then carried[name] = true; count = count + 1 end
@@ -396,7 +396,7 @@ end
 local function one_protocol_object(backports, root, found)
     local out = fixtures.scratch()
     for _, library in ipairs(backports.libraries()) do
-        local opt = {root = root, sdkdir = os.getenv("BP_SDK")}
+        local opt = {root = root, sources = root, sdkdir = os.getenv("BP_SDK")}
         local folder = path.join(root, library.folder)
         if os.isdir(folder) then
             local forced = {}
@@ -440,7 +440,7 @@ local function message_names(backports, found)
             local surface = {classes = {FixMapView = true},
                              members = {["-[FixMapView alpha]"] = true, ["-[FixMapView beta:]"] = true},
                              symbols = {}, defined = {}}
-            backports.check_registry(root, surface, true, "6.1.3", {}, inventory)
+            backports.check_registry(root, root,surface, true, "6.1.3", {}, inventory)
             return "passed"
         end,
         catch {function (errors) message = tostring(errors) end}
@@ -496,7 +496,7 @@ local function real_object(backports, modules, found)
     local message
     local ok = try {
         function ()
-            backports.registry_step({root = root, builddir = built.run, deployment = "6.1.3"},
+            backports.registry_step({root = root, sources = root, builddir = built.run, deployment = "6.1.3"},
                                     {classes = {}, members = {}, symbols = {}, defined = {}}, true, {})
             return "passed"
         end,
@@ -526,7 +526,7 @@ local function protocol_owner_step(backports, opt, found)
         local message
         local ok = try {
             function ()
-                backports.check_registry(root, {classes = {}, members = {},
+                backports.check_registry(root, root, {classes = {}, members = {},
                                                symbols = {}, defined = {}}, true, "6.1.3", {}, inventory, sdkdir, {})
                 return "passed"
             end,
@@ -542,7 +542,7 @@ local function protocol_owner_step(backports, opt, found)
     local function ask(n, a, b, c, d)
         local value
         local ok = try {
-            function () value = backports.protocol_declared(a, b, c, d) return true end,
+            function () value = backports.protocol_declared(a, a, b, c, d) return true end,
             catch {function () return false end}
         }
         return ok and value or false
@@ -565,7 +565,7 @@ local function protocol_owner_step(backports, opt, found)
     end
     local backports = path.join(mutant_root, "apple", "backports.lua")
     local text = io.readfile(backports)
-    local needle = "protocol_declared(root, owner, inventory, sdkdir))"
+    local needle = "protocol_declared(root, src, owner, inventory, sdkdir))"
     local first, last = text:find(needle, 1, true)
     local second = first and text:find(needle, last + 1, true)
     if not first or second then
@@ -581,7 +581,7 @@ function main(modules)
     local backports = import("apple.backports", {rootdir = modules, anonymous = true})
     local message
     local ok = try {
-        function () backports.check_registry(os.getenv("PROBE_ROOT"), {classes = {}, members = {}, symbols = {}, declared = {}},
+        function () backports.check_registry(os.getenv("PROBE_ROOT"), os.getenv("PROBE_ROOT"),{classes = {}, members = {}, symbols = {}, declared = {}},
                                         true, "6.1.3", {}, {classes = {}}, nil, {}) return "passed" end,
         catch {function (errors) message = tostring(errors) end}
     }
@@ -644,7 +644,7 @@ end
 
 local function inline_rows_step(backports, opt, found)
     local counter = 0
-    local header_path = path.join(opt.modules, "..", "packages", "frameworks", "apple-backports", "AVFoundation",
+    local header_path = path.join(opt.modules, "..", "..", "frameworks", "Backports", "src", "AVFoundation",
                                  "RevenantCMTag26.h")
     local header = io.readfile(header_path)
     if not header then
@@ -662,7 +662,7 @@ local function inline_rows_step(backports, opt, found)
             '{"framework": "Fix", "entries": [{"api": "%s()", "kind": "function", "introduced": "13.0", "minimum": "6.0", "status": "implemented", "facts": "f"}]}', name))
         local message
         local ok = try {
-            function () backports.check_registry(root, {classes = {}, members = {}, symbols = {}, defined = {}},
+            function () backports.check_registry(root, root, {classes = {}, members = {}, symbols = {}, defined = {}},
                                                 true, "6.1.3", {}, {classes = {}}, nil, {}) return true end,
             catch {function (e) message = tostring(e) end}
         }
@@ -722,7 +722,7 @@ function generated_index(backports, found)
         io.writefile(path.join(root, ".gen", "Accounts", "FixConstants70.m"), text)
     end
     local function complaints()
-        local _, incomplete = backports.registry(root)
+        local _, incomplete = backports.registry(root, root)
         return table.concat(incomplete, "; ")
     end
     write_source('NSString *const FixConstantAlpha = @"alpha";\n')
@@ -783,10 +783,10 @@ function failures(opt)
     local first = source:find("function releases_in", 1, true)
     local last = first and source:find("\nend\n", first, true)
     local body = (first and last) and source:sub(first, last) or ""
-    if not body:find("entry_of(listed(opt.root), name)", 1, true) then
+    if not body:find("entry_of(listed(opt.root, opt.sources), name)", 1, true) then
         table.insert(found, "releases_in must reach the registry through entry_of and not by a raw index that misses every function")
     end
-    local listed, incomplete = backports.registry(root)
+    local listed, incomplete = backports.registry(root, root)
     for index, complaint in ipairs(incomplete or {}) do
         if index <= 8 then
             table.insert(found, "the registry says: " .. complaint)
@@ -831,7 +831,7 @@ function status_rule(backports, found)
     os.mkdir(path.join(root, "registry"))
     local function complaints(rows)
         io.writefile(path.join(root, "registry", "Fix.json"), '{"framework": "Fix", "entries": [' .. table.concat(rows, ", ") .. ']}')
-        local _, incomplete = backports.registry(root)
+        local _, incomplete = backports.registry(root, root)
         return table.concat(incomplete, "; ")
     end
     local function row(api, status, extra)
@@ -862,7 +862,7 @@ function named_twice(backports, found)
     os.mkdir(path.join(root, "registry"))
     os.mkdir(path.join(root, "registry", "Fix"))
     local function told()
-        local _, incomplete = backports.registry(root)
+        local _, incomplete = backports.registry(root, root)
         return table.concat(incomplete, "; ")
     end
     local function write(where, entries)
@@ -904,7 +904,7 @@ function spelling(backports, found)
     os.tryrm(root)
     local function complaints(api, kind)
         io.writefile(path.join(root, "registry", "Fix.json"), string.format('[{"api": "%s", "kind": "%s", "introduced": "8.0", "minimum": "6.0", "status": "implemented"}]', api, kind))
-        local _, incomplete = backports.registry(root)
+        local _, incomplete = backports.registry(root, root)
         return table.concat(incomplete, "; ")
     end
     for _, spelled in ipairs({{"-[FixView draw:]", "method"}, {"+[FixView make:]", "method"}, {"FixView.size", "property"}, {"FixView.draw", "method"}, {"FixView.size()", "property"}}) do
@@ -928,7 +928,7 @@ function unreadable(backports, found)
     os.mkdir(path.join(root, "registry"))
     local function complaints(rows)
         io.writefile(path.join(root, "registry", "Fix.json"), '{"framework": "Fix", "entries": [' .. table.concat(rows, ", ") .. ']}')
-        local _, incomplete = backports.registry(root)
+        local _, incomplete = backports.registry(root, root)
         return table.concat(incomplete, "; ")
     end
     local function row(api, kind, status, extra)

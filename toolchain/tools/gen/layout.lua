@@ -4,7 +4,7 @@ local sdk = import("sdk", {anonymous = true})
 
 local LAYOUT = {
     VERSION = VERSION,
-    SOURCES_ROOT = "packages/frameworks/apple-backports",
+    SOURCES_ROOT = "../frameworks/Backports/src",
     SNAP_ROOT = "packages/frameworks/apple-backports/spec",
     OUT_ROOT = "packages/frameworks/apple-backports/.gen",
     PINS_ROOT = "packages/frameworks/apple-backports/overrides/hashes",

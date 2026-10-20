@@ -25,7 +25,7 @@ local HEADER = [==[
 //   tools/intents/gen-init-classes.lua:
 //
 //   the properties, from the port's own objects - the `@synthesize NAME = _NAME;` lines inside
-//   each class's @implementation in packages/frameworks/apple-backports/Intents/IN*.m, RevenantIntents100.m
+//   each class's @implementation in frameworks/Backports/src/Intents/IN*.m, RevenantIntents100.m
 //   and RevenantIntents110.m, read by synthesised() in the same file:
 //
 //     xmake l tools/intents/gen-init-classes.lua -o tests/backports/host/intents-init/init-classes.inc

@@ -21,11 +21,11 @@ package("apple-backports")
 
     local add_configs = add_configs
     local modules = path.join(os.scriptdir(), "..", "..", "..", "modules")
-    local inputs = table.join(os.files(path.join(os.scriptdir(), "*.c")), os.files(path.join(os.scriptdir(), "*.h")),
-                              os.files(path.join(os.scriptdir(), "*", "*.m")), os.files(path.join(os.scriptdir(), "*", "*.mm")), os.files(path.join(os.scriptdir(), "*", "*.h")),
+    local repo = path.join(os.scriptdir(), "..", "..", "..")
+    local src = path.normalize(path.join(repo, "..", "frameworks", "Backports", "src"))
+    local inputs = table.join(os.files(path.join(src, "**")),
                               os.files(path.join(os.scriptdir(), "registry", "*.json")), os.files(path.join(os.scriptdir(), "registry", "*", "*.json")))
     table.insert(inputs, path.join(modules, "apple", "backports.lua"))
-    local repo = path.join(os.scriptdir(), "..", "..", "..")
     inputs = table.join(inputs, os.files(path.join(repo, "tools", "gen", "**")), os.files(path.join(repo, "tools", "found", "**.lua")),
                         os.files(path.join(os.scriptdir(), "spec", "**")))
     table.insert(inputs, path.join(repo, "tools", "gen.lua"))
@@ -277,7 +277,8 @@ package("apple-backports")
                                   includedir = path.join(dependency:installdir(), "include")}
             end
         end
-        local common = {root = package:scriptdir(), architecture = package:arch(), deployment = deployment, sdkdir = toolchain:config("sdkdir"),
+        local common = {root = package:scriptdir(), sources = path.normalize(path.join(package:scriptdir(), "..", "..", "..", "..", "frameworks", "Backports", "src")),
+                        architecture = package:arch(), deployment = deployment, sdkdir = toolchain:config("sdkdir"),
                         cc = assert(toolchain:tool("cc"), "the apple-ios toolchain names no compiler for " .. package:arch()),
                         ld = assert(linker, "the apple-ios toolchain names no ld64 for " .. package:arch()), libraries = libraries,
                         archives = archives}

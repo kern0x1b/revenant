@@ -26,7 +26,7 @@ recipe does not name `files/CloudKit`, so the runtime digest is unchanged and no
   swift.tsv rows (37 of 37 pair, none missing).
 - Domain and keys: `CKErrorDomain`, `CKPartialErrorsByItemIDKey` = "CKPartialErrors",
   `CKErrorRetryAfterKey` = "CKRetryAfter". Revenant's backports define the same three strings
-  (`packages/frameworks/apple-backports/CloudKit/CKConstants8.m`), and the host reads the same values (below).
+  (`frameworks/Backports/src/CloudKit/CKConstants8.m`), and the host reads the same values (below).
 
 ## Measured against the host
 

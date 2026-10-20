@@ -250,7 +250,7 @@ function report_registry(target, binary)
     for selector in pairs((objc.binary_selectors(binary, target:arch()) or {used = {}}).used) do
         used[selector:sub(2)] = true
     end
-    local advised = backports.advice(root, used)
+    local advised = backports.advice(root, root, used)
     if #advised == 0 then
         return
     end

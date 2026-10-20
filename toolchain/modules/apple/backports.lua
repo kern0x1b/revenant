@@ -198,9 +198,9 @@ local function exported_symbols(file)
     return found
 end
 
-function seam_symbols(root, library)
+function seam_symbols(src, library)
     local found = {}
-    local folder = path.join(root, library.folder)
+    local folder = path.join(src, library.folder)
     for _, file in ipairs(os.files(path.join(folder, "*"))) do
         if file:endswith(".h") or file:endswith(".m") or file:endswith(".mm") or file:endswith(".c") then
             for line in io.lines(file) do
@@ -330,7 +330,7 @@ function object_key(opt, program, arguments, source, object)
     if not opt.store or not opt.root then
         return nil
     end
-    local checkout = path.normalize(path.join(path.absolute(opt.root), "..", "..", ".."))
+    local checkout = path.normalize(path.join(path.absolute(opt.sources), "..", "..", ".."))
     local function portable(text)
         local at = text:find(checkout, 1, true)
         return at and text:sub(1, at - 1) .. "@checkout" .. portable(text:sub(at + #checkout)) or text
@@ -378,7 +378,7 @@ local function unit(opt, source, object)
         table.insert(arguments, "-I" .. opt.archives[name].includedir)
     end
     if opt.root then
-        local checkout = path.normalize(path.join(path.absolute(opt.root), "..", "..", ".."))
+        local checkout = path.normalize(path.join(path.absolute(opt.sources), "..", "..", ".."))
         table.insert(arguments, "-fmacro-prefix-map=" .. checkout .. "/=")
     end
     local program, arguments = clang(opt, table.join(arguments, {"-c", source, "-o", object}), objective_c)
@@ -410,7 +410,7 @@ function compile_arguments(opt, source)
     end
     if opt.root then
         local folder = path.filename(path.directory(source))
-        for _, dir in ipairs({path.join(opt.root, ".gen", folder), path.join(opt.root, folder)}) do
+        for _, dir in ipairs({path.join(opt.root, ".gen", folder), path.join(opt.sources, folder)}) do
             if os.isdir(dir) then
                 table.insert(arguments, "-I" .. dir)
             end
@@ -428,7 +428,7 @@ function compile_arguments(opt, source)
         table.insert(arguments, "-I" .. opt.archives[name].includedir)
     end
     if opt.root then
-        local checkout = path.normalize(path.join(path.absolute(opt.root), "..", "..", ".."))
+        local checkout = path.normalize(path.join(path.absolute(opt.sources), "..", "..", ".."))
         table.insert(arguments, "-fmacro-prefix-map=" .. checkout .. "/=")
     end
     return arguments, objective_c
@@ -438,7 +438,7 @@ function compile(opt, source, object)
     local flags, objective_c = compile_arguments(opt, source)
     local program, arguments = clang(opt, table.join(flags, {"-c", source, "-o", object}), objective_c)
     local program, argv = cache.wrapped(program, arguments)
-    os.vrunv(program, argv, opt.root and {curdir = path.normalize(path.join(path.absolute(opt.root), "..", "..", ".."))} or nil)
+    os.vrunv(program, argv, opt.root and {curdir = path.normalize(path.join(path.absolute(opt.sources), "..", "..", ".."))} or nil)
     if stored then
         store_folder(path.directory(stored))
         local temporary = stored .. "." .. hash.strhash32(object .. os.mclock()) .. ".tmp"
@@ -524,7 +524,7 @@ local function sections_of(file)
 end
 
 local generated = {}
-function generate(root, sdkdir)
+function generate(root, src, sdkdir)
     local snapshot = path.join(root, "spec")
     if not os.isdir(snapshot) then
         raise("package root %s has no spec/ snapshot (%s): the generated layer in .gen/ cannot be written", root, snapshot)
@@ -539,7 +539,7 @@ function generate(root, sdkdir)
         raise("the generated layer needs REVENANT_GEN_SDK: the iPhoneOS SDK whose release the spec snapshot is measured on (gen --sdk)")
     end
     os.runv(os.programfile(), {"l", path.join(tree, "tools", "gen.lua"), "gen", "--tree", tree, "--all", "--sdk", sdk})
-    if os.isdir(path.join(root, "Intents")) then
+    if os.isdir(path.join(src, "Intents")) then
         local workspace = import("workspace", {rootdir = path.join(tree, "modules"), anonymous = true})
         local arguments = {"l", path.join(tree, "tools", "intents", "objects.lua"), "--sdk", sdk,
             "--out", path.join(root, ".gen", "Intents"), "--work", workspace.run("intents-generation")}
@@ -553,9 +553,9 @@ function generate(root, sdkdir)
     end
 end
 
-function sources(root, library)
-    local found = table.join(os.files(path.join(root, library.folder, "*.m")), os.files(path.join(root, library.folder, "*.mm")),
-                             os.files(path.join(root, library.folder, "*.c")), os.files(path.join(root, ".gen", library.folder, "*.m")),
+function sources(root, src, library)
+    local found = table.join(os.files(path.join(src, library.folder, "*.m")), os.files(path.join(src, library.folder, "*.mm")),
+                             os.files(path.join(src, library.folder, "*.c")), os.files(path.join(root, ".gen", library.folder, "*.m")),
                              os.files(path.join(root, ".gen", library.folder, "*.c")))
     for _, folder in ipairs(library.generated or {}) do
         found = table.join(found, os.files(path.join(root, ".gen", folder, "*.m")))
@@ -588,7 +588,7 @@ function conforming_protocols(opt, library, names, found)
     found = found or {}
     local wanted = {}
     for name in pairs(names) do wanted[name] = true end
-    for _, file in ipairs(os.files(path.join(opt.root, library.folder, "*"))) do
+    for _, file in ipairs(os.files(path.join(opt.sources, library.folder, "*"))) do
         local filename = path.filename(file)
         if filename:endswith(".h") or filename:endswith(".m") or filename:endswith(".c") or filename:endswith(".mm") then
             local text = io.readfile(file)
@@ -709,7 +709,7 @@ local function compiled(opt)
     local attach = path.join(opt.builddir, "objects", "attach.o")
     os.mkdir(path.directory(attach))
     io.writefile(path.join(opt.builddir, "objects", "sdkdir"), opt.sdkdir)
-    compile(opt, path.join(opt.root, "attach.c"), attach)
+    compile(opt, path.join(opt.sources, "attach.c"), attach)
     local placed, windows_of = floors(opt)
     windows_of = windows_of or {}
     local objects, origins, minimums, maximums = {}, {}, {}, {}
@@ -724,7 +724,7 @@ local function compiled(opt)
         for _, source in ipairs(written) do
             local object = path.join(opt.builddir, "objects", library.folder, "protocols", path.filename(source) .. ".o")
             os.mkdir(path.directory(object))
-            local job = table.join(opt, {includes = {path.join(opt.root, library.folder)}})
+            local job = table.join(opt, {includes = {path.join(opt.sources, library.folder)}})
             local minimum = floor[source]
             if minimum and dyld.compare_versions(minimum, opt.deployment) > 0 then
                 job = table.join(job, {deployment = minimum, triple = opt.architecture .. "-apple-ios" .. minimum})
@@ -734,7 +734,7 @@ local function compiled(opt)
             table.insert(objects[library.name], object)
             origins[object] = source
         end
-        for _, source in ipairs(sources(opt.root, library)) do
+        for _, source in ipairs(sources(opt.root, opt.sources, library)) do
             local object
             if placed[source] then
                 object = placed[source].object
@@ -1040,7 +1040,7 @@ local function link(opt, library, attach, objects, releases, outputdir, checked)
         table.insert(arguments, "-Wl,-reexported_symbols_list," .. list)
     end
     local internal = {}
-    local seams = opt.root and seam_symbols(opt.root, library) or {}
+    local seams = opt.sources and seam_symbols(opt.sources, library) or {}
     for _, object in ipairs(kept) do
         for _, symbol in ipairs(defined_symbols(object)) do
             if internal_symbol(symbol) and not seams[symbol] then
@@ -1302,7 +1302,7 @@ local function accessor_of(api)
     return api:match("^([%u][%w_]*)%.([%w_]+)$") and api
 end
 
-function registry(root)
+function registry(root, src)
     local listed, told, incomplete, frameworks = {}, {}, {}, {}
     local unlibraried = {}
     local files = table.join(os.files(path.join(root, "registry", "*.json")), os.files(path.join(root, "registry", "*", "*.json")))
@@ -1381,7 +1381,7 @@ function registry(root)
                     row[name] = cells[column]
                 end
                 local source = row.source ~= "" and row.source or nil
-                local text = source and os.isfile(path.join(root, source)) and io.readfile(path.join(root, source)) or nil
+                local text = source and os.isfile(path.join(src, source)) and io.readfile(path.join(src, source)) or nil
                 local pattern = "%f[%w_]" .. row.api:gsub("[%^%$%(%)%%%.%[%]%*%+%-%?]", "%%%0") .. "%f[^%w_]"
                 if row.owner ~= "generated" then
                     table.insert(incomplete, row.api .. " is in " .. named .. " with owner " .. tostring(row.owner) .. ", not generated")
@@ -1473,8 +1473,8 @@ end
 
 local ORDER = {ignored = 0, owed = 1, absent = 2}
 
-function advice(root, used)
-    local listed = registry(root)
+function advice(root, src, used)
+    local listed = registry(root, src)
     local found = {}
     for api, entry in pairs(listed) do
         if ORDER[entry.status] then
@@ -1556,18 +1556,18 @@ function entry_of(listed, name, inventory)
     return listed[owner]
 end
 
-local function header_folders(root)
-    return {root, path.join(root, "*"), path.join(root, ".gen", "*")}
+local function header_folders(root, src)
+    return {src, path.join(src, "*"), path.join(root, ".gen", "*")}
 end
 
-local function declared_names(root, sdkdir)
+local function declared_names(root, src, sdkdir)
     local names, ours = {}, {}
-    for _, file in ipairs(os.files(path.join(root, "*.h"))) do
+    for _, file in ipairs(os.files(path.join(src, "*.h"))) do
         for word in io.readfile(file):gmatch("[%w_]+") do
             ours[word] = true
         end
     end
-    for _, folder in ipairs(header_folders(root)) do
+    for _, folder in ipairs(header_folders(root, src)) do
         for _, file in ipairs(os.files(path.join(folder, "*.h"))) do
             for word in io.readfile(file):gmatch("[%w_]+") do
                 ours[word] = true
@@ -1637,13 +1637,13 @@ function sdk_protocol_declarations(sdkdir)
     return seen
 end
 
-function inline_bodies_of(root)
+function inline_bodies_of(root, src)
     local seen = {}
     local function normalise(text)
         text = text:gsub("/%*.-%*/", " "):gsub("//[^\n]*", " ")
         return (text:gsub("%s+", " "))
     end
-    for _, folder in ipairs(header_folders(root)) do
+    for _, folder in ipairs(header_folders(root, src)) do
         for _, file in ipairs(os.files(path.join(folder, "*.h"))) do
             for before, after in normalise(io.readfile(file) or ""):gmatch(
                     "([%w_<>%* ]+)%s+([%w_]+)%s*%b()%s*[%w_(),\"%s]*{") do
@@ -1654,14 +1654,14 @@ function inline_bodies_of(root)
     return seen
 end
 
-function protocol_declared(root, owner, inventory, sdkdir)
+function protocol_declared(root, src, owner, inventory, sdkdir)
     if inventory and inventory.protocols and inventory.protocols[owner] ~= nil then
         return true
     end
     if sdk_protocol_declarations(sdkdir)[owner] then
         return true
     end
-    for _, folder in ipairs(header_folders(root)) do
+    for _, folder in ipairs(header_folders(root, src)) do
         for _, file in ipairs(os.files(path.join(folder, "*.h"))) do
             for line in io.lines(file) do
                 for protocol in line:gmatch("@protocol%s+([%w_]+)") do
@@ -1675,10 +1675,10 @@ function protocol_declared(root, owner, inventory, sdkdir)
     return false
 end
 
-function declared_protocols(root)
+function declared_protocols(root, src)
     local declared = {}
-    for _, pattern in ipairs({"*.h", "*/*.h", path.join(".gen", "*", "*.h")}) do
-        for _, file in ipairs(os.files(path.join(root, pattern))) do
+    for _, pattern in ipairs({{src, "*.h"}, {src, "*/*.h"}, {root, path.join(".gen", "*", "*.h")}}) do
+        for _, file in ipairs(os.files(path.join(pattern[1], pattern[2]))) do
             for line in io.lines(file) do
                 for name in line:gmatch("@protocol%s+([%w_]+)") do
                     if not line:find("@protocol%s+" .. name .. "%s*;") then
@@ -1691,8 +1691,8 @@ function declared_protocols(root)
     return declared
 end
 
-function documented_names(root)
-    local listed = registry(root)
+function documented_names(root, src)
+    local listed = registry(root, src)
     local names = {}
     for api in pairs(listed) do
         for spelling in pairs(spellings(api)) do
@@ -1703,12 +1703,12 @@ function documented_names(root)
 end
 
 function registry_step(opt, built, complete, exports)
-    return check_registry(opt.root, built, complete, opt.deployment, exports,
-                          release_inventory(opt.cache), opt.sdkdir, declared_protocols(opt.root))
+    return check_registry(opt.root, opt.sources, built, complete, opt.deployment, exports,
+                          release_inventory(opt.cache), opt.sdkdir, declared_protocols(opt.root, opt.sources))
 end
 
-function check_registry(root, found, complete, deployment, exports, inventory, sdkdir, declared)
-    local listed, incomplete = registry(root)
+function check_registry(root, src, found, complete, deployment, exports, inventory, sdkdir, declared)
+    local listed, incomplete = registry(root, src)
     local unlisted, undocumented = {}, {}
     local declared_by_header
     local inline_bodies
@@ -1760,22 +1760,22 @@ function check_registry(root, found, complete, deployment, exports, inventory, s
             local carried = deployment and entry.introduced and dyld.compare_versions(entry.introduced, deployment) <= 0
             carried = carried or (exports and exports["_" .. name:gsub("%(%)$", "")]) or false
             local ours = not deployment or in_range(entry, deployment)
-            local declared = entry.kind == "protocol" and ((declared or {})[name] or protocol_declared(root, name, inventory, sdkdir)) or
+            local declared = entry.kind == "protocol" and ((declared or {})[name] or protocol_declared(root, src, name, inventory, sdkdir)) or
                 (owner and listed[owner] and listed[owner].kind == "protocol" and
-                 protocol_declared(root, owner, inventory, sdkdir)) or
+                 protocol_declared(root, src, owner, inventory, sdkdir)) or
                 (owner and inventory and inventory.protocols and inventory.protocols[owner] ~= nil) or false
             if entry.status == "implemented" and by_owner and by_member == false and ours and not carried and not declared then
                 table.insert(class_only, name)
             end
             if entry.kind == "function" and not built then
-                inline_bodies = inline_bodies or inline_bodies_of(root)
+                inline_bodies = inline_bodies or inline_bodies_of(root, src)
                 local bare = (name:gsub("%(%)$", ""))
                 if inline_bodies[bare] then
                     built = true
                 end
             end
             if (entry.kind == "type" or entry.kind == "case") and not built then
-                declared_by_header = declared_by_header or declared_names(root, sdkdir)
+                declared_by_header = declared_by_header or declared_names(root, src, sdkdir)
                 built = declared_by_header[name] or false
             end
             if entry.status == "implemented" and not built and not carried and ours and not declared then
@@ -2063,7 +2063,7 @@ function minimums(listed, objects, architecture, deployment, opt)
 end
 
 function build(opt)
-    generate(opt.root, opt.sdkdir)
+    generate(opt.root, opt.sources, opt.sdkdir)
     INVENTORY_STORE = opt.store
     local release = loaded(opt.cache, opt.architecture)
     opt = table.join(opt, {triple = opt.architecture .. "-apple-ios" .. opt.deployment})
@@ -2078,7 +2078,7 @@ function build(opt)
     end
     check_releases(opt, objects, origins)
     local checked_at = os.mclock()
-    local _, _, _, unlibraried = registry(opt.root)
+    local _, _, _, unlibraried = registry(opt.root, opt.sources)
     if #unlibraried > 0 then
         local rows, named = 0, {}
         for _, item in ipairs(unlibraried) do
@@ -2099,7 +2099,7 @@ function build(opt)
     if #built == #LIBRARIES then
         check_band_caches(opt, objects)
         local undocumented, class_only, class_only_names = registry_step(opt, surface(built, opt.architecture,
-            declared_protocols(opt.root), documented_names(opt.root)), opt.registry, release.exports)
+            declared_protocols(opt.root, opt.sources), documented_names(opt.root, opt.sources)), opt.registry, release.exports)
         if undocumented > 0 then
             cprint("${color.warning}note:${clear} %d of the registry's entries name no file of facts yet", undocumented)
         end
@@ -2145,14 +2145,14 @@ end
 
 local LISTED = {}
 
-local function listed(root)
-    LISTED[root] = LISTED[root] or registry(root)
+local function listed(root, src)
+    LISTED[root] = LISTED[root] or registry(root, src)
     return LISTED[root]
 end
 
 function floors(opt)
     local top
-    for _, entry in pairs(listed(opt.root)) do
+    for _, entry in pairs(listed(opt.root, opt.sources)) do
         if entry.minimum and dyld.compare_versions(entry.minimum, opt.deployment) > 0 and (not top or dyld.compare_versions(entry.minimum, top) > 0) then
             top = entry.minimum
         end
@@ -2165,7 +2165,7 @@ function floors(opt)
     end
     local objects, origins, pending = {}, {}, {}
     for _, library in ipairs(staged_libraries(opt)) do
-        for _, source in ipairs(sources(opt.root, library)) do
+        for _, source in ipairs(sources(opt.root, opt.sources, library)) do
             local object = path.join(opt.builddir, "objects-" .. top, library.folder, path.basename(source) .. ".o")
             os.mkdir(path.directory(object))
             table.insert(pending, {opt = at(top), source = source, object = object})
@@ -2174,7 +2174,7 @@ function floors(opt)
         end
     end
     compile_all(opt, pending)
-    local found, problems, unreached, inherited, unreachable, ends = minimums(listed(opt.root), objects, opt.architecture, opt.deployment, opt)
+    local found, problems, unreached, inherited, unreachable, ends = minimums(listed(opt.root, opt.sources), objects, opt.architecture, opt.deployment, opt)
     local windows_of = {}
     for _, object in ipairs(objects) do
         windows_of[origins[object]] = ends[object]
@@ -2299,7 +2299,7 @@ function releases_in(opt, source, object)
     for _, name in ipairs(names) do
         local version = measured[name] or nil
         if not version then
-            local entry = entry_of(listed(opt.root), name)
+            local entry = entry_of(listed(opt.root, opt.sources), name)
             version = entry and entry.status == "implemented" and entry.introduced or nil
         end
         earliest[name] = version or false
@@ -2603,7 +2603,7 @@ function write_searchbundle(opt)
     local folder = path.join(opt.builddir, "searchbundle", "org.revenant.corespotlight.searchBundle")
     os.tryrm(folder)
     os.mkdir(folder)
-    local source = path.join(opt.root, "CoreSpotlight", "SearchBundle", "RevenantSearchDatastore.m")
+    local source = path.join(opt.sources, "CoreSpotlight", "SearchBundle", "RevenantSearchDatastore.m")
     local output = path.join(folder, "org.revenant.corespotlight")
     local triple = opt.architecture .. "-apple-ios" .. opt.deployment
     os.vrunv(driver(opt, {"-target", triple, "-isysroot", opt.sdkdir, "-fuse-ld=" .. opt.ld, "-fobjc-arc",
@@ -2611,7 +2611,7 @@ function write_searchbundle(opt)
                           "-DREVENANT_BACKPORTS_INSTALL_FOLDER=\"" .. INSTALL_FOLDER .. "\"", "-o", output, source, "-framework", "Foundation"}))
     os.vrunv("xcrun", {"strip", "-x", output})
     signing.sign(opt.ldid, output)
-    os.cp(path.join(opt.root, "CoreSpotlight", "SearchBundle", "Info.plist"), path.join(folder, "Info.plist"))
+    os.cp(path.join(opt.sources, "CoreSpotlight", "SearchBundle", "Info.plist"), path.join(folder, "Info.plist"))
     cprint("${color.warning}withheld:${clear} org.revenant.corespotlight.searchBundle is built at %s but not packaged: %s", folder, SEARCHBUNDLE_WITHHELD)
 end
 

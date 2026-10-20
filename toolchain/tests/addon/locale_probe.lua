@@ -53,7 +53,7 @@ function main(modules, root)
     for _, name in ipairs(NAMES) do
         write(path.join(root, "library", "Lib", name .. (#name % 2 == 0 and ".m" or ".c")), "")
     end
-    for _, file in ipairs(backports.sources(path.join(root, "library"), {folder = "Lib"})) do
+    for _, file in ipairs(backports.sources(path.join(root, "library"), path.join(root, "library"), {folder = "Lib"})) do
         emit("backports.sources", relative(file))
     end
 

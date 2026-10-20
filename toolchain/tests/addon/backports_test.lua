@@ -2,7 +2,7 @@ import("fixtures")
 import("core.package.package")
 
 local function recipe_digest(folder, name, recipe, tree_files)
-    local tree = path.join(folder, name)
+    local tree = path.join(folder, name, "toolchain")
     local root = path.join(tree, "packages", "frameworks", "apple-backports")
     os.mkdir(root)
     os.cp(recipe, path.join(root, "xmake.lua"))
@@ -20,9 +20,9 @@ end
 local function digest_step(opt, folder, found)
     local recipe = path.join(opt.modules, "..", "packages", "frameworks", "apple-backports", "xmake.lua")
     local tree_files = {
-        [path.join("packages", "frameworks", "apple-backports", "Foundation", "NSThing.m")] = "// a backport\n",
-        [path.join("packages", "frameworks", "apple-backports", "Foundation", "RevenantThing.h")] = "// its header\n",
-        [path.join("packages", "frameworks", "apple-backports", "attach.c")] = "// the attach helper\n",
+        [path.join("..", "frameworks", "Backports", "src", "Foundation", "NSThing.m")] = "// a backport\n",
+        [path.join("..", "frameworks", "Backports", "src", "Foundation", "RevenantThing.h")] = "// its header\n",
+        [path.join("..", "frameworks", "Backports", "src", "attach.c")] = "// the attach helper\n",
         [path.join("packages", "frameworks", "apple-backports", "registry", "UIKit", "thing.json")] = '{"framework": "UIKit", "entries": []}\n',
         [path.join("packages", "frameworks", "apple-backports", "registry", "flat.json")] = "[]\n",
         [path.join("packages", "frameworks", "apple-backports", "notes.md")] = "notes\n",
@@ -66,7 +66,7 @@ local function placement_step(backports, opt, folder, found)
     io.writefile(source, "void foo(void) { }\n")
     local object = path.join(work, "foo.o")
     backports.compile({triple = "armv7-apple-ios6.0", sdkdir = opt.sdk, deployment = "6.0", cc = opt.clang}, source, object)
-    local releases, unplaced = backports.releases_in({architecture = "armv7", root = work, sdkdir = opt.sdk}, source, {object})
+    local releases, unplaced = backports.releases_in({architecture = "armv7", root = work, sources = work, sdkdir = opt.sdk}, source, {object})
     if #unplaced > 0 then
         table.insert(found, "a function the registry names foo() must be placed by releases_in, which has the " ..
                             "symbol's name and needs the registry's spelling: " .. table.concat(unplaced, " "))
@@ -316,12 +316,12 @@ function failures(opt)
         ]}
     ]])
     local carried = {classes = {UIStackView = true}, members = {["-[UIView tintColorDidChange]"] = true}, symbols = {UIFontTextStyleBody = true}}
-    local undocumented = backports.check_registry(folder, carried)
+    local undocumented = backports.check_registry(folder, folder,carried)
     if undocumented ~= 2 then
         table.insert(found, "an entry that names no file of facts must be counted, not refused: " .. tostring(undocumented))
     end
     carried.members["-[UIView tintAdjustmentMode]"] = true
-    errors = fixtures.refusal(function () backports.check_registry(folder, carried) end)
+    errors = fixtures.refusal(function () backports.check_registry(folder, folder,carried) end)
     if not errors or not errors:find("-[UIView tintAdjustmentMode]", 1, true) then
         table.insert(found, "a method the backports add without an entry in the registry must be refused naming it: " .. tostring(errors))
     end
@@ -334,14 +334,14 @@ function failures(opt)
     ]])
     carried.members["-[UIView setDirectionalLayoutMargins:]"] = true
     carried.symbols["NSStringFromDirectionalEdgeInsets"] = true
-    if fixtures.refusal(function () backports.check_registry(folder, carried) end) then
+    if fixtures.refusal(function () backports.check_registry(folder, folder,carried) end) then
         table.insert(found, "a property's entry covers both of its accessors, and a function's entry is the same whether it is written with brackets or without")
     end
     carried.members["-[UIView setDirectionalLayoutMargins:]"] = nil
     carried.symbols["NSStringFromDirectionalEdgeInsets"] = nil
     os.rm(path.join(registry, "UIKit", "spellings.json"))
     carried.members["-[UIStackView setSpacing:]"] = true
-    if fixtures.refusal(function () backports.check_registry(folder, carried) end) then
+    if fixtures.refusal(function () backports.check_registry(folder, folder,carried) end) then
         table.insert(found, "a method of a class the registry describes needs no entry of its own: the class carries its surface")
     end
     carried.members["-[UIStackView setSpacing:]"] = nil
@@ -350,16 +350,16 @@ function failures(opt)
           "reason": "the release lays out no custom spacing", "effect": "the property is not there"}]
     ]])
     carried.answered = {["-[UIStackView setCustomSpacing:]"] = true}
-    errors = fixtures.refusal(function () backports.check_registry(folder, carried) end)
+    errors = fixtures.refusal(function () backports.check_registry(folder, folder,carried) end)
     if not errors or not errors:find("listed as absent, but what is built answers it: UIStackView.customSpacing", 1, true) then
         table.insert(found, "a member the registry calls absent must not be answered by what is built, as a property the compiler synthesised from the SDK's interface is: " .. tostring(errors))
     end
     carried.answered = {["-[UIBlurEffect effectWithStyle:]"] = true}
-    if fixtures.refusal(function () backports.check_registry(folder, carried) end) then
+    if fixtures.refusal(function () backports.check_registry(folder, folder,carried) end) then
         table.insert(found, "an absent class whose name nothing built carries is not refused for a method of that name elsewhere")
     end
     carried.classes.UIBlurEffect = true
-    errors = fixtures.refusal(function () backports.check_registry(folder, carried) end)
+    errors = fixtures.refusal(function () backports.check_registry(folder, folder,carried) end)
     if not errors or not errors:find("listed as absent, but what is built answers it: UIBlurEffect", 1, true) then
         table.insert(found, "a class the registry calls absent must not be built: " .. tostring(errors))
     end
@@ -382,7 +382,7 @@ function failures(opt)
     carried.classes.UIBlurEffect = nil
     os.rm(path.join(registry, "UIKit", "owed.json"))
     carried.classes.UIStackView = nil
-    errors = fixtures.refusal(function () backports.check_registry(folder, carried) end)
+    errors = fixtures.refusal(function () backports.check_registry(folder, folder,carried) end)
     if not errors or not errors:find("UIStackView", 1, true) then
         table.insert(found, "an entry that says implemented while nothing of that name is built must be refused naming it: " .. tostring(errors))
     end
@@ -396,7 +396,7 @@ function failures(opt)
              "effect": "the release leaves the failure out of -localizedDescription"}
         ]
     ]])
-    errors = fixtures.refusal(function () backports.check_registry(folder, carried) end)
+    errors = fixtures.refusal(function () backports.check_registry(folder, folder,carried) end)
     if not errors or not errors:find("NSLocalizedFailureErrorKey is ignored without a file of facts", 1, true)
        or errors:find("NSJSONWritingSortedKeys", 1, true) then
         table.insert(found, "an API the release's own implementation answers differently is ignored, and must name the file of facts that says how: " .. tostring(errors))
@@ -411,7 +411,7 @@ function failures(opt)
     io.writefile(path.join(registry, "UIKit", "ios10.json"), [[
         [{"api": "UIStackView", "kind": "class", "introduced": "9.0", "status": "implemented", "facts": "facts/UIKit/UIStackView.md"}]
     ]])
-    errors = fixtures.refusal(function () backports.check_registry(folder, carried) end)
+    errors = fixtures.refusal(function () backports.check_registry(folder, folder,carried) end)
     if not errors or not errors:find("UIKit.json and UIKit/ios10.json", 1, true) then
         table.insert(found, "one API named by two files of the registry must be refused naming both: " .. tostring(errors))
     end
@@ -420,7 +420,7 @@ function failures(opt)
         [{"api": "NSLayoutConstraint", "kind": "class", "introduced": "6.0", "minimum": "6.0", "status": "absent",
           "reason": "auto layout arrived in 6.0", "effect": "below 6.0 the class is not there", "source": "the armv7 cache of iOS 5.1.1"}]
     ]])
-    undocumented = backports.check_registry(folder, carried, nil, "6.0")
+    undocumented = backports.check_registry(folder, folder,carried, nil, "6.0")
     if undocumented ~= 2 then
         table.insert(found, "a record of where an API begins needs no file of facts, only what the backports carry does: " .. tostring(undocumented))
     end
@@ -437,7 +437,7 @@ function failures(opt)
              "effect": "the keys come out in the dictionary's own order", "facts": "facts/Foundation/NSJSONSerialization.md"}
         ]
     ]])
-    local advised = backports.advice(folder, {["setTintColor:"] = true, UIBlurEffect = true, NSJSONWritingSortedKeys = true, ["description"] = true})
+    local advised = backports.advice(folder, folder, {["setTintColor:"] = true, UIBlurEffect = true, NSJSONWritingSortedKeys = true, ["description"] = true})
     local order = {}
     for _, entry in ipairs(advised) do
         table.insert(order, entry.api .. "=" .. entry.status)
@@ -456,7 +456,7 @@ function failures(opt)
     ]])
     local declared_found = {classes = {}, members = {}, symbols = {}}
     local declared_inventory = {classes = {}, protocols = {UIHeldDelegate = true}}
-    errors = fixtures.refusal(function () backports.check_registry(folder, declared_found, true, "6.0", {}, declared_inventory) end)
+    errors = fixtures.refusal(function () backports.check_registry(folder, folder,declared_found, true, "6.0", {}, declared_inventory) end)
     if errors and (errors:find("UIInteraction", 1, true) or errors:find("UIHeldDelegate", 1, true)) then
         table.insert(found, "protocols exist only in a header, so an entry for one, or for a member of one the release does not carry, must not be refused for having nothing built or carried: " .. tostring(errors))
     end

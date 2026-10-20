@@ -89,7 +89,7 @@ local HAND_WRITTEN_EFFECT = {
 }
 
 local HAND_WRITTEN_REASON = "behaviour that is more than the class's own storage, written by hand in "
-    .. "packages/frameworks/apple-backports/Intents/RevenantIntents100.m"
+    .. "frameworks/Backports/src/Intents/RevenantIntents100.m"
 
 local GENERATED_REASON = "a data class of the framework: every property the SDK's header declares is kept in the "
     .. "class's own state with the ownership the header gives it, the initialisers the header "

@@ -139,7 +139,7 @@ while IFS='	' read -r file folder minimum name; do
   fi
   if "$CLANG" -target "$target" -isysroot "$SDK" -fobjc-arc -Os -g0 -Wall \
        -Wno-unguarded-availability-new -Wno-unguarded-availability \
-       -I"$OUT/hdr/$folder" -I"$ROOT/packages/frameworks/apple-backports/$folder" \
+       -I"$OUT/hdr/$folder" -I"$ROOT/../frameworks/Backports/src/$folder" \
        -c "$file" -o "$OUT/obj/$base.o" 2> "$OUT/obj/$base.diag"; then
     examined=$((examined+1))
   else
