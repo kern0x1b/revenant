@@ -93,7 +93,7 @@ in the runtime's port overlay, `REVENANT_SWIFT_PORT_HEADERS`):
 Their own `reason` fields say why, and they are right: a uniqueness constraint the store of iOS 6
 cannot enforce would let in the duplicates the model forbids, and no release this port runs on has
 CloudKit, so there is no database for a scope to name and nothing to mirror. That is a wall at a
-seam (`COORDINATION.md` §2), not a gap in the surface: `Schema.Unique` keeps its constraints in the
+seam, not a gap in the surface: `Schema.Unique` keeps its constraints in the
 schema and `ModelContext.save` enforces them, and `ModelConfiguration.cloudKitDatabase` decides the
 store's kind and is readable, while the mirroring it asks for is the wall.
 

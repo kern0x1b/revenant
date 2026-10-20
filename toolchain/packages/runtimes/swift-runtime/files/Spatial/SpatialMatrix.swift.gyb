@@ -169,8 +169,8 @@ extension ${matrix4} {
     /// 7.5475975029328994 becomes -7.5475975029328994, while the x of the second column becomes
     /// +0.96585856842842444 from -0.96585856842842444 and the diagonal keeps its own sign. The
     /// C header's `SPAffineTransform3DFlip` puts a -1 on that axis of the linear part and
-    /// concatenates, which is a different matrix again; the running framework wins (COORDINATION
-    /// section 5) and the difference is recorded in facts/Spatial/README.md.
+    /// concatenates, which is a different matrix again; the running framework wins and the
+    /// difference is recorded in facts/Spatial/README.md.
     func flippingColumn(_ index: Int) -> ${matrix4} {
         guard index >= 0, index < 3 else { return self }
         let alongX: ${scalar} = index == 0 ? -1 : 1
@@ -247,8 +247,8 @@ extension ${matrix} {
     /// 7.5475975029328994 becomes -7.5475975029328994, while the x of the second column becomes
     /// +0.96585856842842444 from -0.96585856842842444 and the diagonal keeps its own sign. The
     /// C header's `SPAffineTransform3DFlip` puts a -1 on that axis of the linear part and
-    /// concatenates, which is a different matrix again; the running framework wins (COORDINATION
-    /// section 5) and the difference is recorded in facts/Spatial/README.md.
+    /// concatenates, which is a different matrix again; the running framework wins and the
+    /// difference is recorded in facts/Spatial/README.md.
     func flippingColumn(_ index: Int) -> ${matrix} {
         guard index >= 0, index < 3 else { return self }
         let alongX: ${scalar} = index == 0 ? -1 : 1
