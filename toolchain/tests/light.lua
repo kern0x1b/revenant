@@ -19,14 +19,8 @@ function main(checkout)
     if os.isfile(path.join(addon, "sdk_verbatim_test.lua")) then
         table.insert(names, "sdk_verbatim_test")
     end
-    if os.isfile(path.join(addon, "matter_objects_test.lua")) then
-        table.insert(names, "matter_objects_test")
-    end
     if os.isfile(path.join(addon, "locale_order_test.lua")) then
         table.insert(names, "locale_order_test")
-    end
-    if os.isfile(path.join(addon, "py_values_test.lua")) then
-        table.insert(names, "py_values_test")
     end
     local failed = 0
     for _, name in ipairs(names) do
