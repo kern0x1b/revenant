@@ -1,5 +1,3 @@
-local toolchain_modules = path.join(os.scriptdir(), "..", "..", "..", "..", "toolchain", "modules")
-
 local engine_location = "usr/lib/rev-fw"
 
 local frameworks = {
@@ -19,7 +17,7 @@ local runtime = {{built = "libc++.1.0.dylib", renamed = "librev-c++.1.dylib"},
 local plist_keys = {"MinimumOSVersion", "UIDeviceFamily", "CFBundleSupportedPlatforms"}
 
 local function toolchain_module(name)
-    return import(name, {rootdir = toolchain_modules, anonymous = true})
+    return import("@addon.revenant." .. name, {anonymous = true})
 end
 
 local function otool(arguments, binary)
