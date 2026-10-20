@@ -1,22 +1,3 @@
-// Codec.swift — the protobuf wire format, written and read by hand.
-//
-// Apple's `.mlmodel` is a protobuf (proto2, little-endian fixed fields) and the schema is Apple's,
-// **BSD-3-Clause**, in `coremltools/mlmodel/format/*.proto`; the copies this package vendors are in
-// `packages/frameworks/createml/proto/` with their licence, pinned to a commit in that directory's README. What is here is not a generator and not a
-// re-declaration of the schema: it is the **wire format** — varints, the fixed 32- and 64-bit
-// doubles, and the length-delimited submessages — plus a reader that walks a message by field number
-// and a writer that emits one. Every field name and number used by the model messages is read out of
-// the vendored `.proto` and named after it, and the ones this package writes are the ones a Core ML
-// model of these estimators needs.
-//
-// There is no protobuf library in the store for this target, so a hand-written codec is the native
-// route rather than a workaround, and it is a small one: six wire types, of which four are used.
-//
-// **What this file does not do:** it does not validate a schema, resolve a `oneof`, or handle
-// extensions. The messages below are read by *field number* and the numbers are in the file next to
-// this one, so a reader that met an unknown field skips it by its wire type, which is what a protobuf
-// reader is required to do.
-
 import Foundation
 
 public enum ProtoField {
