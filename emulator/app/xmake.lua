@@ -27,7 +27,10 @@ target("emulator")
     if has_config("emulator_vulkan") then
         add_packages("vulkan-loader", "swiftshader")
         on_config(function (target)
-            target:add("rpathdirs", path.join(target:pkg("vulkan-loader"):installdir(), "lib"))
+            local loader = target:pkg("vulkan-loader")
+            if loader then
+                target:add("rpathdirs", path.join(loader:installdir(), "lib"))
+            end
         end)
         after_build(function (target)
             local driver = path.join(target:pkg("swiftshader"):installdir(), "lib", "libvk_swiftshader.dylib")
