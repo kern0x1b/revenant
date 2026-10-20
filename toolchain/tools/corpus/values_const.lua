@@ -26,10 +26,6 @@ function oracle_sample()
     return ORACLE_SAMPLE
 end
 
-function scalar_width(kind)
-    return SCALAR_WIDTHS[kind]
-end
-
 function strip_type(text)
     for _, word in ipairs(QUALIFIERS) do
         text = text:gsub("%f[%w_]" .. word .. "%f[^%w_]", " ")

@@ -38,12 +38,6 @@ local function sorted_keys(map)
     return byteorder.keys(map)
 end
 
-local function sorted_list(items)
-    local out = table.join(items)
-    byteorder.sort(out)
-    return out
-end
-
 local function minutes(started)
     return (os.mclock() - started) / 60000.0
 end

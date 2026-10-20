@@ -19,10 +19,6 @@ function unavailable_version()
     return UNAVAILABLE_VERSION
 end
 
-function include_top()
-    return INCLUDE_TOP
-end
-
 function parse_version(text)
     local parts = {}
     for piece in (text .. "."):gmatch("([^.]*)%.") do

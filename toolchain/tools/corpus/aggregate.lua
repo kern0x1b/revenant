@@ -1,7 +1,5 @@
 import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
-local objc = import("apple.objc", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
-local dyld = import("apple.dyld", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
 local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
 
 CORPUS = workspace.corpus()
@@ -15,14 +13,6 @@ end
 
 function built_exports_header()
     return BUILT_EXPORTS_HEADER
-end
-
-function is_gap(status)
-    return GAP_STATUS[status] == true
-end
-
-function band_route(band)
-    return BAND_ROUTE[band]
 end
 
 CACHES = os.getenv("REVENANT_CACHES_DIR") or path.join(CORPUS, "caches")
@@ -310,47 +300,6 @@ function carried_status(reg, kind, name, framework)
     return "gap?"
 end
 
-function load_built_exports()
-    if not os.isfile(BUILT_EXPORTS) then
-        raise("aggregate.lua: export list of the 6.1.3 band not found at %s (REVENANT_BUILT_EXPORTS); make it "
-            .. "with built-exports.lua <canon-run> (README, 'Built exports').", BUILT_EXPORTS)
-    end
-    local lines = io.lines(BUILT_EXPORTS)
-    local header = lines() or ""
-    local built, classes = {}, 0
-    for line in lines do
-        local name = line:match("^%s*(.-)%s*$")
-        if name ~= "" then
-            built[name] = true
-            if name:sub(1, 14) == "_OBJC_CLASS_$_" then
-                classes = classes + 1
-            end
-        end
-    end
-    if header:sub(1, #BUILT_EXPORTS_HEADER) ~= BUILT_EXPORTS_HEADER then
-        raise("aggregate.lua: %s does not name the canon it was read from; make it again with "
-            .. "built-exports.lua <canon-run>.", BUILT_EXPORTS)
-    end
-    if classes == 0 then
-        raise("aggregate.lua: %s names no class; it is not the export list of a backports band.", BUILT_EXPORTS)
-    end
-    return built, header:sub(#BUILT_EXPORTS_HEADER + 1)
-end
-
-function launch_blocks(strong, status, kind, name, built)
-    if strong < 1 or status == "n/a-A5" then
-        return false
-    end
-    if GAP_STATUS[status] then
-        return true
-    end
-    local symbol = name
-    if kind == "class" then
-        symbol = "_OBJC_CLASS_$_" .. name
-    end
-    return built[symbol] == nil
-end
-
 function is_swift_mangled(name)
     return name:sub(1, 3) == "_$s" or name:sub(1, 3) == "_$S" or name:sub(1, 2) == "$s" or name:sub(1, 2) == "$S"
 end
@@ -416,42 +365,6 @@ function report(only)
             e.na, e.ns, e.na - e.ns, flag, e.status, e.band, BAND_ROUTE[e.band] or "?",
             e.framework, e.kind, e.name, table.concat(sorted_members(e.apps), ",")))
     end
-end
-
-local function stock_source()
-    local source = dyld.held_source(path.join(dyld.root(), "6.0"), "armv7")
-    if not source then
-        raise("aggregate.lua: no armv7 6.0 cache is held under %s", dyld.root())
-    end
-    return source
-end
-
-function selector_universe()
-    local names = {}
-    for key in pairs(objc.known_selectors(stock_source())) do
-        names[key:sub(2)] = true
-    end
-    return names
-end
-
-function class_universe()
-    local names = {}
-    for name in pairs(objc.inventory(stock_source()).classes) do
-        names[name] = true
-    end
-    return names
-end
-
-function ranked(entries, count_of, name_of)
-    local keyed = {}
-    for index, entry in ipairs(entries) do
-        keyed[string.format("%07d", 1000000 - count_of(entry)) .. "\1" .. name_of(entry) .. "\1" .. string.format("%07d", index)] = entry
-    end
-    local out = {}
-    for _, key in ipairs(byteorder.keys(keyed)) do
-        table.insert(out, keyed[key])
-    end
-    return out
 end
 
 function main(cmd, ...)
