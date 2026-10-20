@@ -1,7 +1,6 @@
 # Where the emulator's time goes
 
-Measured on this host (Apple M4 Pro, 12 cores, 24 GB), one emulator at a time, iPhone3,1 6.0,
-`scripts/measure.sh`.
+Measured on an Apple M4 Pro (12 cores, 24 GB), one emulator at a time, iPhone3,1 with iOS 6.0 (2026-09-18).
 
 | run | SpringBoard spawned | 100 frames drawn | log |
 |---|---|---|---|

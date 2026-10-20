@@ -1,15 +1,14 @@
 # The emulator: what a test harness can drive
 
-Everything here comes from reading the source of `emulator/` (with the lab patches) and from runs in
-`runs.noindex/`. Paths are relative to `emulator/`.
+The facts here come from the source of `emulator/` and from runs of it. Paths are relative to the
+repository's `emulator/` folder.
 
 ## Launch
 
-    env TMPDIR=<lab>/tmp.noindex VK_ICD_FILENAMES=<lab>/deps/build-swiftshader/Darwin/vk_swiftshader_icd.json \
-      emulator/build/emulator boot --rootfs <run>/rootfs --device iPhone3,1 --host-cache <cache> \
-        --display headless --gles-backend software --control-stdin --frame-output <run>/frame.png
+    TMPDIR=<tmp> build/macosx/arm64/release/emulator boot --rootfs <run>/rootfs --device iPhone3,1 \
+      --host-cache <cache> --display headless --gles-backend software --control-stdin --frame-output <run>/frame.png
 
-* `--device`: iPhone1,1 iPhone1,2 iPhone2,1 iPhone3,1 iPhone4,1 iPod1,1 iPod2,1 iPod4,1 (lab patch)
+* `--device`: iPhone1,1 iPhone1,2 iPhone2,1 iPhone3,1 iPhone4,1 iPod1,1 iPod2,1 iPod4,1
   iPad1,1 iPad2,1 (`src/foundation/device_model.cpp`).
 * The release comes from `System/Library/CoreServices/SystemVersion.plist`; `9A*`, `9B*` map to
   darwin11, every `10*` build to darwin13 (`src/device_state/darwin_kernel_configuration.cpp`).
@@ -72,7 +71,7 @@ The emulator itself also dumps `threads` of any process that dies on a signal.
 * Emulator-detected crashes: `[cpu] fatal pid= pc= lr= fault= access= size=`, then
   `[process] exit pid= status=0 signal=11` and a `[control] thread ...` dump.
 
-## Milestones without screenshots (what `scripts/summary.py` reads)
+## Milestones without screenshots
 
 | milestone | line |
 |---|---|
