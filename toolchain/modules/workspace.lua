@@ -77,22 +77,6 @@ local function sdk_in(installdir, version)
                      "iPhoneOS" .. version .. ".sdk")
 end
 
-function installed_sdk(installdir, version)
-    local preferred = sdk_in(installdir, version)
-    if os.isfile(path.join(preferred, "SDKSettings.json")) then
-        return preferred
-    end
-    local siblings = os.dirs(path.join(path.directory(installdir), "*"))
-    table.sort(siblings)
-    for _, sibling in ipairs(siblings) do
-        local folder = sdk_in(sibling, version)
-        if os.isfile(path.join(folder, "SDKSettings.json")) then
-            return folder
-        end
-    end
-    return nil, preferred
-end
-
 local function package_sdk(version, install)
     local scratch = fresh("sdk-resolve")
     io.writefile(path.join(scratch, "xmake.lua"), string.format("add_repositories(%q)\nadd_requires(%q)\n",
@@ -134,13 +118,10 @@ function sdk_package(version, opt)
     if resolved[key] and not opt.install then
         return resolved[key]
     end
-    local installdir = package_sdk(version, opt.install)
-    local folder, preferred = installed_sdk(installdir, version)
-    if not folder then
-        raise("workspace: the iPhoneOS %s SDK is not there: no revenant's iphoneos-sdk %s install under %s holds an SDKSettings.json "
-              .. "(xmake named %s). Install it with `xmake l %s %s --install`%s",
-              version, version, path.directory(installdir), preferred, path.join(root(), "modules", "workspace.lua"),
-              opt.command or ("sdk-package " .. version), opt.alternative or "")
+    local folder = sdk_in(package_sdk(version, opt.install), version)
+    if not os.isfile(path.join(folder, "SDKSettings.json")) then
+        raise("workspace: the iphoneos-sdk install is incomplete: %s has no SDKSettings.json; run ./xmakew l -P . "
+              .. "toolchain/modules/workspace.lua sdk-package %s --install", folder, version)
     end
     resolved[key] = folder
     return folder
@@ -155,8 +136,7 @@ function sdk(opt)
         end
         return path.absolute(named)
     end
-    return sdk_package(SDK_VERSION, {install = opt.install, command = "sdk",
-                                     alternative = string.format(", or set %s to an iPhoneOS%s.sdk folder", SDK_VARIABLE, SDK_VERSION)})
+    return sdk_package(SDK_VERSION, {install = opt.install})
 end
 
 function main(command, ...)

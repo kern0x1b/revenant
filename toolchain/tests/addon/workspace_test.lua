@@ -83,18 +83,5 @@ function failures(opt)
         table.insert(found, "REVENANT_GEN_SDK names the SDK when it is set: " .. tostring(named))
     end
     os.tryrm(path.directory(sdk))
-
-    local store = path.join(cache, task .. "-store", "iphoneos-sdk", "26.2")
-    local empty_install = path.join(store, "aaaa")
-    local full_install = path.join(store, "bbbb")
-    os.mkdir(empty_install)
-    local full_sdk = path.join(full_install, "Developer.app", "Contents", "Developer", "Platforms", "iPhoneOS.platform",
-                               "Developer", "SDKs", "iPhoneOS26.2.sdk")
-    io.writefile(path.join(full_sdk, "SDKSettings.json"), "{}")
-    local picked = workspace.installed_sdk(empty_install, "26.2")
-    if picked ~= full_sdk then
-        table.insert(found, "an install folder with no SDKSettings.json is skipped for one that has it: " .. tostring(picked))
-    end
-    os.tryrm(path.join(cache, task .. "-store"))
     return found
 end
