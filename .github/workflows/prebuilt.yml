@@ -34,6 +34,23 @@ jobs:
       - name: Name the archive folder
         run: echo "REVENANT_PREBUILT_OUT=$RUNNER_TEMP/prebuilt" >> "$GITHUB_ENV"
 
+      - name: Select Xcode 26.3
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.3.app/Contents/Developer
+          xcode-select -p
+          xcrun clang --version
+
+      - name: Free the disk of the other Xcode versions
+        run: |
+          df -h /
+          for app in /Applications/Xcode_*.app; do
+            case "$app" in
+              /Applications/Xcode_26.3.app) ;;
+              *) sudo rm -rf "$app" ;;
+            esac
+          done
+          df -h /
+
       - name: Build xmake from its pin
         run: ./xmakew --version
 
@@ -63,3 +80,9 @@ jobs:
             gh release create "$tag" "$REVENANT_PREBUILT_OUT/$name"-*.tar.xz "$REVENANT_PREBUILT_OUT/$name"-*.tar.xz.sha256 \
               --title "$tag" --notes "Built by the prebuilt workflow from $COMMIT on $RUNNER_OS $RUNNER_ARCH." --prerelease
           done
+
+      - name: Measure the disk
+        if: always()
+        run: |
+          df -h /
+          du -sh "$RUNNER_TEMP" 2>/dev/null || true
