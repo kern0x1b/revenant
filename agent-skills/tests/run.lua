@@ -56,7 +56,7 @@ function main(...)
     local tests = path.absolute(os.scriptdir())
     local repo = path.directory(tests)
     local top = git(repo, {"rev-parse", "--show-toplevel"})
-    local workspace = import("workspace", {rootdir = path.join(top, "toolchain", "modules"), anonymous = true})
+    local workspace = import("@addon.revenant.workspace", {anonymous = true})
     local credentials = import("credentials", {rootdir = tests, anonymous = true})
 
     if #chosen.scenarios == 0 then
