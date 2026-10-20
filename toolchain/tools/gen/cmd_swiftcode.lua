@@ -23,15 +23,13 @@ end
 function run(args)
     assert(args.sdk, "--sdk (the SDK folder) is required")
     assert(args.out, "--out (the folder to write the code into) is required")
-    local heavy = swift_model.heavy_path(args.coordination)
-    assert(os.isfile(heavy), "no heavy.sh: " .. heavy)
     local all = swift_model.modules(args.sdk)
     local names = args.framework and {args.framework} or all
     local triple = swift_model.triple_of(args.sdk)
     local known = swift_model.module_set(args.sdk)
     os.mkdir(args.out)
     local started = os.mclock()
-    local folder = swift_model.prefetch(heavy,args.sdk, triple, all)
+    local folder = swift_model.prefetch(args.sdk, triple, all)
     local classes, no_model = swift_model.class_index(folder, all)
     local bounds = swift_model.associated_bounds(args.sdk)
     for _, l in ipairs(no_model) do

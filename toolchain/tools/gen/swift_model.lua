@@ -180,15 +180,8 @@ function triple_of(sdk)
     return sdk_info.discover(sdk).triple
 end
 
-function heavy_path(coordination)
-    if coordination then
-        return path.join(coordination, "heavy.sh")
-    end
-    return path.join(os.getenv("HOME"), "Git", "projects", "ios", "coordination", "heavy.sh")
-end
-
-function prefetch(heavy, sdk, triple, names)
-    return swift_shard.dump_batch(heavy, sdk, triple, names, "model")
+function prefetch(sdk, triple, names)
+    return swift_shard.dump_batch(sdk, triple, names, "model")
 end
 
 local function dump(folder, framework, mode)

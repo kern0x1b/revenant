@@ -15,7 +15,7 @@ local function blobs(tree)
 end
 
 function run(args)
-    local corpus = args.coordination or workspace.corpus()
+    local corpus = args.corpus or workspace.corpus()
     local trees = path.join(corpus, "impl-source-trees")
     os.mkdir(trees)
     for _, entry in ipairs(surface_impl.repositories()) do

@@ -5,20 +5,15 @@ description: Run the apple-backports gate on a toolchain checkout or worktree an
 
 # Gating apple-backports
 
-The gate scripts live outside the repository, in `$HOME/Git/projects/ios/coordination/`. They
-read the checkout they are pointed at, live, from disk.
+Run everything from the top of the checkout being gated.
 
 ## 1. Light guard (seconds)
 
 ```
-xmake l $HOME/Git/projects/ios/coordination/run_light_tests.lua "$PWD"
+./xmakew l tools/check.lua toolchain
 ```
 
-Five `tests/addon` suites. Each prints `<name>: OK (0 failures)` or one `<name> FAIL: ...` line
-per failure.
-
-- Pass the checkout as the argument; without one it tests the shared checkout
-  `$HOME/Git/projects/ios/revenant`, not the worktree you are in.
+The `tests/addon` suites. Each prints `<name>: OK (0 failures)` or one `<name> FAIL: ...` line per failure.
 
 ## 2. Full gate (minutes to tens of minutes)
 
@@ -44,17 +39,10 @@ declares and imports that header, so the eight trait protocols of UIKit come fro
 `RevenantTraits17.h`; the command and the row list are in the commit that regenerated them
 (`7a073c987`).
 
-Every edit for the round is done and committed first; then, from the checkout being gated:
-
-```
-out=.agent-work/runs/<task>/gate-<n>          # fresh directory per run, never reused
-mkdir -p "$out"
-$HOME/Git/projects/ios/coordination/heavy.sh xmake l $HOME/Git/projects/ios/coordination/build-gate.lua 6.1.3 "$PWD/$out" "$PWD" > "$out.log" 2>&1; echo EXIT=$?
-```
-
-Pass `timeout: 600000` on the shell call. If the harness backgrounds it, wait for its notification;
-check liveness by the `xmake` process and its compiler children, not by the log (it is silent for
-long stretches).
+Every edit for the round is done and committed first. The full gate is a build of `revenant@apple-backports`
+with every library of `LIBRARIES` in `modules/apple/backports.lua`, which is what runs `check_registry` and the
+imports check; the build log is what is read below. The script that drove it lived outside the repository and is
+gone; until `tools/check.lua backports` replaces it, build the package that way by hand.
 
 Reading the verdict (`$out.log`):
 
@@ -136,5 +124,3 @@ The base commit, what is inside, which of steps 1–4 ran with their verdict lin
 Before `git format-patch`, `git status` must show no rebase or `am` in progress, and `git log -1`
 must be your own last commit: during a stopped rebase HEAD is a partly replayed branch, and the
 export carries the wrong commits.
-The coordinator re-runs the gate after `git am -3`; see the workspace skill `patch-merge`
-(`$HOME/Git/projects/ios/.agents/skills/patch-merge/SKILL.md`).

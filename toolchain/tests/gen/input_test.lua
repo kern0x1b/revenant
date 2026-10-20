@@ -138,7 +138,7 @@ function main()
     local tree = scratch_tree()
     local corpus = scratch_corpus(tree)
     local args = function (fw)
-        return {tree = tree, sdk = FIXTURES, coordination = corpus, framework = fw}
+        return {tree = tree, sdk = FIXTURES, corpus = corpus, framework = fw}
     end
 
     local records, rows = 0, 0
@@ -162,7 +162,7 @@ function main()
     local objc_corpus = path.join(tree, "corpus-objc")
     os.cp(corpus, objc_corpus)
     add_objc_constant(objc_corpus, SWIFT_ONLY)
-    local ok, err = attempt(input.run, {tree = tree, sdk = FIXTURES, coordination = objc_corpus, framework = SWIFT_ONLY})
+    local ok, err = attempt(input.run, {tree = tree, sdk = FIXTURES, corpus = objc_corpus, framework = SWIFT_ONLY})
     local swift_named = not ok and string.find(err, "input " .. SWIFT_ONLY .. ": a Swift-only module", 1, true) ~= nil
     check(swift_named, "input names a Swift-only framework whose ledger lists an Objective-C constant")
 

@@ -237,7 +237,7 @@ local function with_class_keys(rows, facts)
 end
 
 local function trace_one(args, fw, sdk_release)
-    local tree, corpus = args.tree, args.coordination
+    local tree, corpus = args.tree, args.corpus
     local spec = snapshot.load(tree, fw)
     local facts = headers.shard_facts(tree, fw)
     local overridden = overrides_of(tree, fw, facts)
@@ -296,7 +296,7 @@ local function trace_one(args, fw, sdk_release)
 end
 
 function run(args)
-    assert(args.coordination, "trace needs --coordination: the corpus folder")
+    assert(args.corpus, "trace needs --corpus: the corpus folder")
     args.ledger_rows = args.ledger_rows or surface.ledger_6_1_3()
     assert(args.sdk, "trace needs --sdk: the iPhoneOS SDK whose release names the surface table")
     local sdk_release = sdk_info.discover(args.sdk).version

@@ -17,18 +17,17 @@ end
 
 function run(args)
     local fw = args.framework
-    local corpus = args.coordination
+    local corpus = args.corpus
     local cache = args.ipsw_cache
-    assert(corpus, "--coordination (the corpus folder) is required")
+    assert(corpus, "--corpus (the corpus folder) is required")
     assert(cache, "--ipsw-cache (the on-disk iOS cache of the --sdk release) is required")
     assert(args.sdk, "behaviour needs --sdk: the iPhoneOS SDK whose release names the corpus tables")
     local sdk_release = sdk_info.discover(args.sdk).version
-    local heavy = behaviour.heavy_path(corpus)
     local methods = chosen_methods(args, corpus, sdk_release, fw)
     local pages, done, failed = {}, 0, 0
     for _, m in ipairs(methods) do
         local state = behaviour.new_summary()
-        local status, seconds, peak, notes = behaviour.disassemble(heavy, cache, m.address, function(line)
+        local status, seconds, peak, notes = behaviour.disassemble(cache, m.address, function(line)
             behaviour.add_line(state, line)
         end)
         print(string.format("cost\t%s\t-[%s %s]\t%s\t%.2f s\t%.0f MB\texit %d", fw, m.cls, m.selector, m.address, seconds, peak, status))

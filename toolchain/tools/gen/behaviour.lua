@@ -9,7 +9,6 @@ local DOC_OUT = "spec-docs"
 local DEFAULT_LIMIT = 5
 local TIMEOUT_SECONDS = 300
 local MEGABYTE = 1048576
-local HEAVY_NAME = "heavy.sh"
 local SUMMARY_CALLS = 40
 local MILLISECONDS = 1000
 
@@ -19,12 +18,6 @@ local NOTE_LINES = 12
 local MARKUP = "^0x[0-9a-f]+:%s+" .. string.rep("[0-9a-f][0-9a-f]%s+", 4) .. "(%S+)%s*(.*)$"
 local CONDITIONAL = {cbz = true, cbnz = true, tbz = true, tbnz = true}
 local EQUALITY = {["b.eq"] = true, ["b.ne"] = true}
-
-function heavy_path(corpus)
-    local heavy = path.join(path.directory(corpus), HEAVY_NAME)
-    assert(os.isfile(heavy), "no " .. HEAVY_NAME .. " beside the corpus folder: " .. heavy)
-    return heavy
-end
 
 function doc_root()
     return workspace.run(DOC_OUT)
@@ -64,11 +57,11 @@ function methods(corpus, sdk_release, fw)
     return out
 end
 
-function disassemble(heavy, cache, address, each)
+function disassemble(cache, address, each)
     local peak = 0
     local notes = {}
     local started = os.mclock()
-    local status = stream.lines(heavy, {"/bin/sh", "-c", WRAP, "sh", tostring(TIMEOUT_SECONDS), cache, address}, function(line)
+    local status = stream.lines("/bin/sh", {"-c", WRAP, "sh", tostring(TIMEOUT_SECONDS), cache, address}, function(line)
         local bytes = string.match(line, "(%d+)%s+maximum resident set size")
         if bytes then
             peak = tonumber(bytes) / MEGABYTE

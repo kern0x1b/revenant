@@ -2,7 +2,7 @@ local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 local SCRATCH = path.join(os.scriptdir(), "..", "..", "build", "dump-bound-test")
 
 function main()
-    local heavy_batch = import("gen.heavy_batch", {rootdir = TOOLS, anonymous = true})
+    local batch = import("gen.batch", {rootdir = TOOLS, anonymous = true})
     local swift_shard = import("gen.swift_shard", {rootdir = TOOLS, anonymous = true})
     local failures = 0
     local function check(ok, label)
@@ -12,7 +12,7 @@ function main()
         end
     end
 
-    check(heavy_batch.bound_prefix(1800) == "gtimeout -k 30 1800", "the batch's bound text: " .. heavy_batch.bound_prefix(1800))
+    check(batch.bound_prefix(1800) == "gtimeout -k 30 1800", "the batch's bound text: " .. batch.bound_prefix(1800))
 
     local command = swift_shard.dump_command("/sdk", "arm64e-apple-ios26.2", "Fix", "", SCRATCH .. "/Fix", "shard")
     check(string.sub(command, 1, #"gtimeout -k 30 1800 xcrun ") == "gtimeout -k 30 1800 xcrun ",

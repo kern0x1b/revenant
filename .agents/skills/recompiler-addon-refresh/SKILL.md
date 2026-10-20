@@ -33,7 +33,7 @@ Things that look like fixes but do not touch the payload, so don't waste a cycle
 The payload directory is shared machine-wide and is never edited by hand: no copying files into
 it, no `xmake addon --remove`, no re-registration. Removing or reinstalling the addon pulls every
 other in-flight build's plugins (`device`/`deb`/`emulate`) out from under it, and on xmake 3.1.1
-any install makes itself the machine's `active` version (`coordination/crutches.md`, the xmake
+any install makes itself the machine's `active` version (the xmake
 addon lock entry). What this skill does is diagnose, read-only, and hand the finding over.
 
 1. Find the active payload directory: `<XMAKE_GLOBALDIR>/addons/revenant/<active-version-or-latest>/`.

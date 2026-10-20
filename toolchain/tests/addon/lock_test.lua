@@ -18,16 +18,6 @@ function failures(opts)
             failures = failures + 1
         end
     end
-    local gate = io.readfile(path.join(os.getenv("HOME") or "", "Git/projects/ios/coordination/build-gate.lua"))
-    if gate and not gate:find("addons.conf", 1, true) then
-        print("  lock_test FAIL: the gate does not read the machine's own addon copy when xmake writes no lock")
-        failures = failures + 1
-    end
-    if gate and not gate:find("xmake%-addons%.lock") then
-        print("  lock_test FAIL: the gate does not look at the lock at all")
-        failures = failures + 1
-    end
-
     local addon = "v0.8.13"
     local machine = {[addon] = {version = addon}}
     check("a lock naming the pinned addon", held_by(machine, addon, addon), addon)

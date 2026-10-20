@@ -1,7 +1,3 @@
-local function heavy_folder_of(coordination)
-    return path.directory(coordination)
-end
-
 local function steps(args)
     local out = {}
     table.insert(out, {name = "ir", run = function(step_args)
@@ -38,7 +34,6 @@ local function steps(args)
     end})
     table.insert(out, {name = "swiftcode", run = function(step_args)
         step_args.out = path.join(args.out, "swift")
-        step_args.coordination = heavy_folder_of(step_args.coordination)
         return import("cmd_swiftcode", {anonymous = true}).run(step_args)
     end})
     table.insert(out, {name = "scope", run = function(step_args)
@@ -63,7 +58,6 @@ local function steps(args)
             step_args.ir = path.join(args.out, "ir", "full.tsv")
             step_args.headers = path.join(args.out, "headers")
             step_args.out = path.join(args.out, "verify")
-            step_args.coordination = heavy_folder_of(step_args.coordination)
             return import("verify", {anonymous = true}).run(step_args)
         end})
     end
@@ -98,7 +92,7 @@ end
 
 function run(args)
     assert(args.sdk, "sdk needs --sdk: the iPhoneOS SDK the pipeline reads")
-    assert(args.coordination, "sdk needs --coordination: the corpus folder (the surface table, the ledgers and the iOS constants)")
+    assert(args.corpus, "sdk needs --corpus: the corpus folder (the surface table, the ledgers and the iOS constants)")
     assert(args.out, "sdk needs --out: the folder scope (and doc, with --doc) write to")
     args.sdk = path.absolute(args.sdk)
     args.tree = path.absolute(args.tree)

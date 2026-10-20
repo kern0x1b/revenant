@@ -60,11 +60,11 @@ function failures(opt)
     end
 
     local fake = path.join(cache, task .. "-corpus")
-    os.mkdir(path.join(fake, "corpus"))
-    io.writefile(path.join(fake, "corpus", "rows.tsv"), "")
+    os.mkdir(fake)
+    io.writefile(path.join(fake, "rows.tsv"), "")
     local rows = with_env("REVENANT_CORPUS_ROOT", fake, function () return workspace.corpus("rows.tsv") end)
-    if rows ~= path.join(fake, "corpus", "rows.tsv") then
-        table.insert(found, "corpus(<file>) is the file under REVENANT_CORPUS_ROOT/corpus: " .. tostring(rows))
+    if rows ~= path.join(fake, "rows.tsv") then
+        table.insert(found, "corpus(<file>) is the file under REVENANT_CORPUS_ROOT: " .. tostring(rows))
     end
     message = refused(function () with_env("REVENANT_CORPUS_ROOT", fake, function () return workspace.corpus("absent.tsv") end) end)
     if not message or not message:find("absent.tsv", 1, true) then

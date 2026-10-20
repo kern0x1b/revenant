@@ -76,7 +76,7 @@ local function rerecord(tree, fw, refused)
 end
 
 local function write_framework(args, fw, sdk_release)
-    local emitted = derived(args.tree, fw, args.coordination, sdk_release)
+    local emitted = derived(args.tree, fw, args.corpus, sdk_release)
     emitted[MANIFEST_NAME] = manifest_text(emitted, sdk_release)
     local base = layout.gen_dir(args.tree, fw)
     for _, name in ipairs(stale_constants(base, fw, emitted)) do

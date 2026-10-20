@@ -482,7 +482,7 @@ local function width(opt)
     if opt.width then
         return opt.width
     end
-    return math.max(1, tonumber(os.getenv("FLEET_HEAVY_CPUS") or "") or 1)
+    return math.max(1, os.cpuinfo().ncpu)
 end
 
 local COMPILED

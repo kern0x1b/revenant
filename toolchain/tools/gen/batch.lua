@@ -11,7 +11,7 @@ function quote(word)
     return "'" .. (string.gsub(word, "'", "'\\''")) .. "'"
 end
 
-function run(heavy, folder, label, items, fresh)
+function run(folder, label, items, fresh)
     local commands = {}
     for _, item in ipairs(items) do
         if fresh and os.isfile(item.base .. ".status") then
@@ -27,7 +27,7 @@ function run(heavy, folder, label, items, fresh)
         io.writefile(jobs, table.concat(commands, "\0") .. "\0")
         try {
             function()
-                os.execv("gtimeout", {"-k", tostring(KILL_AFTER), tostring(BATCH_TIMEOUT), heavy, "sh", "-c",
+                os.execv("gtimeout", {"-k", tostring(KILL_AFTER), tostring(BATCH_TIMEOUT), "sh", "-c",
                                       string.format("xargs -0 -P %d -n 1 sh -c < %s; true", WIDTH, jobs)})
             end,
             catch {

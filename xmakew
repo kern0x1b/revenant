@@ -73,5 +73,8 @@ if [ ! -x "$prefix/bin/xmake" ]; then
 fi
 
 XMAKE_GLOBALDIR=${XMAKE_GLOBALDIR:-$HOME/.revenant/cache/xmake-global}
-export XMAKE_GLOBALDIR
+CCACHE_DIR=${CCACHE_DIR:-$HOME/.revenant/cache/ccache}
+CCACHE_NOHASHDIR=${CCACHE_NOHASHDIR:-1}
+CCACHE_MAXSIZE=${CCACHE_MAXSIZE:-20G}
+export XMAKE_GLOBALDIR CCACHE_DIR CCACHE_NOHASHDIR CCACHE_MAXSIZE
 exec "$prefix/bin/xmake" "$@"

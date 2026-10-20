@@ -2,7 +2,7 @@ local swift_model = import("swift_model", {anonymous = true})
 local swift_canonical = import("swift_canonical", {anonymous = true})
 local swift_render = import("swift_render", {anonymous = true})
 local swift_roundtrip = import("swift_roundtrip", {anonymous = true})
-local heavy_batch = import("heavy_batch", {anonymous = true})
+local batch = import("batch", {anonymous = true})
 local emit = import("emit", {anonymous = true})
 
 local function prepare(folder, out_dir, name, known, classes, public, headers, graph, bounds)
@@ -102,8 +102,6 @@ end
 function run(args)
     assert(args.sdk, "--sdk (the SDK folder) is required")
     assert(args.out, "--out (the folder to write the code into) is required")
-    local heavy = swift_model.heavy_path(args.coordination)
-    assert(os.isfile(heavy), "no heavy.sh: " .. heavy)
     local all = swift_model.modules(args.sdk)
     local names = args.framework and {args.framework} or all
     local triple = swift_model.triple_of(args.sdk)
@@ -113,7 +111,7 @@ function run(args)
     local bounds = swift_model.associated_bounds(args.sdk)
     os.mkdir(args.out)
     local started = os.mclock()
-    local folder = swift_model.prefetch(heavy,args.sdk, triple, all)
+    local folder = swift_model.prefetch(args.sdk, triple, all)
     local classes, no_model = swift_model.class_index(folder, all)
     for _, l in ipairs(no_model) do
         print("roundtrip: class index, no model: " .. l)
@@ -143,7 +141,7 @@ function run(args)
                                                                  entry.prep.underlying))
         end
     end
-    local left = heavy_batch.run(heavy, args.out, "compile", compiles, true)
+    local left = batch.run(args.out, "compile", compiles, true)
     if left > 0 then
         print(string.format("roundtrip: the compile batch left %d module(s) without a status (the slot or the batch bound stopped it)", left))
     end
@@ -152,7 +150,7 @@ function run(args)
             table.insert(dumps, swift_roundtrip.dump_item(triple, args.sdk, entry.prep.module_dir, entry.name))
         end
     end
-    left = heavy_batch.run(heavy, args.out, "dump", dumps, true)
+    left = batch.run(args.out, "dump", dumps, true)
     if left > 0 then
         print(string.format("roundtrip: the dump batch left %d module(s) without a status (the slot or the batch bound stopped it)", left))
     end
