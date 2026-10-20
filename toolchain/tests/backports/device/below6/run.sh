@@ -5,7 +5,7 @@
 # own minimum; "bare", apple_minimum set to the reference release (6.0) itself, run on it alone - "bare" for what band() (modules/
 # apple/backports.lua) puts in that band, not for whether the package is linked: at apple_minimum 6.0 it reexports the class instead
 # of carrying it, the same way the real apple-backports .deb's own band 6.0 does (checked with nm: no NSProgress/NSUUID class metadata
-# there, only a reexport stub). Revenant's own "copy the library in" mechanism (toolchain/AGENTS.md, "revenant.libraries and verify_placed")
+# there, only a reexport stub). Revenant's own "copy the library in" mechanism (docs/guides/toolchain/contributing.md, "revenant.libraries and verify_placed")
 # copies the band a build's own apple_minimum names, so a "ported" binary (band 4.3, which does carry the class) run on the
 # reference release instead would hold two classes of the same name next to the release's real Foundation, and the runtime's own
 # choice between them ("which one is undefined") is not a measurement of either. Like tests/backports/device/display-probe/xmake.lua's

@@ -209,7 +209,7 @@ xmake device $device_flag list 2>&1 | sed 's/^/  /'
 remote_dir=/private/var/backports
 run_device() { xmake device $device_flag -s 300 run "$1"; }
 
-# The launcher, if the device has not got one. The iPad 2 has no sblaunch -- tests/backports/README.md
+# The launcher, if the device has not got one. The iPad 2 has no sblaunch -- docs/guides/toolchain/tests.md
 # says so in as many words -- and revenant-sblaunch is the tree's own way to start an application on
 # either device, held at /usr/libexec and copied to a device from packages/emulator/emulator-guest, which is
 # the package that builds it.
@@ -316,7 +316,7 @@ for name in $built; do
             copy "$out/$executable.app/$executable" "/Applications/$executable.app/$executable"
             copy "$out/$executable.app/Info.plist" "/Applications/$executable.app/Info.plist"
             # uicache is a per-user cache and answers "incorrect user" from root: it is run as mobile,
-            # which is what tests/backports/README.md says to do. And the iPad 2 has no sblaunch --
+            # which is what docs/guides/toolchain/tests.md says to do. And the iPad 2 has no sblaunch --
             # the launcher's own line -- so this is packages/emulator/emulator-guest/src/revenant-sblaunch, built
             # and signed here with its entitlements and copied to /usr/libexec. Both facts came from
             # the first iPad run: "cannot open cache file. incorrect user?" and "sblaunch: command not

@@ -7,7 +7,7 @@
 #     $HOME/Git/projects/ios/coordination/heavy.sh sh tests/backports/host/dragdroprouting/run.sh
 #
 # DDR_ROOT names the port's checkout; the sources are taken from it by path, so the port is never
-# installed as the addon (toolchain/AGENTS.md, Traps).
+# installed as the addon (docs/guides/toolchain/contributing.md, Traps).
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"

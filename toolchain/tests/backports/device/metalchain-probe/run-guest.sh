@@ -3,7 +3,7 @@
 #
 # IT IS A SEPARATE SCRIPT BECAUSE IT IS THE ONLY HEAVY PART of this case: configure, build and install
 # are a package build and a few seconds of compile, while the run boots a guest and holds a slot of the
-# machine (AGENTS.md section 8). The coordinator asked for exactly this split on 2026-10-04, after a run
+# machine (see docs/guides/toolchain/emulate.md, Devices and releases). The coordinator asked for exactly this split on 2026-10-04, after a run
 # of the whole script under heavy.sh came back "every package not found". So the whole procedure stays
 # runnable as one command (`sh run.sh`, which calls this), and the guest alone can be queued:
 #

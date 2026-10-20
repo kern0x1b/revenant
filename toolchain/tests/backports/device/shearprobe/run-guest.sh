@@ -3,7 +3,7 @@
 #
 # IT IS A SEPARATE SCRIPT BECAUSE IT IS THE ONLY HEAVY PART of this case. Configure, build and install are a
 # package build and a few seconds of compile; the run boots a guest and holds a slot of the machine for a minute
-# or two (AGENTS.md section 8). The whole procedure stays runnable as one command (`sh run.sh`, which calls
+# or two (see docs/guides/toolchain/emulate.md, Devices and releases). The whole procedure stays runnable as one command (`sh run.sh`, which calls
 # this), and the guest alone can be queued:
 #
 #   $HOME/Git/projects/ios/coordination/heavy.sh sh tests/backports/device/shearprobe/run-guest.sh

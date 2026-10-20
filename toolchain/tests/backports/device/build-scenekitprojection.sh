@@ -1,5 +1,5 @@
 #!/bin/sh
-# Compiles one device test for the target, which no script in this tree did: tests/backports/README.md
+# Compiles one device test for the target, which no script in this tree did: docs/guides/toolchain/tests.md
 # indexes the tests and what each needs built, and the gates build the backports, but nothing
 # assembled the clang line for a test binary. This is that line for scenekitprojection.m, and the
 # shape the others take.

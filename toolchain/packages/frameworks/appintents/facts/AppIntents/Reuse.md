@@ -35,4 +35,4 @@ The reviewer brief's rule (owner, 2026-09-28): a delivery names the open upstrea
 (`Sources/AppIntents/Gated.swift`, and the recipe's probes, which measure rather than assume). This
 delivery carries the *conformances* AppIntents adds to those types and takes the types themselves from
 the runtime, which is the Foundation band's to carry; a second copy of `Measurement` here would be a
-second copy of something that exists (`AGENTS.md` §4, reuse before writing).
+second copy of something that exists (the workspace contract: no second copy of what exists).

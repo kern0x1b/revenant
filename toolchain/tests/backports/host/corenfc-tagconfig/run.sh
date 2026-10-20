@@ -15,8 +15,8 @@ here=$(cd "$(dirname "$0")" && pwd)
 port=${PORT:-$here/../../../../packages/frameworks/apple-backports/CoreNFC}
 harness=${TAGCONFIG_HARNESS:-$here/../../device}
 # Built outside the tree, as the two neighbouring runs do: a build directory under the source
-# is what a later `git add` picks up by accident (AGENTS.md, Conventions: build artifacts are
-# never committed).
+# is what a later `git add` picks up by accident (docs/guides/toolchain/contributing.md, Conventions:
+# build output is gitignored).
 build=${TAGCONFIG_BUILD:-$(runs_folder revenant-corenfc-tagconfig-host)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
