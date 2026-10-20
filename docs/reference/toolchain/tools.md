@@ -46,5 +46,5 @@ Two rules the table follows. Where a header and a release's own image disagree, 
 | --- | --- |
 | `gen/` | the generator of the apple-backports skeleton and of the headers a port compiles against (`cmd_gen.lua`, `cmd_headers.lua`), with the checks on its output (`cmd_check.lua`) |
 | `found/` | the declaration reader: a clang-based extractor (`decls.cc`) and the Lua that turns its output into facts (`facts.lua`) |
-| `intents/` | the generator and measurements of the App Intents package |
-| `corpus/` | the measured tables and the readers of the caches (`cache-census.lua`, `cache-images.lua`, `cache-value.lua`) |
+| `intents/` | the App Intents generators: `objects.lua` and `gen-intents.lua` for the objects, `generate.lua` for the registry it drives (`gen-causes.lua`, `gen-registry.lua`), with their class groups and data |
+| `corpus/` | the measured tables and the readers of the caches (`cache-images.lua`, `cache-value.lua`) |

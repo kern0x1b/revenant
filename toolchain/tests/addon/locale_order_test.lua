@@ -25,7 +25,6 @@ local NOT_STRINGS = {
     ["modules/apple/firmware.lua|table.sort(listed, function (a, b) return dyld.compare_versions(a, b) < 0 end)"] = "versions",
     ["modules/gyb/runtime.lua|table.sort(keyed, function(a, b)"] = "Python's order, byteorder.less on strings, then the index",
     ["tools/matter-registry.lua|table.sort(types, function (left, right) return #left > #right end)"] = "lengths",
-    ["tools/corpus/skeleton-table.lua|table.sort(addresses)"] = "numbers",
     ["tools/corpus/const-values.lua|table.sort(kind_order, function (a, b)"] = "counts, then the index",
     ["tools/corpus/ledger_headers.lua|table.sort(named, function (a, b)"] = "byteorder.less on both names",
     ["tools/corpus/surface_walk.lua|table.sort(found, function (a, b)"] = "versions, then byteorder.less",
@@ -36,7 +35,6 @@ local NOT_STRINGS = {
     ["tools/corpus/sdk-surface.lua|table.sort(majors)"] = "numbers",
     ["tools/corpus/sdk-surface.lua|table.sort(ordered, function (a, b)"] = "totals, then the index",
     ["tools/corpus/sdk-introduced.lua|table.sort(unverified, function (a, b)"] = "byteorder.less on each field",
-    ["tools/intents/probe-host-absent.lua|table.sort(rows, function (a, b)"] = "absent first, byteorder.less, then the position",
     ["tools/intents/gen-registry.lua|table.sort(decorated, function (a, b)"] = "byteorder.less on kind and name, then the position",
     ["tools/corpus/cache-value.lua|table.sort(entries, function (a, b) return a.address < b.address or (a.address == b.address and a.order < b.order) end)"] = "addresses",
 }
