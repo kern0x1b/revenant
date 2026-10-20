@@ -86,9 +86,9 @@ jobs:
           PACKAGE: ${{ inputs.package }}
         run: |
           case "$PACKAGE" in
-            llvm) ./xmakew require -P . -y -v revenant@llvm ;;
-            llvm-libraries) ./xmakew require -P . -y -v --extra="{configs={libraries=true}}" revenant@llvm ;;
-            swift) ./xmakew require -P . -y -v revenant@swift ;;
+            llvm) ./xmakew require -P . -y -v --extra="{system=false}" revenant@llvm ;;
+            llvm-libraries) ./xmakew require -P . -y -v --extra="{system=false,configs={libraries=true}}" revenant@llvm ;;
+            swift) ./xmakew require -P . -y -v --extra="{system=false}" revenant@swift ;;
             *) echo "no such package: $PACKAGE" >&2; exit 1 ;;
           esac
 
@@ -97,7 +97,12 @@ jobs:
           COMMIT: ${{ github.sha }}
         run: |
           shopt -s nullglob
-          for tagfile in "$REVENANT_PREBUILT_OUT"/*.tag; do
+          tagfiles=("$REVENANT_PREBUILT_OUT"/*.tag)
+          if [ ${#tagfiles[@]} -eq 0 ]; then
+            echo "the build archived no package, so there is nothing to release" >&2
+            exit 1
+          fi
+          for tagfile in "${tagfiles[@]}"; do
             tag=$(cat "$tagfile")
             name=$(basename "$tagfile" .tag)
             if gh release view "$tag" >/dev/null 2>&1; then
