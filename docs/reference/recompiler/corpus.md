@@ -25,7 +25,7 @@ A check that also has a device part is run by hand, with the output folder as it
 ./xmakew l recompiler/corpus/swiftconformance/check.lua <out>
 ```
 
-These need a claimed device (the workspace skill `device-session`): `REVENANT_DEVICE_HOLDER` and `REVENANT_DEVICE`
+These need a claimed device (the skill `revenant-device`): `REVENANT_DEVICE_HOLDER` and `REVENANT_DEVICE`
 exported and the claim held. They reach the device through Revenant's `device` module. Without an argument, output goes
 to `build/recompiler/corpus/<name>`.
 
@@ -97,7 +97,7 @@ place, and it would be read as this run's answer.
 ### tsdguard
 
 Proves the page-protection scheme of `runtime/xl_tsd_guard.h` on the build host. That header is the runtime half of the
-`TPIDRRO_EL0` crutch. mmap, mprotect and SIGSEGV are POSIX, so `main.c` is compiled for the host and run directly. There
+`TPIDRRO_EL0` workaround. mmap, mprotect and SIGSEGV are POSIX, so `main.c` is compiled for the host and run directly. There
 is no device, lift or translation.
 
 It proves the arithmetic at this machine's page size, which `main.c` prints: 16384 on Apple Silicon. The 4 KiB device

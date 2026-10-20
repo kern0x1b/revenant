@@ -16,7 +16,7 @@
 **/GENERATED-* linguist-generated=true
 *.swift.gyb linguist-language=Swift
 toolchain/docs/** linguist-documentation
-recompiler/docs/** linguist-documentation
+docs/**/recompiler/** linguist-documentation
 frameworks/WebKit/docs/** linguist-documentation
 docs/**/combine/** linguist-documentation
 docs/**/emulator/** linguist-documentation

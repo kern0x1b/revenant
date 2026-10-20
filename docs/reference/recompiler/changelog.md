@@ -44,7 +44,7 @@ are informal.
   backports instead of the absent stock symbols; `-dead_strip_dylibs` keeps only the ones
   used. A framework the target lacks (e.g. WKWebView's WebKit) is weak-linked, so the image
   loads and faults only if that API is used. Gated on `BACKPORTS_DIR`.
-- **jump-table recovery, va_list, Objective-C metadata, block bridging**: see `docs/research.md`.
+- **jump-table recovery, va_list, Objective-C metadata, block bridging**: see `docs/explanation/recompiler/research.md`.
 
 ### Known limitations
 - Swift is not supported (Swift metadata is 64-bit-only; separate effort).

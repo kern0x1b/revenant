@@ -9,7 +9,7 @@ local function swift_toolchain()
             return install, layouts
         end
     end
-    raise("no revenant@swift install under %s carries its own legacy_layouts source cache (docs/corpus.md says why it is needed)", path.join(package.installdir(), "s", "swift"))
+    raise("no revenant@swift install under %s carries its own legacy_layouts source cache (docs/reference/recompiler/corpus.md says why it is needed)", path.join(package.installdir(), "s", "swift"))
 end
 
 function main(out)
