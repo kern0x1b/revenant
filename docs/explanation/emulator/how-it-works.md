@@ -38,5 +38,5 @@ is never reused.
   the devices and frameworks the guest talks to; `src/host/` is what they use on the Mac.
 - `src/debug/`: the gdb remote stub (`--gdb PORT`): registers, memory, software breakpoints, all processes as
   `pPID.TID`.
-- `tools/guest/`: the guest-side probes, built only with a root filesystem and an ARMv6 linker.
-- `tools/glsl/`: the host tool that compiles the Vulkan shaders to the word lists the renderer includes.
+- `tests/guest/dns-probe/`: the guest-side DNS probe, built only with a root filesystem and an ARMv6 linker.
+- `src/glsl/`: the host tool that compiles the Vulkan shaders to the word lists the renderer includes.

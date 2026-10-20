@@ -20,7 +20,7 @@ its license; the package installs them beside it.
 | SwiftShader | 2026.09.16 | Apache-2.0 | The SwiftShader Authors | The toolchain `swiftshader`, `libvk_swiftshader.dylib` placed beside the program |
 
 OpenSSL and libplist come from Revenant's packages, libpng, libjpeg-turbo, the Vulkan headers and
-loader and the glslang library (the shader compiler of `tools/glsl`) from xmake-repo; SDL2 and FFmpeg are optional. Each package carries its license.
+loader and the glslang library (the shader compiler of `src/glsl`) from xmake-repo; SDL2 and FFmpeg are optional. Each package carries its license.
 
 A binary built from this tree carries the notices above with it; the MIT,
 BSD-3-Clause and BSL texts require that. `NOTICE` is the summary to ship.
