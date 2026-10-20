@@ -17,7 +17,7 @@ package("swift-crypto")
     for _, patch in ipairs(os.files(os.scriptdir() .. "/patches/swift-asn1/*.patch")) do
         table.insert(inputs, patch)
     end
-    local compat = path.join(os.scriptdir(), "..", "..", "a", "apple-compat")
+    local compat = path.join(os.scriptdir(), "..", "..", "runtimes", "apple-compat")
     table.insert(inputs, path.join(compat, "src", "memset_s.c"))
     table.insert(inputs, path.join(compat, "src", "objc_opt_self.c"))
     table.insert(inputs, path.join(compat, "src", "objc_allocWithZone.c"))
@@ -84,13 +84,13 @@ package("swift-crypto")
             os.vrunv(toolchain:tool("cc"), table.join(common, kcpflags, {"-c", file, "-o", path.join(objects, "kcp_" .. path.filename(file) .. ".o")}))
         end
         os.vrunv(toolchain:tool("cc"), table.join(common, {"-Os", "-Wall", "-fvisibility=hidden",
-                 "-I", path.join(compat:installdir("include")), "-c", path.join(package:scriptdir(), "..", "..", "..", "packages", "a", "apple-compat", "src", "memset_s.c"),
+                 "-I", path.join(compat:installdir("include")), "-c", path.join(package:scriptdir(), "..", "..", "..", "packages", "runtimes", "apple-compat", "src", "memset_s.c"),
                  "-o", path.join(objects, "memset_s.o")}))
         os.vrunv(toolchain:tool("cc"), table.join(common, {"-Os", "-Wall", "-fvisibility=hidden", "-c",
-                 path.join(package:scriptdir(), "..", "..", "..", "packages", "a", "apple-compat", "src", "objc_opt_self.c"),
+                 path.join(package:scriptdir(), "..", "..", "..", "packages", "runtimes", "apple-compat", "src", "objc_opt_self.c"),
                  "-o", path.join(objects, "objc_opt_self.o")}))
         os.vrunv(toolchain:tool("cc"), table.join(common, {"-Os", "-Wall", "-fvisibility=hidden", "-c",
-                 path.join(package:scriptdir(), "..", "..", "..", "packages", "a", "apple-compat", "src", "objc_allocWithZone.c"),
+                 path.join(package:scriptdir(), "..", "..", "..", "packages", "runtimes", "apple-compat", "src", "objc_allocWithZone.c"),
                  "-o", path.join(objects, "objc_allocWithZone.o")}))
 
         local port_headers = table.wrap((runtime:envs() or {}).REVENANT_SWIFT_PORT_HEADERS)

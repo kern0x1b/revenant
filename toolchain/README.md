@@ -280,7 +280,7 @@ include requires `revenant@emulator` - the emulator, Revenant's own emulator (MP
 provenance and required attribution in its NOTICE), which boots a firmware's
 own userland over an emulated XNU on macOS arm64 hosts; it is pinned by
 commit, with the fixes it has not taken yet as patches under
-`packages/e/emulator/patches/` - with
+`packages/emulator/emulator/patches/` - with
 `revenant@swiftshader`, the CPU Vulkan driver its OpenGL ES is drawn through, and
 `revenant@emulator-guest`, `revenant-runner` and `revenant-sblaunch` built by the
 `daemon` rule for the port's architecture and minimum. The device is `-d`, or the first device of
@@ -667,7 +667,7 @@ compiles its modules with the runtime's compiler and flags, installs them as
 static libraries with their `.swiftmodule`s, and names the folders a port's
 Swift finds them in with `package:setenv("REVENANT_SWIFT_MODULES", ...)`; the
 swift rule adds those folders to the compile. `revenant@combine` is the first:
-OpenCombine at a pinned commit with the patches in `packages/c/combine/patches`, a
+OpenCombine at a pinned commit with the patches in `packages/frameworks/combine/patches`, a
 single module named `Combine` — the core, the Dispatch scheduler and the
 Foundation integration compiled together — with its C++ helper and that helper's
 module map, so a port writes `import Combine`. The scheduler takes `DispatchTime`
@@ -794,7 +794,7 @@ a later build binds those symbols to libc++. Copies of different packages in one
 process, two tweaks in SpringBoard, keep separate thread-local storage and
 exception state. `operator new` and `operator delete` stay with the package too:
 libc++abi defines them as ordinary symbols, forced by
-`packages/l/libcxx/operators-not-weak.exp`, so the package's images and its
+`packages/runtimes/libcxx/operators-not-weak.exp`, so the package's images and its
 libc++ bind them two-level to its own runtime, and the runtime takes no part in
 dyld's coalescing of weak definitions. A failed allocation in a tweak therefore
 throws the `std::bad_alloc` its own `catch` names, and SpringBoard's code keeps
@@ -870,9 +870,9 @@ release that introduced the API: where Apple later corrected a number, the
 corrected one is used, and the facts name both. `NSUnitMass`'s stone is the
 plain case - iOS 10 converts it by 0.157473, the reciprocal of the 6.35029 it
 should be, and a program that asks for stones is asking for stones. Each class
-has a facts file under `packages/a/apple-backports/facts/<Framework>/`, saying
+has a facts file under `packages/frameworks/apple-backports/facts/<Framework>/`, saying
 what was read, from which library and release, and what was deliberately left
-out. `packages/a/apple-backports/registry/<Framework>/` lists every API
+out. `packages/frameworks/apple-backports/registry/<Framework>/` lists every API
 considered, a file per author so that work on different releases never edits the
 same file, with one entry per class, method, property, function or constant and
 one of four answers. `implemented` has facts and tests behind it. `inert` is
@@ -889,7 +889,7 @@ out instead. `NSMeasurementFormatter` is absent for now: formatting a
 measurement needs private ICU entry points iOS 6's libicucore does not export.
 What the package carries range by range, what it carries with a named
 difference and what it refuses with the reason, is
-`packages/a/apple-backports/README.md`.
+`packages/frameworks/apple-backports/README.md`.
 
 The build reads the registry against what the libraries really define - the
 classes they carry, from their exports and their class lists, and the selectors

@@ -112,7 +112,7 @@ a negotiation, with the cost stated in the row.
 ## What is NOT on this list
 
 `sec_identity_*`, `sec_certificate_*` and `sec_trust_*` are a different family and are in the
-security-r3 series (`packages/a/apple-backports/facts/Security/SecObjectWrappers.md`), not here.
+security-r3 series (`packages/frameworks/apple-backports/facts/Security/SecObjectWrappers.md`), not here.
 
 ## The four defaults, and what they are worth
 

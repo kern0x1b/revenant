@@ -14,7 +14,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/CarPlay}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/CarPlay}
 build=${CARPLAY_BUILD:-$(runs_folder carplay-host)}
 mkdir -p "$build"
 rm -f "$build"/cc.log "$build"/probe "$build"/probe.log "$build"/mutant "$build"/mutant.log \

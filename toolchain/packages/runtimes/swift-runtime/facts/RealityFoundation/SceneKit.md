@@ -11,7 +11,7 @@ Both overlays are built for a minimum release of 8.0 or later and for no earlier
   finds it in those of 8.0 and 8.1. `dyld.check` refuses an install whose library loads an image the release lacks.
 - The backports' SceneKit (apple-backports config `scenekit`, libSceneKitBackports.dylib) exports the classes and
   constants above except SCNHitTestResult, and has no -[SCNView hitTest:options:]
-  (`grep -rn "hitTest:options" packages/a/apple-backports/SceneKit` finds nothing; its only mention of the type is the
+  (`grep -rn "hitTest:options" packages/frameworks/apple-backports/SceneKit` finds nothing; its only mention of the type is the
   return type of a physics ray test in SCNPhysicsWorld.m). RealityKit's ARView asks that hit test for every gesture on
   an entity (files/RealityKit/ARView.swift, gestureRecognizerShouldBegin), so a link ahead of SceneKit would load and
   then answer no gesture. It also uses +[SCNNode nodeWithGeometry:], which the backport lacks

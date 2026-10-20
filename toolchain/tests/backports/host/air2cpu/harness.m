@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
-#include "../../../../packages/a/apple-backports/air2cpu-abi.h"
+#include "../../../../packages/frameworks/apple-backports/air2cpu-abi.h"
 
 @interface RevenantHostRevenantMetalBuffer : NSObject
 - (instancetype)initWithLength:(NSUInteger)length bytes:(const void *)bytes;

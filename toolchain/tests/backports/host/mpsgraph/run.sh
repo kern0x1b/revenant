@@ -20,7 +20,7 @@ echo "FAIL host/mpsgraph/run.sh: its Python steps are gone and not yet ported to
 exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-graph=${GRAPH:-$here/../../../../packages/a/apple-backports/MetalPerformanceShadersGraph}
+graph=${GRAPH:-$here/../../../../packages/frameworks/apple-backports/MetalPerformanceShadersGraph}
 build=${BUILD:-$(runs_fresh revenant-mpsgraph)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-macos13.0 -isysroot $sdk"

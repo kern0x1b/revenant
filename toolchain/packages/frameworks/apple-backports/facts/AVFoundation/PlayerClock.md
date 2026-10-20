@@ -1,6 +1,6 @@
 # `-[AVPlayer sourceClock]` is `masterClock` under a new name
 
-`packages/a/apple-backports/AVFoundation/AVPlayerSourceClock15.m`, two accessors on `AVPlayer`:
+`packages/frameworks/apple-backports/AVFoundation/AVPlayerSourceClock15.m`, two accessors on `AVPlayer`:
 `-sourceClock` and `-setSourceClock:`.
 
 ## The SDK header answers the question the cache cannot

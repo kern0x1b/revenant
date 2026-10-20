@@ -28,7 +28,7 @@ registry.
 
 Stand-ins for the `MTL` types. The port needs an object to hand back where an application asks Metal
 for a device, a buffer or a command queue, and on a release with no GPU to ask, these are what it
-hands back. Each is an `@implementation` in `packages/a/apple-backports/Metal/`, and each answers: a
+hands back. Each is an `@implementation` in `packages/frameworks/apple-backports/Metal/`, and each answers: a
 device that reports a registry ID and a name, a buffer with a length, a queue that runs what it is
 given.
 
@@ -89,7 +89,7 @@ is false twice over, and both halves were checked with commands a reader can pas
 `-fvisibility=hidden` to a **`.c`** source only - the `else` arm of a test on the extension - and gives
 an Objective-C source `-Werror=objc-missing-property-synthesis` instead. Every one of these objects is
 a `.m`. The comment above that test says so in its own first words: "Only C is compiled hidden." And
-`packages/a/apple-backports/xmake.lua:15`, the line the old text cited, is a **comment** about AMD and
+`packages/frameworks/apple-backports/xmake.lua:15`, the line the old text cited, is a **comment** about AMD and
 COLAMD's `AMD_EXPORT` overriding `-fvisibility=hidden`; it sets nothing.
 
 **Half two: the flag would not have hidden them anyway.** Same source, two compiles, the recipe's own
@@ -352,7 +352,7 @@ prose file for a whole series.
    the condition `carried_by_release` reports as false, the one `:1942` asks about. Controls in the
    same run: `grep -c '^_OBJC_CLASS_\$_MTL'` is 119, 171, 339 and 394 in 10.3.4, 12.0, 16.0 and 18.0
    and 0 in 6.0 and 7.0.1, and `grep -c '^_OBJC_CLASS_\$_WLSourceDevice' 18.0.tsv` is 3.
-4. **The port builds all sixteen.** `grep -rl "@implementation <name>" packages/a/apple-backports/Metal/*.m`
+4. **The port builds all sixteen.** `grep -rl "@implementation <name>" packages/frameworks/apple-backports/Metal/*.m`
    names a file for every one of them - the table in the section above is the method counts, this is
    where each `@implementation` is written.
 

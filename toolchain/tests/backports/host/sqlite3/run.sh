@@ -3,7 +3,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-src="$root/packages/a/apple-backports/SQLite3"
+src="$root/packages/frameworks/apple-backports/SQLite3"
 build=${SQLITE3_BUILD:-$(runs_folder sqlite3-host)}
 rm -rf "$build"
 mkdir -p "$build/planted"

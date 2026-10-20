@@ -4,7 +4,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-ACCELERATE=${ACCELERATE:-$here/../../../../packages/a/apple-backports/Accelerate}
+ACCELERATE=${ACCELERATE:-$here/../../../../packages/frameworks/apple-backports/Accelerate}
 build=${VIMAGEFIXED_BUILD:-$(runs_folder revenant-vimagefixed-host)}
 rm -rf "$build"
 mkdir -p "$build"
@@ -12,7 +12,7 @@ mkdir -p "$build"
 # Every API name the object files define is renamed in the port's own translation units, so this one can hold
 # the port's answers and the host's side by side. The names come from the port's registry.
 renames=""
-for name in $(runs_xmake l "$here/../registry-functions.lua" "$here/../../../../packages/a/apple-backports/registry/Accelerate" ios7fixedpoint.json ios10fixedpoint.json); do
+for name in $(runs_xmake l "$here/../registry-functions.lua" "$here/../../../../packages/frameworks/apple-backports/registry/Accelerate" ios7fixedpoint.json ios10fixedpoint.json); do
     renames="$renames -D$name=revenant_host_$name"
 done
 

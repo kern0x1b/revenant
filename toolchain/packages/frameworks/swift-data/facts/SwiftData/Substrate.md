@@ -25,9 +25,9 @@ libSwiftMacros.dylib
 `SwiftLibraryPluginProvider`, `SwiftIfConfig`, `SwiftWarningControl`, `SwiftRefactor` - a host
 module each, with its dylib.
 
-`packages/s/swift/xmake.lua:124-129` is what builds them (`SWIFT_BUILD_SWIFT_SYNTAX=ON`, the
+`packages/build-tools/swift/xmake.lua:124-129` is what builds them (`SWIFT_BUILD_SWIFT_SYNTAX=ON`, the
 `swift-syntax-lib` install component, and the `SwiftMacros`/`ObservationMacros` ninja targets),
-and `packages/s/swift-runtime/xmake.lua:149` hands the directory to a port as
+and `packages/runtimes/swift-runtime/xmake.lua:149` hands the directory to a port as
 `SWIFT_PLUGIN_PATH`, which `rules/swift/xmake.lua:182` passes to every port compile as
 `-plugin-path`.
 
@@ -56,7 +56,7 @@ They are not ours to add. The corpus assigns both to `swift-foundation`
 (`coordination/corpus/sdk-26.2-surface.tsv`, `via = swift-foundation`, `owner-registry =
 swift-foundation`, `registry = swiftlang/swift-foundation:Sources/FoundationEssentials/Predicate/
 Predicate.swift` and `.../FoundationInternationalization/String/SortDescriptor.swift`), and
-`packages/s/swift-foundation` - the toolchain package that builds them, work in progress in
+`packages/runtimes/swift-foundation` - the toolchain package that builds them, work in progress in
 `.agent-work/worktrees/api-foundation-swift` - is not in the shared store.
 
 Eight rows depend on those two types and are therefore not in this delivery:
@@ -105,7 +105,7 @@ store's kind and is readable, while the mirroring it asks for is the wall.
 NSUUIDAttributeType API_AVAILABLE(macosx(10.13), ios(11.0), tvos(11.0), watchos(4.0)) = 1100,
 ```
 
-and no file under `packages/a/apple-backports/registry/` carries it (grep: no match). The
+and no file under `packages/frameworks/apple-backports/registry/` carries it (grep: no match). The
 pilot's draft stored a `UUID` as a string and said "on iOS 6"; the reason is iOS **11**, not the
 release. The type-preserving answer at 6.1.3 is `NSTransformableAttributeType`
 (`NSAttributeDescription.h:32`, `ios(3.0)`) with a value transformer, which is what

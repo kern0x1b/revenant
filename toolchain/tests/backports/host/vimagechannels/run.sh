@@ -4,8 +4,8 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-ACCELERATE=$here/../../../../packages/a/apple-backports/Accelerate
-REGISTRY=$here/../../../../packages/a/apple-backports/registry/Accelerate
+ACCELERATE=$here/../../../../packages/frameworks/apple-backports/Accelerate
+REGISTRY=$here/../../../../packages/frameworks/apple-backports/registry/Accelerate
 build=${VIMAGECHANNELS_BUILD:-$(runs_folder revenant-vimagechannels-host)}
 rm -rf "$build"
 mkdir -p "$build"

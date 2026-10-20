@@ -5,7 +5,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 work=$(cd "$here/../../../.." && pwd)
-obj="$work/packages/a/apple-backports/Security/SecurityConstants11_0.m"
+obj="$work/packages/frameworks/apple-backports/Security/SecurityConstants11_0.m"
 build=${BUILD:-$(runs_fresh revenant-security)}
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path --sdk macosx)
@@ -24,7 +24,7 @@ xcrun clang $common "$here/main.m" "$here/cases.m" $libs -o "$build/system"
 echo "the host answered: $(xmake l "$here/compare.lua" --count "$build/system.tsv")"
 
 # 2. the port's own object
-xcrun clang $common -I"$work/packages/a/apple-backports" "$here/main.m" "$here/cases.m" "$obj" $libs -o "$build/port"
+xcrun clang $common -I"$work/packages/frameworks/apple-backports" "$here/main.m" "$here/cases.m" "$obj" $libs -o "$build/port"
 "$build/port" > "$build/port.tsv"
 
 # 3. the comparison, and a mutation that must go red
@@ -32,7 +32,7 @@ xmake l "$here/compare.lua" "$build/system.tsv" "$build/port.tsv"
 api=$(head -1 "$here/algorithms.txt")
 cp "$obj" "$build/mutant.m"
 xmake l "$here/mutate.lua" "$build/mutant.m" "$api" "NotTheHostsValue" > /dev/null
-xcrun clang $common -I"$work/packages/a/apple-backports" "$here/main.m" "$here/cases.m" "$build/mutant.m" $libs -o "$build/mutant"
+xcrun clang $common -I"$work/packages/frameworks/apple-backports" "$here/main.m" "$here/cases.m" "$build/mutant.m" $libs -o "$build/mutant"
 "$build/mutant" > "$build/mutant.tsv"
 if xmake l "$here/compare.lua" "$build/system.tsv" "$build/mutant.tsv" | grep -q "DIFFERS $api"; then
     echo "  caught: $api"

@@ -35,7 +35,7 @@ package("apple-backports")
     table.insert(inputs, path.join(repo, "tools", "corpus", "uikit-constants.tsv"))
     table.insert(inputs, path.join(repo, "tools", "corpus", "uikit-extras-13.4.txt"))
     table.insert(inputs, path.join(os.scriptdir(), "..", "..", "..", "addons", "r", "revenant", "xmake.lua"))
-    for _, header in ipairs(os.files(path.join(os.scriptdir(), "..", "..", "c", "revenant-coding", "files", "*.h"))) do
+    for _, header in ipairs(os.files(path.join(os.scriptdir(), "..", "..", "runtimes", "revenant-coding", "files", "*.h"))) do
         table.insert(inputs, header)
     end
     table.sort(inputs)

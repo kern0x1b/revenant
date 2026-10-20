@@ -346,11 +346,11 @@ end
 
 local function test_swift_row_from_a_registry()
     local swift = swift_base()
-    swift.registries = {ColumnarTransformer = {"implemented", "packages/c/createml", "shape"}}
+    swift.registries = {ColumnarTransformer = {"implemented", "packages/frameworks/createml", "shape"}}
     local row = {api = "ColumnarTransformer", kind = "protocol", lang = "swift", framework = "CreateMLComponents"}
     local status, reason, _, needs = swiftmod.classify_swift("ColumnarTransformer", row, swift)
     check(status == "declared", "a Swift row only a registry records reads declared (got " .. tostring(status) .. ")")
-    check(contains(reason, "packages/c/createml"), "and the reason names the package it came from")
+    check(contains(reason, "packages/frameworks/createml"), "and the reason names the package it came from")
     check(needs == "build", "and the row says what is left: build the module")
     local swift2 = swift_base()
     swift2.registries = swift.registries
@@ -360,7 +360,7 @@ local function test_swift_row_from_a_registry()
     check(status2 == "implemented", "with a built module carrying it, the row reads implemented, not declared")
     local objc = {api = "NSString.length", kind = "method", lang = "objc", framework = "Foundation"}
     local swift3 = swift_base()
-    swift3.registries = {["NSString.length"] = {"implemented", "packages/x/y", "r"}}
+    swift3.registries = {["NSString.length"] = {"implemented", "packages/frameworks/y", "r"}}
     local status3 = swiftmod.classify_swift("NSString.length", objc, swift3)
     check(status3 ~= "implemented" and status3 ~= "declared", "an Objective-C row is not placed from a registry even when one has its name")
 end
@@ -527,10 +527,10 @@ local function test_classify_symbol_and_decide()
     check(s == nil, "a symbol in neither goes to the header pass")
     local keys = classify.registry_keys_for("UIView.hidden")
     check(table.concat(keys, " ") == "UIView.hidden -[UIView hidden] -[UIView setHidden:] +[UIView hidden]", "a property is asked for under its accessor forms too")
-    local registries = {["-[UIView setHidden:]"] = {"absent", "", "packages/a/apple-backports"}, ["Done.x"] = {"implemented", "", "p"}}
+    local registries = {["-[UIView setHidden:]"] = {"absent", "", "packages/frameworks/apple-backports"}, ["Done.x"] = {"implemented", "", "p"}}
     local diagnostics = {}
     local decided = classify.decide({api = "UIView.hidden", lang = "objc"}, registries, diagnostics)
-    check(decided and decided[1] == "decided" and decided[2] == "absent in packages/a/apple-backports's registry: no reason recorded" and decided[4] == "none",
+    check(decided and decided[1] == "decided" and decided[2] == "absent in packages/frameworks/apple-backports's registry: no reason recorded" and decided[4] == "none",
           "a registry that records the row absent decides it, saying so")
     check(classify.decide({api = "Done.x", lang = "objc"}, registries, diagnostics) == nil and #diagnostics == 1, "an implemented entry decides nothing and is reported")
     check(classify.decide({api = "UIView.hidden", lang = "swift"}, registries, {}) == nil, "a Swift row is never decided from a registry")
@@ -572,16 +572,16 @@ local function test_inputs(folder)
     io.writefile(surface, "framework\tkind\n")
     check(contains(raised(function () inputs.load_surface(surface) end), "surface tsv header changed shape"), "a surface of another shape is refused")
     local checkout = path.join(folder, "checkout")
-    os.mkdir(path.join(checkout, "packages", "a", "apple-backports", "registry", "UIKit"))
-    os.mkdir(path.join(checkout, "packages", "c", "combine", "registry"))
-    io.writefile(path.join(checkout, "packages", "a", "apple-backports", "registry", "UIKit", "view.json"),
+    os.mkdir(path.join(checkout, "packages", "frameworks", "apple-backports", "registry", "UIKit"))
+    os.mkdir(path.join(checkout, "packages", "frameworks", "combine", "registry"))
+    io.writefile(path.join(checkout, "packages", "frameworks", "apple-backports", "registry", "UIKit", "view.json"),
                  '{"entries": [{"api": "UIView.hidden", "status": "absent", "reason": "r"}, {"api": "", "status": "absent"}]}')
-    io.writefile(path.join(checkout, "packages", "c", "combine", "registry", "Swift.json"), '[{"api": "Foo.bar", "status": "implemented"}]')
-    io.writefile(path.join(checkout, "packages", "c", "combine", "registry", "broken.json"), '{')
+    io.writefile(path.join(checkout, "packages", "frameworks", "combine", "registry", "Swift.json"), '[{"api": "Foo.bar", "status": "implemented"}]')
+    io.writefile(path.join(checkout, "packages", "frameworks", "combine", "registry", "broken.json"), '{')
     local read = inputs.read_package_registries(checkout)
-    check(read["UIView.hidden"] and read["UIView.hidden"][1] == "absent" and read["UIView.hidden"][3] == "packages/a/apple-backports",
+    check(read["UIView.hidden"] and read["UIView.hidden"][1] == "absent" and read["UIView.hidden"][3] == "packages/frameworks/apple-backports",
           "a registry nested under a package is read with its package")
-    check(read["Foo.bar"] and read["Foo.bar"][3] == "packages/c/combine" and read["Foo.bar"][2] == "", "a registry that is a bare list is read too")
+    check(read["Foo.bar"] and read["Foo.bar"][3] == "packages/frameworks/combine" and read["Foo.bar"][2] == "", "a registry that is a bare list is read too")
     check(read[""] == nil, "an entry with no api is skipped")
     check(inputs.short((os.getenv("HOME") or "") .. "/x") == "$HOME/x", "a path under the home folder is written with $HOME")
     local text = "@interface A : NSObject\n@interface B\n  : UIView\n@interface C (Cat)\n @interface D : E\n"

@@ -48,7 +48,7 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-sources=$root/packages/a/apple-backports/Accessibility
+sources=$root/packages/frameworks/apple-backports/Accessibility
 # A directory of its own per mutant, and not one shared: this script re-invokes itself once per mutant,
 # and a child that cleared the parent's directory took the parent's logs with it - measured, and every
 # mutant then died of a missing log rather than of its own mutation.

@@ -433,7 +433,7 @@ function data()
             "- (void)requestAuthorizationWithCompletionHandler:",
             "    (void (^ __nullable)(INFocusStatusAuthorizationStatus status))completionHandler",
             "{",
-            "    // The same answer packages/a/apple-backports/Intents/RevenantIntents100.m gives for",
+            "    // The same answer packages/frameworks/apple-backports/Intents/RevenantIntents100.m gives for",
             "    // +[INPreferences requestSiriAuthorization:]: this release has no Focus setting to ask",
             "    // about and no prompt to show, so it answers the handler with Restricted rather than",
             "    // leaving the handler waiting for a system that will never call it. A nil handler is not",

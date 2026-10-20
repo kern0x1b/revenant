@@ -16,7 +16,7 @@ function main(folder, objects, release)
     local resolve = assert(io.load(file), "no resolve at " .. file)
     print("resolve: " .. file)
 
-    local root = path.join(checkout, "packages", "a", "apple-backports")
+    local root = path.join(checkout, "packages", "frameworks", "apple-backports")
     local base = folder:startswith("/") and folder or path.join(root, folder)
     os.mkdir(objects)
     local opt = {root = root,

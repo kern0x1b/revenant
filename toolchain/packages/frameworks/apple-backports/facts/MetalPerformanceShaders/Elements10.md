@@ -375,6 +375,6 @@ not. Its three declared properties answer; `-neuronType` and `-data` are 11.0 an
 
 - SDK: `$HOME/.xmake/packages/i/iphoneos-sdk/16.4/6d132ebd18c74ce6b109854a65d49554` (iPhoneOS 16.4)
 - Harness: `tests/backports/host/mpscnn10/run.sh`, cases in `cases.m`
-- Objects: `packages/a/apple-backports/MetalPerformanceShaders/MPSCNNElements10.m`,
+- Objects: `packages/frameworks/apple-backports/MetalPerformanceShaders/MPSCNNElements10.m`,
   `MPSImageElements10.m`; the shared walk seam in `MPSImageConvolution13.m`
 - Ladder: `xmake l tools/cache-index/first-rung.lua` over the held armv7/arm64 caches

@@ -5,7 +5,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-MPS=${MPS:-$here/../../../../packages/a/apple-backports/MetalPerformanceShaders}
+MPS=${MPS:-$here/../../../../packages/frameworks/apple-backports/MetalPerformanceShaders}
 BUILD=${BUILD:-$(runs_fresh revenant-mps-image-batch)}
 renames="-DMPSImageBatchIncrementReadCount=RevenantHostMPSImageBatchIncrementReadCount -DMPSImageBatchSynchronize=RevenantHostMPSImageBatchSynchronize"
 xcrun clang -O -fobjc-arc -fvisibility=hidden -Wno-objc-designated-initializers $renames -I"$MPS" \

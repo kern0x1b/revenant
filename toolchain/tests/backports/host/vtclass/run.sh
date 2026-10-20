@@ -27,7 +27,7 @@ covered=${VTCLASS_COVERED:-$here/covered.txt}
 gen=$(runs_folder generated/vt)
 
 # the generated table roundtrip-cases.h, which cases-roundtrip.m includes
-appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
+appledir=${APPLEDIR:-$here/../../../../packages/frameworks/apple-backports}
 vt="$appledir/VideoToolbox"
 # 0. THE PACKAGE RECIPE MUST PARSE, and this differential cannot see it: it compiles the value files
 #    itself and never loads the recipe, so a recipe with a syntax error leaves the whole family green.

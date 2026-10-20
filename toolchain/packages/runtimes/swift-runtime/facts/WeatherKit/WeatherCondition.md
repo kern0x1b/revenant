@@ -5,7 +5,7 @@ numbers come from the commands named here, run on 2026-10-16 from the `v-impl-sw
 
 ## What is carried
 
-The spec rows are `packages/a/apple-backports/spec/WeatherKit/swift.tsv`, the WeatherCondition
+The spec rows are `packages/frameworks/apple-backports/spec/WeatherKit/swift.tsv`, the WeatherCondition
 container: 41 rows (34 cases, `init(rawValue:)`, `description`, `accessibilityDescription`,
 `allCases`, `rawValue`, and the two typealiases `AllCases` and `RawValue`).
 

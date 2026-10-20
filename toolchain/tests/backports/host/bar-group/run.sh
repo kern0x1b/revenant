@@ -4,7 +4,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-uikit=$here/../../../../packages/a/apple-backports/UIKit
+uikit=$here/../../../../packages/frameworks/apple-backports/UIKit
 build=${BAR_GROUP_BUILD:-$(runs_fresh revenant-bar-group)}
 . "$here/../../common/twoprocess.sh"
 if [ -n "${BAR_GROUP_PORT_SOURCES:-}" ]; then

@@ -79,8 +79,8 @@ have said the opposite of the truth, so it is worth writing down.
 $ xcrun clang -target armv7-apple-ios6.1.3 -isysroot $SDK16 -fobjc-arc -Os -g0 -Wall \
       -Wno-unguarded-availability-new -Wno-unguarded-availability \
       -Werror=objc-missing-property-synthesis -Werror=incomplete-implementation \
-      -I packages/a/apple-backports/Metal -I packages/a/apple-backports \
-      -c packages/a/apple-backports/Metal/MTLHeap10.m -o $W/heapobjs/MTLHeap10.o
+      -I packages/frameworks/apple-backports/Metal -I packages/frameworks/apple-backports \
+      -c packages/frameworks/apple-backports/Metal/MTLHeap10.m -o $W/heapobjs/MTLHeap10.o
 $ strings -a $W/heapobjs/MTLHeap10.o | grep -cxF newAccelerationStructureWithSize:
 1
 $ xcrun otool -oV $W/heapobjs/MTLHeap10.o | grep -c 'name .*newAccelerationStructure'
@@ -101,7 +101,7 @@ rows say.
 ```
 $ for n in MTLIOCommandBuffer MTLIOCommandQueue MTLIOFileHandle MTLIOScratchBuffer \
            MTLIOScratchBufferAllocator MTLMeshRenderPipelineDescriptor MTLArgument MTLHeapDescriptor; do
-      c=$(grep -rl "@implementation $n\b" packages/a/apple-backports/Metal/*.m | tr '\n' ' ')
+      c=$(grep -rl "@implementation $n\b" packages/frameworks/apple-backports/Metal/*.m | tr '\n' ' ')
       printf '%-40s %s\n' "$n" "${c:-none}"
   done
 MTLIOCommandBuffer                     none
@@ -110,12 +110,12 @@ MTLIOFileHandle                        none
 MTLIOScratchBuffer                     none
 MTLIOScratchBufferAllocator            none
 MTLMeshRenderPipelineDescriptor        none
-MTLArgument                            packages/a/apple-backports/Metal/MTLTypeReflection8.m
-MTLHeapDescriptor                      packages/a/apple-backports/Metal/MTLHeap10.m
-$ grep -c '^@protocol' packages/a/apple-backports/Metal/RevenantMetalProtocols.h
+MTLArgument                            packages/frameworks/apple-backports/Metal/MTLTypeReflection8.m
+MTLHeapDescriptor                      packages/frameworks/apple-backports/Metal/MTLHeap10.m
+$ grep -c '^@protocol' packages/frameworks/apple-backports/Metal/RevenantMetalProtocols.h
 32
 $ grep -n '@protocol MTLIO\|@protocol MTLAccelerationStructurePass' \
-      packages/a/apple-backports/Metal/RevenantMetalProtocols.h || echo "none of them is declared there"
+      packages/frameworks/apple-backports/Metal/RevenantMetalProtocols.h || echo "none of them is declared there"
 none of them is declared there
 ```
 

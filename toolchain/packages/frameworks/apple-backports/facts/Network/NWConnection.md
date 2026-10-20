@@ -133,7 +133,7 @@ Measured out of the 6.1.3 cache, and the names matter more than the conclusion:
   connection can ask for 1.2 and can take the peer trust with the call that exists on this release.
   What is *not* there is `SSLSetProtocolVersion` and `SSLGetServerTrust`, the spellings those two
   replaced, and TLS 1.3 is not in this stack at all.
-- **TLS 1.3 comes from picotls**, which the port has as a package (`packages/p/picotls`, a TLS 1.3
+- **TLS 1.3 comes from picotls**, which the port has as a package (`packages/libraries/picotls`, a TLS 1.3
   with a crypto backend of its own and no OpenSSL behind it, and a handshake proven on the host in
   `tests/backports/host/picotls-tls13`). It is needed twice over: a QUIC handshake cannot be made
   with a TLS 1.2 stack whatever the stack is, and a server that refuses 1.2 can only be answered with
@@ -141,5 +141,5 @@ Measured out of the 6.1.3 cache, and the names matter more than the conclusion:
   is what `tests/backports/host/network-connection` is to measure against the host's own Network with
   one local server answering both.
 - **4.3 has no SecureTransport context API at all** - `SSLCreateContext` is iOS 5.0 - so a connection
-  on 4.3 has to reach the call by name at run time, the way `packages/a/apple-backports/Foundation`'s
+  on 4.3 has to reach the call by name at run time, the way `packages/frameworks/apple-backports/Foundation`'s
   metrics reach SecureTransport, and 4.3 answers with what the release can: no TLS, a plain socket.

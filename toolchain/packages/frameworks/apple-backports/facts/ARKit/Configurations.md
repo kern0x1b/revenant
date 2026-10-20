@@ -145,7 +145,7 @@ nothing to synthesise from. Adding `@dynamic automaticImageScaleEstimationEnable
 `ARKit/ARConfiguration3.m` to test the claim is what settled it, and the answer is the compiler's:
 
 ```
-packages/a/apple-backports/ARKit/ARConfiguration3.m:82:10: error: property implementation must
+packages/frameworks/apple-backports/ARKit/ARConfiguration3.m:82:10: error: property implementation must
 have its declaration in interface 'ARImageTrackingConfiguration' or one of its extensions
    82 | @dynamic automaticImageScaleEstimationEnabled;
 ```

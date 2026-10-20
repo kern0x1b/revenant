@@ -12,7 +12,7 @@ package("swift-system")
     for _, patch in ipairs(os.files(os.scriptdir() .. "/patches/*.patch")) do
         table.insert(inputs, patch)
     end
-    local compat = path.join(os.scriptdir(), "..", "..", "a", "apple-compat")
+    local compat = path.join(os.scriptdir(), "..", "..", "runtimes", "apple-compat")
     for _, name in ipairs({"openat", "unlinkat", "fdopendir", "fstatat"}) do
         table.insert(inputs, path.join(compat, "src", name .. ".c"))
     end
@@ -40,7 +40,7 @@ package("swift-system")
         local toolchain = assert(package:toolchains(), "swift-system is built with the apple-ios toolchain")[1]
         toolchain:load()
         local runtime = assert(package:dep("swift-runtime"), "swift-system is compiled against revenant@swift-runtime")
-        local compat = path.join(package:scriptdir(), "..", "..", "..", "packages", "a", "apple-compat")
+        local compat = path.join(package:scriptdir(), "..", "..", "..", "packages", "runtimes", "apple-compat")
         local swiftc = assert(table.wrap((runtime:envs() or {}).SWIFT_EXEC)[1], "swift-runtime names no compiler; reinstall it")
         local minimum = toolchain:config("deployment")
         local triple = package:arch() .. "-apple-ios" .. minimum

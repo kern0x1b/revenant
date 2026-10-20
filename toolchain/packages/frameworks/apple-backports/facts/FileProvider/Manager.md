@@ -106,7 +106,7 @@ corpus prices at 16.0 (`getUserVisibleURLForItemIdentifier:`, `removeDomain:mode
 
 ## What the host registers under this prefix, and where the 25 comes from
 
-`packages/a/apple-backports/spec/FileProvider/bands.json` carries `expect_classes: 25`, and every run of
+`packages/frameworks/apple-backports/spec/FileProvider/bands.json` carries `expect_classes: 25`, and every run of
 `tests/backports/host/inventory/run.sh FileProvider` compares the host's own count against it, so a
 host that answers fewer classes fails instead of quietly reading smaller. **25 classes and 34
 protocols** is what the host registers under the `NSFileProvider` prefix, measured:

@@ -116,7 +116,7 @@ local function rows(registry)
 end
 
 function main(root)
-    root = root or os.getenv("SWIFTREGISTRY_PACKAGE") or path.join(os.scriptdir(), "..", "..", "..", "..", "packages", "s", "swift-runtime")
+    root = root or os.getenv("SWIFTREGISTRY_PACKAGE") or path.join(os.scriptdir(), "..", "..", "..", "..", "packages", "runtimes", "swift-runtime")
     root = path.absolute(root)
     local tree = sources(root)
     local failures = {}

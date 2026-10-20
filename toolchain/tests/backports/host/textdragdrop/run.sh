@@ -18,7 +18,7 @@ export DDR_ROOT=$root
 # never overwrites a tracked source. The mutant is generated from the LIVE source on every run, not
 # read from a file beside this script: a checked-in fixture drifts from the source it was made from and
 # then asserts nothing, which is exactly what happened here.
-port=$root/packages/a/apple-backports/UIKit
+port=$root/packages/frameworks/apple-backports/UIKit
 rm -rf "$build"
 mkdir -p "$build"
 cp "$here/xmake.lua" "$here/control" "$build/"

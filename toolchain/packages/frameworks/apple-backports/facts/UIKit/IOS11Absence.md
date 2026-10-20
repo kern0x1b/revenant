@@ -8,7 +8,7 @@ release really does not answer the name. This page is that check for the file, r
 
 ## The measurement
 
-    REVENANT_ROOT=<worktree> sh packages/a/apple-backports/facts/UIKit/ios11-absence-census.sh
+    REVENANT_ROOT=<worktree> sh packages/frameworks/apple-backports/facts/UIKit/ios11-absence-census.sh
 
 The script beside this page asks every owner-scoped name the file's `absent` rows name, one release at
 a time, through `tools/corpus/objc-inventory.lua` — the tree's own reader, reading each release's own
@@ -144,7 +144,7 @@ disagreement had to be measured away:
 
 The object was then compiled for the port's own target and read back:
 
-    clang -target armv7-apple-ios6.1.3 -fobjc-arc -c packages/a/apple-backports/UIKit/UITextDropProposal.m
+    clang -target armv7-apple-ios6.1.3 -fobjc-arc -c packages/frameworks/apple-backports/UIKit/UITextDropProposal.m
     llvm-nm -gU UITextDropProposal.o
         00000280 S _OBJC_CLASS_$_UITextDropProposal
 

@@ -36,7 +36,7 @@ work_ok "$work" || { echo "FAIL: WORK=$work is not a usable scratch path; see wo
 rm -rf "$work"
 mkdir -p "$work/port"
 
-S="$root/packages/a/apple-backports"
+S="$root/packages/frameworks/apple-backports"
 sdk=$(xcrun --show-sdk-path --sdk macosx)
 target="-target arm64-apple-macos26.0 -isysroot $sdk"
 common="$target -fobjc-arc"

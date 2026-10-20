@@ -22,8 +22,8 @@ reading the symbols:
 
 ```
 xcrun clang -target armv7-apple-ios6.0 -isysroot $HOME/Git/tools/sdks/iPhoneOS16.5.sdk \
-    -fobjc-arc -w -Wno-deprecated-declarations -I packages/r/revenant-coding/files \
-    -c packages/a/apple-backports/Intents/IN11_0.m -o "$OBJ"
+    -fobjc-arc -w -Wno-deprecated-declarations -I packages/runtimes/revenant-coding/files \
+    -c packages/frameworks/apple-backports/Intents/IN11_0.m -o "$OBJ"
 xcrun nm "$OBJ"
 ```
 
@@ -144,12 +144,12 @@ error it produces.
 ```
 xcrun clang -fobjc-arc -target arm64-apple-macos13.0 \
     -isysroot "$(xcrun --show-sdk-path --sdk macosx)" -fsyntax-only -w \
-    -I packages/r/revenant-coding/files packages/a/apple-backports/Intents/IN11_0.m
+    -I packages/runtimes/revenant-coding/files packages/frameworks/apple-backports/Intents/IN11_0.m
 ```
 
 ```
-packages/a/apple-backports/Intents/RevenantIntents262.h:39:1: error: duplicate interface definition for class 'INMessageLinkMetadata'
-packages/a/apple-backports/Intents/RevenantIntents262.h:47:71: error: property has a previous declaration
+packages/frameworks/apple-backports/Intents/RevenantIntents262.h:39:1: error: duplicate interface definition for class 'INMessageLinkMetadata'
+packages/frameworks/apple-backports/Intents/RevenantIntents262.h:47:71: error: property has a previous declaration
 ```
 
 `RevenantIntents262.h` re-declares the classes the port's own SDK lacks, and `INMessageLinkMetadata` is

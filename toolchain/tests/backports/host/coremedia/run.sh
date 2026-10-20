@@ -2,8 +2,8 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-AV=${AV:-$here/../../../../packages/a/apple-backports/AVFoundation}
-GRAPHICS=${GRAPHICS:-$here/../../../../packages/a/apple-backports/Graphics}
+AV=${AV:-$here/../../../../packages/frameworks/apple-backports/AVFoundation}
+GRAPHICS=${GRAPHICS:-$here/../../../../packages/frameworks/apple-backports/Graphics}
 BUILD=${BUILD:-$(runs_fresh revenant-coremedia)}
 sdk=$(xcrun --show-sdk-path)
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-availability"

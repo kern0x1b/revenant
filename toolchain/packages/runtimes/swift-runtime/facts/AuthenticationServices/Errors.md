@@ -6,7 +6,7 @@ the commands named below.
 
 ## What is carried
 
-The spec rows are `packages/a/apple-backports/spec/AuthenticationServices/swift.tsv`: the four error
+The spec rows are `packages/frameworks/apple-backports/spec/AuthenticationServices/swift.tsv`: the four error
 structs and their `Code` containers, 80 rows in all.
 
 | Type | Rows | Carried |

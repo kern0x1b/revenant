@@ -37,7 +37,7 @@ that needs several frames increments the nonce itself — which is what HAP's fr
 
 ## The library, and why this one
 
-Monocypher 4.0.2, vendored at `packages/m/monocypher`, is **BSD-2-Clause OR CC0-1.0** — the licence
+Monocypher 4.0.2, vendored at `packages/libraries/monocypher`, is **BSD-2-Clause OR CC0-1.0** — the licence
 states both, with CC0 as the one the author intends for the public domain and BSD as the fallback.
 The recipe pins the tarball's sha256 (`38d0717…0879c`) and the vendored sources are the 4.0.2 release
 it names; `LICENCE.md` is installed beside the library.

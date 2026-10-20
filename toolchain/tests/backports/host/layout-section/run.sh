@@ -4,7 +4,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-uikit=$here/../../../../packages/a/apple-backports/UIKit
+uikit=$here/../../../../packages/frameworks/apple-backports/UIKit
 build=${LAYOUT_BUILD:-$(runs_fresh revenant-layout-section)}
 . "$here/../../common/twoprocess.sh"
 if [ -n "${LAYOUT_PORT_SOURCES:-}" ]; then

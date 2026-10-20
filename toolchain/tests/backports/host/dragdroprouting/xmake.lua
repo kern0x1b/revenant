@@ -12,7 +12,7 @@ set_defaultplat("iphoneos")
 set_defaultarchs("iphoneos|armv7")
 
 if os.getenv("DDR_ROOT") and os.getenv("DDR_ROOT") ~= "" then root = os.getenv("DDR_ROOT") end
-local ui = os.getenv("DDR_UIKIT") or path.join(root, "packages/a/apple-backports/UIKit")
+local ui = os.getenv("DDR_UIKIT") or path.join(root, "packages/frameworks/apple-backports/UIKit")
 target("dragdroprouting")
     add_rules("@addon/revenant/daemon")
     add_files(path.join(ui, "ViewDragDropRouting11.m"),

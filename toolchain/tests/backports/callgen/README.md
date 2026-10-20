@@ -68,7 +68,7 @@ For another framework, only the `--registry` and the framework's umbrella change
 ## The two smaller checks
 
 * `xmake l tests/backports/callgen/ownership-test.lua` - the copy's ownership decision in
-  `packages/r/revenant-coding/files/RevenantCoding.m`, against properties declared the way the SDK's
+  `packages/runtimes/revenant-coding/files/RevenantCoding.m`, against properties declared the way the SDK's
   headers declare them; the negative control for the guard that matches a property to its ivar.
 * `xmake l tests/backports/callgen/collection-test.lua [factory.m]` - the five
   `+successesWithResolved…:` factories on the host's own Intents, then the port's generated factory

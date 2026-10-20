@@ -1,5 +1,5 @@
 #!/bin/sh
-# run.sh — every registry row of packages/s/swift-runtime/registry/ that says `implemented` names a
+# run.sh — every registry row of packages/runtimes/swift-runtime/registry/ that says `implemented` names a
 # type the overlay sources declare.
 #
 # Why: the family review of 2026-09-28 found `EnvironmentResource` used four times in ARView.swift,

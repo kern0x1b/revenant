@@ -18,7 +18,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-METAL=${METAL:-$here/../../../../packages/a/apple-backports/Metal}
+METAL=${METAL:-$here/../../../../packages/frameworks/apple-backports/Metal}
 BUILD=${BUILD:-$(runs_fresh revenant-metalblit)}
 sources=${SOURCES:-$(cat "$here/sources.txt")}
 sdk=$(xcrun --show-sdk-path)

@@ -36,7 +36,7 @@ library declares 6.1.3 as its own minimum, which is the port's own release. The 
 `swift-runtime`'s `SWIFT_EXEC` and never from a path, because the store holds two builds of swift
 6.4.0 and only the patched one reaches that release — the unpatched one still refuses any target below
 iOS 7.0 with *"Swift requires a minimum deployment target of iOS 7.0.0"*, which is the check
-`packages/s/swift/patches/no-minimum-ios-for-a-bundled-runtime.patch` removes.
+`packages/build-tools/swift/patches/no-minimum-ios-for-a-bundled-runtime.patch` removes.
 
 ## `async`
 

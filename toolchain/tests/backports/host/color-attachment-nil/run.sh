@@ -11,7 +11,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-PORT=${PORT:-$here/../../../../packages/a/apple-backports/Metal}
+PORT=${PORT:-$here/../../../../packages/frameworks/apple-backports/Metal}
 BUILD=${BUILD:-$(runs_folder metal/color-attachment-nil)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-macos13.0 -isysroot $sdk"

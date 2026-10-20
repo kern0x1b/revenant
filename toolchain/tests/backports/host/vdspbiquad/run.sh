@@ -4,7 +4,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-ACCELERATE=${ACCELERATE:-$here/../../../../packages/a/apple-backports/Accelerate}
+ACCELERATE=${ACCELERATE:-$here/../../../../packages/frameworks/apple-backports/Accelerate}
 build=${VDSPBIQUAD_BUILD:-$(runs_folder revenant-vdspbiquad-host)}
 rm -rf "$build"
 mkdir -p "$build"
@@ -13,7 +13,7 @@ mkdir -p "$build"
 # hold the port's answers and the host's side by side. The names come from the port's registry, not from a
 # list kept here, so a name added to any of the files is renamed too.
 renames=""
-for name in $(runs_xmake l "$here/../registry-functions.lua" "$here/../../../../packages/a/apple-backports/registry/Accelerate" ios7biquad.json ios8biquad.json ios9biquad.json ios16biquad.json ios7dft.json); do
+for name in $(runs_xmake l "$here/../registry-functions.lua" "$here/../../../../packages/frameworks/apple-backports/registry/Accelerate" ios7biquad.json ios8biquad.json ios9biquad.json ios16biquad.json ios7dft.json); do
     renames="$renames -D$name=revenant_host_$name"
 done
 

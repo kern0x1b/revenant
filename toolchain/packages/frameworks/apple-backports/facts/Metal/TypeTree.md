@@ -531,7 +531,7 @@ nothing.
 
 ## The reader, and what it answers for the seven classes
 
-`packages/a/apple-backports/Metal/MTLTypeReflection.m` is their `@implementation` -- one translation
+`packages/frameworks/apple-backports/Metal/MTLTypeReflection.m` is their `@implementation` -- one translation
 unit, none of the seven redeclared -- and `tests/backports/host/metal-census/reflection.sh` runs it over
 the property lists the writer produces:
 

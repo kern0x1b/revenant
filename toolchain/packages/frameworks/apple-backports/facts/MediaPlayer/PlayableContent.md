@@ -51,7 +51,7 @@ family names its own replacement — `MP_DEPRECATED("Use CarPlay framework", ios
 
 So the honest effect on the three class rows is: real objects, the app's half wired, and **no system half
 exists to call it**. That is the same position `MPRemoteCommandCenter71.m` is in, and the difference is
-worth keeping straight. `packages/a/apple-backports/xmake.lua:120` calls the command objects "real,
+worth keeping straight. `packages/frameworks/apple-backports/xmake.lua:120` calls the command objects "real,
 addressable command objects that never fire" — and there the mechanism above them (`UIEventTypeRemoteControl`)
 *does* exist on the release, which is why they fire when the hardware sends one. Here there is no
 mechanism at all. The row says "reachable, and nothing on this release calls it" rather than either

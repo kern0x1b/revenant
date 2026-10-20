@@ -8,7 +8,7 @@ rows say.
 
 ## The two band ends
 
-`packages/a/apple-backports/facts/UIKit/cache-hover16.tsv` holds the table. The commands a reader re-runs:
+`packages/frameworks/apple-backports/facts/UIKit/cache-hover16.tsv` holds the table. The commands a reader re-runs:
 
     REVENANT_ROOT=<worktree> xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
     python3 -c "import json,os;print(len(json.load(open(os.path.expanduser('~/.revenant/dyld/4.3/classes_armv7.json')))['classes']))"

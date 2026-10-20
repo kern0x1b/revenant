@@ -4,7 +4,7 @@
 #
 #     sh tests/backports/host/metal-census/rasterrate.sh
 #
-# Run from packages/a/apple-backports. The port is compiled with the four classes RENAMED and the case
+# Run from packages/frameworks/apple-backports. The port is compiled with the four classes RENAMED and the case
 # is not, so the two sets coexist and each side is a different class - the runtime WILL bind a class
 # of the same name to the framework's, and on this host Metal.framework implements all four, so an
 # unrenamed port is silently not the port.
@@ -25,7 +25,7 @@ work=${WORK:-$(runs_folder metal-census/rasterrate)}
 # ONE guard for every script that removes a scratch path - see work-guard.sh.
 . "$here/work-guard.sh"
 work_ok "$work" || { echo "FAIL: WORK=$work is not a usable scratch path; see work-guard.sh" >&2; exit 1; }
-S="$root/packages/a/apple-backports"
+S="$root/packages/frameworks/apple-backports"
 SRC="$S/Metal/MTLRasterizationRate13.m"
 rm -rf "$work"
 mkdir -p "$work"

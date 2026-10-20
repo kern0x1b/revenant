@@ -45,7 +45,7 @@ mkdir -p "$work"
 # the port's headers by relative quoted imports. An earlier version of this check added -I roots of its
 # own and failed for that reason alone.
 library_compile() {
-    ( cd "$root/packages/a/apple-backports" && \
+    ( cd "$root/packages/frameworks/apple-backports" && \
       for object in Metal/MTLTypeReflection8.m Metal/MTLTypeReflection11.m; do
         xcrun clang -target armv7-apple-ios6.1.3 -isysroot "$SDK" -fobjc-arc -Os -g0 -Wall \
             -Wno-unguarded-availability-new -Wno-unguarded-availability \
@@ -62,7 +62,7 @@ library_compile() {
 library_compile
 
 
-"$llvm/bin/clang++" -std=c++17 "-DCHAIR_AIR2CPU_ABI=\"$root/packages/a/apple-backports/air2cpu-abi.h\"" \
+"$llvm/bin/clang++" -std=c++17 "-DCHAIR_AIR2CPU_ABI=\"$root/packages/frameworks/apple-backports/air2cpu-abi.h\"" \
     $($llvm/bin/llvm-config --cxxflags | sed 's/-fno-exceptions//') \
     "$root/tools/air2cpu/air2cpu.cpp" -o "$work/air2cpu" \
     $($llvm/bin/llvm-config --ldflags --libs core irreader bitreader support) -Wl,-rpath,"$llvm/lib"
@@ -94,7 +94,7 @@ fi
 [ $# -gt 0 ] || { echo "no property list to read; build air2cpu and pass one"; exit 2; }
 
 # The real reader, and the mutant: one line apart.
-cp "$root/packages/a/apple-backports/Metal/MTLTypeReflection8.m" "$work/mutant.m"
+cp "$root/packages/frameworks/apple-backports/Metal/MTLTypeReflection8.m" "$work/mutant.m"
 python3 - "$work/mutant.m" <<'PY'
 import sys
 path = sys.argv[1]
@@ -120,7 +120,7 @@ PY
 build() {
     xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" \
         -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" -fobjc-arc \
-        -I"$root/packages/a/apple-backports/Metal" -I"$root/packages/a/apple-backports" \
+        -I"$root/packages/frameworks/apple-backports/Metal" -I"$root/packages/frameworks/apple-backports" \
         -I"$root/tests/backports/host/metalblit/gl-stub" \
         -o "$2" "$1" -framework Foundation -framework Metal -framework CoreGraphics 2>"$3"
 }
@@ -146,7 +146,7 @@ build "$here/reflection.m" "$work/real" "$work/real.build" || { echo "the real r
 build() {
     xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" \
         -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" -fobjc-arc \
-        -I"$root/packages/a/apple-backports/Metal" -I"$root/packages/a/apple-backports" \
+        -I"$root/packages/frameworks/apple-backports/Metal" -I"$root/packages/frameworks/apple-backports" \
         -I"$root/tests/backports/host/metalblit/gl-stub" -o "$work/mutant" "$work/mutant-test.m" \
         -framework Foundation -framework Metal -framework CoreGraphics 2>"$work/mutant.build"
 }

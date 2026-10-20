@@ -4,7 +4,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/IOKit}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/IOKit}
 harness=${IOKITPATHS_HARNESS:-$here/../../device}
 build=${IOKITPATHS_BUILD:-$(runs_fresh revenant-iokitpaths)}
 rm -rf "$build"

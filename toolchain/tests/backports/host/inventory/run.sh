@@ -16,14 +16,14 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 spec=${1:?usage: run.sh FRAMEWORK}
-json=$root/packages/a/apple-backports/spec/$spec/bands.json
+json=$root/packages/frameworks/apple-backports/spec/$spec/bands.json
 [ -f "$json" ] || { echo "FAIL  no spec at $json"; exit 1; }
 prefix=$(jq -r '.class_prefix // empty' "$json")
 expect=$(jq -r '.expect_classes // empty' "$json")
 package=$(jq -r '.package // empty' "$json")
-pkg=$root/packages/a/apple-backports/$package
+pkg=$root/packages/frameworks/apple-backports/$package
 # the band objects of the spec are generated into .gen/<package> by tools/gen (gen --all, the package build's first step)
-gen=$root/packages/a/apple-backports/.gen/$package
+gen=$root/packages/frameworks/apple-backports/.gen/$package
 build=${BUILD:-$(runs_folder inventory)}
 mkdir -p "$build"
 [ -n "$prefix" ] || { echo "FAIL  the spec has no class_prefix, so the probe would match every class on the host"; exit 1; }

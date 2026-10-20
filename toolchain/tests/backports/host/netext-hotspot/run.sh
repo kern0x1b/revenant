@@ -29,7 +29,7 @@ set -u
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-S="$root/packages/a/apple-backports"
+S="$root/packages/frameworks/apple-backports"
 W="$(runs_folder netext-hotspot)"
 rm -rf "$W"
 mkdir -p "$W"

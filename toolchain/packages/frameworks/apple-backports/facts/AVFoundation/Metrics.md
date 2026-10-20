@@ -50,7 +50,7 @@ exists with the members the header declares, and nothing here constructs one.
 **`NSSecureCoding` is implemented on both roots.** `+supportsSecureCoding`, `-encodeWithCoder:` and
 `-initWithCoder:` are on `AVMetricEvent` and on `AVMetricMediaRendition` - the roots of the two hierarchies,
 not seventeen copies - and every subclass inherits all three, because none of them declares the conformance
-itself. Encoding goes through `packages/r/revenant-coding/files/RevenantCoding.h`, whose walker reads each
+itself. Encoding goes through `packages/runtimes/revenant-coding/files/RevenantCoding.h`, whose walker reads each
 class's own ivar list from the object's class up to `NSObject`, so a subclass carries its parent's state
 without either naming it and a property added later is carried by the same code rather than by an edit to an
 archive method. All three objects build with **0 errors and 0 warnings**.

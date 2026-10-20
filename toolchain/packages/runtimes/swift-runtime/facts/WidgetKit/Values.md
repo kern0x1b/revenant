@@ -5,7 +5,7 @@ from. Measured on 2026-10-17 from the `v-impl-appintents` worktree of the toolch
 
 ## What is carried
 
-Spec rows: `packages/a/apple-backports/spec/WidgetKit/swift.tsv` (the containers below) and
+Spec rows: `packages/frameworks/apple-backports/spec/WidgetKit/swift.tsv` (the containers below) and
 `swiftinterface.tsv` (the declaration order of the 26.2 SDK's cases, and which are unavailable on iOS).
 
 | Type | Rows | Source of the shape |

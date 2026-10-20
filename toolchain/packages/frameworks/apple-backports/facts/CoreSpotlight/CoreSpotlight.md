@@ -107,7 +107,7 @@ fixed eleven-bundle list above, none of which reads a third-party category, and
 
 **The twelfth entry named above is built and installed; the query path is not proven yet, and
 exactly how far it gets is now measured on an iPad 2 (6.1.3), not guessed.**
-`packages/a/apple-backports/CoreSpotlight/SearchBundle/RevenantSearchDatastore.m` is
+`packages/frameworks/apple-backports/CoreSpotlight/SearchBundle/RevenantSearchDatastore.m` is
 `org.revenant.corespotlight.searchBundle`'s principal class, built by `write_searchbundle` in
 `modules/apple/backports.lua` whenever `corespotlight` is among the staged libraries, for
 `/System/Library/SearchBundles/org.revenant.corespotlight.searchBundle/`. **It is not packaged:**

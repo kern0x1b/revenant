@@ -7,7 +7,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-P=${PORT_DIR:-$here/../../../../packages/a/apple-backports}
+P=${PORT_DIR:-$here/../../../../packages/frameworks/apple-backports}
 build=${NFC_ACTIVITY_BUILD:-$(runs_fresh revenant-nfc-activity)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"

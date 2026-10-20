@@ -110,7 +110,7 @@ run_group() {
 
 # 1. GREEN on the real source.  This must pass BEFORE the plant means anything.
 echo "== the unplanted group, which must be green"
-run_group green "$root/packages/a/apple-backports/UIKit"
+run_group green "$root/packages/frameworks/apple-backports/UIKit"
 green_line=$(grep -E '^contentunavailable: exit=' "$logdir/green.txt" | tail -1 || true)
 [ -n "$green_line" ] || { cat "$logdir/green.txt"; fail "the control could not find the group's own result line, so it cannot judge the plant"; }
 echo "   $green_line"
@@ -123,7 +123,7 @@ esac
 # lists and only ONE of them differs.
 echo "== planting a line count nothing keyed asked for and a padding no measured configuration has, in a scratch copy"
 mkdir -p "$scratch"
-for f in "$root/packages/a/apple-backports/UIKit/"*.m "$root/packages/a/apple-backports/UIKit/"*.h; do
+for f in "$root/packages/frameworks/apple-backports/UIKit/"*.m "$root/packages/frameworks/apple-backports/UIKit/"*.h; do
     [ -f "$f" ] && cp "$f" "$scratch/"
 done
 # The group's sources reach three headers in the PARENT directory - RevenantSayOnce.h through RevenantMenus.h,
@@ -133,20 +133,20 @@ done
 # plant's failure but the control's: a control that cannot build the group it controls reports "no result
 # line" instead of "the group went red", which is the wrong answer to the wrong question.  So the parent
 # goes beside $scratch, which is what "../" resolves to.
-for f in "$root/packages/a/apple-backports/"*.h; do
+for f in "$root/packages/frameworks/apple-backports/"*.h; do
     [ -f "$f" ] && cp "$f" "$build/"
 done
-cp "$root/packages/a/apple-backports/UIKit/$source_file" "$build/source.before.m"
-cp "$root/packages/a/apple-backports/UIKit/$config_file" "$build/config.before.m"
-plant_value "$root/packages/a/apple-backports/UIKit/$source_file" "$scratch/$source_file"
-plant_config_value "$root/packages/a/apple-backports/UIKit/$config_file" "$scratch/$config_file"
+cp "$root/packages/frameworks/apple-backports/UIKit/$source_file" "$build/source.before.m"
+cp "$root/packages/frameworks/apple-backports/UIKit/$config_file" "$build/config.before.m"
+plant_value "$root/packages/frameworks/apple-backports/UIKit/$source_file" "$scratch/$source_file"
+plant_config_value "$root/packages/frameworks/apple-backports/UIKit/$config_file" "$scratch/$config_file"
 cmp -s "$build/source.before.m" "$scratch/$source_file" && fail "the plant did not change the file, so it is not a plant"
 cmp -s "$build/config.before.m" "$scratch/$config_file" && fail "the second plant did not change its file, so it is not a plant"
 
 # the tree must be untouched, and this asserts it rather than assuming it
-cmp -s "$build/source.before.m" "$root/packages/a/apple-backports/UIKit/$source_file" \
+cmp -s "$build/source.before.m" "$root/packages/frameworks/apple-backports/UIKit/$source_file" \
     || fail "the plant edited the repository instead of the scratch copy"
-cmp -s "$build/config.before.m" "$root/packages/a/apple-backports/UIKit/$config_file" \
+cmp -s "$build/config.before.m" "$root/packages/frameworks/apple-backports/UIKit/$config_file" \
     || fail "the second plant edited the repository instead of the scratch copy"
 
 echo "== the planted group, which must be RED and must NAME the key"
@@ -183,15 +183,15 @@ done
 echo "   the planted run names the padding on all three factories, so the configuration half compares every factory"
 
 # 3. And the real source is still the real source.
-cmp -s "$build/source.before.m" "$root/packages/a/apple-backports/UIKit/$source_file" \
+cmp -s "$build/source.before.m" "$root/packages/frameworks/apple-backports/UIKit/$source_file" \
     || fail "the run left the repository's source changed"
-cmp -s "$build/config.before.m" "$root/packages/a/apple-backports/UIKit/$config_file" \
+cmp -s "$build/config.before.m" "$root/packages/frameworks/apple-backports/UIKit/$config_file" \
     || fail "the run left the repository's configuration source changed"
 
 # 4. The attribution group, the same three steps. Kept in the same script because a control is worth
 #    exactly as much as the run that reads it: a group with no plant is a group nobody has shown responds.
 echo "== the unplanted attribution group, which must be green"
-run_group attr-green "$root/packages/a/apple-backports/UIKit" "$attr_group"
+run_group attr-green "$root/packages/frameworks/apple-backports/UIKit" "$attr_group"
 attr_green_line=$(grep -E "^$attr_group: exit=" "$logdir/attr-green.txt" | tail -1 || true)
 [ -n "$attr_green_line" ] || { cat "$logdir/attr-green.txt"; fail "could not find the attribution group's result line"; }
 echo "   $attr_green_line"
@@ -200,10 +200,10 @@ case "$attr_green_line" in
     *) sed -n '1,40p' "$logdir/attr-green.txt"; fail "the attribution group is red BEFORE any plant" ;;
 esac
 
-cp "$root/packages/a/apple-backports/UIKit/$attr_file" "$build/attr.before.m"
-plant_attr_value "$root/packages/a/apple-backports/UIKit/$attr_file" "$scratch/$attr_file"
+cp "$root/packages/frameworks/apple-backports/UIKit/$attr_file" "$build/attr.before.m"
+plant_attr_value "$root/packages/frameworks/apple-backports/UIKit/$attr_file" "$scratch/$attr_file"
 cmp -s "$build/attr.before.m" "$scratch/$attr_file" && fail "the attribution plant did not change its file, so it is not a plant"
-cmp -s "$build/attr.before.m" "$root/packages/a/apple-backports/UIKit/$attr_file" \
+cmp -s "$build/attr.before.m" "$root/packages/frameworks/apple-backports/UIKit/$attr_file" \
     || fail "the attribution plant edited the repository instead of the scratch copy"
 
 echo "== planting an identifier no caller passed, in the same scratch copy"
@@ -220,7 +220,7 @@ if ! grep -qE "^FAIL the source identifier reads back" "$logdir/attr-red.txt"; t
 fi
 echo "   the planted attribution run names the source-identifier key"
 
-cmp -s "$build/attr.before.m" "$root/packages/a/apple-backports/UIKit/$attr_file" \
+cmp -s "$build/attr.before.m" "$root/packages/frameworks/apple-backports/UIKit/$attr_file" \
     || fail "the run left the repository's attribution source changed"
 
 echo "RED CONTROL OK: green before, red after, naming the key, tree untouched"

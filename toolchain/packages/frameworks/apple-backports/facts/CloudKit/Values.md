@@ -758,7 +758,7 @@ and the copy fix. **Its content contains none of it.** Checked directly:
     0
 
 The order of my own commands produced it: the implementation was made in the working tree, the plant
-script then ran `git checkout packages/a/apple-backports/CloudKit/CKRecords8.m` to undo the plant - and
+script then ran `git checkout packages/frameworks/apple-backports/CloudKit/CKRecords8.m` to undo the plant - and
 `git checkout` on a path undoes **every** uncommitted change to that path, the implementation included,
 not just the plant. I committed after that checkout, so the commit took the pre-implementation file
 under a message describing the implementation.
@@ -907,7 +907,7 @@ the mirror objects.
 it a gap without looking, so: the mirror matches **only `@implementation X`** - it greps
 `@implementation\s+(\w+)` and nothing else, no `@synthesize`, no `@dynamic`, no getter, no property -
 so a `property` row's api, which is a selector, can never be found among the implementations. There are
-**4490 `kind: property` rows** under `packages/a/apple-backports/registry/`, so the shape is common in
+**4490 `kind: property` rows** under `packages/frameworks/apple-backports/registry/`, so the shape is common in
 this repository. Every one of them belongs to another framework, though: the mirror is a **CloudKit-only**
 tool and reads `registry/CloudKit/values.json`, which has **no property rows at all** - 80 class, 13
 method, 25 constant. So there is no CloudKit neighbour of this shape that passes, because the mirror has

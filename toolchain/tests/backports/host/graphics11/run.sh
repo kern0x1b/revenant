@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-GRAPHICS=${GRAPHICS:-$here/../../../../packages/a/apple-backports/Graphics}
+GRAPHICS=${GRAPHICS:-$here/../../../../packages/frameworks/apple-backports/Graphics}
 harness=${GRAPHICS11_HARNESS:-$here/../../device}
 build=${GRAPHICS11_BUILD:-$(runs_folder revenant-graphics11-host)}
 sources="CVCodePoints.m CVConstants.m CVConstants11.m CVConstants12.m CGColorSpaceGetName.m CGImageInfo.m CGPathApplyWithBlock.m CGPDFApplyBlocks.m"

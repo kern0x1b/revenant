@@ -166,7 +166,7 @@ is two things, and both are measurable:
   sha1 of each file in the build tree against the tag: `MTRDeviceController_Concrete.mm`, `MTRBaseDevice.mm`,
   `MTRCommissioningOperation.mm`, `MTRDevice_XPC.mm`, `MTRDeviceController_XPC.mm` and
   `MTRDeviceControllerDataStore.mm` are all **identical**. The recipe compiles the hundred sources unmodified - the
-  only files it adds are `packages/m/matter/Revenant/`, the Apple spellings - so every delegate call site upstream has, the
+  only files it adds are `packages/frameworks/matter/Revenant/`, the Apple spellings - so every delegate call site upstream has, the
   port has, at the same line of the same file. The call sites, in the framework's own `.mm` files: 26 mentions of
   `MTRDeviceControllerDelegate`, 25 of `MTROperationalCredentialsDelegate`, 10 each of `MTRCommissioningDelegate`,
   `MTRDeviceControllerStorageDelegate` and `MTROTAProviderDelegate`, 4 of `MTRDeviceAttestationDelegate`, over 49
@@ -305,7 +305,7 @@ of the framework's own xcconfig, which I had not read yet.
     `corebluetooth`, `facts/CoreBluetooth/CBAdvertisementDataIsConnectable.md`), linked before `-framework CoreBluetooth`.
     The import binds to the backport's string, `kCBAdvDataIsConnectable`, on 6.1.3 and is never null there. The absent-key
     branch of the patch now answers only for a release whose CoreBluetooth never sends the key (6.1.3 measured; the host
-    sends it). Measured on the installed dylib (v-matter8): `nm -m` reads `(undefined) external _CBAdvertisementDataIsConnectable (from libCoreBluetoothBackports)`, and `xmake l packages/m/matter/tests/import_check.lua` answers "every non-weak import of the armv7 slices of 8 binaries resolves against 158520 exports", with no weak import it does not export.
+    sends it). Measured on the installed dylib (v-matter8): `nm -m` reads `(undefined) external _CBAdvertisementDataIsConnectable (from libCoreBluetoothBackports)`, and `xmake l packages/frameworks/matter/tests/import_check.lua` answers "every non-weak import of the armv7 slices of 8 binaries resolves against 158520 exports", with no weak import it does not export.
 - **Weak and bound imports, measured (v-matter8).** `_CCRandomGenerateBytes` is a weak reference bound to
   `libCommonCryptoBackports.dylib` (`nm -m` reads "weak external ... from libCommonCryptoBackports"): the symbol exists in
   the package, so the reference is not null when the backport loads. Accepted by the coordinator as it stands; the

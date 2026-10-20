@@ -5,7 +5,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-ACCELERATE=${ACCELERATE:-$here/../../../../packages/a/apple-backports/Accelerate}
+ACCELERATE=${ACCELERATE:-$here/../../../../packages/frameworks/apple-backports/Accelerate}
 build=${APPLEBLAS_BUILD:-$(runs_folder revenant-appleblas-host)}
 rm -rf "$build"
 mkdir -p "$build"

@@ -7,7 +7,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-uikit=$here/../../../../packages/a/apple-backports/UIKit
+uikit=$here/../../../../packages/frameworks/apple-backports/UIKit
 menu=${MENU_PORT_SOURCE:-$uikit/UIMenu.m}
 build=${MENU_BUILD:-$(runs_fresh revenant-menu-selection)}
 sdk=$(xcrun --show-sdk-path)

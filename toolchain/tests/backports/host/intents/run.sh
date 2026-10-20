@@ -21,7 +21,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/Intents}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/Intents}
 build=${INTENTS_BUILD:-$(runs_fresh revenant-intents)}
 rm -rf "$build"
 mkdir -p "$build"

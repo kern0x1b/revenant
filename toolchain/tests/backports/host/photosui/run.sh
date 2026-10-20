@@ -14,7 +14,7 @@
 #   the port   the same cases.m compiled against the transcribed header beside it, linked with the
 #              port's own objects - PHPickerFilter14.m, PHPickerFilter15.m, PHPickerFilter16.m,
 #              PHPickerConfiguration14.m, PHPickerConfiguration15.m and PHPickerViewController16.m -
-#              built from packages/a/apple-backports/Photos with no change to any of them, and
+#              built from packages/frameworks/apple-backports/Photos with no change to any of them, and
 #              without the host's PhotosUI framework in the link at all. With them the class of
 #              PHPickerViewControllerStub.m, because the 14.0 object that defines
 #              PHPickerViewController is UIKit's and this harness has no UIKit; the category of iOS
@@ -40,7 +40,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/Photos}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/Photos}
 build=${PHOTOSUI_BUILD:-$(runs_folder build/photosui-host)}
 rm -rf "$build"
 mkdir -p "$build"

@@ -4,7 +4,7 @@
 #
 #     sh tests/backports/host/metal-census/counters.sh
 #
-# Run from packages/a/apple-backports. THE PORT IS COMPILED WITH THE RENAMES AND THE CASE IS NOT.
+# Run from packages/frameworks/apple-backports. THE PORT IS COMPILED WITH THE RENAMES AND THE CASE IS NOT.
 # The port exports these eighteen under Apple's own names, because iOS 6 carries no constant of any
 # of them; on this host Apple's Metal declares the same names, so the port's copies are renamed while
 # they are compiled here and dlsym reads Apple's. Compiling the case with the renames as well would
@@ -27,7 +27,7 @@ work=${WORK:-$(runs_folder metal-census/counters)}
 # ONE guard for every script that removes a scratch path - see work-guard.sh.
 . "$here/work-guard.sh"
 work_ok "$work" || { echo "FAIL: WORK=$work is not a usable scratch path; see work-guard.sh" >&2; exit 1; }
-S="$root/packages/a/apple-backports"
+S="$root/packages/frameworks/apple-backports"
 SRC="$S/Metal/MTLCounterConstants14.m"
 rm -rf "$work"
 mkdir -p "$work"

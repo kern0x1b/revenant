@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 #import <CommonCrypto/CommonCrypto.h>
-#import "../../../../packages/a/apple-backports/AVFoundation/RevenantAVContentKey.h"
+#import "../../../../packages/frameworks/apple-backports/AVFoundation/RevenantAVContentKey.h"
 
 static int failures = 0;
 

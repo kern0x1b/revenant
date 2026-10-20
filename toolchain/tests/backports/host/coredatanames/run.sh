@@ -5,9 +5,9 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/.gen/CoreData}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/.gen/CoreData}
 # CoreDataNames70 is committed (it is not one of the measured table's objects); the others are gen's output in .gen/CoreData.
-committed=$here/../../../../packages/a/apple-backports/CoreData
+committed=$here/../../../../packages/frameworks/apple-backports/CoreData
 harness=${COREDATANAMES_HARNESS:-$here/../../device}
 build=${COREDATANAMES_BUILD:-$(runs_fresh revenant-coredatanames)}
 rm -rf "$build"

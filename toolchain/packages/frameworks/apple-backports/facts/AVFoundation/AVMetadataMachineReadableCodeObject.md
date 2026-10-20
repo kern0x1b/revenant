@@ -13,7 +13,7 @@ first use - the highest-ranked genuine gap in this pass's domain filter after `C
 base class is exercised and real, not a stub. No name already claims
 `AVMetadataMachineReadableCodeObject` under a different meaning on this release (`inventory()`
 answered absent, cleanly, the same check that found `AVAudioBuffer` and `PassKit` already claimed
-under different meanings elsewhere this pass). `grep` across `packages/a/apple-backports/AVFoundation/*.m`
+under different meanings elsewhere this pass). `grep` across `packages/frameworks/apple-backports/AVFoundation/*.m`
 found no existing implementation already carrying this selector under a different registry entry.
 
 ## What the port does

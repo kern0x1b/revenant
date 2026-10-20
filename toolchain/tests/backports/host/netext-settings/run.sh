@@ -10,7 +10,7 @@
 #
 #   host   the probe alone, with -framework NetworkExtension. Every answer is Apple's, and the probe
 #          prints a dladdr line naming the image that answered each selector.
-#   port   the probe TOGETHER WITH packages/a/apple-backports/NetworkExtension/NEDNSSettings.m, built
+#   port   the probe TOGETHER WITH packages/frameworks/apple-backports/NetworkExtension/NEDNSSettings.m, built
 #          for the same Mac Catalyst target, with no NetworkExtension linked. Every answer is the
 #          port's.
 #
@@ -27,7 +27,7 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-S="$root/packages/a/apple-backports"
+S="$root/packages/frameworks/apple-backports"
 W=${WORK:-$(runs_folder netext-settings)}
 W=${W%./*}/$(basename "$W")
 rm -rf "$W"

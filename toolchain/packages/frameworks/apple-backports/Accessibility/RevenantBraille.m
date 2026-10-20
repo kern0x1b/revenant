@@ -6,7 +6,7 @@
 #import <stdint.h>
 
 #import "RevenantBraille.h"
-#import "../../../c/revenant-coding/files/RevenantCoding.h"
+#import "../../../runtimes/revenant-coding/files/RevenantCoding.h"
 
 #pragma mark - The standard's tables
 

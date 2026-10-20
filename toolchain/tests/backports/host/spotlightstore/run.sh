@@ -9,7 +9,7 @@ echo "FAIL host/spotlightstore/run.sh: its Python steps are gone and not yet por
 exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-spotlight=${SPOTLIGHT:-$here/../../../../packages/a/apple-backports/CoreSpotlight}
+spotlight=${SPOTLIGHT:-$here/../../../../packages/frameworks/apple-backports/CoreSpotlight}
 build=${SPOTLIGHTSTORE_BUILD:-$(runs_folder revenant-spotlightstore-host)}
 
 run() {

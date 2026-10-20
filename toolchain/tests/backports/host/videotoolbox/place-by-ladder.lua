@@ -2,7 +2,7 @@ local lib = import("vtlib", {rootdir = os.scriptdir(), anonymous = true})
 
 local HERE = os.scriptdir()
 local WORKTREE = path.join(HERE, "..", "..", "..", "..")
-local PACKAGE = path.join(WORKTREE, "packages", "a", "apple-backports")
+local PACKAGE = path.join(WORKTREE, "packages", "frameworks", "apple-backports")
 local TABLE = path.join(HERE, "ladder.tsv")
 local OBJECTS = path.join(PACKAGE, "VideoToolbox")
 local REGISTRY = path.join(PACKAGE, "registry", "VideoToolbox")

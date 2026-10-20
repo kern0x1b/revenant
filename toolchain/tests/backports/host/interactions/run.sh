@@ -4,9 +4,9 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 . "$here/../../common/generated.sh"
 ensure_generated "$here" UIKit
-sources=${INTERACTIONS_SOURCES:-$here/../../../../packages/a/apple-backports/UIKit}
+sources=${INTERACTIONS_SOURCES:-$here/../../../../packages/frameworks/apple-backports/UIKit}
 # a source of the folder, or one the generated layer writes beside it in .gen/UIKit (UIKitConstants110.m is one of those)
-generated=$here/../../../../packages/a/apple-backports/.gen/UIKit
+generated=$here/../../../../packages/frameworks/apple-backports/.gen/UIKit
 source_of() {
     if [ -f "$sources/$1" ]; then printf "%s\n" "$sources/$1"; else printf "%s\n" "$generated/$1"; fi
 }

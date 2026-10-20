@@ -284,7 +284,7 @@
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
-      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/RevenantIntents100.m",
+      "reason": "behaviour that is more than the class's own storage, written by hand in packages/frameworks/apple-backports/Intents/RevenantIntents100.m",
       "effect": "the class carries nothing but NSObject's, as its own surface is empty; the one requirement it inherits from INIntentHandlerProviding, handlerForIntent:, answers the instance of the loaded class that conforms to the intent's own handling protocol and responds to -handleIntent:, and answers nil where there is none, which is what a release with no assistant daemon to launch an extension has to say"
     },
     {
@@ -449,7 +449,7 @@
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
-      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/RevenantIntents100.m",
+      "reason": "behaviour that is more than the class's own storage, written by hand in packages/frameworks/apple-backports/Intents/RevenantIntents100.m",
       "effect": "imageNamed: resolves the name in the app's own asset catalogue through UIKit and carries the image's data, and answers no image for a name the app has none of; systemImageNamed: answers no image, because the system images are SF Symbols and this release has no set of them; imageWithImageData: carries the data it is given; imageWithURL: and imageWithURL:width:height: read the URL and carry what it holds, with the size when one is given; the data, the name and the size are carried by the coding and the copy"
     },
     {
@@ -471,7 +471,7 @@
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
-      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/RevenantIntents100.m",
+      "reason": "behaviour that is more than the class's own storage, written by hand in packages/frameworks/apple-backports/Intents/RevenantIntents100.m",
       "effect": "init makes a UUID string identifier, which is the key the interaction store of this port keeps a donation under and the value the system writes itself at donation time; intentDescription is the class's own words with the framework's IN prefix and Intent suffix off, computed once and kept, since the SDK does not document how the framework derives it; setImage:forParameterNamed: and imageForParameterNamed: keep a real map of the intent's images by parameter name and keyImage returns the first parameter that has one, in parameter name order so the answer is the same on every call; the coding and copying walk the whole ivar chain, so a subclass keeps the identifier, the description and the images its parent has; donationMetadata is not answered and says so in its own entry"
     },
     {
@@ -482,7 +482,7 @@
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
-      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/RevenantIntents100.m",
+      "reason": "behaviour that is more than the class's own storage, written by hand in packages/frameworks/apple-backports/Intents/RevenantIntents100.m",
       "effect": "needsValue, notRequired and unsupported each answer a new result of the class that was asked, carrying the status the name says; the three answers a typed resolution result is built from - a resolved value, values to disambiguate, a value to confirm - are read back through the four accessors of RevenantIntentsResolution.h, which is where a port reads what it resolved, because on a release with Siri the system is the reader"
     },
     {
@@ -504,7 +504,7 @@
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
-      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/RevenantIntents100.m",
+      "reason": "behaviour that is more than the class's own storage, written by hand in packages/frameworks/apple-backports/Intents/RevenantIntents100.m",
       "effect": "initWithIntent:response: copies the intent and the response and makes a UUID string identifier, and the direction is outgoing; donateInteractionWithCompletion: stamps the date interval with the moment of the donation, archives the interaction into this application's own store under Application Support and calls the handler with nil, or with the error the write failed with; the three deletion methods remove by identifier, by group identifier and all of them, and say so the same way; the two revenant_interactions accessors read the store back, newest last"
     },
     {
@@ -658,7 +658,7 @@
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
-      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/RevenantIntents100.m",
+      "reason": "behaviour that is more than the class's own storage, written by hand in packages/frameworks/apple-backports/Intents/RevenantIntents100.m",
       "effect": "the initialiser keeps the type, the name, the identification hint and the icon, copying each of the three objects; applePayPaymentMethod is the one object of that kind for the whole process, of the type the header gives and with no name, hint or icon of its own, because this release has no image of it and no name for it"
     },
     {
@@ -735,7 +735,7 @@
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
-      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/RevenantIntents100.m",
+      "reason": "behaviour that is more than the class's own storage, written by hand in packages/frameworks/apple-backports/Intents/RevenantIntents100.m",
       "effect": "siriAuthorizationStatus answers INSiriAuthorizationStatusRestricted, which is the header's own wording for a system where Siri services are restricted and the user cannot change the answer; requestSiriAuthorization: answers the handler with that same status instead of waiting for a prompt this release cannot show, and does nothing for a handler of nil; siriLanguageCode answers the language the release itself is set to, which is the one a voice would use, since this release has no Siri setting to read"
     },
     {
@@ -944,7 +944,7 @@
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
-      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/RevenantIntents100.m",
+      "reason": "behaviour that is more than the class's own storage, written by hand in packages/frameworks/apple-backports/Intents/RevenantIntents100.m",
       "effect": "the six factory methods answer a real status: completed is completed and not outstanding, the two with a payment amount carry it, the one with a feedback type is outstanding and carries the type, canceled by service and canceled by the user are both canceled and neither missed the pickup, and canceledMissedPickup is canceled and missed it; the five derived answers - isCompleted, isCanceled, isMissedPickup, isOutstanding, paymentAmount and feedbackType - are computed from that state, and completionUserActivity and defaultTippingOptions are kept"
     },
     {
@@ -1351,7 +1351,7 @@
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
-      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/RevenantIntents100.m",
+      "reason": "behaviour that is more than the class's own storage, written by hand in packages/frameworks/apple-backports/Intents/RevenantIntents100.m",
       "effect": "the three initialisers keep the phrase, the pronunciation hint and the vocabulary identifier they are given, copying each; the deprecated initWithIdentifier: keeps the identifier as well and the identifier accessor answers the vocabulary identifier, which is what the header's own deprecation message says it should be used for; initWithSpokenPhrase: keeps the phrase alone and invents no vocabulary identifier for it; INSpeakable's own properties are carried and read"
     },
     {
@@ -1494,7 +1494,7 @@
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
-      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/RevenantIntents100.m",
+      "reason": "behaviour that is more than the class's own storage, written by hand in packages/frameworks/apple-backports/Intents/RevenantIntents100.m",
       "effect": "sharedVocabulary is one instance for the process; setVocabularyStrings:ofType: replaces the phrases of that type in this application's own store, in the order they were offered; setVocabulary:ofType: keeps the spoken phrase of each speakable value it is given; removeAllVocabularyStrings empties the store; revenant_vocabularyStringsOfType: reads a type back, which is where a port reads what it offered, because on a release with Siri the system is the reader"
     },
     {

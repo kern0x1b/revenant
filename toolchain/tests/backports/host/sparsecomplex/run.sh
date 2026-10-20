@@ -9,7 +9,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 # the repository: sparsecomplex -> host -> backports -> tests -> the root, four levels up
 root=$(cd "$here/../../../../" && pwd)
-ACCELERATE=${ACCELERATE:-$root/packages/a/apple-backports/Accelerate}
+ACCELERATE=${ACCELERATE:-$root/packages/frameworks/apple-backports/Accelerate}
 COMPLEX=${COMPLEX:-$here}
 build=${SPARSECOMPLEX_BUILD:-$(runs_folder revenant-sparsecomplex-host)}
 rm -rf "$build"

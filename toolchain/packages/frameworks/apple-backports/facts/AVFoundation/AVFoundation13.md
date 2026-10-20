@@ -173,7 +173,7 @@ declares it, so forwarding to it is a private call. The layer's `-connections` a
 public singular form and is what `-initWithSession:` and `-setSession:` fill in.
 
 Both rows are categories, and both are inert from 13.0 up, which is what makes carrying them from 6.0
-safe: `packages/a/apple-backports/attach.c`'s `revenant_collect` adds a category's method only when
+safe: `packages/frameworks/apple-backports/attach.c`'s `revenant_collect` adds a category's method only when
 `revenant_implements()` finds nothing, walking the class and its superclasses. At 6.1.3 and 12.0
 nothing implements either selector, so the port's methods are installed; at 13.0 and above the
 release implements both and the port's are not installed at all.

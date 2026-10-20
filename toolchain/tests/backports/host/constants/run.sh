@@ -26,7 +26,7 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 revenant=${REVENANT:-$here/../../../..}
-registry="$revenant/packages/a/apple-backports/registry"
+registry="$revenant/packages/frameworks/apple-backports/registry"
 build=${BUILD:-$(runs_fresh revenant-constants)}
 mkdir -p "$build"
 ledger=${LEDGER:-$HOME/Git/projects/ios/coordination/corpus/ledger}
@@ -214,7 +214,7 @@ if [ -n "${HOMEKIT_SOURCES:-}" ] && [ -d "${MUTANT_SDK:-/nonexistent}" ] && [ -x
         # The port's deployment: the same target the objects in the tree are built for, which is why
         # the tool has to read a file rather than load it -- an armv7 binary is not this host's.
         "$MUTANT_CLANG" -target armv7-apple-ios6.1.3 -isysroot "$MUTANT_SDK" -fobjc-arc -Os -g0 -fPIC \
-              -I"$revenant/packages/a/apple-backports/HomeKit" \
+              -I"$revenant/packages/frameworks/apple-backports/HomeKit" \
               -c "$source" -o "$mutant/$side/c.o" 2>/dev/null || true
         [ -f "$mutant/$side/c.o" ] || continue
         "$MUTANT_CLANG" -target armv7-apple-ios6.1.3 -isysroot "$MUTANT_SDK" -dynamiclib -Wl,-undefined,dynamic_lookup \

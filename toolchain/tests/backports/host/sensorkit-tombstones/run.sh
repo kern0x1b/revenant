@@ -17,7 +17,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
+appledir=${APPLEDIR:-$here/../../../../packages/frameworks/apple-backports}
 port=$appledir/SensorKit/NSString+SensorKit14.m
 build=${BUILD:-$(runs_fresh revenant-sensorkit-tombstones)}
 mkdir -p "$build"

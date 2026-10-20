@@ -12,8 +12,8 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
-callkit=${CALLKIT:-$here/../../../../packages/a/apple-backports/CallKit}
-registry=${REGISTRY:-$here/../../../../packages/a/apple-backports/registry/CallKit/ios10.json}
+callkit=${CALLKIT:-$here/../../../../packages/frameworks/apple-backports/CallKit}
+registry=${REGISTRY:-$here/../../../../packages/frameworks/apple-backports/registry/CallKit/ios10.json}
 build=${BUILD:-$(runs_fresh revenant-callkit)}
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path)

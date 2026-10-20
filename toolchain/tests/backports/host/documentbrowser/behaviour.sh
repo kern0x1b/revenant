@@ -11,7 +11,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=${DDR_ROOT:-$here/../../../..}
 runs=$(runs_folder documentbrowser)
-port=$root/packages/a/apple-backports/UIKit/UIDocumentBrowserViewController.m
+port=$root/packages/frameworks/apple-backports/UIKit/UIDocumentBrowserViewController.m
 mkdir -p "$runs"
 
 # The port's file as it is when the run starts, so every mutant is put back to exactly that and an
@@ -26,9 +26,9 @@ build_and_run() {
     mkdir -p "$work"
     # The stand-in for UIView's animation is compiled in, and the port's file is told to use it.
     xcrun clang -fobjc-arc -DREVENANT_TRANSITION_ANIMATION_STANDIN \
-        -I "$here/host-stub" -I "$root/packages/a/apple-backports/UIKit" \
+        -I "$here/host-stub" -I "$root/packages/frameworks/apple-backports/UIKit" \
         -framework Foundation \
-        "$port" "$root/packages/a/apple-backports/UIKit/UIDocumentBrowserTransitionController.m" \
+        "$port" "$root/packages/frameworks/apple-backports/UIKit/UIDocumentBrowserTransitionController.m" \
         "$here/host-stub/UIKit/UIViewController.m" \
         "$here/host-stub/UIKit/UIViewControllerTransitioning.m" \
         "$here/behaviour.m" \
@@ -109,7 +109,7 @@ mutate reveal-ignores-a-document-that-is-here \
     }' \
     'a reveal of a document that is here answers with where it is'
 
-git -C "$root" diff --quiet -- packages/a/apple-backports/UIKit/UIDocumentBrowserViewController.m \
+git -C "$root" diff --quiet -- packages/frameworks/apple-backports/UIKit/UIDocumentBrowserViewController.m \
     && echo && echo "the port's file is as it was: git diff is empty" \
     || { echo; echo "the port's file is NOT as it was"; exit 1; }
 

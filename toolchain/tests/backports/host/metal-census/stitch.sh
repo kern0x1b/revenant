@@ -3,7 +3,7 @@
 #
 #     sh tests/backports/host/metal-census/stitch.sh
 #
-# Run from packages/a/apple-backports. ONE clang line builds the test TOGETHER WITH the port source,
+# Run from packages/frameworks/apple-backports. ONE clang line builds the test TOGETHER WITH the port source,
 # the way tests/backports/host/security/run-cases.sh does it: two objects cannot be linked when one is
 # built for the device and the other for the host, and the failure looks like a missing main rather
 # than a mismatched architecture. The test and the source go in together, as sources, for the host.
@@ -17,7 +17,7 @@ work=${WORK:-$(runs_folder metal-census/stitch)}
 # ONE guard for every script that removes a scratch path - see work-guard.sh.
 . "$(dirname "$0")/work-guard.sh"
 work_ok "$work" || { echo "FAIL: WORK=$work is not a usable scratch path; see work-guard.sh" >&2; exit 1; }
-S="$root/packages/a/apple-backports"
+S="$root/packages/frameworks/apple-backports"
 SRC="$S/Metal/MTLFunctionStitching15.m"
 rm -rf "$work"
 mkdir -p "$work"

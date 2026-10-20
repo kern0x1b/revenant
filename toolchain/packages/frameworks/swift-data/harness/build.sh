@@ -66,7 +66,7 @@ for map in ${REVENANT_FOUNDATION_CMODULES:-}; do
 done
 
 SOURCES="$PACKAGE/files/SwiftData"
-echo "COMPILE -target $TRIPLE -wmo -c packages/s/swift-data/files/SwiftData/*.swift"
+echo "COMPILE -target $TRIPLE -wmo -c packages/frameworks/swift-data/files/SwiftData/*.swift"
 "$REVENANT_SWIFTC" "${FLAGS[@]}" -module-name SwiftData -O \
          -c -o "$OUT/SwiftData.o" \
          "$SOURCES"/*.swift 2> "$OUT/compile.err"

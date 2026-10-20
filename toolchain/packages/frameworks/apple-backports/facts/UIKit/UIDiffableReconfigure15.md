@@ -1,7 +1,7 @@
 # The 15.0 reconfigure pass: the two views, and the snapshot's one honest gap
 
 Four rows of release 15.0, one object:
-`packages/a/apple-backports/UIKit/UIDiffableDataSource+Reconfigure15.m` — three categories, on
+`packages/frameworks/apple-backports/UIKit/UIDiffableDataSource+Reconfigure15.m` — three categories, on
 `NSDiffableDataSourceSnapshot`, `UICollectionView` and `UITableView`, all SDK classes, nothing
 redeclared.
 

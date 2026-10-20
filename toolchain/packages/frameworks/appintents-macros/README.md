@@ -13,7 +13,7 @@ own expansion of them, and it is what the 19 macro rows in `revenant@appintents`
 (`AccessorMacro`, `PeerMacro`, `MemberAttributeMacro`, `MemberMacro`, `ExtensionMacro`,
 `FreestandingMacro`, `Macro`) and **no** `CompilerPlugin` — it sits behind `@_spi(PluginMessage)` in
 `SwiftCompilerPluginMessageHandling`, so a `-load-plugin-executable` cannot be written against it. The
-measurement is in the commit that found it, and `packages/a/appintents/facts/AppIntents/Macros.md`
+measurement is in the commit that found it, and `packages/frameworks/appintents/facts/AppIntents/Macros.md`
 records what each macro's contract is, read off the framework's own `@attached` declarations.
 
 **What is written and what is not**, per macro, in `Sources/`:

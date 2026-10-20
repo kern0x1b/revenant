@@ -158,7 +158,7 @@ Without that tweak none of this is heard: the library writes a file nobody reads
 work exactly as they do with no screen. Nothing on this path can refuse, raise or fail a call. The behaviour does not degrade when the tweak is missing -
 it simply does not happen, the way a device without the hardware a feature needs answers "unavailable" rather than pretending.
 
-The tweak, `org.revenant.callkit-screen` (`packages/a/apple-callkit-screen`), carries the other side: a MobileSubstrate dylib filtered to
+The tweak, `org.revenant.callkit-screen` (`packages/tweaks/apple-callkit-screen`), carries the other side: a MobileSubstrate dylib filtered to
 `com.apple.springboard`, built by Revenant's own tweak rule (`@addon/revenant/tweak`) the way any port builds one, proven for real by
 `tests/addon/tweak_test.lua` (the rule itself, against a device test already held to a running iPhone 4S) and `tests/addon/callkit_screen_test.lua`
 (this package, built and installed - `Library/MobileSubstrate/DynamicLibraries/revenant-callkit-screen.dylib` and its filter plist land where the rule

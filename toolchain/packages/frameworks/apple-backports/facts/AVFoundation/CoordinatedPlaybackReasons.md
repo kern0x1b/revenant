@@ -1,6 +1,6 @@
 # The coordinated-playback reasons, the playback-coordinator notifications, the player rate-change keys
 
-19 constants, all of them iOS 15.0, in `packages/a/apple-backports/AVFoundation/CoordinatedPlaybackReasons15.m`.
+19 constants, all of them iOS 15.0, in `packages/frameworks/apple-backports/AVFoundation/CoordinatedPlaybackReasons15.m`.
 None of them names a camera, a microphone or a media library: they are the strings one participant
 hands another when a coordinated playback session suspends, the two notifications those participants
 post, and the keys and reasons a player reports when its rate changes.

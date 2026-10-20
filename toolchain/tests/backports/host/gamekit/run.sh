@@ -5,7 +5,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/GameKit}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/GameKit}
 harness=${GAMEKIT_HARNESS:-$here/../../device}
 build=${GAMEKIT_BUILD:-$(runs_fresh revenant-gamekit)}
 rm -rf "$build"

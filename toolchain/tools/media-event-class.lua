@@ -1,4 +1,4 @@
-local LIBRARY = {"packages", "a", "apple-backports", "MediaPlayer"}
+local LIBRARY = {"packages", "frameworks", "apple-backports", "MediaPlayer"}
 local HOST = {"tests", "backports", "host", "mediaplayeritem"}
 local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "modules"), anonymous = true})
 

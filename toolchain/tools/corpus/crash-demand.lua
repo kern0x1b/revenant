@@ -249,7 +249,7 @@ function main()
     local reg_kinds = aggregate.load_reg_kinds()
     local store = aggregate.load_store(false)
 
-    local tree_candidates = {path.join(workspace.root(), "packages", "a", "apple-backports")}
+    local tree_candidates = {path.join(workspace.root(), "packages", "frameworks", "apple-backports")}
     if os.getenv("REVENANT_TREE_DIR") then
         table.insert(tree_candidates, 1, os.getenv("REVENANT_TREE_DIR"))
     end
@@ -261,7 +261,7 @@ function main()
     end
     if tree == nil then
         raise("crash-demand.lua: no tree directory found (looked in %s). Set REVENANT_TREE_DIR to the current "
-            .. "worktree's packages/a/apple-backports -- without it protocol_member_in_tree() silently scans an empty "
+            .. "worktree's packages/frameworks/apple-backports -- without it protocol_member_in_tree() silently scans an empty "
             .. "blob and every protocol-owner row (e.g. GCDevice.vendorName) reports a false gap.",
             table.concat(tree_candidates, ", "))
     end

@@ -82,9 +82,9 @@ than papered over by inventing a `ListFooter` style with guessed colours.
 
 ```sh
 clang -Os -g0 -Wall -Wno-unguarded-availability-new -Wno-unguarded-availability -fobjc-arc \
-      -target armv7-apple-ios6.1.3 -isysroot <16.4 SDK> -I packages/a/apple-backports/UIKit \
-      -c packages/a/apple-backports/UIKit/UIBackgroundConfiguration.m   -o UIBackgroundConfiguration.o
-clang … -c packages/a/apple-backports/UIKit/UIListContentConfiguration.m -o UIListContentConfiguration.o
+      -target armv7-apple-ios6.1.3 -isysroot <16.4 SDK> -I packages/frameworks/apple-backports/UIKit \
+      -c packages/frameworks/apple-backports/UIKit/UIBackgroundConfiguration.m   -o UIBackgroundConfiguration.o
+clang … -c packages/frameworks/apple-backports/UIKit/UIListContentConfiguration.m -o UIListContentConfiguration.o
 otool -v -s __TEXT __objc_methname UIBackgroundConfiguration.o
 otool -v -s __TEXT __objc_methname UIListContentConfiguration.o
 ```

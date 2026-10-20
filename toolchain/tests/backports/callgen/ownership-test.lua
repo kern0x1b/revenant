@@ -5,11 +5,11 @@ function run(opt)
     opt = opt or {}
     local build = opt.build or workspace.fresh("revenant-callgen")
     os.mkdir(build)
-    local coding = path.join(revenant, "packages", "c", "revenant-coding", "files")
+    local coding = path.join(revenant, "packages", "runtimes", "revenant-coding", "files")
     local log = path.join(build, "build.log")
     local sdk = os.iorunv("xcrun", {"--show-sdk-path"}):trim()
     local status = os.execv("xcrun", {"clang", "-target", "arm64-apple-macos26.0", "-isysroot", sdk, "-fobjc-arc", "-O0", "-Wall",
-                                      "-I" .. path.join(revenant, "packages", "a", "apple-backports", "Intents"), "-I" .. coding,
+                                      "-I" .. path.join(revenant, "packages", "frameworks", "apple-backports", "Intents"), "-I" .. coding,
                                       path.join(os.scriptdir(), "ownership-test.m"), path.join(coding, "RevenantCoding.m"),
                                       "-framework", "Foundation", "-framework", "CoreLocation", "-o", path.join(build, "ownership")},
                             {stderr = log, try = true})

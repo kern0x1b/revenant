@@ -89,7 +89,7 @@ local HAND_WRITTEN_EFFECT = {
 }
 
 local HAND_WRITTEN_REASON = "behaviour that is more than the class's own storage, written by hand in "
-    .. "packages/a/apple-backports/Intents/RevenantIntents100.m"
+    .. "packages/frameworks/apple-backports/Intents/RevenantIntents100.m"
 
 local GENERATED_REASON = "a data class of the framework: every property the SDK's header declares is kept in the "
     .. "class's own state with the ownership the header gives it, the initialisers the header "
@@ -791,7 +791,7 @@ end
 
 local function read_hand_written(answered, group, hand_written)
     local generator = import("gen-intents", {rootdir = os.scriptdir(), anonymous = true})
-    local file = path.join(revenant_root(), "packages", "a", "apple-backports", "Intents", hand_written)
+    local file = path.join(revenant_root(), "packages", "frameworks", "apple-backports", "Intents", hand_written)
     local lines = lines_of(file)
     local names = {}
     for name in pairs(group) do

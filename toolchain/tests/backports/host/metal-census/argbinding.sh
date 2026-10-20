@@ -4,7 +4,7 @@
 #     sh tests/backports/host/metal-census/argbinding.sh
 #     SELF_TEST=1 sh tests/backports/host/metal-census/argbinding.sh   # prove_defined's own halves
 #
-# Run from packages/a/apple-backports. ONE clang line builds the case TOGETHER WITH the port source,
+# Run from packages/frameworks/apple-backports. ONE clang line builds the case TOGETHER WITH the port source,
 # the way tests/backports/host/metal-census/stitch.sh does it: two objects cannot be linked when one
 # is built for the device and the other for the host, and the failure looks like a missing main
 # rather than a mismatched architecture.
@@ -24,7 +24,7 @@ work=${WORK:-$(runs_folder metal-census/argbinding)}
 # ONE guard for every script that removes a scratch path - see work-guard.sh.
 . "$(dirname "$0")/work-guard.sh"
 work_ok "$work" || { echo "FAIL: WORK=$work is not a usable scratch path; see work-guard.sh" >&2; exit 1; }
-S="$root/packages/a/apple-backports"
+S="$root/packages/frameworks/apple-backports"
 SRC="$S/Metal/MTLArgumentBinding16.m"
 rm -rf "$work"
 mkdir -p "$work"

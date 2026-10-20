@@ -8,7 +8,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/UIKit/UIAppearanceInstances.md",
-      "source": "the host's own UIKit/Foundation under Mac Catalyst through tests/backports/host/smallapis2, and tests/backports/device/smallapis2.m on iOS 6; the port's own object is packages/a/apple-backports/UIKit/UIAppearance+ContainedInInstancesOfClasses.m, a category on UIView and on UIBarItem, the two classes the header's own example uses, each answering +appearanceWhenContainedInInstancesOfClasses: with one call to the release's own +appearanceWhenContainedIn: carrying the classes of the array and a nil after them, up to the eight UIKit takes, and +appearance when the array is empty"
+      "source": "the host's own UIKit/Foundation under Mac Catalyst through tests/backports/host/smallapis2, and tests/backports/device/smallapis2.m on iOS 6; the port's own object is packages/frameworks/apple-backports/UIKit/UIAppearance+ContainedInInstancesOfClasses.m, a category on UIView and on UIBarItem, the two classes the header's own example uses, each answering +appearanceWhenContainedInInstancesOfClasses: with one call to the release's own +appearanceWhenContainedIn: carrying the classes of the array and a nil after them, up to the eight UIKit takes, and +appearance when the array is empty"
     },
     {
       "api": "+[UIView appearanceWhenContainedInInstancesOfClasses:]",

@@ -8,7 +8,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-port=$root/packages/a/apple-backports/MediaPlayer
+port=$root/packages/frameworks/apple-backports/MediaPlayer
 build=${BUILD:-$(runs_folder mediaplayer-constants)}
 mkdir -p "$build"
 names_seen=0
@@ -107,7 +107,7 @@ done 3< "$build/strings.txt"
 # THE SYNTAX STEP, before the link, so a scoping or quoting error is a compile error naming its line and
 # not a truncated link diagnostic. A message-length and caret setting is the pipeline's, not the tool's.
 xcrun clang -fsyntax-only -fmessage-length=0 -fno-caret-diagnostics -fobjc-arc \
-  -I"$root/packages/a/apple-backports" "$build/differential.m" 2>"$build/syntax.log" || {
+  -I"$root/packages/frameworks/apple-backports" "$build/differential.m" 2>"$build/syntax.log" || {
     echo "BUILD  the generated differential does not compile:"; grep "error:" "$build/syntax.log" | head -4 | sed 's/^/    /'; exit 1; }
 
 green=0; red=0
@@ -121,14 +121,14 @@ run_case() {   # $1 = output tag, $2.. = the object sources to compile with the 
   k=0
   for src in "$@"; do
     k=$((k+1))
-    xcrun clang -fobjc-arc -w $renames -I"$root/packages/a/apple-backports" -c "$src" -o "$build/$out-$k.o" \
+    xcrun clang -fobjc-arc -w $renames -I"$root/packages/frameworks/apple-backports" -c "$src" -o "$build/$out-$k.o" \
       2>"$build/$out-$k.log" || { echo "BUILD  $out: $src did not compile"; tail -3 "$build/$out-$k.log" | sed 's/^/    /'; return 1; }
     objs="$objs $build/$out-$k.o"
   done
   # The generated differential declares the revenantHost_* names ITSELF, so compiling it under the SAME -D
   # renames is a double rename and the -D wins: #define NAME revenantHost_NAME collides with the extern the
   # template already emits. The port's objects keep the -D; the differential does not.
-  xcrun clang -fobjc-arc -w -I"$root/packages/a/apple-backports" "$build/differential.m" $objs \
+  xcrun clang -fobjc-arc -w -I"$root/packages/frameworks/apple-backports" "$build/differential.m" $objs \
     -framework Foundation -o "$build/$out.bin" 2>"$build/$out.link" || {
       echo "BUILD  $out FAILED to link - a name the port does not define is a link error here"
       tail -3 "$build/$out.link" | sed 's/^/    /'; return 1; }
@@ -162,7 +162,7 @@ grep '^OK' "$build/green.txt" | awk -F'\t' '$4=="oracle=cache" {printf "    judg
 # media harness above cannot catch that either - it asserts declared == defined WITHIN the files it can
 # see, and a file that is missing from the commit is invisible to it, so it passed at 30 of 30 against 31
 # rows once already.
-reg=$root/packages/a/apple-backports/registry/MediaPlayer
+reg=$root/packages/frameworks/apple-backports/registry/MediaPlayer
 xmake l "$here/check.lua" rows-vs-objects "$reg" "$port" | sed 's/^/ /'
 
 # THE CONTROL: on the REAL tree the comparison must pass, and it must have examined something. A checker

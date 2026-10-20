@@ -2572,7 +2572,7 @@
     "minimum": "6.0",
     "status": "implemented",
     "facts": "facts/UIKit/OpenURLOptions.md",
-    "source": "the shared caches of iOS 9 and 10, and tests/backports/device/openurl.m on iOS 6; the port's own object is packages/a/apple-backports/UIKit/UIApplicationDelegate+OpenURLOptions.m, whose +load watches -[UIApplication setDelegate:] and adds the pre-9.0 selector -application:openURL:sourceApplication:annotation: to the delegate's own class, forwarding it to this one, so a delegate written against the older signature answers the current one. The owner is a @protocol, so the method is one the application's own delegate implements and what this port owes is the asking"
+    "source": "the shared caches of iOS 9 and 10, and tests/backports/device/openurl.m on iOS 6; the port's own object is packages/frameworks/apple-backports/UIKit/UIApplicationDelegate+OpenURLOptions.m, whose +load watches -[UIApplication setDelegate:] and adds the pre-9.0 selector -application:openURL:sourceApplication:annotation: to the delegate's own class, forwarding it to this one, so a delegate written against the older signature answers the current one. The owner is a @protocol, so the method is one the application's own delegate implements and what this port owes is the asking"
   },
   {
     "api": "UIApplicationOpenURLOptionsOpenInPlaceKey",

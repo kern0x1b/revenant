@@ -40,12 +40,12 @@ port_build() {
         -DAXBrailleTable=RevenantPortBrailleTable \
         -DAXBrailleTranslationResult=RevenantPortBrailleTranslationResult \
         -DAXBrailleTranslator=RevenantPortBrailleTranslator \
-        -I"$root/packages/a/apple-backports/Accessibility" \
-        -I"$root/packages/a/apple-backports/Intents" \
+        -I"$root/packages/frameworks/apple-backports/Accessibility" \
+        -I"$root/packages/frameworks/apple-backports/Intents" \
         "$here/braille-differential.m" \
-        "$root/packages/a/apple-backports/Accessibility/RevenantBraille.m" \
-        "$root/packages/a/apple-backports/Foundation/RevenantCoding.m" \
-        -I"$root/packages/a/apple-backports/Intents" \
+        "$root/packages/frameworks/apple-backports/Accessibility/RevenantBraille.m" \
+        "$root/packages/frameworks/apple-backports/Foundation/RevenantCoding.m" \
+        -I"$root/packages/frameworks/apple-backports/Intents" \
         -framework Foundation -framework CoreLocation -o "$build/port" 2>>"$build/build.log" || return 1
 }
 for half in host port; do

@@ -1,6 +1,6 @@
 # MPSRNNDescriptor (iOS 11.0)
 
-Port: `packages/a/apple-backports/MetalPerformanceShaders/MPSRNNDescriptor11.m`
+Port: `packages/frameworks/apple-backports/MetalPerformanceShaders/MPSRNNDescriptor11.m`
 Test: `tests/backports/host/mps-rnn-descriptors/` (descriptor.m, run.sh)
 
 ## Measured

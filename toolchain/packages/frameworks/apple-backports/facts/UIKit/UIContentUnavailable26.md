@@ -34,7 +34,7 @@
 //   source - the same count the registry check makes:
 //
 //     clang -c -fobjc-arc -target armv7-apple-ios6.1.3 -isysroot <16.4 SDK> -Wall \
-//         packages/a/apple-backports/UIKit/UIKit26_0.m -o UIKit26_0.o
+//         packages/frameworks/apple-backports/UIKit/UIKit26_0.m -o UIKit26_0.o
 //     otool -v -s __TEXT __objc_classname UIKit26_0.o     # the class names the object carries
 //     otool -v -s __TEXT __objc_methname  UIKit26_0.o     # the selectors the object carries
 //

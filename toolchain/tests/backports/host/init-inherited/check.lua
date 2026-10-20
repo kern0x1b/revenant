@@ -118,7 +118,7 @@ local function revenant_builds(files, name)
 end
 
 function main(revenant)
-    local apple = path.join(revenant, "packages", "a", "apple-backports")
+    local apple = path.join(revenant, "packages", "frameworks", "apple-backports")
     local files = table.join(os.files(path.join(apple, "HomeKit", "*.m")), os.files(path.join(apple, "HealthKit", "*.m")))
 
     local status = {}

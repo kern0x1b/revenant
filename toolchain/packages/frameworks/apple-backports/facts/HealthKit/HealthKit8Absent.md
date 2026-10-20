@@ -15,7 +15,7 @@ the run prints this machine's own home; the run prints the absolute cache it rea
 thing in it a repository may not carry. Sections 1 to 3 are read by
 
 ```
-REVENANT_ROOT="$PWD" xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 6.1.3 4.3 9.0 18.0
+REVENANT_ROOT="$PWD" xmake l packages/frameworks/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 6.1.3 4.3 9.0 18.0
 ```
 
 through `modules/apple/objc.lua`'s `code_map()`, which gives every method a rung declares as

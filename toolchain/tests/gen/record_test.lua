@@ -1,6 +1,6 @@
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
 local FRAMEWORK = "FixKit"
-local OUT = "packages/a/apple-backports"
+local OUT = "packages/frameworks/apple-backports"
 local SHARD_COLUMNS = "kind,usr,container,name,side,type,params,attrs,availability,message,declhash"
 local CONSTANT_HASH = "1111111111111111"
 

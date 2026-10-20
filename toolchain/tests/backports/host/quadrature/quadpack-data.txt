@@ -6,7 +6,7 @@
 # the original and a reader that only takes the first group gets a different number.
 #
 # tests/backports/host/quadrature/tables.py reads this file, prints the C tables of
-# packages/a/apple-backports/Accelerate/Quadrature10.m from it, and with --check compares them
+# packages/frameworks/apple-backports/Accelerate/Quadrature10.m from it, and with --check compares them
 # against what that file holds. The lines are what the port's numbers have to equal.
 
 # --- dqng.f

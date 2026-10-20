@@ -41,7 +41,7 @@ every row's load error. That is why 33 rows are `absent` and not `implemented` w
 there is no version of "implement it anyway" that is better than not writing it.
 
 The chains, resolved from the 16.4 headers' own `@interface` lines and then checked against every
-`@implementation` in `packages/a/apple-backports` on `580d7e435`:
+`@implementation` in `packages/frameworks/apple-backports` on `580d7e435`:
 
 | row | missing ancestor | whose row it is |
 | --- | --- | --- |
@@ -113,7 +113,7 @@ says so where it is written.
 `-[MPSCNNConvolutionDataSource copyWithZone:device:]` is `absent`, and the evidence is deliberately
 NOT `first-rung.lua`. That tool answers `9.0` for the bare selector, which is `NSObject`'s own
 `copyWithZone:` and says nothing about this owner. What the row rests on instead is that no object in
-`packages/a/apple-backports` defines `MPSCNNConvolutionDataSource` at all - a grep finds only this
+`packages/frameworks/apple-backports` defines `MPSCNNConvolutionDataSource` at all - a grep finds only this
 registry file's own rows for it - so there is no `@implementation` that could carry the method.
 
 ## The rows this band deliberately did not touch
@@ -127,7 +127,7 @@ none of them was edited. This band read them and wrote about them; it did not mo
 
 ## The three classes of this release whose superclass the port already carries
 
-`packages/a/apple-backports/MetalPerformanceShaders/MPSNNStates12.m` and `MPSNNPad16.m`, added on
+`packages/frameworks/apple-backports/MetalPerformanceShaders/MPSNNStates12.m` and `MPSNNPad16.m`, added on
 2026-10-03 from the work `band-wmtl-mps12` left behind. The three rows said on main, and still said when this section was written,
 "this band did not write it" and "the band's time ran out first", with the superclass named as NOT the
 blocker - MPSCNNKernel for MPSNNPad, MPSState for the two states, MPSKernel for MPSRNNMatrixTrainingLayer,
@@ -146,11 +146,11 @@ for armv7, which is the defect that kept it out; this is that check, and the com
 
 ```
 CLANG=~/.xmake/packages/l/llvm/23.1.1/*/bin/clang ; SDK=<the 16.4 iPhoneOS SDK>
-for f in packages/a/apple-backports/MetalPerformanceShaders/*.m ; do
+for f in packages/frameworks/apple-backports/MetalPerformanceShaders/*.m ; do
   "$CLANG" -c -fobjc-arc -fvisibility=hidden -target armv7-apple-ios6.0 -isysroot "$SDK" \
       -Wno-unguarded-availability-new -Wno-deprecated-declarations \
-      -I packages/a/apple-backports -I packages/a/apple-backports/MetalPerformanceShaders \
-      -I packages/a/apple-backports/Metal -I packages/a/apple-backports/CoreML -I includes "$f" -o "${f%.m}.o"
+      -I packages/frameworks/apple-backports -I packages/frameworks/apple-backports/MetalPerformanceShaders \
+      -I packages/frameworks/apple-backports/Metal -I packages/frameworks/apple-backports/CoreML -I includes "$f" -o "${f%.m}.o"
 done
 ld -r -o all.o -undefined dynamic_lookup *.o
 ```
@@ -236,7 +236,7 @@ MPSCNNYOLOLoss, MPSCNNYOLOSLossDescriptor and MPSRNNMatrixTrainingLayer each dec
 is a class this package does not build, which is the whole library's load and not this file's:
 
     $ grep -rn '@implementation MPSCNNLoss\b\|@implementation MPSCNNLossDescriptor\b\|@implementation MPSRNNDescriptor\b' \
-          packages/a/apple-backports/MetalPerformanceShaders/
+          packages/frameworks/apple-backports/MetalPerformanceShaders/
     (nothing)
 
 The control in the same run: `@implementation MPSState` answers MPSState11.m and `@implementation

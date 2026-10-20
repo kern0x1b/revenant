@@ -6,7 +6,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/AppTrackingTransparency}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/AppTrackingTransparency}
 harness=${APTTRACKING_HARNESS:-$here/../../device}
 build=${APTTRACKING_BUILD:-$(runs_fresh revenant-apptracking)}
 rm -rf "$build"

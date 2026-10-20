@@ -19,7 +19,7 @@ end
 function failures(opt)
     local byteorder = import("byteorder", {rootdir = opt.modules})
     local root = path.join(opt.modules, "..")
-    local apple = path.join(root, "packages", "a", "apple-backports")
+    local apple = path.join(root, "packages", "frameworks", "apple-backports")
     local facts = path.join(apple, "facts", "Matter")
     local closure = path.join(facts, "emit-closure.tsv")
     local overlap = path.join(facts, "class-overlap.tsv")

@@ -4,7 +4,7 @@
 
 A **linear** model, as a Core ML `NeuralNetworkRegressor` of one `innerProduct` layer, and that is not a
 wrapper: for a row of features `x` the layer computes `bias + weights · x`, which *is* a linear model,
-and Core ML executes it. Every field number is read out of the vendored schema in `packages/c/createml/proto/`:
+and Core ML executes it. Every field number is read out of the vendored schema in `packages/frameworks/createml/proto/`:
 
 | message | fields used |
 | --- | --- |

@@ -17,7 +17,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/SensorKit}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/SensorKit}
 build=${SENSORKIT_NAMES_BUILD:-$(runs_fresh revenant-sensorkit-names)}
 mkdir -p "$build"
 

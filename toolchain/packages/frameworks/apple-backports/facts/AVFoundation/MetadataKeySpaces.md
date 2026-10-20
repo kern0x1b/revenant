@@ -2,7 +2,7 @@
 
 Thirty constants, in the four key spaces Apple's own tables name: the QuickTime metadata key space
 (`mdta/`), the ISO user data space (`uiso/`), the QuickTime user data space (`udta/`), the common
-space (`common/`), and the object types a machine-readable code names. `packages/a/apple-backports/AVFoundation/`
+space (`common/`), and the object types a machine-readable code names. `packages/frameworks/apple-backports/AVFoundation/`
 carries them in three files, one per release they arrived in.
 
 ## How the values were read

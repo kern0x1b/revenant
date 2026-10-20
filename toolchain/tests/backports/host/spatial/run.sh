@@ -8,7 +8,7 @@
 #   answers for;
 #
 #   the port half builds the same main.swift against the module this tree holds, compiled the way
-#   packages/s/swift-runtime builds it: gyb first, then one unit per scalar with the recipe's own
+#   packages/runtimes/swift-runtime builds it: gyb first, then one unit per scalar with the recipe's own
 #   flags. Every value on the right-hand side is therefore Apple's answer for the same input, and
 #   check.lua compares the two transcripts number by number.
 #
@@ -27,7 +27,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-files=${SPATIAL_FILES:-$here/../../../../packages/s/swift-runtime/files}
+files=${SPATIAL_FILES:-$here/../../../../packages/runtimes/swift-runtime/files}
 here_root=$(cd "$here/../../../.." && pwd)
 build=${SPATIAL_BUILD:-$(runs_folder host-spatial)}
 sdk=${SPATIAL_SDK:-$(xcrun --show-sdk-path)}

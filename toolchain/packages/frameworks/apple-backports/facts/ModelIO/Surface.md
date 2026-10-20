@@ -81,7 +81,7 @@ either and there is nothing to instantiate. The tree's own host probe had it rig
 `tests/backports/host/modelio/port-support.m:57` restates `@protocol MDLAssetResolver <NSObject>` with
 both methods, and `MDLAsset9.m:24` declares `@property (nonatomic, retain) id<MDLAssetResolver> resolver;`.
 
-The generator's header map is why they were ever mistaken for classes: `packages/a/apple-backports/spec/ModelIO/hdr-map.json`
+The generator's header map is why they were ever mistaken for classes: `packages/frameworks/apple-backports/spec/ModelIO/hdr-map.json`
 records only `@interface` declarations, and it holds the three concrete resolvers
 (`MDLRelativeAssetResolver`, `MDLPathAssetResolver`, `MDLBundleAssetResolver`) and neither protocol.
 `RevenantModelIO.h` then declared each missing name as `@interface X : NSObject` so a category had

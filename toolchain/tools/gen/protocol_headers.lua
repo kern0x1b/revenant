@@ -8,7 +8,7 @@ local BODY_KINDS = {body = {api = true, keep = false}, bare = {api = false, keep
                     ["body-keep"] = {api = true, keep = true}, ["bare-keep"] = {api = false, keep = true}}
 
 local function table_path(tree)
-    return path.join(tree, "packages", "a", "apple-backports", "spec", "protocol-headers.tsv")
+    return path.join(tree, "packages", "frameworks", "apple-backports", "spec", "protocol-headers.tsv")
 end
 
 function rows(tree, fw)

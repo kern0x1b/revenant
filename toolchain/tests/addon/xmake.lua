@@ -55,6 +55,7 @@ light("toolchain_check_test")
 light("workspace_test")
 light("compat_test")
 light("assets_extract_test")
+light("revenant_index_test")
 
 suite("architectures_test")
 suite("macho_test")

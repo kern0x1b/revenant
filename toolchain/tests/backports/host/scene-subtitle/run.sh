@@ -6,7 +6,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-uikit=$here/../../../../packages/a/apple-backports/UIKit
+uikit=$here/../../../../packages/frameworks/apple-backports/UIKit
 scene=${SCENE_PORT_SOURCE:-$uikit/UIScene.m}
 build=${SCENE_BUILD:-$(runs_fresh revenant-scene-subtitle)}
 sdk=$(xcrun --show-sdk-path)

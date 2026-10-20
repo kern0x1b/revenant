@@ -18,7 +18,7 @@ NSObject's implementation (1), a different one (0), or the class does not exist 
 questions:
 
 - Apple's CoreML on the host (macOS 27.0.1): every class answers 1 for both selectors.
-- The port's CoreML objects, built from `packages/a/apple-backports/CoreML/` with no framework linked: 1 for every
+- The port's CoreML objects, built from `packages/frameworks/apple-backports/CoreML/` with no framework linked: 1 for every
   class, line for line the same as the host.
 - Controls: a class defined in the probe that overrides `-init` answers 0 on both sides, and a name no framework has
   answers -1 on both sides. A control that answered 1 for the overrider would mean the probe could not see an override.

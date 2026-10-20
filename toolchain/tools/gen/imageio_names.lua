@@ -3,7 +3,7 @@ local pyjson = import("pyjson", {anonymous = true})
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 
 local ROOT = path.join(os.scriptdir(), "..", "..")
-local PORT = path.join("packages", "a", "apple-backports")
+local PORT = path.join("packages", "frameworks", "apple-backports")
 local FRAMEWORK = "ImageIO"
 local FACTS = "facts/ImageIO/Names.md"
 local PROBE = path.join(ROOT, "tests", "backports", "host", "imageio-names", "probe.c")

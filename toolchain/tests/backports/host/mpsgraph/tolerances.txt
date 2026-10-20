@@ -37,7 +37,7 @@
 # single precision, one in half.
 #
 # The measured distance between the two answers, over the case file's thirty-two input classes, is in
-# packages/a/apple-backports/facts/MetalPerformanceShadersGraph/Core.md next to the figure it is held to,
+# packages/frameworks/apple-backports/facts/MetalPerformanceShadersGraph/Core.md next to the figure it is held to,
 # so a gap between the two is visible rather than hidden.
 
 # Table 8.1, single precision. Page 368 of 383.

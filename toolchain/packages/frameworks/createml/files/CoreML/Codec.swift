@@ -2,7 +2,7 @@
 //
 // Apple's `.mlmodel` is a protobuf (proto2, little-endian fixed fields) and the schema is Apple's,
 // **BSD-3-Clause**, in `coremltools/mlmodel/format/*.proto`; the copies this package vendors are in
-// `packages/c/createml/proto/` with their licence, pinned to a commit in that directory's README. What is here is not a generator and not a
+// `packages/frameworks/createml/proto/` with their licence, pinned to a commit in that directory's README. What is here is not a generator and not a
 // re-declaration of the schema: it is the **wire format** — varints, the fixed 32- and 64-bit
 // doubles, and the length-delimited submessages — plus a reader that walks a message by field number
 // and a writer that emits one. Every field name and number used by the model messages is read out of

@@ -1,5 +1,5 @@
 #!/bin/sh
-# run.sh — the RealityFoundation/RealityKit overlays, compiled the way packages/s/swift-runtime
+# run.sh — the RealityFoundation/RealityKit overlays, compiled the way packages/runtimes/swift-runtime
 # builds them: two modules, RealityFoundation first, then RealityKit on top of it, then the harness
 # linked against both.
 #
@@ -22,7 +22,7 @@ echo "FAIL host/realityfoundation/run.sh: its Python steps are gone and not yet 
 exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-files=${RF_OVERLAY_FILES:-$here/../../../../packages/s/swift-runtime/files}
+files=${RF_OVERLAY_FILES:-$here/../../../../packages/runtimes/swift-runtime/files}
 # The build goes in the worktree's own run directory, not the system temp path: the brief's rule is
 # that nothing of a band goes in /tmp, which is wiped, and this build is run output.
 here_root=$(cd "$here/../../../.." && pwd)
@@ -62,8 +62,8 @@ common="-target $target -sdk $sdk -swift-version 5 -parse-as-library -O -wmo"
 # checked here rather than trusted: --check exits non-zero if a row's source is not what coverage.py
 # decides, and the control beside it is the same edit the reviewer made, run every time.
 python3 "$here/coverage.py" --check \
-    "$here/../../../../packages/s/swift-runtime/registry/RealityFoundation.json" \
-    "$here/../../../../packages/s/swift-runtime/registry/RealityKit.json" > "$build/coverage.txt" \
+    "$here/../../../../packages/runtimes/swift-runtime/registry/RealityFoundation.json" \
+    "$here/../../../../packages/runtimes/swift-runtime/registry/RealityKit.json" > "$build/coverage.txt" \
     && coverage=0 || coverage=1
 [ "$coverage" -eq 0 ] || { echo "registry sources are not what coverage.py decides:"; \
     grep -E "MISMATCH|CLAIMS A MEASUREMENT" "$build/coverage.txt" | head -6; }

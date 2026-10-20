@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-CORE=${CORE:-$here/../../../../packages/a/apple-backports/CoreData}
+CORE=${CORE:-$here/../../../../packages/frameworks/apple-backports/CoreData}
 harness=${CONSTRAINT_HARNESS:-$here/../../device}
 build=${CONSTRAINT_BUILD:-$(runs_folder revenant-constraint-host)}
 sources="NSQueryGenerationToken.m NSManagedObjectContext+QueryGeneration.m NSConstraintConflict.m"

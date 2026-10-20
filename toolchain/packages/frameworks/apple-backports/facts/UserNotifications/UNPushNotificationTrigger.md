@@ -138,7 +138,7 @@ substrate for the push arriving at all.
 ## `release-split`
 
 ```
-$ .agent-work/plan-and-analysis/d5-un-r10/compile.sh "$PWD/packages/a/apple-backports" \
+$ .agent-work/plan-and-analysis/d5-un-r10/compile.sh "$PWD/packages/frameworks/apple-backports" \
       UIKit/UNPushNotificationTrigger10.m <objects> 6.0
 $ xmake l tools/release-split.lua <objects> <report> "$SDK"
 release-split: clean, every object file's symbols first-appear in one release

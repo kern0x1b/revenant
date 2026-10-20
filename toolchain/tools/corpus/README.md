@@ -41,7 +41,7 @@ before anything regenerates, and the hint ledger is read before the registry bas
    defines), both from the same binary. `xmake l tools/corpus/defined-methods.lua` with no arguments refreshes
    `defcache/` for every corpus app that has an extracted bundle.
 3. Registry export: `xmake l tools/corpus/export-registry.lua <checkout-root> <outfile>`, with
-   `<checkout-root>` the `packages/a/apple-backports` directory of the checkout. Write the export to the
+   `<checkout-root>` the `packages/frameworks/apple-backports` directory of the checkout. Write the export to the
    default run-folder path (`$(xmake l modules/workspace.lua run registry-export)/carried-registry.tsv`), or
    point `REVENANT_REGISTRY_TSV` at the file; `regen.lua` and the tools read the same default.
 4. Ranking: `xmake l tools/corpus/regen.lua <batch-label>` saves the previous list, runs `crash-demand.lua`,

@@ -97,7 +97,7 @@ function main(...)
             index = index + 1
         end
     end
-    local package = "packages/a/apple-backports"
+    local package = "packages/frameworks/apple-backports"
     local candidates = {}
     if root then
         table.insert(candidates, root)
@@ -119,7 +119,7 @@ function main(...)
     end
     if not chosen then
         print(string.format("registry-one-minimum: read nothing - no package at %s;"
-            .. " pass the path to packages/a/apple-backports", table.concat(candidates, " or ")))
+            .. " pass the path to packages/frameworks/apple-backports", table.concat(candidates, " or ")))
         os.exit(1)
     end
     root = chosen

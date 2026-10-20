@@ -1,5 +1,5 @@
 #!/bin/sh
-# run.sh - runs the installer of packages/a/apple-backports/UIKit/UIViewController+TransitionCoordinator.m, the file
+# run.sh - runs the installer of packages/frameworks/apple-backports/UIKit/UIViewController+TransitionCoordinator.m, the file
 # itself and not a copy, against the host's UIKit under Mac Catalyst, a release that has its own UIPresentationController
 # and so takes the branch a device from 8.0 on takes (revenant_release_presents() is YES here and dead code on 6.1.3). What
 # the port's sheet class does is not on the host (the host has its own class of that name); the recorder stands in for the
@@ -11,7 +11,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-uikit=${UIKIT:-$here/../../../../packages/a/apple-backports/UIKit}
+uikit=${UIKIT:-$here/../../../../packages/frameworks/apple-backports/UIKit}
 device=$here/../../device
 build=${BUILD:-$(runs_fresh revenant-sheethandover)}
 sdk=$(xcrun --show-sdk-path)

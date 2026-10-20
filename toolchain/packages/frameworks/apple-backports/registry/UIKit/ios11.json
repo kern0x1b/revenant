@@ -1181,7 +1181,7 @@
    "status": "owed",
    "reason": "build the property NSItemProvider.teamData",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "the 6.1.3 and 4.3 armv7 caches carry no NSItemProvider at all -- objc-inventory over both (12549 and 7751 lines) finds no class or protocol of that name in either, and the string teamData appears nowhere in either dump, while -hash on NSObject reads present in the same two dumps as the control. The class is the port's own, in packages/a/apple-backports/Foundation/NSItemProvider.m, and first-rung.lua answers 11.0 for the bare name, which is the port's own object being read back and not the release's",
+   "source": "the 6.1.3 and 4.3 armv7 caches carry no NSItemProvider at all -- objc-inventory over both (12549 and 7751 lines) finds no class or protocol of that name in either, and the string teamData appears nowhere in either dump, while -hash on NSObject reads present in the same two dumps as the control. The class is the port's own, in packages/frameworks/apple-backports/Foundation/NSItemProvider.m, and first-rung.lua answers 11.0 for the bare name, which is the port's own object being read back and not the release's",
    "facts": "facts/UIKit/DragAndDrop.md"
   },
   {
@@ -1191,7 +1191,7 @@
    "status": "owed",
    "reason": "build the property NSItemProvider.preferredPresentationSize",
    "effect": "until built: respondsToSelector: answers NO",
-   "source": "the 6.1.3 and 4.3 armv7 caches carry no NSItemProvider, and the string preferredPresentationSize appears nowhere in either dump, with -hash on NSObject present in the same two dumps as the control; first-rung.lua answers 11.0 for the bare name. The port's own NSItemProvider is in packages/a/apple-backports/Foundation/NSItemProvider.m and has no member of this name",
+   "source": "the 6.1.3 and 4.3 armv7 caches carry no NSItemProvider, and the string preferredPresentationSize appears nowhere in either dump, with -hash on NSObject present in the same two dumps as the control; first-rung.lua answers 11.0 for the bare name. The port's own NSItemProvider is in packages/frameworks/apple-backports/Foundation/NSItemProvider.m and has no member of this name",
    "facts": "facts/UIKit/DragAndDrop.md"
   },
   {

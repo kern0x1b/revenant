@@ -7,7 +7,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-spotlight=${SPOTLIGHT:-$here/../../../../packages/a/apple-backports/CoreSpotlight}
+spotlight=${SPOTLIGHT:-$here/../../../../packages/frameworks/apple-backports/CoreSpotlight}
 build=${CORESPOTLIGHT_QUERY_BUILD:-$(runs_folder revenant-corespotlight-query-host)}
 rm -rf "$build"
 mkdir -p "$build/host" "$build/port/src" "$build/port/store" "$build/control/src"

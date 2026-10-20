@@ -8,7 +8,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-FP=${FILEPROVIDER:-$here/../../../../packages/a/apple-backports}
+FP=${FILEPROVIDER:-$here/../../../../packages/frameworks/apple-backports}
 build=${COREDATA_BUILD:-$(runs_folder revenant-coredata-batchinsert)}
 rm -rf "$build"; mkdir -p "$build"
 

@@ -4,7 +4,7 @@ The reviewer brief's rule (owner, 2026-09-28): a delivery names the open upstrea
 "searched: none" with the queries. This is that line for `revenant@widgetkit`.
 
 **searched: none.** The queries and what each turned up are in
-`packages/a/appintents/facts/AppIntents/Reuse.md` — `gh search code "public protocol AppIntent
+`packages/frameworks/appintents/facts/AppIntents/Reuse.md` — `gh search code "public protocol AppIntent
 language:swift"`, `gh search code "public protocol ActivityAttributes language:swift"`, `gh search
 repos "swift backport framework shim iOS 6"` (empty) — and none of them is a TipKit: the framework has
 no open reimplementation that a `search` finds, and `coordination/corpus/ledger/TipKit.tsv` carries
@@ -30,7 +30,7 @@ things a port of it would most likely be built from, and found nothing reusable:
   `PresentationBackgroundInteraction`, `EnvironmentValues` and `EnvironmentKey`, but it is compiled
   only into the SwiftUI targets of the revenant project and there is no `revenant@swiftui` package to depend on
   yet. The ask is with the SwiftUI band; `README.md:40-43` and `facts/TipKit/Rendering.md` say so too.
-* **`packages/a/apple-backports/registry/CoreSpotlight/ios9.json`** — read through
+* **`packages/frameworks/apple-backports/registry/CoreSpotlight/ios9.json`** — read through
   the generator's port headers (`tools/gen/cmd_headers.lua`); not this package's file.
 * **Apple's own `.swiftinterface` and the toolchain's `swift-api-digester`** — as the reference for
   the declarations and the measurement. Nothing from either is vendored, and the host differential

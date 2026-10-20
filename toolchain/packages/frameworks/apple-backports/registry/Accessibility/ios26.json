@@ -16,7 +16,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -27,7 +27,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -38,7 +38,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -63,7 +63,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 16.4, which is the SDK this package compiles against, so the declaration is not transcribed",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
       "effect": "the two values the header's two factories were given, kept as one attributed string a side: customContentWithLabel:value: builds an attributed string from each plain string and customContentWithAttributedLabel:attributedValue: keeps the two it was given, and all four properties answer from that one pair. NSCopying shares the pair and carries importance, NSSecureCoding carries both strings and the number, and isEqual: compares the class, both strings and the number, so two contents that differ only in how urgently the user wants them are not equal - all measured on the host's own Accessibility.framework by tests/backports/host/accessibilitymath/expected-differences.tsv"
     },
     {
@@ -95,7 +95,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -106,7 +106,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -126,7 +126,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "an NSObject subclass with no member of its own, and the parent of the fourteen below: it carries no parsing and no evaluation, so the class an expression is a kind of is the only thing it is for"
     },
     {
@@ -137,7 +137,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil. The property is readonly, so this is not a way to change a built expression; it is the sharing the host does, which a case with a mutable array is what can see"
     },
     {
@@ -148,7 +148,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the two expressions the initialiser was given; the misspelled denimonator is Apple's own spelling in the initialiser and in the property, and it is the name the corpus row and every caller use, so it is the name this carries"
     },
     {
@@ -159,7 +159,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the string the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise. Nothing is parsed and nothing is evaluated: the header declares no method that takes a string and returns anything but it, and the tree an application builds is what an assistive technology would have been handed - a service this release has none of"
     },
     {
@@ -170,7 +170,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the expression the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise"
     },
     {
@@ -181,7 +181,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the string the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise. Nothing is parsed and nothing is evaluated: the header declares no method that takes a string and returns anything but it, and the tree an application builds is what an assistive technology would have been handed - a service this release has none of"
     },
     {
@@ -192,7 +192,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the string the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise. Nothing is parsed and nothing is evaluated: the header declares no method that takes a string and returns anything but it, and the tree an application builds is what an assistive technology would have been handed - a service this release has none of"
     },
     {
@@ -203,7 +203,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the expression the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise"
     },
     {
@@ -214,7 +214,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil. This is one of the two classes the host answers nil for whatever array it was given, and the port answers the array instead: the header declares the property nonnull and the initialiser takes it, so the value is the caller's own and the host dropping it is a defect rather than a stated behaviour. Measured, and declared with the other six cases that follow from it in tests/backports/host/accessibilitymath/expected-differences.tsv"
     },
     {
@@ -225,7 +225,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the three arrays the initialiser was given, each identity preserved and each nil only for one a caller passed nil. The base is the one member whose header disagrees with itself, and its own property's answer is written out below"
     },
     {
@@ -236,7 +236,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil. This is one of the two classes the host answers nil for whatever array it was given, and the port answers the array instead: the header declares the property nonnull and the initialiser takes it, so the value is the caller's own and the host dropping it is a defect rather than a stated behaviour. Measured, and declared with the other six cases that follow from it in tests/backports/host/accessibilitymath/expected-differences.tsv"
     },
     {
@@ -247,7 +247,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil. The property is readonly, so this is not a way to change a built expression; it is the sharing the host does, which a case with a mutable array is what can see"
     },
     {
@@ -258,7 +258,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil. The property is readonly, so this is not a way to change a built expression; it is the sharing the host does, which a case with a mutable array is what can see"
     },
     {
@@ -269,7 +269,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the string the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise. Nothing is parsed and nothing is evaluated: the header declares no method that takes a string and returns anything but it, and the tree an application builds is what an assistive technology would have been handed - a service this release has none of"
     },
     {
@@ -280,7 +280,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the expression the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise"
     },
     {
@@ -298,7 +298,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -332,7 +332,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -343,7 +343,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -354,7 +354,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -365,7 +365,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -376,7 +376,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -387,7 +387,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -398,7 +398,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -409,7 +409,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -420,7 +420,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -508,7 +508,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 16.4, which is the SDK this package compiles against, so the declaration is not transcribed",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
       "effect": "the very attributed string the factory was given, kept as given"
     },
     {
@@ -519,7 +519,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 16.4, which is the SDK this package compiles against, so the declaration is not transcribed",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
       "effect": "the very attributed string the factory was given, kept as given"
     },
     {
@@ -530,7 +530,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 16.4, which is the SDK this package compiles against, so the declaration is not transcribed",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
       "effect": "the number that was set, and the header's named default AXCustomContentImportanceDefault - which is 0 because it is the first case of the NS_ENUM the header declares - for a content nothing set it on. The two numbers are 0 and 1 and both are in that header; no value here was invented"
     },
     {
@@ -541,7 +541,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 16.4, which is the SDK this package compiles against, so the declaration is not transcribed",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
       "effect": "the very string inside the attributed string that was given, and not a second copy of the text, so an attribute the application put on the label is still there when a caller reads the plain spelling - measured on the host, where label == attributedLabel.string"
     },
     {
@@ -552,7 +552,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 16.4, which is the SDK this package compiles against, so the declaration is not transcribed",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
       "effect": "the very string inside the attributed string that was given, and not a second copy of the text, so an attribute the application put on the label is still there when a caller reads the plain spelling - measured on the host, where label == attributedLabel.string"
     },
     {
@@ -683,7 +683,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the expression the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise"
     },
     {
@@ -694,7 +694,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil. The property is readonly, so this is not a way to change a built expression; it is the sharing the host does, which a case with a mutable array is what can see"
     },
     {
@@ -705,7 +705,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the expression the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise"
     },
     {
@@ -716,7 +716,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the two expressions the initialiser was given; the misspelled denimonator is Apple's own spelling in the initialiser and in the property, and it is the name the corpus row and every caller use, so it is the name this carries"
     },
     {
@@ -727,7 +727,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the two expressions the initialiser was given; the misspelled denimonator is Apple's own spelling in the initialiser and in the property, and it is the name the corpus row and every caller use, so it is the name this carries"
     },
     {
@@ -738,7 +738,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the string the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise. Nothing is parsed and nothing is evaluated: the header declares no method that takes a string and returns anything but it, and the tree an application builds is what an assistive technology would have been handed - a service this release has none of"
     },
     {
@@ -749,7 +749,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the expression the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise"
     },
     {
@@ -760,7 +760,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil; an empty array stays an empty array, which is what the host answers"
     },
     {
@@ -771,7 +771,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil; an empty array stays an empty array, which is what the host answers"
     },
     {
@@ -782,7 +782,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the string the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise. Nothing is parsed and nothing is evaluated: the header declares no method that takes a string and returns anything but it, and the tree an application builds is what an assistive technology would have been handed - a service this release has none of"
     },
     {
@@ -793,7 +793,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the string the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise. Nothing is parsed and nothing is evaluated: the header declares no method that takes a string and returns anything but it, and the tree an application builds is what an assistive technology would have been handed - a service this release has none of"
     },
     {
@@ -804,7 +804,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil; an empty array stays an empty array, which is what the host answers"
     },
     {
@@ -815,7 +815,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the expression the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise"
     },
     {
@@ -826,7 +826,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil. This is one of the two classes the host answers nil for whatever array it was given, and the port answers the array instead: the header declares the property nonnull and the initialiser takes it, so the value is the caller's own and the host dropping it is a defect rather than a stated behaviour. Measured, and declared with the other six cases that follow from it in tests/backports/host/accessibilitymath/expected-differences.tsv"
     },
     {
@@ -837,7 +837,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, unflattened and identity preserved, which is what the host answers - the header's own initialiser takes an array here and its own property is declared a single AXMathExpression, and the two cannot both be right. The port keeps the array because the initialiser is the only source of the value and the property the only way to read it back, and answering one of the elements would throw away what the caller put in with nothing in the header to say which element. The declaration is transcribed as Apple writes it and not corrected; a caller wanting one expression takes firstObject. Measured, and declared in tests/backports/host/accessibilitymath/expected-differences.tsv"
     },
     {
@@ -848,7 +848,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil; an empty array stays an empty array, which is what the host answers"
     },
     {
@@ -859,7 +859,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil; an empty array stays an empty array, which is what the host answers"
     },
     {
@@ -870,7 +870,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil. This is one of the two classes the host answers nil for whatever array it was given, and the port answers the array instead: the header declares the property nonnull and the initialiser takes it, so the value is the caller's own and the host dropping it is a defect rather than a stated behaviour. Measured, and declared with the other six cases that follow from it in tests/backports/host/accessibilitymath/expected-differences.tsv"
     },
     {
@@ -881,7 +881,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil. The property is readonly, so this is not a way to change a built expression; it is the sharing the host does, which a case with a mutable array is what can see"
     },
     {
@@ -892,7 +892,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil. The property is readonly, so this is not a way to change a built expression; it is the sharing the host does, which a case with a mutable array is what can see"
     },
     {
@@ -903,7 +903,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the string the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise. Nothing is parsed and nothing is evaluated: the header declares no method that takes a string and returns anything but it, and the tree an application builds is what an assistive technology would have been handed - a service this release has none of"
     },
     {
@@ -914,7 +914,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the expression the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise"
     },
     {
@@ -925,7 +925,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the expression the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise"
     },
     {
@@ -936,7 +936,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "reason": "hand written in packages/frameworks/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the expression the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise"
     },
     {

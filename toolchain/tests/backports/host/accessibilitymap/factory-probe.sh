@@ -13,7 +13,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-sources=${ACCESSIBILITY_SRC:-$root/packages/a/apple-backports/Accessibility}
+sources=${ACCESSIBILITY_SRC:-$root/packages/frameworks/apple-backports/Accessibility}
 build=${FACTORY_BUILD:-$(runs_folder revenant-accessibilitymap-factory)}
 rm -rf "$build"
 mkdir -p "$build"
@@ -21,7 +21,7 @@ sdk=$(xcrun --show-sdk-path)
 xcrun clang -target arm64-apple-macos26.0 -isysroot "$sdk" -fobjc-arc -O0 -Wall -Wno-nonnull \
     -DAXBrailleMap=RevenantPortAXBrailleMap -DAXBrailleMapRenderer=RevenantPortAXBrailleMapRenderer \
     "$here/factory-probe.m" "$sources/RevenantBrailleMap.m" \
-    -I"$root/packages/a/apple-backports" -I"$root/packages/a/apple-backports/Accessibility" \
+    -I"$root/packages/frameworks/apple-backports" -I"$root/packages/frameworks/apple-backports/Accessibility" \
     -framework Foundation -framework CoreGraphics \
     -o "$build/factory" 2> "$build/build.log" || {
         echo "the factory probe did not build" >&2

@@ -323,7 +323,7 @@ compiles every backport with (`modules/apple/backports.lua:554-558`, and a libra
 `includes` of their own - line 928 sets that only for the generated per-band protocol sources):
 
 ```
-source: .../packages/a/apple-backports/Metal/MTL4CommandQueue26.m
+source: .../packages/frameworks/apple-backports/Metal/MTL4CommandQueue26.m
 -I flags:
   (none)
 everything else: -Os -g0 -Wall -Wno-unguarded-availability-new -Wno-unguarded-availability

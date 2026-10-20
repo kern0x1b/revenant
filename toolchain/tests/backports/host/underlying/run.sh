@@ -4,7 +4,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-FOUNDATION=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}
+FOUNDATION=${FOUNDATION:-$here/../../../../packages/frameworks/apple-backports/Foundation}
 DEVICE=${DEVICE:-$here/../../device}
 BUILD=${BUILD:-$(runs_fresh revenant-underlying)}
 xcrun clang -fobjc-arc -fvisibility=hidden -w -DRevenantOperationScheduler=RevenantHostRevenantOperationScheduler -c "$FOUNDATION/RevenantOperationScheduler.m" -o "$BUILD/scheduler.o"

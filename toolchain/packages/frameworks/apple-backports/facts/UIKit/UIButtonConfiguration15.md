@@ -3,7 +3,7 @@
 What the host's own UIKit answers was measured first, on the host's UIKit under Mac Catalyst, and
 every number below is the case's: `tests/backports/host/uikit2/buttonconfig_test.m`, run by the
 `buttonconfig` group in `tests/backports/host/uikit2/run.sh`. The port is
-`packages/a/apple-backports/UIKit/UIButtonConfiguration.m`. 55 checks, 0 failures.
+`packages/frameworks/apple-backports/UIKit/UIButtonConfiguration.m`. 55 checks, 0 failures.
 
 ## M1. The class is the SDK's own, and the port implements it
 

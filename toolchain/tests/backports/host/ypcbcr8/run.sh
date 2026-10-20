@@ -7,13 +7,13 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-ACCELERATE=${ACCELERATE:-$here/../../../../packages/a/apple-backports/Accelerate}
+ACCELERATE=${ACCELERATE:-$here/../../../../packages/frameworks/apple-backports/Accelerate}
 BUILD=${BUILD:-$(runs_fresh revenant-ypcbcr8)}
 sdk=$(xcrun --show-sdk-path)
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-nullability-completeness"
 
 renames=""
-for name in $(runs_xmake l "$here/../registry-functions.lua" "$here/../../../../packages/a/apple-backports/registry/Accelerate" --prefix=vImageConvert --prefix=vImageExtractChannel --contains=YpCbCr --contains=420 --contains=422 --contains=444 --contains=vImageExtractChannel_ARGB8888); do
+for name in $(runs_xmake l "$here/../registry-functions.lua" "$here/../../../../packages/frameworks/apple-backports/registry/Accelerate" --prefix=vImageConvert --prefix=vImageExtractChannel --contains=YpCbCr --contains=420 --contains=422 --contains=444 --contains=vImageExtractChannel_ARGB8888); do
     renames="$renames -D$name=revenantHost_$name"
 done
 for name in kvImage_YpCbCrToARGBMatrix_ITU_R_601_4 kvImage_YpCbCrToARGBMatrix_ITU_R_709_2 \

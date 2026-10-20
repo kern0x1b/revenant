@@ -24,7 +24,7 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-S="$root/packages/a/apple-backports"
+S="$root/packages/frameworks/apple-backports"
 W=${WORK:-$(runs_folder nsundo)}
 rm -rf "$W"; mkdir -p "$W"
 src="$S/Foundation/NSUndoManager+ActionUserInfo.m"

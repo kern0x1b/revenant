@@ -2,7 +2,7 @@ import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "modules")})
 import("registry_rows", {rootdir = os.scriptdir()})
 
 local ROOT = path.absolute(path.join(os.scriptdir(), ".."))
-local DEFAULT = path.join(ROOT, "packages", "a", "apple-backports", "registry")
+local DEFAULT = path.join(ROOT, "packages", "frameworks", "apple-backports", "registry")
 local SCRATCH = import("workspace", {rootdir = path.join(ROOT, "modules"), anonymous = true}).run("registry-shape")
 
 local function git(args, into)
@@ -15,7 +15,7 @@ end
 
 local function apis_in(ref, relative)
     local shown = path.join(SCRATCH, "show.txt")
-    local status = git({"show", ref .. ":packages/a/apple-backports/registry/" .. relative}, shown)
+    local status = git({"show", ref .. ":packages/frameworks/apple-backports/registry/" .. relative}, shown)
     if status ~= 0 then
         os.tryrm(shown)
         return nil

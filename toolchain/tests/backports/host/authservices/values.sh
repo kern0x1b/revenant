@@ -24,7 +24,7 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 revenant=${REVENANT:-$here/../../../..}
-package="$revenant/packages/a/apple-backports/AuthenticationServices"
+package="$revenant/packages/frameworks/apple-backports/AuthenticationServices"
 framework=/System/Library/Frameworks/AuthenticationServices.framework/AuthenticationServices
 build=${BUILD:-$(runs_folder authservices-values)}
 mutate=${1:-}

@@ -16,7 +16,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 tree=$(cd "$here/../../../.." && pwd)
-port=$tree/packages/a/apple-backports/UIKit
+port=$tree/packages/frameworks/apple-backports/UIKit
 build=${BUILD:-$(runs_folder focuscontext/run)}
 sdk=$(xcrun --sdk macosx --show-sdk-path)
 ios=$sdk/System/iOSSupport/System/Library/Frameworks

@@ -56,7 +56,7 @@ band of this repository links against SDK 16.4.
 
 So it is read, once, from the only place it is written down: the `sdk` field of the main executable's own load
 command (`LC_VERSION_MIN_IPHONEOS`, or `LC_BUILD_VERSION` for the platform the image was linked for), through
-`packages/a/apple-backports/RevenantProgramSDK.h`. That read was a file-static in
+`packages/frameworks/apple-backports/RevenantProgramSDK.h`. That read was a file-static in
 `UIKit/UIViewController+AutomaticPresentation.m`, which is not reusable - a static in one object cannot be called
 from another - so it became a header of `static inline` functions and the UIKit caller includes it, which is the
 arrangement `RevenantValueStore.h` and `RevenantSayOnce.h` already use and for the same reason: two libraries that

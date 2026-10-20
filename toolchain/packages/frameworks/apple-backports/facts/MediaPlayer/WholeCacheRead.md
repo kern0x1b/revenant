@@ -113,7 +113,7 @@ and `absent` is reserved for a row the release makes impossible.
 ## The object that is not checked on the host
 
 `AVPlayerItem+NowPlayingInfo16.m` is the one implemented entry of this folder with no differential test
-under `tests/backports/host/mediaplayeritem/`, which `packages/a/apple-backports/README.md` asks of every
+under `tests/backports/host/mediaplayeritem/`, which `packages/frameworks/apple-backports/README.md` asks of every
 implemented entry. `run.sh` there builds `probe.m` alone, and the folder's stand-in tree carries MediaPlayer
 and UIKit headers but no AVFoundation one, so the stand-in seam the object uses
 (`REVENANT_MEDIAPLAYER_STANDIN`, which no test in this series defines) is never taken. What it would compare

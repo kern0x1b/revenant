@@ -70,7 +70,7 @@ thing that has to be got right is that **no `GGML_USE_*` may be named at all**: 
 `#ifdef`, so `-DGGML_USE_OPENMP=0` turns OpenMP *on* and the build then fails on a missing `omp.h`, which
 is what the first attempt of the recipe did. With none named the library builds its plain C CPU path.
 
-The recipe is `packages/g/ggml/xmake.lua`. It pins the tarball
+The recipe is `packages/libraries/ggml/xmake.lua`. It pins the tarball
 `ggml/archive/refs/tags/v0.25.3.tar.gz` by its sha256, writes the two macros the library's sources ask
 for and its CMake would otherwise generate (`GGML_VERSION`, `GGML_COMMIT`, from
 `src/ggml-version.h.in`), compiles the three units and installs `libggml.a` with the five headers
@@ -79,7 +79,7 @@ MLCompute includes.
 ## Two things that cost a day each, and what they were
 
 **The bare `assertion failed!` was a trailing slash.** `xmake -vD` named it -
-`packages/g/ggml/xmake.lua:88`, in `on_test` - and everything before it had succeeded: the three units
+`packages/libraries/ggml/xmake.lua:88`, in `on_test` - and everything before it had succeeded: the three units
 compiled, `libtool` made the archive, and the log showed every copy. `os.vcp` copies a file *as* its
 destination unless the destination names a directory, and xmake spells "this is a directory" as a
 trailing slash - which is why `Box2D` and `revenant` in the neighbouring recipes end theirs in `.. "/"`.
@@ -93,7 +93,7 @@ compute - and with only the library's three the archive links with undefined sym
 anything calls one.
 
 **The recipe is landed and wired**: `add_deps("revenant@ggml 0.25.3")` and its `archives` entry in
-`packages/a/apple-backports/xmake.lua`, and `archives = {"ggml"}` on MLCompute's entry in
+`packages/frameworks/apple-backports/xmake.lua`, and `archives = {"ggml"}` on MLCompute's entry in
 `modules/apple/backports.lua`. Both gates build it and link it, in both bands.
 
 ## What is not done
@@ -131,7 +131,7 @@ the checkout's addon recipe, exactly as `coordination/build-gate.lua` does, and 
 The text above says the recipe compiles the three (then five) C units. That held for the recipe's own
 install and its test, which never linked the archive; the first gate that linked `libMLComputeBackports`
 against it (6.1.3, stack 15) failed with 143 undefined symbols from `libggml.a`. Two causes, both in
-`packages/g/ggml/xmake.lua`:
+`packages/libraries/ggml/xmake.lua`:
 
 - ggml 0.25.3's operators and its graph compute are C++ (`ggml-cpu/ops.cpp`, `vec.cpp`, `binary-ops.cpp`,
   `unary-ops.cpp`, `traits.cpp`, `repack.cpp`, `iqp.cpp`, `ggml-cpu/ggml-cpu.cpp`), and so are the backend and

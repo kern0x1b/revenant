@@ -9,7 +9,7 @@ so it is not a build and the machine's load does not apply.
 
 `SecKeyIsAlgorithmSupported`, `SecKeyCreateSignature`, `SecKeyVerifySignature` and
 `SecKeyCopyKeyExchangeResult` are the four Security calls of iOS 10. They are defined **once**, in
-`packages/a/apple-backports/Security/SecurityFunctions10_0_1.m`, for two kinds of key at once:
+`packages/frameworks/apple-backports/Security/SecurityFunctions10_0_1.m`, for two kinds of key at once:
 
 | key kind | sign and verify | exchange | what the port reads to tell them apart |
 | --- | --- | --- | --- |

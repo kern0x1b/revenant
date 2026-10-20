@@ -107,7 +107,7 @@ release really lacks it, which is what makes the other five worth reading.
 
 ## The same shape as its kin
 
-`UIScribbleInteraction` and `UIIndirectScribbleInteraction` (`packages/a/apple-backports/UIKit/UIScribbleInteraction.m`,
+`UIScribbleInteraction` and `UIIndirectScribbleInteraction` (`packages/frameworks/apple-backports/UIKit/UIScribbleInteraction.m`,
 `facts/UIKit/UIInertInteractions.md`) are carried for the same wall and behave the same way: made with
 `-init` too, delegate kept weakly, never called, `+pencilInputExpected` NO, and the first one added to
 a view says so once in the log. Reusing that shape is why this object is forty lines and not a
@@ -120,7 +120,7 @@ the host's.
 
 ## The build
 
-`packages/a/apple-backports/UIKit/UIPencilInteraction12.m`, named for its release so the file carries
+`packages/frameworks/apple-backports/UIKit/UIPencilInteraction12.m`, named for its release so the file carries
 one release's API and `tools/release-split.lua` has nothing to split. Compiled with the tree's own
 compiler and flags at all three deployment floors the armv7 architecture reaches
 (`clang -target armv7s-apple-ios6.0`, `armv7-apple-ios6.0`, `armv7-apple-ios4.3`, `-fobjc-arc`,

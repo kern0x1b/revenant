@@ -346,7 +346,7 @@ header member the port would not have is **none**.
 
 The one member of this family the 7.1 file already carried, so the piece is a status row and a check
 rather than new code. The class and its `type` are in
-`packages/a/apple-backports/MediaPlayer/MPRemoteCommandCenter71.m`, which the bridge uses to turn an
+`packages/frameworks/apple-backports/MediaPlayer/MPRemoteCommandCenter71.m`, which the bridge uses to turn an
 `UIEventSubtypeRemoteControl*` into a seek event.
 
 **The check is not written, and the reason is in the row.** `MPRemoteCommandCenter71.m` imports the

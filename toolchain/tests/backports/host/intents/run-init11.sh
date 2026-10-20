@@ -6,7 +6,7 @@
 # to say was owed ("the other hundred and two are the same rule applied to the same header, which is
 # a claim and not a measurement until that harness runs"), done for the sixteen this slice owns.
 # What is measured for the PORT's side is by nm over the armv7 object the 11.0 band builds, and it
-# is written out in packages/a/apple-backports/facts/Intents/Init11.md. Nothing here executes armv7
+# is written out in packages/frameworks/apple-backports/facts/Intents/Init11.md. Nothing here executes armv7
 # and this script does not pretend otherwise.
 #
 # THE BASELINE IS TWO RED LINES, AND IT IS PINNED HERE ON PURPOSE. The measurement is not "sixteen
@@ -39,7 +39,7 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 repo=$(cd "$here/../../../.." && pwd)
-registry=${REGISTRY:-$repo/packages/a/apple-backports/registry/Intents/ios11.json}
+registry=${REGISTRY:-$repo/packages/frameworks/apple-backports/registry/Intents/ios11.json}
 build=${INTENTS_INIT11_BUILD:-$(runs_folder build/init11)}
 rm -rf "$build"
 mkdir -p "$build"
@@ -47,7 +47,7 @@ flags="-fobjc-arc -w -Wno-deprecated-declarations"
 cd "$repo"
 
 # The host's own answer, measured on 2026-10-01 by this script's build 1 and written out in
-# packages/a/apple-backports/facts/Intents/Init11.md. Two classes, one reason.
+# packages/frameworks/apple-backports/facts/Intents/Init11.md. Two classes, one reason.
 MEASURED_RED="INCancelRideIntentResponse INSendRideFeedbackIntentResponse"
 
 redset() {
@@ -71,7 +71,7 @@ if [ "$status" -ne 1 ]; then
 fi
 if [ "$got" != "$want" ]; then
     echo "  intents-11 init: FAIL the red set is [$got], and the measurement in"
-    echo "  packages/a/apple-backports/facts/Intents/Init11.md records [$want]"
+    echo "  packages/frameworks/apple-backports/facts/Intents/Init11.md records [$want]"
     exit 1
 fi
 grep -q "control: " "$build/measured.log" || {

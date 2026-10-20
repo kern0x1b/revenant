@@ -18,7 +18,7 @@ exist (no folder, no `LIBRARIES` entry, no `mediaplayer` config) even though
 `registry/MediaPlayer/absent_MediaPlayer.json` already tracked demand against it - added the same
 way `CoreSpotlightBackports`/`PushKitBackports` were: a `LIBRARIES` row in
 `modules/apple/backports.lua`, a `mediaplayer` config and the matching `links`/install-library
-wiring in `packages/a/apple-backports/xmake.lua`.
+wiring in `packages/frameworks/apple-backports/xmake.lua`.
 
 ## What the port does
 

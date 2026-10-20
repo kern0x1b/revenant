@@ -1,5 +1,5 @@
 #!/bin/sh
-# run.sh - holds the constants the port's sheet takes from UIKitCore 16.0 (packages/a/apple-backports/UIKit/
+# run.sh - holds the constants the port's sheet takes from UIKitCore 16.0 (packages/frameworks/apple-backports/UIKit/
 # UISheetPresentationController.m, read from that file here, not copied) against what the host's own sheet metrics
 # answer under Mac Catalyst. The host is a later UIKit: where it agrees, the value has an oracle besides the read of the
 # 16.0 cache; where it differs for a known reason the difference is named and checked, so the test fails if it ever
@@ -8,7 +8,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-source=${SOURCE:-$here/../../../../packages/a/apple-backports/UIKit/UISheetPresentationController.m}
+source=${SOURCE:-$here/../../../../packages/frameworks/apple-backports/UIKit/UISheetPresentationController.m}
 build=${BUILD:-$(runs_fresh revenant-sheetmetrics)}
 sdk=$(xcrun --show-sdk-path)
 xcrun clang -target arm64-apple-ios16.0-macabi -isysroot "$sdk" -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" -fobjc-arc -w \

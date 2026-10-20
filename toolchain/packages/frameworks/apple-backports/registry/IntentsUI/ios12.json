@@ -8,7 +8,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/IntentsUI/IntentsUI.md",
-      "reason": "hand written in packages/a/apple-backports/IntentsUI/RevenantIntentsUI120.m: a real UIKit class that draws itself and keeps the state the header declares",
+      "reason": "hand written in packages/frameworks/apple-backports/IntentsUI/RevenantIntentsUI120.m: a real UIKit class that draws itself and keeps the state the header declares",
       "effect": "every member the header declares has a body; what each answers and where the system's own flow is refused is in facts/IntentsUI/IntentsUI.md",
       "source": "the header of iPhoneOS 16.4"
     },
@@ -19,7 +19,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/IntentsUI/IntentsUI.md",
-      "reason": "hand written in packages/a/apple-backports/IntentsUI/RevenantIntentsUI120.m: a real UIKit class that draws itself and keeps the state the header declares",
+      "reason": "hand written in packages/frameworks/apple-backports/IntentsUI/RevenantIntentsUI120.m: a real UIKit class that draws itself and keeps the state the header declares",
       "effect": "every member the header declares has a body; what each answers and where the system's own flow is refused is in facts/IntentsUI/IntentsUI.md",
       "source": "the header of iPhoneOS 16.4"
     },
@@ -30,7 +30,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/IntentsUI/IntentsUI.md",
-      "reason": "hand written in packages/a/apple-backports/IntentsUI/RevenantIntentsUI120.m: a real UIKit class that draws itself and keeps the state the header declares",
+      "reason": "hand written in packages/frameworks/apple-backports/IntentsUI/RevenantIntentsUI120.m: a real UIKit class that draws itself and keeps the state the header declares",
       "effect": "every member the header declares has a body; what each answers and where the system's own flow is refused is in facts/IntentsUI/IntentsUI.md",
       "source": "the header of iPhoneOS 16.4"
     },

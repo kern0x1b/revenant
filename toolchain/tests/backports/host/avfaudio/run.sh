@@ -20,7 +20,7 @@ xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations \
     "$here/offline.m" -framework Foundation -framework AudioToolbox -framework AVFAudio -framework CoreAudio \
     -o "$offline_bin"
 "$offline_bin" || exit $?
-AVFAUDIO=${AVFAUDIO:-$here/../../../../packages/a/apple-backports/AVFAudio}
+AVFAUDIO=${AVFAUDIO:-$here/../../../../packages/frameworks/apple-backports/AVFAudio}
 build=${AVFAUDIO_HOST_BUILD:-$(runs_folder revenant-avfaudio-host)}
 rm -rf "$build"
 mkdir -p "$build"

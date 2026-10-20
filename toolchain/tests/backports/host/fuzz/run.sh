@@ -10,7 +10,7 @@ if [ "${1:-}" = --mutants ]; then
 fi
 suite=${1:?$usage}
 shift
-FOUNDATION=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}
+FOUNDATION=${FOUNDATION:-$here/../../../../packages/frameworks/apple-backports/Foundation}
 build=${FUZZ_BUILD:-$(runs_folder revenant-fuzz-host)}/$suite
 case $suite in
     percentencoding) sources="NSString+URLUtilities.m NSCharacterSet+URLUtilities.m NSData+Base64.m"; locales= ;;

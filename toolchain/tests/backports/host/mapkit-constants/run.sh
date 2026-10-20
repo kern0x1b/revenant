@@ -11,7 +11,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/MapKit}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/MapKit}
 build=${MAPKIT_CONSTANTS_BUILD:-$(runs_folder revenant-mapkit-constants)}
 sources="MKLaunchOptions71 MKLaunchOptions90 MKMapItemNames11 MKPointOfInterestCategories134 MKPointOfInterestCategories16 MKPointOfInterestCategories18"
 rm -rf "$build"

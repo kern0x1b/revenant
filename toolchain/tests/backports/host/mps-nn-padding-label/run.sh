@@ -11,7 +11,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-PORT=${PORT:-$here/../../../../packages/a/apple-backports/MetalPerformanceShaders}
+PORT=${PORT:-$here/../../../../packages/frameworks/apple-backports/MetalPerformanceShaders}
 BUILD=${BUILD:-$(runs_folder mps-nn/padding-label)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-macos13.0 -isysroot $sdk"

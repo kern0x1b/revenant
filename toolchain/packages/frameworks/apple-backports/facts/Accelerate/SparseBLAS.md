@@ -514,7 +514,7 @@ a description of them:
 
 | upstream | licence | what it gives | usable how |
 | --- | --- | --- | --- |
-| Eigen `SimplicialLLT` / `SimplicialLDLT` / `SparseQR` / `SparseLU` | **MPL-2.0**, file-level copyleft | all four families, with `BunchKaufman` and `AMDOrdering` / `ColamdOrdering` already written | **vendorable as whole unmodified files**, and read as the reference for the algorithm and the pivoting. But the port ships one C/Objective-C `.dylib` per framework; adding a vendored C++ library to `packages/a/apple-backports/Accelerate/` is a packaging change to every band that shares the folder, not a row, and the vendored files would need their own package, their own licence file and their own gate entries |
+| Eigen `SimplicialLLT` / `SimplicialLDLT` / `SparseQR` / `SparseLU` | **MPL-2.0**, file-level copyleft | all four families, with `BunchKaufman` and `AMDOrdering` / `ColamdOrdering` already written | **vendorable as whole unmodified files**, and read as the reference for the algorithm and the pivoting. But the port ships one C/Objective-C `.dylib` per framework; adding a vendored C++ library to `packages/frameworks/apple-backports/Accelerate/` is a packaging change to every band that shares the folder, not a row, and the vendored files would need their own package, their own licence file and their own gate entries |
 | SuiteSparse **AMD and COLAMD** | **BSD-3** | the two orderings every one of the above calls underneath | **the right thing to reuse**: small, self-contained, permissively licensed, and taking them removes the only ordering work that is pure bookkeeping |
 | SuiteSparse **CHOLMOD**, **UMFPACK**, **SPQR** | **LGPL / GPL** | LDLᵀ, QR and LU to stand on | **read only, never vendored.** The licence is the constraint and it is not one to work around |
 
@@ -605,7 +605,7 @@ tarball's and the tree carries a recipe and a hash.
 
 ### The package, written and wired, and exactly where it stops
 
-`packages/s/suitesparse-ordering/xmake.lua`, shaped on `packages/b/box2d/xmake.lua`: the same
+`packages/libraries/suitesparse-ordering/xmake.lua`, shaped on `packages/libraries/box2d/xmake.lua`: the same
 `add_urls` and `add_versions` pair, the same `add_links`, the same `recipe` config so a changed flag is a
 different library, `set_license("BSD-3-Clause")`, `package.strict_compatibility`, and an `on_install` that
 builds with the apple-ios toolchain at `-Os -fvisibility=hidden` into `libSuiteSparseOrdering.a` with
@@ -625,7 +625,7 @@ LGPL and GPL and the rest are not what this package is for. The four licence and
 the package's.
 
 It is wired the way the ruling says: `backports.lua`'s Accelerate row carries
-`archives = {"suitesparse-ordering"}`, and `packages/a/apple-backports/xmake.lua` declares
+`archives = {"suitesparse-ordering"}`, and `packages/frameworks/apple-backports/xmake.lua` declares
 `add_deps("revenant@suitesparse-ordering v7.12.2", {alias = "suitesparse-ordering"})`, without which the gate
 refuses with `apple-backports links the archive suitesparse-ordering and its recipe declares no dependency
 with that alias` — which is what it did, and the dep is the fix.
@@ -731,7 +731,7 @@ the first entry point.
 ## Handing this to the reviewer: what is against main, and what was fixed on the way
 
 **D against main — the two expected blocks and nothing else.** `git diff origin/main...HEAD -- modules/apple/
-backports.lua packages/a/apple-backports/xmake.lua` is:
+backports.lua packages/frameworks/apple-backports/xmake.lua` is:
 
 1. `backports.lua`'s Accelerate row, which gains `archives = {"suitesparse-ordering"}` and the six lines of
    comment above it saying why the archive is not API and which parts of SuiteSparse are absent from it;
@@ -831,7 +831,7 @@ nothing about any category file — there is none here.
 
 `SparseComplex18.m` and `RevenantSparseComplex.h` sit in `tests/backports/host/sparsecomplex/`, beside the
 differential that holds them, and `run.sh` resolves the root and both source paths from its own location.
-They are **beside the test and not in `packages/a/apple-backports/Accelerate/`** for a reason the gate
+They are **beside the test and not in `packages/frameworks/apple-backports/Accelerate/`** for a reason the gate
 enforces rather than a preference: that folder is the library, a file in it is built, and a built symbol
 with no registry entry is a red `built, but no entry in registry/`. The complex half has no registry rows
 because it is not carried yet.

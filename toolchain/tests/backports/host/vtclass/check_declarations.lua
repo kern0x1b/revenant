@@ -647,7 +647,7 @@ function main(...)
     local headers = V.join_path(sdk, "System/Library/Frameworks/VideoToolbox.framework/Headers")
     local sdk_text = read_or_fail(V.header_text, headers)
 
-    local port_header = os.scriptdir() .. "/../../../../packages/a/apple-backports/VideoToolbox/RevenantVideoToolbox.h"
+    local port_header = os.scriptdir() .. "/../../../../packages/frameworks/apple-backports/VideoToolbox/RevenantVideoToolbox.h"
     local port = parse(read_or_fail(V.read_text, port_header))
     local sdk_classes = parse(sdk_text)
 

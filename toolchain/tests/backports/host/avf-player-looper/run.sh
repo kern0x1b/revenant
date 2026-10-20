@@ -19,7 +19,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-avf=$root/packages/a/apple-backports/AVFoundation
+avf=$root/packages/frameworks/apple-backports/AVFoundation
 run=${AVPLAYERLOOPER_RUN:-$(runs_folder v-avf-looper)}
 mutant=${AVPLAYERLOOPER_MUTANT:-0}
 build=$run/build

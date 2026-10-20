@@ -2,10 +2,10 @@ local pinned = 0
 
 function failures(opt)
     local root = path.join(opt.modules, "..")
-    local apple = path.join(root, "packages", "a", "apple-backports")
+    local apple = path.join(root, "packages", "frameworks", "apple-backports")
     local overlap = path.join(apple, "facts", "Matter", "class-overlap.tsv")
     local objects = path.join(apple, "Matter")
-    local real = path.join(root, "packages", "m", "matter", "registry")
+    local real = path.join(root, "packages", "frameworks", "matter", "registry")
     local out = {}
     if not os.isfile(overlap) then
         return {"no class-overlap.tsv at " .. overlap}

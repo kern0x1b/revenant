@@ -9,7 +9,7 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
-uikit=${UIKIT:-$here/../../../../packages/a/apple-backports/UIKit}
+uikit=${UIKIT:-$here/../../../../packages/frameworks/apple-backports/UIKit}
 build=${BUILD:-$(runs_fresh revenant-toolbar)}
 sdk=$(xcrun --show-sdk-path)
 compile() {

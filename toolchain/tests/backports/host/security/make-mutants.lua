@@ -35,7 +35,7 @@ function main(...)
     if not os.isdir(build) then
         os.mkdir(build)
     end
-    local src = os.scriptdir() .. "/../../../../packages/a/apple-backports/Security"
+    local src = os.scriptdir() .. "/../../../../packages/frameworks/apple-backports/Security"
 
     local blocks = tsv.read_text(src .. "/SecProtocolOptionsBlocks13_0.m")
     local old = "    _challenge = block;\n    _challengeQueue = queue;\n}"

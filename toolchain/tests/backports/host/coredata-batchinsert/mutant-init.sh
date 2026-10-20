@@ -13,7 +13,7 @@ echo "FAIL host/coredata-batchinsert/mutant-init.sh: its Python steps are gone a
 exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-FP=${COREDATA:-$here/../../../../packages/a/apple-backports}
+FP=${COREDATA:-$here/../../../../packages/frameworks/apple-backports}
 scratch="$(runs_folder mutant-init)"
 rm -rf "$scratch"; mkdir -p "$scratch"
 

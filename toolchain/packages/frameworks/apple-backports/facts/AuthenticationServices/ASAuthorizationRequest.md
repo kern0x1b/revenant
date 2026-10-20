@@ -40,7 +40,7 @@ graph uses and for the same reason.
 ## Why `port_has` did not see `-init`, and what it reads
 
 It was asked, and here is what it said. The diagnostic read
-`packages/a/apple-backports/AuthenticationServices/ASWebAuthenticationSession.m` — **7231 bytes on
+`packages/frameworks/apple-backports/AuthenticationServices/ASWebAuthenticationSession.m` — **7231 bytes on
 disk, 7231 read**, so the file was not short and not unreadable — found `@implementation
 ASWebAuthenticationSession` at offset 3374, and then searched for:
 

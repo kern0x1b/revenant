@@ -8,7 +8,7 @@
 #
 # ONE source, writer.m, compiled twice: once with the real <AVFoundation/AVFoundation.h> and this
 # machine's own AVFoundation - the ORACLE, from which every expectation is read - and once with -I standin
-# and the port's own packages/a/apple-backports/AVFoundation/AVAssetWriterInputMultiPass8.m linked in
+# and the port's own packages/frameworks/apple-backports/AVFoundation/AVAssetWriterInputMultiPass8.m linked in
 # UNMODIFIED, against a stand-in release shaped like the one the port runs on.
 #
 # The join is not "nothing differs". Every row falls into one of three classes:
@@ -41,7 +41,7 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-port=$root/packages/a/apple-backports/AVFoundation/AVAssetWriterInputMultiPass8.m
+port=$root/packages/frameworks/apple-backports/AVFoundation/AVAssetWriterInputMultiPass8.m
 build=${AVFW_BUILD:-$(runs_folder avf-writerinput8)}
 # BESIDE the build directory, not inside it.
 oracle_dir=${AVFW_ORACLE:-$(runs_folder avf-writerinput8-oracle)}

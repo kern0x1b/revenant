@@ -5,9 +5,9 @@ w=$(cd "$(dirname "$0")/../../../.." && pwd)
 m=$(runs_folder revenant-dynamics-mutant)
 run() {
     name=$1 file=$2 from=$3 to=$4
-    rm -rf "$m"; cp -R "$w/packages/a/apple-backports/UIKit" "$m"
+    rm -rf "$m"; cp -R "$w/packages/frameworks/apple-backports/UIKit" "$m"
     sed -i '' "s/$from/$to/g" "$m/$file"
-    if cmp -s "$w/packages/a/apple-backports/UIKit/$file" "$m/$file"; then echo "MUTANT $name changed nothing"; return; fi
+    if cmp -s "$w/packages/frameworks/apple-backports/UIKit/$file" "$m/$file"; then echo "MUTANT $name changed nothing"; return; fi
     echo "== mutant $name"
     DYNAMICS_SOURCES=$m DYNAMICS_BUILD=$(runs_folder revenant-dynamics-mutant-build) sh "$w/tests/backports/host/dynamics/run.sh" 2>&1 | grep -E 'passed=|^FAIL [^T]' | cut -c1-160
 }

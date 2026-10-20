@@ -206,7 +206,7 @@ max |m * inverse - identity| = 1.19e-07
 The tracker's pose is to come out of a permissive visual-inertial odometry rather than out of a
 hand-written one. The owner ruled OpenCV 3.4.x — BSD-3, and the line that shipped an official armv7
 iOS framework build in `platforms/ios/build_framework.py`, so armv7 at a 6.x deployment is a path
-upstream walked. `packages/o/opencv/xmake.lua` pins the 3.4.20 tag by its own URL and SHA-256 and
+upstream walked. `packages/libraries/opencv/xmake.lua` pins the 3.4.20 tag by its own URL and SHA-256 and
 builds five modules — `core`, `imgproc`, `features2d`, `flann`, `calib3d` — with no apps, tests, IPP,
 OpenCL or codecs. `features2d` has ORB; `calib3d` has `findEssentialMat`, `recoverPose` and
 `solvePnPRansac`, which is where a pose that converges comes from.
@@ -252,7 +252,7 @@ position lands - for one frame, and check which of the three pairs disagrees. Th
 output and no new maths.
 
 The owner's ruling is that this does not get fixed by tuning the solver: the pose is to come out of
-OpenCV 3.4.20's ORB and `solvePnPRansac` once `packages/o/opencv` builds, and this is the record of
+OpenCV 3.4.20's ORB and `solvePnPRansac` once `packages/libraries/opencv` builds, and this is the record of
 what the hand-written path is not doing while it waits.
 
 ## The diagnostic ran: the intrinsics were the transpose, and that was not the cause

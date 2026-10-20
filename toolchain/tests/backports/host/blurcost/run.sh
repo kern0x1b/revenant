@@ -4,7 +4,7 @@
 #
 # Compiles the port's own RevenantBlur.m against a C shim for its Objective-C header
 # (blurcost/RevenantBlur.h) and times revenant_blur_pixels at the three sizes
-# packages/a/apple-backports/facts/UIKit/UIVisualEffect.md reports a whole refresh at. That is the
+# packages/frameworks/apple-backports/facts/UIKit/UIVisualEffect.md reports a whole refresh at. That is the
 # BEFORE figure for moving the shading off the main thread: the read stays there whatever happens, and
 # this is not it.
 #
@@ -17,7 +17,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-sources=${BLURCOST_SOURCES:-$root/packages/a/apple-backports/UIKit}
+sources=${BLURCOST_SOURCES:-$root/packages/frameworks/apple-backports/UIKit}
 build=${BLURCOST_BUILD:-$(runs_folder revenant-blurcost)}
 rm -rf "$build"
 mkdir -p "$build"

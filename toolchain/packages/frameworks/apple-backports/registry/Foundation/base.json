@@ -1076,7 +1076,7 @@
     "introduced": "7.0",
     "status": "implemented",
     "facts": "facts/Foundation/NSURLSession.md",
-    "source": "packages/a/apple-backports/Foundation/NSURLSessionConfiguration.m, which the setter's own entry already documents the absent half of"
+    "source": "packages/frameworks/apple-backports/Foundation/NSURLSessionConfiguration.m, which the setter's own entry already documents the absent half of"
   },
   {
     "api": "-[NSURLSessionConfiguration setTLSMinimumSupportedProtocol:]",
@@ -1093,7 +1093,7 @@
     "introduced": "7.0",
     "status": "implemented",
     "facts": "facts/Foundation/NSURLSession.md",
-    "source": "packages/a/apple-backports/Foundation/NSURLSessionConfiguration.m, which the setter's own entry already documents the absent half of"
+    "source": "packages/frameworks/apple-backports/Foundation/NSURLSessionConfiguration.m, which the setter's own entry already documents the absent half of"
   },
   {
     "api": "-[NSURLSessionTask progress]",

@@ -4,7 +4,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-uikit=$here/../../../../packages/a/apple-backports/UIKit
+uikit=$here/../../../../packages/frameworks/apple-backports/UIKit
 build=${STORAGE_BUILD:-$(runs_fresh revenant-storage-config)}
 . "$here/../../common/twoprocess.sh"
 if [ -n "${STORAGE_PORT_SOURCES:-}" ]; then

@@ -35,7 +35,7 @@ measure the claim rather than assert it:
   with the port's own clang, the 16.4 SDK and `-femulated-tls`: 27 of 27, no error.** The one thing
   that stops them without that flag is `picotls.h:1583`'s thread-local, and that flag is the port's
   own answer to exactly this release ("what an armv7 build below iOS 9 needs because that release's
-  libSystem has no real `__thread`"), the same one `packages/m/matter` builds with;
+  libSystem has no real `__thread`"), the same one `packages/frameworks/matter` builds with;
 - **quicly's 14 library sources compile for the same target the same way: 14 of 14, no error**, with
   its tracer header generated from its own `quicly-probes.d` by its own `misc/probe2trace.pl`;
 - the undefined symbols the two leave are `__emutls_get_address` and `__emutls_v.*` (the port's own

@@ -68,7 +68,7 @@ binary=$(find "$build/project/build" -name consumer -type f -perm -u+x 2>/dev/nu
 # The three things the package promises, read from the shared store rather than from the build tree: the module a port
 # compiles against, its textual interface, and the library a port links.
 store=${XMAKE_GLOBALDIR:-$HOME/.xmake}
-library=$(find "$store/packages/s/swiftui" -name libRevenantSwiftUI.a 2>/dev/null | head -1)
+library=$(find "$store/packages/frameworks/swiftui" -name libRevenantSwiftUI.a 2>/dev/null | head -1)
 [ -n "$library" ] || { echo "consumer: revenant@swiftui installed no libRevenantSwiftUI.a under $store"; exit 1; }
 installdir=$(dirname "$(dirname "$library")")
 module=$installdir/lib/swift/iphoneos/SwiftUI.swiftmodule

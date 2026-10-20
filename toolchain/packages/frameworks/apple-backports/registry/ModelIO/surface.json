@@ -8,7 +8,7 @@
       "kind": "class",
       "minimum": "6.0",
       "reason": "iOS 6.1.3 has no ModelIO.framework at all, so the class is carried; a hard reference to one is a LOAD-FAIL and carrying it is what stops the kill",
-      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/a/apple-backports/ModelIO",
+      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/frameworks/apple-backports/ModelIO",
       "status": "implemented"
     },
     {
@@ -19,7 +19,7 @@
       "kind": "class",
       "minimum": "6.0",
       "reason": "iOS 6.1.3 has no ModelIO.framework at all, so the class is carried; a hard reference to one is a LOAD-FAIL and carrying it is what stops the kill",
-      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/a/apple-backports/ModelIO",
+      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/frameworks/apple-backports/ModelIO",
       "status": "implemented"
     },
     {
@@ -30,7 +30,7 @@
       "kind": "class",
       "minimum": "6.0",
       "reason": "iOS 6.1.3 has no ModelIO.framework at all, so the class is carried; a hard reference to one is a LOAD-FAIL and carrying it is what stops the kill",
-      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/a/apple-backports/ModelIO",
+      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/frameworks/apple-backports/ModelIO",
       "status": "implemented"
     },
     {
@@ -41,7 +41,7 @@
       "kind": "class",
       "minimum": "6.0",
       "reason": "iOS 6.1.3 has no ModelIO.framework at all, so the class is carried; a hard reference to one is a LOAD-FAIL and carrying it is what stops the kill",
-      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/a/apple-backports/ModelIO",
+      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/frameworks/apple-backports/ModelIO",
       "status": "implemented"
     },
     {
@@ -52,7 +52,7 @@
       "kind": "class",
       "minimum": "6.0",
       "reason": "iOS 6.1.3 has no ModelIO.framework at all, so the class is carried; a hard reference to one is a LOAD-FAIL and carrying it is what stops the kill",
-      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/a/apple-backports/ModelIO",
+      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/frameworks/apple-backports/ModelIO",
       "status": "implemented"
     },
     {
@@ -63,7 +63,7 @@
       "kind": "class",
       "minimum": "6.0",
       "reason": "iOS 6.1.3 has no ModelIO.framework at all, so the class is carried; a hard reference to one is a LOAD-FAIL and carrying it is what stops the kill",
-      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/a/apple-backports/ModelIO",
+      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/frameworks/apple-backports/ModelIO",
       "status": "implemented"
     },
     {
@@ -74,7 +74,7 @@
       "kind": "class",
       "minimum": "6.0",
       "reason": "iOS 6.1.3 has no ModelIO.framework at all, so the class is carried; a hard reference to one is a LOAD-FAIL and carrying it is what stops the kill",
-      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/a/apple-backports/ModelIO",
+      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/frameworks/apple-backports/ModelIO",
       "status": "implemented"
     },
     {
@@ -85,7 +85,7 @@
       "kind": "class",
       "minimum": "6.0",
       "reason": "iOS 6.1.3 has no ModelIO.framework at all, so the class is carried; a hard reference to one is a LOAD-FAIL and carrying it is what stops the kill",
-      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/a/apple-backports/ModelIO",
+      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/frameworks/apple-backports/ModelIO",
       "status": "implemented"
     },
     {
@@ -96,7 +96,7 @@
       "kind": "class",
       "minimum": "6.0",
       "reason": "iOS 6.1.3 has no ModelIO.framework at all, so the class is carried; a hard reference to one is a LOAD-FAIL and carrying it is what stops the kill",
-      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/a/apple-backports/ModelIO",
+      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/frameworks/apple-backports/ModelIO",
       "status": "implemented"
     },
     {
@@ -107,7 +107,7 @@
       "kind": "class",
       "minimum": "6.0",
       "reason": "iOS 6.1.3 has no ModelIO.framework at all, so the class is carried; a hard reference to one is a LOAD-FAIL and carrying it is what stops the kill",
-      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/a/apple-backports/ModelIO",
+      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/frameworks/apple-backports/ModelIO",
       "status": "implemented"
     },
     {
@@ -118,7 +118,7 @@
       "kind": "class",
       "minimum": "6.0",
       "reason": "iOS 6.1.3 has no ModelIO.framework at all, so the class is carried; a hard reference to one is a LOAD-FAIL and carrying it is what stops the kill",
-      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/a/apple-backports/ModelIO",
+      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/frameworks/apple-backports/ModelIO",
       "status": "implemented"
     },
     {
@@ -129,7 +129,7 @@
       "kind": "class",
       "minimum": "6.0",
       "reason": "iOS 6.1.3 has no ModelIO.framework at all, so the class is carried; a hard reference to one is a LOAD-FAIL and carrying it is what stops the kill",
-      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/a/apple-backports/ModelIO",
+      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/frameworks/apple-backports/ModelIO",
       "status": "implemented"
     },
     {
@@ -140,7 +140,7 @@
       "kind": "class",
       "minimum": "6.0",
       "reason": "iOS 6.1.3 has no ModelIO.framework at all, so the class is carried; a hard reference to one is a LOAD-FAIL and carrying it is what stops the kill",
-      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/a/apple-backports/ModelIO",
+      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/frameworks/apple-backports/ModelIO",
       "status": "implemented"
     },
     {
@@ -151,7 +151,7 @@
       "kind": "class",
       "minimum": "6.0",
       "reason": "iOS 6.1.3 has no ModelIO.framework at all, so the class is carried; a hard reference to one is a LOAD-FAIL and carrying it is what stops the kill",
-      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/a/apple-backports/ModelIO",
+      "source": "clang s own AST of the 26.2 headers via tools/corpus/surface-diff-latest.py --rows, MINUS every class the tree already declares in registry/ModelIO or implements in packages/frameworks/apple-backports/ModelIO",
       "status": "implemented"
     },
     {
@@ -217,7 +217,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "a row named the selector and no object defined it - the generator had already carried the double sibling and, a row naming it, skipped this one - so the class is built for real here instead of a selector with nil behind it",
-      "source": "the 16.4 SDK MDLValueTypes.h, which declares MDLMatrix4x4Array over NSObject<NSCopying> with elementCount, precision, clear, initWithElementCount: and the four array selectors, read against packages/a/apple-backports/ModelIO/MDLMatrix4x4Array11.m",
+      "source": "the 16.4 SDK MDLValueTypes.h, which declares MDLMatrix4x4Array over NSObject<NSCopying> with elementCount, precision, clear, initWithElementCount: and the four array selectors, read against packages/frameworks/apple-backports/ModelIO/MDLMatrix4x4Array11.m",
       "status": "implemented"
     },
     {
@@ -239,7 +239,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLMeshBuffer at MDLMeshBuffer.h:61 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLMeshBuffer.h, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLMeshBuffer.h, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -272,7 +272,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLTransformOp at MDLTransformStack.h:26 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLTransformStack.h, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLTransformStack11.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLTransformStack.h, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLTransformStack11.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -525,7 +525,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLTransformComponent at MDLTransform.h:27 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLTransform.h, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLTransform9.m and MDLTransformStack11.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLTransform.h, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLTransform9.m and MDLTransformStack11.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -1251,7 +1251,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLAssetResolver at MDLAssetResolver.h:14 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLAssetResolver.h:16 and :17, read against the three @implementation blocks of packages/a/apple-backports/ModelIO/MDLAssetResolver11.m, which is the object the 11.0 band builds",
+      "source": "the 16.4 SDK's MDLAssetResolver.h:16 and :17, read against the three @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLAssetResolver11.m, which is the object the 11.0 band builds",
       "status": "implemented"
     },
     {
@@ -1262,7 +1262,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLAssetResolver at MDLAssetResolver.h:14 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLAssetResolver.h:16 and :17, read against the three @implementation blocks of packages/a/apple-backports/ModelIO/MDLAssetResolver11.m, which is the object the 11.0 band builds",
+      "source": "the 16.4 SDK's MDLAssetResolver.h:16 and :17, read against the three @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLAssetResolver11.m, which is the object the 11.0 band builds",
       "status": "implemented"
     },
     {
@@ -1955,7 +1955,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "build -[MDLLightProbeIrradianceDataSource sphericalHarmonicsCoefficientsAtPosition:]",
-      "source": "the 16.4 SDK's MDLAsset.h:318, and nm -gU over every object of packages/a/apple-backports/ModelIO, which lists no class of that name for any object to define",
+      "source": "the 16.4 SDK's MDLAsset.h:318, and nm -gU over every object of packages/frameworks/apple-backports/ModelIO, which lists no class of that name for any object to define",
       "status": "owed"
     },
     {
@@ -2120,7 +2120,7 @@
       "kind": "selector",
       "minimum": "6.0",
       "reason": "a row named the selector and no object defined it - the generator had already carried the double sibling and, a row naming it, skipped this one - so the class is built for real here instead of a selector with nil behind it",
-      "source": "the 16.4 SDK MDLValueTypes.h, which declares MDLMatrix4x4Array over NSObject<NSCopying> with elementCount, precision, clear, initWithElementCount: and the four array selectors, read against packages/a/apple-backports/ModelIO/MDLMatrix4x4Array11.m",
+      "source": "the 16.4 SDK MDLValueTypes.h, which declares MDLMatrix4x4Array over NSObject<NSCopying> with elementCount, precision, clear, initWithElementCount: and the four array selectors, read against packages/frameworks/apple-backports/ModelIO/MDLMatrix4x4Array11.m",
       "status": "implemented"
     },
     {
@@ -2131,7 +2131,7 @@
       "kind": "selector",
       "minimum": "6.0",
       "reason": "a row named the selector and no object defined it - the generator had already carried the double sibling and, a row naming it, skipped this one - so the class is built for real here instead of a selector with nil behind it",
-      "source": "the 16.4 SDK MDLValueTypes.h, which declares MDLMatrix4x4Array over NSObject<NSCopying> with elementCount, precision, clear, initWithElementCount: and the four array selectors, read against packages/a/apple-backports/ModelIO/MDLMatrix4x4Array11.m",
+      "source": "the 16.4 SDK MDLValueTypes.h, which declares MDLMatrix4x4Array over NSObject<NSCopying> with elementCount, precision, clear, initWithElementCount: and the four array selectors, read against packages/frameworks/apple-backports/ModelIO/MDLMatrix4x4Array11.m",
       "status": "implemented"
     },
     {
@@ -2142,7 +2142,7 @@
       "kind": "selector",
       "minimum": "6.0",
       "reason": "a row named the selector and no object defined it - the generator had already carried the double sibling and, a row naming it, skipped this one - so the class is built for real here instead of a selector with nil behind it",
-      "source": "the 16.4 SDK MDLValueTypes.h, which declares MDLMatrix4x4Array over NSObject<NSCopying> with elementCount, precision, clear, initWithElementCount: and the four array selectors, read against packages/a/apple-backports/ModelIO/MDLMatrix4x4Array11.m",
+      "source": "the 16.4 SDK MDLValueTypes.h, which declares MDLMatrix4x4Array over NSObject<NSCopying> with elementCount, precision, clear, initWithElementCount: and the four array selectors, read against packages/frameworks/apple-backports/ModelIO/MDLMatrix4x4Array11.m",
       "status": "implemented"
     },
     {
@@ -2164,7 +2164,7 @@
       "kind": "selector",
       "minimum": "6.0",
       "reason": "a row named the selector and no object defined it - the generator had already carried the double sibling and, a row naming it, skipped this one - so the class is built for real here instead of a selector with nil behind it",
-      "source": "the 16.4 SDK MDLValueTypes.h, which declares MDLMatrix4x4Array over NSObject<NSCopying> with elementCount, precision, clear, initWithElementCount: and the four array selectors, read against packages/a/apple-backports/ModelIO/MDLMatrix4x4Array11.m",
+      "source": "the 16.4 SDK MDLValueTypes.h, which declares MDLMatrix4x4Array over NSObject<NSCopying> with elementCount, precision, clear, initWithElementCount: and the four array selectors, read against packages/frameworks/apple-backports/ModelIO/MDLMatrix4x4Array11.m",
       "status": "implemented"
     },
     {
@@ -2175,7 +2175,7 @@
       "kind": "selector",
       "minimum": "6.0",
       "reason": "a row named the selector and no object defined it - the generator had already carried the double sibling and, a row naming it, skipped this one - so the class is built for real here instead of a selector with nil behind it",
-      "source": "the 16.4 SDK MDLValueTypes.h, which declares MDLMatrix4x4Array over NSObject<NSCopying> with elementCount, precision, clear, initWithElementCount: and the four array selectors, read against packages/a/apple-backports/ModelIO/MDLMatrix4x4Array11.m",
+      "source": "the 16.4 SDK MDLValueTypes.h, which declares MDLMatrix4x4Array over NSObject<NSCopying> with elementCount, precision, clear, initWithElementCount: and the four array selectors, read against packages/frameworks/apple-backports/ModelIO/MDLMatrix4x4Array11.m",
       "status": "implemented"
     },
     {
@@ -2384,7 +2384,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLMeshBuffer at MDLMeshBuffer.h:61 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLMeshBuffer.h, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLMeshBuffer.h, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -2395,7 +2395,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLMeshBufferAllocator at MDLMeshBuffer.h:181 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLMeshBuffer.h, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLMeshBuffer.h, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -2406,7 +2406,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLMeshBufferAllocator at MDLMeshBuffer.h:181 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLMeshBuffer.h, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLMeshBuffer.h, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -2417,7 +2417,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLMeshBufferAllocator at MDLMeshBuffer.h:181 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLMeshBuffer.h, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLMeshBuffer.h, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -2428,7 +2428,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLMeshBufferAllocator at MDLMeshBuffer.h:181 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLMeshBuffer.h, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLMeshBuffer.h, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -2439,7 +2439,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLMeshBufferAllocator at MDLMeshBuffer.h:181 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLMeshBuffer.h, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLMeshBuffer.h, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -2450,7 +2450,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLMeshBufferAllocator at MDLMeshBuffer.h:181 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLMeshBuffer.h, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLMeshBuffer.h, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -2472,7 +2472,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLObjectContainerComponent at MDLTypes.h:82 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLTypes.h, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLObject9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLTypes.h, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLObject9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -2483,7 +2483,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLObjectContainerComponent at MDLTypes.h:82 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLTypes.h, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLObject9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLTypes.h, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLObject9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -2494,7 +2494,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLObjectContainerComponent at MDLTypes.h:82 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLTypes.h, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLObject9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLTypes.h, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLObject9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -3308,7 +3308,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLTransformComponent at MDLTransform.h:27 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLTransform.h, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLTransform9.m and MDLTransformStack11.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLTransform.h, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLTransform9.m and MDLTransformStack11.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -3319,7 +3319,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLTransformComponent at MDLTransform.h:27 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLTransform.h, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLTransform9.m and MDLTransformStack11.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLTransform.h, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLTransform9.m and MDLTransformStack11.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -3330,7 +3330,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLTransformComponent at MDLTransform.h:27 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLTransform.h, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLTransform9.m and MDLTransformStack11.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLTransform.h, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLTransform9.m and MDLTransformStack11.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -3341,7 +3341,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLTransformOp at MDLTransformStack.h:26 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLTransformStack.h, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLTransformStack11.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLTransformStack.h, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLTransformStack11.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -3352,7 +3352,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLTransformOp at MDLTransformStack.h:26 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLTransformStack.h, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLTransformStack11.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLTransformStack.h, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLTransformStack11.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -3561,7 +3561,7 @@
       "kind": "protocol",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLNamed at MDLTypes.h:68 as an @protocol with a body and every consumer in the SDK takes it protocol-qualified, so no Apple class of this name exists to carry and the port carries the protocol instead; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLTypes.h:68, with the ios version measured by clang's -Wunguarded-availability at -target armv7-apple-ios6.1.3, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLObject9.m, where MDLObject synthesizes it",
+      "source": "the 16.4 SDK's MDLTypes.h:68, with the ios version measured by clang's -Wunguarded-availability at -target armv7-apple-ios6.1.3, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLObject9.m, where MDLObject synthesizes it",
       "status": "implemented"
     },
     {
@@ -3572,7 +3572,7 @@
       "kind": "protocol",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLMeshBufferZone at MDLMeshBuffer.h:155 as an @protocol with a body and every consumer in the SDK takes it protocol-qualified, so no Apple class of this name exists to carry and the port carries the protocol instead; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLMeshBuffer.h:155, with the ios version measured by clang's -Wunguarded-availability at -target armv7-apple-ios6.1.3, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLMeshBuffer11.m, where MDLMeshBufferZoneDefault carries it",
+      "source": "the 16.4 SDK's MDLMeshBuffer.h:155, with the ios version measured by clang's -Wunguarded-availability at -target armv7-apple-ios6.1.3, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLMeshBuffer11.m, where MDLMeshBufferZoneDefault carries it",
       "status": "implemented"
     },
     {
@@ -3583,7 +3583,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLMeshBuffer at MDLMeshBuffer.h:61 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLMeshBuffer.h:61, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLMeshBuffer.h:61, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -3594,7 +3594,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLMeshBuffer at MDLMeshBuffer.h:61 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLMeshBuffer.h:61, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLMeshBuffer.h:61, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -3605,7 +3605,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLMeshBuffer at MDLMeshBuffer.h:61 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLMeshBuffer.h:61, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLMeshBuffer.h:61, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -3616,7 +3616,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLMeshBuffer at MDLMeshBuffer.h:61 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLMeshBuffer.h:61, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLMeshBuffer.h:61, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLMeshBuffer9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -3627,7 +3627,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLMeshBufferZone at MDLMeshBuffer.h:155 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLMeshBuffer.h:155, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLMeshBuffer11.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLMeshBuffer.h:155, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLMeshBuffer11.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -3638,7 +3638,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLMeshBufferZone at MDLMeshBuffer.h:155 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLMeshBuffer.h:155, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLMeshBuffer11.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLMeshBuffer.h:155, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLMeshBuffer11.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -3649,7 +3649,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLNamed at MDLTypes.h:68 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLTypes.h:68, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLObject9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLTypes.h:68, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLObject9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -3660,7 +3660,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLObjectContainerComponent at MDLTypes.h:82 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLTypes.h:82, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLObject9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLTypes.h:82, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLObject9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -3671,7 +3671,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLObjectContainerComponent at MDLTypes.h:82 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLTypes.h:82, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLObject9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLTypes.h:82, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLObject9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -3682,7 +3682,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLTransformComponent at MDLTransform.h:27 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLTransform.h:27, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLTransform9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLTransform.h:27, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLTransform9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -3693,7 +3693,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLTransformComponent at MDLTransform.h:27 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLTransform.h:27, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLTransform9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLTransform.h:27, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLTransform9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -3704,7 +3704,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLTransformComponent at MDLTransform.h:27 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLTransform.h:27, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLTransform9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLTransform.h:27, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLTransform9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -3715,7 +3715,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLTransformComponent at MDLTransform.h:27 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLTransform.h:27, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLTransform9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLTransform.h:27, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLTransform9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -3726,7 +3726,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLTransformComponent at MDLTransform.h:27 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLTransform.h:27, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLTransform9.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLTransform.h:27, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLTransform9.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -3737,7 +3737,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLTransformOp at MDLTransformStack.h:26 as an @protocol, so this member belongs to a protocol and the port carries it as one; the release has no ModelIO surface at all",
-      "source": "the 16.4 SDK's MDLTransformStack.h:26, read against the @implementation blocks of packages/a/apple-backports/ModelIO/MDLTransformStack11.m, which are the objects the 9.0 and 11.0 bands build",
+      "source": "the 16.4 SDK's MDLTransformStack.h:26, read against the @implementation blocks of packages/frameworks/apple-backports/ModelIO/MDLTransformStack11.m, which are the objects the 9.0 and 11.0 bands build",
       "status": "implemented"
     },
     {
@@ -3748,7 +3748,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLVertexAttribute as an @interface, so this member belongs to a class and the port carries the class; the release has no ModelIO surface at all. The accessor is not in ModelIO own library and is not missing: it is in the library ModelIO links",
-      "source": "the 16.4 SDK's MDLVertexDescriptor.h, which declares all three as @interface classes at lines 172, 198 and 273 - they were @protocols by the 26.2 SDK - read against packages/a/apple-backports/MetalKit/MDLVertexDescriptor9.m, the object that defines them, and against packages/a/apple-backports/ModelIO/, whose objects reference the three and define no accessor of their own",
+      "source": "the 16.4 SDK's MDLVertexDescriptor.h, which declares all three as @interface classes at lines 172, 198 and 273 - they were @protocols by the 26.2 SDK - read against packages/frameworks/apple-backports/MetalKit/MDLVertexDescriptor9.m, the object that defines them, and against packages/frameworks/apple-backports/ModelIO/, whose objects reference the three and define no accessor of their own",
       "status": "implemented"
     },
     {
@@ -3759,7 +3759,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLVertexAttribute as an @interface, so this member belongs to a class and the port carries the class; the release has no ModelIO surface at all. The accessor is not in ModelIO own library and is not missing: it is in the library ModelIO links",
-      "source": "the 16.4 SDK's MDLVertexDescriptor.h, which declares all three as @interface classes at lines 172, 198 and 273 - they were @protocols by the 26.2 SDK - read against packages/a/apple-backports/MetalKit/MDLVertexDescriptor9.m, the object that defines them, and against packages/a/apple-backports/ModelIO/, whose objects reference the three and define no accessor of their own",
+      "source": "the 16.4 SDK's MDLVertexDescriptor.h, which declares all three as @interface classes at lines 172, 198 and 273 - they were @protocols by the 26.2 SDK - read against packages/frameworks/apple-backports/MetalKit/MDLVertexDescriptor9.m, the object that defines them, and against packages/frameworks/apple-backports/ModelIO/, whose objects reference the three and define no accessor of their own",
       "status": "implemented"
     },
     {
@@ -3770,7 +3770,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLVertexAttribute as an @interface, so this member belongs to a class and the port carries the class; the release has no ModelIO surface at all. The accessor is not in ModelIO own library and is not missing: it is in the library ModelIO links",
-      "source": "the 16.4 SDK's MDLVertexDescriptor.h, which declares all three as @interface classes at lines 172, 198 and 273 - they were @protocols by the 26.2 SDK - read against packages/a/apple-backports/MetalKit/MDLVertexDescriptor9.m, the object that defines them, and against packages/a/apple-backports/ModelIO/, whose objects reference the three and define no accessor of their own",
+      "source": "the 16.4 SDK's MDLVertexDescriptor.h, which declares all three as @interface classes at lines 172, 198 and 273 - they were @protocols by the 26.2 SDK - read against packages/frameworks/apple-backports/MetalKit/MDLVertexDescriptor9.m, the object that defines them, and against packages/frameworks/apple-backports/ModelIO/, whose objects reference the three and define no accessor of their own",
       "status": "implemented"
     },
     {
@@ -3781,7 +3781,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLVertexAttribute as an @interface, so this member belongs to a class and the port carries the class; the release has no ModelIO surface at all. The accessor is not in ModelIO own library and is not missing: it is in the library ModelIO links",
-      "source": "the 16.4 SDK's MDLVertexDescriptor.h, which declares all three as @interface classes at lines 172, 198 and 273 - they were @protocols by the 26.2 SDK - read against packages/a/apple-backports/MetalKit/MDLVertexDescriptor9.m, the object that defines them, and against packages/a/apple-backports/ModelIO/, whose objects reference the three and define no accessor of their own",
+      "source": "the 16.4 SDK's MDLVertexDescriptor.h, which declares all three as @interface classes at lines 172, 198 and 273 - they were @protocols by the 26.2 SDK - read against packages/frameworks/apple-backports/MetalKit/MDLVertexDescriptor9.m, the object that defines them, and against packages/frameworks/apple-backports/ModelIO/, whose objects reference the three and define no accessor of their own",
       "status": "implemented"
     },
     {
@@ -3792,7 +3792,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLVertexAttribute as an @interface, so this member belongs to a class and the port carries the class; the release has no ModelIO surface at all. The accessor is not in ModelIO own library and is not missing: it is in the library ModelIO links",
-      "source": "the 16.4 SDK's MDLVertexDescriptor.h, which declares all three as @interface classes at lines 172, 198 and 273 - they were @protocols by the 26.2 SDK - read against packages/a/apple-backports/MetalKit/MDLVertexDescriptor9.m, the object that defines them, and against packages/a/apple-backports/ModelIO/, whose objects reference the three and define no accessor of their own",
+      "source": "the 16.4 SDK's MDLVertexDescriptor.h, which declares all three as @interface classes at lines 172, 198 and 273 - they were @protocols by the 26.2 SDK - read against packages/frameworks/apple-backports/MetalKit/MDLVertexDescriptor9.m, the object that defines them, and against packages/frameworks/apple-backports/ModelIO/, whose objects reference the three and define no accessor of their own",
       "status": "implemented"
     },
     {
@@ -3803,7 +3803,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLVertexAttribute as an @interface, so this member belongs to a class and the port carries the class; the release has no ModelIO surface at all. The accessor is not in ModelIO own library and is not missing: it is in the library ModelIO links",
-      "source": "the 16.4 SDK's MDLVertexDescriptor.h, which declares all three as @interface classes at lines 172, 198 and 273 - they were @protocols by the 26.2 SDK - read against packages/a/apple-backports/MetalKit/MDLVertexDescriptor9.m, the object that defines them, and against packages/a/apple-backports/ModelIO/, whose objects reference the three and define no accessor of their own",
+      "source": "the 16.4 SDK's MDLVertexDescriptor.h, which declares all three as @interface classes at lines 172, 198 and 273 - they were @protocols by the 26.2 SDK - read against packages/frameworks/apple-backports/MetalKit/MDLVertexDescriptor9.m, the object that defines them, and against packages/frameworks/apple-backports/ModelIO/, whose objects reference the three and define no accessor of their own",
       "status": "implemented"
     },
     {
@@ -3814,7 +3814,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLVertexBufferLayout as an @interface, so this member belongs to a class and the port carries the class; the release has no ModelIO surface at all. The accessor is not in ModelIO own library and is not missing: it is in the library ModelIO links",
-      "source": "the 16.4 SDK's MDLVertexDescriptor.h, which declares all three as @interface classes at lines 172, 198 and 273 - they were @protocols by the 26.2 SDK - read against packages/a/apple-backports/MetalKit/MDLVertexDescriptor9.m, the object that defines them, and against packages/a/apple-backports/ModelIO/, whose objects reference the three and define no accessor of their own",
+      "source": "the 16.4 SDK's MDLVertexDescriptor.h, which declares all three as @interface classes at lines 172, 198 and 273 - they were @protocols by the 26.2 SDK - read against packages/frameworks/apple-backports/MetalKit/MDLVertexDescriptor9.m, the object that defines them, and against packages/frameworks/apple-backports/ModelIO/, whose objects reference the three and define no accessor of their own",
       "status": "implemented"
     },
     {
@@ -3825,7 +3825,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLVertexDescriptor as an @interface, so this member belongs to a class and the port carries the class; the release has no ModelIO surface at all. The accessor is not in ModelIO own library and is not missing: it is in the library ModelIO links",
-      "source": "the 16.4 SDK's MDLVertexDescriptor.h, which declares all three as @interface classes at lines 172, 198 and 273 - they were @protocols by the 26.2 SDK - read against packages/a/apple-backports/MetalKit/MDLVertexDescriptor9.m, the object that defines them, and against packages/a/apple-backports/ModelIO/, whose objects reference the three and define no accessor of their own",
+      "source": "the 16.4 SDK's MDLVertexDescriptor.h, which declares all three as @interface classes at lines 172, 198 and 273 - they were @protocols by the 26.2 SDK - read against packages/frameworks/apple-backports/MetalKit/MDLVertexDescriptor9.m, the object that defines them, and against packages/frameworks/apple-backports/ModelIO/, whose objects reference the three and define no accessor of their own",
       "status": "implemented"
     },
     {
@@ -3836,7 +3836,7 @@
       "kind": "property",
       "minimum": "6.0",
       "reason": "the 16.4 SDK declares MDLVertexDescriptor as an @interface, so this member belongs to a class and the port carries the class; the release has no ModelIO surface at all. The accessor is not in ModelIO own library and is not missing: it is in the library ModelIO links",
-      "source": "the 16.4 SDK's MDLVertexDescriptor.h, which declares all three as @interface classes at lines 172, 198 and 273 - they were @protocols by the 26.2 SDK - read against packages/a/apple-backports/MetalKit/MDLVertexDescriptor9.m, the object that defines them, and against packages/a/apple-backports/ModelIO/, whose objects reference the three and define no accessor of their own",
+      "source": "the 16.4 SDK's MDLVertexDescriptor.h, which declares all three as @interface classes at lines 172, 198 and 273 - they were @protocols by the 26.2 SDK - read against packages/frameworks/apple-backports/MetalKit/MDLVertexDescriptor9.m, the object that defines them, and against packages/frameworks/apple-backports/ModelIO/, whose objects reference the three and define no accessor of their own",
       "status": "implemented"
     }
   ],

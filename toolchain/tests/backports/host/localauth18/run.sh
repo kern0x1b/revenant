@@ -9,9 +9,9 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 . "$here/../../common/generated.sh"
 ensure_generated "$here" LocalAuthentication
-port=${PORT:-$here/../../../../packages/a/apple-backports/LocalAuthentication}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/LocalAuthentication}
 # the generated layer's protocol header (RevenantLocalAuthenticationProtocols.h) is in .gen/LocalAuthentication
-port_gen=$here/../../../../packages/a/apple-backports/.gen/LocalAuthentication
+port_gen=$here/../../../../packages/frameworks/apple-backports/.gen/LocalAuthentication
 harness=${LOCALAUTH18_HARNESS:-$here/../../device}
 build=${LOCALAUTH18_BUILD:-$(runs_fresh revenant-localauth18)}
 rm -rf "$build"

@@ -66,7 +66,7 @@ caller asks when they subscript a slice.
 ## What this overlay is over, and what it is constrained to
 
 The overlay declares **no dependency on CoreML**, and it is named after the framework. The reason is
-in `packages/c/createml/xmake.lua`: the module is called `CoreML` and so is the SDK's CoreML as a
+in `packages/frameworks/createml/xmake.lua`: the module is called `CoreML` and so is the SDK's CoreML as a
 clang module, two modules cannot share a name, and the Swift one wins — so the module is given a
 header of its own that includes the framework's, and built with `-import-objc-header`. That is the
 same route `revenant@swift-runtime` takes for `Foundation`, `UIKit` and `CoreData`, and it is why

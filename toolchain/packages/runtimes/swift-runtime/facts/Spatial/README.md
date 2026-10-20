@@ -1,6 +1,6 @@
 # Spatial: what is built here, and what is measured
 
-`packages/s/swift-runtime/files/Spatial` is the source of the `Spatial` module `xmake.lua` builds
+`packages/runtimes/swift-runtime/files/Spatial` is the source of the `Spatial` module `xmake.lua` builds
 into `libswiftSpatial.dylib`, for a release that has no Swift module of its own: the SDK carries
 Spatial for arm64 only, and every release this runtime targets is armv7. The five templates are
 gyb's, and each writes both scalars, because every type has a `Float` twin that differs only in the

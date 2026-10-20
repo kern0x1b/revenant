@@ -49,7 +49,7 @@ between signing a message and signing a digest:
 - `RevenantCKSharedSecretES256` is the ECDH: `uECC_shared_secret` between a 32 byte private key and a
   65 byte uncompressed public point, which micro-ecc has and the wrapper had no use for.
 
-The package's recipe also builds that wrapper now (`packages/m/micro-ecc/xmake.lua`). It did not:
+The package's recipe also builds that wrapper now (`packages/libraries/micro-ecc/xmake.lua`). It did not:
 `on_install` compiled `uECC.c` alone and installed only micro-ecc's own three headers, so
 `RevenantCKWebAuth.h` was in the package's source and not in its `include/`, and nothing that included it
 could compile. That was a gap in the package, not in its users, and it is fixed at the source.

@@ -3,7 +3,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-src="$root/packages/a/apple-compat/src"
+src="$root/packages/runtimes/apple-compat/src"
 build=${COMPAT_LIBC_BUILD:-$(runs_folder compat-libc-host)}
 rm -rf "$build"
 mkdir -p "$build/planted"

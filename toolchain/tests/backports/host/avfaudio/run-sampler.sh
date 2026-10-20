@@ -14,8 +14,8 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-AVFAUDIO="$root/packages/a/apple-backports/AVFAudio"
-AVFOUNDATION="$root/packages/a/apple-backports/AVFoundation"
+AVFAUDIO="$root/packages/frameworks/apple-backports/AVFAudio"
+AVFOUNDATION="$root/packages/frameworks/apple-backports/AVFoundation"
 build=${AVFAUDIO_SAMPLER_BUILD:-$(runs_folder revenant-avfaudio-sampler)}
 rm -rf "$build"
 mkdir -p "$build"

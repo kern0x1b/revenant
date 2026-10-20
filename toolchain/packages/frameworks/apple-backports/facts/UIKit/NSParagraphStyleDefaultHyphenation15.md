@@ -2,7 +2,7 @@
 
 Two rows: `NSParagraphStyle.usesDefaultHyphenation` and
 `NSMutableParagraphStyle.usesDefaultHyphenation`. One object,
-`packages/a/apple-backports/UIKit/NSParagraphStyle+Text15.m`, a category on the SDK's own two
+`packages/frameworks/apple-backports/UIKit/NSParagraphStyle+Text15.m`, a category on the SDK's own two
 classes — nothing is redeclared, which is why the file is an `@implementation` of a category
 rather than of a new class.
 

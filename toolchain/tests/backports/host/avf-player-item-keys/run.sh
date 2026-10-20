@@ -20,7 +20,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-src=$root/packages/a/apple-backports/AVFoundation/AVPlayerItemAutomaticKeys7.m
+src=$root/packages/frameworks/apple-backports/AVFoundation/AVPlayerItemAutomaticKeys7.m
 run=${AVPLAYERITEMKEYS_RUN:-$(runs_folder v-avf-item-keys)}
 mutant=${AVPLAYERITEMKEYS_MUTANT:-0}
 build=$run/build

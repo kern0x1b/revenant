@@ -148,7 +148,7 @@ doubt is whether a category method **replaces** the release's own, because 7.0 h
 
 If the port's copy replaced the release's, every 7.0-and-later caller of `isVideoBinned` would reach
 `[self isBinned]` on a release that has no such method. It does not replace it, and the reason is in
-`packages/a/apple-backports/attach.c`: `revenant_collect` adds a category's method only when
+`packages/frameworks/apple-backports/attach.c`: `revenant_collect` adds a category's method only when
 `!revenant_implements(cls, selector)`, and `revenant_implements` walks the class and its superclasses.
 So at 6.1.3, where nothing implements `isVideoBinned`, the port's method is installed and forwards
 to the release's `-isBinned`; at 7.0 and above, where the release implements `isVideoBinned`, the

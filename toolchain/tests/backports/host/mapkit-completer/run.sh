@@ -13,7 +13,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/MapKit}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/MapKit}
 build=${MAPKIT_COMPLETER_BUILD:-$(runs_folder revenant-mapkit-completer)}
 query="a place that does not exist anywhere at all zzzzqqq"
 rm -rf "$build"

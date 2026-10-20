@@ -2,7 +2,7 @@
 # checks the archive against the recipe's digest and unpacks it. The caller sets `box2d` (this
 # directory) and `BUILD` (where the archive is kept and unpacked); this sets `version`, `digest`,
 # `url`, `flags` (the recipe's compiler flags) and `source` (the unpacked tree, $BUILD/src/...).
-recipe=$box2d/../../../../packages/b/box2d/xmake.lua
+recipe=$box2d/../../../../packages/libraries/box2d/xmake.lua
 version=$(sed -n 's/.*add_versions("\([^"]*\)", "[0-9a-f]*").*/\1/p' "$recipe")
 digest=$(sed -n 's/.*add_versions("[^"]*", "\([0-9a-f]*\)").*/\1/p' "$recipe")
 url=$(sed -n 's/.*add_urls("\([^"]*\)").*/\1/p' "$recipe" | sed "s/\$(version)/$version/")

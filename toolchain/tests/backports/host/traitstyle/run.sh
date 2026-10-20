@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-sources=${TRAITSTYLE_SOURCES:-$here/../../../../packages/a/apple-backports/UIKit}
+sources=${TRAITSTYLE_SOURCES:-$here/../../../../packages/frameworks/apple-backports/UIKit}
 harness=${TRAITSTYLE_HARNESS:-$here/../../device}
 build=${TRAITSTYLE_BUILD:-$(runs_folder revenant-traitstyle-host)}
 sdk=$(xcrun --show-sdk-path)

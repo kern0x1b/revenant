@@ -906,7 +906,7 @@ local function banner(name, classes, release, deferred)
 
 #import <Intents/Intents.h>
 #import <objc/runtime.h>
-#import "../../../c/revenant-coding/files/RevenantCoding.h"
+#import "../../../runtimes/revenant-coding/files/RevenantCoding.h"
 #import "RevenantIntentsResolution.h"
 #import "RevenantIntents262.h"
 

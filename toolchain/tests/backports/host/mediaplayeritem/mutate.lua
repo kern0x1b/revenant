@@ -1,4 +1,4 @@
-local LIBRARY = {"packages", "a", "apple-backports", "MediaPlayer"}
+local LIBRARY = {"packages", "frameworks", "apple-backports", "MediaPlayer"}
 local GROUPS = {"MPMediaItem70.m", "MPMediaItem80.m", "MPMediaItem92.m", "MPMediaItem100.m", "MPMediaItem103.m"}
 
 local function read(file)

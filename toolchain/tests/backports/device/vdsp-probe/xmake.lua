@@ -13,11 +13,11 @@ set_defaultarchs("iphoneos|armv7")
 target("vdsp-biquad-probe")
     add_rules("@addon/revenant/daemon")
     add_files(path.join(root, "tests/backports/device/vdsp-probe/vdsp-biquad-probe.m"))
-    add_files(path.join(root, "packages/a/apple-backports/Accelerate/vDSPBiquad6.m"))
-    add_files(path.join(root, "packages/a/apple-backports/Accelerate/vDSPSve7.m"))
+    add_files(path.join(root, "packages/frameworks/apple-backports/Accelerate/vDSPBiquad6.m"))
+    add_files(path.join(root, "packages/frameworks/apple-backports/Accelerate/vDSPSve7.m"))
     add_defines("vDSP_sve_svesq=revenant_probe_vDSP_sve_svesq",
                 "vDSP_sve_svesqD=revenant_probe_vDSP_sve_svesqD")
-    add_files(path.join(root, "packages/a/apple-backports/Accelerate/vDSPSve7.m"))
+    add_files(path.join(root, "packages/frameworks/apple-backports/Accelerate/vDSPSve7.m"))
     add_defines("vDSP_sve_svesq=revenant_probe_vDSP_sve_svesq", "vDSP_sve_svesqD=revenant_probe_vDSP_sve_svesqD")
     add_defines("vDSP_biquad=revenant_probe_vDSP_biquad",
                 "vDSP_biquadD=revenant_probe_vDSP_biquadD",

@@ -80,7 +80,7 @@ comment and in its registry row.
 ## THE FIVE FILES OF THE SERIES THAT ARE NOT HERE, AND WHY
 
 Each of these names is a class `origin/main` already implements, in
-`packages/a/apple-backports/MetalPerformanceShaders/`, and its registry row on `main` already reads
+`packages/frameworks/apple-backports/MetalPerformanceShaders/`, and its registry row on `main` already reads
 `implemented`. Landing the series' copy as well would define the same class twice in one dylib.
 
 | file | class | already implemented on `main` in |

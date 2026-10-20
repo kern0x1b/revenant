@@ -14,7 +14,7 @@ package("libcxx")
     for _, patch in ipairs(os.files(path.join(os.scriptdir(), "patches", "*.patch"))) do
         table.insert(digests, path.filename(patch) .. "=" .. hash.sha256(patch))
     end
-    local folder = path.join(os.scriptdir(), "..", "..", "a", "apple-compat")
+    local folder = path.join(os.scriptdir(), "..", "..", "runtimes", "apple-compat")
     for _, shim in ipairs(table.join(os.files(path.join(folder, "src", "*.c")), os.files(path.join(folder, "src", "*.h")),
                                      os.files(path.join(folder, "include", "revenant", "*.h")))) do
         table.insert(digests, "apple-compat/" .. path.filename(shim) .. "=" .. hash.sha256(shim))

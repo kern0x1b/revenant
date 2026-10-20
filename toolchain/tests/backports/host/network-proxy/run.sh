@@ -11,7 +11,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-BACKPORTS=${BACKPORTS:-$here/../../../../packages/a/apple-backports}
+BACKPORTS=${BACKPORTS:-$here/../../../../packages/frameworks/apple-backports}
 harness=${NETWORK_HARNESS:-$here/../../device}
 build=${NETWORK_BUILD:-$(runs_folder revenant-network-proxy)}
 # The port's path monitor lives in the Foundation library, so the objects under test are this

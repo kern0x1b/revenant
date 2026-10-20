@@ -21,7 +21,7 @@ local PROLOGUE = [==[
 
 local HERE = os.scriptdir()
 local WORKTREE = path.join(HERE, "..", "..", "..", "..")
-local PACKAGE = path.join(WORKTREE, "packages", "a", "apple-backports", "VideoToolbox")
+local PACKAGE = path.join(WORKTREE, "packages", "frameworks", "apple-backports", "VideoToolbox")
 local TABLE = path.join(HERE, "ladder.tsv")
 local CASES = path.join(HERE, "cases.m")
 

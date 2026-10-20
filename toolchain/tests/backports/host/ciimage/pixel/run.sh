@@ -12,7 +12,7 @@ echo "FAIL host/ciimage/pixel/run.sh: its Python steps are gone and not yet port
 exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../../common/runs.sh" "$here"
-GRAPHICS=${GRAPHICS:-$here/../../../../../packages/a/apple-backports/Graphics}
+GRAPHICS=${GRAPHICS:-$here/../../../../../packages/frameworks/apple-backports/Graphics}
 TOLERANCE=${1:-0.0005}
 BUILD=${BUILD:-$(runs_fresh revenant-pixel)}
 quiet="-Wno-nonnull -Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-objc-protocol-method-implementation -Wno-nullability-completeness -Wno-availability -Wno-objc-missing-property-synthesis -Wno-incomplete-implementation"

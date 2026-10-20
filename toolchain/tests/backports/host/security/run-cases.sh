@@ -22,7 +22,7 @@ work=$(cd "$here/../../../.." && pwd)
 build=${BUILD:-$(runs_folder run-cases)}
 mkdir -p "$build"; rm -f "$build/cases-entered" "$build"/verdict-*
 sdk=$(xcrun --show-sdk-path --sdk macosx)
-S="$work/packages/a/apple-backports/Security"
+S="$work/packages/frameworks/apple-backports/Security"
 H="$here"
 # -Werror=implicit-function-declaration, so a call to a name no header declares is a BUILD
 # FAILURE and not a silently int-returning call that reads garbage.
@@ -431,7 +431,7 @@ mutate "$G" "$build/mutant-trust-result.m" \
 # driver targets arm64-apple-ios15.0-macabi against the iOSSupport frameworks, so an object compiled
 # for the host is a different architecture and the link says "ld: building for 'macCatalyst', but
 # linking in object file .../uECC.o built for 'macOS'".
-package=${SECURITY_MICRO_ECC:-$here/../../../../packages/m/micro-ecc}
+package=${SECURITY_MICRO_ECC:-$here/../../../../packages/libraries/micro-ecc}
 clone="$build/micro-ecc"
 [ -f "$clone/uECC.h" ] || git clone --quiet --depth 1 https://github.com/kmackay/micro-ecc.git "$clone" > /dev/null 2>&1
 [ -f "$clone/uECC.h" ] || { echo "FAIL micro-ecc did not clone: no uECC.h in $clone"; exit 1; }

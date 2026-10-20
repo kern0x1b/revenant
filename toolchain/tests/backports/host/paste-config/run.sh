@@ -7,7 +7,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PASTE_PORT_SOURCE:-$here/../../../../packages/a/apple-backports/UIKit/UIPasteControlConfiguration.m}
+port=${PASTE_PORT_SOURCE:-$here/../../../../packages/frameworks/apple-backports/UIKit/UIPasteControlConfiguration.m}
 build=${PASTE_BUILD:-$(runs_fresh revenant-paste-config)}
 sdk=$(xcrun --show-sdk-path)
 app="$build/paste-config"

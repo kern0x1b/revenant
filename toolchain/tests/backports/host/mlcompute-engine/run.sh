@@ -16,7 +16,7 @@ echo "FAIL host/mlcompute-engine/run.sh: its Python steps are gone and not yet p
 exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${MLCOMPUTE_PORT:-$here/../../../../packages/a/apple-backports/MLCompute}
+port=${MLCOMPUTE_PORT:-$here/../../../../packages/frameworks/apple-backports/MLCompute}
 # The archive lives under a per-configuration hash, and the gate prints which one it used; take the
 # newest, which is the one the last 6.1.3 build linked.
 ggml=${MLCOMPUTE_GGML:-$(ls -td "$HOME"/.xmake/packages/g/ggml/0.25.3/*/ 2>/dev/null | head -1 | sed "s:/$::")}

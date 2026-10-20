@@ -4,7 +4,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/CFNetwork}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/CFNetwork}
 harness=${CFNETWORKNAMES_HARNESS:-$here/../../device}
 build=${CFNETWORKNAMES_BUILD:-$(runs_fresh revenant-cfnetworknames)}
 rm -rf "$build"

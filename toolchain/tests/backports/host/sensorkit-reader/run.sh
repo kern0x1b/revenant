@@ -29,7 +29,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 . "$here/../../common/generated.sh"
 ensure_generated "$here" SensorKit
-appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
+appledir=${APPLEDIR:-$here/../../../../packages/frameworks/apple-backports}
 reader=${READER:-$appledir/SensorKit/SRSensorReader.m}
 build=${BUILD:-$(runs_fresh revenant-sensorkit-reader)}
 mkdir -p "$build"

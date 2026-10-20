@@ -1,6 +1,6 @@
 # The UIButton configuration members of iOS 15.0: what is wired and what is only kept
 
-Eight rows of release 15.0, one object: `packages/a/apple-backports/UIKit/UIButton+Configuration15.m`,
+Eight rows of release 15.0, one object: `packages/frameworks/apple-backports/UIKit/UIButton+Configuration15.m`,
 a category on the SDK's own `UIButton` — nothing is redeclared, which is why the file is an
 `@implementation` of a category. Six are `implemented`, two are `inert`, and the difference is
 the substance of this page rather than a detail in it.

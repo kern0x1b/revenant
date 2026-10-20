@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-FOUNDATION=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}
+FOUNDATION=${FOUNDATION:-$here/../../../../packages/frameworks/apple-backports/Foundation}
 BUILD=${BUILD:-$(runs_fresh revenant-iso8601)}
 sources=${SOURCES:-$(cat "$here/sources.txt")}
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-incomplete-implementation -Wno-objc-protocol-method-implementation -Wno-nullability-completeness -Wno-objc-designated-initializers"

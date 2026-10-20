@@ -11,8 +11,8 @@ echo "FAIL host/mlcompute/run.sh: its Python steps are gone and not yet ported t
 exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${MLCOMPUTE_PORT:-$here/../../../../packages/a/apple-backports/MLCompute}
-registry=${MLCOMPUTE_REGISTRY:-$here/../../../../packages/a/apple-backports/registry/MLCompute}
+port=${MLCOMPUTE_PORT:-$here/../../../../packages/frameworks/apple-backports/MLCompute}
+registry=${MLCOMPUTE_REGISTRY:-$here/../../../../packages/frameworks/apple-backports/registry/MLCompute}
 build=${MLCOMPUTE_BUILD:-$(runs_folder revenant-mlcompute-host)}
 # The engine the port's own MLCInferenceGraph computes its forward pass with, built by the one script both
 # MLCompute harnesses use and kept beside $build rather than inside it, so the rm below does not throw it away

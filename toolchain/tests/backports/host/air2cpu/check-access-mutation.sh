@@ -52,11 +52,11 @@ PY
 # The generated source includes the call convention by a path relative to ITSELF, so a mutant that
 # lives outside the tree needs the header at the same relative place. Copied, not symlinked: the run
 # directory is wiped and a symlink into the checkout would outlive it.
-mkdir -p "$work/../../packages/a/apple-backports"
-cp "$root/packages/a/apple-backports/air2cpu-abi.h" "$work/../../packages/a/apple-backports/air2cpu-abi.h"
+mkdir -p "$work/../../packages/frameworks/apple-backports"
+cp "$root/packages/frameworks/apple-backports/air2cpu-abi.h" "$work/../../packages/frameworks/apple-backports/air2cpu-abi.h"
 
 build() {
-    "$llvm/bin/clang++" -std=c++17 "-DCHAIR_AIR2CPU_ABI=\"$root/packages/a/apple-backports/air2cpu-abi.h\"" \
+    "$llvm/bin/clang++" -std=c++17 "-DCHAIR_AIR2CPU_ABI=\"$root/packages/frameworks/apple-backports/air2cpu-abi.h\"" \
         $($llvm/bin/llvm-config --cxxflags | sed 's/-fno-exceptions//') \
         "$1" -o "$2" $($llvm/bin/llvm-config --ldflags --libs core irreader bitreader support) \
         -Wl,-rpath,"$llvm/lib" 2>"$3"

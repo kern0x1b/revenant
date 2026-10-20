@@ -2,7 +2,7 @@
 
 The advertisement key that says a peripheral accepts a connection: `NSString *const CBAdvertisementDataIsConnectable`,
 declared by CoreBluetooth of iOS 7.0 on. It lives in `libCoreBluetoothBackports.dylib`, built with the
-`corebluetooth` config (`packages/a/apple-backports/CoreBluetooth/CBAdvertisementDataIsConnectable.m`).
+`corebluetooth` config (`packages/frameworks/apple-backports/CoreBluetooth/CBAdvertisementDataIsConnectable.m`).
 
 ## What the release has
 
@@ -34,7 +34,7 @@ The constant is a string. The library links no CoreBluetooth framework, so the B
 ## What the port does with it
 
 The Matter stack imports the constant from `libMatterBackports.dylib`. Before this library the import was weak and bound
-to nothing on 6.1.3 (`packages/m/matter/facts/MatterFramework.md`, "BLE advertisement connectability"). With the library
+to nothing on 6.1.3 (`packages/frameworks/matter/facts/MatterFramework.md`, "BLE advertisement connectability"). With the library
 linked before `-framework CoreBluetooth`, the import binds to the backport, and the absent-key branch of the BLE patch
 only applies to a release whose CoreBluetooth never sends the key.
 

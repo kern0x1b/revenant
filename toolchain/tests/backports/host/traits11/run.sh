@@ -8,7 +8,7 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
-uikit=${UIKIT:-$here/../../../../packages/a/apple-backports/UIKit}
+uikit=${UIKIT:-$here/../../../../packages/frameworks/apple-backports/UIKit}
 build=${BUILD:-$(runs_fresh revenant-traits11)}
 sdk=$(xcrun --show-sdk-path)
 common="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks -fobjc-arc -w"

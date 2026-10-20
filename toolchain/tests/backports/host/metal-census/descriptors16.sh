@@ -5,7 +5,7 @@
 #     sh tests/backports/host/metal-census/descriptors16.sh
 #     SELF_TEST=1 sh tests/backports/host/metal-census/descriptors16.sh   # prove_defined's own halves
 #
-# Run from packages/a/apple-backports. ONE clang line builds the case TOGETHER WITH the port source,
+# Run from packages/frameworks/apple-backports. ONE clang line builds the case TOGETHER WITH the port source,
 # the way descriptors.sh does it: the device object and the host case cannot be linked together, and
 # the failure looks like a missing main rather than a mismatched architecture.
 #
@@ -18,7 +18,7 @@
 # attachment array answers indices 0 to 3 and STOPS THE PROCESS on index 4, so a case that asked both
 # sides at 4 would kill the run instead of comparing anything. The bound is measured out of process,
 # one index per invocation, and the command and its output are in
-# packages/a/apple-backports/facts/Metal/Descriptors16.md.
+# packages/frameworks/apple-backports/facts/Metal/Descriptors16.md.
 #
 # A MUTATION THAT DOES NOT BUILD IS "RUN FAILED", NEVER RED - the same rule and the same reason as in
 # descriptors.sh: a mutation compiled with a wrong -I depth once left the previous binary in place and
@@ -33,7 +33,7 @@ work=${WORK:-$(runs_folder metal-census/descriptors16)}
 # ONE guard for every script that removes a scratch path - see work-guard.sh.
 . "$here/work-guard.sh"
 work_ok "$work" || { echo "FAIL: WORK=$work is not a usable scratch path; see work-guard.sh" >&2; exit 1; }
-S="$root/packages/a/apple-backports"
+S="$root/packages/frameworks/apple-backports"
 SRC="$S/Metal/MTLDescriptors16.m"
 rm -rf "$work"
 mkdir -p "$work"

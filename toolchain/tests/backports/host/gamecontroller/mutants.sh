@@ -13,7 +13,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 tree=$(cd "$here/../../../.." && pwd)
-rel=${MUTATE_FILE:-packages/a/apple-backports/GameController/RevenantGCSnapshot.h}
+rel=${MUTATE_FILE:-packages/frameworks/apple-backports/GameController/RevenantGCSnapshot.h}
 source_file="$tree/$rel"
 out=${BUILD:-$(runs_folder fin/mutants)}
 mkdir -p "$out"
@@ -82,7 +82,7 @@ check 'if (header[1] == 0)' \
 
 # The touchpad's own rules, in the file that writes them. Each is one the host's touch state
 # group compares against the host's own touchpad, so a mutation has to move a compared line.
-touchpad_rel=packages/a/apple-backports/GameController/GCControllerTouchpad14.m
+touchpad_rel=packages/frameworks/apple-backports/GameController/GCControllerTouchpad14.m
 touchpad_file="$tree/$touchpad_rel"
 restore_touchpad() {
     git -C "$tree" show "HEAD:$touchpad_rel" > "$touchpad_file"
@@ -151,7 +151,7 @@ check_touchpad '    GCTouchState state;
 # reads a field out of its neighbour's element, the other reads the direction pad as if it were an
 # axis. A mutant that stops the build is RUN FAILED and never counted as noticed.
 # The extended game's half is in GCSnapshots7.m, which holds no other rule this file mutates.
-objects_rel=packages/a/apple-backports/GameController/GCSnapshots9.m
+objects_rel=packages/frameworks/apple-backports/GameController/GCSnapshots9.m
 objects_file="$tree/$objects_rel"
 restore_objects() {
     git -C "$tree" show "HEAD:$objects_rel" > "$objects_file"
@@ -214,7 +214,7 @@ check_in_7 \
     'extended-save-snapshot-reads-the-wrong-button'
 
 # The 7.0 object's extended half, held the same way as the 10.0.1 one.
-snap7_rel=packages/a/apple-backports/GameController/GCSnapshots7.m
+snap7_rel=packages/frameworks/apple-backports/GameController/GCSnapshots7.m
 snap7_file="$tree/$snap7_rel"
 restore_snap7() {
     git -C "$tree" show "HEAD:$snap7_rel" > "$snap7_file"
@@ -252,7 +252,7 @@ check_in_7() {
 }
 
 # The 15.4 object, held the same way: one mutant that reads a mode out of a curve that carries none.
-trigger154_rel=packages/a/apple-backports/GameController/GCDualSenseAdaptiveTrigger154.m
+trigger154_rel=packages/frameworks/apple-backports/GameController/GCDualSenseAdaptiveTrigger154.m
 trigger154_file="$tree/$trigger154_rel"
 restore_trigger154() {
     git -C "$tree" show "HEAD:$trigger154_rel" > "$trigger154_file"

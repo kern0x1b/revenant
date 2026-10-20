@@ -7,7 +7,7 @@ echo "FAIL host/shear/run.sh: its Python steps are gone and not yet ported to Lu
 exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-ACCELERATE=$here/../../../../packages/a/apple-backports/Accelerate
+ACCELERATE=$here/../../../../packages/frameworks/apple-backports/Accelerate
 SHEARS=${SHEARS:-$ACCELERATE}
 build=${SHEAR_BUILD:-$(runs_folder revenant-shear-host)}
 rm -rf "$build"

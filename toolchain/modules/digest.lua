@@ -56,13 +56,13 @@ function stripped(source)
 end
 
 local RECIPES = {
-    {folder = "packages/s/swift-runtime", variable = "swift_runtime_sources_digest",
-     inputs = {"packages/s/swift-runtime/xmake.lua", "modules/apple/shared_runtime.lua",
+    {folder = "packages/runtimes/swift-runtime", variable = "swift_runtime_sources_digest",
+     inputs = {"packages/runtimes/swift-runtime/xmake.lua", "modules/apple/shared_runtime.lua",
                "modules/apple/backports.lua", "modules/apple/compat.lua", "modules/apple/dyld.lua",
                "modules/gyb/bigint.lua", "modules/gyb/compiler.lua", "modules/gyb/lexer.lua", "modules/gyb/main.lua",
                "modules/gyb/parser.lua", "modules/gyb/random.lua", "modules/gyb/runtime.lua", "modules/gyb/template.lua"}},
-    {folder = "packages/l/libcxx", variable = "libcxx_sources_digest",
-     inputs = {"packages/l/libcxx/xmake.lua", "modules/apple/shared_runtime.lua"}}
+    {folder = "packages/runtimes/libcxx", variable = "libcxx_sources_digest",
+     inputs = {"packages/runtimes/libcxx/xmake.lua", "modules/apple/shared_runtime.lua"}}
 }
 
 function recipes()

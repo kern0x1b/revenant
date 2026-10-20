@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-sources=${STACKSPACING_SOURCES:-$here/../../../../packages/a/apple-backports/UIKit}
+sources=${STACKSPACING_SOURCES:-$here/../../../../packages/frameworks/apple-backports/UIKit}
 harness=${STACKSPACING_HARNESS:-$here/../../device}
 build=${STACKSPACING_BUILD:-$(runs_folder revenant-stackspacing-host)}
 sdk=$(xcrun --show-sdk-path)

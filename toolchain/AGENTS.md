@@ -50,7 +50,7 @@ Android) as it is here; iOS 6 is the first platform it targets, not its limit.
 | `config/` | Conan configuration: settings, hooks, and the `revenant` driver + platform facts under `config/extensions/`. |
 | `recipes/` | Conan recipes - the SDK, ld64, ldid, libplist, libcxx, the imports check, and the `revenant-base` / `revenant-apple` bases every port extends. |
 | `modules/` | build modules / ports. `modules/gyb/` is the only gyb: Swift's `gyb.py` and the Python its templates run, in Lua (README, "No Python runs in that build"); nothing here calls Python to expand a template. |
-| `packages/` | package definitions. |
+| `packages/` | package definitions, filed by group as `packages/<group>/<name>`: `build-tools`, `runtimes`, `frameworks`, `libraries`, `emulator`, `tweaks`. The table of which package is in which group is `config/extensions/revenant/index.lua`, and `tests/addon/revenant_index_test.lua` holds the tree to it. |
 | `plugins/` | build plugins. |
 | `rules/` | build rules. |
 | `toolchains/` | toolchain definitions. |
@@ -85,7 +85,7 @@ Each entry: wrong pattern -> right pattern -> the mechanical reason.
   up a changed recipe or patch. Right: just rebuild normally against the shared store. Reason:
   every package that matters here (`apple-backports`, `llvm`, `swift-runtime`, `libcxx`, `swift`)
   hashes its own sources, patches and recipe into a readonly digest config (`sources`/`recipe` -
-  see `packages/a/apple-backports/xmake.lua` and `packages/s/swift-runtime/digest.lua`), so a
+  see `packages/frameworks/apple-backports/xmake.lua` and `packages/runtimes/swift-runtime/digest.lua`), so a
   changed backport, patch or recipe is already a different package with its own install path -
   no force needed, no collision with another band's build (a change that's only a comment or
   layout is deliberately excluded from the digest, by design). A private store instead
@@ -162,7 +162,7 @@ Each entry: wrong pattern -> right pattern -> the mechanical reason.
   byte size of every patch you wrote: a headerless or 0-byte file is this mistake, not a tool bug.
 
 - **A shared registry file is edited by rows, never rewritten.** Wrong: an export whose diff on
-  `packages/a/apple-backports/registry/**` touches hundreds of lines because the file was
+  `packages/frameworks/apple-backports/registry/**` touches hundreds of lines because the file was
   re-indented - 711 insertions against 708 deletions, 51/51, and 5488 of "differing" lines that
   differ only in one leading space, all measured on 2026-09-30 in three different families. Right:
   take the base revision of the file verbatim and re-apply only the row values that change, so the
@@ -185,7 +185,7 @@ Each entry: wrong pattern -> right pattern -> the mechanical reason.
 
 - **A C function shared between backport files.** Wrong: calling from one file a C function defined
   in a file that implements a class or exports an API symbol. Right: define it in a file that exports
-  no API symbol of its own, as `packages/a/apple-backports/UIKit/UIViewController+DocumentMenu.m`
+  no API symbol of its own, as `packages/frameworks/apple-backports/UIKit/UIViewController+DocumentMenu.m`
   does, or link the files through Objective-C methods. Reason: a file whose exports a band's release
   already has is left out of that band, so the call is `Undefined symbols` in later bands only -
   `backports-gate` links one band and passes; only the all-band build of `canon-install` shows it.

@@ -494,7 +494,7 @@ A test that creates UIKit objects is an application (its own `-Info.plist`,
 installed and started through SpringBoard), not a process of its own: a bare
 process has no `UIApplicationMain` behind it, and there `UITextView`'s
 `initWithFrame:` traps with `SIGTRAP`
-(`packages/a/apple-backports/facts/UIKit/TextSystem7.md`). Inside the
+(`packages/frameworks/apple-backports/facts/UIKit/TextSystem7.md`). Inside the
 application, schedule later steps with timers or
 `performSelector:withObject:afterDelay:`, not with `dispatch_async` to the main
 queue from a block already running there: the main queue is serial, so a block
@@ -551,12 +551,12 @@ clang force-load arclite below iOS 9.
   `host/ios1516/run.sh` writes into `ios1516-expectations.h` after holding the port's method to the host's own, the
   orientation update of a view controller and the padding above a section header.
 - `textalias.m`: a process of its own, the classes the release carries without exporting them that the port exports as
-  aliases (`packages/a/apple-backports/revenant_alias.h`), `NSTextTab` and `NSTextList`: the linked name answers the release's
+  aliases (`packages/frameworks/apple-backports/revenant_alias.h`), `NSTextTab` and `NSTextList`: the linked name answers the release's
   class, what is made through it is the release's class, the name answers NSObject's class introspection as the release's
   class, a subclass written of the name inherits the release's class and is laid out after it, and the categories written
   on the name - `NSTextTab`'s `+columnTerminatorsForLocale:`, `NSTextList`'s initializer of iOS 16 - are on the release's
   class, from `libUIKitBackports.dylib`, attached by the library's loader and by nothing in a `+load`. It is built with
-  `packages/a/apple-backports/attach.c` beside `check.m`, which makes the process an image with aliases of its own for the
+  `packages/frameworks/apple-backports/attach.c` beside `check.m`, which makes the process an image with aliases of its own for the
   loader's other paths: `NSTextBlock`, whose category writes a method the release has and one it lacks, and `NSTextTable`,
   whose subclass has a `+load`, so the runtime lays the alias out before the loader runs. It is built by its own project,
   `device/textalias/xmake.lua` (`xmake f -P tests/backports/device/textalias -p iphoneos -a armv7`, then `xmake build`, then
@@ -686,7 +686,7 @@ clang force-load arclite below iOS 9.
   Three of those checks are not about the safe area at all: they ask the
   release's own visual format parser what it does with the iOS 11 spacing
   option, which is a question only a real iOS 6 can answer.
-- `revenant-sblaunch` (in `packages/e/emulator-guest/src/`, built by that
+- `revenant-sblaunch` (in `packages/emulator/emulator-guest/src/`, built by that
   package, which is where `xmake emulate launch` takes it from): one way to
   start an application on either device without `uiopen`, which has twice left
   the iPhone 4S to its watchdog. It takes one argument, the bundle identifier,
@@ -808,7 +808,7 @@ clang force-load arclite below iOS 9.
   not answered, and that every call returns without raising. It says nothing
   about how hard the motor turns: that was measured on an iPhone4,1 with the
   accelerometer and is written down in
-  `packages/a/apple-backports/facts/UIKit/UIFeedbackGenerator.md`, since an
+  `packages/frameworks/apple-backports/facts/UIKit/UIFeedbackGenerator.md`, since an
   emulated device has no motor and every call there plays nothing.
 - `avaudioengine.m`: a process of its own for `AVAudioEngine`/`AVAudioPlayerNode`, linking
   `libAVFoundationBackports.dylib`. A graph that compiles, runs and produces silence reports

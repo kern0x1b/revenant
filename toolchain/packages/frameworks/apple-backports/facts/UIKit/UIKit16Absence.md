@@ -189,8 +189,8 @@ The row asks for the marker protocol `UIPopoverPresentationControllerSourceItem`
 two things, and neither is written:
 
 ```
-grep -c UIPopoverPresentationControllerSourceItem packages/a/apple-backports/UIKit/RevenantUIKitProtocols.h
-grep -rn "UIPopoverPresentationController.sourceItem" packages/a/apple-backports/registry/
+grep -c UIPopoverPresentationControllerSourceItem packages/frameworks/apple-backports/UIKit/RevenantUIKitProtocols.h
+grep -rn "UIPopoverPresentationController.sourceItem" packages/frameworks/apple-backports/registry/
 ```
 
 ```
@@ -230,7 +230,7 @@ inside the safe area. The port's `UILayoutGuide` has every anchor that job needs
 one it needs to state the relation:
 
 ```
-grep -n "addConstraint" packages/a/apple-backports/UIKit/UILayoutGuide.m
+grep -n "addConstraint" packages/frameworks/apple-backports/UIKit/UILayoutGuide.m
 ```
 
 ```

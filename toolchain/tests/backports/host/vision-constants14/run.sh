@@ -11,7 +11,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 . "$here/../../common/generated.sh"
 ensure_generated "$here" Vision
-appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
+appledir=${APPLEDIR:-$here/../../../../packages/frameworks/apple-backports}
 build=${BUILD:-$(runs_folder vision-constants14)}
 mkdir -p "$build"
 source="$appledir/Vision/Vision14_0Constants.m"

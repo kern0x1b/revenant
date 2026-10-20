@@ -2,7 +2,7 @@
 # The measurement registry/UIKit/ios11.json cites: does each name the slice's rows name exist in the
 # release a row is `absent` about, read class-scoped out of that release's own dyld shared cache.
 #
-# Usage: REVENANT_ROOT=<worktree> sh packages/a/apple-backports/facts/UIKit/ios11-absence-census.sh
+# Usage: REVENANT_ROOT=<worktree> sh packages/frameworks/apple-backports/facts/UIKit/ios11-absence-census.sh
 #
 # Needs nothing but the tree's own tools and the held caches under $HOME/.revenant/dyld: no SDK, no
 # compiler, no package store. Every rung prints its class and protocol counts before its answers,

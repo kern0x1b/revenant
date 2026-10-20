@@ -29,7 +29,7 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-avf=$root/packages/a/apple-backports/AVFoundation
+avf=$root/packages/frameworks/apple-backports/AVFoundation
 build=${AVF_NOTICE_BUILD:-$(runs_folder avf-notifications)}
 expected=${AVF_NOTICE_ROWS:-67}   # every NSString *const the family defines
 sources="AVFoundationKeys9 AVFoundationKeys11 AVFoundationKeys134 AVFoundationKeys16 AVFoundationKeysUnheld AVFoundationDeviceTypeAndPresetKeys134 AVFoundationDeviceTypeAndPresetKeys16 AVCaptureCurrentSentinels8"

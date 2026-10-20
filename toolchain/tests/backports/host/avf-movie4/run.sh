@@ -32,7 +32,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-avf=$root/packages/a/apple-backports/AVFoundation
+avf=$root/packages/frameworks/apple-backports/AVFoundation
 run=${AVMOVIE4_RUN:-$(runs_folder v-avmovie4)}
 mutant=${AVMOVIE4_MUTANT:-0}
 movies=$run/movies

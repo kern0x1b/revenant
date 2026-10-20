@@ -4,7 +4,7 @@ Introduced in iOS 7.0: `UIDynamicAnimator`, `UIDynamicBehavior` and the six beha
 collision), the protocols `UIDynamicItem`, `UIDynamicAnimatorDelegate`, `UICollisionBehaviorDelegate`; with the 9.0 members of
 these classes (`frictionTorque`, `attachmentRange` and five factories of the attachment, `charge` and `anchored`, `snapPoint`,
 `UIFloatRange`). The 9.0 classes are in `UIFieldBehavior.md`. Code: `UIKit/UIDynamicAnimator.mm` (world, bodies, contact filter
-and listener), one `.mm` per behaviour, `UIKit/RevenantDynamics.h`, over unmodified Box2D 2.2.1 (`packages/b/box2d`), the engine
+and listener), one `.mm` per behaviour, `UIKit/RevenantDynamics.h`, over unmodified Box2D 2.2.1 (`packages/libraries/box2d`), the engine
 iOS 7.0's private PhysicsKit is a fork of.
 
 Marks: **measured (host)** = the host's UIKitCore and PhysicsKit through Mac Catalyst (arm64e, macOS 27.0), by the band's oracle

@@ -79,7 +79,7 @@
 // registry check makes, and the check's own spelling:
 //
 //   clang-23 -c -fobjc-arc -target armv7-apple-ios6.1.3 -isysroot <16.4 SDK> -Wall \
-//       packages/a/apple-backports/UIKit/UIKit26_0.m -o /tmp/UIKit26_0.o
+//       packages/frameworks/apple-backports/UIKit/UIKit26_0.m -o /tmp/UIKit26_0.o
 //   otool -v -s __TEXT __objc_methname /tmp/UIKit26_0.o | sed -n 's/^[0-9a-f]*  //p' | grep -E \
 //       '^(colorByApplyingContentHeadroom:|align(Left|Center|Right|Justified):|newFromPasteboard:|\
 //       performClose:|toggleInspector:)$'
@@ -126,7 +126,7 @@
 // write that property and the object must not either - and it defined a setIdentifier: there.  Removed.  Its
 // type is a typedef of NSString * (UIDeferredMenuElement.h:13), so the getter keeps NSString * and the
 // association it reads is written by whatever creates the element.  Nothing in the tree called it:
-//   grep -rn 'setIdentifier:' packages/a/apple-backports/UIKit/
+//   grep -rn 'setIdentifier:' packages/frameworks/apple-backports/UIKit/
 // names UIBarButtonItem (whose identifier the SDK declares readwrite, UIBarButtonItem.h:180, and whose pair
 // is unchanged) and three respondsToSelector: guards that ask an NSLayoutConstraint.
 //

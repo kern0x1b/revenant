@@ -39,7 +39,7 @@
       "status": "implemented",
       "reason": "it builds a button from a UIButtonConfiguration, and UIButtonConfiguration (the declarative style engine iOS 15 replaced the button property surface with) is itself absent from this port - no demand for it, not a wall",
       "effect": "a button of the port's own UIButton type holding the configuration given, with the primary action wired so that the button's configurationUpdateHandler path can reach it; the constructor the SDK declares for 15.0",
-      "source": "SDK 16.4, UIKit; not in UIButton's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it), and 6.1.3's UIButton carries no selector mentioning configuration at all; the port's own UIButtonConfiguration is the value these carry, measured by tests/backports/host/uikit2/buttonconfig_test.m, and the wiring is delivered by packages/a/apple-backports/UIKit/UIButton+Configuration15.m",
+      "source": "SDK 16.4, UIKit; not in UIButton's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it), and 6.1.3's UIButton carries no selector mentioning configuration at all; the port's own UIButtonConfiguration is the value these carry, measured by tests/backports/host/uikit2/buttonconfig_test.m, and the wiring is delivered by packages/frameworks/apple-backports/UIKit/UIButton+Configuration15.m",
       "facts": "facts/UIKit/UIButtonConfiguration15Wiring.md"
     },
     {
@@ -119,7 +119,7 @@
       "status": "implemented",
       "reason": "marks items whose cells are to be configured again in place rather than replaced; the snapshot already records reloaded items (UIKit/NSDiffableDataSourceSnapshot.m), but applying a reconfigure needs reconfigureItemsAtIndexPaths:, which the release's collection and table views do not have (see those rows) - no demand",
       "effect": "the identifiers are added to the set reconfiguredItemIdentifiers answers, so a caller can read back what it asked to reconfigure; the identifiers are kept, and an empty array does nothing",
-      "source": "SDK 16.4, UIKit; not in the owner's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it); delivered by packages/a/apple-backports/UIKit/UIDiffableDataSource+Reconfigure15.m, which reuses the reload the port's own diffable data sources already call - the storage is an associated object, which does not survive -copyWithZone: - measured on the host - so a copied snapshot reports none while the original reports its set; the port's own _reloadedItems is an ivar in a 13.0 object, and a 15.0 ivar there is the mixed-release object band() refuses",
+      "source": "SDK 16.4, UIKit; not in the owner's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it); delivered by packages/frameworks/apple-backports/UIKit/UIDiffableDataSource+Reconfigure15.m, which reuses the reload the port's own diffable data sources already call - the storage is an associated object, which does not survive -copyWithZone: - measured on the host - so a copied snapshot reports none while the original reports its set; the port's own _reloadedItems is an ivar in a 13.0 object, and a 15.0 ivar there is the mixed-release object band() refuses",
       "facts": "facts/UIKit/UIDiffableReconfigure15.md"
     },
     {
@@ -180,7 +180,7 @@
       "status": "implemented",
       "reason": "it schedules the next -updateConfiguration call, and that method only exists to read the button's UIButtonConfiguration, which this port does not carry - no demand",
       "effect": "asks the button to update its configuration now: the update runs the button's configurationUpdateHandler if it has one, with the button and its configuration",
-      "source": "SDK 16.4, UIKit; not in UIButton's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it), and 6.1.3's UIButton carries no selector mentioning configuration at all; the port's own UIButtonConfiguration is the value these carry, measured by tests/backports/host/uikit2/buttonconfig_test.m, and the wiring is delivered by packages/a/apple-backports/UIKit/UIButton+Configuration15.m",
+      "source": "SDK 16.4, UIKit; not in UIButton's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it), and 6.1.3's UIButton carries no selector mentioning configuration at all; the port's own UIButtonConfiguration is the value these carry, measured by tests/backports/host/uikit2/buttonconfig_test.m, and the wiring is delivered by packages/frameworks/apple-backports/UIKit/UIButton+Configuration15.m",
       "facts": "facts/UIKit/UIButtonConfiguration15Wiring.md"
     },
     {
@@ -191,7 +191,7 @@
       "status": "implemented",
       "reason": "the point where a subclass reapplies its UIButtonConfiguration; nothing to override when the configuration this method exists to serve is not carried - no demand",
       "effect": "runs the button's configurationUpdateHandler with the button and its configuration, and does nothing when the button has no handler",
-      "source": "SDK 16.4, UIKit; not in UIButton's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it), and 6.1.3's UIButton carries no selector mentioning configuration at all; the port's own UIButtonConfiguration is the value these carry, measured by tests/backports/host/uikit2/buttonconfig_test.m, and the wiring is delivered by packages/a/apple-backports/UIKit/UIButton+Configuration15.m",
+      "source": "SDK 16.4, UIKit; not in UIButton's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it), and 6.1.3's UIButton carries no selector mentioning configuration at all; the port's own UIButtonConfiguration is the value these carry, measured by tests/backports/host/uikit2/buttonconfig_test.m, and the wiring is delivered by packages/frameworks/apple-backports/UIKit/UIButton+Configuration15.m",
       "facts": "facts/UIKit/UIButtonConfiguration15Wiring.md"
     },
     {
@@ -202,7 +202,7 @@
       "status": "implemented",
       "reason": "reruns the configuration of the cells already on screen, keeping the cell objects; the release's collection view can only reload an item, which replaces its cell - the very difference reconfigure exists for - and handing the old cell back needs the release's private dequeue, which the port does not reach into; no demand",
       "effect": "the index paths are reloaded inside one -performBatchUpdates:, so the cells build themselves again and keep their positions: 6.1.3 has no -reconfigureItemsAtIndexPaths:, and a reload is what the port's own UICollectionViewDiffableDataSource already does for the same request",
-      "source": "SDK 16.4, UIKit; not in the owner's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it); delivered by packages/a/apple-backports/UIKit/UIDiffableDataSource+Reconfigure15.m, which reuses the reload the port's own diffable data sources already call - -[UICollectionView reloadItemsAtIndexPaths:], measured present in the 6.1.3 cache and already called from UICollectionViewDiffableDataSource.m",
+      "source": "SDK 16.4, UIKit; not in the owner's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it); delivered by packages/frameworks/apple-backports/UIKit/UIDiffableDataSource+Reconfigure15.m, which reuses the reload the port's own diffable data sources already call - -[UICollectionView reloadItemsAtIndexPaths:], measured present in the 6.1.3 cache and already called from UICollectionViewDiffableDataSource.m",
       "facts": "facts/UIKit/UIDiffableReconfigure15.md"
     },
     {
@@ -382,7 +382,7 @@
       "status": "implemented",
       "reason": "reruns the configuration of the cells already on screen, keeping the cell objects; the release's table can only reload a row, which replaces its cell - the very difference reconfigure exists for - and handing the old cell back needs the release's private dequeue, which the port does not reach into; no demand",
       "effect": "the index paths are reloaded with UITableViewRowAnimationNone inside one -performBatchUpdates:, so the rows build themselves again and keep their positions: 6.1.3 has no -reconfigureRowsAtIndexPaths:, and this is the reload UITableViewDiffableDataSource.m already uses",
-      "source": "SDK 16.4, UIKit; not in the owner's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it); delivered by packages/a/apple-backports/UIKit/UIDiffableDataSource+Reconfigure15.m, which reuses the reload the port's own diffable data sources already call - -[UITableView reloadRowsAtIndexPaths:withRowAnimation:], measured present in the 6.1.3 cache and already called from UITableViewDiffableDataSource.m",
+      "source": "SDK 16.4, UIKit; not in the owner's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it); delivered by packages/frameworks/apple-backports/UIKit/UIDiffableDataSource+Reconfigure15.m, which reuses the reload the port's own diffable data sources already call - -[UITableView reloadRowsAtIndexPaths:withRowAnimation:], measured present in the 6.1.3 cache and already called from UITableViewDiffableDataSource.m",
       "facts": "facts/UIKit/UIDiffableReconfigure15.md"
     },
     {
@@ -463,7 +463,7 @@
       "status": "implemented",
       "reason": "the items marked with reconfigureItemsWithIdentifiers:, which is not carried (see its row), so there would never be any to answer",
       "effect": "the identifiers reconfigureItemsWithIdentifiers: was given, in order, and an empty array when none was; a COPIED snapshot answers empty, because the set is an associated object and does not survive the copy - the port's own reloadedItemIdentifiers does survive, and the difference is named in the facts page rather than papered over",
-      "source": "SDK 16.4, UIKit; not in the owner's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it); delivered by packages/a/apple-backports/UIKit/UIDiffableDataSource+Reconfigure15.m, which reuses the reload the port's own diffable data sources already call - the same associated-object storage, and the copy behaviour measured rather than assumed",
+      "source": "SDK 16.4, UIKit; not in the owner's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it); delivered by packages/frameworks/apple-backports/UIKit/UIDiffableDataSource+Reconfigure15.m, which reuses the reload the port's own diffable data sources already call - the same associated-object storage, and the copy behaviour measured rather than assumed",
       "facts": "facts/UIKit/UIDiffableReconfigure15.md"
     },
     {
@@ -494,7 +494,7 @@
       "status": "owed",
       "reason": "build the property NSMutableParagraphStyle.usesDefaultHyphenation",
       "effect": "a stand-in is built and answers; the real behaviour is owed",
-      "source": "SDK 16.4, UIKit; not in NSMutableParagraphStyle's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it), where 6.1.3 carries -setHyphenationFactor: and no boolean; delivered by packages/a/apple-backports/UIKit/NSParagraphStyle+Text15.m",
+      "source": "SDK 16.4, UIKit; not in NSMutableParagraphStyle's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it), where 6.1.3 carries -setHyphenationFactor: and no boolean; delivered by packages/frameworks/apple-backports/UIKit/NSParagraphStyle+Text15.m",
       "facts": "facts/UIKit/NSParagraphStyleDefaultHyphenation15.md"
     },
     {
@@ -505,7 +505,7 @@
       "status": "owed",
       "reason": "build the property NSParagraphStyle.usesDefaultHyphenation",
       "effect": "a stand-in is built and answers; the real behaviour is owed",
-      "source": "SDK 16.4, UIKit; not in NSParagraphStyle's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it), where 6.1.3 carries -hyphenationFactor and no boolean; delivered by packages/a/apple-backports/UIKit/NSParagraphStyle+Text15.m",
+      "source": "SDK 16.4, UIKit; not in NSParagraphStyle's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it), where 6.1.3 carries -hyphenationFactor and no boolean; delivered by packages/frameworks/apple-backports/UIKit/NSParagraphStyle+Text15.m",
       "facts": "facts/UIKit/NSParagraphStyleDefaultHyphenation15.md"
     },
     {
@@ -689,7 +689,7 @@
       "status": "implemented",
       "reason": "toggles the -updateConfiguration cycle this port does not carry, since UIButtonConfiguration itself is absent - no demand",
       "effect": "YES until something says otherwise, and setting it YES asks for a configuration update - the default and the effect the 14.0 automaticallyUpdatesContentConfiguration row measured on the host",
-      "source": "SDK 16.4, UIKit; not in UIButton's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it), and 6.1.3's UIButton carries no selector mentioning configuration at all; the port's own UIButtonConfiguration is the value these carry, measured by tests/backports/host/uikit2/buttonconfig_test.m, and the wiring is delivered by packages/a/apple-backports/UIKit/UIButton+Configuration15.m",
+      "source": "SDK 16.4, UIKit; not in UIButton's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it), and 6.1.3's UIButton carries no selector mentioning configuration at all; the port's own UIButtonConfiguration is the value these carry, measured by tests/backports/host/uikit2/buttonconfig_test.m, and the wiring is delivered by packages/frameworks/apple-backports/UIKit/UIButton+Configuration15.m",
       "facts": "facts/UIKit/UIButtonConfiguration15Wiring.md"
     },
     {
@@ -710,7 +710,7 @@
       "status": "owed",
       "reason": "build the property UIButton.changesSelectionAsPrimaryAction",
       "effect": "a stand-in is built and answers; the real behaviour is owed",
-      "source": "SDK 16.4, UIKit; not in UIButton's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it), and 6.1.3's UIButton carries no selector mentioning configuration at all; the port's own UIButtonConfiguration is the value these carry, measured by tests/backports/host/uikit2/buttonconfig_test.m, and the wiring is delivered by packages/a/apple-backports/UIKit/UIButton+Configuration15.m",
+      "source": "SDK 16.4, UIKit; not in UIButton's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it), and 6.1.3's UIButton carries no selector mentioning configuration at all; the port's own UIButtonConfiguration is the value these carry, measured by tests/backports/host/uikit2/buttonconfig_test.m, and the wiring is delivered by packages/frameworks/apple-backports/UIKit/UIButton+Configuration15.m",
       "facts": "facts/UIKit/UIButtonConfiguration15Wiring.md"
     },
     {
@@ -721,7 +721,7 @@
       "status": "implemented",
       "reason": "holds the UIButtonConfiguration this port does not carry - no demand for the declarative style engine, so nothing to hold",
       "effect": "the configuration is kept per button and copied on set, so mutating the caller's configuration afterwards does not reach the button; setting it asks for a configuration update",
-      "source": "SDK 16.4, UIKit; not in UIButton's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it), and 6.1.3's UIButton carries no selector mentioning configuration at all; the port's own UIButtonConfiguration is the value these carry, measured by tests/backports/host/uikit2/buttonconfig_test.m, and the wiring is delivered by packages/a/apple-backports/UIKit/UIButton+Configuration15.m",
+      "source": "SDK 16.4, UIKit; not in UIButton's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it), and 6.1.3's UIButton carries no selector mentioning configuration at all; the port's own UIButtonConfiguration is the value these carry, measured by tests/backports/host/uikit2/buttonconfig_test.m, and the wiring is delivered by packages/frameworks/apple-backports/UIKit/UIButton+Configuration15.m",
       "facts": "facts/UIKit/UIButtonConfiguration15Wiring.md"
     },
     {
@@ -732,7 +732,7 @@
       "status": "implemented",
       "reason": "the block -updateConfiguration calls after applying the automatic update; moot without the UIButtonConfiguration cycle this port does not carry - no demand",
       "effect": "the handler is kept per button, copied on set, and setting it asks for a configuration update; the update then calls it with the button and the button's configuration, through the same seam the 15.0 cell rows use",
-      "source": "SDK 16.4, UIKit; not in UIButton's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it); delivered on the cell rows' own seam - revenant_host_update_handler and revenant_host_set_update_handler from RevenantConfigurationHost.m, which take a UIView and are reused here rather than remade, and the 15.0 cell rows are the precedent - packages/a/apple-backports/UIKit/UIButton+Configuration15.m",
+      "source": "SDK 16.4, UIKit; not in UIButton's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it); delivered on the cell rows' own seam - revenant_host_update_handler and revenant_host_set_update_handler from RevenantConfigurationHost.m, which take a UIView and are reused here rather than remade, and the 15.0 cell rows are the precedent - packages/frameworks/apple-backports/UIKit/UIButton+Configuration15.m",
       "facts": "facts/UIKit/UIButtonConfiguration15Wiring.md"
     },
     {
@@ -773,7 +773,7 @@
       "status": "owed",
       "reason": "build the property UIButton.subtitleLabel",
       "effect": "a stand-in is built and answers; the real behaviour is owed",
-      "source": "SDK 16.4, UIKit; not in UIButton's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it), and 6.1.3's UIButton carries no selector mentioning configuration at all; the port's own UIButtonConfiguration is the value these carry, measured by tests/backports/host/uikit2/buttonconfig_test.m, and the wiring is delivered by packages/a/apple-backports/UIKit/UIButton+Configuration15.m",
+      "source": "SDK 16.4, UIKit; not in UIButton's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it), and 6.1.3's UIButton carries no selector mentioning configuration at all; the port's own UIButtonConfiguration is the value these carry, measured by tests/backports/host/uikit2/buttonconfig_test.m, and the wiring is delivered by packages/frameworks/apple-backports/UIKit/UIButton+Configuration15.m",
       "facts": "facts/UIKit/UIButtonConfiguration15Wiring.md"
     },
     {
@@ -963,7 +963,7 @@
       "status": "implemented",
       "reason": "`visualEffect` is 15.0 and Apple's own class answers it: the arm64e cache of iOS 18.0 carries -visualEffect and -setVisualEffect: in UIListSeparatorConfiguration's own instance list, among its 37, and the host's own class answers both. The row used to say `absent` with the reason \"the port does not carry UIListSeparatorConfiguration\", which this band's own class made stale - and the port was answering the property anyway, because the 16.4 build SDK declares it on the class and clang auto-synthesised the pair into the 14.5 object (nm on that object showed -visualEffect, -setVisualEffect: and _OBJC_IVAR_$_UIListSeparatorConfiguration._visualEffect). The pair now lives in UIListSeparatorConfiguration+VisualEffect15.m and the 14.5 object declares the property @dynamic, so nm on it shows nothing for this member. Measured on the host's own UIKitCore under Mac Catalyst (facts/UIKit/UIListSeparatorConfiguration145.md, M4, the probe in .agent-work/runs/fix/effect-probe.m): nil until written; after -setVisualEffect: a UIBlurEffect and NOT the instance that was set, so the header's `copy` is applied; -copyWithZone: carries it and the copy's effect is again not the receiver's instance; a copy of a fresh configuration is nil; -isEqual: is 1 for two configurations written alike and 0 once one of them has an effect, while -hash answers alike either way, so the effect joins the equality and not the hash; and the archive writes SEVEN keys whose seventh is `visualEffect`, the property's own name, and reads back a UIBlurEffect",
       "effect": "the vibrancy effect a list separator is drawn with, read and written with copy semantics: nil until written, never the instance the caller set, carried by -copyWithZone: as another copy, and archived under the property's own name so a configuration reads back with it. What the release's list layout does with it: nothing, because 6.1.3 has no UICollectionView list and so no separator to draw behind - the value round trip is the whole of the property here, as it is for every other member of this class, and the row says so rather than claiming a separator this release does not have",
-      "source": "UIListSeparatorConfiguration.h:60 of the 16.4 build SDK (byte for byte the 26.2 one after the comments and the availability macros) declares the property. The port's own objects are packages/a/apple-backports/UIKit/UIListSeparatorConfiguration+VisualEffect15.m, which defines the pair and holds the storage as one associated object per configuration with the copy made on the way in, and packages/a/apple-backports/UIKit/UIListSeparatorConfiguration145.m, whose @dynamic and whose three seams in RevenantLists.h are how a 14.5 object reaches a 15.0 member. Measured on the host's own UIKitCore under Mac Catalyst (facts/UIKit/UIListSeparatorConfiguration145.md, M4, the probe in .agent-work/runs/fix/effect-probe.m): nil until written; after -setVisualEffect: a UIBlurEffect and NOT the instance that was set, so the header's `copy` is applied; -copyWithZone: carries it and the copy's effect is again not the receiver's instance; a copy of a fresh configuration is nil; -isEqual: is 1 for two configurations written alike and 0 once one of them has an effect, while -hash answers alike either way, so the effect joins the equality and not the hash; and the archive writes SEVEN keys whose seventh is `visualEffect`, the property's own name, and reads back a UIBlurEffect. Held to the host by the case in tests/backports/host/uikit2/listseparator_test.m, which asks all seven reads on both sides - nil until written, the class of the effect, copied on the way in, carried and re-copied by -copyWithZone:, and back from the archive - 166 checks, 0 failures; and it responds to a wrong answer: a plant that stops the archive writing the key turns exactly the archived-effect rows red on both sides"
+      "source": "UIListSeparatorConfiguration.h:60 of the 16.4 build SDK (byte for byte the 26.2 one after the comments and the availability macros) declares the property. The port's own objects are packages/frameworks/apple-backports/UIKit/UIListSeparatorConfiguration+VisualEffect15.m, which defines the pair and holds the storage as one associated object per configuration with the copy made on the way in, and packages/frameworks/apple-backports/UIKit/UIListSeparatorConfiguration145.m, whose @dynamic and whose three seams in RevenantLists.h are how a 14.5 object reaches a 15.0 member. Measured on the host's own UIKitCore under Mac Catalyst (facts/UIKit/UIListSeparatorConfiguration145.md, M4, the probe in .agent-work/runs/fix/effect-probe.m): nil until written; after -setVisualEffect: a UIBlurEffect and NOT the instance that was set, so the header's `copy` is applied; -copyWithZone: carries it and the copy's effect is again not the receiver's instance; a copy of a fresh configuration is nil; -isEqual: is 1 for two configurations written alike and 0 once one of them has an effect, while -hash answers alike either way, so the effect joins the equality and not the hash; and the archive writes SEVEN keys whose seventh is `visualEffect`, the property's own name, and reads back a UIBlurEffect. Held to the host by the case in tests/backports/host/uikit2/listseparator_test.m, which asks all seven reads on both sides - nil until written, the class of the effect, copied on the way in, carried and re-copied by -copyWithZone:, and back from the archive - 166 checks, 0 failures; and it responds to a wrong answer: a plant that stops the archive writing the key turns exactly the archived-effect rows red on both sides"
     },
     {
       "api": "UIMenu.selectedElements",
@@ -1179,7 +1179,7 @@
       "status": "implemented",
       "reason": "the switch that turns the port's own table prefetching on and off; the collection view's half of the same feature has had one since 10.0, and Apple's UITableView gained this one in 15.0, so before this row the table was the one half a caller could not silence",
       "effect": "NO until set, and setting it YES is what lets the table ask its prefetch data source for the rows just past the screen; the pass itself is the port's own, from UITableView+Prefetching10.m, and a closed gate means the table lays out and the data source is not called at all",
-      "source": "SDK 16.4, UIKit; not in UITableView's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it), and 6.1.3's UITableView carries no selector mentioning prefetch at all; the default is the one measured on the host for the collection view's own half of this feature - a freshly made view answers NO for isPrefetchingEnabled and nil for the data source - and the gate is delivered by packages/a/apple-backports/UIKit/UITableView+PrefetchingEnabled15.m",
+      "source": "SDK 16.4, UIKit; not in UITableView's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it), and 6.1.3's UITableView carries no selector mentioning prefetch at all; the default is the one measured on the host for the collection view's own half of this feature - a freshly made view answers NO for isPrefetchingEnabled and nil for the data source - and the gate is delivered by packages/frameworks/apple-backports/UIKit/UITableView+PrefetchingEnabled15.m",
       "facts": "facts/UIKit/UITableViewPrefetchingEnabled15.md"
     },
     {
@@ -1582,7 +1582,7 @@
       "status": "implemented",
       "effect": "the release's own initWithMarkerFormat:options:, then its startingItemNumber set",
       "facts": "facts/UIKit/NSTextMembers13.md",
-      "source": "SDK 16.4, UIKit; the release's NSTextList (UIFoundation) lacks it in 6.1.3 and 12.0 and has it in 16.0 and 18.0 (objc.inventory); the port's own object is packages/a/apple-backports/UIKit/NSTextList+Init16.m, a category on NSTextList that defines it by chaining to the release's own -initWithMarkerFormat:options: and then writing startingItemNumber"
+      "source": "SDK 16.4, UIKit; the release's NSTextList (UIFoundation) lacks it in 6.1.3 and 12.0 and has it in 16.0 and 18.0 (objc.inventory); the port's own object is packages/frameworks/apple-backports/UIKit/NSTextList+Init16.m, a category on NSTextList that defines it by chaining to the release's own -initWithMarkerFormat:options: and then writing startingItemNumber"
     },
     {
       "api": "-[UIBarButtonItem creatingFixedGroup]",

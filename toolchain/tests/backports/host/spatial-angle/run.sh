@@ -13,7 +13,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-src=${SPATIAL_SRC:-$root/packages/a/apple-backports/Spatial}
+src=${SPATIAL_SRC:-$root/packages/frameworks/apple-backports/Spatial}
 build=${SPATIAL_ANGLE_BUILD:-$(runs_folder spatial-angle)}
 rm -rf "$build"
 mkdir -p "$build/control"

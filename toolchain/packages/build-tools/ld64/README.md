@@ -106,7 +106,7 @@ one object, no `-lc++abi`, no backports, no `-no_implicit_dylibs`. It aborts in
 ## The store, and why a rebuild of this package is a fleet event
 
 This recipe **had** no digest: `add_versions("956.6", "6809ba18…")` was a fixed string and nothing hashed
-`patches/`, unlike `packages/a/apple-backports/xmake.lua`, which puts a `sources` config hashed from its
+`patches/`, unlike `packages/frameworks/apple-backports/xmake.lua`, which puts a `sources` config hashed from its
 own files into the package identity. So a patch added here did not change the install path
 `~/.xmake/packages/l/ld64/956.6/aac8ea2d04874dfdbdc0b81f5db2dd03/`, and the fix was invisible until that
 directory was rebuilt — and because `toolchains/apple-ios` hands this `ld` to every armv7 link, whoever
@@ -115,7 +115,7 @@ rebuilt it changed the linker for every package in the fleet at once. It now car
 `aac8ea2d04874dfdbdc0b81f5db2dd03` (Sep 16) and `a5083ad21d0544179849329a215a04e3` (Sep 28), the same
 version string beside a second install path, with the old one still working.
 
-`ld64` also has exactly one in-tree dependent, `packages/i/iphoneos-sdk`, which uses it for four `-r`
+`ld64` also has exactly one in-tree dependent, `packages/build-tools/iphoneos-sdk`, which uses it for four `-r`
 relocations of `crt1.o`, `crt1.3.1.o`, `dylib1.o` and `bundle1.o`. Everything else reaches it through the
 toolchain.
 
@@ -132,13 +132,13 @@ after  (fix):         _objc_getClass (from libobjc)      _class_getSuperclass (f
 are `/usr/lib/libobjc.A.dylib` and CoreFoundation. With implicit dylibs off there is no ordinal for the
 `File` that actually exports the ObjC runtime, so the symbols were bound to a library that does not export
 them — a link that succeeds and a binary that binds wrongly on the device. The flag is no longer on any
-recipe: `packages/m/matter/xmake.lua`, the one place that carried it, drops it, because the linker that
+recipe: `packages/frameworks/matter/xmake.lua`, the one place that carried it, drops it, because the linker that
 needed the workaround is the one this series fixes.
 
 ## The digest over patches/
 
 `add_configs("patches", ...)` hashes this package's `patches/*.patch` into the package identity, the shape
-`packages/a/apple-backports/xmake.lua` uses for its own sources. The reason is the same as the fix's: this
+`packages/frameworks/apple-backports/xmake.lua` uses for its own sources. The reason is the same as the fix's: this
 is the linker every armv7 link in the fleet uses, so a rebuild in place changes the linker under every
 package at once, and a patch edited here was invisible until somebody happened to rebuild. With the digest,
 a changed linker is a different package that installs beside the old one and the old install path keeps

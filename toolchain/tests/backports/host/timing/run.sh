@@ -5,7 +5,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-UIKIT=${UIKIT:-$here/../../../../packages/a/apple-backports/UIKit}
+UIKIT=${UIKIT:-$here/../../../../packages/frameworks/apple-backports/UIKit}
 BUILD=${BUILD:-$(runs_fresh revenant-timing)}
 sources=${SOURCES:-$(cat "$here/sources.txt")}
 sdk=$(xcrun --show-sdk-path)

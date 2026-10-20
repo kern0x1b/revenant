@@ -1,5 +1,5 @@
 #!/bin/sh
-# Differential test of the CoreMIDI translation (packages/a/apple-backports/CoreMIDI) against macOS CoreMIDI:
+# Differential test of the CoreMIDI translation (packages/frameworks/apple-backports/CoreMIDI) against macOS CoreMIDI:
 # every answer macOS gave the oracle (oracle/batch-up.txt and oracle/batch-down.txt, from oracle/batch.m) and the probes in
 # differential.m. The API files are compiled too, with their functions renamed, so a file that stops compiling
 # stops this run instead of hiding in the library.
@@ -17,9 +17,9 @@ if [ -z "${COREMIDI_BRACKETED:-}" ]; then
     sh "$here/prefs-bracket.sh" selftest
     COREMIDI_BRACKETED=1 exec sh "$here/prefs-bracket.sh" run sh "$here/run.sh" "$@"
 fi
-CORE=${COREMIDI:-$here/../../../../packages/a/apple-backports/CoreMIDI}
+CORE=${COREMIDI:-$here/../../../../packages/frameworks/apple-backports/CoreMIDI}
 # the generated layer's protocol header (RevenantCoreMIDIProtocols.h) is in .gen/CoreMIDI, which the package build puts on the path too
-CORE_GEN=$here/../../../../packages/a/apple-backports/.gen/CoreMIDI
+CORE_GEN=$here/../../../../packages/frameworks/apple-backports/.gen/CoreMIDI
 build=${COREMIDI_BUILD:-$(runs_folder coremidi-host)}
 # COREMIDI_SANITIZE=address builds the library and the differential with AddressSanitizer: the buffer overruns of the
 # packet readers (MIDISysex17.m) are found by that build, not by the answers.

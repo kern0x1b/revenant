@@ -69,7 +69,7 @@ store:
   RevenantTraitHomeExtras, @(0), YES)` declares this trait's kind to be the writer's kind.
 
 So the constructor is one call to the writer, and what it writes is what `-listEnvironment` reads.
-`packages/a/apple-backports/UIKit/UITraitCollection+TraitConstructors18.m` is that call.
+`packages/frameworks/apple-backports/UIKit/UITraitCollection+TraitConstructors18.m` is that call.
 
 ### What the system's own UIKit answers, measured
 

@@ -107,7 +107,7 @@ end
 
 local function emit(release, members, root)
     local label = LABEL[release]
-    local library = path.join(root, "packages", "a", "apple-backports", "MediaPlayer", "MPMediaItem" .. release .. ".m")
+    local library = path.join(root, "packages", "frameworks", "apple-backports", "MediaPlayer", "MPMediaItem" .. release .. ".m")
     local declarations, bodies = {}, {}
     local constants = CONSTANTS[release] or {}
     local constants_decl, constants_def = {}, {}
@@ -137,7 +137,7 @@ local function emit(release, members, root)
     end
     write(table_file, table.concat(rows))
 
-    local facts = path.join(root, "packages", "a", "apple-backports", "facts", "MediaPlayer", "MPMediaItem.md")
+    local facts = path.join(root, "packages", "frameworks", "apple-backports", "facts", "MediaPlayer", "MPMediaItem.md")
     write_facts(facts, release, members, label)
     print(string.format("wrote %s, %s and the facts rows from %d members", library, table_file, #members))
 end

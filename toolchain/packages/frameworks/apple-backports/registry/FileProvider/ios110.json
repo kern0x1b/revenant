@@ -160,7 +160,7 @@
             "status": "implemented",
             "reason": "iOS 6.1.3 has no FileProvider.framework surface, so the NSFileProviderDomain is carried: a hard reference to a name the release lacks is a CRASH-ON-USE, and carrying it is what stops the launch-time kill",
             "effect": "the member this row names, carried because the release exports no such name; a caller naming it is CALLABLE and the behaviour is the refusal Apple documents rather than a fiction",
-            "source": "the band object the generator wrote from packages/a/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
+            "source": "the band object the generator wrote from packages/frameworks/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
             "facts": "facts/FileProvider/Names.md"
         },
         {
@@ -171,7 +171,7 @@
             "status": "implemented",
             "reason": "Corpus rank 7. carried so a caller naming it is CALLABLE; the behaviour is the refusal Apple documents for a device that cannot capture, and it is never invoked by a differential",
             "effect": "the member this row names, carried because the release exports no such name; a caller naming it is CALLABLE and the behaviour is the refusal Apple documents rather than a fiction",
-            "source": "the band object the generator wrote from packages/a/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
+            "source": "the band object the generator wrote from packages/frameworks/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
             "facts": "facts/FileProvider/Names.md"
         },
         {
@@ -182,7 +182,7 @@
             "status": "implemented",
             "reason": "Corpus rank 7. carried so a caller naming it is CALLABLE; the behaviour is the refusal Apple documents for a device that cannot capture, and it is never invoked by a differential",
             "effect": "the member this row names, carried because the release exports no such name; a caller naming it is CALLABLE and the behaviour is the refusal Apple documents rather than a fiction",
-            "source": "the band object the generator wrote from packages/a/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
+            "source": "the band object the generator wrote from packages/frameworks/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
             "facts": "facts/FileProvider/Names.md"
         },
         {
@@ -193,7 +193,7 @@
             "status": "implemented",
             "reason": "Corpus rank 7. carried so a caller naming it is CALLABLE; the behaviour is the refusal Apple documents for a device that cannot capture, and it is never invoked by a differential",
             "effect": "the member this row names, carried because the release exports no such name; a caller naming it is CALLABLE and the behaviour is the refusal Apple documents rather than a fiction",
-            "source": "the band object the generator wrote from packages/a/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
+            "source": "the band object the generator wrote from packages/frameworks/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
             "facts": "facts/FileProvider/Names.md"
         },
         {
@@ -204,7 +204,7 @@
             "status": "implemented",
             "reason": "Corpus rank 7. carried so a caller naming it is CALLABLE; the behaviour is the refusal Apple documents for a device that cannot capture, and it is never invoked by a differential",
             "effect": "the member this row names, carried because the release exports no such name; a caller naming it is CALLABLE and the behaviour is the refusal Apple documents rather than a fiction",
-            "source": "the band object the generator wrote from packages/a/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
+            "source": "the band object the generator wrote from packages/frameworks/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
             "facts": "facts/FileProvider/Names.md"
         },
         {
@@ -215,7 +215,7 @@
             "status": "implemented",
             "reason": "Corpus rank 7. carried so a caller naming it is CALLABLE; the behaviour is the refusal Apple documents for a device that cannot capture, and it is never invoked by a differential",
             "effect": "the member this row names, carried because the release exports no such name; a caller naming it is CALLABLE and the behaviour is the refusal Apple documents rather than a fiction",
-            "source": "the band object the generator wrote from packages/a/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
+            "source": "the band object the generator wrote from packages/frameworks/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
             "facts": "facts/FileProvider/Names.md"
         },
         {
@@ -226,7 +226,7 @@
             "status": "implemented",
             "reason": "Corpus rank 7. carried so a caller naming it is CALLABLE; the behaviour is the refusal Apple documents for a device that cannot capture, and it is never invoked by a differential",
             "effect": "the member this row names, carried because the release exports no such name; a caller naming it is CALLABLE and the behaviour is the refusal Apple documents rather than a fiction",
-            "source": "the band object the generator wrote from packages/a/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
+            "source": "the band object the generator wrote from packages/frameworks/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
             "facts": "facts/FileProvider/Names.md"
         },
         {
@@ -237,7 +237,7 @@
             "status": "implemented",
             "reason": "Corpus rank 7. carried so a caller naming it is CALLABLE; the behaviour is the refusal Apple documents for a device that cannot capture, and it is never invoked by a differential",
             "effect": "the member this row names, carried because the release exports no such name; a caller naming it is CALLABLE and the behaviour is the refusal Apple documents rather than a fiction",
-            "source": "the band object the generator wrote from packages/a/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
+            "source": "the band object the generator wrote from packages/frameworks/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
             "facts": "facts/FileProvider/Names.md"
         },
         {
@@ -248,7 +248,7 @@
             "status": "implemented",
             "reason": "Corpus rank 7. carried so a caller naming it is CALLABLE; the behaviour is the refusal Apple documents for a device that cannot capture, and it is never invoked by a differential",
             "effect": "the member this row names, carried because the release exports no such name; a caller naming it is CALLABLE and the behaviour is the refusal Apple documents rather than a fiction",
-            "source": "the band object the generator wrote from packages/a/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
+            "source": "the band object the generator wrote from packages/frameworks/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
             "facts": "facts/FileProvider/Names.md"
         },
         {
@@ -259,7 +259,7 @@
             "status": "implemented",
             "reason": "Corpus rank 7. carried so a caller naming it is CALLABLE; the behaviour is the refusal Apple documents for a device that cannot capture, and it is never invoked by a differential",
             "effect": "the member this row names, carried because the release exports no such name; a caller naming it is CALLABLE and the behaviour is the refusal Apple documents rather than a fiction",
-            "source": "the band object the generator wrote from packages/a/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
+            "source": "the band object the generator wrote from packages/frameworks/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
             "facts": "facts/FileProvider/Names.md"
         },
         {
@@ -290,7 +290,7 @@
             "status": "implemented",
             "reason": "Corpus rank 7. carried so a caller naming it is CALLABLE; the behaviour is the refusal Apple documents for a device that cannot capture, and it is never invoked by a differential",
             "effect": "the member this row names, carried because the release exports no such name; a caller naming it is CALLABLE and the behaviour is the refusal Apple documents rather than a fiction",
-            "source": "the band object the generator wrote from packages/a/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
+            "source": "the band object the generator wrote from packages/frameworks/apple-backports/spec/FileProvider/bands.json, compiled and read through tests/backports/host/inventory/run.sh, which builds the objects and checks each never_call name against the BUILT object as an exact nm symbol",
             "facts": "facts/FileProvider/Names.md"
         },
         {

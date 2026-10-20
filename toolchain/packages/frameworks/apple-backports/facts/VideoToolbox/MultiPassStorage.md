@@ -81,8 +81,8 @@ from claiming a mapping it has not seen.
 ```
 $ clang -fsyntax-only -fobjc-arc -Wall -Werror=objc-missing-property-synthesis \
       -target armv7-apple-ios6.0 -isysroot "$(cat /tmp/land/sdkpath)" \
-      -Ipackages/a/apple-backports -Ipackages/a/apple-backports/VideoToolbox \
-      packages/a/apple-backports/VideoToolbox/VTMultiPassStorage9_0.m
+      -Ipackages/frameworks/apple-backports -Ipackages/frameworks/apple-backports/VideoToolbox \
+      packages/frameworks/apple-backports/VideoToolbox/VTMultiPassStorage9_0.m
 (no output)
 $ nm -gU .../VTMPS.o
 _T VTMultiPassStorageClose

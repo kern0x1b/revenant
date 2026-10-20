@@ -7,7 +7,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 build=${AUDIOTOOLBOX_FUNCTIONS_BUILD:-$(runs_folder revenant-audiotoolbox-functions)}
-avfaudio="$here/../../../../packages/a/apple-backports/AVFAudio"
+avfaudio="$here/../../../../packages/frameworks/apple-backports/AVFAudio"
 rm -rf "$build"
 mkdir -p "$build"
 

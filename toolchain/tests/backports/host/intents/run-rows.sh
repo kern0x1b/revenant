@@ -164,7 +164,7 @@ echo "intents rows: 12.0 group measured; what it settles and what it does not is
 # hands the handler to a dispatch instead of calling it inline.  A direct call would sit between the
 # method's opening brace and the dispatch, so its absence there is the assertion.
 root=$(cd "$here/../../../.." && pwd)
-port=$root/packages/a/apple-backports/Intents/IN12_0.m
+port=$root/packages/frameworks/apple-backports/Intents/IN12_0.m
 echo "intents rows: the port's own three bodies hand the handler to a dispatch"
 python3 - "$port" <<'PY'
 import sys

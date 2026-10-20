@@ -32,9 +32,9 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/generated.sh"
 ensure_generated "$here" AVFoundation
 root=$(cd "$here/../../../.." && pwd)
-avf=$root/packages/a/apple-backports/AVFoundation
+avf=$root/packages/frameworks/apple-backports/AVFoundation
 # the generated protocol header (tools/gen writes it into .gen/AVFoundation/ on gen --all)
-avf_gen=$root/packages/a/apple-backports/.gen/AVFoundation
+avf_gen=$root/packages/frameworks/apple-backports/.gen/AVFoundation
 control=${CONTROL:-0}
 # AVFCAPSMUTANT=1 plants a wrong capability answer; AVFCAPSMUTANT=prefcam plants the preferred-camera pair's
 # persistence away. Each is named, so a run that plants neither is not called a mutation.
@@ -87,7 +87,7 @@ python3 - 8 "$avf/CharonAVCaptureDeviceReactions17.h:reactions" \
         "$avf/RevenantAVCaptureDeviceDynamic26.h:dynamic26" \
         "$avf/RevenantAVCaptureDeferredStart26.h:deferredstart26" \
         "$avf_gen/RevenantAVFoundationProtocols.h:protocols" \
-        "$root/packages/a/apple-backports/registry/AVFoundation" \
+        "$root/packages/frameworks/apple-backports/registry/AVFoundation" \
         "$build/members.tsv" <<'MEMBERS'
 import json, os, re, sys
 # The pair COUNT is an argument of its own and not a slice's length: with four pairs, sys.argv[1:-2] is three of
@@ -734,7 +734,7 @@ fi
 # THE PROBE IS LINKED TWICE, and the second link is what makes the 26.0 deferred-start defaults checkable at
 # all: "By default, for apps that are linked on or after iOS 26, this value is true" (AVCaptureSession.h:685) is
 # a property of the APPLICATION, which this port can only read out of the main executable's own load command
-# (packages/a/apple-backports/RevenantProgramSDK.h). One binary answers one branch, so both are asked: the
+# (packages/frameworks/apple-backports/RevenantProgramSDK.h). One binary answers one branch, so both are asked: the
 # default link carries this host's SDK and the second carries an explicit pre-26 field. Each probe PRINTS the
 # field it was linked with (a CONTROL line, read back with the port's own helper), and run.sh refuses either
 # binary whose measurement does not match the branch it was linked for - so the label on a row is a measurement

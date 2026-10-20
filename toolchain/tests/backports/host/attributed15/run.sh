@@ -14,7 +14,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-SOURCES=${SOURCES:-$root/packages/a/apple-backports/Foundation}
+SOURCES=${SOURCES:-$root/packages/frameworks/apple-backports/Foundation}
 HARNESS=${HARNESS:-$here/../../device}
 BUILD=${BUILD:-$(runs_folder build/attributed15)}
 sdk=$(xcrun --show-sdk-path)

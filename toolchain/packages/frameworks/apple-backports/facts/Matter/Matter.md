@@ -17,7 +17,7 @@ classes the committed generated objects define, the real stack defines **1188** 
 - `class-overlap.tsv` (this directory) is the measurement, one row per generated class: `yes` when the real stack
   defines it, `no` when it does not. 1188 yes, 20 no. The 20 are listed in the table under "The 20 generated-only
   classes" below.
-- The real stack's registry (`packages/m/matter/registry`) carries 854 of the 1188 class names as class rows. The
+- The real stack's registry (`packages/frameworks/matter/registry`) carries 854 of the 1188 class names as class rows. The
   other 334 are classes the real stack defines and its registry has no class row for: the registry is written from the
   SDK 26.2 surface corpus, and those 334 are not in that corpus (for example `MTRBaseClusterChime`,
   `MTRUnitTestingClusterGlobalEchoRequestParams`).
@@ -426,7 +426,7 @@ special case: `base64EncodedStringWithOptions:` on nil returns nil and `%@` prin
 `(null)`, which is what the host prints for a nil member.
 
 `-base64EncodedStringWithOptions:` is iOS 7 and this library is carried from 6.0, so the call is
-FoundationBackports' and not a hand-rolled encoder: `packages/a/apple-backports/registry/Foundation/base.json`
+FoundationBackports' and not a hand-rolled encoder: `packages/frameworks/apple-backports/registry/Foundation/base.json`
 carries `-[NSData base64EncodedStringWithOptions:]` as `introduced 7.0, status implemented`, and
 `MatterClusterBackports` already lists `libraries = {"FoundationBackports"}`
 (`modules/apple/backports.lua:119`), so the object links it the way every other object of the library does.
@@ -829,7 +829,7 @@ class name of each row). The core column is the pinned connectedhomeip v1.6.1.0 
 The removal rule "the real stack carries it, so the generated object goes" needs the real stack's registry to hold the
 rows the object carries, or the rows go with it. It does not, for most of the 1188:
 
-| the 1188 generated classes' rows in this package's registry | rows | in `packages/m/matter/registry` by kind and name |
+| the 1188 generated classes' rows in this package's registry | rows | in `packages/frameworks/matter/registry` by kind and name |
 | --- | --- | --- |
 | class rows of the 854 the real registry has a class row for | 854 | 854 |
 | property rows of those 854 | 3927 | 2197 |
@@ -841,7 +841,7 @@ So 9516 rows (4916 of the 854's, and 4600 of the 334's) are held by no registry 
 objects outright would leave those rows with no object behind them, and the registry check holds a row no build
 answers as red; deleting the rows would lose them. The registry is written by `tools/matter-registry.lua` from the
 SDK 26.2 surface corpus, and no corpus file is on the machine this section was measured on, so these rows cannot be
-written into `packages/m/matter/registry` here. The decision (extend the corpus, keep the objects for the rows the
+written into `packages/frameworks/matter/registry` here. The decision (extend the corpus, keep the objects for the rows the
 real stack's registry does not carry, or accept the loss) belongs to the coordinator.
 
 ## The real stack's registry after the corpus rerun (v-matter10)
@@ -862,7 +862,7 @@ above are answered by the corpus, not by a gap. The rerun carries 17061 of the 2
   marks all 48 `Apple...Aliro` rows `unavailable` (yes). The dylib defines none of them (`strings` finds
   `clearAliroReaderConfig` and `AppleAliro` nowhere): the unprefixed Aliro selectors are the ones it carries. The
   `Revenant/MTRBaseClusterDoorLock.mm` and `Revenant/MTRClusterDoorLock.mm` forwards that were meant to add them are not in
-  the matter package's build (`packages/m/matter/xmake.lua` names no `revenant` directory), so they are not compiled.
+  the matter package's build (`packages/frameworks/matter/xmake.lua` names no `revenant` directory), so they are not compiled.
 - The other 29 of the 48 were never in the committed registry and stay out (unavailable).
 
 The 1188 generated classes' rows against the new real registry (by kind and name; the 20 are not in this set):
@@ -949,7 +949,7 @@ corpus marks unavailable are all Aliro methods of `MTRBaseClusterDoorLock` (33) 
 with `Apple` (for example `+[MTRBaseClusterDoorLock readAttributeAppleAliroBLEAdvertisingVersionWithClusterStateCache:endpoint:queue:completion:]`,
 `16.1`, `unavailable` yes, `container`) and 12 unprefixed. The corpus carries all 36 Apple-spelled rows as unavailable
 (`yes`). The dylib defines none of the Apple-spelled selectors. The `Revenant/MTRBaseClusterDoorLock.mm` and
-`Revenant/MTRClusterDoorLock.mm` forwards that would have added them are not in `packages/m/matter/xmake.lua`, so nothing
+`Revenant/MTRClusterDoorLock.mm` forwards that would have added them are not in `packages/frameworks/matter/xmake.lua`, so nothing
 compiled them; both are deleted (coordinator's decision 6), and the Aliro rows leave with the generated classes. No
 app can call them: the SDK declares them unavailable.
 
@@ -957,7 +957,7 @@ app can call them: the SDK declares them unavailable.
 `registry/Matter/ios16.json` goes from 21250 entries to 268 (the 20982 rows owned by
 the 1185 are dropped; the 268 owned by the 23 stay, the same bytes in the same order). `registry/Matter/ios16.json.unannotated`
 goes from 10334 lines to 264, by the same owner rule. The `matter` option's description no longer names 1208 objects.
-Every row of the removed classes is either homed in `packages/m/matter/registry` (11512 rows, by kind and name: 864 classes,
+Every row of the removed classes is either homed in `packages/frameworks/matter/registry` (11512 rows, by kind and name: 864 classes,
 8408 methods, 2240 properties), unavailable in the corpus (48), absent from the corpus and proved above (9426).
 
 ## Open
@@ -1021,7 +1021,7 @@ gone no generated class needs them. No exception to condition (1) is made.
 - The 23 objects, `Matter/RevenantMatterTypes.h` and `Matter/RevenantMatterQueueStorage.h` (the two headers only they included).
 - `registry/Matter/ios16.json` and `registry/Matter/ios16.json.unannotated`. The folder is gone.
 - The library `MatterClusterBackports`: its entry in `modules/apple/backports.lua`, the `matter` config and its library
-  line in `packages/a/apple-backports/xmake.lua`. Nothing else in the tree named it (grep over the tree).
+  line in `packages/frameworks/apple-backports/xmake.lua`. Nothing else in the tree named it (grep over the tree).
 - `tests/backports/emulate/matter`, the emulator app that loaded that library by name. Its three classes
   (MTRBaseClusterIdentify, MTRBaseClusterOnOff, MTRBaseClusterTestCluster) had already gone in v-matter11.
 - The generator and the tables only it read: `tools/matter-generate.py`, `tools/matter-init-defaults.tsv`,
@@ -1038,11 +1038,11 @@ gone no generated class needs them. No exception to condition (1) is made.
 **Kept, and why.** `tools/matter-closure.lua` and `facts/Matter/emit-closure.tsv` are the proof that nothing is generated.
 The real stack's host-side harness stays: `tests/backports/host/matter/run.sh`, `members.m` (the host's own surface, read from a
 live process) and `pure.m` (one program held against the host framework), with `tools/matter-host-diff.lua` and
-`tools/matter-pure-diff.lua`, which compare them with the real stack's `libMatterBackports.dylib` (`packages/m/matter/facts/MatterFramework.md`).
+`tools/matter-pure-diff.lua`, which compare them with the real stack's `libMatterBackports.dylib` (`packages/frameworks/matter/facts/MatterFramework.md`).
 Those files test only revenant@matter's surface and read nothing of the removed family.
 
 **The matter option (ruling, coordinator).** Its removal is accepted. The real stack's route is revenant@matter: its
-`libMatterBackports.dylib` is built and installed by `packages/m/matter`, which depends on apple-backports, so no
+`libMatterBackports.dylib` is built and installed by `packages/frameworks/matter`, which depends on apple-backports, so no
 apple-backports option can deliver it.
 
 **Guards.** `tests/addon/matter_closure_test.lua` has no pending list: it fails on any committed `Matter/RevenantMatter*.m`.
@@ -1052,9 +1052,9 @@ apple-backports option can deliver it.
 **What an application gets for Matter now.**
 - From apple-backports: nothing. No file in this package defines or installs a Matter cluster class.
 - From revenant@matter: the real stack's `libMatterBackports.dylib` (v1.6.1.0, armv7), installed under
-  `/usr/lib/revenant/org.revenant.apple-backports/libMatterBackports.dylib` (`packages/m/matter/xmake.lua:339`). That package
-  depends on apple-backports (`packages/m/matter/xmake.lua:28`), so apple-backports cannot deliver it: the dependency would be
+  `/usr/lib/revenant/org.revenant.apple-backports/libMatterBackports.dylib` (`packages/frameworks/matter/xmake.lua:339`). That package
+  depends on apple-backports (`packages/frameworks/matter/xmake.lua:28`), so apple-backports cannot deliver it: the dependency would be
   a cycle. The owner's acceptance "the matter option still delivers the real stack's libMatterBackports" cannot hold from this
   package; the option is removed instead.
 - The 1185 generated classes that are no longer built: each row is carried by the real stack's registry
-  (`packages/m/matter/registry`), unavailable in the SDK 26.2 headers, or declared nowhere in them (`absent-proof.tsv`, v-matter11).
+  (`packages/frameworks/matter/registry`), unavailable in the SDK 26.2 headers, or declared nowhere in them (`absent-proof.tsv`, v-matter11).

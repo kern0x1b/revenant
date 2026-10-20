@@ -42,7 +42,7 @@
       "status": "owed",
       "reason": "build -[AVPlayerViewControllerDelegate playerViewController:restoreUserInterfaceForFullScreenExitWithCompletionHandler:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "packages/a/apple-backports/AVKit/AVPlayerViewController.m (RevenantAVPlayerFullScreenViewController and -revenant_fullScreen:); SDK 26.2 AVKit/AVPlayerViewController.h",
+      "source": "packages/frameworks/apple-backports/AVKit/AVPlayerViewController.m (RevenantAVPlayerFullScreenViewController and -revenant_fullScreen:); SDK 26.2 AVKit/AVPlayerViewController.h",
       "facts": "facts/AVKit/Absent.md"
     },
     {

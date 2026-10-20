@@ -45,7 +45,7 @@ holds them.
   `RevenantWeakMapTable`, an NSMapTable subclass made with the sides that are weak. Each entry holds a strong side
   strongly and a weak side unretained; a weak side's object holds a small watch as an associated object, and the watch,
   released with the object, marks that side of the entry gone and queues the entry on its table. Not a `__weak`
-  reference: on 4.3 that is the SDK's arclite (`packages/i/iphoneos-sdk/arclite/weak.m`), which learns of a death
+  reference: on 4.3 that is the SDK's arclite (`packages/build-tools/iphoneos-sdk/arclite/weak.m`), which learns of a death
   through NSObject's `-release` and so aborts for an object that keeps its own retain count - measured, the first
   NSMutableString key ended the port's run on 4.3 with "cannot form weak reference to instance ... of class
   NSCFString". Entries are found by the key's `-hash` and `-isEqual:`, as the object personality finds them. A table

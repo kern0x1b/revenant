@@ -1,6 +1,6 @@
 # UITableView.prefetchingEnabled, iOS 15.0
 
-One row, one object: `packages/a/apple-backports/UIKit/UITableView+PrefetchingEnabled15.m`.
+One row, one object: `packages/frameworks/apple-backports/UIKit/UITableView+PrefetchingEnabled15.m`.
 
 ## What was missing, and why it is a real gap rather than a duplicate
 

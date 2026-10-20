@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-CORE=${CORE:-$here/../../../../packages/a/apple-backports/CoreData}
+CORE=${CORE:-$here/../../../../packages/frameworks/apple-backports/CoreData}
 harness=${BATCHUPDATE_HARNESS:-$here/../../device}
 build=${BATCHUPDATE_BUILD:-$(runs_folder revenant-batchupdate-host)}
 sources="NSPersistentStoreResult.m NSBatchUpdateRequest.m NSAsynchronousFetchRequest.m NSBatchDeleteRequest.m NSBatchDeleteRequest+ObjectIDs.m NSBatchDeleteResult.m NSManagedObjectContext+ExecuteRequest.m"

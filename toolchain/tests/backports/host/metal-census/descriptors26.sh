@@ -35,7 +35,7 @@ work_ok "$work" || { echo "FAIL: WORK=$work is not a usable scratch path; see wo
 rm -rf "$work"
 mkdir -p "$work"
 
-S="$root/packages/a/apple-backports"
+S="$root/packages/frameworks/apple-backports"
 sdk=$(xcrun --show-sdk-path --sdk macosx)
 # macOS 26.0: the case compares MTL4* members, and the release that declares them is the honest
 # target. At a lower one every MTL4 member is an unguarded-availability warning, and a warning is not

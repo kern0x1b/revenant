@@ -15,7 +15,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
+appledir=${APPLEDIR:-$here/../../../../packages/frameworks/apple-backports}
 gfx="$appledir/Graphics"
 build=${BUILD:-$(runs_folder cifeature)}
 mkdir -p "$build"

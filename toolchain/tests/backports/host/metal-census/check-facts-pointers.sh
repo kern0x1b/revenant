@@ -17,9 +17,9 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-reg=$root/packages/a/apple-backports/registry/Metal/absent_Metal.json
-pkg=$root/packages/a/apple-backports
-factsroot=$root/packages/a/apple-backports/facts
+reg=$root/packages/frameworks/apple-backports/registry/Metal/absent_Metal.json
+pkg=$root/packages/frameworks/apple-backports
+factsroot=$root/packages/frameworks/apple-backports/facts
 work=${WORK:-$(runs_folder metal-census/facts-pointers)}
 # ONE guard for every script that removes a scratch path - see work-guard.sh.
 . "$here/work-guard.sh"

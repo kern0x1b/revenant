@@ -1,5 +1,5 @@
 #!/bin/sh
-# run.sh — a host differential for the shared value machinery (packages/a/apple-backports/RevenantValueStore.h)
+# run.sh — a host differential for the shared value machinery (packages/frameworks/apple-backports/RevenantValueStore.h)
 # and for the MetricKit value classes built on it.
 #
 # What the host can answer: the system's own MetricKit writing a value nothing measured, which is an
@@ -18,11 +18,11 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-metrickit=${METRICKIT:-$here/../../../../packages/a/apple-backports/MetricKit}
-foundation=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}
-appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
-store=${STORE:-$here/../../../../packages/a/apple-backports/RevenantValueStore.h}
-registry=${REGISTRY:-$here/../../../../packages/a/apple-backports/registry/MetricKit/ios13.json}
+metrickit=${METRICKIT:-$here/../../../../packages/frameworks/apple-backports/MetricKit}
+foundation=${FOUNDATION:-$here/../../../../packages/frameworks/apple-backports/Foundation}
+appledir=${APPLEDIR:-$here/../../../../packages/frameworks/apple-backports}
+store=${STORE:-$here/../../../../packages/frameworks/apple-backports/RevenantValueStore.h}
+registry=${REGISTRY:-$here/../../../../packages/frameworks/apple-backports/registry/MetricKit/ios13.json}
 build=${BUILD:-$(runs_fresh revenant-metricvalue)}
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path --sdk macosx)

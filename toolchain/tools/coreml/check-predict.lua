@@ -224,7 +224,7 @@ local CASES = {
 
 function prepare(out, compiled)
     local root = path.directory(path.directory(os.scriptdir()))
-    local core = path.join(root, "packages", "a", "apple-backports", "CoreML")
+    local core = path.join(root, "packages", "frameworks", "apple-backports", "CoreML")
     os.mkdir(out)
     if not os.isfile(path.join(out, "models", "manifest.json")) then
         os.execv(os.programfile(), {"l", path.join(os.scriptdir(), "make-models.lua"), "--out", path.join(out, "models")})

@@ -2,7 +2,7 @@
 
 One row, and it stays `absent`. What changed here is the row's **reason**: the version this page
 replaces said the port "does not draw the table's separators, so there is no drawing for a reference
-to steer", and that is false about this tree's own code. `packages/a/apple-backports/UIKit/UITableView+Separators7.m`
+to steer", and that is false about this tree's own code. `packages/frameworks/apple-backports/UIKit/UITableView+Separators7.m`
 takes a table's separators over - it sets `separatorStyle` to None for that table, which is the
 release's own answer for a table with no separator, remembers what the style was, and draws the line
 itself in a view of its own inside each cell (`RevenantTableSeparatorView`, `-revenant_layoutSeparator`).

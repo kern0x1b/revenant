@@ -4,7 +4,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-ACCELERATE=${ACCELERATE:-$here/../../../../packages/a/apple-backports/Accelerate}
+ACCELERATE=${ACCELERATE:-$here/../../../../packages/frameworks/apple-backports/Accelerate}
 build=${SPARSEBLAS_BUILD:-$(runs_folder sparseblas-host)}
 rm -rf "$build"
 mkdir -p "$build"
@@ -13,7 +13,7 @@ mkdir -p "$build"
 # can hold the port's objects and the host's side by side. The names come from the port's registry and
 # not from a list kept here, so a name added to the library is renamed too.
 renames=""
-for name in $(runs_xmake l "$here/../registry-functions.lua" "$here/../../../../packages/a/apple-backports/registry/Accelerate" --prefix=sparse_); do
+for name in $(runs_xmake l "$here/../registry-functions.lua" "$here/../../../../packages/frameworks/apple-backports/registry/Accelerate" --prefix=sparse_); do
     renames="$renames -D$name=revenant_host_$name"
 done
 

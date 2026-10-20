@@ -7,18 +7,18 @@
 #
 # It builds Monocypher out of the TARBALL the recipe pins, which the shared xmake store's package cache
 # keeps, and never from the network: what is checked here must be the bytes the package is built from.
-# It used to copy packages/m/monocypher/monocypher.c, a vendored copy this tree deliberately does not
+# It used to copy packages/libraries/monocypher/monocypher.c, a vendored copy this tree deliberately does not
 # have: the recipe says why in its own comment - "The sources come from Monocypher's own tarball, not
 # from a copy in this tree: xmake builds a package in its own source directory, which does not hold a
-# vendored file" - so the harness died on "cp: .../packages/m/monocypher/monocypher.c: No such file or
+# vendored file" - so the harness died on "cp: .../packages/libraries/monocypher/monocypher.c: No such file or
 # directory" while the package itself builds from the tarball every day. Re-vendoring the file would
 # put back exactly what the recipe removed, so the sources are read where they are.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 revenant=${REVENANT:-$here/../../../..}
-crypto="$revenant/packages/a/apple-backports/HomeKit/RevenantHapCrypto.m"
-recipe="$revenant/packages/m/monocypher/xmake.lua"
+crypto="$revenant/packages/frameworks/apple-backports/HomeKit/RevenantHapCrypto.m"
+recipe="$revenant/packages/libraries/monocypher/xmake.lua"
 build=${BUILD:-$(runs_fresh revenant-hapcrypto)}
 mkdir -p "$build/monocypher"
 
@@ -66,7 +66,7 @@ cp "$build/monocypher-$version/src/monocypher.c" "$build/monocypher-$version/src
    "$build/monocypher-$version/src/optional/monocypher-ed25519.c" "$build/monocypher-$version/src/optional/monocypher-ed25519.h" \
    "$build/monocypher/"
 
-cc -O2 -I"$build" -I"$revenant/packages/a/apple-backports/HomeKit" \
+cc -O2 -I"$build" -I"$revenant/packages/frameworks/apple-backports/HomeKit" \
    -o "$build/vectors" "$here/vectors.c" "$crypto" \
    "$build/monocypher/monocypher.c" "$build/monocypher/monocypher-ed25519.c"
 

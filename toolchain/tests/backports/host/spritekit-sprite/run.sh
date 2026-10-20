@@ -17,7 +17,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-src=${SPRITEKIT_SRC:-$root/packages/a/apple-backports/SpriteKit}
+src=${SPRITEKIT_SRC:-$root/packages/frameworks/apple-backports/SpriteKit}
 build=${SPRITEKIT_SPRITE_BUILD:-$(runs_folder spritekit-sprite)}
 rm -rf "$build"
 mkdir -p "$build/control"

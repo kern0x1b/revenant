@@ -275,7 +275,7 @@
       "facts": "facts/ARKit/AbsentClasses.md",
       "reason": "carried: the class is there with its six members, which are the accessors of the SDK's own properties and answer the zero values of a mesh that was never measured. A face mesh is measured by the TrueDepth camera this device lacks (ARFaceTrackingConfiguration.isSupported is NO), so no session makes one. The initialiser from blend shapes and the other methods are not carried; facts/ARKit/AbsentClasses.md has the list",
       "effect": "alloc and init answer an object whose six members are nil or zero, as the host's fresh object answers",
-      "source": "carried in packages/a/apple-backports/ARKit/ARFaceGeometry.m; SDK declarations from spec/ARKit/declarations.tsv; host differential tests/backports/host/arkit-absent-classes/run.sh"
+      "source": "carried in packages/frameworks/apple-backports/ARKit/ARFaceGeometry.m; SDK declarations from spec/ARKit/declarations.tsv; host differential tests/backports/host/arkit-absent-classes/run.sh"
     },
     {
       "api": "ARMeshAnchor",
@@ -295,7 +295,7 @@
       "facts": "facts/ARKit/AbsentClasses.md",
       "reason": "carried: the class is there with its four members (vertices, normals, faces, classification), which answer nil because a scene mesh is reconstructed from scene depth and this device has no depth sensor, so no session makes one (ARMeshAnchor.m says the same of its anchor). The methods that build a mesh are not carried; facts/ARKit/AbsentClasses.md",
       "effect": "alloc and init answer an object whose four members are nil, as the host's fresh object answers",
-      "source": "carried in packages/a/apple-backports/ARKit/ARMeshGeometry.m; SDK declarations from spec/ARKit/declarations.tsv; host differential tests/backports/host/arkit-absent-classes/run.sh"
+      "source": "carried in packages/frameworks/apple-backports/ARKit/ARMeshGeometry.m; SDK declarations from spec/ARKit/declarations.tsv; host differential tests/backports/host/arkit-absent-classes/run.sh"
     },
     {
       "api": "ARObjectAnchor",
@@ -315,7 +315,7 @@
       "facts": "facts/ARKit/AbsentClasses.md",
       "reason": "carried as a SceneKit geometry: the class is there, and its init is SCNGeometry's own, as on the host. The factories that build one from a device and the update from an ARFaceGeometry are not carried, because the face mesh they draw needs the TrueDepth camera this device lacks; facts/ARKit/AbsentClasses.md",
       "effect": "a SceneKit geometry with no face in it; the factories it would be made by are not carried",
-      "source": "carried in packages/a/apple-backports/ARKit/ARSCNFaceGeometry.m; SDK declarations from spec/ARKit/declarations.tsv; host differential tests/backports/host/arkit-absent-classes/run.sh"
+      "source": "carried in packages/frameworks/apple-backports/ARKit/ARSCNFaceGeometry.m; SDK declarations from spec/ARKit/declarations.tsv; host differential tests/backports/host/arkit-absent-classes/run.sh"
     },
     {
       "api": "ARSCNPlaneGeometry",
@@ -1227,7 +1227,7 @@
       "facts": "facts/ARKit/AbsentClasses.md",
       "reason": "carried: the class is there with its six members, which answer nil or zero for an object no scan made. A scan reads a mesh out of a depth sensor (ARObjectScanningConfiguration.isSupported is NO), so no archive is written on this device. The archive readers and the merge and transform methods are not carried; facts/ARKit/AbsentClasses.md",
       "effect": "alloc and init answer an object whose six members are nil or zero, as the host's fresh object answers",
-      "source": "carried in packages/a/apple-backports/ARKit/ARReferenceObject.m; SDK declarations from spec/ARKit/declarations.tsv; host differential tests/backports/host/arkit-absent-classes/run.sh"
+      "source": "carried in packages/frameworks/apple-backports/ARKit/ARReferenceObject.m; SDK declarations from spec/ARKit/declarations.tsv; host differential tests/backports/host/arkit-absent-classes/run.sh"
     },
     {
       "api": "ARSCNView",

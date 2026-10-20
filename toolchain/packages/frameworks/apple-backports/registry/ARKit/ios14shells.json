@@ -10,7 +10,7 @@
       "facts": "facts/ARKit/AbsentClasses.md",
       "reason": "carried: the class is there with its three members, state, accuracy and stateReason, which answer 0. A geo-tracking session reports a status, and this port runs none, because a geo-tracking session is not supported on this device (ARGeoTrackingConfiguration, facts/ARKit/AbsentClasses.md)",
       "effect": "alloc and init answer an object whose three members are 0, as the host's fresh object answers",
-      "source": "ARGeoTrackingStatus.m, carried in packages/a/apple-backports/ARKit; SDK declarations from spec/ARKit/declarations.tsv; host differential tests/backports/host/arkit-absent-classes/run.sh"
+      "source": "ARGeoTrackingStatus.m, carried in packages/frameworks/apple-backports/ARKit; SDK declarations from spec/ARKit/declarations.tsv; host differential tests/backports/host/arkit-absent-classes/run.sh"
     },
     {
       "api": "ARGeoTrackingConfiguration",
@@ -21,7 +21,7 @@
       "facts": "facts/ARKit/AbsentClasses.md",
       "reason": "carried: the class is there with its initialisers, and +isSupported answers NO, because a geo-tracking session needs an A12 chip or later and this device has an A5 (facts/ARKit/AbsentClasses.md)",
       "effect": "alloc, init and new answer an object of the class; a session started with it is refused through session:didFailWithError:",
-      "source": "ARGeoTrackingConfiguration.m, carried in packages/a/apple-backports/ARKit; SDK declarations spec/ARKit/declarations.tsv lines 227-242; the device probe tests/backports/device/arkit-config"
+      "source": "ARGeoTrackingConfiguration.m, carried in packages/frameworks/apple-backports/ARKit; SDK declarations spec/ARKit/declarations.tsv lines 227-242; the device probe tests/backports/device/arkit-config"
     },
     {
       "api": "ARGeoTrackingConfiguration.environmentTexturing",

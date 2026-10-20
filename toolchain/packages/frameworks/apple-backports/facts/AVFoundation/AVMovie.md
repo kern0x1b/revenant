@@ -1,6 +1,6 @@
 # AVMovie and AVMovieTrack, the read side, by forwarding
 
-`packages/a/apple-backports/AVFoundation/AVMovie.m`: `RevenantMovie` (runtime name `AVMovie`, superclass `AVAsset`) and
+`packages/frameworks/apple-backports/AVFoundation/AVMovie.m`: `RevenantMovie` (runtime name `AVMovie`, superclass `AVAsset`) and
 `RevenantMovieTrack` (runtime name `AVMovieTrack`, superclass `AVAssetTrack`). Registry rows: `registry/AVFoundation/movie13.json`.
 Host differential: `tests/backports/host/avf-movie4` (writer.m makes the movies, probe.m is built against the host and the
 port, run.sh joins the tables and holds the planted control).

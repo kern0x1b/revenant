@@ -6,7 +6,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-package=${PACKAGE:-$here/../../../../packages/m/micro-ecc}
+package=${PACKAGE:-$here/../../../../packages/libraries/micro-ecc}
 build=${MICROECC_BUILD:-$(runs_fresh revenant-microecc)}
 rm -rf "$build"
 mkdir -p "$build"

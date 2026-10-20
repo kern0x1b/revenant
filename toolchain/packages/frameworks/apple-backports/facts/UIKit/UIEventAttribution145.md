@@ -5,7 +5,7 @@ measured first, on the host's UIKit under Mac Catalyst **27.0, build 26A428**, t
 `.agent-work/runs/b2/` and held to the port by
 `tests/backports/host/uikit2/eventattribution_test.m`, run by the `eventattribution` group in
 `tests/backports/host/uikit2/run.sh`. The port is
-`packages/a/apple-backports/UIKit/UIEventAttribution145.m`.
+`packages/frameworks/apple-backports/UIKit/UIEventAttribution145.m`.
 
 Unlike the 17.0 empty-state family, this group's **system side comes out of a framework**: both classes are
 in the 16.4 SDK this package compiles against, and both headers are byte for byte the 26.2 ones after the

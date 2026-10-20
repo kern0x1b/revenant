@@ -1,5 +1,5 @@
 #!/bin/sh
-# The three measurement formatters of packages/a/apple-backports/Foundation - NSLengthFormatter,
+# The three measurement formatters of packages/frameworks/apple-backports/Foundation - NSLengthFormatter,
 # NSMassFormatter and NSEnergyFormatter, whole from the 26.2 header - against the host's own three.
 # The port's classes are renamed, both are in one process, and every check compares two answers for
 # one input: which unit a value is written in, the number, the name, the plural, the space between
@@ -24,7 +24,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-FOUNDATION=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}
+FOUNDATION=${FOUNDATION:-$here/../../../../packages/frameworks/apple-backports/Foundation}
 BUILD=${BUILD:-$(runs_fresh revenant-unitformat)}
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-incomplete-implementation -Wno-objc-protocol-method-implementation -Wno-nullability-completeness -Wno-objc-designated-initializers -Wno-format-security"
 rm -rf "$BUILD/port"

@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-FOUNDATION=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}
+FOUNDATION=${FOUNDATION:-$here/../../../../packages/frameworks/apple-backports/Foundation}
 harness=${PROBES_HARNESS:-$here/../../device}
 build=${PROBES_BUILD:-$(runs_folder revenant-probes-host)}
 sources="DCDevice.m DCErrorDomain.m ARConfiguration.m ARImageTrackingConfiguration.m"
@@ -21,7 +21,7 @@ for source in $sources; do
     xcrun clang $target -fobjc-arc -fvisibility=hidden -w $renames -I"$FOUNDATION" -c "$FOUNDATION/$source" -o "$build/$source.o"
     objects="$objects $build/$source.o"
 done
-session="$here/../../../../packages/a/apple-backports/CoreNFC/NFCReaderSession.m"
+session="$here/../../../../packages/frameworks/apple-backports/CoreNFC/NFCReaderSession.m"
 xcrun clang $target -fobjc-arc -fvisibility=hidden -w $renames -I"$FOUNDATION" -c "$session" -o "$build/NFCReaderSession.m.o"
 objects="$objects $build/NFCReaderSession.m.o"
 xcrun clang $target -fobjc-arc -Wall -Wno-deprecated-declarations -Wno-unguarded-availability-new -I"$harness" \

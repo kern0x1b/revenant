@@ -18,7 +18,7 @@ ladder this port holds (1.1.4 through 18.0, read through `tools/cache-index/firs
 held rung carrying any of them is `NONE`, and the 26.2 header that declares them puts every one of them
 at 18.5. They are one object file because they are one release. The iPhoneOS 16.4 SDK this package
 compiles against declares none of them, so they are transcribed into
-`packages/a/apple-backports/Accelerate/RevenantSparseComplex26.h`.
+`packages/frameworks/apple-backports/Accelerate/RevenantSparseComplex26.h`.
 
 The imports the object does carry are the release's own and resolve on every band: `cblas_ccopy`,
 `cblas_zcopy`, `cheev_` and `zheev_` are all first exported by 3.2, and the oldest band this port

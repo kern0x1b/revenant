@@ -194,7 +194,7 @@ used**, and the map's list of them was written before the measurement that remov
 A document relying on one of the standard fourteen carries NO `/Widths`, and the metrics that answer it are
 normative data of PDF 1.7 Annex F - which no API on this release hands over (the `CGFont` answer above is
 the proof). So they are **measured**, one character at a time, and generated into
-`packages/a/apple-backports/PDFKit/Base14Widths11.m` by `tools/make-base14-table.py` from a run of
+`packages/frameworks/apple-backports/PDFKit/Base14Widths11.m` by `tools/make-base14-table.py` from a run of
 `tools/host-base14.m`; `--check` says whether the file still matches the measurement. Both halves:
 
 - **the advances**, codes 32..126 of all fourteen, in thousandths of an em. Measured over two fixtures per

@@ -71,7 +71,7 @@ eleventh appears.
 **the backports gate never builds it** - a green gate says nothing about it. Two things verify it,
 and they are different jobs:
 
-- the **armv7 build** is `packages/s/swift-data/harness/build.sh <release>`, which runs the flags
+- the **armv7 build** is `packages/frameworks/swift-data/harness/build.sh <release>`, which runs the flags
   `modules/apple/swift.lua runtime_flags` builds, compiles the whole module, hands the object to
   `harness/symbols.lua` for the counts, and links it against a built
   `libCoreDataBackports.dylib`. Where the toolchain, the runtime and swift-foundation's two modules
@@ -83,7 +83,7 @@ and they are different jobs:
   OBJECT  SwiftData.o  895464 bytes  Mach-O object arm_v7
   SYMBOLS defined=2836 undefined=433
   ```
-- the **committed check** is `xmake l packages/s/swift-data/harness/symbols.lua` with
+- the **committed check** is `xmake l packages/frameworks/swift-data/harness/symbols.lua` with
   `REVENANT_SWIFTDATA_OBJECT` naming an object or the installed `libSwiftData.a`, which prints the same
   `SYMBOLS` and `UNDEFINED` lines and runs the ten-symbol check; and the package's `on_test`, which
   runs that check on what it installed. Its control is the same file with

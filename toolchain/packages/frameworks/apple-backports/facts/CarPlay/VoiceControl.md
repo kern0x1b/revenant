@@ -94,7 +94,7 @@ asked of:
 
 ```
 $ xcrun clang -target armv7-apple-ios6.1.3 -isysroot <iOS16.4 SDK> -fobjc-arc -Os -g0 -Wall \
-      -Werror=objc-missing-property-synthesis -c packages/a/apple-backports/CarPlay/CarPlayVoiceControl12.m \
+      -Werror=objc-missing-property-synthesis -c packages/frameworks/apple-backports/CarPlay/CarPlayVoiceControl12.m \
       -o CarPlayVoiceControl12.o
 $ otool -oV CarPlayVoiceControl12.o | grep name        # every method the class defines
     initWithIdentifier:titleVariants:image:repeats:

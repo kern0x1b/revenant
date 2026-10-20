@@ -440,7 +440,7 @@ None of the 39 needs a row of its own, and that is not an assumption -- it is th
 asked over the list the command above writes:
 
 ```
-REVENANT_ROOT=<worktree> REGISTRY_ROOT=<worktree>/packages/a/apple-backports \
+REVENANT_ROOT=<worktree> REGISTRY_ROOT=<worktree>/packages/frameworks/apple-backports \
 MEMBERS=<worktree>/Vision130-members.txt xmake l tools/vision/check-rows.lua
 ```
 
@@ -605,11 +605,11 @@ as the control:
 ```
 xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$(xcrun --show-sdk-path)" \
     -iframework "$(xcrun --show-sdk-path)/System/iOSSupport/System/Library/Frameworks" \
-    -fobjc-arc -w -include rename.h -I packages/a/apple-backports/Vision \
+    -fobjc-arc -w -include rename.h -I packages/frameworks/apple-backports/Vision \
     -framework Foundation -framework Vision -framework CoreGraphics -framework CoreImage \
     -framework CoreVideo -framework CoreML -framework ImageIO \
-    tools/vision/conforms130.m packages/a/apple-backports/Vision/*.c \
-    packages/a/apple-backports/Vision/*.m -o conforms130 && ./conforms130
+    tools/vision/conforms130.m packages/frameworks/apple-backports/Vision/*.c \
+    packages/frameworks/apple-backports/Vision/*.m -o conforms130 && ./conforms130
 ```
 
 `rename.h` is the header `tests/backports/host/vision/run.sh` writes from
@@ -803,11 +803,11 @@ The port's classes are the ones being asked, so no answer can come from the Visi
 sdk=$(xcrun --show-sdk-path)
 xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" \
     -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" -fobjc-arc -w \
-    -include rename.h -I packages/a/apple-backports/Vision \
+    -include rename.h -I packages/frameworks/apple-backports/Vision \
     -framework Foundation -framework Vision -framework CoreGraphics -framework CoreImage \
     -framework CoreVideo -framework CoreML -framework ImageIO \
-    tools/vision/vn-init-answer.m packages/a/apple-backports/Vision/*.c \
-    packages/a/apple-backports/Vision/*.m -o vninit && ./vninit
+    tools/vision/vn-init-answer.m packages/frameworks/apple-backports/Vision/*.c \
+    packages/frameworks/apple-backports/Vision/*.m -o vninit && ./vninit
 ```
 
 `rename.h` is the header `tests/backports/host/vision/run.sh` writes from `registry/Vision/ios11.json`, and

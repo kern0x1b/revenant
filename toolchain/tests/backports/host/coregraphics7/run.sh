@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-GRAPHICS=${GRAPHICS:-$here/../../../../packages/a/apple-backports/Graphics}
+GRAPHICS=${GRAPHICS:-$here/../../../../packages/frameworks/apple-backports/Graphics}
 harness=${COREGRAPHICS7_HARNESS:-$here/../../device}
 build=${COREGRAPHICS7_BUILD:-$(runs_folder revenant-coregraphics7-host)}
 sources="CGColorSpaceICCData10.m CGColorSpaceHDR13.m CGColorSpaceHDR14.m CGColorSpaceHDR15.m CGColorSpaceExtendedRange93.m"

@@ -159,7 +159,7 @@ carrying the sentence about the 110 `-init` rows a header really does mark.
 
 What the release was asked, and how:
 
-    sh tools/intents/probe-host-absent.sh packages/a/apple-backports/registry/Intents/ios16.json
+    sh tools/intents/probe-host-absent.sh packages/frameworks/apple-backports/registry/Intents/ios16.json
 
     ios16.json  -[INListCarsIntent init]  found=yes answers=yes declared-by=INListCarsIntent init=object
     # absent rows: 1, control rows: 464 implemented rows of the same files
@@ -369,7 +369,7 @@ Undefined symbols for architecture arm64:
 
 So the three live in an associated object each, and `-copyWithZone:`, `-encodeWithCoder:` and
 `-initWithCoder:` - the class's own three, which walk its ivar list through the one helper in
-`packages/r/revenant-coding` - are answered in `IN17_0.m` beside them, under the keys that helper
+`packages/runtimes/revenant-coding` - are answered in `IN17_0.m` beside them, under the keys that helper
 itself uses (`INMessage.attachmentFiles` and so on, which are the keys the class of iOS 17.0
 occupies for the same three). Without that a copy and an archive of an `INMessage` would carry
 ten of its thirteen values and drop exactly the three of 17.0. Those three methods are not API of
@@ -846,7 +846,7 @@ which is not this commit's file.
 unavailable, so the same argument that moved the 110 `-init` rows moves these three `+new` rows, and
 they were `absent` for the same wrong reason before. What was measured, and how:
 
-    sh tools/intents/probe-host-absent.sh packages/a/apple-backports/registry/Intents/ios12.json
+    sh tools/intents/probe-host-absent.sh packages/frameworks/apple-backports/registry/Intents/ios12.json
 
     ios12.json  +[INShortcut new]            found=yes answers=yes declared-by=NSObject
     ios12.json  +[INVoiceShortcut new]       found=yes answers=yes declared-by=NSObject

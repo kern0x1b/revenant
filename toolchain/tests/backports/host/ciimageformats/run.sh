@@ -8,7 +8,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-port=$root/packages/a/apple-backports/Graphics
+port=$root/packages/frameworks/apple-backports/Graphics
 build=${BUILD:-$(runs_folder ciimageformats)}
 mkdir -p "$build"
 

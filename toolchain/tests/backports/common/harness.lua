@@ -3,7 +3,7 @@ local workspace = import("workspace", {rootdir = path.join(TOOLCHAIN, "modules")
 local byteorder = import("byteorder", {rootdir = path.join(TOOLCHAIN, "modules"), anonymous = true})
 local json = import("core.base.json")
 
-local GENERATED = path.join(TOOLCHAIN, "packages", "a", "apple-backports", ".gen")
+local GENERATED = path.join(TOOLCHAIN, "packages", "frameworks", "apple-backports", ".gen")
 local TWOPROCESS_FRAMEWORKS = {"-framework", "UIKit", "-framework", "Foundation", "-framework", "CoreGraphics"}
 local LOG_TAIL = 5
 

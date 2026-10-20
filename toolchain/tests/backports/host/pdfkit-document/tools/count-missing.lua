@@ -31,8 +31,8 @@ local INHERITED = { dealloc = true, init = true, ["copyWithZone:"] = true }
 
 local PROBE = "System/Library/Frameworks/PDFKit.framework/Headers/PDFDocument.h"
 local HEADERS_REL = "System/Library/Frameworks/PDFKit.framework/Headers"
-local OWN_REL = "packages/a/apple-backports/PDFKit/RevenantPDFKit.h"
-local REGISTRY_REL = "packages/a/apple-backports/registry/PDFKit"
+local OWN_REL = "packages/frameworks/apple-backports/PDFKit/RevenantPDFKit.h"
+local REGISTRY_REL = "packages/frameworks/apple-backports/registry/PDFKit"
 
 local function byte_less(a, b)
     for i = 1, math.min(#a, #b) do

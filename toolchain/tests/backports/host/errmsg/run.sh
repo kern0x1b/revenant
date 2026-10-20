@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-SECURITY=${SECURITY:-$here/../../../../packages/a/apple-backports/Security}
+SECURITY=${SECURITY:-$here/../../../../packages/frameworks/apple-backports/Security}
 harness=${ERRMSG_HARNESS:-$here/../../device}
 build=${ERRMSG_BUILD:-$(runs_folder revenant-errmsg-host)}
 rm -rf "$build"

@@ -38,7 +38,7 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-port=$root/packages/a/apple-backports/AVFoundation/AVAssetExportSessionMetadataItemFilter7.m
+port=$root/packages/frameworks/apple-backports/AVFoundation/AVAssetExportSessionMetadataItemFilter7.m
 build=${AVFEF_BUILD:-$(runs_folder avf-export-metadata-filter7)}
 oracle_dir=${AVFEF_ORACLE:-$(runs_folder avf-export-metadata-filter7-oracle)}
 rm -rf "$build"

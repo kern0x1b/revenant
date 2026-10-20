@@ -9,7 +9,7 @@ if [ "${1:-}" = --mutants ]; then
     shift
 fi
 [ $# -eq 0 ] || { echo "$usage" >&2; exit 2; }
-FOUNDATION=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}
+FOUNDATION=${FOUNDATION:-$here/../../../../packages/frameworks/apple-backports/Foundation}
 BUILD=${BUILD:-$(runs_folder bundlerequest)}
 export BUILD
 sources=${SOURCES:-$(cat "$here/sources.txt")}

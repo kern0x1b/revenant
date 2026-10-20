@@ -7,7 +7,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${TOOLTIP_PORT_SOURCE:-$here/../../../../packages/a/apple-backports/UIKit/UIToolTipConfiguration.m}
+port=${TOOLTIP_PORT_SOURCE:-$here/../../../../packages/frameworks/apple-backports/UIKit/UIToolTipConfiguration.m}
 build=${TOOLTIP_BUILD:-$(runs_fresh revenant-tooltip-config)}
 sdk=$(xcrun --show-sdk-path)
 app="$build/tooltip-config"

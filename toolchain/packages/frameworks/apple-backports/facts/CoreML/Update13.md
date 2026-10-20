@@ -1,6 +1,6 @@
 # Core ML, the model-update classes
 
-What `packages/a/apple-backports/CoreML/CoreMLUpdate13.m` and `CoreMLUpdate14.m` carry, what the host does with
+What `packages/frameworks/apple-backports/CoreML/CoreMLUpdate13.m` and `CoreMLUpdate14.m` carry, what the host does with
 the same model, what was measured, and what was not.
 
 ## WHAT THE OBJECTS HOLD

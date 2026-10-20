@@ -7,7 +7,7 @@ buckets by the words the rows use.
 ```
 python3 - <<'PY'
 import json, os, collections
-root = "packages/a/apple-backports/registry"
+root = "packages/frameworks/apple-backports/registry"
 counts = collections.Counter()
 for framework in ("Metal", "MetalKit"):
     for name in sorted(os.listdir(os.path.join(root, framework))):
@@ -86,7 +86,7 @@ is the point of this entry. Each of the fifteen carried the reason:
 Two things about that are no longer true. **`RevenantMetalProtocols.h` does not name `MTLAllocation`
 at all** — `grep -c MTLAllocation` on the file is 0 — and **line 51 is a bare forward declaration**,
 not that diagnostic. The header compiles with the library's own flags and no `-I`, run from
-`packages/a/apple-backports`, and the quoted `file:line:column` no longer resolves to anything.
+`packages/frameworks/apple-backports`, and the quoted `file:line:column` no longer resolves to anything.
 
 So the fifteen were re-derived from what the port actually carries, and the evidence is a compiled
 one. **`-Wprotocol` was silenced in every Metal class's own source** by a `#pragma clang diagnostic

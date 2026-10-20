@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-CORE=${CORE:-$here/../../../../packages/a/apple-backports/CoreData}
+CORE=${CORE:-$here/../../../../packages/frameworks/apple-backports/CoreData}
 harness=${FETCHINDEX_HARNESS:-$here/../../device}
 build=${FETCHINDEX_BUILD:-$(runs_folder revenant-fetchindex-host)}
 sources="NSFetchIndexElementDescription.m NSFetchIndexDescription.m NSEntityDescription+Indexes.m"

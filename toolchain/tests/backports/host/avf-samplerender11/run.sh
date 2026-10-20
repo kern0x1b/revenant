@@ -48,7 +48,7 @@
 # given and then ABORTS on a flush, a rate change or a release. The run therefore asks the flush rows and
 # the rate-change rows of renderers that hold no media at all, which is askable, and the rows that a
 # stalled renderer would answer are the ALLOWANCES below. Every measurement behind that is in
-# packages/a/apple-backports/facts/AVFoundation/SampleBufferRender11.md.
+# packages/frameworks/apple-backports/facts/AVFoundation/SampleBufferRender11.md.
 #
 # Not run through heavy.sh: it compiles six small files, links two binaries and runs them, and the fleet's
 # heavy lane is for the gate.
@@ -58,7 +58,7 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-port=$root/packages/a/apple-backports/AVFoundation
+port=$root/packages/frameworks/apple-backports/AVFoundation
 build=${AVFSR_BUILD:-$(runs_folder avf-samplerender11)}
 # BESIDE the build directory, not inside it.
 oracle_dir=${AVFSR_ORACLE:-$(runs_folder avf-samplerender11-oracle)}
@@ -257,7 +257,7 @@ ALLOWANCES = {
    "the queue the port made has no device clock and -AudioQueueGetCurrentTime answers -66678 with no valid "
    "time in it; a renderer that cannot place a buffer at its timestamp answers Failed with an "
    "AVFoundationErrorDomain error, where Apple's own renderer keeps answering Rendering for media it has "
-   "accepted and can never play. Measured in packages/a/apple-backports/facts/AVFoundation/SampleBufferRender11.md"),
+   "accepted and can never play. Measured in packages/frameworks/apple-backports/facts/AVFoundation/SampleBufferRender11.md"),
  "renderer: error after the first enqueue is nil": ("NO", "follows the row above, and the port names the queue's own OSStatus in the description"),
  "renderer: status after nine enqueues": ("2", "follows the first-enqueue row"),
  "renderer: error after nine enqueues is nil": ("NO", "follows the first-enqueue row"),

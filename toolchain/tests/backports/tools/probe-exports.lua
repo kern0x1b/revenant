@@ -153,7 +153,7 @@ end
 
 function main(...)
     local options = parse({...})
-    local root = path.join(options.revenant, "packages", "a", "apple-backports")
+    local root = path.join(options.revenant, "packages", "frameworks", "apple-backports")
     local listed
     if options.registry then
         listed = registry_names(root)

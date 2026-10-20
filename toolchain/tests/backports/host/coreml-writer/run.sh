@@ -10,7 +10,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 build=${WRITER_BUILD:-$(runs_folder revenant-coreml-writer-host)}
 rm -rf "$build"
 mkdir -p "$build/tmp"
-core="$runs_checkout/packages/a/apple-backports/CoreML"
+core="$runs_checkout/packages/frameworks/apple-backports/CoreML"
 models="/System/Library/PrivateFrameworks/TuriCore.framework/Versions/A/Resources"
 xcrun clang -std=c11 -Wall -Wextra -Wno-unused-parameter -I"$core" -c "$core/RevenantMLWrite.c" -o "$build/write.o"
 xcrun clang -std=c11 -I"$core" -c "$core/RevenantMLProto.c" -o "$build/proto.o"

@@ -28,7 +28,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-sources=${ACCESSIBILITY_SRC:-$root/packages/a/apple-backports/Accessibility}
+sources=${ACCESSIBILITY_SRC:-$root/packages/frameworks/apple-backports/Accessibility}
 build=${BUILD:-$(runs_folder accessibilitymath)}
 rm -rf "$build"
 mkdir -p "$build"

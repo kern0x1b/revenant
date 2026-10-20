@@ -15,7 +15,7 @@ set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 revenant=$(cd "$here/../../../.." && pwd)
-files="$revenant/packages/c/createml/files"
+files="$revenant/packages/frameworks/createml/files"
 out=$(runs_fresh revenant-createml)
 # `KEEP=1` leaves the build directory behind, so a suite that dies can be run again under a debugger:
 #
@@ -66,7 +66,7 @@ xcrun swiftc -swift-version 5 -wmo -parse-as-library -O -enable-testing \
 # share a name. `-import-objc-header` puts the header's declarations in the module directly.
 
 # The specification writer is part of the CoreML overlay, not a module of its own: on the device
-# `packages/c/createml/xmake.lua` builds every `files/CoreML/*.swift` as the one `CoreML` module, and
+# `packages/frameworks/createml/xmake.lua` builds every `files/CoreML/*.swift` as the one `CoreML` module, and
 # a writer that the package never compiles would be a file only the host test can see. It used to be a
 # separate `PortProto` module, which is why `CreateMLComponents` could not see it.
 xcrun swiftc -swift-version 5 -wmo -parse-as-library -O \

@@ -221,7 +221,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "effect": "the port's own immutable record of one credential-provider exchange, and the only thing -[ASCredentialProviderExtensionContext lastExchange] hands back: the credential the extension selected, the error a cancellation carried, whether the exchange was cancelled, whether it was a configuration request, and the answer the completion handler gave about expiry. It is the port's own addition and not an Apple class -- Apple's counterpart is the SYSTEM taking the credential, which the port has no way to be -- and it is a class rather than a struct returned by value because a struct return is a stret call an ordinary message send does not describe, and because an immutable object cannot be changed by whoever holds it",
-      "source": "defined by packages/a/apple-backports/AuthenticationServices/ASPortCredentialExchange.h"
+      "source": "defined by packages/frameworks/apple-backports/AuthenticationServices/ASPortCredentialExchange.h"
     }
   ]
 }

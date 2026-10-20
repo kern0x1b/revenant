@@ -2,7 +2,7 @@
 # textkit2.m as a device binary under xmake emulate: every implemented method of the range layer of TextKit 2
 # called on the release, once per release, and nothing may crash. The port's classes are the only ones of their
 # names on 6.1.3 and on 4.3, so this is a call test and not a differential: what each answer is was measured
-# against the host's own UIKit (packages/a/apple-backports/facts/UIKit/NSTextRange15.md) and the checks here are
+# against the host's own UIKit (packages/frameworks/apple-backports/facts/UIKit/NSTextRange15.md) and the checks here are
 # those rules held on the release. The two releases are the ones the port targets: 6.1.3 and 4.3, so both ends
 # of the armv7 range are asked. One heavy job (the package's build and an emulated boot a release), so run it in
 # a slot of the machine:

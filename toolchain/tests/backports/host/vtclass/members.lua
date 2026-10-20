@@ -10,7 +10,7 @@ function WORKTREE()
 end
 
 function VT_DIR()
-    return WORKTREE() .. "/packages/a/apple-backports/VideoToolbox"
+    return WORKTREE() .. "/packages/frameworks/apple-backports/VideoToolbox"
 end
 
 function HEADER()

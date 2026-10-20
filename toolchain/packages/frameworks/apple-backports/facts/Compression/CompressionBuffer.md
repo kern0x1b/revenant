@@ -1,6 +1,6 @@
 # The buffer API of Compression: formats, answers and what the layer does
 
-The layer is `packages/a/apple-backports/Compression/CompressionBuffer.c`. Its facts are measured on the host's own
+The layer is `packages/frameworks/apple-backports/Compression/CompressionBuffer.c`. Its facts are measured on the host's own
 libcompression (macOS, the same process as the port), not read from a header or a disassembly. The differential that
 checks them is `tests/backports/host/compression/run.sh` (seed as argument; it prints the seed).
 
@@ -17,7 +17,7 @@ checks them is `tests/backports/host/compression/run.sh` (seed as argument; it p
   300000 bytes of words (226012 bytes). Every other preset differs on the 300000-byte input (preset 5 also matches on
   the 1000 bytes; a one-off survey,
   not kept; the differential requires the bytes of every LZMA case: `LZMA encodes the host's bytes`). The codec is xz 5.8.4
-  (packages/x/xz), built from its own sources and a configuration header of this repository (packages/x/xz/config.h).
+  (packages/libraries/xz), built from its own sources and a configuration header of this repository (packages/libraries/xz/config.h).
 
 ## Empty input (measured)
 
@@ -205,7 +205,7 @@ with 0 bytes (the stream checks, seeds 1 and 2). It is not a format defect.
   block of output (up to 128 KiB), the 64 KiB LZ4 dictionary, and the codec's own state (zlib's and liblzma's windows). It does
   not hold the whole input or output, except one LZFSE block (below).
 - LZFSE decoding is block by block. The layer reads each block's size from its header, with the codec's own header types
-  (lzfse_internal.h, installed by packages/l/lzfse) and the packed fields as lzfse_decode_base.c reads them, and decodes a
+  (lzfse_internal.h, installed by packages/libraries/lzfse) and the packed fields as lzfse_decode_base.c reads them, and decodes a
   block when it is whole (an LZVN block with raw bytes is the exception: decoded as its bytes come, below). The block is decoded
   after the window of output before it: the window goes in front of the block
   as a stored block, so the codec reads the block's matches from it (up to LZFSE_ENCODE_MAX_D_VALUE, 262139 bytes).
@@ -213,7 +213,7 @@ with 0 bytes (the stream checks, seeds 1 and 2). It is not a format defect.
   of a stream whose first block is stored, 8 header bytes and one byte). The host also writes an LZVN block's bytes before
   the block ends (measured on 15-byte inputs: first output at byte 16 of a 26-byte block). The layer does the same, from
   v-int-c11: an LZVN block with raw bytes is decoded by upstream's own resumable state (lzvn_decoder_state, lzvn_decode_base.h,
-  installed by packages/l/lzfse) carried across calls. Each call runs the codec on the payload bytes the caller has, and the
+  installed by packages/libraries/lzfse) carried across calls. Each call runs the codec on the payload bytes the caller has, and the
   bytes it completes are written; a match or an instruction it cannot finish waits for the next call, and an
   end-of-stream opcode with raw bytes or payload left over is a corrupt block. Measured: the differential's decode check
   with the LZFSE decode allowance at 0 passes for every chunking (seeds 1 and 2, failures=0, the first output and the count

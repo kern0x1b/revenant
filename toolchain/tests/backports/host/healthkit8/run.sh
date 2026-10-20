@@ -20,7 +20,7 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 checkout=$(cd "$here/../../../.." && pwd)
-healthkit=${HEALTHKIT:-$checkout/packages/a/apple-backports/HealthKit}
+healthkit=${HEALTHKIT:-$checkout/packages/frameworks/apple-backports/HealthKit}
 objects=${OBJECTSDIR:-$(runs_folder healthkit8)}
 # REVENANT_HOST_BUILD: this is a host differential - the port's process links no framework of the name it
 # measures, so there is no release class for a revenant_alias.h proxy to stand in for, nothing for the
@@ -77,7 +77,7 @@ mv "$objects/probe.new" "$objects/probe"
 # by a silent gap.
 rows=$(python3 - "$checkout" <<'PY'
 import json, sys
-registry = json.load(open(sys.argv[1] + "/packages/a/apple-backports/registry/HealthKit/ios8.json"))
+registry = json.load(open(sys.argv[1] + "/packages/frameworks/apple-backports/registry/HealthKit/ios8.json"))
 asked = ["+[HKQuery predicateForStatesOfMindWithAssociation:]",
          "+[HKQuery predicateForStatesOfMindWithKind:]",
          "+[HKQuery predicateForStatesOfMindWithLabel:]",

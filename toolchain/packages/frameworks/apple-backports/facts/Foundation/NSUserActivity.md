@@ -123,7 +123,7 @@ the two rows' `source` fields cited that tool too. `grep` over the package's own
 the tree, with the file count beside it:
 
 ```
-$ cd packages/a/apple-backports
+$ cd packages/frameworks/apple-backports
 $ grep -rn "userActivityWasContinued\|userActivity:didReceiveInputStream:outputStream" --include="*.m" --include="*.h" --include="*.c" .
 (no output; grep exits 1)
 $ find . \( -name "*.m" -o -name "*.h" -o -name "*.c" \) | wc -l

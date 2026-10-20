@@ -2,12 +2,12 @@
 # run.sh - the port's CGAffineTransformDecompose and CGAffineTransformMakeWithComponents, held to the host's own
 # CoreGraphics (differential.m). The port's source is compiled for this host with both functions renamed, so the
 # host's and the port's stand side by side in one binary. The port is linked twice: through the system's sine-cosine
-# pair, and through apple-compat's __sincos_stret (packages/a/apple-compat/src), as a build for an older release links it.
+# pair, and through apple-compat's __sincos_stret (packages/runtimes/apple-compat/src), as a build for an older release links it.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-GRAPHICS=${GRAPHICS:-$here/../../../../packages/a/apple-backports/Graphics}
-COMPAT=${COMPAT:-$here/../../../../packages/a/apple-compat/src}
+GRAPHICS=${GRAPHICS:-$here/../../../../packages/frameworks/apple-backports/Graphics}
+COMPAT=${COMPAT:-$here/../../../../packages/runtimes/apple-compat/src}
 BUILD=${BUILD:-$(runs_fresh revenant-affine-components)}
 mkdir -p "$BUILD"
 renames="-DCGAffineTransformDecompose=RevenantHostDecompose -DCGAffineTransformMakeWithComponents=RevenantHostMakeWithComponents"

@@ -4,7 +4,7 @@ What the host's own UIKit answers was measured first, on the host's UIKit under 
 every number and answer below is the case's, not a reading of the header. The case is
 `tests/backports/host/uikit2/contentunavailable_test.m`, run by the `contentunavailable` group in
 `tests/backports/host/uikit2/run.sh`, and the port is
-`packages/a/apple-backports/UIKit/UIContentUnavailableProperties.m`.
+`packages/frameworks/apple-backports/UIKit/UIContentUnavailableProperties.m`.
 
 ## M1. The three property bags and the state object are plain holders, with three measured defaults
 
@@ -173,7 +173,7 @@ by side over the same key.  That is what the red control plants against.
 ## M4. The configuration and its content view: every default measured on the host, 2026-10-03
 
 M3's blocker is gone and the two classes are carried. `UIContentUnavailableConfiguration` and
-`UIContentUnavailableView` are in `packages/a/apple-backports/UIKit/UIContentUnavailableConfiguration.m`,
+`UIContentUnavailableView` are in `packages/frameworks/apple-backports/UIKit/UIContentUnavailableConfiguration.m`,
 declared in `UIContentUnavailableConfiguration.h`, transcribed from
 `toolchain/.agent-work/sdk-26.2/iPhoneOS26.2.sdk/System/Library/Frameworks/UIKit.framework/Headers`, whose
 `UIContentUnavailableConfiguration.h` and `UIContentUnavailableView.h` are byte for byte the Mac Catalyst

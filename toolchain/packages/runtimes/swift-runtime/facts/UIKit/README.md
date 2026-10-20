@@ -5,7 +5,7 @@
 part of the API push that is Swift-only, which no Objective-C file can answer.
 
 **Where it goes.** Appended to the overlay's own `stdlib/public/Darwin/UIKit/UIKit.swift`, the file
-`packages/s/swift-runtime/xmake.lua` builds the `UIKit` Swift module from (line 432 onwards, the
+`packages/runtimes/swift-runtime/xmake.lua` builds the `UIKit` Swift module from (line 432 onwards, the
 `uikit` tree it fetches at `swift-5.2.5-RELEASE` / `71d85a7c28eed8f46241649a723ddf23989139c6` and
 patches with `patches/uikit/*.patch` before `build_overlay`). The overlay of swift-5.2.5 declares
 none of these 28 types, so nothing here collides with what it already has.
@@ -43,7 +43,7 @@ SDK's own UIKit marks `API_AVAILABLE(ios(13.0))` (`UIKit.framework/Headers/UIAcc
 is the wrong place; it is `UITargetedPreview.h:17`, and the copy the port's headers keep reads
 `API_AVAILABLE(ios(6.1.3))` because `registry/UIKit/ios13menus.json` carries that class `implemented`
 at `6.0`), so the enum carries the release the SDK 26.2 interface gives it, `@available(iOS 13.4, *)`,
-and `packages/s/swift-runtime/xmake.lua` lowers that mark where the UIKit backports are linked.
+and `packages/runtimes/swift-runtime/xmake.lua` lowers that mark where the UIKit backports are linked.
 
 Measured at `armv7-apple-ios6.1.3` over this tree, the two configurations the recipe builds:
 
@@ -100,13 +100,13 @@ declaration is wrong.
 ## The 86 that resolve: 0 error lines
 
 Against the port's headers made from **this tree's registry** (the generator's output
-`.agent-work/runs/uikit-c/port/6.1.3/`, over `packages/a/apple-backports`), the typecheck over the 86 rows that are not waiting is clean.
+`.agent-work/runs/uikit-c/port/6.1.3/`, over `packages/frameworks/apple-backports`), the typecheck over the 86 rows that are not waiting is clean.
 That number was measured on an earlier run, before this series; the output has not been re-typechecked under this
 path, so read it as that run's measurement, not a fresh one:
 
 ```
 $ export REVENANT_PORT_VFS=$PWD/.agent-work/runs/uikit-c/port/6.1.3/vfs.yaml
-$ n=0; for f in /tmp/n86/*.swift; do c=$(packages/s/swift-runtime/facts/UIKit/tc.sh "$f" 2>&1 | grep -c "error:"); n=$((n+c)); done
+$ n=0; for f in /tmp/n86/*.swift; do c=$(packages/runtimes/swift-runtime/facts/UIKit/tc.sh "$f" 2>&1 | grep -c "error:"); n=$((n+c)); done
 $ echo "files: $(ls /tmp/n86/*.swift | wc -l)   total error lines: $n"
 files: 86   total error lines: 0
 ```
@@ -165,7 +165,7 @@ declarations and 5 typealiases, and the typecheck over the 86 rows that are not 
 exactly one error:
 
 ```
-$ for f in /tmp/n86/*.swift; do packages/s/swift-runtime/facts/UIKit/tc.sh "$f" 2>&1 | grep "error:"; done \
+$ for f in /tmp/n86/*.swift; do packages/runtimes/swift-runtime/facts/UIKit/tc.sh "$f" 2>&1 | grep "error:"; done \
     | sed 's/.*error: //' | sort | uniq -c
     688 'UITargetedPreview' is only available in iOS 13.0 or newer
 ```

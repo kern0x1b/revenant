@@ -1,8 +1,8 @@
 DispatchWorkItem and the flags of iOS 8 are available below 8: revenant@apple-compat carries
 dispatch_block_create, dispatch_block_create_with_qos_class and the rest of dispatch_block_*
-(packages/a/apple-compat/src/). The QoS and voucher flags (detached, assignCurrentContext,
+(packages/runtimes/apple-compat/src/). The QoS and voucher flags (detached, assignCurrentContext,
 noQoS, inheritQoS, enforceQoS) change nothing on a release that has neither QoS nor vouchers,
-as packages/a/apple-compat/src/dispatch_block.h says: a lower-QoS block runs at its queue's own
+as packages/runtimes/apple-compat/src/dispatch_block.h says: a lower-QoS block runs at its queue's own
 priority. The calls that take a work item or its flags come down in
 the-overlay-of-dispatch-hands-a-release-before-8-its-work-items.patch.
 

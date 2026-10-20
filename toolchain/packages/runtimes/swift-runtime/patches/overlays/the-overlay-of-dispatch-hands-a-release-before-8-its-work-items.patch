@@ -1,5 +1,5 @@
 The overlay's calls that take a work item are available below iOS 8, and hand its flags to the release: revenant@apple-compat
-carries dispatch_block_create and the rest of dispatch_block_* (packages/a/apple-compat/src/), so what Queue.swift,
+carries dispatch_block_create and the rest of dispatch_block_* (packages/runtimes/apple-compat/src/), so what Queue.swift,
 Dispatch.swift and Source.swift marked iOS 8, and asked #available(iOS 8.0) for at run time, is the same code on every
 release. Before this a barrier, a class of service or any other flag given to async(group:qos:flags:), sync(flags:),
 asyncAfter or DispatchGroup.notify was dropped below 8, and the closure was dispatched plainly. The two marks of iOS 8 over
@@ -10,7 +10,7 @@ _sync, _group_async, _group_notify, _after and _source_set_event_handler, which 
 DISPATCH_BLOCK_BARRIER, and run a source's event handler made so, as a barrier, as libdispatch-703 (iOS 10) and later do,
 and are the system's calls where the release has dispatch_block_create - which is what iOS 8 and 9 answer by, their
 libdispatch having the block calls and no barrier bit for a source (libdispatch-442 and -500). What a class of service or a
-voucher asks has no counterpart before iOS 8, as packages/a/apple-compat/src/dispatch_block.h says. A source's cancellation
+voucher asks has no counterpart before iOS 8, as packages/runtimes/apple-compat/src/dispatch_block.h says. A source's cancellation
 and registration handlers are left as they are: on iOS 10 and later they run alone as well, the calls that reach them are
 the release's own, and that is what coordination/crutches.md's entry for the barrier source handler records.
 
@@ -25,7 +25,7 @@ Taking the marks down is what the compiler refuses, at the deployment target thi
 
 revenant@apple-compat does answer both calls below 8 - dispatch_queue_attr_make_with_qos_class hands the attribute back as it
 was given, so the queue is the serial or concurrent one it would have been, and dispatch_queue_get_qos_class says it has no
-class (packages/a/apple-compat/src/dispatch_queue_attr_make_with_qos_class.c) - and a program that reaches either call
+class (packages/runtimes/apple-compat/src/dispatch_queue_attr_make_with_qos_class.c) - and a program that reaches either call
 through C gets the release's answer. What stays marked is the API the release itself marks: below 8 a queue asked for a
 class of service is given the attribute it was given, which is what init(label:qos:) does without the branch, and
 DispatchQueue.qos is a property of iOS 8 and no earlier.

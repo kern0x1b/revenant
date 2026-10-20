@@ -4,7 +4,7 @@
 # WHAT IT MEASURES: what the RELEASE's stack negotiates by default, so the four
 # sec_protocol_options_get_default_*_protocol_version rows answer a measurement instead of a decision.
 # The values those rows carry are a crutch until this runs; see
-# packages/a/apple-backports/facts/Security/SecProtocolWorklist.md.
+# packages/frameworks/apple-backports/facts/Security/SecProtocolWorklist.md.
 #
 # One heavy job, so it runs in a slot of the machine:
 #     $HOME/Git/projects/ios/coordination/heavy.sh sh tests/backports/device/ssl-defaults-probe/run.sh

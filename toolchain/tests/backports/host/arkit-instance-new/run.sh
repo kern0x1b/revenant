@@ -16,11 +16,11 @@ mkdir -p "$runs"
 
 sdk26=$(runs_sdk)
 hdr=$sdk26/System/Library/Frameworks/ARKit.framework/Headers
-spec=$repo/packages/a/apple-backports/spec/ARKit/declarations.tsv
+spec=$repo/packages/frameworks/apple-backports/spec/ARKit/declarations.tsv
 for c in ARRaycastQuery ARRaycastResult ARTrackedRaycast; do
     grep -qx -- "- (instancetype)new NS_UNAVAILABLE;" "$hdr/$c.h" || { echo "FAIL: $c.h does not declare -new unavailable"; exit 1; }
     grep -q "^method	c:objc(cs)$c(im)new	.*\*unavailable ios=13.0/" "$spec" || { echo "FAIL: the spec does not say $c -new is unavailable from 13.0"; exit 1; }
-    if grep -q -- "-new\b\|(im)new\| new\]" "$repo/packages/a/apple-backports/ARKit/$c.m" 2>/dev/null; then
+    if grep -q -- "-new\b\|(im)new\| new\]" "$repo/packages/frameworks/apple-backports/ARKit/$c.m" 2>/dev/null; then
         echo "FAIL: the port defines $c -new"; exit 1
     fi
 done

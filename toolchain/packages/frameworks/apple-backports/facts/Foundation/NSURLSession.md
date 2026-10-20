@@ -73,7 +73,7 @@ census of `Foundation17ReleaseAbsences.md` in their own `source`).
 The claim is a claim about this package's own sources, and it is checkable by hand:
 
 ```
-$ cd packages/a/apple-backports
+$ cd packages/frameworks/apple-backports
 $ grep -rn "didCreateTask\|didReceiveInformationalResponse\|needNewBodyStreamFromOffset" --include="*.m" --include="*.h" --include="*.c" .
 (no output; grep exits 1)
 $ find . \( -name "*.m" -o -name "*.h" -o -name "*.c" \) | wc -l

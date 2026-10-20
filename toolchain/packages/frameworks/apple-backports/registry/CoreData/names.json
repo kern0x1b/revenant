@@ -118,7 +118,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "iOS 6's CoreData exports no such name, and an application that writes one is killed by dyld before its main; the name is carried with the text CoreData of iOS 18.0 gives it. What the release then does with it is a separate matter, and it is in the effect",
-      "effect": "the symbol is there and holds the string 'NSPersistentStoreCoordinatorStoresWillChangeNotification'. the release's own coordinator posts this when its stores change, and the port's own coordinator (packages/a/apple-backports/CoreData/RevenantStoreCoordinator.h) posts it the same way for the stores it makes",
+      "effect": "the symbol is there and holds the string 'NSPersistentStoreCoordinatorStoresWillChangeNotification'. the release's own coordinator posts this when its stores change, and the port's own coordinator (packages/frameworks/apple-backports/CoreData/RevenantStoreCoordinator.h) posts it the same way for the stores it makes",
       "facts": "facts/CoreData/Names.md",
       "source": "CoreData of the arm64e shared cache of iOS 18.0, read through each symbol with tools/corpus/cache-value.lua; the armv7 shared cache of iOS 6.1.3 for what the release's own CoreData exports (125 names, four of them its ubiquity family); the host's own CoreData as the second source (tests/backports/host/coredatanames)"
     },

@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-sources=${LAYOUT_SOURCES:-$here/../../../../packages/a/apple-backports/UIKit}
+sources=${LAYOUT_SOURCES:-$here/../../../../packages/frameworks/apple-backports/UIKit}
 harness=${LAYOUT_HARNESS:-$here/../../device}
 build=${LAYOUT_BUILD:-$(runs_folder revenant-layout-host)}
 sdk=$(xcrun --show-sdk-path)

@@ -4,7 +4,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-ACCELERATE=${ACCELERATE:-$here/../../../../packages/a/apple-backports/Accelerate}
+ACCELERATE=${ACCELERATE:-$here/../../../../packages/frameworks/apple-backports/Accelerate}
 build=${VDSPDISTANCE_BUILD:-$(runs_folder revenant-vdspdistance-host)}
 
 # SAN=1 builds and links the renamed port objects and the differential under AddressSanitizer, through
@@ -24,7 +24,7 @@ mkdir -p "$build"
 # hold the port's answers and the host's side by side. The names come from the port's registry, not from a
 # list kept here, so a name added to any of the files is renamed too.
 renames=""
-for name in $(xmake l "$here/../registry-functions.lua" "$here/../../../../packages/a/apple-backports/registry/Accelerate" ios5distance.json); do
+for name in $(xmake l "$here/../registry-functions.lua" "$here/../../../../packages/frameworks/apple-backports/registry/Accelerate" ios5distance.json); do
     renames="$renames -D$name=revenant_host_$name"
 done
 

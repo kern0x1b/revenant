@@ -160,7 +160,7 @@ zero of zero.
 ```
 The first block is written by the registry walk's `--write-facts` mode (removed), so it is this tree and cannot
 be anything else; the second names the tree it was measured on, and `git archive 6fcdc631b
-packages/a/apple-backports/registry` reproduces it.
+packages/frameworks/apple-backports/registry` reproduces it.
 
 <!-- framework: Foundation -->
 <!-- count:begin -->
@@ -170,7 +170,7 @@ Foundation   110 absent   9 ignored   792 implemented   48 inert      (16271 row
 <!-- count:end -->
 
 Two historical pairs, each naming the tree it was measured on and reproducible with
-`git archive <tree> packages/a/apple-backports/registry`:
+`git archive <tree> packages/frameworks/apple-backports/registry`:
 
 ```
 # output of the removed registry walk, as measured:

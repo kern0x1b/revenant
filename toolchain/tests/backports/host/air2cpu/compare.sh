@@ -60,7 +60,7 @@ cat "$work/oracle.out"
 
 # 2. The port's own translation of that AIR, and its answer.
 # the tool is told where the one call convention lives, and refuses to build without it
-"$llvm/bin/clang++" -std=c++17 "-DCHAIR_AIR2CPU_ABI=\"$root/packages/a/apple-backports/air2cpu-abi.h\"" \
+"$llvm/bin/clang++" -std=c++17 "-DCHAIR_AIR2CPU_ABI=\"$root/packages/frameworks/apple-backports/air2cpu-abi.h\"" \
     $("$llvm/bin/llvm-config" --cxxflags | sed 's/-fno-exceptions//') \
     "$root/tools/air2cpu/air2cpu.cpp" -o "$work/air2cpu" \
     $("$llvm/bin/llvm-config" --ldflags --libs core irreader bitreader support) -Wl,-rpath,"$llvm/lib"
@@ -74,14 +74,14 @@ cat "$work/air2cpu.out"
 # with the element's real width, and a base must never be multiplied by itself. This is the class of
 # bug that made every array element of every kernel alias onto element zero, silently.
 python3 "$here/check-generated-addressing.py" "$work/port.c"
-xcrun clang -O2 -Wno-unused-variable -I"$work" -I"$root/packages/a/apple-backports" "$work/port.c" "$here/driver.c" -o "$work/port"
+xcrun clang -O2 -Wno-unused-variable -I"$work" -I"$root/packages/frameworks/apple-backports" "$work/port.c" "$here/driver.c" -o "$work/port"
 (cd "$work" && ./port) > "$work/port.out"
 cat "$work/port.out"
 
 # 3. The port's OWN encoder, compiled from the package and linked in, dispatching the same kernels
 #    through the same Metal API. driver.c above is the harness; this is the code that runs on the
 #    device, and a rotation of the tid/gid/tg it hands a kernel turns this red.
-METAL=$root/packages/a/apple-backports/Metal
+METAL=$root/packages/frameworks/apple-backports/Metal
 STUB=$here/../metalblit/gl-stub
 # The three files the dispatch path is made of, and not the device: RevenantMetalDevice.m makes an
 # EAGL context, which a host has none of, and its two one-line compute methods are what the harness
@@ -108,7 +108,7 @@ for source in $port_sources; do
         -c "$METAL/$source" -o "$work/port-obj/renamed-$source.o" 2>>"$work/port-build.log" || {
             echo "harness: the port's $source does not compile renamed:"; tail -5 "$work/port-build.log"; exit 1; }
 done
-xcrun clang $target -fobjc-arc $quiet $renames -I"$work" -I"$root/packages/a/apple-backports" "$work/port.c" "$here/harness.m" "$here/host-fixtures.m" "$work"/port-obj/renamed-*.o \
+xcrun clang $target -fobjc-arc $quiet $renames -I"$work" -I"$root/packages/frameworks/apple-backports" "$work/port.c" "$here/harness.m" "$here/host-fixtures.m" "$work"/port-obj/renamed-*.o \
     -framework Metal -framework Foundation -framework QuartzCore -framework CoreGraphics \
     -o "$work/harness"
 "$work/harness" "$here/kernels.metal" > "$work/port.out" 2> "$work/port.err" || {
