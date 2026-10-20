@@ -18,8 +18,11 @@
 #   softmax 1   one unit in the last place apart, and inside a 64-unit bound
 #   neuron 15   800 units apart, outside any bound a rounding argument would accept
 set -eu
+echo "FAIL host/mpsmatrix/rank-selftest.sh: its Python steps are gone and not yet ported to Lua: the inline block PYEOF at line 30; rank.py; the inline block PYEOF at line 107; rank-before.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
-work=${SELFTEST_BUILD:-$here/../../../.agent-work/runs/host/mpsmatrix-rank-selftest}
+. "$here/../../common/runs.sh" "$here"
+work=${SELFTEST_BUILD:-$(runs_folder host/mpsmatrix-rank-selftest)}
 rm -rf "$work"
 mkdir -p "$work"
 echo "selftest work: $work"

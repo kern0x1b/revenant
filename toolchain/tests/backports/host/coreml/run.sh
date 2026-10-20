@@ -10,6 +10,8 @@
 # does. facts/CoreML/CoreML.md carries the measurement. COREML_DIVERGENT still names a container
 # whose prediction numbers are a recorded divergence, for whoever finds the next one.
 set -eu
+echo "FAIL host/coreml/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 65; the inline block PY at line 99; the inline block PY at line 268" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)

@@ -1,6 +1,6 @@
 local LIBRARY = {"packages", "a", "apple-backports", "MediaPlayer"}
 local HOST = {"tests", "backports", "host", "mediaplayeritem"}
-local RUNS = {".agent-work", "runs", "mutate"}
+local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "modules"), anonymous = true})
 
 local USAGE = "usage: xmake l tools/media-event-class.lua <Class> <member> <type> <release> <value> [--carried]"
 
@@ -175,7 +175,7 @@ function main(...)
     local root = path.absolute(path.join(os.scriptdir(), ".."))
     local library = path.join(root, table.unpack(LIBRARY))
     local host = path.join(root, table.unpack(HOST))
-    local runs = path.join(root, table.unpack(RUNS))
+    local runs = workspace.run("mutate")
     local source = carried and "MPRemoteCommandCenter71.m" or (klass .. ".m")
     local what = member:gsub("Time", ""):gsub("Rate", ""):gsub("Type", ""):lower()
     if what == "" then
@@ -192,7 +192,6 @@ function main(...)
     io.writefile(check_path, check_text)
 
     local baseline = path.join(runs, tag .. "-base")
-    os.mkdir(runs)
     local status, _, stderr = run("xcrun", {"clang", "-fobjc-arc", "-framework", "Foundation",
                                             "-I", host, "-I", library, "-o", baseline, check_path}, runs)
     if status ~= 0 then

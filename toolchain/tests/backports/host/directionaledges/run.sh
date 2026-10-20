@@ -13,7 +13,7 @@ mkdir -p "$BUILD"
 xcrun clang -fobjc-arc -fvisibility=hidden -target arm64-apple-ios15.0-macabi -isysroot "$sdk" \
     -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" $quiet $renames \
     -c "$UIKIT/NSDirectionalEdgeInsets.m" -o "$BUILD/NSDirectionalEdgeInsets.o"
-perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$BUILD/NSDirectionalEdgeInsets.o"
+perl -0777 -pi -e 's/__objc_catlist\0\0/__port_catlist\0\0/g' "$BUILD/NSDirectionalEdgeInsets.o"
 xcrun clang -fobjc-arc -target arm64-apple-ios15.0-macabi -isysroot "$sdk" \
     -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" $quiet -I"$DEVICE" \
     "$here/differential.m" "$here/../foundation2/host-attach.c" "$DEVICE/directionaledges-cases.m" \

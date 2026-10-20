@@ -13,19 +13,7 @@ sdk=$(xcrun --show-sdk-path)
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-nullability-completeness"
 
 renames=""
-for name in $(python3 - "$here" <<'PY'
-import json, os, sys
-registry = os.path.join(sys.argv[1], "..", "..", "..", "..", "packages", "a", "apple-backports", "registry", "Accelerate")
-for part in sorted(os.listdir(registry)):
-    if not part.endswith(".json"):
-        continue
-    for entry in json.load(open(os.path.join(registry, part)))["entries"]:
-        if entry["kind"] == "function" and entry["api"].startswith(("vImageConvert", "vImageExtractChannel")) \
-                and ("YpCbCr" in entry["api"] or "420" in entry["api"] or "422" in entry["api"]
-                     or "444" in entry["api"] or "vImageExtractChannel_ARGB8888" in entry["api"]):
-            print(entry["api"].rstrip("()"))
-PY
-); do
+for name in $(runs_xmake l "$here/../registry-functions.lua" "$here/../../../../packages/a/apple-backports/registry/Accelerate" --prefix=vImageConvert --prefix=vImageExtractChannel --contains=YpCbCr --contains=420 --contains=422 --contains=444 --contains=vImageExtractChannel_ARGB8888); do
     renames="$renames -D$name=revenantHost_$name"
 done
 for name in kvImage_YpCbCrToARGBMatrix_ITU_R_601_4 kvImage_YpCbCrToARGBMatrix_ITU_R_709_2 \

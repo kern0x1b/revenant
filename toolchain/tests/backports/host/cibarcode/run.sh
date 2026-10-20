@@ -18,10 +18,13 @@
 # and the host's own CIPDF417CodeDescriptor dies in its own dealloc. Those groups are compared on the records
 # the host printed before it died, and the count it never reached is printed.
 set -eu
+echo "FAIL host/cibarcode/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 35" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 port=$root/packages/a/apple-backports/Graphics
-build=${BUILD:-$root/.agent-work/runs/cibarcode}
+build=${BUILD:-$(runs_folder cibarcode)}
 rm -rf "$build"
 mkdir -p "$build"
 

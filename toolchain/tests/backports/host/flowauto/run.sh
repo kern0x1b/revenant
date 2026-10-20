@@ -21,4 +21,4 @@ if [ ! -s "$build/flowauto.json" ]; then
 fi
 xmake l "$here/../../common/embed.lua" "$build/flowauto.json" "$device/flowauto-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/flowauto_expectations/' "$device/flowauto-expectations.h" && rm -f "$device/flowauto-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/flowauto.json'))))")"
+echo "records: $(runs_harness records "$build/flowauto.json")"

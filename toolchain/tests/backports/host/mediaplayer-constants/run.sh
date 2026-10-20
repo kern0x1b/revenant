@@ -6,9 +6,10 @@
 # does not define is a LINK ERROR, and a run that compared nothing is a failure.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 port=$root/packages/a/apple-backports/MediaPlayer
-build=${BUILD:-$root/.agent-work/runs/mediaplayer-constants}
+build=${BUILD:-$(runs_folder mediaplayer-constants)}
 mkdir -p "$build"
 names_seen=0
 

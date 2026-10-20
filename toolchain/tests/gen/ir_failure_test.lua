@@ -1,5 +1,5 @@
 local REPO = path.absolute(path.join(os.scriptdir(), "..", ".."))
-local RUNS = path.join(REPO, ".agent-work", "runs", "ir-failure-test")
+local RUNS = import("workspace", {rootdir = path.join(REPO, "modules"), anonymous = true}).run("ir-failure-test")
 local fake = import("fake_decls", {rootdir = os.scriptdir(), anonymous = true})
 
 local SHARD = table.concat({

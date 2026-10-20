@@ -1,4 +1,5 @@
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
+local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
 
 local function raises(fn)
     local raised = false
@@ -89,9 +90,7 @@ end
 
 local function test_emit(check)
     local emit = import("gen.emit", {rootdir = TOOLS, anonymous = true})
-    local dir = path.join(os.scriptdir(), "..", "..", ".agent-work", "runs", "gen-test-" .. tostring(os.time()) .. "-"
-                          .. tostring(math.random(1000000)))
-    os.mkdir(dir)
+    local dir = workspace.fresh("gen-test")
     local target = path.join(dir, "nested", "out.txt")
     local before = emit.count()
     check(emit.file(target, "alpha\n") == true, "a new file is written")
@@ -115,7 +114,7 @@ local function test_zero_writes(check)
     local release_fixture = import("release_fixture", {rootdir = os.scriptdir(), anonymous = true})
     local emit = import("gen.emit", {rootdir = TOOLS, anonymous = true})
     local root = path.absolute(path.join(os.scriptdir(), "..", ".."))
-    local tree = path.join(root, ".agent-work", "runs", "gen-zero-writes-" .. tostring(os.time()) .. "-" .. tostring(math.random(1000000)))
+    local tree = workspace.fresh("gen-zero-writes")
     local package = path.join("packages", "a", "apple-backports")
     os.mkdir(path.join(tree, "packages", "a"))
     os.cp(path.join(root, package), path.join(tree, package))

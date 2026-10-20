@@ -12,4 +12,4 @@ xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" -iframework "$sd
 (cd "$build" && ./record "$build/stringdrawing.json" > "$build/stringdrawing.log" 2>&1)
 xmake l "$here/../../common/embed.lua" "$build/stringdrawing.json" "$device/stringdrawing-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/stringdrawing_expectations/' "$device/stringdrawing-expectations.h" && rm -f "$device/stringdrawing-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/stringdrawing.json'))))")"
+echo "records: $(runs_harness records "$build/stringdrawing.json")"

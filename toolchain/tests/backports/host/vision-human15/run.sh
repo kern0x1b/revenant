@@ -7,8 +7,9 @@
 #   3. the plant: a category on the port whose upperBodyOnly answers YES must turn part 2 red
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
-build=${BUILD:-$here/../../../../.agent-work/runs/vision-human15}
+build=${BUILD:-$(runs_folder vision-human15)}
 mkdir -p "$build"
 vision="$appledir/Vision"
 [ -f "$vision/VNHumanObservation.m" ] || { echo "no $vision/VNHumanObservation.m"; exit 1; }

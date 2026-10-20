@@ -16,16 +16,6 @@ local function abspath(p)
     return "/" .. table.concat(parts, "/")
 end
 
-local function makedirs(path)
-    local current = ""
-    for piece in string.gmatch(path, "[^/]+") do
-        current = current .. "/" .. piece
-        if not os.isdir(current) then
-            os.mkdir(current)
-        end
-    end
-end
-
 local function write_or_fail(path, text)
     try {
         function()
@@ -124,12 +114,8 @@ function main()
 
     local here = abspath(os.scriptdir())
     local worktree = abspath(here .. "/../../../..")
-    local out_dir = worktree .. "/.agent-work/runs/vt"
+    local out_dir = import("workspace", {rootdir = worktree .. "/modules", anonymous = true}).run("vt")
     local table_path = here .. "/type-branches.tsv"
-
-    if not os.isdir(out_dir) then
-        makedirs(out_dir)
-    end
     local source = out_dir .. "/classify.m"
     local classify = out_dir .. "/classify"
     local build_err = out_dir .. "/classify.err"

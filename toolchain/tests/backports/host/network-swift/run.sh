@@ -15,9 +15,10 @@
 # The outputs are compared with diff. Nothing here runs python. The compiler is the host's, unless SWIFTC is set.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 files=${NETWORK_SWIFT_FILES:-$root/packages/s/swift-runtime/files/Network}
-build=${NETWORK_SWIFT_BUILD:-$root/.agent-work/runs/host-network-swift}
+build=${NETWORK_SWIFT_BUILD:-$(runs_folder host-network-swift)}
 swiftc=${SWIFTC:-swiftc}
 target=${NETWORK_SWIFT_TARGET:-$(uname -m)-apple-macos26.0}
 rm -rf "$build"

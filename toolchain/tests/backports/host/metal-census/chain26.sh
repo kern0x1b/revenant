@@ -24,9 +24,12 @@
 # produced an object carrying Apple's name in one invocation and the port's in another (see
 # descriptors26.sh). The binary is asked for the renamed symbols and the run stops if they are absent.
 set -eu
+echo "FAIL host/metal-census/chain26.sh: its Python steps are gone and not yet ported to Lua: the inline block PYEOF at line 128" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-work=${WORK:-$root/.agent-work/runs/metal-census/chain26}
+work=${WORK:-$(runs_folder metal-census/chain26)}
 # ONE guard for every script that removes a scratch path - see work-guard.sh.
 . "$here/work-guard.sh"
 work_ok "$work" || { echo "FAIL: WORK=$work is not a usable scratch path; see work-guard.sh" >&2; exit 1; }

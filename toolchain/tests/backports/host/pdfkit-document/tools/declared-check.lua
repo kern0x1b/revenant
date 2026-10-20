@@ -343,47 +343,28 @@ local function glob_files(dir, suffix)
     return out
 end
 
-local function dirname(p)
-    local d = p:match("^(.*)/[^/]*$")
-    if d == nil then
-        return "."
-    end
-    if d == "" then
-        return "/"
-    end
-    return d
-end
-
 local function find_sdk()
-    local roots = {}
-    local here = path.absolute(os.scriptdir())
-    while true do
-        roots[#roots + 1] = here
-        local parent = dirname(here)
-        if parent == here then
-            break
-        end
-        here = parent
+    local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "..", "..", "..", "modules"), anonymous = true})
+    local sdk, failure
+    try {
+        function()
+            sdk = workspace.sdk()
+        end,
+        catch {
+            function(errors)
+                failure = tostring(errors)
+            end
+        }
+    }
+    if failure then
+        print("  the 26.2 SDK was not found: " .. failure)
+        os.exit(2)
     end
-    local home = os.getenv("HOME")
-    if home and home ~= "" then
-        roots[#roots + 1] = path.join(home, "revenant")
-        roots[#roots + 1] = path.join(home, "revenant", ".agent-work", "worktrees")
+    if not os.isfile(path.join(sdk, PROBE)) then
+        print("  the 26.2 SDK at " .. sdk .. " holds no " .. PROBE)
+        os.exit(2)
     end
-    local candidates = {}
-    for _, root in ipairs(roots) do
-        candidates[#candidates + 1] = path.join(root, ".agent-work", "sdk-26.2", "iPhoneOS26.2.sdk")
-    end
-    for _, candidate in ipairs(candidates) do
-        if os.isfile(path.join(candidate, PROBE)) then
-            return path.normalize(candidate)
-        end
-    end
-    print("  the 26.2 SDK was not found.  Looked for " .. PROBE .. " under:")
-    for _, candidate in ipairs(candidates) do
-        print("    " .. path.normalize(candidate))
-    end
-    os.exit(2)
+    return sdk
 end
 
 local function decode_json(file)

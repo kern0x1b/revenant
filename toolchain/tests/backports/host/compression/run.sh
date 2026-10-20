@@ -6,9 +6,10 @@
 # revenant_host_* so the host's and the port's are callable in the same process. Usage: run.sh [seed]
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 seed=${1:-1}
-build=${COMPRESSION_BUILD:-$root/.agent-work/runs/compression-host}
+build=${COMPRESSION_BUILD:-$(runs_folder compression-host)}
 rm -rf "$build"
 mkdir -p "$build/src"
 fetch() {

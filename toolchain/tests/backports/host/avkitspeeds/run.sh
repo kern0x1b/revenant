@@ -7,11 +7,12 @@
 #
 # A device pass would run the port's own object against this file; no such test is in the tree yet, and
 # facts/AVKit/AVPlaybackSpeed.md says so rather than implying one is.
-#
-# The build directory is inside the worktree's .agent-work, never the system temp path, which is wiped.
 set -eu
+echo "FAIL host/avkitspeeds/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 19" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
-build=${BUILD:-$here/../../../../.agent-work/avkitspeeds-host}
+. "$here/../../common/runs.sh" "$here"
+build=${BUILD:-$(runs_folder avkitspeeds-host)}
 mkdir -p "$build"
 xcrun clang -fobjc-arc -w "$here/host.m" -framework AVKit -framework Foundation -o "$build/host"
 "$build/host" | tee "$build/avkitspeeds.log"

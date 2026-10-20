@@ -27,7 +27,8 @@ set -eu
 
 root=$(cd "$(dirname "$0")/../../../.." && pwd)
 here="$root/tests/backports/host/uikit2"
-build="$root/.agent-work/runs/uikit2-red-control"
+. "$here/../../common/runs.sh" "$here"
+build="$(runs_folder uikit2-red-control)"
 scratch="$build/sources"
 source_file="UIContentUnavailableProperties.m"
 config_file="UIContentUnavailableConfiguration.m"

@@ -2,10 +2,6 @@
 # run.sh - MPSCNNLossDataDescriptor (11.3), MPSCNNLossDescriptor (11.3), MPSCNNYOLOLossDescriptor (12.0) and
 # MPSNNNeuronDescriptor (11.3) against Apple's own objects, member by member.
 #
-# The port's four classes are built for Catalyst beside Apple's MetalPerformanceShaders in one process, with every class
-# their sources define renamed RevenantHost<Name>, so the port is reached under names of its own and cannot replace Apple's.
-# The build and the scratch output are under .agent-work/runs/mps-loss/.
-#
 # A MUTANT runs last: the factory's default weight is 2.0, not Apple's 1.0 (measured), so the defaults comparison must turn
 # red on that member, and the mutant's source is a scratch copy, not the port.
 set -eu

@@ -17,6 +17,8 @@
 # beside it. The identifier both sides are asked about for the arithmetic is the host's own, and the
 # port's table is what is held to it.
 set -eu
+echo "FAIL host/healthkit/run.sh: its Python steps are gone and not yet ported to Lua: mutate.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 healthkit=${HEALTHKIT:-$here/../../../../packages/a/apple-backports/HealthKit}

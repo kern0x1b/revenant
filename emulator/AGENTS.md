@@ -8,7 +8,7 @@ An emulator that boots a legacy iOS firmware's own userland. It does not emulate
 hardware registers: it emulates an XNU kernel (system calls, Mach, IOKit) and the
 devices the firmware asks about, and lets the firmware's real launchd, daemons and
 frameworks run on top, on a JIT-translated ARM CPU (Dynarmic: revenant's `dynarmic` package, an upstream
-commit with our patches, in `third_party/packages/d/dynarmic`).
+commit with our patches, in `third_party/dynarmic`).
 
 ## Build and run
 
@@ -48,7 +48,7 @@ from its commit and its patches' checksums.
 - `src/debug/` the gdb remote stub (`--gdb PORT`): registers, memory, software
   breakpoints, all processes as `pPID.TID`.
 - Nothing third-party is vendored (`THIRD-PARTY.md`): a change to Dynarmic is a new patch in
-  `third_party/packages/d/dynarmic/patches/`, listed in that recipe.
+  `third_party/dynarmic/patches/`, listed in that recipe.
 
 ## Things that bite
 

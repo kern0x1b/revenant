@@ -23,9 +23,12 @@
 # tile descriptor's colour attachments are an 11.0 class and an object holds the API of ONE release.
 # Each is compiled under the same rename set, so the case sees one coherent port.
 set -eu
+echo "FAIL host/metal-census/descriptors26.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 280" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-work=${WORK:-$root/.agent-work/runs/metal-census/descriptors26}
+work=${WORK:-$(runs_folder metal-census/descriptors26)}
 # ONE guard for every script that removes a scratch path - see work-guard.sh.
 . "$here/work-guard.sh"
 work_ok "$work" || { echo "FAIL: WORK=$work is not a usable scratch path; see work-guard.sh" >&2; exit 1; }
@@ -69,8 +72,8 @@ prove_defined() {   # $1 nm output
 }
 
 if [ -n "${SELF_TEST:-}" ]; then
-    selfdir="$root/.agent-work/runs/metal-census/descriptors26-self-test"
-    work_ok "$selfdir" || { echo "FAIL: the self-test scratch is not under .agent-work" >&2; exit 1; }
+    selfdir="$(runs_folder metal-census/descriptors26-self-test)"
+    work_ok "$selfdir" || { echo "FAIL: the self-test scratch is not under the run folder" >&2; exit 1; }
     rm -rf "$selfdir"; mkdir -p "$selfdir" || exit 1
     fake="$selfdir/symbols"
     : > "$fake"

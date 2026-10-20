@@ -21,8 +21,7 @@ function main()
         end
     end
 
-    local root = path.join(os.scriptdir(), "..", "..", ".agent-work", "runs", "headers-test-" .. tostring(os.time()) .. "-"
-                           .. tostring(math.random(1000000)))
+    local root = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true}).fresh("headers-test")
     local folder = path.join(root, "packages", "a", "apple-backports", "spec", "Fixture")
     os.mkdir(folder)
     local shard = io.open(path.join(folder, "declarations.tsv"), "wb")

@@ -8,6 +8,8 @@
 # the framework in the port process - the same values the port's own constants carry, over 136 of them
 # measured equal to the host's.
 set -eu
+echo "FAIL host/ciimage/pixel/run.sh: its Python steps are gone and not yet ported to Lua: compare.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../../common/runs.sh" "$here"
 GRAPHICS=${GRAPHICS:-$here/../../../../../packages/a/apple-backports/Graphics}

@@ -14,9 +14,10 @@
 # libSceneKitBackports and installed with `xmake emulate install`.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../common/runs.sh" "$here"
 # Three levels, not two: tests/backports/device is three below the repository root, and a short path
 # writes the build into tests/ where nothing expects it and nothing sweeps it.
-work=${WORK:-$here/../../../.agent-work/runs/device-scenekitprojection}
+work=${WORK:-$(runs_folder device-scenekitprojection)}
 target=${TARGET:-armv7-apple-ios6.1.3}
 sdk=${SDK:-$(ls -d "$HOME"/.xmake/packages/i/iphoneos-sdk/16.4/*/Developer.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.4.sdk 2>/dev/null | head -1)}
 cc=${CC:-$HOME/.xmake/packages/s/swift/6.4.0/f1d0e4f9eebe477396350986a88081e5/bin/clang}

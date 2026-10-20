@@ -11,9 +11,10 @@
 # loaded the daemons fails, and the lines it prints name the services that were not there.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../backports/common/runs.sh" "$here"
 device=${1:-iPhone4,1}
 release=${2:-6.1.3}
-out=${OUT_DIR:-$here/../../../.agent-work/runs/emulate-launchd}
+out=${OUT_DIR:-$(runs_folder emulate-launchd)}
 rm -rf "$out"
 mkdir -p "$out"
 cp "$here/xmake.lua" "$here/control" "$here/main.c" "$out/"

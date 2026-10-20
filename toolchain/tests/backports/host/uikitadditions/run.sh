@@ -13,4 +13,4 @@ xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" -iframework "$sd
 (cd "$build" && ./record "$build/uikitadditions.json" > "$build/uikitadditions.log" 2>&1)
 xmake l "$here/../../common/embed.lua" "$build/uikitadditions.json" "$device/uikitadditions-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/uikitadditions_expectations/' "$device/uikitadditions-expectations.h" && rm -f "$device/uikitadditions-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/uikitadditions.json'))))")"
+echo "records: $(runs_harness records "$build/uikitadditions.json")"

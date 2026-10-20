@@ -16,10 +16,13 @@
 # actually define, so the MPSImage and the answer are the port's own and not the release's class
 # reached by accident.
 set -eu
+echo "FAIL host/mpsimage9/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 41" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 mps=${MPS:-$root/packages/a/apple-backports/MetalPerformanceShaders}
-build=${BUILD:-$root/.agent-work/runs/host/mpsimage9}
+build=${BUILD:-$(runs_folder host/mpsimage9)}
 mkdir -p "$build"
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-unguarded-availability -Wno-incomplete-implementation"
 # A HOST harness: it links the host frameworks and runs here, so it is for the host target and the host

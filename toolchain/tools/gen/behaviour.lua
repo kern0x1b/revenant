@@ -3,8 +3,9 @@ local objc = import("objc", {anonymous = true})
 local order = import("order", {anonymous = true})
 local strings = import("strings", {anonymous = true})
 local pages = import("pages", {anonymous = true})
+local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
 
-local DOC_OUT = ".agent-work/spec-docs"
+local DOC_OUT = "spec-docs"
 local DEFAULT_LIMIT = 5
 local TIMEOUT_SECONDS = 300
 local MEGABYTE = 1048576
@@ -25,8 +26,12 @@ function heavy_path(corpus)
     return heavy
 end
 
-function page_path(tree, fw, files, cls)
-    return path.join(tree, DOC_OUT, fw, "behaviour", files[pages.key("class", cls)])
+function doc_root()
+    return workspace.run(DOC_OUT)
+end
+
+function page_path(fw, files, cls)
+    return path.join(doc_root(), fw, "behaviour", files[pages.key("class", cls)])
 end
 
 function page_files(corpus, sdk_release, fw)

@@ -16,9 +16,12 @@
 # that is the state the bug lived in and a repaired tree would make the fixture look wrong for the
 # wrong reason.
 set -eu
+echo "FAIL host/realityfoundation/coverage-control.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 33; the one-line step at line 44; coverage-fixture-check.py; the one-line step at line 58; the inline block PY at line 80; the one-line step at line 92; the one-line step at line 97; the one-line step at line 98" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 repo=$(cd "$here/../../../.." && pwd)
-runs="$repo/.agent-work/runs/realityfoundation"
+runs="$(runs_folder realityfoundation)"
 mkdir -p "$runs"
 coverage="$here/coverage.py"
 fixture="$here/coverage-guard-pre-repair.py"

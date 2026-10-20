@@ -19,11 +19,14 @@
 #   sh values.sh               measure, exit 0 only when the two builds hold the same values
 #   sh values.sh --mutate      change the port's default operation and require a difference
 set -eu
+echo "FAIL host/authservices/values.sh: its Python steps are gone and not yet ported to Lua: host-write-guard.py; the inline block PYTHON at line 121; apply-anchor.py; compare-tables.py; writing-selectors-scan.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 revenant=${REVENANT:-$here/../../../..}
 package="$revenant/packages/a/apple-backports/AuthenticationServices"
 framework=/System/Library/Frameworks/AuthenticationServices.framework/AuthenticationServices
-build=${BUILD:-$revenant/.agent-work/runs/authservices-values}
+build=${BUILD:-$(runs_folder authservices-values)}
 mutate=${1:-}
 mkdir -p "$build"
 

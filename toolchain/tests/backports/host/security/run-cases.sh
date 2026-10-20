@@ -17,8 +17,9 @@
 set -eu
 
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 work=$(cd "$here/../../../.." && pwd)
-build=${BUILD:-$work/.agent-work/runs/run-cases}
+build=${BUILD:-$(runs_folder run-cases)}
 mkdir -p "$build"; rm -f "$build/cases-entered" "$build"/verdict-*
 sdk=$(xcrun --show-sdk-path --sdk macosx)
 S="$work/packages/a/apple-backports/Security"

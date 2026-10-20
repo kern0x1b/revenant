@@ -12,4 +12,4 @@ xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" -iframework "$sd
 (cd "$build" && ./record "$build/fontkeys.json" > "$build/fontkeys.log" 2>&1)
 xmake l "$here/../../common/embed.lua" "$build/fontkeys.json" "$device/fontkeys-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/fontkeys_expectations/' "$device/fontkeys-expectations.h" && rm -f "$device/fontkeys-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/fontkeys.json'))))")"
+echo "records: $(runs_harness records "$build/fontkeys.json")"

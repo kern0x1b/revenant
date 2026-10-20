@@ -15,9 +15,12 @@
 # pass. Every build below removes its outputs first, and a build that fails is named and exits
 # non-zero instead of being counted as a red test.
 set -eu
+echo "FAIL host/metal-census/argbinding.sh: its Python steps are gone and not yet ported to Lua: the inline block PY2 at line 129; the inline block PY3 at line 202" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-work=${WORK:-$root/.agent-work/runs/metal-census/argbinding}
+work=${WORK:-$(runs_folder metal-census/argbinding)}
 # ONE guard for every script that removes a scratch path - see work-guard.sh.
 . "$(dirname "$0")/work-guard.sh"
 work_ok "$work" || { echo "FAIL: WORK=$work is not a usable scratch path; see work-guard.sh" >&2; exit 1; }
@@ -60,8 +63,8 @@ prove_defined() {   # $1 nm output
 # SELF-TEST of prove_defined, against a fake nm: one class missing from the symbol table must be
 # NAMED, and the full list must pass - or the function accepts a table with a hole in it.
 if [ -n "${SELF_TEST:-}" ]; then
-    selfdir="$root/.agent-work/runs/metal-census/argbinding-self-test"
-    work_ok "$selfdir" || { echo "FAIL: the self-test scratch is not under .agent-work" >&2; exit 1; }
+    selfdir="$(runs_folder metal-census/argbinding-self-test)"
+    work_ok "$selfdir" || { echo "FAIL: the self-test scratch is not under the run folder" >&2; exit 1; }
     rm -rf "$selfdir"; mkdir -p "$selfdir" || exit 1
     fake="$selfdir/symbols"
     for name in $class_list; do

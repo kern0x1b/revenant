@@ -18,10 +18,13 @@
 # --mutation breaks one answer per comparison in the port's own source; each has to go red naming its
 # comparison, and a mutation that does not build is RUN FAILED, never counted as noticed.
 set -eu
+echo "FAIL host/netext-proxy/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PYEOF at line 116" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 S="$root/packages/a/apple-backports"
-W=${WORK:-$root/.agent-work/runs/netext-proxy}
+W=${WORK:-$(runs_folder netext-proxy)}
 W=${W%./*}/$(basename "$W")
 rm -rf "$W"
 mkdir -p "$W"

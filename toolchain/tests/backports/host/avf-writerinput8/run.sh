@@ -36,12 +36,15 @@
 # Not run through heavy.sh: it compiles four small files, links two binaries and runs them, and the
 # fleet's heavy lane is for the gate.
 set -eu
+echo "FAIL host/avf-writerinput8/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 56; the inline block PYEOF at line 198; the inline block PYEOF at line 312" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 port=$root/packages/a/apple-backports/AVFoundation/AVAssetWriterInputMultiPass8.m
-build=${AVFW_BUILD:-$root/.agent-work/runs/avf-writerinput8}
+build=${AVFW_BUILD:-$(runs_folder avf-writerinput8)}
 # BESIDE the build directory, not inside it.
-oracle_dir=${AVFW_ORACLE:-$root/.agent-work/runs/avf-writerinput8-oracle}
+oracle_dir=${AVFW_ORACLE:-$(runs_folder avf-writerinput8-oracle)}
 rm -rf "$build"
 mkdir -p "$build"
 

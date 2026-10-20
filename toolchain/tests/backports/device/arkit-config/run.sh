@@ -1,17 +1,12 @@
 #!/bin/sh
-# tests/backports/device/arkit-config/arkit-config.m on an emulated 4S under 6.1.3, with revenant@apple-backports linked, so the
-# configurations are the library's own. One heavy job (a package build and an emulated boot), so run it in a slot of the machine:
-#     $HOME/Git/projects/ios/coordination/heavy.sh sh tests/backports/device/arkit-config/run.sh
-# ARKITCONFIG_DEVICE and ARKITCONFIG_RELEASE name the device and release (iPhone4,1 and 6.1.3 by default: the fleet's 4S); the
-# build and the logs go to ARKITCONFIG_BUILD (default .agent-work/runs/arkit-config under the checkout).
-# Exits 1 on a configure, build or install failure, on a run that printed no verdict, and on any FAIL line.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=${ARKITCONFIG_ROOT:-$(cd "$here/../../../.." && pwd)}
 export ARKITCONFIG_ROOT=$root
 device=${ARKITCONFIG_DEVICE:-iPhone4,1}
 release=${ARKITCONFIG_RELEASE:-6.1.3}
-build=${ARKITCONFIG_BUILD:-$root/.agent-work/runs/arkit-config}
+build=${ARKITCONFIG_BUILD:-$(runs_folder arkit-config)}
 
 rm -rf "$build"
 mkdir -p "$build"

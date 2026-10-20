@@ -15,15 +15,10 @@ here=$(cd "$(dirname "$0")" && pwd)
 # The offline-render differential is its own program: it asks the host's own 3D mixer and the host's
 # own offline engine, and it needs neither the port's sources nor an SDK, so it is built and run first
 # and its verdict is part of this script's.
+offline_bin="$(runs_folder revenant-avfaudio-offline)/avfaudio-offline"
 xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations \
     "$here/offline.m" -framework Foundation -framework AudioToolbox -framework AVFAudio -framework CoreAudio \
-    -o "$here/../../../.agent-work/avfaudio-offline" 2>/dev/null || {
-        xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations "$here/offline.m" \
-            -framework Foundation -framework AudioToolbox -framework AVFAudio -framework CoreAudio \
-            -o "$(runs_folder revenant-avfaudio-offline)/avfaudio-offline"
-    }
-offline_bin="$here/../../../.agent-work/avfaudio-offline"
-[ -x "$offline_bin" ] || offline_bin="$(runs_folder revenant-avfaudio-offline)/avfaudio-offline"
+    -o "$offline_bin"
 "$offline_bin" || exit $?
 AVFAUDIO=${AVFAUDIO:-$here/../../../../packages/a/apple-backports/AVFAudio}
 build=${AVFAUDIO_HOST_BUILD:-$(runs_folder revenant-avfaudio-host)}

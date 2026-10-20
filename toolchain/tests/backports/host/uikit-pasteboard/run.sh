@@ -18,9 +18,10 @@
 # for the gate.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 tree=$(cd "$here/../../../.." && pwd)
 port=$tree/packages/a/apple-backports/UIKit
-build=${BUILD:-$tree/.agent-work/runs/uikit-pasteboard}
+build=${BUILD:-$(runs_folder uikit-pasteboard)}
 mkdir -p "$build"
 
 # the port's own objects, compiled UNMODIFIED: the categories must attach to the stand-in's class

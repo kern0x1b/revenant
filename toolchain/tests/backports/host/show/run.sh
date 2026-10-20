@@ -16,4 +16,4 @@ codesign -s - --force "$app" > /dev/null 2>&1
 SHOW_RECORDS="$build/show.json" "$app/Contents/MacOS/app" > "$build/show.log" 2>&1 || true
 xmake l "$here/../../common/embed.lua" "$build/show.json" "$device/show-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/show_expectations/' "$device/show-expectations.h" && rm -f "$device/show-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/show.json'))))")"
+echo "records: $(runs_harness records "$build/show.json")"

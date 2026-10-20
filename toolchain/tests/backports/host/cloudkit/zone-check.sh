@@ -1,4 +1,6 @@
 #!/bin/bash
+echo "FAIL host/cloudkit/zone-check.sh: its Python steps are gone and not yet ported to Lua: compare.py; the inline block PY at line 115; the inline block PY at line 173" >&2
+exit 1
 # The zone differential's own check, and the only thing that attests it.
 #
 # It runs FIVE things, and the first two exist because a change to this family that passes only the

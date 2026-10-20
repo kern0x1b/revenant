@@ -16,4 +16,4 @@ codesign -s - --force "$app" > /dev/null 2>&1
 PRESSES_RECORDS="$build/presses.json" "$app/Contents/MacOS/app" > "$build/presses.log" 2>&1 || true
 xmake l "$here/../../common/embed.lua" "$build/presses.json" "$device/presses-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/presses_expectations/' "$device/presses-expectations.h" && rm -f "$device/presses-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/presses.json'))))")"
+echo "records: $(runs_harness records "$build/presses.json")"

@@ -54,9 +54,9 @@ static void host_add(Class cls, const struct host_list *list, const char *prefix
 void host_attach_prefixed(const char *prefix)
 {
     unsigned long size;
-    const struct host_category *const *categories = (const struct host_category *const *)getsectiondata(&__dso_handle, "__DATA", "__revenant_catlist", &size);
+    const struct host_category *const *categories = (const struct host_category *const *)getsectiondata(&__dso_handle, "__DATA", "__port_catlist", &size);
     if (!categories)
-        categories = (const struct host_category *const *)getsectiondata(&__dso_handle, "__DATA_CONST", "__revenant_catlist", &size);
+        categories = (const struct host_category *const *)getsectiondata(&__dso_handle, "__DATA_CONST", "__port_catlist", &size);
     for (size_t index = 0; categories && index < size / sizeof(void *); index++) {
         const struct host_category *category = categories[index];
         host_add(category->cls, category->instance_methods, prefix);
@@ -67,10 +67,10 @@ void host_attach_prefixed(const char *prefix)
 size_t host_attach_members(Class from, Class to)
 {
     unsigned long size;
-    const struct host_category *const *categories = (const struct host_category *const *)getsectiondata(&__dso_handle, "__DATA", "__revenant_catlist", &size);
+    const struct host_category *const *categories = (const struct host_category *const *)getsectiondata(&__dso_handle, "__DATA", "__port_catlist", &size);
     size_t moved = 0;
     if (!categories)
-        categories = (const struct host_category *const *)getsectiondata(&__dso_handle, "__DATA_CONST", "__revenant_catlist", &size);
+        categories = (const struct host_category *const *)getsectiondata(&__dso_handle, "__DATA_CONST", "__port_catlist", &size);
     for (size_t index = 0; categories && index < size / sizeof(void *); index++) {
         const struct host_category *category = categories[index];
         if (category->cls != from)

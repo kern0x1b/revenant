@@ -429,7 +429,7 @@ local function run_checks()
             end
         end
         local signals = {}
-        for _, line in ipairs(lines_keeping_newline(HERE .. "/../../../../.agent-work/runs/vt/type-branches.tsv")) do
+        for _, line in ipairs(lines_keeping_newline(HERE .. "/type-branches.tsv")) do
             local r = split_tab(line)
             if #r == 3 then
                 local digits = strip_ws(r[2])
@@ -439,7 +439,7 @@ local function run_checks()
                 signals[r[1]] = {tonumber(digits), r[3] == "objc"}
             end
         end
-        local canonical = G.probe_types(sdk, seen, HERE .. "/../../../../.agent-work/runs/vt")
+        local canonical = G.probe_types(sdk, seen, import("workspace", {rootdir = HERE .. "/../../../../modules", anonymous = true}).run("vt"))
         print(string.format("  %d distinct argument types across the seventeen initialisers", #seen))
         for _, type_name in ipairs(seen) do
             local got = nil

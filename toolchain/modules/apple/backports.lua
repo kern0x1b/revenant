@@ -984,7 +984,7 @@ local function link(opt, library, attach, objects, releases, outputdir, checked)
     local arguments = {"-target", opt.triple, "-isysroot", opt.sdkdir, "-fuse-ld=" .. opt.ld, "-fobjc-arc",
                        "-dynamiclib", "-Wno-incompatible-sysroot", NOT_ENCRYPTED,
                        "-install_name", path.join(INSTALL_FOLDER, path.filename(output)),
-                       "-Wl,-rename_section,__DATA,__objc_catlist,__DATA,__revenant_catlist", "-o", output, attach}
+                       "-Wl,-rename_section,__DATA,__objc_catlist,__DATA,__port_catlist", "-o", output, attach}
     table.join2(arguments, kept)
     if #reexported > 0 then
         local folder = path.join(opt.builddir, "stubs", path.filename(outputdir), library.name)

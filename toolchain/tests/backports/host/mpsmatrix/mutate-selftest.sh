@@ -7,7 +7,8 @@
 # file byte-identical afterwards. The third case's abort is what proves the second is not a coincidence.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
-scratch=${1:-$here/../../../.agent-work/runs/mutate-selftest}
+. "$here/../../common/runs.sh" "$here"
+scratch=${1:-$(runs_folder mutate-selftest)}
 rm -rf "$scratch"; mkdir -p "$scratch/mutants"; work=$scratch
 MUTANTS_DIR=$scratch/mutants
 cp "$here/mutants/metacharacter.anchor" "$here/mutants/metacharacter.repl" "$scratch/mutants/"

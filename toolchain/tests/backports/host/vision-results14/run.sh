@@ -10,8 +10,9 @@
 #      type - must turn the comparison red
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
-build=${BUILD:-$here/../../../../.agent-work/runs/vision-results14}
+build=${BUILD:-$(runs_folder vision-results14)}
 mkdir -p "$build"
 vision="$appledir/Vision"
 [ -f "$vision/Vision14_0.m" ] || { echo "no $vision/Vision14_0.m"; exit 1; }

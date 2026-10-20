@@ -3,6 +3,8 @@
 # pixels for one lit quad over angles, shininess, roughness, metalness and albedo; the fits name the formulas and
 # how far every pixel is from them. Takes a few minutes; run it through coordination/heavy.sh.
 set -eu
+echo "FAIL host/scenekit/lighting/run.sh: its Python steps are gone and not yet ported to Lua: fitspec.py; fitpbr.py; fitgraze.py; fitselfillumination.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../../common/runs.sh" "$here"
 BUILD=${BUILD:-$(runs_fresh revenant-lighting)}

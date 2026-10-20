@@ -197,7 +197,7 @@ function main(ledger, out, mode)
         assert(#api_names > 0, "the ledger names no missing ImageIO constant")
         byteorder.sort(api_names)
 
-        local build = path.join(ROOT, ".agent-work", "imageio-names")
+        local build = import("workspace", {rootdir = path.join(ROOT, "modules"), anonymous = true}).fresh("imageio-names")
         values = measure_values(api_names, build)
         os.tryrm(build)
         local rungs = measure_rungs(api_names)

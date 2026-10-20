@@ -17,14 +17,17 @@
 #
 # A heavy build, so it runs through heavy.sh, and its output is the two logs it names.
 set -eu
+echo "FAIL host/renderer-differential/build.sh: its Python steps are gone and not yet ported to Lua: the inline block PYREMOVE at line 94" >&2
+exit 1
 
 # The port checkout, found the way every other host test finds it, with DDR_ROOT as the override.
 # It used to be REQUIRED and unset, so the script died on `${DDR_ROOT:?}` before compiling anything
 # and the sweep had no run.sh to run: this is not an external input at all, it is this repository.
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=${DDR_ROOT:-$here/../../../..}
 port=$root/packages/a/apple-backports/UIKit/UITextDragPreviewRenderer11.m
-build=${DDR_BUILD:-$root/.agent-work/runs/renderer-differential-build}
+build=${DDR_BUILD:-$(runs_folder renderer-differential-build)}
 sdk=$(xcrun --show-sdk-path)
 port_name=RevenantHostCopyTextDragPreviewRenderer
 mkdir -p "$build"

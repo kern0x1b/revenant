@@ -4,19 +4,17 @@
 #
 #   ./mutant-init.sh
 #
-# No tracked file is touched. The port's source is COPIED into a scratch directory under
-# .agent-work/runs/mutant-init/, the copy is mutated by mutant-init.py, the copy is built, and the
-# listing is run on the copy and diffed against the committed host reference. Two things this
-# script checks that a red alone does not:
-#
 #   - the MUTANT BUILT. A compile failure is not a red: it is the failure mode that made an earlier
 #     one-line sed useless, and it is reported as a failure of this script, not as a pass.
 #   - the differing line is PRINTED, so the red names raised=0 against the reference's raised=1
 #     instead of a bare "VERDICT: RED".
 set -eu
+echo "FAIL host/coredata-batchinsert/mutant-init.sh: its Python steps are gone and not yet ported to Lua: mutant-init.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 FP=${COREDATA:-$here/../../../../packages/a/apple-backports}
-scratch="$here/../../../../.agent-work/runs/mutant-init"
+scratch="$(runs_folder mutant-init)"
 rm -rf "$scratch"; mkdir -p "$scratch"
 
 echo "=== 1. the mutant, and the one statement it replaces"

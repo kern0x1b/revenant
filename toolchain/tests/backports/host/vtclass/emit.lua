@@ -654,8 +654,7 @@ local function run(sdk_argument)
     local order = G.ORDER()
 
     local work = dirname(dirname(dirname(dirname(absolute_dir(os.scriptdir())))))
-    local out = work .. "/.agent-work/generated/vt"
-    os.mkdir(out)
+    local out = import("workspace", {rootdir = work .. "/modules", anonymous = true}).run("generated", "vt")
 
     local summary, absent = emit_classes(order, protocols, classes, text, out)
 

@@ -61,8 +61,7 @@ local function fixture(kind, fw)
 end
 
 local function scratch_tree()
-    local tree = path.join(ROOT, ".agent-work", "runs", "input-test-" .. tostring(os.time()) .. "-" .. tostring(math.random(1000000)))
-    os.mkdir(tree)
+    local tree = import("workspace", {rootdir = path.join(ROOT, "modules"), anonymous = true}).fresh("input-test")
     for _, fw in ipairs(COPIED) do
         local spec = path.join(ROOT, SPEC, fw)
         if os.isdir(spec) then

@@ -22,7 +22,10 @@
 #   * the CONTROL runs the unmutated source through the identical build-and-run path and must stay
 #     green, so a red mutant is the mutation and not the path.
 set -eu
+echo "FAIL host/avf-descriptors/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PERTURB at line 66; the inline block PERTURB at line 87; the inline block PERTURB at line 105; the inline block PYEOF at line 246" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 avf=$root/packages/a/apple-backports/AVFoundation
 # THE ROW COUNT IS NOT TYPED HERE. It used to be, twice, and the two literals did not agree with the
@@ -44,8 +47,8 @@ sources="AVPlayerMediaSelectionCriteria7 AVPlayerMediaSelectionCriteria7Members 
 control=${CONTROL:-0}
 break=${BREAK:-0}
 mutant=${AVFMUTANT:-0}
-build=${AVF_DESC_BUILD:-$root/.agent-work/avf-descriptors-build}
-baseline_dir=${AVF_DESC_BASELINE:-$root/.agent-work/avf-descriptors-baseline}
+build=${AVF_DESC_BUILD:-$(runs_folder avf-descriptors-build)}
+baseline_dir=${AVF_DESC_BASELINE:-$(runs_folder avf-descriptors-baseline)}
 rm -rf "$build"
 mkdir -p "$build/src" "$build/o" "$baseline_dir"
 

@@ -13,4 +13,4 @@ xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" -iframework "$sd
 (cd "$build" && ./record "$build/collectiontransition.json" > "$build/collectiontransition.log" 2>&1)
 xmake l "$here/../../common/embed.lua" "$build/collectiontransition.json" "$device/collectiontransition-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/collectiontransition_expectations/' "$device/collectiontransition-expectations.h" && rm -f "$device/collectiontransition-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/collectiontransition.json'))))")"
+echo "records: $(runs_harness records "$build/collectiontransition.json")"

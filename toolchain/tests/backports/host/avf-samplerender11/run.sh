@@ -53,12 +53,15 @@
 # Not run through heavy.sh: it compiles six small files, links two binaries and runs them, and the fleet's
 # heavy lane is for the gate.
 set -eu
+echo "FAIL host/avf-samplerender11/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 73; the inline block PYEOF at line 220; the inline block PYEOF at line 350" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 port=$root/packages/a/apple-backports/AVFoundation
-build=${AVFSR_BUILD:-$root/.agent-work/runs/avf-samplerender11}
+build=${AVFSR_BUILD:-$(runs_folder avf-samplerender11)}
 # BESIDE the build directory, not inside it.
-oracle_dir=${AVFSR_ORACLE:-$root/.agent-work/runs/avf-samplerender11-oracle}
+oracle_dir=${AVFSR_ORACLE:-$(runs_folder avf-samplerender11-oracle)}
 rm -rf "$build"
 mkdir -p "$build"
 

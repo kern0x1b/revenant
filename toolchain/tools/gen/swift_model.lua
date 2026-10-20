@@ -187,8 +187,8 @@ function heavy_path(coordination)
     return path.join(os.getenv("HOME"), "Git", "projects", "ios", "coordination", "heavy.sh")
 end
 
-function prefetch(tree, heavy, sdk, triple, names)
-    return swift_shard.dump_batch(tree, heavy, sdk, triple, names, "model")
+function prefetch(heavy, sdk, triple, names)
+    return swift_shard.dump_batch(heavy, sdk, triple, names, "model")
 end
 
 local function dump(folder, framework, mode)

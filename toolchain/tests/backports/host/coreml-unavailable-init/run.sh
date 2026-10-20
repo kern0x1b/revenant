@@ -8,8 +8,9 @@
 #   4. a plant: the port's copy of one class gets its own -init, which must turn the answer red
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
-build=${BUILD:-$here/../../../../.agent-work/runs/coreml-unavailable-init}
+build=${BUILD:-$(runs_folder coreml-unavailable-init)}
 mkdir -p "$build"
 coreml="$appledir/CoreML"
 libs="-framework Foundation -framework CoreGraphics -framework CoreVideo -framework Accelerate"

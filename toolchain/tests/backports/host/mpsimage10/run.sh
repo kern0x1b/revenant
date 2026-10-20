@@ -8,9 +8,12 @@
 # float tolerance rather than bit for bit, because a normalisation accumulates in a different order on
 # a GPU than on a CPU. See TOLERANCE below.
 set -eu
+echo "FAIL host/mpsimage10/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 39; the inline block PY at line 53; the inline block PY at line 121" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 mps=${MPS:-$here/../../../../packages/a/apple-backports/MetalPerformanceShaders}
-build=${BUILD:-$here/../../../../.agent-work/runs/host/mpsimage10}
+build=${BUILD:-$(runs_folder host/mpsimage10)}
 rm -rf "$build"
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path)
@@ -74,7 +77,7 @@ build_objects() {
         name=$(basename "$source" .m)
         xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -DREVENANT_PLANT=$_plant \
             -c "$source" -o "$_objdir/$name.plain.o"
-        python3 "$here/../prefix_selectors.py" "$source" "$_objdir/$name.m" ccharonHost_ \
+        runs_xmake l "$here/../prefix_selectors.lua" "$source" "$_objdir/$name.m" crevenantHost_ \
             --declarations="$build/declarations.h" -fobjc-arc $target $quiet -DREVENANT_PLANT=$_plant \
             -I"$mps" -include "$build/rename.h" -- "$_objdir/$name.plain.o"
         xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -DREVENANT_PLANT=$_plant -I"$mps" \

@@ -151,7 +151,7 @@ Each entry: wrong pattern -> right pattern -> the mechanical reason.
   or replacing a release method there with no category carrying its selector. Right: decide on the
   release alone, and keep a same-selector category beside the replacement, as apple-backports'
   `Foundation/NSBundle+ReceiptURL.m` does. Reason: `+load` runs before `attach.c`'s constructor
-  attaches `__DATA,__revenant_catlist`, and the registry check counts only selectors categories add.
+  attaches `__DATA,__port_catlist`, and the registry check counts only selectors categories add.
 
 - **`git format-patch --no-walk` takes SHAs, not a range.** Wrong:
   `git format-patch --no-walk 716270c33..HEAD`, which makes git treat the whole `A..B` string as one

@@ -12,6 +12,8 @@
 #
 # Usage: sh check-model.sh [<package dir>]   (default: this repository's apple-backports)
 set -eu
+echo "FAIL host/hapcrypto/check-model.sh: its Python steps are gone and not yet ported to Lua: the inline block PYTHON at line 42" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 scratch=$(runs_fresh revenant-hapcrypto-check)

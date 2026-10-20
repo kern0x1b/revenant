@@ -133,7 +133,7 @@ uses (`-Os -g0 -Wall -Wno-unguarded-availability-new -Werror=objc-missing-proper
 Category methods are `t` (local text) in this project, not `T` — measured against
 `NSObject+AccessibilityAttributedStrings.m`, an object already in the tree: its four `_UIAccessibility…`
 constants are `S` and its six methods are `t`. That is by design (`-fvisibility=hidden` is applied only to
-C, and a category is attached through `__revenant_catlist`, renamed at link), and `carried_api` at
+C, and a category is attached through `__port_catlist`, renamed at link), and `carried_api` at
 `backports.lua:1407` counts members added in a category to a class the release already carries. So a
 category on `NSObject` — which 6.1.3 and 4.3 both carry — is the right shape here, and it is a category
 rather than a new class precisely because `NSObject` is the release's own.

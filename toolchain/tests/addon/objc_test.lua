@@ -82,7 +82,7 @@ local function armv7_cache(file, opt)
     put(text + 0x140, "/System/Library/Frameworks/Probe.framework/Probe\0")
     local sections = {{"__objc_classlist", data, 4}}
     if opt.revenant then
-        table.insert(sections, {"__revenant_catlist", data + 0x100, 4})
+        table.insert(sections, {"__port_catlist", data + 0x100, 4})
     end
     local commands = {}
     for _, segment in ipairs({{"__TEXT", text + 0x1000, 5}, {"__DATA", data, 3, sections}, {"__LINKEDIT", linkedit, 1}}) do
@@ -136,7 +136,7 @@ local function inventory_failures(folder, opt)
     for index, case in ipairs({{"a cache read from firmware", {}, "Probe -probe"},
                            {"a class whose method list address has its low bit set, as garbage from a device copy does", {methods = 0x30001901}, "Probe "},
                            {"an image carrying the category list a built library's link renames, which a release's image never does",
-                            {revenant = true}, nil, "holds 1 image this repository built, whose category section is renamed to __revenant_catlist"},
+                            {revenant = true}, nil, "holds 1 image this repository built, whose category section is renamed to __port_catlist"},
                            {"a cache copied from a running device, its pages slid", {slide = 0x10000000}, nil, "copied from a running device: 1 of its pages hold pointers the device slid"}}) do
         local cachefile = armv7_cache(path.join(folder, "dyld_shared_cache_armv7_" .. index), case[2])
         local output, log = cachefile .. ".txt", cachefile .. ".log"
@@ -253,7 +253,7 @@ local function selector_failures(folder, opt)
     local objc = import("apple.objc", {rootdir = opt.modules, anonymous = true})
     io.writefile(path.join(folder, "selectors.m"), SELECTORS)
     for _, case in ipairs({{"armv7", "armv7-apple-ios6.0", "plain"}, {"arm64", "arm64-apple-ios7.0", "plain"},
-                           {"armv7", "armv7-apple-ios6.0", "revenant_catlist", {"-Wl,-rename_section,__DATA,__objc_catlist,__DATA,__revenant_catlist"}}}) do
+                           {"armv7", "armv7-apple-ios6.0", "revenant_catlist", {"-Wl,-rename_section,__DATA,__objc_catlist,__DATA,__port_catlist"}}}) do
         local library = "libselectors_" .. case[1] .. "_" .. case[3] .. ".dylib"
         fixtures.run(folder, opt.clang, table.join({"-target", case[2], "-isysroot", opt.sdk, "-Wno-incompatible-sysroot", "-w", "-fobjc-arc",
                                                     "-mlinker-version=" .. fixtures.linker_version(opt.ld64), "-fuse-ld=" .. opt.ld64, "-dynamiclib", "-framework", "Foundation",

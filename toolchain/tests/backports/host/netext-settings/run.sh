@@ -22,18 +22,20 @@
 # --mutation breaks one answer per comparison in the port's source and each has to go red naming it. A
 # mutation that does not build is RUN FAILED and never counted as noticed.
 set -eu
+echo "FAIL host/netext-settings/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PYEOF at line 142" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 S="$root/packages/a/apple-backports"
-W=${WORK:-$root/.agent-work/runs/netext-settings}
+W=${WORK:-$(runs_folder netext-settings)}
 W=${W%./*}/$(basename "$W")
 rm -rf "$W"
 mkdir -p "$W"
 
 sdk=$(xcrun --show-sdk-path --sdk macosx)
 port="-target arm64-apple-ios15.0-macabi -isysroot $sdk -fobjc-arc -O0 -Wall -Wno-unguarded-availability-new -I$S/NetworkExtension"
-# The 26.2 SDK tree the coordinator keeps for the corpus; IOS26_SDK overrides it.
-header26="${IOS26_SDK:-$HOME/Git/projects/ios/charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk}/System/Library/Frameworks/NetworkExtension.framework/Headers/NEDNSSettings.h"
+header26="${IOS26_SDK:-$(runs_sdk)}/System/Library/Frameworks/NetworkExtension.framework/Headers/NEDNSSettings.h"
 
 echo "=== host: Apple's own answers, and the image that answered"
 # shellcheck disable=SC2086

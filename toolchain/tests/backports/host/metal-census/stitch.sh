@@ -8,9 +8,12 @@
 # built for the device and the other for the host, and the failure looks like a missing main rather
 # than a mismatched architecture. The test and the source go in together, as sources, for the host.
 set -eu
+echo "FAIL host/metal-census/stitch.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 115; the inline block PY at line 131; the inline block PY3 at line 150" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-work=${WORK:-$root/.agent-work/runs/metal-census/stitch}
+work=${WORK:-$(runs_folder metal-census/stitch)}
 # ONE guard for every script that removes a scratch path - see work-guard.sh.
 . "$(dirname "$0")/work-guard.sh"
 work_ok "$work" || { echo "FAIL: WORK=$work is not a usable scratch path; see work-guard.sh" >&2; exit 1; }
@@ -63,8 +66,8 @@ prove_defined() {   # $1 binary
 # test itself uses the class and so does not compile; that is a BUILD failure and names nothing,
 # which is not what this control is for.
 if [ -n "${SELF_TEST:-}" ]; then
-    selfdir="$root/.agent-work/runs/metal-census/stitch-self-test"
-    work_ok "$selfdir" || { echo "FAIL: the self-test scratch is not under .agent-work" >&2; exit 1; }
+    selfdir="$(runs_folder metal-census/stitch-self-test)"
+    work_ok "$selfdir" || { echo "FAIL: the self-test scratch is not under the run folder" >&2; exit 1; }
     rm -rf "$selfdir"; mkdir -p "$selfdir" || exit 1
     fake="$selfdir/symbols"
     for name in $class_list; do
