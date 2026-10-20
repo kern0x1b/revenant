@@ -149,7 +149,6 @@ local function write_c(file, functions, swift)
 end
 
 function write(skeleton, frameworks)
-    os.tryrm(skeleton)
     os.mkdir(skeleton)
     io.writefile(path.join(skeleton, "revenant_backports.h"), HEADER)
     io.writefile(path.join(skeleton, "registrar.m"), REGISTRAR)
@@ -167,6 +166,8 @@ function write(skeleton, frameworks)
         totals.objc = totals.objc + #methods
         totals.c = totals.c + #functions
         totals.swift = totals.swift + #swift
+        os.tryrm(path.join(skeleton, framework.name .. ".m"))
+        os.tryrm(path.join(skeleton, framework.name .. ".c"))
         if #classes > 0 or #methods > 0 then
             write_objc(path.join(skeleton, framework.name .. ".m"), classes, methods)
         end

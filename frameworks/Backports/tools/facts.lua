@@ -144,9 +144,14 @@ function swift_facts(sdk, name, version, scratch)
     return state.rows
 end
 
-function src_keys(sdk, version, file)
-    local text = os.iorunv(CLANG, {"-target", target_of(version), "-isysroot", sdk, "-fobjc-arc", "-w", "-fsyntax-only",
-        "-Xclang", "-ast-dump", "-x", "objective-c", file})
+function src_keys(sdk, file, target, includes)
+    local language = file:endswith(".mm") and "objective-c++" or "objective-c"
+    local arguments = {"-target", target, "-isysroot", sdk, "-fobjc-arc", "-w", "-fsyntax-only", "-Xclang", "-ast-dump", "-x", language}
+    for _, folder in ipairs(includes) do
+        table.insert(arguments, "-I" .. folder)
+    end
+    table.insert(arguments, file)
+    local text = os.iorunv(CLANG, arguments)
     local keys = {}
     local function note(key)
         keys[key] = true
