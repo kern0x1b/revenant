@@ -61,7 +61,7 @@ Each is an xmake package at its release, built for armv7 and iOS 6 by a recipe i
 ICU is built with its data trimmed to the languages listed in the install script of `third_party/icu/xmake.lua`.
 
 `libios6compat.a` - the symbols this OS predates, see
-[compatibility.md](../../reference/webkit/compatibility.md) - is this port's own code in `compat/`, built by the
+[compatibility.md](../../reference/webkit/compatibility.md) - is this port's own code in `src/compat/`, built by the
 engine package before the engine itself. It holds only this port's own stubs; the engine
 links OpenSSL and libpsl from their packages.
 
@@ -72,17 +72,17 @@ whether curl serves the same extract today. It is the `webkit-cacert` check:
 
 ## 3. The engine
 
-`packages/engine/xmake.lua` is the `webkit-engine` package, and `modules/engine.lua` holds
+`src/packages/engine/xmake.lua` is the `webkit-engine` package, and `src/modules/engine.lua` holds
 what it does: the CMake options and tuning flags of each variant, and the steps, in the
 order that fails cheapest first:
 
-1. `modules/carry.lua` - the patched tree still holds what this port needs (`carry-manifest.txt`)
+1. `src/modules/carry.lua` - the patched tree still holds what this port needs (`carry-manifest.txt`)
 2. `libios6compat.a`, then the engine through CMake and Ninja; configure is checked to have
    taken every path it was given and the project include
 3. WebKitLegacy exports exactly the symbols its export list names
 4. no compat stub shadows a definition WebKit has
-5. `modules/symbols.lua` - the symbol surface matches `carry-symbols.txt`
-6. `modules/stage.lua` - the frameworks laid out as the iOS 6 system frameworks they
+5. `src/modules/symbols.lua` - the symbol surface matches `carry-symbols.txt`
+6. `src/modules/stage.lua` - the frameworks laid out as the iOS 6 system frameworks they
    replace, beside the C++ runtime, as the device filesystem tree in the package's `stage/`,
    its plists binary and checked; and a `batteries/` folder with `jsc` for the tests
 
@@ -90,7 +90,7 @@ The tweaks and the Settings bundle are xmake targets in `xmake.lua` beside the p
 with the toolchain's `tweak` rule, which checks every binary as it links. Why each CMake
 setting has the value it has is in [engine-configuration.md](../../explanation/webkit/engine-configuration.md).
 
-The package's identity includes a digest of its recipe, the modules, `compat/` and
+The package's identity includes a digest of its recipe, the modules, `src/compat/` and
 `carry-symbols.txt`, so a change to any of them rebuilds the engine and nothing else does.
 
 Three things about this build are worth knowing, because they explain choices
@@ -147,11 +147,11 @@ unprefixed one; see [architecture.md](../../explanation/webkit/architecture.md#t
 ./xmakew deb -P .
 ```
 
-`RevSafari` carries the package: its target names `packaging/control` and
-`packaging/DEBIAN`, and installs the engine package's `stage/` tree at the root of the
+`RevSafari` carries the package: its target names `src/packaging/control` and
+`src/packaging/DEBIAN`, and installs the engine package's `stage/` tree at the root of the
 `.deb`, beside `RevSafari.dylib` and its MobileSubstrate filter, `rev-safari-compat.dylib`,
 `rev-TLS.dylib` and `RevPrefs.bundle` with its PreferenceLoader entry. The version is
-`version` in `xmake.lua`; `packaging/control` carries none of its own.
+`version` in `xmake.lua`; `src/packaging/control` carries none of its own.
 
 Two settings on the `rev-safari-compat` target are not optional: the compat dylib is
 built without `_FORTIFY_SOURCE` and without libc++ (`-nostdlib++`), because the `__*_chk` symbols
@@ -169,7 +169,7 @@ address; neither is in the repository.
 
 ## The engine without Safari
 
-`app/rev-webview-host.m` is a plain UIKit view controller around one `WebView`:
+`examples/webview-host/rev-webview-host.m` is a plain UIKit view controller around one `WebView`:
 no tabs, no chrome, one URL. It exists for two reasons.
 
 **As a harness.** It links the engine and `ModernTLSURLProtocol` and nothing
@@ -195,7 +195,7 @@ checkout, as everything that reaches the phone does.
 
 **As an embedding surface.** Compiled with `-DREV_WEBVIEW_HOST_NO_MAIN` the file
 carries no `main()`, and `RevWebViewHostControlling` in
-`app/RevWebViewHostEmbedding.h` is the whole interface another application
+`examples/webview-host/RevWebViewHostEmbedding.h` is the whole interface another application
 drives it through — load, back, forward, reload, stop, a content frame, and a
 delegate that reports title, progress, URL, scroll offset and failures. That is
 the consumer the app-shell cache policy in [network.md](../../explanation/webkit/network.md) was written
@@ -331,7 +331,7 @@ Homebrew's.
 The device address and password are not in the repository. Copy the example and fill it in:
 
 ```sh
-cp frameworks/WebKit/device.env.example device.env    # at the top of revenant: DEVICE_HOST / DEVICE_PORT
+cp frameworks/WebKit/tests/data/device.env.example device.env    # at the top of revenant: DEVICE_HOST / DEVICE_PORT
 ```
 
 Then build and install the package, which carries the loader, the compatibility dylib, the TLS dylib and the Settings

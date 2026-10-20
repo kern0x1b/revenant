@@ -1,14 +1,4 @@
 #!/bin/bash
-# launchd.sh [DEVICE] [RELEASE]: the order of a run, measured on a real guest. The program
-# (main.c) runs as the guest's test and asks launchd for the Mach services of the firmware's
-# LaunchDaemons at its first instruction; it exits 0 when each of them was already registered. The
-# run's own verdict is the check:
-#
-#     $HOME/Git/projects/ios/coordination/heavy.sh sh tests/emulate/launchd/launchd.sh iPhone4,1 6.1.3
-#
-# REVENANT_REPO names the checkout whose emulator-guest package (the runner) is run, REVENANT_ADDON
-# the addon whose emulator module installs it. A runner that starts the program before launchd has
-# loaded the daemons fails, and the lines it prints name the services that were not there.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../backports/common/runs.sh" "$here"

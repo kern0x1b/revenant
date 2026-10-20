@@ -1,25 +1,4 @@
 #!/bin/bash
-# The module built for armv7, with the counts every published number comes from.
-#
-# The flags are the ones modules/apple/swift.lua runtime_flags() builds, and the Foundation modules
-# are the ones FetchDescriptor's predicate and sortBy are swift-foundation's own types from. Where
-# the toolchain, the runtime and those two modules are is a fact about this machine's store, not
-# about the package, so they are named in the environment and this script says so when they are
-# not:
-#
-#   REVENANT_SWIFTC            the toolchain's swiftc
-#   REVENANT_SWIFT_RESOURCE    the swift-runtime's resource directory, its lib/swift
-#   REVENANT_SWIFT_MODULES     the swift-runtime's armv7 module directory
-#   REVENANT_SWIFT_PORT      the backports' port headers, the vfs.yaml
-#   REVENANT_SWIFT_SDK         the iPhoneOS SDK
-#   REVENANT_SWIFT_PLUGIN_PATH the toolchain's macro plugins
-#   REVENANT_SWIFT_AVAILABILITY a file of availability macros, one `Name Release: ...` per line
-#   REVENANT_FOUNDATION_MODULES the Foundation band's build, for FoundationEssentials and
-#                             FoundationInternationalization
-#   REVENANT_FOUNDATION_CMODULES the C modules those two are built against, space separated
-#   REVENANT_BACKPORTS         a built libCoreDataBackports.dylib to link against
-#
-#   ./harness/build.sh 6.1.3
 set -eu
 RELEASE="${1:-6.1.3}"
 ARCH="${REVENANT_SWIFT_ARCH:-armv7}"
@@ -50,10 +29,6 @@ while IFS= read -r line; do
     esac
 done < "$REVENANT_SWIFT_AVAILABILITY"
 
-# -wmo -c on its own writes a Mach-O. The bitcode wrapper comes from asking for the module
-# interface in the same invocation, and a -emit-library link of that wrapper "succeeds" into an
-# empty library - so the interface is a second compile and the count below is the check that the
-# object is real.
 FLAGS=(-target "$TRIPLE" -clang-target "$TRIPLE" -sdk "$REVENANT_SWIFT_SDK"
        -resource-dir "$REVENANT_SWIFT_RESOURCE" -Xfrontend -bundled-swift-runtime
        -runtime-compatibility-version none -wmo -parse-as-library
@@ -80,12 +55,8 @@ if grep -qE 'error:' "$OUT/compile.err"; then
 fi
 echo "OBJECT  $(basename "$OUT/SwiftData.o") $(stat -f %z "$OUT/SwiftData.o") bytes  $(file -b "$OUT/SwiftData.o")"
 
-# The counts and what every undefined symbol is waiting for, from harness/symbols.lua: the number
-# the delivery quotes, with the classification that says whether the module needs anything at all.
 REVENANT_SWIFTDATA_OBJECT="$OUT/SwiftData.o" xmake l "$HERE/symbols.lua"
 
-# And the link, with the pinned ld64 - which the flags name through REVENANT_SWIFTC's own -use-ld,
-# and which the host's ld cannot substitute for.
 if [ -n "${REVENANT_BACKPORTS:-}" ] && [ -f "$REVENANT_BACKPORTS/libCoreDataBackports.dylib" ]; then
     LD64="${REVENANT_LD64:-}"
     LINKFLAGS=()

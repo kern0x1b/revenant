@@ -12,7 +12,10 @@ local languages = {
     hh = {kind = "c", cpp = true, clang = "c++"},
     inc = {kind = "c", cpp = true, clang = "c++"},
     swift = {kind = "swift"},
-    lua = {kind = "lua"}
+    lua = {kind = "lua"},
+    sh = {kind = "sh"},
+    yml = {kind = "yaml"},
+    yaml = {kind = "yaml"}
 }
 
 local legal = {"^SPDX%-", "^[Cc]opyright", "^Licensed under the ", "^Licensed to the ", "^Permission is hereby granted,",
@@ -244,17 +247,210 @@ local function lua_comments(text)
     return spans
 end
 
+local sh_boundary = {[9] = true, [10] = true, [32] = true, [38] = true, [59] = true, [124] = true}
+
+local function sh_heredocs(text, pos, pending)
+    while #pending > 0 do
+        local hd = table.remove(pending, 1)
+        while pos <= #text do
+            local nl = text:find("\n", pos, true) or #text + 1
+            local line = text:sub(pos, nl - 1):gsub("\r$", "")
+            pos = nl + 1
+            if hd.strip then
+                line = line:gsub("^\t+", "")
+            end
+            if line == hd.delim then
+                break
+            end
+        end
+    end
+    return pos
+end
+
+local function sh_spans(text, i)
+    local spans, pending = {}, {}
+    local stack = {{kind = "code", depth = 0}}
+    local n = #text
+    local function push(kind)
+        table.insert(stack, {kind = kind, depth = 0})
+    end
+    while i <= n do
+        local top = stack[#stack]
+        local kind = top.kind
+        local c, nxt = text:byte(i), text:byte(i + 1)
+        local step = 1
+        if c == 92 then
+            step = 2
+        elseif c == 10 then
+            i = sh_heredocs(text, i + 1, pending)
+            step = 0
+        elseif (c == 34 and kind == "dq") or (c == 96 and kind == "bt") or (c == 125 and kind == "param") then
+            table.remove(stack)
+        elseif c == 41 and nxt == 41 and kind == "arith" and top.depth == 0 then
+            table.remove(stack)
+            step = 2
+        elseif c == 36 and nxt == 40 then
+            local arith = text:byte(i + 2) == 40
+            push(arith and "arith" or "sub")
+            step = arith and 3 or 2
+        elseif c == 36 and nxt == 123 then
+            push("param")
+            step = 2
+        elseif c == 96 then
+            push("bt")
+        elseif c == 39 and kind ~= "dq" then
+            local j = i + 1
+            local ansi = text:byte(i - 1) == 36
+            while j <= n and text:byte(j) ~= 39 do
+                j = j + ((ansi and text:byte(j) == 92) and 2 or 1)
+            end
+            step = j + 1 - i
+        elseif c == 34 then
+            push("dq")
+        elseif kind == "arith" then
+            if c == 40 then
+                top.depth = top.depth + 1
+            elseif c == 41 and top.depth > 0 then
+                top.depth = top.depth - 1
+            end
+        elseif kind == "code" or kind == "sub" or kind == "bt" then
+            if c == 40 then
+                if nxt == 40 then
+                    push("arith")
+                    step = 2
+                else
+                    top.depth = top.depth + 1
+                end
+            elseif c == 41 then
+                if top.depth > 0 then
+                    top.depth = top.depth - 1
+                elseif kind == "sub" then
+                    table.remove(stack)
+                end
+            elseif c == 60 and nxt == 60 and text:byte(i + 2) ~= 60 then
+                local p = i + 2
+                local strip = text:byte(p) == 45
+                if strip then
+                    p = p + 1
+                end
+                p = p + #(text:match("^[ \t]*", p) or "")
+                local full, delim = text:match("^(\\?['\"]?([^%s;&|<>()'\"\\]+)['\"]?)", p)
+                if full then
+                    table.insert(pending, {delim = delim, strip = strip})
+                    step = p + #full - i
+                end
+            elseif c == 35 and (i == 1 or sh_boundary[text:byte(i - 1)]) then
+                local e = (text:find("\n", i, true) or n + 1) - 1
+                if text:byte(e) == 13 then
+                    e = e - 1
+                end
+                table.insert(spans, {i, e})
+                step = e - i + 1
+            end
+        end
+        i = i + step
+    end
+    return spans
+end
+
+local function sh_comments(text)
+    local i = 1
+    if text:sub(1, 2) == "#!" then
+        i = (text:find("\n", 1, true) or #text) + 1
+    end
+    return sh_spans(text, i)
+end
+
+local yaml_opens = {[44] = true, [45] = true, [58] = true, [63] = true, [91] = true, [123] = true}
+
+local function yaml_hash(text, from, to)
+    local last
+    local i = from
+    while i <= to do
+        local c = text:byte(i)
+        if c == 35 and (i == from or text:byte(i - 1) == 32 or text:byte(i - 1) == 9) then
+            return i
+        elseif (c == 39 or c == 34) and (not last or yaml_opens[last]) then
+            local j = i + 1
+            while j <= to do
+                local d = text:byte(j)
+                if c == 39 and d == 39 and text:byte(j + 1) == 39 then
+                    j = j + 2
+                elseif c == 34 and d == 92 then
+                    j = j + 2
+                elseif d == c then
+                    break
+                else
+                    j = j + 1
+                end
+            end
+            i = j + 1
+            last = 0
+        else
+            if c ~= 32 and c ~= 9 then
+                last = c
+            end
+            i = i + 1
+        end
+    end
+end
+
+local function yaml_comments(text)
+    local spans = {}
+    local n = #text
+    local pos = 1
+    while pos <= n do
+        local nl = text:find("\n", pos, true) or n + 1
+        local hash = yaml_hash(text, pos, nl - 1)
+        local code = text:sub(pos, (hash or nl) - 1)
+        if hash then
+            local e = nl - 1
+            if text:byte(e) == 13 then
+                e = e - 1
+            end
+            table.insert(spans, {hash, e})
+        end
+        pos = nl + 1
+        if code:match("[:%-]%s*[|>][-+%d]*%s*$") or code:match("^%s*[|>][-+%d]*%s*$") then
+            local indent = #code:match("^ *")
+            local first, last = pos, pos - 1
+            while pos <= n do
+                local e = text:find("\n", pos, true) or n + 1
+                local line = text:sub(pos, e - 1)
+                if line:match("%S") and #line:match("^ *") <= indent then
+                    break
+                end
+                last = e - 1
+                pos = e + 1
+            end
+            if code:match("^%s*%-?%s*run%s*:") then
+                for _, span in ipairs(sh_spans(text:sub(first, last), 1)) do
+                    table.insert(spans, {first - 1 + span[1], first - 1 + span[2]})
+                end
+            end
+        end
+    end
+    return spans
+end
+
 local function comments(text, lang)
     local spans
     if lang.kind == "c" then
         spans = c_comments(text, lang.cpp)
     elseif lang.kind == "swift" then
         spans = swift_comments(text)
+    elseif lang.kind == "sh" then
+        spans = sh_comments(text)
+    elseif lang.kind == "yaml" then
+        spans = yaml_comments(text)
     else
         spans = lua_comments(text)
     end
     local header = 0
-    local last = (lang.kind == "lua" and text:byte(1) == 35) and (text:find("\n", 1, true) or 0) or 0
+    local last = 0
+    if (lang.kind == "lua" and text:byte(1) == 35) or (lang.kind == "sh" and text:sub(1, 2) == "#!") then
+        last = text:find("\n", 1, true) or 0
+    end
     for index, span in ipairs(spans) do
         if text:sub(last + 1, span[1] - 1):match("^%s*$") then
             header = index
@@ -472,6 +668,23 @@ for i = 1, #arg, 2 do
 end
 ]]
 
+local function code(text, spans)
+    local parts, pos = {}, 1
+    for _, span in ipairs(spans) do
+        table.insert(parts, text:sub(pos, span[1] - 1))
+        pos = span[2] + 1
+    end
+    table.insert(parts, text:sub(pos))
+    local lines = {}
+    for line in (table.concat(parts) .. "\n"):gmatch("(.-)\n") do
+        line = line:gsub("%s+$", "")
+        if line ~= "" then
+            table.insert(lines, line)
+        end
+    end
+    return table.concat(lines, "\n")
+end
+
 local function verify(files, rev)
     local scratch = path.join(os.getenv("HOME"), ".revenant", "cache", "comments-verify")
     os.tryrm(scratch)
@@ -493,6 +706,12 @@ local function verify(files, rev)
                 return swift_tree(old, "x") == swift_tree(new, "x")
             end}
             if not same then
+                table.insert(differ, file)
+            end
+        elseif lang.kind == "sh" or lang.kind == "yaml" then
+            local before = io.readfile(old, {encoding = "binary"})
+            local after = io.readfile(new, {encoding = "binary"})
+            if code(before, comments(before, lang)) ~= code(after, comments(after, lang)) then
                 table.insert(differ, file)
             end
         else
@@ -525,6 +744,38 @@ local function changed(rev)
         end
     end
     return files
+end
+
+local function test_suite()
+    local count = 0
+    local function check(text, kind, want, name)
+        count = count + 1
+        local got = #comments(text, {kind = kind})
+        assert(got == want, string.format("test %s: %d comments, want %d", name, got, want))
+    end
+
+    check("#!/bin/sh\necho ok\n", "sh", 0, "shebang is not a comment")
+    check("# note\necho ok\n", "sh", 1, "comment without shebang")
+    check("#!/bin/sh\n# note\necho ok\n", "sh", 1, "comment after shebang")
+    check("#!/bin/sh\necho ok # note\n", "sh", 1, "trailing comment")
+    check("#!/bin/sh\necho http://x#y foo#bar\n", "sh", 0, "hash inside a word")
+    check("#!/bin/sh\necho '#a' \"#b\" $# ${#v} ${v#p}\n", "sh", 0, "quotes and expansions")
+    check("#!/bin/sh\necho \"$(printf %s '#x')\" # note\n", "sh", 1, "substitution inside quotes")
+    check("#!/bin/sh\ncase x in \\#) ;; esac\n", "sh", 0, "escaped hash")
+    check("#!/bin/sh\necho $(( 2#1010 ))\n", "sh", 0, "arithmetic")
+    check("#!/bin/sh\ncat <<-EOF\n\t# text\n\tEOF\n# note\n", "sh", 1, "heredoc body is not a comment")
+    check("#!/bin/sh\n# Copyright 2026\necho ok\n", "sh", 0, "licence header")
+    check("key: val\n", "yaml", 0, "no comment")
+    check("# note\nkey: val\n", "yaml", 1, "comment line")
+    check("key: val # note\n", "yaml", 1, "trailing comment")
+    check("key: '#a' \"#b\"\n", "yaml", 0, "quoted hash")
+    check("url: http://x#y\n", "yaml", 0, "hash inside a word")
+    check("desc: |\n  # text\n  x\n", "yaml", 0, "block scalar body")
+    check("run: | # note\n  echo ok\n", "yaml", 1, "block scalar header comment")
+    check("run: |\n  # note\n  echo $#\n", "yaml", 1, "run block is shell")
+    check("# Copyright 2026\nname: x\n", "yaml", 0, "licence header")
+
+    print(string.format("comments: %d tests passed", count))
 end
 
 function main(command, ...)
@@ -561,7 +812,9 @@ function main(command, ...)
             raise("%d of %d files changed beyond comments", #differ, #files)
         end
         print("%d files differ from %s only in comments", #files, rev)
+    elseif command == "test" then
+        test_suite()
     else
-        raise("usage: xmake l tools/comments.lua check|strip [path ...] | verify [rev]")
+        raise("usage: xmake l tools/comments.lua check|strip [path ...] | verify [rev] | test")
     end
 end

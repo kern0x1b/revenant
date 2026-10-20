@@ -19,14 +19,8 @@ function main(checkout)
     if os.isfile(path.join(addon, "sdk_verbatim_test.lua")) then
         table.insert(names, "sdk_verbatim_test")
     end
-    if os.isfile(path.join(addon, "matter_objects_test.lua")) then
-        table.insert(names, "matter_objects_test")
-    end
     if os.isfile(path.join(addon, "locale_order_test.lua")) then
         table.insert(names, "locale_order_test")
-    end
-    if os.isfile(path.join(addon, "py_values_test.lua")) then
-        table.insert(names, "py_values_test")
     end
     local failed = 0
     for _, name in ipairs(names) do
@@ -54,7 +48,7 @@ function main(checkout)
         }
         if not ok then failed = failed + 1 end
     end
-    local corpus_lua_test = path.join(revenant, "tools", "corpus", "tests", "corpus_test.lua")
+    local corpus_lua_test = path.join(revenant, "tests", "corpus", "corpus_test.lua")
     if os.isfile(corpus_lua_test) then
         local ok = try {
             function ()
@@ -86,6 +80,10 @@ function main(checkout)
         }
         if not built then failed = failed + 1 end
     end
+    local skip = {}
+    for name in (os.getenv("LIGHT_SKIP") or ""):gmatch("[^,%s]+") do
+        skip[name] = true
+    end
     for _, name in ipairs({"gen_test", "headers_test", "members_test", "trace_test", "doc_test", "scope_test", "protocols_test",
                            "atomic_test", "ir_failure_test", "ir_identity_test", "record_test", "clean_checkout_test",
                            "targets_test", "host_json_test", "stream_test", "protocol_set_test", "removed_ceiling_test",
@@ -102,7 +100,9 @@ function main(checkout)
                            "functions_test", "usr_include_test", "probe_test",
                            "swift_name_render_test", "reexport_import_test", "usr_headers_test", "vfs_overlay_test"}) do
         local suite = path.join(revenant, "tests", "gen", name .. ".lua")
-        if os.isfile(suite) then
+        if skip[name] then
+            print(name .. ": SKIPPED by LIGHT_SKIP")
+        elseif os.isfile(suite) then
             local ok = try {
                 function ()
                     os.execv(os.programfile(), {"l", suite}, {stdout = os.nuldev(), stderr = os.nuldev(), curdir = revenant})

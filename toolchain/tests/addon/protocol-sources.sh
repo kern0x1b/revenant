@@ -1,28 +1,8 @@
 #!/bin/sh
-# protocol-sources.sh — the 6.1.3 gate's protocol step on its own, so a band can run it without the gate.
-#
-# For every library, the sources modules/apple/backports.lua's protocol_sources() writes are read out of
-# the registry the way that function reads it, then compiled for the triple of their rows' minimum, with
-# that library's own folder on the include path and the library's flags, against the 16.4 SDK. It is the
-# step that caught UIKit's eight trait protocols: the rows were in the registry, the sources were
-# generated, and RevenantUIKitProtocols.h had never been regenerated to declare them, so
-# UIKitBackportsProtocols17.0.m did not compile and nothing before the gate reads that header.
-#
-# protocol_headers_test.lua is the cheap half of this and runs in the light guard: a row whose protocol is
-# declared nowhere the source can see. This is the half no cheap check can make, because a forward
-# declaration is correct when the SDK supplies the body and a compile error when it does not:
-#
-#   error: @protocol is using a forward protocol declaration of 'UICGFloatTraitDefinition'
-#
-# Usage: protocol-sources.sh <sdk16> <outdir>
-#   exit status: the number of sources that did not compile (0 when every one of them compiled)
 set -u
 SDK=$1
 OUT=$2
-ROOT=$(cd "$(dirname "$0")/../.." && pwd)   # tests/addon -> the checkout root
-# The pinned toolchain of tools/matter-framework.sh, so a run compiles what the gate compiles. $CLANG
-# overrides it; the version is a pin, not a preference, and a clang that is not the one the library is
-# built with answers a different question.
+ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 CLANG=${CLANG:-$HOME/.xmake/packages/l/llvm/23.1.1/6a8c97aaa69241df9ed69ac86f13a045/bin/clang}
 [ -x "$CLANG" ] || { echo "protocol-sources: no clang at $CLANG; set CLANG to the pinned one"; exit 2; }
 rm -rf "$OUT"; mkdir -p "$OUT/src" "$OUT/obj"
@@ -129,8 +109,6 @@ examined=0
 while IFS='	' read -r file folder minimum name; do
   base=$(basename "$file" .m)
   target="armv7-apple-ios${minimum}"
-  # the library's protocol header is written by tools/gen (protocolheaders), into this run's own folder, so the check needs no .gen
-  # from an earlier build: a fresh checkout compiles the same header the build writes
   if [ ! -f "$OUT/hdr/$folder/Revenant${folder}Protocols.h" ]; then
     mkdir -p "$OUT/hdr/$folder"
     xmake l "$ROOT/tools/gen.lua" protocolheaders --tree "$ROOT" --framework "$folder" --out "$OUT/hdr/$folder" \
@@ -148,8 +126,6 @@ while IFS='	' read -r file folder minimum name; do
     fail=$((fail+1))
   fi
 done < "$OUT/plan.txt"
-# One line of evidence and one line of verdict, so a caller that gates on the exit status and a reader with a
-# log can both use it. A run that examined nothing has examined nothing: it is a failure, and it says so.
 if [ "$examined" -eq 0 ] && [ "$fail" -eq 0 ]; then
     echo "protocol-sources: FAIL - 0 protocol sources examined, so nothing was compiled; the registry is"
     echo "  $ROOT/packages/frameworks/apple-backports/registry and the libraries are read from"

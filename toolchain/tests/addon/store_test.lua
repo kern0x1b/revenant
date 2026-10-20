@@ -58,15 +58,15 @@ function failures(opt)
     local held = path.join(work, "target")
     os.mkdir(held)
     local envs = {XMAKE_GLOBALDIR = held}
-    os.iorunv("xmake", {"addon", "--install", "-y", path.absolute(path.join(opt.modules, ".."))}, {curdir = work, envs = envs})
+    os.iorunv(os.programfile(), {"addon", "--install", "-y", path.absolute(path.join(opt.modules, ".."))}, {curdir = work, envs = envs})
     local answered = path.join(work, "borrow.log")
-    local code = os.execv("xmake", {"borrow", "--from=" .. path.join(folder, "source"), "swift"},
+    local code = os.execv(os.programfile(), {"borrow", "--from=" .. path.join(folder, "source"), "swift"},
                           {curdir = work, envs = envs, try = true, stdout = answered, stderr = answered})
     local told = (io.readfile(answered) or ""):trim()
     if code ~= 0 or not os.isfile(path.join(held, ".xmake", "packages", "s", "swift", "6.4.0", "cccc", "bin", "swift")) then
         table.insert(found, "the task takes the install it is asked for, and answered " .. tostring(code) .. ": " .. told:gsub("\n", " | "):sub(1, 400))
     end
-    code = os.execv("xmake", {"borrow", "--from=" .. path.join(folder, "source"), "nothing"},
+    code = os.execv(os.programfile(), {"borrow", "--from=" .. path.join(folder, "source"), "nothing"},
                     {curdir = work, envs = envs, try = true, stdout = answered, stderr = answered})
     if code == 0 then
         table.insert(found, "a package the source store holds nothing of is refused, not passed over")

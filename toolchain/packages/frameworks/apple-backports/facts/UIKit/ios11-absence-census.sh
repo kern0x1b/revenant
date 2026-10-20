@@ -1,19 +1,4 @@
 #!/bin/sh
-# The measurement registry/UIKit/ios11.json cites: does each name the slice's rows name exist in the
-# release a row is `absent` about, read class-scoped out of that release's own dyld shared cache.
-#
-# Usage: REVENANT_ROOT=<worktree> sh packages/frameworks/apple-backports/facts/UIKit/ios11-absence-census.sh
-#
-# Needs nothing but the tree's own tools and the held caches under $HOME/.revenant/dyld: no SDK, no
-# compiler, no package store. Every rung prints its class and protocol counts before its answers,
-# which is the control: 11.0 is a rung the slice's names really do exist on, so a zero on 6.1.3 or
-# 4.3 beside those counts is the release's and not the reader's. Drop the 11.0 lines and a run
-# certifies nothing.
-#
-# A property's NAME is not always a selector, so the selectors below are the ones the header's
-# getter produces: `useFastSameViewOperations` is its own getter, and the @property(getter=isX)
-# families are named by their accessors. Each name is asked as `-[Owner selector]`; the word after it
-# is PRESENT or no, and "owner absent" says the release has no such class or protocol at all.
 set -eu
 root=${REVENANT_ROOT:-$PWD}
 inventory=$root/tools/corpus/objc-inventory.lua
@@ -48,49 +33,38 @@ check() {
     done
 }
 
-# The scroll view's own callback and the delegate question that hangs off it.
 check UIScrollView adjustedContentInsetDidChange
 check UIScrollViewDelegate scrollViewDidChangeAdjustedContentInset:
 
-# The controller: the safe area and the layout margins, and the 11.0-only system minimum beside them.
 check UIViewController viewSafeAreaInsetsDidChange viewLayoutMarginsDidChange \
                        systemMinimumLayoutMargins viewRespectsSystemMinimumLayoutMargins
 
-# The two table-shaped classes and their update group, their separator and their safe area.
 check UITableView hasUncommittedUpdates insetsContentViewsToSafeArea separatorInsetReference
 check UICollectionView hasUncommittedUpdates reorderingCadence
 
-# The bar item's large-content pair, the split view's edge, NSObject's accessibility trio.
 check UIBarItem largeContentSizeImage largeContentSizeImageInsets
 check UISplitViewController primaryEdge
 check NSObject accessibilityContainerType accessibilityDragSourceDescriptors accessibilityDropPointDescriptors
 
-# The pasteboard, provider-shaped and not.
 check UIPasteboard itemProviders setObjects: setObjects:localOnly:expirationDate: \
                        setItemProviders:localOnly:expirationDate:
 
-# Spring loading, asked of both the table and the collection delegate.
 check UITableViewDelegate tableView:shouldSpringLoadRowAtIndexPath:withContext:
 check UICollectionViewDelegate collectionView:shouldSpringLoadItemAtIndexPath:withContext:
 
-# The focus coordinator the port carries: what it adds beside -addCoordinatedAnimations:.
 check UIFocusAnimationCoordinator addCoordinatedFocusingAnimations:completion: \
                              addCoordinatedUnfocusingAnimations:completion:
 
-# The styled custom action the port builds, and the attributed-reading protocols around it.
 check UIAccessibilityCustomAction initWithAttributedName:target:selector: attributedName
 check UIAccessibilityReadingContent accessibilityAttributedContentForLineNumber: accessibilityAttributedPageContent
 check UIScrollViewAccessibilityDelegate accessibilityAttributedScrollStatusForScrollView:
 check UIPickerViewAccessibilityDelegate pickerView:accessibilityAttributedHintForComponent: \
                                 pickerView:accessibilityAttributedLabelForComponent:
 
-# The extension-side owners, none of which exists before extensions do.
 check UITextDocumentProxy documentIdentifier selectedText
 check NSItemProvider preferredPresentationSize preferredPresentationStyle teamData
 check UIInputViewController hasFullAccess needsInputModeSwitchKey
 
-# The classes and protocols of the slice, asked by name rather than by selector: each is a name the
-# release either has or has not, so a zero here is the release's answer to the whole row.
 for name in UITextDropProposal UISpringLoadedInteraction UISpringLoadedInteractionBehavior \
              UISpringLoadedInteractionContext UISpringLoadedInteractionEffect \
              UISpringLoadedInteractionSupporting UIFocusSystem UIFocusDebugger \

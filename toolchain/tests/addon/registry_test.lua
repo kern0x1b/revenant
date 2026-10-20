@@ -598,7 +598,7 @@ end
     io.writefile(out, "")
     local err = path.join(scratch, "mutant.err")
     io.writefile(err, "")
-    local rc = os.execv("xmake", {"l", path.join(mutant_root, "probe.lua"), mutant_root},
+    local rc = os.execv(os.programfile(), {"l", path.join(mutant_root, "probe.lua"), mutant_root},
                         {try = true, envs = {PROBE_ROOT = root}, stdout = out, stderr = err})
     local said = io.readfile(out) or ""
     local failed = io.readfile(err) or ""

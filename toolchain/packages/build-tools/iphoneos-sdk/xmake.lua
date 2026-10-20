@@ -208,7 +208,7 @@ package("iphoneos-sdk")
                     table.insert(sources, path.join(csu, source))
                 end
                 os.vrunv("xcrun", table.join({"clang", "-r", "-target", architecture .. "-apple-ios", "-miphoneos-version-min=" .. object[2],
-                                              "-isysroot", folder, "-Os", "-nostdlib", "-Wl,-keep_private_externs", "-fuse-ld=" .. linker},
+                                              "-isysroot", folder, "-Os", "-nostdlib", "-Wl,-keep_private_externs", "--ld-path=" .. linker},
                                              object[4], sources, {"-o", slice}))
                 table.insert(slices, slice)
             end

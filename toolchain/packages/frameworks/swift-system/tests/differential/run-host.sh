@@ -1,7 +1,4 @@
 #!/bin/bash
-# Host differential: Apple's System (the macOS SDK) against upstream's System built from the same patched tree as module
-# SystemUnderTest, on the same generated inputs. Usage: run-host.sh <SRC> <outdir> [seed]
-# <SRC> is the unpacked swift-system 1.8.1 tree with the patches of this recipe applied. The outputs must be identical.
 set -u
 SRC="$1"; OUT="$2"; SEED="${3:-20261014}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -26,12 +23,10 @@ xcrun swiftc -swift-version 5 -D OURS -I "$OUT" -I "$SRC/Sources/CSystem/include
 "$OUT/apple-prog" "$OUT/run-apple" "$SEED" > "$OUT/apple.txt" 2>&1; echo "apple rc=$?"
 "$OUT/ours-prog" "$OUT/run-ours" "$SEED" > "$OUT/ours.txt" 2>&1; echo "ours rc=$?"
 if diff "$OUT/apple.txt" "$OUT/ours.txt" > "$OUT/diff.txt"; then echo "DIFFERENTIAL: identical, $(wc -l < "$OUT/apple.txt") lines"; else echo "DIFFERENTIAL: DIFFERENT, $(wc -l < "$OUT/diff.txt") diff lines"; exit 1; fi
-# Per row: the carried names must be exactly the 420 of carried-rows.txt; a row is identical when its line matches on both sides.
 grep '^row ' "$OUT/apple.txt" > "$OUT/rows-apple.txt"; grep '^row ' "$OUT/ours.txt" > "$OUT/rows-ours.txt"
 if awk '{print $2}' "$OUT/rows-apple.txt" | sort | diff - "$HERE/carried-rows.txt" > "$OUT/rows-names.diff"; then echo "ROW NAMES: the $(wc -l < "$OUT/rows-apple.txt" | tr -d ' ') rows are exactly carried-rows.txt"; else echo "ROW NAMES: DO NOT MATCH carried-rows.txt (see rows-names.diff)"; fi
 paste -d'\t' "$OUT/rows-apple.txt" "$OUT/rows-ours.txt" | awk -F'\t' '/ not-exercised$/ { skip++; next } $1 == $2 { same++; next } { diff++ } END { printf "ROWS: %d identical, %d different, %d not exercised on the host (reasons in run-apple/rows-detail.txt)\n", same, diff, skip }'
 [ "$(grep -c '^row ' "$OUT/ours.txt")" -gt 0 ] && cmp -s "$OUT/run-apple/rows-detail.txt" "$OUT/run-ours/rows-detail.txt" && echo "ROWS detail: identical observations" || echo "ROWS detail: observations differ (see run-*/rows-detail.txt)"
-# The apple-compat calls the module reaches (fstatat, unlinkat, fdopendir) against the host's own libc, on generated inputs.
 mkdir -p "$OUT/run-compat/sub"; echo hi > "$OUT/run-compat/a"; echo x > "$OUT/run-compat/sub/c"
 for f in openat unlinkat fdopendir fstatat; do xcrun clang -c -I "$APPLE_COMPAT/include" "$APPLE_COMPAT/src/$f.c" -o "$OUT/compat-$f.o" || exit 1; done
 xcrun clang -c -I "$APPLE_COMPAT/include" "$HERE/compat.c" -o "$OUT/compat-test.o" || exit 1

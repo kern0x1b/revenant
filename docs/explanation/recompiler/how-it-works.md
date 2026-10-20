@@ -9,13 +9,13 @@ Mach-O that a real iOS 6 device (or an emulator) loads and runs as a normal app.
 
 | Component | Role |
 |---|---|
-| `xlate/` | Lifts arm64 to LLVM IR (Rellume), recovers jump tables, rewrites Objective-C class, protocol and ivar metadata and data binds to the 32-bit layout, and emits `lifted.bc`. |
-| `xlate/` (`xlgen`) | Generates the guest-to-host ABI bridges (calling convention, `va_list`, blocks, Objective-C message dispatch, data-symbol shims) from the SDK headers. |
-| `runtime/` | The armv7 support runtime: message routing, block bridging, weak references, ivar-layout reconciliation and Objective-C compatibility shims. It is compiled per translation, because it includes the state header that xlate writes for each app. |
-| `scripts/translate.lua` | The end-to-end pipeline: arm64 executable to armv7 iOS 6 executable. |
-| `scripts/ipa.lua` | The same for a whole `.ipa`, its embedded frameworks lifted as guest images. |
-| `corpus/` | Small self-contained test programs and apps, the translator's regression suite. |
-| `perf/` | The on-device translated-versus-native benchmark. |
+| `src/xlate/` | Lifts arm64 to LLVM IR (Rellume), recovers jump tables, rewrites Objective-C class, protocol and ivar metadata and data binds to the 32-bit layout, and emits `lifted.bc`. |
+| `src/xlate/` (`xlgen`) | Generates the guest-to-host ABI bridges (calling convention, `va_list`, blocks, Objective-C message dispatch, data-symbol shims) from the SDK headers. |
+| `src/runtime/` | The armv7 support runtime: message routing, block bridging, weak references, ivar-layout reconciliation and Objective-C compatibility shims. It is compiled per translation, because it includes the state header that xlate writes for each app. |
+| `tools/translate.lua` | The end-to-end pipeline: arm64 executable to armv7 iOS 6 executable. |
+| `tools/ipa.lua` | The same for a whole `.ipa`, its embedded frameworks lifted as guest images. |
+| `tests/` | Small self-contained test programs and apps, the translator's regression suite. |
+| `tools/perf/` | The on-device translated-versus-native benchmark. |
 
 Rellume, farmdec and BlocksRuntime are packages of `third_party/`, pinned by commit with our changes as patches.
 Rellume is built for AArch64 only, the one architecture xlate lifts.
@@ -44,18 +44,18 @@ classes. A class the guest lays out in that layout therefore keeps it, and the h
 ordinary host class built from the guest's `class_ro_t` (name, superclass, instance and class methods, instance size).
 The bridge translates a class to and from the shadow where it crosses (`xl_class_in`, `xl_class_out`: a receiver, an
 argument, a result). Nothing writes to the guest object, so what Swift reads from it stays true. The code is
-`runtime/swift_classes.m`.
+`src/runtime/swift_classes.m`.
 
 - A shadow is made when the Swift runtime hands a class over, through the calls the bridge provides because iOS 6
   lacks them (`objc_readClassPair`, `_objc_realizeClassFromSwift`, `objc_setHook_lazyClassNamer`,
-  `objc_setHook_getImageName`; `runtime/bridge-provides.txt`). It is made at start-up for a class the compiler listed in
+  `objc_setHook_getImageName`; `src/runtime/bridge-provides.txt`). It is made at start-up for a class the compiler listed in
   `__objc_classlist` (a device registers those when it loads the image, so a lookup by name finds them), and the first
   time a message or a call reaches a class the compiler laid out statically and listed only in `__objc_clsrolist`,
   which is when a device realizes it.
 - A class the `ro` gives no name (a generic class instantiated at run time, or a prespecialized one) is named by the
   Swift runtime's own lazy class namer, which the shadow builder asks. The name is the runtime's, not a copy of its rule.
 - Only Swift classes whose whole ancestry is the guest's own move to this layout (`SplitGuestLayoutClasses` in
-  `xlate/src/objc.cpp`). A Swift class with a host ancestor, an `NSArray` subclass for instance, and every Objective-C
+  `src/xlate/objc.cpp`). A Swift class with a host ancestor, an `NSArray` subclass for instance, and every Objective-C
   class keep the host layout that the class list rewrite gives them, because host code sends their instances messages.
   What Swift reads from the fields that the rewrite overwrites (its superclass at +8 is the host's cache and vtable
   words, its data word at +32 is zero) is not what it wrote.
@@ -67,7 +67,7 @@ argument, a result). Nothing writes to the guest object, so what Swift reads fro
   `/private/var/revenant/xl-shadow-log` on the device, then read `xlate-shadow.log`). A method a shadow adds is a block
   IMP that carries `self`, the selector and four more words to the guest method.
 
-`corpus/classpair` builds the cases as a program for macOS, where objc4 is the real thing, and the translation must
+`tests/classpair` builds the cases as a program for macOS, where objc4 is the real thing, and the translation must
 print on the iPad 2 what objc4 printed.
 
 ## Scope and limits

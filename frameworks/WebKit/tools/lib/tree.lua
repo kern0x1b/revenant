@@ -7,7 +7,7 @@ function revenant(...)
 end
 
 function modules(name)
-    return import(name, {rootdir = member("modules"), anonymous = true})
+    return import(name, {rootdir = member("src", "modules"), anonymous = true})
 end
 
 function where(name)
