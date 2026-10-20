@@ -3,8 +3,6 @@
 # where the device test reads them, then compiles the port's Vision classes under names of their own (Revenant<name>) and holds them to the
 # same records, with mutants of the port that each have to be told apart.
 set -eu
-echo "FAIL host/vision/run.sh: its Python steps are gone and not yet ported to Lua: the inline block at line 73; the one-line step at line 109; the inline block PY at line 124; compare.py; the inline block PY at line 162" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
@@ -38,22 +36,20 @@ libs="-framework Foundation -framework CoreGraphics -framework CoreImage -framew
 # to run printed at the reader, which meant a fresh worktree guarded nothing at all: the sweep found
 # no directory and called the test DEAD, and a person who ran it by hand had to know to go and write
 # the models first. Nothing outside the tree is needed and nothing is downloaded.
-if [ ! -d "$models" ]; then
-    echo "no Core ML containers in $models: writing them with tools/coreml/make-models.lua"
-    xmake l "$here/../../../../tools/coreml/make-models.lua" --out "$models" > "$build/models.log" 2>&1 || {
-        echo "FAIL: the containers could not be written, so the picture cases have nothing to read:"
-        tail -3 "$build/models.log" | sed 's/^/    /'; exit 1; }
-fi
-if [ ! -d "$models" ]; then
-    echo "no Core ML containers in $models"
-    echo "the picture cases need them, and without them this run records $((expected_records - 8)) records instead of $expected_records and lets a mutant survive: write them with"
-    echo "    xmake l $here/../../../../tools/coreml/make-models.lua --out $models"
-    exit 1
-fi
 missing=""
 for c in $required; do
     [ -f "$models/$c" ] || missing="$missing $c"
 done
+if [ -n "$missing" ]; then
+    echo "no Core ML containers$missing in $models: writing them with tools/coreml/make-models.lua"
+    runs_xmake l "$here/../../../../tools/coreml/make-models.lua" --out "$models" > "$build/models.log" 2>&1 || {
+        echo "FAIL: the containers could not be written, so the picture cases have nothing to read:"
+        tail -3 "$build/models.log" | sed 's/^/    /'; exit 1; }
+    missing=""
+    for c in $required; do
+        [ -f "$models/$c" ] || missing="$missing $c"
+    done
+fi
 if [ -n "$missing" ]; then
     echo "the corpus is missing$missing, which the cases in $device/vision-cases.m name"
     echo "vision_image is the one a case EXPECTS to fail: it is expected to be PRESENT and to fail,"
@@ -70,11 +66,7 @@ VISION_COREML_MODELS="$models" VISION_RECORDS="$build/system.json" "$build/syste
 # record behind: absent is not the same as a container that is present and fails, and the record is
 # where the two look alike. vision_image is the one a case expects to fail -- it is expected to be
 # PRESENT and to fail -- so a corpus without it is short, not excused.
-absent=$(python3 -c "
-import json
-d = json.load(open('$build/system.json'))
-print(' '.join(sorted(k[len('coreml.model.absent.'):] for k in d if k.startswith('coreml.model.absent.'))))
-" 2>/dev/null || echo "")
+absent=$(runs_xmake l "$runs_checkout/tests/backports/common/records.lua" suffixes "$build/system.json" coreml.model.absent. 2>/dev/null || echo "")
 if [ -n "$absent" ]; then
     echo "a case recorded a container of its own as absent: $absent, and the corpus check above passed"
     echo "a container that is expected to fail must be PRESENT and fail; absent is not failing, and the case records nothing for it"
@@ -87,8 +79,7 @@ record="$build/vision-expectations.h"
 if [ "${RECORD:-}" = 1 ]; then
     record="$device/vision-expectations.h"
 fi
-xmake l "$here/../../common/embed.lua" "$build/system.json" "$record" foundation2_expectations
-sed -i.bak 's/foundation2_expectations/vision_expectations/' "$record" && rm -f "$record.bak"
+runs_xmake l "$here/../../common/embed.lua" "$build/system.json" "$record" vision_expectations
 # The record may not carry this machine's home path, and the file is already written by the line above, so this is
 # checked before anything reads it. It happened once: a case recorded failure.localizedDescription, which is a framework
 # sentence naming the model's file URL, and the run went on to print a pass. The cases now record the error's domain and
@@ -106,7 +97,7 @@ recorded=$(runs_harness records "$build/system.json")
 # expect to fail -- this host's Core ML does not run an image model -- and it is listed, with its
 # reason, in vision-cases.m beside the compile. Anything else that fails is recorded under
 # coreml.compile.unexpected and fails here: a run that skips a case must not be a run that passes.
-unexpected=$(python3 -c "import json; print(json.load(open('$build/system.json')).get('coreml.compile.unexpected',''))" 2>/dev/null || echo "")
+unexpected=$(runs_xmake l "$runs_checkout/tests/backports/common/records.lua" value "$build/system.json" coreml.compile.unexpected 2>/dev/null || echo "")
 if [ -n "$unexpected" ]; then
     echo "a container the cases name failed to compile, and no case expects it to: $unexpected"
     echo "the expected ones are listed with their reasons in $device/vision-cases.m, at compile_failure_expected"
@@ -121,16 +112,7 @@ if [ "$recorded" -lt "$expected_records" ]; then
 fi
 
 
-python3 - "$registry" "$build/rename.h" <<'PY'
-import json, sys
-names = set()
-for entry in json.load(open(sys.argv[1]))["entries"]:
-    if entry["kind"] in ("class", "constant", "function"):
-        names.add(entry["api"].replace("()", ""))
-with open(sys.argv[2], "w") as out:
-    for name in sorted(names):
-        out.write("#define %s Revenant%s\n" % (name, name))
-PY
+runs_xmake l "$runs_checkout/tests/backports/common/registry.lua" names "$registry" "$build/rename.h" class,constant,function
 
 port() {
     dir=$1
@@ -148,7 +130,7 @@ VISION_COREML_MODELS="$models" VISION_RECORDS="$build/port.json" "$build/port/ru
 # The comparison's verdict is kept rather than ending the run: the mutants are below, and a red
 # comparison used to exit here, so a red test never checked that its controls still fire. Both
 # verdicts are reported and either one fails the run.
-if python3 "$here/compare.py" "$build/system.json" "$build/port.json"; then verdict=same; else verdict=differs; fi
+if runs_xmake l "$runs_checkout/tests/backports/common/records.lua" union "$build/system.json" "$build/port.json" 400; then verdict=same; else verdict=differs; fi
 echo "comparison: $verdict"
 
 # 4. mutants: each of these has to change the record, or the rule it stands for is not applied
@@ -159,13 +141,7 @@ mutant() {
     file=$1; from=$2; to=$3
     rm -rf "$build/mutant"; mkdir -p "$build/mutant"
     cp "$vision"/*.c "$vision"/*.m "$vision"/*.h "$build/mutant/"
-    python3 - "$build/mutant/$file" "$from" "$to" <<'PY'
-import sys
-path, old, new = sys.argv[1:4]
-text = open(path).read()
-assert old in text, old
-open(path, "w").write(text.replace(old, new, 1))
-PY
+    runs_xmake l "$runs_checkout/tests/backports/common/mutants.lua" first "$build/mutant/$file" "$from" "$to"
     port "$build/mutant"
     rm -f "$build/mutant.json"
     VISION_COREML_MODELS="$models" \
