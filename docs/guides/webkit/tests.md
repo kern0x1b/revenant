@@ -50,6 +50,16 @@ strings, arrays and the modulo and double paths that the softfp ABI fix broke;
 `poly.js` polymorphic inline caches; `coverage.js` Map/Set/iterator builtins;
 `mapdfg.js` the Map and Set DFG intrinsics written by hand for 32-bit.
 
+## TLS, on the phone
+
+With the shim installed, Safari must refuse both of these. A page that loads means the shim is not verifying:
+
+    https://self-signed.badssl.com    must show a certificate error
+    https://expired.badssl.com        must show a certificate error
+
+`https://badssl.com` has a valid certificate and must load, so a refusal above means the shim
+and not a dead network.
+
 ## In a browser, by hand
 
 Three pages measure the engine under a feed, which is the shape of page this
