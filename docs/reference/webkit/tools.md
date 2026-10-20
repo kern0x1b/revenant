@@ -1,6 +1,6 @@
 # The probes, and what each one answers
 
-Every tool in `tools/` exists because a question about the device could not be
+Every probe in `src/device-tools/` exists because a question about the device could not be
 answered from inside the engine, or could not be trusted from inside it. Each
 one runs on the phone, links nothing of WebKit unless it says so, and prints a
 verdict rather than a log.
@@ -23,9 +23,9 @@ revives the `iproxy` tunnel before every command, because a dead tunnel answers
 
 ## Building them
 
-The `webkit-device-tools` package, `src/packages/device-tools/xmake.lua`, compiles the four C tools
-in `tools/` for armv7 and signs each with the entitlements in
-`tools/entitlements/` it needs. Configuring for iphoneos requires it, so it is built with the
+The `webkit-device-tools` package, `src/device-tools/xmake.lua`, compiles the four C probes
+in `src/device-tools/` for armv7 and signs each with the entitlements in
+`src/device-tools/entitlements/` it needs. Configuring for iphoneos requires it, so it is built with the
 port, and `./xmakew where -P . webkit-device-tools` names its folder:
 
 ```sh
@@ -42,8 +42,5 @@ What used to be Python is Lua run by `./xmakew l`; each prints its usage with `-
 | `port-delta.lua` | how much the patch series changes upstream, by area and kind, and how much of it carries the `WEBKIT_IOS6` guard |
 | `carry-audit.lua` | files whose port markers thinned out against a reference tree, after moving the series to a newer base |
 | `symbol-check.lua` | the engine's imported symbols and exported classes against `carry-symbols.txt`, and `--pin` |
-| `compat-audit.lua` | no `libios6compat.a` stub defines a symbol the engine or ICU defines |
-| `prefix-exports.lua` | the prefixed variant's export list, written from the class prefix header |
 | `required-encodings.lua` | `tests/host/required-encodings.txt`, read from `TextCodecICU.cpp` |
-| `probe-soft-links.lua` | a C probe that asks the phone for every constant PAL soft-links |
 | `check-cacert.lua` | the application's trust store against the reviewed hash, and `--upstream` |

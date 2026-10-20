@@ -96,7 +96,7 @@ allocator lives in `Source/bmalloc/bmalloc/ios6`, behind the CMake variable
 list. It is slower. On the same device and network, alternating builds:
 domInteractive medians 6240 ms against 6090 for the system allocator, resident
 157-159 MB against 154-160, and bmalloc owned both outliers at 8.1 and 8.7 s.
-`tools/allocator-benchmark.js`, which allocates without the network: system
+`tests/device/allocator-benchmark.js`, which allocates without the network: system
 1494 and 1550 ms, bmalloc 1690, bmalloc with the scavenger at 2048 ms instead of
 512 gives 1626 and 1617. Tuning helps and is not enough; allocation is 12% of the
 sampled load window, so the ceiling was a few percent in any case.

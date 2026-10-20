@@ -1,4 +1,4 @@
-includes("src/packages/engine", "src/packages/device-tools")
+includes("src/engine", "src/device-tools")
 
 option("webkit_host_tests", {default = false, showmenu = true,
                              description = "Build ICU for this Mac and the WebKit port's host tests of its data, run with ./xmakew test -P . icu-sanity/* icu-locales/*."})

@@ -72,7 +72,7 @@ whether curl serves the same extract today. It is the `webkit-cacert` check:
 
 ## 3. The engine
 
-`src/packages/engine/xmake.lua` is the `webkit-engine` package, and `src/modules/engine.lua` holds
+`src/engine/xmake.lua` is the `webkit-engine` package, and `src/modules/engine.lua` holds
 what it does: the CMake options and tuning flags of each variant, and the steps, in the
 order that fails cheapest first:
 
@@ -117,12 +117,7 @@ depending on `@rpath`.
 defines.** A stub that shadows a real definition links cleanly and then fails at
 runtime: `WebCoreWebThreadLock` is a function pointer in WTF and was a function
 here, which turned a call into a store into `__TEXT` and a bus error.
-The build checks for exactly that, and `tools/compat-audit.lua` runs the same check by hand:
-
-```sh
-./xmakew l frameworks/WebKit/tools/compat-audit.lua --compat <build>/compat/libios6compat.a \
-    --engine-build <build> --icu "$(./xmakew where -P . icu)"
-```
+The build checks for exactly that, every time it stages the engine.
 
 **Every import has to exist on the phone.** The SDK the engine compiles against
 is years newer than the system it runs on, so a call can link cleanly against a

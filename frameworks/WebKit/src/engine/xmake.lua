@@ -4,7 +4,7 @@ package("webkit-engine")
     set_license("LGPL-2.1-or-later AND BSD-2-Clause")
     set_policy("package.strict_compatibility", true)
 
-    local member = path.join(os.scriptdir(), "..", "..", "..")
+    local member = path.join(os.scriptdir(), "..", "..")
     local digests = {}
     local inputs = table.join({path.join(os.scriptdir(), "xmake.lua"), path.join(member, "tests", "data", "carry-symbols.txt")},
                               os.files(path.join(member, "src", "modules", "*.lua")), os.files(path.join(member, "src", "compat", "**")))
@@ -22,7 +22,7 @@ package("webkit-engine")
     add_deps("revenant@ldid 2.1.5-procursus7+23.gaf86971", {alias = "ldid"})
 
     on_install("iphoneos", function (package)
-        import("engine", {rootdir = path.join(package:scriptdir(), "..", "..", "modules"), anonymous = true}).install(package)
+        import("engine", {rootdir = path.join(package:scriptdir(), "..", "modules"), anonymous = true}).install(package)
     end)
 
     on_test(function (package)
