@@ -102,6 +102,7 @@ jobs:
 
       - name: Configure the Backports component
         if: steps.component.outputs.present == 'true'
+        timeout-minutes: 15
         run: |
           stamp() { while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done; }
           echo "stage configure starts $(date -u +%H:%M:%S)"
@@ -110,6 +111,7 @@ jobs:
 
       - name: Build the Backports component
         if: steps.component.outputs.present == 'true'
+        timeout-minutes: 6
         run: |
           stamp() { while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done; }
           echo "stage build starts $(date -u +%H:%M:%S)"
@@ -126,6 +128,7 @@ jobs:
 
       - name: Check every source key against the built libraries
         if: steps.component.outputs.present == 'true'
+        timeout-minutes: 2
         run: |
           mkdir -p "$RUNNER_TEMP/report"
           echo "stage exports starts $(date -u +%H:%M:%S)"
@@ -136,6 +139,7 @@ jobs:
 
       - name: Count the implemented members per framework
         if: steps.component.outputs.present == 'true'
+        timeout-minutes: 2
         run: |
           mkdir -p "$RUNNER_TEMP/report"
           echo "stage status starts $(date -u +%H:%M:%S)"
