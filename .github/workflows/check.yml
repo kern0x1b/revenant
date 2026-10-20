@@ -79,7 +79,9 @@ jobs:
         id: store
         with:
           path: ~/.revenant/cache/xmake-global
-          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ github.run_id }}
+          restore-keys: |
+            xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}-
 
       - uses: actions/cache/restore@v4
         id: generated
@@ -180,10 +182,10 @@ jobs:
           key: backports-generated-${{ runner.os }}-${{ hashFiles('frameworks/Backports/**') }}
 
       - uses: actions/cache/save@v4
-        if: always() && steps.store.outputs.cache-hit != 'true'
+        if: always()
         with:
           path: ~/.revenant/cache/xmake-global
-          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ github.run_id }}
 
       - uses: actions/cache/save@v4
         if: always() && steps.xmake.outputs.cache-hit != 'true'
