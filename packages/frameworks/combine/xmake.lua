@@ -20,7 +20,7 @@ package("combine")
 
     local digests = {"xmake.lua=" .. hash.sha256(path.join(os.scriptdir(), "xmake.lua"))}
     for _, patch in ipairs(patches) do
-        local file = path.join(os.scriptdir(), "..", "..", "..", "..", "frameworks", "Combine", "patches", patch[1])
+        local file = path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Combine", "patches", patch[1])
         add_patches("2026.10.19", file, patch[2])
         table.insert(digests, patch[1] .. "=" .. hash.sha256(file))
     end
@@ -65,7 +65,7 @@ package("combine")
             return
         end
 
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "modules")
+        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
         local swift = import("apple.swift", {rootdir = modules, anonymous = true})
         local toolchain = assert(package:toolchains(), "Combine is built with the apple-ios toolchain")[1]
         toolchain:load()

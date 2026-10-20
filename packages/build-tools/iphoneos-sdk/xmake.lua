@@ -21,7 +21,7 @@ package("iphoneos-sdk")
     add_configs("layout", {description = "The SDK sits in the package at Developer.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS<version>.sdk, where clang's driver finds the toolchain's libarclite and CMake's iOS platform files the SDK name.", default = "developer-folder", type = "string", readonly = true})
 
     local digests = {}
-    local inputs = table.join({path.join(os.scriptdir(), "xmake.lua"), path.join(os.scriptdir(), "..", "..", "..", "modules", "apple", "sdkstubs.lua")},
+    local inputs = table.join({path.join(os.scriptdir(), "xmake.lua"), path.join(os.scriptdir(), "..", "..", "..", "toolchain", "modules", "apple", "sdkstubs.lua")},
                               os.files(path.join(os.scriptdir(), "usr", "**")), os.files(path.join(os.scriptdir(), "arclite", "*")),
                               os.files(path.join(os.scriptdir(), "blocks", "*")), os.files(path.join(os.scriptdir(), "markers", "*")))
     table.sort(inputs)
@@ -50,7 +50,7 @@ package("iphoneos-sdk")
         os.vcp("*", folder .. "/")
         local libraries = path.join(folder, "usr", "lib")
 
-        local stubs = import("apple.sdkstubs", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
+        local stubs = import("apple.sdkstubs", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
         local markers = package:resourcedir("markers")
         if markers then
             local older = os.isfile(path.join(markers, "SDKSettings.json")) and markers or assert(os.dirs(path.join(markers, "iPhoneOS*.sdk"))[1], "the older SDK's archive holds no SDK")

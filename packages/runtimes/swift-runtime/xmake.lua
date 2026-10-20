@@ -39,7 +39,7 @@ package("swift-runtime")
     }
 
     on_download(function (package, opt)
-        local checkout = import("checkout", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
+        local checkout = import("checkout", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
         checkout.pinned(opt.sourcedir, sources)
     end)
 
@@ -79,7 +79,7 @@ package("swift-runtime")
         end
         package:add("links", "swiftCore")
         if package:config("shared") then
-            local runtime = import("apple.shared_runtime", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
+            local runtime = import("apple.shared_runtime", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
             for _, kind in ipairs({"swift-runtime", "swift-runtime-ui"}) do
                 package:add("linkdirs", path.join("share", "root", "usr", "lib", "revenant", runtime.package_name(kind, package:buildhash())))
             end
@@ -90,7 +90,7 @@ package("swift-runtime")
     end)
 
     on_install("iphoneos", function (package)
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "modules")
+        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
         local swift = import("apple.swift", {rootdir = modules, anonymous = true})
         local gyb = import("gyb.template", {rootdir = modules, anonymous = true})
         local cmake = import("apple.cmake", {rootdir = modules, anonymous = true})
@@ -347,7 +347,7 @@ package("swift-runtime")
             end
 
             if package:config("backports") then
-                local tree = path.absolute(path.join(package:scriptdir(), "..", "..", ".."))
+                local tree = path.absolute(path.join(package:scriptdir(), "..", "..", "..", "toolchain"))
                 local work = path.join(package:installdir("share"), "port-ir")
                 os.mkdir(work)
                 local ir = path.join(work, "full.tsv")
@@ -880,13 +880,13 @@ package("swift-runtime")
     end)
 
     on_test(function (package)
-        local swift = import("apple.swift", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
+        local swift = import("apple.swift", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
         local resources = path.join(package:installdir("lib"), "swift")
         local install = path.join(resources, "iphoneos")
         local libraries = install
         local installed = {}
         if package:config("shared") then
-            local shared = import("apple.shared_runtime", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
+            local shared = import("apple.shared_runtime", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
             libraries = path.join(package:installdir("share"), "root", shared.folder_of(shared.package_name("swift-runtime", package:buildhash())))
             for _, kind in ipairs({"swift-runtime", "swift-runtime-ui"}) do
                 assert(os.isfile(path.join(package:installdir("share"), "shared-packages", shared.package_name(kind, package:buildhash()) .. ".json")),
@@ -909,7 +909,7 @@ package("swift-runtime")
             assert(os.isdir(path.join(install, module .. ".swiftmodule")) or os.isfile(path.join(install, module .. ".swiftmodule")),
                    "the runtime has no " .. module .. " module")
         end
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "modules")
+        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
         local linked = {}
         for _, alias in ipairs({"libcxx", "apple-backports"}) do
             local dep = package:dep(alias)

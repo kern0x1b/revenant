@@ -39,7 +39,7 @@ package("matter")
     end
 
     on_install("iphoneos", function (package)
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "modules")
+        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
         local toolchain = import("apple.cmake", {rootdir = modules, anonymous = true}).toolchain(package)
         local sdk = assert(toolchain:config("sdkdir"), "the apple-ios toolchain names no SDK")
         local minimum = assert(toolchain:config("deployment"), "the apple-ios toolchain names no minimum release")

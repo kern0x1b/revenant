@@ -27,7 +27,7 @@ package("swift-data")
     end)
 
     on_install("iphoneos", function (package)
-        local modules_root = path.join(package:scriptdir(), "..", "..", "..", "modules")
+        local modules_root = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
         local swift = import("apple.swift", {rootdir = modules_root, anonymous = true})
         local toolchain = assert(package:toolchains(), "SwiftData is built with the apple-ios toolchain")[1]
         toolchain:load()

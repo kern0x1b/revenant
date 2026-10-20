@@ -36,7 +36,7 @@ package("libcxx")
     add_shflags("-nostdlib++")
 
     on_download(function (package, opt)
-        local checkout = import("checkout", {rootdir = path.join(os.scriptdir(), "..", "..", "..", "modules"), anonymous = true})
+        local checkout = import("checkout", {rootdir = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
         checkout.pinned(opt.sourcedir, {{url = opt.url, tag = "llvmorg-" .. package:version_str(),
                                          commit = package:revision(opt.url_alias) or package:commit(),
                                          sparse = {"/*", "!/*/", "/libcxx/", "/libcxxabi/", "/libunwind/", "/runtimes/", "/cmake/",
@@ -46,7 +46,7 @@ package("libcxx")
 
     on_install("iphoneos", function (package)
         import("core.base.semver")
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "modules")
+        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
         local cmake = import("apple.cmake", {rootdir = modules, anonymous = true})
         local macho = import("apple.macho", {rootdir = modules, anonymous = true})
         for _, patch in ipairs({"utimensat-told-no.patch", "reexport-when-dyld-can.patch", "one-emulated-tls-runtime.patch", "one-atomic-runtime.patch", "process-wide-compat.patch"}) do
@@ -210,7 +210,7 @@ package("libcxx")
         assert(os.isfile(path.join(package:installdir("lib"), "libc++.1.0.dylib")))
         assert(os.isfile(path.join(package:installdir("include", "c++", "v1"), "vector")))
         if package:config("packaged") then
-            local shared = import("apple.shared_runtime", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
+            local shared = import("apple.shared_runtime", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
             local name = shared.package_name("libcxx", package:buildhash())
             assert(os.isfile(path.join(package:installdir("share"), "shared-packages", name .. ".json")), "the packaged libc++ left no description of its package")
             local identity = os.iorunv("xcrun", {"otool", "-D", path.join(package:installdir("lib"), "libc++.1.0.dylib")})

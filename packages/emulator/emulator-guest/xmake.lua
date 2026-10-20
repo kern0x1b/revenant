@@ -30,7 +30,7 @@ package("emulator-guest")
         os.vrunv(os.programfile(), table.join({"f", "-p", "iphoneos", "-a", package:arch(), "-m", "release"}, argv))
         os.vrunv(os.programfile(), table.join({"build"}, argv), {envs = {REVENANT_RELEASE = "1"}})
         os.vrunv(os.programfile(), table.join({"install", "-o", package:installdir()}, argv))
-        os.vcp(path.join(package:scriptdir(), "..", "..", "..", "LICENSE"), package:installdir("licenses"))
+        os.vcp(path.join(package:scriptdir(), "..", "..", "..", "toolchain", "LICENSE"), package:installdir("licenses"))
     end)
 
     on_test(function (package)

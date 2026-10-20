@@ -55,7 +55,7 @@ package("swift-syntax")
             end
         end
         print("%s: building from %s", package:name(), source)
-        local parallel = import("parallel", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
+        local parallel = import("parallel", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
         parallel.hold(nil, function (jobs)
             local argv = {"nice", "-n", "10", "swift", "build", "--package-path", source, "--scratch-path", build,
                           "--triple", "arm64-apple-macosx13.0", "-c", "release", "--jobs", tostring(jobs)}

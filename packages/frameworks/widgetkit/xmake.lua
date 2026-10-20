@@ -28,7 +28,7 @@ package("widgetkit")
     end)
 
     on_install("iphoneos", function (package)
-        local modules = path.join(os.scriptdir(), "..", "..", "..", "modules")
+        local modules = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "modules")
         local swift = import("apple.swift", {rootdir = modules, anonymous = true})
         local toolchain = assert(package:toolchains(), "WidgetKit is built with the apple-ios toolchain")[1]
         toolchain:load()
@@ -71,6 +71,6 @@ package("widgetkit")
 
         os.tryrm(probe_dir)
         package:setenv("REVENANT_SWIFT_MODULES", swiftdir)
-        os.cp(path.join(os.scriptdir(), "..", "..", "..", "LICENSE"), path.join(package:installdir("licenses")))
+        os.cp(path.join(os.scriptdir(), "..", "..", "..", "toolchain", "LICENSE"), path.join(package:installdir("licenses")))
         os.cp("README.md", path.join(package:installdir("share")))
     end)

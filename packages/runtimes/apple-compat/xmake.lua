@@ -16,7 +16,7 @@ package("apple-compat")
 
     on_load("iphoneos", function (package)
         import("core.base.semver")
-        local compat = import("apple.compat", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
+        local compat = import("apple.compat", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
         local toolchain = assert(package:toolchains(), "apple-compat is built with the apple-ios toolchain")[1]
         toolchain:load()
         local symbols, process_wide = {}, {}
@@ -71,7 +71,7 @@ package("apple-compat")
                 os.vcp(path.join(package:scriptdir(), "src", symbol .. ".c"), folder .. "/")
             end
         end
-        os.vcp(path.join(package:scriptdir(), "..", "..", "..", "LICENSE"), package:installdir("licenses"))
+        os.vcp(path.join(package:scriptdir(), "..", "..", "..", "toolchain", "LICENSE"), package:installdir("licenses"))
     end)
 
     on_test(function (package)

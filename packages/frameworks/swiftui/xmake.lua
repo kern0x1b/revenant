@@ -23,7 +23,7 @@ package("swiftui")
     end)
 
     on_install("iphoneos", function (package)
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "modules")
+        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
         local swift = import("apple.swift", {rootdir = modules, anonymous = true})
         local toolchain = assert(package:toolchains(), "SwiftUI is built with the apple-ios toolchain")[1]
         toolchain:load()

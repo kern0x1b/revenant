@@ -24,7 +24,7 @@ package("appintents")
     end)
 
     on_install("iphoneos", function (package)
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "modules")
+        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
         local swift = import("apple.swift", {rootdir = modules, anonymous = true})
         local toolchain = assert(package:toolchains(), "AppIntents is built with the apple-ios toolchain")[1]
         toolchain:load()
@@ -147,6 +147,6 @@ package("appintents")
 
         os.tryrm(probe_dir)
         package:setenv("REVENANT_SWIFT_MODULES", swiftdir)
-        os.cp(path.join(os.scriptdir(), "..", "..", "..", "LICENSE"), path.join(package:installdir("licenses")))
+        os.cp(path.join(os.scriptdir(), "..", "..", "..", "toolchain", "LICENSE"), path.join(package:installdir("licenses")))
         os.cp("README.md", package:installdir("share"))
     end)

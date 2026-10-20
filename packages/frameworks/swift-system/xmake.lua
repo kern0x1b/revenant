@@ -35,7 +35,7 @@ package("swift-system")
     end)
 
     on_install("iphoneos", function (package)
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "modules")
+        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
         local swift = import("apple.swift", {rootdir = modules, anonymous = true})
         local toolchain = assert(package:toolchains(), "swift-system is built with the apple-ios toolchain")[1]
         toolchain:load()
@@ -101,7 +101,7 @@ package("swift-system")
     end)
 
     on_test(function (package)
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "modules")
+        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
         local dyld = import("apple.dyld", {rootdir = modules, anonymous = true})
         local toolchain = assert(package:toolchains(), "swift-system is built with the apple-ios toolchain")[1]
         toolchain:load()

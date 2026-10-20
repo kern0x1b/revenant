@@ -14,7 +14,7 @@ package("firmware-tools")
     on_install("@macosx", function (package)
         os.mkdir(package:installdir("bin"))
         os.vrunv("xcrun", {"swiftc", "-O", path.join(package:scriptdir(), "src", "revenant-firmware.swift"), "-o", path.join(package:installdir("bin"), "revenant-firmware")})
-        os.vcp(path.join(package:scriptdir(), "..", "..", "..", "LICENSE"), package:installdir("licenses"))
+        os.vcp(path.join(package:scriptdir(), "..", "..", "..", "toolchain", "LICENSE"), package:installdir("licenses"))
     end)
 
     on_test(function (package)
