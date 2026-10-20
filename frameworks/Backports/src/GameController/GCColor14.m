@@ -1,8 +1,5 @@
 #import <GameController/GameController.h>
 
-#pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
-#pragma clang diagnostic ignored "-Wobjc-designated-initializers"
-
 @implementation GCColor {
     float _red;
     float _green;
