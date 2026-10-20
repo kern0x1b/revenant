@@ -485,12 +485,7 @@ local function message_of(errors)
 end
 
 local function coverage_check(corpus, out)
-    local candidates = {}
-    local tools = os.getenv("REVENANT_TOOLS_DIR")
-    if tools and tools ~= "" then
-        table.insert(candidates, path.join(tools, "store.json"))
-    end
-    table.insert(candidates, path.join(corpus, "store.json"))
+    local candidates = {path.join(corpus, "store.json")}
     local store_path = nil
     for _, candidate in ipairs(candidates) do
         if os.isfile(candidate) then

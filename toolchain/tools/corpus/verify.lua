@@ -1,23 +1,14 @@
 import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 local text = import("objc_text", {rootdir = os.scriptdir()})
+local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
 local aggregate = import("aggregate", {rootdir = os.scriptdir(), anonymous = true})
 
 local EXPORT = aggregate.registry_export()
 local CORPUS = aggregate.corpus_dir()
-local REVENANT = path.directory(path.directory(os.scriptdir()))
-
-local TREE = nil
-for _, candidate in ipairs({os.getenv("REVENANT_TREE_DIR") or false,
-                            path.join(REVENANT, "..", "packages", "frameworks", "apple-backports")}) do
-    if candidate and os.isdir(candidate) then
-        TREE = candidate
-        break
-    end
-end
-if not TREE then
-    raise("verify.lua: no tree directory found. Set REVENANT_TREE_DIR to the current worktree's "
-        .. "packages/frameworks/apple-backports -- without it every check reports false positives.")
+local TREE = path.join(workspace.root(), "packages", "frameworks", "apple-backports")
+if not os.isdir(TREE) then
+    raise("verify.lua: no tree directory at %s -- without it every check reports false positives.", TREE)
 end
 
 local function walk(dir, prune, out)
@@ -107,12 +98,9 @@ end
 local ADOPTERS = {}
 do
     local store_path = path.join(CORPUS, "store.json")
-    if os.getenv("REVENANT_TOOLS_DIR") and os.isfile(path.join(os.getenv("REVENANT_TOOLS_DIR"), "store.json")) then
-        store_path = path.join(os.getenv("REVENANT_TOOLS_DIR"), "store.json")
-    end
     if not os.isfile(store_path) then
         io.stderr:write(string.format("verify.lua: WARNING no store.json found (looked in %s) -- PROTOCOLS/ADOPTERS stay "
-            .. "empty, every protocol-member row falls back to the flat tree scan. Set REVENANT_TOOLS_DIR.\n", store_path))
+            .. "empty, every protocol-member row falls back to the flat tree scan.\n", store_path))
     else
         local held = json.decode(io.readfile(store_path))
         if held == nil then

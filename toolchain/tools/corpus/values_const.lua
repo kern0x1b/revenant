@@ -204,7 +204,7 @@ function read_cache(cachefile, symbols, scratch, revenant_root)
     io.writefile(listing, table.concat(lines))
     local out_file, err_file = listing .. ".out", listing .. ".err"
     local status, failure = os.execv(os.programfile(), {"l", path.join(os.scriptdir(), "cache-value.lua"), cachefile, listing},
-                                     {try = true, curdir = revenant_root, envs = {REVENANT_ROOT = revenant_root}, stdout = out_file, stderr = err_file,
+                                     {try = true, curdir = revenant_root, stdout = out_file, stderr = err_file,
                                       timeout = 5400 * 1000})
     local output, errors = io.readfile(out_file) or "", io.readfile(err_file) or ""
     os.tryrm(listing)

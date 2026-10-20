@@ -2,6 +2,7 @@ import("core.base.option")
 import("core.base.process")
 import("lib.detect.find_tool")
 import("byteorder")
+import("workspace")
 
 CHOSEN = "REVENANT_DEVICE"
 
@@ -83,7 +84,7 @@ function where(settings)
 end
 
 local function leases()
-    return path.join(os.getenv("REVENANT_HOME") or path.join(os.getenv("HOME"), ".revenant"), "devices")
+    return path.join(workspace.home(), "devices")
 end
 
 function holder_name(given)

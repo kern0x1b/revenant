@@ -1,8 +1,8 @@
 local measured = import("gen.measured", {rootdir = path.join(os.scriptdir(), ".."), anonymous = true})
 local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
 
-local root = os.getenv("REVENANT_ROOT") or path.join(os.scriptdir(), "..", "..")
-local cache_root = os.getenv("CACHE_ROOT") or path.join(os.getenv("HOME"), ".revenant", "dyld")
+local root = workspace.root()
+local cache_root = os.getenv("CACHE_ROOT") or path.join(workspace.home(), "dyld")
 local cache_value = path.join(os.scriptdir(), "cache-value.lua")
 
 local function cache_file(cache)
@@ -67,7 +67,7 @@ local function read_cache(cache, rows)
         table.insert(lines, symbol_line(row, row.expected))
     end
     io.writefile(symbols, table.concat(lines, "\n") .. "\n")
-    local out, err = os.iorunv("xmake", {"l", cache_value, file, symbols}, {envs = {REVENANT_ROOT = root}})
+    local out, err = os.iorunv("xmake", {"l", cache_value, file, symbols})
     os.rm(symbols)
     assert(out ~= nil and out ~= "", "the reader gave no output for " .. file .. ": " .. tostring(err))
     local found = {}

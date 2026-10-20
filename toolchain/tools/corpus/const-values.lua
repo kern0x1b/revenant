@@ -134,7 +134,7 @@ end
 function main(...)
     local args = common.parse_args("const-values.lua", OPTIONS, {...})
     local started = os.mclock()
-    local revenant_root = os.getenv("REVENANT_ROOT") or workspace.root()
+    local revenant_root = workspace.root()
     local scratch = workspace.fresh("const-values")
     local surface = args.surface or workspace.corpus("sdk-26.2-surface.tsv")
 
