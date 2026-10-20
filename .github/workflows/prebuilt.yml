@@ -57,7 +57,7 @@ jobs:
       - name: Install the linker the iOS SDK links with
         run: |
           [ -x /opt/homebrew/opt/llvm/bin/llvm-config ] || brew install llvm
-          ./xmakew require -P . -y -v revenant@ld64 956.6
+          ./xmakew require -P . -y -v revenant@ld64
 
       - name: Build or fetch the package
         env:
