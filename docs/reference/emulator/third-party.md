@@ -23,4 +23,4 @@ OpenSSL and libplist come from Revenant's packages, libpng, libjpeg-turbo, the V
 loader and the glslang library (the shader compiler of `tools/glsl`) from xmake-repo; SDL2 and FFmpeg are optional. Each package carries its license.
 
 A binary built from this tree carries the notices above with it; the MIT,
-BSD-3-Clause and BSL texts require that. `NOTICE` is the summary to ship.
+BSD-3-Clause and BSL texts require that. `notice.md` is the summary to ship.

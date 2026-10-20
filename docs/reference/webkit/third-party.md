@@ -94,7 +94,7 @@ rather than replacing anything.
 
 ## This project's own code
 
-MIT, `frameworks/WebKit/src/LICENSE`. That covers what is in this repository: the compatibility
+MIT, `frameworks/WebKit/LICENSE`. That covers what is in this repository: the compatibility
 library, the port's tooling, the tests, the packaging and the documentation.
 
 ## Trademarks and screenshots

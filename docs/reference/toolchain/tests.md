@@ -1,6 +1,6 @@
-# Run the toolchain's tests
+# The toolchain's tests
 
-The toolchain's tests are in `toolchain/tests/`, and they run at two levels: the fast suite that the repository's check runs, and the suites of each part of the toolchain. This guide says what runs where.
+The toolchain's tests are in `toolchain/tests/`, and they run at two levels: the fast suite that the repository's check runs, and the suites of each part of the toolchain. This reference says what runs where.
 
 ## The suites
 

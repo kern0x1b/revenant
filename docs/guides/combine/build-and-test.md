@@ -22,7 +22,7 @@ as one daemon, with the XCTest shim of `frameworks/Combine/tests/XCTest.swift`; 
 found by `frameworks/Combine/tools/discover.lua` and leaves out what `frameworks/Combine/tests/data/skip.txt`
 names. With the project configured `--emulate=y`, `./xmakew emulate -P . -d iPhone4,1 -r 6.1.3 install`
 and `./xmakew emulate -P . -d iPhone4,1 -r 6.1.3 run /usr/libexec/CombineTests` start it in the guest
-(skill `emulator`), and its exit status is the verdict. `./xmakew test -P . CombineGenerated`
+(skill `emulator-session`), and its exit status is the verdict. `./xmakew test -P . CombineGenerated`
 expands each gyb template with Revenant's gyb (`toolchain/modules/gyb`) and checks the `GENERATED-*`
 source beside it is that expansion byte for byte.
 

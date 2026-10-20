@@ -48,7 +48,7 @@ From the top of revenant:
 ./xmakew l frameworks/SwiftUI/tools/emulate.lua snapshots        # 38 rendered scenarios against frameworks/SwiftUI/tests/data/snapshots/
 ```
 
-`emulate.lua` drives revenant's emulator (skill `emulator`): it configures the project with `-c` (so the package
+`emulate.lua` drives revenant's emulator (skill `emulator-session`): it configures the project with `-c` (so the package
 the pin names is the one installed) and `--emulate=y`, then runs `./xmakew emulate install` and
 `emulate run /usr/libexec/SwiftUITests`, or `emulate launch space.kern0x1b.swiftui.snapshots until-exit`. The scenarios
 need a key window, so they run in the application, through SpringBoard; the engine tests are a console binary and go
@@ -58,7 +58,7 @@ prints.
 A change is done when the engine tests, every snapshot and the ledger check (`coverage.lua --check`, after
 `tools/api-surface.lua`) pass. Anything that
 touches layout, gestures, animation, dialogs or navigation also gets a run on hardware (an iPad 2 or an iPhone 4S on
-iOS 6.1.3): the skill `device` says how to reach one from here.
+iOS 6.1.3): the skill `device-session` says how to reach one from here.
 
 ## Rules that matter
 

@@ -1,6 +1,6 @@
 ---
 name: xmake-basics
-description: Reference for how an old-iOS app project drives xmake 3.1.1 with the revenant addon — where xmake keeps the configuration, the build and the packages, which the toolchain rule gives a target its kind and why a device target without one is wrong, set_default and add_deps, build modes (mode.debug, mode.release) and the strip policy Revenant's checks need, what xmake f keeps and forgets between runs (-c, a failed configure, options given again), options before a positional argument, what xmake run cannot do, the commands the addon adds, and the environment variables that matter (XMAKE_COLORTERM, REVENANT_HOME, and why XMAKE_GLOBALDIR stays unset). Use when writing or reading an xmake.lua, when a configure or build does something unexpected with platform, architecture or mode, or before running an xmake command whose effect you do not know.
+description: Reference for how an old-iOS app project drives xmake 3.1.2 with the revenant addon — where xmake keeps the configuration, the build and the packages, which the toolchain rule gives a target its kind and why a device target without one is wrong, set_default and add_deps, build modes (mode.debug, mode.release) and the strip policy Revenant's checks need, what xmake f keeps and forgets between runs (-c, a failed configure, options given again), options before a positional argument, what xmake run cannot do, the commands the addon adds, and the environment variables that matter (XMAKE_COLORTERM, REVENANT_HOME, and why XMAKE_GLOBALDIR stays unset). Use when writing or reading an xmake.lua, when a configure or build does something unexpected with platform, architecture or mode, or before running an xmake command whose effect you do not know.
 ---
 
 Derived from the `xmake-basics`, `xmake-targets`, `xmake-commands` and `xmake-env-vars` skills of xmake-io/xmake-skills at `ef67caa` (Apache-2.0), rewritten and modified for the toolchain.
@@ -35,7 +35,7 @@ target's lines are the skill `project`'s (step 3); the build loop and its checks
 - `is_plat("iphoneos")`, `is_arch("armv7")` branch the description on the configuration.
 - A project inside another checkout: run `xmake -P .` (skill `build`, "Other refusals").
 - `xmake -P <dir>` from another folder builds into `build/` (and configures into `.xmake/`) of the
-  folder you are in, not of `<dir>` (xmake 3.1.1 `core/project/config.lua:164-168`). Run xmake
+  folder you are in, not of `<dir>` (xmake 3.1.2 `core/project/config.lua:164-168`). Run xmake
   from the project folder; `-P .` there changes nothing.
 
 ## 2. Modes

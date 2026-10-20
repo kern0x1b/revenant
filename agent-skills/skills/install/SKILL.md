@@ -39,7 +39,7 @@ df -h ~
 brew install xmake llvm dpkg
 ```
 
-- `xmake` is the build system (3.1.1 or later: it has `xmake addon`, which the pin needs).
+- `xmake` is the build system (3.1.2 or later: it has `xmake addon`, which the pin needs).
 - `llvm` is Homebrew's LLVM: Revenant's linker package (ld64) finds `llvm-config` through it while
   it builds. It is not the compiler your app is built with; that one the toolchain builds itself.
 - `dpkg` gives `dpkg-deb` and `dpkg-scanpackages` for the skills `package` and `cydia-repo`.
@@ -47,7 +47,7 @@ brew install xmake llvm dpkg
 How to know it worked:
 
 ```
-xmake --version | head -1             # xmake v3.1.1+… or later
+xmake --version | head -1             # xmake v3.1.2+… or later
 xmake addon --help | grep -- --install
 brew --prefix llvm                     # a path such as /opt/homebrew/opt/llvm
 dpkg-deb --version | head -1
@@ -100,13 +100,13 @@ Check before starting it (this also installs the addon, which is quick):
 
 ```
 xmake require -y --info 2>&1 | sed 's/\x1b\[[0-9;]*m//g' > .logs/require-info.log
-grep -A20 'require(revenant@llvm 23.1.1)' .logs/require-info.log | grep -m1 'installdir:'
+grep -A20 'require(revenant@llvm 23.1.2)' .logs/require-info.log | grep -m1 'installdir:'
 ```
 
 With no package named, `--info` describes the project's own requires, as the pinned addon states
-them (`revenant@llvm 23.1.1` at revenant 0.8.10); a package named on the command line is resolved
+them (`revenant@llvm 23.1.2` at revenant 0.8.10); a package named on the command line is resolved
 alone and may differ from the one the project uses, and the store holds several llvm installs.
-It prints `-> installdir: <home>/.xmake/packages/l/llvm/23.1.1/<hash>`, the exact install this pin
+It prints `-> installdir: <home>/.xmake/packages/l/llvm/23.1.2/<hash>`, the exact install this pin
 would use. Test that path:
 
 ```
@@ -170,7 +170,7 @@ Then follow the skill `firmware`.
 
 - **`xmake-addons.lock` names another version** (e.g. `v0.0.0-…` or an older tag), and
   `xmake addon --list` in the project agrees → stop and tell the user; do not edit the lock or
-  reinstall the addon to force it. Reason: xmake (3.1.1) keeps one "active" version of an addon
+  reinstall the addon to force it. Reason: xmake (3.1.2) keeps one "active" version of an addon
   per machine and writes the lock from it; when `v<X>` was already installed and another project
   installed a different toolchain later, the lock records that other one and the build uses it.
   xmake has no command today that makes the pinned version active again, so this is a limit of

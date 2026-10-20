@@ -8,7 +8,7 @@
   outside revenant takes SwiftUI as the package `revenant@swiftui-uikit` instead.
 - To run the tests and rendered scenarios: revenant's emulator, which `./xmakew emulate` drives once the project is
   configured with `--emulate=y`. `frameworks/SwiftUI/tools/emulate.lua` does that configure itself; use the emulator the way the
-  repository's skill `emulator` says.
+  repository's skill `emulator-session` says.
 - To measure on hardware: an iPhone 4S or an iPad 2 on iOS 6.1.3, claimed with `./xmakew device` (skill
   `device`).
 

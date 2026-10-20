@@ -1,4 +1,4 @@
-# Build and run the emulator
+# Build, run and test the emulator
 
 ## Requirements
 
