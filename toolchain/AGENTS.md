@@ -35,9 +35,7 @@ Android) as it is here; iOS 6 is the first platform it targets, not its limit.
   the linker. Start here for anything task-specific.
 - **`DESIGN.md`** - how the pieces fit and *why*, including the Gradle/Maven ->
   The toolchain mapping for anyone arriving from the JVM world.
-- **Skills** (revenant's `.agents/skills/`): `backports-gate` - gating apple-backports and reading the
-  verdict; `corpus-regen` - the registry export and demand data after a push; `emulate-port` -
-  `xmake emulate`. The xmake reference skills are the pinned `xmake-skills` plugin (revenant's `.claude/settings.json`).
+- **Skills** (revenant's `.agents/skills/`): `emulator` - `xmake emulate` and the emulator. The xmake reference skills are the pinned `xmake-skills` plugin (revenant's `.claude/settings.json`).
 - **Workspace-wide procedures** are skills in `$HOME/Git/projects/ios/.agents/skills/`:
   `device-session` (claim, run, install, launch, tap on a real device), `canon-install`,
   `patch-merge`, `worktree-sweep`, `session-handoff`, `band-launch`, `band-supervise`. A session
@@ -188,7 +186,7 @@ Each entry: wrong pattern -> right pattern -> the mechanical reason.
   no API symbol of its own, as `packages/frameworks/apple-backports/UIKit/UIViewController+DocumentMenu.m`
   does, or link the files through Objective-C methods. Reason: a file whose exports a band's release
   already has is left out of that band, so the call is `Undefined symbols` in later bands only -
-  `backports-gate` links one band and passes; only the all-band build of `canon-install` shows it.
+  a build of one band passes; only the all-band build of `canon-install` shows it.
 
 - **The compiler cache behind a backports build.** Wrong: reading a hit rate as proof the build is
   the same, or setting the cache's key by hand for one run. Right: `./xmakew` exports `CCACHE_DIR`, `CCACHE_NOHASHDIR` and `CCACHE_MAXSIZE`; the check for a cache is the

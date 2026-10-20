@@ -59,5 +59,5 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   Its package store is `$HOME/.revenant/cache/xmake-global` (`XMAKE_GLOBALDIR`). Everything a build can make again is under
   `$HOME/.revenant/cache`, and `./xmakew l tools/clean.lua [--packages | --all]` gives it back; it is in `docs/guides/machine.md`.
 - Before handing a change over: `./xmakew l tools/check.lua layout`, `./xmakew l tools/check.lua <component>` for
-  each component it touches, then that component's gate skill (`backports-gate` for the toolchain, `emulator-boot`
-  for the emulator).
+  each component it touches, then that component's gate (the backports gate is gone until `xmake test` replaces it;
+  for the emulator, the skill `emulator`).

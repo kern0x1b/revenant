@@ -51,7 +51,7 @@ is handed.
 
 **This part has not been run.** It needs hardware, not the host and not the emulator: the cases
 that need a window cannot run in a plain Catalyst binary, and a UIKit app started by `xmake
-emulate` never reaches `application:didFinishLaunchingWithOptions:` (the `emulate-port` skill), so
+emulate` never reaches `application:didFinishLaunchingWithOptions:` (the `emulator` skill), so
 the frames the emulator draws are SpringBoard's. Until that test is green on a device the driven
 half of this group is **device-unverified**: the hooks above are measured against the host, and the
 progress, the settling and the completions are written to the 26.2 header but not yet seen running

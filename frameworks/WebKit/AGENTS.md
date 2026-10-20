@@ -2,7 +2,7 @@
 
 Orientation for anyone — human or AI assistant — working on this repository.
 Read it before making changes. Task-specific playbooks live as skills under
-revenant's `.agents/skills/` (revenant-build, revenant-deploy, revenant-test, revenant-debug, revenant-device); this file is
+revenant's `.agents/skills/` (webkit, device); this file is
 the map.
 
 ## What this is
@@ -119,4 +119,4 @@ the `RevPrefs` target in `xmake.lua`, like the dylibs beside it — that writes 
 - Tests: `tests/run-batteries.lua` and `tests/device/*.lua`, run with `./xmakew l`; the
   host tests are `./xmakew test -P .` after `./xmakew f -P . --webkit_host_tests=y`.
 - Documentation: `docs/` (`architecture.md`, `network.md`, `compatibility.md`, `building.md`, `memory-and-caches.md`).
-- Playbooks: revenant's `.agents/skills/revenant-{build,deploy,test,debug,device}/SKILL.md`.
+- Playbooks: revenant's `.agents/skills/webkit/SKILL.md` and `.agents/skills/device/SKILL.md`.

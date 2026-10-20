@@ -145,6 +145,6 @@ Four files: `MPMusicPlayerQueueDescriptor101.m` (10.1 classes), `MPMusicPlayerCo
 The second mixes three releases, and that is deliberate and stated in the file and in all three of its
 rows. The reason is the trap in `AGENTS.md` under "A C function shared between backport files": a helper
 defined in a file that exports one band's API is **left out** of the bands that do not export it, so the
-reference is `Undefined symbols` in later bands only — `backports-gate` links one band and passes, and only
+reference is `Undefined symbols` in later bands only — a build of one band passes, and only
 the all-band canon build shows it. Every row carries its own `introduced`, which is what `band()` places on.
 `release-split` reads band points only, so it cannot see this; the exception is in the prose instead.

@@ -20,7 +20,7 @@ library, which writes each shader as the C word list the renderer includes; it i
 shaders wait for it). The program is
 `build/macosx/arm64/release/emulator`, with SwiftShader's `libvk_swiftshader.dylib` (Revenant's `swiftshader`
 package) copied beside it: the Vulkan renderer loads that file by path through the loader, and without a
-usable driver a boot falls back to the reference renderer with one log line. The skill `emulator-boot` (revenant's `.agents/skills/emulator-boot/SKILL.md`)
+usable driver a boot falls back to the reference renderer with one log line. The skill `emulator` (revenant's `.agents/skills/emulator/SKILL.md`)
 builds it, boots a root filesystem and reads the log.
 
 The kernel's libraries share `emulator_kernel_api`, a target with no sources that carries the kernel's

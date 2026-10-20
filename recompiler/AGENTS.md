@@ -96,14 +96,14 @@ repository.
   (`coordination/crutches.md`, the xmake addon lock entry).
 - **The payload under `~/.xmake/addons` is never edited by hand**: no copying files into it, no
   `xmake addon --remove`. A stale payload is diagnosed read-only
-  (the skill `recompiler-addon-refresh`) and handed to the coordinator.
+  and handed to the coordinator.
 
 ## Devices and the emulator
 
 iPhone 4S and iPad 2, both iOS 6.1.3. The procedure for any device session — claim, run,
 install, launch, tap, respring, cleanup — is the workspace skill `device-session`
 (`$HOME/Git/projects/ios/.agents/skills/device-session/SKILL.md`); the fleet's device traps are
-in `toolchain/COORDINATION.md` §5. The emulator is reached through the skill `emulate-port`.
+in `toolchain/COORDINATION.md` §5. The emulator is reached through the skill `emulator`.
 Specific to this repository: the 4S carries the owner's real Telegram account — never read, log,
 or forward chat or contact content, never tap a chat-list row, and don't leave Telegram open
 after a check.

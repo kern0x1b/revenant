@@ -49,8 +49,8 @@ Bands produce patches. **Only the coordinator merges and pushes.**
    only on green. Every claim in the patch is re-verified here; a band's own gate is not enough.
 4. After each push the coordinator regenerates the registry export the demand engine reads.
 
-Gate: the skill `backports-gate` (`.agents/skills/backports-gate/SKILL.md`) — light guard, full
-gate, release split, how to read the verdict. Merge: the workspace skill `patch-merge`
+Gate: the backports gate skill was removed, and `xmake test` replaces it; until then the light guard is
+`./xmakew l tools/check.lua toolchain`. Merge: the workspace skill `patch-merge`
 (`$HOME/Git/projects/ios/.agents/skills/patch-merge/SKILL.md`). `build-gate.lua` takes the
 checkout as argument three — **never hardcode the path**.
 
@@ -185,7 +185,7 @@ Honesty is a hard requirement, not a style.
 2. `git -C $HOME/Git/projects/ios/revenant fetch origin && git log --oneline -5` — see where main is.
 3. Create the coordinator's own merge worktree; never merge in the shared checkout.
 4. The gate scripts are in `$HOME/Git/projects/ios/coordination/`; gate the merge worktree by passing it
-   as argument three (skill `backports-gate`).
+   as argument three.
 5. Bring up one session per band from the table in section 4 — workspace skill `band-launch`.
 6. Bring up the demand engine and have it re-certify **through `tools/corpus/verify.py`** before anything
    is handed out. Nothing goes out any other way.
