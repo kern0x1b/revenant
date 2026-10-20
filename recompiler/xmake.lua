@@ -30,7 +30,7 @@ target("xlate")
     set_kind("binary")
     set_languages("c++20")
     add_rules("recompiler.llvm")
-    add_files("xlate/src/xlate.cpp", "xlate/src/macho.cpp", "xlate/src/objc.cpp", "xlate/src/exports.cpp", "xlate/src/tsd_scan.cpp")
+    add_files("src/xlate/xlate.cpp", "src/xlate/macho.cpp", "src/xlate/objc.cpp", "src/xlate/exports.cpp", "src/xlate/tsd_scan.cpp")
     add_packages("llvm", "rellume")
     add_links("LLVM")
     on_config(function (target)
@@ -44,7 +44,7 @@ target("xlgen")
     set_kind("binary")
     set_languages("c++20")
     add_rules("recompiler.llvm")
-    add_files("xlate/src/xlgen.cpp")
+    add_files("src/xlate/xlgen.cpp")
     add_packages("llvm")
     add_links("clang-cpp", "LLVM")
 
@@ -55,8 +55,8 @@ rule("recompiler.translated")
     end)
 rule_end()
 
-for _, app in ipairs({{"recompiler_cxxinit", "corpus/cxxinit/build.lua"}, {"recompiler_refrepro", "corpus/refrepro/build.lua"},
-                      {"recompiler_devtime", "perf/build.lua"}}) do
+for _, app in ipairs({{"recompiler_cxxinit", "tests/cxxinit/build.lua"}, {"recompiler_refrepro", "tests/refrepro/build.lua"},
+                      {"recompiler_devtime", "tools/perf/build.lua"}}) do
     local name, script = app[1], app[2]
     target(name)
         set_kind("phony")
@@ -75,7 +75,7 @@ target("recompiler_corpus")
     add_tests("jumptable", "tsdscan", "tsdguard", "int128", "ordinal", "weakimport", "classpair", "lse")
     on_test(function (target, opt)
         local name = path.filename(opt.name)
-        local check = import("check", {rootdir = path.join(target:scriptdir(), "corpus", name), anonymous = true})
+        local check = import("check", {rootdir = path.join(target:scriptdir(), "tests", name), anonymous = true})
         local ok, errors = try { function () check(path.join(target:autogendir(), "tests", name), {host_only = true}); return true end,
                                  catch { function (errors) return false, errors end } }
         if not ok then

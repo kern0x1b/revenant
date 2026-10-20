@@ -38,7 +38,7 @@ are informal.
   operator `new`/`new[]`/`delete`/`delete[]` (to the host allocator), so translated C++ code
   initializes and allocates. Exception unwinding (`__gxx_personality_v0`, `__cxa_begin_catch`,
   `_Unwind_Resume`) remains a trap, hit only if an exception propagates. Regression test:
-  `corpus/cxxinit` (a global C++ object with a std::string/std::vector and a destructor).
+  `tests/cxxinit` (a global C++ object with a std::string/std::vector and a destructor).
 - **backports binding**: link the apple-backports libraries before the stock frameworks so a
   translated app's iOS 7+ classes (NSURLSession, UIAlertController, ...) bind from the
   backports instead of the absent stock symbols; `-dead_strip_dylibs` keeps only the ones
