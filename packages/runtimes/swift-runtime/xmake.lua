@@ -44,9 +44,9 @@ package("swift-runtime")
     for _, patch in ipairs(os.files(path.join(os.scriptdir(), "patches", "**.patch"))) do
         table.insert(digests, path.relative(patch, path.join(os.scriptdir(), "patches")) .. "=" .. hash.sha256(patch))
     end
-    for _, held in ipairs({"files/CloudKit", "files/Network", "files/RealityFoundation", "files/RealityKit", "files/SceneKit", "files/Spatial", "files/WeatherKit"}) do
-        for _, file in ipairs(os.files(path.join(os.scriptdir(), held, "**"))) do
-            table.insert(digests, path.relative(file, path.join(os.scriptdir(), held)) .. "=" .. hash.sha256(file))
+    for _, held in ipairs({"CloudKit", "Network", "RealityFoundation", "RealityKit", "SceneKit", "Spatial", "WeatherKit"}) do
+        for _, file in ipairs(os.files(path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", held, "**"))) do
+            table.insert(digests, path.relative(file, path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", held)) .. "=" .. hash.sha256(file))
         end
     end
     local folder = path.join(os.scriptdir(), "..", "..", "runtimes", "apple-compat")
@@ -697,7 +697,7 @@ package("swift-runtime")
             local reality = path.absolute("realityfoundation")
             os.mkdir(reality)
             local reality_sources = {}
-            for _, file in ipairs(os.files(path.join(package:scriptdir(), "files", "RealityFoundation", "*.swift"))) do
+            for _, file in ipairs(os.files(path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "RealityFoundation", "*.swift"))) do
                 local output = path.join(reality, path.filename(file))
                 os.cp(file, output)
                 table.insert(reality_sources, output)
@@ -710,7 +710,7 @@ package("swift-runtime")
             local realitykit = path.absolute("realitykit")
             os.mkdir(realitykit)
             local realitykit_sources = {}
-            for _, file in ipairs(os.files(path.join(package:scriptdir(), "files", "RealityKit", "*.swift"))) do
+            for _, file in ipairs(os.files(path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "RealityKit", "*.swift"))) do
                 local output = path.join(realitykit, path.filename(file))
                 os.cp(file, output)
                 table.insert(realitykit_sources, output)
@@ -725,7 +725,7 @@ package("swift-runtime")
         local spatial = path.absolute("spatial")
         os.mkdir(spatial)
         local spatial_sources = {}
-        for _, file in ipairs(os.files(path.join(package:scriptdir(), "files", "Spatial", "*"))) do
+        for _, file in ipairs(os.files(path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "Spatial", "*"))) do
             local name = path.filename(file)
             if name:endswith(".gyb") then
                 table.insert(spatial_sources, expand(file, path.join(spatial, (name:gsub("%.gyb$", "")))))
@@ -742,7 +742,7 @@ package("swift-runtime")
             local dir = path.absolute(module:lower())
             os.mkdir(dir)
             local module_sources = {}
-            for _, file in ipairs(os.files(path.join(package:scriptdir(), "files", module, "*.swift"))) do
+            for _, file in ipairs(os.files(path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", module, "*.swift"))) do
                 local output = path.join(dir, path.filename(file))
                 os.cp(file, output)
                 table.insert(module_sources, output)
@@ -755,13 +755,13 @@ package("swift-runtime")
             local network = path.absolute("network")
             os.mkdir(network)
             local network_sources = {}
-            for _, file in ipairs(os.files(path.join(package:scriptdir(), "files", "Network", "*.swift"))) do
+            for _, file in ipairs(os.files(path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "Network", "*.swift"))) do
                 local output = path.join(network, path.filename(file))
                 os.cp(file, output)
                 table.insert(network_sources, output)
             end
             assert(#network_sources > 0, "the Network sources are missing from the package")
-            local seam = path.join(package:scriptdir(), "files", "Network", "seam")
+            local seam = path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "Network", "seam")
             build_overlay("Network", network_sources, {}, nil, {backports = {"FoundationBackports"},
                                                               extra_flags = {"-Xfrontend", "-import-underlying-module", "-I", seam}})
         end
