@@ -1,5 +1,5 @@
 local USAGE = [[usage: ./xmakew l frameworks/WebKit/tools/prefix-exports.lua HEADER SOURCE DESTINATION
-  applies the Rev class prefix of HEADER (compat/stubs/ios6_class_prefix.h) to the exported-symbols list
+  applies the Rev class prefix of HEADER (src/compat/stubs/ios6_class_prefix.h) to the exported-symbols list
   SOURCE and writes DESTINATION: the classes are renamed by a force-included header, which the list knows
   nothing about, so every _OBJC_CLASS_$_, _OBJC_METACLASS_$_ and _OBJC_IVAR_$_ name it gives is renamed
   too. The prefixed engine does this in every build.]]

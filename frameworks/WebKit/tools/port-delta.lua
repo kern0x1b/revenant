@@ -75,7 +75,7 @@ end
 
 local function guarded(source, wanted)
     local found = {}
-    local carry = import("carry", {rootdir = path.join(os.scriptdir(), "..", "modules"), anonymous = true})
+    local carry = import("carry", {rootdir = path.join(os.scriptdir(), "..", "src", "modules"), anonymous = true})
     for _, line in ipairs(carry.files_containing(path.join(source, "Source"), wanted)) do
         found[path.relative(line, source)] = true
     end

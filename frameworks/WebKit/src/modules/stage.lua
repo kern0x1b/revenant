@@ -1,4 +1,4 @@
-local toolchain_modules = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "modules")
+local toolchain_modules = path.join(os.scriptdir(), "..", "..", "..", "..", "toolchain", "modules")
 
 local engine_location = "usr/lib/rev-fw"
 

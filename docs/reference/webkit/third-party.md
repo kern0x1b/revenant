@@ -54,7 +54,7 @@ it is packaged.
 
 | File | What it is | License |
 | --- | --- | --- |
-| `app/cacert.pem` | the CA certificate bundle the TLS backend verifies against: the public root certificates extracted from Mozilla's `certdata.txt` by the curl project's `mk-ca-bundle.pl` | The certificates are the certificate authorities' own, published to be distributed. Mozilla's `certdata.txt`, which they are extracted from, is MPL-2.0; the extract carries no license header of its own, only its provenance, date and SHA-256 |
+| `examples/webview-host/cacert.pem` | the CA certificate bundle the TLS backend verifies against: the public root certificates extracted from Mozilla's `certdata.txt` by the curl project's `mk-ca-bundle.pl` | The certificates are the certificate authorities' own, published to be distributed. Mozilla's `certdata.txt`, which they are extracted from, is MPL-2.0; the extract carries no license header of its own, only its provenance, date and SHA-256 |
 
 It is here rather than fetched, and deliberately so: a trust store is the one
 dependency that must not change without somebody reading the change. It is also
@@ -94,7 +94,7 @@ rather than replacing anything.
 
 ## This project's own code
 
-MIT, `frameworks/WebKit/LICENSE`. That covers what is in this repository: the compatibility
+MIT, `frameworks/WebKit/src/LICENSE`. That covers what is in this repository: the compatibility
 library, the port's tooling, the tests, the packaging and the documentation.
 
 ## Trademarks and screenshots

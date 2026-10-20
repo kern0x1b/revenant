@@ -18,7 +18,7 @@ The project is `frameworks/WebKit/`. `docs/guides/webkit/contributing.md` maps t
 
 ## Deploy
 
-1. `cp frameworks/WebKit/device.env.example device.env` at the top, then set `DEVICE_HOST`, `DEVICE_PORT` and, over USB, `DEVICE_UDID`. The file is gitignored.
+1. `cp frameworks/WebKit/tests/data/device.env.example device.env` at the top, then set `DEVICE_HOST`, `DEVICE_PORT` and, over USB, `DEVICE_UDID`. The file is gitignored.
 2. Claim the phone first: `./xmakew device claim` (see the `device` skill).
 3. `./xmakew device install -P .` builds and stages the substitution, writes the .deb, copies it to the phone and runs `dpkg -i`. It refuses a .deb whose app would replace an installed app with another bundle id.
 

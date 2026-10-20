@@ -68,7 +68,7 @@ What it asserts about a merged tree:
   armv7, `USE(JSVALUE32_64)` reached by the armv7 configuration, the CMake
   entries that name the files above.
 - **The symbol surface**, in `carry-symbols.txt` and checked by
-  `modules/symbols.lua` as a step of every engine build: every symbol the three
+  `src/modules/symbols.lua` as a step of every engine build: every symbol the three
   frameworks leave undefined - 6486 of them - and every Objective-C class they
   export by name. A *new* undefined symbol is the important one: it means an
   upstream change reached for API this system may not have, and dyld kills the

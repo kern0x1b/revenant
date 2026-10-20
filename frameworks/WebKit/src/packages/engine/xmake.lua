@@ -4,10 +4,10 @@ package("webkit-engine")
     set_license("LGPL-2.1-or-later AND BSD-2-Clause")
     set_policy("package.strict_compatibility", true)
 
-    local member = path.join(os.scriptdir(), "..", "..")
+    local member = path.join(os.scriptdir(), "..", "..", "..")
     local digests = {}
-    local inputs = table.join({path.join(os.scriptdir(), "xmake.lua"), path.join(member, "carry-symbols.txt")},
-                              os.files(path.join(member, "modules", "*.lua")), os.files(path.join(member, "compat", "**")))
+    local inputs = table.join({path.join(os.scriptdir(), "xmake.lua"), path.join(member, "tests", "data", "carry-symbols.txt")},
+                              os.files(path.join(member, "src", "modules", "*.lua")), os.files(path.join(member, "src", "compat", "**")))
     table.sort(inputs)
     for _, file in ipairs(inputs) do
         table.insert(digests, path.relative(file, member) .. "=" .. hash.sha256(file))

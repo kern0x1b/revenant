@@ -5,7 +5,7 @@ description: Use when a task has to run on a real jailbroken legacy iPhone or iP
 
 # Real device
 
-Run everything from the top of the checkout with `./xmakew`. The phone's address lives in `device.env`, or `device.NAME.env` when several phones are attached; git ignores both. `frameworks/WebKit/device.env.example` is the template. A new worktree has none: copy the main checkout's, never commit one.
+Run everything from the top of the checkout with `./xmakew`. The phone's address lives in `device.env`, or `device.NAME.env` when several phones are attached; git ignores both. `frameworks/WebKit/tests/data/device.env.example` is the template. A new worktree has none: copy the main checkout's, never commit one.
 
 The module reads these from the env file or the environment: `DEVICE_HOST`, `DEVICE_PORT`, `DEVICE_UDID` (needed for a USB tunnel and for claiming), `DEVICE_PASSWORD` (leave it unset to use an SSH key). `nothing names a phone` means the env file the command picked does not exist here.
 

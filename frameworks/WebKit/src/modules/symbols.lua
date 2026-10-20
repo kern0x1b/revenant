@@ -1,6 +1,6 @@
 local frameworks = {"JavaScriptCore", "WebCore", "WebKitLegacy"}
 local staged = {JavaScriptCore = "JavaScriptCore", WebCore = "WebCore", WebKitLegacy = "WebKit"}
-local pin = path.join(os.scriptdir(), "..", "carry-symbols.txt")
+local pin = path.join(os.scriptdir(), "..", "..", "tests", "data", "carry-symbols.txt")
 
 local header = [[
 # Symbols this port's frameworks depend on and provide, as of the last

@@ -1,7 +1,7 @@
 import("lib.detect.find_tool")
 
 local member = path.join(os.scriptdir(), "..")
-local toolchain_modules = path.join(member, "..", "..", "toolchain", "modules")
+local toolchain_modules = path.join(member, "..", "..", "..", "toolchain", "modules")
 
 local common = {
     {"PORT", "Cocoa"},
