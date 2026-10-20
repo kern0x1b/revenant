@@ -28,6 +28,10 @@ package("ld64")
     end)
 
     on_install("@macosx", function (package)
+        local prebuilt = import("prebuilt", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
+        if prebuilt.install(package) then
+            return
+        end
         import("lib.detect.find_tool")
         local llvm_config = find_tool("llvm-config", {paths = {"$(env LLVM_PREFIX)/bin", "/opt/homebrew/opt/llvm/bin", "/usr/local/opt/llvm/bin"}})
         if not llvm_config then
@@ -74,6 +78,7 @@ package("ld64")
         os.vcp(path.join(tapi, "src", "LICENSE.txt"), package:installdir("licenses", "libtapi"))
         os.ln("arm-apple-darwin11-ld", path.join(package:installdir("bin"), "ld"))
         os.vrunv("install_name_tool", {"-rpath", path.join(tapi_install, "lib"), "@executable_path/../lib", ld})
+        prebuilt.pack(package)
     end)
 
     on_test(function (package)
