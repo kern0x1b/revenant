@@ -53,8 +53,10 @@ libc++, the backports, the SDK and the tools). They are built with `./xmakew f -
 `--emulate=y` also requires the emulator, so that `./xmakew emulate -P .` installs their packages into an emulated
 device and runs them there.
 
-The toolchain is both the package repository and the addon `revenant` (toolchain and rules) of those builds, from the
-`toolchain/` folder of this checkout. The top `xmake.lua` declares it with `add_addons("revenant", {sourcedir = "toolchain"})`:
+The toolchain is the addon `revenant` (toolchain and rules) of those builds, from the `toolchain/` folder of this checkout,
+and the package repository of those builds is the checkout's root, with `packages/` and `addons/`. The top `xmake.lua`
+declares the addon with `add_addons("revenant", {sourcedir = "toolchain"})` and the repository with
+`add_repositories("revenant .")`:
 xmake takes the addon from that folder for this project, as it is in the checkout, and installs nothing in its global
 directory, so the machine's active revenant addon (the one other projects use) stays as it is. `@addon/revenant/...` rules, toolchains and
 includes, `@addon.revenant.<module>` imports, the global modules of `toolchain/addon.lua` and Revenant's plugins all resolve
@@ -68,7 +70,7 @@ uses (`addon(revenant): <checkout>/toolchain`).
 Stock xmake does not know `sourcedir` in `add_addons` and would fetch and install the toolchain from the repository instead,
 so revenant is always built with `./xmakew`.
 
-`REVENANT_REPO` names another toolchain folder for the packages (a released tree whose packages are installed already).
+`REVENANT_REPO` names another checkout of revenant for the packages (a released tree whose packages are installed already).
 Revenant's recipes of the members (`revenant@combine`, `revenant@swiftui-uikit`, `revenant@swiftui`, `revenant@emulator`) are for
 applications outside revenant and keep their pinned commits. The one revenant requires itself is `revenant@combine` with
 `sources = true`: it installs the patched OpenCombine tree, and Combine's targets compile it.
@@ -76,8 +78,9 @@ applications outside revenant and keep their pinned commits. The one revenant re
 ## Publishing a member
 
 Applications outside revenant take the toolchain with `add_repositories("revenant <url> <tag>")`, and xmake reads a package
-repository from the top of what it clones. The toolchain's public repository is therefore a mirror of the `toolchain/`
-folder: `./xmakew l tools/publish.lua toolchain` writes it as the branch `publish/toolchain` (`git subtree split`).
+repository from the top of what it clones. `./xmakew l tools/publish.lua toolchain` writes a mirror of the `toolchain/`
+folder as the branch `publish/toolchain` (`git subtree split`); that mirror has the addon, but not the `packages/` and
+`addons/` of the root, and `tools/publish.lua` cannot split the root yet.
 `git subtree split` follows the folder's path, and the folder had another name before the rename, so the mirror's
 history starts at the rename; the pins and tags of the earlier public repository stay valid there. Pushing it is a
 separate step.
