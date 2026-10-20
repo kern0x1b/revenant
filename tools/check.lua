@@ -23,7 +23,7 @@ local layout = {
            "xmake.lua", "xmakew", "tools", "docs", "third_party", "toolchain", "packages", "addons", "emulator", "recompiler",
            "agent-skills", "frameworks", ".agents", ".claude", ".claude-plugin", ".github", ".editorconfig", ".gitattributes",
            ".gitignore"},
-    component = {"xmake.lua", "README.md", "src", "include", "patches", "tests", "examples", "tools"},
+    component = {"xmake.lua", "README.md", "LICENSE", "src", "include", "patches", "tests", "examples", "tools"},
     plugin = {"README.md", "tests", ".claude-plugin", "skills", "LICENSE", "THIRD-PARTY.md"},
     docs = {"README.md", "tutorials", "guides", "reference", "explanation"},
     third_party = {"xmake.lua", "patches"},

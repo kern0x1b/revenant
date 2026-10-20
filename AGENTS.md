@@ -28,6 +28,7 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   ```
   xmake.lua    its targets and tests, included by the top xmake.lua (xmake test runs its tests)
   README.md    one screen: what it is, how to build, run and test it, links into docs/
+  LICENSE      when the component ships its licence inside its own package
   src/         all of its code
   include/     its public headers, when it has any
   patches/     when the component is an upstream at a commit plus our changes (its xmake.lua applies them)
