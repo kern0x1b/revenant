@@ -51,7 +51,7 @@ emulation:
 
 ## What the run leaves out
 
-`harness/skip.txt` names what the `CombineTests` daemon does not run, so one run
+`Tests/skip.txt` names what the `CombineTests` daemon does not run, so one run
 reaches its end and its exit status is the verdict: the three crashes and the
 up-front skip above, and `URLSessionTests` (16 tests), whose test classes
 subclass `URLSession`, an iOS 7 class. Of the 1469 tests upstream's suite has,

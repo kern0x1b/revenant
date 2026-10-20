@@ -35,7 +35,7 @@ if is_plat("iphoneos") then
         set_values("swift.module", "XCTest")
         add_packages("apple-backports")
         set_optimize("fastest")
-        add_files("harness/XCTest.swift")
+        add_files("Tests/XCTest.swift")
         add_frameworks("Foundation")
 
     target("CombineTests")
@@ -47,13 +47,13 @@ if is_plat("iphoneos") then
         set_optimize("fastest")
         set_values("swift.flags", "-DOPENCOMBINE_COMPATIBILITY_TEST", "-disable-availability-checking", "-suppress-warnings")
         set_values("revenant.libraries", "apple-backports")
-        set_values("revenant.control", "harness/control")
+        set_values("revenant.control", "Tests/control")
         set_values("revenant.waive.weak-imports",
                    "every weak import is reached only behind #available or carried by the backports: the runtime's overlays built with availability checking on, Combine's run-loop timer tolerance, compiler-rt's version check")
         on_load(function (target)
             local tests = sources(target, "Tests", "OpenCombineTests")
-            local harness = path.join(os.scriptdir(), "harness")
-            local text = import("discover", {rootdir = harness, anonymous = true}).main(tests, path.join(harness, "skip.txt"))
+            local discover = import("discover", {rootdir = path.join(os.scriptdir(), "tools"), anonymous = true})
+            local text = discover.main(tests, path.join(os.scriptdir(), "Tests", "skip.txt"))
             local main = path.join(target:autogendir(), "main.swift")
             if not os.isfile(main) or io.readfile(main) ~= text then
                 io.writefile(main, text)
