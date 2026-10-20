@@ -30,6 +30,8 @@
 #        ACCESSIBILITY_SRC=<dir>   build another copy of the port's sources (mutants.sh)
 #        BUILD=<dir>               where the two programs and their output go
 set -eu
+echo "FAIL host/accessibilitymap/run.sh: it runs protocol-check.sh, whose inline Python block PYTHON is gone and not yet ported to Lua" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)

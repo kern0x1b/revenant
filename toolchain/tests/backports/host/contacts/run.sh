@@ -8,6 +8,8 @@
 # ABPersonCreateVCardRepresentationWithPeople of the host's own AddressBook.framework, so this is an exact match, not an approximation),
 # groups and containers before a save, and the plain value classes beside them.
 set -eu
+echo "FAIL host/contacts/run.sh: its Python steps are gone and not yet ported to Lua: rename.py; compare.py; expectations.py; mutate.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
@@ -32,7 +34,7 @@ divergent="predicate.fetchRequestRoundTrip=kept"
 
 xcrun clang $common -I"$device" "$here/record.m" "$device/contacts-cases.m" $libs -framework Contacts -o "$build/system"
 CONTACTS_RECORDS="$build/system.json" "$build/system"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/system.json'))))")"
+echo "records: $(runs_harness records "$build/system.json")"
 
 python3 "$here/rename.py" "$registry9" "$registry10" "$build/rename.h"
 

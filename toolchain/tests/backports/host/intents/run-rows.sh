@@ -25,8 +25,11 @@
 #
 # Usage: sh tests/backports/host/intents/run-rows.sh
 set -eu
+echo "FAIL host/intents/run-rows.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 169" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
-build=${INTENTS_ROWS_BUILD:-$here/../../../.agent-work/build/intents-rows}
+. "$here/../../common/runs.sh" "$here"
+build=${INTENTS_ROWS_BUILD:-$(runs_folder build/intents-rows)}
 mkdir -p "$build"
 flags="-fobjc-arc -w -Wno-deprecated-declarations"
 

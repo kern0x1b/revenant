@@ -45,7 +45,7 @@ rm -f "$build"/*.bak
 
 xcrun clang -fobjc-arc -w $quiet -c "$build/port.m" -o "$build/plain/port.o"
 printf '#import <Foundation/Foundation.h>\n' > "$build/prefixed/declarations.h"
-python3 "$here/../prefix_selectors.py" "$build/port.m" "$build/prefixed/port.m" charonHost_ \
+runs_xmake l "$here/../prefix_selectors.lua" "$build/port.m" "$build/prefixed/port.m" charonHost_ \
     --declarations="$build/prefixed/declarations.h" -fobjc-arc $quiet -- "$build/plain/port.o"
 xcrun clang -fobjc-arc -w $quiet -include "$build/prefixed/declarations.h" -c "$build/prefixed/port.m" -o "$build/port.o"
 # The renamed categories are not attached to anything: the answers under test are the install's, and the

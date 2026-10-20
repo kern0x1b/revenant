@@ -10,6 +10,8 @@
 # The certificate and the key are made here, by the host's own openssl, into the build directory: the
 # port's tree holds neither, and both are thrown away with the directory.
 set -eu
+echo "FAIL host/picotls-tls13/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 74" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 BACKPORTS=${BACKPORTS:-$here/../../../../packages}

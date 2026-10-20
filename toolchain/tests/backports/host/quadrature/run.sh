@@ -1,9 +1,12 @@
 #!/bin/sh
 # The port's Quadrature10.m held against the host's own Accelerate, case by case.
 set -eu
+echo "FAIL host/quadrature/run.sh: its Python steps are gone and not yet ported to Lua: tables.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 ACCELERATE=${ACCELERATE:-$here/../../../../packages/a/apple-backports/Accelerate}
-build=${QUADRATURE_BUILD:-$here/../../../../.agent-work/runs/quadrature-host}
+build=${QUADRATURE_BUILD:-$(runs_folder quadrature-host)}
 rm -rf "$build"
 mkdir -p "$build"
 

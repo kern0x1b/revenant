@@ -12,4 +12,4 @@ xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" -iframework "$sd
 (cd "$build" && ./record "$build/textattr.json" > "$build/textattr.log" 2>&1)
 xmake l "$here/../../common/embed.lua" "$build/textattr.json" "$device/textattr-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/textattr_expectations/' "$device/textattr-expectations.h" && rm -f "$device/textattr-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/textattr.json'))))")"
+echo "records: $(runs_harness records "$build/textattr.json")"

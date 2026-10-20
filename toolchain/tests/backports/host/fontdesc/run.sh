@@ -16,4 +16,4 @@ codesign -s - --force "$app" > /dev/null 2>&1
 FONTDESC_RECORDS="$build/fontdesc.json" "$app/Contents/MacOS/app" > "$build/fontdesc.log" 2>&1 || true
 xmake l "$here/../../common/embed.lua" "$build/fontdesc.json" "$device/fontdesc-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/fontdesc_expectations/' "$device/fontdesc-expectations.h" && rm -f "$device/fontdesc-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/fontdesc.json'))))")"
+echo "records: $(runs_harness records "$build/fontdesc.json")"

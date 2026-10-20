@@ -13,18 +13,7 @@ mkdir -p "$build"
 # hold the port's answers and the host's side by side. The names come from the port's registry, not from a
 # list kept here, so a name added to any of the files is renamed too.
 renames=""
-for name in $(python3 - "$here" <<'PY'
-import json, os, sys
-registry = os.path.join(sys.argv[1], "..", "..", "..", "..", "packages", "a", "apple-backports", "registry", "Accelerate")
-for part in ("ios7biquad.json", "ios8biquad.json", "ios9biquad.json", "ios16biquad.json", "ios7dft.json"):
-    path = os.path.join(registry, part)
-    if not os.path.exists(path):
-        continue
-    for entry in json.load(open(path))["entries"]:
-        if entry["kind"] == "function":
-            print(entry["api"].rstrip("()"))
-PY
-); do
+for name in $(runs_xmake l "$here/../registry-functions.lua" "$here/../../../../packages/a/apple-backports/registry/Accelerate" ios7biquad.json ios8biquad.json ios9biquad.json ios16biquad.json ios7dft.json); do
     renames="$renames -D$name=revenant_host_$name"
 done
 

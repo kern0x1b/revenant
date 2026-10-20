@@ -34,10 +34,13 @@
 # loaded first. The rename is the mechanism and the `class` lines in both transcripts are the receipt - the
 # system build prints `MPSNNAdditionNode`, the port build prints `RevenantMPSNNAdditionNode`.
 set -eu
+echo "FAIL host/mpsnn/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 68" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 mps=${MPS:-$root/packages/a/apple-backports/MetalPerformanceShaders}
-build=${BUILD:-$root/.agent-work/runs/host/mpsnn}
+build=${BUILD:-$(runs_folder host/mpsnn)}
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-macos13.0 -isysroot $sdk"
@@ -79,7 +82,7 @@ printf '#import <MetalPerformanceShaders/MetalPerformanceShaders.h>\n#include <s
 objects=""
 for source in "$mps"/*.m; do
     name=$(basename "$source" .m)
-    python3 "$here/../prefix_selectors.py" "$source" "$build/$name.m" ccharonHost_ \
+    runs_xmake l "$here/../prefix_selectors.lua" "$source" "$build/$name.m" ccharonHost_ \
         --declarations="$build/declarations.h" -fobjc-arc $target $quiet -I"$mps" \
         -include "$build/rename.h" -- "$build/$name.plain.o" || exit 1
     xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -I"$mps" -include "$build/rename.h" \

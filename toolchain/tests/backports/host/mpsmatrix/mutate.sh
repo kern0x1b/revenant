@@ -1,4 +1,6 @@
 #!/bin/sh
+echo "FAIL host/mpsmatrix/mutate.sh: its Python steps are gone and not yet ported to Lua: the inline block PYEOF at line 27" >&2
+exit 1
 # mutate.sh - the two functions the mutation campaign uses, and nothing else. It defines them and does
 # not run them, so a test can source it without starting a campaign: mutation.sh runs its campaign on
 # the spot, which is why a test that sourced it found no function to call.

@@ -16,4 +16,4 @@ codesign -s - --force "$app" > /dev/null 2>&1
 TEXTALIGN_RECORDS="$build/textalign.json" "$app/Contents/MacOS/app" > "$build/textalign.log" 2>&1 || true
 xmake l "$here/../../common/embed.lua" "$build/textalign.json" "$device/textalign-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/textalign_expectations/' "$device/textalign-expectations.h" && rm -f "$device/textalign-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/textalign.json'))))")"
+echo "records: $(runs_harness records "$build/textalign.json")"

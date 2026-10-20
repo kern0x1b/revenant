@@ -25,7 +25,10 @@
 #
 # Run DIRECTLY: three small compiles, four small runs.
 set -eu
+echo "FAIL host/avf-capabilities/run.sh: its Python steps are gone and not yet ported to Lua: the inline block MEMBERS at line 82; the inline block PROLOGUE at line 220; the inline block COPY at line 513; the inline block PERTURB at line 591; the inline block PREFCAM at line 998" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 . "$here/../../common/generated.sh"
 ensure_generated "$here" AVFoundation
 root=$(cd "$here/../../../.." && pwd)
@@ -36,7 +39,7 @@ control=${CONTROL:-0}
 # AVFCAPSMUTANT=1 plants a wrong capability answer; AVFCAPSMUTANT=prefcam plants the preferred-camera pair's
 # persistence away. Each is named, so a run that plants neither is not called a mutation.
 mutant=${AVFCAPSMUTANT:-0}
-build=${AVF_CAPS_BUILD:-$root/.agent-work/avf-capabilities-build}
+build=${AVF_CAPS_BUILD:-$(runs_folder avf-capabilities-build)}
 rm -rf "$build"
 mkdir -p "$build/src" "$build/o"
 

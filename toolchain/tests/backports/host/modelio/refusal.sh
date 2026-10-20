@@ -11,9 +11,10 @@
 # reader that loads a mesh look identical on stderr unless the result is stated too.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 pkg=$root/packages/a/apple-backports/ModelIO
-build=${BUILD:-$root/.agent-work/runs/modelio-refusal}
+build=${BUILD:-$(runs_folder modelio-refusal)}
 # The build directory is CLEARED, not added to. Every earlier attempt at this script appeared to do nothing
 # because a stale MDLVertexDescriptor9.o from the previous attempt was still in $build and was linked
 # alongside the one the current attempt compiled, giving a duplicate symbol that named a file no longer in

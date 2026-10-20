@@ -8,12 +8,13 @@
 
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 repo=$(cd "$here/../../../.." && pwd)
-runs=${RUNS:-$repo/.agent-work/runs/arkit-instance-new}
+runs=${RUNS:-$(runs_folder arkit-instance-new)}
 rm -rf "$runs"
 mkdir -p "$runs"
 
-sdk26=${REVENANT_GEN_SDK:-$HOME/Git/projects/ios/charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk}
+sdk26=$(runs_sdk)
 hdr=$sdk26/System/Library/Frameworks/ARKit.framework/Headers
 spec=$repo/packages/a/apple-backports/spec/ARKit/declarations.tsv
 for c in ARRaycastQuery ARRaycastResult ARTrackedRaycast; do

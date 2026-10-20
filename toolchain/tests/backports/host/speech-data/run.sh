@@ -13,10 +13,11 @@
 # Two processes, not one, because both sides define the same classes. No recognizer is created or started in any case.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 . "$here/../../common/generated.sh"
 ensure_generated "$here" Speech
 appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
-build=${BUILD:-$here/../../../../.agent-work/runs/speech-data}
+build=${BUILD:-$(runs_folder speech-data)}
 mkdir -p "$build"
 cases="1 2 3 4 5 6 7 8 9 10 12 13 14"
 

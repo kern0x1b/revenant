@@ -18,9 +18,10 @@
 # Not run through heavy.sh: it compiles a few files and runs two small binaries; the contact cases wait at most 35 s each.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 tree=$(cd "$here/../../../.." && pwd)
 port=$tree/packages/a/apple-backports/UIKit
-build=${BUILD:-$tree/.agent-work/runs/printer/run}
+build=${BUILD:-$(runs_folder printer/run)}
 sdk=$(xcrun --sdk macosx --show-sdk-path)
 ios=$sdk/System/iOSSupport/System/Library/Frameworks
 . "$here/../uikit2/renames.sh"

@@ -43,7 +43,10 @@
 # mutant that did not die in the required way, which is the rule M13's comment below is about. So the
 # rule is held by the comparison against the host and there is no mutant for it.
 set -eu
+echo "FAIL host/accessibilitymath/mutants.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 79" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 sources=$root/packages/a/apple-backports/Accessibility
 # A directory of its own per mutant, and not one shared: this script re-invokes itself once per mutant,
@@ -51,8 +54,8 @@ sources=$root/packages/a/apple-backports/Accessibility
 # mutant then died of a missing log rather than of its own mutation.
 mutant=${MUTANT:-all}
 case $mutant in
-    all) work=$root/.agent-work/runs/accessibilitymath-mutants/all ;;
-    *)   work=$root/.agent-work/runs/accessibilitymath-mutants/m$mutant ;;
+    all) work=$(runs_folder accessibilitymath-mutants/all) ;;
+    *)   work=$(runs_folder accessibilitymath-mutants/m)$mutant ;;
 esac
 rm -rf "$work"
 mkdir -p "$work"

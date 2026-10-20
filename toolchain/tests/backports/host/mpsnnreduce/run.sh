@@ -14,9 +14,12 @@
 # which is the header's twelve per-class sentences written as arithmetic in plain C and never names the
 # port's class. A case that agrees is two implementations of one sentence, not one compared with itself.
 set -eu
+echo "FAIL host/mpsnnreduce/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 39; the inline block PY at line 82" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 mps=${MPS:-$here/../../../../packages/a/apple-backports/MetalPerformanceShaders}
-build=${BUILD:-$here/../../../../.agent-work/runs/host/mpsnnreduce}
+build=${BUILD:-$(runs_folder host/mpsnnreduce)}
 rm -rf "$build"
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path)

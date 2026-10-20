@@ -16,4 +16,4 @@ codesign -s - --force "$app" > /dev/null 2>&1
 INPUTVIEW_RECORDS="$build/inputview.json" "$app/Contents/MacOS/app" > "$build/inputview.log" 2>&1 || true
 xmake l "$here/../../common/embed.lua" "$build/inputview.json" "$device/inputview-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/inputview_expectations/' "$device/inputview-expectations.h" && rm -f "$device/inputview-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/inputview.json'))))")"
+echo "records: $(runs_harness records "$build/inputview.json")"

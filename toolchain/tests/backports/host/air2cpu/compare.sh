@@ -7,14 +7,17 @@
 # compared here, and a kernel the tool refused is reported as refused rather than as a difference,
 # because a refused kernel answers the port's documented error and is not a wrong number.
 set -eu
+echo "FAIL host/air2cpu/compare.sh: its Python steps are gone and not yet ported to Lua: extract.py; check-generated-addressing.py; compare.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 # The evidence - the extracted AIR, the generated C, both sides' answers - lands in $work, and $work is
 # under this worktree's own run directory, because band output is never written to the system
 # temporary directory: that one is wiped out from under a run. A band or a reviewer can be pointed at
 # $work/air/m0.bc, $work/port.c, $work/oracle.out and $work/port.out after the fact, and it is durable.
 # Set WORK to put it elsewhere.
-work=${WORK:-$root/.agent-work/runs/air2cpu/run}
+work=${WORK:-$(runs_folder air2cpu/run)}
 mkdir -p "$work"
 run=$work/$(date +%Y%m%d-%H%M%S)
 mkdir -p "$run"

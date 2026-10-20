@@ -19,6 +19,8 @@
 # It is a port-only program and not a second half of the differential, and the reason is recorded as an
 # owed line in this directory's README.md rather than in a comment: see there.
 set -eu
+echo "FAIL host/accessibilitymap/protocol-check.sh: its Python steps are gone and not yet ported to Lua: the inline block PYTHON at line 38" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 . "$here/../../common/generated.sh"

@@ -8,11 +8,12 @@
 # printed 22 of 22 and exited 0. A comparison that cannot go red proves nothing.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 port=$root/packages/a/apple-backports/Graphics
 # the band objects the generator writes (generate() in modules/apple/backports.lua builds them): a band is in the library's folder or here
 gen=$root/packages/a/apple-backports/.gen/ImageIO
-build=${BUILD:-$root/.agent-work/runs/imageio-names}
+build=${BUILD:-$(runs_folder imageio-names)}
 mkdir -p "$build"
 obj=${PORT_OBJ:-$build/slice.o}
 

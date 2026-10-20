@@ -18,12 +18,15 @@
 # What this is not: a system comparison - no release before iOS 13 carries either module and the
 # 26.2 one is an interface with no implementation to run. main.swift says so at its top.
 set -eu
+echo "FAIL host/realityfoundation/run.sh: its Python steps are gone and not yet ported to Lua: coverage.py; mutate.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 files=${RF_OVERLAY_FILES:-$here/../../../../packages/s/swift-runtime/files}
 # The build goes in the worktree's own run directory, not the system temp path: the brief's rule is
 # that nothing of a band goes in /tmp, which is wiped, and this build is run output.
 here_root=$(cd "$here/../../../.." && pwd)
-build=${RF_BUILD:-$here_root/.agent-work/runs/host-realityfoundation}
+build=${RF_BUILD:-$(runs_folder host-realityfoundation)}
 sdk=${RF_SDK:-$(xcrun --show-sdk-path)}
 target=${RF_TARGET:-$(uname -m)-apple-macos14}
 swiftc=${RF_SWIFTC:-$HOME/.xmake/packages/s/swift/6.4.0/f1d0e4f9eebe477396350986a88081e5/bin/swiftc}

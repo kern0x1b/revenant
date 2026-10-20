@@ -31,37 +31,14 @@ if [ -n "${PLANT:-}" ]; then
     # RevenantChannels.h beside it every file fails on a missing include, which is a build failure and not a
     # measurement.
     cp "$ACCELERATE/RevenantChannels.h" "$build/planted/RevenantChannels.h"
-    python3 - "$build/planted" "$PLANT" <<'PY'
-import glob, sys
-folder, needle = sys.argv[1], sys.argv[2]
-hits = 0
-for path in glob.glob(folder + "/*.m"):
-    text = open(path).read()
-    found = text.count(needle)
-    if found:
-        # Every occurrence goes, and the count is asserted rather than assumed: a needle that is not there
-        # would leave the object exactly as the port ships it and the control would pass for the wrong reason.
-        # The whole `if (...) return ...;` statement goes, so what is left is valid C: a bare `0;` where an
-        # `if` used to be would not compile, and a control that fails to build proves nothing.
-        open(path, "w").write(text.replace(needle, "/* planted: the NULL test is gone */"))
-        hits += found
-if hits == 0:
-    sys.exit("PLANT: the line to remove is not in any of the three files, so nothing was planted")
-print("planted: removed %d occurrence(s) of the NULL test" % hits)
-PY
+    runs_harness plant "$build/planted" "$PLANT"
     ACCELERATE="$build/planted"
 fi
 
 # Every API name the objects define is renamed in the port's own translation units, so this one can hold the
 # port's answers and the host's side by side. The names come from the port's registry, not from a list kept
 # here, so a name added to the library is renamed too.
-names=$(python3 -c "
-import json, sys
-for part in sys.argv[1:]:
-    for entry in json.load(open(part))['entries']:
-        if entry['kind'] == 'function':
-            print(entry['api'].rstrip('()'))
-" "$REGISTRY/ios7channels.json" "$REGISTRY/ios8channels.json" "$REGISTRY/ios16channels.json")
+names=$(runs_xmake l "$here/../registry-functions.lua" "$REGISTRY" ios7channels.json ios8channels.json ios16channels.json)
 
 renames=""
 for name in $names; do

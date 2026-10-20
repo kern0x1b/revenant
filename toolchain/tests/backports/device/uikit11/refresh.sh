@@ -1,6 +1,8 @@
 #!/bin/sh
 # Runs the host tests this tweak replays and writes their answers to uikit11-expectations.h.
 set -eu
+echo "FAIL device/uikit11/refresh.sh: its Python steps are gone and not yet ported to Lua: expectations.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 host=$here/../../host

@@ -17,9 +17,10 @@
 #   * a build failure is "RUN FAILED" with the compiler's first lines, never a noticed mutation.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 avf=$root/packages/a/apple-backports/AVFoundation
-run=${AVPLAYERLOOPER_RUN:-$root/.agent-work/runs/v-avf-looper}
+run=${AVPLAYERLOOPER_RUN:-$(runs_folder v-avf-looper)}
 mutant=${AVPLAYERLOOPER_MUTANT:-0}
 build=$run/build
 rm -rf "$build"

@@ -16,4 +16,4 @@ codesign -s - --force "$app" > /dev/null 2>&1
 LAYOUTGUIDE_RECORDS="$build/layoutguide.json" "$app/Contents/MacOS/app" > "$build/layoutguide.log" 2>&1 || true
 xmake l "$here/../../common/embed.lua" "$build/layoutguide.json" "$device/layoutguide-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/layoutguide_expectations/' "$device/layoutguide-expectations.h" && rm -f "$device/layoutguide-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/layoutguide.json'))))")"
+echo "records: $(runs_harness records "$build/layoutguide.json")"

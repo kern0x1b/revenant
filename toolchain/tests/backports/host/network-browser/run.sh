@@ -24,10 +24,13 @@
 # --mutation breaks one answer per comparison in the port's own source; each has to go red naming its
 # comparison, and a mutation that does not build is RUN FAILED and never counted as noticed.
 set -eu
+echo "FAIL host/network-browser/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PYEOF at line 134" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 S="$root/packages/a/apple-backports"
-W=${WORK:-$root/.agent-work/runs/network-browser}
+W=${WORK:-$(runs_folder network-browser)}
 W=${W%./*}/$(basename "$W")
 rm -rf "$W"
 mkdir -p "$W"

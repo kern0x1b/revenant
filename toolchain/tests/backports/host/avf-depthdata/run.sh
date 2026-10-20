@@ -24,9 +24,10 @@
 # Run DIRECTLY: two compiles and two runs, not through heavy.sh.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 avf=$root/packages/a/apple-backports/AVFoundation
-build=${AVF_DEPTH_BUILD:-$root/.agent-work/avf-depthdata-build}
+build=${AVF_DEPTH_BUILD:-$(runs_folder avf-depthdata-build)}
 mutant=${MUTANT:-0}
 control=${CONTROL:-0}
 ALLOWED_DIFF="metadata-0 metadata-1 metadata-2 metadata-3 metadata-4 tagged tagged-converted"

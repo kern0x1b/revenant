@@ -10,7 +10,10 @@
 # compared exactly: a difference of one bit in one element is a failure, not a tolerance this script
 # chooses after seeing the numbers.
 set -eu
+echo "FAIL host/mpsmatrix/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 67; rank.py; page-check.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 for script in "$here"/*.sh; do
     bash -n "$script" || { echo "harness script does not parse: $script" >&2; exit 1; }
 done
@@ -21,7 +24,7 @@ mps=${MPS:-$here/../../../../packages/a/apple-backports/MetalPerformanceShaders}
 # check nothing invokes is not a check.
 sh "$here/rank-selftest.sh" || { echo "rank-selftest failed; the grader is not measuring" >&2; exit 1; }
 
-build=${BUILD:-$here/../../../../.agent-work/runs/host/mpsmatrix}
+build=${BUILD:-$(runs_folder host/mpsmatrix)}
 candidate=${CANDIDATE:+-DREVENANT_BN_CANDIDATE=$CANDIDATE}
 system=${SYSTEM_TXT:-}
 rm -rf "$build"
@@ -80,7 +83,7 @@ for source in "$mps"/*.m; do
         echo "the port source $source did not compile; stopping, because a count from a stale build is not a count"
         exit 1
     fi
-    python3 "$here/../prefix_selectors.py" "$source" "$build/$name.m" ccharonHost_ \
+    runs_xmake l "$here/../prefix_selectors.lua" "$source" "$build/$name.m" ccharonHost_ \
         --declarations="$build/declarations.h" -fobjc-arc $target $quiet -include "$build/rename.h" -- "$build/$name.plain.o"
     # The define belongs here and not only on the plain compile: prefix_selectors.py turns the plain
     # object back into source, and this is the compile whose object is linked, so a define left off

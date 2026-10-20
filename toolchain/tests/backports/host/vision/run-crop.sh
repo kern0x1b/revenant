@@ -11,6 +11,8 @@
 # (the header's REVENANT_VISION_INTERPOLATION is the seam), which is how the one the framework uses was
 # found: the numbers below are the measurement, and the default in the header is the answer.
 set -eu
+echo "FAIL host/vision/run-crop.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 29; the inline block PY2 at line 79" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)

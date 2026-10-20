@@ -13,8 +13,9 @@
 # Two processes per case, not one, because both sides define the same classes. No case starts a broadcast or a recording.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
-build=${BUILD:-$here/../../../../.agent-work/runs/replaykit-broadcast}
+build=${BUILD:-$(runs_folder replaykit-broadcast)}
 harness=$here/../../device
 windowed=$here/../uikit2
 rm -rf "$build"

@@ -9,9 +9,10 @@
 # twenty-two went missing once: the tools built four fixtures and the table listed twenty-two rows.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../../common/runs.sh" "$here"
 tree=$(cd "$here/../../../../.." && pwd)
 facts=${FACTS_FILE:-$tree/packages/a/apple-backports/facts/PDFKit/Document11.md}
-build=${BUILD:-$tree/.agent-work/runs/pdfkit-table}
+build=${BUILD:-$(runs_folder pdfkit-table)}
 mkdir -p "$build/fixtures"
 
 xmake l "$here/make-text-fixtures.lua" "$build/fixtures" > "$build/generated.tsv"

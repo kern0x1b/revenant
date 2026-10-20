@@ -12,7 +12,7 @@ target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/Syste
 mkdir -p "$BUILD"
 xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -c "$UIKIT/CASpringAnimation+InitialVelocity.m" -o "$BUILD/plain.o"
 printf '#import <QuartzCore/QuartzCore.h>\n' > "$BUILD/declarations.h"
-python3 "$here/../prefix_selectors.py" "$UIKIT/CASpringAnimation+InitialVelocity.m" "$BUILD/CASpringAnimation+InitialVelocity.m" charonHost_ \
+runs_xmake l "$here/../prefix_selectors.lua" "$UIKIT/CASpringAnimation+InitialVelocity.m" "$BUILD/CASpringAnimation+InitialVelocity.m" charonHost_ \
     --declarations="$BUILD/declarations.h" -fobjc-arc $target $quiet -- "$BUILD/plain.o"
 xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -I"$UIKIT" -include "$BUILD/declarations.h" \
     -c "$BUILD/CASpringAnimation+InitialVelocity.m" -o "$BUILD/spring.o"

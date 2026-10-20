@@ -11,9 +11,10 @@
 # control's output differs: a comparison that cannot tell the mutated class from the host proves nothing.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 src=${SPRITEKIT_SRC:-$root/packages/a/apple-backports/SpriteKit}
-build=${SPRITEKIT_NODE_BUILD:-$root/.agent-work/runs/spritekit-node}
+build=${SPRITEKIT_NODE_BUILD:-$(runs_folder spritekit-node)}
 rm -rf "$build"
 mkdir -p "$build/control"
 

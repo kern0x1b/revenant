@@ -26,7 +26,7 @@ for source in $sources; do
 done
 printf '#import <UIKit/UIKit.h>\n' > "$BUILD/prefixed/declarations.h"
 for source in $sources; do
-    python3 "$here/../prefix_selectors.py" "$UIKIT/$source" "$BUILD/prefixed/$source" charonHost_ --declarations="$BUILD/prefixed/declarations.h" -fobjc-arc $target $quiet -I"$UIKIT" -- "$BUILD"/plain/*.o
+    runs_xmake l "$here/../prefix_selectors.lua" "$UIKIT/$source" "$BUILD/prefixed/$source" charonHost_ --declarations="$BUILD/prefixed/declarations.h" -fobjc-arc $target $quiet -I"$UIKIT" -- "$BUILD"/plain/*.o
     xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -I"$UIKIT" -include "$BUILD/prefixed/declarations.h" -c "$BUILD/prefixed/$source" -o "$BUILD/renamed/$source.o"
     perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$BUILD/renamed/$source.o"
 done

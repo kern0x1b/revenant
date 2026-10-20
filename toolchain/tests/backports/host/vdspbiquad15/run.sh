@@ -11,8 +11,9 @@
 # script's own flags, so the objects are made exactly the way the plain run makes them.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 ACCELERATE=${ACCELERATE:-$here/../../../../packages/a/apple-backports/Accelerate}
-build=${VDSPBIQUAD15_BUILD:-$here/../../../../.agent-work/runs/vdspbiquad15-host}
+build=${VDSPBIQUAD15_BUILD:-$(runs_folder vdspbiquad15-host)}
 
 san=""
 if [ "${SAN:-}" = 1 ]; then san="-fsanitize=address -fno-omit-frame-pointer"; fi
@@ -23,18 +24,7 @@ mkdir -p "$build"
 # hold the port's answers and the host's side by side. The names come from the port's registry, not from a
 # list kept here, so a name added to any of the files is renamed too.
 renames=""
-for name in $(python3 - "$here" <<'PY'
-import json, os, sys
-registry = os.path.join(sys.argv[1], "..", "..", "..", "..", "packages", "a", "apple-backports", "registry", "Accelerate")
-for part in ("ios6biquad.json", "ios15biquad.json"):
-    path = os.path.join(registry, part)
-    if not os.path.exists(path):
-        continue
-    for entry in json.load(open(path))["entries"]:
-        if entry["kind"] == "function":
-            print(entry["api"].rstrip("()"))
-PY
-); do
+for name in $(runs_xmake l "$here/../registry-functions.lua" "$here/../../../../packages/a/apple-backports/registry/Accelerate" ios6biquad.json ios15biquad.json); do
     renames="$renames -D$name=revenant_host_$name"
 done
 

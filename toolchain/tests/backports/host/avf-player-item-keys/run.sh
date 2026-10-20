@@ -18,9 +18,10 @@
 # must go red. Run DIRECTLY, not through heavy.sh: a few compiles and runs of a few seconds each.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 src=$root/packages/a/apple-backports/AVFoundation/AVPlayerItemAutomaticKeys7.m
-run=${AVPLAYERITEMKEYS_RUN:-$root/.agent-work/runs/v-avf-item-keys}
+run=${AVPLAYERITEMKEYS_RUN:-$(runs_folder v-avf-item-keys)}
 mutant=${AVPLAYERITEMKEYS_MUTANT:-0}
 build=$run/build
 rm -rf "$build"

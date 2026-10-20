@@ -15,9 +15,10 @@
 # and it is the caller's to make.
 set -eu
 cd "$(dirname "$0")"
+. ../../backports/common/runs.sh "$PWD"
 device=${1:-iPhone2,1}
 release=${2:-6.1.3}
-out=${OUT_DIR:-.agent-work/install}
+out=${OUT_DIR:-$(runs_folder emulate-install)}
 program=emulateinstall
 installed=/usr/libexec/$program
 mkdir -p "$out"

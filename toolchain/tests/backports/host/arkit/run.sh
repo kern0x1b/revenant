@@ -17,18 +17,16 @@
 # What stays out: the frame's own projection and unprojection, which the view forwards to the camera.
 # SceneKit cannot observe those, and they are carried as `documented` on their rows rather than
 # measured here.
-#
-# `--mutants` changes one thing at a time in a *copy* of the port's sources under .agent-work and
-# requires the run to go red. The tree is never touched: a mutant that edited the checkout would leave
-# the band holding mutated source, and one that restored through git would take out whatever else was
-# uncommitted - which is what the first version of this did, and why the copy is the rule now.
 
 set -eu
+echo "FAIL host/arkit/run.sh: its Python steps are gone and not yet ported to Lua: mutate.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 repo=$(cd "$here/../../../.." && pwd)
 ARKit=$repo/packages/a/apple-backports/ARKit
 SceneKit=$repo/packages/a/apple-backports/SceneKit
-runs=${RUNS:-$repo/.agent-work/runs/arkit-host}
+runs=${RUNS:-$(runs_folder arkit-host)}
 mkdir -p "$runs"
 
 # the declarations the port's own ARKit classes need, and the UIKit types RevenantSCN.h:2 imports. They

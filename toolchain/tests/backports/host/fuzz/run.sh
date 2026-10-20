@@ -55,7 +55,7 @@ for s in $sources; do
 done
 printf '#import <Foundation/Foundation.h>\n' > "$build/prefixed/declarations.h"
 for s in $sources; do
-    python3 "$here/../prefix_selectors.py" "$FOUNDATION/$s" "$build/prefixed/$s" charonHost_ --declarations="$build/prefixed/declarations.h" -fobjc-arc $quiet -- "$build"/plain/*.o
+    runs_xmake l "$here/../prefix_selectors.lua" "$FOUNDATION/$s" "$build/prefixed/$s" charonHost_ --declarations="$build/prefixed/declarations.h" -fobjc-arc $quiet -- "$build"/plain/*.o
 done
 for s in $sources; do
     xcrun clang -fobjc-arc -fvisibility=hidden $quiet -I"$FOUNDATION" -include "$build/prefixed/declarations.h" -c "$build/prefixed/$s" -o "$build/renamed/$s.o"

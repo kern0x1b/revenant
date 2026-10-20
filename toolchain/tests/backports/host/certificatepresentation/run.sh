@@ -17,6 +17,8 @@
 # very call the presentation makes - so this runs as a plain Catalyst binary with no window and no app
 # context, and nothing about the host's own state is involved.
 set -eu
+echo "FAIL host/certificatepresentation/run.sh: its Python steps are gone and not yet ported to Lua: rename.py; compare.py; mutate.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
@@ -31,7 +33,7 @@ libs="-framework Foundation -framework Security -framework CoreGraphics -framewo
 
 xcrun clang $common -I"$device" "$here/record.m" "$device/certificate-cases.m" $libs -o "$build/system"
 CERTIFICATE_RECORDS="$build/system.json" "$build/system"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/system.json'))))")"
+echo "records: $(runs_harness records "$build/system.json")"
 
 python3 "$here/rename.py" "$registry" "$build/rename.h"
 

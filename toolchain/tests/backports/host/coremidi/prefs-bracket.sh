@@ -117,8 +117,9 @@ run() {
 }
 
 selftest() {
-    # The stand-in home is a folder of this checkout's run area, removed as soon as the check has been read.
-    area=${MIDI_PREFS_SELFTEST_DIR:-$(cd "$(dirname "$0")/../../../.." && pwd)/.agent-work/runs/prefs-bracket-selftest}
+    here=$(cd "$(dirname "$0")" && pwd)
+    . "$here/../../common/runs.sh" "$here"
+    area=${MIDI_PREFS_SELFTEST_DIR:-$(runs_folder prefs-bracket-selftest)}
     rm -rf "$area"
     mkdir -p "$area/Library/Preferences/ByHost" "$area/Library/Audio/MIDI Configurations"
     printf 'one\n' > "$area/Library/Preferences/ByHost/com.apple.MIDI.TEST.plist"

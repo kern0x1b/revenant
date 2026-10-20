@@ -11,12 +11,7 @@ mkdir -p "$build"
 
 # Every API name the object defines is renamed in the port's own translation unit, so this one can hold the
 # port's answers and the host's side by side. The names come from the port's registry.
-names=$(python3 -c "
-import json, sys
-for entry in json.load(open(sys.argv[1]))['entries']:
-    if entry['kind'] == 'function':
-        print(entry['api'].rstrip('()'))
-" "$REGISTRY/ios7packed12u.json")
+names=$(runs_xmake l "$here/../registry-functions.lua" "$REGISTRY" ios7packed12u.json)
 
 renames=""
 for name in $names; do

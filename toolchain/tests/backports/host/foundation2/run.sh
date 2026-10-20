@@ -21,7 +21,7 @@ echo "renamed:$renames"
 mkdir -p "$BUILD/prefixed"
 printf '#import <Foundation/Foundation.h>\n' > "$BUILD/prefixed/declarations.h"
 for source in $sources; do
-    python3 "$here/../prefix_selectors.py" "$FOUNDATION/$source" "$BUILD/prefixed/$source" charonHost_ --declarations="$BUILD/prefixed/declarations.h" -fobjc-arc $quiet -include "$here/ivars.h" -- "$BUILD"/plain/*.o
+    runs_xmake l "$here/../prefix_selectors.lua" "$FOUNDATION/$source" "$BUILD/prefixed/$source" charonHost_ --declarations="$BUILD/prefixed/declarations.h" -fobjc-arc $quiet -include "$here/ivars.h" -- "$BUILD"/plain/*.o
 done
 for source in $sources; do
     xcrun clang -fobjc-arc -fvisibility=hidden $quiet $renames -I"$FOUNDATION" -include "$here/ivars.h" -include "$BUILD/prefixed/declarations.h" -c "$BUILD/prefixed/$source" -o "$BUILD/renamed/$source.o"

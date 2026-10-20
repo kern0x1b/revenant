@@ -19,8 +19,6 @@ files="$revenant/packages/c/createml/files"
 out=$(runs_fresh revenant-createml)
 # `KEEP=1` leaves the build directory behind, so a suite that dies can be run again under a debugger:
 #
-#     KEEP=1 ./run.sh && lldb --batch -o run -o bt "$revenant"/.agent-work/runs/revenant-createml.*/tabularframe
-#
 # The reason it is an option rather than a habit: Swift's `print` buffers when stdout is a pipe, and a
 # `precondition` or a bounds trap kills the process before the buffer is flushed - so a suite that
 # traps right after a diagnostic print prints **nothing at all**, and "printed nothing" says nothing

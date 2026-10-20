@@ -18,9 +18,10 @@
 # COUNTING invokers outside this directory, and it is reported here too.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 facts=$root/packages/a/apple-backports/facts/Metal/Census.md
-work=${WORK:-$root/.agent-work/runs/metal-census/invokers}
+work=${WORK:-$(runs_folder metal-census/invokers)}
 # ONE guard for every script that removes a scratch path - see work-guard.sh.
 . "$here/work-guard.sh"
 work_ok "$work" || { echo "FAIL: WORK=$work is not a usable scratch path; see work-guard.sh" >&2; exit 1; }

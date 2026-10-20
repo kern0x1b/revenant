@@ -12,17 +12,7 @@ sdk=$(xcrun --show-sdk-path)
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-nullability-completeness"
 
 renames=""
-for name in $(python3 - "$here" <<'PY'
-import json, os, sys
-registry = os.path.join(sys.argv[1], "..", "..", "..", "..", "packages", "a", "apple-backports", "registry", "Accelerate")
-for part in sorted(os.listdir(registry)):
-    if not part.endswith(".json"):
-        continue
-    for entry in json.load(open(os.path.join(registry, part)))["entries"]:
-        if entry["kind"] == "function" and entry["api"].startswith("vImageRotate90"):
-            print(entry["api"].rstrip("()"))
-PY
-); do
+for name in $(runs_xmake l "$here/../registry-functions.lua" "$here/../../../../packages/a/apple-backports/registry/Accelerate" --prefix=vImageRotate90); do
     renames="$renames -D$name=revenantHost_$name"
 done
 

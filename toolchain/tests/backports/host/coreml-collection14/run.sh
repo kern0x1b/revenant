@@ -7,8 +7,9 @@
 #   3. the outputs are compared line by line; a plant on a scratch copy of the port's file - the value changed - must turn it red
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
-build=${BUILD:-$here/../../../../.agent-work/runs/coreml-collection14}
+build=${BUILD:-$(runs_folder coreml-collection14)}
 mkdir -p "$build"
 source="$appledir/CoreML/MLModelCollection14.m"
 [ -f "$source" ] || { echo "no $source"; exit 1; }

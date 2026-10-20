@@ -10,6 +10,8 @@
 #
 # The cases and the answers are both text, so a failure is a diff and not a judgement.
 set -eu
+echo "FAIL host/hapcrypto/run-bignum.sh: its Python steps are gone and not yet ported to Lua: the inline block PYTHON at line 28" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 revenant=${REVENANT:-$here/../../../..}

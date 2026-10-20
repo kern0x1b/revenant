@@ -8,8 +8,9 @@
 #      class) must turn the comparison red
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
-build=${BUILD:-$here/../../../../.agent-work/runs/vision-init11}
+build=${BUILD:-$(runs_folder vision-init11)}
 mkdir -p "$build"
 vision="$appledir/Vision"
 [ -f "$vision/VNHandlers.m" ] || { echo "no $vision/VNHandlers.m"; exit 1; }

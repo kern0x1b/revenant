@@ -15,9 +15,10 @@
 # two.  The images differ by construction: one names PDFKit, the other names this binary.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 tree=$(cd "$here/../../../.." && pwd)
 port=$tree/packages/a/apple-backports/PDFKit
-build=${BUILD:-$tree/.agent-work/runs/pdfkit-document}
+build=${BUILD:-$(runs_folder pdfkit-document)}
 mkdir -p "$build/fixtures"
 
 # the fixture: written here with the release's own CGPDFContext, so neither side is asked about a file

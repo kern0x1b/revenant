@@ -19,9 +19,12 @@
 # argbinding.sh: a mutation compiled with a wrong -I depth once left the previous binary in place and
 # a green run was read off an object that no longer existed.
 set -eu
+echo "FAIL host/metal-census/descriptors.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 143" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-work=${WORK:-$root/.agent-work/runs/metal-census/descriptors}
+work=${WORK:-$(runs_folder metal-census/descriptors)}
 # ONE guard for every script that removes a scratch path - see work-guard.sh.
 . "$here/work-guard.sh"
 work_ok "$work" || { echo "FAIL: WORK=$work is not a usable scratch path; see work-guard.sh" >&2; exit 1; }
@@ -75,8 +78,8 @@ prove_defined() {   # $1 nm output
 }
 
 if [ -n "${SELF_TEST:-}" ]; then
-    selfdir="$root/.agent-work/runs/metal-census/descriptors-self-test"
-    work_ok "$selfdir" || { echo "FAIL: the self-test scratch is not under .agent-work" >&2; exit 1; }
+    selfdir="$(runs_folder metal-census/descriptors-self-test)"
+    work_ok "$selfdir" || { echo "FAIL: the self-test scratch is not under the run folder" >&2; exit 1; }
     rm -rf "$selfdir"; mkdir -p "$selfdir" || exit 1
     fake="$selfdir/symbols"
     for name in $class_list; do

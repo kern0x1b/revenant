@@ -19,10 +19,6 @@
 # swift-5.2.5's overlay, in the runtime's own source under ~/.xmake/cache/packages/2609/s/swift-runtime). The package's build
 # step is therefore proved by hand for now (see the delivery), and this test takes over when the runtime builds again.
 #
-# The project it configures and builds lives under .agent-work/runs of the worktree, never in a temporary directory: the
-# configured tree is evidence (it is what the resolution decided and what the build wrote) and the system temporary
-# directory is wiped. The worktree's .agent-work is excluded in the repository, so nothing of it is ever tracked.
-#
 # One run at a time, and the lock that says so is a directory of this script's own, outside the store: two runs of the same
 # project wait on the same package in the shared store, and a run that waits on a run of its own has two xmakes at 0% CPU
 # and no output to say why. mkdir is the lock: it is atomic, it is ours, and a run that finds a stale one says so rather
@@ -30,7 +26,8 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 export SWIFTUI_ROOT=${SWIFTUI_ROOT:-$(cd "$here/../../.." && pwd)}
-build=${SWIFTUI_BUILD:-$(cd "$here/../../.." && pwd)/.agent-work/runs/swiftui-consumer}
+. "$here/../../backports/common/runs.sh" "$here"
+build=${SWIFTUI_BUILD:-$(runs_folder swiftui-consumer)}
 mkdir -p "$build"
 if ! mkdir "$build/run.lock" 2>/dev/null; then
     echo "consumer: another run of this test is in $build (its lock is $build/run.lock, from $(stat -f %Sm "$build/run.lock"))" >&2

@@ -34,10 +34,13 @@
 #
 # sh tests/backports/host/intents/run-init11.sh
 set -eu
+echo "FAIL host/intents/run-init11.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 118; the inline block PY at line 133" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 repo=$(cd "$here/../../../.." && pwd)
 registry=${REGISTRY:-$repo/packages/a/apple-backports/registry/Intents/ios11.json}
-build=${INTENTS_INIT11_BUILD:-$repo/.agent-work/build/init11}
+build=${INTENTS_INIT11_BUILD:-$(runs_folder build/init11)}
 rm -rf "$build"
 mkdir -p "$build"
 flags="-fobjc-arc -w -Wno-deprecated-declarations"

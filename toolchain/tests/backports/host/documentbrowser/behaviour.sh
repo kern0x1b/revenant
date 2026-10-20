@@ -2,17 +2,15 @@
 # behaviour.sh -- run the document browser's five methods on the host, and then break each behaviour
 # once and watch the test name it.
 #
-# The port's file is compiled against a stand-in for the one UIKit interface it needs, so what runs is
-# the port's own code and not a description of it. Everything is built and run under
-# .agent-work/runs/documentbrowser/, never in a system temp path and never in the shared SDK, and
-# every mutant is restored from HEAD, so the tree is as it was whether this passes or not.
-#
 #   DDR_ROOT=<the checkout> sh tests/backports/host/documentbrowser/behaviour.sh
 set -eu
+echo "FAIL host/documentbrowser/behaviour.sh: its Python steps are gone and not yet ported to Lua: the inline block PYMUT at line 60" >&2
+exit 1
 
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=${DDR_ROOT:-$here/../../../..}
-runs=$root/.agent-work/runs/documentbrowser
+runs=$(runs_folder documentbrowser)
 port=$root/packages/a/apple-backports/UIKit/UIDocumentBrowserViewController.m
 mkdir -p "$runs"
 

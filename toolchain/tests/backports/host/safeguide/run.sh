@@ -16,4 +16,4 @@ codesign -s - --force "$app" > /dev/null 2>&1
 SAFEGUIDE_RECORDS="$build/safeguide.json" "$app/Contents/MacOS/app" > "$build/safeguide.log" 2>&1 || true
 xmake l "$here/../../common/embed.lua" "$build/safeguide.json" "$device/safeguide-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/safeguide_expectations/' "$device/safeguide-expectations.h" && rm -f "$device/safeguide-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/safeguide.json'))))")"
+echo "records: $(runs_harness records "$build/safeguide.json")"

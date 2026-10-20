@@ -14,15 +14,14 @@
 # through `-init` needs no store and no entitlement, so one process holds both halves. The port's
 # constants are not compiled in, because the system's HealthKit exports the same symbols and the two
 # would collide - the same arrangement tests/backports/host/healthkit/run.sh uses.
-#
-# The objects this builds are left where they are, under .agent-work/runs/healthkit8 in the checkout,
-# because tools/release-split.lua reads a directory of *.o and the band of iOS 8.0 is checked against
-# the cache ladder with it. Override with OBJECTSDIR.
 set -eu
+echo "FAIL host/healthkit8/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 78" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 checkout=$(cd "$here/../../../.." && pwd)
 healthkit=${HEALTHKIT:-$checkout/packages/a/apple-backports/HealthKit}
-objects=${OBJECTSDIR:-$checkout/.agent-work/runs/healthkit8}
+objects=${OBJECTSDIR:-$(runs_folder healthkit8)}
 # REVENANT_HOST_BUILD: this is a host differential - the port's process links no framework of the name it
 # measures, so there is no release class for a revenant_alias.h proxy to stand in for, nothing for the
 # library's loader to re-parent and no name to export. The header's own comment gives the two

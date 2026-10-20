@@ -12,6 +12,8 @@
 # own translation units, every name renamed, the archive linked in, hidden visibility throughout - and this
 # one RevenantMLC entry point is what crosses the boundary.
 set -eu
+echo "FAIL host/mlcompute-engine/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 33; the inline block CMP at line 84; the inline block MUT at line 136" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 port=${MLCOMPUTE_PORT:-$here/../../../../packages/a/apple-backports/MLCompute}

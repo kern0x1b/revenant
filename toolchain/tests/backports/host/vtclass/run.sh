@@ -24,7 +24,7 @@ root=$(cd "$here/../../../.." && pwd)
 # fails its differential must leave no trace that would make the next run skip it - which is exactly what
 # appending to covered.txt before the commit did, and it cost four classes a run to find.
 covered=${VTCLASS_COVERED:-$here/covered.txt}
-gen=$here/../../../../.agent-work/generated/vt
+gen=$(runs_folder generated/vt)
 
 # the generated table roundtrip-cases.h, which cases-roundtrip.m includes
 appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
@@ -56,38 +56,13 @@ libs="-framework Foundation -framework CoreMedia -framework VideoToolbox"
 #    argument count or a type that disagrees with the SDK is found here rather than by a caller, and the
 #    initialiser of VTMotionBlurConfiguration was declared with four arguments where the SDK declares five
 #    for twenty-six commits before anything noticed.
-# with a default, so a bare ./run.sh needs nothing set; the driver exports the same path
-# The SDK whose VideoToolbox headers this compares against, found the way the other host tests find
-# one: a version glob under the shared store, with VT_SDK naming a particular SDK. The path that was
-# here spelled the recipe digest - .../iphoneos-sdk/26.2/05d7872150914e1884a8de9d9dc71896/... - and
-# iOS 26.2 is not installed in this store at all (measured: the 26.2 directory does not exist), so
-# probe-types.py read VideoToolbox headers out of a path that is not there, globbed nothing, and died
-# on `AttributeError: 'NoneType' object has no attribute 'group'` twenty lines later with the SDK
-# nowhere in the message. An input that is not on the machine is said by name, in the words the sweep
-# reads, and not as a traceback about a protocol.
-# An SDK that was never built as a package is not absent either: this workspace keeps an extracted
-# iPhoneOS 26.2 SDK under the main checkout's agent work area, and the store glob cannot see it
-# because the store holds packages and not extractions. Both are asked, in that order, and VT_SDK
-# still overrides both.
-extracted=$HOME/Git/projects/ios/charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk
-VT_SDK=${VT_SDK:-$(ls -d "$HOME"/.xmake/packages/i/iphoneos-sdk/26.2/*/Developer.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk 2>/dev/null | head -1)}
-if [ -z "$VT_SDK" ] || [ ! -d "$VT_SDK" ]; then
-    VT_SDK=$extracted
-fi
-if [ -z "$VT_SDK" ] || [ ! -d "$VT_SDK" ]; then
-    echo "FAIL: no iPhoneOS26.2.sdk, so there are no VideoToolbox headers to compare the port's"
-    echo "      declarations against. This machine has neither $HOME/.xmake/packages/i/iphoneos-sdk/26.2/"
-    echo "      nor $extracted. Build the SDK once, extract one to that path, or set VT_SDK to an"
-    echo "      iPhoneOS 26.2 SDK."
+VT_SDK=${VT_SDK:-$(runs_sdk)}
+if [ ! -d "$VT_SDK" ]; then
+    echo "FAIL: VT_SDK is $VT_SDK, which is not a folder, so there are no VideoToolbox headers to compare the port's declarations against"
     exit 1
 fi
 export VT_SDK
 echo "sdk: $VT_SDK"
-# 0a. PROVISION THE INPUTS. A clean tree has no .agent-work/generated/vt: probe-types.py and emit.py
-#     both write there, and cases-roundtrip.m includes the header emit.py produces, so a run that skipped
-#     them stopped with "roundtrip-cases.h file not found" - which is how a reviewer reached the mutants
-#     and found nothing there. The runner generates what it needs, in order, and CHECKS that each step
-#     produced its output rather than trusting the exit status.
 rm -f "$gen/roundtrip-cases.h" "$gen/mutants.tsv"
 xmake l "$here/probe_types.lua" || exit 1
 [ -s "$here/type-branches.tsv" ] || { echo "the committed type-branches.tsv is missing, and the generator reads that one"; exit 1; }

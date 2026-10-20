@@ -1,5 +1,7 @@
 #!/bin/sh
 set -eu
+echo "FAIL host/air2es/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 16" >&2
+exit 1
 
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
