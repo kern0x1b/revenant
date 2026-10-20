@@ -37,11 +37,7 @@ jobs:
           echo "Layout breaks: ${count:-no count printed} (reported, not failing yet)" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Check the toolchain
-        env:
-          LIGHT_SKIP: doc_test
-        run: |
-          echo "::notice title=doc_test::skipped: it tests the old generator, which is deleted with the registry"
-          ./xmakew l -P . tools/check.lua toolchain
+        run: ./xmakew l -P . tools/check.lua toolchain
 
       - uses: actions/cache/save@v4
         if: always() && steps.xmake.outputs.cache-hit != 'true'

@@ -28,7 +28,6 @@ package("createml")
     on_load("iphoneos", function (package)
         package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
                     backports = package:config("backports") or nil, backports_uikit = package:config("backports_uikit") or nil}})
-        package:add("deps", "revenant@apple-backports", {alias = "apple-backports"})
         for _, library in ipairs(libraries) do
             package:add("links", library)
         end

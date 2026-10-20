@@ -31,7 +31,6 @@ if is_plat("iphoneos") then
     if whole then
         add_requires("revenant@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})
         add_requires("revenant@libcxx", {alias = "libcxx"})
-        add_requires("revenant@apple-backports", {alias = "apple-backports", configs = {coredata = true, uikit = true}})
     end
     add_requires("revenant@apple-compat", {alias = "apple-compat"})
 end

@@ -7,12 +7,6 @@ local LOCALES = {
 local NOT_STRINGS = {
     ["modules/emulator.lua|table.sort(held, function (a, b) return a.address < b.address end)"] = "addresses",
     ["modules/emulator.lua|table.sort(named, function (a, b) return a.address < b.address end)"] = "addresses",
-    ["modules/apple/backports.lua|table.sort(candidates, function (a, b)"] = "preferred rank, then byteorder.less",
-    ["modules/apple/backports.lua|table.sort(named, function (a, b)"] = "status order, then byteorder.less",
-    ["modules/apple/backports.lua|table.sort(order, function (a, b) return lower(a, b) == a and a ~= b end)"] = "versions",
-    ["modules/apple/backports.lua|table.sort(found, function (a, b) return dyld.compare_versions(a, b) < 0 end)"] = "versions",
-    ["modules/apple/backports.lua|table.sort(points, function (a, b) return dyld.compare_versions(a, b) < 0 end)"] = "versions",
-    ["modules/apple/backports.lua|table.sort(listed, function (a, b) return dyld.compare_versions(a, b) < 0 end)"] = "versions",
     ["modules/packaging.lua|table.sort(merged, function (a, b) return a ~= executable and b == executable end)"] = "booleans",
     ["modules/apple/sdkstubs.lua|table.sort(found, function (a, b) return release(a) < release(b) end)"] = "numbers",
     ["modules/apple/dyld.lua|table.sort(releases, function (a, b) return compare(a, b) < 0 end)"] = "versions",
@@ -24,19 +18,6 @@ local NOT_STRINGS = {
     ["modules/apple/firmware.lua|table.sort(chosen, function (a, b) return a.size < b.size end)"] = "sizes",
     ["modules/apple/firmware.lua|table.sort(listed, function (a, b) return dyld.compare_versions(a, b) < 0 end)"] = "versions",
     ["modules/gyb/runtime.lua|table.sort(keyed, function(a, b)"] = "Python's order, byteorder.less on strings, then the index",
-    ["tools/matter-registry.lua|table.sort(types, function (left, right) return #left > #right end)"] = "lengths",
-    ["tools/corpus/const-values.lua|table.sort(kind_order, function (a, b)"] = "counts, then the index",
-    ["tools/corpus/ledger_headers.lua|table.sort(named, function (a, b)"] = "byteorder.less on both names",
-    ["tools/corpus/surface_walk.lua|table.sort(found, function (a, b)"] = "versions, then byteorder.less",
-    ["tools/corpus/surface-diff.lua|table.sort(releases, function (a, b) return tonumber(a) < tonumber(b) end)"] = "numbers",
-    ["tools/corpus/surface-diff.lua|table.sort(listed, function (a, b)"] = "versions, then byteorder.less",
-    ["tools/corpus/ledger_output.lua|table.sort(indexed, function (a, b)"] = "the caller's order, then the index",
-    ["tools/corpus/sdk-surface.lua|table.sort(list, function (a, b)"] = "the caller's order, then the position",
-    ["tools/corpus/sdk-surface.lua|table.sort(majors)"] = "numbers",
-    ["tools/corpus/sdk-surface.lua|table.sort(ordered, function (a, b)"] = "totals, then the index",
-    ["tools/corpus/sdk-introduced.lua|table.sort(unverified, function (a, b)"] = "byteorder.less on each field",
-    ["tools/intents/gen-registry.lua|table.sort(decorated, function (a, b)"] = "byteorder.less on kind and name, then the position",
-    ["tools/corpus/cache-value.lua|table.sort(entries, function (a, b) return a.address < b.address or (a.address == b.address and a.order < b.order) end)"] = "addresses",
 }
 
 local function unsorted_strings(root)

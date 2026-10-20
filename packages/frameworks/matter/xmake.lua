@@ -10,7 +10,6 @@ package("matter")
     add_patches("v1.6.1.0", "patches/ble-connectable.patch", "67f3d5e8bac9fc8fe0e2a256db4efe93dcb5cfa72d95c809e384966220972b19")
 
     add_deps("revenant@apple-compat", {alias = "apple-compat"})
-    add_deps("revenant@apple-backports", {alias = "backports", configs = {network = true, security = true, commoncrypto = true, corebluetooth = true}})
     add_deps("revenant@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})
     add_deps("revenant@ld64", {alias = "ld64"})
     add_deps("revenant@libcxx", {alias = "libcxx", configs = {packaged = true}})
@@ -228,14 +227,13 @@ package("matter")
         os.cp(path.join(framework, "Matter.modulemap"), path.join(installed, "Modules", "module.modulemap"))
 
         local libcxx = package:dep("libcxx"):installdir("lib")
-        local backports = package:dep("apple-backports"):installdir("lib")
+        raise("matter links libMatterBackports against the Backports libraries, which are project targets a package cannot depend on yet; see docs/explanation/backports-loading.md")
         local output = path.join(package:installdir("lib"), "libMatterBackports.dylib")
         os.vrunv(assert(toolchain:tool("mxx"), "the apple-ios toolchain names no Objective-C++ compiler for %s", package:arch()),
                  table.join(flags, {"-fuse-ld=" .. path.join(package:dep("ld64"):installdir("bin"), "ld"),
-                                    "-dynamiclib", "-install_name", "/usr/lib/revenant/org.revenant.apple-backports/libMatterBackports.dylib",
+                                    "-dynamiclib", "-install_name", "/usr/lib/revenant/org.revenant.backports/libMatterBackports.dylib",
                                     "-o", output, path.join(out, "lib", "libCHIP.a")}, objects,
-                           {"-L" .. backports, "-lNetworkBackports", "-lFoundationBackports", "-lSecurityBackports", "-lCommonCryptoBackports", "-lCoreBluetoothBackports",
-                            "-L" .. libcxx, "-lc++abi", "-lc++",
+                           {"-L" .. libcxx, "-lc++abi", "-lc++",
                             path.join(package:dep("apple-compat"):installdir("lib"), "libapple-compat.a"),
                             "-framework", "Foundation", "-framework", "Security", "-framework", "CoreData",
                             "-framework", "CoreBluetooth",

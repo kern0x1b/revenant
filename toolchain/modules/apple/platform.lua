@@ -7,7 +7,6 @@ import("firmware")
 import("objc")
 import("signing")
 import("bundle")
-import("backports")
 import("runtime_guards")
 import("shared_runtime", {alias = "staged"})
 
@@ -133,19 +132,20 @@ function imports_source(target, architecture)
     return (firmware.ensure(architecture or target:arch(), deployment(target), {tool = tool}))
 end
 
-function backport_libraries(target)
-    local package = target:pkg("apple-backports")
-    local libraries = {}
-    for _, folder in ipairs(package and table.wrap(package:get("linkdirs")) or {}) do
-        for _, library in ipairs(backports.libraries()) do
-            local file = path.join(folder, "lib" .. library.name .. ".dylib")
-            if os.isfile(file) then
-                table.insert(libraries, file)
-            end
+function backport_targets(target)
+    local found = {}
+    for _, dependency in ipairs(target:orderdeps()) do
+        if dependency:name():endswith("Backports") and dependency:is_shared() then
+            table.insert(found, dependency)
         end
     end
-    if package and #libraries == 0 then
-        raise("target(%s) uses apple-backports, and its link folders %s hold none of its libraries", target:name(), table.concat(table.wrap(package:get("linkdirs")), " "))
+    return found
+end
+
+function backport_libraries(target)
+    local libraries = {}
+    for _, dependency in ipairs(backport_targets(target)) do
+        table.insert(libraries, dependency:targetfile())
     end
     return libraries
 end
@@ -212,15 +212,10 @@ function provided_libraries(target)
 end
 
 function backport_package(target)
-    local libraries = backport_libraries(target)
-    if #libraries == 0 then
-        return nil
+    if #backport_targets(target) > 0 then
+        raise("target(%s) links the Backports libraries, and no package installs them yet: the one .deb of the repository is not written, so the application cannot be packaged with them", target:name())
     end
-    local debs = os.files(path.join(path.directory(path.directory(libraries[1])), "share", backports.package_name() .. "_*.deb"))
-    if #debs ~= 1 then
-        raise("target(%s) uses apple-backports, whose install holds %d %s packages instead of one", target:name(), #debs, backports.package_name())
-    end
-    return {deb = debs[1], name = backports.package_name(), relation = ">=", version = path.filename(debs[1]):match("^[^_]+_([^_]+)_")}
+    return nil
 end
 
 function report_selectors(source, binaries, architecture, folder, provided)
@@ -235,31 +230,6 @@ function report_selectors(source, binaries, architecture, folder, provided)
                    named, #missing, #missing == 1 and "" or "s", architecture, shown)
         end
     end
-end
-
-function report_registry(target, binary)
-    local libraries = backport_libraries(target)
-    if #libraries == 0 then
-        return
-    end
-    local root = path.join(path.directory(path.directory(libraries[1])), "share")
-    if not os.isdir(path.join(root, "registry")) then
-        return
-    end
-    local used = macho.imported_symbols(binary, target:arch())
-    for selector in pairs((objc.binary_selectors(binary, target:arch()) or {used = {}}).used) do
-        used[selector:sub(2)] = true
-    end
-    local advised = backports.advice(root, root, used)
-    if #advised == 0 then
-        return
-    end
-    local told = {}
-    for _, entry in ipairs(advised) do
-        table.insert(told, string.format("  %s (iOS %s) is %s: %s", entry.api, entry.introduced or "?", entry.status, entry.effect or "?"))
-    end
-    cprint("${color.warning}warning:${clear} %s calls %d API the backports do not carry as the release that added them does:\n%s",
-           path.filename(binary), #advised, table.concat(told, "\n"))
 end
 
 function verify_one_runtime(target)
@@ -300,7 +270,6 @@ function verify(target, binary, opt)
         local provided = provided_libraries(target)
         dyld.check(source, table.join({binary}, provided), nil, import_options(target, provided))
         report_selectors(source, {binary}, target:arch(), nil, provided)
-        report_registry(target, binary)
     end
 end
 

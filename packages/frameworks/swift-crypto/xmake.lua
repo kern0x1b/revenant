@@ -34,7 +34,6 @@ package("swift-crypto")
     on_load("iphoneos", function (package)
         package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})
         package:add("deps", "revenant@apple-compat", {alias = "apple-compat"})
-        package:add("deps", "revenant@apple-backports", {alias = "apple-backports", configs = {commoncrypto = true}})
         package:add("deps", "revenant@ld64", {alias = "ld64"})
         package:add("links", "swiftCrypto")
         package:add("linkdirs", "lib")
@@ -47,7 +46,7 @@ package("swift-crypto")
         toolchain:load()
         local runtime = assert(package:dep("swift-runtime"), "swift-crypto is compiled against revenant@swift-runtime")
         local compat = package:dep("apple-compat")
-        local backports = package:dep("apple-backports")
+        raise("swift-crypto links the CommonCrypto Backports library, which is a project target a package cannot depend on yet; see docs/explanation/backports-loading.md")
         local swiftc = assert(table.wrap((runtime:envs() or {}).SWIFT_EXEC)[1], "swift-runtime names no compiler; reinstall it")
         local minimum = toolchain:config("deployment")
         local triple = package:arch() .. "-apple-ios" .. minimum
@@ -170,7 +169,7 @@ package("swift-crypto")
         local lib = path.join(objects, "libswiftCrypto.dylib")
         os.vrunv(toolchain:tool("cc"), table.join(common, {"-fuse-ld=" .. ld64, "-dynamiclib", "-install_name", "@rpath/libswiftCrypto.dylib",
                  "-o", lib}, os.files(path.join(objects, "*.o")),
-                 {"-L", path.join(resources, "iphoneos"), "-L", path.join(backports:installdir("lib")),
+                 {"-L", path.join(resources, "iphoneos"),
                   "-lswiftCore", "-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswift_Concurrency",
                   "-lswiftFoundation", "-lFoundationBackports", "-lCommonCryptoBackports"}))
         os.cp(lib, package:installdir("lib"))

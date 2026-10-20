@@ -17,10 +17,6 @@ package("swift-runtime")
 
     local renamed = {"clock_gettime", "clock_getres", "dispatch_get_global_queue", "memset_s", "os_system_version_get_current_version"}
 
-    local still_ios7 = {["Progress.swift"] = true, ["Calendar.swift"] = true}
-
-    local lowered_with_backports = {"URLComponents.swift", "DateInterval.swift", "NSStringAPI.swift"}
-
     local sources = {
         {name = "platform", tag = "swift-6.2-RELEASE", commit = "1ff1cc1170617ab23ab74aa8b741c8daca1903f6",
          url = "https://github.com/swiftlang/swift.git", sparse = {"/stdlib/public/Platform/", "/LICENSE.txt"}},
@@ -61,9 +57,9 @@ package("swift-runtime")
     table.sort(digests)
     add_configs("recipe", {description = "The digest of this recipe and the changes it makes to the runtime's sources, so a changed flag or patch is a different runtime.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
 
-    add_configs("backports", {description = "Build the overlays for a port that carries revenant@apple-backports: API the backports implement is available from the port's release, in the overlays and in the port's own Swift.", default = false, type = "boolean"})
+    add_configs("backports", {description = "Build the overlays for a port that links the frameworks/Backports libraries: API they implement is available from the port's release, in the overlays and in the port's own Swift. Blocked until the port headers are generated again; see the raise in on_install.", default = false, type = "boolean"})
 
-    add_configs("backports_uikit", {description = "With backports: link the overlay of UIKit against libUIKitBackports, for an application that carries revenant@apple-backports with its uikit config.", default = false, type = "boolean"})
+    add_configs("backports_uikit", {description = "With backports: link the overlay of UIKit against UIKitBackports, for an application that links that target.", default = false, type = "boolean"})
 
     add_configs("library_evolution", {description = "Build the standard library, the runtime and concurrency with library evolution, for programs compiled by an SDK's Swift that bind to its resilient symbols. Writes no .swiftinterface, and an arm64 install stops after Darwin (the SDK has the other overlays); another build of its own, named by its own mark.", default = false, type = "boolean"})
 
@@ -73,9 +69,6 @@ package("swift-runtime")
         package:add("deps", "revenant@libcxx", {alias = "libcxx", configs = {packaged = package:config("shared") or nil}})
         if package:config("backports_uikit") and not package:config("backports") then
             raise("swift-runtime's backports_uikit config is the application half of the backports config; set backports too")
-        end
-        if package:config("backports") then
-            package:add("deps", "revenant@apple-backports", {alias = "apple-backports", configs = {coredata = true, uikit = package:config("backports_uikit") or nil}})
         end
         package:add("links", "swiftCore")
         if package:config("shared") then
@@ -302,7 +295,9 @@ package("swift-runtime")
 
         local port_headers, carried = {}, {}
 
-        local backported = package:config("backports") and package:dep("apple-backports") or nil
+        if package:config("backports") then
+            raise("swift-runtime's backports config is blocked: its port headers came from tools/gen, which is deleted with apple-backports, and the Backports libraries are project targets that a package cannot depend on")
+        end
 
         local foundation_links = {}
 
@@ -346,52 +341,6 @@ package("swift-runtime")
                 os.vrunv("patch", {"-p1", "-i", patch}, {curdir = overlays})
             end
 
-            if package:config("backports") then
-                local tree = path.absolute(path.join(package:scriptdir(), "..", "..", "..", "toolchain"))
-                local work = path.join(package:installdir("share"), "port-ir")
-                os.mkdir(work)
-                local ir = path.join(work, "full.tsv")
-                local spec_sdk = os.getenv("REVENANT_GEN_SDK")
-                if not spec_sdk or spec_sdk == "" then
-                    raise("swift-runtime's port headers need REVENANT_GEN_SDK: the iPhoneOS SDK whose release the spec snapshot is measured on")
-                end
-                os.execv("xmake", {"l", path.join(tree, "tools", "found", "ir.lua")}, {curdir = tree,
-                         envs = {IR_SDK = spec_sdk, IR_MODE = "check", IR_FULL = ir}})
-                local render = import("gen.cmd_headers", {rootdir = path.join(tree, "tools"), anonymous = true})
-                local staged = path.join(package:installdir("share"), "port")
-                local status = render.run({tree = tree, ir = ir, sdk = toolchain:config("sdkdir"), out = staged, release = minimum})
-                os.rm(work)
-                if status ~= 0 then
-                    raise("swift-runtime's port headers: the generator refused the SDK (status %s)", tostring(status))
-                end
-                local overlay = path.join(staged, "port", minimum, "vfs.yaml")
-                port_headers = {"-vfsoverlay", overlay}
-                package:setenv("REVENANT_SWIFT_PORT_HEADERS", overlay)
-                package:setenv("REVENANT_SWIFT_RUNTIME_BACKPORTS", package:config("backports_uikit") and "coredata,uikit" or "coredata")
-                carried.FoundationBackports = path.join(backported:installdir("lib"), "libFoundationBackports.dylib")
-                carried.CoreDataBackports = path.join(backported:installdir("lib"), "libCoreDataBackports.dylib")
-                if package:config("backports_uikit") then
-                    carried.UIKitBackports = path.join(backported:installdir("lib"), "libUIKitBackports.dylib")
-                end
-                local foundation = path.join(overlays, "stdlib", "public", "Darwin", "Foundation")
-                for _, file in ipairs(os.files(path.join(foundation, "*.swift"))) do
-                    if not still_ios7[path.filename(file)] then
-                        io.writefile(file, (io.readfile(file):gsub("\n[ \t]*@available%(macOS 10%.9, iOS 7%.0, %*%)\n", "\n")))
-                    end
-                end
-                for _, name in ipairs(lowered_with_backports) do
-                    local file = path.join(foundation, name)
-                    io.writefile(file, (io.readfile(file):gsub("@available%(([^)]*)%)", function (arguments)
-                        return "@available(" .. arguments:gsub("iOS (%d+)%.(%d+)", function (major, minor)
-                            local release = tonumber(major)
-                            return (release >= 7 and release <= 11) and "iOS " .. minimum or "iOS " .. major .. "." .. minor
-                        end) .. ")"
-                    end)))
-                end
-            end
-            if package:config("backports") then
-                timed("port headers")
-            end
             local installed_shims = path.join(install, "shims")
             local shim_modules = path.join(installed_shims, "module.modulemap")
             for _, name in ipairs({"ObjectiveC", "Dispatch", "CoreFoundation", "Foundation"}) do
@@ -840,18 +789,6 @@ package("swift-runtime")
             end
             local cxx = runtime.package_name("libcxx", libcxx:buildhash())
             local depends, ui_depends = {string.format("%s (= %s)", cxx, runtime.package_version(libcxx:buildhash()))}, {string.format("%s (= %s)", name, version)}
-            if package:config("backports") then
-                assert(backported, "the backports are named once above and only under the backports config, which this " ..
-                                   "step is inside of; the name is then nil and this is the step that read it")
-                local backports = import("apple.backports", {rootdir = modules, anonymous = true})
-                local debs = os.files(path.join(backported:installdir("share"), backports.package_name() .. "_*.deb"))
-                assert(#debs == 1, "the apple-backports install holds " .. #debs .. " packages instead of one")
-                local needed = string.format("%s (>= %s)", backports.package_name(), path.filename(debs[1]):match("^[^_]+_([^_]+)_"))
-                table.insert(depends, needed)
-                if package:config("backports_uikit") then
-                    table.insert(ui_depends, needed)
-                end
-            end
             runtime.stage({packages = {{name = name, version = version, title = "Swift runtime " .. package:buildhash():sub(1, 8),
                                         description = "The Swift runtime and the overlays of one build of Revenant's revenant@swift-runtime,",
                                         depends = depends,
@@ -911,7 +848,7 @@ package("swift-runtime")
         end
         local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
         local linked = {}
-        for _, alias in ipairs({"libcxx", "apple-backports"}) do
+        for _, alias in ipairs({"libcxx"}) do
             local dep = package:dep(alias)
             if dep then
                 table.join2(linked, os.files(path.join(dep:installdir("lib"), "*.dylib")))

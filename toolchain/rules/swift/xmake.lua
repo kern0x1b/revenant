@@ -56,18 +56,17 @@ rule("swift")
             target:add("ldflags", "-Wl,-u,_" .. mark, {force = true})
             local port_headers = table.wrap((package:envs() or {}).REVENANT_SWIFT_PORT_HEADERS)[1]
             if port_headers then
-                local carried = target:pkg("apple-backports")
-                if not carried then
-                    raise("target(%s) compiles against swift-runtime built with the backports, and does not carry them: add_requires(\"revenant@apple-backports\", {alias = \"apple-backports\"}) and add_packages(\"apple-backports\")", target:name())
+                local linked = {}
+                for _, dependency in ipairs(target:orderdeps()) do
+                    linked[dependency:name()] = true
+                end
+                if not linked.FoundationBackports then
+                    raise("target(%s) compiles against swift-runtime built with the backports, and does not link them: add_deps(\"FoundationBackports\")", target:name())
                 end
                 local libraries = {coredata = "CoreDataBackports", uikit = "UIKitBackports"}
                 for _, config in ipairs(table.wrap((package:envs() or {}).REVENANT_SWIFT_RUNTIME_BACKPORTS)[1]:split(",")) do
-                    local found = false
-                    for _, folder in ipairs(table.wrap(carried:get("linkdirs"))) do
-                        found = found or os.isfile(path.join(folder, "lib" .. libraries[config] .. ".dylib"))
-                    end
-                    if not found then
-                        raise("target(%s) compiles against swift-runtime built with the %s backports, and its apple-backports package holds no lib%s.dylib: add_requires(\"revenant@apple-backports\", {alias = \"apple-backports\", configs = {%s = true}})", target:name(), config, libraries[config], config)
+                    if not linked[libraries[config]] then
+                        raise("target(%s) compiles against swift-runtime built with the %s backports, and does not link %s: add_deps(\"%s\")", target:name(), config, libraries[config], libraries[config])
                     end
                 end
                 target:add("values", "swift.flags", "-vfsoverlay", port_headers)

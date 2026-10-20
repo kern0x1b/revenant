@@ -1,7 +1,7 @@
 import("core.package.package")
 import("private.action.require.impl.repository")
 
-local HEAVY = {"llvm", "swift", "swift-bootstrap", "swift-runtime", "libcxx", "apple-backports", "apple-compat", "iphoneos-sdk", "ld64"}
+local HEAVY = {"llvm", "swift", "swift-bootstrap", "swift-runtime", "libcxx", "apple-compat", "iphoneos-sdk", "ld64"}
 
 local function inputs(name, root)
     local dir = repository.find_packagedir(path.join(root, "packages"), name)
