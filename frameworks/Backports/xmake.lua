@@ -147,7 +147,7 @@ if is_plat("iphoneos") then
             on_config(function (target)
                 local includes = {}
                 for _, name in ipairs(library.archives) do
-                    table.insert(includes, target:pkg(name):installdir("include"))
+                    table.insert(includes, path.join(target:pkg(name):installdir(), "include"))
                 end
                 generator.skeleton_for(library.folder, includes)
                 local files = {}
