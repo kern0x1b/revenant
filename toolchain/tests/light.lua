@@ -63,9 +63,11 @@ function main(checkout)
     }
     if not ok then failed = failed + 1 end
     local found = path.join(revenant, "tools", "found")
-    local built = child("found-configure", {"f", "-P", found, "-y"}, revenant)
-    if built.status == 0 then
+    local configured = child("found-configure", {"f", "-P", found, "-y"}, revenant)
+    local built = configured
+    if configured.status == 0 then
         built = child("found-build", {"-P", found}, revenant)
+        os.tryrm(configured.scratch)
     end
     failed = failed + report("tools/found build", built)
     local skip = {}
