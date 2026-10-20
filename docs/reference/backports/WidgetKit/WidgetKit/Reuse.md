@@ -30,7 +30,7 @@ things a port of it would most likely be built from, and found nothing reusable:
   `PresentationBackgroundInteraction`, `EnvironmentValues` and `EnvironmentKey`, but it is compiled
   only into the SwiftUI targets of the revenant project and there is no `revenant@swiftui` package to depend on
   yet. The ask is with the SwiftUI band; `README.md:40-43` and `facts/TipKit/Rendering.md` say so too.
-* **`packages/frameworks/apple-backports/registry/CoreSpotlight/ios9.json`** — read through
+* **`the deleted registry package registry/CoreSpotlight/ios9.json`** — read through
   the generator's port headers (`tools/gen/cmd_headers.lua`); not this package's file.
 * **Apple's own `.swiftinterface` and the toolchain's `swift-api-digester`** — as the reference for
   the declarations and the measurement. Nothing from either is vendored, and the host differential

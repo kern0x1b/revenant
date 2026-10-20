@@ -105,7 +105,7 @@ store's kind and is readable, while the mirroring it asks for is the wall.
 NSUUIDAttributeType API_AVAILABLE(macosx(10.13), ios(11.0), tvos(11.0), watchos(4.0)) = 1100,
 ```
 
-and no file under `packages/frameworks/apple-backports/registry/` carries it (grep: no match). The
+and no file under `the deleted registry package registry/` carries it (grep: no match). The
 pilot's draft stored a `UUID` as a string and said "on iOS 6"; the reason is iOS **11**, not the
 release. The type-preserving answer at 6.1.3 is `NSTransformableAttributeType`
 (`NSAttributeDescription.h:32`, `ios(3.0)`) with a value transformer, which is what

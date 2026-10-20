@@ -24,7 +24,7 @@ The reviewer brief's rule (owner, 2026-09-28): a delivery names the open upstrea
   the **view rows are routed to** and the reason they are not declared here: it is compiled only into
   the SwiftUI targets of the revenant project, with no `revenant@swiftui` package to depend on, so a port cannot
   build against it yet (`facts/WidgetKit/Providers.md` lists the rows; the ask is with the band).
-* **`packages/frameworks/apple-backports/registry/CoreSpotlight/ios9.json`** — the backports package's own
+* **`the deleted registry package registry/CoreSpotlight/ios9.json`** — the backports package's own
   registry entry, read by the AppIntents recipe through the runtime's port overlay (`REVENANT_SWIFT_PORT_HEADERS`). The
   `scriptdir()` defect that hid it was this delivery's; the registry itself is not ours.
 * **Apple's own `.swiftinterface`s and `swift-api-digester`** — as *references* for the declarations

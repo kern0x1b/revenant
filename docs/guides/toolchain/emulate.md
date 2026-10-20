@@ -20,7 +20,7 @@ A device test of a library is a program that prints its own result and exits wit
     add_repositories("revenant /path/to/revenant")
     add_addons("revenant latest")
     set_config("apple_minimum", "6.0")
-    add_requires("revenant@apple-backports", {alias = "apple-backports"})
+    add_deps("FoundationBackports")
     includes("@addon/revenant/apple-ios")
     includes("@addon/revenant/emulate")
 
@@ -28,7 +28,7 @@ A device test of a library is a program that prints its own result and exits wit
         set_kind("binary")
         add_rules("@addon/revenant/daemon")
         add_files("test.m")
-        add_packages("apple-backports")
+        add_deps("FoundationBackports")
         add_frameworks("Foundation")
         set_values("revenant.version", "1.0")
         set_values("revenant.control", "packaging/control")

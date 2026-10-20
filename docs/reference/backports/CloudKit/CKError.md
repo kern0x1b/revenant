@@ -6,7 +6,7 @@ the host. Every number here was produced by the commands named in it, on 2026-10
 
 ## What is carried
 
-The spec rows are `packages/frameworks/apple-backports/spec/CloudKit/swift.tsv`, the CKError and CKError.Code
+The spec rows are `the deleted registry package spec/CloudKit/swift.tsv`, the CKError and CKError.Code
 containers (88 rows: 47 for CKError, 41 for CKError.Code).
 
 | Rows | Carried | Not carried |
@@ -21,7 +21,7 @@ recipe does not name `files/CloudKit`, so the runtime digest is unchanged and no
 
 ## Constants
 
-- Raw values: the `enumconst` rows of `packages/frameworks/apple-backports/spec/CloudKit/declarations.tsv`
+- Raw values: the `enumconst` rows of `the deleted registry package spec/CloudKit/declarations.tsv`
   (CKErrorCode, 37 values, 1 to 37). The file's cases are these values, paired by name with the
   swift.tsv rows (37 of 37 pair, none missing).
 - Domain and keys: `CKErrorDomain`, `CKPartialErrorsByItemIDKey` = "CKPartialErrors",

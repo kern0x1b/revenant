@@ -69,5 +69,5 @@ it, and nothing from it is linked into a port (`packages/frameworks/createml/pro
 
 ## First-party
 
-`packages/runtimes/apple-compat`, `packages/frameworks/apple-backports`, `packages/emulator/emulator-guest`
+`packages/runtimes/apple-compat`, `frameworks/Backports`, `packages/emulator/emulator-guest`
 and `packages/emulator/firmware-tools` are Revenant's own (MIT); they are not third-party and are not listed here.

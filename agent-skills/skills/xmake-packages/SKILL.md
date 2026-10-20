@@ -25,11 +25,11 @@ add_requires("revenant@<package>", {alias = "<package>", configs = {…}})
 ```
 
 and on the target `add_packages("<package>")`. Always give the alias: the target, values such as
-`revenant.libraries`, and Revenant's own lookups name a package by it. For the backports the alias is
-exactly `apple-backports`, and their configs are the skill `backports`'s.
+`revenant.libraries`, and Revenant's own lookups name a package by it. For the backports there is no alias: they are targets, not packages, and
+the skill `backports` says which to add with `add_deps`.
 
 At `revenant-repo-0.8.10` the repository has 18 packages. What a project requires itself, by
-purpose: `apple-backports` (newer API), `apple-compat` (functions the release lacks, linked
+purpose: the `frameworks/Backports` targets (newer API), `apple-compat` (functions the release lacks, linked
 hidden into the image), `libcxx` (the C++ runtime an app bundles), `openssl` (TLS and crypto,
 also built for the device), `swift-runtime` and `swift-embedded` (Swift), `Combine` (Combine, skill `combine`). The
 rest come with Revenant's includes or as their dependencies: `llvm`, `ld64`, `ldid`, `libplist`,

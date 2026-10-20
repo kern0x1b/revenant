@@ -89,8 +89,8 @@ in the runtime's Foundation overlay while bridging a dictionary during a JSON de
 
 - **No URLSession publishers** (`dataTaskPublisher`): Combine at `f5fe6511` does not ship them (its
   reasons, README `:562-564`: iOS 7, and a TLS stack; recipe `:3`). That is Combine's gap, not the
-  release's: `revenant@apple-backports` implements `NSURLSession` from iOS 5.0
-  (`revenant-repo-0.8.10:packages/a/apple-backports/registry/Foundation/base.json:1347-1351`,
+  release's: the `frameworks/Backports` targets implement `NSURLSession` from iOS 5.0
+  (`revenant-repo-0.8.10:the deleted registry: Foundation/base.json:1347-1351`,
   `"status": "implemented"`). Fetch with the backported `URLSession`, or with the release's own
   `NSURLConnection`, and deliver the result through a `Future` or a `PassthroughSubject`. From
   Swift the backport is reached through the runtime's `backports` config, and a program with it

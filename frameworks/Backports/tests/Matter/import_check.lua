@@ -1,5 +1,5 @@
 function main(checkout, cachefile, dylib, backports, libcxx)
-    assert(checkout and cachefile and dylib and backports and libcxx, "usage: import_check.lua <checkout> <cachefile> <dylib> <apple-backports lib> <libcxx lib>")
+    assert(checkout and cachefile and dylib and backports and libcxx, "usage: import_check.lua <checkout> <cachefile> <dylib> <Backports lib> <libcxx lib>")
     local dyld = import("apple.dyld", {rootdir = path.join(checkout, "modules"), anonymous = true})
     local providers = {}
     for _, name in ipairs({"libNetworkBackports.dylib", "libFoundationBackports.dylib", "libSecurityBackports.dylib", "libCommonCryptoBackports.dylib", "libCoreBluetoothBackports.dylib"}) do

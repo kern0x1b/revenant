@@ -9,7 +9,7 @@ Both overlays are built for a minimum release of 8.0 or later and for no earlier
   lighting models, SCNMatrix4Identity, SCNHitTestResult, SCNView).
 - A byte search of the armv7 dyld caches this tree holds finds no SceneKit in those of iOS 6.1.3, 7.0 and 7.1.2, and
   finds it in those of 8.0 and 8.1. `dyld.check` refuses an install whose library loads an image the release lacks.
-- The backports' SceneKit (apple-backports config `scenekit`, libSceneKitBackports.dylib) exports the classes and
+- The backports' SceneKit (the SceneKitBackports target, libSceneKitBackports.dylib) exports the classes and
   constants above except SCNHitTestResult, and has no -[SCNView hitTest:options:]
   (`grep -rn "hitTest:options" frameworks/Backports/src/SceneKit` finds nothing; its only mention of the type is the
   return type of a physics ray test in SCNPhysicsWorld.m). RealityKit's ARView asks that hit test for every gesture on
@@ -20,5 +20,5 @@ Both overlays are built for a minimum release of 8.0 or later and for no earlier
 ## What brings it back
 
 A registry row and an implementation for SCNHitTestResult and -[SCNView hitTest:options:] (and
-+[SCNNode nodeWithGeometry:]) in apple-backports' SceneKit, then the overlays linked ahead of the framework with a weak
++[SCNNode nodeWithGeometry:]) in the Backports' SceneKit, then the overlays linked ahead of the framework with a weak
 load of it.

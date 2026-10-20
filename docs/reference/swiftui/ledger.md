@@ -299,7 +299,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   настройки нет), `textScale` и `textVariant` (вариантов размера и ширины у текста iOS 6 нет;
   `textVariant` — над `TextVariantPreference`, с `FixedTextVariant` и `SizeDependentTextVariant`), плюс
   `textScale(.secondary)` рисует строку размером меньшей надписи самого релиза: caption 1 против body,
-  12/17 — из `apple-backports/facts/UIKit/UIFontTextStyles.md:18,20`; `writingDirection(strategy:)` и
+  12/17 — из `docs/reference/backports/UIKit/UIFontTextStyles.md:18,20`; `writingDirection(strategy:)` и
   `multilineTextAlignment(strategy:)` с их тремя случаями — обе
   стратегии пишут в журнал, обе названы там же. `writingDirection` и `multilineTextAlignment` —
   имена этих двух модификаторов в журнале. И четыре речи
@@ -307,7 +307,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   `speechAnnouncementsQueued`. Сами четыре атрибута в каноне этого порта есть
   (`frameworks/Backports/src/UIKit/UIAccessibilitySpeechAttributes.m` и два соседа, `registry/UIKit/ios13rest.json`),
   а VoiceOver iOS 6 не читает ни одного с атрибутированной строки —
-  `apple-backports/facts/UIKit/UIAccessibilitySpeechAttributes.md`; каждый пишет в журнал именно с этим.
+  `docs/reference/backports/UIKit/UIAccessibilitySpeechAttributes.md`; каждый пишет в журнал именно с этим.
   Эти четыре `Text`-перегрузки — то, что добавил 26.2; `View`-перегрузки были уже в 16.4.
   `TypesettingLanguage` назван по идентификатору языка: в Foundation этой поры нет `Locale.Language`.
 - `PlainButtonStyle`, `BorderedButtonStyle`, `BorderedProminentButtonStyle`, `DefaultButtonStyle` и

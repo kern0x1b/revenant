@@ -5,7 +5,7 @@ frames. The writer is `files/TabularData/CSVWriting.swift`; the comparison is
 `tests/backports/host/createml/csvwriting.swift`, which builds each frame in both modules, writes it with each
 module's options, and fails on any difference in the bytes, or in the error's case, row, column, cell bytes
 and text. The declarations are the SDK's, as the spec rows give them
-(`packages/frameworks/apple-backports/spec/TabularData/swift.tsv`).
+(`the deleted registry package spec/TabularData/swift.tsv`).
 
 ## Carried
 

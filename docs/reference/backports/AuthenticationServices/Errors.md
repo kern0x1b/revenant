@@ -6,7 +6,7 @@ the commands named below.
 
 ## What is carried
 
-The spec rows are `packages/frameworks/apple-backports/spec/AuthenticationServices/swift.tsv`: the four error
+The spec rows are `the deleted registry package spec/AuthenticationServices/swift.tsv`: the four error
 structs and their `Code` containers, 80 rows in all.
 
 | Type | Rows | Carried |
@@ -28,7 +28,7 @@ below confirms the host answers the same way: `CustomNSError`, `Hashable`, `Erro
 ## Domains and codes
 
 - Domains: `com.apple.AuthenticationServices.AuthorizationError` (`ASAuthorizationErrorDomain`,
-  revenant@apple-backports `AuthenticationServices/ASConstants13_0.m`),
+  the Backports `AuthenticationServices/ASConstants13_0.m`),
   `ASCredentialIdentityStoreErrorDomain` and `ASExtensionErrorDomain` (`ASConstants12_0.m`),
   `com.apple.AuthenticationServices.WebAuthenticationSession` (`ASWebAuthenticationSession.m`).
   The host reads the same four strings (below).

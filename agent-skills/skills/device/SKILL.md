@@ -83,7 +83,7 @@ xmake device -y install
 ```
 
 It builds, writes every package the project declares (the app's, its dependencies — the
-`org.revenant.apple-backports` and shared Swift runtime packages `xmake deb` carries — and any probe
+`org.revenant.backports` and shared Swift runtime packages `xmake deb` carries — and any probe
 or test stand with a control file of its own), refuses when `/Applications/<Name>.app` on the device
 belongs to another bundle identifier, copies each `.deb` to `/tmp` on the device, runs `dpkg -i`, and
 then `su mobile -c uicache` so SpringBoard shows the icon.
@@ -156,7 +156,7 @@ xmake device uninstall <package>                 # dpkg -r, then the shared runt
 xmake device --keep uninstall <package>          # dpkg -r of the named packages only
 ```
 
-It never removes `org.revenant.apple-backports`: other programs built with the toolchain use it.
+It never removes `org.revenant.backports`: other programs built with the toolchain use it.
 
 ## 8. root and mobile
 

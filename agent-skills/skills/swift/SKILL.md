@@ -144,7 +144,7 @@ How to know it worked: the build (`-v`, §2) compiles the `.m` file that include
 
 ## 5. Backports and apple-compat from Swift
 
-**Backports.** Swift reaches what `revenant@apple-backports` implements only through the runtime's
+**Backports.** Swift reaches what the `frameworks/Backports` targets implement only through the runtime's
 `backports` config (`README.md:575-596`). With it, `modules/apple/lift.lua` lowers, in copies of
 the SDK's headers, the release of every API the backports implement to the program's release,
 and the rule hands those headers to your Swift (`v0.8.10:rules/swift/xmake.lua:69-92`). What it
@@ -157,9 +157,9 @@ The requires, from the rule and the recipe at the pin (`rules/swift/xmake.lua:75
 - `add_requires("revenant@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})`;
   an application may add `backports_uikit = true`, which links UIKit's overlay against
   libUIKitBackports (`backports_uikit` without `backports` is refused);
-- `add_requires("revenant@apple-backports", {alias = "apple-backports", configs = {coredata = true}})`,
+- `add_deps("CoreDataBackports")`,
   with `uikit = true` when the runtime has `backports_uikit` (and whatever the skill `backports`
-  asks for the API you call), and `add_packages("apple-backports")` in the target.
+  asks for the API you call), and `add_deps("FoundationBackports")` in the target.
 
 The rule refuses the build when the program does not carry the backports the runtime links, and
 names the missing config: a lowered call finds its implementation only where that library is

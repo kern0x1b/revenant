@@ -4,7 +4,7 @@ Source of every behaviour below: the host's own `TabularData` (macOS 27 SDK, Swi
 bytes. The reader is `files/TabularData/CSVReading.swift`; the comparison is
 `tests/backports/host/createml/csvreading.swift`, which runs both in one process and fails on any
 difference. The declarations are the SDK's, as the spec rows give them
-(`packages/frameworks/apple-backports/spec/TabularData/swift.tsv`).
+(`the deleted registry package spec/TabularData/swift.tsv`).
 
 ## Carried
 

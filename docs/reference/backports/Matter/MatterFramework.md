@@ -47,7 +47,7 @@ this measurement came from; the members could not be had at all until the framew
   instead of a whole package resolve.
 **The link succeeds** with `-Wl,-no_implicit_dylibs` (see the flag's reason below): `libMatterBackports.dylib`,
 45 110 492 bytes, `MH_MAGIC ARM V7`, 1506 exported `MTR*` classes, 24 777 exported symbols, 382 undefined, install
-name `/usr/lib/revenant/org.revenant.apple-backports/libMatterBackports.dylib`.
+name `/usr/lib/revenant/org.revenant.backports/libMatterBackports.dylib`.
 
 - The four link experiments that found it, each one a link, over the 125 objects the build produces (the framework's 123 plus the two generated Apple spellings): **dropping** the two sources the framework's target shares
   with `libCHIP.a` (`DescriptorCluster.cpp`, `AttributePersistenceProviderInstance.cpp`) - asserts, so the duplicate
@@ -278,7 +278,7 @@ of the framework's own xcconfig, which I had not read yet.
 - **Signposts.** The framework's device browser, `MTRDeviceConnectivityMonitor.mm`, watches a peer's reachability
   through `nw_connection_*` of Network.framework (iOS 12) and the Darwin platform behind it uses the `os_signpost_*`
   family of libsystem (iOS 12). A release below 12 has neither. Network's connection is `libNetworkBackports.dylib`
-  (`apple-backports`, `facts/Network/NWConnection.md`): a real datagram socket, the path reported by the path monitor
+  (the Backports, and the facts of `Network/NWConnection.md`): a real datagram socket, the path reported by the path monitor
   the Foundation library already carries, and viability that means the kernel has a route to the address and the
   device's own reachability says the path is satisfied. The signposts are `revenant@apple-compat`'s: the system's own
   where a release has them, and here the header's answer for signposts that are turned off, with `os_signpost_enabled`
@@ -301,7 +301,7 @@ of the framework's own xcconfig, which I had not read yet.
   section for that, and the Matter core spec's BLE commissioning section has not been read in this tree. A connect that
   then fails is not reported by this file, which has no `didFailToConnectPeripheral`. The constant itself is not yet a
   CoreBluetooth backport: the key's weak import stays null on 6.1.3 until one exists (open, see the report).
-  - Status (v-matter8, 2026-10-14): the constant is now carried by `libCoreBluetoothBackports.dylib` (apple-backports
+  - Status (v-matter8, 2026-10-14): the constant is now carried by `libCoreBluetoothBackports.dylib` (the Backports
     `corebluetooth`, `facts/CoreBluetooth/CBAdvertisementDataIsConnectable.md`), linked before `-framework CoreBluetooth`.
     The import binds to the backport's string, `kCBAdvDataIsConnectable`, on 6.1.3 and is never null there. The absent-key
     branch of the patch now answers only for a release whose CoreBluetooth never sends the key (6.1.3 measured; the host

@@ -5,7 +5,7 @@ come from the commands named here, run on 2026-10-17 from the `v-impl-swift-apps
 
 ## What is carried
 
-The spec rows are `packages/frameworks/apple-backports/spec/WeatherKit/swift.tsv`, the `Wind.CompassDirection`
+The spec rows are `the deleted registry package spec/WeatherKit/swift.tsv`, the `Wind.CompassDirection`
 container: 25 rows (the enum row, 16 cases, `abbreviation`, `description`, `accessibilityDescription`,
 `init(rawValue:)`, `AllCases`, `RawValue`, `allCases` and `rawValue`).
 

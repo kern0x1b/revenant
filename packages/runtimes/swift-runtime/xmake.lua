@@ -296,7 +296,7 @@ package("swift-runtime")
         local port_headers, carried = {}, {}
 
         if package:config("backports") then
-            raise("swift-runtime's backports config is blocked: its port headers came from tools/gen, which is deleted with apple-backports, and the Backports libraries are project targets that a package cannot depend on")
+            raise("swift-runtime's backports config is blocked: its port headers came from tools/gen, which is deleted, and the Backports libraries are project targets that a package cannot depend on")
         end
 
         local foundation_links = {}

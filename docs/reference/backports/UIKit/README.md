@@ -100,7 +100,7 @@ declaration is wrong.
 ## The 86 that resolve: 0 error lines
 
 Against the port's headers made from **this tree's registry** (the generator's output
-`.agent-work/runs/uikit-c/port/6.1.3/`, over `packages/frameworks/apple-backports`), the typecheck over the 86 rows that are not waiting is clean.
+`.agent-work/runs/uikit-c/port/6.1.3/`, over `frameworks/Backports`), the typecheck over the 86 rows that are not waiting is clean.
 That number was measured on an earlier run, before this series; the output has not been re-typechecked under this
 path, so read it as that run's measurement, not a fresh one:
 

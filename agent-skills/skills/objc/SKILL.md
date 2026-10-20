@@ -132,7 +132,7 @@ How to know it worked: in the `-v` build log each compile line carries
 
 For each API newer than `apple_minimum`, choose in this order, and record the choice in `PROJECT.md`:
 
-1. **A backport**, if `revenant@apple-backports` implements it: the app calls the modern API and the
+1. **A backport**, if the `frameworks/Backports` targets implement it: the app calls the modern API and the
    backport supplies it on the old release (skill `backports`). For a C call of the system library,
    `revenant@apple-compat` carries shims (§3).
 2. **The release's own older API**: `UIAlertView` for `UIAlertController`, `NSURLConnection` for
