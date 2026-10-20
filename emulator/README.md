@@ -37,6 +37,6 @@ The requirements, the options and how to boot a root filesystem are in
 
 ## License
 
-MPL-2.0. `LICENSE` is the licence text, and `NOTICE` the notices to ship with a binary.
+MPL-2.0. The licence text is `LICENSES/MPL-2.0.txt`, and `docs/reference/emulator/NOTICE` the notices to ship with a binary.
 
 Built with Claude (Anthropic). This project is developed with AI assistance, openly; see the commit history.

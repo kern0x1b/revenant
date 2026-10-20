@@ -1,8 +1,8 @@
 # The corpus and the benchmark
 
-`corpus/` holds the translator's own regression programs and `perf/` its benchmark. Their sources are C, Objective-C,
+`tests/` holds the translator's own regression programs and `tools/perf/` its benchmark. Their sources are C, Objective-C,
 assembly and Swift. The steps that build, translate and check them are Lua run by xmake: a `check.lua` or `build.lua`
-beside the sources, and the shared parts in `scripts/` (`env.lua`, `corpus.lua`, `translate.lua`, `macho.lua`).
+beside the sources, and the shared parts in `tools/` (`env.lua`, `corpus.lua`, `translate.lua`, `macho.lua`).
 
 ## Running
 
@@ -20,9 +20,9 @@ build targets each leave an `.app` or an executable in their own target folder.
 A check that also has a device part is run by hand, with the output folder as its argument:
 
 ```sh
-./xmakew l recompiler/corpus/weakimport/check.lua <out>
-./xmakew l recompiler/corpus/classpair/check.lua <out>
-./xmakew l recompiler/corpus/swiftconformance/check.lua <out>
+./xmakew l recompiler/tests/weakimport/check.lua <out>
+./xmakew l recompiler/tests/classpair/check.lua <out>
+./xmakew l recompiler/tests/swiftconformance/check.lua <out>
 ```
 
 These need a claimed device (the skill `device`): `REVENANT_DEVICE_HOLDER` and `REVENANT_DEVICE`
@@ -33,7 +33,7 @@ to `build/recompiler/corpus/<name>`.
 
 ### jumptable
 
-A control for `JumpTables::Resolve` in `xlate/src/xlate.cpp`. At build time, xlate finds where a register-indirect
+A control for `JumpTables::Resolve` in `src/xlate/xlate.cpp`. At build time, xlate finds where a register-indirect
 branch can go: it reads the guest's byte table for every index the branch's guards let through.
 
 The demo crashed past `_DictionaryStorage.allocate` with "jump to an address that does not start a translated
@@ -78,10 +78,10 @@ those as lifted, and the program would only fail when it got there.
 
 ### tsdscan
 
-A control for xlate's build-time TSD offset scan (`xlate/src/tsd_scan.cpp`). xlate refuses to lift an image that reads
+A control for xlate's build-time TSD offset scan (`src/xlate/tsd_scan.cpp`). xlate refuses to lift an image that reads
 `TPIDRRO_EL0` at an offset nobody has audited. Two builds of `main.c` are fed to xlate directly; neither is run:
 
-1. `TSD_OFFSET=0x358`, Swift's `__PTK_FRAMEWORK_SWIFT_KEY7`. This is the one offset that `runtime/runtime.c`'s fake TSD
+1. `TSD_OFFSET=0x358`, Swift's `__PTK_FRAMEWORK_SWIFT_KEY7`. This is the one offset that `src/runtime/runtime.c`'s fake TSD
    block is measured and sized for, so xlate must accept the image.
 2. `TSD_OFFSET=0x40`, an offset no guest has ever been measured touching. xlate must refuse it. The error must name the
    offset and each of the three cases by its function:
@@ -96,7 +96,7 @@ place, and it would be read as this run's answer.
 
 ### tsdguard
 
-Proves the page-protection scheme of `runtime/xl_tsd_guard.h` on the build host. That header is the runtime half of the
+Proves the page-protection scheme of `src/runtime/xl_tsd_guard.h` on the build host. That header is the runtime half of the
 `TPIDRRO_EL0` workaround. mmap, mprotect and SIGSEGV are POSIX, so `main.c` is compiled for the host and run directly. There
 is no device, lift or translation.
 
@@ -107,7 +107,7 @@ a bounded parent-side wait and a SIGKILL fallback, after a real hang on a device
 
 ### int128
 
-Checks `runtime/int128.c` (`__udivti3`, `__umodti3`, `__divti3`, `__modti3`) against a 128-bit reference in Lua. The
+Checks `src/runtime/int128.c` (`__udivti3`, `__umodti3`, `__divti3`, `__modti3`) against a 128-bit reference in Lua. The
 inputs are:
 
 - edge values, and every pair of them;
@@ -178,7 +178,7 @@ binaries carry.
 
 ### swiftconformance (device only)
 
-A control for the `_dyld_register_func_for_add_image` bridge in `runtime/bridge.m`, the fix for the
+A control for the `_dyld_register_func_for_add_image` bridge in `src/runtime/bridge.m`, the fix for the
 `_DictionaryStorage.allocate` crash.
 
 In `fixture.swift`, `Widget`'s conformance to `Hashable` is a `__swift5_proto` record in the guest image itself. The

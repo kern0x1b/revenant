@@ -14,7 +14,7 @@ covers the build, the options and a boot.
 
 ## Layout
 
-- `app/`: the verbs, the live control channel (`--control-stdin`), the SDL window.
+- `src/app/`: the verbs, the live control channel (`--control-stdin`), the SDL window; its headers are in `include/app/`.
 - `src/`: the library. `src/runtime/` is the session, `src/kernel/` the BSD and Mach side of the kernel,
   `src/mach/` Mach messaging, `src/device_state/` what the firmware is told about the device, `src/foundation/` the
   address space and the CPU wrapper, and `src/graphics/`, `src/media/`, `src/network/`, `src/telephony/`,

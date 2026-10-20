@@ -13,22 +13,22 @@ repository's root `AGENTS.md` applies.
 | Path | What it is |
 | --- | --- |
 | `xmake.lua` | The member's part of the revenant xmake project, included from the top `xmake.lua`: the targets `xlate` and `xlgen`, the corpus and perf targets, and the dependencies. |
-| `xlate/` | The lifter: arm64 to LLVM IR, jump-table recovery, Objective-C metadata and data-bind rewriting, and the `lifted.bc` output. Target `xlate`. Also `xlgen`, which generates the guest-to-host ABI bridges from the SDK headers. Target `xlgen`. |
-| `runtime/` | The armv7 support runtime: message routing, block bridging, weak references, ivar-layout reconciliation, Objective-C compatibility shims. Compiled per translation, because it includes the state header xlate writes for each app. |
-| `scripts/` | `translate.lua` and `ipa.lua`, the pipeline; `env.lua` (tools and paths from the xmake configuration), `macho.lua` (the Mach-O edits), `corpus.lua` (shared by the corpus checks), `imports.lua` and `absent_on_target.lua`. |
-| `corpus/` | Small self-contained test programs and apps: the translator's regression suite. [The corpus](../../reference/recompiler/corpus.md) says what each check proves. |
-| `perf/` | The on-device translated-versus-native benchmark. |
-| `targets/` | Untracked (`.gitignore` ignores `targets/*` except `targets/*-includes.h`): one directory per real-world app, living only on this disk. Everything under it, `*-out*`, `*-arm64`, `*.app`, `*.ipa`, `*.log`, is generated or investigative material. Never read it as source, never grep it wholesale, never move it. |
+| `src/xlate/` | The lifter: arm64 to LLVM IR, jump-table recovery, Objective-C metadata and data-bind rewriting, and the `lifted.bc` output. Target `xlate`. Also `xlgen`, which generates the guest-to-host ABI bridges from the SDK headers. Target `xlgen`. |
+| `src/runtime/` | The armv7 support runtime: message routing, block bridging, weak references, ivar-layout reconciliation, Objective-C compatibility shims. Compiled per translation, because it includes the state header xlate writes for each app. |
+| `tools/` | `translate.lua` and `ipa.lua`, the pipeline; `env.lua` (tools and paths from the xmake configuration), `macho.lua` (the Mach-O edits), `corpus.lua` (shared by the corpus checks), `imports.lua` and `absent_on_target.lua`. |
+| `tests/` | Small self-contained test programs and apps: the translator's regression suite. [The corpus](../../reference/recompiler/corpus.md) says what each check proves. |
+| `tools/perf/` | The on-device translated-versus-native benchmark. |
+| `targets/` | Not a folder of the repository: its two `*-includes.h` lists are in `include/`. A real-world app's folder, `targets/<app>/`, is untracked and lives only on the disk that builds it. Everything under it, `*-out*`, `*-arm64`, `*.app`, `*.ipa`, `*.log`, is generated or investigative material. Never read it as source, never grep it wholesale, never move it. |
 
 Rellume, farmdec and BlocksRuntime are packages of `third_party/`, pinned by commit with our changes as patches.
 
 ## Conventions
 
 - Keep translator changes **universal**: a fix must work for any input binary, not be special-cased to one app.
-  App-specific behaviour belongs in `targets/<app>/`, not in `xlate/` or `runtime/`.
+  App-specific behaviour belongs in `targets/<app>/`, not in `src/xlate/` or `src/runtime/`.
 - Missing target-OS APIs are **reported, not stubbed** by the translator. They belong to the backports. When a target
   needs a backport that does not exist yet, route the request to the backports and do not improvise a stub in
-  `runtime/`.
+  `src/runtime/`.
 - Scripts are Lua run by `./xmakew l`; no shell or Python scripts. No comments in code, scripts or recipes: the why
   goes in the commit message, and what a reader needs goes in `docs/`.
 - Git is forward only, as the root `AGENTS.md` says.

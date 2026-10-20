@@ -16,7 +16,7 @@ took 40 to 75 minutes on the machine it was measured on.
 ## Translate an executable
 
 ```sh
-./xmakew l recompiler/scripts/translate.lua path/to/app-arm64 includes.h out/
+./xmakew l recompiler/tools/translate.lua path/to/app-arm64 includes.h out/
 ```
 
 `includes.h` imports the frameworks the app uses. The output `out/<name>` is an armv7 iOS 6 executable; drop it into
@@ -25,19 +25,19 @@ the app bundle in place of the original.
 A whole `.ipa` is translated with
 
 ```sh
-./xmakew l recompiler/scripts/ipa.lua App.ipa includes.h out/App.ipa
+./xmakew l recompiler/tools/ipa.lua App.ipa includes.h out/App.ipa
 ```
 
 The translator takes a compiled arm64 Mach-O, never source. For an app under `targets/` that means the decrypted
-executable and frameworks of its released `.ipa`, never objects built from an edited copy of its source. `corpus/` and
-`perf/` build their own arm64 input from their own source.
+executable and frameworks of its released `.ipa`, never objects built from an edited copy of its source. `tests/` and
+`tools/perf/` build their own arm64 input from their own source.
 
 ## Guest libraries, and what a bind names
 
 Further arguments are guest images lifted with the executable:
 
 ```sh
-./xmakew l recompiler/scripts/translate.lua app-arm64 includes.h out/ libA.dylib libB.dylib
+./xmakew l recompiler/tools/translate.lua app-arm64 includes.h out/ libA.dylib libB.dylib
 ```
 
 `XL_FRAMEWORKS_DIR` finds a bundle's embedded frameworks. A bind takes an image by the install name it spells,
@@ -55,7 +55,7 @@ is `@rpath/libc++.1.dylib`, the recipe's name for it. It is translated with
 
 ```sh
 XL_REPLACES=/usr/lib/libc++.1.dylib=<libs>/libc++.1.dylib \
-  ./xmakew l recompiler/scripts/translate.lua <demo>-arm64 recompiler/targets/swiftdemo-includes.h out/ \
+  ./xmakew l recompiler/tools/translate.lua <demo>-arm64 recompiler/include/swiftdemo-includes.h out/ \
   <libs>/libswiftCore.dylib <libs>/libc++.1.dylib <libs>/libc++abi.1.dylib
 ```
 
@@ -69,7 +69,7 @@ relinks the runtime, a few seconds.
 
 - `./xmakew test 'recompiler_corpus/*'` runs the host part of every corpus check.
 - `./xmakew build recompiler_cxxinit recompiler_refrepro recompiler_devtime` builds the corpus apps and the benchmark.
-- `./xmakew l recompiler/corpus/<name>/check.lua <out>` runs a check whole, including its device part where it has
+- `./xmakew l recompiler/tests/<name>/check.lua <out>` runs a check whole, including its device part where it has
   one (weakimport, classpair, swiftconformance).
 - `./xmakew l tools/check.lua recompiler` runs the configuration, the build and the host checks together.
 
