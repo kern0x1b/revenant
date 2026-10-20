@@ -106,7 +106,3 @@ object, so what Swift reads from it stays true. `runtime/swift_classes.m`.
   it does not run to the end yet, and what a Swift program meets is measured one failure at a time.
 - iOS 7+ system APIs the app calls must exist on the target; ones that don't are reported, not stubbed (they belong to a separate backports effort).
 - Un-liftable functions (hand-written assembly in crash reporters, etc.) become traps that fault only if actually called.
-
-## License
-
-MIT — see `LICENSE`.
