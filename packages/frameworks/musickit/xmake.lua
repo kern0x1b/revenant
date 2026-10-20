@@ -10,11 +10,11 @@ package("musickit")
     add_configs("backports", {description = "Compile against the swift-runtime built with the backports, for a port that requires it so.", default = false, type = "boolean"})
 
     local sources = {}
-    for _, file in ipairs(os.files(path.join(os.scriptdir(), "files", "**", "*.swift"))) do
+    for _, file in ipairs(os.files(path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "MusicKit", "*.swift"))) do
         table.insert(sources, file)
     end
-    table.insert(sources, path.join(os.scriptdir(), "files", "RevenantC.c"))
-    local digests = {path.join(os.scriptdir(), "xmake.lua"), path.join(os.scriptdir(), "README.md")}
+    table.insert(sources, path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "MusicKit", "RevenantC.c"))
+    local digests = {path.join(os.scriptdir(), "xmake.lua"), path.join(os.scriptdir(), "..", "..", "..", "docs", "reference", "backports", "MusicKit", "README.md")}
     for _, file in ipairs(sources) do
         table.insert(digests, path.filename(file) .. "=" .. hash.sha256(file))
     end
@@ -43,21 +43,21 @@ package("musickit")
         local swiftdir = path.join(package:installdir("lib"), "swift", "iphoneos")
         local module = path.join(swiftdir, "MusicKit.swiftmodule")
         os.mkdir(module)
-        local files = os.files(path.join("files", "MusicKit", "**.swift"))
+        local files = os.files(path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "MusicKit", "*.swift"))
         assert(#files > 0, "the module has no sources")
         os.mkdir(path.absolute("objects"))
         local micro = assert(package:dep("micro-ecc"), "MusicKit signs its developer token with revenant@micro-ecc")
-        os.vrunv(toolchain:tool("cc"), table.join(target, {"-I" .. path.join(os.scriptdir(), "files", "include"),
-                 "-I" .. path.join(micro:installdir("include")), "-I" .. path.join("files"),
-                 "-Os", "-fvisibility=hidden", "-c", path.join("files", "RevenantC.c"),
+        os.vrunv(toolchain:tool("cc"), table.join(target, {"-I" .. path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "MusicKit", "include"),
+                 "-I" .. path.join(micro:installdir("include")), "-I" .. path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "MusicKit"),
+                 "-Os", "-fvisibility=hidden", "-c", path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "MusicKit", "RevenantC.c"),
                  "-o", path.absolute(path.join("objects", "RevenantC.o"))}))
         os.vrunv(swiftc, table.join(swift.runtime_flags({
             architecture = package:arch(), deployment = minimum, sdk = sdk,
             resources = path.join(runtime:installdir(), "lib", "swift"),
             plugins = table.wrap((runtime:envs() or {}).SWIFT_PLUGIN_PATH)[1],
             module = "MusicKit", optimize = "fastest", prefix_map = os.curdir() .. "=/musickit"}),
-            {"-import-objc-header", path.join("files", "include", "MusicKitC.h"),
-             "-I", path.join("files", "include"),
+            {"-import-objc-header", path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "MusicKit", "include", "MusicKitC.h"),
+             "-I", path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "MusicKit", "include"),
              "-emit-module", "-emit-module-path", path.join(module, package:arch() .. "-apple-ios.swiftmodule"), "-c"}, files,
             {"-o", path.absolute(path.join("objects", "MusicKit.o"))}))
         os.vrunv(toolchain:tool("ar"), {"-rcs", path.join(package:installdir("lib"), "libMusicKit.a"),

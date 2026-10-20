@@ -39,7 +39,7 @@ package("swift-runtime")
         checkout.pinned(opt.sourcedir, sources)
     end)
 
-    includes(path.join(os.scriptdir(), "digest.lua"))
+    includes(path.join(os.scriptdir(), "port", "digest.lua"))
     local digests = {"sources=" .. swift_runtime_sources_digest}
     for _, patch in ipairs(os.files(path.join(os.scriptdir(), "patches", "**.patch"))) do
         table.insert(digests, path.relative(patch, path.join(os.scriptdir(), "patches")) .. "=" .. hash.sha256(patch))

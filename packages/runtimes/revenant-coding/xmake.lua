@@ -7,8 +7,8 @@ package("revenant-coding")
     add_links("revenant-coding")
 
     local digests = {"xmake.lua=" .. hash.sha256(path.join(os.scriptdir(), "xmake.lua"))}
-    local sources = table.join(os.files(path.join(os.scriptdir(), "files", "*.h")),
-                                  os.files(path.join(os.scriptdir(), "files", "*.m")))
+    local sources = table.join(os.files(path.join(os.scriptdir(), "port", "*.h")),
+                                  os.files(path.join(os.scriptdir(), "port", "*.m")))
     table.sort(sources)
     for _, source in ipairs(sources) do
         table.insert(digests, path.filename(source) .. "=" .. hash.sha256(source))
@@ -23,7 +23,7 @@ package("revenant-coding")
         local target = {"-target", package:arch() .. "-apple-ios",
                         "-miphoneos-version-min=" .. toolchain:config("deployment"),
                         "-isysroot", toolchain:config("sdkdir"), "-I" .. os.curdir()}
-        local sources = os.files(path.join(os.scriptdir(), "files", "*.m"))
+        local sources = os.files(path.join(os.scriptdir(), "port", "*.m"))
         if #sources == 0 then
             raise("revenant-coding has no source under files/: the library would be built empty and "
                   .. "every dylib that links it would have no implementation behind it")
@@ -39,7 +39,7 @@ package("revenant-coding")
         os.mkdir(package:installdir("lib"))
         os.vrunv("xcrun", table.join({"libtool", "-static", "-o", path.join(package:installdir("lib"), "librevenant-coding.a")}, objects))
         os.mkdir(package:installdir("include"))
-        for _, header in ipairs(os.files(path.join(os.scriptdir(), "files", "*.h"))) do
+        for _, header in ipairs(os.files(path.join(os.scriptdir(), "port", "*.h"))) do
             os.vcp(header, package:installdir("include"))
         end
     end)

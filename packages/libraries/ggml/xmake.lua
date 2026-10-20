@@ -8,7 +8,7 @@ package("ggml")
     add_versions("0.25.3", "cd9b92d5652f5e4abb41603bf59e269f8fec1b2d05ce22fded981064dd25fb89")
     add_links("ggml")
 
-    add_configs("recipe", {description = "The digest of this recipe, so a changed flag is a different library.", default = hash.strhash128(hash.sha256(path.join(os.scriptdir(), "xmake.lua")) .. hash.sha256(path.join(os.scriptdir(), "ggml-libcxx.cpp"))), type = "string", readonly = true})
+    add_configs("recipe", {description = "The digest of this recipe, so a changed flag is a different library.", default = hash.strhash128(hash.sha256(path.join(os.scriptdir(), "xmake.lua")) .. hash.sha256(path.join(os.scriptdir(), "port", "ggml-libcxx.cpp"))), type = "string", readonly = true})
 
     local FLAGS = {"-Os", "-fvisibility=hidden", "-fno-exceptions", "-fno-rtti", "-D_GNU_SOURCE", "-Dggml_EXPORTS", "-DGGML_CPU_GENERIC",
         "-Dclock_gettime=revenant_ggml_clock_gettime"}
@@ -47,7 +47,7 @@ package("ggml")
         do
             local shim = path.absolute(path.join("objects", "ggml-libcxx.o"))
             local shim_public = path.absolute(path.join("objects", "ggml-libcxx-public.o"))
-            os.vrunv(toolchain:tool("cxx"), table.join(target, FLAGS, CXXFLAGS, {"-c", path.join(package:scriptdir(), "ggml-libcxx.cpp"), "-o", shim_public}))
+            os.vrunv(toolchain:tool("cxx"), table.join(target, FLAGS, CXXFLAGS, {"-c", path.join(package:scriptdir(), "port", "ggml-libcxx.cpp"), "-o", shim_public}))
             os.vrunv("xcrun", {"ld", "-r", "-arch", package:arch(), "-platform_version", "ios", toolchain:config("deployment"), "16.4",
                                "-keep_private_externs", "-unexported_symbol", "*", shim_public, "-o", shim})
             table.insert(objects, shim)

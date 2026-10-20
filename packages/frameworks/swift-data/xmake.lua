@@ -43,7 +43,7 @@ package("swift-data")
 
         local sources = {}
         for _, module in ipairs(modules) do
-            table.insert(sources, path.join(package:scriptdir(), "files", module, "*.swift"))
+            table.insert(sources, path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", module, "*.swift"))
         end
 
         local port_headers = table.wrap((runtime:envs() or {}).REVENANT_SWIFT_PORT_HEADERS)
@@ -65,7 +65,7 @@ package("swift-data")
         end
 
         package:setenv("REVENANT_SWIFT_MODULES", install)
-        os.cp(path.join(package:scriptdir(), "README.md"), package:installdir())
+        os.cp(path.join(package:scriptdir(), "..", "..", "..", "docs", "reference", "backports", "SwiftData", "README.md"), package:installdir())
     end)
 
     on_test(function (package)

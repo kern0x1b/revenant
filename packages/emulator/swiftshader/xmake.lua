@@ -16,7 +16,7 @@ package("swiftshader")
 
     on_install("macosx|arm64", function (package)
         local generated = path.absolute("spirv-tools-generated")
-        import("spirv_tools_generated", {rootdir = package:scriptdir(), anonymous = true}).main({
+        import("spirv_tools_generated", {rootdir = path.join(package:scriptdir(), "port"), anonymous = true}).main({
             headers = path.absolute(path.join("third_party", "SPIRV-Headers", "include", "spirv")),
             tools = path.absolute(path.join("third_party", "SPIRV-Tools")),
             outputdir = generated})

@@ -12,12 +12,13 @@ package("createml")
     add_configs("backports_uikit", {description = "With backports: the runtime whose UIKit overlay is linked to the UIKit backports.", default = false, type = "boolean"})
 
     local digested = {path.join(os.scriptdir(), "xmake.lua")}
-    for _, file in ipairs(os.files(path.join(os.scriptdir(), "files", "**.swift"))) do
-        table.insert(digested, file)
+    local src = path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "src")
+    for _, module in ipairs({"CoreML", "CreateML", "CreateMLComponents", "TabularData"}) do
+        for _, file in ipairs(os.files(path.join(src, module, "**.swift"))) do
+            table.insert(digested, file)
+        end
     end
-    for _, file in ipairs(os.files(path.join(os.scriptdir(), "files", "**.h"))) do
-        table.insert(digested, file)
-    end
+    table.insert(digested, path.join(src, "CoreML", "RevenantCoreML.h"))
     table.sort(digested)
     local digests = {}
     for _, file in ipairs(digested) do
@@ -51,7 +52,7 @@ package("createml")
 
         local sources = {}
         for _, module in ipairs(modules) do
-            table.insert(sources, path.join(package:scriptdir(), "files", module, "*.swift"))
+            table.insert(sources, path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", module, "*.swift"))
         end
 
         local port_headers = table.wrap((runtime:envs() or {}).REVENANT_SWIFT_PORT_HEADERS)
@@ -60,7 +61,7 @@ package("createml")
             local folder = path.join(install, module .. ".swiftmodule")
             os.mkdir(folder)
             local header = module == "CoreML"
-                          and {"-import-objc-header", path.join(package:scriptdir(), "files", "CoreML", "RevenantCoreML.h")}
+                          and {"-import-objc-header", path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "CoreML", "RevenantCoreML.h")}
                           or nil
             local argv = table.join(swift.runtime_flags({
                 architecture = package:arch(), deployment = minimum, sdk = sdk,
@@ -76,7 +77,7 @@ package("createml")
         end
 
         package:setenv("REVENANT_SWIFT_MODULES", install)
-        os.cp(path.join(package:scriptdir(), "README.md"), package:installdir())
+        os.cp(path.join(package:scriptdir(), "..", "..", "..", "docs", "reference", "backports", "CreateML", "README.md"), package:installdir())
     end)
 
     on_test(function (package)

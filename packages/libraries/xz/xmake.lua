@@ -9,7 +9,7 @@ package("xz")
     add_links("xzcodec")
 
     local recipe = os.scriptdir()
-    local digest = {hash.sha256(path.join(recipe, "xmake.lua")), hash.sha256(path.join(recipe, "config.h"))}
+    local digest = {hash.sha256(path.join(recipe, "xmake.lua")), hash.sha256(path.join(recipe, "port", "config.h"))}
     add_configs("recipe", {description = "The digest of this recipe and its config.h, so a changed flag is a different library.", default = hash.strhash128(table.concat(digest, ";")), type = "string", readonly = true})
 
     local FLAGS = {"-Os", "-fvisibility=hidden", "-fno-strict-aliasing", "-DLZMA_API_STATIC", "-DHAVE_CONFIG_H"}
@@ -40,7 +40,7 @@ package("xz")
         local toolchain = assert(package:toolchains(), "xz is built with the apple-ios toolchain")[1]
         toolchain:load()
         local target = {"-target", package:arch() .. "-apple-ios", "-miphoneos-version-min=" .. toolchain:config("deployment"),
-                        "-isysroot", toolchain:config("sdkdir"), "-I" .. recipe, "-I" .. os.curdir(),
+                        "-isysroot", toolchain:config("sdkdir"), "-I" .. path.join(recipe, "port"), "-I" .. os.curdir(),
                         "-Isrc/liblzma/api", "-Isrc/liblzma/common", "-Isrc/liblzma/check", "-Isrc/liblzma/lz", "-Isrc/liblzma/lzma",
                         "-Isrc/liblzma/rangecoder", "-Isrc/liblzma/simple", "-Isrc/liblzma/delta", "-Isrc/common"}
         local objects = {}

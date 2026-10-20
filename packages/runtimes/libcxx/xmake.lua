@@ -9,7 +9,7 @@ package("libcxx")
     add_deps("revenant@apple-compat", {alias = "apple-compat"})
     add_deps("cmake", "ninja", {kind = "binary"})
 
-    includes(path.join(os.scriptdir(), "digest.lua"))
+    includes(path.join(os.scriptdir(), "port", "digest.lua"))
     local digests = {"sources=" .. libcxx_sources_digest}
     for _, patch in ipairs(os.files(path.join(os.scriptdir(), "patches", "*.patch"))) do
         table.insert(digests, path.filename(patch) .. "=" .. hash.sha256(patch))
@@ -54,7 +54,7 @@ package("libcxx")
         end
         local compat = package:dep("apple-compat")
         local cxxflags = {"-mllvm", "-hot-cold-split=false", "-D_LIBCPP_NO_UTIMENSAT"}
-        local shflags = {"-Wl,-force_symbols_not_weak_list," .. path.join(package:scriptdir(), "operators-not-weak.exp")}
+        local shflags = {"-Wl,-force_symbols_not_weak_list," .. path.join(package:scriptdir(), "port", "operators-not-weak.exp")}
         for _, symbol in ipairs(compat:data("provided") or {}) do
             local header = path.join(compat:installdir("include"), "revenant", symbol .. ".h")
             if os.isfile(header) then
