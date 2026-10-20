@@ -1,6 +1,4 @@
 #!/bin/bash
-echo "FAIL host/cloudkit/zone-check.sh: its Python steps are gone and not yet ported to Lua: compare.py; the inline block PY at line 115; the inline block PY at line 173" >&2
-exit 1
 # The zone differential's own check, and the only thing that attests it.
 #
 # It runs FIVE things, and the first two exist because a change to this family that passes only the
@@ -44,7 +42,7 @@ fails=0
 # /iPhoneOS16.4.sdk - which the glob here did not spell, so it matched nothing and the first stage of
 # this check reported "no 16.4 SDK with an SDKSettings.json naming it" over an SDK that is installed.
 sdk16=${CHARKIT_SDK_16:-}
-for candidate in "$HOME"/.xmake/packages/i/iphoneos-sdk/16.4/*/Developer.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.4.sdk; do
+for candidate in "${XMAKE_GLOBALDIR:-$HOME/.revenant/cache/xmake-global}"/.xmake/packages/i/iphoneos-sdk/16.4/*/Developer.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.4.sdk; do
     if [ -n "$sdk16" ]; then break; fi
     if [ -f "$candidate/SDKSettings.json" ] &&
        grep -q '"CanonicalName":"iphonesimulator16.4"\|"CanonicalName":"iphoneos16.4"' "$candidate/SDKSettings.json"; then
@@ -99,7 +97,7 @@ echo "== 3. the unplanted comparison, through compare.py =="
 if [ -x "$WORK/zone-port" ] && [ -x "$WORK/host" ]; then
     CLOUDKIT_DATABASE="$WORK/host.json" "$WORK/host" >/dev/null 2>&1
     CLOUDKIT_ZONE="$WORK/port.json" "$WORK/zone-port" >/dev/null 2>&1
-    out=$(python3 tests/backports/host/cloudkit/compare.py "$WORK/host.json" "$WORK/port.json" 2>&1)
+    out=$(runs_xmake l "$HERE/compare.lua" "$WORK/host.json" "$WORK/port.json" 2>&1)
     code=$?
     echo "$out" | sed 's/^/  /'
     if [ "$code" -ne 0 ]; then
@@ -112,22 +110,14 @@ fi
 echo "== 4. the planted control, in a scratch copy, sentinel checked first =="
 if [ -x "$WORK/zone-port" ]; then
     cp $CL/CKRecords8.m "$WORK/plant/CKRecords8.m"
-    python3 - "$WORK/plant/CKRecords8.m" <<'PY'
-import sys
-path = sys.argv[1]
-text = open(path).read()
-zone = text.index("@implementation CKRecordZone {")
-at = text.index("- (BOOL)isEqual:(id)other", zone)      # inside CKRecordZone, not CKRecordZoneID's
-text = text[:at] + "int RevenantPlantMarker = 1;\n\n- (NSInteger)capabilities { return 7; }\n\n" + text[at:]
-open(path, "w").write(text)
-PY
+    runs_xmake l "$HERE/plant-zone.lua" "$WORK/plant/CKRecords8.m"
     xcrun clang -c -target arm64-apple-ios13.1-macabi -isysroot "$HOST_SDK" -fobjc-arc \
         $INC -o "$WORK/plant/CKRecords8.o" "$WORK/plant/CKRecords8.m" 2>"$WORK.plant.log" \
         || { echo "  FAIL the scratch copy did not compile"; fails=$((fails + 1)); }
     if link_port "$WORK/plant/CKRecords8.o" "$WORK/zone-planted" &&
        nm "$WORK/zone-planted" 2>/dev/null | grep -q RevenantPlantMarker; then
         CLOUDKIT_ZONE="$WORK/port-planted.json" "$WORK/zone-planted" >/dev/null 2>&1
-        out=$(python3 tests/backports/host/cloudkit/compare.py "$WORK/host.json" "$WORK/port-planted.json" 2>&1)
+        out=$(runs_xmake l "$HERE/compare.lua" "$WORK/host.json" "$WORK/port-planted.json" 2>&1)
         code=$?
         echo "  the sentinel IS in the linked binary, so the link is not stale"
         echo "$out" | grep -E "^[0-9]+ differ|differ:" | sed 's/^/  /'
@@ -170,15 +160,9 @@ if build_initializers tests/backports/host/cloudkit/initializers-host.m "$WORK/i
         echo "  ok the host answers every case the way facts/CloudKit/Values.md records"
     fi
     cp tests/backports/host/cloudkit/initializers-host.m "$WORK/plant/initializers-planted.m"
-    python3 - "$WORK/plant/initializers-planted.m" <<'PY'
-import sys
-path = sys.argv[1]
-text = open(path).read()
-old = '#define REFUSES @"raises NSInternalInconsistencyException: You must use a concrete subclass of CKOperation"'
-new = '#define REFUSES @"raises NSInvalidArgumentException: You must instantiate one of the CKOperation subclasses"'
-assert text.count(old) == 1, "the expectation the control changes is not there exactly once"
-open(path, "w").write(text.replace(old, new, 1))
-PY
+    runs_xmake l "$HERE/../../common/substitute.lua" once "$WORK/plant/initializers-planted.m" \
+        '#define REFUSES @"raises NSInternalInconsistencyException: You must use a concrete subclass of CKOperation"' \
+        '#define REFUSES @"raises NSInvalidArgumentException: You must instantiate one of the CKOperation subclasses"'
     if build_initializers "$WORK/plant/initializers-planted.m" "$WORK/init-planted"; then
         planted=$(DYLD_FRAMEWORK_PATH="$HOST_SDK/System/iOSSupport/System/Library/Frameworks" \
                   "$WORK/init-planted" 2>&1)
