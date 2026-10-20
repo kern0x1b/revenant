@@ -3,7 +3,7 @@ local tree = import("lib.tree", {rootdir = os.scriptdir(), anonymous = true})
 local USAGE = [[usage: ./xmakew l frameworks/SwiftUI/tools/emulate.lua tests|snapshots|perf [options]
   tests                     the engine tests (SwiftUITests) as the guest's first process
   snapshots [--accept] [--only=NAME]
-                            the snapshot bundle through SpringBoard, its trees against Snapshots/
+                            the snapshot bundle through SpringBoard, its trees against tests/data/snapshots/
   perf                      the demo's timing scenarios through SpringBoard
   --device=ID --release=V   the emulated device and release (tests: iPhone4,1 6.1.3; the others: iPod4,1 6.0)
   --seconds=N --timeout=N   xmake emulate's -s and -t]]
@@ -104,7 +104,7 @@ end
 
 local function references()
     local names = {}
-    for _, file in ipairs(os.files(tree.root("Snapshots", "*.txt"))) do
+    for _, file in ipairs(os.files(tree.root("tests", "data", "snapshots", "*.txt"))) do
         names[path.filename(file)] = true
     end
     return names
@@ -159,7 +159,7 @@ local function snapshots(arguments)
     end
     local differs = 0
     for _, name in ipairs(table.orderkeys(got)) do
-        local shot, reference = path.join(shots, name), tree.root("Snapshots", name)
+        local shot, reference = path.join(shots, name), tree.root("tests", "data", "snapshots", name)
         if not os.isfile(reference) or chosen.accept then
             os.cp(shot, reference)
             print("reference %s written", name)

@@ -12,17 +12,17 @@ if is_plat("iphoneos") then
     local function demo_application(identifier, name, ...)
         add_rules("@addon/revenant/app", "@addon/revenant/swift")
         add_deps("SwiftUI")
-        add_files("Demo/*.swift")
-        add_files("Demo/device/gesture.m")
-        add_includedirs("Demo/device")
+        add_files("examples/showcase/*.swift")
+        add_files("examples/showcase/device/gesture.m")
+        add_includedirs("examples/showcase/device")
         add_packages("apple-backports")
         add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "CoreData")
-        set_values("swift.flags", "-import-objc-header", path.join(os.scriptdir(), "Demo", "device", "bridge.h"))
+        set_values("swift.flags", "-import-objc-header", path.join(os.scriptdir(), "examples", "showcase", "device", "bridge.h"))
         set_optimize("fastest")
-        set_values("app.plist-file", "Demo/Info.plist")
+        set_values("app.plist-file", "examples/showcase/Info.plist")
         set_values("app.plist", "CFBundleIdentifier=" .. identifier, "CFBundleDisplayName=" .. name, ...)
         set_values("revenant.libraries", "apple-backports")
-        set_values("revenant.control", "Demo/control")
+        set_values("revenant.control", "examples/showcase/control")
         weak_import_waiver()
     end
 
@@ -43,7 +43,7 @@ if is_plat("iphoneos") then
         add_rules("@addon/revenant/swift")
         add_deps("Combine")
         set_optimize("fastest")
-        add_files("Sources/*.swift")
+        add_files("src/*.swift")
         add_values("swift.flags", "-enforce-exclusivity=unchecked", "-suppress-warnings")
         add_frameworks("UIKit", "QuartzCore", "CoreGraphics", "CoreData", "Foundation", "CoreFoundation")
         before_build(function (target)
@@ -64,25 +64,25 @@ if is_plat("iphoneos") then
         end
 
     target("SwiftUITests")
-        probe_daemon("Tests/control", "Tests/main.swift")
+        probe_daemon("tests/control", "tests/main.swift")
         set_values("swift.flags", "-disable-availability-checking")
 
     target("SwiftUIProbe")
         set_default(false)
-        probe_daemon("Tests/Probe/control", "Tests/Probe/main.swift")
+        probe_daemon("tests/probe/control", "tests/probe/main.swift")
 
     target("SwiftUITypeChecks")
         set_kind("phony")
         set_default(false)
         add_deps("SwiftUI")
-        add_tests("tables-positive", {source = "Tests/TypeChecks/tables/positive.swift"})
-        add_tests("tables-negative", {source = "Tests/TypeChecks/tables/negative.swift", rejected = "conform to 'TableRowContent'"})
-        add_tests("tables-negative-widget-bundle", {source = "Tests/TypeChecks/tables/negative-widget-bundle.swift",
+        add_tests("tables-positive", {source = "tests/typechecks/tables/positive.swift"})
+        add_tests("tables-negative", {source = "tests/typechecks/tables/negative.swift", rejected = "conform to 'TableRowContent'"})
+        add_tests("tables-negative-widget-bundle", {source = "tests/typechecks/tables/negative-widget-bundle.swift",
                                                     rejected = "could not be inferred", swiftflags = {"-disable-availability-checking"}})
-        add_tests("tables-negative-widget-concrete", {source = "Tests/TypeChecks/tables/negative-widget-concrete.swift",
+        add_tests("tables-negative-widget-concrete", {source = "tests/typechecks/tables/negative-widget-concrete.swift",
                                                       rejected = "could not be inferred", swiftflags = {"-disable-availability-checking"}})
-        add_tests("tabs-positive", {source = "Tests/TypeChecks/tabs/positive.swift"})
-        add_tests("tabs-negative", {source = "Tests/TypeChecks/tabs/negative.swift", rejected = "conform to specified type 'TabContent'"})
+        add_tests("tabs-positive", {source = "tests/typechecks/tabs/positive.swift"})
+        add_tests("tabs-negative", {source = "tests/typechecks/tabs/negative.swift", rejected = "conform to specified type 'TabContent'"})
         on_test(function (target, opt)
             local swift = import("@addon.revenant.apple.swift")
             local module = target:dep("SwiftUI")

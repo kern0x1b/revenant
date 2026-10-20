@@ -7,11 +7,11 @@ function revenant(...)
 end
 
 function sources()
-    return root("Sources")
+    return root("src")
 end
 
 function api(...)
-    return root("Tests", "API", ...)
+    return root("tests", "data", "api", ...)
 end
 
 function workspace()

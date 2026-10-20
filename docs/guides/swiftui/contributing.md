@@ -11,20 +11,22 @@ named `SwiftUI` because every symbol an app takes from SwiftUI is mangled with t
 
 ## Layout
 
-- `Sources/` — the module. `Core.swift`, `Graph.swift` (nodes, reconciler, scheduler), `Layout.swift`,
+- `src/` — the module. `Core.swift`, `Graph.swift` (nodes, reconciler, scheduler), `Layout.swift`,
   `Gestures.swift`, `AnimatableEngine.swift`, `Dialogs.swift`, `Hosting.swift`, and one file per area.
-- `Tests/main.swift` — the engine tests (one flat file; identifiers are global, so prefix new ones).
-- `Tests/Probe/`, `Sources/Probe.swift` — the headless probe: `_Probe` hosts a view without a window, dumps its tree,
+- `tests/main.swift`, `tests/control` — the engine tests (one flat file; identifiers are global, so prefix new ones).
+- `tests/probe/`, and `_Probe` in `src/` — the headless probe: `_Probe` hosts a view without a window, dumps its tree,
   drives gestures, dialogs and animations for tests. `_Probe`, `_DialogDescription` and `_Unsupported` are
   `@_spi(Probe)`, not public API: a client of them says `@_spi(Probe) import SwiftUI`.
-- `Tests/TypeChecks/` — snippets the `Table` and `TabContent` builders must accept or refuse, run by the tests of the
+- `tests/typechecks/` — snippets the `Table` and `TabContent` builders must accept or refuse, run by the tests of the
   `SwiftUITypeChecks` target.
-- `Tests/Host/` — macOS oracles (`docs/host.md`); `Tests/Surface/` — the interface walker (`docs/surface.md`), a host
-  project of its own; `Tests/API/` — the lists of Apple's types and modifiers, the allow-list and the not-applicable
-  list the coverage check and the API diff read, and the sample app of `docs/bridge.md`.
-- `Demo/` — the demo app and its snapshot scenarios, with the `Info.plist` and `control` of both applications;
-  `Snapshots/` — the tree references.
-- `docs/ledger.md` + `tools/coverage.lua` — the ledger and its checker.
+- `tests/host/` — macOS oracles (`docs/reference/swiftui/host.md`); `tests/surface/` — the interface walker
+  (`docs/reference/swiftui/surface.md`), a host project of its own; `tests/data/api/` — the lists of Apple's types and
+  modifiers, the allow-list and the not-applicable list the coverage check and the API diff read, and the sample app of
+  `docs/explanation/swiftui/guest-bridge.md`.
+- `tests/data/snapshots/` — the tree references of the rendered scenarios.
+- `examples/showcase/` — the demo app and its snapshot scenarios, with the `Info.plist` and `control` of both applications.
+- `docs/` at the top of revenant — the documents of this module, by kind: the ledger
+  (`docs/reference/swiftui/ledger.md`) with `tools/coverage.lua` as its checker, and the rest under `docs/*/swiftui/`.
 - `tools/` — every script of this folder, in Lua, run with `./xmakew l frameworks/SwiftUI/tools/<script>` from the top of
   revenant; `tools/lib/tree.lua` names the folders they read and the run folder they write
   (`$HOME/.revenant/cache/<task>/swiftui/`, from `toolchain/modules/workspace.lua`).
@@ -43,7 +45,7 @@ From the top of revenant:
 ./xmakew build -P . SwiftUI                                      # begins with the ledger check
 ./xmakew test -P . SwiftUITypeChecks/*                           # the builder typechecks
 ./xmakew l frameworks/SwiftUI/tools/emulate.lua tests            # the engine tests, in the emulator
-./xmakew l frameworks/SwiftUI/tools/emulate.lua snapshots        # 38 rendered scenarios against Snapshots/
+./xmakew l frameworks/SwiftUI/tools/emulate.lua snapshots        # 38 rendered scenarios against frameworks/SwiftUI/tests/data/snapshots/
 ```
 
 `emulate.lua` drives revenant's emulator (skill `emulate-port`): it configures the project with `-c` (so the package
@@ -62,7 +64,7 @@ iOS 6.1.3): the skill `swiftui-device` says how to reach one from here.
 
 - **No silent no-ops.** An API the engine does not honour either works, or is declared with `ignored(...)` (nothing to
   correspond to on iOS 6) or `_Unsupported.note(...)` (works with a named difference), and appears in
-  `docs/ledger.md`. `coverage.lua --check` fails the build otherwise. A protocol requirement that is only an
+  `docs/reference/swiftui/ledger.md`. `coverage.lua --check` fails the build otherwise. A protocol requirement that is only an
   *extension* member is not dispatched dynamically: put user-overridable members in the protocol.
 - **Do not measure completeness by names.** Use `tools/api-surface.lua`; it compares declarations. When you add an
   overload, the gap count should fall.
@@ -90,7 +92,7 @@ iOS 6.1.3): the skill `swiftui-device` says how to reach one from here.
   file you are in.
 - **No copyleft code.** Wrong: copying code from a GPL project into this repository — the Objective-C Telegram-iOS
   before its Swift rewrite, a good reference for swipes, custom cells and gesture-driven animation on plain UIKit, is
-  one. Right: study how it solves the problem and write it anew. Reason: this repository is MIT (`LICENSE`), and GPL
+  one. Right: study how it solves the problem and write it anew. Reason: this repository is MIT (`LICENSES/MIT.txt`), and GPL
   code would bind it to the GPL.
 
 ## Limits of the test environment
@@ -108,4 +110,6 @@ colour-filter and blur pixel checks always run, and fail if it draws nothing).
 ## Conventions
 
 - Commit subjects are plain and imperative; an agent's commit ends with its own `Co-Authored-By:` trailer.
-- Documents in `docs/` and the ledger are in Russian; the front README and this guide are in English.
+- The ledger, the research and the guest bridge are in Russian (`docs/reference/swiftui/ledger.md`,
+  `docs/explanation/swiftui/research.md`, `docs/explanation/swiftui/guest-bridge.md`); the front README and this guide are
+  in English.

@@ -16,7 +16,7 @@ on this tree: 241 rows before the parser, 205 after it, **201** once the re-expo
 and the four CoreGraphics typealiases that no `.swiftinterface` declares are on the allow-list with that
 reason.
 
-It is a host project of its own, `Tests/Surface/xmake.lua`, because the gate itself must stay Lua-only and
+It is a host project of its own, `frameworks/SwiftUI/tests/surface/xmake.lua`, because the gate itself must stay Lua-only and
 fast: `./xmakew l frameworks/SwiftUI/tools/apple-surface.lua` builds it and writes the surface file,
 `apple-26-surface.tsv` in the run folder (`$HOME/.revenant/cache/<task>/swiftui/api/`), which `api-invented.lua`
 reads.
@@ -62,7 +62,7 @@ empty *new* side with and without `--allow-empty-new`. **5/5.**
     $ ./xmakew l frameworks/SwiftUI/tools/surf-diff.lua old.tsv new.tsv      # new.tsv has two columns
     …/new.tsv: line 1 has 2 tab-separated column(s), the 3 this diff reads are owner/kind/name; 1 line(s)
     in all (first at line 1). Refusing to read the file as the empty set: the partition below would hold
-    vacuously. Use the artifact that has three columns (frameworks/SwiftUI/docs/surface.md says …).
+    vacuously. Use the artifact that has three columns (docs/reference/swiftui/surface.md says …).
     $ echo $?
     1
 
@@ -103,5 +103,5 @@ rewritten.** Reading an exported patch as a claim about what ran would be wrong,
 amended to hide it: amending an exported series breaks every reference to it, and the honest form is the
 commit's own message beside a note that says what it means. So: **read a series as a whole.** A `wip:`
 commit says in its own subject line that its work did not run, and the commit that follows it is the one
-that measured it. This series has no `wip:` subject, and `AGENTS.md` asks for none — plain
+that measured it. This series has no `wip:` subject, and `docs/guides/swiftui/contributing.md` asks for none — plain
 imperative subject, no type prefix, no scope tag.

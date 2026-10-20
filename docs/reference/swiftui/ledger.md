@@ -30,7 +30,7 @@
 **Что эти числа не говорят.** Счёт выше — по *именам* типов и модификаторов. По декларациям картина строже:
 типизированный разбор `swift-api-digester` (`../tools/api-surface.lua`, колонки отчёта — `../tools/api-diff.lua`)
 сравнивает интерфейс Apple SwiftUI для iOS 16.4 с нашим модулем по подписи каждой декларации и на 19.09 находит
-**из 4740 деклараций Apple 3233 (68%) вызываются как у Apple, 314 (7%) есть, но с другой подписью, 927 (20%) нет и их ещё писать, 266 (6%) — типы, которых в iOS 6 быть не может (сцены, виджеты, документы, роторы, AttributedString…), закрытый список с причинами в `Tests/API/not-applicable.txt`** (вызов, который
+**из 4740 деклараций Apple 3233 (68%) вызываются как у Apple, 314 (7%) есть, но с другой подписью, 927 (20%) нет и их ещё писать, 266 (6%) — типы, которых в iOS 6 быть не может (сцены, виджеты, документы, роторы, AttributedString…), закрытый список с причинами в `frameworks/SwiftUI/tests/data/api/not-applicable.txt`** (вызов, который
 компилируется у нас благодаря значениям параметров по умолчанию, отсутствующим не считается). Заметная часть первых —
 то, чему в iOS 6 нечему соответствовать (Widgets, документы, окна, `UIHostingConfiguration`, роторы доступности);
 остальное — работа, которая ещё не сделана: перегрузки вроде `Stepper`, `TextField` с `prompt:`/`axis:`, 48 ключей
@@ -102,7 +102,7 @@
 `snappy`, `bouncy`: у `UIView` iOS 6 нет пружинной анимации, поэтому свойство `UIView` идёт по ближайшей из
 четырёх кривых времени; анимации самого движка, идущие кадр за кадром, считаются так же, как у Apple: `Animation.spring` и её именованные
 формы — лесенкой шагов в 1/300 с, где конец определяют три проверки, а `interpolatingSpring` — решением пружины, которое
-кончается там, где его кончает Core Animation; всё это сверено с macOS 27, `Tests/Host/springcmp.swift`), `ShadowStyle.inner` (внутренних теней в CoreAnimation нет — не рисуется),
+кончается там, где его кончает Core Animation; всё это сверено с macOS 27, `frameworks/SwiftUI/tests/host/springcmp.swift`), `ShadowStyle.inner` (внутренних теней в CoreAnimation нет — не рисуется),
 `Text.LineStyle.Pattern` (только сплошные подчёркивание и зачёркивание), `Font.leading` (вариантов интерлиньяжа у
 `UIFont` нет — используйте `lineSpacing`), `Font.Design.rounded` (скруглённого системного шрифта нет — обычный),
 `foregroundStyle(gradient)` у текста (текст одного цвета — первый цвет градиента), `submitLabel(.continue)`
@@ -170,16 +170,16 @@
 
 ## Устройство
 
-- `Sources/Core.swift` — протокол `View`, построитель, прозрачные контейнеры.
-- `Sources/Graph.swift` — дерево узлов, согласование, транзакции обновления, вписывание динамических свойств по смещениям полей из метаданных Swift.
-- `Sources/State.swift` — обёртки свойств и их хранилища в узлах.
-- `Sources/Layout.swift` — модель раскладки, стеки, `Spacer`, `padding`, `frame`.
-- `Sources/Views.swift` — примитивные представления поверх контролов UIKit.
-- `Sources/Modifiers.swift` — модификаторы как узлы и как изменение окружения.
-- `Sources/List.swift`, `Navigation.swift` — `UITableView` и `UINavigationController`.
-- `Sources/Presentation.swift` — лист и предупреждение, `Sources/Environment.swift` — ключи окружения.
-- `Sources/Hosting.swift` — контроллер-хост, `Sources/App.swift` — запуск приложения.
-- `Sources/Probe.swift` — служебный доступ для тестов (дерево, размеры строк, число вычислений `body`).
+- `frameworks/SwiftUI/src/Core.swift` — протокол `View`, построитель, прозрачные контейнеры.
+- `frameworks/SwiftUI/src/Graph.swift` — дерево узлов, согласование, транзакции обновления, вписывание динамических свойств по смещениям полей из метаданных Swift.
+- `frameworks/SwiftUI/src/State.swift` — обёртки свойств и их хранилища в узлах.
+- `frameworks/SwiftUI/src/Layout.swift` — модель раскладки, стеки, `Spacer`, `padding`, `frame`.
+- `frameworks/SwiftUI/src/Views.swift` — примитивные представления поверх контролов UIKit.
+- `frameworks/SwiftUI/src/Modifiers.swift` — модификаторы как узлы и как изменение окружения.
+- `frameworks/SwiftUI/src/List.swift`, `Navigation.swift` — `UITableView` и `UINavigationController`.
+- `frameworks/SwiftUI/src/Presentation.swift` — лист и предупреждение, `frameworks/SwiftUI/src/Environment.swift` — ключи окружения.
+- `frameworks/SwiftUI/src/Hosting.swift` — контроллер-хост, `frameworks/SwiftUI/src/App.swift` — запуск приложения.
+- `frameworks/SwiftUI/src/Probe.swift` — служебный доступ для тестов (дерево, размеры строк, число вычислений `body`).
 
 ## Сборка и проверка
 
@@ -190,7 +190,7 @@
 ./xmakew build -P . SwiftUI SwiftUIDemo SwiftUISnapshots SwiftUITests   # модуль, демо, снимочный бандл, тесты движка (armv7, iOS 6)
 ./xmakew test -P . SwiftUITypeChecks/*                                  # построители Table и TabContent принимают и отказывают, как у Apple
 ./xmakew l frameworks/SwiftUI/tools/emulate.lua tests                   # модульные тесты движка в эмуляторе
-./xmakew l frameworks/SwiftUI/tools/emulate.lua snapshots [--accept]    # снимочные тесты: деревья сценариев против Snapshots/
+./xmakew l frameworks/SwiftUI/tools/emulate.lua snapshots [--accept]    # снимочные тесты: деревья сценариев против frameworks/SwiftUI/tests/data/snapshots/
 ```
 
 Сборка идёт против установки пакета `revenant@swift-runtime` 6.4.0, которую требует проект revenant, в общем
@@ -212,7 +212,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   `Canvas`, `@FetchRequest` с живым обновлением из Core Data, доступность), iLEmu iPhone4,1 iOS 6.1.3 и живой
   iPad 2 (iOS 6.1.3) — все проходят.
 - Снимочные сценарии в приложении (iPod4,1 iOS 6.0): 16 деревьев, сверяются посимвольно с эталонами в
-  `Snapshots/`; эталон нового сценария записывается только после ручной проверки дерева.
+  `frameworks/SwiftUI/tests/data/snapshots/`; эталон нового сценария записывается только после ручной проверки дерева.
 - Производительность (безоконный пробник `SwiftUIProbe`, живое железо iOS 6.1.3; вывод прогонов в дереве не хранится): простой экран —
   полное обновление 1,6 мс на iPad 2 и 2,1 мс на iPhone 4S, первичная сборка и раскладка 6,5 мс. Глубокий экран —
   шесть строк вложенных стеков глубины d — до кэша размеров рос в 7–8 раз на уровень (d=3: 1174 мс на обновление,
@@ -231,7 +231,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   формах: у колеблющейся пружины это огибающая размаха, ниже `epsilon` (логарифм, делённый на затухание), у остальных —
   десятая доля секунды после последней десятой, где расстояние ещё не меньше `epsilon`; сетка у Apple 1013 десятых
   (до 101,2 с), и если на последней пружина ещё снаружи, Apple отвечает «успокоилась сразу» (0) — граница найдена
-  делением отрезка по отклику и жёсткости (`Tests/Host/springcmp.swift`), а у критической интерполирующей пружины то же с 1012
+  делением отрезка по отклику и жёсткости (`frameworks/SwiftUI/tests/host/springcmp.swift`), а у критической интерполирующей пружины то же с 1012
   десятыми. Расходятся в двух местах, и оба измерены:
   Безье-кривые — на 5·10⁻⁷ (наш корень точнее: у Apple он одинарной точности, `0.399999619` против `0.4` —
   это `Float`); `velocity` перезатухающей пружины (`dampingRatio > 1`)
@@ -271,7 +271,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   `realVerticalSizeClass` (классы размера Catalyst), `defaultWheelPickerItemHeight` (колесо выбора — watchOS),
   `isSceneCaptured`, `fontResolutionContext` (`Font.Context` — тип SwiftUI iOS 18, вложенного `Context` у нашего
   `Font` нет), `lineHeight` и `_lineHeightMultiple` (это свойства `AttributedString`, которого в этом заходе
-  ещё нет). Для них — `Tests/API/not-applicable.txt` (16 строк); `lineHeight` и `_lineHeightMultiple` ждут `AttributedString`.
+  ещё нет). Для них — `frameworks/SwiftUI/tests/data/api/not-applicable.txt` (16 строк); `lineHeight` и `_lineHeightMultiple` ждут `AttributedString`.
 
 - `TypesettingLanguage.contentAware` — внутренний: вверх по потоку он за `@_spi(Private)`, а у Apple в 16.4
   и 26.2 такого члена нет вовсе (`SwiftUICore.swiftinterface:8758-8762` — только `automatic`,
@@ -363,7 +363,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   инструмента: 55 вложенных `typealias` вида `GlassButtonStyle.Configuration`, которые порт обязан
   объявить, а интерфейс Apple их не расписывает, и 7 `Body`-свидетельств ассоциированных типов. Пятьдесят
   восемь строк, которые добавил этот диапазон, убраны: четыре имени из ревью плюс хранилища ключевых
-  кадров. Интерфейсы 26.2 теперь читает `Tests/Surface` (surftool) — `SwiftParser` из swift-syntax
+  кадров. Интерфейсы 26.2 теперь читает `frameworks/SwiftUI/tests/surface` (surftool) — `SwiftParser` из swift-syntax
   (Apache-2.0, подключён путём, ничего не вендорится) вместо регулярных выражений: 40 из 41 строки
   артефактов уходят, остаётся 205, а добавляются четыре — `CGAffineTransform`, `CGPoint`, `CGRect` и
   `CGSize`, которые выражения принимали за объявленные, хотя их нет ни в одном интерфейсе девяти
@@ -385,14 +385,14 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   `TextEditor` отдаёт его своему `UITextView`: iOS 6 несёт ровно один выделенный диапазон, поэтому
   набор диапазонов читается и записывается как самый нижний из них, и об этом сказано в коде.
   `nsRange(in:)` и `init(nsRange:in:)` — наш мост к `UITextView`, внутренние: это не API 26.2. Замер —
-  в `docs/facts/TextSelection.md`: сам заголовок UIKit 26.2 говорит, что `selectedRange` — это весь
+  в `docs/reference/swiftui/facts/TextSelection.md`: сам заголовок UIKit 26.2 говорит, что `selectedRange` — это весь
   выбор начиная с iOS 2, а первый `NSArray` выделенных диапазонов — `selectedRanges` в iOS 26.0.
 
 - `RasterizationOptions` — вложенный, как в обоих SDK: `_RendererConfiguration.RasterizationOptions`
   (`arm64e-apple-ios.swiftinterface:17490` и в 26.2 то же), семь хранимых свойств и `init()`. Значений по
   умолчанию **ни один интерфейс не даёт**, и на хосте его не прочитать: тип член underscored-структуры и на
   публичной поверхности macOS его нет — **это было неверно**: подчёркнутое имя в Swift публичное, и
-  `Tests/Host/hostrenderer.swift` его читает. Замерено на фреймворке macOS 27: `colorMode` nonLinear,
+  `frameworks/SwiftUI/tests/host/hostrenderer.swift` его читает. Замерено на фреймворке macOS 27: `colorMode` nonLinear,
   `rendersAsynchronously` false, `isOpaque` **true**, `drawsPlatformViews` **true**,
   `prefersDisplayCompositing` false, `maxDrawableCount` **3**, `rbColorMode` nil. Внешний тип назван так,
   как его объявляет SDK, — `_RendererConfiguration`, без замены. В слой `CALayer` iOS 6 доходят три из семи:
@@ -444,7 +444,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   `fill.contains(.none)` истинно, и так же оно и у Apple; проверка читала включение как тождество. Теперь
   тождество и включение проверяются отдельно, обе стороны равенства записаны.
 
-- Проверка на «виджет-бандл безусловно не собирается» лежит в `Tests/TypeChecks/tables/`: `if` без
+- Проверка на «виджет-бандл безусловно не собирается» лежит в `frameworks/SwiftUI/tests/typechecks/tables/`: `if` без
   `#available` доходит до проверки типов как `any Widget`, а existential не отвечает `Widget`, и сборка
   отказана. Недоступной перегрузки `buildOptional` в интерфейсе 26.2 нет вовсе: у `WidgetBundleBuilder` есть
   две формы (`arm64e-apple-ios.swiftinterface:21949` и `:21970`), обе доступные, и ни одна не берёт такой
@@ -523,5 +523,5 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   запущенного `xmake emulate launch` на iPhone4,1 6.1.3 (эмулятор), после `tap 160 271` вызвала действие один раз
   (`tapped 1`, текст и фон сменились), но и через секунду гостевого времени без изменений экрана кнопка
   нарисована как нажатая: белый фон и надпись полупрозрачны. Снимки до и после касания —
-  `docs/device/button-before-tap-emulator.png`, `docs/device/button-after-tap-emulator.png`. На устройстве не
+  `docs/reference/swiftui/device/button-before-tap-emulator.png`, `docs/reference/swiftui/device/button-after-tap-emulator.png`. На устройстве не
   проверялось; не разобрано, остаётся ли подсветка после отпускания или так рисуется выключенная кнопка.

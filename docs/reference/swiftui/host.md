@@ -2,7 +2,7 @@
 
 The programs here are how a value that only Apple's framework knows was measured, kept in the tree so
 the number next to it can be reproduced by whoever reads it. They build and run on the **host** — macOS
-with the host's own Swift — and are not part of the module. They are `Tests/Host/`.
+with the host's own Swift — and are not part of the module. They are `frameworks/SwiftUI/tests/host/`.
 
 ```
 $ swiftc -O hostrenderer.swift -o hostrenderer && ./hostrenderer
@@ -12,7 +12,7 @@ maxDrawableCount=3 rbColorMode=nil
 ```
 
 Those are the seven defaults of `_RendererConfiguration.RasterizationOptions` in
-`Sources/Rasterizations.swift`. The SDK interface declares the seven properties and a
+`frameworks/SwiftUI/src/Rasterizations.swift`. The SDK interface declares the seven properties and a
 bare `init()` and gives no value for any of them, so the framework itself is the only source there is,
 and the type is underscored — which in Swift is public, so the host can name it.
 
@@ -44,7 +44,7 @@ the port's `Passage` (`Flights.swift`). Apple's is a `Shape` in an `NSHostingVie
 is drawn with and the time, the first animation begun from nothing and the second (or none) a number of seconds into it. The port is asked for
 the number at the time of each record, and a record is matched if the port has it at any time within three thousandths of a second of
 it (the run loop gives the moments, and the fluid spring is a staircase of steps of a three-hundredth). The command is in its header; it
-takes about ten minutes, and `retargetcmp pins` prints the lines for `Tests/main.swift` instead (the width of a bar at moments after the
+takes about ten minutes, and `retargetcmp pins` prints the lines for `frameworks/SwiftUI/tests/main.swift` instead (the width of a bar at moments after the
 second animation began). A fluid spring that is delayed or sped up and told to go somewhere else is the case left out: no rule fitted
 it (a curve, fresh from where the value is, fresh from where it is when the delay is over, a speed from the first, or any speed at all,
 none within a hundredth), so the port starts it from where the value is with no speed, as it did before.

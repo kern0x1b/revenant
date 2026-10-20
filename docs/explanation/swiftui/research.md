@@ -77,7 +77,7 @@ arm64, плюс гостевой libswiftCore, всё переводится е�
 
 Собрано отдельным скриптом, которого больше нет (теперь это цель `Combine` в `frameworks/Combine`): Swift 6.4 (revenant@swift), `-target armv7-apple-ios7.0`, рантайм и оверлеи учебных сборок проекта Swift-оверлеев, линковка при iOS 6.0, install name `@executable_path`. Проверка импортов тулчейна против кэшей 6.0 и 6.1.3: **0 strong missing**.
 
-Тесты: 1453 upstream-теста (исключён `URLSessionTests.swift` — наследует `NSURLSession`, iOS 7) прогнаны через собственный шим XCTest (230 строк; теперь `frameworks/Combine/Tests/XCTest.swift`, а список тестов собирает `frameworks/Combine/tools/discover.lua` для цели `CombineTests`).
+Тесты: 1453 upstream-теста (исключён `URLSessionTests.swift` — наследует `NSURLSession`, iOS 7) прогнаны через собственный шим XCTest (230 строк; теперь `frameworks/Combine/tests/XCTest.swift`, а список тестов собирает `frameworks/Combine/tools/discover.lua` для цели `CombineTests`).
 
 | где | тестов | прошло | упало | аварий |
 |---|---|---|---|---|
@@ -92,7 +92,7 @@ arm64, плюс гостевой libswiftCore, всё переводится е�
 - 1 × `Dictionary._conditionallyBridgeFromObjectiveC` (путь JSONDecoder) — trap в оверлее. Передано проекту Swift-оверлеев.
 - 5 × `Timer.tolerance` → слабый `CFRunLoopTimerSetTolerance` (iOS 7) равен NULL. Передано проекту бэкпортов, **уже реализовано** ею (`apple-backports`, `NSTimer+Tolerance.m`); после влития прогон нужно повторить.
 
-Нынешние результаты тех же тестов против Combine: `frameworks/Combine/docs/TEST-RESULTS.md`.
+Нынешние результаты тех же тестов против Combine: `docs/reference/combine/test-results.md`.
 
 ## 4. B2. OpenSwiftUI и OpenAttributeGraph — состояние
 
@@ -122,7 +122,7 @@ arm64, плюс гостевой libswiftCore, всё переводится е�
 
 ### 5.2 Что уже сделано
 
-Модуль `Sources/` (проект SwiftUI; Swift-модуль по-прежнему называется `SwiftUI`) — около 14 000 строк.
+Модуль `frameworks/SwiftUI/src/` (проект SwiftUI; Swift-модуль по-прежнему называется `SwiftUI`) — около 14 000 строк.
 Полный перечень поддержанного, игнорируемого и отсутствующего ведётся в `ledger.md` и сверяется со сборкой
 (`coverage.lua --check`). Счёт на 19.09 по интерфейсу SwiftUI из SDK 16.4 — по той его части, которую Apple объявляет
 доступной на iOS (срез строит `tools/ios-surface.lua`): **490 из 520 типов, 289 из 289 модификаторов `View`**, из них
@@ -146,7 +146,7 @@ arm64, плюс гостевой libswiftCore, всё переводится е�
 
 ### 5.3 Проба: приложение
 
-`Demo/DemoApp.swift` (177 строк) — приложение на обычном синтаксисе SwiftUI: `@main struct DemoApp: App`, `NavigationView` со `List`, карточка со `@State` (счётчик, переключатель, поле ввода), `@StateObject` модель с `@Published`, `@EnvironmentObject` в строках и на экране деталей, `ForEach` по `Identifiable`, условное представление, `NavigationLink` на экран деталей.
+`frameworks/SwiftUI/examples/showcase/DemoApp.swift` (177 строк) — приложение на обычном синтаксисе SwiftUI: `@main struct DemoApp: App`, `NavigationView` со `List`, карточка со `@State` (счётчик, переключатель, поле ввода), `@StateObject` модель с `@Published`, `@EnvironmentObject` в строках и на экране деталей, `ForEach` по `Identifiable`, условное представление, `NavigationLink` на экран деталей.
 
 Собирается целью `SwiftUIDemo` в `SwiftUIDemo.app` (armv7, `MinimumOSVersion 6.0`), проверка импортов тулчейна против 6.0 и 6.1.3 — 0 strong missing.
 
@@ -162,7 +162,7 @@ arm64, плюс гостевой libswiftCore, всё переводится е�
 
 ### 5.4 Проба: движок на железе
 
-`Tests/Probe/main.swift` — безоконный пробник: строит дерево, меняет состояние через `@Published`, сбрасывает транзакции, печатает дерево `UIView` с рамками и замеряет время. Запущен на **iPhone 4S, iOS 6.1.3** (через модуль device тулчейна, файлы только в `/var/tmp`, после прогона удалены; вывод прогона в дереве не хранится):
+`frameworks/SwiftUI/tests/probe/main.swift` — безоконный пробник: строит дерево, меняет состояние через `@Published`, сбрасывает транзакции, печатает дерево `UIView` с рамками и замеряет время. Запущен на **iPhone 4S, iOS 6.1.3** (через модуль device тулчейна, файлы только в `/var/tmp`, после прогона удалены; вывод прогона в дереве не хранится):
 
 - дерево собралось, изменение `@Published` добавило новую строку `ForEach`, показало условный блок и изменило ширины — согласование и лейаут на железе работают;
 - **2,83 мс** на полное обновление экрана (200 обновлений за 0,566 с), худшее 3,71 мс;

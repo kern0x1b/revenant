@@ -406,7 +406,7 @@ function main(...)
     ARGS = {...}
     local n, parts = counts()
     local baseline_path = tree.api("coverage-baseline.json")
-    local readme_path = tree.root("docs", "ledger.md")
+    local readme_path = tree.revenant("docs", "reference", "swiftui", "ledger.md")
 
     if has_arg("--update") then
         io.writefile(baseline_path, baseline_json(n))
@@ -419,7 +419,7 @@ function main(...)
         end)
         local actual = invented_count()
         if actual == nil then
-            print(invented_file() .. " нет: счёт выдуманных имён в docs/ledger.md не записан, его пишет " .. INVENTED_GENERATOR)
+            print(invented_file() .. " нет: счёт выдуманных имён в docs/reference/swiftui/ledger.md не записан, его пишет " .. INVENTED_GENERATOR)
         else
             readme = string.gsub(readme, INVENTED_SCORE, function(head)
                 return head .. actual .. ":"
@@ -444,7 +444,7 @@ function main(...)
         local readme = read(readme_path)
         local ios = {string.match(readme, IOS_SCORE)}
         if #ios == 0 then
-            problems[#problems + 1] = "docs/ledger.md не содержит строки со счётом для iOS"
+            problems[#problems + 1] = "docs/reference/swiftui/ledger.md не содержит строки со счётом для iOS"
         else
             local actual = {}
             for i, key in ipairs({"ios_types", "ios_apple_types", "ios_mods", "ios_apple_mods", "ios_working", "ios_pending", "ios_ignored"}) do
@@ -457,13 +457,13 @@ function main(...)
                 end
             end
             if not same then
-                problems[#problems + 1] = "docs/ledger.md для iOS говорит (" .. text.join(", ", ios) .. "), на деле ("
-                    .. text.join(", ", actual) .. ") — обновите docs/ledger.md (./xmakew l frameworks/SwiftUI/tools/coverage.lua --update)"
+                problems[#problems + 1] = "docs/reference/swiftui/ledger.md для iOS говорит (" .. text.join(", ", ios) .. "), на деле ("
+                    .. text.join(", ", actual) .. ") — обновите docs/reference/swiftui/ledger.md (./xmakew l frameworks/SwiftUI/tools/coverage.lua --update)"
             end
         end
         local stated = {string.match(readme, SCORE)}
         if #stated == 0 then
-            problems[#problems + 1] = "docs/ledger.md не содержит строки со счётом"
+            problems[#problems + 1] = "docs/reference/swiftui/ledger.md не содержит строки со счётом"
         else
             local actual = {n.types, n.mods, n.working, n.pending, n.ignored}
             local same = true
@@ -473,13 +473,13 @@ function main(...)
                 end
             end
             if not same then
-                problems[#problems + 1] = "docs/ledger.md говорит (" .. text.join(", ", stated) .. "), на деле ("
-                    .. text.join(", ", actual) .. ") — обновите docs/ledger.md (./xmakew l frameworks/SwiftUI/tools/coverage.lua --update)"
+                problems[#problems + 1] = "docs/reference/swiftui/ledger.md говорит (" .. text.join(", ", stated) .. "), на деле ("
+                    .. text.join(", ", actual) .. ") — обновите docs/reference/swiftui/ledger.md (./xmakew l frameworks/SwiftUI/tools/coverage.lua --update)"
             end
         end
         for _, name in ipairs(sorted_keys(parts.ignored)) do
             if not string.find(readme, "`" .. name .. "`", 1, true) then
-                problems[#problems + 1] = "игнорируемый API " .. name .. " не описан в docs/ledger.md"
+                problems[#problems + 1] = "игнорируемый API " .. name .. " не описан в docs/reference/swiftui/ledger.md"
             end
         end
         local said = string.match(readme, INVENTED_SCORE_ONE)
@@ -488,12 +488,12 @@ function main(...)
         if has_arg("--before-build") then
         elseif actual == nil then
             problems[#problems + 1] = invented_file() .. " нет, и без него счёт выдуманных имён не проверить: его пишет "
-                .. INVENTED_GENERATOR .. ", запустите его и обновите docs/ledger.md (./xmakew l frameworks/SwiftUI/tools/coverage.lua --update)"
+                .. INVENTED_GENERATOR .. ", запустите его и обновите docs/reference/swiftui/ledger.md (./xmakew l frameworks/SwiftUI/tools/coverage.lua --update)"
         elseif said == nil then
-            problems[#problems + 1] = "docs/ledger.md не называет счёт выдуманных имён (" .. invented_file() .. ")"
+            problems[#problems + 1] = "docs/reference/swiftui/ledger.md не называет счёт выдуманных имён (" .. invented_file() .. ")"
         elseif said ~= actual then
-            problems[#problems + 1] = "docs/ledger.md говорит " .. said .. " выдуманных имён, " .. invented_file() .. " содержит "
-                .. actual .. " — обновите docs/ledger.md (./xmakew l frameworks/SwiftUI/tools/coverage.lua --update)"
+            problems[#problems + 1] = "docs/reference/swiftui/ledger.md говорит " .. said .. " выдуманных имён, " .. invented_file() .. " содержит "
+                .. actual .. " — обновите docs/reference/swiftui/ledger.md (./xmakew l frameworks/SwiftUI/tools/coverage.lua --update)"
         end
         local counted, partial, unreadable = stub_calls()
         for _, call in ipairs(unreadable) do
@@ -503,7 +503,7 @@ function main(...)
             local kind, name, where = entry[1], entry[2], entry[3]
             if not string.find(readme, "`" .. name, 1, true) then
                 local word = kind == "pendingNote" and "unimplemented" or "ignored"
-                problems[#problems + 1] = where .. ": частичный " .. word .. " «" .. name .. "» не назван в docs/ledger.md"
+                problems[#problems + 1] = where .. ": частичный " .. word .. " «" .. name .. "» не назван в docs/reference/swiftui/ledger.md"
             end
         end
         if #problems > 0 then
@@ -514,7 +514,7 @@ function main(...)
             os.exit(1)
         end
         print("coverage: типы " .. n.types .. "/" .. n.apple_types .. ", модификаторы " .. n.mods .. "/" .. n.apple_mods
-            .. " (действуют " .. n.working .. ", заглушки " .. n.pending .. ", игнорируются " .. n.ignored .. ") — docs/ledger.md сходится")
+            .. " (действуют " .. n.working .. ", заглушки " .. n.pending .. ", игнорируются " .. n.ignored .. ") — docs/reference/swiftui/ledger.md сходится")
         return 0
     end
 

@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- The folder follows revenant's one layout: `Sources/` is `src/`, `Tests/` is `tests/` (its API lists under
+  `tests/data/api/`, the snapshot references under `tests/data/snapshots/`), `Demo/` is `examples/showcase/`, and the
+  documents are under the top `docs/` (`docs/guides/swiftui/`, `docs/reference/swiftui/`,
+  `docs/explanation/swiftui/`). The README is one screen; its sections moved to those documents. The licence is
+  `LICENSES/MIT.txt` and `REUSE.toml`; the folder's own `LICENSE` is gone. Entries above name the old paths as they were.
+
 ### Added
 
 - A toolchain port in `SwiftUI/` (`xmake.lua`, `control`, `Info.plist`): the demo application, the snapshot bundle and

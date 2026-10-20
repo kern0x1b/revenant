@@ -247,7 +247,7 @@ function main(...)
             end
         end
     end
-    io.stderr:write(string.format("# absent %d, variant %d, not applicable %d (Tests/API/not-applicable.txt, with reasons)\n",
+    io.stderr:write(string.format("# absent %d, variant %d, not applicable %d (tests/data/api/not-applicable.txt, with reasons)\n",
         total["absent"], total["variant"], total["not-applicable"]))
 
     local used = {}
