@@ -26,9 +26,10 @@
 # measure that, and their output is in the commit message and in facts/Spatial/README.md.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 files=${SPATIAL_FILES:-$here/../../../../packages/s/swift-runtime/files}
 here_root=$(cd "$here/../../../.." && pwd)
-build=${SPATIAL_BUILD:-$here_root/.agent-work/runs/host-spatial}
+build=${SPATIAL_BUILD:-$(runs_folder host-spatial)}
 sdk=${SPATIAL_SDK:-$(xcrun --show-sdk-path)}
 # macOS 26, not 14: Spatial's `lerp`, `smoothstep` and `AffineTransform3D.columns` are marked
 # macOS 26.0 in Apple's own interface, and an expression the host cannot answer is not a

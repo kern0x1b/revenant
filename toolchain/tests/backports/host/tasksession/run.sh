@@ -15,8 +15,9 @@
 #   sh tests/backports/host/tasksession/run.sh
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-BUILD=${BUILD:-$root/.agent-work/build/tasksession}
+BUILD=${BUILD:-$(runs_folder build/tasksession)}
 rm -rf "$BUILD"
 mkdir -p "$BUILD"
 

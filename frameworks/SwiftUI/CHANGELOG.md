@@ -76,6 +76,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - The engine tests, thirty-four rendered scenarios with tree references, an in-app timing scenario and an arm64
   guest-ABI check.
 
+### Changed
+
+- The folder is laid out by role, one level deep: `Sources/` (the module), `Tests/`, `Demo/`, `Snapshots/`,
+  `tools/` and `docs/`, with one `xmake.lua`. The probe is the `SwiftUIProbe` target, the Table and TabContent
+  typechecks are the tests of `SwiftUITypeChecks`, and building `SwiftUI` begins with the ledger check.
+- Everything runs through revenant's `./xmakew`: the emulator runs, the snapshots and the timings are
+  `tools/emulate.lua`, the device runs `tools/device.lua`, the API diff `tools/api-surface.lua`, Apple's 26.2
+  surface `tools/apple-surface.lua` (with the walker as the host project `Tests/Surface/`). The tools take the
+  26.2 SDK and their run folder from `toolchain/modules/workspace.lua` and write nothing into the tree.
+
+### Removed
+
+- `build.sh`, `pkg-env.sh`, `run-emu.sh`, `run-app.sh`, `snapshots.sh`, `perf.sh`, `device-shots.sh`, the API and
+  surface shell scripts and the typecheck `run.sh` files, replaced as above; the `swiftuirt` daemon of `rtpkg/`;
+  the committed probe output of `device-run/` and `bridge/gaps14-classified.tsv`, which are run output.
+
 ### Fixed
 
 - A `Button` whose label is not a single `Text` (an icon, a `Label`, a stack) drew an empty rounded rectangle and dropped

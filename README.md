@@ -26,7 +26,7 @@ consume the toolchain as an xmake repository.
 a member uses another's target with `add_deps`. `./xmakew f -y && ./xmakew` at the top builds everything, `./xmakew
 build <target>` one target, `./xmakew test` the tests.
 
-`xmakew` is the xmake of revenant: the first run builds the xmake pinned in `third_party/packages/x/xmake` (its url,
+`xmakew` is the xmake of revenant: the first run builds the xmake pinned in `third_party/xmake` (its url,
 commit and patches, read from that recipe) into `~/.revenant/cache/xmake/<key>`, the key being made of the commit and
 the patches' checksums, and every run executes that build with its arguments. It needs only `sh`, `git`, `make` and
 a C compiler, and builds again when the recipe changes.
@@ -34,7 +34,7 @@ a C compiler, and builds again when the recipe changes.
 | Path | What it is |
 | --- | --- |
 | `xmakew` | the pinned and patched xmake, built on first use (above) |
-| `third_party/packages/<l>/<name>/` | an xmake package of third-party code: the upstream by url and commit or checksum, our changes in `patches/` applied in order by `add_patches` |
+| `third_party/<name>/` | an xmake package of third-party code: the upstream by url and commit or checksum, our changes in `patches/` applied in order by `add_patches` |
 | `tools/check.lua` | `./xmakew l tools/check.lua [<member> ...]`: the members' checks that need no device or firmware |
 | `tools/publish.lua` | `./xmakew l tools/publish.lua <member>`: a member's history as a repository of its own (below) |
 
@@ -45,9 +45,11 @@ OpenCombine at a commit plus the patches of `revenant@combine`.
 
 ### The members for iOS
 
-`Combine` and `CombineHelpers`, `SwiftUI`, the SwiftUI demo, snapshots and engine tests, and
-`swiftuirt` are targets of the graph for iphoneos; Revenant's packages are third-party code to them (the Swift runtime,
-libc++, the backports, the SDK and the tools). They are built with `./xmakew f -p iphoneos -a armv7`.
+`Combine` and `CombineHelpers`, `SwiftUI`, the SwiftUI demo, snapshot bundle, engine tests, probe and
+typechecks are targets of the graph for iphoneos; Revenant's packages are third-party code to them (the Swift runtime,
+libc++, the backports, the SDK and the tools). They are built with `./xmakew f -p iphoneos -a armv7`. The option
+`--emulate=y` also requires the emulator, so that `./xmakew emulate -P .` installs their packages into an emulated
+device and runs them there.
 
 The toolchain is both the package repository and the addon `revenant` (toolchain and rules) of those builds, from the
 `toolchain/` folder of this checkout. The top `xmake.lua` declares it with `add_addons("revenant", {sourcedir = "toolchain"})`:

@@ -16,4 +16,4 @@ codesign -s - --force "$app" > /dev/null 2>&1
 TAIL3_RECORDS="$build/tail3.json" "$app/Contents/MacOS/app" > "$build/tail3.log" 2>&1 || true
 xmake l "$here/../../common/embed.lua" "$build/tail3.json" "$device/tail3-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/tail3_expectations/' "$device/tail3-expectations.h" && rm -f "$device/tail3-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/tail3.json'))))")"
+echo "records: $(runs_harness records "$build/tail3.json")"

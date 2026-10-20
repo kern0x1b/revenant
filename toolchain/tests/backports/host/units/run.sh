@@ -23,8 +23,7 @@ xcrun clang -fobjc-arc $quiet "$here/differential.m" "$BUILD"/renamed/*.o -frame
 # -v also writes the numbers the mapper's host kind reads, under the run directory. The default output is
 # untouched: without -v the file is not written and the differential prints only its summary.
 if [ "${1:-}" = "-v" ]; then
-    values="$here/../../../../.agent-work/runs/units/host-values.tsv"
-    mkdir -p "$(dirname "$values")"
+    values="$(runs_folder units)/host-values.tsv"
     # The header is written here and not in the program: the counts are the program's own summary line,
     # and the date and the command belong to the run. The rows go to a body file the program appends to,
     # and this is what the mapper reads, so a row can cite a run and a command.

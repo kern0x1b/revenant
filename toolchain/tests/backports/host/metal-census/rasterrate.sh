@@ -16,9 +16,12 @@
 # harness here: a mutation compiled with a wrong -I depth once left the previous binary in place and a
 # green run was read off an object that no longer existed.
 set -eu
+echo "FAIL host/metal-census/rasterrate.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 100" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-work=${WORK:-$root/.agent-work/runs/metal-census/rasterrate}
+work=${WORK:-$(runs_folder metal-census/rasterrate)}
 # ONE guard for every script that removes a scratch path - see work-guard.sh.
 . "$here/work-guard.sh"
 work_ok "$work" || { echo "FAIL: WORK=$work is not a usable scratch path; see work-guard.sh" >&2; exit 1; }

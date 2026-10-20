@@ -216,7 +216,7 @@ local function collect(cache)
                 end
             end
         end
-        local revenant = section_entries(read, loaded.image, "__revenant_catlist")
+        local revenant = section_entries(read, loaded.image, "__port_catlist")
         if #revenant > 0 then
             table.insert(port, loaded.install)
         end
@@ -338,7 +338,7 @@ end
 
 local function release_only(source, found)
     if #found.port > 0 then
-        raise("%s holds %d image%s this repository built, whose category section is renamed to __revenant_catlist: a release's own metadata is what inventory() reads, and the port's categories merged into it would make every class the port extends look like the release's own. Read such a library with binary_inventory, or take it out of the folder that holds the release's libraries",
+        raise("%s holds %d image%s this repository built, whose category section is renamed to __port_catlist: a release's own metadata is what inventory() reads, and the port's categories merged into it would make every class the port extends look like the release's own. Read such a library with binary_inventory, or take it out of the folder that holds the release's libraries",
               source, #found.port, #found.port == 1 and "" or "s")
     end
 end
@@ -391,7 +391,7 @@ function binary_selectors(binary, architecture)
     local found = collect(source)
     local implemented = {}
     add_selectors(implemented, found)
-    for _, selector in ipairs(section_entries(found.read, image, "__revenant_addsel")) do
+    for _, selector in ipairs(section_entries(found.read, image, "__port_addsel")) do
         local name = found.read.string(selector)
         if name then
             implemented["-" .. name] = true
@@ -425,7 +425,7 @@ function binary_categories(binary, architecture)
     end
     local read = reader(source)
     local found = {}
-    for _, category in ipairs(table.join(section_entries(read, image, "__objc_catlist"), section_entries(read, image, "__revenant_catlist"))) do
+    for _, category in ipairs(table.join(section_entries(read, image, "__objc_catlist"), section_entries(read, image, "__port_catlist"))) do
         local class = read.pointer(category + read.size)
         table.insert(found, {name = read.string(read.pointer(category)), class = class ~= 0 and class_data(read, class).name or nil,
                              bound = source.bound[category + read.size],
@@ -443,7 +443,7 @@ function binary_aliases(binary, architecture)
     local read = reader(source)
     local found = {}
     for _, section in ipairs(image.sections) do
-        if section.segment == "__DATA" and section.name == "__revenant_alias" then
+        if section.segment == "__DATA" and section.name == "__port_alias" then
             for index = 0, section.size // (2 * read.size) - 1 do
                 local entry = section.addr + index * 2 * read.size
                 local proxy = class_data(read, read.pointer(entry)).name

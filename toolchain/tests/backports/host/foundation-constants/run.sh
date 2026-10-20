@@ -20,9 +20,10 @@
 # counts as RUN FAILED, never as noticed, and the run says which.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 S="$root/packages/a/apple-backports"
-work=${WORK:-$root/.agent-work/runs/foundation-constants}
+work=${WORK:-$(runs_folder foundation-constants)}
 rm -rf "$work"
 mkdir -p "$work"
 

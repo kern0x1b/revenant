@@ -8,13 +8,12 @@
 #   2. three plants, each on a scratch copy of the decoder with one line changed, must each turn the run red:
 #      the syndrome roots shifted by one (a wrong generator polynomial), each Forney magnitude flipped (a wrong
 #      correction) and the unmasking skipped
-#
-# No python. The build and the plants go under .agent-work/runs/ciqr, never /tmp.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$here/../../../..
 gfx=${GFX:-$root/packages/a/apple-backports/Graphics}
-build=${BUILD:-$root/.agent-work/runs/ciqr}
+build=${BUILD:-$(runs_folder ciqr)}
 mkdir -p "$build"
 
 build_run() {

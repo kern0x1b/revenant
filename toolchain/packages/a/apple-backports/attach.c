@@ -40,7 +40,7 @@ static const void *revenant_section(const revenant_header *header, intptr_t slid
 static const struct revenant_alias *revenant_image_aliases(uint32_t image, size_t *count)
 {
     unsigned long size = 0;
-    const struct revenant_alias *aliases = revenant_section((const revenant_header *)_dyld_get_image_header(image), _dyld_get_image_vmaddr_slide(image), "__DATA", "__revenant_alias", &size);
+    const struct revenant_alias *aliases = revenant_section((const revenant_header *)_dyld_get_image_header(image), _dyld_get_image_vmaddr_slide(image), "__DATA", "__port_alias", &size);
     *count = aliases ? size / sizeof *aliases : 0;
     return aliases;
 }
@@ -324,7 +324,7 @@ static void revenant_adopt_declarations(Class release, Class proxy)
 __attribute__((constructor)) static void revenant_backports_attach(void)
 {
     unsigned long size;
-    const struct revenant_category *const *categories = (const struct revenant_category *const *)revenant_section(&__dso_handle, revenant_slide(), "__DATA", "__revenant_catlist", &size);
+    const struct revenant_category *const *categories = (const struct revenant_category *const *)revenant_section(&__dso_handle, revenant_slide(), "__DATA", "__port_catlist", &size);
     size_t count = categories ? size / sizeof(void *) : 0;
     size_t capacity = 0;
     for (size_t index = 0; index < count; index++) {
@@ -332,7 +332,7 @@ __attribute__((constructor)) static void revenant_backports_attach(void)
         capacity += (category->instance_methods ? category->instance_methods->count : 0) + (category->class_methods ? category->class_methods->count : 0);
     }
     unsigned long own_size = 0;
-    const struct revenant_alias *own = revenant_section(&__dso_handle, revenant_slide(), "__DATA", "__revenant_alias", &own_size);
+    const struct revenant_alias *own = revenant_section(&__dso_handle, revenant_slide(), "__DATA", "__port_alias", &own_size);
     size_t own_count = own ? own_size / sizeof *own : 0;
     Class *releases = calloc(own_count ? own_count : 1, sizeof *releases);
     for (size_t index = 0; index < own_count; index++) {

@@ -13,20 +13,7 @@ mkdir -p "$build"
 # hold the port's objects and the host's side by side. The names come from the port's registry, not from
 # a list kept here, so a name added to the library is renamed too.
 renames=""
-for name in $(python3 - "$here" <<'PY'
-import json, sys, os
-here = sys.argv[1]
-registry = os.path.join(here, "..", "..", "..", "..", "packages", "a", "apple-backports", "registry", "Accelerate")
-for part in ("ios8blas.json",):
-    for entry in json.load(open(os.path.join(registry, part)))["entries"]:
-        name = entry["api"].rstrip("()")
-        # la_retain and la_release are the two the SDK header reaches through macros, and a header that
-        # redefines a -D wins: the port's own definitions keep their names and are linked against the
-        # host library's, so they are called unrenamed (see differential.m).
-        if entry["kind"] == "function" and name not in ("la_retain", "la_release"):
-            print(name)
-PY
-); do
+for name in $(runs_xmake l "$here/../registry-functions.lua" "$here/../../../../packages/a/apple-backports/registry/Accelerate" ios8blas.json --except=la_retain --except=la_release); do
     renames="$renames -D$name=revenant_host_$name"
 done
 

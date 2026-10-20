@@ -1,5 +1,7 @@
 #!/bin/sh
 set -eu
+echo "FAIL host/session/with-server.sh: its Python steps are gone and not yet ported to Lua: server.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 output=$(mktemp "$(runs_folder revenant-session)/output.XXXXXX")

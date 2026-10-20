@@ -16,4 +16,4 @@ codesign -s - --force "$app" > /dev/null 2>&1
 SCROLLGUIDE_RECORDS="$build/scrollguide.json" "$app/Contents/MacOS/app" > "$build/scrollguide.log" 2>&1 || true
 xmake l "$here/../../common/embed.lua" "$build/scrollguide.json" "$device/scrollguide-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/scrollguide_expectations/' "$device/scrollguide-expectations.h" && rm -f "$device/scrollguide-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/scrollguide.json'))))")"
+echo "records: $(runs_harness records "$build/scrollguide.json")"

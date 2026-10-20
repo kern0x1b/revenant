@@ -13,8 +13,9 @@
 # Two processes, not one, because both sides define the same classes.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
-build=${BUILD:-$here/../../../../.agent-work/runs/coremotion-activity}
+build=${BUILD:-$(runs_folder coremotion-activity)}
 mkdir -p "$build"
 sdk=$(xcrun --sdk macosx --show-sdk-path)
 target=arm64-apple-ios17.0-macabi

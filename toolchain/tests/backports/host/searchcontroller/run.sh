@@ -17,4 +17,4 @@ codesign -s - --force "$bundle" > /dev/null 2>&1
 "$bundle/Contents/MacOS/app" "$build/searchcontroller.json" > "$build/searchcontroller.log" 2>&1
 xmake l "$here/../../common/embed.lua" "$build/searchcontroller.json" "$device/searchcontroller-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/searchcontroller_expectations/' "$device/searchcontroller-expectations.h" && rm -f "$device/searchcontroller-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/searchcontroller.json'))))")"
+echo "records: $(runs_harness records "$build/searchcontroller.json")"

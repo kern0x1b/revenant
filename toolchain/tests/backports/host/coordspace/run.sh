@@ -16,4 +16,4 @@ codesign -s - --force "$app" > /dev/null 2>&1
 COORDSPACE_RECORDS="$build/coordspace.json" "$app/Contents/MacOS/app" > "$build/coordspace.log" 2>&1 || true
 xmake l "$here/../../common/embed.lua" "$build/coordspace.json" "$device/coordspace-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/coordspace_expectations/' "$device/coordspace-expectations.h" && rm -f "$device/coordspace-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/coordspace.json'))))")"
+echo "records: $(runs_harness records "$build/coordspace.json")"

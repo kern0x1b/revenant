@@ -278,7 +278,7 @@ function main(...)
     local extra = report("registered, but not built", orphan)
 
     if control then
-        local scratch = M.WORKTREE() .. "/.agent-work/runs/vtclass/registry-control"
+        local scratch = import("workspace", {rootdir = path.join(M.WORKTREE(), "modules"), anonymous = true}).run("vtclass", "registry-control")
         if os.isdir(scratch) then
             os.rm(scratch)
         end

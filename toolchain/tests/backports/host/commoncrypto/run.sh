@@ -6,10 +6,11 @@
 # The build directory is under the checkout's agent work area, never the system temp path.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 CCSRC=${CCSRC:-$root/packages/a/apple-backports/CommonCrypto}
 SECSRC=${SECSRC:-$root/packages/a/apple-backports/Security}
-build=${CC_BUILD:-$root/.agent-work/runs/commoncrypto-host}
+build=${CC_BUILD:-$(runs_folder commoncrypto-host)}
 rm -rf "$build"
 mkdir -p "$build"
 xcrun clang -fobjc-arc -fvisibility=hidden -w -DCCRandomGenerateBytes=revenant_host_CCRandomGenerateBytes \

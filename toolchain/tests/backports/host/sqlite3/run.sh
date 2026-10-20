@@ -1,14 +1,10 @@
 #!/bin/sh
-# The SQLite3 backport's functions against the HOST's own libsqlite3, in one process each: the string builder (sqlite3_str_*,
-# differential-str.c) and the keyword functions (sqlite3_keyword_*, differential-keywords.c). The port is compiled with each of
-# its names renamed to revenant_port_*, so the host's function and the port's are both callable. Each family has a planted control
-# that changes the port, and the differential must fail on it: a differential that cannot fail proves nothing.
-# Usage: run.sh   (the build area is .agent-work/runs/sqlite3-host under the checkout)
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 src="$root/packages/a/apple-backports/SQLite3"
-build=${SQLITE3_BUILD:-$root/.agent-work/runs/sqlite3-host}
+build=${SQLITE3_BUILD:-$(runs_folder sqlite3-host)}
 rm -rf "$build"
 mkdir -p "$build/planted"
 names="new finish append appendall appendchar vappendf appendf reset errcode length value"

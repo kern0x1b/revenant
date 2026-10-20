@@ -24,10 +24,13 @@
 #   AVFMUTANT=1 BREAK=1    breaks a file so it does not compile, which must be RUN FAILED and exit 1:
 #                          a build failure is never a noticed mutation
 set -eu
+echo "FAIL host/avf-notifications/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PERTURB at line 95; the inline block PERTURB at line 110" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 avf=$root/packages/a/apple-backports/AVFoundation
-build=${AVF_NOTICE_BUILD:-$root/.agent-work/avf-notifications}
+build=${AVF_NOTICE_BUILD:-$(runs_folder avf-notifications)}
 expected=${AVF_NOTICE_ROWS:-67}   # every NSString *const the family defines
 sources="AVFoundationKeys9 AVFoundationKeys11 AVFoundationKeys134 AVFoundationKeys16 AVFoundationKeysUnheld AVFoundationDeviceTypeAndPresetKeys134 AVFoundationDeviceTypeAndPresetKeys16 AVCaptureCurrentSentinels8"
 control=${CONTROL:-0}

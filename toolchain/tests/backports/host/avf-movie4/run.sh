@@ -30,9 +30,10 @@
 #     printed in the table, and the join says how many it did not compare.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 avf=$root/packages/a/apple-backports/AVFoundation
-run=${AVMOVIE4_RUN:-$root/.agent-work/runs/v-avmovie4}
+run=${AVMOVIE4_RUN:-$(runs_folder v-avmovie4)}
 mutant=${AVMOVIE4_MUTANT:-0}
 movies=$run/movies
 build=$run/build

@@ -21,7 +21,7 @@ Swift runtime), [Combine] (Combine), [SwiftUI] (SwiftUI) and [emulator] (the emu
 | `.claude-plugin/` | `plugin.json` and `marketplace.json`; several runtimes read these. They list the plugin, they do not contain it |
 | `.claude/settings.json` | settings for sessions working on this repository; not part of the plugin |
 | `skills/<name>/SKILL.md` | the skills, one directory each, in the Agent Skills format; depth in `references/` beside it (not yet) |
-| `tests/` | the clean-machine check: scenarios (a request and the interview answers, never code) and the script that runs them (not yet) |
+| `tests/` | the clean-machine check: scenarios (a request and the interview answers, never code), `run.lua` that runs them and `check.lua` that decides whether a run counts, both run with `./xmakew l` from the revenant checkout |
 | `THIRD-PARTY.md`, `LICENSES/` | what is derived from whom, at which commit, under which license (not yet) |
 
 ## How to check

@@ -175,7 +175,7 @@ local function categories_step(backports, opt, folder, found)
     io.writefile(path.join(work, "two.m"), "#import <Foundation/Foundation.h>\n@implementation NSProgress (ProbeTwo)\n+ (int)probeTwo { return 2; }\n@end\n")
     fixtures.run(work, opt.clang, {"-target", "armv7-apple-ios4.3", "-isysroot", opt.sdk, "-Wno-incompatible-sysroot", "-w",
                                    "-mlinker-version=" .. fixtures.linker_version(opt.ld64), "-fuse-ld=" .. opt.ld64, "-dynamiclib",
-                                   "-framework", "Foundation", "-Wl,-rename_section,__DATA,__objc_catlist,__DATA,__revenant_catlist",
+                                   "-framework", "Foundation", "-Wl,-rename_section,__DATA,__objc_catlist,__DATA,__port_catlist",
                                    "one.m", "two.m", "-o", "libprobe.dylib"})
     local library = path.join(work, "libprobe.dylib")
     local named = table.concat(backports.unattached_categories({exports = {}}, {classes = {}}, {library}, "armv7"), " ")
@@ -195,7 +195,7 @@ local function categories_step(backports, opt, folder, found)
                  "extern char revenant_alias_class_NSProxied __asm__(\"_OBJC_CLASS_$_RevenantNSProxied\");\n" ..
                  "@interface RevenantNSProxied : NSObject\n@end\n@implementation RevenantNSProxied\n@end\n" ..
                  "__asm__(\".globl _OBJC_CLASS_$_NSProxied\\n.set _OBJC_CLASS_$_NSProxied, _OBJC_CLASS_$_RevenantNSProxied\\n\");\n" ..
-                 "__attribute__((used, section(\"__DATA,__revenant_alias\"))) static const struct revenant_alias revenant_alias_NSProxied = { &revenant_alias_class_NSProxied, \"NSProxied\"};\n")
+                 "__attribute__((used, section(\"__DATA,__port_alias\"))) static const struct revenant_alias revenant_alias_NSProxied = { &revenant_alias_class_NSProxied, \"NSProxied\"};\n")
     fixtures.run(work, opt.clang, {"-target", "armv7-apple-ios4.3", "-isysroot", opt.sdk, "-Wno-incompatible-sysroot", "-w",
                                    "-mlinker-version=" .. fixtures.linker_version(opt.ld64), "-fuse-ld=" .. opt.ld64, "-dynamiclib",
                                    "-framework", "Foundation", "alias.m", "-o", "libalias.dylib"})

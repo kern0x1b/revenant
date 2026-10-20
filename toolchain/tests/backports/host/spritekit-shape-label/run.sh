@@ -11,9 +11,10 @@
 # moved. The run passes only when the port matches the host and the control's output differs.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 src=${SPRITEKIT_SRC:-$root/packages/a/apple-backports/SpriteKit}
-build=${SPRITEKIT_SHAPE_BUILD:-$root/.agent-work/runs/spritekit-shape-label}
+build=${SPRITEKIT_SHAPE_BUILD:-$(runs_folder spritekit-shape-label)}
 rm -rf "$build"
 mkdir -p "$build/control"
 

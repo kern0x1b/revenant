@@ -15,11 +15,11 @@ for file in $carried; do
     xcrun clang -fobjc-arc -fvisibility=hidden $quiet -c "$GRAPHICS/$file" -o "$BUILD/plain/$file.o"
 done
 for file in $carried; do
-    python3 "$here/../prefix_selectors.py" "$GRAPHICS/$file" "$BUILD/prefixed/$file" charonHost_ --declarations="$BUILD/prefixed/declarations.h" -fobjc-arc $quiet -- "$BUILD"/plain/*.o
+    runs_xmake l "$here/../prefix_selectors.lua" "$GRAPHICS/$file" "$BUILD/prefixed/$file" revenantHost_ --declarations="$BUILD/prefixed/declarations.h" -fobjc-arc $quiet -- "$BUILD"/plain/*.o
 done
 for file in $carried; do
     xcrun clang -fobjc-arc -fvisibility=hidden $quiet -include "$BUILD/prefixed/declarations.h" -c "$BUILD/prefixed/$file" -o "$BUILD/renamed/$file.o"
-    perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$BUILD/renamed/$file.o"
+    perl -0777 -pi -e 's/__objc_catlist\0\0/__port_catlist\0\0/g' "$BUILD/renamed/$file.o"
 done
 xcrun clang -fobjc-arc $quiet "$here/differential.m" "$here/../foundation2/host-attach.c" "$BUILD"/renamed/*.o -framework CoreImage -framework CoreVideo -framework CoreGraphics -framework Foundation -o "$BUILD/differential"
 "$BUILD/differential"

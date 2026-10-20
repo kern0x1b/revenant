@@ -9,9 +9,10 @@
 
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 repo=$(cd "$here/../../../.." && pwd)
 ARKit=$repo/packages/a/apple-backports/ARKit
-runs=${RUNS:-$repo/.agent-work/runs/arkit-absent-classes}
+runs=${RUNS:-$(runs_folder arkit-absent-classes)}
 rm -rf "$runs"
 mkdir -p "$runs"
 

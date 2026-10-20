@@ -23,6 +23,8 @@
 # /System/Library/Frameworks/<F>.framework/<F> at all (measured 2026-10-03: the binary comes from the
 # cache, the symlink dangles, and dlopen of the same path succeeds). dlopen is the question.
 set -eu
+echo "FAIL host/unavailable-init/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 47; check_host.py; check_port.py; the inline block PY2 at line 117; plants.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 charon=${REVENANT:-$here/../../../..}

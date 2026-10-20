@@ -50,7 +50,7 @@ function run(args)
         table.insert(names, cls)
     end
     for _, cls in ipairs(order.strings(names)) do
-        emit.file(behaviour.page_path(args.tree, fw, files, cls), behaviour.page_text(fw, cls, pages[cls], sdk_release))
+        emit.file(behaviour.page_path(fw, files, cls), behaviour.page_text(fw, cls, pages[cls], sdk_release))
     end
     print(string.format("behaviour %s: %d methods, %d summarised, %d failed", fw, #methods, done, failed))
     return failed > 0 and 1 or 0

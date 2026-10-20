@@ -21,6 +21,8 @@
 # coordination/corpus/ledger/constant-values-<framework>.tsv, next to the HomeKit and
 # AuthenticationServices ones it reproduces. Exit 0 only when every value agrees.
 set -eu
+echo "FAIL host/constants/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PYTHON at line 58; the inline block PYTHON at line 90" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 revenant=${REVENANT:-$here/../../../..}

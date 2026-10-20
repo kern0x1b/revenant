@@ -6,9 +6,10 @@
 # change the comparison: a check that cannot go red proves nothing.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 port=$root/packages/a/apple-backports/Graphics
-build=${BUILD:-$root/.agent-work/runs/ciimageformats}
+build=${BUILD:-$(runs_folder ciimageformats)}
 mkdir -p "$build"
 
 objects="$port/CIConstants142.m $port/CIConstants170.m"

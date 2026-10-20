@@ -15,9 +15,10 @@
 # nil dereference; the host's crash is measured in facts/SpriteKit/SKTexture.md.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 src=${SPRITEKIT_SRC:-$root/packages/a/apple-backports/SpriteKit}
-build=${SPRITEKIT_SPRITE_BUILD:-$root/.agent-work/runs/spritekit-sprite}
+build=${SPRITEKIT_SPRITE_BUILD:-$(runs_folder spritekit-sprite)}
 rm -rf "$build"
 mkdir -p "$build/control"
 

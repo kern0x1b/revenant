@@ -16,4 +16,4 @@ codesign -s - --force "$app" > /dev/null 2>&1
 IMAGETRAITS_RECORDS="$build/imagetraits.json" "$app/Contents/MacOS/app" > "$build/imagetraits.log" 2>&1 || true
 xmake l "$here/../../common/embed.lua" "$build/imagetraits.json" "$device/imagetraits-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/imagetraits_expectations/' "$device/imagetraits-expectations.h" && rm -f "$device/imagetraits-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/imagetraits.json'))))")"
+echo "records: $(runs_harness records "$build/imagetraits.json")"

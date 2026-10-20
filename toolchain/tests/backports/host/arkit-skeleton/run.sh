@@ -9,18 +9,18 @@
 # port's own code; the host's class is reached through objc_msgSend, so nothing here needs ARKit's
 # headers -- they are the iPhoneOS ones and do not compile into a macOS build.
 #
-# `--mutants` changes one thing at a time in a *copy* of the port's sources under .agent-work and
-# requires the run to go red. The checkout is never touched.
-#
 # What is compared: jointCount, every joint name in order, every parent index in order, and
 # `indexForJointName:` for every name in the table plus one that is in none of it -- a harness that
 # only ever asked for names in the table could not tell a right answer from a lucky one.
 
 set -eu
+echo "FAIL host/arkit-skeleton/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 57" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 repo=$(cd "$here/../../../.." && pwd)
 ARKit=$repo/packages/a/apple-backports/ARKit
-runs=${RUNS:-$repo/.agent-work/runs/arkit-skeleton-host}
+runs=${RUNS:-$(runs_folder arkit-skeleton-host)}
 mkdir -p "$runs"
 
 renames="-DARSkeletonDefinition=RevenantPortARSkeletonDefinition \

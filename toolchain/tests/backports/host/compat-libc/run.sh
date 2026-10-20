@@ -1,15 +1,10 @@
 #!/bin/sh
-# The apple-compat shims OSAtomicIncrement32, OSAtomicIncrement32Barrier, OSAtomicDecrement32, OSAtomicDecrement32Barrier,
-# ffsll and flsll against the HOST's own definitions, in one process: differential.c. The shims are compiled from
-# packages/a/apple-compat/src with REVENANT_COMPAT_SYSTEM=0, so the port's own code answers, not a lookup of the system's, and
-# with each name renamed to revenant_port_* so the two are callable together. A planted control then replaces the add with
-# one that adds two, and the differential must fail on it: a differential that cannot fail proves nothing.
-# Usage: run.sh   (the build area is .agent-work/runs/compat-libc-host under the checkout)
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 src="$root/packages/a/apple-compat/src"
-build=${COMPAT_LIBC_BUILD:-$root/.agent-work/runs/compat-libc-host}
+build=${COMPAT_LIBC_BUILD:-$(runs_folder compat-libc-host)}
 rm -rf "$build"
 mkdir -p "$build/planted"
 names="OSAtomicIncrement32 OSAtomicIncrement32Barrier OSAtomicDecrement32 OSAtomicDecrement32Barrier OSAtomicIncrement64 OSAtomicIncrement64Barrier OSAtomicDecrement64 OSAtomicDecrement64Barrier ffsll flsll timingsafe_bcmp strchrnul rpmatch strtonum strsignal_r timespec_get"

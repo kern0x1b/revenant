@@ -55,11 +55,11 @@ for s in $sources; do
 done
 printf '#import <Foundation/Foundation.h>\n' > "$build/prefixed/declarations.h"
 for s in $sources; do
-    python3 "$here/../prefix_selectors.py" "$FOUNDATION/$s" "$build/prefixed/$s" charonHost_ --declarations="$build/prefixed/declarations.h" -fobjc-arc $quiet -- "$build"/plain/*.o
+    runs_xmake l "$here/../prefix_selectors.lua" "$FOUNDATION/$s" "$build/prefixed/$s" revenantHost_ --declarations="$build/prefixed/declarations.h" -fobjc-arc $quiet -- "$build"/plain/*.o
 done
 for s in $sources; do
     xcrun clang -fobjc-arc -fvisibility=hidden $quiet -I"$FOUNDATION" -include "$build/prefixed/declarations.h" -c "$build/prefixed/$s" -o "$build/renamed/$s.o"
-    perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$build/renamed/$s.o"
+    perl -0777 -pi -e 's/__objc_catlist\0\0/__port_catlist\0\0/g' "$build/renamed/$s.o"
 done
 xcrun clang -fobjc-arc -w -I"$here" "$here/$suite.m" "$here/fuzz.m" "$here/../foundation2/host-attach.c" "$build"/renamed/*.o -framework Foundation -o "$build/fuzz"
 if [ -z "$locales" ]; then

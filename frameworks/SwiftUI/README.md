@@ -15,7 +15,7 @@ The project, its directory and its build targets carry the same name.
 
 A retained node tree over UIKit views, with a reconciler, a layout engine of its own and a scheduler that re-renders
 only what changed. The areas below are exercised by tests and by rendered scenarios; the full ledger — what is
-implemented, what is deliberately ignored and why, what is simplified — is in [`SwiftUI/README.md`](SwiftUI/README.md)
+implemented, what is deliberately ignored and why, what is simplified — is in [`docs/ledger.md`](docs/ledger.md)
 (in Russian) and is checked by the build.
 
 | Area | What there is |
@@ -34,8 +34,8 @@ implemented, what is deliberately ignored and why, what is simplified — is in 
 
 The screens of the demo app, drawn by the engine on an iPhone 4S running iOS 6.1.3 (armv7) — nothing here is an emulator.
 [`docs/device/`](docs/device/) holds them: the symbol set, a social feed, settings, a dashboard, a store, contacts, token
-search and an onboarding pager. `device-shots.sh` installs the demo, has the app render a scenario in its own process and
-fetches the picture; `device-shots.sh --live` takes a picture of the real screen.
+search and an onboarding pager. `tools/device.lua shots` installs the demo, has the app render a scenario in its own
+process and fetches the picture; `tools/device.lua shots --live` takes a picture of the real screen.
 
 ### How complete is it
 
@@ -45,7 +45,7 @@ Two numbers, and they measure different things.
   that iOS 6 cannot honour is *declared*, writes a line to a journal when used, and is listed with its reason. Nothing
   is a silent no-op — the build fails if an ignored or simplified API is not named in the ledger.
 - **By declaration:** comparing Apple's SwiftUI interface for iOS 16.4 with this module signature by signature
-  (`bridge/api-surface.sh`) finds, of the 4740 declarations of Apple's public interface, **3233 (68%) callable as Apple writes them, 314 (7%) present with a different signature, 927 (20%) absent and still to write, and 266 (6%) of types that iOS 6 or a phone cannot have, listed with a reason in `bridge/not-applicable.txt`**.
+  (`tools/api-surface.lua`) finds, of the 4740 declarations of Apple's public interface, **3233 (68%) callable as Apple writes them, 314 (7%) present with a different signature, 927 (20%) absent and still to write, and 266 (6%) of types that iOS 6 or a phone cannot have, listed with a reason in `Tests/API/not-applicable.txt`**.
   A good part of the absent ones has nothing to correspond to on iOS 6 (widgets, documents, windows, accessibility
   rotors); the rest is the work queue.
 
@@ -68,69 +68,76 @@ exists.
 
 ## Requirements
 
-- macOS and the revenant checkout this folder is in, configured for iOS at its top (revenant's README: the revenant addon of
-  the checkout, `xmake f -p iphoneos -a armv7`): the module is the `SwiftUI` target, Combine the `Combine` and
-  `CombineHelpers` targets, and `swift-runtime`, `libcxx`, `apple-compat`, the iOS SDK, `llvm`, `ld64` and `ldid` the
-  toolchain packages the project requires. `pkg-env.sh` asks the revenant project where each is (`xmake where`, `xmake show`).
-  An app outside revenant takes SwiftUI as the package `revenant@swiftui-uikit` instead.
-- To run the tests and rendered scenarios: the toolchain's emulator (`emulator/`), which `xmake emulate` drives — the port in
-  `SwiftUI/` builds the demo app, the snapshot bundle and the test binary as packages, and the emulator image,
-  the device and the release are named on the command line (`-d iPhone4,1 -r 6.1.3`). The addon must be one that has
-  `xmake emulate launch` (revenant v0.8.14 or later); `REVENANT_ADDON` names it, and `REVENANT_REPO` a toolchain checkout to
-  take the packages from.
-- To measure on hardware: an iPhone 4S or an iPad 2 on iOS 6.1.3, reached through Revenant's device tooling
-  (`REVENANT_MODULES` names the `modules` directory of a toolchain checkout).
+- macOS and the revenant checkout this folder is in, configured for iOS at its top (revenant's README, "One xmake
+  project"): the module is the `SwiftUI` target, Combine the `Combine` and `CombineHelpers` targets, and
+  `swift-runtime`, `libcxx`, `apple-backports`, the iOS SDK and the tools are packages the project requires. An app
+  outside revenant takes SwiftUI as the package `revenant@swiftui-uikit` instead.
+- To run the tests and rendered scenarios: revenant's emulator, which `./xmakew emulate` drives once the project is
+  configured with `--emulate=y`. `tools/emulate.lua` does that configure itself; use the emulator the way the
+  repository's skill `emulate-port` says.
+- To measure on hardware: an iPhone 4S or an iPad 2 on iOS 6.1.3, claimed with `./xmakew device` (skill
+  `swiftui-device`).
 
-Machine-local paths go in `local.env` (git-ignored); nothing personal is tracked.
+Run output (logs, pictures, API dumps, the copy of Apple's framework) goes under `$HOME/.revenant/cache/<task>/swiftui/`,
+never into the tree; `toolchain/modules/workspace.lua` names the task and the iOS 26.2 SDK the tools read.
 
 ## Build
 
+From the top of revenant:
+
 ```bash
-SwiftUI/build.sh        # module, demo app, tests and probe -> SwiftUI/out/SwiftUIDemo.app
-xmake f -P SwiftUI -p iphoneos -a armv7 -y   # the same, as a Revenant port: the app and the tests as packages
+./xmakew f -P . -p iphoneos -a armv7 -y
+./xmakew build -P . SwiftUI SwiftUIDemo SwiftUISnapshots SwiftUITests
+./xmakew test -P . SwiftUITypeChecks/*                 # the Table and TabContent builders accept and refuse what Apple's do
 ```
 
-The build begins with `xmake l SwiftUI/coverage.lua --check --before-build`, which refuses to continue if the ledger and the code
-disagree. The count of invented names is not part of that: it is read from `bridge/api/invented.txt`, which
-`bridge/api-surface.sh` makes from the module the build produces, so a fresh tree runs the build, then api-surface.sh,
-then a plain `xmake l coverage.lua --check`, which compares that count with the README.
-Everything is compiled with availability checking **on**, against the same Swift runtime the app carries.
+Building `SwiftUI` begins with `tools/coverage.lua --check --before-build`, which refuses to continue if the ledger
+and the code disagree. The count of invented names is not part of that: it is read from the `invented.txt` that
+`tools/api-surface.lua` makes from the module the build produces, so a fresh tree runs the build, then
+api-surface.lua, then a plain `./xmakew l frameworks/SwiftUI/tools/coverage.lua --check`, which compares that count
+with the ledger. Everything is compiled with availability checking **on**, against the same Swift runtime the app
+carries.
 
 ## Usage
 
+From the top of revenant, each a `./xmakew l frameworks/SwiftUI/tools/<script>`:
+
 ```bash
-../run-emu.sh                                           # the engine tests, in the emulator
-../snapshots.sh [--accept]                              # rendered scenarios against tree references
-../perf.sh                                              # in-app timings of deeply nested layouts
-xmake emulate -P SwiftUI -d iPhone4,1 -r 6.1.3 launch space.kern0x1b.swiftui.demo
-xmake l coverage.lua --check                            # the ledger, checked against the code
-../bridge/prepare-fw.sh && ../bridge/api-surface.sh     # the typed API diff against Apple's interface
+emulate.lua tests                        # the engine tests, in the emulator
+emulate.lua snapshots [--accept] [--only=NAME]   # rendered scenarios against Snapshots/
+emulate.lua perf                         # in-app timings of deeply nested layouts
+coverage.lua --check                     # the ledger, checked against the code
+api-surface.lua                          # the typed API diff against Apple's interface
+apple-surface.lua                        # Apple's 26.2 surface, which the invented-name gate reads
+device.lua shots SCENARIO...             # scenarios rendered on a claimed phone
 ```
 
 `xmake emulate launch` starts the application the way SpringBoard does, so it reaches
 `application:didFinishLaunchingWithOptions:`; the engine tests are a console binary and go through `xmake emulate run`.
 
 `bridge/guest-abi-check.sh` is gone: it built for arm64 with the iOS 16.4 SDK's stdlib, not the runtime the port ships
-(the reason and the measurement are in `SwiftUI/README.md`, in its section on the two builds of the module).
+(the reason and the measurement are in `docs/ledger.md`, in its section on the two builds of the module).
 
-## Repository layout
+## Layout
 
 | Path | Holds |
 | --- | --- |
-| `xmake.lua` | the `SwiftUI` target, and the targets of `SwiftUI/` and `rtpkg/`, as part of the revenant project |
-| `SwiftUI/` | the module (`Sources/SwiftUI`), the demo app, the engine tests, the probe, the snapshot references, the coverage ledger, and the targets (`xmake.lua`, `control`, `Info.plist`) of the app, the snapshot bundle and the tests for `xmake emulate` |
-| `bridge/` | the typed API diff against Apple's interface, the invented-name gate, and the name lists they use |
-| `rtpkg/` | `swiftuirt`, a daemon of Combine and the runtime with the backports, as a target of the revenant project |
-| `docs/` | the research (in Russian) |
-| `*.sh`, `device.lua` | run the emulator, take snapshots and timings, reach a device |
+| `xmake.lua` | the targets, as part of the revenant project: the module `SwiftUI`, the applications `SwiftUIDemo` and `SwiftUISnapshots`, the daemons `SwiftUITests` and `SwiftUIProbe`, and `SwiftUITypeChecks` |
+| `Sources/` | the module |
+| `Demo/` | the demo application and its scenarios; `Info.plist` and `control` of both applications |
+| `Snapshots/` | the reference view trees of the scenarios, which `emulate.lua snapshots` compares against |
+| `Tests/` | the engine tests (`main.swift`, `control`), the headless probe (`Probe/`), the builder typechecks (`TypeChecks/`), the macOS oracles (`Host/`), the interface walker (`Surface/`) and the API lists the coverage check reads (`API/`) |
+| `tools/` | the Lua tools above, and the ones they share (`lib/`) |
+| `docs/` | the ledger and the research (in Russian), and the notes of the tools |
 
 ## Documentation
 
 | Document | About |
 | --- | --- |
-| [`SwiftUI/README.md`](SwiftUI/README.md) | the ledger: what is implemented, ignored, simplified or missing; measurements |
+| [`docs/ledger.md`](docs/ledger.md) | the ledger: what is implemented, ignored, simplified or missing; measurements |
 | [`docs/research.md`](docs/research.md) | why Apple's SwiftUI cannot be ported, and the design of this implementation (Russian) |
-| [`bridge/README.md`](bridge/README.md) | the guest build by hand: the sample app, the slot table |
+| [`docs/bridge.md`](docs/bridge.md) | the guest build by hand: the sample app, the slot table |
+| [`docs/surface.md`](docs/surface.md) | the interface walker and the surface files the gaps are read from |
 | [`../Combine/docs/TEST-RESULTS.md`](../Combine/docs/TEST-RESULTS.md) | OpenCombine's own tests against Combine, the `Combine` this module re-exports, on iOS 6 |
 | [`AGENTS.md`](AGENTS.md) | the contributor guide |
 

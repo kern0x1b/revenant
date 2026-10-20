@@ -34,7 +34,7 @@ struct revenant_alias {
             ".set _OBJC_CLASS_$_" #Name ", _OBJC_CLASS_$_Revenant" #Name "\n"                                        \
             ".globl _OBJC_METACLASS_$_" #Name "\n"                                                                 \
             ".set _OBJC_METACLASS_$_" #Name ", _OBJC_METACLASS_$_Revenant" #Name "\n");                              \
-    __attribute__((used, section("__DATA,__revenant_alias"))) static const struct revenant_alias revenant_alias_##Name = { \
+    __attribute__((used, section("__DATA,__port_alias"))) static const struct revenant_alias revenant_alias_##Name = { \
         REVENANT_ALIAS_SELF(Name), #Name};
 #endif
 

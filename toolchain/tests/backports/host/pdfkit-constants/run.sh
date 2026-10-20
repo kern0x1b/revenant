@@ -12,10 +12,13 @@
 # Prints COMPARED <n> MISMATCHES <m> and exits non-zero on any mismatch, on any name the host does not
 # answer, or on any name whose host image is not PDFKit.
 set -eu
+echo "FAIL host/pdfkit-constants/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 25; the inline block PY at line 72" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 tree=$(cd "$here/../../../.." && pwd)
 port=$tree/packages/a/apple-backports/PDFKit
-build=${BUILD:-$tree/.agent-work/runs/pdfkit-constants}
+build=${BUILD:-$(runs_folder pdfkit-constants)}
 mkdir -p "$build"
 
 # the port's own map: name -> literal, out of the committed objects

@@ -19,10 +19,13 @@
 # comparison has to report it. --no-plant runs the same comparison without the break, which is how the
 # mutation verdict is shown failing on its own.
 set -eu
+echo "FAIL host/nsundo/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PYEOF at line 47; the inline block PYEOF at line 112; the inline block PYEOF at line 130" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 S="$root/packages/a/apple-backports"
-W=${WORK:-$root/.agent-work/runs/nsundo}
+W=${WORK:-$(runs_folder nsundo)}
 rm -rf "$W"; mkdir -p "$W"
 src="$S/Foundation/NSUndoManager+ActionUserInfo.m"
 scratch="$W/scratch"; mkdir -p "$scratch"

@@ -11,6 +11,8 @@
 # the switches taking away nothing the port draws. No bound on the frames is set yet (facts/SceneKit/SCNView.md,
 # "The frame tolerance"). Run it through coordination/heavy.sh (it renders with Metal).
 set -eu
+echo "FAIL host/scenekit/frames.sh: its Python steps are gone and not yet ported to Lua: compare.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 SCENES=$1

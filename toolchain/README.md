@@ -151,7 +151,7 @@ classes it imports, and of the protocols it records count as implemented; a
 protocol no class adopts is not recorded, and its optional methods are
 reported. The release's selectors are cached as `selectors_<arch>.txt` beside its
 cache; methods a runtime component adds at run time (arclite's subscripting)
-are declared by that component in a `__DATA,__revenant_addsel` section and
+are declared by that component in a `__DATA,__port_addsel` section and
 count as implemented.
 
 A check is a target:
@@ -692,8 +692,8 @@ libcxx; the package names Combine's module folders too, since SwiftUI re-exports
 Combine. A SwiftUI port takes the `backports` variant of all three: Combine's own
 weak import, `_CFRunLoopTimerSetTolerance`, is answered by
 `revenant@apple-backports`, which the port then carries (`coredata = true`, and
-`add_packages` plus `set_values("revenant.libraries", ...)` for it), as
-`SwiftUI/rtpkg/xmake.lua` does. The runtime's own weak imports are checked against
+`add_packages` plus `set_values("revenant.libraries", ...)` for it), as the
+targets of `frameworks/SwiftUI/xmake.lua` in revenant do. The runtime's own weak imports are checked against
 `modules/apple/runtime_guards.lua`. That a SwiftUI port passes `xmake deb`
 with no `revenant.waive.weak-imports` has not been run end to end yet: it needs the
 rebuilt runtime.
@@ -853,7 +853,7 @@ than iOS 4.2 gets the file left out and nothing re-exported in its place, which
 is what dyld there can do: ld64 refuses `-reexported_symbols_list` for such a
 target, and the release's own symbol is what the port binds anyway. Methods a later release added
 to an existing class are categories, which the link moves from `__objc_catlist`
-to `__DATA,__revenant_catlist`, where the runtime does not attach them: the
+to `__DATA,__port_catlist`, where the runtime does not attach them: the
 library's initializer adds each method, property and protocol only to a class
 that does not respond to it. It reads method lists rather than calling
 `class_getInstanceMethod`, which on iOS 6 runs `+initialize` while UIKit is

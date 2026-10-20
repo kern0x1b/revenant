@@ -39,12 +39,11 @@ anything to the user.
 
 ## 2. What to tell the user when there is none
 
-- **A SwiftUI app cannot be built with this stack at this pin.** SwiftUI's own repository builds
-  with its own scripts: `SwiftUI/build.sh` calls the compiler and clang by hand for
-  `armv7-apple-ios`, iOS 6.0, against packages installed in a private xmake global directory
-  (`xmake-global/`, its README's "Requirements"), and its tests need an emulator lab it points to
-  with `EMULATOR_LAB`. That is not a path for an app: a private xmake store is what this plugin
-  never uses, and those scripts are not an interface anyone supports.
+- **A SwiftUI app cannot be built with this stack at this pin.** SwiftUI's folder in revenant
+  (`frameworks/SwiftUI`) builds only as targets of revenant's own xmake project, for
+  `armv7-apple-ios`, iOS 6.0, and its demo and tests run in revenant's emulator from that
+  checkout. That is not a path for an app: nothing there is a package a project can require, and
+  those targets are not an interface anyone supports.
 - Do not copy SwiftUI's sources into the project, compile them as a target of your own, or write a
   small imitation of SwiftUI views over UIKit. Each is a second, unsupported SwiftUI the user would
   have to maintain, and none of it is what they asked for.

@@ -19,8 +19,9 @@
 #    gate stops on it.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-work=${WORK:-$root/.agent-work/runs/metal-census/pre-export}
+work=${WORK:-$(runs_folder metal-census/pre-export)}
 # CHECK 2 TAKES ITS OWN OBJECTS DIRECTORY, so it runs on ANY library: the gate's mixed-release object
 # was SecProtocolMetadataAccessors13_0.m in Security, and a check that can only look at Metal cannot
 # see it. The compile loop above is Metal and MetalKit; this is whatever you point it at.

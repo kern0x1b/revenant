@@ -13,10 +13,10 @@ local pages = import("pages", {anonymous = true})
 local tsv = import("tsv", {anonymous = true})
 local sdk_info = import("sdk", {anonymous = true})
 local project = import("project", {anonymous = true})
+local behaviour = import("behaviour", {anonymous = true})
 
 local objc_each = objc.each
 
-local DOC_OUT = {".agent-work", "spec-docs"}
 local LEDGER_6_1_3 = surface.ledger_6_1_3()
 local LEDGER_4_3 = surface.ledger_4_3()
 local NO_VALUE = "-"
@@ -574,7 +574,7 @@ function run(args)
     assert(files.read_text(swift.bucket_path(tree)) ~= nil,
            "doc needs the Swift bucket " .. swift.bucket_path(tree) .. ": run the swift command first")
     local targets = args.all and gen.frameworks(tree) or {args.framework}
-    local out_root = args.out or path.join(tree, DOC_OUT[1], DOC_OUT[2])
+    local out_root = args.out or behaviour.doc_root()
     local needs = {}
     for _, fw in ipairs(targets) do
         needs[fw] = needs_of(tree, fw)

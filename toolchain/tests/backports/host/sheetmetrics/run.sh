@@ -27,7 +27,7 @@ host() {
 failures=0
 same() {
     p=$(port "$1"); h=$(host "$2")
-    if python3 -c "import sys; sys.exit(0 if abs(float('$p') - float('$h')) < 1e-9 else 1)"; then
+    if awk -v p="$p" -v h="$h" 'BEGIN { n = "^[-+]?([0-9]+[.]?[0-9]*|[.][0-9]+)([eE][-+]?[0-9]+)?$"; if (p !~ n || h !~ n) exit 1; d = p - h; if (d < 0) d = -d; exit !(d < 1e-9) }'; then
         echo "ok $1 = $p, the host's $2"
     else
         echo "FAIL $1: port $p, host $2 $h"; failures=$((failures + 1))

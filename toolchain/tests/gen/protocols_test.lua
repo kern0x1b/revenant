@@ -70,8 +70,7 @@ end
 function main()
     local check, failures, count = checks()
     local protocols = import("gen.protocols", {rootdir = TOOLS, anonymous = true})
-    local root = path.join(TOOLS, "..", ".agent-work", "runs", "protocols-test-" .. tostring(os.time()))
-    os.mkdir(root)
+    local root = import("workspace", {rootdir = path.join(TOOLS, "..", "modules"), anonymous = true}).fresh("protocols-test")
 
     local tree, corpus = write_fixture(path.join(root, "with"), true)
     write_record(tree, {"FKProto"})

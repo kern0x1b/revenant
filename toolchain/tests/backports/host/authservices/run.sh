@@ -18,18 +18,18 @@
 # **A class the registry carries and whose header cannot be found is an error.** There is no table here
 # to be left out of, which is what let a class be asked about one member and pass.
 #
-# The port's library is built from this worktree's own sources into .agent-work/runs/, so the port side
-# measures the tree and not a gate's older binary.
-#
 #   sh run.sh                measure, exit 0 only when every case agrees
 #   sh run.sh --mutate       remove one method from the port and require exactly that case red
 set -eu
+echo "FAIL host/authservices/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PYTHON at line 89; portshape.py; the inline block PYTHON at line 179; the inline block PYTHON at line 242; the inline block PYTHON at line 269" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 revenant=${REVENANT:-$here/../../../..}
 package="$revenant/packages/a/apple-backports/AuthenticationServices"
 registry="$revenant/packages/a/apple-backports/registry/AuthenticationServices"
 framework=${AS_FRAMEWORK:-AuthenticationServices}
-build=${BUILD:-$revenant/.agent-work/runs/authservices-shape}
+build=${BUILD:-$(runs_folder authservices-shape)}
 mkdir -p "$build"
 
 # The SDK the port is compiled against: the headers are where the member list comes from and the SDK is

@@ -6,23 +6,17 @@
 #
 # Two things are true of the campaign and both were false of the one it replaces:
 #
-#   * It mutates a COPY of the library. The copy is made once under .agent-work, the run is pointed at
-#     it with MPS=, and every restore is a copy out of a pristine one. No tracked file is written at
-#     all: a run interrupted between a mutation and its restore used to leave the tree changed, and a
-#     script that can leave the tree changed does not belong on a shared worktree.
-#   * Every mutant is named. mutate.sh reads the anchor and the replacement from
-#     mutants/<site>.anchor and mutants/<site>.repl, so no shell parses C source and no anchor in this
-#     file can fall out of step with the file it names - which is what happened: the inline anchors this
-#     replaces had drifted from MPSMatrixBatchNormalization12.m and the campaign could not start.
-#
 # The count a mutant has to move is the grader's summary line, not a byte-exact count of differing
 # cases: that count read 58 before the SoftPlus fix and 58 after it, so a mutant wrong by 94 % did not
 # move it. The line carries all three numbers - identical, within the bound, beyond it - and a mutant
 # that is a wrong answer moves the third.
 set -eu
+echo "FAIL host/mpsmatrix/mutation.sh: its Python steps are gone and not yet ported to Lua: the inline block PYEOF at line 89" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-work=${MUTATION_BUILD:-$root/.agent-work/runs/host/mpsmatrix-mutation}
+work=${MUTATION_BUILD:-$(runs_folder host/mpsmatrix-mutation)}
 # Beside $work and not inside it: run.sh removes its own build directory at the start of every run, and
 # $work is that directory, so a copy kept under it is gone before the first mutant is applied.
 mps=$work.mps

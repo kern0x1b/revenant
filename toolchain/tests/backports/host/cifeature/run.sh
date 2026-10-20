@@ -14,9 +14,10 @@
 #      change a plain line, one changes only a known line, and each must be caught by the comparison or its pin
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
 gfx="$appledir/Graphics"
-build=${BUILD:-$here/../../../../.agent-work/runs/cifeature}
+build=${BUILD:-$(runs_folder cifeature)}
 mkdir -p "$build"
 
 # rename.h: every class the port's files declare, read from those files, renamed with a prefix in the port build only.

@@ -9,9 +9,10 @@
 # No python anywhere in this harness: the fixtures come from make-annotations.m, and the comparison is diff.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 tree=$(cd "$here/../../../.." && pwd)
 port=$tree/packages/a/apple-backports/PDFKit
-build=${BUILD:-$tree/.agent-work/runs/pdfkit-annotations}
+build=${BUILD:-$(runs_folder pdfkit-annotations)}
 mkdir -p "$build/fixtures"
 
 xcrun clang -fobjc-arc -Wall "$here/make-annotations.m" -framework Foundation \

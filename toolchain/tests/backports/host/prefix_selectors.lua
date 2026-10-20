@@ -1,8 +1,7 @@
 import("core.base.json")
 
 local SCRIPT_DIR = os.scriptdir()
-local RUNS = path.normalize(path.join(SCRIPT_DIR, "..", "..", "..", ".agent-work", "runs", "prefix-selectors"))
-os.mkdir(RUNS)
+local RUNS = import("workspace", {rootdir = path.join(SCRIPT_DIR, "..", "..", "..", "modules"), anonymous = true}).run("prefix-selectors")
 
 local FAMILIES = {"mutableCopy", "copy", "init", "new", "alloc"}
 local RUNTIME_HOOKS = {load = true, initialize = true}
@@ -210,7 +209,7 @@ local function clang_dump(flags, source_path, filter)
     end
     if filter then
         table.insert(args, "-Xclang")
-        table.insert(args, "-ast-dump-filter=haron")
+        table.insert(args, "-ast-dump-filter=evenant")
     end
     table.insert(args, source_path)
     return os.iorunv("xcrun", args)

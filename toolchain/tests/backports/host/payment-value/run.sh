@@ -1,11 +1,6 @@
 #!/bin/sh
 # run.sh - PKPaymentToken and PKPayment, the port's against the host's own PassKit, in one process.
 #
-# PKPayment8.m is compiled for the Mac Catalyst target, the one PassKit's own iOS surface is read through, with
-# its classes renamed (revenantHost_PKPayment and revenantHost_PKPaymentToken) so the system's PassKit and the port's
-# run side by side. probe.m asks both the same questions and prints SAME or FAIL for each. The renamed build and
-# the probe live under the checkout's .agent-work/runs, not the system temporary directory.
-#
 # The mutant check is run here too: a copy of PKPayment8.m in which -initWithToken: drops the token it is given
 # must make the probe FAIL, because a comparison that cannot fail decides nothing.
 set -eu

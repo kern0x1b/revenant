@@ -1,6 +1,7 @@
 #!/bin/sh
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 usage="usage: run.sh [--mutants]"
 mutants=no
 if [ "${1:-}" = --mutants ]; then
@@ -9,7 +10,7 @@ if [ "${1:-}" = --mutants ]; then
 fi
 [ $# -eq 0 ] || { echo "$usage" >&2; exit 2; }
 FOUNDATION=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}
-BUILD=${BUILD:-$here/../../../../.agent-work/runs/bundlerequest}
+BUILD=${BUILD:-$(runs_folder bundlerequest)}
 export BUILD
 sources=${SOURCES:-$(cat "$here/sources.txt")}
 # SAN=1 adds AddressSanitizer, which names the file, the line and the access where lldb only gives a

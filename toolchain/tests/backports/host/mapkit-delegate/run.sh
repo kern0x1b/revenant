@@ -10,11 +10,9 @@
 # than nine cases, because then it is not covering the nine.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 port=${PORT:-$here/../../../../packages/a/apple-backports/MapKit}
-# BUILD goes under the repository's own .agent-work, never the system temp: the run output is
-# evidence and belongs with the band's runs, where it survives a reboot and is not mistaken
-# for scratch. Same rule as the other probes in this package.
-build=${MAPKIT_DELEGATE_BUILD:-$PWD/.agent-work/runs/mapkit-delegate}
+build=${MAPKIT_DELEGATE_BUILD:-$(runs_folder mapkit-delegate)}
 mkdir -p "$build"
 rm -f "$build"/cc.log "$build"/runner.log "$build"/*.txt "$build"/*.body "$build"/*.dylib "$build"/runner
 MACOSX_SDK=$(xcrun --sdk macosx --show-sdk-path)

@@ -35,11 +35,14 @@
 # Not run through heavy.sh: it compiles two small files, links two binaries and runs them against a live
 # capture, and the fleet's heavy lane is for the gate.
 set -eu
+echo "FAIL host/avf-recommended-settings7/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 52; the inline block PYEOF at line 160; the inline block PYEOF at line 211" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 port=$root/packages/a/apple-backports/AVFoundation/AVCaptureDataOutputRecommendedSettings7.m
-build=${AVFRS_BUILD:-$root/.agent-work/runs/avf-recommended-settings7}
-oracle_dir=${AVFRS_ORACLE:-$root/.agent-work/runs/avf-recommended-settings7-oracle}
+build=${AVFRS_BUILD:-$(runs_folder avf-recommended-settings7)}
+oracle_dir=${AVFRS_ORACLE:-$(runs_folder avf-recommended-settings7-oracle)}
 rm -rf "$build"
 mkdir -p "$build/src"
 

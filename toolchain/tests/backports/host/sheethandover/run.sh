@@ -22,7 +22,7 @@ mkdir -p "$app/Contents/MacOS"
 # The category the file carries (transitioningDelegate and transitionCoordinator, which UIKit has) is attached the way a
 # band attaches it, only where the release lacks the selector, and not over the host's.
 xcrun clang -fobjc-arc $target $quiet -I"$uikit" -c "$uikit/UIViewController+TransitionCoordinator.m" -o "$build/installer.o"
-perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$build/installer.o"
+perl -0777 -pi -e 's/__objc_catlist\0\0/__port_catlist\0\0/g' "$build/installer.o"
 xcrun clang -fobjc-arc $target $quiet -I"$uikit" -I"$device" "$here/record.m" "$here/stubs.m" "$device/check.m" "$uikit/RevenantTransitionCoordinator.m" \
     "$here/../foundation2/host-attach.c" "$build/installer.o" -framework UIKit -framework Foundation -framework QuartzCore -framework CoreGraphics -o "$app/Contents/MacOS/app"
 cp "$here/record.plist" "$app/Contents/Info.plist"

@@ -14,6 +14,8 @@
 #   sh run.sh
 
 set -e
+echo "FAIL host/musickit/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 93" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 # Four levels up is the repository root, as in every other suite under tests/backports/host: five is

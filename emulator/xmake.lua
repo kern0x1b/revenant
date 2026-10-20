@@ -33,9 +33,9 @@ option("emulator_dynarmic_test_emit_failure")
 option_end()
 
 local host = {plat = "macosx", arch = "arm64"}
-add_requires("revenant-third-party@dynarmic 6.7.0", table.join(host, {alias = "dynarmic",
+add_requires("dynarmic 6.7.0", table.join(host, {alias = "dynarmic",
              configs = {test_emit_failure = has_config("emulator_dynarmic_test_emit_failure")}}))
-add_requires("revenant-third-party@boost 1.81.0", table.join(host, {alias = "boost"}))
+add_requires("boost 1.81.0", table.join(host, {alias = "boost"}))
 add_requires("revenant@openssl 4.0.2", table.join(host, {alias = "openssl"}))
 add_requires("revenant@libplist 2.7.0", table.join(host, {alias = "libplist"}))
 add_requires("libpng", "libjpeg-turbo", table.join(host, {system = false}))

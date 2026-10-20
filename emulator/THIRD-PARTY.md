@@ -6,8 +6,8 @@ Nothing third-party is kept in this tree: every component is an xmake package th
 
 | Component | Version | License | Copyright | Package |
 | --- | --- | --- | --- | --- |
-| Dynarmic | MC-XiaoXiao/dynarmic at the pinned commit, with our patches | 0BSD | MerryMage and contributors (`LICENSE.txt` in its tree) | `third_party/packages/d/dynarmic` |
-| Boost libraries | 1.81.0 release | BSL-1.0 | the Boost authors | `third_party/packages/b/boost` |
+| Dynarmic | MC-XiaoXiao/dynarmic at the pinned commit, with our patches | 0BSD | MerryMage and contributors (`LICENSE.txt` in its tree) | `third_party/dynarmic` |
+| Boost libraries | 1.81.0 release | BSL-1.0 | the Boost authors | `third_party/boost` |
 
 Dynarmic builds libraries of its own from its `externals/` (fmt, mcl, oaknut, robin-map), each with
 its license; the package installs them beside it.

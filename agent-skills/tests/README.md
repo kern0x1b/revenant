@@ -15,40 +15,45 @@ no app they describe exists anywhere in this repository.
 
 ## Run
 
+From the revenant checkout:
+
 ```
-tests/run.sh [--runtime claude] [--hours N] list timer …   # or: all
+./xmakew l agent-skills/tests/run.lua [--runtime claude] [--hours N] list timer …   # or: all
 ```
 
-For each scenario `run.sh`:
+Run output goes under `$HOME/.revenant/cache/<task>/agent-skills/` (`toolchain/modules/workspace.lua`
+names the task). For each scenario `run.lua`:
 
-1. makes a scratch directory under `$HOME/.revenant/cache/agent-skills/`, outside any repository, and in it a fresh
+1. makes a scratch directory `scratch.<random>` there, outside any repository, and in it a fresh
    `HOME`;
 2. clones revenant at `HEAD` (the tree must be committed) and installs the plugin into that `HOME`
    with the runtime's own commands: for Claude Code `claude plugin marketplace add <clone>` and
    `claude plugin install agent-skills@revenant`;
 3. copies the scenario's `answers.md` into an empty project directory and runs the agent there,
    headless, on `request.md`;
-4. runs `check.sh` and copies the evidence (transcript, check, project without build products,
-   `.deb`s) to `$HOME/.revenant/cache/agent-skills/<run>/<id>/`.
+4. runs `check.lua` and copies the evidence (transcript, check, project without build products,
+   `.deb`s) to `<run>/<id>/` next to the scratch directory.
 
 Shared on purpose, not isolated: the xmake package store (`XMAKE_GLOBALDIR` is the real home, so
 nothing is rebuilt into a private store) and Revenant's firmware, caches and emulator images
 (`REVENANT_HOME`). A guard in front of `xmake` refuses `--force` and `xmake emulate clean`.
 
-`run.sh` refuses to start unless `REVENANT_AGENT_SKILLS_ISOLATION_APPROVED=1` is set (the isolation is
+`run.lua` refuses to start unless `REVENANT_AGENT_SKILLS_ISOLATION_APPROVED=1` is set (the isolation is
 approved; the variable keeps an accidental run from starting it).
 
 Login. On macOS the agent's login lives in the login keychain, and a fresh `HOME` is not logged in
-(measured: `Not logged in`). `run.sh` therefore copies only the Claude login from the keychain into
+(measured: `Not logged in`). `run.lua` therefore copies only the Claude login from the keychain into
 the scenario's `HOME` as `.claude/.credentials.json`, mode `600`. That `HOME` is removed as soon as
-the scenario ends and by a trap on any exit. The evidence is scanned for the exact token before the
-`HOME` goes, and `check.sh` scans it again for credential files and token shapes. The file never
+the scenario ends, when the run stops on an error, and on Ctrl-C. A `kill` with TERM or HUP skips
+that cleanup: xmake's Lua catches only SIGINT, so remove `home-*` in the scratch directory by hand
+after one. The evidence is scanned for the exact token before the `HOME` goes, and `check.lua`
+scans it again for credential files and token shapes. The file never
 reaches the evidence, a log or git. Each scenario is capped to the access token's remaining
 lifetime minus 15 minutes, so the copy never has to refresh the login.
 
 ## What counts
 
-`check.sh PROJECT SCENARIO PLUGIN` prints one `ok`/`FAIL` line per check and ends with
+`./xmakew l agent-skills/tests/check.lua PROJECT SCENARIO PLUGIN [EVIDENCE]` prints one `ok`/`FAIL` line per check and ends with
 `RUN COUNTS` only if all pass:
 
 - the app's own sources are in the scenario's language, and `PROJECT.md` exists;

@@ -13,4 +13,4 @@ xcrun clang -target arm64-apple-ios16.0-macabi -isysroot "$sdk" -iframework "$sd
 SHEET_RECORDS="$build/sheet.json" "$build/record" > "$build/sheet.log"
 xmake l "$here/../../common/embed.lua" "$build/sheet.json" "$device/sheet-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/sheet_expectations/' "$device/sheet-expectations.h" && rm -f "$device/sheet-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/sheet.json'))))")"
+echo "records: $(runs_harness records "$build/sheet.json")"

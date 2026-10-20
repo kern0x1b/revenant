@@ -7,6 +7,8 @@
 # callservicesd comes back CXErrorCodeRequestTransactionErrorUnentitled and no delegate method is ever called; the transactions the port
 # really performs are held on the device instead.
 set -eu
+echo "FAIL host/callkit/run.sh: its Python steps are gone and not yet ported to Lua: rename.py; compare.py; expectations.py; mutate.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
@@ -30,7 +32,7 @@ divergent="configuration.deprecatedName configuration.ringtone directoryManager.
 
 xcrun clang $common -I"$device" "$here/record.m" "$device/callkit-cases.m" $libs -framework CallKit -o "$build/system"
 CALLKIT_RECORDS="$build/system.json" "$build/system"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/system.json'))))")"
+echo "records: $(runs_harness records "$build/system.json")"
 
 python3 "$here/rename.py" "$registry" "$build/rename.h"
 

@@ -39,8 +39,9 @@
 # comparison above - the two answers are always compared with each other, never with a recording.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 port=${PORT:-$here/../../../../packages/a/apple-backports/Photos}
-build=${PHOTOSUI_BUILD:-$here/../../../../.agent-work/build/photosui-host}
+build=${PHOTOSUI_BUILD:-$(runs_folder build/photosui-host)}
 rm -rf "$build"
 mkdir -p "$build"
 

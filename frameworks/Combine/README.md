@@ -58,8 +58,8 @@ There are two ways to take it:
 ## Build
 
 Inside revenant, `xmake.lua` requires `revenant@combine` with `sources = true` and makes
-two targets of the revenant project for iOS (`xmake f -p iphoneos -a armv7` at the
-revenant top) from the installed tree: `Combine`, the one module, and
+two targets of the revenant project for iOS (`./xmakew f -P . -p iphoneos -a armv7` at
+the revenant top) from the installed tree: `Combine`, the one module, and
 `CombineHelpers`, the C++ helper it imports. A target of another member links it
 with `add_deps("Combine")`.
 
@@ -73,11 +73,14 @@ add_packages("combine")
 
 ## Test
 
-`xmake build CombineTests` compiles upstream's `Tests/OpenCombineTests` against
-the module as one daemon, with the XCTest shim of `harness/XCTest.swift`; the
-test list is found by `harness/discover.lua` and leaves out what
-`harness/skip.txt` names. `xmake emulate run` starts it in the guest, and its
-exit status is the verdict. `xmake test CombineGenerated` expands each gyb
+`./xmakew build -P . CombineTests` compiles upstream's `Tests/OpenCombineTests`
+against the module as one daemon, with the XCTest shim of `Tests/XCTest.swift`;
+the test list is found by `tools/discover.lua` and leaves out what
+`Tests/skip.txt` names. With the project configured `--emulate=y`,
+`./xmakew emulate -P . -d iPhone4,1 -r 6.1.3 install` and
+`./xmakew emulate -P . -d iPhone4,1 -r 6.1.3 run /usr/libexec/CombineTests` start it
+in the guest (skill `emulate-port`), and its exit status is the verdict.
+`./xmakew test -P . CombineGenerated` expands each gyb
 template with Revenant's gyb (`toolchain/modules/gyb`) and checks the `GENERATED-*`
 source beside it is that expansion byte for byte.
 
@@ -108,7 +111,8 @@ Timer.publish(every: 1, on: .main, in: .common)
 | Path | Holds |
 | --- | --- |
 | `xmake.lua` | the `Combine` and `CombineHelpers` targets on the patched tree, `CombineTests` and its `CombineXCTest` shim, and `CombineGenerated`, the gyb check |
-| `harness/` | the XCTest shim, the test discovery, the skip list and the Debian control of the test daemon |
+| `Tests/` | the XCTest shim, the skip list and the Debian control of the test daemon |
+| `tools/` | the test discovery, which writes the `main.swift` that runs upstream's tests |
 | `docs/` | the test results |
 | `../../toolchain/packages/c/combine/` | the recipe and the patch series |
 

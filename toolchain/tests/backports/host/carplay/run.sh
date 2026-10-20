@@ -11,14 +11,11 @@
 #   3. THE DIFF. Both sides print `label<TAB>answer`, and every label they both carry has to answer
 #      the same on both, or the run is red. That is what makes the port's rows measured rather than
 #      asserted: the answer in `registry/CarPlay/ios12.json` is the answer Apple's own object gave.
-#
-# Each half carries a mutant, and the run FAILS if a mutant does not differ, because a comparison
-# that cannot fail decides nothing. Run output lands under this repository's own .agent-work, never
-# the system temp: the transcript is the evidence the registry's `source` names.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 port=${PORT:-$here/../../../../packages/a/apple-backports/CarPlay}
-build=${CARPLAY_BUILD:-$PWD/.agent-work/runs/carplay-host}
+build=${CARPLAY_BUILD:-$(runs_folder carplay-host)}
 mkdir -p "$build"
 rm -f "$build"/cc.log "$build"/probe "$build"/probe.log "$build"/mutant "$build"/mutant.log \
       "$build"/mutated.m "$build"/runner "$build"/runner.log "$build"/runner.mutant.m \

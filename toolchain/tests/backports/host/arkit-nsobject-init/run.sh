@@ -9,8 +9,9 @@
 
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 repo=$(cd "$here/../../../.." && pwd)
-runs=${RUNS:-$repo/.agent-work/runs/arkit-nsobject-init}
+runs=${RUNS:-$(runs_folder arkit-nsobject-init)}
 rm -rf "$runs"
 mkdir -p "$runs"
 

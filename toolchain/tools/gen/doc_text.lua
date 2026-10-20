@@ -125,7 +125,7 @@ function rows(tree, fw, sdk)
             take(line)
         end
     elseif (sdk_modules.module_of(sdk, fw) or {}).kind == "swift" then
-        for _, line in ipairs(swift_docs.lines(tree, sdk, fw)) do
+        for _, line in ipairs(swift_docs.lines(sdk, fw)) do
             take(line)
         end
     else

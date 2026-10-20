@@ -54,6 +54,7 @@ function main(tree, sdk, corpus)
     local tbd = import("gen.tbd", {rootdir = TOOLS, anonymous = true})
     local doc_text = import("gen.doc_text", {rootdir = TOOLS, anonymous = true})
     local surface = import("gen.surface", {rootdir = TOOLS, anonymous = true})
+    local workspace = import("workspace", {rootdir = path.join(tree, "modules"), anonymous = true})
     local fixtures = path.join(tree, "tests", "gen", "input", "fixtures")
     local decls = host.target_product(tree, path.join(tree, "tools", "found"), "decls")
 
@@ -98,7 +99,7 @@ function main(tree, sdk, corpus)
                     table.insert(keep, line)
                 end
             end
-            write_file(path.join(tree, ".agent-work", "runs", "capture", "doc", fw .. ".txt"), table.concat(keep, "\n") .. (#keep > 0 and "\n" or ""))
+            write_file(path.join(workspace.run("capture", "doc"), fw .. ".txt"),table.concat(keep, "\n") .. (#keep > 0 and "\n" or ""))
             local synthetic = {}
             for _, line in ipairs(keep) do
                 table.insert(synthetic, synthetic_row(tsv, line))

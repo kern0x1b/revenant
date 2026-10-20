@@ -8,6 +8,7 @@
 # second says the %ld form is not. Either failing stops here, before a binary exists to be run.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 FOUNDATION=${FOUNDATION:-$root/packages/a/apple-backports/Foundation}
 CLASSES=RevenantMorphology.m
@@ -20,7 +21,7 @@ printf 'guard  %s: revenant_grammatical( %s times (want >= 8), "grammaticalGende
 [ "$bare" -eq 0 ] || { echo "$CLASSES prints a bare number for grammaticalGender" >&2; exit 1; }
 
 # The build lives under the worktree and not in /tmp: nothing this project builds goes to /tmp.
-BUILD=${BUILD:-$root/.agent-work/build/morphology}
+BUILD=${BUILD:-$(runs_folder build/morphology)}
 rm -rf "$BUILD"
 mkdir -p "$BUILD"
 RENAME="-DNSMorphology=revenantHostNSMorphology -DNSMorphologyCustomPronoun=revenantHostNSMorphologyCustomPronoun

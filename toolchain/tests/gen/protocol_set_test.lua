@@ -1,6 +1,6 @@
 local ROOT = path.absolute(path.join(os.scriptdir(), "..", ".."))
 local TOOLS = path.join(ROOT, "tools")
-local FIXTURE = path.join(ROOT, ".agent-work", "runs", "protocol-set-test")
+local FIXTURE = import("workspace", {rootdir = path.join(ROOT, "modules"), anonymous = true}).run("protocol-set-test")
 local FW = "Fixture"
 
 function main()

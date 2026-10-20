@@ -22,9 +22,10 @@
 # which addon is in use.
 set -eu
 cd "$(dirname "$0")"
+. ../../backports/common/runs.sh "$PWD"
 device=${1:-iPhone2,1}
 release=${2:-6.1.3}
-out=${OUT_DIR:-.agent-work/output}
+out=${OUT_DIR:-$(runs_folder emulate-output)}
 known=revenant-emulate-output
 mkdir -p "$out"
 

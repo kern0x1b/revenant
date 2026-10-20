@@ -1,8 +1,7 @@
 import("core.base.json")
 
 local function fail(message)
-    io.stderr:write("credentials: " .. message .. "\n")
-    os.exit(1)
+    raise("credentials: " .. message)
 end
 
 local function read_binary(file)
@@ -27,21 +26,24 @@ local function claude_login(file)
     return doc.claudeAiOauth
 end
 
-local function store(file)
-    local doc = json.decode(io.stdin:read("a"))
+function store(file, text)
+    local doc = json.decode(text or io.stdin:read("a"))
     if type(doc) ~= "table" or type(doc.claudeAiOauth) ~= "table" then
-        fail("no claudeAiOauth object on stdin")
+        fail("no claudeAiOauth object in what was given to store")
     end
     io.writefile(file, json.encode({claudeAiOauth = doc.claudeAiOauth}))
 end
 
-local function left(file)
+function seconds_left(file)
     local seconds = claude_login(file).expiresAt / 1000 - os.time()
-    local whole = seconds >= 0 and math.floor(seconds) or math.ceil(seconds)
-    print(string.format("%d", whole))
+    return seconds >= 0 and math.floor(seconds) or math.ceil(seconds)
 end
 
-local function leaked(file, dir)
+local function left(file)
+    print(string.format("%d", seconds_left(file)))
+end
+
+function leaked_paths(file, dir)
     local login = claude_login(file)
     local secrets = {}
     for _, key in ipairs({"accessToken", "refreshToken"}) do
@@ -55,16 +57,24 @@ local function leaked(file, dir)
         paths[#paths + 1] = path
     end
     table.sort(paths)
+    local found = {}
     for _, path in ipairs(paths) do
         local data = read_binary(path)
         if data then
             for _, secret in ipairs(secrets) do
                 if string.find(data, secret, 1, true) then
-                    print(path)
+                    found[#found + 1] = path
                     break
                 end
             end
         end
+    end
+    return found
+end
+
+local function leaked(file, dir)
+    for _, path in ipairs(leaked_paths(file, dir)) do
+        print(path)
     end
 end
 

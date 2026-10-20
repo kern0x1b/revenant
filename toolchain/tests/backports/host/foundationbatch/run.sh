@@ -24,11 +24,11 @@ printf '#import <Foundation/Foundation.h>\n' > "$build/prefixed/declarations.h"
 renamed=""
 for file in $files; do
     xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -c "$sources/$file" -o "$build/plain/$file.o"
-    python3 "$here/../prefix_selectors.py" "$sources/$file" "$build/prefixed/$file" charonHost_ \
+    runs_xmake l "$here/../prefix_selectors.lua" "$sources/$file" "$build/prefixed/$file" revenantHost_ \
         --declarations="$build/prefixed/declarations.h" -fobjc-arc $target $quiet -- "$build/plain/$file.o"
     xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -I"$sources" \
         -include "$build/prefixed/declarations.h" -c "$build/prefixed/$file" -o "$build/renamed/$file.o"
-    perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$build/renamed/$file.o"
+    perl -0777 -pi -e 's/__objc_catlist\0\0/__port_catlist\0\0/g' "$build/renamed/$file.o"
     renamed="$renamed $build/renamed/$file.o"
 done
 xcrun clang -fobjc-arc $target $quiet -I"$harness" "$here/test.m" "$here/../foundation2/host-attach.c" \

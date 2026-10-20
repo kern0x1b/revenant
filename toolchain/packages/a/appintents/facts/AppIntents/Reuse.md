@@ -17,12 +17,12 @@ The reviewer brief's rule (owner, 2026-09-28): a delivery names the open upstrea
 
 * **`revenant@swift-runtime`** — the port's own Swift runtime, a package, declared as every recipe's
   dependency. Nothing in the four modules reimplements it.
-* **SwiftUI's `SwiftUI`** — the SwiftUI band, `$HOME/Git/projects/ios/SwiftUI`
-  (`SwiftUI/Sources/SwiftUI/`): `View` with its `body` requirement (`Core.swift:7-13`), `Text`
+* **SwiftUI's `SwiftUI`** — the SwiftUI band, `frameworks/SwiftUI`
+  (`Sources/`) in revenant: `View` with its `body` requirement (`Core.swift:7-13`), `Text`
   (`Views.swift`), `ShapeStyle`, `Edge`, `Binding`, `PresentationBackgroundInteraction`,
   `EnvironmentValues` (`Graph.swift:8`), `EnvironmentKey` (`Environment.swift:4`). It is the source
   the **view rows are routed to** and the reason they are not declared here: it is compiled only into
-  `rtpkg`'s `swiftuirt` daemon target, with no `revenant@swiftui` package to depend on, so a port cannot
+  the SwiftUI targets of the revenant project, with no `revenant@swiftui` package to depend on, so a port cannot
   build against it yet (`facts/WidgetKit/Providers.md` lists the rows; the ask is with the band).
 * **`packages/a/apple-backports/registry/CoreSpotlight/ios9.json`** — the backports package's own
   registry entry, read by the AppIntents recipe through the runtime's port overlay (`REVENANT_SWIFT_PORT_HEADERS`). The
