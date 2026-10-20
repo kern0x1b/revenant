@@ -9,7 +9,6 @@ local NOT_STRINGS = {
     ["modules/emulator.lua|table.sort(named, function (a, b) return a.address < b.address end)"] = "addresses",
     ["modules/packaging.lua|table.sort(merged, function (a, b) return a ~= executable and b == executable end)"] = "booleans",
     ["modules/apple/sdkstubs.lua|table.sort(found, function (a, b) return release(a) < release(b) end)"] = "numbers",
-    ["modules/apple/dyld.lua|table.sort(releases, function (a, b) return compare(a, b) < 0 end)"] = "versions",
     ["modules/apple/dyld.lua|table.sort(ladder, function (a, b) return compare(a.release, b.release) < 0 end)"] = "versions",
     ["modules/apple/dyld.lua|table.sort(missing, function (a, b)"] = "byteorder.less on both names",
     ["modules/apple/dyld.lua|table.sort(dangling, function (a, b)"] = "byteorder.less on both names",

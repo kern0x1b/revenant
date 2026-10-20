@@ -1,5 +1,6 @@
 local MODULES = path.join(os.scriptdir(), "..", "..", "modules")
 local dyld = import("apple.dyld", {rootdir = MODULES, anonymous = true})
+local workspace = import("workspace", {rootdir = MODULES, anonymous = true})
 
 local NAMES_SCRIPT = path.join(os.scriptdir(), "names.lua")
 
@@ -10,7 +11,7 @@ local HEADER = "# revenant-cache-index 2 format=2 order=byte release=%s arch=%s 
 local USAGE = "usage: xmake l tools/cache-index/build.lua [--only RELEASE]... [--force] [--no-merge]"
 
 local function index_dir()
-    return path.join(os.getenv("REVENANT_HOME") or path.join(os.getenv("HOME"), ".revenant"), "cache-index")
+    return path.join(workspace.home(), "cache-index")
 end
 
 local function index_file(release)
