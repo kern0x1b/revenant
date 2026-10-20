@@ -59,6 +59,21 @@ jobs:
           [ -x /opt/homebrew/opt/llvm/bin/llvm-config ] || brew install llvm
           ./xmakew require -P . -y -v revenant@ld64
 
+      - name: Prove the iOS SDK links with ld64
+        run: |
+          ld=$(find "$HOME/.revenant/cache/xmake-global/.xmake/packages/l/ld64" -name ld -path '*/bin/ld' | head -n 1)
+          [ -x "$ld" ] || { echo "no ld64 under the store" >&2; exit 1; }
+          probe="$RUNNER_TEMP/linker-probe"
+          mkdir -p "$probe"
+          printf 'int f(void) { return 1; }\n' > "$probe/a.c"
+          xcrun clang -c -target armv6-apple-ios -miphoneos-version-min=2.0 "$probe/a.c" -o "$probe/a.o"
+          rc=0
+          xcrun clang -r -target armv6-apple-ios -miphoneos-version-min=2.0 -nostdlib --ld-path="$ld" -v "$probe/a.o" -o "$probe/a-link.o" > "$probe/link.log" 2>&1 || rc=$?
+          grep -E '^ *"[^"]*/ld"' "$probe/link.log" | cut -c1-240
+          if ! grep -qF "\"$ld\"" "$probe/link.log"; then cat "$probe/link.log"; echo "the link did not invoke $ld" >&2; exit 1; fi
+          if [ "$rc" -ne 0 ]; then cat "$probe/link.log"; fi
+          exit "$rc"
+
       - name: Build or fetch the package
         env:
           PACKAGE: ${{ inputs.package }}
