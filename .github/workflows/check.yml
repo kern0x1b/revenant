@@ -51,7 +51,7 @@ jobs:
 
   backports:
     runs-on: macos-26
-    timeout-minutes: 60
+    timeout-minutes: 360
     env:
       REVENANT_PREBUILT: kern0x1b/revenant
       REVENANT_PREBUILT_ONLY: "1"
@@ -81,6 +81,14 @@ jobs:
           path: ~/.revenant/cache/xmake-global
           key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
 
+      - uses: actions/cache/restore@v4
+        id: generated
+        with:
+          path: build/generated/backports
+          key: backports-generated-${{ runner.os }}-${{ hashFiles('frameworks/Backports/**') }}
+          restore-keys: |
+            backports-generated-${{ runner.os }}-
+
       - name: Check that the branch has the Backports component
         id: component
         run: |
@@ -95,7 +103,7 @@ jobs:
       - name: Configure and build the Backports component
         if: steps.component.outputs.present == 'true'
         run: |
-          ./xmakew f -P . -p iphoneos -a armv7 --component=Backports
+          ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y
           ./xmakew build -P .
 
       - name: Upload the Backports libraries
@@ -105,6 +113,12 @@ jobs:
           name: backports-libraries
           path: build/iphoneos/armv7/release/lib*.dylib
           if-no-files-found: error
+
+      - uses: actions/cache/save@v4
+        if: always() && steps.generated.outputs.cache-hit != 'true'
+        with:
+          path: build/generated/backports
+          key: backports-generated-${{ runner.os }}-${{ hashFiles('frameworks/Backports/**') }}
 
       - uses: actions/cache/save@v4
         if: always() && steps.store.outputs.cache-hit != 'true'
