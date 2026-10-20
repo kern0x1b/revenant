@@ -10,7 +10,7 @@ local SOURCES = {
 
 local CONSTANTS = {
     table = "tools/corpus/cfconst.tsv",
-    facts = "tools/corpus/cfconst.md",
+    facts = "docs/reference/toolchain/tools.md#measured-constants",
     frameworks = {Contacts = true, CoreData = true, CoreServices = true, Foundation = true, HealthKit = true, IOSurface = true, UIKit = true},
 }
 

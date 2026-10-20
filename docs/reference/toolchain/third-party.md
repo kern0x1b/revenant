@@ -1,14 +1,16 @@
 # Third-party code, and where each piece stands
 
 This repository contains almost no third-party source. Every dependency below is
-declared by a recipe or package under `recipes/` and `packages/` that names the
-upstream it fetches and the version it pins; nothing external is vendored into
-the tree except the sources listed under *Vendored in the tree*. Each package copies
-its upstream license file under `licenses/` when it installs.
+declared by a package under `toolchain/packages/` that names the upstream it fetches
+and the version it pins; nothing external is vendored into the tree except the sources
+listed under *Vendored in the tree*. Each package copies its upstream license file
+under `licenses/` when it installs.
 
 The point of this file is that a reader can tell, without building anything,
 exactly what a port built with the toolchain links against, what builds it, and under
-what terms. Versions and licenses here are taken from the package recipes.
+what terms. Versions and licenses here are taken from the package definitions, and
+package paths are relative to `toolchain/`. The packages are described in
+[packages](packages.md).
 
 ## Libraries a port links
 
@@ -22,7 +24,7 @@ carried into the program that ships to the device.
 | Combine — a `Combine` module for platforms without Apple's framework: OpenCombine, below, with our patches | 2026.10.19 | MIT (the upstream MIT copyright is installed with the package) | `packages/frameworks/combine` |
 | SwiftUI — a `SwiftUI` module on the UIKit of iOS 6 | 2026.09.23 | MIT | `packages/frameworks/swiftui-uikit`, from [`kern0x1b/revenant`](https://github.com/kern0x1b/revenant/tree/main/frameworks/SwiftUI) |
 | [OpenCombine](https://github.com/OpenCombine/OpenCombine) — a `Combine` module for platforms without Apple's framework | `1c6f02c7ed8140c0ba7a783aaddb6e0685a0037b` (its `0.14.0` is `8576f0d579b27020beccbccc3ea6844f3ddfc2c2`) | MIT, Copyright (c) 2019 Sergej Jaskiewicz; the licence is installed with the package under `licenses/LICENSE` | `packages/frameworks/combine` |
-| Combine's patches to OpenCombine: its three modules compiled as one named `Combine`, the adaptations iOS 6 needs, and what Apple declares and OpenCombine lacks | 2026.10.19, `../frameworks/Combine/patches` | MIT, under OpenCombine's copyright; no new licence is claimed over Sergej Jaskiewicz's work | `packages/frameworks/combine` |
+| Combine's patches to OpenCombine: its three modules compiled as one named `Combine`, the adaptations iOS 6 needs, and what Apple declares and OpenCombine lacks | 2026.10.19, listed in `packages/frameworks/combine/xmake.lua` | MIT, under OpenCombine's copyright; no new licence is claimed over Sergej Jaskiewicz's work | `packages/frameworks/combine` |
 | [lzfse](https://github.com/lzfse/lzfse) — the LZFSE and LZVN codec behind `COMPRESSION_LZFSE` in the Compression backport, unmodified, built with its symbols hidden | `88e2d2788b4021d0b2eb9fe2d97352ae9190f128` (tag `lzfse-1.0`) | BSD-3-Clause; the licence is installed with the package under `licenses/LICENSE` | `packages/libraries/lzfse` |
 | [zlib](https://github.com/madler/zlib) — the raw deflate codec behind `COMPRESSION_ZLIB` in the Compression backport, unmodified, built as `libzcodec.a` so the system `libz` is not linked | `v1.3.2` (`da607da739fa6047df13e66a2af6b8bec7c2a498`) | Zlib; the licence is installed with the package under `licenses/LICENSE` | `packages/libraries/zlib` |
 | [LZ4](https://github.com/lz4/lz4) — the block codec behind `COMPRESSION_LZ4_RAW` and the blocks of `COMPRESSION_LZ4` in the Compression backport, `lib/` only, unmodified, built with its symbols hidden | `v1.9.2` (`fdf2ef5809ca875c454510610764d9125ef2ebbd`) | BSD-2-Clause; the licence is installed with the package under `licenses/LICENSE` | `packages/libraries/lz4` |
@@ -57,7 +59,7 @@ into the port binary that ships to a device.
 
 ## Vendored in the tree
 
-Two third-party sources are held in this repository. The first is the Core ML model schema, kept as
+One third-party source is held in this repository: the Core ML model schema, kept as
 the reference the `createml` package's Swift codec follows. Nothing is generated from
 it, and nothing from it is linked into a port (`packages/frameworks/createml/proto/README.md`).
 
@@ -68,5 +70,4 @@ it, and nothing from it is linked into a port (`packages/frameworks/createml/pro
 ## First-party
 
 `packages/runtimes/apple-compat`, `packages/frameworks/apple-backports`, `packages/emulator/emulator-guest`
-and `packages/emulator/firmware-tools`, and the recipes under `recipes/`, are Revenant's
-own (MIT); they are not third-party and are not listed here.
+and `packages/emulator/firmware-tools` are Revenant's own (MIT); they are not third-party and are not listed here.

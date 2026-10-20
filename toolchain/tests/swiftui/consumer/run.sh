@@ -9,7 +9,7 @@
 #     $HOME/Git/projects/ios/coordination/heavy.sh sh tests/swiftui/consumer/run.sh
 #
 # One heavy job: it installs revenant@swiftui into the shared store and builds one program for armv7. The recipe's own digest
-# is its buildhash, so a changed recipe is a different package and needs no force (revenant AGENTS.md, Traps: the shared
+# is its buildhash, so a changed recipe is a different package and needs no force (docs/guides/toolchain/contributing.md, Traps: the shared
 # ~/.xmake store). SWIFTUI_ROOT names the checkout when this is not run from one; SWIFTUI_MINIMUM is the release the port
 # builds for, 6.1.3 by default: what an armv7 device of the fleet runs.
 #

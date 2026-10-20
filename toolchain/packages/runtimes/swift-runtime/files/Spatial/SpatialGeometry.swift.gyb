@@ -6,7 +6,7 @@
 // another and a `simd_packed_*` initialiser fills it side by side.
 //
 // The algorithms are the headers' own, named at each one; where the SDK's Swift interface body and
-// the running system disagree, the system wins (COORDINATION section 5), so the sign of
+// the running system disagree, the system wins, so the sign of
 // `Point3D - Vector3D` was read off the host rather than copied.
 //
 //===----------------------------------------------------------------------===//
