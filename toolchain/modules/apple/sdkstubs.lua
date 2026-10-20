@@ -273,6 +273,64 @@ function slice(doc, wanted)
     return out
 end
 
+local function section(text, key)
+    local at = text:find("\n" .. key .. ":[ \t]*\n")
+    if not at then
+        return nil
+    end
+    return at, text:find("\n%S", at + 1) or #text
+end
+
+function add_section(text, older, key)
+    local oat, oafter = section(older, key)
+    if not oat then
+        return text
+    end
+    local body = older:sub(oat, oafter):match("^\n[^\n]*\n(.*)$") or ""
+    local blocks = {}
+    for line in body:gmatch("[^\n]*\n") do
+        if line:match("^  %- ") then
+            table.insert(blocks, {text = line, armv7 = line:find("armv7", 1, true) ~= nil})
+        elseif #blocks > 0 then
+            blocks[#blocks].text = blocks[#blocks].text .. line
+        end
+    end
+    local kept = {}
+    for _, block in ipairs(blocks) do
+        if block.armv7 then
+            table.insert(kept, block.text)
+        end
+    end
+    if #kept == 0 then
+        return text
+    end
+    local at, after = section(text, key)
+    if at then
+        if text:sub(at, after):find("armv7", 1, true) then
+            return text
+        end
+        return text:sub(1, after) .. table.concat(kept) .. text:sub(after + 1)
+    end
+    if text:sub(-1) ~= "\n" then
+        text = text .. "\n"
+    end
+    return text .. key .. ":\n" .. table.concat(kept)
+end
+
+function restore_armv7(text, older, sections)
+    local held = read(older)
+    local slices = {}
+    for _, arch in ipairs({"armv7", "armv7s"}) do
+        if table.contains(held.archs, arch) then
+            table.insert(slices, arch)
+        end
+    end
+    text = add_archs(text, slices)
+    text = add_clients(text)
+    text = add_section(text, sections, "parent-umbrella")
+    return add_symbols(text, slice(held, slices))
+end
+
 function add_clients(text)
     local at = text:find("\nallowable%-clients:[ \t]*\n")
     if not at then

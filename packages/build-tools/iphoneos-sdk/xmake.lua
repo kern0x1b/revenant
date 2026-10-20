@@ -82,7 +82,7 @@ package("iphoneos-sdk")
                 return stubs.in_libsystem(install) or install == "/usr/lib/libobjc.A.dylib"
             end
 
-            local older_runtime, older_armv7 = {}, {}
+            local older_runtime, older_armv7, older_sections = {}, {}, {}
             for _, file in ipairs(os.files(path.join(older, "**.tbd"))) do
                 if not file:find("/DriverKit/", 1, true) then
                     for _, part in ipairs(stubs.documents(io.readfile(file))) do
@@ -90,8 +90,9 @@ package("iphoneos-sdk")
                         if is_runtime(doc.install) and not older_runtime[doc.install] then
                             older_runtime[doc.install] = doc
                         end
-                        if table.contains(doc.archs, "armv7") and not older_armv7[doc.install] then
-                            older_armv7[doc.install] = doc
+                        if table.contains(doc.archs, "armv7") then
+                            older_armv7[doc.install] = older_armv7[doc.install] or part
+                            older_sections[doc.install] = (older_sections[doc.install] or "") .. part
                         end
                     end
                 end
@@ -111,15 +112,7 @@ package("iphoneos-sdk")
                                 table.join2(wanted, stubs.derived(doc, first, versions))
                             end
                             if older_armv7[install] then
-                                local slices = {}
-                                for _, arch in ipairs({"armv7", "armv7s"}) do
-                                    if table.contains(older_armv7[install].archs, arch) then
-                                        table.insert(slices, arch)
-                                    end
-                                end
-                                part = stubs.add_archs(part, slices)
-                                part = stubs.add_clients(part)
-                                part = stubs.add_symbols(part, stubs.slice(older_armv7[install], slices))
+                                part = stubs.restore_armv7(part, older_armv7[install], older_sections[install])
                             end
                             part = stubs.add_markers(part, wanted)
                             if older_runtime[install] then
@@ -150,7 +143,11 @@ package("iphoneos-sdk")
             for _, stub in ipairs(folder_stubs) do
                 local text = not stub:find("/DriverKit/", 1, true) and io.readfile(stub)
                 if text and text:find("reexported-libraries:", 1, true) then
-                    local rewritten = stubs.add_reexports(text, capable)
+                    local parts = stubs.documents(text)
+                    for index, part in ipairs(parts) do
+                        parts[index] = stubs.add_reexports(part, capable)
+                    end
+                    local rewritten = table.concat(parts)
                     if rewritten ~= text then
                         io.writefile(stub, rewritten)
                     end
