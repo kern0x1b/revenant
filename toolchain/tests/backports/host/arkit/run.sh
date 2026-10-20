@@ -19,8 +19,6 @@
 # measured here.
 
 set -eu
-echo "FAIL host/arkit/run.sh: its Python steps are gone and not yet ported to Lua: mutate.py" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 repo=$(cd "$here/../../../.." && pwd)
@@ -97,7 +95,7 @@ mutant() {
     rm -rf "$copy"; mkdir -p "$copy"
     cp "$ARKit/ARSCNView11.m" "$ARKit/ARSCNView12.m" "$ARKit/ARSCNPlaneGeometry.m" \
        "$ARKit/RevenantARKitPrivate.h" "$ARKit/RevenantARTracker.h" "$copy/"
-    python3 "$here/mutate.py" "$copy/$file" "$from" "$to" || { echo "MUTANT NOT APPLIED: $label"; survived=$((survived + 1)); return; }
+    runs_xmake l "$runs_checkout/tests/backports/common/mutants.lua" once "$copy/$file" "$from" "$to" || { echo "MUTANT NOT APPLIED: $label"; survived=$((survived + 1)); return; }
     if port "$copy" >/dev/null 2>&1 && "$runs/diff" > "$runs/mutant.txt" 2>&1 && grep -q '^VERDICT ok' "$runs/mutant.txt"; then
         echo "MUTANT SURVIVED: $label"
         survived=$((survived + 1))
@@ -136,7 +134,7 @@ mutant_image() {
     copy="$runs/mutant-image"
     rm -rf "$copy"; mkdir -p "$copy"
     cp "$ARKit/ARReferenceImage.m" "$copy/"
-    python3 "$here/mutate.py" "$copy/$file" "$from" "$to" || { echo "MUTANT NOT APPLIED: $label"; survived=$((survived + 1)); return; }
+    runs_xmake l "$runs_checkout/tests/backports/common/mutants.lua" once "$copy/$file" "$from" "$to" || { echo "MUTANT NOT APPLIED: $label"; survived=$((survived + 1)); return; }
     if port_image "$copy" >/dev/null 2>&1 && (cd "$repo" && "$runs/image-diff") > "$runs/image-mutant.txt" 2>&1 && grep -q '^VERDICT ok' "$runs/image-mutant.txt"; then
         echo "MUTANT SURVIVED: $label"
         survived=$((survived + 1))
