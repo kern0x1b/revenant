@@ -45,9 +45,11 @@ OpenCombine at a commit plus the patches of `revenant@combine`.
 
 ### The members for iOS
 
-`Combine` and `CombineHelpers`, `SwiftUI`, the SwiftUI demo, snapshots and engine tests, and
-`swiftuirt` are targets of the graph for iphoneos; Revenant's packages are third-party code to them (the Swift runtime,
-libc++, the backports, the SDK and the tools). They are built with `./xmakew f -p iphoneos -a armv7`.
+`Combine` and `CombineHelpers`, `SwiftUI`, the SwiftUI demo, snapshot bundle, engine tests, probe and
+typechecks are targets of the graph for iphoneos; Revenant's packages are third-party code to them (the Swift runtime,
+libc++, the backports, the SDK and the tools). They are built with `./xmakew f -p iphoneos -a armv7`. The option
+`--emulate=y` also requires the emulator, so that `./xmakew emulate -P .` installs their packages into an emulated
+device and runs them there.
 
 The toolchain is both the package repository and the addon `revenant` (toolchain and rules) of those builds, from the
 `toolchain/` folder of this checkout. The top `xmake.lua` declares it with `add_addons("revenant", {sourcedir = "toolchain"})`:
