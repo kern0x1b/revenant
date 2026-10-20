@@ -1,3 +1,0 @@
-    for (NSUInteger c = 0; c < order; c++) {
-        for (NSUInteger r = order; r-- > 0; ) {
-            if (c > r) { continue; }

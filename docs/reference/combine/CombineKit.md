@@ -57,9 +57,6 @@ in ours, not apple: 272
 
 ## The 93 rows that are not covered, each with the reason
 
-The parts, which `tests/backports/host/combine/coverage.sh` recomputes from the built armv7
-module and fails on when they do not match — so this table is a check, not a claim:
-
 | family | rows not covered |
 | --- | --- |
 | optional and result publisher members | 73 |

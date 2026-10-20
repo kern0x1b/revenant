@@ -1,1 +1,0 @@
-            NSUInteger pairs = startIndex < factors ? factors - startIndex : 0;

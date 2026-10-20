@@ -107,7 +107,7 @@ function bucket_text(rows)
 end
 
 function bucket_path(tree)
-    return path.join(tree, layout.constants().OUT_ROOT, BUCKET_FILE)
+    return path.join(tree, "..", layout.constants().OUT_ROOT, BUCKET_FILE)
 end
 
 function read_bucket(tree)

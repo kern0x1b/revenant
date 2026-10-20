@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
-. "$here/../../backports/common/runs.sh" "$here"
+. "$here/../../common/runs.sh" "$here"
 device=${1:-iPhone4,1}
 release=${2:-6.1.3}
 out=${OUT_DIR:-$(runs_folder emulate-launchd)}

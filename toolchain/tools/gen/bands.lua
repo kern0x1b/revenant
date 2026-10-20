@@ -99,7 +99,7 @@ function objects(tree, fw)
     for _, piece in ipairs(spec.pieces) do
         own[prefix .. piece.tag .. ".m"] = true
     end
-    local package_dir = path.join(tree, layout.constants().SOURCES_ROOT, spec.package or fw)
+    local package_dir = path.join(tree, "..", layout.constants().SOURCES_ROOT, spec.package or fw)
     local defined = defined_in_package(package_dir, own)
     local clash = {}
     for _, piece in ipairs(spec.pieces) do

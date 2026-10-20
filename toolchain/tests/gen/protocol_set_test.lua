@@ -1,6 +1,7 @@
 local ROOT = path.absolute(path.join(os.scriptdir(), "..", ".."))
 local TOOLS = path.join(ROOT, "tools")
-local FIXTURE = import("workspace", {rootdir = path.join(ROOT, "modules"), anonymous = true}).run("protocol-set-test")
+local CONTAINER = import("workspace", {rootdir = path.join(ROOT, "modules"), anonymous = true}).run("protocol-set-test")
+local FIXTURE = path.join(CONTAINER, "toolchain")
 local FW = "Fixture"
 
 function main()
@@ -14,9 +15,9 @@ function main()
     end
     local cmd_check = import("gen.cmd_check", {rootdir = TOOLS, anonymous = true})
 
-    os.tryrm(FIXTURE)
-    local registry = path.join(FIXTURE, "packages", "frameworks", "apple-backports", "registry", FW)
-    local sets = path.join(FIXTURE, "packages", "frameworks", "apple-backports", "overrides", "protocol-sets")
+    os.tryrm(CONTAINER)
+    local registry = path.join(FIXTURE, "..", "packages", "frameworks", "apple-backports", "registry", FW)
+    local sets = path.join(FIXTURE, "..", "packages", "frameworks", "apple-backports", "overrides", "protocol-sets")
     os.mkdir(registry)
     os.mkdir(sets)
     io.writefile(path.join(registry, "one.json"), '{"entries": [{"api": "MTLNamed", "kind": "protocol"}]}')
@@ -30,7 +31,7 @@ function main()
     io.writefile(path.join(sets, FW .. ".tsv"), "protocol\treason\nCHUnlisted\tnamed by no row\n")
     check(#cmd_check.record_conflicts(FIXTURE, FW) == 0, "a record of protocols no row implements has no conflict")
 
-    os.tryrm(FIXTURE)
+    os.tryrm(CONTAINER)
     print("protocol set test: " .. (failures == 0 and "OK" or ("FAIL " .. failures)) .. " (" .. count .. " checks)")
     if failures > 0 then
         os.exit(1)

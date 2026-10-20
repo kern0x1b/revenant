@@ -28,7 +28,7 @@ local function found(tree, name)
 end
 
 function shard_folders(tree)
-    local root = path.join(tree, layout.constants().SNAP_ROOT)
+    local root = path.join(tree, "..", layout.constants().SNAP_ROOT)
     local seen, names = {}, {}
     for _, pattern in ipairs({"*", "*/*"}) do
         for _, file in ipairs({layout.constants().SHARD_FILE, SWIFT_SHARD_FILE, INTERFACE_FILE}) do
@@ -125,7 +125,7 @@ local function swift_record(fw, r)
 end
 
 local function check_release(tree, folder, release)
-    local file = path.join(tree, layout.constants().SNAP_ROOT, folder, layout.constants().SHARD_FILE)
+    local file = path.join(tree, "..", layout.constants().SNAP_ROOT, folder, layout.constants().SHARD_FILE)
     if not os.isfile(file) then
         return
     end
@@ -157,14 +157,14 @@ local function records(tree, avail, release)
             end
         end
         local digester = {}
-        local text = files.read_text(path.join(tree, layout.constants().SNAP_ROOT, folder, SWIFT_SHARD_FILE)) or ""
+        local text = files.read_text(path.join(tree, "..", layout.constants().SNAP_ROOT, folder, SWIFT_SHARD_FILE)) or ""
         for _, r in ipairs(tsv.records(text)) do
             local record = swift_record(name, r)
             if record then
                 table.insert(digester, record)
             end
         end
-        local interface = files.read_text(path.join(tree, layout.constants().SNAP_ROOT, folder, INTERFACE_FILE))
+        local interface = files.read_text(path.join(tree, "..", layout.constants().SNAP_ROOT, folder, INTERFACE_FILE))
         if interface or #digester > 0 then
             local reconciled, counts = swift_match.reconcile(name, digester, interface and tsv.records(interface) or {})
             for _, record in ipairs(reconciled) do

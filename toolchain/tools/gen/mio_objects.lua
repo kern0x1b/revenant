@@ -262,7 +262,7 @@ function plan(tree, fw, sdk_release)
     local rows_path = path.join(snap, "surface-rows-" .. sdk_release .. ".tsv")
     assert(os.isfile(rows_path), "no surface rows for SDK " .. sdk_release .. ": " .. rows_path)
     local rows = load(rows_path)
-    local own_classes, have_members = defined_in_tree(path.join(tree, layout.constants().SOURCES_ROOT, fw))
+    local own_classes, have_members = defined_in_tree(path.join(tree, "..", layout.constants().SOURCES_ROOT, fw))
     local headers = headers_of(snap)
 
     local classes, methods = {}, {}

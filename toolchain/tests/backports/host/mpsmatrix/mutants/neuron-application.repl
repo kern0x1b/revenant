@@ -1,1 +1,0 @@
-            double y = RevenantMPSApplyNeuron(MPSCNNNeuronTypeNone, sum, neuron.a, neuron.b, neuron.c, RevenantMPSNeuronA(&neuron, column));  // MUTATION: the neuron is skipped

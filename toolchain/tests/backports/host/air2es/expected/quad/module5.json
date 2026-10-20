@@ -1,1 +1,0 @@
-{"stage":"fragment","entry":"fetchFragment","usesVertexId":false,"attributes":[],"uniforms":[{"name":"u0_0","buffer":0,"offset":0,"instanceStride":0,"scalar":"float","components":4}],"textures":[],"varyings":[],"constants":[],"inputs":[],"sizes":[],"outputs":[0],"fetches":[],"usesInstanceId":false}

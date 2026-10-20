@@ -1,7 +1,0 @@
-Package: org.revenant.uikitprinter-app
-Name: Revenant printer picker application
-Architecture: iphoneos-arm
-Description: The Bonjour printer picker as an application, launched through SpringBoard
-Maintainer: revenant
-Author: revenant
-Section: Development

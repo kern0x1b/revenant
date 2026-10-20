@@ -21,7 +21,7 @@ local function inputs(name, root)
 end
 
 function main(...)
-    local root = path.join(path.directory(os.scriptdir()), "toolchain")
+    local root = path.directory(os.scriptdir())
     local names = {...}
     if #names == 0 then
         names = HEAVY

@@ -22,7 +22,7 @@ function constants()
 end
 
 function snap_dir(tree, fw)
-    return path.join(tree, LAYOUT.SNAP_ROOT, fw)
+    return path.join(tree, "..", LAYOUT.SNAP_ROOT, fw)
 end
 
 function shard_path(tree, fw)
@@ -34,7 +34,7 @@ function constant_record_path(tree, fw)
 end
 
 function gen_dir(tree, fw)
-    return path.join(tree, LAYOUT.OUT_ROOT, fw)
+    return path.join(tree, "..", LAYOUT.OUT_ROOT, fw)
 end
 
 function spec_path(tree, fw, sdk_release)
@@ -42,11 +42,11 @@ function spec_path(tree, fw, sdk_release)
 end
 
 function pins_path(tree, fw)
-    return path.join(tree, LAYOUT.PINS_ROOT, fw .. ".tsv")
+    return path.join(tree, "..", LAYOUT.PINS_ROOT, fw .. ".tsv")
 end
 
 function protocol_set_path(tree, fw)
-    return path.join(tree, LAYOUT.PROTOCOL_SETS_ROOT, fw .. ".tsv")
+    return path.join(tree, "..", LAYOUT.PROTOCOL_SETS_ROOT, fw .. ".tsv")
 end
 
 function manifest_path(tree, fw)

@@ -1,2 +1,0 @@
-# Categories of the stringcase fuzzer where the host is not the truth: the category, a tab, and why.
-stringByApplyingTransform:reverse:.hostAnswersTwoWays	the host answers the same transform of the same string two ways - asked again it gives the port's answer - so the first answer is the host's, not a difference of the port

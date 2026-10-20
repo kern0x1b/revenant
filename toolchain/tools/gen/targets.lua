@@ -72,7 +72,7 @@ function problems(tree)
                     end
                 end
             end
-            for _, filepath in ipairs(os.files(path.join(tree, "packages", "frameworks", "apple-backports", "registry", name, "*.json"))) do
+            for _, filepath in ipairs(os.files(path.join(tree, "..", "packages", "frameworks", "apple-backports", "registry", name, "*.json"))) do
                 local doc = json.decode(io.readfile(filepath))
                 for _, e in ipairs(doc.entries or doc) do
                     local api = string.gsub(e.api or "", "%(%)$", "")

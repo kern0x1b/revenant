@@ -1,2 +1,0 @@
-            double deviation = RevenantMPSImageLoad(buffer, &from, RevenantMPSImageIndex(&from, pixel, channel));
-            squared += deviation * deviation;

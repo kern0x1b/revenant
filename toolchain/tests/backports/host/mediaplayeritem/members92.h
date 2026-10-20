@@ -1,1 +1,0 @@
-    {"hasProtectedAsset", "BOOL", "hasProtectedAsset"},

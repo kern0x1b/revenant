@@ -257,10 +257,10 @@ local function owned_constants(tree, fw)
         end
     end
     local found = {}
-    for _, filepath in ipairs(files.glob(path.join(tree, layout.registry_dir(fw), "*.json"))) do
+    for _, filepath in ipairs(files.glob(path.join(tree, "..", layout.registry_dir(fw), "*.json"))) do
         table.insert(found, {full = filepath, relative = path.join(layout.registry_dir(fw), path.filename(filepath))})
     end
-    local single = path.join(tree, layout.constants().REGISTRY, fw .. ".json")
+    local single = path.join(tree, "..", layout.constants().REGISTRY, fw .. ".json")
     if os.isfile(single) then
         table.insert(found, {full = single, relative = path.join(layout.constants().REGISTRY, fw .. ".json")})
     end

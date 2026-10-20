@@ -287,7 +287,7 @@ function modules(sdk)
 end
 
 function shard_path(tree, framework)
-    return path.join(tree, layout.constants().SNAP_ROOT, framework, SHARD_FILE)
+    return path.join(tree, "..", layout.constants().SNAP_ROOT, framework, SHARD_FILE)
 end
 
 function write_shards(tree, sdk, triple, names)

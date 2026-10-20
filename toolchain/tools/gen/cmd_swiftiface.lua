@@ -14,7 +14,7 @@ end
 
 function run(args)
     assert(args.sdk, "swiftiface needs --sdk: the iOS SDK folder the interface texts are read from")
-    local root = path.join(args.tree, layout.constants().SNAP_ROOT)
+    local root = path.join(args.tree, "..", layout.constants().SNAP_ROOT)
     local best = {}
     for _, filepath in ipairs(files.glob(args.sdk .. "/**/" .. INTERFACE)) do
         local module = module_of(filepath)

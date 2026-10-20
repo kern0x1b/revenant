@@ -9,7 +9,7 @@ local REVENANT = path.directory(path.directory(os.scriptdir()))
 
 local TREE = nil
 for _, candidate in ipairs({os.getenv("REVENANT_TREE_DIR") or false,
-                            path.join(REVENANT, "packages", "frameworks", "apple-backports")}) do
+                            path.join(REVENANT, "..", "packages", "frameworks", "apple-backports")}) do
     if candidate and os.isdir(candidate) then
         TREE = candidate
         break

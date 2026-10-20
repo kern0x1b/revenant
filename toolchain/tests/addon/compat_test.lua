@@ -615,7 +615,7 @@ local function caller_failures(folder, headers)
 end
 
 function failures(opt)
-    local compat = opt.compat or path.join(opt.modules, "..", "packages", "runtimes", "apple-compat")
+    local compat = opt.compat or path.join(opt.modules, "..", "..", "packages", "runtimes", "apple-compat")
     local shims = path.absolute(path.join(compat, "src"))
     local headers = path.absolute(path.join(compat, "include", "revenant"))
     local folder = fixtures.scratch()

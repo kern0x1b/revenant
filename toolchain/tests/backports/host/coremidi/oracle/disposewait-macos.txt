@@ -1,9 +1,0 @@
-disposewait: client create status 0
-disposewait: destination create status 0
-disposewait: destination: list sent status 0, read procedure entered 1
-disposewait: destination: dispose came back within 1.5 s while the read procedure was still running: no (procedure returned: 0)
-disposewait: destination: dispose status 0, took 1.5 s or more (it waited for the procedure), procedure returned 1
-disposewait: source create status 0, input port create status 0, connect status 0
-disposewait: input port: list sent status 0, read procedure entered 1
-disposewait: input port: dispose came back within 1.5 s while the read procedure was still running: no (procedure returned: 0)
-disposewait: input port: dispose status 0, took 1.5 s or more (it waited for the procedure), procedure returned 1

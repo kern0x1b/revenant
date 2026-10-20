@@ -25,7 +25,7 @@ What the toolchain is, and why it is built this way, is in [design](../../explan
 | `packages/<group>/<name>/` | package definitions, grouped as `build-tools`, `runtimes`, `frameworks`, `libraries`, `emulator`, `tweaks` |
 | `tools/package-index.lua` | the group of each package; `tests/addon/revenant_index_test.lua` holds the tree to it |
 | `tools/` | developer tools, see [tools](../../reference/toolchain/tools.md) |
-| `tests/` | `light.lua`, which runs the addon's tests; `addon/`, `backports/`, `emulate/`, `gen/`, `swiftui/` |
+| `tests/` | `light.lua`, which runs the addon's tests; `addon/`, `common/`, `corpus/`, `emulate/`, `gen/`, `swiftui/` |
 
 `./xmakew l tools/check.lua layout` from the repository root reports what is not yet in the repository's layout.
 

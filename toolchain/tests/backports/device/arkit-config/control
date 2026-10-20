@@ -1,7 +1,0 @@
-Package: org.revenant.arkitconfig
-Name: Revenant ARKit configurations probe
-Architecture: iphoneos-arm
-Description: The stored settings, the support answers and the body refusal of the ARKit configurations, on the release
-Maintainer: revenant
-Author: revenant
-Section: Development

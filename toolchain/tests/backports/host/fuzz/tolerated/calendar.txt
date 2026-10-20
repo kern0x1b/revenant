@@ -1,3 +1,0 @@
-# Categories of the calendar fuzzer where the host is not the truth: the category, a tab, and why.
-setting.beforeStandardTime	before about 1921 a zone keeps its local mean time to the second, and the newest Calendar answers nil or a time a few seconds away where the release's own zone data and search decide on iOS 6
-valid.leapMonth	whether a leap month flag names a real month is the release's ICU, which iOS 6 ignores and macOS 27 checks per calendar
