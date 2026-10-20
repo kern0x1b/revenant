@@ -1,5 +1,5 @@
 function report(cache, binaries)
-    local dyld = import("apple.dyld", {rootdir = path.join(os.scriptdir(), "..", "..", "toolchain", "modules"), anonymous = true})
+    local dyld = import("@addon.revenant.apple.dyld", {anonymous = true})
     local missing, count, loaded = dyld.missing_imports(cache, binaries)
     local lines = {}
     for _, entry in ipairs(missing) do

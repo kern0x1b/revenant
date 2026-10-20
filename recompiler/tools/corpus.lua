@@ -29,7 +29,7 @@ function run(program, argv, log)
 end
 
 function device()
-    local module = import("device", {rootdir = env().modules, anonymous = true})
+    local module = import("@addon.revenant.device", {anonymous = true})
     local settings = module.bind(os.projectdir(), nil)
     return {
         copy = function (localfile, remote)
