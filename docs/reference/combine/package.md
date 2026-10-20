@@ -1,6 +1,6 @@
 # Combine for the port's armv7 releases
 
-One Swift module, built for armv7 by `packages/frameworks/combine/xmake.lua` against the
+One Swift module, built for armv7 by `toolchain/packages/frameworks/combine/xmake.lua` against the
 `revenant@swift-runtime` a port carries. A port takes it with
 `add_requires("revenant@combine", {alias = "combine"})` and `add_packages("combine")`
 beside the runtime and libcxx, and writes `import Combine`.
@@ -11,7 +11,7 @@ beside the runtime and libcxx, and writes `import Combine`.
 | --- | --- |
 | Upstream | [OpenCombine](https://github.com/OpenCombine/OpenCombine), MIT — the reimplementation of Apple's Combine |
 | Pinned commit | `1c6f02c7ed8140c0ba7a783aaddb6e0685a0037b` (OpenCombine's `HEAD`; its `0.14.0` tag is `8576f0d579b27020beccbccc3ea6844f3ddfc2c2`), version `2026.10.19` |
-| Our patches | `patches/`, applied in order: the three modules made one named `Combine`, the iOS 6 adaptations, and what OpenCombine lacks and Apple declares (below) |
+| Our patches | `frameworks/Combine/patches/`, applied in order: the three modules made one named `Combine`, the iOS 6 adaptations, and what OpenCombine lacks and Apple declares (below) |
 | The licence | the upstream's `LICENSE`, installed with the package under `licenses/LICENSE`: MIT License, Copyright (c) 2019 Sergej Jaskiewicz |
 | Our terms | the patches claim no new licence over Sergej Jaskiewicz's work, and the upstream's copyright and permission notice travel with the code unchanged |
 
@@ -51,9 +51,9 @@ revenant does, in `frameworks/Combine`.
 | --- | --- |
 | Corpus rows for `Combine` | 1224 |
 | Covered by the built armv7 module | 1131 |
-| The 93 that are not, and why | `facts/Combine/CombineKit.md` |
+| The 93 that are not, and why | `docs/reference/combine/CombineKit.md` |
 | `swift-api-digester -dump-sdk`, Apple's 26.2 `Combine.swiftinterface` against ours | 963 declarations in both, 72 in Apple's that are not in ours, 272 in ours that Apple does not declare |
-| Host differential, 40 cases, the same source against the host's own Combine and against ours | `DIFFERENTIAL: identical`; the mutation turns it to 4 differing lines; `facts/Combine/CombineKit.md` |
+| Host differential, 40 cases, the same source against the host's own Combine and against ours | `DIFFERENTIAL: identical`; the mutation turns it to 4 differing lines; `docs/reference/combine/CombineKit.md` |
 | The armv7 probe on the emulated iPhone 4S at 6.1.3 | 50 of 50, `combinekit: every check held`, exit 0 |
 
 The counts were taken on `2026.09.20`, the fork with a layer of its own; `2026.10.19` carries

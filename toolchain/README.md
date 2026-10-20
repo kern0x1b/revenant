@@ -667,7 +667,7 @@ compiles its modules with the runtime's compiler and flags, installs them as
 static libraries with their `.swiftmodule`s, and names the folders a port's
 Swift finds them in with `package:setenv("REVENANT_SWIFT_MODULES", ...)`; the
 swift rule adds those folders to the compile. `revenant@combine` is the first:
-OpenCombine at a pinned commit with the patches in `packages/frameworks/combine/patches`, a
+OpenCombine at a pinned commit with the patches in `../frameworks/Combine/patches`, a
 single module named `Combine` — the core, the Dispatch scheduler and the
 Foundation integration compiled together — with its C++ helper and that helper's
 module map, so a port writes `import Combine`. The scheduler takes `DispatchTime`
