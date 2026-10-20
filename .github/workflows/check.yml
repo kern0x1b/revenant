@@ -100,18 +100,35 @@ jobs:
             echo "Backports build skipped: this branch has no component option." >> "$GITHUB_STEP_SUMMARY"
           fi
 
+      - name: Install the full LLVM that ld64 finds through llvm-config
+        if: steps.component.outputs.present == 'true'
+        timeout-minutes: 6
+        run: |
+          echo "stage llvm starts $(date -u +%H:%M:%S)"
+          [ -x /opt/homebrew/opt/llvm/bin/llvm-config ] || brew install llvm
+          echo "stage llvm ends $(date -u +%H:%M:%S)"
+
       - name: Configure the Backports component
         if: steps.component.outputs.present == 'true'
-        timeout-minutes: 15
+        timeout-minutes: 13
         run: |
           stamp() { while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done; }
           echo "stage configure starts $(date -u +%H:%M:%S)"
-          ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y 2>&1 | stamp
+          ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v 2>&1 | stamp
           echo "stage configure ends $(date -u +%H:%M:%S)"
+
+      - name: Show the package logs when the configure failed
+        if: failure() && steps.component.outputs.present == 'true'
+        run: |
+          find "$HOME/.revenant/cache/xmake-global" -path '*logs*' -type f 2>/dev/null | head -20
+          for f in $(find "$HOME/.revenant/cache/xmake-global" -path '*logs*' -type f 2>/dev/null | head -10); do
+            echo "== $f"
+            tail -30 "$f"
+          done
 
       - name: Build the Backports component
         if: steps.component.outputs.present == 'true'
-        timeout-minutes: 6
+        timeout-minutes: 5
         run: |
           stamp() { while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done; }
           echo "stage build starts $(date -u +%H:%M:%S)"
