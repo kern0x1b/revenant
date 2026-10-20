@@ -33,6 +33,11 @@ local function archive_of(package)
     return path.join(package:cachedir(), "prebuilt", asset(package))
 end
 
+local function ready(package)
+    os.mkdir(path.join(package:cachedir(), "source"))
+    return true
+end
+
 function fetch(package)
     local repository = source()
     if not repository then
@@ -43,7 +48,7 @@ function fetch(package)
     end
     local archive = archive_of(package)
     if os.isfile(archive) then
-        return true
+        return ready(package)
     end
     local url = string.format("https://github.com/%s/releases/download/%s/%s", repository, tag(package), asset(package))
     local partial = archive .. ".part"
@@ -71,7 +76,7 @@ function fetch(package)
         raise("%s: the prebuilt %s has the sha256 %s, its release lists %s", package:name(), url, actual, tostring(expected))
     end
     os.mv(partial, archive)
-    return true
+    return ready(package)
 end
 
 function install(package)

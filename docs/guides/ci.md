@@ -26,8 +26,9 @@ Three caches make a warm run quick:
   is restored by exact key and saved once, after the configure has succeeded, so a store is never saved half-made;
 - the generated skeleton `build/generated/backports`, keyed by `frameworks/Backports/**` and saved on the same condition.
 
-A warm run that restores its store writes nothing back. The backports job installs no LLVM: `ld64` comes from its
-prebuilt release, and `REVENANT_PREBUILT_ONLY=1` makes a missing release an error instead of a source build.
+A warm run that restores its store writes nothing back. The backports job installs no LLVM from Homebrew: the
+toolchain's `llvm` (its clang, which monocypher builds with) and `ld64` come from their prebuilt releases, and
+`REVENANT_PREBUILT_ONLY=1` makes a missing release an error instead of a source build.
 
 ## Fetching a branch's artifacts
 

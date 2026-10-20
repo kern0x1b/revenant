@@ -28,7 +28,9 @@ never built twice.
 With `REVENANT_PREBUILT=<owner>/<repository>` set, a recipe wired to the module does this:
 
 1. `on_download` asks for the release of its key. If the release exists, the archive and its checksum are
-   downloaded into the package's cache folder, the checksum is checked, and the source checkout is skipped.
+   downloaded into the package's cache folder, the checksum is checked, and the source checkout is skipped. xmake
+   still enters the package's `source` folder before `on_install` for a package with a url, so that folder is made,
+   empty, at this point.
 2. `on_install` unpacks the archive into the install folder and returns. If there is no release, it
    prints so and builds from source as it does today.
 
