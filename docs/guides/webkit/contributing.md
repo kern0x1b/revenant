@@ -2,7 +2,7 @@
 
 Orientation for anyone — human or AI assistant — working on this repository.
 Read it before making changes. Task-specific playbooks live as skills under
-revenant's `.agents/skills/` (revenant-build, revenant-deploy, revenant-test, revenant-debug, revenant-device); this guide is
+revenant's `.agents/skills/` (webkit, device); this guide is
 the map.
 
 ## What this is
@@ -121,7 +121,7 @@ the `RevPrefs` target in `xmake.lua`, like the dylibs beside it — that writes 
 - Documentation: the guides beside this file, the explanations in [`docs/explanation/webkit/`](../../explanation/webkit/)
   and the reference in [`docs/reference/webkit/`](../../reference/webkit/). The [README](../../../frameworks/WebKit/README.md)
   has the index.
-- Playbooks: revenant's `.agents/skills/revenant-{build,deploy,test,debug,device}/SKILL.md`.
+- Playbooks: revenant's `.agents/skills/webkit/SKILL.md` and `.agents/skills/device/SKILL.md`.
 
 ## Repository layout
 

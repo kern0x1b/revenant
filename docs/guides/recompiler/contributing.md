@@ -45,15 +45,13 @@ Rellume, farmdec and BlocksRuntime are packages of `third_party/`, pinned by com
 - Check a toolchain version only in an `XMAKE_GLOBALDIR` of your own, the way `toolchain/tests/addon/store_test.lua`
   does. On xmake 3.1.1 every addon install becomes the machine's `active` version, so an install into the shared store
   changes it for every project.
-- The payload under `~/.xmake/addons` is never edited by hand: no copying files into it, no `xmake addon --remove`. A
-  stale payload is diagnosed read-only with the skill `recompiler-addon-refresh`
-  (`.agents/skills/recompiler-addon-refresh/SKILL.md`).
+- The payload under `~/.xmake/addons` is never edited by hand: no copying files into it, no `xmake addon --remove`.
 
 ## Devices and the emulator
 
 The test devices are an iPhone 4S and an iPad 2, both on iOS 6.1.3. A device session follows the skill
-`revenant-device` (`.agents/skills/revenant-device/SKILL.md`). The emulator is reached through the skill `emulate-port`
-(`.agents/skills/emulate-port/SKILL.md`).
+`device` (`.agents/skills/device/SKILL.md`). The emulator is reached through the skill `emulator`
+(`.agents/skills/emulator/SKILL.md`).
 
 A test device may carry a personal account. Never read, log or forward its content, and close any app a check opened
 on it.

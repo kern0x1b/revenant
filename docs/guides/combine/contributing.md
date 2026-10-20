@@ -67,7 +67,7 @@ Consequences to respect:
   `./xmakew build -P . CombineTests` the tests. Configured with `--emulate=y` as
   well, `./xmakew emulate -P . -d iPhone4,1 -r 6.1.3 install` and
   `./xmakew emulate -P . -d iPhone4,1 -r 6.1.3 run /usr/libexec/CombineTests` start
-  them in the guest; the repository's skill `emulate-port` says how to use the emulator.
+  them in the guest; the repository's skill `emulator` says how to use the emulator.
 - `./xmakew test -P . CombineGenerated` expands each `*.swift.gyb` with Revenant's gyb
   (`toolchain/modules/gyb`) and checks the `GENERATED-*` file beside it.
 - Outside revenant: `add_requires("revenant@combine")`, which compiles the module against
