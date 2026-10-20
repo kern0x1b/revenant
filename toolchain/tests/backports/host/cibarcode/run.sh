@@ -18,8 +18,6 @@
 # and the host's own CIPDF417CodeDescriptor dies in its own dealloc. Those groups are compared on the records
 # the host printed before it died, and the count it never reached is printed.
 set -eu
-echo "FAIL host/cibarcode/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 35" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -32,16 +30,12 @@ CASE_GROUPS="sweep-qr sweep-aztec sweep-pdf417 sweep-matrix qr aztec pdf417-rows
 common="-fobjc-arc -w -I$here"
 
 # Every name the port's own sources define, read out of the sources so a class the port adds cannot be missed
-python3 - "$port/CIBarcodeDescriptor11.m" "$build/rename.h" <<'PY'
-import re, sys
-source, out = sys.argv[1], sys.argv[2]
-names = set(re.findall(r"^@implementation\s+(CI\w+)", open(source).read(), re.M))
-assert names, "no class found in the port's source: the rename would leave the port's classes colliding"
-with open(out, "w") as handle:
-    for name in sorted(names):
-        handle.write("#define %s Revenant%s\n" % (name, name))
-print("  RENAMED: %d names the port defines, in this build only" % len(names))
-PY
+runs_xmake l "$runs_checkout/tests/backports/common/classes.lua" implemented "$port/CIBarcodeDescriptor11.m" CI "$build/rename.h"
+if [ ! -s "$build/rename.h" ]; then
+  echo "FAIL: no class found in the port's source: the rename would leave the port's classes colliding"
+  exit 1
+fi
+echo "  RENAMED: $(grep -c define "$build/rename.h") names the port defines, in this build only"
 
 # THE HOST'S BUILD: CoreImage answers every case.
 if ! xcrun clang $common -DREVENANT_HOST "$here/cases.m" -framework Foundation -framework CoreImage -o "$build/host" 2>"$build/host.log"; then
