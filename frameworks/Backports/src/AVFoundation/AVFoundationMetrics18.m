@@ -3,7 +3,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreMedia/CoreMedia.h>
 #import <objc/runtime.h>
-#import "../../../runtimes/revenant-coding/files/RevenantCoding.h"
+#import "RevenantCoding.h"
 
 @interface AVMetricEventStream ()
 {

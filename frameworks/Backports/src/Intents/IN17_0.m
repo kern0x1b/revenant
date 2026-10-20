@@ -1,7 +1,7 @@
 #import <Intents/Intents.h>
 #import <objc/runtime.h>
 #import "RevenantIntents262.h"
-#import "../../../runtimes/revenant-coding/files/RevenantCoding.h"
+#import "RevenantCoding.h"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 

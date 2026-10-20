@@ -7,7 +7,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-#import "../../../runtimes/revenant-coding/files/RevenantCoding.h"
+#import "RevenantCoding.h"
 #import "RevenantIntentsResolution.h"
 #import "RevenantIntentsStore.h"
 

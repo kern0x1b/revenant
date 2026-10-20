@@ -1,6 +1,6 @@
 #import "RevenantAccessibility.h"
 
-#import "../../../runtimes/revenant-coding/files/RevenantCoding.h"
+#import "RevenantCoding.h"
 
 #pragma mark - AXRequest
 
