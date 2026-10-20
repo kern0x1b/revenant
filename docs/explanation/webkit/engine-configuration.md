@@ -60,7 +60,7 @@ megabytes against a page that uses forty, in a process the system kills at about
 a hundred and seventy.
 
 **Hot/cold splitting stays off.** `-mllvm -hot-cold-split=false` in the
-tuning flags of `modules/engine.lua` is not an oversight. Under ThinLTO an `-mllvm` flag
+tuning flags of `src/modules/engine.lua` is not an oversight. Under ThinLTO an `-mllvm` flag
 reaches code generation only when the link carries it as well, and turned on
 there splitting grows `__text` by 1.4-1.6% in each of the three frameworks:
 every outlined cold block gets a prologue and epilogue of its own. It buys
@@ -82,7 +82,7 @@ libxslt calling functions the phone does not have. Both libraries now come from
 packages - libxml2 2.15.4 and libxslt 1.1.45 - and are linked into WebCore
 statically, with their symbols hidden. WebKit creates `LibXml2::LibXml2` and
 `LibXslt::LibXslt` from the SDK only when no such target exists yet; the file
-`modules/engine.lua` writes from the packages it links, included into the WebKit
+`src/modules/engine.lua` writes from the packages it links, included into the WebKit
 project as `CMAKE_PROJECT_WebKit_INCLUDE`, finds the
 packages' own targets first, and the SDK's header directories now travel with
 the SDK targets instead of being added to WebCore unconditionally. libxslt's

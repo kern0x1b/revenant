@@ -1,5 +1,5 @@
 # What this port carries, and what must still be true of the patched engine
-# tree after the series is moved to a newer upstream. modules/carry.lua reads
+# tree after the series is moved to a newer upstream. src/modules/carry.lua reads
 # this file: every build of the engine checks it before configuring, and
 # tools/carry-check.lua checks it on demand.
 #
@@ -116,9 +116,9 @@ grep  Source/WebKitLegacy/PlatformCocoa.cmake -exported_symbols_list ${WEBKIT_IO
 grep  Source/cmake/WebKitMacros.cmake MACOSX_FRAMEWORK_INFO_PLIST
 
 # ---- the build settings the device depends on -----------------------------
-set   modules/engine.lua {"ENABLE_JIT", "ON"}
-set   modules/engine.lua {"ENABLE_C_LOOP", "OFF"}
-set   modules/engine.lua {"ENABLE_DFG_JIT", "ON"}
+set   src/modules/engine.lua {"ENABLE_JIT", "ON"}
+set   src/modules/engine.lua {"ENABLE_C_LOOP", "OFF"}
+set   src/modules/engine.lua {"ENABLE_DFG_JIT", "ON"}
 
 # ---- the port's own notes -------------------------------------------------
 file  PORTING-IOS6.md

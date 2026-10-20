@@ -1,7 +1,7 @@
-local member = path.join(os.scriptdir(), "..")
+local member = path.join(os.scriptdir(), "..", "..")
 
 function manifest()
-    return path.join(member, "carry-manifest.txt")
+    return path.join(member, "tests", "data", "carry-manifest.txt")
 end
 
 local function directives(file)

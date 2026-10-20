@@ -81,7 +81,7 @@ function main(...)
     end
     local phone = harness.phone()
     if not phone:reachable() then
-        raise("the phone is not reachable: check device.env (see device.env.example)")
+        raise("the phone is not reachable: check device.env (see tests/data/device.env.example)")
     end
     phone:run("mkdir -p " .. remote .. "/Frameworks/JavaScriptCore.framework")
     local hashes = remote_hashes(phone)

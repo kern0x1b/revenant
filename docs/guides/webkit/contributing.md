@@ -11,7 +11,7 @@ A modern WebKit engine built from source for **armv7 / iOS 6.1.3** (iPhone 4S),
 and the machinery that runs it. There are two ways the engine is used:
 
 1. **Standalone app** — the engine hosted in this repo's own application
-   (`app/`), which exists to exercise the engine directly. Built by
+   (`examples/webview-host/`), which exists to exercise the engine directly. Built by
    `./xmakew build -P . RevWebViewHost`, against the prefixed variant of `webkit-engine`.
 2. **Safari substitution** — the engine dropped underneath the phone's own Mobile
    Safari by a MobileSubstrate tweak. This is the current focus; the screenshots
@@ -25,8 +25,8 @@ A loader is injected into the launching app, sets `DYLD_FRAMEWORK_PATH` /
 
 | Source | Built by | On device | Job |
 | --- | --- | --- | --- |
-| `platform/safari/rev-safari-tweak.c` | target `RevSafari` | `/Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib` | The **loader**: reads `InjectedApps`, re-execs enabled apps, skips SpringBoard. |
-| `platform/safari/safari-compat.mm` | target `rev-safari-compat` | `/usr/lib/rev-safari-compat.dylib` | **Compat + hooks**: iOS 6 ABI stubs, bookmarks start page, WebAssembly, preference reads. Inserted by the loader. |
+| `src/platform/safari/rev-safari-tweak.c` | target `RevSafari` | `/Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib` | The **loader**: reads `InjectedApps`, re-execs enabled apps, skips SpringBoard. |
+| `src/platform/safari/safari-compat.mm` | target `rev-safari-compat` | `/usr/lib/rev-safari-compat.dylib` | **Compat + hooks**: iOS 6 ABI stubs, bookmarks start page, WebAssembly, preference reads. Inserted by the loader. |
 | `third_party/webkit` and its patches | package `webkit-engine`, its `stage/usr/lib/rev-fw` | `/usr/lib/rev-fw/*.framework` | The WebKit engine itself. |
 
 **The loader and the compat dylib are different files.** Deploying the compat
@@ -35,10 +35,10 @@ this has happened. The package puts each in its own place.
 
 ## The Settings pane
 
-`platform/prefs/` builds `RevPrefs.bundle` — a native PreferenceBundle, built by
+`src/platform/prefs/` builds `RevPrefs.bundle` — a native PreferenceBundle, built by
 the `RevPrefs` target in `xmake.lua`, like the dylibs beside it — that writes the `space.kern0x1b.rev` preferences domain the engine reads
 (`NewTabStartPage`, `CustomURLEnabled`, `CustomURL`, `InjectedApps`). System
-`PSListController` cells are loaded from `platform/prefs/Resources/Root.plist`.
+`PSListController` cells are loaded from `src/platform/prefs/Resources/Root.plist`.
 
 ## Hard-won gotchas
 
@@ -59,7 +59,7 @@ the `RevPrefs` target in `xmake.lua`, like the dylibs beside it — that writes 
 - **An excluded engine source needs its feature gate off.** Wrong: dropping a
   file from the build (a `// ios6:` line in
   `Source/WebCore/SourcesCocoa.txt`) and aliasing its symbols to
-  `webkitIOS6MediaEngineUnavailable` in `compat/ios6_media_stubs.cpp` while the
+  `webkitIOS6MediaEngineUnavailable` in `src/compat/ios6_media_stubs.cpp` while the
   `HAVE_*`/`ENABLE_*` gate that calls it stays on. Right: turn that gate off
   under `WEBKIT_IOS6` too, as `HAVE_AVASSETREADER` is in
   `Source/WTF/wtf/PlatformHave.h`. Reason: the alias returns `0` in a register
@@ -111,7 +111,7 @@ the `RevPrefs` target in `xmake.lua`, like the dylibs beside it — that writes 
   see [build and test](build-and-test.md). The engine's device filesystem tree is the `stage/` folder of
   the `webkit-engine` package.
 - Package: `./xmakew deb -P .` writes `space.kern0x1b.rev_<version>_iphoneos-arm.deb`,
-  engine frameworks included; `packaging/` holds only the `control` file and the
+  engine frameworks included; `src/packaging/` holds only the `control` file and the
   `DEBIAN/postinst` script. The version is `version` in `xmake.lua`.
 - Deploy: `./xmakew device install -P .` builds the package, runs `dpkg -i` on the phone
   `device.env` names, and refuses a .deb whose app would replace another bundle id.
@@ -126,17 +126,19 @@ the `RevPrefs` target in `xmake.lua`, like the dylibs beside it — that writes 
 ## Repository layout
 
 ```
-app/            The standalone application: the embeddable host for the web view
-compat/         Symbols iOS 6 does not have, built into libios6compat.a
-modules/        What the engine package does: options, checks, staging, the carry manifest
-packages/       The webkit-engine and webkit-device-tools packages
-packaging/      The package's control file and DEBIAN scripts
-platform/       The tweak, compat and TLS dylibs and the Settings bundle, xmake targets
-  safari/       The Safari substitution: the loader, the compat/hooks, WebAssembly and TLS sources
-  prefs/        The RevWebKit Settings PreferenceBundle
-  device/       What is installed on the phone beside the engine
-sdk-usage/      The lists of what the port reads from Apple's SDKs (see the reference)
+examples/webview-host/  The standalone application: the embeddable host for the web view
+src/                    The port's code: its packages, modules, compat library, platform targets and licence
+  compat/       Symbols iOS 6 does not have, built into libios6compat.a
+  modules/      What the engine package does: options, checks, staging, the carry manifest
+  packages/     The webkit-engine and webkit-device-tools packages
+  packaging/    The package's control file and DEBIAN scripts
+  platform/     The tweak, compat and TLS dylibs and the Settings bundle, xmake targets
+    safari/     The Safari substitution: the loader, the compat/hooks, WebAssembly and TLS sources
+    prefs/      The RevWebKit Settings PreferenceBundle
+    device/     What is installed on the phone beside the engine
+  LICENSE       The licence of the port's code, shipped in its packages
 tests/          The numeric device suite, host tests, and JS conformance checks
+  data/         Reference data the checks read: carry-manifest.txt, carry-symbols.txt, sdk-usage/, device.env.example
 tools/          Diagnostic instruments on the device, and the maintenance scripts on the host
 xmake.lua       The member: its packages, targets, checks and host tests
 ```

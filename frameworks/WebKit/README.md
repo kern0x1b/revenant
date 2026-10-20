@@ -48,7 +48,7 @@ port's patch series, `third_party/webkit/patches`.
 
 ## License
 
-MIT, see `LICENSE`, for the code in this repository. The engine is WebKit and keeps its own terms, LGPL-2.1-or-later and
+MIT, see `src/LICENSE`, for the code in this repository. The engine is WebKit and keeps its own terms, LGPL-2.1-or-later and
 BSD-2-Clause; the port's changes to it are the patches in `third_party/webkit/patches`, under those same terms. Every
 library this operating system cannot supply is fetched from its own upstream by an xmake package, and
 [third-party](../../docs/reference/webkit/third-party.md) lists each one.

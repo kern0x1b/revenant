@@ -4,7 +4,7 @@ package("webkit-device-tools")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
 
-    local tools = path.join(os.scriptdir(), "..", "..", "tools")
+    local tools = path.join(os.scriptdir(), "..", "..", "..", "tools")
     local digests = {}
     local inputs = table.join({path.join(os.scriptdir(), "xmake.lua")},
                               os.files(path.join(tools, "*.c")), os.files(path.join(tools, "entitlements", "*.xml")))
@@ -21,7 +21,7 @@ package("webkit-device-tools")
     on_install("iphoneos", function (package)
         local toolchain = assert(package:toolchains(), "webkit-device-tools is built with the apple-ios toolchain")[1]
         toolchain:load()
-        local member = path.join(package:scriptdir(), "..", "..")
+        local member = path.join(package:scriptdir(), "..", "..", "..")
         local common = {"-target", package:arch() .. "-apple-ios", "-miphoneos-version-min=" .. toolchain:config("deployment"),
                         "-isysroot", toolchain:config("sdkdir")}
         if toolchain:config("linker_version") then
@@ -41,8 +41,8 @@ package("webkit-device-tools")
             os.vrunv(toolchain:tool("cc"), table.join(compiled, linker, {path.join(tools, tool .. ".c"), "-o", path.join(package:installdir("bin"), tool)}, frameworks))
         end
         os.mkdir(package:installdir("licenses"))
-        os.vcp(path.join(member, "LICENSE"), package:installdir("licenses"))
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "..", "toolchain", "modules")
+        os.vcp(path.join(member, "src", "LICENSE"), package:installdir("licenses"))
+        local modules = path.join(package:scriptdir(), "..", "..", "..", "..", "..", "toolchain", "modules")
         local signing = import("apple.signing", {rootdir = modules, anonymous = true})
         local ldid = path.join(package:dep("ldid"):installdir(), "bin", "ldid")
         for _, tool in ipairs(TOOLS) do

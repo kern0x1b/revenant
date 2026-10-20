@@ -23,6 +23,7 @@ local layout = {
            "xmake.lua", "xmakew", "tools", "docs", "third_party", "toolchain", "emulator", "recompiler", "agent-skills",
            "frameworks", ".agents", ".claude", ".claude-plugin", ".github", ".editorconfig", ".gitattributes", ".gitignore"},
     component = {"xmake.lua", "README.md", "src", "include", "patches", "tests", "examples", "tools"},
+    plugin = {"README.md", "tests", ".claude-plugin", "skills", "LICENSE", "THIRD-PARTY.md"},
     docs = {"README.md", "tutorials", "guides", "reference", "explanation"},
     third_party = {"xmake.lua", "patches"},
     agentfiles = {"AGENTS.md", "CLAUDE.md", ".claude", ".agents"}
@@ -49,6 +50,10 @@ function checks.layout()
         elseif parts[1] == "toolchain" or parts[1] == "emulator" or parts[1] == "recompiler" or parts[1] == "agent-skills" then
             component = 1
         end
+        local members, listed = allowed.component, layout.component
+        if parts[1] == "agent-skills" then
+            members, listed = allowed.plugin, layout.plugin
+        end
         for i = 2, #parts do
             if allowed.agentfiles[parts[i]] then
                 wrong(file, "agent files live only at the top")
@@ -58,8 +63,8 @@ function checks.layout()
             wrong(file, "not part of the top layout")
         elseif parts[1] == "frameworks" and #parts == 2 then
             wrong(file, "frameworks/ holds framework folders only")
-        elseif component and #parts > component and not allowed.component[parts[component + 1]] then
-            wrong(file, "a component holds only " .. table.concat(layout.component, ", "))
+        elseif component and #parts > component and not members[parts[component + 1]] then
+            wrong(file, "a component holds only " .. table.concat(listed, ", "))
         elseif parts[1] == "docs" and not allowed.docs[parts[2]] then
             wrong(file, "docs/ holds only " .. table.concat(layout.docs, ", "))
         elseif parts[1] == "third_party" and #parts > 2 and not allowed.third_party[parts[3]] then

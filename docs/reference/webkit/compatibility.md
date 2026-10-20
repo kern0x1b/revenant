@@ -1,7 +1,7 @@
 # The compatibility layer, and the rule it answers to
 
 A 2026 engine calls API that a 2012 system does not have. Around three thousand
-lines in `compat/` stand in for it, and one rule governs all of them:
+lines in `src/compat/` stand in for it, and one rule governs all of them:
 
 > **No stub may answer success while doing nothing.** Where the behaviour exists
 > on this system — or existed in WebKit's own history — the real implementation
@@ -13,7 +13,7 @@ found by a crash, a backtrace or a test that passes; it moves the failure
 somewhere else and takes the evidence with it. Every entry under *What the audit
 found* below was that shape.
 
-## What is in `compat/`
+## What is in `src/compat/`
 
 | File | Stands in for |
 | --- | --- |
@@ -33,12 +33,12 @@ device. The archive is built from a named list rather than an `ios6_*.o` glob:
 the glob kept a retired bridge's stale objects as members long after its sources
 were deleted.
 
-`compat/stubs/` is the other half: headers that close the gap between the iOS
+`src/compat/stubs/` is the other half: headers that close the gap between the iOS
 16.4 SDK this port compiles against and what WebKit trunk expects. Almost all of
 it is declarations for constants and enum values from releases after it that the
 engine only ever compares against — codec identifiers, pixel formats — plus the
 SPI headers iOS ships no headers for at all. A constant the SDK declares but iOS
-6 does not export is defined in `compat/ios6_missing_constants.c` instead, so
+6 does not export is defined in `src/compat/ios6_missing_constants.c` instead, so
 the image binds it to itself rather than weakly to NULL. Two of them are not
 declarations:
 
@@ -170,7 +170,7 @@ Two more sat in the injected dylib and reported invented numbers:
   `JSTests/stress/big-int-less-than-general.js`, which compares `0n` against
   `Number.MIN_VALUE`.
 - **`new WebAssembly.Instance(module)` throws.** WebAssembly here is the wasm3
-  interpreter behind `platform/safari/RevWasm.m`. Its bootstrap answers
+  interpreter behind `src/platform/safari/RevWasm.m`. Its bootstrap answers
   `validate`, `compile`, `instantiate` and the synchronous `new
   WebAssembly.Module(bytes)`, but exports a stub for the synchronous `Instance`
   constructor that throws `sync Instance unsupported`, although a working
