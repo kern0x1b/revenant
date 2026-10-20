@@ -8,8 +8,6 @@
 # ABPersonCreateVCardRepresentationWithPeople of the host's own AddressBook.framework, so this is an exact match, not an approximation),
 # groups and containers before a save, and the plain value classes beside them.
 set -eu
-echo "FAIL host/contacts/run.sh: its Python steps are gone and not yet ported to Lua: rename.py; compare.py; expectations.py; mutate.py" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
@@ -36,7 +34,7 @@ xcrun clang $common -I"$device" "$here/record.m" "$device/contacts-cases.m" $lib
 CONTACTS_RECORDS="$build/system.json" "$build/system"
 echo "records: $(runs_harness records "$build/system.json")"
 
-python3 "$here/rename.py" "$registry9" "$registry10" "$build/rename.h"
+runs_xmake l "$here/../../common/registry-rename.lua" "$registry9" "$registry10" "$build/rename.h"
 
 port() {
     dir=$1
@@ -47,11 +45,11 @@ rm -rf "$build/port"; mkdir -p "$build/port"
 cp "$contacts"/*.m "$contacts/RevenantContacts.h" "$build/port/"
 port "$build/port"
 CONTACTS_RECORDS="$build/port.json" "$build/port/run"
-python3 "$here/compare.py" "$build/system.json" "$build/port.json" "$divergent"
+runs_xmake l "$here/../../common/records-compare.lua" compare-pinned "$build/system.json" "$build/port.json" "$divergent"
 echo "port: agrees with the system on every record"
 
-python3 "$here/expectations.py" "$build/system.json" "$divergent" "$build/expectations.json"
-xmake l "$here/../../common/embed.lua" "$build/expectations.json" "$device/contacts-expectations.h" foundation2_expectations
+runs_xmake l "$here/../../common/records-compare.lua" expect-pinned "$build/system.json" "$divergent" "$build/expectations.json"
+runs_xmake l "$here/../../common/embed.lua" "$build/expectations.json" "$device/contacts-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/contacts_expectations/' "$device/contacts-expectations.h" && rm -f "$device/contacts-expectations.h.bak"
 
 survived=0
@@ -59,7 +57,7 @@ mutant() {
     file=$1; from=$2; to=$3
     rm -rf "$build/mutant"; mkdir -p "$build/mutant"
     cp "$contacts"/*.m "$contacts/RevenantContacts.h" "$build/mutant/"
-    python3 "$here/mutate.py" "$build/mutant/$file" "$from" "$to"
+    runs_xmake l "$here/../../common/substitute.lua" first "$build/mutant/$file" "$from" "$to"
     port "$build/mutant"
     rm -f "$build/mutant.json"
     CONTACTS_RECORDS="$build/mutant.json" timeout 60 "$build/mutant/run" > /dev/null 2>&1 || true
