@@ -18,9 +18,16 @@ that it does not find on macOS. The light guard skips `doc_test` (`LIGHT_SKIP`),
 deleted with the registry; the workflow prints a notice saying so. Every other suite must pass, so the `checks` job
 is red when one of them fails.
 
-Two caches make a warm run quick: the pinned xmake binary, keyed by `xmakew` and `third_party/xmake`, and the
-package store `~/.revenant/cache/xmake-global`, keyed by the output of `./xmakew l tools/keys.lua`. Each cache is
-saved even when its job fails, so a red run still leaves the next one warm.
+Three caches make a warm run quick:
+
+- the pinned xmake binary, keyed by `xmakew` and `third_party/xmake`;
+- the package store `~/.revenant/cache/xmake-global`, which holds the iPhoneOS SDK and the linker. It is keyed by the
+  output of `./xmakew l tools/keys.lua iphoneos-sdk ld64`, so only a change to those two packages makes a new key. It
+  is restored by exact key and saved once, after the configure has succeeded, so a store is never saved half-made;
+- the generated skeleton `build/generated/backports`, keyed by `frameworks/Backports/**` and saved on the same condition.
+
+A warm run that restores its store writes nothing back. The backports job installs no LLVM: `ld64` comes from its
+prebuilt release, and `REVENANT_PREBUILT_ONLY=1` makes a missing release an error instead of a source build.
 
 ## Fetching a branch's artifacts
 

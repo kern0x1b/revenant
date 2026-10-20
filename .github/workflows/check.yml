@@ -73,15 +73,13 @@ jobs:
 
       - name: Key the package store
         id: keys
-        run: echo "hash=$(./xmakew l -P . tools/keys.lua | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/cache/restore@v4
         id: store
         with:
           path: ~/.revenant/cache/xmake-global
-          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ github.run_id }}
-          restore-keys: |
-            xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}-
+          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
 
       - uses: actions/cache/restore@v4
         id: generated
@@ -102,17 +100,9 @@ jobs:
             echo "Backports build skipped: this branch has no component option." >> "$GITHUB_STEP_SUMMARY"
           fi
 
-      - name: Install the full LLVM that ld64 finds through llvm-config
-        if: steps.component.outputs.present == 'true'
-        timeout-minutes: 6
-        run: |
-          echo "stage llvm starts $(date -u +%H:%M:%S)"
-          [ -x /opt/homebrew/opt/llvm/bin/llvm-config ] || brew install llvm
-          echo "stage llvm ends $(date -u +%H:%M:%S)"
-
       - name: Configure the Backports component
         if: steps.component.outputs.present == 'true'
-        timeout-minutes: 13
+        timeout-minutes: 20
         run: |
           stamp() { while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done; }
           echo "stage configure starts $(date -u +%H:%M:%S)"
@@ -128,9 +118,23 @@ jobs:
             tail -30 "$f"
           done
 
+      - name: Save the package store
+        if: steps.component.outputs.present == 'true' && steps.store.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.revenant/cache/xmake-global
+          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+
+      - name: Save the generated skeleton
+        if: steps.component.outputs.present == 'true' && steps.generated.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: build/generated/backports
+          key: backports-generated-${{ runner.os }}-${{ hashFiles('frameworks/Backports/**') }}
+
       - name: Build the Backports component
         if: steps.component.outputs.present == 'true'
-        timeout-minutes: 5
+        timeout-minutes: 10
         run: |
           stamp() { while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done; }
           echo "stage build starts $(date -u +%H:%M:%S)"
@@ -174,18 +178,6 @@ jobs:
           name: backports-report
           path: ${{ runner.temp }}/report
           if-no-files-found: error
-
-      - uses: actions/cache/save@v4
-        if: always() && steps.generated.outputs.cache-hit != 'true'
-        with:
-          path: build/generated/backports
-          key: backports-generated-${{ runner.os }}-${{ hashFiles('frameworks/Backports/**') }}
-
-      - uses: actions/cache/save@v4
-        if: always()
-        with:
-          path: ~/.revenant/cache/xmake-global
-          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ github.run_id }}
 
       - uses: actions/cache/save@v4
         if: always() && steps.xmake.outputs.cache-hit != 'true'
