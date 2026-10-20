@@ -1,0 +1,87 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Tue, 20 Oct 2026 03:13:00 +0200
+Subject: [PATCH 9/9] Build a package once when two processes reinstall it at
+ once
+
+When a library dependency with package.strict_compatibility changed,
+every process that loads the package decides to reinstall it in place.
+The install takes the package's file lock, so a second process waits for
+the first one, but it then builds the package again, because the
+decision was taken before the lock and the manifest it read was the old
+one.
+
+After it holds the lock, the install now reads the manifest again, and
+when it records the buildhash of every strict library dependency as it
+is now, another process has just reinstalled the package for the same
+dependencies and this one uses that install. install_always and --force
+still rebuild. package:manifest_reload() drops the manifest a package
+has cached and reads it from disk.
+---
+ xmake/core/package/package.lua                |  5 ++++
+ .../action/require/impl/actions/install.lua   | 26 ++++++++++++++++++-
+ 2 files changed, 30 insertions(+), 1 deletion(-)
+
+diff --git a/xmake/core/package/package.lua b/xmake/core/package/package.lua
+index 8c6d3cc..ec7b874 100644
+--- a/xmake/core/package/package.lua
++++ b/xmake/core/package/package.lua
+@@ -1040,6 +1040,11 @@ function _instance:manifest_load()
+     return manifest
+ end
+ 
++function _instance:manifest_reload()
++    self._MANIFEST = nil
++    return self:manifest_load()
++end
++
+ -- save the manifest file of this package
+ function _instance:manifest_save()
+ 
+diff --git a/xmake/modules/private/action/require/impl/actions/install.lua b/xmake/modules/private/action/require/impl/actions/install.lua
+index b76ea44..3a6d2af 100644
+--- a/xmake/modules/private/action/require/impl/actions/install.lua
++++ b/xmake/modules/private/action/require/impl/actions/install.lua
+@@ -517,6 +517,27 @@ end
+ --
+ -- @param package  the package instance
+ --
++function _reinstalled_meanwhile(package)
++    local manifest = package:manifest_reload()
++    if not manifest then
++        return false
++    end
++    local strict = project.policy("package.librarydeps.strict_compatibility")
++    if strict == nil then
++        strict = package:policy("package.librarydeps.strict_compatibility")
++    end
++    local recorded = manifest.deps or {}
++    for _, dep in ipairs(package:librarydeps() or {}) do
++        if strict or dep:policy("package.strict_compatibility") then
++            local info = recorded[dep:name()]
++            if not info or info.buildhash ~= dep:buildhash() then
++                return false
++            end
++        end
++    end
++    return true
++end
++
+ function main(package)
+     local oldir = _enter_workdir(package)
+ 
+@@ -538,7 +559,10 @@ function main(package)
+             else
+ 
+                 -- build and install package to the install directory
+-                local force_reinstall = package:policy("package.install_always") or package:data("force_reinstall") or option.get("force")
++                local force_reinstall = package:policy("package.install_always") or option.get("force")
++                if not force_reinstall and package:data("force_reinstall") then
++                    force_reinstall = not _reinstalled_meanwhile(package)
++                end
+                 if force_reinstall or not package:manifest_load() then
+ 
+                     -- clear install directory
+-- 
+2.54.0 (Apple Git-157)
+

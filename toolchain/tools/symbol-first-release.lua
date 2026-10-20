@@ -1,7 +1,7 @@
 import("apple.dyld", {rootdir = path.join(os.scriptdir(), "..", "modules")})
 
 local function newest_sdk()
-    local found = os.dirs(path.join(os.getenv("HOME"), ".xmake", "packages", "i", "iphoneos-sdk", "*", "*", "Developer.app",
+    local found = os.dirs(path.join(os.getenv("XMAKE_GLOBALDIR") or os.getenv("HOME"), ".xmake", "packages", "i", "iphoneos-sdk", "*", "*", "Developer.app",
                                     "Contents", "Developer", "Platforms", "iPhoneOS.platform", "Developer", "SDKs", "iPhoneOS*.sdk"))
     table.sort(found, function (a, b) return os.mtime(a) > os.mtime(b) end)
     return found[1]

@@ -106,7 +106,7 @@ package("swift-runtime")
         package:setenv("SWIFT_EXEC", swiftc)
         package:setenv("SWIFT_PLUGIN_PATH", path.join(compiler:installdir("lib"), "swift", "host", "plugins"))
         package:setenv("REVENANT_SWIFT_RUNTIME_MARK", package:data("mark"))
-        local jobs = math.min(import("core.base.option").get("jobs") or os.cpuinfo("ncpu"), 8)
+        local parallel = import("parallel", {rootdir = modules, anonymous = true})
 
         local marked = os.getenv("SWIFTRT_PROFILE") and {} or nil
         local phase = marked and os.mclock() or 0
@@ -221,7 +221,7 @@ package("swift-runtime")
                 "-DCMAKE_TOOLCHAIN_FILE=" .. toolchain_file(name, extra), "-DCMAKE_POLICY_DEFAULT_CMP0195=NEW",
                 "-DCMAKE_BUILD_TYPE=Release", "-DBUILD_SHARED_LIBS=ON", "-DCMAKE_INSTALL_PREFIX=" .. package:installdir(),
                 "-DCMAKE_INSTALL_LIBDIR=lib", "-DCMAKE_MAKE_PROGRAM=" .. ninja}, configs))
-            os.vrunv(ninja, {"-C", builddir, "-j" .. jobs})
+            os.vrunv(ninja, table.join({"-C", builddir}, parallel.ninja(8, ninja)))
             os.vrunv("cmake", {"--install", builddir})
         end
 

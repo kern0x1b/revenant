@@ -267,7 +267,7 @@ function write_cache_record(file, names, conformances)
 end
 
 function find_digester()
-    local root = path.join(os.getenv("HOME") or "~", ".xmake", "packages", "s", "swift")
+    local root = path.join(os.getenv("XMAKE_GLOBALDIR") or os.getenv("HOME") or "~", ".xmake", "packages", "s", "swift")
     local best_time, best_path
     for _, file in ipairs(os.files(path.join(root, "**", "swift-api-digester"))) do
         local modified = os.mtime(file)

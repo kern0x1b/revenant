@@ -55,15 +55,17 @@ package("swift-syntax")
             end
         end
         print("%s: building from %s", package:name(), source)
-        local jobs = os.getenv("FLEET_HEAVY_CPUS") or "2"
-        local argv = {"nice", "-n", "10", "swift", "build", "--package-path", source, "--scratch-path", build,
-                      "--triple", "arm64-apple-macosx13.0", "-c", "release", "--jobs", jobs}
-        for _, module in ipairs(modules) do
-            table.insert(argv, "--target")
-            table.insert(argv, module)
-        end
-        os.vrunv(argv[1], table.slice(argv, 2), {curdir = source})
-        print("%s: built %s targets with --jobs %s", package:name(), #modules, jobs)
+        local parallel = import("parallel", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
+        parallel.hold(nil, function (jobs)
+            local argv = {"nice", "-n", "10", "swift", "build", "--package-path", source, "--scratch-path", build,
+                          "--triple", "arm64-apple-macosx13.0", "-c", "release", "--jobs", tostring(jobs)}
+            for _, module in ipairs(modules) do
+                table.insert(argv, "--target")
+                table.insert(argv, module)
+            end
+            os.vrunv(argv[1], table.slice(argv, 2), {curdir = source})
+            print("%s: built %s targets with --jobs %s", package:name(), #modules, jobs)
+        end)
         local products = path.join(build, "release")
         local modules_copied, objects_copied = 0, 0
         for _, entry in ipairs(os.filedirs(path.join(products, "*.swiftmodule"))) do
