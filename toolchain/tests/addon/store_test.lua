@@ -11,7 +11,7 @@ local function install(store, name, version, digest, finished)
 end
 
 function failures(opt)
-    local store = import("store", {rootdir = opt.modules, anonymous = true})
+    local store = import("store", {rootdir = path.join(opt.modules, "..", "tests", "common"), anonymous = true})
     local found = {}
     local folder = fixtures.scratch()
     local source, target = path.join(folder, "source", ".xmake"), path.join(folder, "target", ".xmake")

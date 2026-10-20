@@ -1,5 +1,5 @@
 function failures(opt)
-    local dependency = import("apple.dependency", {rootdir = opt.modules, anonymous = true})
+    local dependency = import("dependency", {rootdir = path.join(opt.modules, "..", "tests", "common"), anonymous = true})
     local found = {}
     local function fake(name, plat, arch, deps)
         local instance = {name = function () return name end, plat = function () return plat end, arch = function () return arch end}
