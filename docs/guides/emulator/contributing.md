@@ -9,7 +9,7 @@ XNU kernel (system calls, Mach, IOKit) and the devices the firmware asks about, 
 daemons and frameworks run on top, on a JIT-translated ARM CPU (Dynarmic: revenant's `dynarmic` package, an upstream
 commit with our patches, in `third_party/dynarmic`).
 
-[How it works](../../explanation/emulator/how-it-works.md) describes the pieces. [Build and run](build-and-run.md)
+[How it works](../../explanation/emulator/how-it-works.md) describes the pieces. [Build and test](build-and-test.md)
 covers the build, the options and a boot.
 
 ## Layout
