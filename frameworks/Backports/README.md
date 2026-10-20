@@ -29,7 +29,7 @@ Lists the iOS SDK members that the minimum deployment target lacks, emits a skel
 - `./xmakew l -P . frameworks/Backports/tools/generate.lua`: facts and skeleton, cached per module.
 - `./xmakew l -P . frameworks/Backports/tools/status.lua`: `implemented X of Y` per framework.
 - `./xmakew l -P . frameworks/Backports/tests/backports_test.lua`: fixture test.
-- `./xmakew f -P . -p iphoneos -a armv7` then `./xmakew build -P . FoundationBackports`: one shared library per library of the former package, `lib<Name>.dylib` with its install name under `/usr/lib/revenant/org.revenant.apple-backports`. Each compiles `src/<Framework>`, `src/attach.c` and the skeleton of its framework, which configure generates; `backports_min_ios` is the only minimum, with no bands.
+- `./xmakew f -P . -p iphoneos -a armv7 --component=Backports` then `./xmakew build -P . FoundationBackports`: one shared library per library of the former package, `lib<Name>.dylib` with its install name under `/usr/lib/revenant/org.revenant.apple-backports`. Each compiles `src/<Framework>`, `src/attach.c` and the skeleton of its framework, which configure generates; `backports_min_ios` is the only minimum, with no bands. The component option configures only this component and what it needs, and the build reads the iOS 26.2 SDK, so the sources compile against the headers they are written for.
 - `REVENANT_GEN_SDK=<iPhoneOS SDK folder>` overrides the SDK the toolchain resolves.
 
 ## Limits
