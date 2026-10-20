@@ -35,8 +35,6 @@
 # Not run through heavy.sh: it compiles two small files, links two binaries and runs them against a live
 # capture, and the fleet's heavy lane is for the gate.
 set -eu
-echo "FAIL host/avf-recommended-settings7/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 52; the inline block PYEOF at line 160; the inline block PYEOF at line 211" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -49,44 +47,37 @@ mkdir -p "$build/src"
 FLAGS="-fobjc-arc -w"
 
 mutate() {
-    python3 - "$1" "$2" <<'PY'
-import sys
-path, which = sys.argv[1], sys.argv[2]
-text = open(path).read()
-MUTATIONS = {
     # THE LEFT-OVER'S FOURTH KEY. Its dictionary answered channels * 64000 with nothing behind it, and
     # Apple's own answer for the same live input carries no bit rate at all - so this key on the port side
     # and not on the host side is what the check must notice.
-    "bitrate": ("""        AVSampleRateKey: @(asbd->mSampleRate),
-    };""",
-                """        AVSampleRateKey: @(asbd->mSampleRate),
-        AVEncoderBitRateKey: @(asbd->mChannelsPerFrame * 64000),
-    };"""),
     # the sample rate read off the live format, replaced by a number written in the source
-    "hardcoded": ("AVSampleRateKey: @(asbd->mSampleRate),", "AVSampleRateKey: @(44100),"),
     # the codec taken from the release's own -availableVideoCodecTypes: last entry instead of the first
     # (the measured list here is avc1,jpeg, and the recommendation answers the FIRST)
-    "lastcodec": ("NSString *codec = self.availableVideoCodecTypes.firstObject;",
-                  "NSString *codec = self.availableVideoCodecTypes.lastObject;"),
     # the frame size read off the live format, transposed
-    "swapdims": ("""        AVVideoWidthKey: @(size.width),
-        AVVideoHeightKey: @(size.height),""",
-                 """        AVVideoWidthKey: @(size.height),
-        AVVideoHeightKey: @(size.width),"""),
     # the check that there is a live format at all, answered with invented numbers instead of nil: this is
     # the left-over's shape for the audio case (a made-up 44100 Hz mono for an output attached to
     # nothing), and the unattached rows are where it shows.
-    "nilwhenempty": ("""    if (!asbd || asbd->mChannelsPerFrame == 0 || asbd->mSampleRate <= 0)
-        return nil;""",
-                     """    if (!asbd || asbd->mChannelsPerFrame == 0 || asbd->mSampleRate <= 0)
-        return @{AVFormatIDKey: @(kAudioFormatMPEG4AAC), AVNumberOfChannelsKey: @(1), AVSampleRateKey: @(44100)};"""),
-}
-before, after = MUTATIONS[which]
-if before not in text:
-    raise SystemExit("the %s mutation did not apply, so this run proves nothing" % which)
-open(path, "w").write(text.replace(before, after, 1))
-print("# applied the %s mutation" % which)
-PY
+    case "$2" in
+        bitrate) runs_xmake l "$here/../../common/substitute.lua" first "$1" \
+            "        AVSampleRateKey: @(asbd->mSampleRate),
+    };" "        AVSampleRateKey: @(asbd->mSampleRate),
+        AVEncoderBitRateKey: @(asbd->mChannelsPerFrame * 64000),
+    };" ;;
+        hardcoded) runs_xmake l "$here/../../common/substitute.lua" first "$1" \
+            "AVSampleRateKey: @(asbd->mSampleRate)," "AVSampleRateKey: @(44100)," ;;
+        lastcodec) runs_xmake l "$here/../../common/substitute.lua" first "$1" \
+            "NSString *codec = self.availableVideoCodecTypes.firstObject;" \
+            "NSString *codec = self.availableVideoCodecTypes.lastObject;" ;;
+        swapdims) runs_xmake l "$here/../../common/substitute.lua" first "$1" \
+            "        AVVideoWidthKey: @(size.width),
+        AVVideoHeightKey: @(size.height)," "        AVVideoWidthKey: @(size.height),
+        AVVideoHeightKey: @(size.width)," ;;
+        nilwhenempty) runs_xmake l "$here/../../common/substitute.lua" first "$1" \
+            "    if (!asbd || asbd->mChannelsPerFrame == 0 || asbd->mSampleRate <= 0)
+        return nil;" "    if (!asbd || asbd->mChannelsPerFrame == 0 || asbd->mSampleRate <= 0)
+        return @{AVFormatIDKey: @(kAudioFormatMPEG4AAC), AVNumberOfChannelsKey: @(1), AVSampleRateKey: @(44100)};" ;;
+    esac
+    echo "# applied the $2 mutation"
 }
 
 want=${AVFRSMUTANT:-}
@@ -157,87 +148,14 @@ fi
 
 # ---- 4. the join and the verdict
 set +e
-python3 - "$build" "$oracle_dir" <<'PYEOF'
-import sys, os
-build, oracle_dir = sys.argv[1], sys.argv[2]
-
-def load(name):
-    rows = {}
-    for line in open(name):
-        if not line.strip():
-            continue
-        key, sep, value = line.rstrip("\n").partition(" | ")
-        if not sep:
-            print("MALFORMED       a line with no ' | ' in it: %s" % line.strip())
-            continue
-        rows[key.strip()] = value.strip()
-    return rows
-
-host = load(os.path.join(build, "host.table"))
-port = load(os.path.join(build, "port.table"))
-base = load(os.path.join(oracle_dir, "port.baseline"))
-
-# The rows that describe the two RUNS rather than the two answers: the devices this machine has and the
-# row count. Both halves print them and both must agree, but a difference in the device names would not be
-# a difference in what either half recommends.
-RUN_ROWS = ("CONTROL audio device", "CONTROL video device", "rows",
-            "CONTROL concrete audio output class", "CONTROL concrete video output class",
-            "CONTROL audio dispatched IMP", "CONTROL video dispatched IMP",
-            "CONTROL audio class IMP", "CONTROL video class IMP")
-
-port_only = host_only = unequal = 0
-unexplained = []
-for key in sorted(set(host) | set(port)):
-    if key in RUN_ROWS:
-        continue
-    if key not in port:
-        print("HOST ONLY        %-52s host=[%s]" % (key, host[key])); host_only += 1
-    elif key not in host:
-        print("PORT ONLY        %-52s port=[%s]" % (key, port[key])); port_only += 1
-    elif host[key] != port[key]:
-        unequal += 1
-        print("UNEXPLAINED      %-52s host=[%s] port=[%s]" % (key, host[key], port[key]))
-        unexplained.append(key)
-print("SUMMARY keys: host=%d port=%d  must-match-unequal=%d port-only=%d host-only=%d"
-      % (len(host), len(port), unequal, port_only, host_only))
-sys.exit(1 if (port_only or host_only or unexplained) else 0)
-PYEOF
+runs_xmake l "$here/tables.lua" join "$build" "$oracle_dir"
 join_status=$?
 set -e
 
 # ---- 5. the directionality assertion, and the control
 if [ -n "$want" ] && [ "$control" = 0 ]; then
     set +e
-    changed=$(python3 - "$build" "$oracle_dir" <<'PYEOF'
-import sys, os
-build, oracle_dir = sys.argv[1], sys.argv[2]
-def load(name):
-    rows = {}
-    for line in open(name):
-        if not line.strip():
-            continue
-        key, _, value = line.rstrip("\n").partition(" | ")
-        rows[key.strip()] = value.strip()
-    return rows
-base = load(os.path.join(oracle_dir, "port.baseline"))
-port = load(os.path.join(build, "port.table"))
-host = load(os.path.join(build, "host.table"))
-changed, right_then_wrong = [], []
-for key in set(base) | set(port):
-    if base.get(key) == port.get(key):
-        continue
-    changed.append(key)
-    # the key was RIGHT: the host answered it and the port answered the same before the mutation
-    if key in host and base.get(key) == host[key]:
-        right_then_wrong.append(key)
-for key in sorted(right_then_wrong):
-    print("BROKE A RIGHT ONE  %-52s was=[%s] now=[%s]" % (key, base.get(key), port.get(key)))
-for key in sorted(changed):
-    print("CHANGED           %-52s before=[%s] after=[%s]" % (key, base.get(key), port.get(key)))
-print("DIRECTIONALITY changed=%d right-then-wrong=%d" % (len(changed), len(right_then_wrong)))
-sys.exit(0 if (changed and right_then_wrong) else 1)
-PYEOF
-)
+    changed=$(runs_xmake l "$here/tables.lua" direction "$build" "$oracle_dir")
     dir_status=$?
     set -e
     if [ "$dir_status" != 0 ]; then
