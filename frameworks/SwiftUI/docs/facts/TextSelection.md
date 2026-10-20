@@ -23,8 +23,8 @@ walks `RangeSet.ranges` and takes the range with the smallest `lowerBound`, and
 text does not have comes back as a caret at its end). Both are the port's own and are internal, since
 they are not 26.2 API.
 
-There is no device measurement here: `run-emu.sh` and `snapshots.sh` both need the emulator, which is
-`emulate-launch`'s `xmake emulate` and not on this machine. What is measured is the SDK's own
+There is no device measurement here: `tools/emulate.lua tests` and `tools/emulate.lua snapshots` both need the
+emulator, which was not on this machine. What is measured is the SDK's own
 availability annotation, quoted above, and the port's own header for the 6.1.3 toolchain
-(`SwiftUI/bridge/fw/`, the interface of iOS 16.4), which likewise has no multi-range selection on
+(the copy `tools/api-surface.lua prepare` makes, the interface of iOS 16.4), which likewise has no multi-range selection on
 `UITextView`.

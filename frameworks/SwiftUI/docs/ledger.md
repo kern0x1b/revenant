@@ -3,7 +3,7 @@
 Своя реализация SwiftUI для iOS 6 armv7 поверх UIKit шестой системы, часть revenant рядом с тулчейном и эмулятором.
 
 **Это не SwiftUI Apple.** Ни строки кода Apple здесь нет и не будет: у настоящего SwiftUI нет исходников,
-он существует только как бинарник для arm64, и на iOS 6 он не переносится (разбор и цифры — в `../docs/research.md`).
+он существует только как бинарник для arm64, и на iOS 6 он не переносится (разбор и цифры — в `research.md`).
 
 **Модуль называется `SwiftUI`, а не SwiftUI, и это обязательно.** От имени модуля зависят манглы всех символов,
 которые приложение берёт у SwiftUI: с другим именем приложение не собралось бы без правки `import SwiftUI`
@@ -12,7 +12,7 @@
 Совместимость двух видов:
 - **по исходникам** — приложение на обычном синтаксисе SwiftUI компилируется против этого модуля без правок текста;
 - **по поверхности символов** для гостевой сборки рекомпилятора — модуль, собранный с библиотечной эволюцией,
-  удовлетворяет все 64 символа SwiftUI, которые берёт подопытное приложение Apple-сборки (`../bridge/README.md`).
+  удовлетворяет все 64 символа SwiftUI, которые берёт подопытное приложение Apple-сборки (`bridge.md`).
   Раскладки внутренних типов и точки входа графа у нас свои.
 
 ## Состояние
@@ -22,15 +22,15 @@
 
 ### Что поддержано, что игнорируется, чего нет
 
-Счёт ведётся скриптом `coverage.lua` по интерфейсам SwiftUI и SwiftUICore из SDK 26.2, которые перечисляет `../bridge/types-surface.lua` (1344 публичных типа и typealias). Список модификаторов `View` (311) остаётся ручным: он заведён при первом коммите и с интерфейса 16.4 не менялся.
+Счёт ведётся скриптом `coverage.lua` по интерфейсам SwiftUI и SwiftUICore из SDK 26.2, которые перечисляет `../tools/types-surface.lua` (1344 публичных типа и typealias). Список модификаторов `View` (311) остаётся ручным: он заведён при первом коммите и с интерфейса 16.4 не менялся.
 На сегодня: **664 типов** и **311 модификаторов**, из них **206 действуют**, 0 заглушки (пишут в журнал), 105 объявлены и игнорируются.
 Из того, что Apple объявляет доступным на iOS: **646 из 1208 типов** и **289 из 289 модификаторов**, из них **202 действуют**, 0 заглушки, 87 игнорируются
-(остальное в интерфейсе помечено `@available(iOS, unavailable)` — это macOS, tvOS и watchOS; список типов строит `../bridge/types-surface.lua`, список модификаторов — `../bridge/ios-surface.lua`).
+(остальное в интерфейсе помечено `@available(iOS, unavailable)` — это macOS, tvOS и watchOS; список типов строит `../tools/types-surface.lua`, список модификаторов — `../tools/ios-surface.lua`).
 
 **Что эти числа не говорят.** Счёт выше — по *именам* типов и модификаторов. По декларациям картина строже:
-типизированный разбор `swift-api-digester` (`../bridge/api-surface.sh`, колонки отчёта — `../bridge/api-diff.lua`)
+типизированный разбор `swift-api-digester` (`../tools/api-surface.lua`, колонки отчёта — `../tools/api-diff.lua`)
 сравнивает интерфейс Apple SwiftUI для iOS 16.4 с нашим модулем по подписи каждой декларации и на 19.09 находит
-**из 4740 деклараций Apple 3233 (68%) вызываются как у Apple, 314 (7%) есть, но с другой подписью, 927 (20%) нет и их ещё писать, 266 (6%) — типы, которых в iOS 6 быть не может (сцены, виджеты, документы, роторы, AttributedString…), закрытый список с причинами в `bridge/not-applicable.txt`** (вызов, который
+**из 4740 деклараций Apple 3233 (68%) вызываются как у Apple, 314 (7%) есть, но с другой подписью, 927 (20%) нет и их ещё писать, 266 (6%) — типы, которых в iOS 6 быть не может (сцены, виджеты, документы, роторы, AttributedString…), закрытый список с причинами в `Tests/API/not-applicable.txt`** (вызов, который
 компилируется у нас благодаря значениям параметров по умолчанию, отсутствующим не считается). Заметная часть первых —
 то, чему в iOS 6 нечему соответствовать (Widgets, документы, окна, `UIHostingConfiguration`, роторы доступности);
 остальное — работа, которая ещё не сделана: перегрузки вроде `Stepper`, `TextField` с `prompt:`/`axis:`, 48 ключей
@@ -102,7 +102,7 @@
 `snappy`, `bouncy`: у `UIView` iOS 6 нет пружинной анимации, поэтому свойство `UIView` идёт по ближайшей из
 четырёх кривых времени; анимации самого движка, идущие кадр за кадром, считаются так же, как у Apple: `Animation.spring` и её именованные
 формы — лесенкой шагов в 1/300 с, где конец определяют три проверки, а `interpolatingSpring` — решением пружины, которое
-кончается там, где его кончает Core Animation; всё это сверено с macOS 27, `host/springcmp.swift`), `ShadowStyle.inner` (внутренних теней в CoreAnimation нет — не рисуется),
+кончается там, где его кончает Core Animation; всё это сверено с macOS 27, `Tests/Host/springcmp.swift`), `ShadowStyle.inner` (внутренних теней в CoreAnimation нет — не рисуется),
 `Text.LineStyle.Pattern` (только сплошные подчёркивание и зачёркивание), `Font.leading` (вариантов интерлиньяжа у
 `UIFont` нет — используйте `lineSpacing`), `Font.Design.rounded` (скруглённого системного шрифта нет — обычный),
 `foregroundStyle(gradient)` у текста (текст одного цвета — первый цвет градиента), `submitLabel(.continue)`
@@ -124,7 +124,7 @@
 от текущего значения без скорости); `repeatCount` дважды подряд (у Apple две пары повторов делят состояние и
 ответы путаются, у нас действует последний); `shouldMerge` кастомной анимации при смене цели в пути (движок его не зовёт). `coverage.lua --check` требует, чтобы каждая такая запись в коде была названа здесь.
 
-`GeometryProxy.containerCornerInsets` отдаёт нулевые отступы: на iOS 6 ни один контейнер не рисуется со скруглёнными углами, скруглять нечего. У `LayoutSubview` и `LayoutSubviews` `==` объявлены явно, а у `GridItem`, `GridItem.Size`, `ScrollPosition` и `ScrollDismissesKeyboardMode` — через синтез компилятора: в отличие от `@frozen` типов Apple, наш модуль не печатает выведенные равенства в своём интерфейсе, и `bridge/api-diff.py` видит их как `__derived_struct_equals`.
+`GeometryProxy.containerCornerInsets` отдаёт нулевые отступы: на iOS 6 ни один контейнер не рисуется со скруглёнными углами, скруглять нечего. У `LayoutSubview` и `LayoutSubviews` `==` объявлены явно, а у `GridItem`, `GridItem.Size`, `ScrollPosition` и `ScrollDismissesKeyboardMode` — через синтез компилятора: в отличие от `@frozen` типов Apple, наш модуль не печатает выведенные равенства в своём интерфейсе, и `tools/api-diff.lua` видит их как `__derived_struct_equals`.
 
 `TabContent` повторяет объявление Apple 26.2 (`TabValue`, рекурсивное `Body`) без двух его внутренних членов: `_identifiedView` — внутренний член, который здесь никто не вызывает, а `_TabContentBodyAdaptor` существует только чтобы показать этот вызов; объявить их без потребителя было бы пустышкой. Инициализаторы `TabView` с `TabContent`-содержимым здесь не изолированы по `MainActor`, как у Apple: остальные инициализаторы `TabView` в модуле тоже не изолированы, иначе каждый вызов `TabView` требовал бы изолированного контекста.
 
@@ -165,40 +165,43 @@
   installs, rebuild the check against `-resource-dir <runtime>/lib/swift`, not the SDK's stdlib.
 
 Из этого следуют требования к коду: модуль называется `SwiftUI`, имена и метки аргументов совпадают
-с Apple дословно, порядок требований протоколов — слот в слот (таблица в `../bridge/README.md`),
+с Apple дословно, порядок требований протоколов — слот в слот (таблица в `bridge.md`),
 публичные классы хранят только свойства статически известного размера.
 
 ## Устройство
 
-- `Sources/SwiftUI/Core.swift` — протокол `View`, построитель, прозрачные контейнеры.
-- `Sources/SwiftUI/Graph.swift` — дерево узлов, согласование, транзакции обновления, вписывание динамических свойств по смещениям полей из метаданных Swift.
-- `Sources/SwiftUI/State.swift` — обёртки свойств и их хранилища в узлах.
-- `Sources/SwiftUI/Layout.swift` — модель раскладки, стеки, `Spacer`, `padding`, `frame`.
-- `Sources/SwiftUI/Views.swift` — примитивные представления поверх контролов UIKit.
-- `Sources/SwiftUI/Modifiers.swift` — модификаторы как узлы и как изменение окружения.
-- `Sources/SwiftUI/List.swift`, `Navigation.swift` — `UITableView` и `UINavigationController`.
-- `Sources/SwiftUI/Presentation.swift` — лист и предупреждение, `Sources/SwiftUI/Environment.swift` — ключи окружения.
-- `Sources/SwiftUI/Hosting.swift` — контроллер-хост, `Sources/SwiftUI/App.swift` — запуск приложения.
-- `Sources/SwiftUI/Probe.swift` — служебный доступ для тестов (дерево, размеры строк, число вычислений `body`).
+- `Sources/Core.swift` — протокол `View`, построитель, прозрачные контейнеры.
+- `Sources/Graph.swift` — дерево узлов, согласование, транзакции обновления, вписывание динамических свойств по смещениям полей из метаданных Swift.
+- `Sources/State.swift` — обёртки свойств и их хранилища в узлах.
+- `Sources/Layout.swift` — модель раскладки, стеки, `Spacer`, `padding`, `frame`.
+- `Sources/Views.swift` — примитивные представления поверх контролов UIKit.
+- `Sources/Modifiers.swift` — модификаторы как узлы и как изменение окружения.
+- `Sources/List.swift`, `Navigation.swift` — `UITableView` и `UINavigationController`.
+- `Sources/Presentation.swift` — лист и предупреждение, `Sources/Environment.swift` — ключи окружения.
+- `Sources/Hosting.swift` — контроллер-хост, `Sources/App.swift` — запуск приложения.
+- `Sources/Probe.swift` — служебный доступ для тестов (дерево, размеры строк, число вычислений `body`).
 
 ## Сборка и проверка
 
+Из корня revenant:
+
 ```
-./build.sh                       # модуль SwiftUI, SwiftUIDemo.app, SwiftUITests, SwiftUIProbe (armv7, iOS 6)
-../run-emu.sh t1 out/SwiftUIDemo.app SwiftUITests          # модульные тесты движка в iLEmu
-../snapshots.sh [--accept]                          # снимочные тесты: деревья сценариев против Snapshots/reference
-../run-app.sh app1 out/SwiftUIDemo.app 560 ../scratch/ctl7.txt   # демо в эмуляторе со сценарием касаний
+./xmakew f -P . -p iphoneos -a armv7 -y
+./xmakew build -P . SwiftUI SwiftUIDemo SwiftUISnapshots SwiftUITests   # модуль, демо, снимочный бандл, тесты движка (armv7, iOS 6)
+./xmakew test -P . SwiftUITypeChecks/*                                  # построители Table и TabContent принимают и отказывают, как у Apple
+./xmakew l frameworks/SwiftUI/tools/emulate.lua tests                   # модульные тесты движка в эмуляторе
+./xmakew l frameworks/SwiftUI/tools/emulate.lua snapshots [--accept]    # снимочные тесты: деревья сценариев против Snapshots/
 ```
 
-Сборка идёт против установки пакета `revenant@swift-runtime` 6.4.0, которую требует `../rtpkg`, в общем хранилище
-xmake; `../pkg-env.sh` спрашивает путь к каждому пакету у самого xmake (`xmake where`) и собирает флаги.
+Сборка идёт против установки пакета `revenant@swift-runtime` 6.4.0, которую требует проект revenant, в общем
+хранилище xmake; флаги собирают правила тулчейна.
 Все модули и dylib — из одной установки: стандартная библиотека, конкурентность, оверлеи Foundation, UIKit,
 QuartzCore, CoreGraphics, Dispatch, ObjectiveC, CoreFoundation и CoreData. Цель — `armv7-apple-ios6.0` с
 `-bundled-swift-runtime`, **проверка доступности включена**: любое API новее iOS 6 компилятор называет сам, а не
 падение на устройстве (так нашлись и исправлены `CGPathAddRoundedRect`, `component(_:from:)`,
 `keyboardDismissMode`, `contentSizeForViewInPopover`; `NSItemProvider`/`NSUserActivity` в подписях помечены iOS 8).
-Combine — цель `Combine` проекта revenant (`../../combine`): исходники OpenCombine с патчами пакета `revenant@combine` 2026.10.19,
-собранные против того же рантайма; допуск таймера — за `#available`; `../rtpkg` требует его с тем же рантаймом. Тесты
+Combine — цель `Combine` проекта revenant (`../../Combine`): исходники OpenCombine с патчами пакета `revenant@combine` 2026.10.19,
+собранные против того же рантайма; допуск таймера — за `#available`; цели этого каталога собираются с ним на том же рантайме. Тесты
 OpenCombine против этого модуля — цель `CombineTests` там же.
 
 ## Замеры
@@ -209,8 +212,8 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   `Canvas`, `@FetchRequest` с живым обновлением из Core Data, доступность), iLEmu iPhone4,1 iOS 6.1.3 и живой
   iPad 2 (iOS 6.1.3) — все проходят.
 - Снимочные сценарии в приложении (iPod4,1 iOS 6.0): 16 деревьев, сверяются посимвольно с эталонами в
-  `Snapshots/reference`; эталон нового сценария записывается только после ручной проверки дерева.
-- Производительность (безоконный пробник `SwiftUIProbe`, живое железо iOS 6.1.3; `../device-run/`): простой экран —
+  `Snapshots/`; эталон нового сценария записывается только после ручной проверки дерева.
+- Производительность (безоконный пробник `SwiftUIProbe`, живое железо iOS 6.1.3; вывод прогонов в дереве не хранится): простой экран —
   полное обновление 1,6 мс на iPad 2 и 2,1 мс на iPhone 4S, первичная сборка и раскладка 6,5 мс. Глубокий экран —
   шесть строк вложенных стеков глубины d — до кэша размеров рос в 7–8 раз на уровень (d=3: 1174 мс на обновление,
   d=6 не дождались за 15 минут), с кэшем растёт линейно: d=1 — 14 мс, d=3 — 56 мс, d=6 — 139 мс (iPad 2). На iPhone 4S (те же сборка и сценарий, финальная версия): d=1 — 19 мс, d=3 — 78 мс, d=5 — 139 мс; обновление одной строки из шести — 4,9 / 15 / 25 мс. Кэш:
@@ -218,7 +221,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   вложенных узлов раскладки и у всех предков. Синхронизация подвидов (`mountContents()`) и применение кадра
   (`place()`) дополнительно пропускаются для узла, чей кадр не изменился и который не был помечен грязным —
   когда меняется только одна строка из шести, обновление на iPad 2 падает: d=1 — 3,4 мс, d=3 — 10 мс, d=5 — 18 мс.
-  Текст (внутри приложения, `perf.sh`; вне приложения на устройстве нет шрифтового сервера, процесс падает на
+  Текст (внутри приложения, `tools/emulate.lua perf`; вне приложения на устройстве нет шрифтового сервера, процесс падает на
   первом `Text`) идёт немного дороже цвета на глубоких экранах из-за измерения строк, но растёт так же линейно.
 
 - `Spring` и `UnitCurve` сверены с фреймворком macOS 27 (`.agent-work/host/` — снимок замеров и хост-проверка): совпадают до девятого
@@ -228,7 +231,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   формах: у колеблющейся пружины это огибающая размаха, ниже `epsilon` (логарифм, делённый на затухание), у остальных —
   десятая доля секунды после последней десятой, где расстояние ещё не меньше `epsilon`; сетка у Apple 1013 десятых
   (до 101,2 с), и если на последней пружина ещё снаружи, Apple отвечает «успокоилась сразу» (0) — граница найдена
-  делением отрезка по отклику и жёсткости (`host/springcmp.swift`), а у критической интерполирующей пружины то же с 1012
+  делением отрезка по отклику и жёсткости (`Tests/Host/springcmp.swift`), а у критической интерполирующей пружины то же с 1012
   десятыми. Расходятся в двух местах, и оба измерены:
   Безье-кривые — на 5·10⁻⁷ (наш корень точнее: у Apple он одинарной точности, `0.399999619` против `0.4` —
   это `Float`); `velocity` перезатухающей пружины (`dampingRatio > 1`)
@@ -268,7 +271,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   `realVerticalSizeClass` (классы размера Catalyst), `defaultWheelPickerItemHeight` (колесо выбора — watchOS),
   `isSceneCaptured`, `fontResolutionContext` (`Font.Context` — тип SwiftUI iOS 18, вложенного `Context` у нашего
   `Font` нет), `lineHeight` и `_lineHeightMultiple` (это свойства `AttributedString`, которого в этом заходе
-  ещё нет). Для них — `bridge/not-applicable.txt` (16 строк); `lineHeight` и `_lineHeightMultiple` ждут `AttributedString`.
+  ещё нет). Для них — `Tests/API/not-applicable.txt` (16 строк); `lineHeight` и `_lineHeightMultiple` ждут `AttributedString`.
 
 - `TypesettingLanguage.contentAware` — внутренний: вверх по потоку он за `@_spi(Private)`, а у Apple в 16.4
   и 26.2 такого члена нет вовсе (`SwiftUICore.swiftinterface:8758-8762` — только `automatic`,
@@ -312,16 +315,16 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   есть (в 16.4 и в 26.2 у `ButtonStyle` нет ни одного `where Self ==`-расширения, а эти шесть стилей объявлены
   как `PrimitiveButtonStyle`); наши пять имён `ButtonStyle.plain` и подобных выдуманы и убраны.
 
-- `bridge/tools/` держит то, чем этот диапазон меряет свою полноту: `ours.py` читает, что объявляет
-  дерево, `gaps.py` говорит, чего из поверхности 26.2 в этом дереве нет, `ours-check.py` сторожит оба.
+- `tools/` держит то, чем этот диапазон меряет свою полноту: `ours.lua` читает, что объявляет
+  дерево, `gaps.lua` говорит, чего из поверхности 26.2 в этом дереве нет, `ours-check.lua` сторожит оба.
   Числа, которые этот диапазон приводил до сих пор, — **нижняя граница**: `count('{')` по строке ломался на
   любой строке, где скобка стоит в строке или в комментарии, и с неё обход уходил на неверную глубину.
   Теперь скобки считает `braces()`, который читает строку как Swift: `//`, `/* */`, `"…"`, многострочный
   литерал и `#"…"#` скобку не несут, а блок-комментарий и многострочный литерал состояние переносят.
-  Семь контролей в `ours-check.py` это сторожат, включая тот, что требовал от `ours.py` самого: расширение
+  Семь контролей в `ours-check.lua` это сторожат, включая тот, что требовал от `ours.lua` самого: расширение
   `Anchor.Source` в `TextModifiers.swift:168` даёт `bounds` и `rect`. Пересчёт после этого даёт те же 169
   строк, и это тоже честно: `Anchor` остаётся шестнадцатью, потому что расходятся не обходы, а то, кому
-  принадлежит член, — `surface-26.2.tsv` относит член расширения `Anchor.Source` к `Anchor`, а `ours.py`
+  принадлежит член, — `surface-26.2.tsv` относит член расширения `Anchor.Source` к `Anchor`, а `ours.lua`
   хранит последнюю компоненту имени. Это дефект второй инструменты, а не этого, и он назван ниже.
 
 - Стили кнопки. `link` (синее подчёркнутое слово, как ссылка в `UITableViewCell` iOS 6) и `card`
@@ -352,7 +355,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   `.wheel`, рядом с полем у `.field` и между полем и степперами у `.stepperField` (сценарий
   `date-picker-styles`). `DatePickerStyle.compact` и `DatePickerStyle.graphical` пишут в журнал: `UIDatePicker` в iOS 6 умеет только колесо, поэтому колесо и остаётся.
 
-- Обратная проверка поверхности, `bridge/api-surface.sh` со `STRICT=1`, читает объединение интерфейсов
+- Обратная проверка поверхности, `tools/api-surface.lua` со `STRICT=1`, читает объединение интерфейсов
   26.2 всех модулей, которые этот переэкспортирует, и печатает каждое наше публичное имя, которого там нет.
   После этого захода в её списке 241 строка, и ни одна не выдумана этим заходом: 200 — из базовой ветки
   (`_Probe` 34, `ColorMatrix` 16, `_DialogDescription` 6, `GestureEvent` 6, `ProjectionTransform` 6 и
@@ -360,7 +363,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   инструмента: 55 вложенных `typealias` вида `GlassButtonStyle.Configuration`, которые порт обязан
   объявить, а интерфейс Apple их не расписывает, и 7 `Body`-свидетельств ассоциированных типов. Пятьдесят
   восемь строк, которые добавил этот диапазон, убраны: четыре имени из ревью плюс хранилища ключевых
-  кадров. Интерфейсы 26.2 теперь читает `bridge/tools/surftool` — `SwiftParser` из swift-syntax
+  кадров. Интерфейсы 26.2 теперь читает `Tests/Surface` (surftool) — `SwiftParser` из swift-syntax
   (Apache-2.0, подключён путём, ничего не вендорится) вместо регулярных выражений: 40 из 41 строки
   артефактов уходят, остаётся 205, а добавляются четыре — `CGAffineTransform`, `CGPoint`, `CGRect` и
   `CGSize`, которые выражения принимали за объявленные, хотя их нет ни в одном интерфейсе девяти
@@ -389,7 +392,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   (`arm64e-apple-ios.swiftinterface:17490` и в 26.2 то же), семь хранимых свойств и `init()`. Значений по
   умолчанию **ни один интерфейс не даёт**, и на хосте его не прочитать: тип член underscored-структуры и на
   публичной поверхности macOS его нет — **это было неверно**: подчёркнутое имя в Swift публичное, и
-  `SwiftUI/host/hostrenderer.swift` его читает. Замерено на фреймворке macOS 27: `colorMode` nonLinear,
+  `Tests/Host/hostrenderer.swift` его читает. Замерено на фреймворке macOS 27: `colorMode` nonLinear,
   `rendersAsynchronously` false, `isOpaque` **true**, `drawsPlatformViews` **true**,
   `prefersDisplayCompositing` false, `maxDrawableCount` **3**, `rbColorMode` nil. Внешний тип назван так,
   как его объявляет SDK, — `_RendererConfiguration`, без замены. В слой `CALayer` iOS 6 доходят три из семи:
@@ -441,7 +444,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   `fill.contains(.none)` истинно, и так же оно и у Apple; проверка читала включение как тождество. Теперь
   тождество и включение проверяются отдельно, обе стороны равенства записаны.
 
-- Проверка на «виджет-бандл безусловно не собирается» лежит в `SwiftUI/tools/tabletests/`: `if` без
+- Проверка на «виджет-бандл безусловно не собирается» лежит в `Tests/TypeChecks/tables/`: `if` без
   `#available` доходит до проверки типов как `any Widget`, а existential не отвечает `Widget`, и сборка
   отказана. Недоступной перегрузки `buildOptional` в интерфейсе 26.2 нет вовсе: у `WidgetBundleBuilder` есть
   две формы (`arm64e-apple-ios.swiftinterface:21949` и `:21970`), обе доступные, и ни одна не берёт такой
@@ -449,9 +452,9 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   же, как у нас. **Мутант, который различает, — обратный тому, что был проверен сначала:** не убирать
   перегрузку, а добавить
   `static func buildOptional(_ widget: (any Widget)?) -> some Widget`. С ней проверка компилируется, и
-  `tabletests/run.sh` выходит с 1: `negative-widget-bundle: FAIL -- expected a rejection naming cannot
-  conform to 'Widget', got: it compiled`; без неё — выход 0 и отказ. Оба прогона в
-  `SwiftUI/host/runs/`. То есть проверка сторожит ровно то, что сторожит форма SDK, и может стать красной.
+  `tabletests/run.sh` (теперь тест `tables-negative-widget-bundle` цели `SwiftUITypeChecks`) выходил с 1: `negative-widget-bundle: FAIL -- expected a rejection naming cannot
+  conform to 'Widget', got: it compiled`; без неё — выход 0 и отказ. Оба прогона описаны в
+  `typechecks.md`. То есть проверка сторожит ровно то, что сторожит форма SDK, и может стать красной.
 
 - Десять типов, доступных на iOS, которые мы **не носим**, и по какой причине каждая. Проверено по
   интерфейсу 26.2 (`iPhoneOS26.2.sdk/System/Library/Frameworks/SwiftUI.framework/Modules/SwiftUI.swiftmodule/arm64e-apple-ios.swiftinterface`
@@ -495,15 +498,15 @@ OpenCombine против этого модуля — цель `CombineTests` т�
 
 ## Как собрать в рабочей копии ревью
 
-Пакеты берутся из общего хранилища xmake, и `pkg-env.sh` спрашивает путь к каждому у самого xmake
-(`xmake where` в `rtpkg`), поэтому рабочей копии ничего не нужно, кроме установки этих пакетов на машине:
+Пакеты берутся из общего хранилища xmake через проект revenant, поэтому рабочей копии ничего не нужно, кроме
+установки этих пакетов на машине (из корня revenant):
 
 ```
-(cd rtpkg && xmake f -p iphoneos -a armv7 -y)
+./xmakew f -P . -p iphoneos -a armv7 -y
 ```
 
-`local.env` нужен только для `run-emu.sh` и `snapshots.sh`, а не для сборки. Проверки таблиц
-(`SwiftUI/tools/tabletests/run.sh`) читают `SwiftUI/out/mods`, который пишет `SwiftUI/build.sh`.
+Эмулятор нужен только `tools/emulate.lua`, а не сборке; проект с `--emulate=y` он настраивает сам. Проверки
+таблиц и вкладок — тесты цели `SwiftUITypeChecks` — читают модуль, который собирает цель `SwiftUI`.
 
 ## Ограничения окружения
 
