@@ -2,9 +2,9 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-CIFormat kCIFormatA8 = 257;
-CIFormat kCIFormatLA8 = 260;
-CIFormat kCIFormatR8 = 261;
+const CIFormat kCIFormatA8 = 257;
+const CIFormat kCIFormatLA8 = 260;
+const CIFormat kCIFormatR8 = 261;
 NSString *const CIDetectorEyeBlink = @"CIDetectorEyeBlink";
 NSString *const CIDetectorSmile = @"CIDetectorSmile";
 NSString *const kCIContextOutputPremultiplied = @"output_premultiplied";

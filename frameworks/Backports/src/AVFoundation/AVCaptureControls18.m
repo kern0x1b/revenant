@@ -1,5 +1,5 @@
 #import "RevenantAVCaptureControls18.h"
-#import "RevenantAVFoundationProtocols.h"
+#import <AVFoundation/AVCaptureSession.h>
 #import <objc/runtime.h>
 
 static void revenant_controls_unsupported(NSString *selector)

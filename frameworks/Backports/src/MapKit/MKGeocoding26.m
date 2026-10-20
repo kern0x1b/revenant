@@ -4,12 +4,6 @@
 #import <objc/message.h>
 #import "RevenantMapKit.h"
 
-typedef NS_ENUM(NSInteger, MKAddressRepresentationsContextStyle) {
-    MKAddressRepresentationsContextStyleAutomatic = 0,
-    MKAddressRepresentationsContextStyleFull,
-    MKAddressRepresentationsContextStyleShort,
-};
-
 @interface MKAddressRepresentations ()
 @property (nonatomic, copy) NSString *fullAddress;
 @property (nonatomic, copy) NSString *shortAddress;
@@ -209,29 +203,6 @@ typedef NS_ENUM(NSInteger, MKAddressRepresentationsContextStyle) {
     return [NSString stringWithFormat:@"<MKAddress: %p %@>", self, self.fullAddress];
 }
 
-@end
-
-@interface MKGeocodingRequest : NSObject
-- (instancetype)init;
-- (instancetype)initWithAddressString:(NSString *)addressString;
-@property (nonatomic, copy) NSString *addressString;
-@property (nonatomic) MKCoordinateRegion region;
-@property (nonatomic, strong) NSLocale *preferredLocale;
-- (void)getMapItemsWithCompletionHandler:(void (^)(NSArray<MKMapItem *> *, NSError *))completionHandler;
-- (void)cancel;
-@property (nonatomic, readonly, getter=isLoading) BOOL loading;
-@property (nonatomic, readonly, getter=isCancelled) BOOL cancelled;
-@end
-
-@interface MKReverseGeocodingRequest : NSObject
-- (instancetype)init;
-- (instancetype)initWithLocation:(CLLocation *)location;
-@property (nonatomic, strong) CLLocation *location;
-@property (nonatomic, strong) NSLocale *preferredLocale;
-- (void)getMapItemsWithCompletionHandler:(void (^)(NSArray<MKMapItem *> *, NSError *))completionHandler;
-- (void)cancel;
-@property (nonatomic, readonly, getter=isLoading) BOOL loading;
-@property (nonatomic, readonly, getter=isCancelled) BOOL cancelled;
 @end
 
 @interface CLGeocoder (RevenantGeocoding)

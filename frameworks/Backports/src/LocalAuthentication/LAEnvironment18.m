@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <objc/message.h>
 #import <LocalAuthentication/LAContext.h>
-#import "RevenantLocalAuthenticationProtocols.h"
+#import <LocalAuthentication/LAEnvironment.h>
 
 #if __has_include(<LocalAuthentication/LACompanionType.h>)
 #import <LocalAuthentication/LACompanionType.h>
@@ -16,47 +16,6 @@ typedef NS_ENUM(NSInteger, LACompanionType) {
 @class LAEnvironmentState;
 
 @protocol LAEnvironmentObserver;
-
-@interface LAEnvironmentMechanism : NSObject
-+ (instancetype)new NS_UNAVAILABLE;
-- (instancetype)init NS_UNAVAILABLE;
-@property (nonatomic, readonly) BOOL isUsable;
-@property (nonatomic, readonly) NSString *localizedName;
-@property (nonatomic, readonly) NSString *iconSystemName;
-@end
-
-@interface LAEnvironmentMechanismBiometry : LAEnvironmentMechanism
-@property (nonatomic, readonly) LABiometryType biometryType;
-@property (nonatomic, readonly) BOOL isEnrolled;
-@property (nonatomic, readonly) BOOL isLockedOut;
-@property (nonatomic, readonly) NSData *stateHash;
-@property (nonatomic, readonly) BOOL builtInSensorInaccessible;
-@end
-
-@interface LAEnvironmentMechanismCompanion : LAEnvironmentMechanism
-@property (nonatomic, readonly) LACompanionType type;
-@property (nonatomic, readonly) NSData *stateHash;
-@end
-
-@interface LAEnvironmentMechanismUserPassword : LAEnvironmentMechanism
-@property (nonatomic, readonly) BOOL isSet;
-@end
-
-@interface LAEnvironmentState : NSObject <NSCopying>
-@property (nonatomic, readonly, nullable) LAEnvironmentMechanismBiometry *biometry;
-@property (nonatomic, readonly, nullable) LAEnvironmentMechanismUserPassword *userPassword;
-@property (nonatomic, readonly) NSArray<LAEnvironmentMechanismCompanion *> *companions;
-@property (nonatomic, readonly) NSArray<LAEnvironmentMechanism *> *allMechanisms;
-@end
-
-@interface LAEnvironment : NSObject
-+ (instancetype)new NS_UNAVAILABLE;
-- (instancetype)init NS_UNAVAILABLE;
-@property (nonatomic, readonly, class) LAEnvironment *currentUser;
-@property (nonatomic, readonly) LAEnvironmentState *state;
-- (void)addObserver:(id<LAEnvironmentObserver>)observer;
-- (void)removeObserver:(id<LAEnvironmentObserver>)observer;
-@end
 
 #pragma mark - the one mechanism of a release with a lock screen and no sensor
 

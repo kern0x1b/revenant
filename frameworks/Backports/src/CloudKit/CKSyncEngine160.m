@@ -21,7 +21,7 @@
 
 - (instancetype)initWithDatabase:(CKDatabase *)database
               stateSerialization:(nullable CKSyncEngineStateSerialization *)stateSerialization
-                        delegate:(nullable id)delegate
+                        delegate:(id<CKSyncEngineDelegate>)delegate
 {
     CKDatabase *held = database;
     CKSyncEngineStateSerialization *heldState = stateSerialization;

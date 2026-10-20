@@ -2,7 +2,7 @@
 #import <Metal/Metal.h>
 #import <objc/runtime.h>
 #import "RevenantMetal26Types.h"
-#import "RevenantMetalProtocols.h"
+#import <Metal/Metal.h>
 
 static void RevenantMetal4ResetBlendState(MTL4RenderPipelineColorAttachmentDescriptor *attachment);
 

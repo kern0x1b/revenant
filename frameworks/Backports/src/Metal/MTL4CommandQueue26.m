@@ -2,7 +2,7 @@
 #import <Metal/Metal.h>
 #import "RevenantMetal.h"
 #import "RevenantMetal26Types.h"
-#import "RevenantMetalProtocols.h"
+#import <Metal/Metal.h>
 
 @interface RevenantMetal4CommandQueue : NSObject <MTL4CommandQueue>
 @property (atomic, readonly) NSString *label;

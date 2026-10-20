@@ -1,5 +1,10 @@
 #import "RevenantSpriteKit.h"
 
+@interface SKTexture ()
+@property (nonatomic, readonly) CGRect textureRect;
+@property (nonatomic, readonly) CGSize size;
+@end
+
 @implementation SKTexture {
     CGRect _textureRect;
     CGSize _imageSize;

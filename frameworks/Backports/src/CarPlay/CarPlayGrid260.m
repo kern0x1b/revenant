@@ -32,20 +32,20 @@ NS_ASSUME_NONNULL_BEGIN
 
 @implementation CPListTemplate (RevenantGrid260)
 
-- (NSArray<CPGridButton *> *)headerGridButtons
+- (nullable NSArray<CPGridButton *> *)headerGridButtons
 {
     return [self revenant_headerGridButtons];
 }
 
-- (void)setHeaderGridButtons:(NSArray<CPGridButton *> *)headerGridButtons
+- (void)setHeaderGridButtons:(nullable NSArray<CPGridButton *> *)headerGridButtons
 {
     [self revenant_setHeaderGridButtons:headerGridButtons];
 }
 
-- (instancetype)initWithTitle:(NSString *)title
+- (instancetype)initWithTitle:(nullable NSString *)title
                      sections:(NSArray<CPListSection *> *)sections
-   assistantCellConfiguration:(CPAssistantCellConfiguration *)assistantCellConfiguration
-            headerGridButtons:(NSArray<CPGridButton *> *)headerGridButtons
+   assistantCellConfiguration:(nullable CPAssistantCellConfiguration *)assistantCellConfiguration
+            headerGridButtons:(nullable NSArray<CPGridButton *> *)headerGridButtons
 {
     self = [self initWithTitle:title
                      sections:sections
@@ -62,8 +62,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithTitleVariants:(NSArray<NSString *> *)titleVariants
                                 image:(UIImage *)image
-                 messageConfiguration:(CPMessageGridItemConfiguration *)messageConfiguration
-                              handler:(void (^)(CPGridButton *))handler
+                 messageConfiguration:(nullable CPMessageGridItemConfiguration *)messageConfiguration
+                              handler:(void (^ _Nullable)(CPGridButton *))handler
 {
     self = [self initWithTitleVariants:titleVariants image:image handler:handler];
     if (self) {
@@ -72,7 +72,7 @@ NS_ASSUME_NONNULL_BEGIN
     return self;
 }
 
-- (CPMessageGridItemConfiguration *)messageConfiguration
+- (nullable CPMessageGridItemConfiguration *)messageConfiguration
 {
     return [self revenant_messageConfiguration];
 }

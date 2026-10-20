@@ -19,7 +19,7 @@
 
 HMAccessoryCategory *RevenantHomeKitAccessoryCategory(NSString *categoryType)
 {
-    HMAccessoryCategory *category = [[HMAccessoryCategory alloc] init];
+    HMAccessoryCategory *category = [HMAccessoryCategory alloc];
     category.revenant_categoryType = categoryType;
     return category;
 }

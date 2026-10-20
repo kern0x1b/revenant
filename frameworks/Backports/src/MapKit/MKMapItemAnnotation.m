@@ -10,35 +10,32 @@
 
 - (nullable NSDictionary *)dictionaryRepresentation;
 
-- (nullable NSTimeZone *)timeZone;
-- (nullable NSString *)pointOfInterestCategory;
-- (nullable NSString *)identifier;
-@property (nonatomic, readonly, copy) NSArray<NSString *> *alternateIdentifiers;
-- (nullable MKAddress *)address;
-- (nullable MKAddressRepresentations *)addressRepresentations;
-- (nullable CLLocation *)location;
+@end
 
+@interface MKAddress (RevenantFullAddress)
+- (instancetype)initWithFullAddress:(NSString *)fullAddress;
+- (nullable MKAddressRepresentations *)addressRepresentations;
 @end
 
 @implementation MKMapItem (RevenantMembers)
 
-- (NSString *)identifier
+- (MKMapItemIdentifier *)identifier
 {
     SEL placeID = NSSelectorFromString(@"placeID");
     if ([self respondsToSelector:placeID]) {
         id (*read)(id, SEL) = (id (*)(id, SEL))objc_msgSend;
         id value = read(self, placeID);
         if ([value isKindOfClass:[NSString class]]) {
-            return value;
+            return [[MKMapItemIdentifier alloc] initWithIdentifierString:value];
         }
     }
     return nil;
 }
 
-- (NSArray<NSString *> *)alternateIdentifiers
+- (NSSet<MKMapItemIdentifier *> *)alternateIdentifiers
 {
-    NSString *identifier = self.identifier;
-    return identifier.length > 0 ? @[identifier] : @[];
+    MKMapItemIdentifier *identifier = self.identifier;
+    return identifier ? [NSSet setWithObject:identifier] : [NSSet set];
 }
 
 - (NSTimeZone *)timeZone
@@ -103,15 +100,6 @@
 }
 
 @end
-
-#if !REVENANT_HOST_PROBE
-@interface MKMapItemAnnotation : NSObject
-- (instancetype)initWithMapItem:(MKMapItem *)mapItem;
-@property (nonatomic, strong) MKMapItem *mapItem;
-@property (nonatomic, readonly) CLLocationCoordinate2D coordinate;
-@property (nonatomic, readonly, copy) NSString *title;
-@end
-#endif
 
 @implementation MKMapItemAnnotation {
     MKMapItem *_mapItem;

@@ -9,11 +9,11 @@
 - (instancetype)configurationWithLocale:(nullable NSLocale *)locale;
 @end
 
+#endif
+
 @interface UIImageConfiguration (RevenantLocale17Equality)
 - (BOOL)isEqualToConfiguration:(UIImageConfiguration *)otherConfiguration;
 @end
-
-#endif
 
 static const char RevenantImageConfigurationLocaleKey;
 

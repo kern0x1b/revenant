@@ -13,8 +13,6 @@ static char RevenantPresentationBackgroundEffectKey;
 }
 @end
 
-@interface UIColorEffect : UIVisualEffect
-@end
 
 @implementation UIColorEffect
 @end

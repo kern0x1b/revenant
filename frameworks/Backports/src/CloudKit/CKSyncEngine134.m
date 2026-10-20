@@ -12,6 +12,10 @@ static NSError *RevenantCKSyncEngineNoAccount(void)
                          nil);
 }
 
+@interface CKSyncEngineState (RevenantSyncEngine)
+- (instancetype)initForSyncEngine:(CKSyncEngine *)engine;
+@end
+
 @implementation CKSyncEngine
 {
     CKSyncEngineState *_state;

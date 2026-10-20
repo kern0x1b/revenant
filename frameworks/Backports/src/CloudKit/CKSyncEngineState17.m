@@ -5,6 +5,10 @@
 
 #pragma mark - CKSyncEngineFetchChangesScope
 
+@interface CKSyncEnginePendingRecordZoneChange (RevenantZoneID)
+@property (copy, nonatomic) CKRecordZoneID *zoneID;
+@end
+
 @implementation CKSyncEngineFetchChangesScope
 
 @synthesize zoneIDs = _zoneIDs;
@@ -225,9 +229,9 @@
 - (instancetype)revenant_contextWithReason:(CKSyncEngineSyncReason)reason
                                   options:(CKSyncEngineFetchChangesOptions *)options
 {
-    CKSyncEngineFetchChangesContext *made = [[CKSyncEngineFetchChangesContext alloc] init];
-    made.reason = reason;
-    made.options = options;
+    CKSyncEngineFetchChangesContext *made = [CKSyncEngineFetchChangesContext alloc];
+    made->_reason = reason;
+    made->_options = options;
     return made;
 }
 
@@ -261,9 +265,9 @@
 - (instancetype)revenant_contextWithReason:(CKSyncEngineSyncReason)reason
                                  options:(CKSyncEngineSendChangesOptions *)options
 {
-    CKSyncEngineSendChangesContext *made = [[CKSyncEngineSendChangesContext alloc] init];
-    made.reason = reason;
-    made.options = options;
+    CKSyncEngineSendChangesContext *made = [CKSyncEngineSendChangesContext alloc];
+    made->_reason = reason;
+    made->_options = options;
     return made;
 }
 

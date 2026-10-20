@@ -1,5 +1,5 @@
 #import "RevenantMetal.h"
-#import "RevenantMetalProtocols.h"
+#import <Metal/Metal.h>
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"

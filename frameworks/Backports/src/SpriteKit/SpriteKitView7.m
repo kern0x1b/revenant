@@ -1,6 +1,6 @@
 #if TARGET_OS_IPHONE
 #import "RevenantSpriteKit.h"
-#import "RevenantSpriteKitProtocols.h"
+#import <SpriteKit/SpriteKit.h>
 #import <QuartzCore/QuartzCore.h>
 #import <OpenGLES/EAGL.h>
 #import <OpenGLES/EAGLDrawable.h>

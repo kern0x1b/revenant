@@ -5,7 +5,6 @@
 #import "RevenantMapKit.h"
 
 @interface MKMapSnapshotOptions ()
-@property (nonatomic, copy) MKMapConfiguration *preferredConfiguration;
 @end
 
 @implementation MKMapSnapshotOptions {

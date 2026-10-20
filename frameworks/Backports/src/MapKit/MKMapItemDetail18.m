@@ -4,28 +4,7 @@
 #import <objc/runtime.h>
 #import "RevenantMapKit.h"
 
-@interface MKMapItem (RevenantDetailReads)
-- (nullable NSString *)identifier;
-- (nullable MKAddress *)address;
-@end
-
 NS_ASSUME_NONNULL_BEGIN
-
-typedef NS_ENUM(long long, MKMapItemDetailSelectionAccessoryPresentationStyleCalloutStyle) {
-    MKMapItemDetailSelectionAccessoryPresentationStyleCalloutStyleSmall = 0,
-    MKMapItemDetailSelectionAccessoryPresentationStyleCalloutStyleMedium = 1,
-    MKMapItemDetailSelectionAccessoryPresentationStyleCalloutStyleLarge = 2,
-};
-
-@interface MKMapItemDetailSelectionAccessoryPresentationStyle : NSObject
-- (instancetype)init NS_UNAVAILABLE;
-+ (instancetype)new NS_UNAVAILABLE;
-+ (instancetype)calloutWithCalloutStyle:(MKMapItemDetailSelectionAccessoryPresentationStyleCalloutStyle)style;
-+ (instancetype)automaticWithPresentationViewController:(UIViewController *)controller;
-+ (instancetype)sheetPresentedFromViewController:(UIViewController *)controller;
-@property (class, nonatomic, readonly) MKMapItemDetailSelectionAccessoryPresentationStyle *callout;
-@property (class, nonatomic, readonly) MKMapItemDetailSelectionAccessoryPresentationStyle *openInMaps;
-@end
 
 @implementation MKMapItemDetailSelectionAccessoryPresentationStyle
 
@@ -65,13 +44,13 @@ typedef NS_ENUM(long long, MKMapItemDetailSelectionAccessoryPresentationStyleCal
     return (id)objc_getAssociatedObject(object_getClass(self), (const void *)"revenantOpenInMaps");
 }
 
-+ (instancetype)calloutWithCalloutStyle:(MKMapItemDetailSelectionAccessoryPresentationStyleCalloutStyle)style
++ (instancetype)calloutWithCalloutStyle:(MKMapItemDetailSelectionAccessoryCalloutStyle)style
 {
     (void)style;
     return [self revenant_styleOfKind:1 holder:nil calling:@selector(calloutWithCalloutStyle:)];
 }
 
-+ (instancetype)automaticWithPresentationViewController:(UIViewController *)controller
++ (MKMapItemDetailSelectionAccessoryPresentationStyle *)automaticWithPresentationViewController:(nullable UIViewController *)controller
 {
     return [self revenant_styleOfKind:2 holder:controller calling:@selector(automaticWithPresentationViewController:)];
 }
@@ -112,14 +91,6 @@ typedef NS_ENUM(long long, MKMapItemDetailSelectionAccessoryPresentationStyleCal
 
 @end
 
-#if !REVENANT_HOST_PROBE
-@interface MKSelectionAccessory : NSObject
-- (instancetype)initWithMapItemDetailPresentationStyle:(MKMapItemDetailSelectionAccessoryPresentationStyle *)presentationStyle;
-+ (instancetype)mapItemDetailWithPresentationStyle:(MKMapItemDetailSelectionAccessoryPresentationStyle *)presentationStyle;
-- (BOOL)isEqualToSelectionAccessory:(MKSelectionAccessory *)other;
-- (MKMapItemDetailSelectionAccessoryPresentationStyle *)mapItemDetailPresentationStyle;
-@end
-#endif
 
 @implementation MKSelectionAccessory {
     MKMapItemDetailSelectionAccessoryPresentationStyle *_style;
@@ -159,20 +130,6 @@ typedef NS_ENUM(long long, MKMapItemDetailSelectionAccessoryPresentationStyleCal
 
 @end
 
-#if !REVENANT_HOST_PROBE
-@protocol MKMapItemDetailViewControllerDelegate <NSObject>
-@optional
-- (void)mapItemDetailViewControllerDidFinish:(id)viewController;
-@end
-
-@interface MKMapItemDetailViewController : UIViewController
-- (instancetype)initWithMapItem:(MKMapItem *)mapItem;
-- (instancetype)initWithMapItem:(MKMapItem *)mapItem displaysMap:(BOOL)displaysMap;
-@property (nonatomic, strong) MKMapItem *mapItem;
-@property (nonatomic, weak) id <MKMapItemDetailViewControllerDelegate> delegate;
-@end
-#endif
-
 @implementation MKMapItemDetailViewController {
     MKMapItem *_mapItem;
     __weak id <MKMapItemDetailViewControllerDelegate> _delegate;
@@ -187,12 +144,12 @@ typedef NS_ENUM(long long, MKMapItemDetailSelectionAccessoryPresentationStyleCal
 
 - (id)revenant_typedDelegate { return _delegate; }
 
-- (instancetype)initWithMapItem:(MKMapItem *)mapItem
+- (instancetype)initWithMapItem:(nullable MKMapItem *)mapItem
 {
     return [self initWithMapItem:mapItem displaysMap:YES];
 }
 
-- (instancetype)initWithMapItem:(MKMapItem *)mapItem displaysMap:(BOOL)displaysMap
+- (instancetype)initWithMapItem:(nullable MKMapItem *)mapItem displaysMap:(BOOL)displaysMap
 {
     self = [super initWithNibName:nil bundle:nil];
     if (self) {
@@ -203,7 +160,7 @@ typedef NS_ENUM(long long, MKMapItemDetailSelectionAccessoryPresentationStyleCal
     return self;
 }
 
-- (void)setMapItem:(MKMapItem *)mapItem
+- (void)setMapItem:(nullable MKMapItem *)mapItem
 {
     _mapItem = mapItem;
     self.title = mapItem.name;
@@ -250,7 +207,7 @@ typedef NS_ENUM(long long, MKMapItemDetailSelectionAccessoryPresentationStyleCal
     NSMutableArray *rows = [NSMutableArray array];
     if (_address.text.length > 0) { [rows addObject:_address.text]; }
     if (_mapItem.phoneNumber.length > 0) { [rows addObject:_mapItem.phoneNumber]; }
-    if (_mapItem.identifier.length > 0) { [rows addObject:_mapItem.identifier]; }
+    if (_mapItem.identifier.identifierString.length > 0) { [rows addObject:_mapItem.identifier.identifierString]; }
     return (NSInteger)rows.count;
 }
 
@@ -270,7 +227,7 @@ typedef NS_ENUM(long long, MKMapItemDetailSelectionAccessoryPresentationStyleCal
     NSMutableArray *rows = [NSMutableArray array];
     if (_address.text.length > 0) { [rows addObject:_address.text]; }
     if (_mapItem.phoneNumber.length > 0) { [rows addObject:_mapItem.phoneNumber]; }
-    if (_mapItem.identifier.length > 0) { [rows addObject:_mapItem.identifier]; }
+    if (_mapItem.identifier.identifierString.length > 0) { [rows addObject:_mapItem.identifier.identifierString]; }
     if ((NSUInteger)indexPath.row < rows.count) {
         cell.textLabel.text = rows[(NSUInteger)indexPath.row];
     }

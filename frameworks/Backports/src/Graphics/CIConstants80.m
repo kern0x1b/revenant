@@ -2,16 +2,16 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-CIFormat kCIFormatL16 = 1795;
-CIFormat kCIFormatLA16 = 1796;
-CIFormat kCIFormatLAh = 2052;
-CIFormat kCIFormatLh = 2051;
-CIFormat kCIFormatR16 = 1797;
-CIFormat kCIFormatRG16 = 1798;
-CIFormat kCIFormatRGBA16 = 1800;
-CIFormat kCIFormatRGBAf = 2312;
-CIFormat kCIFormatRGh = 2054;
-CIFormat kCIFormatRh = 2053;
+const CIFormat kCIFormatL16 = 1795;
+const CIFormat kCIFormatLA16 = 1796;
+const CIFormat kCIFormatLAh = 2052;
+const CIFormat kCIFormatLh = 2051;
+const CIFormat kCIFormatR16 = 1797;
+const CIFormat kCIFormatRG16 = 1798;
+const CIFormat kCIFormatRGBA16 = 1800;
+const CIFormat kCIFormatRGBAf = 2312;
+const CIFormat kCIFormatRGh = 2054;
+const CIFormat kCIFormatRh = 2053;
 
 NSString *const CIDetectorAspectRatio = @"CIDetectorAspectRatio";
 NSString *const CIDetectorFocalLength = @"CIDetectorFocalLength";

@@ -3,6 +3,23 @@
 #import "RevenantCKSubscription.h"
 #import "RevenantCKSyncEngine26.h"
 
+@interface CKSyncEnginePendingRecordZoneChange ()
+@property (readonly, copy, nonatomic) CKRecordZoneID *zoneID;
+@end
+
+static const CKSyncEnginePendingRecordZoneChangeType RevenantCKPendingRecordZoneChangeTypeSaveZone = (CKSyncEnginePendingRecordZoneChangeType)2;
+
+static const CKSyncEnginePendingRecordZoneChangeType RevenantCKPendingRecordZoneChangeTypeDeleteZone = (CKSyncEnginePendingRecordZoneChangeType)3;
+
+@interface CKSyncEngineFetchedRecordZoneChangesEvent ()
+@property (readonly, copy, nonatomic) CKRecordZoneID *zoneID;
+@property (nullable, readonly, copy, nonatomic) NSError *error;
+@end
+
+@interface CKSyncEngineFetchedDatabaseChangesEvent ()
+@property (readonly, copy, nonatomic) NSArray<CKSyncEngineFetchedZoneDeletion *> *zoneDeletions;
+@end
+
 @implementation CKSyncEnginePendingRecordZoneChange
 @synthesize recordID = _recordID;
 @synthesize zoneID = _zoneID;
@@ -23,7 +40,7 @@
     self = [super init];
     if (self) {
         _zoneID = [zone.zoneID copy];
-        _type = CKSyncEnginePendingRecordZoneChangeTypeSaveZone;
+        _type = RevenantCKPendingRecordZoneChangeTypeSaveZone;
     }
     return self;
 }
@@ -33,7 +50,7 @@
     self = [super init];
     if (self) {
         _zoneID = [zoneID copy];
-        _type = CKSyncEnginePendingRecordZoneChangeTypeDeleteZone;
+        _type = RevenantCKPendingRecordZoneChangeTypeDeleteZone;
     }
     return self;
 }

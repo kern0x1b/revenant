@@ -3,7 +3,6 @@
 #import <objc/message.h>
 #import "RevenantMapKit.h"
 
-enum { MKDirectionsTransportTypeCycling = 1 << 3 };
 
 static NSString *MKRevenantOSRMBase(void)
 {

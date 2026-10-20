@@ -3,11 +3,6 @@
 
 #import "RevenantCKValue.h"
 
-@interface CKAllowedSharingOptions ()
-@property (nonatomic, assign) BOOL allowsAccessRequests;
-@property (nonatomic, assign) BOOL allowsParticipantsToInviteOthers;
-@end
-
 @implementation CKAllowedSharingOptions
 
 @synthesize allowsAccessRequests = _allowsAccessRequests;
