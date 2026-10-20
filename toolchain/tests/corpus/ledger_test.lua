@@ -1,4 +1,4 @@
-local TOOLS = path.join(os.scriptdir(), "..")
+local TOOLS = path.join(os.scriptdir(), "..", "..", "tools", "corpus")
 local MODULES = path.join(TOOLS, "..", "..", "modules")
 local classify = import("ledger_classify", {rootdir = TOOLS, anonymous = true})
 local swiftmod = import("ledger_swift", {rootdir = TOOLS, anonymous = true})

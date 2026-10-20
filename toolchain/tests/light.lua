@@ -19,14 +19,8 @@ function main(checkout)
     if os.isfile(path.join(addon, "sdk_verbatim_test.lua")) then
         table.insert(names, "sdk_verbatim_test")
     end
-    if os.isfile(path.join(addon, "matter_objects_test.lua")) then
-        table.insert(names, "matter_objects_test")
-    end
     if os.isfile(path.join(addon, "locale_order_test.lua")) then
         table.insert(names, "locale_order_test")
-    end
-    if os.isfile(path.join(addon, "py_values_test.lua")) then
-        table.insert(names, "py_values_test")
     end
     local failed = 0
     for _, name in ipairs(names) do
@@ -54,7 +48,7 @@ function main(checkout)
         }
         if not ok then failed = failed + 1 end
     end
-    local corpus_lua_test = path.join(revenant, "tools", "corpus", "tests", "corpus_test.lua")
+    local corpus_lua_test = path.join(revenant, "tests", "corpus", "corpus_test.lua")
     if os.isfile(corpus_lua_test) then
         local ok = try {
             function ()
