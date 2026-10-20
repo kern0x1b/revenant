@@ -83,7 +83,7 @@ fi
 
 # the whole-selector renamer does what renames() must not: a category's selector prefixed whole, with the
 # identifiers inside the selector left as they are
-python3 "$here/../prefix_selectors.py" "$here/probe.m" "$build/probe.renamed.m" charonHost \
+runs_xmake l "$here/../prefix_selectors.lua" "$here/probe.m" "$build/probe.renamed.m" charonHost \
     --declarations="$build/declarations.h" $flags -target arm64-apple-ios15.0-macabi -isysroot "$sdk" \
     -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" -- "$build/probe.o"
 check yes "$(present 'revenantHostProbeOf:(id)object forKey:(id)key' "$build/probe.renamed.m")" "the category's two-piece selector is prefixed whole"
@@ -118,14 +118,14 @@ int main(void)
 }
 EOF
 if xcrun clang $target $flags -w -c "$build/undefined.m" -o "$build/undefined.o"; then
-    if python3 "$here/../check-private-selectors.py" "$build/undefined.o" "$build/probe.renamed.o" > "$build/private.log" 2>&1; then
+    if runs_xmake l "$here/../check-private-selectors.lua" "$build/undefined.o" "$build/probe.renamed.o" > "$build/private.log" 2>&1; then
         check yes no "a test naming a renamed selector no object defines is refused"
         sed 's/^/    /' "$build/private.log"
     else
         check yes yes "a test naming a renamed selector no object defines is refused"
         grep -m1 '^FAIL' "$build/private.log" | cut -c1-120 | sed 's/^/    /'
     fi
-    if python3 "$here/../check-private-selectors.py" "$build/probe.renamed.o" "$build/probe.renamed.o" > "$build/private2.log" 2>&1; then
+    if runs_xmake l "$here/../check-private-selectors.lua" "$build/probe.renamed.o" "$build/probe.renamed.o" > "$build/private2.log" 2>&1; then
         check yes yes "a test naming only what the objects define passes"
     else
         check yes no "a test naming only what the objects define passes"

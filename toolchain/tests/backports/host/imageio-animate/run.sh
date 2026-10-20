@@ -18,9 +18,10 @@
 # declaration is stale.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 port=$root/packages/a/apple-backports/Graphics
-build=${BUILD:-$root/.agent-work/runs/imageio-animate}
+build=${BUILD:-$(runs_folder imageio-animate)}
 mkdir -p "$build"
 
 # THE OBJECT LIST IS A FILE, so a band extends this harness instead of forking it, and an object on disk the

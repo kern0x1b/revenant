@@ -21,9 +21,12 @@
 # why -init's reason text is the LITERAL and not NSStringFromClass: a class-name substitution would
 # spell the renamed class where Apple spells NSBatchInsertRequest.
 set -eu
+echo "FAIL host/coredata-batchinsert/check.sh: its Python steps are gone and not yet ported to Lua: mutant-ivar.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 FP=${COREDATA:-$here/../../../../packages/a/apple-backports}
-build=${COREDATA_CHECK:-$here/../../../../.agent-work/runs/coredata-check}
+build=${COREDATA_CHECK:-$(runs_folder coredata-check)}
 rm -rf "$build"; mkdir -p "$build"
 
 cp "$FP/CoreData/NSBatchInsertRequest.m" "$build/port.m"

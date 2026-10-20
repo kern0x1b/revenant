@@ -19,6 +19,8 @@
 # an armv7 emulator, which is a heavy job to be run when a slot is free, and it is recorded in
 # coordination/crutches.md as the native fix.
 set -eu
+echo "FAIL host/homekit/run.sh: its Python steps are gone and not yet ported to Lua: ast_check.py; oracle.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 revenant=${REVENANT:-$here/../../../..}
 # absolute, because anything resolved against a build directory rather than the working directory

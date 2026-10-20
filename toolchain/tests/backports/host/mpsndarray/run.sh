@@ -33,10 +33,13 @@
 # comparison that reads only one end of each case cannot see one of them. The run has to pass once and
 # fail twice, or the comparison is not looking at the thing it claims to.
 set -eu
+echo "FAIL host/mpsndarray/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 57; the inline block PY at line 105; the inline block PY at line 127" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 mps=${MPS:-$root/packages/a/apple-backports/MetalPerformanceShaders}
-build=${BUILD:-$root/.agent-work/runs/host/mpsndarray}
+build=${BUILD:-$(runs_folder host/mpsndarray)}
 rm -rf "$build"
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path)

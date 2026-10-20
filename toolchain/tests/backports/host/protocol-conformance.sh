@@ -7,6 +7,7 @@
 #     sh tests/backports/host/protocol-conformance.sh
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../common/runs.sh" "$here"
 root=$(cd "$here/../../.." && pwd)
 SDK=""
 for candidate in "$HOME"/.xmake/packages/i/iphoneos-sdk/16.4/*/Developer.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.4.sdk; do
@@ -16,7 +17,7 @@ done
 # THE PINNED CLANG, the one tests/addon/protocol-sources.sh pins: a clang other than the library's answers a different question.
 CLANG=${CLANG:-$HOME/.xmake/packages/l/llvm/23.1.1/6a8c97aaa69241df9ed69ac86f13a045/bin/clang}
 [ -x "$CLANG" ] || { echo "FAIL: no clang at $CLANG; set CLANG to the pinned one" >&2; exit 2; }
-work=${WORK:-$root/.agent-work/runs/protocol-conformance}
+work=${WORK:-$(runs_folder protocol-conformance)}
 rm -rf "$work"
 mkdir -p "$work/gen"
 # The Metal protocol header is written at build time from spec/protocol-headers.tsv, so the check reads the same header the build does.

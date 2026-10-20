@@ -9,7 +9,10 @@
 # commit at a time. So a mid-series commit carrying the line, or the tip carrying it twice, or two
 # commits carrying it, all pass the hook and fail the rule. This reads the series and says so.
 set -eu
+echo "FAIL host/metal-census/check-series-self-review.sh: its Python steps are gone and not yet ported to Lua: the inline block at line 27; the inline block at line 72" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 base=${1:-origin/main}
 tip=${2:-HEAD}
@@ -61,9 +64,9 @@ for sha, subject, body in commits:
 # reading, and git's output format is fed to it directly - the end-to-end path is exercised on the
 # real series every time this runs, which is the case that matters.
 if [ -n "${SELF_TEST:-}" ]; then
-    work=$root/.agent-work/runs/metal-census/self-review-selftest
+    work=$(runs_folder metal-census/self-review-selftest)
     . "$here/work-guard.sh"
-    work_ok "$work" || { echo "FAIL: the self-test scratch is not under .agent-work" >&2; exit 1; }
+    work_ok "$work" || { echo "FAIL: the self-test scratch is not under the run folder" >&2; exit 1; }
     rm -rf "$work"; mkdir -p "$work" || exit 1
     feed() {   # git log output on stdin, in git's own --format with %x1f and %x1e
         python3 -c '

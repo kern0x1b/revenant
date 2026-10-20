@@ -13,9 +13,12 @@
 # port's walk agrees with RevenantMPSStatisticsReference.h, which is the header's own sentences written as
 # arithmetic in plain C and never names the port's class.
 set -eu
+echo "FAIL host/mpsstatistics/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 38; the inline block PY at line 80" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 mps=${MPS:-$here/../../../../packages/a/apple-backports/MetalPerformanceShaders}
-build=${BUILD:-$here/../../../../.agent-work/runs/host/mpsstatistics}
+build=${BUILD:-$(runs_folder host/mpsstatistics)}
 rm -rf "$build"
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path)

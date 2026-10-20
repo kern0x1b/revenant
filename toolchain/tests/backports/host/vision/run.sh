@@ -3,6 +3,8 @@
 # where the device test reads them, then compiles the port's Vision classes under names of their own (Revenant<name>) and holds them to the
 # same records, with mutants of the port that each have to be told apart.
 set -eu
+echo "FAIL host/vision/run.sh: its Python steps are gone and not yet ported to Lua: the inline block at line 73; the one-line step at line 109; the inline block PY at line 124; compare.py; the inline block PY at line 162" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
@@ -13,7 +15,7 @@ registry=${REGISTRY:-$here/../../../../packages/a/apple-backports/registry/Visio
 # prints "port: same as the system", and lets the mutant of VNRequests.m that removes the wrapper's
 # refusal survive -- so a missing corpus read as a defect in the port. It is a corpus, and a check
 # that cannot see its cases must say so before it reports anything.
-models=${MODELS:-$here/../../../../.agent-work/runs/coreml-models-2}
+models=${MODELS:-$(runs_folder coreml-models-2)}
 # resolved so the failure below names a path a reader can paste, and so the count does not depend on
 # how the run was invoked
 models=$(cd "$(dirname "$models")" 2>/dev/null && pwd)/$(basename "$models")
@@ -99,7 +101,7 @@ if [ "$home" != "0" ]; then
 fi
 echo "no home path in $record"
 
-recorded=$(python3 -c "import json; print(len(json.load(open('$build/system.json'))))")
+recorded=$(runs_harness records "$build/system.json")
 # A container the cases name failing to compile is a case going wrong. vision_image is the one they
 # expect to fail -- this host's Core ML does not run an image model -- and it is listed, with its
 # reason, in vision-cases.m beside the compile. Anything else that fails is recorded under

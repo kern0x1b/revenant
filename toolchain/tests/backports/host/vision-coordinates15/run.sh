@@ -8,8 +8,9 @@
 #   4. a plant on a scratch copy of the port's Vision15_0.m - one axis swapped in one function - must turn the comparison red
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
-build=${BUILD:-$here/../../../../.agent-work/runs/vision-coordinates15}
+build=${BUILD:-$(runs_folder vision-coordinates15)}
 mkdir -p "$build"
 vision="$appledir/Vision"
 [ -f "$vision/Vision15_0.m" ] || { echo "no $vision/Vision15_0.m"; exit 1; }

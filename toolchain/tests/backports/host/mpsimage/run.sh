@@ -13,14 +13,14 @@
 # once and fail twice, naming the plants. A comparison that has never been seen to fail is not a
 # comparison, and the two plants are the cheapest way to see one.
 set -eu
+echo "FAIL host/mpsimage/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 53" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 mps=${MPS:-$root/packages/a/apple-backports/MetalPerformanceShaders}
 metal=$root/packages/a/apple-backports/Metal
-build=${BUILD:-$here/../../../../.agent-work/runs/host/mpsimage}
-# The parent of the build directory is made too: the default path resolves to
-# <repo>/.agent-work/runs/host, which is where the brief puts run output, and the first compile failed
-# with "unable to open output file" because nothing had made it.
+build=${BUILD:-$(runs_folder host/mpsimage)}
 mkdir -p "$build"
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-unguarded-availability -Wno-incomplete-implementation"
 # A HOST harness: both builds link the host frameworks and run here, so both are for the

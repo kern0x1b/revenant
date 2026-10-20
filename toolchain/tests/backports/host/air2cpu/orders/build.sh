@@ -3,8 +3,11 @@
 # unpack its AIR so the codes can be read. No metal tool is involved: the host's Metal framework
 # compiles the source and -[MTLDynamicLibrary serializeToURL:error:] writes the file.
 set -eu
+echo "FAIL host/air2cpu/orders/build.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 17" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
-work=${1:-$here/../../../../../.agent-work/runs/orders}
+. "$here/../../../common/runs.sh" "$here"
+work=${1:-$(runs_folder orders)}
 mkdir -p "$work"
 cp "$here"/*.metal "$work"/
 cd "$work"

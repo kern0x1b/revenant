@@ -4,9 +4,12 @@
 # The verdict is the addon's verdict.json and the two files the program wrote in the image; the
 # runner's log carries neither of those.
 set -eu
+echo "FAIL host/textdragweak/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PYMUT at line 37; the one-line step at line 89" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=${DDR_ROOT:-$here/../../../..}
-build=${DDR_BUILD:-$root/.agent-work/runs/textdragweak-build}
+build=${DDR_BUILD:-$(runs_folder textdragweak-build)}
 device=${DDR_DEVICE:-iPhone3,1}
 releases=${DDR_RELEASES:-"6.1.3"}
 export DDR_ROOT=$root

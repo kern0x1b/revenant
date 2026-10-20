@@ -116,20 +116,6 @@ local function file_name(framework)
     return (framework:gsub("/", "_"))
 end
 
-local function plain_replace(text, old, new)
-    local out, from = {}, 1
-    while true do
-        local at = text:find(old, from, true)
-        if not at then
-            table.insert(out, text:sub(from))
-            return table.concat(out)
-        end
-        table.insert(out, text:sub(from, at - 1))
-        table.insert(out, new)
-        from = at + #old
-    end
-end
-
 function write_todo(file, entries, release)
     local order = {missing = 0, undecided = 1, unmeasured = 2}
     local todo = {}
@@ -227,7 +213,7 @@ function write_output(results, args, elapsed, indexes, walked, header_seconds, s
         write(string.format("| the tree those libraries were built from | %s |\n", tree))
     end
     write(string.format("| the release's own cache | `%s` |\n", ledger_inputs.short(args.release_cache)))
-    write(string.format("| real 26.2 SDK | `%s` |\n", plain_replace(ledger_inputs.short((args.sdk:gsub("/+$", ""))), "$HOME/.agent-work/sdk-26.2/", "")))
+    write(string.format("| real 26.2 SDK | `%s` |\n", ledger_inputs.short((args.sdk:gsub("/+$", "")))))
     write(string.format("| lift overlay | `%s` (mtime %d) |\n", path.filename(args.vfs), os.mtime(args.vfs)))
     write(string.format("| header target | `%s` |\n", TARGET))
     write(string.format("| tool | `toolchain/tools/corpus/%s`, header walk by `tools/corpus/%s` |\n\n", TOOL, WALK))

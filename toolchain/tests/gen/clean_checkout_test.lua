@@ -1,7 +1,8 @@
 local ROOT = path.absolute(path.join(os.scriptdir(), "..", ".."))
 local GEN_PREFIX = "packages/a/apple-backports/.gen/"
 local SDK_FIXTURE = path.absolute(path.join(os.scriptdir(), "sdk_fixture", "release-26.2"))
-local DERIVED = {".git", ".agent-work", "build", ".xmake", "packages/a/apple-backports/.gen"}
+local DERIVED = {".git", "build", ".xmake", "packages/a/apple-backports/.gen"}
+local workspace = import("workspace", {rootdir = path.join(ROOT, "modules"), anonymous = true})
 
 local function listing(dir)
     local out = {}
@@ -63,12 +64,9 @@ function main()
         failures = failures + 1
         print("FAIL " .. label)
     end
-    local stamp = tostring(os.time()) .. "-" .. tostring(math.random(1000000))
-    local dir = path.join(ROOT, ".agent-work", "runs", "clean-checkout-" .. stamp)
-    local shim_dir = path.join(ROOT, ".agent-work", "runs", "clean-checkout-python-" .. stamp)
+    local dir = workspace.fresh("clean-checkout")
+    local shim_dir = workspace.fresh("clean-checkout-shim")
     local marker = path.join(shim_dir, "python3-was-run")
-    os.mkdir(dir)
-    os.mkdir(shim_dir)
     io.writefile(path.join(shim_dir, "python3"), "#!/bin/sh\ntouch '" .. marker .. "'\nexit 99\n")
     os.execv("chmod", {"755", path.join(shim_dir, "python3")})
     local search_path = shim_dir .. ":" .. (os.getenv("PATH") or "")

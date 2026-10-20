@@ -3,8 +3,9 @@
 # each, comparing a status, a count and every element.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 ACCELERATE=${ACCELERATE:-$here/../../../../packages/a/apple-backports/Accelerate}
-build=${SPARSEBLAS_BUILD:-$here/../../../../.agent-work/runs/sparseblas-host}
+build=${SPARSEBLAS_BUILD:-$(runs_folder sparseblas-host)}
 rm -rf "$build"
 mkdir -p "$build"
 
@@ -12,17 +13,7 @@ mkdir -p "$build"
 # can hold the port's objects and the host's side by side. The names come from the port's registry and
 # not from a list kept here, so a name added to the library is renamed too.
 renames=""
-for name in $(python3 - "$here" <<'PY'
-import json, os, sys
-here = sys.argv[1]
-registry = os.path.join(here, "..", "..", "..", "..", "packages", "a", "apple-backports", "registry", "Accelerate")
-for part in sorted(os.listdir(registry)):
-    for entry in json.load(open(os.path.join(registry, part)))["entries"]:
-        name = entry["api"].rstrip("()")
-        if entry["kind"] == "function" and name.startswith("sparse_"):
-            print(name)
-PY
-); do
+for name in $(runs_xmake l "$here/../registry-functions.lua" "$here/../../../../packages/a/apple-backports/registry/Accelerate" --prefix=sparse_); do
     renames="$renames -D$name=revenant_host_$name"
 done
 

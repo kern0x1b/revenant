@@ -1,10 +1,6 @@
 #!/bin/bash
 # The module built for armv7, with the counts every published number comes from.
 #
-# `swift-data` is in no LIBRARIES and no gate config, so the backports gate never builds it: a
-# green gate says nothing about this package. This is the build that does, and it is here rather
-# than in a band's .agent-work because a package's build belongs to the package.
-#
 # The flags are the ones modules/apple/swift.lua runtime_flags() builds, and the Foundation modules
 # are the ones FetchDescriptor's predicate and sortBy are swift-foundation's own types from. Where
 # the toolchain, the runtime and those two modules are is a fact about this machine's store, not

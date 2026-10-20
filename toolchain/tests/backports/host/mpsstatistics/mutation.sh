@@ -23,14 +23,14 @@
 # site and a count, and exits non-zero naming any that does not resolve exactly once - so a stale anchor
 # is found in a second rather than in the middle of a campaign.
 #
-# The library is copied under .agent-work and the run is pointed at the copy with MPS=, so no tracked
-# file is written and a run interrupted between a mutation and its restore leaves the tree alone.
-#
 #     CAMPAIGN=one|all    one runs one site, all runs every site (the default)
 set -eu
+echo "FAIL host/mpsstatistics/mutation.sh: its Python steps are gone and not yet ported to Lua: the inline block PYEOF at line 55; the inline block PYEOF at line 91" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-work=${MUTATION_BUILD:-$root/.agent-work/runs/host/mpsstatistics-mutation}
+work=${MUTATION_BUILD:-$(runs_folder host/mpsstatistics-mutation)}
 mps=$work.mps
 pristine=$work.mps.pristine
 rm -rf "$mps" "$pristine"

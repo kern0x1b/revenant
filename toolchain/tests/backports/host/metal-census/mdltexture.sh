@@ -19,9 +19,12 @@
 # THE MDLTEXTURE IS APPLE'S, and one of them, given to both sides: it is the input, not the thing under
 # test, and two of them would be two inputs.
 set -eu
+echo "FAIL host/metal-census/mdltexture.sh: its Python steps are gone and not yet ported to Lua: the inline block PYMUT at line 120" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-work=${WORK:-$root/.agent-work/runs/metal-census/mdltexture}
+work=${WORK:-$(runs_folder metal-census/mdltexture)}
 # ONE guard for every script that removes a scratch path - see work-guard.sh.
 . "$here/work-guard.sh"
 work_ok "$work" || { echo "FAIL: WORK=$work is not a usable scratch path; see work-guard.sh" >&2; exit 1; }

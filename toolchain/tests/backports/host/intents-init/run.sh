@@ -28,9 +28,12 @@
 #
 #   sh tests/backports/host/intents-init/run.sh --write
 set -eu
+echo "FAIL host/intents-init/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 53" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-BUILD=${BUILD:-$root/.agent-work/build/intents-init}
+BUILD=${BUILD:-$(runs_folder build/intents-init)}
 rm -rf "$BUILD"
 mkdir -p "$BUILD"
 flags="-fobjc-arc -Wall -Wexcess-initializers -Werror"

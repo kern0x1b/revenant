@@ -19,9 +19,10 @@
 # Run DIRECTLY: a few compiles and two runs, not through heavy.sh.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 avf=$root/packages/a/apple-backports/AVFoundation
-build=${AVF_CONTENTKEY_BUILD:-$root/.agent-work/avf-contentkey-build}
+build=${AVF_CONTENTKEY_BUILD:-$(runs_folder avf-contentkey-build)}
 mutant=${MUTANT:-0}
 control=${CONTROL:-0}
 ALLOWED_DIFF=""

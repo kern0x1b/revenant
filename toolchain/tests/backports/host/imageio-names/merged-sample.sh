@@ -8,9 +8,10 @@
 # - "the value is the symbol's name" - holds for rows that were merged before the harness existed.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 port=$root/packages/a/apple-backports/Graphics
-build=${BUILD:-$root/.agent-work/runs/imageio-names}
+build=${BUILD:-$(runs_folder imageio-names)}
 mkdir -p "$build"
 [ -x "$build/probe" ] || xcrun clang -w "$here/probe.c" -framework CoreFoundation -framework ImageIO -o "$build/probe"
 

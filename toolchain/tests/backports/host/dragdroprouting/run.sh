@@ -9,11 +9,14 @@
 # DDR_ROOT names the port's checkout; the sources are taken from it by path, so the port is never
 # installed as the addon (toolchain/AGENTS.md, Traps).
 set -eu
+echo "FAIL host/dragdroprouting/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PYMUT at line 56; the inline block at line 109" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=${DDR_ROOT:-$here/../../../..}
 # The build tree is under the worktree: a harness may not default into /tmp, and the run
 # output is kept with the other runs rather than in a directory the system wipes.
-build=${DDR_BUILD:-$root/.agent-work/runs/dragdroprouting-build}
+build=${DDR_BUILD:-$(runs_folder dragdroprouting-build)}
 device=${DDR_DEVICE:-iPhone3,1}   # 6.1.3: the emulator cache holds this profile; iPhone4,1 6.1.3 has no
                                   # firmware and the boot is blocked before the guest ever runs
 releases=${DDR_RELEASES:-"6.1.3"}

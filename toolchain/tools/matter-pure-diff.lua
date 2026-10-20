@@ -22,7 +22,8 @@ function main(host, port, ...)
             outfile = arguments[index + 1]
         end
     end
-    outfile = outfile or path.join(os.scriptdir(), "..", ".agent-work", "matter-pure-diff.tsv")
+    outfile = outfile or path.join(import("workspace", {rootdir = path.join(os.scriptdir(), "..", "modules"), anonymous = true}).run("matter"),
+                                   "matter-pure-diff.tsv")
     assert(os.isfile(host), "%s is not there: sh tests/backports/host/matter/run.sh writes the host's answers", host)
     assert(os.isfile(port), "%s is not there: this product has no port-side pure.m answers (its library carries the cluster and data classes only)", port)
     local theirs, their_order = read(host)

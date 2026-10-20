@@ -22,7 +22,8 @@
 # answer and 173 of them answer true - the same 173 the table in spec/ImageIO/property-map.tsv carries.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
-build=${BUILD:-$here/../../../.agent-work/runs/imageio-mapping}
+. "$here/../../common/runs.sh" "$here"
+build=${BUILD:-$(runs_folder imageio-mapping)}
 mkdir -p "$build"
 
 xcrun clang -w -fobjc-arc -I"$here" "$here/property-mapping.m" \

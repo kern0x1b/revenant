@@ -7,6 +7,8 @@
 # The names come from the port's own sources, not from a list kept here, so a class the port adds is
 # renamed too.
 set -eu
+echo "FAIL host/mlcompute/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 42" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 port=${MLCOMPUTE_PORT:-$here/../../../../packages/a/apple-backports/MLCompute}

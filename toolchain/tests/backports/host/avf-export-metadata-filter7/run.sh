@@ -33,11 +33,14 @@
 # mutation), and a red verdict overall. A control runs each mutant's UNMUTATED source through the
 # identical build-and-run path and must stay green.
 set -eu
+echo "FAIL host/avf-export-metadata-filter7/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 50; the inline block PYEOF at line 136; the inline block PYEOF at line 201" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 port=$root/packages/a/apple-backports/AVFoundation/AVAssetExportSessionMetadataItemFilter7.m
-build=${AVFEF_BUILD:-$root/.agent-work/runs/avf-export-metadata-filter7}
-oracle_dir=${AVFEF_ORACLE:-$root/.agent-work/runs/avf-export-metadata-filter7-oracle}
+build=${AVFEF_BUILD:-$(runs_folder avf-export-metadata-filter7)}
+oracle_dir=${AVFEF_ORACLE:-$(runs_folder avf-export-metadata-filter7-oracle)}
 rm -rf "$build"
 mkdir -p "$build/src"
 

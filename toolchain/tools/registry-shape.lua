@@ -3,7 +3,7 @@ import("registry_rows", {rootdir = os.scriptdir()})
 
 local ROOT = path.absolute(path.join(os.scriptdir(), ".."))
 local DEFAULT = path.join(ROOT, "packages", "a", "apple-backports", "registry")
-local SCRATCH = path.join(ROOT, ".agent-work", "runs", "registry-shape")
+local SCRATCH = import("workspace", {rootdir = path.join(ROOT, "modules"), anonymous = true}).run("registry-shape")
 
 local function git(args, into)
     return os.execv("git", args, {try = true, stdout = into or os.nuldev(), stderr = os.nuldev()})
@@ -14,7 +14,6 @@ local function resolves(ref)
 end
 
 local function apis_in(ref, relative)
-    os.mkdir(SCRATCH)
     local shown = path.join(SCRATCH, "show.txt")
     local status = git({"show", ref .. ":packages/a/apple-backports/registry/" .. relative}, shown)
     if status ~= 0 then

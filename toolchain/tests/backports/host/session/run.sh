@@ -1,5 +1,7 @@
 #!/bin/sh
 set -eu
+echo "FAIL host/session/run.sh: it ends in with-server.sh, whose Python step server.py is gone and not yet ported to Lua" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 FOUNDATION=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}

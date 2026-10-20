@@ -4,6 +4,8 @@
 # categories replace the system's methods of the same name) and held to the same records, with mutants that each have to be told apart.
 # An application, not a process of its own: UIWindow needs UIApplicationMain behind it, as host/safeguide/run.sh does.
 set -eu
+echo "FAIL host/toolbar/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 40; the inline block PY at line 59; the inline block PY at line 77" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
@@ -26,7 +28,7 @@ record() {
 }
 compile "$build/system.app"
 record "$build/system.app" "$build/system.json"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/system.json'))))")"
+echo "records: $(runs_harness records "$build/system.json")"
 cat "$build/system.json.log"
 
 files="UIView+SafeArea.m UIViewController+SafeArea.m"

@@ -13,8 +13,9 @@
 # the same script and prints its own line.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 port=${PORT:-$here/../../../../packages/a/apple-backports/Graphics}
-build=${COREVIDEO_BUILD:-$here/../../../../.agent-work/runs/corevideo-host}
+build=${COREVIDEO_BUILD:-$(runs_folder corevideo-host)}
 rm -rf "$build"
 mkdir -p "$build"
 

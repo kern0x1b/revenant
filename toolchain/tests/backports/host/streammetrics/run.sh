@@ -80,7 +80,7 @@ for file in $files; do
         perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$build/ported/$file.o"
     elif [ -n "$release_owns" ]; then
         # shellcheck disable=SC2046
-        python3 "$here/../prefix_selectors.py" "$sources/$file" "$build/ported/$file" charonHost_ \
+        runs_xmake l "$here/../prefix_selectors.lua" "$sources/$file" "$build/ported/$file" charonHost_ \
             $target -DREVENANT_HOST_BUILD -I"$sources" -- $build/plain/*.o
         # shellcheck disable=SC2046
         xcrun clang $target $flags -I"$sources" $(cat "$build/flags") -c "$build/ported/$file" -o "$build/ported/$file.o"

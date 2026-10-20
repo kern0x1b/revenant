@@ -10,6 +10,7 @@
 # and the check proves first that it can fail (selftest).
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 . "$here/../../common/generated.sh"
 ensure_generated "$here" CoreMIDI
 if [ -z "${COREMIDI_BRACKETED:-}" ]; then
@@ -19,8 +20,7 @@ fi
 CORE=${COREMIDI:-$here/../../../../packages/a/apple-backports/CoreMIDI}
 # the generated layer's protocol header (RevenantCoreMIDIProtocols.h) is in .gen/CoreMIDI, which the package build puts on the path too
 CORE_GEN=$here/../../../../packages/a/apple-backports/.gen/CoreMIDI
-# The build folder is a run folder of this checkout (.agent-work/runs), never the system temp directory.
-build=${COREMIDI_BUILD:-$here/../../../../.agent-work/runs/coremidi-host}
+build=${COREMIDI_BUILD:-$(runs_folder coremidi-host)}
 # COREMIDI_SANITIZE=address builds the library and the differential with AddressSanitizer: the buffer overruns of the
 # packet readers (MIDISysex17.m) are found by that build, not by the answers.
 sanitize=""

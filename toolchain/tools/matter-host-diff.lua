@@ -237,8 +237,8 @@ function main(corpus, host, port, architecture)
         print("    %-10s both %-6d host only %-6d port only %-6d neither %d", kind, counts.both, counts.host_carries,
               counts.port_carries, counts.surface_only)
     end
-    local out = path.join(os.scriptdir(), "..", ".agent-work", "host", "matter-host-diff.tsv")
-    os.mkdir(path.directory(out))
+    local out = path.join(import("workspace", {rootdir = path.join(os.scriptdir(), "..", "modules"), anonymous = true}).run("matter"),
+                          "matter-host-diff.tsv")
     io.writefile(out, table.concat(lines, "\n") .. "\n")
     print("wrote %d rows of difference to %s", #lines, out)
 end

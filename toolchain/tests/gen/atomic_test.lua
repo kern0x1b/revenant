@@ -1,6 +1,6 @@
 local REPO = path.absolute(path.join(os.scriptdir(), "..", ".."))
 local TOOLS = path.join(REPO, "tools")
-local ROOT = path.join(REPO, ".agent-work", "runs", "atomic-test")
+local ROOT = import("workspace", {rootdir = path.join(REPO, "modules"), anonymous = true}).run("atomic-test")
 
 local function raises(fn)
     local raised = false

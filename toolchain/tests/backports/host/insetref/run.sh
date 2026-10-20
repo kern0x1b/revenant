@@ -3,6 +3,8 @@
 # writes the answers where the device test reads them, then compiles the port's flow layout beside them (its categories replace the
 # system's methods of the same name) and holds it to the same records, with mutants of the port that each have to be told apart.
 set -eu
+echo "FAIL host/insetref/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 31; the inline block PY at line 47" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
@@ -18,7 +20,7 @@ compile "$build/system"
 INSETREF_RECORDS="$build/system.json" "$build/system"
 xmake l "$here/../../common/embed.lua" "$build/system.json" "$device/insetref-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/insetref_expectations/' "$device/insetref-expectations.h" && rm -f "$device/insetref-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/system.json'))))")"
+echo "records: $(runs_harness records "$build/system.json")"
 
 port="UICollectionViewFlowLayout+SelfSizing.m"
 mkdir -p "$build/port"

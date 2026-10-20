@@ -17,6 +17,8 @@
 # comparison can tell the port from the system - and one run printing both was reading as if the plant
 # had been the thing that passed.
 set -eu
+echo "FAIL host/netext-requests/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PYEOF at line 106" >&2
+exit 1
 
 mode=clean
 plant=apply
@@ -28,9 +30,10 @@ for arg in "$@"; do
     esac
 done
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 S="$root/packages/a/apple-backports"
-W=${WORK:-$root/.agent-work/runs/netext-requests}
+W=${WORK:-$(runs_folder netext-requests)}
 W=${W%./*}/$(basename "$W")
 rm -rf "$W"; mkdir -p "$W"
 sdk=$(xcrun --show-sdk-path --sdk macosx)

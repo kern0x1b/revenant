@@ -5,7 +5,7 @@ local files = import("files", {anonymous = true})
 
 local SOURCES_ROOT = layout.constants().SOURCES_ROOT
 local IMPLEMENTATION_SKIP = strings.set({".gen", "spec", "registry", "facts", "overrides", "gen"})
-local CLASS_SKIP = strings.set({".gen", "spec", "overrides", "registry", ".agent-work"})
+local CLASS_SKIP = strings.set({".gen", "spec", "overrides", "registry"})
 
 local memo = {}
 

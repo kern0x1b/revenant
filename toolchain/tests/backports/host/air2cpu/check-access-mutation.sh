@@ -9,21 +9,17 @@
 # sum.ll shape puts the access) passes the older fixture and reads NO access from a real library. That
 # is not a hypothetical: it is what the real modules showed, 19 arguments and 0 accesses.
 #
-# So the mutation is the writer that reads only the first operand, built from a SCRATCH COPY of the
-# real one under .agent-work/runs/ - the checkout is never edited - and run against accesses.ll, whose
-# kernels carry the three measured spellings and one argument with none. The mutant must write NO
-# access where the real writer writes read-only, write-only and read-write. If the mutant ever agrees
-# with the real writer, this check fails and says so, because then the check is no longer testing
-# anything.
-#
 # What this is NOT: it does not check that the mapping is right. The mapping is the header's own
 # enumerators - MTLArgument.h:214, MTLArgumentAccessReadOnly = 0, ReadWrite = 1, WriteOnly = 2, and
 # :296 documents all three as "read, write, read-write" - and the real writer's mapping is read in
 # fixtures/accesses.ll by run-compare below, not here.
 set -eu
+echo "FAIL host/air2cpu/check-access-mutation.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 30" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-work=${WORK:-$root/.agent-work/runs/air2cpu/access-mutation}
+work=${WORK:-$(runs_folder air2cpu/access-mutation)}
 llvm=${LLVM:-$(brew --prefix llvm)}
 rm -rf "$work"
 mkdir -p "$work"

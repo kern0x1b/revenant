@@ -16,4 +16,4 @@ codesign -s - --force "$app" > /dev/null 2>&1
 CUSTOM_RECORDS="$build/customtransition.json" timeout 60 "$app/Contents/MacOS/app" > "$build/customtransition.log" 2>&1 || true
 xmake l "$here/../../common/embed.lua" "$build/customtransition.json" "$device/customtransition-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/customtransition_expectations/' "$device/customtransition-expectations.h" && rm -f "$device/customtransition-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/customtransition.json'))))")"
+echo "records: $(runs_harness records "$build/customtransition.json")"

@@ -13,11 +13,12 @@
 # thirty-one the registry rows name. The floor counts the 31 MEMBERS, not the check lines: the
 # operations each take two lines (the ok flag and the error's shape) and that is the honest unit.
 set -eu
+echo "FAIL host/passkit/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 70; the inline block PY3 at line 98; the inline block PY4 at line 131; the inline block PY5 at line 170; the inline block PY2 at line 181" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 port=${PORT:-$here/../../../../packages/a/apple-backports/PassKit}
-# BUILD goes under the repository's own .agent-work, never the system temp: the run output is
-# evidence and belongs with the band's runs. Same rule as the other probes in this package.
-build=${PASSKIT_BUILD:-$PWD/.agent-work/runs/passkit}
+build=${PASSKIT_BUILD:-$(runs_folder passkit)}
 mkdir -p "$build"
 # The clear-out MUST include the mutants' own sources. Leaving them out lets a mutant file from an
 # earlier run be linked in place of the one this run writes, which is not a stale-cache nuisance: it

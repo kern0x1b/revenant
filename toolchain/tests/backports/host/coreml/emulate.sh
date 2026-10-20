@@ -4,11 +4,6 @@
 # once. One heavy job (a build and an emulated boot), so run it in a slot of the machine:
 #     $HOME/Git/projects/ios/coordination/heavy.sh sh tests/backports/host/coreml/emulate.sh
 #
-# The containers come from .agent-work/runs/coreml-predict/models, the ones the interpreter check
-# and the host differential read; embed-models.lua writes them into the test's own header, so the
-# device reads byte for byte what this host reads. COREML_MINIMUM and COREML_DEVICE name the
-# release and the device; 6.1.3 on an iPad 2 is the port's own band.
-#
 # Leaves the logs in $COREML_BUILD and exits 1 on a failed check, a crash or a boot the emulator
 # could not finish.
 set -eu

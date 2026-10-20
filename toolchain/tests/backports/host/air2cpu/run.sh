@@ -12,9 +12,12 @@
 # Every line printed here starts with ok/FAIL/note so run-all.sh reads this test as alive: a test whose
 # run.sh says nothing before it stops is DEAD as far as the sweep is concerned, whatever it printed.
 set -eu
+echo "FAIL host/air2cpu/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 35" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-work=${WORK:-$root/.agent-work/runs/air2cpu/run.sh}
+work=${WORK:-$(runs_folder air2cpu/run.sh)}
 
 if sh "$here/compare.sh"; then
     echo "ok   the differential is complete: Apple's answer and the port's, kernel for kernel"

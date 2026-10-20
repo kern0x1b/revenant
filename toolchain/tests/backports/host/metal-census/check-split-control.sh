@@ -11,13 +11,11 @@
 # Two halves, and the second is the half that matters: the PRE-FIX file must FAIL and the FIXED PAIR
 # must PASS. A check with only a negative has not been shown to pass on good input, and the one failure
 # it has seen is the same failure every time for the same reason.
-#
-# Nothing here touches the tree: the sources come from git into a scratch under this worktree's
-# .agent-work/runs, and the objects are compiled there.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-work=${WORK:-$root/.agent-work/runs/metal-census/split-control}
+work=${WORK:-$(runs_folder metal-census/split-control)}
 SDK=""
 for candidate in "$HOME"/.xmake/packages/i/iphoneos-sdk/16.4/*/Developer.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.4.sdk; do
     if [ -f "$candidate/SDKSettings.json" ]; then SDK="$candidate"; break; fi

@@ -12,10 +12,11 @@
 # The build lives under the worktree and not in /tmp: nothing this project builds goes to /tmp.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 SOURCES=${SOURCES:-$root/packages/a/apple-backports/Foundation}
 HARNESS=${HARNESS:-$here/../../device}
-BUILD=${BUILD:-$root/.agent-work/build/attributed15}
+BUILD=${BUILD:-$(runs_folder build/attributed15)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-incomplete-implementation -Wno-objc-property-implementation -Wno-objc-protocol-method-implementation -Wno-nullability-completeness -Wno-unguarded-availability"
@@ -28,7 +29,7 @@ printf '#import <Foundation/Foundation.h>\n#import <UIKit/UIKit.h>\n' > "$BUILD/
 for file in NSAttributedStringLocalizedFormat15.m NSBundle+LocalizedAttributed15.m NSAttributedStringInflection15.m NSURLSessionTask+Delegate15.m; do
     xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -c "$SOURCES/$file" -o "$BUILD/plain/$file.o"
     # shellcheck disable=SC2086
-    python3 "$here/../prefix_selectors.py" "$SOURCES/$file" "$BUILD/ported/$file" charonHost_ \
+    runs_xmake l "$here/../prefix_selectors.lua" "$SOURCES/$file" "$BUILD/ported/$file" charonHost_ \
         --declarations="$BUILD/declarations.h" -fobjc-arc -fvisibility=hidden $target $quiet -- "$BUILD/plain/$file.o"
     # shellcheck disable=SC2086
     xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -I"$SOURCES" \
@@ -43,7 +44,7 @@ xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -c "$SOURCES/$markdown
 . "$here/../uikit2/renames.sh"
 renames "$BUILD/plain/$markdown.o" > "$BUILD/renames"
 # shellcheck disable=SC2046
-python3 "$here/../prefix_selectors.py" "$SOURCES/$markdown" "$BUILD/ported/$markdown" charonHost_ \
+runs_xmake l "$here/../prefix_selectors.lua" "$SOURCES/$markdown" "$BUILD/ported/$markdown" charonHost_ \
     --declarations="$BUILD/declarations.h" -fobjc-arc -fvisibility=hidden $target $quiet $(cat "$BUILD/renames") -- "$BUILD/plain/$markdown.o"
 # shellcheck disable=SC2046
 xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -I"$SOURCES" $(cat "$BUILD/renames") \

@@ -1,4 +1,5 @@
 local layout = import("layout", {anonymous = true})
+local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
 local tsv = import("tsv", {anonymous = true})
 local files = import("files", {anonymous = true})
 local digest = import("digest", {anonymous = true})
@@ -128,16 +129,14 @@ local DUMP_TIMEOUT = 1800
 local BATCH_TIMEOUT = 5400
 local KILL_AFTER = 30
 local STOPPED_BY_BOUND = {["124"] = true, ["137"] = true}
-local CACHE_ROOT = path.join(".agent-work", "digester-cache")
+local CACHE_ROOT = "digester-cache"
 
-local function cache_folder(tree, sdk)
+local function cache_folder(sdk)
     local digester = string.gsub(os.iorunv("xcrun", {"--find", DIGESTER}), "%s+$", "")
     local key = string.gsub(os.iorunv("sh", {"-c", "{ shasum -a 256 \"$1\"; find \"$2\" -name '*.swiftinterface' -print0 | sort -z | "
         .. "xargs -0 shasum -a 256; shasum -a 256 \"$2/SDKSettings.json\"; } | shasum -a 256 | cut -c1-32", "sh", digester, sdk}),
         "%s+$", "")
-    local folder = path.join(tree, CACHE_ROOT, key)
-    os.mkdir(folder)
-    return folder
+    return workspace.run(CACHE_ROOT, key)
 end
 
 local VARIANTS = {shard = true, model = true}
@@ -207,9 +206,9 @@ local function run_dumps(heavy, folder, sdk, triple, names, variant)
     end
 end
 
-function dump_batch(tree, heavy, sdk, triple, names, variant)
+function dump_batch(heavy, sdk, triple, names, variant)
     assert(VARIANTS[variant], "dump_batch: no variant " .. tostring(variant))
-    local folder = cache_folder(tree, sdk)
+    local folder = cache_folder(sdk)
     run_dumps(heavy, folder, sdk, triple, names, variant)
     return folder
 end
@@ -292,7 +291,7 @@ function shard_path(tree, framework)
 end
 
 function write_shards(tree, heavy, sdk, triple, names)
-    local folder = dump_batch(tree, heavy, sdk, triple, names, "shard")
+    local folder = dump_batch(heavy, sdk, triple, names, "shard")
     local out = {}
     for _, framework in ipairs(names) do
         local rows, reason = dump_rows(folder, framework)

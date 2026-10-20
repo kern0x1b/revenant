@@ -29,7 +29,10 @@
 #   * a mutation that does not build is RUN FAILED with the compiler's own lines, so a build failure is
 #     never counted as a noticed mutation.
 set -eu
+echo "FAIL host/avf-globals/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PERTURB at line 96; the inline block PERTURB at line 305; the inline block GETTERS at line 446; the inline block LISTEOF at line 492; the inline block PROLOGUE at line 533; the inline block PERTURB at line 600; the inline block PERTURB at line 685; the inline block CONTROLSLIST at line 884; the inline block CONTROLSPROTO at line 941; the inline block CONTROLSPROLOGUE at line 960; the inline block CONTROLSPROTOC at line 1006; the inline block CONTROLSCOPY at line 1042; the inline block PERTURB at line 1087" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 avf=$root/packages/a/apple-backports/AVFoundation
 # the generated protocol header (tools/gen writes it into .gen/AVFoundation/ on gen --all)
@@ -44,7 +47,7 @@ kind=constant
 [ "$mutant" = metrics ] && kind=metrics
 [ "$mutant" = coding ] && kind=coding
 [ "$mutant" = controls ] && kind=controls
-build=${AVF_GLOBALS_BUILD:-$root/.agent-work/avf-globals-build}
+build=${AVF_GLOBALS_BUILD:-$(runs_folder avf-globals-build)}
 rm -rf "$build"
 mkdir -p "$build/src" "$build/o"
 

@@ -52,9 +52,11 @@ static void same_string(NSString *ours, NSString *theirs, NSString *what)
 static NSString *revenant_run_path(void)
 {
     const char *fromEnvironment = getenv("BUILD");
-    if (fromEnvironment != NULL && fromEnvironment[0] != '\0')
-        return [NSString stringWithUTF8String:fromEnvironment];
-    return @".agent-work/runs/bundlerequest/fresh";
+    if (fromEnvironment == NULL || fromEnvironment[0] == '\0') {
+        fprintf(stderr, "differential: BUILD names no run folder, and run.sh sets it\n");
+        exit(1);
+    }
+    return [NSString stringWithUTF8String:fromEnvironment];
 }
 
 static NSString *revenant_bundlePath(id self, SEL selector)

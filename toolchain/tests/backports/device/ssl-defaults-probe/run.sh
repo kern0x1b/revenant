@@ -19,9 +19,10 @@
 #     TLSv10 = 0x0301     TLSv12 = 0x0303     DTLSv10 = 0xfeff
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 minimum=${SSLDEFAULTS_MINIMUM:-6.1.3}
-work=${WORK:-$root/.agent-work/ssl-defaults}
+work=${WORK:-$(runs_folder ssl-defaults)}
 mkdir -p "$work/runs"
 stamp=$(date +%Y%m%d-%H%M%S)
 out=$work/runs/defaults-$minimum-$stamp

@@ -5,7 +5,11 @@
 int main(int argc, const char *argv[])
 {
     @autoreleasepool {
-        NSString *models = argc > 1 ? @(argv[1]) : @".agent-work/runs/coreml-predict/models";
+        if (argc < 2) {
+            fprintf(stderr, "usage: %s <models folder>\n", argv[0]);
+            return 1;
+        }
+        NSString *models = @(argv[1]);
         NSMutableDictionary *records = [NSMutableDictionary dictionary];
         coreml_run(models, ^(NSString *name, NSString *value) { records[name] = value ?: @"(nil)"; });
         NSData *json = [NSJSONSerialization dataWithJSONObject:records

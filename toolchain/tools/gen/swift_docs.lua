@@ -3,12 +3,9 @@ local files = import("files", {anonymous = true})
 local stream = import("stream", {anonymous = true})
 local sdk_info = import("sdk", {anonymous = true})
 local sdk_modules = import("sdk_modules", {anonymous = true})
+local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
 
 local memo = {}
-
-local function heavy_path()
-    return path.join(os.getenv("HOME"), "Git", "projects", "ios", "coordination", "heavy.sh")
-end
 
 local function escaped(text)
     local out = string.gsub(text or "", "\\", "\\\\")
@@ -84,14 +81,14 @@ local function row_of(name, symbol)
     return table.concat(cells, "\t")
 end
 
-function lines(tree, sdk, name)
+function lines(sdk, name)
     local key = sdk .. "\t" .. name
     if memo[key] ~= nil then
         return memo[key]
     end
     local record = sdk_modules.module_of(sdk, name)
     assert(record ~= nil, "swift docs: the SDK holds no module " .. name)
-    local out = path.join(tree, ".agent-work", "symbolgraph", (string.gsub(name, "/", "_")))
+    local out = workspace.run("symbolgraph", (string.gsub(name, "/", "_")))
     os.tryrm(out)
     os.mkdir(out)
     local target = "arm64-apple-ios" .. sdk_info.discover(sdk).version
@@ -104,7 +101,7 @@ function lines(tree, sdk, name)
     table.insert(argv, out)
     table.insert(argv, "-minimum-access-level")
     table.insert(argv, "public")
-    local status, _, errors = stream.heavy_text(heavy_path(), argv)
+    local status, _, errors = stream.heavy_text(workspace.heavy(), argv)
     assert(status == 0, string.format("swift docs %s: swift-symbolgraph-extract exits with status %s: %s", name, tostring(status),
         string.sub(errors or "", -300)))
     local file = path.join(out, record.base .. ".symbols.json")

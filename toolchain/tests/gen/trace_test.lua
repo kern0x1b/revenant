@@ -519,9 +519,7 @@ function main()
     test_superclass(check)
     test_unchecked_member(check)
     test_stub_text(check)
-    local root = path.join(os.scriptdir(), "..", "..", ".agent-work", "runs", "trace-test-" .. tostring(os.time()) .. "-"
-                           .. tostring(math.random(1000000)))
-    os.mkdir(root)
+    local root = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true}).fresh("trace-test")
     local err = nil
     try {
         function() test_trace_run(check, root) end,

@@ -28,9 +28,10 @@
 # Run DIRECTLY: a few compiles and runs, not through heavy.sh.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 avf=$root/packages/a/apple-backports/AVFoundation
-build=${AVF_CONTENTKEY_SESSION_BUILD:-$root/.agent-work/avf-contentkey-session-build}
+build=${AVF_CONTENTKEY_SESSION_BUILD:-$(runs_folder avf-contentkey-session-build)}
 mutant=${MUTANT:-0}
 control=${CONTROL:-0}
 ALLOWED_DIFF=""

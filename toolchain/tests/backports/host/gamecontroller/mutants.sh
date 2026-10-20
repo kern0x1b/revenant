@@ -11,27 +11,19 @@
 # and the script ends by refusing to pass if the file is left changed.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 tree=$(cd "$here/../../../.." && pwd)
 rel=${MUTATE_FILE:-packages/a/apple-backports/GameController/RevenantGCSnapshot.h}
 source_file="$tree/$rel"
-out=${BUILD:-$here/../../../../.agent-work/fin/mutants}
+out=${BUILD:-$(runs_folder fin/mutants)}
 mkdir -p "$out"
 
 restore() {
     git -C "$tree" show "HEAD:$rel" > "$source_file"
 }
 
-# Writes the mutation over the port's file, with python so that the text being replaced never has to
-# survive a shell's quoting. Answers 0 when it changed something.
 mutate() {
-    python3 -c '
-import sys
-path, old, new = sys.argv[1], sys.argv[2], sys.argv[3]
-text = open(path).read()
-if old not in text:
-    sys.exit(3)
-open(path, "w").write(text.replace(old, new, 1))
-' "$source_file" "$1" "$2"
+    runs_xmake l "$here/../../common/replace.lua" "$source_file" "$source_file" "$1" "$2"
 }
 
 failures=0
@@ -96,14 +88,7 @@ restore_touchpad() {
     git -C "$tree" show "HEAD:$touchpad_rel" > "$touchpad_file"
 }
 mutate_touchpad() {
-    python3 -c '
-import sys
-path, old, new = sys.argv[1], sys.argv[2], sys.argv[3]
-text = open(path).read()
-if old not in text:
-    sys.exit(3)
-open(path, "w").write(text.replace(old, new, 1))
-' "$touchpad_file" "$1" "$2"
+    runs_xmake l "$here/../../common/replace.lua" "$touchpad_file" "$touchpad_file" "$1" "$2"
 }
 check_touchpad() {
     old=$1
@@ -172,14 +157,7 @@ restore_objects() {
     git -C "$tree" show "HEAD:$objects_rel" > "$objects_file"
 }
 mutate_objects() {
-    python3 -c '
-import sys
-path, old, new = sys.argv[1], sys.argv[2], sys.argv[3]
-text = open(path).read()
-if old not in text:
-    sys.exit(3)
-open(path, "w").write(text.replace(old, new, 1))
-' "$objects_file" "$1" "$2"
+    runs_xmake l "$here/../../common/replace.lua" "$objects_file" "$objects_file" "$1" "$2"
 }
 check_objects() {
     old=$1
@@ -242,14 +220,7 @@ restore_snap7() {
     git -C "$tree" show "HEAD:$snap7_rel" > "$snap7_file"
 }
 mutate_snap7() {
-    python3 -c '
-import sys
-path, old, new = sys.argv[1], sys.argv[2], sys.argv[3]
-text = open(path).read()
-if old not in text:
-    sys.exit(3)
-open(path, "w").write(text.replace(old, new, 1))
-' "$snap7_file" "$1" "$2"
+    runs_xmake l "$here/../../common/replace.lua" "$snap7_file" "$snap7_file" "$1" "$2"
 }
 check_in_7() {
     old=$1
@@ -287,14 +258,7 @@ restore_trigger154() {
     git -C "$tree" show "HEAD:$trigger154_rel" > "$trigger154_file"
 }
 mutate_trigger154() {
-    python3 -c '
-import sys
-path, old, new = sys.argv[1], sys.argv[2], sys.argv[3]
-text = open(path).read()
-if old not in text:
-    sys.exit(3)
-open(path, "w").write(text.replace(old, new, 1))
-' "$trigger154_file" "$1" "$2"
+    runs_xmake l "$here/../../common/replace.lua" "$trigger154_file" "$trigger154_file" "$1" "$2"
 }
 check_trigger154() {
     old=$1

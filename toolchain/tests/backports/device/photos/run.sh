@@ -36,11 +36,6 @@
 #   --control       also run the negative control, and require it to fail
 #   --allow-write   as PHOTOS_ALLOW_WRITE=1
 #
-# Environment (all optional; the defaults are what the shared xmake store holds):
-#   PHOTOS_CC, PHOTOS_LD, PHOTOS_SDK    the toolchain; default the store's llvm, ld64 and iphoneos-sdk
-#   PHOTOS_BUILD                       where the builds and the reports go
-#                                      (default <worktree>/.agent-work/runs/photos-device)
-#
 # The claim is the operator's, not this script's: export REVENANT_DEVICE_HOLDER and claim first
 # (`xmake device -d NAME --minutes=30 claim`); this script refuses a device held by someone else and
 # says so. Nothing here installs a package: the port's sources are compiled into each program, so the
@@ -49,8 +44,11 @@
 # Exits 0 only when every program that ran reported a figure with no failed check, and, with
 # --control, when the control reported at least one.
 set -eu
+echo "FAIL device/photos/run.sh: its Python steps are gone and not yet ported to Lua: band.py" >&2
+exit 1
 
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 release=6.1.3
 device_name=""
@@ -92,7 +90,7 @@ for tool in "$PHOTOS_CC" "$PHOTOS_LD" "$PHOTOS_SDK"; do
 done
 command -v ldid >/dev/null 2>&1 || { echo "run.sh: ldid is not on PATH (brew install ldid)" >&2; exit 1; }
 
-out=${PHOTOS_BUILD:-$root/.agent-work/runs/photos-device}
+out=${PHOTOS_BUILD:-$(runs_folder photos-device)}
 mkdir -p "$out"
 photos=$root/packages/a/apple-backports/Photos
 triple=armv7-apple-ios$release

@@ -13,8 +13,9 @@
 # either a port defect or a change in the host, and this run says which.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-build=${BUILD:-$root/.agent-work/runs/imageio-table}
+build=${BUILD:-$(runs_folder imageio-table)}
 mkdir -p "$build"
 
 xcrun clang -w -fobjc-arc -I"$here" "$here/property-table.m" \

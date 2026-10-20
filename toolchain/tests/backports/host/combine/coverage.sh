@@ -12,6 +12,8 @@
 # It needs the armv7 module built, and builds it if it is not there: the same swiftc the
 # package uses, the same swift-runtime resource directory, through the same three steps.
 set -eu
+echo "FAIL host/combine/coverage.sh: its Python steps are gone and not yet ported to Lua: coverage.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 repo=$(cd "$here/../../../.." && pwd)

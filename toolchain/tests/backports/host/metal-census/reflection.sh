@@ -3,11 +3,6 @@
 #
 #     sh tests/backports/host/metal-census/reflection.sh PLIST [PLIST...]
 #
-# The reader is compiled from the port's own MTLTypeReflection.m - the same file the device builds -
-# so this is a check of the reader and not of a copy. The mutant is a SCRATCH copy of that file under
-# .agent-work/runs/, with one change: it maps an access it does not recognise to read-write. The port
-# must never make that guess, so the mutant has to fail the assertion the real reader passes.
-#
 # The port's own header imports <OpenGLES/EAGL.h>, which the host does not have - the same wall
 # tests/backports/host/metalblit/run.sh writes down, answered there with a stub, and answered here
 # with the SAME stub directory rather than a second one. The reader under test does no OpenGL: it
@@ -17,9 +12,12 @@
 # read by this too, and any real property list the caller names. Nothing of Apple's libraries is
 # asserted about here - no kernel, no name, no value.
 set -eu
+echo "FAIL host/metal-census/reflection.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 98; the inline block PY2 at line 128" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-work=${WORK:-$root/.agent-work/runs/metal-census/reflection}
+work=${WORK:-$(runs_folder metal-census/reflection)}
 llvm=${LLVM:-$(brew --prefix llvm)}
 sdk=${SDK:-$("$llvm/bin/llvm-config" --sdk 2>/dev/null || xcrun --show-sdk-path)}
 # the SDK the LIBRARY builds against, which is 16.4 and not the host's: an armv7/6.1.3 object is
@@ -64,8 +62,6 @@ library_compile() {
 library_compile
 
 
-# air2cpu, built here, because a check that depends on a binary someone left in .agent-work reads
-# nothing at all when that binary is gone - and says so here rather than passing quietly.
 "$llvm/bin/clang++" -std=c++17 "-DCHAIR_AIR2CPU_ABI=\"$root/packages/a/apple-backports/air2cpu-abi.h\"" \
     $($llvm/bin/llvm-config --cxxflags | sed 's/-fno-exceptions//') \
     "$root/tools/air2cpu/air2cpu.cpp" -o "$work/air2cpu" \

@@ -16,4 +16,4 @@ codesign -s - --force "$app" > /dev/null 2>&1
 PASTEBOARD10_RECORDS="$build/pasteboard10.json" "$app/Contents/MacOS/app" > "$build/pasteboard10.log" 2>&1 || true
 xmake l "$here/../../common/embed.lua" "$build/pasteboard10.json" "$device/pasteboard10-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/pasteboard10_expectations/' "$device/pasteboard10-expectations.h" && rm -f "$device/pasteboard10-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/pasteboard10.json'))))")"
+echo "records: $(runs_harness records "$build/pasteboard10.json")"

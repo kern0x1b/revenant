@@ -11,9 +11,10 @@
 # moves the origin the wrong way. The run passes only when the port matches the host and the control's output differs.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 src=${SPRITEKIT_SRC:-$root/packages/a/apple-backports/SpriteKit}
-build=${SPRITEKIT_SCENE_BUILD:-$root/.agent-work/runs/spritekit-scene}
+build=${SPRITEKIT_SCENE_BUILD:-$(runs_folder spritekit-scene)}
 rm -rf "$build"
 mkdir -p "$build/control"
 

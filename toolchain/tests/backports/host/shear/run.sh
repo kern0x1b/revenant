@@ -3,11 +3,10 @@
 # same translates, same slopes, same edging modes, every byte of every destination row compared - and both
 # answers compared against an expectation this harness computes in its own loops.
 set -eu
+echo "FAIL host/shear/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 52" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-# The four band files (vImageShear70/80/100/150.m) are in the build, with their thirty-six registry rows
-# (commit 2f0211c2ef), and this harness compiles them from the package they ship in. They used to live in
-# `.agent-work/pending-shears/`, a folder nothing tracks, which is why the sweep found them missing.
 ACCELERATE=$here/../../../../packages/a/apple-backports/Accelerate
 SHEARS=${SHEARS:-$ACCELERATE}
 build=${SHEAR_BUILD:-$(runs_folder revenant-shear-host)}

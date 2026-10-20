@@ -23,10 +23,13 @@
 # Usage: sh tests/backports/host/avf-metadata/run.sh          the differential
 #        AVFMUTANT=1 sh tests/backports/host/avf-metadata/run.sh   the mutant, which must go red
 set -eu
+echo "FAIL host/avf-metadata/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PERTURB at line 88; the inline block PERTURB at line 105" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 avf=$root/packages/a/apple-backports/AVFoundation
-build=${AVF_METADATA_BUILD:-$root/.agent-work/avf-metadata}
+build=${AVF_METADATA_BUILD:-$(runs_folder avf-metadata)}
 expected=${AVF_METADATA_ROWS:-47}
 rm -rf "$build"
 mkdir -p "$build"

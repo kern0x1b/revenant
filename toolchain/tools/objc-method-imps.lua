@@ -6,7 +6,7 @@ local dyld = import("apple.dyld", {rootdir = modules, anonymous = true})
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "modules")})
 
 local OBJDUMP = "/Library/Developer/CommandLineTools/usr/bin/llvm-objdump"
-local RUN = path.join(path.directory(os.scriptdir()), ".agent-work/runs/objc-method-imps")
+local RUN = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "modules"), anonymous = true}).run("objc-method-imps")
 
 local function hex_of(bytes)
     return (bytes:gsub(".", function (c) return string.format("%02x", c:byte()) end))
@@ -157,7 +157,6 @@ function main(cachefile, ...)
         end
     end
     assert(cachefile, "usage: objc-method-imps.lua <cache> <class>... [<Class>@<selector>...] [<0xaddress>...]")
-    os.mkdir(RUN)
     local cache = dyld.open_cache(cachefile)
     for _, address in ipairs(addresses) do
         show(cache, address)

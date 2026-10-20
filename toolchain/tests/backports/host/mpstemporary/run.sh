@@ -14,9 +14,12 @@
 #
 # Not a differential and not a claim about Apple's arithmetic: nothing here measures Apple's code.
 set -eu
+echo "FAIL host/mpstemporary/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 48; the inline block PY at line 60" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 mps=${MPS:-$here/../../../../packages/a/apple-backports/MetalPerformanceShaders}
-build=${BUILD:-$here/../../../../.agent-work/runs/host/mpstemporary}
+build=${BUILD:-$(runs_folder host/mpstemporary)}
 rm -rf "$build"
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path)

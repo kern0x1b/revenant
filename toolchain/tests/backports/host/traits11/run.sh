@@ -3,6 +3,8 @@
 # device test reads them, then compiles the port's own categories over the system's classes (a category replaces the method it names) and its
 # UITextInputPasswordRules and the accessors of the scroll indicator insets under names of their own (the host's UIScreen asks -isCaptured while it is made, so that file is held to the iPad 2 alone), holds them to the same records, and tells each of a list of mutants of the port apart.
 set -eu
+echo "FAIL host/traits11/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 47; the inline block PY at line 63" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
@@ -17,7 +19,7 @@ xcrun clang $common -I"$device" "$here/record.m" "$device/traits11-cases.m" $lib
 TRAITS11_RECORDS="$build/system.json" "$build/system"
 xmake l "$here/../../common/embed.lua" "$build/system.json" "$device/traits11-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/traits11_expectations/' "$device/traits11-expectations.h" && rm -f "$device/traits11-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/system.json'))))")"
+echo "records: $(runs_harness records "$build/system.json")"
 
 cat > "$build/rename.h" <<'HEADER'
 #define UITextInputPasswordRules RevenantUITextInputPasswordRules

@@ -9,20 +9,17 @@
 # and the checks the host does allow: the three literal keys in the archive's own bytes, the round trip
 # of three floats, and +supportsSecureCoding beside a class that adopts nothing.
 #
-# `--mutants` changes one thing at a time in a *copy* of the port's sources under .agent-work and
-# requires the run to go red. The checkout is never touched. The mutants are the ones that matter
-# here: a key renamed (the archive check sees it), a key swapped between two properties (only the
-# round trip sees it, because both keys are still present), and a default from -init changed (only the
-# defaults check sees it).
-#
 # The port's object is compiled into this harness with the class name renamed, so what runs is the
 # port's own code.
 
 set -eu
+echo "FAIL host/arkit-planeextent/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 49" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 repo=$(cd "$here/../../../.." && pwd)
 ARKit=$repo/packages/a/apple-backports/ARKit
-runs=${RUNS:-$repo/.agent-work/runs/arkit-planeextent-host}
+runs=${RUNS:-$(runs_folder arkit-planeextent-host)}
 mkdir -p "$runs"
 
 renames=-DARPlaneExtent=RevenantPortARPlaneExtent

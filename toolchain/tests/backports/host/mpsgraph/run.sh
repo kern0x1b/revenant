@@ -16,6 +16,8 @@
 # another family recorded is not in these two runs, and reading it here would report a divergence that has
 # gone away.
 set -eu
+echo "FAIL host/mpsgraph/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 70; the inline block PY at line 208" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 graph=${GRAPH:-$here/../../../../packages/a/apple-backports/MetalPerformanceShadersGraph}
@@ -97,7 +99,7 @@ build_objects() {
         _s=$(basename "$source" .m)
         xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -DREVENANT_PLANT=$_plant \
             -c "$source" -o "$_objdir/$_s.plain.o"
-        python3 "$here/../prefix_selectors.py" "$source" "$_objdir/$_s.m" ccharonHost_ \
+        runs_xmake l "$here/../prefix_selectors.lua" "$source" "$_objdir/$_s.m" ccharonHost_ \
             --declarations="$build/declarations.h" -fobjc-arc $target $quiet -DREVENANT_PLANT=$_plant \
             -I"$graph" -include "$build/rename.h" -- "$_objdir/$_s.plain.o"
         xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -DREVENANT_PLANT=$_plant \

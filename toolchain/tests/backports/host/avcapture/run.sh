@@ -26,7 +26,7 @@ for file in $carried; do
     xcrun clang -fobjc-arc $target -fvisibility=hidden $quiet $renames -I"$AV" -c "$AV/$file" -o "$BUILD/plain/$file.o"
 done
 for file in $carried; do
-    python3 "$here/../prefix_selectors.py" "$AV/$file" "$BUILD/prefixed/$file" charonHost_ --declarations="$BUILD/prefixed/declarations.h" -fobjc-arc $target $quiet $renames -I"$AV" -- "$BUILD"/plain/*.o
+    runs_xmake l "$here/../prefix_selectors.lua" "$AV/$file" "$BUILD/prefixed/$file" charonHost_ --declarations="$BUILD/prefixed/declarations.h" -fobjc-arc $target $quiet $renames -I"$AV" -- "$BUILD"/plain/*.o
 done
 for file in $carried; do
     xcrun clang -fobjc-arc $target -fvisibility=hidden $quiet $renames -I"$AV" -include "$BUILD/prefixed/declarations.h" -c "$BUILD/prefixed/$file" -o "$BUILD/renamed/$file.o"

@@ -7,9 +7,12 @@
 # one runtime; port-support.m supplies the handful of symbols ModelIO itself exports that a release
 # without it has to carry. Nothing in the comparison is tuned: a line that differs is reported.
 set -eu
+echo "FAIL host/modelio/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 63; compare.py" >&2
+exit 1
 here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../../common/runs.sh" "$here"
 MODELIO=${MODELIO:-$here/../../../../packages/a/apple-backports/ModelIO}
-BUILD=${BUILD:-$here/../../../../.agent-work/runs/modelio-diff}
+BUILD=${BUILD:-$(runs_folder modelio-diff)}
 # REVENANT_HOST_BUILD: this is a host differential - the port's process links no framework of the name it
 # measures, so there is no release class for a revenant_alias.h proxy to stand in for, nothing for the
 # library's loader to re-parent and no name to export. The header's own comment gives the two

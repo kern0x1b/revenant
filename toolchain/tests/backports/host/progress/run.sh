@@ -12,4 +12,4 @@ xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" -iframework "$sd
 (cd "$build" && ./record "$build/progress.json" > "$build/progress.log" 2>&1)
 xmake l "$here/../../common/embed.lua" "$build/progress.json" "$device/progress-expectations.h" foundation2_expectations
 sed -i.bak 's/foundation2_expectations/progress_expectations/' "$device/progress-expectations.h" && rm -f "$device/progress-expectations.h.bak"
-echo "records: $(python3 -c "import json; print(len(json.load(open('$build/progress.json'))))")"
+echo "records: $(runs_harness records "$build/progress.json")"

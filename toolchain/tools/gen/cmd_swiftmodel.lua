@@ -15,7 +15,7 @@ function run(args)
     local names = args.framework and {args.framework} or swift_model.modules(args.sdk)
     local triple = swift_model.triple_of(args.sdk)
     os.mkdir(args.out)
-    local folder = swift_model.prefetch(args.tree, heavy, args.sdk, triple, names)
+    local folder = swift_model.prefetch(heavy,args.sdk, triple, names)
     local written, missing, total = 0, 0, 0
     for _, name in ipairs(names) do
         local rows, reason = swift_model.write_model(folder, args.out, name)
