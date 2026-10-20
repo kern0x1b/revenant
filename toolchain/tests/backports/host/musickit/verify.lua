@@ -1,7 +1,7 @@
 local bigint = import("bigint", {rootdir = path.join(os.scriptdir(), "..", "..", "..", "..", "modules", "gyb"), anonymous = true})
 
 local ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-local ORDER_HEX = "FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC63FF51"
+local ORDER_HEX = "FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551"
 
 local function b64u_decode(text)
     local standard = text:gsub("%-", "+"):gsub("_", "/")
