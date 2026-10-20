@@ -29,7 +29,7 @@ is never reused.
 
 ## Layout
 
-- `app/`: the verbs, the live control channel (`--control-stdin`), the SDL window.
+- `src/app/`: the verbs, the live control channel (`--control-stdin`), the SDL window; its headers are in `include/app/`.
 - `src/runtime/`: the session, the boot options, the scheduler loop, the pacer.
 - `src/kernel/`: the BSD and Mach side of the kernel; `src/mach/` Mach messaging and the execution policies;
   `src/device_state/` what the firmware is told about the device (identity, kernel configuration, activation).

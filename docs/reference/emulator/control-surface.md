@@ -24,7 +24,7 @@ repository's `emulator/` folder.
   (failed snapshot write, gdb disconnect, scheduler stall). The guest's exit code is never the
   process exit code: parse `[process] exit pid=N status=S [signal=G]`.
 
-## `--control-stdin` (`app/control/live_control.cpp`, `src/runtime/emulator_session.cpp`)
+## `--control-stdin` (`src/app/control/live_control.cpp`, `src/runtime/emulator_session.cpp`)
 
 One command per line; `#` comments; EOF on stdin does not stop the emulator (send `quit`).
 Replies are log lines starting with `[control]`. Ready marker: `[control] ready; use help for commands`.

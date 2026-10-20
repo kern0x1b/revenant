@@ -2,14 +2,18 @@
 -- License, v. 2.0. If a copy of the MPL was not distributed with this
 -- file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+local headers = path.join(os.scriptdir(), "..", "..", "include")
+
 target("emulator_app_control")
     set_kind("static")
     add_files("control/live_control.cpp")
+    add_includedirs(headers, {public = true})
     add_deps("emulator_foundation", "emulator_debug", {public = true})
 
 target("emulator_app_sdl")
     set_kind("static")
     add_files("sdl/sdl_display.cpp", "sdl/sdl_input.cpp", "sdl/sdl_audio_sink.cpp")
+    add_includedirs(headers, {public = true})
     add_deps("emulator_graphics", "emulator_media", {public = true})
     if has_config("emulator_sdl") then
         add_packages("libsdl2")
@@ -23,6 +27,7 @@ target("emulator_app_sdl")
 target("emulator")
     set_kind("binary")
     add_files("main.cpp", "desktop_host.cpp", "abi_command.cpp")
+    add_includedirs(headers, {public = true})
     add_deps("emulator_host", "emulator_app_control", "emulator_app_sdl", "emulator_runtime")
     if has_config("emulator_vulkan") then
         add_packages("vulkan-loader", "swiftshader")
