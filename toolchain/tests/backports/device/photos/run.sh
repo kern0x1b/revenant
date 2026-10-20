@@ -44,8 +44,6 @@
 # Exits 0 only when every program that ran reported a figure with no failed check, and, with
 # --control, when the control reported at least one.
 set -eu
-echo "FAIL device/photos/run.sh: its Python steps are gone and not yet ported to Lua: band.py" >&2
-exit 1
 
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
@@ -107,12 +105,12 @@ frameworks="-framework AssetsLibrary -framework AVFoundation -framework CoreLoca
             -framework ImageIO -framework MobileCoreServices -framework UIKit -framework Foundation"
 
 # The band's own sources, asked of the build's own rule and not of a list written out here:
-# band.py reads the registry minimum of every class each file defines and prints the files this
+# band.lua reads the registry minimum of every class each file defines and prints the files this
 # release's band carries. A hardcoded list is what it replaces, and it went stale twice in one
 # afternoon -- once for PHChangeRequest13.m, a 13.0 object the 6.0 band carries because
 # registry/Photos/ios13.json gives it minimum 6.0, and once for a file added beside it, whose absence
 # only the device could see, as an unrecognized selector.
-band=$(python3 "$here/band.py" "$release" "$photos" "$root/packages/a/apple-backports/registry")
+band=$(runs_xmake l "$here/band.lua" "$release" "$photos" "$root/packages/frameworks/apple-backports/registry")
 
 compile_one() { # $1 source, $2 object
     # shellcheck disable=SC2086

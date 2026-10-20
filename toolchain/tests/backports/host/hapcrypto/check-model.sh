@@ -12,8 +12,6 @@
 #
 # Usage: sh check-model.sh [<package dir>]   (default: this repository's apple-backports)
 set -eu
-echo "FAIL host/hapcrypto/check-model.sh: its Python steps are gone and not yet ported to Lua: the inline block PYTHON at line 42" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 scratch=$(runs_fresh revenant-hapcrypto-check)
@@ -39,37 +37,7 @@ grep -ho '@implementation[[:space:]]\+[A-Za-z_][A-Za-z0-9_]*' "$package/$framewo
 # the SDK's own headers do and an application's own class adopts it -- so what the port owes is the
 # messages, and a protocol is answered when the library sends at least one of the selectors the protocol
 # declares. That is checked against the library's own sources below.
-python3 - "$package/registry/$framework" "$listed" "$protocols" <<'PYTHON'
-import json, os, sys
-folder, out = sys.argv[1], sys.argv[2]
-names = set()
-for name in sorted(os.listdir(folder)):
-    if not name.endswith(".json"):
-        continue
-    with open(os.path.join(folder, name)) as f:
-        held = json.load(f)
-    for entry in held.get("entries", held):
-        if entry.get("status") == "implemented" and entry.get("kind") in ("class", "protocol"):
-            names.add(entry["api"])
-protocols = sys.argv[3]
-classes = set()
-for name in names:
-    (classes if name[0].isupper() and not name.endswith("Delegate") else set()).add(name)
-# The split is by kind, read from the rows themselves, not guessed from the name.
-kind = {}
-for name in sorted(os.listdir(folder)):
-    if not name.endswith(".json"):
-        continue
-    with open(os.path.join(folder, name)) as f:
-        held = json.load(f)
-    for entry in held.get("entries", held):
-        if entry.get("status") == "implemented" and entry.get("kind") in ("class", "protocol"):
-            kind[entry["api"]] = entry["kind"]
-classes = sorted(name for name, k in kind.items() if k == "class")
-protocol_rows = sorted(name for name, k in kind.items() if k == "protocol")
-open(out, "w").write("".join(name + "\n" for name in classes))
-open(protocols, "w").write("".join(name + "\n" for name in protocol_rows))
-PYTHON
+runs_xmake l "$here/registry-split.lua" "$package/registry/$framework" "$listed" "$protocols"
 
 # A protocol is answered by a message the library sends. The selectors are named here rather than read
 # out of the SDK at run time, because the SDK a band builds against is not necessarily the one on this

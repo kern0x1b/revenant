@@ -33,7 +33,7 @@ xcrun clang $common "$here/record.m" "$here/cases.m" $libs -o "$build/system"
 METRICVALUE_RECORDS="$build/system.json" "$build/system"
 echo "records: $(xmake l "$here/records.lua" count "$build/system.json")"
 
-xmake l "$here/rename.lua" "$registry" "$build/rename.h"
+xmake l "$here/../../common/registry-rename.lua" "$registry" "$build/rename.h"
 port() {
     dir=$1
     # The shared header goes one level ABOVE the folder of .m files, exactly where the real tree has it,

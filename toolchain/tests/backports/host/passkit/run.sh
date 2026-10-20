@@ -13,8 +13,6 @@
 # thirty-one the registry rows name. The floor counts the 31 MEMBERS, not the check lines: the
 # operations each take two lines (the ok flag and the error's shape) and that is the honest unit.
 set -eu
-echo "FAIL host/passkit/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 70; the inline block PY3 at line 98; the inline block PY4 at line 131; the inline block PY5 at line 170; the inline block PY2 at line 181" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 port=${PORT:-$here/../../../../packages/frameworks/apple-backports/PassKit}
@@ -60,28 +58,21 @@ build_port() {
 }
 build_port "$build/libport.dylib"
 # The mutant: the SAME source, one line changed -- a NO that becomes YES, which is the answer a row
-# forbids. mutate.py asserts the line is there, so a renamed line fails the build rather than
+# forbids. substitute.lua asserts the line is there, so a renamed line fails the build rather than
 # producing a mutant that is quietly identical to the real run.
 # The NO that becomes YES now lives in the class object, since that is where the class and its
 # capability answers are: the two controller categories left PKSecureElement8.m in the previous commit,
 # so mutating THAT file is mutating a file that no longer has the line -- and the assert below is what
 # says so instead of producing a mutant that is quietly the real run.
 cp "$port/PKPaymentAuthorizationController10.m" "$build/PKPaymentAuthorizationController10.mutated.m"
-python3 - "$build/PKPaymentAuthorizationController10.mutated.m" <<'PY'
-import sys
-path = sys.argv[1]
-text = open(path).read()
-old = """+ (BOOL)canMakePayments
+runs_xmake l "$here/../../common/substitute.lua" first "$build/PKPaymentAuthorizationController10.mutated.m" \
+    "+ (BOOL)canMakePayments
 {
     return NO;
-}"""
-new = """+ (BOOL)canMakePayments
+}" "+ (BOOL)canMakePayments
 {
     return YES;
-}"""
-assert old in text, "the line the mutant changes is not there: the mutant would be the real run"
-open(path, "w").write(text.replace(old, new, 1))
-PY
+}"
 # A SECOND mutant, on the shared error rather than on a capability: one code changed, so the
 # comparison is shown to see the error's VALUE and not only the NO. Two mutants, because one kind of
 # mutation that goes red is not evidence that the other would.
@@ -90,60 +81,43 @@ PY
 #
 #   1. presentSecureElementPass: answers NO in the real run because nothing is presented. The mutant
 #      makes it YES. That is a flipped answer, so it must go RED and name that case.
-#   2. a comment's wording is changed. That is bytes and not behaviour, and it must stay GREEN -- a
+#   2. a blank line is added beside it (the port's sources carry no comments to reword).
+#      That is bytes and not behaviour, and it must stay GREEN -- a
 #      differential that went red on a reworded comment would be reading the file, not the answer, and
 #      every future edit would make it useless.
 # Asserting both lines are present is what stops a rename turning either mutation into the real run.
 cp "$port/PKSecureElement8.m" "$build/PKSecureElement8.mutated.m"
-python3 - "$build/PKSecureElement8.mutated.m" <<'PY3'
-import sys
-path = sys.argv[1]
-text = open(path).read()
-flipped = """- (BOOL)presentSecureElementPass:(PKSecureElementPass *)secureElementPass
+runs_xmake l "$here/../../common/substitute.lua" first "$build/PKSecureElement8.mutated.m" \
+    "- (BOOL)presentSecureElementPass:(PKSecureElementPass *)secureElementPass
 {
     (void)secureElementPass;
     return NO;
-}"""
-flipped_to = """- (BOOL)presentSecureElementPass:(PKSecureElementPass *)secureElementPass
+}" "- (BOOL)presentSecureElementPass:(PKSecureElementPass *)secureElementPass
 {
     (void)secureElementPass;
     return YES;
-}"""
-assert flipped in text, "the answer the third mutant flips is not there: the mutant would be the real run"
-text = text.replace(flipped, flipped_to, 1)
-# the bytes-and-not-behaviour half: a word in the file's own header, which is a real line of
-# PKSecureElement8.m so the assertion below is about this file and not about a string I remembered
-old_comment = "answered the way Apple's documentation says for a device that has no Secure Element"
-new_comment = "answered the way Apple's documentation states it for a device with no Secure Element"
-assert old_comment in text, "the comment the third mutant rewords is not there"
-text = text.replace(old_comment, new_comment, 1)
-open(path, "w").write(text)
-PY3
+}" \
+    "    (void)secureElementPass;
+    return YES;" "    (void)secureElementPass;
+
+    return YES;"
 
 # THE FOURTH MUTANT, on the iOS 11 value classes' own object. The file it mutates is the newest one, and
 # the two changes must come out OPPOSITE ways again:
 #
 #   1. the update's DEFAULT status, PKPaymentAuthorizationStatusSuccess -> Failure. That is a value the
 #      transcript prints, so it must go RED and name the case.
-#   2. a comment's wording in the same file. That is bytes and not behaviour, and it must stay GREEN --
+#   2. a blank line added in the same file. That is bytes and not behaviour, and it must stay GREEN --
 #      a comparison that turned red on a reworded comment would be reading the file, not the answer.
 cp "$port/PKPaymentRequestStatus11.m" "$build/PKPaymentRequestStatus11.mutated.m"
-python3 - "$build/PKPaymentRequestStatus11.mutated.m" <<'PY4'
-import sys
-path = sys.argv[1]
-text = open(path).read()
-flipped = """    _status = PKPaymentAuthorizationStatusSuccess;
-    _paymentSummaryItems = [paymentSummaryItems copy];"""
-flipped_to = """    _status = PKPaymentAuthorizationStatusFailure;
-    _paymentSummaryItems = [paymentSummaryItems copy];"""
-assert flipped in text, "the default the fourth mutant flips is not there: the mutant would be the real run"
-text = text.replace(flipped, flipped_to, 1)
-old_comment = "the object stores what the delegate put in it and hands the same values back"
-new_comment = "the object stores what the delegate put in it and hands back the same values"
-assert old_comment in text, "the comment the fourth mutant rewords is not there"
-text = text.replace(old_comment, new_comment, 1)
-open(path, "w").write(text)
-PY4
+runs_xmake l "$here/../../common/substitute.lua" first "$build/PKPaymentRequestStatus11.mutated.m" \
+    "    _status = PKPaymentAuthorizationStatusSuccess;
+    _paymentSummaryItems = [paymentSummaryItems copy];" "    _status = PKPaymentAuthorizationStatusFailure;
+    _paymentSummaryItems = [paymentSummaryItems copy];" \
+    "    _paymentSummaryItems = [paymentSummaryItems copy];
+    return self;" "    _paymentSummaryItems = [paymentSummaryItems copy];
+
+    return self;"
 
 # THE FIFTH MUTANT, on the view controller's SUPERCLASS -- the check that is class_getSuperclass and
 # not isSubclassOfClass, so this is the only mutant that can tell the two apart.
@@ -167,25 +141,13 @@ mut5=$build/mut5
 mkdir -p "$mut5"
 cp "$port/RevenantPassKitStandin.h" "$mut5/RevenantPassKitStandin.h"
 cp "$port/PKPaymentAuthorizationViewController8.m" "$mut5/PKPaymentAuthorizationViewController8.m"
-python3 - "$mut5/CharonPassKitStandin.h" <<'PY5'
-import sys
-path = sys.argv[1]
-text = open(path).read()
-old = "@interface PKPaymentAuthorizationViewController : UIViewController"
-new = "@interface PKPaymentAuthorizationViewController : UIView"
-assert text.count(old) == 1, "the superclass the fifth mutant changes is not there exactly once"
-open(path, "w").write(text.replace(old, new, 1))
-PY5
+runs_xmake l "$here/../../common/substitute.lua" once "$mut5/RevenantPassKitStandin.h" \
+    "@interface PKPaymentAuthorizationViewController : UIViewController" \
+    "@interface PKPaymentAuthorizationViewController : UIView"
 
 cp "$port/RevenantPassKit.m" "$build/RevenantPassKit.mutated.m"
-python3 - "$build/CharonPassKit.mutated.m" <<'PY2'
-import sys
-text = open(sys.argv[1]).read()
-old = "code:PKUnsupportedVersionError"
-new = "code:PKInvalidSignature"
-assert old in text, "the code the mutant changes is not there"
-open(sys.argv[1], "w").write(text.replace(old, new, 1))
-PY2
+runs_xmake l "$here/../../common/substitute.lua" first "$build/RevenantPassKit.mutated.m" \
+    "code:PKUnsupportedVersionError" "code:PKInvalidSignature"
 # MUTANT 1: the class object's NO becomes YES. The Secure Element file is UNMUTATED here, so the
 # third mutant's file is not linked into this build -- a mutant dylib with two mutations in it cannot
 # say which one the transcript saw.

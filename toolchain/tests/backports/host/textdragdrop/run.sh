@@ -4,8 +4,6 @@
 # The verdict is the addon's verdict.json and the two files the program wrote in the image; the
 # runner's log carries neither of those.
 set -eu
-echo "FAIL host/textdragdrop/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PYMUT at line 36; the one-line step at line 88" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=${DDR_ROOT:-$here/../../../..}
@@ -33,23 +31,14 @@ mutated=$build/UITextView+TextDragDrop11.m.mutant
 
 # The mutation, made from the source in front of us: the all-items preview is asked before the drop,
 # where UITextDropping.h puts the drop first. Two calls, the other way round.
-python3 - "$original" "$mutated" <<'PYMUT'
-import sys
-src, dst = sys.argv[1], sys.argv[2]
-s = open(src).read()
-before = s
-perform = """    if ([delegate respondsToSelector:perform])
+perform='    if ([delegate respondsToSelector:perform])
         ((void (*)(id, SEL, id, id))objc_msgSend)(delegate, perform, self.control, request);
-"""
-preview = """    if ([delegate respondsToSelector:preview])
+'
+preview='    if ([delegate respondsToSelector:preview])
         ((UITargetedDragPreview * (*)(id, SEL, id, id))objc_msgSend)(delegate, preview, self.control, (id)[UITargetedDragPreview class]);
-"""
-assert s.count(perform) == 1 and s.count(preview) == 1, "the two calls to swap were not found"
-# the source has the drop first, as UITextDropping.h has it, so the mutant is the preview first
-s = s.replace(perform + preview, preview + perform)
-assert s != before
-open(dst, "w").write(s)
-PYMUT
+'
+cp "$original" "$mutated"
+runs_xmake l "$here/../../common/substitute.lua" once "$mutated" "$perform$preview" "$preview$perform"
 
 # The mutant has to differ from the source, or the mutated half is the clean half and asserts
 # nothing. `cmp` says so, and the diff is printed, so the two can be read rather than trusted.
@@ -85,10 +74,7 @@ run_one() {
         return 1
     fi
     verdict=$(ls -d "$HOME/.revenant/emulator/images.noindex/$image/iPhone3,1_"*"/run/verdict.json" 2>/dev/null | head -1)
-    [ -n "$verdict" ] && echo "$half $release: $(python3 -c "
-import json
-d=json.load(open('$verdict'))
-print(d.get('state','?'), d.get('reason',''))")"
+    [ -n "$verdict" ] && echo "$half $release: $(runs_xmake l "$here/../../common/verdict.lua" "$verdict")"
     if [ "$status" -eq 0 ] && grep -Eq 'pass.{0,12} on iPhone' "$release-$half.log"; then
         echo "$half $release: pass"
         return 0

@@ -4,8 +4,6 @@
 # The verdict is the addon's verdict.json and the two files the program wrote in the image; the
 # runner's log carries neither of those.
 set -eu
-echo "FAIL host/textdragweak/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PYMUT at line 37; the one-line step at line 89" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=${DDR_ROOT:-$here/../../../..}
@@ -34,25 +32,19 @@ mutated=$build/UITextView+TextDragDrop11.m.mutant
 # The mutation, made from the source in front of us: the delegates go back into an unowned
 # associated slot, the way they were before the weak box. Both headers declare them weak, so this
 # is the one change that must turn the weak contract's checks red.
-python3 - "$original" "$mutated" <<'PYMUT'
-import sys
-src, dst = sys.argv[1], sys.argv[2]
-s = open(src).read()
-drag_from = "    RevenantWeakDelegateBox *box = objc_getAssociatedObject(control, &RevenantTextDragDelegateKey);\n    return box.target;"
-drag_to = "    return objc_getAssociatedObject(control, &RevenantTextDragDelegateKey);"
-set_drag = """    if (!delegate) {
+drag_from='    RevenantWeakDelegateBox *box = objc_getAssociatedObject(control, &RevenantTextDragDelegateKey);
+    return box.target;'
+drag_to='    return objc_getAssociatedObject(control, &RevenantTextDragDelegateKey);'
+set_drag='    if (!delegate) {
         objc_setAssociatedObject(control, &RevenantTextDragDelegateKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         return;
     }
     RevenantWeakDelegateBox *box = [[RevenantWeakDelegateBox alloc] init];
     box.target = delegate;
-    objc_setAssociatedObject(control, &RevenantTextDragDelegateKey, box, OBJC_ASSOCIATION_RETAIN_NONATOMIC);"""
-set_drag_mut = "    objc_setAssociatedObject(control, &RevenantTextDragDelegateKey, delegate, OBJC_ASSOCIATION_ASSIGN);"
-if s.count(drag_from) != 1 or s.count(set_drag) != 1:
-    sys.exit("the mutation is anchored on text that is not there")
-s = s.replace(drag_from, drag_to).replace(set_drag, set_drag_mut)
-open(dst, "w").write(s)
-PYMUT
+    objc_setAssociatedObject(control, &RevenantTextDragDelegateKey, box, OBJC_ASSOCIATION_RETAIN_NONATOMIC);'
+set_drag_mut='    objc_setAssociatedObject(control, &RevenantTextDragDelegateKey, delegate, OBJC_ASSOCIATION_ASSIGN);'
+cp "$original" "$mutated"
+runs_xmake l "$here/../../common/substitute.lua" once "$mutated" "$drag_from" "$drag_to" "$set_drag" "$set_drag_mut"
 
 echo "== the mutant against the live source:"
 if cmp -s "$mutated" "$original"; then
@@ -86,10 +78,7 @@ run_one() {
         return 1
     fi
     verdict=$(ls -d "$HOME/.revenant/emulator/images.noindex/$image/iPhone3,1_"*"/run/verdict.json" 2>/dev/null | head -1)
-    [ -n "$verdict" ] && echo "$half $release: $(python3 -c "
-import json
-d=json.load(open('$verdict'))
-print(d.get('state','?'), d.get('reason',''))")"
+    [ -n "$verdict" ] && echo "$half $release: $(runs_xmake l "$here/../../common/verdict.lua" "$verdict")"
     if [ "$status" -eq 0 ] && grep -Eq 'pass.{0,12} on iPhone' "$release-$half.log"; then
         echo "$half $release: pass"
         return 0

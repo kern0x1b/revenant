@@ -17,8 +17,6 @@
 #
 # A heavy build, so it runs through heavy.sh, and its output is the two logs it names.
 set -eu
-echo "FAIL host/renderer-differential/build.sh: its Python steps are gone and not yet ported to Lua: the inline block PYREMOVE at line 94" >&2
-exit 1
 
 # The port checkout, found the way every other host test finds it, with DDR_ROOT as the override.
 # It used to be REQUIRED and unset, so the script died on `${DDR_ROOT:?}` before compiling anything
@@ -91,17 +89,12 @@ rect_differing=$(grep -c DIFFER "$build/mutant.log" || true)
 # The second mutant: the same file with the null-or-empty condition removed, which is the wrong
 # renderer as it stood before the fix. It must go red on exactly the cases the condition covers and
 # on no other, so its count is the number of values the fix is responsible for.
-python3 - "$port" "$build/mutant-nocondition.m" <<'PYREMOVE'
-import sys
-src, dst = sys.argv[1], sys.argv[2]
-s = open(src).read()
-before = s
-for name in ("firstLineRect", "bodyRect", "lastLineRect"):
-    s = s.replace("if (%s && !CGRectIsEmpty(*%s))" % (name, name), "if (%s)" % name)
-assert s != before, "the condition was not found to remove"
-open(dst, "w").write(s)
-print("   the condition removed from", before.count("!CGRectIsEmpty"), "places")
-PYREMOVE
+cp "$port" "$build/mutant-nocondition.m"
+runs_xmake l "$here/../../common/substitute.lua" all "$build/mutant-nocondition.m" \
+    "if (firstLineRect && !CGRectIsEmpty(*firstLineRect))" "if (firstLineRect)" \
+    "if (bodyRect && !CGRectIsEmpty(*bodyRect))" "if (bodyRect)" \
+    "if (lastLineRect && !CGRectIsEmpty(*lastLineRect))" "if (lastLineRect)"
+echo "   the condition removed from the mutant's copy of the port"
 grep -c "!CGRectIsEmpty" "$build/mutant-nocondition.m" || echo "   no condition left"
 set -x
 xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" \

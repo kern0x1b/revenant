@@ -24,8 +24,6 @@
 #   AVFMUTANT=1 BREAK=1    breaks a file so it does not compile, which must be RUN FAILED and exit 1:
 #                          a build failure is never a noticed mutation
 set -eu
-echo "FAIL host/avf-notifications/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PERTURB at line 95; the inline block PERTURB at line 110" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -92,31 +90,15 @@ done
 
 if [ "$mutant" != 0 ] && [ "$control" = 0 ]; then
     if [ "$break" != 0 ]; then
-        python3 - "$build/src/AVFoundationKeys16.m" <<'PERTURB'
-import sys
-path = sys.argv[1]
-text = open(path).read()
-before = 'NSString *const AVFragmentedMovieWasDefragmentedNotification'
-if before not in text:
-    raise SystemExit("the control did not apply, so this run proves nothing")
-text = text.replace(before, 'this is not C at all')
-open(path, 'w').write(text)
-PERTURB
+        runs_xmake l "$here/../../common/substitute.lua" all "$build/src/AVFoundationKeys16.m" \
+            'NSString *const AVURLAssetPrimarySessionIdentifierKey' 'this is not C at all'
     else
-        # One value, one byte: the notification's own name loses its last character. A differential
+        # One value, one byte: the constant's own string loses its last character. A differential
         # over strings cannot miss that, and a differential over addresses could not see it at all.
         # Aimed at the 16.0 object because the first aim was a name the 9.3.6 object carries - the
         # split put it there, and the perturb said so by name rather than passing for the wrong reason.
-        python3 - "$build/src/AVFoundationKeys16.m" <<'PERTURB'
-import sys
-path = sys.argv[1]
-text = open(path).read()
-before = '@"AVFragmentedMovieWasDefragmentedNotification"'
-after = '@"AVFragmentedMovieWasDefragmentedNotificatio"'
-if before not in text:
-    raise SystemExit("the mutant did not apply, so this run proves nothing")
-open(path, 'w').write(text.replace(before, after))
-PERTURB
+        runs_xmake l "$here/../../common/substitute.lua" all "$build/src/AVFoundationKeys16.m" \
+            '@"AVURLAssetPrimarySessionIdentifierKey"' '@"AVURLAssetPrimarySessionIdentifierKe"'
     fi
 fi
 

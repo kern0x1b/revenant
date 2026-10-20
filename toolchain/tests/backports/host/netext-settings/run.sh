@@ -22,8 +22,6 @@
 # --mutation breaks one answer per comparison in the port's source and each has to go red naming it. A
 # mutation that does not build is RUN FAILED and never counted as noticed.
 set -eu
-echo "FAIL host/netext-settings/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PYEOF at line 142" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -139,15 +137,8 @@ if [ "${1:-}" = "--mutation" ]; then
         was=$(printf '%s' "$mutation" | cut -d'|' -f2)
         now=$(printf '%s' "$mutation" | cut -d'|' -f3)
         mutant="$W/mutant-$name.m"
-        if ! python3 - "$S/NetworkExtension/NEDNSSettings.m" "$mutant" "$was" "$now" <<'PYEOF'
-import sys
-source, target, was, now = sys.argv[1:5]
-text = open(source).read()
-if text.count(was) != 1:
-    print("the text to break appears %d times, not once" % text.count(was))
-    raise SystemExit(1)
-open(target, "w").write(text.replace(was, now, 1))
-PYEOF
+        cp "$S/NetworkExtension/NEDNSSettings.m" "$mutant"
+        if ! runs_xmake l "$here/../../common/substitute.lua" once "$mutant" "$was" "$now"
         then
             echo "RUN FAILED $name: the mutation did not apply to the port's source" >&2
             failed=$((failed + 1))

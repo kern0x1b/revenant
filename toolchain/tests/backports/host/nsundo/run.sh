@@ -19,8 +19,6 @@
 # comparison has to report it. --no-plant runs the same comparison without the break, which is how the
 # mutation verdict is shown failing on its own.
 set -eu
-echo "FAIL host/nsundo/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PYEOF at line 47; the inline block PYEOF at line 112; the inline block PYEOF at line 130" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -44,15 +42,8 @@ flags="-fobjc-arc -O0 -Wall -Wno-unguarded-availability-new -I$S/Foundation"
 
 guard='    if ([NSUndoManager instancesRespondToSelector:@selector(setActionUserInfoValue:forKey:)])
         return;'
-if ! python3 - "$src" "$scratch/port.m" "$guard" <<'PYEOF'
-import sys
-source, target, guard = sys.argv[1], sys.argv[2], sys.argv[3]
-text = open(source).read()
-if text.count(guard) != 1:
-    print("the capability guard is not in the source once")
-    raise SystemExit(1)
-open(target, "w").write(text.replace(guard, "    /* the guard is stood down for this build only: see the head of run.sh */", 1))
-PYEOF
+cp "$src" "$scratch/port.m"
+if ! runs_xmake l "$here/../../common/substitute.lua" once "$scratch/port.m" "$guard" "    /* the guard is stood down for this build only: see the head of run.sh */"
 then
     echo "RUN FAILED: the capability guard was not found" >&2
     exit 1
@@ -76,8 +67,8 @@ for name in undoCount redoCount setActionUserInfoValue:forKey: undoActionUserInf
     b=$(grep "^image.$name	" "$W/B.txt" | cut -f2)
     a=$(grep "^image.$name	" "$W/A.txt" | cut -f2)
     case "$b" in
-        "$root"/*) ;;
-        *) echo "  FAIL $name: B answered from '$b', which is not this worktree's object"; bad=$((bad + 1)) ;;
+        "$W/B") ;;
+        *) echo "  FAIL $name: B answered from '$b', which is not B's own build of the port's object"; bad=$((bad + 1)) ;;
     esac
     case "$a" in
         "$root"/*) echo "  FAIL $name: A answered from the port's own build ('$a')"; bad=$((bad + 1)) ;;
@@ -109,16 +100,9 @@ if [ "$mode" = mutation ]; then
     if [ "$plant" = apply ]; then
         # Rule three is "a registration outside an undo or a redo empties the redo stack". Broken:
         # the redo stack is left alone, so a fresh registration after an undo still reports a redo.
-        if ! python3 - "$scratch/port.m" <<'PYEOF'
-import sys
-target = sys.argv[1]
-text = open(target).read()
-mark = "        [redo removeAllObjects];\n"
-if text.count(mark) != 1:
-    print("the rule to break is not in the source once")
-    raise SystemExit(1)
-open(target, "w").write(text.replace(mark, "", 1))
-PYEOF
+        mark='        [redo removeAllObjects];
+'
+        if ! runs_xmake l "$here/../../common/substitute.lua" once "$scratch/port.m" "$mark" ""
         then
             echo "RUN FAILED: the plant did not apply" >&2
             exit 1
@@ -127,15 +111,7 @@ PYEOF
         cp "$src" "$scratch/port.m"
         guard='    if ([NSUndoManager instancesRespondToSelector:@selector(setActionUserInfoValue:forKey:)])
         return;'
-        if ! python3 - "$src" "$scratch/port.m" "$guard" <<'PYEOF'
-import sys
-source, target, guard = sys.argv[1], sys.argv[2], sys.argv[3]
-text = open(source).read()
-if text.count(guard) != 1:
-    print("the capability guard is not in the source once")
-    raise SystemExit(1)
-open(target, "w").write(text.replace(guard, "    /* the guard is stood down for this build only: see the head of run.sh */", 1))
-PYEOF
+        if ! runs_xmake l "$here/../../common/substitute.lua" once "$scratch/port.m" "$guard" "    /* the guard is stood down for this build only: see the head of run.sh */"
         then
             echo "RUN FAILED: the capability guard was not found" >&2
             exit 1

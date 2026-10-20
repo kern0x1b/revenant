@@ -9,8 +9,6 @@
 #   - the differing line is PRINTED, so the red names raised=0 against the reference's raised=1
 #     instead of a bare "VERDICT: RED".
 set -eu
-echo "FAIL host/coredata-batchinsert/mutant-init.sh: its Python steps are gone and not yet ported to Lua: mutant-init.py" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 FP=${COREDATA:-$here/../../../../packages/frameworks/apple-backports}
@@ -18,7 +16,7 @@ scratch="$(runs_folder mutant-init)"
 rm -rf "$scratch"; mkdir -p "$scratch"
 
 echo "=== 1. the mutant, and the one statement it replaces"
-python3 "$here/mutant-init.py" "$FP/CoreData/NSBatchInsertRequest.m" "$scratch/port.m"
+runs_xmake l "$here/mutants.lua" init "$FP/CoreData/NSBatchInsertRequest.m" "$scratch/port.m"
 
 # The copy is for the HOST build, so the import the package's own header needs is gone and the
 # class is renamed with -D: nothing links two definitions of NSBatchInsertRequest.

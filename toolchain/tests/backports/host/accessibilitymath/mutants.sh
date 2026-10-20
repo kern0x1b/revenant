@@ -43,8 +43,6 @@
 # mutant that did not die in the required way, which is the rule M13's comment below is about. So the
 # rule is held by the comparison against the host and there is no mutant for it.
 set -eu
-echo "FAIL host/accessibilitymath/mutants.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 79" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -76,15 +74,10 @@ apply() {
     fi
     mkdir -p "$copy"
     cp "$sources"/*.h "$sources"/*.m "$copy/"
-    python3 - "$copy/$(basename "$file")" "$search" "$replace" <<'PY'
-import sys
-path, search, replace = sys.argv[1], sys.argv[2], sys.argv[3]
-text = open(path).read()
-if text.count(search) != 1:
-    sys.exit("MUTANT-SETUP-FAILED: %r appears %d times, and a mutant must change one line"
-             % (search, text.count(search)))
-open(path, 'w').write(text.replace(search, replace))
-PY
+    if ! runs_xmake l "$here/../../common/substitute.lua" once "$copy/$(basename "$file")" "$search" "$replace"; then
+        echo "MUTANT-SETUP-FAILED: the line above must appear exactly once in $file, and a mutant must change one line" >&2
+        exit 2
+    fi
 }
 
 # Each entry: the mutant's number, the file, the line to change, and what it changes to.

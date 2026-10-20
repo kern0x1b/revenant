@@ -4,8 +4,6 @@
 #
 #   DDR_ROOT=<the checkout> sh tests/backports/host/documentbrowser/behaviour.sh
 set -eu
-echo "FAIL host/documentbrowser/behaviour.sh: its Python steps are gone and not yet ported to Lua: the inline block PYMUT at line 60" >&2
-exit 1
 
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
@@ -57,13 +55,7 @@ mutate() {
     expected=$4
     echo
     echo "== the mutant: $name"
-    python3 - "$port" "$from" "$to" <<'PYMUT'
-import sys
-path, before, after = sys.argv[1], sys.argv[2], sys.argv[3]
-s = open(path).read()
-assert s.count(before) == 1, "the mutation site was not found exactly once"
-open(path, "w").write(s.replace(before, after))
-PYMUT
+    runs_xmake l "$here/../../common/substitute.lua" once "$port" "$from" "$to"
     build_and_run "mutant-$name" || true
     if grep -q "^FAIL .*$expected" "$runs/mutant-$name/run.log"; then
         echo "  red by name: $expected"

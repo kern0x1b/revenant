@@ -19,8 +19,6 @@
 # It is a port-only program and not a second half of the differential, and the reason is recorded as an
 # owed line in this directory's README.md rather than in a comment: see there.
 set -eu
-echo "FAIL host/accessibilitymap/protocol-check.sh: its Python steps are gone and not yet ported to Lua: the inline block PYTHON at line 38" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 . "$here/../../common/generated.sh"
@@ -35,28 +33,11 @@ sdk=$(xcrun --show-sdk-path)
 
 # The names, from the registry. A copy of the registry is read when REGISTRY_ROOT points at one, which is
 # how the rename mutant changes one and nothing else.
-python3 - "$registry/registry/Accessibility" "$build/names.h" <<'PYTHON'
-import glob, json, os, sys
-folder, header = sys.argv[1], sys.argv[2]
-rows = []
-for path in sorted(glob.glob(os.path.join(folder, "*.json"))):
-    for row in json.load(open(path)).get("entries", []):
-        if row.get("kind") == "protocol" and row.get("status") == "implemented":
-            rows.append(row["api"])
-with open(header, "w") as out:
-    out.write("// Written by protocol-check.sh from registry/Accessibility's protocol rows, so that this check\n")
-    out.write("// asks about what the registry claims. One macro per implemented protocol row.\n")
-    out.write("#import <Foundation/Foundation.h>\n\n")
-    out.write("#define REVENANT_PROTOCOLS @[%s]\n" % ", ".join('@"%s"' % n for n in rows))
-    out.write("#define REVENANT_PROTOCOL_COUNT %d\n" % len(rows))
-print("registry protocol rows read: %d" % len(rows))
-for index, name in enumerate(rows, 1):
-    print("  [%d] %s" % (index, name))
-PYTHON
+runs_xmake l "$here/names-header.lua" "$registry/registry/Accessibility" "$build/names.h"
 
 # The sources, from the build's own generator, every file it writes and none renamed into another: the
 # first attempt at this collapsed them onto one name and silently dropped the 15.0 protocols.
-(cd "$root" && xmake l tests/backports/host/accessibilitymap/protocol-names.lua \
+(cd "$root" && runs_xmake l "$here/protocol-names.lua" \
     "$registry" "$build/generated" "$root/modules" > "$build/generated.log")
 cat "$build/generated.log"
 sources_m=$(ls "$build/generated"/*.m)

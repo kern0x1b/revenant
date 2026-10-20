@@ -36,8 +36,6 @@
 # Not run through heavy.sh: it compiles four small files, links two binaries and runs them, and the
 # fleet's heavy lane is for the gate.
 set -eu
-echo "FAIL host/avf-writerinput8/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PY at line 56; the inline block PYEOF at line 198; the inline block PYEOF at line 312" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -53,51 +51,7 @@ FLAGS="-fobjc-arc -w"
 # ---- the six mutations. Each changes a line the join READS, and each names the rows it must break, so
 #      "the mutant went red" and "the mutant broke the thing it aimed at" are one claim.
 mutate() {
-    python3 - "$1" "$2" <<'PY'
-import sys
-path, which = sys.argv[1], sys.argv[2]
-text = open(path).read()
-MUTATIONS = {
-    # the pass the writer's -startWriting begins. Read by every "currentPassDescription after startWriting"
-    # row, which the port answers {0/1,0/0} and the host answers too.
-    "beginpass": ("            for (AVAssetWriterInput *each in self_.inputs)\n                revenant_begin_pass(each);",
-                  "            for (AVAssetWriterInput *each in self_.inputs)\n                (void)each;"),
-    # the time range of that pass: zero to POSITIVE INFINITY, which is what both halves print.
-    "ranges": ("CMTimeRangeMake(kCMTimeZero, kCMTimePositiveInfinity)",
-               "CMTimeRangeMake(kCMTimeZero, kCMTimeZero)"),
-    # the final invocation of the block after the pass ends. Read by "block calls after
-    # markCurrentPassAsFinished", which is 2 on both sides.
-    "finalcall": ("""    dispatch_queue_t queue = objc_getAssociatedObject(self, &revenant_multipass_queue);
-    if (queue) {
-        dispatch_async(queue, ^{
-            revenant_invoke_pass_callback(self);
-        });
-    }""", "    (void)0;"),
-    # THE LEFTOVER'S DEFECT. -markCurrentPassAsFinished forwarding to the release's -markAsFinished
-    # finishes the input a second time; read by "markCurrentPassAsFinished called markAsFinished itself",
-    # which is NO on both sides.
-    "forward": ("""    revenant_end_pass(self);
-    dispatch_queue_t queue""", """    revenant_end_pass(self);
-    [self markAsFinished];
-    dispatch_queue_t queue"""),
-    # the setter's own precondition: "This property cannot be set after writing on the receiver's
-    # AVAssetWriter has started". Read by "performsMultiPassEncodingIfSupported set YES after
-    # startWriting", which RAISES on both sides.
-    "setafter": ("""    if (objc_getAssociatedObject(self, &revenant_multipass_writing))
-        revenant_raise(@"-[AVAssetWriterInput setPerformsMultiPassEncodingIfSupported:] cannot be called after the input's asset writer has started writing");""",
-                 "    (void)0;"),
-    # the export's own precondition, same sentence for the export session. Read by
-    # "canPerformMultiplePassesOverSourceMediaData set YES after the export started", which RAISES.
-    "exportafter": ("""    if (objc_getAssociatedObject(self, &revenant_export_started))
-        revenant_raise(@"-[AVAssetExportSession setCanPerformMultiplePassesOverSourceMediaData:] cannot be called after the export has started");""",
-                    "    (void)0;"),
-}
-before, after = MUTATIONS[which]
-if before not in text:
-    raise SystemExit("the %s mutation did not apply, so this run proves nothing" % which)
-open(path, "w").write(text.replace(before, after, 1))
-print("# applied the %s mutation" % which)
-PY
+    runs_xmake l "$here/mutations.lua" "$1" "$2"
 }
 
 want=${AVFWMUTANT:-}
@@ -195,153 +149,17 @@ fi
 
 # ---- 5. the join and the verdict
 set +e
-python3 - "$build" "$oracle_dir" <<'PYEOF'
-import sys, os
-build, oracle_dir = sys.argv[1], sys.argv[2]
+runs_xmake l "$here/join.lua" join "$build" "$oracle_dir"
 
-def load(path):
-    rows = {}
-    if not os.path.exists(path):
-        return rows
-    for line in open(path):
-        if not line.strip():
-            continue
-        key, sep, value = line.rstrip("\n").partition(" | ")
-        if not sep:
-            print("MALFORMED         the host or the port printed a line with no ' | ' in it: %s" % line.strip())
-            continue
-        rows[key.strip()] = value.strip()
-    return rows
 
-host = load(os.path.join(build, "host.table"))
-port = load(os.path.join(build, "port.table"))
-base = load(os.path.join(oracle_dir, "port.baseline"))
-
-# The differences that are in the PORT's build and not in the host's. Each one is a row Apple's own
-# single-pass class does not produce here either, and each says why.
-ALLOWANCES = {
- # --- the switch. 6.1.3's writer has no analysis pass to hand out, so the port answers NO whatever the
- #     client sets; a YES would ask it to append the same media again to a writer it has been told it is
- #     finished with, which is the call that raises. Apple's own class answers YES from the switch alone
- #     and runs a genuine second pass. Every row below follows from that one fact.
- "switch-on unattached: canPerformMultiplePasses unattached after setting the switch":
-   "the switch is stored and reads back; the writer cannot re-read its source on the release this port "
-   "runs on, so canPerformMultiplePasses is NO. Measured: Apple's own class answers YES from the switch "
-   "alone, before anything is attached",
- "switch-on before startWriting: canPerformMultiplePasses attached before startWriting":
-   "follows the switch: NO here, for the reason on the row above",
- "switch-on: canPerformMultiplePasses after startWriting": "follows the switch",
- "switch-on: canPerformMultiplePasses after setting the switch post-start": "follows the switch",
- "switch-on: canPerformMultiplePasses after markCurrentPassAsFinished": "follows the switch",
- "switch-on: currentPassDescription after markCurrentPassAsFinished":
-   "Apple nominates a SECOND pass here - the description is still live and the block ran once, not twice. "
-   "This port has no analysis pass to hand out, and AVAssetWriterInput.h:512 says that with "
-   "canPerformMultiplePasses NO the description becomes nil at once",
- "switch-on: block calls after markCurrentPassAsFinished":
-   "follows the row above: two invocations here, one where Apple starts a second pass",
- "switch-on: block on the given queue after markCurrentPassAsFinished":
-   "follows the row above; both halves deliver every invocation on the queue the client gave",
- "switch-on: block calls after a second markCurrentPassAsFinished":
-   "Apple is between passes there and refuses a second -markCurrentPassAsFinished because a pass is "
-   "pending, so its one invocation stands; this port has no pending pass",
- "switch-on: block saw":
-   "follows the second-pass rows: the port's block sees the first pass and then nil, which is the whole "
-   "of what a single-pass writer has to offer",
- "switch-on: markCurrentPassAsFinished a second time":
-   "the HOST's own answer here is not reproducible: six runs of the oracle gave RAISED five times and "
-   "ACCEPTED once, because with the switch on Apple's analysis pass may already have finished by the time "
-   "the second call arrives. The port refuses in both configurations, which is what the host did in five "
-   "of six runs and in every switch-off run",
- # --- WHEN the first invocation arrives. Measured on the host: nothing has been invoked at the instant
- #     the call returns, and one invocation arrives on the given queue once the writer's own setup has
- #     run. Which instant that is between is Apple's internal timing and not an answer the header gives,
- #     so the count AT registration may differ; both halves deliver it on the given queue, which the
- #     "on the given queue" rows show.
- "switch-off: block calls on registration":
-   "the host delivers the first invocation from its own setup, after the call has returned; this port "
-   "queues it, so it is delivered before the queue drains",
- "switch-off: block on the given queue on registration": "follows the row above",
- "switch-on: block calls on registration": "follows the registration rows above",
- "switch-on: block on the given queue on registration": "follows the registration rows above",
- # --- the STAND-IN's own two answers, which are the stand-in's and not the port's. Each says what the
- #     release's own class does, measured on the host.
- "switch-off before startWriting: markAsFinished before startWriting":
-   "the release's -markAsFinished refuses before -startWriting (measured: NSInternalInconsistencyException, "
-   "'Cannot call method when status is 0'); the stand-in records it instead. Nothing in this family calls "
-   "it in that state - the port raises from -markCurrentPassAsFinished first",
- "switch-on before startWriting: markAsFinished before startWriting": "follows the row above",
- "switch-off: finishWriting":
-   "the real writer refuses to finish a file nothing was appended to (measured NO); the stand-in has no "
-   "encoder and answers YES. The harness appends nothing in either half",
- "switch-on: finishWriting": "follows the row above",
-}
-# Rows that describe the two BUILDS and not the two answers: a name the real framework has and the
-# stand-in header does not, and the settings row, which names what each half asked its own writer.
-BUILD_ROWS = {
- "CONTROL: CLASS AVAssetWriterInputPassDescription": "the stand-in declares the class and does not implement it; the port brings it",
- "CONFIGURATION: h264 16x16, no bitrate": "each half asks its own writer what it can encode",
-}
-
-less = more = differs = malformed = 0
-unexplained = []
-for key in sorted(set(host) | set(port)):
-    if key in BUILD_ROWS:
-        print("BUILD             %-74s %s" % (key, BUILD_ROWS[key]))
-        continue
-    if key not in port:
-        print("ANSWERS LESS      %s" % key); less += 1
-    elif key not in host:
-        print("HOST LACKS IT     %s" % key); more += 1
-    elif host[key] != port[key]:
-        differs += 1
-        if key in ALLOWANCES:
-            print("ALLOWED           %-74s host=[%s] port=[%s]" % (key, host[key], port[key]))
-        else:
-            print("UNEXPLAINED       %-74s host=[%s] port=[%s]" % (key, host[key], port[key]))
-            unexplained.append(key)
-print("SUMMARY rows: host=%d port=%d  must-match-unequal=%d answers-less=%d host-lacks=%d unexplained=%d"
-      % (len(host), len(port), differs, less, more, len(unexplained)))
-sys.exit(1 if (less or more or unexplained) else 0)
-PYEOF
 join_status=$?
 set -e
 
 # ---- 6. the directionality assertion, and the control
 if [ -n "$want" ] && [ "$control" = 0 ]; then
     set +e
-    changed=$(python3 - "$build" "$oracle_dir" <<'PYEOF'
-import sys, os
-build, oracle_dir = sys.argv[1], sys.argv[2]
-def load(name):
-    rows = {}
-    for line in open(name):
-        if not line.strip():
-            continue
-        key, _, value = line.rstrip("\n").partition(" | ")
-        rows[key.strip()] = value.strip()
-    return rows
-base = load(os.path.join(oracle_dir, "port.baseline"))
-port, host = load(os.path.join(build, "port.table")), load(os.path.join(build, "host.table"))
-changed, right_then_wrong, closer = [], [], []
-for key in set(base) | set(port):
-    if base.get(key) == port.get(key):
-        continue
-    changed.append(key)
-    if key in host and base.get(key) == host[key] and port.get(key) != host[key]:
-        right_then_wrong.append(key)
-    elif key in host and base.get(key) != host[key] and port.get(key) == host[key]:
-        closer.append(key)
-for key in sorted(right_then_wrong):
-    print("BROKE A RIGHT ONE  %s" % key)
-for key in sorted(closer):
-    print("MOVED TOWARD HOST  %s" % key)
-for key in sorted(changed):
-    print("CHANGED           %-74s before=[%s] after=[%s]" % (key, base.get(key), port.get(key)))
-print("DIRECTIONALITY changed=%d right-then-wrong=%d moved-toward-host=%d"
-      % (len(changed), len(right_then_wrong), len(closer)))
-sys.exit(0 if (changed and right_then_wrong) else 1)
-PYEOF
-)
+    changed=$(runs_xmake l "$here/join.lua" direction "$build" "$oracle_dir")
+
     dir_status=$?
     set -e
     if [ "$dir_status" != 0 ]; then

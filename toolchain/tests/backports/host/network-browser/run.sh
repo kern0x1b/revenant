@@ -24,8 +24,6 @@
 # --mutation breaks one answer per comparison in the port's own source; each has to go red naming its
 # comparison, and a mutation that does not build is RUN FAILED and never counted as noticed.
 set -eu
-echo "FAIL host/network-browser/run.sh: its Python steps are gone and not yet ported to Lua: the inline block PYEOF at line 134" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
@@ -131,14 +129,8 @@ if [ "${1:-}" = "--mutation" ]; then
         now=$(printf '%s' "$mutation" | cut -d'|' -f4)
         source="$S/$file"
         mutant="$W/mutant-$line-$(basename "$file")"
-        if ! python3 - "$source" "$mutant" "$was" "$now" <<'PYEOF'
-import sys
-source, target, was, now = sys.argv[1:5]
-text = open(source).read()
-if text.count(was) != 1:
-    raise SystemExit("the text to break appears %d times in %s, not once" % (text.count(was), source))
-open(target, "w").write(text.replace(was, now, 1))
-PYEOF
+        cp "$source" "$mutant"
+        if ! runs_xmake l "$here/../../common/substitute.lua" once "$mutant" "$was" "$now"
         then
             echo "RUN FAILED $line: the text to break is not in $file exactly once" >&2
             mut_failed=$((mut_failed + 1))

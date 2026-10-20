@@ -5,8 +5,6 @@
 # search.m does the same with the search bundle's RevenantSearchDatastore.m added, reading a store into which entries no indexing
 # application would write have been put. Then mutants of the rollback, the cause and the reading, which the checks must tell apart.
 set -eu
-echo "FAIL host/spotlightstore/run.sh: its Python steps are gone and not yet ported to Lua: mutate.py" >&2
-exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 spotlight=${SPOTLIGHT:-$here/../../../../packages/frameworks/apple-backports/CoreSpotlight}
@@ -48,7 +46,7 @@ survived=0
 mutant() {
     file=$1; from=$2; to=$3
     rm -rf "$build/mutant"; sources "$build/mutant"
-    python3 "$here/../contacts/mutate.py" "$build/mutant/$file" "$from" "$to"
+    runs_xmake l "$here/../../common/substitute.lua" first "$build/mutant/$file" "$from" "$to"
     if run "$build/mutant" > "$build/mutant.log" 2>&1; then echo "MUTANT SURVIVED: $from -> $to"; survived=$((survived + 1))
     # A mutant that does not build proves nothing about the checks.
     elif grep -q 'uncaught exception' "$build/mutant.log"; then echo "killed: the reading raised what it should have logged"
