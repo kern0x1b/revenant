@@ -1,6 +1,0 @@
-protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
-PKPushRegistryDelegate	8.0	sdk16 body		NSObject	-	-	-	-	-	-
-PKPushRegistryDelegate	8.0	sdk16 body		NSObject	required	method	yes	pushRegistry:didUpdatePushCredentials:forType:	- (void)pushRegistry:(PKPushRegistry * _Nonnull)registry didUpdatePushCredentials:(PKPushCredentials * _Nonnull)pushCredentials forType:(PKPushType  _Nonnull)type;	yes
-PKPushRegistryDelegate	8.0	sdk16 body		NSObject	optional	method	yes	pushRegistry:didReceiveIncomingPushWithPayload:forType:	- (void)pushRegistry:(PKPushRegistry * _Nonnull)registry didReceiveIncomingPushWithPayload:(PKPushPayload * _Nonnull)payload forType:(PKPushType  _Nonnull)type API_AVAILABLE(ios(8.0));	yes
-PKPushRegistryDelegate	8.0	sdk16 body		NSObject	optional	method	yes	pushRegistry:didReceiveIncomingPushWithPayload:forType:withCompletionHandler:	- (void)pushRegistry:(PKPushRegistry * _Nonnull)registry didReceiveIncomingPushWithPayload:(PKPushPayload * _Nonnull)payload forType:(PKPushType  _Nonnull)type withCompletionHandler:(void (^ _Nonnull)(void))completion API_AVAILABLE(ios(11.0));	yes
-PKPushRegistryDelegate	8.0	sdk16 body		NSObject	optional	method	yes	pushRegistry:didInvalidatePushTokenForType:	- (void)pushRegistry:(PKPushRegistry * _Nonnull)registry didInvalidatePushTokenForType:(PKPushType  _Nonnull)type;	yes

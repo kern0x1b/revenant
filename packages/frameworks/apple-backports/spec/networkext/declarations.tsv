@@ -1,9 +1,0 @@
-#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
-enum	c:@EA@ne_socket_attribution_t	-			unsigned int	-	-	-	-	1e6e7f936d0e770e	-
-enumconst	c:@EA@ne_socket_attribution_t@NE_SOCKET_ATTRIBUTION_DEVELOPER	ne_socket_attribution_t			-	-	-	-	-	29a3cfb821b72064	1
-enumconst	c:@EA@ne_socket_attribution_t@NE_SOCKET_ATTRIBUTION_USER	ne_socket_attribution_t			-	-	-	-	-	c63f3c63e6ad12a1	2
-typedef	c:@T@ne_socket_attribution_t	-			enum ne_socket_attribution_t	-	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	e6cbe15a4a35401e	-
-function	c:@F@ne_socket_set_domains	-			int (int, const char *const *const, int)	int socket | const char *const *const domain_names | int domain_count	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	ecf0d873a18de062	-
-function	c:@F@ne_socket_set_attribution	-			int (int, ne_socket_attribution_t)	int socket | ne_socket_attribution_t attribution	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	646e941f33412535	-
-function	c:@F@ne_socket_set_website_attribution	-			int (int, const char *)	int socket | const char * hostname	-	ios=15.0/-/-/0,macos=12.0/-/-/0,tvos=15.0/-/-/0,watchos=8.0/-/-/0	-	6abe95961ccc23b8	-
-function	c:@F@ne_socket_set_is_app_initiated	-			int (int, _Bool)	int socket | _Bool is_app_initiated	-	ios=-/-/-/1,macos=-/-/-/1,tvos=-/-/-/1,watchos=-/-/-/1	-	b259412fd4665b46	-

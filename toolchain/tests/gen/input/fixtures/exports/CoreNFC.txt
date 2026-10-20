@@ -1,2 +1,0 @@
-NFCISO15693TagResponseErrorKey
-NFCTagResponseUnexpectedLengthErrorKey

@@ -1,2 +1,0 @@
-kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
-constant	CLKWatchFaceLibraryErrorDomain	-	CLKWatchFaceLibraryErrorDomain	14.0	NSString * const	API_AVAILABLE(watchos(7.0), ios(14.0))	79b69636d8e53305	found	CLKWatchFaceLibraryErrorDomain	-	ios-26.2-cache (no host value)	-	exported	ns	-

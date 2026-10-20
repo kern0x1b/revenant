@@ -1,5 +1,0 @@
-module	kind	api	introduced	deprecated	obsoleted	unavailable	via
-GameKit	method	GKAccessPoint.trigger(gameActivityDefinitionID:handler:)	26.0				container
-GameKit	method	GKAccessPoint.trigger(gameActivity:handler:)	26.0				container
-GameKit	property	GKGameActivityDefinition.playerRange	26.0				container
-GameKit	property	GKAchievementDescription.rarityPercent	17.0				container

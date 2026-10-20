@@ -1,4 +1,0 @@
-framework module FixtureNested [system] {
-  umbrella header "FixtureNested.h"
-  export *
-}

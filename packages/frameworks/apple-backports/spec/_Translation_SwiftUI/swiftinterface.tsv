@@ -1,4 +1,0 @@
-module	kind	api	introduced	deprecated	obsoleted	unavailable	via
-_Translation_SwiftUI	method	View.translationPresentation(isPresented:text:attachmentAnchor:arrowEdge:replacementAction:)	17.4				container
-_Translation_SwiftUI	method	View.translationTask(_:action:)	18.0				container
-_Translation_SwiftUI	method	View.translationTask(source:target:action:)	18.0				container

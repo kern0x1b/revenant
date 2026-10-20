@@ -1,4 +1,0 @@
-module FixtureDotted.Sub [system] {
-  header "FixtureDottedSub.h"
-  export *
-}

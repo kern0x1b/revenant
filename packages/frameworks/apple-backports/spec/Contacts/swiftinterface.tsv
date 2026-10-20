@@ -1,6 +1,0 @@
-module	kind	api	introduced	deprecated	obsoleted	unavailable	via
-Contacts	property	CNError.affectedRecords	9.0				container
-Contacts	property	CNError.affectedRecordIdentifiers	9.0				container
-Contacts	property	CNError.keyPaths	9.0				container
-Contacts	property	CNContact.id	17				container
-Contacts	typealias	CNContact.ID	17				own

@@ -1,9 +1,0 @@
-protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
-MSMessagesAppTranscriptPresentation	11.0	sdk16 body			-	-	-	-	-	-
-MSMessagesAppTranscriptPresentation	11.0	sdk16 body			required	method	yes	contentSizeThatFits:	- (CGSize)contentSizeThatFits:(CGSize)size API_AVAILABLE(ios(11.0));	yes
-MSMessagesAppTranscriptPresentation	11.0	sdk16 body			required	property	no	messageTintColor	@property (nonatomic, readonly) API_AVAILABLE(ios(26.0)) UIColor *messageTintColor API_AVAILABLE(ios(26.0));	no
-MSMessagesAppTranscriptPresentation	11.0	sdk16 body			required	property	no	messageCornerRadius	@property (nonatomic, readonly, assign, unsafe_unretained) CGFloat messageCornerRadius API_AVAILABLE(ios(26.0));	no
-MSMessagesAppTranscriptPresentation	11.0	sdk16 body			required	method	yes	invalidateMessageTintColor	- (void)invalidateMessageTintColor API_AVAILABLE(ios(26.0));	no
-MSStickerBrowserViewDataSource	10.0	sdk16 body		NSObject	-	-	-	-	-	-
-MSStickerBrowserViewDataSource	10.0	sdk16 body		NSObject	required	method	yes	numberOfStickersInStickerBrowserView:	- (NSInteger)numberOfStickersInStickerBrowserView:(MSStickerBrowserView * _Nonnull)stickerBrowserView;	yes
-MSStickerBrowserViewDataSource	10.0	sdk16 body		NSObject	required	method	yes	stickerBrowserView:stickerAtIndex:	- (MSSticker * _Nonnull)stickerBrowserView:(MSStickerBrowserView * _Nonnull)stickerBrowserView stickerAtIndex:(NSInteger)index;	yes

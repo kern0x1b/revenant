@@ -1,6 +1,0 @@
-protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
-AVCustomRoutingControllerDelegate	16.0	sdk16 body		NSObject	-	-	-	-	-	-
-AVCustomRoutingControllerDelegate	16.0	sdk16 body		NSObject	required	method	yes	customRoutingController:handleEvent:completionHandler:	- (void)customRoutingController:(AVCustomRoutingController * _Nonnull)controller handleEvent:(AVCustomRoutingEvent * _Nonnull)event completionHandler:(void (^ _Nonnull)(BOOL))completionHandler;	yes
-AVCustomRoutingControllerDelegate	16.0	sdk16 body		NSObject	optional	method	yes	customRoutingController:eventDidTimeOut:	- (void)customRoutingController:(AVCustomRoutingController * _Nonnull)controller eventDidTimeOut:(AVCustomRoutingEvent * _Nonnull)event;	yes
-AVCustomRoutingControllerDelegate	16.0	sdk16 body		NSObject	optional	method	yes	customRoutingController:didSelectItem:	- (void)customRoutingController:(AVCustomRoutingController * _Nonnull)controller didSelectItem:(AVCustomRoutingActionItem * _Nonnull)customActionItem;	yes
-AVRoutingPlaybackParticipant	26.0	transcribed			-	-	-	-	-	-

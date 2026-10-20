@@ -1,8 +1,0 @@
-protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
-VNFaceObservationAccepting	11.0	sdk16 body		NSObject	-	-	-	-	-	-
-VNFaceObservationAccepting	11.0	sdk16 body		NSObject	required	property	no	inputFaceObservations	@property (nonatomic, readwrite, copy) NSArray<VNFaceObservation *> * _Nullable inputFaceObservations;	yes
-VNRequestProgressProviding	13.0	sdk16 body		NSObject	-	-	-	-	-	-
-VNRequestProgressProviding	13.0	sdk16 body		NSObject	required	property	no	progressHandler	@property (nonatomic, readwrite, copy) VNRequestProgressHandler _Nonnull progressHandler;	yes
-VNRequestProgressProviding	13.0	sdk16 body		NSObject	required	property	no	indeterminate	@property (atomic, readonly) BOOL indeterminate;	yes
-VNRequestRevisionProviding	12.0	sdk16 body			-	-	-	-	-	-
-VNRequestRevisionProviding	12.0	sdk16 body			required	property	no	requestRevision	@property (nonatomic, readonly, assign, unsafe_unretained) NSUInteger requestRevision;	yes

@@ -1,6 +1,0 @@
-api	introduced	status	reasons	returns	params	decl
-DDDeviceCategoryToString	16.0	generable		NSString *	DDDeviceCategory inValue	NSString * DDDeviceCategoryToString(DDDeviceCategory inValue)
-DDDeviceMediaPlaybackStateToString	16.0	generable		NSString *	DDDeviceMediaPlaybackState inValue	NSString * DDDeviceMediaPlaybackStateToString(DDDeviceMediaPlaybackState inValue)
-DDDeviceProtocolToString	16.0	generable		NSString *	DDDeviceProtocol inValue	NSString * DDDeviceProtocolToString(DDDeviceProtocol inValue)
-DDDeviceStateToString	16.0	generable		NSString *	DDDeviceState inValue	NSString * DDDeviceStateToString(DDDeviceState inValue)
-DDEventTypeToString	16.0	generable		NSString *	DDEventType inValue	NSString * DDEventTypeToString(DDEventType inValue)

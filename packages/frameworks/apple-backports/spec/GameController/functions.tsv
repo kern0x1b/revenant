@@ -1,5 +1,0 @@
-api	introduced	status	reasons	returns	params	decl
-GCInputArcadeButtonName	16.0	generable		GCInputButtonName	NSInteger row; NSInteger column	GCInputButtonName GCInputArcadeButtonName(NSInteger row, NSInteger column)
-GCInputBackLeftButton	17.4	generable		GCInputButtonName	NSInteger position	GCInputButtonName GCInputBackLeftButton(NSInteger position)
-GCInputBackRightButton	17.4	generable		GCInputButtonName	NSInteger position	GCInputButtonName GCInputBackRightButton(NSInteger position)
-NSStringFromGCPoint2	17.4	generable		NSString*	GCPoint2 point	NSString* NSStringFromGCPoint2(GCPoint2 point)

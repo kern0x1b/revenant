@@ -1,2 +1,0 @@
-kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
-constant	SAErrorDomain	-	SAErrorDomain	16.0	NSErrorDomain	API_AVAILABLE(ios(16.0), macos(13.0), watchos(10.1)) API_UNAVAILABLE(tvos)	7e49109838ea8f6c	found	SAErrorDomain	SAErrorDomain	host-macos	-	exported	ns	-

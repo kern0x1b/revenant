@@ -1,3 +1,0 @@
-// swift-interface-format-version: 1.0
-// swift-module-flags: -module-name WiFiInfrastructure
-// A Swift-only module of the input test's SDK fixture: it has a module folder under usr/lib/swift and no C header.

@@ -1,8 +1,0 @@
-framework	kind	usr	container	name	side	type	params	availability	message	declhash
-AudioToolbox	swift-function	c:@F@CopyInstrumentInfoFromSoundBank	-	CopyInstrumentInfoFromSoundBank(_:_:)	-	Darwin.OSStatus	CoreFoundation.CFURL | Swift.UnsafeMutablePointer<Swift.Unmanaged<CoreFoundation.CFArray>?>	ios=7.0	-	d06409e9f6c1359f
-AudioToolbox	swift-function	c:@F@CopyNameFromSoundBank	-	CopyNameFromSoundBank(_:_:)	-	Darwin.OSStatus	CoreFoundation.CFURL | Swift.UnsafeMutablePointer<Swift.Unmanaged<CoreFoundation.CFString>?>	ios=7.0	-	7f85d1c8b41b6fba
-AudioToolbox	swift-constant	c:@macro@AUDIO_TOOLBOX_VERSION	-	AUDIO_TOOLBOX_VERSION	-	Swift.Int32	-	-	-	b7b16830c7222821
-AudioToolbox	swift-constant	c:@macro@kInstrumentInfoKey_LSB	-	kInstrumentInfoKey_LSB	-	Swift.String	-	-	-	ff457d4e4874eaaf
-AudioToolbox	swift-constant	c:@macro@kInstrumentInfoKey_MSB	-	kInstrumentInfoKey_MSB	-	Swift.String	-	-	-	68619ce4e8612b24
-AudioToolbox	swift-constant	c:@macro@kInstrumentInfoKey_Name	-	kInstrumentInfoKey_Name	-	Swift.String	-	-	-	5a6403d33aee2779
-AudioToolbox	swift-constant	c:@macro@kInstrumentInfoKey_Program	-	kInstrumentInfoKey_Program	-	Swift.String	-	-	-	79bafd15d1fcdd90

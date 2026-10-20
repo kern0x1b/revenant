@@ -1,3 +1,0 @@
-framework	kind	usr	container	name	side	type	params	availability	message	declhash
-_CoreData_CloudKit	swift-class	c:objc(cs)NSPersistentCloudKitContainerOptions	-	NSPersistentCloudKitContainerOptions	-	-	-	ios=13.0	-	2158e8059f65edcf
-_CoreData_CloudKit	swift-property	s:So36NSPersistentCloudKitContainerOptionsC010_CoreData_bC0E13databaseScopeSo010CKDatabaseI0Vvp	NSPersistentCloudKitContainerOptions	databaseScope	-	CloudKit.CKDatabase.Scope	-	ios=14.0,macos=11.0,tvos=14.0,watchos=7.0	-	3fec6c9eb173b88e

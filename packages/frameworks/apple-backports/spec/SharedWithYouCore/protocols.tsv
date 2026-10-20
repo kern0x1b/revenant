@@ -1,4 +1,0 @@
-protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
-SWCollaborationActionHandler	16.0	sdk16 body		NSObject	-	-	-	-	-	-
-SWCollaborationActionHandler	16.0	sdk16 body		NSObject	required	method	yes	collaborationCoordinator:handleStartCollaborationAction:	- (void)collaborationCoordinator:(SWCollaborationCoordinator * _Nonnull)coordinator handleStartCollaborationAction:(SWStartCollaborationAction * _Nonnull)action;	yes
-SWCollaborationActionHandler	16.0	sdk16 body		NSObject	required	method	yes	collaborationCoordinator:handleUpdateCollaborationParticipantsAction:	- (void)collaborationCoordinator:(SWCollaborationCoordinator * _Nonnull)coordinator handleUpdateCollaborationParticipantsAction:(SWUpdateCollaborationParticipantsAction * _Nonnull)action;	yes

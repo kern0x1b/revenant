@@ -1,9 +1,0 @@
-module	kind	api	introduced	deprecated	obsoleted	unavailable	via
-SpriteKit	property	SKShapeNode.customPlaygroundQuickLook		yes			none
-SpriteKit	property	SKSpriteNode.customPlaygroundQuickLook		yes			none
-SpriteKit	property	SKTextureAtlas.customPlaygroundQuickLook		yes			none
-SpriteKit	property	SKTexture.customPlaygroundQuickLook		yes			none
-SpriteKit	typealias	SKColor					none
-SpriteKit	method	SKWarpGeometryGrid.init(columns:rows:sourcePositions:destinationPositions:)	10.0				container
-SpriteKit	method	SKWarpGeometryGrid.replacingBySourcePositions(positions:)	10.0				container
-SpriteKit	method	SKWarpGeometryGrid.replacingByDestinationPositions(positions:)	10.0				container

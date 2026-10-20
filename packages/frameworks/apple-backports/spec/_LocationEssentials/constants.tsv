@@ -1,2 +1,0 @@
-kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
-constant	kCLLocationAccuracyReduced	-	kCLLocationAccuracyReduced	14.0	const CLLocationAccuracy	API_AVAILABLE(ios(14.0), macos(11.0), watchos(7.0), tvos(14.0))	1b223213e5c16a76	numeric	-	-	host-macos	-	exported	ns	-

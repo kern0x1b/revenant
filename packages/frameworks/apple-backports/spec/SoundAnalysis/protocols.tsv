@@ -1,7 +1,0 @@
-protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
-SNRequest	13.0	sdk16 body		NSObject	-	-	-	-	-	-
-SNResult	13.0	sdk16 body		NSObject	-	-	-	-	-	-
-SNResultsObserving	13.0	sdk16 body		NSObject	-	-	-	-	-	-
-SNResultsObserving	13.0	sdk16 body		NSObject	required	method	yes	request:didProduceResult:	- (void)request:(id<SNRequest>  _Nonnull)request didProduceResult:(id<SNResult>  _Nonnull)result;	yes
-SNResultsObserving	13.0	sdk16 body		NSObject	optional	method	yes	request:didFailWithError:	- (void)request:(id<SNRequest>  _Nonnull)request didFailWithError:(NSError * _Nonnull)error;	yes
-SNResultsObserving	13.0	sdk16 body		NSObject	optional	method	yes	requestDidComplete:	- (void)requestDidComplete:(id<SNRequest>  _Nonnull)request;	yes

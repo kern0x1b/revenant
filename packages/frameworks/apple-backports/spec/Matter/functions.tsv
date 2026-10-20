@@ -1,9 +1,0 @@
-api	introduced	status	reasons	returns	params	decl
-MTRAttributeNameForID	17.6	generable		NSString *	MTRClusterIDType clusterID; MTRAttributeIDType attributeID	NSString * MTRAttributeNameForID(MTRClusterIDType clusterID, MTRAttributeIDType attributeID)
-MTRClusterNameForID	17.6	generable		NSString *	MTRClusterIDType clusterID	NSString * MTRClusterNameForID(MTRClusterIDType clusterID)
-MTRDeviceControllerStorageClasses	17.6	generable		NSSet<Class> *		NSSet<Class> * MTRDeviceControllerStorageClasses()
-MTREventNameForID	18.2	generable		NSString *	MTRClusterIDType clusterID; MTREventIDType eventID	NSString * MTREventNameForID(MTRClusterIDType clusterID, MTREventIDType eventID)
-MTRRequestCommandNameForID	18.2	generable		NSString *	MTRClusterIDType clusterID; MTRCommandIDType commandID	NSString * MTRRequestCommandNameForID(MTRClusterIDType clusterID, MTRCommandIDType commandID)
-MTRResponseCommandNameForID	18.2	generable		NSString *	MTRClusterIDType clusterID; MTRCommandIDType commandID	NSString * MTRResponseCommandNameForID(MTRClusterIDType clusterID, MTRCommandIDType commandID)
-MTRSetLogCallback	16.4	generable		void	MTRLogType logTypeThreshold; MTRLogCallback callback	void MTRSetLogCallback(MTRLogType logTypeThreshold, MTRLogCallback callback)
-MTRSetMessageReliabilityParameters	17.6	generable		void	NSNumber * idleRetransmitMs; NSNumber * activeRetransmitMs; NSNumber * activeThresholdMs; NSNumber * additionalRetransmitDelayMs	void MTRSetMessageReliabilityParameters(NSNumber * idleRetransmitMs, NSNumber * activeRetransmitMs, NSNumber * activeThresholdMs, NSNumber * additionalRetransmitDelayMs)

@@ -1,7 +1,0 @@
-#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
-interface	c:objc(cs)ASIdentifierManager	-			-	-	-	ios=6/-/-/0,macos=10.14/-/-/0,tvos=6/-/-/0	deprecated: This has been replaced by functionality in AppTrackingTransparency's ATTrackingManager class.	213c84825076d244	-
-super	-	ASIdentifierManager	NSObject		-	-	-	-	-	f7523dcdf496b67c	-
-method	c:objc(cs)ASIdentifierManager(cm)sharedManager	-			ASIdentifierManager *	-	-	ios=6/-/-/0,macos=10.14/-/-/0,tvos=6/-/-/0	-	8493df4cb9086f0b	-
-property	c:objc(cs)ASIdentifierManager(py)advertisingIdentifier	-			NSUUID *	-	readonly,nonatomic	ios=6/-/-/0,macos=10.14/-/-/0,tvos=6/-/-/0	-	9b09df0f976d1165	-
-property	c:objc(cs)ASIdentifierManager(py)advertisingTrackingEnabled	-			BOOL	-	readonly,nonatomic,getter=isAdvertisingTrackingEnabled	ios=6/14/-/0,macos=10.14/11.0/-/0,tvos=6/14/-/0	-	59a237fc3c8470dd	-
-typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-

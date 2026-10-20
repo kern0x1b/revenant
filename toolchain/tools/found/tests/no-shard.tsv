@@ -1,2 +1,0 @@
-# the frameworks of the sweep with no shard that declare nothing of their own: name, class, targets, reason (TAB separated). Computed by the sweep from the frameworks' own headers and the census of their declarations (ir.lua scan_no_shard), never listed by name.
-FixtureUmbrella	alias	FixtureUmbrella/FixtureNested	its headers declare nothing; its declarations belong to FixtureUmbrella/FixtureNested (1)

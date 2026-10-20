@@ -1,4 +1,0 @@
-framework module Inner [system] {
-  umbrella header "Inner.h"
-  export *
-}

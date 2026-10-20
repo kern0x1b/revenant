@@ -1,8 +1,0 @@
-module FixtureC [system] {
-  umbrella header "FixtureC/fc.h"
-  export *
-}
-module FixtureCExtra [system] {
-  header "FixtureC/fc_extra.h"
-  export *
-}

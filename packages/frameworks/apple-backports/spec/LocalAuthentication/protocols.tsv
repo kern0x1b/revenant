@@ -1,3 +1,0 @@
-protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
-LAEnvironmentObserver	18.0	transcribed		NSObject	-	-	-	-	-	-
-LAEnvironmentObserver	18.0	transcribed		NSObject	optional	method	yes	environment:stateDidChangeFromOldState:	- (void)environment:(LAEnvironment * _Nonnull)environment stateDidChangeFromOldState:(LAEnvironmentState * _Nonnull)oldState;	-

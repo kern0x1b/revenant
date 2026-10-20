@@ -1,3 +1,0 @@
-module	kind	api	introduced	deprecated	obsoleted	unavailable	via
-MetricKit	function	mxSignpost(_:dso:log:name:signpostID:_:_:)	13.0				own
-MetricKit	function	mxSignpostAnimationIntervalBegin(dso:log:name:signpostID:_:_:)	15.0				own

@@ -1,5 +1,0 @@
-protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
-CLSContextProvider	12.2	sdk16 body			-	-	-	-	-	-
-CLSContextProvider	12.2	sdk16 body			required	method	yes	updateDescendantsOfContext:completion:	- (void)updateDescendantsOfContext:(CLSContext * _Nonnull)context completion:(void (^ _Nonnull)(NSError * _Nullable))completion;	yes
-CLSDataStoreDelegate	11.3	sdk16 body		NSObject	-	-	-	-	-	-
-CLSDataStoreDelegate	11.3	sdk16 body		NSObject	required	method	yes	createContextForIdentifier:parentContext:parentIdentifierPath:	- (__kindof CLSContext * _Nullable)createContextForIdentifier:(NSString * _Nonnull)identifier parentContext:(__kindof CLSContext * _Nonnull)parentContext parentIdentifierPath:(NSArray<NSString *> * _Nonnull)parentIdentifierPath;	yes

@@ -1,2 +1,0 @@
-kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
-constant	WCErrorDomain	-	WCErrorDomain	9.0	NSString * const	NS_AVAILABLE_IOS(9.0)	a307e08294e5d0d1	found	WCErrorDomain	-	ios-26.2-cache (no host value)	-	exported	ns	-

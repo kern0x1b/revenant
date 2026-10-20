@@ -1,4 +1,0 @@
-module	kind	api	introduced	deprecated	obsoleted	unavailable	via
-_PermissionKit_UIKit	method	AskCenter.ask(_:in:)	26.2				container
-_PermissionKit_UIKit	method	AskCenter.ask(_:in:)	26.2				container
-_PermissionKit_UIKit	method	CommunicationLimits.ask(_:in:)	26	yes			container

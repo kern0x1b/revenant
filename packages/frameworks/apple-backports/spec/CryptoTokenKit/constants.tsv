@@ -1,2 +1,0 @@
-kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
-constant	TKErrorDomain	-	TKErrorDomain	9.0	NSString *const	API_AVAILABLE(macos(10.10), ios(9.0), tvos(9.0), watchos(2.0))	8578ff5374493897	found	CryptoTokenKit	CryptoTokenKit	ios-26.2-cache	-	exported	ns	-

@@ -1,8 +1,0 @@
-kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
-constant	BEAccessibilitySelectionChangedNotification	-	BEAccessibilitySelectionChangedNotification	18.0	UIAccessibilityNotifications	-	3c6c1c8139adefd5	numeric	-	-	host-macos	-	exported	ns	-
-constant	BEAccessibilityTraitMenuItem	-	BEAccessibilityTraitMenuItem	18.0	UIAccessibilityTraits	-	5e043d3a8d09c508	numeric	-	-	host-macos	-	exported	ns	-
-constant	BEAccessibilityTraitPopUpButton	-	BEAccessibilityTraitPopUpButton	18.0	UIAccessibilityTraits	-	67989da94844fe74	numeric	-	-	host-macos	-	exported	ns	-
-constant	BEAccessibilityTraitRadioButton	-	BEAccessibilityTraitRadioButton	18.0	UIAccessibilityTraits	-	688415b1730c1f57	numeric	-	-	host-macos	-	exported	ns	-
-constant	BEAccessibilityTraitReadOnly	-	BEAccessibilityTraitReadOnly	18.0	UIAccessibilityTraits	-	e190a4cb5d1b6f1c	numeric	-	-	host-macos	-	exported	ns	-
-constant	BEAccessibilityTraitVisited	-	BEAccessibilityTraitVisited	18.0	UIAccessibilityTraits	-	dcaca45ca624c2f4	numeric	-	-	host-macos	-	exported	ns	-
-constant	BEAccessibilityValueChangedNotification	-	BEAccessibilityValueChangedNotification	18.0	UIAccessibilityNotifications	-	3d042828ea284c34	numeric	-	-	host-macos	-	exported	ns	-

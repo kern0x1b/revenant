@@ -1,2 +1,0 @@
-kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
-constant	LPErrorDomain	-	LPErrorDomain	13.0	NSErrorDomain const	API_AVAILABLE(macos(10.15), ios(13.0), watchos(6.0))	7d821773fd3ec5f4	found	LPErrorDomain	LPErrorDomain	ios-26.2-cache	-	exported	ns	-

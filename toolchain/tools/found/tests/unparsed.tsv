@@ -1,4 +1,0 @@
-# the frameworks of the SDK the extractor does not parse as C or Objective-C: name, the class of its source, and the evidence (tab-separated, one line each). parsed (Swift interface): read by the swift shard step; no declarations: no header of its own.
-Broken	unparsed	<sdk>/System/Library/Frameworks/Broken.framework/Headers/Broken.h:2: 'Missing.h' file not found
-NoHeader	no declarations	no public header in Headers/ and no module map header; the folder holds no header: Headers/readme.txt
-Swiftonly	parsed (Swift interface)	no Objective-C or C header; Swift interface only; its Swift interface <sdk>/System/Library/Frameworks/Swiftonly.framework/Modules/Swiftonly.swiftmodule/x86_64-apple-ios.swiftinterface is read by the swift shard step

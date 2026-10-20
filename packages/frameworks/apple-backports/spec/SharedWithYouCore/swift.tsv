@@ -1,5 +1,0 @@
-framework	kind	usr	container	name	side	type	params	availability	message	declhash
-SharedWithYouCore	swift-constant	c:@SharedWithYouCoreVersionNumber	-	SharedWithYouCoreVersionNumber	-	Swift.Double	-	-	-	a8a9b6d7acf0f342
-SharedWithYouCore	swift-constant	c:@SharedWithYouCoreVersionString	-	SharedWithYouCoreVersionString	-	_	-	-	-	8db8605c938e872f
-SharedWithYouCore	swift-class	c:objc(cs)SWCollaborationOption	-	SWCollaborationOption	-	-	-	ios=16.0	-	90500b83b0b6d2f0
-SharedWithYouCore	swift-method	s:So21SWCollaborationOptionC17SharedWithYouCoreE5title10identifier8subtitle8selected26requiredOptionsIdentifiersABSS_S2SSbSaySSGtcfc	SWCollaborationOption	init(title:identifier:subtitle:selected:requiredOptionsIdentifiers:)	-	-	SharedWithYouCore.SWCollaborationOption | Swift.String | Swift.String | Swift.String | Swift.Bool | [Swift.String]	-	-	271508d5affc7ac2

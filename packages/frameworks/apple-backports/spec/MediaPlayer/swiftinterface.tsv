@@ -1,4 +1,0 @@
-module	kind	api	introduced	deprecated	obsoleted	unavailable	via
-MediaPlayer	method	MPMediaItemAnimatedArtwork.init(artworkID:previewImageRequestHandler:videoAssetFileURLRequestHandler:)	26.0				own
-MediaPlayer	method	MPMusicPlayerPlayParameters.init(from:)	11.0				container
-MediaPlayer	method	MPMusicPlayerPlayParameters.encode(to:)	11.0				container

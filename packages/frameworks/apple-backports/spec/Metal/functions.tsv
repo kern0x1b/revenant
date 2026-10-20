@@ -1,2 +1,0 @@
-api	introduced	status	reasons	returns	params	decl
-MTLCopyAllDevices	18.0	generable		NSArray <id<MTLDevice>> *		NSArray <id<MTLDevice>> * MTLCopyAllDevices()

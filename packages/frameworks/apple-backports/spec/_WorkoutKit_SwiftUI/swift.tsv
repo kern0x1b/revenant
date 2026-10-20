@@ -1,3 +1,0 @@
-framework	kind	usr	container	name	side	type	params	availability	message	declhash
-_WorkoutKit_SwiftUI	swift-protocol	s:7SwiftUI4ViewP	-	View	-	-	-	ios=13.0,macos=10.15,tvos=13.0,watchos=6.0	-	897655e96801af3a
-_WorkoutKit_SwiftUI	swift-method	s:7SwiftUI4ViewP012_WorkoutKit_aB0E14workoutPreview_11isPresentedQr0dE00D4PlanV_AA7BindingVySbGtF	View	workoutPreview(_:isPresented:)	-	some SwiftUI.View	WorkoutKit.WorkoutPlan | SwiftUI.Binding<Swift.Bool>	-	-	c52f1e7fb07f144a
