@@ -1,7 +1,7 @@
 local ORDER = {"crc32", "sha256", "fnv64", "sort", "list", "geometry", "matrix", "text"}
 
 function main(out)
-    local scripts = path.join(os.scriptdir(), "..")
+    local scripts = path.join(os.scriptdir(), "..", "..", "tools")
     local corpus = import("corpus", {rootdir = scripts, anonymous = true})
     local e
     e, out = corpus.setup("devtime", out)
