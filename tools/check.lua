@@ -19,7 +19,7 @@ function checks.recompiler()
 end
 
 local layout = {
-    top = {"AGENTS.md", "README.md", "CONTRIBUTING.md", "SECURITY.md", "CHANGELOG.md", "LICENSES", "REUSE.toml",
+    top = {"AGENTS.md", "README.md", "CONTRIBUTING.md", "SECURITY.md", "LICENSES", "REUSE.toml",
            "xmake.lua", "xmakew", "tools", "docs", "third_party", "toolchain", "packages", "addons", "emulator", "recompiler",
            "agent-skills", "frameworks", ".agents", ".claude", ".claude-plugin", ".github", ".editorconfig", ".gitattributes",
            ".gitignore"},
