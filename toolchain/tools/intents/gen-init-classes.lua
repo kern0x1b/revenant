@@ -2,8 +2,8 @@ import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 
 local ROOT = path.absolute(path.join(os.scriptdir(), "..", ".."))
-local REGISTRY = path.join(ROOT, "packages", "a", "apple-backports", "registry", "Intents")
-local CLASSES = path.join(ROOT, "packages", "a", "apple-backports", "Intents")
+local REGISTRY = path.join(ROOT, "packages", "frameworks", "apple-backports", "registry", "Intents")
+local CLASSES = path.join(ROOT, "packages", "frameworks", "apple-backports", "Intents")
 
 local function sources()
     local found = {}
@@ -21,11 +21,11 @@ local HEADER = [==[
 // synthesizes for each. Generated; the two derivations are:
 //
 //   the class list, from the registry - every status `implemented` row that names `-[<class> init]`,
-//   read from packages/a/apple-backports/registry/Intents/ios*.json by registry_classes() in
+//   read from packages/frameworks/apple-backports/registry/Intents/ios*.json by registry_classes() in
 //   tools/intents/gen-init-classes.lua:
 //
 //   the properties, from the port's own objects - the `@synthesize NAME = _NAME;` lines inside
-//   each class's @implementation in packages/a/apple-backports/Intents/IN*.m, RevenantIntents100.m
+//   each class's @implementation in packages/frameworks/apple-backports/Intents/IN*.m, RevenantIntents100.m
 //   and RevenantIntents110.m, read by synthesised() in the same file:
 //
 //     xmake l tools/intents/gen-init-classes.lua -o tests/backports/host/intents-init/init-classes.inc

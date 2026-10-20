@@ -7,7 +7,7 @@
 #import <AudioUnit/AudioUnitProperties.h>
 #import <AudioUnit/AUComponent.h>
 #include <stdio.h>
-#include "../../../../packages/a/apple-backports/AVFAudio/RevenantAudioToolboxNames.h"
+#include "../../../../packages/frameworks/apple-backports/AVFAudio/RevenantAudioToolboxNames.h"
 
 static int checks = 0;
 static int failures = 0;

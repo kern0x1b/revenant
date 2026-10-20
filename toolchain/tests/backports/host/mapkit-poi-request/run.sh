@@ -14,7 +14,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/MapKit}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/MapKit}
 build=${MAPKIT_POI_BUILD:-$(runs_folder revenant-mapkit-poi-request)}
 rm -rf "$build"
 mkdir -p "$build"

@@ -9,7 +9,7 @@
 # ONE source, writer.m, compiled twice: plain, against this machine's own AVFoundation and its own
 # microphone and camera on a session that is really started - that half is the ORACLE, and it is where
 # every expectation comes from - and once more with the port's
-# packages/a/apple-backports/AVFoundation/AVCaptureDataOutputRecommendedSettings7.m linked in.
+# packages/frameworks/apple-backports/AVFoundation/AVCaptureDataOutputRecommendedSettings7.m linked in.
 #
 # The join is per KEY, not per dictionary. So:
 #
@@ -40,7 +40,7 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-port=$root/packages/a/apple-backports/AVFoundation/AVCaptureDataOutputRecommendedSettings7.m
+port=$root/packages/frameworks/apple-backports/AVFoundation/AVCaptureDataOutputRecommendedSettings7.m
 build=${AVFRS_BUILD:-$(runs_folder avf-recommended-settings7)}
 oracle_dir=${AVFRS_ORACLE:-$(runs_folder avf-recommended-settings7-oracle)}
 rm -rf "$build"

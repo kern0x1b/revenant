@@ -11,7 +11,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-PORT=${COREML_UPDATE_PORT:-$here/../../../../packages/a/apple-backports/CoreML}
+PORT=${COREML_UPDATE_PORT:-$here/../../../../packages/frameworks/apple-backports/CoreML}
 build=${COREML_UPDATE_BUILD:-$(runs_folder revenant-coreml-update)}
 # The bound on any weight or bias: this many float32 ulps of the largest weight in the host's dump of the event.
 # A float32 ulp at a magnitude m is 2^(e - 23) for the exponent e of m, so the bound scales with the weights.

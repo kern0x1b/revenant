@@ -8,8 +8,8 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-CCSRC=${CCSRC:-$root/packages/a/apple-backports/CommonCrypto}
-SECSRC=${SECSRC:-$root/packages/a/apple-backports/Security}
+CCSRC=${CCSRC:-$root/packages/frameworks/apple-backports/CommonCrypto}
+SECSRC=${SECSRC:-$root/packages/frameworks/apple-backports/Security}
 build=${CC_BUILD:-$(runs_folder commoncrypto-host)}
 rm -rf "$build"
 mkdir -p "$build"

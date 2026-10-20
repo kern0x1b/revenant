@@ -3,7 +3,7 @@ local json = import("core.base.json")
 
 local HERE = os.scriptdir()
 local WORKTREE = path.join(HERE, "..", "..", "..", "..")
-local PACKAGE = path.join(WORKTREE, "packages", "a", "apple-backports")
+local PACKAGE = path.join(WORKTREE, "packages", "frameworks", "apple-backports")
 
 local PREFIX = "VideoToolboxConstants"
 

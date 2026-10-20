@@ -3,7 +3,7 @@ import("core.package.package")
 
 local function recipe_digest(folder, name, recipe, tree_files)
     local tree = path.join(folder, name)
-    local root = path.join(tree, "packages", "a", "apple-backports")
+    local root = path.join(tree, "packages", "frameworks", "apple-backports")
     os.mkdir(root)
     os.cp(recipe, path.join(root, "xmake.lua"))
     for file, text in pairs(tree_files) do
@@ -18,14 +18,14 @@ local function recipe_digest(folder, name, recipe, tree_files)
 end
 
 local function digest_step(opt, folder, found)
-    local recipe = path.join(opt.modules, "..", "packages", "a", "apple-backports", "xmake.lua")
+    local recipe = path.join(opt.modules, "..", "packages", "frameworks", "apple-backports", "xmake.lua")
     local tree_files = {
-        [path.join("packages", "a", "apple-backports", "Foundation", "NSThing.m")] = "// a backport\n",
-        [path.join("packages", "a", "apple-backports", "Foundation", "RevenantThing.h")] = "// its header\n",
-        [path.join("packages", "a", "apple-backports", "attach.c")] = "// the attach helper\n",
-        [path.join("packages", "a", "apple-backports", "registry", "UIKit", "thing.json")] = '{"framework": "UIKit", "entries": []}\n',
-        [path.join("packages", "a", "apple-backports", "registry", "flat.json")] = "[]\n",
-        [path.join("packages", "a", "apple-backports", "notes.md")] = "notes\n",
+        [path.join("packages", "frameworks", "apple-backports", "Foundation", "NSThing.m")] = "// a backport\n",
+        [path.join("packages", "frameworks", "apple-backports", "Foundation", "RevenantThing.h")] = "// its header\n",
+        [path.join("packages", "frameworks", "apple-backports", "attach.c")] = "// the attach helper\n",
+        [path.join("packages", "frameworks", "apple-backports", "registry", "UIKit", "thing.json")] = '{"framework": "UIKit", "entries": []}\n',
+        [path.join("packages", "frameworks", "apple-backports", "registry", "flat.json")] = "[]\n",
+        [path.join("packages", "frameworks", "apple-backports", "notes.md")] = "notes\n",
         [path.join("modules", "apple", "backports.lua")] = "-- the build module\n",
         [path.join("addons", "r", "revenant", "xmake.lua")] = 'add_versions("v0.8.4", "0")\n'
     }

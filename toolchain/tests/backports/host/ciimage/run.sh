@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-GRAPHICS=${GRAPHICS:-$here/../../../../packages/a/apple-backports/Graphics}
+GRAPHICS=${GRAPHICS:-$here/../../../../packages/frameworks/apple-backports/Graphics}
 BUILD=${BUILD:-$(runs_fresh revenant-ciimage)}
 # CoreImage is on the host itself: the categories are built for macOS with their selectors
 # prefixed, so the port and the system answer side by side in one process.

@@ -18,7 +18,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 scratch=$(runs_fresh revenant-hapcrypto-check)
 root=${1:-$here/../../../..}
-package=${PACKAGE:-$root/packages/a/apple-backports}
+package=${PACKAGE:-$root/packages/frameworks/apple-backports}
 framework=${FRAMEWORK:-HomeKit}
 
 implemented=$(mktemp "$scratch/implemented.XXXXXX")

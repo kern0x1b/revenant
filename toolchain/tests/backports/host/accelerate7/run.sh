@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-ACCELERATE=${ACCELERATE:-$here/../../../../packages/a/apple-backports/Accelerate}
+ACCELERATE=${ACCELERATE:-$here/../../../../packages/frameworks/apple-backports/Accelerate}
 harness=${ACCELERATE7_HARNESS:-$here/../../device}
 build=${ACCELERATE7_BUILD:-$(runs_folder revenant-accelerate7-host)}
 sources="vImageBuffer7.m vImageCGImage7.m"

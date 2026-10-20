@@ -2,7 +2,7 @@
 #import <CoreMIDI/MIDIServices.h>
 #include <stdio.h>
 #include <string.h>
-#include "../../../../packages/a/apple-backports/AVFAudio/RevenantMIDIEventList.h"
+#include "../../../../packages/frameworks/apple-backports/AVFAudio/RevenantMIDIEventList.h"
 
 static int failures = 0;
 static int checks = 0;

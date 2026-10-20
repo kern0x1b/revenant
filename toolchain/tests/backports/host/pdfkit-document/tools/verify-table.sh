@@ -11,7 +11,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../../common/runs.sh" "$here"
 tree=$(cd "$here/../../../../.." && pwd)
-facts=${FACTS_FILE:-$tree/packages/a/apple-backports/facts/PDFKit/Document11.md}
+facts=${FACTS_FILE:-$tree/packages/frameworks/apple-backports/facts/PDFKit/Document11.md}
 build=${BUILD:-$(runs_folder pdfkit-table)}
 mkdir -p "$build/fixtures"
 

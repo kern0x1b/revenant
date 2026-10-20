@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-UIKIT=${UIKIT:-$here/../../../../packages/a/apple-backports/UIKit}
+UIKIT=${UIKIT:-$here/../../../../packages/frameworks/apple-backports/UIKit}
 BUILD=${BUILD:-$(runs_fresh revenant-uttypetags)}
 mkdir -p "$BUILD/shim/MobileCoreServices"
 echo '#include <CoreServices/CoreServices.h>' > "$BUILD/shim/MobileCoreServices/MobileCoreServices.h"

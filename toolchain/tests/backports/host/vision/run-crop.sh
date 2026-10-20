@@ -16,7 +16,7 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-vision=${VISION:-$root/packages/a/apple-backports/Vision}
+vision=${VISION:-$root/packages/frameworks/apple-backports/Vision}
 # The build directory: BUILD if the caller set it, a fresh temporary one otherwise, and made
 # either way, so a caller who points BUILD at a path that is not there yet gets one made rather
 # than a build that fails inside the compiler.

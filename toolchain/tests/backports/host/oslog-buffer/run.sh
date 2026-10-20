@@ -14,7 +14,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-FOUNDATION=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}
+FOUNDATION=${FOUNDATION:-$here/../../../../packages/frameworks/apple-backports/Foundation}
 BUILD=${BUILD:-$(runs_fresh revenant-oslog-buffer)}
 # Measured: the header's os_log macro takes the packed-buffer path only from a 10.12 target
 # (OS_LOG_TARGET_HAS_10_12_FEATURES). At 10.11 it calls _os_log_internal, so _os_log_impl never runs.

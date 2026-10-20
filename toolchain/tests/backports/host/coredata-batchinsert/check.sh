@@ -25,7 +25,7 @@ echo "FAIL host/coredata-batchinsert/check.sh: its Python steps are gone and not
 exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-FP=${COREDATA:-$here/../../../../packages/a/apple-backports}
+FP=${COREDATA:-$here/../../../../packages/frameworks/apple-backports}
 build=${COREDATA_CHECK:-$(runs_folder coredata-check)}
 rm -rf "$build"; mkdir -p "$build"
 

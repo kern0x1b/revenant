@@ -10,7 +10,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-FP=${FILEPROVIDER:-$here/../../../../packages/a/apple-backports/FileProvider}
+FP=${FILEPROVIDER:-$here/../../../../packages/frameworks/apple-backports/FileProvider}
 build=${FILEPROVIDER_BUILD:-$(runs_folder revenant-fileprovider-host)}
 rm -rf "$build"; mkdir -p "$build"
 

@@ -3,7 +3,7 @@
 `run.sh` runs four things, in this order: `probe.m` (below -- what the **host's** MediaPlayer answers for
 the 22 absent properties), and then the four contract checks -- `contract.m`,
 `mpratingcommandeventcheck.m`, `mpskipintervalcommandeventcheck.m` and `mpseekcommandeventcheck.m` -- which
-measure the **port's** code. They compile against `packages/a/apple-backports/MediaPlayer` and this
+measure the **port's** code. They compile against `packages/frameworks/apple-backports/MediaPlayer` and this
 directory's `standin/`, never against this Mac's MediaPlayer, which declares several of these already and
 would make a category look like a clobber. Before 2026-10-03 the four checks were in this directory and
 named by no runner; `coordination/crutches.md` recorded that, and it is closed.

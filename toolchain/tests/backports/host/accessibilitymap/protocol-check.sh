@@ -26,8 +26,8 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/generated.sh"
 ensure_generated "$here" Accessibility
 root=$(cd "$here/../../../.." && pwd)
-sources=${ACCESSIBILITY_SRC:-$root/packages/a/apple-backports/Accessibility}
-registry=${REGISTRY_ROOT:-$root/packages/a/apple-backports}
+sources=${ACCESSIBILITY_SRC:-$root/packages/frameworks/apple-backports/Accessibility}
+registry=${REGISTRY_ROOT:-$root/packages/frameworks/apple-backports}
 build=${PROTOCOL_BUILD:-$(runs_folder revenant-accessibilitymap-protocol)}
 rm -rf "$build"
 mkdir -p "$build"
@@ -64,7 +64,7 @@ sources_m=$(ls "$build/generated"/*.m)
 xcrun clang -target arm64-apple-macos26.0 -isysroot "$sdk" -fobjc-arc -O0 -Wall -Wno-nonnull \
     -include "$sources/RevenantBrailleMap.h" \
     "$here/protocol-check.m" "$sources/RevenantBrailleMap.m" $sources_m \
-    -I"$root/packages/a/apple-backports" -I"$sources" -I"$build" -I"$root/packages/a/apple-backports/.gen/Accessibility" \
+    -I"$root/packages/frameworks/apple-backports" -I"$sources" -I"$build" -I"$root/packages/frameworks/apple-backports/.gen/Accessibility" \
     -framework Foundation -framework CoreGraphics -o "$build/protocol" 2> "$build/build.log" || {
         echo "the protocol check did not build" >&2
         tail -20 "$build/build.log" >&2

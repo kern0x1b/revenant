@@ -7,7 +7,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${EDITMENU_PORT_SOURCE:-$here/../../../../packages/a/apple-backports/UIKit/UIEditMenuConfiguration.m}
+port=${EDITMENU_PORT_SOURCE:-$here/../../../../packages/frameworks/apple-backports/UIKit/UIEditMenuConfiguration.m}
 build=${EDITMENU_BUILD:-$(runs_fresh revenant-editmenu-config)}
 sdk=$(xcrun --show-sdk-path)
 app="$build/editmenu-config"

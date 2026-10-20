@@ -25,7 +25,7 @@ rm -rf "$build"
 mkdir -p "$build"
 cp "$here/xmake.lua" "$here/control" "$build/"
 # DDR_UIKIT is NOT set here. xmake.lua already falls back to the port's own UIKit when it is unset
-# (path.join(root, "packages/a/apple-backports/UIKit")), and this line used to point it at a scratch
+# (path.join(root, "packages/frameworks/apple-backports/UIKit")), and this line used to point it at a scratch
 # copy through a variable nothing defines, so under `set -u` the whole test died on
 # "dragdroprouting/run.sh: line 24: scratch: unbound variable" before xmake was ever configured.
 cd "$build"
@@ -44,7 +44,7 @@ failed=0
 # The port's own sources are copied into a scratch tree and the build is pointed at that, so the
 # mutant is a file in the scratch tree and no tracked source is ever written. There is therefore
 # nothing to restore and no trap: a kill leaves the worktree exactly as it was.
-port=$root/packages/a/apple-backports/UIKit
+port=$root/packages/frameworks/apple-backports/UIKit
 scratch=$build/port-sources
 rm -rf "$scratch"
 mkdir -p "$scratch"

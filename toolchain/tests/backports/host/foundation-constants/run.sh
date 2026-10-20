@@ -22,7 +22,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-S="$root/packages/a/apple-backports"
+S="$root/packages/frameworks/apple-backports"
 work=${WORK:-$(runs_folder foundation-constants)}
 rm -rf "$work"
 mkdir -p "$work"

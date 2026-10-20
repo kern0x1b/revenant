@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-UIKIT=${UIKIT:-$here/../../../../packages/a/apple-backports/UIKit}
+UIKIT=${UIKIT:-$here/../../../../packages/frameworks/apple-backports/UIKit}
 harness=${ANIMATORSCRUB_HARNESS:-$here/../../device}
 build=${ANIMATORSCRUB_BUILD:-$(runs_folder revenant-animatorscrub-host)}
 sources=${SOURCES:-$(cat "$here/sources.txt")}

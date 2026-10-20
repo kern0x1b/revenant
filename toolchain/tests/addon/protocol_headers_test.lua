@@ -8,7 +8,7 @@ end
 
 local function implemented_protocols(root, folder)
     local found = {}
-    local registry = path.join(root, "packages", "a", "apple-backports", "registry")
+    local registry = path.join(root, "packages", "frameworks", "apple-backports", "registry")
     local files = os.files(path.join(registry, folder, "*.json"))
     local single = path.join(registry, folder .. ".json")
     if os.isfile(single) then table.insert(files, single) end
@@ -55,7 +55,7 @@ function failures(opt)
     local found = {}
     local root = path.join(opt.modules, "..")
     for _, library in ipairs(libraries_of(opt.modules)) do
-        local folder = path.join(root, "packages", "a", "apple-backports", library.folder)
+        local folder = path.join(root, "packages", "frameworks", "apple-backports", library.folder)
         local rows = implemented_protocols(root, library.folder)
         if #rows > 0 then
             local header = path.join(folder, "Revenant" .. library.folder .. "Protocols.h")

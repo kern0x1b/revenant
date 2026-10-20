@@ -28,7 +28,7 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-avf=$root/packages/a/apple-backports/AVFoundation
+avf=$root/packages/frameworks/apple-backports/AVFoundation
 build=${AVF_METADATA_BUILD:-$(runs_folder avf-metadata)}
 expected=${AVF_METADATA_ROWS:-47}
 rm -rf "$build"

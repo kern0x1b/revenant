@@ -36,7 +36,7 @@ local function write_fixture(tree, corpus)
     os.mkdir(tree)
     os.cp(TOOLS, path.join(tree, "tools"))
     os.cp(path.join(TOOLS, "..", "modules"), path.join(tree, "modules"))
-    local package = path.join(tree, "packages", "a", "apple-backports")
+    local package = path.join(tree, "packages", "frameworks", "apple-backports")
     shards.write(tree, FIXTURE, {
         shards.objc_row("method", "c:objc(cs)FKThing(im)setName:age:", nil, nil, nil, "ios=12.0/-/-/0"),
         shards.objc_row("method", "c:objc(cs)FKThing(im)reset", nil, nil, nil, "ios=12.0/-/-/0"),
@@ -61,7 +61,7 @@ local function write_fixture(tree, corpus)
               '{"entries": [{"api": "-[FKThing reset]", "kind": "method", "status": "implemented", "owner": "hand"}]}\n')
     emit.file(path.join(package, "overrides", "hashes", FIXTURE .. ".tsv"),
               tsv.table_text({"api", "key", "pinned", "pinned-by", "registry"}, {
-                  {"-[FKThing reset]", "FKThing_reset", "-", "fixture pin", "packages/a/apple-backports/registry/FixtureKit/ios.json"},
+                  {"-[FKThing reset]", "FKThing_reset", "-", "fixture pin", "packages/frameworks/apple-backports/registry/FixtureKit/ios.json"},
               }))
     emit.file(path.join(package, ".gen", FIXTURE, "trace", "skipped.tsv"),
               tsv.table_text({"api", "reason"}, {{"+[FKThing make]", "class method not stubbed in the fixture"}}))
@@ -228,7 +228,7 @@ local function test_pages(check)
           "a member row shows its extractor declaration (its pipes escaped), its ledger status and its demand, and is a stub")
     check(has(class, "| method | `not derived: not in the doc rows` | - | not checked at 6.1.3 | not checked at 4.3 | - | - | - | not stubbed: class method not stubbed in the fixture |"),
           "a member the extractor does not list is marked, and a member the trace left out reports its reason")
-    check(has(class, "| method | `- (void)reset` | - | not checked at 6.1.3 | absent | - | - | implemented: packages/a/apple-backports/registry/FixtureKit/ios.json, pin fixture pin | hand/override |"),
+    check(has(class, "| method | `- (void)reset` | - | not checked at 6.1.3 | absent | - | - | implemented: packages/frameworks/apple-backports/registry/FixtureKit/ios.json, pin fixture pin | hand/override |"),
           "an overridden member shows its extractor declaration, its registry row, its pin and the hand override")
     check(has(class, "| property | `` @property (nonatomic, copy) NSString *title API_DEPRECATED(\"Use `other`\", ios(1.0, 2.0)) `` | - |"),
           "a property row shows its extractor declaration, in a code span that can hold a backtick")

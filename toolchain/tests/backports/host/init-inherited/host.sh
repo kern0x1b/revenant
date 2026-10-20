@@ -9,7 +9,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-healthkit=${HEALTHKIT:-$here/../../../../packages/a/apple-backports/HealthKit}
+healthkit=${HEALTHKIT:-$here/../../../../packages/frameworks/apple-backports/HealthKit}
 BUILD=${BUILD:-$(runs_fresh revenant-init-inherited)}
 quiet="-w -DREVENANT_HOST_BUILD"
 rm -rf "$BUILD"

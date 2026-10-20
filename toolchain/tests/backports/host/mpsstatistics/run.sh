@@ -17,7 +17,7 @@ echo "FAIL host/mpsstatistics/run.sh: its Python steps are gone and not yet port
 exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-mps=${MPS:-$here/../../../../packages/a/apple-backports/MetalPerformanceShaders}
+mps=${MPS:-$here/../../../../packages/frameworks/apple-backports/MetalPerformanceShaders}
 build=${BUILD:-$(runs_folder host/mpsstatistics)}
 rm -rf "$build"
 mkdir -p "$build"

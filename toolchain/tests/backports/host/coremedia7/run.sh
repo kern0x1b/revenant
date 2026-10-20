@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-AV=${AV:-$here/../../../../packages/a/apple-backports/AVFoundation}
+AV=${AV:-$here/../../../../packages/frameworks/apple-backports/AVFoundation}
 BUILD=${BUILD:-$(runs_fresh revenant-coremedia7)}
 mkdir -p "$BUILD"
 sdk=$(xcrun --show-sdk-path)

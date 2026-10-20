@@ -1,0 +1,227 @@
+{
+  "framework": "AuthenticationServices",
+  "entries": [
+    {
+      "api": "ASWebAuthenticationSession",
+      "kind": "class",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "a departure from 12.0 in the start: iOS 12 starts the wrapped session through a method of its own that this release does not have, so the session is started as the SFAuthenticationSession of iOS 11 is, over the page of this package",
+      "effect": "the session is made with a URL, a callback scheme and a completion handler, and is started with -start, which answers YES once and NO while it runs; the handler is given the callback URL with no error when the page reaches the scheme, or nil and an error of ASWebAuthenticationSessionErrorDomain with the code 1 for a cancel, for an address that is not a web address and for a page dismissed by the user; -cancel ends a running session the same way and does nothing to one that has not started",
+      "facts": "facts/AuthenticationServices/ASWebAuthenticationSession.md",
+      "source": "AuthenticationServices of the arm64 shared cache of iOS 12.0: -[ASWebAuthenticationSession initWithURL:callbackURLScheme:completionHandler:] at 0x1aa076000 makes an SFAuthenticationSession whose handler hands the callback URL on and turns any error into code 1 of the domain, -start and -cancel at 0x1aa076200 and 0x1aa076218 forward to it; an iPad 2 running 6.1.3 with a loopback server for what comes out"
+    },
+    {
+      "api": "ASWebAuthenticationSessionErrorDomain",
+      "kind": "constant",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the string com.apple.AuthenticationServices.WebAuthenticationSession, which iOS 12 gives the constant",
+      "facts": "facts/AuthenticationServices/ASWebAuthenticationSession.md",
+      "source": "AuthenticationServices of the arm64 shared cache of iOS 12.0: the string the error of the session is made with, at 0x1aa07c65e"
+    },
+    {
+      "api": "ASCredentialIdentityStore",
+      "kind": "class",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "+sharedStore and the header's five methods over a property list of the port's own, under .agent-work/runs/ and never in the user's Library: -getCredentialIdentityStoreStateWithCompletion: reporting enabled and incremental for the application's own store, -saveCredentialIdentities:completion: and -removeCredentialIdentities:completion: matching an identity on its service identifier, user and record identifier and NOT its rank, -removeAllCredentialIdentitiesWithCompletion: emptying it, and -replaceCredentialIdentitiesWithIdentities:completion: making the store's set EXACTLY the array, which is what the caller asked for. The header confines that last method to a store that does not take incremental updates, and that is a rule for the CALLER about which method to call, not permission for the port to do something else: a caller that wants a superset calls -saveCredentialIdentities:. A write that fails is reported as the (NO, ASCredentialIdentityStoreErrorDomain error) the header defines, never swallowed. The host's writing half is never called: on a Mac those four change the user's AutoFill state, so the host side is read-only and the writing half's behaviour is documented from the header",
+      "source": "the 26.2 header's contract for the writing half, which is deliberately NOT measured on the host because those four methods change this Mac's AutoFill state: every store write in the probe goes through one chokepoint that reads the receiver's class out of the runtime and refuses anything the harness has not renamed to the port's, and tests/backports/host/authservices/port-store-selftest.m asks the same predicate about this Mac's own store class object and sends nothing; the 26.2 header for every member; and the port's own property list, whose save-then-query the value differential exercises",
+      "facts": "facts/AuthenticationServices/ASCredentialIdentity.md"
+    },
+    {
+      "api": "ASCredentialIdentityStoreState",
+      "kind": "class",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "whether the credential identity store can be written to and whether it takes changes or the whole set: -isEnabled and -supportsIncrementalUpdates, both readonly, both copied in and out, and NSSecureCoding through a coder carrying both. The header is explicit that enabled is a gate on writing, so this is the value a caller needs before it writes anything",
+      "source": "macOS 27.0's own AuthenticationServices, asked with class_copyMethodList for the class's method list by tests/backports/host/authservices; the 26.2 header's contract; and the class's members as the header declares them, read by clang's AST",
+      "facts": "facts/AuthenticationServices/ASCredentialIdentity.md"
+    },
+    {
+      "api": "ASCredentialProviderExtensionContext",
+      "kind": "class",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the NSExtensionContext subclass a password-manager extension completes its exchange into. Three of the header's four members are carried: -completeRequestWithSelectedCredential:completionHandler:, -completeExtensionConfigurationRequest and -cancelRequestWithError:, and each RECORDS the exchange in -lastExchange -- the credential, the error, whether it was cancelled, whether it was a configuration request, and the answer the completion handler gave about expiry -- because on a device the counterpart of a completion is the system taking the credential, and the port has no system to hand it to, so what a test can observe is what the extension decided. The fourth, -completeRequestReturningItems:completionHandler:, is declared NS_UNAVAILABLE by the release and is deliberately not implemented, which is the release's own request rather than a gap",
+      "source": "macOS 27.0's own AuthenticationServices, asked with class_copyMethodList for the method list by tests/backports/host/authservices, and the 26.2 header's four declarations read by clang's AST at ios(12.0)",
+      "facts": "facts/AuthenticationServices/ASCredentialProvider.md"
+    },
+    {
+      "api": "ASCredentialProviderViewController",
+      "kind": "class",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the UIViewController subclass a password-manager EXTENSION subclasses so the system can ask it for a credential. Its five members are the release's own overridables and each is a documented no-op default, which is what a base class does for an extension that overrides none: -prepareCredentialListForServiceIdentifiers:, -prepareInterfaceToProvideCredentialForIdentity:, -prepareInterfaceForExtensionConfiguration and -provideCredentialWithoutUserInteractionForIdentity: prepare or provide nothing, because inventing a credential the extension never said it had would be offering one, and -extensionContext answers nil because the port has no system-provided context and will not stand in one that cannot complete anything",
+      "source": "macOS 27.0's own AuthenticationServices, asked with class_copyMethodList for the method list by tests/backports/host/authservices, and the 26.2 header's five declarations read by clang's AST at ios(12.0)",
+      "facts": "facts/AuthenticationServices/ASCredentialProvider.md"
+    },
+    {
+      "api": "ASCredentialServiceIdentifier",
+      "kind": "class",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "which service a stored credential is for, and whether that service is named by a domain or a URL: -identifier and -type, both readonly, with the release's own public -initWithIdentifier:type: kept as it is (this class does not mark it unavailable), -copyWithZone: carrying both parts because the same string typed as a domain and as a URL is a different service, and NSSecureCoding through a coder carrying both. The port does not parse the string against RFC 1035 or RFC 1738, because the release does not either and refusing identities the system would have kept is the worse mistake",
+      "source": "macOS 27.0's own AuthenticationServices, asked with class_copyMethodList for the class's method list by tests/backports/host/authservices; the 26.2 header's contract; and the class's members as the header declares them, read by clang's AST",
+      "facts": "facts/AuthenticationServices/ASCredentialIdentity.md"
+    },
+    {
+      "api": "ASPasswordCredential",
+      "kind": "class",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "a user and a password as a value: -initWithUser:password:, +credentialWithUser:password:, -user and -password, each copied in and out, and -copyWithZone: carrying BOTH -- a copy that dropped the password would look like a credential and could not be used for one. The reason the two provider classes are absent -- no credential provider extension for the system's AutoFill to consult -- does not touch a value object an application constructs and hands back",
+      "source": "macOS 27.0's own AuthenticationServices, asked with class_copyMethodList for the class's method list by tests/backports/host/authservices; and the 26.2 header's contract, its members read by clang's AST",
+      "facts": "facts/AuthenticationServices/ASCredentialIdentity.md"
+    },
+    {
+      "api": "ASPasswordCredentialIdentity",
+      "kind": "class",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "one stored credential -- who may sign in to which service and in what order autofill offers them: -serviceIdentifier, -user and -recordIdentifier all readonly, -rank writable and defaulting to 0, the release's own -initWithServiceIdentifier:user:recordIdentifier: and +identityWithServiceIdentifier:user:recordIdentifier: kept as they are because this class marks only plain -init unavailable, -copyWithZone: carrying all four, and NSSecureCoding with the service identifier decoded as its own class because the system compares those by value",
+      "source": "macOS 27.0's own AuthenticationServices, asked with class_copyMethodList for the class's method list by tests/backports/host/authservices; the 26.2 header's contract; and the class's members as the header declares them, read by clang's AST",
+      "facts": "facts/AuthenticationServices/ASCredentialIdentity.md"
+    },
+    {
+      "api": "ASWebAuthenticationSession.presentationContextProvider",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the provider exists so the release can pick the window to present the page over; -start now asks it, the way the release does",
+      "effect": "kept and read back weakly, as the release holds it; -start sends presentationAnchorForWebAuthenticationSession: and presents over the anchor it returns. A session with no provider, or a provider that returns nil, still starts over the one window this release runs, where iOS 13 raises for a missing provider",
+      "facts": "facts/AuthenticationServices/ASWebAuthenticationSession.md",
+      "source": "the headers of SDK 16.4; AuthenticationServices of the arm64 shared cache of iOS 13.0 for what the release does, and the SFAuthenticationSession of iOS 11 this package's session is built on for what it can do"
+    },
+    {
+      "api": "ASWebAuthenticationPresentationContextProviding",
+      "kind": "protocol",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the headers of SDK 16.4; AuthenticationServices of the arm64 shared cache of iOS 13.0 for what the release does, and the SFAuthenticationSession of iOS 11 this package's session is built on for what it can do",
+      "facts": "transcribed from the 26.2 SDK's AST, whose ObjCProtocolDecl carries the base list, the members and whether each is required or optional; the generator is tools/transcribe-protocols.py@52253c0650, in the registry-types series, not in this tree. The 16.4 SDK declares it with a body - AuthenticationServices.framework in that SDK is a symlink into ../../../System/Cryptexes/OS/\u2026 and os.files does not follow one, which is why the scan resolves every framework before reading its Headers"
+    },
+    {
+      "api": "-[ASWebAuthenticationPresentationContextProviding presentationAnchorForWebAuthenticationSession:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port carries the caller's side of this protocol member: -[ASWebAuthenticationSession start] sends it to the provider, the same way the release does, and presents over the window it returns instead of always guessing the key window",
+      "effect": "an application's own provider is asked, and its answer is used to choose which window the sign-in page appears over",
+      "facts": "facts/AuthenticationServices/ASWebAuthenticationSession.md",
+      "source": "the headers of SDK 16.4; AuthenticationServices of the arm64 shared cache of iOS 13.0 for what the release does, and the SFAuthenticationSession of iOS 11 this package's session is built on for what it can do"
+    },
+    {
+      "api": "ASWebAuthenticationSession.prefersEphemeralWebBrowserSession",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the release has one process-wide cookie jar and no store per UIWebView, so isolating a sign-in flow means emptying that jar for the flow's duration, not switching to a private store. The jar is journaled to a plist on disk before it is emptied (a jetsam kill mid-flow must not cost the application every cookie it owned), replaced empty, and restored from the journal when the flow ends by any path - completion, cancellation, or a fresh launch finding a leftover journal from a kill",
+      "effect": "starting an ephemeral session empties the shared cookie jar for the flow and restores exactly what was there before once it ends; cookies and the URL cache are isolated, local and database storage are not, since UIWebView has no such per-session store to isolate on this release",
+      "source": "the headers of SDK 16.4; AuthenticationServices of the arm64 shared cache of iOS 13.0 for what the release does, and the SFAuthenticationSession of iOS 11 this package's session is built on for what it can do",
+      "facts": "facts/AuthenticationServices/ASWebAuthenticationSession.md"
+    },
+    {
+      "api": "ASWebAuthenticationSession.canStart",
+      "kind": "property",
+      "introduced": "13.4",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "YES until the session has been started or cancelled, NO after, which is what a session that has been spent answers; it is read from the port's own state, since SFAuthenticationSession has nothing to ask",
+      "facts": "facts/AuthenticationServices/ASWebAuthenticationSession.md",
+      "source": "the headers of SDK 16.4; AuthenticationServices of the arm64 shared cache of iOS 13.0 for what the release does, and the SFAuthenticationSession of iOS 11 this package's session is built on for what it can do"
+    },
+    {
+      "api": "ASAuthorizationAppleIDCredential.authorizationCode",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the short-lived code the server exchanges for the identity token, the other half of the pair identityToken makes. The getter is at ASAuthorizationAppleIDCredential.m:85 and its storage is declared by the @synthesize at :31, and the shape check compares it against the host's own class -- so this row is a measurement, not a reading of the header",
+      "source": "macOS 27.0's own AuthenticationServices, asked with class_copyMethodList for the method list by tests/backports/host/authservices, and the declaration in ASAuthorizationAppleIDCredential.m",
+      "facts": "facts/AuthenticationServices/ASAuthorizationRequest.md"
+    },
+    {
+      "api": "ASAuthorizationRequest",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the base every request in this framework is: -provider, -copyWithZone:, -encodeWithCoder: and -initWithCoder:, and a -init that leaves a request with no provider, which is the state the release's own -init leaves it in. The release marks -init and +new unavailable, so the port's construction is -revenant_initWithProvider: carrying objc_method_family(init), declared in RevenantASConstruction.h",
+      "facts": "facts/AuthenticationServices/ASAuthorizationRequest.md",
+      "source": "macOS 27.0's own AuthenticationServices, dlopened and asked with class_getInstanceMethod for each member, by tests/backports/host/authservices; and the 26.2 header's contract"
+    },
+    {
+      "api": "ASAuthorizationOpenIDRequest",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the OpenID-shaped request: -requestedScopes, -state, -nonce and -requestedOperation with their setters, -init (this header does not mark it unavailable and the host binds it, unlike the superclass, which does), and -copyWithZone: carrying all four across. A fresh request holds nil scopes, state and nonce and the implicit operation",
+      "facts": "facts/AuthenticationServices/ASAuthorizationRequest.md",
+      "source": "macOS 27.0's own AuthenticationServices, asked with class_copyMethodList for the class's method list by tests/backports/host/authservices; the 26.2 header's contract; and the request's members as the header declares them, read by clang's AST"
+    },
+    {
+      "api": "ASAuthorizationAppleIDRequest",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the request Sign in with Apple is made with: -user and -setUser: over the value a previous authorization response vended, so a second sign-in asks for the same person rather than a new one; -init, which this header does not mark unavailable; and -copyWithZone: carrying the user as well as the superclass's scopes, state, nonce and operation",
+      "facts": "facts/AuthenticationServices/ASAuthorizationRequest.md",
+      "source": "macOS 27.0's own AuthenticationServices, asked with class_copyMethodList for the class's method list by tests/backports/host/authservices -- four instance methods, of which the destructor is the compiler's; the 26.2 header's contract; and the request's members as the header declares them, read by clang's AST"
+    },
+    {
+      "api": "ASAuthorizationAppleIDCredential",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the value a finished Sign in with Apple returns: -user, -authorizedScopes, -identityToken, -authorizationCode, -state, -email, -fullName and -realUserStatus, all readonly, each copied in and out, and -copyWithZone: carrying all eight. -fullName and -email are only filled on the FIRST sign-in for a user and are nil on every later one; -realUserStatus is a hint the header says not to gate on, and the port carries the value it was given and nothing more",
+      "facts": "facts/AuthenticationServices/ASAuthorizationRequest.md",
+      "source": "macOS 27.0's own AuthenticationServices, asked with class_copyMethodList for the class's method list by tests/backports/host/authservices; the 26.2 header's contract; and the credential's members as the header declares them, read by clang's AST"
+    },
+    {
+      "api": "ASAuthorizationAppleIDProvider",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the provider a Sign in with Apple request comes from: -createRequest returning a fresh ASAuthorizationAppleIDRequest with the same nil scopes, state, nonce and operation the host's own provider hands out, which is what makes a request makeable where -init and +new are unavailable. -getCredentialStateForUserID:completion: answers ASAuthorizationAppleIDProviderCredentialNotFound with an ASAuthorizationErrorDomain error, because this port has never seen an Apple ID and that is the honest state for it: answering 'authorized' to a question about a revocation it cannot see would have an application keep sending tokens for an identifier the user had revoked",
+      "facts": "facts/AuthenticationServices/ASAuthorizationRequest.md",
+      "source": "macOS 27.0's own AuthenticationServices, asked with class_copyMethodList and with [[ASAuthorizationAppleIDProvider alloc] init] createRequest, which needs no daemon, no network and no UI; the 26.2 header's contract; and the class's members as the header declares them, read by clang's AST"
+    },
+    {
+      "api": "ASAuthorization",
+      "kind": "class",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the result of a finished request: -provider and -credential, both held strongly and both copied in and out, with -copyWithZone: carrying the same pair rather than copying either end -- copying an authorization must not mint a second credential claiming the same identity",
+      "facts": "facts/AuthenticationServices/ASAuthorizationRequest.md",
+      "source": "macOS 27.0's own AuthenticationServices, asked with class_copyMethodList for the class's method list by tests/backports/host/authservices; the 26.2 header's contract; and the class's members as the header declares them, read by clang's AST"
+    },
+    {
+      "api": "ASPortCredentialExchange",
+      "kind": "class",
+      "introduced": "port",
+      "minimum": "6.0",
+      "status": "implemented",
+      "effect": "the port's own immutable record of one credential-provider exchange, and the only thing -[ASCredentialProviderExtensionContext lastExchange] hands back: the credential the extension selected, the error a cancellation carried, whether the exchange was cancelled, whether it was a configuration request, and the answer the completion handler gave about expiry. It is the port's own addition and not an Apple class -- Apple's counterpart is the SYSTEM taking the credential, which the port has no way to be -- and it is a class rather than a struct returned by value because a struct return is a stret call an ordinary message send does not describe, and because an immutable object cannot be changed by whoever holds it",
+      "source": "defined by packages/frameworks/apple-backports/AuthenticationServices/ASPortCredentialExchange.h"
+    }
+  ]
+}

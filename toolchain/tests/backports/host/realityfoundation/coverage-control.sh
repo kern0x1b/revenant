@@ -25,10 +25,10 @@ runs="$(runs_folder realityfoundation)"
 mkdir -p "$runs"
 coverage="$here/coverage.py"
 fixture="$here/coverage-guard-pre-repair.py"
-registry="$repo/packages/s/swift-runtime/registry/RealityFoundation.json"
+registry="$repo/packages/runtimes/swift-runtime/registry/RealityFoundation.json"
 pre="$runs/control-pre-repair.json"
 
-declaration_sentence="the declaration in packages/s/swift-runtime/files/, which tests/backports/host/swiftregistry holds to a name, and the interface line it was read from. No check in this series measures it"
+declaration_sentence="the declaration in packages/runtimes/swift-runtime/files/, which tests/backports/host/swiftregistry holds to a name, and the interface line it was read from. No check in this series measures it"
 cp "$registry" "$pre"
 python3 - "$pre" "$declaration_sentence" <<'PY'
 import json, sys

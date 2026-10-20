@@ -4,7 +4,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-ACCELERATE=${ACCELERATE:-$here/../../../../packages/a/apple-backports/Accelerate}
+ACCELERATE=${ACCELERATE:-$here/../../../../packages/frameworks/apple-backports/Accelerate}
 build=${VDSPDFTALLOC_BUILD:-$(runs_folder revenant-vdspdft-alloc-host)}
 rm -rf "$build"
 mkdir -p "$build"
@@ -17,7 +17,7 @@ xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations "$here/probe.m" \
 
 # the port: its two objects with the six names renamed, probe.m with REVENANT_PORT
 renames=""
-for name in $(xmake l "$here/../registry-functions.lua" "$here/../../../../packages/a/apple-backports/registry/Accelerate" ios15dftinterleaved.json); do
+for name in $(xmake l "$here/../registry-functions.lua" "$here/../../../../packages/frameworks/apple-backports/registry/Accelerate" ios15dftinterleaved.json); do
     renames="$renames -D$name=revenant_host_$name"
 done
 # shellcheck disable=SC2086

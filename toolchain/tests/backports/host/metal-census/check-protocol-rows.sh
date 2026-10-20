@@ -20,8 +20,8 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-reg=$root/packages/a/apple-backports/registry/Metal/absent_Metal.json
-hdr=$root/packages/a/apple-backports/.gen/Metal/RevenantMetalProtocols.h
+reg=$root/packages/frameworks/apple-backports/registry/Metal/absent_Metal.json
+hdr=$root/packages/frameworks/apple-backports/.gen/Metal/RevenantMetalProtocols.h
 work=${WORK:-$(runs_folder metal-census/protocol-rows)}
 # ONE guard for every script that removes a scratch path - see work-guard.sh.
 . "$here/work-guard.sh"

@@ -92,7 +92,7 @@ command -v ldid >/dev/null 2>&1 || { echo "run.sh: ldid is not on PATH (brew ins
 
 out=${PHOTOS_BUILD:-$(runs_folder photos-device)}
 mkdir -p "$out"
-photos=$root/packages/a/apple-backports/Photos
+photos=$root/packages/frameworks/apple-backports/Photos
 triple=armv7-apple-ios$release
 # The flags the library is built with (modules/apple/backports.lua:1118, :473), not a private set: the
 # sources below must be compiled exactly as the dylib compiles them, or a run measures another build.
@@ -158,7 +158,7 @@ build() {
         index=$((index + 1))
         compile_one "$photos/$source" "$objects/$index.o"
     done
-    compile_one "$root/packages/a/apple-backports/attach.c" "$objects/attach.o"
+    compile_one "$root/packages/frameworks/apple-backports/attach.c" "$objects/attach.o"
     compile_one "$here/../check.m" "$objects/check.o"
     # A program of the device's own directory, or this directory's control, which is the only one
     # written here.
@@ -213,13 +213,13 @@ run_device() { xmake device $device_flag -s 300 run "$1"; }
 
 # The launcher, if the device has not got one. The iPad 2 has no sblaunch -- tests/backports/README.md
 # says so in as many words -- and revenant-sblaunch is the tree's own way to start an application on
-# either device, held at /usr/libexec and copied to a device from packages/e/emulator-guest, which is
+# either device, held at /usr/libexec and copied to a device from packages/emulator/emulator-guest, which is
 # the package that builds it.
 #
 # It is FOUND, not built here, and the reason is measured: the same source compiled with this script's
 # own clang line produces a binary that dies with SIGILL the moment SpringBoard is asked to run it --
 # `Illegal instruction: 4`, exit 132, on the iPad 2 on 2026-10-01 -- while the copy out of the shared
-# store exits 0. packages/e/emulator-guest builds it through @addon/revenant/daemon, and installing that
+# store exits 0. packages/emulator/emulator-guest builds it through @addon/revenant/daemon, and installing that
 # addon is not this script's business; PHOTOS_SBLAUNCH names a copy when the store has none.
 sblaunch=/usr/libexec/revenant-sblaunch
 ensure_sblaunch() {
@@ -229,7 +229,7 @@ ensure_sblaunch() {
     launcher=${PHOTOS_SBLAUNCH:-$(ls -t "$HOME"/.xmake/packages/e/emulator-guest/latest/*/usr/libexec/revenant-sblaunch 2>/dev/null | head -1)}
     if [ ! -f "$launcher" ]; then
         echo "run.sh: revenant-sblaunch is not in the shared store and PHOTOS_SBLAUNCH does not name one;" >&2
-        echo "  it is built by packages/e/emulator-guest, whose install holds it at usr/libexec/revenant-sblaunch" >&2
+        echo "  it is built by packages/emulator/emulator-guest, whose install holds it at usr/libexec/revenant-sblaunch" >&2
         exit 1
     fi
     run_device "mkdir -p /usr/libexec"
@@ -319,7 +319,7 @@ for name in $built; do
             copy "$out/$executable.app/Info.plist" "/Applications/$executable.app/Info.plist"
             # uicache is a per-user cache and answers "incorrect user" from root: it is run as mobile,
             # which is what tests/backports/README.md says to do. And the iPad 2 has no sblaunch --
-            # the launcher's own line -- so this is packages/e/emulator-guest/src/revenant-sblaunch, built
+            # the launcher's own line -- so this is packages/emulator/emulator-guest/src/revenant-sblaunch, built
             # and signed here with its entitlements and copied to /usr/libexec. Both facts came from
             # the first iPad run: "cannot open cache file. incorrect user?" and "sblaunch: command not
             # found".

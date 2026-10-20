@@ -5,7 +5,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/Foundation}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/Foundation}
 harness=${DEVICEATTEST_HARNESS:-$here/../../device}
 build=${DEVICEATTEST_BUILD:-$(runs_fresh revenant-deviceattest)}
 rm -rf "$build"

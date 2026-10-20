@@ -54,7 +54,7 @@ local function one_minimum_step(backports, root, found)
         table.insert(found, string.format("one minimum per object: the fixture holds three objects and"
             .. " exactly two of them mix, and the rule named %d", objects))
     end
-    local scoped = tool.offenders(path.join(root, "..", "..", "..", "packages", "a", "apple-backports"), "Foundation")
+    local scoped = tool.offenders(path.join(root, "..", "..", "..", "packages", "frameworks", "apple-backports"), "Foundation")
     for _, one in ipairs(scoped) do
         if path.filename(one.object) ~= "NSURLSessionWebSocket13.m" then
             table.insert(found, "one minimum per object: Foundation holds one object that mixes and the"
@@ -333,7 +333,7 @@ end
 
 
 local function generated_includes(backports, found)
-    local folder = "/somewhere/packages/a/apple-backports/Foundation"
+    local folder = "/somewhere/packages/frameworks/apple-backports/Foundation"
     local flags = table.concat(backports.compile_arguments({includes = {folder}}, "Protocols.m"), " ")
     if not flags:find("-I" .. folder, 1, true) then
         table.insert(found, "a generated source's job must add the library's own folder to its include path, and it does not: " .. flags)
@@ -590,9 +590,9 @@ end
 ]])
     os.mkdir(path.join(mutant_root, "packages"))
     os.mkdir(path.join(mutant_root, "packages", "a"))
-    os.mkdir(path.join(mutant_root, "packages", "a", "apple-backports"))
-    os.mkdir(path.join(mutant_root, "packages", "a", "apple-backports", "registry"))
-    io.writefile(path.join(mutant_root, "packages", "a", "apple-backports", "registry", "Fix.json"),
+    os.mkdir(path.join(mutant_root, "packages", "frameworks", "apple-backports"))
+    os.mkdir(path.join(mutant_root, "packages", "frameworks", "apple-backports", "registry"))
+    io.writefile(path.join(mutant_root, "packages", "frameworks", "apple-backports", "registry", "Fix.json"),
                  io.readfile(path.join(root, "registry", "Fix.json")))
     local out = path.join(root, "mutant.out")
     io.writefile(out, "")
@@ -644,7 +644,7 @@ end
 
 local function inline_rows_step(backports, opt, found)
     local counter = 0
-    local header_path = path.join(opt.modules, "..", "packages", "a", "apple-backports", "AVFoundation",
+    local header_path = path.join(opt.modules, "..", "packages", "frameworks", "apple-backports", "AVFoundation",
                                  "RevenantCMTag26.h")
     local header = io.readfile(header_path)
     if not header then
@@ -756,7 +756,7 @@ function failures(opt)
     local backports = import("apple.backports", {rootdir = opt.modules, anonymous = true})
     SCRATCH_RUNS = import("workspace", {rootdir = opt.modules, anonymous = true}).run("registry-test")
     local found = {}
-    local root = path.join(opt.modules, "..", "packages", "a", "apple-backports")
+    local root = path.join(opt.modules, "..", "packages", "frameworks", "apple-backports")
     if not os.isdir(path.join(root, "registry")) then
         table.insert(found, root .. " holds no registry to read")
         return found

@@ -5,7 +5,7 @@ echo "FAIL host/quadrature/run.sh: its Python steps are gone and not yet ported 
 exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-ACCELERATE=${ACCELERATE:-$here/../../../../packages/a/apple-backports/Accelerate}
+ACCELERATE=${ACCELERATE:-$here/../../../../packages/frameworks/apple-backports/Accelerate}
 build=${QUADRATURE_BUILD:-$(runs_folder quadrature-host)}
 rm -rf "$build"
 mkdir -p "$build"

@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-GRAPHICS=${GRAPHICS:-$here/../../../../packages/a/apple-backports/.gen/CoreImage}
+GRAPHICS=${GRAPHICS:-$here/../../../../packages/frameworks/apple-backports/.gen/CoreImage}
 BUILD=${BUILD:-$(runs_fresh revenant-ciimagefilter)}
 # CoreImage is on the host itself: the port's categories are built for macOS with their selectors
 # prefixed, so the host's +[CIFilter gaussianBlurFilter] and the port's +revenantHost_gaussianBlurFilter

@@ -1,0 +1,115 @@
+{
+  "framework": "AVKit",
+  "entries": [
+    {
+      "api": "AVPictureInPictureControllerDelegate",
+      "kind": "protocol",
+      "introduced": "9.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the port declares it and sends six of its methods: RevenantAVPlayerPictureInPictureRelay in AVPlayerViewController.m adopts it and implements the will/did start, the will/did stop, the failed-to-start and the restore-user-interface callbacks, which AVPictureInPictureController.m then sends around both transitions. The row said the protocol was not there and that NSProtocolFromString would answer nil; that was wrong",
+      "effect": "the protocol object is in the library, so NSProtocolFromString answers it and a delegate's conformsToProtocol: answers YES; the six methods the port sends are the ones a 9.0 delegate implements, and a delegate that implements more of them is called for nothing this port sends",
+      "source": "measured with nm on the built object: __OBJC_PROTOCOL_$_AVPictureInPictureControllerDelegate is a D (defined data) symbol and __OBJC_LABEL_PROTOCOL_$_AVPictureInPictureControllerDelegate is S, both in AVPlayerViewController.o; the release holds no AVKit (the armv7 shared cache of 6.1.3 (568965 names, armv7)), so this is the port's own",
+      "facts": "facts/AVKit/AVPictureInPictureController.md"
+    },
+    {
+      "api": "AVRoutePickerView",
+      "kind": "class",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class AVRoutePickerView",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "the armv7 cache ladder through tools/cache-index/first-rung.lua for every name above, and the failed compile of the deleted first attempt recorded in this row's reason",
+      "facts": "facts/AVKit/Absent.md"
+    },
+    {
+      "api": "AVPlayerItem.externalMetadata",
+      "kind": "property",
+      "introduced": "12.2",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the property AVPlayerItem.externalMetadata",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "the armv7 shared cache of 6.1.3 (568965 names, armv7) for timedMetadata present and the name absent; SDK 26.2 AVKit/AVPlayerItem+AVKitAdditions.h",
+      "facts": "facts/AVKit/Absent.md"
+    },
+    {
+      "api": "-[AVPlayerViewControllerDelegate playerViewController:restoreUserInterfaceForFullScreenExitWithCompletionHandler:]",
+      "kind": "method",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[AVPlayerViewControllerDelegate playerViewController:restoreUserInterfaceForFullScreenExitWithCompletionHandler:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "packages/frameworks/apple-backports/AVKit/AVPlayerViewController.m (RevenantAVPlayerFullScreenViewController and -revenant_fullScreen:); SDK 26.2 AVKit/AVPlayerViewController.h",
+      "facts": "facts/AVKit/Absent.md"
+    },
+    {
+      "api": "AVPictureInPictureSampleBufferPlaybackDelegate",
+      "kind": "protocol",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the protocol AVPictureInPictureSampleBufferPlaybackDelegate",
+      "effect": "until built: NSProtocolFromString answers nil",
+      "source": "the armv7 shared cache of 6.1.3 (568965 names, armv7) and the armv7 cache ladder; SDK 26.2 AVKit/AVPictureInPictureController_AVSampleBufferDisplayLayerSupport.h:109-131",
+      "facts": "facts/AVKit/Absent.md"
+    },
+    {
+      "api": "AVPictureInPictureVideoCallViewController",
+      "kind": "class",
+      "introduced": "15.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class AVPictureInPictureVideoCallViewController",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "SDK 26.2 AVKit/AVPictureInPictureController_VideoCallSupport.h:21-62; the armv7 cache ladder, which places the name first at 16.0",
+      "facts": "facts/AVKit/Absent.md"
+    },
+    {
+      "api": "-[AVPlayerViewControllerDelegate playerViewController:didPresentInterstitialTimeRange:]",
+      "kind": "method",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[AVPlayerViewControllerDelegate playerViewController:didPresentInterstitialTimeRange:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "the armv7 shared cache of 6.1.3 (568965 names, armv7) for both absent names; SDK 26.2 AVKit/AVInterstitialTimeRange.h",
+      "facts": "facts/AVKit/Absent.md"
+    },
+    {
+      "api": "-[AVPlayerViewControllerDelegate playerViewController:willPresentInterstitialTimeRange:]",
+      "kind": "method",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build -[AVPlayerViewControllerDelegate playerViewController:willPresentInterstitialTimeRange:]",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "the armv7 shared cache of 6.1.3 (568965 names, armv7) for both absent names; SDK 26.2 AVKit/AVInterstitialTimeRange.h",
+      "facts": "facts/AVKit/Absent.md"
+    },
+    {
+      "api": "AVInterstitialTimeRange",
+      "kind": "class",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the class AVInterstitialTimeRange",
+      "effect": "until built: NSClassFromString answers nil",
+      "source": "the armv7 shared cache of 6.1.3 (568965 names, armv7); SDK 26.2 AVKit/AVInterstitialTimeRange.h",
+      "facts": "facts/AVKit/Absent.md"
+    },
+    {
+      "api": "AVPlayerItem.interstitialTimeRanges",
+      "kind": "property",
+      "introduced": "16.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "reason": "build the property AVPlayerItem.interstitialTimeRanges",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "the armv7 shared cache of 6.1.3 (568965 names, armv7); SDK 26.2 AVKit/AVPlayerItem+AVKitAdditions.h",
+      "facts": "facts/AVKit/Absent.md"
+    }
+  ]
+}

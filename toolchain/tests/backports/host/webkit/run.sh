@@ -25,7 +25,7 @@ build=${BUILD:-$(runs_fresh revenant-webkit)}
 # mktemp's does; nothing here creates it, so the first link fails on a missing output path.
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path)
-sources=${WEBEXT_SOURCES:-$here/../../../../packages/a/apple-backports/WebKit}
+sources=${WEBEXT_SOURCES:-$here/../../../../packages/frameworks/apple-backports/WebKit}
 harness=${WEBEXT_HARNESS:-$here/../../device}
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
 frameworks="-framework WebKit -framework UIKit -framework Foundation"

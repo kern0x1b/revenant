@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-CORE=${CORE:-$here/../../../../packages/a/apple-backports/CoreData}
+CORE=${CORE:-$here/../../../../packages/frameworks/apple-backports/CoreData}
 harness=${HISTORY11_HARNESS:-$here/../../device}
 build=${HISTORY11_BUILD:-$(runs_folder revenant-history11-host)}
 sources="NSPersistentHistoryChangeRequest.m NSPersistentHistoryToken.m NSPersistentHistoryResult.m NSPersistentHistoryTransaction.m NSPersistentHistoryChange.m CoreDataConstants11.m CoreDataConstants12.m NSPersistentStoreCoordinator+HistoryToken.m NSManagedObjectContext+TransactionAuthor.m"

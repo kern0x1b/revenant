@@ -41,8 +41,8 @@ mps=$work.mps
 pristine=$work.mps.pristine
 rm -rf "$mps" "$pristine"
 mkdir -p "$mps" "$pristine"
-cp "$root/packages/a/apple-backports/MetalPerformanceShaders/"*.m "$mps"/
-cp "$root/packages/a/apple-backports/MetalPerformanceShaders/"*.h "$mps"/
+cp "$root/packages/frameworks/apple-backports/MetalPerformanceShaders/"*.m "$mps"/
+cp "$root/packages/frameworks/apple-backports/MetalPerformanceShaders/"*.h "$mps"/
 cp "$mps"/* "$pristine"/
 export MPS="$mps"
 echo "mutating a copy: $mps"

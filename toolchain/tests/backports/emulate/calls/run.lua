@@ -14,7 +14,7 @@ function run(opt)
     os.mkdir(generated)
     os.mkdir(path.join(work, "runs"))
     local registry = opt.registry or steps.env("REGISTRY")
-                     or path.join(root, "packages", "a", "apple-backports", "registry", steps.env("FRAMEWORK") or "Intents")
+                     or path.join(root, "packages", "frameworks", "apple-backports", "registry", steps.env("FRAMEWORK") or "Intents")
     local result = gencalls.generate({sdk = workspace.sdk(), registries = {registry}, dump = path.join(work, "ast.json"),
                                       out = path.join(generated, "Calls.m"), manifest = path.join(generated, "calls.json")})
     print("%s: %d classes, %d members called", result.out, result.classes, result.members)

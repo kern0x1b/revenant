@@ -12,7 +12,7 @@ armv7). It is built for the legacy-iOS work of the [toolchain], where it is
 the reactive layer under [SwiftUI].
 
 Combine is not a fork. The code is OpenCombine's, pinned at one upstream commit;
-what is ours is the patch series in `toolchain/packages/c/combine/patches/`, applied by
+what is ours is the patch series in `toolchain/packages/frameworks/combine/patches/`, applied by
 the `revenant@combine` recipe, and the targets in this folder that build the patched
 sources inside revenant.
 
@@ -114,7 +114,7 @@ Timer.publish(every: 1, on: .main, in: .common)
 | `Tests/` | the XCTest shim, the skip list and the Debian control of the test daemon |
 | `tools/` | the test discovery, which writes the `main.swift` that runs upstream's tests |
 | `docs/` | the test results |
-| `../../toolchain/packages/c/combine/` | the recipe and the patch series |
+| `../../toolchain/packages/frameworks/combine/` | the recipe and the patch series |
 
 ## Documentation
 

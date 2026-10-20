@@ -11,8 +11,8 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-P=${PORT_DIR:-$here/../../../../packages/a/apple-backports}
-CODING=$P/../../c/revenant-coding/files
+P=${PORT_DIR:-$here/../../../../packages/frameworks/apple-backports}
+CODING=$P/../../runtimes/revenant-coding/files
 build=${EK_BUILD:-$(runs_fresh revenant-intents-ek)}
 sdk=$(xcrun --show-sdk-path)
 catalyst="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"

@@ -21,7 +21,7 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-mps=${MPS:-$root/packages/a/apple-backports/MetalPerformanceShaders}
+mps=${MPS:-$root/packages/frameworks/apple-backports/MetalPerformanceShaders}
 build=${BUILD:-$(runs_folder host/mpsimage9)}
 mkdir -p "$build"
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-unguarded-availability -Wno-incomplete-implementation"

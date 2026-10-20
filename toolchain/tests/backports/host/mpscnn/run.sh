@@ -12,7 +12,7 @@ echo "FAIL host/mpscnn/run.sh: its Python steps are gone and not yet ported to L
 exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-mps=${MPS:-$here/../../../../packages/a/apple-backports/MetalPerformanceShaders}
+mps=${MPS:-$here/../../../../packages/frameworks/apple-backports/MetalPerformanceShaders}
 build=${BUILD:-$(runs_folder host/mpscnn)}
 rm -rf "$build"
 mkdir -p "$build"
@@ -155,7 +155,7 @@ cnn_status=$?
 # bit-identical, and the largest distance the page quotes. Wired here because a page that names a case
 # among the identical ones and prints that case's differing element lower down is a page written from
 # memory, and this is the transcript that says otherwise. The page is named, not globbed.
-FACTS_CNN=$here/../../../../packages/a/apple-backports/facts/MetalPerformanceShaders/Cnn.md
+FACTS_CNN=$here/../../../../packages/frameworks/apple-backports/facts/MetalPerformanceShaders/Cnn.md
 page_status=0
 python3 "$here/page-check.py" "$build" "$FACTS_CNN" || page_status=$?
 if [ "$page_status" -ne 0 ]; then

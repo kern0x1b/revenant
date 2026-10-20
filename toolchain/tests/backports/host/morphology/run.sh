@@ -10,7 +10,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-FOUNDATION=${FOUNDATION:-$root/packages/a/apple-backports/Foundation}
+FOUNDATION=${FOUNDATION:-$root/packages/frameworks/apple-backports/Foundation}
 CLASSES=RevenantMorphology.m
 
 table=$FOUNDATION/$CLASSES

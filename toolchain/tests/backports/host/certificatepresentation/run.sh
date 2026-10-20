@@ -22,8 +22,8 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
-securityui=${SECURITYUI:-$here/../../../../packages/a/apple-backports/SecurityUI}
-registry=${REGISTRY:-$here/../../../../packages/a/apple-backports/registry/SecurityUI/ios18.json}
+securityui=${SECURITYUI:-$here/../../../../packages/frameworks/apple-backports/SecurityUI}
+registry=${REGISTRY:-$here/../../../../packages/frameworks/apple-backports/registry/SecurityUI/ios18.json}
 build=${BUILD:-$(runs_fresh revenant-certificatepresentation)}
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path --sdk macosx)

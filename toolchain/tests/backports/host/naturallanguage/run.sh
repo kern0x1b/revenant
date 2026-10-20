@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-FOUNDATION=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}
+FOUNDATION=${FOUNDATION:-$here/../../../../packages/frameworks/apple-backports/Foundation}
 harness=${NATURALLANGUAGE_HARNESS:-$here/../../device}
 build=${NATURALLANGUAGE_BUILD:-$(runs_folder revenant-naturallanguage-host)}
 rm -rf "$build"

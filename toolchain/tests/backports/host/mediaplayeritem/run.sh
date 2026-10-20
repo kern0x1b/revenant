@@ -44,7 +44,7 @@ echo "header:   $header"
 # the port's header and the port's own shape rather than against this Mac's MediaPlayer, which declares
 # several of these already and a category compiled against that would look like a clobber. It is the same
 # compile line tools/media-event-class.lua uses.
-library=${MPITEM_LIBRARY:-$(cd "$here/../../../../packages/a/apple-backports/MediaPlayer" 2>/dev/null && pwd)}
+library=${MPITEM_LIBRARY:-$(cd "$here/../../../../packages/frameworks/apple-backports/MediaPlayer" 2>/dev/null && pwd)}
 [ -f "$library/MPMediaItemStandin.h" ] || {
     echo "FAIL: no MPMediaItemStandin.h under $library, so the three checks below have no stand-in to"
     echo "      compile against and would certify nothing while looking present in the tree."

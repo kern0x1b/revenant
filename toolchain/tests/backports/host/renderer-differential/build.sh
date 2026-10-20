@@ -26,7 +26,7 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=${DDR_ROOT:-$here/../../../..}
-port=$root/packages/a/apple-backports/UIKit/UITextDragPreviewRenderer11.m
+port=$root/packages/frameworks/apple-backports/UIKit/UITextDragPreviewRenderer11.m
 build=${DDR_BUILD:-$(runs_folder renderer-differential-build)}
 sdk=$(xcrun --show-sdk-path)
 port_name=RevenantHostCopyTextDragPreviewRenderer
@@ -39,7 +39,7 @@ set -x
 xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" \
     -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" -fobjc-arc -w \
     -DUITextDragPreviewRenderer=$port_name \
-    -I "$root/packages/a/apple-backports/UIKit" \
+    -I "$root/packages/frameworks/apple-backports/UIKit" \
     -c "$port" -o "$build/port.o"
 set +x
 nm -gU "$build/port.o" | grep -E "OBJC_CLASS_\$_" | sed 's/^/   /'
@@ -49,7 +49,7 @@ echo "== the comparison, compiled without the rename:"
 set -x
 xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" \
     -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" -fobjc-arc -w \
-    -I "$root/packages/a/apple-backports/UIKit" \
+    -I "$root/packages/frameworks/apple-backports/UIKit" \
     -c "$here/compare.m" -o "$build/compare.o"
 set +x
 
@@ -61,7 +61,7 @@ set -x
 xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" \
     -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" -fobjc-arc -w \
     -DUITextDragPreviewRenderer=$port_name \
-    -I "$root/packages/a/apple-backports/UIKit" \
+    -I "$root/packages/frameworks/apple-backports/UIKit" \
     -c "$build/mutant.m" -o "$build/mutant.o"
 
 link() {
@@ -107,7 +107,7 @@ set -x
 xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" \
     -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" -fobjc-arc -w \
     -DUITextDragPreviewRenderer=$port_name \
-    -I "$root/packages/a/apple-backports/UIKit" \
+    -I "$root/packages/frameworks/apple-backports/UIKit" \
     -c "$build/mutant-nocondition.m" -o "$build/mutant-nocondition.o"
 set +x
 link "$build/compare.o" "$build/mutant-nocondition.o"

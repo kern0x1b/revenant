@@ -1,5 +1,5 @@
 #!/bin/sh
-# NSJSONSerialization of packages/a/apple-backports/Foundation/NSJSONSerialization.m, compiled for the host with the
+# NSJSONSerialization of packages/frameworks/apple-backports/Foundation/NSJSONSerialization.m, compiled for the host with the
 # class renamed, against the host's own NSJSONSerialization: the whole class (the three 5.0 methods and the two 7.0
 # stream methods), every reading and writing rule the file names, the exact wording of every error and exception, the
 # position each error carries, and the number each literal comes out as.
@@ -12,7 +12,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-FOUNDATION=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}
+FOUNDATION=${FOUNDATION:-$here/../../../../packages/frameworks/apple-backports/Foundation}
 BUILD=${BUILD:-$(runs_fresh revenant-json1)}
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-incomplete-implementation -Wno-objc-protocol-method-implementation -Wno-nullability-completeness -Wno-objc-designated-initializers"
 rm -rf "$BUILD/port"

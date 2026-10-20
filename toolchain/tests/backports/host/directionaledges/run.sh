@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-UIKIT=${UIKIT:-$here/../../../../packages/a/apple-backports/UIKit}
+UIKIT=${UIKIT:-$here/../../../../packages/frameworks/apple-backports/UIKit}
 DEVICE=${DEVICE:-$here/../../device}
 BUILD=${BUILD:-$(runs_fresh revenant-directionaledges)}
 EXPECTATIONS=${EXPECTATIONS:-$DEVICE/directionaledges-expectations.h}

@@ -1,0 +1,3 @@
+kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
+constant	NFCISO15693TagResponseErrorKey	-	NFCISO15693TagResponseErrorKey	11.0	NSString * const	API_AVAILABLE(ios(11.0)) API_UNAVAILABLE(watchos, macos, tvos, visionos)	f715544561454386	owned:registry:packages/frameworks/apple-backports/registry/CoreNFC/ios11.json	-	-	host-macos	registry:packages/frameworks/apple-backports/registry/CoreNFC/ios11.json	exported	ns	-
+constant	NFCTagResponseUnexpectedLengthErrorKey	-	NFCTagResponseUnexpectedLengthErrorKey	13.0	NSString * const	API_AVAILABLE(ios(13.0)) API_UNAVAILABLE(watchos, macos, tvos, visionos)	63481b78ac7d43c4	found	TagResponseInvalidLength	-	ios-26.2-cache (no host value)	-	exported	ns	-

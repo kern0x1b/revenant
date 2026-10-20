@@ -7,7 +7,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${SEARCH_PORT_SOURCE:-$here/../../../../packages/a/apple-backports/UIKit/UITextSearchOptions.m}
+port=${SEARCH_PORT_SOURCE:-$here/../../../../packages/frameworks/apple-backports/UIKit/UITextSearchOptions.m}
 build=${SEARCH_BUILD:-$(runs_fresh revenant-search-options)}
 sdk=$(xcrun --show-sdk-path)
 app="$build/search-options"

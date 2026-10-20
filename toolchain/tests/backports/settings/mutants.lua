@@ -83,7 +83,7 @@ end
 
 function run(opt)
     opt = opt or {}
-    local package = path.join(revenant, "packages", "a", "apple-backports")
+    local package = path.join(revenant, "packages", "frameworks", "apple-backports")
     local sources = opt.sources or path.join(package, "Accessibility")
     local work = opt.build or workspace.run("revenant-accessibility-settings-mutants")
     os.tryrm(work)

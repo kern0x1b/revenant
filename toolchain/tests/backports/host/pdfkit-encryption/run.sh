@@ -12,7 +12,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 tree=$(cd "$here/../../../.." && pwd)
-port=$tree/packages/a/apple-backports/PDFKit
+port=$tree/packages/frameworks/apple-backports/PDFKit
 build=${BUILD:-$(runs_folder pdfkit-encryption)}
 mkdir -p "$build/fixtures"
 

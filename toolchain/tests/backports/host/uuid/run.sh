@@ -1,10 +1,10 @@
 #!/bin/sh
-# NSUUID of packages/a/apple-backports/Foundation/NSUUID.m, compiled for the host with its two classes renamed, against the host's own
+# NSUUID of packages/frameworks/apple-backports/Foundation/NSUUID.m, compiled for the host with its two classes renamed, against the host's own
 # NSUUID: parsing, equality, hash, description, archives (malformed ones too), nil arguments, and a subclass of the cluster.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-FOUNDATION=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}
+FOUNDATION=${FOUNDATION:-$here/../../../../packages/frameworks/apple-backports/Foundation}
 BUILD=${BUILD:-$(runs_fresh revenant-uuid)}
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-incomplete-implementation -Wno-objc-protocol-method-implementation -Wno-nullability-completeness -Wno-objc-designated-initializers"
 rm -rf "$BUILD/port"

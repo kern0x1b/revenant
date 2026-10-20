@@ -77,7 +77,7 @@ end
 local function surface_diff(options)
     local sdk = options.sdk or sw.newest_macos_sdk()
     local target = options.target or (is_macos_sdk(sdk) and "arm64-apple-ios26.0-macabi" or "arm64-apple-ios" .. sw.sdk_version(sdk))
-    local registry_root = options.registry or path.join(workspace.root(), "packages", "a", "apple-backports", "registry")
+    local registry_root = options.registry or path.join(workspace.root(), "packages", "frameworks", "apple-backports", "registry")
     local above = sw.parse_version(options.above)
     local up_to = options["up-to"] and sw.parse_version(options["up-to"]) or nil
     print("SDK %s, target %s, API that arrived after iOS %s%s", path.filename(sdk), target, options.above,

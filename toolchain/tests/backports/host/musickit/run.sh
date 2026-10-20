@@ -19,10 +19,10 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 # Four levels up is the repository root, as in every other suite under tests/backports/host: five is
-# its parent, and the run as written looked for packages/m/musickit there and found the worktrees
-# directory - "clang: error: no such file or directory: '.../worktrees/packages/m/musickit/files/RevenantC.c'".
+# its parent, and the run as written looked for packages/frameworks/musickit there and found the worktrees
+# directory - "clang: error: no such file or directory: '.../worktrees/packages/frameworks/musickit/files/RevenantC.c'".
 root=$(cd "$here/../../../../" && pwd)
-musickit=${REVENANT_ROOT:-$root}/packages/m/musickit
+musickit=${REVENANT_ROOT:-$root}/packages/frameworks/musickit
 revenant=${REVENANT_ROOT:-$root}
 openssl=${OPENSSL:-openssl}
 work=$(runs_fresh revenant-musickit-jose)
@@ -57,7 +57,7 @@ if [ -z "$swiftc" ]; then
     echo "swiftc: $swiftc"
 fi
 
-# uECC's *sources*, at the commit packages/m/micro-ecc/xmake.lua pins. They are not in the installed
+# uECC's *sources*, at the commit packages/libraries/micro-ecc/xmake.lua pins. They are not in the installed
 # package - it ships include/ (headers) and lib/ (the archive), and the archive is armv7 because the
 # recipe builds it for the device, so a host link cannot use it either. The three paths this run tried
 # before - include/uECC.c and two guesses beside the package - all miss, and the error was "no such file
@@ -75,14 +75,14 @@ fi
 "$openssl" ecparam -name prime256v1 -genkey -noout -out "$work/key.pem" 2>/dev/null
 "$openssl" pkcs8 -topk8 -nocrypt -in "$work/key.pem" -out "$work/key8.pem" 2>/dev/null
 
-xcrun -sdk macosx clang -O1 -w -I "$musickit/files/include" -I "$revenant/packages/m/micro-ecc/files" \
+xcrun -sdk macosx clang -O1 -w -I "$musickit/files/include" -I "$revenant/packages/libraries/micro-ecc/files" \
      -I "$uecc/include" -c "$musickit/files/RevenantC.c" -o "$work/shim.o"
-xcrun -sdk macosx clang -O1 -w -I "$revenant/packages/m/micro-ecc/files" -I "$uecc/include" \
-     -c "$revenant/packages/m/micro-ecc/files/RevenantCKWebAuth.c" -o "$work/web.o"
+xcrun -sdk macosx clang -O1 -w -I "$revenant/packages/libraries/micro-ecc/files" -I "$uecc/include" \
+     -c "$revenant/packages/libraries/micro-ecc/files/RevenantCKWebAuth.c" -o "$work/web.o"
 xcrun -sdk macosx clang -O1 -w -I "$work/uECC" -c "$work/uECC/uECC.c" -o "$work/u.o"
 
 "$swiftc" -O -module-name M -import-objc-header "$musickit/files/include/MusicKitC.h" \
-     -I "$musickit/files/include" -Xcc -I"$uecc/include" -Xcc -I"$revenant/packages/m/micro-ecc/files" \
+     -I "$musickit/files/include" -Xcc -I"$uecc/include" -Xcc -I"$revenant/packages/libraries/micro-ecc/files" \
      -o "$work/mint" "$here/main.swift" "$musickit/files/MusicKit/Authorization.swift" \
      "$work/shim.o" "$work/u.o" "$work/web.o"
 

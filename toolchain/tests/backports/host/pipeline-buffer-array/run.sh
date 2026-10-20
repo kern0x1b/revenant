@@ -11,7 +11,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-METAL=${METAL:-$here/../../../../packages/a/apple-backports/Metal}
+METAL=${METAL:-$here/../../../../packages/frameworks/apple-backports/Metal}
 BUILD=${BUILD:-$(runs_fresh revenant-pipeline-buffer-array)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios16.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"

@@ -19,8 +19,8 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-AVFAUDIO="$root/packages/a/apple-backports/AVFAudio"
-AVFOUNDATION=${AVFILE_FOUNDATION:-$root/packages/a/apple-backports/AVFoundation}
+AVFAUDIO="$root/packages/frameworks/apple-backports/AVFAudio"
+AVFOUNDATION=${AVFILE_FOUNDATION:-$root/packages/frameworks/apple-backports/AVFoundation}
 build=${AVFILE_BUILD:-$(runs_folder revenant-avfaudio-file)}
 rm -rf "$build"
 mkdir -p "$build/host-scratch" "$build/port-scratch"

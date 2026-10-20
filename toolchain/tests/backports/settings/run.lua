@@ -35,7 +35,7 @@ end
 function run(opt)
     opt = opt or {}
     local here = os.scriptdir()
-    local sources = opt.sources or path.join(revenant, "packages", "a", "apple-backports", "Accessibility")
+    local sources = opt.sources or path.join(revenant, "packages", "frameworks", "apple-backports", "Accessibility")
     local build = opt.build or workspace.run("revenant-accessibility-settings")
     os.tryrm(build)
     os.mkdir(build)

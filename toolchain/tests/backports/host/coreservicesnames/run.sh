@@ -5,7 +5,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/.gen/CoreServices}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/.gen/CoreServices}
 harness=${CORESERVICESNAMES_HARNESS:-$here/../../device}
 build=${CORESERVICESNAMES_BUILD:-$(runs_fresh revenant-coreservicesnames)}
 rm -rf "$build"

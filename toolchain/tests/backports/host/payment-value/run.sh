@@ -6,7 +6,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/PassKit}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/PassKit}
 build=${PAYMENT_BUILD:-$(runs_fresh revenant-payment-value)}
 MACOSX_SDK=$(xcrun --sdk macosx --show-sdk-path)
 TARGET="-target arm64-apple-ios17.0-macabi -isysroot $MACOSX_SDK -isystem $MACOSX_SDK/System/iOSSupport/usr/include -F $MACOSX_SDK/System/iOSSupport/System/Library/Frameworks"

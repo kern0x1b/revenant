@@ -1,7 +1,7 @@
 local ROOT = path.absolute(path.join(os.scriptdir(), "..", ".."))
 local TOOLS = path.join(ROOT, "tools")
 local TREE = import("workspace", {rootdir = path.join(ROOT, "modules"), anonymous = true}).run("snapshot-pins-test")
-local SPEC = path.join(TREE, "packages", "a", "apple-backports", "spec")
+local SPEC = path.join(TREE, "packages", "frameworks", "apple-backports", "spec")
 local pins = import("gen.snapshot_pins", {rootdir = TOOLS, anonymous = true})
 local check = import("gen.cmd_check", {rootdir = TOOLS, anonymous = true})
 

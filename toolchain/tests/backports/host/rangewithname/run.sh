@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-FOUNDATION=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}
+FOUNDATION=${FOUNDATION:-$here/../../../../packages/frameworks/apple-backports/Foundation}
 BUILD=${BUILD:-$(runs_fresh revenant-rangewithname)}
 source=NSTextCheckingResult+RangeWithName.m
 quiet="-Wno-unguarded-availability-new -Wno-objc-protocol-method-implementation -Wno-nullability-completeness"

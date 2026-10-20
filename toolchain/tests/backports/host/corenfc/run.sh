@@ -8,7 +8,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/CoreNFC}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/CoreNFC}
 harness=${CORENFC_HARNESS:-$here/../../device}
 build=${CORENFC_BUILD:-$(runs_fresh revenant-corenfc)}
 rm -rf "$build"

@@ -7,7 +7,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-uikit=$here/../../../../packages/a/apple-backports/UIKit
+uikit=$here/../../../../packages/frameworks/apple-backports/UIKit
 view=${CALENDAR_PORT_SOURCE:-$uikit/UICalendarView.m}
 build=${CALENDAR_BUILD:-$(runs_fresh revenant-calendar-view)}
 sdk=$(xcrun --show-sdk-path)

@@ -4,7 +4,7 @@
 #include <dlfcn.h>
 #include <unistd.h>
 #import "check.h"
-#import "../../../packages/a/apple-backports/revenant_alias.h"
+#import "../../../packages/frameworks/apple-backports/revenant_alias.h"
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 #pragma clang diagnostic ignored "-Wnonnull"

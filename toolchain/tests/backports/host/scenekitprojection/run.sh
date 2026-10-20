@@ -3,7 +3,7 @@
 # answers for the same camera, viewport and points.
 #
 # The backports carry neither method (measured 2026-09-28: `grep -rn projectPoint
-# packages/a/apple-backports/` is empty, while the SDK declares both at
+# packages/frameworks/apple-backports/` is empty, while the SDK declares both at
 # SCNSceneRenderer.h:129-142), so this states the arithmetic the port is given and holds it against
 # the system's. It is red, and says so: a view that has not rendered a frame gives the host's
 # projectPoint its input back unchanged, so the oracle is not a projection yet. The rendering setup

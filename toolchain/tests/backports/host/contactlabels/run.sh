@@ -5,7 +5,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/.gen/Contacts}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/.gen/Contacts}
 harness=${CONTACTLABELS_HARNESS:-$here/../../device}
 build=${CONTACTLABELS_BUILD:-$(runs_fresh revenant-contactlabels)}
 rm -rf "$build"

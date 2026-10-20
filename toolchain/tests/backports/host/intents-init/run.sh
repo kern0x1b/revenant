@@ -49,7 +49,7 @@ echo "host   macOS $host build $build, $arch"
 # a claim no run of this harness can reach, and INListCarsIntent was exactly that - its body moved
 # into gen-intents.py's EXTRA_METHODS, the row was added, and neither file was regenerated, so 110
 # of the 111 rows were being measured and the guard below was 110 against 110.
-registry=$root/packages/a/apple-backports/registry/Intents
+registry=$root/packages/frameworks/apple-backports/registry/Intents
 claimed=$(python3 - "$registry" <<'PY'
 import glob, json, os, re, sys
 names = set()

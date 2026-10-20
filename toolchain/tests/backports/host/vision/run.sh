@@ -8,8 +8,8 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
-vision=${VISION:-$here/../../../../packages/a/apple-backports/Vision}
-registry=${REGISTRY:-$here/../../../../packages/a/apple-backports/registry/Vision/ios11.json}
+vision=${VISION:-$here/../../../../packages/frameworks/apple-backports/Vision}
+registry=${REGISTRY:-$here/../../../../packages/frameworks/apple-backports/registry/Vision/ios11.json}
 # The Core ML containers the picture cases run against. Without them the picture cases are NOT
 # SKIPPED, they are simply not there: the same command then records 37 keys instead of 45, still
 # prints "port: same as the system", and lets the mutant of VNRequests.m that removes the wrapper's

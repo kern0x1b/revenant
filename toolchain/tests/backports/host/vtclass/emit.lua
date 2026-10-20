@@ -677,7 +677,7 @@ local function run(sdk_argument)
     V.write_file(join(out, "unavailable.tsv"), table.concat(absent, "\n") .. "\n")
 
     local rows = R.build_rows(G, header_texts, protocols, classes, order)
-    local registry_dir = work .. "/packages/a/apple-backports/registry/VideoToolbox"
+    local registry_dir = work .. "/packages/frameworks/apple-backports/registry/VideoToolbox"
     local facts_dir = out .. "/facts"
     local written = R.write(registry_dir, facts_dir, rows, order)
     for _, pair in ipairs(written) do

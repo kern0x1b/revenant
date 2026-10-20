@@ -1,6 +1,6 @@
 #!/bin/sh
 # run.sh - asks the host's UIKit and Core Animation, under Mac Catalyst, what UIKit's "magic" sheet shadow is made of, and
-# holds the port's shadow (packages/a/apple-backports/UIKit/RevenantSheetShadow.c) to it: the vibrant colour matrix 16.0
+# holds the port's shadow (packages/frameworks/apple-backports/UIKit/RevenantSheetShadow.c) to it: the vibrant colour matrix 16.0
 # gives it (-[_UIShadowView _updateShadowVisualStyling], with the lower intensity the sheet's drop shadow view sets) takes
 # its colour from what lies behind the layer, over red, blue, grey and white, and a view's alpha scales it; the port's
 # matrix and cap insets are the host shadow view's, its generated image is _UIPopoverShadow, and its pixel leaves what the
@@ -10,7 +10,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
-uikit=$here/../../../../packages/a/apple-backports/UIKit
+uikit=$here/../../../../packages/frameworks/apple-backports/UIKit
 build=${BUILD:-$(runs_fresh revenant-sheetshadow)}
 sdk=$(xcrun --show-sdk-path)
 app="$build/sheetshadow.app"

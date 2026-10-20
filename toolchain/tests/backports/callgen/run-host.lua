@@ -10,7 +10,7 @@ end
 function run(opt)
     opt = opt or {}
     local here = os.scriptdir()
-    local registry = opt.registry or path.join(revenant, "packages", "a", "apple-backports", "registry", opt.framework or "Intents")
+    local registry = opt.registry or path.join(revenant, "packages", "frameworks", "apple-backports", "registry", opt.framework or "Intents")
     local build = opt.build or workspace.fresh("revenant-callgen")
     local out = opt.out or path.join(build, "calls.log")
     os.mkdir(build)

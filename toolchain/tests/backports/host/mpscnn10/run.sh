@@ -12,7 +12,7 @@ echo "FAIL host/mpscnn10/run.sh: its Python steps are gone and not yet ported to
 exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-mps=${MPS:-$here/../../../../packages/a/apple-backports/MetalPerformanceShaders}
+mps=${MPS:-$here/../../../../packages/frameworks/apple-backports/MetalPerformanceShaders}
 build=${BUILD:-$(runs_folder host/mpscnn10)}
 rm -rf "$build"
 mkdir -p "$build"

@@ -3,7 +3,7 @@ import("fixtures")
 function failures(opt)
     local found = {}
     local folder = fixtures.scratch()
-    local runtime = path.join(opt.modules, "..", "packages", "i", "iphoneos-sdk", "blocks", "BlocksRuntime.m")
+    local runtime = path.join(opt.modules, "..", "packages", "build-tools", "iphoneos-sdk", "blocks", "BlocksRuntime.m")
     local probe = path.join(os.scriptdir(), "blocks", "blocks_probe.m")
     local modes = {
         {"without a system blocks runtime", {"-DREVENANT_WITHOUT_NATIVE", "-Ddlsym=revenant_test_dlsym", "-DMALLOC_BLOCK_CLASS=\"__RevenantMallocBlock\""}},

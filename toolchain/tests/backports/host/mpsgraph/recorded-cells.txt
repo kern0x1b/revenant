@@ -17,7 +17,7 @@
 # and in float16. Each line below is the two runs' bytes for one cell, read out of the run's own
 # outputs. facts/MetalPerformanceShadersGraph/Core.md groups them and says what was measured about
 # each group and what was attempted for it.
-# rejected for it, is in packages/a/apple-backports/facts/MetalPerformanceShadersGraph/Core.md.
+# rejected for it, is in packages/frameworks/apple-backports/facts/MetalPerformanceShadersGraph/Core.md.
 atan float16 6 483e 007e
 atan float16 7 48be 00fe
 atan float16 13 fd13 0014

@@ -45,7 +45,7 @@ local function run()
     local ir = path.join(SCRATCH, "full.tsv")
     write(ir, table.concat(lines, "\n") .. "\n")
     local tree = path.join(SCRATCH, "tree")
-    os.mkdir(path.join(tree, "packages", "a", "apple-backports", "registry"))
+    os.mkdir(path.join(tree, "packages", "frameworks", "apple-backports", "registry"))
 
     local out = path.join(SCRATCH, "out")
     local port_values = path.join(SCRATCH, "port-values-empty.tsv")

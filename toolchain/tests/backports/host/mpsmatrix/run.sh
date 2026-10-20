@@ -17,7 +17,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 for script in "$here"/*.sh; do
     bash -n "$script" || { echo "harness script does not parse: $script" >&2; exit 1; }
 done
-mps=${MPS:-$here/../../../../packages/a/apple-backports/MetalPerformanceShaders}
+mps=${MPS:-$here/../../../../packages/frameworks/apple-backports/MetalPerformanceShaders}
 # The grader's self-test first, because it needs no transcripts and a run of it is a second: it is the
 # check that the four-argument form of rank.py - the form its own help documents - works, and that the
 # 2026-09-29 form of it, which died with UnboundLocalError on that form, does not. Wired here because a
@@ -172,8 +172,8 @@ rank_status=$?
 # transcripts rather than reading a log, and a page that states a figure this run does not produce makes
 # the run red. Two files, both named rather than globbed, so a page that moves is a line to change here
 # and not a glob that silently checks nothing.
-FACTS=$here/../../../../packages/a/apple-backports/facts/MetalPerformanceShaders/Matrix.md
-REGISTRY=$here/../../../../packages/a/apple-backports/registry/MetalPerformanceShaders/matrix.json
+FACTS=$here/../../../../packages/frameworks/apple-backports/facts/MetalPerformanceShaders/Matrix.md
+REGISTRY=$here/../../../../packages/frameworks/apple-backports/registry/MetalPerformanceShaders/matrix.json
 page_status=0
 python3 "$here/page-check.py" "$build" "$FACTS" "$REGISTRY" || page_status=$?
 

@@ -1,7 +1,7 @@
 #import <AVFoundation/AVFoundation.h>
 #include <stdio.h>
-#include "../../../../packages/a/apple-backports/AVFAudio/RevenantEnvironmentOutput.h"
-#include "../../../../packages/a/apple-backports/AVFAudio/RevenantEnvironmentFilter.h"
+#include "../../../../packages/frameworks/apple-backports/AVFAudio/RevenantEnvironmentOutput.h"
+#include "../../../../packages/frameworks/apple-backports/AVFAudio/RevenantEnvironmentFilter.h"
 
 static int checks = 0;
 static int failures = 0;

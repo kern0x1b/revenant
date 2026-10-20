@@ -10,7 +10,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-sources=${DYNAMICS_SOURCES:-$here/../../../../packages/a/apple-backports/UIKit}
+sources=${DYNAMICS_SOURCES:-$here/../../../../packages/frameworks/apple-backports/UIKit}
 harness=$here/../../device
 build=${DYNAMICS_BUILD:-$(runs_folder revenant-dynamics-host)}
 sdk=$(xcrun --show-sdk-path)

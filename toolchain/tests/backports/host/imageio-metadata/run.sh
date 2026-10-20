@@ -19,9 +19,9 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-port=$root/packages/a/apple-backports/Graphics
+port=$root/packages/frameworks/apple-backports/Graphics
 # ImageIOMetadata7.m is written by tools/gen (spec/ImageIO/property-map.tsv) into .gen/ImageIO, so a name the list gives is looked for in both
-gen=$root/packages/a/apple-backports/.gen/ImageIO
+gen=$root/packages/frameworks/apple-backports/.gen/ImageIO
 build=${BUILD:-$(runs_folder imageio-metadata)}
 mkdir -p "$build"
 

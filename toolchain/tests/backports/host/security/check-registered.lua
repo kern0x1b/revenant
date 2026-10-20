@@ -208,8 +208,8 @@ end
 
 local here = os.scriptdir()
 local worktree = here .. "/../../../.."
-local objects = worktree .. "/packages/a/apple-backports/Security"
-local registry = worktree .. "/packages/a/apple-backports/registry/Security"
+local objects = worktree .. "/packages/frameworks/apple-backports/Security"
+local registry = worktree .. "/packages/frameworks/apple-backports/registry/Security"
 
 local function names()
     local out = {}

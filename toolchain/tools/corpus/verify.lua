@@ -9,7 +9,7 @@ local REVENANT = path.directory(path.directory(os.scriptdir()))
 
 local TREE = nil
 for _, candidate in ipairs({os.getenv("REVENANT_TREE_DIR") or false,
-                            path.join(REVENANT, "packages", "a", "apple-backports")}) do
+                            path.join(REVENANT, "packages", "frameworks", "apple-backports")}) do
     if candidate and os.isdir(candidate) then
         TREE = candidate
         break
@@ -17,7 +17,7 @@ for _, candidate in ipairs({os.getenv("REVENANT_TREE_DIR") or false,
 end
 if not TREE then
     raise("verify.lua: no tree directory found. Set REVENANT_TREE_DIR to the current worktree's "
-        .. "packages/a/apple-backports -- without it every check reports false positives.")
+        .. "packages/frameworks/apple-backports -- without it every check reports false positives.")
 end
 
 local function walk(dir, prune, out)

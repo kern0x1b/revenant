@@ -13,8 +13,8 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-P=${PORT_DIR:-$here/../../../../packages/a/apple-backports}
-CODING=$P/../../c/revenant-coding/files
+P=${PORT_DIR:-$here/../../../../packages/frameworks/apple-backports}
+CODING=$P/../../runtimes/revenant-coding/files
 build=${OWED_INIT_BUILD:-$(runs_fresh revenant-intents-init-owed)}
 # Catalyst, as the INImage bridge is: RevenantIntents100.m imports UIKit, so the port cannot be built for macOS here,
 # and both builds must share one target to be linked into one probe. The host is the Catalyst Intents of iOSSupport.

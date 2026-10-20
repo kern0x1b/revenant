@@ -1,5 +1,5 @@
 local TOOLS = path.join(os.scriptdir(), "..", "..", "tools")
-local SNAP = "packages/a/apple-backports/spec"
+local SNAP = "packages/frameworks/apple-backports/spec"
 local RELEASE = "26.2"
 local OBJC_HEADER = "#libclang=fixture\tsdk=iPhoneOS" .. RELEASE .. "\tcolumns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value\n"
 local SWIFT_HEADER = "framework\tkind\tusr\tcontainer\tname\tside\ttype\tparams\tavailability\tmessage\tdeclhash\n"

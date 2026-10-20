@@ -34,9 +34,9 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-avf=$root/packages/a/apple-backports/AVFoundation
+avf=$root/packages/frameworks/apple-backports/AVFoundation
 # the generated protocol header (tools/gen writes it into .gen/AVFoundation/ on gen --all)
-avf_gen=$root/packages/a/apple-backports/.gen/AVFoundation
+avf_gen=$root/packages/frameworks/apple-backports/.gen/AVFoundation
 control=${CONTROL:-0}
 # WHICH MUTATION, because one variable drove both phases and the first phase reported its verdict and
 # exited before the second was ever reached: AVFGLOBALSMUTANT=function planted the returned string and
@@ -554,7 +554,7 @@ for parent in sorted(parents):
 # `@interface AVMetricErrorEvent : AVMetricEvent` becomes `@interface revenant_host_AVMetricErrorEvent : AVMetricEvent`
 # if only the class's own name is prefixed - and bare `AVMetricEvent` in the host build resolves to APPLE's
 # class, because the host framework is linked in. The port's error event then derives from Apple's event, and
-# packages/r/revenant-coding's walker, which walks [object class] up to NSObject, reaches Apple's AVMetricEvent
+# packages/runtimes/revenant-coding's walker, which walks [object class] up to NSObject, reaches Apple's AVMetricEvent
 # and reads and writes ITS ivars at ITS offsets on a port object.
 #
 # The dump that showed it, from the port's own class:
@@ -657,7 +657,7 @@ done
 #
 # The port's own objects are compiled for the host here in the same way, so the walker is treated the same.
 coding=""
-for candidate in "$root/packages/r/revenant-coding/files" "$HOME/Git/projects/ios/revenant/toolchain/packages/r/revenant-coding/files"; do
+for candidate in "$root/packages/runtimes/revenant-coding/files" "$HOME/Git/projects/ios/revenant/toolchain/packages/runtimes/revenant-coding/files"; do
     [ -f "$candidate/RevenantCoding.m" ] && { coding_source="$candidate/RevenantCoding.m"; break; }
 done
 [ -n "${coding_source:-}" ] || {

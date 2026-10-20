@@ -7,7 +7,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${SUGGESTION_PORT_SOURCE:-$here/../../../../packages/a/apple-backports/UIKit/UISearchSuggestionItem.m}
+port=${SUGGESTION_PORT_SOURCE:-$here/../../../../packages/frameworks/apple-backports/UIKit/UISearchSuggestionItem.m}
 build=${SUGGESTION_BUILD:-$(runs_fresh revenant-suggestion-item)}
 sdk=$(xcrun --show-sdk-path)
 app="$build/suggestion-item"

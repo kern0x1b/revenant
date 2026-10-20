@@ -12,7 +12,7 @@ set_defaultplat("iphoneos")
 set_defaultarchs("iphoneos|armv7")
 
 local source = os.getenv("MAPTABLE6_PORT")
-if not source or source == "" then source = path.join(root, "packages/a/apple-backports/Foundation/NSMapTable+Objects6.m") end
+if not source or source == "" then source = path.join(root, "packages/frameworks/apple-backports/Foundation/NSMapTable+Objects6.m") end
 local port = {defines = {"weakToStrongObjectsMapTable=revenantHost_weakToStrongObjectsMapTable",
                          "strongToWeakObjectsMapTable=revenantHost_strongToWeakObjectsMapTable",
                          "weakToWeakObjectsMapTable=revenantHost_weakToWeakObjectsMapTable",

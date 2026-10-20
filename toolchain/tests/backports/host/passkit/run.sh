@@ -17,7 +17,7 @@ echo "FAIL host/passkit/run.sh: its Python steps are gone and not yet ported to 
 exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/PassKit}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/PassKit}
 build=${PASSKIT_BUILD:-$(runs_folder passkit)}
 mkdir -p "$build"
 # The clear-out MUST include the mutants' own sources. Leaving them out lets a mutant file from an

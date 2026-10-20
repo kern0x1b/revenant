@@ -23,7 +23,7 @@ xcrun clang -fobjc-arc -w -O1 $target -isysroot "$sdk" -iframework "$ios" -I "$h
 "$runs/check" | tee "$runs/host.txt"
 grep -q '^VERDICT ok' "$runs/host.txt" || { echo "FAIL: the host half is not green"; exit 1; }
 
-port=$repo/packages/a/apple-backports
+port=$repo/packages/frameworks/apple-backports
 awk -v rows="$here/rows.inc" '
   function selof(line,   s, n, t, i, out) {
     s = line; sub(/\{.*$/, "", s); sub(/;.*$/, "", s); gsub(/\([^)]*\)/, "", s); sub(/^[-+] */, "", s)

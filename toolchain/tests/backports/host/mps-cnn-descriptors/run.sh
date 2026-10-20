@@ -13,7 +13,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-PORT=${PORT:-$here/../../../../packages/a/apple-backports/MetalPerformanceShaders}
+PORT=${PORT:-$here/../../../../packages/frameworks/apple-backports/MetalPerformanceShaders}
 BUILD=${BUILD:-$(runs_folder mps-cnn/descriptors)}
 # Built for macOS, not Catalyst: the 16.4 header marks setNeuronType:parameterA:parameterB:, neuronType,
 # neuronParameterA and neuronParameterB MPS_UNAVAILABLE(macCatalyst) (MPSCNNConvolution.h:266-284), so a Catalyst

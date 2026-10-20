@@ -1,0 +1,1145 @@
+{
+ "framework": "UIKit",
+ "entries": [
+  {
+   "api": "-[UIDragItem initWithItemProvider:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "an item carrying that provider, and nothing else: the preview is given separately when the drag begins, or by the previewProvider the application sets",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type is and what it is a subclass of; the tree's own UIPreviewTarget and UITargetedPreview, which the drag's target and preview build on and do not duplicate; the host's own UIKit under Mac Catalyst for the answers that are observable there"
+  },
+  {
+   "api": "UIDragItem.itemProvider",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the provider whose data this item moves, as it was given",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type is and what it is a subclass of; the tree's own UIPreviewTarget and UITargetedPreview, which the drag's target and preview build on and do not duplicate; the host's own UIKit under Mac Catalyst for the answers that are observable there"
+  },
+  {
+   "api": "UIDragItem.localObject",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "what the application attached to this item, which is visible only inside the process that started the drag and travels with the item nowhere",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type is and what it is a subclass of; the tree's own UIPreviewTarget and UITargetedPreview, which the drag's target and preview build on and do not duplicate; the host's own UIKit under Mac Catalyst for the answers that are observable there"
+  },
+  {
+   "api": "UIDragItem.previewProvider",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "a block that makes this item's preview, copied when it is set and called when and if the preview is wanted, so an application can change the picture while the drag is under way",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type is and what it is a subclass of; the tree's own UIPreviewTarget and UITargetedPreview, which the drag's target and preview build on and do not duplicate; the host's own UIKit under Mac Catalyst for the answers that are observable there"
+  },
+  {
+   "api": "UIDragPreview",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "a still picture of a view with the parameters a lift and a drop are built from; it neither moves nor changes the view it was made from, which is what the header says of it",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type is and what it is a subclass of; the tree's own UIPreviewTarget and UITargetedPreview, which the drag's target and preview build on and do not duplicate; the host's own UIKit under Mac Catalyst for the answers that are observable there"
+  },
+  {
+   "api": "-[UIDragPreview initWithView:parameters:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "a preview of that view with those parameters, the designated way to make one",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type is and what it is a subclass of; the tree's own UIPreviewTarget and UITargetedPreview, which the drag's target and preview build on and do not duplicate; the host's own UIKit under Mac Catalyst for the answers that are observable there"
+  },
+  {
+   "api": "-[UIDragPreview initWithView:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "a preview of that view with default parameters, which is the parameters a peek uses",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type is and what it is a subclass of; the tree's own UIPreviewTarget and UITargetedPreview, which the drag's target and preview build on and do not duplicate; the host's own UIKit under Mac Catalyst for the answers that are observable there"
+  },
+  {
+   "api": "UIDragPreview.view",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the view this preview was made from, which the preview does not move or change",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type is and what it is a subclass of; the tree's own UIPreviewTarget and UITargetedPreview, which the drag's target and preview build on and do not duplicate; the host's own UIKit under Mac Catalyst for the answers that are observable there"
+  },
+  {
+   "api": "UIDragPreview.parameters",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the parameters the lift and the drop are built from, copied from the ones it was made with",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type is and what it is a subclass of; the tree's own UIPreviewTarget and UITargetedPreview, which the drag's target and preview build on and do not duplicate; the host's own UIKit under Mac Catalyst for the answers that are observable there"
+  },
+  {
+   "api": "UIDragPreviewParameters",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "a drag's preview parameters, which are the same kind of object as a peek's: the header makes it a subclass of UIPreviewParameters and the tree already carries that, down to the visible path and the shadow, so this adds nothing to it and duplicates nothing",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type is and what it is a subclass of; the tree's own UIPreviewTarget and UITargetedPreview, which the drag's target and preview build on and do not duplicate; the host's own UIKit under Mac Catalyst for the answers that are observable there"
+  },
+  {
+   "api": "UIDragPreviewTarget",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "where a drag's preview is aimed: a container, a centre in it and a transform, which is UIPreviewTarget as the header says, and the tree already carries that including the precondition it raises on when the container is not in a window",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type is and what it is a subclass of; the tree's own UIPreviewTarget and UITargetedPreview, which the drag's target and preview build on and do not duplicate; the host's own UIKit under Mac Catalyst for the answers that are observable there"
+  },
+  {
+   "api": "UITargetedDragPreview",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "a drag's preview aimed at a target, which is UITargetedPreview as the header says and the tree already carries, with the drag's own types",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type is and what it is a subclass of; the tree's own UIPreviewTarget and UITargetedPreview, which the drag's target and preview build on and do not duplicate; the host's own UIKit under Mac Catalyst for the answers that are observable there"
+  },
+  {
+   "api": "-[UITargetedDragPreview retargetedPreviewWithTarget:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the same picture aimed at another target, which is the superclass's own retargeting with the drag's type",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type is and what it is a subclass of; the tree's own UIPreviewTarget and UITargetedPreview, which the drag's target and preview build on and do not duplicate; the host's own UIKit under Mac Catalyst for the answers that are observable there"
+  },
+  {
+   "api": "UIDragInteraction",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the interaction a view has that lifts and carries: a long press lifts what is under the touch, a pan carries the picture the lift made across the application's own windows, and letting go is the drop",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type declares; the release's own UILongPressGestureRecognizer and UIPanGestureRecognizer, which are the gestures a drag is made of; the port's own sessions, which have no counterpart on the release because it has no drag service"
+  },
+  {
+   "api": "-[UIDragInteraction initWithDelegate:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "a drag interaction for that delegate, enabled as the class says by default, with its two gestures installed on the view it is given",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type declares; the release's own UILongPressGestureRecognizer and UIPanGestureRecognizer, which are the gestures a drag is made of; the port's own sessions, which have no counterpart on the release because it has no drag service"
+  },
+  {
+   "api": "UIDragInteraction.delegate",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "who is asked what is being dragged and what happens to it, held weakly as the header says",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type declares; the release's own UILongPressGestureRecognizer and UIPanGestureRecognizer, which are the gestures a drag is made of; the port's own sessions, which have no counterpart on the release because it has no drag service"
+  },
+  {
+   "api": "UIDragInteraction.enabled",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "whether this interaction lifts and carries at all; turning it off stops both gestures",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type declares; the release's own UILongPressGestureRecognizer and UIPanGestureRecognizer, which are the gestures a drag is made of; the port's own sessions, which have no counterpart on the release because it has no drag service"
+  },
+  {
+   "api": "UIDragInteraction.enabledByDefault",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "YES: a drag interaction an application made is on unless it is turned off, and what lifts is the view under the touch",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type declares; the release's own UILongPressGestureRecognizer and UIPanGestureRecognizer, which are the gestures a drag is made of; the port's own sessions, which have no counterpart on the release because it has no drag service; the port's own object is packages/frameworks/apple-backports/UIKit/UIDragInteraction.m, and the accessor is the CLASS method +isEnabledByDefault (UIDragInteraction.h declares the property class, so there is no instance accessor), and -init reads it, so an interaction an application makes is on unless it is turned off. Read out of the compiled object: otool -v -s __TEXT __objc_methname on UIDragInteraction.o carries isEnabledByDefault, enabledByDefault and the encoding `TB,R,N,GisEnabledByDefault`, whose N is the class-property flag"
+  },
+  {
+   "api": "UIDragInteraction.allowsSimultaneousRecognitionDuringLift",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "whether the lift's gesture may be recognised at the same time as another, NO in an interaction made by hand",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type declares; the release's own UILongPressGestureRecognizer and UIPanGestureRecognizer, which are the gestures a drag is made of; the port's own sessions, which have no counterpart on the release because it has no drag service"
+  },
+  {
+   "api": "UICollectionViewDropCoordinator",
+   "kind": "protocol",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "carried, and answered by the port's own objects: the release has no collection view drag or drop at all, so everything that conforms to this is the port's",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UITableViewDropCoordinator",
+   "kind": "protocol",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "carried, and answered by the port's own objects: the release has no table view drag or drop at all, so everything that conforms to this is the port's",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UICollectionViewDropItem",
+   "kind": "protocol",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "carried, and answered by the port's own objects: the release has no collection view drag or drop at all, so everything that conforms to this is the port's",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UITableViewDropItem",
+   "kind": "protocol",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "carried, and answered by the port's own objects: the release has no table view drag or drop at all, so everything that conforms to this is the port's",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UICollectionViewDropPlaceholderContext",
+   "kind": "protocol",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "carried, and answered by the port's own objects: the release has no collection view drag or drop at all, so everything that conforms to this is the port's",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UITableViewDropPlaceholderContext",
+   "kind": "protocol",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "carried, and answered by the port's own objects: the release has no table view drag or drop at all, so everything that conforms to this is the port's",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UICollectionViewDragDelegate",
+   "kind": "protocol",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "carried, and answered by the port's own objects: the release has no collection view drag or drop at all, so everything that conforms to this is the port's",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UICollectionViewDropDelegate",
+   "kind": "protocol",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "carried, and answered by the port's own objects: the release has no collection view drag or drop at all, so everything that conforms to this is the port's",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UITableViewDragDelegate",
+   "kind": "protocol",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "carried, and answered by the port's own objects: the release has no table view drag or drop at all, so everything that conforms to this is the port's",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UITableViewDropDelegate",
+   "kind": "protocol",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "carried, and answered by the port's own objects: the release has no table view drag or drop at all, so everything that conforms to this is the port's",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UICollectionViewDropItem.dragItem",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the item being dropped, as the session carries it",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UICollectionViewDropItem.sourceIndexPath",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "where that item was before the drag, and nil when it came from somewhere else",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UICollectionViewDropItem.previewSize",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the size the item's preview is drawn at, which is the size the layout gives the item it would land on",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UITableViewDropItem.dragItem",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the item being dropped, as the session carries it",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UITableViewDropItem.sourceIndexPath",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "where that item was before the drag, and nil when it came from somewhere else",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UITableViewDropItem.previewSize",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the size the item's preview is drawn at, which is the width of the table and its row height",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UICollectionViewDropProposal.intent",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "where in the collection view the drop would put the item: into a section, at an index path, or wherever the delegate means by unspecified",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UITableViewDropProposal.intent",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "where in the table view the drop would put the row: into a section, at an index path, or unspecified",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "-[UICollectionViewDropProposal initWithDropOperation:intent:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "a proposal for that operation and that intent",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "-[UITableViewDropProposal initWithDropOperation:intent:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "a proposal for that operation and that intent",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "-[UICollectionViewPlaceholder initWithInsertionIndexPath:reuseIdentifier:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "where an item will be once the data source has been told about it: the index path it stands at and the cell it is drawn with",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "-[UITableViewPlaceholder initWithInsertionIndexPath:reuseIdentifier:rowHeight:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the same for a table, with the height the row will be drawn at",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UICollectionViewPlaceholder.cellUpdateHandler",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "a block that is given the cell the placeholder is standing in, which is how a delegate draws a cell for a row that does not exist yet",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UITableViewPlaceholder.cellUpdateHandler",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the same for a table's cell",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UICollectionViewDropPlaceholder.previewParametersProvider",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "a block that is given the placeholder's cell and gives the preview parameters its preview is built from",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UITableViewDropPlaceholder.previewParametersProvider",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the same for a table's placeholder",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each protocol declares; the release's own indexPathForItemAtPoint: and indexPathForRowAtPoint: for where an item would land, and its layout for the size it would be drawn at; the port's own sessions, which have no counterpart on the release because it has no drag"
+  },
+  {
+   "api": "UIDropInteraction",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the drop target a %s registers with a drag; the tree's own file builds it and the port asks it whether it will have a session",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type is; the tree's own UIDropInteraction.m, UIDropProposal.m and UIDropCoordinators.m build them, and the port's drag and drop uses them"
+  },
+  {
+   "api": "UIDropProposal",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "what a drop proposes: the operation, whether it is precise, and whether it wants the full size preview",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type is; the tree's own UIDropInteraction.m, UIDropProposal.m and UIDropCoordinators.m build them, and the port's drag and drop uses them"
+  },
+  {
+   "api": "UICollectionViewPlaceholder",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "where an item will be in a collection view once the data source has been told, and the cell it is drawn with",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type is; the tree's own UIDropInteraction.m, UIDropProposal.m and UIDropCoordinators.m build them, and the port's drag and drop uses them"
+  },
+  {
+   "api": "UICollectionViewDropPlaceholder",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "a placeholder that is also a drop target, with the parameters its preview is built from",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type is; the tree's own UIDropInteraction.m, UIDropProposal.m and UIDropCoordinators.m build them, and the port's drag and drop uses them"
+  },
+  {
+   "api": "UICollectionViewDropProposal",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "a drop proposal that also says where the item would land",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type is; the tree's own UIDropInteraction.m, UIDropProposal.m and UIDropCoordinators.m build them, and the port's drag and drop uses them"
+  },
+  {
+   "api": "UITableViewPlaceholder",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "where a row will be once the data source has been told, with the height it is drawn at",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type is; the tree's own UIDropInteraction.m, UIDropProposal.m and UIDropCoordinators.m build them, and the port's drag and drop uses them"
+  },
+  {
+   "api": "UITableViewDropPlaceholder",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "a table placeholder that is also a drop target",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type is; the tree's own UIDropInteraction.m, UIDropProposal.m and UIDropCoordinators.m build them, and the port's drag and drop uses them"
+  },
+  {
+   "api": "UITableViewDropProposal",
+   "kind": "class",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "a drop proposal that also says where the row would land",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each type is; the tree's own UIDropInteraction.m, UIDropProposal.m and UIDropCoordinators.m build them, and the port's drag and drop uses them"
+  },
+  {
+   "api": "-[UICollectionViewDragDelegate collectionView:itemsForBeginningDragSession:atIndexPath:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the collection view asks its own drag delegate: what the item at an index path is, asked with a session it can answer about, before anything is lifted",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UICollectionViewDragDelegate collectionView:dragPreviewParametersForItemAtIndexPath:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the collection view asks its own drag delegate: the parameters the item's lift preview is built from, the drag delegate's to choose",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UICollectionViewDragDelegate collectionView:dragSessionAllowsMoveOperation:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the collection view asks its own drag delegate: whether a session may move its items, asked when the answer is needed so a delegate can change its mind mid-drag",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UICollectionViewDragDelegate collectionView:dragSessionIsRestrictedToDraggingApplication:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the collection view asks its own drag delegate: whether a session is confined to the application that began it, YES where the delegate has none because a drag on this release stays here",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UICollectionViewDragDelegate collectionView:dragSessionWillBegin:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the collection view asks its own drag delegate: told once the items exist and before the lift animation",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UICollectionViewDragDelegate collectionView:dragSessionDidEnd:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the collection view asks its own drag delegate: told once the drag is over",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UICollectionViewDragDelegate collectionView:itemsForAddingToDragSession:atIndexPath:point:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the collection view asks its own drag delegate: the items a second item adds to a session under way, with the point the release's own layout gives that index path",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UITableViewDragDelegate tableView:itemsForBeginningDragSession:atIndexPath:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the table view asks its own drag delegate: what the row at an index path is, asked with a session it can answer about, before anything is lifted",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UITableViewDragDelegate tableView:dragPreviewParametersForRowAtIndexPath:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the table view asks its own drag delegate: the parameters the row's lift preview is built from, the drag delegate's to choose",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UITableViewDragDelegate tableView:dragSessionAllowsMoveOperation:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the table view asks its own drag delegate: whether a session may move its rows, asked when the answer is needed",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UITableViewDragDelegate tableView:dragSessionIsRestrictedToDraggingApplication:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the table view asks its own drag delegate: whether a session is confined to the application that began it, YES where the delegate has none",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UITableViewDragDelegate tableView:dragSessionWillBegin:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the table view asks its own drag delegate: told once the items exist and before the lift animation",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UITableViewDragDelegate tableView:dragSessionDidEnd:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the table view asks its own drag delegate: told once the drag is over",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UITableViewDragDelegate tableView:itemsForAddingToDragSession:atIndexPath:point:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the table view asks its own drag delegate: the items a second row adds to a session under way, with the point the release's own row geometry gives it",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UICollectionViewDropDelegate collectionView:canHandleDropSession:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the collection view asks its own drop delegate: whether the session will be handled at all; NO where the delegate has none, so an unhandled session is not dropped",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UICollectionViewDropDelegate collectionView:dropSessionDidEnter:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the collection view asks its own drop delegate: told when the session enters, before the first update",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UICollectionViewDropDelegate collectionView:dropSessionDidUpdate:withDestinationIndexPath:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the collection view asks its own drop delegate: what the session would do at this point, asked each time the finger moves, with the destination the release's own hit test gives; cancelled rather than moved where the delegate answers nothing, so nothing is dropped that was not agreed to",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UICollectionViewDropDelegate collectionView:dropPreviewParametersForItemAtIndexPath:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the collection view asks its own drop delegate: the parameters the drop preview is built from, the drop delegate's to choose",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UICollectionViewDropDelegate collectionView:performDropWithCoordinator:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the collection view asks its own drop delegate: the drop, with the coordinator the items move through: the items, the destination, the proposal and the session",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UICollectionViewDropDelegate collectionView:dropSessionDidExit:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the collection view asks its own drop delegate: told when the session leaves the view",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UICollectionViewDropDelegate collectionView:dropSessionDidEnd:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the collection view asks its own drop delegate: told when the session is over",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UITableViewDropDelegate tableView:canHandleDropSession:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the table view asks its own drop delegate: whether the session will be handled at all; NO where the delegate has none",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UITableViewDropDelegate tableView:dropSessionDidEnter:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the table view asks its own drop delegate: told when the session enters, before the first update",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UITableViewDropDelegate tableView:dropSessionDidUpdate:withDestinationIndexPath:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the table view asks its own drop delegate: what the session would do at this point, asked each time the finger moves, with the destination the release's own hit test gives; cancelled where the delegate answers nothing",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UITableViewDropDelegate tableView:dropPreviewParametersForRowAtIndexPath:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the table view asks its own drop delegate: the parameters the drop preview is built from",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UITableViewDropDelegate tableView:performDropWithCoordinator:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the table view asks its own drop delegate: the drop, with the coordinator the rows move through",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UITableViewDropDelegate tableView:dropSessionDidExit:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the table view asks its own drop delegate: told when the session leaves the view",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UITableViewDropDelegate tableView:dropSessionDidEnd:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the table view asks its own drop delegate: told when the session is over",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and when the header says it is asked; the order the port drives is written down in .agent-work/plan-and-analysis/uikit-a/viewdragdrop-oracle.md, and the one ordering an upstream shows is WinObjC (MIT) at 94f6b5bfdc09d945e30607b56124b6f94a5b9d7b, UICollectionView.mm:1730-1750. Neither upstream routes a view-level drag and drop delegate, and the Catalyst host cannot be asked because macOS UIKit has no such protocol, so the sequence is the documented one tested against the engine"
+  },
+  {
+   "api": "-[UIDragInteractionDelegate dragInteraction:itemsForBeginningSession:]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "asked by the port",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+  },
+  {
+   "api": "-[UIDragInteractionDelegate dragInteraction:sessionAllowsMoveOperation:]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "asked by the port",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+  },
+  {
+   "api": "-[UIDragInteractionDelegate dragInteraction:sessionDidMove:]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "asked by the port",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+  },
+  {
+   "api": "-[UIDragInteractionDelegate dragInteraction:sessionWillBegin:]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "asked by the port",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+  },
+  {
+   "api": "-[UIDropInteractionDelegate dropInteraction:canHandleSession:]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "asked by the port",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+  },
+  {
+   "api": "-[UIDropInteractionDelegate dropInteraction:sessionDidEnter:]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "asked by the port",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+  },
+  {
+   "api": "-[UIDropInteractionDelegate dropInteraction:sessionDidUpdate:]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "asked by the port",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+  },
+  {
+   "api": "-[UIDropInteractionDelegate dropInteraction:performDrop:]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "asked by the port",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+  },
+  {
+   "api": "-[UIDropInteractionDelegate dropInteraction:sessionDidExit:]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "asked by the port",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+  },
+  {
+   "api": "-[UIDropInteractionDelegate dropInteraction:sessionDidEnd:]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "asked by the port",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+  },
+  {
+   "api": "-[UIDropInteractionDelegate dropInteraction:concludeDrop:]",
+   "kind": "method",
+   "introduced": "9.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "asked by the port",
+   "facts": "facts/UIKit/DragAndDrop.md",
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+  },
+  {
+   "api": "-[UITextDragPreviewRenderer initWithLayoutManager:range:unifyRects:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "a renderer for that range, the three rectangles measured from the release's own layout manager: the bounding rectangle of the range, the used rectangle of the line fragments at each end, and the body between them; unifying says whether a range of one line is drawn as a body rather than as a first line",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and which type carries it; the renderer's geometry is the release's own NSLayoutManager, measured through its own line-fragment questions, and a range of no glyphs has no picture"
+  },
+  {
+   "api": "-[UITextDragPreviewRenderer initWithLayoutManager:range:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the same, with the rectangles left apart rather than unified",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and which type carries it; the renderer's geometry is the release's own NSLayoutManager, measured through its own line-fragment questions, and a range of no glyphs has no picture"
+  },
+  {
+   "api": "-[UITextDragPreviewRenderer adjustFirstLineRect:bodyRect:lastLineRect:textOrigin:]",
+   "kind": "method",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "moves the three rectangles by the text's origin, in place, so a preview drawn where the text is not already begins at the caret rather than at its line's origin",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and which type carries it; the renderer's geometry is the release's own NSLayoutManager, measured through its own line-fragment questions, and a range of no glyphs has no picture"
+  },
+  {
+   "api": "UITextDragPreviewRenderer.layoutManager",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the layout manager the rectangles were measured with",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and which type carries it; the renderer's geometry is the release's own NSLayoutManager, measured through its own line-fragment questions, and a range of no glyphs has no picture"
+  },
+  {
+   "api": "UITextDragPreviewRenderer.image",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the picture of the text, drawn once by asking that layout manager to draw its glyphs, so the text in the picture is where the text is in the view; nil for a renderer with no layout manager or a range of no glyphs, and never a blank image",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and which type carries it; the renderer's geometry is the release's own NSLayoutManager, measured through its own line-fragment questions, and a range of no glyphs has no picture"
+  },
+  {
+   "api": "UITextDragPreviewRenderer.firstLineRect",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the rectangle of the first line of the range",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and which type carries it; the renderer's geometry is the release's own NSLayoutManager, measured through its own line-fragment questions, and a range of no glyphs has no picture"
+  },
+  {
+   "api": "UITextDragPreviewRenderer.bodyRect",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the rectangle between the first and the last lines, and the whole range when the rectangles were unified",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and which type carries it; the renderer's geometry is the release's own NSLayoutManager, measured through its own line-fragment questions, and a range of no glyphs has no picture"
+  },
+  {
+   "api": "UITextDragPreviewRenderer.lastLineRect",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the rectangle of the last line of the range",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2 for what each question is and which type carries it; the renderer's geometry is the release's own NSLayoutManager, measured through its own line-fragment questions, and a range of no glyphs has no picture"
+  },
+  {
+   "api": "UITextView.textDragDelegate",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the text control's drag delegate, which is the delegate asked what a drag of a range of this text carries; it is held weakly, as the header declares it, so a delegate deallocated first reads back nil rather than a stale address",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2, which declares these on the UITextDraggable and UITextDroppable protocols, adopted by UITextField and UITextView in their class extensions; the port's own categories on those two classes, compiled with the library's flags"
+  },
+  {
+   "api": "UITextView.textDragInteraction",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the interaction that lifts a range of this text, made once per control; nil until an application asks for one, which is what the header's nullable property allows",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2, which declares these on the UITextDraggable and UITextDroppable protocols, adopted by UITextField and UITextView in their class extensions; the port's own categories on those two classes, compiled with the library's flags"
+  },
+  {
+   "api": "UITextView.isTextDragActive",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "whether a drag of this text is under way, which is whether the interaction is carrying a session; a control with no interaction is not being dragged",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2, which declares these on the UITextDraggable and UITextDroppable protocols, adopted by UITextField and UITextView in their class extensions; the port's own categories on those two classes, compiled with the library's flags"
+  },
+  {
+   "api": "UITextView.textDragOptions",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the options a drag of this text is made under, none by default",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2, which declares these on the UITextDraggable and UITextDroppable protocols, adopted by UITextField and UITextView in their class extensions; the port's own categories on those two classes, compiled with the library's flags"
+  },
+  {
+   "api": "UITextView.textDropDelegate",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the text control's drop delegate, which is asked whether this control will take a drop and what it would do with it; it is held weakly, as the header declares it, so a delegate deallocated first reads back nil rather than a stale address",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2, which declares these on the UITextDraggable and UITextDroppable protocols, adopted by UITextField and UITextView in their class extensions; the port's own categories on those two classes, compiled with the library's flags"
+  },
+  {
+   "api": "UITextView.textDropInteraction",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the interaction that receives a drop on this control, made once per control; nil until an application asks for one",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2, which declares these on the UITextDraggable and UITextDroppable protocols, adopted by UITextField and UITextView in their class extensions; the port's own categories on those two classes, compiled with the library's flags"
+  },
+  {
+   "api": "UITextView.isTextDropActive",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "whether a drop is under way on this control, which is whether its interaction is holding a session; a control with no interaction is not receiving a drop",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2, which declares these on the UITextDraggable and UITextDroppable protocols, adopted by UITextField and UITextView in their class extensions; the port's own categories on those two classes, compiled with the library's flags"
+  },
+  {
+   "api": "UITextField.textDragDelegate",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the text control's drag delegate, which is the delegate asked what a drag of a range of this text carries; it is held weakly, as the header declares it, so a delegate deallocated first reads back nil rather than a stale address",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2, which declares these on the UITextDraggable and UITextDroppable protocols, adopted by UITextField and UITextView in their class extensions; the port's own categories on those two classes, compiled with the library's flags"
+  },
+  {
+   "api": "UITextField.textDragInteraction",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the interaction that lifts a range of this text, made once per control; nil until an application asks for one, which is what the header's nullable property allows",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2, which declares these on the UITextDraggable and UITextDroppable protocols, adopted by UITextField and UITextView in their class extensions; the port's own categories on those two classes, compiled with the library's flags"
+  },
+  {
+   "api": "UITextField.isTextDragActive",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "whether a drag of this text is under way, which is whether the interaction is carrying a session; a control with no interaction is not being dragged",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2, which declares these on the UITextDraggable and UITextDroppable protocols, adopted by UITextField and UITextView in their class extensions; the port's own categories on those two classes, compiled with the library's flags"
+  },
+  {
+   "api": "UITextField.textDragOptions",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the options a drag of this text is made under, none by default",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2, which declares these on the UITextDraggable and UITextDroppable protocols, adopted by UITextField and UITextView in their class extensions; the port's own categories on those two classes, compiled with the library's flags"
+  },
+  {
+   "api": "UITextField.textDropDelegate",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the text control's drop delegate, which is asked whether this control will take a drop and what it would do with it; it is held weakly, as the header declares it, so a delegate deallocated first reads back nil rather than a stale address",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2, which declares these on the UITextDraggable and UITextDroppable protocols, adopted by UITextField and UITextView in their class extensions; the port's own categories on those two classes, compiled with the library's flags"
+  },
+  {
+   "api": "UITextField.textDropInteraction",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "the interaction that receives a drop on this control, made once per control; nil until an application asks for one",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2, which declares these on the UITextDraggable and UITextDroppable protocols, adopted by UITextField and UITextView in their class extensions; the port's own categories on those two classes, compiled with the library's flags"
+  },
+  {
+   "api": "UITextField.isTextDropActive",
+   "kind": "property",
+   "introduced": "11.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "effect": "whether a drop is under way on this control, which is whether its interaction is holding a session; a control with no interaction is not receiving a drop",
+   "facts": "facts/UIKit/TextDragAndDrop.md",
+   "source": "the header of SDK 26.2, which declares these on the UITextDraggable and UITextDroppable protocols, adopted by UITextField and UITextView in their class extensions; the port's own categories on those two classes, compiled with the library's flags"
+  }
+ ]
+}

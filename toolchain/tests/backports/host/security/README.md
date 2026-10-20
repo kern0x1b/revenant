@@ -261,10 +261,10 @@ directory, so the same run comes out the same from here, from the repository roo
 ```
 shasum -a 256 tests/backports/host/security/sec-object-wrappers.m \
          tests/backports/host/security/compare-sec-object-wrappers.lua \
-         packages/a/apple-backports/Security/SecObjectWrappers12_0.m
+         packages/frameworks/apple-backports/Security/SecObjectWrappers12_0.m
 ```
 
     0e134f43b64166c4e55a12f1f000cd36b1ad422922c937c49ee27487b11ad00c  tests/backports/host/security/sec-object-wrappers.m
     38d1065dfd5eb70702bca6db5cca4d4cd7a451fa077ac7f8279911fa6ad8bab7  tests/backports/host/security/compare-sec-object-wrappers.lua
-    c4fb20d9e4423c9127cbfdea7531b8a981a4aae89347106b2aa870ea33dbfbc9  packages/a/apple-backports/Security/SecObjectWrappers12_0.m
+    c4fb20d9e4423c9127cbfdea7531b8a981a4aae89347106b2aa870ea33dbfbc9  packages/frameworks/apple-backports/Security/SecObjectWrappers12_0.m
 

@@ -6,7 +6,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-package=${PACKAGE:-$here/../../../../packages/m/micro-ecc}
+package=${PACKAGE:-$here/../../../../packages/libraries/micro-ecc}
 build=${SECKEYCURVE_BUILD:-$(runs_fresh revenant-seckeycurve)}
 rm -rf "$build"
 mkdir -p "$build"
@@ -83,7 +83,7 @@ done
 # an in-memory key is in no keychain, so the release's own SecItemCopyMatching answers errSecItemNotFound
 # for every one of them (measured, attrs.m in the evidence of this suite's design). port-shims.h answers
 # both shapes from the host's own Security, and the differential says which key is of which kind.
-port=${PORT:-$here/../../../../packages/a/apple-backports/Security}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/Security}
 renames="-DRevenantCKPublicPoint=revenantHostRevenantCKPublicPoint
     -DSecKeyCreateSignature=revenantHost_SecKeyCreateSignature
     -DSecKeyVerifySignature=revenantHost_SecKeyVerifySignature

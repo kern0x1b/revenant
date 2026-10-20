@@ -12,7 +12,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/GameplayKit}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/GameplayKit}
 out=${BUILD:-$(runs_fresh revenant-gameplaykit-graph)}
 mkdir -p "$out"
 

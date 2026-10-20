@@ -15,11 +15,11 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 revenant=${REVENANT:-$here/../../../..}
-crypto="$revenant/packages/a/apple-backports/HomeKit/RevenantHAPBignum.m"
+crypto="$revenant/packages/frameworks/apple-backports/HomeKit/RevenantHAPBignum.m"
 build=${BUILD:-$(runs_fresh revenant-hapcrypto)}
 mkdir -p "$build"
 
-cc -O2 -I"$revenant/packages/a/apple-backports/HomeKit" -o "$build/bignum" "$here/bignum.c" "$crypto"
+cc -O2 -I"$revenant/packages/frameworks/apple-backports/HomeKit" -o "$build/bignum" "$here/bignum.c" "$crypto"
 
 cases=$build/cases.txt
 answers=$build/answers.txt

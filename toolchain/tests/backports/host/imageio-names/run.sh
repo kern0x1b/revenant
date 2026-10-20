@@ -10,9 +10,9 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-port=$root/packages/a/apple-backports/Graphics
+port=$root/packages/frameworks/apple-backports/Graphics
 # the band objects the generator writes (generate() in modules/apple/backports.lua builds them): a band is in the library's folder or here
-gen=$root/packages/a/apple-backports/.gen/ImageIO
+gen=$root/packages/frameworks/apple-backports/.gen/ImageIO
 build=${BUILD:-$(runs_folder imageio-names)}
 mkdir -p "$build"
 obj=${PORT_OBJ:-$build/slice.o}
@@ -97,7 +97,7 @@ rm -rf "$build/slice-obj"; mkdir -p "$build/slice-obj"
 objs=""
 for f in $files; do
   o="$build/slice-obj/$(basename "$f" .m).o"
-  xcrun clang -w -I"$root/packages/a/apple-backports" -c "$f" -o "$o" 2>"$build/port.log" || {
+  xcrun clang -w -I"$root/packages/frameworks/apple-backports" -c "$f" -o "$o" 2>"$build/port.log" || {
     echo "BUILD  $f"; head -3 "$build/port.log" | sed 's/^/    /'; exit 1; }
   objs="$objs $o"
 done
@@ -172,7 +172,7 @@ sed -i '' "s%^CFStringRef const $first = CFSTR(\"[^\"]*\");%CFStringRef const $f
 plant_objs() {  # $1 = dir: compile every planted source apart and return the object list
   local o=""
   for f in "$1"/*.m; do
-    xcrun clang -w -I"$root/packages/a/apple-backports" -c "$f" -o "$f.o" 2>/dev/null || { echo "BUILD  plant $f"; exit 1; }
+    xcrun clang -w -I"$root/packages/frameworks/apple-backports" -c "$f" -o "$f.o" 2>/dev/null || { echo "BUILD  plant $f"; exit 1; }
     o="$o $f.o"
   done
   printf '%s' "${o# }"
@@ -228,7 +228,7 @@ while read -r name <&3; do
   for f in "$build/m$i"/src/*.m; do
     b=$(basename "$f" .m)
     if grep -q "^CFStringRef const $name = \|^const CFStringRef $name = " "$f"; then
-      xcrun clang -w -I"$root/packages/a/apple-backports" -c "$f" -o "$build/m$i/$b.o" 2>"$build/m$i/c.log" || {
+      xcrun clang -w -I"$root/packages/frameworks/apple-backports" -c "$f" -o "$build/m$i/$b.o" 2>"$build/m$i/c.log" || {
         echo "BUILD  mutant $i did not compile $b"; head -3 "$build/m$i/c.log" | sed 's/^/    /'; exit 1; }
       held="$build/m$i/$b.o"
     else

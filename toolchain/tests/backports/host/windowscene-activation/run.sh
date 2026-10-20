@@ -6,7 +6,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-ports=${WINDOWSCENE_PORT_DIR:-$here/../../../../packages/a/apple-backports/UIKit}
+ports=${WINDOWSCENE_PORT_DIR:-$here/../../../../packages/frameworks/apple-backports/UIKit}
 build=${WINDOWSCENE_BUILD:-$(runs_fresh revenant-windowscene-activation)}
 sdk=$(xcrun --show-sdk-path)
 app="$build/windowscene-activation"

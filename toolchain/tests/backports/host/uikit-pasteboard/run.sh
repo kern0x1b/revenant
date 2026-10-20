@@ -20,7 +20,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 tree=$(cd "$here/../../../.." && pwd)
-port=$tree/packages/a/apple-backports/UIKit
+port=$tree/packages/frameworks/apple-backports/UIKit
 build=${BUILD:-$(runs_folder uikit-pasteboard)}
 mkdir -p "$build"
 

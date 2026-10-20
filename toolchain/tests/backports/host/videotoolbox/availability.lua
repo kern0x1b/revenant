@@ -55,7 +55,7 @@ local function read_constants(path)
 end
 
 function main(...)
-    local path = (...) or (os.scriptdir() .. "/../../../../packages/a/apple-backports/spec/VideoToolbox/declarations.tsv")
+    local path = (...) or (os.scriptdir() .. "/../../../../packages/frameworks/apple-backports/spec/VideoToolbox/declarations.tsv")
     local constants, stated = read_constants(path)
     local bad = {}
     for _, sample in ipairs(SAMPLES) do

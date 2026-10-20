@@ -12,8 +12,8 @@ root=$(cd "$here/../../../.." && pwd)
 build=${MAPTABLE6_BUILD:-$(runs_folder revenant-maptable6-control)}
 rm -rf "$build"
 mkdir -p "$build"
-sed 's|dlsym(objc, "objc_loadWeakRetained") != NULL|0|' "$root/packages/a/apple-backports/Foundation/NSMapTable+Objects6.m" > "$build/port.m"
-if cmp -s "$build/port.m" "$root/packages/a/apple-backports/Foundation/NSMapTable+Objects6.m"; then
+sed 's|dlsym(objc, "objc_loadWeakRetained") != NULL|0|' "$root/packages/frameworks/apple-backports/Foundation/NSMapTable+Objects6.m" > "$build/port.m"
+if cmp -s "$build/port.m" "$root/packages/frameworks/apple-backports/Foundation/NSMapTable+Objects6.m"; then
     echo "the control's edit found nothing to change in the port"; exit 2
 fi
 export MAPTABLE6_PORT="$build/port.m" MAPTABLE6_BUILD="$build/run" MAPTABLE6_RELEASES=${MAPTABLE6_RELEASES:-"6.0 5.1.1"}

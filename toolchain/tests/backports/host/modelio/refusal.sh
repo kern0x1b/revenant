@@ -13,7 +13,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-pkg=$root/packages/a/apple-backports/ModelIO
+pkg=$root/packages/frameworks/apple-backports/ModelIO
 build=${BUILD:-$(runs_folder modelio-refusal)}
 # The build directory is CLEARED, not added to. Every earlier attempt at this script appeared to do nothing
 # because a stale MDLVertexDescriptor9.o from the previous attempt was still in $build and was linked
@@ -63,7 +63,7 @@ xcrun clang -fobjc-arc -fvisibility=hidden -w -I "$pkg" -c "$here/port-support.m
 # the three name constants, and the class lives in the MetalKit file the differential links for exactly this
 # reason. It is compiled here into the cleared build directory and linked once.
 xcrun clang -fobjc-arc -fvisibility=hidden $quiet \
-    -c "$root/packages/a/apple-backports/MetalKit/MDLVertexDescriptor9.m" -o "$build/MetalKit.o" \
+    -c "$root/packages/frameworks/apple-backports/MetalKit/MDLVertexDescriptor9.m" -o "$build/MetalKit.o" \
     2>"$build/cc.log" || { echo "BUILD  the vertex descriptor"; head -3 "$build/cc.log" | sed 's/^/    /'; exit 1; }
 xcrun clang -fobjc-arc $quiet -DMDL_TEXTURE_TAKES_IS_CUBE=0 -DMDL_PLANE_TAKES_INWARD_NORMALS=1 \
     -I"$here" -framework CoreServices -framework Foundation -framework CoreGraphics -framework ImageIO \

@@ -14,7 +14,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/Graphics}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/Graphics}
 build=${COREVIDEO_BUILD:-$(runs_folder corevideo-host)}
 rm -rf "$build"
 mkdir -p "$build"

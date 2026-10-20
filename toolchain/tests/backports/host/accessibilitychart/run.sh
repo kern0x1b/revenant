@@ -32,7 +32,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-sources=${ACCESSIBILITY_SRC:-$root/packages/a/apple-backports/Accessibility}
+sources=${ACCESSIBILITY_SRC:-$root/packages/frameworks/apple-backports/Accessibility}
 build=${BUILD:-$(runs_folder revenant-accessibilitychart)}
 rm -rf "$build"
 mkdir -p "$build"
@@ -83,7 +83,7 @@ port_build() {
     # the renames are a list of -D flags and have to reach the shell unquoted
     # shellcheck disable=SC2086
     xcrun clang $common $renames "$here/cases.m" "$sources/RevenantChartDescriptors.m" "$build/protocols.m" \
-        -I"$root/packages/a/apple-backports" -framework Foundation -framework CoreGraphics \
+        -I"$root/packages/frameworks/apple-backports" -framework Foundation -framework CoreGraphics \
         -o "$build/port" 2> "$build/port-build.log" || return 1
 }
 for half in host port; do

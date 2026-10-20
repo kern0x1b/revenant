@@ -11,7 +11,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/PassKit}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/PassKit}
 build=${PASSKIT_CONSTANTS_BUILD:-$(runs_folder revenant-passkit-constants)}
 sources="PKPassConstants9 PKPassConstants16"
 rm -rf "$build"

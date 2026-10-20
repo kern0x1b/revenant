@@ -7,7 +7,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-uikit=$here/../../../../packages/a/apple-backports/UIKit
+uikit=$here/../../../../packages/frameworks/apple-backports/UIKit
 category=${CONTROL_TOOLTIP_PORT_SOURCE:-$uikit/UIControl+ToolTip15.m}
 build=${CONTROL_TOOLTIP_BUILD:-$(runs_fresh revenant-control-tooltip)}
 sdk=$(xcrun --show-sdk-path)

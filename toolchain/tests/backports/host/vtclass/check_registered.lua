@@ -4,7 +4,7 @@ local S = import("pystr", {rootdir = os.scriptdir()})
 local J = import("registry_json", {rootdir = os.scriptdir()})
 
 local function REGISTRY()
-    return M.WORKTREE() .. "/packages/a/apple-backports/registry/VideoToolbox"
+    return M.WORKTREE() .. "/packages/frameworks/apple-backports/registry/VideoToolbox"
 end
 
 local function read_checked(path)

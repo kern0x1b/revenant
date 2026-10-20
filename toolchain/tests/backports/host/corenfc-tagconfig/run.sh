@@ -1,6 +1,6 @@
 #!/bin/sh
 # run.sh - the port's NFCTagCommandConfiguration and its two ISO15693 subclasses, against the host's
-# CoreNFC through Mac Catalyst. The port's classes are built from packages/a/apple-backports/CoreNFC
+# CoreNFC through Mac Catalyst. The port's classes are built from packages/frameworks/apple-backports/CoreNFC
 # with their names prefixed, so the port's and the host's coexist in one process and every value is
 # compared against what the host's own object answers (facts/CoreNFC/TagConfiguration.md).
 #
@@ -12,7 +12,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/CoreNFC}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/CoreNFC}
 harness=${TAGCONFIG_HARNESS:-$here/../../device}
 # Built outside the tree, as the two neighbouring runs do: a build directory under the source
 # is what a later `git add` picks up by accident (AGENTS.md, Conventions: build artifacts are
@@ -49,8 +49,8 @@ xcrun clang $target -fobjc-arc -fvisibility=hidden -w $renames -I"$port" \
     -c "$build/NFCTagConfiguration11.m" -o "$build/NFCTagConfiguration11.o"
 objects="$objects $build/NFCTagConfiguration11.o"
 xcrun clang $target -fobjc-arc -fvisibility=hidden -w $renames \
-    -I"$here/../../../../packages/a/apple-backports/Foundation" \
-    -c "$here/../../../../packages/a/apple-backports/CoreNFC/NFCReaderSession.m" -o "$build/NFCReaderSession.o"
+    -I"$here/../../../../packages/frameworks/apple-backports/Foundation" \
+    -c "$here/../../../../packages/frameworks/apple-backports/CoreNFC/NFCReaderSession.m" -o "$build/NFCReaderSession.o"
 objects="$objects $build/NFCReaderSession.o"
 xcrun clang $target -fobjc-arc -Wall -Wno-deprecated-declarations -Wno-unguarded-availability-new \
     -I"$harness" -I"$here" \

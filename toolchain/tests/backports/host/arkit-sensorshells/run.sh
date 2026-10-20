@@ -14,7 +14,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 repo=$(cd "$here/../../../.." && pwd)
-ARKit=$repo/packages/a/apple-backports/ARKit
+ARKit=$repo/packages/frameworks/apple-backports/ARKit
 runs=${RUNS:-$(runs_folder arkit-sensorshells-host)}
 rm -rf "$runs"
 mkdir -p "$runs"

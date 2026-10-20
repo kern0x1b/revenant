@@ -7,7 +7,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-METAL=${METAL:-$here/../../../../packages/a/apple-backports/MetalPerformanceShaders}
+METAL=${METAL:-$here/../../../../packages/frameworks/apple-backports/MetalPerformanceShaders}
 BUILD=${BUILD:-$(runs_folder mps-loss)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios16.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"

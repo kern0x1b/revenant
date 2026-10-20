@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-AV=${AV:-$here/../../../../packages/a/apple-backports/AVFoundation}
+AV=${AV:-$here/../../../../packages/frameworks/apple-backports/AVFoundation}
 BUILD=${BUILD:-$(runs_fresh revenant-avcapture)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"

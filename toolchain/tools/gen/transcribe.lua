@@ -473,7 +473,7 @@ local function header_text(tree, sdk, framework, entries, defined16, have, proto
         end
     end
     table.sort(hand, order.less)
-    local folder_path = path.absolute(path.join(tree, "packages", "a", "apple-backports", framework))
+    local folder_path = path.absolute(path.join(tree, "packages", "frameworks", "apple-backports", framework))
     local seen = {}
     for _, header in ipairs(hand) do
         if not seen[header] then

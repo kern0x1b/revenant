@@ -6,7 +6,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-GRAPHICS=${GRAPHICS:-$here/../../../../packages/a/apple-backports/Graphics}
+GRAPHICS=${GRAPHICS:-$here/../../../../packages/frameworks/apple-backports/Graphics}
 harness=${CGPDFNAMES_HARNESS:-$here/../../device}
 build=${CGPDFNAMES_BUILD:-$(runs_fresh revenant-cgpdf-names)}
 renames=""

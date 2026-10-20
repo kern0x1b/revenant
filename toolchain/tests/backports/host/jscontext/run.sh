@@ -10,7 +10,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/JavaScriptCore}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/JavaScriptCore}
 out=${BUILD:-$(runs_fresh revenant-jscontext)}
 xcrun clang -fobjc-arc -w -framework Foundation -framework JavaScriptCore -framework CoreGraphics "$here/checks.m" -o "$out/oracle"
 echo "oracle: the host's JavaScriptCore"

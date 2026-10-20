@@ -1,0 +1,148 @@
+{
+  "framework": "ARKit",
+  "entries": [
+    {
+      "api": "ARGeoTrackingStatus",
+      "kind": "class",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "reason": "carried: the class is there with its three members, state, accuracy and stateReason, which answer 0. A geo-tracking session reports a status, and this port runs none, because a geo-tracking session is not supported on this device (ARGeoTrackingConfiguration, facts/ARKit/AbsentClasses.md)",
+      "effect": "alloc and init answer an object whose three members are 0, as the host's fresh object answers",
+      "source": "ARGeoTrackingStatus.m, carried in packages/frameworks/apple-backports/ARKit; SDK declarations from spec/ARKit/declarations.tsv; host differential tests/backports/host/arkit-absent-classes/run.sh"
+    },
+    {
+      "api": "ARGeoTrackingConfiguration",
+      "kind": "class",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "reason": "carried: the class is there with its initialisers, and +isSupported answers NO, because a geo-tracking session needs an A12 chip or later and this device has an A5 (facts/ARKit/AbsentClasses.md)",
+      "effect": "alloc, init and new answer an object of the class; a session started with it is refused through session:didFailWithError:",
+      "source": "ARGeoTrackingConfiguration.m, carried in packages/frameworks/apple-backports/ARKit; SDK declarations spec/ARKit/declarations.tsv lines 227-242; the device probe tests/backports/device/arkit-config"
+    },
+    {
+      "api": "ARGeoTrackingConfiguration.environmentTexturing",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "reason": "build ARGeoTrackingConfiguration.environmentTexturing as a stored setting, as the world configuration stores its own",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "the SDK 26.2 declaration, spec/ARKit/declarations.tsv line 230"
+    },
+    {
+      "api": "ARGeoTrackingConfiguration.wantsHDREnvironmentTextures",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "reason": "build ARGeoTrackingConfiguration.wantsHDREnvironmentTextures as a stored setting, as the world configuration stores its own",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "the SDK 26.2 declaration, spec/ARKit/declarations.tsv line 231"
+    },
+    {
+      "api": "ARGeoTrackingConfiguration.planeDetection",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "reason": "build ARGeoTrackingConfiguration.planeDetection as a stored setting, as the world configuration stores its own",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "the SDK 26.2 declaration, spec/ARKit/declarations.tsv line 232"
+    },
+    {
+      "api": "ARGeoTrackingConfiguration.detectionImages",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "reason": "build ARGeoTrackingConfiguration.detectionImages as a stored set, copied on the way in, as the world configuration stores its own",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "the SDK 26.2 declaration, spec/ARKit/declarations.tsv line 233"
+    },
+    {
+      "api": "ARGeoTrackingConfiguration.automaticImageScaleEstimationEnabled",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "reason": "build ARGeoTrackingConfiguration.automaticImageScaleEstimationEnabled as a stored setting, as the world configuration stores its own",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "the SDK 26.2 declaration, spec/ARKit/declarations.tsv line 234"
+    },
+    {
+      "api": "ARGeoTrackingConfiguration.maximumNumberOfTrackedImages",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "reason": "build ARGeoTrackingConfiguration.maximumNumberOfTrackedImages as a stored number, as the world configuration stores its own",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "the SDK 26.2 declaration, spec/ARKit/declarations.tsv line 235"
+    },
+    {
+      "api": "ARGeoTrackingConfiguration.detectionObjects",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "reason": "build ARGeoTrackingConfiguration.detectionObjects as a stored set, copied on the way in, as the world configuration stores its own",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "the SDK 26.2 declaration, spec/ARKit/declarations.tsv line 236"
+    },
+    {
+      "api": "ARGeoTrackingConfiguration.appClipCodeTrackingEnabled",
+      "kind": "property",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "reason": "build ARGeoTrackingConfiguration.appClipCodeTrackingEnabled as a stored setting, as the world configuration stores its own",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "the SDK 26.2 declaration, spec/ARKit/declarations.tsv line 237"
+    },
+    {
+      "api": "+[ARGeoTrackingConfiguration supportsAppClipCodeTracking]",
+      "kind": "method",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "reason": "build +[ARGeoTrackingConfiguration supportsAppClipCodeTracking] to answer NO, as the world configuration's +supportsAppClipCodeTracking does on this device",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "the SDK 26.2 declaration, spec/ARKit/declarations.tsv line 238"
+    },
+    {
+      "api": "+[ARGeoTrackingConfiguration checkAvailabilityWithCompletionHandler:]",
+      "kind": "method",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "reason": "build +[ARGeoTrackingConfiguration checkAvailabilityWithCompletionHandler:] to report NO with an error on a device without the chip; the NO is what the documentation gives for that device and is not measured here",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "the SDK 26.2 declaration, spec/ARKit/declarations.tsv line 239"
+    },
+    {
+      "api": "+[ARGeoTrackingConfiguration checkAvailabilityAtCoordinate:completionHandler:]",
+      "kind": "method",
+      "introduced": "14.0",
+      "minimum": "6.0",
+      "status": "owed",
+      "facts": "facts/ARKit/AbsentClasses.md",
+      "reason": "build +[ARGeoTrackingConfiguration checkAvailabilityAtCoordinate:completionHandler:] to report NO with an error on a device without the chip, as the check without a coordinator does; the NO is the documented answer, not measured here",
+      "effect": "until built: respondsToSelector: answers NO",
+      "source": "the SDK 26.2 declaration, spec/ARKit/declarations.tsv line 240"
+    }
+  ]
+}

@@ -13,9 +13,9 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
-contacts=${CONTACTS:-$here/../../../../packages/a/apple-backports/Contacts}
-registry9=${REGISTRY9:-$here/../../../../packages/a/apple-backports/registry/Contacts/ios9.json}
-registry10=${REGISTRY10:-$here/../../../../packages/a/apple-backports/registry/Contacts/ios10.json}
+contacts=${CONTACTS:-$here/../../../../packages/frameworks/apple-backports/Contacts}
+registry9=${REGISTRY9:-$here/../../../../packages/frameworks/apple-backports/registry/Contacts/ios9.json}
+registry10=${REGISTRY10:-$here/../../../../packages/frameworks/apple-backports/registry/Contacts/ios10.json}
 build=${BUILD:-$(runs_fresh revenant-contacts)}
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path --sdk macosx)

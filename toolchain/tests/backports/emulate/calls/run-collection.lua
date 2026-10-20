@@ -4,7 +4,7 @@ local steps = import("steps", {rootdir = path.directory(os.scriptdir()), anonymo
 local mutant = import("collection-mutant", {rootdir = path.join(os.scriptdir(), "..", "..", "callgen"), anonymous = true})
 
 local HERE = os.scriptdir()
-local FACTORY = "packages/a/apple-backports/Intents/IN16_0.m"
+local FACTORY = "packages/frameworks/apple-backports/Intents/IN16_0.m"
 local COUNT_LINE = "^  [A-Z].*count="
 
 local function tails(files, count)

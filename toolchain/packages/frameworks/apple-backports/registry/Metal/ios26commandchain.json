@@ -1,0 +1,82 @@
+{
+ "framework": "Metal",
+ "entries": [
+  {
+   "api": "MTL4CommandQueue",
+   "kind": "protocol",
+   "introduced": "26.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the port's own RevenantMetal4CommandQueue conforms to it, so the protocol object and its method list are emitted with that class's object and the surface's rows for the protocol's members are answered by the protocol rather than by a second spelling of each method. The corpus asks for a lift and not for code: the protocol is header-ok in the SDK 26.2 dump and the 16.4 SDK this package compiles against does not declare it, so the declaration is transcribed into RevenantMetalProtocols.h by tools/transcribe-protocols.py@52253c0650, facts only, exactly as every other Metal protocol the 16.4 SDK lacks is (facts/Metal/Descriptors14.md for the eleven that arrived with the 14.0 descriptors)",
+   "effect": "an application that holds id<MTL4CommandQueue> gets the port's own queue, NSProtocolFromString answers the name, and -conformsToProtocol: answers YES for the class. That is not a formality: check_registry holds a member row to a built object carrying that spelling, and the run of the landing gate on 2026-10-04 failed all ten Metal 4 queue rows - the eight methods and MTL4CommandQueue.device and .label - with \"listed as implemented, but nothing of that name is built\", because the methods were on a toolchain* class and a member row naming the protocol is counted from the protocol object's method list and not from a toolchain class's. The four `inert` rows did not fail because only `implemented` rows are held to it. The device probe asks ten of the members on the emulated guest and reports \"metalchain: 29 check(s), 2 failure(s), 12 not answered\" (facts/Metal/CommandChain26.md)",
+   "source": "SDK 26.2, Metal, MTL4CommandQueue.h; the declaration transcribed by tools/transcribe-protocols.py@52253c0650 and the conformance in packages/frameworks/apple-backports/Metal/MTL4CommandQueue26.m",
+   "facts": "facts/Metal/CommandChain26.md"
+  },
+  {
+   "api": "MTL4CommandBufferOptions",
+   "kind": "class",
+   "introduced": "26.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "what a Metal 4 command buffer is asked for beyond its descriptor: one member, the log state, which reads nil on a fresh options",
+   "effect": "the value the application set, read back, with Apple's own defaults measured against a fresh object of Apple's class and a value equality over every member. This is the TOP of the Metal 4 command chain; the queue and everything under it are built over the port's Metal 3 objects and verified on the DEVICE against the captured table at tests/backports/host/metal-census/chain-expectations.txt, with every answer that depends on the GPU recorded as a difference per row (facts/Metal/CommandChain26.md)",
+   "source": "SDK 26.2, Metal, MTL4CommandQueue.h and MTL4CommandBuffer.h; the defaults are measured against Apple's own objects by tests/backports/host/metal-census/chain26.sh",
+   "facts": "facts/Metal/CommandChain26.md"
+  },
+  {
+   "api": "MTL4CommandQueueDescriptor",
+   "kind": "class",
+   "introduced": "26.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "what a Metal 4 command queue is asked for: a label and the dispatch queue its feedback goes on. Two plain values, and every default is Apple's own, measured: both read nil on a fresh descriptor",
+   "effect": "the value the application set, read back, with Apple's own defaults measured against a fresh object of Apple's class and a value equality over every member. This is the TOP of the Metal 4 command chain; the queue and everything under it are built over the port's Metal 3 objects and verified on the DEVICE against the captured table at tests/backports/host/metal-census/chain-expectations.txt, with every answer that depends on the GPU recorded as a difference per row (facts/Metal/CommandChain26.md)",
+   "source": "SDK 26.2, Metal, MTL4CommandQueue.h and MTL4CommandBuffer.h; the defaults are measured against Apple's own objects by tests/backports/host/metal-census/chain26.sh",
+   "facts": "facts/Metal/CommandChain26.md"
+  },
+  {
+   "api": "MTL4CommandQueueErrorDomain",
+   "kind": "constant",
+   "introduced": "26.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the error domain a Metal 4 command queue's errors carry, and its value is its own name - read out of Apple's own framework with a nonsense name as the control, not assumed from the sibling domains",
+   "effect": "the value the application set, read back, with Apple's own defaults measured against a fresh object of Apple's class and a value equality over every member. This is the TOP of the Metal 4 command chain; the queue and everything under it are built over the port's Metal 3 objects and verified on the DEVICE against the captured table at tests/backports/host/metal-census/chain-expectations.txt, with every answer that depends on the GPU recorded as a difference per row (facts/Metal/CommandChain26.md)",
+   "source": "SDK 26.2, Metal, MTL4CommandQueue.h and MTL4CommandBuffer.h; the defaults are measured against Apple's own objects by tests/backports/host/metal-census/chain26.sh",
+   "facts": "facts/Metal/CommandChain26.md"
+  },
+  {
+   "api": "MTL4CommandBufferOptions.logState",
+   "kind": "property",
+   "introduced": "26.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the log state a command buffer records into; nil on a fresh options, measured, and a copy carries it",
+   "effect": "the value the application set, read back, with Apple's own defaults measured against a fresh object of Apple's class and a value equality over every member. This is the TOP of the Metal 4 command chain; the queue and everything under it are built over the port's Metal 3 objects and verified on the DEVICE against the captured table at tests/backports/host/metal-census/chain-expectations.txt, with every answer that depends on the GPU recorded as a difference per row (facts/Metal/CommandChain26.md)",
+   "source": "SDK 26.2, Metal, MTL4CommandQueue.h and MTL4CommandBuffer.h; the defaults are measured against Apple's own objects by tests/backports/host/metal-census/chain26.sh",
+   "facts": "facts/Metal/CommandChain26.md"
+  },
+  {
+   "api": "MTL4CommandQueueDescriptor.feedbackQueue",
+   "kind": "property",
+   "introduced": "26.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the dispatch queue the queue's feedback goes on, held as the header declares it - ASSIGNED, not retained - so the descriptor does not keep a queue alive that Metal does not",
+   "effect": "the value the application set, read back, with Apple's own defaults measured against a fresh object of Apple's class and a value equality over every member. This is the TOP of the Metal 4 command chain; the queue and everything under it are built over the port's Metal 3 objects and verified on the DEVICE against the captured table at tests/backports/host/metal-census/chain-expectations.txt, with every answer that depends on the GPU recorded as a difference per row (facts/Metal/CommandChain26.md)",
+   "source": "SDK 26.2, Metal, MTL4CommandQueue.h and MTL4CommandBuffer.h; the defaults are measured against Apple's own objects by tests/backports/host/metal-census/chain26.sh",
+   "facts": "facts/Metal/CommandChain26.md"
+  },
+  {
+   "api": "MTL4CommandQueueDescriptor.label",
+   "kind": "property",
+   "introduced": "26.0",
+   "minimum": "6.0",
+   "status": "implemented",
+   "reason": "the queue's label, copied - the header says copy and a caller that hands in a mutable string does not thereby change what the descriptor reads back, which the differential checks by mutating the caller's string",
+   "effect": "the value the application set, read back, with Apple's own defaults measured against a fresh object of Apple's class and a value equality over every member. This is the TOP of the Metal 4 command chain; the queue and everything under it are built over the port's Metal 3 objects and verified on the DEVICE against the captured table at tests/backports/host/metal-census/chain-expectations.txt, with every answer that depends on the GPU recorded as a difference per row (facts/Metal/CommandChain26.md)",
+   "source": "SDK 26.2, Metal, MTL4CommandQueue.h and MTL4CommandBuffer.h; the defaults are measured against Apple's own objects by tests/backports/host/metal-census/chain26.sh",
+   "facts": "facts/Metal/CommandChain26.md"
+  }
+ ]
+}

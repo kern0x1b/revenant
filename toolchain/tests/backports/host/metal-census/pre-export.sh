@@ -3,7 +3,7 @@
 #
 #     sh tests/backports/host/metal-census/pre-export.sh
 #
-# Run from packages/a/apple-backports. It compiles every .m of Metal/ and MetalKit/ with the
+# Run from packages/frameworks/apple-backports. It compiles every .m of Metal/ and MetalKit/ with the
 # library's own flags, then on the resulting OBJECTS runs the two checks below. A compile cannot
 # catch either of them, and both cost a merge.
 #

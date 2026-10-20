@@ -1,6 +1,6 @@
 #!/bin/sh
 # run.sh — the host probe for the os_signpost family the port carries over its own os_log
-# (packages/a/apple-backports/Foundation/RevenantOSSignpost11.m and RevenantOSSignpost12.m).
+# (packages/frameworks/apple-backports/Foundation/RevenantOSSignpost11.m and RevenantOSSignpost12.m).
 #
 # It asks the host's own os_signpost the three questions the port's records make claims about: whether
 # signposts are enabled, what the two id sources answer, and whether either of them is a reserved value.

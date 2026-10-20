@@ -24,7 +24,7 @@ work_ok "$work" || { echo "FAIL: WORK=$work is not a usable scratch path; see wo
 rm -rf "$work"
 mkdir -p "$work"
 
-S="$root/packages/a/apple-backports"
+S="$root/packages/frameworks/apple-backports"
 sdk=$(xcrun --show-sdk-path --sdk macosx)
 # The macabi slice, not a macOS one: MetalKit's headers are iOSSupport headers here, and a macOS
 # target brings AppKit's in beside them (measured: NSParagraphStyle.h redeclares a Foundation

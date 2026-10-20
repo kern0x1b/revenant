@@ -6,7 +6,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-sources=${UIKIT2_SOURCES:-$here/../../../../packages/a/apple-backports/UIKit}
+sources=${UIKIT2_SOURCES:-$here/../../../../packages/frameworks/apple-backports/UIKit}
 harness=${UIKIT2_HARNESS:-$here/../../device}
 build=${UIKIT2_BUILD:-$(runs_folder revenant-uikit2-host)}
 sdk=$(xcrun --show-sdk-path)

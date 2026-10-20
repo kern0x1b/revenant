@@ -53,9 +53,9 @@ local function run()
 
     local named = path.join(root, "named")
     local bare = path.join(root, "bare")
-    write(path.join(named, "packages", "a", "apple-backports", "registry", "Fixture.json"),
+    write(path.join(named, "packages", "frameworks", "apple-backports", "registry", "Fixture.json"),
           '{"framework": "Fixture", "entries": [{"api": "FixtureFn", "kind": "function", "status": "implemented", "minimum": "6.0"}]}')
-    os.mkdir(path.join(bare, "packages", "a", "apple-backports", "registry"))
+    os.mkdir(path.join(bare, "packages", "frameworks", "apple-backports", "registry"))
 
     local function header(out, release_folder)
         local dir = release_folder and path.join(out, "port", release_folder) or out

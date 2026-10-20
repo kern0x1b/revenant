@@ -1,0 +1,436 @@
+{
+  "framework": "IntentsUI",
+  "entries": [
+    {
+      "api": "INUIAddVoiceShortcutButton",
+      "kind": "class",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/IntentsUI/IntentsUI.md",
+      "reason": "hand written in packages/frameworks/apple-backports/IntentsUI/RevenantIntentsUI120.m: a real UIKit class that draws itself and keeps the state the header declares",
+      "effect": "every member the header declares has a body; what each answers and where the system's own flow is refused is in facts/IntentsUI/IntentsUI.md",
+      "source": "the header of iPhoneOS 16.4"
+    },
+    {
+      "api": "INUIAddVoiceShortcutViewController",
+      "kind": "class",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/IntentsUI/IntentsUI.md",
+      "reason": "hand written in packages/frameworks/apple-backports/IntentsUI/RevenantIntentsUI120.m: a real UIKit class that draws itself and keeps the state the header declares",
+      "effect": "every member the header declares has a body; what each answers and where the system's own flow is refused is in facts/IntentsUI/IntentsUI.md",
+      "source": "the header of iPhoneOS 16.4"
+    },
+    {
+      "api": "INUIEditVoiceShortcutViewController",
+      "kind": "class",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/IntentsUI/IntentsUI.md",
+      "reason": "hand written in packages/frameworks/apple-backports/IntentsUI/RevenantIntentsUI120.m: a real UIKit class that draws itself and keeps the state the header declares",
+      "effect": "every member the header declares has a body; what each answers and where the system's own flow is refused is in facts/IntentsUI/IntentsUI.md",
+      "source": "the header of iPhoneOS 16.4"
+    },
+    {
+      "api": "+[INImage imageSizeForIntentResponse:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "status": "implemented",
+      "effect": "answers 60 by 60 points for every input the host was asked with (nil, NSObject, a plain subclass and four response classes), so it is the host's measured constant and not a stand-in; tests/backports/host/inimage-bridge asks the port and the host the same questions",
+      "facts": "facts/IntentsUI/IntentsUI.md",
+      "source": "the Catalyst host's IntentsUI, measured with tests/backports/host/inimage-bridge and the probes behind it; the declaration from the generator's rendered rows of iPhoneOS 16.4"
+    },
+    {
+      "api": "+[INImage imageWithCGImage:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "status": "implemented",
+      "effect": "makes an image whose bytes are the CGImage's data provider bytes, unencoded (the host stores exactly CGDataProviderCopyData of the image; a 10 by 20 red image is 1280 bytes of 64-byte rows); nil makes an image with no bytes",
+      "facts": "facts/IntentsUI/IntentsUI.md",
+      "source": "the Catalyst host's IntentsUI, measured with tests/backports/host/inimage-bridge"
+    },
+    {
+      "api": "+[INImage imageWithUIImage:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "status": "implemented",
+      "effect": "makes an image whose bytes are UIImagePNGRepresentation of the UIImage, the same PNG the host stores; nil makes an image with no bytes, as the host does and not a nil image",
+      "facts": "facts/IntentsUI/IntentsUI.md",
+      "source": "the Catalyst host's IntentsUI, measured with tests/backports/host/inimage-bridge"
+    },
+    {
+      "api": "-[INImage fetchUIImageWithCompletion:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "status": "implemented",
+      "effect": "an image with bytes calls the completion before the call returns, on the calling thread, with the UIImage decoded from them (nil for bytes that are not an image); an image with no bytes calls it later on a background queue with nil. A URL-backed image is data-backed in the port: the host fetches it, and a file URL answers nil, which is named in facts/IntentsUI/IntentsUI.md",
+      "facts": "facts/IntentsUI/IntentsUI.md",
+      "source": "the Catalyst host's IntentsUI, measured with tests/backports/host/inimage-bridge"
+    },
+    {
+      "api": "-[INUIAddVoiceShortcutButton initWithFrame:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "inherited: the port class declares no initialiser of this name, so the superclass answers, as the host does; measured by tests/backports/host/intentsui-init",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the host IntentsUI (Catalyst) for the answer: tests/backports/host/intentsui-init, where the port matches the host line for line and the plant is red",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "-[INUIAddVoiceShortcutButton initWithStyle:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "answered by the class's own @implementation in RevenantIntentsUI120.m",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "-[INUIAddVoiceShortcutButton init]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "inherited: the port class declares no initialiser of this name, so the superclass answers, as the host does; measured by tests/backports/host/intentsui-init",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the host IntentsUI (Catalyst) for the answer: tests/backports/host/intentsui-init, where the port matches the host line for line and the plant is red",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "-[INUIAddVoiceShortcutButton setStyle:]",
+      "kind": "method",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "answered by the class's own @implementation in RevenantIntentsUI120.m",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "-[INUIAddVoiceShortcutButtonDelegate presentAddVoiceShortcutViewController:forAddVoiceShortcutButton:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "a method of a protocol the SDK declares: the class that answers it is the application's, and the declaration is what this package carries",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "-[INUIAddVoiceShortcutButtonDelegate presentEditVoiceShortcutViewController:forAddVoiceShortcutButton:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "a method of a protocol the SDK declares: the class that answers it is the application's, and the declaration is what this package carries. The protocol is declared with a body in that SDK at INUIAddVoiceShortcutButton.h:25, and the package installs the declaration through IntentsUI/RevenantIntentsUIProtocols.h, which forward-declares the protocol and imports <IntentsUI/IntentsUI.h> for its body; the class that conforms on the port's side is INUIAddVoiceShortcutButton (RevenantIntentsUI120.m:41), which sends the add half of this pair at :150 and this edit half to no one, because the controller it would present is the application's to own. Measured on the gate's own reader over the 69 libraries of the 6.1.3 gate: the row is not among the rows its owner class alone answers, so what answers it is that declaration.",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "-[INUIAddVoiceShortcutViewController initWithNibName:bundle:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "inherited: the port class declares no initialiser of this name, so the superclass answers, as the host does; measured by tests/backports/host/intentsui-init",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the host IntentsUI (Catalyst) for the answer: tests/backports/host/intentsui-init, where the port matches the host line for line and the plant is red",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "-[INUIAddVoiceShortcutViewController initWithShortcut:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "answered by the class's own @implementation in RevenantIntentsUI120.m",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "-[INUIAddVoiceShortcutViewController init]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "inherited: the port class declares no initialiser of this name, so the superclass answers, as the host does; measured by tests/backports/host/intentsui-init",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the host IntentsUI (Catalyst) for the answer: tests/backports/host/intentsui-init, where the port matches the host line for line and the plant is red",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "-[INUIAddVoiceShortcutViewControllerDelegate addVoiceShortcutViewController:didFinishWithVoiceShortcut:error:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "a method of a protocol the SDK declares: the class that answers it is the application's, and the declaration is what this package carries",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "-[INUIAddVoiceShortcutViewControllerDelegate addVoiceShortcutViewControllerDidCancel:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "a method of a protocol the SDK declares: the class that answers it is the application's, and the declaration is what this package carries",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "-[INUIEditVoiceShortcutViewController initWithNibName:bundle:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "inherited: the port class declares no initialiser of this name, so the superclass answers, as the host does; measured by tests/backports/host/intentsui-init",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the host IntentsUI (Catalyst) for the answer: tests/backports/host/intentsui-init, where the port matches the host line for line and the plant is red",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "-[INUIEditVoiceShortcutViewController initWithVoiceShortcut:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "answered by the class's own @implementation in RevenantIntentsUI120.m",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "-[INUIEditVoiceShortcutViewController init]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "inherited: the port class declares no initialiser of this name, so the superclass answers, as the host does; measured by tests/backports/host/intentsui-init",
+      "source": "the header of iPhoneOS 16.4 for the contract, and the host IntentsUI (Catalyst) for the answer: tests/backports/host/intentsui-init, where the port matches the host line for line and the plant is red",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "-[INUIEditVoiceShortcutViewControllerDelegate editVoiceShortcutViewController:didDeleteVoiceShortcutWithIdentifier:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "a method of a protocol the SDK declares: the class that answers it is the application's, and the declaration is what this package carries",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "-[INUIEditVoiceShortcutViewControllerDelegate editVoiceShortcutViewController:didUpdateVoiceShortcut:error:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "a method of a protocol the SDK declares: the class that answers it is the application's, and the declaration is what this package carries",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "-[INUIEditVoiceShortcutViewControllerDelegate editVoiceShortcutViewControllerDidCancel:]",
+      "kind": "method",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "a method of a protocol the SDK declares: the class that answers it is the application's, and the declaration is what this package carries. The protocol is declared with a body in that SDK at INUIEditVoiceShortcutViewController.h:37, and the package installs the declaration through IntentsUI/RevenantIntentsUIProtocols.h, which forward-declares the protocol and imports <IntentsUI/IntentsUI.h> for its body; the class that holds the delegate on the port's side is INUIEditVoiceShortcutViewController (RevenantIntentsUI120.m:245), which sends the delete half of this protocol at :304 and the update half at :302 and this cancel to no one. Measured on the gate's own reader over the 69 libraries of the 6.1.3 gate: the row is not among the rows its owner class alone answers, so what answers it is that declaration.",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "-[INUIHostedViewControlling configureViewForParameters:ofInteraction:interactiveBehavior:context:completion:]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "the protocol's member, and RevenantIntentsUIHostedViewController is a class that really answers it: the interaction's parameters become the view's content, the interactive behaviour becomes the button the header describes for that case, and the completion is answered with the set that was configured and the size the content needs. The class is named as Revenant's own because no SDK header declares a conforming class - the application writes its own - and it is named so that nothing collides with a class Apple may add",
+      "facts": "facts/IntentsUI/IntentsUI.md",
+      "effect": "configureWithInteraction:context:completion: answers the completion with the size the view's content needs, and configureViewForParameters:ofInteraction:interactiveBehavior:context:completion: answers it with YES, the parameters that were configured from the interaction, and that size. The context argument is the enumeration the header declares - a Siri snippet or a place card within Maps - not an extension context, so neither method needs a host this release does not have"
+    },
+    {
+      "api": "-[INUIHostedViewControlling configureWithInteraction:context:completion:]",
+      "kind": "method",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "the protocol's member, and RevenantIntentsUIHostedViewController is a class that really answers it: the interaction's parameters become the view's content, the interactive behaviour becomes the button the header describes for that case, and the completion is answered with the set that was configured and the size the content needs. The class is named as Revenant's own because no SDK header declares a conforming class - the application writes its own - and it is named so that nothing collides with a class Apple may add",
+      "facts": "facts/IntentsUI/IntentsUI.md",
+      "effect": "configureWithInteraction:context:completion: answers the completion with the size the view's content needs, and configureViewForParameters:ofInteraction:interactiveBehavior:context:completion: answers it with YES, the parameters that were configured from the interaction, and that size. The context argument is the enumeration the header declares - a Siri snippet or a place card within Maps - not an extension context, so neither method needs a host this release does not have"
+    },
+    {
+      "api": "-[NSExtensionContext interfaceParametersDescription]",
+      "kind": "method",
+      "introduced": "11.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class is defined by Foundation/NSExtensionContext.m, and its three members by IntentsUI/RevenantNSExtensionContext+IntentsUI.m, which answers what an application's own context answers on a release with no extension host: the three members answer the host's measured fresh-context values (zero sizes, nil description), and the completion calls back once with expired NO, by the ruling",
+      "source": "the header of iPhoneOS 16.4 for the contract (INUIHostedViewControlling.h); the host (Catalyst) for the values, tests/backports/host/nsextension-context, where the port matches the host on every line but the completion, which the ruling sets",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "INUIAddVoiceShortcutButton.cornerRadius",
+      "kind": "property",
+      "introduced": "13.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "synthesised in the class's own @implementation over the ivar it declares, written out so the claim is in the file",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "INUIAddVoiceShortcutButton.delegate",
+      "kind": "property",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "synthesised in the class's own @implementation over the ivar it declares, written out so the claim is in the file",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "INUIAddVoiceShortcutButton.shortcut",
+      "kind": "property",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "synthesised in the class's own @implementation over the ivar it declares, written out so the claim is in the file",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "INUIAddVoiceShortcutButton.style",
+      "kind": "property",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "synthesised in the class's own @implementation over the ivar it declares, written out so the claim is in the file",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "INUIAddVoiceShortcutViewController.delegate",
+      "kind": "property",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "synthesised in the class's own @implementation over the ivar it declares, written out so the claim is in the file",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "INUIEditVoiceShortcutViewController.delegate",
+      "kind": "property",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "synthesised in the class's own @implementation over the ivar it declares, written out so the claim is in the file",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "INUIHostedViewSiriProviding.displaysMap",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "a property of a protocol the SDK declares: the class that answers it is the application's - there is no Siri here to say which of the three a snippet shows - and the declaration is what this package carries",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "INUIHostedViewSiriProviding.displaysMessage",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "a property of a protocol the SDK declares: the class that answers it is the application's - there is no Siri here to say which of the three a snippet shows - and the declaration is what this package carries",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "INUIHostedViewSiriProviding.displaysPaymentTransaction",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "source": "the header of iPhoneOS 16.4",
+      "reason": "a property of a protocol the SDK declares: the class that answers it is the application's - there is no Siri here to say which of the three a snippet shows - and the declaration is what this package carries",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "NSExtensionContext.hostedViewMaximumAllowedSize",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class is defined by Foundation/NSExtensionContext.m, and its three members by IntentsUI/RevenantNSExtensionContext+IntentsUI.m, which answers what an application's own context answers on a release with no extension host: the three members answer the host's measured fresh-context values (zero sizes, nil description), and the completion calls back once with expired NO, by the ruling",
+      "source": "the header of iPhoneOS 16.4 for the contract (INUIHostedViewControlling.h); the host (Catalyst) for the values, tests/backports/host/nsextension-context, where the port matches the host on every line but the completion, which the ruling sets",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "NSExtensionContext.hostedViewMinimumAllowedSize",
+      "kind": "property",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "reason": "the class is defined by Foundation/NSExtensionContext.m, and its three members by IntentsUI/RevenantNSExtensionContext+IntentsUI.m, which answers what an application's own context answers on a release with no extension host: the three members answer the host's measured fresh-context values (zero sizes, nil description), and the completion calls back once with expired NO, by the ruling",
+      "source": "the header of iPhoneOS 16.4 for the contract (INUIHostedViewControlling.h); the host (Catalyst) for the values, tests/backports/host/nsextension-context, where the port matches the host on every line but the completion, which the ruling sets",
+      "facts": "facts/IntentsUI/IntentsUI.md"
+    },
+    {
+      "api": "INUIAddVoiceShortcutButtonDelegate",
+      "kind": "protocol",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/IntentsUI/IntentsUI.md",
+      "reason": "the protocol is the SDK's own declaration and its members are answered by the conforming class, which is the application's",
+      "source": "the header of iPhoneOS 16.4"
+    },
+    {
+      "api": "INUIAddVoiceShortcutViewControllerDelegate",
+      "kind": "protocol",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/IntentsUI/IntentsUI.md",
+      "reason": "the protocol is the SDK's own declaration and its members are answered by the conforming class, which is the application's",
+      "source": "the header of iPhoneOS 16.4"
+    },
+    {
+      "api": "INUIEditVoiceShortcutViewControllerDelegate",
+      "kind": "protocol",
+      "introduced": "12.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/IntentsUI/IntentsUI.md",
+      "reason": "the protocol is the SDK's own declaration and its members are answered by the conforming class, which is the application's",
+      "source": "the header of iPhoneOS 16.4"
+    },
+    {
+      "api": "INUIHostedViewControlling",
+      "kind": "protocol",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/IntentsUI/IntentsUI.md",
+      "reason": "the protocol is the SDK's own declaration, and this release also carries a class that conforms to it (RevenantIntentsUIHostedViewController), so the two members below are answered by code rather than only by the application's own class",
+      "source": "the header of iPhoneOS 16.4"
+    },
+    {
+      "api": "INUIHostedViewSiriProviding",
+      "kind": "protocol",
+      "introduced": "10.0",
+      "minimum": "6.0",
+      "status": "implemented",
+      "facts": "facts/IntentsUI/IntentsUI.md",
+      "reason": "the protocol is the SDK's own declaration and its members are answered by the conforming class, which is the application's",
+      "source": "the header of iPhoneOS 16.4"
+    }
+  ]
+}

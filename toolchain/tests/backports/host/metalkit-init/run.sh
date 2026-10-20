@@ -12,8 +12,8 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-METALKIT=${METALKIT:-$here/../../../../packages/a/apple-backports/MetalKit}
-METAL=${METAL:-$here/../../../../packages/a/apple-backports/Metal}
+METALKIT=${METALKIT:-$here/../../../../packages/frameworks/apple-backports/MetalKit}
+METAL=${METAL:-$here/../../../../packages/frameworks/apple-backports/Metal}
 BUILD=${BUILD:-$(runs_fresh revenant-metalkit-init)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"

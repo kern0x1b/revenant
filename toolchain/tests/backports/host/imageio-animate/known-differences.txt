@@ -4,7 +4,7 @@
 # file with cut -d'#' -f1 and a name that wrapped onto a second line would be read as two cases. run.sh
 # requires that every difference this file declares really is a difference and that no difference is missing
 # from it, so a stale line cannot sit here. The full argument is in
-# packages/a/apple-backports/facts/ImageIO/Animation.md.
+# packages/frameworks/apple-backports/facts/ImageIO/Animation.md.
 #
 # There is no line here, and the reason is the shape of what the host does: the two cases where the port
 # answers something the host cannot are not differences to declare, because the host has no answer at all -

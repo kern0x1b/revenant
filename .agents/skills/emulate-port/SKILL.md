@@ -6,7 +6,7 @@ description: Run a toolchain port (a daemon, a test probe, an application, a pac
 # `xmake emulate`
 
 macOS arm64 hosts only. The emulator is built by the `revenant@emulator` package (pinned by
-commit, patches under `packages/e/emulator/patches/`); the `emulator/` folder of the repository is its source,
+commit, patches under `packages/emulator/emulator/patches/`); the `emulator/` folder of the repository is its source,
 not what this command runs.
 
 ## Setup in the port's xmake.lua

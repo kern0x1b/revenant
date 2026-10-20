@@ -12,7 +12,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$here/../../../..
-gfx=${GFX:-$root/packages/a/apple-backports/Graphics}
+gfx=${GFX:-$root/packages/frameworks/apple-backports/Graphics}
 build=${BUILD:-$(runs_folder ciqr)}
 mkdir -p "$build"
 

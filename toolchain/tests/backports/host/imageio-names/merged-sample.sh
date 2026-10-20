@@ -10,14 +10,14 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-port=$root/packages/a/apple-backports/Graphics
+port=$root/packages/frameworks/apple-backports/Graphics
 build=${BUILD:-$(runs_folder imageio-names)}
 mkdir -p "$build"
 [ -x "$build/probe" ] || xcrun clang -w "$here/probe.c" -framework CoreFoundation -framework ImageIO -o "$build/probe"
 
 rm -rf "$build/merged-obj"; mkdir -p "$build/merged-obj"
 for f in "$port"/ImageIONames*.m; do
-  xcrun clang -w -I"$root/packages/a/apple-backports" -c "$f" -o "$build/merged-obj/$(basename "$f" .m).o" 2>>"$build/merged.log" || {
+  xcrun clang -w -I"$root/packages/frameworks/apple-backports" -c "$f" -o "$build/merged-obj/$(basename "$f" .m).o" 2>>"$build/merged.log" || {
     echo "BUILD  $f"; head -3 "$build/merged.log" | sed 's/^/    /'; exit 1; }
 done
 all=$(ls "$build/merged-obj"/*.o)

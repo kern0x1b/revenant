@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-sources=${1:-$here/../../../../packages/a/apple-backports/Foundation}
+sources=${1:-$here/../../../../packages/frameworks/apple-backports/Foundation}
 output=${2:-$(runs_fresh revenant-url)}
 expectations=${3:-$here/../../device/url_expectations.h}
 rm -rf "$output"

@@ -21,7 +21,7 @@ echo "FAIL host/healthkit/run.sh: its Python steps are gone and not yet ported t
 exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-healthkit=${HEALTHKIT:-$here/../../../../packages/a/apple-backports/HealthKit}
+healthkit=${HEALTHKIT:-$here/../../../../packages/frameworks/apple-backports/HealthKit}
 BUILD=${BUILD:-$(runs_fresh revenant-healthkit)}
 sdk=$(xcrun --show-sdk-path)
 # REVENANT_HOST_BUILD: this is a host differential - the port's process links no framework of the name it
@@ -156,7 +156,7 @@ mutant() {
     # nothing of a previous run's may be here: the binary is only run if this step builds it
     rm -f "$BUILD/mutant/differential"
     cp "$healthkit"/*.m "$healthkit"/*.h "$BUILD/mutant/HealthKit/"
-    cp "$here/../../../../packages/a/apple-backports/RevenantSayOnce.h" "$BUILD/mutant/"
+    cp "$here/../../../../packages/frameworks/apple-backports/RevenantSayOnce.h" "$BUILD/mutant/"
     python3 "$here/mutate.py" "$BUILD/mutant/HealthKit/$file" "$from" "$to"
     for source in $sources; do
         xcrun clang -fobjc-arc $quiet $renames $constants -I"$BUILD/mutant/HealthKit" -c "$BUILD/mutant/HealthKit/$source" \

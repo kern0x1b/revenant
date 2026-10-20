@@ -1,8 +1,8 @@
 local ROOT = path.join(os.scriptdir(), "..", "..")
 local TOOLS = path.join(ROOT, "tools")
 local FIXTURES = path.join(os.scriptdir(), "input", "fixtures")
-local SPEC = path.join("packages", "a", "apple-backports", "spec")
-local REGISTRY = path.join("packages", "a", "apple-backports", "registry")
+local SPEC = path.join("packages", "frameworks", "apple-backports", "spec")
+local REGISTRY = path.join("packages", "frameworks", "apple-backports", "registry")
 local COMPARED = {"CoreNFC", "Foundation"}
 local SWIFT_ONLY = "WiFiInfrastructure"
 local NO_CONSTANT = "Accelerate"

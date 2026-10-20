@@ -1,7 +1,7 @@
 import("core.base.json")
 
 local root = os.getenv("CONF_ROOT")
-local pkg = root .. "/packages/a/apple-backports"
+local pkg = root .. "/packages/frameworks/apple-backports"
 local sdk = os.getenv("CONF_SDK")
 local clang = os.getenv("CONF_CLANG")
 local gen = os.getenv("CONF_GEN")

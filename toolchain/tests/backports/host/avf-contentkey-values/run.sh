@@ -21,7 +21,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-avf=$root/packages/a/apple-backports/AVFoundation
+avf=$root/packages/frameworks/apple-backports/AVFoundation
 build=${AVF_CONTENTKEY_BUILD:-$(runs_folder avf-contentkey-build)}
 mutant=${MUTANT:-0}
 control=${CONTROL:-0}

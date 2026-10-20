@@ -61,8 +61,8 @@ function run(opt)
         local object = path.join(build, name .. "." .. half .. ".o")
         local log = path.join(build, "build.log")
         if not clang({"-target", "armv7-apple-ios6.1.3", "-isysroot", port_sdk, "-fobjc-arc", "-O0", "-w",
-                      "-I" .. path.join(revenant, "packages", "c", "revenant-coding", "files"),
-                      "-I" .. path.join(revenant, "packages", "a", "apple-backports", "Intents"), "-c", compiled, "-o", object},
+                      "-I" .. path.join(revenant, "packages", "runtimes", "revenant-coding", "files"),
+                      "-I" .. path.join(revenant, "packages", "frameworks", "apple-backports", "Intents"), "-c", compiled, "-o", object},
                      log, string.format("the %s half did not compile", half)) then
             return 1
         end

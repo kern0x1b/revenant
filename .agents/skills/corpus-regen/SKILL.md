@@ -16,12 +16,12 @@ From a checkout at the pushed commit:
 ```
 sha=$(git rev-parse --short HEAD)
 export_tsv=$(xmake l modules/workspace.lua run registry-export)/carried-registry.tsv
-xmake l tools/corpus/export-registry.lua "$PWD/packages/a/apple-backports" "$export_tsv"
+xmake l tools/corpus/export-registry.lua "$PWD/packages/frameworks/apple-backports" "$export_tsv"
 wc -l "$export_tsv"
 cp "$export_tsv" $HOME/Git/projects/ios/coordination/corpus/carried-registry-$sha.tsv
 ```
 
-- The first argument is the **package root** `packages/a/apple-backports` (the script reads
+- The first argument is the **package root** `packages/frameworks/apple-backports` (the script reads
   `<root>/registry/*.json`), not the checkout root. A wrong root writes a header-only file without an
   error: compare the row count with the previous `carried-registry-*.tsv`.
 - The corpus tools read the export at `REVENANT_REGISTRY_TSV`, which defaults to
@@ -29,7 +29,7 @@ cp "$export_tsv" $HOME/Git/projects/ios/coordination/corpus/carried-registry-$sh
   `regen.lua` uses that default path. The run folder is scratch, so the durable copy is the one in
   `coordination/corpus/`. Point `REVENANT_REGISTRY_TSV` at it when the run-folder copy is missing.
 - An export older than the last registry commit on `origin/main` makes every ranking stale:
-  `git log -1 --format=%cd origin/main -- packages/a/apple-backports/registry` against the file's mtime.
+  `git log -1 --format=%cd origin/main -- packages/frameworks/apple-backports/registry` against the file's mtime.
 
 ## 2. Regenerate the ranking
 
@@ -67,7 +67,7 @@ A list of "missing" APIs is not evidence. Every list goes through `tools/corpus/
 `check(name, rows)` takes `rows` of `(api, kind, extra)`, and the command line
 `xmake l tools/corpus/verify.lua <name> <rows.tsv>` takes one such row per line. It checks the registry
 export and the source tree, and prints how many rows are real. It reads `REVENANT_REGISTRY_TSV` and
-`REVENANT_TREE_DIR` (default: this checkout's `packages/a/apple-backports`).
+`REVENANT_TREE_DIR` (default: this checkout's `packages/frameworks/apple-backports`).
 
 - "Not found" is reliable; "found" must be read: a declaration, a synthesized property and `@dynamic`
   all look like an implementation. `@dynamic` is evidence of absence.

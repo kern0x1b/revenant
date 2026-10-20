@@ -29,7 +29,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 charon=${REVENANT:-$here/../../../..}
 charon=$(cd "$charon" && pwd)
-appledir="$charon/packages/a/apple-backports"
+appledir="$charon/packages/frameworks/apple-backports"
 build=${BUILD:-$(runs_fresh revenant-unavailable-init)}
 mkdir -p "$build"
 survived=0

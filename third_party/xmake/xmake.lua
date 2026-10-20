@@ -1,7 +1,7 @@
 package("xmake")
     set_kind("binary")
     set_homepage("https://xmake.io")
-    set_description("A cross-platform build utility based on Lua, with revenant's patches to its addon handling, a job count taken from a GNU make jobserver or XMAKE_MAX_JOBS, one build for two processes that reinstall the same package, and package locks waited for without stopping the other jobs")
+    set_description("A cross-platform build utility based on Lua, with revenant's patches to its addon handling, a job count taken from a GNU make jobserver or XMAKE_MAX_JOBS, one build for two processes that reinstall the same package, package locks waited for without stopping the other jobs, and repository packages found in group folders")
     set_license("Apache-2.0")
 
     add_urls("https://github.com/xmake-io/xmake.git")
@@ -17,7 +17,8 @@ package("xmake")
         {"0007-Use-an-addon-from-a-folder-of-the-project-without-in.patch", "cd99e18ad9599d0c793a437cd9a315f86f273ac08f738b1391a56e8818ae94a1"},
         {"0008-Take-the-job-count-from-a-jobserver-or-from-XMAKE_MA.patch", "bde5d35a476c49a7e3782485f4148a4ed86806a34bf2c4de95dd352658b0dc6d"},
         {"0009-Build-a-package-once-when-two-processes-reinstall-it.patch", "6672dfa17742337d83a5eb3a59018d4458a24d92bea6567568f58fecab2ae72f"},
-        {"0010-Wait-for-a-package-lock-without-stopping-the-other-j.patch", "5add9a04d3290347faafc247532505e34b156145496ed0671bcc06b3d12c34f0"}}) do
+        {"0010-Wait-for-a-package-lock-without-stopping-the-other-j.patch", "5add9a04d3290347faafc247532505e34b156145496ed0671bcc06b3d12c34f0"},
+        {"0011-Find-a-repository-package-in-a-group-folder-as-well-.patch", "f2f4da9353f71b615e5282b8d2040bc80e3a627497fa14c4a57c3acddc0d647f"}}) do
         add_patches("2026.10.17", path.join(os.scriptdir(), "patches", patch[1]), patch[2])
     end
 

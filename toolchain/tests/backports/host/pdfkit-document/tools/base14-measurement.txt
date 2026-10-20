@@ -17,7 +17,7 @@
 #
 # Measured, not transcribed: the run reproduces Helvetica's and Courier's published widths and CORRECTS
 # two published numbers (Courier's descent is -246 where the AFM says -157; Times-Roman's `t` is 278
-# where a table says 333).  See packages/a/apple-backports/facts/PDFKit/Selection11.md.
+# where a table says 333).  See packages/frameworks/apple-backports/facts/PDFKit/Selection11.md.
 
 cgfixture-base14-courier-0.pdf text-len=47 whole=79.2000,717.2400,338.4000,12.0000
  33 ! x=79.2000 w=7.2000

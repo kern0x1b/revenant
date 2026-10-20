@@ -26,8 +26,8 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 revenant=${REVENANT:-$here/../../../..}
-package="$revenant/packages/a/apple-backports/AuthenticationServices"
-registry="$revenant/packages/a/apple-backports/registry/AuthenticationServices"
+package="$revenant/packages/frameworks/apple-backports/AuthenticationServices"
+registry="$revenant/packages/frameworks/apple-backports/registry/AuthenticationServices"
 framework=${AS_FRAMEWORK:-AuthenticationServices}
 build=${BUILD:-$(runs_folder authservices-shape)}
 mkdir -p "$build"
@@ -64,7 +64,7 @@ build_library() {
     for source in $sources; do
         name=$(basename "$source" .m)
         "$AS_CLANG" -target armv7-apple-ios6.1.3 -isysroot "$sdk" -fobjc-arc -Os -g0 -fPIC \
-            -I"$package" -I"$revenant/packages/a/apple-backports/HomeKit" -I"$monocypher" \
+            -I"$package" -I"$revenant/packages/frameworks/apple-backports/HomeKit" -I"$monocypher" \
             -c "$source" -o "$objdir/$name.o" 2>"$build/$name.log" || {
                 echo "FAIL: $source did not compile"; head -5 "$build/$name.log"; return 1; }
         objects="$objects $objdir/$name.o"
@@ -81,7 +81,7 @@ monocypher=$(ls -d "$HOME"/.xmake/packages/m/monocypher/*/*/include 2>/dev/null 
 # the construction header reaches. A class whose source is not here is a class the check cannot see, so
 # the list is what is on disk rather than a list kept here.
 sources=$(ls "$package"/*.m)
-shared=$(ls "$revenant/packages/a/apple-backports/HomeKit"/Revenant*.m 2>/dev/null || true)
+shared=$(ls "$revenant/packages/frameworks/apple-backports/HomeKit"/Revenant*.m 2>/dev/null || true)
 build_library "$sources $shared" "$build/libAuthenticationServicesBackports.dylib"
 echo "built:    $(ls "$package"/*.m | wc -l | tr -d ' ') AuthenticationServices sources, $(echo $shared | wc -w | tr -d ' ') shared"
 

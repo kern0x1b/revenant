@@ -24,8 +24,8 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 repo=$(cd "$here/../../../.." && pwd)
-ARKit=$repo/packages/a/apple-backports/ARKit
-SceneKit=$repo/packages/a/apple-backports/SceneKit
+ARKit=$repo/packages/frameworks/apple-backports/ARKit
+SceneKit=$repo/packages/frameworks/apple-backports/SceneKit
 runs=${RUNS:-$(runs_folder arkit-host)}
 mkdir -p "$runs"
 

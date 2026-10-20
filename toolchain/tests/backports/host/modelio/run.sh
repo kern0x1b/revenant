@@ -11,7 +11,7 @@ echo "FAIL host/modelio/run.sh: its Python steps are gone and not yet ported to 
 exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-MODELIO=${MODELIO:-$here/../../../../packages/a/apple-backports/ModelIO}
+MODELIO=${MODELIO:-$here/../../../../packages/frameworks/apple-backports/ModelIO}
 BUILD=${BUILD:-$(runs_folder modelio-diff)}
 # REVENANT_HOST_BUILD: this is a host differential - the port's process links no framework of the name it
 # measures, so there is no release class for a revenant_alias.h proxy to stand in for, nothing for the
@@ -21,7 +21,7 @@ BUILD=${BUILD:-$(runs_folder modelio-diff)}
 # a name built by ## cannot be renamed the way this harness renames classes. What the alias is FOR is a
 # device band; here the class of the release's name is the class and every member of it is measured.
 quiet="-DREVENANT_HOST_BUILD -Wno-unknown-pragmas -Wno-unused-value -Wno-nonnull -Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-objc-protocol-method-implementation -Wno-nullability-completeness -Wno-availability -Wno-objc-missing-property-synthesis -Wno-incomplete-implementation"
-VERTICES=${VERTICES:-$here/../../../../packages/a/apple-backports/MetalKit/MDLVertexDescriptor9.m}
+VERTICES=${VERTICES:-$here/../../../../packages/frameworks/apple-backports/MetalKit/MDLVertexDescriptor9.m}
 carried="MDLAnimatedValue11.m MDLAnimatedValue16.m MDLAssetResolver11.m MDLMaterial101.m MDLMeshBuffer11.m MDLTransformStack11.m MDLTransformStack16.m MDLTransform9.m MDLObject9.m MDLMeshBuffer9.m MDLSubmesh9.m MDLMesh9.m MDLMeshGenerators9.m MDLMaterial9.m MDLTexture9.m MDLVoxelArray9.m MDLAsset9.m"
 rm -rf "$BUILD/host" "$BUILD/port"
 mkdir -p "$BUILD/host" "$BUILD/port"

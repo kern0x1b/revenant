@@ -16,7 +16,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 . "$here/../../common/generated.sh"
 ensure_generated "$here" Speech
-appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
+appledir=${APPLEDIR:-$here/../../../../packages/frameworks/apple-backports}
 build=${BUILD:-$(runs_folder speech-data)}
 mkdir -p "$build"
 cases="1 2 3 4 5 6 7 8 9 10 12 13 14"

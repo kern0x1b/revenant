@@ -25,7 +25,7 @@ expect(#names == 2 and names[1] == "FileProvider11.m" and names[2] == "FileProvi
 for _, name in ipairs(names) do
     local text = objects[name]
     expect(has(text, "#import <FileProvider/FileProvider.h>\n"), name .. " imports the framework header")
-    expect(has(text, "// packages/a/apple-backports/spec/FileProvider/bands.json. "), name .. " names the spec it is written from")
+    expect(has(text, "// packages/frameworks/apple-backports/spec/FileProvider/bands.json. "), name .. " names the spec it is written from")
     expect(string.sub(text, -1) == "\n" and string.sub(text, -2, -2) ~= "\n", name .. " ends with one newline")
 end
 

@@ -27,7 +27,7 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-avf=$root/packages/a/apple-backports/AVFoundation
+avf=$root/packages/frameworks/apple-backports/AVFoundation
 # THE ROW COUNT IS NOT TYPED HERE. It used to be, twice, and the two literals did not agree with the
 # comment above them: the comment said both sides emit the SAME 49 rows, the assertions said 63, and
 # the worktree had by then moved to 71. One export carried all three numbers, and the reviewer's first
@@ -167,7 +167,7 @@ fi
 # WHICH CLASSES THE PORT DOES NOT CARRY is READ from the registry below rather than listed here, so the
 # eleven names the probe asks about cannot drift away from the rows that record them, and a name the
 # registry says nothing about is compared and goes red.
-reg=$root/packages/a/apple-backports/registry/AVFoundation
+reg=$root/packages/frameworks/apple-backports/registry/AVFoundation
 [ -d "$reg" ] || { echo "FAIL: no AVFoundation registry at $reg, so a row about a class the port does not carry cannot be told from a defect"; exit 1; }
 
 # The baseline is the port's own UNMUTATED table, written beside the build directory (which is wiped

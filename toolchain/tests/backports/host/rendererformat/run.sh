@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-UIKIT=${UIKIT:-$here/../../../../packages/a/apple-backports/UIKit}
+UIKIT=${UIKIT:-$here/../../../../packages/frameworks/apple-backports/UIKit}
 harness=${RENDERERFORMAT_HARNESS:-$here/../../device}
 build=${RENDERERFORMAT_BUILD:-$(runs_folder revenant-rendererformat-host)}
 sources="UIGraphicsRendererFormat.m UIGraphicsImageRendererFormat.m UIGraphicsRendererFormat+Preferred.m"

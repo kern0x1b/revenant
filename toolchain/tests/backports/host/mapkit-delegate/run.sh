@@ -11,7 +11,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-port=${PORT:-$here/../../../../packages/a/apple-backports/MapKit}
+port=${PORT:-$here/../../../../packages/frameworks/apple-backports/MapKit}
 build=${MAPKIT_DELEGATE_BUILD:-$(runs_folder mapkit-delegate)}
 mkdir -p "$build"
 rm -f "$build"/cc.log "$build"/runner.log "$build"/*.txt "$build"/*.body "$build"/*.dylib "$build"/runner

@@ -6,7 +6,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-AV=${AV:-$root/packages/a/apple-backports/AVFoundation}
+AV=${AV:-$root/packages/frameworks/apple-backports/AVFoundation}
 BUILD=${BUILD:-$(runs_fresh revenant-photosettings)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"

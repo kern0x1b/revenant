@@ -4,7 +4,7 @@ local surface_walk = import("surface_walk", {rootdir = HERE, anonymous = true})
 local ledger_json = import("ledger_json", {rootdir = HERE, anonymous = true})
 
 local TARGET = "armv7-apple-ios6.1.3"
-local SWIFT_ONLY_PACKAGE = "packages/a/apple-backports"
+local SWIFT_ONLY_PACKAGE = "packages/frameworks/apple-backports"
 local DECIDED_STATUSES = {absent = true, inert = true, ignored = true}
 local DIAGNOSTIC_LIMIT = 5
 local RELEASE_NATIVE = "release-native: 6.1.3 dyld cache"

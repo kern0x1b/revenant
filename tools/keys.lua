@@ -1,10 +1,11 @@
 import("core.package.package")
+import("private.action.require.impl.repository")
 
 local HEAVY = {"llvm", "swift", "swift-bootstrap", "swift-runtime", "libcxx", "apple-backports", "apple-compat", "iphoneos-sdk", "ld64"}
 
 local function inputs(name, root)
-    local dir = path.join(root, "packages", name:sub(1, 1), name)
-    if not os.isfile(path.join(dir, "xmake.lua")) then
+    local dir = repository.find_packagedir(path.join(root, "packages"), name)
+    if not dir then
         raise("keys: %s has no recipe under %s", name, path.join(root, "packages"))
     end
     local instance = package.load_from_repository(name, dir, {packagefile = path.join(dir, "xmake.lua")})

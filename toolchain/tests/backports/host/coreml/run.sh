@@ -15,8 +15,8 @@ exit 1
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-coreml=${COREML:-$root/packages/a/apple-backports/CoreML}
-registry=${REGISTRY:-$root/packages/a/apple-backports/registry/CoreML}
+coreml=${COREML:-$root/packages/frameworks/apple-backports/CoreML}
+registry=${REGISTRY:-$root/packages/frameworks/apple-backports/registry/CoreML}
 models=${MODELS:-$(xmake l "$root/modules/workspace.lua" run coreml-predict)/models}
 build=${BUILD:-$(runs_fresh revenant-coreml)}
 sdk=$(xcrun --show-sdk-path)

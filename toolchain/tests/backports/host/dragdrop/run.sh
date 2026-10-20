@@ -2,7 +2,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-UIKIT=${UIKIT:-$here/../../../../packages/a/apple-backports/UIKit}
+UIKIT=${UIKIT:-$here/../../../../packages/frameworks/apple-backports/UIKit}
 harness=${DRAGDROP_HARNESS:-$here/../../device}
 build=${DRAGDROP_BUILD:-$(runs_folder revenant-dragdrop-host)}
 # The port files this harness builds. Three of the five that are missing were missing the same way: the
