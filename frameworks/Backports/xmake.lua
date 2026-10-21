@@ -200,3 +200,36 @@ if not is_plat("iphoneos") and has_config("air2cpu") then
         add_files(path.join(SRC, "air2cpu", "air2cpu.cpp"))
         add_packages("llvm")
 end
+
+local FOUNDATION_TESTS = {
+    progress_keys = {"NSProgressKeys7.m"},
+    metadata_query = {"NSMetadataQuery+Enumerate7.m"},
+    text_checking = {"NSTextCheckingResult+Alternatives7.m"},
+    expression = {"NSExpression+AllowEvaluation7.m"},
+    date_components = {"NSDateComponents+Component8.m"},
+    calendar_identifiers = {"NSCalendarIdentifiers8.m"},
+    validated_format = {"NSString+ValidatedFormat.m"},
+    file_relationship = {"NSFileManager+Relationship8.m"},
+}
+
+if not is_plat("iphoneos") then
+    local TESTS = path.join(os.scriptdir(), "tests", "Foundation")
+    for name, sources in pairs(FOUNDATION_TESTS) do
+        target("FoundationBackports_" .. name .. "_test")
+            set_kind("binary")
+            set_plat("macosx")
+            set_arch("arm64")
+            set_default(false)
+            add_files(path.join(TESTS, name .. "_test.m"))
+            for _, source in ipairs(sources) do
+                add_files(path.join(SRC, "Foundation", source))
+            end
+            add_includedirs(TESTS)
+            add_mflags("-fobjc-arc")
+            add_ldflags("-fobjc-arc")
+            add_frameworks("Foundation")
+            add_tests("default")
+            add_tests("negative", {runargs = {"--negative"}, should_fail = true})
+        target_end()
+    end
+end

@@ -585,6 +585,12 @@ static NSString *revenant_validated_string(id receiver, SEL command, NSString *f
     return revenant_validated_string(self, _cmd, format, validFormatSpecifiers, locale, arguments, error);
 }
 
+- (instancetype)initWithValidatedFormat:(NSString *)format validFormatSpecifiers:(NSString *)validFormatSpecifiers
+                              arguments:(va_list)arguments error:(NSError **)error
+{
+    return revenant_validated_string(self, _cmd, format, validFormatSpecifiers, nil, arguments, error);
+}
+
 + (instancetype)stringWithValidatedFormat:(NSString *)format validFormatSpecifiers:(NSString *)validFormatSpecifiers
                                     error:(NSError **)error, ...
 {

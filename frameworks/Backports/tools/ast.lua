@@ -64,6 +64,10 @@ local function node_of(body, state)
         end
     end
     local index = is_loc(tokens[1]) and 2 or 1
+    if tokens[index] == "prev" and tokens[index + 1] and string.find(tokens[index + 1], "^0x%x+$") then
+        index = index + 2
+        index = is_loc(tokens[index]) and index + 1 or index
+    end
     while tokens[index] ~= nil and FLAGS[tokens[index]] do
         index = index + 1
     end
