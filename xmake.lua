@@ -6,7 +6,11 @@ set_defaultmode("release")
 
 option("component", {type = "string", default = "", showmenu = true,
                      description = "Configure only this component and what it needs, for example Backports; empty configures every component."})
-local whole = get_config("component") == ""
+option("apple_sdk", {type = "string", default = "", showmenu = true,
+                     description = "The iPhoneOS SDK version, 16.4 or 26.2; empty takes 16.4 for the whole graph and 26.2 for a component."})
+
+local component = get_config("component")
+local whole = component == ""
 
 add_repositories("revenant " .. (os.getenv("REVENANT_REPO") or "."))
 add_addons("revenant", {sourcedir = "toolchain"})
@@ -18,9 +22,6 @@ option("emulate", {default = false, showmenu = true,
                    description = "Require the emulator, so that ./xmakew emulate installs this project's packages into an emulated device and runs them there."})
 
 set_config("apple_minimum", "6.0")
-if not whole then
-    set_config("apple_sdk", "26.2")
-end
 if is_plat("iphoneos") then
     includes("@addon/revenant/apple-ios")
     if has_config("emulate") then

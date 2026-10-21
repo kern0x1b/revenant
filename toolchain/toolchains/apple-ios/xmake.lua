@@ -51,7 +51,7 @@ toolchain("apple-ios")
             raise("toolchain(apple-ios) needs the SDK and llvm packages and apple_minimum; includes(\"@addon/revenant/apple-ios\") provides them")
         end
         if not os.isfile(path.join(found.sdk, "SDKSettings.json")) then
-            raise("the iphoneos-sdk package has no %s: xmake-requires.lock pins a Revenant package repository older than this addon; delete the lock, or run xmake require --upgrade, after moving add_addons to a new tag", found.sdk)
+            raise("the iphoneos-sdk %s package is not installed: install it with ./xmakew require -P . -y revenant@iphoneos-sdk %s, then configure again", toolchain:config("sdk"), toolchain:config("sdk"))
         end
         local minimum = import("@self.apple.architectures").deployment(toolchain:arch(), declared)
         local clangxx = found.clang .. "++"
