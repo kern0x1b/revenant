@@ -48,7 +48,8 @@ package("swift-runtime")
     add_configs("shared", {description = "Install the libraries under absolute install names and leave what a Debian package holding them is written from, which the programs built against this runtime depend on instead of carrying the libraries: the program that depends on it writes and signs that package, so this package needs no host tool.", default = false, type = "boolean"})
 
     on_load("iphoneos", function (package)
-        package:add("deps", "revenant@apple-compat", {alias = "apple-compat"})
+        local sdk = assert(package:toolchains(), "swift-runtime is built with the apple-ios toolchain")[1]:config("sdk")
+        package:add("deps", "revenant@apple-compat", {alias = "apple-compat", configs = {apple_sdk = sdk}})
         package:add("deps", "revenant@libcxx", {alias = "libcxx", configs = {packaged = package:config("shared") or nil}})
         if package:config("backports_uikit") and not package:config("backports") then
             raise("swift-runtime's backports_uikit config is the application half of the backports config; set backports too")
