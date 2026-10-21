@@ -38,8 +38,9 @@ package("iphoneos-sdk")
         if settings.CanonicalName ~= wanted then
             raise("the archive describes itself as %s, not %s", tostring(settings.CanonicalName), wanted)
         end
-        local developer = path.join(package:installdir(), "Developer.app", "Contents", "Developer")
-        local folder = path.join(developer, "Platforms", "iPhoneOS.platform", "Developer", "SDKs", "iPhoneOS" .. package:version_str() .. ".sdk")
+        local sdk = import("@addon.revenant.apple.sdk", {anonymous = true})
+        local developer = sdk.developer(package:installdir())
+        local folder = sdk.folder(package:installdir(), package:version_str())
         os.mkdir(folder)
         os.vcp("*", folder .. "/")
         local libraries = path.join(folder, "usr", "lib")
@@ -270,8 +271,9 @@ package("iphoneos-sdk")
     end)
 
     on_test(function (package)
-        local developer = path.join(package:installdir(), "Developer.app", "Contents", "Developer")
-        local folder = path.join(developer, "Platforms", "iPhoneOS.platform", "Developer", "SDKs", "iPhoneOS" .. package:version_str() .. ".sdk")
+        local sdk = import("@addon.revenant.apple.sdk", {anonymous = true})
+        local developer = sdk.developer(package:installdir())
+        local folder = sdk.folder(package:installdir(), package:version_str())
         assert(os.isfile(path.join(developer, "Toolchains", "XcodeDefault.xctoolchain", "usr", "lib", "arc", "libarclite_iphoneos.a")))
         assert(os.isfile(path.join(folder, "usr", "include", "simd", "base.h")))
         for _, name in ipairs({"crt1.o", "crt1.3.1.o", "dylib1.o", "bundle1.o", "libgcc_s.1.tbd", "libBlocksRuntime.a"}) do

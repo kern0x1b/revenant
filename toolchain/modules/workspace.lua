@@ -78,8 +78,7 @@ function corpus(...)
 end
 
 local function sdk_in(installdir, version)
-    return path.join(installdir, "Developer.app", "Contents", "Developer", "Platforms", "iPhoneOS.platform", "Developer", "SDKs",
-                     "iPhoneOS" .. version .. ".sdk")
+    return import("apple.sdk", {rootdir = os.scriptdir()}).folder(installdir, version)
 end
 
 function package_of(requirement, install)

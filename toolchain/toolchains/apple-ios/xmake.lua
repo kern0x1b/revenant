@@ -16,13 +16,12 @@ toolchain("apple-ios")
     set_toolset("scar", "ar")
     set_toolset("strip", "strip")
 
-    local function parts(toolchain, project)
+    local function parts(toolchain, project, apple_sdk)
         local required = project.required_packages() or {}
         local found = {}
         local sdk = required["iphoneos-sdk"]
         if sdk and toolchain:config("sdk") then
-            found.sdk = path.join(sdk:installdir(), "Developer.app", "Contents", "Developer", "Platforms", "iPhoneOS.platform", "Developer", "SDKs",
-                                  "iPhoneOS" .. toolchain:config("sdk") .. ".sdk")
+            found.sdk = apple_sdk.folder(sdk:installdir(), toolchain:config("sdk"))
         end
         local ld64 = required["ld64"]
         if ld64 and toolchain:config("ld64") then
@@ -36,8 +35,8 @@ toolchain("apple-ios")
     end
 
     on_check(function (toolchain)
-        local found = parts(toolchain, import("core.project.project"))
-        if not found.sdk or not toolchain:config("minimum") or not found.clang then
+        local found = parts(toolchain, import("core.project.project"), import("@self.apple.sdk"))
+        if not toolchain:config("minimum") or not found.clang then
             return false
         end
         return not toolchain:is_arch("armv6", "armv7", "armv7s") or found.linker ~= nil
@@ -45,13 +44,16 @@ toolchain("apple-ios")
 
     on_load(function (toolchain)
         import("core.base.semver")
-        local found = parts(toolchain, import("core.project.project"))
+        local found = parts(toolchain, import("core.project.project"), import("@self.apple.sdk"))
         local declared = toolchain:config("minimum")
-        if not found.sdk or not declared or not found.clang then
+        if not declared or not found.clang then
             raise("toolchain(apple-ios) needs the SDK and llvm packages and apple_minimum; includes(\"@addon/revenant/apple-ios\") provides them")
         end
+        if not found.sdk then
+            raise("the iphoneos-sdk %s package has no install folder in this configuration: --require=n registers packages without locating them, so configure without it", toolchain:config("sdk"))
+        end
         if not os.isfile(path.join(found.sdk, "SDKSettings.json")) then
-            raise("the iphoneos-sdk %s package is not installed: configure without --require=n, and xmake installs it", toolchain:config("sdk"))
+            raise("the iphoneos-sdk %s package is incomplete: %s has no SDKSettings.json, so configure again and xmake installs it", toolchain:config("sdk"), found.sdk)
         end
         local minimum = import("@self.apple.architectures").deployment(toolchain:arch(), declared)
         local clangxx = found.clang .. "++"

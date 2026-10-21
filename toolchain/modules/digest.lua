@@ -103,7 +103,7 @@ local RECIPES = {
                "toolchain/src/apple-compat/src/fdopendir.c", "toolchain/src/apple-compat/src/fstatat.c",
                "toolchain/src/apple-compat/include/revenant/*.h"}},
     {folder = "packages/i/iphoneos-sdk", variable = "iphoneos_sdk_additions_digest",
-     inputs = {"packages/i/iphoneos-sdk/xmake.lua", "toolchain/modules/apple/sdkstubs.lua", "toolchain/src/iphoneos-sdk/usr/**",
+     inputs = {"packages/i/iphoneos-sdk/xmake.lua", "toolchain/modules/apple/sdk.lua", "toolchain/modules/apple/sdkstubs.lua", "toolchain/src/iphoneos-sdk/usr/**",
                "toolchain/src/iphoneos-sdk/arclite/*", "toolchain/src/iphoneos-sdk/blocks/*", "toolchain/src/iphoneos-sdk/markers/*"}}
 }
 
