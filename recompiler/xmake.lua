@@ -71,22 +71,37 @@ for _, app in ipairs({{"recompiler_cxxinit", "tests/cxxinit/build.lua"}, {"recom
         set_values("recompiler.script", script)
 end
 
+local function corpus(target, opt)
+    local name = path.filename(opt.name)
+    local check = import("check", {rootdir = path.join(target:scriptdir(), "tests", name), anonymous = true})
+    local passed, errors = true, nil
+    try {
+        function () check(path.join(target:autogendir(), "tests", name), {host_only = true}) end,
+        catch { function (raised) passed, errors = false, raised end }
+    }
+    if not passed then
+        opt.errors = tostring(errors)
+    end
+    return passed
+end
+
 target("recompiler_corpus")
     set_kind("phony")
     set_default(false)
     add_deps("xlate", "xlgen")
     add_packages("blocksruntime", "iphoneos-sdk", "ld64", "ldid")
-    add_tests("jumptable", "tsdscan", "tsdguard", "int128", "ordinal", "weakimport", "classpair", "lse")
-    on_test(function (target, opt)
-        local name = path.filename(opt.name)
-        local check = import("check", {rootdir = path.join(target:scriptdir(), "tests", name), anonymous = true})
-        local passed, errors = true, nil
-        try {
-            function () check(path.join(target:autogendir(), "tests", name), {host_only = true}) end,
-            catch { function (raised) passed, errors = false, raised end }
-        }
-        if not passed then
-            opt.errors = tostring(errors)
-        end
-        return passed
-    end)
+    add_tests("jumptable", "tsdscan", "tsdguard", "int128", "weakimport", "lse")
+    on_test(corpus)
+target_end()
+
+if get_config("tests") == "device" then
+    target("recompiler_device")
+        set_kind("phony")
+        set_default(false)
+        set_group("device")
+        add_deps("xlate", "xlgen")
+        add_packages("blocksruntime", "iphoneos-sdk", "ld64", "ldid")
+        add_tests("classpair", "ordinal")
+        on_test(corpus)
+    target_end()
+end
