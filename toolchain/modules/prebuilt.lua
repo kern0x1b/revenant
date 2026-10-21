@@ -31,7 +31,24 @@ function key(package)
         table.insert(deps, dep:name() .. "=" .. dep:buildhash())
     end
     byteorder.sort(deps)
-    return hash.strhash128(table.concat(table.join(parts, deps), ";"))
+    local value = hash.strhash128(table.concat(table.join(parts, deps), ";"))
+    if os.getenv("REVENANT_PREBUILT_TRACE") then
+        local configs = {}
+        for name, setting in pairs(package:_configs_for_buildhash() or {}) do
+            table.insert(configs, name .. "=" .. (type(setting) == "table" and string.serialize(setting, {strip = true, indent = false}) or tostring(setting)))
+        end
+        byteorder.sort(configs)
+        local urls = {}
+        for _, url in ipairs(package:urls() or {}) do
+            table.insert(urls, url .. "@" .. tostring(package:sourcehash(package:url_alias(url))))
+        end
+        print("prebuilt-trace %s parts=%s", package:name(), table.concat(parts, " | "))
+        print("prebuilt-trace %s configs=%s", package:name(), table.concat(configs, " ; "))
+        print("prebuilt-trace %s urls=%s label=%s", package:name(), table.concat(urls, " ; "), tostring(package:label()))
+        print("prebuilt-trace %s deps=%s", package:name(), table.concat(deps, " | "))
+        print("prebuilt-trace %s key=%s", package:name(), value)
+    end
+    return value
 end
 
 function tag(package)
