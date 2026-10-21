@@ -12,9 +12,21 @@ package("firmware-tools")
     add_configs("sources", {description = "The digest of the tool's sources, so a changed source is a different package.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
 
     on_install("@macosx", function (package)
-        os.mkdir(package:installdir("bin"))
-        os.vrunv("xcrun", {"swiftc", "-O", path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "firmware-tools", "src", "revenant-firmware.swift"), "-o", path.join(package:installdir("bin"), "revenant-firmware")})
-        os.vcp(path.join(package:scriptdir(), "..", "..", "..", "toolchain", "LICENSE"), package:installdir("licenses"))
+        local root = path.translate(path.join(os.scriptdir(), "..", "..", ".."))
+        local project = path.absolute("project")
+        os.mkdir(project)
+        io.writefile(path.join(project, "xmake.lua"), table.concat({
+            "set_project(\"firmware-tools\")",
+            "set_xmakever(\"3.1.2\")",
+            "add_rules(\"mode.release\", \"mode.debug\")",
+            "set_defaultmode(\"release\")",
+            "option(\"component\", {type = \"string\", default = \"\"})",
+            "includes(\"" .. path.join(root, "toolchain", "src", "firmware-tools") .. "\")",
+            ""}, "\n"))
+        os.vrunv(os.programfile(), {"f", "-p", "macosx", "-a", "arm64", "-m", "release", "-y"}, {curdir = project})
+        os.vrunv(os.programfile(), {"build", "-y", "revenant-firmware"}, {curdir = project})
+        os.vrunv(os.programfile(), {"install", "-y", "-o", package:installdir(), "revenant-firmware"}, {curdir = project})
+        os.vcp(path.join(root, "toolchain", "LICENSE"), package:installdir("licenses"))
     end)
 
     on_test(function (package)

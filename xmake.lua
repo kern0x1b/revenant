@@ -35,7 +35,7 @@ if is_plat("iphoneos") then
 end
 
 includes("frameworks/Backports")
-includes("emulator", "recompiler", "frameworks/Combine", "frameworks/SwiftUI", "frameworks/WebKit", "toolchain/tests")
+includes("emulator", "recompiler", "frameworks/Combine", "frameworks/SwiftUI", "frameworks/WebKit", "toolchain/src/firmware-tools", "toolchain/tests")
 
 if whole then
     target("repository")
