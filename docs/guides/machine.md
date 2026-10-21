@@ -10,7 +10,6 @@ Everything a build can make again lives under `~/.revenant/cache`:
 | --- | --- | --- |
 | `xmake/<key>` | the pinned and patched xmake, one folder per pin and patch set | `xmakew` |
 | `xmake-global/.xmake` | the package store (`packages`), the package sources and build folders (`cache`), the repositories | xmake, through `XMAKE_GLOBALDIR`, which `xmakew` sets |
-| `ccache` | the compiler cache | `xmakew` points `CCACHE_DIR` at it |
 | `<task>` | scratch of one task, deleted when the task ends | the task |
 
 ## The data that is not a cache
@@ -36,8 +35,8 @@ A folder belongs in `~/.revenant/cache` if, and only if, removing it costs only 
 
 | Level | Removes | Keeps |
 | --- | --- | --- |
-| default | each worktree's ignored `.xmake` and `build`, every tool cache and scratch folder, the package sources and build folders of the store, xmake's leftover build folders | the package store, ccache, the xmake binaries |
-| `--packages` | the same and the package store | ccache, the xmake binaries |
+| default | each worktree's ignored `.xmake` and `build`, every tool cache and scratch folder, the package sources and build folders of the store, xmake's leftover build folders, an old `ccache` folder | the package store, the xmake binaries |
+| `--packages` | the same and the package store | the xmake binaries |
 | `--all` | everything under `~/.revenant/cache`; the xmake binaries are built again on the next `./xmakew` | nothing |
 
 Only ignored and untracked build folders are removed: `git check-ignore` decides.

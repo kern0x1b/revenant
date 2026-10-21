@@ -7,14 +7,13 @@ stay a plain list of settings.
 
 ## How the build is driven
 
-**ccache.** Every source file gets recompiled from scratch whenever a CMake flag
+**No object cache.** Every source file gets recompiled from scratch whenever a CMake flag
 changes, because configuring starts from an empty build directory - on one night
-that happened four times for a change to one or two files. ccache keys on the
-preprocessed source plus the command line, not on the build directory, so it
-survives and turns "rebuild everything" back into "recompile what changed" once
-it is warm. It is not taken from `PATH`: it is used when
-`tools.cmake.cmaketoolchain:extra_variables` sets the compiler launchers, as
-[building.md](../../guides/webkit/build-and-test.md) shows.
+that happened four times for a change to one or two files. The engine's build sets no
+compiler launcher, so nothing replays an object it built before. A cache such as ccache,
+which keys on the preprocessed source and the command line rather than on the build
+directory, would turn "rebuild everything" back into "recompile what changed"; none is
+wired here.
 
 **The SDK is named explicitly.** Otherwise the build asks `xcrun` for an
 "iphoneos" SDK by name, which only a full Xcode install has, and the toolchain

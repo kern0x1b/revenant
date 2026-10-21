@@ -111,6 +111,3 @@ A boot that never ran the command, whose reports show a daemon was killed, is ex
 | `REVENANT_ASSETS_EXTRACT_CACHE` | `tools/assets-extract` | where the tool builds itself |
 | `LLVM_PREFIX` | the `ld64` package | the prefix of the `llvm` package, from which `llvm-config` finds `libLTO` |
 | `XMAKE_GLOBALDIR` | `./xmakew` | the package store, default `~/.revenant/cache/xmake-global` |
-| `CCACHE_DIR`, `CCACHE_NOHASHDIR`, `CCACHE_MAXSIZE` | `./xmakew` | the compiler cache: default folder, relative source paths (1), size (20G) |
-| `CCACHE` | the compiler cache | the program to wrap compilers with; checked before use |
-| `CCACHE_DISABLE` | the compiler cache | set to anything, even empty, to run without the cache |
