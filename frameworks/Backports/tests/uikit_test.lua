@@ -43,12 +43,57 @@ local AREAS = {
             "-[UISimpleTextPrintFormatter initWithAttributedText:]", "-[UISimpleTextPrintFormatter attributedText]",
         },
     },
+    {
+        name = "iOS 8 split view controller: display modes, collapse and separate",
+        sources = {"RevenantWeak.m", "UISplitViewController+DisplayModes8.m", "UISplitViewController+Collapse8.m"},
+        members = {
+            "-[UISplitViewController isCollapsed]", "-[UISplitViewController collapsed]", "-[UISplitViewController preferredDisplayMode]",
+            "-[UISplitViewController displayMode]", "-[UISplitViewController displayModeButtonItem]",
+            "-[UISplitViewController preferredPrimaryColumnWidthFraction]", "-[UISplitViewController minimumPrimaryColumnWidth]",
+            "-[UISplitViewController maximumPrimaryColumnWidth]", "-[UISplitViewController primaryColumnWidth]",
+            "-[UISplitViewController showViewController:sender:]", "-[UISplitViewController showDetailViewController:sender:]",
+            "-[UIViewController collapseSecondaryViewController:forSplitViewController:]",
+            "-[UIViewController separateSecondaryViewControllerForSplitViewController:]",
+            "-[UINavigationController collapseSecondaryViewController:forSplitViewController:]",
+        },
+    },
+    {
+        name = "iOS 8 input view controllers and the objects the system provides",
+        sources = {"UIInputViewController.m", "UIResponder+InputViewController8.m", "UILexicon.m", "UIDocumentPickerExtensionViewController.m"},
+        members = {
+            "@UIInputViewController", "-[UIInputViewController inputView]", "-[UIInputViewController textDocumentProxy]",
+            "-[UIInputViewController primaryLanguage]", "-[UIInputViewController hasDictationKey]", "-[UIInputViewController dismissKeyboard]",
+            "-[UIResponder inputViewController]", "-[UIResponder inputAccessoryViewController]",
+            "@UILexiconEntry", "-[UILexiconEntry documentText]", "-[UILexiconEntry userInput]", "@UILexicon", "-[UILexicon entries]",
+            "@UIDocumentPickerExtensionViewController", "-[UIDocumentPickerExtensionViewController documentPickerMode]",
+            "-[UIDocumentPickerExtensionViewController originalURL]", "-[UIDocumentPickerExtensionViewController validTypes]",
+            "-[UIDocumentPickerExtensionViewController providerIdentifier]", "-[UIDocumentPickerExtensionViewController prepareForPresentationInMode:]",
+        },
+    },
+    {
+        name = "iOS 8 and 9 members of existing classes",
+        sources = {"RevenantWeak.m", "NSLayoutConstraint+Getter8.m", "NSObject+InterfaceBuilder8.m", "UIAlertAction+Getter8.m", "UIApplication+Getter8.m",
+                   "UIDocument+UserActivity8.m", "UIImage+Asset8.m", "UIImageAsset.m", "UILocalNotification+Category8.m", "UISearchController+Getter8.m",
+                   "UITouch+MajorRadius8.m", "UIUserNotificationAction+Getter8.m", "UIFocusGuide+Getter9.m", "UIView+Focus9.m", "UIScreen+Focus9.m"},
+        members = {
+            "-[NSLayoutConstraint active]", "-[NSObject prepareForInterfaceBuilder]", "-[UIAlertAction enabled]",
+            "-[UIApplication registeredForRemoteNotifications]", "-[UIDocument userActivity]", "-[UIDocument updateUserActivityState:]",
+            "-[UIDocument restoreUserActivityState:]", "-[UIImage imageAsset]", "-[UILocalNotification category]", "-[UILocalNotification alertTitle]",
+            "-[UISearchController active]", "-[UITouch majorRadius]", "-[UIUserNotificationAction authenticationRequired]",
+            "-[UIUserNotificationAction destructive]", "-[UIFocusGuide enabled]", "-[UIView focused]", "-[UIScreen supportsFocus]",
+            "-[UIScreen focusedView]", "-[UIScreen focusedItem]",
+        },
+    },
 }
 
 local function key_of(member)
-    local sign, class, selector = member:match("^([%+%-])%[(%S+) ([^%]]+)%]$")
+    local class = member:match("^@(%S+)$")
+    if class then
+        return "class||" .. class
+    end
+    local sign, owner, selector = member:match("^([%+%-])%[(%S+) ([^%]]+)%]$")
     assert(sign, "not a member: " .. member)
-    return (sign == "+" and "class method" or "instance method") .. "|" .. class .. "|" .. selector
+    return (sign == "+" and "class method" or "instance method") .. "|" .. owner .. "|" .. selector
 end
 
 function main()
