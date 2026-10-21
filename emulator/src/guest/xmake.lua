@@ -1,19 +1,17 @@
-add_repositories("revenant @repository@")
-add_addons("revenant")
-set_config("apple_minimum", "@minimum@")
-includes("@addon/revenant/apple-ios")
+if get_config("component") ~= "" or not is_plat("iphoneos") then
+    return
+end
 
-set_defaultplat("iphoneos")
-set_defaultarchs("iphoneos|@arch@")
+local GUEST = os.scriptdir()
 
 target("revenant-runner")
     add_rules("@addon/revenant/daemon")
-    add_files("revenant-runner.c")
+    add_files(path.join(GUEST, "revenant-runner.c"))
     add_frameworks("CoreFoundation")
     add_syslinks("objc")
 
 target("revenant-sblaunch")
     add_rules("@addon/revenant/daemon")
-    add_files("revenant-sblaunch.c")
+    add_files(path.join(GUEST, "revenant-sblaunch.c"))
     add_frameworks("CoreFoundation")
     set_values("revenant.entitlements", "revenant-sblaunch.entitlements")
