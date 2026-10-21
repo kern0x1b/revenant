@@ -176,16 +176,18 @@ target("SwiftData")
     end)
     target_end()
 
-local function scenekit_flags(target)
+local function deployment_of(target)
     local toolchain = target:toolchain("apple-ios")
     toolchain:load()
-    local minimum = toolchain:config("deployment")
-    if tonumber(minimum:match("^(%d+)")) < 8 then
-        raise("target(%s) overlays SceneKit, and iOS %s has no SceneKit", target:name(), minimum)
-    end
+    return toolchain:config("deployment"), toolchain
+end
+
+local function scenekit_flags(target)
+    local semver = import("core.base.semver")
+    local minimum, toolchain = deployment_of(target)
     local headers = path.join(toolchain:config("sdkdir"), "System", "Library", "Frameworks", "SceneKit.framework", "Headers")
     local apinote = path.join(headers, "SceneKit.apinotes")
-    if not os.isfile(apinote) then
+    if semver.compare(minimum, "8.0") < 0 or not os.isfile(apinote) then
         return {}
     end
     local folder = path.join(target:autogendir(), "scenekit")
@@ -235,6 +237,15 @@ local function overlay(name, folder, opt)
                 target:add("files", table.unpack(opt.generate(target)))
             end
         end)
+        before_build(function (target)
+            if opt.minimum then
+                local semver = import("core.base.semver")
+                local minimum = deployment_of(target)
+                if semver.compare(minimum, opt.minimum) < 0 then
+                    raise("%s needs iOS %s or newer, and this build targets iOS %s", name, opt.minimum, minimum)
+                end
+            end
+        end)
         on_config(function (target)
             local flags = {"-parse-as-library", "-swift-version", "5", "-module-link-name", name,
                            "-Xfrontend", "-disable-implicit-string-processing-module-import"}
@@ -252,11 +263,11 @@ end
 
 local FOUNDATION_LINKS = {"swiftDarwin", "swiftObjectiveC", "swiftDispatch", "swiftCoreFoundation", "swiftCoreGraphics", "swiftFoundation"}
 
-overlay("swiftRealityFoundation", "RealityFoundation", {concurrency = true, scenekit = true,
+overlay("swiftRealityFoundation", "RealityFoundation", {concurrency = true, scenekit = true, minimum = "8.0",
     frameworks = {"Foundation", "CoreFoundation", "QuartzCore", "SceneKit"},
     links = table.join(FOUNDATION_LINKS, {"swiftQuartzCore"})})
 
-overlay("swiftRealityKit", "RealityKit", {concurrency = true, scenekit = true, deps = {"swiftRealityFoundation"},
+overlay("swiftRealityKit", "RealityKit", {concurrency = true, scenekit = true, minimum = "8.0", deps = {"swiftRealityFoundation"},
     frameworks = {"Foundation", "CoreFoundation", "QuartzCore", "SceneKit", "UIKit"},
     links = table.join(FOUNDATION_LINKS, {"swiftQuartzCore"})})
 
@@ -266,4 +277,4 @@ overlay("swiftCloudKit", "CloudKit", {})
 
 overlay("swiftWeatherKit", "WeatherKit", {})
 
-overlay("swiftNetwork", "Network", {flags = {"-Xfrontend", "-import-underlying-module", "-I", path.join(SRC, "Network", "seam")}})
+overlay("swiftNetwork", "Network", {minimum = "12.0", flags = {"-Xfrontend", "-import-underlying-module", "-I", path.join(SRC, "Network", "seam")}})

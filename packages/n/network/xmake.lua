@@ -9,6 +9,11 @@ package("network")
     add_configs("sources", {description = "The digest of this recipe and the module's sources, so a changed declaration is a different package.", default = network_sources_digest, type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
+        local toolchain = assert(package:toolchains(), "network is built with the apple-ios toolchain")[1]
+        toolchain:load()
+        if tonumber(toolchain:config("deployment"):match("^(%d+)")) < 12 then
+            raise("network is the Network framework's overlay, which needs iOS 12, and this build targets iOS %s", toolchain:config("deployment"))
+        end
         package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime"})
         package:add("links", "swiftNetwork")
     end)
