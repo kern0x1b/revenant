@@ -46,11 +46,16 @@ jobs:
           restore-keys: |
             ccache-${{ runner.os }}-
 
+      - name: Install the packages
+        id: configure
+        run: ./xmakew f -P . -y
+
       - name: Run the tests
+        id: tests
         run: ./xmakew test -P .
 
       - name: Save the package store
-        if: success() && steps.store.outputs.cache-hit != 'true'
+        if: steps.configure.outcome == 'success' && steps.store.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: ~/.revenant/cache/xmake-global
