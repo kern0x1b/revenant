@@ -538,7 +538,7 @@ package("swift-runtime")
         end
     end)
 
-    on_install("@macosx", function (package)
+    on_install("macosx", function (package)
         raise("%s is the Swift runtime of iOS, so configure the project for iOS before requiring it: ./xmakew f -P . -p iphoneos -a armv7 --component=Swift", package:name())
     end)
 
