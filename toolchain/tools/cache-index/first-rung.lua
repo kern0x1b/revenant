@@ -34,11 +34,11 @@ end
 local function open_table(file)
     local index = file .. ".idx"
     if not os.isfile(file) then
-        fail("first-rung.lua: " .. file .. " is not there. Build it: xmake l tools/cache-index/build.lua")
+        fail("first-rung.lua: " .. file .. " is not there. Build it: ./xmakew l toolchain/tools/cache-index/build.lua")
     end
     if not os.isfile(index) then
         fail("first-rung.lua: " .. index .. " is not there, so " .. file .. " cannot be read in blocks. Rebuild both: "
-            .. "xmake l tools/cache-index/build.lua")
+            .. "./xmakew l toolchain/tools/cache-index/build.lua")
     end
     local self = {path = file, size = os.filesize(file), offsets = {}, firsts = {}, cached = nil}
     each_line(io.readfile(index, {encoding = "binary"}), function (line)
@@ -310,7 +310,7 @@ local function lookup(names, timing)
     end
 end
 
-local USAGE = "usage: xmake l tools/cache-index/first-rung.lua [--stdin] [--timing] [NAME...] | --rungs NAME... | --self-test"
+local USAGE = "usage: ./xmakew l toolchain/tools/cache-index/first-rung.lua [--stdin] [--timing] [NAME...] | --rungs NAME... | --self-test"
 
 function main(...)
     local args = {...}

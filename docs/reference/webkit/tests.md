@@ -3,7 +3,7 @@
 Run before every deploy, from the top of revenant:
 
     ./xmakew f -P . --webkit_host_tests=y && ./xmakew test -P .   ICU data checks on this Mac
-    ./xmakew l frameworks/WebKit/tests/run-batteries.lua           JavaScript batteries under jsc on the iPhone
+    ./xmakew l frameworks/WebKit/tests/device/run-batteries.lua    JavaScript batteries under jsc on the iPhone
 
 ## host
 
@@ -34,7 +34,7 @@ The same fault takes two seconds to find here.
 
 ## device
 
-`tests/js/*.js` run under `jsc` on the phone with the freshly built engine:
+`tests/device/js/*.js` run under `jsc` on the phone with the freshly built engine:
 `run-batteries.lua` takes the `batteries/` folder the `webkit-engine` package installs
 (`jsc`, its `JavaScriptCore` and the C++ runtime it was built against), or the one
 `--batteries` names. It compares each file with the phone's copy by content and pushes
@@ -67,18 +67,18 @@ device is asked to render and the shape that used to be measured against a live
 site - where the content changes between runs and every comparison is therefore
 worthless.
 
-    tests/enginebench.html    four timings: building a feed, megamorphic property
-                              access, allocation churn, forced relayout
-    tests/membench.html       a long session's feed, built in batches, printing
-                              posts and document height as it grows
-    tests/scrollbench.html    scrolling: the gap distribution between animation
-                              frames, not a mean
-    tests/scrollbench-fixed-bars.html
-                              the same measurement under two position:fixed bars
-                              whose height changes while a feed grows during the
-                              run - the shape the fixed-bar flush race needs
-    tests/fullscreentest.html element.requestFullscreen() on a div, with a canvas
-                              that keeps drawing while fullscreen
+    tests/device/enginebench.html            four timings: building a feed, megamorphic property
+                                            access, allocation churn, forced relayout
+    tests/device/membench.html              a long session's feed, built in batches, printing
+                                            posts and document height as it grows
+    tests/device/scrollbench.html           scrolling: the gap distribution between animation
+                                            frames, not a mean
+    tests/device/scrollbench-fixed-bars.html
+                                            the same measurement under two position:fixed bars
+                                            whose height changes while a feed grows during the
+                                            run - the shape the fixed-bar flush race needs
+    tests/device/fullscreentest.html        element.requestFullscreen() on a div, with a canvas
+                                            that keeps drawing while fullscreen
 
 `scrollbench.html` has two knobs, because the regime is part of what is
 measured: `?posts=1400` puts the collector in the band a content-bearing feed

@@ -34,11 +34,14 @@ libdispatch answers, the check is in the device group: `compat_device_test` and 
 The suites that run only for the iPhone OS platform (`SwiftUITypeChecks`, `CombineGenerated`, and the WebKit host
 tests behind `webkit_host_tests`) are declared by the platform, not by the default run; they belong to the components
 that define them. The fixtures of `tests/emulate/` and `tests/swiftui/` are built for a device and are not xmake tests
-yet.
+yet. Each `tests/emulate/<case>/` runs with `./xmakew l toolchain/tests/emulate/<case>/<case>.lua [DEVICE] [RELEASE]`:
+`install` (the install places the build's program in the image), `launchd` (the program runs under launchd and prints
+its probe line), and `output` (a program's stdout and stderr reach the host, through a run that ends and through one
+that hangs). Their scratch folders are `$HOME/.revenant/cache/<task>/emulate-<case>/`, where `<task>` is the checkout's folder.
 
 ## Known gaps
 
 These are open, and a test for each does not yet exist:
 
 - `AXNameFromColor` is not carried. The host answers a curated vocabulary of named colours with the nearest match, not with the components of a colour, so it needs a fit rather than a lookup, and the fit has not been done.
-- The appintents-macros expansion test asserts nothing. `tests/Expansions.swift` is a hand-written reference expansion, and the harness that would assert it needs `SwiftSyntaxMacrosTestSupport`, which this machine's Command Line Tools do not have. Once the harness exists it must fail on a mutation of the accessor's setter: `set { _rating = self.init() }` in place of `set { _rating = newValue }`.
+- The appintents-macros expansion test asserts nothing. `frameworks/Backports/tests/AppIntentsMacros/Expansions.swift` is a hand-written reference expansion, and the harness that would assert it needs `SwiftSyntaxMacrosTestSupport`, which this machine's Command Line Tools do not have. Once the harness exists it must fail on a mutation of the accessor's setter: `set { _rating = self.init() }` in place of `set { _rating = newValue }`.

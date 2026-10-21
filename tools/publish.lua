@@ -1,5 +1,5 @@
 function main(member, branch)
-    assert(member, "usage: xmake l tools/publish.lua <member> [<branch>]")
+    assert(member, "usage: ./xmakew l tools/publish.lua <member> [<branch>]")
     local root = path.directory(os.scriptdir())
     assert(os.isdir(path.join(root, member)), "no member folder " .. member)
     branch = branch or ("publish/" .. member)

@@ -55,7 +55,7 @@ Each entry: the wrong pattern, the right one, and the mechanical reason.
   store, or a private `XMAKE_GLOBALDIR` to pick up a changed recipe or patch. Right: build normally.
   `./xmakew` points `XMAKE_GLOBALDIR` at `$HOME/.revenant/cache/xmake-global`. Reason: the packages that matter
   (`llvm`, `swift-runtime`, `libcxx`, `swift`) hash their sources, patches and definition into a
-  digest (`the deleted registry package xmake.lua`, `packages/s/swift-runtime/digest.lua`), so a changed
+  digest (`packages/s/swift-runtime/xmake.lua`, `packages/s/swift-runtime/port/digest.lua`), so a changed
   backport or patch is already a different package with its own install path. A private store re-resolves the whole
   chain from the network, up to building LLVM. A build's own output that must survive (a crash log) goes to a file
   of its own: `./xmakew build ... > "$HOME/.revenant/cache/<task>/build.log" 2>&1`.
@@ -94,7 +94,7 @@ Each entry: the wrong pattern, the right one, and the mechanical reason.
 
 - **`+load` in a backport.** Wrong: expecting `+load` to see a method that the library's categories add, or replacing
   a release method with no same-selector category beside the replacement. Right: decide on the release alone, and
-  keep a same-selector category beside the replacement, as `Foundation/NSBundle+ReceiptURL.m` does. Reason: `+load`
+  keep a same-selector category beside the replacement, as `frameworks/Backports/src/Foundation/NSBundle+ReceiptURL.m` does. Reason: `+load`
   runs before the constructor attaches `__DATA,__port_catlist`, and the selector check counts only what categories add.
 
 - **`git format-patch --no-walk` takes SHAs, not a range.** Wrong: `git format-patch --no-walk A..B`, which git reads as
@@ -103,13 +103,12 @@ Each entry: the wrong pattern, the right one, and the mechanical reason.
 
 - **A seam the port owns.** Wrong: a `revenant_` C function that a library exports for another library of the package,
   declared like an API. Right: declare it with `REVENANT_SEAM` before its return type, on a line of its own, in a
-  header and in its definition. `seam_symbols()` in `modules/apple/backports.lua` reads that declaration, and `link()`
-  keeps the symbol exported. Reason: a `revenant_` name is not Apple API, and the backports checks count it as
+  header and in its definition. Reason: a `revenant_` name is not Apple API, and the backports checks count it as
   internal.
 
 - **A C function shared between backport files.** Wrong: calling from one file a C function defined in a file that
   implements a class or exports an API symbol. Right: define it in a file that exports no API symbol of its own, as
-  `UIKit/UIViewController+DocumentMenu.m` does, or link the files through Objective-C methods. Reason: a file whose
+  `frameworks/Backports/src/UIKit/UIViewController+DocumentMenu.m` does, or link the files through Objective-C methods. Reason: a file whose
   exports a band's release already has is left out of that band, so the call is an undefined symbol in later bands
   only. A one-band build links and passes; only the all-band build shows it.
 
@@ -123,13 +122,12 @@ Each entry: the wrong pattern, the right one, and the mechanical reason.
   objects under one key.
 
 - **A job runner started inside a job.** Wrong: `async.runjobs`, or anything else on xmake's scheduler, called from a
-  `package:on_install` or from a function that one calls. Right: let `width()` in `modules/apple/backports.lua` see
-  it, which compiles one unit at a time when `scheduler.co_count() > 1`. Reason: a runner started inside a runner never
+  `package:on_install` or from a function that one calls. Right: compile one unit at a time when `scheduler.co_count() > 1`. Reason: a runner started inside a runner never
   returns. Every object is written, nothing is printed, and the process stays alive, whatever `isolate` says.
 
 - **A working copy installed as the addon.** Wrong: a scratch project with `add_addons("revenant")` whose
   `add_repositories` points at a worktree or clone, run against the shared `~/.xmake`. Right: test a package or a module
-  with a `XMAKE_GLOBALDIR` of its own, as `tests/addon/store_test.lua` does. Reason: on xmake 3.1.1 every addon install
+  with a `XMAKE_GLOBALDIR` of its own. Reason: on xmake 3.1.1 every addon install
   becomes the machine's active version, and every new project then locks that copy instead of the version it declares.
 
 - **Package source caches are patched.** Wrong: quoting what an upstream project does from the tree a package build

@@ -17,5 +17,5 @@ Builds applications and tweaks for legacy Apple platforms with [xmake](https://x
 - Commands and environment: [reference/toolchain/commands.md](../docs/reference/toolchain/commands.md)
 - Packages and versions: [reference/toolchain/packages.md](../docs/reference/toolchain/packages.md)
 - Developer tools: [reference/toolchain/tools.md](../docs/reference/toolchain/tools.md)
-- Changelog and third-party licences: [changelog](../docs/reference/toolchain/changelog.md), [third-party](../docs/reference/toolchain/third-party.md)
+- Third-party licences: [third-party](../docs/reference/toolchain/third-party.md)
 - Why it is built this way: [explanation/toolchain/design.md](../docs/explanation/toolchain/design.md), [runtimes and backports](../docs/explanation/toolchain/runtimes.md)

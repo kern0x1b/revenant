@@ -44,6 +44,58 @@ rather than screenshots: `tests/device/run.lua`, currently **57 of 57**. Alongsi
 real sites and reports whether each one survived, painted, and what it cost in memory. Both are described in
 [the device suite](device-suite.md).
 
+## How the features are carried
+
+- **`navigator.share`** hands a title, a text and a URL to the system share sheet. The promise resolves when an activity
+  ran, and rejects with `AbortError` when the sheet is cancelled. The sheet is presented on the main thread and the answer
+  comes back on the web thread.
+- **Clipboard.** `navigator.clipboard.writeText` writes an item dictionary through `-[UIPasteboard setItems:]`, with the
+  types mapped to uniform type identifiers, so the copy is visible to the rest of the phone. Reading rejects with
+  `NotAllowedError`, as the specification asks without a paste gesture.
+- **`canPlayType()`** answers from AVFoundation's MIME types (`AVAssetMIMETypeCache`), not from a short list, so formats
+  the framework plays are not refused.
+- **Fonts.** `@font-face` loads through a data provider (`CGFontCreateWithDataProvider`), because the private CoreText
+  parser that WebKit uses is not in iOS 6. The system parser does not read WOFF, so WebKit's own converter is compiled in
+  for WOFF; WOFF2 uses the library built for armv7. Font features are translated to the numeric AAT pairs. A font with
+  only OpenType tables does not get `font-variant-caps` small capitals, because this CoreText does not translate an AAT
+  selector into a GSUB feature.
+- **Favicons** are the page's own declared icons, not a third party's copy of them, so a start page does not disclose
+  the hosts a user bookmarks.
+- **Scrolling inside a page.** Overflow blocks and frames scroll with the finger: the embedder wraps each promoted layer
+  in a `UIWebOverflowScrollView`, and frames are keyed by the element that owns them.
+- **Web Crypto** performs ECDSA, ECDH, RSA-OAEP, RSASSA-PKCS1, PBKDF2 and AES-CBC, CFB and CTR, through WebKit's own
+  OpenSSL backend, and AES-GCM, HMAC, HKDF and AES key wrapping on the same backend. Upstream routes all of them through
+  CryptoKit, which has no armv7 target.
+- **Console.** The Settings pane's Diagnostics switch sends what a page logs, uncaught errors included, to
+  `/tmp/rev-safari-stderr.log` with file and line.
+- **`requestIdleCallback`** is enabled; the engine implements it and this port had it off.
+- **User agent.** The `Version` token is `18.7` (`Version/18.7 Mobile/15E148 Safari/604.1`), beside `AppleWebKit/605`.
+  The 2012 token sent sites the workarounds written for the engine this one replaced, and the OS release it sits beside
+  is frozen at 6.1.3.
+
+## The jsc shell on the phone
+
+`jsc` from trunk runs on the iPhone 4S, and it is a current engine, not a subset. A first probe printed:
+
+```
+private field: 5                                  // #x
+optional chain: ok                                // ?. and ??
+Object.groupBy: {"odd":[1,3],"even":[2,4]}        // ES2024
+Array.fromAsync: function                          // ES2024
+RegExp v flag: true                                // ES2024
+Temporal: object                                   // ES2026
+```
+
+The first throughput numbers, with the JIT off (CLoop interpreter on the phone, JIT on the Mac). The comparison mixes
+a 2011 CPU with the absence of a JIT, so it is an order of magnitude, not a JIT penalty:
+
+| | iPhone 4S, CLoop | Mac, JIT |
+|---|---|---|
+| `fib(24)` | 97 ms | 3 ms |
+| 2 M iteration loop | 2128 ms | 7 ms |
+
+That is roughly a million simple JavaScript operations per second.
+
 ## The Settings pane
 
 Installed as **`RevWebKit`** in the system Settings app, as a real PreferenceBundle. It writes the

@@ -21,6 +21,11 @@ removal and still ships the whole 32-bit backend, and the port builds it:
 restored, and nothing upstream does to trunk can take it away from a branch that
 already carries it.
 
+Trunk took the 32-bit JIT out in two steps. From 2026-03-08 to 2026-03-15 WebKit forced `ENABLE_JIT` off for every
+`USE(JSVALUE32_64)` build. On 2026-08-01 it deleted the orphaned assembler, with the commit message "ARMv7 runs on
+CLoop now". A checkout from before mid-March still has a working ARMv7 JIT; that is why the port branches from
+`webkitglib/2.54`.
+
 What upstream's removal decides is the *next base*. Two commits did it, and any
 series cut after the second has no ARMv7 backend to inherit:
 

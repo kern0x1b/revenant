@@ -1,7 +1,7 @@
 # ActivityKit's 10 unplaced rows, and why none of them is a missing declaration
 
 162 rows, **152 placed**, 10 missing, 0 wrong-kind, built for `armv7-apple-ios6.1.3` from the
-sources with the recipe's own flags. `.agent-work/host/classify.py` against the digester's own dump
+sources with the recipe's own flags. the digester's own dump
 (`activitykit-dump.json`) sorts the ten three ways:
 
 | rows | which | what they are |
@@ -27,6 +27,6 @@ naming list.
 
 **So there is no ActivityKit declaration to write.** What the port's own source has to answer for,
 it has: the activity's authorisation, its state and dismissal, its push type, the alert
-configuration, and the availability facts in `facts/ActivityKit/Availability.md`. The rows move when
+configuration, and the availability facts in `docs/reference/backports/ActivityKit/ActivityKit/Availability.md`. The rows move when
 the matcher moves, and the three enum-equality rows move when the digester prints a member it has
 been asked to print.

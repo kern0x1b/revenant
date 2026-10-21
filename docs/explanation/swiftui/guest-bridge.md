@@ -29,7 +29,7 @@
 Символов `_ViewInputs`/`_GraphValue`/`_ViewOutputs` приложение не импортирует вовсе: эти типы для него
 непрозрачны, он только передаёт их дальше.
 
-## Форма протоколов (из кэша прошивки, `../a/protocol.lua`, `../a/slots.lua`)
+## Форма протоколов (из кэша прошивки)
 
 `View` в iOS 16.0 и 18.0 одинаков — 6 требований в таком порядке:
 
@@ -89,8 +89,8 @@ swiftc -target arm64-apple-ios14.0 -sdk $SDK -o demo-arm64 app-nc.o arm64/SwiftU
 
 ## Команды
 
+Скрипты, которые снимают формы протоколов и таблицу слотов из кэша прошивки, были исследовательскими и в репозиторий не вошли; остальная команда повторяется так:
+
 ```
-xmake l ../a/protocol.lua 16.0 SwiftUI.framework/SwiftUI '$s7SwiftUI4ViewMp' '$s7SwiftUI3AppMp' '$s7SwiftUI5SceneMp'
-xmake l ../a/slots.lua 16.0 '$s7SwiftUI4ViewMp'
 nm -u app.o | sort > undef.txt
 ```

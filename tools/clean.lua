@@ -124,7 +124,7 @@ function main(...)
         elseif argument == "--dry-run" or argument == "-n" then
             dry = true
         else
-            raise("usage: xmake l tools/clean.lua [--packages | --all] [--dry-run]")
+            raise("usage: ./xmakew l tools/clean.lua [--packages | --all] [--dry-run]")
         end
     end
     local total = 0

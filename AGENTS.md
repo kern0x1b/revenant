@@ -21,12 +21,12 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   <component>/               toolchain, emulator, recompiler, agent-skills, frameworks/<Framework>
   ```
 
-  A document about the whole repository is not in a component's folder: it sits directly under its quadrant (`explanation/platform.md`, `explanation/backports-loading.md`, `guides/ci.md`, `guides/machine.md`, `guides/prebuilt.md`). A component's documents sit under `<quadrant>/<component>/`, and `docs/README.md` indexes every document.
+  A document about the whole repository is not in a component's folder: it sits directly under its quadrant (`docs/explanation/platform.md`, `docs/explanation/backports-loading.md`, `docs/guides/ci.md`, `docs/guides/machine.md`, `docs/guides/prebuilt.md`). A component's documents sit under `<quadrant>/<component>/`, and `docs/README.md` indexes every document.
 
   Every component has the same shape, lowercase, and nothing else at its top:
 
   ```
-  xmake.lua    its targets and tests, included by the top xmake.lua (xmake test runs its tests)
+  xmake.lua    its targets and tests, included by the top xmake.lua (`./xmakew test` runs its tests)
   README.md    one screen: what it is, how to build, run and test it, links into docs/
   LICENSE      when the component ships its licence inside its own package
   src/         all of its code
@@ -38,7 +38,7 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   ```
 
   `agent-skills` is the one plugin with a different shape: `README.md`, `tests/`, `.claude-plugin/`, `skills/`, `LICENSE`
-  and `THIRD-PARTY.md`. The plugin format fixes its manifest at `.claude-plugin/plugin.json` beside the skills, and an
+  and `THIRD-PARTY.md`. The plugin format fixes its manifest at `agent-skills/.claude-plugin/plugin.json` beside the skills, and an
   installed plugin is that folder alone, so the skills and the licence and notice they carry stay there. Its
   `plugin.json` could point the skills at `src/`, but Claude Code's loading of a custom skills path is not verified
   here, so the skills are not moved until it is.
@@ -47,8 +47,10 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   A component uses another through the build graph (`add_deps`, or its package by name), never by a path into the
   other's folder. The layout is checked by `./xmakew test -P . repository/layout`.
 - A change that spans components is one series in revenant, one commit per component it touches.
-- Nothing but the project lives in the revenant folder: no scratch, logs, notes, run output or worktrees. Scratch goes
-  to `$HOME/.revenant/cache/<task>/` and is deleted when the task ends.
+- Nothing but the project lives in the revenant folder: no scratch, logs, notes or run output. Apart from the root
+  `build/` and `.xmake/`, the checkout holds nothing that is not the project, except worktrees, which live in one place
+  only, `.claude/worktrees/<task>/`; git ignores that folder (`.gitignore`). Scratch goes to
+  `$HOME/.revenant/cache/<task>/` and is deleted when the task ends.
 - No comments in code, scripts or recipes; a licence header a licence requires is the only exception. What a change
   does and why goes in its commit message; knowledge a reader of the code needs goes in `docs/`.
   `./xmakew l tools/comments.lua check [path ...]` finds comments, `strip` removes them, and `verify [rev]` proves that
@@ -77,4 +79,4 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   needs a device, an emulator image or firmware is declared only by `./xmakew f -P . --tests=device`, and it fails
   naming what it lacks when that is missing.
 - Before handing a change over: `./xmakew test -P .`, then that component's gate (the backports gate is gone until
-  `xmake test` replaces it; for the emulator, the skill `emulator-session`).
+  ``./xmakew test -P .` replaces it; for the emulator, the skill `emulator-session`).

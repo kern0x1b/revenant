@@ -57,7 +57,7 @@ Consequences to respect:
 | `tests/data/skip.txt` | the tests left out of the iOS 6 run, one `Class` or `Class.test` per line (see `docs/reference/combine/test-results.md`) |
 | `tests/control` | the Debian control of the test daemon |
 | `tools/discover.lua` | finds upstream's tests and writes the `main.swift` that runs them |
-| `../../docs/` at the top of revenant | `guides/combine/` (this guide, build and test, usage), `reference/combine/` (features, changelog, test results, the third-party notice), `explanation/combine/` (how it works) |
+| `../../docs/` at the top of revenant | `guides/combine/` (this guide, build and test, usage), `reference/combine/` (features, test results, the third-party notice), `explanation/combine/` (how it works) |
 | `../../../packages/c/combine/` | the recipe: the pin of OpenCombine and the list of patches |
 
 ## 3. How to build, and how to check

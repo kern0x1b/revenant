@@ -14,9 +14,7 @@ function folder()
 end
 
 function shots()
-    local found = path.join(tests, "sweep-shots")
-    os.mkdir(found)
-    return found
+    return import("workspace", {rootdir = path.join(revenant, "toolchain", "modules"), anonymous = true}).run("webkit-shots")
 end
 
 function run_token()

@@ -1,6 +1,6 @@
 # WeatherCondition, measured
 
-What `files/WeatherKit/WeatherCondition.swift` carries and what it was checked against. The
+What `frameworks/Backports/src/WeatherKit/WeatherCondition.swift` carries and what it was checked against. The
 numbers come from the commands named here, run on 2026-10-16 from the `v-impl-swift-apps` worktree.
 
 ## What is carried
@@ -14,7 +14,7 @@ list conformances, so they are there because the host has them.
 
 ## Measured against the host
 
-The oracle is the host's WeatherKit, read through `harness/WeatherKit/main.swift`. It is built twice:
+The oracle is the host's WeatherKit, read through `frameworks/Backports/tests/SwiftRuntime/WeatherKit/main.swift`. It is built twice:
 `swiftc -O main.swift` against the host, and `swiftc -DOURS -O main.swift files/WeatherKit/WeatherCondition.swift`.
 
 - Host: macOS 27, Swift 6.4. Locale at run time: `AppleLocale` en_US, `AppleLanguages` en-US first.

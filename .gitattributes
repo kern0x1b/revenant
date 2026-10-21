@@ -17,6 +17,5 @@
 *.swift.gyb linguist-language=Swift
 docs/** linguist-documentation
 
-toolchain/tests/addon/sdk-verbatim/** comments=fixture
 frameworks/SwiftUI/src/SymbolVariants.swift comments=upstream
 frameworks/SwiftUI/src/TextSettings.swift comments=upstream

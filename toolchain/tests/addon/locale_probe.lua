@@ -2,7 +2,6 @@ function main(modules, root)
     local macho = import("apple.macho", {rootdir = modules, anonymous = true})
     local debian = import("debian", {rootdir = modules, anonymous = true})
     local emulator = import("emulator", {rootdir = modules, anonymous = true})
-    local vt = import("vt-ladder-names", {rootdir = path.join(modules, "..", "tools"), anonymous = true})
     local byteorder = import("byteorder", {rootdir = modules, anonymous = true})
 
     os.tryrm(root)
@@ -39,12 +38,6 @@ function main(modules, root)
     end
     for _, entry in ipairs(emulator.describe_files(path.join(root, "described"))) do
         emit("emulator.describe_files", entry.path .. " " .. entry.size .. " " .. entry.hash)
-    end
-
-    local names = path.join(root, "names.txt")
-    write(names, table.concat(NAMES, "\n") .. "\n")
-    for _, name in ipairs(vt.names_from(names)) do
-        emit("vt-ladder-names.names_from", name)
     end
 
     local sdkstubs = import("apple.sdkstubs", {rootdir = modules, anonymous = true})

@@ -145,9 +145,7 @@ How to know it worked: the build (`-v`, §2) compiles the `.m` file that include
 ## 5. Backports and apple-compat from Swift
 
 **Backports.** Swift reaches what the `frameworks/Backports` targets implement only through the runtime's
-`backports` config (`README.md:575-596`). With it, `modules/apple/lift.lua` lowers, in copies of
-the SDK's headers, the release of every API the backports implement to the program's release,
-and the rule hands those headers to your Swift (`v0.8.10:rules/swift/xmake.lua:69-92`). What it
+`backports` config (`README.md:575-596`). With it, the Swift rule hands your Swift the SDK's headers, with each API the backports implement lowered to the program's release (`v0.8.10:rules/swift/xmake.lua:69-92`). What it
 does not lower: below an entry's own minimum, and anything the registry calls absent, inert or
 ignored; those keep their `#available`. Which API to take and its status is the skill `backports`.
 

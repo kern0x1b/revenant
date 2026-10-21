@@ -154,7 +154,7 @@ was working. This loads a canvas cleared to red and looks at the screen.
 ```
 
 It prints how much of the page area is red and exits non-zero when the answer is
-`absent`. The screenshot stays in `tests/device/sweep-shots/gl-present.png`.
+`absent`. The screenshot goes to `$HOME/.revenant/cache/<task>/webkit-shots/gl-present.png`.
 
 ## conformance.lua — Khronos' suite, on the phone
 
@@ -211,8 +211,8 @@ is a secure context, and `revtouch` taps the button and then the sheet's Cancel.
 
 It prints what the page saw on load and after cancelling, and exits non-zero
 unless the promise rejects with `AbortError`, which is what the specification
-asks for when the sheet is dismissed. The screenshot of the open sheet stays in
-`tests/device/sweep-shots/share-sheet.png`.
+asks for when the sheet is dismissed. The screenshot of the open sheet goes to
+`$HOME/.revenant/cache/<task>/webkit-shots/share-sheet.png`.
 
 ## sweep.lua — the same engine against the web as it is served
 
@@ -238,7 +238,7 @@ is served out of this directory.
 | `PAINTED` | how much of the page area the screenshot drew, `blank` under 1% |
 | `DIRTY` | the process's dirty memory, which is what jetsam judges by |
 
-Screenshots go to `tests/device/sweep-shots/` (gitignored), so a verdict that
+Screenshots go to `$HOME/.revenant/cache/<task>/webkit-shots/`, so a verdict that
 looks wrong can be looked at.
 
 **The device is not a Unix box.** It carries `sed`, `grep`, `xargs`, `cat`, `ls`,

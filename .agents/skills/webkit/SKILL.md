@@ -39,9 +39,9 @@ The project is `frameworks/WebKit/`. `docs/guides/webkit/contributing.md` maps t
 ## Test
 
 - Host, on this Mac: `./xmakew f -P . --webkit_host_tests=y`, then `./xmakew test -P .` (`icu-sanity`, `icu-locales`).
-- Batteries on the phone: `./xmakew l frameworks/WebKit/tests/run-batteries.lua [BATTERY...]` runs `tests/js` under `jsc` with the engine just built.
+- Batteries on the phone: `./xmakew l frameworks/WebKit/tests/device/run-batteries.lua [BATTERY...]` runs `tests/device/js` under `jsc` with the engine just built.
 - Device pages: `./xmakew l frameworks/WebKit/tests/device/run.lua [HOST] [--port N]` loads each test page in Safari on the phone and prints its verdict. HOST is this Mac's address as the phone reaches it.
-- Other device checks (`gl-present.lua`, `gl-frame-rate.lua`, `share-sheet.lua`, `conformance.lua`, `sweep.lua`) are in `tests/device/`; its README says what each one measures.
+- Other device checks (`gl-present.lua`, `gl-frame-rate.lua`, `share-sheet.lua`, `conformance.lua`, `sweep.lua`) are in `tests/device/`; `docs/reference/webkit/tests.md` says what each one measures.
 - After a change to the JavaScriptCore patches, run the batteries as well as the pages. Pages rarely keep a function hot enough to reach DFG, so they can pass while every OSR entry into DFG code crashes.
 - Ground truth for rendering: the stock engine renders modern Google and YouTube pages broken, and the port renders them.
 - The Settings pane cannot be scrolled remotely. Move a row to the top to inspect it, or have someone at the phone scroll.

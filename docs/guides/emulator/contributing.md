@@ -52,5 +52,5 @@ covers the build, the options and a boot.
 - Commits: a plain imperative subject, and a body that says why, with the writing agent's own `Co-Authored-By:`
   trailer.
 - No personal data in tracked files: no device addresses, host names or absolute paths.
-- Version numbers are the emulator's own, from `v0.1.0`. [The changelog](../../reference/emulator/changelog.md)
+- Version numbers are the emulator's own, from `v0.1.0`.
   records every release.
