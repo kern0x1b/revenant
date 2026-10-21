@@ -11,7 +11,7 @@ So the module splits the two halves and implements each in the place it belongs:
 
 | the framework's half | this module's answer |
 | --- | --- |
-| **the datastore** - a service that records donations, display counts and invalidations | `Tips.Store`: a plist in the app's own Application Support ((a workflow file kept outside the repository)), read and written through `PropertyListSerialization`; the invalidations survive a relaunch, which is what the framework's own store does |
+| **the datastore** - a service that records donations, display counts and invalidations | `Tips.Store`: a plist in the app's own Application Support (`revenant-tipkit/tips.plist`), read and written through `PropertyListSerialization`; the invalidations survive a relaunch, which is what the framework's own store does |
 | **the rules** - `DonationFilter`, `DonatedWithin`, `LargestSubset`, `SmallestSubset`, combined with `&&` or `\|\|` | real: each condition is evaluated over the donations the app has sent, the operators compare as they are named (`equal` … `greaterThanOrEqual`), and a subset condition counts the groups the donations fall into |
 | **the eligibility** - `shouldDisplay`, `status`, the display count, the display duration, the display frequency | real: not invalidated, every rule holds, the frequency has passed, the options' count and duration allow it, and `status` is `pending`, `available` or `invalidated` over the same store |
 | **the presentation** - a popover the system animates over the app's views | the app's own: `TipUIPopoverViewController` is a real `UIViewController` that loads a `TipUIView` as its view and the app presents it over its own controller; `TipUIView` is a real `UIView` that sizes itself, rounds its corners and draws with the release's own drawing; the collection view and the reusable view are real `UICollectionViewCell`/`UIView` for an app that draws its tip in a list |
@@ -32,7 +32,7 @@ What is *not* there and why:
 ## What the host differential found, and the three rows that are declared but unreachable
 
 `MacOSX27.sdk` carries `TipKit.framework`, so this module's differential ran against Apple's own
-(`the host-differential writeup, **not kept**; its results are in the facts beside this`, (a workflow file kept outside the repository)): the same probe against Apple's
+(`the host-differential writeup, **not kept**; its results are in the facts beside this`, `.agent-work/host/tipkit-diff.txt`): the same probe against Apple's
 `TipKit` and against this module built as `RevenantTipKit`, 37 lines each, **37 of 37 identical** after
 the module name is normalised. What it changed:
 
@@ -70,7 +70,7 @@ the other side (`input.value` is how many, `input.op` is which way) and the key 
 `RevenantDonationCompare` — which already compares numerically — answers it. That is what moved
 TipKit from 245 to **247 of 321 placed**.
 
-**What the remaining 73 rows are** ((a workflow file kept outside the repository),
+**What the remaining 73 rows are** (`.agent-work/handoffs/2026-09-28-ledger-swift-digester-naming.md`,
 classifier (the row classifier, since removed), run against the digester's own dump):
 
 | how the digester prints it | rows | whose work it is |
@@ -84,5 +84,5 @@ So the real gap for this band is **14 rows**, and 13 of them are the `SwiftUI.Vi
 (`View.popoverTip(_:arrowEdge:action:)` and its two siblings, `tipImageStyle` ×3, `tipViewStyle`,
 `tipAnchor`, `tipBackground`, `tipBackgroundInteraction`, `tipCornerRadius`, `tipImageSize`), which
 are the SwiftUI band's: this module draws its popover in `UIView` and `UIViewController` instead, as
-`docs/reference/backports/TipKit/TipKit/Rendering.md` says at the top. Counting the four normalisations the ledger can make,
+`facts/TipKit/Rendering.md` says at the top. Counting the four normalisations the ledger can make,
 this module is at **247 + 59 = 306 of 321**.

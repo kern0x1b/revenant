@@ -62,7 +62,7 @@ For the user who asks what waiting would bring, and only as SwiftUI's own accoun
 by this plugin:
 
 - It targets iOS 6 on armv7, with Revenant's Swift runtime carried in the app.
-- Its ledger of what is implemented, ignored or simplified is `frameworks/SwiftUI/README.md` in that
+- Its ledger of what is implemented, ignored or simplified is `SwiftUI/README.md` in that
   repository (in Russian).
 - By its own count against Apple's SwiftUI interface for iOS 16.4: of 4740 public declarations,
   3233 (68%) are callable as Apple writes them, 314 (7%) exist with a different signature, 927

@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `GeometryEffect`, `Animation.repeatForever` and `repeatCount`.
 - Every overload of `alert` and `confirmationDialog`, and presentation by item (`alert(item:)`, `actionSheet(item:)`,
   `fullScreenCover(item:)`, `popover(item:)`).
-- (a file of an earlier layout, not in the repository) and (a file of an earlier layout, not in the repository): a declaration-level diff against Apple's SwiftUI interface.
+- `bridge/api-surface.sh` and `bridge/api-diff.py`: a declaration-level diff against Apple's SwiftUI interface.
 - Real toolbars: every placement (`principal` becomes the title, `bottomBar` and `status` the toolbar, several items per
   side in declared order), custom-view bar items for anything that is not a plain text button, `ToolbarItem(id:)`, and
   `showsByDefault`.
@@ -66,7 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - `swipeActions` on both edges, with colours (`.tint`) and `allowsFullSwipe`, handed to the table as UIKit's own
   contextual actions when the backports provide them (looked up at run time; stock iOS 6 keeps its Delete button). Checked
   against stand-in classes; not yet on a phone with the backports.
-- (a file of an earlier layout, not in the repository): the closed list of Apple's types that iOS 6 cannot have, each with its reason; the declaration diff counts them apart from the work still to do.
+- `bridge/not-applicable.txt`: the closed list of Apple's types that iOS 6 cannot have, each with its reason; the declaration diff counts them apart from the work still to do.
 - `NavigationStack` is a stack of its own: `NavigationStack(path:)` with a `NavigationPath` or a typed array,
   `NavigationLink(value:)` adds to the path, `navigationDestination(for:)` shows the screen for a value, and the back
   button removes it (before, it was `NavigationView` under another name).
@@ -74,7 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `Picker(selection:label:content:)`, the closure forms of `NavigationLink`, `Section` and `GestureState` forms,
   `Menu(primaryAction:)`.
 - `searchable(text:tokens:suggestedTokens:)`: tokens are a row of chips with a cross above the search field, suggested ones show while searching and a tap moves one into the tokens.
-- `device-shots.sh`, `device-crash.py`: install the demo on a phone, render scenarios there, fetch pictures (also of the live screen) and read crash reports; (a file of an earlier layout, not in the repository) holds pictures from an iPhone 4S.
+- `device-shots.sh`, `device-crash.py`: install the demo on a phone, render scenarios there, fetch pictures (also of the live screen) and read crash reports; `docs/device/` holds pictures from an iPhone 4S.
 - The demo can be given real touches on a phone (`--gesture`, the helper of the backports' device tests), links the phone's
   backports library when `BACKPORTS_LIBS` names it, and `List` asks the backports' swipe facade to attach to its table.
 - `.bordered` and `.borderedProminent` buttons are drawn as iOS 6 draws a button (gradient, gloss over the upper half, dark
@@ -98,7 +98,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - `build.sh`, `pkg-env.sh`, `run-emu.sh`, `run-app.sh`, `snapshots.sh`, `perf.sh`, `device-shots.sh`, the API and
   surface shell scripts and the typecheck `run.sh` files, replaced as above; the `swiftuirt` daemon of `rtpkg/`;
-  the committed probe output of `device-run/` and (a file of an earlier layout, not in the repository), which are run output.
+  the committed probe output of `device-run/` and `bridge/gaps14-classified.tsv`, which are run output.
 
 ### Fixed
 

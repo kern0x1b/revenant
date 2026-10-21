@@ -27,7 +27,7 @@ Name each rule as `add_rules("@addon/revenant/<rule>")` (`v0.8.10:rules/<rule>/x
 | `swift` | none; added next to one of the above | — | compiles the `.swift` files (skill `xmake-swift`) |
 | `check` | `phony`, not built by default | — | nothing. `xmake check` runs it on the Mac |
 
-- Every rule except `check` depends on the `apple-ios` rule (`toolchain/rules/apple-ios/xmake.lua`). That
+- Every rule except `check` depends on the `apple-ios` rule (`rules/apple-ios/xmake.lua`). That
   rule sets the `apple-ios` toolchain, refuses a target whose project has no `apple_minimum` or no
   `includes("@addon/revenant/apple-ios")`, and refuses a checkout nested in another project unless
   run with `xmake -P .`. You never add it yourself.
@@ -53,7 +53,7 @@ to the `xmake.lua` that declares the target.
 | `revenant.install` | `app`, `daemon`, `tweak` | the install folder on the device | `rules/*/xmake.lua` |
 | `revenant.libraries` | `daemon`, `tweak` | packages whose shared libraries it loads, placed in `/usr/lib/revenant/<Package>/` | `modules/apple/platform.lua:330-398` |
 | `tweak.filter` | `tweak` | the MobileSubstrate filter plist, installed as `<name>.plist` beside the dylib | `rules/tweak/xmake.lua:25-28` |
-| `swift.module`, `swift.flags` | `swift` | module name; extra `swiftc` options | `toolchain/rules/swift/xmake.lua` |
+| `swift.module`, `swift.flags` | `swift` | module name; extra `swiftc` options | `rules/swift/xmake.lua` |
 | `check.script`, `check.command` | `check` | a script run by the interpreter its extension names (`.sh .rb .pl .js`), or any program, with arguments | `modules/checks.lua:21-37` |
 | `check.files`, `check.pass-files`, `check.needs-files` | `check` | globs of tracked files it concerns; pass the matching files as arguments; stay quiet when none match | `modules/checks.lua:57-85` |
 | `revenant.control` | any | the Debian control file: makes the target part of a package; required for `revenant.libraries` | `modules/packaging.lua:53`, `platform.lua:331` |

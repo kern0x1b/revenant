@@ -31,7 +31,7 @@ mints one.
 
 What *is* the app's own and is real: the attributes, the content state, the stale date, the relevance
 score (clipped to 0...1, as the framework's own initialiser does), the alert's two texts and its
-sound, the dismissal policy, and the errors' domain, codes and sentences. `docs/reference/backports/ActivityKit/ActivityKit/Availability.md`.
+sound, the dismissal policy, and the errors' domain, codes and sentences. `facts/ActivityKit/Availability.md`.
 
 ## The Foundation type it is written in
 
@@ -49,7 +49,7 @@ MIT, the repository's.
 `xmake` resolves these packages out of the shared `~/.xmake` store, and that store takes a
 **machine-wide** lock per package: a second `xmake` that reaches the same package waits, and prints
 `package(swift-runtime) is being accessed by other processes, please wait!` until the first is done.
-So every `xmake` command that touches the store goes through (a workflow file kept outside the repository), one at a time,
+So every `xmake` command that touches the store goes through `coordination/heavy.sh`, one at a time,
 or it hangs:
 
     coordination/heavy.sh xmake f -c -y      # resolve

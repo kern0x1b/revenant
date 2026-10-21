@@ -1,6 +1,6 @@
 # WidgetKit value types, measured
 
-What (a file of an earlier layout, not in the repository) carries, what it was checked against, and where each value comes
+What `files/WidgetKit/Values.swift` carries, what it was checked against, and where each value comes
 from. Measured on 2026-10-17 from the `v-impl-appintents` worktree of the toolchain.
 
 ## What is carried
@@ -50,7 +50,7 @@ The macOS host does not have the accessory cases, so no host value can confirm 5
 ## Measured against the host
 
 The oracle is the macOS host's WidgetKit (macOS 27, Swift 6.4). The probe is
-(a file of an earlier layout, not in the repository), built twice: `swiftc -O main.swift` against the host, and
+`harness/WidgetKit/values/main.swift`, built twice: `swiftc -O main.swift` against the host, and
 `swiftc -DOURS -O main.swift files/WidgetKit/Values.swift` against the file. Both runs print 26
 lines, and they are identical (`diff` exits 0).
 
@@ -76,7 +76,7 @@ line. The probe sees a changed description.
 
 Three types are unavailable on the macOS host: `LevelOfDetail`, `WidgetLocation`, `WidgetMountingStyle`
 (`'X' is unavailable in macOS`, the host's own error). They cannot go in the differential. Their
-values come from the 26.2 declarations and the contract. (a file of an earlier layout, not in the repository) is
+values come from the 26.2 declarations and the contract. `harness/WidgetKit/contract/main.swift` is
 built against the file only, and it prints:
 
     family-raw-accessory accessoryCorner accessoryCircular accessoryRectangular accessoryInline

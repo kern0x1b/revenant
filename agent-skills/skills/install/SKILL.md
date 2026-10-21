@@ -160,7 +160,7 @@ the project it shows whichever version was installed last. The first configure m
 ## 7. Record it
 
 In `PROJECT.md` under `## Progress`, the install line: the pin (`revenant-repo-<X>` / `v<X>`), the
-`xmake addon --list` line, (a workflow file kept outside the repository), and whether the compiler was built or found.
+`xmake addon --list` line, `.logs/configure.log`, and whether the compiler was built or found.
 Commit `xmake.lua`, `xmake-requires.lock` and `xmake-addons.lock` if the project is a git
 repository; keep `build/` and `.xmake/` out of it.
 

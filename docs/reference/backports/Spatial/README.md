@@ -1,6 +1,6 @@
 # Spatial: what is built here, and what is measured
 
-(a file of an earlier layout, not in the repository) is the source of the `Spatial` module `xmake.lua` builds
+`packages/s/swift-runtime/files/Spatial` is the source of the `Spatial` module `xmake.lua` builds
 into `libswiftSpatial.dylib`, for a release that has no Swift module of its own: the SDK carries
 Spatial for arm64 only, and every release this runtime targets is armv7. The five templates are
 gyb's, and each writes both scalars, because every type has a `Float` twin that differs only in the
@@ -10,7 +10,7 @@ scalar.
 
 `swiftc -target armv7-apple-ios6.1.3 -emit-module -emit-object` over the generated sources, with
 the recipe's own flags, against the armv7 standard library built in
-(a workflow file kept outside the repository) (Swift, SwiftOnoneSupport and the supplemental
+`toolchain/.agent-work/swift-study/full-ios/rd` (Swift, SwiftOnoneSupport and the supplemental
 libraries for `armv7-apple-ios`, plus `layouts-armv7.yaml`) and the compiler's own `clang`,
 `apinotes`, `module.modulemap` and the study's `shims`: EXIT 0, `Spatial.swiftmodule` 1262020
 bytes and `Spatial.o` 1121024 bytes written. The recipe's install path itself is not run here: no
@@ -35,7 +35,7 @@ host's own Foundation hides both:
 `tests/backports/host/spatial` builds one file of 943 values twice - against Apple's
 Spatial.framework and against this module - and compares them number by number. It is **red**:
 **940 agree, 3 differ**, so nothing in this module is claimed verified and no registry row is
-written for it ((a workflow file kept outside the repository)).
+written for it (`registry/Spatial.json`).
 
 Closed against it, each one a measured difference:
 
@@ -92,5 +92,5 @@ does not declare: `AffineTransform3D.applying`, `ProjectiveTransform3D.matrix3x3
 `Rotation3D.affineTransform`, `Rotation3D.isUnit`, `Rotation3D.rotation(to:)`, `EulerAngles.vector`,
 `Rect3D.mid`, `Rect3D.merged`, `Ray3D.contains`, `Point3D.uniformlyScaled`, `Vector3D.translated`,
 `SphericalCoordinates3D.isZero`, `Vector3D.vector`/`simd`, and `ProjectiveTransform3D.scaleComponent`
-as a `SIMD4` where Apple's is a `Size3D`. Those are the names rule R4 of (a file of an earlier layout, not in the repository)
+as a `SIMD4` where Apple's is a `Size3D`. Those are the names rule R4 of `.agents/skills/patch-merge`
 section 4 is about: a name no SDK header declares.

@@ -79,7 +79,7 @@ One module: the core, the Dispatch scheduler and the Foundation integration fold
 - `DispatchTime.distance(to:)`, which the runtime's Dispatch overlay (Swift 5.4.3) lacks and the
   recipe adds for the scheduler (recipe `:53-55`, README `:560-562`).
 
-Combine's own account ((a file of an earlier layout, not in the repository) at `f5fe6511`): its probe of the surface above passes
+Combine's own account (`docs/TEST-RESULTS.md` at `f5fe6511`): its probe of the surface above passes
 on iOS 6.1.3 armv7 on an iPhone 4S and an iPad 2; the upstream suite in emulation passes 1448 of
 1453 tests. Of the five that do not, two are the stride of §4, and one (`testRecordDecode`) crashed
 in the runtime's Foundation overlay while bridging a dictionary during a JSON decode: check a

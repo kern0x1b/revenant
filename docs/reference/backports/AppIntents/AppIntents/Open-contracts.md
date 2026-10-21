@@ -78,7 +78,7 @@ rows are `missing` by the truth and belong to the Foundation port.
 ## 5. Rows the digester prints under another name — 106 rows
 
 Documented once, with the five normalisations and the per-module counts, in
-(a workflow file kept outside the repository). Of the 106, 68 are
+`.agent-work/handoffs/2026-09-28-ledger-swift-digester-naming.md`. Of the 106, 68 are
 `IntentParameter.init`'s generic parameter list, which the digester does not print at all; the rest are
 `==(a:b:)`→`==(_:_:)`, `init?(coder:)`→`init(coder:)`, `subscript(keyPath:)`→`subscript(_:)` and `~=`.
 Of the families below, the comparators (`ContainsComparator` ×5, the three other comparators ×6) and

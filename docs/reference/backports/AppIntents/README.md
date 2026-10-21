@@ -33,7 +33,7 @@ no live activity. Every API for those exists here, and each one is the port's ow
 | show a confirmation, a choice or a dialog | the in-process handler `IntentConfirmationRequest.handler` / `IntentChoiceRequest.handler` answers; with none, the run continues as the caller asked | `IntentResult.swift` |
 | set a focus filter | `current` is nothing, which is what a device with no focus filter answers | `SystemIntents.swift` |
 | open a URL through LaunchServices | the port's own `RevenantURL.handler`; the open is recorded and nothing else | `URLRepresentations.swift` |
-| expand a macro with the framework's plugin | the declarations are there; a port writes the conformance out | `docs/reference/backports/AppIntents/AppIntents/Macros.md` |
+| expand a macro with the framework's plugin | the declarations are there; a port writes the conformance out | `facts/AppIntents/Macros.md` |
 
 None of these is a silent fake: each is a real value in the port's own store or a real, absent answer,
 and the facts file says which is which.
@@ -43,7 +43,7 @@ and the facts file says which is which.
 `LocalizedStringResource` is carried inside the module (`LocalizedStringResource.swift`), because the
 port's Foundation is the swift-5.4.3 overlay and predates the type, and AppIntents' entire API is
 written in terms of it. The Foundation band owns the canonical copy
-((a workflow file kept outside the repository), 24 rows); when it lands, that one file goes away and
+(`coordination/corpus/ledger/Foundation.tsv`, 24 rows); when it lands, that one file goes away and
 nothing else here changes.
 
 `AttributedString`, `Measurement` and `Calendar.RecurrenceRule` are conformed to only when the runtime
@@ -66,7 +66,7 @@ MIT, the repository's. `LICENSE` is the one at the root of the repository, copie
 `xmake` resolves these packages out of the shared `~/.xmake` store, and that store takes a
 **machine-wide** lock per package: a second `xmake` that reaches the same package waits, and prints
 `package(swift-runtime) is being accessed by other processes, please wait!` until the first is done.
-So every `xmake` command that touches the store goes through (a workflow file kept outside the repository), one at a time,
+So every `xmake` command that touches the store goes through `coordination/heavy.sh`, one at a time,
 or it hangs:
 
     coordination/heavy.sh xmake f -c -y      # resolve

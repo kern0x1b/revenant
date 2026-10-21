@@ -1,6 +1,6 @@
 # The next whole family: the census, the pick, and the order — before any code
 
-The header decides the rows: (a workflow file kept outside the repository) carries **80**. This is the
+The header decides the rows: `coordination/corpus/ledger/AppIntents.tsv` carries **80**. This is the
 census of what is *uncarried* per family, ordered by size, with what each family's rows actually are,
 so the pick is a consequence of the table and not a preference. **No code in this commit.**
 

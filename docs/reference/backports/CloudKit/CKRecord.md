@@ -6,7 +6,7 @@ type `CloudKit.CKRecord`) and the CKRecord group, measured on 2026-10-17 from th
 
 ## The probe
 
-(a workflow file kept outside the repository) (scratch, not committed):
+`.agent-work/runs/v-impl-swift-apps/ckrecord/probe.swift` (scratch, not committed):
 
     import CloudKit
     let r = CKRecord(recordType: "Note")

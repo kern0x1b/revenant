@@ -62,7 +62,7 @@ placed before only because it was an empty refinement, with no member of its own
 
 the row classifier (since removed) read the `-dump-sdk` dump of the built module and
 `the missing-rows list, **regenerated** from the corpus ledger and a digester dump, not kept` and sorts every row; the writeup for the ledger band is
-(a workflow file kept outside the repository). Of the 95:
+`.agent-work/handoffs/2026-09-28-ledger-swift-digester-naming.md`. Of the 95:
 
 | how the digester prints it | rows | whose work it is |
 | --- | --- | --- |
@@ -103,7 +103,7 @@ nothing this module does not have.
 
 `340 - 100 - 0 = 240` is this module's placement, measured with the toolchain's own
 `swift-api-digester -dump-sdk` of the module built for `armv7-apple-ios6.1.3` against
-(a workflow file kept outside the repository) (340 rows), and it is the same number the kits' run
+`coordination/corpus/ledger/WidgetKit.tsv` (340 rows), and it is the same number the kits' run
 directory's table carries with its `<F>-missing.tsv` beside it. The rule is stated there: `rows -
 missing - wrong-kind = placed`, every line checked against the list beside it rather than written from
 memory, because a table written from memory drifts (TipKit once read 247/73 while its own TSV held 75).

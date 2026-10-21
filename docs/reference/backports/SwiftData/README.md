@@ -9,7 +9,7 @@ The storage is the release's own Core Data - `NSPersistentContainer` and
 and this package is the SwiftData API as a layer over it.
 
 What is measured about that substrate, and what the port does and does not have, is in
-`docs/reference/backports/SwiftData/Substrate.md`. Two things a caller should read there first: a Swift module
+`facts/SwiftData/Substrate.md`. Two things a caller should read there first: a Swift module
 cannot be built for the 4.3 band (the runtime's own `Swift` module has a floor of iOS 6.0, because
 every Core Data backport entry has `minimum: 6.0`), and `FetchDescriptor`'s predicate and sort
 order are `Foundation.Predicate` and `Foundation.SortDescriptor`, which arrive with
@@ -32,20 +32,20 @@ the expansion produces.
 **What is not done is the expansion, not the API.** `SwiftDataMacros` - the host executable
 `@Model` and the rest expand through - is not written, and it is waiting on `revenant@swift-syntax`
 (6ae40d50), which publishes the host compiler and the swift-syntax build a plugin is compiled
-against. The rule that builds a plugin from sources is `toolchain/rules/macro/xmake.lua`, from that series;
+against. The rule that builds a plugin from sources is `rules/macro/xmake.lua`, from that series;
 this package will name it and nothing more.
 
 Built, measured: `swiftc -target armv7-apple-ios6.1.3` over the whole module, the swift-runtime
 built with the Core Data backports and swift-foundation's `FoundationEssentials` and
 `FoundationInternationalization` on the search path: **0 errors**, a `Mach-O object arm_v7` of
 **895464 bytes, 2836 defined and 433 undefined symbols**, the ten swift-foundation ones named in
-`docs/reference/backports/SwiftData/Substrate.md` and in `on_test`. `-wmo -c` on its own writes that object;
+`facts/SwiftData/Substrate.md` and in `on_test`. `-wmo -c` on its own writes that object;
 the bitcode wrapper an earlier run produced came from asking for the module interface in the same
 invocation, and a `-emit-library` link of it "succeeded" into a 16428-byte library with **zero**
 defined symbols - which is how the check that now prints the counts came to exist.
 
 The link is **not** finished, and for one reason only. The 433 undefined symbols of this build, as
-`frameworks/Backports/tests/SwiftData/harness/symbols.lua` prints them, and they add up:
+`harness/symbols.lua` prints them, and they add up:
 
 | count | what it is waiting for |
 | --- | --- |
@@ -64,7 +64,7 @@ The **11** swift-foundation ones are 8 + 3: `Predicate`, `SortDescriptor`, `Date
 swift-foundation's, and f25214c6's run output is its typecheck-only `check.sh` path, so
 `lib_FoundationEssentials.dylib` does not exist anywhere. Every other import of this module resolves
 against the runtime and the Core Data backports. The ten are named one by one in
-`frameworks/Backports/tests/SwiftData/harness/symbols.lua`, and `on_test` fails when one of them stops being undefined or when an
+`harness/symbols.lua`, and `on_test` fails when one of them stops being undefined or when an
 eleventh appears.
 
 **Which build verifies this package.** `swift-data` is in no `LIBRARIES` and no gate config, so
@@ -73,7 +73,7 @@ and they are different jobs:
 
 - the **armv7 build** is `./xmakew l -P . frameworks/Backports/tests/SwiftData/harness/build.lua <release>`, which runs the flags
   `modules/apple/swift.lua runtime_flags` builds, compiles the whole module, hands the object to
-  `frameworks/Backports/tests/SwiftData/harness/symbols.lua` for the counts, and links it against a built
+  `harness/symbols.lua` for the counts, and links it against a built
   `libCoreDataBackports.dylib`. Where the toolchain, the runtime and swift-foundation's two modules
   are is a fact about one machine's store and not about the package, so the script takes them in
   the environment and **names every variable it needs when one is missing**. At this tip, for
@@ -106,4 +106,4 @@ a program that writes `@Model` needs `SwiftDataMacros`.
 The differential so far is one case, and it is measured on both sides: `.agent-work/probe/model/
 MissingValue.swift` is compiled against Apple's SwiftData on the host and typechecked against this
 module for armv7, and the host's answer to a value the schema requires and the row does not hold
-is a trap with those words - see `docs/reference/backports/SwiftData/Substrate.md`.
+is a trap with those words - see `facts/SwiftData/Substrate.md`.

@@ -28,7 +28,7 @@ carried into the program that ships to the device.
 | [lzfse](https://github.com/lzfse/lzfse) — the LZFSE and LZVN codec behind `COMPRESSION_LZFSE` in the Compression backport, unmodified, built with its symbols hidden | `88e2d2788b4021d0b2eb9fe2d97352ae9190f128` (tag `lzfse-1.0`) | BSD-3-Clause; the licence is installed with the package under `licenses/LICENSE` | `packages/l/lzfse` |
 | [zlib](https://github.com/madler/zlib) — the raw deflate codec behind `COMPRESSION_ZLIB` in the Compression backport, unmodified, built as `libzcodec.a` so the system `libz` is not linked | `v1.3.2` (`da607da739fa6047df13e66a2af6b8bec7c2a498`) | Zlib; the licence is installed with the package under `licenses/LICENSE` | `packages/z/zlib` |
 | [LZ4](https://github.com/lz4/lz4) — the block codec behind `COMPRESSION_LZ4_RAW` and the blocks of `COMPRESSION_LZ4` in the Compression backport, `lib/` only, unmodified, built with its symbols hidden | `v1.9.2` (`fdf2ef5809ca875c454510610764d9125ef2ebbd`) | BSD-2-Clause; the licence is installed with the package under `licenses/LICENSE` | `packages/l/lz4` |
-| [xz](https://github.com/tukaani-project/xz) — the liblzma subset behind `COMPRESSION_LZMA` in the Compression backport (the LZMA1 and LZMA2 coders, the xz container, the CRC32, CRC64 and SHA-256 checks), unmodified sources, built with its symbols hidden and a configuration header of this repository ((a file of an earlier layout, not in the repository), derived from the upstream's `dos/config.h`) | `v5.8.4` (`d3e650e63c110e830fd5391e7f8b45df0b91d3da`) | 0BSD; the licence is installed with the package under `licenses/COPYING.0BSD` | `packages/x/xz` |
+| [xz](https://github.com/tukaani-project/xz) — the liblzma subset behind `COMPRESSION_LZMA` in the Compression backport (the LZMA1 and LZMA2 coders, the xz container, the CRC32, CRC64 and SHA-256 checks), unmodified sources, built with its symbols hidden and a configuration header of this repository (`packages/x/xz/config.h`, derived from the upstream's `dos/config.h`) | `v5.8.4` (`d3e650e63c110e830fd5391e7f8b45df0b91d3da`) | 0BSD; the licence is installed with the package under `licenses/COPYING.0BSD` | `packages/x/xz` |
 
 ## The compiler, linker, signer and SDK
 
@@ -61,11 +61,11 @@ into the port binary that ships to a device.
 
 One third-party source is held in this repository: the Core ML model schema, kept as
 the reference the `createml` package's Swift codec follows. Nothing is generated from
-it, and nothing from it is linked into a port ((a file of an earlier layout, not in the repository)).
+it, and nothing from it is linked into a port (`packages/c/createml/proto/README.md`).
 
 | Component | Version | License | Where |
 | --- | --- | --- | --- |
-| The Core ML model schema (`Model.proto`, `FeatureTypes.proto`, `Parameters.proto`, `DataStructures.proto`, `TreeEnsemble.proto`, `NeuralNetwork.proto`), from coremltools | `apple/coremltools`, `mlmodel/format/` | BSD-3-Clause, the notice kept in (a file of an earlier layout, not in the repository) | (a file of an earlier layout, not in the repository) |
+| The Core ML model schema (`Model.proto`, `FeatureTypes.proto`, `Parameters.proto`, `DataStructures.proto`, `TreeEnsemble.proto`, `NeuralNetwork.proto`), from coremltools | `apple/coremltools`, `mlmodel/format/` | BSD-3-Clause, the notice kept in `packages/c/createml/proto/LICENSE.txt` | `packages/c/createml/proto` |
 
 ## First-party
 

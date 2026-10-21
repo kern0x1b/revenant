@@ -1,8 +1,8 @@
 # CSV reading in TabularData: what is measured, and what is carried
 
 Source of every behaviour below: the host's own `TabularData` (macOS 27 SDK, Swift 6.4), run on the same
-bytes. The reader is (a file of an earlier layout, not in the repository); the comparison is
-(a file of an earlier layout, not in the repository), which runs both in one process and fails on any
+bytes. The reader is `files/TabularData/CSVReading.swift`; the comparison is
+`tests/backports/host/createml/csvreading.swift`, which runs both in one process and fails on any
 difference. The declarations are the SDK's, as the spec rows give them
 (`the deleted registry package spec/TabularData/swift.tsv`).
 
@@ -30,7 +30,7 @@ difference. The declarations are the SDK's, as the spec rows give them
     rows past the end names the row asked for and the number of records in the file, the header included.
   - `badEncoding`: a string column (forced) with a cell that is not UTF-8.
   - Dates: a column of date cells reads as a date column, and a forced date column reads each cell through the
-    parsers. The rules, the calendar and the strategies are in (a file of an earlier layout, not in the repository).
+    parsers. The rules, the calendar and the strategies are in `facts/TabularData/DateParsing.md`.
   - `failedToParse` carries the cell as it is in the file, with its quotes (measured on a quoted date cell and a
     quoted integer); its text reads `Cell contents are '...'` when the cell is UTF-8,
     `Cell contents bytes are [...]` when it is not.
