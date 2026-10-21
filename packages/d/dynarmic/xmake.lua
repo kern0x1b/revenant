@@ -22,7 +22,7 @@ package("dynarmic")
     add_configs("test_emit_failure", {description = "Compile the fault-injection hooks of the portable emitter, for tests.", default = false, type = "boolean"})
 
     add_deps("cmake", "ninja", {kind = "binary", host = true})
-    add_deps("boost 1.81.0")
+    add_deps("revenant@boost 1.81.0")
     add_links("dynarmic", "mcl", "fmt")
 
     on_install("macosx|arm64", function (package)

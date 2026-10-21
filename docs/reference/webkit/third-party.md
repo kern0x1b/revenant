@@ -4,7 +4,7 @@ This repository contains no third-party source. Every dependency below is an
 xmake package whose recipe names the upstream release, commit or archive checksum it
 fetches; nothing is vendored. The engine is upstream WebKit at one commit, fetched by
 the `webkit` package, with this port's changes as a series of patches in
-`third_party/webkit/patches`, so WebKit's code and its licenses live upstream rather than here.
+`packages/w/webkit/patches`, so WebKit's code and its licenses live upstream rather than here.
 
 The point of this file is that a reader can tell, without building anything,
 exactly what this project links against and under what terms.
@@ -13,7 +13,7 @@ exactly what this project links against and under what terms.
 
 | Component | Where it comes from | License |
 | --- | --- | --- |
-| WebKit, `main` at 2026-09-14 | `third_party/webkit`: upstream `https://github.com/WebKit/WebKit` at the commit the recipe names; this port's changes are the patches beside it, under WebKit's terms | LGPL-2.1-or-later and BSD-2-Clause, as WebKit ships them: `Source/WebCore/LICENSE-LGPL-2.1`, `Source/WebCore/LICENSE-APPLE`, `Source/JavaScriptCore/COPYING.LIB` |
+| WebKit, `main` at 2026-09-14 | `packages/w/webkit`: upstream `https://github.com/WebKit/WebKit` at the commit the recipe names; this port's changes are the patches beside it, under WebKit's terms | LGPL-2.1-or-later and BSD-2-Clause, as WebKit ships them: `Source/WebCore/LICENSE-LGPL-2.1`, `Source/WebCore/LICENSE-APPLE`, `Source/JavaScriptCore/COPYING.LIB` |
 | ANGLE | inside the WebKit tree, `Source/ThirdParty/ANGLE`; the EAGL backend this port adds lives there under the same terms | BSD-3-Clause, `Source/ThirdParty/ANGLE/LICENSE` |
 
 ## Libraries this operating system cannot supply
@@ -25,15 +25,15 @@ and built for armv7. Each package carries its upstream license file under
 | Component | Version | License | Fetched by |
 | --- | --- | --- | --- |
 | libc++, libc++abi | 23.1.1 | Apache-2.0 with the LLVM exception | `libcxx` package (toolchain) |
-| ICU | 78.3 | Unicode license (ICU) | `third_party/icu` |
+| ICU | 78.3 | Unicode license (ICU) | `packages/i/icu` |
 | OpenSSL | 4.0.2 | Apache-2.0 | `openssl` package (toolchain) |
-| libpsl | 0.23.3 | MIT; the Public Suffix List data it carries is MPL-2.0 | `third_party/libpsl` |
-| libwebp | 1.6.0 | BSD-3-Clause | `third_party/libwebp` |
-| libxml2 | 2.15.4 | MIT | `third_party/libxml2` |
-| libxslt | 1.1.45 | MIT | `third_party/libxslt` |
-| woff2 | its latest commit, 2026-06-29; the last tag is 1.0.2 from 2017 | MIT | `third_party/woff2` |
-| brotli | 1.2.0 | MIT | `third_party/brotli` |
-| wasm3 | 0.9.1-beta.1 | MIT | `third_party/wasm3` |
+| libpsl | 0.23.3 | MIT; the Public Suffix List data it carries is MPL-2.0 | `packages/l/libpsl` |
+| libwebp | 1.6.0 | BSD-3-Clause | `packages/l/libwebp` |
+| libxml2 | 2.15.4 | MIT | `packages/l/libxml2` |
+| libxslt | 1.1.45 | MIT | `packages/l/libxslt` |
+| woff2 | its latest commit, 2026-06-29; the last tag is 1.0.2 from 2017 | MIT | `packages/w/woff2` |
+| brotli | 1.2.0 | MIT | `packages/b/brotli` |
+| wasm3 | 0.9.1-beta.1 | MIT | `packages/w/wasm3` |
 
 ## Tools that build it
 

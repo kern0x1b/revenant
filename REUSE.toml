@@ -58,19 +58,19 @@ SPDX-FileCopyrightText = ["2023-2025 Kyle-Ye", "2026 kern0x1b"]
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
-path = "third_party/webkit/patches/**"
+path = "packages/w/webkit/patches/**"
 precedence = "closest"
 SPDX-FileCopyrightText = ["Apple Inc. and the WebKit contributors", "2006 Samuel Weinig", "2026 Igalia S.L.", "2026 kern0x1b"]
 SPDX-License-Identifier = "LGPL-2.1-or-later AND BSD-2-Clause"
 
 [[annotations]]
-path = "third_party/webkit/patches/0019-WebGL-through-an-ANGLE-backend-on-EAGL.patch"
+path = "packages/w/webkit/patches/0019-WebGL-through-an-ANGLE-backend-on-EAGL.patch"
 precedence = "closest"
 SPDX-FileCopyrightText = ["2026 The ANGLE Project Authors", "Apple Inc. and the WebKit contributors", "2026 kern0x1b"]
 SPDX-License-Identifier = "BSD-3-Clause AND LGPL-2.1-or-later AND BSD-2-Clause"
 
 [[annotations]]
-path = "third_party/dynarmic/patches/0001-Apply-the-emulator-s-dynarmic-arm64-backend.patch"
+path = "packages/d/dynarmic/patches/0001-Apply-the-emulator-s-dynarmic-arm64-backend.patch"
 precedence = "closest"
 SPDX-FileCopyrightText = ["2017 merryhime", "2026 kern0x1b"]
 SPDX-License-Identifier = "0BSD"

@@ -16,7 +16,7 @@ package("webkit-engine")
     add_configs("variant", {description = "system replaces the phone's frameworks beneath Mobile Safari; prefixed renames every class for an application that carries its own engine.", default = "system", type = "string", values = {"system", "prefixed"}})
 
     add_deps("cmake", "ninja", {kind = "binary"})
-    add_deps("webkit", "icu", "brotli", "libpsl", "libwebp", "libxml2", "libxslt", "woff2")
+    add_deps("revenant@webkit", "revenant@icu", "revenant@brotli", "revenant@libpsl", "revenant@libwebp", "revenant@libxml2", "revenant@libxslt", "revenant@woff2")
     add_deps("revenant@openssl", {alias = "openssl"})
     add_deps("revenant@libcxx", {alias = "libcxx"})
     add_deps("revenant@ldid 2.1.5-procursus7+23.gaf86971", {alias = "ldid"})

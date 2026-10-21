@@ -2,7 +2,7 @@
 set -eu
 
 root=$(cd "$(dirname "$0")" && pwd)
-package=$root/third_party/xmake
+package=$root/packages/x/xmake
 recipe=$package/xmake.lua
 
 url=$(sed -n 's/^ *add_urls("\([^"]*\)").*/\1/p' "$recipe")

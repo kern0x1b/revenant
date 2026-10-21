@@ -31,7 +31,7 @@ Xcode is not needed and neither is Theos; `strip`, `otool`, `nm`, `plutil` and
 ## 1. The engine source
 
 The engine is upstream WebKit at one commit of `main` with this port as an ordered series of
-patches, `third_party/webkit/patches/`. The `webkit` package in `third_party/webkit/xmake.lua`
+patches, `packages/w/webkit/patches/`. The `webkit` package in `packages/w/webkit/xmake.lua`
 fetches that commit by hash, as a sparse checkout of the folders the build reads, and applies
 the series with `git apply`; each patch is pinned by its sha256 in the recipe. Nothing of the
 engine is vendored and there is no fork to keep in step.
@@ -43,7 +43,7 @@ with it. How to move the base to a newer upstream commit is in
 ## 2. The libraries iOS 6 cannot supply
 
 Each is an xmake package at its release, built for armv7 and iOS 6 by a recipe in
-`third_party/`, or by the toolchain where every member shares it:
+the package repository, or by the toolchain where every member shares it:
 
 | Package | Version | Why the system copy will not do |
 | --- | --- | --- |
@@ -58,7 +58,7 @@ Each is an xmake package at its release, built for armv7 and iOS 6 by a recipe i
 | `brotli` | 1.2.0 | what woff2 decompresses with |
 | `wasm3` | 0.9.1-beta.1 | the interpreter behind WebAssembly in Safari's compat dylib |
 
-ICU is built with its data trimmed to the languages listed in the install script of `third_party/icu/xmake.lua`.
+ICU is built with its data trimmed to the languages listed in the install script of `packages/i/icu/xmake.lua`.
 
 `libios6compat.a` - the symbols this OS predates, see
 [compatibility.md](../../reference/webkit/compatibility.md) - is this port's own code in `src/compat/`, built by the

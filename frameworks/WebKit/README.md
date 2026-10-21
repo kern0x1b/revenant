@@ -18,7 +18,7 @@ The port is a member of revenant, built from the top of the checkout:
 ./xmakew deb -P .
 ```
 
-The requirements, the whole sequence and the install on the phone are in [build and test](../../docs/guides/webkit/build-and-test.md). The engine is upstream WebKit at a commit of `main` plus the port's patch series, `third_party/webkit/patches`. Every document is in [the index](../../docs/README.md).
+The requirements, the whole sequence and the install on the phone are in [build and test](../../docs/guides/webkit/build-and-test.md). The engine is upstream WebKit at a commit of `main` plus the port's patch series, `packages/w/webkit/patches`. Every document is in [the index](../../docs/README.md).
 
 ## License
 

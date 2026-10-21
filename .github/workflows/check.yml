@@ -28,13 +28,13 @@ jobs:
         id: xmake
         with:
           path: ~/.revenant/cache/xmake
-          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'third_party/xmake/**') }}
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
       - uses: actions/cache/restore@v4
         id: store
         with:
           path: ~/.revenant/cache/xmake-global
-          key: xmake-global-checks-${{ runner.os }}-${{ hashFiles('xmakew', 'third_party/xmake/**', 'packages/**', 'third_party/dynarmic/**', 'third_party/rellume/**', 'third_party/farmdec/**', 'third_party/blocksruntime/**', 'third_party/boost/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua', 'recompiler/xmake.lua', 'toolchain/tests/xmake.lua') }}
+          key: xmake-global-checks-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua', 'recompiler/xmake.lua', 'toolchain/tests/xmake.lua') }}
 
       - uses: actions/cache/restore@v4
         id: ccache
@@ -58,7 +58,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: ~/.revenant/cache/xmake-global
-          key: xmake-global-checks-${{ runner.os }}-${{ hashFiles('xmakew', 'third_party/xmake/**', 'packages/**', 'third_party/dynarmic/**', 'third_party/rellume/**', 'third_party/farmdec/**', 'third_party/blocksruntime/**', 'third_party/boost/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua', 'recompiler/xmake.lua', 'toolchain/tests/xmake.lua') }}
+          key: xmake-global-checks-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**', 'packages/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua', 'recompiler/xmake.lua', 'toolchain/tests/xmake.lua') }}
 
       - uses: actions/cache/save@v4
         if: always()
@@ -70,7 +70,7 @@ jobs:
         if: always() && steps.xmake.outputs.cache-hit != 'true'
         with:
           path: ~/.revenant/cache/xmake
-          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'third_party/xmake/**') }}
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
   backports:
     runs-on: macos-26
@@ -95,7 +95,7 @@ jobs:
         id: xmake
         with:
           path: ~/.revenant/cache/xmake
-          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'third_party/xmake/**') }}
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}
 
       - name: Key the package store
         id: keys
@@ -134,7 +134,7 @@ jobs:
             build/.objs
             build/.deps
             build/iphoneos
-          key: backports-objects-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'packages/**', 'addons/**', 'third_party/**', 'xmake.lua', 'xmakew') }}
+          key: backports-objects-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew') }}
 
       - name: Configure the Backports component
         if: steps.component.outputs.present == 'true'
@@ -192,7 +192,7 @@ jobs:
             build/.objs
             build/.deps
             build/iphoneos
-          key: backports-objects-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'packages/**', 'addons/**', 'third_party/**', 'xmake.lua', 'xmakew') }}
+          key: backports-objects-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'packages/**', 'addons/**', 'xmake.lua', 'xmakew') }}
 
       - name: Upload the Backports libraries
         if: steps.component.outputs.present == 'true'
@@ -235,4 +235,4 @@ jobs:
         if: always() && steps.xmake.outputs.cache-hit != 'true'
         with:
           path: ~/.revenant/cache/xmake
-          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'third_party/xmake/**') }}
+          key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'packages/x/xmake/**') }}

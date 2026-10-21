@@ -22,7 +22,7 @@ package("rellume")
 
     add_configs("llvm", {description = "The version of revenant's llvm package, with its libraries, that rellume is built against.", default = "23.1.3", type = "string"})
 
-    add_deps("farmdec 2022.02.08", {alias = "farmdec"})
+    add_deps("revenant@farmdec 2022.02.08", {alias = "farmdec"})
     on_load(function (package)
         package:add("deps", "revenant@llvm " .. package:config("llvm"), {alias = "llvm", configs = {libraries = true}})
     end)

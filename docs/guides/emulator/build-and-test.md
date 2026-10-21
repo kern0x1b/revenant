@@ -4,7 +4,7 @@
 
 - macOS on Apple silicon, xmake 3.1.2 or later, and a C++20 compiler (Apple clang).
 - Every library comes as an xmake package, installed by the first configure. Dynarmic and Boost come from
-  revenant's `third_party` repository; OpenSSL, libplist and SwiftShader come from Revenant's packages; libpng,
+  revenant's package repository, `packages/`; OpenSSL, libplist and SwiftShader come from Revenant's packages; libpng,
   libjpeg-turbo, the Vulkan headers, loader and memory allocator, and the glslang library (the shader compiler of
   `src/glsl`), come from xmake's. SDL2 (a window) and FFmpeg (compressed audio) are optional.
 - Nothing to install to draw. The build takes SwiftShader (Revenant's `swiftshader` package, a Vulkan driver on the
@@ -29,7 +29,7 @@ and `--emulator_dynarmic_test_emit_failure`, given to `./xmakew f`; `./xmakew f 
 in `tests/guest/dns-probe` is built when `--emulator_guest_rootfs` and `--emulator_armv6_ld` name a root filesystem and an
 ARMv6 linker. Boost is the 1.81.0 release and needs no compiler flag with Apple clang 21.
 
-Through the toolchain the build is the `emulator` package: `./xmakew emulate` builds and runs it.
+Through the toolchain the build is the `emulator` package, which builds the `emulator` target of this checkout in a project of its own, so `xmake emulate` runs the emulator of the tree; `xmake emulate` is the port's task, see [the emulator skill](../../../.agents/skills/emulator-session/SKILL.md).
 
 The program is `build/macosx/arm64/release/emulator`.
 

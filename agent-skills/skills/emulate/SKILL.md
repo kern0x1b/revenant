@@ -40,8 +40,8 @@ launch an app the way a user's tap does; what it can prove about an app is narro
 ## 2. Add the emulator to the project
 
 1. After the `includes("@addon/revenant/apple-ios")` line of `xmake.lua`, add
-   `includes("@addon/revenant/emulate")`. It requires `revenant@emulator` (the emulator, built from
-   source with CMake on first use), `revenant@swiftshader` (its CPU graphics
+   `includes("@addon/revenant/emulate")`. It requires `revenant@emulator` (the emulator, built with xmake
+   from `emulator/` of the checkout on first use), `revenant@swiftshader` (its CPU graphics
    driver) and `revenant@emulator-guest` (the runner that starts your program in the guest).
 2. Configure again so they are installed: `xmake f -p iphoneos -a armv7 -y > .logs/config.log 2>&1`.
 
@@ -52,8 +52,8 @@ Apple's servers and unpacked into `~/.revenant/firmware/rootfs/<device>/<version
 1.2 GB for an iOS 6 iPhone; skill `firmware`), then booted once past its first-boot data migration
 into a **golden image** under `~/.revenant/emulator/golden.noindex/` (about 1.5 GB, about 5 host
 minutes for iOS 6). Every later install and run is an APFS clone of it: seconds and almost no
-space. A golden image is keyed by device, build and the emulator package: a new the toolchain pin that
-brings a new emulator builds a new golden image and removes the old one.
+space. A golden image is keyed by device, build and the emulator package: a changed emulator, which is a new
+package, builds a new golden image and removes the old one.
 
 ## 3. Install the app's packages into the image
 

@@ -12,11 +12,11 @@ package("swift-system")
     for _, patch in ipairs(os.files(os.scriptdir() .. "/patches/*.patch")) do
         table.insert(inputs, patch)
     end
-    local compat = path.join(os.scriptdir(), "..", "..", "a", "apple-compat")
+    local compat = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "src", "apple-compat")
     for _, name in ipairs({"openat", "unlinkat", "fdopendir", "fstatat"}) do
-        table.insert(inputs, path.join(compat, "port", "src", name .. ".c"))
+        table.insert(inputs, path.join(compat, "src", name .. ".c"))
     end
-    for _, file in ipairs(os.files(path.join(compat, "port", "include", "revenant", "*.h"))) do
+    for _, file in ipairs(os.files(path.join(compat, "include", "revenant", "*.h"))) do
         table.insert(inputs, file)
     end
     table.sort(inputs)
@@ -40,7 +40,7 @@ package("swift-system")
         local toolchain = assert(package:toolchains(), "swift-system is built with the apple-ios toolchain")[1]
         toolchain:load()
         local runtime = assert(package:dep("swift-runtime"), "swift-system is compiled against revenant@swift-runtime")
-        local compat = path.join(package:scriptdir(), "..", "..", "..", "packages", "a", "apple-compat")
+        local compat = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "apple-compat")
         local swiftc = assert(table.wrap((runtime:envs() or {}).SWIFT_EXEC)[1], "swift-runtime names no compiler; reinstall it")
         local minimum = toolchain:config("deployment")
         local triple = package:arch() .. "-apple-ios" .. minimum
@@ -56,10 +56,10 @@ package("swift-system")
         end
         local csystem = path.join(tree, "Sources", "CSystem")
         local cflags = {"-target", triple, "-isysroot", sdk, "-miphoneos-version-min=" .. minimum,
-                        "-I", path.join(csystem, "include"), "-I", path.join(compat, "port", "include")}
+                        "-I", path.join(csystem, "include"), "-I", path.join(compat, "include")}
         for _, file in ipairs(table.join(
-                os.files(path.join(compat, "port", "src", "openat.c")), os.files(path.join(compat, "port", "src", "unlinkat.c")),
-                os.files(path.join(compat, "port", "src", "fdopendir.c")), os.files(path.join(compat, "port", "src", "fstatat.c")),
+                os.files(path.join(compat, "src", "openat.c")), os.files(path.join(compat, "src", "unlinkat.c")),
+                os.files(path.join(compat, "src", "fdopendir.c")), os.files(path.join(compat, "src", "fstatat.c")),
                 os.files(path.join(csystem, "shims.c")), os.files(path.join(csystem, "csystem_port.c")))) do
             os.vrunv(toolchain:tool("cc"), table.join(cflags, {"-c", file, "-o", path.join(objects, path.basename(file) .. ".o")}))
         end
@@ -80,7 +80,7 @@ package("swift-system")
         local argv = swift.runtime_flags({architecture = package:arch(), deployment = minimum, sdk = sdk, resources = resources,
                                           module = "SystemPackage"})
         table.join2(argv, {"-swift-version", "6", "-enable-experimental-feature", "Lifetimes", "-D", "SYSTEM_PACKAGE_DARWIN",
-                           "-D", "SYSTEM_PACKAGE", "-I", path.join(csystem, "include"), "-I", path.join(compat, "port", "include"),
+                           "-D", "SYSTEM_PACKAGE", "-I", path.join(csystem, "include"), "-I", path.join(compat, "include"),
                            "-Xfrontend", "-disable-autolinking-runtime-compatibility-concurrency",
                            "-Xfrontend", "-disable-autolinking-runtime-compatibility-dynamic-replacements"}, availability,
                            {"-emit-module", "-emit-module-path", path.join(module, package:arch() .. "-apple-ios.swiftmodule"), "-c"},

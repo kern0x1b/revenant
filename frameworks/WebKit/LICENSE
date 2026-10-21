@@ -24,5 +24,5 @@ SOFTWARE.
 
 The engine this project builds is WebKit, which carries its own licences (LGPL
 2.1 and a two-clause BSD licence). This port's changes to that source are the
-patches in third_party/webkit/patches of revenant, and are covered by those
+patches in packages/w/webkit/patches of revenant, and are covered by those
 licences rather than by the one above. See docs/reference/webkit/third-party.md.

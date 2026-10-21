@@ -8,8 +8,9 @@ package("micro-ecc")
     add_versions("2024.11.14", "541b3a78026420a3e369c4c9281c396b5e531113")
     add_links("micro-ecc")
 
+    local webauth = path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "CloudKit", "webauth")
     local digest = {hash.sha256(path.join(os.scriptdir(), "xmake.lua"))}
-    for _, file in ipairs(os.files(path.join(os.scriptdir(), "port", "**"))) do
+    for _, file in ipairs(os.files(path.join(webauth, "*"))) do
         digest[#digest + 1] = hash.sha256(file)
     end
     add_configs("recipe", {description = "The digest of this recipe and of the files it adds, so a changed flag or a changed wrapper is a different library.", default = hash.strhash128(table.concat(digest, ";")), type = "string", readonly = true})
@@ -23,7 +24,7 @@ package("micro-ecc")
                         "-isysroot", toolchain:config("sdkdir"), "-I" .. os.curdir()}
         local objects = {}
         local sources = {{path = "uECC.c", where = "."},
-                         {path = path.join(os.scriptdir(), "port", "RevenantCKWebAuth.c"), where = path.join(os.scriptdir(), "port")}}
+                         {path = path.join(webauth, "RevenantCKWebAuth.c"), where = webauth}}
         for _, entry in ipairs(sources) do
             local object = path.absolute(path.join("objects", (path.filename(entry.path) .. ".o")))
             os.mkdir(path.directory(object))
@@ -31,7 +32,7 @@ package("micro-ecc")
             table.insert(objects, object)
         end
         os.vrunv("xcrun", table.join({"libtool", "-static", "-o", path.join(package:installdir("lib"), "libmicro-ecc.a")}, objects))
-        for _, header in ipairs({"uECC.h", "uECC_vli.h", "types.h", path.join(os.scriptdir(), "port", "RevenantCKWebAuth.h")}) do
+        for _, header in ipairs({"uECC.h", "uECC_vli.h", "types.h", path.join(webauth, "RevenantCKWebAuth.h")}) do
             os.vcp(header, package:installdir("include"))
         end
         os.vcp("LICENSE.txt", package:installdir("licenses"))
@@ -41,15 +42,15 @@ package("micro-ecc")
         assert(os.isfile(path.join(package:installdir("lib"), "libmicro-ecc.a")))
         assert(os.isfile(path.join(package:installdir("include"), "uECC.h")))
         assert(os.isfile(path.join(package:installdir("include"), "RevenantCKWebAuth.h")))
-        local hashed = #os.files(path.join(os.scriptdir(), "port", "**"))
+        local hashed = #os.files(path.join(webauth, "*"))
         assert(hashed > 0, "the recipe digests the files it adds and found none of them")
         local added = {"RevenantCKWebAuth.c", "RevenantCKWebAuth.h"}
         for _, name in ipairs(added) do
-            assert(os.isfile(path.join(os.scriptdir(), "port", name)), "the recipe adds " .. name .. " and it is not there")
+            assert(os.isfile(path.join(webauth, name)), "the recipe adds " .. name .. " and it is not there")
         end
         assert(hashed == #added, "the digest read " .. hashed .. " files and the recipe adds " .. #added)
-        local header = io.readfile(path.join(os.scriptdir(), "port", "RevenantCKWebAuth.h"))
-        local wrapper = io.readfile(path.join(os.scriptdir(), "port", "RevenantCKWebAuth.c"))
+        local header = io.readfile(path.join(webauth, "RevenantCKWebAuth.h"))
+        local wrapper = io.readfile(path.join(webauth, "RevenantCKWebAuth.c"))
         for name in header:gmatch("%s(Revenant%w+)%s*%(") do
             local defined = wrapper:match("[%a][%w%* ]*" .. name .. "%s*%(")
             if not defined then
