@@ -9,8 +9,12 @@ program=emulateinstall
 installed=/usr/libexec/$program
 mkdir -p "$out"
 
-image=$(grep -rl "org.revenant.emulateinstall" "${HOME}/.revenant/emulator/images.noindex"/*/*/image.json 2>/dev/null |
-        sed 's#/image.json$##' | head -1)
+image_of_project() {
+  grep -rl "org.revenant.emulateinstall" "${HOME}/.revenant/emulator/images.noindex"/*/*/image.json 2>/dev/null |
+    sed 's#/image.json$##' | head -1
+}
+
+image=$(image_of_project)
 if [ -n "$image" ]; then
   echo "the image for this project is already there: $image" >&2
   echo "remove it to run this case against a fresh one, or run it against a device and release whose image" >&2
@@ -28,8 +32,7 @@ if [ -z "$built" ]; then
   echo "the project was not built, so there is nothing to look for in the image; see $out/configure.log" >&2
   exit 1
 fi
-image=$(grep -rl "org.revenant.emulateinstall" "${HOME}/.revenant/emulator/images.noindex"/*/*/image.json 2>/dev/null |
-        sed 's#/image.json$##' | head -1)
+image=$(image_of_project)
 if [ -z "$image" ]; then
   echo "the install wrote no image.json, so it placed nothing it named; see $out/install.log" >&2
   exit 1

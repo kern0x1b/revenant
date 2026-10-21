@@ -44,8 +44,8 @@ What the toolchain is, and why it is built this way, is in [design](../../explan
 - A package takes a dependency by its own name, `package:dep("name")`. A host tool brings its own dependencies,
   and they meet a target's dependencies under the same key, where the later one wins: tdlib once linked a macOS
   libcrypto that way. Keep a host tool, or anything with library dependencies, out of a package other packages
-  depend on. Where a dependency's folder goes to CMake or a linker, use `target_dependency(package, name)` from
-  `modules/apple/dependency.lua`.
+  depend on. Where a dependency's folder goes to CMake or a linker, take the dependency from `package:orderdeps()`
+  whose name, plat and arch match the package.
 
 ## Traps
 

@@ -36,7 +36,7 @@ function task()
         end
         local parent = path.directory(folder)
         if not parent or parent == folder then
-            return path.filename(path.directory(root()))
+            return path.filename(root())
         end
         folder = parent
     end
@@ -82,10 +82,10 @@ local function sdk_in(installdir, version)
                      "iPhoneOS" .. version .. ".sdk")
 end
 
-local function package_sdk(version, install)
-    local scratch = fresh("sdk-resolve")
+function package_of(requirement, install)
+    local scratch = fresh("package-resolve")
     io.writefile(path.join(scratch, "xmake.lua"), string.format("add_repositories(%q)\nadd_requires(%q)\n",
-                                                                 "revenant " .. root(), "iphoneos-sdk " .. version))
+                                                                 "revenant " .. root(), requirement))
     local failure
     local result = try {
         function ()
@@ -96,7 +96,7 @@ local function package_sdk(version, install)
             local start = output:sub(1, 2) == "[\n" and 1 or output:find("\n[\n", 1, true)
             local entries = start and json.decode(output:sub(start)) or {}
             for _, entry in ipairs(entries) do
-                if entry.require == "iphoneos-sdk " .. version and entry.installdir then
+                if entry.require == requirement and entry.installdir then
                     return entry.installdir
                 end
             end
@@ -109,10 +109,10 @@ local function package_sdk(version, install)
     }
     os.tryrm(scratch)
     if failure then
-        raise("workspace: xmake could not resolve revenant's iphoneos-sdk %s package: %s", version, failure)
+        raise("workspace: xmake could not resolve revenant's %s package: %s", requirement, failure)
     end
     if not result then
-        raise("workspace: xmake named no install folder for revenant's iphoneos-sdk %s package", version)
+        raise("workspace: xmake named no install folder for revenant's %s package", requirement)
     end
     return result
 end
@@ -123,7 +123,7 @@ function sdk_package(version, opt)
     if resolved[key] and not opt.install then
         return resolved[key]
     end
-    local folder = sdk_in(package_sdk(version, opt.install), version)
+    local folder = sdk_in(package_of("iphoneos-sdk " .. version, opt.install), version)
     if not os.isfile(path.join(folder, "SDKSettings.json")) then
         raise("workspace: the iphoneos-sdk install is incomplete: %s has no SDKSettings.json; run ./xmakew l -P . "
               .. "toolchain/modules/workspace.lua sdk-package %s --install", folder, version)

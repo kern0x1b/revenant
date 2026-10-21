@@ -72,7 +72,7 @@ The flags it returns force the shim's header into each file.
 
 A package reaches a dependency by the dependency's own name, `package:dep("swift-bootstrap")`, whatever `alias` the port gave it. A miss is a `nil` that fails only where the value is first used.
 
-`package:dep(name)` is keyed by name, so a host tool and a target that depend on the same library meet under one key, and the later one wins. Keep a host tool out of any package that other packages depend on. Where a dependency's folder goes to CMake or a linker, `target_dependency(package, name)` from `modules/apple/dependency.lua` gives the right folder.
+`package:dep(name)` is keyed by name, so a host tool and a target that depend on the same library meet under one key, and the later one wins. Keep a host tool out of any package that other packages depend on. Where a dependency's folder goes to CMake or a linker, the dependency in `package:orderdeps()` whose name, plat and arch match the package is the right one.
 
 ## Checkouts
 
