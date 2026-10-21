@@ -22,6 +22,10 @@ if get_config("tests") == "device" then
     add_requires("revenant@swift 6.4.0", {alias = "swift", system = false})
 end
 
+local install_hints = {
+    ["iphoneos-sdk"] = "install it with ./xmakew l -P . toolchain/modules/workspace.lua sdk-package 16.4 --install",
+}
+
 local function suites(name, list, packages, group)
     target(name)
         set_kind("phony")
@@ -37,6 +41,12 @@ local function suites(name, list, packages, group)
         end
         on_test(function (target, opt)
             local suite = path.filename(opt.name)
+            for _, name in ipairs(packages) do
+                if not target:pkg(name) then
+                    raise("%s is not installed on this machine, so %s cannot run; %s", name, suite,
+                          install_hints[name] or "install it from the requirement of that name in toolchain/tests/xmake.lua")
+                end
+            end
             local arguments = {modules = path.join(toolchain, "modules")}
             if #packages > 0 then
                 table.join2(arguments, {
