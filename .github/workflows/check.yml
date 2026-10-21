@@ -181,6 +181,7 @@ jobs:
           echo "stage exports ends $(date -u +%H:%M:%S)"
           cat "$RUNNER_TEMP/report/exports.txt" | head -40
           cat "$RUNNER_TEMP/report/exports.txt" >> "$GITHUB_STEP_SUMMARY"
+          cp build/generated/backports/exports.txt "$RUNNER_TEMP/report/exports-detail.txt"
 
       - name: Count the implemented members per framework
         if: steps.component.outputs.present == 'true'
