@@ -202,6 +202,15 @@ local AREAS = {
             "@UICellAccessoryDetail", "-[UICellAccessoryDetail actionHandler]",
         },
     },
+    {
+        name = "iOS 7 web view pagination and the TextKit objects of a text view",
+        sources = {"UIWebView+Pagination7.m", "UITextView+TextKit7.m"},
+        members = {
+            "-[UIWebView paginationMode]", "-[UIWebView paginationBreakingMode]", "-[UIWebView pageLength]", "-[UIWebView gapBetweenPages]", "-[UIWebView pageCount]",
+            "-[UITextView initWithFrame:textContainer:]", "-[UITextView textStorage]", "-[UITextView layoutManager]", "-[UITextView textContainer]",
+            "-[UITextView selectable]", "-[UITextView linkTextAttributes]",
+        },
+    },
 }
 
 local function key_of(member)
