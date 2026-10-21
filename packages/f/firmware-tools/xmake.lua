@@ -5,7 +5,7 @@ package("firmware-tools")
     set_license("MIT")
 
     local digests = {}
-    for _, file in ipairs(os.files(path.join(os.scriptdir(), "port", "src", "*"))) do
+    for _, file in ipairs(os.files(path.join(os.scriptdir(), "..", "..", "..", "toolchain", "src", "firmware-tools", "src", "*"))) do
         table.insert(digests, path.filename(file) .. "=" .. hash.sha256(file))
     end
     table.sort(digests)
@@ -13,7 +13,7 @@ package("firmware-tools")
 
     on_install("@macosx", function (package)
         os.mkdir(package:installdir("bin"))
-        os.vrunv("xcrun", {"swiftc", "-O", path.join(package:scriptdir(), "port", "src", "revenant-firmware.swift"), "-o", path.join(package:installdir("bin"), "revenant-firmware")})
+        os.vrunv("xcrun", {"swiftc", "-O", path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "firmware-tools", "src", "revenant-firmware.swift"), "-o", path.join(package:installdir("bin"), "revenant-firmware")})
         os.vcp(path.join(package:scriptdir(), "..", "..", "..", "toolchain", "LICENSE"), package:installdir("licenses"))
     end)
 

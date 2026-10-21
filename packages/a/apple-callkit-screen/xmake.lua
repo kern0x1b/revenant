@@ -4,7 +4,7 @@ package("apple-callkit-screen")
     set_license("MIT")
 
     local digests = {}
-    local sources = table.join(os.files(path.join(os.scriptdir(), "port", "src", "*")), {path.join(os.scriptdir(), "port", "project.lua")})
+    local sources = table.join(os.files(path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "CallKit", "tweak", "*")), {path.join(os.scriptdir(), "port", "project.lua")})
     table.sort(sources)
     for _, file in ipairs(sources) do
         table.insert(digests, path.filename(file) .. "=" .. hash.sha256(file))
@@ -18,7 +18,7 @@ package("apple-callkit-screen")
         local revenant = addon.addons()[addon.dirname("revenant")] or raise("apple-callkit-screen is built with the revenant addon's rules, and no revenant addon is installed")
         local project = path.absolute("tweak")
         os.mkdir(project)
-        os.cp(path.join(package:scriptdir(), "port", "src", "*"), project .. "/")
+        os.cp(path.join(package:scriptdir(), "..", "..", "..", "frameworks", "Backports", "src", "CallKit", "tweak", "*"), project .. "/")
         local template = io.readfile(path.join(package:scriptdir(), "port", "project.lua"))
         io.writefile(path.join(project, "xmake.lua"), (template:gsub("@(%w+)@", {
             repository = path.translate(path.join(package:scriptdir(), "..", "..", "..")),
