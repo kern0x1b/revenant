@@ -17,7 +17,7 @@ Mach-O that a real iOS 6 device (or an emulator) loads and runs as a normal app.
 | `tests/` | Small self-contained test programs and apps, the translator's regression suite. |
 | `tests/perf/` | The on-device translated-versus-native benchmark. |
 
-Rellume, farmdec and BlocksRuntime are packages of `third_party/`, pinned by commit with our changes as patches.
+Rellume, farmdec and BlocksRuntime are packages of the package repository, pinned by commit with our changes as patches.
 Rellume is built for AArch64 only, the one architecture xlate lifts.
 
 The guest keeps its arm64 memory image, rebased below 4 GiB. Code runs natively as armv7. Only the crossings into

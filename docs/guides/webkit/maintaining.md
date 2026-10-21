@@ -13,8 +13,8 @@ breaks it, because nothing upstream will ever tell us.
 
 | | |
 | --- | --- |
-| `third_party/webkit/xmake.lua` | the base: one commit of upstream `WebKit/WebKit` `main`, fetched by hash |
-| `third_party/webkit/patches/` | the product: this port as an ordered series of patches, one per concern, each explaining in its message what it changes and why |
+| `packages/w/webkit/xmake.lua` | the base: one commit of upstream `WebKit/WebKit` `main`, fetched by hash |
+| `packages/w/webkit/patches/` | the product: this port as an ordered series of patches, one per concern, each explaining in its message what it changes and why |
 | the recipe's checksums | one sha256 per patch, so the series that builds is the series that was reviewed |
 
 There is no fork to keep in step and no merge commit to read: base plus series is the
@@ -125,10 +125,10 @@ Moving the base is work in a scratch clone of WebKit, never in the package cache
 
 ```sh
 git clone --filter=blob:none https://github.com/WebKit/WebKit.git webkit && cd webkit
-git switch -c series <base commit from third_party/webkit/xmake.lua>
-git am <revenant>/third_party/webkit/patches/*.patch
+git switch -c series <base commit from packages/w/webkit/xmake.lua>
+git am <revenant>/packages/w/webkit/patches/*.patch
 git rebase --onto <new base> <base commit> series    # with rerere.enabled, so a resolution replays
-git format-patch -N -o <revenant>/third_party/webkit/patches <new base>..series
+git format-patch -N -o <revenant>/packages/w/webkit/patches <new base>..series
 ```
 
 In order, stopping at the first failure that matters:
