@@ -16,8 +16,13 @@ jobs:
   checks:
     runs-on: macos-26
     timeout-minutes: 60
+    env:
+      REVENANT_PREBUILT: kern0x1b/revenant
+      REVENANT_PREBUILT_ONLY: "1"
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/cache/restore@v4
         id: xmake
@@ -25,14 +30,41 @@ jobs:
           path: ~/.revenant/cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'third_party/xmake/**') }}
 
-      - name: Check the comments
-        run: ./xmakew l -P . tools/comments.lua check
+      - uses: actions/cache/restore@v4
+        id: store
+        with:
+          path: ~/.revenant/cache/xmake-global
+          key: xmake-global-checks-${{ runner.os }}-${{ hashFiles('xmakew', 'third_party/xmake/**', 'packages/**', 'third_party/dynarmic/**', 'third_party/rellume/**', 'third_party/farmdec/**', 'third_party/blocksruntime/**', 'third_party/boost/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua', 'recompiler/xmake.lua', 'toolchain/tests/xmake.lua') }}
 
-      - name: Check the layout
-        run: ./xmakew l -P . tools/check.lua layout
+      - uses: actions/cache/restore@v4
+        id: ccache
+        with:
+          path: ~/.revenant/cache/ccache
+          key: ccache-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            ccache-${{ runner.os }}-
 
-      - name: Check the toolchain
-        run: ./xmakew l -P . tools/check.lua toolchain
+      - name: Install the packages
+        id: configure
+        timeout-minutes: 30
+        run: ./xmakew f -P . -y --emulator_vulkan=n
+
+      - name: Run the tests
+        id: tests
+        run: ./xmakew test -P . --output-on-failure
+
+      - name: Save the package store
+        if: always() && steps.configure.outcome == 'success' && steps.store.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.revenant/cache/xmake-global
+          key: xmake-global-checks-${{ runner.os }}-${{ hashFiles('xmakew', 'third_party/xmake/**', 'packages/**', 'third_party/dynarmic/**', 'third_party/rellume/**', 'third_party/farmdec/**', 'third_party/blocksruntime/**', 'third_party/boost/**', 'toolchain/modules/prebuilt.lua', 'emulator/xmake.lua', 'recompiler/xmake.lua', 'toolchain/tests/xmake.lua') }}
+
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: ~/.revenant/cache/ccache
+          key: ccache-${{ runner.os }}-${{ github.run_id }}
 
       - uses: actions/cache/save@v4
         if: always() && steps.xmake.outputs.cache-hit != 'true'

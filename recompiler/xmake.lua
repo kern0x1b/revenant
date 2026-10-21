@@ -1,11 +1,15 @@
+if get_config("component") ~= "" or is_plat("iphoneos") then
+    return
+end
+
 local host = {plat = "macosx", arch = "arm64"}
 local llvm = "23.1.3"
-add_requires("revenant@llvm " .. llvm, table.join(host, {alias = "llvm", configs = {libraries = true}}))
+add_requires("revenant@llvm " .. llvm, {alias = "llvm", configs = {libraries = true}})
 add_requires("rellume 2026.09.10", table.join(host, {alias = "rellume", configs = {llvm = llvm}}))
 add_requires("blocksruntime 2017.10.27", table.join(host, {alias = "blocksruntime"}))
-add_requires("revenant@iphoneos-sdk 16.4", table.join(host, {alias = "iphoneos-sdk"}))
-add_requires("revenant@ld64 956.6", table.join(host, {alias = "ld64"}))
-add_requires("revenant@ldid", table.join(host, {alias = "ldid"}))
+add_requires("revenant@iphoneos-sdk 16.4", {alias = "iphoneos-sdk"})
+add_requires("revenant@ld64 956.6", {alias = "ld64"})
+add_requires("revenant@ldid", {alias = "ldid"})
 add_requireconfs("llvm.iphoneos-sdk", {override = true, version = "16.4"})
 add_requireconfs("rellume.llvm.iphoneos-sdk", {override = true, version = "16.4"})
 
@@ -67,19 +71,37 @@ for _, app in ipairs({{"recompiler_cxxinit", "tests/cxxinit/build.lua"}, {"recom
         set_values("recompiler.script", script)
 end
 
+local function corpus(target, opt)
+    local name = path.filename(opt.name)
+    local check = import("check", {rootdir = path.join(target:scriptdir(), "tests", name), anonymous = true})
+    local passed, errors = true, nil
+    try {
+        function () check(path.join(target:autogendir(), "tests", name), {host_only = true}) end,
+        catch { function (raised) passed, errors = false, raised end }
+    }
+    if not passed then
+        opt.errors = tostring(errors)
+    end
+    return passed
+end
+
 target("recompiler_corpus")
     set_kind("phony")
     set_default(false)
     add_deps("xlate", "xlgen")
     add_packages("blocksruntime", "iphoneos-sdk", "ld64", "ldid")
-    add_tests("jumptable", "tsdscan", "tsdguard", "int128", "ordinal", "weakimport", "classpair", "lse")
-    on_test(function (target, opt)
-        local name = path.filename(opt.name)
-        local check = import("check", {rootdir = path.join(target:scriptdir(), "tests", name), anonymous = true})
-        local ok, errors = try { function () check(path.join(target:autogendir(), "tests", name), {host_only = true}); return true end,
-                                 catch { function (errors) return false, errors end } }
-        if not ok then
-            opt.errors = tostring(errors)
-        end
-        return ok
-    end)
+    add_tests("jumptable", "tsdscan", "tsdguard", "int128", "weakimport", "lse")
+    on_test(corpus)
+target_end()
+
+if get_config("tests") == "device" then
+    target("recompiler_device")
+        set_kind("phony")
+        set_default(false)
+        set_group("device")
+        add_deps("xlate", "xlgen")
+        add_packages("blocksruntime", "iphoneos-sdk", "ld64", "ldid")
+        add_tests("classpair", "ordinal")
+        on_test(corpus)
+    target_end()
+end

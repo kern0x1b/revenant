@@ -21,7 +21,7 @@ package("dynarmic")
 
     add_configs("test_emit_failure", {description = "Compile the fault-injection hooks of the portable emitter, for tests.", default = false, type = "boolean"})
 
-    add_deps("cmake", "ninja", {kind = "binary"})
+    add_deps("cmake", "ninja", {kind = "binary", host = true})
     add_deps("boost 1.81.0")
     add_links("dynarmic", "mcl", "fmt")
 

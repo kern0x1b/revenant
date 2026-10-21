@@ -11,7 +11,11 @@ package("ld64")
     add_resources("956.6", "libtapi",
                   "https://github.com/tpoechtrager/apple-libtapi/archive/fa9443738c1a18accef4244732ec6d6ee97a8133.tar.gz",
                   "cf939c661aa288da773e59acf8ab916bb6c322bf7abe9130c09a66bcc98fdc5a")
-    add_deps("cmake", "ninja", {kind = "binary"})
+    on_load(function (package)
+        if not import("prebuilt", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true}).wanted(package) then
+            package:add("deps", "cmake", "ninja", {kind = "binary"})
+        end
+    end)
 
     local inputs = os.files(path.join(os.scriptdir(), "patches", "*.patch"))
     table.sort(inputs)

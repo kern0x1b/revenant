@@ -37,7 +37,7 @@ With `REVENANT_PREBUILT=<owner>/<repository>` set, a recipe wired to the module 
 Without `REVENANT_PREBUILT`, the module does nothing, and the recipes build exactly as before.
 
 With `REVENANT_PREBUILT_ONLY=1` as well, a missing release is an error instead: `fetch` raises and names the key, and
-nothing is built from source. The `backports` job of `check.yml` sets it, so a build there can never fall back to
+nothing is built from source. The `checks` and `backports` jobs of `check.yml` set it, so a build there can never fall back to
 LLVM or Swift. It changes no key.
 
 The `llvm` and `swift` recipes are wired. To wire another recipe, call `prebuilt.fetch(package)` at the

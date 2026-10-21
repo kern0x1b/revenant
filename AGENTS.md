@@ -45,7 +45,7 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   `toolchain/` is the xmake addon `revenant`, so its `addon.lua`, `includes/`, `modules/`, `plugins/`, `rules/` and `toolchains/` take the shape xmake reads: `plugins/<name>/` holds `xmake.lua` and `main.lua`, `rules/`, `toolchains/` and `includes/` hold `<name>/xmake.lua`, and `modules/` holds Lua files only. The package repository is the top of the checkout, so `packages/<letter>/<name>/` and `addons/<letter>/<name>/` hold `xmake.lua` alone. A recipe in `packages/<letter>/<name>/` holds its `xmake.lua`, the `port/` folder of the sources it builds, and its `patches/` (upstream patches applied in order); nothing else.
 
   A component uses another through the build graph (`add_deps`, or its package by name), never by a path into the
-  other's folder. The layout is checked by `./xmakew l tools/check.lua layout`.
+  other's folder. The layout is checked by `./xmakew test -P . repository/layout`.
 - A change that spans components is one series in revenant, one commit per component it touches.
 - Nothing but the project lives in the revenant folder: no scratch, logs, notes, run output or worktrees. Scratch goes
   to `$HOME/.revenant/cache/<task>/` and is deleted when the task ends.
@@ -70,6 +70,10 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   the revenant addon from `toolchain/` of the checkout; stock xmake would fetch and install the toolchain globally instead.
   Its package store is `$HOME/.revenant/cache/xmake-global` (`XMAKE_GLOBALDIR`). Everything a build can make again is under
   `$HOME/.revenant/cache`, and `./xmakew l tools/clean.lua [--packages | --all]` gives it back; it is in `docs/guides/machine.md`.
-- Before handing a change over: `./xmakew l tools/check.lua layout`, `./xmakew l tools/check.lua <component>` for
-  each component it touches, then that component's gate (the backports gate is gone until `xmake test` replaces it;
-  for the emulator, the skill `emulator-session`).
+- Tests: `./xmakew test -P .` is the one test entry point. It runs every test a host with the prebuilt packages can
+  run (`REVENANT_PREBUILT=kern0x1b/revenant`, `REVENANT_PREBUILT_ONLY=1`), in parallel, and each component's tests are
+  targets named for it, so `./xmakew test -P . 'toolchain_*/*'` or `'repository/*'` runs one component. A test that
+  needs a device, an emulator image or firmware is declared only by `./xmakew f -P . --tests=device`, and it fails
+  naming what it lacks when that is missing.
+- Before handing a change over: `./xmakew test -P .`, then that component's gate (the backports gate is gone until
+  `xmake test` replaces it; for the emulator, the skill `emulator-session`).

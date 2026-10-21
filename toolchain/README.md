@@ -6,7 +6,7 @@ Builds applications and tweaks for legacy Apple platforms with [xmake](https://x
 
     xmake                                   # build a port; every binary is checked as it links
     xmake deb                               # package it as a .deb
-    ./xmakew l tools/check.lua toolchain    # test the toolchain, from the repository root
+    ./xmakew test -P . 'toolchain_*/*'      # test the toolchain, from the repository root
 
 ## Documentation
 

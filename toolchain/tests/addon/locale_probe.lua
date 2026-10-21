@@ -1,5 +1,4 @@
 function main(modules, root)
-    local store = import("store", {rootdir = path.join(modules, "..", "tests", "common"), anonymous = true})
     local macho = import("apple.macho", {rootdir = modules, anonymous = true})
     local debian = import("debian", {rootdir = modules, anonymous = true})
     local emulator = import("emulator", {rootdir = modules, anonymous = true})
@@ -19,13 +18,6 @@ function main(modules, root)
     end
     local function relative(file)
         return path.relative(file, root)
-    end
-
-    for _, digest in ipairs({"Bb", "bB", "aA", "AA", "ab", "Ab"}) do
-        write(path.join(root, "store", "packages", "s", "swift", "6.4.0", digest, "manifest.txt"), digest .. "\n")
-    end
-    for _, install in ipairs(store.installs(path.join(root, "store"), "swift")) do
-        emit("store.installs", relative(install))
     end
 
     for _, name in ipairs(NAMES) do

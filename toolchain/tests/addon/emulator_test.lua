@@ -495,6 +495,11 @@ local function queue_step(emulator, folder, opt, found)
     if #landed == 0 and not os.isdir(path.join(work, "store")) then
         table.insert(found, "emulator_test's xmake addon --install left no store of its own under " .. work .. ", so where it installed is not what XMAKE_GLOBALDIR says")
     end
+    if os.execv(os.programfile(), {"queue", "--help"}, {try = true, curdir = work, envs = envs,
+                                                        stdout = path.join(work, "help.log"), stderr = path.join(work, "help.log")}) ~= 0 then
+        table.insert(found, "the queue step needs the xmake task queue, which the heavy job pool removed from this repository, so xmake has no such task and the step cannot run")
+        return
+    end
     for _, held in ipairs({"", "1"}) do
         for _, case in ipairs({{"/usr/bin/true", 0}, {"/usr/bin/false", 1}}) do
             local code = os.execv(os.programfile(), {"queue", "--", case[1]},
