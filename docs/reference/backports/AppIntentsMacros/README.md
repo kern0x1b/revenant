@@ -52,10 +52,9 @@ from source — never do that either.* Nothing collides in the shared store anyw
 `revenant@swift-syntax` installs under its own recipe digest (the recipe file's hash and the pinned
 commit, since its sources are upstream's and not in this tree).
 
-A gate that builds this should also **bound** its `xmake` calls and close stdin (`</dev/null`), so
-neither a hang nor a prompt can hold a slot again, and it should be launched only when the machine is
-below its load cap — a queued job that waits in heavy.sh is a job holding a slot, which is the thing
-the cap exists to prevent.
+A build that runs this should also **bound** its `xmake` calls and close stdin (`</dev/null`), so
+neither a hang nor a prompt can hold the machine, and it should start only when `uptime` shows the
+machine idle (load1 below 12): two heavy compiles at once make both slower.
 
 ## Where `revenant@swift-syntax`'s products land — measured, not derived
 

@@ -43,8 +43,8 @@ code, and it needs one device compile to settle.
 
 ## The order of work, before any code
 
-1. **One device compile of the module** (a heavy job; launch under `heavy.sh` only at `uptime` load1
-   below 12, and kill the pid if the log says `waiting`). Without it no probe can read the current
+1. **One device compile of the module** (a heavy job: run it alone, with `uptime` load1 below 12).
+   Without it no probe can read the current
    module, because the store's build predates the `IntentItemSection.Builder` typealias.
 2. **Typecheck `probe-intembuilder.swift`** — four member references in the framework's spelling.
    Green places `IntentItem.Builder`'s four rows.
