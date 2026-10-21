@@ -13,7 +13,7 @@ layout is spelled out there:
 | `frameworks/Combine/` | Combine down to iOS 6, armv7 (module `Combine`) |
 | `recompiler/` | static recompiler of arm64 iOS applications into armv7 binaries for iOS 6 |
 | `agent-skills/` | skills for coding agents that build modern apps for old iOS |
-| `frameworks/WebKit/` | a current WebKit built for armv7 (the engine is `third_party/webkit`: upstream at a commit plus the port's patches) |
+| `frameworks/WebKit/` | a current WebKit built for armv7 (the engine is `packages/w/webkit`: upstream at a commit plus the port's patches) |
 
 Names: the repository and the platform are revenant; a folder is named for what it holds (`toolchain/`, `emulator/`,
 `recompiler/`, `agent-skills/`); a group of products is named by its role (`frameworks/`); a member that implements
@@ -28,7 +28,7 @@ consume the toolchain as an xmake repository.
 a member uses another's target with `add_deps`. `./xmakew f -y && ./xmakew` at the top builds everything, `./xmakew
 build <target>` one target, `./xmakew test` the tests.
 
-`xmakew` is the xmake of revenant: the first run builds the xmake pinned in `third_party/xmake` (its url,
+`xmakew` is the xmake of revenant: the first run builds the xmake pinned in `packages/x/xmake` (its url,
 commit and patches, read from that recipe) into `~/.revenant/cache/xmake/<key>`, the key being made of the commit and
 the patches' checksums, and every run executes that build with its arguments. It needs only `sh`, `git`, `make` and
 a C compiler, and builds again when the recipe changes.
@@ -36,7 +36,7 @@ a C compiler, and builds again when the recipe changes.
 | Path | What it is |
 | --- | --- |
 | `xmakew` | the pinned and patched xmake, built on first use (above) |
-| `third_party/<name>/` | an xmake package of third-party code: the upstream by url and commit or checksum, our changes in `patches/` applied in order by `add_patches` |
+| `packages/<letter>/<name>/` | an xmake package: third-party code as the upstream by url and commit or checksum, our changes in `patches/` applied in order by `add_patches`, and the build files of an upstream that has none in `port/` |
 | `tools/layout.lua` | `./xmakew l tools/layout.lua`: the layout of AGENTS.md, which `./xmakew test -P .` runs as `repository/layout` |
 | `tools/publish.lua` | `./xmakew l tools/publish.lua <member>`: a member's history as a repository of its own (below) |
 
@@ -96,4 +96,4 @@ member>`. Building and testing follow each member's own README.
 
 Each member is under the licence in its own folder: the emulator under MPL-2.0 (with its [notice](docs/reference/emulator/notice.md)), every other member under
 MIT. A member that builds on third-party code lists it in its third-party notice, `docs/reference/<member>/third-party.md`; the code itself comes in as a package
-of `third_party/` or of the toolchain. [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md) hold for all members.
+of the package repository (`packages/`) or of the toolchain. [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md) hold for all members.
