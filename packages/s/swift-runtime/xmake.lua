@@ -8,7 +8,6 @@ package("swift-runtime")
     add_versions("6.4.0", "b8189d766d86ad7fc8106787d6ce9e402f38dd72")
 
     add_deps("revenant@swift 6.4.0", {alias = "swift", host = true, private = true, system = false})
-    add_deps("revenant@apple-compat", {alias = "apple-compat"})
 
     local renamed = {"clock_gettime", "clock_getres", "dispatch_get_global_queue", "memset_s", "os_system_version_get_current_version"}
 
@@ -30,6 +29,9 @@ package("swift-runtime")
     }
 
     on_download(function (package, opt)
+        if not package:config("shared") and import("@addon.revenant.prebuilt", {anonymous = true}).fetch(package) then
+            return
+        end
         local checkout = import("@addon.revenant.checkout", {anonymous = true})
         checkout.pinned(opt.sourcedir, sources)
     end)
@@ -46,6 +48,7 @@ package("swift-runtime")
     add_configs("shared", {description = "Install the libraries under absolute install names and leave what a Debian package holding them is written from, which the programs built against this runtime depend on instead of carrying the libraries: the program that depends on it writes and signs that package, so this package needs no host tool.", default = false, type = "boolean"})
 
     on_load("iphoneos", function (package)
+        package:add("deps", "revenant@apple-compat", {alias = "apple-compat"})
         package:add("deps", "revenant@libcxx", {alias = "libcxx", configs = {packaged = package:config("shared") or nil}})
         if package:config("backports_uikit") and not package:config("backports") then
             raise("swift-runtime's backports_uikit config is the application half of the backports config; set backports too")
@@ -78,6 +81,9 @@ package("swift-runtime")
         package:setenv("SWIFT_EXEC", swiftc)
         package:setenv("SWIFT_PLUGIN_PATH", path.join(compiler:installdir("lib"), "swift", "host", "plugins"))
         package:setenv("REVENANT_SWIFT_RUNTIME_MARK", package:data("mark"))
+        if not package:config("shared") and import("@addon.revenant.prebuilt", {anonymous = true}).install(package) then
+            return
+        end
         local parallel = import("@addon.revenant.parallel", {anonymous = true})
 
         local marked = os.getenv("SWIFTRT_PROFILE") and {} or nil
@@ -518,6 +524,9 @@ package("swift-runtime")
             package:setenv("REVENANT_SHARED_PACKAGE", name .. "=" .. cxx .. ";" .. ui .. "=" .. name)
             timed("package")
         end
+        if not package:config("shared") then
+            import("@addon.revenant.prebuilt", {anonymous = true}).pack(package)
+        end
         if marked then
             print("swift-runtime: where the install went, every phase in the order it ran:")
             local total = 0
@@ -527,6 +536,10 @@ package("swift-runtime")
             end
             printf("swift-runtime:   %-26s %8.1fs\n", "total", total)
         end
+    end)
+
+    on_install("@macosx", function (package)
+        raise("%s is the Swift runtime of iOS, so configure the project for iOS before requiring it: ./xmakew f -P . -p iphoneos -a armv7 --component=Swift", package:name())
     end)
 
     on_test(function (package)

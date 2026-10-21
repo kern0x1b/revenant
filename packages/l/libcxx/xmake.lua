@@ -6,7 +6,6 @@ package("libcxx")
 
     add_urls("https://github.com/llvm/llvm-project.git")
     add_versions("23.1.1", "6dfe1677ab8dffbc6ec13d53a1e0215d75147689")
-    add_deps("revenant@apple-compat", {alias = "apple-compat"})
     add_deps("cmake", "ninja", {kind = "binary"})
 
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
@@ -25,7 +24,14 @@ package("libcxx")
     add_ldflags("-nostdlib++")
     add_shflags("-nostdlib++")
 
+    on_load("iphoneos", function (package)
+        package:add("deps", "revenant@apple-compat", {alias = "apple-compat"})
+    end)
+
     on_download(function (package, opt)
+        if not package:config("packaged") and import("@addon.revenant.prebuilt", {anonymous = true}).fetch(package) then
+            return
+        end
         local checkout = import("@addon.revenant.checkout", {anonymous = true})
         checkout.pinned(opt.sourcedir, {{url = opt.url, tag = "llvmorg-" .. package:version_str(),
                                          commit = package:revision(opt.url_alias) or package:commit(),
@@ -36,6 +42,9 @@ package("libcxx")
 
     on_install("iphoneos", function (package)
         import("core.base.semver")
+        if not package:config("packaged") and import("@addon.revenant.prebuilt", {anonymous = true}).install(package) then
+            return
+        end
         local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
         local macho = import("@addon.revenant.apple.macho", {anonymous = true})
         for _, patch in ipairs({"utimensat-told-no.patch", "reexport-when-dyld-can.patch", "one-emulated-tls-runtime.patch", "one-atomic-runtime.patch", "process-wide-compat.patch"}) do
@@ -193,6 +202,13 @@ package("libcxx")
                           metadata = path.join(package:installdir("share"), "shared-packages"), strip = {"-x"}})
             package:setenv("REVENANT_SHARED_PACKAGE", name)
         end
+        if not package:config("packaged") then
+            import("@addon.revenant.prebuilt", {anonymous = true}).pack(package)
+        end
+    end)
+
+    on_install("@macosx", function (package)
+        raise("%s is the C++ runtime of iOS, so configure the project for iOS before requiring it: ./xmakew f -P . -p iphoneos -a armv7 --component=Swift", package:name())
     end)
 
     on_test(function (package)
