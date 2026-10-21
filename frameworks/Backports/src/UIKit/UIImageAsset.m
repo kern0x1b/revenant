@@ -1,5 +1,6 @@
 #import <UIKit/UIKit.h>
 #import <UIKit/UIImageConfiguration.h>
+#import "RevenantImageAsset.h"
 
 typedef struct {
     CGFloat scale;
@@ -86,6 +87,7 @@ static BOOL revenant_ranksAtLeast(RevenantImageVariantRank a, RevenantImageVaria
 {
     if (!image)
         return;
+    revenant_image_set_asset(image, self);
     NSUInteger index = [_keys indexOfObject:key];
     if (index != NSNotFound) {
         _images[index] = image;
@@ -144,7 +146,9 @@ static BOOL revenant_ranksAtLeast(RevenantImageVariantRank a, RevenantImageVaria
     UIImage *image = _images[best];
     RevenantImageVariantTraits matched = revenant_traitsOf(_keys[best]);
     CGFloat scale = matched.scale > 0 ? matched.scale : image.scale;
-    return [UIImage imageWithCGImage:image.CGImage scale:scale orientation:image.imageOrientation];
+    UIImage *variant = [UIImage imageWithCGImage:image.CGImage scale:scale orientation:image.imageOrientation];
+    revenant_image_set_asset(variant, self);
+    return variant;
 }
 
 - (UIImage *)imageWithConfiguration:(UIImageConfiguration *)configuration

@@ -202,6 +202,11 @@ jobs:
           path: build/iphoneos/armv7/release/lib*.dylib
           if-no-files-found: error
 
+      - name: Run the Backports tests
+        if: steps.component.outputs.present == 'true'
+        timeout-minutes: 10
+        run: ./xmakew test -P . "backports_uikit/*" --output-on-failure
+
       - name: Check the exports and count the implemented members
         if: steps.component.outputs.present == 'true'
         timeout-minutes: 10

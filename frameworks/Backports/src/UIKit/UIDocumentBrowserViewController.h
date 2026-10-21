@@ -7,6 +7,7 @@
 @protocol UIDocumentBrowserViewControllerDelegate;
 
 @protocol UIDocumentBrowserViewControllerDelegate;
+@class UTType;
 
 NS_HEADER_AUDIT_BEGIN(nullability, sendability)
 
@@ -52,6 +53,17 @@ API_AVAILABLE(ios(11.0)) API_UNAVAILABLE(watchos, tvos)
     API_DEPRECATED_WITH_REPLACEMENT("transitionControllerForDocumentAtURL:", ios(11.0, 12.0));
 
 @property (copy, nonatomic) NSArray<UIDocumentBrowserAction *> *customActions;
+
+- (instancetype)initForOpeningContentTypes:(nullable NSArray<UTType *> *)allowedContentTypes
+    API_AVAILABLE(ios(14.0));
+
+@property (readonly, copy, nonatomic) NSArray<UTType *> *contentTypesForRecentDocuments API_AVAILABLE(ios(14.0));
+
+@property (assign, nonatomic) BOOL shouldShowFileExtensions API_AVAILABLE(ios(13.0));
+
+@property (copy, nonatomic) NSString *localizedCreateDocumentActionTitle API_AVAILABLE(ios(13.0));
+
+@property (assign, nonatomic) CGFloat defaultDocumentAspectRatio API_AVAILABLE(ios(13.0));
 
 @property (assign, nonatomic) UIDocumentBrowserUserInterfaceStyle browserUserInterfaceStyle;
 

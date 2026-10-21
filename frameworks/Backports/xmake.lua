@@ -3,6 +3,7 @@ option("backports_min_ios", {default = "6.0", showmenu = true,
 
 local ROOT = path.absolute(path.join(os.scriptdir(), "..", ".."))
 local TOOLS = path.absolute(path.join(os.scriptdir(), "tools"))
+local TESTS = path.absolute(path.join(os.scriptdir(), "tests"))
 local SKELETON = path.join(ROOT, "build", "generated", "backports", "skeleton")
 local INSTALL_FOLDER = "/usr/lib/revenant/org.revenant.backports"
 local SRC = path.absolute(path.join(os.scriptdir(), "src"))
@@ -162,6 +163,29 @@ if is_plat("iphoneos") then
                 end
             end)
     end
+end
+
+local function backports_tests(name, scripts)
+    target(name)
+        set_kind("phony")
+        set_default(false)
+        for suite in pairs(scripts) do
+            add_tests(suite)
+        end
+        on_test(function (target, opt)
+            local ok = os.execv(os.programfile(), {"l", "-P", ROOT, path.join(TESTS, scripts[path.filename(opt.name)])}, {try = true, curdir = ROOT})
+            if ok ~= 0 then
+                opt.errors = path.filename(opt.name) .. " failed"
+            end
+            return ok == 0
+        end)
+    target_end()
+end
+
+if is_plat("iphoneos") then
+    backports_tests("backports_uikit", {uikit = "uikit_test.lua"})
+else
+    backports_tests("backports", {generator = "backports_test.lua"})
 end
 
 option("air2cpu", {default = false, showmenu = true,
