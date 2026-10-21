@@ -80,10 +80,13 @@ target("recompiler_corpus")
     on_test(function (target, opt)
         local name = path.filename(opt.name)
         local check = import("check", {rootdir = path.join(target:scriptdir(), "tests", name), anonymous = true})
-        local ok, errors = try { function () check(path.join(target:autogendir(), "tests", name), {host_only = true}); return true end,
-                                 catch { function (errors) return false, errors end } }
-        if not ok then
+        local passed, errors = true, nil
+        try {
+            function () check(path.join(target:autogendir(), "tests", name), {host_only = true}) end,
+            catch { function (raised) passed, errors = false, raised end }
+        }
+        if not passed then
             opt.errors = tostring(errors)
         end
-        return ok
+        return passed
     end)
