@@ -38,9 +38,9 @@ What used to be Python is Lua run by `./xmakew l`; each prints its usage with `-
 
 | Script | What it does |
 | --- | --- |
-| `carry-check.lua` | checks that the patched engine tree still holds what the port needs, against `carry-manifest.txt`; every engine build runs it first |
-| `port-delta.lua` | how much the patch series changes upstream, by area and kind, and how much of it carries the `WEBKIT_IOS6` guard |
-| `carry-audit.lua` | files whose port markers thinned out against a reference tree, after moving the series to a newer base |
-| `symbol-check.lua` | the engine's imported symbols and exported classes against `carry-symbols.txt`, and `--pin` |
-| `required-encodings.lua` | `tests/host/required-encodings.txt`, read from `TextCodecICU.cpp` |
-| `check-cacert.lua` | the application's trust store against the reviewed hash, and `--upstream` |
+| `carry_check.lua` | checks that the patched engine tree still holds what the port needs, against `carry-manifest.txt`; every engine build runs it first |
+| `port_delta.lua` | how much the patch series changes upstream, by area and kind, and how much of it carries the `WEBKIT_IOS6` guard |
+| `carry_audit.lua` | files whose port markers thinned out against a reference tree, after moving the series to a newer base |
+| `symbol_check.lua` | the engine's imported symbols and exported classes against `carry-symbols.txt`, and `--pin` |
+| `required_encodings.lua` | `tests/host/required-encodings.txt`, read from `TextCodecICU.cpp` |
+| `check_cacert.lua` | the application's trust store against the reviewed hash, and `--upstream` |

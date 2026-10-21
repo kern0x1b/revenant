@@ -65,7 +65,7 @@ ICU is built with its data trimmed to the languages listed in the install script
 engine package before the engine itself. It holds only this port's own stubs; the engine
 links OpenSSL and libpsl from their packages.
 
-`tools/check-cacert.lua` builds nothing: it verifies the trust store the standalone
+`tools/check_cacert.lua` builds nothing: it verifies the trust store the standalone
 application carries against the hash this project reviewed, and with `--upstream` says
 whether curl serves the same extract today. It is the `webkit-cacert` check:
 `./xmakew check -P . webkit-cacert`.

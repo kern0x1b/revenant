@@ -29,7 +29,7 @@ end
 local function load(file)
     local root = json.decode(io.readfile(file)).ABIRoot
     if not root then
-        raise("api-diff: " .. file .. " has no ABIRoot")
+        raise("api_diff: " .. file .. " has no ABIRoot")
     end
     local found = {}
     walk(root, {}, found)
@@ -114,7 +114,7 @@ function main(...)
         if a == "--type" then
             only = argv[i + 1]
             if not only then
-                raise("api-diff: --type needs a name")
+                raise("api_diff: --type needs a name")
             end
         end
     end

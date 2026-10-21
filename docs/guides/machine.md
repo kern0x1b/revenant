@@ -22,7 +22,7 @@ Everything under `~/.revenant` that is not `cache` is data, and no clean touches
 | `firmware` | `toolchain/modules/apple/firmware.lua` and the `firmware` plugin | the firmware catalog, the root file systems, a download that resumes |
 | `emulator` | the emulator's image commands | golden images that took a first boot to make |
 | `devices` | `toolchain/modules/device.lua` | which run holds which device |
-| `cache-index` | `toolchain/tools/cache-index/build.lua`, from `dyld` | an index its readers find beside `dyld` |
+| `cache-index` | `toolchain/tools/cache_index/build.lua`, from `dyld` | an index its readers find beside `dyld` |
 | `corpus` | the corpus tools | data read from applications and devices; `REVENANT_CORPUS_ROOT` names another place |
 
 A folder belongs in `~/.revenant/cache` if, and only if, removing it costs only time.
@@ -49,7 +49,7 @@ changes exactly when those files do:
 
 | Package | Digest config | Made from |
 | --- | --- | --- |
-| `swift-runtime`, `libcxx` | `recipe` | `digest.lua`, which `toolchain/tools/recipe-digests.lua` writes from the recipe and the modules it runs |
+| `swift-runtime`, `libcxx` | `recipe` | `digest.lua`, which `toolchain/tools/recipe_digests.lua` writes from the recipe and the modules it runs |
 | `llvm`, `swift` | `recipe` | the recipe and its patches |
 | `swift-bootstrap` | `recipe` | the recipe, and the swift.org package by its sha256 |
 | `iphoneos-sdk` | `additions` | what the recipe adds to the SDK |

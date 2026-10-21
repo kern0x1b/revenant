@@ -34,11 +34,11 @@ end
 local function open_table(file)
     local index = file .. ".idx"
     if not os.isfile(file) then
-        fail("first-rung.lua: " .. file .. " is not there. Build it: ./xmakew l toolchain/tools/cache-index/build.lua")
+        fail("first_rung.lua: " .. file .. " is not there. Build it: ./xmakew l toolchain/tools/cache_index/build.lua")
     end
     if not os.isfile(index) then
-        fail("first-rung.lua: " .. index .. " is not there, so " .. file .. " cannot be read in blocks. Rebuild both: "
-            .. "./xmakew l toolchain/tools/cache-index/build.lua")
+        fail("first_rung.lua: " .. index .. " is not there, so " .. file .. " cannot be read in blocks. Rebuild both: "
+            .. "./xmakew l toolchain/tools/cache_index/build.lua")
     end
     local self = {path = file, size = os.filesize(file), offsets = {}, firsts = {}, cached = nil}
     each_line(io.readfile(index, {encoding = "binary"}), function (line)
@@ -273,7 +273,7 @@ local function rungs_of(names)
     for _, release in ipairs(order) do
         held[release] = names_of(release)
     end
-    io.stderr:write(string.format("first-rung.lua: read %d per-release index(es) in %.2fs\n", #order,
+    io.stderr:write(string.format("first_rung.lua: read %d per-release index(es) in %.2fs\n", #order,
         (os.mclock() - started) / 1000))
     for _, name in ipairs(names) do
         local found = {}
@@ -306,11 +306,11 @@ local function lookup(names, timing)
         io.write(name, "\t", answered[name], "\n")
     end
     if timing then
-        io.stderr:write(string.format("first-rung.lua: %d name(s) in %.3fs\n", #names, (os.mclock() - started) / 1000))
+        io.stderr:write(string.format("first_rung.lua: %d name(s) in %.3fs\n", #names, (os.mclock() - started) / 1000))
     end
 end
 
-local USAGE = "usage: ./xmakew l toolchain/tools/cache-index/first-rung.lua [--stdin] [--timing] [NAME...] | --rungs NAME... | --self-test"
+local USAGE = "usage: ./xmakew l toolchain/tools/cache_index/first_rung.lua [--stdin] [--timing] [NAME...] | --rungs NAME... | --self-test"
 
 function main(...)
     local args = {...}
@@ -356,7 +356,7 @@ function main(...)
     end
     if want_stdin or #names == 0 then
         if not want_stdin and stdin_is_terminal() then
-            fail("first-rung.lua: give names as arguments, or on stdin")
+            fail("first_rung.lua: give names as arguments, or on stdin")
         end
         names_from_stdin(names)
     end

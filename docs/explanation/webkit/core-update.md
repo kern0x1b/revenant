@@ -9,7 +9,7 @@ is how the series is carried now. The record below is from the fork's time, and
 names its branches.
 
 How far the port has drifted is still a question about content rather than about
-the log, and `tools/port-delta.lua` answers it from the series itself. When the
+the log, and `tools/port_delta.lua` answers it from the series itself. When the
 fork was measured against `origin/webkitglib/2.54` it read:
 
 ```
@@ -24,7 +24,7 @@ fork was measured against `origin/webkitglib/2.54` it read:
 
 ## How far behind the snapshot is
 
-`tools/port-delta.lua --freshness` now answers it from GitHub's comparison of the base
+`tools/port_delta.lua --freshness` now answers it from GitHub's comparison of the base
 with upstream `main`. Its predecessor, since rewritten in Lua, answered from content rather than dates,
 because content is what the question is really about: for each commit on the upstream branch
 it takes a line that commit added and looks for it in our tree, and the first
@@ -99,7 +99,7 @@ git format-patch -N -o <revenant>/packages/w/webkit/patches <base>..series
 ```
 
 Conflicts land only where a fix touches a file this port also changed, which
-`tools/port-delta.lua` lists, and `rerere.enabled` means a resolution is only
+`tools/port_delta.lua` lists, and `rerere.enabled` means a resolution is only
 made once. Then the checksums in the recipe, the carry check, the build, and
 `tests/device/run.lua`.
 
@@ -128,7 +128,7 @@ carry a `WEBKIT_IOS6` guard on one side.
 own removals over 3222 commits, but five were load-bearing here - the 32-bit
 LLInt, the ARMv7 registers and macro assembler, two 32-bit JIT sources - and
 nothing in git said so, because this port had not touched them since the branch
-point. `frameworks/WebKit/tools/carry-check.lua` named all five in under a second. That is the
+point. `frameworks/WebKit/tools/carry_check.lua` named all five in under a second. That is the
 clearest argument for the manifest that exists.
 
 **Two build systems have to be carried, not merged.** Upstream removed the iOS
@@ -429,7 +429,7 @@ left needs work per family rather than per file:
 The audit that found the lost adaptations is now a script:
 
 ```sh
-./xmakew l frameworks/WebKit/tools/carry-audit.lua <reference tree> Source/WebCore/page
+./xmakew l frameworks/WebKit/tools/carry_audit.lua <reference tree> Source/WebCore/page
 ```
 
 It compares, per file, how many port markers a file carries here against the
@@ -598,7 +598,7 @@ what is left.
 
 ## The procedure this argues for
 
-1. Run `tools/port-delta.lua` on the current series and keep the output. It
+1. Run `tools/port_delta.lua` on the current series and keep the output. It
    is the before picture, and the after picture has to be explainable.
 2. Fetch the new upstream branch and diff it against the current base to see
    which of the 440 unguarded WebCore/JSC files upstream also touched. Only those
@@ -638,7 +638,7 @@ mechanically, which would change meaning in some of them for no benefit.
 For triage during a merge:
 
 ```sh
-./xmakew l frameworks/WebKit/tools/port-delta.lua --unguarded Source/WebCore/platform
+./xmakew l frameworks/WebKit/tools/port_delta.lua --unguarded Source/WebCore/platform
 ```
 
 lists the changed files in an area that carry no guard, largest diff first -

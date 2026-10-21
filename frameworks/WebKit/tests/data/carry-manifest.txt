@@ -1,7 +1,7 @@
 # What this port carries, and what must still be true of the patched engine
 # tree after the series is moved to a newer upstream. src/modules/carry.lua reads
 # this file: every build of the engine checks it before configuring, and
-# tools/carry-check.lua checks it on demand.
+# tools/carry_check.lua checks it on demand.
 #
 #   file  <path>                 the path must exist
 #   grep  <path> <text>          the file must contain that text

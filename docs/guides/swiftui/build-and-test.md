@@ -28,8 +28,8 @@ From the top of revenant:
 
 Building `SwiftUI` begins with `frameworks/SwiftUI/tools/coverage.lua --check --before-build`, which refuses to continue if
 the ledger and the code disagree. The count of invented names is not part of that: it is read from the `invented.txt`
-that `frameworks/SwiftUI/tools/api-surface.lua` makes from the module the build produces, so a fresh tree runs the build, then
-api-surface.lua, then a plain `./xmakew l frameworks/SwiftUI/tools/coverage.lua --check`, which compares that count
+that `frameworks/SwiftUI/tools/api_surface.lua` makes from the module the build produces, so a fresh tree runs the build, then
+api_surface.lua, then a plain `./xmakew l frameworks/SwiftUI/tools/coverage.lua --check`, which compares that count
 with the ledger. Everything is compiled with availability checking **on**, against the same Swift runtime the app
 carries.
 
@@ -42,8 +42,8 @@ emulate.lua tests                        # the engine tests, in the emulator
 emulate.lua snapshots [--accept] [--only=NAME]   # rendered scenarios against frameworks/SwiftUI/tests/data/snapshots/
 emulate.lua perf                         # in-app timings of deeply nested layouts
 coverage.lua --check                     # the ledger, checked against the code
-api-surface.lua                          # the typed API diff against Apple's interface
-api-surface.lua apple                    # Apple's 26.2 surface, which the invented-name gate reads
+api_surface.lua                          # the typed API diff against Apple's interface
+api_surface.lua apple                    # Apple's 26.2 surface, which the invented-name gate reads
 device.lua shots SCENARIO...             # scenarios rendered on a claimed phone
 ```
 

@@ -248,7 +248,7 @@ local function ours()
     return types, mods, ignored, pending_only
 end
 
-local INVENTED_GENERATOR = "tools/api-surface.lua"
+local INVENTED_GENERATOR = "tools/api_surface.lua"
 
 local function invented_file()
     return path.join(tree.run("api"), "invented.txt")

@@ -422,7 +422,7 @@ local function collapse(file)
     io.stderr:write(string.format("# %d rows of three columns from %s\n", #rows, file))
 end
 
-local USAGE = "usage: ./xmakew l frameworks/SwiftUI/tools/surface-rows.lua sdk WANT | tree | collapse OURS.tsv"
+local USAGE = "usage: ./xmakew l frameworks/SwiftUI/tools/surface_rows.lua sdk WANT | tree | collapse OURS.tsv"
 
 function main(action, argument)
     if action == "sdk" and argument then

@@ -77,5 +77,8 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   targets named for it, so `./xmakew test -P . 'toolchain_*/*'` or `'repository/*'` runs one component. A test that
   needs a device, an emulator image or firmware is declared only by `./xmakew f -P . --tests=device`, and it fails
   naming what it lacks when that is missing.
+- Lua files under `tools/` and `toolchain/modules/` are snake_case, as xmake's own module files are (`find_tool.lua`):
+  `frameworks/SwiftUI/tools/api_surface.lua`, `toolchain/tools/cache_index/`. The names of the data a tool writes, such as
+  `~/.revenant/cache-index`, are not file names, and keep their spelling.
 - Before handing a change over: `./xmakew test -P .`, then that component's gate (the backports gate is gone until
   `./xmakew test -P .` replaces it; for the emulator, the skill `emulator-session`).

@@ -3,12 +3,12 @@ import("core.project.project")
 
 local tree = import("lib.tree", {rootdir = os.scriptdir(), anonymous = true})
 
-local USAGE = [==[usage: ./xmakew l frameworks/SwiftUI/tools/api-surface.lua [prepare | apple [MODULE...]]
+local USAGE = [==[usage: ./xmakew l frameworks/SwiftUI/tools/api_surface.lua [prepare | apple [MODULE...]]
   prepare   copy the SwiftUI framework of the iOS 16.4 SDK with its interface patched, for swift-api-digester
   apple     write Apple's 26.2 surface, one row per declaration, to apple-26-surface.tsv in the run folder, which
-            api-invented.lua reads; it builds the surftool of tests/surface first
-  (none)    prepare if needed, then dump Apple's and this module's API, list the gaps (api-diff.lua) and the
-            public names Apple's 26.2 does not declare (api-invented.lua); STRICT=1 makes an invented name a failure.
+            api_invented.lua reads; it builds the surftool of tests/surface first
+  (none)    prepare if needed, then dump Apple's and this module's API, list the gaps (api_diff.lua) and the
+            public names Apple's 26.2 does not declare (api_invented.lua); STRICT=1 makes an invented name a failure.
 Run it from the top of revenant, configured for iphoneos, after ./xmakew build -P . SwiftUI.]==]
 
 local SDK_VERSION = "16.4"
@@ -110,8 +110,8 @@ local function surface()
                                            "-F", tree.run("fw")}, {flags[1], flags[2]}))
     os.execv(digester, table.join(common, {"-o", path.join(out, "ours.json"), "-target", "armv7-apple-ios6.0"}, flags))
     local gaps = path.join(out, "gaps.txt")
-    if lua("api-diff.lua", {path.join(out, "apple.json"), path.join(out, "ours.json")}, gaps) ~= 0 then
-        raise("api-diff.lua failed")
+    if lua("api_diff.lua", {path.join(out, "apple.json"), path.join(out, "ours.json")}, gaps) ~= 0 then
+        raise("api_diff.lua failed")
     end
     local counts = {}
     for line in io.readfile(gaps):gmatch("[^\n]+") do
@@ -129,16 +129,16 @@ local function surface()
         print("%7d %s", counts[owners[i]], owners[i])
     end
     local invented = path.join(out, "invented.txt")
-    local status = lua("api-invented.lua", {path.join(out, "ours.json")}, invented)
+    local status = lua("api_invented.lua", {path.join(out, "ours.json")}, invented)
     if status ~= 0 and status ~= 1 then
         os.rm(invented)
-        raise("api-invented.lua failed with %s, so there is no count of invented names", status)
+        raise("api_invented.lua failed with %s, so there is no count of invented names", status)
     end
     local count = 0
     for line in io.readfile(invented):gmatch("[^\n]+") do
         count = count + 1
     end
-    print("api-surface: %d public names here that Apple's 26.2 does not declare (see %s); STRICT=1 makes this a failure", count, invented)
+    print("api_surface: %d public names here that Apple's 26.2 does not declare (see %s); STRICT=1 makes this a failure", count, invented)
     if status ~= 0 then
         os.exit(status)
     end

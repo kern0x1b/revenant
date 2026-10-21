@@ -18,7 +18,7 @@ changed for this port. The following are used at build or test time and come fro
 | [OpenSwiftUI](https://github.com/OpenSwiftUIProject/OpenSwiftUI) | `b13f093dcc71` | MIT | the result-builder shapes in `frameworks/SwiftUI/src/Tables.swift` — `buildIf`, both `buildEither` overloads and `buildLimitedAvailability`, and the `_ConditionalContent` storage enum — follow OpenSwiftUI's `ViewBuilder` and `ConditionalContent`; Apple's constraints and SwiftUI's own node plumbing are ours. OpenSwiftUI has no `Table` at this commit — no `Table`, `TableColumn`, `TableColumnBuilder`, `KeyPathComparator` or `SortOrder` file exists in it (checked against the file list of `b13f093dcc71`) — so the sort order, the header and its arrow are written here from Apple's 26.2 interface and are not derived from it |
 
 SwiftUI re-implements the shape of Apple's public SwiftUI API and contains no code or assets of Apple's. The lists of
-public type and modifier names in `frameworks/SwiftUI/tests/data/api/` are identifiers only. `tools/api-surface.lua prepare` makes a local copy
+public type and modifier names in `frameworks/SwiftUI/tests/data/api/` are identifiers only. `tools/api_surface.lua prepare` makes a local copy
 of a framework from the reader's own iOS SDK to compare against, in a run folder outside the tree; that copy is not part of this repository and must not
 be committed or passed on.
 

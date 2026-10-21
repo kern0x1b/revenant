@@ -56,7 +56,7 @@ through `run`. Its logs, the run's results and the pictures go to a fresh folder
 prints.
 
 A change is done when the engine tests, every snapshot and the ledger check (`coverage.lua --check`, after
-`tools/api-surface.lua`) pass. Anything that
+`tools/api_surface.lua`) pass. Anything that
 touches layout, gestures, animation, dialogs or navigation also gets a run on hardware (an iPad 2 or an iPhone 4S on
 iOS 6.1.3): the skill `device-session` says how to reach one from here.
 
@@ -66,7 +66,7 @@ iOS 6.1.3): the skill `device-session` says how to reach one from here.
   correspond to on iOS 6) or `_Unsupported.note(...)` (works with a named difference), and appears in
   `docs/reference/swiftui/ledger.md`. `coverage.lua --check` fails the build otherwise. A protocol requirement that is only an
   *extension* member is not dispatched dynamically: put user-overridable members in the protocol.
-- **Do not measure completeness by names.** Use `tools/api-surface.lua`; it compares declarations. When you add an
+- **Do not measure completeness by names.** Use `tools/api_surface.lua`; it compares declarations. When you add an
   overload, the gap count should fall.
 - **Availability checking stays on.** Never build with `-disable-availability-checking`: it hides iOS 7+ APIs and the
   `fatalError` stubs of the overlay. Put newer API behind `#available`.
@@ -86,7 +86,7 @@ iOS 6.1.3): the skill `device-session` says how to reach one from here.
   fresh reference.
 - **Nothing personal.** No device addresses, hostnames, credentials or absolute `/Users/<name>/…` paths in tracked
   files; the phone is named in a git-ignored `device.env`. The copy of Apple's SwiftUI framework that
-  `tools/api-surface.lua prepare` makes is Apple's SDK content: it lives in the run folder, outside the tree, and must
+  `tools/api_surface.lua prepare` makes is Apple's SDK content: it lives in the run folder, outside the tree, and must
   never be committed.
 - **No Apple code or assets** in the repository, and no comments that explain the obvious; match the density of the
   file you are in.

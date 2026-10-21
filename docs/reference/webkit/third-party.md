@@ -68,7 +68,7 @@ so the roots travel with the application. The Safari substitution does not use
 this file at all - there the chain is handed back as a `SecTrustRef` and the
 system evaluates it against its own store.
 
-`tools/check-cacert.lua` verifies the file against the SHA-256 this project
+`tools/check_cacert.lua` verifies the file against the SHA-256 this project
 reviewed - `f66dff1b…480bc9` - and with `--upstream` compares it against what
 <https://curl.se/ca/cacert.pem> serves today, printing what to do if they differ
 rather than replacing anything.

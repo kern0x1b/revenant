@@ -11,7 +11,7 @@ hand it the same thing? The answer is checked by building and linking, not by re
 
 Build: `swiftc -target arm64-apple-ios14.0 -sdk <SDK 16.4> -F fw -O -wmo -parse-as-library`, where `app.swift` is
 `frameworks/SwiftUI/tests/data/api/app.swift`.
-`fw/SwiftUI.framework` is a local copy of the framework from the SDK, which `tools/api-surface.lua prepare` makes in the
+`fw/SwiftUI.framework` is a local copy of the framework from the SDK, which `tools/api_surface.lua prepare` makes in the
 run's folder, with one line of `swiftinterface` changed (`os_log` with string interpolation does not rebuild with the
 6.4 compiler). The copy is needed only to compile the test app on this machine; nothing from Apple is distributed.
 

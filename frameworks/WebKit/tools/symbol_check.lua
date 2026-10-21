@@ -1,4 +1,4 @@
-local USAGE = [[usage: ./xmakew l frameworks/WebKit/tools/symbol-check.lua [--pin] [BUILD]
+local USAGE = [[usage: ./xmakew l frameworks/WebKit/tools/symbol_check.lua [--pin] [BUILD]
   compares the symbols JavaScriptCore, WebCore and WebKitLegacy import and the Objective-C classes they
   export with carry-symbols.txt; --pin makes this build the new baseline. BUILD is an engine build folder
   or a staged tree; the default is the stage of the system webkit-engine package.]]

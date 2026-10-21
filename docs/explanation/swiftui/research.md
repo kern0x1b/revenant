@@ -192,7 +192,7 @@ Layers:
 The module `frameworks/SwiftUI/src/` (the SwiftUI project; the Swift module is still called `SwiftUI`) is about 14,000
 lines. The full list of what is supported, ignored and missing is kept in `ledger.md`, and it is checked against the build
 (`coverage.lua --check`). The count as of 19.09, for the SwiftUI interface of SDK 16.4, over the part Apple declares
-available on iOS (the slice comes from `tools/apple-names.lua modifiers`): **490 of 520 types, 289 of 289 `View`
+available on iOS (the slice comes from `tools/apple_names.lua modifiers`): **490 of 520 types, 289 of 289 `View`
 modifiers**, of which 188 work, 101 are declared and ignored (each writes a line to the log and to
 `/var/revenant/swiftui-ignored.txt`), and no `unimplemented` stubs are left. Over the full interface, including the
 macOS, tvOS and watchOS part: 503 of 592 types. The list of ignored items is closed: only things with nothing to match on
@@ -264,14 +264,14 @@ A limit found at the same time: `UIFont`/`GSFontCreateWithName` crashes on iOS 6
 
 The count "490 of 520 types, 289 of 289 modifiers" is correct as a count of **names**, and it stays that way, but it cannot
 measure completeness. The typed comparison of `swift-api-digester` (Apple's SwiftUI interface for iOS 16.4 against our
-module, `tools/api-surface.lua`) shows what the name count cannot see: **1402 Apple declarations are missing and 321 are
+module, `tools/api_surface.lua`) shows what the name count cannot see: **1402 Apple declarations are missing and 321 are
 present with a different signature** (calls covered by our default values are not counted). The reason the name count is
 blind is that a comparison by name does not distinguish overloads, and accepts `Shading.linearGradient` as
 `ShapeStyle.linearGradient`. The same comparison and scenarios taken from real code also found three silent falsehoods that
 the names did not show: the `.updating` of a gesture did not call the body (gestures were matched by the closure's type
 through `Mirror`), `animatableData` of our own shapes, effects and layouts was read nowhere, and `GeometryEffect` was
 recorded as "ignored" with a wrong reason (`CALayer.transform` exists since iOS 2). All three are fixed. The rest of the list
-is the work queue (`gaps.txt`, which `tools/api-surface.lua` writes).
+is the work queue (`gaps.txt`, which `tools/api_surface.lua` writes).
 
 ### Techniques from related systems (review of 19.09)
 
