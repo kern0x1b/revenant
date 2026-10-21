@@ -28,7 +28,9 @@ never built twice.
 With `REVENANT_PREBUILT=<owner>/<repository>` set, a recipe wired to the module does this:
 
 1. `on_download` asks for the release of its key. If the release exists, the archive and its checksum are
-   downloaded into the package's cache folder, the checksum is checked, and the source checkout is skipped.
+   downloaded into the package's cache folder, the checksum is checked, and the source checkout is skipped. xmake
+   still enters the package's `source` folder before `on_install` for a package with a url, so that folder is made,
+   empty, at this point.
 2. `on_install` unpacks the archive into the install folder and returns. If there is no release, it
    prints so and builds from source as it does today.
 
@@ -41,8 +43,8 @@ LLVM or Swift. It changes no key.
 The `llvm` and `swift` recipes are wired. To wire another recipe, call `prebuilt.fetch(package)` at the
 top of its `on_download`, `prebuilt.install(package)` at the top of its `on_install`, and
 `prebuilt.pack(package)` at its end. Doing that changes the recipe, and so the key, once.
-`apple-backports`, `swift-runtime` and `libcxx` are not wired yet: `swift-runtime` sets environment
-variables and data in `on_install` that an early return would skip, and wiring `apple-backports` rebuilds it
+the Backports targets, `swift-runtime` and `libcxx` are not wired yet: `swift-runtime` sets environment
+variables and data in `on_install` that an early return would skip, and wiring the Backports rebuilds it
 and everything that depends on it.
 
 ## On CI
@@ -65,7 +67,7 @@ that archive would not work under another one.
 | Input | On CI | Consequence |
 | --- | --- | --- |
 | The iPhoneOS SDK (`iphoneos-sdk`) | downloaded from the same GitHub releases as on a machine | works; the SDK itself is never put in an archive, since Apple's licence does not allow that |
-| Firmware and `~/.revenant/dyld` (`apple-backports`) | not there; `firmware.ensure` would fetch and decrypt gigabytes of firmware | `apple-backports`, and `swift-runtime` with `backports`, are not built on CI |
+| Firmware and `~/.revenant/dyld` (`frameworks/Backports`) | not there; `firmware.ensure` would fetch and decrypt gigabytes of firmware | the Backports targets, and `swift-runtime` with `backports`, are not built on CI |
 | The host Xcode or Command Line Tools | the runner's Xcode, not this machine's | not part of the key: an archive built with another host clang is used under the same key. LLVM and Swift do not link against the host's C++ library in a way a newer macOS breaks, but that is not verified |
 | Time and disk | a GitHub-hosted job ends after 6 hours, and the standard `macos-15` runner has 3 cores, 7 GB of memory and 14 GB of storage | not measured: Swift's ten source checkouts and its build are likely to need more than 14 GB and more than 6 hours on 3 cores, and then need a larger runner (`macos-15-xlarge`, paid) or a self-hosted one; LLVM with two targets may fit |
 | `ccache` | empty on each run | a full build each time a key changes |

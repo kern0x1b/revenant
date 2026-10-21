@@ -1,2 +1,0 @@
-kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
-constant	FPUIErrorDomain	-	FPUIErrorDomain	11.0	NSString *const	API_AVAILABLE(ios(11.0)) API_UNAVAILABLE(macCatalyst, tvos)	13b295996825cf79	found	com.apple.FileProviderUI	com.apple.FileProviderUI	ios-26.2-cache	-	exported	ns	-

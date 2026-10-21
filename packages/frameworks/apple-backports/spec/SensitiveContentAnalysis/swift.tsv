@@ -1,8 +1,0 @@
-framework	kind	usr	container	name	side	type	params	availability	message	declhash
-SensitiveContentAnalysis	swift-class	c:objc(cs)SCSensitivityAnalyzer	-	SCSensitivityAnalyzer	-	-	-	ios=17.0	-	e6340f204b334fe9
-SensitiveContentAnalysis	swift-class	s:So21SCSensitivityAnalyzerC24SensitiveContentAnalysisE05VideoE7HandlerC	SCSensitivityAnalyzer	VideoAnalysisHandler	-	-	-	-	-	0bc408f6f75220ad
-SensitiveContentAnalysis	swift-property	s:So21SCSensitivityAnalyzerC24SensitiveContentAnalysisE05VideoE7HandlerC8progressSo10NSProgressCvp	SCSensitivityAnalyzer.VideoAnalysisHandler	progress	-	Foundation.Progress	-	-	-	f997edd20dc04a73
-SensitiveContentAnalysis	swift-method	s:So21SCSensitivityAnalyzerC24SensitiveContentAnalysisE05VideoE7HandlerC03hascD0So0aE0CyYaKF	SCSensitivityAnalyzer.VideoAnalysisHandler	hasSensitiveContent()	-	SensitiveContentAnalysis.SCSensitivityAnalysis	-	-	-	532a85f9b743d4df
-SensitiveContentAnalysis	swift-method	s:So21SCSensitivityAnalyzerC24SensitiveContentAnalysisE05videoE09forFileAtAbCE05VideoE7HandlerC10Foundation3URLV_tF	SCSensitivityAnalyzer	videoAnalysis(forFileAt:)	-	SensitiveContentAnalysis.SCSensitivityAnalyzer.VideoAnalysisHandler	Foundation.URL	-	-	7509a45c5643cddc
-SensitiveContentAnalysis	swift-class	c:objc(cs)SCVideoStreamAnalyzer	-	SCVideoStreamAnalyzer	-	-	-	ios=26.0	-	26ab6869e2934b6b
-SensitiveContentAnalysis	swift-property	s:So21SCVideoStreamAnalyzerC24SensitiveContentAnalysisE15analysisChangesQrvp	SCVideoStreamAnalyzer	analysisChanges	-	some _Concurrency.AsyncSequence<SensitiveContentAnalysis.SCSensitivityAnalysis, any Swift.Error>	-	-	-	6ff6b3a71b22202b

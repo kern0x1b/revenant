@@ -1,5 +1,0 @@
-// swift-interface-format-version: 1.0
-// swift-module-flags: -target arm64e-apple-ios26.2 -enable-library-evolution
-// swift-module-flags-ignorable: -formal-cxx-interoperability-mode=off
-import Swift
-public struct Public {}

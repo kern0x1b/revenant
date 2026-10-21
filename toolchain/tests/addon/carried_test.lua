@@ -43,12 +43,12 @@ end
 local function bundled_step(bundle, found)
     local target = {
         name = function () return "tweak" end,
-        values = function (_, key) return key == "revenant.libraries" and {"revenant@apple-backports"} or nil end,
+        values = function (_, key) return key == "revenant.libraries" and {"revenant@backports"} or nil end,
         dep = function () return nil end,
         pkg = function () return nil end
     }
     local refused = fixtures.refusal(function () bundle.carried_libraries(target, "revenant.libraries") end)
-    if not (refused and refused:find("which is apple-backports", 1, true)) then
+    if not (refused and refused:find("which is backports", 1, true)) then
         table.insert(found, "a package bundled under the name of its repository must be told the name to use, not " .. tostring(refused))
     end
 end

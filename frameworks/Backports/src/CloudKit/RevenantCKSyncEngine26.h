@@ -1,0 +1,28 @@
+#ifndef REVENANT_CK_SYNC_ENGINE_26_H
+#define REVENANT_CK_SYNC_ENGINE_26_H
+
+#import <Foundation/Foundation.h>
+#import <CloudKit/CloudKit.h>
+
+NS_ASSUME_NONNULL_BEGIN
+
+@class CKSyncEngine, CKSyncEngineConfiguration, CKSyncEngineState, CKSyncEngineStateSerialization;
+@class CKSyncEngineEvent, CKSyncEngineStateUpdateEvent, CKSyncEngineAccountChangeEvent;
+@class CKSyncEngineWillFetchChangesEvent, CKSyncEngineFetchedDatabaseChangesEvent;
+@class CKSyncEngineDidFetchChangesEvent, CKSyncEngineWillFetchRecordZoneChangesEvent;
+@class CKSyncEngineFetchedRecordZoneChangesEvent, CKSyncEngineDidFetchRecordZoneChangesEvent;
+@class CKSyncEngineWillSendChangesEvent, CKSyncEngineSentDatabaseChangesEvent;
+@class CKSyncEngineSentRecordZoneChangesEvent, CKSyncEngineDidSendChangesEvent;
+@class CKSyncEngineFetchedRecordDeletion, CKSyncEngineFetchedZoneDeletion;
+@class CKSyncEngineFailedRecordSave, CKSyncEngineFailedZoneSave;
+@class CKSyncEngineFetchChangesContext, CKSyncEngineFetchChangesOptions, CKSyncEngineFetchChangesScope;
+@class CKSyncEngineSendChangesContext, CKSyncEngineSendChangesOptions, CKSyncEngineSendChangesScope;
+@class CKSyncEngineRecordZoneChangeBatch, CKSyncEnginePendingZoneSave, CKSyncEnginePendingZoneDelete;
+
+@protocol CKSyncEngineRecordProvider <NSObject>
+- (nullable CKRecord *)revenant_recordForRecordID:(CKRecordID *)recordID;
+@end
+
+NS_ASSUME_NONNULL_END
+
+#endif

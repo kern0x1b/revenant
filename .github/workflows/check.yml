@@ -28,20 +28,11 @@ jobs:
       - name: Check the comments
         run: ./xmakew l -P . tools/comments.lua check
 
-      - name: Count the layout breaks
-        run: |
-          out="$RUNNER_TEMP/layout.txt"
-          ./xmakew l -P . tools/check.lua layout > "$out" 2>&1 || true
-          count=$(grep -oE '[0-9]+ paths break' "$out" | grep -oE '[0-9]+' || true)
-          echo "::warning title=layout::${count:-no count printed} paths break the layout; not failing yet"
-          echo "Layout breaks: ${count:-no count printed} (reported, not failing yet)" >> "$GITHUB_STEP_SUMMARY"
+      - name: Check the layout
+        run: ./xmakew l -P . tools/check.lua layout
 
       - name: Check the toolchain
-        env:
-          LIGHT_SKIP: doc_test
-        run: |
-          echo "::notice title=doc_test::skipped: it tests the old generator, which is deleted with the registry"
-          ./xmakew l -P . tools/check.lua toolchain
+        run: ./xmakew l -P . tools/check.lua toolchain
 
       - uses: actions/cache/save@v4
         if: always() && steps.xmake.outputs.cache-hit != 'true'
@@ -51,12 +42,15 @@ jobs:
 
   backports:
     runs-on: macos-26
-    timeout-minutes: 60
+    timeout-minutes: 30
     env:
       REVENANT_PREBUILT: kern0x1b/revenant
       REVENANT_PREBUILT_ONLY: "1"
     steps:
       - uses: actions/checkout@v4
+
+      - name: Give the checkout a fixed mtime
+        run: git ls-files -z | xargs -0 touch -t 200001010000
 
       - name: Select the newest Xcode and show its clang
         run: |
@@ -73,13 +67,21 @@ jobs:
 
       - name: Key the package store
         id: keys
-        run: echo "hash=$(./xmakew l -P . tools/keys.lua | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+        run: echo "hash=$(./xmakew l -P . tools/keys.lua iphoneos-sdk ld64 | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/cache/restore@v4
         id: store
         with:
           path: ~/.revenant/cache/xmake-global
           key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+
+      - uses: actions/cache/restore@v4
+        id: generated
+        with:
+          path: build/generated/backports
+          key: backports-generated-${{ runner.os }}-${{ hashFiles('frameworks/Backports/**') }}
+          restore-keys: |
+            backports-generated-${{ runner.os }}-
 
       - name: Check that the branch has the Backports component
         id: component
@@ -92,11 +94,65 @@ jobs:
             echo "Backports build skipped: this branch has no component option." >> "$GITHUB_STEP_SUMMARY"
           fi
 
-      - name: Configure and build the Backports component
+      - uses: actions/cache/restore@v4
+        id: objects
         if: steps.component.outputs.present == 'true'
+        with:
+          path: |
+            build/.objs
+            build/.deps
+            build/iphoneos
+          key: backports-objects-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'packages/**', 'addons/**', 'third_party/**', 'xmake.lua', 'xmakew') }}
+
+      - name: Configure the Backports component
+        if: steps.component.outputs.present == 'true'
+        timeout-minutes: 20
         run: |
-          ./xmakew f -P . -p iphoneos -a armv7 --component=Backports
-          ./xmakew build -P .
+          stamp() { while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done; }
+          echo "stage configure starts $(date -u +%H:%M:%S)"
+          ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v 2>&1 | stamp
+          echo "stage configure ends $(date -u +%H:%M:%S)"
+
+      - name: Show the package logs when the configure failed
+        if: failure() && steps.component.outputs.present == 'true'
+        run: |
+          find "$HOME/.revenant/cache/xmake-global" -path '*logs*' -type f 2>/dev/null | head -20
+          for f in $(find "$HOME/.revenant/cache/xmake-global" -path '*logs*' -type f 2>/dev/null | head -10); do
+            echo "== $f"
+            tail -30 "$f"
+          done
+
+      - name: Save the package store
+        if: steps.component.outputs.present == 'true' && steps.store.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.revenant/cache/xmake-global
+          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+
+      - name: Save the generated skeleton
+        if: steps.component.outputs.present == 'true' && steps.generated.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: build/generated/backports
+          key: backports-generated-${{ runner.os }}-${{ hashFiles('frameworks/Backports/**') }}
+
+      - name: Build the Backports component
+        if: steps.component.outputs.present == 'true'
+        timeout-minutes: 12
+        run: |
+          stamp() { while IFS= read -r line; do printf '%s %s\n' "$(date -u +%H:%M:%S)" "$line"; done; }
+          echo "stage build starts $(date -u +%H:%M:%S)"
+          ./xmakew build -P . 2>&1 | stamp
+          echo "stage build ends $(date -u +%H:%M:%S)"
+
+      - uses: actions/cache/save@v4
+        if: steps.component.outputs.present == 'true' && steps.objects.outputs.cache-hit != 'true'
+        with:
+          path: |
+            build/.objs
+            build/.deps
+            build/iphoneos
+          key: backports-objects-${{ runner.os }}-${{ steps.keys.outputs.hash }}-${{ hashFiles('frameworks/Backports/**', 'toolchain/**', 'packages/**', 'addons/**', 'third_party/**', 'xmake.lua', 'xmakew') }}
 
       - name: Upload the Backports libraries
         if: steps.component.outputs.present == 'true'
@@ -106,11 +162,36 @@ jobs:
           path: build/iphoneos/armv7/release/lib*.dylib
           if-no-files-found: error
 
-      - uses: actions/cache/save@v4
-        if: always() && steps.store.outputs.cache-hit != 'true'
+      - name: Check every source key against the built libraries
+        if: steps.component.outputs.present == 'true'
+        timeout-minutes: 4
+        run: |
+          mkdir -p "$RUNNER_TEMP/report"
+          echo "stage exports starts $(date -u +%H:%M:%S)"
+          ./xmakew l -P . frameworks/Backports/tools/exports.lua > "$RUNNER_TEMP/report/exports.txt" 2>&1
+          echo "stage exports ends $(date -u +%H:%M:%S)"
+          cat "$RUNNER_TEMP/report/exports.txt" | head -40
+          cat "$RUNNER_TEMP/report/exports.txt" >> "$GITHUB_STEP_SUMMARY"
+          cp build/generated/backports/exports.txt "$RUNNER_TEMP/report/exports-detail.txt"
+
+      - name: Count the implemented members per framework
+        if: steps.component.outputs.present == 'true'
+        timeout-minutes: 6
+        run: |
+          mkdir -p "$RUNNER_TEMP/report"
+          echo "stage status starts $(date -u +%H:%M:%S)"
+          ./xmakew l -P . frameworks/Backports/tools/status.lua > "$RUNNER_TEMP/report/status.txt" 2>&1
+          echo "stage status ends $(date -u +%H:%M:%S)"
+          echo "Top 10 frameworks by implemented members:" >> "$GITHUB_STEP_SUMMARY"
+          grep -v '^total' "$RUNNER_TEMP/report/status.txt" | sort -k3,3nr | head -10 >> "$GITHUB_STEP_SUMMARY"
+          grep '^total' "$RUNNER_TEMP/report/status.txt" >> "$GITHUB_STEP_SUMMARY" || true
+
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.component.outputs.present == 'true'
         with:
-          path: ~/.revenant/cache/xmake-global
-          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+          name: backports-report
+          path: ${{ runner.temp }}/report
+          if-no-files-found: warn
 
       - uses: actions/cache/save@v4
         if: always() && steps.xmake.outputs.cache-hit != 'true'

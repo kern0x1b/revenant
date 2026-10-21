@@ -1,3 +1,0 @@
-module	kind	api	introduced	deprecated	obsoleted	unavailable	via
-_CoreData_CloudKit	property	NSPersistentCloudKitContainerOptions.databaseScope	14.0				own
-_CoreData_CloudKit	property	NSPersistentCloudKitContainerOptions.value	14.0				container

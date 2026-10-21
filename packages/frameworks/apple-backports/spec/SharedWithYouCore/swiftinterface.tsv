@@ -1,2 +1,0 @@
-module	kind	api	introduced	deprecated	obsoleted	unavailable	via
-SharedWithYouCore	method	SWCollaborationOption.init(title:identifier:subtitle:selected:requiredOptionsIdentifiers:)	16				container

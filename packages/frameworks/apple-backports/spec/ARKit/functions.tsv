@@ -1,2 +1,0 @@
-api	introduced	status	reasons	returns	params	decl
-ARSkeletonJointNameForRecognizedPointKey	14.0	generable		ARSkeletonJointName	VNRecognizedPointKey recognizedPointKey	ARSkeletonJointName ARSkeletonJointNameForRecognizedPointKey(VNRecognizedPointKey recognizedPointKey)

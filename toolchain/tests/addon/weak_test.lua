@@ -3,7 +3,7 @@ import("fixtures")
 function failures(opt)
     local found = {}
     local folder = fixtures.scratch()
-    local arclite = path.join(opt.modules, "..", "..", "packages", "build-tools", "iphoneos-sdk", "arclite")
+    local arclite = path.join(opt.modules, "..", "..", "packages", "i", "iphoneos-sdk", "port", "arclite")
     local probe = path.join(os.scriptdir(), "weak", "weak_probe.m")
     local modes = {
         {"without a system weak reference runtime", {"-DREVENANT_WITHOUT_NATIVE", "-Ddlsym=revenant_test_dlsym"}},

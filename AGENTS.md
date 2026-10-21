@@ -16,8 +16,8 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
     reference/<component>/     facts to look up: APIs, options, formats, measured behaviour
     explanation/<component>/   why it is built the way it is: design, decisions, research
   third_party/<name>/        code we use but do not develop: upstream by url and commit, our patches/
-  packages/ addons/          the package repository, read from the top of the checkout: packages/<group>/<name>/
-                             and addons/<group>/<name>/
+  packages/ addons/          the package repository, read from the top of the checkout: packages/<letter>/<name>/
+                             and addons/<letter>/<name>/
   <component>/               toolchain, emulator, recompiler, agent-skills, frameworks/<Framework>
   ```
 
@@ -42,7 +42,7 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   installed plugin is that folder alone, so the skills and the licence and notice they carry stay there. Its
   `plugin.json` could point the skills at `src/`, but Claude Code's loading of a custom skills path is not verified
   here, so the skills are not moved until it is.
-  `toolchain/` is the xmake addon `revenant`, so its `addon.lua`, `includes/`, `modules/`, `plugins/`, `rules/` and `toolchains/` take the shape xmake reads: `plugins/<name>/` holds `xmake.lua` and `main.lua`, `rules/`, `toolchains/` and `includes/` hold `<name>/xmake.lua`, and `modules/` holds Lua files only. The package repository is the top of the checkout, so `packages/<group>/<name>/` and `addons/<group>/<name>/` hold `xmake.lua` alone.
+  `toolchain/` is the xmake addon `revenant`, so its `addon.lua`, `includes/`, `modules/`, `plugins/`, `rules/` and `toolchains/` take the shape xmake reads: `plugins/<name>/` holds `xmake.lua` and `main.lua`, `rules/`, `toolchains/` and `includes/` hold `<name>/xmake.lua`, and `modules/` holds Lua files only. The package repository is the top of the checkout, so `packages/<letter>/<name>/` and `addons/<letter>/<name>/` hold `xmake.lua` alone. A recipe in `packages/<letter>/<name>/` holds its `xmake.lua`, the `port/` folder of the sources it builds, and its `patches/` (upstream patches applied in order); nothing else.
 
   A component uses another through the build graph (`add_deps`, or its package by name), never by a path into the
   other's folder. The layout is checked by `./xmakew l tools/check.lua layout`.

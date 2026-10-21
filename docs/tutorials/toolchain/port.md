@@ -65,14 +65,13 @@ An application that runs on more than one architecture names them:
 
 A port takes a package by its name and an alias, adds it to the target, and names its libraries where a tweak or daemon loads them:
 
-    add_requires("revenant@apple-backports", {alias = "apple-backports", configs = {uikit = true}})
+    add_deps("UIKitBackports")
 
     target("example")
         add_rules("@addon/revenant/app")
-        add_packages("apple-backports")
-        set_values("revenant.libraries", "apple-backports")
+        add_deps("FoundationBackports")
 
-The `configs` choose which backport libraries are built; see [the packages reference](../../reference/toolchain/packages.md#apple-backports). `revenant.libraries` is needed for the check to see the backport dylib as the build's own. Without it, a link fails with "these imports are not exported by the device's iOS", even though the package is there.
+The `configs` choose which backport libraries are built; see [the packages reference](../../reference/toolchain/packages.md#backports). `revenant.libraries` is needed for the check to see the backport dylib as the build's own. Without it, a link fails with "these imports are not exported by the device's iOS", even though the package is there.
 
 ### Swift
 
@@ -98,7 +97,7 @@ Combine is `revenant@combine`, and SwiftUI is `revenant@swiftui-uikit`. Both are
     target("example")
         add_packages("combine", "swiftui", "swift-runtime", "libcxx")
 
-A SwiftUI port takes the `backports` variant of the three packages. Combine's own weak import is answered by `revenant@apple-backports`, which the port then carries with `coredata = true` where it uses Core Data. The runtime's weak imports are checked against `modules/apple/runtime_guards.lua`.
+A SwiftUI port takes the `backports` variant of the three packages. Combine's own weak import is answered by the `frameworks/Backports` targets, which the port then carries with `coredata = true` where it uses Core Data. The runtime's weak imports are checked against `modules/apple/runtime_guards.lua`.
 
 ## Next
 

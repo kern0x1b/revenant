@@ -1,8 +1,0 @@
-protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
-NEAppPushDelegate	14.0	sdk16 body		NSObject	-	-	-	-	-	-
-NEAppPushDelegate	14.0	sdk16 body		NSObject	required	method	yes	appPushManager:didReceiveIncomingCallWithUserInfo:	- (void)appPushManager:(NEAppPushManager * _Nonnull)manager didReceiveIncomingCallWithUserInfo:(NSDictionary * _Nonnull)userInfo API_AVAILABLE(ios(14.0));	yes
-NWTCPConnectionAuthenticationDelegate	9.0	sdk16 body		NSObject	-	-	-	-	-	-
-NWTCPConnectionAuthenticationDelegate	9.0	sdk16 body		NSObject	optional	method	yes	shouldProvideIdentityForConnection:	- (BOOL)shouldProvideIdentityForConnection:(NWTCPConnection * _Nonnull)connection API_AVAILABLE(ios(9.0));	yes
-NWTCPConnectionAuthenticationDelegate	9.0	sdk16 body		NSObject	optional	method	yes	provideIdentityForConnection:completionHandler:	- (void)provideIdentityForConnection:(NWTCPConnection * _Nonnull)connection completionHandler:(void (^ _Nonnull)(SecIdentityRef _Nonnull, NSArray<id> * _Nonnull))completion API_AVAILABLE(ios(9.0));	yes
-NWTCPConnectionAuthenticationDelegate	9.0	sdk16 body		NSObject	optional	method	yes	shouldEvaluateTrustForConnection:	- (BOOL)shouldEvaluateTrustForConnection:(NWTCPConnection * _Nonnull)connection API_AVAILABLE(ios(9.0));	yes
-NWTCPConnectionAuthenticationDelegate	9.0	sdk16 body		NSObject	optional	method	yes	evaluateTrustForConnection:peerCertificateChain:completionHandler:	- (void)evaluateTrustForConnection:(NWTCPConnection * _Nonnull)connection peerCertificateChain:(NSArray<id> * _Nonnull)peerCertificateChain completionHandler:(void (^ _Nonnull)(SecTrustRef _Nonnull))completion API_AVAILABLE(ios(9.0));	yes

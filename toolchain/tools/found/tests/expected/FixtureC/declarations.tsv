@@ -1,3 +1,0 @@
-#libclang=<decls --version>	sdk=sdk	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
-typedef	c:@T@fc_count	-			int	-	-	-	-	50706e92b53013e9	-
-function	c:@F@fc_add	-			int (int, int)	int a | int b	-	-	-	b97eba60d77a3922	-

@@ -1,11 +1,12 @@
 local MODULES = path.join(os.scriptdir(), "..", "..", "modules")
 local dyld = import("apple.dyld", {rootdir = MODULES, anonymous = true})
+local workspace = import("workspace", {rootdir = MODULES, anonymous = true})
 local byteorder = import("byteorder", {rootdir = MODULES, anonymous = true})
 
 local MERGED = "first-rung.tsv.gz"
 
 local function index_dir()
-    return path.join(os.getenv("REVENANT_HOME") or path.join(os.getenv("HOME"), ".revenant"), "cache-index")
+    return path.join(workspace.home(), "cache-index")
 end
 
 local function index_file(release)

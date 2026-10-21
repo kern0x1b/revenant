@@ -1,8 +1,0 @@
-api	introduced	status	reasons	returns	params	decl
-be_kevent	18.4	generable		int	int kq; const struct kevent* changelist; int nchanges; struct kevent* eventlist; int nevents; unsigned int be_flags	int be_kevent(int kq, const struct kevent* changelist, int nchanges, struct kevent* eventlist, int nevents, unsigned int be_flags)
-be_kevent64	18.4	generable		int	int kq; const struct kevent64_s* changelist; int nchanges; struct kevent64_s* eventlist; int nevents; unsigned int flags	int be_kevent64(int kq, const struct kevent64_s* changelist, int nchanges, struct kevent64_s* eventlist, int nevents, unsigned int flags)
-be_memory_inline_jit_restrict_rwx_to_rw_with_witness	17.4	generable		void		void be_memory_inline_jit_restrict_rwx_to_rw_with_witness()
-be_memory_inline_jit_restrict_rwx_to_rw_with_witness_impl	17.4	generable		void		void be_memory_inline_jit_restrict_rwx_to_rw_with_witness_impl()
-be_memory_inline_jit_restrict_rwx_to_rx_with_witness	17.4	generable		void		void be_memory_inline_jit_restrict_rwx_to_rx_with_witness()
-be_memory_inline_jit_restrict_rwx_to_rx_with_witness_impl	17.4	generable		void		void be_memory_inline_jit_restrict_rwx_to_rx_with_witness_impl()
-be_memory_inline_jit_restrict_with_witness_supported	17.4	generable		int		int be_memory_inline_jit_restrict_with_witness_supported()

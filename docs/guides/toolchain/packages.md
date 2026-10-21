@@ -1,6 +1,6 @@
 # Write a package
 
-A package is a library, a runtime or a tool that a port requires by name. A package in `packages/<group>/<name>/` is an xmake package whose `on_install` builds the upstream for the port's architecture and release, with the toolchain's flags. This guide shows the bridges that do the building, and the traps that cost a build to find. The packages that exist are in the [packages reference](../../reference/toolchain/packages.md).
+A package is a library, a runtime or a tool that a port requires by name. A package in `packages/<letter>/<name>/` is an xmake package whose `on_install` builds the upstream for the port's architecture and release, with the toolchain's flags. This guide shows the bridges that do the building, and the traps that cost a build to find. The packages that exist are in the [packages reference](../../reference/toolchain/packages.md).
 
 ## Pin the upstream
 

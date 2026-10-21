@@ -83,7 +83,7 @@ A check runs when a file it names is staged or changed, and on every run that is
 | --- | --- |
 | `/usr/libexec/` | a `daemon` executable, through `revenant.install` |
 | `/usr/lib/revenant/<Package>/` | the shared libraries a tweak or daemon loads, of the packages named by `revenant.libraries`; only the libraries it loads |
-| `/usr/lib/revenant/org.revenant.apple-backports/` | the backports' libraries; one set per process |
+| `/usr/lib/revenant/org.revenant.backports/` | the backports' libraries; one set per process |
 | `/Applications/<Name>.app` | an application; its `Frameworks` folder holds `app.frameworks` |
 | `/usr/share/doc/<Package>/` | the licences named by `revenant.licenses` |
 | `/System/Library/LaunchDaemons/` | in an emulated image, the only folder iOS 6's launchd reads |

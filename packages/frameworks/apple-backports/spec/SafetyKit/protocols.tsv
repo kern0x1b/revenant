@@ -1,5 +1,0 @@
-protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
-SACrashDetectionDelegate	16.0	sdk16 body		NSObject	-	-	-	-	-	-
-SACrashDetectionDelegate	16.0	sdk16 body		NSObject	optional	method	yes	crashDetectionManager:didDetectEvent:	- (void)crashDetectionManager:(SACrashDetectionManager * _Nonnull)crashDetectionManager didDetectEvent:(SACrashDetectionEvent * _Nonnull)event;	yes
-SAEmergencyResponseDelegate	16.0	sdk16 body		NSObject	-	-	-	-	-	-
-SAEmergencyResponseDelegate	16.0	sdk16 body		NSObject	optional	method	yes	emergencyResponseManager:didUpdateVoiceCallStatus:	- (void)emergencyResponseManager:(SAEmergencyResponseManager * _Nonnull)emergencyResponseManager didUpdateVoiceCallStatus:(SAEmergencyResponseManagerVoiceCallStatus)voiceCallStatus;	yes

@@ -1,3 +1,0 @@
-module	kind	api	introduced	deprecated	obsoleted	unavailable	via
-_QuickLook_SwiftUI	method	SwiftUICore.View.quickLookPreview(_:in:)	14.0				container
-_QuickLook_SwiftUI	method	SwiftUICore.View.quickLookPreview(_:)	14.0				container

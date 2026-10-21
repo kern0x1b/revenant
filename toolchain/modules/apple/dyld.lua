@@ -2,6 +2,7 @@ import("core.base.option")
 import("macho")
 import("compat")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..")})
+import("workspace", {rootdir = path.join(os.scriptdir(), "..")})
 
 local caches = {}
 
@@ -24,7 +25,7 @@ local function uleb(data, at)
 end
 
 function root()
-    return path.join(os.getenv("REVENANT_HOME") or path.join(os.getenv("HOME"), ".revenant"), "dyld")
+    return path.join(workspace.home(), "dyld")
 end
 
 local function parts(version)
@@ -63,18 +64,6 @@ function held_source(folder, architecture)
     if os.isdir(libraries) then
         return libraries
     end
-end
-
-function held_releases(architecture)
-    local releases = {}
-    for _, folder in ipairs(os.dirs(path.join(root(), "*"))) do
-        local release = path.filename(folder)
-        if release:match("^%d+[%.%d]*$") and held_source(folder, architecture) then
-            table.insert(releases, release)
-        end
-    end
-    table.sort(releases, function (a, b) return compare(a, b) < 0 end)
-    return releases
 end
 
 function held_ladder(preferred)
@@ -856,9 +845,6 @@ local function first_release_file(ladder, sdkdir, under)
     return kept_file("first-release", hash.strhash128(sdk_key(sdkdir) .. " " .. ladder_signature(ladder)), under)
 end
 
-function first_release_key(ladder, sdkdir)
-    return code_key() .. "-" .. sdk_key(sdkdir) .. "-" .. ladder_signature(ladder)
-end
 
 function kept_files(sdkdirs, ladders, under)
     local files = {}
@@ -963,21 +949,6 @@ function image_imports(binaries, others, architecture)
         imports[path.filename(binary)] = names
     end
     return {imports = imports, exported = exported}
-end
-
-function unexported_weak_imports(binaries, others, architecture)
-    local read = image_imports(binaries, others, architecture)
-    local found = {}
-    for _, library in ipairs(table.orderkeys(read.imports)) do
-        local names = {}
-        for symbol, weak in pairs(read.imports[library]) do
-            if weak and not read.exported[symbol] then
-                names[symbol] = true
-            end
-        end
-        found[library] = table.orderkeys(names)
-    end
-    return found
 end
 
 function missing_imports(cachefile, binaries, root)
@@ -1390,47 +1361,6 @@ local function local_symbols(cache, address, wide)
     return found
 end
 
-function image_at(cache, address)
-    for _, loaded in ipairs(cache.images) do
-        for _, segment in ipairs(loaded.image.segments) do
-            if segment.name ~= "__LINKEDIT" and address >= segment.vmaddr
-                and address < segment.vmaddr + segment.vmsize then
-                return loaded
-            end
-        end
-    end
-    return nil
-end
-
-function symbol_at(cache, address)
-    local loaded = image_at(cache, address)
-    if not loaded then
-        return nil
-    end
-    cache.named = cache.named or {}
-    local names = cache.named[loaded.address]
-    if not names then
-        names = {}
-        for _, entry in ipairs(image_symbols(cache, loaded).exports) do
-            names[entry[1]] = names[entry[1]] or {}
-            table.insert(names[entry[1]], entry[2])
-        end
-        cache.named[loaded.address] = names
-    end
-    if names[address] then
-        return {name = table.concat(names[address], " | "), image = loaded.install, at = address, kind = "export"}
-    end
-    local below
-    for _, entry in ipairs(local_symbols(cache, loaded.address, loaded.image.wide)) do
-        if entry.value <= address and entry.value > 0 and (not below or entry.value > below.value) then
-            below = entry
-        end
-    end
-    if below then
-        return {name = below.name, image = loaded.install, at = below.value, kind = "local"}
-    end
-    return {name = nil, image = loaded.install}
-end
 
 local function symbol_table(cache, linkedit, symoff, nsyms, stroff, locals, wide)
     local entry_size = wide and 16 or 12

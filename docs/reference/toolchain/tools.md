@@ -30,21 +30,7 @@ Left out: the dark appearance, Display P3 renditions, size classes, device subty
 
 The index is written to `$HOME/.revenant/cache-index/`: one file per release of the names it holds, and `first-rung.tsv.gz` for every name. "First" means the oldest held release that carries the name, on the ladder `dyld.held_ladder({"armv7","armv7s"})` gives in `modules/apple/dyld.lua`. The reading child runs under `nice -n 19`; a cold build reads the whole ladder once and takes a long time, so run it one at a time.
 
-## Measured constants
-
-`toolchain/tools/corpus/cfconst.tsv` holds the constants of 31 objects in seven frameworks (558 declarations): each row is one declaration with its object, its imports, the release and architecture of the dyld cache its value was read from, its type, its name and its initialiser. `tools/gen/measured.lua` writes each object into `.gen/<Framework>/` when the generator runs; none of them is committed.
-
-    REVENANT_ROOT=$PWD xmake l tools/corpus/cfconst-check.lua    reads the caches the table names
-
-The check reads each symbol through `tools/corpus/cache-value.lua` and the project's reader, `modules/apple/dyld.lua`, and compares what the cache holds with the initialiser: a string by its text, a number by its float32 bits, a struct field by field, one word per field at the cache's pointer size. A row whose value differs fails the check. There is no pin. A row the reader cannot judge is reported as not judged, and the check fails if it judged none.
-
-Two rules the table follows. Where a header and a release's own image disagree, the release is the one that is right. A struct the reader does not read is recorded with its reason, not guessed.
-
 ## Other tool folders
 
 | Folder | What it holds |
 | --- | --- |
-| `gen/` | the generator of the apple-backports skeleton and of the headers a port compiles against (`cmd_gen.lua`, `cmd_headers.lua`), with the checks on its output (`cmd_check.lua`) |
-| `found/` | the declaration reader: a clang-based extractor (`decls.cc`) and the Lua that turns its output into facts (`facts.lua`) |
-| `intents/` | the App Intents generators: `objects.lua` and `gen-intents.lua` for the objects, `generate.lua` for the registry it drives (`gen-causes.lua`, `gen-registry.lua`), with their class groups and data |
-| `corpus/` | the measured tables and the readers of the caches (`cache-images.lua`, `cache-value.lua`) |

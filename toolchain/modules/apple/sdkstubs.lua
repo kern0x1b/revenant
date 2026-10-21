@@ -2,7 +2,7 @@ import("byteorder", {rootdir = path.join(os.scriptdir(), "..")})
 
 local FAMILY_UMBRELLA = "/usr/lib/libSystem.B.dylib"
 local FAMILY_FOLDER = "/usr/lib/system/"
-local LISTS = {"symbols", "weak-symbols", "thread-local-symbols"}
+local LISTS = {"symbols", "weak-symbols", "thread-local-symbols", "objc-classes", "objc-ivars", "objc-eh-types"}
 
 function documents(text)
     local found, current = {}, nil
@@ -58,19 +58,20 @@ function read(text)
         local listed = line:match("^  %- " .. key .. ":%s*%[(.-)%]")
         local held = section == "exports" or section == "reexports"
         if held and listed then
-            entry = {archs = architectures(listed), text = line}
+            entry = {archs = architectures(listed), lines = {line}}
             table.insert(doc.exports, entry)
         elseif entry and held then
-            entry.text = entry.text .. line
+            table.insert(entry.lines, line)
         end
     end
     for _, entry in ipairs(doc.exports) do
+        local body = table.concat(entry.lines)
         entry.lists = {}
         for _, list in ipairs(LISTS) do
-            local content = entry.text:match("\n    " .. list:gsub("%-", "%%-") .. ":%s*%[(.-)%]")
+            local content = body:match("\n    " .. list:gsub("%-", "%%-") .. ":%s*%[(.-)%]")
             entry.lists[list] = content and names(content) or {}
         end
-        entry.text = nil
+        entry.lines = nil
     end
     return doc
 end
@@ -203,6 +204,9 @@ function add_symbols(text, wanted)
     local entries = {}
     for _, group in ipairs(wanted) do
         local archs = supported_archs(doc, group.archs)
+        if doc.format == "v3" and group.list ~= "symbols" then
+            archs = {}
+        end
         local tokens = {}
         for _, token in ipairs(group.tokens) do
             local already = true
@@ -218,6 +222,167 @@ function add_symbols(text, wanted)
         end
     end
     return put_entries(text, entries)
+end
+
+function add_archs(text, wanted)
+    local doc = read(text)
+    local missing = {}
+    for _, arch in ipairs(wanted) do
+        if not table.contains(doc.archs, arch) then
+            table.insert(missing, arch)
+        end
+    end
+    if #missing == 0 then
+        return text
+    end
+    local key, suffix = doc.format == "v3" and "archs" or "targets", doc.format == "v3" and "" or "-ios"
+    local names = {}
+    for _, arch in ipairs(missing) do
+        table.insert(names, arch .. suffix)
+    end
+    local at, close = text:find("\n" .. key .. ":[ \t]*%[[^%]]*%]")
+    local listed = text:sub(at, close):gsub("%s*%]$", "")
+    return text:sub(1, at - 1) .. listed .. ", " .. table.concat(names, ", ") .. " ]" .. text:sub(close + 1)
+end
+
+function slice(doc, wanted)
+    local groups, order = {}, {}
+    for _, entry in ipairs(doc.exports) do
+        local archs = {}
+        for _, arch in ipairs(wanted) do
+            if table.contains(entry.archs, arch) then
+                table.insert(archs, arch)
+            end
+        end
+        if #archs > 0 then
+            for _, list in ipairs(LISTS) do
+                local key = list .. "\t" .. table.concat(archs, ",")
+                if not groups[key] then
+                    groups[key] = {archs = archs, list = list, tokens = {}, seen = {}}
+                    table.insert(order, key)
+                end
+                for _, symbol in ipairs(entry.lists[list]) do
+                    if not symbol:startswith("$ld$") and not groups[key].seen[symbol] then
+                        groups[key].seen[symbol] = true
+                        table.insert(groups[key].tokens, symbol)
+                    end
+                end
+            end
+        end
+    end
+    local out = {}
+    for _, key in ipairs(order) do
+        table.insert(out, {archs = groups[key].archs, list = groups[key].list, tokens = groups[key].tokens})
+    end
+    return out
+end
+
+local function section(text, key)
+    local at = text:find("\n" .. key .. ":[ \t]*\n")
+    if not at then
+        return nil
+    end
+    return at, text:find("\n%S", at + 1) or #text
+end
+
+local function armv7_lines(older, key)
+    local oat, oafter = section(older, key)
+    if not oat then
+        return {}
+    end
+    local body = older:sub(oat, oafter):match("^\n[^\n]*\n(.*)$") or ""
+    local kept, keep = {}, false
+    for line in body:gmatch("[^\n]*\n") do
+        if line:match("^  %- ") then
+            keep = line:find("armv7", 1, true) ~= nil
+        end
+        if keep then
+            table.insert(kept, line)
+        end
+    end
+    return kept
+end
+
+function add_section(text, older_parts, key)
+    local at, after = section(text, key)
+    if at and text:sub(at, after):find("armv7", 1, true) then
+        return text
+    end
+    local kept = {}
+    for _, older in ipairs(older_parts) do
+        kept = armv7_lines(older, key)
+        if #kept > 0 then
+            break
+        end
+    end
+    if #kept == 0 then
+        return text
+    end
+    local extra = table.concat(kept)
+    if at then
+        return text:sub(1, after) .. extra .. text:sub(after + 1)
+    end
+    if text:sub(-1) ~= "\n" then
+        text = text .. "\n"
+    end
+    return text .. key .. ":\n" .. extra
+end
+
+function restore_armv7(text, held, older_parts)
+    local slices = {}
+    for _, arch in ipairs({"armv7", "armv7s"}) do
+        if table.contains(held.archs, arch) then
+            table.insert(slices, arch)
+        end
+    end
+    text = add_archs(text, slices)
+    if not text:find("^%-%-%- !tapi%-tbd%-v3") then
+        text = add_clients(text)
+        text = add_section(text, older_parts, "parent-umbrella")
+    end
+    return add_symbols(text, slice(held, slices))
+end
+
+function add_clients(text)
+    local at = text:find("\nallowable%-clients:[ \t]*\n")
+    if not at then
+        return text
+    end
+    local after = text:find("\n%S", at + 1) or #text
+    local section = text:sub(at, after)
+    if section:find("armv7", 1, true) then
+        return text
+    end
+    local body = section:match("^\n[^\n]*\n(.*)$") or ""
+    local extra = (body:gsub("targets:(%s*)%[[^%]]*%]", "targets:%1[ armv7-ios, armv7s-ios ]"))
+    if extra == "" then
+        return text
+    end
+    return text:sub(1, after) .. extra .. text:sub(after + 1)
+end
+
+function add_reexports(text, capable)
+    local at = text:find("\nreexported%-libraries:[ \t]*\n")
+    if not at then
+        return text
+    end
+    local after = text:find("\n%S", at + 1) or #text
+    local section = text:sub(at, after)
+    if section:find("armv7", 1, true) then
+        return text
+    end
+    local names, seen = {}, {}
+    for name in section:gmatch("'(/[^']+)'") do
+        if capable[name] and not seen[name] then
+            seen[name] = true
+            table.insert(names, "'" .. name .. "'")
+        end
+    end
+    if #names == 0 then
+        return text
+    end
+    local entry = string.format("  - targets:         [ armv7-ios, armv7s-ios ]\n    libraries:       [ %s ]\n", table.concat(names, ", "))
+    return text:sub(1, after) .. entry .. text:sub(after + 1)
 end
 
 function group(found)

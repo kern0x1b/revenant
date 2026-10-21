@@ -90,7 +90,7 @@ arm64, плюс гостевой libswiftCore, всё переводится е�
 - 7 × `DispatchQueueSchedulerTests` — trap в `SchedulerTimeType.Stride.magnitude`. Это `Int(_nanoseconds: Int64)`, а `Int` на armv7 32-битный. **У Apple ровно та же форма API**: в `Schedulers+DispatchQueue.swift` (Apache-2.0) `public var magnitude: Int` — само хранилище; в `Dispatch.swiftinterface` SDK 16.4 — `public typealias Magnitude = Swift.Int`. То есть на 32 битах и Apple Combine не представляет интервалы больше ±2,1 с. Упирается в `SignedNumeric.Magnitude`. Полезное для upstream исправление: хранить `Int64`, а публичный геттер сделать `Int(clamping:)`, тесты величин закрыть `#if` по разрядности. Это касается всех 32-битных платформ OpenCombine (wasm32, armv7 Linux/Android).
 - 1 × `DispatchQueue.async(group:qos:flags:)` и 1 × `DispatchQueue.concurrentPerform` — падение внутри libdispatch iOS 6 из Swift-оверлея (QoS — API iOS 8). Передано проекту Swift-оверлеев.
 - 1 × `Dictionary._conditionallyBridgeFromObjectiveC` (путь JSONDecoder) — trap в оверлее. Передано проекту Swift-оверлеев.
-- 5 × `Timer.tolerance` → слабый `CFRunLoopTimerSetTolerance` (iOS 7) равен NULL. Передано проекту бэкпортов, **уже реализовано** ею (`apple-backports`, `NSTimer+Tolerance.m`); после влития прогон нужно повторить.
+- 5 × `Timer.tolerance` → слабый `CFRunLoopTimerSetTolerance` (iOS 7) равен NULL. Передано проекту бэкпортов, **уже реализовано** ею (the backports, `NSTimer+Tolerance.m`); после влития прогон нужно повторить.
 
 Нынешние результаты тех же тестов против Combine: `docs/reference/combine/test-results.md`.
 

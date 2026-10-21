@@ -1,6 +1,0 @@
-framework	kind	usr	container	name	side	type	params	availability	message	declhash
-_PermissionKit_UIKit	swift-class	s:13PermissionKit9AskCenterC	-	AskCenter	-	-	-	ios=26.2,macos=26.2	-	a65f5ef7b7f359c4
-_PermissionKit_UIKit	swift-method	s:13PermissionKit9AskCenterC01_aB6_UIKitE3ask_2inyAA0A8QuestionCyAA18CommunicationTopicVG_So16UIViewControllerCtYaKF	AskCenter	ask(_:in:)	-	()	PermissionKit.PermissionQuestion<PermissionKit.CommunicationTopic> | UIKit.UIViewController	-	-	401d3ff61b654227
-_PermissionKit_UIKit	swift-method	s:13PermissionKit9AskCenterC01_aB6_UIKitE3ask_2inyAA0A8QuestionCyAA25SignificantAppUpdateTopicVG_So16UIViewControllerCtYaKF	AskCenter	ask(_:in:)	-	()	PermissionKit.PermissionQuestion<PermissionKit.SignificantAppUpdateTopic> | UIKit.UIViewController	-	-	30bac9907e6b2b19
-_PermissionKit_UIKit	swift-class	s:13PermissionKit19CommunicationLimitsC	-	CommunicationLimits	-	-	-	ios=26,macos=26	-	31c5640f1d8e48ef
-_PermissionKit_UIKit	swift-method	s:13PermissionKit19CommunicationLimitsC01_aB6_UIKitE3ask_2inyAA0A8QuestionCyAA0C5TopicVG_So16UIViewControllerCtYaKF	CommunicationLimits	ask(_:in:)	-	()	PermissionKit.PermissionQuestion<PermissionKit.CommunicationTopic> | UIKit.UIViewController	-	-	535647f95d15b0e0

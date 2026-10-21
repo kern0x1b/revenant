@@ -47,7 +47,7 @@ The xmake verbs the toolchain adds, their options and defaults, the verdicts and
 
 | Action | What it does |
 | --- | --- |
-| `install` | Puts the packages of the port, and `revenant@apple-backports` if it is used, into the image of the emulated device, and runs their maintainer scripts against it. |
+| `install` | Puts the packages of the port, and the Backports targets if it is used, into the image of the emulated device, and runs their maintainer scripts against it. |
 | `run COMMAND` | Starts `COMMAND` in a fresh clone of the image and reports a verdict. |
 | `launch BUNDLE-ID [STEP ...]` | Installs, registers the application with SpringBoard, has SpringBoard launch it, and keeps its output and a snapshot. Steps follow the identifier: `tap X Y`, `drag X1 Y1 X2 Y2` (in points), `home`, `until-exit`. |
 | `debug COMMAND` | Starts `COMMAND` as the guest's first process under the emulator's debugger, and prints where it stopped. |

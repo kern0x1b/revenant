@@ -1,2 +1,0 @@
-protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
-UICoordinateSpace	8.0	refused	UICoordinateSpace: not in the 26.2 AST; the SDK that declares it is not the one the build uses		-	-	-	-	-	-

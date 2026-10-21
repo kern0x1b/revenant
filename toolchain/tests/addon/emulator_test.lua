@@ -523,7 +523,7 @@ local function naming_step(emulator, found)
 end
 
 local function runner_source(opt, found)
-    local source = io.readfile(path.join(opt.modules, "..", "..", "packages", "emulator", "emulator-guest", "src", "revenant-runner.c"))
+    local source = io.readfile(path.join(opt.modules, "..", "..", "packages", "e", "emulator-guest", "port", "src", "revenant-runner.c"))
     if source:find("CFPropertyListCreateWithStream", 1, true) then
         table.insert(found, "the runner reads SystemVersion.plist with a function iOS 3 does not have: CFPropertyListCreateWithStream arrived in 4.0, CFPropertyListCreateFromStream is there from 2.0")
     end

@@ -1,5 +1,0 @@
-{
-    "framework": "Spatial",
-    "entries": [],
-    "note": "The value types are this package's build: files/Spatial is the source of the Spatial module xmake.lua builds, both scalars out of one gyb template, and facts/Spatial/README.md names the measurements - the armv7 / iOS 6.1.3 build and the host differential against the framework itself. No entry is written here, and by this directory's own rule (README.md) that means no name in it is claimed implemented: the row list is the corpus ledger's Spatial.tsv, which the corpus tool places against the built module, and a Swift module exports no symbol a dylib inventory sees, so nothing here reaches check_registry or the lift sets."
-}

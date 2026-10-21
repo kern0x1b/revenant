@@ -8,7 +8,7 @@ description: Turn the built app into a Debian package for a jailbroken device wi
 `xmake deb` builds the project, stages every target that names a control file, strips and signs
 the binaries with `ldid`, checks every import against the release's own libraries **as a release
 build** (a weak import the release lacks is refused here, where a plain build only warns), and
-writes a `.deb`. For an app that uses `revenant@apple-backports`, or shares the Swift runtime, it
+writes a `.deb`. For an app that links the `frameworks/Backports` targets, or shares the Swift runtime, it
 also writes the `.deb` of each such dependency beside it and adds a `Depends` on it. At this pin a
 Swift app that carries its runtime is refused here, and a shared runtime was never built (skill
 `swift` §7). Read
@@ -57,7 +57,7 @@ xmake deb -y -v > .logs/deb.log 2>&1
 argument packages only the control file that target names.
 
 Check, in `.logs/deb.log`: a line `deb build/<Package>_<Version>_iphoneos-arm.deb`, and for an app
-with backports a line `deb build/org.revenant.apple-backports_<release>+<digest>_iphoneos-arm.deb`
+with backports a line `deb build/org.revenant.backports_<release>+<digest>_iphoneos-arm.deb`
 before it; no `error:`, no `add -v for getting more warnings` (without `-v` xmake shows only the
 first warning). Selector warnings are the skills `build`'s and `backports`' concern: `xmake deb`
 does not refuse them, so read every one, do not skip them.
@@ -79,23 +79,23 @@ dpkg-deb -c build/<Package>_<Version>_iphoneos-arm.deb
 - `Package:`, `Name:`, `Architecture: iphoneos-arm`, `Maintainer:` as `PROJECT.md` says;
 - `Version:` equal to the project's version, and `Installed-Size:` present;
 - `Depends:` your own entries, then, for an app with backports,
-  `org.revenant.apple-backports (>= <release>+<digest>)` — the exact version of the backports `.deb`
+  `org.revenant.backports (>= <release>+<digest>)` — the exact version of the backports `.deb`
   written beside it — and, for a Swift app that shares its runtime, the runtime's packages.
 
 In `-c`, check: `./Applications/<Name>.app/` with `<Name>` (the executable), `Info.plist` and the
-app's resources; nothing under `/usr/lib/revenant/org.revenant.apple-backports/` (the backports are
+app's resources; nothing under `/usr/lib/revenant/org.revenant.backports/` (the backports are
 **not** in the app's package; they come in their own); no source, no build artefact, nothing of
 Apple's.
 
-Inspect the backports package the same way when there is one: `Package: org.revenant.apple-backports`,
-`Architecture: iphoneos-arm`, its libraries under `./usr/lib/revenant/org.revenant.apple-backports/bands/`.
+Inspect the backports package the same way when there is one: `Package: org.revenant.backports`,
+`Architecture: iphoneos-arm`, its libraries under `./usr/lib/revenant/org.revenant.backports/bands/`.
 Its `postinst` links the band of the device's own release when it is installed, and refuses a
 release outside the bands it carries.
 
 ## 4. What travels together
 
 The app's `.deb` is not installable alone when it depends on the backports or a shared runtime:
-dpkg refuses it until `org.revenant.apple-backports` of at least that version is installed. Keep
+dpkg refuses it until `org.revenant.backports` of at least that version is installed. Keep
 every `.deb` this step wrote together:
 
 - on the user's own device, skill `device`: `xmake device install` installs the dependency
@@ -111,7 +111,7 @@ Record in `PROJECT.md` `## Progress`: the `.deb` paths, and the `Package`, `Vers
 ## Traps
 
 - `Version:` in the control file → the build refuses it; the version comes from `set_version`.
-- Writing `Depends: org.revenant.apple-backports` by hand → it goes stale when the backports change;
+- Writing `Depends: org.revenant.backports` by hand → it goes stale when the backports change;
   the build adds it with the exact version of the package it just wrote.
 - Shipping only the app's `.deb` → it cannot be installed where the backports package is missing;
   ship every `.deb` the step wrote.

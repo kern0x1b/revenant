@@ -1,5 +1,0 @@
-protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
-VSAccountManagerDelegate	10.0	sdk16 body		NSObject	-	-	-	-	-	-
-VSAccountManagerDelegate	10.0	sdk16 body		NSObject	required	method	yes	accountManager:presentViewController:	- (void)accountManager:(VSAccountManager * _Nonnull)accountManager presentViewController:(UIViewController * _Nonnull)viewController;	yes
-VSAccountManagerDelegate	10.0	sdk16 body		NSObject	required	method	yes	accountManager:dismissViewController:	- (void)accountManager:(VSAccountManager * _Nonnull)accountManager dismissViewController:(UIViewController * _Nonnull)viewController;	yes
-VSAccountManagerDelegate	10.0	sdk16 body		NSObject	optional	method	yes	accountManager:shouldAuthenticateAccountProviderWithIdentifier:	- (BOOL)accountManager:(VSAccountManager * _Nonnull)accountManager shouldAuthenticateAccountProviderWithIdentifier:(NSString * _Nonnull)accountProviderIdentifier;	yes

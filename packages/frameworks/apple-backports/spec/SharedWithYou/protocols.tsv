@@ -1,7 +1,0 @@
-protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
-SWCollaborationViewDelegate	16.0	sdk16 body		NSObject	-	-	-	-	-	-
-SWCollaborationViewDelegate	16.0	sdk16 body		NSObject	optional	method	yes	collaborationViewShouldPresentPopover:	- (BOOL)collaborationViewShouldPresentPopover:(SWCollaborationView * _Nonnull)collaborationView;	yes
-SWCollaborationViewDelegate	16.0	sdk16 body		NSObject	optional	method	yes	collaborationViewWillPresentPopover:	- (void)collaborationViewWillPresentPopover:(SWCollaborationView * _Nonnull)collaborationView;	yes
-SWCollaborationViewDelegate	16.0	sdk16 body		NSObject	optional	method	yes	collaborationViewDidDismissPopover:	- (void)collaborationViewDidDismissPopover:(SWCollaborationView * _Nonnull)collaborationView;	yes
-SWHighlightEvent	16.0	sdk16 body		NSObject,NSSecureCoding,NSCopying	-	-	-	-	-	-
-SWHighlightEvent	16.0	sdk16 body		NSObject,NSSecureCoding,NSCopying	required	property	no	highlightURL	@property (nonatomic, readonly, copy) NSURL * _Nonnull highlightURL;	yes

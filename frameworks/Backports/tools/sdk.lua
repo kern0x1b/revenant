@@ -4,8 +4,12 @@ function root()
     return path.absolute(path.join(os.scriptdir(), "..", "..", ".."))
 end
 
+function workspace()
+    return import("workspace", {rootdir = path.join(root(), "toolchain", "modules"), anonymous = true})
+end
+
 function sdk_folder()
-    return import("workspace", {rootdir = path.join(root(), "toolchain", "modules"), anonymous = true}).sdk()
+    return workspace().sdk()
 end
 
 function sdk_version(sdk)
@@ -72,7 +76,7 @@ function build_root()
 end
 
 function model_cache()
-    return path.join(os.getenv("HOME") or "", ".revenant", "cache", "backports", "modcache")
+    return path.join(workspace().home(), "cache", "backports", "modcache")
 end
 
 function cache_key(version)

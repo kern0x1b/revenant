@@ -16,7 +16,9 @@ local languages = {
     yaml = {kind = "yaml"}
 }
 
-local legal = {"[Ll]icen[cs]e", "SPDX%-License%-Identifier", "[Cc]opyright"}
+local legal = {"^SPDX%-", "^[Cc]opyright", "^Licensed under the ", "^Licensed to the ", "^Permission is hereby granted,",
+    "^Redistribution and use in source and binary forms", "^This program is free software",
+    "^This Source Code Form is subject to the terms of the Mozilla Public", "^Use of this source code is governed by a"}
 
 local markers = {
     c = {"//", "/*"},
@@ -490,9 +492,12 @@ function comments(text, lang)
     if header > 0 then
         local block = text:sub(spans[1][1], spans[header][2])
         local islegal = false
-        for _, pattern in ipairs(legal) do
-            if block:find(pattern) then
-                islegal = true
+        for line in (block .. "\n"):gmatch("(.-)\n") do
+            local words = line:gsub("^[%s/*#%-!;]*", "")
+            for _, pattern in ipairs(legal) do
+                if words:find(pattern) then
+                    islegal = true
+                end
             end
         end
         if islegal then

@@ -1,2 +1,0 @@
-kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
-constant	CLLocationPushServiceErrorDomain	-	CLLocationPushServiceErrorDomain	15.0	NSErrorDomain const	API_AVAILABLE(ios(15.0)) API_UNAVAILABLE(watchos, tvos, macos, macCatalyst, visionos)	8fdec43033cbfd6d	found	CLLocationPushServiceErrorDomain	CLLocationPushServiceErrorDomain	ios-26.2-cache	-	exported	ns	-

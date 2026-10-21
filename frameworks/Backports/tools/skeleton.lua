@@ -20,9 +20,9 @@ struct revenant_backports_method {
     IMP implementation;
 };
 
-void revenant_backports_fail(const char *name) __attribute__((noreturn));
+void revenant_backports_fail(const char *name) __attribute__((noreturn, visibility("hidden")));
 void revenant_backports_register(const struct revenant_backports_class *classes, unsigned count,
-                                 const struct revenant_backports_method *methods, unsigned method_count);
+                                 const struct revenant_backports_method *methods, unsigned method_count) __attribute__((visibility("hidden")));
 
 #endif
 ]==]
@@ -105,7 +105,7 @@ local function objc_model(rows)
     return classes, methods
 end
 
-local function write_objc(file, classes, methods)
+local function objc_source(classes, methods)
     local lines = {'#include "revenant_backports.h"', ""}
     for index, method in ipairs(methods) do
         table.insert(lines, string.format("static void revenant_stub_%d(void)", index))
@@ -132,27 +132,32 @@ local function write_objc(file, classes, methods)
     table.insert(lines, string.format("    revenant_backports_register(%s, %d, %s, %d);",
         #classes > 0 and "revenant_classes" or "NULL", #classes, #methods > 0 and "revenant_methods" or "NULL", #methods))
     table.insert(lines, "}")
-    io.writefile(file, table.concat(lines, "\n") .. "\n")
+    return table.concat(lines, "\n") .. "\n"
 end
 
-local function write_c(file, functions, swift)
+local function c_source(functions, swift)
     local lines = {'#include "revenant_backports.h"', ""}
     for index, entry in ipairs(functions) do
-        table.insert(lines, string.format("__attribute__((weak)) void revenant_c_%d(void) __asm__(%s);", index, quoted("_" .. entry.symbol)))
-        table.insert(lines, string.format("__attribute__((weak)) void revenant_c_%d(void) { revenant_backports_fail(%s); }", index, quoted(entry.label)))
+        table.insert(lines, string.format("__attribute__((weak, visibility(\"default\"))) void revenant_c_%d(void) __asm__(%s);", index, quoted("_" .. entry.symbol)))
+        table.insert(lines, string.format("__attribute__((weak, visibility(\"default\"))) void revenant_c_%d(void) { revenant_backports_fail(%s); }", index, quoted(entry.label)))
     end
     for index, entry in ipairs(swift) do
-        table.insert(lines, string.format("__attribute__((weak)) void revenant_swift_%d(void) __asm__(%s);", index, quoted("_" .. entry.symbol)))
-        table.insert(lines, string.format("__attribute__((weak)) void revenant_swift_%d(void) { revenant_backports_fail(%s); }", index, quoted(entry.label)))
+        table.insert(lines, string.format("__attribute__((weak, visibility(\"default\"))) void revenant_swift_%d(void) __asm__(%s);", index, quoted("_" .. entry.symbol)))
+        table.insert(lines, string.format("__attribute__((weak, visibility(\"default\"))) void revenant_swift_%d(void) { revenant_backports_fail(%s); }", index, quoted(entry.label)))
     end
-    io.writefile(file, table.concat(lines, "\n") .. "\n")
+    return table.concat(lines, "\n") .. "\n"
+end
+
+local function emit(file, text)
+    if not os.isfile(file) or io.readfile(file) ~= text then
+        io.writefile(file, text)
+    end
 end
 
 function write(skeleton, frameworks)
-    os.tryrm(skeleton)
     os.mkdir(skeleton)
-    io.writefile(path.join(skeleton, "revenant_backports.h"), HEADER)
-    io.writefile(path.join(skeleton, "registrar.m"), REGISTRAR)
+    emit(path.join(skeleton, "revenant_backports.h"), HEADER)
+    emit(path.join(skeleton, "registrar.m"), REGISTRAR)
     local totals = {objc = 0, c = 0, swift = 0}
     for _, framework in ipairs(frameworks) do
         local functions, swift = {}, {}
@@ -167,11 +172,17 @@ function write(skeleton, frameworks)
         totals.objc = totals.objc + #methods
         totals.c = totals.c + #functions
         totals.swift = totals.swift + #swift
+        local objc_file = path.join(skeleton, framework.name .. ".m")
+        local c_file = path.join(skeleton, framework.name .. ".c")
         if #classes > 0 or #methods > 0 then
-            write_objc(path.join(skeleton, framework.name .. ".m"), classes, methods)
+            emit(objc_file, objc_source(classes, methods))
+        else
+            os.tryrm(objc_file)
         end
         if #functions > 0 or #swift > 0 then
-            write_c(path.join(skeleton, framework.name .. ".c"), functions, swift)
+            emit(c_file, c_source(functions, swift))
+        else
+            os.tryrm(c_file)
         end
     end
     return totals

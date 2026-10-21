@@ -1,5 +1,0 @@
-{
-    "framework": "CloudKit",
-    "entries": [],
-    "note": "The Swift half of CloudKit this package builds is files/CloudKit: CKError and CKError.Code (85 of the 88 rows of the spec's CKError containers; the three record properties wait for CKRecord). facts/CloudKit/CKError.md names the measurements against the host. No entry is written here, and by this directory's README that means no name in it is claimed implemented: the module is wired into xmake.lua but not yet built, because the runtime install is blocked on the lift's measured set for iPhoneOS16.4 (the lift left-alone check fails with 43 differences; facts/CloudKit/CKRecord.md and the review that carries this file say where). When the install passes and the module is measured, the two containers become rows here as implemented."
-}

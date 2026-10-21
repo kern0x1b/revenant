@@ -1,9 +1,0 @@
-protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
-CMHeadphoneMotionManagerDelegate	14.0	sdk16 body		NSObject	-	-	-	-	-	-
-CMHeadphoneMotionManagerDelegate	14.0	sdk16 body		NSObject	optional	method	yes	headphoneMotionManagerDidConnect:	- (void)headphoneMotionManagerDidConnect:(CMHeadphoneMotionManager * _Nonnull)manager;	yes
-CMHeadphoneMotionManagerDelegate	14.0	sdk16 body		NSObject	optional	method	yes	headphoneMotionManagerDidDisconnect:	- (void)headphoneMotionManagerDidDisconnect:(CMHeadphoneMotionManager * _Nonnull)manager;	yes
-CMWaterSubmersionManagerDelegate	16.0	sdk16 body		NSObject	-	-	-	-	-	-
-CMWaterSubmersionManagerDelegate	16.0	sdk16 body		NSObject	required	method	yes	manager:didUpdateEvent:	- (void)manager:(CMWaterSubmersionManager * _Nonnull)manager didUpdateEvent:(CMWaterSubmersionEvent * _Nonnull)event;	yes
-CMWaterSubmersionManagerDelegate	16.0	sdk16 body		NSObject	required	method	yes	manager:didUpdateMeasurement:	- (void)manager:(CMWaterSubmersionManager * _Nonnull)manager didUpdateMeasurement:(CMWaterSubmersionMeasurement * _Nonnull)measurement;	yes
-CMWaterSubmersionManagerDelegate	16.0	sdk16 body		NSObject	required	method	yes	manager:didUpdateTemperature:	- (void)manager:(CMWaterSubmersionManager * _Nonnull)manager didUpdateTemperature:(CMWaterTemperature * _Nonnull)measurement;	yes
-CMWaterSubmersionManagerDelegate	16.0	sdk16 body		NSObject	required	method	yes	manager:errorOccurred:	- (void)manager:(CMWaterSubmersionManager * _Nonnull)manager errorOccurred:(NSError * _Nonnull)error;	yes

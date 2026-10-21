@@ -1,3 +1,0 @@
-framework	kind	usr	container	name	side	type	params	availability	message	declhash
-SecurityUI	swift-protocol	s:7SwiftUI4ViewP	-	View	-	-	-	ios=13.0,macos=10.15,tvos=13.0,watchos=6.0	-	897655e96801af3a
-SecurityUI	swift-method	s:7SwiftUI4ViewP08SecurityB0E16certificateSheet5trust5title7message4helpQrAA7BindingVySo11SecTrustRefaSgG_SSSgAP10Foundation3URLVSgtF	View	certificateSheet(trust:title:message:help:)	-	some SwiftUI.View	SwiftUI.Binding<Security.SecTrust?> | Swift.String? | Swift.String? | Foundation.URL?	-	-	53dfef49a045b6df

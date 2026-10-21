@@ -1,5 +1,0 @@
-framework	kind	usr	container	name	side	type	params	availability	message	declhash
-MetalKit	swift-function	s:8MetalKit030MTKModelIOVertexDescriptorFromA9WithErrorySo09MDLVertexE0CSo09MTLVertexE0CKF	-	MTKModelIOVertexDescriptorFromMetalWithError(_:)	-	ModelIO.MDLVertexDescriptor	Metal.MTLVertexDescriptor	ios=10.0,macos=10.12,swift=4,tvos=10.0	-	961a61df7f74bfa8
-MetalKit	swift-function	s:8MetalKit44MTKMetalVertexDescriptorFromModelIOWithErrorySo09MTLVertexE0CSgSo09MDLVertexE0CKF	-	MTKMetalVertexDescriptorFromModelIOWithError(_:)	-	Metal.MTLVertexDescriptor?	ModelIO.MDLVertexDescriptor	ios=10.0,macos=10.12,swift=4,tvos=10.0	-	1b9ec89092a3fda6
-MetalKit	swift-class	c:objc(cs)MTKMesh	-	MTKMesh	-	-	-	ios=9.0	-	e93d2aaf4d9ee2f2
-MetalKit	swift-method	s:So7MTKMeshC8MetalKitE9newMeshes5asset6deviceSaySo7MDLMeshCG13modelIOMeshes_SayABG05metalcE0tSo8MDLAssetC_So9MTLDevice_ptKFZ	MTKMesh	newMeshes(asset:device:)	+	(modelIOMeshes: [ModelIO.MDLMesh], metalKitMeshes: [MetalKit.MTKMesh])	ModelIO.MDLAsset | any Metal.MTLDevice	-	-	c8c30d7f4b2ff85c

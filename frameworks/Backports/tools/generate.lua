@@ -4,7 +4,6 @@ import("core.project.project")
 local ast = import("ast", {rootdir = os.scriptdir(), anonymous = true})
 local sdkfiles = import("sdk", {rootdir = os.scriptdir(), anonymous = true})
 local facts = import("facts", {rootdir = os.scriptdir(), anonymous = true})
-local implemented = import("implemented", {rootdir = os.scriptdir(), anonymous = true})
 local skeleton = import("skeleton", {rootdir = os.scriptdir(), anonymous = true})
 
 local SHARDS = 4
@@ -98,10 +97,9 @@ function extract_all(sdk, version, cache, logs, names)
     end, {total = #shards, comax = #shards})
 end
 
-local function ready(sdk, version, logs)
+local function ready(sdk, version, logs, names)
     local cache = sdkfiles.cache_folder(version)
     os.mkdir(cache)
-    local names = sdkfiles.framework_names(sdk)
     local missing = {}
     for _, name in ipairs(names) do
         if not os.isfile(path.join(cache, name .. ".tsv")) then
@@ -117,7 +115,7 @@ local function ready(sdk, version, logs)
         os.mkdir(logs)
         extract_all(sdk, version, cache, logs, missing)
     end
-    return cache, names
+    return cache
 end
 
 local function frameworks_of(cache, names)
@@ -132,20 +130,44 @@ function key_of(row)
     return row.kind .. "|" .. row.container .. "|" .. row.name
 end
 
-function prepare()
+function target_minimum()
+    local option = project.option("backports_min_ios")
+    assert(option, "frameworks/Backports/xmake.lua declares no backports_min_ios option")
+    return option:value() or option:get("default")
+end
+
+function prepare(only)
     local sdk = sdkfiles.sdk_folder()
     local version = sdkfiles.sdk_version(sdk)
     local logs = path.join(sdkfiles.build_root(), "logs")
     os.mkdir(logs)
-    local cache, names = ready(sdk, version, logs)
+    local names = sdkfiles.framework_names(sdk)
+    if only then
+        local chosen = {}
+        for _, name in ipairs(names) do
+            if table.contains(only, name) then
+                table.insert(chosen, name)
+            end
+        end
+        names = chosen
+    end
+    local cache = ready(sdk, version, logs, names)
     return {
         sdk = sdk,
         version = version,
         logs = logs,
         minimum = minimum(),
         frameworks = frameworks_of(cache, names),
-        implemented = implemented.detect(sdk, version),
     }
+end
+
+function skeleton_for(name)
+    local state = prepare({name})
+    local pending = {}
+    for _, framework in ipairs(state.frameworks) do
+        table.insert(pending, {name = framework.name, rows = in_scope_rows(state, framework)})
+    end
+    return skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending)
 end
 
 function in_scope_rows(state, framework)
@@ -159,8 +181,12 @@ function in_scope_rows(state, framework)
     return kept
 end
 
-function is_implemented(state, framework, row)
-    return (state.implemented[framework.name] or {})[key_of(row)] == true
+function is_implemented(implemented, framework, row)
+    local keys = implemented[framework.name] or {}
+    if row.kind == "property" then
+        return keys["instance method|" .. row.container .. "|" .. row.name] == true
+    end
+    return keys[key_of(row)] == true
 end
 
 function main(...)
@@ -171,14 +197,9 @@ function main(...)
     local state = prepare()
     local pending = {}
     for _, framework in ipairs(state.frameworks) do
-        local rows = {}
-        for _, row in ipairs(in_scope_rows(state, framework)) do
-            if not is_implemented(state, framework, row) then
-                table.insert(rows, row)
-            end
-        end
-        table.insert(pending, {name = framework.name, rows = rows})
+        table.insert(pending, {name = framework.name, rows = in_scope_rows(state, framework)})
     end
+    os.tryrm(path.join(sdkfiles.build_root(), "skeleton"))
     local totals = skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending)
     print(string.format("skeleton: %d ObjC methods, %d C functions, %d Swift symbols under %s", totals.objc, totals.c, totals.swift,
         path.join(sdkfiles.build_root(), "skeleton")))

@@ -3,7 +3,6 @@ function main(modules, root)
     local macho = import("apple.macho", {rootdir = modules, anonymous = true})
     local debian = import("debian", {rootdir = modules, anonymous = true})
     local emulator = import("emulator", {rootdir = modules, anonymous = true})
-    local backports = import("apple.backports", {rootdir = modules, anonymous = true})
     local vt = import("vt-ladder-names", {rootdir = path.join(modules, "..", "tools"), anonymous = true})
     local byteorder = import("byteorder", {rootdir = modules, anonymous = true})
 
@@ -50,13 +49,6 @@ function main(modules, root)
         emit("emulator.describe_files", entry.path .. " " .. entry.size .. " " .. entry.hash)
     end
 
-    for _, name in ipairs(NAMES) do
-        write(path.join(root, "library", "Lib", name .. (#name % 2 == 0 and ".m" or ".c")), "")
-    end
-    for _, file in ipairs(backports.sources(path.join(root, "library"), {folder = "Lib"})) do
-        emit("backports.sources", relative(file))
-    end
-
     local names = path.join(root, "names.txt")
     write(names, table.concat(NAMES, "\n") .. "\n")
     for _, name in ipairs(vt.names_from(names)) do
@@ -68,23 +60,6 @@ function main(modules, root)
     local doc = {exports = {{archs = {"arm64"}, lists = {symbols = {"UIVieX"}, ["weak-symbols"] = {}, ["thread-local-symbols"] = {}}}}}
     for _, group in ipairs(sdkstubs.dropped(older, doc)) do
         emit("sdkstubs.dropped", group.list .. " " .. table.concat(group.archs, ",") .. " " .. table.concat(group.tokens, ","))
-    end
-
-    local registry = import("registry-one-minimum", {rootdir = path.join(modules, "..", "tools"), anonymous = true})
-    local gate = path.join(root, "gate")
-    for _, name in ipairs({"UIView", "UIVieX", "aBc"}) do
-        write(path.join(gate, "registry", name .. ".json"), '{"entries": [{"api": "UIView"}, {"api": "' .. name .. '"}]}')
-    end
-    write(path.join(gate, "registry", "Sub", "Ab.json"), '{"entries": [{"api": "UIView"}]}')
-    local rows = registry.rows_of(gate, nil)
-    local apis = table.keys(rows)
-    byteorder.sort(apis)
-    for _, api in ipairs(apis) do
-        local files = {}
-        for _, row in ipairs(rows[api]) do
-            table.insert(files, relative(row.registry))
-        end
-        emit("registry-one-minimum.rows_of", api .. " " .. table.concat(files, ","))
     end
 
     local sorted = table.clone(NAMES)

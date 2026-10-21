@@ -1,2 +1,0 @@
-#libclang=<decls --version>	sdk=sdk	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
-function	c:@F@plain_value	-			int (void)	-	-	-	-	08d98783347021bf	-

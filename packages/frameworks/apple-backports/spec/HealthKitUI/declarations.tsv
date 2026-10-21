@@ -1,8 +1,0 @@
-#libclang=Apple clang version 21.0.0 (clang-2100.3.34.2) dylib-sha256=b206adf7f1c2b3f466f5ae24acb6fa787e1872981083f28d3e691c8e23830c2a target=arm64-apple-ios26.2	sdk=iPhoneOS26.2	columns=kind,usr,container,name,side,type,params,attrs,availability,message,declhash,value
-interface	c:objc(cs)HKActivityRingView	-			-	-	-	ios=9.3/-/-/0,maccatalyst=13.0/-/-/0,macos=13.0/-/-/0,watchos=-/-/-/1	-	e18615cbb968798c	-
-super	-	HKActivityRingView	UIView		-	-	-	-	-	828dd55d941b0208	-
-property	c:objc(cs)HKActivityRingView(py)activitySummary	-			HKActivitySummary *	-	strong,nonatomic	ios=9.3/-/-/0,maccatalyst=13.0/-/-/0,macos=13.0/-/-/0,watchos=-/-/-/1	-	19c2c582c40a5a3b	-
-method	c:objc(cs)HKActivityRingView(im)setActivitySummary:animated:	-			void	HKActivitySummary * activitySummary | BOOL animated	-	ios=9.3/-/-/0,maccatalyst=13.0/-/-/0,macos=13.0/-/-/0,watchos=-/-/-/1	-	022e565600be8bb1	-
-category	c:objc(cy)HKHealthStore@UIKit	-			-	-	-	ios=8.0/-/-/0,maccatalyst=13.0/-/-/0,macos=13.0/-/-/0,watchos=2.0/-/-/0	-	462e11d6bae90dbf	-
-property	c:objc(cs)HKHealthStore(py)authorizationViewControllerPresenter	UIKit			UIViewController *	-	weak,nonatomic	ios=17.0/-/-/0,watchos=-/-/-/1	-	6e6b8e71b1d04866	-
-typedef	c:@T@BOOL	-			_Bool	-	-	-	-	d78b4888c5c70ee1	-

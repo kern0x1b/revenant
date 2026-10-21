@@ -1,2 +1,0 @@
-api	introduced	status	reasons	returns	params	decl
-NIAlgorithmConvergenceStatusReasonDescription	16.0	generable		NSString *	const NIAlgorithmConvergenceStatusReason reason	NSString * NIAlgorithmConvergenceStatusReasonDescription(const NIAlgorithmConvergenceStatusReason reason)

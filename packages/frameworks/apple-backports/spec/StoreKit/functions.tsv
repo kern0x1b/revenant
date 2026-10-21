@@ -1,2 +1,0 @@
-api	introduced	status	reasons	returns	params	decl
-SKTerminateForInvalidReceipt	7.1	generable		void		void SKTerminateForInvalidReceipt()

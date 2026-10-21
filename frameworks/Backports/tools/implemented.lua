@@ -1,51 +1,49 @@
-local facts = import("facts", {rootdir = os.scriptdir(), anonymous = true})
 local sdkfiles = import("sdk", {rootdir = os.scriptdir(), anonymous = true})
 
-local function sources()
-    local src = path.join(sdkfiles.root(), "frameworks", "Backports", "src")
-    local files = {}
-    for _, pattern in ipairs({"**.m", "**.c"}) do
-        for _, file in ipairs(os.files(path.join(src, pattern))) do
-            table.insert(files, path.absolute(file))
-        end
-    end
-    table.sort(files)
-    return files, src
+local function add(keys, framework, key)
+    keys[framework] = keys[framework] or {}
+    keys[framework][key] = true
 end
 
-local function read_keys(store)
+local function classes_and_functions(keys, framework, object)
+    for line in os.iorunv("nm", {object}):gmatch("[^\n]+") do
+        local letter, name = line:match("^%s*%x*%s*(%a) (%S+)$")
+        if name and name:sub(1, 1) == "_" then
+            local class = name:match("^_OBJC_CLASS_%$_(.+)$")
+            if class and (letter == "S" or letter == "D") then
+                add(keys, framework, "class||" .. class)
+            elseif not name:find("^_OBJC") then
+                if letter == "T" then
+                    add(keys, framework, "C function||" .. name:sub(2))
+                elseif letter == "D" or letter == "S" then
+                    add(keys, framework, "global variable||" .. name:sub(2))
+                end
+            end
+        end
+    end
+end
+
+local function methods(keys, framework, object)
+    for line in os.iorunv("otool", {"-ov", object}):gmatch("[^\n]+") do
+        if line:match("^%s+imp%s") then
+            local sign, container, selector = line:match("([%+%-])%[(%S+) ([^%]]+)%]$")
+            if sign then
+                local class = container:match("^[^(]+")
+                add(keys, framework, (sign == "+" and "class method" or "instance method") .. "|" .. class .. "|" .. selector)
+            end
+        end
+    end
+end
+
+function from_objects(root)
     local keys = {}
-    for line in io.lines(store) do
-        table.insert(keys, line)
+    root = root or path.join(sdkfiles.root(), "build", ".objs")
+    for _, object in ipairs(os.files(path.join(root, "**.o"))) do
+        local framework = string.match(object, "/src/([^/]+)/[^/]+%.o$")
+        if framework then
+            classes_and_functions(keys, framework, object)
+            methods(keys, framework, object)
+        end
     end
     return keys
-end
-
-function detect(sdk, version)
-    local files, src = sources()
-    local folder = path.join(sdkfiles.build_root(), "implemented")
-    os.mkdir(folder)
-    local by_framework = {}
-    for _, file in ipairs(files) do
-        local framework = string.match(path.relative(file, src), "^([^/]+)/")
-        assert(framework, file .. " is not under a framework folder of src")
-        local store = path.join(folder, sdkfiles.cache_key(version) .. "-" .. hash.sha256(file) .. ".txt")
-        local keys
-        if os.isfile(store) then
-            keys = read_keys(store)
-        else
-            local found = facts.src_keys(sdk, version, file)
-            keys = {}
-            for key in pairs(found) do
-                table.insert(keys, key)
-            end
-            table.sort(keys)
-            io.writefile(store, table.concat(keys, "\n") .. (#keys > 0 and "\n" or ""))
-        end
-        by_framework[framework] = by_framework[framework] or {}
-        for _, key in ipairs(keys) do
-            by_framework[framework][key] = true
-        end
-    end
-    return by_framework
 end

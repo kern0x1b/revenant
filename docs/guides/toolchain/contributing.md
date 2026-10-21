@@ -22,8 +22,7 @@ What the toolchain is, and why it is built this way, is in [design](../../explan
 | `includes/apple-ios/`, `includes/emulate/` | what a port includes: `@addon/revenant/apple-ios` and `@addon/revenant/emulate` |
 | `plugins/` | the verbs: `check`, `compile-commands`, `deb`, `device`, `emulate`, `firmware`, `where` |
 | `modules/apple/` | the Lua the rules and verbs run; `modules/gyb/` expands Swift's `.gyb` templates in Lua |
-| `packages/<group>/<name>/` | package definitions, grouped as `build-tools`, `runtimes`, `frameworks`, `libraries`, `emulator`, `tweaks` |
-| `tools/package-index.lua` | the group of each package; `tests/addon/revenant_index_test.lua` holds the tree to it |
+| `packages/<letter>/<name>/` | package definitions, grouped as `build-tools`, `runtimes`, `frameworks`, `libraries`, `emulator`, `tweaks` |
 | `tools/` | developer tools, see [tools](../../reference/toolchain/tools.md) |
 | `tests/` | `light.lua`, which runs the addon's tests; `addon/`, `common/`, `corpus/`, `emulate/`, `gen/`, `swiftui/` |
 
@@ -55,8 +54,8 @@ Each entry: the wrong pattern, the right one, and the mechanical reason.
 - **The shared package store.** Wrong: `xmake require --force`, `xrepo install --force`, deleting anything under the
   store, or a private `XMAKE_GLOBALDIR` to pick up a changed recipe or patch. Right: build normally.
   `./xmakew` points `XMAKE_GLOBALDIR` at `$HOME/.revenant/cache/xmake-global`. Reason: the packages that matter
-  (`apple-backports`, `llvm`, `swift-runtime`, `libcxx`, `swift`) hash their sources, patches and definition into a
-  digest (`packages/frameworks/apple-backports/xmake.lua`, `packages/runtimes/swift-runtime/digest.lua`), so a changed
+  (`llvm`, `swift-runtime`, `libcxx`, `swift`) hash their sources, patches and definition into a
+  digest (`the deleted registry package xmake.lua`, `packages/s/swift-runtime/digest.lua`), so a changed
   backport or patch is already a different package with its own install path. A private store re-resolves the whole
   chain from the network, up to building LLVM. A build's own output that must survive (a crash log) goes to a file
   of its own: `./xmakew build ... > "$HOME/.revenant/cache/<task>/build.log" 2>&1`.
@@ -105,7 +104,7 @@ Each entry: the wrong pattern, the right one, and the mechanical reason.
 - **A seam the port owns.** Wrong: a `revenant_` C function that a library exports for another library of the package,
   declared like an API. Right: declare it with `REVENANT_SEAM` before its return type, on a line of its own, in a
   header and in its definition. `seam_symbols()` in `modules/apple/backports.lua` reads that declaration, and `link()`
-  keeps the symbol exported. Reason: a `revenant_` name is not Apple API, and the apple-backports checks count it as
+  keeps the symbol exported. Reason: a `revenant_` name is not Apple API, and the backports checks count it as
   internal.
 
 - **A C function shared between backport files.** Wrong: calling from one file a C function defined in a file that

@@ -11,7 +11,7 @@ framework builds and runs where there is no system Combine: legacy iOS (down to
 iOS 6.1.3, armv7). It is the reactive layer under [SwiftUI]'s SwiftUI on the
 [toolchain] toolchain.
 
-There is no copy of the code here. `packages/frameworks/combine/xmake.lua` pins
+There is no copy of the code here. `packages/c/combine/xmake.lua` pins
 OpenCombine at one commit and applies the series in `frameworks/Combine/patches/`; this
 module holds the targets that build the patched tree inside revenant and run upstream's
 tests against it.
@@ -58,7 +58,7 @@ Consequences to respect:
 | `tests/control` | the Debian control of the test daemon |
 | `tools/discover.lua` | finds upstream's tests and writes the `main.swift` that runs them |
 | `../../docs/` at the top of revenant | `guides/combine/` (this guide, build and test, usage), `reference/combine/` (features, changelog, test results, the third-party notice), `explanation/combine/` (how it works) |
-| `../../../packages/frameworks/combine/` | the recipe: the pin of OpenCombine and the list of patches |
+| `../../../packages/c/combine/` | the recipe: the pin of OpenCombine and the list of patches |
 
 ## 3. How to build, and how to check
 

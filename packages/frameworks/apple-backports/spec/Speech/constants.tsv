@@ -1,2 +1,0 @@
-kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
-constant	SFSpeechErrorDomain	-	SFSpeechErrorDomain	17	NSErrorDomain const	API_AVAILABLE(macos(14), ios(17), tvos(18))	a14e7352b34359e1	found	SFSpeechErrorDomain	SFSpeechErrorDomain	ios-26.2-cache	-	exported	ns	-

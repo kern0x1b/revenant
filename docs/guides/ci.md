@@ -18,9 +18,25 @@ that it does not find on macOS. The light guard skips `doc_test` (`LIGHT_SKIP`),
 deleted with the registry; the workflow prints a notice saying so. Every other suite must pass, so the `checks` job
 is red when one of them fails.
 
-Two caches make a warm run quick: the pinned xmake binary, keyed by `xmakew` and `third_party/xmake`, and the
-package store `~/.revenant/cache/xmake-global`, keyed by the output of `./xmakew l tools/keys.lua`. Each cache is
-saved even when its job fails, so a red run still leaves the next one warm.
+Four caches make a warm run quick:
+
+- the pinned xmake binary, keyed by `xmakew` and `third_party/xmake`;
+- the package store `~/.revenant/cache/xmake-global`, which holds the iPhoneOS SDK and the linker. It is keyed by the
+  output of `./xmakew l tools/keys.lua iphoneos-sdk ld64`, so only a change to those two packages makes a new key. It
+  is restored by exact key and saved once, after the configure has succeeded, so a store is never saved half-made;
+- the generated skeleton `build/generated/backports`, keyed by `frameworks/Backports/**` and saved on the same condition;
+- the objects `build/.objs`, their depfiles `build/.deps` and the libraries `build/iphoneos`, keyed by the store key and
+  by the hashes of `frameworks/Backports/**`, `toolchain/**`, `packages/**`, `addons/**`, `third_party/**`, `xmake.lua`
+  and `xmakew`, saved once the
+  build has succeeded.
+
+xmake recompiles a source whose mtime is newer than its depfile, and a restored cache has older depfiles than a fresh
+checkout has sources. So the job first gives every tracked file one fixed mtime, and the skeleton writer rewrites a
+generated file only when its text changed, so a restored skeleton keeps the mtime its objects were built against.
+
+A warm run that restores its store writes nothing back. The backports job installs no LLVM from Homebrew: the
+toolchain's `llvm` (its clang, which monocypher builds with) and `ld64` come from their prebuilt releases, and
+`REVENANT_PREBUILT_ONLY=1` makes a missing release an error instead of a source build.
 
 ## Fetching a branch's artifacts
 

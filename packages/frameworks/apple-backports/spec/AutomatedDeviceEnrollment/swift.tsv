@@ -1,3 +1,0 @@
-framework	kind	usr	container	name	side	type	params	availability	message	declhash
-AutomatedDeviceEnrollment	swift-protocol	s:7SwiftUI4ViewP	-	View	-	-	-	ios=13.0,macos=10.15,tvos=13.0,watchos=6.0	-	897655e96801af3a
-AutomatedDeviceEnrollment	swift-method	s:7SwiftUI4ViewP25AutomatedDeviceEnrollmentE09automatedeF8Addition11isPresentedQrAA7BindingVySbG_tF	View	automatedDeviceEnrollmentAddition(isPresented:)	-	some SwiftUI.View	SwiftUI.Binding<Swift.Bool>	-	-	7ce5d8d8f57a2ea3

@@ -1,6 +1,6 @@
 # Combine for the port's armv7 releases
 
-One Swift module, built for armv7 by `packages/frameworks/combine/xmake.lua` against the
+One Swift module, built for armv7 by `packages/c/combine/xmake.lua` against the
 `revenant@swift-runtime` a port carries. A port takes it with
 `add_requires("revenant@combine", {alias = "combine"})` and `add_packages("combine")`
 beside the runtime and libcxx, and writes `import Combine`.

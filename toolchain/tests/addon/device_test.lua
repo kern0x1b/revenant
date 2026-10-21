@@ -81,17 +81,17 @@ local function pruning_failures(device, folder)
             "org.revenant.swift-runtime-11111111" .. ok .. "org.revenant.libcxx-22222222 (= 1)",
             "org.revenant.swift-runtime-ui-11111111" .. ok .. "org.revenant.swift-runtime-11111111 (= 1)",
             "org.revenant.libcxx-22222222" .. ok,
-            "org.revenant.apple-backports" .. ok,
+            "org.revenant.backports" .. ok,
             "org.revenant.swiftfull" .. ok
         }, extra or {})
     end
     installed(chain())
     local left = remove({"port.a"})
-    if left ~= "org.revenant.apple-backports org.revenant.libcxx-22222222 org.revenant.swift-runtime-11111111 org.revenant.swiftfull port.b" then
+    if left ~= "org.revenant.backports org.revenant.libcxx-22222222 org.revenant.swift-runtime-11111111 org.revenant.swiftfull port.b" then
         table.insert(found, "the runtime a program still needs must stay, and the UI package nobody needs must go: " .. left)
     end
     left = remove({"port.b"})
-    if left ~= "org.revenant.apple-backports org.revenant.swiftfull" then
+    if left ~= "org.revenant.backports org.revenant.swiftfull" then
         table.insert(found, "the last program takes the runtime and the C++ runtime with it, in as many passes as it takes, and leaves everything else: " .. left)
     end
     installed(chain())

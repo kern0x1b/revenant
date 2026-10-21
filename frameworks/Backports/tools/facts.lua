@@ -144,38 +144,3 @@ function swift_facts(sdk, name, version, scratch)
     return state.rows
 end
 
-function src_keys(sdk, version, file)
-    local text = os.iorunv(CLANG, {"-target", target_of(version), "-isysroot", sdk, "-fobjc-arc", "-w", "-fsyntax-only",
-        "-Xclang", "-ast-dump", "-x", "objective-c", file})
-    local keys = {}
-    local function note(key)
-        keys[key] = true
-    end
-    ast.scan(lines_of(text), function (top)
-        if top.file == file then
-            if top.kind == "ObjCImplementationDecl" and top.name then
-                note("class||" .. top.name)
-                for _, child in ipairs(top.children) do
-                    if child.kind == "ObjCMethodDecl" and child.name and ast.children_of(child, "CompoundStmt")[1] then
-                        note((child.class_method and "class method" or "instance method") .. "|" .. top.name .. "|" .. child.name)
-                    elseif child.kind == "ObjCPropertyImplDecl" and child.name then
-                        note("property|" .. top.name .. "|" .. child.name)
-                    end
-                end
-            elseif top.kind == "ObjCCategoryImplDecl" then
-                local interface = ast.children_of(top, "ObjCInterface")[1]
-                for _, child in ipairs(top.children) do
-                    if interface and interface.type and child.kind == "ObjCMethodDecl" and child.name
-                        and ast.children_of(child, "CompoundStmt")[1] then
-                        note((child.class_method and "class method" or "instance method") .. "|" .. interface.type .. "|" .. child.name)
-                    end
-                end
-            elseif top.kind == "FunctionDecl" and top.name and ast.children_of(top, "CompoundStmt")[1] then
-                note("C function||" .. top.name)
-            elseif top.kind == "VarDecl" and top.name and not top.flags.extern and #top.children > 0 then
-                note("global variable||" .. top.name)
-            end
-        end
-    end)
-    return keys
-end

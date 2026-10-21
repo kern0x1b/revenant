@@ -1,3 +1,0 @@
-kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
-constant	kMCSessionMaximumNumberOfPeers	-	kMCSessionMaximumNumberOfPeers	7.0	NSUInteger const	NS_AVAILABLE(10_10, 7_0)	d7e40c461b85a7a7	numeric	-	-	host-macos	-	exported	ns	-
-constant	kMCSessionMinimumNumberOfPeers	-	kMCSessionMinimumNumberOfPeers	7.0	NSUInteger const	NS_AVAILABLE(10_10, 7_0)	cd4c91a77e97bab3	numeric	-	-	host-macos	-	exported	ns	-

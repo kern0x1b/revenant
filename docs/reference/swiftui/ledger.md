@@ -277,7 +277,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   и 26.2 такого члена нет вовсе (`SwiftUICore.swiftinterface:8758-8762` — только `automatic`,
   `explicit(_:)` и `==`).
 - `blur` и шесть цветовых фильтров получают измеренную формулировку: размытие в каноне этого порта есть
-  (`apple-backports/UIKit/UIVisualEffect.m`, `RevenantBlur.m`; `facts/UIKit/UIVisualEffect.md`), но это
+  (`frameworks/Backports/src/UIKit/UIVisualEffect.m`, `RevenantBlur.m`; `facts/UIKit/UIVisualEffect.md`), но это
   `UIView`, а у модификатора SwiftUI нет вида, в который его положить; шесть фильтров ложатся на
   `compositingFilter` слоя, который порт уже ставит, и пока им не рисуется.
 - `SymbolVariants` взят из OpenSwiftUI (MIT, `OpenSwiftUIProject/OpenSwiftUI`,
@@ -299,15 +299,15 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   настройки нет), `textScale` и `textVariant` (вариантов размера и ширины у текста iOS 6 нет;
   `textVariant` — над `TextVariantPreference`, с `FixedTextVariant` и `SizeDependentTextVariant`), плюс
   `textScale(.secondary)` рисует строку размером меньшей надписи самого релиза: caption 1 против body,
-  12/17 — из `apple-backports/facts/UIKit/UIFontTextStyles.md:18,20`; `writingDirection(strategy:)` и
+  12/17 — из `docs/reference/backports/UIKit/UIFontTextStyles.md:18,20`; `writingDirection(strategy:)` и
   `multilineTextAlignment(strategy:)` с их тремя случаями — обе
   стратегии пишут в журнал, обе названы там же. `writingDirection` и `multilineTextAlignment` —
   имена этих двух модификаторов в журнале. И четыре речи
   VoiceOver — `speechAlwaysIncludesPunctuation`, `speechSpellsOutCharacters`, `speechAdjustedPitch`,
   `speechAnnouncementsQueued`. Сами четыре атрибута в каноне этого порта есть
-  (`apple-backports/UIKit/UIAccessibilitySpeechAttributes.m` и два соседа, `registry/UIKit/ios13rest.json`),
+  (`frameworks/Backports/src/UIKit/UIAccessibilitySpeechAttributes.m` и два соседа, `registry/UIKit/ios13rest.json`),
   а VoiceOver iOS 6 не читает ни одного с атрибутированной строки —
-  `apple-backports/facts/UIKit/UIAccessibilitySpeechAttributes.md`; каждый пишет в журнал именно с этим.
+  `docs/reference/backports/UIKit/UIAccessibilitySpeechAttributes.md`; каждый пишет в журнал именно с этим.
   Эти четыре `Text`-перегрузки — то, что добавил 26.2; `View`-перегрузки были уже в 16.4.
   `TypesettingLanguage` назван по идентификатору языка: в Foundation этой поры нет `Locale.Language`.
 - `PlainButtonStyle`, `BorderedButtonStyle`, `BorderedProminentButtonStyle`, `DefaultButtonStyle` и

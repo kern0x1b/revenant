@@ -60,7 +60,7 @@ function failures(opt)
         table.insert(found, "the staged tree stays unsigned: signing is the program's")
     end
 
-    for _, recipe in ipairs({"packages/runtimes/libcxx/xmake.lua", "packages/runtimes/swift-runtime/xmake.lua"}) do
+    for _, recipe in ipairs({"packages/l/libcxx/xmake.lua", "packages/s/swift-runtime/xmake.lua"}) do
         local text = io.readfile(path.join(opt.modules, "..", "..", recipe))
         if text:find("revenant@ldid", 1, true) then
             table.insert(found, recipe .. " must not depend on ldid: a host tool's dependencies (openssl) reach every package that depends on this one")

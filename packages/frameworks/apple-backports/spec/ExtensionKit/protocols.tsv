@@ -1,4 +1,0 @@
-protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
-EXHostViewControllerDelegate	26.0	sdk16 body		NSObject	-	-	-	-	-	-
-EXHostViewControllerDelegate	26.0	sdk16 body		NSObject	optional	method	yes	hostViewControllerDidActivate:	- (void)hostViewControllerDidActivate:(EXHostViewController * _Nonnull)viewController;	yes
-EXHostViewControllerDelegate	26.0	sdk16 body		NSObject	optional	method	yes	hostViewControllerWillDeactivate:error:	- (void)hostViewControllerWillDeactivate:(EXHostViewController * _Nonnull)viewController error:(NSError * _Nullable)error;	yes

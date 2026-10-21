@@ -14,15 +14,6 @@ add_requires("revenant@firmware-tools", {alias = "firmware-tools"})
 add_requireconfs("**.m4", {system = false})
 add_requireconfs("**.pkgconf", {system = false})
 
-local carried = get_config("apple_backports")
-if carried then
-    local configs = {}
-    for _, name in ipairs(carried:split(",")) do
-        configs[name] = true
-    end
-    add_requireconfs("**.apple-backports", {override = true, configs = configs})
-end
-
 local minimum = get_config("apple_minimum")
 
 includes(path.join(os.scriptdir(), "..", "..", "modules", "apple", "slices.lua"))

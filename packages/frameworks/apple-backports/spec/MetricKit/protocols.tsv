@@ -1,4 +1,0 @@
-protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
-MXMetricManagerSubscriber	13.0	sdk16 body		NSObject	-	-	-	-	-	-
-MXMetricManagerSubscriber	13.0	sdk16 body		NSObject	optional	method	yes	didReceiveMetricPayloads:	- (void)didReceiveMetricPayloads:(NSArray<MXMetricPayload *> * _Nonnull)payloads;	yes
-MXMetricManagerSubscriber	13.0	sdk16 body		NSObject	optional	method	yes	didReceiveDiagnosticPayloads:	- (void)didReceiveDiagnosticPayloads:(NSArray<MXDiagnosticPayload *> * _Nonnull)payloads API_AVAILABLE(ios(14.0));	yes

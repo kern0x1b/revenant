@@ -1,2 +1,0 @@
-api	introduced	status	reasons	returns	params	decl
-PKPayLaterValidateAmount	17.0	generable		void	NSDecimalNumber *amount; NSString *currencyCode; void(^completion)(BOOL eligible)	void PKPayLaterValidateAmount(NSDecimalNumber *amount, NSString *currencyCode, void(^completion)(BOOL eligible))

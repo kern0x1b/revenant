@@ -1,2 +1,0 @@
-kind	api	cls	key	introduced	type	availability	hash	value_status	value	host_value	value_source	owned	tbd	shape	measured
-constant	SWCollaborationMetadataTypeIdentifier	-	SWCollaborationMetadataTypeIdentifier	16.0	NSString * const	API_AVAILABLE(ios(16.0), macos(13.0))	b2e803a74e05c164	found	com.apple.SharedWithYou.SWCollaborationMetadata	com.apple.SharedWithYou.SWCollaborationMetadata	ios-26.2-cache	-	exported	ns	-

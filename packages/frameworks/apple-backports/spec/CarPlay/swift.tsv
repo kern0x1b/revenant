@@ -1,6 +1,0 @@
-framework	kind	usr	container	name	side	type	params	availability	message	declhash
-CarPlay	swift-class	c:objc(cs)CPListSection	-	CPListSection	-	-	-	ios=12.0	-	d2e97e595fbaa0ef
-CarPlay	swift-method	s:So13CPListSectionC7CarPlayE5itemsABSaySo0A4ItemCG_tcfc	CPListSection	init(items:)	-	-	CarPlay.CPListSection | [CarPlay.CPListItem]	ios=12	-	d0d1d75080e6e4e2
-CarPlay	swift-method	s:So13CPListSectionC7CarPlayE5itemsABSaySo0A12TemplateItem_pG_tcfc	CPListSection	init(items:)	-	-	CarPlay.CPListSection | [any CarPlay.CPListTemplateItem]	ios=14	-	123757352f326069
-CarPlay	swift-method	s:So13CPListSectionC7CarPlayE5items6header17sectionIndexTitleABSaySo0A4ItemCG_SSSgAJtcfc	CPListSection	init(items:header:sectionIndexTitle:)	-	-	CarPlay.CPListSection | [CarPlay.CPListItem] | Swift.String? | Swift.String?	ios=12	-	6430ffb1fe6d4a2f
-CarPlay	swift-method	s:So13CPListSectionC7CarPlayE5items6header17sectionIndexTitleABSaySo0A12TemplateItem_pG_SSSgAItcfc	CPListSection	init(items:header:sectionIndexTitle:)	-	-	CarPlay.CPListSection | [any CarPlay.CPListTemplateItem] | Swift.String? | Swift.String?	ios=14	-	0f90419c4e618615

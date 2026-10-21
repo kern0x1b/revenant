@@ -3,6 +3,8 @@ local facts = import("facts", {rootdir = tools, anonymous = true})
 local ast = import("ast", {rootdir = tools, anonymous = true})
 local sdkfiles = import("sdk", {rootdir = tools, anonymous = true})
 local generate = import("generate", {rootdir = tools, anonymous = true})
+local implemented = import("implemented", {rootdir = tools, anonymous = true})
+local workspace = import("workspace", {rootdir = path.absolute(path.join(os.scriptdir(), "..", "..", "..", "toolchain", "modules")), anonymous = true})
 
 local VERSION = "26.2"
 
@@ -48,20 +50,26 @@ function main()
     end
     assert(#scoped == 3, "expected 3 in-scope methods, got " .. #scoped)
 
-    local keys = facts.src_keys(sdk, VERSION, path.join(data, "src", "Fixture", "Fixture.m"))
-    local implemented, missing = 0, {}
+    local objects = path.join(workspace.home(), "cache", "backports-test-objects")
+    os.tryrm(objects)
+    local object = path.join(objects, "Fixture", "src", "Fixture", "Fixture.m.o")
+    os.mkdir(path.directory(object))
+    os.vrunv("clang", {"-target", "armv7-apple-ios6.0", "-isysroot", sdk, "-fobjc-arc", "-w", "-c", "-o", object,
+        path.join(data, "src", "Fixture", "Fixture.m")})
+    local keys = implemented.from_objects(objects).Fixture or {}
+    local found, missing = 0, {}
     for _, row in ipairs(scoped) do
         local key = row.kind .. "|" .. row.container .. "|" .. row.name
         if keys[key] then
-            implemented = implemented + 1
+            found = found + 1
         else
             table.insert(missing, row.name)
         end
     end
-    assert(implemented == 2, "expected 2 implemented members, got " .. implemented)
+    assert(found == 2, "expected 2 implemented members, got " .. found)
     assert(#missing == 1 and missing[1] == "fx_later", "expected fx_later to be the only missing member")
 
-    local cache = path.join(os.getenv("HOME"), ".revenant", "cache", "backports-test")
+    local cache = path.join(workspace.home(), "cache", "backports-test")
     os.tryrm(cache)
     os.mkdir(cache)
     local logs = path.join(cache, "logs")
@@ -76,7 +84,7 @@ function main()
     assert(digester and string.find(digester, "BadSwift: ", 1, true), "a failing digester call did not raise naming BadSwift: " .. tostring(digester))
 
     os.tryrm(cache)
-    print("backports tests passed: extracted " .. #rows .. " facts, Y=" .. #scoped .. ", X=" .. implemented)
+    print("backports tests passed: extracted " .. #rows .. " facts, Y=" .. #scoped .. ", X=" .. found)
     print("clang failure: " .. clang)
     print("digester failure: " .. digester)
 end

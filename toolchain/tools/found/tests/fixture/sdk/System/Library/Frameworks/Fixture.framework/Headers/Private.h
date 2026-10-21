@@ -1,1 +1,0 @@
-int FXPrivateOnly(void);

@@ -1,2 +1,0 @@
-module	kind	api	introduced	deprecated	obsoleted	unavailable	via
-AssetsLibrary	method	ALAssetsLibrary.enumerateGroupsWithTypes(_:usingBlock:failureBlock:)	9.0	9.0	26.0		own

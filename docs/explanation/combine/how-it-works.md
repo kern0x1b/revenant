@@ -2,7 +2,7 @@
 
 Combine is not a fork. The code is OpenCombine's, pinned at one upstream commit; what is
 ours is the patch series in `frameworks/Combine/patches/`, applied by the `revenant@combine`
-recipe in `packages/frameworks/combine/`, and the targets of this module that build
+recipe in `packages/c/combine/`, and the targets of this module that build
 the patched sources inside revenant.
 
 The recipe fetches OpenCombine at its pinned commit and applies the patches in order. The

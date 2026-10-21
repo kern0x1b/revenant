@@ -67,7 +67,7 @@ xmake emulate -y -d iPhone4,1 -r 6.1.3 install > .logs/emulate-install-iPhone4,1
 `install` runs `xmake deb` first (the whole packaging of skill `package`: build, stage, sign,
 imports refused rather than warned), then clones the golden image and unpacks the data of **every
 .deb that step wrote** — the app's and, for an app that uses the backports, the
-`org.revenant.apple-backports` package — and runs each package's `preinst` and `postinst` against
+`org.revenant.backports` package — and runs each package's `preinst` and `postinst` against
 the image the way dpkg does (`DPKG_ROOT`). The backports' `postinst` links the libraries built for
 the image's own release and refuses a release outside its bands. What `xmake deb` refuses is not
 installed: at this pin a Swift program that carries its runtime stops `xmake emulate install` with

@@ -1,5 +1,0 @@
-protocol	introduced	status	reasons	bases	section	kind	instance	selector	decl	in16
-NCWidgetProviding	10.0	sdk16 body		NSObject	-	-	-	-	-	-
-NCWidgetProviding	10.0	sdk16 body		NSObject	optional	method	yes	widgetPerformUpdateWithCompletionHandler:	- (void)widgetPerformUpdateWithCompletionHandler:(void (^ _Nonnull)(NCUpdateResult))completionHandler API_AVAILABLE(ios(8.0));	yes
-NCWidgetProviding	10.0	sdk16 body		NSObject	optional	method	yes	widgetActiveDisplayModeDidChange:withMaximumSize:	- (void)widgetActiveDisplayModeDidChange:(NCWidgetDisplayMode)activeDisplayMode withMaximumSize:(CGSize)maxSize API_AVAILABLE(ios(10.0));	yes
-NCWidgetProviding	10.0	sdk16 body		NSObject	optional	method	yes	widgetMarginInsetsForProposedMarginInsets:	- (UIEdgeInsets)widgetMarginInsetsForProposedMarginInsets:(UIEdgeInsets)defaultMarginInsets API_AVAILABLE(ios(8.0));	yes

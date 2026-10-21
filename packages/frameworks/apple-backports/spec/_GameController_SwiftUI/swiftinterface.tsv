@@ -1,6 +1,0 @@
-module	kind	api	introduced	deprecated	obsoleted	unavailable	via
-_GameController_SwiftUI	method	SwiftUICore.View.handlesGameControllerEvents(matching:)	18.0				container
-_GameController_SwiftUI	method	SwiftUICore.View.handlesGameControllerEvents(matching:withOptions:)	26.0				own
-_GameController_SwiftUI	struct	GameControllerEventHandlingOptions	26.0				own
-_GameController_SwiftUI	method	GameControllerEventHandlingOptions.init()	26.0				container
-_GameController_SwiftUI	method	GameControllerEventHandlingOptions.receivesEventsInView(_:)	26.0				container

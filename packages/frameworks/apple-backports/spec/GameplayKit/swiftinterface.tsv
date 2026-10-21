@@ -1,7 +1,0 @@
-module	kind	api	introduced	deprecated	obsoleted	unavailable	via
-GameplayKit	method	GKPath.init(points:radius:cyclical:)	9.0				container
-GameplayKit	method	GKPath.init(points:radius:cyclical:)	10.0				container
-GameplayKit	method	GKPolygonObstacle.init(points:)	9.0				container
-GameplayKit	method	GKEntity.component(ofType:)	9.0				container
-GameplayKit	method	GKEntity.removeComponent(ofType:)	9.0				container
-GameplayKit	method	GKStateMachine.state(forClass:)	9.0				container
