@@ -23,7 +23,7 @@ if get_config("tests") == "device" then
 end
 
 local install_hints = {
-    ["iphoneos-sdk"] = "install it with ./xmakew l -P . toolchain/modules/workspace.lua sdk-package 16.4 --install",
+    ["iphoneos-sdk"] = "configure the project with ./xmakew f -P . first, which installs it",
 }
 
 local function suites(name, list, packages, group)

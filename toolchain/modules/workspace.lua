@@ -125,8 +125,8 @@ function sdk_package(version, opt)
     end
     local folder = sdk_in(package_of("iphoneos-sdk " .. version, opt.install), version)
     if not os.isfile(path.join(folder, "SDKSettings.json")) then
-        raise("workspace: the iphoneos-sdk install is incomplete: %s has no SDKSettings.json; run ./xmakew l -P . "
-              .. "toolchain/modules/workspace.lua sdk-package %s --install", folder, version)
+        raise("workspace: the iphoneos-sdk install is incomplete: %s has no SDKSettings.json; configure the project "
+              .. "with ./xmakew f -P . so xmake installs it again", folder)
     end
     resolved[key] = folder
     return folder
