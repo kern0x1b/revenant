@@ -36,7 +36,7 @@ package("libcxx")
     add_shflags("-nostdlib++")
 
     on_download(function (package, opt)
-        local checkout = import("checkout", {rootdir = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local checkout = import("@addon.revenant.checkout", {anonymous = true})
         checkout.pinned(opt.sourcedir, {{url = opt.url, tag = "llvmorg-" .. package:version_str(),
                                          commit = package:revision(opt.url_alias) or package:commit(),
                                          sparse = {"/*", "!/*/", "/libcxx/", "/libcxxabi/", "/libunwind/", "/runtimes/", "/cmake/",
@@ -46,9 +46,8 @@ package("libcxx")
 
     on_install("iphoneos", function (package)
         import("core.base.semver")
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
-        local cmake = import("apple.cmake", {rootdir = modules, anonymous = true})
-        local macho = import("apple.macho", {rootdir = modules, anonymous = true})
+        local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
+        local macho = import("@addon.revenant.apple.macho", {anonymous = true})
         for _, patch in ipairs({"utimensat-told-no.patch", "reexport-when-dyld-can.patch", "one-emulated-tls-runtime.patch", "one-atomic-runtime.patch", "process-wide-compat.patch"}) do
             os.vrunv("git", {"apply", path.join(package:scriptdir(), "patches", patch), "-p2"})
         end
@@ -123,7 +122,7 @@ package("libcxx")
         for _, name in ipairs(process_wide) do
             wanted[name] = true
         end
-        local compat_module = import("apple.compat", {rootdir = modules, anonymous = true})
+        local compat_module = import("@addon.revenant.apple.compat", {anonymous = true})
         for _, name in ipairs(table.orderkeys(compat_module.process_wide())) do
             local found = exported:find(" T _" .. name .. "\n", 1, true)
             if wanted[name] and not found then
@@ -186,7 +185,7 @@ package("libcxx")
         end
         os.cp("libcxx/LICENSE.TXT", package:installdir("licenses") .. "/")
         if package:config("packaged") then
-            local shared = import("apple.shared_runtime", {rootdir = modules, anonymous = true})
+            local shared = import("@addon.revenant.apple.shared_runtime", {anonymous = true})
             local name = shared.package_name("libcxx", package:buildhash())
             local held = {{source = path.join(library, "libc++.1.0.dylib"), leaf = "libc++.1.dylib"},
                           {source = path.join(library, "libc++abi.1.0.dylib"), leaf = "libc++abi.1.dylib"}}
@@ -194,7 +193,7 @@ package("libcxx")
             for _, entry in ipairs(held) do
                 identities[entry.source] = shared.folder_of(name) .. "/" .. entry.leaf
             end
-            import("apple.bundle", {rootdir = modules, anonymous = true}).retarget(table.keys(identities), identities,
+            import("@addon.revenant.apple.bundle", {anonymous = true}).retarget(table.keys(identities), identities,
                                                                                     {home = shared.folder_of(name) .. "/"})
             shared.stage({packages = {{name = name, version = shared.package_version(package:buildhash()),
                                        title = "C++ runtime " .. package:buildhash():sub(1, 8),
@@ -210,7 +209,7 @@ package("libcxx")
         assert(os.isfile(path.join(package:installdir("lib"), "libc++.1.0.dylib")))
         assert(os.isfile(path.join(package:installdir("include", "c++", "v1"), "vector")))
         if package:config("packaged") then
-            local shared = import("apple.shared_runtime", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+            local shared = import("@addon.revenant.apple.shared_runtime", {anonymous = true})
             local name = shared.package_name("libcxx", package:buildhash())
             assert(os.isfile(path.join(package:installdir("share"), "shared-packages", name .. ".json")), "the packaged libc++ left no description of its package")
             local identity = os.iorunv("xcrun", {"otool", "-D", path.join(package:installdir("lib"), "libc++.1.0.dylib")})

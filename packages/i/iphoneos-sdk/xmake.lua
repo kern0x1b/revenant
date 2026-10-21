@@ -51,7 +51,7 @@ package("iphoneos-sdk")
         os.vcp("*", folder .. "/")
         local libraries = path.join(folder, "usr", "lib")
 
-        local stubs = import("apple.sdkstubs", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local stubs = import("@addon.revenant.apple.sdkstubs", {anonymous = true})
         local markers = package:resourcedir("markers")
         if markers then
             local older = os.isfile(path.join(markers, "SDKSettings.json")) and markers or assert(os.dirs(path.join(markers, "iPhoneOS*.sdk"))[1], "the older SDK's archive holds no SDK")
@@ -270,7 +270,7 @@ package("iphoneos-sdk")
     end)
 
     on_fetch(function (package)
-        local stubs = import("apple.sdkstubs", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local stubs = import("@addon.revenant.apple.sdkstubs", {anonymous = true})
         if stubs.installed(package:installdir(), package:version_str()) then
             return {}
         end

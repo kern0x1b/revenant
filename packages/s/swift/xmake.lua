@@ -45,24 +45,24 @@ package("swift")
     add_configs("recipe", {description = "The digest of this recipe and the changes it makes to the compiler's sources, so a changed flag or patch is a different compiler.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
 
     on_download(function (package, opt)
-        if import("prebuilt", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true}).fetch(package) then
+        if import("@addon.revenant.prebuilt", {anonymous = true}).fetch(package) then
             return
         end
-        local checkout = import("checkout", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local checkout = import("@addon.revenant.checkout", {anonymous = true})
         checkout.pinned(opt.sourcedir, assert(sources[package:version_str()],
                         "this package knows no sources for Swift " .. package:version_str()))
     end)
 
     on_install("@macosx", function (package)
-        local prebuilt = import("prebuilt", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local prebuilt = import("@addon.revenant.prebuilt", {anonymous = true})
         if prebuilt.install(package) then
             return
         end
-        local swift = import("apple.swift", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local swift = import("@addon.revenant.apple.swift", {anonymous = true})
         local bootstrap = assert(package:dep("swift-bootstrap"), "revenant@swift is built with the swift.org toolchain of the same release")
         local build = path.absolute("build")
         local prefix = package:installdir()
-        local parallel = import("parallel", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local parallel = import("@addon.revenant.parallel", {anonymous = true})
         local compile_jobs = 8
 
         for _, source in ipairs(assert(sources[package:version_str()], "this package knows no sources for Swift " .. package:version_str())) do

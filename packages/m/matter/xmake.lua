@@ -38,8 +38,7 @@ package("matter")
     end
 
     on_install("iphoneos", function (package)
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
-        local toolchain = import("apple.cmake", {rootdir = modules, anonymous = true}).toolchain(package)
+        local toolchain = import("@addon.revenant.apple.cmake", {anonymous = true}).toolchain(package)
         local sdk = assert(toolchain:config("sdkdir"), "the apple-ios toolchain names no SDK")
         local minimum = assert(toolchain:config("deployment"), "the apple-ios toolchain names no minimum release")
         local cpu = assert(cpus[package:arch()], "Matter builds armv7, armv7s and arm64, not %s", package:arch())

@@ -10,7 +10,7 @@ package("libwebp")
     add_links("webpdemux", "webp", "sharpyuv")
 
     on_install("iphoneos", function (package)
-        local cmake = import("apple.cmake", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
         local configs = {}
         for _, tool in ipairs({"ANIM_UTILS", "CWEBP", "DWEBP", "GIF2WEBP", "IMG2WEBP", "VWEBP", "WEBPINFO", "WEBPMUX", "EXTRAS"}) do
             table.insert(configs, "-DWEBP_BUILD_" .. tool .. "=OFF")

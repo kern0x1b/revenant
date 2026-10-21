@@ -29,8 +29,7 @@ package("musickit")
     end)
 
     on_install("iphoneos", function (package)
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
-        local swift = import("apple.swift", {rootdir = modules, anonymous = true})
+        local swift = import("@addon.revenant.apple.swift", {anonymous = true})
         local toolchain = assert(package:toolchains(), "MusicKit is built with the apple-ios toolchain")[1]
         toolchain:load()
         local runtime = assert(package:dep("swift-runtime"), "MusicKit is compiled against revenant@swift-runtime")

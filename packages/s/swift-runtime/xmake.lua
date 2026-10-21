@@ -35,7 +35,7 @@ package("swift-runtime")
     }
 
     on_download(function (package, opt)
-        local checkout = import("checkout", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local checkout = import("@addon.revenant.checkout", {anonymous = true})
         checkout.pinned(opt.sourcedir, sources)
     end)
 
@@ -72,7 +72,7 @@ package("swift-runtime")
         end
         package:add("links", "swiftCore")
         if package:config("shared") then
-            local runtime = import("apple.shared_runtime", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+            local runtime = import("@addon.revenant.apple.shared_runtime", {anonymous = true})
             for _, kind in ipairs({"swift-runtime", "swift-runtime-ui"}) do
                 package:add("linkdirs", path.join("share", "root", "usr", "lib", "revenant", runtime.package_name(kind, package:buildhash())))
             end
@@ -83,11 +83,10 @@ package("swift-runtime")
     end)
 
     on_install("iphoneos", function (package)
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
-        local swift = import("apple.swift", {rootdir = modules, anonymous = true})
-        local gyb = import("gyb.template", {rootdir = modules, anonymous = true})
-        local cmake = import("apple.cmake", {rootdir = modules, anonymous = true})
-        local compat = import("apple.compat", {rootdir = modules, anonymous = true})
+        local swift = import("@addon.revenant.apple.swift", {anonymous = true})
+        local gyb = import("@addon.revenant.gyb.template", {anonymous = true})
+        local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
+        local compat = import("@addon.revenant.apple.compat", {anonymous = true})
         local compiler = assert(package:dep("swift"), "the runtime is built with revenant@swift")
         local libcxx = assert(package:dep("libcxx"), "the runtime links the C++ runtime of revenant@libcxx")
         local shims = assert(package:dep("apple-compat"), "the runtime takes what the release lacks from revenant@apple-compat")
@@ -99,7 +98,7 @@ package("swift-runtime")
         package:setenv("SWIFT_EXEC", swiftc)
         package:setenv("SWIFT_PLUGIN_PATH", path.join(compiler:installdir("lib"), "swift", "host", "plugins"))
         package:setenv("REVENANT_SWIFT_RUNTIME_MARK", package:data("mark"))
-        local parallel = import("parallel", {rootdir = modules, anonymous = true})
+        local parallel = import("@addon.revenant.parallel", {anonymous = true})
 
         local marked = os.getenv("SWIFTRT_PROFILE") and {} or nil
         local phase = marked and os.mclock() or 0
@@ -780,7 +779,7 @@ package("swift-runtime")
         os.vcp(path.join(path.absolute("platform"), "LICENSE.txt"), package:installdir("licenses") .. "/")
         timed("install:layout")
         if package:config("shared") then
-            local runtime = import("apple.shared_runtime", {rootdir = modules, anonymous = true})
+            local runtime = import("@addon.revenant.apple.shared_runtime", {anonymous = true})
             local name, ui = runtime.package_name("swift-runtime", package:buildhash()), runtime.package_name("swift-runtime-ui", package:buildhash())
             local version = runtime.package_version(package:buildhash())
             local libraries, ui_libraries = {}, {}
@@ -817,13 +816,13 @@ package("swift-runtime")
     end)
 
     on_test(function (package)
-        local swift = import("apple.swift", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local swift = import("@addon.revenant.apple.swift", {anonymous = true})
         local resources = path.join(package:installdir("lib"), "swift")
         local install = path.join(resources, "iphoneos")
         local libraries = install
         local installed = {}
         if package:config("shared") then
-            local shared = import("apple.shared_runtime", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+            local shared = import("@addon.revenant.apple.shared_runtime", {anonymous = true})
             libraries = path.join(package:installdir("share"), "root", shared.folder_of(shared.package_name("swift-runtime", package:buildhash())))
             for _, kind in ipairs({"swift-runtime", "swift-runtime-ui"}) do
                 assert(os.isfile(path.join(package:installdir("share"), "shared-packages", shared.package_name(kind, package:buildhash()) .. ".json")),
@@ -846,7 +845,6 @@ package("swift-runtime")
             assert(os.isdir(path.join(install, module .. ".swiftmodule")) or os.isfile(path.join(install, module .. ".swiftmodule")),
                    "the runtime has no " .. module .. " module")
         end
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
         local linked = {}
         for _, alias in ipairs({"libcxx"}) do
             local dep = package:dep(alias)
@@ -854,7 +852,7 @@ package("swift-runtime")
                 table.join2(linked, os.files(path.join(dep:installdir("lib"), "*.dylib")))
             end
         end
-        local dyld = import("apple.dyld", {rootdir = modules, anonymous = true})
+        local dyld = import("@addon.revenant.apple.dyld", {anonymous = true})
         local read = dyld.image_imports(installed, linked, package:arch())
         local found = {}
         for _, library in ipairs(table.orderkeys(read.imports)) do
@@ -876,18 +874,18 @@ package("swift-runtime")
                    ", where SceneKit " .. (expected and "is" or "is not") .. " in the release")
         end
 
-        local differs = import("apple.runtime_guards", {rootdir = modules, anonymous = true}).compare(found, {
+        local differs = import("@addon.revenant.apple.runtime_guards", {anonymous = true}).compare(found, {
             imports = read.imports, exported = read.exported,
             minimum = toolchain:config("deployment"), backports = package:config("backports") and true or false})
         assert(#differs == 0, "the runtime's imports and its guard table differ at " .. toolchain:config("deployment") ..
                (package:config("backports") and " with the backports" or "") .. ":\n  " .. table.concat(differs, "\n  "))
 
-        local placeable = import("apple.firmware", {rootdir = modules, anonymous = true}).source(package:arch(), toolchain:config("deployment"))
+        local placeable = import("@addon.revenant.apple.firmware", {anonymous = true}).source(package:arch(), toolchain:config("deployment"))
         dyld.check(placeable, table.join(installed, linked), package:installdir(),
-                   {exempt = linked, runtime = installed, guards = import("apple.runtime_guards", {rootdir = modules, anonymous = true}).guards()})
+                   {exempt = linked, runtime = installed, guards = import("@addon.revenant.apple.runtime_guards", {anonymous = true}).guards()})
 
         local idle = {}
-        for _, name in ipairs(import("apple.shared_runtime", {rootdir = modules, anonymous = true}).unbound_dependencies(
+        for _, name in ipairs(import("@addon.revenant.apple.shared_runtime", {anonymous = true}).unbound_dependencies(
                                   path.join(libraries, "libswiftSpatial.dylib"), package:arch())) do
             if name:startswith("libswift") then
                 table.insert(idle, name)

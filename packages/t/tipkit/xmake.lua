@@ -26,8 +26,7 @@ package("tipkit")
     end)
 
     on_install("iphoneos", function (package)
-        local modules = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "modules")
-        local swift = import("apple.swift", {rootdir = modules, anonymous = true})
+        local swift = import("@addon.revenant.apple.swift", {anonymous = true})
         local toolchain = assert(package:toolchains(), "TipKit is built with the apple-ios toolchain")[1]
         toolchain:load()
         local runtime = assert(package:dep("swift-runtime"), "TipKit is compiled against revenant@swift-runtime")
@@ -88,6 +87,6 @@ package("tipkit")
 
         os.tryrm(probe_dir)
         package:setenv("REVENANT_SWIFT_MODULES", swiftdir)
-        os.cp(path.join(os.scriptdir(), "..", "..", "..", "toolchain", "LICENSE"), path.join(package:installdir("licenses")))
+        os.cp(import("@addon.revenant.data", {anonymous = true}).licence(), path.join(package:installdir("licenses")))
         os.cp(path.join(package:scriptdir(), "..", "..", "..", "docs", "reference", "backports", "TipKit", "README.md"), path.join(package:installdir("share")))
     end)

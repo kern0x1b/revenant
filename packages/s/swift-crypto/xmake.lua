@@ -40,8 +40,7 @@ package("swift-crypto")
     end)
 
     on_install("iphoneos", function (package)
-        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
-        local swift = import("apple.swift", {rootdir = modules, anonymous = true})
+        local swift = import("@addon.revenant.apple.swift", {anonymous = true})
         local toolchain = assert(package:toolchains(), "swift-crypto is built with the apple-ios toolchain")[1]
         toolchain:load()
         local runtime = assert(package:dep("swift-runtime"), "swift-crypto is compiled against revenant@swift-runtime")
@@ -83,13 +82,13 @@ package("swift-crypto")
             os.vrunv(toolchain:tool("cc"), table.join(common, kcpflags, {"-c", file, "-o", path.join(objects, "kcp_" .. path.filename(file) .. ".o")}))
         end
         os.vrunv(toolchain:tool("cc"), table.join(common, {"-Os", "-Wall", "-fvisibility=hidden",
-                 "-I", path.join(compat:installdir("include")), "-c", path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "apple-compat", "src", "memset_s.c"),
+                 "-I", path.join(compat:installdir("include")), "-c", import("@addon.revenant.data", {anonymous = true}).src("apple-compat", "src", "memset_s.c"),
                  "-o", path.join(objects, "memset_s.o")}))
         os.vrunv(toolchain:tool("cc"), table.join(common, {"-Os", "-Wall", "-fvisibility=hidden", "-c",
-                 path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "apple-compat", "src", "objc_opt_self.c"),
+                 import("@addon.revenant.data", {anonymous = true}).src("apple-compat", "src", "objc_opt_self.c"),
                  "-o", path.join(objects, "objc_opt_self.o")}))
         os.vrunv(toolchain:tool("cc"), table.join(common, {"-Os", "-Wall", "-fvisibility=hidden", "-c",
-                 path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "apple-compat", "src", "objc_allocWithZone.c"),
+                 import("@addon.revenant.data", {anonymous = true}).src("apple-compat", "src", "objc_allocWithZone.c"),
                  "-o", path.join(objects, "objc_allocWithZone.o")}))
 
         local port_headers = table.wrap((runtime:envs() or {}).REVENANT_SWIFT_PORT_HEADERS)

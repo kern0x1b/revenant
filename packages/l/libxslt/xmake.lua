@@ -12,7 +12,7 @@ package("libxslt")
     add_defines("LIBXSLT_STATIC", "LIBEXSLT_STATIC")
 
     on_install("iphoneos", function (package)
-        local cmake = import("apple.cmake", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
         cmake.install(package, {"-DLIBXSLT_WITH_PROGRAMS=OFF", "-DLIBXSLT_WITH_TESTS=OFF", "-DLIBXSLT_WITH_PYTHON=OFF",
                                 "-DLIBXSLT_WITH_PROFILER=OFF", "-DLIBXSLT_WITH_DEBUGGER=OFF", "-DLIBXSLT_WITH_CRYPTO=OFF",
                                 "-DLIBXSLT_WITH_MODULES=OFF"},

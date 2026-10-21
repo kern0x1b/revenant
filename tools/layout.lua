@@ -24,9 +24,7 @@ local COMPONENTS = {"frameworks", "toolchain", "emulator", "recompiler", "agent-
 local UNCONVERTED = {"activitykit", "appintents", "apple-compat", "createml", "musickit", "swift-data", "swift-embedded",
                      "tipkit", "widgetkit"}
 
-local REACHING = {"brotli", "combine", "ggml", "icu", "iphoneos-sdk", "ld64", "libcxx", "libpsl", "libwebp", "libxml2",
-                  "libxslt", "llvm", "matter", "opencv", "openssl", "swift", "swift-crypto", "swift-runtime", "swift-syntax",
-                  "swift-system", "wasm3", "woff2"}
+local REACHING = {"ggml", "iphoneos-sdk", "libcxx", "swift-crypto", "swift-runtime", "swift-system"}
 
 local function set_of(list)
     local set = {}

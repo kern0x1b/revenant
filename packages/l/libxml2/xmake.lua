@@ -13,7 +13,7 @@ package("libxml2")
     add_defines("LIBXML_STATIC")
 
     on_install("iphoneos", function (package)
-        local cmake = import("apple.cmake", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
         cmake.install(package, {"-DLIBXML2_WITH_PROGRAMS=OFF", "-DLIBXML2_WITH_TESTS=OFF", "-DLIBXML2_WITH_PYTHON=OFF",
                                 "-DLIBXML2_WITH_DOCS=OFF", "-DLIBXML2_WITH_ICU=ON", "-DLIBXML2_WITH_ICONV=OFF",
                                 "-DCMAKE_INSTALL_SYSCONFDIR=/etc"},

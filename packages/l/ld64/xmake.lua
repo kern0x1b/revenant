@@ -12,7 +12,7 @@ package("ld64")
                   "https://github.com/tpoechtrager/apple-libtapi/archive/fa9443738c1a18accef4244732ec6d6ee97a8133.tar.gz",
                   "cf939c661aa288da773e59acf8ab916bb6c322bf7abe9130c09a66bcc98fdc5a")
     on_load(function (package)
-        if not import("prebuilt", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true}).wanted(package) then
+        if not import("@addon.revenant.prebuilt", {anonymous = true}).wanted(package) then
             package:add("deps", "cmake", "ninja", {kind = "binary"})
         end
     end)
@@ -32,7 +32,7 @@ package("ld64")
     end)
 
     on_install("@macosx", function (package)
-        local prebuilt = import("prebuilt", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local prebuilt = import("@addon.revenant.prebuilt", {anonymous = true})
         if prebuilt.install(package) then
             return
         end
@@ -67,7 +67,7 @@ package("ld64")
         os.vrunv("./configure", {"--prefix=" .. install, "--target=arm-apple-darwin11", "--with-libtapi=" .. tapi_install,
                                  "--with-llvm-config=" .. llvm_config.program},
                  {curdir = cctools, envs = {CPPFLAGS = "-I" .. path.join(llvm, "include")}})
-        local parallel = import("parallel", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local parallel = import("@addon.revenant.parallel", {anonymous = true})
         for _, part in ipairs({"ld64/src/3rd", "ld64/src/mach_o", "ld64/src/ld"}) do
             parallel.hold(nil, function (width)
                 os.vrunv("make", {"-C", part, "-j" .. width}, {curdir = cctools})

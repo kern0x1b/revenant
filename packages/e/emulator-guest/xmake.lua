@@ -33,7 +33,7 @@ package("emulator-guest")
         os.vrunv(os.programfile(), {"f", "-p", "iphoneos", "-a", package:arch(), "-m", "release", "-y"}, {curdir = project})
         os.vrunv(os.programfile(), {"build", "-y", "revenant-runner", "revenant-sblaunch"}, {curdir = project, envs = {REVENANT_RELEASE = "1"}})
         os.vrunv(os.programfile(), {"install", "-y", "-o", package:installdir(), "revenant-runner", "revenant-sblaunch"}, {curdir = project})
-        os.vcp(path.join(root, "toolchain", "LICENSE"), package:installdir("licenses"))
+        os.vcp(import("@addon.revenant.data", {anonymous = true}).licence(), package:installdir("licenses"))
     end)
 
     on_test(function (package)

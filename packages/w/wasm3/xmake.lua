@@ -26,7 +26,7 @@ file(GLOB M3_HEADERS ${WASM3_SOURCE}/*.h)
 install(TARGETS m3 ARCHIVE DESTINATION lib)
 install(FILES ${M3_HEADERS} DESTINATION include)
 ]])
-        local cmake = import("apple.cmake", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules"), anonymous = true})
+        local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
         cmake.install(package, {"-DWASM3_SOURCE=" .. path.absolute("source")}, {sourcedir = "build-revenant", licenses = "LICENSE"})
     end)
 
