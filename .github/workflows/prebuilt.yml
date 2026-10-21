@@ -28,6 +28,7 @@ jobs:
     timeout-minutes: 360
     env:
       REVENANT_PREBUILT: ${{ github.repository }}
+      REVENANT_PREBUILT_TRACE: "1"
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
