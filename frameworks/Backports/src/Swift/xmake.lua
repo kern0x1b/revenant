@@ -101,6 +101,14 @@ target("TipKit")
         end
     end)
 
+local function open_gap(name, cause)
+    before_build(function (target)
+        local toolchain = target:toolchain("apple-ios")
+        toolchain:load()
+        raise("%s is not yet backported to iOS %s: %s; see the open gaps in frameworks/Backports/README.md", name, toolchain:config("deployment"), cause)
+    end)
+end
+
 target("WidgetKit")
     set_kind("static")
     set_default(false)
@@ -111,6 +119,7 @@ target("WidgetKit")
     on_load(function (target)
         target:add("files", path.join(SRC, "WidgetKit", "*.swift"))
     end)
+    open_gap("WidgetKit", "Values.swift and Timeline.swift both declare TimelineEntry and TimelineEntryRelevance, with Float and Double scores")
 
 local function port_overlay(target)
     local ports = table.wrap((target:pkg("swift-runtime"):envs() or {}).REVENANT_SWIFT_PORT_HEADERS)
@@ -120,7 +129,7 @@ local function port_overlay(target)
     return {"-vfsoverlay", table.concat(ports, path.envsep())}
 end
 
-local function createml(name, folder, deps, flags)
+local function createml(name, folder, deps, flags, gap)
     target(name)
         set_kind("static")
         set_default(false)
@@ -136,13 +145,17 @@ local function createml(name, folder, deps, flags)
         on_config(function (target)
             add_flags(target, table.join(port_overlay(target), flags or {}))
         end)
+        if gap then
+            open_gap(name, gap)
+        end
     target_end()
 end
 
 createml("TabularData", "TabularData", {}, {})
-createml("CoreML", "CoreML", {}, {"-import-objc-header", path.join(SRC, "CoreML", "RevenantCoreML.h")})
-createml("CreateMLComponents", "CreateMLComponents", {"TabularData", "CoreML"}, {})
-createml("CreateML", "CreateML", {"CreateMLComponents", "TabularData", "CoreML"}, {})
+createml("CoreML", "CoreML", {}, {"-import-objc-header", path.join(SRC, "CoreML", "RevenantCoreML.h")},
+         "ShapedArray.swift names MLMultiArrayDataType, which the SDK's CoreML declares for iOS 11 and later only")
+createml("CreateMLComponents", "CreateMLComponents", {"TabularData", "CoreML"}, {}, "it needs CoreML, an open gap")
+createml("CreateML", "CreateML", {"CreateMLComponents", "TabularData", "CoreML"}, {}, "it needs CreateMLComponents and CoreML, open gaps")
 
 target("MusicKit")
     set_kind("static")
@@ -160,6 +173,7 @@ target("MusicKit")
     on_config(function (target)
         add_flags(target, {"-import-objc-header", path.join(SRC, "MusicKit", "include", "MusicKitC.h"), "-I", path.join(SRC, "MusicKit", "include")})
     end)
+    open_gap("MusicKit", "Catalog.swift uses URLComponents, which needs iOS 7, and URLQueryItem, which needs iOS 8")
     target_end()
 
 target("SwiftData")
@@ -174,6 +188,7 @@ target("SwiftData")
     on_config(function (target)
         add_flags(target, port_overlay(target))
     end)
+    open_gap("SwiftData", "DefaultStore.swift imports FoundationEssentials, which the iOS 6 SDK does not provide")
     target_end()
 
 local function deployment_of(target)
@@ -214,7 +229,7 @@ local function overlay(name, folder, opt)
         add_rules("@addon/revenant/swift")
         set_optimize("fastest")
         set_values("swift.module", name:sub(#"swift" + 1))
-        add_shflags("-dynamiclib", "-install_name", "@rpath/lib" .. name .. ".dylib", {force = true})
+        add_shflags("-dynamiclib", "-install_name", "@rpath/lib" .. name .. ".dylib", "-Wl,-dead_strip_dylibs", {force = true})
         if opt.generate then
             add_packages("swift")
         end
