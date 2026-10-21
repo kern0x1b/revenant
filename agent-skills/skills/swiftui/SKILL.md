@@ -26,11 +26,13 @@ import finds for armv7 declares no view. Measured at the pin: the bare import bu
 `struct Probe: View { var body: some View { Text("x") } }` stops with
 `error: cannot find type 'View' in scope` and `error: cannot find 'Text' in scope`.
 
-When the project pins a later the toolchain, check that tag before you answer the user:
+**In the checkout, not as a package.** SwiftUI is the target `SwiftUI` of `frameworks/SwiftUI`, which takes
+Combine from the package `combine`. The package repository has no `swiftui` package yet: a thin wrapper needs the
+swift rule to install the target's module, which it does not do. So an app outside the checkout cannot take SwiftUI
+from this toolchain, and the answer to the user is to say so. See `docs/explanation/architecture.md`.
 
-```
-curl -s -o /dev/null -w "%{http_code}\n" https://raw.githubusercontent.com/kern0x1b/revenant/publish/packages/s/swiftui-uikit/xmake.lua
-```
+When the project pins a later toolchain, check whether that tag names a SwiftUI package before you answer the user,
+in its `packages/s/` folder, and say what the tag contains.
 
 `404`: no package at that tag, and §2 applies. `200`: the tag has one, and this skill predates it.
 Read that recipe's `set_description` and its configs, tell the user that this skill does not cover
