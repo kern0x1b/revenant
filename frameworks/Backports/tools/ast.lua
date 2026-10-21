@@ -100,6 +100,7 @@ function scan(handle, on_block)
                     on_block(top)
                 end
                 top = node
+                top.body = body
                 stack = {[0] = node}
             elseif stack[depth - 1] ~= nil then
                 table.insert(stack[depth - 1].children, node)
