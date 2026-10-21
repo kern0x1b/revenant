@@ -58,19 +58,20 @@ function read(text)
         local listed = line:match("^  %- " .. key .. ":%s*%[(.-)%]")
         local held = section == "exports" or section == "reexports"
         if held and listed then
-            entry = {archs = architectures(listed), text = line}
+            entry = {archs = architectures(listed), lines = {line}}
             table.insert(doc.exports, entry)
         elseif entry and held then
-            entry.text = entry.text .. line
+            table.insert(entry.lines, line)
         end
     end
     for _, entry in ipairs(doc.exports) do
+        local body = table.concat(entry.lines)
         entry.lists = {}
         for _, list in ipairs(LISTS) do
-            local content = entry.text:match("\n    " .. list:gsub("%-", "%%-") .. ":%s*%[(.-)%]")
+            local content = body:match("\n    " .. list:gsub("%-", "%%-") .. ":%s*%[(.-)%]")
             entry.lists[list] = content and names(content) or {}
         end
-        entry.text = nil
+        entry.lines = nil
     end
     return doc
 end
