@@ -39,14 +39,9 @@ if is_plat("iphoneos") then
 end
 
 includes("frameworks/Backports")
+includes("emulator", "recompiler", "frameworks/Combine", "frameworks/SwiftUI", "frameworks/WebKit", "toolchain/tests")
 
 if whole then
-    if is_plat("iphoneos") then
-        includes("frameworks/Combine", "frameworks/SwiftUI", "frameworks/WebKit")
-    else
-        includes("emulator", "recompiler", "frameworks/Combine", "frameworks/SwiftUI", "frameworks/WebKit", "toolchain/tests")
-    end
-
     target("repository")
         set_kind("phony")
         set_default(false)

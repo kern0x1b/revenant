@@ -14,7 +14,7 @@ option_end()
 
 local rootfs = get_config("emulator_guest_rootfs")
 local ld = get_config("emulator_armv6_ld")
-if rootfs and ld and os.isfile(ld) and os.isfile(path.join(rootfs, "usr", "lib", "libSystem.B.dylib")) then
+if get_config("component") == "" and not is_plat("iphoneos") and rootfs and ld and os.isfile(ld) and os.isfile(path.join(rootfs, "usr", "lib", "libSystem.B.dylib")) then
     target("emulator_guest_dns_probe")
         set_kind("phony")
         on_build(function (target)

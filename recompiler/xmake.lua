@@ -1,3 +1,7 @@
+if get_config("component") ~= "" or is_plat("iphoneos") then
+    return
+end
+
 local host = {plat = "macosx", arch = "arm64"}
 local llvm = "23.1.3"
 add_requires("revenant@llvm " .. llvm, table.join(host, {alias = "llvm", configs = {libraries = true}}))

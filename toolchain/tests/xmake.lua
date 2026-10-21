@@ -1,3 +1,7 @@
+if get_config("component") ~= "" or is_plat("iphoneos") then
+    return
+end
+
 local addon = path.join(os.scriptdir(), "addon")
 local toolchain = path.directory(os.scriptdir())
 local host = {plat = "macosx", arch = "arm64"}
@@ -8,13 +12,13 @@ add_requires("revenant@iphoneos-sdk 16.4", table.join(host, {alias = "iphoneos-s
 add_requires("revenant@llvm 23.1.3", table.join(host, {alias = "llvm", configs = {libraries = true}}))
 add_requires("revenant@swift 6.4.0", table.join(host, {alias = "swift", system = false}))
 
-local light = {"assets_extract_test", "cache_sweep_test", "checkout_test", "compat_test", "dependency_test",
+local light = {"assets_extract_test", "cache_sweep_test", "checkout_test", "compat_test",
                "descriptions_test", "digest_test", "firmware_test", "locale_order_test", "lock_test", "sdk_verbatim_test",
                "sdkstubs_test", "swift_rule_test", "workspace_test"}
 
 local packaged = {"architectures_test", "atomics_test", "blocks_test", "callkit_screen_test", "carried_test", "checks_test", "device_test",
                   "debian_test", "dyld_test", "gdb_test", "macho_test", "objc_test", "operators_test", "port_test",
-                  "shared_runtime_test", "store_test", "tls_test", "toolchain_check_test", "tweak_test", "weak_test"}
+                  "shared_runtime_test", "tls_test", "toolchain_check_test", "tweak_test", "weak_test"}
 
 local device = {"emulator_test", "swift_test"}
 

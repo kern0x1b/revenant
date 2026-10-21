@@ -32,6 +32,12 @@ option("emulator_dynarmic_test_emit_failure")
     set_description("Compile Dynarmic's portable-emit fault injection, for tests")
 option_end()
 
+includes("tests/guest/dns-probe")
+
+if get_config("component") ~= "" or is_plat("iphoneos") then
+    return
+end
+
 local host = {plat = "macosx", arch = "arm64"}
 add_requires("dynarmic 6.7.0", table.join(host, {alias = "dynarmic",
              configs = {test_emit_failure = has_config("emulator_dynarmic_test_emit_failure")}}))
@@ -90,7 +96,7 @@ add_rules("emulator.module")
 
 includes("src/mach", "src/foundation", "src/device_state", "src/filesystem", "src/network", "src/storage",
          "src/telephony", "src/media", "src/bluetooth", "src/crypto", "src/graphics", "src/kernel", "src/debug",
-         "src/host", "src/runtime", "src/app", "src/glsl", "tests/guest/dns-probe")
+         "src/host", "src/runtime", "src/app", "src/glsl")
 
 target("emulator_block_profile_test")
     set_kind("binary")
