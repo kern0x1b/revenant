@@ -37,7 +37,7 @@ a C compiler, and builds again when the recipe changes.
 | --- | --- |
 | `xmakew` | the pinned and patched xmake, built on first use (above) |
 | `third_party/<name>/` | an xmake package of third-party code: the upstream by url and commit or checksum, our changes in `patches/` applied in order by `add_patches` |
-| `tools/check.lua` | `./xmakew l tools/check.lua [<member> ...]`: the members' checks that need no device or firmware |
+| `tools/layout.lua` | `./xmakew l tools/layout.lua`: the layout of AGENTS.md, which `./xmakew test -P .` runs as `repository/layout` |
 | `tools/publish.lua` | `./xmakew l tools/publish.lua <member>`: a member's history as a repository of its own (below) |
 
 Third-party code is never a copy here: `dynarmic` is MC-XiaoXiao's dynarmic at a commit plus our arm64 backend as

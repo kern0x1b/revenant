@@ -3,20 +3,21 @@
 `.github/workflows/check.yml` runs on every push to any branch, and on demand from the Actions tab or with
 `gh workflow run check.yml --ref <branch>`. Its two jobs run in parallel, both on `macos-26`:
 
-- `checks` runs the comment check (`./xmakew l tools/comments.lua check`), the layout check and the toolchain check
-  (`./xmakew l tools/check.lua toolchain`, the light guard). The layout check reports its count of breaks in the
-  step summary and does not fail the job yet. The toolchain check fails while the light guard fails, so the job is
-  red on any branch where that is so.
+- `checks` runs `./xmakew test -P .`: every test a host with the prebuilt packages can run, in parallel. That is the
+  repository's layout and comment checks (`repository/*`), the toolchain's suites (`toolchain_light/*` and
+  `toolchain_packages/*`), the emulator's and the recompiler's host tests. It sets `REVENANT_PREBUILT=kern0x1b/revenant`
+  and `REVENANT_PREBUILT_ONLY=1`, so LLVM and Swift come from their releases and a missing release is an error, not a
+  source build. The tests that need a device, an emulator image or firmware are not declared on CI; see
+  [the tests reference](../reference/toolchain/tests.md).
 - `backports` selects the newest Xcode and sets `REVENANT_PREBUILT=kern0x1b/revenant`, so LLVM and Swift come from
   their releases and are never built in the job. It configures and builds the Backports component
   (`./xmakew f -P . -p iphoneos -a armv7 --component=Backports`, then `./xmakew build -P .`) and uploads
   `build/iphoneos/armv7/release/lib*.dylib` as the artifact `backports-libraries`. A branch without the `component`
   option skips both steps, and the job summary says so.
 
-The checks run on macOS, not Linux: on Linux the light guard stops early at `registry_test`, which finds gaps there
-that it does not find on macOS. The light guard skips `doc_test` (`LIGHT_SKIP`), which tests the old generator and is
-deleted with the registry; the workflow prints a notice saying so. Every other suite must pass, so the `checks` job
-is red when one of them fails.
+The checks run on macOS, not Linux: the suites compile with the Mac's clang and the emulator is a macOS program. Every
+test in the default run must pass, so the `checks` job is red when one of them fails, and no test is skipped in CI
+by a list of names.
 
 Four caches make a warm run quick:
 

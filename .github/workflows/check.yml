@@ -16,6 +16,9 @@ jobs:
   checks:
     runs-on: macos-26
     timeout-minutes: 60
+    env:
+      REVENANT_PREBUILT: kern0x1b/revenant
+      REVENANT_PREBUILT_ONLY: "1"
     steps:
       - uses: actions/checkout@v4
 
@@ -25,14 +28,39 @@ jobs:
           path: ~/.revenant/cache/xmake
           key: xmake-bin-${{ runner.os }}-${{ hashFiles('xmakew', 'third_party/xmake/**') }}
 
-      - name: Check the comments
-        run: ./xmakew l -P . tools/comments.lua check
+      - name: Key the package store
+        id: keys
+        run: echo "hash=$(./xmakew l -P . tools/keys.lua | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
-      - name: Check the layout
-        run: ./xmakew l -P . tools/check.lua layout
+      - uses: actions/cache/restore@v4
+        id: store
+        with:
+          path: ~/.revenant/cache/xmake-global
+          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
 
-      - name: Check the toolchain
-        run: ./xmakew l -P . tools/check.lua toolchain
+      - uses: actions/cache/restore@v4
+        id: ccache
+        with:
+          path: ~/.revenant/cache/ccache
+          key: ccache-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            ccache-${{ runner.os }}-
+
+      - name: Run the tests
+        run: ./xmakew test -P .
+
+      - name: Save the package store
+        if: success() && steps.store.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.revenant/cache/xmake-global
+          key: xmake-global-${{ runner.os }}-${{ steps.keys.outputs.hash }}
+
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: ~/.revenant/cache/ccache
+          key: ccache-${{ runner.os }}-${{ github.run_id }}
 
       - uses: actions/cache/save@v4
         if: always() && steps.xmake.outputs.cache-hit != 'true'
