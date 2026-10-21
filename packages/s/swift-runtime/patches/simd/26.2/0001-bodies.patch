@@ -16,13 +16,12 @@
 +}
  @available(swift, deprecated: 4, message: "Use the .determinant property instead.")
 -public func matrix_determinant(_ x: simd.simd_float2x2) -> Swift.Float
--@available(swift, deprecated: 4, renamed: "simd_float2x2")
--public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Float>, _ col1: Swift.SIMD2<Swift.Float>) -> simd.simd_float2x2
--public func matrix_from_rows(_ row0: Swift.SIMD2<Swift.Float>, _ row1: Swift.SIMD2<Swift.Float>) -> simd.simd_float2x2
 +public func matrix_determinant(_ x: simd.simd_float2x2) -> Swift.Float {
 +  return (x.columns.0.x * x.columns.1.y - x.columns.1.x * x.columns.0.y)
 +}
-+@available(swift, deprecated: 4, renamed: "simd_float2x2")
+ @available(swift, deprecated: 4, renamed: "simd_float2x2")
+-public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Float>, _ col1: Swift.SIMD2<Swift.Float>) -> simd.simd_float2x2
+-public func matrix_from_rows(_ row0: Swift.SIMD2<Swift.Float>, _ row1: Swift.SIMD2<Swift.Float>) -> simd.simd_float2x2
 +public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Float>, _ col1: Swift.SIMD2<Swift.Float>) -> simd.simd_float2x2 {
 +  return simd_matrix(col0, col1)
 +}
@@ -48,15 +47,14 @@
  @available(swift, deprecated: 4, renamed: "simd_float3x2")
 -public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Float>, _ col1: Swift.SIMD2<Swift.Float>, _ col2: Swift.SIMD2<Swift.Float>) -> simd.simd_float3x2
 -public func matrix_from_rows(_ row0: Swift.SIMD3<Swift.Float>, _ row1: Swift.SIMD3<Swift.Float>) -> simd.simd_float3x2
--@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_float3x2) -> simd.float2x3
 +public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Float>, _ col1: Swift.SIMD2<Swift.Float>, _ col2: Swift.SIMD2<Swift.Float>) -> simd.simd_float3x2 {
 +  return simd_matrix(col0, col1, col2)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD3<Swift.Float>, _ row1: Swift.SIMD3<Swift.Float>) -> simd.simd_float3x2 {
 +  return simd_matrix_from_rows(row0, row1)
 +}
-+@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+ @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_float3x2) -> simd.float2x3
 +public func matrix_transpose(_ x: simd.simd_float3x2) -> simd.float2x3 {
 +  return simd_transpose(x)
 +}
@@ -74,14 +72,15 @@
  @available(swift, deprecated: 4, renamed: "simd_float4x2")
 -public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Float>, _ col1: Swift.SIMD2<Swift.Float>, _ col2: Swift.SIMD2<Swift.Float>, _ col3: Swift.SIMD2<Swift.Float>) -> simd.simd_float4x2
 -public func matrix_from_rows(_ row0: Swift.SIMD4<Swift.Float>, _ row1: Swift.SIMD4<Swift.Float>) -> simd.simd_float4x2
+-@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_float4x2) -> simd.float2x4
 +public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Float>, _ col1: Swift.SIMD2<Swift.Float>, _ col2: Swift.SIMD2<Swift.Float>, _ col3: Swift.SIMD2<Swift.Float>) -> simd.simd_float4x2 {
 +  return simd_matrix(col0, col1, col2, col3)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD4<Swift.Float>, _ row1: Swift.SIMD4<Swift.Float>) -> simd.simd_float4x2 {
 +  return simd_matrix_from_rows(row0, row1)
 +}
- @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_float4x2) -> simd.float2x4
++@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
 +public func matrix_transpose(_ x: simd.simd_float4x2) -> simd.float2x4 {
 +  return simd_transpose(x)
 +}
@@ -99,15 +98,14 @@
  @available(swift, deprecated: 4, renamed: "simd_float2x3")
 -public func matrix_from_columns(_ col0: Swift.SIMD3<Swift.Float>, _ col1: Swift.SIMD3<Swift.Float>) -> simd.simd_float2x3
 -public func matrix_from_rows(_ row0: Swift.SIMD2<Swift.Float>, _ row1: Swift.SIMD2<Swift.Float>, _ row2: Swift.SIMD2<Swift.Float>) -> simd.simd_float2x3
--@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_float2x3) -> simd.float3x2
 +public func matrix_from_columns(_ col0: Swift.SIMD3<Swift.Float>, _ col1: Swift.SIMD3<Swift.Float>) -> simd.simd_float2x3 {
 +  return simd_matrix(col0, col1)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD2<Swift.Float>, _ row1: Swift.SIMD2<Swift.Float>, _ row2: Swift.SIMD2<Swift.Float>) -> simd.simd_float2x3 {
 +  return simd_matrix_from_rows(row0, row1, row2)
 +}
-+@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+ @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_float2x3) -> simd.float3x2
 +public func matrix_transpose(_ x: simd.simd_float2x3) -> simd.float3x2 {
 +  return simd_transpose(x)
 +}
@@ -135,13 +133,12 @@
 +}
  @available(swift, deprecated: 4, message: "Use the .determinant property instead.")
 -public func matrix_determinant(_ x: simd.simd_float3x3) -> Swift.Float
--@available(swift, deprecated: 4, renamed: "simd_float3x3")
--public func matrix_from_columns(_ col0: Swift.SIMD3<Swift.Float>, _ col1: Swift.SIMD3<Swift.Float>, _ col2: Swift.SIMD3<Swift.Float>) -> simd.simd_float3x3
--public func matrix_from_rows(_ row0: Swift.SIMD3<Swift.Float>, _ row1: Swift.SIMD3<Swift.Float>, _ row2: Swift.SIMD3<Swift.Float>) -> simd.simd_float3x3
 +public func matrix_determinant(_ x: simd.simd_float3x3) -> Swift.Float {
 +  return (x.columns.0.x * (x.columns.1.y * x.columns.2.z - x.columns.1.z * x.columns.2.y) - x.columns.1.x * (x.columns.0.y * x.columns.2.z - x.columns.0.z * x.columns.2.y) + x.columns.2.x * (x.columns.0.y * x.columns.1.z - x.columns.0.z * x.columns.1.y))
 +}
-+@available(swift, deprecated: 4, renamed: "simd_float3x3")
+ @available(swift, deprecated: 4, renamed: "simd_float3x3")
+-public func matrix_from_columns(_ col0: Swift.SIMD3<Swift.Float>, _ col1: Swift.SIMD3<Swift.Float>, _ col2: Swift.SIMD3<Swift.Float>) -> simd.simd_float3x3
+-public func matrix_from_rows(_ row0: Swift.SIMD3<Swift.Float>, _ row1: Swift.SIMD3<Swift.Float>, _ row2: Swift.SIMD3<Swift.Float>) -> simd.simd_float3x3
 +public func matrix_from_columns(_ col0: Swift.SIMD3<Swift.Float>, _ col1: Swift.SIMD3<Swift.Float>, _ col2: Swift.SIMD3<Swift.Float>) -> simd.simd_float3x3 {
 +  return simd_matrix(col0, col1, col2)
 +}
@@ -167,14 +164,15 @@
  @available(swift, deprecated: 4, renamed: "simd_float4x3")
 -public func matrix_from_columns(_ col0: Swift.SIMD3<Swift.Float>, _ col1: Swift.SIMD3<Swift.Float>, _ col2: Swift.SIMD3<Swift.Float>, _ col3: Swift.SIMD3<Swift.Float>) -> simd.simd_float4x3
 -public func matrix_from_rows(_ row0: Swift.SIMD4<Swift.Float>, _ row1: Swift.SIMD4<Swift.Float>, _ row2: Swift.SIMD4<Swift.Float>) -> simd.simd_float4x3
+-@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_float4x3) -> simd.float3x4
 +public func matrix_from_columns(_ col0: Swift.SIMD3<Swift.Float>, _ col1: Swift.SIMD3<Swift.Float>, _ col2: Swift.SIMD3<Swift.Float>, _ col3: Swift.SIMD3<Swift.Float>) -> simd.simd_float4x3 {
 +  return simd_matrix(col0, col1, col2, col3)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD4<Swift.Float>, _ row1: Swift.SIMD4<Swift.Float>, _ row2: Swift.SIMD4<Swift.Float>) -> simd.simd_float4x3 {
 +  return simd_matrix_from_rows(row0, row1, row2)
 +}
- @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_float4x3) -> simd.float3x4
++@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
 +public func matrix_transpose(_ x: simd.simd_float4x3) -> simd.float3x4 {
 +  return simd_transpose(x)
 +}
@@ -192,15 +190,14 @@
  @available(swift, deprecated: 4, renamed: "simd_float2x4")
 -public func matrix_from_columns(_ col0: Swift.SIMD4<Swift.Float>, _ col1: Swift.SIMD4<Swift.Float>) -> simd.simd_float2x4
 -public func matrix_from_rows(_ row0: Swift.SIMD2<Swift.Float>, _ row1: Swift.SIMD2<Swift.Float>, _ row2: Swift.SIMD2<Swift.Float>, _ row3: Swift.SIMD2<Swift.Float>) -> simd.simd_float2x4
--@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_float2x4) -> simd.float4x2
 +public func matrix_from_columns(_ col0: Swift.SIMD4<Swift.Float>, _ col1: Swift.SIMD4<Swift.Float>) -> simd.simd_float2x4 {
 +  return simd_matrix(col0, col1)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD2<Swift.Float>, _ row1: Swift.SIMD2<Swift.Float>, _ row2: Swift.SIMD2<Swift.Float>, _ row3: Swift.SIMD2<Swift.Float>) -> simd.simd_float2x4 {
 +  return simd_matrix_from_rows(row0, row1, row2, row3)
 +}
-+@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+ @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_float2x4) -> simd.float4x2
 +public func matrix_transpose(_ x: simd.simd_float2x4) -> simd.float4x2 {
 +  return simd_transpose(x)
 +}
@@ -218,15 +215,14 @@
  @available(swift, deprecated: 4, renamed: "simd_float3x4")
 -public func matrix_from_columns(_ col0: Swift.SIMD4<Swift.Float>, _ col1: Swift.SIMD4<Swift.Float>, _ col2: Swift.SIMD4<Swift.Float>) -> simd.simd_float3x4
 -public func matrix_from_rows(_ row0: Swift.SIMD3<Swift.Float>, _ row1: Swift.SIMD3<Swift.Float>, _ row2: Swift.SIMD3<Swift.Float>, _ row3: Swift.SIMD3<Swift.Float>) -> simd.simd_float3x4
--@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_float3x4) -> simd.float4x3
 +public func matrix_from_columns(_ col0: Swift.SIMD4<Swift.Float>, _ col1: Swift.SIMD4<Swift.Float>, _ col2: Swift.SIMD4<Swift.Float>) -> simd.simd_float3x4 {
 +  return simd_matrix(col0, col1, col2)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD3<Swift.Float>, _ row1: Swift.SIMD3<Swift.Float>, _ row2: Swift.SIMD3<Swift.Float>, _ row3: Swift.SIMD3<Swift.Float>) -> simd.simd_float3x4 {
 +  return simd_matrix_from_rows(row0, row1, row2, row3)
 +}
-+@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+ @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_float3x4) -> simd.float4x3
 +public func matrix_transpose(_ x: simd.simd_float3x4) -> simd.float4x3 {
 +  return simd_transpose(x)
 +}
@@ -249,18 +245,18 @@
  @available(macOS 10.10, iOS 8.0, tvOS 10.0, watchOS 3.0, *)
  @available(swift, deprecated: 4, message: "Use the .inverse property instead.")
 -public func matrix_invert(_ x: simd.simd_float4x4) -> simd.simd_float4x4
--@available(swift, deprecated: 4, message: "Use the .determinant property instead.")
--public func matrix_determinant(_ x: simd.simd_float4x4) -> Swift.Float
 +public func matrix_invert(_ x: simd.simd_float4x4) -> simd.simd_float4x4 {
 +  return simd_inverse(x)
 +}
-+@available(swift, deprecated: 4, message: "Use the .determinant property instead.")
+ @available(swift, deprecated: 4, message: "Use the .determinant property instead.")
+-public func matrix_determinant(_ x: simd.simd_float4x4) -> Swift.Float
+-@available(swift, deprecated: 4, renamed: "simd_float4x4")
+-public func matrix_from_columns(_ col0: Swift.SIMD4<Swift.Float>, _ col1: Swift.SIMD4<Swift.Float>, _ col2: Swift.SIMD4<Swift.Float>, _ col3: Swift.SIMD4<Swift.Float>) -> simd.simd_float4x4
+-public func matrix_from_rows(_ row0: Swift.SIMD4<Swift.Float>, _ row1: Swift.SIMD4<Swift.Float>, _ row2: Swift.SIMD4<Swift.Float>, _ row3: Swift.SIMD4<Swift.Float>) -> simd.simd_float4x4
 +public func matrix_determinant(_ x: simd.simd_float4x4) -> Swift.Float {
 +  return (x.columns.0.x * (x.columns.1.y * (x.columns.2.z * x.columns.3.w - x.columns.2.w * x.columns.3.z) - x.columns.2.y * (x.columns.1.z * x.columns.3.w - x.columns.1.w * x.columns.3.z) + x.columns.3.y * (x.columns.1.z * x.columns.2.w - x.columns.1.w * x.columns.2.z)) - x.columns.1.x * (x.columns.0.y * (x.columns.2.z * x.columns.3.w - x.columns.2.w * x.columns.3.z) - x.columns.2.y * (x.columns.0.z * x.columns.3.w - x.columns.0.w * x.columns.3.z) + x.columns.3.y * (x.columns.0.z * x.columns.2.w - x.columns.0.w * x.columns.2.z)) + x.columns.2.x * (x.columns.0.y * (x.columns.1.z * x.columns.3.w - x.columns.1.w * x.columns.3.z) - x.columns.1.y * (x.columns.0.z * x.columns.3.w - x.columns.0.w * x.columns.3.z) + x.columns.3.y * (x.columns.0.z * x.columns.1.w - x.columns.0.w * x.columns.1.z)) - x.columns.3.x * (x.columns.0.y * (x.columns.1.z * x.columns.2.w - x.columns.1.w * x.columns.2.z) - x.columns.1.y * (x.columns.0.z * x.columns.2.w - x.columns.0.w * x.columns.2.z) + x.columns.2.y * (x.columns.0.z * x.columns.1.w - x.columns.0.w * x.columns.1.z)))
 +}
- @available(swift, deprecated: 4, renamed: "simd_float4x4")
--public func matrix_from_columns(_ col0: Swift.SIMD4<Swift.Float>, _ col1: Swift.SIMD4<Swift.Float>, _ col2: Swift.SIMD4<Swift.Float>, _ col3: Swift.SIMD4<Swift.Float>) -> simd.simd_float4x4
--public func matrix_from_rows(_ row0: Swift.SIMD4<Swift.Float>, _ row1: Swift.SIMD4<Swift.Float>, _ row2: Swift.SIMD4<Swift.Float>, _ row3: Swift.SIMD4<Swift.Float>) -> simd.simd_float4x4
++@available(swift, deprecated: 4, renamed: "simd_float4x4")
 +public func matrix_from_columns(_ col0: Swift.SIMD4<Swift.Float>, _ col1: Swift.SIMD4<Swift.Float>, _ col2: Swift.SIMD4<Swift.Float>, _ col3: Swift.SIMD4<Swift.Float>) -> simd.simd_float4x4 {
 +  return simd_matrix(col0, col1, col2, col3)
 +}
@@ -302,15 +298,14 @@
  @available(swift, deprecated: 4, renamed: "simd_double2x2")
 -public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Double>, _ col1: Swift.SIMD2<Swift.Double>) -> simd.simd_double2x2
 -public func matrix_from_rows(_ row0: Swift.SIMD2<Swift.Double>, _ row1: Swift.SIMD2<Swift.Double>) -> simd.simd_double2x2
--@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_double2x2) -> simd.double2x2
 +public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Double>, _ col1: Swift.SIMD2<Swift.Double>) -> simd.simd_double2x2 {
 +  return simd_matrix(col0, col1)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD2<Swift.Double>, _ row1: Swift.SIMD2<Swift.Double>) -> simd.simd_double2x2 {
 +  return simd_matrix_from_rows(row0, row1)
 +}
-+@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+ @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_double2x2) -> simd.double2x2
 +public func matrix_transpose(_ x: simd.simd_double2x2) -> simd.double2x2 {
 +  return simd_transpose(x)
 +}
@@ -328,15 +323,14 @@
  @available(swift, deprecated: 4, renamed: "simd_double3x2")
 -public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Double>, _ col1: Swift.SIMD2<Swift.Double>, _ col2: Swift.SIMD2<Swift.Double>) -> simd.simd_double3x2
 -public func matrix_from_rows(_ row0: Swift.SIMD3<Swift.Double>, _ row1: Swift.SIMD3<Swift.Double>) -> simd.simd_double3x2
--@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_double3x2) -> simd.double2x3
 +public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Double>, _ col1: Swift.SIMD2<Swift.Double>, _ col2: Swift.SIMD2<Swift.Double>) -> simd.simd_double3x2 {
 +  return simd_matrix(col0, col1, col2)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD3<Swift.Double>, _ row1: Swift.SIMD3<Swift.Double>) -> simd.simd_double3x2 {
 +  return simd_matrix_from_rows(row0, row1)
 +}
-+@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+ @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_double3x2) -> simd.double2x3
 +public func matrix_transpose(_ x: simd.simd_double3x2) -> simd.double2x3 {
 +  return simd_transpose(x)
 +}
@@ -354,15 +348,14 @@
  @available(swift, deprecated: 4, renamed: "simd_double4x2")
 -public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Double>, _ col1: Swift.SIMD2<Swift.Double>, _ col2: Swift.SIMD2<Swift.Double>, _ col3: Swift.SIMD2<Swift.Double>) -> simd.simd_double4x2
 -public func matrix_from_rows(_ row0: Swift.SIMD4<Swift.Double>, _ row1: Swift.SIMD4<Swift.Double>) -> simd.simd_double4x2
--@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_double4x2) -> simd.double2x4
 +public func matrix_from_columns(_ col0: Swift.SIMD2<Swift.Double>, _ col1: Swift.SIMD2<Swift.Double>, _ col2: Swift.SIMD2<Swift.Double>, _ col3: Swift.SIMD2<Swift.Double>) -> simd.simd_double4x2 {
 +  return simd_matrix(col0, col1, col2, col3)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD4<Swift.Double>, _ row1: Swift.SIMD4<Swift.Double>) -> simd.simd_double4x2 {
 +  return simd_matrix_from_rows(row0, row1)
 +}
-+@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+ @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_double4x2) -> simd.double2x4
 +public func matrix_transpose(_ x: simd.simd_double4x2) -> simd.double2x4 {
 +  return simd_transpose(x)
 +}
@@ -380,15 +373,14 @@
  @available(swift, deprecated: 4, renamed: "simd_double2x3")
 -public func matrix_from_columns(_ col0: Swift.SIMD3<Swift.Double>, _ col1: Swift.SIMD3<Swift.Double>) -> simd.simd_double2x3
 -public func matrix_from_rows(_ row0: Swift.SIMD2<Swift.Double>, _ row1: Swift.SIMD2<Swift.Double>, _ row2: Swift.SIMD2<Swift.Double>) -> simd.simd_double2x3
--@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_double2x3) -> simd.double3x2
 +public func matrix_from_columns(_ col0: Swift.SIMD3<Swift.Double>, _ col1: Swift.SIMD3<Swift.Double>) -> simd.simd_double2x3 {
 +  return simd_matrix(col0, col1)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD2<Swift.Double>, _ row1: Swift.SIMD2<Swift.Double>, _ row2: Swift.SIMD2<Swift.Double>) -> simd.simd_double2x3 {
 +  return simd_matrix_from_rows(row0, row1, row2)
 +}
-+@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+ @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_double2x3) -> simd.double3x2
 +public func matrix_transpose(_ x: simd.simd_double2x3) -> simd.double3x2 {
 +  return simd_transpose(x)
 +}
@@ -416,20 +408,22 @@
 +}
  @available(swift, deprecated: 4, message: "Use the .determinant property instead.")
 -public func matrix_determinant(_ x: simd.simd_double3x3) -> Swift.Double
+-@available(swift, deprecated: 4, renamed: "simd_double3x3")
+-public func matrix_from_columns(_ col0: Swift.SIMD3<Swift.Double>, _ col1: Swift.SIMD3<Swift.Double>, _ col2: Swift.SIMD3<Swift.Double>) -> simd.simd_double3x3
+-public func matrix_from_rows(_ row0: Swift.SIMD3<Swift.Double>, _ row1: Swift.SIMD3<Swift.Double>, _ row2: Swift.SIMD3<Swift.Double>) -> simd.simd_double3x3
+-@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_double3x3) -> simd.double3x3
 +public func matrix_determinant(_ x: simd.simd_double3x3) -> Swift.Double {
 +  return (x.columns.0.x * (x.columns.1.y * x.columns.2.z - x.columns.1.z * x.columns.2.y) - x.columns.1.x * (x.columns.0.y * x.columns.2.z - x.columns.0.z * x.columns.2.y) + x.columns.2.x * (x.columns.0.y * x.columns.1.z - x.columns.0.z * x.columns.1.y))
 +}
- @available(swift, deprecated: 4, renamed: "simd_double3x3")
--public func matrix_from_columns(_ col0: Swift.SIMD3<Swift.Double>, _ col1: Swift.SIMD3<Swift.Double>, _ col2: Swift.SIMD3<Swift.Double>) -> simd.simd_double3x3
--public func matrix_from_rows(_ row0: Swift.SIMD3<Swift.Double>, _ row1: Swift.SIMD3<Swift.Double>, _ row2: Swift.SIMD3<Swift.Double>) -> simd.simd_double3x3
++@available(swift, deprecated: 4, renamed: "simd_double3x3")
 +public func matrix_from_columns(_ col0: Swift.SIMD3<Swift.Double>, _ col1: Swift.SIMD3<Swift.Double>, _ col2: Swift.SIMD3<Swift.Double>) -> simd.simd_double3x3 {
 +  return simd_matrix(col0, col1, col2)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD3<Swift.Double>, _ row1: Swift.SIMD3<Swift.Double>, _ row2: Swift.SIMD3<Swift.Double>) -> simd.simd_double3x3 {
 +  return simd_matrix_from_rows(row0, row1, row2)
 +}
- @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_double3x3) -> simd.double3x3
++@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
 +public func matrix_transpose(_ x: simd.simd_double3x3) -> simd.double3x3 {
 +  return simd_transpose(x)
 +}
@@ -472,15 +466,14 @@
  @available(swift, deprecated: 4, renamed: "simd_double2x4")
 -public func matrix_from_columns(_ col0: Swift.SIMD4<Swift.Double>, _ col1: Swift.SIMD4<Swift.Double>) -> simd.simd_double2x4
 -public func matrix_from_rows(_ row0: Swift.SIMD2<Swift.Double>, _ row1: Swift.SIMD2<Swift.Double>, _ row2: Swift.SIMD2<Swift.Double>, _ row3: Swift.SIMD2<Swift.Double>) -> simd.simd_double2x4
--@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_double2x4) -> simd.double4x2
 +public func matrix_from_columns(_ col0: Swift.SIMD4<Swift.Double>, _ col1: Swift.SIMD4<Swift.Double>) -> simd.simd_double2x4 {
 +  return simd_matrix(col0, col1)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD2<Swift.Double>, _ row1: Swift.SIMD2<Swift.Double>, _ row2: Swift.SIMD2<Swift.Double>, _ row3: Swift.SIMD2<Swift.Double>) -> simd.simd_double2x4 {
 +  return simd_matrix_from_rows(row0, row1, row2, row3)
 +}
-+@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+ @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_double2x4) -> simd.double4x2
 +public func matrix_transpose(_ x: simd.simd_double2x4) -> simd.double4x2 {
 +  return simd_transpose(x)
 +}
@@ -498,15 +491,14 @@
  @available(swift, deprecated: 4, renamed: "simd_double3x4")
 -public func matrix_from_columns(_ col0: Swift.SIMD4<Swift.Double>, _ col1: Swift.SIMD4<Swift.Double>, _ col2: Swift.SIMD4<Swift.Double>) -> simd.simd_double3x4
 -public func matrix_from_rows(_ row0: Swift.SIMD3<Swift.Double>, _ row1: Swift.SIMD3<Swift.Double>, _ row2: Swift.SIMD3<Swift.Double>, _ row3: Swift.SIMD3<Swift.Double>) -> simd.simd_double3x4
--@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_double3x4) -> simd.double4x3
 +public func matrix_from_columns(_ col0: Swift.SIMD4<Swift.Double>, _ col1: Swift.SIMD4<Swift.Double>, _ col2: Swift.SIMD4<Swift.Double>) -> simd.simd_double3x4 {
 +  return simd_matrix(col0, col1, col2)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD3<Swift.Double>, _ row1: Swift.SIMD3<Swift.Double>, _ row2: Swift.SIMD3<Swift.Double>, _ row3: Swift.SIMD3<Swift.Double>) -> simd.simd_double3x4 {
 +  return simd_matrix_from_rows(row0, row1, row2, row3)
 +}
-+@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+ @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_double3x4) -> simd.double4x3
 +public func matrix_transpose(_ x: simd.simd_double3x4) -> simd.double4x3 {
 +  return simd_transpose(x)
 +}
@@ -540,15 +532,14 @@
  @available(swift, deprecated: 4, renamed: "simd_double4x4")
 -public func matrix_from_columns(_ col0: Swift.SIMD4<Swift.Double>, _ col1: Swift.SIMD4<Swift.Double>, _ col2: Swift.SIMD4<Swift.Double>, _ col3: Swift.SIMD4<Swift.Double>) -> simd.simd_double4x4
 -public func matrix_from_rows(_ row0: Swift.SIMD4<Swift.Double>, _ row1: Swift.SIMD4<Swift.Double>, _ row2: Swift.SIMD4<Swift.Double>, _ row3: Swift.SIMD4<Swift.Double>) -> simd.simd_double4x4
--@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
--public func matrix_transpose(_ x: simd.simd_double4x4) -> simd.double4x4
 +public func matrix_from_columns(_ col0: Swift.SIMD4<Swift.Double>, _ col1: Swift.SIMD4<Swift.Double>, _ col2: Swift.SIMD4<Swift.Double>, _ col3: Swift.SIMD4<Swift.Double>) -> simd.simd_double4x4 {
 +  return simd_matrix(col0, col1, col2, col3)
 +}
 +public func matrix_from_rows(_ row0: Swift.SIMD4<Swift.Double>, _ row1: Swift.SIMD4<Swift.Double>, _ row2: Swift.SIMD4<Swift.Double>, _ row3: Swift.SIMD4<Swift.Double>) -> simd.simd_double4x4 {
 +  return simd_matrix_from_rows(row0, row1, row2, row3)
 +}
-+@available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+ @available(swift, deprecated: 4, message: "Use the .transpose property instead.")
+-public func matrix_transpose(_ x: simd.simd_double4x4) -> simd.double4x4
 +public func matrix_transpose(_ x: simd.simd_double4x4) -> simd.double4x4 {
 +  return simd_transpose(x)
 +}
@@ -571,17 +562,17 @@
  @_transparent public func acos(_ x: simd.simd_double2) -> simd.simd_double2 {
    return __tg_acos(x)
  }
-@@ -3341,10 +3517,6 @@
-   return __tg_sinh(x)
- }
+@@ -3339,10 +3515,6 @@
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
--@_transparent public func sinpi(_ x: simd.simd_double2) -> simd.simd_double2 {
--  return __tg_sinpi(x)
+ @_transparent public func sinh(_ x: simd.simd_double2) -> simd.simd_double2 {
+   return __tg_sinh(x)
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
- @_transparent public func asin(_ x: simd.simd_double2) -> simd.simd_double2 {
-   return __tg_asin(x)
+-@_transparent public func sinpi(_ x: simd.simd_double2) -> simd.simd_double2 {
+-  return __tg_sinpi(x)
  }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func asin(_ x: simd.simd_double2) -> simd.simd_double2 {
 @@ -3361,10 +3533,6 @@
    return __tg_tanh(x)
  }
@@ -615,28 +606,28 @@
  @_transparent public func acos(_ x: simd.simd_double3) -> simd.simd_double3 {
    return __tg_acos(x)
  }
-@@ -3521,10 +3681,6 @@
-   return __tg_sinh(x)
- }
+@@ -3519,10 +3679,6 @@
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func sinh(_ x: simd.simd_double3) -> simd.simd_double3 {
+   return __tg_sinh(x)
+-}
+-@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func sinpi(_ x: simd.simd_double3) -> simd.simd_double3 {
 -  return __tg_sinpi(x)
--}
--@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
- @_transparent public func asin(_ x: simd.simd_double3) -> simd.simd_double3 {
-   return __tg_asin(x)
  }
-@@ -3539,10 +3695,6 @@
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
- @_transparent public func tanh(_ x: simd.simd_double3) -> simd.simd_double3 {
+ @_transparent public func asin(_ x: simd.simd_double3) -> simd.simd_double3 {
+@@ -3541,10 +3697,6 @@
    return __tg_tanh(x)
--}
--@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func tanpi(_ x: simd.simd_double3) -> simd.simd_double3 {
 -  return __tg_tanpi(x)
- }
- @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+-}
+-@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func atan(_ x: simd.simd_double3) -> simd.simd_double3 {
+   return __tg_atan(x)
+ }
 @@ -3565,10 +3717,6 @@
    return __tg_exp2(x)
  }
@@ -670,17 +661,17 @@
  @_transparent public func asin(_ x: simd.simd_double4) -> simd.simd_double4 {
    return __tg_asin(x)
  }
-@@ -3719,10 +3859,6 @@
- @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
- @_transparent public func tanh(_ x: simd.simd_double4) -> simd.simd_double4 {
+@@ -3721,10 +3861,6 @@
    return __tg_tanh(x)
--}
--@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
--@_transparent public func tanpi(_ x: simd.simd_double4) -> simd.simd_double4 {
--  return __tg_tanpi(x)
  }
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+-@_transparent public func tanpi(_ x: simd.simd_double4) -> simd.simd_double4 {
+-  return __tg_tanpi(x)
+-}
+-@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
  @_transparent public func atan(_ x: simd.simd_double4) -> simd.simd_double4 {
+   return __tg_atan(x)
+ }
 @@ -3745,10 +3881,6 @@
    return __tg_exp2(x)
  }
@@ -714,17 +705,17 @@
  @_transparent public func asin(_ x: simd.simd_double8) -> simd.simd_double8 {
    return __tg_asin(x)
  }
-@@ -3901,10 +4025,6 @@
-   return __tg_tanh(x)
- }
+@@ -3899,10 +4023,6 @@
  @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
--@_transparent public func tanpi(_ x: simd.simd_double8) -> simd.simd_double8 {
--  return __tg_tanpi(x)
+ @_transparent public func tanh(_ x: simd.simd_double8) -> simd.simd_double8 {
+   return __tg_tanh(x)
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
- @_transparent public func atan(_ x: simd.simd_double8) -> simd.simd_double8 {
-   return __tg_atan(x)
+-@_transparent public func tanpi(_ x: simd.simd_double8) -> simd.simd_double8 {
+-  return __tg_tanpi(x)
  }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func atan(_ x: simd.simd_double8) -> simd.simd_double8 {
 @@ -3925,10 +4045,6 @@
    return __tg_exp2(x)
  }
@@ -802,28 +793,28 @@
  @_transparent public func asin(_ x: simd.simd_float3) -> simd.simd_float3 {
    return __tg_asin(x)
  }
-@@ -4259,10 +4351,6 @@
- @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
- @_transparent public func tanh(_ x: simd.simd_float3) -> simd.simd_float3 {
+@@ -4261,10 +4353,6 @@
    return __tg_tanh(x)
--}
--@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 -@_transparent public func tanpi(_ x: simd.simd_float3) -> simd.simd_float3 {
 -  return __tg_tanpi(x)
- }
- @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
- @_transparent public func atan(_ x: simd.simd_float3) -> simd.simd_float3 {
-@@ -4285,10 +4373,6 @@
-   return __tg_exp2(x)
- }
- @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
--@_transparent public func exp10(_ x: simd.simd_float3) -> simd.simd_float3 {
--  return __tg_exp10(x)
 -}
 -@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
- @_transparent public func expm1(_ x: simd.simd_float3) -> simd.simd_float3 {
-   return __tg_expm1(x)
+ @_transparent public func atan(_ x: simd.simd_float3) -> simd.simd_float3 {
+   return __tg_atan(x)
  }
+@@ -4283,10 +4371,6 @@
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func exp2(_ x: simd.simd_float3) -> simd.simd_float3 {
+   return __tg_exp2(x)
+-}
+-@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+-@_transparent public func exp10(_ x: simd.simd_float3) -> simd.simd_float3 {
+-  return __tg_exp10(x)
+ }
+ @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+ @_transparent public func expm1(_ x: simd.simd_float3) -> simd.simd_float3 {
 @@ -4401,10 +4485,6 @@
    return __tg_cosh(x)
  }
@@ -978,7 +969,25 @@
    }
  }
  extension simd.simd_quatf : Swift.Equatable {
-@@ -5282,10 +5322,26 @@
+@@ -5231,9 +5271,15 @@
+ }
+ @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+ extension simd.simd_quatf : Swift.Hashable {
+-  public func hash(into hasher: inout Swift.Hasher)
++  public func hash(into hasher: inout Swift.Hasher) {
++    hasher.combine(vector)
++  }
+   public var hashValue: Swift.Int {
+-    get
++    get {
++      var hasher = Swift.Hasher()
++      hash(into: &hasher)
++      return hasher.finalize()
++    }
+   }
+ }
+ extension simd.simd_quatf : @unchecked Swift.Sendable {
+@@ -5282,10 +5328,26 @@
      lhs = lhs / rhs
    }
  }
@@ -1006,7 +1015,7 @@
  @_transparent public func exp(_ q: simd.simd_quatf) -> simd.simd_quatf {
    return __tg_exp(q)
  }
-@@ -5351,14 +5407,18 @@
+@@ -5351,14 +5413,18 @@
    }
  }
  extension simd.simd_double3x3 {
@@ -1028,7 +1037,25 @@
    }
  }
  extension simd.simd_quatd : Swift.Equatable {
-@@ -5422,7 +5482,14 @@
+@@ -5368,9 +5434,15 @@
+ }
+ @available(macOS 14.0, iOS 17.0, tvOS 17.0, watchOS 10.0, *)
+ extension simd.simd_quatd : Swift.Hashable {
+-  public func hash(into hasher: inout Swift.Hasher)
++  public func hash(into hasher: inout Swift.Hasher) {
++    hasher.combine(vector)
++  }
+   public var hashValue: Swift.Int {
+-    get
++    get {
++      var hasher = Swift.Hasher()
++      hash(into: &hasher)
++      return hasher.finalize()
++    }
+   }
+ }
+ extension simd.simd_quatd : @unchecked Swift.Sendable {
+@@ -5422,7 +5494,14 @@
  @_transparent public func dot(_ lhs: simd.simd_quatd, _ rhs: simd.simd_quatd) -> Swift.Double {
    return simd_dot(lhs, rhs)
  }
