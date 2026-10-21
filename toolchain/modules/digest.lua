@@ -1,3 +1,5 @@
+import("byteorder", {rootdir = os.scriptdir()})
+
 local function long_bracket(source, at)
     return source:match("^%[(=*)%[", at)
 end
@@ -117,7 +119,7 @@ function sources(root, inputs)
         local files = {path.join(root, input)}
         if input:find("*", 1, true) then
             files = os.files(path.join(root, input))
-            table.sort(files)
+            byteorder.sort(files)
         end
         for _, file in ipairs(files) do
             local text = io.readfile(file)

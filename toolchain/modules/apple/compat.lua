@@ -1,3 +1,5 @@
+import("byteorder", {rootdir = path.join(os.scriptdir(), "..")})
+
 ARRIVED = {
     __bswapdi2 = {iOS = "3.0"},
     __bswapsi2 = {iOS = "3.0"},
@@ -174,8 +176,8 @@ function needed(deployment)
             table.insert(shared[symbol] and sharing or symbols, symbol)
         end
     end
-    table.sort(symbols)
-    table.sort(sharing)
+    byteorder.sort(symbols)
+    byteorder.sort(sharing)
     return symbols, sharing
 end
 
