@@ -111,6 +111,24 @@ local AREAS = {
             "-[UIWebView allowsLinkPreview]", "-[UIWebView allowsPictureInPictureMediaPlayback]", "-[UILabel allowsDefaultTighteningForTruncation]",
         },
     },
+    {
+        name = "iOS 10 constraints, fonts, previews, refresh controls and bars",
+        sources = {"UIFont+TextStyles10.m", "UICollectionView+Getter10.m", "UIViewPropertyAnimator+Getter10.m", "NSLayoutConstraint+Anchors10.m",
+                   "UILayoutGuide+Ambiguity10.m", "UIImage+RendererFormat10.m", "UIPreviewInteraction.m", "UIViewController+FocusRestore10.m",
+                   "UIAccessibilityElement+ContainerSpace10.m", "UIScrollView+RefreshControl10.m", "UITabBar+Tint10.m", "UICloudSharingController.m"},
+        members = {
+            "+[UIFont preferredFontForTextStyle:compatibleWithTraitCollection:]", "-[UICollectionView prefetchingEnabled]",
+            "-[UIViewPropertyAnimator interruptible]", "-[UIViewPropertyAnimator manualHitTestingEnabled]", "-[UIViewPropertyAnimator userInteractionEnabled]",
+            "-[NSLayoutConstraint firstAnchor]", "-[NSLayoutConstraint secondAnchor]", "-[UILayoutGuide constraintsAffectingLayoutForAxis:]",
+            "-[UILayoutGuide hasAmbiguousLayout]", "-[UIImage imageRendererFormat]", "@UIPreviewInteraction", "-[UIPreviewInteraction initWithView:]",
+            "-[UIPreviewInteraction view]", "-[UIPreviewInteraction delegate]", "-[UIPreviewInteraction cancelInteraction]",
+            "-[UIViewController restoresFocusAfterTransition]", "-[UIAccessibilityElement accessibilityFrameInContainerSpace]",
+            "-[UIScrollView refreshControl]", "-[UITabBar unselectedItemTintColor]", "-[UITabBarItem badgeColor]",
+            "-[UITabBarItem badgeTextAttributesForState:]", "-[UITabBarItem setBadgeTextAttributes:forState:]",
+            "@UICloudSharingController", "-[UICloudSharingController initWithShare:container:]", "-[UICloudSharingController initWithPreparationHandler:]",
+            "-[UICloudSharingController delegate]", "-[UICloudSharingController share]", "-[UICloudSharingController availablePermissions]",
+        },
+    },
 }
 
 local function key_of(member)
