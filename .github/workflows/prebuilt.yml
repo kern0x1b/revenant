@@ -85,9 +85,9 @@ jobs:
           if [ "$rc" -ne 0 ]; then cat "$probe/link.log"; fi
           exit "$rc"
 
-      - name: Configure the iOS project for the iOS 6.0 shared cache
+      - name: Install the firmware tools through the Backports configuration
         if: inputs.package == 'libcxx' || inputs.package == 'swift-runtime'
-        run: ./xmakew f -P . -p iphoneos -a armv7 --component=Swift -y -v
+        run: ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y -v
 
       - name: Restore the iOS 6.0 armv7 shared cache
         if: inputs.package == 'libcxx' || inputs.package == 'swift-runtime'
