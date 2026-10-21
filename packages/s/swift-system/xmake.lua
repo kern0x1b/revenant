@@ -7,24 +7,9 @@ package("swift-system")
     add_urls("https://github.com/apple/swift-system/archive/refs/tags/$(version).tar.gz")
     add_versions("1.8.1", "5610bea8f1f390895137247e7e6aa6bf89a6cd108d75d3368aba5da3f06f0d7a")
 
-    local digests = {}
-    local inputs = {os.scriptdir() .. "/xmake.lua"}
-    for _, patch in ipairs(os.files(os.scriptdir() .. "/patches/*.patch")) do
-        table.insert(inputs, patch)
-    end
-    local compat = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "src", "apple-compat")
-    for _, name in ipairs({"openat", "unlinkat", "fdopendir", "fstatat"}) do
-        table.insert(inputs, path.join(compat, "src", name .. ".c"))
-    end
-    for _, file in ipairs(os.files(path.join(compat, "include", "revenant", "*.h"))) do
-        table.insert(inputs, file)
-    end
-    table.sort(inputs)
-    for _, file in ipairs(inputs) do
-        table.insert(digests, path.filename(file) .. "=" .. hash.sha256(file))
-    end
+    includes(path.join(os.scriptdir(), "port", "digest.lua"))
     add_configs("sources", {description = "The digest of this recipe, its patches and the apple-compat calls it builds, so a changed step is a different package.",
-                            default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
+                            default = swift_system_sources_digest, type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
         package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})

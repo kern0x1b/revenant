@@ -62,7 +62,8 @@ local RECIPES = {
                "toolchain/modules/gyb/bigint.lua", "toolchain/modules/gyb/compiler.lua", "toolchain/modules/gyb/lexer.lua", "toolchain/modules/gyb/main.lua",
                "toolchain/modules/gyb/parser.lua", "toolchain/modules/gyb/random.lua", "toolchain/modules/gyb/runtime.lua", "toolchain/modules/gyb/template.lua"}},
     {folder = "packages/l/libcxx", variable = "libcxx_sources_digest",
-     inputs = {"packages/l/libcxx/xmake.lua", "toolchain/modules/apple/shared_runtime.lua"}},
+     inputs = {"packages/l/libcxx/xmake.lua", "packages/l/libcxx/patches/*.patch", "toolchain/modules/apple/shared_runtime.lua",
+               "toolchain/src/apple-compat/src/*.c", "toolchain/src/apple-compat/src/*.h", "toolchain/src/apple-compat/include/revenant/*.h"}},
     {folder = "packages/s/swiftui", variable = "swiftui_sources_digest",
      inputs = {"packages/s/swiftui/xmake.lua", "frameworks/SwiftUI/xmake.lua", "frameworks/SwiftUI/src/*"}},
     {folder = "packages/a/appintents", variable = "appintents_sources_digest",
@@ -86,7 +87,16 @@ local RECIPES = {
      inputs = {"packages/a/apple-compat/xmake.lua", "toolchain/src/apple-compat/xmake.lua", "toolchain/src/apple-compat/src/*",
                "toolchain/src/apple-compat/include/revenant/*", "toolchain/modules/apple/compat.lua"}},
     {folder = "packages/s/swift-embedded", variable = "swift_embedded_sources_digest",
-     inputs = {"packages/s/swift-embedded/xmake.lua", "toolchain/src/swift-embedded/xmake.lua", "toolchain/modules/apple/swift.lua"}}
+     inputs = {"packages/s/swift-embedded/xmake.lua", "toolchain/src/swift-embedded/xmake.lua", "toolchain/modules/apple/swift.lua"}},
+    {folder = "packages/s/swift-crypto", variable = "swift_crypto_sources_digest",
+     inputs = {"packages/s/swift-crypto/xmake.lua", "packages/s/swift-crypto/patches/*.patch", "packages/s/swift-crypto/patches/swift-asn1/*.patch",
+               "toolchain/src/apple-compat/src/memset_s.c", "toolchain/src/apple-compat/src/objc_opt_self.c",
+               "toolchain/src/apple-compat/src/objc_allocWithZone.c", "toolchain/src/apple-compat/include/revenant/*.h"}},
+    {folder = "packages/s/swift-system", variable = "swift_system_sources_digest",
+     inputs = {"packages/s/swift-system/xmake.lua", "packages/s/swift-system/patches/*.patch",
+               "toolchain/src/apple-compat/src/openat.c", "toolchain/src/apple-compat/src/unlinkat.c",
+               "toolchain/src/apple-compat/src/fdopendir.c", "toolchain/src/apple-compat/src/fstatat.c",
+               "toolchain/src/apple-compat/include/revenant/*.h"}}
 }
 
 function recipes()

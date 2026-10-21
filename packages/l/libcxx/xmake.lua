@@ -10,17 +10,7 @@ package("libcxx")
     add_deps("cmake", "ninja", {kind = "binary"})
 
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
-    local digests = {"sources=" .. libcxx_sources_digest}
-    for _, patch in ipairs(os.files(path.join(os.scriptdir(), "patches", "*.patch"))) do
-        table.insert(digests, path.filename(patch) .. "=" .. hash.sha256(patch))
-    end
-    local folder = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "src", "apple-compat")
-    for _, shim in ipairs(table.join(os.files(path.join(folder, "src", "*.c")), os.files(path.join(folder, "src", "*.h")),
-                                     os.files(path.join(folder, "include", "revenant", "*.h")))) do
-        table.insert(digests, "apple-compat/" .. path.filename(shim) .. "=" .. hash.sha256(shim))
-    end
-    table.sort(digests)
-    add_configs("recipe", {description = "The digest of this recipe and the patches it applies, so a changed flag or patch is a different runtime.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
+    add_configs("recipe", {description = "The digest of this recipe, the patches it applies and the apple-compat shims it links, so a changed flag, patch or shim is a different runtime.", default = libcxx_sources_digest, type = "string", readonly = true})
 
     add_configs("shared", {description = "The runtime is always the shared pair an application bundles.", default = true, type = "boolean", readonly = true})
     add_configs("operators", {description = "operator new and delete are ordinary definitions in libc++abi, so no image binds them weakly and dyld never coalesces them with another C++ runtime in the process.", default = "not-weak", type = "string", readonly = true})

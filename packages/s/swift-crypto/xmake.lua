@@ -9,27 +9,9 @@ package("swift-crypto")
     add_resources("5.0.1", "swift-asn1", "https://github.com/apple/swift-asn1/archive/refs/tags/1.7.3.tar.gz",
                   "77add3684fd75a586529893288af51ed092c565ec0c154d2b4eedb3a6bdc294c")
 
-    local digests = {}
-    local inputs = {os.scriptdir() .. "/xmake.lua"}
-    for _, patch in ipairs(os.files(os.scriptdir() .. "/patches/*.patch")) do
-        table.insert(inputs, patch)
-    end
-    for _, patch in ipairs(os.files(os.scriptdir() .. "/patches/swift-asn1/*.patch")) do
-        table.insert(inputs, patch)
-    end
-    local compat = path.join(os.scriptdir(), "..", "..", "..", "toolchain", "src", "apple-compat")
-    table.insert(inputs, path.join(compat, "src", "memset_s.c"))
-    table.insert(inputs, path.join(compat, "src", "objc_opt_self.c"))
-    table.insert(inputs, path.join(compat, "src", "objc_allocWithZone.c"))
-    for _, file in ipairs(os.files(path.join(compat, "include", "revenant", "*.h"))) do
-        table.insert(inputs, file)
-    end
-    table.sort(inputs)
-    for _, file in ipairs(inputs) do
-        table.insert(digests, path.filename(file) .. "=" .. hash.sha256(file))
-    end
+    includes(path.join(os.scriptdir(), "port", "digest.lua"))
     add_configs("sources", {description = "The digest of this recipe, its patches and the apple-compat calls it builds, so a changed step is a different package.",
-                            default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
+                            default = swift_crypto_sources_digest, type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
         package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})
