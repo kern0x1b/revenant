@@ -16,7 +16,7 @@ package("icu")
     end)
 
     on_install("iphoneos", "macosx", function (package)
-        local modules = path.join(package:scriptdir(), "..", "..", "toolchain", "modules")
+        local modules = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "modules")
         local parallel = import("parallel", {rootdir = modules, anonymous = true})
         local trees = {"", "curr/", "lang/", "region/", "zone/", "unit/", "coll/", "brkitr/", "rbnf/"}
         local dropped = {"rbnf/", "translit/"}

@@ -8,7 +8,7 @@ On every profile, 6.1.3 stopped with backboardd dying at a register value that c
 backboardd loads its HID plug-ins in sequence. MultitouchHID is unmapped and AutoBrightness is mapped at the same
 base, and the JIT kept executing the blocks it had translated for MultitouchHID. The invalidation of the unmapped
 range found one block out of 589 that it covered: Dynarmic's `equal_range` over the block map returns the first of
-several overlapping blocks only. The patch in `third_party/dynarmic` walks the map from the start of the range
+several overlapping blocks only. The patch in `packages/d/dynarmic` walks the map from the start of the range
 instead. After it, backboardd stays up and SpringBoard launches (about 92 s on an iPhone 4S).
 
 The same lookup is wherever Dynarmic invalidates a range that holds more than one block: dlclose and dlopen at one

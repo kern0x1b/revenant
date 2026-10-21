@@ -7,7 +7,7 @@ For whoever is changing the emulator, human or AI. The repository-wide rules are
 An emulator that boots a legacy iOS firmware's own userland. It does not emulate hardware registers: it emulates an
 XNU kernel (system calls, Mach, IOKit) and the devices the firmware asks about, and lets the firmware's real launchd,
 daemons and frameworks run on top, on a JIT-translated ARM CPU (Dynarmic: revenant's `dynarmic` package, an upstream
-commit with our patches, in `third_party/dynarmic`).
+commit with our patches, in `packages/d/dynarmic`).
 
 [How it works](../../explanation/emulator/how-it-works.md) describes the pieces. [Build and test](build-and-test.md)
 covers the build, the options and a boot.
@@ -22,7 +22,7 @@ covers the build, the options and a boot.
   for what they use on the Mac.
 - `tests/guest/dns-probe/`: the guest DNS probe; `src/glsl/`: the GLSL shader compiler, a host tool.
 - Nothing third-party is vendored ([the third-party notices](../../reference/emulator/third-party.md)). A change to
-  Dynarmic is a new patch in `third_party/dynarmic/patches/`, listed in that package.
+  Dynarmic is a new patch in `packages/d/dynarmic/patches/`, listed in that package.
 
 ## Things that bite
 
@@ -36,7 +36,7 @@ covers the build, the options and a boot.
   after finding the Voice device's input stream; without one it throws with its state lock held and mediaserverd
   deadlocks. Describe devices from a registry dump of a real one, never from a guess.
 - **A range invalidation must reach every block it covers.** Dynarmic's `equal_range` over a Boost interval map
-  stops at the first of several overlapping blocks. The patch in `third_party/dynarmic` walks the map from the
+  stops at the first of several overlapping blocks. The patch in `packages/d/dynarmic` walks the map from the
   range's start instead. Any new lookup over overlapping intervals needs the same care.
 - **A fault ends the process.** A CPU fault (a bad access, a non-executable page) ends the guest process; no Mach
   exception and no signal is raised yet.

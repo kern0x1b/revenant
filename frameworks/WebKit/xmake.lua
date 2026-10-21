@@ -14,7 +14,7 @@ if is_plat("iphoneos") then
     add_requires("webkit-engine", {alias = "webkit-engine"})
     add_requires("webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed"}})
     add_requires("webkit-device-tools")
-    add_requires("wasm3")
+    add_requires("revenant@wasm3", {alias = "wasm3"})
     add_requires("revenant@openssl", {alias = "openssl"})
 
     add_cxflags("-mcpu=cortex-a9", "-mfpu=neon")
@@ -103,7 +103,7 @@ if is_plat("iphoneos") then
             target:add("values", "app.resources", path.relative(path.join(engine, "bundle"), target:scriptdir()))
         end)
 elseif has_config("webkit_host_tests") then
-    add_requires("icu")
+    add_requires("revenant@icu", {alias = "icu"})
 
     target("icu-sanity")
         set_kind("binary")

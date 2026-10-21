@@ -27,7 +27,7 @@ A loader is injected into the launching app, sets `DYLD_FRAMEWORK_PATH` /
 | --- | --- | --- | --- |
 | `src/platform/safari/rev-safari-tweak.c` | target `RevSafari` | `/Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib` | The **loader**: reads `InjectedApps`, re-execs enabled apps, skips SpringBoard. |
 | `src/platform/safari/safari-compat.mm` | target `rev-safari-compat` | `/usr/lib/rev-safari-compat.dylib` | **Compat + hooks**: iOS 6 ABI stubs, bookmarks start page, WebAssembly, preference reads. Inserted by the loader. |
-| `third_party/webkit` and its patches | package `webkit-engine`, its `stage/usr/lib/rev-fw` | `/usr/lib/rev-fw/*.framework` | The WebKit engine itself. |
+| `packages/w/webkit` and its patches | package `webkit-engine`, its `stage/usr/lib/rev-fw` | `/usr/lib/rev-fw/*.framework` | The WebKit engine itself. |
 
 **The loader and the compat dylib are different files.** Deploying the compat
 dylib over `RevSafari.dylib` (or vice versa) drops Safari to the system engine —
@@ -84,7 +84,7 @@ the `RevPrefs` target in `xmake.lua`, like the dylibs beside it — that writes 
   `killall Preferences` and reopen. A respring re-locks the device.
 - **`/usr/bin/shot`** always writes `/tmp/screenshot.png` and ignores any path
   argument.
-- **The engine is upstream plus a patch series** (`third_party/webkit`). A change
+- **The engine is upstream plus a patch series** (`packages/w/webkit`). A change
   to the engine is a change to one of its patches, made in a scratch clone of
   WebKit at the base commit with the series applied, exported again with
   `git format-patch`, and its sha256 updated in the recipe. Never edit the
@@ -144,5 +144,5 @@ tools/          Diagnostic instruments on the device, and the maintenance script
 xmake.lua       The member: its packages, targets, checks and host tests
 ```
 
-The documentation is at the top of revenant, in `docs/`. The engine itself is `third_party/webkit`: an upstream commit
+The documentation is at the top of revenant, in `docs/`. The engine itself is `packages/w/webkit`: an upstream commit
 and the patch series, and the libraries iOS 6 cannot supply are packages beside it.

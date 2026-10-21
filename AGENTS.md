@@ -15,9 +15,9 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
     guides/<component>/        how to do one task (build, test, debug, release, work on it as an agent)
     reference/<component>/     facts to look up: APIs, options, formats, measured behaviour
     explanation/<component>/   why it is built the way it is: design, decisions, research
-  third_party/<name>/        code we use but do not develop: upstream by url and commit, our patches/
   packages/ addons/          the package repository, read from the top of the checkout: packages/<letter>/<name>/
-                             and addons/<letter>/<name>/
+                             and addons/<letter>/<name>/; the third-party code we use but do not develop is a
+                             package there too, upstream by url and commit, with our patches/
   <component>/               toolchain, emulator, recompiler, agent-skills, frameworks/<Framework>
   ```
 
@@ -42,7 +42,7 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   installed plugin is that folder alone, so the skills and the licence and notice they carry stay there. Its
   `plugin.json` could point the skills at `src/`, but Claude Code's loading of a custom skills path is not verified
   here, so the skills are not moved until it is.
-  `toolchain/` is the xmake addon `revenant`, so its `addon.lua`, `includes/`, `modules/`, `plugins/`, `rules/` and `toolchains/` take the shape xmake reads: `plugins/<name>/` holds `xmake.lua` and `main.lua`, `rules/`, `toolchains/` and `includes/` hold `<name>/xmake.lua`, and `modules/` holds Lua files only. The package repository is the top of the checkout, so `packages/<letter>/<name>/` and `addons/<letter>/<name>/` hold `xmake.lua` alone. A recipe in `packages/<letter>/<name>/` holds its `xmake.lua`, the `port/` folder of the sources it builds, and its `patches/` (upstream patches applied in order); nothing else.
+  `toolchain/` is the xmake addon `revenant`, so its `addon.lua`, `includes/`, `modules/`, `plugins/`, `rules/` and `toolchains/` take the shape xmake reads: `plugins/<name>/` holds `xmake.lua` and `main.lua`, `rules/`, `toolchains/` and `includes/` hold `<name>/xmake.lua`, and `modules/` holds Lua files only. The package repository is the top of the checkout, so `packages/<letter>/<name>/` and `addons/<letter>/<name>/` hold `xmake.lua` alone. A recipe in `packages/<letter>/<name>/` holds its `xmake.lua`, its `patches/` (upstream patches applied in order, `.patch` files only) and, for upstream code that has no build files of its own, a `port/` folder of build files only: `project.lua`, `config.h`, generated Lua and `.exp` lists. Our own sources are not in a package: they are in the `src/` of the component that owns them, and the package builds them from there, by its `xmake.lua` path. A framework's row globs the `*.m`, `*.mm` and `*.c` files of its own `src/<Framework>/` folder, so a source that a package builds, and a tweak, sit in a subfolder of that folder that the glob does not read: `frameworks/Backports/src/CloudKit/webauth/`, `frameworks/Backports/src/CallKit/tweak/`. `frameworks/WebKit/src/platform/` keeps its tweaks the same way.
 
   A component uses another through the build graph (`add_deps`, or its package by name), never by a path into the
   other's folder. The layout is checked by `./xmakew test -P . repository/layout`.
@@ -54,10 +54,11 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   `./xmakew l tools/comments.lua check [path ...]` finds comments, `strip` removes them, and `verify [rev]` proves that
   the files changed since `rev` differ from it in comments only (clang's raw tokens, Swift's parse tree, Lua's
   bytecode). Files that carry upstream text (`comments=upstream`) or whose comments are the test data (`comments=fixture`) are marked in `.gitattributes`.
-- Third-party code is a package of `third_party/<name>/`: the upstream by url and commit or
+- Third-party code is a package of `packages/<letter>/<name>/`: the upstream by url and commit or
   checksum, our changes as `git format-patch` files in its `patches/`, applied in order by `add_patches`. Never
-  commit a copy of upstream code. The top `xmake.lua` includes each one, so a member requires it by its bare name
-  (`add_requires("dynarmic 6.7.0")`).
+  commit a copy of upstream code. A member requires it through the package repository by name, as
+  `revenant@<name>` (`add_requires("revenant@dynarmic 6.7.0")`), so that no other repository's package of the same
+  name is taken.
 - Every dependency is at its latest release, or at the head of its main branch where it has no releases or we need
   what is not released yet. A newer version that dropped something we need (armv7, iOS 6, an API, a build mode) gets
   it back as a patch on that version; an old pin is never the answer. Moving a pin means rebasing our patches onto
@@ -65,7 +66,7 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
 - Skills live in `.agents/skills/` at the top of revenant (`.claude/skills` links there); a member keeps none of its
   own. xmake's own skills come from the `xmake-skills` plugin pinned in `.claude/settings.json`, and are not copied into `.agents/`. The `xmake-*` skills of `agent-skills/` are derived from those upstream skills and rewritten for the toolchain: `agent-skills/THIRD-PARTY.md` maps each one to its upstream skills and to the commit they were taken from.
   `agent-skills/` is the plugin `agent-skills` of the revenant marketplace (`.claude-plugin/marketplace.json`).
-- xmake at the top is always `./xmakew`, the pinned and patched xmake of `third_party/xmake` (built into
+- xmake at the top is always `./xmakew`, the pinned and patched xmake of `packages/x/xmake` (built into
   `$HOME/.revenant/cache/xmake/` on first use): `./xmakew f -p iphoneos -a armv7`, `./xmakew build <target>`. It takes
   the revenant addon from `toolchain/` of the checkout; stock xmake would fetch and install the toolchain globally instead.
   Its package store is `$HOME/.revenant/cache/xmake-global` (`XMAKE_GLOBALDIR`). Everything a build can make again is under

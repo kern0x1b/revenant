@@ -12,7 +12,7 @@ The project is `frameworks/WebKit/`. `docs/guides/webkit/contributing.md` maps t
 - `./xmakew f -P . -p iphoneos -a armv7`, then `./xmakew -P .`: the engine packages, the tweaks and the Settings bundle.
 - `./xmakew deb -P .` writes `space.kern0x1b.rev_<version>_iphoneos-arm.deb` under `build/`. `version` is in `frameworks/WebKit/xmake.lua`.
 - `./xmakew build -P . RevWebViewHost` builds the standalone app, which uses the `prefixed` variant of `webkit-engine`. The phone uses `system`.
-- The engine is upstream WebKit at one commit plus `third_party/webkit/patches/`. A change to the engine is a change to a patch: in a scratch clone at the base commit under `$HOME/.revenant/cache/<task>/`, `git am` the series, make the change in its commit, `git format-patch` the series back into `third_party/webkit/patches/`, and put the new sha256 in `third_party/webkit/xmake.lua`. Never edit the fetched source in the package cache; the next fetch discards it.
+- The engine is upstream WebKit at one commit plus `packages/w/webkit/patches/`. A change to the engine is a change to a patch: in a scratch clone at the base commit under `$HOME/.revenant/cache/<task>/`, `git am` the series, make the change in its commit, `git format-patch` the series back into `packages/w/webkit/patches/`, and put the new sha256 in `packages/w/webkit/xmake.lua`. Never edit the fetched source in the package cache; the next fetch discards it.
 - A change to a WebCore header needs the whole `webkit-engine` rebuilt. A partial build loads and misbehaves with no crash log.
 - Before deploying a dylib, check it in the build output: `otool -L` and `nm -u FILE | c++filt`. The loader links only libSystem and CoreFoundation. The compat dylib framework-links Foundation, CoreFoundation, objc and sqlite. Keep each install name equal to its deployed path, and do not link either with `-undefined dynamic_lookup`.
 
@@ -75,7 +75,7 @@ A page misbehaves: enable Settings, RevWebKit, Diagnostics, Log page console (`C
 
 A symptom after a change of the port's own:
 
-- Suspect the port first. List the port's changes that could produce it (the patches in `third_party/webkit/patches` that touch `Source/<area>`, `grep -rn WEBKIT_IOS6` in the patched tree, `app/`, `compat/`, `platform/`), and rule each out by measurement before blaming the site, upstream WebKit or the phone.
+- Suspect the port first. List the port's changes that could produce it (the patches in `packages/w/webkit/patches` that touch `Source/<area>`, `grep -rn WEBKIT_IOS6` in the patched tree, `app/`, `compat/`, `platform/`), and rule each out by measurement before blaming the site, upstream WebKit or the phone.
 - Diagnostics never run on a per-frame or per-event path: no `fopen`, `getenv`, `dladdr`, `sleep` or JavaScript evaluation there. Gate them behind a `/tmp/native-*` switch file, off by default, with the `access()` result cached in a `static`.
 - When the screen disagrees with a metric, measure what the eye sees, such as a layer's position in window coordinates, and compare it with a fresh screenshot.
 

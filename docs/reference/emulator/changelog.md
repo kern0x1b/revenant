@@ -33,14 +33,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   (`--emulator_vulkan`, `--emulator_sdl`, `--emulator_ffmpeg`, `--emulator_lto`,
   `--emulator_dynarmic_test_emit_failure`, the guest probe's `--emulator_guest_rootfs` and
   `--emulator_armv6_ld`). The CMake files are gone. Every library is an xmake package: Dynarmic and Boost
-  from revenant's `third_party` repository, OpenSSL and libplist from Revenant's, the rest from xmake's. The
+  from revenant's package repository, `packages/`, OpenSSL and libplist from Revenant's, the rest from xmake's. The
   vendored Vulkan Memory Allocator is the `vulkan-memory-allocator` 3.4.0 package now (the same header).
   The IR artifact key takes the Dynarmic package's identity (its commit and patch checksums,
   `DYNARMIC_BUILD_FINGERPRINT`), so artifacts saved before this are made again once.
 - The JIT core is Dynarmic again, under its own name: upstream (MC-XiaoXiao/dynarmic) at a
   pinned commit with our patches (the arm64 backend for A32 guests, the A32 test swap callbacks,
-  the fault-injection hooks named for the core), kept in revenant's `third_party/dynarmic`; Boost is
-  the 1.81.0 release pinned in `third_party/boost`. The Umbra and ext-boost submodules are gone.
+  the fault-injection hooks named for the core), kept in revenant's `packages/d/dynarmic`; Boost is
+  the 1.81.0 release pinned in `packages/b/boost`. The Umbra and ext-boost submodules are gone.
   IR artifacts saved before this are made again, since the core's revision is in their key.
 - The project and its JIT core, Umbra, take names of their own: the namespace, build files,
   binary, file names and preference keys.

@@ -4,7 +4,7 @@ package("emulator-guest")
     set_license("MIT")
 
     local digests = {}
-    local sources = table.join(os.files(path.join(os.scriptdir(), "port", "src", "*")), {path.join(os.scriptdir(), "port", "project.lua")})
+    local sources = table.join(os.files(path.join(os.scriptdir(), "..", "..", "..", "emulator", "src", "guest", "*")), {path.join(os.scriptdir(), "port", "project.lua")})
     table.sort(sources)
     for _, file in ipairs(sources) do
         table.insert(digests, path.filename(file) .. "=" .. hash.sha256(file))
@@ -18,7 +18,7 @@ package("emulator-guest")
         local revenant = addon.addons()[addon.dirname("revenant")] or raise("emulator-guest is built with the revenant addon's rules, and no revenant addon is installed")
         local project = path.absolute("guest")
         os.mkdir(project)
-        os.cp(path.join(package:scriptdir(), "port", "src", "*"), project .. "/")
+        os.cp(path.join(package:scriptdir(), "..", "..", "..", "emulator", "src", "guest", "*"), project .. "/")
         local template = io.readfile(path.join(package:scriptdir(), "port", "project.lua"))
         io.writefile(path.join(project, "xmake.lua"), (template:gsub("@(%w+)@", {
             repository = path.translate(path.join(package:scriptdir(), "..", "..", "..")),

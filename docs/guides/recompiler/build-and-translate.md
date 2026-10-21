@@ -4,7 +4,7 @@
 
 The recompiler is part of the revenant xmake project; run everything from the top of revenant. Every tool comes from
 a package. LLVM 23 with its libraries comes from Revenant's `llvm` package (its `libraries` config), built from source
-on the first configure. Rellume, farmdec and BlocksRuntime are packages of `third_party/`. The iOS SDK (for the
+on the first configure. Rellume, farmdec and BlocksRuntime are packages of the package repository. The iOS SDK (for the
 header-driven bridge generation), `ld64` and `ldid` are Revenant's packages. The first configure builds LLVM, which
 took 40 to 75 minutes on the machine it was measured on.
 

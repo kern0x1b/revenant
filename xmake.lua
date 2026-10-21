@@ -8,11 +8,6 @@ option("component", {type = "string", default = "", showmenu = true,
                      description = "Configure only this component and what it needs, for example Backports; empty configures every component."})
 local whole = get_config("component") == ""
 
-if whole then
-    includes("third_party/blocksruntime", "third_party/boost", "third_party/dynarmic", "third_party/farmdec", "third_party/rellume")
-    includes("third_party/brotli", "third_party/icu", "third_party/libpsl", "third_party/libwebp", "third_party/libxml2",
-             "third_party/libxslt", "third_party/wasm3", "third_party/webkit", "third_party/woff2")
-end
 add_repositories("revenant " .. (os.getenv("REVENANT_REPO") or "."))
 add_addons("revenant", {sourcedir = "toolchain"})
 

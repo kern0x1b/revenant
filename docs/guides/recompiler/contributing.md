@@ -20,7 +20,7 @@ repository's root `AGENTS.md` applies.
 | `tests/perf/` | The on-device translated-versus-native benchmark. |
 | `targets/` | Not a folder of the repository: its two `*-includes.h` lists are in `include/`. A real-world app's folder, `targets/<app>/`, is untracked and lives only on the disk that builds it. Everything under it, `*-out*`, `*-arm64`, `*.app`, `*.ipa`, `*.log`, is generated or investigative material. Never read it as source, never grep it wholesale, never move it. |
 
-Rellume, farmdec and BlocksRuntime are packages of `third_party/`, pinned by commit with our changes as patches.
+Rellume, farmdec and BlocksRuntime are packages of the package repository, pinned by commit with our changes as patches.
 
 ## Conventions
 
